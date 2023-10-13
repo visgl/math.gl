@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import {getGeohashBounds, getGeohashBoundaryFlat} from '@math.gl/geohash';
+import {getGeohashBounds, getGeohashBoundaryFlat} from '@math.gl/dggs-geohash';
 
 const TEST_DATA = [
   {

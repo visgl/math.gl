@@ -45,27 +45,27 @@
   </tbody>
 </table>
 
-## v3.7 (In Development)
+## v4.0 (In Development)
 
-Target Release Date: March, 2023
+Target Release Date: Q4, 2023
 
 - Three new modules for working with DGGS (Discrete Global Grid System) math.
 - Node.js v18 is now officially supported.
 - Typescript v5 now used
 
-**`@math.gl/geohash`** (NEW MODULE)
+**`@math.gl/dggs-geohash`** (NEW MODULE)
 
 - New module with math for the GeoHash DGGS (Discrete Global Grid System).
 
-**`@math.gl/quadkey`** (NEW MODULE)
+**`@math.gl/dggs-quadkey`** (NEW MODULE)
 
 - New module with math for the quadkey DGGS (Discrete Global Grid System).
 
-**`@math.gl/s2`** (NEW MODULE)
+**`@math.gl/dggs-s2`** (NEW MODULE)
 
 - New module that contains a lightweight implementation of the S2 DGGS (Discrete Global Grid System).
 
-**`@math.gl/core`
+**`@math.gl/core`**
 
 - `config` is now truly global (stored on `globalThis`).
 

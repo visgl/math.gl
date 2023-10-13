@@ -14,12 +14,12 @@ In terms of API design and nomenclature, the golden standard for DGGS systems at
 
 ## Supported Grid Systems
 
-| DGGS                                            | Module             | Functionality                   |
-| ----------------------------------------------- | ------------------ | ------------------------------- |
-| ![GeoHash](../../images/dggs/geohash.png 'GeoHash') | `@math.gl/geohash` | Get geometry of GeoHash tokens. |
-| ![QuadKey](../../images/dggs/quadkey.png 'QuadKey') | `@math.gl/quadkey` | Get geometry of QuadKey tokens  |
-| ![S2](../../images/dggs/s2.png 'S2')                | `@math.gl/s2`      | Get geometry of S2 tokens.      |
-| ![H3](../../images/dggs/h3.png 'H3')                | `h3-js` \*         | Get geometry of H3 tokens.      |
+| DGGS                                                | Module                  | Functionality                   |
+| --------------------------------------------------- | ----------------------- | ------------------------------- |
+| ![GeoHash](../../images/dggs/geohash.png 'GeoHash') | `@math.gl/dggs-geohash` | Get geometry of GeoHash tokens. |
+| ![QuadKey](../../images/dggs/quadkey.png 'QuadKey') | `@math.gl/dggs-quadkey` | Get geometry of QuadKey tokens  |
+| ![S2](../../images/dggs/s2.png 'S2')                | `@math.gl/dggs-s2`      | Get geometry of S2 tokens.      |
+| ![H3](../../images/dggs/h3.png 'H3')                | `h3-js` \*              | Get geometry of H3 tokens.      |
 
 Note that `h3-js` is not a `math.gl` library. For H3 it is recommended to work directly with the H3 JavaScript bindings.
 

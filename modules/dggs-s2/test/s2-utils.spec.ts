@@ -1,7 +1,7 @@
 // loaders.gl, MIT license
 import test from 'tape-promise/tape';
 
-import {getS2BoundaryFlat} from '@math.gl/s2';
+import {getS2BoundaryFlat} from '@math.gl/dggs-s2';
 
 // import Long from 'long';
 

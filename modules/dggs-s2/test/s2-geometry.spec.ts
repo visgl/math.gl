@@ -2,7 +2,7 @@
 
 import test from 'tape-promise/tape';
 
-import {_toHilbertQuadKey as toHilbertQuadKey} from '@math.gl/s2';
+import {_toHilbertQuadKey as toHilbertQuadKey} from '@math.gl/dggs-s2';
 import {S2} from 's2-geometry';
 import Long from 'long';
 

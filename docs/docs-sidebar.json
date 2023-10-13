@@ -150,26 +150,26 @@
       },
       {
         "type": "category",
-        "label": "@math.gl/geohash",
+        "label": "@math.gl/dggs-geohash",
         "items": [
-          "modules/geohash/README",
-          "modules/geohash/api-reference/geohash"
+          "modules/dggs-geohash/README",
+          "modules/dggs-geohash/api-reference/geohash"
         ]
       },
       {
         "type": "category",
-        "label": "@math.gl/quadkey",
+        "label": "@math.gl/dggs-quadkey",
         "items": [
-          "modules/quadkey/README",
-          "modules/quadkey/api-reference/quadkey"
+          "modules/dggs-quadkey/README",
+          "modules/dggs-quadkey/api-reference/quadkey"
         ]
       },
       {
         "type": "category",
-        "label": "@math.gl/s2",
+        "label": "@math.gl/dggs-s2",
         "items": [
-          "modules/s2/README",
-          "modules/s2/api-reference/s2"
+          "modules/dggs-s2/README",
+          "modules/dggs-s2/api-reference/s2"
         ]
       }
     ]

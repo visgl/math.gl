@@ -5,18 +5,18 @@
 </p>
 
 
-`@math.gl/geohash` is a JavaScript library with 
+`@math.gl/dggs-geohash` is a JavaScript library with 
 
 ## Installation
 
 ```bash
-npm install @math.gl/sun
+npm install @math.gl/dggs-geohash
 ```
 
 ## Usage
 
 ```js
-import {getGeohashPolygon} from '@math.gl/quadkey';
+import {getGeohashPolygon} from '@math.gl/dggs-geohash';
 const polygon = getGeohashPolygon(geohash);
 ```
 

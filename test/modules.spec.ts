@@ -8,6 +8,6 @@ import '../modules/proj4/test';
 import '../modules/sun/test';
 import '../modules/web-mercator/test';
 
-import '../modules/geohash/test';
-import '../modules/quadkey/test';
-import '../modules/s2/test';
+import '../modules/dggs-geohash/test';
+import '../modules/dggs-quadkey/test';
+import '../modules/dggs-s2/test';

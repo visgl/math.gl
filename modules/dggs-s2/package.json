@@ -1,5 +1,5 @@
 {
-  "name": "@math.gl/s2",
+  "name": "@math.gl/dggs-s2",
   "description": "A minimal S2 DGGS (Discrete Global Grid System) implementation",
   "license": "MIT",
   "type": "module",

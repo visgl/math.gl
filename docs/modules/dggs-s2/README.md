@@ -4,18 +4,18 @@
   <img src="https://img.shields.io/badge/From-v3.7-blue.svg?style=flat-square" alt="From-v3.7" />
 </p>
 
-`@math.gl/s2` is a small JavaScript library for working with the S2 DGGS (Discrete Global Grid System).
+`@math.gl/dggs-s2` is a small JavaScript library for working with the S2 DGGS (Discrete Global Grid System).
 
 ## Installation
 
 ```bash
-npm install @math.gl/s2
+npm install @math.gl/dggs-s2
 ```
 
 ## Usage
 
 ```js
-import {} from '@math.gl/s2';
+import {} from '@math.gl/dggs-s2';
 ```
 
 ## Attribution

@@ -1,5 +1,5 @@
 {
-  "name": "@math.gl/geohash",
+  "name": "@math.gl/dggs-geohash",
   "description": "Math for the GeoHash DGGS (Discrete Global Grid System)",
   "license": "MIT",
   "type": "module",

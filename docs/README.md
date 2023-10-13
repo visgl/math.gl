@@ -9,7 +9,7 @@ While math.gl is highly **optimized for use with the WebGL and WebGPU APIs**, it
 - **3D math** - Basic vectors and matrices, as well as 3D primitives and culling: **`@math.gl/types`**, **`@math.gl/core`**, **`@math.gl/culling`**
 - **Geospatial projections** - Support for a variety of geospatial projections **`@math.gl/geospatial`**, **`@math.gl/geoid`**, **`@math.gl/proj4`**, **`@math.gl/web-mercator`**
 - **Geospatial utilities** - Cutting polygons and calculating sun position and direction **`@math.gl/polygon`**,  **`@math.gl/sun`**
-- **Discrete Global Grids** - Standardized interfaces to a number of the major discrete global grids. **`@math.gl/geohash`**, **`@math.gl/quadkey`**, **`@math.gl/s2`**
+- **Discrete Global Grids** - Standardized interfaces to a number of the major discrete global grids. **`@math.gl/dggs-geohash`**, **`@math.gl/dggs-quadkey`**, **`@math.gl/dggs-s2`**
 
 ## Modules
 
@@ -33,9 +33,9 @@ math.gl is a toolbox that offers a suite of composable modules.
 | **DGGS (Discrete global grid support) libraries** | Module <span style={{width: 300}} /> | Description                     |
 | ------------------------------------------------- | ------------------------------------ | ------------------------------- |
 |                                                   |                                      |                                 |
-| ![geohash](./images/dggs/geohash.png 'geohash')   | **`@math.gl/geohash`**               | Get geometry of GeoHash tokens. |
-| ![quadkey](./images/dggs/quadkey.png 'quadkey')   | **`@math.gl/quadkey`**               | Get geometry of QuadKey tokens  |
-| ![s2](./images/dggs/s2.png 's2')                  | **`@math.gl/s2`**                    | Get geometry of S2 tokens.      |
+| ![geohash](./images/dggs/geohash.png 'geohash')   | **`@math.gl/dggs-geohash`**               | Get geometry of GeoHash tokens. |
+| ![quadkey](./images/dggs/quadkey.png 'quadkey')   | **`@math.gl/dggs-quadkey`**               | Get geometry of QuadKey tokens  |
+| ![s2](./images/dggs/s2.png 's2')                  | **`@math.gl/dggs-s2`**                    | Get geometry of S2 tokens.      |
 
 <br/>
 In addition, math.gl provides a few deprecated legacy modules, to avoid breaking older applications.

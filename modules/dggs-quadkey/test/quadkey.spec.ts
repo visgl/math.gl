@@ -1,5 +1,5 @@
 import test from 'tape-promise/tape';
-import {quadkeyToWorldBounds, getQuadkeyBoundary} from '@math.gl/quadkey';
+import {quadkeyToWorldBounds, getQuadkeyBoundary} from '@math.gl/dggs-quadkey';
 
 const TEST_DATA = [
   {

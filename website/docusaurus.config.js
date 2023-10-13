@@ -59,9 +59,9 @@ const config = {
             '@math.gl/proj4': resolve('../modules/proj4/src'),
             '@math.gl/web-mercator': resolve('../modules/web-mercator/src'),
             '@math.gl/sun': resolve('../modules/sun/src'),
-            '@math.gl/geohash': resolve('../modules/mapbox/geohash'),
-            '@math.gl/quadkey': resolve('../modules/quadkey/src'),
-            '@math.gl/s2': resolve('../modules/s2/src'),
+            '@math.gl/ddgs-geohash': resolve('../modules/ddgs-geohash/src'),
+            '@math.gl/dggs-quadkey': resolve('../modules/dggs-quadkey/src'),
+            '@math.gl/dggs-s2': resolve('../modules/dggs-s2/src'),
 
             '@probe.gl/bench': resolve('../node_modules/@probe.gl/bench')
           }

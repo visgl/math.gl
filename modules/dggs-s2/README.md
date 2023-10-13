@@ -1,4 +1,4 @@
-# @math.gl/s2
+# @math.gl/dggs-s2
 
 [math.gl](https://math.gl/docs) is a suite of math modules for 3D and geospatial applications.
 
