@@ -23,7 +23,7 @@
 // NOTE: Transform is not a public API so we should be careful to always lock
 // down mapbox-gl to a specific major, minor, and patch version.
 import mapbox from 'mapbox-gl';
-import * as vec4 from 'gl-matrix/vec4';
+import {vec4} from '@loaders.gl/core';
 
 const {Map, LngLat, Point} = mapbox;
 let Transform;

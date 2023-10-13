@@ -16,4 +16,5 @@ import './spec/fly-to-viewport.spec';
 import './fp32-limits';
 
 // Test vs. mapbox Transform
-import './spec/versus-mapbox/versus-mapbox.spec';
+// Commented out as this pulls in gl-matrix
+// import './spec/versus-mapbox/versus-mapbox.spec';

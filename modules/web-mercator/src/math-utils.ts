@@ -1,4 +1,4 @@
-import {transformMat4, scale} from 'gl-matrix/vec4';
+import {vec4} from '@math.gl/core';
 
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
 export function createMat4(): number[] {
@@ -7,8 +7,8 @@ export function createMat4(): number[] {
 
 // Transforms a vec4 with a projection matrix
 export function transformVector(matrix: number[], vector: number[]): number[] {
-  const result = transformMat4([] as number[], vector, matrix);
-  scale(result, result, 1 / result[3]);
+  const result = vec4.transformMat4([] as number[], vector, matrix);
+  vec4.scale(result, result, 1 / result[3]);
   return result;
 }
 

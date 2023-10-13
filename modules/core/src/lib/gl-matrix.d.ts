@@ -10,6 +10,7 @@ type NumericArray =
   | Float64Array
   | number[];
 
+/*
 declare module 'gl-matrix/vec2' {
   function length(a: Readonly<NumericArray>): number;
   function negate<T extends NumericArray>(out: T, a: Readonly<NumericArray>): T;
@@ -264,3 +265,4 @@ declare module 'gl-matrix/quat' {
   function rotateY<T extends NumericArray>(out: T, a: Readonly<NumericArray>, rad: number): T;
   function rotateZ<T extends NumericArray>(out: T, a: Readonly<NumericArray>, rad: number): T;
 }
+*/

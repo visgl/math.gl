@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {configure, Vector4, Matrix4} from '@math.gl/core';
-import * as mat4 from 'gl-matrix/mat4';
+import {configure, Vector4, Matrix4, mat4} from '@math.gl/core';
 
 /*
 class CesiumMatrix4 {
@@ -132,7 +131,7 @@ export function matrix4Bench(suite, addReferenceBenchmarks) {
   suite
     .group('@math.gl/core: Matrix4 Multiplication')
     .add('Matrix4#multiplyRight(Matrix4)', () => matrix4.multiplyRight(matrix4))
-    .add('gl-matrix#multiply(Matrix4)', () => mat4.multiply(matrix4, matrix4, matrix4))
+    .add('mat4#multiply(Matrix4)', () => mat4.multiply(matrix4, matrix4, matrix4))
     .add('Matrix4#transform(dir4)', () => matrix4.transform(dirVector4, mathglVector4))
     .add('Matrix4#transform(point4)', () => matrix4.transform(pointVector4, mathglVector4))
     .add('Matrix4#transformAsVector(v3)', () => matrix4.transformAsVector(vector3, vector3))
@@ -156,13 +155,11 @@ export function matrix4Bench(suite, addReferenceBenchmarks) {
 
   if (addReferenceBenchmarks) {
     suite
-      .add('gl-matrix#multiply(array)', () =>
-        mat4.multiply(classicArray, classicArray, classicArray)
-      )
-      .add('gl-matrix#multiply(float32Array)', () =>
+      .add('mat4#multiply(array)', () => mat4.multiply(classicArray, classicArray, classicArray))
+      .add('mat4#multiply(float32Array)', () =>
         mat4.multiply(float32Array, float32Array, float32Array)
       )
-      .add('gl-matrix#multiply(float64Array)', () =>
+      .add('mat4#multiply(float64Array)', () =>
         mat4.multiply(float64Array, float64Array, float64Array)
       );
   }

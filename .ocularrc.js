@@ -15,8 +15,7 @@ export default {
   },
 
   aliases: {
-    test: resolve('./test'),
-    'gl-matrix/*': resolve('./node_modules/gl-matrix/cjs/*.js')
+    test: resolve('./test')
   },
 
   entry: {

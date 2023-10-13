@@ -1,8 +1,6 @@
 import {getSunPosition, getSunDirection} from '../src/suncalc';
-import {equals, config} from '@math.gl/core';
+import {equals, config, vec3} from '@math.gl/core';
 import test from 'tape-promise/tape';
-
-import {angle} from 'gl-matrix/vec3';
 
 test('Sunlight#azimuth and altitude', (t) => {
   const MS_IN_AN_HOUR = 3.6e6;
@@ -51,8 +49,8 @@ test('Sunlight#azimuth and altitude', (t) => {
     const azimuthInDegree = 180 + (azimuth * 180) / Math.PI;
     const altitudeInDegree = (altitude * 180) / Math.PI;
 
-    t.ok(equals(azimuthInDegree, testCase.azimuth), 'Azimuth angle should match.');
-    t.ok(equals(altitudeInDegree, testCase.altitude), 'Altitude angle should match.');
+    t.ok(equals(azimuthInDegree, testCase.azimuth), 'Azimuth vec3.angle should match.');
+    t.ok(equals(altitudeInDegree, testCase.altitude), 'Altitude vec3.angle should match.');
   });
 
   config.EPSILON = oldEpsilon;
@@ -98,7 +96,7 @@ test('getSunDirection', (t) => {
   for (const testCase of testCases) {
     const direction = getSunDirection(testCase.timestamp, testCase.latitude, testCase.longitude);
     t.comment(direction.join(','));
-    t.ok(angle(direction, testCase.expected) < 0.05, testCase.title);
+    t.ok(vec3.angle(direction, testCase.expected) < 0.05, testCase.title);
   }
 
   t.end();

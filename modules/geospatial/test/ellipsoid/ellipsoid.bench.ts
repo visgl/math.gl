@@ -4,7 +4,6 @@
 import {Vector3, Matrix4} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
 // import {externalVector3ToArray, setExternalVector3} from '@math.gl/geospatial/type-utils';
-// import * as vec3 from 'gl-matrix/vec3';
 
 const ellipsoid = Ellipsoid.WGS84;
 const spaceCartesian = new Vector3(4582719.8827300891, -4582719.8827300882, 1725510.4250797231);

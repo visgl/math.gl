@@ -6,19 +6,19 @@
       <td>
         <center>
           <img style={{height: 200}} src="https://raw.github.com/uber-web/math.gl/master/docs/images/dggs/s2.png" />
-          <p><b>v3.7</b> <i><a target="_blank" href="https://math.gl/docs/modules/s2">S2 (DGGS)</a></i></p>
+          <p><b>v4.0</b> <i><a target="_blank" href="https://math.gl/docs/modules/s2">S2 (DGGS)</a></i></p>
         </center>
       </td>
       <td>
         <center>
           <img style={{height: 200}} src="https://raw.github.com/uber-web/math.gl/master/docs/images/dggs/geohash.png" />
-          <p><b>v3.7</b> <i><a target="_blank" href="https://math.gl/docs/modules/geohash">GeoHash (DGGS)</a></i></p>
+          <p><b>v4.0</b> <i><a target="_blank" href="https://math.gl/docs/modules/geohash">GeoHash (DGGS)</a></i></p>
         </center>
       </td>
       <td>
         <center>
           <img style={{height: 200}} src="https://raw.github.com/uber-web/math.gl/master/docs/images/dggs/quadkey.png" />
-          <p><b>v3.7</b> <i><a target="_blank" href="https://math.gl/docs/modules/quadkey">Quadkey (DGGS)</a></i></p>
+          <p><b>v4.0</b> <i><a target="_blank" href="https://math.gl/docs/modules/quadkey">Quadkey (DGGS)</a></i></p>
         </center>
       </td>
     </tr>
@@ -49,9 +49,10 @@
 
 Target Release Date: Q4, 2023
 
-- Three new modules for working with DGGS (Discrete Global Grid System) math.
-- Node.js v18 is now officially supported.
-- Typescript v5 now used
+- New modules for working with DGGS (Discrete Global Grid System) math.
+- Node.js v18, v20 are now officially supported.
+- Typescript v5
+- Removed dependency on gl-matrix
 
 **`@math.gl/dggs-geohash`** (NEW MODULE)
 

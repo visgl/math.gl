@@ -2,9 +2,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 /* eslint-disable */
-import {Vector3, Matrix4, assert, equals, _MathUtils, NumericArray} from '@math.gl/core';
-// @ts-ignore gl-matrix typings...
-import * as vec3 from 'gl-matrix/vec3';
+import {Vector3, Matrix4, assert, equals, _MathUtils, NumericArray, vec3} from '@math.gl/core';
 
 import {WGS84_RADIUS_X, WGS84_RADIUS_Y, WGS84_RADIUS_Z} from '../constants';
 import {fromCartographicToRadians, toCartographicFromRadians} from '../type-utils';

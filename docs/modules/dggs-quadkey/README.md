@@ -1,7 +1,7 @@
 # Overview
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/From-v3.7-blue.svg?style=flat-square" alt="From-v3.7" />
+  <img src="https://img.shields.io/badge/From-v4.0-blue.svg?style=flat-square" alt="From-v4.0" />
 </p>
 
 `@math.gl/dggs-quadkey` is a JavaScript library providing math for the Quadkey DGGS (Discrete Global Grid System).

@@ -1,9 +1,7 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import {NumericArray, Vector3} from '@math.gl/core';
-// @ts-ignore gl-matrix typings...
-import * as mat4 from 'gl-matrix/mat4';
+import {NumericArray, Vector3, mat4} from '@math.gl/core';
 
 import {INTERSECTION} from '../../constants';
 import {BoundingVolume} from './bounding-volume';
