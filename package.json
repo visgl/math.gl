@@ -24,6 +24,7 @@
     "test-size-explicit": "npm run build && webpack --config test/webpack.config.js --env.import-vec4-mat4-explicit",
     "test-size": "npm run build && webpack --config test/webpack.config.js --env.import-nothing"
   },
+  "dependencies": {},
   "devDependencies": {
     "@probe.gl/bench": "^3.5.4",
     "@turf/destination": "^6.0.1",
@@ -39,5 +40,9 @@
   "resolutions": {
     "tape": "4.11.0",
     "es-abstract": "^1.21.1"
+  },
+  "volta": {
+    "node": "18.18.1",
+    "yarn": "1.22.19"
   }
 }
