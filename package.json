@@ -26,7 +26,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@probe.gl/bench": "^3.5.4",
+    "@probe.gl/bench": "^4.0.0",
     "@turf/destination": "^6.0.1",
     "@types/tape-promise": "^4.0.1",
     "babel-plugin-transform-builtin-extend": "^1.1.2",
