@@ -1,25 +1,27 @@
 # Introduction
 
-Welcome to math.gl! math.gl is JavaScript (TypeScript) math library focused on **geospatial** and **3D** use cases. Designed as a composable, **modular toolbox**. math.gl provides a core module with classic vector and matrix classes, and a suite of optional modules implementing various aspects of geospatial and 3D math.
+Welcome to math.gl! 
 
-While math.gl is highly **optimized for use with the WebGL and WebGPU APIs**, it has no WebGL dependencies and is designed to be usable in any application.
+math.gl is TypeScript math library focused on **geospatial** and **3D** use cases. Designed as a composable, **modular toolbox**. math.gl provides a core module with the standard complement of vector and matrix classes, and a suite of optional modules implementing various aspects of geospatial and 3D math.
+
+math.gl is  **optimized for use with WebGL and WebGPU**, however it is not a GPU math library, meaning that it has no GPU dependencies and is designed to be usable in any application.
 
 ## Features
 
-- **3D math** - Basic vectors and matrices, as well as 3D primitives and culling: **`@math.gl/types`**, **`@math.gl/core`**, **`@math.gl/culling`**
+- **Core classes** - Basic vectors and matrices: **`@math.gl/types`**, **`@math.gl/core`**
 - **Geospatial projections** - Support for a variety of geospatial projections **`@math.gl/geospatial`**, **`@math.gl/geoid`**, **`@math.gl/proj4`**, **`@math.gl/web-mercator`**
 - **Geospatial utilities** - Cutting polygons and calculating sun position and direction **`@math.gl/polygon`**,  **`@math.gl/sun`**
 - **Discrete Global Grids** - Standardized interfaces to a number of the major discrete global grids. **`@math.gl/dggs-geohash`**, **`@math.gl/dggs-quadkey`**, **`@math.gl/dggs-s2`**
+- **3D math** - 3D primitives and culling: **`@math.gl/culling`**
 
 ## Modules
 
 math.gl is a toolbox that offers a suite of composable modules.
 
-| **Core math libraries**                    | Module <span style={{width: 300}} /> | Description                                  |
-| ------------------------------------------ | ------------------------------------ | -------------------------------------------- |
-|                                            | **`@math.gl/types`**                 | Basic math type helpers (`NumericArray` etc) |
-| ![core](./images/core.png 'core')          | **`@math.gl/core`**                  | 3D math classes (vectors, matrices, etc)     |
-| ![culling](./images/culling.png 'culling') | **`@math.gl/culling`**               | Bounding volumes and intersection testing.   |
+| **Core math libraries**           | Module <span style={{width: 300}} /> | Description                                  |
+| --------------------------------- | ------------------------------------ | -------------------------------------------- |
+|                                   | **`@math.gl/types`**                 | Basic math type helpers (`NumericArray` etc) |
+| ![core](./images/core.png 'core') | **`@math.gl/core`**                  | Basic math classes (vectors, matrices, etc)  |
 
 | **Geospatial math libraries**                       | Module <span style={{width: 300}} /> | Description                                        |
 | --------------------------------------------------- | ------------------------------------ | -------------------------------------------------- |
@@ -32,10 +34,13 @@ math.gl is a toolbox that offers a suite of composable modules.
 
 | **DGGS (Discrete global grid support) libraries** | Module <span style={{width: 300}} /> | Description                     |
 | ------------------------------------------------- | ------------------------------------ | ------------------------------- |
-|                                                   |                                      |                                 |
-| ![geohash](./images/dggs/geohash.png 'geohash')   | **`@math.gl/dggs-geohash`**               | Get geometry of GeoHash tokens. |
-| ![quadkey](./images/dggs/quadkey.png 'quadkey')   | **`@math.gl/dggs-quadkey`**               | Get geometry of QuadKey tokens  |
-| ![s2](./images/dggs/s2.png 's2')                  | **`@math.gl/dggs-s2`**                    | Get geometry of S2 tokens.      |
+| ![geohash](./images/dggs/geohash.png 'geohash')   | **`@math.gl/dggs-geohash`**          | Get geometry of GeoHash tokens. |
+| ![quadkey](./images/dggs/quadkey.png 'quadkey')   | **`@math.gl/dggs-quadkey`**          | Get geometry of QuadKey tokens  |
+| ![s2](./images/dggs/s2.png 's2')                  | **`@math.gl/dggs-s2`**               | Get geometry of S2 tokens.      |
+
+| **3D math libraries**                      | Module <span style={{width: 300}} /> | Description                                |
+| ------------------------------------------ | ------------------------------------ | ------------------------------------------ |
+| ![culling](./images/culling.png 'culling') | **`@math.gl/culling`**               | Bounding volumes and intersection testing. |
 
 <br/>
 In addition, math.gl provides a few deprecated legacy modules, to avoid breaking older applications.
@@ -53,16 +58,18 @@ math.gl is fully supported on:
 
 - Evergreen browsers: Recent versions of Chrome, Safari, Firefox, Edge etc.
 - Node.js: Active and Maintenance [LTS releases](https://nodejs.org/en/about/releases/)
-- IE11: Supported (with certain performance caveats) using math.gl's fully transpiled `es5` distribution and `@babel/polyfills`.
-
-Note that Internet Explorer < 10 will not work. If your application needs to support older browsers, an option could be to use [`gl-matrix`](http://glmatrix.net/) directly.
 
 ## History
 
-- The core classes were originally developed as part of luma.gl v4 to provide a basic 3D math library for the luma.gl and deck.gl frameworks.
-- math.gl was then broken out into its own repository to ensure it remained an independently usable set of 3D and Geospatial math modules.
-- parts of the Cesium math library were ported and published as independently usable math.gl modules (the geospatial and culling modules). This was a collaboration with the Cesium team around 3D Tiles support in loaders.gl,
-- Additional geospatial modules have gradually been added to support more advanced use cases for deck.gl.
+| Year  | Version | Description                                                                                                                                                            |
+| ----- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2015  | N/A     | `@math.gl/core` classes were created as part of luma.gl v4, as a set of class wrappers for `gl-matrix` for luma.gl and deck.gl frameworks.                             |
+| 2017  | v1.0    | `math.gl` was broken out into its own repository to manage luma.gl growth. The goal was to  independently usable set of 3D and Geospatial math modules.                |
+| 2018  | v2.0    | The math.gl API started to mature.                                                                                                                                     |
+| 2019  | v3.0    | A collaboration with the Cesium team around 3D Tiles led to parts of the Cesium math library were ported into the `math.gl/geospatial` and `@math.gl/culling` modules. |
+| 2020+ | v3.x    | Additional geospatial modules have gradually been added to support more advanced use cases for deck.gl.                                                                |
+| 2022  | v3.6    | Code base fully rewritten in TypeScript.                                                                                                                               |
+| 2023  | v4.0    | ES module support. gl-matrix was removed as a dependency and math.gl became fully stand-alone.                                                                         |
 
 ## Attributions
 

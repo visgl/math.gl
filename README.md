@@ -23,8 +23,8 @@ In spite of its name, math.gl has no actual WebGL dependencies (e.g. it does not
 
 ## Attribution
 
-math.gl heavily inspired by, and includes code, documentation and ideas from some of the most proven open source JavaScript math libraries, the awesome [`gl-matrix`](http://glmatrix.net/) and the THREE.js math library. Those libraries encouraged reuse which enabled math.gl to be built, and naturally math.gl does the same!
+math.gl was inspired by, and includes code, documentation and ideas from some of the most proven open source JavaScript math libraries, including the awesome [`gl-matrix`](http://glmatrix.net/) and the THREE.js math library. The generous open source licenses of those libraries encouraged reuse which enabled math.gl to be built, and naturally math.gl does the same.
 
 ## License
 
-MIT license. The libraries that math.gl are built on are also all open source under permissive licenses.
+MIT license. Any code that math.gl has forked is also open source under permissive licenses.

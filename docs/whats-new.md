@@ -45,22 +45,23 @@
   </tbody>
 </table>
 
-## v4.0 (In Development)
+## v4.0
 
-Target Release Date: Q4, 2023
+Release Date: Oct 14, 2023.
 
-- New modules for working with DGGS (Discrete Global Grid System) math.
-- Node.js v18, v20 are now officially supported.
+- ESM (ECMAScript modules).
+- Node.js v16, v18, v20.
 - Typescript v5
-- Removed dependency on gl-matrix
+- `gl-matrix` dependency removed.
+- New modules for working with DGGS (Discrete Global Grid System) math.
 
 **`@math.gl/dggs-geohash`** (NEW MODULE)
 
-- New module with math for the GeoHash DGGS (Discrete Global Grid System).
+- New module with lightweight math for the GeoHash DGGS (Discrete Global Grid System).
 
 **`@math.gl/dggs-quadkey`** (NEW MODULE)
 
-- New module with math for the quadkey DGGS (Discrete Global Grid System).
+- New module with lightweight math for the quadkey DGGS (Discrete Global Grid System).
 
 **`@math.gl/dggs-s2`** (NEW MODULE)
 
@@ -69,6 +70,7 @@ Target Release Date: Q4, 2023
 **`@math.gl/core`**
 
 - `config` is now truly global (stored on `globalThis`).
+- `gl-matrix` dependency removed.
 
 **`@math.gl/types`**
 
@@ -76,7 +78,7 @@ Target Release Date: Q4, 2023
 
 ## v3.6
 
-Target Release Date: Q4, 2021
+Release Date: June 10, 2022
 
 Codebase has been fully converted to typescript. In general this means that users can expect
 the types exported from math.gl to be considerably improved, however in some function signatures

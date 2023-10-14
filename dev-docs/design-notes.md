@@ -51,8 +51,6 @@ Some background:
 
 math.gl is a JavaScript math library primarily intended to support WebGL applications. It is a generic library but was developed as a companion for [luma.gl](http://uber.github.io/luma.gl/) and [deck.gl](http://uber.github.io/deck.gl/).
 
-math.gl contains a set of classes (Matrix4 etc) to complement the procedural interface of gl-matrix. It also imports a limited subset of the standard `gl-matrix` functions (to keep bundle size down), these can be used in parallel with the classes.
-
 ## Who is this for?
 
 JavaScript WebGL programmers who:

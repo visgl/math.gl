@@ -4,7 +4,11 @@
   <img src="https://img.shields.io/badge/From-v4.0-blue.svg?style=flat-square" alt="From-v4.0" />
 </p>
 
-> The GeoHash functions in math.gl are currently focused on **decoding** S2 encoded data, not encoding it.
+:::caution
+This module is still experimental. It may have issues and functionality may change in minor releases.
+:::
+
+> The GeoHash functions in math.gl are currently focused on **decoding** Geohash encoded data, not encoding it.
 
 ## Functions
 

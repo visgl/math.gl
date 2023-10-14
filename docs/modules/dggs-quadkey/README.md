@@ -4,6 +4,10 @@
   <img src="https://img.shields.io/badge/From-v4.0-blue.svg?style=flat-square" alt="From-v4.0" />
 </p>
 
+:::caution
+This module is still experimental. It may have issues and functionality may change in minor releases.
+:::
+
 `@math.gl/dggs-quadkey` is a JavaScript library providing math for the Quadkey DGGS (Discrete Global Grid System).
 
 ## Installation

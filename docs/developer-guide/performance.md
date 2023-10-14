@@ -78,7 +78,7 @@ for (...) {
 
 ## Browser, OS version etc
 
-The JavaScript engine powering Chrome and Node is still improving. The performance difference between e.g. Node 8 and Node 11 is rather staggering.
+The JavaScript engine powering Chrome and Node is still improving. The performance difference between some older Node versions was dramatic.
 
 ## Benchmarking
 

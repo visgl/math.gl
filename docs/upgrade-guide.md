@@ -1,5 +1,10 @@
 # Upgrade Guide
 
+## Upgrading to v4.0
+
+- math.gl v4.0 is now packaged as ESM modules, but with additional CommonJS exports. In most cases you should not have problems importing 4.0.
+- The `gl-matrix` dependency has been removed. You can still install / import gl-matrix in your application, it should remain highly compatible with math.gl. 
+
 ## Upgrading to v3.6
 
 In version 3.6 the entire math.gl code base was converted to typescript (`.ts`).

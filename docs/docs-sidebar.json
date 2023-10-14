@@ -24,6 +24,22 @@
       },
       {
         "type": "category",
+        "label": "Geospatial Math",
+        "items": [
+          "developer-guide/geospatial/geospatial-models",
+          "developer-guide/geospatial/web-mercator-coordinates",
+          "developer-guide/geospatial/web-mercator-offset-accuracy"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Discrete Global Grid Systems Math",
+        "items": [
+          "developer-guide/geospatial/dggs"
+        ]
+      },
+      {
+        "type": "category",
         "label": "3D Math",
         "items": [
           "developer-guide/math/transformations",
@@ -32,16 +48,6 @@
           "developer-guide/math/coordinate-systems",
           "developer-guide/math/rotations",
           "developer-guide/math/floating-point"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "Geospatial Math",
-        "items": [
-          "developer-guide/geospatial/geospatial-models",
-          "developer-guide/geospatial/dggs",
-          "developer-guide/geospatial/web-mercator-coordinates",
-          "developer-guide/geospatial/web-mercator-offset-accuracy"
         ]
       }
     ]
