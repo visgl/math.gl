@@ -1,8 +1,14 @@
 # CHANGELOG
 
-4.0 track:
-- ES Modules (type: module)
-- gl-matrix fork
+## v4.0
+
+- docs: Update docs for 4.0 (#7)
+
+## v4.0.0-beta.1
+
+- chore: Remove gl-matrix import (#6)
+- chore: Rename DGGS modules (#5)
+- chore: Node 18 (#3)
 
 ## 4.0.0-alpha.4
 
