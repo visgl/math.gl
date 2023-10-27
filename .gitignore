@@ -1,19 +1,32 @@
+# Yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+*/**/yarn.lock
+yarn-error.log
+npm-debug.log
+report*.json
+
+# Node modules
+node_modules/
+
+# Dists
 dist/*
 dist-esm/*
 dist-es6/*
 **/dist/*
 
-node_modules/
+# Generatred
 coverage/
 .nyc_output/
-
 .docusaurus
 
-npm-debug.log
-*/**/yarn.lock
-yarn-error.log
-report*.json
-
+# typescript
 tsconfig.tsbuildinfo
 
 # editor files
@@ -23,4 +36,3 @@ tsconfig.tsbuildinfo
 *.zip
 *.rar
 
-.reify-cache
