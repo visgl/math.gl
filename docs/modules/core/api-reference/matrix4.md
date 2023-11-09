@@ -73,25 +73,25 @@ Since `Matrix4` is a subclass of the built in JavaScript `Array` it can be used 
 
 ## Methods
 
-##### constructor()
+##### `constructor()`
 
 Creates an empty `Matrix4`
 
 `new Matrix4()`
 
-##### identity(): this
+##### `identity(): this`
 
 Sets the matrix to the multiplicative identity matrix.
 
 `matrix4.identity()`
 
-##### set(...number): this
+##### `set(...number): this`
 
 Sets the elements of the matrix.
 
 `matrix4.set(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33)`
 
-##### fromQuaternion(quaternion: Quaternion): this
+##### `fromQuaternion(quaternion: Quaternion): this`
 
 Sets the matrix to a transformation corresponding to the rotations represented by the given quaternion.
 
@@ -99,7 +99,7 @@ Sets the matrix to a transformation corresponding to the rotations represented b
 
 - `quaternion` (`Quaternion`) - the quaternion to create matrix from
 
-##### frustum(options: {left: number, right: number, bottom: number, top: number, near: number, far: number}): this
+##### `frustum(options: {left: number, right: number, bottom: number, top: number, near: number, far: number}): this`
 
 Generates a frustum matrix with the given bounds. The frustum far plane can be infinite.
 
@@ -112,7 +112,7 @@ Generates a frustum matrix with the given bounds. The frustum far plane can be i
 - `near` (`number`) - Near bound of the frustum
 - `far` (`number`|`Infinity`) - Far bound of the frustum
 
-##### lookAt(options?: {eye: number, center: number, up: number}): this
+##### `lookAt(options?: {eye: number, center: number, up: number}): this`
 
 Generates a look-at matrix with the given eye position, focal point, and up axis
 
@@ -122,7 +122,7 @@ Generates a look-at matrix with the given eye position, focal point, and up axis
 - `center`=`[0, 0, 0]` (`Vector3`|`number[3]`) vec3 Point the viewer is looking at
 - `up`=`[0, 1, 0]` (`Vector3`|`number[3]`) vec3 vec3 pointing up
 
-##### ortho(options: {left: number, right: number, bottom: number, top: number, near?: number, far: number}): this
+##### `ortho(options: {left: number, right: number, bottom: number, top: number, near?: number, far: number}): this`
 
 Generates a orthogonal projection matrix with the given bounds
 
@@ -135,12 +135,12 @@ Generates a orthogonal projection matrix with the given bounds
 - `near` (`number`) - Near bound of the frustum
 - `far` (`number`) - Far bound of the frustum
 
-##### orthographic
+##### `orthographic()`
 
 Generates an orthogonal projection matrix with the same parameters
 as a perspective matrix (plus `focalDistance`).
 
-- Matrix4.orthographic({fovy, aspect, focalDistance, near, far})
+- `Matrix4.orthographic({fovy, aspect, focalDistance, near, far})`
 
 - `fovy` (`number`) - Vertical field of view in radians
 - `aspect` (`number`) - Aspect ratio. typically viewport width/height
@@ -150,7 +150,7 @@ as a perspective matrix (plus `focalDistance`).
 
 > In applications it is not unusual to want to offer both perspective and orthographic views and this method is supplied to make this as simple as possible.
 
-##### perspective
+##### `perspective()`
 
 Generates a perspective projection matrix with the given bounds. The frustum far plane can be infinite.
 
@@ -161,7 +161,7 @@ Generates a perspective projection matrix with the given bounds. The frustum far
 - `near`=`0.1` (`number`) - Near bound of the frustum
 - `far`=`500` (`number`|`Infinity`) - Far bound of the frustum
 
-##### determinant(): number
+##### `determinant(): number`
 
 Returns the determinant of the matrix (does not modify the matrix).
 
@@ -172,7 +172,7 @@ Returns (`number`) - the determinant
 - If the determinant is zero, the matrix is not invertible.
 - Determinant calculation is somewhat expensive.
 
-##### transpose(): this
+##### `transpose(): this`
 
 Sets this matrix to its transpose matrix.
 
@@ -180,7 +180,7 @@ Sets this matrix to its transpose matrix.
 
 - The transpose matrix mirrors the original matrix elements in the diagonal.
 
-##### invert(): this
+##### `invert(): this`
 
 Sets this matrix to its inverse matrix.
 
@@ -188,7 +188,7 @@ Sets this matrix to its inverse matrix.
 
 - The inverse matrix mirrors the original matrix elements in the diagonal.
 
-##### multiplyLeft(matrix: number[16]): this
+##### `multiplyLeft(matrix: number[16]): this`
 
 Multiplies in another matrix from the left
 
@@ -196,19 +196,19 @@ Multiplies in another matrix from the left
 
 - When using `Matrix4` to transform vectors, the vectors are multiplied in from the right. This means that the multiplying in a matrix from the left will cause it to be applied last during transformation (unless additional matrices are multiplied in from the left of course).
 
-##### multiplyRight(matrix: number[16]): this
+##### `multiplyRight(matrix: number[16]): this`
 
 `matrix4.multiplyRight(matrix4)`
 
 - When using `Matrix4` to transform vectors, the vectors are multiplied in from the right. This means that the multiplying in a matrix from the left will cause it to be applied last during transformation (unless additional matrices are multiplied in from the left of course).
 
-##### rotateX(radians: number): this
+##### `rotateX(radians: number): this`
 
 Adds a rotation by the given angle around the X axis. Equivalent to right multiplying the new transform into the matrix but more performant.
 
 `matrix4.rotateX(radians)`
 
-##### rotateY(radians: number): this
+##### `rotateY(radians: number): this`
 
 Adds a rotation by the given angle around the Y axis.
 
@@ -216,7 +216,7 @@ Adds a rotation by the given angle around the Y axis.
 
 - Equivalent to right multiplying the new transform into the matrix but more performant.
 
-##### rotateZ(radians: number): this
+##### `rotateZ(radians: number): this`
 
 Adds a rotation by the given angle around the Z axis.
 
@@ -224,7 +224,7 @@ Adds a rotation by the given angle around the Z axis.
 
 - Equivalent to right multiplying the new transform into the matrix but more performant.
 
-##### rotateXYZ(angles: [rx: number, ry: number, rz: number]): this
+##### `rotateXYZ(angles: [rx: number, ry: number, rz: `number]): this
 
 Adds successive rotations by the given angles around the X, Y and Z axis.
 
@@ -232,7 +232,7 @@ Adds successive rotations by the given angles around the X, Y and Z axis.
 
 - Equivalent to right multiplying the new transform into the matrix but more performant.
 
-##### rotateAxis(radians: number, axis: number[3]): this
+##### `rotateAxis(radians: number, axis: number[3]): this`
 
 Adds successive rotations by the given angles around the X, Y and Z axis.
 
@@ -240,7 +240,7 @@ Adds successive rotations by the given angles around the X, Y and Z axis.
 
 Equivalent to right multiplying the new transform into the matrix but more performant.
 
-##### scale(factor: number | number[3]): this
+##### `scale(factor: number | number[3]): this`
 
 Adds a scaling transform, each axis can be scaled independently.
 
@@ -260,7 +260,7 @@ Equivalent to right multiplying the new transform into the matrix but more perfo
 - Scale with `-1` will flip the coordinate system in that axis.
 - Scale with `0` will drop that component.
 
-##### translate(scale: number[3]): this
+##### `translate(scale: number[3]): this`
 
 Adds a translation to the matrix.
 
@@ -276,21 +276,21 @@ During vector transformation the given translation values are added to each comp
 
 #### Decomposition
 
-##### getRotation(result?: number[16]) : number[16]
+##### `getRotation(result?: number[16]) : number[16]`
 
 Returns a 4x4 rotation matrix.
 
-##### getRotationMatrix3(result?: number[9]) : number[9]
+##### `getRotationMatrix3(result?: number[9]) : number[9]`
 
 Returns a 3x3 rotation matrix.
 
-##### getTranslation(result?: number[3]) : number[3]
+##### `getTranslation(result?: number[3]) : number[3]`
 
 Returns the 3-element translation vector component of the affine transform described by the matrix.
 
 For performance, an existing vector can be provided, if not a new vector will be returned.
 
-##### getScale(result?: number[3]) : number[3]
+##### `getScale(result?: number[3]) : number[3]`
 
 Returns the 3-element scale vector component of the affine transform described by the matrix.
 
@@ -298,7 +298,7 @@ For performance, an existing vector can be provided, if not a new vector will be
 
 #### Point Transformations
 
-##### transformAsPoint(vector : number[4]) : number[4]
+##### `transformAsPoint(vector : number[4]) : number[4]`
 
 Transforms any 2, 3 or 4 element vector as a "point" by multiplying it (from the right) with this matrix. `Point` here means that the returned vector will include any translations in this matrix.
 
@@ -311,7 +311,7 @@ Transforms any 2, 3 or 4 element vector as a "point" by multiplying it (from the
 - If `vector` is specified in homogeneous coordinates, `w` coordinate must NOT be `0`.
 - If `vector` is specified in homogeneous coordinates the returned vector will be `w` adjusted, (i.e. `w` coordinate will be `1`, even if the supplied vector was not normalized).
 
-##### transformAsVector(vector : number[4]) : number[4]
+##### `transformAsVector(vector : number[4]) : number[4]`
 
 Transforms any 2, 3 or 4 element vector interpreted as a direction (i.e. all vectors are based in the origin so the transformation not pick up any translations from the matrix).
 

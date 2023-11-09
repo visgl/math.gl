@@ -88,8 +88,7 @@ Throws
 
 Duplicates an Ellipsoid instance.
 
-- {Ellipsoid} [result] Optional object onto which to store the result, or undefined if a new
-  instance should be created.
+- result?: Ellipsoid - Optional object onto which to store the result, or undefined if a new instance should be created.
 
 Returns
 

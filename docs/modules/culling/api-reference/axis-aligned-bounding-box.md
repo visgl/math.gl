@@ -29,7 +29,7 @@ const box = makeAxisAlignedBoundingBoxFromPoints([
 
 ## Global Functions
 
-### makeAxisAlignedBoundingBoxFromPoints(positions : Array[3][], result? : AxisAlignedBoundingBox) : AxisAlignedBoundingBox
+### `makeAxisAlignedBoundingBoxFromPoints(positions : Array`[3][], result? : AxisAlignedBoundingBox) : AxisAlignedBoundingBox
 
 Computes an instance of an `AxisAlignedBoundingBox` of the given positions.
 
@@ -38,32 +38,32 @@ Computes an instance of an `AxisAlignedBoundingBox` of the given positions.
 
 ## Fields
 
-### center: Vector3 = [0, 0, 0]
+### `center: Vector3 = [0, 0, 0]`
 
 The center position of the box.
 
-### halfDiagonal: Vector3
+### `halfDiagonal: Vector3`
 
 The positive diagonal vector.
 
-### minimum: Vector3
+### `minimum: Vector3`
 
 The minimum corner of the bounding box.
 
-### maximum: Vector3
+### `maximum: Vector3`
 
 The maximum corner of the bounding box.
 
 ## Methods
 
-### constructor(minimum = [0, 0, 0], maximum = [0, 0, 0]) {
+### `constructor(minimum = [0, 0, 0], maximum = [0, 0, 0])`
 
-### constructor
+### `constructor`
 
-- {Vector3} [minimum=Vector3.ZERO] The minimum corner of the box, i.e. `[xMin, yMin, zMin]`.
-- {Vector3} [maximum=Vector3.ZERO] The maximum corner of the box, i.e. `[xMax, yMax, zMax]`.
+- `minimum=Vector3.ZERO`: `Vector3` The minimum corner of the box, i.e. `[xMin, yMin, zMin]`.
+- `maximum=Vector3.ZERO`: `Vector3` The maximum corner of the box, i.e. `[xMax, yMax, zMax]`.
 
-### clone() : AxisAlignedBoundingBox
+### `clone() : AxisAlignedBoundingBox`
 
 Duplicates a `AxisAlignedBoundingBox` instance.
 
@@ -71,7 +71,7 @@ Returns
 
 - A new `AxisAlignedBoundingBox` instance.
 
-### equals(right : AxisAlignedBoundingBox) : Boolean
+### `equals(right : AxisAlignedBoundingBox) : Boolean`
 
 Compares the provided `AxisAlignedBoundingBox` componentwise and returns `true` if they are equal, `false` otherwise.
 
@@ -81,7 +81,7 @@ Returns
 
 - `true` if left and right are equal, `false` otherwise.
 
-### intersectPlane(plane : Plane) : INTERSECTION
+### `intersectPlane(plane : Plane) : INTERSECTION`
 
 Determines which side of a plane the axis-aligned bounding box is located.
 
@@ -93,7 +93,7 @@ Returns
 - `INTERSECTION.OUTSIDE` if the entire box is on the opposite side, and
 - `INTERSECTION.INTERSECTING` if the box intersects the plane.
 
-### distanceTo(point : Number[3]) : Number
+### `distanceTo(point : Number[3]) : Number`
 
 Computes the estimated distance from the closest point on a bounding box to a point.
 
@@ -103,7 +103,7 @@ Returns
 
 - The estimated distance from the bounding sphere to the point.
 
-### distanceSquaredTo(point : Number[3]) : Number
+### `distanceSquaredTo(point : Number[3]) : Number`
 
 Computes the estimated distance squared from the closest point on a bounding box to a point.
 

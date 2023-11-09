@@ -34,7 +34,7 @@ const reprojectedPosition = projection.project(wgs84Position);
 
 There are an infinite number of possible coordinate systems; therefore strict syntax is required to describe the parameters of any given CRS. Two main systems are supported in this module: Proj4 strings and WKT strings. Within WKT there exists both OGC WKT and ESRI WKT syntax; both are generally supported though some more-obscure projection keywords may not be used. Note that Proj4 strings [can be slightly more accurate](https://github.com/proj4js/proj4js/issues/222) in some circumstances than WKT strings.
 
-There are thousands of named "EPSG" projections. This module only includes aliases for those in the section below by default. To use a different EPSG projection, you can use <https://epsg.io>. For example, <https://epsg.io/4326> defines standard longitude-latitude coordinates and lists multiple projection strings. Choose one of the `OGC WKT`, `ESRI WKT`, or `PROJ.4` strings listed.
+There are thousands of named "EPSG" projections. This module only includes aliases for those in the section below by default. To use a different EPSG projection, you can use https://epsg.io. For example, https://epsg.io/4326 defines standard longitude-latitude coordinates and lists multiple projection strings. Choose one of the `OGC WKT`, `ESRI WKT`, or `PROJ.4` strings listed.
 
 The epsg.io website also has a public API, e.g., for WGS 84: `https://epsg.io/?q=4326&format=json`
 

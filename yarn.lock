@@ -2474,18 +2474,25 @@
   dependencies:
     "@octokit/openapi-types" "^7.2.3"
 
-"@probe.gl/bench@^3.5.4":
-  version "3.5.4"
-  resolved "https://registry.yarnpkg.com/@probe.gl/bench/-/bench-3.5.4.tgz#df42c9c349fa8dfd0636a64394c941ccdd448296"
-  integrity sha512-I41uR/JTcfY7bDpD+koWGzmj6g7WCL6CO8GgKC9uhQn3KUxjSirQ7UvBs5svmoHBa0yD0IOoF2shMJA/5kQsYA==
+"@probe.gl/bench@^4.0.0":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@probe.gl/bench/-/bench-4.0.4.tgz#833353fac77a74dc4b7b32b12da9ca6319995063"
+  integrity sha512-7cf8VLdt4/8lhsUnt6+0bxGaYCK2udeuQ2uwUtyR4nCWcOPbVhknt6XcSI8l6NRrr4oGEJ3vF9nj5561dIl3Gg==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    "@probe.gl/log" "3.5.4"
+    "@probe.gl/log" "4.0.4"
 
 "@probe.gl/env@3.5.4":
   version "3.5.4"
   resolved "https://registry.yarnpkg.com/@probe.gl/env/-/env-3.5.4.tgz#faddd1232f607b634fa9f00502b40706e143426d"
   integrity sha512-MtMINUpcPzAp8upQNbm5U1Hp+/EQ8yw0tXccg5Aiz7cl92LsMopDPtgXnCRv2whzcayioHAdg4YIhNPY5fFxMQ==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+
+"@probe.gl/env@4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@probe.gl/env/-/env-4.0.4.tgz#ea4e7d16f143faaf1e863316c6ccfe68db8b66a4"
+  integrity sha512-sYNGqesDfWD6dFP5oNZtTeFA4Z6ak5T4a8BNPdNhoqy7PK9w70JHrb6mv+RKWqKXq33KiwCDWL7fYxx2HuEH2w==
   dependencies:
     "@babel/runtime" "^7.0.0"
 
@@ -2497,10 +2504,18 @@
     "@babel/runtime" "^7.0.0"
     "@probe.gl/env" "3.5.4"
 
-"@probe.gl/react-bench@^3.5.4":
-  version "3.5.4"
-  resolved "https://registry.yarnpkg.com/@probe.gl/react-bench/-/react-bench-3.5.4.tgz#e21e9e10c555c953a3f23dc4a29c7925a6bf2a3e"
-  integrity sha512-K+KSKAZG+3+gTbaBWhRgOG3WtMuMq9a1f1Zz39eT0jN2XbR56eDYgpGo0FYcPDRA+jUlKdV3c7+d5X0Xk+iaOQ==
+"@probe.gl/log@4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@probe.gl/log/-/log-4.0.4.tgz#e42d1d0e22981c4010521c350cad2305bce02976"
+  integrity sha512-WpmXl6njlBMwrm8HBh/b4kSp/xnY1VVmeT4PWUKF+RkVbFuKQbsU11dA1IxoMd7gSY+5DGIwxGfAv1H5OMzA4A==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    "@probe.gl/env" "4.0.4"
+
+"@probe.gl/react-bench@^4.0.0":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@probe.gl/react-bench/-/react-bench-4.0.4.tgz#67295684764a56d704975194235722add5642a15"
+  integrity sha512-olhlG6qfghjwG8pjNtjgtIT8sRTNXeAEZrVPU/aGYaMIVwzCCYz+uUHT+AdyECHDcafXEkdUlFabzx02teevig==
   dependencies:
     "@babel/runtime" "^7.0.0"
     css-loader "^2.1.1"

@@ -29,4 +29,4 @@ Gravity Height Model data files tend to be stored in PGM format.
 
 ## Attribution
 
-This implementation is a JavaScript port of selected code from [GeographicLib-1.50.1(https://geographiclib.sourceforge.io/html/index.html), listed as Copyright Charles Karney <charles@karney.com>, under the MIT license.
+This implementation is a JavaScript port of selected code from [GeographicLib-1.50.1](https://geographiclib.sourceforge.io/html/index.html), listed as Copyright Charles Karney charles@karney.com, under the MIT license.

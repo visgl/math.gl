@@ -34,20 +34,20 @@ const projection = new Proj4Projection({from: 'EPSG:4326', to: 'EPSG:4269'});
 
 ## Static Fields
 
-### Proj4Projection.defineProjectionAliases(projections: {[alias: string]: string});
+### `Proj4Projection.defineProjectionAliases(projections: {[alias: string]: string})`
 
 Defines projection aliases
 
 ## Methods
 
-### constructor(options: {from?: string, to?: string})
+### `constructor(options: {from?: string, to?: string})`
 
 Create a new `Proj4Projection` instance that can convert between the specified coordinate systems.
 
-### project(coord: number[]): number[]
+### `project(coord: number[]): number[]`
 
 Project a coordinate project from first to second coordinate system
 
-### unproject(coord: number[]): number[]
+### `unproject(coord: number[]): number[]`
 
 Project a coordinate project from second to first coordinate system

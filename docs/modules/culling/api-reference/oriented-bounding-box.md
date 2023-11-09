@@ -46,7 +46,7 @@ const box = makeOrientedBoundingBoxFromPoints([
 
 ## Global Functions
 
-### makeOrientedBoundingBoxFromPoints(positions : Array[3][], result? : OrientedBoundingBox) : OrientedBoundingBox
+### `makeOrientedBoundingBoxFromPoints(positions : Array[3][], result? : OrientedBoundingBox) : OrientedBoundingBox`
 
 Computes an instance of an `OrientedBoundingBox` of the given positions.
 This is an implementation of Stefan Gottschalk's [Collision Queries using Oriented Bounding Boxes](http://gamma.cs.unc.edu/users/gottschalk/main.pdf) (PHD thesis).
@@ -56,36 +56,36 @@ This is an implementation of Stefan Gottschalk's [Collision Queries using Orient
 
 ## Fields
 
-### center: Vector3
+### `center: Vector3`
 
 The center position of the box.
 
-### halfAxes: Matrix3
+### `halfAxes: Matrix3`
 
 The transformation matrix, to rotate the box to the right position.
 
-### readonly halfSize: number[]
+### `readonly halfSize: number[]`
 
 The array with three half-sizes for the bounding box
 
-### readonly quaternion: Quaternion
+### `readonly quaternion: Quaternion`
 
 The quaternion describing the orientation of the bounding box
 
 ## Methods
 
-### constructor(center = [0, 0, 0], halfAxes = [0, 0, 0, 0, 0, 0, 0, 0, 0]) {
+### `constructor(center = [0, 0, 0], halfAxes = [0, 0, 0, 0, 0, 0, 0, 0, 0])`
 
-### constructor
+### `constructor`
 
 - `center`=`Vector3.ZERO` The center of the box.
 - `halfAxes`=`Matrix3.ZERO` The three orthogonal half-axes of the bounding box. Equivalently, the transformation matrix, to rotate and scale a cube centered at the origin.
 
-### fromCenterHalfSizeQuaternion(center : number[], halfSize : number[], quaternion : number[]) : OrientedBoundingBox
+### `fromCenterHalfSizeQuaternion(center : number[], halfSize : number[], `quaternion : number[]) : OrientedBoundingBox
 
 Create an OrientedBoundingBox from a half-size-quaternion based OBB
 
-### clone() : OrientedBoundingBox
+### `clone() : OrientedBoundingBox`
 
 Duplicates a OrientedBoundingBox instance.
 
@@ -93,7 +93,7 @@ Returns
 
 - A new `OrientedBoundingBox` instance.
 
-### equals(right: OrientedBoundingBox) : Boolean
+### `equals(right: OrientedBoundingBox) : Boolean`
 
 Compares the provided OrientedBoundingBox componentwise and returns `true` if they are equal, `false` otherwise.
 
@@ -103,7 +103,7 @@ Returns
 
 - `true` if left and right are equal, `false` otherwise.
 
-### intersectPlane(plane : Plane) : INTERSECTION
+### `intersectPlane(plane : Plane) : INTERSECTION`
 
 Determines which side of a plane the oriented bounding box is located.
 
@@ -115,7 +115,7 @@ Returns
 - `INTERSECTION.OUTSIDE` if the entire box is on the opposite side, and
 - `INTERSECTION.INTERSECTING` if the box intersects the plane.
 
-### distanceTo(point : Number[3]) : Number
+### `distanceTo(point : Number[3]) : Number`
 
 Computes the estimated distance from the closest point on a bounding box to a point.
 
@@ -125,7 +125,7 @@ Returns
 
 - The estimated distance from the bounding sphere to the point.
 
-### distanceSquaredTo(point : Number[3]) : Number
+### `distanceSquaredTo(point : Number[3]) : Number`
 
 Computes the estimated distance squared from the closest point on a bounding box to a point.
 
@@ -135,7 +135,7 @@ Returns
 
 - The estimated distance squared from the bounding sphere to the point.
 
-### computePlaneDistances(position : Number[3], direction : Number[3], result : Number[2]]) : Number[2]
+### `computePlaneDistances(position : Number[3], direction : Number[3], result : `Number[2]]) : Number[2]
 
 The distances calculated by the vector from the center of the bounding box to position projected onto direction.
 

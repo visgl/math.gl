@@ -12,6 +12,10 @@ Parse header of "Earth Gravity Model" \*.pgm file.
 
 Parse "Earth Gravity Model" loaded from a \*.pgm file, e.g. https://geographiclib.sourceforge.io/html/geoid.html
 
-@param {Uint8Array} data - binary buffer of pgm file
-@param {Object} options - loader options
-@returns {GeoidHeightModel} - instance of GeoidHeightModel class
+```ts
+parsePGM(data: Uint8Array, options: object}): GeoidHeightModel
+```
+
+- `data` - binary buffer of pgm file
+- `options` - loader options
+- `GeoidHeightModel` - instance of `GeoidHeightModel` class
