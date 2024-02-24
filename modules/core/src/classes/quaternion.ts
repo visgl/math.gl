@@ -92,17 +92,17 @@ export class Quaternion extends MathArray {
     this.identity();
     switch (euler.order) {
       case Euler.XYZ:
-        return this.rotateX(this[0]).rotateY(this[1]).rotateZ(this[2]);
+        return this.rotateX(euler[0]).rotateY(euler[1]).rotateZ(euler[2]);
       case Euler.YXZ:
-        return this.rotateY(this[0]).rotateX(this[1]).rotateZ(this[2]);
+        return this.rotateY(euler[0]).rotateX(euler[1]).rotateZ(euler[2]);
       case Euler.ZXY:
-        return this.rotateZ(this[0]).rotateX(this[1]).rotateY(this[2]);
+        return this.rotateZ(euler[0]).rotateX(euler[1]).rotateY(euler[2]);
       case Euler.ZYX:
-        return this.rotateZ(this[0]).rotateY(this[1]).rotateX(this[2]);
+        return this.rotateZ(euler[0]).rotateY(euler[1]).rotateX(euler[2]);
       case Euler.YZX:
-        return this.rotateY(this[0]).rotateZ(this[1]).rotateX(this[2]);
+        return this.rotateY(euler[0]).rotateZ(euler[1]).rotateX(euler[2]);
       case Euler.XZY:
-        return this.rotateX(this[0]).rotateZ(this[1]).rotateY(this[2]);
+        return this.rotateX(euler[0]).rotateZ(euler[1]).rotateY(euler[2]);
       default:
         throw new Error('Unknown Euler angle order');
     }
