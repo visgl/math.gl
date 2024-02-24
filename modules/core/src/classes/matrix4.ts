@@ -241,6 +241,34 @@ export class Matrix4 extends Matrix {
   }
 
   /**
+   * Calculates a 4x4 matrix from the given matrix3
+   * @param matrix3 
+   * @returns self
+   */
+  fromMatrix3(matrix3: Readonly<NumericArray>): this {
+    this[0] = matrix3[0];
+    this[1] = matrix3[1];
+    this[2] = matrix3[2];
+    this[3] = 0;
+
+    this[4] = matrix3[3];
+    this[5] = matrix3[4];
+    this[6] = matrix3[5];
+    this[7] = 0;
+
+    this[8] = matrix3[6];
+    this[9] = matrix3[7];
+    this[10] = matrix3[8];
+    this[11] = 0;
+
+    this[12] = 0;
+    this[13] = 0;
+    this[14] = 0;
+    this[15] = 1;
+    return this.check();
+  }
+
+  /**
    * Generates a frustum matrix with the given bounds
    * @param view.left - Left bound of the frustum
    * @param view.right - Right bound of the frustum
