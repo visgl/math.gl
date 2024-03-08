@@ -1,6 +1,13 @@
 # CHANGELOG
 
-## v4.0
+## v4.0.1
+
+- chore: Bump probe.gl (#8)
+- chore: Fix publint warnings (#14)
+- fix: Return type of `rotate` in `Matrix3` (#13)
+- Upgrade ocular-dev-tools (#17)
+
+## v4.0.0
 
 - docs: Update docs for 4.0 (#7)
 

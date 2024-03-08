@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "4.0.0",
+  "version": "4.0.1",
   "keywords": [
     "webgl",
     "javascript",
@@ -45,7 +45,7 @@
     "./src/lib/common.js"
   ],
   "dependencies": {
-    "@math.gl/types": "4.0.0"
+    "@math.gl/types": "4.0.1"
   },
   "gitHead": "e1a95300cb225a90da6e90333d4adf290f7ba501"
 }
