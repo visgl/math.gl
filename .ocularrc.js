@@ -6,12 +6,10 @@ export default {
     // extensions: ['js', 'md']
   },
 
-  babel: {
-    // extensions: ['.js']
-  },
+  babel: false,
 
   typescript: {
-    project: 'tsconfig.modules.json'
+    project: 'tsconfig.build.json'
   },
 
   aliases: {

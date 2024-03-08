@@ -1,8 +1,11 @@
 const {getESLintConfig} = require('ocular-dev-tools/configuration');
 
 module.exports = getESLintConfig({
-  react: '16.8.2',
-  overrides: {
+  overrides: {parser: '',
+    parserOptions: {
+      project: ['./tsconfig.json'],
+      ecmaVersion: 2020
+    },
     env: {
       browser: true,
       es2020: true,

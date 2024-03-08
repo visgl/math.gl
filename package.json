@@ -13,33 +13,23 @@
     "examples/*"
   ],
   "scripts": {
-    "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
+    "bootstrap": "yarn && ocular-bootstrap",
     "clean": "ocular-clean",
     "build": "npm run clean && time ocular-build",
     "cover": "ocular-test cover",
     "lint": "tsc && ocular-lint",
     "metrics": "ocular-metrics",
     "publish": "ocular-publish",
-    "test": "ocular-test",
-    "test-size-explicit": "npm run build && webpack --config test/webpack.config.js --env.import-vec4-mat4-explicit",
-    "test-size": "npm run build && webpack --config test/webpack.config.js --env.import-nothing"
+    "test": "ocular-test"
   },
   "dependencies": {},
   "devDependencies": {
     "@probe.gl/bench": "^4.0.0",
     "@turf/destination": "^6.0.1",
     "@types/tape-promise": "^4.0.1",
-    "babel-plugin-transform-builtin-extend": "^1.1.2",
-    "ocular-dev-tools": "2.0.0-alpha.9",
-    "pre-commit": "^1.2.2"
-  },
-  "resolutions_notes": [
-    "Note: tape 4.12 and higher no longer compares 0 and -0 equally...",
-    "es-abstract breaks on Node 18"
-  ],
-  "resolutions": {
-    "tape": "4.11.0",
-    "es-abstract": "^1.21.1"
+    "ocular-dev-tools": "2.0.0-alpha.28",
+    "pre-commit": "^1.2.2",
+    "puppeteer": "^22.0.0"
   },
   "volta": {
     "node": "18.18.1",

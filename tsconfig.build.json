@@ -2,15 +2,26 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "build": true,
-    "target": "es2020",
-    "module": "es2020",
-    "esModuleInterop": true,
-    "declaration": true,
-    "declarationMap": true,
-    "noEmit": false,
-    "emitDeclarationOnly": true
+    "build": true
     // Uncomment to debug
     // "listEmittedFiles": true
-  }
+  },
+  // Monorepo setup. All modules need to be listed here
+  "references": [
+    {"path": "modules/core"},
+    {"path": "modules/culling"},
+    {"path": "modules/dggs-geohash"},
+    {"path": "modules/dggs-s2"},
+    {"path": "modules/dggs-quadkey"},
+    {"path": "modules/geoid"},
+    {"path": "modules/geospatial"},
+    {"path": "modules/main"},
+    {"path": "modules/polygon"},
+    {"path": "modules/proj4"},
+    {"path": "modules/sun"},
+    {"path": "modules/web-mercator"}
+  ],
+  "include": [
+    "modules/*/src"
+  ]
 }
