@@ -192,7 +192,7 @@ export class Matrix3 extends Matrix {
     return this.check();
   }
 
-  rotate(radians: number): NumericArray {
+  rotate(radians: number): this {
     mat3_rotate(this, this, radians);
     return this.check();
   }
