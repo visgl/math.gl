@@ -1,12 +1,11 @@
 // math.gl, MIT license
 
-import Long from 'long';
 import {IJToST, STToUV, FaceUVToXYZ, XYZToLngLat} from '../s2geometry/s2-geometry';
 import {getS2Cell} from '../s2geometry/s2-cell-utils';
 
 const MAX_RESOLUTION = 100;
 
-export function getS2GeoBounds(s2Index: Long): Float64Array {
+export function getS2GeoBounds(s2Index: bigint): Float64Array {
   const s2Cell = getS2Cell(s2Index);
   return getS2GeoBoundsFromCell(s2Cell);
 }
