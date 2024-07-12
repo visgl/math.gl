@@ -32,8 +32,5 @@
   "files": [
     "dist",
     "src"
-  ],
-  "dependencies": {
-    "@math.gl/web-mercator": "4.0.1"
-  }
+  ]
 }

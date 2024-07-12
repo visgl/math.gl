@@ -2388,7 +2388,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/core@npm:4.0.1, @math.gl/core@workspace:modules/core":
+"@math.gl/core@npm:4.0.1, @math.gl/core@npm:^4.0.1, @math.gl/core@workspace:modules/core":
   version: 0.0.0-use.local
   resolution: "@math.gl/core@workspace:modules/core"
   dependencies:
@@ -2407,16 +2407,12 @@ __metadata:
 "@math.gl/dggs-geohash@workspace:modules/dggs-geohash":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs-geohash@workspace:modules/dggs-geohash"
-  dependencies:
-    "@math.gl/web-mercator": "npm:4.0.1"
   languageName: unknown
   linkType: soft
 
 "@math.gl/dggs-quadkey@workspace:modules/dggs-quadkey":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs-quadkey@workspace:modules/dggs-quadkey"
-  dependencies:
-    "@math.gl/web-mercator": "npm:4.0.1"
   languageName: unknown
   linkType: soft
 
@@ -2474,13 +2470,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/web-mercator@npm:4.0.1, @math.gl/web-mercator@workspace:modules/web-mercator":
+"@math.gl/web-mercator@workspace:modules/web-mercator":
   version: 0.0.0-use.local
   resolution: "@math.gl/web-mercator@workspace:modules/web-mercator"
   dependencies:
+    "@math.gl/core": "npm:^4.0.1"
     mock-browser: "npm:^0.92.14"
-  peerDependencies:
-    "@math.gl/core": ^4.0.0
   languageName: unknown
   linkType: soft
 
@@ -15765,23 +15760,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.5.0":
-  version: 5.5.3
-  resolution: "typescript@npm:5.5.3"
+"typescript@npm:5.4.3":
+  version: 5.4.3
+  resolution: "typescript@npm:5.4.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/f52c71ccbc7080b034b9d3b72051d563601a4815bf3e39ded188e6ce60813f75dbedf11ad15dd4d32a12996a9ed8c7155b46c93a9b9c9bad1049766fe614bbdd
+  checksum: 10c0/22443a8760c3668e256c0b34b6b45c359ef6cecc10c42558806177a7d500ab1a7d7aac1f976d712e26989ddf6731d2fbdd3212b7c73290a45127c1c43ba2005a
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.5.0#optional!builtin<compat/typescript>":
-  version: 5.5.3
-  resolution: "typescript@patch:typescript@npm%3A5.5.3#optional!builtin<compat/typescript>::version=5.5.3&hash=379a07"
+"typescript@patch:typescript@npm%3A5.4.3#optional!builtin<compat/typescript>":
+  version: 5.4.3
+  resolution: "typescript@patch:typescript@npm%3A5.4.3#optional!builtin<compat/typescript>::version=5.4.3&hash=5adc0c"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/911c7811d61f57f07df79c4a35f56a0f426a65426a020e5fcd792f66559f399017205f5f10255329ab5a3d8c2d1f1d19530aeceffda70758a521fae1d469432e
+  checksum: 10c0/6e51f8b7e6ec55b897b9e56b67e864fe8f44e30f4a14357aad5dc0f7432db2f01efc0522df0b6c36d361c51f2dc3dcac5c832efd96a404cfabf884e915d38828
   languageName: node
   linkType: hard
 
