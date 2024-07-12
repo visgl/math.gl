@@ -9,7 +9,7 @@
     "noEmit": false,
     "useDefineForClassFields": false,
     // Uncomment to debug
-    "listEmittedFiles": true,
+    // "listEmittedFiles": true,
     "plugins": [
       {
         "transform": "ocular-dev-tools/ts-transform-append-extension",
