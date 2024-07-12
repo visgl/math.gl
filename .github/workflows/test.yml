@@ -37,7 +37,7 @@ jobs:
           yarn lint
           yarn test node
 
-      - name: Coveralls
-        uses: coverallsapp/github-action@09b709cf6a16e30b0808ba050c7a6e8a5ef13f8d # v1.2.5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Coveralls
+#        uses: coverallsapp/github-action@09b709cf6a16e30b0808ba050c7a6e8a5ef13f8d # v1.2.5
+#        with:
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
