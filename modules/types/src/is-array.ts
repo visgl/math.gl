@@ -5,8 +5,8 @@ import {TypedArray, NumericArray} from './array-types';
  * @param value value to be tested
  * @returns input as TypedArray, or null
  */
-export function isTypedArray(value: unknown): TypedArray | null {
-  return ArrayBuffer.isView(value) && !(value instanceof DataView) ? (value as TypedArray) : null;
+export function isTypedArray(value: unknown): value is TypedArray {
+  return ArrayBuffer.isView(value) && !(value instanceof DataView);
 }
 
 /**
@@ -14,9 +14,9 @@ export function isTypedArray(value: unknown): TypedArray | null {
  * @param value value to be tested
  * @returns input as NumericArray, or null
  */
-export function isNumericArray(value: unknown): NumericArray | null {
+export function isNumericArray(value: unknown): value is NumericArray {
   if (Array.isArray(value)) {
-    return value.length === 0 || typeof value[0] === 'number' ? (value as number[]) : null;
+    return value.length === 0 || typeof value[0] === 'number';
   }
   return isTypedArray(value);
 }
