@@ -1,5 +1,5 @@
 {
-  "name": "math.gl",
+  "name": "math.gl-monorepo",
   "description": "Array-based 3D Math Classes optimized for WebGL applications",
   "license": "MIT",
   "private": true,
@@ -17,22 +17,24 @@
     "clean": "ocular-clean",
     "build": "npm run clean && time ocular-build",
     "cover": "ocular-test cover",
-    "lint": "tsc && ocular-lint",
+    "lint": "ocular-lint",
     "metrics": "ocular-metrics",
     "publish": "ocular-publish",
     "test": "ocular-test"
   },
-  "dependencies": {},
   "devDependencies": {
     "@probe.gl/bench": "^4.0.0",
     "@turf/destination": "^6.0.1",
     "@types/tape-promise": "^4.0.1",
-    "ocular-dev-tools": "2.0.0-alpha.28",
+    "ocular-dev-tools": "2.0.0-alpha.33",
     "pre-commit": "^1.2.2",
     "puppeteer": "^22.0.0"
   },
+  "resolutions": {
+    "typescript": "^5.5.0"
+  },
   "volta": {
-    "node": "18.18.1",
-    "yarn": "1.22.19"
+    "node": "20.15.1",
+    "yarn": "4.3.1"
   }
 }
