@@ -20,7 +20,7 @@ test('getS2BoundaryFlat', (t) => {
     '5b', // face 2
     '6b', // face 3
     'ab', // face 5
-    // '4/001003', TODO - not supported
+    '4/001003',
     '54', // antimeridian
     '5c' // antimeridian
     // new Long(0, -2138636288, false),

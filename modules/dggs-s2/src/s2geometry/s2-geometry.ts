@@ -7,6 +7,8 @@ Permission to use, copy, modify, and/or distribute this software for any purpose
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+import Long from 'long';
+
 //
 // Functional Style
 //
@@ -69,7 +71,7 @@ export function fromHilbertQuadKey(hilbertQuadkey: string): S2Cell {
   return {face, ij: point, level};
 }
 
-export function toHilbertQuadkey(id: bigint): string {
+export function toHilbertQuadkey(id: Long): string {
   let bin = id.toString(2);
 
   while (bin.length < FACE_BITS + POS_BITS) {
@@ -86,7 +88,7 @@ export function toHilbertQuadkey(id: bigint): string {
   const posB = bin.substring(3, lsbIndex);
   const levelN = posB.length / 2;
 
-  const faceS = BigInt(`0b${faceB}`).toString(10);
+  const faceS = Long.fromString(faceB, true, 2).toString(10);
 
   /*
     Here is a fix for the case when posB is an empty string that causes an exception in Long.fromString
@@ -96,7 +98,7 @@ export function toHilbertQuadkey(id: bigint): string {
   let posS = '0';
   if (levelN !== 0) {
     // posB is not an empty string< because levelN!==0
-    posS = BigInt(`0b${posB}`).toString(4);
+    posS = Long.fromString(posB, true, 2).toString(4);
 
     while (posS.length < levelN) {
       // eslint-disable-next-line prefer-template

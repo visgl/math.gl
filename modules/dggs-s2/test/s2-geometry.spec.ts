@@ -4,6 +4,7 @@ import test from 'tape-promise/tape';
 
 import {_toHilbertQuadKey as toHilbertQuadKey} from '@math.gl/dggs-s2';
 import {S2} from 's2-geometry';
+import Long from 'long';
 
 // TODO - restore test
 test.skip('S2#toHilbertQuadkey', (t) => {
@@ -18,7 +19,7 @@ test.skip('S2#toHilbertQuadkey', (t) => {
   for (const point of TEST_COORDINATES) {
     for (const level of TEST_LEVELS) {
       const key = S2.latLngToKey(point.lat, point.lng, level);
-      const id = BigInt(S2.keyToId(key));
+      const id = Long.fromString(S2.keyToId(key), true);
       const token = id.toString(16).replace(/0+$/, '');
 
       t.comment(`level ${level}, id: ${id.toString()}, token: ${token}`);
