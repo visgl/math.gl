@@ -33,9 +33,6 @@
     "dist",
     "src"
   ],
-  "dependencies": {
-    "long": "^5.2.1"
-  },
   "devDependencies": {
     "s2-geometry": "^1.2.10"
   }

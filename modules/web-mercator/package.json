@@ -33,6 +33,9 @@
     "dist",
     "src"
   ],
+  "peerDependencies": {
+    "@math.gl/core": "^4.0.0"
+  },
   "devDependencies": {
     "mock-browser": "^0.92.14"
   }
