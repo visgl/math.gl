@@ -4,7 +4,7 @@ name: test
 on:
   push:
     branches:
-    - master
+      - master
   pull_request:
 
 jobs:
@@ -12,31 +12,33 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18, 20]
+        node-version: [20]
 
     steps:
-      - uses: actions/checkout@v3.0.2
-
-      - name: Set up Node ${{ matrix.node-version }}
-        uses: actions/setup-node@v3.1.1
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: volta-cli/action@2d68418f32546fd191eb666e232b321d5726484d # v4.1.1
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
-          # Useful for caching dependencies in monorepos
-          cache-dependency-path: yarn.lock
 
-      - name: Bootstrap
+      - name: Install dependencies
         run: |
-          yarn bootstrap
+          yarn install
+        env:
+          YARN_ENABLE_IMMUTABLE_INSTALLS: false 
+
+      - name: Build code
+        run: |
           yarn build
 
       - name: Run tests
         run: |
-          yarn test ci
+          yarn test-ci
 
       - name: Coveralls
-        if: matrix.node-version == 18
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@09b709cf6a16e30b0808ba050c7a6e8a5ef13f8d # v1.2.5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ${{ github.workspace }}/coverage/lcov.info
+
+
