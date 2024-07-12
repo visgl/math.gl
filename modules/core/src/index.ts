@@ -1,7 +1,7 @@
 // luma.gl, MIT license
 
 // types
-export type {TypedArray, NumericArray} from '@math.gl/types';
+export type {TypedArray, TypedArrayConstructor, NumberArray, NumericArray} from '@math.gl/types';
 
 export type {isTypedArray, isNumericArray} from '@math.gl/types';
 
