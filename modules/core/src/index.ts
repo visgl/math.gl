@@ -1,4 +1,6 @@
-// luma.gl, MIT license
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 // types
 export type {TypedArray, TypedArrayConstructor, NumberArray, NumericArray} from '@math.gl/types';

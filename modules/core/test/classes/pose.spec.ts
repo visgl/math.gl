@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {Matrix4, Vector3, equals} from '@math.gl/core';
 import {Euler, Pose} from '@math.gl/core';

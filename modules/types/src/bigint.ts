@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // BigInt compatibility layer
 // Inspired by ArrowJS (under Apache2 license)
 // https://github.com/apache/arrow/blob/master/js/src/util/compat.ts

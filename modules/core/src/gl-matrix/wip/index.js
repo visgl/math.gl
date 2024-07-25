@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // @eslint-disable
 // @ts-nocheck
 
