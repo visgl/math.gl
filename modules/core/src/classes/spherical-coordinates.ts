@@ -1,5 +1,8 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 // Copyright (c) 2017 Uber Technologies, Inc.
-// MIT License
+
 // Adaptation of THREE.js Spherical class, under MIT license
 import {NumericArray} from '@math.gl/types';
 import {Vector3} from './vector3';

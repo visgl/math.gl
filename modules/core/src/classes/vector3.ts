@@ -1,5 +1,8 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 // Copyright (c) 2017 Uber Technologies, Inc.
-// MIT License
+
 import {NumericArray} from '@math.gl/types';
 import {Vector} from './base/vector';
 import {config, isArray} from '../lib/common';

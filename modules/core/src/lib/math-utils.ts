@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // NOTE: Added to make Cesium-derived test cases work
 // TODO: Determine if/how to keep
 export const EPSILON1 = 1e-1;

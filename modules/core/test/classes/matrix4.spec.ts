@@ -1,5 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 // Copyright (c) 2017 Uber Technologies, Inc.
-// MIT License
 
 /* eslint-disable max-statements */
 import {Matrix4, Vector3, config, configure} from '@math.gl/core';
