@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 // Copyright (c) 2017 Uber Technologies, Inc.
 
-import {NumericArray} from '@math.gl/types';
+import {NumericArray, NumberArray3} from '@math.gl/types';
 import {Vector} from './base/vector';
 import {config, isArray} from '../lib/common';
 import {checkNumber} from '../lib/validators';
@@ -25,9 +25,12 @@ const ORIGIN = [0, 0, 0];
 
 let ZERO: Vector3;
 
+/** Helper type that captures array length for a 3 element vector */
+export type Vector3Like = Vector3 | NumberArray3;
+
 /**
- * Three-element vector class.
- * Subclass of Array<number>
+ * Three-element vector class with common linear algebra operations.
+ * Subclass of Array<number> meaning that it is highly compatible with other libraries
  */
 export class Vector3 extends Vector {
   static get ZERO(): Vector3 {

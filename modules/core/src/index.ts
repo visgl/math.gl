@@ -15,6 +15,13 @@ export {Matrix3} from './classes/matrix3';
 export {Matrix4} from './classes/matrix4';
 export {Quaternion} from './classes/quaternion';
 
+export type {Vector2Like} from './classes/vector2';
+export type {Vector3Like} from './classes/vector3';
+export type {Vector4Like} from './classes/vector4';
+export type {Matrix3Like} from './classes/matrix3';
+export type {Matrix4Like} from './classes/matrix4';
+
+
 // experimental
 export {SphericalCoordinates} from './classes/spherical-coordinates';
 export {Pose} from './classes/pose';

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 // Copyright (c) 2017 Uber Technologies, Inc.
 
-import {NumericArray} from '@math.gl/types';
+import {NumericArray, NumberArray4} from '@math.gl/types';
 /* eslint-disable camelcase */
 import {
   transformMat4 as vec4_transformMat4,
@@ -19,9 +19,12 @@ import type {Matrix4} from './matrix4';
 
 let ZERO: Vector4;
 
+/** Helper type that captures array length for a 4 element vector */
+export type Vector4Like = Vector4 | NumberArray4;
+
 /**
- * Four-element vector class.
- * Subclass of Array<number>
+ * Four-element vector class with common linear algebra operations.
+ * Subclass of Array<number> meaning that it is highly compatible with other libraries
  */
 export class Vector4 extends Vector {
   static get ZERO(): Vector4 {
