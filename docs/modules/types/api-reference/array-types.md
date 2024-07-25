@@ -1,5 +1,9 @@
 # Array Types
 
+math.gl provides a number of numeric array types.
+
+Working with a mix of typed arrays and standard JavaScript arrays containing numbers.
+
 ## Types
 
 ### `TypedArray`
