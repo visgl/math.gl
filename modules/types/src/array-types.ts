@@ -52,7 +52,7 @@ export type NumberArray2 = [number, number];
 export type NumberArray3 = [number, number, number];
 
 /** Array with exactly 4 numbers */
-export type NumberArrray4 = [number, number, number, number];
+export type NumberArray4 = [number, number, number, number];
 
 /** Array with exactly 6 numbers */
 export type NumberArray6 = [number, number, number, number, number, number];

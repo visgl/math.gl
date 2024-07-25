@@ -10,6 +10,7 @@ export type {
   NumberArray1,
   NumberArray2,
   NumberArray3,
+  NumberArray4,
   NumberArray6,
   NumberArray8,
   NumberArray9,
