@@ -20,7 +20,7 @@ import {vec2_transformMat4AsVector} from '../lib/gl-matrix-extras';
 export type Vector2Like = Vector2 | NumberArray2;
 
 /**
- * Two-element vector class with common linear algebra operations. 
+ * Two-element vector class with common linear algebra operations.
  * Subclass of Array<number> meaning that it is highly compatible with other libraries
  */
 export class Vector2 extends Vector {

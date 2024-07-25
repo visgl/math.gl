@@ -60,8 +60,8 @@ const IDENTITY_MATRIX = Object.freeze([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0,
 /** Helper type that captures array length for a 4x4 matrix */
 export type Matrix4Like = Matrix4 | NumberArray16;
 
-/** 
- * A 4x4 matrix with common linear algebra operations 
+/**
+ * A 4x4 matrix with common linear algebra operations
  * Subclass of Array<number> meaning that it is highly compatible with other libraries
  */
 export class Matrix4 extends Matrix {

@@ -39,7 +39,7 @@ const IDENTITY_MATRIX = Object.freeze([1, 0, 0, 0, 1, 0, 0, 0, 1]);
 /** Helper type that captures array length for a 3x3 matrix */
 export type Matrix3Like = Matrix3 | NumberArray9;
 
-/** 
+/**
  * A 3x3 matrix with common linear algebra operations
  * Subclass of Array<number> meaning that it is highly compatible with other libraries
  */

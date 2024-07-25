@@ -21,7 +21,6 @@ export type {Vector4Like} from './classes/vector4';
 export type {Matrix3Like} from './classes/matrix3';
 export type {Matrix4Like} from './classes/matrix4';
 
-
 // experimental
 export {SphericalCoordinates} from './classes/spherical-coordinates';
 export {Pose} from './classes/pose';

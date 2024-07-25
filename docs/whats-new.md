@@ -45,6 +45,21 @@
   </tbody>
 </table>
 
+## v4.1
+
+Release Date: Q3, 2024.
+
+- [SPDX](https://spdx.org/licenses/) license headers.
+
+**`@math.gl/core`**
+
+- New `Vector2Like` - `Matrix4Like` types to specify numeric inputs of a specific length.
+
+**`@math.gl/types`**
+
+- New `NumberArray2` - `NumberArray16` types to specify numeric arrays of a specific length.
+- `isTypedArray()` and `isNumericArray()` utilities now support typescript type narrowing.
+
 ## v4.0
 
 Release Date: Oct 14, 2023.
