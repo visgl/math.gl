@@ -57,8 +57,9 @@ Release Date: Q3, 2024.
 
 **`@math.gl/types`**
 
-- New `NumberArray2` - `NumberArray16` types to specify numeric arrays of a specific length.
-- `isTypedArray()` and `isNumericArray()` utilities now support typescript type narrowing.
+- New types for expressing [bounds](./modules/types/api-reference/bounds) (extents): `Bounds`, `Bounds2D` and `Bounds3D`.
+- New types to specify numeric arrays of a specific length: `NumberArray2` - `NumberArray16`. 
+- `isTypedArray()` and `isNumericArray()` utilities now perform typescript type narrowing.
 
 ## v4.0
 

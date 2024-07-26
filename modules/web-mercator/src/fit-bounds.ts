@@ -4,37 +4,38 @@ import {MAX_LATITUDE, lngLatToWorld, worldToLngLat} from './web-mercator-utils';
 
 /**
  * Options for fitBounds
- * @param width - viewport width
- * @param height - viewport height
- * @param bounds - [[lon, lat], [lon, lat]]
- * @param minExtent - The width/height of the bounded area will never be smaller than this
- * @param padding - The amount of padding in pixels
- *  to add to the given bounds. Can also be an object with top, bottom, left and right
- *  properties defining the padding.
- * @param options.offset= - The center of the given bounds relative to the map's center,
  */
 export type FitBoundsOptions = {
+  /**  viewport width  */
   width: number;
+  /**  viewport height  */
   height: number;
+  /**  [[lon, lat], [lon, lat]]  */
   bounds: [[number, number], [number, number]];
-  minExtent?: number; // 0.01 would be about 1000 meters (degree is ~110KM)
+  /**  The width/height of the bounded area will never be smaller than this. 0.01 would be about 1000 meters (degree is ~110KM)  */
+  minExtent?: number;
+  /**  The maximum zoom level to fit the bounds within. */
   maxZoom?: number; // ~x4,000,000 => About 10 meter extents
-  // options
+  /**
+   * padding - The amount of padding in pixels to add to the given bounds.
+   * Can also be an object with top, bottom, left and right properties defining the padding.
+   */
   padding?: number | Padding;
+  /** The center of the given bounds relative to the map's center,  */
   offset?: number[];
 };
 
 /**
  * An object describing the padding to add to the bounds.
- * @property top - Padding from top in pixels to add to the given bounds
- * @property bottom - Padding from bottom in pixels to add to the given bounds
- * @property left - Padding from left in pixels to add to the given bounds
- * @property right - Padding from right in pixels to add to the given bounds
  */
 export type Padding = {
+  /** Padding from top in pixels to add to the given bounds */
   top: number;
+  /** Padding from bottom in pixels to add to the given bounds */
   bottom: number;
+  /** Padding from left in pixels to add to the given bounds */
   left: number;
+  /** Padding from right in pixels to add to the given bounds */
   right: number;
 };
 
