@@ -3,6 +3,8 @@
 // Copyright (c) vis.gl contributors
 // Copyright (c) 2017 Uber Technologies, Inc.
 
+import {NumericArray, NumberArray2} from '@math.gl/types';
+
 import {Vector} from './base/vector';
 import {config, isArray} from '../lib/common';
 import {checkNumber} from '../lib/validators';
@@ -13,11 +15,13 @@ import {
   transformMat2 as vec2_transformMat2
 } from '../gl-matrix/vec2';
 import {vec2_transformMat4AsVector} from '../lib/gl-matrix-extras';
-import {NumericArray} from '@math.gl/types';
+
+/** Helper type that captures array length for a 2 element vector */
+export type Vector2Like = Vector2 | NumberArray2;
 
 /**
- * Two-element vector class.
- * Subclass of Array<number>
+ * Two-element vector class with common linear algebra operations.
+ * Subclass of Array<number> meaning that it is highly compatible with other libraries
  */
 export class Vector2 extends Vector {
   // Creates a new, empty vec2
