@@ -41,7 +41,7 @@ const w = v.scale([1, -1, 1]); // Flip y component
 
 ## Inheritance
 
-`Vector3` extends [`Vector`](/docs/modules/core/api-reference/vector) extends [`MathArray`](/docs/modules/core/api-reference/math-array) extends [`Array`](https://developer.mozilla.org/en-US/docsWeb/JavaScript/Reference/Global_Objects/Array)
+`Vector3` extends [`Vector`](/docs/modules/core/api-reference/vector) extends [`MathArray`](/docs/modules/core/api-reference/math-array) extends [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)
 
 ## Members
 

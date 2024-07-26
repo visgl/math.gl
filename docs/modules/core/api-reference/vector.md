@@ -4,7 +4,7 @@
 
 ## Inheritance
 
-`class Vector extends [MathArray](./docs/api-reference/math-array) extends [Array](https://developer.mozilla.org/en-US/docsWeb/JavaScript/Reference/Global_Objects/Array)`
+`class Vector extends [MathArray](./docs/api-reference/math-array) extends [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)`
 
 ## Methods
 
