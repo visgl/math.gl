@@ -45,6 +45,11 @@
   </tbody>
 </table>
 
+
+**`@math.gl/types`**
+
+- New types for expressing [bounds](./modules/types/api-reference/bounds) (extents): `Bounds`, `Bounds2D` and `Bounds3D`.
+- 
 ## v4.0
 
 Release Date: Oct 14, 2023.

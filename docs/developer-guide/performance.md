@@ -4,7 +4,7 @@ The code vector and matrix operations in math.gl are based on gl-matrix which is
 
 Since math.gl uses gl-matrix functions under the hood, math.gl's performance is usually very close to gl-matrix, but the additional conveniences in math.gl do come with a certain overhead. Understanding this overhead can help you write more performant code and work around performance issues.
 
-In cases where javascript math calculations are performance critical, you can always use gl-matrix operations directly. See (./docs/get-started/using-with-gl-matrix.md). Essentially, since all math.gl classes inherit from `Array`s they work directly as arguments to gl-matrix functions, no copying necessary.
+In cases where JavaScript math calculations are performance critical, you can always use gl-matrix operations directly. See (./docs/get-started/using-with-gl-matrix.md). Essentially, since all math.gl classes inherit from `Array`s they work directly as arguments to gl-matrix functions, no copying necessary.
 
 ## Disabling Debug Checks
 

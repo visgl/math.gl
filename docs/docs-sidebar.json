@@ -61,7 +61,8 @@
         "label": "@math.gl/types",
         "items": [
           "modules/types/README",
-          "modules/types/api-reference/array-types"
+          "modules/types/api-reference/array-types",
+          "modules/types/api-reference/bounds"
         ]
       },
       {
