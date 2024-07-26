@@ -99,4 +99,4 @@ To get good performance it is important to structure code so that it can be comp
 
 In particular, math.gl makes efforts to ensure that the engine knows that fields in math classes contain numbers, which allows for important optimizations that can result in a \~5x performance difference for simple operations.
 
-A good introduction to the topic can be found in [JavaScript Performance Pitfalls in V8](https://ponyfoo.com/articles/JavaScript-performance-pitfalls-v8).
+A good introduction to the topic can be found in [JavaScript Performance Pitfalls in V8](https://ponyfoo.com/articles/javascript-performance-pitfalls-v8).

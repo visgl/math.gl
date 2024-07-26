@@ -23,7 +23,7 @@ const point = new Vector4(0, 0, 0, 1);
 
 ## Inheritance
 
-`Vector4` extends [`Vector`](./vector) extends [`MathArray`](./math-array) extends [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)
+`Vector4` extends [`Vector`](./vector) extends [`MathArray`](./math-array) extends [`Array`](https://developer.mozilla.org/en-US/docs/Web/javascript/Reference/Global_Objects/Array)
 
 ## Members
 

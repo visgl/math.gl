@@ -39,7 +39,7 @@ const vector3 = transform.transformDirection([1, 2, 1]);
 
 ## Inheritance
 
-`class Matrix3 extends [Matrix](./docs/api-reference/matrix) extends [MathArray](./docs/api-reference/math-array) extends [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)`
+`class Matrix3 extends [Matrix](./docs/api-reference/matrix) extends [MathArray](./docs/api-reference/math-array) extends [Array](https://developer.mozilla.org/en-US/docs/Web/javascript/Reference/Global_Objects/Array)`
 
 ## Methods
 
