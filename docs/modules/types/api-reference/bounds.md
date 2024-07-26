@@ -11,30 +11,31 @@ Typing out the definitions directly is sometimes easier and clearer than importi
 
 ### `Bounds`
 
-2D or 3D bounds
+2 or 3 dimensional bounds, expressed as an array of arrays `[[minX, minY], [maxX, maxY]]` or `[[minX, minY, minZ], [maxX, maxY, maxZ]]`.
+
+```ts
+export type Bounds =
+  | [[number, number], [number, number]]
+  | [[number, number, number], [number, number, number]];
+```
 
 ### `Bounds2D`
 
-2 dimensional bounds `[[minX, minY], [maxX, maxY]]`
+2 dimensional bounds, expressed as an array of arrays `[[minX, minY], [maxX, maxY]]`.
+
 ```ts
 type Bounds2D = [[number, number], [number, number]];
 ```
 
-/** 3 dimensional bounds [[minX, minY, minZ], [maxX, maxY, maxZ]] */
-export type Bounds3D = [[number, number, number], [number, number, number]];
-
-/** 2 or 3 dimensional bounds [[minX, minY], [maxX, maxY]] or [[minX, minY, minZ], [maxX, maxY, maxZ]] */
-export type Bounds =
-  | [[number, number], [number, number]]
-  | [[number, number, number], [number, number, number]];
-
-Any javascript typed array, or any javascript array containing numbers
-
 ### `Bounds3D`
 
-Any javascript typed array, or any javascript array containing numbers
+3 dimensional bounds, expressed as an array of arrays `[[minX, minY, minZ], [maxX, maxY, maxZ]]`
 
-## Utilities
+```ts
+export type Bounds3D = [[number, number, number], [number, number, number]];
+```
+
+## Functions
 
 ### `is2DBounds()`
 
@@ -47,7 +48,7 @@ Checks if the supplied bounds are 2D and narrows the type to `Bounds2D`.
 ### `get2DBounds()`
 
 ```ts
-get2DBounds(bounds: Bounds2D | Bounds3D): Bounds2D`
+get2DBounds(bounds: Bounds): Bounds2D`
 ```
 
 Returns 2D bounds, truncating 3D bounds to 2D if needed.

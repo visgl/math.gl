@@ -8,11 +8,11 @@ Working with a mix of typed arrays and standard JavaScript arrays containing num
 
 ### `TypedArray`
 
-Any javascript typed array
+Any JavaScript typed array
 
 ### `NumericArray`
 
-Any javascript typed array, or any javascript array containing numbers
+Any JavaScript typed array, or any JavaScript array containing numbers
 
 ## Utilities
 
