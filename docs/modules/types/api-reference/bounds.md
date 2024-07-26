@@ -39,7 +39,7 @@ Any javascript typed array, or any javascript array containing numbers
 ### `is2DBounds()`
 
 ```ts
-is2DBounds(bounds: Bounds2D | Bounds3D): bounds is Bounds2D
+is2DBounds(bounds: Bounds): bounds is Bounds2D
 ```
 
 Checks if the supplied bounds are 2D and narrows the type to `Bounds2D`.
