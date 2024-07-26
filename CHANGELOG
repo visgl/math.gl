@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## v4.1.0
+
+- feat: Add sized array types (#11)
+- feat(types): Add bounds types (#12)
+- chore: Add SPDX license headers (#10)
+- Remove legacy viewport-mercator-project module (#9)
+- Restore browser test (#8)
+- fix(dggs-s2): Replace long module with bigint (#6)
+- fix(types): isTypedArray now performs type narrowing (#3)
+- chore: github test workflow (#4)
+- chore: Move to yarn@4.3.1, node@20.15.1, ocular-dev-tools@alpha.33 (#2)
+- chore: Remove dependency on long
+- chore: Remove dependency on long
+
 ## v4.0.1
 
 - chore: Bump probe.gl (#8)
