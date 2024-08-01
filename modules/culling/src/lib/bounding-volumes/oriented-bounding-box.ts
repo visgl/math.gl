@@ -5,7 +5,8 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import {Vector3, Matrix3, Matrix4, Quaternion, NumericArray} from '@math.gl/core';
+import {NumericArray} from '@math.gl/types';
+import {Vector3, Matrix3, Matrix4, Quaternion} from '@math.gl/core';
 import type {BoundingVolume} from './bounding-volume';
 import {BoundingSphere} from './bounding-sphere';
 import type {Plane} from '../plane';

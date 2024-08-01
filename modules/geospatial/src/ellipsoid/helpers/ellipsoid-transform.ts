@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT and Apache-2.0
 // Copyright (c) vis.gl contributors
 
-import {NumericArray, Vector3, assert, equals as equalsEpsilon} from '@math.gl/core';
+import {NumericArray} from '@math.gl/types';
+import {Vector3, assert, equals as equalsEpsilon} from '@math.gl/core';
 
 import type {Ellipsoid} from '../ellipsoid';
 

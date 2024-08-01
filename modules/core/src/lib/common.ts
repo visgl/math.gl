@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/* eslint-disable no-shadow */ // radians and degrees are common variable names
+
 import type {NumericArray} from '@math.gl/types';
 
 import type {MathArray} from '../classes/base/math-array';
@@ -301,7 +303,7 @@ function duplicateArray(array: NumericArray): NumericArray {
 // otherwise applies func to the argument value
 function map(
   value: number | NumericArray,
-  func: (x: number, index?: number, result?: NumericArray) => number,
+  func: (x: number, index?: number, resultArray?: NumericArray) => number,
   result?: NumericArray
 ): number | NumericArray {
   if (isArray(value)) {

@@ -190,6 +190,7 @@ export function addMetersToLngLat(lngLatZ: number[], xyz: number[]): number[] {
   const [longitude, latitude, z0] = lngLatZ;
   const [x, y, z] = xyz;
 
+  // eslint-disable-next-line no-shadow
   const {unitsPerMeter, unitsPerMeter2} = getDistanceScales({
     longitude,
     latitude,

@@ -14,6 +14,7 @@ import {checkNumber} from '../lib/validators';
 const ERR_UNKNOWN_ORDER = 'Unknown Euler angle order';
 const ALMOST_ONE = 0.99999;
 
+// eslint-disable-next-line no-shadow
 enum RotationOrder {
   ZYX = 0,
   YXZ = 1,
@@ -71,8 +72,8 @@ export class Euler extends MathArray {
     super(-0, -0, -0, -0);
     // eslint-disable-next-line prefer-rest-params
     if (arguments.length > 0 && Array.isArray(arguments[0])) {
-      // eslint-disable-next-line prefer-rest-params
       // @ts-expect-error
+      // eslint-disable-next-line prefer-rest-params
       this.fromVector3(...arguments);
     } else {
       this.set(x, y, z, order);

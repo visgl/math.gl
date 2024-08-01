@@ -3,9 +3,22 @@
 // Copyright (c) vis.gl contributors
 
 // types
-export type {TypedArray, TypedArrayConstructor, NumberArray, NumericArray} from '@math.gl/types';
+export type {
+  TypedArray,
+  TypedArrayConstructor,
+  NumericArray,
+  NumberArray,
+  NumberArray2,
+  NumberArray3,
+  NumberArray4,
+  NumberArray6,
+  NumberArray8,
+  NumberArray9,
+  NumberArray12,
+  NumberArray16
+} from '@math.gl/types';
 
-export type {isTypedArray, isNumericArray} from '@math.gl/types';
+export type {isTypedArray, isNumberArray, isNumericArray} from '@math.gl/types';
 
 // classes
 export {Vector2} from './classes/vector2';

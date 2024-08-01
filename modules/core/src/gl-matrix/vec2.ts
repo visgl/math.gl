@@ -12,9 +12,9 @@ import * as glMatrix from './common.js';
 /**
  * Creates a new, empty vec2
  *
- * @returns {NumericArray} a new 2D vector
+ * @returns a new 2D vector
  */
-export function create() {
+export function create(): NumericArray {
   const out = new glMatrix.ARRAY_TYPE(2);
   if (glMatrix.ARRAY_TYPE != Float32Array) {
     out[0] = 0;
@@ -26,10 +26,10 @@ export function create() {
 /**
  * Creates a new vec2 initialized with values from an existing vector
  *
- * @param {Readonly<NumericArray>} a vector to clone
- * @returns {NumericArray} a new 2D vector
+ * @param a vector to clone
+ * @returns a new 2D vector
  */
-export function clone(a) {
+export function clone(a: Readonly<NumericArray>): NumericArray {
   const out = new glMatrix.ARRAY_TYPE(2);
   out[0] = a[0];
   out[1] = a[1];
@@ -39,11 +39,11 @@ export function clone(a) {
 /**
  * Creates a new vec2 initialized with the given values
  *
- * @param {Number} x X component
- * @param {Number} y Y component
- * @returns {NumericArray} a new 2D vector
+ * @param x X component
+ * @param y Y component
+ * @returns a new 2D vector
  */
-export function fromValues(x, y) {
+export function fromValues(x: number, y: number): NumericArray {
   const out = new glMatrix.ARRAY_TYPE(2);
   out[0] = x;
   out[1] = y;
