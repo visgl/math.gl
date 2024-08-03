@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT and ISC
+// Copyright (c) vis.gl contributors
+
 /*
   Adapted from https://github.com/mapbox/earcut
 

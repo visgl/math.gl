@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import fs from 'fs';
 
 export async function openFile(filePath: string): Promise<Uint8Array | null> {

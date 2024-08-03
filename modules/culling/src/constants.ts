@@ -1,5 +1,6 @@
-// This file is derived from the Cesium math library under Apache 2 license
-// See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 export const INTERSECTION = {
   OUTSIDE: -1, // Represents that an object is not contained within the frustum.

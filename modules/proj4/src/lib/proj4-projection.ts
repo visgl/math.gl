@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import proj4 from 'proj4';
 
 export class Proj4Projection {

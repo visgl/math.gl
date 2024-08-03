@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT and ISC
+// Copyright (c) vis.gl contributors
+
 // math.gl, MIT license
 /*
 Adapted from s2-geometry under ISC License (ISC)

@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable max-statements, max-depth, complexity, no-unused-expressions */
 import {bitCode, intersect, BoundingBox} from './lineclip';
 import {getPointAtIndex, copy, push} from './utils';

@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT and Apache-2.0
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable */
 import {Vector3, _MathUtils} from '@math.gl/core';
 import type {Ellipsoid} from '../ellipsoid';
