@@ -1,1 +1,4 @@
 **/dist*
+
+modules/core/src/classes/base/math-array.ts
+modules/types/src/bounds-types.ts
