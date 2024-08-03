@@ -9,7 +9,7 @@ export function validateVector(v: NumericArray, length: number): boolean {
   if (v.length !== length) {
     return false;
   }
-  // Could be arguments "array" (v.every not available)
+  // Could be arguments "array" (v.every not availasble)
   for (let i = 0; i < v.length; ++i) {
     if (!Number.isFinite(v[i])) {
       return false;
