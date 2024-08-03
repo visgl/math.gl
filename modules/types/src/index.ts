@@ -17,6 +17,7 @@ export type {
   NumberArray12,
   NumberArray16
 } from './array-types';
-export {isTypedArray, isNumericArray} from './is-array';
+
+export {isTypedArray, isNumberArray, isNumericArray} from './is-array';
 
 export type {Bounds, Bounds2D, Bounds3D} from './bounds-types';

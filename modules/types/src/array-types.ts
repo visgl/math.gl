@@ -37,10 +37,10 @@ export type TypedArrayConstructor =
 export type NumericArray = TypedArray | number[];
 
 /**
- * TypeScript type covering all typed arrays and classic arrays consisting of numbers
- * @note alias for NumericArray
+ * TypeScript type for classic arrays consisting of numbers
+ * @note Included for completeness / orthogonality, prefer `number[]` in actual use
  */
-export type NumberArray = TypedArray | number[];
+export type NumberArray = number[];
 
 /** Array with exactly 1 number */
 export type NumberArray1 = [number];
