@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // math.gl, MIT license
 import {NumericArray} from '@math.gl/types';
 

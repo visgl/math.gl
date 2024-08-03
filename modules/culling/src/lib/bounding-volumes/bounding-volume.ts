@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT and Apache-2.0
+// Copyright (c) vis.gl contributors
+
 // import {INTERSECTION} from '../../constants';
 import {Plane} from '../plane';
 

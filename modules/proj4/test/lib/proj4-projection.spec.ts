@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // This file is derived from  https://github.com/proj4js
 // under this permissive license: https://github.com/proj4js/proj4js/blob/master/LICENSE.md
 

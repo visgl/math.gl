@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT and ISC
+// Copyright (c) vis.gl contributors
+
 /* eslint-disable max-statements, max-depth, complexity, no-unused-expressions */
 
 import {equals} from '@math.gl/core';

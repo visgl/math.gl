@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {cutPolylineByGrid, cutPolygonByGrid} from './cut-by-grid';
 import {getPointAtIndex, push} from './utils';
 import type {Polygon} from './cut-by-grid';

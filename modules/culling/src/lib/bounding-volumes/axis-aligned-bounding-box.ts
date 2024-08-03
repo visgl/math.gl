@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT and Apache-2.0
+// Copyright (c) vis.gl contributors
+
 import {BoundingVolume} from './bounding-volume';
 import {Vector3} from '@math.gl/core';
 import {Plane} from '../plane';

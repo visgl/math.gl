@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import type {NumericArray} from '@math.gl/core';
 
 export function push(target: number[], source: number[]): boolean {

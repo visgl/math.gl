@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {getS2GeoBoundsFromCell} from './s2-to-boundary';
 
 export function getS2Region(s2cell: {face: number; ij: [number, number]; level: number}): number[] {

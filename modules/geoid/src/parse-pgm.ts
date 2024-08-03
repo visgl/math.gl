@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 // Parsing code is ported from GeographicLib-1.50.1: /GeographicLib-1.50.1/src/Geoid.cpp
 // https://geographiclib.sourceforge.io/html/index.html
 // Original code attribution:

@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import test from 'tape-promise/tape';
 import {cutPolylineByMercatorBounds, cutPolygonByMercatorBounds} from '@math.gl/polygon';
 

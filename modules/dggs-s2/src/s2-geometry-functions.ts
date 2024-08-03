@@ -1,4 +1,6 @@
-// math.gl, MIT license
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
 import {getS2IndexFromToken} from './s2-token-functions';
 import {getS2GeoBounds} from './converters/s2-to-boundary';

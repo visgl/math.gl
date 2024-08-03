@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {NumberArray} from '@math.gl/types';
+import {NumericArray} from '@math.gl/types';
 import {config} from './common';
 
-export function validateVector(v: NumberArray, length: number): boolean {
+export function validateVector(v: NumericArray, length: number): boolean {
   if (v.length !== length) {
     return false;
   }
-  // Could be arguments "array" (v.every not availasble)
+  // Could be arguments "array" (v.every not available)
   for (let i = 0; i < v.length; ++i) {
     if (!Number.isFinite(v[i])) {
       return false;
@@ -25,7 +25,7 @@ export function checkNumber(value: unknown): number {
   return value as number;
 }
 
-export function checkVector<T extends NumberArray>(
+export function checkVector<T extends NumericArray>(
   v: T,
   length: number,
   callerName: string = ''

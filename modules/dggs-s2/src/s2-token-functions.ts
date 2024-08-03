@@ -1,4 +1,6 @@
-// loaders.gl, MIT license
+// math.gl
+// SPDX-License-Identifier: MIT and Apache-2.0
+// Copyright (c) vis.gl contributors
 
 // s2-geometry is a pure JavaScript port of Google/Niantic's S2 Geometry library
 // which is perfect since it works in the browser.

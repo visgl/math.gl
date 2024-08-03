@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT and ISC
+// Copyright (c) vis.gl contributors
+
 /*
   Adapted from https://github.com/mapbox/lineclip to work with flat arrays
   and 3d positions
