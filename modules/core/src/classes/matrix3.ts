@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 // Copyright (c) 2017 Uber Technologies, Inc.
 
-import {NumericArray, NumberArray9} from '@math.gl/types';
+import {NumericArray, NumericArray9} from '@math.gl/types';
 import {Matrix} from './base/matrix';
 import {checkVector} from '../lib/validators';
 
@@ -38,7 +38,7 @@ enum INDICES {
 const IDENTITY_MATRIX = Object.freeze([1, 0, 0, 0, 1, 0, 0, 0, 1]);
 
 /** Helper type that captures array length for a 3x3 matrix */
-export type Matrix3Like = Matrix3 | NumberArray9;
+export type Matrix3Like = Matrix3 | NumericArray9;
 
 /**
  * A 3x3 matrix with common linear algebra operations

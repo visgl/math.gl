@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /**
- * TypeScript type covering all typed arrays
+ * Type covering all non-big typed arrays
  */
 export type TypedArray =
   | Int8Array
@@ -16,10 +16,9 @@ export type TypedArray =
   | Float32Array
   | Float64Array;
 
-// TODO
-// | BigInt64Array
-// | BigUint64Array;
-
+/**
+ * Type covering constructors for all non-big typed arrays
+ */
 export type TypedArrayConstructor =
   | Int8ArrayConstructor
   | Uint8ArrayConstructor
@@ -32,12 +31,17 @@ export type TypedArrayConstructor =
   | Float64ArrayConstructor;
 
 /**
- * TypeScript type covering all typed arrays and classic arrays consisting of numbers
+ * Type covering all big typed arrays
  */
-export type NumericArray = TypedArray | number[];
+export type BigTypedArray = BigInt64Array | BigUint64Array;
 
 /**
- * TypeScript type for classic arrays consisting of numbers
+ * Type covering constructors for all big typed arrays
+ */
+export type BigTypedArrayConstructor = BigInt64ArrayConstructor | BigUint64ArrayConstructor;
+
+/**
+ * Type for classic arrays consisting of numbers
  * @note Included for completeness / orthogonality, prefer `number[]` in actual use
  */
 export type NumberArray = number[];
@@ -98,3 +102,35 @@ export type NumberArray16 = [
   number,
   number
 ];
+
+/**
+ * Type covering classic arrays consisting of numbers as well as typed arrays
+ */
+export type NumericArray = TypedArray | number[];
+
+/** Array with exactly 1 number, or a typed array */
+export type NumericArray1 = NumberArray1 | TypedArray;
+
+/** Array with exactly 2 numbers, or a typed array */
+export type NumericArray2 = NumberArray2 | TypedArray;
+
+/** Array with exactly 3 numbers, or a typed array */
+export type NumericArray3 = NumberArray3 | TypedArray;
+
+/** Array with exactly 4 numbers, or a typed array */
+export type NumericArray4 = NumberArray4 | TypedArray;
+
+/** Array with exactly 6 numbers, or a typed array */
+export type NumericArray6 = NumberArray6 | TypedArray;
+
+/** Array with exactly 8 numbers, or a typed array */
+export type NumericArray8 = NumberArray8 | TypedArray;
+
+/** Array with exactly 9 numbers, or a typed array */
+export type NumericArray9 = NumberArray9 | TypedArray;
+
+/** Array with exactly 12 numbers, or a typed array */
+export type NumericArray12 = NumberArray12 | TypedArray;
+
+/** Array with exactly 16 numbers, or a typed array */
+export type NumericArray16 = NumberArray16 | TypedArray;

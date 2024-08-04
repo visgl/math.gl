@@ -45,6 +45,12 @@
   </tbody>
 </table>
 
+## v5.0
+
+Release Date: TBD, maybe Q4, 2024.
+
+Goal: Stronger type guarantees for math classes via the new sized array types.
+
 ## v4.1
 
 Release Date: Q3, 2024.
@@ -57,9 +63,10 @@ Release Date: Q3, 2024.
 
 **`@math.gl/types`**
 
-- New types for expressing [bounds](./modules/types/api-reference/bounds) (extents): `Bounds`, `Bounds2D` and `Bounds3D`.
-- New types to specify numeric arrays of a specific length: `NumberArray2` - `NumberArray16`. 
-- `isTypedArray()` and `isNumericArray()` utilities now perform typescript type narrowing.
+- `Bounds`, `Bounds2D` and `Bounds3D` - New types for expressing [bounds](./modules/types/api-reference/bounds) (extents): .
+- `NumberArray2` - `NumberArray16` - New types to specify numeric arrays of a specific length: . 
+- `NumericArray2` - `NumericArray16` - New types to specify numeric arrays of a specific length: . 
+- `isTypedArray()`, `isNumericArray()` - These utilities now perform typescript type narrowing.
 
 ## v4.0
 
