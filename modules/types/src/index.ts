@@ -3,9 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 export type {
+  // typed arrays
   TypedArray,
   TypedArrayConstructor,
-  NumericArray,
+  BigTypedArray,
+  BigTypedArrayConstructor,
+  // numeric arrays (sized number arrays)
   NumberArray,
   NumberArray1,
   NumberArray2,
@@ -15,7 +18,18 @@ export type {
   NumberArray8,
   NumberArray9,
   NumberArray12,
-  NumberArray16
+  NumberArray16,
+  // numeric arrays (sized number arrays or typed arrays)
+  NumericArray,
+  NumericArray1,
+  NumericArray2,
+  NumericArray3,
+  NumericArray4,
+  NumericArray6,
+  NumericArray8,
+  NumericArray9,
+  NumericArray12,
+  NumericArray16
 } from './array-types';
 
 export {isTypedArray, isNumberArray, isNumericArray} from './is-array';

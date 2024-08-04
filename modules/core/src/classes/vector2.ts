@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 // Copyright (c) 2017 Uber Technologies, Inc.
 
-import {NumericArray, NumberArray2} from '@math.gl/types';
+import {NumericArray, NumericArray2} from '@math.gl/types';
 
 import {Vector} from './base/vector';
 import {config, isArray} from '../lib/common';
@@ -17,7 +17,7 @@ import {
 import {vec2_transformMat4AsVector} from '../lib/gl-matrix-extras';
 
 /** Helper type that captures array length for a 2 element vector */
-export type Vector2Like = Vector2 | NumberArray2;
+export type Vector2Like = Vector2 | NumericArray2;
 
 /**
  * Two-element vector class with common linear algebra operations.

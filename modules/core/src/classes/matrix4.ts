@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 // Copyright (c) 2017 Uber Technologies, Inc.
 
-import {NumericArray, NumberArray16} from '@math.gl/types';
+import {NumericArray, NumericArray16} from '@math.gl/types';
 import {Matrix} from './base/matrix';
 import {checkVector} from '../lib/validators';
 
@@ -59,7 +59,7 @@ const DEFAULT_FAR = 500;
 const IDENTITY_MATRIX = Object.freeze([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 
 /** Helper type that captures array length for a 4x4 matrix */
-export type Matrix4Like = Matrix4 | NumberArray16;
+export type Matrix4Like = Matrix4 | NumericArray16;
 
 /**
  * A 4x4 matrix with common linear algebra operations

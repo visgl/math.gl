@@ -4,23 +4,41 @@ math.gl provides a number of numeric array types.
 
 TypeScript types to simplify working with a mix of typed arrays and standard JavaScript arrays containing numbers.
 
+
+
 ## Types
 
 ### `TypedArray`
 
-Any JavaScript typed array.
+Type matching any non-big JavaScript typed array.
+
+### `TypedArrayConstructor`
+
+Type matching constructor for any non-big JavaScript typed array.
+
+### `BigTypedArray`
+
+Type matching any big JavaScript typed array.
+
+### `BigTypedArrayConstructor`
+
+Type matching constructor for any big JavaScript typed array.
 
 ### `NumberArray`
 
 A classic JavaScript array containing numbers. Included for completeness, it is recommended to just use the type `number[]` in this case.
 
-### `NumericArray`
-
-Any JavaScript typed array, or any classic JavaScript array containing numbers
-
 ### `NumberArray2-NumberArray16`
 
 JavaScript number arrays of specific lengths.
+
+### `NumericArray`
+
+Type matching any classic JavaScript array containing numbers or any non-big typed array.
+
+### `NumericArray2-NumericArray16`
+
+Types matching number arrays of specific lengths or typed arrays.
 
 ## Utilities
 
