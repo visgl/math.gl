@@ -19,7 +19,8 @@
     "cover": "ocular-test cover",
     "lint": "ocular-lint",
     "metrics": "ocular-metrics",
-    "publish": "ocular-publish",
+    "publish-beta": "ocular-publish beta",
+    "publish-prod": "ocular-publish prod",
     "test": "ocular-test"
   },
   "devDependencies": {
