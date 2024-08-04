@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v4.1.0
+## v4.1.0-alpha.1
 
 - feat: Add sized array types (#11)
 - feat(types): Add bounds types (#12)

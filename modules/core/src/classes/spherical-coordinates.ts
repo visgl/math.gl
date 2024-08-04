@@ -6,8 +6,7 @@
 // Adaptation of THREE.js Spherical class, under MIT license
 import {NumericArray} from '@math.gl/types';
 import {Vector3} from './vector3';
-import {formatValue, equals, config} from '../lib/common';
-import {degrees, radians, clamp} from '../lib/common';
+import {formatValue, equals, config, degrees, radians, clamp} from '../lib/common';
 // @ts-ignore gl-matrix types...
 import * as vec3 from '../gl-matrix/vec3';
 

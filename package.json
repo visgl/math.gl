@@ -13,7 +13,7 @@
     "examples/*"
   ],
   "scripts": {
-    "bootstrap": "yarn && ocular-bootstrap",
+    "bootstrap": "ocular-bootstrap",
     "clean": "ocular-clean",
     "build": "npm run clean && time ocular-build",
     "cover": "ocular-test cover",
@@ -26,9 +26,10 @@
     "@probe.gl/bench": "^4.0.0",
     "@turf/destination": "^6.0.1",
     "@types/tape-promise": "^4.0.1",
-    "ocular-dev-tools": "2.0.0-alpha.33",
+    "ocular-dev-tools": "2.0.0-alpha.34",
     "pre-commit": "^1.2.2",
-    "puppeteer": "^22.0.0"
+    "puppeteer": "^22.0.0",
+    "tap-spec": "^5.0.0"
   },
   "resolutions": {
     "typescript": "5.4.3"

@@ -31,6 +31,7 @@ import {transformMat4 as vec2_transformMat4} from '../gl-matrix/vec2';
 import {transformMat4 as vec3_transformMat4} from '../gl-matrix/vec3';
 import {transformMat4 as vec4_transformMat4} from '../gl-matrix/vec4';
 
+// eslint-disable-next-line no-shadow
 enum INDICES {
   COL0ROW0 = 0,
   COL0ROW1 = 1,
