@@ -2,12 +2,6 @@
 
 ## v4.1.0-alpha.1
 
-- chore: bump to ocular-dev-tools@2.0.0-alpha.34
-- chore: Licenses (#15)
-- chore: Clean up types (#14)
-
-## v4.1.0-alpha.1
-
 - feat: Add sized array types (#11)
 - feat(types): Add bounds types (#12)
 - chore: Add SPDX license headers (#10)
