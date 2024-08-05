@@ -23,7 +23,7 @@ export function getBounds2D(bounds: Bounds): Bounds2D {
   return isBounds2D(bounds)
     ? bounds
     : [
-      [bounds[0][0], bounds[0][1]],
-      [bounds[1][0], bounds[1][1]]
-    ];
+        [bounds[0][0], bounds[0][1]],
+        [bounds[1][0], bounds[1][1]]
+      ];
 }
