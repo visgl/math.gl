@@ -15,7 +15,7 @@ import {
   toCartographicFromRadians
 } from '../src/type-utils';
 
-import ellipsoidBench from './ellipsoid/ellipsoid.bench';
+import {ellipsoidBench} from './ellipsoid/ellipsoid.bench';
 
 class ObjectVector {
   x: number;
