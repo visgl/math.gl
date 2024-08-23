@@ -110,16 +110,43 @@ export const DimIndex: Record<string, number> = {
  * @returns Signed area of the polygon.
  * https://en.wikipedia.org/wiki/Shoelace_formula
  */
-export function getPolygonSignedArea(points: NumericArray, options: PolygonParams = {}): number {
+export function getPolygonSignedArea(
+  points: NumericArray,
+  options: PolygonParams & {fast?: boolean} = {}
+): number {
   const {start = 0, end = points.length, plane = 'xy'} = options;
   const dim = options.size || 2;
-  let area = 0;
   const i0 = DimIndex[plane[0]];
   const i1 = DimIndex[plane[1]];
 
+  let area = 0;
   for (let i = start, j = end - dim; i < end; i += dim) {
     area += (points[i + i0] - points[j + i0]) * (points[i + i1] + points[j + i1]);
     j = i;
+  }
+  return area / 2;
+}
+
+export function getPolygonSignedAreaFlatFast(
+  points: NumericArray,
+  options: PolygonParams = {}
+): number {
+  // const {start = 0} = options; TODO - fast
+  if (options.start) {
+    throw new Error('start option is not supported in fast mode');
+  }
+  const {end = points.length, plane = 'xy'} = options;
+  const dim = options.size || 2;
+  const i0 = DimIndex[plane[0]];
+  const i1 = DimIndex[plane[1]];
+
+  const Area = function (curr: number, prev: number): number {
+    return (points[curr + i0] - points[prev + i0]) * (points[curr + i1] - points[prev + i1]);
+  };
+
+  let area = Area(0, end - dim);
+  for (let i = dim; i < end; i += dim) {
+    area += Area(i, i - dim);
   }
   return area / 2;
 }
