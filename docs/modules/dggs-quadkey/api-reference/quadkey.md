@@ -8,7 +8,6 @@
 This module is still experimental. It may have issues and functionality may change in minor releases.
 :::
 
-
 The quadkey library is currently focused on decoding quadkeys.
 
 > The quadkey functions in math.gl are currently focused on **decoding** S2 encoded data, not encoding it.

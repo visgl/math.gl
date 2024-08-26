@@ -15,4 +15,3 @@ Some of the high-level goals for future and past versions
 # v3.6
 
 - Full typescript support
-

@@ -43,7 +43,7 @@ Interpolation of quaternions is done using Spherical Linear intERPolation (aka S
 
 ## Rotation Matrices
 
-Rotations around arbitrary points can be treated as rotations around the origin simply by applying a translation before the rotation, and the inverse translation after the rotation. 
+Rotations around arbitrary points can be treated as rotations around the origin simply by applying a translation before the rotation, and the inverse translation after the rotation.
 
 Thus, when combining rotations with other transformations (translations, scalings, projections etc), 4x4 matrices are the representation of choice.
 
@@ -102,20 +102,23 @@ Calculate the quaternion that represents the rotation you want to apply (e.g. mo
 If you are new to working with 3D rotations it can be good to have an awareness of how they differ mathematically from 2D rotations
 
 In two dimensions, rotations represent a highly structured and intuitive set of operations:
-  - A series of 2D rotations can be applied in any order (they commute).
-  - The combination of two 2D rotations can always be expressed as another single rotation (simply by taking the sum of the angles of the two rotations).
-  - Any 2D rotation can be fully parametrized by a single value (the "angle").
+
+- A series of 2D rotations can be applied in any order (they commute).
+- The combination of two 2D rotations can always be expressed as another single rotation (simply by taking the sum of the angles of the two rotations).
+- Any 2D rotation can be fully parametrized by a single value (the "angle").
 
 However, in three dimensions, rotations start to loose some "structure":
-  - In 3D, rotations are no longer order-independent (they are not commutative), meaning that applying the same two rotations in different order will often yield different results.
-  - However, by [Euler's Rotation Theorem](https://en.wikipedia.org/wiki/Euler%27s_rotation_theorem), two 3D rotations around the origin can still always be expressed as (combined into) another single 3D rotation around the origin. 
-  - Also, a 3D rotation requires not two, but three values to be fully specified.
+
+- In 3D, rotations are no longer order-independent (they are not commutative), meaning that applying the same two rotations in different order will often yield different results.
+- However, by [Euler's Rotation Theorem](https://en.wikipedia.org/wiki/Euler%27s_rotation_theorem), two 3D rotations around the origin can still always be expressed as (combined into) another single 3D rotation around the origin.
+- Also, a 3D rotation requires not two, but three values to be fully specified.
 
 While math.gl does not support rotations in four and higher dimensions, it should be no surprised that rotations continue to "loose structure" as the number of dimensions increase:
-  - Higher dimension rotations are also not commutative.
-  - Euler's Rotation Theorem no longer holds. There are now two different "types" of basic rotations, and the combination of two rotations will in general not even result in another "rotation", but another, more complex transformation.
-  - In addition, the number of parameters (degrees of freedom) required to fully specify a rotation grows with mind-boggling rapidity, as `2^(n-1) - 1`, (meaning that e.g. a "21 dimensional rotation" would require over one million values to be fully specified).
-  
+
+- Higher dimension rotations are also not commutative.
+- Euler's Rotation Theorem no longer holds. There are now two different "types" of basic rotations, and the combination of two rotations will in general not even result in another "rotation", but another, more complex transformation.
+- In addition, the number of parameters (degrees of freedom) required to fully specify a rotation grows with mind-boggling rapidity, as `2^(n-1) - 1`, (meaning that e.g. a "21 dimensional rotation" would require over one million values to be fully specified).
+
 ## Background: More on Euler Angles
 
 [Euler angle values](https://en.wikipedia.org/wiki/Euler_angles)

@@ -28,7 +28,6 @@ In particular, the basic math.gl math classes have implementations of most of th
 | `Matrix3` | `THREE.Matrix3` | Math.gl stores in column-major order by default |
 | `Matrix4` | `THREE.Matrix4` | ditto                                           |
 
-
 ### Colum-Major vs. Row-Major Matrices
 
 By default, math.gl stores matrices in column-major order internally (while exposing a row-major friendly interface), whereas THREE.js stores matrices in row-major order.
@@ -40,4 +39,3 @@ Since math.gl's classes are subclasses of JavaScripts built-in `Array` class, th
 ### Cross-Library Convenience Methods
 
 A complication with THREE.js is that the framework is not strict about separating the library into independent layers. Thus the THREE math classes have convenience methods that accept other THREE.js objects such `Geometries` and `BufferAttributes`. These methods can not be implemented in math.gl.
-

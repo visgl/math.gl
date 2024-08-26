@@ -18,12 +18,11 @@ npm install @math.gl/dggs-quadkey
 
 ## Usage
 
-Get a polygon representing the outline of a specific 
+Get a polygon representing the outline of a specific
+
 ```js
 import {getQuadkeyLngLat} from '@math.gl/dggs-quadkey';
 const center = getQuadkeyLngLat(quadkey);
 ```
 
 ## Attribution
-
-

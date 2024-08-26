@@ -63,9 +63,9 @@ Release Date: Q3, 2024.
 
 **`@math.gl/types`**
 
-- `Bounds`, `Bounds2D` and `Bounds3D` - New types for expressing [bounds](./modules/types/api-reference/bounds) (extents): .
-- `NumberArray2` - `NumberArray16` - New types to specify numeric arrays of a specific length: . 
-- `NumericArray2` - `NumericArray16` - New types to specify numeric arrays of a specific length: . 
+- `Bounds`, `Bounds2D` and `Bounds3D` - New types for expressing [bounds](./modules/types/api-reference/bounds) (extents).
+- `NumberArray2` - `NumberArray16` - New types to specify numeric arrays of a specific length.
+- `NumericArray2` - `NumericArray16` - New types to specify numeric arrays of a specific length.
 - `isTypedArray()`, `isNumericArray()` - These utilities now perform typescript type narrowing.
 
 ## v4.0
@@ -112,6 +112,7 @@ are no longer supported. For details, consult the [upgrade guide](./upgrade-guid
 - New module that exports a few typescript types that e.g. generalize handling of numeric arrays.
 
 **`@math.gl/polygon` (NEW)**
+
 - Includes earcut 2.2 (various bug fixes for edge cases)
 - The `earcut` utility supports a new argument `plane` to calculate tesselation on alternative projection planes.
 

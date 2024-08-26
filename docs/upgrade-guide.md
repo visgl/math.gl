@@ -8,7 +8,7 @@
 ## Upgrading to v4.0
 
 - math.gl v4.0 is now packaged as ESM modules, but with additional CommonJS exports. In most cases you should not have problems importing 4.0.
-- The `gl-matrix` dependency has been removed. You can still install / import gl-matrix in your application, it should remain highly compatible with math.gl. 
+- The `gl-matrix` dependency has been removed. You can still install / import gl-matrix in your application, it should remain highly compatible with math.gl.
 
 ## Upgrading to v3.6
 
@@ -17,12 +17,12 @@ While the API itself has not changed, in some cases, the introduction of types
 made it harder to keep supporting some type signatures and overloads.
 
 Known changes
+
 - `Matrix4.lookAt()` - Now only accepts named parameters.
 - `SphericalCoordinates()` - Constructor is now more restrictive in terms of what parameters it accepts.
 
 Note that some omissions may be unintentional, feel free to report upgrade issues
 in the math.gl github repo.
-
 
 ## Upgrading to v3.0
 

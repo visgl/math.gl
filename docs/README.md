@@ -1,16 +1,16 @@
 # Introduction
 
-Welcome to math.gl! 
+Welcome to math.gl!
 
 math.gl is TypeScript math library focused on **geospatial** and **3D** use cases. Designed as a composable, **modular toolbox**. math.gl provides a core module with the standard complement of vector and matrix classes, and a suite of optional modules implementing various aspects of geospatial and 3D math.
 
-math.gl is  **optimized for use with WebGL and WebGPU**, however it is not a GPU math library, meaning that it has no GPU dependencies and is designed to be usable in any application.
+math.gl is **optimized for use with WebGL and WebGPU**, however it is not a GPU math library, meaning that it has no GPU dependencies and is designed to be usable in any application.
 
 ## Features
 
 - **Core classes** - Basic vectors and matrices: **`@math.gl/types`**, **`@math.gl/core`**
 - **Geospatial projections** - Support for a variety of geospatial projections **`@math.gl/geospatial`**, **`@math.gl/geoid`**, **`@math.gl/proj4`**, **`@math.gl/web-mercator`**
-- **Geospatial utilities** - Cutting polygons and calculating sun position and direction **`@math.gl/polygon`**,  **`@math.gl/sun`**
+- **Geospatial utilities** - Cutting polygons and calculating sun position and direction **`@math.gl/polygon`**, **`@math.gl/sun`**
 - **Discrete Global Grids** - Standardized interfaces to a number of the major discrete global grids. **`@math.gl/dggs-geohash`**, **`@math.gl/dggs-quadkey`**, **`@math.gl/dggs-s2`**
 - **3D math** - 3D primitives and culling: **`@math.gl/culling`**
 
@@ -64,7 +64,7 @@ math.gl is fully supported on:
 | Year  | Version | Description                                                                                                                                                            |
 | ----- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2015  | N/A     | `@math.gl/core` classes were created as part of luma.gl v4, as a set of class wrappers for `gl-matrix` for luma.gl and deck.gl frameworks.                             |
-| 2017  | v1.0    | `math.gl` was broken out into its own repository to manage luma.gl growth. The goal was to  independently usable set of 3D and Geospatial math modules.                |
+| 2017  | v1.0    | `math.gl` was broken out into its own repository to manage luma.gl growth. The goal was to independently usable set of 3D and Geospatial math modules.                 |
 | 2018  | v2.0    | The math.gl API started to mature.                                                                                                                                     |
 | 2019  | v3.0    | A collaboration with the Cesium team around 3D Tiles led to parts of the Cesium math library were ported into the `math.gl/geospatial` and `@math.gl/culling` modules. |
 | 2020+ | v3.x    | Additional geospatial modules have gradually been added to support more advanced use cases for deck.gl.                                                                |

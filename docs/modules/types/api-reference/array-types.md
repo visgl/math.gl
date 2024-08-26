@@ -4,8 +4,6 @@ math.gl provides a number of numeric array types.
 
 TypeScript types to simplify working with a mix of typed arrays and standard JavaScript arrays containing numbers.
 
-
-
 ## Types
 
 ### `TypedArray`
@@ -46,14 +44,16 @@ Types matching number arrays of specific lengths or typed arrays.
 
 Checks if a value is a typed array.
 
-Remarks: 
+Remarks:
+
 - Avoids type narrowing problems with `ArrayBuffer.isView()` (which accepts `DataViews` that do not support array methods).
 
 ### `isNumberArray(value: unknown): value as NumberArray`
 
 Checks if a value is a classic JavaScript array of numbers.
 
-Remarks: 
+Remarks:
+
 - Only the type of the first element in a standard array is checked to be a `number`.
 
 ### `isNumericArray(value: unknown): value as NumericArray`
@@ -61,5 +61,6 @@ Remarks:
 Checks if a value is either a classic JavaScript array of numbers or a typed array.
 
 Remarks:
+
 - Avoids type narrowing problems with `ArrayBuffer.isView()` (which accepts `DataViews` that do not support array methods).
 - Only the type of the first element in a standard array is checked to be a `number`.

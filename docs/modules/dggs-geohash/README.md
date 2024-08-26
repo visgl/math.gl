@@ -24,4 +24,3 @@ const polygon = getGeohashPolygon(geohash);
 ```
 
 ## Attribution
-

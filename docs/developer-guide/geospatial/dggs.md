@@ -26,10 +26,9 @@ Encoding (lng/lat to cell index) and advanced operations (child/neighbor calcula
 
 Note that `h3-js` is not a `math.gl` library. For H3 it is recommended to work directly with the H3 JavaScript bindings.
 
-
 ## H3 API Conventions
 
-In terms of API design and nomenclature, the golden standard for DGGS systems at this time is arguably [H3](https://h3geo.org), in terms of functionality, number of languages and platforms supported, community activity etc.  
+In terms of API design and nomenclature, the golden standard for DGGS systems at this time is arguably [H3](https://h3geo.org), in terms of functionality, number of languages and platforms supported, community activity etc.
 
 Rather than expose the original function names as in the existing JavaScript libraries for each DGGS, math.gl applies API naming convention based on the H3 API.
 
@@ -61,6 +60,7 @@ While not directly supported by math.gl, H3 is in fact the DGGS we would recomme
 - K-ring formation for filtering and convolutions
 
 Downsides:
+
 - More complex projection math.
 
 ### S2
@@ -75,9 +75,6 @@ Good cross-language support.
 
 ### QuadKey
 
-Bing Maps uses a [quadkey](http://msdn.microsoft.com/en-us/library/bb259689.aspx.) structure as their tiling scheme. Here is an overview of the concept 
+Bing Maps uses a [quadkey](http://msdn.microsoft.com/en-us/library/bb259689.aspx.) structure as their tiling scheme. Here is an overview of the concept
 
 - Quadtrees are more predictable in that each level spans a square (at least in terms of coordinates), whereas in geohash representation sometimes squares sometimes rectangles are spanned.
-
-
-
