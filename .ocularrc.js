@@ -2,11 +2,9 @@ import {resolve} from 'path';
 
 export default {
   lint: {
-    paths: ['dev-docs', 'docs', 'modules', 'examples', 'test'] // 'website'
-    // extensions: ['js', 'md']
+    paths: ['dev-docs', 'docs', 'modules', 'examples', 'test'], // 'website'
+    extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx', 'd.ts', 'md']
   },
-
-  babel: false,
 
   typescript: {
     project: 'tsconfig.build.json'

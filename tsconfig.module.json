@@ -12,12 +12,12 @@
     // "listEmittedFiles": true,
     "plugins": [
       {
-        "transform": "ocular-dev-tools/ts-transform-append-extension",
+        "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
         "extensions": [".js"],
         "after": true
       },
       {
-        "transform": "ocular-dev-tools/ts-transform-append-extension",
+        "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
         "extensions": [".js"],
         "afterDeclarations": true
       }
