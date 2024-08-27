@@ -6,11 +6,11 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "4.1.0-alpha.8",
+  "version": "4.1.0-alpha.9",
   "keywords": [],
   "repository": {
     "type": "git",
-    "url": "https://github.com/uber-web/math.gl.git"
+    "url": "https://github.com/visgl/math.gl.git"
   },
   "types": "dist/index.d.ts",
   "main": "dist/index.cjs",
@@ -27,6 +27,6 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/core": "4.1.0-alpha.8"
+    "@math.gl/core": "4.1.0-alpha.9"
   }
 }
