@@ -1,17 +1,12 @@
-const {getESLintConfig} = require('ocular-dev-tools/configuration');
+const {getESLintConfig} = require('@vis.gl/dev-tools/configuration');
 
 module.exports = getESLintConfig({
-  overrides: {parser: '',
-    parserOptions: {
-      project: ['./tsconfig.json'],
-      ecmaVersion: 2020
-    },
+  overrides: {
     env: {
       browser: true,
       es2020: true,
       node: true
     },
-
     overrides: [
       {
         // scripts use devDependencies
@@ -26,7 +21,6 @@ module.exports = getESLintConfig({
         files: ['modules/**/*.ts', 'modules/**/*.js'],
         rules: {
           'no-use-before-define': 0,
-          'import/no-unresolved': 0,
           'import/named': 0,
           '@typescript-eslint/ban-ts-comment': 0 // We do need our ts-ignores
         }

@@ -12,8 +12,8 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "noEmit": true,
     "baseUrl": ".",
+    "useDefineForClassFields": false,
 
     // BEGIN TYPE CHECK SETTINGS
     "skipLibCheck": true,
@@ -64,7 +64,19 @@
       "@math.gl/web-mercator/*": ["modules/web-mercator/src/*"],
       "@math.gl/web-mercator/test/*": ["modules/web-mercator/test/*"],
       "test/*": ["test/*"]
-    }
+    },
+    "plugins": [
+      {
+        "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
+        "extensions": [".js"],
+        "after": true
+      },
+      {
+        "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
+        "extensions": [".js"],
+        "afterDeclarations": true
+      }
+    ]
   },
   "include":[
     "modules/*/src",
