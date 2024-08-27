@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v4.1.0-alpha.4
+
+- chore: switch to @vis.gl/dev-tools and CI release
+- feat(types): Sized numeric arrays (#16)
+
+## v4.1.0-alpha.3
 ## v4.1.0-alpha.2
 
 - chore: bump to ocular-dev-tools@2.0.0-alpha.34
