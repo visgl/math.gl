@@ -6,10 +6,6 @@ export default {
     extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx', 'd.ts', 'md']
   },
 
-  typescript: {
-    project: 'tsconfig.build.json'
-  },
-
   aliases: {
     test: resolve('./test')
   },
