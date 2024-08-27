@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "4.1.0-alpha.6",
+  "version": "4.1.0-alpha.7",
   "keywords": [
     "webgl",
     "javascript",
@@ -41,7 +41,7 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/core": "4.1.0-alpha.6",
+    "@math.gl/core": "4.1.0-alpha.7",
     "@types/proj4": "^2.5.0",
     "proj4": "2.6.2"
   },

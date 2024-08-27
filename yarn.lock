@@ -996,11 +996,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/core@npm:4.1.0-alpha.6, @math.gl/core@workspace:modules/core":
+"@math.gl/core@npm:4.1.0-alpha.7, @math.gl/core@workspace:modules/core":
   version: 0.0.0-use.local
   resolution: "@math.gl/core@workspace:modules/core"
   dependencies:
-    "@math.gl/types": "npm:4.1.0-alpha.6"
+    "@math.gl/types": "npm:4.1.0-alpha.7"
   languageName: unknown
   linkType: soft
 
@@ -1008,8 +1008,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/culling@workspace:modules/culling"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.6"
-    "@math.gl/types": "npm:4.1.0-alpha.6"
+    "@math.gl/core": "npm:4.1.0-alpha.7"
+    "@math.gl/types": "npm:4.1.0-alpha.7"
   languageName: unknown
   linkType: soft
 
@@ -1037,7 +1037,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geoid@workspace:modules/geoid"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.6"
+    "@math.gl/core": "npm:4.1.0-alpha.7"
   languageName: unknown
   linkType: soft
 
@@ -1045,8 +1045,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.6"
-    "@math.gl/types": "npm:4.1.0-alpha.6"
+    "@math.gl/core": "npm:4.1.0-alpha.7"
+    "@math.gl/types": "npm:4.1.0-alpha.7"
   languageName: unknown
   linkType: soft
 
@@ -1054,7 +1054,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/polygon@workspace:modules/polygon"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.6"
+    "@math.gl/core": "npm:4.1.0-alpha.7"
   languageName: unknown
   linkType: soft
 
@@ -1062,7 +1062,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/proj4@workspace:modules/proj4"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.6"
+    "@math.gl/core": "npm:4.1.0-alpha.7"
     "@types/proj4": "npm:^2.5.0"
     proj4: "npm:2.6.2"
   languageName: unknown
@@ -1074,7 +1074,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/types@npm:4.1.0-alpha.6, @math.gl/types@workspace:modules/types":
+"@math.gl/types@npm:4.1.0-alpha.7, @math.gl/types@workspace:modules/types":
   version: 0.0.0-use.local
   resolution: "@math.gl/types@workspace:modules/types"
   languageName: unknown
@@ -1084,7 +1084,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/web-mercator@workspace:modules/web-mercator"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.6"
+    "@math.gl/core": "npm:4.1.0-alpha.7"
     mock-browser: "npm:^0.92.14"
   languageName: unknown
   linkType: soft
@@ -2142,9 +2142,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vis.gl/dev-tools@npm:1.0.0-alpha.11":
-  version: 1.0.0-alpha.11
-  resolution: "@vis.gl/dev-tools@npm:1.0.0-alpha.11"
+"@vis.gl/dev-tools@npm:1.0.0-alpha.12":
+  version: 1.0.0-alpha.12
+  resolution: "@vis.gl/dev-tools@npm:1.0.0-alpha.12"
   dependencies:
     "@esbuild-plugins/node-globals-polyfill": "npm:^0.2.0"
     "@esbuild-plugins/node-modules-polyfill": "npm:^0.2.0"
@@ -2184,19 +2184,19 @@ __metadata:
     ocular-metrics: scripts/metrics.js
     ocular-publish: scripts/publish.js
     ocular-test: scripts/test.js
-  checksum: 10c0/6613de742df0112cb638cd95a862c22839fe5b4c2570b94f262b990dad34b3b8c96f032ce1a4e3ac08a51a164ef44b1d46cf2afaa637ed6024c6deda38c82dab
+  checksum: 10c0/f1b9b85844d0a47fca849560c353654fa23ff2ca96d137125ce2ba3ddedb022b00750cc6c20a6b2f8f148d540a3950858b4866261725565420d03373cd23fac9
   languageName: node
   linkType: hard
 
-"@vis.gl/ts-plugins@npm:1.0.0-alpha.11":
-  version: 1.0.0-alpha.11
-  resolution: "@vis.gl/ts-plugins@npm:1.0.0-alpha.11"
+"@vis.gl/ts-plugins@npm:1.0.0-alpha.12":
+  version: 1.0.0-alpha.12
+  resolution: "@vis.gl/ts-plugins@npm:1.0.0-alpha.12"
   dependencies:
     "@luma.gl/constants": "npm:^9.0.0"
     minimatch: "npm:^3.0.0"
     ts-patch: "npm:^3.1.2"
     typescript: "npm:^5.2.2"
-  checksum: 10c0/af41c092c00b0f874f7ac336fc97d1a98a517f436252edb14fb801b49eba8a068f6b85de66d43890f4ae3ad7473277cf628fad79ef21737df86675fb0d312c1a
+  checksum: 10c0/0601331ccebcf20b25c2f76313d362f88410fb90ff9b4b2b9de5a7378a526dbe374b631cd9ae8c9239397c182b7e0e62136bf2d0d129787c0e025e29abcb44f1
   languageName: node
   linkType: hard
 
@@ -9372,8 +9372,8 @@ __metadata:
     "@probe.gl/bench": "npm:^4.0.0"
     "@turf/destination": "npm:^6.0.1"
     "@types/tape-promise": "npm:^4.0.1"
-    "@vis.gl/dev-tools": "npm:1.0.0-alpha.11"
-    "@vis.gl/ts-plugins": "npm:1.0.0-alpha.11"
+    "@vis.gl/dev-tools": "npm:1.0.0-alpha.12"
+    "@vis.gl/ts-plugins": "npm:1.0.0-alpha.12"
     pre-commit: "npm:^1.2.2"
     puppeteer: "npm:^22.0.0"
     tap-spec: "npm:^5.0.0"
@@ -9384,7 +9384,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math.gl@workspace:modules/main"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.6"
+    "@math.gl/core": "npm:4.1.0-alpha.7"
   languageName: unknown
   linkType: soft
 
