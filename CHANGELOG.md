@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v4.1.0-alpha.6
+
+- chore: switch to @vis.gl/dev-tools and CI release
+- feat(types): Sized numeric arrays (#16)
+
 ## v4.1.0-alpha.5
 ## v4.1.0-alpha.4
 
