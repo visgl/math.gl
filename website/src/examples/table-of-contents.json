@@ -1,0 +1,11 @@
+[
+  {
+    "type": "doc",
+    "label": "Overview",
+    "id": "index"
+  },
+  {
+    "type": "doc",
+    "id": "benchmarks"
+  }
+]
