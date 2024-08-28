@@ -4,15 +4,18 @@
   "private": true,
   "description": "Website for vis.gl project",
   "scripts": {
-    "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build": "./scripts/build.sh prod",
-    "build-staging": "./scripts/build.sh staging",
-    "swizzle": "docusaurus swizzle",
+    "build": "docusaurus build",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-heading-ids": "ocular-doc-headers ../docs",
     "deploy": "docusaurus deploy"
+  },
+  "resolution_notes": {
+    "cheerio": "@cmfcmf/docusaurus-search-local breaks with v1.0.0 production release"
+  },
+  "resolutions": {
+    "cheerio": "1.0.0-rc.9"
   },
   "dependencies": {
     "@docusaurus/core": "^2.0.0",
