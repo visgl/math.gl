@@ -2254,9 +2254,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vis.gl/dev-tools@npm:1.0.0-alpha.13":
-  version: 1.0.0-alpha.13
-  resolution: "@vis.gl/dev-tools@npm:1.0.0-alpha.13"
+"@vis.gl/dev-tools@npm:1.0.0-alpha.19":
+  version: 1.0.0-alpha.19
+  resolution: "@vis.gl/dev-tools@npm:1.0.0-alpha.19"
   dependencies:
     "@esbuild-plugins/node-globals-polyfill": "npm:^0.2.0"
     "@esbuild-plugins/node-modules-polyfill": "npm:^0.2.0"
@@ -2277,6 +2277,7 @@ __metadata:
     lerna: "npm:^8.1.0"
     minimatch: "npm:^3.0.0"
     prettier: "npm:^3.2.0"
+    semver: "npm:^7.6.0"
     tap-spec: "npm:^5.0.0"
     tape: "npm:^4.11.0"
     tape-promise: "npm:^4.0.0"
@@ -2296,19 +2297,19 @@ __metadata:
     ocular-metrics: scripts/metrics.js
     ocular-publish: scripts/publish.js
     ocular-test: scripts/test.js
-  checksum: 10c0/1636c998f9353ae4f9967046e1cb094ccf4f921f5e7e6d894d5263e9fd8c35e0cbc6fd935c042b1f16ec1ecac342478ff68e33c7fa9132ac4b653afdc957c339
+  checksum: 10c0/7fc365a758603a5a87cf28e00d8aa7761301519fc09be1f62d344743525940b176ae3e3b997526639b5346ba4ee64f75bb2e7ac9bf7633420fa6b00859bbb271
   languageName: node
   linkType: hard
 
-"@vis.gl/ts-plugins@npm:1.0.0-alpha.13":
-  version: 1.0.0-alpha.13
-  resolution: "@vis.gl/ts-plugins@npm:1.0.0-alpha.13"
+"@vis.gl/ts-plugins@npm:1.0.0-alpha.19":
+  version: 1.0.0-alpha.19
+  resolution: "@vis.gl/ts-plugins@npm:1.0.0-alpha.19"
   dependencies:
     "@luma.gl/constants": "npm:^9.0.0"
     minimatch: "npm:^3.0.0"
     ts-patch: "npm:^3.1.2"
     typescript: "npm:^5.2.2"
-  checksum: 10c0/4f8894a2fc1d86158a574fc9ab8d8cab2249133a172cebfa62da621247ee5f0734912c98b4bbcb6536dd000c90568c604592cbc26910a3f00448977150c313c0
+  checksum: 10c0/967b8952c8a449da008db51a0b0cc8d0c50e9ac571d6c1379c4407d276e8bd34b634829ad001c7604412fe09c7d09bc88ae03dc4fe8a48bad4c81c19f61ba55b
   languageName: node
   linkType: hard
 
@@ -9052,8 +9053,8 @@ __metadata:
     "@probe.gl/bench": "npm:^4.0.0"
     "@turf/destination": "npm:^6.0.1"
     "@types/tape-promise": "npm:^4.0.1"
-    "@vis.gl/dev-tools": "npm:1.0.0-alpha.13"
-    "@vis.gl/ts-plugins": "npm:1.0.0-alpha.13"
+    "@vis.gl/dev-tools": "npm:1.0.0-alpha.19"
+    "@vis.gl/ts-plugins": "npm:1.0.0-alpha.19"
     pre-commit: "npm:^1.2.2"
     puppeteer: "npm:^22.0.0"
     tap-spec: "npm:^5.0.0"
