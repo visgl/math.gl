@@ -22,6 +22,7 @@ module.exports = getESLintConfig({
         rules: {
           'no-use-before-define': 0,
           'import/named': 0,
+          '@typescript-eslint/no-shadow': 0,
           '@typescript-eslint/ban-ts-comment': 0 // We do need our ts-ignores
         }
       },
@@ -43,7 +44,6 @@ module.exports = getESLintConfig({
           '@typescript-eslint/explicit-module-boundary-types': 0,
           '@typescript-eslint/restrict-template-expressions': 0,
           '@typescript-eslint/restrict-plus-operands': 0,
-          'no-shadow': 0,
           'max-params': 0,
           'max-statements': 0,
           complexity: 0,

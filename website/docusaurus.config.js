@@ -17,8 +17,7 @@ const config = getDocusaurusConfig({
   webpackConfig: {
     resolve: {
       alias: {
-        'website-examples': resolve('../examples'),
-        '@probe.gl/bench': resolve('../node_modules/@probe.gl/bench')
+        'website-examples': resolve('../examples')
       }
     }
   }
