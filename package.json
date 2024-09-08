@@ -33,8 +33,13 @@
     "puppeteer": "^22.0.0",
     "tap-spec": "^5.0.0"
   },
+  "resolutions_notes": {
+    "typescript": "Control the version of TypeScript to avoid breaking changes",
+    "tape": "New versions mess up numeric equality tests"
+  },
   "resolutions": {
-    "typescript": "5.4.3"
+    "typescript": "5.4.3",
+    "tape": "4.5.0"
   },
   "volta": {
     "node": "20.15.1",
