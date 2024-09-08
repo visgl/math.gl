@@ -45,7 +45,7 @@
   </tbody>
 </table>
 
-## v5.0
+## v5.0 (In planning stage)
 
 Release Date: TBD, maybe Q4, 2024.
 
@@ -53,13 +53,15 @@ Goal: Stronger type guarantees for math classes via the new sized array types.
 
 ## v4.1
 
-Release Date: Q3, 2024.
+Release Date: Sep 7, 2024.
 
-- [SPDX](https://spdx.org/licenses/) license headers.
+This minor release brings:
+- type improvements to support more rigorous typing of array lenghts.
+- [SPDX](https://spdx.org/licenses/)-compliant license headers.
 
 **`@math.gl/core`**
 
-- New `Vector2Like` - `Matrix4Like` types to specify numeric inputs of a specific length.
+- `Vector2Like` - `Matrix4Like` - New types to specify numeric inputs of a specific length.
 
 **`@math.gl/types`**
 
@@ -72,7 +74,8 @@ Release Date: Q3, 2024.
 
 Release Date: Oct 14, 2023.
 
-- ESM (ECMAScript modules).
+This release brings:
+- ESM (ECMAScript module) compliant.
 - Node.js v16, v18, v20.
 - Typescript v5
 - `gl-matrix` dependency removed.

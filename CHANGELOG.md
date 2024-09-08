@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v4.1.0
+
+- Website home page pass
+- Bump dev-tools
+- Try fix website publish
+- Create website.yml
+- build(deps): bump semver from 5.7.1 to 5.7.2 (#31)
+- build(deps): bump word-wrap from 1.2.3 to 1.2.5 (#30)
+- build(deps-dev): bump webpack from 4.46.0 to 5.94.0 (#29)
+
 ## v4.1.0-alpha.9
 
 - chore: switch to @vis.gl/dev-tools and CI release

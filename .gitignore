@@ -8,6 +8,8 @@
 !.yarn/versions
 
 */**/yarn.lock
+!website/yarn.lock
+
 yarn-error.log
 npm-debug.log
 report*.json
