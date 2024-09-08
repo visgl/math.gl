@@ -1,5 +1,5 @@
 import React, {PureComponent} from 'react';
-import {render} from 'react-dom';
+import {render} from 'react-dom'; // eslint-disable-line
 
 import {BenchResults} from '@probe.gl/react-bench';
 import {Bench} from '@probe.gl/bench';
