@@ -38,7 +38,7 @@
   },
   "volta": {
     "node": "20.15.1",
-    "yarn": "4.3.1"
+    "yarn": "4.4.1"
   },
   "pre-commit": [
     "test-pre-commit"
