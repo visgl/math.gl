@@ -56,6 +56,7 @@ Goal: Stronger type guarantees for math classes via the new sized array types.
 Release Date: Sep 7, 2024.
 
 This minor release brings:
+
 - type improvements to support more rigorous typing of array lenghts.
 - [SPDX](https://spdx.org/licenses/)-compliant license headers.
 
@@ -75,6 +76,7 @@ This minor release brings:
 Release Date: Oct 14, 2023.
 
 This release brings:
+
 - ESM (ECMAScript module) compliant.
 - Node.js v16, v18, v20.
 - Typescript v5
