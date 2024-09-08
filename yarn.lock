@@ -956,11 +956,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/core@npm:4.1.0-alpha.9, @math.gl/core@workspace:modules/core":
+"@math.gl/core@npm:4.1.0, @math.gl/core@workspace:modules/core":
   version: 0.0.0-use.local
   resolution: "@math.gl/core@workspace:modules/core"
   dependencies:
-    "@math.gl/types": "npm:4.1.0-alpha.9"
+    "@math.gl/types": "npm:4.1.0"
   languageName: unknown
   linkType: soft
 
@@ -968,8 +968,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/culling@workspace:modules/culling"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.9"
-    "@math.gl/types": "npm:4.1.0-alpha.9"
+    "@math.gl/core": "npm:4.1.0"
+    "@math.gl/types": "npm:4.1.0"
   languageName: unknown
   linkType: soft
 
@@ -997,7 +997,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geoid@workspace:modules/geoid"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.9"
+    "@math.gl/core": "npm:4.1.0"
   languageName: unknown
   linkType: soft
 
@@ -1005,8 +1005,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.9"
-    "@math.gl/types": "npm:4.1.0-alpha.9"
+    "@math.gl/core": "npm:4.1.0"
+    "@math.gl/types": "npm:4.1.0"
   languageName: unknown
   linkType: soft
 
@@ -1014,7 +1014,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/polygon@workspace:modules/polygon"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.9"
+    "@math.gl/core": "npm:4.1.0"
   languageName: unknown
   linkType: soft
 
@@ -1022,7 +1022,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/proj4@workspace:modules/proj4"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.9"
+    "@math.gl/core": "npm:4.1.0"
     "@types/proj4": "npm:^2.5.0"
     proj4: "npm:2.6.2"
   languageName: unknown
@@ -1034,7 +1034,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/types@npm:4.1.0-alpha.9, @math.gl/types@workspace:modules/types":
+"@math.gl/types@npm:4.1.0, @math.gl/types@workspace:modules/types":
   version: 0.0.0-use.local
   resolution: "@math.gl/types@workspace:modules/types"
   languageName: unknown
@@ -1044,7 +1044,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/web-mercator@workspace:modules/web-mercator"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.9"
+    "@math.gl/core": "npm:4.1.0"
     mock-browser: "npm:^0.92.14"
   languageName: unknown
   linkType: soft
@@ -8612,7 +8612,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math.gl@workspace:modules/main"
   dependencies:
-    "@math.gl/core": "npm:4.1.0-alpha.9"
+    "@math.gl/core": "npm:4.1.0"
   languageName: unknown
   linkType: soft
 
