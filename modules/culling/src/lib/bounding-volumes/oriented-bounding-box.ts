@@ -560,7 +560,6 @@ export class OrientedBoundingBox implements BoundingVolume {
 }
 
 const scratchScale = new Vector3();
-const scratchHalfAxes = new Matrix3();
 
 /** helper function for OrientedBoundingBox.fromRegion() */
 // eslint-disable-next-line max-params
@@ -577,10 +576,8 @@ function fromPlaneExtents(
     maximumZ: number,
     result: OrientedBoundingBox
 ) {
-  if (!result)
-    result = new OrientedBoundingBox()
-
-  const halfAxes = new Matrix3();
+  const center = result.center;
+  const halfAxes = result.halfAxes;
   halfAxes.setColumn(0, planeXAxis);
   halfAxes.setColumn(1, planeYAxis);
   halfAxes.setColumn(2, planeZAxis);
@@ -596,8 +593,9 @@ function fromPlaneExtents(
   scale.y = (maximumY - minimumY) / 2.0;
   scale.z = (maximumZ - minimumZ) / 2.0;
 
+  planeOrigin = center.copy(planeOrigin);
   result.center = planeOrigin.add(centerOffset);
-  result.halfAxes = halfAxes.multiplyByScale(scale, scratchHalfAxes);
+  result.halfAxes = halfAxes.multiplyByScale(scale, halfAxes);
 
   return result;
 }
