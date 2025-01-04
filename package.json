@@ -38,14 +38,14 @@
     "tape": "New versions mess up numeric equality tests"
   },
   "resolutions": {
-    "typescript": "5.4.3",
+    "typescript": "5.6.2",
     "tape": "4.5.0"
-  },
-  "volta": {
-    "node": "20.15.1",
-    "yarn": "4.4.1"
   },
   "pre-commit": [
     "test-pre-commit"
-  ]
+  ],
+  "volta": {
+    "node": "20.15.1",
+    "yarn": "4.6.0"
+  }
 }

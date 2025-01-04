@@ -26,5 +26,9 @@
   "browserslist": [
     ">0.2% and supports async-functions",
     "not dead"
-  ]
+  ],
+  "volta": {
+    "node": "20.15.1",
+    "yarn": "4.6.0"
+  }
 }
