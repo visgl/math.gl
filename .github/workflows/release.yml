@@ -7,7 +7,7 @@ on:
 
 jobs:
   check_branch:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       should_build: ${{ steps.permitted.outputs.result }}
 
