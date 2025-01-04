@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v4.2.0-alpha.3
+
+- chore: Fix CI release action (#47)
+
 ## v4.2.0-alpha.2
 
 - chore: Fix CI workflows (#46)
