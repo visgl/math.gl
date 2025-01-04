@@ -9,6 +9,8 @@ export {BoundingSphere} from './lib/bounding-volumes/bounding-sphere';
 export {OrientedBoundingBox} from './lib/bounding-volumes/oriented-bounding-box';
 export {CullingVolume} from './lib/culling-volume';
 export {Plane} from './lib/plane';
+export {Ray} from './lib/ray';
+export {EllipsoidTangentPlane} from './lib/ellipsoid-tangent-plane';
 
 export {PerspectiveOffCenterFrustum as _PerspectiveOffCenterFrustum} from './lib/perspective-off-center-frustum';
 export {PerspectiveFrustum as _PerspectiveFrustum} from './lib/perspective-frustum';
