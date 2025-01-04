@@ -48,6 +48,8 @@ export {
   // math.gl global utility methods
   config,
   configure,
+  safeMod,
+  normalizeAngle,
   formatValue,
   isArray,
   clone,

@@ -9,6 +9,7 @@
   },
   "references": [
     {"path": "../types"},
-    {"path": "../core"}
+    {"path": "../core"},
+    {"path": "../culling"}
   ]
 }
