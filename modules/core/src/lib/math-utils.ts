@@ -29,4 +29,5 @@ export const PI_OVER_TWO = Math.PI / 2;
 export const PI_OVER_FOUR = Math.PI / 4;
 export const PI_OVER_SIX = Math.PI / 6;
 
+export const PI = Math.PI;
 export const TWO_PI = Math.PI * 2;
