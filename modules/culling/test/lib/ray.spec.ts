@@ -13,4 +13,3 @@ test('Ray#constructs', (t) => {
   t.ok(ray);
   t.end();
 });
-

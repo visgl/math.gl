@@ -6,10 +6,8 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 import {Vector2, Vector3, Matrix4} from '@math.gl/core';
-// @ts-ignore
-// eslint-disable-next-line import/no-unresolved
-import {Ellipsoid} from '@math.gl/geospatial';
-import {Plane,Ray} from '@math.gl/culling';
+import {Plane, Ray} from '@math.gl/culling';
+import {Ellipsoid} from './ellipsoid';
 
 const scratchOrigin = new Vector3();
 const scratchCart3 = new Vector3();

@@ -6,11 +6,8 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 import {NumericArray} from '@math.gl/types';
-import {Vector3, Matrix3, Matrix4, Quaternion, _MathUtils} from '@math.gl/core';
+import {Vector3, Matrix3, Matrix4, Quaternion} from '@math.gl/core';
 
-// @ts-ignore
-// eslint-disable-next-line import/no-unresolved
-import {Ellipsoid, Rectangle} from '@math.gl/geospatial';
 import type {BoundingVolume} from './bounding-volume';
 import {BoundingSphere} from './bounding-sphere';
 import {Plane} from '../plane';

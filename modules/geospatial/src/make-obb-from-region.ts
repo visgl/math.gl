@@ -5,13 +5,13 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import { Vector2, Vector3, degrees, _MathUtils } from "@math.gl/core";
-import { OrientedBoundingBox, Plane } from "@math.gl/culling";
+import {Vector2, Vector3, degrees, _MathUtils} from '@math.gl/core';
+import {OrientedBoundingBox, Plane} from '@math.gl/culling';
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved
-import { LngLatRectangle } from "./lng-lat-rectangle";
-import { Ellipsoid } from "./ellipsoid";
-import { EllipsoidTangentPlane } from "./ellipsoid-tangent-plane";
+import {LngLatRectangle} from './lng-lat-rectangle';
+import {Ellipsoid} from './ellipsoid';
+import {EllipsoidTangentPlane} from './ellipsoid-tangent-plane';
 
 const scratchOffset = new Vector3();
 
@@ -75,7 +75,7 @@ export function makeOBBfromRegion(region: number[]): OrientedBoundingBox {
   const tangentPointCartographic = new Vector3([
     degrees(tangentPoint.x),
     degrees(tangentPoint.y),
-    0.0,
+    0.0
   ]);
 
   const lonCenter = tangentPoint.x;
@@ -84,38 +84,35 @@ export function makeOBBfromRegion(region: number[]): OrientedBoundingBox {
   if (rectangle.width <= _MathUtils.PI) {
     const westDeg = degrees(west);
 
-    const tangentPoint = Ellipsoid.WGS84.cartographicToCartesian(
-      tangentPointCartographic
-    );
+    const tangentPoint = Ellipsoid.WGS84.cartographicToCartesian(tangentPointCartographic);
     const ellipsoidTangentPlane = new EllipsoidTangentPlane(tangentPoint);
 
-    const latCenter =
-      southDeg < 0.0 && northDeg > 0.0 ? 0.0 : tangentPointCartographic.y;
+    const latCenter = southDeg < 0.0 && northDeg > 0.0 ? 0.0 : tangentPointCartographic.y;
 
     const perimeterCartographicNC = scratchPerimeterCartographicNC.copy([
       lonCenterDeg,
       northDeg,
-      maximumHeight,
+      maximumHeight
     ]);
     const perimeterCartographicNW = scratchPerimeterCartographicNW.copy([
       westDeg,
       northDeg,
-      maximumHeight,
+      maximumHeight
     ]);
     const perimeterCartographicCW = scratchPerimeterCartographicCW.copy([
       westDeg,
       latCenter,
-      maximumHeight,
+      maximumHeight
     ]);
     const perimeterCartographicSW = scratchPerimeterCartographicSW.copy([
       westDeg,
       southDeg,
-      maximumHeight,
+      maximumHeight
     ]);
     const perimeterCartographicSC = scratchPerimeterCartographicSC.copy([
       lonCenterDeg,
       southDeg,
-      maximumHeight,
+      maximumHeight
     ]);
 
     const perimeterCartesianNC = Ellipsoid.WGS84.cartographicToCartesian(
@@ -139,37 +136,28 @@ export function makeOBBfromRegion(region: number[]): OrientedBoundingBox {
       scratchPerimeterCartesianSC
     );
 
-    const perimeterProjectedNC =
-      ellipsoidTangentPlane.projectPointToNearestOnPlane(
-        perimeterCartesianNC,
-        scratchPerimeterProjectedNC
-      );
-    const perimeterProjectedNW =
-      ellipsoidTangentPlane.projectPointToNearestOnPlane(
-        perimeterCartesianNW,
-        scratchPerimeterProjectedNW
-      );
-    const perimeterProjectedCW =
-      ellipsoidTangentPlane.projectPointToNearestOnPlane(
-        perimeterCartesianCW,
-        scratchPerimeterProjectedCW
-      );
-    const perimeterProjectedSW =
-      ellipsoidTangentPlane.projectPointToNearestOnPlane(
-        perimeterCartesianSW,
-        scratchPerimeterProjectedSW
-      );
-    const perimeterProjectedSC =
-      ellipsoidTangentPlane.projectPointToNearestOnPlane(
-        perimeterCartesianSC,
-        scratchPerimeterProjectedSC
-      );
-
-    minX = Math.min(
-      perimeterProjectedNW.x,
-      perimeterProjectedCW.x,
-      perimeterProjectedSW.x
+    const perimeterProjectedNC = ellipsoidTangentPlane.projectPointToNearestOnPlane(
+      perimeterCartesianNC,
+      scratchPerimeterProjectedNC
     );
+    const perimeterProjectedNW = ellipsoidTangentPlane.projectPointToNearestOnPlane(
+      perimeterCartesianNW,
+      scratchPerimeterProjectedNW
+    );
+    const perimeterProjectedCW = ellipsoidTangentPlane.projectPointToNearestOnPlane(
+      perimeterCartesianCW,
+      scratchPerimeterProjectedCW
+    );
+    const perimeterProjectedSW = ellipsoidTangentPlane.projectPointToNearestOnPlane(
+      perimeterCartesianSW,
+      scratchPerimeterProjectedSW
+    );
+    const perimeterProjectedSC = ellipsoidTangentPlane.projectPointToNearestOnPlane(
+      perimeterCartesianSC,
+      scratchPerimeterProjectedSC
+    );
+
+    minX = Math.min(perimeterProjectedNW.x, perimeterProjectedCW.x, perimeterProjectedSW.x);
     maxX = -minX;
 
     maxY = Math.max(perimeterProjectedNW.y, perimeterProjectedNC.y);
@@ -225,19 +213,13 @@ export function makeOBBfromRegion(region: number[]): OrientedBoundingBox {
   const isPole =
     Math.abs(planeOrigin.x) < _MathUtils.EPSILON10 &&
     Math.abs(planeOrigin.y) < _MathUtils.EPSILON10;
-  const planeNormal = !isPole
-    ? scratchPlaneNormal.copy(planeOrigin).normalize()
-    : VECTOR3_UNIT_X;
+  const planeNormal = !isPole ? scratchPlaneNormal.copy(planeOrigin).normalize() : VECTOR3_UNIT_X;
   const planeYAxis = VECTOR3_UNIT_Z;
   const planeXAxis = scratchPlaneXAxis.copy(planeNormal).cross(planeYAxis);
   plane = scratchPlane.fromPointNormal(planeOrigin, planeNormal);
 
   const horizonCartesian = Ellipsoid.WGS84.cartographicToCartesian(
-    [
-      degrees(lonCenter + _MathUtils.PI_OVER_TWO),
-      latitudeNearestToEquator,
-      maximumHeight,
-    ],
+    [degrees(lonCenter + _MathUtils.PI_OVER_TWO), latitudeNearestToEquator, maximumHeight],
     scratchHorizonCartesian
   );
   const projectedPoint = plane.projectPointOntoPlane(
