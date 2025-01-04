@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v4.2.0-alpha.2
+
+- chore: Fix CI workflows (#46)
+- build(deps): bump nanoid from 3.3.7 to 3.3.8 (#39)
+
 ## v4.2.0-alpha.1
 
 - feat(geospatial): Add makeOBBFromRegion() (#43) (Co-authored-by: Raimund Schnürer <raimund.schnurer@epfl.ch>)
