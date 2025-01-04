@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v4.2.0-alpha.1
+
+- feat(geospatial): Add makeOBBFromRegion() (#43) (Co-authored-by: Raimund Schnürer <raimund.schnurer@epfl.ch>)
+- chore: Bump lerna to 4.2.0-alpha.0. Fix CI. Modernize dependencies. (#41)
+- build(deps): bump vite from 4.5.3 to 4.5.5 (#34)
+- chore: Fix website build (#33)
+
 ## v4.1.0
 
 - Website home page pass
