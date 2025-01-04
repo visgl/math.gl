@@ -812,6 +812,7 @@ __metadata:
   resolution: "@math.gl/culling@workspace:modules/culling"
   dependencies:
     "@math.gl/core": "npm:4.1.0-alpha.9"
+    "@math.gl/geospatial": "npm:4.1.0-alpha.9"
     "@math.gl/types": "npm:4.1.0-alpha.9"
   languageName: unknown
   linkType: soft
@@ -844,7 +845,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/geospatial@workspace:modules/geospatial":
+"@math.gl/geospatial@npm:4.1.0-alpha.9, @math.gl/geospatial@workspace:modules/geospatial":
   version: 0.0.0-use.local
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:

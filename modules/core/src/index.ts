@@ -48,6 +48,8 @@ export {
   // math.gl global utility methods
   config,
   configure,
+  safeMod,
+  normalizeAngle,
   formatValue,
   isArray,
   clone,
@@ -58,9 +60,6 @@ export {
   // math.gl "GLSL"-style functions
   radians,
   degrees,
-  mod,
-  zeroToTwoPi,
-  negativePiToPi,
   sin,
   cos,
   tan,

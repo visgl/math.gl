@@ -96,8 +96,7 @@ export class Plane {
    * @returns {Vector3} The intersection point or undefined if there is no intersections.
    */
   intersectWithRay(ray: Ray, result?: Vector3): Vector3 {
-    if (!result)
-      result = new Vector3()
+    if (!result) result = new Vector3();
 
     const origin = ray.origin;
     const direction = ray.direction;

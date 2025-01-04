@@ -211,8 +211,7 @@ export class Matrix3 extends Matrix {
    * @returns {Vector3} The modified result parameter.
    */
   multiplyByVector(cartesian: Vector3, result?: Vector3): Vector3 {
-    if (!result)
-      result = new Vector3()
+    if (!result) result = new Vector3();
 
     const vX = cartesian.x;
     const vY = cartesian.y;
@@ -237,8 +236,7 @@ export class Matrix3 extends Matrix {
    * @returns {Matrix3} The modified result parameter.
    */
   multiplyByScale(scale: Vector3, result?: Matrix3): Matrix3 {
-    if (!result)
-      result = new Matrix3()
+    if (!result) result = new Matrix3();
 
     result[0] = this[0] * scale.x;
     result[1] = this[1] * scale.x;
