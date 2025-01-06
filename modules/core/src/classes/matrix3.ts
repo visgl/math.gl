@@ -233,24 +233,14 @@ export class Matrix3 extends Matrix {
    * Computes the product of this matrix times a (non-uniform) scale, as if the scale were a scale matrix.
    *
    * @param scale The non-uniform scale on the right-hand side.
-   * @param result The object onto which to store the result.
    * @returns The modified result parameter.
    */
-  multiplyByScale(scale: Vector3, result?: Matrix3): Matrix3 {
-    if (!result)
-      result = new Matrix3()
+  multiplyByScale(scale: Vector3): Matrix3 {
+    const x = scale.x;
+    const y = scale.y;
+    const z = scale.z;
 
-    result[0] = this[0] * scale.x;
-    result[1] = this[1] * scale.x;
-    result[2] = this[2] * scale.x;
-    result[3] = this[3] * scale.y;
-    result[4] = this[4] * scale.y;
-    result[5] = this[5] * scale.y;
-    result[6] = this[6] * scale.z;
-    result[7] = this[7] * scale.z;
-    result[8] = this[8] * scale.z;
-
-    return result;
+    return super.scale([x, x, x, y, y, y, z, z, z]);
   }
 
   rotate(radians: number): this {
