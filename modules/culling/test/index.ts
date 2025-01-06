@@ -6,6 +6,7 @@
 import './lib/algorithms/compute-eigen-decomposition.spec';
 import './lib/algorithms/bounding-sphere-from-points.spec';
 import './lib/algorithms/bounding-box-from-points.spec';
+import './lib/algorithms/bounding-box-from-region.spec';
 import './lib/algorithms/plane-ray-intersection.spec';
 
 import './lib/bounding-volumes/axis-aligned-bounding-box.spec';
