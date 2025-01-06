@@ -49,8 +49,9 @@ GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORI
 ```
 
 ### API
-For searching (without knowing the exact identifier) there was epsg.io API, which transitioned to MapTiler Coordinates API: `https://api.maptiler.com/coordinates/search/4326.json?key=YOUR_MAPTILER_KEY&exports=true`
+For searching (without knowing the exact identifier) there was epsg.io API, which transitioned to MapTiler Coordinates API. This API requires obtaining a free API key to use.
 
+Example: `https://api.maptiler.com/coordinates/search/4326.json?key=YOUR_MAPTILER_KEY&exports=true`  
 Response (slightly different from the epsg.io API response):
 
 ```json
