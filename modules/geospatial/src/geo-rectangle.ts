@@ -8,7 +8,7 @@
 import {Vector3, negativePiToPi, _MathUtils} from '@math.gl/core'
 
 /** A two dimensional region specified as longitude and latitude coordinates. */
-export class Rectangle {
+export class GeoRectangle {
     west: number;
     south: number;
     east: number;
@@ -36,7 +36,7 @@ export class Rectangle {
      * @param [result] The object onto which to store the result.
      * @returns The modified result parameter or a new Cartographic instance if none was provided.
      */
-    static center(rectangle: Rectangle, result?: Vector3) {
+    static center(rectangle: GeoRectangle, result?: Vector3) {
         if (!result)
             result = new Vector3()
 

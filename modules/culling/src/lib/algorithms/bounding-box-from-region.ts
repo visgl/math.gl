@@ -9,7 +9,7 @@ import {OrientedBoundingBox} from "../bounding-volumes/oriented-bounding-box";
 import {degrees, Vector2, Vector3, _MathUtils} from "@math.gl/core";
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved
-import {Ellipsoid, Rectangle} from '@math.gl/geospatial';
+import {Ellipsoid, GeoRectangle} from '@math.gl/geospatial';
 import {EllipsoidTangentPlane} from "../ellipsoid-tangent-plane";
 import {Plane} from "../plane";
 
@@ -61,14 +61,14 @@ export function makeOrientedBoundingBoxFromRegion (region: number[]) {
 
     let maxX: number; let maxY: number; let maxZ: number; let minX: number; let minY: number; let minZ: number; let plane: Plane;
 
-    const rectangle = new Rectangle(west, south, east, north);
-    const tangentPoint = Rectangle.center(rectangle, scratchTangentPoint);
+    const geoRectangle = new GeoRectangle(west, south, east, north);
+    const tangentPoint = GeoRectangle.center(geoRectangle, scratchTangentPoint);
     const tangentPointCartographic = new Vector3([degrees(tangentPoint.x), degrees(tangentPoint.y), 0.0]);
 
     const lonCenter = tangentPoint.x;
     const lonCenterDeg = tangentPointCartographic.x;
 
-    if (rectangle.width <= _MathUtils.PI) {
+    if (geoRectangle.width <= _MathUtils.PI) {
         const westDeg = degrees(west);
 
         const tangentPoint = Ellipsoid.WGS84.cartographicToCartesian(tangentPointCartographic);
