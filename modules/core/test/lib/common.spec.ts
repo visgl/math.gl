@@ -7,7 +7,7 @@ import test, {Test} from 'tape-promise/tape';
 import {Vector2, Vector3, Pose, _MathUtils} from '@math.gl/core';
 import {config, configure, isArray, clone, equals, exactEquals, formatValue} from '@math.gl/core';
 import {toRadians, toDegrees} from '@math.gl/core';
-import {radians, degrees, sin, cos, tan, asin, acos, atan, clamp, lerp} from '@math.gl/core';
+import {radians, degrees, mod, zeroToTwoPi, negativePiToPi, sin, cos, tan, asin, acos, atan, clamp, lerp} from '@math.gl/core';
 import {tapeEquals} from 'test/utils/tape-assertions';
 
 test('math.gl#tests', (t) => {
@@ -164,7 +164,7 @@ function runTests(t: Test, functionUnderTest: Function, testCases: any[]): void 
   for (const testCase of testCases) {
     tapeEquals(
       t,
-      functionUnderTest(testCase.input),
+      testCase.hasOwnProperty("input") ? functionUnderTest(testCase.input) : functionUnderTest(...testCase.inputs),
       testCase.result,
       `should return a value of ${JSON.stringify(testCase.result)}`
     );
@@ -204,6 +204,81 @@ test('math.gl#degrees', (t) => {
   ]);
   t.end();
 });
+
+test('math.gl#mod', (t) => {
+  runTests(t, mod, [
+    { inputs: [0.0, 1.0], result: 0.0 },
+    { inputs: [0.1, 1.0], result: 0.1 },
+    { inputs: [0.5, 1.0], result: 0.5 },
+    { inputs: [1.0, 1.0], result: 0.0 },
+    { inputs: [1.1, 1.0], result: 0.1 },
+    { inputs: [-0.0, 1.0], result: 0.0 },
+    { inputs: [-0.1, 1.0], result: 0.9 },
+    { inputs: [-0.5, 1.0], result: 0.5 },
+    { inputs: [-1.0, 1.0], result: 0.0 },
+    { inputs: [-1.1, 1.0], result: 0.9 },
+    { inputs: [0.0, -1.0], result: -0.0 },
+    { inputs: [0.1, -1.0], result: -0.9 },
+    { inputs: [0.5, -1.0], result: -0.5 },
+    { inputs: [1.0, -1.0], result: -0.0 },
+    { inputs: [1.1, -1.0], result: -0.9 },
+    { inputs: [-0.0, -1.0], result: -0.0 },
+    { inputs: [-0.1, -1.0], result: -0.1 },
+    { inputs: [-0.5, -1.0], result: -0.5 },
+    { inputs: [-1.0, -1.0], result: -0.0 },
+    { inputs: [-1.1, -1.0], result: -0.1 },
+  ]);
+  t.end();
+})
+
+test('math.gl#zeroToTwoPi', (t) => {
+  runTests(t, zeroToTwoPi, [
+    { input: 0.0, result: 0.0 },
+    { input: +Math.PI, result: +Math.PI },
+    { input: -Math.PI, result: +Math.PI },
+    { input: +Math.PI - 1.0, result: +Math.PI - 1.0 },
+    { input: -Math.PI + 1.0, result: +Math.PI + 1.0 },
+    { input: +Math.PI - 0.1, result: +Math.PI - 0.1 },
+    { input: -Math.PI + 0.1, result: +Math.PI + 0.1 },
+    { input: +Math.PI + 0.1, result: +Math.PI + 0.1 },
+    { input: -Math.PI - 0.1, result: +Math.PI - 0.1 },
+    { input: +2.0 * Math.PI, result: 2.0 * Math.PI },
+    { input: -2.0 * Math.PI, result: 2.0 * Math.PI },
+    { input: +3.0 * Math.PI, result: Math.PI },
+    { input: -3.0 * Math.PI, result: Math.PI },
+    { input: +4.0 * Math.PI, result: 2.0 * Math.PI },
+    { input: -4.0 * Math.PI, result: 2.0 * Math.PI },
+    { input: +5.0 * Math.PI, result: Math.PI },
+    { input: -5.0 * Math.PI, result: Math.PI },
+    { input: +6.0 * Math.PI, result: 2.0 * Math.PI },
+    { input: -6.0 * Math.PI, result: 2.0 * Math.PI },
+  ]);
+  t.end();
+})
+
+test('math.gl#negativePiToPi', (t) => {
+  runTests(t, negativePiToPi, [
+    { input: 0.0, result: 0.0 },
+    { input: +Math.PI, result: +Math.PI },
+    { input: -Math.PI, result: -Math.PI },
+    { input: +Math.PI - 1.0, result: +Math.PI - 1.0 },
+    { input: -Math.PI + 1.0, result: -Math.PI + 1.0 },
+    { input: +Math.PI - 0.1, result: +Math.PI - 0.1 },
+    { input: -Math.PI + 0.1, result: -Math.PI + 0.1 },
+    { input: +2.0 * Math.PI, result: 0.0 },
+    { input: -2.0 * Math.PI, result: 0.0 },
+    { input: +3.0 * Math.PI, result: Math.PI },
+    { input: -3.0 * Math.PI, result: Math.PI },
+    { input: +4.0 * Math.PI, result: 0.0 },
+    { input: -4.0 * Math.PI, result: 0.0 },
+    { input: +5.0 * Math.PI, result: Math.PI },
+    { input: -5.0 * Math.PI, result: Math.PI },
+    { input: +6.0 * Math.PI, result: 0.0 },
+    { input: -6.0 * Math.PI, result: 0.0 },
+  ]);
+  t.end();
+})
+
 
 test('math.gl#sin', (t) => {
   runTests(t, sin, [
