@@ -5,6 +5,7 @@
 
 import {NumericArray, NumericArray9} from '@math.gl/types';
 import {Matrix} from './base/matrix';
+import {Vector3} from './vector3';
 import {checkVector} from '../lib/validators';
 
 import {vec4_transformMat3} from '../lib/gl-matrix-extras';
@@ -200,6 +201,54 @@ export class Matrix3 extends Matrix {
   multiplyRight(a: NumericArray): this {
     mat3_multiply(this, this, a);
     return this.check();
+  }
+
+  /**
+   * Computes the product of this matrix and a column vector.
+   *
+   * @param {Vector3} cartesian The column.
+   * @param {Vector3} result The object onto which to store the result.
+   * @returns {Vector3} The modified result parameter.
+   */
+  multiplyByVector(cartesian: Vector3, result?: Vector3): Vector3 {
+    if (!result) result = new Vector3();
+
+    const vX = cartesian.x;
+    const vY = cartesian.y;
+    const vZ = cartesian.z;
+
+    const x = this[0] * vX + this[3] * vY + this[6] * vZ;
+    const y = this[1] * vX + this[4] * vY + this[7] * vZ;
+    const z = this[2] * vX + this[5] * vY + this[8] * vZ;
+
+    result.x = x;
+    result.y = y;
+    result.z = z;
+
+    return result;
+  }
+
+  /**
+   * Computes the product of this matrix times a (non-uniform) scale, as if the scale were a scale matrix.
+   *
+   * @param {Vector3} scale The non-uniform scale on the right-hand side.
+   * @param {Matrix3} result The object onto which to store the result.
+   * @returns {Matrix3} The modified result parameter.
+   */
+  multiplyByScale(scale: Vector3, result?: Matrix3): Matrix3 {
+    if (!result) result = new Matrix3();
+
+    result[0] = this[0] * scale.x;
+    result[1] = this[1] * scale.x;
+    result[2] = this[2] * scale.x;
+    result[3] = this[3] * scale.y;
+    result[4] = this[4] * scale.y;
+    result[5] = this[5] * scale.y;
+    result[6] = this[6] * scale.z;
+    result[7] = this[7] * scale.z;
+    result[8] = this[8] * scale.z;
+
+    return result;
   }
 
   rotate(radians: number): this {

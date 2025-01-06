@@ -8,12 +8,12 @@
 /* eslint-disable */
 import {Vector3, Matrix4, assert, equals, _MathUtils, NumericArray, vec3} from '@math.gl/core';
 
-import {WGS84_RADIUS_X, WGS84_RADIUS_Y, WGS84_RADIUS_Z} from '../constants';
-import {fromCartographicToRadians, toCartographicFromRadians} from '../type-utils';
+import {WGS84_RADIUS_X, WGS84_RADIUS_Y, WGS84_RADIUS_Z} from './constants';
+import {fromCartographicToRadians, toCartographicFromRadians} from './type-utils';
 
-import type {AxisDirection} from './helpers/ellipsoid-transform';
-import {localFrameToFixedFrame} from './helpers/ellipsoid-transform';
-import {scaleToGeodeticSurface} from './helpers/scale-to-geodetic-surface';
+import type {AxisDirection} from './ellipsoid-helpers/ellipsoid-transform';
+import {localFrameToFixedFrame} from './ellipsoid-helpers/ellipsoid-transform';
+import {scaleToGeodeticSurface} from './ellipsoid-helpers/scale-to-geodetic-surface';
 
 const scratchVector = new Vector3();
 const scratchNormal = new Vector3();

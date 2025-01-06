@@ -7,6 +7,7 @@
 import type {NumericArray} from '@math.gl/types';
 
 import type {MathArray} from '../classes/base/math-array';
+import {EPSILON14, TWO_PI, PI} from './math-utils';
 
 const RADIANS_TO_DEGREES = (1 / Math.PI) * 180;
 const DEGREES_TO_RADIANS = (1 / 180) * Math.PI;
@@ -120,6 +121,72 @@ export function degrees(
   result?: NumericArray
 ): number | NumericArray {
   return map(radians, (radians) => radians * RADIANS_TO_DEGREES, result);
+}
+
+/**
+ * The modulo operation that also works for negative dividends.
+ *
+ * @param m The dividend.
+ * @param n The divisor.
+ * @returns The remainder.
+ */
+export function safeMod(m: number, n: number): number {
+  if (Math.sign(m) === Math.sign(n) && Math.abs(m) < Math.abs(n)) {
+    return m;
+  }
+
+  return ((m % n) + n) % n;
+}
+
+/**
+ * Produces an angle restricted to its equivalent in a normalized range
+ *
+ * @param angle in radians
+ * @param range 'zero-to-two-pi' - in the range 0 <= angle <= 2PI, | 'negative-pi-to-pi' -  -Pi <= angle <= Pi
+ * @returns The angle in the range [0, <code>TWO_PI</code>] or  [<code>-PI</code>, <code>PI</code>]..
+ */
+export function normalizeAngle(
+  angle: number,
+  range: 'zero-to-two-pi' | 'negative-pi-to-pi'
+): number {
+  switch (range) {
+    case 'negative-pi-to-pi':
+      return negativePiToPi(angle);
+    case 'zero-to-two-pi':
+      return zeroToTwoPi(angle);
+    default:
+      return angle;
+  }
+}
+
+/**
+ * Produces an angle in the range 0 <= angle <= 2Pi which is equivalent to the provided angle.
+ *
+ * @param angle in radians
+ * @returns The angle in the range [0, <code>TWO_PI</code>].
+ */
+function zeroToTwoPi(angle: number): number {
+  if (angle >= 0 && angle <= TWO_PI) {
+    return angle;
+  }
+  const remainder = safeMod(angle, TWO_PI);
+  if (Math.abs(remainder) < EPSILON14 && Math.abs(angle) > EPSILON14) {
+    return TWO_PI;
+  }
+  return remainder;
+}
+
+/**
+ * Produces an angle in the range -Pi <= angle <= Pi which is equivalent to the provided angle.
+ *
+ * @param angle in radians
+ * @returns The angle in the range [<code>-PI</code>, <code>PI</code>].
+ */
+function negativePiToPi(angle: number): number {
+  if (angle >= -PI && angle <= PI) {
+    return angle;
+  }
+  return zeroToTwoPi(angle + PI) - PI;
 }
 
 /**

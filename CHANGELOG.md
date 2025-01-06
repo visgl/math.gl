@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## v4.2.0-alpha.3
+
+- chore: Fix CI release action (#47)
+
+## v4.2.0-alpha.2
+
+- chore: Fix CI workflows (#46)
+- build(deps): bump nanoid from 3.3.7 to 3.3.8 (#39)
+
+## v4.2.0-alpha.1
+
+- feat(geospatial): Add makeOBBFromRegion() (#43) (Co-authored-by: Raimund Schnürer <raimund.schnurer@epfl.ch>)
+- chore: Bump lerna to 4.2.0-alpha.0. Fix CI. Modernize dependencies. (#41)
+- build(deps): bump vite from 4.5.3 to 4.5.5 (#34)
+- chore: Fix website build (#33)
+
 ## v4.1.0
 
 - Website home page pass

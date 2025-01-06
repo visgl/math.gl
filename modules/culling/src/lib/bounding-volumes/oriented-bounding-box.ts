@@ -7,9 +7,10 @@
 
 import {NumericArray} from '@math.gl/types';
 import {Vector3, Matrix3, Matrix4, Quaternion} from '@math.gl/core';
+
 import type {BoundingVolume} from './bounding-volume';
 import {BoundingSphere} from './bounding-sphere';
-import type {Plane} from '../plane';
+import {Plane} from '../plane';
 import {INTERSECTION} from '../../constants';
 
 const scratchVector3 = new Vector3();
