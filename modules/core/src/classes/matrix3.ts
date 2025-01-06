@@ -204,32 +204,6 @@ export class Matrix3 extends Matrix {
   }
 
   /**
-   * Computes the product of this matrix and a column vector.
-   *
-   * @param cartesian The column.
-   * @param result The object onto which to store the result.
-   * @returns The modified result parameter.
-   */
-  multiplyByVector(cartesian: Vector3, result?: Vector3): Vector3 {
-    if (!result)
-      result = new Vector3()
-
-    const vX = cartesian.x;
-    const vY = cartesian.y;
-    const vZ = cartesian.z;
-
-    const x = this[0] * vX + this[3] * vY + this[6] * vZ;
-    const y = this[1] * vX + this[4] * vY + this[7] * vZ;
-    const z = this[2] * vX + this[5] * vY + this[8] * vZ;
-
-    result.x = x;
-    result.y = y;
-    result.z = z;
-
-    return result;
-  }
-
-  /**
    * Computes the product of this matrix times a (non-uniform) scale, as if the scale were a scale matrix.
    *
    * @param scale The non-uniform scale on the right-hand side.

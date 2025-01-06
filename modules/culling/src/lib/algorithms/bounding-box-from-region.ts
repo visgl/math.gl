@@ -244,7 +244,7 @@ function fromPlaneExtents(
     centerOffset.x = (minimumX + maximumX) / 2.0;
     centerOffset.y = (minimumY + maximumY) / 2.0;
     centerOffset.z = (minimumZ + maximumZ) / 2.0;
-    centerOffset = halfAxes.multiplyByVector(centerOffset, scratchOffset);
+    centerOffset = halfAxes.transform(centerOffset, scratchOffset) as Vector3;
 
     const scale = scratchScale;
     scale.x = (maximumX - minimumX) / 2.0;
