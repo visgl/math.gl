@@ -6,8 +6,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 /* eslint-disable */
-import {Vector3, equals, assert, NumericArray, _MathUtils} from '@math.gl/core';
-import {Ray} from './ray';
+import {Vector3, equals, assert, NumericArray} from '@math.gl/core';
 
 const scratchPosition = new Vector3();
 const scratchNormal = new Vector3();
@@ -86,35 +85,5 @@ export class Plane {
     const scaledNormal = scratchNormal.copy(this.normal).scale(pointDistance);
 
     return scratchPoint.subtract(scaledNormal).to(result);
-  }
-
-  /**
-   * Computes the intersection of a ray and this plane.
-   *
-   * @param ray The ray.
-   * @param [result] The object onto which to store the result.
-   * @returns The intersection point or undefined if there is no intersections.
-   */
-  intersectWithRay(ray: Ray, result?: Vector3): Vector3 {
-    if (!result)
-      result = new Vector3()
-
-    const origin = ray.origin;
-    const direction = ray.direction;
-    const normal = this.normal;
-    const denominator = normal.dot(direction);
-
-    if (Math.abs(denominator) < _MathUtils.EPSILON15) {
-      return undefined;
-    }
-
-    const t = (-this.distance - normal.dot(origin)) / denominator;
-
-    if (t < 0) {
-      return undefined;
-    }
-
-    result = result.copy(direction).multiplyByScalar(t);
-    return origin.add(result);
   }
 }

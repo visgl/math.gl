@@ -20,4 +20,6 @@ export {
   makeAxisAlignedBoundingBoxFromPoints,
   makeOrientedBoundingBoxFromPoints
 } from './lib/algorithms/bounding-box-from-points';
+export {makeOrientedBoundingBoxFromRegion} from "./lib/algorithms/bounding-box-from-region";
+export {intersectPlaneWithRay} from "./lib/algorithms/plane-ray-intersection";
 export {computeEigenDecomposition} from './lib/algorithms/compute-eigen-decomposition';

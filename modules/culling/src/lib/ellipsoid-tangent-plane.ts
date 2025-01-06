@@ -11,6 +11,7 @@ import {Vector2, Vector3, Matrix4} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
 import {Plane} from './plane';
 import {Ray} from './ray';
+import {intersectPlaneWithRay} from "./algorithms/plane-ray-intersection";
 
 const scratchOrigin = new Vector3();
 const scratchCart3 = new Vector3();
@@ -64,11 +65,11 @@ export class EllipsoidTangentPlane {
         scratchProjectPointOntoPlaneRay.origin = cartesian;
         scratchProjectPointOntoPlaneRay.direction = scratchDirection.copy(plane.normal);
 
-        let intersectionPoint = plane.intersectWithRay(ray, scratchProjectPointOntoPlaneCartesian3);
+        let intersectionPoint = intersectPlaneWithRay(plane, ray, scratchProjectPointOntoPlaneCartesian3);
 
         if (!intersectionPoint) {
             ray.direction = ray.direction.negate();
-            intersectionPoint = plane.intersectWithRay(ray, scratchProjectPointOntoPlaneCartesian3);
+            intersectionPoint = intersectPlaneWithRay(plane, ray, scratchProjectPointOntoPlaneCartesian3);
         }
 
         const v = intersectionPoint.subtract(this._origin);
