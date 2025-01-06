@@ -206,9 +206,9 @@ export class Matrix3 extends Matrix {
   /**
    * Computes the product of this matrix and a column vector.
    *
-   * @param {Vector3} cartesian The column.
-   * @param {Vector3} result The object onto which to store the result.
-   * @returns {Vector3} The modified result parameter.
+   * @param cartesian The column.
+   * @param result The object onto which to store the result.
+   * @returns The modified result parameter.
    */
   multiplyByVector(cartesian: Vector3, result?: Vector3): Vector3 {
     if (!result)
@@ -232,9 +232,9 @@ export class Matrix3 extends Matrix {
   /**
    * Computes the product of this matrix times a (non-uniform) scale, as if the scale were a scale matrix.
    *
-   * @param {Vector3} scale The non-uniform scale on the right-hand side.
-   * @param {Matrix3} result The object onto which to store the result.
-   * @returns {Matrix3} The modified result parameter.
+   * @param scale The non-uniform scale on the right-hand side.
+   * @param result The object onto which to store the result.
+   * @returns The modified result parameter.
    */
   multiplyByScale(scale: Vector3, result?: Matrix3): Matrix3 {
     if (!result)

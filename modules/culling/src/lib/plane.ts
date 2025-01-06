@@ -91,9 +91,9 @@ export class Plane {
   /**
    * Computes the intersection of a ray and this plane.
    *
-   * @param {Ray} ray The ray.
-   * @param {Vector3} [result] The object onto which to store the result.
-   * @returns {Vector3} The intersection point or undefined if there is no intersections.
+   * @param ray The ray.
+   * @param [result] The object onto which to store the result.
+   * @returns The intersection point or undefined if there is no intersections.
    */
   intersectWithRay(ray: Ray, result?: Vector3): Vector3 {
     if (!result)

@@ -15,8 +15,8 @@ export class Ray {
     /**
      * Creates a new ray that extends infinitely from the provided origin in the provided direction.
      *
-     * @param {Vector3} [origin=Vector3] The origin of the ray.
-     * @param {Vector3} [direction=Vector3] The direction of the ray.
+     * @param [origin=Vector3] The origin of the ray.
+     * @param [direction=Vector3] The direction of the ray.
      */
     constructor(origin?: Vector3, direction?: Vector3) {
         if (origin)

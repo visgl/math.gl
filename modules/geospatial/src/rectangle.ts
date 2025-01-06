@@ -17,12 +17,12 @@ export class Rectangle {
     /**
      * Creates a new two dimensional region specified as longitude and latitude coordinates.
      *
-     * @param {number} [west=0.0] The westernmost longitude, in radians, in the range [-Pi, Pi].
-     * @param {number} [south=0.0] The southernmost latitude, in radians, in the range [-Pi/2, Pi/2].
-     * @param {number} [east=0.0] The easternmost longitude, in radians, in the range [-Pi, Pi].
-     * @param {number} [north=0.0] The northernmost latitude, in radians, in the range [-Pi/2, Pi/2].
+     * @param [west=0.0] The westernmost longitude, in radians, in the range [-Pi, Pi].
+     * @param [south=0.0] The southernmost latitude, in radians, in the range [-Pi/2, Pi/2].
+     * @param [east=0.0] The easternmost longitude, in radians, in the range [-Pi, Pi].
+     * @param [north=0.0] The northernmost latitude, in radians, in the range [-Pi/2, Pi/2].
      */
-    constructor(west: number, south: number, east: number, north: number) {
+    constructor(west: number = 0.0, south: number = 0.0, east: number = 0.0, north: number = 0.0) {
         this.west = west;
         this.south = south;
         this.east = east;
@@ -32,9 +32,9 @@ export class Rectangle {
     /**
      * Computes the center of a rectangle.
      *
-     * @param {Rectangle} rectangle The rectangle for which to find the center
-     * @param {Cartographic} [result] The object onto which to store the result.
-     * @returns {Cartographic} The modified result parameter or a new Cartographic instance if none was provided.
+     * @param rectangle The rectangle for which to find the center
+     * @param [result] The object onto which to store the result.
+     * @returns The modified result parameter or a new Cartographic instance if none was provided.
      */
     static center(rectangle: Rectangle, result?: Vector3) {
         if (!result)

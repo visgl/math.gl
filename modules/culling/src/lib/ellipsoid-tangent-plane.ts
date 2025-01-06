@@ -32,7 +32,7 @@ export class EllipsoidTangentPlane {
      * Creates a new plane tangent to the WGS84 ellipsoid at the provided origin.
      * If origin is not on the surface of the ellipsoid, it's surface projection will be used.
      *
-     * @param {Cartesian3} origin The point on the surface of the ellipsoid where the tangent plane touches.
+     * @param origin The point on the surface of the ellipsoid where the tangent plane touches.
      */
     constructor(origin: number[]) {
         origin = Ellipsoid.WGS84.scaleToGeodeticSurface(origin, scratchOrigin);
@@ -50,9 +50,9 @@ export class EllipsoidTangentPlane {
     /**
      * Computes the projection of the provided 3D position onto the 2D plane, along the plane normal.
      *
-     * @param {Vector3} cartesian The point to project.
-     * @param {Vector2} [result] The object onto which to store the result.
-     * @returns {Vector2} The modified result parameter or a new Cartesian2 instance if none was provided.
+     * @param cartesian The point to project.
+     * @param [result] The object onto which to store the result.
+     * @returns The modified result parameter or a new Cartesian2 instance if none was provided.
      */
     projectPointToNearestOnPlane (cartesian: Vector3, result?: Vector2): Vector2 {
         if (!result)

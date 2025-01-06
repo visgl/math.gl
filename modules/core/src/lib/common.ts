@@ -127,9 +127,9 @@ export function degrees(
 /**
  * The modulo operation that also works for negative dividends.
  *
- * @param {number} m The dividend.
- * @param {number} n The divisor.
- * @returns {number} The remainder.
+ * @param m The dividend.
+ * @param n The divisor.
+ * @returns The remainder.
  */
 export function mod(m: number, n: number): number {
   if (Math.sign(m) === Math.sign(n) && Math.abs(m) < Math.abs(n)) {
@@ -142,8 +142,8 @@ export function mod(m: number, n: number): number {
 /**
  * Produces an angle in the range 0 <= angle <= 2Pi which is equivalent to the provided angle.
  *
- * @param {number} angle in radians
- * @returns {number} The angle in the range [0, <code>TWO_PI</code>].
+ * @param angle in radians
+ * @returns The angle in the range [0, <code>TWO_PI</code>].
  */
 export function zeroToTwoPi(angle: number): number {
   if (angle >= 0 && angle <= TWO_PI) {
@@ -162,8 +162,8 @@ export function zeroToTwoPi(angle: number): number {
 /**
  * Produces an angle in the range -Pi <= angle <= Pi which is equivalent to the provided angle.
  *
- * @param {number} angle in radians
- * @returns {number} The angle in the range [<code>-PI</code>, <code>PI</code>].
+ * @param angle in radians
+ * @returns The angle in the range [<code>-PI</code>, <code>PI</code>].
  */
 export function negativePiToPi(angle: number): number {
   if (angle >= -PI && angle <= PI) {

@@ -138,9 +138,9 @@ export class OrientedBoundingBox implements BoundingVolume {
    * Computes an OrientedBoundingBox that bounds a region on the surface of the WGS84 ellipsoid.
    * There are no guarantees about the orientation of the bounding box.
    *
-   * @param {number[]} region The cartographic region ([west, south, east, north, minimum height, maximum height])
+   * @param region The cartographic region ([west, south, east, north, minimum height, maximum height])
    *                          on the surface of the ellipsoid.
-   * @returns {OrientedBoundingBox} The modified result parameter or a new OrientedBoundingBox instance if none was provided.
+   * @returns The modified result parameter or a new OrientedBoundingBox instance if none was provided.
    */
   // eslint-disable-next-line max-statements
   fromRegion(region: number[]): OrientedBoundingBox {
@@ -149,7 +149,7 @@ export class OrientedBoundingBox implements BoundingVolume {
     const northDeg = degrees(north);
     const southDeg = degrees(south);
 
-    let maxX: number, maxY: number, maxZ: number, minX: number, minY: number, minZ: number, plane: Plane;
+    let maxX: number; let maxY: number; let maxZ: number; let minX: number; let minY: number; let minZ: number; let plane: Plane;
 
     const rectangle = new Rectangle(west, south, east, north);
     const tangentPoint = Rectangle.center(rectangle, scratchTangentPoint);
