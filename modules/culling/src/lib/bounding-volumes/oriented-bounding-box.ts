@@ -326,7 +326,7 @@ export class OrientedBoundingBox implements BoundingVolume {
 
   /**
    * Applies a 4x4 affine transformation matrix to a bounding sphere.
-   * @param transform The transformation matrix to apply to the bounding sphere.
+   * @param transformation The transformation matrix to apply to the bounding sphere.
    * @returns itself, i.e. the modified BoundingVolume.
    */
   transform(transformation: readonly number[]): this {
