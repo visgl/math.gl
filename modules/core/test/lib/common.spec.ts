@@ -7,7 +7,7 @@ import test, {Test} from 'tape-promise/tape';
 import {Vector2, Vector3, Pose, _MathUtils} from '@math.gl/core';
 import {config, configure, isArray, clone, equals, exactEquals, formatValue} from '@math.gl/core';
 import {toRadians, toDegrees} from '@math.gl/core';
-import {radians, degrees, mod, zeroToTwoPi, negativePiToPi, sin, cos, tan, asin, acos, atan, clamp, lerp} from '@math.gl/core';
+import {radians, degrees, safeMod, normalizeAngle, sin, cos, tan, asin, acos, atan, clamp, lerp} from '@math.gl/core';
 import {tapeEquals} from 'test/utils/tape-assertions';
 
 test('math.gl#tests', (t) => {
@@ -205,8 +205,8 @@ test('math.gl#degrees', (t) => {
   t.end();
 });
 
-test('math.gl#mod', (t) => {
-  runTests(t, mod, [
+test('math.gl#safeMod', (t) => {
+  runTests(t, safeMod, [
     { inputs: [0.0, 1.0], result: 0.0 },
     { inputs: [0.1, 1.0], result: 0.1 },
     { inputs: [0.5, 1.0], result: 0.5 },
@@ -231,7 +231,9 @@ test('math.gl#mod', (t) => {
   t.end();
 })
 
-test('math.gl#zeroToTwoPi', (t) => {
+test('math.gl#normalizeAngle zero-to-two-pi', (t) => {
+  const zeroToTwoPi = angle => normalizeAngle(angle, 'zero-to-two-pi');
+
   runTests(t, zeroToTwoPi, [
     { input: 0.0, result: 0.0 },
     { input: +Math.PI, result: +Math.PI },
@@ -256,7 +258,9 @@ test('math.gl#zeroToTwoPi', (t) => {
   t.end();
 })
 
-test('math.gl#negativePiToPi', (t) => {
+test('math.gl#normalizeAngle negative-pi-to-pi', (t) => {
+  const negativePiToPi = angle => normalizeAngle(angle, 'negative-pi-to-pi');
+
   runTests(t, negativePiToPi, [
     { input: 0.0, result: 0.0 },
     { input: +Math.PI, result: +Math.PI },
