@@ -6,7 +6,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 import {Vector2, Vector3, Matrix4} from '@math.gl/core';
-import {Plane, Ray} from '@math.gl/culling';
+import {Plane, Ray, intersectPlaneWithRay} from '@math.gl/culling';
 import {Ellipsoid} from './ellipsoid';
 
 const scratchOrigin = new Vector3();
@@ -20,79 +20,80 @@ const scratchDirection = new Vector3();
 
 /** A plane tangent to the WGS84 ellipsoid at the provided origin */
 export class EllipsoidTangentPlane {
-  private _origin: Vector3;
-  private _xAxis: Vector3;
-  private _yAxis: Vector3;
-  private _plane: Plane;
+    private _origin: Vector3;
+    private _xAxis: Vector3;
+    private _yAxis: Vector3;
+    private _plane: Plane;
 
-  /**
-   * Creates a new plane tangent to the WGS84 ellipsoid at the provided origin.
-   * If origin is not on the surface of the ellipsoid, it's surface projection will be used.
-   *
-   * @param {Cartesian3} origin The point on the surface of the ellipsoid where the tangent plane touches.
-   */
-  constructor(origin: number[]) {
-    origin = Ellipsoid.WGS84.scaleToGeodeticSurface(origin, scratchOrigin);
+    /**
+     * Creates a new plane tangent to the WGS84 ellipsoid at the provided origin.
+     * If origin is not on the surface of the ellipsoid, it's surface projection will be used.
+     *
+     * @param origin The point on the surface of the ellipsoid where the tangent plane touches.
+     */
+    constructor(origin: number[]) {
+        origin = Ellipsoid.WGS84.scaleToGeodeticSurface(origin, scratchOrigin);
 
-    const eastNorthUp = Ellipsoid.WGS84.eastNorthUpToFixedFrame(origin, scratchEastNorthUp);
+        const eastNorthUp = Ellipsoid.WGS84.eastNorthUpToFixedFrame(origin, scratchEastNorthUp);
 
-    this._origin = origin as Vector3;
-    this._xAxis = new Vector3(scratchCart3.from(eastNorthUp.getColumn(0)));
-    this._yAxis = new Vector3(scratchCart3.from(eastNorthUp.getColumn(1)));
-    const normal = new Vector3(scratchCart3.from(eastNorthUp.getColumn(2)));
+        this._origin = origin as Vector3;
+        this._xAxis = new Vector3(scratchCart3.from(eastNorthUp.getColumn(0)));
+        this._yAxis = new Vector3(scratchCart3.from(eastNorthUp.getColumn(1)));
+        const normal = new Vector3(scratchCart3.from(eastNorthUp.getColumn(2)));
 
-    this._plane = scratchPlane.fromPointNormal(origin, normal);
-  }
-
-  /**
-   * Computes the projection of the provided 3D position onto the 2D plane, along the plane normal.
-   *
-   * @param {Vector3} cartesian The point to project.
-   * @param {Vector2} [result] The object onto which to store the result.
-   * @returns {Vector2} The modified result parameter or a new Cartesian2 instance if none was provided.
-   */
-  projectPointToNearestOnPlane(cartesian: Vector3, result?: Vector2): Vector2 {
-    if (!result) result = new Vector2();
-
-    const plane = this._plane;
-
-    const ray = scratchProjectPointOntoPlaneRay;
-    scratchProjectPointOntoPlaneRay.origin = cartesian;
-    scratchProjectPointOntoPlaneRay.direction = scratchDirection.copy(plane.normal);
-
-    let intersectionPoint = plane.intersectWithRay(ray, scratchProjectPointOntoPlaneCartesian3);
-
-    if (!intersectionPoint) {
-      ray.direction = ray.direction.negate();
-      intersectionPoint = plane.intersectWithRay(ray, scratchProjectPointOntoPlaneCartesian3);
+        this._plane = scratchPlane.fromPointNormal(origin, normal);
     }
 
-    const v = intersectionPoint.subtract(this._origin);
-    const x = this._xAxis.dot(v);
-    const y = this._yAxis.dot(v);
+    /**
+     * Computes the projection of the provided 3D position onto the 2D plane, along the plane normal.
+     *
+     * @param cartesian The point to project.
+     * @param [result] The object onto which to store the result.
+     * @returns The modified result parameter or a new Cartesian2 instance if none was provided.
+     */
+    projectPointToNearestOnPlane (cartesian: Vector3, result?: Vector2): Vector2 {
+        if (!result)
+            result = new Vector2();
 
-    result.x = x;
-    result.y = y;
-    return result;
-  }
+        const plane = this._plane;
 
-  get plane() {
-    return this._plane;
-  }
+        const ray = scratchProjectPointOntoPlaneRay;
+        scratchProjectPointOntoPlaneRay.origin = cartesian;
+        scratchProjectPointOntoPlaneRay.direction = scratchDirection.copy(plane.normal);
 
-  get origin() {
-    return this._origin;
-  }
+        let intersectionPoint = intersectPlaneWithRay(plane, ray, scratchProjectPointOntoPlaneCartesian3);
 
-  get xAxis() {
-    return this._xAxis;
-  }
+        if (!intersectionPoint) {
+            ray.direction = ray.direction.negate();
+            intersectionPoint = intersectPlaneWithRay(plane, ray, scratchProjectPointOntoPlaneCartesian3);
+        }
 
-  get yAxis() {
-    return this._yAxis;
-  }
+        const v = intersectionPoint.subtract(this._origin);
+        const x = this._xAxis.dot(v);
+        const y = this._yAxis.dot(v);
 
-  get zAxis() {
-    return this._plane.normal;
-  }
+        result.x = x;
+        result.y = y;
+        return result;
+    }
+
+    get plane() {
+        return this._plane;
+    }
+
+    get origin() {
+        return this._origin;
+    }
+
+    get xAxis() {
+        return this._xAxis;
+    }
+
+    get yAxis() {
+        return this._yAxis;
+    }
+
+    get zAxis() {
+        return this._plane.normal;
+    }
 }
