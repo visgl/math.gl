@@ -9,8 +9,7 @@ import {OrientedBoundingBox} from "../bounding-volumes/oriented-bounding-box";
 import {degrees, Vector2, Vector3, _MathUtils} from "@math.gl/core";
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved
-import {Ellipsoid, GeoRectangle} from '@math.gl/geospatial';
-import {EllipsoidTangentPlane} from "../ellipsoid-tangent-plane";
+import {Ellipsoid, GeoRectangle, EllipsoidTangentPlane} from '@math.gl/geospatial';
 import {Plane} from "../plane";
 
 const scratchTangentPoint = new Vector3();
