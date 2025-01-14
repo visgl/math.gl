@@ -4,5 +4,6 @@
 
 import './type-utils.spec';
 import './geo-rectangle.spec';
+import './ellipsoid-tangent-plane.spec'
 import './ellipsoid/ellipsoid.spec';
 import './ellipsoid/ellipsoid-transform.spec';

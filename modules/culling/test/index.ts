@@ -16,7 +16,6 @@ import './lib/bounding-volumes/oriented-bounding-box.spec';
 import './lib/plane.spec';
 import './lib/ray.spec';
 import './lib/culling-volume.spec';
-import './lib/ellipsoid-tangent-plane.spec';
 
 import './lib/perspective-off-center-frustum.spec';
 import './lib/perspective-frustum.spec';

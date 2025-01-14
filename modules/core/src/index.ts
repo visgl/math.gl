@@ -60,9 +60,6 @@ export {
   // math.gl "GLSL"-style functions
   radians,
   degrees,
-  mod,
-  zeroToTwoPi,
-  negativePiToPi,
   sin,
   cos,
   tan,
