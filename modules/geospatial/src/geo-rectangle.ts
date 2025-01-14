@@ -5,7 +5,7 @@
 // This file is derived from the Cesium library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import {Vector3, negativePiToPi, _MathUtils} from '@math.gl/core'
+import {Vector3, normalizeAngle, _MathUtils} from '@math.gl/core'
 
 /** A two dimensional region specified as longitude and latitude coordinates. */
 export class GeoRectangle {
@@ -47,7 +47,7 @@ export class GeoRectangle {
             east += _MathUtils.TWO_PI;
         }
 
-        const longitude = negativePiToPi((west + east) * 0.5);
+        const longitude = normalizeAngle((west + east) * 0.5, 'negative-pi-to-pi');
         const latitude = (rectangle.south + rectangle.north) * 0.5;
 
         result.x = longitude;
