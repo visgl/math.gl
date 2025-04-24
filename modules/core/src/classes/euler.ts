@@ -289,23 +289,7 @@ export class Euler extends MathArray {
 
   // TODO - move to Quaternion
   getQuaternion(): Quaternion {
-    const q = new Quaternion();
-    switch (this[3]) {
-      case RotationOrder.XYZ:
-        return q.rotateX(this[0]).rotateY(this[1]).rotateZ(this[2]);
-      case RotationOrder.YXZ:
-        return q.rotateY(this[0]).rotateX(this[1]).rotateZ(this[2]);
-      case RotationOrder.ZXY:
-        return q.rotateZ(this[0]).rotateX(this[1]).rotateY(this[2]);
-      case RotationOrder.ZYX:
-        return q.rotateZ(this[0]).rotateY(this[1]).rotateX(this[2]);
-      case RotationOrder.YZX:
-        return q.rotateY(this[0]).rotateZ(this[1]).rotateX(this[2]);
-      case RotationOrder.XZY:
-        return q.rotateX(this[0]).rotateZ(this[1]).rotateY(this[2]);
-      default:
-        throw new Error(ERR_UNKNOWN_ORDER);
-    }
+    return new Quaternion().fromEuler(this);
   }
 
   // INTERNAL METHODS

@@ -31,6 +31,7 @@ import {
 } from '../gl-matrix/quat';
 // @ts-ignore gl-matrix types...
 import {transformQuat as vec4_transformQuat} from '../gl-matrix/vec4';
+import { Euler } from './euler';
 
 const IDENTITY_QUATERNION = [0, 0, 0, 1] as const;
 
@@ -80,6 +81,31 @@ export class Quaternion extends MathArray {
   fromMatrix3(m: Readonly<NumericArray>): this {
     quat_fromMat3(this, m);
     return this.check();
+  }
+
+  /**
+   * Creates a quaternion from the given Euler.
+   * @param euler
+   * @returns
+   */
+  fromEuler(euler: Euler): this {
+    this.identity();
+    switch (euler.order) {
+      case Euler.XYZ:
+        return this.rotateX(euler[0]).rotateY(euler[1]).rotateZ(euler[2]);
+      case Euler.YXZ:
+        return this.rotateY(euler[0]).rotateX(euler[1]).rotateZ(euler[2]);
+      case Euler.ZXY:
+        return this.rotateZ(euler[0]).rotateX(euler[1]).rotateY(euler[2]);
+      case Euler.ZYX:
+        return this.rotateZ(euler[0]).rotateY(euler[1]).rotateX(euler[2]);
+      case Euler.YZX:
+        return this.rotateY(euler[0]).rotateZ(euler[1]).rotateX(euler[2]);
+      case Euler.XZY:
+        return this.rotateX(euler[0]).rotateZ(euler[1]).rotateY(euler[2]);
+      default:
+        throw new Error('Unknown Euler angle order');
+    }
   }
 
   fromAxisRotation(axis: Readonly<NumericArray>, rad: number): this {
@@ -283,10 +309,10 @@ export class Quaternion extends MathArray {
     arg0:
       | Readonly<NumericArray>
       | {
-          start: Readonly<NumericArray>;
-          target: Readonly<NumericArray>;
-          ratio: number;
-        },
+        start: Readonly<NumericArray>;
+        target: Readonly<NumericArray>;
+        ratio: number;
+      },
     arg1?: Readonly<NumericArray> | number,
     arg2?: number
   ): this {
