@@ -9,6 +9,7 @@ import type {NumericArray} from '@math.gl/core';
 
 import {
   getPolygonSignedArea,
+  getPolygonSignedAreaFlatFast,
   forEachSegmentInPolygon,
   modifyPolygonWindingDirection,
   getPolygonSignedAreaPoints,
@@ -46,10 +47,12 @@ export class Polygon {
    * Returns signed area of the polygon.
    * @returns Signed area of the polygon.
    */
-  getSignedArea(): number {
-    if (this.isFlatArray) return getPolygonSignedArea(this.points as NumericArray, this.options);
-
-    return getPolygonSignedAreaPoints(this.points as number[][], this.options);
+  getSignedArea(fast?: boolean): number {
+    return this.isFlatArray
+      ? fast
+        ? getPolygonSignedAreaFlatFast(this.points as NumericArray, this.options)
+        : getPolygonSignedArea(this.points as NumericArray, this.options)
+      : getPolygonSignedAreaPoints(this.points as number[][], this.options);
   }
 
   /**
