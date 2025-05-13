@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+export {S2Decoder} from './s2-decoder';
+
 export {getS2IndexFromToken, getS2TokenFromIndex, getS2ChildIndex} from './s2-token-functions';
-export {getS2BoundaryFlat} from './s2-geometry-functions';
 
 export {getS2Cell as _getS2Cell} from './s2geometry/s2-cell-utils';
 export {toHilbertQuadkey as _toHilbertQuadKey} from './s2geometry/s2-geometry';

@@ -35,5 +35,8 @@
   ],
   "devDependencies": {
     "s2-geometry": "^1.2.10"
+  },
+  "dependencies": {
+    "@math.gl/types": "4.2.0-alpha.3"
   }
 }

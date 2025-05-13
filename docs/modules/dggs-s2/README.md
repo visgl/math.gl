@@ -22,6 +22,15 @@ npm install @math.gl/dggs-s2
 import {} from '@math.gl/dggs-s2';
 ```
 
+### S2 Cell Format
+
+S2 cells are identified by a 64&nbsp;bit index. The three most significant bits
+encode the cube face, followed by 60&nbsp;bits that encode the cell's position on
+the Hilbert curve. The least significant bit is always set and trailing zero
+bits indicate the level of the cell. When written in hexadecimal the trailing
+zeros are stripped; this representation is commonly referred to as the **S2
+token**.
+
 ## Attribution
 
 This module is a fork of a subset of the s2-geometry module under ISC License (ISC)

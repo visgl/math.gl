@@ -32,5 +32,8 @@
   "files": [
     "dist",
     "src"
-  ]
+  ],
+  "dependencies": {
+    "@math.gl/types": "4.2.0-alpha.3"
+  }
 }

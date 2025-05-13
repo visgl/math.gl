@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
-import {getGeohashBounds, getGeohashBoundaryFlat} from '@math.gl/dggs-geohash';
+import {GeohashDecoder} from '@math.gl/dggs-geohash';
 
 const TEST_DATA = [
   {
@@ -21,9 +21,9 @@ const TEST_DATA = [
 ];
 
 // TODO - restore test
-test.skip('geohash#getGeohashBounds', (t) => {
+test.skip('GeohashDecoder#getBounds', (t) => {
   for (const {geohash} of TEST_DATA) {
-    const polygon = getGeohashBounds(geohash);
+    const polygon = GeohashDecoder.getCellBounds(geohash);
     t.ok(polygon instanceof Array, 'polygon is flat array');
     t.is(polygon.length / 2 - 1, 4, 'polygon has 4 sides');
     t.deepEqual(polygon.slice(0, 2), polygon.slice(-2), 'polygon is closed');
@@ -33,9 +33,9 @@ test.skip('geohash#getGeohashBounds', (t) => {
 });
 
 // TODO - restore test
-test.skip('geohash#getGeohashBoundaryFlat', (t) => {
+test.skip('GeohashDecoder#getBoundaryFlat', (t) => {
   for (const {geohash, expectedBounds} of TEST_DATA) {
-    const bounds = getGeohashBoundaryFlat(geohash);
+    const bounds = GeohashDecoder.getCellBoundaryPolygonFlat(geohash);
     t.deepEquals(bounds, expectedBounds, 'Geohash bounds calculated');
   }
 

@@ -34,4 +34,6 @@ export type {
 
 export {isTypedArray, isNumberArray, isNumericArray} from './is-array';
 
-export type {Bounds, Bounds2D, Bounds3D} from './bounds-types';
+export {type Bounds, type Bounds2D, type Bounds3D} from './bounds-types';
+
+export {type DGGSDecoder} from './dggs';

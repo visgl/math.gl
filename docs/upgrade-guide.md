@@ -1,5 +1,9 @@
 # Upgrade Guide
 
+## Upgrading to v4.2
+
+- The DGGS modules no longer export individual functions, but instead export "decoder objects" with an interchangeable API. To upgrade, import the decoder objects and replace your calls, e.g. `getS2LngLat(...)` => `S2Decoder.getCellLngLat(...)`.
+
 ## Upgrading to v4.1
 
 - The `NumberArray` type now only covers classic JavaScript arrays `number[]`, not typed arrays. Use `NumericArray` to cover both classic and typed arrays.

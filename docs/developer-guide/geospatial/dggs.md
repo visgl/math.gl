@@ -2,18 +2,24 @@
 
 Discrete global grid systems are powerful tools that enables us to convert geospatial data into a common, easy-to-analyze form.
 
-## Why DGGS in math.gl
+## Why DGGS in math.gl?
 
 Today there are multiple DGGS grid systems, and it is not unusual for an application to have to work with
-more than one DGGS. This can require working with a set of independent DGGS libraries with large API surfaces and subtly different API conventions, which can be taxing for implementors and maintainers.
+more than one DGGS. This can require working with a set of independent DGGS libraries with large API surfaces
+and subtly different API conventions and terminologies, which can be taxing for developers.
 
-We found that there is a value in having a common set of small, easy-to-use DGGS libraries that work with common API conventions.
+In addition the libraries can be large dependencies. Some existing JavaScript implementations have not been updated to use
+modern conveniences, such as `bigint`s for representing 64 bit cell indexes.
 
-## Goals
+There is a value in having a common set of small, easy-to-use DGGS decoder modules that work with common API conventions.
+
+## Scope
 
 The DGGS support in math.gl is currently focused on decoding cell indexes or tokens into center points (lng/lat) or cell boundary polygons.
 
-Encoding (lng/lat to cell index) and advanced operations (child/neighbor calculation, polygon fills etc) are not currently included. Some basic encoding may be included in the future, however it is a goal to keep these libraries fairly small, and the intention is not to eventually fully duplicate large existing DGGS libraries.
+Encoding (lng/lat to cell index) may be supported in a future version.
+
+Advanced operations (child/neighbor calculation, polygon fills etc) are not currently included. Some basic encoding may be included in the future, however it is a goal to keep these libraries fairly small, and the intention is not to eventually fully duplicate large existing DGGS libraries.
 
 ## Supported Grid Systems
 
