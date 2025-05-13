@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import { type DGGSDecoder, type Bounds2D } from '@math.gl/types';
+import {type DGGSDecoder, type Bounds2D} from '@math.gl/types';
 
 /** Decoder for the geohash dggs */
 export const GeohashDecoder = {
@@ -10,7 +10,7 @@ export const GeohashDecoder = {
   getCellLngLat: (geohash: string): number[] => getGeohashLngLat(geohash),
   getCellBoundaryPolygon: (geohash: string): [number, number][] => getGeohashBoundary(geohash),
   getCellBoundaryPolygonFlat: (geohash: string): number[] => getGeohashBoundaryFlat(geohash),
-  getCellBounds: (geohash: string): Bounds2D => getGeohashBounds(geohash),
+  getCellBounds: (geohash: string): Bounds2D => getGeohashBounds(geohash)
 } as const satisfies DGGSDecoder;
 
 const BASE32_CODES = '0123456789bcdefghjkmnpqrstuvwxyz';
@@ -51,6 +51,7 @@ function getGeohashBoundaryFlat(geohash: string): number[] {
 /**
  * @note Adapted from ngeohash decode_bbox
  */
+/* eslint-disable max-depth */
 export function getGeohashBounds(geohash: string): Bounds2D {
   let isLon = true;
   let maxLat = MAX_LAT;
@@ -85,5 +86,8 @@ export function getGeohashBounds(geohash: string): Bounds2D {
     }
   }
 
-  return [[minLat, minLon], [maxLat, maxLon]];
+  return [
+    [minLat, minLon],
+    [maxLat, maxLon]
+  ];
 }

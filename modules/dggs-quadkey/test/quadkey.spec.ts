@@ -29,7 +29,6 @@ const TEST_DATA = [
   }
 ];
 
-
 test.skip('QuadkeyDecoder#getCellBoundaryPolygon', (t) => {
   for (const {quadkey} of TEST_DATA) {
     const polygon = QuadkeyDecoder.getCellBoundaryPolygon(quadkey);

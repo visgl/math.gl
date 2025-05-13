@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import { type DGGSDecoder, type Bounds2D } from '@math.gl/types';
+import {type DGGSDecoder, type Bounds2D} from '@math.gl/types';
 export {getS2IndexFromToken, getS2TokenFromIndex} from './s2-token-functions';
 import {getS2GeoBounds} from './converters/s2-to-boundary';
 import {getS2Cell as _getS2Cell} from './s2geometry/s2-cell-utils';
 import {IJToST, STToUV, FaceUVToXYZ, XYZToLngLat} from './s2geometry/s2-geometry';
-import { getS2IndexFromToken, getS2TokenFromIndex } from './s2-token-functions';
+import {getS2IndexFromToken, getS2TokenFromIndex} from './s2-token-functions';
 
 /** Decoder for the S2 DGGS */
 export const S2Decoder = {
@@ -73,5 +73,8 @@ function getS2Bounds(s2Token: string): Bounds2D {
     if (y > ymax) ymax = y;
   }
 
-  return [[xmin, ymin], [xmax, ymax]];
+  return [
+    [xmin, ymin],
+    [xmax, ymax]
+  ];
 }
