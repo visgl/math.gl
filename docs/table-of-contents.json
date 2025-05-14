@@ -33,7 +33,7 @@
       },
       {
         "type": "category",
-        "label": "Discrete Global Grid Systems Math",
+        "label": "Discrete Global Grids",
         "items": [
           "developer-guide/geospatial/dggs"
         ]

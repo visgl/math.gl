@@ -2,24 +2,21 @@
 
 Discrete global grid systems are powerful tools that enables us to convert geospatial data into a common, easy-to-analyze form.
 
-## Why DGGS in math.gl?
 
-Today there are multiple DGGS grid systems, and it is not unusual for an application to have to work with
-more than one DGGS. This can require working with a set of independent DGGS libraries with large API surfaces
-and subtly different API conventions and terminologies, which can be taxing for developers.
+## Why DGGS support in math.gl?
 
-In addition the libraries can be large dependencies. Some existing JavaScript implementations have not been updated to use
-modern conveniences, such as `bigint`s for representing 64 bit cell indexes.
+There is value in having access to a common set of minimal, pluggable and interchangeable DGGS libraries.
 
-There is a value in having a common set of small, easy-to-use DGGS decoder modules that work with common API conventions.
+Today there are multiple advanced DGGS grid systems that offer different tradeoffs, and it is not unusual for an application to have to consume data encoded in one or more systems. 
+
+This requires integrating a set of independent DGGS libraries following different API conventions and nomenclature. Such independent DGGS libraries tend to offer a large set of functions and can accordingly be large dependencies, and bundling complications (WASM etc) can add additional effort from implementors and maintainers.
 
 ## Scope
 
 The DGGS support in math.gl is currently focused on decoding cell indexes or tokens into center points (lng/lat) or cell boundary polygons.
 
-Encoding (lng/lat to cell index) may be supported in a future version.
-
-Advanced operations (child/neighbor calculation, polygon fills etc) are not currently included. Some basic encoding may be included in the future, however it is a goal to keep these libraries fairly small, and the intention is not to eventually fully duplicate large existing DGGS libraries.
+- Encoding (lng/lat to cell index) may be supported in a future version.
+- Advanced operations (child/neighbor calculation, polygon fills etc) are not currently included. Some features may be included in the future, however it is a goal to keep these libraries fairly small, and the intention is not to eventually fully duplicate large existing DGGS libraries.
 
 ## Supported Grid Systems
 
