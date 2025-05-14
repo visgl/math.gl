@@ -1,6 +1,4 @@
-# DGGS Types
-
-### DGGSDecoder
+# DGGSDecoder
 
 A common type is provided as a template for DGGS decoder objects.
 

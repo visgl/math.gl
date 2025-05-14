@@ -49,7 +49,10 @@
 
 Release Date: TBD, maybe Q1, 2024.
 
-- DGGS modules now export "decoder objects" that provide an interchangeable API for working with DGGS encoded data.
+**`@math.gl/dggs`** (NEW MODULE)
+
+- DGGS functionality has been consolidated into a single module.
+- The DGGS module export "DGGS decoder objects" that conform to an interchangeable API for working with DGGS encoded data.
 
 ## v4.1
 

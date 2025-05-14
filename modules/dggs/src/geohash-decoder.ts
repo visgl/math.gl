@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {type DGGSDecoder, type Bounds2D} from '@math.gl/types';
+import {type Bounds2D} from '@math.gl/types';
+import {type DGGSDecoder} from './dggs-decoder';
 
 /** Decoder for the geohash dggs */
 export const GeohashDecoder = {

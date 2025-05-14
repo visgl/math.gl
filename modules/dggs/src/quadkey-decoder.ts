@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {type Bounds2D, type DGGSDecoder} from '@math.gl/types';
+import {type Bounds2D} from '@math.gl/types';
+import {type DGGSDecoder} from './dggs-decoder';
 
 const TILE_SIZE = 512;
 

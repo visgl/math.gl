@@ -4,7 +4,7 @@
 
 import {getS2Cell} from '../s2geometry/s2-cell-utils';
 import {getS2Region} from './s2-to-region';
-import {getS2IndexFromToken} from '../s2-token-functions';
+import {getS2IndexFromToken} from '../s2geometry/s2-token-functions';
 
 // import {OrientedBoundingBox, makeOrientedBoundingBoxFromPoints} from '@math.gl/culling';
 // import {Ellipsoid} from '@math.gl/geospatial';

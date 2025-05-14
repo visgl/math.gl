@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {IJToST, STToUV, FaceUVToXYZ, XYZToLngLat} from '../s2geometry/s2-geometry';
-import {getS2Cell} from '../s2geometry/s2-cell-utils';
+import {IJToST, STToUV, FaceUVToXYZ, XYZToLngLat} from './s2-geometry';
+import {getS2Cell} from './s2-cell-utils';
 
 const MAX_RESOLUTION = 100;
 
