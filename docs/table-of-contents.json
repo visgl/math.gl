@@ -158,26 +158,12 @@
       },
       {
         "type": "category",
-        "label": "@math.gl/dggs-geohash",
+        "label": "@math.gl/dggs",
         "items": [
-          "modules/dggs-geohash/README",
-          "modules/dggs-geohash/api-reference/geohash"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/dggs-quadkey",
-        "items": [
-          "modules/dggs-quadkey/README",
-          "modules/dggs-quadkey/api-reference/quadkey"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/dggs-s2",
-        "items": [
-          "modules/dggs-s2/README",
-          "modules/dggs-s2/api-reference/s2"
+          "modules/dggs/README",
+          "modules/dggs/api-reference/geohash-decoder",
+          "modules/dggs-s2/api-reference/s2-decoder",
+          "modules/dggs-quadkey/api-reference/quadkey-decoder"
         ]
       }
     ]
