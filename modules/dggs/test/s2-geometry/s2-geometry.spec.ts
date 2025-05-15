@@ -2,7 +2,7 @@
 
 import test from 'tape-promise/tape';
 
-import {_toHilbertQuadKey as toHilbertQuadKey} from '@math.gl/dggs-s2';
+import {toHilbertQuadkey} from '@math.gl/dggs/s2-geometry/s2-geometry';
 import {S2} from 's2-geometry';
 
 // TODO - restore test
@@ -22,9 +22,9 @@ test.skip('S2#toHilbertQuadkey', (t) => {
       const token = id.toString(16).replace(/0+$/, '');
 
       t.comment(`level ${level}, id: ${id.toString()}, token: ${token}`);
-      t.is(toHilbertQuadKey(key), key, 'Quad key to quad key');
-      t.is(toHilbertQuadKey(id), key, 'Id to quad key');
-      t.is(toHilbertQuadKey(token), key, 'Token to quad key');
+      t.is(toHilbertQuadkey(key), key, 'Quad key to quad key');
+      t.is(toHilbertQuadkey(id), key, 'Id to quad key');
+      t.is(toHilbertQuadkey(token), key, 'Token to quad key');
     }
   }
 

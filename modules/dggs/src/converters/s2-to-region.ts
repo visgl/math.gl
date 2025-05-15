@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {getS2GeoBoundsFromCell} from '../s2geometry/s2-to-boundary';
+import {getS2GeoBoundsFromCell} from '../s2-geometry/s2-to-boundary';
 
 export function getS2Region(s2cell: {face: number; ij: [number, number]; level: number}): number[] {
   const corners = getS2GeoBoundsFromCell(s2cell);

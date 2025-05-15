@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
-import {QuadkeyDecoder, _quadkeyToWorldBounds} from '@math.gl/dggs-quadkey';
+import {QuadkeyDecoder} from '@math.gl/dggs';
+import {quadkeyToWorldBounds} from '@math.gl/dggs/quadkey-decoder';
 
 const TEST_DATA = [
   {
@@ -41,7 +42,7 @@ test.skip('QuadkeyDecoder#getCellBoundaryPolygon', (t) => {
 
 test('QuadkeyDecoder#ToWorldBounds', (t) => {
   for (const {quadkey, expectedBounds} of TEST_DATA) {
-    const bounds = _quadkeyToWorldBounds(quadkey);
+    const bounds = quadkeyToWorldBounds(quadkey);
     t.deepEquals(bounds, expectedBounds, 'Quadkey bounds calculated');
   }
 

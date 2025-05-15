@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {getS2Cell} from '../s2geometry/s2-cell-utils';
+import {getS2Cell} from '../s2-geometry/s2-geometry';
 import {getS2Region} from './s2-to-region';
-import {getS2IndexFromToken} from '../s2geometry/s2-token-functions';
+import {getS2IndexFromToken} from '../s2-geometry/s2-token';
 
 // import {OrientedBoundingBox, makeOrientedBoundingBoxFromPoints} from '@math.gl/culling';
 // import {Ellipsoid} from '@math.gl/geospatial';

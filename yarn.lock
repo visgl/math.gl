@@ -830,6 +830,7 @@ __metadata:
   resolution: "@math.gl/dggs@workspace:modules/dggs"
   dependencies:
     "@math.gl/types": "npm:4.2.0-alpha.3"
+    s2-geometry: "npm:^1.2.10"
   languageName: unknown
   linkType: soft
 
@@ -6754,6 +6755,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"long@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "long@npm:3.2.0"
+  checksum: 10c0/03884ad097403bda356228899c8397d7e4e2cd26489983034faa8e52ab9f18df4539de548571ad2f574ecf78454fc377bbcd2ba8ba76d567bf973345aefcbdb2
+  languageName: node
+  linkType: hard
+
 "loose-envify@npm:^1.1.0, loose-envify@npm:^1.4.0":
   version: 1.4.0
   resolution: "loose-envify@npm:1.4.0"
@@ -9140,6 +9148,15 @@ __metadata:
   dependencies:
     tslib: "npm:^2.1.0"
   checksum: 10c0/3c49c1ecd66170b175c9cacf5cef67f8914dcbc7cd0162855538d365c83fea631167cacb644b3ce533b2ea0e9a4d0b12175186985f89d75abe73dbd8f7f06f68
+  languageName: node
+  linkType: hard
+
+"s2-geometry@npm:^1.2.10":
+  version: 1.2.10
+  resolution: "s2-geometry@npm:1.2.10"
+  dependencies:
+    long: "npm:^3.2.0"
+  checksum: 10c0/4cc50d9ee56a15731d8952755ef30f22c5139158c77b4ee0d015fc3676049ffc632d7e6fd489aeeabb04b8ded59d1577b8a270b0317f675a31b70adfecd9e9df
   languageName: node
   linkType: hard
 

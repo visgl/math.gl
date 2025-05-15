@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import test from 'tape-promise/tape';
-import {GeohashDecoder} from '@math.gl/dggs-geohash';
+import {GeohashDecoder} from '@math.gl/dggs';
 
 const TEST_DATA = [
   {

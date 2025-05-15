@@ -5,11 +5,9 @@
 import {type Bounds2D} from '@math.gl/types';
 import {type DGGSDecoder} from './dggs-decoder';
 
-export {getS2IndexFromToken, getS2TokenFromIndex} from './s2geometry/s2-token-functions';
-import {getS2GeoBounds} from './s2geometry/s2-to-boundary';
-import {getS2Cell as _getS2Cell} from './s2geometry/s2-cell-utils';
-import {IJToST, STToUV, FaceUVToXYZ, XYZToLngLat} from './s2geometry/s2-geometry';
-import {getS2IndexFromToken, getS2TokenFromIndex} from './s2geometry/s2-token-functions';
+import {getS2IndexFromToken, getS2TokenFromIndex} from './s2-geometry/s2-token';
+import {getS2GeoBounds} from './s2-geometry/s2-to-boundary';
+import {getS2Cell, IJToST, STToUV, FaceUVToXYZ, XYZToLngLat} from './s2-geometry/s2-geometry';
 
 /** Decoder for the S2 DGGS */
 export const S2Decoder = {
@@ -27,7 +25,7 @@ export const S2Decoder = {
  */
 export function getS2LngLat(s2Token: string): number[] {
   const s2Index = getS2IndexFromToken(s2Token);
-  const cell = _getS2Cell(s2Index);
+  const cell = getS2Cell(s2Index);
 
   const st = IJToST(cell.ij, cell.level, [0.5, 0.5]);
   const uv = STToUV(st);

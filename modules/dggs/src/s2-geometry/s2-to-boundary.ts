@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {IJToST, STToUV, FaceUVToXYZ, XYZToLngLat} from './s2-geometry';
-import {getS2Cell} from './s2-cell-utils';
+import {IJToST, STToUV, FaceUVToXYZ, XYZToLngLat, getS2Cell} from './s2-geometry';
 
 const MAX_RESOLUTION = 100;
 
@@ -12,7 +11,13 @@ export function getS2GeoBounds(s2Index: bigint): Float64Array {
   return getS2GeoBoundsFromCell(s2Cell);
 }
 
-/* getGeoBounds */
+/**
+ * The S2 cell edge is curved: http://s2geometry.io/
+ * This is more prominent at lower levels
+ * resolution is the number of segments to generate per edge.
+ * We exponentially reduce resolution as level increases so it doesn't affect perf
+ * when there are a large number of cells
+ */
 // eslint-disable-next-line max-statements
 export function getS2GeoBoundsFromCell({
   face,
@@ -31,11 +36,6 @@ export function getS2GeoBoundsFromCell({
     [0, 0]
   ];
 
-  // The S2 cell edge is curved: http://s2geometry.io/
-  // This is more prominent at lower levels
-  // resolution is the number of segments to generate per edge.
-  // We exponentially reduce resolution as level increases so it doesn't affect perf
-  // when there are a large number of cells
   const resolution = Math.max(1, Math.ceil(MAX_RESOLUTION * Math.pow(2, -level)));
   const result = new Float64Array(4 * resolution * 2 + 2);
   let ptIndex = 0;

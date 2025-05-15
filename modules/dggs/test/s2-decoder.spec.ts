@@ -1,7 +1,7 @@
 // loaders.gl, MIT license
 import test from 'tape-promise/tape';
 
-import {S2Decoder} from '@math.gl/dggs-s2';
+import {S2Decoder} from '@math.gl/dggs';
 
 test.skip('S2Decoder#getCellLngLat', (t) => {
   const s2Token = '8085873c';

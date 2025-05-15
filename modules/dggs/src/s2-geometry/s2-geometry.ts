@@ -11,6 +11,18 @@ Permission to use, copy, modify, and/or distribute this software for any purpose
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+export type S2Cell = {
+  face: number;
+  ij: [number, number];
+  level: number;
+};
+
+export function getS2Cell(s2Index: bigint): S2Cell {
+  const key = toHilbertQuadkey(s2Index);
+  const s2cell = fromHilbertQuadKey(key);
+  return s2cell;
+}
+
 //
 // Functional Style
 //
@@ -18,12 +30,6 @@ const FACE_BITS = 3;
 const MAX_LEVEL = 30;
 const POS_BITS = 2 * MAX_LEVEL + 1; // 61 (60 bits of data, 1 bit lsb marker)
 const RADIAN_TO_DEGREE = 180 / Math.PI;
-
-export type S2Cell = {
-  face: number;
-  ij: [number, number];
-  level: number;
-};
 
 /*
   Original function taken from deck.gl doesn't support the case of (face <= 5)

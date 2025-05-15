@@ -2,12 +2,11 @@
 
 Discrete global grid systems are powerful tools that enables us to convert geospatial data into a common, easy-to-analyze form.
 
-
 ## Why DGGS support in math.gl?
 
 There is value in having access to a common set of minimal, pluggable and interchangeable DGGS libraries.
 
-Today there are multiple advanced DGGS grid systems that offer different tradeoffs, and it is not unusual for an application to have to consume data encoded in one or more systems. 
+Today there are multiple advanced DGGS grid systems that offer different tradeoffs, and it is not unusual for an application to have to consume data encoded in one or more systems.
 
 This requires integrating a set of independent DGGS libraries following different API conventions and nomenclature. Such independent DGGS libraries tend to offer a large set of functions and can accordingly be large dependencies, and bundling complications (WASM etc) can add additional effort from implementors and maintainers.
 
@@ -20,12 +19,12 @@ The DGGS support in math.gl is currently focused on decoding cell indexes or tok
 
 ## Supported Grid Systems
 
-| DGGS                                                | Module                  | Functionality                   |
-| --------------------------------------------------- | ----------------------- | ------------------------------- |
-| ![GeoHash](../../images/dggs/geohash.png 'GeoHash') | `@math.gl/dggs-geohash` | Get geometry of GeoHash tokens. |
-| ![QuadKey](../../images/dggs/quadkey.png 'QuadKey') | `@math.gl/dggs-quadkey` | Get geometry of QuadKey tokens  |
-| ![S2](../../images/dggs/s2.png 'S2')                | `@math.gl/dggs-s2`      | Get geometry of S2 tokens.      |
-| ![H3](../../images/dggs/h3.png 'H3')                | `h3-js` \*              | Get geometry of H3 tokens.      |
+| DGGS                                                | Module          | Functionality                   |
+| --------------------------------------------------- | --------------- | ------------------------------- |
+| ![GeoHash](../../images/dggs/geohash.png 'GeoHash') | `@math.gl/dggs` | Get geometry of GeoHash tokens. |
+| ![QuadKey](../../images/dggs/quadkey.png 'QuadKey') | `@math.gl/dggs` | Get geometry of QuadKey tokens  |
+| ![S2](../../images/dggs/s2.png 'S2')                | `@math.gl/dggs` | Get geometry of S2 tokens.      |
+| ![H3](../../images/dggs/h3.png 'H3')                | `h3-js` \*      | Get geometry of H3 tokens.      |
 
 Note that `h3-js` is not a `math.gl` library. For H3 it is recommended to work directly with the H3 JavaScript bindings.
 
