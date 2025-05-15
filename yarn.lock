@@ -825,22 +825,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/dggs-geohash@workspace:modules/dggs-geohash":
+"@math.gl/dggs@workspace:modules/dggs":
   version: 0.0.0-use.local
-  resolution: "@math.gl/dggs-geohash@workspace:modules/dggs-geohash"
-  languageName: unknown
-  linkType: soft
-
-"@math.gl/dggs-quadkey@workspace:modules/dggs-quadkey":
-  version: 0.0.0-use.local
-  resolution: "@math.gl/dggs-quadkey@workspace:modules/dggs-quadkey"
-  languageName: unknown
-  linkType: soft
-
-"@math.gl/dggs-s2@workspace:modules/dggs-s2":
-  version: 0.0.0-use.local
-  resolution: "@math.gl/dggs-s2@workspace:modules/dggs-s2"
+  resolution: "@math.gl/dggs@workspace:modules/dggs"
   dependencies:
+    "@math.gl/types": "npm:4.2.0-alpha.3"
     s2-geometry: "npm:^1.2.10"
   languageName: unknown
   linkType: soft

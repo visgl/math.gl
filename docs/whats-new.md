@@ -45,17 +45,14 @@
   </tbody>
 </table>
 
-## v5.0 (In planning)
-
-Release Date: TBD, maybe Q2, 2025.
-
-Goal: Stronger type guarantees for math classes via the new sized array types.
-
 ## v4.2 (In development)
 
 Release Date: TBD, maybe Q1, 2024.
 
-Goal: Minor functionality additions, as required.
+**`@math.gl/dggs`** (NEW MODULE)
+
+- DGGS functionality has been consolidated into a single module.
+- The DGGS module export "DGGS decoder objects" that conform to an interchangeable API for working with DGGS encoded data.
 
 ## v4.1
 

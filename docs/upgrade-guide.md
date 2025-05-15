@@ -1,5 +1,11 @@
 # Upgrade Guide
 
+## Upgrading to v4.2
+
+- The DGGS modules `@math.gl/dggs-s2`, `@math.gl/dggs-geohash` and `@math.gl/dggs-quadkey` have been replaced with the new `@math.gl/dggs` module.
+- The new DGGS module no longer export individual functions, but instead export a "decoder objects" for each DGGS that conform an common API.
+- To upgrade, import the decoder objects and replace your calls, e.g. `getS2LngLat(...)` => `S2Decoder.getCellLngLat(...)`.
+
 ## Upgrading to v4.1
 
 - The `NumberArray` type now only covers classic JavaScript arrays `number[]`, not typed arrays. Use `NumericArray` to cover both classic and typed arrays.
