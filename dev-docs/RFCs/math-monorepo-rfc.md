@@ -30,7 +30,7 @@ Using with pure javascript `Array`
 
 ```js
 import {Ellipsoid} from '@math.gl/geospatial';
-const cartesian = Ellipsoid.WSG84.cartographicToCartesian([lng, lat, z]);
+const cartesian = Ellipsoid.WSG84.cartographicToCartesian([lngDegrees, latDegress, zMetresFromEllipsoid]);
 ```
 
 Using with math.gl `Vector3`:
@@ -38,7 +38,7 @@ Using with math.gl `Vector3`:
 ```js
 import {Ellipsoid} from '@math.gl/geospatial';
 import {Vector3} from '@math.gl/core';
-const cartesian = Ellipsoid.WSG84.cartographicToCartesian(new Vector3(lng, lat, z));
+const cartesian = Ellipsoid.WSG84.cartographicToCartesian(new Vector3(lngDegrees, latDegress, zMetresFromEllipsoid));
 ```
 
 ### Dependencies and Bundle Size
