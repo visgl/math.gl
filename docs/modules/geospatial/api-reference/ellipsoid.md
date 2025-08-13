@@ -15,9 +15,8 @@ Rather than constructing this object directly, one of the provided constants is 
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```js
-import {toRadians} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
-const cartographicPosition = [toRadians(21), toRadians(78), 5000];
+const cartographicPosition = [21, 78, 5000]; // longitude degrees, latitude degrees, meters above ellipsoid
 const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPosition);
 ```
 
@@ -33,7 +32,8 @@ Get the transform from local east-north-up at cartographic (0.0, 0.0) to Earth's
 
 ```js
 import {Ellipsoid} from '@math.gl/geospatial';
-const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame([0, 0, 0]);
+const cartesianOrigin = [17832.12, 83234.52, 952313.73]
+const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
 ```
 
 ## Static Fields
@@ -116,7 +116,7 @@ Returns
 
 Converts the provided cartographic to Cartesian representation.
 
-- `cartographic` The cartographic position.
+- `cartographic` The cartographic position (degrees).
 - `result` Optional object onto which to store the result.
 
 Returns
@@ -144,7 +144,7 @@ The local axes are defined as:
 - The `y` axis points in the local north direction.
 - The `z` axis points in the direction of the ellipsoid surface normal which passes through the position.
 
-- `origin` The center point of the local reference frame.
+- `origin` The cartesian coordinate of the center point of the local reference frame.
 - `ellipsoid`=`Ellipsoid.WGS84` The ellipsoid whose fixed frame is used in the transformation.
 - `result` Optional object onto which to store the result.
 
@@ -163,7 +163,7 @@ Computes a 4x4 transformation matrix from a reference frame centered at the prov
 - `firstAxis` name of the first axis of the local reference frame. Must be 'east', 'north', 'up', 'west', 'south' or 'down'.
 - `secondAxis` name of the second axis of the local reference frame.
 - `thirdAxis` name of the third axis of the local reference frame. Can be omitted as it is implied by the cross product of the first two axis.
-- `origin` The center point of the local reference frame.
+- `origin` The cartesian coordinate of the center point of the local reference frame.
 - `result` Optional object onto which to store the result.
 
 Returns
