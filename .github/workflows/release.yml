@@ -5,6 +5,9 @@ on:
     tags:
       - v*
 
+permissions:
+  contents: read
+
 jobs:
   check_branch:
     runs-on: ubuntu-22.04
@@ -12,7 +15,7 @@ jobs:
       should_build: ${{ steps.permitted.outputs.result }}
 
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Fetch remote branches
         run: |
@@ -30,7 +33,7 @@ jobs:
           echo "result=${result}" >> "$GITHUB_OUTPUT"
 
   release:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: check_branch
     permissions:
       contents: write
@@ -42,19 +45,34 @@ jobs:
       NPM_ACCESS_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
 
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: volta-cli/action@2d68418f32546fd191eb666e232b321d5726484d # v4.1.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
-          cache: 'yarn'
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack / Yarn 4
+        run: |
+          corepack enable
+          corepack prepare yarn@4.13.0 --activate
+          yarn -v
+
+      - name: Cache Yarn Berry artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.yarn/berry/cache
+            .yarn/install-state.gz
+          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json') }}
 
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
 
       - name: Build packages
         run: npm run build
-      
-      - name: Run tests from transpiled code
-        run: npx ocular-test dist
+
+      - name: Run release test suite
+        run: yarn test
 
       - name: Login to NPM
         run: npm config set "//registry.npmjs.org/:_authToken=${NPM_ACCESS_TOKEN}"
