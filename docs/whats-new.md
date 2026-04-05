@@ -45,17 +45,13 @@
   </tbody>
 </table>
 
-## v5.0 (In planning)
-
-Release Date: TBD, maybe Q2, 2025.
-
-Goal: Stronger type guarantees for math classes via the new sized array types.
-
 ## v4.2 (In development)
 
-Release Date: TBD, maybe Q1, 2024.
+Target Release Date: Q2, 2026.
 
-Goal: Minor functionality additions, as required.
+Highlights:
+
+- TypeScript 6 compatibility.
 
 ## v4.1
 

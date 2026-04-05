@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    // Library builds target standard ESM output instead of Node-specific emit.
+    "module": "es2020",
+    // Bundler resolution avoids deprecated legacy node resolution while keeping
+    // package builds compatible with extensionless source imports.
+    "moduleResolution": "bundler"
+  }
+}

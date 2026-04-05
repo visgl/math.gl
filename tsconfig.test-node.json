@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.base.json",
+  "ts-node": {
+    // It is faster to skip typechecking. Remove if you want ts-node to do typechecking.
+    "transpileOnly": true
+  },
+  "compilerOptions": {
+    // Keep Node-oriented test execution on TypeScript's stable Node ESM mode.
+    // This is used only by the Node test runner, not by general source checking.
+    "module": "Node16",
+    "moduleResolution": "node16"
+  },
+  "include": [
+    "test",
+    "modules/*/src",
+    "modules/*/test"
+  ],
+  "exclude": [
+    "test/apps/**/*",
+    "node_modules",
+    "**/dist/**/*",
+    "**/*bench*"
+  ]
+}
