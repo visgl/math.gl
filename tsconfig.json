@@ -13,6 +13,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "useDefineForClassFields": false,
 
     // BEGIN TYPE CHECK SETTINGS
