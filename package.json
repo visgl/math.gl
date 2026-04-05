@@ -35,10 +35,12 @@
   },
   "resolutions_notes": {
     "typescript": "Control the version of TypeScript to avoid breaking changes",
+    "ts-patch": "Keep the TS transformer patch layer compatible with the selected TypeScript version",
     "tape": "New versions mess up numeric equality tests"
   },
   "resolutions": {
-    "typescript": "5.6.2",
+    "typescript": "6.0.2",
+    "ts-patch": "3.3.0",
     "tape": "4.5.0"
   },
   "pre-commit": [

@@ -1,6 +1,8 @@
 import {resolve} from 'path';
 
 export default {
+  ocularPath: resolve('./node_modules/@vis.gl/dev-tools'),
+
   lint: {
     paths: ['dev-docs', 'docs', 'modules', 'test'], // 'examples', 'website'
     extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx', 'd.ts', 'md']
