@@ -3,20 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 /**
- * Constructor type for `Float16Array` when the current TypeScript lib defines it.
- * Resolves to `never` in environments where `Float16Array` is not available.
+ * Base union for numeric arrays that are always available in the current lib set.
  */
-type OptionalFloat16ArrayConstructor =
-  typeof globalThis extends {Float16Array: infer T} ? T : never;
-
-/**
- * Instance type for `Float16Array` when the current TypeScript lib defines it.
- * Resolves to `never` in environments where `Float16Array` is not available.
- */
-type OptionalFloat16Array =
-  typeof globalThis extends {Float16Array: {prototype: infer T}} ? T : never;
-
-type NumericArray =
+type NumericArrayBase =
   | Int8Array
   | Uint8Array
   | Int16Array
@@ -26,9 +15,12 @@ type NumericArray =
   | Uint8ClampedArray
   | Float32Array
   | Float64Array
-  // Conditionally include Float16Array without hard-referencing the global symbol.
-  | OptionalFloat16Array
   | number[];
+
+// Conditionally include Float16Array without hard-referencing the global symbol.
+type NumericArray = typeof globalThis extends {Float16Array: {prototype: infer T}}
+  ? NumericArrayBase | T
+  : NumericArrayBase;
 
 /*
 declare module 'gl-matrix/vec2' {

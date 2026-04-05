@@ -55,7 +55,7 @@ export class LngLatRectangle {
     return result;
   }
 
-  get width() {
+  get width(): number {
     let east = this.east;
     const west = this.west;
 
