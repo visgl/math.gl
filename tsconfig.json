@@ -1,19 +1,5 @@
 {
-  "extends": "./tsconfig.base.json",
-  "ts-node": {
-    // It is faster to skip typechecking. Remove if you want ts-node to do typechecking.
-    "transpileOnly": true
-  },
-
-  "compilerOptions": {
-    // Use Node 20 module semantics in repo-level tooling and tests so TypeScript
-    // understands modern package.json features such as "exports".
-    "module": "Node20",
-    // TypeScript does not currently expose a separate "node20" resolution mode.
-    // The Node-style resolver remains under the node16/nodenext family, and this
-    // is the stable choice for Node-oriented workflows in this repo.
-    "moduleResolution": "node16"
-  },
+  "extends": "./tsconfig.build.json",
   "include":[
     "modules/*/src",
     "modules/*/test"
