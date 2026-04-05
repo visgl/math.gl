@@ -3,9 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 /**
- * Type covering all non-big typed arrays
+ * Base union for non-big JavaScript typed arrays that are always available in the current lib set.
  */
-export type TypedArray =
+type TypedArrayBase =
   | Int8Array
   | Uint8Array
   | Uint8ClampedArray
@@ -17,9 +17,10 @@ export type TypedArray =
   | Float64Array;
 
 /**
- * Type covering constructors for all non-big typed arrays
+ * Base union for constructors of non-big JavaScript typed arrays that are always available in the
+ * current lib set.
  */
-export type TypedArrayConstructor =
+type TypedArrayConstructorBase =
   | Int8ArrayConstructor
   | Uint8ArrayConstructor
   | Uint8ClampedArrayConstructor
@@ -29,6 +30,22 @@ export type TypedArrayConstructor =
   | Uint32ArrayConstructor
   | Float32ArrayConstructor
   | Float64ArrayConstructor;
+
+/**
+ * Type covering all non-big typed arrays
+ */
+// Conditionally include Float16Array without hard-referencing the global symbol.
+export type TypedArray = typeof globalThis extends {Float16Array: {prototype: infer T}}
+  ? TypedArrayBase | T
+  : TypedArrayBase;
+
+/**
+ * Type covering constructors for all non-big typed arrays
+ */
+// Conditionally include the Float16Array constructor without hard-referencing it.
+export type TypedArrayConstructor = typeof globalThis extends {Float16Array: infer T}
+  ? TypedArrayConstructorBase | T
+  : TypedArrayConstructorBase;
 
 /**
  * Type covering all big typed arrays

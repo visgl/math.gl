@@ -23,6 +23,13 @@ const TEST_CASES: {value: unknown; isTypedArray: boolean; isNumericArray: boolea
   {value: '', isTypedArray: false, isNumericArray: false}
 ];
 
+const Float16ArrayCtor = (globalThis as {Float16Array?: new (length: number) => ArrayBufferView})
+  .Float16Array;
+
+if (Float16ArrayCtor) {
+  TEST_CASES.unshift({value: new Float16ArrayCtor(1), isTypedArray: true, isNumericArray: true});
+}
+
 test('math.gl#isTypedArray', (t) => {
   for (const tc of TEST_CASES) {
     t.equal(

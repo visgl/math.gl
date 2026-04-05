@@ -19,6 +19,12 @@ export type FlytoTransitionOptions = {
   maxDuration?: number;
 };
 
+type TransitionViewport = {
+  longitude: number;
+  latitude: number;
+  zoom: number;
+};
+
 /**
  * mapbox-gl-js flyTo : https://www.mapbox.com/mapbox-gl-js/api/#map#flyto.
  * It implements “Smooth and efficient zooming and panning.” algorithm by
@@ -44,14 +50,16 @@ export function flyToViewport(
 
   // If change in center is too small, do linear interpolaiton.
   if (u1 < EPSILON) {
-    const viewport = {};
+    const viewport: TransitionViewport = {
+      longitude: 0,
+      latitude: 0,
+      zoom: 0
+    };
     for (const key of VIEWPORT_TRANSITION_PROPS) {
       const startValue = startProps[key];
       const endValue = endProps[key];
-      // @ts-ignore-error properties are populated dynamically
       viewport[key] = lerp(startValue, endValue, t);
     }
-    // @ts-expect-error properties are populated dynamically
     return viewport;
   }
 
@@ -63,7 +71,7 @@ export function flyToViewport(
   const scaleIncrement = 1 / w; // Using w method for scaling.
   const newZoom = startZoom + scaleToZoom(scaleIncrement);
 
-  const newCenterWorld = vec2.scale([], uDelta, u);
+  const newCenterWorld = vec2.scale([] as number[], uDelta, u) as [number, number];
   vec2.add(newCenterWorld, newCenterWorld, startCenterXY);
 
   const newCenter = worldToLngLat(newCenterWorld);
@@ -103,8 +111,8 @@ function getFlyToTransitionParams(
   opts: FlytoTransitionOptions
 ): {
   startZoom: number;
-  startCenterXY: number[];
-  uDelta: number[];
+  startCenterXY: [number, number];
+  uDelta: [number, number];
   w0: number;
   u1: number;
   S: number;
@@ -116,15 +124,15 @@ function getFlyToTransitionParams(
   opts = Object.assign({}, DEFAULT_OPTS, opts);
   const rho = opts.curve;
   const startZoom = startProps.zoom;
-  const startCenter = [startProps.longitude, startProps.latitude];
+  const startCenter: [number, number] = [startProps.longitude, startProps.latitude];
   const startScale = zoomToScale(startZoom);
   const endZoom = endProps.zoom;
-  const endCenter = [endProps.longitude, endProps.latitude];
+  const endCenter: [number, number] = [endProps.longitude, endProps.latitude];
   const scale = zoomToScale(endZoom - startZoom);
 
-  const startCenterXY = lngLatToWorld(startCenter);
-  const endCenterXY = lngLatToWorld(endCenter);
-  const uDelta = vec2.sub([] as number[], endCenterXY, startCenterXY);
+  const startCenterXY: [number, number] = lngLatToWorld(startCenter);
+  const endCenterXY: [number, number] = lngLatToWorld(endCenter);
+  const uDelta = vec2.sub([] as number[], endCenterXY, startCenterXY) as [number, number];
 
   const w0 = Math.max(startProps.width, startProps.height);
   const w1 = w0 / scale;

@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-type NumericArray =
+/**
+ * Base union for numeric arrays that are always available in the current lib set.
+ */
+type NumericArrayBase =
   | Int8Array
   | Uint8Array
   | Int16Array
@@ -13,6 +16,11 @@ type NumericArray =
   | Float32Array
   | Float64Array
   | number[];
+
+// Conditionally include Float16Array without hard-referencing the global symbol.
+type NumericArray = typeof globalThis extends {Float16Array: {prototype: infer T}}
+  ? NumericArrayBase | T
+  : NumericArrayBase;
 
 /*
 declare module 'gl-matrix/vec2' {

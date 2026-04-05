@@ -10,9 +10,13 @@ TypeScript types to simplify working with a mix of typed arrays and standard Jav
 
 Type matching any non-big JavaScript typed array.
 
+When the environment's type libraries define `Float16Array`, it is included conditionally as well.
+
 ### `TypedArrayConstructor`
 
 Type matching constructor for any non-big JavaScript typed array.
+
+When the environment's type libraries define `Float16Array`, its constructor is included conditionally as well.
 
 ### `BigTypedArray`
 
@@ -33,6 +37,8 @@ JavaScript number arrays of specific lengths.
 ### `NumericArray`
 
 Type matching any classic JavaScript array containing numbers or any non-big typed array.
+
+This conditionally includes `Float16Array` when the environment provides that type.
 
 ### `NumericArray2-NumericArray16`
 
