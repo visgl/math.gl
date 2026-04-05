@@ -3,6 +3,20 @@
 // Copyright (c) vis.gl contributors
 
 /**
+ * Constructor type for `Float16Array` when the current TypeScript lib defines it.
+ * Resolves to `never` in environments where `Float16Array` is not available.
+ */
+type OptionalFloat16ArrayConstructor =
+  typeof globalThis extends {Float16Array: infer T} ? T : never;
+
+/**
+ * Instance type for `Float16Array` when the current TypeScript lib defines it.
+ * Resolves to `never` in environments where `Float16Array` is not available.
+ */
+type OptionalFloat16Array =
+  typeof globalThis extends {Float16Array: {prototype: infer T}} ? T : never;
+
+/**
  * Type covering all non-big typed arrays
  */
 export type TypedArray =
@@ -14,7 +28,9 @@ export type TypedArray =
   | Int32Array
   | Uint32Array
   | Float32Array
-  | Float64Array;
+  | Float64Array
+  // Conditionally include Float16Array without hard-referencing the global symbol.
+  | OptionalFloat16Array;
 
 /**
  * Type covering constructors for all non-big typed arrays
@@ -28,7 +44,9 @@ export type TypedArrayConstructor =
   | Int32ArrayConstructor
   | Uint32ArrayConstructor
   | Float32ArrayConstructor
-  | Float64ArrayConstructor;
+  | Float64ArrayConstructor
+  // Conditionally include the Float16Array constructor without hard-referencing it.
+  | OptionalFloat16ArrayConstructor;
 
 /**
  * Type covering all big typed arrays
