@@ -55,7 +55,14 @@ Goal: Stronger type guarantees for math classes via the new sized array types.
 
 Release Date: TBD, maybe Q1, 2024.
 
-Goal: Minor functionality additions, as required.
+Goals:
+
+- Functionality additions to improve 3D Tiles support in loaders.gl.
+
+**`@math.gl/geopspatial`**
+
+- `makeOBBFromRegion()` - New function that creates a cartesian oriented bounding box from a geospatial region.
+- `EllipsoidTangentPlane` - New helper class for doing math on the ellipsoid surface.
 
 ## v4.1
 

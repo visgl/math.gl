@@ -113,6 +113,7 @@
         "items": [
           "modules/geospatial/README",
           "modules/geospatial/api-reference/ellipsoid",
+          "modules/geospatial/api-reference/ellipsoid-tangent-plane",
           "modules/geospatial/api-reference/helpers"
         ]
       },
