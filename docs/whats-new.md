@@ -53,8 +53,14 @@ Highlights:
 
 - TypeScript 6 compatibility.
 - New expression evaluator module
+- DGGS support is consolidated into a single module with interchangeable decoder objects.
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 - Stronger type guarantees for math classes via the new sized array types.
+
+**`@math.gl/dggs`** (NEW MODULE)
+
+- Consolidates GeoHash, Quadkey, and S2 functionality into a single module.
+- Exports DGGS decoder objects with an interchangeable API for encoded data.
 
 **`@math.gl/expressions`** (NEW EXPERIMENTAL MODULE)
 
