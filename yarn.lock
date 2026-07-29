@@ -825,19 +825,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/dggs-geohash@workspace:modules/dggs-geohash":
+"@math.gl/dggs-geohash@npm:4.2.0-alpha.3, @math.gl/dggs-geohash@workspace:modules/dggs-geohash":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs-geohash@workspace:modules/dggs-geohash"
   languageName: unknown
   linkType: soft
 
-"@math.gl/dggs-quadkey@workspace:modules/dggs-quadkey":
+"@math.gl/dggs-quadkey@npm:4.2.0-alpha.3, @math.gl/dggs-quadkey@workspace:modules/dggs-quadkey":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs-quadkey@workspace:modules/dggs-quadkey"
   languageName: unknown
   linkType: soft
 
-"@math.gl/dggs-s2@workspace:modules/dggs-s2":
+"@math.gl/dggs-s2@npm:4.2.0-alpha.3, @math.gl/dggs-s2@workspace:modules/dggs-s2":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs-s2@workspace:modules/dggs-s2"
   dependencies:
@@ -845,11 +845,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/expressions@workspace:modules/expressions":
+"@math.gl/expressions@npm:4.2.0-alpha.3, @math.gl/expressions@workspace:modules/expressions":
   version: 0.0.0-use.local
   resolution: "@math.gl/expressions@workspace:modules/expressions"
   dependencies:
     "@math.gl/core": "npm:4.2.0-alpha.3"
+    "@math.gl/dggs-geohash": "npm:4.2.0-alpha.3"
+    "@math.gl/dggs-quadkey": "npm:4.2.0-alpha.3"
+    "@math.gl/dggs-s2": "npm:4.2.0-alpha.3"
     "@math.gl/geospatial": "npm:4.2.0-alpha.3"
     jsep: "npm:^1.4.0"
   languageName: unknown
@@ -1871,6 +1874,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-dom@npm:^18.2.0":
+  version: 18.3.7
+  resolution: "@types/react-dom@npm:18.3.7"
+  peerDependencies:
+    "@types/react": ^18.0.0
+  checksum: 10c0/8bd309e2c3d1604a28a736a24f96cbadf6c05d5288cfef8883b74f4054c961b6b3a5e997fd5686e492be903c8f3380dba5ec017eff3906b1256529cd2d39603e
+  languageName: node
+  linkType: hard
+
 "@types/react-table@npm:^6.8.5":
   version: 6.8.15
   resolution: "@types/react-table@npm:6.8.15"
@@ -1887,6 +1899,16 @@ __metadata:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: 10c0/548b1d3d7c2f0242fbfdbbd658731b4ce69a134be072fa83e6ab516f2840402a3f20e3e7f72e95133b23d4880ef24a6d864050dc8e1f7c68f39fa87ca8445917
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.2.0":
+  version: 18.3.31
+  resolution: "@types/react@npm:18.3.31"
+  dependencies:
+    "@types/prop-types": "npm:*"
+    csstype: "npm:^3.2.2"
+  checksum: 10c0/44180549dd045f536ececd39e39aacdf828e76adc1c4a90b132f453e23cc370c4648d9102ae401172ebd8fd8b1977a901a39e214e53ec77171b27514b588c179
   languageName: node
   linkType: hard
 
@@ -3461,6 +3483,13 @@ __metadata:
   version: 3.1.3
   resolution: "csstype@npm:3.1.3"
   checksum: 10c0/80c089d6f7e0c5b2bd83cf0539ab41474198579584fa10d86d0cafe0642202343cbc119e076a0b1aece191989477081415d66c9fefbf3c957fc2fc4b7009f248
+  languageName: node
+  linkType: hard
+
+"csstype@npm:^3.2.2":
+  version: 3.2.3
+  resolution: "csstype@npm:3.2.3"
+  checksum: 10c0/cd29c51e70fa822f1cecd8641a1445bed7063697469d35633b516e60fe8c1bde04b08f6c5b6022136bb669b64c63d4173af54864510fbb4ee23281801841a3ce
   languageName: node
   linkType: hard
 
@@ -6917,6 +6946,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"math.gl-expression-playground@workspace:examples/expressions":
+  version: 0.0.0-use.local
+  resolution: "math.gl-expression-playground@workspace:examples/expressions"
+  dependencies:
+    "@math.gl/expressions": "npm:4.2.0-alpha.3"
+    "@types/react": "npm:^18.2.0"
+    "@types/react-dom": "npm:^18.2.0"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+    typescript: "npm:^6.0.2"
+    vite: "npm:^5.0.0"
+  languageName: unknown
+  linkType: soft
+
 "math.gl-monorepo@workspace:.":
   version: 0.0.0-use.local
   resolution: "math.gl-monorepo@workspace:."
@@ -8665,6 +8708,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-dom@npm:^18.2.0":
+  version: 18.3.1
+  resolution: "react-dom@npm:18.3.1"
+  dependencies:
+    loose-envify: "npm:^1.1.0"
+    scheduler: "npm:^0.23.2"
+  peerDependencies:
+    react: ^18.3.1
+  checksum: 10c0/a752496c1941f958f2e8ac56239172296fcddce1365ce45222d04a1947e0cc5547df3e8447f855a81d6d39f008d7c32eab43db3712077f09e3f67c4874973e85
+  languageName: node
+  linkType: hard
+
 "react-is@npm:^16.13.1, react-is@npm:^16.8.1":
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
@@ -8702,6 +8757,15 @@ __metadata:
     object-assign: "npm:^4.1.1"
     prop-types: "npm:^15.6.2"
   checksum: 10c0/df8faae43e01387013900e8f8fb3c4ce9935b7edbcbaa77e12999c913eb958000a0a8750bf9a0886dae0ad768dd4a4ee983752d5bade8d840adbe0ce890a2438
+  languageName: node
+  linkType: hard
+
+"react@npm:^18.2.0":
+  version: 18.3.1
+  resolution: "react@npm:18.3.1"
+  dependencies:
+    loose-envify: "npm:^1.1.0"
+  checksum: 10c0/283e8c5efcf37802c9d1ce767f302dd569dd97a70d9bb8c7be79a789b9902451e0d16334b05d73299b20f048cbc3c7d288bbbde10b701fa194e2089c237dbea3
   languageName: node
   linkType: hard
 
@@ -9246,6 +9310,15 @@ __metadata:
     loose-envify: "npm:^1.1.0"
     object-assign: "npm:^4.1.1"
   checksum: 10c0/9658932a73148a93d791c064b331d9690ddfecc4de25bcd6c9b89f5f1166e3d23d9c31c1595d66565e5ffbb34d47035cb14841aba6444bc266bfcd215cefe9c0
+  languageName: node
+  linkType: hard
+
+"scheduler@npm:^0.23.2":
+  version: 0.23.2
+  resolution: "scheduler@npm:0.23.2"
+  dependencies:
+    loose-envify: "npm:^1.1.0"
+  checksum: 10c0/26383305e249651d4c58e6705d5f8425f153211aef95f15161c151f7b8de885f24751b377e4a0b3dd42cce09aad3f87a61dab7636859c0d89b7daf1a1e2a5c78
   languageName: node
   linkType: hard
 

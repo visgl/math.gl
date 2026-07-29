@@ -2,6 +2,7 @@
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From-v4.2" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
 </p>
 
 `parseExpressionString(expression: string): (row: Record<string, unknown>) => unknown`

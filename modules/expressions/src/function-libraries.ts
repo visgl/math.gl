@@ -20,6 +20,7 @@ import {
   toRadians
 } from '@math.gl/core';
 import {Ellipsoid, isWGS84} from '@math.gl/geospatial';
+import type {ExpressionFunctionRegistry} from './function-registry';
 
 /**
  * A function that can be exposed to evaluated expressions.
@@ -39,6 +40,11 @@ export type ExpressionFunctionLibrary = Record<string, ExpressionFunction>;
  * Options shared by the synchronous and asynchronous expression evaluators.
  */
 export type ExpressionEvaluationOptions = {
+  /**
+   * Instance-scoped registry of named functions available to the expression.
+   */
+  registry?: ExpressionFunctionRegistry;
+
   /**
    * Function libraries to add to the evaluation context.
    *
@@ -141,15 +147,22 @@ export const GEOSPATIAL_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {
  *
  * @remarks
  * Libraries are merged from left to right, then overlaid with `context`.
- * The input objects are not modified.
+ * Registry functions have the lowest precedence. The input objects are not modified.
  */
 export function mergeFunctionLibraries(
   context: Record<string, unknown>,
   options?: ExpressionEvaluationOptions
 ): Record<string, unknown> {
   if (!options?.libraries?.length) {
-    return context;
+    if (!options?.registry) {
+      return context;
+    }
   }
 
-  return Object.assign({}, ...options.libraries, context);
+  return Object.assign(
+    {},
+    options.registry?.getFunctionTable(),
+    ...(options.libraries || []),
+    context
+  );
 }

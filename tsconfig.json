@@ -82,7 +82,7 @@
       }
     ]
   },
-  "include": ["modules/*/src", "modules/*/test"],
+  "include": ["modules/*/src", "modules/*/test", "examples/expressions"],
   "exclude": [
     "modules/core/test",
     "modules/polygon/test",

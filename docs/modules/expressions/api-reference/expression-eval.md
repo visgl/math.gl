@@ -2,6 +2,7 @@
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From-v4.2" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
 </p>
 
 The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
@@ -44,9 +45,10 @@ If `callback` is omitted, the second argument is treated as the evaluator implem
 
 `ExpressionEvaluationOptions` currently supports:
 
+- `registry?: ExpressionFunctionRegistry`
 - `libraries?: ExpressionFunctionLibrary[]`
 
-Each library is a `Record<string, ExpressionFunction>`. Libraries are merged left-to-right. A later library replaces same-named functions in an earlier library, and values supplied in the evaluation context take final precedence.
+Each library is a `Record<string, ExpressionFunction>`. Registry functions have the lowest precedence. Libraries are then merged left-to-right. A later library replaces same-named functions in an earlier library, and values supplied in the evaluation context take final precedence.
 
 ```ts
 import {
