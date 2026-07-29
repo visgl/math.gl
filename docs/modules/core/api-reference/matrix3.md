@@ -166,11 +166,11 @@ During vector transformation the given translation values are added to each comp
 
 ### transformVector()
 
-`transformVector(vector, out)`
+`transformVector(vector, result)`
 
 - `vector` (`Array`|`Vector2`|`Vector3`)
-- `out` - unless supplied, will be a `Vector2` or `Vector3`, matching the length of input vector.
-  Returns `out`, or a newly minted `Vector2` or `Vector3`.
+- `result` - unless supplied, will be a `Vector2` or `Vector3`, matching the length of input vector.
+  Returns `result`, or a newly minted `Vector2` or `Vector3`.
 
 ## Remarks
 

@@ -306,11 +306,11 @@ For performance, an existing vector can be provided, if not a new vector will be
 
 Transforms any 2, 3 or 4 element vector as a "point" by multiplying it (from the right) with this matrix. `Point` here means that the returned vector will include any translations in this matrix.
 
-`const vector = matrix4.transformPoint(vector, out=)`
+`const vector = matrix4.transformPoint(vector, result)`
 
 - `vector` (`Array`|`Vector2`|`Vector3`|`Vector4`)
-- `out` - unless supplied, will be a Vector2, Vector3 or Vector4, matching the length of input vector.
-  Returns `out`, or a newly minted `Vector2`, `Vector3` or `Vector4`
+- `result` - unless supplied, will be a Vector2, Vector3 or Vector4, matching the length of input vector.
+  Returns `result`, or a newly minted `Vector2`, `Vector3` or `Vector4`
 
 - If `vector` is specified in homogeneous coordinates, `w` coordinate must NOT be `0`.
 - If `vector` is specified in homogeneous coordinates the returned vector will be `w` adjusted, (i.e. `w` coordinate will be `1`, even if the supplied vector was not normalized).
@@ -319,7 +319,7 @@ Transforms any 2, 3 or 4 element vector as a "point" by multiplying it (from the
 
 Transforms any 2, 3 or 4 element vector interpreted as a direction (i.e. all vectors are based in the origin so the transformation not pick up any translations from the matrix).
 
-`const vector = matrix4.transformDirection(vector, out)`
+`const vector = matrix4.transformDirection(vector, result)`
 
 - If `vector` is specified in homogeneous coordinates, `w` coordinate must be `0`.
 

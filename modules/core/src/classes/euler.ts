@@ -289,24 +289,24 @@ export class Euler extends MathArray {
 
   /**
    * Creates a quaternion representing these Euler angles.
-   * @param target - Quaternion to update. A new instance is created when omitted.
+   * @param result - Quaternion to update. A new instance is created when omitted.
    * @returns The updated quaternion.
    */
-  getQuaternion(target: Quaternion = new Quaternion()): Quaternion {
-    target.identity();
+  getQuaternion(result: Quaternion = new Quaternion()): Quaternion {
+    result.identity();
     switch (this[3]) {
       case RotationOrder.XYZ:
-        return target.rotateX(this[0]).rotateY(this[1]).rotateZ(this[2]);
+        return result.rotateX(this[0]).rotateY(this[1]).rotateZ(this[2]);
       case RotationOrder.YXZ:
-        return target.rotateY(this[1]).rotateX(this[0]).rotateZ(this[2]);
+        return result.rotateY(this[1]).rotateX(this[0]).rotateZ(this[2]);
       case RotationOrder.ZXY:
-        return target.rotateZ(this[2]).rotateX(this[0]).rotateY(this[1]);
+        return result.rotateZ(this[2]).rotateX(this[0]).rotateY(this[1]);
       case RotationOrder.ZYX:
-        return target.rotateZ(this[2]).rotateY(this[1]).rotateX(this[0]);
+        return result.rotateZ(this[2]).rotateY(this[1]).rotateX(this[0]);
       case RotationOrder.YZX:
-        return target.rotateY(this[1]).rotateZ(this[2]).rotateX(this[0]);
+        return result.rotateY(this[1]).rotateZ(this[2]).rotateX(this[0]);
       case RotationOrder.XZY:
-        return target.rotateX(this[0]).rotateZ(this[2]).rotateY(this[1]);
+        return result.rotateX(this[0]).rotateZ(this[2]).rotateY(this[1]);
       default:
         throw new Error(ERR_UNKNOWN_ORDER);
     }
