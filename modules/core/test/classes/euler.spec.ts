@@ -102,7 +102,15 @@ test('Euler#getQuaternion', t => {
     const euler = new Euler(angles[0], angles[1], angles[2], order);
     const rotationMatrix = new Matrix4();
     euler.getRotationMatrix(rotationMatrix);
-    const quaternionMatrix = new Matrix4().fromQuaternion(euler.getQuaternion());
+    const target = new Quaternion(1, 2, 3, 4);
+    const quaternion = euler.getQuaternion(target);
+    const quaternionMatrix = new Matrix4().fromQuaternion(quaternion);
+
+    t.equal(
+      quaternion,
+      target,
+      `Euler.getQuaternion returns target for ${Euler.rotationOrder(order)}`
+    );
 
     tapeEquals(
       t,
