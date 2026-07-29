@@ -46,6 +46,10 @@ Creates a quaternion from the given 3x3 rotation matrix. NOTE: The resultant qua
 
 `fromMatrix3(m)`
 
+### fromEuler(euler: Euler): this
+
+Sets this quaternion from Euler angles and returns it.
+
 ### fromValues(x: number, y: number, z: number, w): number: this
 
 Creates a new quat initialized with the given values

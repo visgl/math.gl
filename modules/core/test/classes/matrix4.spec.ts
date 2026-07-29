@@ -44,6 +44,15 @@ test('Matrix4#fromQuaternion', t => {
   t.end();
 });
 
+test('Matrix4#fromMatrix3', t => {
+  const matrix4 = new Matrix4();
+  const result = matrix4.fromMatrix3([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+  t.equal(result, matrix4, 'returns this');
+  tapeEquals(t, result, [1, 2, 3, 0, 4, 5, 6, 0, 7, 8, 9, 0, 0, 0, 0, 1]);
+  t.end();
+});
+
 test('Matrix4#from', t => {
   tapeEquals(t, new Matrix4().from(INDICES_MATRIX), INDICES_MATRIX);
   // tapeEquals(t, new Matrix4().from({x: 1, y: 2, z: 3, w: 4}), [1, 2, 3, 4]);

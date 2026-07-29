@@ -113,7 +113,9 @@ Returns `Matrix4` - a rotation matrix corresponding to rotations per the specifi
 
 ### getQuaternion
 
-`euler.getQuaternion()`
+`euler.getQuaternion(quaternion = new Quaternion())`
+
+Returns the supplied quaternion, updated to represent these Euler angles.
 
 ## Remarks
 

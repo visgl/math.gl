@@ -5,6 +5,7 @@
 
 import {NumericArray, NumericArray16} from '@math.gl/types';
 import {Matrix} from './base/matrix';
+import type {Matrix3Like} from './matrix3';
 import {checkVector} from '../lib/validators';
 
 /* eslint-disable camelcase */
@@ -241,31 +242,29 @@ export class Matrix4 extends Matrix {
   }
 
   /**
-   * Calculates a 4x4 matrix from the given matrix3
-   * @param matrix3 
-   * @returns self
+   * Sets this matrix from a 3x3 matrix, with zero translation.
+   * @param matrix3 - 3x3 matrix in column-major order.
+   * @returns This matrix.
    */
-  fromMatrix3(matrix3: Readonly<NumericArray>): this {
-    this[0] = matrix3[0];
-    this[1] = matrix3[1];
-    this[2] = matrix3[2];
-    this[3] = 0;
-
-    this[4] = matrix3[3];
-    this[5] = matrix3[4];
-    this[6] = matrix3[5];
-    this[7] = 0;
-
-    this[8] = matrix3[6];
-    this[9] = matrix3[7];
-    this[10] = matrix3[8];
-    this[11] = 0;
-
-    this[12] = 0;
-    this[13] = 0;
-    this[14] = 0;
-    this[15] = 1;
-    return this.check();
+  fromMatrix3(matrix3: Readonly<Matrix3Like>): this {
+    return this.set(
+      matrix3[0],
+      matrix3[1],
+      matrix3[2],
+      0,
+      matrix3[3],
+      matrix3[4],
+      matrix3[5],
+      0,
+      matrix3[6],
+      matrix3[7],
+      matrix3[8],
+      0,
+      0,
+      0,
+      0,
+      1
+    );
   }
 
   /**

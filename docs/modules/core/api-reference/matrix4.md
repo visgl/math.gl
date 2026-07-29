@@ -99,6 +99,10 @@ Sets the matrix to a transformation corresponding to the rotations represented b
 
 - `quaternion` (`Quaternion`) - the quaternion to create matrix from
 
+##### `fromMatrix3(matrix3: Matrix3 | number[9]): this`
+
+Sets the upper-left 3x3 elements from `matrix3`, with zero translation.
+
 ##### `frustum(options: {left: number, right: number, bottom: number, top: number, near: number, far: number}): this`
 
 Generates a frustum matrix with the given bounds. The frustum far plane can be infinite.

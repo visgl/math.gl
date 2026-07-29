@@ -7,7 +7,7 @@
 import test from 'tape-promise/tape';
 import {tapeEquals} from 'test/utils/tape-assertions';
 
-import {Quaternion, Vector3} from '@math.gl/core';
+import {Euler, Matrix4, Quaternion, Vector3} from '@math.gl/core';
 
 test('Quaternion#import', t => {
   t.equals(typeof Quaternion, 'function');
@@ -56,6 +56,26 @@ test('Quaternion#fromMatrix3', t => {
     if (testCase.quaternion) {
       tapeEquals(t, result, testCase.quaternion, testCase.title);
     }
+  }
+
+  t.end();
+});
+
+test('Quaternion#fromEuler', t => {
+  const orders = [Euler.XYZ, Euler.YXZ, Euler.ZXY, Euler.ZYX, Euler.YZX, Euler.XZY];
+
+  for (const order of orders) {
+    const euler = new Euler(0.2, -0.4, 0.6, order);
+    const quaternion = new Quaternion(1, 2, 3, 4);
+    const result = quaternion.fromEuler(euler);
+
+    t.equal(result, quaternion, `${Euler.rotationOrder(order)} returns this`);
+    tapeEquals(
+      t,
+      new Matrix4().fromQuaternion(result),
+      euler.getRotationMatrix(new Matrix4()),
+      `${Euler.rotationOrder(order)} produces the expected rotation`
+    );
   }
 
   t.end();

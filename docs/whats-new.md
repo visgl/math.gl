@@ -56,6 +56,10 @@ Highlights:
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 - Stronger type guarantees for math classes via the new sized array types.
 
+**`@math.gl/core`**
+
+- Added `Matrix4.fromMatrix3()` and `Quaternion.fromEuler()` conversion helpers.
+
 **`@math.gl/expressions`** (NEW EXPERIMENTAL MODULE)
 
 - Promotes the expression parser previously embedded in `@deck.gl/json` to a documented experimental module.
