@@ -45,24 +45,16 @@
   </tbody>
 </table>
 
-## v5.0 (In planning)
-
-Release Date: TBD, maybe Q2, 2025.
-
-Goal: Stronger type guarantees for math classes via the new sized array types.
-
 ## v4.2 (In development)
 
-Release Date: TBD, maybe Q1, 2024.
+Target Release Date: Q2, 2026.
 
-Goals:
+Highlights:
 
+- TypeScript 6 compatibility.
+- New expression evaluator module
 - Functionality additions to improve 3D Tiles support in loaders.gl.
-
-**`@math.gl/geospatial`**
-
-- `makeOBBFromRegion()` - New function that creates a cartesian oriented bounding box from a geospatial region.
-- `EllipsoidTangentPlane` - New helper class for doing math on the ellipsoid surface.
+- Stronger type guarantees for math classes via the new sized array types.
 
 **`@math.gl/expressions`** (NEW EXPERIMENTAL MODULE)
 
@@ -72,6 +64,11 @@ Goals:
 - Adds isolated function registries and optional GeoHash, Quadkey, and S2 function tables.
 - Compiles restricted JSON-style accessor expressions with function calls disabled.
 - Includes an interactive expression playground with editable context and sample DGGS expressions.
+
+**`@math.gl/geospatial`**
+
+- `makeOBBFromRegion()` - New function that creates a cartesian oriented bounding box from a geospatial region.
+- `EllipsoidTangentPlane` - New helper class for doing math on the ellipsoid surface.
 
 ## v4.1
 
