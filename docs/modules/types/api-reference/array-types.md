@@ -73,3 +73,17 @@ Remarks:
 
 - Avoids type narrowing problems with `ArrayBuffer.isView()` (which accepts `DataViews` that do not support array methods).
 - Only the type of the first element in a standard array is checked to be a `number`.
+
+### `NativeFloat16ArrayConstructor`
+
+The native `Float16Array` constructor, or `undefined` when the current JavaScript runtime does not
+provide it.
+
+### `getFloat16ArrayConstructor()`
+
+Returns the native `Float16Array` constructor when available and `Uint16Array` otherwise. The
+fallback stores float16 bit patterns; it does not provide native float16 numeric semantics.
+
+### `isFloat16ArrayConstructor(value: unknown)`
+
+Returns `true` when the value is the native `Float16Array` constructor for the current runtime.
