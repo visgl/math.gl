@@ -45,6 +45,12 @@
   </tbody>
 </table>
 
+## v5.0 (In planning)
+
+Release Date: TBD, maybe Q2, 2025.
+
+Goal: Stronger type guarantees for math classes via the new sized array types.
+
 ## v4.2 (In development)
 
 Target Release Date: Q2, 2026.
