@@ -50,6 +50,7 @@
 Target Release Date: Q2, 2026.
 
 Highlights:
+
 - TypeScript 6 compatibility.
 - New expression evaluator module
 - Functionality additions to improve 3D Tiles support in loaders.gl.
