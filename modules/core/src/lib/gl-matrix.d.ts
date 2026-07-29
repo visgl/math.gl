@@ -2,6 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+// Float16Array is declared in a separate TypeScript library. This reference affects types only.
+// eslint-disable-next-line spaced-comment
+/// <reference lib="es2025.float16" preserve="true" />
+
+/**
+ * Numeric arrays accepted by the local gl-matrix compatibility declarations.
+ *
+ * @remarks Includes `Float16Array`; math.gl does not provide a runtime polyfill.
+ */
 type NumericArray =
   | Int8Array
   | Uint8Array
@@ -10,6 +19,7 @@ type NumericArray =
   | Int32Array
   | Uint32Array
   | Uint8ClampedArray
+  | Float16Array
   | Float32Array
   | Float64Array
   | number[];

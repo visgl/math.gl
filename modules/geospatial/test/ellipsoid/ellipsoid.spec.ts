@@ -27,6 +27,7 @@ const spaceCartesianGeodeticSurfaceNormal = new Vector3(
   0.25889908678270795
 );
 
+// [longitude, latitude, height] in degrees, degrees, and meters
 const spaceCartographic = new Vector3(-45.0, 15.0, 330000.0);
 const spaceCartographicGeodeticSurfaceNormal = new Vector3(
   0.68301270189221941,
@@ -126,7 +127,7 @@ test('Ellipsoid#geocentricSurfaceNormal works with a result parameter', (t) => {
   t.end();
 });
 
-test('Ellipsoid#cartographicToCartesian works without a result parameter', (t) => {
+test('Ellipsoid#cartographicToCartesian interprets degrees without a result parameter', (t) => {
   const ellipsoid = Ellipsoid.WGS84;
   const returnedResult = ellipsoid.cartographicToCartesian(spaceCartographic);
   tapeEqualsEpsilon(t, returnedResult, spaceCartesian, _MathUtils.EPSILON7);

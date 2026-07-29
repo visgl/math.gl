@@ -7,7 +7,20 @@ import test, {Test} from 'tape-promise/tape';
 import {Vector2, Vector3, Pose, _MathUtils} from '@math.gl/core';
 import {config, configure, isArray, clone, equals, exactEquals, formatValue} from '@math.gl/core';
 import {toRadians, toDegrees} from '@math.gl/core';
-import {radians, degrees, sin, cos, tan, asin, acos, atan, clamp, lerp} from '@math.gl/core';
+import {
+  radians,
+  degrees,
+  safeMod,
+  normalizeAngle,
+  sin,
+  cos,
+  tan,
+  asin,
+  acos,
+  atan,
+  clamp,
+  lerp
+} from '@math.gl/core';
 import {tapeEquals} from 'test/utils/tape-assertions';
 
 test('math.gl#tests', (t) => {
@@ -202,6 +215,23 @@ test('math.gl#degrees', (t) => {
     {input: Math.PI, result: 180},
     {input: [Math.PI, Math.PI, Math.PI], result: [180, 180, 180]}
   ]);
+  t.end();
+});
+
+test('math.gl#safeMod', (t) => {
+  t.equals(safeMod(1, 3), 1);
+  t.equals(safeMod(4, 3), 1);
+  t.equals(safeMod(-1, 3), 2);
+  t.equals(safeMod(-4, 3), 2);
+  t.end();
+});
+
+test('math.gl#normalizeAngle', (t) => {
+  t.equals(normalizeAngle(0, 'zero-to-two-pi'), 0);
+  t.equals(normalizeAngle(-Math.PI / 2, 'zero-to-two-pi'), (Math.PI * 3) / 2);
+  t.equals(normalizeAngle(Math.PI * 3, 'zero-to-two-pi'), Math.PI);
+  t.equals(normalizeAngle(Math.PI * 1.5, 'negative-pi-to-pi'), -Math.PI / 2);
+  t.equals(normalizeAngle(-Math.PI * 1.5, 'negative-pi-to-pi'), Math.PI / 2);
   t.end();
 });
 

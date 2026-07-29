@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["*.ts", "*.tsx", "*.d.ts"],
+  "compilerOptions": {
+    "allowJs": false,
+    "composite": false,
+    "jsx": "react-jsx",
+    "lib": ["DOM", "ES2020"],
+    "noEmit": true
+  }
+}

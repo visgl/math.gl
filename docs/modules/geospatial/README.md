@@ -15,23 +15,30 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 
 ## Classes
 
-| Class             | Description                                                     |
-| ----------------- | --------------------------------------------------------------- |
-| `Ellipsoid`       | Implements ellipsoid                                            |
-| `Ellipsoid.WSG84` | An `Ellipsoid` instance initialized with Earth radii per WGS84. |
+| Class                   | Description                                                                 |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `Ellipsoid`             | Implements ellipsoid math and cartographic/Cartesian conversions.           |
+| `Ellipsoid.WGS84`       | An `Ellipsoid` instance initialized with Earth radii per WGS84.             |
+| `EllipsoidTangentPlane` | Projects WGS84 Cartesian positions into a local east-north plane.           |
+| `LngLatRectangle`       | Represents a longitude-latitude rectangle, including antimeridian crossing. |
+
+## Functions
+
+| Function            | Description                                                     |
+| ------------------- | --------------------------------------------------------------- |
+| `makeOBBFromRegion` | Creates an oriented bounding box for a WGS84 geospatial region. |
 
 ## Usage Examples
 
-A major use of this library is to convert between "cartesian" (`x`, `y`, `z`) and "cartographic" (`longitude`, `latitude`, `height`) representations of WSG84 coordinates. The `Ellipsoid` class implements these calculations.
+A major use of this library is to convert between "cartesian" (`x`, `y`, `z`) and "cartographic" (`longitude` and `latitude` in degrees, `height` in meters above the ellipsoid) representations of WGS84 coordinates. The `Ellipsoid` class implements these calculations.
 
 ## Usage
 
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```js
-import {toRadians} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
-const cartographicPosition = [toRadians(21), toRadians(78), 5000];
+const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
 const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPosition);
 ```
 
@@ -43,11 +50,12 @@ const cartesianPosition = [17832.12, 83234.52, 952313.73];
 const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPosition);
 ```
 
-Get the transform from local east-north-up at cartographic (0.0, 0.0) to Earth's fixed frame.
+Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```js
 import {Ellipsoid} from '@math.gl/geospatial';
-const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame([0, 0, 0]);
+const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
+const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
 ```
 
 ## Framework Independence

@@ -30,7 +30,7 @@
     "noImplicitThis": true, // covered by strict
     "strictBindCallApply": true, // covered by strict
     "strictFunctionTypes": true, // covered by strict
-    "useUnknownInCatchVariables": true,  // covered by strict
+    "useUnknownInCatchVariables": true, // covered by strict
     // "strictNullChecks": true, // covered by strict
     // "strictPropertyInitialization": true, // covered by strict, requires strict null checks
 
@@ -55,6 +55,8 @@
       "@math.gl/dggs-s2/test/*": ["./modules/dggs-s2/test/*"],
       "@math.gl/dggs-quadkey/*": ["./modules/dggs-quadkey/src/*"],
       "@math.gl/dggs-quadkey/test/*": ["./modules/dggs-quadkey/test/*"],
+      "@math.gl/expressions/*": ["./modules/expressions/src/*"],
+      "@math.gl/expressions/test/*": ["./modules/expressions/test/*"],
       "@math.gl/geoid/*": ["./modules/geoid/src/*"],
       "@math.gl/geoid/test/*": ["./modules/geoid/test/*"],
       "@math.gl/geospatial/*": ["./modules/geospatial/src/*"],
@@ -84,11 +86,8 @@
       }
     ]
   },
-  "include":[
-    "modules/*/src",
-    "modules/*/test"
-  ],
-  "exclude":[
+  "include": ["modules/*/src", "modules/*/test", "examples/expressions"],
+  "exclude": [
     "modules/core/test",
     "modules/polygon/test",
     "modules/web-mercator/test",

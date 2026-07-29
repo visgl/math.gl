@@ -100,8 +100,8 @@ export function cutPolygonByMercatorBounds(
     // Each part is guaranteed to be in a single copy of the world
     // Map longitudes back to [-180, 180]
     for (const part of parts) {
-      // @ts-expect-error (mutates readonly array) May mutate newPositions, which is created by us
-      shiftLongitudesIntoRange(part.positions, size);
+      // May mutate newPositions, which is created by us.
+      shiftLongitudesIntoRange(part.positions as NumericArray, size);
     }
   }
   return parts;

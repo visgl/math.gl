@@ -6,19 +6,15 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 import {Vector2, Vector3, Matrix4} from '@math.gl/core';
-import {Plane, Ray} from '@math.gl/culling';
+import {Plane} from '@math.gl/culling';
 import {Ellipsoid} from './ellipsoid';
 
 const scratchOrigin = new Vector3();
 const scratchCart3 = new Vector3();
 const scratchEastNorthUp = new Matrix4();
-const scratchPlane = new Plane();
-
-const scratchProjectPointOntoPlaneRay = new Ray();
 const scratchProjectPointOntoPlaneCartesian3 = new Vector3();
-const scratchDirection = new Vector3();
 
-/** A plane tangent to the WGS84 ellipsoid at the provided origin */
+/** A two-dimensional east-north plane tangent to the WGS84 ellipsoid. */
 export class EllipsoidTangentPlane {
   private _origin: Vector3;
   private _xAxis: Vector3;
@@ -27,45 +23,40 @@ export class EllipsoidTangentPlane {
 
   /**
    * Creates a new plane tangent to the WGS84 ellipsoid at the provided origin.
-   * If origin is not on the surface of the ellipsoid, it's surface projection will be used.
+   * If origin is not on the surface of the ellipsoid, its surface projection will be used.
    *
-   * @param {Cartesian3} origin The point on the surface of the ellipsoid where the tangent plane touches.
+   * @param origin A nonzero WGS84 Cartesian point.
    */
   constructor(origin: number[]) {
-    origin = Ellipsoid.WGS84.scaleToGeodeticSurface(origin, scratchOrigin);
+    const originOnSurface = Ellipsoid.WGS84.scaleToGeodeticSurface(origin, scratchOrigin);
 
-    const eastNorthUp = Ellipsoid.WGS84.eastNorthUpToFixedFrame(origin, scratchEastNorthUp);
+    const eastNorthUp = Ellipsoid.WGS84.eastNorthUpToFixedFrame(
+      originOnSurface,
+      scratchEastNorthUp
+    );
 
-    this._origin = origin as Vector3;
+    this._origin = new Vector3(originOnSurface);
     this._xAxis = new Vector3(scratchCart3.from(eastNorthUp.getColumn(0)));
     this._yAxis = new Vector3(scratchCart3.from(eastNorthUp.getColumn(1)));
     const normal = new Vector3(scratchCart3.from(eastNorthUp.getColumn(2)));
 
-    this._plane = scratchPlane.fromPointNormal(origin, normal);
+    this._plane = new Plane().fromPointNormal(this._origin, normal);
   }
 
   /**
    * Computes the projection of the provided 3D position onto the 2D plane, along the plane normal.
    *
-   * @param {Vector3} cartesian The point to project.
-   * @param {Vector2} [result] The object onto which to store the result.
-   * @returns {Vector2} The modified result parameter or a new Cartesian2 instance if none was provided.
+   * @param cartesian The WGS84 Cartesian point to project.
+   * @param result The optional object in which to store the local east-north coordinates.
+   * @returns The supplied result or a new Vector2.
    */
   projectPointToNearestOnPlane(cartesian: Vector3, result?: Vector2): Vector2 {
     if (!result) result = new Vector2();
 
-    const plane = this._plane;
-
-    const ray = scratchProjectPointOntoPlaneRay;
-    scratchProjectPointOntoPlaneRay.origin = cartesian;
-    scratchProjectPointOntoPlaneRay.direction = scratchDirection.copy(plane.normal);
-
-    let intersectionPoint = plane.intersectWithRay(ray, scratchProjectPointOntoPlaneCartesian3);
-
-    if (!intersectionPoint) {
-      ray.direction = ray.direction.negate();
-      intersectionPoint = plane.intersectWithRay(ray, scratchProjectPointOntoPlaneCartesian3);
-    }
+    const intersectionPoint = this._plane.projectPointOntoPlane(
+      cartesian,
+      scratchProjectPointOntoPlaneCartesian3
+    );
 
     const v = intersectionPoint.subtract(this._origin);
     const x = this._xAxis.dot(v);
@@ -76,23 +67,23 @@ export class EllipsoidTangentPlane {
     return result;
   }
 
-  get plane() {
+  get plane(): Plane {
     return this._plane;
   }
 
-  get origin() {
+  get origin(): Vector3 {
     return this._origin;
   }
 
-  get xAxis() {
+  get xAxis(): Vector3 {
     return this._xAxis;
   }
 
-  get yAxis() {
+  get yAxis(): Vector3 {
     return this._yAxis;
   }
 
-  get zAxis() {
+  get zAxis(): Vector3 {
     return this._plane.normal;
   }
 }
