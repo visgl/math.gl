@@ -21,6 +21,9 @@ export type {
 export type {isTypedArray, isNumberArray, isNumericArray} from '@math.gl/types';
 
 // classes
+export {MathArray as _MathArray} from './classes/base/math-array';
+export {Matrix as _Matrix} from './classes/base/matrix';
+export {Vector as _Vector} from './classes/base/vector';
 export {Vector2} from './classes/vector2';
 export {Vector3} from './classes/vector3';
 export {Vector4} from './classes/vector4';
