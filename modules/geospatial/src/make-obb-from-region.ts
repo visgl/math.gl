@@ -49,12 +49,13 @@ const VECTOR3_UNIT_Z = new Vector3(0, 0, 1);
  * Computes an OrientedBoundingBox that bounds a region on the surface of the WGS84 ellipsoid.
  * There are no guarantees about the orientation of the bounding box.
  *
- * @param {number[]} region The cartographic region ([west, south, east, north, minimum height, maximum height])
- *                          on the surface of the ellipsoid.
- * @returns {OrientedBoundingBox} The modified result parameter or a new OrientedBoundingBox instance if none was provided.
+ * @param region The cartographic region ([west, south, east, north, minimum height, maximum height])
+ * on the surface of the ellipsoid. Longitude and latitude values are in radians; heights are in
+ * meters.
+ * @returns A new OrientedBoundingBox that encloses the region.
  */
 // eslint-disable-next-line max-statements
-export function makeOBBfromRegion(region: number[]): OrientedBoundingBox {
+export function makeOBBFromRegion(region: readonly number[]): OrientedBoundingBox {
   const obb = new OrientedBoundingBox();
 
   const [west, south, east, north, minimumHeight, maximumHeight] = region;
@@ -261,9 +262,7 @@ export function makeOBBfromRegion(region: number[]): OrientedBoundingBox {
   );
 }
 
-const scratchScale = new Vector3();
-
-/** helper function for OrientedBoundingBox.fromRegion() */
+/** Helper function for makeOBBFromRegion(). */
 // eslint-disable-next-line max-params
 function fromPlaneExtents(
   planeOrigin: Vector3,
@@ -284,20 +283,24 @@ function fromPlaneExtents(
   halfAxes.setColumn(1, planeYAxis);
   halfAxes.setColumn(2, planeZAxis);
 
-  let centerOffset = scratchOffset;
-  centerOffset.x = (minimumX + maximumX) / 2.0;
-  centerOffset.y = (minimumY + maximumY) / 2.0;
-  centerOffset.z = (minimumZ + maximumZ) / 2.0;
-  centerOffset = halfAxes.multiplyByVector(centerOffset, scratchOffset);
+  const centerOffset = scratchOffset
+    .set((minimumX + maximumX) / 2.0, (minimumY + maximumY) / 2.0, (minimumZ + maximumZ) / 2.0)
+    .transformByMatrix3(halfAxes);
 
-  const scale = scratchScale;
-  scale.x = (maximumX - minimumX) / 2.0;
-  scale.y = (maximumY - minimumY) / 2.0;
-  scale.z = (maximumZ - minimumZ) / 2.0;
+  const scaleX = (maximumX - minimumX) / 2.0;
+  const scaleY = (maximumY - minimumY) / 2.0;
+  const scaleZ = (maximumZ - minimumZ) / 2.0;
+  halfAxes[0] *= scaleX;
+  halfAxes[1] *= scaleX;
+  halfAxes[2] *= scaleX;
+  halfAxes[3] *= scaleY;
+  halfAxes[4] *= scaleY;
+  halfAxes[5] *= scaleY;
+  halfAxes[6] *= scaleZ;
+  halfAxes[7] *= scaleZ;
+  halfAxes[8] *= scaleZ;
 
-  planeOrigin = center.copy(planeOrigin);
-  result.center = planeOrigin.add(centerOffset);
-  result.halfAxes = halfAxes.multiplyByScale(scale, halfAxes);
+  center.copy(planeOrigin).add(centerOffset);
 
   return result;
 }

@@ -15,6 +15,7 @@ The culling module does not attempt to be a general "physics-based" collision de
 | `BoundingSphere`      |             |
 | `OrientedBoundingBox` |             |
 | `Plane`               |             |
+| `Ray`                 |             |
 
 ## Example Usage
 

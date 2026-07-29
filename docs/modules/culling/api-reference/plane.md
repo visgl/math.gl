@@ -103,6 +103,17 @@ Returns
 
 - The modified result parameter or a new `Vector3` instance if one was not provided.
 
+### intersectWithRay(ray : Ray, result? : Vector3) : Vector3 | undefined
+
+Computes the forward intersection between a ray and the plane.
+
+- `ray` - The ray to intersect with the plane.
+- `result` - Optional `Vector3` in which to store the intersection point.
+
+Returns the supplied `result` or a new `Vector3` when the ray intersects the plane in its forward
+direction. Returns `undefined` when the ray is parallel to the plane or the intersection is behind
+the ray origin.
+
 ### transform(transform : Number[16]) : Plane
 
 Transforms the plane by the given transformation matrix.

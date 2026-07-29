@@ -56,6 +56,22 @@ Works on single values and vectors
 
 Works on single values and vectors
 
+### safeMod
+
+`safeMod(dividend, divisor)`
+
+Returns a modulo result that follows the sign of the divisor, including when the dividend is
+negative.
+
+### normalizeAngle
+
+`normalizeAngle(angle, range)`
+
+Normalizes an angle in radians. `range` is either:
+
+- `'zero-to-two-pi'` for the range from 0 to 2π
+- `'negative-pi-to-pi'` for the range from -π to π
+
 ### equals
 
 `equals(a, b, epsilon)`
