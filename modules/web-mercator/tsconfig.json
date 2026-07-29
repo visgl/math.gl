@@ -9,6 +9,7 @@
     "outDir": "dist"
   },
   "references": [
-    {"path": "../types"}
+    {"path": "../types"},
+    {"path": "../core"}
   ]
 }
