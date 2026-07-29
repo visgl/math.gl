@@ -6,7 +6,7 @@ import test from 'tape-promise/tape';
 import {tapeEquals} from 'test/utils/tape-assertions';
 
 import {_MathUtils, Vector3, Matrix4} from '@math.gl/core';
-import {Plane} from '@math.gl/culling';
+import {Plane, Ray} from '@math.gl/culling';
 
 const UNIT_X = [1, 0, 0];
 const UNIT_Y = [0, 1, 0];
@@ -146,6 +146,37 @@ test('Plane#projectPointOntoPlane uses result parameter', (t) => {
 
 test('Plane#projectPointOntoPlane requires the point parameter', (t) => {
   t.throws(() => new Plane(UNIT_X, 0).projectPointOntoPlane(undefined));
+  t.end();
+});
+
+test('Plane#intersectWithRay returns the forward intersection without mutating the ray', (t) => {
+  const plane = new Plane(UNIT_X, -2);
+  const ray = new Ray(new Vector3(0, 1, 0), new Vector3(1, 0, 0));
+  const originalOrigin = ray.origin.clone();
+  const originalDirection = ray.direction.clone();
+  const result = new Vector3();
+
+  const returnedResult = plane.intersectWithRay(ray, result);
+
+  t.equals(returnedResult, result, 'returns the supplied result');
+  tapeEquals(t, result, [2, 1, 0]);
+  tapeEquals(t, ray.origin, originalOrigin, 'does not mutate the ray origin');
+  tapeEquals(t, ray.direction, originalDirection, 'does not mutate the ray direction');
+  t.end();
+});
+
+test('Plane#intersectWithRay returns undefined for parallel or backward rays', (t) => {
+  const plane = new Plane(UNIT_X, -2);
+  t.equals(
+    plane.intersectWithRay(new Ray(new Vector3(0, 0, 0), new Vector3(0, 1, 0))),
+    undefined,
+    'parallel ray'
+  );
+  t.equals(
+    plane.intersectWithRay(new Ray(new Vector3(0, 0, 0), new Vector3(-1, 0, 0))),
+    undefined,
+    'ray points away from plane'
+  );
   t.end();
 });
 

@@ -59,7 +59,7 @@ Goals:
 
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 
-**`@math.gl/geopspatial`**
+**`@math.gl/geospatial`**
 
 - `makeOBBFromRegion()` - New function that creates a cartesian oriented bounding box from a geospatial region.
 - `EllipsoidTangentPlane` - New helper class for doing math on the ellipsoid surface.

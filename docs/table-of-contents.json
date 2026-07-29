@@ -100,7 +100,8 @@
           "modules/culling/api-reference/bounding-volume",
           "modules/culling/api-reference/culling-volume",
           "modules/culling/api-reference/oriented-bounding-box",
-          "modules/culling/api-reference/plane"
+          "modules/culling/api-reference/plane",
+          "modules/culling/api-reference/ray"
         ]
       },
       {
@@ -119,6 +120,8 @@
           "modules/geospatial/README",
           "modules/geospatial/api-reference/ellipsoid",
           "modules/geospatial/api-reference/ellipsoid-tangent-plane",
+          "modules/geospatial/api-reference/lng-lat-rectangle",
+          "modules/geospatial/api-reference/make-obb-from-region",
           "modules/geospatial/api-reference/helpers"
         ]
       },

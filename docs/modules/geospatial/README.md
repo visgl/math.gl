@@ -15,10 +15,18 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 
 ## Classes
 
-| Class             | Description                                                     |
-| ----------------- | --------------------------------------------------------------- |
-| `Ellipsoid`       | Implements ellipsoid                                            |
-| `Ellipsoid.WSG84` | An `Ellipsoid` instance initialized with Earth radii per WGS84. |
+| Class                   | Description                                                                 |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `Ellipsoid`             | Implements ellipsoid math and cartographic/Cartesian conversions.           |
+| `Ellipsoid.WGS84`       | An `Ellipsoid` instance initialized with Earth radii per WGS84.             |
+| `EllipsoidTangentPlane` | Projects WGS84 Cartesian positions into a local east-north plane.           |
+| `LngLatRectangle`       | Represents a longitude-latitude rectangle, including antimeridian crossing. |
+
+## Functions
+
+| Function            | Description                                                     |
+| ------------------- | --------------------------------------------------------------- |
+| `makeOBBFromRegion` | Creates an oriented bounding box for a WGS84 geospatial region. |
 
 ## Usage Examples
 

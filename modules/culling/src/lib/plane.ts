@@ -93,11 +93,9 @@ export class Plane {
    *
    * @param {Ray} ray The ray.
    * @param {Vector3} [result] The object onto which to store the result.
-   * @returns {Vector3} The intersection point or undefined if there is no intersections.
+   * @returns {Vector3} The intersection point or undefined if there is no intersection.
    */
-  intersectWithRay(ray: Ray, result?: Vector3): Vector3 {
-    if (!result) result = new Vector3();
-
+  intersectWithRay(ray: Ray, result: Vector3 = new Vector3()): Vector3 | undefined {
     const origin = ray.origin;
     const direction = ray.direction;
     const normal = this.normal;
@@ -113,7 +111,6 @@ export class Plane {
       return undefined;
     }
 
-    result = result.copy(direction).multiplyByScalar(t);
-    return origin.add(result);
+    return result.copy(direction).multiplyByScalar(t).add(origin);
   }
 }
