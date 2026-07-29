@@ -808,36 +808,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/core@npm:4.2.0-alpha.1, @math.gl/core@workspace:modules/core":
+"@math.gl/core@npm:4.2.0-alpha.3, @math.gl/core@workspace:modules/core":
   version: 0.0.0-use.local
   resolution: "@math.gl/core@workspace:modules/core"
   dependencies:
-    "@math.gl/types": "npm:4.2.0-alpha.1"
+    "@math.gl/types": "npm:4.2.0-alpha.3"
   languageName: unknown
   linkType: soft
 
-"@math.gl/culling@npm:4.2.0-alpha.1, @math.gl/culling@workspace:modules/culling":
+"@math.gl/culling@npm:4.2.0-alpha.3, @math.gl/culling@workspace:modules/culling":
   version: 0.0.0-use.local
   resolution: "@math.gl/culling@workspace:modules/culling"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.1"
-    "@math.gl/types": "npm:4.2.0-alpha.1"
+    "@math.gl/core": "npm:4.2.0-alpha.3"
+    "@math.gl/types": "npm:4.2.0-alpha.3"
   languageName: unknown
   linkType: soft
 
-"@math.gl/dggs-geohash@workspace:modules/dggs-geohash":
+"@math.gl/dggs-geohash@npm:4.2.0-alpha.3, @math.gl/dggs-geohash@workspace:modules/dggs-geohash":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs-geohash@workspace:modules/dggs-geohash"
   languageName: unknown
   linkType: soft
 
-"@math.gl/dggs-quadkey@workspace:modules/dggs-quadkey":
+"@math.gl/dggs-quadkey@npm:4.2.0-alpha.3, @math.gl/dggs-quadkey@workspace:modules/dggs-quadkey":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs-quadkey@workspace:modules/dggs-quadkey"
   languageName: unknown
   linkType: soft
 
-"@math.gl/dggs-s2@workspace:modules/dggs-s2":
+"@math.gl/dggs-s2@npm:4.2.0-alpha.3, @math.gl/dggs-s2@workspace:modules/dggs-s2":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs-s2@workspace:modules/dggs-s2"
   dependencies:
@@ -845,21 +845,34 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@math.gl/expressions@npm:4.2.0-alpha.3, @math.gl/expressions@workspace:modules/expressions":
+  version: 0.0.0-use.local
+  resolution: "@math.gl/expressions@workspace:modules/expressions"
+  dependencies:
+    "@math.gl/core": "npm:4.2.0-alpha.3"
+    "@math.gl/dggs-geohash": "npm:4.2.0-alpha.3"
+    "@math.gl/dggs-quadkey": "npm:4.2.0-alpha.3"
+    "@math.gl/dggs-s2": "npm:4.2.0-alpha.3"
+    "@math.gl/geospatial": "npm:4.2.0-alpha.3"
+    jsep: "npm:^1.4.0"
+  languageName: unknown
+  linkType: soft
+
 "@math.gl/geoid@workspace:modules/geoid":
   version: 0.0.0-use.local
   resolution: "@math.gl/geoid@workspace:modules/geoid"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.1"
+    "@math.gl/core": "npm:4.2.0-alpha.3"
   languageName: unknown
   linkType: soft
 
-"@math.gl/geospatial@workspace:modules/geospatial":
+"@math.gl/geospatial@npm:4.2.0-alpha.3, @math.gl/geospatial@workspace:modules/geospatial":
   version: 0.0.0-use.local
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.1"
-    "@math.gl/culling": "npm:4.2.0-alpha.1"
-    "@math.gl/types": "npm:4.2.0-alpha.1"
+    "@math.gl/core": "npm:4.2.0-alpha.3"
+    "@math.gl/culling": "npm:4.2.0-alpha.3"
+    "@math.gl/types": "npm:4.2.0-alpha.3"
   languageName: unknown
   linkType: soft
 
@@ -867,7 +880,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/polygon@workspace:modules/polygon"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.1"
+    "@math.gl/core": "npm:4.2.0-alpha.3"
   languageName: unknown
   linkType: soft
 
@@ -875,7 +888,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/proj4@workspace:modules/proj4"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.1"
+    "@math.gl/core": "npm:4.2.0-alpha.3"
     "@types/proj4": "npm:^2.5.0"
     proj4: "npm:2.6.2"
   languageName: unknown
@@ -894,7 +907,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/types@npm:4.2.0-alpha.1, @math.gl/types@workspace:modules/types":
+"@math.gl/types@npm:4.2.0-alpha.3, @math.gl/types@workspace:modules/types":
   version: 0.0.0-use.local
   resolution: "@math.gl/types@workspace:modules/types"
   languageName: unknown
@@ -904,7 +917,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/web-mercator@workspace:modules/web-mercator"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.1"
+    "@math.gl/core": "npm:4.2.0-alpha.3"
     mock-browser: "npm:^0.92.14"
   languageName: unknown
   linkType: soft
@@ -1861,6 +1874,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-dom@npm:^18.2.0":
+  version: 18.3.7
+  resolution: "@types/react-dom@npm:18.3.7"
+  peerDependencies:
+    "@types/react": ^18.0.0
+  checksum: 10c0/8bd309e2c3d1604a28a736a24f96cbadf6c05d5288cfef8883b74f4054c961b6b3a5e997fd5686e492be903c8f3380dba5ec017eff3906b1256529cd2d39603e
+  languageName: node
+  linkType: hard
+
 "@types/react-table@npm:^6.8.5":
   version: 6.8.15
   resolution: "@types/react-table@npm:6.8.15"
@@ -1877,6 +1899,16 @@ __metadata:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: 10c0/548b1d3d7c2f0242fbfdbbd658731b4ce69a134be072fa83e6ab516f2840402a3f20e3e7f72e95133b23d4880ef24a6d864050dc8e1f7c68f39fa87ca8445917
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.2.0":
+  version: 18.3.31
+  resolution: "@types/react@npm:18.3.31"
+  dependencies:
+    "@types/prop-types": "npm:*"
+    csstype: "npm:^3.2.2"
+  checksum: 10c0/44180549dd045f536ececd39e39aacdf828e76adc1c4a90b132f453e23cc370c4648d9102ae401172ebd8fd8b1977a901a39e214e53ec77171b27514b588c179
   languageName: node
   linkType: hard
 
@@ -2049,9 +2081,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vis.gl/dev-tools@npm:1.0.0-alpha.19":
-  version: 1.0.0-alpha.19
-  resolution: "@vis.gl/dev-tools@npm:1.0.0-alpha.19"
+"@vis.gl/dev-tools@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@vis.gl/dev-tools@npm:1.0.2"
   dependencies:
     "@esbuild-plugins/node-globals-polyfill": "npm:^0.2.0"
     "@esbuild-plugins/node-modules-polyfill": "npm:^0.2.0"
@@ -2092,19 +2124,19 @@ __metadata:
     ocular-metrics: scripts/metrics.js
     ocular-publish: scripts/publish.js
     ocular-test: scripts/test.js
-  checksum: 10c0/7fc365a758603a5a87cf28e00d8aa7761301519fc09be1f62d344743525940b176ae3e3b997526639b5346ba4ee64f75bb2e7ac9bf7633420fa6b00859bbb271
+  checksum: 10c0/692d8d5c2d77932b2c8e0b500b09c266633090154a5bdb6cf990f40494ea8a3772b35b29530b8424e5d18faa4898f1769e0daebffab80aec4e5b8f2317d55b48
   languageName: node
   linkType: hard
 
-"@vis.gl/ts-plugins@npm:1.0.0-alpha.19":
-  version: 1.0.0-alpha.19
-  resolution: "@vis.gl/ts-plugins@npm:1.0.0-alpha.19"
+"@vis.gl/ts-plugins@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@vis.gl/ts-plugins@npm:1.0.2"
   dependencies:
     "@luma.gl/constants": "npm:^9.0.0"
     minimatch: "npm:^3.0.0"
     ts-patch: "npm:^3.1.2"
     typescript: "npm:^5.2.2"
-  checksum: 10c0/967b8952c8a449da008db51a0b0cc8d0c50e9ac571d6c1379c4407d276e8bd34b634829ad001c7604412fe09c7d09bc88ae03dc4fe8a48bad4c81c19f61ba55b
+  checksum: 10c0/995a27df25124f10971edaf2cbd547664b90270357b4f59bfa23e32e2dd1f973a4cb3048a00bf7a108f38a78c107fb7af5c3e231aac647be07537ff6cf90eff7
   languageName: node
   linkType: hard
 
@@ -3451,6 +3483,13 @@ __metadata:
   version: 3.1.3
   resolution: "csstype@npm:3.1.3"
   checksum: 10c0/80c089d6f7e0c5b2bd83cf0539ab41474198579584fa10d86d0cafe0642202343cbc119e076a0b1aece191989477081415d66c9fefbf3c957fc2fc4b7009f248
+  languageName: node
+  linkType: hard
+
+"csstype@npm:^3.2.2":
+  version: 3.2.3
+  resolution: "csstype@npm:3.2.3"
+  checksum: 10c0/cd29c51e70fa822f1cecd8641a1445bed7063697469d35633b516e60fe8c1bde04b08f6c5b6022136bb669b64c63d4173af54864510fbb4ee23281801841a3ce
   languageName: node
   linkType: hard
 
@@ -5241,14 +5280,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"global-prefix@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "global-prefix@npm:3.0.0"
+"global-prefix@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "global-prefix@npm:4.0.0"
   dependencies:
-    ini: "npm:^1.3.5"
-    kind-of: "npm:^6.0.2"
-    which: "npm:^1.3.1"
-  checksum: 10c0/510f489fb68d1cc7060f276541709a0ee6d41356ef852de48f7906c648ac223082a1cc8fce86725ca6c0e032bcdc1189ae77b4744a624b29c34a9d0ece498269
+    ini: "npm:^4.1.3"
+    kind-of: "npm:^6.0.3"
+    which: "npm:^4.0.0"
+  checksum: 10c0/a757bba494f0542a34e82716450506a076e769e05993a9739aea3bf27c3f710cd5635d0f4c1c242650c0dc133bf20a8e8fc9cfd3d1d1c371717218ef561f1ac4
   languageName: node
   linkType: hard
 
@@ -5631,7 +5670,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ini@npm:^1.3.2, ini@npm:^1.3.5, ini@npm:^1.3.8":
+"ini@npm:^1.3.2, ini@npm:^1.3.8":
   version: 1.3.8
   resolution: "ini@npm:1.3.8"
   checksum: 10c0/ec93838d2328b619532e4f1ff05df7909760b6f66d9c9e2ded11e5c1897d6f2f9980c54dd638f88654b00919ce31e827040631eab0a3969e4d1abefa0719516a
@@ -6314,6 +6353,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jsep@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "jsep@npm:1.4.0"
+  checksum: 10c0/fe60adf47e050e22eadced42514a51a15a3cf0e2d147896584486acd8ee670fc16641101b9aeb81f4aaba382043d29744b7aac41171e8106515b14f27e0c7116
+  languageName: node
+  linkType: hard
+
 "json-buffer@npm:3.0.1":
   version: 3.0.1
   resolution: "json-buffer@npm:3.0.1"
@@ -6900,6 +6946,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"math.gl-expression-playground@workspace:examples/expressions":
+  version: 0.0.0-use.local
+  resolution: "math.gl-expression-playground@workspace:examples/expressions"
+  dependencies:
+    "@math.gl/expressions": "npm:4.2.0-alpha.3"
+    "@types/react": "npm:^18.2.0"
+    "@types/react-dom": "npm:^18.2.0"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+    typescript: "npm:^6.0.2"
+    vite: "npm:^5.0.0"
+  languageName: unknown
+  linkType: soft
+
 "math.gl-monorepo@workspace:.":
   version: 0.0.0-use.local
   resolution: "math.gl-monorepo@workspace:."
@@ -6907,8 +6967,8 @@ __metadata:
     "@probe.gl/bench": "npm:^4.0.0"
     "@turf/destination": "npm:^6.0.1"
     "@types/tape-promise": "npm:^4.0.1"
-    "@vis.gl/dev-tools": "npm:1.0.0-alpha.19"
-    "@vis.gl/ts-plugins": "npm:1.0.0-alpha.19"
+    "@vis.gl/dev-tools": "npm:^1.0.2"
+    "@vis.gl/ts-plugins": "npm:^1.0.2"
     pre-commit: "npm:^1.2.2"
     puppeteer: "npm:^22.0.0"
     tap-spec: "npm:^5.0.0"
@@ -6919,7 +6979,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math.gl@workspace:modules/main"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.1"
+    "@math.gl/core": "npm:4.2.0-alpha.3"
   languageName: unknown
   linkType: soft
 
@@ -7271,11 +7331,11 @@ __metadata:
   linkType: hard
 
 "nanoid@npm:^3.3.7":
-  version: 3.3.7
-  resolution: "nanoid@npm:3.3.7"
+  version: 3.3.8
+  resolution: "nanoid@npm:3.3.8"
   bin:
     nanoid: bin/nanoid.cjs
-  checksum: 10c0/e3fb661aa083454f40500473bb69eedb85dc160e763150b9a2c567c7e9ff560ce028a9f833123b618a6ea742e311138b591910e795614a629029e86e180660f3
+  checksum: 10c0/4b1bb29f6cfebf3be3bc4ad1f1296fb0a10a3043a79f34fbffe75d1621b4318319211cd420549459018ea3592f0d2f159247a6f874911d6d26eaaadda2478120
   languageName: node
   linkType: hard
 
@@ -8648,6 +8708,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-dom@npm:^18.2.0":
+  version: 18.3.1
+  resolution: "react-dom@npm:18.3.1"
+  dependencies:
+    loose-envify: "npm:^1.1.0"
+    scheduler: "npm:^0.23.2"
+  peerDependencies:
+    react: ^18.3.1
+  checksum: 10c0/a752496c1941f958f2e8ac56239172296fcddce1365ce45222d04a1947e0cc5547df3e8447f855a81d6d39f008d7c32eab43db3712077f09e3f67c4874973e85
+  languageName: node
+  linkType: hard
+
 "react-is@npm:^16.13.1, react-is@npm:^16.8.1":
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
@@ -8685,6 +8757,15 @@ __metadata:
     object-assign: "npm:^4.1.1"
     prop-types: "npm:^15.6.2"
   checksum: 10c0/df8faae43e01387013900e8f8fb3c4ce9935b7edbcbaa77e12999c913eb958000a0a8750bf9a0886dae0ad768dd4a4ee983752d5bade8d840adbe0ce890a2438
+  languageName: node
+  linkType: hard
+
+"react@npm:^18.2.0":
+  version: 18.3.1
+  resolution: "react@npm:18.3.1"
+  dependencies:
+    loose-envify: "npm:^1.1.0"
+  checksum: 10c0/283e8c5efcf37802c9d1ce767f302dd569dd97a70d9bb8c7be79a789b9902451e0d16334b05d73299b20f048cbc3c7d288bbbde10b701fa194e2089c237dbea3
   languageName: node
   linkType: hard
 
@@ -9232,6 +9313,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"scheduler@npm:^0.23.2":
+  version: 0.23.2
+  resolution: "scheduler@npm:0.23.2"
+  dependencies:
+    loose-envify: "npm:^1.1.0"
+  checksum: 10c0/26383305e249651d4c58e6705d5f8425f153211aef95f15161c151f7b8de885f24751b377e4a0b3dd42cce09aad3f87a61dab7636859c0d89b7daf1a1e2a5c78
+  languageName: node
+  linkType: hard
+
 "schema-utils@npm:^1.0.0":
   version: 1.0.0
   resolution: "schema-utils@npm:1.0.0"
@@ -9272,7 +9362,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.0.0, semver@npm:^7.1.1, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.6.3":
+"semver@npm:^7.0.0, semver@npm:^7.1.1, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.3.8, semver@npm:^7.5.3, semver@npm:^7.6.0, semver@npm:^7.6.3":
   version: 7.6.3
   resolution: "semver@npm:7.6.3"
   bin:
@@ -10156,20 +10246,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-patch@npm:^3.1.2":
-  version: 3.2.1
-  resolution: "ts-patch@npm:3.2.1"
+"ts-patch@npm:3.3.0":
+  version: 3.3.0
+  resolution: "ts-patch@npm:3.3.0"
   dependencies:
     chalk: "npm:^4.1.2"
-    global-prefix: "npm:^3.0.0"
+    global-prefix: "npm:^4.0.0"
     minimist: "npm:^1.2.8"
     resolve: "npm:^1.22.2"
-    semver: "npm:^7.5.4"
+    semver: "npm:^7.6.3"
     strip-ansi: "npm:^6.0.1"
   bin:
     ts-patch: bin/ts-patch.js
     tspc: bin/tspc.js
-  checksum: 10c0/c214e0218f905c6445830821d400280c9b127fa41f2984bbad59c1f19eda7b6a0529457af7bc6d80fdfa38289207d5b5e2f40912c33758a243ca2064ed0aa137
+  checksum: 10c0/41abfa08ea70755f44f39c32b8906479cddf66f163ea37bdd8b543dcda548ec6cc3d7b6f53371161fbfaa9ff48e4fbb0d5839f46f425f7058f7710253e607c20
   languageName: node
   linkType: hard
 
@@ -10365,23 +10455,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.6.2":
-  version: 5.6.2
-  resolution: "typescript@npm:5.6.2"
+"typescript@npm:6.0.2":
+  version: 6.0.2
+  resolution: "typescript@npm:6.0.2"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/3ed8297a8c7c56b7fec282532503d1ac795239d06e7c4966b42d4330c6cf433a170b53bcf93a130a7f14ccc5235de5560df4f1045eb7f3550b46ebed16d3c5e5
+  checksum: 10c0/4b860b0bf87cc0fee0f66d8ef2640b5a8a8a8c74d1129adb82e389e5f97124383823c47946bef8a73ede371461143a3aa8544399d2133c7b2e4f07e81860af7f
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A5.6.2#optional!builtin<compat/typescript>":
-  version: 5.6.2
-  resolution: "typescript@patch:typescript@npm%3A5.6.2#optional!builtin<compat/typescript>::version=5.6.2&hash=8c6c40"
+"typescript@patch:typescript@npm%3A6.0.2#optional!builtin<compat/typescript>":
+  version: 6.0.2
+  resolution: "typescript@patch:typescript@npm%3A6.0.2#optional!builtin<compat/typescript>::version=6.0.2&hash=5786d5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/94eb47e130d3edd964b76da85975601dcb3604b0c848a36f63ac448d0104e93819d94c8bdf6b07c00120f2ce9c05256b8b6092d23cf5cf1c6fa911159e4d572f
+  checksum: 10c0/49f0b84fc6ca55653e77752b8a61beabc09ee3dae5d965c31596225aa6ef213c5727b1d2e895b900416dc603854ba0872ac4a812c2a4ed6793a601f9c675de02
   languageName: node
   linkType: hard
 
@@ -10559,8 +10649,8 @@ __metadata:
   linkType: hard
 
 "vite@npm:^4.5.0":
-  version: 4.5.5
-  resolution: "vite@npm:4.5.5"
+  version: 4.5.9
+  resolution: "vite@npm:4.5.9"
   dependencies:
     esbuild: "npm:^0.18.10"
     fsevents: "npm:~2.3.2"
@@ -10594,13 +10684,13 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/cde5a1d80ae61b2c0b2e2a04938e10aa8821a4c2c625f1dcd6eff179f0c9ce98a5b3c8fd62b54a81299568f7747fff4d35ffecc0e7f7ff34d76124d94a24ce9b
+  checksum: 10c0/d51b9da32fddc6079333a16306c4c70d6ea6b253267931b5cd5d1c521bcfbee926297dc6878da79b0f1e058b7eef72555226be701fae376c2dfae9f83bc5699a
   languageName: node
   linkType: hard
 
 "vite@npm:^5.0.0":
-  version: 5.4.11
-  resolution: "vite@npm:5.4.11"
+  version: 5.4.14
+  resolution: "vite@npm:5.4.14"
   dependencies:
     esbuild: "npm:^0.21.3"
     fsevents: "npm:~2.3.3"
@@ -10637,7 +10727,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/d536bb7af57dd0eca2a808f95f5ff1d7b7ffb8d86e17c6893087680a0448bd0d15e07475270c8a6de65cb5115592d037130a1dd979dc76bcef8c1dda202a1874
+  checksum: 10c0/8842933bd70ca6a98489a0bb9c8464bec373de00f9a97c8c7a4e64b24d15c88bfaa8c1acb38a68c3e5eb49072ffbccb146842c2d4edcdd036a9802964cffe3d1
   languageName: node
   linkType: hard
 
@@ -10769,7 +10859,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"which@npm:^1.2.9, which@npm:^1.3.1":
+"which@npm:^1.2.9":
   version: 1.3.1
   resolution: "which@npm:1.3.1"
   dependencies:

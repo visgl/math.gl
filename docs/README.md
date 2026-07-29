@@ -9,6 +9,7 @@ math.gl is **optimized for use with WebGL and WebGPU**, however it is not a GPU 
 ## Features
 
 - **Core classes** - Basic vectors and matrices: **`@math.gl/types`**, **`@math.gl/core`**
+- **Expression parsing** - Parse and evaluate compact JavaScript-style expressions: **`@math.gl/expressions`**
 - **Geospatial projections** - Support for a variety of geospatial projections **`@math.gl/geospatial`**, **`@math.gl/geoid`**, **`@math.gl/proj4`**, **`@math.gl/web-mercator`**
 - **Geospatial utilities** - Cutting polygons and calculating sun position and direction **`@math.gl/polygon`**, **`@math.gl/sun`**
 - **Discrete Global Grids** - Standardized interfaces to a number of the major discrete global grids. **`@math.gl/dggs-geohash`**, **`@math.gl/dggs-quadkey`**, **`@math.gl/dggs-s2`**
@@ -22,6 +23,7 @@ math.gl is a toolbox that offers a suite of composable modules.
 | --------------------------------- | ------------------------------------ | -------------------------------------------- |
 |                                   | **`@math.gl/types`**                 | Basic math type helpers (`NumericArray` etc) |
 | ![core](./images/core.png 'core') | **`@math.gl/core`**                  | Basic math classes (vectors, matrices, etc)  |
+|                                   | **`@math.gl/expressions`**           | Parse and evaluate lightweight expressions.  |
 
 | **Geospatial math libraries**                       | Module <span style={{width: 300}} /> | Description                                        |
 | --------------------------------------------------- | ------------------------------------ | -------------------------------------------------- |
@@ -76,6 +78,7 @@ math.gl is fully supported on:
 math.gl was inspired by and built upon some of the most proven open source JavaScript math libraries:
 
 - [`gl-matrix`](http://glmatrix.net/) - math.gl classes use gl-matrix under the hood
+- [`expression-eval`](https://www.npmjs.com/package/expression-eval) by [@donmccurdy](https://github.com/donmccurdy) - inspiration and source material for `@math.gl/expressions`
 - THREE.js math library - math.gl classes are API-compatible with a subset of the THREE.js classes and pass THREE.js test suites.
 - The CesiumJS math library (Apache2) - The geospatial and culling modules were ported from Cesium code base.
 

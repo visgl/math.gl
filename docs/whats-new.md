@@ -64,6 +64,15 @@ Goals:
 - `makeOBBFromRegion()` - New function that creates a cartesian oriented bounding box from a geospatial region.
 - `EllipsoidTangentPlane` - New helper class for doing math on the ellipsoid surface.
 
+**`@math.gl/expressions`** (NEW EXPERIMENTAL MODULE)
+
+- Promotes the expression parser previously embedded in `@deck.gl/json` to a documented experimental module.
+- Parses, evaluates, and compiles synchronous or asynchronous JavaScript-style expressions.
+- Provides configurable function libraries, including importable basic math and WGS84 geospatial libraries.
+- Adds isolated function registries and optional GeoHash, Quadkey, and S2 function tables.
+- Compiles restricted JSON-style accessor expressions with function calls disabled.
+- Includes an interactive expression playground with editable context and sample DGGS expressions.
+
 ## v4.1
 
 Release Date: Sep 7, 2024.

@@ -2,11 +2,7 @@
   {
     "type": "category",
     "label": "Overview",
-    "items": [
-      "README",
-      "whats-new",
-      "upgrade-guide"
-    ]
+    "items": ["README", "whats-new", "upgrade-guide"]
   },
   {
     "type": "category",
@@ -34,9 +30,7 @@
       {
         "type": "category",
         "label": "Discrete Global Grid Systems Math",
-        "items": [
-          "developer-guide/geospatial/dggs"
-        ]
+        "items": ["developer-guide/geospatial/dggs"]
       },
       {
         "type": "category",
@@ -87,6 +81,17 @@
       },
       {
         "type": "category",
+        "label": "@math.gl/expressions (experimental)",
+        "items": [
+          "modules/expressions/README",
+          "modules/expressions/api-reference/expression-eval",
+          "modules/expressions/api-reference/function-registry",
+          "modules/expressions/api-reference/dggs-function-libraries",
+          "modules/expressions/api-reference/parse-expression-string"
+        ]
+      },
+      {
+        "type": "category",
         "label": "@math.gl/culling",
         "items": [
           "modules/culling/README",
@@ -133,10 +138,7 @@
       {
         "type": "category",
         "label": "@math.gl/proj4",
-        "items": [
-          "modules/proj4/README",
-          "modules/proj4/api-reference/proj4-projection"
-        ]
+        "items": ["modules/proj4/README", "modules/proj4/api-reference/proj4-projection"]
       },
       {
         "type": "category",
@@ -159,26 +161,17 @@
       {
         "type": "category",
         "label": "@math.gl/dggs-geohash",
-        "items": [
-          "modules/dggs-geohash/README",
-          "modules/dggs-geohash/api-reference/geohash"
-        ]
+        "items": ["modules/dggs-geohash/README", "modules/dggs-geohash/api-reference/geohash"]
       },
       {
         "type": "category",
         "label": "@math.gl/dggs-quadkey",
-        "items": [
-          "modules/dggs-quadkey/README",
-          "modules/dggs-quadkey/api-reference/quadkey"
-        ]
+        "items": ["modules/dggs-quadkey/README", "modules/dggs-quadkey/api-reference/quadkey"]
       },
       {
         "type": "category",
         "label": "@math.gl/dggs-s2",
-        "items": [
-          "modules/dggs-s2/README",
-          "modules/dggs-s2/api-reference/s2"
-        ]
+        "items": ["modules/dggs-s2/README", "modules/dggs-s2/api-reference/s2"]
       }
     ]
   }

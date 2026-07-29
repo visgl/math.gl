@@ -22,6 +22,7 @@ module.exports = getESLintConfig({
         rules: {
           'no-use-before-define': 0,
           'import/named': 0,
+          'import/no-unresolved': 0,
           '@typescript-eslint/no-shadow': 0,
           '@typescript-eslint/ban-ts-comment': 0 // We do need our ts-ignores
         }

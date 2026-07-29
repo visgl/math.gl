@@ -1,0 +1,49 @@
+{
+  "name": "@math.gl/expressions",
+  "description": "Experimental expression parsing and evaluation utilities",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "4.2.0-alpha.3",
+  "keywords": [
+    "javascript",
+    "math",
+    "expressions",
+    "parser",
+    "evaluator",
+    "jsep"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./dggs": {
+      "types": "./dist/dggs.d.ts",
+      "import": "./dist/dggs.js",
+      "require": "./dist/dggs.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "@math.gl/core": "4.2.0-alpha.3",
+    "@math.gl/dggs-geohash": "4.2.0-alpha.3",
+    "@math.gl/dggs-quadkey": "4.2.0-alpha.3",
+    "@math.gl/dggs-s2": "4.2.0-alpha.3",
+    "@math.gl/geospatial": "4.2.0-alpha.3",
+    "jsep": "^1.4.0"
+  }
+}
