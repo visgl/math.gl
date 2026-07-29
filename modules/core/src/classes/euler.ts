@@ -294,15 +294,15 @@ export class Euler extends MathArray {
       case RotationOrder.XYZ:
         return q.rotateX(this[0]).rotateY(this[1]).rotateZ(this[2]);
       case RotationOrder.YXZ:
-        return q.rotateY(this[0]).rotateX(this[1]).rotateZ(this[2]);
+        return q.rotateY(this[1]).rotateX(this[0]).rotateZ(this[2]);
       case RotationOrder.ZXY:
-        return q.rotateZ(this[0]).rotateX(this[1]).rotateY(this[2]);
+        return q.rotateZ(this[2]).rotateX(this[0]).rotateY(this[1]);
       case RotationOrder.ZYX:
-        return q.rotateZ(this[0]).rotateY(this[1]).rotateX(this[2]);
+        return q.rotateZ(this[2]).rotateY(this[1]).rotateX(this[0]);
       case RotationOrder.YZX:
-        return q.rotateY(this[0]).rotateZ(this[1]).rotateX(this[2]);
+        return q.rotateY(this[1]).rotateZ(this[2]).rotateX(this[0]);
       case RotationOrder.XZY:
-        return q.rotateX(this[0]).rotateZ(this[1]).rotateY(this[2]);
+        return q.rotateX(this[0]).rotateZ(this[2]).rotateY(this[1]);
       default:
         throw new Error(ERR_UNKNOWN_ORDER);
     }

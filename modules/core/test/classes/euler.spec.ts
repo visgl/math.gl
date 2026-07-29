@@ -94,6 +94,27 @@ test('Euler#coverage', t => {
   t.end();
 });
 
+test('Euler#getQuaternion', t => {
+  const angles = [30 * DEGREE_TO_RADIANS, 45 * DEGREE_TO_RADIANS, 60 * DEGREE_TO_RADIANS];
+  const orders = [Euler.XYZ, Euler.YXZ, Euler.ZXY, Euler.ZYX, Euler.YZX, Euler.XZY];
+
+  for (const order of orders) {
+    const euler = new Euler(angles[0], angles[1], angles[2], order);
+    const rotationMatrix = new Matrix4();
+    euler.getRotationMatrix(rotationMatrix);
+    const quaternionMatrix = new Matrix4().fromQuaternion(euler.getQuaternion());
+
+    tapeEquals(
+      t,
+      quaternionMatrix,
+      rotationMatrix,
+      `Euler.getQuaternion matches getRotationMatrix for ${Euler.rotationOrder(order)}`
+    );
+  }
+
+  t.end();
+});
+
 test('Euler#toQuaternion', t => {
   const eulers = [
     new Euler(
