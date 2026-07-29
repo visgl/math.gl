@@ -19,7 +19,7 @@ const VECTOR4_UNIT_Z = new Vector4(0, 0, 1, 0);
 
 const UNIT_SPHERE = new Ellipsoid(1, 1, 1);
 
-test('Ellipsoid#transforms#eastNorthUpToFixedFrame works without a result parameter', (t) => {
+test('Ellipsoid#transforms#eastNorthUpToFixedFrame works without a result parameter', t => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
 
@@ -32,7 +32,7 @@ test('Ellipsoid#transforms#eastNorthUpToFixedFrame works without a result parame
   t.end();
 });
 
-test('Ellipsoid#transforms#eastNorthUpToFixedFrame works with a result parameter', (t) => {
+test('Ellipsoid#transforms#eastNorthUpToFixedFrame works with a result parameter', t => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
   const result = new Matrix4([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]);
@@ -46,7 +46,7 @@ test('Ellipsoid#transforms#eastNorthUpToFixedFrame works with a result parameter
   t.end();
 });
 
-test('Ellipsoid#transforms#eastNorthUpToFixedFrame works at the north pole', (t) => {
+test('Ellipsoid#transforms#eastNorthUpToFixedFrame works at the north pole', t => {
   const northPole = new Vector3(0.0, 0.0, 1.0);
   const expectedTranslation = new Vector4(northPole.x, northPole.y, northPole.z, 1.0);
 
@@ -60,7 +60,7 @@ test('Ellipsoid#transforms#eastNorthUpToFixedFrame works at the north pole', (t)
   t.end();
 });
 
-test('Ellipsoid#transforms#eastNorthUpToFixedFrame works at the south pole', (t) => {
+test('Ellipsoid#transforms#eastNorthUpToFixedFrame works at the south pole', t => {
   const southPole = new Vector3(0.0, 0.0, -1.0);
   const expectedTranslation = new Vector4(southPole.x, southPole.y, southPole.z, 1.0);
 
@@ -72,7 +72,7 @@ test('Ellipsoid#transforms#eastNorthUpToFixedFrame works at the south pole', (t)
   t.end();
 });
 
-test('Ellipsoid#transforms#northEastDownToFixedFrame works without a result parameter', (t) => {
+test('Ellipsoid#transforms#northEastDownToFixedFrame works without a result parameter', t => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
 
@@ -84,7 +84,7 @@ test('Ellipsoid#transforms#northEastDownToFixedFrame works without a result para
   t.end();
 });
 
-test('Ellipsoid#transforms#northEastDownToFixedFrame works with a result parameter', (t) => {
+test('Ellipsoid#transforms#northEastDownToFixedFrame works with a result parameter', t => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
   const result = new Matrix4().set(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2);
@@ -104,7 +104,7 @@ test('Ellipsoid#transforms#northEastDownToFixedFrame works with a result paramet
   t.end();
 });
 
-test('Ellipsoid#transforms#northEastDownToFixedFrame works at the north pole', (t) => {
+test('Ellipsoid#transforms#northEastDownToFixedFrame works at the north pole', t => {
   const northPole = new Vector3(0.0, 0.0, 1.0);
   const expectedTranslation = new Vector4(northPole.x, northPole.y, northPole.z, 1.0);
 
@@ -124,7 +124,7 @@ test('Ellipsoid#transforms#northEastDownToFixedFrame works at the north pole', (
   t.end();
 });
 
-test('Ellipsoid#transforms#northEastDownToFixedFrame works at the south pole', (t) => {
+test('Ellipsoid#transforms#northEastDownToFixedFrame works at the south pole', t => {
   const southPole = new Vector3(0.0, 0.0, -1.0);
   const expectedTranslation = new Vector4(southPole.x, southPole.y, southPole.z, 1.0);
 
@@ -136,7 +136,7 @@ test('Ellipsoid#transforms#northEastDownToFixedFrame works at the south pole', (
   t.end();
 });
 
-test('Ellipsoid#transforms#northUpEastToFixedFrame works without a result parameter', (t) => {
+test('Ellipsoid#transforms#northUpEastToFixedFrame works without a result parameter', t => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
 
@@ -148,7 +148,7 @@ test('Ellipsoid#transforms#northUpEastToFixedFrame works without a result parame
   t.end();
 });
 
-test('Ellipsoid#transforms#northUpEastToFixedFrame works with a result parameter', (t) => {
+test('Ellipsoid#transforms#northUpEastToFixedFrame works with a result parameter', t => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
   const result = new Matrix4([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]);
@@ -162,7 +162,7 @@ test('Ellipsoid#transforms#northUpEastToFixedFrame works with a result parameter
   t.end();
 });
 
-test('Ellipsoid#transforms#northUpEastToFixedFrame works at the north pole', (t) => {
+test('Ellipsoid#transforms#northUpEastToFixedFrame works at the north pole', t => {
   const northPole = new Vector3(0.0, 0.0, 1.0);
   const expectedTranslation = new Vector4(northPole.x, northPole.y, northPole.z, 1.0);
 
@@ -182,7 +182,7 @@ test('Ellipsoid#transforms#northUpEastToFixedFrame works at the north pole', (t)
   t.end();
 });
 
-test('Ellipsoid#transforms#northUpEastToFixedFrame works at the south pole', (t) => {
+test('Ellipsoid#transforms#northUpEastToFixedFrame works at the south pole', t => {
   const southPole = new Vector3(0.0, 0.0, -1.0);
   const expectedTranslation = new Vector4(southPole.x, southPole.y, southPole.z, 1.0);
 
@@ -195,7 +195,7 @@ test('Ellipsoid#transforms#northUpEastToFixedFrame works at the south pole', (t)
   t.end();
 });
 
-test('Ellipsoid#transforms#northWestUpToFixedFrame works without a result parameter', (t) => {
+test('Ellipsoid#transforms#northWestUpToFixedFrame works without a result parameter', t => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
   const returnedResult = UNIT_SPHERE.localFrameToFixedFrame('north', 'west', 'up', origin);
@@ -207,7 +207,7 @@ test('Ellipsoid#transforms#northWestUpToFixedFrame works without a result parame
   t.end();
 });
 
-test('Ellipsoid#transforms#northWestUpToFixedFrame works with a result parameter', (t) => {
+test('Ellipsoid#transforms#northWestUpToFixedFrame works with a result parameter', t => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
   const result = new Matrix4().set(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2);
@@ -221,7 +221,7 @@ test('Ellipsoid#transforms#northWestUpToFixedFrame works with a result parameter
   t.end();
 });
 
-test('Ellipsoid#transforms#northWestUpToFixedFrame works at the north pole', (t) => {
+test('Ellipsoid#transforms#northWestUpToFixedFrame works at the north pole', t => {
   const northPole = new Vector3(0.0, 0.0, 1.0);
   const expectedTranslation = new Vector4(northPole.x, northPole.y, northPole.z, 1.0);
 
@@ -241,7 +241,7 @@ test('Ellipsoid#transforms#northWestUpToFixedFrame works at the north pole', (t)
   t.end();
 });
 
-test('Ellipsoid#transforms#northWestUpToFixedFrame works at the south pole', (t) => {
+test('Ellipsoid#transforms#northWestUpToFixedFrame works at the south pole', t => {
   const southPole = new Vector3(0.0, 0.0, -1.0);
   const expectedTranslation = new Vector4(southPole.x, southPole.y, southPole.z, 1.0);
 
@@ -378,7 +378,7 @@ test('Ellipsoid#transforms#normal use of localFrameToFixedFrameGenerator', t => 
 });
 */
 
-test('Ellipsoid#transforms#localFrameToFixedFrame incorrect use throws', (t) => {
+test('Ellipsoid#transforms#localFrameToFixedFrame incorrect use throws', t => {
   const origin = [1, 0, 0];
 
   t.throws(() => UNIT_SPHERE.localFrameToFixedFrame(undefined, undefined, null, origin));

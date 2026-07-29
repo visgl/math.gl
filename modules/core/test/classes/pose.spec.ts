@@ -64,12 +64,12 @@ const MATRIX_TEST_CASES = [
   }
 ];
 
-test('Pose#import', (t) => {
+test('Pose#import', t => {
   t.equals(typeof Pose, 'function');
   t.end();
 });
 
-test('Pose#constructor', (t) => {
+test('Pose#constructor', t => {
   let pose1;
   let pose2;
 
@@ -89,7 +89,7 @@ test('Pose#constructor', (t) => {
   t.end();
 });
 
-test('Pose#equals', (t) => {
+test('Pose#equals', t => {
   const pose1 = new Pose({});
 
   t.notOk(pose1.equals(undefined), 'not equal to undefined');
@@ -98,7 +98,7 @@ test('Pose#equals', (t) => {
   t.end();
 });
 
-test('Pose#setters, getters', (t) => {
+test('Pose#setters, getters', t => {
   const SAMPLE = MATRIX_TEST_CASES[0].TRANSFORM_A_TO_B;
   const pose = new Pose({});
 
@@ -111,15 +111,15 @@ test('Pose#setters, getters', (t) => {
   t.end();
 });
 
-test('Pose#getPosition, getOrientation', (t) => {
+test('Pose#getPosition, getOrientation', t => {
   const pose = new Pose({});
   t.ok(pose.getPosition() instanceof Vector3, 'position is Vector3');
   t.ok(pose.getOrientation() instanceof Euler, 'orientation is Euler');
   t.end();
 });
 
-test('Pose#transformationMatrix', (t) => {
-  MATRIX_TEST_CASES.forEach((testCase) => {
+test('Pose#transformationMatrix', t => {
+  MATRIX_TEST_CASES.forEach(testCase => {
     const poseAToB = new Pose(testCase.TRANSFORM_A_TO_B);
     const poseBToA = new Pose(testCase.TRANSFORM_B_TO_A);
 
@@ -133,8 +133,8 @@ test('Pose#transformationMatrix', (t) => {
   t.end();
 });
 
-test('Pose#getTransformationMatrixFromPose, getTransformationMatrixToPose', (t) => {
-  MATRIX_TEST_CASES.forEach((testCase) => {
+test('Pose#getTransformationMatrixFromPose, getTransformationMatrixToPose', t => {
+  MATRIX_TEST_CASES.forEach(testCase => {
     const poseA = new Pose(testCase.TRANSFORM_A_TO_B);
     const poseB = new Pose(testCase.TRANSFORM_B_TO_A);
 
@@ -149,7 +149,7 @@ test('Pose#getTransformationMatrixFromPose, getTransformationMatrixToPose', (t) 
   t.end();
 });
 
-test('Pose#toPose', (t) => {
+test('Pose#toPose', t => {
   const A = new Pose({
     yaw: 0,
     pitch: 0,

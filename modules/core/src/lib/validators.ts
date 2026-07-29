@@ -41,7 +41,7 @@ const map: Record<string, boolean> = {};
 export function deprecated(method: string, version: string): void {
   if (!map[method]) {
     map[method] = true;
-    // eslint-disable-next-line
+    // biome-ignore lint/suspicious/noConsole: deprecations are intentionally reported to users.
     console.warn(
       `${method} has been removed in version ${version}, see upgrade guide for more information`
     );

@@ -6,7 +6,7 @@ import {_toHilbertQuadKey as toHilbertQuadKey} from '@math.gl/dggs-s2';
 import {S2} from 's2-geometry';
 
 // TODO - restore test
-test.skip('S2#toHilbertQuadkey', (t) => {
+test.skip('S2#toHilbertQuadkey', t => {
   const TEST_COORDINATES = [
     {lat: 0, lng: 0},
     {lat: -122.45, lng: 37.78},

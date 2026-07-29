@@ -15,7 +15,7 @@ import {
   parseExpressionString
 } from '@math.gl/expressions';
 
-test('@math.gl/expressions#eval', (t) => {
+test('@math.gl/expressions#eval', t => {
   t.equal(evaluate(parse('x * 2 + 1'), {x: 3}), 7, 'evaluates arithmetic expressions');
   t.equal(evaluate(parse('foo.bar'), {foo: {bar: 5}}), 5, 'resolves member expressions');
   t.equal(evaluate(parse('flag ? a : b'), {flag: false, a: 1, b: 2}), 2, 'evaluates conditionals');
@@ -23,13 +23,13 @@ test('@math.gl/expressions#eval', (t) => {
   t.end();
 });
 
-test('@math.gl/expressions#compile', (t) => {
+test('@math.gl/expressions#compile', t => {
   const accessor = compile('points[1].value + offset');
   t.equal(accessor({points: [{value: 1}, {value: 4}], offset: 3}), 7, 'compiles expressions');
   t.end();
 });
 
-test('@math.gl/expressions#compile with function libraries', (t) => {
+test('@math.gl/expressions#compile with function libraries', t => {
   const fn = compile('clamp(sin(angle), 0, 1)', {
     libraries: [BASIC_MATH_FUNCTION_LIBRARY]
   });
@@ -37,7 +37,7 @@ test('@math.gl/expressions#compile with function libraries', (t) => {
   t.end();
 });
 
-test('@math.gl/expressions#function library precedence', (t) => {
+test('@math.gl/expressions#function library precedence', t => {
   const firstLibrary = {transform: (value: number) => value + 1};
   const secondLibrary = {transform: (value: number) => value * 2};
   const fn = compile('transform(value)', {
@@ -53,7 +53,7 @@ test('@math.gl/expressions#function library precedence', (t) => {
   t.end();
 });
 
-test('@math.gl/expressions#compileAsync', async (t) => {
+test('@math.gl/expressions#compileAsync', async t => {
   const fn = compileAsync('loader(value) + 1');
   const result = await fn({
     value: 4,
@@ -65,7 +65,7 @@ test('@math.gl/expressions#compileAsync', async (t) => {
   t.end();
 });
 
-test('@math.gl/expressions#evalAsync', async (t) => {
+test('@math.gl/expressions#evalAsync', async t => {
   const result = await evalAsync(parse('fetcher(value) * 2'), {
     value: 5,
     async fetcher(input: number) {
@@ -76,7 +76,7 @@ test('@math.gl/expressions#evalAsync', async (t) => {
   t.end();
 });
 
-test('@math.gl/expressions#eval with geospatial function library', (t) => {
+test('@math.gl/expressions#eval with geospatial function library', t => {
   const result = evaluate(
     parse('cartographicToCartesian(position)'),
     {position: [0, 0, 0]},
@@ -86,7 +86,7 @@ test('@math.gl/expressions#eval with geospatial function library', (t) => {
   t.end();
 });
 
-test('@math.gl/expressions#parseExpressionString', (t) => {
+test('@math.gl/expressions#parseExpressionString', t => {
   const identity = parseExpressionString('-');
   const property = parseExpressionString('a.b.c');
   const expression = parseExpressionString('value * 3');
@@ -102,7 +102,7 @@ test('@math.gl/expressions#parseExpressionString', (t) => {
   t.end();
 });
 
-test('@math.gl/expressions#addBinaryOp', (t) => {
+test('@math.gl/expressions#addBinaryOp', t => {
   addBinaryOp('**', 11, (a: number, b: number) => a ** b);
   t.equal(evaluate(parse('2 ** 3'), {}), 8, 'supports custom operators');
   t.end();

@@ -3,7 +3,7 @@ import {Vector3, toRadians, _MathUtils} from '@math.gl/core';
 import {LngLatRectangle} from '@math.gl/geospatial';
 import {tapeEquals, tapeEqualsEpsilon} from 'test/utils/tape-assertions';
 
-test('LngLatRectangle stores its bounds and computes its center and width', (t) => {
+test('LngLatRectangle stores its bounds and computes its center and width', t => {
   const rectangle = new LngLatRectangle(
     toRadians(-20),
     toRadians(-10),
@@ -18,7 +18,7 @@ test('LngLatRectangle stores its bounds and computes its center and width', (t) 
   t.end();
 });
 
-test('LngLatRectangle handles a rectangle crossing the antimeridian', (t) => {
+test('LngLatRectangle handles a rectangle crossing the antimeridian', t => {
   const rectangle = new LngLatRectangle(
     toRadians(170),
     toRadians(-10),

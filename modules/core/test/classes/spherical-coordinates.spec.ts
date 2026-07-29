@@ -53,12 +53,12 @@ const REPRESENTATION_TEST_CASES = [
   }
 ];
 
-test('SphericalCoordinates#import', (t) => {
+test('SphericalCoordinates#import', t => {
   t.equals(typeof SphericalCoordinates, 'function', 'SphericalCoordinates import OK');
   t.end();
 });
 
-test('SphericalCoordinates#constructor', (t) => {
+test('SphericalCoordinates#constructor', t => {
   const spherical = new SphericalCoordinates();
   t.ok(spherical, 'SphericalCoordinates default constructor OK');
   t.throws(() => new SphericalCoordinates({bearing: NaN}));
@@ -67,7 +67,7 @@ test('SphericalCoordinates#constructor', (t) => {
   t.end();
 });
 
-test('SphericalCoordinates#representations', (t) => {
+test('SphericalCoordinates#representations', t => {
   for (const tc of REPRESENTATION_TEST_CASES) {
     for (const rep1 of tc.representations) {
       // Create
@@ -87,7 +87,7 @@ test('SphericalCoordinates#representations', (t) => {
   t.end();
 });
 
-test('SphericalCoordinates#accessors', (t) => {
+test('SphericalCoordinates#accessors', t => {
   const spherical = new SphericalCoordinates();
   t.equals(spherical.bearing, 180, 'bearing');
   t.equals(spherical.pitch, 0, 'pitch');
@@ -100,7 +100,7 @@ test('SphericalCoordinates#accessors', (t) => {
   t.end();
 });
 
-test('SphericalCoordinates#methods', (t) => {
+test('SphericalCoordinates#methods', t => {
   const spherical = new SphericalCoordinates();
   spherical.set(1, 0, 0);
   spherical.copy(new SphericalCoordinates());
@@ -109,7 +109,7 @@ test('SphericalCoordinates#methods', (t) => {
   t.end();
 });
 
-test('SphericalCoordinates#clone', (t) => {
+test('SphericalCoordinates#clone', t => {
   const spherical = new SphericalCoordinates();
   const s2 = spherical.clone();
   t.notEqual(spherical, s2, 'clone');
@@ -118,7 +118,7 @@ test('SphericalCoordinates#clone', (t) => {
   t.end();
 });
 
-test('SphericalCoordinates#makeSafe', (t) => {
+test('SphericalCoordinates#makeSafe', t => {
   const spherical = new SphericalCoordinates();
   t.doesNotThrow(() => spherical.makeSafe());
   t.end();

@@ -73,8 +73,8 @@ async function openFile(filePath) {
 
 const FIXTURES_PATH = 'modules/polygon/test/data/earcut/fixtures/';
 
-Object.keys(expected.triangles).forEach((id) => {
-  test(id, async (t) => {
+Object.keys(expected.triangles).forEach(id => {
+  test(id, async t => {
     const filepath = FIXTURES_PATH + `${id}.json`;
     const raw = await openFile(filepath);
     const data = flatten(raw);

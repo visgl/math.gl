@@ -24,7 +24,7 @@ const TEST_CASES: {value: unknown; isTypedArray: boolean; isNumericArray: boolea
   {value: '', isTypedArray: false, isNumericArray: false}
 ];
 
-test('math.gl#isTypedArray', (t) => {
+test('math.gl#isTypedArray', t => {
   for (const tc of TEST_CASES) {
     t.equal(
       Boolean(isTypedArray(tc.value)),
@@ -35,7 +35,7 @@ test('math.gl#isTypedArray', (t) => {
   t.end();
 });
 
-test('math.gl#isTypedArray(Float16Array)', (t) => {
+test('math.gl#isTypedArray(Float16Array)', t => {
   // Float16Array is not yet available in every JavaScript runtime supported by math.gl.
   const Float16ArrayConstructor = globalThis.Float16Array;
   if (typeof Float16ArrayConstructor !== 'function') {
@@ -56,7 +56,7 @@ test('math.gl#isTypedArray(Float16Array)', (t) => {
   t.end();
 });
 
-test('math.gl#isNumericArray', (t) => {
+test('math.gl#isNumericArray', t => {
   for (const tc of TEST_CASES) {
     t.equal(
       Boolean(isNumericArray(tc.value)),

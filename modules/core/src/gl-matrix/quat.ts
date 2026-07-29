@@ -20,7 +20,7 @@ import * as vec4 from './vec4.js';
  */
 export function create() {
   const out = new glMatrix.ARRAY_TYPE(4);
-  if (glMatrix.ARRAY_TYPE != Float32Array) {
+  if (glMatrix.ARRAY_TYPE !== Float32Array) {
     out[0] = 0;
     out[1] = 0;
     out[2] = 0;

@@ -7,7 +7,7 @@ import {cutPolylineByMercatorBounds, cutPolygonByMercatorBounds} from '@math.gl/
 
 import {flatten} from './lineclip.spec';
 
-test('cutPolylineByMercatorBounds - simple', (t) => {
+test('cutPolylineByMercatorBounds - simple', t => {
   t.deepEquals(
     cutPolylineByMercatorBounds([-170, 0, 170, 20]),
     [
@@ -38,7 +38,7 @@ test('cutPolylineByMercatorBounds - simple', (t) => {
   t.end();
 });
 
-test('cutPolylineByMercatorBounds - multiple crossings', (t) => {
+test('cutPolylineByMercatorBounds - multiple crossings', t => {
   const result = cutPolylineByMercatorBounds([-170, 0, 170, 20, -175, 35, 175, 45]);
 
   t.comment(JSON.stringify(result));
@@ -52,7 +52,7 @@ test('cutPolylineByMercatorBounds - multiple crossings', (t) => {
   t.end();
 });
 
-test('cutPolylineByMercatorBounds - multiple worlds', (t) => {
+test('cutPolylineByMercatorBounds - multiple worlds', t => {
   const polyline: number[][] = [];
   const N = 30;
 
@@ -76,7 +76,7 @@ test('cutPolylineByMercatorBounds - multiple worlds', (t) => {
   t.end();
 });
 
-test('cutPolygonByMercatorBounds - simple', (t) => {
+test('cutPolygonByMercatorBounds - simple', t => {
   const polygon = [
     [-170, 0],
     [170, 0],
@@ -111,14 +111,14 @@ test('cutPolygonByMercatorBounds - simple', (t) => {
   t.deepEquals(parts[0].positions, flatten(expectedA), 'normalize: false');
   t.deepEquals(
     parts[1].positions,
-    flatten2(expectedB, (p) => [p[0] + 360, p[1]]),
+    flatten2(expectedB, p => [p[0] + 360, p[1]]),
     'normalize: false'
   );
 
   t.end();
 });
 
-test('cutPolygonByMercatorBounds - with holes', (t) => {
+test('cutPolygonByMercatorBounds - with holes', t => {
   const polygon = [
     [-170, 0],
     [170, 0],
@@ -166,7 +166,7 @@ test('cutPolygonByMercatorBounds - with holes', (t) => {
   t.end();
 });
 
-test('cutPolygonByMercatorBounds - contains pole', (t) => {
+test('cutPolygonByMercatorBounds - contains pole', t => {
   const polygon = [
     [-150, 75],
     [-90, 80],

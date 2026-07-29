@@ -107,7 +107,7 @@ export function radians(
   degrees: number | NumericArray,
   result?: NumericArray
 ): number | NumericArray {
-  return map(degrees, (degrees) => degrees * DEGREES_TO_RADIANS, result);
+  return map(degrees, degrees => degrees * DEGREES_TO_RADIANS, result);
 }
 
 /**
@@ -120,7 +120,7 @@ export function degrees(
   radians: number | NumericArray,
   result?: NumericArray
 ): number | NumericArray {
-  return map(radians, (radians) => radians * RADIANS_TO_DEGREES, result);
+  return map(radians, radians => radians * RADIANS_TO_DEGREES, result);
 }
 
 /**
@@ -194,7 +194,7 @@ function negativePiToPi(angle: number): number {
  * @deprecated
  */
 export function sin(radians: number | NumericArray, result?: NumericArray): number | NumericArray {
-  return map(radians, (angle) => Math.sin(angle), result);
+  return map(radians, angle => Math.sin(angle), result);
 }
 
 /**
@@ -202,7 +202,7 @@ export function sin(radians: number | NumericArray, result?: NumericArray): numb
  * @deprecated
  */
 export function cos(radians: number | NumericArray, result?: NumericArray): number | NumericArray {
-  return map(radians, (angle) => Math.cos(angle), result);
+  return map(radians, angle => Math.cos(angle), result);
 }
 
 /**
@@ -210,7 +210,7 @@ export function cos(radians: number | NumericArray, result?: NumericArray): numb
  * @deprecated
  */
 export function tan(radians: number | NumericArray, result?: NumericArray): number | NumericArray {
-  return map(radians, (angle) => Math.tan(angle), result);
+  return map(radians, angle => Math.tan(angle), result);
 }
 
 /**
@@ -218,7 +218,7 @@ export function tan(radians: number | NumericArray, result?: NumericArray): numb
  * @deprecated
  */
 export function asin(radians: number | NumericArray, result?: NumericArray): number | NumericArray {
-  return map(radians, (angle) => Math.asin(angle), result);
+  return map(radians, angle => Math.asin(angle), result);
 }
 
 /**
@@ -226,7 +226,7 @@ export function asin(radians: number | NumericArray, result?: NumericArray): num
  * @deprecated
  */
 export function acos(radians: number | NumericArray, result?: NumericArray): number | NumericArray {
-  return map(radians, (angle) => Math.acos(angle), result);
+  return map(radians, angle => Math.acos(angle), result);
 }
 
 /**
@@ -234,7 +234,7 @@ export function acos(radians: number | NumericArray, result?: NumericArray): num
  * @deprecated
  */
 export function atan(radians: number | NumericArray, result?: NumericArray): number | NumericArray {
-  return map(radians, (angle) => Math.atan(angle), result);
+  return map(radians, angle => Math.atan(angle), result);
 }
 
 /**
@@ -248,7 +248,7 @@ export function clamp(
   min: number,
   max: number
 ): number | NumericArray {
-  return map(value, (value) => Math.max(min, Math.min(max, value)));
+  return map(value, value => Math.max(min, Math.min(max, value)));
 }
 
 /**

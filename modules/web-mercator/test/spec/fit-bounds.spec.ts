@@ -123,7 +123,7 @@ const FITBOUNDS_TEST_CASES: [
   ]
 ];
 
-test('fitBounds', (t) => {
+test('fitBounds', t => {
   for (const [input, expected] of FITBOUNDS_TEST_CASES) {
     const result = fitBounds(input);
 
@@ -135,7 +135,7 @@ test('fitBounds', (t) => {
   t.end();
 });
 
-test('WebMercatorViewport.fitBounds', (t) => {
+test('WebMercatorViewport.fitBounds', t => {
   for (const [input, expected] of FITBOUNDS_TEST_CASES) {
     const viewport = new WebMercatorViewport({
       longitude: -122,
@@ -162,7 +162,7 @@ test('WebMercatorViewport.fitBounds', (t) => {
   t.end();
 });
 
-test('fitBounds#degenerate', (t) => {
+test('fitBounds#degenerate', t => {
   const OPTIONS = {
     height: 100,
     width: 100,

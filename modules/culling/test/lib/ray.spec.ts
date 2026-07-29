@@ -7,14 +7,14 @@ import {tapeEquals} from 'test/utils/tape-assertions';
 import {Vector3} from '@math.gl/core';
 import {Ray} from '@math.gl/culling';
 
-test('Ray#constructor uses zero-vector defaults', (t) => {
+test('Ray#constructor uses zero-vector defaults', t => {
   const ray = new Ray();
   tapeEquals(t, ray.origin, [0, 0, 0]);
   tapeEquals(t, ray.direction, [0, 0, 0]);
   t.end();
 });
 
-test('Ray#constructor clones the origin and normalizes the direction', (t) => {
+test('Ray#constructor clones the origin and normalizes the direction', t => {
   const origin = new Vector3(1, 2, 3);
   const direction = new Vector3(0, 4, 0);
   const ray = new Ray(origin, direction);

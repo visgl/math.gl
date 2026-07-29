@@ -8,7 +8,6 @@
 /* eslint-disable */
 import test from 'tape-promise/tape';
 import {Proj4Projection} from '@math.gl/proj4';
-import {_MathUtils} from '@math.gl/core';
 import {tapeEqualsEpsilon} from 'test/utils/tape-assertions';
 
 import {testPoints} from './test-data';
@@ -31,7 +30,7 @@ Proj4Projection.defineProjectionAliases({
 //   this.end();
 // });
 
-test('proj2proj#should work transforming from one projection to another', (t) => {
+test('proj2proj#should work transforming from one projection to another', t => {
   var sweref99tm = '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs';
   var rt90 =
     '+lon_0=15.808277777799999 +lat_0=0.0 +k=1.0 +x_0=1500000.0 +y_0=0.0 +proj=tmerc +ellps=bessel +units=m +towgs84=414.1,41.3,603.1,-0.855,2.141,-7.023,0 +no_defs';
@@ -51,7 +50,7 @@ it('should work with a proj object', t => {
 });
 */
 
-test('Proj4Projection', (t) => {
+test('Proj4Projection', t => {
   for (const testPoint of testPoints) {
     t.comment(`new Proj4Projection({to: ${testPoint.code}})`);
 
@@ -179,7 +178,7 @@ test('Proj4Projection', (t) => {
   t.end();
 });
 
-test('Proj4Projection is bound', (t) => {
+test('Proj4Projection is bound', t => {
   const projection = new Proj4Projection({from: 'WGS84', to: 'WGS84'});
   const coords = [[0, 0]];
   const reprojectedCooords = coords.map(projection.project);

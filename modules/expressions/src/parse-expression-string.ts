@@ -15,7 +15,7 @@ import {get} from './get';
 export type AccessorFunction = (row: Record<string, unknown>) => unknown;
 
 const cachedExpressionMap: Record<string, AccessorFunction> = {
-  '-': (object) => object
+  '-': object => object
 };
 
 /**
@@ -47,7 +47,7 @@ export function parseExpressionString(propValue: string): AccessorFunction {
 
 /** Validates and compiles a parsed accessor expression. */
 function compileAst(ast: jsep.Expression): AccessorFunction {
-  traverse(ast, (node) => {
+  traverse(ast, node => {
     if (node.type === 'CallExpression') {
       throw new Error('Function calls not allowed in expression accessors');
     }
@@ -60,7 +60,7 @@ function compileAst(ast: jsep.Expression): AccessorFunction {
 // eslint-disable-next-line complexity
 function traverse(node: unknown, visitor: (node: {type: string}) => void): void {
   if (Array.isArray(node)) {
-    node.forEach((element) => traverse(element, visitor));
+    node.forEach(element => traverse(element, visitor));
     return;
   }
 

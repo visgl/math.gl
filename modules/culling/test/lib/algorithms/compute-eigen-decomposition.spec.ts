@@ -4,20 +4,20 @@ import test from 'tape-promise/tape';
 import {Matrix3} from '@math.gl/core';
 import {computeEigenDecomposition} from '@math.gl/culling';
 
-test('computeEigenDecomposition#throws without a matrix', (t) => {
+test('computeEigenDecomposition#throws without a matrix', t => {
   // @ts-expect-error
   t.throws(() => computeEigenDecomposition());
   t.end();
 });
 
-test('computeEigenDecomposition#computes eigenvalues and eigenvectors', (t) => {
-  // prettier-ignore
+test('computeEigenDecomposition#computes eigenvalues and eigenvectors', t => {
+  // biome-ignore format: preserve the matrix layout
   const a = new Matrix3().setRowMajor(
     4.0, -1.0, 1.0,
     -1.0, 3.0, -2.0,
     1.0, -2.0, 3.0);
 
-  // prettier-ignore
+  // biome-ignore format: preserve the matrix layout
   // const expectedDiagonal = new Matrix3().setRowMajor(
   //   3.0, 0.0, 0.0,
   //   0.0, 6.0, 0.0,
@@ -47,14 +47,14 @@ test('computeEigenDecomposition#computes eigenvalues and eigenvectors', (t) => {
   t.end();
 });
 
-test('computeEigenDecomposition#computes eigenvalues and eigenvectors with result parameters', (t) => {
-  // prettier-ignore
+test('computeEigenDecomposition#computes eigenvalues and eigenvectors with result parameters', t => {
+  // biome-ignore format: preserve the matrix layout
   const a = new Matrix3().setRowMajor(
     4.0, -1.0, 1.0,
     -1.0, 3.0, -2.0,
     1.0, -2.0, 3.0);
 
-  // prettier-ignore
+  // biome-ignore format: preserve the matrix layout
   // const expectedDiagonal = new Matrix3().setRowMajor(
   //   3.0, 0.0, 0.0,
   //   0.0, 6.0, 0.0,

@@ -11,7 +11,7 @@ import {
   S2_FUNCTION_LIBRARY
 } from '@math.gl/expressions/dggs';
 
-test('@math.gl/expressions/dggs function tables', (t) => {
+test('@math.gl/expressions/dggs function tables', t => {
   const registry = new ExpressionFunctionRegistry([DGGS_FUNCTION_LIBRARY]);
 
   t.deepEqual(

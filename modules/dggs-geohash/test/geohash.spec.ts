@@ -21,7 +21,7 @@ const TEST_DATA = [
 ];
 
 // TODO - restore test
-test.skip('geohash#getGeohashBounds', (t) => {
+test.skip('geohash#getGeohashBounds', t => {
   for (const {geohash} of TEST_DATA) {
     const polygon = getGeohashBounds(geohash);
     t.ok(polygon instanceof Array, 'polygon is flat array');
@@ -33,7 +33,7 @@ test.skip('geohash#getGeohashBounds', (t) => {
 });
 
 // TODO - restore test
-test.skip('geohash#getGeohashBoundaryFlat', (t) => {
+test.skip('geohash#getGeohashBoundaryFlat', t => {
   for (const {geohash, expectedBounds} of TEST_DATA) {
     const bounds = getGeohashBoundaryFlat(geohash);
     t.deepEquals(bounds, expectedBounds, 'Geohash bounds calculated');

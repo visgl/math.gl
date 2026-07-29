@@ -11,7 +11,7 @@ import {
   parse
 } from '@math.gl/expressions';
 
-test('@math.gl/expressions#ExpressionFunctionRegistry', (t) => {
+test('@math.gl/expressions#ExpressionFunctionRegistry', t => {
   const registry = new ExpressionFunctionRegistry()
     .registerFunction('double', (value: number) => value * 2)
     .registerFunctions({
@@ -27,7 +27,7 @@ test('@math.gl/expressions#ExpressionFunctionRegistry', (t) => {
   t.end();
 });
 
-test('@math.gl/expressions#ExpressionFunctionRegistry collisions', (t) => {
+test('@math.gl/expressions#ExpressionFunctionRegistry collisions', t => {
   const registry = new ExpressionFunctionRegistry([{transform: (value: number) => value + 1}]);
 
   t.throws(
@@ -55,7 +55,7 @@ test('@math.gl/expressions#ExpressionFunctionRegistry collisions', (t) => {
   t.end();
 });
 
-test('@math.gl/expressions#ExpressionFunctionRegistry precedence and isolation', (t) => {
+test('@math.gl/expressions#ExpressionFunctionRegistry precedence and isolation', t => {
   const first = new ExpressionFunctionRegistry([{valueOf: () => 1}]);
   const second = new ExpressionFunctionRegistry([{valueOf: () => 2}]);
 
@@ -75,7 +75,7 @@ test('@math.gl/expressions#ExpressionFunctionRegistry precedence and isolation',
   t.end();
 });
 
-test('@math.gl/expressions#ExpressionFunctionRegistry async', async (t) => {
+test('@math.gl/expressions#ExpressionFunctionRegistry async', async t => {
   const registry = new ExpressionFunctionRegistry().registerFunction(
     'load',
     async (value: number) => await Promise.resolve(value * 2)

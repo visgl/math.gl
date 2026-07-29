@@ -16,7 +16,7 @@ export function flatten(arr: unknown, result: any[] = []): any[] {
   return result;
 }
 
-test('clips line', (t) => {
+test('clips line', t => {
   const result = clipPolyline(
     flatten([
       [-10, 10],
@@ -47,7 +47,7 @@ test('clips line', (t) => {
   t.end();
 });
 
-test('clips line crossing through many times', (t) => {
+test('clips line crossing through many times', t => {
   const result = clipPolyline(
     flatten([
       [10, -10],
@@ -67,7 +67,7 @@ test('clips line crossing through many times', (t) => {
   t.end();
 });
 
-test('clips 3d line', (t) => {
+test('clips 3d line', t => {
   const result = clipPolyline(
     flatten([
       [10, -10, 0],
@@ -88,7 +88,7 @@ test('clips 3d line', (t) => {
   t.end();
 });
 
-test('clips line from partial array', (t) => {
+test('clips line from partial array', t => {
   const polyline = flatten([
     [10, -10],
     [10, 30],
@@ -109,7 +109,7 @@ test('clips line from partial array', (t) => {
   t.end();
 });
 
-test('clips polygon', (t) => {
+test('clips polygon', t => {
   const result = clipPolygon(
     flatten([
       [-10, 20],
@@ -156,7 +156,7 @@ test('clips polygon', (t) => {
   t.end();
 });
 
-test('polygon contains bbox', (t) => {
+test('polygon contains bbox', t => {
   const result = clipPolygon(
     flatten([
       [10, 40],
@@ -181,7 +181,7 @@ test('polygon contains bbox', (t) => {
   t.end();
 });
 
-test('clips 3d polygon', (t) => {
+test('clips 3d polygon', t => {
   const result = clipPolygon(
     flatten([
       [10, -5, 0],
@@ -211,7 +211,7 @@ test('clips 3d polygon', (t) => {
   t.end();
 });
 
-test('clips polygon fom partial array', (t) => {
+test('clips polygon fom partial array', t => {
   const polygon = flatten([
     [10, -5],
     [25, 10],
@@ -241,7 +241,7 @@ test('clips polygon fom partial array', (t) => {
   t.end();
 });
 
-test('clips floating point lines', (t) => {
+test('clips floating point lines', t => {
   const line = flatten([
     [-86.66015624999999, 42.22851735620852],
     [-81.474609375, 38.51378825951165],
@@ -269,7 +269,7 @@ test('clips floating point lines', (t) => {
   t.end();
 });
 
-test('preserves line if no protrusions exist', (t) => {
+test('preserves line if no protrusions exist', t => {
   const result = clipPolyline([1, 1, 2, 2, 3, 3], [0, 0, 30, 30]);
 
   t.comment(JSON.stringify(result));
@@ -278,7 +278,7 @@ test('preserves line if no protrusions exist', (t) => {
   t.end();
 });
 
-test('clips without leaving empty parts', (t) => {
+test('clips without leaving empty parts', t => {
   const result = clipPolyline([40, 40, 50, 50], [0, 0, 30, 30]);
 
   t.deepEquals(result, []);
@@ -286,7 +286,7 @@ test('clips without leaving empty parts', (t) => {
   t.end();
 });
 
-test('still works when polygon never crosses bbox', (t) => {
+test('still works when polygon never crosses bbox', t => {
   const result = clipPolygon(
     flatten([
       [3, 3],
