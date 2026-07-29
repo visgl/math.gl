@@ -38,7 +38,7 @@ try {
   new Map({
     container: window.document.body
   });
-} catch (err) {
+} catch {
   // Ignore
 }
 /* eslint-enable */

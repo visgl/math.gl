@@ -7,7 +7,7 @@ import {Vector2, Vector3, _MathUtils} from '@math.gl/core';
 import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial';
 import {tapeEquals, tapeEqualsEpsilon} from 'test/utils/tape-assertions';
 
-test('EllipsoidTangentPlane constructs an east-north-up frame', (t) => {
+test('EllipsoidTangentPlane constructs an east-north-up frame', t => {
   const surfacePoint = Ellipsoid.WGS84.cartographicToCartesian([0, 0, 0]);
   const tangentPlane = new EllipsoidTangentPlane(surfacePoint);
 
@@ -18,7 +18,7 @@ test('EllipsoidTangentPlane constructs an east-north-up frame', (t) => {
   t.end();
 });
 
-test('EllipsoidTangentPlane projects onto the local two-dimensional plane', (t) => {
+test('EllipsoidTangentPlane projects onto the local two-dimensional plane', t => {
   const surfacePoint = Ellipsoid.WGS84.cartographicToCartesian([0, 0, 0]);
   const tangentPlane = new EllipsoidTangentPlane(surfacePoint);
   const point = new Vector3(surfacePoint).add([25, 100, 50]);
@@ -33,7 +33,7 @@ test('EllipsoidTangentPlane projects onto the local two-dimensional plane', (t) 
   t.end();
 });
 
-test('EllipsoidTangentPlane instances do not share mutable frame state', (t) => {
+test('EllipsoidTangentPlane instances do not share mutable frame state', t => {
   const first = new EllipsoidTangentPlane(Ellipsoid.WGS84.cartographicToCartesian([0, 0, 0]));
   const firstOrigin = first.origin.clone();
   const firstNormal = first.plane.normal.clone();

@@ -22,7 +22,7 @@ const TEST_REGIONS = [
   }
 ];
 
-test('makeOBBFromRegion bounds representative WGS84 regions', (t) => {
+test('makeOBBFromRegion bounds representative WGS84 regions', t => {
   for (const testCase of TEST_REGIONS) {
     const [west, south, east, north, minimumHeight, maximumHeight] = testCase.degrees;
     const region = [

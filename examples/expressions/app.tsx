@@ -107,10 +107,8 @@ export default function ExpressionPlayground(): JSX.Element {
   }
 
   function toggleLibrary(libraryId: LibraryId): void {
-    setEnabledLibraries((current) =>
-      current.includes(libraryId)
-        ? current.filter((id) => id !== libraryId)
-        : [...current, libraryId]
+    setEnabledLibraries(current =>
+      current.includes(libraryId) ? current.filter(id => id !== libraryId) : [...current, libraryId]
     );
   }
 
@@ -129,9 +127,9 @@ export default function ExpressionPlayground(): JSX.Element {
           <span>Sample</span>
           <select
             value={sampleId}
-            onChange={(event) => {
+            onChange={event => {
               const sample = EXPRESSION_SAMPLES.find(
-                (candidate) => candidate.id === event.target.value
+                candidate => candidate.id === event.target.value
               );
               if (sample) {
                 selectSample(sample);
@@ -143,7 +141,7 @@ export default function ExpressionPlayground(): JSX.Element {
             </option>
             {groupSamples(EXPRESSION_SAMPLES).map(([group, samples]) => (
               <optgroup key={group} label={group}>
-                {samples.map((sample) => (
+                {samples.map(sample => (
                   <option key={sample.id} value={sample.id}>
                     {sample.label}
                   </option>
@@ -155,7 +153,7 @@ export default function ExpressionPlayground(): JSX.Element {
       </header>
 
       <section className="library-strip" aria-label="Function libraries">
-        {(Object.keys(LIBRARIES) as LibraryId[]).map((libraryId) => {
+        {(Object.keys(LIBRARIES) as LibraryId[]).map(libraryId => {
           const library = LIBRARIES[libraryId];
           return (
             <label className="library-toggle" key={libraryId}>
@@ -186,11 +184,11 @@ export default function ExpressionPlayground(): JSX.Element {
             aria-label="Expression"
             value={expression}
             spellCheck={false}
-            onChange={(event) => {
+            onChange={event => {
               setSampleId('');
               setExpression(event.target.value);
             }}
-            onKeyDown={(event) => {
+            onKeyDown={event => {
               if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
                 event.preventDefault();
                 startEvaluation();
@@ -204,7 +202,7 @@ export default function ExpressionPlayground(): JSX.Element {
             aria-label="JSON context"
             value={contextText}
             spellCheck={false}
-            onChange={(event) => {
+            onChange={event => {
               setSampleId('');
               setContextText(event.target.value);
             }}
@@ -214,7 +212,7 @@ export default function ExpressionPlayground(): JSX.Element {
             <h2>Available functions</h2>
             <div className="function-list">
               {functionNames.length ? (
-                functionNames.map((name) => <code key={name}>{name}</code>)
+                functionNames.map(name => <code key={name}>{name}</code>)
               ) : (
                 <span className="empty-message">Select a function library.</span>
               )}
@@ -341,14 +339,14 @@ function extractCoordinates(value: unknown): [number, number][] {
     : value;
 
   if (Array.isArray(normalized) && normalized.length >= 1 && normalized.every(isPosition)) {
-    return normalized.map((position) => [position[0], position[1]]);
+    return normalized.map(position => [position[0], position[1]]);
   }
 
   if (
     Array.isArray(normalized) &&
     normalized.length >= 2 &&
     normalized.length % 2 === 0 &&
-    normalized.every((coordinate) => typeof coordinate === 'number')
+    normalized.every(coordinate => typeof coordinate === 'number')
   ) {
     const coordinates: [number, number][] = [];
     for (let index = 0; index < normalized.length; index += 2) {

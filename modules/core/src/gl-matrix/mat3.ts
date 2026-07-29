@@ -12,7 +12,7 @@ import * as glMatrix from './common.js';
  */
 export function create() {
   const out = new glMatrix.ARRAY_TYPE(9);
-  if (glMatrix.ARRAY_TYPE != Float32Array) {
+  if (glMatrix.ARRAY_TYPE !== Float32Array) {
     out[1] = 0;
     out[2] = 0;
     out[3] = 0;

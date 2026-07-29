@@ -12,7 +12,7 @@ import {getS2BoundaryFlat} from '@math.gl/dggs-s2';
 //   t.end();
 // });
 
-test('getS2BoundaryFlat', (t) => {
+test('getS2BoundaryFlat', t => {
   const TEST_TOKENS = [
     '80858004', // face 4
     '1c', // face 0

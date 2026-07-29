@@ -10,7 +10,7 @@ import {
   isTypedArray
 } from '@math.gl/types';
 
-test('math.gl#Float16Array constructor', (t) => {
+test('math.gl#Float16Array constructor', t => {
   const Float16ArrayConstructor = getFloat16ArrayConstructor();
   const value = new Float16ArrayConstructor(1);
 

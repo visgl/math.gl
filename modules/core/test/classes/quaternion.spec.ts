@@ -9,17 +9,17 @@ import {tapeEquals} from 'test/utils/tape-assertions';
 
 import {Quaternion, Vector3} from '@math.gl/core';
 
-test('Quaternion#import', (t) => {
+test('Quaternion#import', t => {
   t.equals(typeof Quaternion, 'function');
   t.end();
 });
 
-test('Quaternion#construct and Array.isArray check', (t) => {
+test('Quaternion#construct and Array.isArray check', t => {
   t.ok(Array.isArray(new Quaternion()));
   t.end();
 });
 
-test('Quaternion#methods', (t) => {
+test('Quaternion#methods', t => {
   const q = new Quaternion();
   t.equals(q[0], 0);
   t.equals(q[1], 0);
@@ -42,7 +42,7 @@ test('Quaternion#methods', (t) => {
   t.end();
 });
 
-test('Quaternion#fromMatrix3', (t) => {
+test('Quaternion#fromMatrix3', t => {
   const TEST_CASES = [
     {
       title: 'legacy',
@@ -61,7 +61,7 @@ test('Quaternion#fromMatrix3', (t) => {
   t.end();
 });
 
-test('Quaternion#fromAxisRotation', (t) => {
+test('Quaternion#fromAxisRotation', t => {
   let q = new Quaternion().fromAxisRotation(new Vector3(0, 0, 1), Math.PI);
   tapeEquals(t, q, [0, 0, 1, Math.cos(Math.PI / 2)]);
 
@@ -85,7 +85,7 @@ const quatA = [1, 2, 3, 4];
 // const id = [0, 0, 0, 1];
 // const deg90 = Math.PI / 2;
 
-test('Quaternion#create', (t) => {
+test('Quaternion#create', t => {
   tapeEquals(
     t,
     new Quaternion(),
@@ -97,7 +97,7 @@ test('Quaternion#create', (t) => {
   t.end();
 });
 
-test('Quaternion#clone', (t) => {
+test('Quaternion#clone', t => {
   const result = new Quaternion(quatA).clone();
   tapeEquals(
     t,
@@ -108,13 +108,13 @@ test('Quaternion#clone', (t) => {
   t.end();
 });
 
-test('Quaternion#copy', (t) => {
+test('Quaternion#copy', t => {
   const result = new Quaternion().copy(quatA);
   tapeEquals(t, result, [1, 2, 3, 4], 'should place values into out');
   t.end();
 });
 
-test('Quaternion#set', (t) => {
+test('Quaternion#set', t => {
   const result = new Quaternion().set(1, 2, 3, 4);
   tapeEquals(
     t,
@@ -125,33 +125,33 @@ test('Quaternion#set', (t) => {
   t.end();
 });
 
-test('Quaternion#identity', (t) => {
+test('Quaternion#identity', t => {
   const result = new Quaternion(1, 1, 1, 1).identity();
   tapeEquals(t, result, [0, 0, 0, 1], 'should return identity quaternion');
   t.end();
 });
 
-test('Quaternion#rotationTo', (t) => {
+test('Quaternion#rotationTo', t => {
   t.doesNotThrow(() => new Quaternion().rotationTo([1, 1, 1, 1], [2, 2, 2, 2]));
   t.end();
 });
 
-test('Quaternion#calculateW', (t) => {
+test('Quaternion#calculateW', t => {
   t.doesNotThrow(() => new Quaternion().calculateW());
   t.end();
 });
 
-test('Quaternion#invert', (t) => {
+test('Quaternion#invert', t => {
   t.doesNotThrow(() => new Quaternion([1, 1, 1, 1]).invert());
   t.end();
 });
 
-test('Quaternion#lerp', (t) => {
+test('Quaternion#lerp', t => {
   t.doesNotThrow(() => new Quaternion().lerp([1, 1, 1, 1], [2, 2, 2, 2], 0.5));
   t.end();
 });
 
-test('Quaternion#slerp', (t) => {
+test('Quaternion#slerp', t => {
   t.doesNotThrow(() => new Quaternion().slerp([1, 1, 1, 1], [2, 2, 2, 2], 0.5));
   t.doesNotThrow(() =>
     new Quaternion().slerp({
@@ -163,47 +163,47 @@ test('Quaternion#slerp', (t) => {
   t.end();
 });
 
-test('Quaternion#scale', (t) => {
+test('Quaternion#scale', t => {
   t.doesNotThrow(() => new Quaternion([1, 1, 1, 1]).scale(5));
   t.end();
 });
 
-test('Quaternion#rotateX', (t) => {
+test('Quaternion#rotateX', t => {
   t.doesNotThrow(() => new Quaternion([1, 1, 1, 1]).rotateX(5));
   t.end();
 });
 
-test('Quaternion#rotateY', (t) => {
+test('Quaternion#rotateY', t => {
   t.doesNotThrow(() => new Quaternion([1, 1, 1, 1]).rotateY(5));
   t.end();
 });
 
-test('Quaternion#rotateZ', (t) => {
+test('Quaternion#rotateZ', t => {
   t.doesNotThrow(() => new Quaternion([1, 1, 1, 1]).rotateZ(5));
   t.end();
 });
 
-test('Quaternion#add', (t) => {
+test('Quaternion#add', t => {
   const quat = new Quaternion(1, 1, 1, 1).identity();
   tapeEquals(t, quat.add([0, 0, 0, 0]), quat, 'should add quaternion');
   t.end();
 });
 
-test('Quaternion#setAxisAngle', (t) => {
+test('Quaternion#setAxisAngle', t => {
   const result = new Quaternion().setAxisAngle([1, 0, 0], Math.PI * 0.5);
   tapeEquals(t, result, [0.707106, 0, 0, 0.707106], 'should return correct values');
   t.end();
 });
 
-test('Quaternion#transform', (t) => {
+test('Quaternion#transform', t => {
   const quat = new Quaternion();
   t.throws(() => quat.transformVector4([NaN, 0, 0, 0]));
   t.throws(() => quat.transformVector4([0, 0, 0]));
   t.end();
 });
 
-test.skip('getAxisAngle', (tt) => {
-  test('Quaternion#getAxisAngle for a quaternion representing no rotation', (t) => {
+test.skip('getAxisAngle', tt => {
+  test('Quaternion#getAxisAngle for a quaternion representing no rotation', t => {
     const out = [0, 0, 0];
     const quat = new Quaternion().setAxisAngle([0, 1, 0], 0.0);
     // @ts-expect-error

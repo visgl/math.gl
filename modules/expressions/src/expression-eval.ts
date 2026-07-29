@@ -81,11 +81,11 @@ const binops: Record<string, (...args: any[]) => any> = {
   '^': (a: number, b: number) => a ^ b,
   '&': (a: number, b: number) => a & b,
   '==': (a: unknown, b: unknown) => {
-    // eslint-disable-next-line eqeqeq
+    // biome-ignore lint/suspicious/noDoubleEquals: this operator implements JavaScript loose equality.
     return a == b;
   },
   '!=': (a: unknown, b: unknown) => {
-    // eslint-disable-next-line eqeqeq
+    // biome-ignore lint/suspicious/noDoubleEquals: this operator implements JavaScript loose inequality.
     return a != b;
   },
   '===': (a: unknown, b: unknown) => a === b,
@@ -118,7 +118,7 @@ const unops: Record<string, (...args: any[]) => any> = {
 };
 
 function evaluateArray(list: jsep.Expression[], context: ExpressionContext): unknown[] {
-  return list.map((value) => evaluate(value, context));
+  return list.map(value => evaluate(value, context));
 }
 
 /** Evaluates each expression in an array concurrently. */
@@ -126,7 +126,7 @@ async function evaluateArrayAsync(
   list: jsep.Expression[],
   context: ExpressionContext
 ): Promise<unknown[]> {
-  return await Promise.all(list.map((value) => evalAsync(value, context)));
+  return await Promise.all(list.map(value => evalAsync(value, context)));
 }
 
 /** Resolves a member expression and preserves its receiver for method calls. */

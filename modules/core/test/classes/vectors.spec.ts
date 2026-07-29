@@ -21,14 +21,14 @@ export function tapeEquals(t: Test, a, b, msg, extra) {
   });
 }
 
-test('Math#types', (t) => {
+test('Math#types', t => {
   t.equals(typeof Vector2, 'function');
   t.equals(typeof Vector3, 'function');
   t.equals(typeof Vector4, 'function');
   t.end();
 });
 
-test('Math#construct and Array.isArray check', (t) => {
+test('Math#construct and Array.isArray check', t => {
   t.ok(Array.isArray(new Vector2()));
   t.ok(Array.isArray(new Vector3()));
   t.ok(Array.isArray(new Vector4()));
@@ -38,7 +38,7 @@ test('Math#construct and Array.isArray check', (t) => {
 // ['add', 'cross'];
 const VECTOR_METHODS = ['clone'];
 
-test('Vector2#members and methods', (t) => {
+test('Vector2#members and methods', t => {
   const v = new Vector2();
   t.equals(v.x, 0);
   t.equals(v.y, 0);
@@ -49,7 +49,7 @@ test('Vector2#members and methods', (t) => {
   t.end();
 });
 
-test('Vector4#members and methods', (t) => {
+test('Vector4#members and methods', t => {
   const v = new Vector4();
   t.equals(v.x, 0);
   t.equals(v.y, 0);

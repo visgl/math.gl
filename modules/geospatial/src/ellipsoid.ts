@@ -160,7 +160,7 @@ export class Ellipsoid {
     origin: Readonly<NumericArray>,
     result?: Matrix4
   ): Matrix4;
-  localFrameToFixedFrame<Matrix4T>(
+  localFrameToFixedFrame<_Matrix4T>(
     firstAxis: AxisDirection,
     secondAxis: AxisDirection,
     thirdAxis: AxisDirection,

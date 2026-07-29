@@ -20,7 +20,7 @@
 
 const c0_ = 240;
 
-// prettier-ignore
+// biome-ignore format: preserve the coefficient table layout
 const c3_ = [
   9, -18, -88,    0,  96,   90,   0,   0, -60, -20,
   -9,  18,   8,    0, -96,   30,   0,   0,  60, -20,
@@ -38,7 +38,7 @@ const c3_ = [
 
 const c0n_ = 372;
 
-// prettier-ignore
+// biome-ignore format: preserve the coefficient table layout
 const c3n_ = [
   0, 0, -131, 0,  138,  144, 0,   0, -102, -31,
   0, 0,    7, 0, -138,   42, 0,   0,  102, -31,
@@ -56,7 +56,7 @@ const c3n_ = [
 
 const c0s_ = 372;
 
-// prettier-ignore
+// biome-ignore format: preserve the coefficient table layout
 const c3s_ = [
   18,  -36, -122,   0,  120,  135, 0,   0,  -84, -31,
   -18,   36,   -2,   0, -120,   51, 0,   0,   84, -31,
@@ -135,7 +135,7 @@ export class Geoid {
     // C++: Math::LatFix(lat)
     lat = Math.abs(lat) > 90 ? NaN : lat;
 
-    if (isNaN(lat) || isNaN(lon)) {
+    if (Number.isNaN(lat) || Number.isNaN(lon)) {
       return NaN;
     }
 

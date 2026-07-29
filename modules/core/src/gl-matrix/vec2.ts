@@ -16,7 +16,7 @@ import * as glMatrix from './common.js';
  */
 export function create(): NumericArray {
   const out = new glMatrix.ARRAY_TYPE(2);
-  if (glMatrix.ARRAY_TYPE != Float32Array) {
+  if (glMatrix.ARRAY_TYPE !== Float32Array) {
     out[0] = 0;
     out[1] = 0;
   }

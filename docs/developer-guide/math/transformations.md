@@ -13,7 +13,7 @@ The most general transform is a 4x4 matrix. See the article on [homogeneous coor
 Most math.gl classes offer a `transform` method that accepts matrices and quaternions.
 
 ```js
-// prettier-ignore
+// biome-ignore format: preserve the matrix layout
 const transformedVector1 = new Vector4(1, 0, 0, 1).transform([
   1, 0, 0, 0,
   0, 1, 0, 0,

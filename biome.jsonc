@@ -1,0 +1,96 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.10/schema.json",
+  "extends": ["./dev-modules/devtools-extensions/biome/base.jsonc"],
+  "files": {
+    "includes": [
+      "modules/**/*.js",
+      "modules/**/*.jsx",
+      "modules/**/*.ts",
+      "modules/**/*.tsx",
+      "dev-docs/**/*.js",
+      "dev-docs/**/*.jsx",
+      "dev-docs/**/*.ts",
+      "dev-docs/**/*.tsx",
+      "docs/**/*.js",
+      "docs/**/*.jsx",
+      "docs/**/*.ts",
+      "docs/**/*.tsx",
+      "test/**/*.js",
+      "test/**/*.jsx",
+      "test/**/*.ts",
+      "test/**/*.tsx",
+      "examples/**/*.js",
+      "examples/**/*.jsx",
+      "examples/**/*.ts",
+      "examples/**/*.tsx",
+      "!**/*.min.js",
+      "!**/dist/**",
+      "!**/wip/**",
+      "!**/.cache/**",
+      "!**/.docusaurus/**"
+    ]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "bracketSpacing": false
+  },
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "asNeeded",
+      "quoteStyle": "single",
+      "jsxQuoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "none",
+      "bracketSpacing": false
+    }
+  },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": {
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error",
+        "noUnreachable": "error"
+      },
+      "suspicious": {
+        "noAssignInExpressions": "error",
+        "noAsyncPromiseExecutor": "error",
+        "noConsole": "error",
+        "noDebugger": "error",
+        "noDoubleEquals": "error",
+        "noGlobalIsNan": "error",
+        "noRedeclare": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["modules/core/test/threejs-tests/**"],
+      "linter": {
+        "enabled": false
+      }
+    },
+    {
+      "includes": ["modules/core/src/gl-matrix/**/*.js", "modules/core/src/gl-matrix/**/*.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noRedeclare": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["test/size/**/*.js"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    }
+  ]
+}

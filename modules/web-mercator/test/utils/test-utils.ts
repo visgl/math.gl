@@ -15,10 +15,10 @@ export function toLowPrecision<T>(input: T, precision: number = 7): T {
     value =
       Math.abs(input) > 1 ? Number(input.toPrecision(precision)) : Number(input.toFixed(precision));
   } else if (Array.isArray(input)) {
-    value = input.map((item) => toLowPrecision(item, precision));
+    value = input.map(item => toLowPrecision(item, precision));
   } else if (ArrayBuffer.isView(input)) {
     // @ts-expect-error DataView (sigh...)
-    value = Array.from(input).map((item) => toLowPrecision(item, precision));
+    value = Array.from(input).map(item => toLowPrecision(item, precision));
   } else if (typeof input === 'object') {
     for (const key in input) {
       input[key] = toLowPrecision(input[key], precision);

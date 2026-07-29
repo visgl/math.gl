@@ -379,10 +379,10 @@ export class WebMercatorViewport {
   getBounds(options?: {z?: number}): number[][] {
     const corners = this.getBoundingRegion(options);
 
-    const west = Math.min(...corners.map((p) => p[0]));
-    const east = Math.max(...corners.map((p) => p[0]));
-    const south = Math.min(...corners.map((p) => p[1]));
-    const north = Math.max(...corners.map((p) => p[1]));
+    const west = Math.min(...corners.map(p => p[0]));
+    const east = Math.max(...corners.map(p => p[0]));
+    const south = Math.min(...corners.map(p => p[1]));
+    const north = Math.max(...corners.map(p => p[1]));
     return [
       [west, south],
       [east, north]

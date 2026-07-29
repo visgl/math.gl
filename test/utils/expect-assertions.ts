@@ -59,7 +59,7 @@ export function it(message: string, testfunc: Function) {
     currentBeforeFunc();
   }
 
-  test(message, (t) => {
+  test(message, t => {
     currentTest = t;
     testfunc();
     t.end();

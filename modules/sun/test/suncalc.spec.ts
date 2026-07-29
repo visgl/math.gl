@@ -2,7 +2,7 @@ import {getSunPosition, getSunDirection} from '../src/suncalc';
 import {equals, config, vec3} from '@math.gl/core';
 import test from 'tape-promise/tape';
 
-test('Sunlight#azimuth and altitude', (t) => {
+test('Sunlight#azimuth and altitude', t => {
   const MS_IN_AN_HOUR = 3.6e6;
   const TIMESTAMP = 1553990400000 + 7 * MS_IN_AN_HOUR; // 03/31/2019 @ 12:00am (UTC) + Vancouver(GMT-7) timezone offset
   const LATITUDE = 49.253;
@@ -43,7 +43,7 @@ test('Sunlight#azimuth and altitude', (t) => {
   // use a bigger epsilon here
   config.EPSILON = 0.3;
 
-  TEST_CASES.forEach((testCase) => {
+  TEST_CASES.forEach(testCase => {
     const {azimuth, altitude} = getSunPosition(testCase.timestamp, LATITUDE, LONGITUDE);
     // azimuth is measured from south to west, azimuth + 180 is converting to north to east
     const azimuthInDegree = 180 + (azimuth * 180) / Math.PI;
@@ -57,7 +57,7 @@ test('Sunlight#azimuth and altitude', (t) => {
   t.end();
 });
 
-test('getSunDirection', (t) => {
+test('getSunDirection', t => {
   const testCases = [
     {
       title: 'Tropic of Cancer on Summer Solstice at noon',
