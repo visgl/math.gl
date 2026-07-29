@@ -28,11 +28,11 @@ test('math.gl#Float16Array constructor', (t) => {
     );
   } else {
     t.equal(Float16ArrayConstructor, Uint16Array, 'falls back to Uint16Array');
-    t.notOk(
-      isFloat16ArrayConstructor(Float16ArrayConstructor),
-      'does not identify the fallback as native Float16Array'
-    );
   }
 
+  t.notOk(
+    isFloat16ArrayConstructor(Uint16Array),
+    'does not identify the Uint16Array fallback as native Float16Array'
+  );
   t.end();
 });
