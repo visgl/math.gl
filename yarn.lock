@@ -845,6 +845,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@math.gl/expressions@workspace:modules/expressions":
+  version: 0.0.0-use.local
+  resolution: "@math.gl/expressions@workspace:modules/expressions"
+  dependencies:
+    "@math.gl/core": "npm:4.2.0-alpha.3"
+    "@math.gl/geospatial": "npm:4.2.0-alpha.3"
+    jsep: "npm:^1.4.0"
+  languageName: unknown
+  linkType: soft
+
 "@math.gl/geoid@workspace:modules/geoid":
   version: 0.0.0-use.local
   resolution: "@math.gl/geoid@workspace:modules/geoid"
@@ -853,7 +863,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/geospatial@workspace:modules/geospatial":
+"@math.gl/geospatial@npm:4.2.0-alpha.3, @math.gl/geospatial@workspace:modules/geospatial":
   version: 0.0.0-use.local
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
@@ -6311,6 +6321,13 @@ __metadata:
     whatwg-url: "npm:^4.3.0"
     xml-name-validator: "npm:^2.0.1"
   checksum: 10c0/bcfce735902ad93fcd3a02feb5bd2b2e8f3ce17a7859978dd85f0874fb5cf0a06719db7b5d01a19ec5afbe469ed5da3d013e773aead56ddead9ce9cba7568913
+  languageName: node
+  linkType: hard
+
+"jsep@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "jsep@npm:1.4.0"
+  checksum: 10c0/fe60adf47e050e22eadced42514a51a15a3cf0e2d147896584486acd8ee670fc16641101b9aeb81f4aaba382043d29744b7aac41171e8106515b14f27e0c7116
   languageName: node
   linkType: hard
 

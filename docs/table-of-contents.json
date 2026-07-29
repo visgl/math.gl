@@ -2,11 +2,7 @@
   {
     "type": "category",
     "label": "Overview",
-    "items": [
-      "README",
-      "whats-new",
-      "upgrade-guide"
-    ]
+    "items": ["README", "whats-new", "upgrade-guide"]
   },
   {
     "type": "category",
@@ -34,9 +30,7 @@
       {
         "type": "category",
         "label": "Discrete Global Grid Systems Math",
-        "items": [
-          "developer-guide/geospatial/dggs"
-        ]
+        "items": ["developer-guide/geospatial/dggs"]
       },
       {
         "type": "category",
@@ -83,6 +77,15 @@
           "modules/core/api-reference/vector2",
           "modules/core/api-reference/vector3",
           "modules/core/api-reference/vector4"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@math.gl/expressions",
+        "items": [
+          "modules/expressions/README",
+          "modules/expressions/api-reference/expression-eval",
+          "modules/expressions/api-reference/parse-expression-string"
         ]
       },
       {
@@ -174,10 +177,7 @@
       {
         "type": "category",
         "label": "@math.gl/dggs-s2",
-        "items": [
-          "modules/dggs-s2/README",
-          "modules/dggs-s2/api-reference/s2"
-        ]
+        "items": ["modules/dggs-s2/README", "modules/dggs-s2/api-reference/s2"]
       }
     ]
   }
