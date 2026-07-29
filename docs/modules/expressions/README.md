@@ -19,20 +19,20 @@ npm install @math.gl/expressions
 Evaluate a parsed expression against a data object:
 
 ```js
-import { parse, eval as evaluate } from "@math.gl/expressions";
+import {parse, eval as evaluate} from '@math.gl/expressions';
 
-const expression = parse("value * scale + 1");
-const result = evaluate(expression, { value: 3, scale: 2 });
+const expression = parse('value * scale + 1');
+const result = evaluate(expression, {value: 3, scale: 2});
 // 7
 ```
 
 Compile an expression once and reuse it:
 
 ```js
-import { compile } from "@math.gl/expressions";
+import {compile} from '@math.gl/expressions';
 
-const accessor = compile("points[1].value");
-const result = accessor({ points: [{ value: 1 }, { value: 4 }] });
+const accessor = compile('points[1].value');
+const result = accessor({points: [{value: 1}, {value: 4}]});
 // 4
 ```
 
@@ -42,27 +42,24 @@ Supply function libraries through parser options:
 import {
   BASIC_MATH_FUNCTION_LIBRARY,
   GEOSPATIAL_FUNCTION_LIBRARY,
-  compile,
-} from "@math.gl/expressions";
+  compile
+} from '@math.gl/expressions';
 
-const fn = compile(
-  "cartographicToCartesian([toRadians(longitude), toRadians(latitude), 0])",
-  {
-    libraries: [BASIC_MATH_FUNCTION_LIBRARY, GEOSPATIAL_FUNCTION_LIBRARY],
-  },
-);
+const fn = compile('cartographicToCartesian([toRadians(longitude), toRadians(latitude), 0])', {
+  libraries: [BASIC_MATH_FUNCTION_LIBRARY, GEOSPATIAL_FUNCTION_LIBRARY]
+});
 
-const cartesian = fn({ longitude: 0, latitude: 0 });
+const cartesian = fn({longitude: 0, latitude: 0});
 // [6378137, 0, 0]
 ```
 
 Compile a JSON-style accessor expression that disallows function calls:
 
 ```js
-import { parseExpressionString } from "@math.gl/expressions";
+import {parseExpressionString} from '@math.gl/expressions';
 
-const getFill = parseExpressionString("style.fill.color");
-const fill = getFill({ style: { fill: { color: "#08f" } } });
+const getFill = parseExpressionString('style.fill.color');
+const fill = getFill({style: {fill: {color: '#08f'}}});
 // '#08f'
 ```
 
@@ -87,9 +84,9 @@ const fill = getFill({ style: { fill: { color: "#08f" } } });
 The evaluator APIs accept a `libraries` option:
 
 ```ts
-compile(expression, { libraries: [BASIC_MATH_FUNCTION_LIBRARY] });
-eval(ast, row, { libraries: [GEOSPATIAL_FUNCTION_LIBRARY] });
-evalAsync(ast, row, { libraries: [customLibrary] });
+compile(expression, {libraries: [BASIC_MATH_FUNCTION_LIBRARY]});
+eval(ast, row, {libraries: [GEOSPATIAL_FUNCTION_LIBRARY]});
+evalAsync(ast, row, {libraries: [customLibrary]});
 ```
 
 Libraries are merged left-to-right and then overlaid with the input context object, so row values win if a field name collides with a library export.

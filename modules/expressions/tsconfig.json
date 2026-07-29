@@ -7,5 +7,5 @@
     "rootDir": "src",
     "outDir": "dist"
   },
-  "references": [{ "path": "../core" }, { "path": "../geospatial" }]
+  "references": [{"path": "../core"}, {"path": "../geospatial"}]
 }

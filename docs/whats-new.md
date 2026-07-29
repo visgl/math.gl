@@ -57,6 +57,13 @@ Release Date: TBD, maybe Q1, 2024.
 
 Goal: Minor functionality additions, as required.
 
+**`@math.gl/expressions`** (NEW MODULE)
+
+- Promotes the expression parser previously embedded in `@deck.gl/json` to a stable, documented module.
+- Parses, evaluates, and compiles synchronous or asynchronous JavaScript-style expressions.
+- Provides configurable function libraries, including importable basic math and WGS84 geospatial libraries.
+- Compiles restricted JSON-style accessor expressions with function calls disabled.
+
 ## v4.1
 
 Release Date: Sep 7, 2024.

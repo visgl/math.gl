@@ -135,10 +135,7 @@
       {
         "type": "category",
         "label": "@math.gl/proj4",
-        "items": [
-          "modules/proj4/README",
-          "modules/proj4/api-reference/proj4-projection"
-        ]
+        "items": ["modules/proj4/README", "modules/proj4/api-reference/proj4-projection"]
       },
       {
         "type": "category",
@@ -161,18 +158,12 @@
       {
         "type": "category",
         "label": "@math.gl/dggs-geohash",
-        "items": [
-          "modules/dggs-geohash/README",
-          "modules/dggs-geohash/api-reference/geohash"
-        ]
+        "items": ["modules/dggs-geohash/README", "modules/dggs-geohash/api-reference/geohash"]
       },
       {
         "type": "category",
         "label": "@math.gl/dggs-quadkey",
-        "items": [
-          "modules/dggs-quadkey/README",
-          "modules/dggs-quadkey/api-reference/quadkey"
-        ]
+        "items": ["modules/dggs-quadkey/README", "modules/dggs-quadkey/api-reference/quadkey"]
       },
       {
         "type": "category",

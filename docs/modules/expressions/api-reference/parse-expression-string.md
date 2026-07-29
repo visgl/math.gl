@@ -1,5 +1,9 @@
 # Accessor Compiler
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From-v4.2" />
+</p>
+
 `parseExpressionString(expression: string): (row: Record<string, unknown>) => unknown`
 
 Compiles a JSON-style accessor expression into a reusable function.

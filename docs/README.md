@@ -22,13 +22,13 @@ math.gl is a toolbox that offers a suite of composable modules.
 | **Core math libraries**           | Module <span style={{width: 300}} /> | Description                                  |
 | --------------------------------- | ------------------------------------ | -------------------------------------------- |
 |                                   | **`@math.gl/types`**                 | Basic math type helpers (`NumericArray` etc) |
-| ![core](./images/core.png "core") | **`@math.gl/core`**                  | Basic math classes (vectors, matrices, etc)  |
+| ![core](./images/core.png 'core') | **`@math.gl/core`**                  | Basic math classes (vectors, matrices, etc)  |
 |                                   | **`@math.gl/expressions`**           | Parse and evaluate lightweight expressions.  |
 
 | **Geospatial math libraries**                       | Module <span style={{width: 300}} /> | Description                                        |
 | --------------------------------------------------- | ------------------------------------ | -------------------------------------------------- |
-| ![geospatial](./images/geospatial.svg "geospatial") | **`@math.gl/geospatial`**            | Ellipsoidal math for WGS84 coordinates.            |
-| ![geoid](./images/geoid.png "geoid")                | **`@math.gl/geoid`**                 | Earth Gravity Model support .                      |
+| ![geospatial](./images/geospatial.svg 'geospatial') | **`@math.gl/geospatial`**            | Ellipsoidal math for WGS84 coordinates.            |
+| ![geoid](./images/geoid.png 'geoid')                | **`@math.gl/geoid`**                 | Earth Gravity Model support .                      |
 |                                                     | **`@math.gl/polygon`**               | Polygon math, including geospatial cutting etc.    |
 |                                                     | **`@math.gl/proj4`**                 | Conversion between coordinate reference systems.   |
 |                                                     | **`@math.gl/sun`**                   | Solar position / direction from position and time. |
@@ -36,13 +36,13 @@ math.gl is a toolbox that offers a suite of composable modules.
 
 | **DGGS (Discrete global grid support) libraries** | Module <span style={{width: 300}} /> | Description                     |
 | ------------------------------------------------- | ------------------------------------ | ------------------------------- |
-| ![geohash](./images/dggs/geohash.png "geohash")   | **`@math.gl/dggs-geohash`**          | Get geometry of GeoHash tokens. |
-| ![quadkey](./images/dggs/quadkey.png "quadkey")   | **`@math.gl/dggs-quadkey`**          | Get geometry of QuadKey tokens  |
-| ![s2](./images/dggs/s2.png "s2")                  | **`@math.gl/dggs-s2`**               | Get geometry of S2 tokens.      |
+| ![geohash](./images/dggs/geohash.png 'geohash')   | **`@math.gl/dggs-geohash`**          | Get geometry of GeoHash tokens. |
+| ![quadkey](./images/dggs/quadkey.png 'quadkey')   | **`@math.gl/dggs-quadkey`**          | Get geometry of QuadKey tokens  |
+| ![s2](./images/dggs/s2.png 's2')                  | **`@math.gl/dggs-s2`**               | Get geometry of S2 tokens.      |
 
 | **3D math libraries**                      | Module <span style={{width: 300}} /> | Description                                |
 | ------------------------------------------ | ------------------------------------ | ------------------------------------------ |
-| ![culling](./images/culling.png "culling") | **`@math.gl/culling`**               | Bounding volumes and intersection testing. |
+| ![culling](./images/culling.png 'culling') | **`@math.gl/culling`**               | Bounding volumes and intersection testing. |
 
 <br/>
 In addition, math.gl provides a few deprecated legacy modules, to avoid breaking older applications.

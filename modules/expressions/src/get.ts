@@ -4,12 +4,12 @@
 
 /**
  * Access properties of nested containers using dot-path notation.
- * Returns `undefined` if any container is not valid, instead of throwing.
+ *
+ * @param container - Object from which to read a value.
+ * @param compositeKey - Dot-separated property path.
+ * @returns The nested value, or `undefined` when the path cannot be resolved.
  */
-export function get(
-  container: Record<string, unknown>,
-  compositeKey: string,
-): unknown {
+export function get(container: Record<string, unknown>, compositeKey: string): unknown {
   let value: unknown = container;
 
   for (const key of getKeys(compositeKey)) {
@@ -19,16 +19,18 @@ export function get(
   return value;
 }
 
+/** Tests whether a value can be used for property access. */
 function isObject(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object";
+  return value !== null && typeof value === 'object';
 }
 
 const keyMap: Record<string, string[]> = {};
 
+/** Returns a cached list of property names for a dot-separated path. */
 function getKeys(compositeKey: string): string[] {
   let keyList = keyMap[compositeKey];
   if (!keyList) {
-    keyList = compositeKey.split(".");
+    keyList = compositeKey.split('.');
     keyMap[compositeKey] = keyList;
   }
   return keyList;

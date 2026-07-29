@@ -1,5 +1,9 @@
 # Expression Evaluator
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From-v4.2" />
+</p>
+
 The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
 
 ## `parse(expression: string | Expression): Expression`
@@ -22,15 +26,19 @@ Compiles an expression into a reusable function.
 
 Async variant of `compile`.
 
-## `addUnaryOp(operator: string, callback): void`
+## `addUnaryOp(operator: string, callback: UnaryOperator): void`
 
 Registers a unary operator with both JSEP and the evaluator.
 
-## `addBinaryOp(operator: string, precedenceOrCallback, callback?): void`
+`UnaryOperator` receives the evaluated operand and returns the operator result.
+
+## `addBinaryOp(operator: string, precedenceOrCallback: number | BinaryOperator, callback?: BinaryOperator): void`
 
 Registers a binary operator with both JSEP and the evaluator.
 
 If `callback` is omitted, the second argument is treated as the evaluator implementation and the parser uses the default precedence map bundled with the module.
+
+`BinaryOperator` receives the evaluated left and right operands and returns the operator result. Supply an explicit precedence when registering a new operator.
 
 ## Function Libraries
 
@@ -38,8 +46,29 @@ If `callback` is omitted, the second argument is treated as the evaluator implem
 
 - `libraries?: ExpressionFunctionLibrary[]`
 
-The module ships with:
+Each library is a `Record<string, ExpressionFunction>`. Libraries are merged left-to-right. A later library replaces same-named functions in an earlier library, and values supplied in the evaluation context take final precedence.
 
-- `BASIC_MATH_FUNCTION_LIBRARY`
-- `GEOSPATIAL_FUNCTION_LIBRARY`
-- `mergeFunctionLibraries(context, options)`
+```ts
+import {
+  BASIC_MATH_FUNCTION_LIBRARY,
+  compile,
+  type ExpressionFunctionLibrary
+} from '@math.gl/expressions';
+
+const statistics: ExpressionFunctionLibrary = {
+  mean: (...values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length
+};
+
+const evaluate = compile('round(mean(a, b, c))', {
+  libraries: [BASIC_MATH_FUNCTION_LIBRARY, statistics]
+});
+
+evaluate({a: 1, b: 2, c: 4}); // 2
+```
+
+The module provides these importable libraries:
+
+- `BASIC_MATH_FUNCTION_LIBRARY` provides common `Math` functions and math.gl helpers including `clamp`, `lerp`, angle conversion, normalization, and safe modulo.
+- `GEOSPATIAL_FUNCTION_LIBRARY` provides WGS84 coordinate conversion, surface projection, local frame, and ellipsoid helpers.
+
+Use `mergeFunctionLibraries(context, options)` when integrating libraries with a custom evaluation workflow. It does not mutate the supplied context or libraries.
