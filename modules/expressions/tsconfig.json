@@ -7,5 +7,11 @@
     "rootDir": "src",
     "outDir": "dist"
   },
-  "references": [{"path": "../core"}, {"path": "../geospatial"}]
+  "references": [
+    {"path": "../core"},
+    {"path": "../dggs-geohash"},
+    {"path": "../dggs-quadkey"},
+    {"path": "../dggs-s2"},
+    {"path": "../geospatial"}
+  ]
 }

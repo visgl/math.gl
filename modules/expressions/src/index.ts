@@ -7,6 +7,7 @@ export type {
   ExpressionFunction,
   ExpressionFunctionLibrary
 } from './function-libraries';
+export {ExpressionFunctionRegistry, type FunctionRegistrationOptions} from './function-registry';
 export type {BinaryOperator, Expression, ExpressionContext, UnaryOperator} from './expression-eval';
 export {
   addBinaryOp,

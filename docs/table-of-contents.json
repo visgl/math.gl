@@ -81,10 +81,12 @@
       },
       {
         "type": "category",
-        "label": "@math.gl/expressions",
+        "label": "@math.gl/expressions (experimental)",
         "items": [
           "modules/expressions/README",
           "modules/expressions/api-reference/expression-eval",
+          "modules/expressions/api-reference/function-registry",
+          "modules/expressions/api-reference/dggs-function-libraries",
           "modules/expressions/api-reference/parse-expression-string"
         ]
       },

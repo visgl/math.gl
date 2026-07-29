@@ -7,5 +7,10 @@
   {
     "type": "doc",
     "id": "benchmarks"
+  },
+  {
+    "type": "doc",
+    "label": "Expressions (experimental)",
+    "id": "expressions"
   }
 ]
