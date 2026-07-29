@@ -3,42 +3,31 @@
 // Copyright (c) vis.gl contributors
 
 import {
-  getGeohashBoundary,
-  getGeohashBoundaryFlat,
-  getGeohashBounds,
-  getGeohashLngLat
-} from '@math.gl/dggs-geohash';
-import {
-  getQuadkeyBoundary,
-  getQuadkeyBoundaryFlat,
-  getQuadkeyLngLat,
-  quadkeyToWorldBounds
-} from '@math.gl/dggs-quadkey';
-import {
-  getS2BoundaryFlat,
+  GeohashDecoder,
+  QuadkeyDecoder,
+  S2Decoder,
   getS2ChildIndex,
-  getS2IndexFromToken,
-  getS2TokenFromIndex
-} from '@math.gl/dggs-s2';
+  quadkeyToWorldBounds
+} from '@math.gl/dggs';
 import type {ExpressionFunctionLibrary} from './function-libraries';
 
 /**
  * GeoHash functions ready to register with an expression evaluator.
  */
 export const GEOHASH_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {
-  getGeohashBoundary,
-  getGeohashBoundaryFlat,
-  getGeohashBounds,
-  getGeohashLngLat
+  getGeohashBoundary: GeohashDecoder.getCellBoundaryPolygon,
+  getGeohashBoundaryFlat: GeohashDecoder.getCellBoundaryPolygonFlat,
+  getGeohashBounds: GeohashDecoder.getCellBounds,
+  getGeohashLngLat: GeohashDecoder.getCellLngLat
 };
 
 /**
  * Quadkey functions ready to register with an expression evaluator.
  */
 export const QUADKEY_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {
-  getQuadkeyBoundary,
-  getQuadkeyBoundaryFlat,
-  getQuadkeyLngLat,
+  getQuadkeyBoundary: QuadkeyDecoder.getCellBoundaryPolygon,
+  getQuadkeyBoundaryFlat: QuadkeyDecoder.getCellBoundaryPolygonFlat,
+  getQuadkeyLngLat: QuadkeyDecoder.getCellLngLat,
   quadkeyToWorldBounds
 };
 
@@ -46,10 +35,10 @@ export const QUADKEY_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {
  * S2 functions ready to register with an expression evaluator.
  */
 export const S2_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {
-  getS2BoundaryFlat,
+  getS2BoundaryFlat: S2Decoder.getCellBoundaryPolygonFlat,
   getS2ChildIndex,
-  getS2IndexFromToken,
-  getS2TokenFromIndex
+  getS2IndexFromToken: S2Decoder.getCellIndexFromToken,
+  getS2TokenFromIndex: S2Decoder.getTokenFromCellIndex
 };
 
 /**

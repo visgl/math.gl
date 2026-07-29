@@ -1,6 +1,6 @@
 {
-  "name": "@math.gl/dggs-geohash",
-  "description": "Math for the GeoHash DGGS (Discrete Global Grid System)",
+  "name": "@math.gl/dggs",
+  "description": "Decoders for Discrete Global Grid Systems (DGGS) including s2, geohash and quadkey",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
@@ -32,5 +32,11 @@
   "files": [
     "dist",
     "src"
-  ]
+  ],
+  "dependencies": {
+    "@math.gl/types": "4.2.0-alpha.3"
+  },
+  "devDependencies": {
+    "s2-geometry": "^1.2.10"
+  }
 }

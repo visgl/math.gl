@@ -1,18 +1,27 @@
 // loaders.gl, MIT license
 import test from 'tape-promise/tape';
 
-import {getS2BoundaryFlat} from '@math.gl/dggs-s2';
+import {S2Decoder} from '@math.gl/dggs';
 
-// import Long from 'long';
+test('S2Decoder#getCellLngLat', t => {
+  const s2Token = '8085873c';
+  const lngLat = S2Decoder.getCellLngLat(s2Token);
+  t.deepEquals(
+    lngLat.map(d => Number(d.toFixed(12))),
+    [-122.4637079795235, 37.78228912269449].map(d => Number(d.toFixed(12)))
+  );
+  t.end();
+});
 
-// TODO - restore test
-// test('Utils -> getS2LngLat', (t) => {
-//   const s2Token = '8085873c';
-//   t.deepEqual(getS2LngLat(s2Token), [-122.4637079795235, 37.78228912269449]);
-//   t.end();
-// });
+test('S2Decoder#token/index roundtrip', t => {
+  const token = '80858004';
+  const index = S2Decoder.getCellIndexFromToken(token);
+  const token2 = S2Decoder.getTokenFromCellIndex(index);
+  t.is(token2, token, 'round trips');
+  t.end();
+});
 
-test('getS2BoundaryFlat', t => {
+test('S2Decoder#getCellBoundaryPolygonFlat', t => {
   const TEST_TOKENS = [
     '80858004', // face 4
     '1c', // face 0
@@ -28,8 +37,7 @@ test('getS2BoundaryFlat', t => {
   ];
 
   for (const token of TEST_TOKENS) {
-    const polygon = getS2BoundaryFlat(token);
-    t.ok(polygon instanceof Float64Array, 'polygon is flat array');
+    const polygon = S2Decoder.getCellBoundaryPolygonFlat(token);
     t.is((polygon.length / 2 - 1) % 4, 0, 'polygon has 4 sides');
     t.deepEqual(polygon.slice(0, 2), polygon.slice(-2), 'polygon is closed');
 

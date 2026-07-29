@@ -11,6 +11,18 @@ Permission to use, copy, modify, and/or distribute this software for any purpose
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+export type S2Cell = {
+  face: number;
+  ij: [number, number];
+  level: number;
+};
+
+export function getS2Cell(s2Index: bigint): S2Cell {
+  const key = toHilbertQuadkey(s2Index);
+  const s2cell = fromHilbertQuadKey(key);
+  return s2cell;
+}
+
 //
 // Functional Style
 //
@@ -19,12 +31,6 @@ const MAX_LEVEL = 30;
 const POS_BITS = 2 * MAX_LEVEL + 1; // 61 (60 bits of data, 1 bit lsb marker)
 const RADIAN_TO_DEGREE = 180 / Math.PI;
 
-export type S2Cell = {
-  face: number;
-  ij: [number, number];
-  level: number;
-};
-
 /*
   Original function taken from deck.gl doesn't support the case of (face <= 5)
   It's fixed here.
@@ -32,13 +38,8 @@ export type S2Cell = {
 export function fromHilbertQuadKey(hilbertQuadkey: string): S2Cell {
   const parts = hilbertQuadkey.split('/');
   const face = parseInt(parts[0], 10);
-  const position = parts[1];
-  /*
-    Fix for the case of level==0 that corresponds to (face <= 5)
-    const maxLevel = position.length;
-    let level;
-  */
-  const maxLevel = face > 5 ? position.length : 0;
+  const position = parts[1] || '';
+  const maxLevel = position.length;
   let level = 0;
 
   const point = [0, 0] as [number, number];
@@ -92,14 +93,8 @@ export function toHilbertQuadkey(id: bigint): string {
 
   const faceS = BigInt(`0b${faceB}`).toString(10);
 
-  /*
-    Here is a fix for the case when posB is an empty string that causes an exception in Long.fromString
-
-    let posS = Long.fromString(posB, true, 2).toString(4);
-  */
-  let posS = '0';
+  let posS = '';
   if (levelN !== 0) {
-    // posB is not an empty string< because levelN!==0
     posS = BigInt(`0b${posB}`).toString(4);
 
     while (posS.length < levelN) {
@@ -107,9 +102,6 @@ export function toHilbertQuadkey(id: bigint): string {
       posS = '0' + posS;
     }
   }
-  // Note, posS will be "0" for the level==0
-  // TODO: Is it ok?
-
   return `${faceS}/${posS}`;
 }
 

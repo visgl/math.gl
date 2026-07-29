@@ -2,16 +2,28 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {type Bounds2D} from '@math.gl/types';
+import {type DGGSDecoder} from './dggs-decoder';
+
 const TILE_SIZE = 512;
 
-export function getQuadkeyLngLat(quadkey: string): number[] {
+/** Decoder for the quadkey DGGS */
+export const QuadkeyDecoder = {
+  name: 'quadkey',
+  getCellLngLat: (quadkey: string): number[] => getQuadkeyLngLat(quadkey),
+  getCellBoundaryPolygon: (quadkey: string): [number, number][] => getQuadkeyBoundary(quadkey),
+  getCellBoundaryPolygonFlat: (quadkey: string): number[] => getQuadkeyBoundaryFlat(quadkey),
+  getCellBounds: (quadkey: string): Bounds2D => getQuadkeyBounds(quadkey)
+} as const satisfies DGGSDecoder;
+
+function getQuadkeyLngLat(quadkey: string): number[] {
   const [topLeft, bottomRight] = quadkeyToWorldBounds(quadkey);
   const [w, n] = worldToLngLat(topLeft);
   const [e, s] = worldToLngLat(bottomRight);
   return [(e + w) / 2, (s + n) / 2];
 }
 
-export function getQuadkeyBoundary(quadkey: string): number[][] {
+function getQuadkeyBoundary(quadkey: string): [number, number][] {
   const [topLeft, bottomRight] = quadkeyToWorldBounds(quadkey);
   const [w, n] = worldToLngLat(topLeft);
   const [e, s] = worldToLngLat(bottomRight);
@@ -24,14 +36,24 @@ export function getQuadkeyBoundary(quadkey: string): number[][] {
   ];
 }
 
-export function getQuadkeyBoundaryFlat(quadkey: string): number[] {
+function getQuadkeyBoundaryFlat(quadkey: string): number[] {
   const [topLeft, bottomRight] = quadkeyToWorldBounds(quadkey);
   const [w, n] = worldToLngLat(topLeft);
   const [e, s] = worldToLngLat(bottomRight);
   return [e, n, e, s, w, s, w, n, e, n];
 }
 
-export function quadkeyToWorldBounds(quadkey: string): [number[], number[]] {
+function getQuadkeyBounds(quadkey: string): Bounds2D {
+  const [topLeft, bottomRight] = quadkeyToWorldBounds(quadkey);
+  const [w, n] = worldToLngLat(topLeft);
+  const [e, s] = worldToLngLat(bottomRight);
+  return [
+    [w, s],
+    [e, n]
+  ];
+}
+
+export function quadkeyToWorldBounds(quadkey: string): [[number, number], [number, number]] {
   let x = 0;
   let y = 0;
   let mask = 1 << quadkey.length;

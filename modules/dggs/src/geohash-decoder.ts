@@ -2,7 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* eslint-disable max-depth */
+import {type Bounds2D} from '@math.gl/types';
+import {type DGGSDecoder} from './dggs-decoder';
+
+/** Decoder for the geohash dggs */
+export const GeohashDecoder = {
+  name: 'geohash',
+  getCellLngLat: (geohash: string): number[] => getGeohashLngLat(geohash),
+  getCellBoundaryPolygon: (geohash: string): [number, number][] => getGeohashBoundary(geohash),
+  getCellBoundaryPolygonFlat: (geohash: string): number[] => getGeohashBoundaryFlat(geohash),
+  getCellBounds: (geohash: string): Bounds2D => getGeohashBounds(geohash)
+} as const satisfies DGGSDecoder;
 
 const BASE32_CODES = '0123456789bcdefghjkmnpqrstuvwxyz';
 const BASE32_CODES_DICT: Record<string, number> = {};
@@ -16,14 +26,14 @@ const MIN_LON = -180;
 const MAX_LON = 180;
 
 /** Return center lng,lat of geohash cell */
-export function getGeohashLngLat(geohash: string): number[] {
-  const [s, w, n, e] = getGeohashBounds(geohash);
+function getGeohashLngLat(geohash: string): number[] {
+  const [[w, s], [e, n]] = getGeohashBounds(geohash);
   return [(e + w) / 2, (n + s) / 2];
 }
 
 /** Return boundary polygon of geohash cell as lng,lat array */
-export function getGeohashBoundary(geohash: string): number[][] {
-  const [s, w, n, e] = getGeohashBounds(geohash);
+function getGeohashBoundary(geohash: string): [number, number][] {
+  const [[w, s], [e, n]] = getGeohashBounds(geohash);
   return [
     [e, n],
     [e, s],
@@ -34,15 +44,16 @@ export function getGeohashBoundary(geohash: string): number[][] {
 }
 
 /** Return boundary polygon of geohash cell as flat array */
-export function getGeohashBoundaryFlat(geohash: string): number[] {
-  const [s, w, n, e] = getGeohashBounds(geohash);
+function getGeohashBoundaryFlat(geohash: string): number[] {
+  const [[w, s], [e, n]] = getGeohashBounds(geohash);
   return [e, n, e, s, w, s, w, n, e, n];
 }
 
 /**
  * @note Adapted from ngeohash decode_bbox
  */
-export function getGeohashBounds(geohash: string): number[] {
+/* eslint-disable max-depth */
+export function getGeohashBounds(geohash: string): Bounds2D {
   let isLon = true;
   let maxLat = MAX_LAT;
   let minLat = MIN_LAT;
@@ -76,5 +87,8 @@ export function getGeohashBounds(geohash: string): number[] {
     }
   }
 
-  return [minLat, minLon, maxLat, maxLon];
+  return [
+    [minLon, minLat],
+    [maxLon, maxLat]
+  ];
 }
