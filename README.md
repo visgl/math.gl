@@ -1,18 +1,23 @@
 <p align="right">
-  <a href="https://npmjs.org/package/math.gl">
-    <img src="https://img.shields.io/npm/v/math.gl.svg?style=flat-square" alt="version" />
+  <a href="https://www.npmjs.com/package/math.gl">
+    <img src="https://img.shields.io/npm/v/math.gl.svg?style=flat-square&label=npm%20package" alt="npm package version" />
   </a>
-  <a href="https://npmjs.org/package/math.gl">
-    <img src="https://img.shields.io/npm/dm/math.gl.svg?style=flat-square" alt="downloads" />
+  <a href="https://github.com/visgl/math.gl/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square" alt="MIT license" />
   </a>
-  <a href='https://coveralls.io/github/visgl/math.gl'><img src='https://coveralls.io/repos/visgl/math.gl/badge.svg' alt='Coverage Status' /></a>
+  <a href="https://www.npmjs.com/package/math.gl">
+    <img src="https://img.shields.io/npm/dm/math.gl.svg?style=flat-square&label=downloads" alt="npm downloads" />
+  </a>
+  <a href="https://coveralls.io/github/visgl/math.gl?branch=master">
+    <img src="https://img.shields.io/coveralls/visgl/math.gl.svg?style=flat-square&label=coverage" alt="coverage" />
+  </a>
 </p>
 
-<h1 align="center">math.gl | <a href="https://visgl.github.io/math.gl">Docs</a></h1>
+<h1 align="center">math.gl | <a href="https://math.gl">Docs</a></h1>
 
 # math.gl
 
-> This page is a brief summary only. Please refer to the extensive online [documentation](https://visgl.github.io/math.gl).
+> This page is a brief summary only. Please refer to the extensive online [documentation](https://math.gl).
 
 math.gl is JavaScript math library focused on geospatial and 3D use cases. 
 
