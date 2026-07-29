@@ -89,7 +89,10 @@ export class Ellipsoid {
     return this.radii.toString();
   }
 
-  /** Converts the provided cartographic to Cartesian representation. */
+  /** Converts the provided cartographic position to Cartesian representation.
+   * The position is supplied as [longitude, latitude, height], where longitude and latitude
+   * are in degrees and height is in meters above the ellipsoid.
+   */
   cartographicToCartesian(cartographic: number[], result: Vector3): Vector3;
   cartographicToCartesian(cartographic: number[], result?: number[]): number[];
 
@@ -111,8 +114,10 @@ export class Ellipsoid {
     return k.to(result);
   }
 
-  /** Converts the provided cartesian to cartographic (lng/lat/z) representation.
-   * The cartesian is undefined at the center of the ellipsoid. */
+  /** Converts the provided Cartesian position to [longitude, latitude, height],
+   * where longitude and latitude are in degrees and height is in meters above the ellipsoid.
+   * The cartographic position is undefined at the center of the ellipsoid.
+   */
   cartesianToCartographic(cartesian: Readonly<NumericArray>, result: Vector3): Vector3;
   cartesianToCartographic(cartesian: Readonly<NumericArray>, result?: number[]): number[];
 
@@ -183,7 +188,9 @@ export class Ellipsoid {
     return scratchVector.from(cartesian).normalize().to(result);
   }
 
-  /** Computes the normal of the plane tangent to the surface of the ellipsoid at provided position. */
+  /** Computes the normal of the plane tangent to the surface of the ellipsoid at the provided
+   * [longitude, latitude, height], where longitude and latitude are in degrees.
+   */
   geodeticSurfaceNormalCartographic<NumArray>(
     cartographic: Readonly<NumericArray>,
     result: NumArray

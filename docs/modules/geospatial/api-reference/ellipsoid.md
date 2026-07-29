@@ -8,6 +8,8 @@ A quadratic surface defined in Cartesian coordinates by the equation `(x / a)^2 
 
 The main use of this class is to convert between the "cartesian" and "cartographic" coordinate systems.
 
+Cartographic positions are represented as `[longitude, latitude, height]`. Longitude and latitude are in degrees, and height is in meters above the ellipsoid.
+
 Rather than constructing this object directly, one of the provided constants is used.
 
 ## Usage
@@ -15,9 +17,8 @@ Rather than constructing this object directly, one of the provided constants is 
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```js
-import {toRadians} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
-const cartographicPosition = [toRadians(21), toRadians(78), 5000];
+const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
 const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPosition);
 ```
 
@@ -29,11 +30,12 @@ const cartesianPosition = [17832.12, 83234.52, 952313.73];
 const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPosition);
 ```
 
-Get the transform from local east-north-up at cartographic (0.0, 0.0) to Earth's fixed frame.
+Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```js
 import {Ellipsoid} from '@math.gl/geospatial';
-const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame([0, 0, 0]);
+const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
+const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
 ```
 
 ## Static Fields
@@ -112,29 +114,29 @@ Returns
 
 - A string representing this ellipsoid in the format '(radii.x, radii.y, radii.z)'.
 
-### cartographicToCartesian(cartographic : Number[3], result : Number[3]]) : Vector3 | Number[3]
+### cartographicToCartesian(cartographic : Number[3], result : Number[3]) : Vector3 | Number[3]
 
 Converts the provided cartographic to Cartesian representation.
 
-- `cartographic` The cartographic position.
+- `cartographic` The cartographic position as `[longitude, latitude, height]`. Longitude and latitude are in degrees, and height is in meters above the ellipsoid.
 - `result` Optional object onto which to store the result.
 
 Returns
 
 - The modified `result` parameter or a new `Vector3` instance if none was provided.
 
-### cartesianToCartographic(cartesian : Number[3], result : Number[3]]) : Vector3 | Number[3] | `undefined`
+### cartesianToCartographic(cartesian : Number[3], result : Number[3]) : Vector3 | Number[3] | `undefined`
 
-Converts the provided cartesian to cartographic representation. The cartesian is `undefined` at the center of the ellipsoid.
+Converts the provided Cartesian position to cartographic representation. The result is `undefined` when the Cartesian position is at the center of the ellipsoid.
 
 - `cartesian` The Cartesian position to convert to cartographic representation.
 - `result` Optional object onto which to store the result.
 
 Returns
 
-- The modified result parameter, new `Vector3` instance if none was provided, or undefined if the cartesian is at the center of the ellipsoid.
+- The modified result parameter, a new `Vector3` instance if none was provided, or `undefined` if the Cartesian position is at the center of the ellipsoid. A defined result contains `[longitude, latitude, height]`, with longitude and latitude in degrees and height in meters above the ellipsoid.
 
-### eastNorthUpToFixedFrame(origin : Number[3], ellpsoid : Ellipsoid, result : Number[16]) : Matrix4 | Number[16]
+### eastNorthUpToFixedFrame(origin : Number[3], result : Number[16]) : Matrix4 | Number[16]
 
 Computes a 4x4 transformation matrix from a reference frame with an east-north-up axes centered at the provided origin to the provided ellipsoid's fixed reference frame.
 
@@ -144,8 +146,7 @@ The local axes are defined as:
 - The `y` axis points in the local north direction.
 - The `z` axis points in the direction of the ellipsoid surface normal which passes through the position.
 
-- `origin` The center point of the local reference frame.
-- `ellipsoid`=`Ellipsoid.WGS84` The ellipsoid whose fixed frame is used in the transformation.
+- `origin` The Cartesian position at the center of the local reference frame.
 - `result` Optional object onto which to store the result.
 
 Returns
@@ -163,40 +164,40 @@ Computes a 4x4 transformation matrix from a reference frame centered at the prov
 - `firstAxis` name of the first axis of the local reference frame. Must be 'east', 'north', 'up', 'west', 'south' or 'down'.
 - `secondAxis` name of the second axis of the local reference frame.
 - `thirdAxis` name of the third axis of the local reference frame. Can be omitted as it is implied by the cross product of the first two axis.
-- `origin` The center point of the local reference frame.
+- `origin` The Cartesian position at the center of the local reference frame.
 - `result` Optional object onto which to store the result.
 
 Returns
 
 - A 4x4 transformation matrix from a reference frame, with first axis and second axis compliant with the parameters, in the modified `result` parameter or a new `Matrix4` instance if none was provided.
 
-### geocentricSurfaceNormal(cartesian : Number[3], result : Number[3]]) : Vector3 | Number[3]
+### geocentricSurfaceNormal(cartesian : Number[3], result : Number[3]) : Vector3 | Number[3]
 
 Computes the unit vector directed from the center of this ellipsoid toward the provided Cartesian position.
 
-- `cartesian` - The WSG84 cartesian coordinate for which to to determine the geocentric normal.
+- `cartesian` - The WGS84 Cartesian coordinate for which to determine the geocentric normal.
 - `result` - Optional object onto which to store the result.
 
 Returns
 
 - The modified result parameter or a new `Vector3` instance if none was provided.
 
-### geodeticSurfaceNormalCartographic(cartographic : Number[3], result : Number[3]]) : Vector3 | Number[3]
+### geodeticSurfaceNormalCartographic(cartographic : Number[3], result : Number[3]) : Vector3 | Number[3]
 
 Computes the normal of the plane tangent to the surface of the ellipsoid at the provided position.
 
-- `cartographic` The cartographic position for which to to determine the geodetic normal.
+- `cartographic` The cartographic position as `[longitude, latitude, height]`. Longitude and latitude are in degrees.
 - `result` Optional object onto which to store the result.
 
 Returns
 
 The modified result parameter or a new `Vector3` instance if none was provided.
 
-### geodeticSurfaceNormal(cartesian : Number[3], result : Number[3]]) : Vector3 | Number[3]
+### geodeticSurfaceNormal(cartesian : Number[3], result : Number[3]) : Vector3 | Number[3]
 
 Computes the normal of the plane tangent to the surface of the ellipsoid at the provided position.
 
-- `cartesian` The Cartesian position for which to to determine the surface normal.
+- `cartesian` The Cartesian position for which to determine the surface normal.
 - `result` Optional object onto which to store the result.
 
 Returns
