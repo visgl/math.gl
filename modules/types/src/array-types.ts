@@ -2,10 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+// TypeScript declares Float16Array in a separate library; this reference has no runtime effect.
+// eslint-disable-next-line spaced-comment
+/// <reference lib="es2025.float16" preserve="true" />
+
 /**
- * Base union for non-big JavaScript typed arrays that are always available in the current lib set.
+ * Type covering all non-big typed arrays
  */
-type TypedArrayBase =
+export type TypedArray =
   | Int8Array
   | Uint8Array
   | Uint8ClampedArray
@@ -13,14 +17,19 @@ type TypedArrayBase =
   | Uint16Array
   | Int32Array
   | Uint32Array
+  /**
+   * A platform half-precision floating-point array.
+   *
+   * @remarks This type does not provide a runtime `Float16Array` polyfill.
+   */
+  | Float16Array
   | Float32Array
   | Float64Array;
 
 /**
- * Base union for constructors of non-big JavaScript typed arrays that are always available in the
- * current lib set.
+ * Type covering constructors for all non-big typed arrays
  */
-type TypedArrayConstructorBase =
+export type TypedArrayConstructor =
   | Int8ArrayConstructor
   | Uint8ArrayConstructor
   | Uint8ClampedArrayConstructor
@@ -28,24 +37,14 @@ type TypedArrayConstructorBase =
   | Uint16ArrayConstructor
   | Int32ArrayConstructor
   | Uint32ArrayConstructor
+  /**
+   * The platform half-precision floating-point array constructor.
+   *
+   * @remarks This type does not provide a runtime `Float16Array` constructor.
+   */
+  | Float16ArrayConstructor
   | Float32ArrayConstructor
   | Float64ArrayConstructor;
-
-/**
- * Type covering all non-big typed arrays
- */
-// Conditionally include Float16Array without hard-referencing the global symbol.
-export type TypedArray = typeof globalThis extends {Float16Array: {prototype: infer T}}
-  ? TypedArrayBase | T
-  : TypedArrayBase;
-
-/**
- * Type covering constructors for all non-big typed arrays
- */
-// Conditionally include the Float16Array constructor without hard-referencing it.
-export type TypedArrayConstructor = typeof globalThis extends {Float16Array: infer T}
-  ? TypedArrayConstructorBase | T
-  : TypedArrayConstructorBase;
 
 /**
  * Type covering all big typed arrays

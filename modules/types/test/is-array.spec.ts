@@ -4,6 +4,7 @@
 
 import test from 'tape-promise/tape';
 import {isTypedArray, isNumericArray} from '@math.gl/types';
+import type {TypedArray, TypedArrayConstructor} from '@math.gl/types';
 
 const TEST_CASES: {value: unknown; isTypedArray: boolean; isNumericArray: boolean}[] = [
   {value: new Float32Array(1), isTypedArray: true, isNumericArray: true},
@@ -23,13 +24,6 @@ const TEST_CASES: {value: unknown; isTypedArray: boolean; isNumericArray: boolea
   {value: '', isTypedArray: false, isNumericArray: false}
 ];
 
-const Float16ArrayCtor = (globalThis as {Float16Array?: new (length: number) => ArrayBufferView})
-  .Float16Array;
-
-if (Float16ArrayCtor) {
-  TEST_CASES.unshift({value: new Float16ArrayCtor(1), isTypedArray: true, isNumericArray: true});
-}
-
 test('math.gl#isTypedArray', (t) => {
   for (const tc of TEST_CASES) {
     t.equal(
@@ -38,6 +32,27 @@ test('math.gl#isTypedArray', (t) => {
       `isTypedArray(${JSON.stringify(tc.value)}) => ${tc.isTypedArray}`
     );
   }
+  t.end();
+});
+
+test('math.gl#isTypedArray(Float16Array)', (t) => {
+  // Float16Array is not yet available in every JavaScript runtime supported by math.gl.
+  const Float16ArrayConstructor = globalThis.Float16Array;
+  if (typeof Float16ArrayConstructor !== 'function') {
+    t.skip('Float16Array is not available in this runtime');
+    t.end();
+    return;
+  }
+
+  const typedArrayConstructor: TypedArrayConstructor = Float16ArrayConstructor;
+  const value: TypedArray = new Float16ArrayConstructor(1);
+  t.equal(
+    typedArrayConstructor,
+    Float16ArrayConstructor,
+    'Float16ArrayConstructor is a typed array constructor'
+  );
+  t.equal(isTypedArray(value), true, 'Float16Array is a typed array');
+  t.equal(isNumericArray(value), true, 'Float16Array is a numeric array');
   t.end();
 });
 

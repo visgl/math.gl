@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/**
- * Base union for numeric arrays that are always available in the current lib set.
- */
-type NumericArrayBase =
+// TypeScript declares Float16Array in a separate library; this reference has no runtime effect.
+// eslint-disable-next-line spaced-comment
+/// <reference lib="es2025.float16" preserve="true" />
+
+type NumericArray =
   | Int8Array
   | Uint8Array
   | Int16Array
@@ -13,14 +14,15 @@ type NumericArrayBase =
   | Int32Array
   | Uint32Array
   | Uint8ClampedArray
+  /**
+   * A platform half-precision floating-point array.
+   *
+   * @remarks This type does not provide a runtime `Float16Array` polyfill.
+   */
+  | Float16Array
   | Float32Array
   | Float64Array
   | number[];
-
-// Conditionally include Float16Array without hard-referencing the global symbol.
-type NumericArray = typeof globalThis extends {Float16Array: {prototype: infer T}}
-  ? NumericArrayBase | T
-  : NumericArrayBase;
 
 /*
 declare module 'gl-matrix/vec2' {
