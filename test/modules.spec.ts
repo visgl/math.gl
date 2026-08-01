@@ -2,6 +2,7 @@ import '../modules/types/test';
 import '../modules/core/test';
 import '../modules/expressions/test';
 import '../modules/culling/test';
+import '../modules/geometry/test';
 import '../modules/geoid/test';
 import '../modules/geospatial/test';
 import '../modules/polygon/test';

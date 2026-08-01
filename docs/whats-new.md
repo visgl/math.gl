@@ -52,6 +52,8 @@ Target Release Date: Q2, 2026.
 Highlights:
 
 - TypeScript 6 compatibility.
+- New `@math.gl/geometry` CPU primitive mesh and tessellation module.
+- glTF 2.1 box, capsule, cylinder, plane and sphere analytic shapes in `@math.gl/culling`.
 - New expression evaluator module
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 - Stronger type guarantees for math classes via the new sized array types.
@@ -69,6 +71,15 @@ Highlights:
 
 - `makeOBBFromRegion()` - New function that creates a cartesian oriented bounding box from a geospatial region.
 - `EllipsoidTangentPlane` - New helper class for doing math on the ellipsoid surface.
+
+**`@math.gl/geometry`** (NEW MODULE)
+
+- Adds renderer-independent `Geometry` typed-array storage and indexed-geometry unpacking.
+- Adds tessellators for glTF 2.1 draft shapes and common luma.gl primitives.
+
+**`@math.gl/culling`**
+
+- Adds analytic glTF shape queries for clipping/culling, rays, transforms and enclosing bounds.
 
 ## v4.1
 
