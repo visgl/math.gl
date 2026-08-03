@@ -81,6 +81,10 @@ Note that Proj4Projection allows aliases to be defined and comes with the follow
 | Lat/lon, WGS84 datum | `EPSG:4326`, `WGS84`                                             |
 | Lat/lon, NAD83 datum | `EPSG:4269`                                                      |
 | Web mercator         | `EPSG:3857`, `EPSG:3785`, `GOOGLE`, `EPSG:900913`, `EPSG:102113` |
+| WGS84 UTM north      | `EPSG:32601` through `EPSG:32660`                                |
+| WGS84 UTM south      | `EPSG:32701` through `EPSG:32760`                                |
+| WGS84 UPS north      | `EPSG:5041`                                                      |
+| WGS84 UPS south      | `EPSG:5042`                                                      |
 
 ### References
 

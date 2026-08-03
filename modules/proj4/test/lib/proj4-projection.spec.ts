@@ -268,27 +268,36 @@ test('Proj4Projection accepts modern WKT2 and PROJJSON definitions', t => {
   t.end();
 });
 
-test('Proj4Projection supports UTM and polar stereographic coordinate systems', t => {
-  const utmProjection = new Proj4Projection({
-    from: 'WGS84',
-    to: '+proj=utm +zone=10 +datum=WGS84 +units=m +no_defs'
-  });
-  const projectedUtmPosition = utmProjection.project([-122.4, 37.8]);
+test('Proj4Projection supports predefined UTM and UPS coordinate systems', t => {
+  const northUtmProjection = new Proj4Projection({from: 'WGS84', to: 'EPSG:32610'});
+  const projectedNorthUtmPosition = northUtmProjection.project([-122.4, 37.8]);
 
-  tapeEqualsEpsilon(t, projectedUtmPosition[0], 552821.3829931148, 0.000001);
-  tapeEqualsEpsilon(t, projectedUtmPosition[1], 4183794.4989348184, 0.000001);
-  tapeEqualsEpsilon(t, utmProjection.unproject(projectedUtmPosition)[0], -122.4, 1e-10);
-  tapeEqualsEpsilon(t, utmProjection.unproject(projectedUtmPosition)[1], 37.8, 1e-10);
+  tapeEqualsEpsilon(t, projectedNorthUtmPosition[0], 552821.3829931148, 0.000001);
+  tapeEqualsEpsilon(t, projectedNorthUtmPosition[1], 4183794.4989348184, 0.000001);
+  tapeEqualsEpsilon(t, northUtmProjection.unproject(projectedNorthUtmPosition)[0], -122.4, 1e-10);
+  tapeEqualsEpsilon(t, northUtmProjection.unproject(projectedNorthUtmPosition)[1], 37.8, 1e-10);
 
-  const polarProjection = new Proj4Projection({
-    from: 'WGS84',
-    to: '+proj=stere +lat_0=90 +lat_ts=90 +k=0.994 +x_0=2000000 +y_0=2000000 +datum=WGS84 +units=m +no_defs'
-  });
-  const projectedPolarPosition = polarProjection.project([0, 85]);
+  const southUtmProjection = new Proj4Projection({from: 'WGS84', to: 'EPSG:32756'});
+  const projectedSouthUtmPosition = southUtmProjection.project([151.2, -33.9]);
 
-  tapeEqualsEpsilon(t, projectedPolarPosition[0], 2000000, 0.000001);
-  tapeEqualsEpsilon(t, projectedPolarPosition[1], 1444542.6086173225, 0.000001);
-  tapeEqualsEpsilon(t, polarProjection.unproject(projectedPolarPosition)[1], 85, 1e-10);
+  tapeEqualsEpsilon(t, projectedSouthUtmPosition[0], 333568.9410115522, 0.000001);
+  tapeEqualsEpsilon(t, projectedSouthUtmPosition[1], 6247473.33684402, 0.000001);
+  tapeEqualsEpsilon(t, southUtmProjection.unproject(projectedSouthUtmPosition)[0], 151.2, 1e-10);
+  tapeEqualsEpsilon(t, southUtmProjection.unproject(projectedSouthUtmPosition)[1], -33.9, 1e-10);
+
+  const northUpsProjection = new Proj4Projection({from: 'WGS84', to: 'EPSG:5041'});
+  const projectedNorthUpsPosition = northUpsProjection.project([0, 85]);
+
+  tapeEqualsEpsilon(t, projectedNorthUpsPosition[0], 2000000, 0.000001);
+  tapeEqualsEpsilon(t, projectedNorthUpsPosition[1], 1444542.6086173225, 0.000001);
+  tapeEqualsEpsilon(t, northUpsProjection.unproject(projectedNorthUpsPosition)[1], 85, 1e-10);
+
+  const southUpsProjection = new Proj4Projection({from: 'WGS84', to: 'EPSG:5042'});
+  const projectedSouthUpsPosition = southUpsProjection.project([0, -85]);
+
+  tapeEqualsEpsilon(t, projectedSouthUpsPosition[0], 2000000, 0.000001);
+  tapeEqualsEpsilon(t, projectedSouthUpsPosition[1], 2555457.3913826775, 0.000001);
+  tapeEqualsEpsilon(t, southUpsProjection.unproject(projectedSouthUpsPosition)[1], -85, 1e-10);
   t.end();
 });
 
