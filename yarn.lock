@@ -988,8 +988,7 @@ __metadata:
   resolution: "@math.gl/proj4@workspace:modules/proj4"
   dependencies:
     "@math.gl/core": "npm:4.2.0-alpha.3"
-    "@types/proj4": "npm:^2.5.0"
-    proj4: "npm:2.6.2"
+    proj4: "npm:2.20.9"
   languageName: unknown
   linkType: soft
 
@@ -1956,13 +1955,6 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/11979d0690e774046d3a1e8cfc613a6b53a613909d81c93831cf253800e93ba1a2d47950979b523aebd4fc023351b644d7f4aa2dfcc027c70816a2968420e7da
-  languageName: node
-  linkType: hard
-
-"@types/proj4@npm:^2.5.0":
-  version: 2.5.5
-  resolution: "@types/proj4@npm:2.5.5"
-  checksum: 10c0/d8bf889945a7184c05a049e8125feaee9cf2d36c434435547653f3f2e29d581108b49b1b964452994277b45ef5415896defbe26e42ca647420e6d0aa60483f29
   languageName: node
   linkType: hard
 
@@ -8610,13 +8602,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"proj4@npm:2.6.2":
-  version: 2.6.2
-  resolution: "proj4@npm:2.6.2"
+"proj4@npm:2.20.9":
+  version: 2.20.9
+  resolution: "proj4@npm:2.20.9"
   dependencies:
     mgrs: "npm:1.0.0"
-    wkt-parser: "npm:^1.2.4"
-  checksum: 10c0/b184519aac86a8b4c28299cd71ddd109f85d76ec3cb9a67e6990718996033ea12ae862827ad5beb6ed96050a2ffaaceccf4bd553e880efc74b82718b4fc10668
+    wkt-parser: "npm:^1.5.5"
+  peerDependencies:
+    geotiff: "*"
+  peerDependenciesMeta:
+    geotiff:
+      optional: true
+  checksum: 10c0/9917dc75627a3198b0226741a04e29ecd084f3613ba4a9359815fddab4f579d3135cf68d3ba914659470c45a5ca9c3d52b6f68a43365d6b9484d8603761ecdf9
   languageName: node
   linkType: hard
 
@@ -11001,10 +10998,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wkt-parser@npm:^1.2.4":
-  version: 1.3.3
-  resolution: "wkt-parser@npm:1.3.3"
-  checksum: 10c0/900fcdaea02828407742c4ea370b46a04c48ed95f63cde3db8e5b90c5a1b80da9827b43eb58940dd8cf790a971f9b8c42022b1548bce29a11153e699eef5bcb4
+"wkt-parser@npm:^1.5.5":
+  version: 1.5.6
+  resolution: "wkt-parser@npm:1.5.6"
+  checksum: 10c0/67f938ffb6a1721dbc733823677327ff858a0a1f2f0d224e2ecbdf9e879f27764434dd6e44c89a2e94e3d37cc6e5f9874f878e4a1b1e2fd29a1279be38c322ca
   languageName: node
   linkType: hard
 

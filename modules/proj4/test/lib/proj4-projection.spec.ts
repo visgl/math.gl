@@ -12,6 +12,60 @@ import {tapeEqualsEpsilon} from 'test/utils/tape-assertions';
 
 import {testPoints} from './test-data';
 
+const WGS84_PROJJSON = {
+  type: 'GeographicCRS',
+  name: 'WGS 84',
+  datum: {
+    type: 'GeodeticReferenceFrame',
+    name: 'World Geodetic System 1984',
+    ellipsoid: {
+      name: 'WGS 84',
+      semi_major_axis: 6378137,
+      inverse_flattening: 298.257223563
+    }
+  },
+  coordinate_system: {
+    subtype: 'ellipsoidal',
+    axis: [
+      {name: 'Geodetic longitude', abbreviation: 'Lon', direction: 'east', unit: 'degree'},
+      {name: 'Geodetic latitude', abbreviation: 'Lat', direction: 'north', unit: 'degree'}
+    ]
+  }
+};
+
+const WGS84_WKT2 =
+  'GEOGCRS["WGS 84",DATUM["World Geodetic System 1984",ELLIPSOID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],CS[ellipsoidal,2],AXIS["geodetic latitude (Lat)",north,ORDER[1]],AXIS["geodetic longitude (Lon)",east,ORDER[2]],ANGLEUNIT["degree",0.0174532925199433]]';
+
+/** Create a two-by-two NTv2 grid with one- and two-arcsecond datum shifts. */
+function createDatumGridFixture(): ArrayBuffer {
+  const grid = new ArrayBuffer(176 + 176 + 4 * 8);
+  const view = new DataView(grid);
+  const littleEndian = true;
+
+  view.setInt32(8, 11, littleEndian);
+  view.setInt32(24, 11, littleEndian);
+  view.setInt32(40, 1, littleEndian);
+  view.setFloat64(120, 6378137, littleEndian);
+  view.setFloat64(136, 6356752.314245, littleEndian);
+  view.setFloat64(152, 6378137, littleEndian);
+  view.setFloat64(168, 6356752.314245, littleEndian);
+
+  const subgridOffset = 176;
+  view.setFloat64(subgridOffset + 88, 3600, littleEndian);
+  view.setFloat64(subgridOffset + 120, 3600, littleEndian);
+  view.setFloat64(subgridOffset + 136, 3600, littleEndian);
+  view.setFloat64(subgridOffset + 152, 3600, littleEndian);
+  view.setInt32(subgridOffset + 168, 4, littleEndian);
+
+  for (let index = 0; index < 4; index++) {
+    const nodeOffset = 352 + index * 8;
+    view.setFloat32(nodeOffset, 1, littleEndian);
+    view.setFloat32(nodeOffset + 4, 2, littleEndian);
+  }
+
+  return grid;
+}
+
 // You can do this in the grunt config for each mocha task, see the `options` config
 // Start the main app logic.
 
@@ -184,6 +238,95 @@ test('Proj4Projection is bound', t => {
   const reprojectedCooords = coords.map(projection.project);
   tapeEqualsEpsilon(t, reprojectedCooords[0][0], 0, 0.000001);
   tapeEqualsEpsilon(t, reprojectedCooords[0][1], 0, 0.000001);
+  t.end();
+});
+
+test('Proj4Projection accepts modern WKT2 and PROJJSON definitions', t => {
+  const longitudeLatitude = [-122.4, 37.8];
+
+  for (const definition of [WGS84_WKT2, WGS84_PROJJSON]) {
+    const projection = new Proj4Projection({from: definition, to: 'EPSG:3857'});
+    const projectedPosition = projection.project(longitudeLatitude);
+
+    tapeEqualsEpsilon(t, projectedPosition[0], -13625505.673096687, 0.000001);
+    tapeEqualsEpsilon(t, projectedPosition[1], 4551210.919691888, 0.000001);
+    tapeEqualsEpsilon(t, projection.unproject(projectedPosition)[0], longitudeLatitude[0], 1e-10);
+    tapeEqualsEpsilon(t, projection.unproject(projectedPosition)[1], longitudeLatitude[1], 1e-10);
+  }
+
+  Proj4Projection.defineProjectionAliases({MATH_GL_WGS84_PROJJSON: WGS84_PROJJSON});
+  const aliasProjection = new Proj4Projection({
+    from: 'MATH_GL_WGS84_PROJJSON',
+    to: 'EPSG:3857'
+  });
+  tapeEqualsEpsilon(
+    t,
+    aliasProjection.project(longitudeLatitude)[0],
+    -13625505.673096687,
+    0.000001
+  );
+  t.end();
+});
+
+test('Proj4Projection supports UTM and polar stereographic coordinate systems', t => {
+  const utmProjection = new Proj4Projection({
+    from: 'WGS84',
+    to: '+proj=utm +zone=10 +datum=WGS84 +units=m +no_defs'
+  });
+  const projectedUtmPosition = utmProjection.project([-122.4, 37.8]);
+
+  tapeEqualsEpsilon(t, projectedUtmPosition[0], 552821.3829931148, 0.000001);
+  tapeEqualsEpsilon(t, projectedUtmPosition[1], 4183794.4989348184, 0.000001);
+  tapeEqualsEpsilon(t, utmProjection.unproject(projectedUtmPosition)[0], -122.4, 1e-10);
+  tapeEqualsEpsilon(t, utmProjection.unproject(projectedUtmPosition)[1], 37.8, 1e-10);
+
+  const polarProjection = new Proj4Projection({
+    from: 'WGS84',
+    to: '+proj=stere +lat_0=90 +lat_ts=90 +k=0.994 +x_0=2000000 +y_0=2000000 +datum=WGS84 +units=m +no_defs'
+  });
+  const projectedPolarPosition = polarProjection.project([0, 85]);
+
+  tapeEqualsEpsilon(t, projectedPolarPosition[0], 2000000, 0.000001);
+  tapeEqualsEpsilon(t, projectedPolarPosition[1], 1444542.6086173225, 0.000001);
+  tapeEqualsEpsilon(t, polarProjection.unproject(projectedPolarPosition)[1], 85, 1e-10);
+  t.end();
+});
+
+test('Proj4Projection respects declared axis order without breaking bound callbacks', t => {
+  const projection = new Proj4Projection({
+    from: '+proj=longlat +datum=WGS84 +axis=neu',
+    to: 'EPSG:3857',
+    enforceAxis: true
+  });
+  const coordinates = [
+    [37.8, -122.4],
+    [40.7, -74]
+  ];
+  const projectedCoordinates = coordinates.map(projection.project);
+
+  tapeEqualsEpsilon(t, projectedCoordinates[0][0], -13625505.673096687, 0.000001);
+  tapeEqualsEpsilon(t, projectedCoordinates[0][1], 4551210.919691888, 0.000001);
+  tapeEqualsEpsilon(t, projectedCoordinates[1][0], -8237642.318702244, 0.000001);
+  tapeEqualsEpsilon(t, projection.unproject(projectedCoordinates[0])[0], 37.8, 1e-10);
+  tapeEqualsEpsilon(t, projection.unproject(projectedCoordinates[0])[1], -122.4, 1e-10);
+  t.end();
+});
+
+test('Proj4Projection registers and applies NTv2 datum grids', t => {
+  Proj4Projection.registerDatumGrid('math-gl-test.gsb', createDatumGridFixture(), {
+    includeErrorFields: false
+  });
+
+  const projection = new Proj4Projection({
+    from: '+proj=longlat +ellps=WGS84 +nadgrids=math-gl-test.gsb +no_defs',
+    to: 'WGS84'
+  });
+  const projectedPosition = projection.project([-0.5, 0.5]);
+
+  tapeEqualsEpsilon(t, projectedPosition[0], -0.5 - 2 / 3600, 1e-10);
+  tapeEqualsEpsilon(t, projectedPosition[1], 0.5 + 1 / 3600, 1e-10);
+  tapeEqualsEpsilon(t, projection.unproject(projectedPosition)[0], -0.5, 1e-10);
+  tapeEqualsEpsilon(t, projection.unproject(projectedPosition)[1], 0.5, 1e-10);
   t.end();
 });
 
