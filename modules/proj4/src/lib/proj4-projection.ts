@@ -5,10 +5,7 @@
 import proj4 from 'proj4';
 
 /** A PROJ string, WKT definition, named coordinate system, or PROJJSON definition. */
-export type Proj4ProjectionDefinition = Extract<
-  Parameters<typeof proj4>[0],
-  string | {type: string}
->;
+export type Proj4ProjectionDefinition = string | {type: string; [key: string]: unknown};
 
 export type Proj4ProjectionOptions = {
   from?: Proj4ProjectionDefinition;
