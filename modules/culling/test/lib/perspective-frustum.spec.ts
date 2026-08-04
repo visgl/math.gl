@@ -3,7 +3,7 @@
 
 // @ts-nocheck
 
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {tapeEquals, tapeEqualsEpsilon} from 'test/utils/tape-assertions';
 
 import {_PerspectiveFrustum as PerspectiveFrustum} from '@math.gl/culling';

@@ -1,4 +1,4 @@
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import destination from '@turf/destination';
 import {toLowPrecision} from '../utils/test-utils';
 import {config, equals} from '@math.gl/core';

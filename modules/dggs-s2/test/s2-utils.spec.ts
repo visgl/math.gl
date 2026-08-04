@@ -1,5 +1,5 @@
 // loaders.gl, MIT license
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 
 import {getS2BoundaryFlat} from '@math.gl/dggs-s2';
 

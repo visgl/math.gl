@@ -9,7 +9,7 @@
 
 // @ts-nocheck
 /* eslint-disable quotes, no-var */
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 
 import {Vector3, Vector4, Matrix3, Matrix4, Quaternion, Euler} from '@math.gl/core';
 // import Spherical from 'math.gl/spherical';

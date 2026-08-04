@@ -9,7 +9,7 @@
 
 // @ts-nocheck
 /* eslint-disable */
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {Matrix4, Vector3, Quaternion, Euler, toRadians} from '@math.gl/core';
 import {eps} from './constants';
 

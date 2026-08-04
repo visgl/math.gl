@@ -1,8 +1,6 @@
-import {resolve} from 'path';
+import {resolve} from 'node:path';
 
 export default {
-  ocularPath: resolve('./node_modules/@vis.gl/dev-tools'),
-
   lint: {
     paths: ['dev-docs', 'docs', 'modules', 'test'], // 'examples', 'website'
     extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx', 'd.ts', 'md']
@@ -13,8 +11,6 @@ export default {
   },
 
   entry: {
-    test: 'test/node.ts',
-    'test-browser': 'test/browser.ts',
     bench: 'test/bench/node.ts',
     'bench-browser': 'test/bench/browser.ts',
     size: [

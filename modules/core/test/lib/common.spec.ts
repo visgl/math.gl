@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 // Copyright (c) 2017 Uber Technologies, Inc.
 
-import test, {Test} from 'tape-promise/tape';
+import test, {Test} from 'test/utils/vitest-tape';
 import {Vector2, Vector3, Pose, _MathUtils} from '@math.gl/core';
 import {config, configure, isArray, clone, equals, exactEquals, formatValue} from '@math.gl/core';
 import {toRadians, toDegrees} from '@math.gl/core';

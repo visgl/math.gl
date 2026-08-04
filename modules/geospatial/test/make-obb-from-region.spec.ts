@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT and Apache-2.0
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {toRadians} from '@math.gl/core';
 import {OrientedBoundingBox} from '@math.gl/culling';
 import {Ellipsoid, makeOBBFromRegion} from '@math.gl/geospatial';

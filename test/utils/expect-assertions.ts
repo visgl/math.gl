@@ -1,6 +1,6 @@
 // math.gl, MIT license
 
-import test, {Test} from 'tape-promise/tape';
+import test, {Test} from 'test/utils/vitest-tape';
 import {tapeEquals, tapeNotEquals, tapeEqualsEpsilon} from './tape-assertions';
 
 // Maps `expect` style tests to `tape assert` style tests

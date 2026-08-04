@@ -1,6 +1,6 @@
 import {getSunPosition, getSunDirection} from '../src/suncalc';
 import {equals, config, vec3} from '@math.gl/core';
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 
 test('Sunlight#azimuth and altitude', t => {
   const MS_IN_AN_HOUR = 3.6e6;

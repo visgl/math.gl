@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT and Apache-2.0
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {Vector2, Vector3, _MathUtils} from '@math.gl/core';
 import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial';
 import {tapeEquals, tapeEqualsEpsilon} from 'test/utils/tape-assertions';

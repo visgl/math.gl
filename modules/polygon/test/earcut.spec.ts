@@ -26,7 +26,7 @@
 // @ts-nocheck External code
 
 import fs from 'fs';
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {earcut} from '@math.gl/polygon';
 import {extractAreas, deviation, flatten} from './earcut-utils';
 import expected from './data/earcut/expected';
