@@ -1,4 +1,4 @@
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 // import {tapeEqualsEpsilon} from 'test/utils/tape-assertions';
 
 import {Matrix3} from '@math.gl/core';

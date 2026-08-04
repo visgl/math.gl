@@ -9,7 +9,7 @@
 
 // @ts-nocheck
 /* eslint-disable quotes, no-var */
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 
 import {Matrix3} from 'math.gl/matrix3';
 import {Matrix4} from 'math.gl/matrix4';

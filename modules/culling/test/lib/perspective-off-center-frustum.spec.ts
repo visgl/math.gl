@@ -3,7 +3,7 @@
 
 // @ts-nocheck
 
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {tapeEquals} from 'test/utils/tape-assertions';
 
 import {_PerspectiveOffCenterFrustum as PerspectiveOffCenterFrustum} from '@math.gl/culling';

@@ -6,7 +6,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 /* eslint-disable */
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {Vector3, toDegrees, _MathUtils} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
 import {tapeEquals, tapeEqualsEpsilon} from 'test/utils/tape-assertions';

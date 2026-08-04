@@ -6,7 +6,7 @@
 // MIT License
 
 /* eslint-disable max-statements */
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {tapeEquals} from 'test/utils/tape-assertions';
 import {toNested} from './utils';
 

@@ -1,7 +1,7 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {toRadians} from '@math.gl/core';
 import {
   isWGS84,

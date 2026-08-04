@@ -1,6 +1,6 @@
 // math.gl, MIT license
 
-import type {Test} from 'tape-promise/tape';
+import type {Test} from 'test/utils/vitest-tape';
 import {equals, withEpsilon} from '@math.gl/core';
 
 function isEqual(a: any, b: any): boolean {
@@ -17,25 +17,11 @@ function isEqual(a: any, b: any): boolean {
 // Use tape assert to compares using a.equals(b)
 // Usage test(..., t => { tapeEquals(t, a, b, ...); });
 export function tapeEquals(t: Test, a: any, b: any, msg?: string, extra?: any): void {
-  // @ts-ignore Untyped method
-  t._assert(isEqual(a, b), {
-    message: msg || 'should be equal',
-    operator: 'equal',
-    actual: a,
-    expected: b,
-    extra
-  });
+  t.ok(isEqual(a, b), msg || 'should be equal');
 }
 
 export function tapeNotEquals(t: Test, a: any, b: any, msg?: string, extra?: any): void {
-  // @ts-ignore Untyped method
-  t._assert(!isEqual(a, b), {
-    message: msg || 'should not be equal',
-    operator: 'notEqual',
-    actual: a,
-    expected: b,
-    extra
-  });
+  t.ok(!isEqual(a, b), msg || 'should not be equal');
 }
 
 // eslint-disable-next-line max-params

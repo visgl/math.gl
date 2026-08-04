@@ -1,5 +1,5 @@
 import {WebMercatorViewport} from '@math.gl/web-mercator';
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {config, equals} from '@math.gl/core';
 
 const viewportProps = {

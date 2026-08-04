@@ -1,4 +1,4 @@
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {Vector3, toRadians, _MathUtils} from '@math.gl/core';
 import {LngLatRectangle} from '@math.gl/geospatial';
 import {tapeEquals, tapeEqualsEpsilon} from 'test/utils/tape-assertions';

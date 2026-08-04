@@ -4,7 +4,7 @@
 // Copyright (c) 2017 Uber Technologies, Inc.
 
 /* eslint-disable max-statements */
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {tapeEquals} from 'test/utils/tape-assertions';
 
 import {Vector2, Matrix4, Matrix3} from '@math.gl/core';

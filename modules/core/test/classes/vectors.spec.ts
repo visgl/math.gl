@@ -4,21 +4,14 @@
 // Copyright (c) 2017 Uber Technologies, Inc.
 
 /* eslint-disable max-statements */
-import test, {Test} from 'tape-promise/tape';
+import test, {Test} from 'test/utils/vitest-tape';
 import {Vector2, Vector3, Vector4} from '@math.gl/core';
 
 // FOR TAPE TESTING
 // Use tape assert to compares using a.equals(b)
 // Usage test(..., t => { tapeEquals(t, a, b, ...); });
 export function tapeEquals(t: Test, a, b, msg, extra) {
-  /* eslint-disable no-invalid-this */
-  t._assert(a.equals(b), {
-    message: msg || 'should be equal',
-    operator: 'equal',
-    actual: a,
-    expected: b,
-    extra
-  });
+  t.ok(a.equals(b), msg || 'should be equal');
 }
 
 test('Math#types', t => {

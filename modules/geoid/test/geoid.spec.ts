@@ -1,4 +1,4 @@
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {Geoid} from '@math.gl/geoid';
 import {openFile} from './utils/file-utils';
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import test from 'test/utils/vitest-tape';
 import {ExpressionFunctionRegistry, compile} from '@math.gl/expressions';
 import {
   DGGS_FUNCTION_LIBRARY,
