@@ -4,9 +4,8 @@
 // Copyright (c) 2017 Uber Technologies, Inc.
 
 /* eslint-disable max-statements */
-import {Matrix4, Vector3, config, configure} from '@math.gl/core';
-import test from 'test/utils/vitest-tape';
-import {tapeEquals, tapeEqualsEpsilon} from 'test/utils/tape-assertions';
+import {test, expect} from 'vitest';
+import {Matrix4, Vector3, config, configure, equals} from '@math.gl/core';
 
 config.EPSILON = 1e-6;
 
@@ -25,143 +24,120 @@ const TRANSPOSED_INDICES_MATRIX = [1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8
 //   set: {}
 // };
 
-test('Matrix4#types', t => {
-  t.equals(typeof Matrix4, 'function');
-  t.ok(Matrix4.IDENTITY);
-  t.ok(Matrix4.ZERO);
-  t.end();
+test('Matrix4#types', () => {
+  expect(typeof Matrix4).toBe('function');
+  expect(Matrix4.IDENTITY).toBeTruthy();
+  expect(Matrix4.ZERO).toBeTruthy();
 });
 
-test('Matrix4#construct and Array.isArray check', t => {
+test('Matrix4#construct and Array.isArray check', () => {
   const m = new Matrix4();
-  t.ok(Array.isArray(m));
-  // t.ok(m.INDICES);
-  t.end();
+  expect(Array.isArray(m)).toBeTruthy();
 });
 
-test('Matrix4#fromQuaternion', t => {
-  tapeEquals(t, new Matrix4().fromQuaternion([0, 0, 0, 1]), IDENTITY_MATRIX);
-  t.end();
+test('Matrix4#fromQuaternion', () => {
+  expect(equals(new Matrix4().fromQuaternion([0, 0, 0, 1]), IDENTITY_MATRIX)).toBe(true);
 });
 
-test('Matrix4#from', t => {
-  tapeEquals(t, new Matrix4().from(INDICES_MATRIX), INDICES_MATRIX);
-  // tapeEquals(t, new Matrix4().from({x: 1, y: 2, z: 3, w: 4}), [1, 2, 3, 4]);
-  t.end();
+test('Matrix4#from', () => {
+  expect(equals(new Matrix4().from(INDICES_MATRIX), INDICES_MATRIX)).toBe(true);
 });
 
-test('Matrix4#to', t => {
+test('Matrix4#to', () => {
   const matrix = new Matrix4(INDICES_MATRIX);
-  t.ok(matrix.to(matrix), 'Handles copy to self');
-  // tapeEquals(t, matrix.to([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), INDICES_MATRIX);
-  // t.deepEquals(matrix.to({x: 0, y: 0, z: 0, w: 0}), {x: 1, y: 2, z: 4});
-  t.end();
+  expect(matrix.to(matrix), 'Handles copy to self').toBeTruthy();
 });
 
-test('Matrix4#toString', t => {
+test('Matrix4#toString', () => {
   const matrix = new Matrix4(INDICES_MATRIX);
   configure({printRowMajor: true});
-  tapeEquals(t, String(matrix), '[row-major: 1 5 9 13 2 6 10 14 3 7 11 15 4 8 12 16]');
+  expect(equals(String(matrix), '[row-major: 1 5 9 13 2 6 10 14 3 7 11 15 4 8 12 16]')).toBe(true);
 
   configure({printRowMajor: false});
-  tapeEquals(t, String(matrix), '[column-major: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]');
+  expect(equals(String(matrix), '[column-major: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]')).toBe(
+    true
+  );
 
   configure({printRowMajor: true});
-
-  t.end();
 });
 
-test('Matrix4.toFloat32Array', t => {
-  t.equals(typeof Matrix4.prototype.toFloat32Array, 'function');
+test('Matrix4.toFloat32Array', () => {
+  expect(typeof Matrix4.prototype.toFloat32Array).toBe('function');
   const m = new Matrix4();
   m.identity();
-  t.equals(m.toFloat32Array().BYTES_PER_ELEMENT, 4);
-  t.end();
+  expect(m.toFloat32Array().BYTES_PER_ELEMENT).toBe(4);
 });
 
-test('Matrix4.equals', t => {
+test('Matrix4.equals', () => {
   const m = new Matrix4();
-  t.ok(m.equals(IDENTITY_MATRIX));
-  t.notOk(m.equals([...IDENTITY_MATRIX, 0]));
-  t.end();
+  expect(m.equals(IDENTITY_MATRIX)).toBeTruthy();
+  expect(m.equals([...IDENTITY_MATRIX, 0])).toBeFalsy();
 });
 
-test('Matrix4.exactEquals', t => {
+test('Matrix4.exactEquals', () => {
   const m = new Matrix4();
-  t.ok(m.exactEquals(IDENTITY_MATRIX));
-  t.notOk(m.exactEquals([...IDENTITY_MATRIX, 0]));
-  t.end();
+  expect(m.exactEquals(IDENTITY_MATRIX)).toBeTruthy();
+  expect(m.exactEquals([...IDENTITY_MATRIX, 0])).toBeFalsy();
 });
 
-test('Matrix4#identity (identity matrix)', t => {
-  t.equals(typeof Matrix4.prototype.identity, 'function');
+test('Matrix4#identity (identity matrix)', () => {
+  expect(typeof Matrix4.prototype.identity).toBe('function');
   const m = new Matrix4();
   m.identity();
 
   const RESULT = IDENTITY_MATRIX;
 
-  tapeEquals(t, m, RESULT);
-  t.end();
+  expect(equals(m, RESULT)).toBe(true);
 });
 
-test('Matrix4#copy', t => {
-  t.equals(typeof Matrix4.prototype.copy, 'function');
+test('Matrix4#copy', () => {
+  expect(typeof Matrix4.prototype.copy).toBe('function');
 
   const INPUT = INDICES_MATRIX;
   const RESULT = INDICES_MATRIX;
 
   const m = new Matrix4().copy(INPUT);
 
-  tapeEquals(t, m, RESULT, 'copy gave the right result');
-
-  t.end();
+  expect(equals(m, RESULT), 'copy gave the right result').toBe(true);
 });
 
-test('Matrix4#set', t => {
-  t.equals(typeof Matrix4.prototype.set, 'function');
+test('Matrix4#set', () => {
+  expect(typeof Matrix4.prototype.set).toBe('function');
 
   const INPUT = INDICES_MATRIX;
   const RESULT = INDICES_MATRIX;
 
   const m = new Matrix4().copy(INPUT);
 
-  tapeEquals(t, m, RESULT, 'set gave the right result');
-
-  t.end();
+  expect(equals(m, RESULT), 'set gave the right result').toBe(true);
 });
 
-test('Matrix4#setRowMajor', t => {
+test('Matrix4#setRowMajor', () => {
   const INPUT = INDICES_MATRIX;
   const RESULT = TRANSPOSED_INDICES_MATRIX;
 
   // @ts-expect-error TS2556: Expected 16 arguments, but got 0 or more.
   const m = new Matrix4().setRowMajor(...INPUT);
-  tapeEquals(t, m, RESULT, 'setRowMajor gave the right result');
-
-  t.end();
+  expect(equals(m, RESULT), 'setRowMajor gave the right result').toBe(true);
 });
 
-test('Matrix4#toRowMajor', t => {
+test('Matrix4#toRowMajor', () => {
   const INPUT = INDICES_MATRIX;
   const RESULT = TRANSPOSED_INDICES_MATRIX;
 
   const m = new Matrix4(INPUT).toRowMajor([...INDICES_MATRIX]);
-  tapeEquals(t, m, RESULT, 'setRowMajor gave the right result');
-
-  t.end();
+  expect(equals(m, RESULT), 'setRowMajor gave the right result').toBe(true);
 });
 
-test('Matrix4#getScale', t => {
+test('Matrix4#getScale', () => {
   const INPUT = INDICES_MATRIX;
   const RESULT = [3.7416573867739413, 10.488088481701515, 17.37814719698276];
 
   const scale = new Matrix4(INPUT).getScale();
-  tapeEquals(t, scale, RESULT, 'getScale gave the right result');
-
-  t.end();
+  expect(equals(scale, RESULT), 'getScale gave the right result').toBe(true);
 });
 
-test('Matrix4#getRotation', t => {
+test('Matrix4#getRotation', () => {
   const INPUT = INDICES_MATRIX;
   const RESULT = [
     0.2672612419124244, 0.19069251784911848, 0.17263060129453078, 0, 1.3363062095621219,
@@ -170,12 +146,10 @@ test('Matrix4#getRotation', t => {
   ];
 
   const m = new Matrix4(INPUT).getRotation([...INDICES_MATRIX]);
-  tapeEquals(t, m, RESULT, 'getRotation gave the right result');
-
-  t.end();
+  expect(equals(m, RESULT), 'getRotation gave the right result').toBe(true);
 });
 
-test('Matrix4#getRotationMatrix3', t => {
+test('Matrix4#getRotationMatrix3', () => {
   const INPUT = INDICES_MATRIX;
   const RESULT = [
     0.2672612419124244, 0.19069251784911848, 0.17263060129453078, 1.3363062095621219,
@@ -184,98 +158,78 @@ test('Matrix4#getRotationMatrix3', t => {
   ];
 
   const m = new Matrix4(INPUT).getRotationMatrix3([...INDICES_MATRIX.slice(0, 9)]);
-  tapeEquals(t, m, RESULT, 'getRotationMatrix3 gave the right result');
-
-  t.end();
+  expect(equals(m, RESULT), 'getRotationMatrix3 gave the right result').toBe(true);
 });
 
-test('Matrix4#getTranslation', t => {
+test('Matrix4#getTranslation', () => {
   const INPUT = INDICES_MATRIX;
   const RESULT = [13, 14, 15];
 
   const m = new Matrix4(INPUT).getTranslation([0, 0, 0]);
-  tapeEquals(t, m, RESULT, 'getTranslation gave the right result');
-
-  t.end();
+  expect(equals(m, RESULT), 'getTranslation gave the right result').toBe(true);
 });
 
-test('Matrix4#perspective#', t => {
+test('Matrix4#perspective#', () => {
   const fovy = Math.PI * 0.5;
   const result = new Matrix4().perspective({fovy, aspect: 1, near: 0, far: 1});
-  tapeEquals(
-    t,
-    result,
-    [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0],
+  expect(
+    equals(result, [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0]),
     'should place values into out'
-  );
-  t.end();
+  ).toBe(true);
 });
 
-test('Matrix4#perspective#with nonzero near, 45deg fovy, and realistic aspect ratio', t => {
+test('Matrix4#perspective#with nonzero near, 45deg fovy, and realistic aspect ratio', () => {
   const result = new Matrix4().perspective({
     fovy: (45 * Math.PI) / 180.0,
     aspect: 640 / 480,
     near: 0.1,
     far: 200
   });
-  tapeEquals(
-    t,
-    result,
-    [1.81066, 0, 0, 0, 0, 2.414213, 0, 0, 0, 0, -1.001, -1, 0, 0, -0.2001, 0],
+  expect(
+    equals(result, [1.81066, 0, 0, 0, 0, 2.414213, 0, 0, 0, 0, -1.001, -1, 0, 0, -0.2001, 0]),
     'should calculate correct matrix'
-  );
-  t.end();
+  ).toBe(true);
 });
 
-test('Matrix4#perspective#with no far plane, 45deg fovy, and realistic aspect ratio', t => {
+test('Matrix4#perspective#with no far plane, 45deg fovy, and realistic aspect ratio', () => {
   const result = new Matrix4().perspective({
     fovy: (45 * Math.PI) / 180.0,
     aspect: 640 / 480,
     near: 0.1
   });
-  tapeEqualsEpsilon(
-    t,
-    result,
-    [1.81066, 0, 0, 0, 0, 2.414213, 0, 0, 0, 0, -1, -1, 0, 0, -0.2, 0],
-    1e-3,
+  expect(
+    equals(result, [1.81066, 0, 0, 0, 0, 2.414213, 0, 0, 0, 0, -1, -1, 0, 0, -0.2, 0], 1e-3),
     'should calculate correct matrix'
-  );
-  // TODO why so inexact?
-  t.end();
+  ).toBe(true);
 });
 
-test('Matrix4#perspective#with infinite far plane, 45deg fovy, and realistic aspect ratio', t => {
+test('Matrix4#perspective#with infinite far plane, 45deg fovy, and realistic aspect ratio', () => {
   const result = new Matrix4().perspective({
     fovy: (45 * Math.PI) / 180.0,
     aspect: 640 / 480,
     near: 0.1,
     far: Infinity
   });
-  tapeEquals(
-    t,
-    result,
-    [1.81066, 0, 0, 0, 0, 2.414213, 0, 0, 0, 0, -1, -1, 0, 0, -0.2, 0],
+  expect(
+    equals(result, [1.81066, 0, 0, 0, 0, 2.414213, 0, 0, 0, 0, -1, -1, 0, 0, -0.2, 0]),
     'should calculate correct matrix'
-  );
-  t.throws(() => new Matrix4().perspective({fovy: 10, aspect: 1, near: 0, far: 1}));
-  t.end();
+  ).toBe(true);
+  expect(() => new Matrix4().perspective({fovy: 10, aspect: 1, near: 0, far: 1})).toThrow();
 });
 
-test('Matrix4#orthographic#', t => {
+test('Matrix4#orthographic#', () => {
   const fovy = Math.PI * 0.5;
   const result = new Matrix4().orthographic({fovy, aspect: 1, near: 0, far: 1});
-  t.ok(result);
-  t.throws(() => new Matrix4().orthographic({fovy: 10, aspect: 1, near: 0, far: 1}));
-  t.end();
+  expect(result).toBeTruthy();
+  expect(() => new Matrix4().orthographic({fovy: 10, aspect: 1, near: 0, far: 1})).toThrow();
 });
 
-test('Matrix4#frustum', t => {
+test('Matrix4#frustum', () => {
   const result = new Matrix4().frustum({left: -1, right: 1, bottom: -1, top: 1, near: -1, far: 1});
-  t.ok(result);
-  t.end();
+  expect(result).toBeTruthy();
 });
 
-test('Matrix4#frustum() works', t => {
+test('Matrix4#frustum() works', () => {
   const expected = new Matrix4([2, 0, 3, 0, 0, 2, 5, 0, 0, 0, -3, -4, 0, 0, -1, 0]).transpose();
   const returnedResult = new Matrix4().frustum({
     left: 1,
@@ -285,11 +239,10 @@ test('Matrix4#frustum() works', t => {
     near: 1,
     far: 2
   });
-  tapeEquals(t, returnedResult, expected);
-  t.end();
+  expect(equals(returnedResult, expected)).toBe(true);
 });
 
-test('Matrix4#frustum(far: Infinity) works', t => {
+test('Matrix4#frustum(far: Infinity) works', () => {
   const expected = new Matrix4([2, 0, 3, 0, 0, 2, 5, 0, 0, 0, -1, -2, 0, 0, -1, 0]).transpose();
   const returnedResult = new Matrix4().frustum({
     left: 1,
@@ -299,26 +252,21 @@ test('Matrix4#frustum(far: Infinity) works', t => {
     near: 1,
     far: Infinity
   });
-  tapeEquals(t, returnedResult, expected);
-  t.end();
+  expect(equals(returnedResult, expected)).toBe(true);
 });
 
-test('Matrix4#ortho', t => {
+test('Matrix4#ortho', () => {
   const result = new Matrix4().ortho({left: -1, right: 1, bottom: -1, top: 1, near: -1, far: 1});
-  t.ok(result);
-  t.end();
+  expect(result).toBeTruthy();
 });
 
-test('Matrix4#lookat', t => {
+test('Matrix4#lookat', () => {
   const result = new Matrix4().lookAt({eye: [1, 1, 1], center: [0, 0, 0], up: [0, 1, 0]});
-  t.ok(result);
-  // result = new Matrix4().lookAt([1, 1, 1], [0, 0, 0], [0, 1, 0]);
-  // t.ok(result);
-  t.end();
+  expect(result).toBeTruthy();
 });
 
-test('Matrix4.transpose', t => {
-  t.equals(typeof Matrix4.prototype.transpose, 'function');
+test('Matrix4.transpose', () => {
+  expect(typeof Matrix4.prototype.transpose).toBe('function');
 
   const INPUT = INDICES_MATRIX;
   const RESULT = TRANSPOSED_INDICES_MATRIX;
@@ -328,65 +276,58 @@ test('Matrix4.transpose', t => {
 
   const result = m.transpose();
 
-  tapeEquals(t, result, RESULT, 'transpose gave the right result');
-  t.end();
+  expect(equals(result, RESULT), 'transpose gave the right result').toBe(true);
 });
 
-test('Matrix4.add', t => {
+test('Matrix4.add', () => {
   const RESULT = [2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2];
 
   let m = new Matrix4().identity();
   m = m.add(m);
 
-  tapeEquals(t, m, RESULT, 'add gave the right result');
-  t.end();
+  expect(equals(m, RESULT), 'add gave the right result').toBe(true);
 });
 
-test('Matrix4.scale', t => {
+test('Matrix4.scale', () => {
   const M1_RESULT = [1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1];
   const M2_RESULT = [2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1];
 
-  t.equals(typeof Matrix4.prototype.scale, 'function');
+  expect(typeof Matrix4.prototype.scale).toBe('function');
   const m1 = new Matrix4().identity();
   const m1Result = m1.scale([1, 2, 3]);
 
-  tapeEquals(t, m1Result, M1_RESULT, 'scale gave the right result');
+  expect(equals(m1Result, M1_RESULT), 'scale gave the right result').toBe(true);
 
   const m2 = new Matrix4().identity();
   const m2Result = m2.scale(2);
 
-  tapeEquals(t, m2Result, M2_RESULT, 'scale gave the right result');
-
-  t.end();
+  expect(equals(m2Result, M2_RESULT), 'scale gave the right result').toBe(true);
 });
 
-test('Matrix4.multiplyRight', t => {
+test('Matrix4.multiplyRight', () => {
   const RESULT = [2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2];
 
   const m = new Matrix4().multiplyRight(RESULT);
 
-  tapeEquals(t, m, RESULT, 'multiplyRight gave the right result');
-  t.end();
+  expect(equals(m, RESULT), 'multiplyRight gave the right result').toBe(true);
 });
 
-test('Matrix4.multiplyLeft', t => {
+test('Matrix4.multiplyLeft', () => {
   const RESULT = [2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2];
 
   const m = new Matrix4().multiplyLeft(RESULT);
 
-  tapeEquals(t, m, RESULT, 'multiplyLeft gave the right result');
-  t.end();
+  expect(equals(m, RESULT), 'multiplyLeft gave the right result').toBe(true);
 });
 
-test('Matrix4.translate', t => {
+test('Matrix4.translate', () => {
   const RESULT = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 1];
 
-  t.equals(typeof Matrix4.prototype.translate, 'function');
+  expect(typeof Matrix4.prototype.translate).toBe('function');
   const m = new Matrix4().identity();
   const result = m.translate([1, 2, 3]);
 
-  tapeEquals(t, result, RESULT, 'translate gave the right result');
-  t.end();
+  expect(equals(result, RESULT), 'translate gave the right result').toBe(true);
 });
 
 // test('Matrix4.invert', t => {
@@ -507,8 +448,8 @@ test('Matrix4.translate', t => {
 //   t.end();
 // });
 
-test('Matrix4.rotateAxis', t => {
-  t.equals(typeof Matrix4.prototype.rotateAxis, 'function');
+test('Matrix4.rotateAxis', () => {
+  expect(typeof Matrix4.prototype.rotateAxis).toBe('function');
   const v = new Vector3(1, 2, 3).normalize();
   const theta = Math.PI / 4;
   const m = new Matrix4();
@@ -519,11 +460,10 @@ test('Matrix4.rotateAxis', t => {
     0.7907905578613281, -0.06345657259225845, 0, -0.3152016404063445, 0.3145079017103789,
     0.8953952789306641, 0, 0, 0, 0, 1
   ]).transpose();
-  t.assert(result.equals(reference), 'rotateAxis generated expected matrix');
-  t.end();
+  expect(result.equals(reference), 'rotateAxis generated expected matrix').toBeTruthy();
 });
 
-test('Matrix4.rotateXYZ', t => {
+test('Matrix4.rotateXYZ', () => {
   const m = new Matrix4();
   const result = m.rotateXYZ([1, 2, 3]);
   const reference = [
@@ -531,11 +471,10 @@ test('Matrix4.rotateXYZ', t => {
     -0.642872836134547, -0.7637183366502791, 0, 0.9092974268256817, 0.35017548837401463,
     -0.2248450953661529, 0, 0, 0, 0, 1
   ];
-  tapeEquals(t, result, reference, 'rotateXYZ generated expected matrix');
-  t.end();
+  expect(equals(result, reference), 'rotateXYZ generated expected matrix').toBe(true);
 });
 
-test('Matrix4#transform', t => {
+test('Matrix4#transform', () => {
   const matrix = new Matrix4().translate([1, 2, 3]).scale([2, 2, 2]);
 
   const TEST_CASES = [
@@ -610,14 +549,12 @@ test('Matrix4#transform', t => {
 
   for (const testCase of TEST_CASES) {
     const p4 = matrix[testCase.method](testCase.input);
-    tapeEquals(t, p4, testCase.expected, 'transform gave the right result');
+    expect(equals(p4, testCase.expected), 'transform gave the right result').toBe(true);
   }
 
-  t.throws(() => matrix.transform([NaN, 0, 0, 0]));
-  t.throws(() => matrix.transform([0]));
-  t.throws(() => matrix.transform([0, 0, 0, 0, 0]));
-  t.throws(() => matrix.transformAsVector([0, 0, 0, 0, 0]));
-  t.throws(() => matrix.transformAsPoint([0, 0, 0, 0, 0]));
-
-  t.end();
+  expect(() => matrix.transform([NaN, 0, 0, 0])).toThrow();
+  expect(() => matrix.transform([0])).toThrow();
+  expect(() => matrix.transform([0, 0, 0, 0, 0])).toThrow();
+  expect(() => matrix.transformAsVector([0, 0, 0, 0, 0])).toThrow();
+  expect(() => matrix.transformAsPoint([0, 0, 0, 0, 0])).toThrow();
 });

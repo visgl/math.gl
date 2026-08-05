@@ -1,4 +1,4 @@
-import test from 'test/utils/vitest-tape';
+import {test, expect} from 'vitest';
 import {getBounds} from '@math.gl/web-mercator';
 import {WebMercatorViewport} from '@math.gl/web-mercator';
 import {toLowPrecision} from '../utils/test-utils';
@@ -137,29 +137,27 @@ const GETBOUNDS_TEST_CASES = [
   }
 ];
 
-test('getBounds', t => {
+test('getBounds', () => {
   for (const {title, viewportProps, quad, z} of GETBOUNDS_TEST_CASES) {
     const viewport = new WebMercatorViewport(viewportProps);
     const result = getBounds(viewport, z);
-    t.deepEqual(toLowPrecision(result), toLowPrecision(quad), title);
+    expect(toLowPrecision(result), title).toEqual(toLowPrecision(quad));
   }
-  t.end();
 });
 
-test('WebMercatorViewport.getBounds/getBoundingRegion', t => {
+test('WebMercatorViewport.getBounds/getBoundingRegion', () => {
   for (const testCase of GETBOUNDS_TEST_CASES) {
     const viewport = new WebMercatorViewport(testCase.viewportProps);
     const opts = testCase.z ? {z: testCase.z} : undefined;
 
     const bounds = viewport.getBounds(opts);
-    t.deepEqual(
-      toLowPrecision(bounds),
-      toLowPrecision(testCase.rect),
-      `${testCase.title}: bounding box`
+    expect(toLowPrecision(bounds), `${testCase.title}: bounding box`).toEqual(
+      toLowPrecision(testCase.rect)
     );
 
     const region = viewport.getBoundingRegion(opts);
-    t.deepEqual(toLowPrecision(region), toLowPrecision(testCase.quad), `${testCase.title}: quad`);
+    expect(toLowPrecision(region), `${testCase.title}: quad`).toEqual(
+      toLowPrecision(testCase.quad)
+    );
   }
-  t.end();
 });

@@ -1,4 +1,4 @@
-import test from 'test/utils/vitest-tape';
+import {test, expect} from 'vitest';
 import destination from '@turf/destination';
 import {toLowPrecision} from '../utils/test-utils';
 import {config, equals} from '@math.gl/core';
@@ -23,61 +23,56 @@ const DISTANCE_TOLERANCE = 0.0005;
 const DISTANCE_TOLERANCE_PIXELS = 2;
 const DISTANCE_SCALE_TEST_ZOOM = 12;
 
-test('Viewport#imports', t => {
-  t.ok(lngLatToWorld, 'lngLatToWorld imports OK');
-  t.ok(worldToLngLat, 'worldToLngLat imports OK');
-  t.ok(getMeterZoom, 'getMeterZoom imports OK');
-  t.ok(getViewMatrix, 'getViewMatrix imports OK');
-  t.ok(getProjectionMatrix, 'getProjectionMatrix imports OK');
-  t.ok(getProjectionParameters, 'getProjectionParameters imports OK');
-  t.ok(worldToPixels, 'worldToPixels imports OK');
-  t.ok(pixelsToWorld, 'pixelsToWorld imports OK');
-  t.end();
+test('Viewport#imports', () => {
+  expect(lngLatToWorld, 'lngLatToWorld imports OK').toBeTruthy();
+  expect(worldToLngLat, 'worldToLngLat imports OK').toBeTruthy();
+  expect(getMeterZoom, 'getMeterZoom imports OK').toBeTruthy();
+  expect(getViewMatrix, 'getViewMatrix imports OK').toBeTruthy();
+  expect(getProjectionMatrix, 'getProjectionMatrix imports OK').toBeTruthy();
+  expect(getProjectionParameters, 'getProjectionParameters imports OK').toBeTruthy();
+  expect(worldToPixels, 'worldToPixels imports OK').toBeTruthy();
+  expect(pixelsToWorld, 'pixelsToWorld imports OK').toBeTruthy();
 });
 
-test('lngLatToWorld', t => {
-  t.throws(() => lngLatToWorld([38, -122]), /latitude/i, 'throws on invalid latitude');
-  t.ok(
+test('lngLatToWorld', () => {
+  expect(() => lngLatToWorld([38, -122]), 'throws on invalid latitude').toThrow(/latitude/i);
+  expect(
     equals(lngLatToWorld([-122, 38]), [82.4888888888889, 314.50692551385134]),
     'returns correct result'
-  );
-  t.end();
+  ).toBeTruthy();
 });
 
-test('getDistanceScales', t => {
+test('getDistanceScales', () => {
   for (const vc in VIEWPORT_PROPS) {
     const props = VIEWPORT_PROPS[vc];
     const {metersPerUnit, unitsPerMeter, degreesPerUnit, unitsPerDegree} = getDistanceScales(props);
 
-    t.deepEqual(
+    expect(
       [
         toLowPrecision(metersPerUnit[0] * unitsPerMeter[0]),
         toLowPrecision(metersPerUnit[1] * unitsPerMeter[1]),
         toLowPrecision(metersPerUnit[2] * unitsPerMeter[2])
       ],
-      [1, 1, 1],
       'metersPerUnit checks with unitsPerMeter'
-    );
+    ).toEqual([1, 1, 1]);
 
-    t.deepEqual(
+    expect(
       [
         toLowPrecision(degreesPerUnit[0] * unitsPerDegree[0]),
         toLowPrecision(degreesPerUnit[1] * unitsPerDegree[1]),
         toLowPrecision(degreesPerUnit[2] * unitsPerDegree[2])
       ],
-      [1, 1, 1],
       'degreesPerUnit checks with unitsPerDegree'
-    );
+    ).toEqual([1, 1, 1]);
   }
-  t.end();
 });
 
-test('getDistanceScales#unitsPerDegree', t => {
+test('getDistanceScales#unitsPerDegree', () => {
   const scale = Math.pow(2, DISTANCE_SCALE_TEST_ZOOM);
   const z = 1000;
 
   for (const vc in VIEWPORT_PROPS) {
-    t.comment(vc);
+    console.log(vc);
     const props = VIEWPORT_PROPS[vc];
     const {longitude, latitude} = props;
     const {unitsPerDegree, unitsPerDegree2} = getDistanceScales({
@@ -88,7 +83,7 @@ test('getDistanceScales#unitsPerDegree', t => {
 
     // Test degree offsets
     for (const delta of [0.001, 0.01, 0.05, 0.1, 0.3]) {
-      t.comment(`R = ${delta} degrees`);
+      console.log(`R = ${delta} degrees`);
 
       // To pixels
       const coords = [delta * unitsPerDegree[0], delta * unitsPerDegree[1], z * unitsPerDegree[2]];
@@ -109,28 +104,27 @@ test('getDistanceScales#unitsPerDegree', t => {
       const diff = getDiff(coords, realCoords, scale);
       const diffAdjusted = getDiff(coordsAdjusted, realCoords, scale);
 
-      t.comment(`unadjusted: ${diff.message}`);
-      t.comment(`adjusted: ${diffAdjusted.message}`);
+      console.log(`unadjusted: ${diff.message}`);
+      console.log(`adjusted: ${diffAdjusted.message}`);
 
-      t.ok(
+      expect(
         diffAdjusted.error.every(e => e < DISTANCE_TOLERANCE),
         'Error within ratio tolerance'
-      );
-      t.ok(
+      ).toBeTruthy();
+      expect(
         diffAdjusted.errorPixels.every(p => p < DISTANCE_TOLERANCE_PIXELS),
         'Error within pixel tolerance'
-      );
+      ).toBeTruthy();
     }
   }
-  t.end();
 });
 
-test('getDistanceScales#unitsPerMeter', t => {
+test('getDistanceScales#unitsPerMeter', () => {
   const scale = Math.pow(2, DISTANCE_SCALE_TEST_ZOOM);
   const z = 1000;
 
   for (const vc in VIEWPORT_PROPS) {
-    t.comment(vc);
+    console.log(vc);
     const props = VIEWPORT_PROPS[vc];
     const {longitude, latitude} = props;
     const {unitsPerMeter, unitsPerMeter2} = getDistanceScales({
@@ -141,7 +135,7 @@ test('getDistanceScales#unitsPerMeter', t => {
 
     // Test degree offsets
     for (const delta of [10, 100, 1000, 5000, 10000, 30000]) {
-      t.comment(`R = ${delta} meters`);
+      console.log(`R = ${delta} meters`);
 
       // To pixels
       const coords = [delta * unitsPerMeter[0], delta * unitsPerMeter[1], z * unitsPerMeter[2]];
@@ -165,32 +159,31 @@ test('getDistanceScales#unitsPerMeter', t => {
       const diff = getDiff(coords, realCoords, scale);
       const diffAdjusted = getDiff(coordsAdjusted, realCoords, scale);
 
-      t.comment(`unadjusted: ${diff.message}`);
-      t.comment(`adjusted: ${diffAdjusted.message}`);
+      console.log(`unadjusted: ${diff.message}`);
+      console.log(`adjusted: ${diffAdjusted.message}`);
 
-      t.ok(
+      expect(
         diffAdjusted.error.every(e => e < DISTANCE_TOLERANCE),
         'Error within ratio tolerance'
-      );
-      t.ok(
+      ).toBeTruthy();
+      expect(
         diffAdjusted.errorPixels.every(p => p < DISTANCE_TOLERANCE_PIXELS),
         'Error within pixel tolerance'
-      );
+      ).toBeTruthy();
     }
   }
-  t.end();
 });
 
-test('addMetersToLngLat', t => {
+test('addMetersToLngLat', () => {
   config.EPSILON = 1e-7;
 
   for (const vc in VIEWPORT_PROPS) {
-    t.comment(vc);
+    console.log(vc);
     const {longitude, latitude} = VIEWPORT_PROPS[vc];
 
     // Test degree offsets
     for (const delta of [10, 100, 1000, 5000]) {
-      t.comment(`R = ${delta} meters`);
+      console.log(`R = ${delta} meters`);
 
       const origin = [longitude, latitude];
       // turf unit is kilometers
@@ -199,15 +192,14 @@ test('addMetersToLngLat', t => {
 
       const result = addMetersToLngLat(origin, [delta, delta, delta]);
 
-      t.comment(`Comparing: ${result}, ${pt}`);
+      console.log(`Comparing: ${result}, ${pt}`);
 
-      t.ok(equals(result, pt), 'Returns correct result');
+      expect(equals(result, pt), 'Returns correct result').toBeTruthy();
     }
   }
-  t.end();
 });
 
-test('getMeterZoom', t => {
+test('getMeterZoom', () => {
   const TEST_LATITUDES = [0, 37.5, 75];
 
   for (const latitude of TEST_LATITUDES) {
@@ -215,14 +207,11 @@ test('getMeterZoom', t => {
     const scale = zoomToScale(zoom);
 
     const {unitsPerMeter} = getDistanceScales({latitude, longitude: 0});
-    t.deepEqual(
+    expect(
       toLowPrecision(unitsPerMeter.map(x => x * scale)),
-      [1, 1, 1],
       'zoom yields 1 pixel per meter'
-    );
+    ).toEqual([1, 1, 1]);
   }
-
-  t.end();
 });
 
 function getDiff(value, baseValue, scale) {
@@ -240,7 +229,7 @@ function getDiff(value, baseValue, scale) {
   };
 }
 
-test('getProjectionParameters', t => {
+test('getProjectionParameters', () => {
   const TEST_CASES = {
     ...VIEWPORT_PROPS,
     extremePitched: {
@@ -259,11 +248,19 @@ test('getProjectionParameters', t => {
 
     // TODO - for now, just tests that fields are valid number
     const {fov, aspect, focalDistance, near, far} = getProjectionParameters(props);
-    t.ok(Number.isFinite(fov), 'getProjectionParameters: fov is a number');
-    t.ok(Number.isFinite(aspect), 'getProjectionParameters: aspect is a number');
-    t.ok(Number.isFinite(focalDistance), 'getProjectionParameters: focalDistance is a number');
-    t.ok(Number.isFinite(near) && near > 0, 'getProjectionParameters: near is a number');
-    t.ok(Number.isFinite(far) && far > near, 'getProjectionParameters: far is a number');
+    expect(Number.isFinite(fov), 'getProjectionParameters: fov is a number').toBeTruthy();
+    expect(Number.isFinite(aspect), 'getProjectionParameters: aspect is a number').toBeTruthy();
+    expect(
+      Number.isFinite(focalDistance),
+      'getProjectionParameters: focalDistance is a number'
+    ).toBeTruthy();
+    expect(
+      Number.isFinite(near) && near > 0,
+      'getProjectionParameters: near is a number'
+    ).toBeTruthy();
+    expect(
+      Number.isFinite(far) && far > near,
+      'getProjectionParameters: far is a number'
+    ).toBeTruthy();
   }
-  t.end();
 });

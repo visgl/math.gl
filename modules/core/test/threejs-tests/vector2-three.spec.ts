@@ -9,134 +9,118 @@
 
 // @ts-nocheck
 /* eslint-disable quotes, no-var */
-import test from 'test/utils/vitest-tape';
+import {assert, expect, test} from 'vitest';
 
 import {Vector2, Matrix3} from '@math.gl/core';
 import {x, y} from './constants';
 
 // INSTANCING
 
-test('three.js#Vector2#Instancing', assert => {
+test('three.js#Vector2#Instancing', () => {
   let a = new Vector2();
-  assert.ok(a.x === 0, 'Passed!');
-  assert.ok(a.y === 0, 'Passed!');
+  expect(a.x === 0, 'Passed!').toBeTruthy();
+  expect(a.y === 0, 'Passed!').toBeTruthy();
 
   a = new Vector2(x, y);
-  assert.ok(a.x === x, 'Passed!');
-  assert.ok(a.y === y, 'Passed!');
-  assert.end();
+  expect(a.x === x, 'Passed!').toBeTruthy();
+  expect(a.y === y, 'Passed!').toBeTruthy();
 });
 
-test('three.js#Vector2#properties', assert => {
+test('three.js#Vector2#properties', () => {
   var a = new Vector2(0, 0);
   var width = 100;
   var height = 200;
 
-  assert.ok((a.width = width), 'Set width');
-  assert.ok((a.height = height), 'Set height');
+  expect((a.width = width), 'Set width').toBeTruthy();
+  expect((a.height = height), 'Set height').toBeTruthy();
 
   a.set(width, height);
   assert.strictEqual(a.width, width, 'Get width');
   assert.strictEqual(a.height, height, 'Get height');
-  assert.end();
 });
 
-test.skip('Vector2#Vector2#width', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#width', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#height', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#height', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
 // PUBLIC STUFF
-test.skip('Vector2#Vector2#isVector2', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#isVector2', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test('three.js#Vector2#set', assert => {
+test('three.js#Vector2#set', () => {
   var a = new Vector2();
-  assert.ok(a.x === 0, 'Passed!');
-  assert.ok(a.y === 0, 'Passed!');
+  expect(a.x === 0, 'Passed!').toBeTruthy();
+  expect(a.y === 0, 'Passed!').toBeTruthy();
 
   a.set(x, y);
-  assert.ok(a.x === x, 'Passed!');
-  assert.ok(a.y === y, 'Passed!');
-  assert.end();
+  expect(a.x === x, 'Passed!').toBeTruthy();
+  expect(a.y === y, 'Passed!').toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#setScalar', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#setScalar', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#setX', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#setX', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#setY', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#setY', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#setComponent', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#setComponent', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#getComponent', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#getComponent', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#clone', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#clone', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test('three.js#Vector2#copy', assert => {
+test('three.js#Vector2#copy', () => {
   var a = new Vector2(x, y);
   var b = new Vector2().copy(a);
-  assert.ok(b.x === x, 'Passed!');
-  assert.ok(b.y === y, 'Passed!');
+  expect(b.x === x, 'Passed!').toBeTruthy();
+  expect(b.y === y, 'Passed!').toBeTruthy();
 
   // ensure that it is a true copy
   a.x = 0;
   a.y = -1;
-  assert.ok(b.x === x, 'Passed!');
-  assert.ok(b.y === y, 'Passed!');
-  assert.end();
+  expect(b.x === x, 'Passed!').toBeTruthy();
+  expect(b.y === y, 'Passed!').toBeTruthy();
 });
 
-test('three.js#Vector2#add', assert => {
+test('three.js#Vector2#add', () => {
   var a = new Vector2(x, y);
   var b = new Vector2(-x, -y);
 
   a.add(b);
-  assert.ok(a.x === 0, 'Passed!');
-  assert.ok(a.y === 0, 'Passed!');
+  expect(a.x === 0, 'Passed!').toBeTruthy();
+  expect(a.y === 0, 'Passed!').toBeTruthy();
 
   var c = new Vector2().addVectors(b, b);
-  assert.ok(c.x === -2 * x, 'Passed!');
-  assert.ok(c.y === -2 * y, 'Passed!');
-  assert.end();
+  expect(c.x === -2 * x, 'Passed!').toBeTruthy();
+  expect(c.y === -2 * y, 'Passed!').toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#addScalar', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#addScalar', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#addVectors', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#addVectors', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test('three.js#Vector2#addScaledVector', assert => {
+test('three.js#Vector2#addScaledVector', () => {
   var a = new Vector2(x, y);
   var b = new Vector2(2, 3);
   var s = 3;
@@ -144,142 +128,120 @@ test('three.js#Vector2#addScaledVector', assert => {
   a.addScaledVector(b, s);
   assert.strictEqual(a.x, x + b.x * s, 'Check x');
   assert.strictEqual(a.y, y + b.y * s, 'Check y');
-  assert.end();
 });
 
-test('three.js#Vector2#sub', assert => {
+test('three.js#Vector2#sub', () => {
   var a = new Vector2(x, y);
   var b = new Vector2(-x, -y);
 
   a.sub(b);
-  assert.ok(a.x === 2 * x, 'Passed!');
-  assert.ok(a.y === 2 * y, 'Passed!');
+  expect(a.x === 2 * x, 'Passed!').toBeTruthy();
+  expect(a.y === 2 * y, 'Passed!').toBeTruthy();
 
   var c = new Vector2().subVectors(a, a);
-  assert.ok(c.x === 0, 'Passed!');
-  assert.ok(c.y === 0, 'Passed!');
-  assert.end();
+  expect(c.x === 0, 'Passed!').toBeTruthy();
+  expect(c.y === 0, 'Passed!').toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#subScalar', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#subScalar', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#subVectors', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#subVectors', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#multiply', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#multiply', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#multiplyScalar', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#multiplyScalar', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#divide', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#divide', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#divideScalar', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#divideScalar', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
 // TODO
-test.skip('Vector2#applyMatrix3', assert => {
+test.skip('Vector2#applyMatrix3', () => {
   var a = new Vector2(x, y);
   var m = new Matrix3().set(2, 3, 5, 7, 11, 13, 17, 19, 23);
 
   a.applyMatrix3(m);
   assert.strictEqual(a.x, 18, 'Check x');
   assert.strictEqual(a.y, 60, 'Check y');
-  assert.end();
 });
 
-test.skip('Vector2#Vector2#min', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#min', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#max', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#max', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#clamp', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#clamp', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#clampScalar', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#clampScalar', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#clampLength', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#clampLength', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#floor', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#floor', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#ceil', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#ceil', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#round', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#round', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#roundToZero', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#roundToZero', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test('three.js#Vector2#negate', assert => {
+test('three.js#Vector2#negate', () => {
   var a = new Vector2(x, y);
 
   a.negate();
-  assert.ok(a.x === -x, 'Passed!');
-  assert.ok(a.y === -y, 'Passed!');
-  assert.end();
+  expect(a.x === -x, 'Passed!').toBeTruthy();
+  expect(a.y === -y, 'Passed!').toBeTruthy();
 });
 
-test('three.js#Vector2#dot', assert => {
+test('three.js#Vector2#dot', () => {
   var a = new Vector2(x, y);
   var b = new Vector2(-x, -y);
   var c = new Vector2();
 
   let result = a.dot(b);
-  assert.ok(result === -x * x - y * y, 'Passed!');
+  expect(result === -x * x - y * y, 'Passed!').toBeTruthy();
 
   result = a.dot(c);
-  assert.ok(result === 0, 'Passed!');
-  assert.end();
+  expect(result === 0, 'Passed!').toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#lengthSq', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#lengthSq', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#length', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#length', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#manhattanLength', assert => {
+test.skip('Vector2#manhattanLength', () => {
   var a = new Vector2(x, 0);
   var b = new Vector2(0, -y);
   var c = new Vector2();
@@ -290,89 +252,79 @@ test.skip('Vector2#manhattanLength', assert => {
 
   a.set(x, y);
   assert.strictEqual(a.manhattanLength(), Math.abs(x) + Math.abs(y), 'Two components');
-  assert.end();
 });
 
-test('three.js#Vector2#normalize', assert => {
+test('three.js#Vector2#normalize', () => {
   var a = new Vector2(x, 0);
   var b = new Vector2(0, -y);
 
   a.normalize();
-  assert.ok(a.len() === 1, 'Passed!');
-  assert.ok(a.x === 1, 'Passed!');
+  expect(a.len() === 1, 'Passed!').toBeTruthy();
+  expect(a.x === 1, 'Passed!').toBeTruthy();
 
   b.normalize();
-  assert.ok(b.len() === 1, 'Passed!');
-  assert.ok(b.y === -1, 'Passed!');
-  assert.end();
+  expect(b.len() === 1, 'Passed!').toBeTruthy();
+  expect(b.y === -1, 'Passed!').toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#angle', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#angle', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#distanceTo', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#distanceTo', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#distanceToSquared', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#distanceToSquared', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#manhattanDistanceTo', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#manhattanDistanceTo', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#setLength', assert => {
+test.skip('Vector2#setLength', () => {
   let a = new Vector2(x, 0);
 
-  assert.ok(a.len() === x, 'Passed!');
+  expect(a.len() === x, 'Passed!').toBeTruthy();
   a.setLength(y);
-  assert.ok(a.len() === y, 'Passed!');
+  expect(a.len() === y, 'Passed!').toBeTruthy();
 
   a = new Vector2(0, 0);
-  assert.ok(a.len() === 0, 'Passed!');
+  expect(a.len() === 0, 'Passed!').toBeTruthy();
   a.setLength(y);
-  assert.ok(a.len() === 0, 'Passed!');
+  expect(a.len() === 0, 'Passed!').toBeTruthy();
   a.setLength();
-  assert.ok(isNaN(a.len()), 'Passed!');
-  assert.end();
+  expect(isNaN(a.len()), 'Passed!').toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#lerp', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#lerp', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('Vector2#Vector2#lerpVectors', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#lerpVectors', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test('three.js#Vector2#equals', assert => {
+test('three.js#Vector2#equals', () => {
   var a = new Vector2(x, 0);
   var b = new Vector2(0, -y);
 
-  assert.ok(a.x !== b.x, 'Passed!');
-  assert.ok(a.y !== b.y, 'Passed!');
+  expect(a.x !== b.x, 'Passed!').toBeTruthy();
+  expect(a.y !== b.y, 'Passed!').toBeTruthy();
 
-  assert.ok(!a.equals(b), 'Passed!');
-  assert.ok(!b.equals(a), 'Passed!');
+  expect(!a.equals(b), 'Passed!').toBeTruthy();
+  expect(!b.equals(a), 'Passed!').toBeTruthy();
 
   a.copy(b);
-  assert.ok(a.x === b.x, 'Passed!');
-  assert.ok(a.y === b.y, 'Passed!');
+  expect(a.x === b.x, 'Passed!').toBeTruthy();
+  expect(a.y === b.y, 'Passed!').toBeTruthy();
 
-  assert.ok(a.equals(b), 'Passed!');
-  assert.ok(b.equals(a), 'Passed!');
-  assert.end();
+  expect(a.equals(b), 'Passed!').toBeTruthy();
+  expect(b.equals(a), 'Passed!').toBeTruthy();
 });
 
-test('three.js#Vector2#fromArray', assert => {
+test('three.js#Vector2#fromArray', () => {
   var a = new Vector2();
   var array = [1, 2, 3, 4];
 
@@ -383,10 +335,9 @@ test('three.js#Vector2#fromArray', assert => {
   a.fromArray(array, 2);
   assert.strictEqual(a.x, 3, 'With offset: check x');
   assert.strictEqual(a.y, 4, 'With offset: check y');
-  assert.end();
 });
 
-test('three.js#Vector2#toArray', assert => {
+test('three.js#Vector2#toArray', () => {
   var a = new Vector2(x, y);
 
   let array = a.toArray();
@@ -403,7 +354,6 @@ test('three.js#Vector2#toArray', assert => {
   assert.strictEqual(array[0], undefined, 'With array and offset: check [0]');
   assert.strictEqual(array[1], x, 'With array and offset: check x');
   assert.strictEqual(array[2], y, 'With array and offset: check y');
-  assert.end();
 });
 
 /* TODO
@@ -418,173 +368,159 @@ test.skip('Vector2#fromBufferAttribute', assert => {
   a.fromBufferAttribute(attr, 1);
   assert.strictEqual(a.x, 3, 'Offset 1: check x');
   assert.strictEqual(a.y, 4, 'Offset 1: check y');
-  assert.end();
 });
 */
 
-test.skip('Vector2#Vector2#rotateAround', assert => {
-  assert.ok(false, "everything's gonna be alright");
-  assert.end();
+test.skip('Vector2#Vector2#rotateAround', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
 // TODO (Itee) refactor/split
-test.skip('Vector2#setX,setY', assert => {
+test.skip('Vector2#setX,setY', () => {
   var a = new Vector2();
-  assert.ok(a.x === 0, 'Passed!');
-  assert.ok(a.y === 0, 'Passed!');
+  expect(a.x === 0, 'Passed!').toBeTruthy();
+  expect(a.y === 0, 'Passed!').toBeTruthy();
 
   a.setX(x);
   a.setY(y);
-  assert.ok(a.x === x, 'Passed!');
-  assert.ok(a.y === y, 'Passed!');
-  assert.end();
+  expect(a.x === x, 'Passed!').toBeTruthy();
+  expect(a.y === y, 'Passed!').toBeTruthy();
 });
 
-test('three.js#Vector2#setComponent,getComponent', assert => {
+test('three.js#Vector2#setComponent,getComponent', () => {
   var a = new Vector2();
-  assert.ok(a.x === 0, 'Passed!');
-  assert.ok(a.y === 0, 'Passed!');
+  expect(a.x === 0, 'Passed!').toBeTruthy();
+  expect(a.y === 0, 'Passed!').toBeTruthy();
 
   a.setComponent(0, 1);
   a.setComponent(1, 2);
-  assert.ok(a.getComponent(0) === 1, 'Passed!');
-  assert.ok(a.getComponent(1) === 2, 'Passed!');
-  assert.end();
+  expect(a.getComponent(0) === 1, 'Passed!').toBeTruthy();
+  expect(a.getComponent(1) === 2, 'Passed!').toBeTruthy();
 });
 
-test('three.js#Vector2#multiply/divide', assert => {
+test('three.js#Vector2#multiply/divide', () => {
   var a = new Vector2(x, y);
   var b = new Vector2(-x, -y);
 
   a.multiplyScalar(-2);
-  assert.ok(a.x === x * -2, 'Passed!');
-  assert.ok(a.y === y * -2, 'Passed!');
+  expect(a.x === x * -2, 'Passed!').toBeTruthy();
+  expect(a.y === y * -2, 'Passed!').toBeTruthy();
 
   b.multiplyScalar(-2);
-  assert.ok(b.x === 2 * x, 'Passed!');
-  assert.ok(b.y === 2 * y, 'Passed!');
+  expect(b.x === 2 * x, 'Passed!').toBeTruthy();
+  expect(b.y === 2 * y, 'Passed!').toBeTruthy();
 
   a.divideScalar(-2);
-  assert.ok(a.x === x, 'Passed!');
-  assert.ok(a.y === y, 'Passed!');
+  expect(a.x === x, 'Passed!').toBeTruthy();
+  expect(a.y === y, 'Passed!').toBeTruthy();
 
   b.divideScalar(-2);
-  assert.ok(b.x === -x, 'Passed!');
-  assert.ok(b.y === -y, 'Passed!');
-  assert.end();
+  expect(b.x === -x, 'Passed!').toBeTruthy();
+  expect(b.y === -y, 'Passed!').toBeTruthy();
 });
 
-test('three.js#Vector2#min/max/clamp', assert => {
+test('three.js#Vector2#min/max/clamp', () => {
   var a = new Vector2(x, y);
   var b = new Vector2(-x, -y);
   var c = new Vector2();
 
   c.copy(a).min(b);
-  assert.ok(c.x === -x, 'Passed!');
-  assert.ok(c.y === -y, 'Passed!');
+  expect(c.x === -x, 'Passed!').toBeTruthy();
+  expect(c.y === -y, 'Passed!').toBeTruthy();
 
   c.copy(a).max(b);
-  assert.ok(c.x === x, 'Passed!');
-  assert.ok(c.y === y, 'Passed!');
+  expect(c.x === x, 'Passed!').toBeTruthy();
+  expect(c.y === y, 'Passed!').toBeTruthy();
 
   c.set(-2 * x, 2 * y);
   c.clamp(b, a);
-  assert.ok(c.x === -x, 'Passed!');
-  assert.ok(c.y === y, 'Passed!');
+  expect(c.x === -x, 'Passed!').toBeTruthy();
+  expect(c.y === y, 'Passed!').toBeTruthy();
 
   c.set(-2 * x, 2 * x);
   c.clampScalar(-x, x);
-  assert.equal(c.x, -x, 'scalar clamp x');
-  assert.equal(c.y, x, 'scalar clamp y');
-  assert.end();
+  expect(c.x, 'scalar clamp x').toBe(-x);
+  expect(c.y, 'scalar clamp y').toBe(x);
 });
 
-test.skip('Vector2#rounding', assert => {
-  assert.deepEqual(new Vector2(-0.1, 0.1).floor(), new Vector2(-1, 0), 'floor .1');
-  assert.deepEqual(new Vector2(-0.5, 0.5).floor(), new Vector2(-1, 0), 'floor .5');
-  assert.deepEqual(new Vector2(-0.9, 0.9).floor(), new Vector2(-1, 0), 'floor .9');
+test.skip('Vector2#rounding', () => {
+  expect(new Vector2(-0.1, 0.1).floor(), 'floor .1').toEqual(new Vector2(-1, 0));
+  expect(new Vector2(-0.5, 0.5).floor(), 'floor .5').toEqual(new Vector2(-1, 0));
+  expect(new Vector2(-0.9, 0.9).floor(), 'floor .9').toEqual(new Vector2(-1, 0));
 
-  assert.deepEqual(new Vector2(-0.1, 0.1).ceil(), new Vector2(0, 1), 'ceil .1');
-  assert.deepEqual(new Vector2(-0.5, 0.5).ceil(), new Vector2(0, 1), 'ceil .5');
-  assert.deepEqual(new Vector2(-0.9, 0.9).ceil(), new Vector2(0, 1), 'ceil .9');
+  expect(new Vector2(-0.1, 0.1).ceil(), 'ceil .1').toEqual(new Vector2(0, 1));
+  expect(new Vector2(-0.5, 0.5).ceil(), 'ceil .5').toEqual(new Vector2(0, 1));
+  expect(new Vector2(-0.9, 0.9).ceil(), 'ceil .9').toEqual(new Vector2(0, 1));
 
-  assert.deepEqual(new Vector2(-0.1, 0.1).round(), new Vector2(0, 0), 'round .1');
-  assert.deepEqual(new Vector2(-0.5, 0.5).round(), new Vector2(0, 1), 'round .5');
-  assert.deepEqual(new Vector2(-0.9, 0.9).round(), new Vector2(-1, 1), 'round .9');
+  expect(new Vector2(-0.1, 0.1).round(), 'round .1').toEqual(new Vector2(0, 0));
+  expect(new Vector2(-0.5, 0.5).round(), 'round .5').toEqual(new Vector2(0, 1));
+  expect(new Vector2(-0.9, 0.9).round(), 'round .9').toEqual(new Vector2(-1, 1));
 
-  assert.deepEqual(new Vector2(-0.1, 0.1).roundToZero(), new Vector2(0, 0), 'roundToZero .1');
-  assert.deepEqual(new Vector2(-0.5, 0.5).roundToZero(), new Vector2(0, 0), 'roundToZero .5');
-  assert.deepEqual(new Vector2(-0.9, 0.9).roundToZero(), new Vector2(0, 0), 'roundToZero .9');
-  assert.deepEqual(new Vector2(-1.1, 1.1).roundToZero(), new Vector2(-1, 1), 'roundToZero 1.1');
-  assert.deepEqual(new Vector2(-1.5, 1.5).roundToZero(), new Vector2(-1, 1), 'roundToZero 1.5');
-  assert.deepEqual(new Vector2(-1.9, 1.9).roundToZero(), new Vector2(-1, 1), 'roundToZero 1.9');
-  assert.end();
+  expect(new Vector2(-0.1, 0.1).roundToZero(), 'roundToZero .1').toEqual(new Vector2(0, 0));
+  expect(new Vector2(-0.5, 0.5).roundToZero(), 'roundToZero .5').toEqual(new Vector2(0, 0));
+  expect(new Vector2(-0.9, 0.9).roundToZero(), 'roundToZero .9').toEqual(new Vector2(0, 0));
+  expect(new Vector2(-1.1, 1.1).roundToZero(), 'roundToZero 1.1').toEqual(new Vector2(-1, 1));
+  expect(new Vector2(-1.5, 1.5).roundToZero(), 'roundToZero 1.5').toEqual(new Vector2(-1, 1));
+  expect(new Vector2(-1.9, 1.9).roundToZero(), 'roundToZero 1.9').toEqual(new Vector2(-1, 1));
 });
 
-test('three.js#Vector2#length/lengthSq', assert => {
+test('three.js#Vector2#length/lengthSq', () => {
   var a = new Vector2(x, 0);
   var b = new Vector2(0, -y);
   var c = new Vector2();
 
-  assert.ok(a.len() === x, 'Passed!');
-  assert.ok(a.lengthSq() === x * x, 'Passed!');
-  assert.ok(b.len() === y, 'Passed!');
-  assert.ok(b.lengthSq() === y * y, 'Passed!');
-  assert.ok(c.len() === 0, 'Passed!');
-  assert.ok(c.lengthSq() === 0, 'Passed!');
+  expect(a.len() === x, 'Passed!').toBeTruthy();
+  expect(a.lengthSq() === x * x, 'Passed!').toBeTruthy();
+  expect(b.len() === y, 'Passed!').toBeTruthy();
+  expect(b.lengthSq() === y * y, 'Passed!').toBeTruthy();
+  expect(c.len() === 0, 'Passed!').toBeTruthy();
+  expect(c.lengthSq() === 0, 'Passed!').toBeTruthy();
 
   a.set(x, y);
-  assert.ok(a.len() === Math.sqrt(x * x + y * y), 'Passed!');
-  assert.ok(a.lengthSq() === x * x + y * y, 'Passed!');
-  assert.end();
+  expect(a.len() === Math.sqrt(x * x + y * y), 'Passed!').toBeTruthy();
+  expect(a.lengthSq() === x * x + y * y, 'Passed!').toBeTruthy();
 });
 
-test('three.js#Vector2#distanceTo/distanceToSquared', assert => {
+test('three.js#Vector2#distanceTo/distanceToSquared', () => {
   var a = new Vector2(x, 0);
   var b = new Vector2(0, -y);
   var c = new Vector2();
 
-  assert.ok(a.distanceTo(c) === x, 'Passed!');
-  assert.ok(a.distanceToSquared(c) === x * x, 'Passed!');
+  expect(a.distanceTo(c) === x, 'Passed!').toBeTruthy();
+  expect(a.distanceToSquared(c) === x * x, 'Passed!').toBeTruthy();
 
-  assert.ok(b.distanceTo(c) === y, 'Passed!');
-  assert.ok(b.distanceToSquared(c) === y * y, 'Passed!');
-  assert.end();
+  expect(b.distanceTo(c) === y, 'Passed!').toBeTruthy();
+  expect(b.distanceToSquared(c) === y * y, 'Passed!').toBeTruthy();
 });
 
-test('three.js#Vector2#lerp/clone', assert => {
+test('three.js#Vector2#lerp/clone', () => {
   var a = new Vector2(x, 0);
   var b = new Vector2(0, -y);
 
-  assert.ok(a.lerp(a, 0).equals(a.lerp(a, 0.5)), 'Passed!');
-  assert.ok(a.lerp(a, 0).equals(a.lerp(a, 1)), 'Passed!');
+  expect(a.lerp(a, 0).equals(a.lerp(a, 0.5)), 'Passed!').toBeTruthy();
+  expect(a.lerp(a, 0).equals(a.lerp(a, 1)), 'Passed!').toBeTruthy();
 
-  assert.ok(a.clone().lerp(b, 0).equals(a), 'Passed!');
+  expect(a.clone().lerp(b, 0).equals(a), 'Passed!').toBeTruthy();
 
-  assert.ok(a.clone().lerp(b, 0.5).x === x * 0.5, 'Passed!');
-  assert.ok(a.clone().lerp(b, 0.5).y === -y * 0.5, 'Passed!');
+  expect(a.clone().lerp(b, 0.5).x === x * 0.5, 'Passed!').toBeTruthy();
+  expect(a.clone().lerp(b, 0.5).y === -y * 0.5, 'Passed!').toBeTruthy();
 
-  assert.ok(a.clone().lerp(b, 1).equals(b), 'Passed!');
-  assert.end();
+  expect(a.clone().lerp(b, 1).equals(b), 'Passed!').toBeTruthy();
 });
 
-test('three.js#Vector2#setComponent/getComponent exceptions', assert => {
+test('three.js#Vector2#setComponent/getComponent exceptions', () => {
   var a = new Vector2(0, 0);
 
-  assert.throws(
+  expect(
     () => a.setComponent(2, 0),
-    /index is out of range/,
     'setComponent with an out of range index throws Error'
+  ).toThrow(/index is out of range/);
+  expect(() => a.getComponent(2), 'getComponent with an out of range index throws Error').toThrow(
+    /index is out of range/
   );
-  assert.throws(
-    () => a.getComponent(2),
-    /index is out of range/,
-    'getComponent with an out of range index throws Error'
-  );
-  assert.end();
 });
 
-test('three.js#Vector2#setScalar/addScalar/subScalar', assert => {
+test('three.js#Vector2#setScalar/addScalar/subScalar', () => {
   var a = new Vector2(1, 1);
   var s = 3;
 
@@ -599,10 +535,9 @@ test('three.js#Vector2#setScalar/addScalar/subScalar', assert => {
   a.subScalar(2 * s);
   assert.strictEqual(a.x, 0, 'subScalar: check x');
   assert.strictEqual(a.y, 0, 'subScalar: check y');
-  assert.end();
 });
 
-test('three.js#Vector2#multiply/divide', assert => {
+test('three.js#Vector2#multiply/divide', () => {
   var a = new Vector2(x, y);
   var b = new Vector2(2 * x, 2 * y);
   var c = new Vector2(4 * x, 4 * y);
@@ -614,5 +549,4 @@ test('three.js#Vector2#multiply/divide', assert => {
   b.divide(c);
   assert.strictEqual(b.x, 0.5, 'divide: check x');
   assert.strictEqual(b.y, 0.5, 'divide: check y');
-  assert.end();
 });

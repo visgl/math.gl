@@ -3,8 +3,7 @@
 
 // @ts-nocheck
 
-import test from 'test/utils/vitest-tape';
-import {tapeEquals, tapeEqualsEpsilon} from 'test/utils/tape-assertions';
+import {test, expect} from 'vitest';
 
 import {_PerspectiveFrustum as PerspectiveFrustum} from '@math.gl/culling';
 import {Vector2, Vector3, Vector4, Matrix4, _MathUtils, equals} from '@math.gl/core';
@@ -29,7 +28,7 @@ function beforeEachTest() {
   return {frustum, planes};
 }
 
-test('PerspectiveFrustum#constructs', t => {
+test('PerspectiveFrustum#constructs', () => {
   const options = {
     fov: 1.0,
     aspectRatio: 2.0,
@@ -40,136 +39,115 @@ test('PerspectiveFrustum#constructs', t => {
   };
 
   const f = new PerspectiveFrustum(options);
-  t.equals(f.fov, options.fov);
-  t.equals(f.aspectRatio, options.aspectRatio);
-  t.equals(f.near, options.near);
-  t.equals(f.far, options.far);
-  t.equals(f.xOffset, options.xOffset);
-  t.equals(f.yOffset, options.yOffset);
-
-  t.end();
+  expect(f.fov).toBe(options.fov);
+  expect(f.aspectRatio).toBe(options.aspectRatio);
+  expect(f.near).toBe(options.near);
+  expect(f.far).toBe(options.far);
+  expect(f.xOffset).toBe(options.xOffset);
+  expect(f.yOffset).toBe(options.yOffset);
 });
 
-test('PerspectiveFrustum#default constructs', t => {
+test('PerspectiveFrustum#default constructs', () => {
   const f = new PerspectiveFrustum();
-  t.ok(f.fov === undefined);
-  t.ok(f.aspectRatio === undefined);
-  t.equals(f.near, 1.0);
-  t.equals(f.far, 500000000.0);
-  t.equals(f.xOffset, 0.0);
-  t.equals(f.yOffset, 0.0);
-
-  t.end();
+  expect(f.fov === undefined).toBeTruthy();
+  expect(f.aspectRatio === undefined).toBeTruthy();
+  expect(f.near).toBe(1.0);
+  expect(f.far).toBe(500000000.0);
+  expect(f.xOffset).toBe(0.0);
+  expect(f.yOffset).toBe(0.0);
 });
 
-test('PerspectiveFrustum#out of range fov causes an exception', t => {
+test('PerspectiveFrustum#out of range fov causes an exception', () => {
   const {frustum} = beforeEachTest();
   frustum.fov = -1.0;
-  t.throws(() => frustum.projectionMatrix);
+  expect(() => frustum.projectionMatrix).toThrow();
 
   frustum.fov = _MathUtils.TWO_PI;
 
-  t.throws(() => frustum.projectionMatrix);
-
-  t.end();
+  expect(() => frustum.projectionMatrix).toThrow();
 });
 
-test('PerspectiveFrustum#negative aspect ratio throws an exception', t => {
+test('PerspectiveFrustum#negative aspect ratio throws an exception', () => {
   const {frustum} = beforeEachTest();
   frustum.aspectRatio = -1.0;
-  t.throws(() => frustum.projectionMatrix);
-
-  t.end();
+  expect(() => frustum.projectionMatrix).toThrow();
 });
 
-test('PerspectiveFrustum#out of range near plane throws an exception', t => {
+test('PerspectiveFrustum#out of range near plane throws an exception', () => {
   const {frustum} = beforeEachTest();
   frustum.near = -1.0;
-  t.throws(() => frustum.projectionMatrix);
-
-  t.end();
+  expect(() => frustum.projectionMatrix).toThrow();
 });
 
-test('PerspectiveFrustum#negative far plane throws an exception', t => {
+test('PerspectiveFrustum#negative far plane throws an exception', () => {
   const {frustum} = beforeEachTest();
   frustum.far = -1.0;
-  t.throws(() => frustum.projectionMatrix);
-  t.end();
+  expect(() => frustum.projectionMatrix).toThrow();
 });
 
-test('PerspectiveFrustum#computeCullingVolume with no position throws an exception', t => {
+test('PerspectiveFrustum#computeCullingVolume with no position throws an exception', () => {
   const {frustum} = beforeEachTest();
-  t.throws(() => frustum.computeCullingVolume());
-  t.end();
+  expect(() => frustum.computeCullingVolume()).toThrow();
 });
 
-test('PerspectiveFrustum#computeCullingVolume with no direction throws an exception', t => {
+test('PerspectiveFrustum#computeCullingVolume with no direction throws an exception', () => {
   const {frustum} = beforeEachTest();
-  t.throws(() => frustum.computeCullingVolume([0, 0, 0]));
-  t.end();
+  expect(() => frustum.computeCullingVolume([0, 0, 0])).toThrow();
 });
 
-test('PerspectiveFrustum#computeCullingVolume with no up throws an exception', t => {
+test('PerspectiveFrustum#computeCullingVolume with no up throws an exception', () => {
   const {frustum} = beforeEachTest();
-  t.throws(() => frustum.computeCullingVolume([0, 0, 0], [0, 0, 0]));
-  t.end();
+  expect(() => frustum.computeCullingVolume([0, 0, 0], [0, 0, 0])).toThrow();
 });
 
-test('PerspectiveFrustum#get frustum left plane', t => {
+test('PerspectiveFrustum#get frustum left plane', () => {
   const {planes} = beforeEachTest();
   const leftPlane = planes[0];
   const expectedResult = new Vector4(Math.sqrt(3.0) / 2.0, 0.0, -0.5, 0.0);
   equals(leftPlane, expectedResult, _MathUtils.EPSILON14);
-  t.end();
 });
 
-test('PerspectiveFrustum#get frustum right plane', t => {
+test('PerspectiveFrustum#get frustum right plane', () => {
   const {planes} = beforeEachTest();
   const rightPlane = planes[1];
   const expectedResult = new Vector4(-Math.sqrt(3.0) / 2.0, 0.0, -0.5, 0.0);
   equals(rightPlane, expectedResult, _MathUtils.EPSILON14);
-  t.end();
 });
 
-test('PerspectiveFrustum#get frustum bottom plane', t => {
+test('PerspectiveFrustum#get frustum bottom plane', () => {
   const {planes} = beforeEachTest();
   const bottomPlane = planes[2];
   const expectedResult = new Vector4(0.0, Math.sqrt(3.0) / 2.0, -0.5, 0.0);
   equals(bottomPlane, expectedResult, _MathUtils.EPSILON14);
-  t.end();
 });
 
-test('PerspectiveFrustum#get frustum top plane', t => {
+test('PerspectiveFrustum#get frustum top plane', () => {
   const {planes} = beforeEachTest();
   const topPlane = planes[3];
   const expectedResult = new Vector4(0.0, -Math.sqrt(3.0) / 2.0, -0.5, 0.0);
   equals(topPlane, expectedResult, _MathUtils.EPSILON14);
-  t.end();
 });
 
-test('PerspectiveFrustum#get frustum near plane', t => {
+test('PerspectiveFrustum#get frustum near plane', () => {
   const {planes} = beforeEachTest();
   const nearPlane = planes[4];
   const expectedResult = new Vector4(0.0, 0.0, -1.0, -1.0);
   equals(nearPlane, expectedResult, _MathUtils.EPSILON15);
-  t.end();
 });
 
-test('PerspectiveFrustum#get frustum far plane', t => {
+test('PerspectiveFrustum#get frustum far plane', () => {
   const {planes} = beforeEachTest();
   const farPlane = planes[5];
   const expectedResult = new Vector4(0.0, 0.0, 1.0, 2.0);
   equals(farPlane, expectedResult, _MathUtils.EPSILON15);
-  t.end();
 });
 
-test('PerspectiveFrustum#get sseDenominator', t => {
+test('PerspectiveFrustum#get sseDenominator', () => {
   const {frustum} = beforeEachTest();
   equals(frustum.sseDenominator, 1.1547, _MathUtils.EPSILON5);
-  t.end();
 });
 
-test('PerspectiveFrustum#get perspective projection matrix', t => {
+test('PerspectiveFrustum#get perspective projection matrix', () => {
   const {frustum} = beforeEachTest();
   const projectionMatrix = frustum.projectionMatrix;
   const expected = new Matrix4().perspective({
@@ -178,11 +156,10 @@ test('PerspectiveFrustum#get perspective projection matrix', t => {
     near: frustum.near,
     far: frustum.far
   });
-  tapeEqualsEpsilon(t, projectionMatrix, expected, _MathUtils.EPSILON6);
-  t.end();
+  expect(equals(projectionMatrix, expected, _MathUtils.EPSILON6)).toBe(true);
 });
 
-test('PerspectiveFrustum#get infinite perspective matrix', t => {
+test('PerspectiveFrustum#get infinite perspective matrix', () => {
   const {frustum} = beforeEachTest();
   const top = frustum.near * Math.tan(0.5 * frustum.fovy);
   const bottom = -top;
@@ -198,11 +175,10 @@ test('PerspectiveFrustum#get infinite perspective matrix', t => {
     near,
     far: Infinity
   });
-  tapeEquals(t, frustum.infiniteProjectionMatrix, expected);
-  t.end();
+  expect(equals(frustum.infiniteProjectionMatrix, expected)).toBe(true);
 });
 
-test('PerspectiveFrustum#get pixel dimensions', t => {
+test('PerspectiveFrustum#get pixel dimensions', () => {
   const {frustum} = beforeEachTest();
   const dimensions = new Vector2(1.0, 1.0);
   const pixelSize = frustum.getPixelDimensions(dimensions.x, dimensions.y, 1.0, new Vector2());
@@ -212,37 +188,32 @@ test('PerspectiveFrustum#get pixel dimensions', t => {
     1.0,
     new Vector2()
   );
-  t.equals(pixelSize.x, expected.x);
-  t.equals(pixelSize.y, expected.y);
-  t.end();
+  expect(pixelSize.x).toBe(expected.x);
+  expect(pixelSize.y).toBe(expected.y);
 });
 
-test('PerspectiveFrustum#equals', t => {
+test('PerspectiveFrustum#equals', () => {
   const {frustum} = beforeEachTest();
   const frustum2 = new PerspectiveFrustum();
   frustum2.near = 1.0;
   frustum2.far = 2.0;
   frustum2.fov = Math.PI / 3.0;
   frustum2.aspectRatio = 1.0;
-  t.ok(frustum.equals(frustum2));
-  t.end();
+  expect(frustum.equals(frustum2)).toBeTruthy();
 });
 
-test('PerspectiveFrustum#equals undefined', t => {
+test('PerspectiveFrustum#equals undefined', () => {
   const {frustum} = beforeEachTest();
-  t.notOk(frustum.equals());
-  t.end();
+  expect(frustum.equals()).toBeFalsy();
 });
 
-test('PerspectiveFrustum#throws with undefined frustum parameters', t => {
+test('PerspectiveFrustum#throws with undefined frustum parameters', () => {
   const frustum = new PerspectiveFrustum();
-  t.throws(() => frustum.infiniteProjectionMatrix);
-  t.end();
+  expect(() => frustum.infiniteProjectionMatrix).toThrow();
 });
 
-test('PerspectiveFrustum#clone', t => {
+test('PerspectiveFrustum#clone', () => {
   const {frustum} = beforeEachTest();
   const frustum2 = frustum.clone();
-  tapeEquals(t, frustum, frustum2);
-  t.end();
+  expect(equals(frustum, frustum2)).toBe(true);
 });

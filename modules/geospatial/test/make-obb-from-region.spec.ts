@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT and Apache-2.0
 // Copyright (c) vis.gl contributors
 
-import test from 'test/utils/vitest-tape';
+import {test, expect} from 'vitest';
 import {toRadians} from '@math.gl/core';
 import {OrientedBoundingBox} from '@math.gl/culling';
 import {Ellipsoid, makeOBBFromRegion} from '@math.gl/geospatial';
@@ -22,7 +22,7 @@ const TEST_REGIONS = [
   }
 ];
 
-test('makeOBBFromRegion bounds representative WGS84 regions', t => {
+test('makeOBBFromRegion bounds representative WGS84 regions', () => {
   for (const testCase of TEST_REGIONS) {
     const [west, south, east, north, minimumHeight, maximumHeight] = testCase.degrees;
     const region = [
@@ -35,21 +35,26 @@ test('makeOBBFromRegion bounds representative WGS84 regions', t => {
     ];
     const box = makeOBBFromRegion(region);
 
-    t.ok(box instanceof OrientedBoundingBox, `${testCase.name}: returns an oriented bounding box`);
-    t.ok(box.center.every(Number.isFinite), `${testCase.name}: center is finite`);
-    t.ok(box.halfAxes.every(Number.isFinite), `${testCase.name}: half axes are finite`);
+    expect(
+      box instanceof OrientedBoundingBox,
+      `${testCase.name}: returns an oriented bounding box`
+    ).toBeTruthy();
+    expect(box.center.every(Number.isFinite), `${testCase.name}: center is finite`).toBeTruthy();
+    expect(
+      box.halfAxes.every(Number.isFinite),
+      `${testCase.name}: half axes are finite`
+    ).toBeTruthy();
 
     for (const longitude of [west, east]) {
       for (const latitude of [south, north]) {
         for (const height of [minimumHeight, maximumHeight]) {
           const corner = Ellipsoid.WGS84.cartographicToCartesian([longitude, latitude, height]);
-          t.ok(
+          expect(
             box.distanceTo(corner) < 1e-5,
             `${testCase.name}: contains [${longitude}, ${latitude}, ${height}]`
-          );
+          ).toBeTruthy();
         }
       }
     }
   }
-  t.end();
 });
