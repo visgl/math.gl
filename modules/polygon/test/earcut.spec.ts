@@ -25,38 +25,33 @@
 
 // @ts-nocheck External code
 
+import {test, expect} from 'vitest';
 import fs from 'fs';
-import test from 'test/utils/vitest-tape';
 import {earcut} from '@math.gl/polygon';
 import {extractAreas, deviation, flatten} from './earcut-utils';
 import expected from './data/earcut/expected';
 
-test('indices-2d', function (t) {
+test('indices-2d', function () {
   const indices = earcut([10, 0, 0, 50, 60, 60, 70, 10]);
-  t.same(indices, [1, 0, 3, 3, 2, 1]);
-  t.end();
+  expect(indices).toEqual([1, 0, 3, 3, 2, 1]);
 });
 
-test('indices-3d', function (t) {
+test('indices-3d', function () {
   const indices = earcut([10, 4, 0, 0, 50, 0, 60, 60, 0, 70, 10, 0], null, 3);
-  t.same(indices, [1, 0, 3, 3, 2, 1]);
-  t.end();
+  expect(indices).toEqual([1, 0, 3, 3, 2, 1]);
 });
 
-test('indices-3d', function (t) {
+test('indices-3d', function () {
   const indices = earcut([10, 4, 0, 0, 50, 0, 60, 60, 0, 70, 10, 0], null, 3);
-  t.same(indices, [1, 0, 3, 3, 2, 1]);
-  t.end();
+  expect(indices).toEqual([1, 0, 3, 3, 2, 1]);
 });
 
-test('projection', function (t) {
+test('projection', function () {
   let indices = earcut([0, 4, 0, 0, 50, 0, 0, 60, 20, 0, 10, 20], null, 3, undefined, 'xy');
-  t.same(indices, []); // Polygon has no area on the XY plane
+  expect(indices).toEqual([]); // Polygon has no area on the XY plane
 
   indices = earcut([0, 4, 0, 0, 50, 0, 0, 60, 20, 0, 10, 20], null, 3, undefined, 'yz');
-  t.same(indices, [2, 3, 0, 0, 1, 2]);
-
-  t.end();
+  expect(indices).toEqual([2, 3, 0, 0, 1, 2]);
 });
 
 async function openFile(filePath) {
@@ -74,7 +69,7 @@ async function openFile(filePath) {
 const FIXTURES_PATH = 'modules/polygon/test/data/earcut/fixtures/';
 
 Object.keys(expected.triangles).forEach(id => {
-  test(id, async t => {
+  test(id, async () => {
     const filepath = FIXTURES_PATH + `${id}.json`;
     const raw = await openFile(filepath);
     const data = flatten(raw);
@@ -84,27 +79,24 @@ Object.keys(expected.triangles).forEach(id => {
     const expectedDeviation = expected.errors[id] || 0;
 
     const numTriangles = indices.length / 3;
-    t.ok(
+    expect(
       numTriangles === expectedTriangles,
       `${numTriangles} triangles when expected ${expectedTriangles}`
-    );
+    ).toBeTruthy();
 
     if (expectedTriangles > 0) {
-      t.ok(
+      expect(
         actualDeviation <= expectedDeviation,
         `deviation ${actualDeviation} <= ${expectedDeviation}`
-      );
+      ).toBeTruthy();
     }
 
     // Compare to result obtained with precomputed areas
     const areas = extractAreas(data.vertices, data.holes, data.dimensions);
     const indices2 = earcut(data.vertices, data.holes, data.dimensions, areas);
-    t.deepEqual(
+    expect(
       indices2,
-      indices,
       'earcut triangulation with precomputed areas should match one without precomputation'
-    );
-
-    t.end();
+    ).toEqual(indices);
   });
 });

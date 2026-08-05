@@ -6,9 +6,9 @@
 // under this permissive license: https://github.com/proj4js/proj4js/blob/master/LICENSE.md
 
 /* eslint-disable */
-import test from 'test/utils/vitest-tape';
+import {test, expect} from 'vitest';
+import {equals} from '@math.gl/core';
 import {Proj4Projection} from '@math.gl/proj4';
-import {tapeEqualsEpsilon} from 'test/utils/tape-assertions';
 
 import {testPoints} from './test-data';
 
@@ -30,14 +30,13 @@ Proj4Projection.defineProjectionAliases({
 //   this.end();
 // });
 
-test('proj2proj#should work transforming from one projection to another', t => {
+test('proj2proj#should work transforming from one projection to another', () => {
   var sweref99tm = '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs';
   var rt90 =
     '+lon_0=15.808277777799999 +lat_0=0.0 +k=1.0 +x_0=1500000.0 +y_0=0.0 +proj=tmerc +ellps=bessel +units=m +towgs84=414.1,41.3,603.1,-0.855,2.141,-7.023,0 +no_defs';
   var result = new Proj4Projection({from: sweref99tm, to: rt90}).project([319180, 6399862]);
-  tapeEqualsEpsilon(t, result[0], 1271137.9275601401, 0.000001);
-  tapeEqualsEpsilon(t, result[1], 6404230.291459564, 0.000001);
-  t.end();
+  expect(equals(result[0], 1271137.9275601401, 0.000001)).toBe(true);
+  expect(equals(result[1], 6404230.291459564, 0.000001)).toBe(true);
 });
 
 /*
@@ -50,9 +49,9 @@ it('should work with a proj object', t => {
 });
 */
 
-test('Proj4Projection', t => {
+test('Proj4Projection', () => {
   for (const testPoint of testPoints) {
-    t.comment(`new Proj4Projection({to: ${testPoint.code}})`);
+    console.log(`new Proj4Projection({to: ${testPoint.code}})`);
 
     let xyAcc = 2;
     // let llAcc = 6;
@@ -71,8 +70,8 @@ test('Proj4Projection', t => {
     var proj = new Proj4Projection({to: testPoint.code});
     var xy = proj.project(testPoint.ll);
 
-    tapeEqualsEpsilon(t, xy[0], testPoint.xy[0], xyEPSLN, 'x is close');
-    tapeEqualsEpsilon(t, xy[1], testPoint.xy[1], xyEPSLN, 'y is close');
+    expect(equals(xy[0], testPoint.xy[0], xyEPSLN), 'x is close').toBe(true);
+    expect(equals(xy[1], testPoint.xy[1], xyEPSLN), 'y is close').toBe(true);
 
     /*
     // it('should work with backwards', t => {
@@ -175,16 +174,14 @@ test('Proj4Projection', t => {
     tapeEqualsEpsilon(t, ll.y, testPoint.ll[1], llEPSLN, 'y is close');
     */
   }
-  t.end();
 });
 
-test('Proj4Projection is bound', t => {
+test('Proj4Projection is bound', () => {
   const projection = new Proj4Projection({from: 'WGS84', to: 'WGS84'});
   const coords = [[0, 0]];
   const reprojectedCooords = coords.map(projection.project);
-  tapeEqualsEpsilon(t, reprojectedCooords[0][0], 0, 0.000001);
-  tapeEqualsEpsilon(t, reprojectedCooords[0][1], 0, 0.000001);
-  t.end();
+  expect(equals(reprojectedCooords[0][0], 0, 0.000001)).toBe(true);
+  expect(equals(reprojectedCooords[0][1], 0, 0.000001)).toBe(true);
 });
 
 /*

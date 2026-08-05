@@ -2,57 +2,44 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'test/utils/vitest-tape';
+import {test, expect} from 'vitest';
 import {cutPolylineByMercatorBounds, cutPolygonByMercatorBounds} from '@math.gl/polygon';
 
 import {flatten} from './lineclip.spec';
 
-test('cutPolylineByMercatorBounds - simple', t => {
-  t.deepEquals(
-    cutPolylineByMercatorBounds([-170, 0, 170, 20]),
-    [
-      [-170, 0, -180, 10],
-      [180, 10, 170, 20]
-    ],
-    '2d'
-  );
+test('cutPolylineByMercatorBounds - simple', () => {
+  expect(cutPolylineByMercatorBounds([-170, 0, 170, 20]), '2d').toEqual([
+    [-170, 0, -180, 10],
+    [180, 10, 170, 20]
+  ]);
 
-  t.deepEquals(
-    cutPolylineByMercatorBounds([-170, 0, 100, 170, 20, 200], {size: 3}),
-    [
-      [-170, 0, 100, -180, 10, 150],
-      [180, 10, 150, 170, 20, 200]
-    ],
-    '3d'
-  );
+  expect(cutPolylineByMercatorBounds([-170, 0, 100, 170, 20, 200], {size: 3}), '3d').toEqual([
+    [-170, 0, 100, -180, 10, 150],
+    [180, 10, 150, 170, 20, 200]
+  ]);
 
-  t.deepEquals(
+  expect(
     cutPolylineByMercatorBounds([-170, 0, 170, 20], {normalize: false}),
-    [
-      [-170, 0, -180, 10],
-      [-180, 10, -190, 20]
-    ],
     'normalize: false'
-  );
-
-  t.end();
+  ).toEqual([
+    [-170, 0, -180, 10],
+    [-180, 10, -190, 20]
+  ]);
 });
 
-test('cutPolylineByMercatorBounds - multiple crossings', t => {
+test('cutPolylineByMercatorBounds - multiple crossings', () => {
   const result = cutPolylineByMercatorBounds([-170, 0, 170, 20, -175, 35, 175, 45]);
 
-  t.comment(JSON.stringify(result));
-  t.deepEquals(result, [
+  console.log(JSON.stringify(result));
+  expect(result).toEqual([
     [-170, 0, -180, 10],
     [180, 10, 170, 20, 180, 30],
     [-180, 30, -175, 35, -180, 40],
     [180, 40, 175, 45]
   ]);
-
-  t.end();
 });
 
-test('cutPolylineByMercatorBounds - multiple worlds', t => {
+test('cutPolylineByMercatorBounds - multiple worlds', () => {
   const polyline: number[][] = [];
   const N = 30;
 
@@ -61,7 +48,7 @@ test('cutPolylineByMercatorBounds - multiple worlds', t => {
   }
   const result = cutPolylineByMercatorBounds(flatten(polyline));
 
-  t.is(result.length, Math.ceil((N * 60) / 360), 'returns correct number of parts');
+  expect(result.length, 'returns correct number of parts').toBe(Math.ceil((N * 60) / 360));
 
   for (const positions of result) {
     // check left/right bounds
@@ -70,13 +57,11 @@ test('cutPolylineByMercatorBounds - multiple worlds', t => {
       // check slope
       valid = valid && positions[i] > positions[i - 2] && positions[i + 1] > positions[i - 1];
     }
-    t.ok(valid, 'part is valid');
+    expect(valid, 'part is valid').toBeTruthy();
   }
-
-  t.end();
 });
 
-test('cutPolygonByMercatorBounds - simple', t => {
+test('cutPolygonByMercatorBounds - simple', () => {
   const polygon = [
     [-170, 0],
     [170, 0],
@@ -97,28 +82,24 @@ test('cutPolygonByMercatorBounds - simple', t => {
   ];
 
   let parts = cutPolygonByMercatorBounds(flatten(polygon));
-  t.deepEquals(parts[0].positions, flatten(expectedA), '2d');
-  t.deepEquals(parts[1].positions, flatten(expectedB), '2d');
+  expect(parts[0].positions, '2d').toEqual(flatten(expectedA));
+  expect(parts[1].positions, '2d').toEqual(flatten(expectedB));
 
   const flatten2 = (ring, accessPosition) => flatten(ring.map(accessPosition));
   const addZ = (p: number[]) => [p[0], p[1], 100];
 
   parts = cutPolygonByMercatorBounds(flatten2(polygon, addZ), null, {size: 3});
-  t.deepEquals(parts[0].positions, flatten2(expectedA, addZ), '3d');
-  t.deepEquals(parts[1].positions, flatten2(expectedB, addZ), '3d');
+  expect(parts[0].positions, '3d').toEqual(flatten2(expectedA, addZ));
+  expect(parts[1].positions, '3d').toEqual(flatten2(expectedB, addZ));
 
   parts = cutPolygonByMercatorBounds(flatten(polygon), null, {normalize: false});
-  t.deepEquals(parts[0].positions, flatten(expectedA), 'normalize: false');
-  t.deepEquals(
-    parts[1].positions,
-    flatten2(expectedB, p => [p[0] + 360, p[1]]),
-    'normalize: false'
+  expect(parts[0].positions, 'normalize: false').toEqual(flatten(expectedA));
+  expect(parts[1].positions, 'normalize: false').toEqual(
+    flatten2(expectedB, p => [p[0] + 360, p[1]])
   );
-
-  t.end();
 });
 
-test('cutPolygonByMercatorBounds - with holes', t => {
+test('cutPolygonByMercatorBounds - with holes', () => {
   const polygon = [
     [-170, 0],
     [170, 0],
@@ -152,21 +133,19 @@ test('cutPolygonByMercatorBounds - with holes', t => {
   ];
 
   let result = cutPolygonByMercatorBounds(flatten([polygon, holeA]), [8]);
-  t.is(result.length, 2, 'Returns correct number of parts');
-  t.deepEquals(result[0].positions, flatten([expectedA, holeA]), 'part 1 positions');
-  t.deepEquals(result[0].holeIndices, [8], 'part 1 holeIndices');
-  t.deepEquals(result[1].positions, flatten(expectedB), 'part 2 positions');
+  expect(result.length, 'Returns correct number of parts').toBe(2);
+  expect(result[0].positions, 'part 1 positions').toEqual(flatten([expectedA, holeA]));
+  expect(result[0].holeIndices, 'part 1 holeIndices').toEqual([8]);
+  expect(result[1].positions, 'part 2 positions').toEqual(flatten(expectedB));
 
   result = cutPolygonByMercatorBounds(flatten([polygon, holeB]), [8]);
-  t.is(result.length, 2, 'Returns correct number of parts');
-  t.deepEquals(result[0].positions, flatten(expectedA), 'part 1 positions');
-  t.deepEquals(result[1].positions, flatten([expectedB, holeB]), 'part 2 positions');
-  t.deepEquals(result[1].holeIndices, [8], 'part 2 holeIndices');
-
-  t.end();
+  expect(result.length, 'Returns correct number of parts').toBe(2);
+  expect(result[0].positions, 'part 1 positions').toEqual(flatten(expectedA));
+  expect(result[1].positions, 'part 2 positions').toEqual(flatten([expectedB, holeB]));
+  expect(result[1].holeIndices, 'part 2 holeIndices').toEqual([8]);
 });
 
-test('cutPolygonByMercatorBounds - contains pole', t => {
+test('cutPolygonByMercatorBounds - contains pole', () => {
   const polygon = [
     [-150, 75],
     [-90, 80],
@@ -177,8 +156,7 @@ test('cutPolygonByMercatorBounds - contains pole', t => {
   ];
 
   const result = cutPolygonByMercatorBounds(flatten(polygon));
-  t.deepEquals(
-    result[0].positions,
+  expect(result[0].positions).toEqual(
     flatten([
       [-90, 80],
       [-30, 70],
@@ -190,8 +168,7 @@ test('cutPolygonByMercatorBounds - contains pole', t => {
       [-90, 85.051129]
     ])
   );
-  t.deepEquals(
-    result[1].positions,
+  expect(result[1].positions).toEqual(
     flatten([
       [-180, 75],
       [-150, 75],
@@ -200,6 +177,4 @@ test('cutPolygonByMercatorBounds - contains pole', t => {
       [-180, 85.051129]
     ])
   );
-
-  t.end();
 });

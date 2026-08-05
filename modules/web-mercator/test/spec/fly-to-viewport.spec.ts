@@ -1,4 +1,4 @@
-import test from 'test/utils/vitest-tape';
+import {test, expect} from 'vitest';
 import {flyToViewport, getFlyToDuration} from '@math.gl/web-mercator';
 import {toLowPrecision} from '../utils/test-utils';
 
@@ -98,24 +98,18 @@ const DURATION_TEST_CASES = [
   }
 ];
 
-test('flyToViewport', t => {
+test('flyToViewport', () => {
   FLY_TO_TEST_CASES.forEach(testCase => {
     const propsInTransition = flyToViewport(testCase.startProps, testCase.endProps, testCase.t);
-    t.deepEqual(toLowPrecision(propsInTransition), testCase.expect, 'interpolated correctly');
+    expect(toLowPrecision(propsInTransition), 'interpolated correctly').toEqual(testCase.expect);
   });
-
-  t.end();
 });
 
-test('getFlyToDuration', t => {
+test('getFlyToDuration', () => {
   DURATION_TEST_CASES.forEach(testCase => {
     const duration = getFlyToDuration(testCase.startProps, testCase.endProps, testCase.opts);
-    t.deepEqual(
-      toLowPrecision(duration),
-      toLowPrecision(testCase.expect),
-      `${testCase.title}: should get correct duration`
+    expect(toLowPrecision(duration), `${testCase.title}: should get correct duration`).toEqual(
+      toLowPrecision(testCase.expect)
     );
   });
-
-  t.end();
 });

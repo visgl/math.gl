@@ -1,4 +1,4 @@
-import test from 'test/utils/vitest-tape';
+import {test, expect} from 'vitest';
 import {normalizeViewportProps} from '@math.gl/web-mercator';
 import {config, equals} from '@math.gl/core';
 
@@ -85,19 +85,18 @@ const NORMALIZATION_TEST_CASES = [
   ]
 ];
 
-test('normalizeViewportProps', t => {
+test('normalizeViewportProps', () => {
   config.EPSILON = 1e-7;
 
   for (const [input, expected] of NORMALIZATION_TEST_CASES) {
     const result = normalizeViewportProps(input);
 
-    t.ok(
+    expect(
       equals(
         Object.keys(expected).map(key => result[key]),
         Object.keys(expected).map(key => expected[key])
       ),
       'correct viewport returned'
-    );
+    ).toBeTruthy();
   }
-  t.end();
 });

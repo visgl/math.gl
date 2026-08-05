@@ -1,21 +1,19 @@
-import test from 'test/utils/vitest-tape';
+import {test, expect} from 'vitest';
 import {Geoid} from '@math.gl/geoid';
 import {openFile} from './utils/file-utils';
 
 const PGM_FILE_PATH = 'modules/geoid/test/data/egm84-30.pgm';
 
-test('geoid - exports', t => {
-  t.assert(Geoid, 'Geoid is defined');
-  t.end();
+test('geoid - exports', () => {
+  expect(Geoid, 'Geoid is defined').toBeTruthy();
 });
 
-test('geoid - get height model info', async t => {
+test('geoid - get height model info', async () => {
   const data = await openFile(PGM_FILE_PATH);
 
   // If data is null - now ways to open the file
   if (data === null) {
-    t.fail(`Can't open file: ${PGM_FILE_PATH}`);
-    return;
+    throw new Error(`Can't open file: ${PGM_FILE_PATH}`);
   }
 
   const geoid = new Geoid({
@@ -36,17 +34,15 @@ test('geoid - get height model info', async t => {
   });
 
   const center = [8.67694237417622, 50.109450651843204, 172.017822265625];
-  t.equal(geoid.getHeight(center[1], center[0]), 48.093804428091886);
-  t.end();
+  expect(geoid.getHeight(center[1], center[0])).toBe(48.093804428091886);
 });
 
-test('geoid - cubic approximation', async t => {
+test('geoid - cubic approximation', async () => {
   const data = await openFile(PGM_FILE_PATH);
 
   // If data is null - now ways to open the file
   if (data === null) {
-    t.fail(`Can't open file: ${PGM_FILE_PATH}`);
-    return;
+    throw new Error(`Can't open file: ${PGM_FILE_PATH}`);
   }
 
   const geoid = new Geoid({
@@ -67,6 +63,5 @@ test('geoid - cubic approximation', async t => {
   });
 
   const center = [8.67694237417622, 50.109450651843204, 172.017822265625];
-  t.equal(geoid.getHeight(center[1], center[0]), 48.09178497292629);
-  t.end();
+  expect(geoid.getHeight(center[1], center[0])).toBe(48.09178497292629);
 });

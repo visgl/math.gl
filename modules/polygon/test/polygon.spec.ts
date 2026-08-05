@@ -6,11 +6,10 @@
 // MIT License
 
 /* eslint-disable max-statements */
-import test from 'test/utils/vitest-tape';
-import {tapeEquals} from 'test/utils/tape-assertions';
+import {test, expect} from 'vitest';
 import {toNested} from './utils';
 
-import {configure} from '@math.gl/core';
+import {configure, equals} from '@math.gl/core';
 import {_Polygon as Polygon, WINDING} from '@math.gl/polygon';
 
 const TEST_CASES = [
@@ -123,47 +122,43 @@ const TEST_CASES = [
   }
 ];
 
-test('Polygon#import', t => {
-  t.equals(typeof Polygon, 'function');
-  t.end();
+test('Polygon#import', () => {
+  expect(typeof Polygon).toBe('function');
 });
 
-test('Polygon#construct', t => {
-  t.ok(
+test('Polygon#construct', () => {
+  expect(
     new Polygon([
       [0, 0],
       [1, 1]
     ])
-  );
-  t.end();
+  ).toBeTruthy();
 });
 
-test('Polygon#methods', t => {
+test('Polygon#methods', () => {
   configure({EPSILON: 1e-4});
 
   for (const tc of TEST_CASES) {
     const polygon = new Polygon(tc.polygon, tc.options);
-    t.ok(polygon, `${tc.title}: Created polygon`);
-    tapeEquals(
-      t,
-      polygon.getSignedArea(),
-      tc.area * tc.sign,
+    expect(polygon, `${tc.title}: Created polygon`).toBeTruthy();
+    expect(
+      equals(polygon.getSignedArea(), tc.area * tc.sign),
       `${tc.title}: getSignedArea() returned expected result`
-    );
-    tapeEquals(t, polygon.getArea(), tc.area, `${tc.title}: getArea() returned expected result`);
-    tapeEquals(
-      t,
-      polygon.getWindingDirection(),
-      tc.sign,
+    ).toBe(true);
+    expect(
+      equals(polygon.getArea(), tc.area),
+      `${tc.title}: getArea() returned expected result`
+    ).toBe(true);
+    expect(
+      equals(polygon.getWindingDirection(), tc.sign),
       `${tc.title}: getWindingDirection() returned expected result`
-    );
+    ).toBe(true);
   }
 
   configure({EPSILON: 1e-12});
-  t.end();
 });
 
-test('Polygon#forEachSegment', t => {
+test('Polygon#forEachSegment', () => {
   const config = configure({EPSILON: 1e-4});
 
   for (const tc of TEST_CASES) {
@@ -172,41 +167,34 @@ test('Polygon#forEachSegment', t => {
     polygon.forEachSegment(() => {
       count++;
     });
-    t.equals(count, tc.segments, 'forEachSegment() iterated over all virtual segments');
+    expect(count, 'forEachSegment() iterated over all virtual segments').toBe(tc.segments);
   }
 
   configure(config);
-  t.end();
 });
 
-test('Polygon#modifyWindingDirection', t => {
+test('Polygon#modifyWindingDirection', () => {
   const testPolygon = [1, 1, 2, 2, 1, 3];
   const testPolygonReversed = [1, 3, 2, 2, 1, 1];
 
   const polygon = new Polygon(testPolygon);
 
-  t.equals(
-    polygon.getWindingDirection(),
-    WINDING.COUNTER_CLOCKWISE,
-    'getWindingDirection() returned expected result'
+  expect(polygon.getWindingDirection(), 'getWindingDirection() returned expected result').toBe(
+    WINDING.COUNTER_CLOCKWISE
   );
 
   polygon.modifyWindingDirection(WINDING.CLOCKWISE);
-  t.ok(
+  expect(
     testPolygon.every((value, index) => value === testPolygonReversed[index]),
     'modifyWindingDirection() reversed polygon as expected'
-  );
+  ).toBeTruthy();
 
-  t.equals(
-    polygon.getWindingDirection(),
-    WINDING.CLOCKWISE,
-    'getWindingDirection() returned expected result'
+  expect(polygon.getWindingDirection(), 'getWindingDirection() returned expected result').toBe(
+    WINDING.CLOCKWISE
   );
-
-  t.end();
 });
 
-test('Polygon#Compare flat and complex input', t => {
+test('Polygon#Compare flat and complex input', () => {
   const testFlatData = [0.5, 0.5, 2.0, 0.25, 4, 2, 5, 1, 6, 4, 3.5, 4.1, 1, 2.5, -6, 1];
   const testPointsData = toNested(testFlatData);
 
@@ -216,16 +204,13 @@ test('Polygon#Compare flat and complex input', t => {
   const area1 = flatPolygon.getSignedArea();
   const area2 = pointsPolygon.getSignedArea();
 
-  t.equals(
+  expect(
     area1,
-    area2,
     'results from flat getSignedArea() results are identical to results of array of points getSignedArea()'
-  );
-
-  t.end();
+  ).toBe(area2);
 });
 
-test('Polygon#Compare open and closed', t => {
+test('Polygon#Compare open and closed', () => {
   const testDataOpen = [0.5, 0.5, 2.0, 0.25, 4, 2, 5, 1, 6, 4, 3.5, 4.1, 1, 2.5, -6, 1];
   const testDataClosed = [...testDataOpen, ...testDataOpen.slice(0, 2)];
 
@@ -235,12 +220,10 @@ test('Polygon#Compare open and closed', t => {
   const area1 = openPolygon.getSignedArea();
   const area2 = closedPolygon.getSignedArea();
 
-  t.equals(area1, area2, 'area of an open polygon are the same as for a closed one');
-
-  t.end();
+  expect(area1, 'area of an open polygon are the same as for a closed one').toBe(area2);
 });
 
-test('Polygon#Compare 2D and 3D input', t => {
+test('Polygon#Compare 2D and 3D input', () => {
   const testFlatData = [0.5, 0.5, 2.0, 0.25, 4, 2, 5, 1, 6, 4, 3.5, 4.1, 1, 2.5, -6, 1];
   const testPointsData2D = toNested(testFlatData);
   const testPointsData3D = toNested(testFlatData, {addZ: true});
@@ -251,11 +234,8 @@ test('Polygon#Compare 2D and 3D input', t => {
   const area1 = polygon2D.getSignedArea();
   const area2 = polygon3D.getSignedArea();
 
-  t.equals(
+  expect(
     area1,
-    area2,
     'results from 2D Polygon.getSignedArea() results are identical to results 3D Polygon.getSignedArea()'
-  );
-
-  t.end();
+  ).toBe(area2);
 });

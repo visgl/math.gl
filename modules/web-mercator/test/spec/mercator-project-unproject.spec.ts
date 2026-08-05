@@ -1,5 +1,5 @@
+import {test, expect} from 'vitest';
 import {WebMercatorViewport} from '@math.gl/web-mercator';
-import test from 'test/utils/vitest-tape';
 import {config, equals} from '@math.gl/core';
 
 const viewportProps = {
@@ -39,43 +39,42 @@ const TEST_CASES = [
   }
 ];
 
-test('Viewport constructor', t => {
+test('Viewport constructor', () => {
   const viewport = new WebMercatorViewport(viewportProps);
 
-  t.ok(viewport, 'Viewport construction successful');
+  expect(viewport, 'Viewport construction successful').toBeTruthy();
 
   const viewportState = {};
   Object.keys(viewportProps).forEach(key => {
     viewportState[key] = viewport[key];
   });
 
-  t.deepEquals(viewportState, viewportProps, 'Viewport props assigned');
-  t.end();
+  expect(viewportState, 'Viewport props assigned').toEqual(viewportProps);
 });
 
-test('Viewport projection', t => {
+test('Viewport projection', () => {
   config.EPSILON = 1e-7;
   const viewport = new WebMercatorViewport(viewportProps);
   TEST_CASES.forEach(({title, func, input, expected}) => {
     const output = viewport[func](input);
-    t.ok(equals(output, expected), `viewport.${func}(${title})`);
+    expect(equals(output, expected), `viewport.${func}(${title})`).toBeTruthy();
   });
-  t.end();
 });
 
-test('Viewport projection#topLeft', t => {
+test('Viewport projection#topLeft', () => {
   const viewport = new WebMercatorViewport(viewportProps);
 
   const topLeft = viewport.unproject([0, 0], {topLeft: true});
   const bottomLeft = viewport.unproject([0, viewport.height], {topLeft: true});
 
-  t.ok(topLeft[1] > bottomLeft[1], 'topLeft latitude is north of bottomLeft latitude');
+  expect(
+    topLeft[1] > bottomLeft[1],
+    'topLeft latitude is north of bottomLeft latitude'
+  ).toBeTruthy();
 
   const topLeft2 = viewport.unproject([0, viewport.height], {topLeft: false});
   const bottomLeft2 = viewport.unproject([0, 0], {topLeft: false});
 
-  t.deepEquals(topLeft, topLeft2, 'topLeft true/false match');
-  t.deepEquals(bottomLeft, bottomLeft2, 'bottomLeft true/false match');
-
-  t.end();
+  expect(topLeft, 'topLeft true/false match').toEqual(topLeft2);
+  expect(bottomLeft, 'bottomLeft true/false match').toEqual(bottomLeft2);
 });

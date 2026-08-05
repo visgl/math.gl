@@ -1,9 +1,8 @@
-import test from 'test/utils/vitest-tape';
-import {Vector3, toRadians, _MathUtils} from '@math.gl/core';
+import {test, expect} from 'vitest';
+import {Vector3, toRadians, _MathUtils, equals} from '@math.gl/core';
 import {LngLatRectangle} from '@math.gl/geospatial';
-import {tapeEquals, tapeEqualsEpsilon} from 'test/utils/tape-assertions';
 
-test('LngLatRectangle stores its bounds and computes its center and width', t => {
+test('LngLatRectangle stores its bounds and computes its center and width', () => {
   const rectangle = new LngLatRectangle(
     toRadians(-20),
     toRadians(-10),
@@ -12,13 +11,12 @@ test('LngLatRectangle stores its bounds and computes its center and width', t =>
   );
   const result = new Vector3();
 
-  t.equals(LngLatRectangle.center(rectangle, result), result, 'returns the supplied result');
-  tapeEqualsEpsilon(t, result, [toRadians(10), toRadians(10), 0], _MathUtils.EPSILON15);
-  tapeEqualsEpsilon(t, rectangle.width, toRadians(60), _MathUtils.EPSILON15);
-  t.end();
+  expect(LngLatRectangle.center(rectangle, result), 'returns the supplied result').toBe(result);
+  expect(equals(result, [toRadians(10), toRadians(10), 0], _MathUtils.EPSILON15)).toBe(true);
+  expect(equals(rectangle.width, toRadians(60), _MathUtils.EPSILON15)).toBe(true);
 });
 
-test('LngLatRectangle handles a rectangle crossing the antimeridian', t => {
+test('LngLatRectangle handles a rectangle crossing the antimeridian', () => {
   const rectangle = new LngLatRectangle(
     toRadians(170),
     toRadians(-10),
@@ -27,8 +25,7 @@ test('LngLatRectangle handles a rectangle crossing the antimeridian', t => {
   );
 
   const center = LngLatRectangle.center(rectangle);
-  tapeEqualsEpsilon(t, Math.abs(center.x), Math.PI, _MathUtils.EPSILON15);
-  tapeEquals(t, [center.y, center.z], [0, 0]);
-  tapeEqualsEpsilon(t, rectangle.width, toRadians(20), _MathUtils.EPSILON15);
-  t.end();
+  expect(equals(Math.abs(center.x), Math.PI, _MathUtils.EPSILON15)).toBe(true);
+  expect(equals([center.y, center.z], [0, 0])).toBe(true);
+  expect(equals(rectangle.width, toRadians(20), _MathUtils.EPSILON15)).toBe(true);
 });
