@@ -56,6 +56,7 @@ Highlights:
 - glTF 2.1 box, capsule, cylinder, plane and sphere analytic shapes in `@math.gl/culling`.
 - New expression evaluator module
 - New standards-based CRS definitions module and modernized proj4 support.
+- New typed-array geometry utilities module.
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 - Stronger type guarantees for math classes via the new sized array types.
 
@@ -94,6 +95,12 @@ Highlights:
 **`@math.gl/culling`**
 
 - Adds analytic glTF shape queries for clipping/culling, rays, transforms and enclosing bounds.
+
+**`@math.gl/geometry-utils`** (NEW MODULE)
+
+- Promotes the renderer-independent geometry helpers previously maintained in `@loaders.gl/math`.
+- Adds typed geometry traversal, vertex-normal generation, component-type conversion, packed RGB565
+  colors, octahedral attribute compression, and typed-array utilities.
 
 ## v4.1
 
