@@ -1,4 +1,4 @@
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {
   makeOrientedBoundingBoxFromPoints,
   makeAxisAlignedBoundingBoxFromPoints
@@ -12,32 +12,31 @@ const testPoints = [
   [1, 1, 2]
 ];
 
-test('makeOrientedBoundingBoxFromPoints#empty', t => {
+test('makeOrientedBoundingBoxFromPoints#empty', () => {
   const boundingBox = makeOrientedBoundingBoxFromPoints([]);
-  t.ok(equals(boundingBox.center, Vector3.ZERO));
-  t.ok(equals(boundingBox.halfSize, Vector3.ZERO));
-  t.end();
+  expect(equals(boundingBox.center, Vector3.ZERO)).toBeTruthy();
+  expect(equals(boundingBox.halfSize, Vector3.ZERO)).toBeTruthy();
 });
 
-test('makeOrientedBoundingBoxFromPoints#one point', t => {
+test('makeOrientedBoundingBoxFromPoints#one point', () => {
   const point = [1, 2, 3];
   const boundingBox = makeOrientedBoundingBoxFromPoints([point]);
-  t.ok(equals(boundingBox.center, point));
-  t.ok(equals(boundingBox.halfSize, Vector3.ZERO));
-  t.end();
+  expect(equals(boundingBox.center, point)).toBeTruthy();
+  expect(equals(boundingBox.halfSize, Vector3.ZERO)).toBeTruthy();
 });
 
-test('makeOrientedBoundingBoxFromPoints', t => {
+test('makeOrientedBoundingBoxFromPoints', () => {
   const boundingBox = makeOrientedBoundingBoxFromPoints(testPoints);
   for (const point of testPoints) {
-    t.ok(equals(boundingBox.distanceTo(point), 0), 'point is inside the bounding box');
+    expect(
+      equals(boundingBox.distanceTo(point), 0),
+      'point is inside the bounding box'
+    ).toBeTruthy();
   }
-  t.end();
 });
 
-test('makeAxisAlignedBoundingBoxFromPoints', t => {
+test('makeAxisAlignedBoundingBoxFromPoints', () => {
   const boundingBox = makeAxisAlignedBoundingBoxFromPoints(testPoints);
-  t.ok(equals(boundingBox.center, [1, 0.5, 1]));
-  t.ok(equals(boundingBox.halfDiagonal, [1, 0.5, 1]));
-  t.end();
+  expect(equals(boundingBox.center, [1, 0.5, 1])).toBeTruthy();
+  expect(equals(boundingBox.halfDiagonal, [1, 0.5, 1])).toBeTruthy();
 });

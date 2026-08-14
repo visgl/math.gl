@@ -5,9 +5,16 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {Vector3, Vector4, Matrix4} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
+
+expect.addEqualityTesters([
+  (first, second) =>
+    typeof first === 'number' && typeof second === 'number' && first === 0 && second === 0
+      ? true
+      : undefined
+]);
 
 const negativeX = new Vector4(-1, 0, 0, 0);
 const negativeY = new Vector4(0, -1, 0, 0);
@@ -19,72 +26,67 @@ const VECTOR4_UNIT_Z = new Vector4(0, 0, 1, 0);
 
 const UNIT_SPHERE = new Ellipsoid(1, 1, 1);
 
-test('Ellipsoid#transforms#eastNorthUpToFixedFrame works without a result parameter', t => {
+test('Ellipsoid#transforms#eastNorthUpToFixedFrame works without a result parameter', () => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
 
   const result = UNIT_SPHERE.eastNorthUpToFixedFrame(origin);
   const returnedResult = new Matrix4(result);
-  t.deepEquals(returnedResult.getColumn(0), VECTOR4_UNIT_Y); // east
-  t.deepEquals(returnedResult.getColumn(1), VECTOR4_UNIT_Z); // north
-  t.deepEquals(returnedResult.getColumn(2), VECTOR4_UNIT_X); // up
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(returnedResult.getColumn(0)).toEqual(VECTOR4_UNIT_Y); // east
+  expect(returnedResult.getColumn(1)).toEqual(VECTOR4_UNIT_Z); // north
+  expect(returnedResult.getColumn(2)).toEqual(VECTOR4_UNIT_X); // up
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#eastNorthUpToFixedFrame works with a result parameter', t => {
+test('Ellipsoid#transforms#eastNorthUpToFixedFrame works with a result parameter', () => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
   const result = new Matrix4([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]);
 
   const returnedResult = UNIT_SPHERE.eastNorthUpToFixedFrame(origin, result);
-  t.equals(result, returnedResult);
-  t.deepEquals(returnedResult.getColumn(0), VECTOR4_UNIT_Y); // east
-  t.deepEquals(returnedResult.getColumn(1), VECTOR4_UNIT_Z); // north
-  t.deepEquals(returnedResult.getColumn(2), VECTOR4_UNIT_X); // up
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(result).toBe(returnedResult);
+  expect(returnedResult.getColumn(0)).toEqual(VECTOR4_UNIT_Y); // east
+  expect(returnedResult.getColumn(1)).toEqual(VECTOR4_UNIT_Z); // north
+  expect(returnedResult.getColumn(2)).toEqual(VECTOR4_UNIT_X); // up
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#eastNorthUpToFixedFrame works at the north pole', t => {
+test('Ellipsoid#transforms#eastNorthUpToFixedFrame works at the north pole', () => {
   const northPole = new Vector3(0.0, 0.0, 1.0);
   const expectedTranslation = new Vector4(northPole.x, northPole.y, northPole.z, 1.0);
 
   const result = new Matrix4();
   const returnedResult = UNIT_SPHERE.eastNorthUpToFixedFrame(northPole, result);
-  t.equals(returnedResult, result);
-  t.deepEquals(returnedResult.getColumn(0), VECTOR4_UNIT_Y); // east
-  t.deepEquals(returnedResult.getColumn(1), negativeX); // north
-  t.deepEquals(returnedResult.getColumn(2), VECTOR4_UNIT_Z); // up
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(returnedResult).toBe(result);
+  expect(returnedResult.getColumn(0)).toEqual(VECTOR4_UNIT_Y); // east
+  expect(returnedResult.getColumn(1)).toEqual(negativeX); // north
+  expect(returnedResult.getColumn(2)).toEqual(VECTOR4_UNIT_Z); // up
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#eastNorthUpToFixedFrame works at the south pole', t => {
+test('Ellipsoid#transforms#eastNorthUpToFixedFrame works at the south pole', () => {
   const southPole = new Vector3(0.0, 0.0, -1.0);
   const expectedTranslation = new Vector4(southPole.x, southPole.y, southPole.z, 1.0);
 
   const returnedResult = UNIT_SPHERE.eastNorthUpToFixedFrame(southPole);
-  t.deepEquals(returnedResult.getColumn(0), VECTOR4_UNIT_Y); // east
-  t.deepEquals(returnedResult.getColumn(1), VECTOR4_UNIT_X); // north
-  t.deepEquals(returnedResult.getColumn(2), negativeZ); // up
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(returnedResult.getColumn(0)).toEqual(VECTOR4_UNIT_Y); // east
+  expect(returnedResult.getColumn(1)).toEqual(VECTOR4_UNIT_X); // north
+  expect(returnedResult.getColumn(2)).toEqual(negativeZ); // up
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#northEastDownToFixedFrame works without a result parameter', t => {
+test('Ellipsoid#transforms#northEastDownToFixedFrame works without a result parameter', () => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
 
   const returnedResult = UNIT_SPHERE.localFrameToFixedFrame('north', 'east', 'down', origin);
-  t.deepEquals(returnedResult.getColumn(0), VECTOR4_UNIT_Z); // north
-  t.deepEquals(returnedResult.getColumn(1), VECTOR4_UNIT_Y); // east
-  t.deepEquals(returnedResult.getColumn(2), negativeX); // down
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(returnedResult.getColumn(0)).toEqual(VECTOR4_UNIT_Z); // north
+  expect(returnedResult.getColumn(1)).toEqual(VECTOR4_UNIT_Y); // east
+  expect(returnedResult.getColumn(2)).toEqual(negativeX); // down
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#northEastDownToFixedFrame works with a result parameter', t => {
+test('Ellipsoid#transforms#northEastDownToFixedFrame works with a result parameter', () => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
   const result = new Matrix4().set(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2);
@@ -96,15 +98,14 @@ test('Ellipsoid#transforms#northEastDownToFixedFrame works with a result paramet
     origin,
     result
   );
-  t.equals(result, returnedResult);
-  t.deepEquals(returnedResult.getColumn(0), VECTOR4_UNIT_Z); // north
-  t.deepEquals(returnedResult.getColumn(1), VECTOR4_UNIT_Y); // east
-  t.deepEquals(returnedResult.getColumn(2), negativeX); // down
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(result).toBe(returnedResult);
+  expect(returnedResult.getColumn(0)).toEqual(VECTOR4_UNIT_Z); // north
+  expect(returnedResult.getColumn(1)).toEqual(VECTOR4_UNIT_Y); // east
+  expect(returnedResult.getColumn(2)).toEqual(negativeX); // down
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#northEastDownToFixedFrame works at the north pole', t => {
+test('Ellipsoid#transforms#northEastDownToFixedFrame works at the north pole', () => {
   const northPole = new Vector3(0.0, 0.0, 1.0);
   const expectedTranslation = new Vector4(northPole.x, northPole.y, northPole.z, 1.0);
 
@@ -116,53 +117,49 @@ test('Ellipsoid#transforms#northEastDownToFixedFrame works at the north pole', t
     northPole,
     result
   );
-  t.equals(returnedResult, result);
-  t.deepEquals(returnedResult.getColumn(0), negativeX); // north
-  t.deepEquals(returnedResult.getColumn(1), VECTOR4_UNIT_Y); // east
-  t.deepEquals(returnedResult.getColumn(2), negativeZ); // down
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(returnedResult).toBe(result);
+  expect(returnedResult.getColumn(0)).toEqual(negativeX); // north
+  expect(returnedResult.getColumn(1)).toEqual(VECTOR4_UNIT_Y); // east
+  expect(returnedResult.getColumn(2)).toEqual(negativeZ); // down
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#northEastDownToFixedFrame works at the south pole', t => {
+test('Ellipsoid#transforms#northEastDownToFixedFrame works at the south pole', () => {
   const southPole = new Vector3(0.0, 0.0, -1.0);
   const expectedTranslation = new Vector4(southPole.x, southPole.y, southPole.z, 1.0);
 
   const returnedResult = UNIT_SPHERE.localFrameToFixedFrame('north', 'east', 'down', southPole);
-  t.deepEquals(returnedResult.getColumn(0), VECTOR4_UNIT_X); // north
-  t.deepEquals(returnedResult.getColumn(1), VECTOR4_UNIT_Y); // east
-  t.deepEquals(returnedResult.getColumn(2), VECTOR4_UNIT_Z); // down
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(returnedResult.getColumn(0)).toEqual(VECTOR4_UNIT_X); // north
+  expect(returnedResult.getColumn(1)).toEqual(VECTOR4_UNIT_Y); // east
+  expect(returnedResult.getColumn(2)).toEqual(VECTOR4_UNIT_Z); // down
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#northUpEastToFixedFrame works without a result parameter', t => {
+test('Ellipsoid#transforms#northUpEastToFixedFrame works without a result parameter', () => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
 
   const returnedResult = UNIT_SPHERE.localFrameToFixedFrame('north', 'up', 'east', origin);
-  t.deepEquals(returnedResult.getColumn(0), VECTOR4_UNIT_Z); // north
-  t.deepEquals(returnedResult.getColumn(1), VECTOR4_UNIT_X); // up
-  t.deepEquals(returnedResult.getColumn(2), VECTOR4_UNIT_Y); // east
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(returnedResult.getColumn(0)).toEqual(VECTOR4_UNIT_Z); // north
+  expect(returnedResult.getColumn(1)).toEqual(VECTOR4_UNIT_X); // up
+  expect(returnedResult.getColumn(2)).toEqual(VECTOR4_UNIT_Y); // east
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#northUpEastToFixedFrame works with a result parameter', t => {
+test('Ellipsoid#transforms#northUpEastToFixedFrame works with a result parameter', () => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
   const result = new Matrix4([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]);
 
   const returnedResult = UNIT_SPHERE.localFrameToFixedFrame('north', 'up', 'east', origin, result);
-  t.equals(result, returnedResult);
-  t.deepEquals(returnedResult.getColumn(0), VECTOR4_UNIT_Z); // north
-  t.deepEquals(returnedResult.getColumn(1), VECTOR4_UNIT_X); // up
-  t.deepEquals(returnedResult.getColumn(2), VECTOR4_UNIT_Y); // east
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(result).toBe(returnedResult);
+  expect(returnedResult.getColumn(0)).toEqual(VECTOR4_UNIT_Z); // north
+  expect(returnedResult.getColumn(1)).toEqual(VECTOR4_UNIT_X); // up
+  expect(returnedResult.getColumn(2)).toEqual(VECTOR4_UNIT_Y); // east
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#northUpEastToFixedFrame works at the north pole', t => {
+test('Ellipsoid#transforms#northUpEastToFixedFrame works at the north pole', () => {
   const northPole = new Vector3(0.0, 0.0, 1.0);
   const expectedTranslation = new Vector4(northPole.x, northPole.y, northPole.z, 1.0);
 
@@ -174,54 +171,50 @@ test('Ellipsoid#transforms#northUpEastToFixedFrame works at the north pole', t =
     northPole,
     result
   );
-  t.equals(returnedResult, result);
-  t.deepEquals(returnedResult.getColumn(0), negativeX); // north
-  t.deepEquals(returnedResult.getColumn(1), VECTOR4_UNIT_Z); // up
-  t.deepEquals(returnedResult.getColumn(2), VECTOR4_UNIT_Y); // east
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(returnedResult).toBe(result);
+  expect(returnedResult.getColumn(0)).toEqual(negativeX); // north
+  expect(returnedResult.getColumn(1)).toEqual(VECTOR4_UNIT_Z); // up
+  expect(returnedResult.getColumn(2)).toEqual(VECTOR4_UNIT_Y); // east
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#northUpEastToFixedFrame works at the south pole', t => {
+test('Ellipsoid#transforms#northUpEastToFixedFrame works at the south pole', () => {
   const southPole = new Vector3(0.0, 0.0, -1.0);
   const expectedTranslation = new Vector4(southPole.x, southPole.y, southPole.z, 1.0);
 
   const returnedResult = UNIT_SPHERE.localFrameToFixedFrame('north', 'up', 'east', southPole);
   const matrix4 = new Matrix4(returnedResult);
-  t.deepEquals(matrix4.getColumn(0), VECTOR4_UNIT_X); // north
-  t.deepEquals(matrix4.getColumn(1), negativeZ); // up
-  t.deepEquals(matrix4.getColumn(2), VECTOR4_UNIT_Y); // east
-  t.deepEquals(matrix4.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(matrix4.getColumn(0)).toEqual(VECTOR4_UNIT_X); // north
+  expect(matrix4.getColumn(1)).toEqual(negativeZ); // up
+  expect(matrix4.getColumn(2)).toEqual(VECTOR4_UNIT_Y); // east
+  expect(matrix4.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#northWestUpToFixedFrame works without a result parameter', t => {
+test('Ellipsoid#transforms#northWestUpToFixedFrame works without a result parameter', () => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
   const returnedResult = UNIT_SPHERE.localFrameToFixedFrame('north', 'west', 'up', origin);
   const matrix4 = new Matrix4(returnedResult);
-  t.deepEquals(matrix4.getColumn(0), VECTOR4_UNIT_Z); // north
-  t.deepEquals(matrix4.getColumn(1), negativeY); // west
-  t.deepEquals(matrix4.getColumn(2), VECTOR4_UNIT_X); // up
-  t.deepEquals(matrix4.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(matrix4.getColumn(0)).toEqual(VECTOR4_UNIT_Z); // north
+  expect(matrix4.getColumn(1)).toEqual(negativeY); // west
+  expect(matrix4.getColumn(2)).toEqual(VECTOR4_UNIT_X); // up
+  expect(matrix4.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#northWestUpToFixedFrame works with a result parameter', t => {
+test('Ellipsoid#transforms#northWestUpToFixedFrame works with a result parameter', () => {
   const origin = new Vector3(1.0, 0.0, 0.0);
   const expectedTranslation = new Vector4(origin.x, origin.y, origin.z, 1.0);
   const result = new Matrix4().set(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2);
 
   const returnedResult = UNIT_SPHERE.localFrameToFixedFrame('north', 'west', 'up', origin, result);
-  t.equals(result, returnedResult);
-  t.deepEquals(returnedResult.getColumn(0), VECTOR4_UNIT_Z); // north
-  t.deepEquals(returnedResult.getColumn(1), negativeY); // west
-  t.deepEquals(returnedResult.getColumn(2), VECTOR4_UNIT_X); // up
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(result).toBe(returnedResult);
+  expect(returnedResult.getColumn(0)).toEqual(VECTOR4_UNIT_Z); // north
+  expect(returnedResult.getColumn(1)).toEqual(negativeY); // west
+  expect(returnedResult.getColumn(2)).toEqual(VECTOR4_UNIT_X); // up
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#northWestUpToFixedFrame works at the north pole', t => {
+test('Ellipsoid#transforms#northWestUpToFixedFrame works at the north pole', () => {
   const northPole = new Vector3(0.0, 0.0, 1.0);
   const expectedTranslation = new Vector4(northPole.x, northPole.y, northPole.z, 1.0);
 
@@ -233,15 +226,14 @@ test('Ellipsoid#transforms#northWestUpToFixedFrame works at the north pole', t =
     northPole,
     result
   );
-  t.equals(returnedResult, result);
-  t.deepEquals(returnedResult.getColumn(0), negativeX); // north
-  t.deepEquals(returnedResult.getColumn(1), negativeY); // west
-  t.deepEquals(returnedResult.getColumn(2), VECTOR4_UNIT_Z); // up
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(returnedResult).toBe(result);
+  expect(returnedResult.getColumn(0)).toEqual(negativeX); // north
+  expect(returnedResult.getColumn(1)).toEqual(negativeY); // west
+  expect(returnedResult.getColumn(2)).toEqual(VECTOR4_UNIT_Z); // up
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
-test('Ellipsoid#transforms#northWestUpToFixedFrame works at the south pole', t => {
+test('Ellipsoid#transforms#northWestUpToFixedFrame works at the south pole', () => {
   const southPole = new Vector3(0.0, 0.0, -1.0);
   const expectedTranslation = new Vector4(southPole.x, southPole.y, southPole.z, 1.0);
 
@@ -252,11 +244,10 @@ test('Ellipsoid#transforms#northWestUpToFixedFrame works at the south pole', t =
     southPole,
     new Matrix4()
   );
-  t.deepEquals(returnedResult.getColumn(0), VECTOR4_UNIT_X); // north
-  t.deepEquals(returnedResult.getColumn(1), negativeY); // west
-  t.deepEquals(returnedResult.getColumn(2), negativeZ); // up
-  t.deepEquals(returnedResult.getColumn(3), expectedTranslation); // translation
-  t.end();
+  expect(returnedResult.getColumn(0)).toEqual(VECTOR4_UNIT_X); // north
+  expect(returnedResult.getColumn(1)).toEqual(negativeY); // west
+  expect(returnedResult.getColumn(2)).toEqual(negativeZ); // up
+  expect(returnedResult.getColumn(3)).toEqual(expectedTranslation); // translation
 });
 
 /*
@@ -378,30 +369,28 @@ test('Ellipsoid#transforms#normal use of localFrameToFixedFrameGenerator', t => 
 });
 */
 
-test('Ellipsoid#transforms#localFrameToFixedFrame incorrect use throws', t => {
+test('Ellipsoid#transforms#localFrameToFixedFrame incorrect use throws', () => {
   const origin = [1, 0, 0];
 
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame(undefined, undefined, null, origin));
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('north', undefined, null, origin));
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame(undefined, 'north', null, origin));
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('south', undefined, null, origin));
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame(undefined, undefined, null, origin)).toThrow();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('north', undefined, null, origin)).toThrow();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame(undefined, 'north', null, origin)).toThrow();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('south', undefined, null, origin)).toThrow();
   // @ts-expect-error intentional
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('northe', 'southe', null, origin));
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('northe', 'southe', null, origin)).toThrow();
 
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('north', 'north', null, origin));
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('north', 'south', null, origin));
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('south', 'north', null, origin));
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('south', 'south', null, origin));
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('north', 'north', null, origin)).toThrow();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('north', 'south', null, origin)).toThrow();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('south', 'north', null, origin)).toThrow();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('south', 'south', null, origin)).toThrow();
 
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('up', 'up', null, origin));
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('up', 'down', null, origin));
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('down', 'up', null, origin));
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('down', 'down', null, origin));
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('up', 'up', null, origin)).toThrow();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('up', 'down', null, origin)).toThrow();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('down', 'up', null, origin)).toThrow();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('down', 'down', null, origin)).toThrow();
 
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('east', 'east', null, origin));
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('east', 'west', null, origin));
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('west', 'east', null, origin));
-  t.throws(() => UNIT_SPHERE.localFrameToFixedFrame('west', 'west', null, origin));
-
-  t.end();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('east', 'east', null, origin)).toThrow();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('east', 'west', null, origin)).toThrow();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('west', 'east', null, origin)).toThrow();
+  expect(() => UNIT_SPHERE.localFrameToFixedFrame('west', 'west', null, origin)).toThrow();
 });

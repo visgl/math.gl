@@ -4,104 +4,93 @@
 // Copyright (c) 2017 Uber Technologies, Inc.
 
 /* eslint-disable max-statements */
-import test from 'tape-promise/tape';
-import {tapeEquals} from 'test/utils/tape-assertions';
+import {test, expect} from 'vitest';
 
-import {Vector2, Matrix4, Matrix3} from '@math.gl/core';
+import {Vector2, Matrix4, Matrix3, equals} from '@math.gl/core';
 
-test('Vector2#import', t => {
-  t.equals(typeof Vector2, 'function');
-  t.end();
+test('Vector2#import', () => {
+  expect(typeof Vector2).toBe('function');
 });
 
-test('Vector2#construct and Array.isArray check', t => {
-  t.ok(Array.isArray(new Vector2()));
-  t.end();
+test('Vector2#construct and Array.isArray check', () => {
+  expect(Array.isArray(new Vector2())).toBeTruthy();
 });
 
 // ['add', 'cross'];
 const VECTOR_METHODS = ['clone'];
 
-test('Vector2#members and methods', t => {
+test('Vector2#members and methods', () => {
   const v = new Vector2();
-  t.equals(v.x, 0);
-  t.equals(v.y, 0);
+  expect(v.x).toBe(0);
+  expect(v.y).toBe(0);
 
   for (const method of VECTOR_METHODS) {
-    t.equals(typeof v[method], 'function');
+    expect(typeof v[method]).toBe('function');
   }
-  t.end();
 });
 
-test('Vector2#from', t => {
+test('Vector2#from', () => {
   let vector2;
   vector2 = new Vector2().from([1, 2]);
-  tapeEquals(t, vector2, [1, 2]);
+  expect(equals(vector2, [1, 2])).toBe(true);
   vector2 = new Vector2().from({x: 1, y: 2});
-  tapeEquals(t, vector2, [1, 2]);
-  t.end();
+  expect(equals(vector2, [1, 2])).toBe(true);
 });
 
-test('Vector2#to', t => {
+test('Vector2#to', () => {
   const vector2 = new Vector2(1, 2);
-  tapeEquals(t, vector2.to([0, 0]), [1, 2]);
-  t.deepEquals(vector2.to({x: 0, y: 0}), {x: 1, y: 2});
-  t.end();
+  expect(equals(vector2.to([0, 0]), [1, 2])).toBe(true);
+  expect(vector2.to({x: 0, y: 0})).toEqual({x: 1, y: 2});
 });
 
-test('Vector2#toString', t => {
+test('Vector2#toString', () => {
   const TEST_CASES = [{input: [0, 1], precision: 5, string: '[0, 1]'}];
   for (const tc of TEST_CASES) {
     const v = new Vector2(tc.input);
-    t.equals(String(v), tc.string);
-    t.equals(`${v}`, tc.string);
+    expect(String(v)).toBe(tc.string);
+    expect(`${v}`).toBe(tc.string);
   }
-  t.end();
 });
 
-test('Vector2#scale', t => {
+test('Vector2#scale', () => {
   const TEST_CASES = [
     {input: [1, 2], scale: 5, result: [5, 10]},
     {input: [1, 2], scale: [2, -1], result: [2, -2]}
   ];
   for (const tc of TEST_CASES) {
     const result = new Vector2(tc.input).scale(tc.scale);
-    tapeEquals(t, result, tc.result);
+    expect(equals(result, tc.result)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector2#distance', t => {
+test('Vector2#distance', () => {
   const TEST_CASES = [{start: [0, 0], end: [3, 4], result: 5}];
   for (const tc of TEST_CASES) {
     const result = new Vector2(tc.start).distance(tc.end);
-    t.equals(result, tc.result);
+    expect(result).toBe(tc.result);
   }
-  t.end();
 });
 
-test('Vector2#len', t => {
+test('Vector2#len', () => {
   const TEST_CASES = [
     {input: [0, 0], result: 0},
     {input: [3, 4], result: 5}
   ];
   for (const tc of TEST_CASES) {
     const result = new Vector2(tc.input).len();
-    t.equals(result, tc.result);
+    expect(result).toBe(tc.result);
   }
-  t.end();
 });
 
-test('Vector2#dot', t => {
+test('Vector2#dot', () => {
   const TEST_CASES = [{input1: [1, 3], input2: [4, -2], result: -2}];
   for (const tc of TEST_CASES) {
     const result = new Vector2(tc.input1).dot(tc.input2);
-    t.equals(result, tc.result);
+    expect(result).toBe(tc.result);
   }
-  t.end();
 });
 
-test('Vector2#normalize', t => {
+test('Vector2#normalize', () => {
   const TEST_CASES = [
     {input: [0, 0], result: [0, 0]},
     {input: [1, 0], result: [1, 0]},
@@ -111,12 +100,11 @@ test('Vector2#normalize', t => {
   for (const tc of TEST_CASES) {
     const v = new Vector2(tc.input);
     const result = v.normalize();
-    t.ok(result.equals(tc.result));
+    expect(result.equals(tc.result)).toBeTruthy();
   }
-  t.end();
 });
 
-test('Vector2#horizontalAngle', t => {
+test('Vector2#horizontalAngle', () => {
   const TEST_CASES = [
     {input: [0, 0], result: 0},
     {input: [1, 0], result: 0},
@@ -124,12 +112,11 @@ test('Vector2#horizontalAngle', t => {
   ];
   for (const tc of TEST_CASES) {
     const result = new Vector2(tc.input).horizontalAngle();
-    tapeEquals(t, result, tc.result);
+    expect(equals(result, tc.result)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector2#verticalAngle', t => {
+test('Vector2#verticalAngle', () => {
   const TEST_CASES = [
     {input: [0, 0], result: 0},
     {input: [1, 0], result: 1.5707963267948966},
@@ -137,12 +124,11 @@ test('Vector2#verticalAngle', t => {
   ];
   for (const tc of TEST_CASES) {
     const result = new Vector2(tc.input).verticalAngle();
-    tapeEquals(t, result, tc.result);
+    expect(equals(result, tc.result)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector2#transform', t => {
+test('Vector2#transform', () => {
   const transform = new Matrix4().scale([0.5, 0.5, 0.5]).translate([1, 1, 1]);
 
   const TEST_CASES = [
@@ -154,12 +140,11 @@ test('Vector2#transform', t => {
   for (const testCase of TEST_CASES) {
     const v = new Vector2(testCase.input);
     const result = v.transform(transform);
-    tapeEquals(t, result, testCase.result);
+    expect(equals(result, testCase.result)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector2#transformAsVector', t => {
+test('Vector2#transformAsVector', () => {
   const transform = new Matrix4().scale([0.5, 0.5, 0.5]).translate([1, 1, 1]);
 
   const TEST_CASES = [
@@ -169,12 +154,11 @@ test('Vector2#transformAsVector', t => {
   for (const testCase of TEST_CASES) {
     const v = new Vector2(testCase.input);
     const result = v.transformAsVector(transform);
-    tapeEquals(t, result, testCase.result);
+    expect(equals(result, testCase.result)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector2#transformByMatrix3', t => {
+test('Vector2#transformByMatrix3', () => {
   const transform = new Matrix3().scale([0.5, 0.5, 0.5]).translate([1, 1, 1]);
 
   const TEST_CASES = [
@@ -186,12 +170,11 @@ test('Vector2#transformByMatrix3', t => {
   for (const testCase of TEST_CASES) {
     const v = new Vector2(testCase.input);
     const result = v.transformByMatrix3(transform);
-    tapeEquals(t, result, testCase.result);
+    expect(equals(result, testCase.result)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector2#transformByMatrix2x3', t => {
+test('Vector2#transformByMatrix2x3', () => {
   const transform = [0.5, 0, 0, 0.5, 0.5, 0.5];
 
   const TEST_CASES = [
@@ -203,12 +186,11 @@ test('Vector2#transformByMatrix2x3', t => {
   for (const testCase of TEST_CASES) {
     const v = new Vector2(testCase.input);
     const result = v.transformByMatrix2x3(transform);
-    tapeEquals(t, result, testCase.result);
+    expect(equals(result, testCase.result)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector2#transformByMatrix2', t => {
+test('Vector2#transformByMatrix2', () => {
   const transform = [0.5, 0, 0, 0.5];
 
   const TEST_CASES = [
@@ -220,7 +202,6 @@ test('Vector2#transformByMatrix2', t => {
   for (const testCase of TEST_CASES) {
     const v = new Vector2(testCase.input);
     const result = v.transformByMatrix2(transform);
-    tapeEquals(t, result, testCase.result);
+    expect(equals(result, testCase.result)).toBe(true);
   }
-  t.end();
 });

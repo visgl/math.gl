@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {getGeohashBounds, getGeohashBoundaryFlat} from '@math.gl/dggs-geohash';
 
 const TEST_DATA = [
@@ -21,23 +21,19 @@ const TEST_DATA = [
 ];
 
 // TODO - restore test
-test.skip('geohash#getGeohashBounds', t => {
+test.skip('geohash#getGeohashBounds', () => {
   for (const {geohash} of TEST_DATA) {
     const polygon = getGeohashBounds(geohash);
-    t.ok(polygon instanceof Array, 'polygon is flat array');
-    t.is(polygon.length / 2 - 1, 4, 'polygon has 4 sides');
-    t.deepEqual(polygon.slice(0, 2), polygon.slice(-2), 'polygon is closed');
+    expect(polygon instanceof Array, 'polygon is flat array').toBeTruthy();
+    expect(polygon.length / 2 - 1, 'polygon has 4 sides').toBe(4);
+    expect(polygon.slice(0, 2), 'polygon is closed').toEqual(polygon.slice(-2));
   }
-
-  t.end();
 });
 
 // TODO - restore test
-test.skip('geohash#getGeohashBoundaryFlat', t => {
+test.skip('geohash#getGeohashBoundaryFlat', () => {
   for (const {geohash, expectedBounds} of TEST_DATA) {
     const bounds = getGeohashBoundaryFlat(geohash);
-    t.deepEquals(bounds, expectedBounds, 'Geohash bounds calculated');
+    expect(bounds, 'Geohash bounds calculated').toEqual(expectedBounds);
   }
-
-  t.end();
 });

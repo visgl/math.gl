@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {quadkeyToWorldBounds, getQuadkeyBoundary} from '@math.gl/dggs-quadkey';
 
 const TEST_DATA = [
@@ -29,22 +29,18 @@ const TEST_DATA = [
   }
 ];
 
-test('quadkey#quadkeyToWorldBounds', t => {
+test('quadkey#quadkeyToWorldBounds', () => {
   for (const {quadkey, expectedBounds} of TEST_DATA) {
     const bounds = quadkeyToWorldBounds(quadkey);
-    t.deepEquals(bounds, expectedBounds, 'Quadkey bounds calculated');
+    expect(bounds, 'Quadkey bounds calculated').toEqual(expectedBounds);
   }
-
-  t.end();
 });
 
-test.skip('quadkey#getQuadkeyBoundary', t => {
+test.skip('quadkey#getQuadkeyBoundary', () => {
   for (const {quadkey} of TEST_DATA) {
     const polygon = getQuadkeyBoundary(quadkey);
-    t.ok(polygon instanceof Array, 'polygon is flat array');
-    t.is(polygon.length / 2 - 1, 4, 'polygon has 4 sides');
-    t.deepEqual(polygon.slice(0, 2), polygon.slice(-2), 'polygon is closed');
+    expect(polygon instanceof Array, 'polygon is flat array').toBeTruthy();
+    expect(polygon.length / 2 - 1, 'polygon has 4 sides').toBe(4);
+    expect(polygon.slice(0, 2), 'polygon is closed').toEqual(polygon.slice(-2));
   }
-
-  t.end();
 });

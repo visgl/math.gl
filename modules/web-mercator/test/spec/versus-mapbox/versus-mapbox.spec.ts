@@ -1,7 +1,7 @@
-import {MapboxTransform} from './mapbox-transform';
+import {test, expect} from 'vitest';
 
+import {MapboxTransform} from './mapbox-transform';
 import {WebMercatorViewport} from '@math.gl/web-mercator';
-import test from 'tape-promise/tape';
 import {toLowPrecision} from '../../utils/test-utils';
 import {equals, config} from '@math.gl/core';
 
@@ -20,7 +20,7 @@ const TEST_CASES = [
   }
 ];
 
-test('Viewport vs Mapbox project', t => {
+test('Viewport vs Mapbox project', () => {
   config.EPSILON = 1e-8;
 
   for (const viewportName in VIEWPORT_PROPS) {
@@ -33,16 +33,15 @@ test('Viewport vs Mapbox project', t => {
       const transform = new MapboxTransform(viewportProps);
       const mapboxProjection = transform.mapboxProject(lngLat);
 
-      t.ok(
+      expect(
         equals(projection, mapboxProjection),
         `project(${title}, ${viewportName}) - viewport ${projection} mapbox ${mapboxProjection}`
-      );
+      ).toBeTruthy();
     }
   }
-  t.end();
 });
 
-test('Viewport vs Mapbox unproject', t => {
+test('Viewport vs Mapbox unproject', () => {
   config.EPSILON = 1e-7;
 
   for (const viewportName in VIEWPORT_PROPS) {
@@ -55,17 +54,16 @@ test('Viewport vs Mapbox unproject', t => {
       const viewport = new WebMercatorViewport(viewportProps);
       const unprojection = viewport.unproject(mapboxProjection, {topLeft: true});
 
-      t.ok(
+      expect(
         equals(unprojection, lngLat),
         `unproject(${title}, ${viewportName}) - viewport/mapbox match`
-      );
+      ).toBeTruthy();
     }
   }
-  t.end();
 });
 
 /* Mapbox's matrixes projects to screenspace instead of clipspace */
-test('Viewport vs Mapbox project 3D', t => {
+test('Viewport vs Mapbox project 3D', () => {
   for (const viewportName in VIEWPORT_PROPS) {
     const viewportProps = VIEWPORT_PROPS[viewportName];
 
@@ -77,16 +75,14 @@ test('Viewport vs Mapbox project 3D', t => {
     const mapboxProjected = transform.mapboxProject(sphericalPosition);
 
     // TODO - math.gl does not deal with significant digits
-    t.deepEquals(
+    expect(
       toLowPrecision(viewportProjected, 4),
-      toLowPrecision(mapboxProjected, 4),
       `project 3D ${viewportName} - viewport/mapbox match`
-    );
+    ).toEqual(toLowPrecision(mapboxProjected, 4));
   }
-  t.end();
 });
 
-test('Viewport/Mapbox getLocationAtPoint', t => {
+test('Viewport/Mapbox getLocationAtPoint', () => {
   for (const viewportName in VIEWPORT_PROPS) {
     const viewportProps = VIEWPORT_PROPS[viewportName];
     for (const {title, lngLat} of TEST_CASES) {
@@ -99,12 +95,10 @@ test('Viewport/Mapbox getLocationAtPoint', t => {
         pos: [100, 100]
       });
 
-      t.deepEquals(
+      expect(
         toLowPrecision(llp),
-        toLowPrecision(llm),
         `getLocationAtPoint(${title}, ${viewportName})) - viewport/mapbox match`
-      );
+      ).toEqual(toLowPrecision(llm));
     }
   }
-  t.end();
 });
