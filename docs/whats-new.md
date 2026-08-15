@@ -53,6 +53,7 @@ Highlights:
 
 - TypeScript 6 compatibility.
 - New expression evaluator module
+- New standards-based CRS definitions module and modernized proj4 support.
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 - Stronger type guarantees for math classes via the new sized array types.
 
@@ -64,6 +65,19 @@ Highlights:
 - Adds isolated function registries and optional GeoHash, Quadkey, and S2 function tables.
 - Compiles restricted JSON-style accessor expressions with function calls disabled.
 - Includes an interactive expression playground with editable context and sample DGGS expressions.
+
+**`@math.gl/crs`** (NEW MODULE)
+
+- Adds lightweight, proj4-independent TypeScript definitions for coordinate reference systems with no runtime dependencies.
+- Uses strict PROJJSON v0.7 as its semantic CRS object model and exports types generated from the official schema.
+- Exposes the vendored official PROJJSON v0.7 schema for runtime validation by applications.
+- Represents authority codes, PROJ strings, and WKT definitions as serialized strings.
+
+**`@math.gl/proj4`**
+
+- Updates proj4js to v2.20.9 and accepts modern WKT2 definitions and the supported PROJJSON CRS object types.
+- Adds optional CRS axis-order enforcement and NTv2 datum-grid registration.
+- Defines aliases for WGS84 UTM and UPS EPSG coordinate systems automatically.
 
 **`@math.gl/geospatial`**
 
