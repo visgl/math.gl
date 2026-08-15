@@ -140,6 +140,11 @@
       },
       {
         "type": "category",
+        "label": "@math.gl/crs",
+        "items": ["modules/crs/README"]
+      },
+      {
+        "type": "category",
         "label": "@math.gl/proj4",
         "items": ["modules/proj4/README", "modules/proj4/api-reference/proj4-projection"]
       },

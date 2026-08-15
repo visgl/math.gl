@@ -32,9 +32,13 @@ const reprojectedPosition = projection.project(wgs84Position);
 
 ## Geospatial Coordinate Systems
 
-There are an infinite number of possible coordinate systems; therefore strict syntax is required to describe the parameters of any given CRS. Two main systems are supported in this module: Proj4 strings and WKT strings. Within WKT there exists both OGC WKT and ESRI WKT syntax; both are generally supported though some more-obscure projection keywords may not be used. Note that Proj4 strings [can be slightly more accurate](https://github.com/proj4js/proj4js/issues/222) in some circumstances than WKT strings.
+There are an infinite number of possible coordinate systems; therefore strict syntax is required to describe the parameters of any given CRS. Standard, proj4-independent definitions are provided by [`@math.gl/crs`](../crs/README.md). This module supports authority codes, PROJ strings, WKT1 and WKT2 strings, and a subset of PROJJSON objects.
 
-There are thousands of named "EPSG" projections. This module only includes aliases for those in the section below by default. To use a different EPSG projection, you can use https://epsg.io. For example, https://epsg.io/4326 defines standard longitude-latitude coordinates and lists multiple projection strings. Choose one of the `OGC WKT`, `ESRI WKT`, or `PROJ.4` strings listed.
+PROJJSON is an OSGeo/PROJ specification designed as a lossless JSON encoding of OGC WKT2:2019 / ISO 19162:2019; it is not independently an OGC or ISO standard. `@math.gl/crs` models the full PROJJSON v0.7 CRS union, while proj4js 2.20.9 currently transforms `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` objects. `Proj4CRSDefinition` exposes that narrower object subset at compile time. Valid `CompoundCRS` and `VerticalCRS` objects can still be represented with `PROJJSONCRS`, but cannot be passed to `Proj4Projection`.
+
+Within WKT there exists both OGC WKT and ESRI WKT syntax; both are generally supported though some more-obscure projection keywords may not be used. WKT definitions remain strings at this API boundary. Note that PROJ strings [can be slightly more accurate](https://github.com/proj4js/proj4js/issues/222) in some circumstances than WKT strings.
+
+There are thousands of named "EPSG" projections. This module only includes aliases for those in the section below by default. To use a different EPSG projection, you can use https://epsg.io. For example, https://epsg.io/4326 defines standard longitude-latitude coordinates and lists multiple projection definitions. Choose an `OGC WKT`, `ESRI WKT`, `PROJ.4`, or `PROJJSON` definition.
 
 The epsg.io website also has a public API, e.g., for WGS 84: `https://epsg.io/?q=4326&format=json`
 
@@ -81,6 +85,10 @@ Note that Proj4Projection allows aliases to be defined and comes with the follow
 | Lat/lon, WGS84 datum | `EPSG:4326`, `WGS84`                                             |
 | Lat/lon, NAD83 datum | `EPSG:4269`                                                      |
 | Web mercator         | `EPSG:3857`, `EPSG:3785`, `GOOGLE`, `EPSG:900913`, `EPSG:102113` |
+| WGS84 UTM north      | `EPSG:32601` through `EPSG:32660`                                |
+| WGS84 UTM south      | `EPSG:32701` through `EPSG:32760`                                |
+| WGS84 UPS north      | `EPSG:5041`                                                      |
+| WGS84 UPS south      | `EPSG:5042`                                                      |
 
 ### References
 
