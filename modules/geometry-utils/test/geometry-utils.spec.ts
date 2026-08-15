@@ -25,6 +25,8 @@ import {expect, test} from 'vitest';
 
 test('GLType converts component types and preserves view offsets', () => {
   expect(GLType.fromTypedArray(new Uint16Array(1))).toBe(GL.UNSIGNED_SHORT);
+  expect(GLType.fromTypedArray(new Uint8ClampedArray([0, 255]))).toBe(GL.UNSIGNED_BYTE);
+  expect(GLType.fromTypedArray(Uint8ClampedArray)).toBe(GL.UNSIGNED_BYTE);
   expect(GLType.fromName('FLOAT')).toBe(GL.FLOAT);
   expect(GLType.getByteSize(GL.DOUBLE)).toBe(8);
   expect(GLType.validate(-1)).toBeFalsy();

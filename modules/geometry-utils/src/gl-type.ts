@@ -30,6 +30,9 @@ export default class GLType {
   /** Returns the WebGL component constant for a typed array or typed-array constructor. */
   static fromTypedArray(arrayOrType: TypedArray | TypedArrayConstructor): number {
     const arrayType = ArrayBuffer.isView(arrayOrType) ? arrayOrType.constructor : arrayOrType;
+    if (arrayType === Uint8ClampedArray) {
+      return GL_TYPE.UNSIGNED_BYTE;
+    }
     for (const [glType, candidateArrayType] of Object.entries(GL_TYPE_TO_ARRAY_TYPE)) {
       if (candidateArrayType === arrayType) {
         return Number(glType);
