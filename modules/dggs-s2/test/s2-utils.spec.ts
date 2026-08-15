@@ -1,5 +1,5 @@
 // loaders.gl, MIT license
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {getS2BoundaryFlat} from '@math.gl/dggs-s2';
 
@@ -12,7 +12,7 @@ import {getS2BoundaryFlat} from '@math.gl/dggs-s2';
 //   t.end();
 // });
 
-test('getS2BoundaryFlat', t => {
+test('getS2BoundaryFlat', () => {
   const TEST_TOKENS = [
     '80858004', // face 4
     '1c', // face 0
@@ -29,9 +29,9 @@ test('getS2BoundaryFlat', t => {
 
   for (const token of TEST_TOKENS) {
     const polygon = getS2BoundaryFlat(token);
-    t.ok(polygon instanceof Float64Array, 'polygon is flat array');
-    t.is((polygon.length / 2 - 1) % 4, 0, 'polygon has 4 sides');
-    t.deepEqual(polygon.slice(0, 2), polygon.slice(-2), 'polygon is closed');
+    expect(polygon instanceof Float64Array, 'polygon is flat array').toBeTruthy();
+    expect((polygon.length / 2 - 1) % 4, 'polygon has 4 sides').toBe(0);
+    expect(polygon.slice(0, 2), 'polygon is closed').toEqual(polygon.slice(-2));
 
     let minLng = 180;
     let maxLng = -180;
@@ -42,6 +42,4 @@ test('getS2BoundaryFlat', t => {
     // TODO - restore test
     // t.ok(maxLng - minLng < 180, 'longitude is adjusted cross the antimeridian');
   }
-
-  t.end();
 });

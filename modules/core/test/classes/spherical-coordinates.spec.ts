@@ -4,9 +4,8 @@
 // Copyright (c) 2017 Uber Technologies, Inc.
 
 /* eslint-disable max-statements, max-depth */
-import test from 'tape-promise/tape';
-import {tapeEquals} from 'test/utils/tape-assertions';
-import {SphericalCoordinates} from '@math.gl/core';
+import {test, expect} from 'vitest';
+import {SphericalCoordinates, equals} from '@math.gl/core';
 
 const REPRESENTATION_TEST_CASES = [
   {
@@ -53,21 +52,19 @@ const REPRESENTATION_TEST_CASES = [
   }
 ];
 
-test('SphericalCoordinates#import', t => {
-  t.equals(typeof SphericalCoordinates, 'function', 'SphericalCoordinates import OK');
-  t.end();
+test('SphericalCoordinates#import', () => {
+  expect(typeof SphericalCoordinates, 'SphericalCoordinates import OK').toBe('function');
 });
 
-test('SphericalCoordinates#constructor', t => {
+test('SphericalCoordinates#constructor', () => {
   const spherical = new SphericalCoordinates();
-  t.ok(spherical, 'SphericalCoordinates default constructor OK');
-  t.throws(() => new SphericalCoordinates({bearing: NaN}));
+  expect(spherical, 'SphericalCoordinates default constructor OK').toBeTruthy();
+  expect(() => new SphericalCoordinates({bearing: NaN})).toThrow();
   // @ts-ignore
-  t.throws(() => new SphericalCoordinates({bearing: 0, pitch: 'a'}));
-  t.end();
+  expect(() => new SphericalCoordinates({bearing: 0, pitch: 'a'})).toThrow();
 });
 
-test('SphericalCoordinates#representations', t => {
+test('SphericalCoordinates#representations', () => {
   for (const tc of REPRESENTATION_TEST_CASES) {
     for (const rep1 of tc.representations) {
       // Create
@@ -76,50 +73,47 @@ test('SphericalCoordinates#representations', t => {
       for (const rep2 of tc.representations) {
         for (const key of Object.keys(rep2)) {
           if (key !== 'radius' && key !== 'altitude') {
-            t.equals(spherical[key], rep2[key], `${key}`);
+            expect(spherical[key], `${key}`).toBe(rep2[key]);
           }
         }
       }
       // Check vector
-      tapeEquals(t, spherical.toVector3(), tc.vector, `Vector conversion OK ${spherical}`);
+      expect(equals(spherical.toVector3(), tc.vector), `Vector conversion OK ${spherical}`).toBe(
+        true
+      );
     }
   }
-  t.end();
 });
 
-test('SphericalCoordinates#accessors', t => {
+test('SphericalCoordinates#accessors', () => {
   const spherical = new SphericalCoordinates();
-  t.equals(spherical.bearing, 180, 'bearing');
-  t.equals(spherical.pitch, 0, 'pitch');
+  expect(spherical.bearing, 'bearing').toBe(180);
+  expect(spherical.pitch, 'pitch').toBe(0);
   // t.equals(spherical.altitude, 0, 'altitude');
-  t.equals(spherical.longitude, 0, 'longitude');
-  t.equals(spherical.latitude, 0, 'latitude');
-  t.equals(spherical.lng, 0, 'lng');
-  t.equals(spherical.lat, 0, 'lat');
-  t.equals(spherical.z, 0, 'z');
-  t.end();
+  expect(spherical.longitude, 'longitude').toBe(0);
+  expect(spherical.latitude, 'latitude').toBe(0);
+  expect(spherical.lng, 'lng').toBe(0);
+  expect(spherical.lat, 'lat').toBe(0);
+  expect(spherical.z, 'z').toBe(0);
 });
 
-test('SphericalCoordinates#methods', t => {
+test('SphericalCoordinates#methods', () => {
   const spherical = new SphericalCoordinates();
   spherical.set(1, 0, 0);
   spherical.copy(new SphericalCoordinates());
   spherical.fromLngLatZ([1, 1, 0]);
   spherical.fromVector3([1, 1, 1]);
-  t.end();
 });
 
-test('SphericalCoordinates#clone', t => {
+test('SphericalCoordinates#clone', () => {
   const spherical = new SphericalCoordinates();
   const s2 = spherical.clone();
-  t.notEqual(spherical, s2, 'clone');
-  tapeEquals(t, spherical, s2, 'clone');
-  t.ok(spherical.exactEquals(s2), 'clone');
-  t.end();
+  expect(spherical, 'clone').not.toBe(s2);
+  expect(equals(spherical, s2), 'clone').toBe(true);
+  expect(spherical.exactEquals(s2), 'clone').toBeTruthy();
 });
 
-test('SphericalCoordinates#makeSafe', t => {
+test('SphericalCoordinates#makeSafe', () => {
   const spherical = new SphericalCoordinates();
-  t.doesNotThrow(() => spherical.makeSafe());
-  t.end();
+  expect(() => spherical.makeSafe()).not.toThrow();
 });

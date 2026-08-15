@@ -54,8 +54,14 @@ jobs:
       - name: Check CRS type boundaries
         run: yarn check:crs-types
 
-      - name: Run tests
-        run: yarn test ci
+      - name: Install Playwright Chromium
+        run: yarn playwright:install
+
+      - name: Run Node tests
+        run: yarn test-node
+
+      - name: Run headless tests with coverage
+        run: yarn cover
 
       - name: Run lint
         run: yarn lint

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {expect, test} from 'vitest';
 
 import {
   invalidCRSType,
@@ -13,12 +13,11 @@ import {
   unsupportedVerticalCRS
 } from './crs-types';
 
-test('CRS definitions expose the intended compile-time subsets', t => {
-  t.equal(serializedDefinitions.length, 3, 'accepts serialized definitions');
-  t.equal(objectDefinitions.length, 4, 'accepts standards-based object definitions');
-  t.equal(proj4Definitions.length, 4, 'accepts the proj4js PROJJSON subset');
-  t.ok(invalidCRSType, 'invalid type is covered by a compile-time assertion');
-  t.ok(unsupportedCompoundCRS, 'compound CRS is covered by a compile-time assertion');
-  t.ok(unsupportedVerticalCRS, 'vertical CRS is covered by a compile-time assertion');
-  t.end();
+test('CRS definitions expose the intended compile-time subsets', () => {
+  expect(serializedDefinitions).toHaveLength(3);
+  expect(objectDefinitions).toHaveLength(4);
+  expect(proj4Definitions).toHaveLength(4);
+  expect(invalidCRSType).toBeTruthy();
+  expect(unsupportedCompoundCRS).toBeTruthy();
+  expect(unsupportedVerticalCRS).toBeTruthy();
 });

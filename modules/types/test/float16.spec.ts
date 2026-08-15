@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {
   NativeFloat16ArrayConstructor,
   getFloat16ArrayConstructor,
@@ -10,29 +10,26 @@ import {
   isTypedArray
 } from '@math.gl/types';
 
-test('math.gl#Float16Array constructor', t => {
+test('math.gl#Float16Array constructor', () => {
   const Float16ArrayConstructor = getFloat16ArrayConstructor();
   const value = new Float16ArrayConstructor(1);
 
-  t.ok(isTypedArray(value), 'selected constructor creates a typed array');
+  expect(isTypedArray(value), 'selected constructor creates a typed array').toBeTruthy();
 
   if (NativeFloat16ArrayConstructor) {
-    t.equal(
-      Float16ArrayConstructor,
-      NativeFloat16ArrayConstructor,
-      'selects the native Float16Array constructor'
+    expect(Float16ArrayConstructor, 'selects the native Float16Array constructor').toBe(
+      NativeFloat16ArrayConstructor
     );
-    t.ok(
+    expect(
       isFloat16ArrayConstructor(Float16ArrayConstructor),
       'identifies the native Float16Array constructor'
-    );
+    ).toBeTruthy();
   } else {
-    t.equal(Float16ArrayConstructor, Uint16Array, 'falls back to Uint16Array');
+    expect(Float16ArrayConstructor, 'falls back to Uint16Array').toBe(Uint16Array);
   }
 
-  t.notOk(
+  expect(
     isFloat16ArrayConstructor(Uint16Array),
     'does not identify the Uint16Array fallback as native Float16Array'
-  );
-  t.end();
+  ).toBeFalsy();
 });

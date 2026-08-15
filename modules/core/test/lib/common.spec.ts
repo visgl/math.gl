@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 // Copyright (c) 2017 Uber Technologies, Inc.
 
-import test, {Test} from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {Vector2, Vector3, Pose, _MathUtils} from '@math.gl/core';
 import {config, configure, isArray, clone, equals, exactEquals, formatValue} from '@math.gl/core';
 import {toRadians, toDegrees} from '@math.gl/core';
@@ -21,283 +21,261 @@ import {
   clamp,
   lerp
 } from '@math.gl/core';
-import {tapeEquals} from 'test/utils/tape-assertions';
 
-test('math.gl#tests', t => {
-  // Note: tape 4.12 and higher no longer compares 0 and -0 equally...
-  // Workaround is to pin tape to 4.11
-  t.equals(0, 0, '0 and 0 compares equally');
-  t.equals(0, -0, '0 and -0 compares equally');
-  t.deepEquals([0], [0], '0 and 0 compares equally');
-  t.deepEquals([0], [-0], '0 and -0 compares equally');
-  t.end();
+test('math.gl#tests', () => {
+  expect(0, '0 and 0 compares equally').toBe(0);
+  expect(0 === -0, '0 and -0 compares equally').toBe(true);
+  expect([0], '0 and 0 compares equally').toEqual([0]);
+  expect(equals([0], [-0]), '0 and -0 compares equally').toBe(true);
 });
 
-test('math.gl#types', t => {
-  t.equals(typeof isArray, 'function');
-  t.equals(typeof radians, 'function');
-  t.equals(typeof equals, 'function');
-  t.equals(typeof config.EPSILON, 'number');
-  t.ok(_MathUtils);
-  t.end();
+test('math.gl#types', () => {
+  expect(typeof isArray).toBe('function');
+  expect(typeof radians).toBe('function');
+  expect(typeof equals).toBe('function');
+  expect(typeof config.EPSILON).toBe('number');
+  expect(_MathUtils).toBeTruthy();
 });
 
-test('math.gl#configue', t => {
+test('math.gl#configue', () => {
   const {EPSILON, debug} = config;
   configure({EPSILON: 1e-13, debug: false});
-  t.equals(config.EPSILON, 1e-13);
-  t.equals(config.debug, false);
+  expect(config.EPSILON).toBe(1e-13);
+  expect(config.debug).toBe(false);
   configure({EPSILON, debug});
-  t.equals(config.EPSILON, EPSILON);
-  t.equals(config.debug, debug);
-  t.end();
+  expect(config.EPSILON).toBe(EPSILON);
+  expect(config.debug).toBe(debug);
 });
 
-test('math.gl#isArray', t => {
-  t.ok(isArray([]), 'isArray([])');
-  t.ok(isArray(new Float32Array(1)), 'isArray(Float32Array)');
-  t.notOk(isArray(new ArrayBuffer(4)), 'isArray(ArrayBuffer)');
-  t.notOk(isArray(new DataView(new ArrayBuffer(16))), 'isArray(DataView)');
+test('math.gl#isArray', () => {
+  expect(isArray([]), 'isArray([])').toBeTruthy();
+  expect(isArray(new Float32Array(1)), 'isArray(Float32Array)').toBeTruthy();
+  expect(isArray(new ArrayBuffer(4)), 'isArray(ArrayBuffer)').toBeFalsy();
+  expect(isArray(new DataView(new ArrayBuffer(16))), 'isArray(DataView)').toBeFalsy();
 
-  t.notOk(isArray(undefined), 'isArray(undefined)');
-  t.notOk(isArray(null), 'isArray(null)');
-  t.notOk(isArray({}), 'isArray({})');
-  t.notOk(isArray({length: 0}), 'isArray({...})');
-  t.notOk(isArray(1), 'isArray(1)');
-  t.notOk(isArray(NaN), 'isArray(NaN)');
-  t.notOk(isArray('NaN'), "isArray('NaN')");
-  t.notOk(isArray(''), "isArray('')");
-  t.end();
+  expect(isArray(undefined), 'isArray(undefined)').toBeFalsy();
+  expect(isArray(null), 'isArray(null)').toBeFalsy();
+  expect(isArray({}), 'isArray({})').toBeFalsy();
+  expect(isArray({length: 0}), 'isArray({...})').toBeFalsy();
+  expect(isArray(1), 'isArray(1)').toBeFalsy();
+  expect(isArray(NaN), 'isArray(NaN)').toBeFalsy();
+  expect(isArray('NaN'), "isArray('NaN')").toBeFalsy();
+  expect(isArray(''), "isArray('')").toBeFalsy();
 });
 
-test('math.gl#clone', t => {
-  tapeEquals(t, clone([1, 2, 3]), [1, 2, 3], 'clone([])');
-  tapeEquals(t, clone(new Vector3([1, 2, 3])), [1, 2, 3], 'clone([])');
-  t.end();
+test('math.gl#clone', () => {
+  expect(equals(clone([1, 2, 3]), [1, 2, 3]), 'clone([])').toBe(true);
+  expect(equals(clone(new Vector3([1, 2, 3])), [1, 2, 3]), 'clone([])').toBe(true);
 });
 
-test('math.gl#formatValue', t => {
-  t.equals(formatValue(1), '1');
-  t.end();
+test('math.gl#formatValue', () => {
+  expect(formatValue(1)).toBe('1');
 });
 
-test('math.gl#equals', t => {
-  t.notOk(equals(1.0, 0.0), 'should return false for different numbers');
-  tapeEquals(t, 1.0, 1.0, 'should return true for the same number');
-  tapeEquals(t, 1.0 + config.EPSILON / 2, 1.0, 'should return true for numbers that are close');
-  tapeEquals(
-    t,
-    [1.0, 2.0],
-    new Float32Array([1.0, 2.0]),
+test('math.gl#equals', () => {
+  expect(equals(1.0, 0.0), 'should return false for different numbers').toBeFalsy();
+  expect(equals(1.0, 1.0), 'should return true for the same number').toBe(true);
+  expect(
+    equals(1.0 + config.EPSILON / 2, 1.0),
+    'should return true for numbers that are close'
+  ).toBe(true);
+  expect(
+    equals([1.0, 2.0], new Float32Array([1.0, 2.0])),
     'should return true for Array and TypedArray with same values'
-  );
-  t.notOk(
+  ).toBe(true);
+  expect(
     equals([1.0, 2.0], new Float32Array([1.0, 3.0])),
     'should return false for Array and TypedArray with different values'
-  );
-  t.notOk(equals([0], 0), 'should return false for Array and Number');
-  t.notOk(equals(null, 0), 'should return false for null and Number');
-  tapeEquals(
-    t,
-    [1.0, 2.0],
-    new Vector2([1.0, 2.0]),
+  ).toBeFalsy();
+  expect(equals([0], 0), 'should return false for Array and Number').toBeFalsy();
+  expect(equals(null, 0), 'should return false for null and Number').toBeFalsy();
+  expect(
+    equals([1.0, 2.0], new Vector2([1.0, 2.0])),
     'should return true for Array and Vector2 with same values'
-  );
-  t.ok(
+  ).toBe(true);
+  expect(
     equals(new Vector2([1.0, 2.0]), [1.0, 2.0]),
     'should return true for Array and Vector2 with same values'
-  );
-  t.notOk(
+  ).toBeTruthy();
+  expect(
     equals([1.0, 2.0], [1.0, 2.0, 3.0]),
     'should return false for Arrays of different lengths'
-  );
-  t.ok(
+  ).toBeFalsy();
+  expect(
     equals(new Vector2([1.0, 2.0]), [1.0, 2.0]),
     'should return true for Arrays of different types'
-  );
-  t.notOk(
+  ).toBeTruthy();
+  expect(
     equals([1.0, 2.0], new Pose()),
     'should return false for incompatible objects w equals method'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     equals(new Pose(), [1.0, 2.0]),
     'should return false for incompatible objects w equals method'
-  );
-  t.end();
+  ).toBeFalsy();
 });
 
-test('math.gl#exactEquals', t => {
-  t.notOk(exactEquals(1.0, 0.0), 'should return false for different numbers');
-  t.ok(exactEquals(1.0, 1.0), 'should return true for the same number');
-  t.notOk(
+test('math.gl#exactEquals', () => {
+  expect(exactEquals(1.0, 0.0), 'should return false for different numbers').toBeFalsy();
+  expect(exactEquals(1.0, 1.0), 'should return true for the same number').toBeTruthy();
+  expect(
     exactEquals(1.0 + config.EPSILON / 2, 1.0),
     'should return false for numbers that are close'
-  );
-  t.ok(exactEquals([1.0, 2.0], [1.0, 2.0]), 'should return true for Arrays  with same values');
-  t.notOk(
+  ).toBeFalsy();
+  expect(
+    exactEquals([1.0, 2.0], [1.0, 2.0]),
+    'should return true for Arrays  with same values'
+  ).toBeTruthy();
+  expect(
     exactEquals([1.0, 2.0], new Float32Array([1.0, 2.0])),
     'should return false for Array and TypedArray with same values'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     exactEquals([1.0, 2.0], new Float32Array([1.0, 3.0])),
     'should return false for Array and TypedArray with different values'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     exactEquals([1.0, 2.0], new Vector2([1.0, 2.0])),
     'should return false for Array and Vector2 with same values'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     exactEquals([1.0, 2.0], [1.0, 2.0, 3.0]),
     'should return false for Arrays of different lengths'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     exactEquals(new Pose(), [1.0, 2.0]),
     'should return false for incompatible objects w equals method'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     exactEquals([1.0, 2.0], new Pose()),
     'should return false for incompatible objects w equals method'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     exactEquals(new Pose(), new Pose({x: 1})),
     'should return false for different compatible objects w equals method'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     exactEquals(new Pose({x: 1}), new Pose()),
     'should return false for different compatible objects w equals method'
-  );
-  t.notOk(
+  ).toBeFalsy();
+  expect(
     exactEquals([new Pose({x: 1})], [new Pose()]),
     'should return false for arrays of different compatible objects w equals method'
-  );
-  t.end();
+  ).toBeFalsy();
 });
 
-function runTests(t: Test, functionUnderTest: Function, testCases: any[]): void {
+function runTests(functionUnderTest: Function, testCases: any[]): void {
   for (const testCase of testCases) {
-    tapeEquals(
-      t,
-      functionUnderTest(testCase.input),
-      testCase.result,
+    expect(
+      equals(functionUnderTest(testCase.input), testCase.result),
       `should return a value of ${JSON.stringify(testCase.result)}`
-    );
+    ).toBe(true);
   }
 }
 
-test('math.gl#toRadians', t => {
-  runTests(t, toRadians, [
+test('math.gl#toRadians', () => {
+  runTests(toRadians, [
     {input: 180, result: Math.PI},
     {input: [180, 180, 180], result: [Math.PI, Math.PI, Math.PI]},
     {input: new Vector3(180, 180, 180), result: [Math.PI, Math.PI, Math.PI]}
   ]);
-  t.end();
 });
 
-test('math.gl#toDegrees', t => {
-  runTests(t, toDegrees, [
+test('math.gl#toDegrees', () => {
+  runTests(toDegrees, [
     {input: Math.PI, result: 180},
     {input: [Math.PI, Math.PI, Math.PI], result: [180, 180, 180]}
   ]);
-  t.end();
 });
 
-test('math.gl#radians', t => {
-  runTests(t, radians, [
+test('math.gl#radians', () => {
+  runTests(radians, [
     {input: 180, result: Math.PI},
     {input: [180, 180, 180], result: [Math.PI, Math.PI, Math.PI]},
     {input: new Vector3(180, 180, 180), result: [Math.PI, Math.PI, Math.PI]}
   ]);
-  t.end();
 });
 
-test('math.gl#degrees', t => {
-  runTests(t, degrees, [
+test('math.gl#degrees', () => {
+  runTests(degrees, [
     {input: Math.PI, result: 180},
     {input: [Math.PI, Math.PI, Math.PI], result: [180, 180, 180]}
   ]);
-  t.end();
 });
 
-test('math.gl#safeMod', t => {
-  t.equals(safeMod(1, 3), 1);
-  t.equals(safeMod(4, 3), 1);
-  t.equals(safeMod(-1, 3), 2);
-  t.equals(safeMod(-4, 3), 2);
-  t.end();
+test('math.gl#safeMod', () => {
+  expect(safeMod(1, 3)).toBe(1);
+  expect(safeMod(4, 3)).toBe(1);
+  expect(safeMod(-1, 3)).toBe(2);
+  expect(safeMod(-4, 3)).toBe(2);
 });
 
-test('math.gl#normalizeAngle', t => {
-  t.equals(normalizeAngle(0, 'zero-to-two-pi'), 0);
-  t.equals(normalizeAngle(-Math.PI / 2, 'zero-to-two-pi'), (Math.PI * 3) / 2);
-  t.equals(normalizeAngle(Math.PI * 3, 'zero-to-two-pi'), Math.PI);
-  t.equals(normalizeAngle(Math.PI * 1.5, 'negative-pi-to-pi'), -Math.PI / 2);
-  t.equals(normalizeAngle(-Math.PI * 1.5, 'negative-pi-to-pi'), Math.PI / 2);
-  t.end();
+test('math.gl#normalizeAngle', () => {
+  expect(normalizeAngle(0, 'zero-to-two-pi')).toBe(0);
+  expect(normalizeAngle(-Math.PI / 2, 'zero-to-two-pi')).toBe((Math.PI * 3) / 2);
+  expect(normalizeAngle(Math.PI * 3, 'zero-to-two-pi')).toBe(Math.PI);
+  expect(normalizeAngle(Math.PI * 1.5, 'negative-pi-to-pi')).toBe(-Math.PI / 2);
+  expect(normalizeAngle(-Math.PI * 1.5, 'negative-pi-to-pi')).toBe(Math.PI / 2);
 });
 
-test('math.gl#sin', t => {
-  runTests(t, sin, [
+test('math.gl#sin', () => {
+  runTests(sin, [
     {input: 0, result: 0},
     {input: [Math.PI / 2, Math.PI / 6, 0], result: [1, 0.5, 0]}
   ]);
-  t.end();
 });
 
-test('math.gl#cos', t => {
-  runTests(t, cos, [
+test('math.gl#cos', () => {
+  runTests(cos, [
     {input: 0, result: 1},
     {input: [Math.PI / 2, Math.PI / 3, 0], result: [0, 0.5, 1]}
   ]);
-  t.end();
 });
 
-test('math.gl#tan', t => {
-  runTests(t, tan, [
+test('math.gl#tan', () => {
+  runTests(tan, [
     {input: 0, result: 0},
     {input: [Math.PI / 4, 0], result: [1, 0]}
   ]);
-  t.end();
 });
 
-test('math.gl#asin', t => {
-  runTests(t, asin, [
+test('math.gl#asin', () => {
+  runTests(asin, [
     {input: 0, result: 0},
     {input: [1, 0.5, 0], result: [Math.PI / 2, Math.PI / 6, 0]}
   ]);
-  t.end();
 });
 
-test('math.gl#acos', t => {
-  runTests(t, acos, [
+test('math.gl#acos', () => {
+  runTests(acos, [
     {input: 1, result: 0},
     {input: [0, 0.5, 1], result: [Math.PI / 2, Math.PI / 3, 0]}
   ]);
-  t.end();
 });
 
-test('math.gl#atan', t => {
-  runTests(t, atan, [
+test('math.gl#atan', () => {
+  runTests(atan, [
     {input: 0, result: 0},
     {input: [1, 0], result: [Math.PI / 4, 0]}
   ]);
-  t.end();
 });
 
-test('math.gl#clamp', t => {
-  tapeEquals(t, clamp(5.0, 2.0, 0.2), 2, 'clamp numbers');
-  tapeEquals(t, clamp([1.0, 0.0], -1.0, 0.2), [0.2, -0], 'clamp arrays');
-  tapeEquals(t, clamp(new Float32Array([2.0, -1.0]), -1.0, 1.0), [1.0, -1.0], 'clamp arrays');
-  t.end();
-});
-
-test('math.gl#lerp', t => {
-  tapeEquals(t, lerp(1.0, 2.0, 0.2), 1.2, 'interpolate between numbers');
-  tapeEquals(t, lerp([1.0, 0.0], [2.0, -1.0], 0.2), [1.2, -0.2], 'interpolate between arrays');
-  tapeEquals(
-    t,
-    lerp(new Float32Array([1.0, 0.0]), [2.0, -1.0], 0.2),
-    [1.2, -0.2],
-    'interpolate between arrays'
+test('math.gl#clamp', () => {
+  expect(equals(clamp(5.0, 2.0, 0.2), 2), 'clamp numbers').toBe(true);
+  expect(equals(clamp([1.0, 0.0], -1.0, 0.2), [0.2, -0]), 'clamp arrays').toBe(true);
+  expect(equals(clamp(new Float32Array([2.0, -1.0]), -1.0, 1.0), [1.0, -1.0]), 'clamp arrays').toBe(
+    true
   );
-  t.end();
+});
+
+test('math.gl#lerp', () => {
+  expect(equals(lerp(1.0, 2.0, 0.2), 1.2), 'interpolate between numbers').toBe(true);
+  expect(
+    equals(lerp([1.0, 0.0], [2.0, -1.0], 0.2), [1.2, -0.2]),
+    'interpolate between arrays'
+  ).toBe(true);
+  expect(
+    equals(lerp(new Float32Array([1.0, 0.0]), [2.0, -1.0], 0.2), [1.2, -0.2]),
+    'interpolate between arrays'
+  ).toBe(true);
 });

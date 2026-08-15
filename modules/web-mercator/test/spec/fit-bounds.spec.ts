@@ -1,7 +1,14 @@
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {fitBounds} from '@math.gl/web-mercator';
 import {WebMercatorViewport, FitBoundsOptions} from '@math.gl/web-mercator';
 import {toLowPrecision} from '../utils/test-utils';
+
+expect.addEqualityTesters([
+  (first, second) =>
+    typeof first === 'number' && typeof second === 'number' && first === 0 && second === 0
+      ? true
+      : undefined
+]);
 
 const FITBOUNDS_TEST_CASES: [
   FitBoundsOptions,
@@ -123,19 +130,18 @@ const FITBOUNDS_TEST_CASES: [
   ]
 ];
 
-test('fitBounds', t => {
+test('fitBounds', () => {
   for (const [input, expected] of FITBOUNDS_TEST_CASES) {
     const result = fitBounds(input);
 
-    t.ok(Number.isFinite(result.longitude), 'get valid longitude');
-    t.ok(Number.isFinite(result.latitude), 'get valid latitude');
-    t.ok(Number.isFinite(result.zoom), 'get valid zoom');
-    t.deepEqual(toLowPrecision(result), toLowPrecision(expected), 'valid viewport returned');
+    expect(Number.isFinite(result.longitude), 'get valid longitude').toBeTruthy();
+    expect(Number.isFinite(result.latitude), 'get valid latitude').toBeTruthy();
+    expect(Number.isFinite(result.zoom), 'get valid zoom').toBeTruthy();
+    expect(toLowPrecision(result), 'valid viewport returned').toEqual(toLowPrecision(expected));
   }
-  t.end();
 });
 
-test('WebMercatorViewport.fitBounds', t => {
+test('WebMercatorViewport.fitBounds', () => {
   for (const [input, expected] of FITBOUNDS_TEST_CASES) {
     const viewport = new WebMercatorViewport({
       longitude: -122,
@@ -146,23 +152,20 @@ test('WebMercatorViewport.fitBounds', t => {
     });
     const result = viewport.fitBounds(input.bounds, input);
 
-    t.ok(result instanceof WebMercatorViewport, 'get viewport');
-    t.equals(
-      toLowPrecision(result.longitude),
-      toLowPrecision(expected.longitude),
-      'get correct longitude'
+    expect(result instanceof WebMercatorViewport, 'get viewport').toBeTruthy();
+    expect(toLowPrecision(result.longitude), 'get correct longitude').toBe(
+      toLowPrecision(expected.longitude)
     );
-    t.equals(
-      toLowPrecision(result.latitude),
-      toLowPrecision(expected.latitude),
-      'get correct latitude'
+    expect(toLowPrecision(result.latitude), 'get correct latitude').toBe(
+      toLowPrecision(expected.latitude)
     );
-    t.equals(toLowPrecision(result.zoom), toLowPrecision(expected.zoom), 'get correct zoom');
+    expect(toLowPrecision(result.zoom) === toLowPrecision(expected.zoom), 'get correct zoom').toBe(
+      true
+    );
   }
-  t.end();
 });
 
-test('fitBounds#degenerate', t => {
+test('fitBounds#degenerate', () => {
   const OPTIONS = {
     height: 100,
     width: 100,
@@ -172,15 +175,15 @@ test('fitBounds#degenerate', t => {
   };
 
   const viewport = new WebMercatorViewport(OPTIONS);
-  t.doesNotThrow(
+  expect(
     () =>
       viewport.fitBounds([
         [-70, 10],
         [-70, 10]
       ]),
     'degenerate bounds do not throw by default'
-  );
-  t.throws(
+  ).not.toThrow();
+  expect(
     () =>
       viewport.fitBounds(
         [
@@ -190,8 +193,8 @@ test('fitBounds#degenerate', t => {
         {maxZoom: Infinity}
       ),
     'degenerate bounds throw if maxZoom removed'
-  );
-  t.doesNotThrow(
+  ).toThrow();
+  expect(
     () =>
       viewport.fitBounds(
         [
@@ -201,9 +204,7 @@ test('fitBounds#degenerate', t => {
         {minExtent: 0.01, maxZoom: Infinity}
       ),
     'degenerate bounds does not throw if maxZoom removed and minExtents added'
-  );
+  ).not.toThrow();
 
-  t.ok(viewport instanceof WebMercatorViewport, 'get viewport');
-
-  t.end();
+  expect(viewport instanceof WebMercatorViewport, 'get viewport').toBeTruthy();
 });

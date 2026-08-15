@@ -6,10 +6,10 @@
 // under this permissive license: https://github.com/proj4js/proj4js/blob/master/LICENSE.md
 
 /* eslint-disable */
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
+import {equals} from '@math.gl/core';
 import {Proj4Projection} from '@math.gl/proj4';
 import {wgs84GeographicCRS} from '@math.gl/crs/test/projjson-fixtures';
-import {tapeEqualsEpsilon} from 'test/utils/tape-assertions';
 
 import {testPoints} from './test-data';
 
@@ -17,6 +17,10 @@ const WGS84_PROJJSON = wgs84GeographicCRS;
 
 const WGS84_WKT2 =
   'GEOGCRS["WGS 84",DATUM["World Geodetic System 1984",ELLIPSOID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],CS[ellipsoidal,2],AXIS["geodetic latitude (Lat)",north,ORDER[1]],AXIS["geodetic longitude (Lon)",east,ORDER[2]],ANGLEUNIT["degree",0.0174532925199433]]';
+
+function expectClose(actual: number, expected: number, epsilon: number): void {
+  expect(equals(actual, expected, epsilon)).toBe(true);
+}
 
 /** Create a two-by-two NTv2 grid with one- and two-arcsecond datum shifts. */
 function createDatumGridFixture(): ArrayBuffer {
@@ -66,14 +70,13 @@ Proj4Projection.defineProjectionAliases({
 //   this.end();
 // });
 
-test('proj2proj#should work transforming from one projection to another', t => {
+test('proj2proj#should work transforming from one projection to another', () => {
   var sweref99tm = '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs';
   var rt90 =
     '+lon_0=15.808277777799999 +lat_0=0.0 +k=1.0 +x_0=1500000.0 +y_0=0.0 +proj=tmerc +ellps=bessel +units=m +towgs84=414.1,41.3,603.1,-0.855,2.141,-7.023,0 +no_defs';
   var result = new Proj4Projection({from: sweref99tm, to: rt90}).project([319180, 6399862]);
-  tapeEqualsEpsilon(t, result[0], 1271137.9275601401, 0.000001);
-  tapeEqualsEpsilon(t, result[1], 6404230.291459564, 0.000001);
-  t.end();
+  expect(equals(result[0], 1271137.9275601401, 0.000001)).toBe(true);
+  expect(equals(result[1], 6404230.291459564, 0.000001)).toBe(true);
 });
 
 /*
@@ -86,9 +89,9 @@ it('should work with a proj object', t => {
 });
 */
 
-test('Proj4Projection', t => {
+test('Proj4Projection', () => {
   for (const testPoint of testPoints) {
-    t.comment(`new Proj4Projection({to: ${testPoint.code}})`);
+    console.log(`new Proj4Projection({to: ${testPoint.code}})`);
 
     let xyAcc = 2;
     // let llAcc = 6;
@@ -107,8 +110,8 @@ test('Proj4Projection', t => {
     var proj = new Proj4Projection({to: testPoint.code});
     var xy = proj.project(testPoint.ll);
 
-    tapeEqualsEpsilon(t, xy[0], testPoint.xy[0], xyEPSLN, 'x is close');
-    tapeEqualsEpsilon(t, xy[1], testPoint.xy[1], xyEPSLN, 'y is close');
+    expect(equals(xy[0], testPoint.xy[0], xyEPSLN), 'x is close').toBe(true);
+    expect(equals(xy[1], testPoint.xy[1], xyEPSLN), 'y is close').toBe(true);
 
     /*
     // it('should work with backwards', t => {
@@ -211,29 +214,27 @@ test('Proj4Projection', t => {
     tapeEqualsEpsilon(t, ll.y, testPoint.ll[1], llEPSLN, 'y is close');
     */
   }
-  t.end();
 });
 
-test('Proj4Projection is bound', t => {
+test('Proj4Projection is bound', () => {
   const projection = new Proj4Projection({from: 'WGS84', to: 'WGS84'});
   const coords = [[0, 0]];
   const reprojectedCooords = coords.map(projection.project);
-  tapeEqualsEpsilon(t, reprojectedCooords[0][0], 0, 0.000001);
-  tapeEqualsEpsilon(t, reprojectedCooords[0][1], 0, 0.000001);
-  t.end();
+  expect(equals(reprojectedCooords[0][0], 0, 0.000001)).toBe(true);
+  expect(equals(reprojectedCooords[0][1], 0, 0.000001)).toBe(true);
 });
 
-test('Proj4Projection accepts modern WKT2 and PROJJSON definitions', t => {
+test('Proj4Projection accepts modern WKT2 and PROJJSON definitions', () => {
   const longitudeLatitude = [-122.4, 37.8];
 
   for (const definition of [WGS84_WKT2, WGS84_PROJJSON]) {
     const projection = new Proj4Projection({from: definition, to: 'EPSG:3857'});
     const projectedPosition = projection.project(longitudeLatitude);
 
-    tapeEqualsEpsilon(t, projectedPosition[0], -13625505.673096687, 0.000001);
-    tapeEqualsEpsilon(t, projectedPosition[1], 4551210.919691888, 0.000001);
-    tapeEqualsEpsilon(t, projection.unproject(projectedPosition)[0], longitudeLatitude[0], 1e-10);
-    tapeEqualsEpsilon(t, projection.unproject(projectedPosition)[1], longitudeLatitude[1], 1e-10);
+    expectClose(projectedPosition[0], -13625505.673096687, 0.000001);
+    expectClose(projectedPosition[1], 4551210.919691888, 0.000001);
+    expectClose(projection.unproject(projectedPosition)[0], longitudeLatitude[0], 1e-10);
+    expectClose(projection.unproject(projectedPosition)[1], longitudeLatitude[1], 1e-10);
   }
 
   Proj4Projection.defineProjectionAliases({MATH_GL_WGS84_PROJJSON: WGS84_PROJJSON});
@@ -241,49 +242,42 @@ test('Proj4Projection accepts modern WKT2 and PROJJSON definitions', t => {
     from: 'MATH_GL_WGS84_PROJJSON',
     to: 'EPSG:3857'
   });
-  tapeEqualsEpsilon(
-    t,
-    aliasProjection.project(longitudeLatitude)[0],
-    -13625505.673096687,
-    0.000001
-  );
-  t.end();
+  expectClose(aliasProjection.project(longitudeLatitude)[0], -13625505.673096687, 0.000001);
 });
 
-test('Proj4Projection supports predefined UTM and UPS coordinate systems', t => {
+test('Proj4Projection supports predefined UTM and UPS coordinate systems', () => {
   const northUtmProjection = new Proj4Projection({from: 'WGS84', to: 'EPSG:32610'});
   const projectedNorthUtmPosition = northUtmProjection.project([-122.4, 37.8]);
 
-  tapeEqualsEpsilon(t, projectedNorthUtmPosition[0], 552821.3829931148, 0.000001);
-  tapeEqualsEpsilon(t, projectedNorthUtmPosition[1], 4183794.4989348184, 0.000001);
-  tapeEqualsEpsilon(t, northUtmProjection.unproject(projectedNorthUtmPosition)[0], -122.4, 1e-10);
-  tapeEqualsEpsilon(t, northUtmProjection.unproject(projectedNorthUtmPosition)[1], 37.8, 1e-10);
+  expectClose(projectedNorthUtmPosition[0], 552821.3829931148, 0.000001);
+  expectClose(projectedNorthUtmPosition[1], 4183794.4989348184, 0.000001);
+  expectClose(northUtmProjection.unproject(projectedNorthUtmPosition)[0], -122.4, 1e-10);
+  expectClose(northUtmProjection.unproject(projectedNorthUtmPosition)[1], 37.8, 1e-10);
 
   const southUtmProjection = new Proj4Projection({from: 'WGS84', to: 'EPSG:32756'});
   const projectedSouthUtmPosition = southUtmProjection.project([151.2, -33.9]);
 
-  tapeEqualsEpsilon(t, projectedSouthUtmPosition[0], 333568.9410115522, 0.000001);
-  tapeEqualsEpsilon(t, projectedSouthUtmPosition[1], 6247473.33684402, 0.000001);
-  tapeEqualsEpsilon(t, southUtmProjection.unproject(projectedSouthUtmPosition)[0], 151.2, 1e-10);
-  tapeEqualsEpsilon(t, southUtmProjection.unproject(projectedSouthUtmPosition)[1], -33.9, 1e-10);
+  expectClose(projectedSouthUtmPosition[0], 333568.9410115522, 0.000001);
+  expectClose(projectedSouthUtmPosition[1], 6247473.33684402, 0.000001);
+  expectClose(southUtmProjection.unproject(projectedSouthUtmPosition)[0], 151.2, 1e-10);
+  expectClose(southUtmProjection.unproject(projectedSouthUtmPosition)[1], -33.9, 1e-10);
 
   const northUpsProjection = new Proj4Projection({from: 'WGS84', to: 'EPSG:5041'});
   const projectedNorthUpsPosition = northUpsProjection.project([0, 85]);
 
-  tapeEqualsEpsilon(t, projectedNorthUpsPosition[0], 2000000, 0.000001);
-  tapeEqualsEpsilon(t, projectedNorthUpsPosition[1], 1444542.6086173225, 0.000001);
-  tapeEqualsEpsilon(t, northUpsProjection.unproject(projectedNorthUpsPosition)[1], 85, 1e-10);
+  expectClose(projectedNorthUpsPosition[0], 2000000, 0.000001);
+  expectClose(projectedNorthUpsPosition[1], 1444542.6086173225, 0.000001);
+  expectClose(northUpsProjection.unproject(projectedNorthUpsPosition)[1], 85, 1e-10);
 
   const southUpsProjection = new Proj4Projection({from: 'WGS84', to: 'EPSG:5042'});
   const projectedSouthUpsPosition = southUpsProjection.project([0, -85]);
 
-  tapeEqualsEpsilon(t, projectedSouthUpsPosition[0], 2000000, 0.000001);
-  tapeEqualsEpsilon(t, projectedSouthUpsPosition[1], 2555457.3913826775, 0.000001);
-  tapeEqualsEpsilon(t, southUpsProjection.unproject(projectedSouthUpsPosition)[1], -85, 1e-10);
-  t.end();
+  expectClose(projectedSouthUpsPosition[0], 2000000, 0.000001);
+  expectClose(projectedSouthUpsPosition[1], 2555457.3913826775, 0.000001);
+  expectClose(southUpsProjection.unproject(projectedSouthUpsPosition)[1], -85, 1e-10);
 });
 
-test('Proj4Projection respects declared axis order without breaking bound callbacks', t => {
+test('Proj4Projection respects declared axis order without breaking bound callbacks', () => {
   const projection = new Proj4Projection({
     from: '+proj=longlat +datum=WGS84 +axis=neu',
     to: 'EPSG:3857',
@@ -295,15 +289,14 @@ test('Proj4Projection respects declared axis order without breaking bound callba
   ];
   const projectedCoordinates = coordinates.map(projection.project);
 
-  tapeEqualsEpsilon(t, projectedCoordinates[0][0], -13625505.673096687, 0.000001);
-  tapeEqualsEpsilon(t, projectedCoordinates[0][1], 4551210.919691888, 0.000001);
-  tapeEqualsEpsilon(t, projectedCoordinates[1][0], -8237642.318702244, 0.000001);
-  tapeEqualsEpsilon(t, projection.unproject(projectedCoordinates[0])[0], 37.8, 1e-10);
-  tapeEqualsEpsilon(t, projection.unproject(projectedCoordinates[0])[1], -122.4, 1e-10);
-  t.end();
+  expectClose(projectedCoordinates[0][0], -13625505.673096687, 0.000001);
+  expectClose(projectedCoordinates[0][1], 4551210.919691888, 0.000001);
+  expectClose(projectedCoordinates[1][0], -8237642.318702244, 0.000001);
+  expectClose(projection.unproject(projectedCoordinates[0])[0], 37.8, 1e-10);
+  expectClose(projection.unproject(projectedCoordinates[0])[1], -122.4, 1e-10);
 });
 
-test('Proj4Projection registers and applies NTv2 datum grids', t => {
+test('Proj4Projection registers and applies NTv2 datum grids', () => {
   Proj4Projection.registerDatumGrid('math-gl-test.gsb', createDatumGridFixture(), {
     includeErrorFields: false
   });
@@ -314,11 +307,10 @@ test('Proj4Projection registers and applies NTv2 datum grids', t => {
   });
   const projectedPosition = projection.project([-0.5, 0.5]);
 
-  tapeEqualsEpsilon(t, projectedPosition[0], -0.5 - 2 / 3600, 1e-10);
-  tapeEqualsEpsilon(t, projectedPosition[1], 0.5 + 1 / 3600, 1e-10);
-  tapeEqualsEpsilon(t, projection.unproject(projectedPosition)[0], -0.5, 1e-10);
-  tapeEqualsEpsilon(t, projection.unproject(projectedPosition)[1], 0.5, 1e-10);
-  t.end();
+  expectClose(projectedPosition[0], -0.5 - 2 / 3600, 1e-10);
+  expectClose(projectedPosition[1], 0.5 + 1 / 3600, 1e-10);
+  expectClose(projection.unproject(projectedPosition)[0], -0.5, 1e-10);
+  expectClose(projection.unproject(projectedPosition)[1], 0.5, 1e-10);
 });
 
 /*

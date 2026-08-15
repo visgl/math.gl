@@ -1,6 +1,4 @@
-// import test from 'tape-promise/tape';
-// import {tapeEquals} from 'test/utils/tape-assertions';
-import {it, expect} from 'test/utils/expect-assertions';
+import {expect, it} from 'vitest';
 
 import {
   AxisAlignedBoundingBox,

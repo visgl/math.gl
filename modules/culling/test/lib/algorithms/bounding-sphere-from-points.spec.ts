@@ -1,10 +1,9 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import test from 'tape-promise/tape';
-import {tapeEquals} from 'test/utils/tape-assertions';
+import {test, expect} from 'vitest';
 
-import {NumericArray, Vector3} from '@math.gl/core';
+import {NumericArray, Vector3, equals} from '@math.gl/core';
 import {makeBoundingSphereFromPoints} from '@math.gl/culling';
 
 function getPositions(center: Readonly<NumericArray>) {
@@ -19,36 +18,30 @@ function getPositions(center: Readonly<NumericArray>) {
   ];
 }
 
-test('makeBoundingSphereFromPoints without positions returns an empty sphere', t => {
+test('makeBoundingSphereFromPoints without positions returns an empty sphere', () => {
   const sphere = makeBoundingSphereFromPoints([]);
-  tapeEquals(t, sphere.center, Vector3.ZERO);
-  t.equals(sphere.radius, 0.0);
-
-  t.end();
+  expect(equals(sphere.center, Vector3.ZERO)).toBe(true);
+  expect(sphere.radius).toBe(0.0);
 });
 
-test('makeBoundingSphereFromPoints works with one point', t => {
+test('makeBoundingSphereFromPoints works with one point', () => {
   const expectedCenter = [1.0, 2.0, 3.0];
   const sphere = makeBoundingSphereFromPoints([expectedCenter]);
-  tapeEquals(t, sphere.center, expectedCenter);
-  t.equals(sphere.radius, 0.0);
-
-  t.end();
+  expect(equals(sphere.center, expectedCenter)).toBe(true);
+  expect(sphere.radius).toBe(0.0);
 });
 
-test('makeBoundingSphereFromPoints computes a center from points', t => {
+test('makeBoundingSphereFromPoints computes a center from points', () => {
   const positionsRadius = 1.0;
   const positionsCenter = [10000001.0, 0.0, 0.0];
   const center = [10000000.0, 0.0, 0.0];
 
   const sphere = makeBoundingSphereFromPoints(getPositions(center));
-  tapeEquals(t, sphere.center, positionsCenter);
-  t.equals(sphere.radius, positionsRadius);
-
-  t.end();
+  expect(equals(sphere.center, positionsCenter)).toBe(true);
+  expect(sphere.radius).toBe(positionsRadius);
 });
 
-test('makeBoundingSphereFromPoints contains all points (naive)', t => {
+test('makeBoundingSphereFromPoints contains all points (naive)', () => {
   const positions = getPositions([0, 0, 0]);
   const sphere = makeBoundingSphereFromPoints(positions);
   const radius = sphere.radius;
@@ -57,13 +50,11 @@ test('makeBoundingSphereFromPoints contains all points (naive)', t => {
   for (let i = 0; i < numPositions; i++) {
     const currentPos = positions[i];
     const deltaToCenter = currentPos.subtract(sphere.center);
-    t.ok(deltaToCenter.len() <= radius);
+    expect(deltaToCenter.len() <= radius).toBeTruthy();
   }
-
-  t.end();
 });
 
-test('makeBoundingSphereFromPoints contains all points (ritter)', t => {
+test('makeBoundingSphereFromPoints contains all points (ritter)', () => {
   const positions = getPositions([0, 0, 0]);
   positions.push(new Vector3(1, 1, 1), new Vector3(2, 2, 2), new Vector3(3, 3, 3));
   const sphere = makeBoundingSphereFromPoints(positions);
@@ -73,10 +64,8 @@ test('makeBoundingSphereFromPoints contains all points (ritter)', t => {
   for (let i = 0; i < numPositions; i++) {
     const currentPos = positions[i];
     const deltaToCenter = currentPos.subtract(sphere.center);
-    t.ok(deltaToCenter.len() <= radius);
+    expect(deltaToCenter.len() <= radius).toBeTruthy();
   }
-
-  t.end();
 });
 
 /*

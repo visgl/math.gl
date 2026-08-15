@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {
   ExpressionFunctionRegistry,
   compile,
@@ -11,7 +11,7 @@ import {
   parse
 } from '@math.gl/expressions';
 
-test('@math.gl/expressions#ExpressionFunctionRegistry', t => {
+test('@math.gl/expressions#ExpressionFunctionRegistry', () => {
   const registry = new ExpressionFunctionRegistry()
     .registerFunction('double', (value: number) => value * 2)
     .registerFunctions({
@@ -19,68 +19,61 @@ test('@math.gl/expressions#ExpressionFunctionRegistry', t => {
     });
 
   const fn = compile('double(add(value, offset))', {registry});
-  t.equal(fn({value: 3, offset: 2}), 10, 'calls functions with evaluated arguments');
-  t.ok(registry.hasFunction('double'), 'reports registered functions');
-  t.equal(registry.getFunction('double')?.(4), 8, 'returns registered functions');
-  t.ok(registry.unregisterFunction('double'), 'unregisters existing functions');
-  t.notOk(registry.unregisterFunction('missing'), 'reports missing functions');
-  t.end();
+  expect(fn({value: 3, offset: 2}), 'calls functions with evaluated arguments').toBe(10);
+  expect(registry.hasFunction('double'), 'reports registered functions').toBeTruthy();
+  expect(registry.getFunction('double')?.(4), 'returns registered functions').toBe(8);
+  expect(registry.unregisterFunction('double'), 'unregisters existing functions').toBeTruthy();
+  expect(registry.unregisterFunction('missing'), 'reports missing functions').toBeFalsy();
 });
 
-test('@math.gl/expressions#ExpressionFunctionRegistry collisions', t => {
+test('@math.gl/expressions#ExpressionFunctionRegistry collisions', () => {
   const registry = new ExpressionFunctionRegistry([{transform: (value: number) => value + 1}]);
 
-  t.throws(
+  expect(
     () => registry.registerFunction('transform', (value: number) => value * 2),
-    /already registered/,
     'rejects duplicate names'
-  );
+  ).toThrow(/already registered/);
 
   registry.registerFunction('transform', (value: number) => value * 2, {replace: true});
-  t.equal(
+  expect(
     compile('transform(value)', {registry})({value: 3}),
-    6,
     'replaces registrations explicitly'
-  );
-  t.throws(
+  ).toBe(6);
+  expect(
     () => registry.registerFunction('not-valid!', () => 1),
-    /Invalid expression function name/,
     'rejects names that cannot be called as identifiers'
-  );
-  t.throws(
+  ).toThrow(/Invalid expression function name/);
+  expect(
     () => registry.registerFunctions({constructor: () => 1}),
-    /Invalid expression function name/,
     'rejects unsafe property names'
-  );
-  t.end();
+  ).toThrow(/Invalid expression function name/);
 });
 
-test('@math.gl/expressions#ExpressionFunctionRegistry precedence and isolation', t => {
+test('@math.gl/expressions#ExpressionFunctionRegistry precedence and isolation', () => {
   const first = new ExpressionFunctionRegistry([{valueOf: () => 1}]);
   const second = new ExpressionFunctionRegistry([{valueOf: () => 2}]);
 
-  t.equal(evaluate(parse('valueOf()'), {}, {registry: first}), 1, 'uses the selected registry');
-  t.equal(evaluate(parse('valueOf()'), {}, {registry: second}), 2, 'isolates registries');
-  t.equal(
+  expect(evaluate(parse('valueOf()'), {}, {registry: first}), 'uses the selected registry').toBe(1);
+  expect(evaluate(parse('valueOf()'), {}, {registry: second}), 'isolates registries').toBe(2);
+  expect(
     evaluate(parse('valueOf()'), {valueOf: () => 3}, {registry: first}),
-    3,
     'context functions take precedence'
-  );
-  t.equal(
+  ).toBe(3);
+  expect(
     evaluate(parse('valueOf()'), {}, {registry: first, libraries: [{valueOf: () => 4}]}),
-    4,
     'per-evaluator libraries take precedence'
-  );
-  t.ok(Object.isFrozen(first.getFunctionTable()), 'returns a frozen function table snapshot');
-  t.end();
+  ).toBe(4);
+  expect(
+    Object.isFrozen(first.getFunctionTable()),
+    'returns a frozen function table snapshot'
+  ).toBeTruthy();
 });
 
-test('@math.gl/expressions#ExpressionFunctionRegistry async', async t => {
+test('@math.gl/expressions#ExpressionFunctionRegistry async', async () => {
   const registry = new ExpressionFunctionRegistry().registerFunction(
     'load',
     async (value: number) => await Promise.resolve(value * 2)
   );
   const fn = compileAsync('load(value) + 1', {registry});
-  t.equal(await fn({value: 4}), 9, 'awaits registered functions');
-  t.end();
+  expect(await fn({value: 4}), 'awaits registered functions').toBe(9);
 });

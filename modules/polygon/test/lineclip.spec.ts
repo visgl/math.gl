@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {clipPolyline, clipPolygon} from '@math.gl/polygon';
 
 export function flatten(arr: unknown, result: any[] = []): any[] {
@@ -16,7 +16,7 @@ export function flatten(arr: unknown, result: any[] = []): any[] {
   return result;
 }
 
-test('clips line', t => {
+test('clips line', () => {
   const result = clipPolyline(
     flatten([
       [-10, 10],
@@ -36,18 +36,16 @@ test('clips line', t => {
     [0, 0, 30, 30]
   );
 
-  t.comment(JSON.stringify(result));
-  t.deepEquals(result, [
+  console.log(JSON.stringify(result));
+  expect(result).toEqual([
     [0, 10, 10, 10, 10, 0],
     [20, 0, 20, 10, 30, 10],
     [30, 20, 20, 20, 20, 30],
     [10, 30, 10, 20, 5, 20, 0, 20]
   ]);
-
-  t.end();
 });
 
-test('clips line crossing through many times', t => {
+test('clips line crossing through many times', () => {
   const result = clipPolyline(
     flatten([
       [10, -10],
@@ -58,16 +56,14 @@ test('clips line crossing through many times', t => {
     [0, 0, 20, 20]
   );
 
-  t.comment(JSON.stringify(result));
-  t.deepEquals(result, [
+  console.log(JSON.stringify(result));
+  expect(result).toEqual([
     [10, 0, 10, 20],
     [20, 20, 20, 0]
   ]);
-
-  t.end();
 });
 
-test('clips 3d line', t => {
+test('clips 3d line', () => {
   const result = clipPolyline(
     flatten([
       [10, -10, 0],
@@ -79,16 +75,14 @@ test('clips 3d line', t => {
     {size: 3}
   );
 
-  t.comment(JSON.stringify(result));
-  t.deepEquals(result, [
+  console.log(JSON.stringify(result));
+  expect(result).toEqual([
     [10, 0, 5, 10, 20, 15],
     [20, 20, 5, 20, 0, -5]
   ]);
-
-  t.end();
 });
 
-test('clips line from partial array', t => {
+test('clips line from partial array', () => {
   const polyline = flatten([
     [10, -10],
     [10, 30],
@@ -100,16 +94,14 @@ test('clips line from partial array', t => {
     endIndex: 12
   });
 
-  t.comment(JSON.stringify(result));
-  t.deepEquals(result, [
+  console.log(JSON.stringify(result));
+  expect(result).toEqual([
     [10, 0, 10, 20],
     [20, 20, 20, 0]
   ]);
-
-  t.end();
 });
 
-test('clips polygon', t => {
+test('clips polygon', () => {
   const result = clipPolygon(
     flatten([
       [-10, 20],
@@ -132,9 +124,8 @@ test('clips polygon', t => {
     [0, 0, 30, 30]
   );
 
-  t.comment(JSON.stringify(result));
-  t.deepEquals(
-    result,
+  console.log(JSON.stringify(result));
+  expect(result).toEqual(
     flatten([
       [0, 20],
       [0, 10],
@@ -152,11 +143,9 @@ test('clips polygon', t => {
       [5, 20]
     ])
   );
-
-  t.end();
 });
 
-test('polygon contains bbox', t => {
+test('polygon contains bbox', () => {
   const result = clipPolygon(
     flatten([
       [10, 40],
@@ -167,9 +156,8 @@ test('polygon contains bbox', t => {
     [0, 0, 20, 20]
   );
 
-  t.comment(JSON.stringify(result));
-  t.deepEquals(
-    result,
+  console.log(JSON.stringify(result));
+  expect(result).toEqual(
     flatten([
       [0, 0],
       [0, 20],
@@ -177,11 +165,9 @@ test('polygon contains bbox', t => {
       [20, 0]
     ])
   );
-
-  t.end();
 });
 
-test('clips 3d polygon', t => {
+test('clips 3d polygon', () => {
   const result = clipPolygon(
     flatten([
       [10, -5, 0],
@@ -193,9 +179,8 @@ test('clips 3d polygon', t => {
     {size: 3}
   );
 
-  t.comment(JSON.stringify(result));
-  t.deepEquals(
-    result,
+  console.log(JSON.stringify(result));
+  expect(result).toEqual(
     flatten([
       [0, 5, 8],
       [5, 0, 4],
@@ -207,11 +192,9 @@ test('clips 3d polygon', t => {
       [0, 15, 16]
     ])
   );
-
-  t.end();
 });
 
-test('clips polygon fom partial array', t => {
+test('clips polygon fom partial array', () => {
   const polygon = flatten([
     [10, -5],
     [25, 10],
@@ -223,9 +206,8 @@ test('clips polygon fom partial array', t => {
     endIndex: 12
   });
 
-  t.comment(JSON.stringify(result));
-  t.deepEquals(
-    result,
+  console.log(JSON.stringify(result));
+  expect(result).toEqual(
     flatten([
       [0, 5],
       [5, 0],
@@ -237,11 +219,9 @@ test('clips polygon fom partial array', t => {
       [0, 15]
     ])
   );
-
-  t.end();
 });
 
-test('clips floating point lines', t => {
+test('clips floating point lines', () => {
   const line = flatten([
     [-86.66015624999999, 42.22851735620852],
     [-81.474609375, 38.51378825951165],
@@ -257,36 +237,30 @@ test('clips floating point lines', t => {
   // @ts-expect-error
   const result = clipPolyline(line, bbox);
 
-  t.comment(JSON.stringify(result));
-  t.deepEquals(result, [
+  console.log(JSON.stringify(result));
+  expect(result).toEqual([
     flatten([
       [-91.91208030440808, 42.29356419217009],
       [-91.93359375, 42.32606244456202],
       [-91.7578125, 42.3228109416169]
     ])
   ]);
-
-  t.end();
 });
 
-test('preserves line if no protrusions exist', t => {
+test('preserves line if no protrusions exist', () => {
   const result = clipPolyline([1, 1, 2, 2, 3, 3], [0, 0, 30, 30]);
 
-  t.comment(JSON.stringify(result));
-  t.deepEquals(result, [[1, 1, 2, 2, 3, 3]]);
-
-  t.end();
+  console.log(JSON.stringify(result));
+  expect(result).toEqual([[1, 1, 2, 2, 3, 3]]);
 });
 
-test('clips without leaving empty parts', t => {
+test('clips without leaving empty parts', () => {
   const result = clipPolyline([40, 40, 50, 50], [0, 0, 30, 30]);
 
-  t.deepEquals(result, []);
-
-  t.end();
+  expect(result).toEqual([]);
 });
 
-test('still works when polygon never crosses bbox', t => {
+test('still works when polygon never crosses bbox', () => {
   const result = clipPolygon(
     flatten([
       [3, 3],
@@ -297,7 +271,5 @@ test('still works when polygon never crosses bbox', t => {
     [0, 0, 2, 2]
   );
 
-  t.deepEquals(result, []);
-
-  t.end();
+  expect(result).toEqual([]);
 });

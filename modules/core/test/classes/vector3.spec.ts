@@ -4,126 +4,113 @@
 // Copyright (c) 2017 Uber Technologies, Inc.
 
 /* eslint-disable max-statements */
-import test from 'tape-promise/tape';
-import {tapeEquals} from 'test/utils/tape-assertions';
+import {test, expect} from 'vitest';
 
-import {Vector3, Matrix4, Matrix3, Quaternion} from '@math.gl/core';
+import {Vector3, Matrix4, Matrix3, Quaternion, equals} from '@math.gl/core';
 
-test('Vector3#import', t => {
-  t.equals(typeof Vector3, 'function');
-  t.end();
+test('Vector3#import', () => {
+  expect(typeof Vector3).toBe('function');
 });
 
-test('Vector3#construct and Array.isArray check', t => {
-  t.ok(Array.isArray(new Vector3()));
-  t.end();
+test('Vector3#construct and Array.isArray check', () => {
+  expect(Array.isArray(new Vector3())).toBeTruthy();
 });
 
-test('Vector3#from', t => {
+test('Vector3#from', () => {
   let vector3;
   vector3 = new Vector3().from([1, 2, 3]);
-  tapeEquals(t, vector3, [1, 2, 3]);
+  expect(equals(vector3, [1, 2, 3])).toBe(true);
   vector3 = new Vector3().from({x: 1, y: 2, z: 3});
-  tapeEquals(t, vector3, [1, 2, 3]);
-  t.end();
+  expect(equals(vector3, [1, 2, 3])).toBe(true);
 });
 
-test('Vector3#to', t => {
+test('Vector3#to', () => {
   const vector3 = new Vector3(1, 2, 3);
-  tapeEquals(t, vector3.to([0, 0, 0]), [1, 2, 3]);
-  t.deepEquals(vector3.to({x: 0, y: 0, z: 0}), {x: 1, y: 2, z: 3});
-  t.end();
+  expect(equals(vector3.to([0, 0, 0]), [1, 2, 3])).toBe(true);
+  expect(vector3.to({x: 0, y: 0, z: 0})).toEqual({x: 1, y: 2, z: 3});
 });
 
 // ['add', 'cross'];
 const VECTOR_METHODS = ['clone'];
 
-test('Vector3#members and methods', t => {
+test('Vector3#members and methods', () => {
   const v = new Vector3();
-  t.equals(v.x, 0);
-  t.equals(v.y, 0);
-  t.equals(v.z, 0);
+  expect(v.x).toBe(0);
+  expect(v.y).toBe(0);
+  expect(v.z).toBe(0);
 
   for (const method of VECTOR_METHODS) {
-    t.equals(typeof v[method], 'function');
+    expect(typeof v[method]).toBe('function');
   }
-  t.end();
 });
 
-test('Vector3#rotates', t => {
+test('Vector3#rotates', () => {
   const TEST_CASES = [
     {input: [0, 0, 1], radians: Math.PI, rotateX: [0, 0, -1]},
     {input: [0, 0, 1], radians: Math.PI / 2, rotateX: [0, -1, 0]}
   ];
   for (const tc of TEST_CASES) {
     const v = new Vector3(tc.input);
-    tapeEquals(t, v.rotateX({radians: tc.radians}), tc.rotateX);
+    expect(equals(v.rotateX({radians: tc.radians}), tc.rotateX)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector3#toString', t => {
+test('Vector3#toString', () => {
   const TEST_CASES = [{input: [0, 0, 1], precision: 5, string: '[0, 0, 1]'}];
   for (const tc of TEST_CASES) {
     const v = new Vector3(tc.input);
-    t.equals(String(v), tc.string);
-    t.equals(`${v}`, tc.string);
+    expect(String(v)).toBe(tc.string);
+    expect(`${v}`).toBe(tc.string);
   }
-  t.end();
 });
 
-test('Vector3#scale', t => {
+test('Vector3#scale', () => {
   const TEST_CASES = [
     {input: [1, 2, 3], scale: 5, result: [5, 10, 15]},
     {input: [1, 2, 3], scale: [2, 0, -1], result: [2, 0, -3]}
   ];
   for (const tc of TEST_CASES) {
     const result = new Vector3(tc.input).scale(tc.scale);
-    tapeEquals(t, result, tc.result);
+    expect(equals(result, tc.result)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector3#distance', t => {
+test('Vector3#distance', () => {
   const TEST_CASES = [{start: [0, 0, 0], end: [3, 4, 0], result: 5}];
   for (const tc of TEST_CASES) {
     const result = new Vector3(tc.start).distance(tc.end);
-    t.equals(result, tc.result);
+    expect(result).toBe(tc.result);
   }
-  t.end();
 });
 
-test('Vector3#len', t => {
+test('Vector3#len', () => {
   const TEST_CASES = [
     {input: [0, 0, 0], result: 0},
     {input: [3, 4, 0], result: 5}
   ];
   for (const tc of TEST_CASES) {
     const result = new Vector3(tc.input).len();
-    t.equals(result, tc.result);
+    expect(result).toBe(tc.result);
   }
-  t.end();
 });
 
-test('Vector3#dot', t => {
+test('Vector3#dot', () => {
   const TEST_CASES = [{input1: [1, 3, -5], input2: [4, -2, -1], result: 3}];
   for (const tc of TEST_CASES) {
     const result = new Vector3(tc.input1).dot(tc.input2);
-    t.equals(result, tc.result);
+    expect(result).toBe(tc.result);
   }
-  t.end();
 });
 
-test('Vector3#angle', t => {
+test('Vector3#angle', () => {
   const TEST_CASES = [{input: [0, 1, 0], result: Math.PI / 2}];
   for (const tc of TEST_CASES) {
     const result = new Vector3([1, 0, 0]).angle(tc.input);
-    tapeEquals(t, result, tc.result);
+    expect(equals(result, tc.result)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector3#normalize', t => {
+test('Vector3#normalize', () => {
   const TEST_CASES = [
     {input: [0, 0, 0], result: [0, 0, 0]},
     {input: [1, 0, 0], result: [1, 0, 0]},
@@ -133,42 +120,53 @@ test('Vector3#normalize', t => {
   for (const tc of TEST_CASES) {
     const v = new Vector3(tc.input);
     const result = v.normalize();
-    t.ok(result.equals(tc.result));
+    expect(result.equals(tc.result)).toBeTruthy();
   }
-  t.end();
 });
 
-test('Vector3.rotateX', t => {
+test('Vector3.rotateX', () => {
   let result = new Vector3([0, 1, 0]).rotateX({radians: Math.PI});
-  t.ok(result.equals([0, -1, 0]), 'rotation around [0, 0, 0] should return rotated vector');
+  expect(
+    result.equals([0, -1, 0]),
+    'rotation around [0, 0, 0] should return rotated vector'
+  ).toBeTruthy();
 
   result = new Vector3([2, 7, 0]).rotateX({radians: Math.PI, origin: [2, 5, 0]});
-  t.ok(result.equals([2, 3, 0]), 'rotation around arbitrary origin should return rotated vector');
-
-  t.end();
+  expect(
+    result.equals([2, 3, 0]),
+    'rotation around arbitrary origin should return rotated vector'
+  ).toBeTruthy();
 });
 
-test('Vector3.rotateY', t => {
+test('Vector3.rotateY', () => {
   let result = new Vector3([1, 1, 0]).rotateY({radians: Math.PI});
-  t.ok(result.equals([-1, 1, 0]), 'rotation around [0, 0, 0] should return rotated vector');
+  expect(
+    result.equals([-1, 1, 0]),
+    'rotation around [0, 0, 0] should return rotated vector'
+  ).toBeTruthy();
 
   result = new Vector3([-2, 3, 10]).rotateY({radians: Math.PI, origin: [-4, 3, 10]});
-  t.ok(result.equals([-6, 3, 10]), 'rotation around arbitrary origin should return rotated vector');
-
-  t.end();
+  expect(
+    result.equals([-6, 3, 10]),
+    'rotation around arbitrary origin should return rotated vector'
+  ).toBeTruthy();
 });
 
-test('Vector3.rotateZ', t => {
+test('Vector3.rotateZ', () => {
   let result = new Vector3([0, 1, 0]).rotateZ({radians: Math.PI});
-  t.ok(result.equals([0, -1, 0]), 'rotation around [0, 0, 0] should return rotated vector');
+  expect(
+    result.equals([0, -1, 0]),
+    'rotation around [0, 0, 0] should return rotated vector'
+  ).toBeTruthy();
 
   result = new Vector3([0, 6, -5]).rotateZ({radians: Math.PI, origin: [0, 0, -5]});
-  t.ok(result.equals([0, -6, -5]), 'rotation around arbitrary origin should return rotated vector');
-
-  t.end();
+  expect(
+    result.equals([0, -6, -5]),
+    'rotation around arbitrary origin should return rotated vector'
+  ).toBeTruthy();
 });
 
-test('Vector3#transform', t => {
+test('Vector3#transform', () => {
   const transform = new Matrix4().scale([0.5, 0.5, 0.5]).translate([1, 1, 1]);
 
   const TEST_CASES = [
@@ -180,12 +178,11 @@ test('Vector3#transform', t => {
   for (const testCase of TEST_CASES) {
     const v = new Vector3(testCase.input);
     const result = v.transform(transform);
-    tapeEquals(t, result, testCase.result);
+    expect(equals(result, testCase.result)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector3#transformByMatrix3', t => {
+test('Vector3#transformByMatrix3', () => {
   const transform = new Matrix3().scale([0.5, 0.5, 0.5]).translate([1, 1, 1]);
 
   const TEST_CASES = [
@@ -197,12 +194,11 @@ test('Vector3#transformByMatrix3', t => {
   for (const testCase of TEST_CASES) {
     const v = new Vector3(testCase.input);
     const result = v.transformByMatrix3(transform);
-    tapeEquals(t, result, testCase.result);
+    expect(equals(result, testCase.result)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector3#transformByMatrix2', t => {
+test('Vector3#transformByMatrix2', () => {
   const transform = [0.5, 0, 0, 0.5];
 
   const TEST_CASES = [
@@ -214,12 +210,11 @@ test('Vector3#transformByMatrix2', t => {
   for (const testCase of TEST_CASES) {
     const v = new Vector3(testCase.input);
     const result = v.transformByMatrix2(transform);
-    tapeEquals(t, result, testCase.result);
+    expect(equals(result, testCase.result)).toBe(true);
   }
-  t.end();
 });
 
-test('Vector3#transformByQuaternion', t => {
+test('Vector3#transformByQuaternion', () => {
   const transform = new Quaternion(0.5, 0.5, 0.5, 0.5);
 
   const TEST_CASES = [
@@ -231,7 +226,6 @@ test('Vector3#transformByQuaternion', t => {
   for (const testCase of TEST_CASES) {
     const v = new Vector3(testCase.input);
     const result = v.transformByQuaternion(transform);
-    tapeEquals(t, result, testCase.result);
+    expect(equals(result, testCase.result)).toBe(true);
   }
-  t.end();
 });
