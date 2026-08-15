@@ -68,6 +68,7 @@ export class Geometry {
       }
       indices.size = 1;
       this.indices = indices;
+      validateIndices(indices, this.attributes);
     }
 
     this.vertexCount = props.vertexCount ?? calculateVertexCount(this.attributes, this.indices);
@@ -103,6 +104,24 @@ function normalizeAttribute(input: GeometryAttributeInput): GeometryAttribute {
 
 function isTypedArray(value: unknown): value is TypedArray {
   return ArrayBuffer.isView(value) && !(value instanceof DataView);
+}
+
+function validateIndices(
+  indices: GeometryAttribute,
+  attributes: Record<string, GeometryAttribute>
+): void {
+  let maximumIndex = -1;
+  for (const index of indices.value) maximumIndex = Math.max(maximumIndex, Number(index));
+  for (const [name, attribute] of Object.entries(attributes)) {
+    if (!attribute.constant && attribute.size) {
+      const attributeVertexCount = attribute.value.length / attribute.size;
+      if (maximumIndex >= attributeVertexCount) {
+        throw new Error(
+          `Geometry index ${maximumIndex} exceeds ${name} vertex count ${attributeVertexCount}`
+        );
+      }
+    }
+  }
 }
 
 function calculateVertexCount(

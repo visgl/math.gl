@@ -81,7 +81,7 @@ test('plane orientation, subdivisions and index width', () => {
 });
 
 test('custom attributes override generated attributes', () => {
-  const position = {size: 3, value: new Float32Array([1, 2, 3])};
+  const position = {size: 3, value: new Float32Array(24 * 3)};
   const box = new BoxGeometry({attributes: {POSITION: position}});
   expect(box.attributes.POSITION.value).toBe(position.value);
 });

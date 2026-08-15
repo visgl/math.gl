@@ -152,13 +152,16 @@ export class CapsuleShape extends ImplicitShapeBase {
         candidates.push({distance, normal: normal.map(value => value / length)});
       }
     }
-    const bottomHit = intersectSphere(origin, direction, -this.height / 2, this.radiusBottom);
-    if (bottomHit) {
+    for (const bottomHit of intersectSphereRoots(
+      origin,
+      direction,
+      -this.height / 2,
+      this.radiusBottom
+    )) {
       const y = origin[1] + bottomHit.distance * direction[1];
       if (y <= profile.bottom.y + EPSILON) candidates.push(bottomHit);
     }
-    const topHit = intersectSphere(origin, direction, this.height / 2, this.radiusTop);
-    if (topHit) {
+    for (const topHit of intersectSphereRoots(origin, direction, this.height / 2, this.radiusTop)) {
       const y = origin[1] + topHit.distance * direction[1];
       if (y >= profile.top.y - EPSILON) candidates.push(topHit);
     }
@@ -201,15 +204,27 @@ function intersectSphere(
   centerY: number,
   radius: number
 ): LocalRayIntersection | undefined {
-  if (radius === 0) return undefined;
+  return intersectSphereRoots(origin, direction, centerY, radius)[0];
+}
+
+function intersectSphereRoots(
+  origin: readonly number[],
+  direction: readonly number[],
+  centerY: number,
+  radius: number
+): LocalRayIntersection[] {
+  if (radius === 0) return [];
   const relative = [origin[0], origin[1] - centerY, origin[2]];
-  const distance = solveQuadratic(
+  return solveQuadratic(
     dot(direction, direction),
     2 * dot(relative, direction),
     dot(relative, relative) - radius * radius
-  ).find(value => value >= 0);
-  if (distance === undefined) return undefined;
-  return {distance, normal: relative.map((value, i) => (value + distance * direction[i]) / radius)};
+  )
+    .filter(distance => distance >= 0)
+    .map(distance => ({
+      distance,
+      normal: relative.map((value, i) => (value + distance * direction[i]) / radius)
+    }));
 }
 
 function dot(a: readonly number[], b: readonly number[]): number {

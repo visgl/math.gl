@@ -35,4 +35,15 @@ test('Geometry validates attribute and index data', () => {
         attributes: {POSITION: new Float32Array(3)}
       })
   ).toThrow();
+  expect(
+    () =>
+      new Geometry({
+        topology: 'triangle-list',
+        indices: new Uint16Array([0, 2]),
+        attributes: {
+          POSITION: new Float32Array(9),
+          NORMAL: {size: 3, value: new Float32Array(6)}
+        }
+      })
+  ).toThrow(/index 2 exceeds NORMAL vertex count 2/);
 });

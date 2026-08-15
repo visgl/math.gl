@@ -76,6 +76,13 @@ test('shape ray intersections return nearest forward hits and normals', () => {
   ).toBeTruthy();
 });
 
+test('capsule ray intersection returns the retained sphere exit hit from inside', () => {
+  const hit = new CapsuleShape().intersectRay(new Ray(new Vector3(0, 0, 0), new Vector3(0, -1, 0)));
+  expect(hit?.distance).toBe(1);
+  expect(hit && Array.from(hit.normal)).toEqual([0, -1, 0]);
+  expect(hit?.entering).toBe(false);
+});
+
 test('shape transforms, plane classification and enclosing bounds', () => {
   const sphere = new SphereShape({matrix: new Matrix4().translate([2, 0, 0])});
   expect(sphere.containsPoint([2, 0, 0])).toBe(true);
