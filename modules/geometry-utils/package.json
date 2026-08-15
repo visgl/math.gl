@@ -1,0 +1,39 @@
+{
+  "name": "@math.gl/geometry-utils",
+  "description": "Typed-array geometry processing and attribute compression utilities",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "4.2.0-alpha.3",
+  "keywords": [
+    "webgl",
+    "webgpu",
+    "geometry",
+    "typed array",
+    "attribute compression"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "@math.gl/core": "4.2.0-alpha.3",
+    "@math.gl/types": "4.2.0-alpha.3"
+  }
+}

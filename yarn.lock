@@ -884,6 +884,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@math.gl/geometry-utils@workspace:modules/geometry-utils":
+  version: 0.0.0-use.local
+  resolution: "@math.gl/geometry-utils@workspace:modules/geometry-utils"
+  dependencies:
+    "@math.gl/core": "npm:4.2.0-alpha.3"
+    "@math.gl/types": "npm:4.2.0-alpha.3"
+  languageName: unknown
+  linkType: soft
+
 "@math.gl/geometry@workspace:modules/geometry":
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry@workspace:modules/geometry"

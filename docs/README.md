@@ -13,7 +13,7 @@ math.gl is **optimized for use with WebGL and WebGPU**, however it is not a GPU 
 - **Geospatial projections** - CRS definitions and support for a variety of geospatial projections **`@math.gl/crs`**, **`@math.gl/geospatial`**, **`@math.gl/geoid`**, **`@math.gl/proj4`**, **`@math.gl/web-mercator`**
 - **Geospatial utilities** - Cutting polygons and calculating sun position and direction **`@math.gl/polygon`**, **`@math.gl/sun`**
 - **Discrete Global Grids** - Standardized interfaces to a number of the major discrete global grids. **`@math.gl/dggs-geohash`**, **`@math.gl/dggs-quadkey`**, **`@math.gl/dggs-s2`**
-- **3D math** - 3D primitives and culling: **`@math.gl/geometry`**, **`@math.gl/culling`**
+- **3D math** - 3D primitives, geometry processing and culling: **`@math.gl/geometry`**, **`@math.gl/geometry-utils`**, **`@math.gl/culling`**
 
 ## Modules
 
@@ -45,6 +45,7 @@ math.gl is a toolbox that offers a suite of composable modules.
 | ------------------------------------------ | ------------------------------------ | ------------------------------------------ |
 |                                            | **`@math.gl/geometry`**              | CPU primitive meshes and tessellation.     |
 | ![culling](./images/culling.png 'culling') | **`@math.gl/culling`**               | Bounding volumes and intersection testing. |
+|                                            | **`@math.gl/geometry-utils`**         | Typed-array geometry processing utilities. |
 
 <br/>
 In addition, math.gl provides a few deprecated legacy modules, to avoid breaking older applications.

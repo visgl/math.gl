@@ -112,6 +112,14 @@
       },
       {
         "type": "category",
+        "label": "@math.gl/geometry-utils",
+        "items": [
+          "modules/geometry-utils/README",
+          "modules/geometry-utils/api-reference/geometry-utils"
+        ]
+      },
+      {
+        "type": "category",
         "label": "@math.gl/geoid",
         "items": [
           "modules/geoid/README",
