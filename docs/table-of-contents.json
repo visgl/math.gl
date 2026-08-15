@@ -92,6 +92,11 @@
       },
       {
         "type": "category",
+        "label": "@math.gl/geometry",
+        "items": ["modules/geometry/README"]
+      },
+      {
+        "type": "category",
         "label": "@math.gl/culling",
         "items": [
           "modules/culling/README",
@@ -101,7 +106,8 @@
           "modules/culling/api-reference/culling-volume",
           "modules/culling/api-reference/oriented-bounding-box",
           "modules/culling/api-reference/plane",
-          "modules/culling/api-reference/ray"
+          "modules/culling/api-reference/ray",
+          "modules/culling/api-reference/shapes"
         ]
       },
       {

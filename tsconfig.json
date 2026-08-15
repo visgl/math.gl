@@ -51,6 +51,8 @@
       "@math.gl/crs/test/*": ["./modules/crs/test/*"],
       "@math.gl/culling/*": ["./modules/culling/src/*"],
       "@math.gl/culling/test/*": ["./modules/culling/test/*"],
+      "@math.gl/geometry/*": ["./modules/geometry/src/*"],
+      "@math.gl/geometry/test/*": ["./modules/geometry/test/*"],
       "@math.gl/dggs-pgeohash/*": ["./modules/dggs-pgeohash/src/*"],
       "@math.gl/dggs-pgeohash/test/*": ["./modules/dggs-pgeohash/test/*"],
       "@math.gl/dggs-s2/*": ["./modules/dggs-s2/src/*"],

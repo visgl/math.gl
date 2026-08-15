@@ -884,6 +884,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@math.gl/geometry@workspace:modules/geometry":
+  version: 0.0.0-use.local
+  resolution: "@math.gl/geometry@workspace:modules/geometry"
+  dependencies:
+    "@math.gl/types": "npm:4.2.0-alpha.3"
+  languageName: unknown
+  linkType: soft
+
 "@math.gl/geospatial@npm:4.2.0-alpha.3, @math.gl/geospatial@workspace:modules/geospatial":
   version: 0.0.0-use.local
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
