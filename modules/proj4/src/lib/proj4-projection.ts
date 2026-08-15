@@ -3,13 +3,19 @@
 // Copyright (c) vis.gl contributors
 
 import proj4 from 'proj4';
+import type {CRSDefinition, PROJJSONCRSByType} from '@math.gl/crs';
 
-/** A PROJ string, WKT definition, named coordinate system, or PROJJSON definition. */
-export type Proj4ProjectionDefinition = string | {type: string; [key: string]: unknown};
+/** PROJJSON object variants currently parsed by proj4js 2.20.9. */
+export type Proj4PROJJSONCRS = PROJJSONCRSByType<
+  'GeographicCRS' | 'GeodeticCRS' | 'ProjectedCRS' | 'BoundCRS'
+>;
+
+/** A CRS definition currently accepted by proj4js 2.20.9. */
+export type Proj4CRSDefinition = CRSDefinition<Proj4PROJJSONCRS>;
 
 export type Proj4ProjectionOptions = {
-  from?: Proj4ProjectionDefinition;
-  to?: Proj4ProjectionDefinition;
+  from?: Proj4CRSDefinition;
+  to?: Proj4CRSDefinition;
   enforceAxis?: boolean;
 };
 
@@ -17,24 +23,37 @@ export type Proj4DatumGridOptions = {
   includeErrorFields?: boolean;
 };
 
+type Proj4Converter = {
+  forward: (coordinates: number[], enforceAxis?: boolean) => number[];
+  inverse: (coordinates: number[], enforceAxis?: boolean) => number[];
+};
+
+// proj4js parses this standards-based subset at runtime, but its internal
+// PROJJSON declaration is narrower than the official schema in a few nested fields.
+const proj4Runtime = proj4 as unknown as {
+  (from: Proj4CRSDefinition, to: Proj4CRSDefinition): Proj4Converter;
+  defs: (name: string, definition: Proj4CRSDefinition) => void;
+  nadgrid: (name: string, grid: ArrayBuffer, options?: Proj4DatumGridOptions) => void;
+};
+
 export class Proj4Projection {
   /** Define aliases for one or more projections */
-  static defineProjectionAliases(aliases: {[name: string]: Proj4ProjectionDefinition}): void {
+  static defineProjectionAliases(aliases: {[name: string]: Proj4CRSDefinition}): void {
     for (const alias in aliases) {
-      proj4.defs(alias, aliases[alias]);
+      proj4Runtime.defs(alias, aliases[alias]);
     }
   }
 
   /** Register an NTv2 datum grid for use in projection definitions. */
   static registerDatumGrid(name: string, grid: ArrayBuffer, options?: Proj4DatumGridOptions): void {
-    proj4.nadgrid(name, grid, options);
+    proj4Runtime.nadgrid(name, grid, options);
   }
 
-  private _projection: proj4.Converter;
+  private _projection: Proj4Converter;
   private _enforceAxis: boolean;
 
   constructor({from = 'WGS84', to = 'WGS84', enforceAxis = false}: Proj4ProjectionOptions) {
-    this._projection = proj4(from, to);
+    this._projection = proj4Runtime(from, to);
     this._enforceAxis = enforceAxis;
     if (!this._projection) {
       throw new Error('Invalid projection');

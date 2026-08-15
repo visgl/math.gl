@@ -8,30 +8,12 @@
 /* eslint-disable */
 import test from 'tape-promise/tape';
 import {Proj4Projection} from '@math.gl/proj4';
+import {wgs84GeographicCRS} from '@math.gl/crs/test/projjson-fixtures';
 import {tapeEqualsEpsilon} from 'test/utils/tape-assertions';
 
 import {testPoints} from './test-data';
 
-const WGS84_PROJJSON = {
-  type: 'GeographicCRS',
-  name: 'WGS 84',
-  datum: {
-    type: 'GeodeticReferenceFrame',
-    name: 'World Geodetic System 1984',
-    ellipsoid: {
-      name: 'WGS 84',
-      semi_major_axis: 6378137,
-      inverse_flattening: 298.257223563
-    }
-  },
-  coordinate_system: {
-    subtype: 'ellipsoidal',
-    axis: [
-      {name: 'Geodetic longitude', abbreviation: 'Lon', direction: 'east', unit: 'degree'},
-      {name: 'Geodetic latitude', abbreviation: 'Lat', direction: 'north', unit: 'degree'}
-    ]
-  }
-};
+const WGS84_PROJJSON = wgs84GeographicCRS;
 
 const WGS84_WKT2 =
   'GEOGCRS["WGS 84",DATUM["World Geodetic System 1984",ELLIPSOID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],CS[ellipsoidal,2],AXIS["geodetic latitude (Lat)",north,ORDER[1]],AXIS["geodetic longitude (Lon)",east,ORDER[2]],ANGLEUNIT["degree",0.0174532925199433]]';

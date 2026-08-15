@@ -10,7 +10,7 @@ math.gl is **optimized for use with WebGL and WebGPU**, however it is not a GPU 
 
 - **Core classes** - Basic vectors and matrices: **`@math.gl/types`**, **`@math.gl/core`**
 - **Expression parsing** - Parse and evaluate compact JavaScript-style expressions: **`@math.gl/expressions`**
-- **Geospatial projections** - Support for a variety of geospatial projections **`@math.gl/geospatial`**, **`@math.gl/geoid`**, **`@math.gl/proj4`**, **`@math.gl/web-mercator`**
+- **Geospatial projections** - CRS definitions and support for a variety of geospatial projections **`@math.gl/crs`**, **`@math.gl/geospatial`**, **`@math.gl/geoid`**, **`@math.gl/proj4`**, **`@math.gl/web-mercator`**
 - **Geospatial utilities** - Cutting polygons and calculating sun position and direction **`@math.gl/polygon`**, **`@math.gl/sun`**
 - **Discrete Global Grids** - Standardized interfaces to a number of the major discrete global grids. **`@math.gl/dggs-geohash`**, **`@math.gl/dggs-quadkey`**, **`@math.gl/dggs-s2`**
 - **3D math** - 3D primitives and culling: **`@math.gl/culling`**
@@ -27,6 +27,7 @@ math.gl is a toolbox that offers a suite of composable modules.
 
 | **Geospatial math libraries**                       | Module <span style={{width: 300}} /> | Description                                        |
 | --------------------------------------------------- | ------------------------------------ | -------------------------------------------------- |
+|                                                     | **`@math.gl/crs`**                   | Standards-based coordinate reference system types. |
 | ![geospatial](./images/geospatial.svg 'geospatial') | **`@math.gl/geospatial`**            | Ellipsoidal math for WGS84 coordinates.            |
 | ![geoid](./images/geoid.png 'geoid')                | **`@math.gl/geoid`**                 | Earth Gravity Model support .                      |
 |                                                     | **`@math.gl/polygon`**               | Polygon math, including geospatial cutting etc.    |

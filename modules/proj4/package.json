@@ -42,6 +42,7 @@
   ],
   "dependencies": {
     "@math.gl/core": "4.2.0-alpha.3",
+    "@math.gl/crs": "4.2.0-alpha.3",
     "proj4": "2.20.9"
   },
   "gitHead": "e1a95300cb225a90da6e90333d4adf290f7ba501"

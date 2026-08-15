@@ -1,0 +1,39 @@
+{
+  "name": "@math.gl/crs",
+  "description": "Standards-based coordinate reference system types for math.gl",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "4.2.0-alpha.3",
+  "keywords": [
+    "geospatial",
+    "coordinate reference system",
+    "CRS",
+    "WKT",
+    "PROJJSON"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./projjson.schema.json": "./schemas/projjson.schema.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "schemas",
+    "README.md"
+  ],
+  "sideEffects": false
+}

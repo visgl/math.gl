@@ -58,9 +58,9 @@ const projection = new Proj4Projection({
 
 ## Static Fields
 
-### `Proj4Projection.defineProjectionAliases(projections: {[alias: string]: Proj4ProjectionDefinition})`
+### `Proj4Projection.defineProjectionAliases(projections: {[alias: string]: Proj4CRSDefinition})`
 
-Defines projection aliases from PROJ strings, WKT strings, or PROJJSON objects.
+Defines projection aliases from authority codes, PROJ strings, WKT strings, or PROJJSON objects.
 
 ### `Proj4Projection.registerDatumGrid(name: string, grid: ArrayBuffer, options?: Proj4DatumGridOptions)`
 
@@ -72,7 +72,7 @@ Registers an NTv2 datum grid that projection definitions can reference with `+na
 
 Create a new `Proj4Projection` instance that can convert between the specified coordinate systems.
 
-- `from` and `to` can be named coordinate systems, PROJ strings, WKT strings, or PROJJSON objects. Both default to `WGS84`.
+- `from` and `to` are `Proj4CRSDefinition` values. They can be named coordinate systems, PROJ strings, WKT strings, or the `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` PROJJSON object kinds supported by proj4js 2.20.9. Both default to `WGS84`.
 - `enforceAxis` defaults to `false`. Set it to `true` to respect the axis order declared by the source and destination coordinate systems.
 
 ### `project(coord: number[]): number[]`

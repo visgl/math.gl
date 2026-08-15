@@ -16,7 +16,10 @@
   "scripts": {
     "bootstrap": "yarn && ocular-bootstrap && npm run build",
     "build": "ocular-clean && time ocular-build",
+    "check:crs-types": "npx tsc --project test/types/crs/tsconfig.json",
+    "check:projjson-types": "node scripts/generate-projjson-types.mjs --check",
     "cover": "ocular-test cover",
+    "generate:projjson-types": "node scripts/generate-projjson-types.mjs",
     "lint": "yarn workspace @math.gl/devtools-extensions lint",
     "metrics": "ocular-metrics",
     "publish-beta": "ocular-publish version-only-beta",
@@ -31,6 +34,8 @@
     "@types/tape-promise": "^4.0.1",
     "@vis.gl/dev-tools": "^1.0.2",
     "@vis.gl/ts-plugins": "^1.0.2",
+    "ajv": "^8.17.1",
+    "json-schema-to-typescript": "^15.0.4",
     "pre-commit": "^1.2.2",
     "puppeteer": "^22.0.0",
     "tap-spec": "^5.0.0"

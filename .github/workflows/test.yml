@@ -45,8 +45,14 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Check generated CRS declarations
+        run: yarn check:projjson-types
+
       - name: Build code
         run: yarn build
+
+      - name: Check CRS type boundaries
+        run: yarn check:crs-types
 
       - name: Run tests
         run: yarn test ci
