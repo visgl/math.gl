@@ -68,6 +68,36 @@ describe('WKT-CRS codec', () => {
     );
   });
 
+  test('parses standard unquoted date-time values in temporal extents', () => {
+    const text =
+      'TIMECRS["Calendar time",TDATUM["Gregorian",TIMEORIGIN["0000-01-01"]],CS[temporalDateTime,1],AXIS["time (T)",future],TIMEUNIT["day",86400],USAGE[SCOPE["History"],TIMEEXTENT[2013-01-01,2014-07-12T17:00+01]]]';
+    const ast = parseWKTCRS(text, {profile: 'wkt2:2019', strict: true});
+    expect(encodeWKTCRS(ast)).toBe(text);
+  });
+
+  test('distinguishes WKT2:2015 from WKT2:2019 additions', () => {
+    const text = 'COORDINATEMETADATA[GEOGCRS["WGS 84"],EPOCH[2021.3]]';
+    expect(validateWKTCRS(parseWKTCRS(text), {profile: 'wkt2:2015'})).toContainEqual(
+      expect.objectContaining({code: 'invalid-root', keyword: 'COORDINATEMETADATA'})
+    );
+    expect(validateWKTCRS(parseWKTCRS(text), {profile: 'wkt2:2019'})).toEqual([]);
+
+    const pointMotionOperation =
+      'POINTMOTIONOPERATION["Velocity model",SOURCECRS[GEODCRS["Source"]],METHOD["Velocity grid"]]';
+    expect(
+      validateWKTCRS(parseWKTCRS(pointMotionOperation), {profile: 'wkt2:2015'})
+    ).toContainEqual(
+      expect.objectContaining({code: 'invalid-root', keyword: 'POINTMOTIONOPERATION'})
+    );
+  });
+
+  test('validates unambiguous standard value shapes', () => {
+    const ast = parseWKTCRS('GEOGCRS["WGS 84",CS[ellipsoidal,"two"]]');
+    expect(validateWKTCRS(ast, {profile: 'wkt2:2019'})).toContainEqual(
+      expect.objectContaining({code: 'invalid-value', keyword: 'CS'})
+    );
+  });
+
   test('strict mode rejects profile violations', () => {
     expect(() =>
       parseWKTCRS('GEOGCS["WGS 84",VENDOR[1]]', {profile: 'wkt1', strict: true})
@@ -90,6 +120,13 @@ describe('WKT-CRS codec', () => {
     const pretty = encodeWKTCRS(parseWKTCRS(WKT1), {format: 'pretty', indent: 2});
     expect(pretty).toContain('\n');
     expect(encodeWKTCRS(parseWKTCRS(pretty))).toBe(WKT1);
+  });
+
+  test('rejects unsafe caller-constructed AST lexemes', () => {
+    const ast = parseWKTCRS('GEOGCRS["WGS 84",ID["EPSG",4326]]');
+    const id = ast.root.values[1] as any;
+    id.values[1] = {type: 'number', value: 4326, raw: '4326]'};
+    expect(() => encodeWKTCRS(ast)).toThrow('Invalid WKT number lexeme');
   });
 
   test.each([

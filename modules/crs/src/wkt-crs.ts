@@ -73,7 +73,8 @@ export type WKTCRSValidationIssueCode =
   | 'invalid-root'
   | 'unknown-keyword'
   | 'mixed-delimiters'
-  | 'empty-node';
+  | 'empty-node'
+  | 'invalid-value';
 
 /** One profile validation issue in a WKT syntax tree. */
 export type WKTCRSValidationIssue = {
@@ -113,15 +114,19 @@ export class WKTCRSValidationError extends Error {
   }
 }
 
-const NUMBER_PATTERN = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?/;
+const NUMBER_PATTERN = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?$/;
 const KEYWORD_PATTERN = /^[A-Za-z][A-Za-z0-9_]*/;
 
 const WKT1_ROOT_KEYWORDS = new Set([
   'COMPD_CS',
+  'CONCAT_MT',
   'FITTED_CS',
   'GEOCCS',
   'GEOGCS',
+  'INVERSE_MT',
   'LOCAL_CS',
+  'PARAM_MT',
+  'PASSTHROUGH_MT',
   'PROJCS',
   'VERT_CS'
 ]);
@@ -145,33 +150,36 @@ const WKT1_KEYWORDS = new Set([
   'VERT_DATUM'
 ]);
 
-const WKT2_ROOT_KEYWORDS = new Set([
+const WKT2_2015_ROOT_KEYWORDS = new Set([
   'BOUNDCRS',
   'COMPOUNDCRS',
-  'CONCATENATEDOPERATION',
-  'COORDINATEMETADATA',
   'COORDINATEOPERATION',
-  'DERIVEDPROJCRS',
   'ENGCRS',
   'ENGINEERINGCRS',
   'GEODCRS',
   'GEODETICCRS',
-  'GEOGCRS',
-  'GEOGRAPHICCRS',
   'PARAMETRICCRS',
-  'POINTMOTIONOPERATION',
   'PROJCRS',
   'PROJECTEDCRS',
-  'TEMPORALCRS',
   'TIMECRS',
   'VERTCRS',
   'VERTICALCRS'
 ]);
 
+const WKT2_2019_ROOT_KEYWORDS = new Set([
+  ...WKT2_2015_ROOT_KEYWORDS,
+  'CONCATENATEDOPERATION',
+  'COORDINATEMETADATA',
+  'DERIVEDPROJCRS',
+  'GEOGCRS',
+  'GEOGRAPHICCRS',
+  'POINTMOTIONOPERATION'
+]);
+
 // WKT is intentionally represented as a generic syntax tree. This set supports strict profile
 // checking without restricting tolerant parsing of vendor extensions.
 const WKT2_KEYWORDS = new Set([
-  ...WKT2_ROOT_KEYWORDS,
+  ...WKT2_2019_ROOT_KEYWORDS,
   'ABRIDGEDTRANSFORMATION',
   'ANCHOR',
   'ANGLEUNIT',
@@ -218,26 +226,60 @@ const WKT2_KEYWORDS = new Set([
   'PARAMETRICUNIT',
   'PDATUM',
   'PRIMEM',
+  'PRIMEMERIDIAN',
   'REMARK',
   'SCALEUNIT',
   'SCOPE',
   'SOURCECRS',
   'STEP',
   'TARGETCRS',
-  'TCRS',
   'TDATUM',
-  'TEMPORALDATUM',
+  'TEMPORALQUANTITY',
   'TIMEEXTENT',
   'TIMEORIGIN',
   'TIMEUNIT',
+  'TIMEDATUM',
+  'TRIAXIAL',
   'TRF',
   'URI',
   'USAGE',
   'VDATUM',
   'VERSION',
   'VERTICALDATUM',
+  'VERTICALEXTENT',
+  'VELOCITYGRID',
   'VRF'
 ]);
+
+const WKT2_2019_ADDITION_KEYWORDS = new Set([
+  'BASEGEOGCRS',
+  'CALENDAR',
+  'CONCATENATEDOPERATION',
+  'COORDEPOCH',
+  'COORDINATEMETADATA',
+  'DERIVEDPROJCRS',
+  'DYNAMIC',
+  'ENSEMBLE',
+  'ENSEMBLEACCURACY',
+  'EPOCH',
+  'FRAMEEPOCH',
+  'GEOGCRS',
+  'GEOGRAPHICCRS',
+  'GEOIDMODEL',
+  'MEMBER',
+  'MODEL',
+  'POINTMOTIONOPERATION',
+  'STEP',
+  'TEMPORALQUANTITY',
+  'TRF',
+  'TRIAXIAL',
+  'VELOCITYGRID',
+  'VRF'
+]);
+
+const WKT2_2015_KEYWORDS = new Set(
+  [...WKT2_KEYWORDS].filter(keyword => !WKT2_2019_ADDITION_KEYWORDS.has(keyword))
+);
 
 /** Parse WKT1, WKT2, or a compatible vendor WKT serialization. */
 export function parseWKTCRS(text: string, options?: ParseWKTCRSOptions): WKTCRSAst {
@@ -267,6 +309,7 @@ export function encodeWKTCRS(ast: WKTCRSAst, options?: EncodeWKTCRSOptions): str
   if (!Number.isInteger(indent) || indent < 0) {
     throw new RangeError('WKT indentation must be a non-negative integer');
   }
+  validateEncodableNode(ast.root);
   return encodeNode(ast.root, format, indent, 0);
 }
 
@@ -283,9 +326,15 @@ export function validateWKTCRS(
   const rootKeywords =
     profile === 'wkt1' || profile === 'gdal' || profile === 'esri'
       ? WKT1_ROOT_KEYWORDS
-      : WKT2_ROOT_KEYWORDS;
+      : profile === 'wkt2:2015'
+        ? WKT2_2015_ROOT_KEYWORDS
+        : WKT2_2019_ROOT_KEYWORDS;
   const knownKeywords =
-    profile === 'wkt1' || profile === 'gdal' || profile === 'esri' ? WKT1_KEYWORDS : WKT2_KEYWORDS;
+    profile === 'wkt1' || profile === 'gdal' || profile === 'esri'
+      ? WKT1_KEYWORDS
+      : profile === 'wkt2:2015'
+        ? WKT2_2015_KEYWORDS
+        : WKT2_KEYWORDS;
   const issues: WKTCRSValidationIssue[] = [];
   const rootKeyword = ast.root.keyword.toUpperCase();
 
@@ -320,6 +369,15 @@ export function validateWKTCRS(
       issues.push({
         code: 'empty-node',
         message: `${node.node.keyword} must contain at least one value`,
+        path: node.path,
+        keyword: node.node.keyword
+      });
+    }
+    const grammarMessage = validateNodeValues(node.node);
+    if (grammarMessage) {
+      issues.push({
+        code: 'invalid-value',
+        message: grammarMessage,
         path: node.path,
         keyword: node.node.keyword
       });
@@ -401,22 +459,23 @@ class WKTParser {
       return this.parseString();
     }
 
-    const numberMatch = this.source.slice(this.offset).match(NUMBER_PATTERN);
-    if (numberMatch) {
-      const raw = numberMatch[0];
-      this.offset += raw.length;
-      return {type: 'number', value: Number(raw), raw};
+    const start = this.offset;
+    while (this.offset < this.source.length && !/[\s,\[\]()]/.test(this.source[this.offset])) {
+      this.offset++;
     }
-
-    const keywordMatch = this.source.slice(this.offset).match(KEYWORD_PATTERN);
-    if (!keywordMatch) {
+    if (start === this.offset) {
       this.fail('Expected a WKT value');
     }
-    const value = keywordMatch[0];
-    this.offset += value.length;
+    const value = this.source.slice(start, this.offset);
     this.skipWhitespace();
     if (this.source[this.offset] === '[' || this.source[this.offset] === '(') {
+      if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(value)) {
+        this.fail(`Invalid WKT keyword '${value}'`);
+      }
       return this.parseNodeAfterKeyword(value);
+    }
+    if (NUMBER_PATTERN.test(value)) {
+      return {type: 'number', value: Number(value), raw: value};
     }
     return {type: 'enumeration', value};
   }
@@ -503,6 +562,47 @@ function encodeValue(
       return value.raw;
     case 'enumeration':
       return value.value;
+    default:
+      throw new TypeError('Invalid WKT value type');
+  }
+}
+
+function validateEncodableNode(node: WKTCRSNode): void {
+  if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(node.keyword)) {
+    throw new TypeError(`Invalid WKT keyword: ${node.keyword}`);
+  }
+  if (node.delimiter !== 'bracket' && node.delimiter !== 'parenthesis') {
+    throw new TypeError(`Invalid WKT delimiter: ${node.delimiter}`);
+  }
+  if (!Array.isArray(node.values)) {
+    throw new TypeError(`Invalid WKT values for ${node.keyword}`);
+  }
+  for (const value of node.values) {
+    if (!value || typeof value !== 'object') {
+      throw new TypeError(`Invalid WKT value in ${node.keyword}`);
+    }
+    switch (value.type) {
+      case 'node':
+        validateEncodableNode(value);
+        break;
+      case 'string':
+        if (typeof value.value !== 'string') {
+          throw new TypeError(`Invalid WKT string in ${node.keyword}`);
+        }
+        break;
+      case 'number':
+        if (typeof value.raw !== 'string' || !NUMBER_PATTERN.test(value.raw)) {
+          throw new TypeError(`Invalid WKT number lexeme: ${value.raw}`);
+        }
+        break;
+      case 'enumeration':
+        if (typeof value.value !== 'string' || !value.value || /[\s,\[\]()"]/.test(value.value)) {
+          throw new TypeError(`Invalid WKT enumeration: ${value.value}`);
+        }
+        break;
+      default:
+        throw new TypeError(`Invalid WKT value in ${node.keyword}`);
+    }
   }
 }
 
@@ -511,6 +611,153 @@ function resolveProfile(rootKeyword: string, profile: WKTCRSProfile | 'auto'): W
     return profile;
   }
   return WKT1_ROOT_KEYWORDS.has(rootKeyword.toUpperCase()) ? 'wkt1' : 'wkt2:2019';
+}
+
+function validateNodeValues(node: WKTCRSNode): string | null {
+  const keyword = node.keyword.toUpperCase();
+  const values = node.values;
+  const typeAt = (index: number, ...types: WKTCRSValue['type'][]) =>
+    Boolean(values[index] && types.includes(values[index].type));
+  const exact = (length: number, ...types: WKTCRSValue['type'][]) =>
+    values.length === length && types.every((type, index) => typeAt(index, type));
+
+  if (
+    [
+      'ANGLEUNIT',
+      'LENGTHUNIT',
+      'PARAMETRICUNIT',
+      'SCALEUNIT',
+      'TIMEUNIT',
+      'TEMPORALQUANTITY',
+      'UNIT'
+    ].includes(keyword) &&
+    !(values.length >= 2 && typeAt(0, 'string') && typeAt(1, 'number'))
+  ) {
+    return `${node.keyword} must start with a quoted name and numeric conversion factor`;
+  }
+  if (keyword === 'CS' && !exact(2, 'enumeration', 'number')) {
+    return `${node.keyword} must contain a coordinate-system type and dimension`;
+  }
+  if (keyword === 'BBOX' && !exact(4, 'number', 'number', 'number', 'number')) {
+    return `${node.keyword} must contain four numeric bounds`;
+  }
+  if (
+    [
+      'ENSEMBLEACCURACY',
+      'EPOCH',
+      'COORDEPOCH',
+      'FRAMEEPOCH',
+      'OPERATIONACCURACY',
+      'ORDER'
+    ].includes(keyword) &&
+    !exact(1, 'number')
+  ) {
+    return `${node.keyword} must contain one number`;
+  }
+  if (
+    ['ANCHOR', 'AREA', 'CALENDAR', 'CITATION', 'REMARK', 'SCOPE', 'URI', 'VERSION'].includes(
+      keyword
+    ) &&
+    !exact(1, 'string')
+  ) {
+    return `${node.keyword} must contain one quoted string`;
+  }
+  if (
+    ['ELLIPSOID', 'SPHEROID', 'TRIAXIAL'].includes(keyword) &&
+    !(values.length >= 3 && typeAt(0, 'string') && typeAt(1, 'number') && typeAt(2, 'number'))
+  ) {
+    return `${node.keyword} must start with a quoted name and numeric ellipsoid axes`;
+  }
+  if (
+    ['PARAMETER'].includes(keyword) &&
+    !(values.length >= 2 && typeAt(0, 'string') && typeAt(1, 'number'))
+  ) {
+    return `${node.keyword} must start with a quoted name and numeric value`;
+  }
+  if (keyword === 'PARAMETERFILE' && !exact(2, 'string', 'string')) {
+    return `${node.keyword} must contain a quoted name and file name`;
+  }
+  if (
+    ['AUTHORITY', 'ID'].includes(keyword) &&
+    !(values.length >= 2 && typeAt(0, 'string') && typeAt(1, 'string', 'number'))
+  ) {
+    return `${node.keyword} must start with a quoted authority and identifier`;
+  }
+  if (
+    ['AXIS'].includes(keyword) &&
+    !(values.length >= 2 && typeAt(0, 'string') && typeAt(1, 'enumeration'))
+  ) {
+    return `${node.keyword} must start with a quoted name and axis direction`;
+  }
+  if (['METHOD', 'PROJECTION'].includes(keyword) && !(values.length >= 1 && typeAt(0, 'string'))) {
+    return `${node.keyword} must start with a quoted name`;
+  }
+  if (keyword === 'TIMEEXTENT') {
+    const isTemporalValue = (index: number) => typeAt(index, 'enumeration', 'string');
+    if (values.length !== 2 || !isTemporalValue(0) || !isTemporalValue(1)) {
+      return `${node.keyword} must contain two date-time or quoted values`;
+    }
+  }
+  if (keyword === 'VERTICALEXTENT') {
+    if (
+      values.length < 2 ||
+      values.length > 3 ||
+      !typeAt(0, 'number') ||
+      !typeAt(1, 'number') ||
+      (values.length === 3 && !typeAt(2, 'node'))
+    ) {
+      return `${node.keyword} must contain two numeric bounds and an optional unit`;
+    }
+  }
+  if (keyword === 'COORDINATEMETADATA') {
+    if (
+      values.length < 1 ||
+      values.length > 2 ||
+      !typeAt(0, 'node') ||
+      (values.length === 2 &&
+        (!typeAt(1, 'node') ||
+          !['EPOCH', 'COORDEPOCH'].includes((values[1] as WKTCRSNode).keyword.toUpperCase())))
+    ) {
+      return `${node.keyword} must contain a CRS and an optional coordinate epoch`;
+    }
+  }
+  if (keyword === 'BOUNDCRS') {
+    const childKeywords = values
+      .slice(0, 3)
+      .map(value => (value.type === 'node' ? value.keyword.toUpperCase() : ''));
+    if (
+      childKeywords[0] !== 'SOURCECRS' ||
+      childKeywords[1] !== 'TARGETCRS' ||
+      childKeywords[2] !== 'ABRIDGEDTRANSFORMATION'
+    ) {
+      return `${node.keyword} must start with SOURCECRS, TARGETCRS, and ABRIDGEDTRANSFORMATION`;
+    }
+  }
+  if (
+    [
+      'COMPOUNDCRS',
+      'CONCATENATEDOPERATION',
+      'COORDINATEOPERATION',
+      'DERIVEDPROJCRS',
+      'ENGCRS',
+      'ENGINEERINGCRS',
+      'GEODCRS',
+      'GEODETICCRS',
+      'GEOGCRS',
+      'GEOGRAPHICCRS',
+      'PARAMETRICCRS',
+      'POINTMOTIONOPERATION',
+      'PROJCRS',
+      'PROJECTEDCRS',
+      'TIMECRS',
+      'VERTCRS',
+      'VERTICALCRS'
+    ].includes(keyword) &&
+    !typeAt(0, 'string')
+  ) {
+    return `${node.keyword} must start with a quoted name`;
+  }
+  return null;
 }
 
 function visitNode(

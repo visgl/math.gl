@@ -56,4 +56,13 @@ describe('PROJ string codec', () => {
     expect(error?.line).toBe(2);
     expect(error?.column).toBe(1);
   });
+
+  test('rejects unsafe caller-constructed raw values', () => {
+    expect(() =>
+      encodePROJString({
+        type: 'proj-string',
+        parameters: [{type: 'parameter', name: 'title', value: 'safe', rawValue: 'two tokens'}]
+      })
+    ).toThrow('Invalid PROJ raw parameter value');
+  });
 });

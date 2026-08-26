@@ -57,6 +57,9 @@ export function encodePROJString(ast: PROJStringAst, options?: EncodePROJStringO
   if (!ast || ast.type !== 'proj-string' || !Array.isArray(ast.parameters)) {
     throw new TypeError('encodePROJString expects a PROJStringAst');
   }
+  if (ast.parameters.length === 0) {
+    throw new TypeError('encodePROJString expects at least one parameter');
+  }
   const separator = options?.format === 'multiline' ? '\n' : ' ';
   return ast.parameters
     .map(parameter => {
@@ -64,6 +67,7 @@ export function encodePROJString(ast: PROJStringAst, options?: EncodePROJStringO
         throw new TypeError(`Invalid PROJ parameter name: ${parameter.name}`);
       }
       if (parameter.rawValue !== undefined) {
+        validateRawParameterValue(parameter.rawValue);
         return `+${parameter.name}=${parameter.rawValue}`;
       }
       if (parameter.value !== undefined) {
@@ -72,6 +76,40 @@ export function encodePROJString(ast: PROJStringAst, options?: EncodePROJStringO
       return `+${parameter.name}`;
     })
     .join(separator);
+}
+
+function validateRawParameterValue(rawValue: string): void {
+  if (typeof rawValue !== 'string') {
+    throw new TypeError('Invalid PROJ raw parameter value');
+  }
+  if (!rawValue) {
+    return;
+  }
+  const first = rawValue[0];
+  if (first !== '"' && first !== "'") {
+    if (/\s|["']/.test(rawValue)) {
+      throw new TypeError(`Invalid PROJ raw parameter value: ${rawValue}`);
+    }
+    return;
+  }
+  let escaped = false;
+  for (let index = 1; index < rawValue.length; index++) {
+    const character = rawValue[index];
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === '\\') {
+      escaped = true;
+      continue;
+    }
+    if (character === first && index !== rawValue.length - 1) {
+      throw new TypeError(`Invalid PROJ raw parameter value: ${rawValue}`);
+    }
+  }
+  if (escaped || rawValue[rawValue.length - 1] !== first) {
+    throw new TypeError(`Invalid PROJ raw parameter value: ${rawValue}`);
+  }
 }
 
 function parseParameter(rawToken: string, offset: number, source: string): PROJParameter {
