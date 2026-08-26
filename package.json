@@ -9,8 +9,10 @@
     "url": "https://github.com/visgl/math.gl.git"
   },
   "workspaces": [
+    "dev-modules/*",
     "modules/*",
-    "examples/*"
+    "examples/*",
+    "website"
   ],
   "scripts": {
     "bootstrap": "yarn && ocular-bootstrap && yarn build",

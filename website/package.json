@@ -11,17 +11,15 @@
     "write-heading-ids": "ocular-doc-headers ../docs",
     "deploy": "docusaurus deploy"
   },
-  "resolution_notes": {
-    "cheerio": "@cmfcmf/docusaurus-search-local breaks with v1.0.0 production release"
-  },
-  "resolutions": {
-    "cheerio": "1.0.0-rc.9"
-  },
   "dependencies": {
     "@docusaurus/core": "^3.10.2",
+    "@mdx-js/react": "^3.1.1",
     "@vis.gl/docusaurus-website": "2.0.0-alpha.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.31"
   },
   "browserslist": [
     ">0.2% and supports async-functions",
