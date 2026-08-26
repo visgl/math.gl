@@ -26,7 +26,7 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 
 | Function            | Description                                                     |
 | ------------------- | --------------------------------------------------------------- |
-| `makeOBBFromRegion` | Creates an oriented bounding box for a WGS84 geospatial region. |
+| `makeOBBFromRegion` | Creates a conservative oriented bounding box for a longitude–latitude–height region, including antimeridian and polar regions. |
 
 ## Usage Examples
 
