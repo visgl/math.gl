@@ -61,6 +61,13 @@ describe('WKT-CRS codec', () => {
     expect(validateWKTCRS(ast, {profile: 'gdal', allowExtensions: true})).toEqual([]);
   });
 
+  test('treats a backslash before a closing quote as literal', () => {
+    const text = 'GEOGCRS["C:\\"]';
+    const ast = parseWKTCRS(text);
+    expect(ast.root.values[0]).toEqual({type: 'string', value: 'C:\\'});
+    expect(encodeWKTCRS(ast)).toBe(text);
+  });
+
   test('accepts and preserves independently matched delimiters', () => {
     const text =
       'GEOGCS["WGS 84",DATUM("WGS_1984",SPHEROID("WGS 84",6378137,298.257223563)),PRIMEM("Greenwich",0),UNIT("degree",0.0174532925199433)]';
@@ -89,6 +96,21 @@ describe('WKT-CRS codec', () => {
       validateWKTCRS(parseWKTCRS(pointMotionOperation), {profile: 'wkt2:2015'})
     ).toContainEqual(
       expect.objectContaining({code: 'invalid-root', keyword: 'POINTMOTIONOPERATION'})
+    );
+  });
+
+  test('distinguishes GDAL and ESRI WKT1 extensions', () => {
+    const gdal = 'PROJCS["Web Mercator",EXTENSION["PROJ4","+proj=merc"]]';
+    expect(validateWKTCRS(parseWKTCRS(gdal), {profile: 'gdal'})).toEqual([]);
+    expect(validateWKTCRS(parseWKTCRS(gdal), {profile: 'wkt1'})).toContainEqual(
+      expect.objectContaining({code: 'unknown-keyword', keyword: 'EXTENSION'})
+    );
+
+    const esri =
+      'VERTCS["NAVD_1988",VDATUM["North_American_Vertical_Datum_1988"],PARAMETER["Vertical_Shift",0],UNIT["Meter",1]]';
+    expect(validateWKTCRS(parseWKTCRS(esri), {profile: 'esri'})).toEqual([]);
+    expect(validateWKTCRS(parseWKTCRS(esri), {profile: 'wkt1'})).toContainEqual(
+      expect.objectContaining({code: 'invalid-root', keyword: 'VERTCS'})
     );
   });
 

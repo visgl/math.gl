@@ -48,7 +48,7 @@ export type WKTCRSAst = {
 export type ParseWKTCRSOptions = {
   /** Validation profile. `auto` distinguishes WKT1 from WKT2 by root keyword. */
   profile?: WKTCRSProfile | 'auto';
-  /** Validate known keywords and delimiter consistency after parsing. */
+  /** Validate known profile keywords and unambiguous value shapes after parsing. */
   strict?: boolean;
 };
 
@@ -148,6 +148,12 @@ const WKT1_KEYWORDS = new Set([
   'UNIT',
   'VERT_DATUM'
 ]);
+
+const GDAL_WKT1_ROOT_KEYWORDS = new Set(WKT1_ROOT_KEYWORDS);
+const GDAL_WKT1_KEYWORDS = new Set([...WKT1_KEYWORDS, 'EXTENSION']);
+
+const ESRI_WKT1_ROOT_KEYWORDS = new Set([...WKT1_ROOT_KEYWORDS, 'COMPDCS', 'LOCALCS', 'VERTCS']);
+const ESRI_WKT1_KEYWORDS = new Set([...WKT1_KEYWORDS, 'COMPDCS', 'LOCALCS', 'VDATUM', 'VERTCS']);
 
 const WKT2_2015_ROOT_KEYWORDS = new Set([
   'BOUNDCRS',
@@ -280,6 +286,22 @@ const WKT2_2015_KEYWORDS = new Set(
   [...WKT2_KEYWORDS].filter(keyword => !WKT2_2019_ADDITION_KEYWORDS.has(keyword))
 );
 
+const PROFILE_ROOT_KEYWORDS: Record<WKTCRSProfile, ReadonlySet<string>> = {
+  wkt1: WKT1_ROOT_KEYWORDS,
+  gdal: GDAL_WKT1_ROOT_KEYWORDS,
+  esri: ESRI_WKT1_ROOT_KEYWORDS,
+  'wkt2:2015': WKT2_2015_ROOT_KEYWORDS,
+  'wkt2:2019': WKT2_2019_ROOT_KEYWORDS
+};
+
+const PROFILE_KEYWORDS: Record<WKTCRSProfile, ReadonlySet<string>> = {
+  wkt1: WKT1_KEYWORDS,
+  gdal: GDAL_WKT1_KEYWORDS,
+  esri: ESRI_WKT1_KEYWORDS,
+  'wkt2:2015': WKT2_2015_KEYWORDS,
+  'wkt2:2019': WKT2_KEYWORDS
+};
+
 /** Parse WKT1, WKT2, or a compatible vendor WKT serialization. */
 export function parseWKTCRS(text: string, options?: ParseWKTCRSOptions): WKTCRSAst {
   const parser = new WKTParser(text);
@@ -312,7 +334,7 @@ export function encodeWKTCRS(ast: WKTCRSAst, options?: EncodeWKTCRSOptions): str
   return encodeNode(ast.root, format, indent, 0);
 }
 
-/** Validate root keywords, known profile keywords, and delimiter consistency. */
+/** Validate root keywords, known profile keywords, and unambiguous value shapes. */
 export function validateWKTCRS(
   ast: WKTCRSAst,
   options?: ValidateWKTCRSOptions
@@ -322,18 +344,8 @@ export function validateWKTCRS(
   }
 
   const profile = resolveProfile(ast.root.keyword, options?.profile || 'auto');
-  const rootKeywords =
-    profile === 'wkt1' || profile === 'gdal' || profile === 'esri'
-      ? WKT1_ROOT_KEYWORDS
-      : profile === 'wkt2:2015'
-        ? WKT2_2015_ROOT_KEYWORDS
-        : WKT2_2019_ROOT_KEYWORDS;
-  const knownKeywords =
-    profile === 'wkt1' || profile === 'gdal' || profile === 'esri'
-      ? WKT1_KEYWORDS
-      : profile === 'wkt2:2015'
-        ? WKT2_2015_KEYWORDS
-        : WKT2_KEYWORDS;
+  const rootKeywords = PROFILE_ROOT_KEYWORDS[profile];
+  const knownKeywords = PROFILE_KEYWORDS[profile];
   const issues: WKTCRSValidationIssue[] = [];
   const rootKeyword = ast.root.keyword.toUpperCase();
 
@@ -492,11 +504,6 @@ class WKTParser {
           continue;
         }
         return {type: 'string', value};
-      }
-      if (character === '\\' && this.source[this.offset] === '"') {
-        value += '"';
-        this.offset++;
-        continue;
       }
       value += character;
     }
