@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {Matrix4, toRadians} from '@math.gl/core';
+import {Matrix4, Vector3, toRadians} from '@math.gl/core';
 import {OrientedBoundingBox} from '@math.gl/culling';
 import {Ellipsoid, makeOBBFromRegion} from '@math.gl/geospatial';
 
@@ -76,6 +76,11 @@ test('supports degree input, custom ellipsoids and affine transforms', () => {
   expect(Math.abs(radiansBox.center.x)).toBeGreaterThan(6e6);
   expect(radiansBox.halfSize[0]).toBeLessThan(2e6);
 
+  const localReversed = makeOBBFromRegion([10, -10, -10, 10, 0, 0], undefined, {
+    units: 'degrees'
+  });
+  expect(localReversed.halfSize[0]).toBeLessThan(2e6);
+
   const ellipsoid = new Ellipsoid(100, 100, 100);
   const customBox = makeOBBFromRegion([0, 0, 0.1, 0.1, 0, 1], ellipsoid);
   expect(customBox.center.every(Number.isFinite)).toBeTruthy();
@@ -86,6 +91,20 @@ test('supports degree input, custom ellipsoids and affine transforms', () => {
   const expectedCenter = transform.transformAsPoint(customBox.center);
   expect(transformed.center).toEqual(expectedCenter);
   expect(transformed.halfAxes.every(Number.isFinite)).toBeTruthy();
+  expect(
+    new Vector3(transformed.halfAxes.getColumn(0)).dot(
+      new Vector3(transformed.halfAxes.getColumn(1))
+    )
+  ).toBe(0);
+});
+
+test('bounds triaxial ellipsoid latitude extrema', () => {
+  const ellipsoid = new Ellipsoid(1000, 100, 100);
+  const box = makeOBBFromRegion([-120, -30, 120, 40, 0, 0], ellipsoid, {
+    units: 'degrees'
+  });
+  const point = ellipsoid.cartographicToCartesian([90, 40, 0]);
+  expect(box.distanceTo(point)).toBeLessThan(1e-8);
 });
 
 test('keeps polar and degenerate regions finite', () => {

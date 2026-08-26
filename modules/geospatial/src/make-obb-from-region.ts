@@ -5,7 +5,7 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import {Matrix4, Vector2, Vector3, degrees, radians, _MathUtils} from '@math.gl/core';
+import {Matrix3, Matrix4, Vector2, Vector3, degrees, radians, _MathUtils} from '@math.gl/core';
 import {OrientedBoundingBox, Plane} from '@math.gl/culling';
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved
@@ -39,7 +39,6 @@ const scratchPlaneXAxis = new Vector3();
 const scratchHorizonCartesian = new Vector3();
 const scratchHorizonProjected = new Vector2();
 const scratchMaxY = new Vector3();
-const scratchMinY = new Vector3();
 const scratchZ = new Vector3();
 
 const VECTOR3_UNIT_X = new Vector3(1, 0, 0);
@@ -85,8 +84,13 @@ export function makeOBBFromRegion(
   }
   const south = rawSouth * unitScale;
   const north = rawNorth * unitScale;
-  const west = normalizeLongitude(rawWest * unitScale);
-  const east = normalizeLongitude(rawEast * unitScale);
+  let west = normalizeLongitude(rawWest * unitScale);
+  let east = normalizeLongitude(rawEast * unitScale);
+  // For reversed boundaries choose the shorter of the two arcs. This keeps 170° to
+  // -170° on the dateline while interpreting 10° to -10° as the 20° local interval.
+  if (east < west && east + _MathUtils.TWO_PI - west > Math.PI) {
+    [west, east] = [east, west];
+  }
   const latitudeTolerance = 1e-12;
   if (
     south > north ||
@@ -293,14 +297,10 @@ function makeOBBFromNormalizedRegion(
   maxX = projectedPoint.dot(planeXAxis);
   minX = -maxX;
 
-  maxY = ellipsoid.cartographicToCartesian(
-    [0.0, northDeg, fullyBelowEquator ? minimumHeight : maximumHeight],
-    scratchMaxY
-  ).z;
-  minY = ellipsoid.cartographicToCartesian(
-    [0.0, southDeg, fullyAboveEquator ? minimumHeight : maximumHeight],
-    scratchMinY
-  ).z;
+  const northHeight = fullyBelowEquator ? minimumHeight : maximumHeight;
+  const southHeight = fullyAboveEquator ? minimumHeight : maximumHeight;
+  maxY = latitudeZExtent(ellipsoid, northDeg, northHeight, true);
+  minY = latitudeZExtent(ellipsoid, southDeg, southHeight, false);
 
   const farZ = ellipsoid.cartographicToCartesian(
     [eastDeg, latitudeNearestToEquator, maximumHeight],
@@ -330,13 +330,42 @@ function makeOBBFromNormalizedRegion(
 
 function applyTransform(obb: OrientedBoundingBox, transform?: Matrix4): OrientedBoundingBox {
   if (!transform) return obb;
-  obb.center.transformAsPoint(transform);
-  for (let column = 0; column < 3; column++) {
-    const axis = obb.halfAxes.getColumn(column, new Vector3());
-    axis.transformAsVector(transform);
-    obb.halfAxes.setColumn(column, axis);
+  // A general affine transform turns an OBB into a parallelepiped. Refit its eight
+  // corners to an axis-aligned OBB so culling methods that assume orthogonal axes remain safe.
+  const axes = [0, 1, 2].map(column => obb.halfAxes.getColumn(column, new Vector3()));
+  const center = transform.transformAsPoint(obb.center) as number[];
+  const minimum = [Infinity, Infinity, Infinity];
+  const maximum = [-Infinity, -Infinity, -Infinity];
+  for (let mask = 0; mask < 8; mask++) {
+    const corner = new Vector3(center);
+    for (let axis = 0; axis < 3; axis++) {
+      const transformedAxis = transform.transformAsVector(axes[axis]) as number[];
+      corner.add(new Vector3(transformedAxis).scale((mask & (1 << axis)) === 0 ? -1 : 1));
+    }
+    for (let component = 0; component < 3; component++) {
+      minimum[component] = Math.min(minimum[component], corner[component]);
+      maximum[component] = Math.max(maximum[component], corner[component]);
+    }
   }
+  obb.center.copy(minimum).add(maximum).scale(0.5);
+  const halfSize = new Vector3(maximum).subtract(minimum).scale(0.5);
+  obb.halfAxes = new Matrix3().set(halfSize.x, 0, 0, 0, halfSize.y, 0, 0, 0, halfSize.z);
   return obb;
+}
+
+function latitudeZExtent(
+  ellipsoid: Ellipsoid,
+  latitude: number,
+  height: number,
+  maximum: boolean
+): number {
+  let extent = maximum ? -Infinity : Infinity;
+  // A triaxial ellipsoid's fixed-latitude extrema occur at a principal longitude.
+  for (const longitude of [0, 90, 180, 270]) {
+    const z = ellipsoid.cartographicToCartesian([longitude, latitude, height], scratchMaxY).z;
+    extent = maximum ? Math.max(extent, z) : Math.min(extent, z);
+  }
+  return extent;
 }
 
 /** Helper function for makeOBBFromRegion(). */
