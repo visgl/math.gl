@@ -4165,42 +4165,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/core@npm:4.2.0-alpha.4, @math.gl/core@workspace:modules/core":
+"@math.gl/core@npm:4.2.0-alpha.5, @math.gl/core@workspace:modules/core":
   version: 0.0.0-use.local
   resolution: "@math.gl/core@workspace:modules/core"
   dependencies:
-    "@math.gl/types": "npm:4.2.0-alpha.4"
+    "@math.gl/types": "npm:4.2.0-alpha.5"
   languageName: unknown
   linkType: soft
 
-"@math.gl/crs@npm:4.2.0-alpha.4, @math.gl/crs@workspace:modules/crs":
+"@math.gl/crs@npm:4.2.0-alpha.5, @math.gl/crs@workspace:modules/crs":
   version: 0.0.0-use.local
   resolution: "@math.gl/crs@workspace:modules/crs"
   languageName: unknown
   linkType: soft
 
-"@math.gl/culling@npm:4.2.0-alpha.4, @math.gl/culling@workspace:modules/culling":
+"@math.gl/culling@npm:4.2.0-alpha.5, @math.gl/culling@workspace:modules/culling":
   version: 0.0.0-use.local
   resolution: "@math.gl/culling@workspace:modules/culling"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.4"
-    "@math.gl/types": "npm:4.2.0-alpha.4"
+    "@math.gl/core": "npm:4.2.0-alpha.5"
+    "@math.gl/types": "npm:4.2.0-alpha.5"
   languageName: unknown
   linkType: soft
 
-"@math.gl/dggs-geohash@npm:4.2.0-alpha.4, @math.gl/dggs-geohash@workspace:modules/dggs-geohash":
+"@math.gl/dggs-geohash@npm:4.2.0-alpha.5, @math.gl/dggs-geohash@workspace:modules/dggs-geohash":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs-geohash@workspace:modules/dggs-geohash"
   languageName: unknown
   linkType: soft
 
-"@math.gl/dggs-quadkey@npm:4.2.0-alpha.4, @math.gl/dggs-quadkey@workspace:modules/dggs-quadkey":
+"@math.gl/dggs-quadkey@npm:4.2.0-alpha.5, @math.gl/dggs-quadkey@workspace:modules/dggs-quadkey":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs-quadkey@workspace:modules/dggs-quadkey"
   languageName: unknown
   linkType: soft
 
-"@math.gl/dggs-s2@npm:4.2.0-alpha.4, @math.gl/dggs-s2@workspace:modules/dggs-s2":
+"@math.gl/dggs-s2@npm:4.2.0-alpha.5, @math.gl/dggs-s2@workspace:modules/dggs-s2":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs-s2@workspace:modules/dggs-s2"
   dependencies:
@@ -4208,15 +4208,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/expressions@npm:4.2.0-alpha.4, @math.gl/expressions@workspace:modules/expressions":
+"@math.gl/expressions@npm:4.2.0-alpha.5, @math.gl/expressions@workspace:modules/expressions":
   version: 0.0.0-use.local
   resolution: "@math.gl/expressions@workspace:modules/expressions"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.4"
-    "@math.gl/dggs-geohash": "npm:4.2.0-alpha.4"
-    "@math.gl/dggs-quadkey": "npm:4.2.0-alpha.4"
-    "@math.gl/dggs-s2": "npm:4.2.0-alpha.4"
-    "@math.gl/geospatial": "npm:4.2.0-alpha.4"
+    "@math.gl/core": "npm:4.2.0-alpha.5"
+    "@math.gl/dggs-geohash": "npm:4.2.0-alpha.5"
+    "@math.gl/dggs-quadkey": "npm:4.2.0-alpha.5"
+    "@math.gl/dggs-s2": "npm:4.2.0-alpha.5"
+    "@math.gl/geospatial": "npm:4.2.0-alpha.5"
     jsep: "npm:^1.4.0"
   languageName: unknown
   linkType: soft
@@ -4225,7 +4225,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geoid@workspace:modules/geoid"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.4"
+    "@math.gl/core": "npm:4.2.0-alpha.5"
   languageName: unknown
   linkType: soft
 
@@ -4233,8 +4233,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry-utils@workspace:modules/geometry-utils"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.4"
-    "@math.gl/types": "npm:4.2.0-alpha.4"
+    "@math.gl/core": "npm:4.2.0-alpha.5"
+    "@math.gl/types": "npm:4.2.0-alpha.5"
   languageName: unknown
   linkType: soft
 
@@ -4242,17 +4242,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry@workspace:modules/geometry"
   dependencies:
-    "@math.gl/types": "npm:4.2.0-alpha.4"
+    "@math.gl/types": "npm:4.2.0-alpha.5"
   languageName: unknown
   linkType: soft
 
-"@math.gl/geospatial@npm:4.2.0-alpha.4, @math.gl/geospatial@workspace:modules/geospatial":
+"@math.gl/geospatial@npm:4.2.0-alpha.5, @math.gl/geospatial@workspace:modules/geospatial":
   version: 0.0.0-use.local
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.4"
-    "@math.gl/culling": "npm:4.2.0-alpha.4"
-    "@math.gl/types": "npm:4.2.0-alpha.4"
+    "@math.gl/core": "npm:4.2.0-alpha.5"
+    "@math.gl/culling": "npm:4.2.0-alpha.5"
+    "@math.gl/types": "npm:4.2.0-alpha.5"
   languageName: unknown
   linkType: soft
 
@@ -4260,7 +4260,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/polygon@workspace:modules/polygon"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.4"
+    "@math.gl/core": "npm:4.2.0-alpha.5"
   languageName: unknown
   linkType: soft
 
@@ -4268,8 +4268,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/proj4@workspace:modules/proj4"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.4"
-    "@math.gl/crs": "npm:4.2.0-alpha.4"
+    "@math.gl/core": "npm:4.2.0-alpha.5"
+    "@math.gl/crs": "npm:4.2.0-alpha.5"
     proj4: "npm:2.20.9"
   languageName: unknown
   linkType: soft
@@ -4287,7 +4287,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/types@npm:4.2.0-alpha.4, @math.gl/types@workspace:modules/types":
+"@math.gl/types@npm:4.2.0-alpha.5, @math.gl/types@workspace:modules/types":
   version: 0.0.0-use.local
   resolution: "@math.gl/types@workspace:modules/types"
   languageName: unknown
@@ -4297,7 +4297,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/web-mercator@workspace:modules/web-mercator"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.4"
+    "@math.gl/core": "npm:4.2.0-alpha.5"
     mock-browser: "npm:^0.92.14"
   languageName: unknown
   linkType: soft
@@ -13204,7 +13204,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math.gl-expression-playground@workspace:examples/expressions"
   dependencies:
-    "@math.gl/expressions": "npm:4.2.0-alpha.4"
+    "@math.gl/expressions": "npm:4.2.0-alpha.5"
     "@types/react": "npm:^18.2.0"
     "@types/react-dom": "npm:^18.2.0"
     react: "npm:^18.2.0"
@@ -13235,7 +13235,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math.gl@workspace:modules/main"
   dependencies:
-    "@math.gl/core": "npm:4.2.0-alpha.4"
+    "@math.gl/core": "npm:4.2.0-alpha.5"
   languageName: unknown
   linkType: soft
 
