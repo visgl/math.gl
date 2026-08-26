@@ -5,7 +5,7 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import {Vector2, Vector3, degrees, _MathUtils} from '@math.gl/core';
+import {Matrix3, Matrix4, Vector2, Vector3, degrees, radians, _MathUtils} from '@math.gl/core';
 import {OrientedBoundingBox, Plane} from '@math.gl/culling';
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved
@@ -39,23 +39,89 @@ const scratchPlaneXAxis = new Vector3();
 const scratchHorizonCartesian = new Vector3();
 const scratchHorizonProjected = new Vector2();
 const scratchMaxY = new Vector3();
-const scratchMinY = new Vector3();
 const scratchZ = new Vector3();
 
 const VECTOR3_UNIT_X = new Vector3(1, 0, 0);
 const VECTOR3_UNIT_Z = new Vector3(0, 0, 1);
 
+export type GeodeticRegion = readonly [
+  west: number,
+  south: number,
+  east: number,
+  north: number,
+  minimumHeight: number,
+  maximumHeight: number
+];
+
+export type MakeOBBFromRegionOptions = {
+  /** Longitude and latitude units. Defaults to radians, as in 3D Tiles regions. */
+  units?: 'radians' | 'degrees';
+  /** Affine transform from ellipsoid-fixed coordinates into the caller's world space. */
+  transform?: Matrix4;
+};
+
 /**
- * Computes an OrientedBoundingBox that bounds a region on the surface of the WGS84 ellipsoid.
- * There are no guarantees about the orientation of the bounding box.
+ * Creates a conservative oriented bounding box for a geodetic region.
  *
- * @param region The cartographic region ([west, south, east, north, minimum height, maximum height])
- * on the surface of the ellipsoid. Longitude and latitude values are in radians; heights are in
- * meters.
- * @returns A new OrientedBoundingBox that encloses the region.
+ * Longitudes and latitudes are radians by default. An east longitude smaller than west
+ * denotes the directed eastward interval crossing the antimeridian; equal longitudes denote
+ * zero width unless the original endpoints differ by a full turn.
+ * Heights use the ellipsoid's linear unit. Inputs and the supplied ellipsoid and transform are
+ * never mutated.
  */
 // eslint-disable-next-line max-statements
-export function makeOBBFromRegion(region: readonly number[]): OrientedBoundingBox {
+export function makeOBBFromRegion(
+  region: readonly number[],
+  ellipsoid: Ellipsoid = Ellipsoid.WGS84,
+  options: MakeOBBFromRegionOptions = {}
+): OrientedBoundingBox {
+  if (!region || region.length !== 6 || region.some(value => !Number.isFinite(value))) {
+    throw new Error('makeOBBFromRegion: region must contain exactly six finite numbers');
+  }
+  const unitScale = options.units === 'degrees' ? radians(1) : 1;
+  const [rawWest, rawSouth, rawEast, rawNorth, minimumHeight, maximumHeight] = region;
+  if (minimumHeight > maximumHeight) {
+    throw new Error('makeOBBFromRegion: minimumHeight must not exceed maximumHeight');
+  }
+  const south = rawSouth * unitScale;
+  const north = rawNorth * unitScale;
+  const west = normalizeLongitude(rawWest * unitScale);
+  let east = normalizeLongitude(rawEast * unitScale);
+  // Preserve a complete directed turn, which would otherwise collapse when both endpoints
+  // are normalized to the same longitude. Reversed boundaries retain Cesium/3D Tiles semantics.
+  const directedSpan = rawEast * unitScale - rawWest * unitScale;
+  if (directedSpan >= _MathUtils.TWO_PI - 1e-12) {
+    east = west + _MathUtils.TWO_PI;
+  }
+  const latitudeTolerance = 1e-12;
+  if (
+    south > north ||
+    south < -_MathUtils.PI_OVER_TWO - latitudeTolerance ||
+    north > _MathUtils.PI_OVER_TWO + latitudeTolerance
+  ) {
+    throw new Error('makeOBBFromRegion: latitude must be within [-π/2, π/2] and south ≤ north');
+  }
+  // Avoid passing a tiny out-of-range value to the ellipsoid conversion at a boundary.
+  const clampedSouth = Math.max(-_MathUtils.PI_OVER_TWO, Math.min(_MathUtils.PI_OVER_TWO, south));
+  const clampedNorth = Math.max(-_MathUtils.PI_OVER_TWO, Math.min(_MathUtils.PI_OVER_TWO, north));
+  return makeOBBFromNormalizedRegion(
+    [west, clampedSouth, east, clampedNorth, minimumHeight, maximumHeight],
+    ellipsoid,
+    options.transform
+  );
+}
+
+function normalizeLongitude(value: number): number {
+  const normalized =
+    ((((value + Math.PI) % _MathUtils.TWO_PI) + _MathUtils.TWO_PI) % _MathUtils.TWO_PI) - Math.PI;
+  return normalized === -Math.PI && value > 0 ? Math.PI : normalized;
+}
+
+function makeOBBFromNormalizedRegion(
+  region: GeodeticRegion,
+  ellipsoid: Ellipsoid,
+  transform?: Matrix4
+): OrientedBoundingBox {
   const obb = new OrientedBoundingBox();
 
   const [west, south, east, north, minimumHeight, maximumHeight] = region;
@@ -85,8 +151,8 @@ export function makeOBBFromRegion(region: readonly number[]): OrientedBoundingBo
   if (rectangle.width <= _MathUtils.PI) {
     const westDeg = degrees(west);
 
-    const tangentPoint = Ellipsoid.WGS84.cartographicToCartesian(tangentPointCartographic);
-    const ellipsoidTangentPlane = new EllipsoidTangentPlane(tangentPoint);
+    const tangentPoint = ellipsoid.cartographicToCartesian(tangentPointCartographic);
+    const ellipsoidTangentPlane = new EllipsoidTangentPlane(tangentPoint, ellipsoid);
 
     const latCenter = southDeg < 0.0 && northDeg > 0.0 ? 0.0 : tangentPointCartographic.y;
 
@@ -116,23 +182,23 @@ export function makeOBBFromRegion(region: readonly number[]): OrientedBoundingBo
       maximumHeight
     ]);
 
-    const perimeterCartesianNC = Ellipsoid.WGS84.cartographicToCartesian(
+    const perimeterCartesianNC = ellipsoid.cartographicToCartesian(
       perimeterCartographicNC,
       scratchPerimeterCartesianNC
     );
-    let perimeterCartesianNW = Ellipsoid.WGS84.cartographicToCartesian(
+    let perimeterCartesianNW = ellipsoid.cartographicToCartesian(
       perimeterCartographicNW,
       scratchPerimeterCartesianNW
     );
-    const perimeterCartesianCW = Ellipsoid.WGS84.cartographicToCartesian(
+    const perimeterCartesianCW = ellipsoid.cartographicToCartesian(
       perimeterCartographicCW,
       scratchPerimeterCartesianCW
     );
-    let perimeterCartesianSW = Ellipsoid.WGS84.cartographicToCartesian(
+    let perimeterCartesianSW = ellipsoid.cartographicToCartesian(
       perimeterCartographicSW,
       scratchPerimeterCartesianSW
     );
-    const perimeterCartesianSC = Ellipsoid.WGS84.cartographicToCartesian(
+    const perimeterCartesianSC = ellipsoid.cartographicToCartesian(
       perimeterCartographicSC,
       scratchPerimeterCartesianSC
     );
@@ -165,11 +231,11 @@ export function makeOBBFromRegion(region: readonly number[]): OrientedBoundingBo
     minY = Math.min(perimeterProjectedSW.y, perimeterProjectedSC.y);
 
     perimeterCartographicNW.z = perimeterCartographicSW.z = minimumHeight;
-    perimeterCartesianNW = Ellipsoid.WGS84.cartographicToCartesian(
+    perimeterCartesianNW = ellipsoid.cartographicToCartesian(
       perimeterCartographicNW,
       scratchPerimeterCartesianNW
     );
-    perimeterCartesianSW = Ellipsoid.WGS84.cartographicToCartesian(
+    perimeterCartesianSW = ellipsoid.cartographicToCartesian(
       perimeterCartographicSW,
       scratchPerimeterCartesianSW
     );
@@ -181,18 +247,21 @@ export function makeOBBFromRegion(region: readonly number[]): OrientedBoundingBo
     );
     maxZ = maximumHeight;
 
-    return fromPlaneExtents(
-      ellipsoidTangentPlane.origin,
-      ellipsoidTangentPlane.xAxis,
-      ellipsoidTangentPlane.yAxis,
-      ellipsoidTangentPlane.zAxis,
-      minX,
-      maxX,
-      minY,
-      maxY,
-      minZ,
-      maxZ,
-      obb
+    return applyTransform(
+      fromPlaneExtents(
+        ellipsoidTangentPlane.origin,
+        ellipsoidTangentPlane.xAxis,
+        ellipsoidTangentPlane.yAxis,
+        ellipsoidTangentPlane.zAxis,
+        minX,
+        maxX,
+        minY,
+        maxY,
+        minZ,
+        maxZ,
+        obb
+      ),
+      transform
     );
   }
 
@@ -206,7 +275,7 @@ export function makeOBBFromRegion(region: readonly number[]): OrientedBoundingBo
       ? northDeg
       : 0.0;
 
-  const planeOrigin = Ellipsoid.WGS84.cartographicToCartesian(
+  const planeOrigin = ellipsoid.cartographicToCartesian(
     [lonCenterDeg, latitudeNearestToEquator, maximumHeight],
     scratchPlaneOrigin
   );
@@ -219,7 +288,7 @@ export function makeOBBFromRegion(region: readonly number[]): OrientedBoundingBo
   const planeXAxis = scratchPlaneXAxis.copy(planeNormal).cross(planeYAxis);
   plane = scratchPlane.fromPointNormal(planeOrigin, planeNormal);
 
-  const horizonCartesian = Ellipsoid.WGS84.cartographicToCartesian(
+  const horizonCartesian = ellipsoid.cartographicToCartesian(
     [degrees(lonCenter + _MathUtils.PI_OVER_TWO), latitudeNearestToEquator, maximumHeight],
     scratchHorizonCartesian
   );
@@ -230,16 +299,12 @@ export function makeOBBFromRegion(region: readonly number[]): OrientedBoundingBo
   maxX = projectedPoint.dot(planeXAxis);
   minX = -maxX;
 
-  maxY = Ellipsoid.WGS84.cartographicToCartesian(
-    [0.0, northDeg, fullyBelowEquator ? minimumHeight : maximumHeight],
-    scratchMaxY
-  ).z;
-  minY = Ellipsoid.WGS84.cartographicToCartesian(
-    [0.0, southDeg, fullyAboveEquator ? minimumHeight : maximumHeight],
-    scratchMinY
-  ).z;
+  const northHeight = fullyBelowEquator ? minimumHeight : maximumHeight;
+  const southHeight = fullyAboveEquator ? minimumHeight : maximumHeight;
+  maxY = latitudeZExtent(ellipsoid, northDeg, northHeight, true);
+  minY = latitudeZExtent(ellipsoid, southDeg, southHeight, false);
 
-  const farZ = Ellipsoid.WGS84.cartographicToCartesian(
+  const farZ = ellipsoid.cartographicToCartesian(
     [eastDeg, latitudeNearestToEquator, maximumHeight],
     scratchZ
   );
@@ -247,19 +312,62 @@ export function makeOBBFromRegion(region: readonly number[]): OrientedBoundingBo
   minZ = plane.getPointDistance(farZ);
   maxZ = 0.0;
 
-  return fromPlaneExtents(
-    planeOrigin,
-    planeXAxis,
-    planeYAxis,
-    planeNormal,
-    minX,
-    maxX,
-    minY,
-    maxY,
-    minZ,
-    maxZ,
-    obb
+  return applyTransform(
+    fromPlaneExtents(
+      planeOrigin,
+      planeXAxis,
+      planeYAxis,
+      planeNormal,
+      minX,
+      maxX,
+      minY,
+      maxY,
+      minZ,
+      maxZ,
+      obb
+    ),
+    transform
   );
+}
+
+function applyTransform(obb: OrientedBoundingBox, transform?: Matrix4): OrientedBoundingBox {
+  if (!transform) return obb;
+  // A general affine transform turns an OBB into a parallelepiped. Refit its eight
+  // corners to an axis-aligned OBB so culling methods that assume orthogonal axes remain safe.
+  const axes = [0, 1, 2].map(column => obb.halfAxes.getColumn(column, new Vector3()));
+  const center = transform.transformAsPoint(obb.center) as number[];
+  const minimum = [Infinity, Infinity, Infinity];
+  const maximum = [-Infinity, -Infinity, -Infinity];
+  for (let mask = 0; mask < 8; mask++) {
+    const corner = new Vector3(center);
+    for (let axis = 0; axis < 3; axis++) {
+      const transformedAxis = transform.transformAsVector(axes[axis]) as number[];
+      corner.add(new Vector3(transformedAxis).scale((mask & (1 << axis)) === 0 ? -1 : 1));
+    }
+    for (let component = 0; component < 3; component++) {
+      minimum[component] = Math.min(minimum[component], corner[component]);
+      maximum[component] = Math.max(maximum[component], corner[component]);
+    }
+  }
+  obb.center.copy(minimum).add(maximum).scale(0.5);
+  const halfSize = new Vector3(maximum).subtract(minimum).scale(0.5);
+  obb.halfAxes = new Matrix3().set(halfSize.x, 0, 0, 0, halfSize.y, 0, 0, 0, halfSize.z);
+  return obb;
+}
+
+function latitudeZExtent(
+  ellipsoid: Ellipsoid,
+  latitude: number,
+  height: number,
+  maximum: boolean
+): number {
+  let extent = maximum ? -Infinity : Infinity;
+  // A triaxial ellipsoid's fixed-latitude extrema occur at a principal longitude.
+  for (const longitude of [0, 90, 180, 270]) {
+    const z = ellipsoid.cartographicToCartesian([longitude, latitude, height], scratchMaxY).z;
+    extent = maximum ? Math.max(extent, z) : Math.min(extent, z);
+  }
+  return extent;
 }
 
 /** Helper function for makeOBBFromRegion(). */
