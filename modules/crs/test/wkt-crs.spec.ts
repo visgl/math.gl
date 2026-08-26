@@ -68,6 +68,10 @@ describe('WKT-CRS codec', () => {
     expect(encodeWKTCRS(ast)).toBe(text);
   });
 
+  test('rejects quotes embedded in unquoted values', () => {
+    expect(() => parseWKTCRS('GEOGCRS["x",VENDOR[north"bad]]')).toThrow(WKTCRSSyntaxError);
+  });
+
   test('accepts and preserves independently matched delimiters', () => {
     const text =
       'GEOGCS["WGS 84",DATUM("WGS_1984",SPHEROID("WGS 84",6378137,298.257223563)),PRIMEM("Greenwich",0),UNIT("degree",0.0174532925199433)]';

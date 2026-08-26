@@ -463,13 +463,16 @@ class WKTParser {
     }
 
     const start = this.offset;
-    while (this.offset < this.source.length && !/[\s,\[\]()]/.test(this.source[this.offset])) {
+    while (this.offset < this.source.length && !/[\s,\[\]()"]/.test(this.source[this.offset])) {
       this.offset++;
     }
     if (start === this.offset) {
       this.fail('Expected a WKT value');
     }
     const value = this.source.slice(start, this.offset);
+    if (this.source[this.offset] === '"') {
+      this.fail('Unexpected quote in unquoted WKT value');
+    }
     this.skipWhitespace();
     if (this.source[this.offset] === '[' || this.source[this.offset] === '(') {
       if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(value)) {

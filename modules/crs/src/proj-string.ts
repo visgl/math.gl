@@ -92,7 +92,11 @@ function validateRawParameterValue(rawValue: string): void {
     }
     return;
   }
+  if (rawValue.length < 2) {
+    throw new TypeError(`Invalid PROJ raw parameter value: ${rawValue}`);
+  }
   let escaped = false;
+  let closingQuoteFound = false;
   for (let index = 1; index < rawValue.length; index++) {
     const character = rawValue[index];
     if (escaped) {
@@ -106,8 +110,11 @@ function validateRawParameterValue(rawValue: string): void {
     if (character === first && index !== rawValue.length - 1) {
       throw new TypeError(`Invalid PROJ raw parameter value: ${rawValue}`);
     }
+    if (character === first) {
+      closingQuoteFound = true;
+    }
   }
-  if (escaped || rawValue[rawValue.length - 1] !== first) {
+  if (escaped || !closingQuoteFound || rawValue[rawValue.length - 1] !== first) {
     throw new TypeError(`Invalid PROJ raw parameter value: ${rawValue}`);
   }
 }
