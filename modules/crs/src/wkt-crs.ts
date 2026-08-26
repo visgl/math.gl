@@ -72,7 +72,6 @@ export type ValidateWKTCRSOptions = {
 export type WKTCRSValidationIssueCode =
   | 'invalid-root'
   | 'unknown-keyword'
-  | 'mixed-delimiters'
   | 'empty-node'
   | 'invalid-value';
 
@@ -347,20 +346,12 @@ export function validateWKTCRS(
     });
   }
 
-  visitNode(ast.root, [], ast.root.delimiter, node => {
+  visitNode(ast.root, [], node => {
     const keyword = node.node.keyword.toUpperCase();
     if (!options?.allowExtensions && !knownKeywords.has(keyword)) {
       issues.push({
         code: 'unknown-keyword',
         message: `${node.node.keyword} is not defined by the ${profile} profile`,
-        path: node.path,
-        keyword: node.node.keyword
-      });
-    }
-    if (node.node.delimiter !== ast.root.delimiter) {
-      issues.push({
-        code: 'mixed-delimiters',
-        message: `${node.node.keyword} uses a different delimiter from the WKT root`,
         path: node.path,
         keyword: node.node.keyword
       });
@@ -763,14 +754,13 @@ function validateNodeValues(node: WKTCRSNode): string | null {
 function visitNode(
   node: WKTCRSNode,
   path: number[],
-  rootDelimiter: WKTCRSDelimiter,
-  visitor: (entry: {node: WKTCRSNode; path: number[]; rootDelimiter: WKTCRSDelimiter}) => void
+  visitor: (entry: {node: WKTCRSNode; path: number[]}) => void
 ): void {
-  visitor({node, path, rootDelimiter});
+  visitor({node, path});
   for (let index = 0; index < node.values.length; index++) {
     const value = node.values[index];
     if (value.type === 'node') {
-      visitNode(value, [...path, index], rootDelimiter, visitor);
+      visitNode(value, [...path, index], visitor);
     }
   }
 }

@@ -61,11 +61,12 @@ describe('WKT-CRS codec', () => {
     expect(validateWKTCRS(ast, {profile: 'gdal', allowExtensions: true})).toEqual([]);
   });
 
-  test('reports mixed delimiters', () => {
-    const ast = parseWKTCRS('GEOGCS["WGS 84",DATUM("WGS_1984")]');
-    expect(validateWKTCRS(ast, {profile: 'wkt1'})).toContainEqual(
-      expect.objectContaining({code: 'mixed-delimiters', keyword: 'DATUM'})
-    );
+  test('accepts and preserves independently matched delimiters', () => {
+    const text =
+      'GEOGCS["WGS 84",DATUM("WGS_1984",SPHEROID("WGS 84",6378137,298.257223563)),PRIMEM("Greenwich",0),UNIT("degree",0.0174532925199433)]';
+    const ast = parseWKTCRS(text);
+    expect(validateWKTCRS(ast, {profile: 'wkt1'})).toEqual([]);
+    expect(encodeWKTCRS(ast)).toBe(text);
   });
 
   test('parses standard unquoted date-time values in temporal extents', () => {
