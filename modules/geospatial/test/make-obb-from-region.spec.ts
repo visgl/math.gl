@@ -79,7 +79,11 @@ test('supports degree input, custom ellipsoids and affine transforms', () => {
   const localReversed = makeOBBFromRegion([10, -10, -10, 10, 0, 0], undefined, {
     units: 'degrees'
   });
-  expect(localReversed.halfSize[0]).toBeLessThan(2e6);
+  expect(localReversed.halfSize[0]).toBeGreaterThan(5e6);
+  const fullTurn = makeOBBFromRegion([0, -10, 360, 10, 0, 0], undefined, {
+    units: 'degrees'
+  });
+  expect(fullTurn.halfSize[0]).toBeGreaterThan(5e6);
 
   const ellipsoid = new Ellipsoid(100, 100, 100);
   const customBox = makeOBBFromRegion([0, 0, 0.1, 0.1, 0, 1], ellipsoid);

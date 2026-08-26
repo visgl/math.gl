@@ -32,14 +32,14 @@ Latitudes must be in `[-π/2, π/2]` (or `[-90, 90]` in degree mode), `south` mu
 
 ### Longitude wrapping
 
-Longitude values are normalized internally, so values outside the conventional range are accepted. If `east < west`, the region crosses the antimeridian and uses the shorter wrapped interval:
+Longitude values outside the conventional range are accepted. The boundaries retain the directed eastward semantics used by 3D Tiles and `LngLatRectangle`: if `east < west`, the interval crosses the antimeridian and continues eastward through ±180°.
 
 ```js
 const datelineRegion = [170, -10, -170, 10, 0, 250];
 const box = makeOBBFromRegion(datelineRegion, undefined, {units: 'degrees'});
 ```
 
-This describes a 20° region centered on ±180°, not a 340° region centered on 0°. Equal west and east longitudes describe zero width, not a full globe.
+This describes a 20° region centered on ±180°. A region from `10°` to `-10°` is the directed 340° interval, not the shorter 20° interval. Equal endpoints describe zero width, while endpoints separated by one full turn (for example `0°` to `360°`) describe a full-globe longitude span.
 
 ### Ellipsoid
 
@@ -59,7 +59,7 @@ const box = makeOBBFromRegion(region, moon);
 | `units` | `'radians' \| 'degrees'` | `'radians'` | Units for longitude and latitude. Heights are never converted. |
 | `transform` | `Matrix4` | — | Affine transform from ellipsoid-fixed coordinates into world coordinates. |
 
-The transform is applied exactly once and may include translation, rotation, non-uniform scale, or shear. Translation affects the center; the linear part affects the half-axes. Inputs and caller-owned values are never mutated.
+The transform is applied exactly once and may include translation, rotation, non-uniform scale, or shear. Translation affects the center; the linear part affects the half-axes. For 3D Tiles, do not automatically pass `tile.transform`: the 3D Tiles specification exempts region bounding volumes from that transform. Inputs and caller-owned values are never mutated.
 
 ## Errors and edge cases
 

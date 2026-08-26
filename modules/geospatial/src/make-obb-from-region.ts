@@ -64,13 +64,14 @@ export type MakeOBBFromRegionOptions = {
  * Creates a conservative oriented bounding box for a geodetic region.
  *
  * Longitudes and latitudes are radians by default. An east longitude smaller than west
- * denotes the shorter interval crossing the antimeridian; equal longitudes denote zero width.
+ * denotes the directed eastward interval crossing the antimeridian; equal longitudes denote
+ * zero width unless the original endpoints differ by a full turn.
  * Heights use the ellipsoid's linear unit. Inputs and the supplied ellipsoid and transform are
  * never mutated.
  */
 // eslint-disable-next-line max-statements
 export function makeOBBFromRegion(
-  region: GeodeticRegion,
+  region: readonly number[],
   ellipsoid: Ellipsoid = Ellipsoid.WGS84,
   options: MakeOBBFromRegionOptions = {}
 ): OrientedBoundingBox {
@@ -84,12 +85,13 @@ export function makeOBBFromRegion(
   }
   const south = rawSouth * unitScale;
   const north = rawNorth * unitScale;
-  let west = normalizeLongitude(rawWest * unitScale);
+  const west = normalizeLongitude(rawWest * unitScale);
   let east = normalizeLongitude(rawEast * unitScale);
-  // For reversed boundaries choose the shorter of the two arcs. This keeps 170° to
-  // -170° on the dateline while interpreting 10° to -10° as the 20° local interval.
-  if (east < west && east + _MathUtils.TWO_PI - west > Math.PI) {
-    [west, east] = [east, west];
+  // Preserve a complete directed turn, which would otherwise collapse when both endpoints
+  // are normalized to the same longitude. Reversed boundaries retain Cesium/3D Tiles semantics.
+  const directedSpan = rawEast * unitScale - rawWest * unitScale;
+  if (directedSpan >= _MathUtils.TWO_PI - 1e-12) {
+    east = west + _MathUtils.TWO_PI;
   }
   const latitudeTolerance = 1e-12;
   if (
