@@ -8,9 +8,11 @@ import {
   invalidCRSType,
   objectDefinitions,
   proj4Definitions,
+  projAst,
   serializedDefinitions,
   unsupportedCompoundCRS,
-  unsupportedVerticalCRS
+  unsupportedVerticalCRS,
+  wktAst
 } from './crs-types';
 
 test('CRS definitions expose the intended compile-time subsets', () => {
@@ -20,4 +22,6 @@ test('CRS definitions expose the intended compile-time subsets', () => {
   expect(invalidCRSType).toBeTruthy();
   expect(unsupportedCompoundCRS).toBeTruthy();
   expect(unsupportedVerticalCRS).toBeTruthy();
+  expect(wktAst.root.keyword).toBe('GEOGCRS');
+  expect(projAst.parameters[0].name).toBe('proj');
 });

@@ -75,6 +75,8 @@ Highlights:
 - Uses strict PROJJSON v0.7 as its semantic CRS object model and exports types generated from the official schema.
 - Exposes the vendored official PROJJSON v0.7 schema for runtime validation by applications.
 - Represents authority codes, PROJ strings, and WKT definitions as serialized strings.
+- Adds value-preserving WKT1/WKT2 syntax parsing, profile validation, and compact or pretty encoding.
+- Adds ordered PROJ definition and pipeline syntax parsing and encoding.
 
 **`@math.gl/proj4`**
 

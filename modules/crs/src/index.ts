@@ -16,3 +16,31 @@ export type {
   PROJStringDefinition,
   WKTCRSDefinition
 } from './crs';
+export type {
+  EncodeWKTCRSOptions,
+  ParseWKTCRSOptions,
+  ValidateWKTCRSOptions,
+  WKTCRSAst,
+  WKTCRSDelimiter,
+  WKTCRSEnumeration,
+  WKTCRSNode,
+  WKTCRSNumber,
+  WKTCRSProfile,
+  WKTCRSString,
+  WKTCRSValidationIssue,
+  WKTCRSValidationIssueCode,
+  WKTCRSValue
+} from './wkt-crs';
+export {
+  encodeWKTCRS,
+  parseWKTCRS,
+  validateWKTCRS,
+  WKTCRSSyntaxError,
+  WKTCRSValidationError
+} from './wkt-crs';
+export type {EncodePROJStringOptions, PROJParameter, PROJStringAst} from './proj-string';
+export {
+  encodePROJString,
+  parsePROJString,
+  PROJStringSyntaxError
+} from './proj-string';

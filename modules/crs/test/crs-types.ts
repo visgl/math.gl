@@ -2,7 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {CRSDefinition, PROJJSONCRS} from '@math.gl/crs';
+import type {
+  CRSDefinition,
+  PROJJSONCRS,
+  PROJParameter,
+  PROJStringAst,
+  WKTCRSAst,
+  WKTCRSNode
+} from '@math.gl/crs';
 import type {Proj4CRSDefinition} from '@math.gl/proj4';
 
 import {
@@ -43,3 +50,14 @@ export const proj4Definitions: Proj4CRSDefinition[] = [
 export const unsupportedCompoundCRS: Proj4CRSDefinition = wgs84Egm2008CompoundCRS;
 // @ts-expect-error proj4js does not transform VerticalCRS objects.
 export const unsupportedVerticalCRS: Proj4CRSDefinition = egm2008VerticalCRS;
+
+const wktRoot: WKTCRSNode = {
+  type: 'node',
+  keyword: 'GEOGCRS',
+  delimiter: 'bracket',
+  values: [{type: 'string', value: 'WGS 84'}]
+};
+export const wktAst: WKTCRSAst = {type: 'wkt-crs', root: wktRoot};
+
+const projParameter: PROJParameter = {type: 'parameter', name: 'proj', value: 'longlat'};
+export const projAst: PROJStringAst = {type: 'proj-string', parameters: [projParameter]};
