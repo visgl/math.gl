@@ -1,6 +1,6 @@
 {
   "name": "math.gl-expression-playground",
-  "version": "4.2.0-alpha.3",
+  "version": "4.2.0-alpha.4",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@math.gl/expressions": "4.2.0-alpha.3",
+    "@math.gl/expressions": "4.2.0-alpha.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
