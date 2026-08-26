@@ -64,5 +64,17 @@ describe('PROJ string codec', () => {
         parameters: [{type: 'parameter', name: 'title', value: 'safe', rawValue: 'two tokens'}]
       })
     ).toThrow('Invalid PROJ raw parameter value');
+    expect(() =>
+      encodePROJString({
+        type: 'proj-string',
+        parameters: [{type: 'parameter', name: 'title', rawValue: '"'}]
+      })
+    ).toThrow('Invalid PROJ raw parameter value');
+    expect(() =>
+      encodePROJString({
+        type: 'proj-string',
+        parameters: [{type: 'parameter', name: 'title', rawValue: '"' + '\\' + '"'}]
+      })
+    ).toThrow('Invalid PROJ raw parameter value');
   });
 });
