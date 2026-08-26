@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v4.2.0-alpha.5
+
+- feat(crs): Add WKT and PROJ syntax codecs (#112)
+
 ## v4.2.0-alpha.4
 
 - fix(geospatial): Extend makeOBBFromRegion with validation, custom ellipsoids, units, affine transforms, and edge-case handling (#111)
