@@ -9,7 +9,14 @@ import {
   type Proj4CRSCompatibilityResult,
   type Proj4CRSDefinition
 } from '@math.gl/proj4';
-import type {CRSDefinition, PROJJSONCRSByType} from '@math.gl/crs';
+import {
+  createSpatialReference,
+  inferCRSRepresentation,
+  type CRSDefinition,
+  type PROJJSONCRSByType,
+  type ReadonlyCRSDefinition,
+  type SpatialReference
+} from '@math.gl/crs';
 
 const serialized: CRSDefinition = 'EPSG:4326';
 const geographic: PROJJSONCRSByType<'GeographicCRS'> = {
@@ -25,9 +32,36 @@ const geographic: PROJJSONCRSByType<'GeographicCRS'> = {
   }
 };
 const definition: Proj4CRSDefinition = geographic;
+const readonlyDefinition: ReadonlyCRSDefinition = geographic;
 const convertedDefinition: Proj4CRSDefinition = toProj4CRSDefinition(geographic);
 const compatibility: Proj4CRSCompatibilityResult = checkProj4CRSCompatibility(geographic);
 
 new Proj4Projection({from: definition, to: serialized});
 void convertedDefinition;
 void compatibility;
+
+if (typeof readonlyDefinition === 'object') {
+  // @ts-expect-error Spatial-reference PROJJSON definitions are deeply readonly.
+  readonlyDefinition.name = 'Mutated name';
+}
+
+const spatialReference: SpatialReference = createSpatialReference({
+  crs: {
+    state: 'explicit',
+    definition: geographic,
+    representation: inferCRSRepresentation(geographic),
+    provenance: 'metadata'
+  },
+  coordinateEpoch: 2020.25,
+  coordinateFrame: 'geographic',
+  coordinateOrder: ['x', 'y']
+});
+
+if (spatialReference.crs.state === 'explicit') {
+  const spatialDefinition: ReadonlyCRSDefinition = spatialReference.crs.definition;
+  const spatialCompatibility = checkProj4CRSCompatibility(spatialReference.crs.definition);
+  const executableSpatialDefinition = toProj4CRSDefinition(spatialReference.crs.definition);
+  new Proj4Projection({from: executableSpatialDefinition, to: serialized});
+  void spatialDefinition;
+  void spatialCompatibility;
+}

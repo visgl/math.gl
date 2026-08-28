@@ -1,6 +1,6 @@
 {
   "name": "@math.gl/crs",
-  "description": "Standards-based coordinate reference system types for math.gl",
+  "description": "Coordinate reference system types, syntax codecs, and metadata descriptors for math.gl",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
@@ -12,6 +12,7 @@
     "coordinate reference system",
     "CRS",
     "WKT",
+    "PROJ",
     "PROJJSON"
   ],
   "repository": {

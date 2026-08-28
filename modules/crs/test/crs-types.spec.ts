@@ -6,10 +6,13 @@ import {expect, test} from 'vitest';
 
 import {
   invalidCRSType,
+  invalidKnownCRSReference,
   objectDefinitions,
   proj4Definitions,
   projAst,
+  readonlyCRSDefinition,
   serializedDefinitions,
+  spatialReference,
   unsupportedCompoundCRS,
   unsupportedVerticalCRS,
   wktAst
@@ -20,8 +23,11 @@ test('CRS definitions expose the intended compile-time subsets', () => {
   expect(objectDefinitions).toHaveLength(4);
   expect(proj4Definitions).toHaveLength(4);
   expect(invalidCRSType).toBeTruthy();
+  expect(invalidKnownCRSReference).toBeTruthy();
   expect(unsupportedCompoundCRS).toBeTruthy();
   expect(unsupportedVerticalCRS).toBeTruthy();
   expect(wktAst.root.keyword).toBe('GEOGCRS');
   expect(projAst.parameters[0].name).toBe('proj');
+  expect(readonlyCRSDefinition.type).toBe('GeographicCRS');
+  expect(spatialReference.crs.state).toBe('explicit');
 });

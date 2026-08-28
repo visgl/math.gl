@@ -77,6 +77,11 @@ Highlights:
 - Represents authority codes, PROJ strings, and WKT definitions as serialized strings.
 - Adds value-preserving WKT1/WKT2 syntax parsing, profile validation, and compact or pretty encoding.
 - Adds ordered PROJ definition and pipeline syntax parsing and encoding.
+- Adds immutable, format-neutral spatial-reference descriptors that preserve definition
+  representation, alternatives, provenance, coordinate epoch, frame, stored order, and explicit
+  default/unknown/absent state.
+- Adds a comprehensive CRS developer guide covering standards, serialization versus semantics,
+  axis order, dynamic and vertical CRS, transformation boundaries, and integration guidance.
 
 **`@math.gl/proj4`**
 

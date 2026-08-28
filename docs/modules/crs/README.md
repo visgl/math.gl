@@ -3,6 +3,10 @@
 `@math.gl/crs` provides lightweight, proj4-independent TypeScript definitions and syntax codecs
 for coordinate reference systems. It has no runtime dependencies and is browser-safe.
 
+The [Coordinate Reference Systems developer guide](/docs/developer-guide/geospatial/coordinate-reference-systems)
+explains CRS families, representations, coordinate epochs, axis order, vertical coordinates,
+transformation boundaries, and cross-library integration in depth.
+
 ## Installation
 
 ```bash
@@ -83,6 +87,32 @@ const text = encodePROJString(ast);
 Shell command-line syntax and PROJ resource or init-file parsing are intentionally outside the
 scope of this codec.
 
+## Spatial-reference descriptors
+
+`SpatialReference` reports how a dataset's coordinates are defined without claiming that they were
+transformed. Its discriminated CRS state preserves explicit definitions, specification defaults,
+explicitly unknown values, and absent metadata.
+
+```ts
+import {createSpatialReference} from '@math.gl/crs';
+
+const spatialReference = createSpatialReference({
+  crs: {
+    state: 'explicit',
+    definition: 'EPSG:4326',
+    representation: 'identifier',
+    provenance: 'metadata'
+  },
+  coordinateFrame: 'geographic',
+  coordinateOrder: ['x', 'y'],
+  units: ['degree', 'degree']
+});
+```
+
+The descriptor can retain alternate source representations and a coordinate epoch. PROJJSON
+definitions and descriptor-owned arrays are cloned and recursively frozen. See the
+[Spatial Reference API](/docs/modules/crs/api-reference/spatial-reference).
+
 ## API
 
 - `CRSDefinition<T extends PROJJSONCRS = PROJJSONCRS>` — a string definition or PROJJSON object.
@@ -95,6 +125,12 @@ scope of this codec.
 - `parseWKTCRS`, `encodeWKTCRS`, `validateWKTCRS` — WKT syntax codec and profile validation.
 - `PROJStringAst`, `PROJParameter` — ordered PROJ syntax tree types.
 - `parsePROJString`, `encodePROJString` — ordinary definition and pipeline syntax codec.
+- `SpatialReference`, `CRSReference` — immutable discovery descriptors with explicit state,
+  representation, provenance, epoch, frame, order, and units.
+- `ReadonlyCRSDefinition`, `ReadonlyPROJJSONCRS` — serialized CRS text or a deeply readonly
+  PROJJSON definition.
+- `createSpatialReference` — constructs and freezes a descriptor.
+- `inferCRSRepresentation` — conservatively classifies a definition's runtime syntax.
 
 The official MIT-licensed schema is vendored unchanged and can be imported or resolved through
 `@math.gl/crs/projjson.schema.json`. It is the PROJJSON runtime validation source of truth. The
