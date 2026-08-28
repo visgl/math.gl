@@ -5,7 +5,7 @@
 import {BoundingVolume} from './bounding-volume';
 import {Vector3} from '@math.gl/core';
 import {Plane} from '../plane';
-import {INTERSECTION} from '../../constants';
+import type {CullingResult} from '../../constants';
 
 const scratchVector = new Vector3();
 const scratchNormal = new Vector3();
@@ -97,7 +97,7 @@ export class AxisAlignedBoundingBox implements BoundingVolume {
   /**
    * Determines which side of a plane a box is located.
    */
-  intersectPlane(plane: Plane): number {
+  intersectPlane(plane: Plane): CullingResult {
     const {halfDiagonal} = this;
     const normal = scratchNormal.from(plane.normal);
     const e =
@@ -107,15 +107,15 @@ export class AxisAlignedBoundingBox implements BoundingVolume {
     const s = this.center.dot(normal) + plane.distance; // signed distance from center
 
     if (s - e > 0) {
-      return INTERSECTION.INSIDE;
+      return 'inside';
     }
 
     if (s + e < 0) {
       // Not in front because normals point inward
-      return INTERSECTION.OUTSIDE;
+      return 'outside';
     }
 
-    return INTERSECTION.INTERSECTING;
+    return 'intersecting';
   }
 
   /** Computes the estimated distance from the closest point on a bounding box to a point. */

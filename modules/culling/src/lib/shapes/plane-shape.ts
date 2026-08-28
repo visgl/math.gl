@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Vector3} from '@math.gl/core';
-import {INTERSECTION} from '../../constants';
+import type {CullingResult} from '../../constants';
 import {ImplicitShapeBase, type ImplicitShape, type LocalRayIntersection} from './implicit-shape';
 import type {AxisAlignedBoundingBox} from '../bounding-volumes/axis-aligned-bounding-box';
 import type {BoundingSphere} from '../bounding-volumes/bounding-sphere';
@@ -58,16 +58,16 @@ export class PlaneShape extends ImplicitShapeBase {
     if (this.sizeZ !== undefined && Math.abs(z) > this.sizeZ / 2 + 1e-12) return undefined;
     return {distance, normal: [0, 1, 0]};
   }
-  override intersectPlane(plane: Plane): number {
+  override intersectPlane(plane: Plane): CullingResult {
     const boundaryPoint = new Vector3(0, 0, 0).transform(this.matrix);
     const inverse = this.inverseMatrix;
     const boundaryNormal = new Vector3(inverse[1], inverse[5], inverse[9]).normalize();
     const alignment = boundaryNormal.dot(plane.normal);
-    if (Math.abs(Math.abs(alignment) - 1) > 1e-10) return INTERSECTION.INTERSECTING;
+    if (Math.abs(Math.abs(alignment) - 1) > 1e-10) return 'intersecting';
     const boundaryDistance = plane.getPointDistance(boundaryPoint);
-    if (alignment < 0 && boundaryDistance > 0) return INTERSECTION.INSIDE;
-    if (alignment > 0 && boundaryDistance < 0) return INTERSECTION.OUTSIDE;
-    return INTERSECTION.INTERSECTING;
+    if (alignment < 0 && boundaryDistance > 0) return 'inside';
+    if (alignment > 0 && boundaryDistance < 0) return 'outside';
+    return 'intersecting';
   }
   override getAxisAlignedBoundingBox(): AxisAlignedBoundingBox | undefined {
     return undefined;

@@ -4,7 +4,7 @@
 
 /* eslint-disable no-undef, no-console */
 import {isArray} from '@math.gl/core';
-import type {SegmentVisitorPoints} from './polygon-utils';
+import type {PolygonWinding, SegmentVisitorPoints, WindingDirection} from './polygon-utils';
 import type {NumericArray} from '@math.gl/core';
 
 import {
@@ -62,10 +62,13 @@ export class Polygon {
 
   /**
    * Returns winding direction of the polygon.
-   * @returns Winding direction of the polygon. 1 is for clockwise, -1 for counterclockwise winding direction.
+   * @returns `'clockwise'`, `'counter-clockwise'`, or `'none'` for a degenerate polygon.
    */
-  getWindingDirection(): number {
-    return Math.sign(this.getSignedArea());
+  getWindingDirection(): WindingDirection {
+    const signedArea = this.getSignedArea();
+    if (signedArea > 0) return 'clockwise';
+    if (signedArea < 0) return 'counter-clockwise';
+    return 'none';
   }
 
   /**
@@ -90,10 +93,10 @@ export class Polygon {
 
   /**
    * Checks winding direction of the polygon and reverses the polygon in case of opposite winding direction.
-   * @param direction Requested winding direction. 1 is for clockwise, -1 for counterclockwise winding direction.
+   * @param direction Requested winding direction.
    * @return Returns true if the winding direction was changed.
    */
-  modifyWindingDirection(direction: number): boolean {
+  modifyWindingDirection(direction: PolygonWinding): boolean {
     if (this.isFlatArray) {
       return modifyPolygonWindingDirection(this.points as NumericArray, direction, this.options);
     }

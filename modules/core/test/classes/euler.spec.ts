@@ -33,18 +33,18 @@ function extendToMatrix4(arr) {
 
 test('Euler#import', () => {
   expect(typeof Euler).toBe('function');
-  expect(Euler.ZYX >= 0).toBeTruthy();
-  expect(Euler.YXZ > 0).toBeTruthy();
-  expect(Euler.XZY > 0).toBeTruthy();
-  expect(Euler.ZXY > 0).toBeTruthy();
-  expect(Euler.YZX > 0).toBeTruthy();
-  expect(Euler.XYZ > 0).toBeTruthy();
+  expect(Euler.ZYX).toBe('zyx');
+  expect(Euler.YXZ).toBe('yxz');
+  expect(Euler.XZY).toBe('xzy');
+  expect(Euler.ZXY).toBe('zxy');
+  expect(Euler.YZX).toBe('yzx');
+  expect(Euler.XYZ).toBe('xyz');
 
-  expect(Euler.RollPitchYaw >= 0).toBeTruthy();
-  expect(Euler.DefaultOrder >= 0).toBeTruthy();
-  expect(Euler.RotationOrders).toBeTruthy();
+  expect(Euler.RollPitchYaw).toBe('zyx');
+  expect(Euler.DefaultOrder).toBe('zyx');
+  expect(Euler.RotationOrders.XYZ).toBe('xyz');
 
-  expect(Euler.rotationOrder(Euler.ZYX)).toBe('ZYX');
+  expect(Euler.rotationOrder(Euler.ZYX)).toBe('zyx');
 });
 
 test('Euler#construct and Array.isArray check', () => {
@@ -77,6 +77,7 @@ test('Euler#coverage', () => {
 
   euler.order = Euler.XYZ;
   euler.order = euler.order;
+  expect(euler.order).toBe('xyz');
 
   euler.copy([0, 0, 0, 1]);
 

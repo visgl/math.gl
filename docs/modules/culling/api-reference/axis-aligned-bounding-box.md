@@ -89,9 +89,9 @@ Determines which side of a plane the axis-aligned bounding box is located.
 
 Returns
 
-- `INTERSECTION.INSIDE` if the entire box is on the side of the plane the normal is pointing
-- `INTERSECTION.OUTSIDE` if the entire box is on the opposite side, and
-- `INTERSECTION.INTERSECTING` if the box intersects the plane.
+- `'inside'` if the entire box is on the side of the plane the normal is pointing
+- `'outside'` if the entire box is on the opposite side, and
+- `'intersecting'` if the box intersects the plane.
 
 ### `distanceTo(point : Number[3]) : Number`
 

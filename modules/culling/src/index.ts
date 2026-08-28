@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 export {INTERSECTION} from './constants';
+export type {CullingResult} from './constants';
 
 export {AxisAlignedBoundingBox} from './lib/bounding-volumes/axis-aligned-bounding-box';
 export {BoundingSphere} from './lib/bounding-volumes/bounding-sphere';

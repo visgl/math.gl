@@ -14,7 +14,7 @@ import {test, expect} from 'vitest';
 import {Quaternion, Vector3, Vector4, Matrix4, Euler} from '@math.gl/core';
 import {x, y, z, w, eps} from './constants';
 
-const orders = ['XYZ', 'YXZ', 'ZXY', 'ZYX', 'YZX', 'XZY'];
+const orders = ['xyz', 'yxz', 'zxy', 'zyx', 'yzx', 'xzy'];
 // const eulerAngles = new Euler(0.1, -0.3, 0.25);
 
 function qSub(a, b) {
