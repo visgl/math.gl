@@ -14,6 +14,7 @@
       "@math.gl/geoid": ["./modules/geoid/src/index.ts"],
       "@math.gl/geospatial": ["./modules/geospatial/src/index.ts"],
       "@math.gl/polygon": ["./modules/polygon/src/index.ts"],
+      "@math.gl/proj": ["./modules/proj/src/index.ts"],
       "@math.gl/proj4": ["./modules/proj4/src/index.ts"],
       "@math.gl/sun": ["./modules/sun/src/index.ts"],
       "@math.gl/types": ["./modules/types/src/index.ts"],

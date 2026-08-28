@@ -69,6 +69,8 @@
       "@math.gl/geometry-utils/test/*": ["./modules/geometry-utils/test/*"],
       "@math.gl/polygon/*": ["./modules/polygon/src/*"],
       "@math.gl/polygon/test/*": ["./modules/polygon/test/*"],
+      "@math.gl/proj/*": ["./modules/proj/src/*"],
+      "@math.gl/proj/test/*": ["./modules/proj/test/*"],
       "@math.gl/proj4/*": ["./modules/proj4/src/*"],
       "@math.gl/proj4/test/*": ["./modules/proj4/test/*"],
       "@math.gl/sun/*": ["./modules/sun/src/*"],
