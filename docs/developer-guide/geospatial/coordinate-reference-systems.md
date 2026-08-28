@@ -50,17 +50,32 @@ latitude and longitude; three-dimensional systems add ellipsoidal height. Applic
 display these values as longitude/latitude even when the authoritative axis order is
 latitude/longitude.
 
+**Canonical example:** [EPSG:4326 — WGS 84](https://epsg.org/crs_4326/index.html) is a
+two-dimensional geographic CRS whose authoritative axes are latitude and longitude in degrees.
+Many web APIs store the same coordinates as `[longitude, latitude]`, which is why CRS axis order
+and array order must be tracked separately.
+
 ### Geocentric CRS
 
 A geocentric CRS uses cartesian X/Y/Z axes whose origin is near the earth's center of mass.
 Earth-centered, earth-fixed (ECEF) coordinates are useful for globe rendering and global 3D
 datasets because they avoid a single planar projection.
 
+**Canonical example:** [EPSG:4978 — WGS 84 geocentric](https://epsg.org/crs_4978/index.html) uses
+earth-centered X, Y, and Z axes measured in metres. It describes the same WGS 84 earth model as
+familiar longitude/latitude CRSs, but its coordinate tuples are cartesian positions rather than
+angles.
+
 ### Projected CRS
 
 A projected CRS applies a map projection to a geographic CRS and normally uses linear easting and
 northing coordinates. Projection parameters, datum, units, and area of use are all part of the
 definition. Two projected CRSs with similar names are not necessarily interchangeable.
+
+**Canonical example:** [EPSG:32633 — WGS 84 / UTM zone 33N](https://epsg.org/crs_32633/index.html)
+uses a Transverse Mercator projection and stores easting and northing in metres. Its zone is
+designed for the northern hemisphere between 12°E and 18°E; using it outside that area increases
+distortion even though the formulas still produce numbers.
 
 ### Vertical CRS
 
@@ -69,11 +84,22 @@ is related to a gravity-defined surface such as a geoid; ellipsoidal height is m
 ellipsoid. Terrain-relative and scene-relative heights are application placement modes, not
 vertical CRSs.
 
+**Canonical example:** [EPSG:5773 — EGM96 height](https://epsg.org/crs_5773/index.html) is a
+vertical CRS with one upward, gravity-related height axis measured in metres. Its zero-height
+surface approximates mean sea level using the EGM96 gravity model; it is not interchangeable with
+WGS 84 ellipsoidal height.
+
 ### Compound and bound CRS
 
 A compound CRS combines compatible components, commonly a horizontal CRS and a vertical CRS. A
 bound CRS additionally records a preferred transformation from a source CRS to a hub CRS. Neither
 form guarantees that a particular runtime supports every component or transformation.
+
+**Canonical examples:** [EPSG:9707 — WGS 84 + EGM96 height](https://epsg.org/crs_9707/index.html)
+is a compound CRS combining the EPSG:4326 horizontal component with the EPSG:5773 vertical
+component. A typical WKT2 `BOUNDCRS` instead wraps ETRS89 (EPSG:4258) as the source, WGS 84
+(EPSG:4326) as the hub, and a specific coordinate operation between them; the operation is part of
+the bound definition rather than a generic property of ETRS89.
 
 ### Dynamic CRS and coordinate epochs
 
@@ -81,6 +107,11 @@ A dynamic reference frame changes with time. Coordinates in such a frame can req
 epoch, expressed as a decimal year, to be interpreted or transformed correctly. The coordinate
 epoch belongs to the coordinate values. It is distinct from a reference frame's definition epoch
 and must not be silently discarded or replaced with the current date.
+
+**Canonical example:** [EPSG:7912 — ITRF2014](https://epsg.org/crs_7912/index.html) is a dynamic
+geographic 3D CRS whose reference frame has definition epoch `2010.0`. Coordinates observed at
+epoch `2020.25` still use EPSG:7912, but must carry `coordinateEpoch: 2020.25` so a time-dependent
+operation can account for motion since the frame epoch.
 
 ## Axis order is not array order
 

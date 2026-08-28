@@ -127,6 +127,8 @@ definitions and descriptor-owned arrays are cloned and recursively frozen. See t
 - `parsePROJString`, `encodePROJString` — ordinary definition and pipeline syntax codec.
 - `SpatialReference`, `CRSReference` — immutable discovery descriptors with explicit state,
   representation, provenance, epoch, frame, order, and units.
+- `ReadonlyCRSDefinition`, `ReadonlyPROJJSONCRS` — serialized CRS text or a deeply readonly
+  PROJJSON definition.
 - `createSpatialReference` — constructs and freezes a descriptor.
 - `inferCRSRepresentation` — conservatively classifies a definition's runtime syntax.
 

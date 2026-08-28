@@ -8,6 +8,7 @@ import {
   Proj4CRSCompatibilityError,
   toProj4CRSDefinition
 } from '@math.gl/proj4';
+import {createSpatialReference} from '@math.gl/crs';
 import {
   egm2008VerticalCRS,
   etrs89BoundCRS,
@@ -118,6 +119,30 @@ test('checkProj4CRSCompatibility probes supported CRS objects without transformi
       checked: true,
       lossy: false
     });
+  }
+});
+
+test('compatibility utilities accept frozen spatial-reference definitions', () => {
+  const spatialReference = createSpatialReference({
+    crs: {
+      state: 'explicit',
+      definition: wgs84GeographicCRS,
+      representation: 'projjson',
+      provenance: 'metadata'
+    }
+  });
+
+  expect(spatialReference.crs.state).toBe('explicit');
+  if (spatialReference.crs.state === 'explicit') {
+    expect(Object.isFrozen(spatialReference.crs.definition)).toBe(true);
+    expect(checkProj4CRSCompatibility(spatialReference.crs.definition)).toMatchObject({
+      status: 'supported',
+      checked: true,
+      lossy: false
+    });
+    expect(toProj4CRSDefinition(spatialReference.crs.definition)).toBe(
+      spatialReference.crs.definition
+    );
   }
 });
 

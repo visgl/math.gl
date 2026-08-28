@@ -8,6 +8,7 @@ import type {
   PROJJSONCRS,
   PROJParameter,
   PROJStringAst,
+  ReadonlyCRSDefinition,
   WKTCRSAst,
   SpatialReference,
   WKTCRSNode
@@ -70,6 +71,28 @@ export const explicitCRSReference: CRSReference = {
   representation: 'identifier',
   provenance: 'metadata'
 };
+export const readonlyCRSDefinition: ReadonlyCRSDefinition = wgs84GeographicCRS;
+
+function assertReadonlyCRSDefinition(definition: ReadonlyCRSDefinition): void {
+  if (typeof definition === 'object') {
+    // @ts-expect-error Spatial-reference PROJJSON definitions are deeply readonly.
+    definition.name = 'Mutated name';
+  }
+  if (typeof definition === 'object' && 'datum' in definition && definition.datum) {
+    // @ts-expect-error Nested PROJJSON definitions are deeply readonly.
+    definition.datum.ellipsoid.name = 'Mutated ellipsoid';
+  }
+}
+void assertReadonlyCRSDefinition;
+
+function assertReadonlyCRSArrays(definition: ReadonlyCRSDefinition): void {
+  if (typeof definition === 'object' && definition.type === 'CompoundCRS') {
+    // @ts-expect-error Nested PROJJSON arrays are deeply readonly.
+    definition.components.push(wgs84GeographicCRS);
+  }
+}
+void assertReadonlyCRSArrays;
+
 export const spatialReference: SpatialReference = {
   crs: explicitCRSReference,
   coordinateFrame: 'geographic',

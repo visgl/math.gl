@@ -32,7 +32,7 @@ A known reference has an explicit or specification-defaulted definition:
 ```ts
 type KnownCRSReference = Readonly<{
   state: 'explicit' | 'default';
-  definition: CRSDefinition;
+  definition: ReadonlyCRSDefinition;
   representation: SpatialReferenceRepresentation;
   provenance: SpatialReferenceProvenance;
   alternatives?: readonly SpatialReferenceAlternative[];
@@ -78,7 +78,7 @@ const spatialReference = createSpatialReference({
 Classifies a `CRSDefinition` using conservative syntax checks.
 
 ```ts
-inferCRSRepresentation(definition: CRSDefinition): SpatialReferenceRepresentation
+inferCRSRepresentation(definition: ReadonlyCRSDefinition): SpatialReferenceRepresentation
 ```
 
 It recognizes PROJJSON objects, common WKT roots, PROJ strings with a `proj` parameter,
@@ -110,6 +110,10 @@ serialize that value.
 
 Only `explicit` and `default` references contain a definition. Narrow on `state` before accessing
 `definition`, `representation`, or `alternatives`.
+
+`ReadonlyCRSDefinition` is a serialized string or a deeply readonly PROJJSON object. Mutable
+PROJJSON inputs remain assignable to this type, while descriptors returned by
+`createSpatialReference()` prevent both top-level and nested mutation at compile time and runtime.
 
 ## Provenance values
 

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import proj4 from 'proj4';
-import type {CRSDefinition, PROJJSONCRS, PROJJSONCRSByType} from '@math.gl/crs';
+import type {PROJJSONCRSByType, ReadonlyCRSDefinition, ReadonlyPROJJSONCRS} from '@math.gl/crs';
 
 /** PROJJSON object variants currently parsed by proj4js 2.20.9. */
 export type Proj4PROJJSONCRS = PROJJSONCRSByType<
@@ -11,7 +11,7 @@ export type Proj4PROJJSONCRS = PROJJSONCRSByType<
 >;
 
 /** A CRS definition currently accepted by proj4js 2.20.9. */
-export type Proj4CRSDefinition = CRSDefinition<Proj4PROJJSONCRS>;
+export type Proj4CRSDefinition = ReadonlyCRSDefinition<Proj4PROJJSONCRS>;
 
 export type Proj4CRSConversionMode = 'strict' | 'horizontal';
 
@@ -72,19 +72,23 @@ const PROJ4_CRS_TYPES = new Set<Proj4PROJJSONCRS['type']>([
   'BoundCRS'
 ]);
 
-function isCRSObject(definition: CRSDefinition): definition is PROJJSONCRS {
+function isCRSObject(definition: ReadonlyCRSDefinition): definition is ReadonlyPROJJSONCRS {
   return typeof definition === 'object' && definition !== null;
 }
 
-function getCRSType(definition: PROJJSONCRS): string | undefined {
+function getCRSType(definition: ReadonlyPROJJSONCRS): string | undefined {
   return typeof definition.type === 'string' ? definition.type : undefined;
 }
 
-function isProj4CRSObject(definition: PROJJSONCRS): definition is Proj4PROJJSONCRS {
+function isProj4CRSObject(
+  definition: ReadonlyPROJJSONCRS
+): definition is ReadonlyPROJJSONCRS<Proj4PROJJSONCRS> {
   return PROJ4_CRS_TYPES.has(definition.type as Proj4PROJJSONCRS['type']);
 }
 
-function isHorizontalProj4CRSObject(definition: PROJJSONCRS): definition is Proj4PROJJSONCRS {
+function isHorizontalProj4CRSObject(
+  definition: ReadonlyPROJJSONCRS
+): definition is ReadonlyPROJJSONCRS<Proj4PROJJSONCRS> {
   if (!isProj4CRSObject(definition)) {
     return false;
   }
@@ -101,8 +105,10 @@ function unsupportedResult(
 }
 
 function findHorizontalComponent(
-  definition: PROJJSONCRS
-): {definition: Proj4PROJJSONCRS} | {reason: Proj4CRSCompatibilityReason; message: string} {
+  definition: ReadonlyPROJJSONCRS
+):
+  | {definition: ReadonlyPROJJSONCRS<Proj4PROJJSONCRS>}
+  | {reason: Proj4CRSCompatibilityReason; message: string} {
   if (definition.type !== 'CompoundCRS' || !Array.isArray(definition.components)) {
     return {
       reason: 'missing-horizontal-crs',
@@ -111,7 +117,8 @@ function findHorizontalComponent(
   }
 
   const horizontalComponents = definition.components.filter(
-    (component): component is Proj4PROJJSONCRS => isHorizontalProj4CRSObject(component)
+    (component): component is ReadonlyPROJJSONCRS<Proj4PROJJSONCRS> =>
+      isHorizontalProj4CRSObject(component)
   );
 
   if (horizontalComponents.length === 0) {
@@ -130,7 +137,7 @@ function findHorizontalComponent(
 }
 
 function getProj4Definition(
-  definition: CRSDefinition,
+  definition: ReadonlyCRSDefinition,
   mode: Proj4CRSConversionMode
 ): {definition: Proj4CRSDefinition; lossy: boolean; type?: string} {
   if (!isCRSObject(definition)) {
@@ -184,7 +191,7 @@ function probeProj4Definition(
 
 /** Convert a broad CRS definition to the Proj4-executable CRS definition type. */
 export function toProj4CRSDefinition(
-  definition: CRSDefinition,
+  definition: ReadonlyCRSDefinition,
   options?: ToProj4CRSDefinitionOptions
 ): Proj4CRSDefinition {
   return getProj4Definition(definition, options?.mode || 'strict').definition;
@@ -192,7 +199,7 @@ export function toProj4CRSDefinition(
 
 /** Check whether a CRS definition can be constructed and used by proj4js. */
 export function checkProj4CRSCompatibility(
-  definition: CRSDefinition,
+  definition: ReadonlyCRSDefinition,
   options?: CheckProj4CRSCompatibilityOptions
 ): Proj4CRSCompatibilityResult {
   const mode = options?.mode || 'strict';

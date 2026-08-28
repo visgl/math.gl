@@ -10,6 +10,7 @@ import {
   objectDefinitions,
   proj4Definitions,
   projAst,
+  readonlyCRSDefinition,
   serializedDefinitions,
   spatialReference,
   unsupportedCompoundCRS,
@@ -27,5 +28,6 @@ test('CRS definitions expose the intended compile-time subsets', () => {
   expect(unsupportedVerticalCRS).toBeTruthy();
   expect(wktAst.root.keyword).toBe('GEOGCRS');
   expect(projAst.parameters[0].name).toBe('proj');
+  expect(readonlyCRSDefinition.type).toBe('GeographicCRS');
   expect(spatialReference.crs.state).toBe('explicit');
 });

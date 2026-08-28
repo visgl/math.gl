@@ -20,6 +20,8 @@ export type {
   CreateSpatialReferenceOptions,
   CRSReference,
   KnownCRSReference,
+  ReadonlyCRSDefinition,
+  ReadonlyPROJJSONCRS,
   SpatialReference,
   SpatialReferenceAlternative,
   SpatialReferenceCoordinateFrame,

@@ -70,18 +70,19 @@ Registers an NTv2 datum grid that projection definitions can reference with `+na
 
 ### `checkProj4CRSCompatibility(definition, options?)`
 
-Checks whether a broad `CRSDefinition` can be constructed by proj4js. It returns a structured result
-with `status` set to `supported`, `unsupported`, or `unknown`, along with `checked`, `lossy`, an
-optional CRS `type`, and a stable `reason` code.
+Checks whether a broad `ReadonlyCRSDefinition` can be constructed by proj4js. Mutable
+`CRSDefinition` values and deeply readonly definitions from `SpatialReference` are both accepted.
+It returns a structured result with `status` set to `supported`, `unsupported`, or `unknown`, along
+with `checked`, `lossy`, an optional CRS `type`, and a stable `reason` code.
 
 For serialized WKT and PROJ strings, `options.serialized` can be `probe` (the default), `unknown`,
 or `accept`. Probing constructs a proj4js converter but does not transform any coordinates.
 
 ### `toProj4CRSDefinition(definition, options?)`
 
-Narrows a broad CRS definition to `Proj4CRSDefinition`. Supported object definitions are returned
-unchanged, and serialized definitions are passed through unchanged. Unsupported object types throw
-`Proj4CRSCompatibilityError` in the default `strict` mode.
+Narrows a broad readonly CRS definition to `Proj4CRSDefinition`. Supported object definitions are
+returned unchanged, and serialized definitions are passed through unchanged. Unsupported object
+types throw `Proj4CRSCompatibilityError` in the default `strict` mode.
 
 Set `options.mode` to `horizontal` to explicitly extract the single Proj4-compatible horizontal
 component from a `CompoundCRS`. This is lossy and rejects compounds with no or multiple eligible

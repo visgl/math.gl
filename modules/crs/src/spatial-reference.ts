@@ -2,7 +2,22 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {CRSDefinition} from './crs';
+import type {CRSStringDefinition, PROJJSONCRS} from './crs';
+
+/** Recursively readonly view of a JSON-compatible type. */
+type DeepReadonly<T> = T extends readonly (infer Item)[]
+  ? readonly DeepReadonly<Item>[]
+  : T extends object
+    ? {readonly [Key in keyof T]: DeepReadonly<T[Key]>}
+    : T;
+
+/** A deeply readonly PROJJSON CRS object. */
+export type ReadonlyPROJJSONCRS<T extends PROJJSONCRS = PROJJSONCRS> = DeepReadonly<T>;
+
+/** A serialized CRS definition or deeply readonly PROJJSON CRS object. */
+export type ReadonlyCRSDefinition<T extends PROJJSONCRS = PROJJSONCRS> =
+  | CRSStringDefinition
+  | ReadonlyPROJJSONCRS<T>;
 
 /** Serialization or naming form in which a CRS definition was supplied. */
 export type SpatialReferenceRepresentation =
@@ -34,7 +49,7 @@ export type SpatialReferenceCoordinateFrame =
 /** One alternate serialization of the same CRS retained by the source. */
 export type SpatialReferenceAlternative = Readonly<{
   /** Original alternate CRS definition. */
-  definition: CRSDefinition;
+  definition: ReadonlyCRSDefinition;
   /** Representation used by the alternate definition. */
   representation: SpatialReferenceRepresentation;
 }>;
@@ -44,7 +59,7 @@ export type KnownCRSReference = Readonly<{
   /** A known definition is either explicitly declared or established by a specification default. */
   state: 'explicit' | 'default';
   /** Preferred definition selected without discarding alternate source representations. */
-  definition: CRSDefinition;
+  definition: ReadonlyCRSDefinition;
   /** Representation used by the preferred definition. */
   representation: SpatialReferenceRepresentation;
   /** How the preferred definition was established. */
@@ -137,7 +152,9 @@ export function createSpatialReference(
  * @param definition - CRS definition to classify syntactically.
  * @returns The apparent serialized representation.
  */
-export function inferCRSRepresentation(definition: CRSDefinition): SpatialReferenceRepresentation {
+export function inferCRSRepresentation(
+  definition: ReadonlyCRSDefinition
+): SpatialReferenceRepresentation {
   if (typeof definition === 'object') {
     return 'projjson';
   }
@@ -182,10 +199,10 @@ function freezeCRSReference(reference: CRSReference): CRSReference {
 }
 
 /** Clone and recursively freeze a JSON CRS object while leaving string definitions unchanged. */
-function cloneAndFreezeDefinition(definition: CRSDefinition): CRSDefinition {
+function cloneAndFreezeDefinition(definition: ReadonlyCRSDefinition): ReadonlyCRSDefinition {
   return typeof definition === 'string'
     ? definition
-    : (cloneAndFreezeJsonValue(definition) as CRSDefinition);
+    : (cloneAndFreezeJsonValue(definition) as ReadonlyCRSDefinition);
 }
 
 /** Clone and freeze the JSON-compatible values used by PROJJSON definitions. */
