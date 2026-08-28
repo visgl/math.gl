@@ -84,6 +84,15 @@ test('Pose#constructor', () => {
   pose2 = new Pose(flattenProps);
 
   expect(pose1.equals(pose2), 'reconstructed from flatten props').toBeTruthy();
+
+  pose1 = new Pose({orientation: new Euler(1, 2, 3, 'xyz')});
+  pose2 = new Pose(pose1);
+  expect(pose1.equals(pose2), 'preserves packed order when reconstructed from a pose').toBeTruthy();
+  expect(pose2.orientation.order).toBe('xyz');
+
+  pose2 = new Pose(JSON.parse(JSON.stringify(pose1)));
+  expect(pose1.equals(pose2), 'preserves packed order when reconstructed from JSON').toBeTruthy();
+  expect(pose2.orientation.order).toBe('xyz');
 });
 
 test('Pose#equals', () => {
