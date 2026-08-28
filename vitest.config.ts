@@ -40,8 +40,14 @@ export default getVitestConfig({
     }
   },
   coverage: {
-    include: ['modules/**/src/**/*.{js,ts}'],
+    provider: 'v8',
+    reporter: ['text', 'lcov'],
+    include: ['modules/**/src/**/*.{js,jsx,cjs,mjs,ts,tsx}'],
     exclude: [
+      '**/*disabled',
+      '**/deprecated',
+      '**/libs/**',
+      '**/wip/**',
       '**/*.d.ts',
       '**/*.map',
       '**/*.{bundle,min}.{js,ts}',
@@ -50,6 +56,7 @@ export default getVitestConfig({
       'test/**',
       'modules/**/test/**',
       'modules/**/wip/**'
-    ]
+    ],
+    excludeAfterRemap: true
   }
 });
