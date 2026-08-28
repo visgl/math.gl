@@ -11,7 +11,7 @@ import {Vector3, Matrix3, Matrix4, Quaternion} from '@math.gl/core';
 import type {BoundingVolume} from './bounding-volume';
 import {BoundingSphere} from './bounding-sphere';
 import {Plane} from '../plane';
-import {INTERSECTION} from '../../constants';
+import type {CullingResult} from '../../constants';
 
 const scratchVector3 = new Vector3();
 const scratchOffset = new Vector3();
@@ -129,7 +129,7 @@ export class OrientedBoundingBox implements BoundingVolume {
   }
 
   /** Determines which side of a plane the oriented bounding box is located. */
-  intersectPlane(plane: Plane): number {
+  intersectPlane(plane: Plane): CullingResult {
     const center = this.center;
     const normal = plane.normal;
     const halfAxes = this.halfAxes;
@@ -159,12 +159,12 @@ export class OrientedBoundingBox implements BoundingVolume {
 
     if (distanceToPlane <= -radEffective) {
       // The entire box is on the negative side of the plane normal
-      return INTERSECTION.OUTSIDE;
+      return 'outside';
     } else if (distanceToPlane >= radEffective) {
       // The entire box is on the positive side of the plane normal
-      return INTERSECTION.INSIDE;
+      return 'inside';
     }
-    return INTERSECTION.INTERSECTING;
+    return 'intersecting';
   }
 
   /** Computes the estimated distance from the closest point on a bounding box to a point. */

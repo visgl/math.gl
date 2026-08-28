@@ -198,11 +198,11 @@ test.skip('three.js#Matrix4#extractRotation', () => {
 
 test.skip('three.js#Matrix4#makeRotationFromEuler/extractRotation', () => {
   const testValues = [
-    new Euler(0, 0, 0, 'XYZ'),
-    new Euler(1, 0, 0, 'XYZ'),
-    new Euler(0, 1, 0, 'ZYX'),
-    new Euler(0, 0, 0.5, 'YZX'),
-    new Euler(0, 0, -0.5, 'YZX')
+    new Euler(0, 0, 0, 'xyz'),
+    new Euler(1, 0, 0, 'xyz'),
+    new Euler(0, 1, 0, 'zyx'),
+    new Euler(0, 0, 0.5, 'yzx'),
+    new Euler(0, 0, -0.5, 'yzx')
   ];
 
   for (let i = 0; i < testValues.length; i++) {

@@ -38,12 +38,7 @@ Returns the direction of the polygon path.
 
 `polygon.getWindingDirection()`
 
-- A positive number is clockwise.
-- A negative number is counter clockwise.
-
-Note:
-
-- A convenience method that returns `Math.sign(polygon.getSignedArea())`
+- Returns `'clockwise'`, `'counter-clockwise'`, or `'none'` for a degenerate polygon.
 
 ### forEachSegment
 
@@ -55,8 +50,7 @@ Lets the application iterate over each segment.
 
 Checks winding direction of the polygon and reverses the polygon in case if opposite winding direction. Note: points of the polygon are modified in-place.
 
-- A positive number is clockwise.
-- A negative number is counter clockwise.
+- `direction` is `'clockwise'` or `'counter-clockwise'`.
 
 `polygon.modifyWindingDirection(direction);`
 

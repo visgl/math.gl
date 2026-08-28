@@ -30,7 +30,7 @@ Constructs a culling volume from a bounding sphere. Creates six planes that crea
 
 - `boundingSphere` The bounding sphere used to create the culling volume.
 
-### computeVisibility(boundingVolume : Object) : Interset
+### computeVisibility(boundingVolume : Object) : CullingResult
 
 Determines whether a bounding volume intersects the culling volume.
 
@@ -38,7 +38,9 @@ Determines whether a bounding volume intersects the culling volume.
 
 Returns
 
-- `INTERSECTION.OUTSIDE`, `INTERSECTION.INTERSECTING`, or `INTERSECTION.INSIDE`.
+- `'outside'`, `'intersecting'`, or `'inside'`.
+
+`INTERSECTION.OUTSIDE`, `INTERSECTION.INTERSECTING`, and `INTERSECTION.INSIDE` remain as deprecated string-valued compatibility constants.
 
 ### computeVisibilityWithPlaneMask(boundingVolume : Object, parentPlaneMask : Number) : Number
 

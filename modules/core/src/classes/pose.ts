@@ -42,7 +42,7 @@ export class Pose {
       // @ts-expect-error
       this.orientation = new Euler(orientation, orientation[3]);
     } else {
-      this.orientation = new Euler(roll, pitch, yaw, Euler.RollPitchYaw);
+      this.orientation = new Euler(roll, pitch, yaw, 'zyx');
     }
   }
 

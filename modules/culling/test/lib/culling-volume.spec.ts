@@ -13,6 +13,7 @@ import {
   _PerspectiveFrustum as PerspectiveFrustum,
   INTERSECTION
 } from '@math.gl/culling';
+import type {CullingResult} from '@math.gl/culling';
 import {BoundingVolume} from '../../dist/lib/bounding-volumes/bounding-volume';
 
 const VECTOR3_UNIT_Z = Object.freeze(new Vector3(0, 0, 1));
@@ -28,6 +29,12 @@ const cullingVolume = frustum.computeCullingVolume(
   new Vector3().copy(VECTOR3_UNIT_Z).negate(),
   new Vector3(0, 1, 0)
 );
+
+test('INTERSECTION compatibility constants are string-valued', () => {
+  expect(INTERSECTION.OUTSIDE).toBe('outside');
+  expect(INTERSECTION.INTERSECTING).toBe('intersecting');
+  expect(INTERSECTION.INSIDE).toBe('inside');
+});
 
 test('CullingVolume#constructor', () => {
   expect(() => new CullingVolume()).not.toThrow();
@@ -64,7 +71,7 @@ test('CullingVolume#computeVisibilityWithPlaneMask throws without a parent plane
 function testWithAndWithoutPlaneMask(
   culling: CullingVolume,
   bound: BoundingVolume,
-  intersect: number
+  intersect: CullingResult
 ) {
   const actualIntersect = culling.computeVisibility(bound);
   expect(actualIntersect).toBe(intersect);

@@ -59,6 +59,7 @@ Highlights:
 - New typed-array geometry utilities module.
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 - Stronger type guarantees for math classes via the new sized array types.
+- Culling results, polygon winding directions, and Euler rotation orders now use descriptive string literal types; legacy named constants remain as deprecated string-valued aliases.
 
 **`@math.gl/expressions`** (NEW EXPERIMENTAL MODULE)
 

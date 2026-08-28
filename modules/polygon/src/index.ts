@@ -11,6 +11,7 @@ export {
   modifyPolygonWindingDirection,
   WINDING
 } from './polygon-utils';
+export type {PolygonWinding, WindingDirection} from './polygon-utils';
 
 export {earcut} from './earcut';
 

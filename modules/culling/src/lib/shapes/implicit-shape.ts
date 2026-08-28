@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Matrix4, Vector3} from '@math.gl/core';
-import {INTERSECTION} from '../../constants';
+import type {CullingResult} from '../../constants';
 import {AxisAlignedBoundingBox} from '../bounding-volumes/axis-aligned-bounding-box';
 import {BoundingSphere} from '../bounding-volumes/bounding-sphere';
 import type {BoundingVolume} from '../bounding-volumes/bounding-volume';
@@ -84,14 +84,14 @@ export abstract class ImplicitShapeBase implements ImplicitShape {
     return localDistance * Math.min(scales[0], scales[1], scales[2]);
   }
 
-  intersectPlane(plane: Plane): number {
+  intersectPlane(plane: Plane): CullingResult {
     const maximum = this.getSupportPoint(plane.normal);
     const minimum = this.getSupportPoint([-plane.normal[0], -plane.normal[1], -plane.normal[2]]);
     const maxDistance = plane.getPointDistance(maximum);
     const minDistance = plane.getPointDistance(minimum);
-    if (minDistance > 0) return INTERSECTION.INSIDE;
-    if (maxDistance < 0) return INTERSECTION.OUTSIDE;
-    return INTERSECTION.INTERSECTING;
+    if (minDistance > 0) return 'inside';
+    if (maxDistance < 0) return 'outside';
+    return 'intersecting';
   }
 
   intersectRay(ray: Ray): RayIntersection | undefined {

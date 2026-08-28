@@ -10,6 +10,12 @@ import {getPolygonWindingDirection} from '@math.gl/polygon';
 
 ## Types
 
+### WindingDirection
+
+`'clockwise' | 'counter-clockwise' | 'none'`
+
+`WINDING.CLOCKWISE`, `WINDING.COUNTER_CLOCKWISE`, and `WINDING.NONE` remain as deprecated string-valued compatibility constants.
+
 ### PolygonParams
 
 `PolygonParams`
@@ -33,7 +39,7 @@ Checks winding direction of the polygon and reverses the polygon in case if oppo
 Arguments:
 
 - `points` (Array|TypedArray) - a flat array of the points that define the polygon.
-- `direction` (Number) - Requested winding direction. A positive 1 for clockwise, -1 for counter clockwise.
+- `direction` (`'clockwise' | 'counter-clockwise'`) - Requested winding direction.
 - `options` (PolygonParams) - Polygon parameters.
 
 Returns:
@@ -68,8 +74,7 @@ Arguments:
 
 Returns:
 
-- A positive number is clockwise.
-- A negative number is counter clockwise.
+- `'clockwise'`, `'counter-clockwise'`, or `'none'` for a degenerate polygon.
 
 ### forEachSegmentInPolygon
 
@@ -92,7 +97,7 @@ Checks winding direction of the polygon and reverses the polygon in case if oppo
 Arguments:
 
 - `points` (Array[]|TypedArray[]) - an array of the points that define the polygon.
-- `direction` (Number) - Requested winding direction. A positive 1 for clockwise, -1 for counter clockwise.
+- `direction` (`'clockwise' | 'counter-clockwise'`) - Requested winding direction.
 - `options` (PolygonParams) - Polygon parameters.
 
 Returns:
@@ -127,8 +132,7 @@ Arguments:
 
 Returns:
 
-- A positive number is clockwise.
-- A negative number is counter clockwise.
+- `'clockwise'`, `'counter-clockwise'`, or `'none'` for a degenerate polygon.
 
 ### forEachSegmentInPolygonPoints
 

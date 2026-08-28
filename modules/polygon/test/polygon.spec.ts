@@ -140,22 +140,26 @@ test('Polygon#methods', () => {
 
   for (const tc of TEST_CASES) {
     const polygon = new Polygon(tc.polygon, tc.options);
+    const windingSign = tc.sign === WINDING.CLOCKWISE ? 1 : -1;
     expect(polygon, `${tc.title}: Created polygon`).toBeTruthy();
     expect(
-      equals(polygon.getSignedArea(), tc.area * tc.sign),
+      equals(polygon.getSignedArea(), tc.area * windingSign),
       `${tc.title}: getSignedArea() returned expected result`
     ).toBe(true);
     expect(
       equals(polygon.getArea(), tc.area),
       `${tc.title}: getArea() returned expected result`
     ).toBe(true);
-    expect(
-      equals(polygon.getWindingDirection(), tc.sign),
-      `${tc.title}: getWindingDirection() returned expected result`
-    ).toBe(true);
+    expect(polygon.getWindingDirection(), `${tc.title}: winding direction`).toBe(tc.sign);
   }
 
   configure({EPSILON: 1e-12});
+});
+
+test('WINDING compatibility constants are string-valued', () => {
+  expect(WINDING.CLOCKWISE).toBe('clockwise');
+  expect(WINDING.COUNTER_CLOCKWISE).toBe('counter-clockwise');
+  expect(WINDING.NONE).toBe('none');
 });
 
 test('Polygon#forEachSegment', () => {

@@ -2,8 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export const INTERSECTION = {
-  OUTSIDE: -1, // Represents that an object is not contained within the frustum.
-  INTERSECTING: 0, // Represents that an object intersects one of the frustum's planes.
-  INSIDE: 1 // Represents that an object is fully within the frustum.
-} as const;
+/** Classification returned by culling intersection tests. */
+export type CullingResult = 'outside' | 'intersecting' | 'inside';
+
+/**
+ * @deprecated Use the string values of {@link CullingResult} directly.
+ */
+export enum INTERSECTION {
+  OUTSIDE = 'outside', // The object is not contained within the frustum.
+  INTERSECTING = 'intersecting', // The object intersects one or more frustum planes.
+  INSIDE = 'inside' // The object is fully within the frustum.
+}
