@@ -20,7 +20,7 @@
     "check:crs-types": "npx tsc --project test/types/crs/tsconfig.json",
     "check:projjson-types": "node scripts/generate-projjson-types.mjs --check",
     "generate:projjson-types": "node scripts/generate-projjson-types.mjs",
-    "cover": "ocular-test headless --coverage",
+    "cover": "yarn test-coverage",
     "lint": "ocular-lint",
     "metrics": "ocular-metrics",
     "playwright:install": "playwright install chromium",
@@ -30,6 +30,7 @@
     "test-browser": "ocular-test browser",
     "test-headless": "ocular-test headless",
     "test-node": "ocular-test node",
+    "test-coverage": "ocular-test headless --coverage",
     "test-pre-commit": "yarn lint && ocular-test node"
   },
   "devDependencies": {

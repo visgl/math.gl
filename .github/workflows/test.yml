@@ -61,7 +61,7 @@ jobs:
         run: yarn test-node
 
       - name: Run headless tests with coverage
-        run: yarn cover
+        run: yarn test-coverage
 
       - name: Run lint
         run: yarn lint
@@ -73,3 +73,6 @@ jobs:
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: coverage/lcov.info
+          format: lcov
+          fail-on-error: false
