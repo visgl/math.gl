@@ -4274,6 +4274,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@math.gl/proj@workspace:modules/proj":
+  version: 0.0.0-use.local
+  resolution: "@math.gl/proj@workspace:modules/proj"
+  dependencies:
+    "@math.gl/web-mercator": "npm:4.2.0-alpha.5"
+  languageName: unknown
+  linkType: soft
+
 "@math.gl/sun@workspace:modules/sun":
   version: 0.0.0-use.local
   resolution: "@math.gl/sun@workspace:modules/sun"
@@ -4293,7 +4301,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/web-mercator@workspace:modules/web-mercator":
+"@math.gl/web-mercator@npm:4.2.0-alpha.5, @math.gl/web-mercator@workspace:modules/web-mercator":
   version: 0.0.0-use.local
   resolution: "@math.gl/web-mercator@workspace:modules/web-mercator"
   dependencies:
