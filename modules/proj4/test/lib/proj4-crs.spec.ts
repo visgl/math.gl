@@ -60,12 +60,27 @@ test('horizontal extraction rejects missing or ambiguous components', () => {
     type: 'CompoundCRS' as const,
     components: [egm2008VerticalCRS]
   };
+  const verticalBoundCRS = {
+    ...etrs89BoundCRS,
+    source_crs: egm2008VerticalCRS
+  };
+  const verticalBoundCompound = {
+    type: 'CompoundCRS' as const,
+    components: [verticalBoundCRS]
+  };
+  const horizontalAndVerticalBoundCompound = {
+    type: 'CompoundCRS' as const,
+    components: [wgs84GeographicCRS, verticalBoundCRS]
+  };
   const ambiguousCompound = {
     type: 'CompoundCRS' as const,
     components: [wgs84GeographicCRS, utm31NProjectedCRS]
   };
 
   expect(() => toProj4CRSDefinition(verticalOnlyCompound, {mode: 'horizontal'})).toThrow(
+    'does not contain a Proj4-compatible horizontal CRS'
+  );
+  expect(() => toProj4CRSDefinition(verticalBoundCompound, {mode: 'horizontal'})).toThrow(
     'does not contain a Proj4-compatible horizontal CRS'
   );
   expect(() => toProj4CRSDefinition(ambiguousCompound, {mode: 'horizontal'})).toThrow(
@@ -75,6 +90,18 @@ test('horizontal extraction rejects missing or ambiguous components', () => {
   expect(checkProj4CRSCompatibility(verticalOnlyCompound, {mode: 'horizontal'})).toMatchObject({
     status: 'unsupported',
     reason: 'missing-horizontal-crs',
+    lossy: true
+  });
+  expect(checkProj4CRSCompatibility(verticalBoundCompound, {mode: 'horizontal'})).toMatchObject({
+    status: 'unsupported',
+    reason: 'missing-horizontal-crs',
+    lossy: true
+  });
+  expect(
+    checkProj4CRSCompatibility(horizontalAndVerticalBoundCompound, {mode: 'horizontal'})
+  ).toMatchObject({
+    status: 'supported',
+    checked: true,
     lossy: true
   });
   expect(checkProj4CRSCompatibility(ambiguousCompound, {mode: 'horizontal'})).toMatchObject({

@@ -84,6 +84,13 @@ function isProj4CRSObject(definition: PROJJSONCRS): definition is Proj4PROJJSONC
   return PROJ4_CRS_TYPES.has(definition.type as Proj4PROJJSONCRS['type']);
 }
 
+function isHorizontalProj4CRSObject(definition: PROJJSONCRS): definition is Proj4PROJJSONCRS {
+  if (!isProj4CRSObject(definition)) {
+    return false;
+  }
+  return definition.type !== 'BoundCRS' || isHorizontalProj4CRSObject(definition.source_crs);
+}
+
 function unsupportedResult(
   type: string | undefined,
   reason: Proj4CRSCompatibilityReason,
@@ -104,7 +111,7 @@ function findHorizontalComponent(
   }
 
   const horizontalComponents = definition.components.filter(
-    (component): component is Proj4PROJJSONCRS => isProj4CRSObject(component)
+    (component): component is Proj4PROJJSONCRS => isHorizontalProj4CRSObject(component)
   );
 
   if (horizontalComponents.length === 0) {
