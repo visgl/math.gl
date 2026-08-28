@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Proj4Projection, type Proj4CRSDefinition} from '@math.gl/proj4';
+import {
+  checkProj4CRSCompatibility,
+  Proj4Projection,
+  toProj4CRSDefinition,
+  type Proj4CRSCompatibilityResult,
+  type Proj4CRSDefinition
+} from '@math.gl/proj4';
 import type {CRSDefinition, PROJJSONCRSByType} from '@math.gl/crs';
 
 const serialized: CRSDefinition = 'EPSG:4326';
@@ -19,5 +25,9 @@ const geographic: PROJJSONCRSByType<'GeographicCRS'> = {
   }
 };
 const definition: Proj4CRSDefinition = geographic;
+const convertedDefinition: Proj4CRSDefinition = toProj4CRSDefinition(geographic);
+const compatibility: Proj4CRSCompatibilityResult = checkProj4CRSCompatibility(geographic);
 
 new Proj4Projection({from: definition, to: serialized});
+void convertedDefinition;
+void compatibility;
