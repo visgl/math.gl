@@ -17,6 +17,19 @@ export type {
   WKTCRSDefinition
 } from './crs';
 export type {
+  CreateSpatialReferenceOptions,
+  CRSReference,
+  KnownCRSReference,
+  SpatialReference,
+  SpatialReferenceAlternative,
+  SpatialReferenceCoordinateFrame,
+  SpatialReferenceProvenance,
+  SpatialReferenceRepresentation,
+  SpatialReferenceState,
+  UnresolvedCRSReference
+} from './spatial-reference';
+export {createSpatialReference, inferCRSRepresentation} from './spatial-reference';
+export type {
   EncodeWKTCRSOptions,
   ParseWKTCRSOptions,
   ValidateWKTCRSOptions,

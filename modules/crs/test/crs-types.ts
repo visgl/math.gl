@@ -3,11 +3,13 @@
 // Copyright (c) vis.gl contributors
 
 import type {
+  CRSReference,
   CRSDefinition,
   PROJJSONCRS,
   PROJParameter,
   PROJStringAst,
   WKTCRSAst,
+  SpatialReference,
   WKTCRSNode
 } from '@math.gl/crs';
 import type {Proj4CRSDefinition} from '@math.gl/proj4';
@@ -61,3 +63,21 @@ export const wktAst: WKTCRSAst = {type: 'wkt-crs', root: wktRoot};
 
 const projParameter: PROJParameter = {type: 'parameter', name: 'proj', value: 'longlat'};
 export const projAst: PROJStringAst = {type: 'proj-string', parameters: [projParameter]};
+
+export const explicitCRSReference: CRSReference = {
+  state: 'explicit',
+  definition: 'EPSG:4326',
+  representation: 'identifier',
+  provenance: 'metadata'
+};
+export const spatialReference: SpatialReference = {
+  crs: explicitCRSReference,
+  coordinateFrame: 'geographic',
+  coordinateOrder: ['x', 'y']
+};
+
+// @ts-expect-error A known reference requires a CRS definition and representation.
+export const invalidKnownCRSReference: CRSReference = {
+  state: 'explicit',
+  provenance: 'metadata'
+};
