@@ -4,6 +4,7 @@
     "paths": {
       "math.gl": ["./modules/main/src/index.ts"],
       "@math.gl/core": ["./modules/core/src/index.ts"],
+      "@math.gl/crs": ["./modules/crs/src/index.ts"],
       "@math.gl/culling": ["./modules/culling/src/index.ts"],
       "@math.gl/geometry": ["./modules/geometry/src/index.ts"],
       "@math.gl/geometry-utils": ["./modules/geometry-utils/src/index.ts"],

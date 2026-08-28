@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v4.2.0-alpha.6
+
+- feat(crs): Add spatial reference descriptors (#115)
+- feat(proj): Add lightweight EPSG3857 utilities (#117)
+- feat: Use string literal API constants (#116)
+- chore: Improve coverage reporting
+
 ## v4.2.0-alpha.5
 
 - feat(crs): Add WKT and PROJ syntax codecs (#112)
@@ -540,4 +547,3 @@
 
 ### 1.0.0-alpha.1
 - Initial source code copy from luma.gl v4.1-alpha branch
-
