@@ -3,15 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import proj4 from 'proj4';
-import type {CRSDefinition, PROJJSONCRSByType} from '@math.gl/crs';
-
-/** PROJJSON object variants currently parsed by proj4js 2.20.9. */
-export type Proj4PROJJSONCRS = PROJJSONCRSByType<
-  'GeographicCRS' | 'GeodeticCRS' | 'ProjectedCRS' | 'BoundCRS'
->;
-
-/** A CRS definition currently accepted by proj4js 2.20.9. */
-export type Proj4CRSDefinition = CRSDefinition<Proj4PROJJSONCRS>;
+import type {Proj4CRSDefinition} from './proj4-crs';
+export type {Proj4CRSDefinition, Proj4PROJJSONCRS} from './proj4-crs';
 
 export type Proj4ProjectionOptions = {
   from?: Proj4CRSDefinition;

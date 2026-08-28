@@ -38,6 +38,38 @@ PROJJSON is an OSGeo/PROJ specification designed as a lossless JSON encoding of 
 
 Within WKT there exists both OGC WKT and ESRI WKT syntax; both are generally supported though some more-obscure projection keywords may not be used. WKT definitions remain strings at this API boundary. Note that PROJ strings [can be slightly more accurate](https://github.com/proj4js/proj4js/issues/222) in some circumstances than WKT strings.
 
+### Checking CRS compatibility
+
+Use `checkProj4CRSCompatibility` when CRS metadata may be broader than proj4js's executable CRS
+model. The result distinguishes a definition that proj4js constructed successfully from one that is
+unsupported or has not been checked. Metadata resolution or preservation does not imply that
+coordinates have been transformed.
+
+```js
+import {checkProj4CRSCompatibility, toProj4CRSDefinition} from '@math.gl/proj4';
+
+const compatibility = checkProj4CRSCompatibility(crs);
+if (compatibility.status === 'supported') {
+  const proj4CRS = toProj4CRSDefinition(crs);
+  // Constructing a Proj4Projection and calling project/unproject are separate steps.
+}
+```
+
+Serialized WKT and PROJ strings are probed by default without transforming coordinates. Applications
+can use `{serialized: 'unknown'}` when they do not want to probe, or `{serialized: 'accept'}` when
+they intentionally defer validation to `Proj4Projection` construction. Unsupported PROJJSON object
+types are reported with a reason such as `unsupported-crs-type`.
+
+`toProj4CRSDefinition` is strict by default and never drops CRS components. An application that
+intentionally needs only the horizontal part of a `CompoundCRS` can opt into the lossy behavior:
+
+```js
+const horizontalCRS = toProj4CRSDefinition(compoundCRS, {mode: 'horizontal'});
+```
+
+Horizontal extraction rejects compounds with no horizontal CRS or more than one eligible horizontal
+CRS. It does not transform, convert, or preserve the discarded vertical or temporal coordinates.
+
 There are thousands of named "EPSG" projections. This module only includes aliases for those in the section below by default. To use a different EPSG projection, you can use https://epsg.io. For example, https://epsg.io/4326 defines standard longitude-latitude coordinates and lists multiple projection definitions. Choose an `OGC WKT`, `ESRI WKT`, `PROJ.4`, or `PROJJSON` definition.
 
 The epsg.io website also has a public API, e.g., for WGS 84: `https://epsg.io/?q=4326&format=json`
