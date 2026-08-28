@@ -1,207 +1,258 @@
-<!doctype html>
-<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-whats-new" data-has-hydrated="false">
-<head>
-<meta charset="UTF-8">
-<meta name="generator" content="Docusaurus v3.5.2">
-<title data-rh="true">What&#x27;s New | math.gl</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://visgl.github.io/math.gl/docs/whats-new"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="What&#x27;s New | math.gl"><meta data-rh="true" name="description" content="v4.0 S2 (DGGS)"><meta data-rh="true" property="og:description" content="v4.0 S2 (DGGS)"><link data-rh="true" rel="icon" href="/math.gl/favicon.png"><link data-rh="true" rel="canonical" href="https://visgl.github.io/math.gl/docs/whats-new"><link data-rh="true" rel="alternate" href="https://visgl.github.io/math.gl/docs/whats-new" hreflang="en"><link data-rh="true" rel="alternate" href="https://visgl.github.io/math.gl/docs/whats-new" hreflang="x-default"><link rel="stylesheet" href="/math.gl/assets/css/styles.41d67516.css">
-<script src="/math.gl/assets/js/runtime~main.e0fa6fcf.js" defer="defer"></script>
-<script src="/math.gl/assets/js/main.2d179c86.js" defer="defer"></script>
-</head>
-<body class="navigation-with-keyboard" data-theme="light">
-<script>!function(){function t(t){document.documentElement.setAttribute("data-theme",t)}var e=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();t(null!==e?e:"light")}(),function(){try{const n=new URLSearchParams(window.location.search).entries();for(var[t,e]of n)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="navbar navbar--fixed-top"><div class="navbar__inner"><div class="navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/math.gl/"><div class="navbar__logo"><img src="/math.gl/visgl-logo-dark.png" alt="vis.gl Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/math.gl/visgl-logo-light.png" alt="vis.gl Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">math.gl</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/math.gl/docs">Docs</a></div><div class="navbar__items navbar__items--right"><a href="https://github.com/visgl/math.gl" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_nPIU"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="Switch between dark and light mode (currently light mode)" aria-label="Switch between dark and light mode (currently light mode)" aria-live="polite"><svg viewBox="0 0 24 24" width="24" height="24" class="lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" class="darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"><div class="dsla-search-wrapper"><div class="dsla-search-field" data-tags="default,docs-default-current"></div></div></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/math.gl/docs">Overview</a></div><ul style="display:block;overflow:visible;height:auto" class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/math.gl/docs">Introduction</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/math.gl/docs/whats-new">What&#x27;s New</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/math.gl/docs/upgrade-guide">Upgrade Guide</a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/math.gl/docs/developer-guide/get-started">Developer Guide</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/math.gl/docs/modules/types">API Reference</a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/math.gl/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Overview</span><meta itemprop="position" content="1"></li><li itemscope="" itemprop="itemListElement" itemtype="https://schema.org/ListItem" class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link" itemprop="name">What&#x27;s New</span><meta itemprop="position" content="2"></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>What&#x27;s New</h1></header>
-<table style="border:0;align:center"><tbody><tr><td><center><img style="height:200px" src="https://raw.github.com/uber-web/math.gl/master/docs/images/dggs/s2.png"><p><b>v4.0</b> <i><a target="_blank" href="https://math.gl/docs/modules/s2">S2 (DGGS)</a></i></p></center></td><td><center><img style="height:200px" src="https://raw.github.com/uber-web/math.gl/master/docs/images/dggs/geohash.png"><p><b>v4.0</b> <i><a target="_blank" href="https://math.gl/docs/modules/geohash">GeoHash (DGGS)</a></i></p></center></td><td><center><img style="height:200px" src="https://raw.github.com/uber-web/math.gl/master/docs/images/dggs/quadkey.png"><p><b>v4.0</b> <i><a target="_blank" href="https://math.gl/docs/modules/quadkey">Quadkey (DGGS)</a></i></p></center></td></tr><tr><td><center><img style="height:200px" src="https://raw.github.com/uber-web/math.gl/master/docs/modules/geoid/images/Earth_Gravitational_Model_1996.png"><p><b>v3.4</b> <i><a target="_blank" href="https://math.gl/modules/geoid/docs">Geoid (Earth Gravity Model)</a></i></p></center></td><td><center><img sstyle="[object Object]" src="https://raw.github.com/uber-web/math.gl/master/docs/images/ts-logo-256.png"><p><b>v3.2</b> <i>TypeScript</i></p></center></td><td><center><img style="height:200px;max-width:200px" src="https://raw.github.com/uber-web/math.gl/master/docs/modules/geospatial/images/WGS84_mean_Earth_radius.svg"><p><b>v3.0</b> <i><a target="_blank" href="https://math.gl/modules/geospatial/docs">WGS84 &amp; Ellipsoid</a></i></p></center></td></tr></tbody></table>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v50-in-planning-stage">v5.0 (In planning stage)<a href="#v50-in-planning-stage" class="hash-link" aria-label="Direct link to v5.0 (In planning stage)" title="Direct link to v5.0 (In planning stage)">​</a></h2>
-<p>Release Date: TBD, maybe Q4, 2024.</p>
-<p>Goal: Stronger type guarantees for math classes via the new sized array types.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v41">v4.1<a href="#v41" class="hash-link" aria-label="Direct link to v4.1" title="Direct link to v4.1">​</a></h2>
+<!doctype html><html lang=en dir=ltr class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-whats-new" data-has-hydrated=false><head><meta charset=UTF-8><meta name=generator content="Docusaurus v3.10.2"><title data-rh=true>What's New | math.gl</title><meta data-rh=true name=viewport content="width=device-width, initial-scale=1.0"/><meta data-rh=true name=twitter:card content=summary_large_image /><meta data-rh=true property=og:url content=https://visgl.github.io/math.gl/docs/whats-new /><meta data-rh=true property=og:locale content=en /><meta data-rh=true name=docusaurus_locale content=en /><meta data-rh=true name=docsearch:language content=en /><meta data-rh=true name=docusaurus_version content=current /><meta data-rh=true name=docusaurus_tag content=docs-default-current /><meta data-rh=true name=docsearch:version content=current /><meta data-rh=true name=docsearch:docusaurus_tag content=docs-default-current /><meta data-rh=true property=og:title content="What's New | math.gl"/><meta data-rh=true name=description content="v4.0 S2 (DGGS)"/><meta data-rh=true property=og:description content="v4.0 S2 (DGGS)"/><link data-rh=true rel=icon href=/math.gl/favicon.png /><link data-rh=true rel=canonical href=https://visgl.github.io/math.gl/docs/whats-new /><link data-rh=true rel=alternate href=https://visgl.github.io/math.gl/docs/whats-new hreflang=en /><link data-rh=true rel=alternate href=https://visgl.github.io/math.gl/docs/whats-new hreflang=x-default /><script data-rh=true type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","item":"https://visgl.github.io/math.gl/docs/whats-new","name":"What's New","position":1}]}</script><link rel=stylesheet href=/math.gl/assets/css/styles.7a57e19f.css /><script src=/math.gl/assets/js/runtime~main.d435da29.js defer></script><script src=/math.gl/assets/js/main.c88b604a.js defer></script></head><body><svg style="display: none;"><defs>
+<symbol id=theme-svg-external-link viewBox="0 0 24 24"><path fill=currentColor d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{for(var[t,e]of new URLSearchParams(window.location.search).entries())if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id=__docusaurus><div role=region aria-label="Skip to main content"><a class=skipToContent_oPtH href=#__docusaurus_skipToContent_fallback>Skip to main content</a></div><nav aria-label=Main class="theme-layout-navbar navbar navbar--fixed-top"><div class=navbar__inner><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded=false class="navbar__toggle clean-btn" type=button><svg width=30 height=30 viewBox="0 0 30 30" aria-hidden=true><path stroke=currentColor stroke-linecap=round stroke-miterlimit=10 stroke-width=2 d="M4 7h22M4 15h22M4 23h22"/></svg></button><a class=navbar__brand href=/math.gl/><div class=navbar__logo><img src=/math.gl/visgl-logo-dark.png alt="vis.gl Logo" class="themedComponent_siVc themedComponent--light_hHel"/><img src=/math.gl/visgl-logo-light.png alt="vis.gl Logo" class="themedComponent_siVc themedComponent--dark_yETr"/></div><b class="navbar__title text--truncate">math.gl</b></a><a aria-current=page class="navbar__item navbar__link navbar__link--active" href=/math.gl/docs>Docs</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href=https://github.com/visgl/math.gl target=_blank rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPrP><use href=#theme-svg-external-link /></svg></a><div class="toggle_ki11 colorModeToggle_Hewu"><button class="clean-btn toggleButton_MMFG toggleButtonDisabled_Uw7m" type=button disabled title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_k9hJ lightToggleIcon_lgto"><path fill=currentColor d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_k9hJ darkToggleIcon_U96C"><path fill=currentColor d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"/></svg><svg viewBox="0 0 24 24" width=24 height=24 aria-hidden=true class="toggleIcon_k9hJ systemToggleIcon_E5c0"><path fill=currentColor d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"/></svg></button></div><div class=navbarSearchContainer_bzqh><div class=dsla-search-wrapper><div class=dsla-search-field data-tags=default,docs-default-current></div></div></div></div></div><div role=presentation class=navbar-sidebar__backdrop></div></nav><div id=__docusaurus_skipToContent_fallback class="theme-layout-main main-wrapper mainWrapper_MB5r"><div class=docsWrapper__sE8><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_iEvu" type=button></button><div class=docRoot_DfVB><aside class="theme-doc-sidebar-container docSidebarContainer_c7NB"><div class=sidebarViewport_KYo0><div class=sidebar_CUen><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_jmj1"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class=menu__list-item-collapsible><a class="categoryLink_ROYx menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role=button aria-expanded=true href=/math.gl/docs><span class=categoryLinkLabel_ufhF>Overview</span></a></div><ul class=menu__list><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/math.gl/docs><span class=linkLabel_fEdy>Introduction</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current=page tabindex=0 href=/math.gl/docs/whats-new><span class=linkLabel_fEdy>What's New</span></a><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class=menu__link tabindex=0 href=/math.gl/docs/upgrade-guide><span class=linkLabel_fEdy>Upgrade Guide</span></a></ul><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_ROYx menu__link menu__link--sublist menu__link--sublist-caret" role=button aria-expanded=false href=/math.gl/docs/developer-guide/get-started><span class=categoryLinkLabel_ufhF>Developer Guide</span></a></div><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class=menu__list-item-collapsible><a class="categoryLink_ROYx menu__link menu__link--sublist menu__link--sublist-caret" role=button aria-expanded=false href=/math.gl/docs/modules/types><span class=categoryLinkLabel_ufhF>API Reference</span></a></div></ul></nav></div></div></aside><main class=docMainContainer_a9sJ><div class="container padding-top--md padding-bottom--lg"><div class=row><div class="col docItemCol_Qr34"><div class=docItemContainer_tjFy><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_T5ub" aria-label=Breadcrumbs><ul class=breadcrumbs><li class=breadcrumbs__item><a aria-label="Home page" class=breadcrumbs__link href=/math.gl/><svg viewBox="0 0 24 24" class=breadcrumbHomeIcon_sfvy><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill=currentColor /></svg></a><li class=breadcrumbs__item><span class=breadcrumbs__link>Overview</span><li class="breadcrumbs__item breadcrumbs__item--active"><span class=breadcrumbs__link>What's New</span></ul></nav><div class="tocCollapsible_wXna theme-doc-toc-mobile tocMobile_Ojys"><button type=button class="clean-btn tocCollapsibleButton_iI2p">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>What's New</h1></header>
+<table style=border:0;align:center><tr><td><center><img style=height:200px src=https://raw.github.com/uber-web/math.gl/master/docs/images/dggs/s2.png /><p><b>v4.0</b> <i><a target=_blank href=https://math.gl/docs/modules/s2>S2 (DGGS)</a></i></center><td><center><img style=height:200px src=https://raw.github.com/uber-web/math.gl/master/docs/images/dggs/geohash.png /><p><b>v4.0</b> <i><a target=_blank href=https://math.gl/docs/modules/geohash>GeoHash (DGGS)</a></i></center><td><center><img style=height:200px src=https://raw.github.com/uber-web/math.gl/master/docs/images/dggs/quadkey.png /><p><b>v4.0</b> <i><a target=_blank href=https://math.gl/docs/modules/quadkey>Quadkey (DGGS)</a></i></center><tr><td><center><img style=height:200px src=https://raw.github.com/uber-web/math.gl/master/docs/modules/geoid/images/Earth_Gravitational_Model_1996.png /><p><b>v3.4</b> <i><a target=_blank href=https://math.gl/modules/geoid/docs>Geoid (Earth Gravity Model)</a></i></center><td><center><img sstyle="[object Object]" src=https://raw.github.com/uber-web/math.gl/master/docs/images/ts-logo-256.png /><p><b>v3.2</b> <i>TypeScript</i></center><td><center><img style=height:200px;max-width:200px src=https://raw.github.com/uber-web/math.gl/master/docs/modules/geospatial/images/WGS84_mean_Earth_radius.svg /><p><b>v3.0</b> <i><a target=_blank href=https://math.gl/modules/geospatial/docs>WGS84 & Ellipsoid</a></i></center></table>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v42-in-development>v4.2 (In development)<a href=#v42-in-development class=hash-link aria-label="Direct link to v4.2 (In development)" title="Direct link to v4.2 (In development)" translate=no>​</a></h2>
+<p>Target Release Date: Q2, 2026.</p>
+<p>Highlights:</p>
+<ul>
+<li class="">TypeScript 6 compatibility.</li>
+<li class="">New <code>@math.gl/geometry</code> CPU primitive mesh and tessellation module.</li>
+<li class="">glTF 2.1 box, capsule, cylinder, plane and sphere analytic shapes in <code>@math.gl/culling</code>.</li>
+<li class="">New expression evaluator module</li>
+<li class="">New standards-based CRS definitions module and modernized proj4 support.</li>
+<li class="">New typed-array geometry utilities module.</li>
+<li class="">Functionality additions to improve 3D Tiles support in loaders.gl.</li>
+<li class="">Stronger type guarantees for math classes via the new sized array types.</li>
+<li class="">Culling results, polygon winding directions, and Euler rotation orders now use descriptive string literal types; legacy named constants remain as deprecated string-valued aliases.</li>
+</ul>
+<p><strong><code>@math.gl/expressions</code></strong> (NEW EXPERIMENTAL MODULE)</p>
+<ul>
+<li class="">Promotes the expression parser previously embedded in <code>@deck.gl/json</code> to a documented experimental module.</li>
+<li class="">Parses, evaluates, and compiles synchronous or asynchronous JavaScript-style expressions.</li>
+<li class="">Provides configurable function libraries, including importable basic math and WGS84 geospatial libraries.</li>
+<li class="">Adds isolated function registries and optional GeoHash, Quadkey, and S2 function tables.</li>
+<li class="">Compiles restricted JSON-style accessor expressions with function calls disabled.</li>
+<li class="">Includes an interactive expression playground with editable context and sample DGGS expressions.</li>
+</ul>
+<p><strong><code>@math.gl/crs</code></strong> (NEW MODULE)</p>
+<ul>
+<li class="">Adds lightweight, proj4-independent TypeScript definitions for coordinate reference systems with no runtime dependencies.</li>
+<li class="">Uses strict PROJJSON v0.7 as its semantic CRS object model and exports types generated from the official schema.</li>
+<li class="">Exposes the vendored official PROJJSON v0.7 schema for runtime validation by applications.</li>
+<li class="">Represents authority codes, PROJ strings, and WKT definitions as serialized strings.</li>
+<li class="">Adds value-preserving WKT1/WKT2 syntax parsing, profile validation, and compact or pretty encoding.</li>
+<li class="">Adds ordered PROJ definition and pipeline syntax parsing and encoding.</li>
+<li class="">Adds immutable, format-neutral spatial-reference descriptors that preserve definition
+representation, alternatives, provenance, coordinate epoch, frame, stored order, and explicit
+default/unknown/absent state.</li>
+<li class="">Adds a comprehensive CRS developer guide covering standards, serialization versus semantics,
+axis order, dynamic and vertical CRS, transformation boundaries, and integration guidance.</li>
+</ul>
+<p><strong><code>@math.gl/proj4</code></strong></p>
+<ul>
+<li class="">Updates proj4js to v2.20.9 and accepts modern WKT2 definitions and the supported PROJJSON CRS object types.</li>
+<li class="">Adds optional CRS axis-order enforcement and NTv2 datum-grid registration.</li>
+<li class="">Defines aliases for WGS84 UTM and UPS EPSG coordinate systems automatically.</li>
+</ul>
+<p><strong><code>@math.gl/geospatial</code></strong></p>
+<ul>
+<li class=""><code>makeOBBFromRegion()</code> - New function that creates a cartesian oriented bounding box from a geospatial region.</li>
+<li class=""><code>EllipsoidTangentPlane</code> - New helper class for doing math on the ellipsoid surface.</li>
+</ul>
+<p><strong><code>@math.gl/geometry</code></strong> (NEW MODULE)</p>
+<ul>
+<li class="">Adds renderer-independent <code>Geometry</code> typed-array storage and indexed-geometry unpacking.</li>
+<li class="">Adds tessellators for glTF 2.1 draft shapes and common luma.gl primitives.</li>
+</ul>
+<p><strong><code>@math.gl/culling</code></strong></p>
+<ul>
+<li class="">Adds analytic glTF shape queries for clipping/culling, rays, transforms and enclosing bounds.</li>
+</ul>
+<p><strong><code>@math.gl/geometry-utils</code></strong> (NEW MODULE)</p>
+<ul>
+<li class="">Promotes the renderer-independent geometry helpers previously maintained in <code>@loaders.gl/math</code>.</li>
+<li class="">Adds typed geometry traversal, vertex-normal generation, component-type conversion, packed RGB565
+colors, octahedral attribute compression, and typed-array utilities.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v41>v4.1<a href=#v41 class=hash-link aria-label="Direct link to v4.1" title="Direct link to v4.1" translate=no>​</a></h2>
 <p>Release Date: Sep 7, 2024.</p>
 <p>This minor release brings:</p>
 <ul>
-<li>type improvements to support more rigorous typing of array lenghts.</li>
-<li><a href="https://spdx.org/licenses/" target="_blank" rel="noopener noreferrer">SPDX</a>-compliant license headers.</li>
+<li class="">type improvements to support more rigorous typing of array lenghts.</li>
+<li class=""><a href=https://spdx.org/licenses/ target=_blank rel="noopener noreferrer" class="">SPDX</a>-compliant license headers.</li>
 </ul>
 <p><strong><code>@math.gl/core</code></strong></p>
 <ul>
-<li><code>Vector2Like</code> - <code>Matrix4Like</code> - New types to specify numeric inputs of a specific length.</li>
+<li class=""><code>Vector2Like</code> - <code>Matrix4Like</code> - New types to specify numeric inputs of a specific length.</li>
 </ul>
 <p><strong><code>@math.gl/types</code></strong></p>
 <ul>
-<li><code>Bounds</code>, <code>Bounds2D</code> and <code>Bounds3D</code> - New types for expressing <a href="/math.gl/docs/modules/types/api-reference/bounds">bounds</a> (extents).</li>
-<li><code>NumberArray2</code> - <code>NumberArray16</code> - New types to specify numeric arrays of a specific length.</li>
-<li><code>NumericArray2</code> - <code>NumericArray16</code> - New types to specify numeric arrays of a specific length.</li>
-<li><code>isTypedArray()</code>, <code>isNumericArray()</code> - These utilities now perform typescript type narrowing.</li>
+<li class=""><code>Bounds</code>, <code>Bounds2D</code> and <code>Bounds3D</code> - New types for expressing <a class="" href=/math.gl/docs/modules/types/api-reference/bounds>bounds</a> (extents).</li>
+<li class=""><code>NumberArray2</code> - <code>NumberArray16</code> - New types to specify numeric arrays of a specific length.</li>
+<li class=""><code>NumericArray2</code> - <code>NumericArray16</code> - New types to specify numeric arrays of a specific length.</li>
+<li class=""><code>isTypedArray()</code>, <code>isNumericArray()</code> - These utilities now perform typescript type narrowing.</li>
 </ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v40">v4.0<a href="#v40" class="hash-link" aria-label="Direct link to v4.0" title="Direct link to v4.0">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v40>v4.0<a href=#v40 class=hash-link aria-label="Direct link to v4.0" title="Direct link to v4.0" translate=no>​</a></h2>
 <p>Release Date: Oct 14, 2023.</p>
 <p>This release brings:</p>
 <ul>
-<li>ESM (ECMAScript module) compliant.</li>
-<li>Node.js v16, v18, v20.</li>
-<li>Typescript v5</li>
-<li><code>gl-matrix</code> dependency removed.</li>
-<li>New modules for working with DGGS (Discrete Global Grid System) math.</li>
+<li class="">ESM (ECMAScript module) compliant.</li>
+<li class="">Node.js v16, v18, v20.</li>
+<li class="">Typescript v5</li>
+<li class=""><code>gl-matrix</code> dependency removed.</li>
+<li class="">New modules for working with DGGS (Discrete Global Grid System) math.</li>
 </ul>
 <p><strong><code>@math.gl/dggs-geohash</code></strong> (NEW MODULE)</p>
 <ul>
-<li>New module with lightweight math for the GeoHash DGGS (Discrete Global Grid System).</li>
+<li class="">New module with lightweight math for the GeoHash DGGS (Discrete Global Grid System).</li>
 </ul>
 <p><strong><code>@math.gl/dggs-quadkey</code></strong> (NEW MODULE)</p>
 <ul>
-<li>New module with lightweight math for the quadkey DGGS (Discrete Global Grid System).</li>
+<li class="">New module with lightweight math for the quadkey DGGS (Discrete Global Grid System).</li>
 </ul>
 <p><strong><code>@math.gl/dggs-s2</code></strong> (NEW MODULE)</p>
 <ul>
-<li>New module that contains a lightweight implementation of the S2 DGGS (Discrete Global Grid System).</li>
+<li class="">New module that contains a lightweight implementation of the S2 DGGS (Discrete Global Grid System).</li>
 </ul>
 <p><strong><code>@math.gl/core</code></strong></p>
 <ul>
-<li><code>config</code> is now truly global (stored on <code>globalThis</code>).</li>
-<li><code>gl-matrix</code> dependency removed.</li>
+<li class=""><code>config</code> is now truly global (stored on <code>globalThis</code>).</li>
+<li class=""><code>gl-matrix</code> dependency removed.</li>
 </ul>
 <p><strong><code>@math.gl/types</code></strong></p>
 <ul>
-<li>New <code>isTypedArray()</code> and <code>isNumericArray()</code> utilities that check values and return properly restricted types to help write clean TypeScript code (e.g. avoids the <code>DataView</code> case when using <code>ArrayBuffer.isView()</code>).</li>
+<li class="">New <code>isTypedArray()</code> and <code>isNumericArray()</code> utilities that check values and return properly restricted types to help write clean TypeScript code (e.g. avoids the <code>DataView</code> case when using <code>ArrayBuffer.isView()</code>).</li>
 </ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v36">v3.6<a href="#v36" class="hash-link" aria-label="Direct link to v3.6" title="Direct link to v3.6">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v36>v3.6<a href=#v36 class=hash-link aria-label="Direct link to v3.6" title="Direct link to v3.6" translate=no>​</a></h2>
 <p>Release Date: June 10, 2022</p>
 <p>Codebase has been fully converted to typescript. In general this means that users can expect
 the types exported from math.gl to be considerably improved, however in some function signatures
-are no longer supported. For details, consult the <a href="/math.gl/docs/upgrade-guide">upgrade guide</a>.</p>
+are no longer supported. For details, consult the <a class="" href=/math.gl/docs/upgrade-guide>upgrade guide</a>.</p>
 <p><strong><code>@math.gl/types</code> (NEW)</strong></p>
 <ul>
-<li>New module that exports a few typescript types that e.g. generalize handling of numeric arrays.</li>
+<li class="">New module that exports a few typescript types that e.g. generalize handling of numeric arrays.</li>
 </ul>
 <p><strong><code>@math.gl/polygon</code> (NEW)</strong></p>
 <ul>
-<li>Includes earcut 2.2 (various bug fixes for edge cases)</li>
-<li>The <code>earcut</code> utility supports a new argument <code>plane</code> to calculate tesselation on alternative projection planes.</li>
+<li class="">Includes earcut 2.2 (various bug fixes for edge cases)</li>
+<li class="">The <code>earcut</code> utility supports a new argument <code>plane</code> to calculate tesselation on alternative projection planes.</li>
 </ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v35">v3.5<a href="#v35" class="hash-link" aria-label="Direct link to v3.5" title="Direct link to v3.5">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v35>v3.5<a href=#v35 class=hash-link aria-label="Direct link to v3.5" title="Direct link to v3.5" translate=no>​</a></h2>
 <p>Release Date: July 14, 2021</p>
 <p><strong><code>@math.gl/web-mercator</code></strong></p>
 <ul>
-<li><code>getBounds()</code> now supports an optional <code>fovy</code> parameter on the <code>WebMercatorViewport</code> object</li>
-<li><code>getProjectionMatrix()</code> and <code>getProjectionParameters()</code> now accept a <code>fovy</code> parameter</li>
+<li class=""><code>getBounds()</code> now supports an optional <code>fovy</code> parameter on the <code>WebMercatorViewport</code> object</li>
+<li class=""><code>getProjectionMatrix()</code> and <code>getProjectionParameters()</code> now accept a <code>fovy</code> parameter</li>
 </ul>
 <p><strong><code>@math.gl/polygon</code></strong></p>
 <ul>
-<li>Improve performance of <code>getPolygonSignedArea()</code> by 3x</li>
-<li>Addition of <code>earcut()</code> method for triangulating polygons</li>
+<li class="">Improve performance of <code>getPolygonSignedArea()</code> by 3x</li>
+<li class="">Addition of <code>earcut()</code> method for triangulating polygons</li>
 </ul>
 <p><strong><code>math.gl/culling</code></strong></p>
 <ul>
-<li>New TypeScript interface <code>BoundingVolume</code> with common operations for bounding volumes (<code>BoundingSphere</code>, <code>AxisAlignedBoundingBox</code>, <code>OrientedBoundingBox</code>).</li>
-<li><code>BoundingVolume.transform()</code> supported on all bounding volumes.</li>
+<li class="">New TypeScript interface <code>BoundingVolume</code> with common operations for bounding volumes (<code>BoundingSphere</code>, <code>AxisAlignedBoundingBox</code>, <code>OrientedBoundingBox</code>).</li>
+<li class=""><code>BoundingVolume.transform()</code> supported on all bounding volumes.</li>
 </ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v34">v3.4<a href="#v34" class="hash-link" aria-label="Direct link to v3.4" title="Direct link to v3.4">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v34>v3.4<a href=#v34 class=hash-link aria-label="Direct link to v3.4" title="Direct link to v3.4" translate=no>​</a></h2>
 <p>Release Date: Jan 7, 2021</p>
 <p><strong><code>@math.gl/geoid</code></strong> - New module</p>
 <ul>
-<li>Support for <a href="https://en.wikipedia.org/wiki/Geoid" target="_blank" rel="noopener noreferrer">geoid</a>-based <a href="https://en.wikipedia.org/wiki/Earth_Gravitational_Model" target="_blank" rel="noopener noreferrer">earth gravity models</a>.</li>
-<li>New <code>Geoid</code> class calculates the height offset (aka &quot;undulation&quot;) from the pure ellipsoid for a given lng/lat (using spherical harmonics).</li>
-<li><code>Geoid</code> instances can be initialized with PGM-encoded earth gravity model coefficient files from standard sources.</li>
+<li class="">Support for <a href=https://en.wikipedia.org/wiki/Geoid target=_blank rel="noopener noreferrer" class="">geoid</a>-based <a href=https://en.wikipedia.org/wiki/Earth_Gravitational_Model target=_blank rel="noopener noreferrer" class="">earth gravity models</a>.</li>
+<li class="">New <code>Geoid</code> class calculates the height offset (aka "undulation") from the pure ellipsoid for a given lng/lat (using spherical harmonics).</li>
+<li class=""><code>Geoid</code> instances can be initialized with PGM-encoded earth gravity model coefficient files from standard sources.</li>
 </ul>
 <p><strong><code>@math.gl/polygon</code></strong></p>
 <ul>
-<li>Support for flat arrays (e.g. polygons stored in typed arrays)</li>
-<li>Support for calling polygon utilities directly on arrays, without a <code>Polygon</code> instance.</li>
-<li>New function <code>modifyPolygonWindingDirection()</code> to modify polygon array winding direction in-place.</li>
+<li class="">Support for flat arrays (e.g. polygons stored in typed arrays)</li>
+<li class="">Support for calling polygon utilities directly on arrays, without a <code>Polygon</code> instance.</li>
+<li class="">New function <code>modifyPolygonWindingDirection()</code> to modify polygon array winding direction in-place.</li>
 </ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v33">v3.3<a href="#v33" class="hash-link" aria-label="Direct link to v3.3" title="Direct link to v3.3">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v33>v3.3<a href=#v33 class=hash-link aria-label="Direct link to v3.3" title="Direct link to v3.3" translate=no>​</a></h2>
 <p>Release Date: Oct 9, 2020</p>
 <p><strong><code>@math.gl/proj4</code></strong> - New module</p>
 <ul>
-<li>A new module supporting conversion between a wide range of geospatial coordinate reference systems specified e.g. using the OGC WKT-CRS specification.</li>
+<li class="">A new module supporting conversion between a wide range of geospatial coordinate reference systems specified e.g. using the OGC WKT-CRS specification.</li>
 </ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v32">v3.2<a href="#v32" class="hash-link" aria-label="Direct link to v3.2" title="Direct link to v3.2">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v32>v3.2<a href=#v32 class=hash-link aria-label="Direct link to v3.2" title="Direct link to v3.2" translate=no>​</a></h2>
 <p>Release Date: July 18, 2020</p>
 <p><strong>Typescript</strong></p>
 <ul>
-<li>Typescript type definitions (<code>.d.ts</code> files) are now exported for all math.gl modules.</li>
+<li class="">Typescript type definitions (<code>.d.ts</code> files) are now exported for all math.gl modules.</li>
 </ul>
 <p><strong><code>@math.gl/polygon</code></strong> - New module</p>
 <ul>
-<li>A new module offering geospatial polygon clipping functions.</li>
+<li class="">A new module offering geospatial polygon clipping functions.</li>
 </ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v31">v3.1<a href="#v31" class="hash-link" aria-label="Direct link to v3.1" title="Direct link to v3.1">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v31>v3.1<a href=#v31 class=hash-link aria-label="Direct link to v3.1" title="Direct link to v3.1" translate=no>​</a></h2>
 <p>Release date: Dec 16, 2019</p>
-<h3 class="anchor anchorWithStickyNavbar_LWe7" id="mathglweb-mercator"><code>@math.gl/web-mercator</code><a href="#mathglweb-mercator" class="hash-link" aria-label="Direct link to mathglweb-mercator" title="Direct link to mathglweb-mercator">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_tleR" id=mathglweb-mercator><code>@math.gl/web-mercator</code><a href=#mathglweb-mercator class=hash-link aria-label="Direct link to mathglweb-mercator" title="Direct link to mathglweb-mercator" translate=no>​</a></h3>
 <ul>
-<li>WebMercator projection support is now available through the new <code>@math.gl/web-mercator</code> npm sub-module.</li>
-<li>The <code>@math.gl/web-mercator</code> module is an evolution of the now archived <a href="https://github.com/uber-archive/viewport-mercator-project" target="_blank" rel="noopener noreferrer"><code>viewport-mercator-project</code></a> repository.</li>
+<li class="">WebMercator projection support is now available through the new <code>@math.gl/web-mercator</code> npm sub-module.</li>
+<li class="">The <code>@math.gl/web-mercator</code> module is an evolution of the now archived <a href=https://github.com/uber-archive/viewport-mercator-project target=_blank rel="noopener noreferrer" class=""><code>viewport-mercator-project</code></a> repository.</li>
 </ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v30">v3.0<a href="#v30" class="hash-link" aria-label="Direct link to v3.0" title="Direct link to v3.0">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v30>v3.0<a href=#v30 class=hash-link aria-label="Direct link to v3.0" title="Direct link to v3.0" translate=no>​</a></h2>
 <p>Release date: Aug 8, 2019</p>
 <p>The 3.0 release brings support for geospatial math, culling, performance improvements, and some API consolidation.</p>
-<h3 class="anchor anchorWithStickyNavbar_LWe7" id="mathglgeospatial"><code>@math.gl/geospatial</code><a href="#mathglgeospatial" class="hash-link" aria-label="Direct link to mathglgeospatial" title="Direct link to mathglgeospatial">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_tleR" id=mathglgeospatial><code>@math.gl/geospatial</code><a href=#mathglgeospatial class=hash-link aria-label="Direct link to mathglgeospatial" title="Direct link to mathglgeospatial" translate=no>​</a></h3>
 <p>A new module (developed in collaboration with the Cesium engineering team) providing WebGL-framework-independent geospatial math classes and algorithms:</p>
 <ul>
-<li>New class <code>Ellipsoid</code> and constant <code>Ellipsoid.WGS84</code> for working with WSG84 coordinates</li>
+<li class="">New class <code>Ellipsoid</code> and constant <code>Ellipsoid.WGS84</code> for working with WSG84 coordinates</li>
 </ul>
-<h3 class="anchor anchorWithStickyNavbar_LWe7" id="mathglculling"><code>@math.gl/culling</code><a href="#mathglculling" class="hash-link" aria-label="Direct link to mathglculling" title="Direct link to mathglculling">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_tleR" id=mathglculling><code>@math.gl/culling</code><a href=#mathglculling class=hash-link aria-label="Direct link to mathglculling" title="Direct link to mathglculling" translate=no>​</a></h3>
 <p>A new module (developed in collaboration with the Cesium engineering team) providing WebGL-framework-independent classesthat support geometric intersection calculations (primarily intended to support frustum culling operations):</p>
 <ul>
-<li>New class <code>AxisAlignedBoundingBox</code></li>
-<li>New class <code>OrientedBoundingBox</code></li>
-<li>New class <code>BoundingSphere</code></li>
-<li>New class <code>CullingVolume</code></li>
+<li class="">New class <code>AxisAlignedBoundingBox</code></li>
+<li class="">New class <code>OrientedBoundingBox</code></li>
+<li class="">New class <code>BoundingSphere</code></li>
+<li class="">New class <code>CullingVolume</code></li>
 </ul>
-<h3 class="anchor anchorWithStickyNavbar_LWe7" id="mathglcore"><code>@math.gl/core</code><a href="#mathglcore" class="hash-link" aria-label="Direct link to mathglcore" title="Direct link to mathglcore">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_tleR" id=mathglcore><code>@math.gl/core</code><a href=#mathglcore class=hash-link aria-label="Direct link to mathglcore" title="Direct link to mathglcore" translate=no>​</a></h3>
 <p><strong>Transform API Consolidation</strong></p>
 <p>The API for transformations (i.e. multiplying vectors with matrices or quaternions) has been extended and made more orthogonal:</p>
 <ul>
-<li>The <code>transform*</code> methods are now available on all <code>Vector</code> classes, in addition to on the <code>Matrix</code> classes. Among other things, this enables transformations without using <code>Matrix</code> classes.</li>
-<li>Naming consistency of transform methods across classes (<code>transform</code>, <code>transformAsPoint</code>, <code>transformAsVector</code>).</li>
-<li>Alternative transform methods added to the <code>Vector</code> classes (<code>transformByMatrix3</code>, <code>transformByMatrix2</code>, <code>transformByMatrix2x3</code> and <code>transformByQuaternion</code>). Simplifies using the most efficient transformation for the job.</li>
+<li class="">The <code>transform*</code> methods are now available on all <code>Vector</code> classes, in addition to on the <code>Matrix</code> classes. Among other things, this enables transformations without using <code>Matrix</code> classes.</li>
+<li class="">Naming consistency of transform methods across classes (<code>transform</code>, <code>transformAsPoint</code>, <code>transformAsVector</code>).</li>
+<li class="">Alternative transform methods added to the <code>Vector</code> classes (<code>transformByMatrix3</code>, <code>transformByMatrix2</code>, <code>transformByMatrix2x3</code> and <code>transformByQuaternion</code>). Simplifies using the most efficient transformation for the job.</li>
 </ul>
 <p><strong>Matrix classes</strong></p>
 <ul>
-<li>New methods <code>Matrix*.setColumn()</code> and <code>Matrix*.getColumn()</code></li>
-<li>New method <code>Matrix*.toString()</code></li>
-<li>Improved method: <code>Matrix4.frustum()</code> now supports infinite <code>far</code> plane (parity with <code>Matrix4.perspective</code>, which already supported this).</li>
+<li class="">New methods <code>Matrix*.setColumn()</code> and <code>Matrix*.getColumn()</code></li>
+<li class="">New method <code>Matrix*.toString()</code></li>
+<li class="">Improved method: <code>Matrix4.frustum()</code> now supports infinite <code>far</code> plane (parity with <code>Matrix4.perspective</code>, which already supported this).</li>
 </ul>
 <p><strong>Utility Functions</strong></p>
 <ul>
-<li>New: global functions <code>toRadians</code> and <code>toDegrees</code></li>
-<li>New: global function <code>exactEqual</code></li>
+<li class="">New: global functions <code>toRadians</code> and <code>toDegrees</code></li>
+<li class="">New: global function <code>exactEqual</code></li>
 </ul>
 <p><strong>Performance Improvements</strong> (and Website Benchmarks)</p>
-<p>A <a href="https://math.gl/examples/benchmarks" target="_blank" rel="noopener noreferrer">benchmarking example</a> has been added to the website that makes it easy to assess the performance of the math.gl library on your own browser. The math.gl library has been carefully tuned based on these benchmarks and performance of the library has been significantly improved over version 2.x.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v23">v2.3<a href="#v23" class="hash-link" aria-label="Direct link to v2.3" title="Direct link to v2.3">​</a></h2>
+<p>A <a href=https://math.gl/examples/benchmarks target=_blank rel="noopener noreferrer" class="">benchmarking example</a> has been added to the website that makes it easy to assess the performance of the math.gl library on your own browser. The math.gl library has been carefully tuned based on these benchmarks and performance of the library has been significantly improved over version 2.x.</p>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v23>v2.3<a href=#v23 class=hash-link aria-label="Direct link to v2.3" title="Direct link to v2.3" translate=no>​</a></h2>
 <p>Release date: Jan 29, 2019</p>
 <ul>
-<li>New class: <code>Matrix3</code></li>
-<li>New: Add <code>scale</code> factor support to <code>Matrix3</code> and <code>Matrix4</code></li>
-<li>Support quaternion to euler conversion</li>
-<li>Now uses the official <code>gl-matrix@3.0.0</code> package as dependency instead of forked gl-matrix packages.</li>
+<li class="">New class: <code>Matrix3</code></li>
+<li class="">New: Add <code>scale</code> factor support to <code>Matrix3</code> and <code>Matrix4</code></li>
+<li class="">Support quaternion to euler conversion</li>
+<li class="">Now uses the official <code>gl-matrix@3.0.0</code> package as dependency instead of forked gl-matrix packages.</li>
 </ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v22">v2.2<a href="#v22" class="hash-link" aria-label="Direct link to v2.2" title="Direct link to v2.2">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v22>v2.2<a href=#v22 class=hash-link aria-label="Direct link to v2.2" title="Direct link to v2.2" translate=no>​</a></h2>
 <p>Release date: Sep 20, 2018</p>
 <ul>
-<li>Use <code>@babel/runtime</code> to reduce bundle size</li>
-<li><code>equals</code> function fix on arrays</li>
+<li class="">Use <code>@babel/runtime</code> to reduce bundle size</li>
+<li class=""><code>equals</code> function fix on arrays</li>
 </ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v20">v2.0<a href="#v20" class="hash-link" aria-label="Direct link to v2.0" title="Direct link to v2.0">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v20>v2.0<a href=#v20 class=hash-link aria-label="Direct link to v2.0" title="Direct link to v2.0" translate=no>​</a></h2>
 <p>Release date: June 25, 2018</p>
-<h3 class="anchor anchorWithStickyNavbar_LWe7" id="new-naming-convention-for-experimental-exports">New Naming Convention for Experimental Exports<a href="#new-naming-convention-for-experimental-exports" class="hash-link" aria-label="Direct link to New Naming Convention for Experimental Exports" title="Direct link to New Naming Convention for Experimental Exports">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_tleR" id=new-naming-convention-for-experimental-exports>New Naming Convention for Experimental Exports<a href=#new-naming-convention-for-experimental-exports class=hash-link aria-label="Direct link to New Naming Convention for Experimental Exports" title="Direct link to New Naming Convention for Experimental Exports" translate=no>​</a></h3>
 <p>Experimental exports are now exported with a leading underscore (_), instead of as members of the <code>experimental</code> namespace.</p>
 <p>The change was made to make it possible for tree-shaking bundlers to remove unused experimental exports from applications.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v12">v1.2<a href="#v12" class="hash-link" aria-label="Direct link to v1.2" title="Direct link to v1.2">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v12>v1.2<a href=#v12 class=hash-link aria-label="Direct link to v1.2" title="Direct link to v1.2" translate=no>​</a></h2>
 <p>Release date: May 4, 2018</p>
 <ul>
-<li>New <code>lerp</code> utility</li>
-<li>Experimental <code>Pose</code> class</li>
+<li class="">New <code>lerp</code> utility</li>
+<li class="">Experimental <code>Pose</code> class</li>
 </ul>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v11">v1.1<a href="#v11" class="hash-link" aria-label="Direct link to v1.1" title="Direct link to v1.1">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v11>v1.1<a href=#v11 class=hash-link aria-label="Direct link to v1.1" title="Direct link to v1.1" translate=no>​</a></h2>
 <p>Release date: April 16, 2018</p>
-<h3 class="anchor anchorWithStickyNavbar_LWe7" id="matrix4-improvements">Matrix4 Improvements<a href="#matrix4-improvements" class="hash-link" aria-label="Direct link to Matrix4 Improvements" title="Direct link to Matrix4 Improvements">​</a></h3>
-<p><strong><code>Matrix4.orthographic()</code></strong> - To simplify switching between perspective and orthographic views, math.gl now offers an additional method for creating orthographic projection matrix, that takes the same parameters as <code>Matrix4.perspective()</code>, with the addition of one additional parameter, <code>focalDistance</code>. See <a href="/math.gl/docs/modules/core/api-reference/matrix4"><code>Matrix4.orthographic</code></a><code>({fovy, aspect, focalDistance, near, far})</code></p>
-<h3 class="anchor anchorWithStickyNavbar_LWe7" id="bundle-size-reduction">Bundle Size Reduction<a href="#bundle-size-reduction" class="hash-link" aria-label="Direct link to Bundle Size Reduction" title="Direct link to Bundle Size Reduction">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_tleR" id=matrix4-improvements>Matrix4 Improvements<a href=#matrix4-improvements class=hash-link aria-label="Direct link to Matrix4 Improvements" title="Direct link to Matrix4 Improvements" translate=no>​</a></h3>
+<p><strong><code>Matrix4.orthographic()</code></strong> - To simplify switching between perspective and orthographic views, math.gl now offers an additional method for creating orthographic projection matrix, that takes the same parameters as <code>Matrix4.perspective()</code>, with the addition of one additional parameter, <code>focalDistance</code>. See <a class="" href=/math.gl/docs/modules/core/api-reference/matrix4><code>Matrix4.orthographic</code></a><code>({fovy, aspect, focalDistance, near, far})</code></p>
+<h3 class="anchor anchorTargetStickyNavbar_tleR" id=bundle-size-reduction>Bundle Size Reduction<a href=#bundle-size-reduction class=hash-link aria-label="Direct link to Bundle Size Reduction" title="Direct link to Bundle Size Reduction" translate=no>​</a></h3>
 <p>math.gl has been tuned to have approximately 20% smaller footprint when bundled in applications.</p>
-<h3 class="anchor anchorWithStickyNavbar_LWe7" id="threejs-compatibility">THREE.js Compatibility<a href="#threejs-compatibility" class="hash-link" aria-label="Direct link to THREE.js Compatibility" title="Direct link to THREE.js Compatibility">​</a></h3>
+<h3 class="anchor anchorTargetStickyNavbar_tleR" id=threejs-compatibility>THREE.js Compatibility<a href=#threejs-compatibility class=hash-link aria-label="Direct link to THREE.js Compatibility" title="Direct link to THREE.js Compatibility" translate=no>​</a></h3>
 <p>math.gl classes now pass large parts of the THREE.js test suite, which should make it easier to reuse code written for the THREE.js math library.</p>
-<h2 class="anchor anchorWithStickyNavbar_LWe7" id="v10">v1.0<a href="#v10" class="hash-link" aria-label="Direct link to v1.0" title="Direct link to v1.0">​</a></h2>
+<h2 class="anchor anchorTargetStickyNavbar_tleR" id=v10>v1.0<a href=#v10 class=hash-link aria-label="Direct link to v1.0" title="Direct link to v1.0" translate=no>​</a></h2>
 <p>Release date: Jan 9, 2018</p>
-<p>Initial release.</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col"><a href="https://github.com/visgl/math.gl/tree/master/docs/../docs/whats-new.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/math.gl/docs"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Introduction</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/math.gl/docs/upgrade-guide"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Upgrade Guide</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#v50-in-planning-stage" class="table-of-contents__link toc-highlight">v5.0 (In planning stage)</a></li><li><a href="#v41" class="table-of-contents__link toc-highlight">v4.1</a></li><li><a href="#v40" class="table-of-contents__link toc-highlight">v4.0</a></li><li><a href="#v36" class="table-of-contents__link toc-highlight">v3.6</a></li><li><a href="#v35" class="table-of-contents__link toc-highlight">v3.5</a></li><li><a href="#v34" class="table-of-contents__link toc-highlight">v3.4</a></li><li><a href="#v33" class="table-of-contents__link toc-highlight">v3.3</a></li><li><a href="#v32" class="table-of-contents__link toc-highlight">v3.2</a></li><li><a href="#v31" class="table-of-contents__link toc-highlight">v3.1</a><ul><li><a href="#mathglweb-mercator" class="table-of-contents__link toc-highlight"><code>@math.gl/web-mercator</code></a></li></ul></li><li><a href="#v30" class="table-of-contents__link toc-highlight">v3.0</a><ul><li><a href="#mathglgeospatial" class="table-of-contents__link toc-highlight"><code>@math.gl/geospatial</code></a></li><li><a href="#mathglculling" class="table-of-contents__link toc-highlight"><code>@math.gl/culling</code></a></li><li><a href="#mathglcore" class="table-of-contents__link toc-highlight"><code>@math.gl/core</code></a></li></ul></li><li><a href="#v23" class="table-of-contents__link toc-highlight">v2.3</a></li><li><a href="#v22" class="table-of-contents__link toc-highlight">v2.2</a></li><li><a href="#v20" class="table-of-contents__link toc-highlight">v2.0</a><ul><li><a href="#new-naming-convention-for-experimental-exports" class="table-of-contents__link toc-highlight">New Naming Convention for Experimental Exports</a></li></ul></li><li><a href="#v12" class="table-of-contents__link toc-highlight">v1.2</a></li><li><a href="#v11" class="table-of-contents__link toc-highlight">v1.1</a><ul><li><a href="#matrix4-improvements" class="table-of-contents__link toc-highlight">Matrix4 Improvements</a></li><li><a href="#bundle-size-reduction" class="table-of-contents__link toc-highlight">Bundle Size Reduction</a></li><li><a href="#threejs-compatibility" class="table-of-contents__link toc-highlight">THREE.js Compatibility</a></li></ul></li><li><a href="#v10" class="table-of-contents__link toc-highlight">v1.0</a></li></ul></div></div></div></div></main></div></div></div><footer class="footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="col footer__col"><div class="footer__title">Other vis.gl Libraries</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https:/deck.gl" target="_blank" rel="noopener noreferrer" class="footer__link-item">deck.gl<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_nPIU"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></a></li><li class="footer__item"><a href="https://luma.gl" target="_blank" rel="noopener noreferrer" class="footer__link-item">luma.gl<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_nPIU"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></a></li><li class="footer__item"><a href="https://loaders.gl" target="_blank" rel="noopener noreferrer" class="footer__link-item">loaders.gl<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_nPIU"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></a></li><li class="footer__item"><a href="https://visgl.github.io/react-map-gl" target="_blank" rel="noopener noreferrer" class="footer__link-item">react-map-gl<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_nPIU"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></a></li><li class="footer__item"><a href="https://visgl.github.io/deck.gl-community/" target="_blank" rel="noopener noreferrer" class="footer__link-item">deck.gl-community<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_nPIU"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></a></li></ul></div><div class="col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://medium.com/vis-gl" target="_blank" rel="noopener noreferrer" class="footer__link-item">vis.gl blog on Medium<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_nPIU"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></a></li><li class="footer__item"><a href="https://github.com/visgl/math.gl" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_nPIU"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2024 OpenJS Foundation</div></div></div></footer></div>
-</body>
-</html>
+<p>Initial release.</div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_QeZL"><a href=https://github.com/visgl/math.gl/tree/master/docs/../docs/whats-new.md target=_blank rel="noopener noreferrer" class=theme-edit-this-page><svg fill=currentColor height=20 width=20 viewBox="0 0 40 40" class=iconEdit_bHB7 aria-hidden=true><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"/></g></svg>Edit this page</a></div><div class="col lastUpdated_ydrU"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href=/math.gl/docs><div class=pagination-nav__sublabel>Previous</div><div class=pagination-nav__label>Introduction</div></a><a class="pagination-nav__link pagination-nav__link--next" href=/math.gl/docs/upgrade-guide><div class=pagination-nav__sublabel>Next</div><div class=pagination-nav__label>Upgrade Guide</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_XG6w thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href=#v42-in-development class="table-of-contents__link toc-highlight">v4.2 (In development)</a><li><a href=#v41 class="table-of-contents__link toc-highlight">v4.1</a><li><a href=#v40 class="table-of-contents__link toc-highlight">v4.0</a><li><a href=#v36 class="table-of-contents__link toc-highlight">v3.6</a><li><a href=#v35 class="table-of-contents__link toc-highlight">v3.5</a><li><a href=#v34 class="table-of-contents__link toc-highlight">v3.4</a><li><a href=#v33 class="table-of-contents__link toc-highlight">v3.3</a><li><a href=#v32 class="table-of-contents__link toc-highlight">v3.2</a><li><a href=#v31 class="table-of-contents__link toc-highlight">v3.1</a><ul><li><a href=#mathglweb-mercator class="table-of-contents__link toc-highlight"><code>@math.gl/web-mercator</code></a></ul><li><a href=#v30 class="table-of-contents__link toc-highlight">v3.0</a><ul><li><a href=#mathglgeospatial class="table-of-contents__link toc-highlight"><code>@math.gl/geospatial</code></a><li><a href=#mathglculling class="table-of-contents__link toc-highlight"><code>@math.gl/culling</code></a><li><a href=#mathglcore class="table-of-contents__link toc-highlight"><code>@math.gl/core</code></a></ul><li><a href=#v23 class="table-of-contents__link toc-highlight">v2.3</a><li><a href=#v22 class="table-of-contents__link toc-highlight">v2.2</a><li><a href=#v20 class="table-of-contents__link toc-highlight">v2.0</a><ul><li><a href=#new-naming-convention-for-experimental-exports class="table-of-contents__link toc-highlight">New Naming Convention for Experimental Exports</a></ul><li><a href=#v12 class="table-of-contents__link toc-highlight">v1.2</a><li><a href=#v11 class="table-of-contents__link toc-highlight">v1.1</a><ul><li><a href=#matrix4-improvements class="table-of-contents__link toc-highlight">Matrix4 Improvements</a><li><a href=#bundle-size-reduction class="table-of-contents__link toc-highlight">Bundle Size Reduction</a><li><a href=#threejs-compatibility class="table-of-contents__link toc-highlight">THREE.js Compatibility</a></ul><li><a href=#v10 class="table-of-contents__link toc-highlight">v1.0</a></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class=footer__title>Other vis.gl Libraries</div><ul class="footer__items clean-list"><li class=footer__item><a href=https:/deck.gl target=_blank rel="noopener noreferrer" class=footer__link-item>deck.gl<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPrP><use href=#theme-svg-external-link /></svg></a><li class=footer__item><a href=https://luma.gl target=_blank rel="noopener noreferrer" class=footer__link-item>luma.gl<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPrP><use href=#theme-svg-external-link /></svg></a><li class=footer__item><a href=https://loaders.gl target=_blank rel="noopener noreferrer" class=footer__link-item>loaders.gl<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPrP><use href=#theme-svg-external-link /></svg></a><li class=footer__item><a href=https://visgl.github.io/react-map-gl target=_blank rel="noopener noreferrer" class=footer__link-item>react-map-gl<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPrP><use href=#theme-svg-external-link /></svg></a><li class=footer__item><a href=https://visgl.github.io/deck.gl-community/ target=_blank rel="noopener noreferrer" class=footer__link-item>deck.gl-community<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPrP><use href=#theme-svg-external-link /></svg></a></ul></div><div class="theme-layout-footer-column col footer__col"><div class=footer__title>More</div><ul class="footer__items clean-list"><li class=footer__item><a href=https://medium.com/vis-gl target=_blank rel="noopener noreferrer" class=footer__link-item>vis.gl blog on Medium<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPrP><use href=#theme-svg-external-link /></svg></a><li class=footer__item><a href=https://github.com/visgl/math.gl target=_blank rel="noopener noreferrer" class=footer__link-item>GitHub<svg width=13.5 height=13.5 aria-label="(opens in new tab)" class=iconExternalLink_nPrP><use href=#theme-svg-external-link /></svg></a></ul></div></div><div class="footer__bottom text--center"><div class=footer__copyright>Copyright © 2026 OpenJS Foundation</div></div></div></footer></div></body>
