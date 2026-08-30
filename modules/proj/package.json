@@ -6,7 +6,7 @@
     "access": "public"
   },
   "type": "module",
-  "version": "5.0.0-alpha.1",
+  "version": "5.0.0-alpha.4",
   "keywords": [
     "math",
     "geospatial",
@@ -35,6 +35,6 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/web-mercator": "5.0.0-alpha.1"
+    "@math.gl/web-mercator": "5.0.0-alpha.4"
   }
 }
