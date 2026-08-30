@@ -7,6 +7,7 @@ import {
   BASIC_MATH_FUNCTION_LIBRARY,
   GEOSPATIAL_FUNCTION_LIBRARY,
   addBinaryOp,
+  addUnaryOp,
   compile,
   compileAsync,
   eval as evaluate,
@@ -14,6 +15,7 @@ import {
   parse,
   parseExpressionString
 } from '@math.gl/expressions';
+import {get} from '../src/get';
 
 test('@math.gl/expressions#eval', () => {
   expect(evaluate(parse('x * 2 + 1'), {x: 3}), 'evaluates arithmetic expressions').toBe(7);
@@ -96,4 +98,114 @@ test('@math.gl/expressions#parseExpressionString', () => {
 test('@math.gl/expressions#addBinaryOp', () => {
   addBinaryOp('**', 11, (a: number, b: number) => a ** b);
   expect(evaluate(parse('2 ** 3'), {}), 'supports custom operators').toBe(8);
+});
+
+test('@math.gl/expressions#get handles cached paths and non-object intermediates', () => {
+  const row = {nested: {value: 7}, scalar: 3};
+  expect(get(row, 'nested.value')).toBe(7);
+  expect(get(row, 'nested.value')).toBe(7);
+  expect(get(row, 'scalar.value')).toBeUndefined();
+  expect(get(row, 'missing.value')).toBeUndefined();
+  expect(get(row, 'null.value')).toBeUndefined();
+});
+
+test('@math.gl/expressions exposes the complete WGS84 function library', () => {
+  const library = GEOSPATIAL_FUNCTION_LIBRARY;
+  const cartesian = [6378137, 0, 0];
+  expect(library.cartesianToCartographic(cartesian)).toHaveLength(3);
+  expect(library.cartographicToCartesian([0, 0, 0])).toHaveLength(3);
+  expect(library.eastNorthUpToFixedFrame(cartesian)).toHaveLength(16);
+  expect(library.geodeticSurfaceNormal(cartesian)).toHaveLength(3);
+  expect(library.geodeticSurfaceNormalCartographic([0, 0])).toHaveLength(3);
+  expect(library.isWGS84(cartesian)).toBe(true);
+  expect(library.scaleToGeocentricSurface([1, 0, 0])).toHaveLength(3);
+  expect(library.scaleToGeodeticSurface(cartesian)).toHaveLength(3);
+  expect(library.transformPositionFromScaledSpace([1, 0, 0])).toHaveLength(3);
+  expect(library.transformPositionToScaledSpace(cartesian)).toHaveLength(3);
+  expect(library.toDegrees(0)).toBe(0);
+  expect(library.toRadians(0)).toBe(0);
+});
+
+test('@math.gl/expressions evaluates every built-in operator family', () => {
+  const cases: Array<[string, unknown]> = [
+    ['0 || 7', 7],
+    ['3 && 7', 7],
+    ['5 | 2', 7],
+    ['5 ^ 2', 7],
+    ['5 & 3', 1],
+    ['2 == 2', true],
+    ['2 != 3', true],
+    ['2 === 2', true],
+    ['2 !== 3', true],
+    ['2 < 3', true],
+    ['3 > 2', true],
+    ['2 <= 2', true],
+    ['2 >= 2', true],
+    ['1 << 2', 4],
+    ['8 >> 2', 2],
+    ['8 >>> 2', 2],
+    ['2 + 3', 5],
+    ['7 - 3', 4],
+    ['2 * 3', 6],
+    ['7 / 2', 3.5],
+    ['7 % 2', 1]
+  ];
+  for (const [source, expected] of cases)
+    expect(evaluate(parse(source), {}), source).toBe(expected);
+
+  expect(evaluate(parse('0 && missing'), {})).toBe(0);
+  expect(evaluate(parse('1 || missing'), {})).toBe(1);
+  expect(evaluate(parse('+value'), {value: '4'})).toBe(4);
+  expect(evaluate(parse('-value'), {value: 4})).toBe(-4);
+  expect(evaluate(parse('~value'), {value: 4})).toBe(-5);
+  expect(evaluate(parse('!value'), {value: 0})).toBe(true);
+});
+
+test('@math.gl/expressions resolves computed members and preserves method receivers', () => {
+  const context = {
+    key: 'value',
+    object: {
+      value: 5,
+      scale(factor: number) {
+        return this.value * factor;
+      }
+    }
+  };
+  expect(evaluate(parse('object[key]'), context)).toBe(5);
+  expect(evaluate(parse('object.scale(3)'), context)).toBe(15);
+  expect(evaluate(parse('missingFunction(value)'), {value: 2})).toBeUndefined();
+  expect(evaluate(parse('this'), context)).toBe(context);
+  expect(() => evaluate(parse('object.constructor'), context)).toThrow(/disallowed/);
+});
+
+test('@math.gl/expressions supports custom unary and default-precedence binary operators', () => {
+  addUnaryOp('%%', (value: number) => value * 10);
+  addBinaryOp('@@', (left: number, right: number) => left - right);
+  expect(evaluate(parse('%%2'), {})).toBe(20);
+  expect(evaluate(parse('10 @@ 3'), {})).toBe(7);
+});
+
+test('@math.gl/expressions#evalAsync covers nested arrays, members and branches', async () => {
+  const context = {
+    value: 3,
+    key: 'value',
+    object: {
+      value: 4,
+      async add(amount: number) {
+        return this.value + amount;
+      }
+    },
+    async double(value: number) {
+      return value * 2;
+    }
+  };
+  expect(await evalAsync(parse('[double(value), object[key], object.add(2)]'), context)).toEqual([
+    6, 4, 6
+  ]);
+  expect(await evalAsync(parse('false && double(value)'), context)).toBe(false);
+  expect(await evalAsync(parse('true || double(value)'), context)).toBe(true);
+  expect(await evalAsync(parse('value > 0 ? -value : +value'), context)).toBe(-3);
+  expect(await evalAsync(parse('this'), context)).toBe(context);
+  expect(await evalAsync(parse('missingFunction(value)'), context)).toBeUndefined();
+  await expect(evalAsync(parse('object.constructor'), context)).rejects.toThrow(/disallowed/);
 });

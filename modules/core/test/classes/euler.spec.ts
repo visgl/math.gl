@@ -88,6 +88,26 @@ test('Euler#fromQuaternion supports every rotation order', () => {
   }
 });
 
+test('Euler covers singular rotation matrices and invalid input paths', () => {
+  const singularComponents: Record<string, number> = {
+    xyz: 8,
+    yxz: 9,
+    zxy: 6,
+    zyx: 2,
+    yzx: 1,
+    xzy: 4
+  };
+  for (const [order, index] of Object.entries(singularComponents)) {
+    const matrix = Matrix4.IDENTITY.slice();
+    matrix[index] = 1;
+    expect(new Euler().fromRotationMatrix(matrix, order as never).order).toBe(order);
+  }
+  expect(() => new Euler().fromRotationMatrix(Matrix4.IDENTITY, 'invalid' as never)).toThrow(
+    /Unknown Euler angle order/
+  );
+  expect(() => new Euler().fromObject({})).toThrow(/not implemented/);
+});
+
 test('Euler.fromQuaternion', () => {
   // transformMatrix result from https://www.wolframalpha.com/input/?i=quaternion:
   const testCases = [

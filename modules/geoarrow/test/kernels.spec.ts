@@ -12,6 +12,7 @@ import {
   makeGeoArrowColumnFromGeometryRows,
   mapGeoArrowCoordinates,
   mapGeoArrowCoordinatesInto,
+  normalizeGeoArrowUnion,
   rewindGeoArrow,
   tessellateGeoArrowPolygons,
   type GeoArrowGeometryValue
@@ -42,6 +43,8 @@ test('coordinate mapping, into mapping and layout conversion are deterministic',
   ).toBe(target);
   expect(getGeoArrowBounds(target)).toEqual([2, 6, 6, 12]);
   expect(interleaveGeoArrowCoordinates(source).coordinateLayout).toBe('interleaved');
+  const unspecifiedLayout = {...source, coordinateLayout: null};
+  expect(interleaveGeoArrowCoordinates(unspecifiedLayout)).toBe(unspecifiedLayout);
 });
 
 test('conversion round trips preserve geometry values', () => {
@@ -255,6 +258,166 @@ test('resource limits fail before materializing expensive work', () => {
     /maximumOutputBytes/
   );
   expect(getGeoArrowVertexCount(source)).toBe(3);
+});
+
+test('bounds, mappings and limits cover sparse physical descriptors', () => {
+  const primitive = (values: number[], validity?: Uint8Array) => ({
+    kind: 'primitive' as const,
+    length: values.length,
+    values: new Float64Array(values),
+    validity: validity ? {values: validity} : undefined
+  });
+  const box: import('../src/types').GeoArrowColumn = {
+    encoding: 'geoarrow.box',
+    dimension: 'xy',
+    coordinateLayout: 'separated',
+    chunks: [
+      {
+        kind: 'struct',
+        length: 2,
+        validity: {values: new Uint8Array([1])},
+        children: {
+          xmin: primitive([1, Number.NaN]),
+          ymin: primitive([2, 4]),
+          xmax: primitive([3, 5]),
+          ymax: primitive([4, 6])
+        }
+      }
+    ]
+  };
+  expect(getGeoArrowBounds(box)).toEqual([1, 2, 3, 4]);
+  expect(
+    getGeoArrowBounds({...box, chunks: [{kind: 'struct', length: 1, children: {}}]})
+  ).toBeNull();
+
+  const empty = makeGeoArrowColumnFromGeometryRows([null]);
+  expect(getGeoArrowBounds(empty)).toBeNull();
+  const mapped = mapGeoArrowCoordinates(
+    makeGeoArrowColumnFromGeometryRows([
+      {
+        type: 'GeometryCollection',
+        geometries: [
+          {type: 'Point', coordinates: [1, 2]},
+          {type: 'LineString', coordinates: []}
+        ]
+      }
+    ]),
+    (coordinate, rowIndex) => [coordinate[0] + rowIndex, coordinate[1] - rowIndex]
+  );
+  expect(materializeGeoArrowRows(mapped)).toEqual([
+    {
+      type: 'GeometryCollection',
+      geometries: [
+        {type: 'Point', coordinates: [1, 2]},
+        {type: 'LineString', coordinates: []}
+      ]
+    }
+  ]);
+
+  const source = makeGeoArrowColumnFromGeometryRows([{type: 'Point', coordinates: [1, 2]}]);
+  const lineTarget = makeGeoArrowColumnFromGeometryRows([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [1, 1]
+      ]
+    }
+  ]);
+  expect(() => mapGeoArrowCoordinatesInto(lineTarget, source, coordinate => coordinate)).toThrow(
+    /different length/
+  );
+  expect(() =>
+    mapGeoArrowCoordinatesInto({...lineTarget, chunks: []}, source, coordinate => coordinate)
+  ).toThrow(/topology/);
+  expect(() =>
+    assertGeoArrowResourceLimits(
+      {...source, chunks: [source.chunks[0], source.chunks[0]]},
+      {maximumChunks: 1}
+    )
+  ).toThrow(/maximumChunks/);
+  expect(() => assertGeoArrowResourceLimits(source, {maximumNestingDepth: 0})).toThrow(
+    /maximumNestingDepth/
+  );
+});
+
+test('union normalization and conversion reject incompatible output families', () => {
+  const point = makeGeoArrowColumnFromGeometryRows([
+    {type: 'Point', coordinates: [1, 2]},
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [1, 1]
+      ]
+    }
+  ]);
+  const union = point.chunks[0];
+  if (union.kind !== 'dense-union') throw new Error('expected dense union');
+  const shuffled = {
+    ...point,
+    chunks: [{...union, children: [...union.children].reverse()}]
+  };
+  const normalized = normalizeGeoArrowUnion(shuffled);
+  expect(normalized).not.toBe(shuffled);
+  expect(normalizeGeoArrowUnion(normalized)).toBe(normalized);
+  const nonMixed = {...point, encoding: 'geoarrow.point' as const};
+  expect(normalizeGeoArrowUnion(nonMixed)).toBe(nonMixed);
+
+  expect(() => convertGeoArrowColumn(point, {encoding: 'geoarrow.wkb'})).toThrow(
+    /serialized output/
+  );
+  const line = makeGeoArrowColumnFromGeometryRows([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [1, 1]
+      ]
+    }
+  ]);
+  expect(() => convertGeoArrowColumn(line, {encoding: 'geoarrow.point'})).toThrow(
+    /cannot be represented/
+  );
+  const collection = makeGeoArrowColumnFromGeometryRows([
+    {type: 'GeometryCollection', geometries: [{type: 'Point', coordinates: [0, 0]}]}
+  ]);
+  expect(() => convertGeoArrowColumn(collection, {encoding: 'geoarrow.point'})).toThrow(
+    /cannot be represented/
+  );
+});
+
+test('rewinding handles multipolygons and nested collections', () => {
+  const polygon = (clockwise: boolean): GeoArrowGeometryValue => ({
+    type: 'Polygon',
+    coordinates: [
+      clockwise
+        ? [
+            [0, 0],
+            [0, 1],
+            [1, 1],
+            [1, 0],
+            [0, 0]
+          ]
+        : [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 1],
+            [0, 0]
+          ]
+    ]
+  });
+  const source = makeGeoArrowColumnFromGeometryRows([
+    {
+      type: 'MultiPolygon',
+      coordinates: [polygon(true).coordinates, polygon(false).coordinates]
+    },
+    {type: 'GeometryCollection', geometries: [polygon(true)]}
+  ]);
+  const rewound = rewindGeoArrow(source, {outer: 'counter-clockwise'});
+  expect(materializeGeoArrowRows(rewound)).toHaveLength(2);
+  expect(rewindGeoArrow(rewound, {outer: 'counter-clockwise'})).toBe(rewound);
 });
 
 function signedArea(ring: readonly (readonly number[])[]): number {

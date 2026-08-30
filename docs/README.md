@@ -1,3 +1,9 @@
+<p class="badges">
+  <a href="https://coveralls.io/github/visgl/math.gl?branch=master">
+    <img src="https://img.shields.io/coveralls/visgl/math.gl.svg?style=flat-square&label=coverage" alt="coverage" />
+  </a>
+</p>
+
 # Introduction
 
 Welcome to math.gl!
