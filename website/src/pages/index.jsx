@@ -43,13 +43,33 @@ hr {
 }
 `;
 
+const HeroBackground = styled.div`
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
+`;
+
+function HeroExample() {
+  const baseUrl = useBaseUrl('/');
+  return (
+    <HeroBackground
+      aria-hidden="true"
+      style={{
+        backgroundImage: `linear-gradient(90deg, rgba(247, 250, 252, 0.98) 0%, rgba(247, 250, 252, 0.9) 34%, rgba(247, 250, 252, 0.42) 70%, rgba(9, 16, 38, 0.18) 100%), url(${baseUrl}images/math-hero.webp)`
+      }}
+    />
+  );
+}
+
 export default function IndexPage() {
   const baseUrl = useBaseUrl('/');
 
   return (
     <Layout title="Home" description="math.gl">
       <>
-        <Home getStartedLink="./docs/developer-guide/get-started" />
+        <Home HeroExample={HeroExample} getStartedLink="./docs/developer-guide/get-started" />
         <TextContainer>
           <h2>
             A collection of math modules for Geospatial and 3D use cases.
