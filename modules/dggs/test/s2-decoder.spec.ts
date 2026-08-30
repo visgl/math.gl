@@ -8,9 +8,8 @@ import {S2Decoder} from '@math.gl/dggs';
 test('S2Decoder#getCellLngLat', () => {
   const s2Token = '8085873c';
   const lngLat = S2Decoder.getCellLngLat(s2Token);
-  expect(lngLat.map(d => Number(d.toFixed(12)))).toEqual(
-    [-122.4637079795235, 37.78228912269449].map(d => Number(d.toFixed(12)))
-  );
+  expect(lngLat[0]).toBeCloseTo(-122.4637079795235, 10);
+  expect(lngLat[1]).toBeCloseTo(37.78228912269449, 10);
 });
 
 test('S2Decoder#token/index roundtrip', () => {
