@@ -35,18 +35,26 @@ export function decodeGeoArrowWKB(column: GeoArrowColumn): GeoArrowColumn {
 export function encodeGeoArrowWKB(column: GeoArrowColumn): GeoArrowColumn {
   if (column.encoding === 'geoarrow.wkb') return column;
   const writers: Array<WKBGeometryWriter | null> = [];
+  const dimensions: GeoArrowDimension[] = [];
   for (const chunk of column.chunks) {
     for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
       if (!isGeoArrowValueValid(chunk.validity, rowIndex)) {
         writers.push(null);
+        dimensions.push(column.dimension);
         continue;
       }
+      dimensions.push(
+        getPhysicalGeometryDimension(chunk, rowIndex, column.encoding, column.dimension)
+      );
       writers.push(builder =>
         writePhysicalGeometry(builder, chunk, rowIndex, column.encoding, column.dimension)
       );
     }
   }
-  const built = WKBBuilder.buildGeometryArray(writers, {dimension: column.dimension});
+  const built = WKBBuilder.buildGeometryArray(writers, {
+    dimension: column.dimension,
+    dimensionResolver: index => dimensions[index] || column.dimension
+  });
   return copyMetadata(column, {
     encoding: 'geoarrow.wkb',
     dimension: column.dimension,
@@ -105,12 +113,15 @@ function writePhysicalGeometry(
     const typeId = array.typeIds[physical];
     const child = array.children.find(candidate => candidate.typeId === typeId);
     if (!child) throw new Error('Dense-union row references an unknown child');
-    writePhysicalGeometry(
-      builder,
-      child.data,
-      array.valueOffsets[physical],
-      child.encoding || encodingFromName(child.name),
-      child.dimension || dimension
+    const childDimension = child.dimension || dimension;
+    builder.withDimension(childDimension, () =>
+      writePhysicalGeometry(
+        builder,
+        child.data,
+        array.valueOffsets[physical],
+        child.encoding || encodingFromName(child.name),
+        childDimension
+      )
     );
     return;
   }
@@ -123,14 +134,18 @@ function writePhysicalGeometry(
     for (let index = first; index < last; index++) {
       const physical = (union.offset || 0) + index;
       const child = union.children.find(candidate => candidate.typeId === union.typeIds[physical]);
-      if (child)
-        writePhysicalGeometry(
-          builder,
-          child.data,
-          union.valueOffsets[physical],
-          child.encoding || encodingFromName(child.name),
-          child.dimension || dimension
+      if (child) {
+        const childDimension = child.dimension || dimension;
+        builder.withDimension(childDimension, () =>
+          writePhysicalGeometry(
+            builder,
+            child.data,
+            union.valueOffsets[physical],
+            child.encoding || encodingFromName(child.name),
+            childDimension
+          )
         );
+      }
     }
     return;
   }
@@ -205,6 +220,18 @@ function writePhysicalGeometry(
   }
 }
 
+function getPhysicalGeometryDimension(
+  array: import('./types').GeoArrowArray,
+  rowIndex: number,
+  encoding: import('./types').GeoArrowEncoding,
+  dimension: GeoArrowDimension
+): GeoArrowDimension {
+  if (encoding !== 'geoarrow.geometry' || array.kind !== 'dense-union') return dimension;
+  const physical = (array.offset || 0) + rowIndex;
+  const child = array.children.find(candidate => candidate.typeId === array.typeIds[physical]);
+  return child?.dimension || dimension;
+}
+
 function readPhysicalCoordinate(
   array: import('./types').GeoArrowArray,
   index: number
@@ -214,7 +241,12 @@ function readPhysicalCoordinate(
     const values: number[] = [];
     for (let component = 0; component < array.size; component++)
       values.push(
-        Number(array.child.values[(array.child.offset || 0) + logical * array.size + component])
+        Number(
+          array.child.values[
+            (array.child.offset || 0) +
+              (logical * array.size + component) * (array.child.stride || 1)
+          ]
+        )
       );
     return values;
   }

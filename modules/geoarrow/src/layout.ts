@@ -386,7 +386,11 @@ function materializeUnionRow(
   const valueOffset = union.valueOffsets[physicalIndex];
   const child = union.children.find(candidate => candidate.typeId === typeId);
   if (!child || valueOffset < 0 || valueOffset >= child.data.length) return null;
-  return materializeGeometryRow(child.data, valueOffset, getEncodingFromChildName(child.name));
+  return materializeGeometryRow(
+    child.data,
+    valueOffset,
+    child.encoding || getEncodingFromChildName(child.name)
+  );
 }
 
 function getEncodingFromChildName(name: string): GeoArrowEncoding {

@@ -9,15 +9,18 @@ import type {
   GeoArrowCoordinateLayout,
   GeoArrowCoordinateMapper,
   GeoArrowDimension,
-  GeoArrowEncoding
+  GeoArrowEncoding,
+  GeoArrowGeometryValue
 } from './types';
 import {getGeoArrowDimensionSize} from './types';
+import {makeGeoArrowColumnFromGeometryRows} from './builder';
 import {
   getGeoArrowRowCount,
   getGeoArrowVertexCount,
   isGeoArrowValueValid,
   visitGeoArrowCoordinates,
-  getListRange
+  getListRange,
+  materializeGeometryRow
 } from './layout';
 
 /** Resource limits applied before potentially expensive materialization or conversion. */
@@ -167,7 +170,8 @@ function readPrimitiveNumber(array: GeoArrowArray, index: number): number {
 export function mapGeoArrowCoordinates(
   column: GeoArrowColumn,
   mapper: GeoArrowCoordinateMapper,
-  options: MapGeoArrowCoordinatesOptions = {}
+  options: MapGeoArrowCoordinatesOptions = {},
+  sourceDimension?: GeoArrowDimension
 ): GeoArrowColumn {
   assertGeoArrowResourceLimits(column, options.limits);
   if (column.encoding === 'geoarrow.wkb' || column.encoding === 'geoarrow.wkt') {
@@ -186,7 +190,8 @@ export function mapGeoArrowCoordinates(
       mapper,
       options.coordinateType || 'preserve',
       options.dimension !== undefined,
-      options.coordinateLayout !== undefined
+      options.coordinateLayout !== undefined,
+      sourceDimension
     );
     rowOffset += chunk.length;
     return mapped;
@@ -279,13 +284,14 @@ export function convertGeoArrowColumn(
   assertGeoArrowResourceLimits(column, options.limits);
   const mapped = mapGeoArrowCoordinates(
     column,
-    coordinate => resizeCoordinate(coordinate, column.dimension, dimension),
+    coordinate => coordinate,
     {
       dimension,
       coordinateLayout: coordinateLayout || undefined,
       coordinateType: options.coordinateType,
       limits: options.limits
-    }
+    },
+    column.dimension
   );
   const offsetConverted =
     requestedOffsetType === 'preserve'
@@ -379,12 +385,15 @@ function mapArrayCoordinates(
   mapper: GeoArrowCoordinateMapper,
   coordinateType: 'preserve' | 'float32' | 'float64',
   forceDimension = false,
-  forceLayout = false
+  forceLayout = false,
+  sourceDimension?: GeoArrowDimension,
+  rowIndicesOverride?: readonly number[]
 ): GeoArrowArray {
   if (encoding === 'geoarrow.geometry' && array.kind === 'dense-union') {
+    const childRowIndices = collectUnionRowIndices(array, rowOffset);
     return {
       ...array,
-      children: array.children.map(child => {
+      children: array.children.map((child, childIndex) => {
         const childEncoding = child.encoding || getEncodingFromChildName(child.name);
         const childDimension = forceDimension
           ? targetDimension
@@ -401,7 +410,9 @@ function mapArrayCoordinates(
             mapper,
             coordinateType,
             forceDimension,
-            forceLayout
+            forceLayout,
+            childDimension,
+            childRowIndices[childIndex]
           ),
           dimension: childDimension,
           coordinateLayout: childLayout,
@@ -422,13 +433,14 @@ function mapArrayCoordinates(
         mapper,
         coordinateType,
         forceDimension,
-        forceLayout
+        forceLayout,
+        sourceDimension,
+        rowIndicesOverride
       )
     };
   }
   const depth = getEncodingDepth(encoding);
-  const rowIndices = new Array<number>(getLeafLength(array, depth));
-  collectLeafRowIndices(array, depth, rowOffset, rowIndices);
+  const rowIndices = rowIndicesOverride || collectLeafRowIndices(array, depth, rowOffset);
   return mapNestedArray(
     array,
     depth,
@@ -437,7 +449,8 @@ function mapArrayCoordinates(
     targetLayout,
     mapper,
     coordinateType,
-    rowIndices
+    rowIndices,
+    sourceDimension
   );
 }
 
@@ -449,7 +462,8 @@ function mapNestedArray(
   targetLayout: GeoArrowCoordinateLayout,
   mapper: GeoArrowCoordinateMapper,
   coordinateType: 'preserve' | 'float32' | 'float64',
-  rowIndices?: readonly number[]
+  rowIndices?: readonly number[],
+  sourceDimension?: GeoArrowDimension
 ): GeoArrowArray {
   if (depth === 0) {
     return mapCoordinateLeaf(
@@ -459,7 +473,8 @@ function mapNestedArray(
       targetLayout,
       mapper,
       coordinateType,
-      rowIndices
+      rowIndices,
+      sourceDimension
     );
   }
   if (array.kind !== 'list') return array;
@@ -473,7 +488,8 @@ function mapNestedArray(
       targetLayout,
       mapper,
       coordinateType,
-      rowIndices
+      rowIndices,
+      sourceDimension
     )
   };
 }
@@ -485,7 +501,8 @@ function mapCoordinateLeaf(
   targetLayout: GeoArrowCoordinateLayout,
   mapper: GeoArrowCoordinateMapper,
   coordinateType: 'preserve' | 'float32' | 'float64',
-  rowIndices?: readonly number[]
+  rowIndices?: readonly number[],
+  sourceDimension?: GeoArrowDimension
 ): GeoArrowArray {
   const count = array.length;
   const targetSize = getGeoArrowDimensionSize(targetDimension);
@@ -493,7 +510,12 @@ function mapCoordinateLeaf(
   for (let index = 0; index < count; index++) {
     const coordinate = readCoordinateAt(array, index);
     const mapped = coordinate
-      ? mapper(coordinate, rowIndices?.[index] ?? rowOffset)
+      ? mapper(
+          sourceDimension
+            ? resizeCoordinate(coordinate, sourceDimension, targetDimension)
+            : coordinate,
+          rowIndices?.[index] ?? rowOffset
+        )
       : new Array(targetSize).fill(0);
     if (mapped.length !== targetSize) {
       throw new Error(`Coordinate mapper returned ${mapped.length} values; expected ${targetSize}`);
@@ -511,30 +533,89 @@ function mapCoordinateLeaf(
 }
 
 /** Fills one row-index entry per coordinate in a concrete nested array. */
-function collectLeafRowIndices(
+function collectLeafRowIndices(array: GeoArrowArray, depth: number, rowOffset: number): number[] {
+  const output = new Array<number>(getLeafLength(array, depth)).fill(rowOffset);
+  for (let rowIndex = 0; rowIndex < array.length; rowIndex++) {
+    if (isGeoArrowValueValid(array.validity, rowIndex)) {
+      assignNestedRowIndices(array, rowIndex, depth, rowOffset + rowIndex, output);
+    }
+  }
+  return output;
+}
+
+function assignNestedRowIndices(
   array: GeoArrowArray,
+  index: number,
   depth: number,
-  rowOffset: number,
-  output: number[],
-  rowIndex = rowOffset
+  rowIndex: number,
+  output: number[]
 ): void {
   if (depth === 0) {
-    for (let index = 0; index < array.length; index++) output[index] = rowIndex;
+    if (index >= 0 && index < output.length) output[index] = rowIndex;
     return;
   }
   if (array.kind !== 'list') return;
-  for (let index = 0; index < array.length; index++) {
-    if (!isGeoArrowValueValid(array.validity, index)) continue;
-    const [first, last] = getListRange(array, index);
-    // Child indices are relative to the supplied child view and may be offset by a slice.
-    const childOutput = output;
-    if (depth - 1 === 0) {
-      for (let childIndex = first; childIndex < last; childIndex++)
-        childOutput[childIndex] = rowIndex + index;
-    } else {
-      collectLeafRowIndices(array.child, depth - 1, rowOffset, childOutput, rowIndex + index);
-    }
+  const [first, last] = getListRange(array, index);
+  for (let childIndex = first; childIndex < last; childIndex++) {
+    assignNestedRowIndices(array.child, childIndex, depth - 1, rowIndex, output);
   }
+}
+
+function collectUnionRowIndices(union: GeoArrowArray, rowOffset: number): number[][] {
+  if (union.kind !== 'dense-union') return [];
+  const output = union.children.map(child => {
+    const encoding = child.encoding || getEncodingFromChildName(child.name);
+    return new Array<number>(getLeafLength(child.data, getEncodingDepth(encoding))).fill(rowOffset);
+  });
+  for (let rowIndex = 0; rowIndex < union.length; rowIndex++) {
+    if (!isGeoArrowValueValid(union.validity, rowIndex)) continue;
+    const physical = (union.offset || 0) + rowIndex;
+    const childIndex = union.children.findIndex(child => child.typeId === union.typeIds[physical]);
+    if (childIndex < 0) continue;
+    const child = union.children[childIndex];
+    assignUnionRowIndices(
+      child.data,
+      child.encoding || getEncodingFromChildName(child.name),
+      union.valueOffsets[physical],
+      rowOffset + rowIndex,
+      output[childIndex]
+    );
+  }
+  return output;
+}
+
+function assignUnionRowIndices(
+  array: GeoArrowArray,
+  encoding: GeoArrowEncoding,
+  index: number,
+  rowIndex: number,
+  output: number[]
+): void {
+  if (encoding === 'geoarrow.geometry' && array.kind === 'dense-union') {
+    const physical = (array.offset || 0) + index;
+    const childIndex = array.children.findIndex(child => child.typeId === array.typeIds[physical]);
+    if (childIndex >= 0) {
+      const child = array.children[childIndex];
+      assignUnionRowIndices(
+        child.data,
+        child.encoding || getEncodingFromChildName(child.name),
+        array.valueOffsets[physical],
+        rowIndex,
+        output
+      );
+    }
+    return;
+  }
+  if (encoding === 'geoarrow.geometrycollection' && array.kind === 'list') {
+    const [first, last] = getListRange(array, index);
+    if (array.child.kind === 'dense-union') {
+      for (let childIndex = first; childIndex < last; childIndex++) {
+        assignUnionRowIndices(array.child, 'geoarrow.geometry', childIndex, rowIndex, output);
+      }
+    }
+    return;
+  }
+  assignNestedRowIndices(array, index, getEncodingDepth(encoding), rowIndex, output);
 }
 
 function getLeafLength(array: GeoArrowArray, depth: number): number {
@@ -713,24 +794,69 @@ function promoteToDenseUnion(column: GeoArrowColumn): GeoArrowColumn {
 
 function demoteDenseUnion(column: GeoArrowColumn, encoding: GeoArrowEncoding): GeoArrowColumn {
   if (encoding === 'geoarrow.geometry' || encoding === 'geoarrow.geometrycollection') return column;
-  const chunks: GeoArrowArray[] = [];
+  const rows: Array<GeoArrowGeometryValue | null> = [];
   for (const chunk of column.chunks) {
     if (chunk.kind !== 'dense-union') throw new Error('Expected dense-union storage');
-    const matching = chunk.children.filter(
-      child => (child.encoding || getEncodingFromChildName(child.name)) === encoding
-    );
-    if (matching.length !== 1 || chunk.children.some(child => !matching.includes(child))) {
-      throw new Error(`Rows cannot be represented as ${encoding}`);
-    }
-    const child = matching[0];
     for (let index = 0; index < chunk.length; index++) {
+      if (!isGeoArrowValueValid(chunk.validity, index)) {
+        rows.push(null);
+        continue;
+      }
       const physical = (chunk.offset || 0) + index;
-      if (chunk.typeIds[physical] !== child.typeId)
+      const child = chunk.children.find(candidate => candidate.typeId === chunk.typeIds[physical]);
+      const childEncoding = child && (child.encoding || getEncodingFromChildName(child.name));
+      if (!child || childEncoding !== encoding) {
         throw new Error(`Rows cannot be represented as ${encoding}`);
+      }
+      const geometry = materializeGeometryRow(
+        child.data,
+        chunk.valueOffsets[physical],
+        childEncoding
+      );
+      rows.push(
+        geometry
+          ? resizeGeometryValue(geometry, child.dimension || column.dimension, column.dimension)
+          : null
+      );
     }
-    chunks.push(child.data);
   }
-  return {...column, encoding, chunks};
+  const built = makeGeoArrowColumnFromGeometryRows(rows, {
+    dimension: column.dimension,
+    coordinateLayout: column.coordinateLayout || 'interleaved',
+    offsetType: getColumnOffsetType(column)
+  });
+  return {
+    ...built,
+    encoding: encoding as GeoArrowColumn['encoding'],
+    spatialReference: column.spatialReference,
+    edges: column.edges,
+    metadata: column.metadata
+  };
+}
+
+function resizeGeometryValue(
+  geometry: import('./types').GeoArrowGeometryValue,
+  sourceDimension: GeoArrowDimension,
+  targetDimension: GeoArrowDimension
+): import('./types').GeoArrowGeometryValue {
+  const map = (value: unknown): unknown => {
+    if (Array.isArray(value) && (value.length === 0 || typeof value[0] === 'number')) {
+      return resizeCoordinate(value as number[], sourceDimension, targetDimension);
+    }
+    return Array.isArray(value) ? value.map(map) : value;
+  };
+  if (geometry.type === 'GeometryCollection') {
+    return {
+      type: geometry.type,
+      geometries: geometry.geometries.map(child =>
+        resizeGeometryValue(child, sourceDimension, targetDimension)
+      )
+    };
+  }
+  return {
+    ...geometry,
+    coordinates: map(geometry.coordinates)
+  } as import('./types').GeoArrowGeometryValue;
 }
 
 function getCanonicalTypeId(encoding: GeoArrowEncoding, dimension: GeoArrowDimension): number {
@@ -784,34 +910,40 @@ function findOffsetType(array: GeoArrowArray): 'int32' | 'int64' | null {
 }
 
 function convertArrayOffsets(array: GeoArrowArray, offsetType: 'int32' | 'int64'): GeoArrowArray {
-  const toOffsets = (offsets: Int32Array | BigInt64Array): Int32Array | BigInt64Array => {
+  const toOffsets = (
+    offsets: Int32Array | BigInt64Array,
+    offsetBase: number | bigint | undefined
+  ): {offsets: Int32Array | BigInt64Array; offsetBase?: number | bigint} => {
     if (offsetType === 'int64') {
       const result = new BigInt64Array(offsets.length);
       for (let index = 0; index < offsets.length; index++) result[index] = BigInt(offsets[index]);
-      return result;
+      return {offsets: result, ...(offsetBase === undefined ? {} : {offsetBase})};
     }
     const result = new Int32Array(offsets.length);
-    for (let index = 0; index < offsets.length; index++) result[index] = Number(offsets[index]);
-    return result;
+    const base = BigInt(offsetBase ?? 0);
+    for (let index = 0; index < offsets.length; index++) {
+      const value = BigInt(offsets[index]) - base;
+      if (value < -2147483648n || value > 2147483647n) {
+        throw new Error('GeoArrow offset cannot be represented as Int32');
+      }
+      result[index] = Number(value);
+    }
+    return {offsets: result, offsetBase: 0};
   };
   switch (array.kind) {
     case 'list':
+      if (array.offsets instanceof (offsetType === 'int64' ? BigInt64Array : Int32Array)) {
+        return {...array, child: convertArrayOffsets(array.child, offsetType)};
+      }
       return {
         ...array,
-        offsets:
-          array.offsets instanceof (offsetType === 'int64' ? BigInt64Array : Int32Array)
-            ? array.offsets
-            : toOffsets(array.offsets),
+        ...toOffsets(array.offsets, array.offsetBase),
         child: convertArrayOffsets(array.child, offsetType)
       } as GeoArrowArray;
     case 'serialized':
-      return {
-        ...array,
-        offsets:
-          array.offsets instanceof (offsetType === 'int64' ? BigInt64Array : Int32Array)
-            ? array.offsets
-            : toOffsets(array.offsets)
-      } as GeoArrowArray;
+      if (array.offsets instanceof (offsetType === 'int64' ? BigInt64Array : Int32Array))
+        return array;
+      return {...array, ...toOffsets(array.offsets, array.offsetBase)} as GeoArrowArray;
     case 'fixed-size-list':
       return {...array, child: convertArrayOffsets(array.child, offsetType)};
     case 'struct':

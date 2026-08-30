@@ -107,6 +107,8 @@ export class GeoArrowBuilder {
     type: GeoArrowGeometryValue['type'];
     dimension: GeoArrowDimension;
     rings: number[][][];
+    polygons: number[][][][];
+    currentPolygon?: number[][][];
     currentRing?: number[][];
     children: GeoArrowGeometryValue[];
   }> = [];
@@ -290,7 +292,19 @@ export class GeoArrowBuilder {
     dimension = this.dimension,
     _count?: number
   ): this {
-    this.eventStack.push({type, dimension, rings: [], children: []});
+    this.eventStack.push({type, dimension, rings: [], polygons: [], children: []});
+    return this;
+  }
+
+  /** Begins a polygon part inside an event-built MultiPolygon. */
+  beginPolygon(): this {
+    const state = this.eventStack[this.eventStack.length - 1];
+    if (!state || state.type !== 'MultiPolygon') {
+      throw new Error("beginPolygon must follow beginGeometry('MultiPolygon')");
+    }
+    state.currentPolygon = [];
+    state.polygons.push(state.currentPolygon);
+    state.currentRing = undefined;
     return this;
   }
 
@@ -299,7 +313,12 @@ export class GeoArrowBuilder {
     const state = this.eventStack[this.eventStack.length - 1];
     if (!state) throw new Error('beginRing must follow beginGeometry');
     state.currentRing = [];
-    state.rings.push(state.currentRing);
+    if (state.type === 'MultiPolygon') {
+      if (!state.currentPolygon) this.beginPolygon();
+      state.currentPolygon!.push(state.currentRing);
+    } else {
+      state.rings.push(state.currentRing);
+    }
     return this;
   }
 
@@ -345,7 +364,10 @@ export class GeoArrowBuilder {
         geometry = {type: 'MultiLineString', coordinates};
         break;
       case 'MultiPolygon':
-        geometry = {type: 'MultiPolygon', coordinates: [coordinates]};
+        geometry = {
+          type: 'MultiPolygon',
+          coordinates: state.polygons.length ? state.polygons : [coordinates]
+        };
         break;
       case 'GeometryCollection':
         geometry = {type: 'GeometryCollection', geometries: state.children};
