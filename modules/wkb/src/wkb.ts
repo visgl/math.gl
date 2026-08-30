@@ -4,6 +4,7 @@
 
 import type {WellKnownDimension, WellKnownGeometry} from './types';
 import {getWellKnownDimensionSize, inferWellKnownGeometryDimension} from './types';
+import {inspectWKBHeader} from './wkb-reader';
 
 /** Defensive limits applied before WKB allocates geometry arrays. */
 export type WKBParseOptions = Readonly<{
@@ -70,36 +71,9 @@ function readWKBGeometry(
   depth: number
 ): WKBReadResult {
   if (depth > state.maximumDepth) throw new Error('WKB geometry nesting exceeds maximumDepth');
-  let offset = startOffset;
-  assertRemaining(view, offset, 5);
-  const byteOrder = view.getUint8(offset++);
-  if (byteOrder !== 0 && byteOrder !== 1) throw new Error('Invalid WKB byte order');
-  const littleEndian = byteOrder === 1;
-  let rawType = view.getUint32(offset, littleEndian);
-  offset += 4;
-  const hasZFlag = Boolean(rawType & 0x80000000);
-  const hasMFlag = Boolean(rawType & 0x40000000);
-  const hasSrid = Boolean(rawType & 0x20000000);
-  rawType &= 0x1fffffff;
-  let dimension: WellKnownDimension;
-  if (rawType >= 3000) {
-    dimension = 'xyzm';
-    rawType -= 3000;
-  } else if (rawType >= 2000) {
-    dimension = 'xym';
-    rawType -= 2000;
-  } else if (rawType >= 1000) {
-    dimension = 'xyz';
-    rawType -= 1000;
-  } else {
-    dimension = hasZFlag && hasMFlag ? 'xyzm' : hasZFlag ? 'xyz' : hasMFlag ? 'xym' : 'xy';
-  }
-  let srid: number | undefined;
-  if (hasSrid) {
-    assertRemaining(view, offset, 4);
-    srid = view.getUint32(offset, littleEndian);
-    offset += 4;
-  }
+  const header = inspectWKBHeader(view, startOffset);
+  let offset = header.bodyByteOffset;
+  const {dimension, geometryType, littleEndian, srid} = header;
   const dimensions = getWellKnownDimensionSize(dimension);
   const readCoordinate = (): number[] => {
     assertRemaining(view, offset, dimensions * 8);
@@ -126,37 +100,37 @@ function readWKBGeometry(
   };
 
   let geometry: WellKnownGeometry;
-  switch (rawType) {
-    case 1:
+  switch (geometryType) {
+    case 'Point':
       geometry = {type: 'Point', coordinates: readCoordinate()};
       break;
-    case 2:
+    case 'LineString':
       geometry = {type: 'LineString', coordinates: readCoordinates()};
       break;
-    case 3:
+    case 'Polygon':
       geometry = {type: 'Polygon', coordinates: Array.from({length: readCount()}, readCoordinates)};
       break;
-    case 4:
-    case 5:
-    case 6:
-    case 7: {
+    case 'MultiPoint':
+    case 'MultiLineString':
+    case 'MultiPolygon':
+    case 'GeometryCollection': {
       const children: WellKnownGeometry[] = [];
       for (let index = 0, count = readCount(); index < count; index++) {
         const child = readWKBGeometry(view, offset, state, depth + 1);
         children.push(child.geometry);
         offset = child.offset;
       }
-      if (rawType === 4) {
+      if (geometryType === 'MultiPoint') {
         geometry = {
           type: 'MultiPoint',
           coordinates: children.map(assertPoint).map(point => point.coordinates)
         };
-      } else if (rawType === 5) {
+      } else if (geometryType === 'MultiLineString') {
         geometry = {
           type: 'MultiLineString',
           coordinates: children.map(assertLineString).map(line => line.coordinates)
         };
-      } else if (rawType === 6) {
+      } else if (geometryType === 'MultiPolygon') {
         geometry = {
           type: 'MultiPolygon',
           coordinates: children.map(assertPolygon).map(polygon => polygon.coordinates)
@@ -166,8 +140,6 @@ function readWKBGeometry(
       }
       break;
     }
-    default:
-      throw new Error(`Unsupported WKB geometry type ${rawType}`);
   }
   return {geometry, offset, dimension, ...(srid === undefined ? {} : {srid})};
 }

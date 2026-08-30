@@ -97,6 +97,77 @@ const measured = writeWKB({type: 'Point', coordinates: [1, 2, 9]}, 'xym');
 does not emit an EWKB SRID; carry CRS/SRID metadata outside the neutral geometry value or in a
 higher-level container.
 
+### Inspect and scan without decoding
+
+Use `inspectWKBHeader` when routing or classifying data. It reads only the endian flag, type code,
+dimension flags, and optional EWKB SRID; the coordinate payload does not need to be present.
+
+```typescript
+import {inspectWKBHeader, scanWKB} from '@math.gl/wkb';
+
+const header = inspectWKBHeader(bytes);
+console.log(header.geometryType, header.dimension, header.srid);
+
+const statistics = scanWKB(bytes, {maximumElements: 1_000_000});
+console.log(statistics.coordinateCount);
+console.log(statistics.geometryCounts);
+console.log(statistics.bounds); // XYZM-aware finite bounds
+```
+
+`scanWKB` validates exactly one complete value and reports its byte length, geometry families,
+per-family counts, coordinate and ring counts, maximum nesting depth, and finite coordinate bounds.
+It accepts sliced typed-array views and mixed-endian nested geometries.
+
+### Visit coordinates directly
+
+`visitWKB` exposes the same validated traversal through callbacks. Coordinate values are passed as
+individual numbers rather than temporary coordinate arrays.
+
+```typescript
+import {visitWKB} from '@math.gl/wkb';
+
+visitWKB(bytes, {
+  geometry: (header, count, depth) => {
+    console.log(header.geometryType, count, depth);
+  },
+  ring: (pointCount, ringIndex) => {
+    console.log(pointCount, ringIndex);
+  },
+  coordinate: (x, y, z, m, dimension, byteOffset) => {
+    // Inspect, copy, transform, or aggregate directly from the source buffer.
+  }
+});
+```
+
+The visitor does not detach or mutate the input and does not create `WellKnownGeometry` rows.
+
+### Two-pass caller-buffer writing
+
+`WKBBuilder` supports the same geometry event sequence in measurement and write modes. Write mode
+accepts an existing buffer, a sliced typed-array view, and an optional destination offset.
+
+```typescript
+import {WKBBuilder} from '@math.gl/wkb';
+
+function emitLine(builder: WKBBuilder): void {
+  builder.beginLineString(2);
+  builder.writeCoordinate(0, 0, 5);
+  builder.writeCoordinate(10, 20, 6);
+}
+
+const measure = new WKBBuilder({mode: 'measure', dimension: 'xyz'});
+emitLine(measure);
+
+const target = new Uint8Array(measure.finishGeometry());
+const writer = new WKBBuilder({mode: 'write', target, dimension: 'xyz'});
+emitLine(writer);
+```
+
+Builder options include little- or big-endian output, XY/XYZ/XYM/XYZM dimensions, EWKB SRID, and
+coordinate transformation. `WKBBuilder.buildGeometryArray()` additionally returns plain Int32
+offsets, contiguous bytes, and an optional validity bitmap for columnar adapters. It never creates
+Arrow objects.
+
 ## WKT
 
 ```typescript
@@ -142,6 +213,10 @@ boundary check from referencing GeoArrow or Apache Arrow.
 
 - `parseWKB(bytes, options?)`
 - `writeWKB(geometry, dimension?)`
+- `inspectWKBHeader(bytes, byteOffset?)`
+- `visitWKB(bytes, visitor, options?)`
+- `scanWKB(bytes, options?)`
+- `WKBBuilder`
 - `parseWKT(text)`
 - `formatWKT(geometry, dimension?)`
 - `getWellKnownDimensionSize(dimension)`
@@ -150,3 +225,8 @@ boundary check from referencing GeoArrow or Apache Arrow.
 - `WellKnownDimension`
 - `WKBParseOptions`
 - `WKBParseResult`
+- `WKBHeader`
+- `WKBVisitor`
+- `WKBScanResult`
+- `WKBBuilderOptions`
+- `WKBGeometryArray`
