@@ -1,7 +1,8 @@
 # CHANGELOG
 
-## Unreleased
+## v5.0.0-alpha.2
 
+- feat(wkb): Add direct buffer traversal and builder (#123)
 - feat(wkb): Add dependency-free WKB, EWKB, and WKT geometry codecs and move format parsing out of
   GeoArrow (#120)
 - feat(core): Add convenience methods to `Quaternion` and `Matrix4` (#54)
