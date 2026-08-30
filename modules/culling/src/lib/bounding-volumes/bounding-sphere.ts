@@ -5,7 +5,8 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import {NumericArray, Vector3, mat4} from '@math.gl/core';
+import {NumericArray, Vector3} from '@math.gl/core';
+import * as mat4 from '@math.gl/core/mat4';
 
 import type {CullingResult} from '../../constants';
 import {BoundingVolume} from './bounding-volume';

@@ -136,7 +136,7 @@ SphericalCoordinates({longitude = 0, latitude = 0, z = 1.0})
 
 ### fromVector3
 
-`fromVector3(v)`
+`fromVector3(v: Readonly<Vector3Like>)`
 
 ### makeSafe
 
@@ -146,7 +146,9 @@ SphericalCoordinates({longitude = 0, latitude = 0, z = 1.0})
 
 ### toVector3
 
-`toVector3(center = [0, 0, 0])`
+`toVector3(result: Vector3Like = [0, 0, 0])`
+
+Returns the supplied result object, or a plain three-element array when omitted. `Vector3Like` accepts tuples, typed arrays, and `Vector3` instances.
 
 // TODO - add parameter for orientation of sphere? up vector etc?
 

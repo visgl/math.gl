@@ -190,54 +190,6 @@ function negativePiToPi(angle: number): number {
 }
 
 /**
- * "GLSL equivalent" of `Math.sin`: Works on single values and vectors
- * @deprecated
- */
-export function sin(radians: number | NumericArray, result?: NumericArray): number | NumericArray {
-  return map(radians, angle => Math.sin(angle), result);
-}
-
-/**
- * "GLSL equivalent" of `Math.cos`: Works on single values and vectors
- * @deprecated
- */
-export function cos(radians: number | NumericArray, result?: NumericArray): number | NumericArray {
-  return map(radians, angle => Math.cos(angle), result);
-}
-
-/**
- * "GLSL equivalent" of `Math.tan`: Works on single values and vectors
- * @deprecated
- */
-export function tan(radians: number | NumericArray, result?: NumericArray): number | NumericArray {
-  return map(radians, angle => Math.tan(angle), result);
-}
-
-/**
- * "GLSL equivalent" of `Math.asin`: Works on single values and vectors
- * @deprecated
- */
-export function asin(radians: number | NumericArray, result?: NumericArray): number | NumericArray {
-  return map(radians, angle => Math.asin(angle), result);
-}
-
-/**
- * "GLSL equivalent" of `Math.acos`: Works on single values and vectors
- * @deprecated
- */
-export function acos(radians: number | NumericArray, result?: NumericArray): number | NumericArray {
-  return map(radians, angle => Math.acos(angle), result);
-}
-
-/**
- * "GLSL equivalent" of `Math.atan`: Works on single values and vectors
- * @deprecated
- */
-export function atan(radians: number | NumericArray, result?: NumericArray): number | NumericArray {
-  return map(radians, angle => Math.atan(angle), result);
-}
-
-/**
  * GLSL style value clamping: Works on single values and vectors
  */
 export function clamp(value: number, min: number, max: number): number;

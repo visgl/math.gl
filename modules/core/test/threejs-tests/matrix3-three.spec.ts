@@ -16,12 +16,12 @@ import {Matrix4} from 'math.gl/matrix4';
 
 function matrixEquals3(a, b, tolerance) {
   tolerance = tolerance || 0.0001;
-  if (a.elements.length !== b.elements.length) {
+  if (a.length !== b.length) {
     return false;
   }
 
-  for (var i = 0, il = a.elements.length; i < il; i++) {
-    var delta = a.elements[i] - b.elements[i];
+  for (var i = 0, il = a.length; i < il; i++) {
+    var delta = a[i] - b[i];
     if (delta > tolerance) {
       return false;
     }
@@ -32,8 +32,8 @@ function matrixEquals3(a, b, tolerance) {
 
 function toMatrix4(m3) {
   var result = new Matrix4();
-  var re = result.elements;
-  var me = m3.elements;
+  var re = result;
+  var me = m3;
   re[0] = me[0];
   re[1] = me[1];
   re[2] = me[2];
@@ -53,15 +53,15 @@ test('three.js#Matrix3#Instancing', () => {
   expect(a.determinant() === 1, 'Passed!').toBeTruthy();
 
   var b = new Matrix3().set(0, 1, 2, 3, 4, 5, 6, 7, 8);
-  expect(b.elements[0] === 0).toBeTruthy();
-  expect(b.elements[1] === 3).toBeTruthy();
-  expect(b.elements[2] === 6).toBeTruthy();
-  expect(b.elements[3] === 1).toBeTruthy();
-  expect(b.elements[4] === 4).toBeTruthy();
-  expect(b.elements[5] === 7).toBeTruthy();
-  expect(b.elements[6] === 2).toBeTruthy();
-  expect(b.elements[7] === 5).toBeTruthy();
-  expect(b.elements[8] === 8).toBeTruthy();
+  expect(b[0] === 0).toBeTruthy();
+  expect(b[1] === 3).toBeTruthy();
+  expect(b[2] === 6).toBeTruthy();
+  expect(b[3] === 1).toBeTruthy();
+  expect(b[4] === 4).toBeTruthy();
+  expect(b[5] === 7).toBeTruthy();
+  expect(b[6] === 2).toBeTruthy();
+  expect(b[7] === 5).toBeTruthy();
+  expect(b[8] === 8).toBeTruthy();
 
   expect(!matrixEquals3(a, b), 'Passed!').toBeTruthy();
 });
@@ -76,28 +76,28 @@ test('three.js#Matrix3#set', () => {
   expect(b.determinant() === 1, 'Passed!').toBeTruthy();
 
   b.set(0, 1, 2, 3, 4, 5, 6, 7, 8);
-  expect(b.elements[0] === 0).toBeTruthy();
-  expect(b.elements[1] === 3).toBeTruthy();
-  expect(b.elements[2] === 6).toBeTruthy();
-  expect(b.elements[3] === 1).toBeTruthy();
-  expect(b.elements[4] === 4).toBeTruthy();
-  expect(b.elements[5] === 7).toBeTruthy();
-  expect(b.elements[6] === 2).toBeTruthy();
-  expect(b.elements[7] === 5).toBeTruthy();
-  expect(b.elements[8] === 8).toBeTruthy();
+  expect(b[0] === 0).toBeTruthy();
+  expect(b[1] === 3).toBeTruthy();
+  expect(b[2] === 6).toBeTruthy();
+  expect(b[3] === 1).toBeTruthy();
+  expect(b[4] === 4).toBeTruthy();
+  expect(b[5] === 7).toBeTruthy();
+  expect(b[6] === 2).toBeTruthy();
+  expect(b[7] === 5).toBeTruthy();
+  expect(b[8] === 8).toBeTruthy();
 });
 
 test('three.js#Matrix3#identity', () => {
   var b = new Matrix3().set(0, 1, 2, 3, 4, 5, 6, 7, 8);
-  expect(b.elements[0] === 0).toBeTruthy();
-  expect(b.elements[1] === 3).toBeTruthy();
-  expect(b.elements[2] === 6).toBeTruthy();
-  expect(b.elements[3] === 1).toBeTruthy();
-  expect(b.elements[4] === 4).toBeTruthy();
-  expect(b.elements[5] === 7).toBeTruthy();
-  expect(b.elements[6] === 2).toBeTruthy();
-  expect(b.elements[7] === 5).toBeTruthy();
-  expect(b.elements[8] === 8).toBeTruthy();
+  expect(b[0] === 0).toBeTruthy();
+  expect(b[1] === 3).toBeTruthy();
+  expect(b[2] === 6).toBeTruthy();
+  expect(b[3] === 1).toBeTruthy();
+  expect(b[4] === 4).toBeTruthy();
+  expect(b[5] === 7).toBeTruthy();
+  expect(b[6] === 2).toBeTruthy();
+  expect(b[7] === 5).toBeTruthy();
+  expect(b[8] === 8).toBeTruthy();
 
   var a = new Matrix3();
   expect(!matrixEquals3(a, b), 'Passed!').toBeTruthy();
@@ -113,7 +113,7 @@ test('three.js#Matrix3#clone', () => {
   expect(matrixEquals3(a, b), 'Passed!').toBeTruthy();
 
   // ensure that it is a true copy
-  a.elements[0] = 2;
+  a[0] = 2;
   expect(!matrixEquals3(a, b), 'Passed!').toBeTruthy();
 });
 
@@ -124,7 +124,7 @@ test('three.js#Matrix3#copy', () => {
   expect(matrixEquals3(a, b), 'Passed!').toBeTruthy();
 
   // ensure that it is a true copy
-  a.elements[0] = 2;
+  a[0] = 2;
   expect(!matrixEquals3(a, b), 'Passed!').toBeTruthy();
 });
 
@@ -152,11 +152,11 @@ test('three.js#Matrix3#multiply/premultiply', () => {
   var expectedPremultiply = [904, 1182, 1556, 1131, 1489, 1967, 1399, 1845, 2435];
 
   a.multiply(b);
-  expect(a.elements, 'multiply: check result').toEqual(expectedMultiply);
+  expect(a, 'multiply: check result').toEqual(expectedMultiply);
 
   a.set(2, 3, 5, 7, 11, 13, 17, 19, 23);
   a.premultiply(b);
-  expect(a.elements, 'premultiply: check result').toEqual(expectedPremultiply);
+  expect(a, 'premultiply: check result').toEqual(expectedPremultiply);
 });
 
 test('three.js#Matrix3#multiplyMatrices', () => {
@@ -181,49 +181,49 @@ test('three.js#Matrix3#multiplyMatrices', () => {
 
   ans.multiplyMatrices(lhs, rhs);
 
-  expect(ans.elements[0] === 446).toBeTruthy();
-  expect(ans.elements[1] === 1343).toBeTruthy();
-  expect(ans.elements[2] === 2491).toBeTruthy();
-  expect(ans.elements[3] === 486).toBeTruthy();
-  expect(ans.elements[4] === 1457).toBeTruthy();
-  expect(ans.elements[5] === 2701).toBeTruthy();
-  expect(ans.elements[6] === 520).toBeTruthy();
-  expect(ans.elements[7] === 1569).toBeTruthy();
-  expect(ans.elements[8] === 2925).toBeTruthy();
+  expect(ans[0] === 446).toBeTruthy();
+  expect(ans[1] === 1343).toBeTruthy();
+  expect(ans[2] === 2491).toBeTruthy();
+  expect(ans[3] === 486).toBeTruthy();
+  expect(ans[4] === 1457).toBeTruthy();
+  expect(ans[5] === 2701).toBeTruthy();
+  expect(ans[6] === 520).toBeTruthy();
+  expect(ans[7] === 1569).toBeTruthy();
+  expect(ans[8] === 2925).toBeTruthy();
 });
 
 test('three.js#Matrix3#multiplyScalar', () => {
   var b = new Matrix3().set(0, 1, 2, 3, 4, 5, 6, 7, 8);
-  expect(b.elements[0] === 0).toBeTruthy();
-  expect(b.elements[1] === 3).toBeTruthy();
-  expect(b.elements[2] === 6).toBeTruthy();
-  expect(b.elements[3] === 1).toBeTruthy();
-  expect(b.elements[4] === 4).toBeTruthy();
-  expect(b.elements[5] === 7).toBeTruthy();
-  expect(b.elements[6] === 2).toBeTruthy();
-  expect(b.elements[7] === 5).toBeTruthy();
-  expect(b.elements[8] === 8).toBeTruthy();
+  expect(b[0] === 0).toBeTruthy();
+  expect(b[1] === 3).toBeTruthy();
+  expect(b[2] === 6).toBeTruthy();
+  expect(b[3] === 1).toBeTruthy();
+  expect(b[4] === 4).toBeTruthy();
+  expect(b[5] === 7).toBeTruthy();
+  expect(b[6] === 2).toBeTruthy();
+  expect(b[7] === 5).toBeTruthy();
+  expect(b[8] === 8).toBeTruthy();
 
-  b.multiplyScalar(2);
-  expect(b.elements[0] === 0 * 2).toBeTruthy();
-  expect(b.elements[1] === 3 * 2).toBeTruthy();
-  expect(b.elements[2] === 6 * 2).toBeTruthy();
-  expect(b.elements[3] === 1 * 2).toBeTruthy();
-  expect(b.elements[4] === 4 * 2).toBeTruthy();
-  expect(b.elements[5] === 7 * 2).toBeTruthy();
-  expect(b.elements[6] === 2 * 2).toBeTruthy();
-  expect(b.elements[7] === 5 * 2).toBeTruthy();
-  expect(b.elements[8] === 8 * 2).toBeTruthy();
+  b.multiplyByScalar(2);
+  expect(b[0] === 0 * 2).toBeTruthy();
+  expect(b[1] === 3 * 2).toBeTruthy();
+  expect(b[2] === 6 * 2).toBeTruthy();
+  expect(b[3] === 1 * 2).toBeTruthy();
+  expect(b[4] === 4 * 2).toBeTruthy();
+  expect(b[5] === 7 * 2).toBeTruthy();
+  expect(b[6] === 2 * 2).toBeTruthy();
+  expect(b[7] === 5 * 2).toBeTruthy();
+  expect(b[8] === 8 * 2).toBeTruthy();
 });
 
 test('three.js#Matrix3#determinant', () => {
   var a = new Matrix3();
   expect(a.determinant() === 1, 'Passed!').toBeTruthy();
 
-  a.elements[0] = 2;
+  a[0] = 2;
   expect(a.determinant() === 2, 'Passed!').toBeTruthy();
 
-  a.elements[0] = 0;
+  a[0] = 0;
   expect(a.determinant() === 0, 'Passed!').toBeTruthy();
 
   // calculated via http://www.euclideanspace.com/maths/algebra/matrix/functions/determinant/threeD/index.htm

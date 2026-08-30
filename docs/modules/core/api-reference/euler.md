@@ -12,20 +12,7 @@ A class to handle Euler rotation. More information on rotation using a Euler vec
 import {Euler} from '@math.gl/core';
 ```
 
-## Constants
-
-- `Euler.ZYX` = `'zyx'`
-- `Euler.YXZ` = `'yxz'`
-- `Euler.XZY` = `'xzy'`
-- `Euler.ZXY` = `'zxy'`
-- `Euler.YZX` = `'yzx'`
-- `Euler.XYZ` = `'xyz'`
-- `Euler.RollPitchYaw` = `'zyx'`
-
-- `Euler.DefaultOrder` (= `Euler.ZYX`)
-- `Euler.RotationOrders` provides the same named string values.
-
-These compatibility constants are deprecated. New code should pass an `EulerRotationOrder` string such as `'zyx'` directly.
+Rotation order is represented by the `EulerRotationOrder` type. Its valid values are `'xyz'`, `'xzy'`, `'yxz'`, `'yzx'`, `'zxy'`, and `'zyx'`. The default is `'zyx'`.
 
 ## Members
 

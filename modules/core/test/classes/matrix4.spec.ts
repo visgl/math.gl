@@ -69,13 +69,6 @@ test('Matrix4#toString', () => {
   configure({printRowMajor: true});
 });
 
-test('Matrix4.toFloat32Array', () => {
-  expect(typeof Matrix4.prototype.toFloat32Array).toBe('function');
-  const m = new Matrix4();
-  m.identity();
-  expect(m.toFloat32Array().BYTES_PER_ELEMENT).toBe(4);
-});
-
 test('Matrix4.equals', () => {
   const m = new Matrix4();
   expect(m.equals(IDENTITY_MATRIX)).toBeTruthy();
@@ -518,38 +511,6 @@ test('Matrix4#transform', () => {
     },
     {
       method: 'transformAsVector',
-      input: [2, 2],
-      expected: [4, 4]
-    },
-    // DEPRECATED
-    {
-      method: 'transformPoint',
-      input: [2, 2, 0],
-      expected: [5, 6, 3]
-    },
-    {
-      method: 'transformVector',
-      input: [2, 2, 0],
-      expected: [5, 6, 3]
-    },
-    {
-      method: 'transformDirection',
-      input: [2, 2, 0],
-      expected: [4, 4, 0]
-    },
-    // DEPRECATED
-    {
-      method: 'transformPoint',
-      input: [2, 2],
-      expected: [5, 6]
-    },
-    {
-      method: 'transformVector',
-      input: [2, 2],
-      expected: [5, 6]
-    },
-    {
-      method: 'transformDirection',
       input: [2, 2],
       expected: [4, 4]
     }

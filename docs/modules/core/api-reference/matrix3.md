@@ -21,20 +21,12 @@ Invert a matrix
 const inverse = matrix.invert();
 ```
 
-Transform a vector as a point (including translations)
+Transform a two-, three-, or four-element vector
 
 ```js
 const transform = new Matrix3();
-const vector2 = transform.transformPoint([1, 2]);
-const vector3 = transform.transformPoint([1, 2, 1]);
-```
-
-Transform a vector as a direction (NOT including translations)
-
-```js
-const transform = new Matrix3();
-const vector2 = transform.transformDirection([1, 2]);
-const vector3 = transform.transformDirection([1, 2, 1]);
+const vector2 = transform.transform([1, 2]);
+const vector3 = transform.transform([1, 2, 1]);
 ```
 
 ## Inheritance

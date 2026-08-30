@@ -33,18 +33,6 @@ function extendToMatrix4(arr) {
 
 test('Euler#import', () => {
   expect(typeof Euler).toBe('function');
-  expect(Euler.ZYX).toBe('zyx');
-  expect(Euler.YXZ).toBe('yxz');
-  expect(Euler.XZY).toBe('xzy');
-  expect(Euler.ZXY).toBe('zxy');
-  expect(Euler.YZX).toBe('yzx');
-  expect(Euler.XYZ).toBe('xyz');
-
-  expect(Euler.RollPitchYaw).toBe('zyx');
-  expect(Euler.DefaultOrder).toBe('zyx');
-  expect(Euler.RotationOrders.XYZ).toBe('xyz');
-
-  expect(Euler.rotationOrder(Euler.ZYX)).toBe('zyx');
 });
 
 test('Euler#construct and Array.isArray check', () => {
@@ -75,7 +63,7 @@ test('Euler#coverage', () => {
   euler.theta = euler.psi;
   euler.psi = euler.phi;
 
-  euler.order = Euler.XYZ;
+  euler.order = 'xyz';
   euler.order = euler.order;
   expect(euler.order).toBe('xyz');
 

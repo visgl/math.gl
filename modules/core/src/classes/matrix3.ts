@@ -65,17 +65,11 @@ export class Matrix3 extends Matrix {
     return INDICES;
   }
 
-  constructor(array?: Readonly<NumericArray>);
-  /** @deprecated */
-  constructor(...args: number[]);
-
-  constructor(array?: number | Readonly<NumericArray>, ...args: number[]) {
+  constructor(array?: Readonly<NumericArray>) {
     // PERF NOTE: initialize elements as double precision numbers
     super(-0, -0, -0, -0, -0, -0, -0, -0, -0);
     if (arguments.length === 1 && Array.isArray(array)) {
       this.copy(array);
-    } else if (args.length > 0) {
-      this.copy([array as number, ...args]);
     } else {
       this.identity();
     }
@@ -254,21 +248,6 @@ export class Matrix3 extends Matrix {
     }
     checkVector(out, vector.length);
     return out;
-  }
-
-  /** @deprecated */
-  transformVector(vector: Readonly<NumericArray>, result?: NumericArray): NumericArray {
-    return this.transform(vector, result);
-  }
-
-  /** @deprecated */
-  transformVector2(vector: Readonly<NumericArray>, result?: NumericArray): NumericArray {
-    return this.transform(vector, result);
-  }
-
-  /** @deprecated */
-  transformVector3(vector: Readonly<NumericArray>, result?: NumericArray): NumericArray {
-    return this.transform(vector, result);
   }
 }
 

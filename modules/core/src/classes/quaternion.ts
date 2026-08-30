@@ -5,7 +5,7 @@
 
 import {NumericArray} from '@math.gl/types';
 import {MathArray} from './base/math-array';
-import {checkNumber, checkVector} from '../lib/validators';
+import {checkNumber} from '../lib/validators';
 import type {EulerLike} from './euler-types';
 // @ts-ignore gl-matrix types...
 import {
@@ -29,10 +29,6 @@ import {
   scale as quat_scale,
   slerp as quat_slerp
 } from '../gl-matrix/quat';
-// @ts-ignore gl-matrix types...
-import {transformQuat as vec4_transformQuat} from '../gl-matrix/vec4';
-const IDENTITY_QUATERNION = [0, 0, 0, 1] as const;
-
 export class Quaternion extends MathArray {
   constructor(x: number | Readonly<NumericArray> = 0, y = 0, z = 0, w = 1) {
     // PERF NOTE: initialize elements as double precision numbers
@@ -296,41 +292,13 @@ export class Quaternion extends MathArray {
 
   slerp(target: Readonly<NumericArray>, ratio: number): this;
   slerp(start: Readonly<NumericArray>, target: Readonly<NumericArray>, ratio: number): this;
-  slerp(params: {
-    start: Readonly<NumericArray>;
-    target: Readonly<NumericArray>;
-    ratio: number;
-  }): this;
-
   // Performs a spherical linear interpolation between two quat
-  slerp(
-    arg0:
-      | Readonly<NumericArray>
-      | {
-          start: Readonly<NumericArray>;
-          target: Readonly<NumericArray>;
-          ratio: number;
-        },
-    arg1?: Readonly<NumericArray> | number,
-    arg2?: number
-  ): this {
+  slerp(arg0: Readonly<NumericArray>, arg1?: Readonly<NumericArray> | number, arg2?: number): this {
     let start: Readonly<NumericArray>;
     let target: Readonly<NumericArray>;
     let ratio: number;
     // eslint-disable-next-line prefer-rest-params
     switch (arguments.length) {
-      case 1: // Deprecated signature ({start, target, ratio})
-        // eslint-disable-next-line prefer-rest-params
-        ({
-          start = IDENTITY_QUATERNION,
-          target,
-          ratio
-        } = arg0 as {
-          start: Readonly<NumericArray>;
-          target: Readonly<NumericArray>;
-          ratio: number;
-        });
-        break;
       case 2: // THREE.js compatibility signature (target, ration)
         start = this; // eslint-disable-line
         target = arg0 as Readonly<NumericArray>;
@@ -344,14 +312,6 @@ export class Quaternion extends MathArray {
     }
     quat_slerp(this, start, target, ratio);
     return this.check();
-  }
-
-  transformVector4(
-    vector: Readonly<NumericArray>,
-    result: NumericArray = [-0, -0, -0, -0]
-  ): NumericArray {
-    vec4_transformQuat(result, vector, this);
-    return checkVector(result, 4);
   }
 
   // THREE.js Math API compatibility

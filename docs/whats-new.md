@@ -60,7 +60,7 @@ Highlights:
 - New typed-array geometry utilities module.
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 - Stronger type guarantees for math classes via the new sized array types.
-- Culling results, polygon winding directions, and Euler rotation orders now use descriptive string literal types; legacy named constants remain as deprecated string-valued aliases.
+- Culling results, polygon winding directions, and Euler rotation orders now use descriptive string literal types.
 
 **`@math.gl/dggs`** (NEW MODULE)
 
@@ -75,7 +75,10 @@ Highlights:
 - Added destination-owned `Matrix4.fromMatrix3()`, `Matrix3.fromMatrix4()`, and `Quaternion.fromEuler()` conversion helpers.
 - `Euler.fromQuaternion()` now supports all six rotation orders and preserves the destination's current order by default.
 - Removed the redundant `Euler.getQuaternion()` and `Euler.toQuaternion()` allocation helpers; use `Quaternion.fromEuler()` instead.
-- `Quaternion.transformVector4()` now returns a plain array by default, avoiding an otherwise unnecessary runtime dependency on `Vector4`.
+- Removed deprecated class aliases, compatibility methods, scalar helpers, Euler constants, and root-level low-level namespaces. See the upgrade guide for replacements.
+- Added focused `/mat3`, `/mat4`, `/quat`, `/vec2`, `/vec3`, and `/vec4` subpath exports for opt-in low-level functions.
+- `SphericalCoordinates` now uses the structural `Vector3Like` type and direct calculations, avoiding runtime dependencies on `Vector3` and `vec3`.
+- Core named-import gzip fixtures are 6–62% smaller than v4.1; the full public-entry fixture is 37% smaller. See the bundling guide for methodology and measurements.
 
 **`@math.gl/expressions`** (NEW EXPERIMENTAL MODULE)
 

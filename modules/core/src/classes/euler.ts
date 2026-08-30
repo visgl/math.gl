@@ -35,57 +35,7 @@ const ROTATION_ORDER_INDICES: Record<EulerRotationOrder, RotationOrderIndex> = {
   xyz: RotationOrderIndex.XYZ
 };
 
-const ROTATION_ORDERS = {
-  ZYX: 'zyx',
-  YXZ: 'yxz',
-  XZY: 'xzy',
-  ZXY: 'zxy',
-  YZX: 'yzx',
-  XYZ: 'xyz'
-} as const;
-
 export class Euler extends MathArray {
-  // Constants
-  /** @deprecated Pass the string `'zyx'` directly. */
-  static get ZYX(): EulerRotationOrder {
-    return 'zyx';
-  }
-  /** @deprecated Pass the string `'yxz'` directly. */
-  static get YXZ(): EulerRotationOrder {
-    return 'yxz';
-  }
-  /** @deprecated Pass the string `'xzy'` directly. */
-  static get XZY(): EulerRotationOrder {
-    return 'xzy';
-  }
-  /** @deprecated Pass the string `'zxy'` directly. */
-  static get ZXY(): EulerRotationOrder {
-    return 'zxy';
-  }
-  /** @deprecated Pass the string `'yzx'` directly. */
-  static get YZX(): EulerRotationOrder {
-    return 'yzx';
-  }
-  /** @deprecated Pass the string `'xyz'` directly. */
-  static get XYZ(): EulerRotationOrder {
-    return 'xyz';
-  }
-  /** @deprecated Pass the string `'zyx'` directly. */
-  static get RollPitchYaw(): EulerRotationOrder {
-    return 'zyx';
-  }
-  /** @deprecated Pass the string `'zyx'` directly. */
-  static get DefaultOrder(): EulerRotationOrder {
-    return 'zyx';
-  }
-  /** @deprecated Pass an {@link EulerRotationOrder} string directly. */
-  static get RotationOrders(): typeof ROTATION_ORDERS {
-    return ROTATION_ORDERS;
-  }
-  /** @deprecated Euler rotation orders are already represented as strings. */
-  static rotationOrder(order: EulerRotationOrder): EulerRotationOrder {
-    return order;
-  }
   get ELEMENTS(): number {
     return 4;
   }

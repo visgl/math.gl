@@ -15,12 +15,12 @@ import {eps} from './constants';
 
 function matrixEquals4(a, b, tolerance) {
   tolerance = tolerance || 0.0001;
-  if (a.elements.length != b.elements.length) {
+  if (a.length != b.length) {
     return false;
   }
 
-  for (let i = 0, il = a.elements.length; i < il; i++) {
-    const delta = a.elements[i] - b.elements[i];
+  for (let i = 0, il = a.length; i < il; i++) {
+    const delta = a[i] - b[i];
     if (delta > tolerance) {
       return false;
     }
@@ -47,22 +47,22 @@ test('three.js#Matrix4#Instancing', () => {
   b.transpose();
   // NOTE
 
-  expect(b.elements[0] == 0).toBeTruthy();
-  expect(b.elements[1] == 4).toBeTruthy();
-  expect(b.elements[2] == 8).toBeTruthy();
-  expect(b.elements[3] == 12).toBeTruthy();
-  expect(b.elements[4] == 1).toBeTruthy();
-  expect(b.elements[5] == 5).toBeTruthy();
-  expect(b.elements[6] == 9).toBeTruthy();
-  expect(b.elements[7] == 13).toBeTruthy();
-  expect(b.elements[8] == 2).toBeTruthy();
-  expect(b.elements[9] == 6).toBeTruthy();
-  expect(b.elements[10] == 10).toBeTruthy();
-  expect(b.elements[11] == 14).toBeTruthy();
-  expect(b.elements[12] == 3).toBeTruthy();
-  expect(b.elements[13] == 7).toBeTruthy();
-  expect(b.elements[14] == 11).toBeTruthy();
-  expect(b.elements[15] == 15).toBeTruthy();
+  expect(b[0] == 0).toBeTruthy();
+  expect(b[1] == 4).toBeTruthy();
+  expect(b[2] == 8).toBeTruthy();
+  expect(b[3] == 12).toBeTruthy();
+  expect(b[4] == 1).toBeTruthy();
+  expect(b[5] == 5).toBeTruthy();
+  expect(b[6] == 9).toBeTruthy();
+  expect(b[7] == 13).toBeTruthy();
+  expect(b[8] == 2).toBeTruthy();
+  expect(b[9] == 6).toBeTruthy();
+  expect(b[10] == 10).toBeTruthy();
+  expect(b[11] == 14).toBeTruthy();
+  expect(b[12] == 3).toBeTruthy();
+  expect(b[13] == 7).toBeTruthy();
+  expect(b[14] == 11).toBeTruthy();
+  expect(b[15] == 15).toBeTruthy();
 
   expect(!matrixEquals4(a, b), 'Passed!').toBeTruthy();
 });
@@ -82,22 +82,22 @@ test('three.js#Matrix4#set', () => {
   b.transpose();
   // NOTE
 
-  expect(b.elements[0] == 0).toBeTruthy();
-  expect(b.elements[1] == 4).toBeTruthy();
-  expect(b.elements[2] == 8).toBeTruthy();
-  expect(b.elements[3] == 12).toBeTruthy();
-  expect(b.elements[4] == 1).toBeTruthy();
-  expect(b.elements[5] == 5).toBeTruthy();
-  expect(b.elements[6] == 9).toBeTruthy();
-  expect(b.elements[7] == 13).toBeTruthy();
-  expect(b.elements[8] == 2).toBeTruthy();
-  expect(b.elements[9] == 6).toBeTruthy();
-  expect(b.elements[10] == 10).toBeTruthy();
-  expect(b.elements[11] == 14).toBeTruthy();
-  expect(b.elements[12] == 3).toBeTruthy();
-  expect(b.elements[13] == 7).toBeTruthy();
-  expect(b.elements[14] == 11).toBeTruthy();
-  expect(b.elements[15] == 15).toBeTruthy();
+  expect(b[0] == 0).toBeTruthy();
+  expect(b[1] == 4).toBeTruthy();
+  expect(b[2] == 8).toBeTruthy();
+  expect(b[3] == 12).toBeTruthy();
+  expect(b[4] == 1).toBeTruthy();
+  expect(b[5] == 5).toBeTruthy();
+  expect(b[6] == 9).toBeTruthy();
+  expect(b[7] == 13).toBeTruthy();
+  expect(b[8] == 2).toBeTruthy();
+  expect(b[9] == 6).toBeTruthy();
+  expect(b[10] == 10).toBeTruthy();
+  expect(b[11] == 14).toBeTruthy();
+  expect(b[12] == 3).toBeTruthy();
+  expect(b[13] == 7).toBeTruthy();
+  expect(b[14] == 11).toBeTruthy();
+  expect(b[15] == 15).toBeTruthy();
 });
 
 test('three.js#Matrix4#identity', () => {
@@ -107,22 +107,22 @@ test('three.js#Matrix4#identity', () => {
   b.transpose();
   // NOTE
 
-  expect(b.elements[0] == 0).toBeTruthy();
-  expect(b.elements[1] == 4).toBeTruthy();
-  expect(b.elements[2] == 8).toBeTruthy();
-  expect(b.elements[3] == 12).toBeTruthy();
-  expect(b.elements[4] == 1).toBeTruthy();
-  expect(b.elements[5] == 5).toBeTruthy();
-  expect(b.elements[6] == 9).toBeTruthy();
-  expect(b.elements[7] == 13).toBeTruthy();
-  expect(b.elements[8] == 2).toBeTruthy();
-  expect(b.elements[9] == 6).toBeTruthy();
-  expect(b.elements[10] == 10).toBeTruthy();
-  expect(b.elements[11] == 14).toBeTruthy();
-  expect(b.elements[12] == 3).toBeTruthy();
-  expect(b.elements[13] == 7).toBeTruthy();
-  expect(b.elements[14] == 11).toBeTruthy();
-  expect(b.elements[15] == 15).toBeTruthy();
+  expect(b[0] == 0).toBeTruthy();
+  expect(b[1] == 4).toBeTruthy();
+  expect(b[2] == 8).toBeTruthy();
+  expect(b[3] == 12).toBeTruthy();
+  expect(b[4] == 1).toBeTruthy();
+  expect(b[5] == 5).toBeTruthy();
+  expect(b[6] == 9).toBeTruthy();
+  expect(b[7] == 13).toBeTruthy();
+  expect(b[8] == 2).toBeTruthy();
+  expect(b[9] == 6).toBeTruthy();
+  expect(b[10] == 10).toBeTruthy();
+  expect(b[11] == 14).toBeTruthy();
+  expect(b[12] == 3).toBeTruthy();
+  expect(b[13] == 7).toBeTruthy();
+  expect(b[14] == 11).toBeTruthy();
+  expect(b[15] == 15).toBeTruthy();
 
   const a = new Matrix4();
   expect(!matrixEquals4(a, b), 'Passed!').toBeTruthy();
@@ -138,7 +138,7 @@ test('three.js#Matrix4#clone', () => {
   expect(matrixEquals4(a, b), 'Passed!').toBeTruthy();
 
   // ensure that it is a true copy
-  a.elements[0] = 2;
+  a[0] = 2;
   expect(!matrixEquals4(a, b), 'Passed!').toBeTruthy();
 });
 
@@ -149,7 +149,7 @@ test('three.js#Matrix4#copy', () => {
   expect(matrixEquals4(a, b), 'Passed!').toBeTruthy();
 
   // ensure that it is a true copy
-  a.elements[0] = 2;
+  a[0] = 2;
   expect(!matrixEquals4(a, b), 'Passed!').toBeTruthy();
 });
 
@@ -311,22 +311,22 @@ test.skip('three.js#Matrix4#multiplyMatrices', () => {
 
   ans.multiplyMatrices(lhs, rhs);
 
-  expect(ans.elements[0]).toBe(1585);
-  expect(ans.elements[1]).toBe(5318);
-  expect(ans.elements[2]).toBe(10514);
-  expect(ans.elements[3]).toBe(15894);
-  expect(ans.elements[4]).toBe(1655);
-  expect(ans.elements[5]).toBe(5562);
-  expect(ans.elements[6]).toBe(11006);
-  expect(ans.elements[7]).toBe(16634);
-  expect(ans.elements[8]).toBe(1787);
-  expect(ans.elements[9]).toBe(5980);
-  expect(ans.elements[10]).toBe(11840);
-  expect(ans.elements[11]).toBe(17888);
-  expect(ans.elements[12]).toBe(1861);
-  expect(ans.elements[13]).toBe(6246);
-  expect(ans.elements[14]).toBe(12378);
-  expect(ans.elements[15]).toBe(18710);
+  expect(ans[0]).toBe(1585);
+  expect(ans[1]).toBe(5318);
+  expect(ans[2]).toBe(10514);
+  expect(ans[3]).toBe(15894);
+  expect(ans[4]).toBe(1655);
+  expect(ans[5]).toBe(5562);
+  expect(ans[6]).toBe(11006);
+  expect(ans[7]).toBe(16634);
+  expect(ans[8]).toBe(1787);
+  expect(ans[9]).toBe(5980);
+  expect(ans[10]).toBe(11840);
+  expect(ans[11]).toBe(17888);
+  expect(ans[12]).toBe(1861);
+  expect(ans[13]).toBe(6246);
+  expect(ans[14]).toBe(12378);
+  expect(ans[15]).toBe(18710);
 });
 
 test('three.js#Matrix4#multiplyScalar', () => {
@@ -336,40 +336,40 @@ test('three.js#Matrix4#multiplyScalar', () => {
   b.transpose();
   // NOTE
 
-  expect(b.elements[0]).toBe(0);
-  expect(b.elements[1]).toBe(4);
-  expect(b.elements[2]).toBe(8);
-  expect(b.elements[3]).toBe(12);
-  expect(b.elements[4]).toBe(1);
-  expect(b.elements[5]).toBe(5);
-  expect(b.elements[6]).toBe(9);
-  expect(b.elements[7]).toBe(13);
-  expect(b.elements[8]).toBe(2);
-  expect(b.elements[9]).toBe(6);
-  expect(b.elements[10]).toBe(10);
-  expect(b.elements[11]).toBe(14);
-  expect(b.elements[12]).toBe(3);
-  expect(b.elements[13]).toBe(7);
-  expect(b.elements[14]).toBe(11);
-  expect(b.elements[15]).toBe(15);
+  expect(b[0]).toBe(0);
+  expect(b[1]).toBe(4);
+  expect(b[2]).toBe(8);
+  expect(b[3]).toBe(12);
+  expect(b[4]).toBe(1);
+  expect(b[5]).toBe(5);
+  expect(b[6]).toBe(9);
+  expect(b[7]).toBe(13);
+  expect(b[8]).toBe(2);
+  expect(b[9]).toBe(6);
+  expect(b[10]).toBe(10);
+  expect(b[11]).toBe(14);
+  expect(b[12]).toBe(3);
+  expect(b[13]).toBe(7);
+  expect(b[14]).toBe(11);
+  expect(b[15]).toBe(15);
 
-  b.multiplyScalar(2);
-  expect(b.elements[0]).toBe(0 * 2);
-  expect(b.elements[1]).toBe(4 * 2);
-  expect(b.elements[2]).toBe(8 * 2);
-  expect(b.elements[3]).toBe(12 * 2);
-  expect(b.elements[4]).toBe(1 * 2);
-  expect(b.elements[5]).toBe(5 * 2);
-  expect(b.elements[6]).toBe(9 * 2);
-  expect(b.elements[7]).toBe(13 * 2);
-  expect(b.elements[8]).toBe(2 * 2);
-  expect(b.elements[9]).toBe(6 * 2);
-  expect(b.elements[10]).toBe(10 * 2);
-  expect(b.elements[11]).toBe(14 * 2);
-  expect(b.elements[12]).toBe(3 * 2);
-  expect(b.elements[13]).toBe(7 * 2);
-  expect(b.elements[14]).toBe(11 * 2);
-  expect(b.elements[15]).toBe(15 * 2);
+  b.multiplyByScalar(2);
+  expect(b[0]).toBe(0 * 2);
+  expect(b[1]).toBe(4 * 2);
+  expect(b[2]).toBe(8 * 2);
+  expect(b[3]).toBe(12 * 2);
+  expect(b[4]).toBe(1 * 2);
+  expect(b[5]).toBe(5 * 2);
+  expect(b[6]).toBe(9 * 2);
+  expect(b[7]).toBe(13 * 2);
+  expect(b[8]).toBe(2 * 2);
+  expect(b[9]).toBe(6 * 2);
+  expect(b[10]).toBe(10 * 2);
+  expect(b[11]).toBe(14 * 2);
+  expect(b[12]).toBe(3 * 2);
+  expect(b[13]).toBe(7 * 2);
+  expect(b[14]).toBe(11 * 2);
+  expect(b[15]).toBe(15 * 2);
 });
 
 test.skip('three.js#Matrix4#applyToBufferAttribute', () => {
@@ -402,10 +402,10 @@ test('three.js#Matrix4#determinant', () => {
   const a = new Matrix4();
   expect(a.determinant() == 1, 'Passed!').toBeTruthy();
 
-  a.elements[0] = 2;
+  a[0] = 2;
   expect(a.determinant() == 2, 'Passed!').toBeTruthy();
 
-  a.elements[0] = 0;
+  a[0] = 0;
   expect(a.determinant() == 0, 'Passed!').toBeTruthy();
 
   // calculated via http://www.euclideanspace.com/maths/algebra/matrix/functions/determinant/fourD/index.htm

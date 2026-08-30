@@ -127,7 +127,7 @@ test('three.js#Vector3#sub', () => {
   var a = new Vector3(x, y, z);
   var b = new Vector3(-x, -y, -z);
 
-  a.sub(b);
+  a.subtract(b);
   expect(a.x === 2 * x, 'Passed!').toBeTruthy();
   expect(a.y === 2 * y, 'Passed!').toBeTruthy();
   expect(a.z === 2 * z, 'Passed!').toBeTruthy();
@@ -282,7 +282,7 @@ test('three.js#Vector3#clampScalar', () => {
   var a = new Vector3(-0.01, 0.5, 1.5);
   var clamped = new Vector3(0.1, 0.5, 1.0);
 
-  a.clampScalar(0.1, 1.0);
+  a.clamp([0.1, 0.1, 0.1], [1, 1, 1]);
   expect(Math.abs(a.x - clamped.x) <= 0.001, 'Check x').toBeTruthy();
   expect(Math.abs(a.y - clamped.y) <= 0.001, 'Check y').toBeTruthy();
   expect(Math.abs(a.z - clamped.z) <= 0.001, 'Check z').toBeTruthy();
@@ -784,17 +784,17 @@ test('three.js#Vector3#setScalar/addScalar/subScalar', assert => {
   var a = new Vector3();
   var s = 3;
 
-  a.setScalar(s);
+  a.fill(s);
   assert.strictEqual(a.x, s, 'setScalar: check x');
   assert.strictEqual(a.y, s, 'setScalar: check y');
   assert.strictEqual(a.z, s, 'setScalar: check z');
 
-  a.addScalar(s);
+  a.add([s, s, s]);
   assert.strictEqual(a.x, 2 * s, 'addScalar: check x');
   assert.strictEqual(a.y, 2 * s, 'addScalar: check y');
   assert.strictEqual(a.z, 2 * s, 'addScalar: check z');
 
-  a.subScalar(2 * s);
+  a.subtract([2 * s, 2 * s, 2 * s]);
   assert.strictEqual(a.x, 0, 'subScalar: check x');
   assert.strictEqual(a.y, 0, 'subScalar: check y');
   assert.strictEqual(a.z, 0, 'subScalar: check z');
@@ -818,22 +818,22 @@ test('three.js#Vector3#multiply/divide', assert => {
   var a = new Vector3(x, y, z);
   var b = new Vector3(-x, -y, -z);
 
-  a.multiplyScalar(-2);
+  a.multiplyByScalar(-2);
   assert.ok(a.x === x * -2, 'Passed!');
   assert.ok(a.y === y * -2, 'Passed!');
   assert.ok(a.z === z * -2, 'Passed!');
 
-  b.multiplyScalar(-2);
+  b.multiplyByScalar(-2);
   assert.ok(b.x === 2 * x, 'Passed!');
   assert.ok(b.y === 2 * y, 'Passed!');
   assert.ok(b.z === 2 * z, 'Passed!');
 
-  a.divideScalar(-2);
+  a.multiplyByScalar(-0.5);
   assert.ok(a.x === x, 'Passed!');
   assert.ok(a.y === y, 'Passed!');
   assert.ok(a.z === z, 'Passed!');
 
-  b.divideScalar(-2);
+  b.multiplyByScalar(-0.5);
   assert.ok(b.x === -x, 'Passed!');
   assert.ok(b.y === -y, 'Passed!');
   assert.ok(b.z === -z, 'Passed!');

@@ -23,12 +23,12 @@ const eulerAzyx = new Euler(0, 1, 0, 'ZYX');
 
 function matrixEquals4(a, b, tolerance) {
   tolerance = tolerance || 0.0001;
-  if (a.elements.length != b.elements.length) {
+  if (a.length != b.length) {
     return false;
   }
 
-  for (var i = 0, il = a.elements.length; i < il; i++) {
-    var delta = a.elements[i] - b.elements[i];
+  for (var i = 0, il = a.length; i < il; i++) {
+    var delta = a[i] - b[i];
     if (delta > tolerance) {
       return false;
     }

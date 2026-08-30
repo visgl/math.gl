@@ -132,7 +132,7 @@ test('three.js#Vector4#sub', () => {
   const a = new Vector4(x, y, z, w);
   const b = new Vector4(-x, -y, -z, -w);
 
-  a.sub(b);
+  a.subtract(b);
   expect(a.x === 2 * x, 'Passed!').toBeTruthy();
   expect(a.y === 2 * y, 'Passed!').toBeTruthy();
   expect(a.z === 2 * z, 'Passed!').toBeTruthy();
@@ -197,7 +197,7 @@ test('three.js#Vector4#clampScalar', () => {
   var a = new Vector4(-0.1, 0.01, 0.5, 1.5);
   var clamped = new Vector4(0.1, 0.1, 0.5, 1.0);
 
-  a.clampScalar(0.1, 1.0);
+  a.clamp([0.1, 0.1, 0.1, 0.1], [1, 1, 1, 1]);
   expect(Math.abs(a.x - clamped.x) <= eps, 'Check x').toBeTruthy();
   expect(Math.abs(a.y - clamped.y) <= eps, 'Check y').toBeTruthy();
   expect(Math.abs(a.z - clamped.z) <= eps, 'Check z').toBeTruthy();
@@ -453,19 +453,19 @@ test('three.js#Vector4#setScalar/addScalar/subScalar', () => {
   var a = new Vector4();
   var s = 3;
 
-  a.setScalar(s);
+  a.fill(s);
   assert.strictEqual(a.x, s, 'setScalar: check x');
   assert.strictEqual(a.y, s, 'setScalar: check y');
   assert.strictEqual(a.z, s, 'setScalar: check z');
   assert.strictEqual(a.w, s, 'setScalar: check w');
 
-  a.addScalar(s);
+  a.add([s, s, s, s]);
   assert.strictEqual(a.x, 2 * s, 'addScalar: check x');
   assert.strictEqual(a.y, 2 * s, 'addScalar: check y');
   assert.strictEqual(a.z, 2 * s, 'addScalar: check z');
   assert.strictEqual(a.w, 2 * s, 'addScalar: check w');
 
-  a.subScalar(2 * s);
+  a.subtract([2 * s, 2 * s, 2 * s, 2 * s]);
   assert.strictEqual(a.x, 0, 'subScalar: check x');
   assert.strictEqual(a.y, 0, 'subScalar: check y');
   assert.strictEqual(a.z, 0, 'subScalar: check z');
@@ -476,25 +476,25 @@ test('three.js#Vector4#multiply/divide', () => {
   var a = new Vector4(x, y, z, w);
   var b = new Vector4(-x, -y, -z, -w);
 
-  a.multiplyScalar(-2);
+  a.multiplyByScalar(-2);
   expect(a.x === x * -2, 'Passed!').toBeTruthy();
   expect(a.y === y * -2, 'Passed!').toBeTruthy();
   expect(a.z === z * -2, 'Passed!').toBeTruthy();
   expect(a.w === w * -2, 'Passed!').toBeTruthy();
 
-  b.multiplyScalar(-2);
+  b.multiplyByScalar(-2);
   expect(b.x === 2 * x, 'Passed!').toBeTruthy();
   expect(b.y === 2 * y, 'Passed!').toBeTruthy();
   expect(b.z === 2 * z, 'Passed!').toBeTruthy();
   expect(b.w === 2 * w, 'Passed!').toBeTruthy();
 
-  a.divideScalar(-2);
+  a.multiplyByScalar(-0.5);
   expect(a.x === x, 'Passed!').toBeTruthy();
   expect(a.y === y, 'Passed!').toBeTruthy();
   expect(a.z === z, 'Passed!').toBeTruthy();
   expect(a.w === w, 'Passed!').toBeTruthy();
 
-  b.divideScalar(-2);
+  b.multiplyByScalar(-0.5);
   expect(b.x === -x, 'Passed!').toBeTruthy();
   expect(b.y === -y, 'Passed!').toBeTruthy();
   expect(b.z === -z, 'Passed!').toBeTruthy();

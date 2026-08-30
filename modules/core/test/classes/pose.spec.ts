@@ -182,6 +182,6 @@ test('Pose#toPose', () => {
 
   const transformAtoB = A.getTransformationMatrixToPose(B);
 
-  const originAInB = transformAtoB.transformVector([0, 0, 0]);
+  const originAInB = transformAtoB.transformAsPoint([0, 0, 0]);
   expect(equals(originAInB, [10, 10, 0]), `originInB should match resultOriginInB`).toBe(true);
 });

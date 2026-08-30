@@ -178,6 +178,6 @@ Sets a quat from the given angle and rotation axis, then returns it.
 
 Performs a spherical linear interpolation between two quaternions
 
-`slerp({start = [0, 0, 0, 1], target, ratio})`
+`quaternion.slerp(target, ratio)`
 
-s
+`quaternion.slerp(start, target, ratio)`

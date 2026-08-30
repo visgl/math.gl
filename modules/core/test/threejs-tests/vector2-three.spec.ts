@@ -134,7 +134,7 @@ test('three.js#Vector2#sub', () => {
   var a = new Vector2(x, y);
   var b = new Vector2(-x, -y);
 
-  a.sub(b);
+  a.subtract(b);
   expect(a.x === 2 * x, 'Passed!').toBeTruthy();
   expect(a.y === 2 * y, 'Passed!').toBeTruthy();
 
@@ -402,19 +402,19 @@ test('three.js#Vector2#multiply/divide', () => {
   var a = new Vector2(x, y);
   var b = new Vector2(-x, -y);
 
-  a.multiplyScalar(-2);
+  a.multiplyByScalar(-2);
   expect(a.x === x * -2, 'Passed!').toBeTruthy();
   expect(a.y === y * -2, 'Passed!').toBeTruthy();
 
-  b.multiplyScalar(-2);
+  b.multiplyByScalar(-2);
   expect(b.x === 2 * x, 'Passed!').toBeTruthy();
   expect(b.y === 2 * y, 'Passed!').toBeTruthy();
 
-  a.divideScalar(-2);
+  a.multiplyByScalar(-0.5);
   expect(a.x === x, 'Passed!').toBeTruthy();
   expect(a.y === y, 'Passed!').toBeTruthy();
 
-  b.divideScalar(-2);
+  b.multiplyByScalar(-0.5);
   expect(b.x === -x, 'Passed!').toBeTruthy();
   expect(b.y === -y, 'Passed!').toBeTruthy();
 });
@@ -438,7 +438,7 @@ test('three.js#Vector2#min/max/clamp', () => {
   expect(c.y === y, 'Passed!').toBeTruthy();
 
   c.set(-2 * x, 2 * x);
-  c.clampScalar(-x, x);
+  c.clamp([-x, -x], [x, x]);
   expect(c.x, 'scalar clamp x').toBe(-x);
   expect(c.y, 'scalar clamp y').toBe(x);
 });
@@ -524,15 +524,15 @@ test('three.js#Vector2#setScalar/addScalar/subScalar', () => {
   var a = new Vector2(1, 1);
   var s = 3;
 
-  a.setScalar(s);
+  a.fill(s);
   assert.strictEqual(a.x, s, 'setScalar: check x');
   assert.strictEqual(a.y, s, 'setScalar: check y');
 
-  a.addScalar(s);
+  a.add([s, s]);
   assert.strictEqual(a.x, 2 * s, 'addScalar: check x');
   assert.strictEqual(a.y, 2 * s, 'addScalar: check y');
 
-  a.subScalar(2 * s);
+  a.subtract([2 * s, 2 * s]);
   assert.strictEqual(a.x, 0, 'subScalar: check x');
   assert.strictEqual(a.y, 0, 'subScalar: check y');
 });

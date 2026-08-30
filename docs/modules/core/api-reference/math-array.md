@@ -59,10 +59,6 @@ Calls `formatString` with the global math.gl config.
 
 `array.toArray(array = [], offset = 0)`
 
-### toFloat32Array
-
-`array.toFloat32Array()`
-
 ### equals
 
 `array.equals(array)`

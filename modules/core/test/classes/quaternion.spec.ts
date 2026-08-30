@@ -143,13 +143,6 @@ test('Quaternion#lerp', () => {
 
 test('Quaternion#slerp', () => {
   expect(() => new Quaternion().slerp([1, 1, 1, 1], [2, 2, 2, 2], 0.5)).not.toThrow();
-  expect(() =>
-    new Quaternion().slerp({
-      start: [1, 1, 1, 1],
-      target: [2, 2, 2, 2],
-      ratio: 0.5
-    })
-  ).not.toThrow();
 });
 
 test('Quaternion#scale', () => {
@@ -176,18 +169,6 @@ test('Quaternion#add', () => {
 test('Quaternion#setAxisAngle', () => {
   const result = new Quaternion().setAxisAngle([1, 0, 0], Math.PI * 0.5);
   expect(equals(result, [0.707106, 0, 0, 0.707106]), 'should return correct values').toBe(true);
-});
-
-test('Quaternion#transform', () => {
-  const quat = new Quaternion();
-  const result = quat.transformVector4([1, 2, 3, 4]);
-  const target = new Float32Array(4);
-
-  expect(result.constructor).toBe(Array);
-  expect(equals(result, [1, 2, 3, 4])).toBe(true);
-  expect(quat.transformVector4([1, 2, 3, 4], target)).toBe(target);
-  expect(() => quat.transformVector4([NaN, 0, 0, 0])).toThrow();
-  expect(() => quat.transformVector4([0, 0, 0])).toThrow();
 });
 
 test.skip('getAxisAngle', () => {

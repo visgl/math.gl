@@ -635,21 +635,6 @@ export class Matrix4 extends Matrix {
     return out;
   }
 
-  /** @deprecated */
-  transformPoint(vector: Readonly<NumericArray>, result?: NumericArray): NumericArray {
-    return this.transformAsPoint(vector, result);
-  }
-
-  /** @deprecated */
-  transformVector(vector: Readonly<NumericArray>, result?: NumericArray): NumericArray {
-    return this.transformAsPoint(vector, result);
-  }
-
-  /** @deprecated */
-  transformDirection(vector: Readonly<NumericArray>, result?: NumericArray): NumericArray {
-    return this.transformAsVector(vector, result);
-  }
-
   // three.js math API compatibility
 
   makeRotationX(radians: number): this {

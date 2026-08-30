@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import {vec2} from '@math.gl/core';
+import * as vec2 from '@math.gl/core/vec2';
 import type {WebMercatorViewport} from './web-mercator-viewport';
 import {worldToLngLat} from './web-mercator-utils';
 import {transformVector} from './math-utils';

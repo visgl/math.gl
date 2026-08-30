@@ -7,20 +7,7 @@ import {test, expect} from 'vitest';
 import {Vector2, Vector3, Pose, _MathUtils} from '@math.gl/core';
 import {config, configure, isArray, clone, equals, exactEquals, formatValue} from '@math.gl/core';
 import {toRadians, toDegrees} from '@math.gl/core';
-import {
-  radians,
-  degrees,
-  safeMod,
-  normalizeAngle,
-  sin,
-  cos,
-  tan,
-  asin,
-  acos,
-  atan,
-  clamp,
-  lerp
-} from '@math.gl/core';
+import {radians, degrees, safeMod, normalizeAngle, clamp, lerp} from '@math.gl/core';
 
 test('math.gl#tests', () => {
   expect(0, '0 and 0 compares equally').toBe(0);
@@ -216,48 +203,6 @@ test('math.gl#normalizeAngle', () => {
   expect(normalizeAngle(Math.PI * 3, 'zero-to-two-pi')).toBe(Math.PI);
   expect(normalizeAngle(Math.PI * 1.5, 'negative-pi-to-pi')).toBe(-Math.PI / 2);
   expect(normalizeAngle(-Math.PI * 1.5, 'negative-pi-to-pi')).toBe(Math.PI / 2);
-});
-
-test('math.gl#sin', () => {
-  runTests(sin, [
-    {input: 0, result: 0},
-    {input: [Math.PI / 2, Math.PI / 6, 0], result: [1, 0.5, 0]}
-  ]);
-});
-
-test('math.gl#cos', () => {
-  runTests(cos, [
-    {input: 0, result: 1},
-    {input: [Math.PI / 2, Math.PI / 3, 0], result: [0, 0.5, 1]}
-  ]);
-});
-
-test('math.gl#tan', () => {
-  runTests(tan, [
-    {input: 0, result: 0},
-    {input: [Math.PI / 4, 0], result: [1, 0]}
-  ]);
-});
-
-test('math.gl#asin', () => {
-  runTests(asin, [
-    {input: 0, result: 0},
-    {input: [1, 0.5, 0], result: [Math.PI / 2, Math.PI / 6, 0]}
-  ]);
-});
-
-test('math.gl#acos', () => {
-  runTests(acos, [
-    {input: 1, result: 0},
-    {input: [0, 0.5, 1], result: [Math.PI / 2, Math.PI / 3, 0]}
-  ]);
-});
-
-test('math.gl#atan', () => {
-  runTests(atan, [
-    {input: 0, result: 0},
-    {input: [1, 0], result: [Math.PI / 4, 0]}
-  ]);
 });
 
 test('math.gl#clamp', () => {
