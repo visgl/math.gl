@@ -1,0 +1,46 @@
+{
+  "name": "@math.gl/geoarrow",
+  "description": "Arrow-independent GeoArrow physical layouts and geometry kernels",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "5.0.0-alpha.1",
+  "keywords": [
+    "geoarrow",
+    "geospatial",
+    "columnar",
+    "typed-array",
+    "math"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./worker": {
+      "types": "./dist/worker.d.ts",
+      "import": "./dist/worker.js",
+      "require": "./dist/worker.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@math.gl/crs": "5.0.0-alpha.1",
+    "@math.gl/polygon": "5.0.0-alpha.1",
+    "@math.gl/types": "5.0.0-alpha.1"
+  }
+}

@@ -2,6 +2,8 @@
 
 ## v5.0.0-alpha.1
 
+- feat(geoarrow): Add runtime-independent physical descriptors, columnar kernels, codecs, builder,
+  polygon tessellation, and worker-transfer support
 - chore: Improve coverage reporting (#118)
 - feat: Use lowercase string literals for public API constants (#116)
 - feat(proj): Add lightweight EPSG3857 utilities (#117)

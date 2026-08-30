@@ -18,6 +18,7 @@
     "bootstrap": "yarn && ocular-bootstrap && yarn build",
     "build": "ocular-clean && time ocular-build",
     "check:crs-types": "npx tsc --project test/types/crs/tsconfig.json",
+    "check:geoarrow-boundary": "node modules/geoarrow/scripts/check-package-boundary.mjs",
     "check:projjson-types": "node scripts/generate-projjson-types.mjs --check",
     "generate:projjson-types": "node scripts/generate-projjson-types.mjs",
     "cover": "yarn test-coverage",

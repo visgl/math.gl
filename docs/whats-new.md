@@ -57,6 +57,7 @@ Highlights:
 - New expression evaluator module
 - DGGS support is consolidated into a single module with interchangeable decoder objects.
 - New standards-based CRS definitions module and modernized proj4 support.
+- New runtime-independent GeoArrow descriptor and columnar geometry module.
 - New typed-array geometry utilities module.
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 - Stronger type guarantees for math classes via the new sized array types.
@@ -92,6 +93,19 @@ Highlights:
   default/unknown/absent state.
 - Adds a comprehensive CRS developer guide covering standards, serialization versus semantics,
   axis order, dynamic and vertical CRS, transformation boundaries, and integration guidance.
+
+**`@math.gl/geoarrow`** (NEW MODULE)
+
+- Defines borrowed physical descriptors for native, mixed, box, WKB, and WKT geometry columns
+  without requiring an Arrow runtime.
+- Traverses and validates interleaved or separated XY/XYZ/XYM/XYZM coordinates, Int32/Int64 list
+  offsets, sliced validity bitmaps, chunks, dense unions, and geometry collections.
+- Adds synchronous bounds, vertex-count, coordinate-map, layout-conversion, winding, and resource
+  limit kernels.
+- Adds a two-pass builder, WKB/WKT codecs, Polygon/MultiPolygon tessellation, and an optional worker
+  transfer subpath.
+- Moves reusable GeoArrow math out of loaders.gl and luma.gl prototypes while leaving runtime
+  adapters, worker scheduling, and GPU resources with their owning libraries.
 
 **`@math.gl/proj4`**
 
