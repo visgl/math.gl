@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.1",
+  "version": "5.0.0-alpha.2",
   "keywords": [
     "javascript",
     "math",
@@ -68,7 +68,7 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/types": "5.0.0-alpha.1",
+    "@math.gl/types": "5.0.0-alpha.2",
     "a5-js": "^0.5.0",
     "h3-js": "^4.2.1",
     "open-location-code": "^1.0.3"
