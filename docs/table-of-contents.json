@@ -122,6 +122,16 @@
       },
       {
         "type": "category",
+        "label": "@math.gl/geoarrow",
+        "items": [
+          "modules/geoarrow/README",
+          "modules/geoarrow/physical-layouts",
+          "modules/geoarrow/api-reference/geoarrow",
+          "modules/geoarrow/migration-guide"
+        ]
+      },
+      {
+        "type": "category",
         "label": "@math.gl/geoid",
         "items": [
           "modules/geoid/README",

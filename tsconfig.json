@@ -61,6 +61,8 @@
       "@math.gl/geoid/test/*": ["./modules/geoid/test/*"],
       "@math.gl/geospatial/*": ["./modules/geospatial/src/*"],
       "@math.gl/geospatial/test/*": ["./modules/geospatial/test/*"],
+      "@math.gl/geoarrow/*": ["./modules/geoarrow/src/*"],
+      "@math.gl/geoarrow/test/*": ["./modules/geoarrow/test/*"],
       "@math.gl/geometry-utils/*": ["./modules/geometry-utils/src/*"],
       "@math.gl/geometry-utils/test/*": ["./modules/geometry-utils/test/*"],
       "@math.gl/polygon/*": ["./modules/polygon/src/*"],
