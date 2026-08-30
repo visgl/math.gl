@@ -25,6 +25,18 @@ are inferred as XYZ because coordinate arrays alone cannot identify a measure.
 
 ## Binary
 
+### `inspectWKBHeader(bytes, byteOffset?)`
+
+Reads endian order, geometry family, semantic dimension, dialect, and optional EWKB SRID without
+traversing the coordinate payload.
+
+### `visitWKB(bytes, visitor, options?)`
+
+Traverses geometry, ring, and optional scalar-coordinate events without allocating geometry or
+coordinate objects. When `visitor.coordinate` is omitted, coordinate payloads are bounds-checked
+and skipped without decoding their Float64 ordinates. This is the fast path for structural
+classification and vertex counting.
+
 ### `parseWKB(bytes, options?)`
 
 Parses exactly one WKB value and rejects trailing data. It accepts little- or big-endian geometry,

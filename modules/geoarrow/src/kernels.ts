@@ -9,18 +9,17 @@ import type {
   GeoArrowCoordinateLayout,
   GeoArrowCoordinateMapper,
   GeoArrowDimension,
-  GeoArrowEncoding,
-  GeoArrowGeometryValue
+  GeoArrowEncoding
 } from './types';
-import {getGeoArrowDimensionSize} from './types';
-import {makeGeoArrowColumnFromGeometryRows} from './builder';
+import {getGeoArrowDimensionSize, getGeoArrowGeometryType} from './types';
+import type {GeoArrowBuilderEncoding} from './builder';
+import {GeoArrowBuilder} from './builder';
 import {
   getGeoArrowRowCount,
   getGeoArrowVertexCount,
   isGeoArrowValueValid,
   visitGeoArrowCoordinates,
-  getListRange,
-  materializeGeometryRow
+  getListRange
 } from './layout';
 
 /** Resource limits applied before potentially expensive materialization or conversion. */
@@ -817,7 +816,6 @@ function promoteToDenseUnion(column: GeoArrowColumn): GeoArrowColumn {
       length: chunk.length,
       typeIds,
       valueOffsets,
-      validity: chunk.validity,
       children: [
         {
           name: getGeoArrowGeometryTypeName(column.encoding),
@@ -835,69 +833,179 @@ function promoteToDenseUnion(column: GeoArrowColumn): GeoArrowColumn {
 
 function demoteDenseUnion(column: GeoArrowColumn, encoding: GeoArrowEncoding): GeoArrowColumn {
   if (encoding === 'geoarrow.geometry' || encoding === 'geoarrow.geometrycollection') return column;
-  const rows: Array<GeoArrowGeometryValue | null> = [];
-  for (const chunk of column.chunks) {
-    if (chunk.kind !== 'dense-union') throw new Error('Expected dense-union storage');
-    for (let index = 0; index < chunk.length; index++) {
-      if (!isGeoArrowValueValid(chunk.validity, index)) {
-        rows.push(null);
-        continue;
-      }
-      const physical = (chunk.offset || 0) + index;
-      const child = chunk.children.find(candidate => candidate.typeId === chunk.typeIds[physical]);
-      const childEncoding = child && (child.encoding || getEncodingFromChildName(child.name));
-      if (!child || childEncoding !== encoding) {
-        throw new Error(`Rows cannot be represented as ${encoding}`);
-      }
-      const geometry = materializeGeometryRow(
-        child.data,
-        chunk.valueOffsets[physical],
-        childEncoding
-      );
-      rows.push(
-        geometry
-          ? resizeGeometryValue(geometry, child.dimension || column.dimension, column.dimension)
-          : null
-      );
-    }
-  }
-  const built = makeGeoArrowColumnFromGeometryRows(rows, {
+  if (!isConcreteEncoding(encoding)) throw new Error(`Rows cannot be represented as ${encoding}`);
+  const builderOptions = {
+    encoding,
     dimension: column.dimension,
     coordinateLayout: column.coordinateLayout || 'interleaved',
     offsetType: getColumnOffsetType(column)
+  } as const;
+  const chunks = column.chunks.map(chunk => {
+    if (chunk.kind !== 'dense-union') throw new Error('Expected dense-union storage');
+    const replay = (builder: GeoArrowBuilder): void => {
+      for (let index = 0; index < chunk.length; index++) {
+        if (!isGeoArrowValueValid(chunk.validity, index)) {
+          builder.append(null);
+          continue;
+        }
+        const physical = (chunk.offset || 0) + index;
+        const child = chunk.children.find(
+          candidate => candidate.typeId === chunk.typeIds[physical]
+        );
+        const childEncoding = child && (child.encoding || getEncodingFromChildName(child.name));
+        const childIndex = chunk.valueOffsets[physical];
+        if (!child || !childEncoding || !isGeoArrowValueValid(child.data.validity, childIndex)) {
+          builder.append(null);
+          continue;
+        }
+        if (!isConcreteEncoding(childEncoding) || !canPromoteEncoding(childEncoding, encoding)) {
+          throw new Error(`Rows cannot be represented as ${encoding}`);
+        }
+        replayPhysicalGeometryIntoBuilder(
+          builder,
+          child.data,
+          childIndex,
+          childEncoding,
+          child.dimension || column.dimension,
+          encoding
+        );
+      }
+    };
+    const measure = new GeoArrowBuilder({...builderOptions, mode: 'measure'});
+    replay(measure);
+    const write = new GeoArrowBuilder({
+      ...builderOptions,
+      mode: 'write',
+      target: measure.allocateTarget()
+    });
+    replay(write);
+    return write.finish().chunks[0];
   });
-  return {
-    ...built,
-    encoding: encoding as GeoArrowColumn['encoding'],
-    spatialReference: column.spatialReference,
-    edges: column.edges,
-    metadata: column.metadata
-  };
+  return {...column, encoding, coordinateLayout: builderOptions.coordinateLayout, chunks};
 }
 
-function resizeGeometryValue(
-  geometry: import('./types').GeoArrowGeometryValue,
+function replayPhysicalGeometryIntoBuilder(
+  builder: GeoArrowBuilder,
+  array: GeoArrowArray,
+  rowIndex: number,
+  sourceEncoding: GeoArrowBuilderEncoding,
   sourceDimension: GeoArrowDimension,
-  targetDimension: GeoArrowDimension
-): import('./types').GeoArrowGeometryValue {
-  const map = (value: unknown): unknown => {
-    if (Array.isArray(value) && (value.length === 0 || typeof value[0] === 'number')) {
-      return resizeCoordinate(value as number[], sourceDimension, targetDimension);
+  targetEncoding: GeoArrowBuilderEncoding
+): void {
+  const targetType = getGeoArrowGeometryTypeName(targetEncoding) as
+    | 'Point'
+    | 'LineString'
+    | 'Polygon'
+    | 'MultiPoint'
+    | 'MultiLineString'
+    | 'MultiPolygon';
+  builder.beginGeometry(targetType, sourceDimension);
+  if (sourceEncoding === 'geoarrow.point') {
+    writePhysicalCoordinateIntoBuilder(builder, array, rowIndex, sourceDimension);
+  } else if (sourceEncoding === 'geoarrow.linestring' || sourceEncoding === 'geoarrow.multipoint') {
+    const [first, last] = requireListRange(array, rowIndex);
+    if (targetEncoding === 'geoarrow.multilinestring') builder.beginRing(last - first);
+    const leaf = (array as import('./types').GeoArrowList).child;
+    for (let index = first; index < last; index++) {
+      writePhysicalCoordinateIntoBuilder(builder, leaf, index, sourceDimension);
     }
-    return Array.isArray(value) ? value.map(map) : value;
-  };
-  if (geometry.type === 'GeometryCollection') {
-    return {
-      type: geometry.type,
-      geometries: geometry.geometries.map(child =>
-        resizeGeometryValue(child, sourceDimension, targetDimension)
-      )
-    };
+  } else if (
+    sourceEncoding === 'geoarrow.polygon' ||
+    sourceEncoding === 'geoarrow.multilinestring'
+  ) {
+    const [first, last] = requireListRange(array, rowIndex);
+    if (targetEncoding === 'geoarrow.multipolygon') builder.beginPolygon();
+    const parts = (array as import('./types').GeoArrowList).child;
+    for (let partIndex = first; partIndex < last; partIndex++) {
+      const [partFirst, partLast] = requireListRange(parts, partIndex);
+      builder.beginRing(partLast - partFirst);
+      const leaf = (parts as import('./types').GeoArrowList).child;
+      for (let index = partFirst; index < partLast; index++) {
+        writePhysicalCoordinateIntoBuilder(builder, leaf, index, sourceDimension);
+      }
+    }
+  } else {
+    const [first, last] = requireListRange(array, rowIndex);
+    const polygons = (array as import('./types').GeoArrowList).child;
+    for (let polygonIndex = first; polygonIndex < last; polygonIndex++) {
+      builder.beginPolygon();
+      const [partFirst, partLast] = requireListRange(polygons, polygonIndex);
+      const parts = (polygons as import('./types').GeoArrowList).child;
+      for (let partIndex = partFirst; partIndex < partLast; partIndex++) {
+        const [ringFirst, ringLast] = requireListRange(parts, partIndex);
+        builder.beginRing(ringLast - ringFirst);
+        const leaf = (parts as import('./types').GeoArrowList).child;
+        for (let index = ringFirst; index < ringLast; index++) {
+          writePhysicalCoordinateIntoBuilder(builder, leaf, index, sourceDimension);
+        }
+      }
+    }
   }
-  return {
-    ...geometry,
-    coordinates: map(geometry.coordinates)
-  } as import('./types').GeoArrowGeometryValue;
+  builder.endGeometry();
+}
+
+function writePhysicalCoordinateIntoBuilder(
+  builder: GeoArrowBuilder,
+  array: GeoArrowArray,
+  index: number,
+  dimension: GeoArrowDimension
+): void {
+  if (array.kind === 'fixed-size-list' && array.child.kind === 'primitive') {
+    const logical = (array.offset || 0) + index;
+    const stride = array.child.stride || 1;
+    const scalarOffset = (array.child.offset || 0) + logical * array.size * stride;
+    const x = Number(array.child.values[scalarOffset]);
+    const y = Number(array.child.values[scalarOffset + stride]);
+    const third =
+      array.size > 2 ? Number(array.child.values[scalarOffset + 2 * stride]) : undefined;
+    const fourth =
+      array.size > 3 ? Number(array.child.values[scalarOffset + 3 * stride]) : undefined;
+    builder.writeCoordinateFromDimension(
+      x,
+      y,
+      dimension === 'xyz' || dimension === 'xyzm' ? third : undefined,
+      dimension === 'xym' ? third : fourth,
+      dimension
+    );
+    return;
+  }
+  if (array.kind === 'struct') {
+    const logical = (array.offset || 0) + index;
+    const read = (name: 'x' | 'y' | 'z' | 'm'): number | undefined => {
+      const child = array.children[name];
+      return child?.kind === 'primitive'
+        ? Number(child.values[(child.offset || 0) + logical * (child.stride || 1)])
+        : undefined;
+    };
+    builder.writeCoordinateFromDimension(read('x')!, read('y')!, read('z'), read('m'), dimension);
+    return;
+  }
+  throw new Error('Invalid GeoArrow coordinate storage');
+}
+
+function requireListRange(array: GeoArrowArray, index: number): [number, number] {
+  if (array.kind !== 'list') throw new Error('Invalid GeoArrow list storage');
+  return getListRange(array, index);
+}
+
+function canPromoteEncoding(source: GeoArrowEncoding, target: GeoArrowEncoding): boolean {
+  return (
+    source === target ||
+    (source === 'geoarrow.point' && target === 'geoarrow.multipoint') ||
+    (source === 'geoarrow.linestring' && target === 'geoarrow.multilinestring') ||
+    (source === 'geoarrow.polygon' && target === 'geoarrow.multipolygon')
+  );
+}
+
+function isConcreteEncoding(encoding: GeoArrowEncoding): encoding is GeoArrowBuilderEncoding {
+  return (
+    encoding === 'geoarrow.point' ||
+    encoding === 'geoarrow.linestring' ||
+    encoding === 'geoarrow.polygon' ||
+    encoding === 'geoarrow.multipoint' ||
+    encoding === 'geoarrow.multilinestring' ||
+    encoding === 'geoarrow.multipolygon'
+  );
 }
 
 function getCanonicalTypeId(encoding: GeoArrowEncoding, dimension: GeoArrowDimension): number {
@@ -1011,7 +1119,7 @@ function convertArrayOffsets(array: GeoArrowArray, offsetType: 'int32' | 'int64'
 }
 
 function getGeoArrowGeometryTypeName(encoding: GeoArrowEncoding): string {
-  return encoding.replace('geoarrow.', '').replace(/^./, character => character.toUpperCase());
+  return getGeoArrowGeometryType(encoding) || encoding.replace('geoarrow.', '');
 }
 
 function rewindArrayRings(

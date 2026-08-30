@@ -184,7 +184,10 @@ builder.endGeometry();
 ```
 
 `MultiLineString` uses one `beginRing` per line and `MultiPolygon` uses `beginPolygon` followed by
-one `beginRing` per ring. Event writes do not create coordinate arrays or Arrow objects.
+one `beginRing` per ring. Parsers that already expose scalar ordinates can call
+`writeCoordinateFromDimension(x, y, z, m, sourceDimension)` to map Z and M into the target
+dimension without allocating a temporary coordinate tuple. Event writes do not create coordinate
+arrays or Arrow objects.
 
 ## Inspection and read-only kernels
 
@@ -233,21 +236,49 @@ import {
 } from '@math.gl/geoarrow/wkb';
 
 const wkb = encodeGeoArrowWKB(polygons);
-const decoded = decodeGeoArrowWKB(wkb);
+const decoded = decodeGeoArrowWKB(wkb, {
+  encoding: 'native',
+  dimension: 'infer',
+  coordinateLayout: 'interleaved',
+  coordinateType: 'float64',
+  offsetType: 'int32'
+});
 const wkt = encodeGeoArrowWKT(decoded);
 const nativeAgain = decodeGeoArrowWKT(wkt);
 ```
 
 WKB decoding accepts little- or big-endian geometry, ISO Z/M/ZM type offsets, EWKB Z/M/SRID flags,
-BinaryView-style serialized buffers, nulls, and mixed concrete families. Concrete rows are scanned
-with `@math.gl/wkb`'s header inspector and visitor, measured, and written directly into native
-buffers. Mixed family or mixed-dimension input becomes a dense union whose children retain their
-own encoding and dimension metadata; no conversion through GeoJSON or nested coordinate arrays is
-needed. GeometryCollection remains on the compatibility path until its nested event topology is
-available.
-multi-geometries, and nested geometry collections. WKT supports all corresponding geometry
-families, dimension tokens, both MultiPoint spellings, and empties. Decoding normalizes mixed-size
-serialized coordinates to the column's declared semantic dimension.
+BinaryView-style serialized buffers, nulls, mixed concrete families, multi-geometries, and recursive
+GeometryCollections. The default dimension policy is `infer`: WKB headers are authoritative because
+Arrow Binary storage has no physical coordinate dimension. Use `preserve` to force the descriptor's
+declared dimension, or request `xy`, `xyz`, `xym`, or `xyzm` explicitly.
+
+Ordinary rows use a header-only classification pass followed by one measurement traversal and one
+write traversal. Scalar ordinates are written directly into the final interleaved or separated
+Float32/Float64 buffers. GeometryCollections use a recursive schema-discovery pass and the same
+two-pass child builders; they do not fall back to `parseWKB`, GeoJSON values, or nested coordinate
+arrays. Input chunk boundaries are retained, and every mixed chunk receives the same union schema
+even when a family first occurs in a later chunk.
+
+`encoding` defaults to `native`, which selects a concrete family when all valid rows agree and a
+dense union otherwise. A concrete target may also perform Point-to-MultiPoint,
+LineString-to-MultiLineString, or Polygon-to-MultiPolygon promotion. `coordinateLayout`,
+`coordinateType`, and `offsetType` select the final buffers directly, avoiding a decode-then-convert
+copy. Dense-union nulls are represented by a valid child dispatch whose selected child value is
+null; no Arrow-incompatible union validity bitmap is emitted.
+
+WKT supports all corresponding geometry families, dimension tokens, both MultiPoint spellings, and
+empties. WKT conversion currently prioritizes semantic compatibility; the WKB visitor path is the
+allocation-sensitive path intended for high-volume loaders.
+
+WKB encoding likewise preserves native chunk boundaries. Each chunk is measured into an offsets
+buffer and then written into one exact byte allocation by replaying the physical descriptors; it
+does not allocate a closure, geometry object, or coordinate array for every row.
+
+`getGeoArrowWKBVertexCount(column)` counts serialized WKB vertices directly from headers and list
+counts. It advances over coordinate payloads without decoding float ordinates, preserves all
+traversal limits, and supports regular offset storage and BinaryView storage. Use it in loaders that
+need counts before deciding whether to allocate native buffers.
 
 Parsing or formatting one geometry is intentionally provided by the dependency-free
 `@math.gl/wkb` package. The GeoArrow `/wkb` bridge consumes its visitors and two-pass builder:

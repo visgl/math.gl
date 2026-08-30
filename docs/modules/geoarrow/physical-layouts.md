@@ -101,7 +101,8 @@ an identity operation.
 
 Null and empty are distinct:
 
-- a null row has a cleared top-level validity bit;
+- a null concrete/list row has a cleared top-level validity bit;
+- a null dense-union row dispatches to a child value whose validity bit is cleared;
 - an empty variable geometry is valid and has equal adjacent list offsets;
 - an empty point is conventionally represented by non-finite coordinate ordinates.
 
@@ -113,7 +114,12 @@ Null and empty are distinct:
 - one `valueOffsets` entry per logical row;
 - named children with stable integer type IDs and optional child-specific encoding, dimension, and
   coordinate layout;
-- an optional root validity bitmap.
+
+Arrow dense unions do not have a root validity buffer. Every row must contain a valid type ID and
+child offset. A null geometry therefore dispatches to a real child slot whose child validity bit is
+cleared. Builders and WKB decoders always emit this Arrow-compatible representation. Readers retain
+support for a legacy descriptor-level validity bitmap, but adapters must not attempt to construct an
+Arrow dense union from that legacy form.
 
 For row `i`, `typeIds[offset + i]` selects a child and `valueOffsets[offset + i]` selects the value
 inside that child. Child arrays remain compact; union rows do not require placeholder values.

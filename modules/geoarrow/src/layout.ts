@@ -154,7 +154,7 @@ export function inspectGeoArrowColumn(column: GeoArrowColumn): GeoArrowColumnIns
   for (const chunk of column.chunks) {
     collectStorageKinds(chunk, storageKinds);
     for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
-      if (!isGeoArrowValueValid(chunk.validity, rowIndex)) nullCount++;
+      if (!isGeoArrowRowValid(chunk, rowIndex)) nullCount++;
     }
   }
   return {
@@ -167,6 +167,20 @@ export function inspectGeoArrowColumn(column: GeoArrowColumn): GeoArrowColumnIns
     valid: validation.valid,
     issues: validation.issues
   };
+}
+
+function isGeoArrowRowValid(array: GeoArrowArray, rowIndex: number): boolean {
+  if (!isGeoArrowValueValid(array.validity, rowIndex)) return false;
+  if (array.kind !== 'dense-union') return true;
+  const physicalIndex = (array.offset || 0) + rowIndex;
+  const child = array.children.find(candidate => candidate.typeId === array.typeIds[physicalIndex]);
+  const valueOffset = array.valueOffsets[physicalIndex];
+  return Boolean(
+    child &&
+      valueOffset >= 0 &&
+      valueOffset < child.data.length &&
+      isGeoArrowValueValid(child.data.validity, valueOffset)
+  );
 }
 
 /** Counts coordinate tuples without materializing geometry objects. */

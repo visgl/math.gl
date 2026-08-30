@@ -117,6 +117,8 @@ The builder also accepts an incremental event stream. Call `beginGeometry(type, 
 `writeCoordinate(x, y, z?, m?)`, and `endGeometry()`. Events are useful for loaders that already
 have a streaming parser and avoid constructing intermediate geometry rows. For backward
 compatibility, a MultiPolygon with no `beginPolygon()` calls is treated as one polygon.
+`writeCoordinateFromDimension(x, y, z, m, sourceDimension)` is the scalar fast path when source and
+target dimensions differ; it maps Z and M by name and does not allocate a coordinate tuple.
 
 ### `makeGeoArrowColumnFromGeometryRows(rows, options?)`
 
@@ -125,17 +127,45 @@ values. Set `encoding: 'geoarrow.geometry'` to force a dense union for homogeneo
 
 ## WKB and WKT
 
-### `decodeGeoArrowWKB(column)` / `decodeGeoArrowWKT(column)`
+### `decodeGeoArrowWKB(column, options?)` / `decodeGeoArrowWKT(column)`
 
 Import these functions from `@math.gl/geoarrow/wkb`. They decode serialized chunks into native
-descriptors while preserving nulls, metadata, CRS, edge semantics, and (where possible) source
-chunking. WKB accepts mixed endianness and WKB/EWKB/ISO dimensions. WKT accepts explicit Z/M/ZM
-tokens and the established three/four-ordinate compatibility form.
+descriptors while preserving nulls, metadata, CRS, edge semantics, and source chunking. WKB accepts
+mixed endianness, WKB/EWKB/ISO dimensions, mixed families and dimensions, recursive collections,
+regular binary storage, and Arrow BinaryView-style storage.
+
+`DecodeGeoArrowWKBOptions` controls final allocation:
+
+| Option | Values | Default |
+| --- | --- | --- |
+| `encoding` | native concrete encoding, `geoarrow.geometry`, `geoarrow.geometrycollection`, or `native` | `native` |
+| `dimension` | `infer`, `preserve`, `xy`, `xyz`, `xym`, or `xyzm` | `infer` |
+| `coordinateLayout` | `interleaved` or `separated` | `interleaved` |
+| `coordinateType` | `float32` or `float64` | `float64` |
+| `offsetType` | `int32` or `int64` | `int32` |
+| `traversal` | `@math.gl/wkb` traversal/resource limits | none |
+
+`infer` reads semantic dimensions from WKB headers rather than trusting the placeholder dimension
+on a Binary descriptor. Concrete family rows use header-only classification plus exact measure and
+write traversals. Mixed unions receive a stable schema across all chunks, and GeometryCollections
+are built recursively without materialized geometry rows. A concrete target supports the canonical
+single-to-multi promotions and rejects incompatible families.
+
+WKT accepts explicit Z/M/ZM tokens and the established three/four-ordinate compatibility form.
+
+### `getGeoArrowWKBVertexCount(column, traversal?)`
+
+Counts vertices across WKB chunks without materializing rows or decoding coordinate ordinates.
+Geometry and ring count fields are sufficient for Point, LineString, Polygon, all multi-geometries,
+and recursive GeometryCollections. Regular binary and BinaryView storage are supported. The
+optional traversal limits are the same as `decodeGeoArrowWKB`.
 
 ### `encodeGeoArrowWKB(column)` / `encodeGeoArrowWKT(column)`
 
 Import these functions from `@math.gl/geoarrow/wkb`. They encode native descriptors into
-variable-width serialized descriptors using a measure/write pass. A column already in the requested
+variable-width serialized descriptors using an exact measure/write pass per source chunk. WKB
+encoding traverses physical descriptors directly, retains chunk boundaries, and represents
+dense-union child nulls in the serialized validity bitmap. A column already in the requested
 encoding is returned unchanged.
 
 Individual geometry parsing and formatting live in `@math.gl/wkb`. GeoArrow's four codec functions

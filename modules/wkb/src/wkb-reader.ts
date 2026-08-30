@@ -283,6 +283,7 @@ function visitCoordinate(
 ): number {
   const coordinateByteLength = getWellKnownDimensionSize(header.dimension) * 8;
   assertRemaining(view, byteOffset, coordinateByteLength);
+  if (!visitor.coordinate) return byteOffset + coordinateByteLength;
   const x = view.getFloat64(byteOffset, header.littleEndian);
   const y = view.getFloat64(byteOffset + 8, header.littleEndian);
   const third =
