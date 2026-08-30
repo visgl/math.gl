@@ -4,18 +4,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return */
 
 import {
-  acos,
-  asin,
-  atan,
   clamp,
-  cos,
   degrees,
   lerp,
   normalizeAngle,
   radians,
   safeMod,
-  sin,
-  tan,
   toDegrees,
   toRadians
 } from '@math.gl/core';
@@ -71,12 +65,12 @@ export type ExpressionEvaluationOptions = {
  */
 export const BASIC_MATH_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {
   abs: Math.abs,
-  acos,
-  asin,
-  atan,
+  acos: Math.acos,
+  asin: Math.asin,
+  atan: Math.atan,
   ceil: Math.ceil,
   clamp,
-  cos,
+  cos: Math.cos,
   degrees,
   exp: Math.exp,
   floor: Math.floor,
@@ -90,9 +84,9 @@ export const BASIC_MATH_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {
   round: Math.round,
   safeMod,
   sign: Math.sign,
-  sin,
+  sin: Math.sin,
   sqrt: Math.sqrt,
-  tan,
+  tan: Math.tan,
   toDegrees,
   toRadians,
   trunc: Math.trunc
