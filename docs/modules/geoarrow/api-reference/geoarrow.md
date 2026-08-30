@@ -47,14 +47,19 @@ Creates a zero-copy physical view by advancing logical offsets and bitmap bit of
 
 ### `getGeoArrowRowCount(column)` / `getGeoArrowVertexCount(column)`
 
-Count logical rows or native coordinate tuples directly over descriptors. Serialized columns must
-be decoded before vertex counting and therefore report zero.
+Count logical rows or native coordinate tuples directly over descriptors. Serialized columns report
+zero native vertices until decoded with the `/wkb` bridge.
 
 ## Bounds and coordinate transforms
 
 ### `getGeoArrowBounds(column)`
 
 Returns `[minX, minY, maxX, maxY]`, or `null` when no finite native coordinate exists.
+
+### `getGeoArrowRowBounds(column)`
+
+Returns one XY bound (or `null`) per logical row in a single descriptor traversal. This is the
+preferred primitive for loaders and query engines that need conservative row pruning.
 
 ### `mapGeoArrowCoordinates(column, mapper, options?)`
 
@@ -75,8 +80,11 @@ non-coordinate columns are returned unchanged.
 
 ### `convertGeoArrowColumn(column, options?)`
 
-Converts native geometry family, semantic dimension, or coordinate layout. Use the codec functions
-for serialized targets. Semantic ordinates map by name, so M is not reinterpreted as Z.
+Converts native geometry family, semantic dimension, coordinate layout, coordinate type, or offset
+width. Options are `encoding`, `dimension`, `coordinateLayout` (`preserve`, `interleaved`, or
+`separated`), `coordinateType` (`preserve`, `float32`, or `float64`), and `offsetType`
+(`preserve`, `int32`, or `int64`). Use `/wkb` for serialized targets. Semantic ordinates map by
+name, so M is not reinterpreted as Z.
 
 ### `normalizeGeoArrowUnion(column)`
 
@@ -104,6 +112,12 @@ Convenience two-pass build with internal allocation.
 
 Allocates exact validity, coordinate, and offset buffers independently of a builder instance.
 
+The builder also accepts an incremental event stream. Call `beginGeometry(type, dimension, count?)`,
+`beginPolygon()` for each MultiPolygon part, `beginRing(count?)`,
+`writeCoordinate(x, y, z?, m?)`, and `endGeometry()`. Events are useful for loaders that already
+have a streaming parser and avoid constructing intermediate geometry rows. For backward
+compatibility, a MultiPolygon with no `beginPolygon()` calls is treated as one polygon.
+
 ### `makeGeoArrowColumnFromGeometryRows(rows, options?)`
 
 Builds homogeneous, geometry-collection, or mixed dense-union storage from materialized geometry
@@ -113,13 +127,15 @@ values. Set `encoding: 'geoarrow.geometry'` to force a dense union for homogeneo
 
 ### `decodeGeoArrowWKB(column)` / `decodeGeoArrowWKT(column)`
 
-Decode serialized chunks into native descriptors. Nulls, metadata, CRS, and edge semantics are
-preserved. Mixed-size serialized coordinates are normalized to the declared column dimension; the
-result may coalesce source chunks.
+Import these functions from `@math.gl/geoarrow/wkb`. They decode serialized chunks into native
+descriptors while preserving nulls, metadata, CRS, edge semantics, and (where possible) source
+chunking. WKB accepts mixed endianness and WKB/EWKB/ISO dimensions. WKT accepts explicit Z/M/ZM
+tokens and the established three/four-ordinate compatibility form.
 
 ### `encodeGeoArrowWKB(column)` / `encodeGeoArrowWKT(column)`
 
-Encode native rows into variable-width serialized descriptors. A column already in the requested
+Import these functions from `@math.gl/geoarrow/wkb`. They encode native descriptors into
+variable-width serialized descriptors using a measure/write pass. A column already in the requested
 encoding is returned unchanged.
 
 Individual geometry parsing and formatting live in `@math.gl/wkb`. GeoArrow's four codec functions
@@ -130,7 +146,7 @@ metadata.
 
 ### `tessellateGeoArrowPolygons(column, options?)`
 
-Returns `GeoArrowTessellation`:
+Import this optional function from `@math.gl/geoarrow/tessellation`. It returns `GeoArrowTessellation`:
 
 | Field | Meaning |
 | --- | --- |

@@ -31,6 +31,21 @@
       "types": "./dist/worker.d.ts",
       "import": "./dist/worker.js",
       "require": "./dist/worker.cjs"
+    },
+    "./builder": {
+      "types": "./dist/builder-entry.d.ts",
+      "import": "./dist/builder-entry.js",
+      "require": "./dist/builder-entry.cjs"
+    },
+    "./wkb": {
+      "types": "./dist/wkb-entry.d.ts",
+      "import": "./dist/wkb-entry.js",
+      "require": "./dist/wkb-entry.cjs"
+    },
+    "./tessellation": {
+      "types": "./dist/tessellation-entry.d.ts",
+      "import": "./dist/tessellation-entry.js",
+      "require": "./dist/tessellation-entry.cjs"
     }
   },
   "files": [

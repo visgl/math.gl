@@ -298,7 +298,7 @@ function visitUnionRowCoordinates(
   const valueOffset = union.valueOffsets[physicalIndex];
   const child = union.children.find(candidate => candidate.typeId === typeId);
   if (!child) return;
-  const encoding = getEncodingFromChildName(child.name);
+  const encoding = child.encoding || getEncodingFromChildName(child.name);
   if (encoding === 'geoarrow.geometrycollection' && child.data.kind === 'list') {
     const [first, last] = getListRange(child.data, valueOffset);
     if (child.data.child.kind === 'dense-union') {
@@ -386,7 +386,11 @@ function materializeUnionRow(
   const valueOffset = union.valueOffsets[physicalIndex];
   const child = union.children.find(candidate => candidate.typeId === typeId);
   if (!child || valueOffset < 0 || valueOffset >= child.data.length) return null;
-  return materializeGeometryRow(child.data, valueOffset, getEncodingFromChildName(child.name));
+  return materializeGeometryRow(
+    child.data,
+    valueOffset,
+    child.encoding || getEncodingFromChildName(child.name)
+  );
 }
 
 function getEncodingFromChildName(name: string): GeoArrowEncoding {
@@ -538,15 +542,26 @@ function validateArray(
       break;
     }
     case 'serialized': {
-      validateOffsets(
-        array.offsets,
-        array.offset || 0,
-        array.length,
-        array.values.length,
-        array.offsetBase,
-        path,
-        issues
-      );
+      if (array.views) {
+        const requiredWords = ((array.offset || 0) + array.length) * 4;
+        if (requiredWords > array.views.length) {
+          issues.push({
+            code: 'invalid-length',
+            path,
+            message: 'Serialized view records are too short.'
+          });
+        }
+      } else {
+        validateOffsets(
+          array.offsets,
+          array.offset || 0,
+          array.length,
+          array.values.length,
+          array.offsetBase,
+          path,
+          issues
+        );
+      }
       break;
     }
   }
@@ -711,12 +726,20 @@ function validateUnionLayouts(
   for (const child of union.children) {
     let encoding: GeoArrowEncoding;
     try {
-      encoding = getEncodingFromChildName(child.name);
+      encoding = child.encoding || getEncodingFromChildName(child.name);
     } catch (error) {
       addInvalidLayout(`${path}.${child.name}`, (error as Error).message, issues);
       continue;
     }
-    validateGeometryLayout(child.data, encoding, column, `${path}.${child.name}`, issues);
+    const childColumn =
+      child.dimension || child.coordinateLayout
+        ? {
+            ...column,
+            dimension: child.dimension || column.dimension,
+            coordinateLayout: child.coordinateLayout || column.coordinateLayout
+          }
+        : column;
+    validateGeometryLayout(child.data, encoding, childColumn, `${path}.${child.name}`, issues);
   }
 }
 
@@ -814,6 +837,8 @@ function collectArrayBuffers(array: GeoArrowArray, buffers: Set<ArrayBuffer>): v
     case 'serialized':
       addBuffer(array.offsets.buffer, buffers);
       addBuffer(array.values.buffer, buffers);
+      if (array.views) addBuffer(array.views.buffer, buffers);
+      for (const data of array.dataBuffers || []) addBuffer(data.buffer, buffers);
       break;
   }
 }

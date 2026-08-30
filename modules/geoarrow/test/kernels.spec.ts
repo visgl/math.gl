@@ -47,6 +47,50 @@ test('coordinate mapping, into mapping and layout conversion are deterministic',
   expect(interleaveGeoArrowCoordinates(unspecifiedLayout)).toBe(unspecifiedLayout);
 });
 
+test('coordinate mapping attributes every nested coordinate to its logical row', () => {
+  const source = makeGeoArrowColumnFromGeometryRows([
+    {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0, 0],
+          [1, 0],
+          [0, 1],
+          [0, 0]
+        ],
+        [
+          [0, 0],
+          [0, 1],
+          [1, 1],
+          [0, 0]
+        ]
+      ]
+    },
+    {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [10, 0],
+          [11, 0],
+          [10, 1],
+          [10, 0]
+        ]
+      ]
+    }
+  ]);
+  const mapped = mapGeoArrowCoordinates(source, (coordinate, rowIndex) => [
+    coordinate[0] + rowIndex * 100,
+    coordinate[1]
+  ]);
+  const rows = materializeGeoArrowRows(mapped);
+  expect((rows[0] as Extract<GeoArrowGeometryValue, {type: 'Polygon'}>).coordinates[1][0][0]).toBe(
+    0
+  );
+  expect((rows[1] as Extract<GeoArrowGeometryValue, {type: 'Polygon'}>).coordinates[0][0][0]).toBe(
+    110
+  );
+});
+
 test('conversion round trips preserve geometry values', () => {
   let seed = 0x12345678;
   const random = (): number => {

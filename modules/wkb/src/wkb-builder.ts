@@ -18,6 +18,8 @@ export type WKBCoordinateTransform = (
 export type WKBBuilderBaseOptions = Readonly<{
   /** Coordinate dimension written by every geometry header. Defaults to `xy`. */
   dimension?: WellKnownDimension;
+  /** Optional per-row dimension resolver used by geometry-array helpers. */
+  dimensionResolver?: (geometryIndex: number) => WellKnownDimension;
   /** Byte order written by every geometry header. Defaults to little endian. */
   byteOrder?: 'little-endian' | 'big-endian';
   /** Optional EWKB spatial reference identifier. */
@@ -67,7 +69,7 @@ const GEOMETRY_TYPE_CODES: Readonly<Record<WKBGeometryType, number>> = {
  */
 export class WKBBuilder {
   readonly mode: 'measure' | 'write';
-  readonly dimension: WellKnownDimension;
+  dimension: WellKnownDimension;
   readonly littleEndian: boolean;
   readonly srid?: number;
   readonly transform?: WKBCoordinateTransform;
@@ -181,6 +183,17 @@ export class WKBBuilder {
     }
   }
 
+  /** Temporarily changes the semantic dimension for a nested geometry. */
+  withDimension<T>(dimension: WellKnownDimension, callback: () => T): T {
+    const previous = this.dimension;
+    this.dimension = dimension;
+    try {
+      return callback();
+    } finally {
+      this.dimension = previous;
+    }
+  }
+
   /** Returns the number of bytes measured or written. */
   finishGeometry(): number {
     return this.byteOffset - this.startByteOffset;
@@ -194,7 +207,12 @@ export class WKBBuilder {
     const valueOffsets = new Int32Array(geometryWriters.length + 1);
     for (let geometryIndex = 0; geometryIndex < geometryWriters.length; geometryIndex++) {
       const geometryWriter = geometryWriters[geometryIndex];
-      const byteLength = geometryWriter ? measureGeometry(geometryWriter, options) : 0;
+      const byteLength = geometryWriter
+        ? measureGeometry(geometryWriter, {
+            ...options,
+            dimension: options.dimensionResolver?.(geometryIndex) ?? options.dimension
+          })
+        : 0;
       const nextOffset = valueOffsets[geometryIndex] + byteLength;
       if (nextOffset > 0x7fffffff) throw new Error('WKB geometry array exceeds Int32 offsets');
       valueOffsets[geometryIndex + 1] = nextOffset;
@@ -222,7 +240,8 @@ export class WKBBuilder {
         mode: 'write',
         target: values,
         byteOffset: valueOffsets[geometryIndex],
-        ...options
+        ...options,
+        dimension: options.dimensionResolver?.(geometryIndex) ?? options.dimension
       });
       geometryWriter(builder);
       const byteLength = builder.finishGeometry();

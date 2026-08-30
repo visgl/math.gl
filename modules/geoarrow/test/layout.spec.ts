@@ -7,6 +7,7 @@ import {
   convertGeoArrowColumn,
   GeoArrowBuilder,
   getGeoArrowBounds,
+  getGeoArrowRowBounds,
   getGeoArrowTransferList,
   getGeoArrowVertexCount,
   inspectGeoArrowColumn,
@@ -20,7 +21,12 @@ import {
   type GeoArrowGeometryValue
 } from '../src/index';
 import {prepareGeoArrowTransfer} from '../src/worker';
-import {getEncodingForGeometryValue, isGeoArrowValueValid, sliceGeoArrowArray} from '../src/layout';
+import {
+  getEncodingForGeometryValue,
+  isGeoArrowValueValid,
+  materializeGeoArrowRows,
+  sliceGeoArrowArray
+} from '../src/layout';
 
 const concreteFixtures: GeoArrowGeometryValue[] = [
   {type: 'Point', coordinates: [1, 2]},
@@ -124,6 +130,77 @@ test('GeoArrowBuilder measure and write passes have exact parity', () => {
   expect(getGeoArrowVertexCount(column)).toBe(4);
 });
 
+test('GeoArrowBuilder event API writes coordinates without Arrow objects', () => {
+  const options = {
+    encoding: 'geoarrow.linestring' as const,
+    dimension: 'xy' as const,
+    coordinateLayout: 'interleaved' as const
+  };
+  const measure = new GeoArrowBuilder({...options, mode: 'measure'});
+  measure
+    .beginGeometry('LineString', 'xy', 2)
+    .beginRing(2)
+    .writeCoordinate(1, 2)
+    .writeCoordinate(3, 4)
+    .endGeometry();
+  const write = new GeoArrowBuilder({...options, mode: 'write', target: measure.allocateTarget()});
+  write
+    .beginGeometry('LineString', 'xy', 2)
+    .beginRing(2)
+    .writeCoordinate(1, 2)
+    .writeCoordinate(3, 4)
+    .endGeometry();
+  const column = write.finish();
+  expect(getGeoArrowVertexCount(column)).toBe(2);
+  expect(getGeoArrowBounds(column)).toEqual([1, 2, 3, 4]);
+});
+
+test('GeoArrowBuilder event API preserves MultiPolygon parts', () => {
+  const options = {
+    encoding: 'geoarrow.multipolygon' as const,
+    dimension: 'xy' as const
+  };
+  const builder = new GeoArrowBuilder({...options, mode: 'measure'});
+  builder.beginGeometry('MultiPolygon', 'xy', 2);
+  builder.beginPolygon().beginRing(4);
+  builder.writeCoordinate(0, 0).writeCoordinate(1, 0).writeCoordinate(0, 1).writeCoordinate(0, 0);
+  builder.beginPolygon().beginRing(4);
+  builder
+    .writeCoordinate(10, 0)
+    .writeCoordinate(11, 0)
+    .writeCoordinate(10, 1)
+    .writeCoordinate(10, 0);
+  builder.endGeometry();
+  const write = new GeoArrowBuilder({...options, mode: 'write', target: builder.allocateTarget()});
+  write.beginGeometry('MultiPolygon', 'xy', 2);
+  write.beginPolygon().beginRing(4);
+  write.writeCoordinate(0, 0).writeCoordinate(1, 0).writeCoordinate(0, 1).writeCoordinate(0, 0);
+  write.beginPolygon().beginRing(4);
+  write.writeCoordinate(10, 0).writeCoordinate(11, 0).writeCoordinate(10, 1).writeCoordinate(10, 0);
+  const column = write.endGeometry().finish();
+  expect(materializeGeoArrowRows(column)[0]).toEqual({
+    type: 'MultiPolygon',
+    coordinates: [
+      [
+        [
+          [0, 0],
+          [1, 0],
+          [0, 1],
+          [0, 0]
+        ]
+      ],
+      [
+        [
+          [10, 0],
+          [11, 0],
+          [10, 1],
+          [10, 0]
+        ]
+      ]
+    ]
+  });
+});
+
 test('dimensions, coordinate layouts and Int32/Int64 offsets conform', () => {
   const dimensions: GeoArrowDimension[] = ['xy', 'xyz', 'xym', 'xyzm'];
   for (const dimension of dimensions) {
@@ -180,6 +257,7 @@ test('sliced validity bitmaps, chunks, nulls and empties are honored', () => {
     coordinateCount: 3
   });
   expect(getGeoArrowBounds(sliced)).toEqual([2, 2, 4, 4]);
+  expect(getGeoArrowRowBounds(sliced)).toEqual([null, [2, 2, 2, 2], [3, 3, 3, 3], [4, 4, 4, 4]]);
 });
 
 test('dense unions and geometry collections dispatch without row-shape assumptions', () => {
