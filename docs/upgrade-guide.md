@@ -4,6 +4,12 @@
 
 Version 5 removes APIs that were deprecated in earlier releases and tightens the dependency boundaries between core classes. The class entry point remains tree-shakeable; low-level gl-matrix-compatible functions now use focused subpath imports.
 
+### TypeScript and runtime support
+
+- Upgrade TypeScript consumers to TypeScript 6.0 or later before installing math.gl v5. The v5 declarations reference TypeScript's `es2025.float16` library to type `Float16Array` accurately.
+- `Float16Array` remains optional at runtime. math.gl detects native or polyfilled support and exposes a `Uint16Array` fallback; it does not install a polyfill.
+- The emitted JavaScript continues to target ES2020. Version 5 does not otherwise raise the runtime policy of evergreen browsers and active or maintenance Node.js LTS releases.
+
 ### Rotation and coordinate conversions
 
 - Replace `euler.getQuaternion()` and `euler.toQuaternion()` with the destination-owned `new Quaternion().fromEuler(euler)`. To reuse an allocation, call `quaternion.fromEuler(euler)` on an existing quaternion.
@@ -51,6 +57,13 @@ import {mat4, vec3} from '@math.gl/core';
 ```
 
 The available subpaths are `@math.gl/core/mat3`, `/mat4`, `/quat`, `/vec2`, `/vec3`, and `/vec4`. Keeping these namespaces out of the root entry point substantially reduces the cost of retaining every root export.
+
+### CRS and proj4 definitions
+
+- Use `CRSDefinition`, PROJJSON types, syntax codecs, and spatial-reference descriptors from the new proj4-independent `@math.gl/crs` package. Authority codes, WKT, and PROJ definitions remain strings, while PROJJSON is the typed semantic object model.
+- `@math.gl/proj4` now uses proj4js 2.20.9. Existing string definitions continue to work. Its `Proj4CRSDefinition` object type intentionally accepts only the `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` PROJJSON variants that proj4js can execute.
+- Check broader CRS metadata with `checkProj4CRSCompatibility()` before constructing a projection. `CompoundCRS` and `VerticalCRS` remain valid `@math.gl/crs` definitions but are not directly executable by proj4js; horizontal extraction from a compound definition must be requested explicitly.
+- Axis-order enforcement remains opt-in through `enforceAxis: true`. Register NTv2 grids with `Proj4Projection.registerDatumGrid()` before using definitions that reference them.
 
 ### DGGS packages
 

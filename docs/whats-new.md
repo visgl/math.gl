@@ -47,11 +47,11 @@
 
 ## v5.0 (In development)
 
-Target Release Date: Q2, 2026.
+Status: prerelease development.
 
 Highlights:
 
-- TypeScript 6 compatibility.
+- TypeScript 6.0 or later is required for TypeScript consumers; emitted JavaScript continues to target ES2020.
 - New `@math.gl/geometry` CPU primitive mesh and tessellation module.
 - glTF 2.1 box, capsule, cylinder, plane and sphere analytic shapes in `@math.gl/culling`.
 - New expression evaluator module

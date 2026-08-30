@@ -1,11 +1,16 @@
 # CHANGELOG
 
-## v5.0.0-alpha.1
+## Unreleased
 
 - feat(wkb): Add dependency-free WKB, EWKB, and WKT geometry codecs and move format parsing out of
-  GeoArrow
+  GeoArrow (#120)
+- feat(core): Add convenience methods to `Quaternion` and `Matrix4` (#54)
 - feat(geoarrow): Add runtime-independent physical descriptors, columnar kernels, codecs, builder,
-  polygon tessellation, and worker-transfer support
+  polygon tessellation, and worker-transfer support (#119)
+- feat(dggs): Consolidate lightweight grid adapters and cell detection in `@math.gl/dggs` (#59)
+
+## v5.0.0-alpha.1
+
 - chore: Improve coverage reporting (#118)
 - feat: Use lowercase string literals for public API constants (#116)
 - feat(proj): Add lightweight EPSG3857 utilities (#117)
