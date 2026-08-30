@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v5.0.0-alpha.1
+
+- chore: Improve coverage reporting (#118)
+- feat: Use lowercase string literals for public API constants (#116)
+- feat(proj): Add lightweight EPSG3857 utilities (#117)
+- feat(crs): Add spatial reference descriptors (#115)
+- feat(proj4): Add CRS compatibility utilities (#114)
+- fix(crs): Reject malformed quoted values (#113)
+
 ## v4.2.0-alpha.5
 
 - feat(crs): Add WKT and PROJ syntax codecs (#112)
@@ -540,4 +549,3 @@
 
 ### 1.0.0-alpha.1
 - Initial source code copy from luma.gl v4.1-alpha branch
-
