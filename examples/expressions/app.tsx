@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState, type ReactElement} from 'react';
 import {
   BASIC_MATH_FUNCTION_LIBRARY,
   ExpressionFunctionRegistry,
@@ -53,7 +53,7 @@ const LIBRARIES: Record<
 
 const INITIAL_SAMPLE = EXPRESSION_SAMPLES[3];
 
-export default function ExpressionPlayground(): JSX.Element {
+export default function ExpressionPlayground(): ReactElement {
   const [sampleId, setSampleId] = useState(INITIAL_SAMPLE.id);
   const [expression, setExpression] = useState(INITIAL_SAMPLE.expression);
   const [contextText, setContextText] = useState(formatJson(INITIAL_SAMPLE.context));
@@ -252,7 +252,7 @@ export default function ExpressionPlayground(): JSX.Element {
   );
 }
 
-function GeometryPreview({value}: {value: unknown}): JSX.Element {
+function GeometryPreview({value}: {value: unknown}): ReactElement {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const coordinates = useMemo(() => extractCoordinates(value), [value]);
 
