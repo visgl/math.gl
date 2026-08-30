@@ -43,3 +43,14 @@ test('quadkeyToWorldBounds', () => {
     expect(bounds, 'Quadkey bounds calculated').toEqual(expectedBounds);
   }
 });
+
+test('QuadkeyDecoder exposes all geometry representations', () => {
+  const quadkey = '0123';
+  expect(QuadkeyDecoder.cellToLngLat(quadkey)).toHaveLength(2);
+  const boundary = QuadkeyDecoder.cellToBoundary(quadkey);
+  expect(QuadkeyDecoder.cellToBoundaryFlat(quadkey)).toEqual(boundary.flat());
+  expect(QuadkeyDecoder.cellToBounds(quadkey)).toEqual([
+    [-67.5, 66.60276990247817],
+    [-45.22499999999999, 74.01954331150228]
+  ]);
+});

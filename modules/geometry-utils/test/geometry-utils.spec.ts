@@ -16,12 +16,19 @@ import {
   makeAttributeIterator,
   makePrimitiveIterator,
   octDecode,
+  octDecodeFloat,
   octDecodeFromVector4,
+  octDecodeInRange,
   octEncode,
+  octEncodeFloat,
+  octEncodeInRange,
   octEncodeToVector4,
+  octPack,
+  octUnpack,
   zigZagDeltaDecode
 } from '@math.gl/geometry-utils';
 import {expect, test} from 'vitest';
+import {getAttributeValues, getPositionAttribute, isGeometry} from '../src/geometry';
 
 test('GLType converts component types and preserves view offsets', () => {
   expect(GLType.fromTypedArray(new Uint16Array(1))).toBe(GL.UNSIGNED_SHORT);
@@ -112,9 +119,103 @@ test('texture coordinate and ZigZag delta compression round-trip', () => {
   zigZagDeltaDecode(u, v);
   expect(Array.from(u)).toEqual([1, 2, 1]);
   expect(Array.from(v)).toEqual([2, 2, 0]);
+
+  const heights = [new Uint16Array([0, 2, 1]), new Uint16Array([0, 2, 3]), [0, 2, 1]] as const;
+  zigZagDeltaDecode(heights[0], heights[1], heights[2]);
+  expect(heights[2]).toEqual([0, 1, 0]);
 });
 
 test('emod wraps positive and negative values', () => {
   expect(emod(1.25)).toBe(0.25);
   expect(emod(-0.25)).toBe(0.75);
+});
+
+test('octahedral compression handles lower hemisphere and packed vectors', () => {
+  const first = new Vector3(1, 1, -1).normalize();
+  const second = new Vector3(-1, 1, 1).normalize();
+  const third = new Vector3(0, -1, 0);
+  const encoded = octEncodeInRange(first, 1023, new Vector2());
+  const decoded = octDecodeInRange(encoded.x, encoded.y, 1023, new Vector3());
+  expect(decoded.distance(first)).toBeLessThan(0.01);
+  expect(octDecodeInRange(0, 0, 255, new Vector3()).magnitude()).toBeCloseTo(1);
+
+  const packed = octPack(first, second, third, new Vector2());
+  const unpackedFirst = new Vector3();
+  const unpackedSecond = new Vector3();
+  const unpackedThird = new Vector3();
+  octUnpack(packed, unpackedFirst, unpackedSecond, unpackedThird);
+  expect(unpackedFirst.distance(first)).toBeLessThan(0.02);
+  expect(unpackedSecond.distance(second)).toBeLessThan(0.01);
+  expect(unpackedThird.distance(third)).toBeLessThan(0.01);
+  expect(octDecodeFloat(octEncodeFloat(first), new Vector3()).distance(first)).toBeLessThan(0.02);
+  expect(() => octDecodeInRange(-1, 0, 255, new Vector3())).toThrow(/unsigned normalized/);
+  expect(() => octDecodeFromVector4({x: 256, y: 0, z: 0, w: 0}, new Vector3())).toThrow(
+    /unsigned normalized/
+  );
+  expect(
+    decompressTextureCoordinates(compressTextureCoordinates(new Vector2(0, 1)), new Vector2())
+  ).toEqual(new Vector2(0, 1));
+});
+
+test('primitive iterator supports every WebGL primitive mode and validates inputs', () => {
+  expect([...makePrimitiveIterator(undefined, {}, GL.POINTS, 0, 2)].map(p => p.i1)).toEqual([0, 1]);
+  expect([...makePrimitiveIterator(undefined, {}, GL.LINES, 0, 4)].map(p => [p.i1, p.i2])).toEqual([
+    [0, 1],
+    [2, 3]
+  ]);
+  expect(
+    [...makePrimitiveIterator(undefined, {}, GL.LINE_STRIP, 0, 3)].map(p => [p.i1, p.i2])
+  ).toEqual([
+    [0, 1],
+    [1, 2]
+  ]);
+  expect(
+    [...makePrimitiveIterator(undefined, {}, GL.TRIANGLES, 0, 3)].map(p => [p.i1, p.i2, p.i3])
+  ).toEqual([[0, 1, 2]]);
+  expect(
+    [...makePrimitiveIterator(undefined, {}, GL.TRIANGLE_FAN, 0, 4)].map(p => [p.i1, p.i2, p.i3])
+  ).toEqual([
+    [0, 1, 2],
+    [0, 2, 3]
+  ]);
+  expect([...makePrimitiveIterator(undefined, {}, GL.POINTS)]).toEqual([]);
+  expect(() => [...makePrimitiveIterator(undefined, {})]).toThrow(/mode is required/);
+  expect(() => [...makePrimitiveIterator(undefined, {}, 999)]).toThrow(/Unknown primitive mode/);
+});
+
+test('geometry utility validation covers non-indexed normals and iterator guards', () => {
+  const geometry = {
+    mode: GL.TRIANGLES,
+    attributes: {positions: {values: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]), size: 3}}
+  };
+  expect(Array.from(computeVertexNormals(geometry))).toEqual([0, 0, 1, 0, 0, 1, 0, 0, 1]);
+  expect(() => computeVertexNormals({...geometry, mode: GL.LINES})).toThrow(/Triangle geometry/);
+  expect(() =>
+    computeVertexNormals({
+      mode: GL.TRIANGLES,
+      attributes: {POSITION: {value: new Float32Array(3), size: 2}}
+    })
+  ).toThrow(/at least three/);
+  expect(() => [...makeAttributeIterator(new Float32Array([1]), 0)]).toThrow(/positive integer/);
+  expect(() => [...makeAttributeIterator(new Float32Array([1, 2, 3]), 2)]).toThrow(/divisible/);
+});
+
+test('geometry attribute helpers distinguish supported legacy shapes', () => {
+  expect(isGeometry(null)).toBe(false);
+  expect(isGeometry({mode: 'triangles', attributes: {}})).toBe(false);
+  expect(isGeometry({mode: 4, attributes: {}})).toBe(true);
+  const values = new Float32Array([1, 2]);
+  expect(getAttributeValues(values)).toBe(values);
+  expect(getAttributeValues({value: values})).toBe(values);
+  expect(getAttributeValues({values})).toBe(values);
+  expect(() => getAttributeValues({})).toThrow(/typed-array/);
+  expect(getPositionAttribute({mode: GL.POINTS, attributes: {POSITION: {value: values}}})).toEqual({
+    value: values
+  });
+  expect(getPositionAttribute({mode: GL.POINTS, attributes: {positions: {value: values}}})).toEqual(
+    {
+      value: values
+    }
+  );
+  expect(() => getPositionAttribute({mode: GL.POINTS, attributes: {}})).toThrow(/position/);
 });

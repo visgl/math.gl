@@ -77,4 +77,28 @@ describe('PROJ string codec', () => {
       })
     ).toThrow('Invalid PROJ raw parameter value');
   });
+
+  test('handles empty values, escapes, flags, and encoder validation', () => {
+    const ast = parsePROJString('+proj= +title="A \\"quoted\\" value" +flag');
+    expect(ast.parameters[0].value).toBe('');
+    expect(ast.parameters[1].value).toBe('A "quoted" value');
+    expect(encodePROJString(ast)).toContain('+flag');
+    expect(
+      encodePROJString({
+        type: 'proj-string',
+        parameters: [
+          {type: 'parameter', name: 'title', value: 'two words'},
+          {type: 'parameter', name: 'quote', value: 'a"b'},
+          {type: 'parameter', name: 'slash', value: 'a\\b'}
+        ]
+      })
+    ).toBe('+title="two words" +quote="a\\"b" +slash=a\\b');
+    expect(() => parsePROJString('+bad="unterminated')).toThrow(PROJStringSyntaxError);
+    expect(() => parsePROJString('+bad=a"b')).toThrow(PROJStringSyntaxError);
+    expect(() => encodePROJString(null as never)).toThrow(TypeError);
+    expect(() => encodePROJString({type: 'proj-string', parameters: []})).toThrow(TypeError);
+    expect(() =>
+      encodePROJString({type: 'proj-string', parameters: [{type: 'parameter', name: 'bad name'}]})
+    ).toThrow(/Invalid PROJ parameter name/);
+  });
 });

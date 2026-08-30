@@ -8,7 +8,7 @@ import {
   getFloat16ArrayConstructor,
   isFloat16ArrayConstructor,
   isTypedArray
-} from '@math.gl/types';
+} from '../src/index';
 
 test('math.gl#Float16Array constructor', () => {
   const Float16ArrayConstructor = getFloat16ArrayConstructor();

@@ -67,6 +67,14 @@ test('Quaternion#fromEuler', () => {
   }
 });
 
+test('Quaternion covers object assignment and invalid Euler orders', () => {
+  const quaternion = new Quaternion().fromObject({x: 1, y: 2, z: 3, w: 4});
+  expect(quaternion).toEqual([1, 2, 3, 4]);
+  expect(() => quaternion.fromEuler({x: 0, y: 0, z: 0, order: 'invalid' as never})).toThrow(
+    /Unknown Euler angle order/
+  );
+});
+
 test('Quaternion#fromAxisRotation', () => {
   let q = new Quaternion().fromAxisRotation(new Vector3(0, 0, 1), Math.PI);
   expect(equals(q, [0, 0, 1, Math.cos(Math.PI / 2)])).toBe(true);

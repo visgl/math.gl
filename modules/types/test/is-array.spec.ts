@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {isTypedArray, isNumericArray} from '@math.gl/types';
-import type {TypedArray, TypedArrayConstructor} from '@math.gl/types';
+import {isTypedArray, isNumericArray} from '../src/index';
+import type {TypedArray, TypedArrayConstructor} from '../src/index';
 
 const TEST_CASES: {value: unknown; isTypedArray: boolean; isNumericArray: boolean}[] = [
   {value: new Float32Array(1), isTypedArray: true, isNumericArray: true},

@@ -38,3 +38,14 @@ test('S2Decoder#cellToBoundaryFlat', () => {
     expect(polygon.slice(0, 2), 'polygon is closed').toEqual(polygon.slice(-2));
   }
 });
+
+test('S2Decoder exposes object boundaries and bounds for token and bigint inputs', () => {
+  const token = '80858004';
+  const index = S2Decoder.tokenToCell(token);
+  const boundaryFromToken = S2Decoder.cellToBoundary(token);
+  const boundaryFromIndex = S2Decoder.cellToBoundary(index);
+  expect(boundaryFromToken).toEqual(boundaryFromIndex);
+  expect(S2Decoder.cellToBounds(token)).toEqual(S2Decoder.cellToBounds(index));
+  expect(S2Decoder.cellToLngLat(index)).toEqual(S2Decoder.cellToLngLat(token));
+  expect(S2Decoder.cellToToken(index)).toBe(token);
+});
