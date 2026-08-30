@@ -72,6 +72,7 @@ export {
   assertGeoArrowResourceLimits,
   convertGeoArrowColumn,
   getGeoArrowBounds,
+  getGeoArrowRowBounds,
   interleaveGeoArrowCoordinates,
   mapGeoArrowCoordinates,
   mapGeoArrowCoordinatesInto,

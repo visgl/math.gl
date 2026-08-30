@@ -1,16 +1,19 @@
 # @math.gl/geoarrow
 
-Columnar geometry descriptors and synchronous CPU kernels for GeoArrow-compatible memory layouts.
+Arrow-independent columnar geometry descriptors and synchronous buffer algorithms for
+GeoArrow-compatible memory layouts.
 
 `@math.gl/geoarrow` works directly over borrowed typed arrays. It deliberately does not require an
 Arrow runtime: a loader, dataframe, database client, or application can adapt its buffers to the
-small descriptor ABI and use the same validation, conversion, column-codec, and tessellation
-kernels.
+small descriptor ABI and use the same validation, conversion, and coordinate algorithms. Optional
+format and mesh capabilities are isolated behind subpaths so consumers only bundle what they use.
 
 ## Install
 
 ```bash
 npm install @math.gl/geoarrow
+# Only needed when using the /wkb subpath directly.
+npm install @math.gl/wkb
 ```
 
 ## Why descriptors?
@@ -34,11 +37,11 @@ identity as a reliable zero-copy signal.
 
 ```typescript
 import {
-  GeoArrowBuilder,
   getGeoArrowBounds,
   getGeoArrowVertexCount,
   mapGeoArrowCoordinates
 } from '@math.gl/geoarrow';
+import {GeoArrowBuilder} from '@math.gl/geoarrow/builder';
 
 const column = GeoArrowBuilder.build(
   [
@@ -173,11 +176,13 @@ The following operations traverse descriptors directly and do not create per-row
 - `validateGeoArrowColumn`
 - `getGeoArrowVertexCount`
 - `getGeoArrowBounds`
+- `getGeoArrowRowBounds`
 - `visitGeoArrowCoordinates`
 - `getGeoArrowTransferList`
 
-Allocating transforms such as coordinate mapping, physical conversion, winding normalization, and
-codec decoding return new descriptors. Their inputs remain unchanged.
+Allocating transforms such as coordinate mapping, physical conversion, and winding normalization
+return new descriptors. Their inputs remain unchanged. Serialized codecs are isolated in the
+`/wkb` subpath.
 
 ## Conversion and winding
 
@@ -207,7 +212,7 @@ import {
   encodeGeoArrowWKB,
   decodeGeoArrowWKT,
   encodeGeoArrowWKT
-} from '@math.gl/geoarrow';
+} from '@math.gl/geoarrow/wkb';
 
 const wkb = encodeGeoArrowWKB(polygons);
 const decoded = decodeGeoArrowWKB(wkb);
@@ -221,19 +226,20 @@ families, dimension tokens, both MultiPoint spellings, and empties. Decoding nor
 serialized coordinates to the column's declared semantic dimension.
 
 Parsing or formatting one geometry is intentionally provided by the dependency-free
-`@math.gl/wkb` package:
+`@math.gl/wkb` package. The GeoArrow `/wkb` bridge consumes its visitors and two-pass builder:
 
 ```typescript
 import {parseWKB, writeWKB, parseWKT, formatWKT} from '@math.gl/wkb';
 ```
 
-`@math.gl/geoarrow` depends on `@math.gl/wkb`; the format package never depends on GeoArrow or
-Apache Arrow.
+The descriptor and buffer-algorithm implementation does not require Apache Arrow. The `/wkb`
+subpath (and the legacy root codec re-exports) uses `@math.gl/wkb`; install it when using those
+functions.
 
 ## Polygon tessellation
 
 ```typescript
-import {tessellateGeoArrowPolygons} from '@math.gl/geoarrow';
+import {tessellateGeoArrowPolygons} from '@math.gl/geoarrow/tessellation';
 
 const mesh = tessellateGeoArrowPolygons(polygons, {
   positionSize: 3,
@@ -280,6 +286,28 @@ worker.postMessage(payload.column, {transfer: payload.transferList});
 explicit `postMessage` call transfers ownership. Shared buffers are omitted because they are not
 transferable.
 
+## Loaders.gl integration
+
+The intended loaders.gl architecture keeps Apache Arrow at the boundary:
+
+```text
+Arrow Data / Vector / Table
+        │  loaders.gl adapter
+        ▼
+GeoArrowColumn descriptors  ──►  @math.gl/geoarrow buffer algorithms
+        │
+        └── loaders.gl Arrow field + extension metadata
+```
+
+The adapter should borrow Arrow buffers and preserve chunking, offsets, validity, dense-union
+dispatch, dimensions, layouts, CRS, and extension metadata. It should not call Arrow scalar
+accessors in conversion paths. Keep GeoJSON conversion, adaptive target policy, Arrow schema
+construction, and row-shaped compatibility values in loaders.gl.
+
+Use the optional `/wkb` bridge only for serialized columns and `/builder` when emitting native
+descriptors from a feature stream. This keeps the common Arrow-to-native path independent of text
+and binary codec code.
+
 ## Adapting another columnar runtime
 
 Keep runtime-specific objects at the boundary. Read their physical buffers and construct a
@@ -299,11 +327,12 @@ the producer runtime.
 
 - Descriptors: `GeoArrowColumn`, `GeoArrowArray`, all physical array descriptor types
 - Layout: `inspectGeoArrowColumn`, `validateGeoArrowColumn`, slicing and traversal
-- Kernels: count, bounds, map, interleave, convert, rewind, union normalization, resource limits
-- Construction: `GeoArrowBuilder`, `makeGeoArrowColumnFromGeometryRows`
-- Column codecs: WKB/WKT descriptor encode and decode (individual parsing/formatting is tested in
+- Buffer algorithms: count, bounds, row bounds, map, interleave, convert, rewind, union
+  normalization, resource limits
+- Construction: `@math.gl/geoarrow/builder`
+- Column codecs: `@math.gl/geoarrow/wkb` (individual parsing/formatting is provided by
   `@math.gl/wkb`)
-- Meshes: `tessellateGeoArrowPolygons`
+- Meshes: `@math.gl/geoarrow/tessellation`
 - Transfer: `getGeoArrowTransferList`, plus `@math.gl/geoarrow/worker`
 
 See the math.gl documentation for the full [physical-layout guide](../../docs/modules/geoarrow/physical-layouts.md),

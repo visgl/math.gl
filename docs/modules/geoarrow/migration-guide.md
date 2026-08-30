@@ -13,8 +13,8 @@ table objects.
 | Adapting table/vector buffers to descriptors | loaders.gl or the table runtime integration |
 | Physical validation, traversal, bounds, mapping, winding | `@math.gl/geoarrow` |
 | Individual WKB/WKT parsing and formatting | `@math.gl/wkb` |
-| WKB/WKT column descriptors and adapters | `@math.gl/geoarrow` |
-| Polygon/MultiPolygon tessellation | `@math.gl/geoarrow` |
+| WKB/WKT column descriptors and adapters | `@math.gl/geoarrow/wkb` |
+| Polygon/MultiPolygon tessellation | `@math.gl/geoarrow/tessellation` |
 | GPU buffer creation and rendering | luma.gl/deck.gl |
 | Worker scheduling and ownership policy | the application or loader |
 
@@ -37,13 +37,13 @@ transfer-list deduplication. Those semantics are represented directly in `GeoArr
 | Arrow bounds kernel | `getGeoArrowBounds` |
 | Arrow coordinate mapper | `mapGeoArrowCoordinates` or `mapGeoArrowCoordinatesInto` |
 | Arrow builder output | `GeoArrowBuilderTarget` and borrowed descriptors |
-| Arrow WKB/WKT construction | plain serialized/native descriptors |
+| Arrow WKB/WKT construction | `@math.gl/geoarrow/wkb` plus plain descriptors |
 | Arrow transfer traversal | descriptor `getGeoArrowTransferList` |
 
 The loaders adapter should inspect Arrow schema/type metadata, then expose the physical buffers. It
 should preserve chunking, view offsets, validity bit offsets, list offset width, union type IDs and
 child names, semantic dimension, coordinate layout, CRS, and edge metadata. It should not iterate
-rows through scalar accessors.
+rows through scalar accessors. The adapter is the only place that imports Apache Arrow.
 
 ## From luma.gl
 
@@ -108,7 +108,8 @@ All downstream consumers can then share math.gl kernels without importing the ru
 1. Add a zero-copy adapter and fixture tests in loaders.gl.
 2. Compare descriptor inspection, count, bounds, conversion, WKB/WKT, and tessellation against the
    existing Arrow-backed fixtures.
-3. Replace luma's private interleaving and tessellation imports with `@math.gl/geoarrow`.
+3. Replace luma's private interleaving and tessellation imports with
+   `@math.gl/geoarrow` and `@math.gl/geoarrow/tessellation`.
 4. Keep worker orchestration in luma/loaders and use `prepareGeoArrowTransfer` for payloads.
 5. Delete the duplicated kernels only after exact output fixtures and buffer-identity assertions
    pass in the consumer repositories.

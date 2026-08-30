@@ -4,7 +4,19 @@
 
 import type {SpatialReference} from '@math.gl/crs';
 import type {TypedArray} from '@math.gl/types';
-import type {WellKnownGeometry} from '@math.gl/wkb';
+/** Minimal tagged geometry shape used only by compatibility builders.
+ *
+ * The physical GeoArrow APIs never create these values. Keeping the structural type here avoids
+ * making the descriptor package depend on the WKB format package.
+ */
+export type GeoArrowGeometryValue =
+  | {type: 'Point'; coordinates: readonly number[]}
+  | {type: 'LineString'; coordinates: readonly (readonly number[])[]}
+  | {type: 'Polygon'; coordinates: readonly (readonly (readonly number[])[])[]}
+  | {type: 'MultiPoint'; coordinates: readonly (readonly number[])[]}
+  | {type: 'MultiLineString'; coordinates: readonly (readonly (readonly number[])[])[]}
+  | {type: 'MultiPolygon'; coordinates: readonly (readonly (readonly (readonly number[])[])[])[]}
+  | {type: 'GeometryCollection'; geometries: readonly GeoArrowGeometryValue[]};
 
 /** GeoArrow concrete, mixed, bounding-box, and serialized encodings. */
 export type GeoArrowEncoding =
@@ -96,6 +108,12 @@ export type GeoArrowBox = GeoArrowStruct;
 export type GeoArrowDenseUnionChild = Readonly<{
   name: string;
   typeId: number;
+  /** Child-specific physical encoding (required for mixed-dimensional unions). */
+  encoding?: GeoArrowEncoding;
+  /** Child-specific semantic dimension. Falls back to the column dimension for legacy data. */
+  dimension?: GeoArrowDimension;
+  /** Child-specific coordinate layout. Falls back to the column layout for legacy data. */
+  coordinateLayout?: GeoArrowCoordinateLayout | null;
   data: GeoArrowArray;
 }>;
 
@@ -117,6 +135,10 @@ export type GeoArrowSerialized = GeoArrowArrayBase &
     encoding: 'binary' | 'utf8';
     offsets: GeoArrowOffsets;
     values: Uint8Array;
+    /** Optional Arrow BinaryView-style records (four uint32 words per row). */
+    views?: Uint32Array;
+    /** Borrowed out-of-line buffers referenced by BinaryView records. */
+    dataBuffers?: readonly Uint8Array[];
     /** Index of logical row zero in `offsets`. */
     offset?: number;
     /** Value subtracted from offsets before indexing `values`. */
@@ -142,9 +164,6 @@ export type GeoArrowColumn = Readonly<{
   edges?: 'planar' | 'spherical';
   metadata?: Readonly<Record<string, unknown>>;
 }>;
-
-/** Materialized geometry value used at codec and builder boundaries. */
-export type GeoArrowGeometryValue = WellKnownGeometry;
 
 /** Coordinate callback used by mapping kernels. */
 export type GeoArrowCoordinateMapper = (

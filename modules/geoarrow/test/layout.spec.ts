@@ -7,6 +7,7 @@ import {
   convertGeoArrowColumn,
   GeoArrowBuilder,
   getGeoArrowBounds,
+  getGeoArrowRowBounds,
   getGeoArrowTransferList,
   getGeoArrowVertexCount,
   inspectGeoArrowColumn,
@@ -124,6 +125,31 @@ test('GeoArrowBuilder measure and write passes have exact parity', () => {
   expect(getGeoArrowVertexCount(column)).toBe(4);
 });
 
+test('GeoArrowBuilder event API writes coordinates without Arrow objects', () => {
+  const options = {
+    encoding: 'geoarrow.linestring' as const,
+    dimension: 'xy' as const,
+    coordinateLayout: 'interleaved' as const
+  };
+  const measure = new GeoArrowBuilder({...options, mode: 'measure'});
+  measure
+    .beginGeometry('LineString', 'xy', 2)
+    .beginRing(2)
+    .writeCoordinate(1, 2)
+    .writeCoordinate(3, 4)
+    .endGeometry();
+  const write = new GeoArrowBuilder({...options, mode: 'write', target: measure.allocateTarget()});
+  write
+    .beginGeometry('LineString', 'xy', 2)
+    .beginRing(2)
+    .writeCoordinate(1, 2)
+    .writeCoordinate(3, 4)
+    .endGeometry();
+  const column = write.finish();
+  expect(getGeoArrowVertexCount(column)).toBe(2);
+  expect(getGeoArrowBounds(column)).toEqual([1, 2, 3, 4]);
+});
+
 test('dimensions, coordinate layouts and Int32/Int64 offsets conform', () => {
   const dimensions: GeoArrowDimension[] = ['xy', 'xyz', 'xym', 'xyzm'];
   for (const dimension of dimensions) {
@@ -180,6 +206,7 @@ test('sliced validity bitmaps, chunks, nulls and empties are honored', () => {
     coordinateCount: 3
   });
   expect(getGeoArrowBounds(sliced)).toEqual([2, 2, 4, 4]);
+  expect(getGeoArrowRowBounds(sliced)).toEqual([null, [2, 2, 2, 2], [3, 3, 3, 3], [4, 4, 4, 4]]);
 });
 
 test('dense unions and geometry collections dispatch without row-shape assumptions', () => {

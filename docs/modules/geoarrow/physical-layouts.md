@@ -18,8 +18,9 @@ type GeoArrowColumn = Readonly<{
 ```
 
 The envelope contains semantic facts that cannot be recovered reliably from raw buffers. Each
-chunk has the same encoding, dimension, and coordinate layout but owns its logical `length`,
-validity, and physical views.
+chunk owns its logical `length`, validity, and physical views. Homogeneous columns declare
+encoding, dimension, and layout at the column level. Dense-union children may override those
+properties independently, which is required for mixed Point Z/Point M collections.
 
 ## Geometry nesting
 
@@ -110,7 +111,8 @@ Null and empty are distinct:
 
 - one `typeIds` entry per logical row;
 - one `valueOffsets` entry per logical row;
-- named children with stable integer type IDs;
+- named children with stable integer type IDs and optional child-specific encoding, dimension, and
+  coordinate layout;
 - an optional root validity bitmap.
 
 For row `i`, `typeIds[offset + i]` selects a child and `valueOffsets[offset + i]` selects the value
@@ -120,14 +122,28 @@ inside that child. Child arrays remain compact; union rows do not require placeh
 child buffer identity. Geometry collections use a variable list whose child is the same dense-union
 shape, so nested members share the union traversal machinery.
 
+For a mixed column, child metadata is authoritative:
+
+```typescript
+children: [
+  {name: 'Point Z', typeId: 2, encoding: 'geoarrow.point', dimension: 'xyz', data: pointZ},
+  {name: 'Point M', typeId: 3, encoding: 'geoarrow.point', dimension: 'xym', data: pointM}
+]
+```
+
+Legacy descriptors that omit child metadata fall back to the parent column declaration. New
+builders should always populate it so that Z and M remain distinguishable after adaptation.
+
 ## Serialized values
 
 `GeoArrowSerialized` stores WKB as `binary` and WKT as `utf8`. It borrows a byte buffer plus Int32 or
 Int64 offsets and supports the same `offset`, `offsetBase`, validity, slicing, and chunk rules as
-native geometry.
+native geometry. Arrow BinaryView-style values can instead borrow four-word view records and a list
+of out-of-line data buffers; short values remain inline in the view record. No consolidation copy is
+required at the descriptor boundary.
 
 Inspection does not decode serialized payloads. Decode explicitly with `decodeGeoArrowWKB` or
-`decodeGeoArrowWKT` before coordinate kernels.
+`decodeGeoArrowWKT` from `@math.gl/geoarrow/wkb` before coordinate algorithms.
 
 ## Boxes
 
