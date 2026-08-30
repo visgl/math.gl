@@ -4,7 +4,13 @@
     "paths": {
       "math.gl": ["./modules/main/src/index.ts"],
       "@math.gl/core": ["./modules/core/src/index.ts"],
+      "@math.gl/crs": ["./modules/crs/src/index.ts"],
+      "@math.gl/crs/test/*": ["./modules/crs/test/*"],
+      "@math.gl/crs/*": ["./modules/crs/src/*"],
       "@math.gl/culling": ["./modules/culling/src/index.ts"],
+      "@math.gl/dggs": ["./modules/dggs/src/index.ts"],
+      "@math.gl/dggs/test/*": ["./modules/dggs/test/*"],
+      "@math.gl/dggs/*": ["./modules/dggs/src/*"],
       "@math.gl/geometry": ["./modules/geometry/src/index.ts"],
       "@math.gl/geometry-utils": ["./modules/geometry-utils/src/index.ts"],
       "@math.gl/dggs-geohash": ["./modules/dggs-geohash/src/index.ts"],
