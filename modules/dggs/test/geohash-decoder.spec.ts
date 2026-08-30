@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {GeohashDecoder} from '@math.gl/dggs';
 
 const TEST_DATA = [
@@ -29,20 +29,16 @@ const TEST_DATA = [
   }
 ];
 
-test('GeohashDecoder#getCellBounds', t => {
+test('GeohashDecoder#getCellBounds', () => {
   for (const {geohash, expectedBounds} of TEST_DATA) {
-    t.deepEqual(GeohashDecoder.getCellBounds(geohash), expectedBounds, `${geohash} bounds`);
+    expect(GeohashDecoder.getCellBounds(geohash), `${geohash} bounds`).toEqual(expectedBounds);
   }
-
-  t.end();
 });
 
-test('GeohashDecoder#getCellBoundaryPolygon', t => {
+test('GeohashDecoder#getCellBoundaryPolygon', () => {
   for (const {geohash} of TEST_DATA) {
     const polygon = GeohashDecoder.getCellBoundaryPolygon(geohash);
-    t.is(polygon.length - 1, 4, `${geohash} polygon has 4 sides`);
-    t.deepEqual(polygon[0], polygon.at(-1), `${geohash} polygon is closed`);
+    expect(polygon.length - 1, `${geohash} polygon has 4 sides`).toBe(4);
+    expect(polygon[0], `${geohash} polygon is closed`).toEqual(polygon.at(-1));
   }
-
-  t.end();
 });

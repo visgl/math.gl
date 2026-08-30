@@ -1,11 +1,13 @@
-// @ts-nocheck
+// math.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {getS2Cell, toHilbertQuadkey} from '@math.gl/dggs/s2-geometry/s2-geometry';
 import {S2} from 's2-geometry';
 
-test('S2 Hilbert quadkey conversion', t => {
+test('S2 Hilbert quadkey conversion', () => {
   const TEST_COORDINATES = [
     {lat: 0, lng: 0},
     {lat: -122.45, lng: 37.78},
@@ -16,8 +18,12 @@ test('S2 Hilbert quadkey conversion', t => {
 
   for (let face = 0; face < 6; face++) {
     const id = (BigInt(face) << 61n) | (1n << 60n);
-    t.is(toHilbertQuadkey(id), `${face}/`, `face ${face} level 0 key`);
-    t.deepEqual(getS2Cell(id), {face, ij: [0, 0], level: 0}, `face ${face} level 0 cell`);
+    expect(toHilbertQuadkey(id), `face ${face} level 0 key`).toBe(`${face}/`);
+    expect(getS2Cell(id), `face ${face} level 0 cell`).toEqual({
+      face,
+      ij: [0, 0],
+      level: 0
+    });
   }
 
   for (const point of TEST_COORDINATES) {
@@ -26,15 +32,12 @@ test('S2 Hilbert quadkey conversion', t => {
       const id = BigInt(S2.keyToId(key));
       const cell = S2.S2Cell.FromHilbertQuadKey(key);
 
-      t.comment(`level ${level}, id: ${id.toString()}`);
-      t.is(toHilbertQuadkey(id), key, 'Id to quad key');
-      t.deepEqual(
-        getS2Cell(id),
-        {face: cell.face, ij: cell.ij, level: cell.level},
-        'Id to S2 cell'
-      );
+      expect(toHilbertQuadkey(id), `level ${level}, id ${id.toString()}: Id to quad key`).toBe(key);
+      expect(getS2Cell(id), `level ${level}, id ${id.toString()}: Id to S2 cell`).toEqual({
+        face: cell.face,
+        ij: cell.ij,
+        level: cell.level
+      });
     }
   }
-
-  t.end();
 });

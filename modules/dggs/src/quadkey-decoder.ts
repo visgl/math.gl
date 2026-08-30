@@ -10,6 +10,7 @@ const TILE_SIZE = 512;
 /** Decoder for the quadkey DGGS */
 export const QuadkeyDecoder = {
   name: 'quadkey',
+  cellColumnNames: ['quadkey', 'quadkeyId', 'quadkey_id'],
   getCellLngLat: (quadkey: string): number[] => getQuadkeyLngLat(quadkey),
   getCellBoundaryPolygon: (quadkey: string): [number, number][] => getQuadkeyBoundary(quadkey),
   getCellBoundaryPolygonFlat: (quadkey: string): number[] => getQuadkeyBoundaryFlat(quadkey),

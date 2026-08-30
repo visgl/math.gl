@@ -8,7 +8,9 @@
 This module is still experimental. It may have issues and functionality may change in minor releases.
 :::
 
-`@math.gl/dggs` is a JavaScript library which provides lightweight support for working with Discrete Global Grid System (DGGS) indices.
+`@math.gl/dggs` provides a deliberately small JavaScript API for decoding cell geometry from GeoHash, Quadkey, and S2 identifiers. It also detects their conventional data-column names so visualization layers can select the appropriate decoder.
+
+It is not a general abstraction over the full API surface of DGGS implementations. Applications that need parent/child traversal, neighbors, fills, compaction, metrics, or OGC API - DGGS support should use a full implementation or an abstraction such as [DGGAL](https://dggal.org/).
 
 ## Installation
 
@@ -21,6 +23,13 @@ npm install @math.gl/dggs
 ```js
 import {GeohashDecoder} from '@math.gl/dggs';
 const polygon = GeohashDecoder.getCellBoundaryPolygon(geohashId);
+```
+
+```js
+import {findDGGSCellColumn} from '@math.gl/dggs';
+
+const match = findDGGSCellColumn(['name', 's2_token', 'value']);
+// {columnName: 's2_token', decoder: S2Decoder}
 ```
 
 ### S2 Cell Format

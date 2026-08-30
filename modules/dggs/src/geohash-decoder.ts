@@ -8,6 +8,7 @@ import {type DGGSDecoder} from './dggs-decoder';
 /** Decoder for the geohash dggs */
 export const GeohashDecoder = {
   name: 'geohash',
+  cellColumnNames: ['geohash', 'geohashId', 'geohash_id'],
   getCellLngLat: (geohash: string): number[] => getGeohashLngLat(geohash),
   getCellBoundaryPolygon: (geohash: string): [number, number][] => getGeohashBoundary(geohash),
   getCellBoundaryPolygonFlat: (geohash: string): number[] => getGeohashBoundaryFlat(geohash),

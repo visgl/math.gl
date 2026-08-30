@@ -22,6 +22,7 @@
         "type": "category",
         "label": "Geospatial Math",
         "items": [
+          "developer-guide/geospatial/coordinate-reference-systems",
           "developer-guide/geospatial/geospatial-models",
           "developer-guide/geospatial/web-mercator-coordinates",
           "developer-guide/geospatial/web-mercator-offset-accuracy"
@@ -92,6 +93,11 @@
       },
       {
         "type": "category",
+        "label": "@math.gl/geometry",
+        "items": ["modules/geometry/README"]
+      },
+      {
+        "type": "category",
         "label": "@math.gl/culling",
         "items": [
           "modules/culling/README",
@@ -101,7 +107,16 @@
           "modules/culling/api-reference/culling-volume",
           "modules/culling/api-reference/oriented-bounding-box",
           "modules/culling/api-reference/plane",
-          "modules/culling/api-reference/ray"
+          "modules/culling/api-reference/ray",
+          "modules/culling/api-reference/shapes"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@math.gl/geometry-utils",
+        "items": [
+          "modules/geometry-utils/README",
+          "modules/geometry-utils/api-reference/geometry-utils"
         ]
       },
       {
@@ -137,6 +152,11 @@
           "modules/polygon/api-reference/cut-polyline-by-mercator-bounds",
           "modules/polygon/api-reference/polygon"
         ]
+      },
+      {
+        "type": "category",
+        "label": "@math.gl/crs",
+        "items": ["modules/crs/README", "modules/crs/api-reference/spatial-reference"]
       },
       {
         "type": "category",

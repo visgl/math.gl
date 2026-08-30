@@ -14,6 +14,7 @@ This module is still experimental. It may have issues and functionality may chan
 
 `QuadkeyDecoder` implements the [DGGSDecoder](./dggs-decoder) API:
 
+- `cellColumnNames: ['quadkey', 'quadkeyId', 'quadkey_id']`
 - `getCellLngLat(token: string): number[]`
 - `getCellBoundaryPolygon(token: string): [number, number][]`
 - `getCellBoundaryPolygonFlat(token: string): number[]`

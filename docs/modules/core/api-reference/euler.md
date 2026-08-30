@@ -14,16 +14,18 @@ import {Euler} from '@math.gl/core';
 
 ## Constants
 
-- `Euler.ZYX`
-- `Euler.YXZ`
-- `Euler.XZY`
-- `Euler.ZXY`
-- `Euler.YZX`
-- `Euler.XYZ`
-- `Euler.RollPitchYaw`
+- `Euler.ZYX` = `'zyx'`
+- `Euler.YXZ` = `'yxz'`
+- `Euler.XZY` = `'xzy'`
+- `Euler.ZXY` = `'zxy'`
+- `Euler.YZX` = `'yzx'`
+- `Euler.XYZ` = `'xyz'`
+- `Euler.RollPitchYaw` = `'zyx'`
 
 - `Euler.DefaultOrder` (= `Euler.ZYX`)
-- `Euler.RotationOrders` = `['ZYX', 'YXZ', 'XZY', 'ZXY', 'YZX', 'XYZ']`;
+- `Euler.RotationOrders` provides the same named string values.
+
+These compatibility constants are deprecated. New code should pass an `EulerRotationOrder` string such as `'zyx'` directly.
 
 ## Members
 
@@ -51,9 +53,9 @@ rotation order in all notations
 
 ### constructor
 
-(x = 0, y = 0, z = 0, order = Euler.DefaultOrder)
+(x = 0, y = 0, z = 0, order = 'zyx')
 
-- Number|Number[], Number, Number, Number
+- Number|Number[], Number, Number, EulerRotationOrder
 
 ### fromRollPitchYaw
 
@@ -63,7 +65,7 @@ Common ZYX rotation order
 
 ### fromRotationMatrix
 
-`euler.fromRotationMatrix(m, order = Euler.DefaultOrder)`
+`euler.fromRotationMatrix(m, order = 'zyx')`
 
 ### fromQuaternion
 

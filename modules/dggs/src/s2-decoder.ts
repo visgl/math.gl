@@ -12,6 +12,7 @@ import {getS2Cell, IJToST, STToUV, FaceUVToXYZ, XYZToLngLat} from './s2-geometry
 /** Decoder for the S2 DGGS */
 export const S2Decoder = {
   name: 's2',
+  cellColumnNames: ['s2', 's2Token', 's2_token', 's2Cell', 's2_cell', 's2CellId', 's2_cell_id'],
   getCellIndexFromToken: (s2Token: string): bigint => getS2IndexFromToken(s2Token),
   getTokenFromCellIndex: (s2Index: bigint): string => getS2TokenFromIndex(s2Index),
   getCellLngLat: (s2Token: string): number[] => getS2LngLat(s2Token),

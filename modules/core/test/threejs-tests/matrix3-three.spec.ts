@@ -9,7 +9,7 @@
 
 // @ts-nocheck
 /* eslint-disable quotes, no-var */
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {Matrix3} from 'math.gl/matrix3';
 import {Matrix4} from 'math.gl/matrix4';
@@ -48,95 +48,88 @@ function toMatrix4(m3) {
 }
 
 // INSTANCING
-test('three.js#Matrix3#Instancing', t => {
+test('three.js#Matrix3#Instancing', () => {
   var a = new Matrix3();
-  t.ok(a.determinant() === 1, 'Passed!');
+  expect(a.determinant() === 1, 'Passed!').toBeTruthy();
 
   var b = new Matrix3().set(0, 1, 2, 3, 4, 5, 6, 7, 8);
-  t.ok(b.elements[0] === 0);
-  t.ok(b.elements[1] === 3);
-  t.ok(b.elements[2] === 6);
-  t.ok(b.elements[3] === 1);
-  t.ok(b.elements[4] === 4);
-  t.ok(b.elements[5] === 7);
-  t.ok(b.elements[6] === 2);
-  t.ok(b.elements[7] === 5);
-  t.ok(b.elements[8] === 8);
+  expect(b.elements[0] === 0).toBeTruthy();
+  expect(b.elements[1] === 3).toBeTruthy();
+  expect(b.elements[2] === 6).toBeTruthy();
+  expect(b.elements[3] === 1).toBeTruthy();
+  expect(b.elements[4] === 4).toBeTruthy();
+  expect(b.elements[5] === 7).toBeTruthy();
+  expect(b.elements[6] === 2).toBeTruthy();
+  expect(b.elements[7] === 5).toBeTruthy();
+  expect(b.elements[8] === 8).toBeTruthy();
 
-  t.ok(!matrixEquals3(a, b), 'Passed!');
-  t.end();
+  expect(!matrixEquals3(a, b), 'Passed!').toBeTruthy();
 });
 
 // PUBLIC STUFF
-test.skip('three.js#Matrix3#isMatrix3', t => {
-  t.ok(false, "everything's gonna be alright");
-  t.end();
+test.skip('three.js#Matrix3#isMatrix3', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test('three.js#Matrix3#set', t => {
+test('three.js#Matrix3#set', () => {
   var b = new Matrix3();
-  t.ok(b.determinant() === 1, 'Passed!');
+  expect(b.determinant() === 1, 'Passed!').toBeTruthy();
 
   b.set(0, 1, 2, 3, 4, 5, 6, 7, 8);
-  t.ok(b.elements[0] === 0);
-  t.ok(b.elements[1] === 3);
-  t.ok(b.elements[2] === 6);
-  t.ok(b.elements[3] === 1);
-  t.ok(b.elements[4] === 4);
-  t.ok(b.elements[5] === 7);
-  t.ok(b.elements[6] === 2);
-  t.ok(b.elements[7] === 5);
-  t.ok(b.elements[8] === 8);
-  t.end();
+  expect(b.elements[0] === 0).toBeTruthy();
+  expect(b.elements[1] === 3).toBeTruthy();
+  expect(b.elements[2] === 6).toBeTruthy();
+  expect(b.elements[3] === 1).toBeTruthy();
+  expect(b.elements[4] === 4).toBeTruthy();
+  expect(b.elements[5] === 7).toBeTruthy();
+  expect(b.elements[6] === 2).toBeTruthy();
+  expect(b.elements[7] === 5).toBeTruthy();
+  expect(b.elements[8] === 8).toBeTruthy();
 });
 
-test('three.js#Matrix3#identity', t => {
+test('three.js#Matrix3#identity', () => {
   var b = new Matrix3().set(0, 1, 2, 3, 4, 5, 6, 7, 8);
-  t.ok(b.elements[0] === 0);
-  t.ok(b.elements[1] === 3);
-  t.ok(b.elements[2] === 6);
-  t.ok(b.elements[3] === 1);
-  t.ok(b.elements[4] === 4);
-  t.ok(b.elements[5] === 7);
-  t.ok(b.elements[6] === 2);
-  t.ok(b.elements[7] === 5);
-  t.ok(b.elements[8] === 8);
+  expect(b.elements[0] === 0).toBeTruthy();
+  expect(b.elements[1] === 3).toBeTruthy();
+  expect(b.elements[2] === 6).toBeTruthy();
+  expect(b.elements[3] === 1).toBeTruthy();
+  expect(b.elements[4] === 4).toBeTruthy();
+  expect(b.elements[5] === 7).toBeTruthy();
+  expect(b.elements[6] === 2).toBeTruthy();
+  expect(b.elements[7] === 5).toBeTruthy();
+  expect(b.elements[8] === 8).toBeTruthy();
 
   var a = new Matrix3();
-  t.ok(!matrixEquals3(a, b), 'Passed!');
+  expect(!matrixEquals3(a, b), 'Passed!').toBeTruthy();
 
   b.identity();
-  t.ok(matrixEquals3(a, b), 'Passed!');
-  t.end();
+  expect(matrixEquals3(a, b), 'Passed!').toBeTruthy();
 });
 
-test('three.js#Matrix3#clone', t => {
+test('three.js#Matrix3#clone', () => {
   var a = new Matrix3().set(0, 1, 2, 3, 4, 5, 6, 7, 8);
   var b = a.clone();
 
-  t.ok(matrixEquals3(a, b), 'Passed!');
+  expect(matrixEquals3(a, b), 'Passed!').toBeTruthy();
 
   // ensure that it is a true copy
   a.elements[0] = 2;
-  t.ok(!matrixEquals3(a, b), 'Passed!');
-  t.end();
+  expect(!matrixEquals3(a, b), 'Passed!').toBeTruthy();
 });
 
-test('three.js#Matrix3#copy', t => {
+test('three.js#Matrix3#copy', () => {
   var a = new Matrix3().set(0, 1, 2, 3, 4, 5, 6, 7, 8);
   var b = new Matrix3().copy(a);
 
-  t.ok(matrixEquals3(a, b), 'Passed!');
+  expect(matrixEquals3(a, b), 'Passed!').toBeTruthy();
 
   // ensure that it is a true copy
   a.elements[0] = 2;
-  t.ok(!matrixEquals3(a, b), 'Passed!');
-  t.end();
+  expect(!matrixEquals3(a, b), 'Passed!').toBeTruthy();
 });
 
-test.skip('three.js#Matrix3#setFromMatrix4', t => {
-  t.ok(false, "everything's gonna be alright");
-  t.end();
+test.skip('three.js#Matrix3#setFromMatrix4', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
 /*
@@ -151,7 +144,7 @@ test('three.js#Matrix3#applyToBufferAttribute', t => {
 });
 */
 
-test('three.js#Matrix3#multiply/premultiply', t => {
+test('three.js#Matrix3#multiply/premultiply', () => {
   // both simply just wrap multiplyMatrices
   var a = new Matrix3().set(2, 3, 5, 7, 11, 13, 17, 19, 23);
   var b = new Matrix3().set(29, 31, 37, 41, 43, 47, 53, 59, 61);
@@ -159,15 +152,14 @@ test('three.js#Matrix3#multiply/premultiply', t => {
   var expectedPremultiply = [904, 1182, 1556, 1131, 1489, 1967, 1399, 1845, 2435];
 
   a.multiply(b);
-  t.deepEqual(a.elements, expectedMultiply, 'multiply: check result');
+  expect(a.elements, 'multiply: check result').toEqual(expectedMultiply);
 
   a.set(2, 3, 5, 7, 11, 13, 17, 19, 23);
   a.premultiply(b);
-  t.deepEqual(a.elements, expectedPremultiply, 'premultiply: check result');
-  t.end();
+  expect(a.elements, 'premultiply: check result').toEqual(expectedPremultiply);
 });
 
-test('three.js#Matrix3#multiplyMatrices', t => {
+test('three.js#Matrix3#multiplyMatrices', () => {
   // Reference:
   //
   // #!/usr/bin/env python
@@ -189,60 +181,57 @@ test('three.js#Matrix3#multiplyMatrices', t => {
 
   ans.multiplyMatrices(lhs, rhs);
 
-  t.ok(ans.elements[0] === 446);
-  t.ok(ans.elements[1] === 1343);
-  t.ok(ans.elements[2] === 2491);
-  t.ok(ans.elements[3] === 486);
-  t.ok(ans.elements[4] === 1457);
-  t.ok(ans.elements[5] === 2701);
-  t.ok(ans.elements[6] === 520);
-  t.ok(ans.elements[7] === 1569);
-  t.ok(ans.elements[8] === 2925);
-  t.end();
+  expect(ans.elements[0] === 446).toBeTruthy();
+  expect(ans.elements[1] === 1343).toBeTruthy();
+  expect(ans.elements[2] === 2491).toBeTruthy();
+  expect(ans.elements[3] === 486).toBeTruthy();
+  expect(ans.elements[4] === 1457).toBeTruthy();
+  expect(ans.elements[5] === 2701).toBeTruthy();
+  expect(ans.elements[6] === 520).toBeTruthy();
+  expect(ans.elements[7] === 1569).toBeTruthy();
+  expect(ans.elements[8] === 2925).toBeTruthy();
 });
 
-test('three.js#Matrix3#multiplyScalar', t => {
+test('three.js#Matrix3#multiplyScalar', () => {
   var b = new Matrix3().set(0, 1, 2, 3, 4, 5, 6, 7, 8);
-  t.ok(b.elements[0] === 0);
-  t.ok(b.elements[1] === 3);
-  t.ok(b.elements[2] === 6);
-  t.ok(b.elements[3] === 1);
-  t.ok(b.elements[4] === 4);
-  t.ok(b.elements[5] === 7);
-  t.ok(b.elements[6] === 2);
-  t.ok(b.elements[7] === 5);
-  t.ok(b.elements[8] === 8);
+  expect(b.elements[0] === 0).toBeTruthy();
+  expect(b.elements[1] === 3).toBeTruthy();
+  expect(b.elements[2] === 6).toBeTruthy();
+  expect(b.elements[3] === 1).toBeTruthy();
+  expect(b.elements[4] === 4).toBeTruthy();
+  expect(b.elements[5] === 7).toBeTruthy();
+  expect(b.elements[6] === 2).toBeTruthy();
+  expect(b.elements[7] === 5).toBeTruthy();
+  expect(b.elements[8] === 8).toBeTruthy();
 
   b.multiplyScalar(2);
-  t.ok(b.elements[0] === 0 * 2);
-  t.ok(b.elements[1] === 3 * 2);
-  t.ok(b.elements[2] === 6 * 2);
-  t.ok(b.elements[3] === 1 * 2);
-  t.ok(b.elements[4] === 4 * 2);
-  t.ok(b.elements[5] === 7 * 2);
-  t.ok(b.elements[6] === 2 * 2);
-  t.ok(b.elements[7] === 5 * 2);
-  t.ok(b.elements[8] === 8 * 2);
-  t.end();
+  expect(b.elements[0] === 0 * 2).toBeTruthy();
+  expect(b.elements[1] === 3 * 2).toBeTruthy();
+  expect(b.elements[2] === 6 * 2).toBeTruthy();
+  expect(b.elements[3] === 1 * 2).toBeTruthy();
+  expect(b.elements[4] === 4 * 2).toBeTruthy();
+  expect(b.elements[5] === 7 * 2).toBeTruthy();
+  expect(b.elements[6] === 2 * 2).toBeTruthy();
+  expect(b.elements[7] === 5 * 2).toBeTruthy();
+  expect(b.elements[8] === 8 * 2).toBeTruthy();
 });
 
-test('three.js#Matrix3#determinant', t => {
+test('three.js#Matrix3#determinant', () => {
   var a = new Matrix3();
-  t.ok(a.determinant() === 1, 'Passed!');
+  expect(a.determinant() === 1, 'Passed!').toBeTruthy();
 
   a.elements[0] = 2;
-  t.ok(a.determinant() === 2, 'Passed!');
+  expect(a.determinant() === 2, 'Passed!').toBeTruthy();
 
   a.elements[0] = 0;
-  t.ok(a.determinant() === 0, 'Passed!');
+  expect(a.determinant() === 0, 'Passed!').toBeTruthy();
 
   // calculated via http://www.euclideanspace.com/maths/algebra/matrix/functions/determinant/threeD/index.htm
   a.set(2, 3, 4, 5, 13, 7, 8, 9, 11);
-  t.ok(a.determinant() === -73, 'Passed!');
-  t.end();
+  expect(a.determinant() === -73, 'Passed!').toBeTruthy();
 });
 
-test('three.js#Matrix3#getInverse', t => {
+test('three.js#Matrix3#getInverse', () => {
   var identity = new Matrix3();
   var identity4 = new Matrix4();
   var a = new Matrix3();
@@ -250,13 +239,13 @@ test('three.js#Matrix3#getInverse', t => {
   var c = new Matrix3().set(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
   b.getInverse(a, false);
-  t.ok(matrixEquals3(a, identity), 'Matrix a is identity matrix');
+  expect(matrixEquals3(a, identity), 'Matrix a is identity matrix').toBeTruthy();
 
   try {
     b.getInverse(c, true);
-    t.ok(false, 'Should never get here !'); // should never get here.
+    expect(false, 'Should never get here !').toBeTruthy(); // should never get here.
   } catch (err) {
-    t.ok(true, `Passed: ${err}`);
+    expect(true, `Passed: ${err}`).toBeTruthy();
   }
 
   var testMatrices = [
@@ -279,30 +268,31 @@ test('three.js#Matrix3#getInverse', t => {
     var mInverse = toMatrix4(mInverse3);
 
     // the determinant of the inverse should be the reciprocal
-    t.ok(Math.abs(a.determinant() * mInverse3.determinant() - 1) < 0.0001, 'Passed!');
-    t.ok(Math.abs(m.determinant() * mInverse.determinant() - 1) < 0.0001, 'Passed!');
+    expect(
+      Math.abs(a.determinant() * mInverse3.determinant() - 1) < 0.0001,
+      'Passed!'
+    ).toBeTruthy();
+    expect(Math.abs(m.determinant() * mInverse.determinant() - 1) < 0.0001, 'Passed!').toBeTruthy();
 
     var mProduct = new Matrix4().multiplyMatrices(m, mInverse);
-    t.ok(Math.abs(mProduct.determinant() - 1) < 0.0001, 'Passed!');
-    t.ok(matrixEquals3(mProduct, identity4), 'Passed!');
+    expect(Math.abs(mProduct.determinant() - 1) < 0.0001, 'Passed!').toBeTruthy();
+    expect(matrixEquals3(mProduct, identity4), 'Passed!').toBeTruthy();
   }
-  t.end();
 });
 
-test('three.js#Matrix3#transpose', t => {
+test('three.js#Matrix3#transpose', () => {
   var a = new Matrix3();
   let b = a.clone().transpose();
-  t.ok(matrixEquals3(a, b), 'Passed!');
+  expect(matrixEquals3(a, b), 'Passed!').toBeTruthy();
 
   b = new Matrix3().set(0, 1, 2, 3, 4, 5, 6, 7, 8);
   var c = b.clone().transpose();
-  t.ok(!matrixEquals3(b, c), 'Passed!');
+  expect(!matrixEquals3(b, c), 'Passed!').toBeTruthy();
   c.transpose();
-  t.ok(matrixEquals3(b, c), 'Passed!');
-  t.end();
+  expect(matrixEquals3(b, c), 'Passed!').toBeTruthy();
 });
 
-test('three.js#Matrix3#getNormalMatrix', t => {
+test('three.js#Matrix3#getNormalMatrix', () => {
   var a = new Matrix3();
   var b = new Matrix4().set(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 57);
   var expected = new Matrix3().set(
@@ -318,16 +308,14 @@ test('three.js#Matrix3#getNormalMatrix', t => {
   );
 
   a.getNormalMatrix(b);
-  t.ok(matrixEquals3(a, expected), 'Check resulting Matrix3');
-  t.end();
+  expect(matrixEquals3(a, expected), 'Check resulting Matrix3').toBeTruthy();
 });
 
-test.skip('three.js#Matrix3#transposeIntoArray', t => {
-  t.ok(false, "everything's gonna be alright");
-  t.end();
+test.skip('three.js#Matrix3#transposeIntoArray', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test('three.js#Matrix3#setUvTransform', t => {
+test('three.js#Matrix3#setUvTransform', () => {
   var a = new Matrix3().set(
     0.1767766952966369,
     0.17677669529663687,
@@ -378,21 +366,19 @@ test('three.js#Matrix3#setUvTransform', t => {
     .translate(params.centerX, params.centerY)
     .translate(params.offsetX, params.offsetY);
 
-  t.ok(matrixEquals3(a, expected), 'Check direct method');
-  t.ok(matrixEquals3(b, expected), 'Check indirect method');
-  t.end();
+  expect(matrixEquals3(a, expected), 'Check direct method').toBeTruthy();
+  expect(matrixEquals3(b, expected), 'Check indirect method').toBeTruthy();
 });
 
-test('three.js#Matrix3#scale', t => {
+test('three.js#Matrix3#scale', () => {
   var a = new Matrix3().set(1, 2, 3, 4, 5, 6, 7, 8, 9);
   var expected = new Matrix3().set(0.25, 0.5, 0.75, 1, 1.25, 1.5, 7, 8, 9);
 
   a.scale(0.25, 0.25);
-  t.ok(matrixEquals3(a, expected), 'Check scaling result');
-  t.end();
+  expect(matrixEquals3(a, expected), 'Check scaling result').toBeTruthy();
 });
 
-test('three.js#Matrix3#rotate', t => {
+test('three.js#Matrix3#rotate', () => {
   var a = new Matrix3().set(1, 2, 3, 4, 5, 6, 7, 8, 9);
   var expected = new Matrix3().set(
     3.5355339059327373,
@@ -407,51 +393,46 @@ test('three.js#Matrix3#rotate', t => {
   );
 
   a.rotate(Math.PI / 4);
-  t.ok(matrixEquals3(a, expected), 'Check rotated result');
-  t.end();
+  expect(matrixEquals3(a, expected), 'Check rotated result').toBeTruthy();
 });
 
-test('three.js#Matrix3#translate', t => {
+test('three.js#Matrix3#translate', () => {
   var a = new Matrix3().set(1, 2, 3, 4, 5, 6, 7, 8, 9);
   var expected = new Matrix3().set(22, 26, 30, 53, 61, 69, 7, 8, 9);
 
   a.translate(3, 7);
-  t.ok(matrixEquals3(a, expected), 'Check translation result');
-  t.end();
+  expect(matrixEquals3(a, expected), 'Check translation result').toBeTruthy();
 });
 
-test('three.js#Matrix3#equals', t => {
+test('three.js#Matrix3#equals', () => {
   var a = new Matrix3().set(0, 1, 2, 3, 4, 5, 6, 7, 8);
   var b = new Matrix3().set(0, -1, 2, 3, 4, 5, 6, 7, 8);
 
-  t.notOk(a.equals(b), 'Check that a does not equal b');
-  t.notOk(b.equals(a), 'Check that b does not equal a');
+  expect(a.equals(b), 'Check that a does not equal b').toBeFalsy();
+  expect(b.equals(a), 'Check that b does not equal a').toBeFalsy();
 
   a.copy(b);
-  t.ok(a.equals(b), 'Check that a equals b after copy()');
-  t.ok(b.equals(a), 'Check that b equals a after copy()');
-  t.end();
+  expect(a.equals(b), 'Check that a equals b after copy()').toBeTruthy();
+  expect(b.equals(a), 'Check that b equals a after copy()').toBeTruthy();
 });
 
-test.skip('three.js#Matrix3#fromArray', t => {
-  t.ok(false, "everything's gonna be alright");
-  t.end();
+test.skip('three.js#Matrix3#fromArray', () => {
+  expect(false, "everything's gonna be alright").toBeTruthy();
 });
 
-test('three.js#Matrix3#toArray', t => {
+test('three.js#Matrix3#toArray', () => {
   var a = new Matrix3().set(1, 2, 3, 4, 5, 6, 7, 8, 9);
   var noOffset = [1, 4, 7, 2, 5, 8, 3, 6, 9];
   var withOffset = [undefined, 1, 4, 7, 2, 5, 8, 3, 6, 9];
 
   let array = a.toArray();
-  t.deepEqual(array, noOffset, 'No array, no offset');
+  expect(array, 'No array, no offset').toEqual(noOffset);
 
   array = [];
   a.toArray(array);
-  t.deepEqual(array, noOffset, 'With array, no offset');
+  expect(array, 'With array, no offset').toEqual(noOffset);
 
   array = [];
   a.toArray(array, 1);
-  t.deepEqual(array, withOffset, 'With array, with offset');
-  t.end();
+  expect(array, 'With array, with offset').toEqual(withOffset);
 });

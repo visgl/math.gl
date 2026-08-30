@@ -4,7 +4,7 @@ Discrete global grid systems are powerful tools that enables us to convert geosp
 
 ## Why DGGS support in math.gl?
 
-There is value in having access to a common set of minimal, pluggable, and interchangeable DGGS decoders.
+There is value in having access to a common set of minimal, pluggable, and interchangeable decoders for DGGS and DGGS-like global grid encodings.
 
 Today there are multiple advanced DGGS grid systems that offer different tradeoffs, and it is not unusual for an application to consume data encoded in one or more systems.
 
@@ -12,10 +12,16 @@ This requires integrating independent DGGS libraries with different API conventi
 
 ## Scope
 
-The DGGS support in math.gl is currently focused on decoding cell indexes or tokens into center points (lng/lat) or cell boundary polygons.
+The DGGS support in math.gl is intentionally limited to decoding cell indexes or tokens into center points (lng/lat) or cell boundary polygons, plus detecting conventional cell-column names. This compact contract is designed to power the DGGS-oriented layer in deck.gl-community (currently named [`GlobalGridLayer`](https://github.com/visgl/deck.gl-community/tree/master/modules/geo-layers/src/global-grid-layer)).
 
 - Encoding (lng/lat to cell index) may be supported in a future version.
-- Advanced operations (child/neighbor calculation, polygon fills, etc.) are not currently included. Some features may be added in the future, but the goal is to keep these decoders small rather than duplicate full DGGS libraries.
+- Advanced operations (parent/child and neighbor calculation, polygon fills, compaction, traversal, metrics, etc.) are out of scope. The goal is to keep these decoders small rather than duplicate complete DGGS libraries.
+
+For a comprehensive abstraction across DGGS implementations and the OGC API - DGGS surface, see [DGGAL, the Discrete Global Grid Abstraction Library](https://dggal.org/). `@math.gl/dggs` is not intended to compete with or reproduce that broader project.
+
+## Cell-column detection
+
+`findDGGSCellColumn(columnNames)` recognizes conventional GeoHash, Quadkey, and S2 column names. It returns the original column name together with its decoder, or `null` when no unique match is available. This lets table- and layer-oriented code infer the common case without guessing from cell values.
 
 ## Supported Grid Systems
 

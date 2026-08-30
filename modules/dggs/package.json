@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "4.2.0-alpha.3",
+  "version": "5.0.0-alpha.1",
   "keywords": [
     "javascript",
     "math",
@@ -34,7 +34,7 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/types": "4.2.0-alpha.3"
+    "@math.gl/types": "5.0.0-alpha.1"
   },
   "devDependencies": {
     "s2-geometry": "^1.2.10"

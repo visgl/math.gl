@@ -1,5 +1,44 @@
 # CHANGELOG
 
+## v5.0.0-alpha.1
+
+- chore: Improve coverage reporting (#118)
+- feat: Use lowercase string literals for public API constants (#116)
+- feat(proj): Add lightweight EPSG3857 utilities (#117)
+- feat(crs): Add spatial reference descriptors (#115)
+- feat(proj4): Add CRS compatibility utilities (#114)
+- fix(crs): Reject malformed quoted values (#113)
+
+## v4.2.0-alpha.5
+
+- feat(crs): Add WKT and PROJ syntax codecs (#112)
+
+## v4.2.0-alpha.4
+
+- fix(geospatial): Extend makeOBBFromRegion with validation, custom ellipsoids, units, affine transforms, and edge-case handling (#111)
+- chore(website): Align Docusaurus with the Yarn workspace (#110)
+- feat: Add geometry-utils module (#109)
+- feat(culling, geometry): Add glTF shape geometry and culling (#100)
+- feat(crs): Modernize proj4 and extract standards-based CRS definitions (#102)
+- chore(test): Migrate to native Vitest (#107)
+- chore(website): Upgrade Docusaurus (#106)
+- chore: Upgrade dev-tools (#104)
+- chore: Upgrade to Yarn 4.18 (#98)
+- fix(core): Correct Euler quaternion rotation order (#97)
+- chore: Fix TypeScript 6 deprecations (#75)
+- feat(core): Export the MathArray, Matrix, and Vector base classes (#53)
+- chore: Migrate linting to Biome (#95)
+- docs: Refresh README badges (#96)
+- feat(types): Add support for Float16Array (#72)
+- fix(geospatial): Finish makeOBBFromRegion support (#44)
+- fix(docs): Correct documented angle units (#62)
+- feat(expressions): Add function registry and DGGS playground (#94)
+- feat(expressions): Add stable expression parser module (#92)
+- chore: Upgrade to TypeScript 6 (#74)
+- chore: Update dev tooling and Corepack configuration (#73)
+- build(deps-dev): Bump Vite from 5.4.11 to 5.4.12 (#48)
+- chore: Move CI to Ubuntu 22.04 (#55)
+
 ## v4.2.0-alpha.3
 
 - chore: Fix CI release action (#47)
@@ -510,4 +549,3 @@
 
 ### 1.0.0-alpha.1
 - Initial source code copy from luma.gl v4.1-alpha branch
-

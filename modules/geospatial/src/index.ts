@@ -6,4 +6,5 @@ export {Ellipsoid} from './ellipsoid';
 export {EllipsoidTangentPlane} from './ellipsoid-tangent-plane';
 export {LngLatRectangle} from './lng-lat-rectangle';
 export {makeOBBFromRegion} from './make-obb-from-region';
+export type {GeodeticRegion, MakeOBBFromRegionOptions} from './make-obb-from-region';
 export {isWGS84} from './type-utils';

@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {Matrix4, Vector3, equals} from '@math.gl/core';
 import {Euler, Pose} from '@math.gl/core';
-import {tapeEquals} from 'test/utils/tape-assertions';
 
 const MATRIX_TEST_CASES = [
   {
@@ -64,92 +63,105 @@ const MATRIX_TEST_CASES = [
   }
 ];
 
-test('Pose#import', t => {
-  t.equals(typeof Pose, 'function');
-  t.end();
+test('Pose#import', () => {
+  expect(typeof Pose).toBe('function');
 });
 
-test('Pose#constructor', t => {
+test('Pose#constructor', () => {
   let pose1;
   let pose2;
 
   pose1 = new Pose({});
-  t.ok(pose1, 'constructed from empty props');
+  expect(pose1, 'constructed from empty props').toBeTruthy();
 
   pose1 = new Pose(MATRIX_TEST_CASES[0].TRANSFORM_A_TO_B);
-  t.ok(pose1, 'constructed from x y z pitch roll yaw');
+  expect(pose1, 'constructed from x y z pitch roll yaw').toBeTruthy();
 
   pose2 = new Pose(pose1);
-  t.ok(pose1.equals(pose2), 'reconstructed from another pose');
+  expect(pose1.equals(pose2), 'reconstructed from another pose').toBeTruthy();
 
   const flattenProps = JSON.parse(JSON.stringify(pose1));
   pose2 = new Pose(flattenProps);
 
-  t.ok(pose1.equals(pose2), 'reconstructed from flatten props');
-  t.end();
+  expect(pose1.equals(pose2), 'reconstructed from flatten props').toBeTruthy();
+
+  pose1 = new Pose({orientation: new Euler(1, 2, 3, 'xyz')});
+  pose2 = new Pose(pose1);
+  expect(pose1.equals(pose2), 'preserves packed order when reconstructed from a pose').toBeTruthy();
+  expect(pose2.orientation.order).toBe('xyz');
+
+  pose2 = new Pose(JSON.parse(JSON.stringify(pose1)));
+  expect(pose1.equals(pose2), 'preserves packed order when reconstructed from JSON').toBeTruthy();
+  expect(pose2.orientation.order).toBe('xyz');
 });
 
-test('Pose#equals', t => {
+test('Pose#equals', () => {
   const pose1 = new Pose({});
 
-  t.notOk(pose1.equals(undefined), 'not equal to undefined');
-  t.notOk(pose1.exactEquals(undefined), 'not exactEquals to undefined');
-
-  t.end();
+  expect(pose1.equals(undefined), 'not equal to undefined').toBeFalsy();
+  expect(pose1.exactEquals(undefined), 'not exactEquals to undefined').toBeFalsy();
 });
 
-test('Pose#setters, getters', t => {
+test('Pose#setters, getters', () => {
   const SAMPLE = MATRIX_TEST_CASES[0].TRANSFORM_A_TO_B;
   const pose = new Pose({});
 
   for (const key in SAMPLE) {
-    t.equals(pose[key], 0, `gets initial ${key} value`);
+    expect(pose[key], `gets initial ${key} value`).toBe(0);
     pose[key] = SAMPLE[key];
-    t.equals(pose[key], SAMPLE[key], `sets ${key} value`);
+    expect(pose[key], `sets ${key} value`).toBe(SAMPLE[key]);
   }
-
-  t.end();
 });
 
-test('Pose#getPosition, getOrientation', t => {
+test('Pose#getPosition, getOrientation', () => {
   const pose = new Pose({});
-  t.ok(pose.getPosition() instanceof Vector3, 'position is Vector3');
-  t.ok(pose.getOrientation() instanceof Euler, 'orientation is Euler');
-  t.end();
+  expect(pose.getPosition() instanceof Vector3, 'position is Vector3').toBeTruthy();
+  expect(pose.getOrientation() instanceof Euler, 'orientation is Euler').toBeTruthy();
 });
 
-test('Pose#transformationMatrix', t => {
+test('Pose#transformationMatrix', () => {
   MATRIX_TEST_CASES.forEach(testCase => {
     const poseAToB = new Pose(testCase.TRANSFORM_A_TO_B);
     const poseBToA = new Pose(testCase.TRANSFORM_B_TO_A);
 
     const transformAToB = poseAToB.getTransformationMatrix();
-    t.ok(transformAToB instanceof Matrix4, 'getTransformationMatrix returns Matrix4');
+    expect(
+      transformAToB instanceof Matrix4,
+      'getTransformationMatrix returns Matrix4'
+    ).toBeTruthy();
 
     const transformBToA = poseBToA.getTransformationMatrix();
-    t.ok(equals(transformAToB, transformBToA.invert()), 'transformation matrices match');
+    expect(
+      equals(transformAToB, transformBToA.invert()),
+      'transformation matrices match'
+    ).toBeTruthy();
   });
-
-  t.end();
 });
 
-test('Pose#getTransformationMatrixFromPose, getTransformationMatrixToPose', t => {
+test('Pose#getTransformationMatrixFromPose, getTransformationMatrixToPose', () => {
   MATRIX_TEST_CASES.forEach(testCase => {
     const poseA = new Pose(testCase.TRANSFORM_A_TO_B);
     const poseB = new Pose(testCase.TRANSFORM_B_TO_A);
 
     const transformAToB = poseA.getTransformationMatrixToPose(poseB);
-    t.ok(transformAToB instanceof Matrix4, 'getTransformationMatrixToPose returns Matrix4');
+    expect(
+      transformAToB instanceof Matrix4,
+      'getTransformationMatrixToPose returns Matrix4'
+    ).toBeTruthy();
     const transformBToA = poseA.getTransformationMatrixFromPose(poseB);
-    t.ok(transformBToA instanceof Matrix4, 'getTransformationMatrixFromPose returns Matrix4');
+    expect(
+      transformBToA instanceof Matrix4,
+      'getTransformationMatrixFromPose returns Matrix4'
+    ).toBeTruthy();
 
-    t.ok(equals(transformAToB, transformBToA.invert()), 'transformation matrices match');
+    expect(
+      equals(transformAToB, transformBToA.invert()),
+      'transformation matrices match'
+    ).toBeTruthy();
   });
-
-  t.end();
 });
 
-test('Pose#toPose', t => {
+test('Pose#toPose', () => {
   const A = new Pose({
     yaw: 0,
     pitch: 0,
@@ -171,7 +183,5 @@ test('Pose#toPose', t => {
   const transformAtoB = A.getTransformationMatrixToPose(B);
 
   const originAInB = transformAtoB.transformVector([0, 0, 0]);
-  tapeEquals(t, originAInB, [10, 10, 0], `originInB should match resultOriginInB`);
-  // t.notOk(equals([0, 0, 0], resultOriginInB), `[0, 0, 0] represents AfromB`);
-  t.end();
+  expect(equals(originAInB, [10, 10, 0]), `originInB should match resultOriginInB`).toBe(true);
 });

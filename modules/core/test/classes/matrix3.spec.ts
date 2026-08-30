@@ -4,9 +4,8 @@
 // Copyright (c) 2017 Uber Technologies, Inc.
 
 /* eslint-disable max-statements */
-import {Matrix3, config} from '@math.gl/core';
-import test from 'tape-promise/tape';
-import {tapeEquals} from 'test/utils/tape-assertions';
+import {test, expect} from 'vitest';
+import {Matrix3, config, equals} from '@math.gl/core';
 
 config.EPSILON = 1e-6;
 
@@ -16,69 +15,54 @@ const INDICES_MATRIX = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const TRANSPOSED_INDICES_MATRIX = [1, 4, 7, 2, 5, 8, 3, 6, 9];
 
-test('Matrix3#types', t => {
-  t.equals(typeof Matrix3, 'function');
-  t.ok(Matrix3.IDENTITY);
-  t.ok(Matrix3.ZERO);
-  t.end();
+test('Matrix3#types', () => {
+  expect(typeof Matrix3).toBe('function');
+  expect(Matrix3.IDENTITY).toBeTruthy();
+  expect(Matrix3.ZERO).toBeTruthy();
 });
 
-test('Matrix3#construct and Array.isArray check', t => {
+test('Matrix3#construct and Array.isArray check', () => {
   const m = new Matrix3();
-  t.ok(Array.isArray(m));
-  t.ok(m.INDICES);
-  t.end();
+  expect(Array.isArray(m)).toBeTruthy();
+  expect(m.INDICES).toBeTruthy();
 });
 
-test('Matrix3#from', t => {
-  tapeEquals(t, new Matrix3().from([1, 2, 3, 4, 5, 6, 7, 8, 9]), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
-  // tapeEquals(t, new Matrix3().from({x: 1, y: 2, z: 3, w: 4}), [1, 2, 3, 4]);
-  t.end();
+test('Matrix3#from', () => {
+  expect(equals(new Matrix3().from([1, 2, 3, 4, 5, 6, 7, 8, 9]), [1, 2, 3, 4, 5, 6, 7, 8, 9])).toBe(
+    true
+  );
 });
 
-test.skip('Matrix3#to', t => {
+test.skip('Matrix3#to', () => {
   const matrix = new Matrix3(1, 2, 3, 4, 5, 6, 7, 8, 9);
-  tapeEquals(t, matrix.to([0, 0, 0, 0, 0, 0, 0, 0, 0]), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
-  // t.deepEquals(matrix.to({x: 0, y: 0, z: 0, w: 0}), {x: 1, y: 2, z: 4});
-  t.end();
+  expect(equals(matrix.to([0, 0, 0, 0, 0, 0, 0, 0, 0]), [1, 2, 3, 4, 5, 6, 7, 8, 9])).toBe(true);
 });
 
-test('Matrix3#toFloat32Array', t => {
-  t.equals(typeof Matrix3.prototype.toFloat32Array, 'function');
+test('Matrix3#toFloat32Array', () => {
+  expect(typeof Matrix3.prototype.toFloat32Array).toBe('function');
   const m = new Matrix3();
   m.identity();
-  t.equals(m.toFloat32Array().BYTES_PER_ELEMENT, 4);
-  t.end();
+  expect(m.toFloat32Array().BYTES_PER_ELEMENT).toBe(4);
 });
 
-test('Matrix3#setRowMajor', t => {
-  t.equals(typeof Matrix3.prototype.setRowMajor, 'function');
-
-  // const INPUT = INDICES_MATRIX;
-  // const RESULT = TRANSPOSED_INDICES_MATRIX;
-
-  // const m = new Matrix3().setRowMajor(...INPUT);
-  // tapeEquals(t, m, RESULT, 'setRowMajor gave the right result');
-
-  t.end();
+test('Matrix3#setRowMajor', () => {
+  expect(typeof Matrix3.prototype.setRowMajor).toBe('function');
 });
 
-test('Matrix3#set', t => {
-  t.equals(typeof Matrix3.prototype.set, 'function');
+test('Matrix3#set', () => {
+  expect(typeof Matrix3.prototype.set).toBe('function');
 
   const INPUT = INDICES_MATRIX;
   const RESULT = INDICES_MATRIX;
 
   const m = new Matrix3().copy(INPUT);
 
-  tapeEquals(t, m, RESULT, 'set gave the right result');
-
-  t.end();
+  expect(equals(m, RESULT), 'set gave the right result').toBe(true);
 });
 
-test('Matrix3#getElement and setElement', t => {
-  t.equals(typeof new Matrix3().setElement, 'function');
-  t.equals(typeof new Matrix3().getElement, 'function');
+test('Matrix3#getElement and setElement', () => {
+  expect(typeof new Matrix3().setElement).toBe('function');
+  expect(typeof new Matrix3().getElement).toBe('function');
 
   const INPUT = INDICES_MATRIX;
 
@@ -88,72 +72,64 @@ test('Matrix3#getElement and setElement', t => {
 
   m.setElement(2, 1, VALUE);
   const result = m.getElement(2, 1);
-  tapeEquals(t, result, VALUE, 'getElement gave the right result');
-
-  t.end();
+  expect(equals(result, VALUE), 'getElement gave the right result').toBe(true);
 });
 
-test('Matrix3#getColumn and setColumn', t => {
-  t.equals(typeof new Matrix3().setColumn, 'function');
-  t.equals(typeof new Matrix3().getColumn, 'function');
+test('Matrix3#getColumn and setColumn', () => {
+  expect(typeof new Matrix3().setColumn).toBe('function');
+  expect(typeof new Matrix3().getColumn).toBe('function');
 
   const INPUT = INDICES_MATRIX;
 
   const m = new Matrix3().copy(INPUT);
 
-  tapeEquals(t, m.getColumn(0), [1, 2, 3]);
-  tapeEquals(t, m.getColumn(1), [4, 5, 6]);
-  tapeEquals(t, m.getColumn(2), [7, 8, 9]);
+  expect(equals(m.getColumn(0), [1, 2, 3])).toBe(true);
+  expect(equals(m.getColumn(1), [4, 5, 6])).toBe(true);
+  expect(equals(m.getColumn(2), [7, 8, 9])).toBe(true);
 
   m.setColumn(1, [6, -5, 4]);
 
-  tapeEquals(t, m.getColumn(0), [1, 2, 3]);
-  tapeEquals(t, m.getColumn(1), [6, -5, 4]);
-  tapeEquals(t, m.getColumn(2), [7, 8, 9]);
-
-  t.end();
+  expect(equals(m.getColumn(0), [1, 2, 3])).toBe(true);
+  expect(equals(m.getColumn(1), [6, -5, 4])).toBe(true);
+  expect(equals(m.getColumn(2), [7, 8, 9])).toBe(true);
 });
 
-test('Matrix3#determinant', t => {
+test('Matrix3#determinant', () => {
   const RESULT = 5;
 
-  t.equals(typeof Matrix3.prototype.determinant, 'function');
+  expect(typeof Matrix3.prototype.determinant).toBe('function');
   const m = new Matrix3().set(1, 2, 3, 0, 1, 5, 5, 6, 0);
   const result = m.determinant();
 
-  tapeEquals(t, result, RESULT, 'determinant gave the right result');
-  t.end();
+  expect(equals(result, RESULT), 'determinant gave the right result').toBe(true);
 });
 
-test('Matrix3#identity (identity matrix)', t => {
-  t.equals(typeof Matrix3.prototype.identity, 'function');
+test('Matrix3#identity (identity matrix)', () => {
+  expect(typeof Matrix3.prototype.identity).toBe('function');
   const m = new Matrix3();
   m.identity();
 
   const RESULT = IDENTITY_MATRIX;
 
-  tapeEquals(t, m, RESULT);
-  t.end();
+  expect(equals(m, RESULT)).toBe(true);
 });
 
-test('Matrix3#copy', t => {
-  t.equals(typeof Matrix3.prototype.copy, 'function');
+test('Matrix3#copy', () => {
+  expect(typeof Matrix3.prototype.copy).toBe('function');
 
   const INPUT = INDICES_MATRIX;
   const RESULT = INDICES_MATRIX;
 
   const m = new Matrix3().copy(INPUT);
 
-  tapeEquals(t, m, RESULT, 'copy gave the right result');
-
-  t.end();
+  expect(equals(m, RESULT), 'copy gave the right result').toBe(true);
 });
 
 // calculation from the website below
 // https://www.andre-gaschler.com/rotationconverter/
 
-test('Matrix3#fromQuaternion', t => {
-  t.equals(typeof Matrix3.prototype.fromQuaternion, 'function');
+test('Matrix3#fromQuaternion', () => {
+  expect(typeof Matrix3.prototype.fromQuaternion).toBe('function');
 
   const RESULT = [
     -0.7238737, 0.4321177, 0.5378486, 0.3953417, -0.379099, 0.8366534, 0.5654306, 0.8182654,
@@ -166,12 +142,11 @@ test('Matrix3#fromQuaternion', t => {
 
   const result = m.fromQuaternion(q);
 
-  tapeEquals(t, result, RESULT, 'fromQuaternion gave the right result');
-  t.end();
+  expect(equals(result, RESULT), 'fromQuaternion gave the right result').toBe(true);
 });
 
-test('Matrix3#transpose', t => {
-  t.equals(typeof Matrix3.prototype.transpose, 'function');
+test('Matrix3#transpose', () => {
+  expect(typeof Matrix3.prototype.transpose).toBe('function');
 
   const INPUT = INDICES_MATRIX;
   const RESULT = TRANSPOSED_INDICES_MATRIX;
@@ -180,92 +155,84 @@ test('Matrix3#transpose', t => {
 
   const result = m.transpose();
 
-  tapeEquals(t, result, RESULT, 'transpose gave the right result');
-  t.end();
+  expect(equals(result, RESULT), 'transpose gave the right result').toBe(true);
 });
 
-test('Matrix3#invert', t => {
+test('Matrix3#invert', () => {
   const INPUT = [1, 2, 3, 0, 1, 5, 5, 6, 0];
   const RESULT = [-6, 3.6, 1.4, 5, -3, -1, -1, 0.8, 0.2];
 
-  t.equals(typeof Matrix3.prototype.invert, 'function');
+  expect(typeof Matrix3.prototype.invert).toBe('function');
   const m = new Matrix3().copy(INPUT);
   const result = m.invert();
 
-  tapeEquals(t, result, RESULT, 'invert gave the right result');
-  t.end();
+  expect(equals(result, RESULT), 'invert gave the right result').toBe(true);
 });
 
-test('Matrix3#multiplyLeft', t => {
+test('Matrix3#multiplyLeft', () => {
   const INPUT_A = INDICES_MATRIX;
   const INPUT_B = [1, 2, 3, 0, 1, 5, 5, 6, 0];
   const RESULT = [16, 22, 13, 34, 49, 37, 52, 76, 61];
 
-  t.equals(typeof Matrix3.prototype.multiplyLeft, 'function');
+  expect(typeof Matrix3.prototype.multiplyLeft).toBe('function');
   const ma = new Matrix3().copy(INPUT_A);
   const mb = new Matrix3().copy(INPUT_B);
   const result = ma.multiplyLeft(mb);
 
-  tapeEquals(t, result, RESULT, 'multiplyLeft gave the right result');
-  t.end();
+  expect(equals(result, RESULT), 'multiplyLeft gave the right result').toBe(true);
 });
 
-test('Matrix3#multiplyRight', t => {
+test('Matrix3#multiplyRight', () => {
   const INPUT_A = INDICES_MATRIX;
   const INPUT_B = [1, 2, 3, 0, 1, 5, 5, 6, 0];
   const RESULT = [30, 36, 42, 39, 45, 51, 29, 40, 51];
 
-  t.equals(typeof Matrix3.prototype.multiplyRight, 'function');
+  expect(typeof Matrix3.prototype.multiplyRight).toBe('function');
   const ma = new Matrix3().copy(INPUT_A);
   const mb = new Matrix3().copy(INPUT_B);
   const result = ma.multiplyRight(mb);
 
-  tapeEquals(t, result, RESULT, 'invert gave the right result');
-  t.end();
+  expect(equals(result, RESULT), 'invert gave the right result').toBe(true);
 });
 
-test('Matrix3#rotate', t => {
+test('Matrix3#rotate', () => {
   const RESULT = [0, 1, 0, -1, 0, 0, 0, 0, 1];
 
-  t.equals(typeof Matrix3.prototype.rotate, 'function');
+  expect(typeof Matrix3.prototype.rotate).toBe('function');
   const m = new Matrix3().identity();
   const result = m.rotate(Math.PI / 2);
 
-  tapeEquals(t, result, RESULT, 'rotate gave the right result');
-  t.end();
+  expect(equals(result, RESULT), 'rotate gave the right result').toBe(true);
 });
 
-test('Matrix3#scale', t => {
+test('Matrix3#scale', () => {
   const M1_RESULT = [1, 0, 0, 0, 2, 0, 0, 0, 1];
   const M2_RESULT = [2, 0, 0, 0, 2, 0, 0, 0, 1];
 
-  t.equals(typeof Matrix3.prototype.scale, 'function');
+  expect(typeof Matrix3.prototype.scale).toBe('function');
 
   const m1 = new Matrix3().identity();
   const m1Result = m1.scale([1, 2, 1]);
 
-  tapeEquals(t, m1Result, M1_RESULT, 'scale gave the right result');
+  expect(equals(m1Result, M1_RESULT), 'scale gave the right result').toBe(true);
 
   const m2 = new Matrix3().identity();
   const m2Result = m2.scale(2);
 
-  tapeEquals(t, m2Result, M2_RESULT, 'scale gave the right result');
-
-  t.end();
+  expect(equals(m2Result, M2_RESULT), 'scale gave the right result').toBe(true);
 });
 
-test('Matrix3#translate', t => {
+test('Matrix3#translate', () => {
   const RESULT = [1, 0, 0, 0, 1, 0, 1, 2, 1];
 
-  t.equals(typeof Matrix3.prototype.translate, 'function');
+  expect(typeof Matrix3.prototype.translate).toBe('function');
   const m = new Matrix3().identity();
   const result = m.translate([1, 2]);
 
-  tapeEquals(t, result, RESULT, 'translate gave the right result');
-  t.end();
+  expect(equals(result, RESULT), 'translate gave the right result').toBe(true);
 });
 
-test('Matrix3#transform', t => {
+test('Matrix3#transform', () => {
   const TEST_CASES = [
     {
       method: 'transform',
@@ -304,16 +271,14 @@ test('Matrix3#transform', t => {
 
   for (const testCase of TEST_CASES) {
     const p4 = matrix[testCase.method](testCase.input);
-    tapeEquals(t, p4, testCase.expected, 'transform gave the right result');
+    expect(equals(p4, testCase.expected), 'transform gave the right result').toBe(true);
   }
 
-  t.throws(() => matrix.transform([NaN, 0, 0, 0]));
-  t.throws(() => matrix.transform([0]));
-  t.throws(() => matrix.transform([0, 0, 0, 0, 0]));
+  expect(() => matrix.transform([NaN, 0, 0, 0])).toThrow();
+  expect(() => matrix.transform([0])).toThrow();
+  expect(() => matrix.transform([0, 0, 0, 0, 0])).toThrow();
   // @ts-expect-error TS2551: Property 'transformAsVector' does not exist
-  t.throws(() => matrix.transformAsVector([0, 0, 0, 0, 0]));
+  expect(() => matrix.transformAsVector([0, 0, 0, 0, 0])).toThrow();
   // @ts-expect-error TS2551: Property 'transformAsVector' does not exist
-  t.throws(() => matrix.transformAsPoint([0, 0, 0, 0, 0]));
-
-  t.end();
+  expect(() => matrix.transformAsPoint([0, 0, 0, 0, 0])).toThrow();
 });

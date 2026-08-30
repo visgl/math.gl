@@ -7,10 +7,20 @@
 import {equals} from '@math.gl/core';
 import type {NumericArray} from '@math.gl/core';
 
-export const WINDING = {
-  CLOCKWISE: 1,
-  COUNTER_CLOCKWISE: -1
-} as const;
+/** Direction in which a polygon's vertices are ordered. */
+export type WindingDirection = 'clockwise' | 'counter-clockwise' | 'none';
+
+/** A non-degenerate polygon winding direction. */
+export type PolygonWinding = Exclude<WindingDirection, 'none'>;
+
+/**
+ * @deprecated Use the string values of {@link WindingDirection} directly.
+ */
+export enum WINDING {
+  CLOCKWISE = 'clockwise',
+  COUNTER_CLOCKWISE = 'counter-clockwise',
+  NONE = 'none'
+}
 
 /** Polygon representation where each point is represented as a separate array of positions. */
 type PointsArray = NumericArray[];
@@ -67,13 +77,13 @@ type PolygonParams = {
  * Checks winding direction of the polygon and reverses the polygon in case of opposite winding direction.
  * Note: points are modified in-place.
  * @param points An array that represents points of the polygon.
- * @param direction Requested winding direction. 1 is for clockwise, -1 for counterclockwise winding direction.
+ * @param direction Requested winding direction.
  * @param options Parameters of the polygon.
  * @return Returns true if the winding direction was changed.
  */
 export function modifyPolygonWindingDirection(
   points: NumericArray,
-  direction: number,
+  direction: PolygonWinding,
   options: PolygonParams = {}
 ): boolean {
   const windingDirection = getPolygonWindingDirection(points, options);
@@ -93,8 +103,8 @@ export function modifyPolygonWindingDirection(
 export function getPolygonWindingDirection(
   points: NumericArray,
   options: PolygonParams = {}
-): number {
-  return Math.sign(getPolygonSignedArea(points, options));
+): WindingDirection {
+  return getWindingDirection(getPolygonSignedArea(points, options));
 }
 
 export const DimIndex: Record<string, number> = {
@@ -190,13 +200,13 @@ function reversePolygon(
  * Checks winding direction of the polygon and reverses the polygon in case of opposite winding direction.
  * Note: points are modified in-place.
  * @param points Array of points that represent the polygon.
- * @param direction Requested winding direction. 1 is for clockwise, -1 for counterclockwise winding direction.
+ * @param direction Requested winding direction.
  * @param options Parameters of the polygon.
  * @return Returns true if the winding direction was changed.
  */
 export function modifyPolygonWindingDirectionPoints(
   points: PointsArray,
-  direction: number,
+  direction: PolygonWinding,
   options: PolygonParams = {}
 ): boolean {
   const currentDirection = getPolygonWindingDirectionPoints(points, options);
@@ -216,8 +226,14 @@ export function modifyPolygonWindingDirectionPoints(
 export function getPolygonWindingDirectionPoints(
   points: PointsArray,
   options: PolygonParams = {}
-): number {
-  return Math.sign(getPolygonSignedAreaPoints(points, options));
+): WindingDirection {
+  return getWindingDirection(getPolygonSignedAreaPoints(points, options));
+}
+
+function getWindingDirection(signedArea: number): WindingDirection {
+  if (signedArea > 0) return 'clockwise';
+  if (signedArea < 0) return 'counter-clockwise';
+  return 'none';
 }
 
 /**

@@ -2,154 +2,136 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 /* eslint-disable */
-import test from 'tape-promise/tape';
-import {tapeEquals} from 'test/utils/tape-assertions';
+import {test, expect} from 'vitest';
 
-import {_MathUtils, Vector3, Matrix4} from '@math.gl/core';
+import {_MathUtils, Vector3, Matrix4, equals} from '@math.gl/core';
 import {Plane, Ray} from '@math.gl/culling';
 
 const UNIT_X = [1, 0, 0];
 const UNIT_Y = [0, 1, 0];
 // const UNIT_Z = [0, 0, 1];
 
-test('Plane#constructs', t => {
+test('Plane#constructs', () => {
   const normal = UNIT_X;
   const distance = 1.0;
   const plane = new Plane(normal, distance);
-  tapeEquals(t, plane.normal, normal);
-  tapeEquals(t, plane.distance, distance);
-  t.end();
+  expect(equals(plane.normal, normal)).toBe(true);
+  expect(equals(plane.distance, distance)).toBe(true);
 });
 
-test('Plane#constructor throws without a normal', t => {
-  t.throws(() => new Plane(null, 0.0));
-  t.end();
+test('Plane#constructor throws without a normal', () => {
+  expect(() => new Plane(null, 0.0)).toThrow();
 });
 
-test.skip('Plane#constructor throws if normal is not normalized', t => {
-  t.throws(() => new Plane(new Vector3(1.0, 2.0, 3.0), 0.0));
-  t.end();
+test.skip('Plane#constructor throws if normal is not normalized', () => {
+  expect(() => new Plane(new Vector3(1.0, 2.0, 3.0), 0.0)).toThrow();
 });
 
-test('Plane#constructor throws without a distance', t => {
-  t.throws(() => new Plane(UNIT_X, null));
-  t.end();
+test('Plane#constructor throws without a distance', () => {
+  expect(() => new Plane(UNIT_X, null)).toThrow();
 });
 
-test('Plane#constructs from a point and a normal', t => {
+test('Plane#constructs from a point and a normal', () => {
   const normal = new Vector3(1.0, 2.0, 3.0).normalize();
   const point = new Vector3(4.0, 5.0, 6.0);
   const plane = new Plane().fromPointNormal(point, normal);
-  tapeEquals(t, plane.normal, normal);
-  tapeEquals(t, plane.distance, -normal.dot(point));
-  t.end();
+  expect(equals(plane.normal, normal)).toBe(true);
+  expect(equals(plane.distance, -normal.dot(point))).toBe(true);
 });
 
-test('Plane#constructs from a point and a normal with result', t => {
+test('Plane#constructs from a point and a normal with result', () => {
   const normal = new Vector3(1.0, 2.0, 3.0).normalize();
   const point = new Vector3(4.0, 5.0, 6.0);
 
   const plane = new Plane().fromPointNormal(point, normal);
 
-  tapeEquals(t, plane.normal, normal);
-  tapeEquals(t, plane.distance, -normal.dot(point));
-  t.end();
+  expect(equals(plane.normal, normal)).toBe(true);
+  expect(equals(plane.distance, -normal.dot(point))).toBe(true);
 });
 
-test('Plane#constructs from coefficents without result', t => {
+test('Plane#constructs from coefficents without result', () => {
   const result = new Plane().fromCoefficients(1, 0, 0, 0);
 
-  tapeEquals(t, result.normal, UNIT_X);
-  tapeEquals(t, result.distance, 0.0);
-  t.end();
+  expect(equals(result.normal, UNIT_X)).toBe(true);
+  expect(equals(result.distance, 0.0)).toBe(true);
 });
 
-test('Plane#constructs from coefficents with result', t => {
+test('Plane#constructs from coefficents with result', () => {
   const result = new Plane().fromCoefficients(1, 0, 0, 0);
 
-  tapeEquals(t, result.normal, UNIT_X);
-  tapeEquals(t, result.distance, 0.0);
-  t.end();
+  expect(equals(result.normal, UNIT_X)).toBe(true);
+  expect(equals(result.distance, 0.0)).toBe(true);
 });
 
-test('Plane#fromPointNormal throws without a point', t => {
-  t.throws(() => new Plane().fromPointNormal(undefined, UNIT_X));
-  t.end();
+test('Plane#fromPointNormal throws without a point', () => {
+  expect(() => new Plane().fromPointNormal(undefined, UNIT_X)).toThrow();
 });
 
-test('Plane#fromPointNormal throws without a normal', t => {
-  t.throws(() => new Plane().fromPointNormal(UNIT_X, undefined));
-  t.end();
+test('Plane#fromPointNormal throws without a normal', () => {
+  expect(() => new Plane().fromPointNormal(UNIT_X, undefined)).toThrow();
 });
 
-test.skip('Plane#fromPointNormal throws if normal is not normalized', t => {
-  t.throws(() => new Plane().fromPointNormal(Vector3.ZERO, Vector3.ZERO));
-  t.end();
+test.skip('Plane#fromPointNormal throws if normal is not normalized', () => {
+  expect(() => new Plane().fromPointNormal(Vector3.ZERO, Vector3.ZERO)).toThrow();
 });
 
-test('Plane#fromCoefficients throws without coefficients', t => {
+test('Plane#fromCoefficients throws without coefficients', () => {
   // @ts-expect-error
-  t.throws(() => new Plane().fromCoefficients(undefined));
-  t.end();
+  expect(() => new Plane().fromCoefficients(undefined)).toThrow();
 });
 
-test('Plane#fromCoefficients throws if normal is not normalized', t => {
-  t.throws(() => new Plane().fromCoefficients(1.0, 2.0, 3.0, 4.0));
-  t.end();
+test('Plane#fromCoefficients throws if normal is not normalized', () => {
+  expect(() => new Plane().fromCoefficients(1.0, 2.0, 3.0, 4.0)).toThrow();
 });
 
-test('Plane#gets the distance to a point', t => {
+test('Plane#gets the distance to a point', () => {
   const normal = new Vector3(1.0, 2.0, 3.0).normalize();
   const plane = new Plane(normal, 12.34);
   const point = new Vector3(4.0, 5.0, 6.0);
 
-  tapeEquals(t, plane.getPointDistance(point), plane.normal.dot(point) + plane.distance);
-  t.end();
+  expect(equals(plane.getPointDistance(point), plane.normal.dot(point) + plane.distance)).toBe(
+    true
+  );
 });
 
-test('Plane#getPointDistance throws without a plane', t => {
+test('Plane#getPointDistance throws without a plane', () => {
   const point = Vector3.ZERO;
   // @ts-expect-error
-  t.throws(() => new Plane().getPointDistance(undefined, point));
-  t.end();
+  expect(() => new Plane().getPointDistance(undefined, point)).toThrow();
 });
 
-test('Plane#getPointDistance throws without a point', t => {
+test('Plane#getPointDistance throws without a point', () => {
   // const plane = new Plane(UNIT_X, 0.0);
-  t.throws(() => new Plane().getPointDistance(undefined));
-  t.end();
+  expect(() => new Plane().getPointDistance(undefined)).toThrow();
 });
 
-test('Plane#projects a point onto the plane', t => {
+test('Plane#projects a point onto the plane', () => {
   const point = new Vector3(1.0, 1.0, 0.0);
 
   let plane = new Plane(UNIT_X, 0.0);
   let result = plane.projectPointOntoPlane(point);
-  tapeEquals(t, result, new Vector3(0.0, 1.0, 0.0));
+  expect(equals(result, new Vector3(0.0, 1.0, 0.0))).toBe(true);
 
   plane = new Plane(UNIT_Y, 0.0);
   result = plane.projectPointOntoPlane(point);
-  tapeEquals(t, result, new Vector3(1.0, 0.0, 0.0));
-  t.end();
+  expect(equals(result, new Vector3(1.0, 0.0, 0.0))).toBe(true);
 });
 
-test('Plane#projectPointOntoPlane uses result parameter', t => {
+test('Plane#projectPointOntoPlane uses result parameter', () => {
   const point = new Vector3(1.0, 1.0, 0.0);
 
   const plane = new Plane(UNIT_X, 0.0);
   const result = new Vector3();
   const returnedResult = plane.projectPointOntoPlane(point, result);
-  t.equals(result, returnedResult);
-  tapeEquals(t, result, new Vector3(0.0, 1.0, 0.0));
-  t.end();
+  expect(result).toBe(returnedResult);
+  expect(equals(result, new Vector3(0.0, 1.0, 0.0))).toBe(true);
 });
 
-test('Plane#projectPointOntoPlane requires the point parameter', t => {
-  t.throws(() => new Plane(UNIT_X, 0).projectPointOntoPlane(undefined));
-  t.end();
+test('Plane#projectPointOntoPlane requires the point parameter', () => {
+  expect(() => new Plane(UNIT_X, 0).projectPointOntoPlane(undefined)).toThrow();
 });
 
-test('Plane#intersectWithRay returns the forward intersection without mutating the ray', t => {
+test('Plane#intersectWithRay returns the forward intersection without mutating the ray', () => {
   const plane = new Plane(UNIT_X, -2);
   const ray = new Ray(new Vector3(0, 1, 0), new Vector3(1, 0, 0));
   const originalOrigin = ray.origin.clone();
@@ -158,66 +140,59 @@ test('Plane#intersectWithRay returns the forward intersection without mutating t
 
   const returnedResult = plane.intersectWithRay(ray, result);
 
-  t.equals(returnedResult, result, 'returns the supplied result');
-  tapeEquals(t, result, [2, 1, 0]);
-  tapeEquals(t, ray.origin, originalOrigin, 'does not mutate the ray origin');
-  tapeEquals(t, ray.direction, originalDirection, 'does not mutate the ray direction');
-  t.end();
+  expect(returnedResult, 'returns the supplied result').toBe(result);
+  expect(equals(result, [2, 1, 0])).toBe(true);
+  expect(equals(ray.origin, originalOrigin), 'does not mutate the ray origin').toBe(true);
+  expect(equals(ray.direction, originalDirection), 'does not mutate the ray direction').toBe(true);
 });
 
-test('Plane#intersectWithRay returns undefined for parallel or backward rays', t => {
+test('Plane#intersectWithRay returns undefined for parallel or backward rays', () => {
   const plane = new Plane(UNIT_X, -2);
-  t.equals(
+  expect(
     plane.intersectWithRay(new Ray(new Vector3(0, 0, 0), new Vector3(0, 1, 0))),
-    undefined,
     'parallel ray'
-  );
-  t.equals(
+  ).toBe(undefined);
+  expect(
     plane.intersectWithRay(new Ray(new Vector3(0, 0, 0), new Vector3(-1, 0, 0))),
-    undefined,
     'ray points away from plane'
-  );
-  t.end();
+  ).toBe(undefined);
 });
 
-test('Plane#clones a plane instance', t => {
+test('Plane#clones a plane instance', () => {
   const normal = new Vector3(1.0, 2.0, 3.0).normalize();
   const distance = 4.0;
   const plane = new Plane(normal, distance);
 
   const result = plane.clone();
-  tapeEquals(t, result.normal, normal);
-  tapeEquals(t, result.distance, distance);
-  t.end();
+  expect(equals(result.normal, normal)).toBe(true);
+  expect(equals(result.distance, distance)).toBe(true);
 });
 
-test('Plane#equals returns true only if two planes are equal by normal and distance', t => {
+test('Plane#equals returns true only if two planes are equal by normal and distance', () => {
   const left = new Plane(UNIT_X, 0.0);
   let right = new Plane(UNIT_Y, 1.0);
 
-  t.equals(left.equals(right), false);
+  expect(left.equals(right)).toBe(false);
 
   right = new Plane(UNIT_Y, 0.0);
 
-  t.equals(left.equals(right), false);
+  expect(left.equals(right)).toBe(false);
 
   right = new Plane(UNIT_X, 0.0);
 
-  t.equals(left.equals(right), true);
+  expect(left.equals(right)).toBe(true);
 
   right = new Plane(UNIT_X, 1.0);
 
-  t.equals(left.equals(right), false);
-  t.end();
+  expect(left.equals(right)).toBe(false);
 });
 
-test('Plane#equals throws is right is undefined', t => {
+test('Plane#equals throws is right is undefined', () => {
   const plane = new Plane(UNIT_X, 0.0);
-  t.throws(() => plane.equals(undefined));
-  t.end();
+  expect(() => plane.equals(undefined)).toThrow();
 });
 
-test('Plane#transforms a plane according to a transform', t => {
+test('Plane#transforms a plane according to a transform', () => {
   const normal = new Vector3(1.0, 2.0, 3.0).normalize();
   const plane = new Plane(normal, 12.34);
 
@@ -225,19 +200,14 @@ test('Plane#transforms a plane according to a transform', t => {
 
   const transformedPlane = plane.clone().transform(transform);
 
-  tapeEquals(t, transformedPlane.distance, plane.distance * 2.0);
-  tapeEquals(
-    t,
-    transformedPlane.normal,
-    [-normal.x, normal.y, -normal.z],
+  expect(equals(transformedPlane.distance, plane.distance * 2.0)).toBe(true);
+  expect(
+    equals(transformedPlane.normal, [-normal.x, normal.y, -normal.z]),
     'epsilon:' + _MathUtils.EPSILON10
-  );
-
-  t.end();
+  ).toBe(true);
 });
 
-test('Plane#transform throws without a transform', t => {
+test('Plane#transform throws without a transform', () => {
   const plane = new Plane(UNIT_X, 0.0);
-  t.throws(() => plane.transform(undefined));
-  t.end();
+  expect(() => plane.transform(undefined)).toThrow();
 });

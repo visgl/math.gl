@@ -123,9 +123,9 @@ Determines which side of a plane a sphere is located.
 
 - `plane` The plane to test against.
   Returns
-- `INTERSECTION.INSIDE` if the entire sphere is on the side of the plane the normal is pointing
-- `INTERSECTION.OUTSIDE` if the entire sphere is on the opposite side
-- `INTERSECTION.INTERSECTING` if the sphere intersects the plane.
+- `'inside'` if the entire sphere is on the side of the plane the normal is pointing
+- `'outside'` if the entire sphere is on the opposite side
+- `'intersecting'` if the sphere intersects the plane.
 
 ### `transform(transform : Number[16]) : BoundingSphere`
 

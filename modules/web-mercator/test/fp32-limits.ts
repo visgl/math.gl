@@ -1,6 +1,6 @@
+import {test} from 'vitest';
 import destination from '@turf/destination';
 import {lngLatToWorld, getDistanceScales} from '@math.gl/web-mercator';
-import test from 'tape-promise/tape';
 
 import VIEWPORT_PROPS from './utils/sample-viewports';
 
@@ -20,22 +20,22 @@ function getDiff(value, baseValue) {
 }
 
 // eslint-disable-next-line max-statements
-test('FP32 & Offset Comparison', t => {
+test('FP32 & Offset Comparison', () => {
   // Explore limits at different scales
   for (let zoom = 1; zoom <= 20; zoom++) {
     const scale = Math.pow(2, zoom);
-    t.comment('--------');
-    t.comment(`Zoom = ${zoom}, Scale = ${scale}`);
+    console.log('--------');
+    console.log(`Zoom = ${zoom}, Scale = ${scale}`);
 
     for (const vc in VIEWPORT_PROPS) {
-      t.comment(vc);
+      console.log(vc);
       const props = VIEWPORT_PROPS[vc];
       const {longitude, latitude} = props;
 
       // Test distance from one edge of the viewport to the other
       // TODO: Find better way to do "one edge of the viewport to the other"
       const delta = Math.pow(2, 20 - zoom) * 50;
-      t.comment(`R = ${delta} meters`);
+      console.log(`R = ${delta} meters`);
 
       let point = [longitude, latitude];
       // turf unit is kilometers
@@ -60,7 +60,7 @@ test('FP32 & Offset Comparison', t => {
         )
       ];
 
-      t.comment(`- Absolute Coordinates FP32: ${getDiff(coordsFP32, realPixelPos).message}`);
+      console.log(`- Absolute Coordinates FP32: ${getDiff(coordsFP32, realPixelPos).message}`);
 
       // Calculate using FP32+64 mixed offset mode (NEW WAY IN DECK.GL 6.0)
       // Select center point (the center is in 32-bit coords)
@@ -88,8 +88,9 @@ test('FP32 & Offset Comparison', t => {
         -(lngLatToWorld(point)[1] - lngLatToWorld([centerPointFP32[0], centerPointFP32[1]])[1])
       ];
 
-      t.comment(`- Offset Coordinates FP32+64: ${getDiff(offsetPixelPos, realPixelPos2).message}`);
+      console.log(
+        `- Offset Coordinates FP32+64: ${getDiff(offsetPixelPos, realPixelPos2).message}`
+      );
     }
   }
-  t.end();
 });
