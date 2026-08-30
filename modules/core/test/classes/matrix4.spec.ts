@@ -39,6 +39,14 @@ test('Matrix4#fromQuaternion', () => {
   expect(equals(new Matrix4().fromQuaternion([0, 0, 0, 1]), IDENTITY_MATRIX)).toBe(true);
 });
 
+test('Matrix4#fromMatrix3', () => {
+  const matrix4 = new Matrix4();
+  const result = matrix4.fromMatrix3([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+  expect(result).toBe(matrix4);
+  expect(equals(result, [1, 2, 3, 0, 4, 5, 6, 0, 7, 8, 9, 0, 0, 0, 0, 1])).toBe(true);
+});
+
 test('Matrix4#from', () => {
   expect(equals(new Matrix4().from(INDICES_MATRIX), INDICES_MATRIX)).toBe(true);
 });
@@ -59,13 +67,6 @@ test('Matrix4#toString', () => {
   );
 
   configure({printRowMajor: true});
-});
-
-test('Matrix4.toFloat32Array', () => {
-  expect(typeof Matrix4.prototype.toFloat32Array).toBe('function');
-  const m = new Matrix4();
-  m.identity();
-  expect(m.toFloat32Array().BYTES_PER_ELEMENT).toBe(4);
 });
 
 test('Matrix4.equals', () => {
@@ -510,38 +511,6 @@ test('Matrix4#transform', () => {
     },
     {
       method: 'transformAsVector',
-      input: [2, 2],
-      expected: [4, 4]
-    },
-    // DEPRECATED
-    {
-      method: 'transformPoint',
-      input: [2, 2, 0],
-      expected: [5, 6, 3]
-    },
-    {
-      method: 'transformVector',
-      input: [2, 2, 0],
-      expected: [5, 6, 3]
-    },
-    {
-      method: 'transformDirection',
-      input: [2, 2, 0],
-      expected: [4, 4, 0]
-    },
-    // DEPRECATED
-    {
-      method: 'transformPoint',
-      input: [2, 2],
-      expected: [5, 6]
-    },
-    {
-      method: 'transformVector',
-      input: [2, 2],
-      expected: [5, 6]
-    },
-    {
-      method: 'transformDirection',
       input: [2, 2],
       expected: [4, 4]
     }

@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 // Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 
-import {configure, Vector4, Matrix4, mat4} from '@math.gl/core';
+import {configure, Vector4, Matrix4} from '@math.gl/core';
+import * as mat4 from '@math.gl/core/mat4';
 
 /*
 class CesiumMatrix4 {

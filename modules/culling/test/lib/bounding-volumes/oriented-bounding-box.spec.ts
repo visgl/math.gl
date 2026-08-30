@@ -760,7 +760,7 @@ test.skip('fromRectangle for rectangles with heights', t => {
     Ellipsoid.UNIT_SPHERE
   );
   tapeEqualsEpsilon(t, box.center, new Vector3(1.0, 0.0, 0.0), _MathUtils.EPSILON15);
-  tapeEqualsEpsilon(t, box.halfAxes, new Matrix3(0, 0, 1, 0, 0, 0, 0, 0, 0), _MathUtils.EPSILON15);
+  tapeEqualsEpsilon(t, box.halfAxes, new Matrix3([0, 0, 1, 0, 0, 0, 0, 0, 0]), _MathUtils.EPSILON15);
 
   box = OrientedBoundingBox.fromRectangle(
     new Rectangle(-d90, -d90, d90, d90),
@@ -769,7 +769,7 @@ test.skip('fromRectangle for rectangles with heights', t => {
     Ellipsoid.UNIT_SPHERE
   );
   tapeEqualsEpsilon(t, box.center, new Vector3(1.0, 0.0, 0.0), _MathUtils.EPSILON15);
-  tapeEqualsEpsilon(t, box.halfAxes, new Matrix3(0, 0, 1, 2, 0, 0, 0, 2, 0), _MathUtils.EPSILON15);
+  tapeEqualsEpsilon(t, box.halfAxes, new Matrix3([0, 0, 1, 2, 0, 0, 0, 2, 0]), _MathUtils.EPSILON15);
 
   box = OrientedBoundingBox.fromRectangle(
     new Rectangle(-d90, -d90, d90, d90),
@@ -788,7 +788,7 @@ test.skip('fromRectangle for rectangles with heights', t => {
   );
   tapeEqualsEpsilon(t, box.center, new Vector3(0.5, 0.0, 0.0), _MathUtils.EPSILON15);
   tapeEqualsEpsilon(t, box.halfAxes,
-    new Matrix3(0, 0, 0.5, 1, 0, 0, 0, 1, 0),
+    new Matrix3([0, 0, 0.5, 1, 0, 0, 0, 1, 0]),
     _MathUtils.EPSILON15
   );
   t.end();
@@ -848,7 +848,7 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
   );
   tapeEqualsEpsilon(t, box.center, new Vector3(0.0, 0.5, 0.0), _MathUtils.EPSILON15);
   tapeEqualsEpsilon(t, box.halfAxes,
-    new Matrix3(-1.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0),
+    new Matrix3([-1.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0]),
     _MathUtils.EPSILON15
   );
 
@@ -860,7 +860,7 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
   );
   tapeEqualsEpsilon(t, box.center, new Vector3(0.5, 0.0, 0.0), _MathUtils.EPSILON15);
   tapeEqualsEpsilon(t, box.halfAxes,
-    new Matrix3(0.0, 0.0, 0.5, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0),
+    new Matrix3([0.0, 0.0, 0.5, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]),
     _MathUtils.EPSILON15
   );
 
@@ -872,7 +872,7 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
   );
   tapeEqualsEpsilon(t, box.center, new Vector3(0.1875 * sqrt3, 0.0, 0.1875), _MathUtils.EPSILON15);
   tapeEqualsEpsilon(t, box.halfAxes,
-    new Matrix3(0, -sqrt3 / 4, (5 * sqrt3) / 16, 1, 0, 0, 0, 3 / 4, 5 / 16),
+    new Matrix3([0, -sqrt3 / 4, (5 * sqrt3) / 16, 1, 0, 0, 0, 3 / 4, 5 / 16]),
     _MathUtils.EPSILON15
   );
 
@@ -887,7 +887,7 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
     _MathUtils.EPSILON15
   );
   tapeEqualsEpsilon(t, box.halfAxes,
-    new Matrix3(0, sqrt3 / 4, (5 * sqrt3) / 16, 1, 0, 0, 0, 3 / 4, -5 / 16),
+    new Matrix3([0, sqrt3 / 4, (5 * sqrt3) / 16, 1, 0, 0, 0, 3 / 4, -5 / 16]),
     _MathUtils.EPSILON15
   );
 
@@ -899,7 +899,7 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
   );
   tapeEqualsEpsilon(t, box.center, new Vector3(0.0, 0.1875 * sqrt3, 0.1875), _MathUtils.EPSILON15);
   tapeEqualsEpsilon(t, box.halfAxes,
-    new Matrix3(-1, 0, 0, 0, -sqrt3 / 4, (5 * sqrt3) / 16, 0, 3 / 4, 5 / 16),
+    new Matrix3([-1, 0, 0, 0, -sqrt3 / 4, (5 * sqrt3) / 16, 0, 3 / 4, 5 / 16]),
     _MathUtils.EPSILON15
   );
 
@@ -914,7 +914,7 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
     _MathUtils.EPSILON15
   );
   tapeEqualsEpsilon(t, box.halfAxes,
-    new Matrix3(-1, 0, 0, 0, sqrt3 / 4, (5 * sqrt3) / 16, 0, 3 / 4, -5 / 16),
+    new Matrix3([-1, 0, 0, 0, sqrt3 / 4, (5 * sqrt3) / 16, 0, 3 / 4, -5 / 16]),
     _MathUtils.EPSILON15
   );
 
@@ -929,7 +929,7 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
     _MathUtils.EPSILON15
   );
   tapeEqualsEpsilon(t, box.halfAxes,
-    new Matrix3(0.0, 0.0, 0.5 * (1.0 - Math.SQRT1_2), Math.SQRT1_2, 0.0, 0.0, 0.0, 0.0, 0.0),
+    new Matrix3([0.0, 0.0, 0.5 * (1.0 - Math.SQRT1_2), Math.SQRT1_2, 0.0, 0.0, 0.0, 0.0, 0.0]),
     _MathUtils.EPSILON15
   );
 
@@ -944,7 +944,7 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
     _MathUtils.EPSILON15
   );
   tapeEqualsEpsilon(t, box.halfAxes,
-    new Matrix3(0.0, 0.0, -0.5 * (1.0 - Math.SQRT1_2), -Math.SQRT1_2, 0.0, 0.0, 0.0, 0.0, 0.0),
+    new Matrix3([0.0, 0.0, -0.5 * (1.0 - Math.SQRT1_2), -Math.SQRT1_2, 0.0, 0.0, 0.0, 0.0, 0.0]),
     _MathUtils.EPSILON15
   );
 
@@ -959,7 +959,7 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
     _MathUtils.EPSILON15
   );
   tapeEqualsEpsilon(t, box.halfAxes,
-    new Matrix3(0.0, 0.0, 0.5 * (1.0 - Math.SQRT1_2), 0.0, 0.0, 0.0, 0.0, Math.SQRT1_2, 0.0),
+    new Matrix3([0.0, 0.0, 0.5 * (1.0 - Math.SQRT1_2), 0.0, 0.0, 0.0, 0.0, Math.SQRT1_2, 0.0]),
     _MathUtils.EPSILON15
   );
 
@@ -971,7 +971,7 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
   );
   tapeEqualsEpsilon(t, box.center, new Vector3(0.5, 0.0, 0.0), _MathUtils.EPSILON15);
   tapeEqualsEpsilon(t, box.halfAxes,
-    new Matrix3(0.0, 0.0, 0.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+    new Matrix3([0.0, 0.0, 0.5, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
     _MathUtils.EPSILON15
   );
 
@@ -983,7 +983,7 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
   );
   tapeEqualsEpsilon(t, box.center, new Vector3(0.5, 0.0, 0.0), _MathUtils.EPSILON15);
   tapeEqualsEpsilon(t, box.halfAxes,
-    new Matrix3(0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0),
+    new Matrix3([0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]),
     _MathUtils.EPSILON15
   );
 

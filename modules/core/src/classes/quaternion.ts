@@ -5,8 +5,8 @@
 
 import {NumericArray} from '@math.gl/types';
 import {MathArray} from './base/math-array';
-import {checkNumber, checkVector} from '../lib/validators';
-import {Vector4} from './vector4';
+import {checkNumber} from '../lib/validators';
+import type {EulerLike} from './euler-types';
 // @ts-ignore gl-matrix types...
 import {
   fromMat3 as quat_fromMat3,
@@ -29,11 +29,6 @@ import {
   scale as quat_scale,
   slerp as quat_slerp
 } from '../gl-matrix/quat';
-// @ts-ignore gl-matrix types...
-import {transformQuat as vec4_transformQuat} from '../gl-matrix/vec4';
-
-const IDENTITY_QUATERNION = [0, 0, 0, 1] as const;
-
 export class Quaternion extends MathArray {
   constructor(x: number | Readonly<NumericArray> = 0, y = 0, z = 0, w = 1) {
     // PERF NOTE: initialize elements as double precision numbers
@@ -80,6 +75,31 @@ export class Quaternion extends MathArray {
   fromMatrix3(m: Readonly<NumericArray>): this {
     quat_fromMat3(this, m);
     return this.check();
+  }
+
+  /**
+   * Sets this quaternion from Euler angles.
+   * @param euler - Euler angles and rotation order.
+   * @returns This quaternion.
+   */
+  fromEuler(euler: Readonly<EulerLike>): this {
+    this.identity();
+    switch (euler.order) {
+      case 'xyz':
+        return this.rotateX(euler.x).rotateY(euler.y).rotateZ(euler.z);
+      case 'yxz':
+        return this.rotateY(euler.y).rotateX(euler.x).rotateZ(euler.z);
+      case 'zxy':
+        return this.rotateZ(euler.z).rotateX(euler.x).rotateY(euler.y);
+      case 'zyx':
+        return this.rotateZ(euler.z).rotateY(euler.y).rotateX(euler.x);
+      case 'yzx':
+        return this.rotateY(euler.y).rotateZ(euler.z).rotateX(euler.x);
+      case 'xzy':
+        return this.rotateX(euler.x).rotateZ(euler.z).rotateY(euler.y);
+      default:
+        throw new Error('Unknown Euler angle order');
+    }
   }
 
   fromAxisRotation(axis: Readonly<NumericArray>, rad: number): this {
@@ -272,41 +292,13 @@ export class Quaternion extends MathArray {
 
   slerp(target: Readonly<NumericArray>, ratio: number): this;
   slerp(start: Readonly<NumericArray>, target: Readonly<NumericArray>, ratio: number): this;
-  slerp(params: {
-    start: Readonly<NumericArray>;
-    target: Readonly<NumericArray>;
-    ratio: number;
-  }): this;
-
   // Performs a spherical linear interpolation between two quat
-  slerp(
-    arg0:
-      | Readonly<NumericArray>
-      | {
-          start: Readonly<NumericArray>;
-          target: Readonly<NumericArray>;
-          ratio: number;
-        },
-    arg1?: Readonly<NumericArray> | number,
-    arg2?: number
-  ): this {
+  slerp(arg0: Readonly<NumericArray>, arg1?: Readonly<NumericArray> | number, arg2?: number): this {
     let start: Readonly<NumericArray>;
     let target: Readonly<NumericArray>;
     let ratio: number;
     // eslint-disable-next-line prefer-rest-params
     switch (arguments.length) {
-      case 1: // Deprecated signature ({start, target, ratio})
-        // eslint-disable-next-line prefer-rest-params
-        ({
-          start = IDENTITY_QUATERNION,
-          target,
-          ratio
-        } = arg0 as {
-          start: Readonly<NumericArray>;
-          target: Readonly<NumericArray>;
-          ratio: number;
-        });
-        break;
       case 2: // THREE.js compatibility signature (target, ration)
         start = this; // eslint-disable-line
         target = arg0 as Readonly<NumericArray>;
@@ -320,14 +312,6 @@ export class Quaternion extends MathArray {
     }
     quat_slerp(this, start, target, ratio);
     return this.check();
-  }
-
-  transformVector4(
-    vector: Readonly<NumericArray>,
-    result: NumericArray = new Vector4()
-  ): NumericArray {
-    vec4_transformQuat(result, vector, this);
-    return checkVector(result, 4);
   }
 
   // THREE.js Math API compatibility

@@ -46,6 +46,10 @@ Creates a quaternion from the given 3x3 rotation matrix. NOTE: The resultant qua
 
 `fromMatrix3(m)`
 
+### fromEuler(euler: EulerLike): this
+
+Sets this quaternion from Euler angles and returns it. `EulerLike` is a structural type containing numeric `x`, `y`, and `z` fields plus an `order` string.
+
 ### fromValues(x: number, y: number, z: number, w): number: this
 
 Creates a new quat initialized with the given values
@@ -174,6 +178,6 @@ Sets a quat from the given angle and rotation axis, then returns it.
 
 Performs a spherical linear interpolation between two quaternions
 
-`slerp({start = [0, 0, 0, 1], target, ratio})`
+`quaternion.slerp(target, ratio)`
 
-s
+`quaternion.slerp(start, target, ratio)`

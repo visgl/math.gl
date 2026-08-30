@@ -5,7 +5,7 @@
 
 /* eslint-disable max-statements, max-depth */
 import {test, expect} from 'vitest';
-import {SphericalCoordinates, equals} from '@math.gl/core';
+import {SphericalCoordinates, Vector3, equals} from '@math.gl/core';
 
 const REPRESENTATION_TEST_CASES = [
   {
@@ -102,7 +102,10 @@ test('SphericalCoordinates#methods', () => {
   spherical.set(1, 0, 0);
   spherical.copy(new SphericalCoordinates());
   spherical.fromLngLatZ([1, 1, 0]);
-  spherical.fromVector3([1, 1, 1]);
+  spherical.fromVector3(new Float32Array([1, 1, 1]));
+
+  const result = new Vector3();
+  expect(spherical.toVector3(result)).toBe(result);
 });
 
 test('SphericalCoordinates#clone', () => {

@@ -57,11 +57,11 @@ Note that while creating objects can be slow, copying data into a temo object (e
 
 ### Supplying `result` Objects
 
-A number of methods, such as `Matrix4.transformVector()`, allocate new objects as return values. These methods typically accept an optional `result` argument which can be populated and returned. By providing a `result` value, you revent the allocation of a new object and instead reuse an object you have already allocated.
+A number of methods, such as `Matrix4.transform()`, allocate new arrays as return values. These methods typically accept an optional `result` argument which can be populated and returned. By providing a `result` value, you prevent the allocation of a new array and instead reuse one you have already allocated.
 
 ```js
 for (...) {
-  const v = matrix4.transformVector([x, y, z]);
+  const v = matrix4.transform([x, y, z]);
   // v now contains a reference to a newly allocated `Vector3` which was updated with the result of the `tranformVector` operation.
 }
 ```
@@ -71,7 +71,7 @@ vs.
 ```js
 const tempVector = new Vector3();
 for (...) {
-  const v = matrix4.transformVector([x, y, z], tempVector);
+  const v = matrix4.transform([x, y, z], tempVector);
   // v now contains a reference to `tempVector` which was updated with the result of the `tranformVector` operation.
 }
 ```

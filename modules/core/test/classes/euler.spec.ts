@@ -33,18 +33,6 @@ function extendToMatrix4(arr) {
 
 test('Euler#import', () => {
   expect(typeof Euler).toBe('function');
-  expect(Euler.ZYX).toBe('zyx');
-  expect(Euler.YXZ).toBe('yxz');
-  expect(Euler.XZY).toBe('xzy');
-  expect(Euler.ZXY).toBe('zxy');
-  expect(Euler.YZX).toBe('yzx');
-  expect(Euler.XYZ).toBe('xyz');
-
-  expect(Euler.RollPitchYaw).toBe('zyx');
-  expect(Euler.DefaultOrder).toBe('zyx');
-  expect(Euler.RotationOrders.XYZ).toBe('xyz');
-
-  expect(Euler.rotationOrder(Euler.ZYX)).toBe('zyx');
 });
 
 test('Euler#construct and Array.isArray check', () => {
@@ -75,7 +63,7 @@ test('Euler#coverage', () => {
   euler.theta = euler.psi;
   euler.psi = euler.phi;
 
-  euler.order = Euler.XYZ;
+  euler.order = 'xyz';
   euler.order = euler.order;
   expect(euler.order).toBe('xyz');
 
@@ -86,51 +74,18 @@ test('Euler#coverage', () => {
   euler.toVector3([0, 0, 0]);
 });
 
-test('Euler#getQuaternion', () => {
+test('Euler#fromQuaternion supports every rotation order', () => {
   const angles = [30 * DEGREE_TO_RADIANS, 45 * DEGREE_TO_RADIANS, 60 * DEGREE_TO_RADIANS];
-  const orders = [Euler.XYZ, Euler.YXZ, Euler.ZXY, Euler.ZYX, Euler.YZX, Euler.XZY];
+  const orders = ['xyz', 'yxz', 'zxy', 'zyx', 'yzx', 'xzy'] as const;
 
   for (const order of orders) {
-    const euler = new Euler(angles[0], angles[1], angles[2], order);
-    const rotationMatrix = new Matrix4();
-    euler.getRotationMatrix(rotationMatrix);
-    const quaternionMatrix = new Matrix4().fromQuaternion(euler.getQuaternion());
+    const source = new Euler(angles[0], angles[1], angles[2], order);
+    const quaternion = new Quaternion().fromEuler(source);
+    const result = new Euler(0, 0, 0, order).fromQuaternion(quaternion);
 
-    expect(
-      equals(quaternionMatrix, rotationMatrix),
-      `Euler.getQuaternion matches getRotationMatrix for ${Euler.rotationOrder(order)}`
-    ).toBe(true);
+    expect(result.order).toBe(order);
+    expect(equals(result.getRotationMatrix(), source.getRotationMatrix())).toBe(true);
   }
-});
-
-test('Euler#toQuaternion', () => {
-  const eulers = [
-    new Euler(
-      90 * DEGREE_TO_RADIANS,
-      -89 * DEGREE_TO_RADIANS,
-      -180 * DEGREE_TO_RADIANS,
-      Euler.RollPitchYaw
-    ),
-    new Euler(
-      30 * DEGREE_TO_RADIANS,
-      45 * DEGREE_TO_RADIANS,
-      90 * DEGREE_TO_RADIANS,
-      Euler.RollPitchYaw
-    ),
-    new Euler(
-      11 * DEGREE_TO_RADIANS,
-      67 * DEGREE_TO_RADIANS,
-      45 * DEGREE_TO_RADIANS,
-      Euler.RollPitchYaw
-    )
-  ];
-  const quaternions = eulers.map(e => e.toQuaternion());
-  quaternions.every((q, i) => {
-    expect(
-      equals(new Euler().fromQuaternion(q), eulers[i]),
-      'Euler.fromQuaternion returns correct value'
-    ).toBe(true);
-  });
 });
 
 test('Euler.fromQuaternion', () => {

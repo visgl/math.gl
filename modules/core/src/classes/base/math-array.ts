@@ -66,11 +66,6 @@ export abstract class MathArray extends Array<number> {
     return target ? this.to(target) : this;
   }
 
-  /** @deprecated */
-  toFloat32Array(): Float32Array {
-    return new Float32Array(this);
-  }
-
   override toString(): string {
     return this.formatString(config);
   }
@@ -216,61 +211,5 @@ export abstract class MathArray extends Array<number> {
       valid = valid && Number.isFinite(this[i]);
     }
     return valid;
-  }
-
-  // three.js compatibility
-
-  /** @deprecated */
-  sub(a: Readonly<NumericArray>): this {
-    return this.subtract(a);
-  }
-
-  /** @deprecated */
-  setScalar(a: number): this {
-    for (let i = 0; i < this.ELEMENTS; ++i) {
-      this[i] = a;
-    }
-    return this.check();
-  }
-
-  /** @deprecated */
-  addScalar(a: number): this {
-    for (let i = 0; i < this.ELEMENTS; ++i) {
-      this[i] += a;
-    }
-    return this.check();
-  }
-
-  /** @deprecated */
-  subScalar(a: number): this {
-    return this.addScalar(-a);
-  }
-
-  /** @deprecated */
-  multiplyScalar(scalar: number): this {
-    // Multiplies all elements
-    // `Matrix4.scale` only scales its 3x3 "minor"
-    for (let i = 0; i < this.ELEMENTS; ++i) {
-      this[i] *= scalar;
-    }
-    return this.check();
-  }
-
-  /** @deprecated */
-  divideScalar(a: number): this {
-    return this.multiplyByScalar(1 / a);
-  }
-
-  /** @deprecated */
-  clampScalar(min: number, max: number): this {
-    for (let i = 0; i < this.ELEMENTS; ++i) {
-      this[i] = Math.min(Math.max(this[i], min), max);
-    }
-    return this.check();
-  }
-
-  /** @deprecated */
-  get elements(): NumericArray {
-    return this;
   }
 }

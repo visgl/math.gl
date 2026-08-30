@@ -4,18 +4,18 @@
 // Copyright (c) 2017 Uber Technologies, Inc.
 
 import {MathArray} from './base/math-array';
-import {Quaternion} from './quaternion';
 import {NumericArray} from '@math.gl/types';
+import type {EulerRotationOrder} from './euler-types';
 
 import {clamp} from '../lib/common';
 import {checkNumber} from '../lib/validators';
+import {fromQuat as mat4_fromQuat} from '../gl-matrix/mat4';
+
+export type {EulerLike, EulerRotationOrder} from './euler-types';
 
 // Internal constants
 const ERR_UNKNOWN_ORDER = 'Unknown Euler angle order';
 const ALMOST_ONE = 0.99999;
-
-/** Order in which Euler rotations are applied. */
-export type EulerRotationOrder = 'zyx' | 'yxz' | 'xzy' | 'zxy' | 'yzx' | 'xyz';
 
 enum RotationOrderIndex {
   ZYX = 0,
@@ -35,57 +35,7 @@ const ROTATION_ORDER_INDICES: Record<EulerRotationOrder, RotationOrderIndex> = {
   xyz: RotationOrderIndex.XYZ
 };
 
-const ROTATION_ORDERS = {
-  ZYX: 'zyx',
-  YXZ: 'yxz',
-  XZY: 'xzy',
-  ZXY: 'zxy',
-  YZX: 'yzx',
-  XYZ: 'xyz'
-} as const;
-
 export class Euler extends MathArray {
-  // Constants
-  /** @deprecated Pass the string `'zyx'` directly. */
-  static get ZYX(): EulerRotationOrder {
-    return 'zyx';
-  }
-  /** @deprecated Pass the string `'yxz'` directly. */
-  static get YXZ(): EulerRotationOrder {
-    return 'yxz';
-  }
-  /** @deprecated Pass the string `'xzy'` directly. */
-  static get XZY(): EulerRotationOrder {
-    return 'xzy';
-  }
-  /** @deprecated Pass the string `'zxy'` directly. */
-  static get ZXY(): EulerRotationOrder {
-    return 'zxy';
-  }
-  /** @deprecated Pass the string `'yzx'` directly. */
-  static get YZX(): EulerRotationOrder {
-    return 'yzx';
-  }
-  /** @deprecated Pass the string `'xyz'` directly. */
-  static get XYZ(): EulerRotationOrder {
-    return 'xyz';
-  }
-  /** @deprecated Pass the string `'zyx'` directly. */
-  static get RollPitchYaw(): EulerRotationOrder {
-    return 'zyx';
-  }
-  /** @deprecated Pass the string `'zyx'` directly. */
-  static get DefaultOrder(): EulerRotationOrder {
-    return 'zyx';
-  }
-  /** @deprecated Pass an {@link EulerRotationOrder} string directly. */
-  static get RotationOrders(): typeof ROTATION_ORDERS {
-    return ROTATION_ORDERS;
-  }
-  /** @deprecated Euler rotation orders are already represented as strings. */
-  static rotationOrder(order: EulerRotationOrder): EulerRotationOrder {
-    return order;
-  }
   get ELEMENTS(): number {
     return 4;
   }
@@ -110,20 +60,9 @@ export class Euler extends MathArray {
     }
   }
 
-  fromQuaternion(quaternion: Readonly<NumericArray>): this {
-    const [x, y, z, w] = quaternion;
-    const ysqr = y * y;
-    const t0 = -2 * (ysqr + z * z) + 1;
-    const t1 = +2 * (x * y + w * z);
-    let t2 = -2 * (x * z - w * y);
-    const t3 = +2 * (y * z + w * x);
-    const t4 = -2 * (x * x + ysqr) + 1;
-    t2 = t2 > 1 ? 1 : t2;
-    t2 = t2 < -1 ? -1 : t2;
-    const roll = Math.atan2(t3, t4);
-    const pitch = Math.asin(t2);
-    const yaw = Math.atan2(t1, t0);
-    return this.set(roll, pitch, yaw, 'zyx');
+  fromQuaternion(quaternion: Readonly<NumericArray>, order: EulerRotationOrder = this.order): this {
+    const matrix = mat4_fromQuat(new Array<number>(16), quaternion);
+    return this.fromRotationMatrix(matrix, order);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -307,36 +246,17 @@ export class Euler extends MathArray {
     return this.set(roll, pitch, yaw, 'zyx');
   }
 
-  fromRotationMatrix(m: Readonly<NumericArray>, order: EulerRotationOrder = 'zyx'): this {
+  fromRotationMatrix(m: Readonly<NumericArray>, order: EulerRotationOrder = this.order): this {
     this._fromRotationMatrix(m, order);
     return this.check();
   }
 
   // ACCESSORS
 
-  getRotationMatrix(m: NumericArray): NumericArray {
-    return this._getRotationMatrix(m);
-  }
-
-  // TODO - move to Quaternion
-  getQuaternion(): Quaternion {
-    const q = new Quaternion();
-    switch (this[3]) {
-      case RotationOrderIndex.XYZ:
-        return q.rotateX(this[0]).rotateY(this[1]).rotateZ(this[2]);
-      case RotationOrderIndex.YXZ:
-        return q.rotateY(this[1]).rotateX(this[0]).rotateZ(this[2]);
-      case RotationOrderIndex.ZXY:
-        return q.rotateZ(this[2]).rotateX(this[0]).rotateY(this[1]);
-      case RotationOrderIndex.ZYX:
-        return q.rotateZ(this[2]).rotateY(this[1]).rotateX(this[0]);
-      case RotationOrderIndex.YZX:
-        return q.rotateY(this[1]).rotateZ(this[2]).rotateX(this[0]);
-      case RotationOrderIndex.XZY:
-        return q.rotateX(this[0]).rotateZ(this[2]).rotateY(this[1]);
-      default:
-        throw new Error(ERR_UNKNOWN_ORDER);
-    }
+  getRotationMatrix(
+    result: NumericArray = [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0]
+  ): NumericArray {
+    return this._getRotationMatrix(result);
   }
 
   // INTERNAL METHODS
@@ -347,7 +267,7 @@ export class Euler extends MathArray {
   //   const q = new Quaternion().setFromEuler(this);
   //   return this.setFromQuaternion(q, newOrder);
   /* eslint-disable complexity, max-statements, one-var */
-  _fromRotationMatrix(m: Readonly<NumericArray>, order: EulerRotationOrder = 'zyx'): this {
+  _fromRotationMatrix(m: Readonly<NumericArray>, order: EulerRotationOrder = this.order): this {
     // assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
     const m11 = m[0],
       m12 = m[4],
@@ -548,21 +468,6 @@ export class Euler extends MathArray {
     te[14] = 0;
     te[15] = 1;
     return te;
-  }
-
-  toQuaternion(): Quaternion {
-    // Abbreviations for the various angular functions
-    const cy = Math.cos(this.yaw * 0.5);
-    const sy = Math.sin(this.yaw * 0.5);
-    const cr = Math.cos(this.roll * 0.5);
-    const sr = Math.sin(this.roll * 0.5);
-    const cp = Math.cos(this.pitch * 0.5);
-    const sp = Math.sin(this.pitch * 0.5);
-    const w = cy * cr * cp + sy * sr * sp;
-    const x = cy * sr * cp - sy * cr * sp;
-    const y = cy * cr * sp + sy * sr * cp;
-    const z = sy * cr * cp - cy * sr * sp;
-    return new Quaternion(x, y, z, w);
   }
 }
 

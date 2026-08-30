@@ -102,40 +102,6 @@ GLSL equivalent: Works on single values and vectors
 
 GLSL equivalent: Works on single values and vectors
 
-### sin
-
-`sin(radians)`
-
-GLSL equivalent: Works on single values and vectors
-
-### cos
-
-`cos(radians)`
-
-GLSL equivalent: Works on single values and vectors
-
-### tan
-
-`tan(radians)`
-
-GLSL equivalent: Works on single values and vectors
-
-### asin
-
-`asin(radians)`
-
-GLSL equivalent: Works on single values and vectors
-
-### acos
-
-`acos(radians)`
-
-GLSL equivalent: Works on single values and vectors
-
-### atan
-
-`atan(radians)`
-
 ### clamp
 
 `clamp(value, min, max)`

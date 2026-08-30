@@ -2,6 +2,58 @@
 
 ## Upgrading to v5.0
 
+Version 5 removes APIs that were deprecated in earlier releases and tightens the dependency boundaries between core classes. The class entry point remains tree-shakeable; low-level gl-matrix-compatible functions now use focused subpath imports.
+
+### Rotation and coordinate conversions
+
+- Replace `euler.getQuaternion()` and `euler.toQuaternion()` with the destination-owned `new Quaternion().fromEuler(euler)`. To reuse an allocation, call `quaternion.fromEuler(euler)` on an existing quaternion.
+- Replace `quaternion.transformVector4(vector, result)` with `result.copy(vector).transformByQuaternion(quaternion)` when `result` is a `Vector4`. For a new result, use `new Vector4(vector).transformByQuaternion(quaternion)`. To retain a tuple or typed-array result, use `transformQuat(result, vector, quaternion)` from `@math.gl/core/vec4`.
+- Replace `quaternion.slerp({start, target, ratio})` with `quaternion.slerp(start, target, ratio)`.
+- `SphericalCoordinates.fromVector3()` and `toVector3()` now use the structural `Vector3Like` type. `toVector3()` returns a plain array by default; pass a `Vector3`, tuple, or typed array as its result argument when a particular representation should be reused.
+
+Euler rotation orders are now represented directly by the `EulerRotationOrder` string type:
+
+| Removed API | Replacement |
+| --- | --- |
+| `Euler.XYZ`, `Euler.XZY`, `Euler.YXZ`, `Euler.YZX`, `Euler.ZXY`, `Euler.ZYX` | The corresponding lowercase string, such as `'xyz'` |
+| `Euler.RollPitchYaw`, `Euler.DefaultOrder` | `'zyx'` |
+| `Euler.RotationOrders`, `Euler.rotationOrder()` | An `EulerRotationOrder` string directly |
+
+### Removed core compatibility APIs
+
+| Removed API | Replacement |
+| --- | --- |
+| `_Euler`, `_Pose`, `_SphericalCoordinates` | `Euler`, `Pose`, `SphericalCoordinates` |
+| `new Matrix3(m00, ...m22)` | `new Matrix3([m00, ...m22])` |
+| `mathArray.toFloat32Array()` | `new Float32Array(mathArray)` |
+| `mathArray.elements` | `mathArray` (the classes extend `Array`) |
+| `mathArray.sub(value)` | `mathArray.subtract(value)` |
+| `mathArray.setScalar(value)` | `mathArray.fill(value)` |
+| `mathArray.multiplyScalar(value)` | `mathArray.multiplyByScalar(value)` |
+| `mathArray.divideScalar(value)` | `mathArray.multiplyByScalar(1 / value)` |
+| `mathArray.addScalar()`, `subScalar()`, `clampScalar()` | Use `add()`, `subtract()`, or `clamp()` with matching arrays, or update the elements explicitly |
+| `Matrix3.transformVector()`, `transformVector2()`, `transformVector3()` | `Matrix3.transform()` |
+| `Matrix4.transformPoint()`, `transformVector()` | `Matrix4.transformAsPoint()` for two- and three-element inputs, or `Matrix4.transform()` for general inputs |
+| `Matrix4.transformDirection()` | `Matrix4.transformAsVector()` |
+| `sin()`, `cos()`, `tan()`, `asin()`, `acos()`, `atan()` | The corresponding `Math` function for scalars; map it over arrays explicitly |
+
+### Low-level function imports
+
+The deprecated `mat3`, `mat4`, `quat`, `vec2`, `vec3`, and `vec4` namespaces are no longer exported from the package root. Import only the low-level module that is needed:
+
+```js
+// v5
+import * as mat4 from '@math.gl/core/mat4';
+import * as vec3 from '@math.gl/core/vec3';
+
+// v4
+import {mat4, vec3} from '@math.gl/core';
+```
+
+The available subpaths are `@math.gl/core/mat3`, `/mat4`, `/quat`, `/vec2`, `/vec3`, and `/vec4`. Keeping these namespaces out of the root entry point substantially reduces the cost of retaining every root export.
+
+### DGGS packages
+
 - The individual DGGS packages `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, and `@math.gl/dggs-quadkey` have been removed. Install only `@math.gl/dggs` and use its `/s2`, `/geohash`, and `/quadkey` subpath exports.
 - New `/a5`, `/h3`, and `/plus-code` subpath exports provide the same small cell-geometry contract for additional systems.
 - The new module exports a decoder object for each DGGS. Each object conforms to the common `DGGSDecoder` API.

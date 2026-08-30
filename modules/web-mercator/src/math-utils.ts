@@ -1,4 +1,4 @@
-import {vec4} from '@math.gl/core';
+import * as vec4 from '@math.gl/core/vec4';
 
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
 export function createMat4(): number[] {

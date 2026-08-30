@@ -5,6 +5,7 @@
 
 import {NumericArray, NumericArray16} from '@math.gl/types';
 import {Matrix} from './base/matrix';
+import type {Matrix3Like} from './matrix3';
 import {checkVector} from '../lib/validators';
 
 /* eslint-disable camelcase */
@@ -238,6 +239,32 @@ export class Matrix4 extends Matrix {
   fromQuaternion(quaternion: Readonly<NumericArray>): this {
     mat4_fromQuat(this, quaternion);
     return this.check();
+  }
+
+  /**
+   * Sets this matrix from a 3x3 matrix, with zero translation.
+   * @param matrix3 - 3x3 matrix in column-major order.
+   * @returns This matrix.
+   */
+  fromMatrix3(matrix3: Readonly<Matrix3Like>): this {
+    return this.set(
+      matrix3[0],
+      matrix3[1],
+      matrix3[2],
+      0,
+      matrix3[3],
+      matrix3[4],
+      matrix3[5],
+      0,
+      matrix3[6],
+      matrix3[7],
+      matrix3[8],
+      0,
+      0,
+      0,
+      0,
+      1
+    );
   }
 
   /**
@@ -606,21 +633,6 @@ export class Matrix4 extends Matrix {
     }
     checkVector(out, vector.length);
     return out;
-  }
-
-  /** @deprecated */
-  transformPoint(vector: Readonly<NumericArray>, result?: NumericArray): NumericArray {
-    return this.transformAsPoint(vector, result);
-  }
-
-  /** @deprecated */
-  transformVector(vector: Readonly<NumericArray>, result?: NumericArray): NumericArray {
-    return this.transformAsPoint(vector, result);
-  }
-
-  /** @deprecated */
-  transformDirection(vector: Readonly<NumericArray>, result?: NumericArray): NumericArray {
-    return this.transformAsVector(vector, result);
   }
 
   // three.js math API compatibility

@@ -19,7 +19,9 @@ import {fitBounds} from './fit-bounds';
 import {getBounds} from './get-bounds';
 import type {FitBoundsOptions} from './fit-bounds';
 
-import {mat4, vec2, vec3} from '@math.gl/core';
+import * as mat4 from '@math.gl/core/mat4';
+import * as vec2 from '@math.gl/core/vec2';
+import * as vec3 from '@math.gl/core/vec3';
 
 /**
    * @param width=1 - Width of "viewport" or window

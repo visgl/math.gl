@@ -34,15 +34,8 @@ test('Matrix3#from', () => {
 });
 
 test.skip('Matrix3#to', () => {
-  const matrix = new Matrix3(1, 2, 3, 4, 5, 6, 7, 8, 9);
+  const matrix = new Matrix3([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   expect(equals(matrix.to([0, 0, 0, 0, 0, 0, 0, 0, 0]), [1, 2, 3, 4, 5, 6, 7, 8, 9])).toBe(true);
-});
-
-test('Matrix3#toFloat32Array', () => {
-  expect(typeof Matrix3.prototype.toFloat32Array).toBe('function');
-  const m = new Matrix3();
-  m.identity();
-  expect(m.toFloat32Array().BYTES_PER_ELEMENT).toBe(4);
 });
 
 test('Matrix3#setRowMajor', () => {
@@ -145,6 +138,14 @@ test('Matrix3#fromQuaternion', () => {
   expect(equals(result, RESULT), 'fromQuaternion gave the right result').toBe(true);
 });
 
+test('Matrix3#fromMatrix4', () => {
+  const matrix3 = new Matrix3();
+  const result = matrix3.fromMatrix4([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+
+  expect(result).toBe(matrix3);
+  expect(equals(result, [1, 2, 3, 5, 6, 7, 9, 10, 11])).toBe(true);
+});
+
 test('Matrix3#transpose', () => {
   expect(typeof Matrix3.prototype.transpose).toBe('function');
 
@@ -243,27 +244,6 @@ test('Matrix3#transform', () => {
       method: 'transform',
       input: [2, 2],
       expected: [4, 4]
-    },
-    // DEPRECATED
-    {
-      method: 'transformVector',
-      input: [2, 2],
-      expected: [4, 4]
-    },
-    {
-      method: 'transformVector',
-      input: [2, 2, 0],
-      expected: [4, 4, 0]
-    },
-    {
-      method: 'transformVector2',
-      input: [2, 2],
-      expected: [4, 4]
-    },
-    {
-      method: 'transformVector3',
-      input: [2, 2, 0],
-      expected: [4, 4, 0]
     }
   ];
 

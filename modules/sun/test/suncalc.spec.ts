@@ -1,6 +1,7 @@
 import {test, expect} from 'vitest';
 import {getSunPosition, getSunDirection} from '../src/suncalc';
-import {equals, config, vec3} from '@math.gl/core';
+import {equals, config} from '@math.gl/core';
+import * as vec3 from '@math.gl/core/vec3';
 
 test('Sunlight#azimuth and altitude', () => {
   const MS_IN_AN_HOUR = 3.6e6;

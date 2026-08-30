@@ -82,7 +82,7 @@ const fullTransform = new Matrix4()
   .scale([1, -1, 1])
   .multiplyRight(partialTransform)
   .rotateX({radians: Math.PI});
-const v = fullTransform.transformVector(new Vector4(...));
+const v = fullTransform.transform(new Vector4(...));
 ```
 
 ## About Rotations

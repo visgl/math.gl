@@ -705,7 +705,7 @@ export function equals(a, b) {
  * @param {ReadonlyVec3} b the destination vector
  * @returns {quat} out
  */
-export const rotationTo = (function () {
+export const rotationTo = /* @__PURE__ */ (function () {
   const tmpvec3 = vec3.create();
   const xUnitVec3 = vec3.fromValues(1, 0, 0);
   const yUnitVec3 = vec3.fromValues(0, 1, 0);
@@ -745,7 +745,7 @@ export const rotationTo = (function () {
  * @param {Number} t interpolation amount, in the range [0-1], between the two inputs
  * @returns {quat} out
  */
-export const sqlerp = (function () {
+export const sqlerp = /* @__PURE__ */ (function () {
   const temp1 = create();
   const temp2 = create();
 
@@ -768,7 +768,7 @@ export const sqlerp = (function () {
  * @param {ReadonlyVec3} up    the vector representing the local "up" direction
  * @returns {quat} out
  */
-export const setAxes = (function () {
+export const setAxes = /* @__PURE__ */ (function () {
   const matr = mat3.create();
 
   return function (out, view, right, up) {

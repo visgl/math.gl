@@ -15,6 +15,7 @@
           "developer-guide/get-started",
           "developer-guide/debugging",
           "developer-guide/performance",
+          "developer-guide/bundling",
           "developer-guide/external-frameworks"
         ]
       },

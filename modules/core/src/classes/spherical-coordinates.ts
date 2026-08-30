@@ -4,11 +4,8 @@
 // Copyright (c) 2017 Uber Technologies, Inc.
 
 // Adaptation of THREE.js Spherical class, under MIT license
-import {NumericArray} from '@math.gl/types';
-import {Vector3} from './vector3';
+import type {Vector3Like} from './vector3';
 import {formatValue, equals, config, degrees, radians, clamp} from '../lib/common';
-// @ts-ignore gl-matrix types...
-import * as vec3 from '../gl-matrix/vec3';
 
 type SphericalCoordinatesOptions = {
   phi?: number;
@@ -174,8 +171,8 @@ export class SphericalCoordinates {
     return this.check();
   }
 
-  fromVector3(v: Readonly<NumericArray>): this {
-    this.radius = vec3.length(v);
+  fromVector3(v: Readonly<Vector3Like>): this {
+    this.radius = Math.hypot(v[0], v[1], v[2]);
     if (this.radius > 0) {
       this.theta = Math.atan2(v[0], v[1]); // equator angle around y-up axis
       this.phi = Math.acos(clamp(v[2] / this.radius, -1, 1)); // polar angle
@@ -183,10 +180,15 @@ export class SphericalCoordinates {
     return this.check();
   }
 
-  toVector3(): Vector3 {
-    return new Vector3(0, 0, this.radius)
-      .rotateX({radians: this.theta})
-      .rotateZ({radians: this.phi});
+  toVector3(result: Vector3Like = [-0, -0, -0]): Vector3Like {
+    const sinTheta = Math.sin(this.theta);
+    const cosTheta = Math.cos(this.theta);
+    const sinPhi = Math.sin(this.phi);
+    const cosPhi = Math.cos(this.phi);
+    result[0] = this.radius * sinTheta * sinPhi;
+    result[1] = -this.radius * sinTheta * cosPhi;
+    result[2] = this.radius * cosTheta;
+    return result;
   }
 
   // restrict phi to be betwee EPS and PI-EPS

@@ -35,6 +35,36 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./mat3": {
+      "types": "./dist/mat3.d.ts",
+      "import": "./dist/mat3.js",
+      "require": "./dist/mat3.cjs"
+    },
+    "./mat4": {
+      "types": "./dist/mat4.d.ts",
+      "import": "./dist/mat4.js",
+      "require": "./dist/mat4.cjs"
+    },
+    "./quat": {
+      "types": "./dist/quat.d.ts",
+      "import": "./dist/quat.js",
+      "require": "./dist/quat.cjs"
+    },
+    "./vec2": {
+      "types": "./dist/vec2.d.ts",
+      "import": "./dist/vec2.js",
+      "require": "./dist/vec2.cjs"
+    },
+    "./vec3": {
+      "types": "./dist/vec3.d.ts",
+      "import": "./dist/vec3.js",
+      "require": "./dist/vec3.cjs"
+    },
+    "./vec4": {
+      "types": "./dist/vec4.d.ts",
+      "import": "./dist/vec4.js",
+      "require": "./dist/vec4.cjs"
     }
   },
   "files": [

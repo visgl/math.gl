@@ -37,18 +37,18 @@ Transform a vector as a point (including translations)
 
 ```js
 const transform = new Matrix4();
-const vector2 = transform.transformPoint([0, 0]);
-const vector3 = transform.transformPoint([0, 1, 2]);
-const vector4 = transform.transformPoint([0, 1, 2, 1]);
+const vector2 = transform.transformAsPoint([0, 0]);
+const vector3 = transform.transformAsPoint([0, 1, 2]);
+const vector4 = transform.transform([0, 1, 2, 1]);
 ```
 
 Transform a vector as a direction (NOT including translations)
 
 ```js
 const transform = new Matrix4();
-const vector2 = transform.transformDirection([0, 0]);
-const vector3 = transform.transformDirection([0, 1, 2]);
-const vector4 = transform.transformDirection([0, 1, 2, 1]);
+const vector2 = transform.transformAsVector([0, 0]);
+const vector3 = transform.transformAsVector([0, 1, 2]);
+const vector4 = transform.transform([0, 1, 2, 0]);
 ```
 
 ## Inheritance
@@ -98,6 +98,10 @@ Sets the matrix to a transformation corresponding to the rotations represented b
 `matrix4.fromQuaternion(quaternion)`
 
 - `quaternion` (`Quaternion`) - the quaternion to create matrix from
+
+##### `fromMatrix3(matrix3: Matrix3 | number[9]): this`
+
+Sets the upper-left 3x3 elements from `matrix3`, with zero translation.
 
 ##### `frustum(options: {left: number, right: number, bottom: number, top: number, near: number, far: number}): this`
 
@@ -298,26 +302,20 @@ For performance, an existing vector can be provided, if not a new vector will be
 
 #### Point Transformations
 
-##### `transformAsPoint(vector : number[4]) : number[4]`
+##### `transformAsPoint(vector : number[2] | number[3])`
 
 Transforms any 2, 3 or 4 element vector as a "point" by multiplying it (from the right) with this matrix. `Point` here means that the returned vector will include any translations in this matrix.
 
-`const vector = matrix4.transformPoint(vector, out=)`
+`const vector = matrix4.transformAsPoint(vector, result)`
 
-- `vector` (`Array`|`Vector2`|`Vector3`|`Vector4`)
-- `out` - unless supplied, will be a Vector2, Vector3 or Vector4, matching the length of input vector.
-  Returns `out`, or a newly minted `Vector2`, `Vector3` or `Vector4`
+- `vector` (`Array`|`Vector2`|`Vector3`)
+- `result` - unless supplied, a plain array matching the input length is allocated.
 
-- If `vector` is specified in homogeneous coordinates, `w` coordinate must NOT be `0`.
-- If `vector` is specified in homogeneous coordinates the returned vector will be `w` adjusted, (i.e. `w` coordinate will be `1`, even if the supplied vector was not normalized).
-
-##### `transformAsVector(vector : number[4]) : number[4]`
+##### `transformAsVector(vector : number[2] | number[3])`
 
 Transforms any 2, 3 or 4 element vector interpreted as a direction (i.e. all vectors are based in the origin so the transformation not pick up any translations from the matrix).
 
-`const vector = matrix4.transformDirection(vector, out)`
-
-- If `vector` is specified in homogeneous coordinates, `w` coordinate must be `0`.
+`const vector = matrix4.transformAsVector(vector, result)`
 
 ## Remarks
 

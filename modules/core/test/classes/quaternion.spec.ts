@@ -6,7 +6,8 @@
 /* eslint-disable*/
 import {test, expect} from 'vitest';
 
-import {Quaternion, Vector3, equals} from '@math.gl/core';
+import {Euler, Matrix4, Quaternion, Vector3, equals} from '@math.gl/core';
+import type {EulerLike} from '@math.gl/core';
 
 test('Quaternion#import', () => {
   expect(typeof Quaternion).toBe('function');
@@ -49,6 +50,20 @@ test('Quaternion#fromMatrix3', () => {
     if (testCase.quaternion) {
       expect(equals(result, testCase.quaternion), testCase.title).toBe(true);
     }
+  }
+});
+
+test('Quaternion#fromEuler', () => {
+  const orders = ['xyz', 'yxz', 'zxy', 'zyx', 'yzx', 'xzy'] as const;
+
+  for (const order of orders) {
+    const euler = new Euler(0.2, -0.4, 0.6, order);
+    const eulerLike: EulerLike = {x: euler.x, y: euler.y, z: euler.z, order};
+    const quaternion = new Quaternion(1, 2, 3, 4);
+    const result = quaternion.fromEuler(eulerLike);
+
+    expect(result).toBe(quaternion);
+    expect(equals(new Matrix4().fromQuaternion(result), euler.getRotationMatrix())).toBe(true);
   }
 });
 
@@ -128,13 +143,6 @@ test('Quaternion#lerp', () => {
 
 test('Quaternion#slerp', () => {
   expect(() => new Quaternion().slerp([1, 1, 1, 1], [2, 2, 2, 2], 0.5)).not.toThrow();
-  expect(() =>
-    new Quaternion().slerp({
-      start: [1, 1, 1, 1],
-      target: [2, 2, 2, 2],
-      ratio: 0.5
-    })
-  ).not.toThrow();
 });
 
 test('Quaternion#scale', () => {
@@ -161,12 +169,6 @@ test('Quaternion#add', () => {
 test('Quaternion#setAxisAngle', () => {
   const result = new Quaternion().setAxisAngle([1, 0, 0], Math.PI * 0.5);
   expect(equals(result, [0.707106, 0, 0, 0.707106]), 'should return correct values').toBe(true);
-});
-
-test('Quaternion#transform', () => {
-  const quat = new Quaternion();
-  expect(() => quat.transformVector4([NaN, 0, 0, 0])).toThrow();
-  expect(() => quat.transformVector4([0, 0, 0])).toThrow();
 });
 
 test.skip('getAxisAngle', () => {

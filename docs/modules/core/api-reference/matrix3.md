@@ -21,20 +21,12 @@ Invert a matrix
 const inverse = matrix.invert();
 ```
 
-Transform a vector as a point (including translations)
+Transform a two-, three-, or four-element vector
 
 ```js
 const transform = new Matrix3();
-const vector2 = transform.transformPoint([1, 2]);
-const vector3 = transform.transformPoint([1, 2, 1]);
-```
-
-Transform a vector as a direction (NOT including translations)
-
-```js
-const transform = new Matrix3();
-const vector2 = transform.transformDirection([1, 2]);
-const vector3 = transform.transformDirection([1, 2, 1]);
+const vector2 = transform.transform([1, 2]);
+const vector3 = transform.transform([1, 2, 1]);
 ```
 
 ## Inheritance
@@ -84,6 +76,10 @@ Sets the matrix to a transformation corresponding to the rotations represented b
 `matrix3.fromQuaternion(quaternion)`
 
 - `quaternion` (`Quaternion`) - the quaternion to create matrix from
+
+### fromMatrix4(matrix4: Matrix4 | number[16]): this
+
+Copies the upper-left 3x3 elements of `matrix4`, including any scale, and returns this matrix. This differs from `Matrix4.getRotationMatrix3()`, which removes scale.
 
 ### determinant(): number
 
@@ -166,11 +162,11 @@ During vector transformation the given translation values are added to each comp
 
 ### transformVector()
 
-`transformVector(vector, out)`
+`transformVector(vector, result)`
 
 - `vector` (`Array`|`Vector2`|`Vector3`)
-- `out` - unless supplied, will be a `Vector2` or `Vector3`, matching the length of input vector.
-  Returns `out`, or a newly minted `Vector2` or `Vector3`.
+- `result` - unless supplied, will be a `Vector2` or `Vector3`, matching the length of input vector.
+  Returns `result`, or a newly minted `Vector2` or `Vector3`.
 
 ## Remarks
 

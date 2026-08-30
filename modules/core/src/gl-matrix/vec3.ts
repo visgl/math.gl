@@ -792,7 +792,7 @@ export const sqrLen = squaredLength;
  * @returns {Array} a
  * @function
  */
-export const forEach = (function () {
+export const forEach = /* @__PURE__ */ (function () {
   const vec = create();
 
   return function (a, stride, offset, count, fn, arg) {

@@ -6,7 +6,8 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 /* eslint-disable */
-import {Vector3, Matrix4, assert, equals, _MathUtils, NumericArray, vec3} from '@math.gl/core';
+import {Vector3, Matrix4, assert, equals, _MathUtils, NumericArray} from '@math.gl/core';
+import * as vec3 from '@math.gl/core/vec3';
 
 import {WGS84_RADIUS_X, WGS84_RADIUS_Y, WGS84_RADIUS_Z} from './constants';
 import {fromCartographicToRadians, toCartographicFromRadians} from './type-utils';
@@ -243,7 +244,7 @@ export class Ellipsoid {
           positionZ * positionZ * oneOverRadiiSquared.z
       );
 
-    return scratchPosition.multiplyScalar(beta).to(result);
+    return scratchPosition.multiplyByScalar(beta).to(result);
   }
 
   /** Transforms a Cartesian X, Y, Z position to the ellipsoid-scaled space by multiplying

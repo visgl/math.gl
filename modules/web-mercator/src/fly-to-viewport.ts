@@ -1,6 +1,6 @@
 import {lerp} from './math-utils';
 import {scaleToZoom, zoomToScale, lngLatToWorld, worldToLngLat} from './web-mercator-utils';
-import {vec2} from '@math.gl/core';
+import * as vec2 from '@math.gl/core/vec2';
 
 import type {ViewportProps} from './normalize-viewport-props';
 
