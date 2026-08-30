@@ -12,6 +12,12 @@ npm install @math.gl/core
 
 Type definitions are provided with each module. There is no need to install any separate types.
 
+math.gl v5 declarations require TypeScript 6.0 or later. The public typed-array definitions refer
+to TypeScript's `es2025.float16` library so that `Float16Array` can be represented accurately. This
+is a type-level requirement only: math.gl does not require or install a runtime `Float16Array`
+implementation. See the [array types guide](../modules/types/api-reference/array-types.md) for
+runtime detection and fallback helpers.
+
 ## ESM modules
 
 Since v4.0, math.gl is published as ES modules, but with a CommonJS named export. This setup should work automatically for most applications and bundlers.
