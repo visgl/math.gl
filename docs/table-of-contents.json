@@ -122,6 +122,11 @@
       },
       {
         "type": "category",
+        "label": "@math.gl/wkb",
+        "items": ["modules/wkb/README", "modules/wkb/api-reference/wkb"]
+      },
+      {
+        "type": "category",
         "label": "@math.gl/geoarrow",
         "items": [
           "modules/geoarrow/README",

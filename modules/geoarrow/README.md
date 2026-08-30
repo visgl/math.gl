@@ -4,7 +4,8 @@ Columnar geometry descriptors and synchronous CPU kernels for GeoArrow-compatibl
 
 `@math.gl/geoarrow` works directly over borrowed typed arrays. It deliberately does not require an
 Arrow runtime: a loader, dataframe, database client, or application can adapt its buffers to the
-small descriptor ABI and use the same validation, conversion, codec, and tessellation kernels.
+small descriptor ABI and use the same validation, conversion, column-codec, and tessellation
+kernels.
 
 ## Install
 
@@ -219,6 +220,16 @@ multi-geometries, and nested geometry collections. WKT supports all correspondin
 families, dimension tokens, both MultiPoint spellings, and empties. Decoding normalizes mixed-size
 serialized coordinates to the column's declared semantic dimension.
 
+Parsing or formatting one geometry is intentionally provided by the dependency-free
+`@math.gl/wkb` package:
+
+```typescript
+import {parseWKB, writeWKB, parseWKT, formatWKT} from '@math.gl/wkb';
+```
+
+`@math.gl/geoarrow` depends on `@math.gl/wkb`; the format package never depends on GeoArrow or
+Apache Arrow.
+
 ## Polygon tessellation
 
 ```typescript
@@ -290,7 +301,8 @@ the producer runtime.
 - Layout: `inspectGeoArrowColumn`, `validateGeoArrowColumn`, slicing and traversal
 - Kernels: count, bounds, map, interleave, convert, rewind, union normalization, resource limits
 - Construction: `GeoArrowBuilder`, `makeGeoArrowColumnFromGeometryRows`
-- Codecs: WKB/WKT encode, decode, parse, and format
+- Column codecs: WKB/WKT descriptor encode and decode (individual parsing/formatting is tested in
+  `@math.gl/wkb`)
 - Meshes: `tessellateGeoArrowPolygons`
 - Transfer: `getGeoArrowTransferList`, plus `@math.gl/geoarrow/worker`
 

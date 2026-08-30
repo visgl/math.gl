@@ -12,7 +12,8 @@ table objects.
 | File/network loading, schemas, GeoParquet metadata | loaders.gl |
 | Adapting table/vector buffers to descriptors | loaders.gl or the table runtime integration |
 | Physical validation, traversal, bounds, mapping, winding | `@math.gl/geoarrow` |
-| WKB/WKT native codecs | `@math.gl/geoarrow` |
+| Individual WKB/WKT parsing and formatting | `@math.gl/wkb` |
+| WKB/WKT column descriptors and adapters | `@math.gl/geoarrow` |
 | Polygon/MultiPolygon tessellation | `@math.gl/geoarrow` |
 | GPU buffer creation and rendering | luma.gl/deck.gl |
 | Worker scheduling and ownership policy | the application or loader |

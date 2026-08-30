@@ -83,11 +83,7 @@ export {
   decodeGeoArrowWKB,
   decodeGeoArrowWKT,
   encodeGeoArrowWKB,
-  encodeGeoArrowWKT,
-  formatWKT,
-  parseWKB,
-  parseWKT,
-  writeWKB
+  encodeGeoArrowWKT
 } from './codecs';
 
 export type {

@@ -75,6 +75,8 @@
       "@math.gl/sun/test/*": ["./modules/sun/test/*"],
       "@math.gl/types/*": ["./modules/types/src/*"],
       "@math.gl/types/test/*": ["./modules/types/test/*"],
+      "@math.gl/wkb/*": ["./modules/wkb/src/*"],
+      "@math.gl/wkb/test/*": ["./modules/wkb/test/*"],
       "@math.gl/web-mercator/*": ["./modules/web-mercator/src/*"],
       "@math.gl/web-mercator/test/*": ["./modules/web-mercator/test/*"],
       "test/*": ["./test/*"]

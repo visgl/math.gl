@@ -4,6 +4,7 @@
 
 import type {SpatialReference} from '@math.gl/crs';
 import type {TypedArray} from '@math.gl/types';
+import type {WellKnownGeometry} from '@math.gl/wkb';
 
 /** GeoArrow concrete, mixed, bounding-box, and serialized encodings. */
 export type GeoArrowEncoding =
@@ -143,20 +144,7 @@ export type GeoArrowColumn = Readonly<{
 }>;
 
 /** Materialized geometry value used at codec and builder boundaries. */
-export type GeoArrowGeometryValue =
-  | Readonly<{type: 'Point'; coordinates: readonly number[]}>
-  | Readonly<{type: 'LineString'; coordinates: readonly (readonly number[])[]}>
-  | Readonly<{type: 'Polygon'; coordinates: readonly (readonly (readonly number[])[])[]}>
-  | Readonly<{type: 'MultiPoint'; coordinates: readonly (readonly number[])[]}>
-  | Readonly<{
-      type: 'MultiLineString';
-      coordinates: readonly (readonly (readonly number[])[])[];
-    }>
-  | Readonly<{
-      type: 'MultiPolygon';
-      coordinates: readonly (readonly (readonly (readonly number[])[])[])[];
-    }>
-  | Readonly<{type: 'GeometryCollection'; geometries: readonly GeoArrowGeometryValue[]}>;
+export type GeoArrowGeometryValue = WellKnownGeometry;
 
 /** Coordinate callback used by mapping kernels. */
 export type GeoArrowCoordinateMapper = (
