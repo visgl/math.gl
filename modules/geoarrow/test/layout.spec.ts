@@ -201,6 +201,58 @@ test('GeoArrowBuilder event API preserves MultiPolygon parts', () => {
   });
 });
 
+test('GeoArrowBuilder event API writes every concrete family directly', () => {
+  const cases: Array<{
+    encoding:
+      | 'geoarrow.point'
+      | 'geoarrow.multipoint'
+      | 'geoarrow.polygon'
+      | 'geoarrow.multilinestring';
+    type: 'Point' | 'MultiPoint' | 'Polygon' | 'MultiLineString';
+  }> = [
+    {encoding: 'geoarrow.point', type: 'Point'},
+    {encoding: 'geoarrow.multipoint', type: 'MultiPoint'},
+    {encoding: 'geoarrow.polygon', type: 'Polygon'},
+    {encoding: 'geoarrow.multilinestring', type: 'MultiLineString'}
+  ];
+  for (const {encoding, type} of cases) {
+    const options = {encoding, dimension: 'xy' as const, coordinateLayout: 'separated' as const};
+    const feed = (builder: GeoArrowBuilder): void => {
+      builder.beginGeometry(type, 'xy', 2);
+      if (type === 'Point') {
+        builder.writeCoordinate(1, 2);
+      } else if (type === 'MultiPoint') {
+        builder.beginRing(2).writeCoordinate(1, 2).writeCoordinate(3, 4);
+      } else if (type === 'Polygon') {
+        builder
+          .beginRing(4)
+          .writeCoordinate(0, 0)
+          .writeCoordinate(2, 0)
+          .writeCoordinate(0, 2)
+          .writeCoordinate(0, 0);
+      } else {
+        builder
+          .beginRing(2)
+          .writeCoordinate(0, 0)
+          .writeCoordinate(1, 1)
+          .beginRing(2)
+          .writeCoordinate(2, 2)
+          .writeCoordinate(3, 3);
+      }
+      builder.endGeometry();
+    };
+    const measure = new GeoArrowBuilder({...options, mode: 'measure'});
+    feed(measure);
+    const write = new GeoArrowBuilder({
+      ...options,
+      mode: 'write',
+      target: measure.allocateTarget()
+    });
+    feed(write);
+    expect(validateGeoArrowColumn(write.finish()).valid).toBe(true);
+  }
+});
+
 test('dimensions, coordinate layouts and Int32/Int64 offsets conform', () => {
   const dimensions: GeoArrowDimension[] = ['xy', 'xyz', 'xym', 'xyzm'];
   for (const dimension of dimensions) {
