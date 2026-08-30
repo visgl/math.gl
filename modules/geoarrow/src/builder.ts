@@ -106,11 +106,15 @@ export class GeoArrowBuilder {
   private readonly eventStack: Array<{
     type: GeoArrowGeometryValue['type'];
     dimension: GeoArrowDimension;
-    rings: number[][][];
-    polygons: number[][][][];
+    direct: boolean;
+    rowIndex: number;
+    ringStarted: boolean;
+    polygonStarted: boolean;
+    rings?: number[][][];
+    polygons?: number[][][][];
     currentPolygon?: number[][][];
     currentRing?: number[][];
-    children: GeoArrowGeometryValue[];
+    children?: GeoArrowGeometryValue[];
   }> = [];
 
   constructor(options: GeoArrowBuilderModeOptions) {
@@ -286,13 +290,47 @@ export class GeoArrowBuilder {
     this.coordinateCount++;
   }
 
+  private writeCoordinateComponents(
+    x: number,
+    y: number,
+    z: number | undefined,
+    m: number | undefined,
+    sourceDimension: GeoArrowDimension
+  ): void {
+    const targetZ = sourceDimension === 'xyz' || sourceDimension === 'xyzm' ? (z ?? 0) : 0;
+    const targetM = sourceDimension === 'xym' || sourceDimension === 'xyzm' ? (m ?? 0) : 0;
+    if (this.target) {
+      writeCoordinateComponents(
+        this.target.coordinates,
+        this.coordinateCount,
+        x,
+        y,
+        targetZ,
+        targetM,
+        this.dimension
+      );
+    }
+    this.coordinateCount++;
+  }
+
   /** Begins an event-driven geometry. Events are accepted by both measure and write builders. */
   beginGeometry(
     type: GeoArrowGeometryValue['type'],
     dimension = this.dimension,
     _count?: number
   ): this {
-    this.eventStack.push({type, dimension, rings: [], polygons: [], children: []});
+    const direct = getGeoArrowGeometryType(this.encoding) === type;
+    const rowIndex = direct ? this.length++ : -1;
+    this.eventStack.push({
+      type,
+      dimension,
+      direct,
+      rowIndex,
+      ringStarted: false,
+      polygonStarted: false,
+      ...(direct ? {} : {rings: [], polygons: []}),
+      ...(direct ? {} : {children: []})
+    });
     return this;
   }
 
@@ -302,8 +340,14 @@ export class GeoArrowBuilder {
     if (!state || state.type !== 'MultiPolygon') {
       throw new Error("beginPolygon must follow beginGeometry('MultiPolygon')");
     }
+    if (state.direct) {
+      this.finishEventRing(state);
+      this.finishEventPolygon(state);
+      state.polygonStarted = true;
+      return this;
+    }
     state.currentPolygon = [];
-    state.polygons.push(state.currentPolygon);
+    state.polygons!.push(state.currentPolygon);
     state.currentRing = undefined;
     return this;
   }
@@ -312,12 +356,17 @@ export class GeoArrowBuilder {
   beginRing(_count?: number): this {
     const state = this.eventStack[this.eventStack.length - 1];
     if (!state) throw new Error('beginRing must follow beginGeometry');
+    if (state.direct) {
+      this.finishEventRing(state);
+      state.ringStarted = true;
+      return this;
+    }
     state.currentRing = [];
     if (state.type === 'MultiPolygon') {
       if (!state.currentPolygon) this.beginPolygon();
       state.currentPolygon!.push(state.currentRing);
     } else {
-      state.rings.push(state.currentRing);
+      state.rings!.push(state.currentRing);
     }
     return this;
   }
@@ -326,12 +375,22 @@ export class GeoArrowBuilder {
   writeCoordinate(x: number | readonly number[], y?: number, z?: number, m?: number): this {
     const state = this.eventStack[this.eventStack.length - 1];
     if (!state) throw new Error('writeCoordinate must follow beginGeometry');
+    if (typeof x === 'number' && state.direct) {
+      this.writeCoordinateComponents(x, y!, z, m, state.dimension);
+      return this;
+    }
     const coordinate = Array.isArray(x)
       ? [...x]
       : [x, y!, ...(z === undefined ? [] : [z]), ...(m === undefined ? [] : [m])];
     const size = getGeoArrowDimensionSize(state.dimension);
     if (coordinate.length !== size)
       throw new Error(`Expected ${size} coordinate values for ${state.dimension}`);
+    if (state.direct) {
+      this.writeCoordinateValues(
+        resizeEventCoordinate(coordinate, state.dimension, this.dimension)
+      );
+      return this;
+    }
     if (state.type === 'Point') {
       state.rings = [[coordinate]];
       return this;
@@ -341,11 +400,49 @@ export class GeoArrowBuilder {
     return this;
   }
 
+  /** Writes scalar ordinates tagged with their source dimension without allocating a tuple. */
+  writeCoordinateFromDimension(
+    x: number,
+    y: number,
+    z: number | undefined,
+    m: number | undefined,
+    sourceDimension: GeoArrowDimension
+  ): this {
+    const state = this.eventStack[this.eventStack.length - 1];
+    if (!state) throw new Error('writeCoordinateFromDimension must follow beginGeometry');
+    if (state.direct) {
+      this.writeCoordinateComponents(x, y, z, m, sourceDimension);
+      return this;
+    }
+    const coordinate = getDimensionNames(state.dimension).map(name => {
+      if (name === 'x') return x;
+      if (name === 'y') return y;
+      if (name === 'z')
+        return sourceDimension === 'xyz' || sourceDimension === 'xyzm' ? (z ?? 0) : 0;
+      return sourceDimension === 'xym' || sourceDimension === 'xyzm' ? (m ?? 0) : 0;
+    });
+    return this.writeCoordinate(coordinate);
+  }
+
   /** Ends the current event geometry and appends it to the builder/parent. */
   endGeometry(): this {
     const state = this.eventStack.pop();
     if (!state) throw new Error('endGeometry without beginGeometry');
-    const coordinates = state.rings;
+    if (state.direct) {
+      this.finishEventRing(state);
+      this.finishEventPolygon(state);
+      const depth = getBuilderDepth(this.encoding);
+      if (depth >= 1) {
+        this.writeOffset(
+          this.target?.geometryOffsets,
+          state.rowIndex + 1,
+          depth === 1 ? this.coordinateCount : this.partCount
+        );
+      }
+      if (this.target) setValidityBit(this.target.validity, state.rowIndex);
+      return this;
+    }
+    const coordinates = state.rings || [];
     let geometry: GeoArrowGeometryValue;
     switch (state.type) {
       case 'Point':
@@ -366,15 +463,15 @@ export class GeoArrowBuilder {
       case 'MultiPolygon':
         geometry = {
           type: 'MultiPolygon',
-          coordinates: state.polygons.length ? state.polygons : [coordinates]
+          coordinates: state.polygons?.length ? state.polygons : [coordinates]
         };
         break;
       case 'GeometryCollection':
-        geometry = {type: 'GeometryCollection', geometries: state.children};
+        geometry = {type: 'GeometryCollection', geometries: state.children || []};
         break;
     }
     const parent = this.eventStack[this.eventStack.length - 1];
-    if (parent?.type === 'GeometryCollection') parent.children.push(geometry);
+    if (parent?.type === 'GeometryCollection') parent.children!.push(geometry);
     else this.append(geometry);
     return this;
   }
@@ -383,6 +480,27 @@ export class GeoArrowBuilder {
     if (!target) return;
     if (target instanceof BigInt64Array) target[index] = BigInt(value);
     else target[index] = value;
+  }
+
+  private finishEventRing(state: (typeof this.eventStack)[number]): void {
+    if (!state.direct || !state.ringStarted) return;
+    if (this.encoding === 'geoarrow.multipolygon') {
+      this.ringCount++;
+      this.writeOffset(this.target?.ringOffsets, this.ringCount, this.coordinateCount);
+    } else if (getBuilderDepth(this.encoding) >= 2) {
+      this.partCount++;
+      this.writeOffset(this.target?.partOffsets, this.partCount, this.coordinateCount);
+    }
+    state.ringStarted = false;
+  }
+
+  private finishEventPolygon(state: (typeof this.eventStack)[number]): void {
+    if (!state.direct || !state.polygonStarted) return;
+    if (this.encoding === 'geoarrow.multipolygon') {
+      this.partCount++;
+      this.writeOffset(this.target?.partOffsets, this.partCount, this.ringCount);
+    }
+    state.polygonStarted = false;
   }
 
   private initializeTargetOffsets(target: GeoArrowBuilderTarget): void {
@@ -469,22 +587,18 @@ function makeDenseUnionArray(
 ): GeoArrowDenseUnion {
   const nonNullTypes = [...new Set(rows.filter(Boolean).map(row => row!.type))];
   const fallbackType = nonNullTypes[0] || 'Point';
-  const childRows = new Map<GeoArrowGeometryValue['type'], GeoArrowGeometryValue[]>();
+  const childRows = new Map<GeoArrowGeometryValue['type'], Array<GeoArrowGeometryValue | null>>();
   for (const type of nonNullTypes.length ? nonNullTypes : [fallbackType]) childRows.set(type, []);
   const typeIds = new Int8Array(rows.length);
   const valueOffsets = new Int32Array(rows.length);
-  const validity = new Uint8Array(Math.ceil(rows.length / 8));
   for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
     const geometry = rows[rowIndex];
     const type = geometry?.type || fallbackType;
     const values = childRows.get(type) || [];
     typeIds[rowIndex] = getGeometryTypeId(type, dimension);
     valueOffsets[rowIndex] = values.length;
-    if (geometry) {
-      values.push(geometry);
-      childRows.set(type, values);
-      setValidityBit(validity, rowIndex);
-    }
+    values.push(geometry);
+    childRows.set(type, values);
   }
   const children = [...childRows.entries()]
     .sort(
@@ -513,8 +627,7 @@ function makeDenseUnionArray(
     length: rows.length,
     typeIds,
     valueOffsets,
-    children,
-    validity: {values: validity}
+    children
   };
 }
 
@@ -606,6 +719,64 @@ function writeCoordinate(
   else if (dimension === 'xyzm') {
     target.z![coordinateIndex] = coordinate[2];
     target.m![coordinateIndex] = coordinate[3];
+  }
+}
+
+function writeCoordinateComponents(
+  target: GeoArrowBuilderTarget['coordinates'],
+  coordinateIndex: number,
+  x: number,
+  y: number,
+  z: number,
+  m: number,
+  dimension: GeoArrowDimension
+): void {
+  if (target instanceof Float32Array || target instanceof Float64Array) {
+    const size = getGeoArrowDimensionSize(dimension);
+    const offset = coordinateIndex * size;
+    target[offset] = x;
+    target[offset + 1] = y;
+    if (dimension === 'xyz') target[offset + 2] = z;
+    else if (dimension === 'xym') target[offset + 2] = m;
+    else if (dimension === 'xyzm') {
+      target[offset + 2] = z;
+      target[offset + 3] = m;
+    }
+    return;
+  }
+  target.x[coordinateIndex] = x;
+  target.y[coordinateIndex] = y;
+  if (dimension === 'xyz') target.z![coordinateIndex] = z;
+  else if (dimension === 'xym') target.m![coordinateIndex] = m;
+  else if (dimension === 'xyzm') {
+    target.z![coordinateIndex] = z;
+    target.m![coordinateIndex] = m;
+  }
+}
+
+function resizeEventCoordinate(
+  coordinate: readonly number[],
+  sourceDimension: GeoArrowDimension,
+  targetDimension: GeoArrowDimension
+): number[] {
+  if (sourceDimension === targetDimension) return [...coordinate];
+  const sourceNames = getDimensionNames(sourceDimension);
+  return getDimensionNames(targetDimension).map(name => {
+    const index = sourceNames.indexOf(name);
+    return index >= 0 ? (coordinate[index] ?? 0) : 0;
+  });
+}
+
+function getDimensionNames(dimension: GeoArrowDimension): Array<'x' | 'y' | 'z' | 'm'> {
+  switch (dimension) {
+    case 'xy':
+      return ['x', 'y'];
+    case 'xyz':
+      return ['x', 'y', 'z'];
+    case 'xym':
+      return ['x', 'y', 'm'];
+    case 'xyzm':
+      return ['x', 'y', 'z', 'm'];
   }
 }
 

@@ -14,6 +14,7 @@ import {
   mapGeoArrowCoordinatesInto,
   normalizeGeoArrowUnion,
   rewindGeoArrow,
+  sliceGeoArrowColumn,
   tessellateGeoArrowPolygons,
   type GeoArrowGeometryValue
 } from '../src/index';
@@ -45,6 +46,34 @@ test('coordinate mapping, into mapping and layout conversion are deterministic',
   expect(interleaveGeoArrowCoordinates(source).coordinateLayout).toBe('interleaved');
   const unspecifiedLayout = {...source, coordinateLayout: null};
   expect(interleaveGeoArrowCoordinates(unspecifiedLayout)).toBe(unspecifiedLayout);
+});
+
+test('single-family promotions share existing coordinate and topology buffers', () => {
+  const point = makeGeoArrowColumnFromGeometryRows([
+    {type: 'Point', coordinates: [1, 2]},
+    {type: 'Point', coordinates: [3, 4]}
+  ]);
+  const promoted = convertGeoArrowColumn(point, {encoding: 'geoarrow.multipoint'});
+  expect(promoted.encoding).toBe('geoarrow.multipoint');
+  expect(materializeGeoArrowRows(promoted)).toEqual([
+    {type: 'MultiPoint', coordinates: [[1, 2]]},
+    {type: 'MultiPoint', coordinates: [[3, 4]]}
+  ]);
+  const pointCoordinates = point.chunks[0];
+  if (pointCoordinates.kind !== 'fixed-size-list' || pointCoordinates.child.kind !== 'primitive') {
+    throw new Error('Expected interleaved Point coordinates');
+  }
+  const promotedChunk = promoted.chunks[0];
+  if (
+    promotedChunk.kind !== 'list' ||
+    promotedChunk.child.kind !== 'fixed-size-list' ||
+    promotedChunk.child.child.kind !== 'primitive'
+  ) {
+    throw new Error('Expected interleaved MultiPoint coordinates');
+  }
+  const pointValues = pointCoordinates.child.values;
+  const promotedValues = promotedChunk.child.child.values;
+  expect(promotedValues.buffer).toBe(pointValues.buffer);
 });
 
 test('coordinate mapping attributes every nested coordinate to its logical row', () => {
@@ -120,6 +149,184 @@ test('conversion forces dense unions and never reinterprets M as Z', () => {
   expect(mixed.encoding).toBe('geoarrow.geometry');
   expect(mixed.chunks[0].kind).toBe('dense-union');
   expect(materializeGeoArrowRows(mixed)).toEqual([{type: 'Point', coordinates: [1, 2, 99]}]);
+});
+
+test('dense-union demotion gathers sliced children directly and promotes single rows', () => {
+  const source = makeGeoArrowColumnFromGeometryRows(
+    [
+      {type: 'Point', coordinates: [-1, -2, -3]},
+      null,
+      {type: 'Point', coordinates: [1, 2, 3]},
+      {
+        type: 'MultiPoint',
+        coordinates: [
+          [4, 5, 6],
+          [7, 8, 9]
+        ]
+      }
+    ],
+    {dimension: 'xyz', offsetType: 'int64'}
+  );
+  const sliced = sliceGeoArrowColumn(source, 1, 4);
+  const converted = convertGeoArrowColumn(sliced, {
+    encoding: 'geoarrow.multipoint',
+    offsetType: 'preserve'
+  });
+  expect(converted.chunks).toHaveLength(1);
+  const chunk = converted.chunks[0];
+  if (chunk.kind !== 'list') throw new Error('Expected MultiPoint list storage');
+  expect(chunk.offsets).toBeInstanceOf(BigInt64Array);
+  expect(materializeGeoArrowRows(converted)).toEqual([
+    null,
+    {type: 'MultiPoint', coordinates: [[1, 2, 3]]},
+    {
+      type: 'MultiPoint',
+      coordinates: [
+        [4, 5, 6],
+        [7, 8, 9]
+      ]
+    }
+  ]);
+});
+
+test('dense-union demotion replays every nested topology from separated coordinates', () => {
+  const cases: Array<{
+    target: 'geoarrow.multilinestring' | 'geoarrow.multipolygon';
+    rows: GeoArrowGeometryValue[];
+    expected: GeoArrowGeometryValue[];
+  }> = [
+    {
+      target: 'geoarrow.multilinestring',
+      rows: [
+        {
+          type: 'LineString',
+          coordinates: [
+            [0, 1, 2],
+            [3, 4, 5]
+          ]
+        },
+        {
+          type: 'MultiLineString',
+          coordinates: [
+            [
+              [6, 7, 8],
+              [9, 10, 11]
+            ]
+          ]
+        }
+      ],
+      expected: [
+        {
+          type: 'MultiLineString',
+          coordinates: [
+            [
+              [0, 1, 2],
+              [3, 4, 5]
+            ]
+          ]
+        },
+        {
+          type: 'MultiLineString',
+          coordinates: [
+            [
+              [6, 7, 8],
+              [9, 10, 11]
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      target: 'geoarrow.multipolygon',
+      rows: [
+        {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [0, 0, 1],
+              [1, 0, 2],
+              [0, 1, 3],
+              [0, 0, 1]
+            ]
+          ]
+        },
+        {
+          type: 'MultiPolygon',
+          coordinates: [
+            [
+              [
+                [10, 10, 4],
+                [11, 10, 5],
+                [10, 11, 6],
+                [10, 10, 4]
+              ]
+            ]
+          ]
+        }
+      ],
+      expected: [
+        {
+          type: 'MultiPolygon',
+          coordinates: [
+            [
+              [
+                [0, 0, 1],
+                [1, 0, 2],
+                [0, 1, 3],
+                [0, 0, 1]
+              ]
+            ]
+          ]
+        },
+        {
+          type: 'MultiPolygon',
+          coordinates: [
+            [
+              [
+                [10, 10, 4],
+                [11, 10, 5],
+                [10, 11, 6],
+                [10, 10, 4]
+              ]
+            ]
+          ]
+        }
+      ]
+    }
+  ];
+  for (const {target, rows, expected} of cases) {
+    const source = makeGeoArrowColumnFromGeometryRows(rows, {
+      dimension: 'xyz',
+      coordinateLayout: 'separated',
+      offsetType: 'int64'
+    });
+    const converted = convertGeoArrowColumn(source, {encoding: target});
+    expect(materializeGeoArrowRows(converted)).toEqual(expected);
+  }
+});
+
+test('dense-union demotion accepts legacy root nulls and rejects incompatible families', () => {
+  const points = makeGeoArrowColumnFromGeometryRows([
+    {type: 'Point', coordinates: [1, 2]},
+    {type: 'MultiPoint', coordinates: [[3, 4]]}
+  ]);
+  const union = points.chunks[0];
+  if (union.kind !== 'dense-union') throw new Error('Expected mixed union storage');
+  const legacy = {
+    ...points,
+    chunks: [{...union, validity: {values: new Uint8Array([0b10])}}]
+  };
+  expect(
+    materializeGeoArrowRows(convertGeoArrowColumn(legacy, {encoding: 'geoarrow.multipoint'}))
+  ).toEqual([null, {type: 'MultiPoint', coordinates: [[3, 4]]}]);
+
+  const incompatible = makeGeoArrowColumnFromGeometryRows([
+    {type: 'Point', coordinates: [1, 2]},
+    {type: 'LineString', coordinates: [[3, 4]]}
+  ]);
+  expect(() => convertGeoArrowColumn(incompatible, {encoding: 'geoarrow.multipoint'})).toThrow(
+    'Rows cannot be represented as geoarrow.multipoint'
+  );
 });
 
 test('dimension conversion recurses through nested geometry collections', () => {
@@ -432,7 +639,7 @@ test('union normalization and conversion reject incompatible output families', (
 });
 
 test('rewinding handles multipolygons and nested collections', () => {
-  const polygon = (clockwise: boolean): GeoArrowGeometryValue => ({
+  const polygon = (clockwise: boolean): Extract<GeoArrowGeometryValue, {type: 'Polygon'}> => ({
     type: 'Polygon',
     coordinates: [
       clockwise

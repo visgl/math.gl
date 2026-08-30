@@ -45,6 +45,20 @@ should preserve chunking, view offsets, validity bit offsets, list offset width,
 child names, semantic dimension, coordinate layout, CRS, and edge metadata. It should not iterate
 rows through scalar accessors. The adapter is the only place that imports Apache Arrow.
 
+For serialized input, pass the borrowed Binary/LargeBinary/BinaryView descriptor directly to
+`decodeGeoArrowWKB`. Do not consolidate chunks or view data buffers first. Leave `dimension` at its
+metadata value and use the decoder's default `infer` policy unless trusted extension metadata
+explicitly requests normalization. Request the final coordinate layout, float width, and offset
+width in that call so math.gl writes those buffers once.
+
+Use `getGeoArrowWKBVertexCount` when sizing or policy decisions need a serialized vertex count. It
+uses the shared `@math.gl/wkb` structural visitor in count-only mode, so loaders.gl does not need to
+retain its separate WKB count parser.
+
+For mixed output, adapt math.gl's stable per-chunk child schema directly to Arrow dense unions.
+There is no union validity buffer: a null row selects a child slot that is null in that child's
+validity bitmap. This is deliberate and avoids an adapter-only null encoding.
+
 ## From luma.gl
 
 The private prototype coupled tessellation and interleaving to Arrow vectors, worker lifecycle, and

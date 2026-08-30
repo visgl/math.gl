@@ -112,6 +112,8 @@ Highlights:
 - Supports both endian orders, ISO and EWKB dimension headers, EWKB SRIDs, all geometry families,
   nested collections, dimension tokens, MultiPoint variants, and empty geometry.
 - Enforces strict input coverage plus configurable WKB nesting and element-count limits.
+- Supports header-only and count-only visitor traversal that skips coordinate decoding when scalar
+  ordinate callbacks are not requested.
 - Provides the neutral format layer used by `@math.gl/geoarrow` without depending on GeoArrow or
   Apache Arrow.
 
@@ -125,6 +127,9 @@ Highlights:
   limit kernels.
 - Adds a two-pass builder, WKB/WKT column adapters, Polygon/MultiPolygon tessellation, and an
   optional worker transfer subpath.
+- Adds direct WKB dimension/family classification, serialized vertex counting, exact per-chunk
+  measure/write conversion, BinaryView access, stable mixed-union schemas, and Arrow-compatible
+  child-null dispatch without materialized geometry rows.
 - Moves reusable GeoArrow math out of loaders.gl and luma.gl prototypes while leaving runtime
   adapters, worker scheduling, and GPU resources with their owning libraries.
 

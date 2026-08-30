@@ -2,74 +2,951 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {formatWKT, parseWKB, parseWKT} from '@math.gl/wkb';
-import type {WKBGeometryWriter} from '@math.gl/wkb';
+import {formatWKT, inspectWKBHeader, parseWKT, visitWKB} from '@math.gl/wkb';
+import type {WKBHeader, WKBTraversalOptions} from '@math.gl/wkb';
 import {WKBBuilder} from '@math.gl/wkb';
 import type {
   GeoArrowColumn,
+  GeoArrowCoordinateLayout,
+  GeoArrowDenseUnionChild,
   GeoArrowDimension,
   GeoArrowGeometryValue,
   GeoArrowSerialized
 } from './types';
 import {getGeoArrowDimensionSize} from './types';
-import {makeGeoArrowColumnFromGeometryRows} from './builder';
+import type {GeoArrowBuilderEncoding} from './builder';
+import {GeoArrowBuilder, makeGeoArrowColumnFromGeometryRows} from './builder';
 import {getGeoArrowOffset, isGeoArrowValueValid, materializeGeometryRow} from './layout';
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
-/** Decodes a GeoArrow WKB column into native physical geometry buffers. */
-export function decodeGeoArrowWKB(column: GeoArrowColumn): GeoArrowColumn {
+/** Buffer controls applied while decoding WKB directly to its final native representation. */
+export type DecodeGeoArrowWKBOptions = Readonly<{
+  encoding?:
+    | GeoArrowBuilderEncoding
+    | 'geoarrow.geometry'
+    | 'geoarrow.geometrycollection'
+    | 'native';
+  /** Defaults to `infer`, because serialized Arrow storage has no physical coordinate dimension. */
+  dimension?: GeoArrowDimension | 'infer' | 'preserve';
+  coordinateLayout?: GeoArrowCoordinateLayout;
+  coordinateType?: 'float32' | 'float64';
+  offsetType?: 'int32' | 'int64';
+  traversal?: WKBTraversalOptions;
+}>;
+
+type WKBChunkClassification = {
+  families: Uint8Array;
+  dimensions: Uint8Array;
+};
+
+type WKBDecodeBuilderOptions = {
+  dimension: GeoArrowDimension;
+  coordinateLayout: GeoArrowCoordinateLayout;
+  coordinateType: 'float32' | 'float64';
+  offsetType: 'int32' | 'int64';
+};
+
+const NULL_FAMILY = 255;
+
+/** Decodes a GeoArrow WKB column into final native physical geometry buffers. */
+export function decodeGeoArrowWKB(
+  column: GeoArrowColumn,
+  options: DecodeGeoArrowWKBOptions = {}
+): GeoArrowColumn {
   if (column.encoding !== 'geoarrow.wkb') throw new Error('Expected a geoarrow.wkb column');
-  const rows = normalizeRowsToDimension(
-    decodeSerializedRows(column, bytes => parseWKB(bytes).geometry),
-    column.dimension
+  const classifications: WKBChunkClassification[] = [];
+  const schemaKeys = new Set<number>();
+  const collectionSchemas: Array<Set<number>> = [];
+  const rootFamilies = new Set<number>();
+  let hasNulls = false;
+  let inferredDimension: GeoArrowDimension = 'xy';
+  for (const chunk of column.chunks) {
+    if (chunk.kind !== 'serialized') throw new Error('Serialized column contains native storage');
+    const families = new Uint8Array(chunk.length).fill(NULL_FAMILY);
+    const dimensions = new Uint8Array(chunk.length);
+    for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
+      if (!isGeoArrowValueValid(chunk.validity, rowIndex)) {
+        hasNulls = true;
+        continue;
+      }
+      const bytes = getSerializedBytes(chunk, rowIndex);
+      const rootHeader = inspectWKBHeader(bytes);
+      const rootFamily = getGeometryFamilyIndex(rootHeader.geometryType);
+      let rowDimension: GeoArrowDimension = rootHeader.dimension;
+      if (rootHeader.geometryType === 'GeometryCollection') {
+        const collectionStack: Array<{depth: number; level: number}> = [];
+        let concreteRootDepth = -1;
+        visitWKB(
+          bytes,
+          {
+            geometry: (header, _count, depth) => {
+              rowDimension = mergeDimensions(rowDimension, header.dimension);
+              if (concreteRootDepth >= 0 && depth > concreteRootDepth) return;
+              concreteRootDepth = -1;
+              while (
+                collectionStack.length &&
+                depth <= collectionStack[collectionStack.length - 1].depth
+              ) {
+                collectionStack.pop();
+              }
+              const parent = collectionStack[collectionStack.length - 1];
+              if (parent) {
+                collectionSchemas[parent.level] ||= new Set<number>();
+                collectionSchemas[parent.level].add(
+                  getGeometryTypeId(header.geometryType, header.dimension)
+                );
+              }
+              if (header.geometryType === 'GeometryCollection') {
+                collectionStack.push({depth, level: parent ? parent.level + 1 : 0});
+              } else if (parent) {
+                concreteRootDepth = depth;
+              }
+            }
+          },
+          options.traversal
+        );
+      }
+      families[rowIndex] = rootFamily;
+      dimensions[rowIndex] = getDimensionIndex(rowDimension);
+      rootFamilies.add(rootFamily);
+      schemaKeys.add(getGeometryTypeIdFromIndices(rootFamily, dimensions[rowIndex]));
+      inferredDimension = mergeDimensions(inferredDimension, rowDimension);
+    }
+    classifications.push({families, dimensions});
+  }
+
+  const dimension = resolveDecodeDimension(options.dimension, column.dimension, inferredDimension);
+  const forceDimension = Boolean(options.dimension && options.dimension !== 'infer');
+  if (forceDimension) {
+    schemaKeys.clear();
+    for (const classification of classifications) {
+      for (let rowIndex = 0; rowIndex < classification.families.length; rowIndex++) {
+        const family = classification.families[rowIndex];
+        if (family === NULL_FAMILY) continue;
+        classification.dimensions[rowIndex] = getDimensionIndex(dimension);
+        schemaKeys.add(getGeometryTypeIdFromIndices(family, getDimensionIndex(dimension)));
+      }
+    }
+  }
+  const encoding = resolveDecodeEncoding(options.encoding, rootFamilies);
+  validateDecodeEncoding(encoding, rootFamilies);
+  const builderOptions = {
+    dimension,
+    coordinateLayout: options.coordinateLayout || 'interleaved',
+    coordinateType: options.coordinateType || 'float64',
+    offsetType: options.offsetType || 'int32'
+  } as const;
+
+  if (encoding !== 'geoarrow.geometry' && encoding !== 'geoarrow.geometrycollection') {
+    const chunks = column.chunks.map((chunk, chunkIndex) =>
+      decodeConcreteWKBChunk(
+        chunk as GeoArrowSerialized,
+        classifications[chunkIndex],
+        encoding,
+        builderOptions,
+        options.traversal
+      )
+    );
+    return copyMetadata(column, {
+      encoding,
+      dimension,
+      coordinateLayout: builderOptions.coordinateLayout,
+      chunks
+    });
+  }
+
+  if (encoding === 'geoarrow.geometrycollection') {
+    const stableCollectionSchemas = normalizeCollectionSchemas(
+      collectionSchemas,
+      dimension,
+      forceDimension
+    );
+    const chunks = column.chunks.map((chunk, chunkIndex) =>
+      decodeGeometryCollectionWKBChunk(
+        chunk as GeoArrowSerialized,
+        classifications[chunkIndex],
+        undefined,
+        stableCollectionSchemas,
+        builderOptions,
+        options.traversal,
+        forceDimension ? dimension : undefined
+      )
+    );
+    return copyMetadata(column, {
+      encoding,
+      dimension,
+      coordinateLayout: builderOptions.coordinateLayout,
+      chunks
+    });
+  }
+
+  if (schemaKeys.size === 0) schemaKeys.add(getGeometryTypeId('Point', dimension));
+  if (hasNulls) schemaKeys.add(getGeometryTypeId('Point', dimension));
+  const stableSchema = [...schemaKeys].sort((left, right) => left - right);
+  const chunks = column.chunks.map((chunk, chunkIndex) =>
+    decodeUnionWKBChunk(
+      chunk as GeoArrowSerialized,
+      classifications[chunkIndex],
+      stableSchema,
+      normalizeCollectionSchemas(collectionSchemas, dimension, forceDimension),
+      builderOptions,
+      options.traversal,
+      forceDimension ? dimension : undefined
+    )
   );
-  return copyMetadata(
-    column,
-    makeGeoArrowColumnFromGeometryRows(rows, {dimension: column.dimension})
+  return copyMetadata(column, {
+    encoding: 'geoarrow.geometry',
+    dimension,
+    coordinateLayout: builderOptions.coordinateLayout,
+    chunks
+  });
+}
+
+/** Counts vertices in serialized WKB chunks without decoding ordinates or allocating rows. */
+export function getGeoArrowWKBVertexCount(
+  column: GeoArrowColumn,
+  traversal?: WKBTraversalOptions
+): number {
+  if (column.encoding !== 'geoarrow.wkb') throw new Error('Expected a geoarrow.wkb column');
+  let vertexCount = 0;
+  for (const chunk of column.chunks) {
+    if (chunk.kind !== 'serialized') throw new Error('Serialized column contains native storage');
+    for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
+      if (!isGeoArrowValueValid(chunk.validity, rowIndex)) continue;
+      visitWKB(
+        getSerializedBytes(chunk, rowIndex),
+        {
+          geometry: (header, count) => {
+            if (header.geometryType === 'Point') vertexCount++;
+            else if (header.geometryType === 'LineString') vertexCount += count || 0;
+          },
+          ring: pointCount => {
+            vertexCount += pointCount;
+          }
+        },
+        traversal
+      );
+    }
+  }
+  return vertexCount;
+}
+
+function decodeConcreteWKBChunk(
+  chunk: GeoArrowSerialized,
+  classification: WKBChunkClassification,
+  encoding: GeoArrowBuilderEncoding,
+  options: WKBDecodeBuilderOptions,
+  traversal: WKBTraversalOptions | undefined
+): import('./types').GeoArrowArray {
+  const measure = new GeoArrowBuilder({...options, encoding, mode: 'measure'});
+  replaySerializedChunk(chunk, classification, encoding, measure, traversal);
+  const write = new GeoArrowBuilder({
+    ...options,
+    encoding,
+    mode: 'write',
+    target: measure.allocateTarget()
+  });
+  replaySerializedChunk(chunk, classification, encoding, write, traversal);
+  return write.finish().chunks[0];
+}
+
+function replaySerializedChunk(
+  chunk: GeoArrowSerialized,
+  classification: WKBChunkClassification,
+  encoding: GeoArrowBuilderEncoding,
+  builder: GeoArrowBuilder,
+  traversal: WKBTraversalOptions | undefined
+): void {
+  const targetType = geometryTypeFromEncoding(encoding);
+  for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
+    if (classification.families[rowIndex] === NULL_FAMILY) builder.append(null);
+    else visitWKBIntoBuilder(getSerializedBytes(chunk, rowIndex), builder, targetType, traversal);
+  }
+}
+
+function decodeUnionWKBChunk(
+  chunk: GeoArrowSerialized,
+  classification: WKBChunkClassification,
+  stableSchema: readonly number[],
+  collectionSchemas: readonly (readonly number[])[],
+  options: WKBDecodeBuilderOptions,
+  traversal: WKBTraversalOptions | undefined,
+  childDimensionOverride: GeoArrowDimension | undefined
+): import('./types').GeoArrowDenseUnion {
+  const measureBuilders = new Map<number, GeoArrowBuilder>();
+  for (const key of stableSchema) {
+    const type = getGeometryTypeFromId(key);
+    if (type !== 'GeometryCollection') {
+      const encoding = encodingFromGeometryType(type);
+      measureBuilders.set(
+        key,
+        new GeoArrowBuilder({
+          ...options,
+          encoding,
+          dimension: getDimensionFromId(key),
+          mode: 'measure'
+        })
+      );
+    }
+  }
+  const typeIds = new Int8Array(chunk.length);
+  const valueOffsets = new Int32Array(chunk.length);
+  const childCounts = new Map<number, number>();
+  const nullKey = stableSchema[0];
+  for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
+    const family = classification.families[rowIndex];
+    const key =
+      family === NULL_FAMILY
+        ? nullKey
+        : getGeometryTypeIdFromIndices(family, classification.dimensions[rowIndex]);
+    typeIds[rowIndex] = key;
+    valueOffsets[rowIndex] = childCounts.get(key) || 0;
+    childCounts.set(key, valueOffsets[rowIndex] + 1);
+    const builder = measureBuilders.get(key);
+    if (builder) {
+      if (family === NULL_FAMILY) builder.append(null);
+      else
+        visitWKBIntoBuilder(
+          getSerializedBytes(chunk, rowIndex),
+          builder,
+          getConcreteGeometryTypeFromId(key),
+          traversal
+        );
+    }
+  }
+  const writeBuilders = new Map<number, GeoArrowBuilder>();
+  for (const key of stableSchema) {
+    if (getGeometryTypeFromId(key) === 'GeometryCollection') continue;
+    const measure = measureBuilders.get(key)!;
+    writeBuilders.set(
+      key,
+      new GeoArrowBuilder({
+        ...options,
+        encoding: encodingFromGeometryType(getConcreteGeometryTypeFromId(key)),
+        dimension: getDimensionFromId(key),
+        mode: 'write',
+        target: measure.allocateTarget()
+      })
+    );
+  }
+  for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
+    const family = classification.families[rowIndex];
+    const key =
+      family === NULL_FAMILY
+        ? nullKey
+        : getGeometryTypeIdFromIndices(family, classification.dimensions[rowIndex]);
+    const builder = writeBuilders.get(key);
+    if (builder) {
+      if (family === NULL_FAMILY) builder.append(null);
+      else
+        visitWKBIntoBuilder(
+          getSerializedBytes(chunk, rowIndex),
+          builder,
+          getConcreteGeometryTypeFromId(key),
+          traversal
+        );
+    }
+  }
+  const children: GeoArrowDenseUnionChild[] = stableSchema.map(key => {
+    const type = getGeometryTypeFromId(key);
+    if (type === 'GeometryCollection') {
+      return {
+        name: type,
+        typeId: key,
+        encoding: 'geoarrow.geometrycollection',
+        dimension: getDimensionFromId(key),
+        coordinateLayout: options.coordinateLayout,
+        data: decodeGeometryCollectionWKBChunk(
+          chunk,
+          classification,
+          key,
+          collectionSchemas,
+          {...options, dimension: getDimensionFromId(key)},
+          traversal,
+          childDimensionOverride
+        )
+      };
+    }
+    const built = writeBuilders.get(key)!.finish();
+    return {
+      name: getGeometryTypeFromId(key),
+      typeId: key,
+      encoding: built.encoding,
+      dimension: built.dimension,
+      coordinateLayout: built.coordinateLayout,
+      data: built.chunks[0]
+    };
+  });
+  return {kind: 'dense-union', length: chunk.length, typeIds, valueOffsets, children};
+}
+
+type CollectionMeasureLevel = {
+  schema: readonly number[];
+  rowCount: number;
+  childCount: number;
+  builders: Map<number, GeoArrowBuilder>;
+};
+
+type CollectionWriteLevel = {
+  schema: readonly number[];
+  rowCursor: number;
+  childCursor: number;
+  offsets: import('./types').GeoArrowOffsets;
+  typeIds: Int8Array;
+  valueOffsets: Int32Array;
+  childCounts: Map<number, number>;
+  builders: Map<number, GeoArrowBuilder>;
+};
+
+function decodeGeometryCollectionWKBChunk(
+  chunk: GeoArrowSerialized,
+  classification: WKBChunkClassification,
+  selectorKey: number | undefined,
+  schemas: readonly (readonly number[])[],
+  options: WKBDecodeBuilderOptions,
+  traversal: WKBTraversalOptions | undefined,
+  childDimensionOverride: GeoArrowDimension | undefined
+): import('./types').GeoArrowList {
+  const measureLevels = schemas.map(schema => makeCollectionMeasureLevel(schema, options));
+  if (measureLevels.length === 0) measureLevels.push(makeCollectionMeasureLevel([], options));
+  forEachSelectedCollectionRow(chunk, classification, selectorKey, (bytes, valid) => {
+    if (!valid) {
+      measureLevels[0].rowCount++;
+      return;
+    }
+    replayWKBCollection(
+      bytes!,
+      measureLevels,
+      undefined,
+      options.dimension,
+      traversal,
+      childDimensionOverride
+    );
+  });
+
+  const writeLevels = measureLevels.map(level => makeCollectionWriteLevel(level, options));
+  forEachSelectedCollectionRow(chunk, classification, selectorKey, (bytes, valid) => {
+    if (!valid) {
+      writeCollectionRow(writeLevels[0], 0);
+      return;
+    }
+    replayWKBCollection(
+      bytes!,
+      measureLevels,
+      writeLevels,
+      options.dimension,
+      traversal,
+      childDimensionOverride
+    );
+  });
+
+  const root = makeCollectionLevelArray(0, measureLevels, writeLevels, options);
+  if (selectorKey !== undefined) return root;
+  const validity = new Uint8Array(Math.ceil(root.length / 8));
+  for (let rowIndex = 0; rowIndex < classification.families.length; rowIndex++) {
+    if (classification.families[rowIndex] === getGeometryFamilyIndex('GeometryCollection')) {
+      validity[rowIndex >> 3] |= 1 << (rowIndex & 7);
+    }
+  }
+  return {...root, validity: {values: validity}};
+}
+
+function forEachSelectedCollectionRow(
+  chunk: GeoArrowSerialized,
+  classification: WKBChunkClassification,
+  selectorKey: number | undefined,
+  visitor: (bytes: Uint8Array | undefined, valid: boolean) => void
+): void {
+  const collectionFamily = getGeometryFamilyIndex('GeometryCollection');
+  for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
+    const family = classification.families[rowIndex];
+    if (selectorKey === undefined) {
+      if (family === NULL_FAMILY) visitor(undefined, false);
+      else if (family === collectionFamily) visitor(getSerializedBytes(chunk, rowIndex), true);
+      else throw new Error('Rows cannot be represented as geoarrow.geometrycollection');
+    } else if (
+      family === collectionFamily &&
+      getGeometryTypeIdFromIndices(family, classification.dimensions[rowIndex]) === selectorKey
+    ) {
+      visitor(getSerializedBytes(chunk, rowIndex), true);
+    }
+  }
+}
+
+function makeCollectionMeasureLevel(
+  schema: readonly number[],
+  options: WKBDecodeBuilderOptions
+): CollectionMeasureLevel {
+  const builders = new Map<number, GeoArrowBuilder>();
+  for (const key of schema) {
+    const type = getGeometryTypeFromId(key);
+    if (type !== 'GeometryCollection') {
+      builders.set(
+        key,
+        new GeoArrowBuilder({
+          ...options,
+          encoding: encodingFromGeometryType(type),
+          dimension: getDimensionFromId(key),
+          mode: 'measure'
+        })
+      );
+    }
+  }
+  return {schema, rowCount: 0, childCount: 0, builders};
+}
+
+function makeCollectionWriteLevel(
+  measure: CollectionMeasureLevel,
+  options: WKBDecodeBuilderOptions
+): CollectionWriteLevel {
+  const OffsetArray = options.offsetType === 'int64' ? BigInt64Array : Int32Array;
+  const builders = new Map<number, GeoArrowBuilder>();
+  for (const [key, builder] of measure.builders) {
+    builders.set(
+      key,
+      new GeoArrowBuilder({
+        ...options,
+        encoding: encodingFromGeometryType(getConcreteGeometryTypeFromId(key)),
+        dimension: getDimensionFromId(key),
+        mode: 'write',
+        target: builder.allocateTarget()
+      })
+    );
+  }
+  return {
+    schema: measure.schema,
+    rowCursor: 0,
+    childCursor: 0,
+    offsets: new OffsetArray(measure.rowCount + 1),
+    typeIds: new Int8Array(measure.childCount),
+    valueOffsets: new Int32Array(measure.childCount),
+    childCounts: new Map(),
+    builders
+  };
+}
+
+function replayWKBCollection(
+  bytes: Uint8Array,
+  measureLevels: CollectionMeasureLevel[],
+  writeLevels: CollectionWriteLevel[] | undefined,
+  collectionDimension: GeoArrowDimension,
+  traversal: WKBTraversalOptions | undefined,
+  childDimensionOverride: GeoArrowDimension | undefined
+): void {
+  const collectionStack: Array<{depth: number; level: number}> = [];
+  let active:
+    | {
+        builder: GeoArrowBuilder;
+        rootDepth: number;
+        rootType: Exclude<WKBHeader['geometryType'], 'GeometryCollection'>;
+      }
+    | undefined;
+  const finishActive = (): void => {
+    active?.builder.endGeometry();
+    active = undefined;
+  };
+  visitWKB(
+    bytes,
+    {
+      geometry: (header, count, depth) => {
+        if (active && depth > active.rootDepth) {
+          if (active.rootType === 'MultiLineString' && header.geometryType === 'LineString') {
+            active.builder.beginRing(count);
+          } else if (active.rootType === 'MultiPolygon' && header.geometryType === 'Polygon') {
+            active.builder.beginPolygon();
+          }
+          return;
+        }
+        finishActive();
+        while (
+          collectionStack.length &&
+          depth <= collectionStack[collectionStack.length - 1].depth
+        ) {
+          collectionStack.pop();
+        }
+        const parent = collectionStack[collectionStack.length - 1];
+        if (header.geometryType === 'GeometryCollection') {
+          if (parent) {
+            addCollectionChild(
+              measureLevels[parent.level],
+              writeLevels?.[parent.level],
+              getGeometryTypeId('GeometryCollection', collectionDimension)
+            );
+          }
+          const level = parent ? parent.level + 1 : 0;
+          if (!measureLevels[level]) {
+            measureLevels[level] = makeCollectionMeasureLevel([], {
+              dimension: collectionDimension,
+              coordinateLayout: 'interleaved',
+              coordinateType: 'float64',
+              offsetType: 'int32'
+            });
+          }
+          if (writeLevels) writeCollectionRow(writeLevels[level], count || 0);
+          else measureLevels[level].rowCount++;
+          collectionStack.push({depth, level});
+          return;
+        }
+        if (!parent) throw new Error('Expected a GeometryCollection root');
+        const key = getGeometryTypeId(
+          header.geometryType,
+          childDimensionOverride || header.dimension
+        );
+        addCollectionChild(measureLevels[parent.level], writeLevels?.[parent.level], key);
+        const builder = writeLevels
+          ? writeLevels[parent.level].builders.get(key)
+          : measureLevels[parent.level].builders.get(key);
+        if (!builder) throw new Error(`Missing GeometryCollection child schema for type ID ${key}`);
+        builder.beginGeometry(header.geometryType, header.dimension, count);
+        active = {builder, rootDepth: depth, rootType: header.geometryType};
+      },
+      ring: pointCount => active?.builder.beginRing(pointCount),
+      coordinate: (x, y, z, m, dimension) =>
+        active?.builder.writeCoordinateFromDimension(x, y, z, m, dimension)
+    },
+    traversal
   );
+  finishActive();
+}
+
+function addCollectionChild(
+  measure: CollectionMeasureLevel,
+  write: CollectionWriteLevel | undefined,
+  key: number
+): void {
+  if (!write) {
+    measure.childCount++;
+    return;
+  }
+  const index = write.childCursor++;
+  write.typeIds[index] = key;
+  write.valueOffsets[index] = write.childCounts.get(key) || 0;
+  write.childCounts.set(key, write.valueOffsets[index] + 1);
+}
+
+function writeCollectionRow(level: CollectionWriteLevel, childCount: number): void {
+  level.rowCursor++;
+  setGeoArrowOffset(level.offsets, level.rowCursor, level.childCursor + childCount);
+}
+
+function makeCollectionLevelArray(
+  levelIndex: number,
+  measureLevels: readonly CollectionMeasureLevel[],
+  writeLevels: readonly CollectionWriteLevel[],
+  options: WKBDecodeBuilderOptions
+): import('./types').GeoArrowList {
+  const measure = measureLevels[levelIndex];
+  const write = writeLevels[levelIndex];
+  const children: GeoArrowDenseUnionChild[] = measure.schema.map(key => {
+    const type = getGeometryTypeFromId(key);
+    if (type === 'GeometryCollection') {
+      return {
+        name: type,
+        typeId: key,
+        encoding: 'geoarrow.geometrycollection',
+        dimension: getDimensionFromId(key),
+        coordinateLayout: options.coordinateLayout,
+        data: makeCollectionLevelArray(levelIndex + 1, measureLevels, writeLevels, options)
+      };
+    }
+    const built = write.builders.get(key)!.finish();
+    return {
+      name: type,
+      typeId: key,
+      encoding: built.encoding,
+      dimension: built.dimension,
+      coordinateLayout: built.coordinateLayout,
+      data: built.chunks[0]
+    };
+  });
+  return {
+    kind: 'list',
+    length: measure.rowCount,
+    offsets: write.offsets,
+    child: {
+      kind: 'dense-union',
+      length: measure.childCount,
+      typeIds: write.typeIds,
+      valueOffsets: write.valueOffsets,
+      children
+    }
+  };
+}
+
+function setGeoArrowOffset(
+  offsets: import('./types').GeoArrowOffsets,
+  index: number,
+  value: number
+): void {
+  if (offsets instanceof BigInt64Array) offsets[index] = BigInt(value);
+  else offsets[index] = value;
+}
+
+function normalizeCollectionSchemas(
+  schemas: readonly ReadonlySet<number>[],
+  dimension: GeoArrowDimension,
+  forceDimension: boolean
+): number[][] {
+  return schemas.map(schema =>
+    [...schema]
+      .map(key =>
+        forceDimension || getGeometryTypeFromId(key) === 'GeometryCollection'
+          ? getGeometryTypeId(getGeometryTypeFromId(key), dimension)
+          : key
+      )
+      .filter((key, index, values) => values.indexOf(key) === index)
+      .sort((left, right) => left - right)
+  );
+}
+
+/** Replays one serialized geometry directly into a two-pass GeoArrowBuilder. */
+function visitWKBIntoBuilder(
+  bytes: Uint8Array,
+  builder: GeoArrowBuilder,
+  targetType: Exclude<WKBHeader['geometryType'], 'GeometryCollection'>,
+  traversal?: WKBTraversalOptions
+): void {
+  let rootType: WKBHeader['geometryType'] | undefined;
+  visitWKB(
+    bytes,
+    {
+      geometry: (header, _count, depth) => {
+        if (depth === 0) {
+          rootType = header.geometryType;
+          builder.beginGeometry(targetType, header.dimension, _count);
+          if (rootType === 'LineString' && targetType === 'MultiLineString')
+            builder.beginRing(_count);
+          if (rootType === 'Polygon' && targetType === 'MultiPolygon') builder.beginPolygon();
+        } else if (rootType === 'MultiLineString' && header.geometryType === 'LineString') {
+          builder.beginRing(_count);
+        } else if (rootType === 'MultiPolygon' && header.geometryType === 'Polygon') {
+          builder.beginPolygon();
+        }
+      },
+      ring: pointCount => {
+        if (rootType === 'Polygon' || rootType === 'MultiPolygon') builder.beginRing(pointCount);
+      },
+      coordinate: (x, y, z, m, dimension) => {
+        builder.writeCoordinateFromDimension(x, y, z, m, dimension);
+      }
+    },
+    traversal
+  );
+  builder.endGeometry();
+}
+
+function encodingFromGeometryType(
+  type: WKBHeader['geometryType']
+): Exclude<
+  GeoArrowColumn['encoding'],
+  | 'geoarrow.geometry'
+  | 'geoarrow.geometrycollection'
+  | 'geoarrow.box'
+  | 'geoarrow.wkb'
+  | 'geoarrow.wkt'
+> {
+  if (type === 'GeometryCollection')
+    throw new Error('GeometryCollection requires collection storage');
+  return `geoarrow.${type.toLowerCase()}` as Exclude<
+    GeoArrowColumn['encoding'],
+    | 'geoarrow.geometry'
+    | 'geoarrow.geometrycollection'
+    | 'geoarrow.box'
+    | 'geoarrow.wkb'
+    | 'geoarrow.wkt'
+  >;
+}
+
+function getGeometryTypeId(type: WKBHeader['geometryType'], dimension: GeoArrowDimension): number {
+  return getGeometryTypeIdFromIndices(getGeometryFamilyIndex(type), getDimensionIndex(dimension));
+}
+
+const GEOMETRY_TYPES: readonly WKBHeader['geometryType'][] = [
+  'Point',
+  'LineString',
+  'Polygon',
+  'MultiPoint',
+  'MultiLineString',
+  'MultiPolygon',
+  'GeometryCollection'
+];
+const DIMENSIONS: readonly GeoArrowDimension[] = ['xy', 'xyz', 'xym', 'xyzm'];
+
+function getGeometryFamilyIndex(type: WKBHeader['geometryType']): number {
+  return GEOMETRY_TYPES.indexOf(type);
+}
+
+function getDimensionIndex(dimension: GeoArrowDimension): number {
+  return DIMENSIONS.indexOf(dimension);
+}
+
+function getGeometryTypeIdFromIndices(family: number, dimension: number): number {
+  return family * 4 + dimension + 1;
+}
+
+function getGeometryTypeFromId(typeId: number): WKBHeader['geometryType'] {
+  return GEOMETRY_TYPES[Math.floor((typeId - 1) / 4)];
+}
+
+function getConcreteGeometryTypeFromId(
+  typeId: number
+): Exclude<WKBHeader['geometryType'], 'GeometryCollection'> {
+  const type = getGeometryTypeFromId(typeId);
+  if (type === 'GeometryCollection')
+    throw new Error('GeometryCollection requires collection storage');
+  return type;
+}
+
+function getDimensionFromId(typeId: number): GeoArrowDimension {
+  return DIMENSIONS[(typeId - 1) % 4];
+}
+
+function mergeDimensions(left: GeoArrowDimension, right: GeoArrowDimension): GeoArrowDimension {
+  const hasZ = left === 'xyz' || left === 'xyzm' || right === 'xyz' || right === 'xyzm';
+  const hasM = left === 'xym' || left === 'xyzm' || right === 'xym' || right === 'xyzm';
+  return hasZ && hasM ? 'xyzm' : hasZ ? 'xyz' : hasM ? 'xym' : 'xy';
+}
+
+function resolveDecodeDimension(
+  requested: DecodeGeoArrowWKBOptions['dimension'],
+  declared: GeoArrowDimension,
+  inferred: GeoArrowDimension
+): GeoArrowDimension {
+  if (!requested || requested === 'infer') return inferred;
+  return requested === 'preserve' ? declared : requested;
+}
+
+function resolveDecodeEncoding(
+  requested: DecodeGeoArrowWKBOptions['encoding'],
+  families: ReadonlySet<number>
+): GeoArrowBuilderEncoding | 'geoarrow.geometry' | 'geoarrow.geometrycollection' {
+  if (requested && requested !== 'native') return requested;
+  if (families.size !== 1) return 'geoarrow.geometry';
+  const type = GEOMETRY_TYPES[[...families][0]];
+  return type === 'GeometryCollection'
+    ? 'geoarrow.geometrycollection'
+    : encodingFromGeometryType(type);
+}
+
+function validateDecodeEncoding(
+  encoding: GeoArrowBuilderEncoding | 'geoarrow.geometry' | 'geoarrow.geometrycollection',
+  families: ReadonlySet<number>
+): void {
+  if (encoding === 'geoarrow.geometry') return;
+  if (encoding === 'geoarrow.geometrycollection') {
+    const collectionFamily = getGeometryFamilyIndex('GeometryCollection');
+    if ([...families].some(family => family !== collectionFamily)) {
+      throw new Error('Rows cannot be represented as geoarrow.geometrycollection');
+    }
+    return;
+  }
+  const targetType = geometryTypeFromEncoding(encoding);
+  for (const family of families) {
+    const sourceType = GEOMETRY_TYPES[family];
+    const promotable =
+      sourceType === targetType ||
+      (sourceType === 'Point' && targetType === 'MultiPoint') ||
+      (sourceType === 'LineString' && targetType === 'MultiLineString') ||
+      (sourceType === 'Polygon' && targetType === 'MultiPolygon');
+    if (!promotable) throw new Error(`Rows cannot be represented as ${encoding}`);
+  }
+}
+
+function geometryTypeFromEncoding(
+  encoding: GeoArrowBuilderEncoding
+): Exclude<WKBHeader['geometryType'], 'GeometryCollection'> {
+  const type = GEOMETRY_TYPES.find(candidate => `geoarrow.${candidate.toLowerCase()}` === encoding);
+  if (!type || type === 'GeometryCollection')
+    throw new Error(`Unsupported target encoding ${encoding}`);
+  return type;
 }
 
 /** Encodes a native GeoArrow column as variable-width WKB bytes. */
 export function encodeGeoArrowWKB(column: GeoArrowColumn): GeoArrowColumn {
   if (column.encoding === 'geoarrow.wkb') return column;
-  const writers: Array<WKBGeometryWriter | null> = [];
-  const dimensions: GeoArrowDimension[] = [];
-  for (const chunk of column.chunks) {
-    for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
-      if (!isGeoArrowValueValid(chunk.validity, rowIndex)) {
-        writers.push(null);
-        dimensions.push(column.dimension);
-        continue;
-      }
-      dimensions.push(
-        getPhysicalGeometryDimension(chunk, rowIndex, column.encoding, column.dimension)
-      );
-      writers.push(builder =>
-        writePhysicalGeometry(builder, chunk, rowIndex, column.encoding, column.dimension)
-      );
-    }
-  }
-  const built = WKBBuilder.buildGeometryArray(writers, {
-    dimension: column.dimension,
-    dimensionResolver: index => dimensions[index] || column.dimension
-  });
   return copyMetadata(column, {
     encoding: 'geoarrow.wkb',
     dimension: column.dimension,
     coordinateLayout: null,
-    chunks: [
-      {
-        kind: 'serialized',
-        encoding: 'binary',
-        length: writers.length,
-        offsets: built.valueOffsets,
-        values: built.values,
-        ...(built.nullBitmap ? {validity: {values: built.nullBitmap}} : {})
-      }
-    ]
+    chunks: column.chunks.map(chunk => encodeWKBChunk(column, chunk))
   });
+}
+
+function encodeWKBChunk(
+  column: GeoArrowColumn,
+  chunk: import('./types').GeoArrowArray
+): GeoArrowSerialized {
+  const offsets = new Int32Array(chunk.length + 1);
+  const validity = new Uint8Array(Math.ceil(chunk.length / 8));
+  let nullCount = 0;
+  for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
+    let byteLength = 0;
+    if (isPhysicalGeometryRowValid(chunk, rowIndex, column.encoding)) {
+      const dimension = getPhysicalGeometryDimension(
+        chunk,
+        rowIndex,
+        column.encoding,
+        column.dimension
+      );
+      const builder = new WKBBuilder({mode: 'measure', dimension});
+      writePhysicalGeometry(builder, chunk, rowIndex, column.encoding, dimension);
+      byteLength = builder.finishGeometry();
+      validity[rowIndex >> 3] |= 1 << (rowIndex & 7);
+    } else {
+      nullCount++;
+    }
+    const nextOffset = offsets[rowIndex] + byteLength;
+    if (nextOffset > 0x7fffffff) throw new Error('WKB geometry chunk exceeds Int32 offsets');
+    offsets[rowIndex + 1] = nextOffset;
+  }
+  const values = new Uint8Array(offsets[offsets.length - 1]);
+  for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
+    if (!isPhysicalGeometryRowValid(chunk, rowIndex, column.encoding)) continue;
+    const dimension = getPhysicalGeometryDimension(
+      chunk,
+      rowIndex,
+      column.encoding,
+      column.dimension
+    );
+    const builder = new WKBBuilder({
+      mode: 'write',
+      target: values,
+      byteOffset: offsets[rowIndex],
+      dimension
+    });
+    writePhysicalGeometry(builder, chunk, rowIndex, column.encoding, dimension);
+    if (offsets[rowIndex] + builder.finishGeometry() !== offsets[rowIndex + 1]) {
+      throw new Error('WKB measure and write passes produced different byte lengths');
+    }
+  }
+  return {
+    kind: 'serialized',
+    encoding: 'binary',
+    length: chunk.length,
+    offsets,
+    values,
+    ...(nullCount ? {validity: {values: validity}} : {})
+  };
+}
+
+function isPhysicalGeometryRowValid(
+  array: import('./types').GeoArrowArray,
+  rowIndex: number,
+  encoding: import('./types').GeoArrowEncoding
+): boolean {
+  if (!isGeoArrowValueValid(array.validity, rowIndex)) return false;
+  if (encoding !== 'geoarrow.geometry' || array.kind !== 'dense-union') return true;
+  const physical = (array.offset || 0) + rowIndex;
+  const child = array.children.find(candidate => candidate.typeId === array.typeIds[physical]);
+  const childIndex = array.valueOffsets[physical];
+  return Boolean(
+    child &&
+      childIndex >= 0 &&
+      childIndex < child.data.length &&
+      isGeoArrowValueValid(child.data.validity, childIndex)
+  );
 }
 
 /** Decodes a GeoArrow WKT column into native physical geometry buffers. */

@@ -7,5 +7,7 @@ export {
   decodeGeoArrowWKB,
   decodeGeoArrowWKT,
   encodeGeoArrowWKB,
-  encodeGeoArrowWKT
+  encodeGeoArrowWKT,
+  getGeoArrowWKBVertexCount
 } from './codecs';
+export type {DecodeGeoArrowWKBOptions} from './codecs';
