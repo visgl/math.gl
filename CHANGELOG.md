@@ -9,6 +9,22 @@
   polygon tessellation, and worker-transfer support (#119)
 - feat(dggs): Consolidate lightweight grid adapters and cell detection in `@math.gl/dggs` (#59)
 
+## v5.0.0-alpha.4
+
+- feat(geoarrow): Add final-target WKB decode options, dimension inference, and count-only WKB
+  traversal (#127)
+- perf(geoarrow): Remove row materialization and per-coordinate arrays from decode, mixed-union
+  conversion, and GeometryCollection paths (#127)
+- fix(geoarrow): Preserve serialized chunk boundaries and emit Arrow-compatible dense-union nulls
+  (#127)
+
+## v5.0.0-alpha.3
+
+- feat(geoarrow): Add loaders-first buffer kernels, mixed-union handling, and optional subpaths (#126)
+- fix(geoarrow): Correct nested row attribution, dimension conversion, union demotion, and offset
+  safety
+- fix(wkb): Support per-geometry dimensions and nested mixed-dimension writing
+
 ## v5.0.0-alpha.1
 
 - chore: Improve coverage reporting (#118)
