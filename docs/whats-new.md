@@ -62,6 +62,7 @@ Highlights:
 - New typed-array geometry utilities module.
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 - Stronger type guarantees for math classes via the new sized array types.
+- Raised aggregate statement coverage to 96.07% (+5.34 points over the pre-moonshot baseline) across expressions, culling, GeoArrow, DGGS, CRS, geoid, geometry, WKB, and typed-array utilities, with coverage tracked directly in pull request checks.
 - Culling results, polygon winding directions, and Euler rotation orders now use descriptive string literal types.
 
 **`@math.gl/dggs`** (NEW MODULE)

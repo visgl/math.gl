@@ -156,6 +156,27 @@ describe('WKT-CRS codec', () => {
     expect(() => encodeWKTCRS(ast)).toThrow('Invalid WKT number lexeme');
   });
 
+  test('reports structural validation errors for standard WKT2 nodes', () => {
+    const invalidNodes = [
+      'AUTHORITY[4326]',
+      'AXIS[1,north]',
+      'METHOD[1]',
+      'TIMEEXTENT[2020]',
+      'VERTICALEXTENT["low",2]',
+      'COORDINATEMETADATA[GEOGCRS["x"],1]',
+      'BOUNDCRS[TARGETCRS["x"]]',
+      'GEOGCRS[1]',
+      'PROJCRS[1]',
+      'VERTCRS[1]'
+    ];
+    for (const text of invalidNodes) {
+      expect(
+        validateWKTCRS(parseWKTCRS(text), {profile: 'wkt2:2019'}).length,
+        text
+      ).toBeGreaterThan(0);
+    }
+  });
+
   test.each([
     '',
     'GEOGCRS',

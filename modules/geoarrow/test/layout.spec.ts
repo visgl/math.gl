@@ -14,11 +14,13 @@ import {
   makeGeoArrowColumnFromGeometryRows,
   sliceGeoArrowColumn,
   validateGeoArrowColumn,
+  type GeoArrowArray,
   type GeoArrowColumn,
   type GeoArrowDimension,
   type GeoArrowGeometryValue
 } from '../src/index';
 import {prepareGeoArrowTransfer} from '../src/worker';
+import {getEncodingForGeometryValue, isGeoArrowValueValid, sliceGeoArrowArray} from '../src/layout';
 
 const concreteFixtures: GeoArrowGeometryValue[] = [
   {type: 'Point', coordinates: [1, 2]},
@@ -292,6 +294,117 @@ test('validation reports malformed layouts and unsafe offsets', () => {
       'invalid-offset'
     );
   }
+});
+
+test('layout validation covers every physical storage and logical encoding guard', () => {
+  const primitive = (length = 1): GeoArrowArray => ({
+    kind: 'primitive',
+    length,
+    values: new Float64Array(length)
+  });
+  const column = (
+    encoding: GeoArrowColumn['encoding'],
+    chunk: GeoArrowArray,
+    layout: GeoArrowColumn['coordinateLayout'] = 'interleaved'
+  ): GeoArrowColumn => ({
+    encoding,
+    dimension: 'xy',
+    coordinateLayout: layout,
+    chunks: [chunk]
+  });
+  const codes = (value: GeoArrowColumn): string[] =>
+    validateGeoArrowColumn(value).issues.map(issue => issue.code);
+
+  expect(isGeoArrowValueValid(undefined, 0)).toBe(true);
+  expect(isGeoArrowValueValid({values: new Uint8Array([0b00000100]), bitOffset: 2}, 0)).toBe(true);
+  expect(isGeoArrowValueValid({values: new Uint8Array([0b00000100]), bitOffset: 2}, 1)).toBe(false);
+  expect(getEncodingForGeometryValue({type: 'Point', coordinates: [0, 0]})).toBe('geoarrow.point');
+
+  expect(codes(column('geoarrow.wkb', primitive()))).toContain('invalid-layout');
+  expect(
+    codes(
+      column('geoarrow.wkt', {
+        ...primitive(),
+        kind: 'serialized',
+        encoding: 'binary',
+        offsets: new Int32Array([0, 0]),
+        values: new Uint8Array()
+      } as GeoArrowArray)
+    )
+  ).toContain('invalid-layout');
+  expect(codes(column('geoarrow.box', primitive()))).toContain('invalid-layout');
+  expect(codes({...column('geoarrow.point', primitive()), coordinateLayout: null})).toContain(
+    'invalid-layout'
+  );
+  expect(
+    codes(
+      column('geoarrow.point', {
+        kind: 'list',
+        length: 1,
+        offsets: new Int32Array([0, 1]),
+        child: primitive()
+      })
+    )
+  ).toContain('invalid-layout');
+  expect(
+    codes(
+      column('geoarrow.point', {kind: 'fixed-size-list', length: 1, size: 2, child: primitive()})
+    )
+  ).toContain('invalid-child');
+  expect(
+    codes(
+      column(
+        'geoarrow.point',
+        {kind: 'struct', length: 1, children: {x: primitive()}} as GeoArrowArray,
+        'separated'
+      )
+    )
+  ).toContain('invalid-layout');
+  expect(codes(column('geoarrow.geometry', primitive()))).toContain('invalid-layout');
+  expect(codes(column('geoarrow.geometrycollection', primitive()))).toContain('invalid-layout');
+
+  const invalidUnion: GeoArrowArray = {
+    kind: 'dense-union',
+    length: 1,
+    typeIds: new Int8Array([9]),
+    valueOffsets: new Int32Array([4]),
+    children: [
+      {name: 'point', typeId: 1, data: primitive()},
+      {name: 'point', typeId: 1, data: primitive()},
+      {name: 'mystery', typeId: 2, data: primitive()}
+    ]
+  };
+  expect(codes(column('geoarrow.geometry', invalidUnion))).toEqual(
+    expect.arrayContaining(['invalid-union', 'invalid-layout'])
+  );
+
+  expect(sliceGeoArrowArray(primitive(3), 1, 3)).toMatchObject({length: 2, offset: 1});
+  expect(
+    sliceGeoArrowArray({kind: 'fixed-size-list', length: 3, size: 2, child: primitive(6)}, 1, 3)
+  ).toMatchObject({length: 2, offset: 1});
+  expect(
+    sliceGeoArrowArray(
+      {kind: 'list', length: 3, offsets: new Int32Array([0, 1, 2, 3]), child: primitive(3)},
+      1,
+      3
+    )
+  ).toMatchObject({length: 2, offset: 1});
+  expect(
+    sliceGeoArrowArray({kind: 'struct', length: 3, children: {x: primitive(3)}}, 1, 3)
+  ).toMatchObject({length: 2, offset: 1});
+  expect(
+    sliceGeoArrowArray(
+      {
+        kind: 'dense-union',
+        length: 3,
+        typeIds: new Int8Array(3),
+        valueOffsets: new Int32Array(3),
+        children: []
+      },
+      1,
+      3
+    )
+  ).toMatchObject({length: 2, offset: 1});
 });
 
 test('box descriptors validate and contribute bounds without coordinate materialization', () => {

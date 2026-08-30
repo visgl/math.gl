@@ -16,6 +16,12 @@ test('Vector4#construct and Array.isArray check', () => {
   expect(Array.isArray(new Vector4())).toBeTruthy();
 });
 
+test('Vector4#ZERO is cached and immutable', () => {
+  expect(Vector4.ZERO).toBe(Vector4.ZERO);
+  expect(Vector4.ZERO).toEqual([0, 0, 0, 0]);
+  expect(Object.isFrozen(Vector4.ZERO)).toBe(true);
+});
+
 test('Vector4#debug validators', () => {
   const {debug} = configure();
   configure({debug: true});

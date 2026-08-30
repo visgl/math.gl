@@ -126,6 +126,38 @@ test('generated triangle winding agrees with outward vertex normals', () => {
   }
 });
 
+test('primitive geometries validate profiles and support all vertical axes', () => {
+  expect(
+    new TruncatedConeGeometry({
+      topRadius: 0.25,
+      bottomRadius: 0.5,
+      verticalAxis: 'x'
+    }).getVertexCount()
+  ).toBeGreaterThan(0);
+  expect(
+    new TruncatedConeGeometry({
+      topRadius: 0.25,
+      bottomRadius: 0.5,
+      verticalAxis: 'z',
+      topCap: true,
+      bottomCap: true
+    }).getVertexCount()
+  ).toBeGreaterThan(0);
+  expect(
+    new CapsuleGeometry({
+      height: 1,
+      radiusBottom: 2,
+      radiusTop: 0.5,
+      nradial: 3,
+      ncap: 1
+    }).getVertexCount()
+  ).toBeGreaterThan(0);
+  expect(() => new TruncatedConeGeometry()).toThrow(/radius/);
+  expect(() => new TruncatedConeGeometry({topRadius: -1})).toThrow(/non-negative/);
+  expect(() => new SphereGeometry({nlat: 1})).toThrow(/nlat/);
+  expect(() => new IcoSphereGeometry({iterations: 9})).toThrow(/<= 8/);
+});
+
 function readVector(array: ArrayLike<number>, index: number): number[] {
   return [Number(array[index * 3]), Number(array[index * 3 + 1]), Number(array[index * 3 + 2])];
 }
