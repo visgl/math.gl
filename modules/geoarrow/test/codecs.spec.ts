@@ -186,6 +186,23 @@ test('WKB decoder uses mixed-dimension dense-union children without row material
   ]);
 });
 
+test('WKB decoder normalizes dimensions on nested multi-geometry members', () => {
+  // MultiPoint Z with one XY Point child (valid mixed-member WKB).
+  const bytes = new Uint8Array(30);
+  const view = new DataView(bytes.buffer);
+  view.setUint8(0, 1);
+  view.setUint32(1, 1004, true);
+  view.setUint32(5, 1, true);
+  view.setUint8(9, 1);
+  view.setUint32(10, 1, true);
+  view.setFloat64(14, 10, true);
+  view.setFloat64(22, 20, true);
+  const source = makeSerializedFixture('geoarrow.wkb', 'binary', bytes, 'xyz');
+  expect(materializeGeoArrowRows(decodeGeoArrowWKB(source))).toEqual([
+    {type: 'MultiPoint', coordinates: [[10, 20, 0]]}
+  ]);
+});
+
 function makeSerializedFixture(
   encoding: 'geoarrow.wkb' | 'geoarrow.wkt',
   physicalEncoding: 'binary' | 'utf8',

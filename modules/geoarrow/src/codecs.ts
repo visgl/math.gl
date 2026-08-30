@@ -159,10 +159,12 @@ export function decodeGeoArrowWKB(column: GeoArrowColumn): GeoArrowColumn {
 /** Replays one serialized geometry directly into a two-pass GeoArrowBuilder. */
 function visitWKBIntoBuilder(bytes: Uint8Array, builder: GeoArrowBuilder): void {
   let rootType: WKBHeader['geometryType'] | undefined;
+  let rootDimension: GeoArrowDimension | undefined;
   visitWKB(bytes, {
     geometry: (header, _count, depth) => {
       if (depth === 0) {
         rootType = header.geometryType;
+        rootDimension = header.dimension;
         builder.beginGeometry(header.geometryType, header.dimension, _count);
       } else if (rootType === 'MultiLineString' && header.geometryType === 'LineString') {
         builder.beginRing(_count);
@@ -174,13 +176,47 @@ function visitWKBIntoBuilder(bytes: Uint8Array, builder: GeoArrowBuilder): void 
       if (rootType === 'Polygon' || rootType === 'MultiPolygon') builder.beginRing(pointCount);
     },
     coordinate: (x, y, z, m, dimension) => {
-      if (dimension === 'xym') builder.writeCoordinate(x, y, undefined, m);
-      else if (dimension === 'xyzm') builder.writeCoordinate(x, y, z, m);
-      else if (dimension === 'xyz') builder.writeCoordinate(x, y, z);
-      else builder.writeCoordinate(x, y);
+      const values =
+        dimension === 'xym'
+          ? [x, y, m!]
+          : dimension === 'xyzm'
+            ? [x, y, z!, m!]
+            : dimension === 'xyz'
+              ? [x, y, z!]
+              : [x, y];
+      // WKB collection members carry their own dimensional header. Normalize each member to the
+      // root geometry dimension before passing it to the builder state, then let the builder apply
+      // the column-level dimension conversion.
+      builder.writeCoordinate(resizeWKBCoordinate(values, dimension, rootDimension!));
     }
   });
   builder.endGeometry();
+}
+
+function resizeWKBCoordinate(
+  coordinate: readonly number[],
+  sourceDimension: GeoArrowDimension,
+  targetDimension: GeoArrowDimension
+): number[] {
+  if (sourceDimension === targetDimension) return [...coordinate];
+  const sourceNames = getDimensionNames(sourceDimension);
+  return getDimensionNames(targetDimension).map(name => {
+    const index = sourceNames.indexOf(name);
+    return index >= 0 ? (coordinate[index] ?? 0) : 0;
+  });
+}
+
+function getDimensionNames(dimension: GeoArrowDimension): Array<'x' | 'y' | 'z' | 'm'> {
+  switch (dimension) {
+    case 'xy':
+      return ['x', 'y'];
+    case 'xyz':
+      return ['x', 'y', 'z'];
+    case 'xym':
+      return ['x', 'y', 'm'];
+    case 'xyzm':
+      return ['x', 'y', 'z', 'm'];
+  }
 }
 
 function encodingFromGeometryType(
