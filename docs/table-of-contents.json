@@ -187,7 +187,10 @@
         "items": [
           "modules/dggs/README",
           "modules/dggs/api-reference/dggs-decoder",
+          "modules/dggs/api-reference/a5-decoder",
           "modules/dggs/api-reference/geohash-decoder",
+          "modules/dggs/api-reference/h3-decoder",
+          "modules/dggs/api-reference/plus-code-decoder",
           "modules/dggs/api-reference/quadkey-decoder",
           "modules/dggs/api-reference/s2-decoder"
         ]

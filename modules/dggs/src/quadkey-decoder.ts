@@ -3,21 +3,25 @@
 // Copyright (c) vis.gl contributors
 
 import {type Bounds2D} from '@math.gl/types';
-import {type DGGSDecoder} from './dggs-decoder';
+import {type DGGSCell, type DGGSDecoder, getDGGSCellToken} from './dggs-decoder';
 
 const TILE_SIZE = 512;
 
 /** Decoder for the quadkey DGGS */
 export const QuadkeyDecoder = {
   name: 'quadkey',
+  hasNumericRepresentation: false,
   cellColumnNames: ['quadkey', 'quadkeyId', 'quadkey_id'],
-  getCellLngLat: (quadkey: string): number[] => getQuadkeyLngLat(quadkey),
-  getCellBoundaryPolygon: (quadkey: string): [number, number][] => getQuadkeyBoundary(quadkey),
-  getCellBoundaryPolygonFlat: (quadkey: string): number[] => getQuadkeyBoundaryFlat(quadkey),
-  getCellBounds: (quadkey: string): Bounds2D => getQuadkeyBounds(quadkey)
+  cellToLngLat: (cell: DGGSCell): [number, number] =>
+    getQuadkeyLngLat(getDGGSCellToken(cell, 'Quadkey')),
+  cellToBoundary: (cell: DGGSCell): [number, number][] =>
+    getQuadkeyBoundary(getDGGSCellToken(cell, 'Quadkey')),
+  cellToBoundaryFlat: (cell: DGGSCell): number[] =>
+    getQuadkeyBoundaryFlat(getDGGSCellToken(cell, 'Quadkey')),
+  cellToBounds: (cell: DGGSCell): Bounds2D => getQuadkeyBounds(getDGGSCellToken(cell, 'Quadkey'))
 } as const satisfies DGGSDecoder;
 
-function getQuadkeyLngLat(quadkey: string): number[] {
+function getQuadkeyLngLat(quadkey: string): [number, number] {
   const [topLeft, bottomRight] = quadkeyToWorldBounds(quadkey);
   const [w, n] = worldToLngLat(topLeft);
   const [e, s] = worldToLngLat(bottomRight);

@@ -15,19 +15,19 @@ import type {ExpressionFunctionLibrary} from './function-libraries';
  * GeoHash functions ready to register with an expression evaluator.
  */
 export const GEOHASH_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {
-  getGeohashBoundary: GeohashDecoder.getCellBoundaryPolygon,
-  getGeohashBoundaryFlat: GeohashDecoder.getCellBoundaryPolygonFlat,
-  getGeohashBounds: GeohashDecoder.getCellBounds,
-  getGeohashLngLat: GeohashDecoder.getCellLngLat
+  getGeohashBoundary: GeohashDecoder.cellToBoundary,
+  getGeohashBoundaryFlat: GeohashDecoder.cellToBoundaryFlat,
+  getGeohashBounds: GeohashDecoder.cellToBounds,
+  getGeohashLngLat: GeohashDecoder.cellToLngLat
 };
 
 /**
  * Quadkey functions ready to register with an expression evaluator.
  */
 export const QUADKEY_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {
-  getQuadkeyBoundary: QuadkeyDecoder.getCellBoundaryPolygon,
-  getQuadkeyBoundaryFlat: QuadkeyDecoder.getCellBoundaryPolygonFlat,
-  getQuadkeyLngLat: QuadkeyDecoder.getCellLngLat,
+  getQuadkeyBoundary: QuadkeyDecoder.cellToBoundary,
+  getQuadkeyBoundaryFlat: QuadkeyDecoder.cellToBoundaryFlat,
+  getQuadkeyLngLat: QuadkeyDecoder.cellToLngLat,
   quadkeyToWorldBounds
 };
 
@@ -35,10 +35,10 @@ export const QUADKEY_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {
  * S2 functions ready to register with an expression evaluator.
  */
 export const S2_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {
-  getS2BoundaryFlat: S2Decoder.getCellBoundaryPolygonFlat,
+  getS2BoundaryFlat: S2Decoder.cellToBoundaryFlat,
   getS2ChildIndex,
-  getS2IndexFromToken: S2Decoder.getCellIndexFromToken,
-  getS2TokenFromIndex: S2Decoder.getTokenFromCellIndex
+  getS2IndexFromToken: S2Decoder.tokenToCell,
+  getS2TokenFromIndex: S2Decoder.cellToToken
 };
 
 /**

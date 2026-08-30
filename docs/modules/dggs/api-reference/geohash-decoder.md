@@ -15,7 +15,7 @@ This module is still experimental. It may have issues and functionality may chan
 `GeohashDecoder` implements the [DGGSDecoder](./dggs-decoder) API:
 
 - `cellColumnNames: ['geohash', 'geohashId', 'geohash_id']`
-- `getCellLngLat(token: string): number[]`
-- `getCellBoundaryPolygon(token: string): [number, number][]`
-- `getCellBoundaryPolygonFlat(token: string): number[]`
-- `getCellBounds(token: string): Bounds2D`
+- `cellToLngLat(cell: string): [number, number]`
+- `cellToBoundary(cell: string): [number, number][]`
+- `cellToBoundaryFlat(cell: string): number[]`
+- `cellToBounds(cell: string): Bounds2D`

@@ -29,15 +29,15 @@ const TEST_DATA = [
   }
 ];
 
-test('GeohashDecoder#getCellBounds', () => {
+test('GeohashDecoder#cellToBounds', () => {
   for (const {geohash, expectedBounds} of TEST_DATA) {
-    expect(GeohashDecoder.getCellBounds(geohash), `${geohash} bounds`).toEqual(expectedBounds);
+    expect(GeohashDecoder.cellToBounds(geohash), `${geohash} bounds`).toEqual(expectedBounds);
   }
 });
 
-test('GeohashDecoder#getCellBoundaryPolygon', () => {
+test('GeohashDecoder#cellToBoundary', () => {
   for (const {geohash} of TEST_DATA) {
-    const polygon = GeohashDecoder.getCellBoundaryPolygon(geohash);
+    const polygon = GeohashDecoder.cellToBoundary(geohash);
     expect(polygon.length - 1, `${geohash} polygon has 4 sides`).toBe(4);
     expect(polygon[0], `${geohash} polygon is closed`).toEqual(polygon.at(-1));
   }

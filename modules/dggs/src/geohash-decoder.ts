@@ -3,16 +3,20 @@
 // Copyright (c) vis.gl contributors
 
 import {type Bounds2D} from '@math.gl/types';
-import {type DGGSDecoder} from './dggs-decoder';
+import {type DGGSCell, type DGGSDecoder, getDGGSCellToken} from './dggs-decoder';
 
 /** Decoder for the geohash dggs */
 export const GeohashDecoder = {
   name: 'geohash',
+  hasNumericRepresentation: false,
   cellColumnNames: ['geohash', 'geohashId', 'geohash_id'],
-  getCellLngLat: (geohash: string): number[] => getGeohashLngLat(geohash),
-  getCellBoundaryPolygon: (geohash: string): [number, number][] => getGeohashBoundary(geohash),
-  getCellBoundaryPolygonFlat: (geohash: string): number[] => getGeohashBoundaryFlat(geohash),
-  getCellBounds: (geohash: string): Bounds2D => getGeohashBounds(geohash)
+  cellToLngLat: (cell: DGGSCell): [number, number] =>
+    getGeohashLngLat(getDGGSCellToken(cell, 'GeoHash')),
+  cellToBoundary: (cell: DGGSCell): [number, number][] =>
+    getGeohashBoundary(getDGGSCellToken(cell, 'GeoHash')),
+  cellToBoundaryFlat: (cell: DGGSCell): number[] =>
+    getGeohashBoundaryFlat(getDGGSCellToken(cell, 'GeoHash')),
+  cellToBounds: (cell: DGGSCell): Bounds2D => getGeohashBounds(getDGGSCellToken(cell, 'GeoHash'))
 } as const satisfies DGGSDecoder;
 
 const BASE32_CODES = '0123456789bcdefghjkmnpqrstuvwxyz';
@@ -27,7 +31,7 @@ const MIN_LON = -180;
 const MAX_LON = 180;
 
 /** Return center lng,lat of geohash cell */
-function getGeohashLngLat(geohash: string): number[] {
+function getGeohashLngLat(geohash: string): [number, number] {
   const [[w, s], [e, n]] = getGeohashBounds(geohash);
   return [(e + w) / 2, (n + s) / 2];
 }

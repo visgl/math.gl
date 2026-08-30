@@ -2,19 +2,32 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {type DGGSCellColumn, type DGGSDecoder} from './dggs-decoder';
+import {type DGGSCell, type DGGSCellColumn, type DGGSDecoder} from './dggs-decoder';
+import {A5Decoder} from './a5-decoder';
 import {GeohashDecoder} from './geohash-decoder';
+import {H3Decoder} from './h3-decoder';
+import {PlusCodeDecoder} from './plus-code-decoder';
 import {QuadkeyDecoder} from './quadkey-decoder';
 import {S2Decoder} from './s2-decoder';
 
-export {type DGGSCellColumn, type DGGSDecoder};
+export {type DGGSCell, type DGGSCellColumn, type DGGSDecoder};
+export {A5Decoder};
 export {GeohashDecoder};
+export {H3Decoder};
+export {PlusCodeDecoder};
 export {QuadkeyDecoder, quadkeyToWorldBounds} from './quadkey-decoder';
 export {S2Decoder};
 export {getS2ChildIndex} from './s2-geometry/s2-token';
 
 /** Lightweight decoders bundled with this module. */
-export const DGGS_DECODERS: readonly DGGSDecoder[] = [GeohashDecoder, QuadkeyDecoder, S2Decoder];
+export const DGGS_DECODERS: readonly DGGSDecoder[] = [
+  A5Decoder,
+  GeohashDecoder,
+  H3Decoder,
+  PlusCodeDecoder,
+  QuadkeyDecoder,
+  S2Decoder
+];
 
 /**
  * Finds a conventional DGGS cell column by name.

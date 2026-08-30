@@ -1,10 +1,12 @@
 # Upgrade Guide
 
-## Upgrading to v4.2
+## Upgrading to v5.0
 
-- The DGGS modules `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, and `@math.gl/dggs-quadkey` have been removed. Use the `@math.gl/dggs/s2`, `@math.gl/dggs/geohash`, and `@math.gl/dggs/quadkey` subpath exports from the consolidated `@math.gl/dggs` package.
+- The individual DGGS packages `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, and `@math.gl/dggs-quadkey` have been removed. Install only `@math.gl/dggs` and use its `/s2`, `/geohash`, and `/quadkey` subpath exports.
+- New `/a5`, `/h3`, and `/plus-code` subpath exports provide the same small cell-geometry contract for additional systems.
 - The new module exports a decoder object for each DGGS. Each object conforms to the common `DGGSDecoder` API.
-- To upgrade, import the decoder object and replace individual function calls. For example, replace `getS2LngLat(...)` with `S2Decoder.getCellLngLat(...)`.
+- `DGGSDecoder` cell geometry methods accept `string | bigint`; A5, H3, and S2 support both representations.
+- To upgrade, import the decoder object and replace individual function calls. For example, replace `getS2LngLat(...)` with `S2Decoder.cellToLngLat(...)`.
 
 ## Upgrading to v4.1
 

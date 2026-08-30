@@ -45,7 +45,7 @@
   </tbody>
 </table>
 
-## v4.2 (In development)
+## v5.0 (In development)
 
 Target Release Date: Q2, 2026.
 
@@ -64,10 +64,11 @@ Highlights:
 
 **`@math.gl/dggs`** (NEW MODULE)
 
-- Consolidates GeoHash, Quadkey, and S2 functionality into a single module.
+- Consolidates all lightweight DGGS functionality into a single module and removes the individual DGGS packages.
 - Exports DGGS decoder objects with an interchangeable API for encoded data.
-- Provides `@math.gl/dggs/geohash`, `@math.gl/dggs/quadkey`, and `@math.gl/dggs/s2` subpath exports.
-- Detects conventional GeoHash, Quadkey, and S2 cell-column names for data-driven layers.
+- Aligns the core decoder shape with deck.gl-community's `GlobalGridLayer` contract.
+- Provides `/a5`, `/geohash`, `/h3`, `/plus-code`, `/quadkey`, and `/s2` subpath exports from `@math.gl/dggs`.
+- Detects conventional cell-column names for all bundled decoders to power data-driven visualization layers.
 
 **`@math.gl/expressions`** (NEW EXPERIMENTAL MODULE)
 

@@ -29,9 +29,9 @@ const TEST_DATA = [
   }
 ];
 
-test('QuadkeyDecoder#getCellBoundaryPolygon', () => {
+test('QuadkeyDecoder#cellToBoundary', () => {
   for (const {quadkey} of TEST_DATA) {
-    const polygon = QuadkeyDecoder.getCellBoundaryPolygon(quadkey);
+    const polygon = QuadkeyDecoder.cellToBoundary(quadkey);
     expect(polygon.length - 1, `${quadkey} polygon has 4 sides`).toBe(4);
     expect(polygon[0], `${quadkey} polygon is closed`).toEqual(polygon.at(-1));
   }

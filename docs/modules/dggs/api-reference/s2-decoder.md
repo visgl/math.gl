@@ -35,9 +35,9 @@ S2 token. An empty cell is represented by the token `X`.
 `S2Decoder` implements the [DGGSDecoder](./dggs-decoder) API:
 
 - `cellColumnNames: ['s2', 's2Token', 's2_token', 's2Cell', 's2_cell', 's2CellId', 's2_cell_id']`
-- `getCellIndexFromToken(token: string): bigint`
-- `getTokenFromCellIndex(index: bigint): string`
-- `getCellLngLat(token: string): number[]`
-- `getCellBoundaryPolygon(token: string): [number, number][]`
-- `getCellBoundaryPolygonFlat(token: string): number[]`
-- `getCellBounds(token: string): Bounds2D`
+- `tokenToCell(token: string): bigint`
+- `cellToToken(cell: string | bigint): string`
+- `cellToLngLat(cell: string | bigint): [number, number]`
+- `cellToBoundary(cell: string | bigint): [number, number][]`
+- `cellToBoundaryFlat(cell: string | bigint): number[]`
+- `cellToBounds(cell: string | bigint): Bounds2D`

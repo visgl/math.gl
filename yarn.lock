@@ -4233,6 +4233,9 @@ __metadata:
   resolution: "@math.gl/dggs@workspace:modules/dggs"
   dependencies:
     "@math.gl/types": "npm:5.0.0-alpha.1"
+    a5-js: "npm:^0.5.0"
+    h3-js: "npm:^4.2.1"
+    open-location-code: "npm:^1.0.3"
     s2-geometry: "npm:^1.2.10"
   languageName: unknown
   linkType: soft
@@ -7090,6 +7093,15 @@ __metadata:
   bin:
     js-yaml: bin/js-yaml.js
   checksum: 10c0/c8b3525717912811f9422ed50e94c5751ed6f771eb1b7e5cde097f14835654931e2bdaecb1e5fc37b51cf8d822410a307f16dd1581d46149398c30215f3f9bac
+  languageName: node
+  linkType: hard
+
+"a5-js@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "a5-js@npm:0.5.0"
+  dependencies:
+    gl-matrix: "npm:^3.4.3"
+  checksum: 10c0/7880ff27bc0b4b03e339e9677a6179f2e7145686da6cf035e58f969696ff5d75f07c2176620ff73a7752b47f40d26f77214e02c7dc8c037c411484fbbbd0ab48
   languageName: node
   linkType: hard
 
@@ -10988,6 +11000,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"gl-matrix@npm:^3.4.3":
+  version: 3.4.4
+  resolution: "gl-matrix@npm:3.4.4"
+  checksum: 10c0/9aa022ffac0d158212ad0cd29939864ad919ac31cd5dc5a5d35e9d66bb62679ddf152ff7b2173ded20131045e40572b87f31b26a920be2a7583a1516b13b5b4b
+  languageName: node
+  linkType: hard
+
 "glob-parent@npm:^5.1.2, glob-parent@npm:~5.1.2":
   version: 5.1.2
   resolution: "glob-parent@npm:5.1.2"
@@ -11174,6 +11193,13 @@ __metadata:
   dependencies:
     duplexer: "npm:^0.1.2"
   checksum: 10c0/4ccb924626c82125897a997d1c84f2377846a6ef57fbee38f7c0e6b41387fba4d00422274440747b58008b5d60114bac2349c2908e9aba55188345281af40a3f
+  languageName: node
+  linkType: hard
+
+"h3-js@npm:^4.2.1":
+  version: 4.5.0
+  resolution: "h3-js@npm:4.5.0"
+  checksum: 10c0/93138b438bc7b50578c6cd6d17e6486ecf3e21438f41d39bd54935591196d50096ae4028cb90e3ae81a3a54035106a189e0cdf9fe0b252f45fbe4f8b10e9fa5d
   languageName: node
   linkType: hard
 
@@ -15217,6 +15243,13 @@ __metadata:
   dependencies:
     mimic-fn: "npm:^2.1.0"
   checksum: 10c0/ffcef6fbb2692c3c40749f31ea2e22677a876daea92959b8a80b521d95cca7a668c884d8b2045d1d8ee7d56796aa405c405462af112a1477594cc63531baeb8f
+  languageName: node
+  linkType: hard
+
+"open-location-code@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "open-location-code@npm:1.0.3"
+  checksum: 10c0/46ec5c9ff3ce1dad7f713d5659d6211d9fdfe8d02297790ce91d7913192cae1702b5988e4edc324fc43fdb8bb4db2486ffc09389d2e4f388d501ef532622d9ec
   languageName: node
   linkType: hard
 
