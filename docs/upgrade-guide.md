@@ -2,7 +2,7 @@
 
 ## Upgrading to v4.2
 
-- The DGGS modules `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, and `@math.gl/dggs-quadkey` have been replaced with `@math.gl/dggs`.
+- The DGGS modules `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, and `@math.gl/dggs-quadkey` have been removed. Use the `@math.gl/dggs/s2`, `@math.gl/dggs/geohash`, and `@math.gl/dggs/quadkey` subpath exports from the consolidated `@math.gl/dggs` package.
 - The new module exports a decoder object for each DGGS. Each object conforms to the common `DGGSDecoder` API.
 - To upgrade, import the decoder object and replace individual function calls. For example, replace `getS2LngLat(...)` with `S2Decoder.getCellLngLat(...)`.
 

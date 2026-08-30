@@ -21,7 +21,7 @@ npm install @math.gl/dggs
 ## Usage
 
 ```js
-import {GeohashDecoder} from '@math.gl/dggs';
+import {GeohashDecoder} from '@math.gl/dggs/geohash';
 const polygon = GeohashDecoder.getCellBoundaryPolygon(geohashId);
 ```
 
@@ -31,6 +31,12 @@ import {findDGGSCellColumn} from '@math.gl/dggs';
 const match = findDGGSCellColumn(['name', 's2_token', 'value']);
 // {columnName: 's2_token', decoder: S2Decoder}
 ```
+
+The root export contains the shared types, bundled decoder registry, cell-column detection, and all three decoders. Decoder-specific subpaths are also available when an application only needs one grid:
+
+- `@math.gl/dggs/geohash`
+- `@math.gl/dggs/quadkey`
+- `@math.gl/dggs/s2`
 
 ### S2 Cell Format
 

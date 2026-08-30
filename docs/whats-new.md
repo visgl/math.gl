@@ -66,6 +66,7 @@ Highlights:
 
 - Consolidates GeoHash, Quadkey, and S2 functionality into a single module.
 - Exports DGGS decoder objects with an interchangeable API for encoded data.
+- Provides `@math.gl/dggs/geohash`, `@math.gl/dggs/quadkey`, and `@math.gl/dggs/s2` subpath exports.
 - Detects conventional GeoHash, Quadkey, and S2 cell-column names for data-driven layers.
 
 **`@math.gl/expressions`** (NEW EXPERIMENTAL MODULE)

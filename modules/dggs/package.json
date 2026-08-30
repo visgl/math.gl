@@ -27,6 +27,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./geohash": {
+      "types": "./dist/geohash.d.ts",
+      "import": "./dist/geohash.js",
+      "require": "./dist/geohash.cjs"
+    },
+    "./quadkey": {
+      "types": "./dist/quadkey.d.ts",
+      "import": "./dist/quadkey.js",
+      "require": "./dist/quadkey.cjs"
+    },
+    "./s2": {
+      "types": "./dist/s2.d.ts",
+      "import": "./dist/s2.js",
+      "require": "./dist/s2.cjs"
     }
   },
   "files": [
