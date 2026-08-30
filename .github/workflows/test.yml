@@ -54,6 +54,9 @@ jobs:
       - name: Check GeoArrow package boundary
         run: yarn check:geoarrow-boundary
 
+      - name: Check WKB package boundary
+        run: yarn check:wkb-boundary
+
       - name: Check CRS type boundaries
         run: yarn check:crs-types
 

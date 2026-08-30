@@ -4272,6 +4272,7 @@ __metadata:
     "@math.gl/crs": "npm:5.0.0-alpha.1"
     "@math.gl/polygon": "npm:5.0.0-alpha.1"
     "@math.gl/types": "npm:5.0.0-alpha.1"
+    "@math.gl/wkb": "npm:5.0.0-alpha.1"
   languageName: unknown
   linkType: soft
 
@@ -4379,6 +4380,12 @@ __metadata:
   dependencies:
     "@math.gl/core": "npm:5.0.0-alpha.1"
     mock-browser: "npm:^0.92.14"
+  languageName: unknown
+  linkType: soft
+
+"@math.gl/wkb@npm:5.0.0-alpha.1, @math.gl/wkb@workspace:modules/wkb":
+  version: 0.0.0-use.local
+  resolution: "@math.gl/wkb@workspace:modules/wkb"
   languageName: unknown
   linkType: soft
 

@@ -2,6 +2,8 @@
 
 ## v5.0.0-alpha.1
 
+- feat(wkb): Add dependency-free WKB, EWKB, and WKT geometry codecs and move format parsing out of
+  GeoArrow
 - feat(geoarrow): Add runtime-independent physical descriptors, columnar kernels, codecs, builder,
   polygon tessellation, and worker-transfer support
 - chore: Improve coverage reporting (#118)

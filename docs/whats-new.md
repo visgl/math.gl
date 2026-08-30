@@ -58,6 +58,7 @@ Highlights:
 - DGGS support is consolidated into a single module with interchangeable decoder objects.
 - New standards-based CRS definitions module and modernized proj4 support.
 - New runtime-independent GeoArrow descriptor and columnar geometry module.
+- New dependency-free WKB, EWKB, and WKT geometry codec module.
 - New typed-array geometry utilities module.
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 - Stronger type guarantees for math classes via the new sized array types.
@@ -94,6 +95,15 @@ Highlights:
 - Adds a comprehensive CRS developer guide covering standards, serialization versus semantics,
   axis order, dynamic and vertical CRS, transformation boundaries, and integration guidance.
 
+**`@math.gl/wkb`** (NEW MODULE)
+
+- Adds dependency-free synchronous WKB, EWKB, and WKT codecs over plain geometry values.
+- Supports both endian orders, ISO and EWKB dimension headers, EWKB SRIDs, all geometry families,
+  nested collections, dimension tokens, MultiPoint variants, and empty geometry.
+- Enforces strict input coverage plus configurable WKB nesting and element-count limits.
+- Provides the neutral format layer used by `@math.gl/geoarrow` without depending on GeoArrow or
+  Apache Arrow.
+
 **`@math.gl/geoarrow`** (NEW MODULE)
 
 - Defines borrowed physical descriptors for native, mixed, box, WKB, and WKT geometry columns
@@ -102,8 +112,8 @@ Highlights:
   offsets, sliced validity bitmaps, chunks, dense unions, and geometry collections.
 - Adds synchronous bounds, vertex-count, coordinate-map, layout-conversion, winding, and resource
   limit kernels.
-- Adds a two-pass builder, WKB/WKT codecs, Polygon/MultiPolygon tessellation, and an optional worker
-  transfer subpath.
+- Adds a two-pass builder, WKB/WKT column adapters, Polygon/MultiPolygon tessellation, and an
+  optional worker transfer subpath.
 - Moves reusable GeoArrow math out of loaders.gl and luma.gl prototypes while leaving runtime
   adapters, worker scheduling, and GPU resources with their owning libraries.
 

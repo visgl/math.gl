@@ -122,15 +122,9 @@ result may coalesce source chunks.
 Encode native rows into variable-width serialized descriptors. A column already in the requested
 encoding is returned unchanged.
 
-### `parseWKB(bytes)` / `writeWKB(geometry, dimension?)`
-
-Low-level single-geometry binary helpers. `parseWKB` also reports consumed byte length and rejects
-trailing bytes.
-
-### `parseWKT(text)` / `formatWKT(geometry, dimension?)`
-
-Low-level single-geometry text helpers, including dimension tokens, collections, MultiPoint syntax,
-and empty geometry.
+Individual geometry parsing and formatting live in `@math.gl/wkb`. GeoArrow's four codec functions
+adapt those neutral codecs to serialized column descriptors, validity, offsets, chunks, CRS, and
+metadata.
 
 ## Polygon tessellation
 
