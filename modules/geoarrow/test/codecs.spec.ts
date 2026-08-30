@@ -126,6 +126,8 @@ test('serialized identity and malformed inputs are handled', () => {
   expect(() => parseWKB(new Uint8Array([1, 1, 0]))).toThrow(/end of WKB/);
   expect(() => parseWKT('POLYGON (0 0, 1 1)')).toThrow();
   expect(() => parseWKT('NOTAGEOMETRY (0 0)')).toThrow(/Unsupported/);
+  expect(() => parseWKT('POINT @ (1 2)')).toThrow(/Unexpected WKT character/);
+  expect(() => parseWKT('POINT (1; 2)')).toThrow(/Unexpected WKT character/);
 });
 
 test('WKB accepts big-endian and EWKB Z/SRID headers', () => {

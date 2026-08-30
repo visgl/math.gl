@@ -460,6 +460,15 @@ function validateArray(
       break;
     }
     case 'fixed-size-list': {
+      const offset = array.offset ?? 0;
+      const validOffset = Number.isSafeInteger(offset) && offset >= 0;
+      if (!validOffset) {
+        issues.push({
+          code: 'invalid-offset',
+          path,
+          message: 'Fixed-size list offset must be a non-negative safe integer.'
+        });
+      }
       if (!Number.isSafeInteger(array.size) || array.size < 1) {
         issues.push({
           code: 'invalid-length',
@@ -467,8 +476,8 @@ function validateArray(
           message: 'Fixed-size list size must be positive.'
         });
       }
-      const childEnd = ((array.offset || 0) + array.length) * array.size;
-      if (childEnd > array.child.length) {
+      const childEnd = (offset + array.length) * array.size;
+      if (validOffset && childEnd > array.child.length) {
         issues.push({code: 'invalid-child', path, message: 'Fixed-size list child is too short.'});
       }
       validateArray(array.child, `${path}.child`, issues);

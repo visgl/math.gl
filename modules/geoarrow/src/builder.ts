@@ -538,13 +538,15 @@ function inferRowsDimension(rows: readonly (GeoArrowGeometryValue | null)[]): Ge
     if (typeof value[0] === 'number') size = Math.max(size, value.length);
     else for (const child of value) visit(child);
   };
+  const visitGeometry = (geometry: GeoArrowGeometryValue): void => {
+    if (geometry.type === 'GeometryCollection') {
+      for (const child of geometry.geometries) visitGeometry(child);
+    } else {
+      visit(geometry.coordinates);
+    }
+  };
   for (const row of rows) {
-    if (!row) continue;
-    if (row.type === 'GeometryCollection') {
-      for (const geometry of row.geometries) {
-        if (geometry.type !== 'GeometryCollection') visit(geometry.coordinates);
-      }
-    } else visit(row.coordinates);
+    if (row) visitGeometry(row);
   }
   return size >= 4 ? 'xyzm' : size === 3 ? 'xyz' : 'xy';
 }

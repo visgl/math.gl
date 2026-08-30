@@ -75,6 +75,49 @@ test('conversion forces dense unions and never reinterprets M as Z', () => {
   expect(materializeGeoArrowRows(mixed)).toEqual([{type: 'Point', coordinates: [1, 2, 99]}]);
 });
 
+test('dimension conversion recurses through nested geometry collections', () => {
+  const source = makeGeoArrowColumnFromGeometryRows([
+    {
+      type: 'GeometryCollection',
+      geometries: [
+        {type: 'Point', coordinates: [1, 2]},
+        {
+          type: 'GeometryCollection',
+          geometries: [{type: 'LineString', coordinates: [[3, 4]]}]
+        }
+      ]
+    }
+  ]);
+  const converted = convertGeoArrowColumn(source, {dimension: 'xyz'});
+  expect(materializeGeoArrowRows(converted)).toEqual([
+    {
+      type: 'GeometryCollection',
+      geometries: [
+        {type: 'Point', coordinates: [1, 2, 0]},
+        {
+          type: 'GeometryCollection',
+          geometries: [{type: 'LineString', coordinates: [[3, 4, 0]]}]
+        }
+      ]
+    }
+  ]);
+});
+
+test('dimension inference recurses through nested geometry collections', () => {
+  const geometry: GeoArrowGeometryValue = {
+    type: 'GeometryCollection',
+    geometries: [
+      {
+        type: 'GeometryCollection',
+        geometries: [{type: 'Point', coordinates: [1, 2, 3]}]
+      }
+    ]
+  };
+  const column = makeGeoArrowColumnFromGeometryRows([geometry]);
+  expect(column.dimension).toBe('xyz');
+  expect(materializeGeoArrowRows(column)).toEqual([geometry]);
+});
+
 test('winding normalization changes only rings with the wrong orientation', () => {
   const polygon: GeoArrowGeometryValue = {
     type: 'Polygon',

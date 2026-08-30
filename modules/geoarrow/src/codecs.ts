@@ -356,8 +356,7 @@ class WKTParser {
   private dimensionSize = 2;
 
   constructor(text: string) {
-    this.tokens =
-      text.match(/[A-Za-z_]+|[(),]|[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/g) || [];
+    this.tokens = tokenizeWKT(text);
   }
 
   parseGeometry(): GeoArrowGeometryValue {
@@ -441,6 +440,23 @@ class WKTParser {
     const actual = this.take();
     if (actual !== token) throw new Error(`Expected WKT token ${token}, found ${actual}`);
   }
+}
+
+function tokenizeWKT(text: string): string[] {
+  const tokens: string[] = [];
+  const tokenPattern = /[A-Za-z_]+|[(),]|[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/gy;
+  let index = 0;
+  while (index < text.length) {
+    while (index < text.length && /\s/.test(text[index])) index++;
+    if (index === text.length) break;
+    tokenPattern.lastIndex = index;
+    const match = tokenPattern.exec(text);
+    if (!match)
+      throw new Error(`Unexpected WKT character ${JSON.stringify(text[index])} at ${index}`);
+    tokens.push(match[0]);
+    index = tokenPattern.lastIndex;
+  }
+  return tokens;
 }
 
 function formatCoordinateNesting(value: readonly unknown[], depth: number): string {

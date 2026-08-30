@@ -272,6 +272,26 @@ test('validation reports malformed layouts and unsafe offsets', () => {
   expect(validateGeoArrowColumn(unsafeOffsets).issues.map(issue => issue.code)).toContain(
     'unsafe-offset'
   );
+
+  for (const offset of [-1, 0.5]) {
+    const invalidFixedSizeList: GeoArrowColumn = {
+      encoding: 'geoarrow.point',
+      dimension: 'xy',
+      coordinateLayout: 'interleaved',
+      chunks: [
+        {
+          kind: 'fixed-size-list',
+          length: 1,
+          size: 2,
+          offset,
+          child: {kind: 'primitive', length: 2, values: new Float64Array([1, 2])}
+        }
+      ]
+    };
+    expect(validateGeoArrowColumn(invalidFixedSizeList).issues.map(issue => issue.code)).toContain(
+      'invalid-offset'
+    );
+  }
 });
 
 test('box descriptors validate and contribute bounds without coordinate materialization', () => {

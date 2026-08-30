@@ -357,16 +357,20 @@ function convertGeometryFamily(
   sourceDimension: GeoArrowDimension,
   targetDimension: GeoArrowDimension
 ): GeoArrowGeometryValue {
-  const coordinates =
-    geometry.type === 'GeometryCollection'
-      ? undefined
-      : mapCoordinateNesting(geometry.coordinates, coordinate =>
-          resizeCoordinate(coordinate, sourceDimension, targetDimension)
-        );
+  if (geometry.type === 'GeometryCollection') {
+    const geometries = geometry.geometries.map(child =>
+      convertGeometryFamily(child, 'geoarrow.geometry', sourceDimension, targetDimension)
+    );
+    if (encoding === 'geoarrow.geometry' || encoding === 'geoarrow.geometrycollection') {
+      return {...geometry, geometries};
+    }
+    throw new Error(`${geometry.type} cannot be represented as ${encoding}`);
+  }
+  const coordinates = mapCoordinateNesting(geometry.coordinates, coordinate =>
+    resizeCoordinate(coordinate, sourceDimension, targetDimension)
+  );
   if (encoding === 'geoarrow.geometry') {
-    return geometry.type === 'GeometryCollection'
-      ? geometry
-      : ({...geometry, coordinates} as GeoArrowGeometryValue);
+    return {...geometry, coordinates} as GeoArrowGeometryValue;
   }
   const target = encoding.replace('geoarrow.', '');
   if (geometry.type.toLowerCase() !== target) {
