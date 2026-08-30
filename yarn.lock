@@ -4308,7 +4308,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/polygon@npm:5.0.0-alpha.1, @math.gl/polygon@workspace:modules/polygon":
+"@math.gl/polygon@workspace:modules/polygon":
   version: 0.0.0-use.local
   resolution: "@math.gl/polygon@workspace:modules/polygon"
   dependencies:
