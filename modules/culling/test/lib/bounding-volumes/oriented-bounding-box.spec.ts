@@ -2,8 +2,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 /* eslint-disable */
-import test, {Test} from 'tape-promise/tape';
-import {tapeEquals, tapeEqualsEpsilon} from 'test/utils/tape-assertions';
+import {test, expect} from 'vitest';
 
 import {
   Vector3,
@@ -12,7 +11,8 @@ import {
   Matrix4,
   toRadians,
   _MathUtils,
-  NumericArray
+  NumericArray,
+  equals
 } from '@math.gl/core';
 import {
   BoundingSphere,
@@ -74,14 +74,13 @@ function translatePositions(positions, translation) {
 }
 */
 
-test('OrientedBoundingBox#constructor sets expected default values', t => {
+test('OrientedBoundingBox#constructor sets expected default values', () => {
   const box = new OrientedBoundingBox();
-  tapeEquals(t, box.center, ZERO_VECTOR3);
-  tapeEquals(t, box.halfAxes, ZERO_MATRIX3);
-  t.end();
+  expect(equals(box.center, ZERO_VECTOR3)).toBe(true);
+  expect(equals(box.halfAxes, ZERO_MATRIX3)).toBe(true);
 });
 
-test('OrientedBoundingBox#halfSize - should return halfSize of quaternion based OBB', t => {
+test('OrientedBoundingBox#halfSize - should return halfSize of quaternion based OBB', () => {
   const originalHalfSize = [100.45386505126953, 91.120384216308594, 426.03338623046875];
   const box = new OrientedBoundingBox().fromCenterHalfSizeQuaternion(
     [-122.40277014424709, 37.795204290863012, 134.5439856108278],
@@ -92,11 +91,10 @@ test('OrientedBoundingBox#halfSize - should return halfSize of quaternion based 
   const halfSize = box.halfSize;
   const originalHalfSizeVector = new Vector3(originalHalfSize);
   const halfSizeVector = new Vector3(halfSize);
-  t.ok(Math.abs(originalHalfSizeVector.len() - halfSizeVector.len()) < delta);
-  t.end();
+  expect(Math.abs(originalHalfSizeVector.len() - halfSizeVector.len()) < delta).toBeTruthy();
 });
 
-test('OrientedBoundingBox#quaternion - should return quaternion of quaternion based OBB', t => {
+test('OrientedBoundingBox#quaternion - should return quaternion of quaternion based OBB', () => {
   const originalQuaternion = [
     0.64432936906814575, 0.76474469900131226, -0.0020481476094573736, 0.0010012148413807154
   ];
@@ -109,11 +107,10 @@ test('OrientedBoundingBox#quaternion - should return quaternion of quaternion ba
   const quaternion = box.quaternion;
   const originalQuaternionVector = new Vector4(originalQuaternion);
   const quaternionVector = new Vector4(quaternion);
-  t.ok(Math.abs(originalQuaternionVector.len() - quaternionVector.len()) < delta);
-  t.end();
+  expect(Math.abs(originalQuaternionVector.len() - quaternionVector.len()) < delta).toBeTruthy();
 });
 
-test('OrientedBoundingBox#fromCenterHalfSizeQuaternion - constructs new OrientedBoundingBox from quaternion-based OBB', t => {
+test('OrientedBoundingBox#fromCenterHalfSizeQuaternion - constructs new OrientedBoundingBox from quaternion-based OBB', () => {
   const TEST_CENTER = Object.freeze(
     new Vector3(-122.40277014424709, 37.795204290863012, 134.5439856108278)
   );
@@ -130,47 +127,42 @@ test('OrientedBoundingBox#fromCenterHalfSizeQuaternion - constructs new Oriented
     [100.45386505126953, 91.120384216308594, 426.03338623046875],
     [0.64432936906814575, 0.76474469900131226, -0.0020481476094573736, 0.0010012148413807154]
   );
-  tapeEquals(t, box.center, TEST_CENTER);
-  tapeEquals(t, box.halfAxes, TEST_MATRIX3);
-  t.end();
+  expect(equals(box.center, TEST_CENTER)).toBe(true);
+  expect(equals(box.halfAxes, TEST_MATRIX3)).toBe(true);
 });
 
-test('OrientedBoundingBox#clone', t => {
+test('OrientedBoundingBox#clone', () => {
   const box = new OrientedBoundingBox();
   const result = box.clone();
-  t.notEquals(box, result);
-  tapeEquals(t, box, result);
-  tapeEquals(t, box.clone(), box);
-  t.end();
+  expect(box).not.toBe(result);
+  expect(equals(box, result)).toBe(true);
+  expect(equals(box.clone(), box)).toBe(true);
 });
 
-test('OrientedBoundingBox#equals works in all cases', t => {
+test('OrientedBoundingBox#equals works in all cases', () => {
   const box = new OrientedBoundingBox();
-  tapeEquals(t, box.equals(new OrientedBoundingBox()), true);
-  t.equals(box.equals(undefined), false);
-  t.end();
+  expect(equals(box.equals(new OrientedBoundingBox()), true)).toBe(true);
+  expect(box.equals(undefined)).toBe(false);
 });
 
-test('OrientedBoundingBox#getBoundingSphere works with a result', t => {
+test('OrientedBoundingBox#getBoundingSphere works with a result', () => {
   const box = makeOrientedBoundingBoxFromPoints(spherePositions);
   const sphere = new BoundingSphere();
   box.getBoundingSphere(sphere);
-  tapeEquals(t, sphere.center, positionsCenter);
-  t.ok(sphere.radius > 1.5);
-  t.ok(sphere.radius < 2.0);
-  t.end();
+  expect(equals(sphere.center, positionsCenter)).toBe(true);
+  expect(sphere.radius > 1.5).toBeTruthy();
+  expect(sphere.radius < 2.0).toBeTruthy();
 });
 
-test('OrientedBoundingBox#getBoundingSphere works without a result parameter', t => {
+test('OrientedBoundingBox#getBoundingSphere works without a result parameter', () => {
   const box = makeOrientedBoundingBoxFromPoints(spherePositions);
   const sphere = box.getBoundingSphere();
-  tapeEquals(t, sphere.center, positionsCenter);
-  t.ok(sphere.radius > 1.5);
-  t.ok(sphere.radius < 2.0);
-  t.end();
+  expect(equals(sphere.center, positionsCenter)).toBe(true);
+  expect(sphere.radius > 1.5).toBeTruthy();
+  expect(sphere.radius < 2.0).toBeTruthy();
 });
 
-test('OrientedBoundingBox#Calculate half sizes and half axes properly', t => {
+test('OrientedBoundingBox#Calculate half sizes and half axes properly', () => {
   const halfAxes = new Matrix3([2, 0, 0, 0, 2, 0, 0, 0, 2]);
   const halfSize = [2, 2, 2];
   const volume = 8;
@@ -184,24 +176,16 @@ test('OrientedBoundingBox#Calculate half sizes and half axes properly', t => {
     new Vector3(2, 2, -2),
     new Vector3(-2, -2, 2)
   ]);
-  t.deepEqual(box.halfAxes, halfAxes);
-  t.deepEqual(box.halfSize, halfSize);
-  t.notEquals(box.halfSize[2], 1);
-  t.equal(
-    box.halfSize.reduce((res, hs) => res * hs),
-    volume
-  );
-  t.end();
+  expect(box.halfAxes).toEqual(halfAxes);
+  expect(box.halfSize).toEqual(halfSize);
+  expect(box.halfSize[2]).not.toBe(1);
+  expect(box.halfSize.reduce((res, hs) => res * hs)).toBe(volume);
 });
 
-test('BoundingSphere#throws from fromOrientedBoundingBox with null orientedBoundingBox parameter', t => {
-  // t.throws(() => sphere.fromOrientedBoundingBox(null));
-  t.end();
-});
+test('BoundingSphere#throws from fromOrientedBoundingBox with null orientedBoundingBox parameter', () => {});
 
 // eslint-disable-next-line max-statements
 function intersectPlaneTestCornersEdgesFaces(
-  t: Test,
   center: Readonly<NumericArray>,
   axes: Readonly<Matrix3>
 ): void {
@@ -247,19 +231,19 @@ function intersectPlaneTestCornersEdgesFaces(
 
   pl = planeNormXform(+1.0, +0.0, +0.0, 0.50001);
   if (pl) {
-    t.equals(box.intersectPlane(pl), INTERSECTION.INSIDE);
+    expect(box.intersectPlane(pl)).toBe(INTERSECTION.INSIDE);
   }
   pl = planeNormXform(-1.0, +0.0, +0.0, 0.50001);
   if (pl) {
-    t.equals(box.intersectPlane(pl), INTERSECTION.INSIDE);
+    expect(box.intersectPlane(pl)).toBe(INTERSECTION.INSIDE);
   }
   pl = planeNormXform(+0.0, +1.0, +0.0, 0.50001);
   if (pl) {
-    t.equals(box.intersectPlane(pl), INTERSECTION.INSIDE);
+    expect(box.intersectPlane(pl)).toBe(INTERSECTION.INSIDE);
   }
   pl = planeNormXform(+0.0, -1.0, +0.0, 0.50001);
   if (pl) {
-    t.equals(box.intersectPlane(pl), INTERSECTION.INSIDE);
+    expect(box.intersectPlane(pl)).toBe(INTERSECTION.INSIDE);
   }
   /*
   pl = planeNormXform(+0.0, +0.0, +1.0,  0.50001); if (pl) { t.equals(box.intersectPlane(pl), INTERSECTION.INSIDE); }
@@ -380,9 +364,8 @@ function intersectPlaneTestCornersEdgesFaces(
   */
 }
 
-test('intersectPlane works with untransformed box', t => {
-  intersectPlaneTestCornersEdgesFaces(t, ZERO_VECTOR3, new Matrix3().identity());
-  t.end();
+test('intersectPlane works with untransformed box', () => {
+  intersectPlaneTestCornersEdgesFaces(ZERO_VECTOR3, new Matrix3().identity());
 });
 
 /*
@@ -465,7 +448,7 @@ function makeRotationZ(angle: number): Matrix3 {
 }
 
 // eslint-disable-next-line max-statements
-test('OrientedBoundingBox#distanceSquaredTo', t => {
+test('OrientedBoundingBox#distanceSquaredTo', () => {
   const r0 = makeRotationZ(toRadians(-45.0));
   const r1 = makeRotationY(toRadians(45.0));
 
@@ -488,165 +471,31 @@ test('OrientedBoundingBox#distanceSquaredTo', t => {
 
   let d = cartesian.distanceTo(center) - scale.x;
   let expected = d * d;
-  tapeEqualsEpsilon(t, obb.distanceSquaredTo(cartesian), expected, _MathUtils.EPSILON10);
-
-  /*
-  // from negative x direction
-  Vector3.multiplyByScalar(xAxis, -2.0, cartesian);
-  Vector3.add(cartesian, center, cartesian);
-
-  d = Vector3.distance(cartesian, center) - scale.x;
-  expected = d * d;
-  tapeEqualsEpsilon(t, obb.distanceSquaredTo(cartesian), expected, _MathUtils.EPSILON10);
-
-  // from positive y direction
-  Vector3.multiplyByScalar(yAxis, 2.0, cartesian);
-  Vector3.add(cartesian, center, cartesian);
-
-  d = Vector3.distance(cartesian, center) - scale.y;
-  expected = d * d;
-  tapeEqualsEpsilon(t, obb.distanceSquaredTo(cartesian), expected, _MathUtils.EPSILON10);
-
-  // from negative y direction
-  Vector3.multiplyByScalar(yAxis, -2.0, cartesian);
-  Vector3.add(cartesian, center, cartesian);
-
-  d = Vector3.distance(cartesian, center) - scale.y;
-  expected = d * d;
-  tapeEqualsEpsilon(t, obb.distanceSquaredTo(cartesian), expected, _MathUtils.EPSILON10);
-
-  // from positive z direction
-  Vector3.multiplyByScalar(zAxis, 2.0, cartesian);
-  Vector3.add(cartesian, center, cartesian);
-
-  d = Vector3.distance(cartesian, center) - scale.z;
-  expected = d * d;
-  tapeEqualsEpsilon(t, obb.distanceSquaredTo(cartesian), expected, _MathUtils.EPSILON10);
-
-  // from negative z direction
-  Vector3.multiplyByScalar(zAxis, -2.0, cartesian);
-  Vector3.add(cartesian, center, cartesian);
-
-  d = Vector3.distance(cartesian, center) - scale.z;
-  expected = d * d;
-  tapeEqualsEpsilon(t, obb.distanceSquaredTo(cartesian), expected, _MathUtils.EPSILON10);
-
-  // from corner point
-  Vector3.add(xAxis, yAxis, cartesian);
-  Vector3.add(zAxis, cartesian, cartesian);
-
-  const cornerDistance = Vector3.magnitude(cartesian);
-  Vector3.add(cartesian, center, cartesian);
-
-  d = Vector3.distance(cartesian, center) - cornerDistance;
-  expected = d * d;
-  tapeEqualsEpsilon(t, obb.distanceSquaredTo(cartesian), expected, _MathUtils.EPSILON10);
-  */
-  t.end();
+  expect(equals(obb.distanceSquaredTo(cartesian), expected, _MathUtils.EPSILON10)).toBe(true);
 });
 
-test('OrientedBoundingBox#distanceSquaredTo throws without cartesian', t => {
-  t.throws(() => new OrientedBoundingBox().distanceSquaredTo(undefined));
-  t.end();
+test('OrientedBoundingBox#distanceSquaredTo throws without cartesian', () => {
+  expect(() => new OrientedBoundingBox().distanceSquaredTo(undefined)).toThrow();
 });
 
 // eslint-disable-next-line max-statements
-test('OrientedBoundingBox#computePlaneDistances', t => {
-  /*
-  const r0 = makeRotationZ(toRadians(-45.0));
-  const r1 = makeRotationY(toRadians(45.0));
+test('OrientedBoundingBox#computePlaneDistances', () => {});
 
-  const rotation = r0.multiplyLeft(r1);
-  const scale = new Vector3(2.0, 3.0, 4.0);
-  const rotationScale = rotation.scale(scale);
-
-  const center = new Vector3(4.0, 3.0, 2.0);
-
-  const obb = new OrientedBoundingBox(center, rotationScale);
-
-  const halfAxes = obb.halfAxes;
-  const xAxis = halfAxes.getColumn(0, new Vector3());
-  // const yAxis = halfAxes.getColumn(1, new Vector3());
-  // const zAxis = halfAxes.getColumn(2, new Vector3());
-
-  // from x direction
-  const position = new Vector3(xAxis).multiplyByScalar(2.0).add(center);
-
-  const direction = new Vector3(xAxis).negate().normalize();
-
-  // let d = position.distanceTo(center);
-  // let expectedNear = d - scale.x;
-  // let expectedFar = d + scale.x;
-
-  const distances = obb.computePlaneDistances(position, direction);
-
-  tapeEqualsEpsilon(t, distances.start, expectedNear, _MathUtils.EPSILON14);
-  tapeEqualsEpsilon(t, distances.stop, expectedFar, _MathUtils.EPSILON14);
-
-  // from y direction
-  position.copy(yAxis).multiplyByScalar(2.0).add(center);
-
-  direction.copy(yAxis).negate().normalize();
-
-  d = position.distance(center);
-  expectedNear = d - scale.y;
-  expectedFar = d + scale.y;
-
-  obb.computePlaneDistances(position, direction, distances);
-  tapeEqualsEpsilon(t, distances.start, expectedNear, _MathUtils.EPSILON14);
-  tapeEqualsEpsilon(t, distances.stop, expectedFar, _MathUtils.EPSILON14);
-
-  // from z direction
-  position.copy(zAxis).multiplyByScalar(2.0).add(center);
-
-  direction.copy(zAxis).negate().normalize();
-
-  d = position.distance(center);
-  expectedNear = d - scale.z;
-  expectedFar = d + scale.z;
-
-  obb.computePlaneDistances(position, direction, distances);
-  tapeEqualsEpsilon(t, distances.start, expectedNear, _MathUtils.EPSILON14);
-  tapeEqualsEpsilon(t, distances.stop, expectedFar, _MathUtils.EPSILON14);
-
-  // from corner point
-  position.copy(xAxis).add(yAxis).add(zAxis);
-
-  direction.copy(position).negate().normalize();
-
-  const cornerDistance = position.magnitude();
-  position.add(center);
-
-  d = position.distance(center);
-  expectedNear = d - cornerDistance;
-  expectedFar = d + cornerDistance;
-
-  obb.computePlaneDistances(position, direction, distances);
-  tapeEqualsEpsilon(t, distances.start, expectedNear, _MathUtils.EPSILON14);
-  tapeEqualsEpsilon(t, distances.stop, expectedFar, _MathUtils.EPSILON14);
-  */
-
-  t.end();
-});
-
-test('OrientedBoundingBox#computePlaneDistances throws without a box', t => {
-  t.throws(() =>
+test('OrientedBoundingBox#computePlaneDistances throws without a box', () => {
+  expect(() =>
     new OrientedBoundingBox().computePlaneDistances(undefined, new Vector3(), new Vector3())
-  );
-  t.end();
+  ).toThrow();
 });
 
-test('OrientedBoundingBox#computePlaneDistances throws without a position', t => {
-  t.throws(() => new OrientedBoundingBox().computePlaneDistances(undefined, new Vector3()));
-  t.end();
+test('OrientedBoundingBox#computePlaneDistances throws without a position', () => {
+  expect(() => new OrientedBoundingBox().computePlaneDistances(undefined, new Vector3())).toThrow();
 });
 
-test('OrientedBoundingBox#computePlaneDistances throws without a direction', t => {
-  t.throws(() => new OrientedBoundingBox().computePlaneDistances(new Vector3(), undefined));
-  t.end();
+test('OrientedBoundingBox#computePlaneDistances throws without a direction', () => {
+  expect(() => new OrientedBoundingBox().computePlaneDistances(new Vector3(), undefined)).toThrow();
 });
 
-test('OrientedBoundingBox#applies transform: translation, rotation, scale', t => {
+test('OrientedBoundingBox#applies transform: translation, rotation, scale', () => {
   const VECTOR3_ZERO = new Vector3(0, 0, 0);
   const obb = new OrientedBoundingBox(VECTOR3_ZERO, [1, 0, 0, 0, 1, 0, 0, 0, 1]);
   const transform = new Matrix4()
@@ -658,8 +507,7 @@ test('OrientedBoundingBox#applies transform: translation, rotation, scale', t =>
     [1.0000000000000002, 4, 3, -1, 2, 3, 1, 2, 5]
   );
   const result = obb.transform(transform);
-  tapeEqualsEpsilon(t, result, expected, _MathUtils.EPSILON8);
-  t.end();
+  expect(equals(result, expected, _MathUtils.EPSILON8)).toBe(true);
 });
 
 /*

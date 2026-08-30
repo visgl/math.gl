@@ -71,6 +71,9 @@ jobs:
       - name: Build packages
         run: npm run build
 
+      - name: Install Playwright Chromium
+        run: yarn playwright:install
+
       - name: Run release test suite
         run: yarn test
 

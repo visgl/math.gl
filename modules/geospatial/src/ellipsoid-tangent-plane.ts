@@ -14,7 +14,7 @@ const scratchCart3 = new Vector3();
 const scratchEastNorthUp = new Matrix4();
 const scratchProjectPointOntoPlaneCartesian3 = new Vector3();
 
-/** A two-dimensional east-north plane tangent to the WGS84 ellipsoid. */
+/** A two-dimensional east-north plane tangent to an ellipsoid. */
 export class EllipsoidTangentPlane {
   private _origin: Vector3;
   private _xAxis: Vector3;
@@ -25,15 +25,13 @@ export class EllipsoidTangentPlane {
    * Creates a new plane tangent to the WGS84 ellipsoid at the provided origin.
    * If origin is not on the surface of the ellipsoid, its surface projection will be used.
    *
-   * @param origin A nonzero WGS84 Cartesian point.
+   * @param origin A nonzero Cartesian point on or near the ellipsoid.
+   * @param ellipsoid The ellipsoid to which the origin belongs. Defaults to WGS84.
    */
-  constructor(origin: number[]) {
-    const originOnSurface = Ellipsoid.WGS84.scaleToGeodeticSurface(origin, scratchOrigin);
+  constructor(origin: number[], ellipsoid: Ellipsoid = Ellipsoid.WGS84) {
+    const originOnSurface = ellipsoid.scaleToGeodeticSurface(origin, scratchOrigin);
 
-    const eastNorthUp = Ellipsoid.WGS84.eastNorthUpToFixedFrame(
-      originOnSurface,
-      scratchEastNorthUp
-    );
+    const eastNorthUp = ellipsoid.eastNorthUpToFixedFrame(originOnSurface, scratchEastNorthUp);
 
     this._origin = new Vector3(originOnSurface);
     this._xAxis = new Vector3(scratchCart3.from(eastNorthUp.getColumn(0)));

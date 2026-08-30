@@ -41,6 +41,7 @@ export type {Matrix4Like} from './classes/matrix4';
 export {SphericalCoordinates} from './classes/spherical-coordinates';
 export {Pose} from './classes/pose';
 export {Euler} from './classes/euler';
+export type {EulerLike, EulerRotationOrder} from './classes/euler-types';
 
 export * as _MathUtils from './lib/math-utils';
 

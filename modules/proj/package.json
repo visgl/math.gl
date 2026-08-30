@@ -1,0 +1,40 @@
+{
+  "name": "@math.gl/proj",
+  "description": "Lightweight coordinate reference system projection utilities",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "version": "5.0.0-alpha.1",
+  "keywords": [
+    "math",
+    "geospatial",
+    "projection",
+    "coordinate reference system",
+    "web mercator",
+    "EPSG:3857",
+    "EPSG:4326"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "@math.gl/web-mercator": "5.0.0-alpha.1"
+  }
+}

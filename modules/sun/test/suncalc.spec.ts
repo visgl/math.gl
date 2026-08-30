@@ -1,8 +1,8 @@
+import {test, expect} from 'vitest';
 import {getSunPosition, getSunDirection} from '../src/suncalc';
 import {equals, config, vec3} from '@math.gl/core';
-import test from 'tape-promise/tape';
 
-test('Sunlight#azimuth and altitude', t => {
+test('Sunlight#azimuth and altitude', () => {
   const MS_IN_AN_HOUR = 3.6e6;
   const TIMESTAMP = 1553990400000 + 7 * MS_IN_AN_HOUR; // 03/31/2019 @ 12:00am (UTC) + Vancouver(GMT-7) timezone offset
   const LATITUDE = 49.253;
@@ -49,15 +49,20 @@ test('Sunlight#azimuth and altitude', t => {
     const azimuthInDegree = 180 + (azimuth * 180) / Math.PI;
     const altitudeInDegree = (altitude * 180) / Math.PI;
 
-    t.ok(equals(azimuthInDegree, testCase.azimuth), 'Azimuth vec3.angle should match.');
-    t.ok(equals(altitudeInDegree, testCase.altitude), 'Altitude vec3.angle should match.');
+    expect(
+      equals(azimuthInDegree, testCase.azimuth),
+      'Azimuth vec3.angle should match.'
+    ).toBeTruthy();
+    expect(
+      equals(altitudeInDegree, testCase.altitude),
+      'Altitude vec3.angle should match.'
+    ).toBeTruthy();
   });
 
   config.EPSILON = oldEpsilon;
-  t.end();
 });
 
-test('getSunDirection', t => {
+test('getSunDirection', () => {
   const testCases = [
     {
       title: 'Tropic of Cancer on Summer Solstice at noon',
@@ -95,9 +100,7 @@ test('getSunDirection', t => {
 
   for (const testCase of testCases) {
     const direction = getSunDirection(testCase.timestamp, testCase.latitude, testCase.longitude);
-    t.comment(direction.join(','));
-    t.ok(vec3.angle(direction, testCase.expected) < 0.05, testCase.title);
+    console.log(direction.join(','));
+    expect(vec3.angle(direction, testCase.expected) < 0.05, testCase.title).toBeTruthy();
   }
-
-  t.end();
 });

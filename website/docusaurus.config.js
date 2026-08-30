@@ -23,4 +23,15 @@ const config = getDocusaurusConfig({
   }
 });
 
+// TODO: Remove this compatibility shim after @vis.gl/docusaurus-website
+// moves onBrokenMarkdownLinks to markdown.hooks.
+config.markdown = {
+  ...config.markdown,
+  hooks: {
+    ...config.markdown?.hooks,
+    onBrokenMarkdownLinks: config.onBrokenMarkdownLinks
+  }
+};
+delete config.onBrokenMarkdownLinks;
+
 module.exports = config;

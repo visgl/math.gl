@@ -39,10 +39,9 @@ export class Pose {
       this.position = new Vector3(x, y, z);
     }
     if (Array.isArray(orientation) && orientation.length === 4) {
-      // @ts-expect-error
-      this.orientation = new Euler(orientation, orientation[3]);
+      this.orientation = new Euler().fromArray(orientation);
     } else {
-      this.orientation = new Euler(roll, pitch, yaw, Euler.RollPitchYaw);
+      this.orientation = new Euler(roll, pitch, yaw, 'zyx');
     }
   }
 

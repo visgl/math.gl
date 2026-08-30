@@ -7,7 +7,7 @@
 
 /* eslint-disable */
 import {Vector3, assert} from '@math.gl/core';
-import {INTERSECTION} from '../constants';
+import type {CullingResult} from '../constants';
 import {Plane} from './plane';
 import type {BoundingVolume} from './bounding-volumes/bounding-volume';
 import type {BoundingSphere} from './bounding-volumes/bounding-sphere';
@@ -93,19 +93,19 @@ export class CullingVolume {
   }
 
   /** Determines whether a bounding volume intersects the culling volume. */
-  computeVisibility(boundingVolume: BoundingVolume): number {
+  computeVisibility(boundingVolume: BoundingVolume): CullingResult {
     // const planes = this.planes;
-    let intersect: number = INTERSECTION.INSIDE;
+    let intersect: CullingResult = 'inside';
     for (const plane of this.planes) {
       const result = boundingVolume.intersectPlane(plane);
       switch (result) {
-        case INTERSECTION.OUTSIDE:
+        case 'outside':
           // We are done
-          return INTERSECTION.OUTSIDE;
+          return 'outside';
 
-        case INTERSECTION.INTERSECTING:
+        case 'intersecting':
           // If no other intersection is outside, return INTERSECTING
-          intersect = INTERSECTION.INTERSECTING;
+          intersect = 'intersecting';
           break;
 
         default:
@@ -149,9 +149,9 @@ export class CullingVolume {
 
       const plane = planes[k];
       const result = boundingVolume.intersectPlane(plane);
-      if (result === INTERSECTION.OUTSIDE) {
+      if (result === 'outside') {
         return CullingVolume.MASK_OUTSIDE;
-      } else if (result === INTERSECTION.INTERSECTING) {
+      } else if (result === 'intersecting') {
         mask |= flag;
       }
     }

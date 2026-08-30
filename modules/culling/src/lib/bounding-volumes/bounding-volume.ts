@@ -4,6 +4,7 @@
 
 // import {INTERSECTION} from '../../constants';
 import {Plane} from '../plane';
+import type {CullingResult} from '../../constants';
 
 /**
  * Common interface for BoundingVolumes
@@ -28,9 +29,9 @@ export interface BoundingVolume {
    *
    * @param plane The plane to test against.
    * @returns
-   *  - `INTERSECTION.INSIDE` if the entire box is on the side of the plane the normal is pointing.
-   *  - `INTERSECTION.OUTSIDE` if the entire box is on the opposite side.
-   *  - `INTERSECTION.INTERSECTING` if the box intersects the plane.
+   *  - `'inside'` if the entire box is on the side of the plane the normal is pointing.
+   *  - `'outside'` if the entire box is on the opposite side.
+   *  - `'intersecting'` if the box intersects the plane.
    */
-  intersectPlane(plane: Plane): number;
+  intersectPlane(plane: Plane): CullingResult;
 }

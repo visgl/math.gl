@@ -7,7 +7,7 @@
 
 import {NumericArray, Vector3, mat4} from '@math.gl/core';
 
-import {INTERSECTION} from '../../constants';
+import type {CullingResult} from '../../constants';
 import {BoundingVolume} from './bounding-volume';
 import {Plane} from '../plane';
 
@@ -131,7 +131,7 @@ export class BoundingSphere implements BoundingVolume {
   }
 
   /** Determines which side of a plane a sphere is located. */
-  intersectPlane(plane: Plane): number {
+  intersectPlane(plane: Plane): CullingResult {
     const center = this.center;
     const radius = this.radius;
     const normal = plane.normal;
@@ -139,13 +139,13 @@ export class BoundingSphere implements BoundingVolume {
 
     // The center point is negative side of the plane normal
     if (distanceToPlane < -radius) {
-      return INTERSECTION.OUTSIDE;
+      return 'outside';
     }
     // The center point is positive side of the plane, but radius extends beyond it; partial overlap
     if (distanceToPlane < radius) {
-      return INTERSECTION.INTERSECTING;
+      return 'intersecting';
     }
     // The center point and radius is positive side of the plane
-    return INTERSECTION.INSIDE;
+    return 'inside';
   }
 }

@@ -45,20 +45,37 @@
   </tbody>
 </table>
 
-## v4.2 (In development)
+## v5.0 (In development)
 
 Target Release Date: Q2, 2026.
 
 Highlights:
 
 - TypeScript 6 compatibility.
+- New `@math.gl/geometry` CPU primitive mesh and tessellation module.
+- glTF 2.1 box, capsule, cylinder, plane and sphere analytic shapes in `@math.gl/culling`.
 - New expression evaluator module
+- DGGS support is consolidated into a single module with interchangeable decoder objects.
+- New standards-based CRS definitions module and modernized proj4 support.
+- New typed-array geometry utilities module.
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 - Stronger type guarantees for math classes via the new sized array types.
+- Culling results, polygon winding directions, and Euler rotation orders now use descriptive string literal types; legacy named constants remain as deprecated string-valued aliases.
+
+**`@math.gl/dggs`** (NEW MODULE)
+
+- Consolidates all lightweight DGGS functionality into a single module and removes the individual DGGS packages.
+- Exports DGGS decoder objects with an interchangeable API for encoded data.
+- Aligns the core decoder shape with deck.gl-community's `GlobalGridLayer` contract.
+- Provides `/a5`, `/geohash`, `/h3`, `/plus-code`, `/quadkey`, and `/s2` subpath exports from `@math.gl/dggs`.
+- Detects conventional cell-column names for all bundled decoders to power data-driven visualization layers.
 
 **`@math.gl/core`**
 
-- Added `Matrix4.fromMatrix3()` and `Quaternion.fromEuler()` conversion helpers.
+- Added destination-owned `Matrix4.fromMatrix3()`, `Matrix3.fromMatrix4()`, and `Quaternion.fromEuler()` conversion helpers.
+- `Euler.fromQuaternion()` now supports all six rotation orders and preserves the destination's current order by default.
+- Removed the redundant `Euler.getQuaternion()` and `Euler.toQuaternion()` allocation helpers; use `Quaternion.fromEuler()` instead.
+- `Quaternion.transformVector4()` now returns a plain array by default, avoiding an otherwise unnecessary runtime dependency on `Vector4`.
 
 **`@math.gl/expressions`** (NEW EXPERIMENTAL MODULE)
 
@@ -69,10 +86,45 @@ Highlights:
 - Compiles restricted JSON-style accessor expressions with function calls disabled.
 - Includes an interactive expression playground with editable context and sample DGGS expressions.
 
+**`@math.gl/crs`** (NEW MODULE)
+
+- Adds lightweight, proj4-independent TypeScript definitions for coordinate reference systems with no runtime dependencies.
+- Uses strict PROJJSON v0.7 as its semantic CRS object model and exports types generated from the official schema.
+- Exposes the vendored official PROJJSON v0.7 schema for runtime validation by applications.
+- Represents authority codes, PROJ strings, and WKT definitions as serialized strings.
+- Adds value-preserving WKT1/WKT2 syntax parsing, profile validation, and compact or pretty encoding.
+- Adds ordered PROJ definition and pipeline syntax parsing and encoding.
+- Adds immutable, format-neutral spatial-reference descriptors that preserve definition
+  representation, alternatives, provenance, coordinate epoch, frame, stored order, and explicit
+  default/unknown/absent state.
+- Adds a comprehensive CRS developer guide covering standards, serialization versus semantics,
+  axis order, dynamic and vertical CRS, transformation boundaries, and integration guidance.
+
+**`@math.gl/proj4`**
+
+- Updates proj4js to v2.20.9 and accepts modern WKT2 definitions and the supported PROJJSON CRS object types.
+- Adds optional CRS axis-order enforcement and NTv2 datum-grid registration.
+- Defines aliases for WGS84 UTM and UPS EPSG coordinate systems automatically.
+
 **`@math.gl/geospatial`**
 
 - `makeOBBFromRegion()` - New function that creates a cartesian oriented bounding box from a geospatial region.
 - `EllipsoidTangentPlane` - New helper class for doing math on the ellipsoid surface.
+
+**`@math.gl/geometry`** (NEW MODULE)
+
+- Adds renderer-independent `Geometry` typed-array storage and indexed-geometry unpacking.
+- Adds tessellators for glTF 2.1 draft shapes and common luma.gl primitives.
+
+**`@math.gl/culling`**
+
+- Adds analytic glTF shape queries for clipping/culling, rays, transforms and enclosing bounds.
+
+**`@math.gl/geometry-utils`** (NEW MODULE)
+
+- Promotes the renderer-independent geometry helpers previously maintained in `@loaders.gl/math`.
+- Adds typed geometry traversal, vertex-normal generation, component-type conversion, packed RGB565
+  colors, octahedral attribute compression, and typed-array utilities.
 
 ## v4.1
 

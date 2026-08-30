@@ -4,60 +4,45 @@
 // Copyright (c) 2017 Uber Technologies, Inc.
 
 /* eslint-disable max-statements */
-import test, {Test} from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {Vector2, Vector3, Vector4} from '@math.gl/core';
 
 // FOR TAPE TESTING
-// Use tape assert to compares using a.equals(b)
-// Usage test(..., t => { tapeEquals(t, a, b, ...); });
-export function tapeEquals(t: Test, a, b, msg, extra) {
-  /* eslint-disable no-invalid-this */
-  t._assert(a.equals(b), {
-    message: msg || 'should be equal',
-    operator: 'equal',
-    actual: a,
-    expected: b,
-    extra
-  });
-}
+export {};
 
-test('Math#types', t => {
-  t.equals(typeof Vector2, 'function');
-  t.equals(typeof Vector3, 'function');
-  t.equals(typeof Vector4, 'function');
-  t.end();
+test('Math#types', () => {
+  expect(typeof Vector2).toBe('function');
+  expect(typeof Vector3).toBe('function');
+  expect(typeof Vector4).toBe('function');
 });
 
-test('Math#construct and Array.isArray check', t => {
-  t.ok(Array.isArray(new Vector2()));
-  t.ok(Array.isArray(new Vector3()));
-  t.ok(Array.isArray(new Vector4()));
-  t.end();
+test('Math#construct and Array.isArray check', () => {
+  expect(Array.isArray(new Vector2())).toBeTruthy();
+  expect(Array.isArray(new Vector3())).toBeTruthy();
+  expect(Array.isArray(new Vector4())).toBeTruthy();
 });
 
 // ['add', 'cross'];
 const VECTOR_METHODS = ['clone'];
 
-test('Vector2#members and methods', t => {
+test('Vector2#members and methods', () => {
   const v = new Vector2();
-  t.equals(v.x, 0);
-  t.equals(v.y, 0);
+  expect(v.x).toBe(0);
+  expect(v.y).toBe(0);
 
   for (const method of VECTOR_METHODS) {
-    t.equals(typeof v[method], 'function');
+    expect(typeof v[method]).toBe('function');
   }
-  t.end();
 });
 
-test('Vector4#members and methods', t => {
+test('Vector4#members and methods', () => {
   const v = new Vector4();
-  t.equals(v.x, 0);
-  t.equals(v.y, 0);
-  t.equals(v.z, 0);
-  t.equals(v.w, 0);
+  expect(v.x).toBe(0);
+  expect(v.y).toBe(0);
+  expect(v.z).toBe(0);
+  expect(v.w).toBe(0);
 
   for (const method of VECTOR_METHODS) {
-    t.equals(typeof v[method], 'function');
+    expect(typeof v[method]).toBe('function');
   }
-  t.end();
 });

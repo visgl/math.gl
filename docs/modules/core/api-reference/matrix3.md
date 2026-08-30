@@ -85,6 +85,10 @@ Sets the matrix to a transformation corresponding to the rotations represented b
 
 - `quaternion` (`Quaternion`) - the quaternion to create matrix from
 
+### fromMatrix4(matrix4: Matrix4 | number[16]): this
+
+Copies the upper-left 3x3 elements of `matrix4`, including any scale, and returns this matrix. This differs from `Matrix4.getRotationMatrix3()`, which removes scale.
+
 ### determinant(): number
 
 Returns the determinant of the matrix (does not modify the matrix).

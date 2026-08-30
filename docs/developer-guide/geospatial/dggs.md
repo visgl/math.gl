@@ -2,27 +2,35 @@
 
 Discrete global grid systems are powerful tools that enables us to convert geospatial data into a common, easy-to-analyze form.
 
-## Why DGGS in math.gl
+## Why DGGS support in math.gl?
 
-Today there are multiple DGGS grid systems, and it is not unusual for an application to have to work with
-more than one DGGS. This can require working with a set of independent DGGS libraries with large API surfaces and subtly different API conventions, which can be taxing for implementors and maintainers.
+There is value in having access to a common set of minimal, pluggable, and interchangeable decoders for DGGS and DGGS-like global grid encodings.
 
-We found that there is a value in having a common set of small, easy-to-use DGGS libraries that work with common API conventions.
+Today there are multiple advanced DGGS grid systems that offer different tradeoffs, and it is not unusual for an application to consume data encoded in one or more systems.
 
-## Goals
+This requires integrating independent DGGS libraries with different API conventions and terminology. These libraries can also be large dependencies, and bundling complications such as WebAssembly can add work for implementers and maintainers.
 
-The DGGS support in math.gl is currently focused on decoding cell indexes or tokens into center points (lng/lat) or cell boundary polygons.
+## Scope
 
-Encoding (lng/lat to cell index) and advanced operations (child/neighbor calculation, polygon fills etc) are not currently included. Some basic encoding may be included in the future, however it is a goal to keep these libraries fairly small, and the intention is not to eventually fully duplicate large existing DGGS libraries.
+The DGGS support in math.gl is intentionally limited to decoding cell indexes or tokens into center points (lng/lat) or cell boundary polygons, plus detecting conventional cell-column names. This compact contract is designed to power the DGGS-oriented layer in deck.gl-community (currently named [`GlobalGridLayer`](https://github.com/visgl/deck.gl-community/tree/master/modules/geo-layers/src/global-grid-layer)).
+
+- Encoding (lng/lat to cell index) may be supported in a future version.
+- Advanced operations (parent/child and neighbor calculation, polygon fills, compaction, traversal, metrics, etc.) are out of scope. The goal is to keep these decoders small rather than duplicate complete DGGS libraries.
+
+For a comprehensive abstraction across DGGS implementations and the OGC API - DGGS surface, see [DGGAL, the Discrete Global Grid Abstraction Library](https://dggal.org/). `@math.gl/dggs` is not intended to compete with or reproduce that broader project.
+
+## Cell-column detection
+
+`findDGGSCellColumn(columnNames)` recognizes conventional GeoHash, Quadkey, and S2 column names. It returns the original column name together with its decoder, or `null` when no unique match is available. This lets table- and layer-oriented code infer the common case without guessing from cell values.
 
 ## Supported Grid Systems
 
-| DGGS                                                | Module                  | Functionality                   |
-| --------------------------------------------------- | ----------------------- | ------------------------------- |
-| ![GeoHash](../../images/dggs/geohash.png 'GeoHash') | `@math.gl/dggs-geohash` | Get geometry of GeoHash tokens. |
-| ![QuadKey](../../images/dggs/quadkey.png 'QuadKey') | `@math.gl/dggs-quadkey` | Get geometry of QuadKey tokens  |
-| ![S2](../../images/dggs/s2.png 'S2')                | `@math.gl/dggs-s2`      | Get geometry of S2 tokens.      |
-| ![H3](../../images/dggs/h3.png 'H3')                | `h3-js` \*              | Get geometry of H3 tokens.      |
+| DGGS                                                | Module          | Functionality                   |
+| --------------------------------------------------- | --------------- | ------------------------------- |
+| ![GeoHash](../../images/dggs/geohash.png 'GeoHash') | `@math.gl/dggs` | Get geometry of GeoHash tokens. |
+| ![QuadKey](../../images/dggs/quadkey.png 'QuadKey') | `@math.gl/dggs` | Get geometry of QuadKey tokens  |
+| ![S2](../../images/dggs/s2.png 'S2')                | `@math.gl/dggs` | Get geometry of S2 tokens.      |
+| ![H3](../../images/dggs/h3.png 'H3')                | `h3-js` \*      | Get geometry of H3 tokens.      |
 
 Note that `h3-js` is not a `math.gl` library. For H3 it is recommended to work directly with the H3 JavaScript bindings.
 

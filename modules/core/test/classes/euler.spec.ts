@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Euler, Matrix4, Quaternion, Pose} from '@math.gl/core';
-import test from 'tape-promise/tape';
-import {tapeEquals} from 'test/utils/tape-assertions';
+import {test, expect} from 'vitest';
+import {Euler, Matrix4, Quaternion, Pose, equals} from '@math.gl/core';
 
 const DEGREE_TO_RADIANS = Math.PI / 180;
 
@@ -32,34 +31,31 @@ function extendToMatrix4(arr) {
   return matrix4;
 }
 
-test('Euler#import', t => {
-  t.equals(typeof Euler, 'function');
-  t.ok(Euler.ZYX >= 0);
-  t.ok(Euler.YXZ > 0);
-  t.ok(Euler.XZY > 0);
-  t.ok(Euler.ZXY > 0);
-  t.ok(Euler.YZX > 0);
-  t.ok(Euler.XYZ > 0);
+test('Euler#import', () => {
+  expect(typeof Euler).toBe('function');
+  expect(Euler.ZYX).toBe('zyx');
+  expect(Euler.YXZ).toBe('yxz');
+  expect(Euler.XZY).toBe('xzy');
+  expect(Euler.ZXY).toBe('zxy');
+  expect(Euler.YZX).toBe('yzx');
+  expect(Euler.XYZ).toBe('xyz');
 
-  t.ok(Euler.RollPitchYaw >= 0);
-  t.ok(Euler.DefaultOrder >= 0);
-  t.ok(Euler.RotationOrders);
+  expect(Euler.RollPitchYaw).toBe('zyx');
+  expect(Euler.DefaultOrder).toBe('zyx');
+  expect(Euler.RotationOrders.XYZ).toBe('xyz');
 
-  t.equals(Euler.rotationOrder(Euler.ZYX), 'ZYX');
-
-  t.end();
+  expect(Euler.rotationOrder(Euler.ZYX)).toBe('zyx');
 });
 
-test('Euler#construct and Array.isArray check', t => {
-  t.ok(Array.isArray(new Euler()));
-  t.end();
+test('Euler#construct and Array.isArray check', () => {
+  expect(Array.isArray(new Euler())).toBeTruthy();
 });
 
-test('Euler#coverage', t => {
+test('Euler#coverage', () => {
   let result = new Euler().fromRollPitchYaw(0, 0, 0);
-  t.ok(result);
+  expect(result).toBeTruthy();
   result = new Euler().fromRotationMatrix(Matrix4.IDENTITY);
-  t.ok(result);
+  expect(result).toBeTruthy();
 
   const euler = new Euler();
 
@@ -71,9 +67,9 @@ test('Euler#coverage', t => {
   euler.gamma = euler.beta;
   euler.alpha = euler.gamma;
 
-  t.ok(euler.alpha >= 0);
-  t.ok(euler.beta >= 0);
-  t.ok(euler.gamma >= 0);
+  expect(euler.alpha >= 0).toBeTruthy();
+  expect(euler.beta >= 0).toBeTruthy();
+  expect(euler.gamma >= 0).toBeTruthy();
 
   euler.phi = euler.theta;
   euler.theta = euler.psi;
@@ -81,82 +77,30 @@ test('Euler#coverage', t => {
 
   euler.order = Euler.XYZ;
   euler.order = euler.order;
+  expect(euler.order).toBe('xyz');
 
   euler.copy([0, 0, 0, 1]);
 
   euler.to([0, 0, 0, 0]);
   euler.toArray4([0, 0, 0, 0]);
   euler.toVector3([0, 0, 0]);
-
-  // result = euler.getQuaternion();
-  // t.ok(result);
-
-  t.end();
 });
 
-test('Euler#getQuaternion', t => {
+test('Euler#fromQuaternion supports every rotation order', () => {
   const angles = [30 * DEGREE_TO_RADIANS, 45 * DEGREE_TO_RADIANS, 60 * DEGREE_TO_RADIANS];
-  const orders = [Euler.XYZ, Euler.YXZ, Euler.ZXY, Euler.ZYX, Euler.YZX, Euler.XZY];
+  const orders = ['xyz', 'yxz', 'zxy', 'zyx', 'yzx', 'xzy'] as const;
 
   for (const order of orders) {
-    const euler = new Euler(angles[0], angles[1], angles[2], order);
-    const rotationMatrix = new Matrix4();
-    euler.getRotationMatrix(rotationMatrix);
-    const result = new Quaternion(1, 2, 3, 4);
-    const quaternion = euler.getQuaternion(result);
-    const quaternionMatrix = new Matrix4().fromQuaternion(quaternion);
+    const source = new Euler(angles[0], angles[1], angles[2], order);
+    const quaternion = new Quaternion().fromEuler(source);
+    const result = new Euler(0, 0, 0, order).fromQuaternion(quaternion);
 
-    t.equal(
-      quaternion,
-      result,
-      `Euler.getQuaternion returns result for ${Euler.rotationOrder(order)}`
-    );
-
-    tapeEquals(
-      t,
-      quaternionMatrix,
-      rotationMatrix,
-      `Euler.getQuaternion matches getRotationMatrix for ${Euler.rotationOrder(order)}`
-    );
+    expect(result.order).toBe(order);
+    expect(equals(result.getRotationMatrix(), source.getRotationMatrix())).toBe(true);
   }
-
-  t.end();
 });
 
-test('Euler#toQuaternion', t => {
-  const eulers = [
-    new Euler(
-      90 * DEGREE_TO_RADIANS,
-      -89 * DEGREE_TO_RADIANS,
-      -180 * DEGREE_TO_RADIANS,
-      Euler.RollPitchYaw
-    ),
-    new Euler(
-      30 * DEGREE_TO_RADIANS,
-      45 * DEGREE_TO_RADIANS,
-      90 * DEGREE_TO_RADIANS,
-      Euler.RollPitchYaw
-    ),
-    new Euler(
-      11 * DEGREE_TO_RADIANS,
-      67 * DEGREE_TO_RADIANS,
-      45 * DEGREE_TO_RADIANS,
-      Euler.RollPitchYaw
-    )
-  ];
-  const quaternions = eulers.map(e => e.toQuaternion());
-  quaternions.every((q, i) => {
-    tapeEquals(
-      t,
-      new Euler().fromQuaternion(q),
-      eulers[i],
-      'Euler.fromQuaternion returns correct value'
-    );
-  });
-  t.end();
-});
-
-test('Euler.fromQuaternion', t => {
+test('Euler.fromQuaternion', () => {
   // transformMatrix result from https://www.wolframalpha.com/input/?i=quaternion:
   const testCases = [
     {
@@ -204,8 +148,6 @@ test('Euler.fromQuaternion', t => {
   });
 
   results.every((result, i) =>
-    tapeEquals(t, result, testCases[i].transformMatrix, 'Euler.fromQuaternion OK')
+    expect(equals(result, testCases[i].transformMatrix), 'Euler.fromQuaternion OK').toBe(true)
   );
-
-  t.end();
 });

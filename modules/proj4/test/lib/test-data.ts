@@ -243,12 +243,12 @@ export const testPoints = [
     xy: [2464770.343667, 6056137.861919]
   },
   {
-    code: 'PROJCS["Rassadiran / Nakhl e Taqi",GEOGCS["Rassadiran",DATUM["Rassadiran",SPHEROID["International 1924",6378388,297,AUTHORITY["EPSG","7022"]],TOWGS84[-133.63,-157.5,-158.62,0,0,0,0],AUTHORITY["EPSG","6153"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4153"]],UNIT["metre",1,AUTHORITY["EPSG","9001"]],PROJECTION["Hotine_Oblique_Mercator"],PARAMETER["latitude_of_center",27.51882880555555],PARAMETER["longitude_of_center",52.60353916666667],PARAMETER["azimuth",0.5716611944444444],PARAMETER["rectified_grid_angle",0.5716611944444444],PARAMETER["scale_factor",0.999895934],PARAMETER["false_easting",658377.437],PARAMETER["false_northing",3044969.194],AUTHORITY["EPSG","2057"],AXIS["Easting",EAST],AXIS["Northing",NORTH]]',
+    code: 'PROJCS["Rassadiran / Nakhl e Taqi",GEOGCS["Rassadiran",DATUM["Rassadiran",SPHEROID["International 1924",6378388,297,AUTHORITY["EPSG","7022"]],TOWGS84[-133.63,-157.5,-158.62,0,0,0,0],AUTHORITY["EPSG","6153"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4153"]],UNIT["metre",1,AUTHORITY["EPSG","9001"]],PROJECTION["Hotine_Oblique_Mercator_Azimuth_Center"],PARAMETER["latitude_of_center",27.51882880555555],PARAMETER["longitude_of_center",52.60353916666667],PARAMETER["azimuth",0.5716611944444444],PARAMETER["rectified_grid_angle",0.5716611944444444],PARAMETER["scale_factor",0.999895934],PARAMETER["false_easting",658377.437],PARAMETER["false_northing",3044969.194],AUTHORITY["EPSG","2057"],AXIS["Easting",EAST],AXIS["Northing",NORTH]]',
     ll: [52.6, 27.5],
     xy: [658017.25458, 3043003.058818]
   },
   {
-    code: 'PROJCS["Rassadiran / Nakhl e Taqi",GEOGCS["Rassadiran",DATUM["D_Rassadiran",SPHEROID["International_1924",6378388,297]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]],PROJECTION["Hotine_Oblique_Mercator_Azimuth_Natural_Origin"],PARAMETER["latitude_of_center",27.51882880555555],PARAMETER["longitude_of_center",52.60353916666667],PARAMETER["azimuth",0.5716611944444444],PARAMETER["rectified_grid_angle",0.5716611944444444],PARAMETER["scale_factor",0.999895934],PARAMETER["false_easting",658377.437],PARAMETER["false_northing",3044969.194],UNIT["Meter",1]]',
+    code: 'PROJCS["Rassadiran / Nakhl e Taqi",GEOGCS["Rassadiran",DATUM["D_Rassadiran",SPHEROID["International_1924",6378388,297]],PRIMEM["Greenwich",0],UNIT["Degree",0.017453292519943295]],PROJECTION["Hotine_Oblique_Mercator_Azimuth_Center"],PARAMETER["latitude_of_center",27.51882880555555],PARAMETER["longitude_of_center",52.60353916666667],PARAMETER["azimuth",0.5716611944444444],PARAMETER["rectified_grid_angle",0.5716611944444444],PARAMETER["scale_factor",0.999895934],PARAMETER["false_easting",658377.437],PARAMETER["false_northing",3044969.194],UNIT["Meter",1]]',
     ll: [52.6, 27.5],
     xy: [658017.25458, 3043003.058818]
   },
@@ -566,7 +566,7 @@ export const testPoints = [
     xy: [222650.79679577847, 110642.2294119271]
   },
   {
-    code: '+proj=tmerc +a=6400000 +lat_1=0.5 +lat_2=2 +n=0.5',
+    code: '+proj=tmerc +a=6400000 +lat_1=0.5 +lat_2=2 +n=0.5 +approx',
     ll: [2, 1],
     xy: [223413.46640632232, 111769.14504059685]
   },

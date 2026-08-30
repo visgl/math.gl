@@ -2,10 +2,9 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 /* eslint-disable */
-import test from 'tape-promise/tape';
-import {tapeEquals} from 'test/utils/tape-assertions';
+import {test, expect} from 'vitest';
 
-import {Vector3, Matrix4} from '@math.gl/core';
+import {Vector3, Matrix4, equals} from '@math.gl/core';
 import {BoundingSphere, Plane, INTERSECTION} from '@math.gl/culling';
 
 // const positionsRadius = 1.0;
@@ -76,231 +75,181 @@ function getPositionsAsEncodedFlatArray() {
 }
 */
 
-test('BoundingSphere#default constructing produces expected values', t => {
+test('BoundingSphere#default constructing produces expected values', () => {
   const sphere = new BoundingSphere();
-  tapeEquals(t, sphere.center, [0, 0, 0]);
-  t.equals(sphere.radius, 0.0);
-
-  t.end();
+  expect(equals(sphere.center, [0, 0, 0])).toBe(true);
+  expect(sphere.radius).toBe(0.0);
 });
 
-test('BoundingSphere#constructor sets expected values (array)', t => {
+test('BoundingSphere#constructor sets expected values (array)', () => {
   const expectedCenter = [1.0, 2.0, 3.0];
   const expectedRadius = 1.0;
   const sphere = new BoundingSphere(expectedCenter, expectedRadius);
-  tapeEquals(t, sphere.center, expectedCenter);
-  t.equals(sphere.radius, expectedRadius);
-
-  t.end();
+  expect(equals(sphere.center, expectedCenter)).toBe(true);
+  expect(sphere.radius).toBe(expectedRadius);
 });
 
-test('BoundingSphere#constructor sets expected values (object)', t => {
+test('BoundingSphere#constructor sets expected values (object)', () => {
   const expectedCenter = {x: 1.0, y: 2.0, z: 3.0};
   const expectedRadius = 1.0;
   // @ts-expect-error TODO - add XYZ types
   const sphere = new BoundingSphere(expectedCenter, expectedRadius);
-  tapeEquals(t, sphere.center, [1, 2, 3]);
-  t.equals(sphere.radius, expectedRadius);
-
-  t.end();
+  expect(equals(sphere.center, [1, 2, 3])).toBe(true);
+  expect(sphere.radius).toBe(expectedRadius);
 });
 
-test('BoundingSphere#fromCornerPoints', t => {
+test('BoundingSphere#fromCornerPoints', () => {
   const sphere = new BoundingSphere().fromCornerPoints(
     new Vector3(-1.0, -0.0, 0.0),
     new Vector3(1.0, 0.0, 0.0)
   );
-  tapeEquals(t, sphere, new BoundingSphere(VECTOR3_ZERO, 1.0));
-
-  t.end();
+  expect(equals(sphere, new BoundingSphere(VECTOR3_ZERO, 1.0))).toBe(true);
 });
 
-test('BoundingSphere#fromCornerPoints throws without corner', t => {
+test('BoundingSphere#fromCornerPoints throws without corner', () => {
   const sphere = new BoundingSphere();
   // @ts-expect-error
-  t.throws(() => sphere.fromCornerPoints());
-
-  t.end();
+  expect(() => sphere.fromCornerPoints()).toThrow();
 });
 
-test('BoundingSphere#fromCornerPoints throws without oppositeCorner', t => {
+test('BoundingSphere#fromCornerPoints throws without oppositeCorner', () => {
   const sphere = new BoundingSphere();
   // @ts-expect-error
-  t.throws(() => sphere.fromCornerPoints(VECTOR3_UNIT_X));
-
-  t.end();
+  expect(() => sphere.fromCornerPoints(VECTOR3_UNIT_X)).toThrow();
 });
 
-test('BoundingSphere#clone', t => {
+test('BoundingSphere#clone', () => {
   const sphere = new BoundingSphere(new Vector3(1.0, 2.0, 3.0), 4.0);
   const result = sphere.clone();
-  t.notEqual(sphere, result);
-  tapeEquals(t, sphere, result);
-
-  t.end();
+  expect(sphere).not.toBe(result);
+  expect(equals(sphere, result)).toBe(true);
 });
 
-test('BoundingSphere#equals', t => {
+test('BoundingSphere#equals', () => {
   const sphere = new BoundingSphere([1.0, 2.0, 3.0], 4.0);
-  t.equals(sphere.equals(new BoundingSphere([1.0, 2.0, 3.0], 4.0)), true);
-  t.equals(sphere.equals(new BoundingSphere([5.0, 2.0, 3.0], 4.0)), false);
-  t.equals(sphere.equals(new BoundingSphere([1.0, 6.0, 3.0], 4.0)), false);
-  t.equals(sphere.equals(new BoundingSphere([1.0, 2.0, 7.0], 4.0)), false);
-  t.equals(sphere.equals(new BoundingSphere([1.0, 2.0, 3.0], 8.0)), false);
-  t.equals(sphere.equals(undefined), false);
-
-  t.end();
+  expect(sphere.equals(new BoundingSphere([1.0, 2.0, 3.0], 4.0))).toBe(true);
+  expect(sphere.equals(new BoundingSphere([5.0, 2.0, 3.0], 4.0))).toBe(false);
+  expect(sphere.equals(new BoundingSphere([1.0, 6.0, 3.0], 4.0))).toBe(false);
+  expect(sphere.equals(new BoundingSphere([1.0, 2.0, 7.0], 4.0))).toBe(false);
+  expect(sphere.equals(new BoundingSphere([1.0, 2.0, 3.0], 8.0))).toBe(false);
+  expect(sphere.equals(undefined)).toBe(false);
 });
 
-test('BoundingSphere#intersectPlane with sphere on the positive side of a plane', t => {
+test('BoundingSphere#intersectPlane with sphere on the positive side of a plane', () => {
   const sphere = new BoundingSphere(VECTOR3_ZERO, 0.5);
   const normal = new Vector3(VECTOR3_UNIT_X).negate();
   const position = VECTOR3_UNIT_X;
   const plane = new Plane(normal, -normal.dot(position));
-  t.equals(sphere.intersectPlane(plane), INTERSECTION.INSIDE);
-
-  t.end();
+  expect(sphere.intersectPlane(plane)).toBe(INTERSECTION.INSIDE);
 });
 
-test('BoundingSphere#intersectPlane with sphere on the negative side of a plane', t => {
+test('BoundingSphere#intersectPlane with sphere on the negative side of a plane', () => {
   const sphere = new BoundingSphere(VECTOR3_ZERO, 0.5);
   const normal = VECTOR3_UNIT_X;
   const position = VECTOR3_UNIT_X;
   const plane = new Plane(normal, -normal.dot(position));
-  t.equals(sphere.intersectPlane(plane), INTERSECTION.OUTSIDE);
-
-  t.end();
+  expect(sphere.intersectPlane(plane)).toBe(INTERSECTION.OUTSIDE);
 });
 
-test('BoundingSphere#intersectPlane with sphere intersecting a plane', t => {
+test('BoundingSphere#intersectPlane with sphere intersecting a plane', () => {
   const sphere = new BoundingSphere(VECTOR3_UNIT_X, 0.5);
   const normal = VECTOR3_UNIT_X;
   const position = VECTOR3_UNIT_X;
   const plane = new Plane(normal, -normal.dot(position));
-  t.equals(sphere.intersectPlane(plane), INTERSECTION.INTERSECTING);
-
-  t.end();
+  expect(sphere.intersectPlane(plane)).toBe(INTERSECTION.INTERSECTING);
 });
 
-test('BoundingSphere#expands to contain another sphere', t => {
+test('BoundingSphere#expands to contain another sphere', () => {
   const bs1 = new BoundingSphere(VECTOR3_UNIT_X.clone().negate(), 1.0);
   const bs2 = new BoundingSphere(VECTOR3_UNIT_X, 1.0);
   const expected = new BoundingSphere(VECTOR3_ZERO, 2.0);
-  tapeEquals(t, bs1.union(bs2), expected);
-
-  t.end();
+  expect(equals(bs1.union(bs2), expected)).toBe(true);
 });
 
-test('BoundingSphere#union left sphere encloses right', t => {
+test('BoundingSphere#union left sphere encloses right', () => {
   const bs1 = new BoundingSphere(VECTOR3_ZERO, 3.0);
   const bs2 = new BoundingSphere(VECTOR3_UNIT_X, 1.0);
   const union = bs1.union(bs2);
-  tapeEquals(t, union, bs1);
-
-  t.end();
+  expect(equals(union, bs1)).toBe(true);
 });
 
-test('BoundingSphere#union of co-located spheres, right sphere encloses left', t => {
+test('BoundingSphere#union of co-located spheres, right sphere encloses left', () => {
   const bs1 = new BoundingSphere(VECTOR3_UNIT_X, 1.0);
   const bs2 = new BoundingSphere(VECTOR3_UNIT_X, 2.0);
   const union = bs1.union(bs2);
-  tapeEquals(t, union, bs2);
-
-  t.end();
+  expect(equals(union, bs2)).toBe(true);
 });
 
-test('BoundingSphere#union result parameter is a tight fit', t => {
+test('BoundingSphere#union result parameter is a tight fit', () => {
   const bs1 = new BoundingSphere(new Vector3(VECTOR3_UNIT_X).negate().scale(3.0), 3.0);
   const bs2 = new BoundingSphere(VECTOR3_UNIT_X, 1.0);
   const expected = new BoundingSphere(new Vector3(VECTOR3_UNIT_X).negate().scale(2.0), 4.0);
   bs1.union(bs2);
-  tapeEquals(t, bs1, expected);
-
-  t.end();
+  expect(equals(bs1, expected)).toBe(true);
 });
 
-test('BoundingSphere#expands to contain another point', t => {
+test('BoundingSphere#expands to contain another point', () => {
   const bs = new BoundingSphere(new Vector3(VECTOR3_UNIT_X).negate(), 1.0);
   const point = VECTOR3_UNIT_X;
   const expected = new BoundingSphere(new Vector3(VECTOR3_UNIT_X).negate(), 2.0);
-  tapeEquals(t, bs.expand(point), expected);
-
-  t.end();
+  expect(equals(bs.expand(point), expected)).toBe(true);
 });
 
-test('BoundingSphere#applies transform', t => {
+test('BoundingSphere#applies transform', () => {
   const bs = new BoundingSphere(VECTOR3_ZERO, 1.0);
   const transform = new Matrix4().translate(new Vector3(1.0, 2.0, 3.0));
   const expected = new BoundingSphere(new Vector3(1.0, 2.0, 3.0), 1.0);
-  tapeEquals(t, bs.transform(transform), expected);
-
-  t.end();
+  expect(equals(bs.transform(transform), expected)).toBe(true);
 });
 
-test('BoundingSphere#applies scale transform', t => {
+test('BoundingSphere#applies scale transform', () => {
   const bs = new BoundingSphere(VECTOR3_ZERO, 1.0);
   const transform = new Matrix4().scale(new Vector3(1.0, 2.0, 3.0));
   const expected = new BoundingSphere(VECTOR3_ZERO, 3.0);
-  tapeEquals(t, bs.transform(transform), expected);
-
-  t.end();
+  expect(equals(bs.transform(transform), expected)).toBe(true);
 });
 
-test('BoundingSphere#estimated distance squared to point', t => {
+test('BoundingSphere#estimated distance squared to point', () => {
   const bs = new BoundingSphere(VECTOR3_ZERO, 1.0);
-  t.equals(bs.distanceSquaredTo([0, 0, 0]), 0, 'point inside the sphere');
-  t.equals(bs.distanceSquaredTo([0, 0, 1]), 0, 'point on the sphere surface');
-  t.equals(bs.distanceSquaredTo([0, 0, 2]), 1, 'point outside the sphere');
-  t.equals(bs.distanceSquaredTo([3, 4, 12]), 144, 'point outside the sphere');
-
-  t.end();
+  expect(bs.distanceSquaredTo([0, 0, 0]), 'point inside the sphere').toBe(0);
+  expect(bs.distanceSquaredTo([0, 0, 1]), 'point on the sphere surface').toBe(0);
+  expect(bs.distanceSquaredTo([0, 0, 2]), 'point outside the sphere').toBe(1);
+  expect(bs.distanceSquaredTo([3, 4, 12]), 'point outside the sphere').toBe(144);
 });
 
-test('BoundingSphere#estimated distance to point', t => {
+test('BoundingSphere#estimated distance to point', () => {
   const bs = new BoundingSphere(VECTOR3_ZERO, 1.0);
-  t.equals(bs.distanceTo([0, 0, 0]), 0, 'point inside the sphere');
-  t.equals(bs.distanceTo([0, 0, 1]), 0, 'point on the sphere surface');
-  t.equals(bs.distanceTo([0, 0, 2]), 1, 'point outside the sphere');
-  t.equals(bs.distanceTo([3, 4, 12]), 12, 'point outside the sphere');
-
-  t.end();
+  expect(bs.distanceTo([0, 0, 0]), 'point inside the sphere').toBe(0);
+  expect(bs.distanceTo([0, 0, 1]), 'point on the sphere surface').toBe(0);
+  expect(bs.distanceTo([0, 0, 2]), 'point outside the sphere').toBe(1);
+  expect(bs.distanceTo([3, 4, 12]), 'point outside the sphere').toBe(12);
 });
 
-test('BoundingSphere#union throws with no parameter', t => {
+test('BoundingSphere#union throws with no parameter', () => {
   const sphere = new BoundingSphere();
-  t.throws(() => sphere.union(undefined));
-
-  t.end();
+  expect(() => sphere.union(undefined)).toThrow();
 });
 
-test('BoundingSphere#expand throws without a point', t => {
+test('BoundingSphere#expand throws without a point', () => {
   const sphere = new BoundingSphere();
-  t.throws(() => sphere.expand(undefined));
-
-  t.end();
+  expect(() => sphere.expand(undefined)).toThrow();
 });
 
-test('BoundingSphere#intersectPlane throws without a plane', t => {
+test('BoundingSphere#intersectPlane throws without a plane', () => {
   const sphere = new BoundingSphere();
-  t.throws(() => sphere.intersectPlane(undefined));
-
-  t.end();
+  expect(() => sphere.intersectPlane(undefined)).toThrow();
 });
 
-test('BoundingSphere#transform throws without a transform', t => {
+test('BoundingSphere#transform throws without a transform', () => {
   const sphere = new BoundingSphere();
   // @ts-expect-error
-  t.throws(() => sphere.transform());
-
-  t.end();
+  expect(() => sphere.transform()).toThrow();
 });
 
-test('BoundingSphere#distanceSquaredTo throws without a cartesian', t => {
+test('BoundingSphere#distanceSquaredTo throws without a cartesian', () => {
   const sphere = new BoundingSphere();
   // @ts-expect-error
-  t.throws(() => sphere.distanceSquaredTo(new BoundingSphere()));
-
-  t.end();
+  expect(() => sphere.distanceSquaredTo(new BoundingSphere())).toThrow();
 });
 
 // CESIUM TEST CASES FOR UNPORTED METHODS

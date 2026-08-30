@@ -14,16 +14,18 @@ import {Euler} from '@math.gl/core';
 
 ## Constants
 
-- `Euler.ZYX`
-- `Euler.YXZ`
-- `Euler.XZY`
-- `Euler.ZXY`
-- `Euler.YZX`
-- `Euler.XYZ`
-- `Euler.RollPitchYaw`
+- `Euler.ZYX` = `'zyx'`
+- `Euler.YXZ` = `'yxz'`
+- `Euler.XZY` = `'xzy'`
+- `Euler.ZXY` = `'zxy'`
+- `Euler.YZX` = `'yzx'`
+- `Euler.XYZ` = `'xyz'`
+- `Euler.RollPitchYaw` = `'zyx'`
 
 - `Euler.DefaultOrder` (= `Euler.ZYX`)
-- `Euler.RotationOrders` = `['ZYX', 'YXZ', 'XZY', 'ZXY', 'YZX', 'XYZ']`;
+- `Euler.RotationOrders` provides the same named string values.
+
+These compatibility constants are deprecated. New code should pass an `EulerRotationOrder` string such as `'zyx'` directly.
 
 ## Members
 
@@ -51,9 +53,9 @@ rotation order in all notations
 
 ### constructor
 
-(x = 0, y = 0, z = 0, order = Euler.DefaultOrder)
+(x = 0, y = 0, z = 0, order = 'zyx')
 
-- Number|Number[], Number, Number, Number
+- Number|Number[], Number, Number, EulerRotationOrder
 
 ### fromRollPitchYaw
 
@@ -63,11 +65,13 @@ Common ZYX rotation order
 
 ### fromRotationMatrix
 
-`euler.fromRotationMatrix(m, order = Euler.DefaultOrder)`
+`euler.fromRotationMatrix(m, order = euler.order)`
 
 ### fromQuaternion
 
-`euler.fromQuaternion(q, order)`
+`euler.fromQuaternion(q, order = euler.order)`
+
+Sets this Euler instance from `q` using the requested rotation order. All six rotation orders are supported.
 
 ### copy
 
@@ -107,15 +111,13 @@ Copies the orientation element
 
 ### getRotationMatrix
 
-`euler.getRotationMatrix(m = new Matrix4())`
+`euler.getRotationMatrix(result = number[16])`
 
-Returns `Matrix4` - a rotation matrix corresponding to rotations per the specified euler angles
+Returns `result`, updated with the 4x4 rotation matrix corresponding to these Euler angles. A plain array is created when `result` is omitted.
 
-### getQuaternion
+To create a quaternion from Euler angles, use the destination-owned conversion:
 
-`euler.getQuaternion(result = new Quaternion())`
-
-Returns `result`, updated to represent these Euler angles.
+`new Quaternion().fromEuler(euler)`
 
 ## Remarks
 

@@ -6,7 +6,7 @@
 import {NumericArray} from '@math.gl/types';
 import {MathArray} from './base/math-array';
 import {checkNumber, checkVector} from '../lib/validators';
-import {Vector4} from './vector4';
+import type {EulerLike} from './euler-types';
 // @ts-ignore gl-matrix types...
 import {
   fromMat3 as quat_fromMat3,
@@ -31,8 +31,6 @@ import {
 } from '../gl-matrix/quat';
 // @ts-ignore gl-matrix types...
 import {transformQuat as vec4_transformQuat} from '../gl-matrix/vec4';
-import type {Euler} from './euler';
-
 const IDENTITY_QUATERNION = [0, 0, 0, 1] as const;
 
 export class Quaternion extends MathArray {
@@ -88,9 +86,24 @@ export class Quaternion extends MathArray {
    * @param euler - Euler angles and rotation order.
    * @returns This quaternion.
    */
-  fromEuler(euler: Euler): this {
-    euler.getQuaternion(this);
-    return this;
+  fromEuler(euler: Readonly<EulerLike>): this {
+    this.identity();
+    switch (euler.order) {
+      case 'xyz':
+        return this.rotateX(euler.x).rotateY(euler.y).rotateZ(euler.z);
+      case 'yxz':
+        return this.rotateY(euler.y).rotateX(euler.x).rotateZ(euler.z);
+      case 'zxy':
+        return this.rotateZ(euler.z).rotateX(euler.x).rotateY(euler.y);
+      case 'zyx':
+        return this.rotateZ(euler.z).rotateY(euler.y).rotateX(euler.x);
+      case 'yzx':
+        return this.rotateY(euler.y).rotateZ(euler.z).rotateX(euler.x);
+      case 'xzy':
+        return this.rotateX(euler.x).rotateZ(euler.z).rotateY(euler.y);
+      default:
+        throw new Error('Unknown Euler angle order');
+    }
   }
 
   fromAxisRotation(axis: Readonly<NumericArray>, rad: number): this {
@@ -335,7 +348,7 @@ export class Quaternion extends MathArray {
 
   transformVector4(
     vector: Readonly<NumericArray>,
-    result: NumericArray = new Vector4()
+    result: NumericArray = [-0, -0, -0, -0]
   ): NumericArray {
     vec4_transformQuat(result, vector, this);
     return checkVector(result, 4);

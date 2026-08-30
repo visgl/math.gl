@@ -45,22 +45,34 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Check generated CRS declarations
+        run: yarn check:projjson-types
+
       - name: Build code
         run: yarn build
 
-      - name: Run tests
-        run: yarn test ci
+      - name: Check CRS type boundaries
+        run: yarn check:crs-types
+
+      - name: Install Playwright Chromium
+        run: yarn playwright:install
+
+      - name: Run Node tests
+        run: yarn test-node
+
+      - name: Run headless tests with coverage
+        run: yarn test-coverage
 
       - name: Run lint
         run: yarn lint
 
       - name: Build website
-        run: |
-          cd website
-          yarn install --immutable
-          yarn build
+        run: yarn workspace project-website build
 
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: coverage/lcov.info
+          format: lcov
+          fail-on-error: false

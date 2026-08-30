@@ -10,11 +10,11 @@
 
 // @ts-nocheck
 /* eslint-disable */
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {Quaternion, Vector3, Vector4, Matrix4, Euler} from '@math.gl/core';
 import {x, y, z, w, eps} from './constants';
 
-const orders = ['XYZ', 'YXZ', 'ZXY', 'ZYX', 'YZX', 'XZY'];
+const orders = ['xyz', 'yxz', 'zxy', 'zyx', 'yzx', 'xzy'];
 // const eulerAngles = new Euler(0.1, -0.3, 0.25);
 
 function qSub(a, b) {
@@ -83,7 +83,7 @@ function doSlerpArray(a, b, t) {
   };
 }
 
-function slerpTestSkeleton(doSlerp, maxError, t) {
+function slerpTestSkeleton(doSlerp, maxError) {
   const a = [0.6753410084407496, 0.4087830051091744, 0.32856700410659473, 0.5185120064806223];
   const b = [0.6602792107657797, 0.43647413932562285, 0.35119011210236006, 0.5001871596632682];
 
@@ -98,32 +98,32 @@ function slerpTestSkeleton(doSlerp, maxError, t) {
   let result;
 
   result = doSlerp(a, b, 0);
-  t.ok(result.equals(a[0], a[1], a[2], a[3], 0), 'Exactly A @ t = 0');
+  expect(result.equals(a[0], a[1], a[2], a[3], 0), 'Exactly A @ t = 0').toBeTruthy();
 
   result = doSlerp(a, b, 1);
-  t.ok(result.equals(b[0], b[1], b[2], b[3], 0), 'Exactly B @ t = 1');
+  expect(result.equals(b[0], b[1], b[2], b[3], 0), 'Exactly B @ t = 1').toBeTruthy();
 
   result = doSlerp(a, b, 0.5);
-  t.ok(Math.abs(result.dotA - result.dotB) <= Number.EPSILON, 'Symmetry at 0.5');
-  t.ok(isNormal(result), 'Approximately normal (at 0.5)');
+  expect(Math.abs(result.dotA - result.dotB) <= Number.EPSILON, 'Symmetry at 0.5').toBeTruthy();
+  expect(isNormal(result), 'Approximately normal (at 0.5)').toBeTruthy();
 
   result = doSlerp(a, b, 0.25);
-  t.ok(result.dotA > result.dotB, 'Interpolating at 0.25');
-  t.ok(isNormal(result), 'Approximately normal (at 0.25)');
+  expect(result.dotA > result.dotB, 'Interpolating at 0.25').toBeTruthy();
+  expect(isNormal(result), 'Approximately normal (at 0.25)').toBeTruthy();
 
   result = doSlerp(a, b, 0.75);
-  t.ok(result.dotA < result.dotB, 'Interpolating at 0.75');
-  t.ok(isNormal(result), 'Approximately normal (at 0.75)');
+  expect(result.dotA < result.dotB, 'Interpolating at 0.75').toBeTruthy();
+  expect(isNormal(result), 'Approximately normal (at 0.75)').toBeTruthy();
 
   const D = Math.SQRT1_2;
 
   result = doSlerp([1, 0, 0, 0], [0, 0, 1, 0], 0.5);
-  t.ok(result.equals(D, 0, D, 0), 'X/Z diagonal from axes');
-  t.ok(isNormal(result), 'Approximately normal (X/Z diagonal)');
+  expect(result.equals(D, 0, D, 0), 'X/Z diagonal from axes').toBeTruthy();
+  expect(isNormal(result), 'Approximately normal (X/Z diagonal)').toBeTruthy();
 
   result = doSlerp([0, D, 0, D], [0, -D, 0, D], 0.5);
-  t.ok(result.equals(0, 0, 0, 1), 'W-Unit from diagonals');
-  t.ok(isNormal(result), 'Approximately normal (W-Unit)');
+  expect(result.equals(0, 0, 0, 1), 'W-Unit from diagonals').toBeTruthy();
+  expect(isNormal(result), 'Approximately normal (W-Unit)').toBeTruthy();
 }
 
 function changeEulerOrder(euler, order) {
@@ -131,34 +131,31 @@ function changeEulerOrder(euler, order) {
 }
 
 // INSTANCING
-test('three.js#Quaternion#Instancing', t => {
+test('three.js#Quaternion#Instancing', () => {
   let a = new Quaternion();
-  t.ok(a.x == 0, 'Passed!');
-  t.ok(a.y == 0, 'Passed!');
-  t.ok(a.z == 0, 'Passed!');
-  t.ok(a.w == 1, 'Passed!');
+  expect(a.x == 0, 'Passed!').toBeTruthy();
+  expect(a.y == 0, 'Passed!').toBeTruthy();
+  expect(a.z == 0, 'Passed!').toBeTruthy();
+  expect(a.w == 1, 'Passed!').toBeTruthy();
 
   a = new Quaternion(x, y, z, w);
-  t.ok(a.x === x, 'Passed!');
-  t.ok(a.y === y, 'Passed!');
-  t.ok(a.z === z, 'Passed!');
-  t.ok(a.w === w, 'Passed!');
-  t.end();
+  expect(a.x === x, 'Passed!').toBeTruthy();
+  expect(a.y === y, 'Passed!').toBeTruthy();
+  expect(a.z === z, 'Passed!').toBeTruthy();
+  expect(a.w === w, 'Passed!').toBeTruthy();
 });
 
 // STATIC STUFF
-test('three.js#Quaternion#slerp', t => {
-  slerpTestSkeleton(doSlerpObject, Number.EPSILON, t);
-  t.end();
+test('three.js#Quaternion#slerp', () => {
+  slerpTestSkeleton(doSlerpObject, Number.EPSILON);
 });
 
-test.skip('three.js#Quaternion#slerpFlat - NOT IMPLEMENTED', t => {
-  slerpTestSkeleton(doSlerpArray, Number.EPSILON, t);
-  t.end();
+test.skip('three.js#Quaternion#slerpFlat - NOT IMPLEMENTED', () => {
+  slerpTestSkeleton(doSlerpArray, Number.EPSILON);
 });
 
 // PROPERTIES
-test('three.js#Quaternion#properties', t => {
+test('three.js#Quaternion#properties', () => {
   const a = new Quaternion();
   // a.onChange(function() {
   //   t.ok(true, 'onChange called');
@@ -169,53 +166,49 @@ test('three.js#Quaternion#properties', t => {
   a.z = z;
   a.w = w;
 
-  t.strictEqual(a.x, x, 'Check x');
-  t.strictEqual(a.y, y, 'Check y');
-  t.strictEqual(a.z, z, 'Check z');
-  t.strictEqual(a.w, w, 'Check w');
-  t.end();
+  expect(a.x, 'Check x').toBe(x);
+  expect(a.y, 'Check y').toBe(y);
+  expect(a.z, 'Check z').toBe(z);
+  expect(a.w, 'Check w').toBe(w);
 });
 
 // PUBLIC STUFF
-test('three.js#Quaternion#set', t => {
+test('three.js#Quaternion#set', () => {
   const a = new Quaternion();
-  t.ok(a.x == 0, 'Passed!');
-  t.ok(a.y == 0, 'Passed!');
-  t.ok(a.z == 0, 'Passed!');
-  t.ok(a.w == 1, 'Passed!');
+  expect(a.x == 0, 'Passed!').toBeTruthy();
+  expect(a.y == 0, 'Passed!').toBeTruthy();
+  expect(a.z == 0, 'Passed!').toBeTruthy();
+  expect(a.w == 1, 'Passed!').toBeTruthy();
 
   a.set(x, y, z, w);
-  t.ok(a.x == x, 'Passed!');
-  t.ok(a.y == y, 'Passed!');
-  t.ok(a.z === z, 'Passed!');
-  t.ok(a.w === w, 'Passed!');
-  t.end();
+  expect(a.x == x, 'Passed!').toBeTruthy();
+  expect(a.y == y, 'Passed!').toBeTruthy();
+  expect(a.z === z, 'Passed!').toBeTruthy();
+  expect(a.w === w, 'Passed!').toBeTruthy();
 });
 
-test('three.js#Quaternion#clone', t => {
-  t.ok(true, "everything's gonna be alright");
-  t.end();
+test('three.js#Quaternion#clone', () => {
+  expect(true, "everything's gonna be alright").toBeTruthy();
 });
 
-test('three.js#Quaternion#copy', t => {
+test('three.js#Quaternion#copy', () => {
   const a = new Quaternion(x, y, z, w);
   const b = new Quaternion().copy(a);
-  t.ok(b.x == x, 'Passed!');
-  t.ok(b.y == y, 'Passed!');
-  t.ok(b.z == z, 'Passed!');
-  t.ok(b.w == w, 'Passed!');
+  expect(b.x == x, 'Passed!').toBeTruthy();
+  expect(b.y == y, 'Passed!').toBeTruthy();
+  expect(b.z == z, 'Passed!').toBeTruthy();
+  expect(b.w == w, 'Passed!').toBeTruthy();
 
   // ensure that it is a true copy
   a.x = 0;
   a.y = -1;
   a.z = 0;
   a.w = -1;
-  t.ok(b.x == x, 'Passed!');
-  t.ok(b.y == y, 'Passed!');
-  t.end();
+  expect(b.x == x, 'Passed!').toBeTruthy();
+  expect(b.y == y, 'Passed!').toBeTruthy();
 });
 
-test.skip('three.js#Quaternion#setFromEuler/setFromQuaternion', t => {
+test.skip('three.js#Quaternion#setFromEuler/setFromQuaternion', () => {
   const angles = [new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1)];
 
   // ensure euler conversion to/from Quaternion matches.
@@ -226,48 +219,45 @@ test.skip('three.js#Quaternion#setFromEuler/setFromQuaternion', t => {
         orders[i]
       );
       const newAngle = new Vector3(eulers2.x, eulers2.y, eulers2.z);
-      t.ok(newAngle.distanceTo(angles[j]) < 0.001, 'Passed!');
+      expect(newAngle.distanceTo(angles[j]) < 0.001, 'Passed!').toBeTruthy();
     }
   }
-  t.end();
 });
 
-test('three.js#Quaternion#setFromAxisAngle', t => {
+test('three.js#Quaternion#setFromAxisAngle', () => {
   // TODO: find cases to validate.
   // t.ok( true, "Passed!" );
 
   const zero = new Quaternion();
 
   let a = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), 0);
-  t.ok(a.equals(zero), 'Passed!');
+  expect(a.equals(zero), 'Passed!').toBeTruthy();
   a = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), 0);
-  t.ok(a.equals(zero), 'Passed!');
+  expect(a.equals(zero), 'Passed!').toBeTruthy();
   a = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), 0);
-  t.ok(a.equals(zero), 'Passed!');
+  expect(a.equals(zero), 'Passed!').toBeTruthy();
 
   const b1 = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI);
-  t.ok(!a.equals(b1), 'Passed!');
+  expect(!a.equals(b1), 'Passed!').toBeTruthy();
   const b2 = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI);
-  t.ok(!a.equals(b2), 'Passed!');
+  expect(!a.equals(b2), 'Passed!').toBeTruthy();
 
   b1.multiply(b2);
-  t.ok(a.equals(b1), 'Passed!');
-  t.end();
+  expect(a.equals(b1), 'Passed!').toBeTruthy();
 });
 
-test.skip('Quaternion#setFromEuler/setFromRotationMatrix', t => {
+test.skip('Quaternion#setFromEuler/setFromRotationMatrix', () => {
   // ensure euler conversion for Quaternion matches that of Matrix4
   for (let i = 0; i < orders.length; i++) {
     const q = new Quaternion().setFromEuler(changeEulerOrder(eulerAngles, orders[i]));
     const m = new Matrix4().makeRotationFromEuler(changeEulerOrder(eulerAngles, orders[i]));
     const q2 = new Quaternion().setFromRotationMatrix(m);
 
-    t.ok(qSub(q, q2).len() < 0.001, 'Passed!');
+    expect(qSub(q, q2).len() < 0.001, 'Passed!').toBeTruthy();
   }
-  t.end();
 });
 
-test.skip('three.js#Quaternion#setFromRotationMatrix', t => {
+test.skip('three.js#Quaternion#setFromRotationMatrix', () => {
   // contrived examples purely to please the god of code coverage...
   // match conditions in constious 'else [if]' blocks
 
@@ -282,10 +272,10 @@ test.skip('three.js#Quaternion#setFromRotationMatrix', t => {
   );
 
   a.setFromRotationMatrix(m);
-  t.ok(Math.abs(a.x - expected.x) <= eps, 'm11 > m22 && m11 > m33: check x');
-  t.ok(Math.abs(a.y - expected.y) <= eps, 'm11 > m22 && m11 > m33: check y');
-  t.ok(Math.abs(a.z - expected.z) <= eps, 'm11 > m22 && m11 > m33: check z');
-  t.ok(Math.abs(a.w - expected.w) <= eps, 'm11 > m22 && m11 > m33: check w');
+  expect(Math.abs(a.x - expected.x) <= eps, 'm11 > m22 && m11 > m33: check x').toBeTruthy();
+  expect(Math.abs(a.y - expected.y) <= eps, 'm11 > m22 && m11 > m33: check y').toBeTruthy();
+  expect(Math.abs(a.z - expected.z) <= eps, 'm11 > m22 && m11 > m33: check z').toBeTruthy();
+  expect(Math.abs(a.w - expected.w) <= eps, 'm11 > m22 && m11 > m33: check w').toBeTruthy();
 
   q = new Quaternion(-1, -2, 1, -1).normalize();
   m.makeRotationFromQuaternion(q);
@@ -297,65 +287,60 @@ test.skip('three.js#Quaternion#setFromRotationMatrix', t => {
   );
 
   a.setFromRotationMatrix(m);
-  t.ok(Math.abs(a.x - expected.x) <= eps, 'm22 > m33: check x');
-  t.ok(Math.abs(a.y - expected.y) <= eps, 'm22 > m33: check y');
-  t.ok(Math.abs(a.z - expected.z) <= eps, 'm22 > m33: check z');
-  t.ok(Math.abs(a.w - expected.w) <= eps, 'm22 > m33: check w');
-  t.end();
+  expect(Math.abs(a.x - expected.x) <= eps, 'm22 > m33: check x').toBeTruthy();
+  expect(Math.abs(a.y - expected.y) <= eps, 'm22 > m33: check y').toBeTruthy();
+  expect(Math.abs(a.z - expected.z) <= eps, 'm22 > m33: check z').toBeTruthy();
+  expect(Math.abs(a.w - expected.w) <= eps, 'm22 > m33: check w').toBeTruthy();
 });
 
-test.skip('three.js#Quaternion#setFromUnitVectors', t => {
+test.skip('three.js#Quaternion#setFromUnitVectors', () => {
   const a = new Quaternion();
   const b = new Vector3(1, 0, 0);
   const c = new Vector3(0, 1, 0);
   const expected = new Quaternion(0, 0, Math.sqrt(2) / 2, Math.sqrt(2) / 2);
 
   a.setFromUnitVectors(b, c);
-  t.ok(Math.abs(a.x - expected.x) <= eps, 'Check x');
-  t.ok(Math.abs(a.y - expected.y) <= eps, 'Check y');
-  t.ok(Math.abs(a.z - expected.z) <= eps, 'Check z');
-  t.ok(Math.abs(a.w - expected.w) <= eps, 'Check w');
-  t.end();
+  expect(Math.abs(a.x - expected.x) <= eps, 'Check x').toBeTruthy();
+  expect(Math.abs(a.y - expected.y) <= eps, 'Check y').toBeTruthy();
+  expect(Math.abs(a.z - expected.z) <= eps, 'Check z').toBeTruthy();
+  expect(Math.abs(a.w - expected.w) <= eps, 'Check w').toBeTruthy();
 });
 
-test('three.js#Quaternion#inverse/conjugate', t => {
+test('three.js#Quaternion#inverse/conjugate', () => {
   const a = new Quaternion(x, y, z, w);
 
   // TODO: add better validation here.
 
   const b = a.clone().conjugate();
 
-  t.ok(a.x == -b.x, 'Passed!');
-  t.ok(a.y == -b.y, 'Passed!');
-  t.ok(a.z == -b.z, 'Passed!');
-  t.ok(a.w == b.w, 'Passed!');
-  t.end();
+  expect(a.x == -b.x, 'Passed!').toBeTruthy();
+  expect(a.y == -b.y, 'Passed!').toBeTruthy();
+  expect(a.z == -b.z, 'Passed!').toBeTruthy();
+  expect(a.w == b.w, 'Passed!').toBeTruthy();
 });
 
-test('three.js#Quaternion#dot', t => {
-  t.ok(true, "everything's gonna be alright");
-  t.end();
+test('three.js#Quaternion#dot', () => {
+  expect(true, "everything's gonna be alright").toBeTruthy();
 });
 
-test('three.js#Quaternion#normalize/length/lengthSq', t => {
+test('three.js#Quaternion#normalize/length/lengthSq', () => {
   const a = new Quaternion(x, y, z, w);
 
-  t.ok(a.len() != 1, 'Passed!');
-  t.ok(a.lengthSq() != 1, 'Passed!');
+  expect(a.len() != 1, 'Passed!').toBeTruthy();
+  expect(a.lengthSq() != 1, 'Passed!').toBeTruthy();
   a.normalize();
-  t.ok(a.len() == 1, 'Passed!');
-  t.ok(a.lengthSq() == 1, 'Passed!');
+  expect(a.len() == 1, 'Passed!').toBeTruthy();
+  expect(a.lengthSq() == 1, 'Passed!').toBeTruthy();
 
   a.set(0, 0, 0, 0);
-  t.ok(a.lengthSq() == 0, 'Passed!');
-  t.ok(a.len() == 0, 'Passed!');
+  expect(a.lengthSq() == 0, 'Passed!').toBeTruthy();
+  expect(a.len() == 0, 'Passed!').toBeTruthy();
   a.normalize();
-  t.ok(a.lengthSq() == 1, 'Passed!');
-  t.ok(a.len() == 1, 'Passed!');
-  t.end();
+  expect(a.lengthSq() == 1, 'Passed!').toBeTruthy();
+  expect(a.len() == 1, 'Passed!').toBeTruthy();
 });
 
-test.skip('Quaternion#multiplyQuaternions/multiply', t => {
+test.skip('Quaternion#multiplyQuaternions/multiply', () => {
   const angles = [new Euler(1, 0, 0), new Euler(0, 1, 0), new Euler(0, 0, 1)];
 
   const q1 = new Quaternion().setFromEuler(changeEulerOrder(angles[0], 'XYZ'));
@@ -372,90 +357,82 @@ test.skip('Quaternion#multiplyQuaternions/multiply', t => {
 
   const qFromM = new Quaternion().setFromRotationMatrix(m);
 
-  t.ok(qSub(q, qFromM).len() < 0.001, 'Passed!');
-  t.end();
+  expect(qSub(q, qFromM).len() < 0.001, 'Passed!').toBeTruthy();
 });
 
-test('three.js#Quaternion#premultiply', t => {
+test('three.js#Quaternion#premultiply', () => {
   const a = new Quaternion(x, y, z, w);
   const b = new Quaternion(2 * x, -y, -2 * z, w);
   const expected = new Quaternion(42, -32, -2, 58);
 
   a.premultiply(b);
-  t.ok(Math.abs(a.x - expected.x) <= eps, 'Check x');
-  t.ok(Math.abs(a.y - expected.y) <= eps, 'Check y');
-  t.ok(Math.abs(a.z - expected.z) <= eps, 'Check z');
-  t.ok(Math.abs(a.w - expected.w) <= eps, 'Check w');
-  t.end();
+  expect(Math.abs(a.x - expected.x) <= eps, 'Check x').toBeTruthy();
+  expect(Math.abs(a.y - expected.y) <= eps, 'Check y').toBeTruthy();
+  expect(Math.abs(a.z - expected.z) <= eps, 'Check z').toBeTruthy();
+  expect(Math.abs(a.w - expected.w) <= eps, 'Check w').toBeTruthy();
 });
 
-test('three.js#Quaternion#slerp', t => {
-  t.ok(true, "everything's gonna be alright");
-  t.end();
+test('three.js#Quaternion#slerp', () => {
+  expect(true, "everything's gonna be alright").toBeTruthy();
 });
 
-test('three.js#Quaternion#equals', t => {
+test('three.js#Quaternion#equals', () => {
   const a = new Quaternion(x, y, z, w);
   const b = new Quaternion(-x, -y, -z, -w);
 
-  t.ok(a.x != b.x, 'Passed!');
-  t.ok(a.y != b.y, 'Passed!');
+  expect(a.x != b.x, 'Passed!').toBeTruthy();
+  expect(a.y != b.y, 'Passed!').toBeTruthy();
 
-  t.ok(!a.equals(b), 'Passed!');
-  t.ok(!b.equals(a), 'Passed!');
+  expect(!a.equals(b), 'Passed!').toBeTruthy();
+  expect(!b.equals(a), 'Passed!').toBeTruthy();
 
   a.copy(b);
-  t.ok(a.x == b.x, 'Passed!');
-  t.ok(a.y == b.y, 'Passed!');
+  expect(a.x == b.x, 'Passed!').toBeTruthy();
+  expect(a.y == b.y, 'Passed!').toBeTruthy();
 
-  t.ok(a.equals(b), 'Passed!');
-  t.ok(b.equals(a), 'Passed!');
-  t.end();
+  expect(a.equals(b), 'Passed!').toBeTruthy();
+  expect(b.equals(a), 'Passed!').toBeTruthy();
 });
 
-test('three.js#Quaternion#fromArray', t => {
-  t.ok(true, "everything's gonna be alright");
-  t.end();
+test('three.js#Quaternion#fromArray', () => {
+  expect(true, "everything's gonna be alright").toBeTruthy();
 });
 
-test('three.js#Quaternion#toArray', t => {
+test('three.js#Quaternion#toArray', () => {
   const a = new Quaternion(x, y, z, w);
 
   let array = a.toArray();
-  t.strictEqual(array[0], x, 'No array, no offset: check x');
-  t.strictEqual(array[1], y, 'No array, no offset: check y');
-  t.strictEqual(array[2], z, 'No array, no offset: check z');
-  t.strictEqual(array[3], w, 'No array, no offset: check w');
+  expect(array[0], 'No array, no offset: check x').toBe(x);
+  expect(array[1], 'No array, no offset: check y').toBe(y);
+  expect(array[2], 'No array, no offset: check z').toBe(z);
+  expect(array[3], 'No array, no offset: check w').toBe(w);
 
   array = [];
   a.toArray(array);
-  t.strictEqual(array[0], x, 'With array, no offset: check x');
-  t.strictEqual(array[1], y, 'With array, no offset: check y');
-  t.strictEqual(array[2], z, 'With array, no offset: check z');
-  t.strictEqual(array[3], w, 'With array, no offset: check w');
+  expect(array[0], 'With array, no offset: check x').toBe(x);
+  expect(array[1], 'With array, no offset: check y').toBe(y);
+  expect(array[2], 'With array, no offset: check z').toBe(z);
+  expect(array[3], 'With array, no offset: check w').toBe(w);
 
   array = [];
   a.toArray(array, 1);
-  t.strictEqual(array[0], undefined, 'With array and offset: check [0]');
-  t.strictEqual(array[1], x, 'With array and offset: check x');
-  t.strictEqual(array[2], y, 'With array and offset: check y');
-  t.strictEqual(array[3], z, 'With array and offset: check z');
-  t.strictEqual(array[4], w, 'With array and offset: check w');
-  t.end();
+  expect(array[0], 'With array and offset: check [0]').toBeUndefined();
+  expect(array[1], 'With array and offset: check x').toBe(x);
+  expect(array[2], 'With array and offset: check y').toBe(y);
+  expect(array[3], 'With array and offset: check z').toBe(z);
+  expect(array[4], 'With array and offset: check w').toBe(w);
 });
 
-test.skip('three.js#Quaternion#onChange - NOT IMPLEMENTED', t => {
-  t.ok(true, "everything's gonna be alright");
-  t.end();
+test.skip('three.js#Quaternion#onChange - NOT IMPLEMENTED', () => {
+  expect(true, "everything's gonna be alright").toBeTruthy();
 });
 
-test.skip('three.js#Quaternion#onChangeCallback - NOT IMPLEMENTED', t => {
-  t.ok(true, "everything's gonna be alright");
-  t.end();
+test.skip('three.js#Quaternion#onChangeCallback - NOT IMPLEMENTED', () => {
+  expect(true, "everything's gonna be alright").toBeTruthy();
 });
 
 // OTHERS
-test.skip('Quaternion#multiplyVector3', t => {
+test.skip('Quaternion#multiplyVector3', () => {
   const angles = [new Euler(1, 0, 0), new Euler(0, 1, 0), new Euler(0, 0, 1)];
 
   // ensure euler conversion for Quaternion matches that of Matrix4
@@ -468,8 +445,7 @@ test.skip('Quaternion#multiplyVector3', t => {
       const qv = v0.clone().applyQuaternion(q);
       const mv = v0.clone().applyMatrix4(m);
 
-      t.ok(qv.distanceTo(mv) < 0.001, 'Passed!');
+      expect(qv.distanceTo(mv) < 0.001, 'Passed!').toBeTruthy();
     }
   }
-  t.end();
 });

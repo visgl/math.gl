@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "4.2.0-alpha.3",
+  "version": "5.0.0-alpha.1",
   "keywords": [
     "javascript",
     "math",
@@ -39,11 +39,9 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/core": "4.2.0-alpha.3",
-    "@math.gl/dggs-geohash": "4.2.0-alpha.3",
-    "@math.gl/dggs-quadkey": "4.2.0-alpha.3",
-    "@math.gl/dggs-s2": "4.2.0-alpha.3",
-    "@math.gl/geospatial": "4.2.0-alpha.3",
+    "@math.gl/core": "5.0.0-alpha.1",
+    "@math.gl/dggs": "5.0.0-alpha.1",
+    "@math.gl/geospatial": "5.0.0-alpha.1",
     "jsep": "^1.4.0"
   }
 }

@@ -2,17 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import type {NumericArray} from '@math.gl/core';
 import {equals} from '@math.gl/core';
 import {cutPolylineByGrid, cutPolygonByGrid} from '@math.gl/polygon';
 
 import {flatten} from './lineclip.spec';
 
-test('subdivide line', t => {
+test('subdivide line', () => {
   const result = cutPolylineByGrid([0, 0, 25, 40]);
-  t.comment(JSON.stringify(result));
-  t.ok(
+  console.log(JSON.stringify(result));
+  expect(
     equals(
       result,
       flatten([
@@ -25,12 +25,10 @@ test('subdivide line', t => {
         [25, 40]
       ])
     )
-  );
-
-  t.end();
+  ).toBeTruthy();
 });
 
-test('subdivide polyline', t => {
+test('subdivide polyline', () => {
   const result = cutPolylineByGrid(
     flatten([
       [30, 20],
@@ -39,8 +37,8 @@ test('subdivide polyline', t => {
       [10, 20]
     ])
   );
-  t.comment(JSON.stringify(result));
-  t.ok(
+  console.log(JSON.stringify(result));
+  expect(
     equals(
       result,
       flatten([
@@ -53,12 +51,10 @@ test('subdivide polyline', t => {
         [10, 20]
       ])
     )
-  );
-
-  t.end();
+  ).toBeTruthy();
 });
 
-test('subdivide polyline - custom grid', t => {
+test('subdivide polyline - custom grid', () => {
   const result = cutPolylineByGrid(
     flatten([
       [30, 20],
@@ -71,8 +67,8 @@ test('subdivide polyline - custom grid', t => {
       gridOffset: [-5, -5]
     }
   );
-  t.comment(JSON.stringify(result));
-  t.ok(
+  console.log(JSON.stringify(result));
+  expect(
     equals(
       result,
       flatten([
@@ -84,12 +80,10 @@ test('subdivide polyline - custom grid', t => {
         [10, 20]
       ])
     )
-  );
-
-  t.end();
+  ).toBeTruthy();
 });
 
-test('subdivide polyline - multiple parts', t => {
+test('subdivide polyline - multiple parts', () => {
   const result = cutPolylineByGrid(
     flatten([
       [30, 20],
@@ -99,20 +93,18 @@ test('subdivide polyline - multiple parts', t => {
     ]),
     {broken: true}
   );
-  t.comment(JSON.stringify(result));
-  t.ok(
+  console.log(JSON.stringify(result));
+  expect(
     equals(result, [
       [30, 20, 25, 25, 20, 20],
       [20, 20, 10, 10],
       [10, 10, 5, 5, 6.6666667, 10],
       [6.6666667, 10, 10, 20]
     ])
-  );
-
-  t.end();
+  ).toBeTruthy();
 });
 
-test('subdivide 3d polyline', t => {
+test('subdivide 3d polyline', () => {
   const result = cutPolylineByGrid(
     flatten([
       [30, 20, 0],
@@ -124,8 +116,8 @@ test('subdivide 3d polyline', t => {
       size: 3
     }
   );
-  t.comment(JSON.stringify(result));
-  t.ok(
+  console.log(JSON.stringify(result));
+  expect(
     equals(
       result,
       flatten([
@@ -138,12 +130,10 @@ test('subdivide 3d polyline', t => {
         [10, 20, 30]
       ])
     )
-  );
-
-  t.end();
+  ).toBeTruthy();
 });
 
-test('subdivide polyline from partial array', t => {
+test('subdivide polyline from partial array', () => {
   const polyline = flatten([
     [30, 20],
     [25, 25],
@@ -154,8 +144,8 @@ test('subdivide polyline from partial array', t => {
     startIndex: 4,
     endIndex: 12
   });
-  t.comment(JSON.stringify(result));
-  t.ok(
+  console.log(JSON.stringify(result));
+  expect(
     equals(
       result,
       flatten([
@@ -168,9 +158,7 @@ test('subdivide polyline from partial array', t => {
         [10, 20]
       ])
     )
-  );
-
-  t.end();
+  ).toBeTruthy();
 });
 
 function arePolygonsEqual(p1, p2) {
@@ -183,7 +171,7 @@ function arePolygonsEqual(p1, p2) {
 }
 
 // Debug with https://codepen.io/Pessimistress/pen/BaNOmKM
-test('subdivide polygon', t => {
+test('subdivide polygon', () => {
   const result = cutPolygonByGrid(
     flatten([
       [5, 20],
@@ -192,7 +180,7 @@ test('subdivide polygon', t => {
     ])
   );
 
-  t.comment(JSON.stringify(result));
+  console.log(JSON.stringify(result));
   const expected = [
     {positions: [5, 0, 10, 0, 10, -5, 5, -10]},
     {positions: [10, 0, 15, 0, 10, -5]},
@@ -202,20 +190,17 @@ test('subdivide polygon', t => {
     {positions: [10, 10, 10, 15, 15, 10]}
   ];
 
-  t.is(result.length, expected.length, `should return ${expected.length} polygons`);
+  expect(result.length, `should return ${expected.length} polygons`).toBe(expected.length);
   for (let i = 0; i < expected.length; i++) {
-    t.ok(arePolygonsEqual(result[i], expected[i]), `polygon ${i}`);
+    expect(arePolygonsEqual(result[i], expected[i]), `polygon ${i}`).toBeTruthy();
   }
-
-  t.end();
 });
 
-test('subdivide polygon - empty', t => {
-  t.deepEqual(cutPolygonByGrid([]), [], 'returns empty array');
-  t.end();
+test('subdivide polygon - empty', () => {
+  expect(cutPolygonByGrid([]), 'returns empty array').toEqual([]);
 });
 
-test('subdivide polygon#edgeTypes', t => {
+test('subdivide polygon#edgeTypes', () => {
   // This polygon tests:
   // - vertex on grid intersection
   // - interpolated edge point on grid intersection
@@ -270,7 +255,7 @@ test('subdivide polygon#edgeTypes', t => {
           ? positions.slice(i * 2 + 2, i * 2 + 4)
           : positions.slice(loopStart, loopStart + 2);
       const type = edgeTypes && edgeTypes[i];
-      t.is(type, getType(position, nextPosition), `edge should be ${displayString[type]}`);
+      expect(type, `edge should be ${displayString[type]}`).toBe(getType(position, nextPosition));
 
       if (i * 2 + 2 === loopEnd) {
         loopStart = loopEnd;
@@ -278,11 +263,9 @@ test('subdivide polygon#edgeTypes', t => {
       }
     }
   }
-
-  t.end();
 });
 
-test('subdivide polygon with custom grid', t => {
+test('subdivide polygon with custom grid', () => {
   const result = cutPolygonByGrid(
     flatten([
       [5, 20],
@@ -296,18 +279,16 @@ test('subdivide polygon with custom grid', t => {
     }
   );
 
-  t.comment(JSON.stringify(result));
+  console.log(JSON.stringify(result));
   const expected = [{positions: [5, 5, 20, 5, 5, -10]}, {positions: [5, 5, 5, 20, 20, 5]}];
 
-  t.is(result.length, expected.length, `should return ${expected.length} polygons`);
+  expect(result.length, `should return ${expected.length} polygons`).toBe(expected.length);
   for (let i = 0; i < expected.length; i++) {
-    t.ok(arePolygonsEqual(result[i], expected[i]), `polygon ${i}`);
+    expect(arePolygonsEqual(result[i], expected[i]), `polygon ${i}`).toBeTruthy();
   }
-
-  t.end();
 });
 
-test('subdivide 3D polygon', t => {
+test('subdivide 3D polygon', () => {
   const result = cutPolygonByGrid(
     flatten([
       [5, 20, 0],
@@ -322,21 +303,19 @@ test('subdivide 3D polygon', t => {
     }
   );
 
-  t.comment(JSON.stringify(result));
+  console.log(JSON.stringify(result));
   const expected = [
     {positions: [5, 5, 15, 20, 5, 15, 5, -10, 30]},
     {positions: [5, 5, 15, 5, 20, 0, 20, 5, 15]}
   ];
 
-  t.is(result.length, expected.length, `should return ${expected.length} polygons`);
+  expect(result.length, `should return ${expected.length} polygons`).toBe(expected.length);
   for (let i = 0; i < expected.length; i++) {
-    t.ok(arePolygonsEqual(result[i], expected[i]), `polygon ${i}`);
+    expect(arePolygonsEqual(result[i], expected[i]), `polygon ${i}`).toBeTruthy();
   }
-
-  t.end();
 });
 
-test('subdivide polygon with holes', t => {
+test('subdivide polygon with holes', () => {
   const result = cutPolygonByGrid(
     flatten([
       [5, 5],
@@ -351,7 +330,7 @@ test('subdivide polygon with holes', t => {
     [8]
   );
 
-  t.comment(JSON.stringify(result));
+  console.log(JSON.stringify(result));
 
   const expected = [
     {positions: [10, 10, 5, 10, 5, 5, 10, 5]},
@@ -363,10 +342,8 @@ test('subdivide polygon with holes', t => {
     }
   ];
 
-  t.is(result.length, expected.length, `should return ${expected.length} polygons`);
+  expect(result.length, `should return ${expected.length} polygons`).toBe(expected.length);
   for (let i = 0; i < expected.length; i++) {
-    t.ok(arePolygonsEqual(result[i], expected[i]), `polygon ${i}`);
+    expect(arePolygonsEqual(result[i], expected[i]), `polygon ${i}`).toBeTruthy();
   }
-
-  t.end();
 });

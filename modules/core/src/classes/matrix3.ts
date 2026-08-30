@@ -119,6 +119,21 @@ export class Matrix3 extends Matrix {
     return this.check();
   }
 
+  /** Sets this matrix from the upper-left 3x3 elements of a 4x4 matrix. */
+  fromMatrix4(matrix4: Readonly<NumericArray>): this {
+    return this.set(
+      matrix4[0],
+      matrix4[1],
+      matrix4[2],
+      matrix4[4],
+      matrix4[5],
+      matrix4[6],
+      matrix4[8],
+      matrix4[9],
+      matrix4[10]
+    );
+  }
+
   /**
    * accepts column major order, stores in column major order
    */
