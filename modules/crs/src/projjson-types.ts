@@ -40,7 +40,44 @@ export type BoundCrs = ObjectUsage & {
   id?: unknown;
   ids?: unknown;
 };
-export type ObjectUsage = IdIdsMutuallyExclusive;
+export type ObjectUsage =
+  | (IdIdsMutuallyExclusive & {
+      $schema?: string;
+      scope?: string;
+      area?: string;
+      bbox?: Bbox;
+      vertical_extent?: VerticalExtent;
+      temporal_extent?: TemporalExtent;
+      remarks?: string;
+      id?: Id;
+      ids?: Ids;
+      [k: string]: unknown;
+    })
+  | (IdIdsMutuallyExclusive & {
+      $schema?: string;
+      usages?: Usages;
+      remarks?: string;
+      id?: Id;
+      ids?: Ids;
+      [k: string]: unknown;
+    });
+export type Unit =
+  | ('metre' | 'degree' | 'unity')
+  | (IdIdsMutuallyExclusive & {
+      type: 'LinearUnit' | 'AngularUnit' | 'ScaleUnit' | 'TimeUnit' | 'ParametricUnit' | 'Unit';
+      name: string;
+      conversion_factor?: number;
+      id?: Id;
+      ids?: Ids;
+    });
+export type Ids = Id[];
+export type Usages = {
+  scope?: string;
+  area?: string;
+  bbox?: Bbox;
+  vertical_extent?: VerticalExtent;
+  temporal_extent?: TemporalExtent;
+}[];
 export type Crs =
   | BoundCrs
   | CompoundCrs
@@ -200,8 +237,6 @@ export type Meridian = IdIdsMutuallyExclusive & {
   ids?: Ids;
 };
 export type ValueInDegreeOrValueAndUnit = number | ValueAndUnit;
-export type Unit = ('metre' | 'degree' | 'unity') | IdIdsMutuallyExclusive;
-export type Ids = Id[];
 export type Conversion = IdIdsMutuallyExclusive & {
   $schema?: string;
   type?: 'Conversion';
@@ -347,7 +382,11 @@ export type DatumEnsemble = IdIdsMutuallyExclusive & {
   $schema?: string;
   type?: 'DatumEnsemble';
   name: string;
-  members: IdIdsMutuallyExclusive[];
+  members: (IdIdsMutuallyExclusive & {
+    name: string;
+    id?: Id;
+    ids?: Ids;
+  })[];
   ellipsoid?: Ellipsoid;
   accuracy: string;
   id?: Id;
@@ -506,8 +545,6 @@ export type DerivedVerticalCrs = ObjectUsage & {
  */
 export type VerticalCrs = ObjectUsage &
   OneAndOnlyOneOfDatumOrDatumEnsemble & {
-    [k: string]: unknown;
-  } & {
     type?: 'VerticalCRS';
     name: string;
     datum?: VerticalReferenceFrame | DynamicVerticalReferenceFrame;
@@ -588,9 +625,16 @@ export type AbridgedTransformation = IdIdsMutuallyExclusive & {
 export interface IdIdsMutuallyExclusive {
   [k: string]: unknown;
 }
-export interface ValueAndUnit {
-  value: number;
-  unit: Unit;
+export interface Bbox {
+  east_longitude: number;
+  west_longitude: number;
+  south_latitude: number;
+  north_latitude: number;
+}
+export interface VerticalExtent {
+  minimum: number;
+  maximum: number;
+  unit?: Unit;
 }
 export interface Id {
   authority: string;
@@ -598,6 +642,14 @@ export interface Id {
   version?: string | number;
   authority_citation?: string;
   uri?: string;
+}
+export interface TemporalExtent {
+  start: string;
+  end: string;
+}
+export interface ValueAndUnit {
+  value: number;
+  unit: Unit;
 }
 /**
  * Association to a PointMotionOperation

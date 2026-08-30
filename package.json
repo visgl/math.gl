@@ -36,16 +36,17 @@
     "test-pre-commit": "yarn lint && ocular-test node"
   },
   "devDependencies": {
-    "@probe.gl/bench": "^4.0.0",
-    "@turf/destination": "^6.0.1",
-    "@vis.gl/dev-tools": "^2.0.0-alpha.4",
-    "@vis.gl/ts-plugins": "^2.0.0-alpha.4",
-    "@vitest/coverage-v8": "^4.0.18",
-    "ajv": "^8.17.1",
-    "json-schema-to-typescript": "^15.0.4",
-    "playwright": "^1.58.0",
-    "pre-commit": "^1.2.2",
-    "vitest": "^4.0.18"
+    "@probe.gl/bench": "^4.1.1",
+    "@turf/destination": "^7.4.0",
+    "@types/node": "^22.20.1",
+    "@vis.gl/dev-tools": "^2.0.0-alpha.6",
+    "@vis.gl/ts-plugins": "^2.0.0-alpha.6",
+    "@vitest/coverage-v8": "4.1.10",
+    "ajv": "^8.20.0",
+    "json-schema-to-typescript": "^16.0.0",
+    "playwright": "^1.62.1",
+    "pre-commit": "^2.0.0",
+    "vitest": "4.1.10"
   },
   "pre-commit": [
     "test-pre-commit"
