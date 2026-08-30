@@ -47,6 +47,22 @@ test('coordinate mapping, into mapping and layout conversion are deterministic',
   expect(interleaveGeoArrowCoordinates(unspecifiedLayout)).toBe(unspecifiedLayout);
 });
 
+test('single-family promotions share existing coordinate and topology buffers', () => {
+  const point = makeGeoArrowColumnFromGeometryRows([
+    {type: 'Point', coordinates: [1, 2]},
+    {type: 'Point', coordinates: [3, 4]}
+  ]);
+  const promoted = convertGeoArrowColumn(point, {encoding: 'geoarrow.multipoint'});
+  expect(promoted.encoding).toBe('geoarrow.multipoint');
+  expect(materializeGeoArrowRows(promoted)).toEqual([
+    {type: 'MultiPoint', coordinates: [[1, 2]]},
+    {type: 'MultiPoint', coordinates: [[3, 4]]}
+  ]);
+  const pointValues = (point.chunks[0] as any).child.values;
+  const promotedValues = (promoted.chunks[0] as any).child.child.values;
+  expect(promotedValues.buffer).toBe(pointValues.buffer);
+});
+
 test('coordinate mapping attributes every nested coordinate to its logical row', () => {
   const source = makeGeoArrowColumnFromGeometryRows([
     {

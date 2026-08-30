@@ -282,17 +282,23 @@ export function convertGeoArrowColumn(
     throw new Error('Use encodeGeoArrowWKB or encodeGeoArrowWKT for serialized output');
   }
   assertGeoArrowResourceLimits(column, options.limits);
-  const mapped = mapGeoArrowCoordinates(
-    column,
-    coordinate => coordinate,
-    {
-      dimension,
-      coordinateLayout: coordinateLayout || undefined,
-      coordinateType: options.coordinateType,
-      limits: options.limits
-    },
-    column.dimension
-  );
+  const needsCoordinateMap =
+    dimension !== column.dimension ||
+    coordinateLayout !== column.coordinateLayout ||
+    (options.coordinateType && options.coordinateType !== 'preserve');
+  const mapped = needsCoordinateMap
+    ? mapGeoArrowCoordinates(
+        column,
+        coordinate => coordinate,
+        {
+          dimension,
+          coordinateLayout: coordinateLayout || undefined,
+          coordinateType: options.coordinateType,
+          limits: options.limits
+        },
+        column.dimension
+      )
+    : column;
   const offsetConverted =
     requestedOffsetType === 'preserve'
       ? mapped
@@ -302,8 +308,43 @@ export function convertGeoArrowColumn(
         };
   if (encoding === column.encoding) return offsetConverted;
   if (encoding === 'geoarrow.geometry') return promoteToDenseUnion(offsetConverted);
+  const promoted = promoteSingleFamily(offsetConverted, encoding, requestedOffsetType);
+  if (promoted) return promoted;
   if (column.encoding === 'geoarrow.geometry') return demoteDenseUnion(offsetConverted, encoding);
   throw new Error(`Rows cannot be represented as ${encoding}`);
+}
+
+/** Wraps a concrete family in one list level without copying its coordinate/topology buffers. */
+function promoteSingleFamily(
+  column: GeoArrowColumn,
+  encoding: GeoArrowEncoding,
+  offsetType: ConvertGeoArrowColumnOptions['offsetType']
+): GeoArrowColumn | null {
+  const sourceEncoding = column.encoding;
+  const validPair =
+    (sourceEncoding === 'geoarrow.point' && encoding === 'geoarrow.multipoint') ||
+    (sourceEncoding === 'geoarrow.linestring' && encoding === 'geoarrow.multilinestring') ||
+    (sourceEncoding === 'geoarrow.polygon' && encoding === 'geoarrow.multipolygon');
+  if (!validPair) return null;
+  const chunks = column.chunks.map(chunk => {
+    const OffsetArray =
+      offsetType === 'int64' || (offsetType === 'preserve' && findOffsetType(chunk) === 'int64')
+        ? BigInt64Array
+        : Int32Array;
+    const offsets = new OffsetArray(chunk.length + 1);
+    for (let index = 0; index <= chunk.length; index++) {
+      if (offsets instanceof BigInt64Array) offsets[index] = BigInt(index);
+      else offsets[index] = index;
+    }
+    return {
+      kind: 'list' as const,
+      length: chunk.length,
+      offsets,
+      child: chunk,
+      validity: chunk.validity
+    };
+  });
+  return {...column, encoding, chunks};
 }
 
 function resizeCoordinate(

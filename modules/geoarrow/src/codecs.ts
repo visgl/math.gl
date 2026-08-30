@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {formatWKT, parseWKB, parseWKT} from '@math.gl/wkb';
-import type {WKBGeometryWriter} from '@math.gl/wkb';
+import {formatWKT, inspectWKBHeader, parseWKB, parseWKT, visitWKB} from '@math.gl/wkb';
+import type {WKBGeometryWriter, WKBHeader} from '@math.gl/wkb';
 import {WKBBuilder} from '@math.gl/wkb';
 import type {
   GeoArrowColumn,
@@ -12,7 +12,7 @@ import type {
   GeoArrowSerialized
 } from './types';
 import {getGeoArrowDimensionSize} from './types';
-import {makeGeoArrowColumnFromGeometryRows} from './builder';
+import {GeoArrowBuilder, makeGeoArrowColumnFromGeometryRows} from './builder';
 import {getGeoArrowOffset, isGeoArrowValueValid, materializeGeometryRow} from './layout';
 
 const textEncoder = new TextEncoder();
@@ -21,14 +21,202 @@ const textDecoder = new TextDecoder();
 /** Decodes a GeoArrow WKB column into native physical geometry buffers. */
 export function decodeGeoArrowWKB(column: GeoArrowColumn): GeoArrowColumn {
   if (column.encoding !== 'geoarrow.wkb') throw new Error('Expected a geoarrow.wkb column');
-  const rows = normalizeRowsToDimension(
-    decodeSerializedRows(column, bytes => parseWKB(bytes).geometry),
-    column.dimension
-  );
-  return copyMetadata(
-    column,
-    makeGeoArrowColumnFromGeometryRows(rows, {dimension: column.dimension})
-  );
+  const records: Array<{bytes: Uint8Array; header: WKBHeader} | null> = [];
+  let hasGeometryCollection = false;
+  for (const chunk of column.chunks) {
+    if (chunk.kind !== 'serialized') throw new Error('Serialized column contains native storage');
+    for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
+      if (!isGeoArrowValueValid(chunk.validity, rowIndex)) {
+        records.push(null);
+        continue;
+      }
+      const bytes = getSerializedBytes(chunk, rowIndex);
+      const header = inspectWKBHeader(bytes);
+      hasGeometryCollection ||= header.geometryType === 'GeometryCollection';
+      records.push({bytes, header});
+    }
+  }
+
+  // Geometry collections have a nested union topology. Keep the compatibility path until the
+  // collection builder grows a fully direct event representation; all concrete families below
+  // are decoded directly into measured native buffers.
+  if (hasGeometryCollection) {
+    const rows = normalizeRowsToDimension(
+      records.map(record => (record ? parseWKB(record.bytes).geometry : null)),
+      column.dimension
+    );
+    return copyMetadata(
+      column,
+      makeGeoArrowColumnFromGeometryRows(rows, {dimension: column.dimension})
+    );
+  }
+
+  const groups = new Map<
+    string,
+    {
+      type: WKBHeader['geometryType'];
+      dimension: GeoArrowDimension;
+      records: {bytes: Uint8Array; header: WKBHeader}[];
+    }
+  >();
+  for (const record of records) {
+    if (!record) continue;
+    const key = `${record.header.geometryType}:${record.header.dimension}`;
+    const group = groups.get(key) || {
+      type: record.header.geometryType,
+      dimension: record.header.dimension,
+      records: []
+    };
+    group.records.push(record);
+    groups.set(key, group);
+  }
+  if (groups.size <= 1) {
+    const group = groups.values().next().value as
+      | {
+          type: WKBHeader['geometryType'];
+          dimension: GeoArrowDimension;
+          records: {bytes: Uint8Array; header: WKBHeader}[];
+        }
+      | undefined;
+    const type = group?.type || 'Point';
+    const targetEncoding = encodingFromGeometryType(type);
+    const measure = new GeoArrowBuilder({
+      encoding: targetEncoding,
+      dimension: column.dimension,
+      mode: 'measure'
+    });
+    for (const record of records) {
+      if (!record) measure.append(null);
+      else visitWKBIntoBuilder(record.bytes, measure);
+    }
+    const write = new GeoArrowBuilder({
+      encoding: targetEncoding,
+      dimension: column.dimension,
+      mode: 'write',
+      target: measure.allocateTarget()
+    });
+    for (const record of records) {
+      if (!record) write.append(null);
+      else visitWKBIntoBuilder(record.bytes, write);
+    }
+    return copyMetadata(column, write.finish());
+  }
+
+  const children = [...groups.values()].map(group => {
+    const encoding = encodingFromGeometryType(group.type);
+    const measure = new GeoArrowBuilder({encoding, dimension: group.dimension, mode: 'measure'});
+    for (const record of group.records) visitWKBIntoBuilder(record.bytes, measure);
+    const write = new GeoArrowBuilder({
+      encoding,
+      dimension: group.dimension,
+      mode: 'write',
+      target: measure.allocateTarget()
+    });
+    for (const record of group.records) visitWKBIntoBuilder(record.bytes, write);
+    const built = write.finish();
+    return {
+      name: group.type,
+      typeId: getGeometryTypeId(group.type, group.dimension),
+      encoding,
+      dimension: group.dimension,
+      coordinateLayout: built.coordinateLayout,
+      data: built.chunks[0]
+    };
+  });
+  const typeIds = new Int8Array(records.length);
+  const valueOffsets = new Int32Array(records.length);
+  const validity = new Uint8Array(Math.ceil(records.length / 8));
+  const groupIndices = new Map<string, number>();
+  const groupCounts = new Map<string, number>();
+  children.forEach((child, index) => groupIndices.set(`${child.name}:${child.dimension}`, index));
+  for (let rowIndex = 0; rowIndex < records.length; rowIndex++) {
+    const record = records[rowIndex];
+    if (!record) continue;
+    const key = `${record.header.geometryType}:${record.header.dimension}`;
+    const child = children[groupIndices.get(key)!];
+    typeIds[rowIndex] = child.typeId;
+    valueOffsets[rowIndex] = groupCounts.get(key) || 0;
+    groupCounts.set(key, valueOffsets[rowIndex] + 1);
+    validity[rowIndex >> 3] |= 1 << (rowIndex & 7);
+  }
+  return copyMetadata(column, {
+    encoding: 'geoarrow.geometry',
+    dimension: column.dimension,
+    coordinateLayout: 'interleaved',
+    chunks: [
+      {
+        kind: 'dense-union',
+        length: records.length,
+        typeIds,
+        valueOffsets,
+        children,
+        validity: {values: validity}
+      }
+    ]
+  });
+}
+
+/** Replays one serialized geometry directly into a two-pass GeoArrowBuilder. */
+function visitWKBIntoBuilder(bytes: Uint8Array, builder: GeoArrowBuilder): void {
+  let rootType: WKBHeader['geometryType'] | undefined;
+  visitWKB(bytes, {
+    geometry: (header, _count, depth) => {
+      if (depth === 0) {
+        rootType = header.geometryType;
+        builder.beginGeometry(header.geometryType, header.dimension, _count);
+      } else if (rootType === 'MultiLineString' && header.geometryType === 'LineString') {
+        builder.beginRing(_count);
+      } else if (rootType === 'MultiPolygon' && header.geometryType === 'Polygon') {
+        builder.beginPolygon();
+      }
+    },
+    ring: pointCount => {
+      if (rootType === 'Polygon' || rootType === 'MultiPolygon') builder.beginRing(pointCount);
+    },
+    coordinate: (x, y, z, m, dimension) => {
+      if (dimension === 'xym') builder.writeCoordinate(x, y, undefined, m);
+      else if (dimension === 'xyzm') builder.writeCoordinate(x, y, z, m);
+      else if (dimension === 'xyz') builder.writeCoordinate(x, y, z);
+      else builder.writeCoordinate(x, y);
+    }
+  });
+  builder.endGeometry();
+}
+
+function encodingFromGeometryType(
+  type: WKBHeader['geometryType']
+): Exclude<
+  GeoArrowColumn['encoding'],
+  | 'geoarrow.geometry'
+  | 'geoarrow.geometrycollection'
+  | 'geoarrow.box'
+  | 'geoarrow.wkb'
+  | 'geoarrow.wkt'
+> {
+  if (type === 'GeometryCollection')
+    throw new Error('GeometryCollection requires collection storage');
+  return `geoarrow.${type.toLowerCase()}` as Exclude<
+    GeoArrowColumn['encoding'],
+    | 'geoarrow.geometry'
+    | 'geoarrow.geometrycollection'
+    | 'geoarrow.box'
+    | 'geoarrow.wkb'
+    | 'geoarrow.wkt'
+  >;
+}
+
+function getGeometryTypeId(type: WKBHeader['geometryType'], dimension: GeoArrowDimension): number {
+  const family = [
+    'Point',
+    'LineString',
+    'Polygon',
+    'MultiPoint',
+    'MultiLineString',
+    'MultiPolygon',
+    'GeometryCollection'
+  ].indexOf(type);
+  const dimensionIndex = ['xy', 'xyz', 'xym', 'xyzm'].indexOf(dimension);
+  return family < 0 || dimensionIndex < 0 ? 1 : family * 4 + dimensionIndex + 1;
 }
 
 /** Encodes a native GeoArrow column as variable-width WKB bytes. */

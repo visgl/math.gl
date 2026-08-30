@@ -168,6 +168,24 @@ const polygons = write.finish(); // borrows target; no Arrow objects are constru
 
 `GeoArrowBuilder.build(rows, options)` is the convenient form when custom allocation is not needed.
 
+For serialized loaders and streaming producers, the builder also accepts geometry events. A measure
+builder and a write builder must receive the same event sequence; the write pass fills the caller's
+buffers directly:
+
+```typescript
+builder.beginGeometry('Polygon', 'xy');
+builder.beginRing(5);
+builder.writeCoordinate(0, 0);
+builder.writeCoordinate(4, 0);
+builder.writeCoordinate(4, 4);
+builder.writeCoordinate(0, 4);
+builder.writeCoordinate(0, 0);
+builder.endGeometry();
+```
+
+`MultiLineString` uses one `beginRing` per line and `MultiPolygon` uses `beginPolygon` followed by
+one `beginRing` per ring. Event writes do not create coordinate arrays or Arrow objects.
+
 ## Inspection and read-only kernels
 
 The following operations traverse descriptors directly and do not create per-row geometry objects:
@@ -221,6 +239,12 @@ const nativeAgain = decodeGeoArrowWKT(wkt);
 ```
 
 WKB decoding accepts little- or big-endian geometry, ISO Z/M/ZM type offsets, EWKB Z/M/SRID flags,
+BinaryView-style serialized buffers, nulls, and mixed concrete families. Concrete rows are scanned
+with `@math.gl/wkb`'s header inspector and visitor, measured, and written directly into native
+buffers. Mixed family or mixed-dimension input becomes a dense union whose children retain their
+own encoding and dimension metadata; no conversion through GeoJSON or nested coordinate arrays is
+needed. GeometryCollection remains on the compatibility path until its nested event topology is
+available.
 multi-geometries, and nested geometry collections. WKT supports all corresponding geometry
 families, dimension tokens, both MultiPoint spellings, and empties. Decoding normalizes mixed-size
 serialized coordinates to the column's declared semantic dimension.
