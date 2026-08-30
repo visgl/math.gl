@@ -113,8 +113,10 @@ Convenience two-pass build with internal allocation.
 Allocates exact validity, coordinate, and offset buffers independently of a builder instance.
 
 The builder also accepts an incremental event stream. Call `beginGeometry(type, dimension, count?)`,
-`beginRing(count?)`, `writeCoordinate(x, y, z?, m?)`, and `endGeometry()`. Events are useful for
-loaders that already have a streaming parser and avoid constructing intermediate geometry rows.
+`beginPolygon()` for each MultiPolygon part, `beginRing(count?)`,
+`writeCoordinate(x, y, z?, m?)`, and `endGeometry()`. Events are useful for loaders that already
+have a streaming parser and avoid constructing intermediate geometry rows. For backward
+compatibility, a MultiPolygon with no `beginPolygon()` calls is treated as one polygon.
 
 ### `makeGeoArrowColumnFromGeometryRows(rows, options?)`
 

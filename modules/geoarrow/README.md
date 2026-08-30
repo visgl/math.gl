@@ -305,8 +305,9 @@ accessors in conversion paths. Keep GeoJSON conversion, adaptive target policy, 
 construction, and row-shaped compatibility values in loaders.gl.
 
 Use the optional `/wkb` bridge only for serialized columns and `/builder` when emitting native
-descriptors from a feature stream. This keeps the common Arrow-to-native path independent of text
-and binary codec code.
+descriptors from a feature stream. For event-built MultiPolygons, call `beginPolygon()` before each
+part; omitting it retains the compatibility behavior of treating all rings as one polygon. This
+keeps the common Arrow-to-native path independent of text and binary codec code.
 
 ## Adapting another columnar runtime
 
