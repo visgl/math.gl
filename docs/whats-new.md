@@ -45,7 +45,7 @@
   </tbody>
 </table>
 
-## v4.2 (In development)
+## v5.0 (In development)
 
 Target Release Date: Q2, 2026.
 
@@ -55,11 +55,20 @@ Highlights:
 - New `@math.gl/geometry` CPU primitive mesh and tessellation module.
 - glTF 2.1 box, capsule, cylinder, plane and sphere analytic shapes in `@math.gl/culling`.
 - New expression evaluator module
+- DGGS support is consolidated into a single module with interchangeable decoder objects.
 - New standards-based CRS definitions module and modernized proj4 support.
 - New typed-array geometry utilities module.
 - Functionality additions to improve 3D Tiles support in loaders.gl.
 - Stronger type guarantees for math classes via the new sized array types.
 - Culling results, polygon winding directions, and Euler rotation orders now use descriptive string literal types; legacy named constants remain as deprecated string-valued aliases.
+
+**`@math.gl/dggs`** (NEW MODULE)
+
+- Consolidates all lightweight DGGS functionality into a single module and removes the individual DGGS packages.
+- Exports DGGS decoder objects with an interchangeable API for encoded data.
+- Aligns the core decoder shape with deck.gl-community's `GlobalGridLayer` contract.
+- Provides `/a5`, `/geohash`, `/h3`, `/plus-code`, `/quadkey`, and `/s2` subpath exports from `@math.gl/dggs`.
+- Detects conventional cell-column names for all bundled decoders to power data-driven visualization layers.
 
 **`@math.gl/expressions`** (NEW EXPERIMENTAL MODULE)
 

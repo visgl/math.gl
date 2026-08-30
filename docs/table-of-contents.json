@@ -183,18 +183,17 @@
       },
       {
         "type": "category",
-        "label": "@math.gl/dggs-geohash",
-        "items": ["modules/dggs-geohash/README", "modules/dggs-geohash/api-reference/geohash"]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/dggs-quadkey",
-        "items": ["modules/dggs-quadkey/README", "modules/dggs-quadkey/api-reference/quadkey"]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/dggs-s2",
-        "items": ["modules/dggs-s2/README", "modules/dggs-s2/api-reference/s2"]
+        "label": "@math.gl/dggs",
+        "items": [
+          "modules/dggs/README",
+          "modules/dggs/api-reference/dggs-decoder",
+          "modules/dggs/api-reference/a5-decoder",
+          "modules/dggs/api-reference/geohash-decoder",
+          "modules/dggs/api-reference/h3-decoder",
+          "modules/dggs/api-reference/plus-code-decoder",
+          "modules/dggs/api-reference/quadkey-decoder",
+          "modules/dggs/api-reference/s2-decoder"
+        ]
       }
     ]
   }

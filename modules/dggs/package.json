@@ -1,0 +1,79 @@
+{
+  "name": "@math.gl/dggs",
+  "description": "Lightweight cell geometry decoders for DGGS and DGGS-like systems",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "5.0.0-alpha.1",
+  "keywords": [
+    "javascript",
+    "math",
+    "geospatial",
+    "dggs",
+    "a5",
+    "h3",
+    "s2",
+    "geohash",
+    "quadkey",
+    "plus-codes"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./a5": {
+      "types": "./dist/a5.d.ts",
+      "import": "./dist/a5.js",
+      "require": "./dist/a5.cjs"
+    },
+    "./geohash": {
+      "types": "./dist/geohash.d.ts",
+      "import": "./dist/geohash.js",
+      "require": "./dist/geohash.cjs"
+    },
+    "./h3": {
+      "types": "./dist/h3.d.ts",
+      "import": "./dist/h3.js",
+      "require": "./dist/h3.cjs"
+    },
+    "./plus-code": {
+      "types": "./dist/plus-code.d.ts",
+      "import": "./dist/plus-code.js",
+      "require": "./dist/plus-code.cjs"
+    },
+    "./quadkey": {
+      "types": "./dist/quadkey.d.ts",
+      "import": "./dist/quadkey.js",
+      "require": "./dist/quadkey.cjs"
+    },
+    "./s2": {
+      "types": "./dist/s2.d.ts",
+      "import": "./dist/s2.js",
+      "require": "./dist/s2.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "@math.gl/types": "5.0.0-alpha.1",
+    "a5-js": "^0.5.0",
+    "h3-js": "^4.2.1",
+    "open-location-code": "^1.0.3"
+  },
+  "devDependencies": {
+    "s2-geometry": "^1.2.10"
+  }
+}

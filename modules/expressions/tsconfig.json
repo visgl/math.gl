@@ -9,9 +9,7 @@
   },
   "references": [
     {"path": "../core"},
-    {"path": "../dggs-geohash"},
-    {"path": "../dggs-quadkey"},
-    {"path": "../dggs-s2"},
+    {"path": "../dggs"},
     {"path": "../geospatial"}
   ]
 }

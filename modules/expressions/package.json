@@ -40,9 +40,7 @@
   ],
   "dependencies": {
     "@math.gl/core": "5.0.0-alpha.1",
-    "@math.gl/dggs-geohash": "5.0.0-alpha.1",
-    "@math.gl/dggs-quadkey": "5.0.0-alpha.1",
-    "@math.gl/dggs-s2": "5.0.0-alpha.1",
+    "@math.gl/dggs": "5.0.0-alpha.1",
     "@math.gl/geospatial": "5.0.0-alpha.1",
     "jsep": "^1.4.0"
   }

@@ -13,6 +13,7 @@
       "@math.gl/expressions": ["./modules/expressions/src/index.ts"],
       "@math.gl/geoid": ["./modules/geoid/src/index.ts"],
       "@math.gl/geospatial": ["./modules/geospatial/src/index.ts"],
+      "@math.gl/geoarrow": ["./modules/geoarrow/src/index.ts"],
       "@math.gl/polygon": ["./modules/polygon/src/index.ts"],
       "@math.gl/proj": ["./modules/proj/src/index.ts"],
       "@math.gl/proj4": ["./modules/proj4/src/index.ts"],
