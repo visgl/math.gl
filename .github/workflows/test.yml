@@ -82,3 +82,43 @@ jobs:
           file: coverage/lcov.info
           format: lcov
           fail-on-error: false
+
+      - name: Publish coverage check
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          COVERAGE_FILE: coverage/lcov.info
+          MINIMUM_LINES: 90
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('node:fs');
+            const lcov = fs.readFileSync(process.env.COVERAGE_FILE, 'utf8');
+            const records = lcov.split('end_of_record');
+            const totals = records.reduce(
+              (result, record) => {
+                const linesFound = Number(record.match(/^LF:(\d+)$/m)?.[1] || 0);
+                const linesHit = Number(record.match(/^LH:(\d+)$/m)?.[1] || 0);
+                return {found: result.found + linesFound, hit: result.hit + linesHit};
+              },
+              {found: 0, hit: 0}
+            );
+            const percentage = totals.found ? (100 * totals.hit) / totals.found : 0;
+            const minimum = Number(process.env.MINIMUM_LINES);
+            const conclusion = percentage >= minimum ? 'success' : 'failure';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const headSha = context.payload.pull_request?.head.sha || context.sha;
+
+            await github.rest.checks.create({
+              owner,
+              repo,
+              name: 'coverage',
+              head_sha: headSha,
+              status: 'completed',
+              conclusion,
+              output: {
+                title: `${percentage.toFixed(2)}% line coverage`,
+                summary: `Coverage is ${conclusion === 'success' ? 'above' : 'below'} the ${minimum}% minimum.`,
+                text: `**${totals.hit.toLocaleString()} / ${totals.found.toLocaleString()}** instrumented lines are covered.\n\n[View the detailed Coveralls report](https://coveralls.io).`
+              }
+            });
