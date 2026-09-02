@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.1",
+  "version": "5.0.0-alpha.4",
   "keywords": [
     "geometry",
     "gltf",
@@ -34,6 +34,6 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/types": "5.0.0-alpha.1"
+    "@math.gl/types": "5.0.0-alpha.4"
   }
 }
