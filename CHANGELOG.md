@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v5.0.0-alpha.5
+
+- chore: use npm trusted publishing (#130)
+
 ## v5.0.0-alpha.4
 
 - feat(geoarrow): Add final-target WKB decode options, dimension inference, and count-only WKB
