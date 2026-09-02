@@ -1145,13 +1145,13 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
 });
 */
 
-test.each([0, 1, 2])('OBB quaternion preserves reflected half axes (axis %i)', axis => {
+for (const axis of [0, 1, 2]) test(`OBB quaternion preserves reflected half axes (axis ${axis})`, t => {
   const halfAxes = new Matrix3().fromQuaternion([0.2, 0.4, 0.4, 0.8]).scale([15, 5, 1]);
   for (let row = 0; row < 3; row++) halfAxes[axis * 3 + row] *= -1;
   const original = Array.from(halfAxes);
   const box = new OrientedBoundingBox([1, 2, 3], halfAxes);
   const quaternion = box.quaternion;
-  expect(Math.hypot(...quaternion)).toBeCloseTo(1, 12);
+  t.ok(Math.abs(Math.hypot(...quaternion) - 1) < 1e-12);
   const reconstructed = new OrientedBoundingBox().fromCenterHalfSizeQuaternion(
     Array.from(box.center),
     box.halfSize,
@@ -1160,7 +1160,8 @@ test.each([0, 1, 2])('OBB quaternion preserves reflected half axes (axis %i)', a
   for (let column = 0; column < 3; column++) {
     const source = new Vector3(halfAxes.getColumn(column));
     const target = new Vector3(reconstructed.halfAxes.getColumn(column));
-    expect(Math.abs(source.dot(target))).toBeCloseTo(source.dot(source), 10);
+    t.ok(Math.abs(Math.abs(source.dot(target)) - source.dot(source)) < 1e-10);
   }
-  expect(Array.from(box.halfAxes)).toEqual(original);
+  t.deepEqual(Array.from(box.halfAxes), original);
+  t.end();
 });

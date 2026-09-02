@@ -34,18 +34,22 @@ jobs:
     needs: check_branch
     permissions:
       contents: write
+      id-token: write
 
     if: ${{ github.repository_owner == 'visgl' && needs.check_branch.outputs.should_build }}
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NPM_ACCESS_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: volta-cli/action@2d68418f32546fd191eb666e232b321d5726484d # v4.1.1
         with:
           cache: 'yarn'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.4
 
       - name: Install dependencies
         run: yarn
@@ -56,8 +60,8 @@ jobs:
       - name: Run tests from transpiled code
         run: npx ocular-test dist
 
-      - name: Login to NPM
-        run: npm config set "//registry.npmjs.org/:_authToken=${NPM_ACCESS_TOKEN}"
+      - name: Update npm for trusted publishing
+        run: npm install --global npm@^11.15.0
 
       - name: Publish to NPM
         run: npx ocular-publish from-git
