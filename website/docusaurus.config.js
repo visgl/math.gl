@@ -1,6 +1,8 @@
 const {getDocusaurusConfig} = require('@vis.gl/docusaurus-website');
 const {resolve} = require('path');
 
+const websiteBaseUrl = process.env.WEBSITE_BASE_URL;
+
 const config = getDocusaurusConfig({
   projectName: 'math.gl',
   tagline: 'A collection of math modules for Geospatial and 3D visualization use cases',
@@ -22,6 +24,17 @@ const config = getDocusaurusConfig({
     }
   }
 });
+
+if (websiteBaseUrl) {
+  config.baseUrl = websiteBaseUrl;
+}
+
+// Opt into all currently documented Docusaurus v4 behavior while v4 is in development.
+config.future = {
+  ...config.future,
+  v4: true,
+  faster: true
+};
 
 // TODO: Remove this compatibility shim after @vis.gl/docusaurus-website
 // moves onBrokenMarkdownLinks to markdown.hooks.
