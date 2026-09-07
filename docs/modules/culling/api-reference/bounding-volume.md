@@ -32,7 +32,7 @@ Returns
 
 - The estimated distance squared from the bounding sphere to the point.
 
-<!--
+{/*
 ### transformWithoutScale(sphere, transform, result)
 
 Applies a 4x4 affine transformation matrix to a bounding sphere where there is no scale
@@ -66,7 +66,7 @@ If you imagine the infinite number of planes with normal direction, this compute
 @param {Interval} [result] A Interval to store the nearest and farthest distances.
 @returns {Interval} The nearest and farthest distances on the bounding sphere from position in direction.
 
--->
+*/}
 
 ## Attribution
 
