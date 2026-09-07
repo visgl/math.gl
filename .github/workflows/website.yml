@@ -7,8 +7,6 @@ on:
       - '*-release'
   workflow_dispatch:
 
-concurrency: website-gh-pages
-
 permissions:
   contents: read
 
@@ -53,6 +51,10 @@ jobs:
   deploy:
     runs-on: ubuntu-22.04
     needs: check_branch
+
+    concurrency:
+      group: website-gh-pages-${{ needs.check_branch.outputs.target_folder || 'root' }}
+      cancel-in-progress: false
     
     permissions:
       contents: write
