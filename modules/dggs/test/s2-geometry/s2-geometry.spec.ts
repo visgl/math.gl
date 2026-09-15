@@ -4,11 +4,17 @@
 
 import {test, expect} from 'vitest';
 
-import {getS2Cell, toHilbertQuadkey} from '@math.gl/dggs/s2-geometry/s2-geometry';
+import {
+  getS2Cell,
+  getS2DescendantIndex,
+  getS2IndexFromCell,
+  toHilbertQuadkey
+} from '@math.gl/dggs/s2-geometry/s2-geometry';
 import {S2} from 's2-geometry';
 import {
   getS2ChildIndex,
   getS2IndexFromToken,
+  getS2Level,
   getS2TokenFromIndex
 } from '../../src/s2-geometry/s2-token';
 
@@ -52,7 +58,63 @@ test('S2 tokens support empty cells, canonical padding and child indexes', () =>
   expect(getS2TokenFromIndex(0n)).toBe('X');
   const parent = getS2IndexFromToken('89c25');
   expect(getS2TokenFromIndex(parent)).toBe('89c25');
-  for (let child = 0; child < 4; child++) {
-    expect(getS2ChildIndex(parent, child)).not.toBe(parent);
+  expect([0, 1, 2, 3].map(child => getS2TokenFromIndex(getS2ChildIndex(parent, child)))).toEqual([
+    '89c244',
+    '89c24c',
+    '89c254',
+    '89c25c'
+  ]);
+});
+
+test('S2 child indexes match the reference implementation across faces and levels', () => {
+  const parentTokens = ['1', '3', '5', '7', '9', 'b', '89c25', '80858004'];
+  for (const parentToken of parentTokens) {
+    const parentIndex = getS2IndexFromToken(parentToken);
+    const parentKey = toHilbertQuadkey(parentIndex);
+    for (let child = 0; child < 4; child++) {
+      const expectedIndex = BigInt(S2.keyToId(`${parentKey}${child}`));
+      expect(getS2ChildIndex(parentIndex, child), `${parentToken} child ${child}`).toBe(
+        expectedIndex
+      );
+    }
   }
+});
+
+test('S2 cell coordinates and spatial descendants match the reference implementation', () => {
+  const rootTokens = ['1', '3', '5', '7', '9', 'b', '89c25'];
+  for (const rootToken of rootTokens) {
+    const rootIndex = getS2IndexFromToken(rootToken);
+    const rootCell = getS2Cell(rootIndex);
+    expect(getS2IndexFromCell(rootCell)).toBe(rootIndex);
+
+    const relativeLevel = 2;
+    const divisionCount = 2 ** relativeLevel;
+    for (let x = 0; x < divisionCount; x++) {
+      for (let y = 0; y < divisionCount; y++) {
+        const referenceCell = S2.S2Cell.FromFaceIJ(
+          rootCell.face,
+          [rootCell.ij[0] * divisionCount + x, rootCell.ij[1] * divisionCount + y],
+          rootCell.level + relativeLevel
+        );
+        const expectedIndex = BigInt(S2.keyToId(referenceCell.toHilbertQuadkey()));
+        expect(
+          getS2DescendantIndex(rootIndex, relativeLevel, x, y),
+          `${rootToken} descendant ${x},${y}`
+        ).toBe(expectedIndex);
+      }
+    }
+  }
+});
+
+test('S2 hierarchy helpers reject malformed and out-of-range inputs', () => {
+  const parentIndex = getS2IndexFromToken('89c25');
+  expect(getS2Level(parentIndex)).toBe(8);
+  expect(() => getS2ChildIndex(parentIndex, -1)).toThrow(/child index/);
+  expect(() => getS2ChildIndex(parentIndex, 4)).toThrow(/child index/);
+  expect(() => getS2ChildIndex(0n, 0)).toThrow(/S2 index/);
+  expect(() => getS2ChildIndex(getS2IndexFromToken('1000000000000001'), 0)).toThrow(/leaf/);
+  expect(() => getS2DescendantIndex(parentIndex, -1, 0, 0)).toThrow(/relative level/);
+  expect(() => getS2DescendantIndex(parentIndex, 1, 2, 0)).toThrow(/coordinates/);
+  expect(() => getS2IndexFromCell({face: 6, ij: [0, 0], level: 0})).toThrow(/face/);
+  expect(() => getS2IndexFromCell({face: 0, ij: [2, 0], level: 1})).toThrow(/coordinates/);
 });

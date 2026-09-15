@@ -72,6 +72,7 @@ Highlights:
 - Aligns the core decoder shape with deck.gl-community's `GlobalGridLayer` contract.
 - Provides `/a5`, `/geohash`, `/h3`, `/plus-code`, `/quadkey`, and `/s2` subpath exports from `@math.gl/dggs`.
 - Detects conventional cell-column names for all bundled decoders to power data-driven visualization layers.
+- Adds validated S2 token/index conversion, exact polar and antimeridian bounds, and face-aware spatial descendant addressing.
 
 **`@math.gl/core`**
 

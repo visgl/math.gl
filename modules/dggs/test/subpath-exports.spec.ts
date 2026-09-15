@@ -8,7 +8,7 @@ import {GeohashDecoder} from '@math.gl/dggs/geohash';
 import {H3Decoder} from '@math.gl/dggs/h3';
 import {PlusCodeDecoder} from '@math.gl/dggs/plus-code';
 import {QuadkeyDecoder} from '@math.gl/dggs/quadkey';
-import {S2Decoder} from '@math.gl/dggs/s2';
+import {getS2DescendantIndex, getS2IndexFromToken, getS2Level, S2Decoder} from '@math.gl/dggs/s2';
 
 type GlobalGridLayerContract = {
   name: string;
@@ -24,6 +24,8 @@ test('@math.gl/dggs decoder subpath exports', () => {
   expect(PlusCodeDecoder.name).toBe('plus-code');
   expect(QuadkeyDecoder.name).toBe('quadkey');
   expect(S2Decoder.name).toBe('s2');
+  const rootIndex = getS2IndexFromToken('1');
+  expect(getS2Level(getS2DescendantIndex(rootIndex, 1, 0, 0))).toBe(1);
 });
 
 test('decoders satisfy the deck.gl-community GlobalGridLayer contract', () => {

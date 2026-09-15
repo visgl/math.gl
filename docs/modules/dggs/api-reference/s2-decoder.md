@@ -13,7 +13,8 @@ This module is still experimental. It may have issues and functionality may chan
 S2 is a discrete global grid system built on the Hilbert curve.
 See [s2geometry.io](https://s2geometry.io/) for more information.
 
-> The S2 functions in math.gl are currently focused on **decoding** S2 encoded data, not encoding it.
+The S2 functions in math.gl focus on decoding cell geometry and navigating an existing hierarchy.
+They do not provide coordinate-to-cell encoding, neighbors, coverings, or region operations.
 
 ## API Notes
 
@@ -41,3 +42,24 @@ S2 token. An empty cell is represented by the token `X`.
 - `cellToBoundary(cell: string | bigint): [number, number][]`
 - `cellToBoundaryFlat(cell: string | bigint): number[]`
 - `cellToBounds(cell: string | bigint): Bounds2D`
+
+`cellToBounds` returns conservative longitude/latitude bounds in degrees. Longitudes are unwrapped
+so that east is greater than or equal to west; antimeridian bounds may therefore contain endpoints
+outside `[-180, 180]`. Level-zero polar faces span the full longitude range.
+
+### S2 hierarchy functions
+
+The `@math.gl/dggs/s2` subpath also exports lightweight hierarchy helpers:
+
+- `isS2TokenValid(token: unknown): boolean`
+- `isS2IndexValid(index: unknown): boolean`
+- `getS2IndexFromToken(token: string): bigint`
+- `getS2TokenFromIndex(index: bigint): string`
+- `getS2Level(index: bigint): number`
+- `getS2ChildIndex(index: bigint, child: number): bigint`
+- `getS2IndexFromCell(cell: S2Cell): bigint`
+- `getS2DescendantIndex(root: bigint, relativeLevel: number, x: number, y: number): bigint`
+
+`getS2ChildIndex` uses Hilbert child order. `getS2DescendantIndex` instead accepts spatial `(x, y)`
+coordinates along the root cell's face-local axes and accounts for Hilbert orientation changes.
+This makes it suitable for implicit quadtree addressing.
