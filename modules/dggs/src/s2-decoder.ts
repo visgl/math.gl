@@ -93,7 +93,7 @@ export function getS2Bounds(cell: DGGSCell): Bounds2D {
     const uv = STToUV(st);
     const [x, y, z] = FaceUVToXYZ(s2Cell.face, uv);
     let [longitude, latitude] = XYZToLngLat([x, y, z]);
-    if (Math.abs(latitude) > 89.999 && previousLongitude !== undefined) {
+    if (x === 0 && y === 0 && previousLongitude !== undefined) {
       longitude = previousLongitude;
     }
     if (previousLongitude !== undefined) {

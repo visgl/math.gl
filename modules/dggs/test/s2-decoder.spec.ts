@@ -116,3 +116,9 @@ test('S2 non-root bounds are ordered and contain the tessellated boundary', () =
     }
   }
 });
+
+test('S2 bounds preserve the longitude extent of cells adjacent to a pole', () => {
+  const [[west], [east]] = getS2Bounds('4555555554');
+  expect(west).toBeLessThanOrEqual(0);
+  expect(east).toBeGreaterThanOrEqual(90);
+});
