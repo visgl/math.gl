@@ -46,7 +46,7 @@
     "json-schema-to-typescript": "^16.0.0",
     "playwright": "^1.62.1",
     "pre-commit": "^2.0.0",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   },
   "pre-commit": [
     "test-pre-commit"
