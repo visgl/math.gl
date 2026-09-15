@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v5.0.0-alpha.6
+
+- feat(dggs): Add validated S2 hierarchy navigation and conservative geographic bounds (#136)
+- chore: Prepare the website for Docusaurus v4 and publish `master` documentation under `next`
+- build(deps): Update `fast-uri` and `postcss-selector-parser`
+
 ## v5.0.0-alpha.5
 
 - chore: use npm trusted publishing (#130)
