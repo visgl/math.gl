@@ -3,12 +3,17 @@
 // Copyright (c) vis.gl contributors
 
 import {type Bounds2D} from '@math.gl/types';
-import {type DGGSCell, type DGGSDecoder, getDGGSCellToken} from './dggs-decoder';
+import {
+  withDGGSBoundaryOptions,
+  type DGGSCell,
+  type DGGSDecoder,
+  getDGGSCellToken
+} from './dggs-decoder';
 
 const TILE_SIZE = 512;
 
 /** Decoder for the quadkey DGGS */
-export const QuadkeyDecoder = {
+export const QuadkeyDecoder = withDGGSBoundaryOptions({
   name: 'quadkey',
   hasNumericRepresentation: false,
   cellColumnNames: ['quadkey', 'quadkeyId', 'quadkey_id'],
@@ -19,7 +24,7 @@ export const QuadkeyDecoder = {
   cellToBoundaryFlat: (cell: DGGSCell): number[] =>
     getQuadkeyBoundaryFlat(getDGGSCellToken(cell, 'Quadkey')),
   cellToBounds: (cell: DGGSCell): Bounds2D => getQuadkeyBounds(getDGGSCellToken(cell, 'Quadkey'))
-} as const satisfies DGGSDecoder;
+} as const satisfies DGGSDecoder);
 
 function getQuadkeyLngLat(quadkey: string): [number, number] {
   const [topLeft, bottomRight] = quadkeyToWorldBounds(quadkey);

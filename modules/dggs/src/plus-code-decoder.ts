@@ -4,7 +4,12 @@
 
 import OpenLocationCodePackage, {type OpenLocationCodeArea} from 'open-location-code';
 import {type Bounds2D} from '@math.gl/types';
-import {type DGGSCell, type DGGSDecoder, getDGGSCellToken} from './dggs-decoder';
+import {
+  withDGGSBoundaryOptions,
+  type DGGSCell,
+  type DGGSDecoder,
+  getDGGSCellToken
+} from './dggs-decoder';
 
 const openLocationCode = new OpenLocationCodePackage.OpenLocationCode();
 
@@ -12,7 +17,7 @@ const openLocationCode = new OpenLocationCodePackage.OpenLocationCode();
  * Lightweight geometry decoder for full Google Plus Codes (Open Location Codes).
  * Short codes require a reference location and are intentionally unsupported.
  */
-export const PlusCodeDecoder = {
+export const PlusCodeDecoder = withDGGSBoundaryOptions({
   name: 'plus-code',
   hasNumericRepresentation: false,
   cellColumnNames: ['plusCode', 'plus_code', 'openLocationCode', 'open_location_code', 'olc'],
@@ -29,7 +34,7 @@ export const PlusCodeDecoder = {
       [area.longitudeHi, area.latitudeHi]
     ];
   }
-} as const satisfies DGGSDecoder;
+} as const satisfies DGGSDecoder);
 
 function getPlusCodeLngLat(cell: DGGSCell): [number, number] {
   const area = decodePlusCode(cell);

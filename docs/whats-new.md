@@ -1,5 +1,9 @@
 # What's New
 
+## Unreleased
+
+- `@math.gl/dggs` adds `unwrapDGGSBoundary` and optional unwrapping on decoder boundary, flat-boundary, and bounds methods. Antimeridian-crossing cells can use continuous longitudes while existing calls retain their output. See [DGGSDecoder](./modules/dggs/api-reference/dggs-decoder.md).
+
 <table style={{border: 0, align: "center"}}>
   <tbody>
     <tr>

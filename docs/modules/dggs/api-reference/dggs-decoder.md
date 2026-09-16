@@ -49,3 +49,64 @@ Returns the closed boundary as `[lng0, lat0, ...]`.
 #### `cellToBounds(cell: DGGSCell): Bounds2D`
 
 Returns the cell bounds as `[[minLng, minLat], [maxLng, maxLat]]`.
+
+### Antimeridian boundary options
+
+All bundled decoders accept an optional `DGGSBoundaryOptions` argument on
+`cellToBoundary(cell, options?)`, `cellToBoundaryFlat(cell, options?)`, and
+`cellToBounds(cell, options?)`:
+
+```typescript
+const options = {unwrap: true, referenceLongitude: 180};
+const boundary = H3Decoder.cellToBoundary(cell, options);
+const flatBoundary = H3Decoder.cellToBoundaryFlat(cell, options);
+const bounds = H3Decoder.cellToBounds(cell, options);
+```
+
+`unwrap` defaults to `false`, preserving existing geometry. With `unwrap: true`,
+longitudes follow the preceding vertex continuously: an edge from 179° to -179°
+becomes 179° to 181°. The optional `referenceLongitude` places the first vertex
+near the supplied longitude; it is ignored unless `unwrap` is enabled. Returned
+longitudes and bounds may lie outside [-180, 180]. Bounds use the unwrapped longitude extent and preserve decoder-specific latitude
+extrema, including poles inside cells. Full-longitude bounds remain unchanged.
+The result is not a wrapped geographic interval.
+
+### `unwrapDGGSBoundary(boundary, referenceLongitude?)`
+
+This standalone export applies the same policy to readonly longitude/latitude
+pairs from any decoder. It returns fresh pairs without mutating the input.
+
+```typescript
+import {unwrapDGGSBoundary} from '@math.gl/dggs';
+
+unwrapDGGSBoundary([[179, 10], [-179, 10]]);
+// [[179, 10], [181, 10]]
+```
+
+Without a reference, the first longitude stays unchanged. Subsequent vertices
+shift by multiples of 360° to minimize the distance to the preceding longitude.
+Exact 180° ties retain their direction. Latitude, vertex order, and open or closed
+boundaries are preserved; an empty boundary returns an empty array.
+
+Boundaries whose input longitude span is at least 360° are conservatively copied
+unchanged, preserving explicit full-world cells. Closed rings that acquire net
+longitude winding are also copied unchanged, even when a reference is supplied.
+Polar cells need additional topology handling. Neither API splits polygons at the
+seam, computes geodesic edges, nor performs renderer tessellation.
+
+For example, a decoder adapter can opt into this policy for `GlobalGridLayer`:
+
+```typescript
+import {H3Decoder} from '@math.gl/dggs';
+import {GlobalGridLayer} from '@deck.gl-community/geo-layers';
+
+const globalGrid = {
+  ...H3Decoder,
+  cellToBoundary: cell => H3Decoder.cellToBoundary(cell, {unwrap: true})
+};
+const layer = new GlobalGridLayer({id: 'h3-cells', data: cells, globalGrid});
+```
+
+Consumers that already unwrap boundaries should apply the policy only once in
+their integration. Renderer-specific polygon normalization and globe subdivision
+remain the renderer's responsibility.

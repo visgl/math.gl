@@ -4,10 +4,15 @@
 
 import {cellToBoundary, cellToLatLng} from 'h3-js';
 import {type Bounds2D} from '@math.gl/types';
-import {type DGGSCell, type DGGSDecoder, getDGGSCellBounds} from './dggs-decoder';
+import {
+  withDGGSBoundaryOptions,
+  type DGGSCell,
+  type DGGSDecoder,
+  getDGGSCellBounds
+} from './dggs-decoder';
 
 /** Lightweight cell geometry decoder for the H3 hexagonal DGGS. */
-export const H3Decoder = {
+export const H3Decoder = withDGGSBoundaryOptions({
   name: 'h3',
   hasNumericRepresentation: true,
   cellColumnNames: [
@@ -26,7 +31,7 @@ export const H3Decoder = {
   cellToBoundary: (cell: DGGSCell): [number, number][] => getH3Boundary(cell),
   cellToBoundaryFlat: (cell: DGGSCell): number[] => getH3Boundary(cell).flat(),
   cellToBounds: (cell: DGGSCell): Bounds2D => getDGGSCellBounds(getH3Boundary(cell))
-} as const satisfies DGGSDecoder;
+} as const satisfies DGGSDecoder);
 
 function getH3Token(cell: DGGSCell): string {
   return typeof cell === 'bigint' ? cell.toString(16) : removeHexPrefix(cell);

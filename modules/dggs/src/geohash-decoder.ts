@@ -3,10 +3,15 @@
 // Copyright (c) vis.gl contributors
 
 import {type Bounds2D} from '@math.gl/types';
-import {type DGGSCell, type DGGSDecoder, getDGGSCellToken} from './dggs-decoder';
+import {
+  withDGGSBoundaryOptions,
+  type DGGSCell,
+  type DGGSDecoder,
+  getDGGSCellToken
+} from './dggs-decoder';
 
 /** Decoder for the geohash dggs */
-export const GeohashDecoder = {
+export const GeohashDecoder = withDGGSBoundaryOptions({
   name: 'geohash',
   hasNumericRepresentation: false,
   cellColumnNames: ['geohash', 'geohashId', 'geohash_id'],
@@ -17,7 +22,7 @@ export const GeohashDecoder = {
   cellToBoundaryFlat: (cell: DGGSCell): number[] =>
     getGeohashBoundaryFlat(getDGGSCellToken(cell, 'GeoHash')),
   cellToBounds: (cell: DGGSCell): Bounds2D => getGeohashBounds(getDGGSCellToken(cell, 'GeoHash'))
-} as const satisfies DGGSDecoder;
+} as const satisfies DGGSDecoder);
 
 const BASE32_CODES = '0123456789bcdefghjkmnpqrstuvwxyz';
 const BASE32_CODES_DICT: Record<string, number> = {};
