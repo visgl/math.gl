@@ -93,9 +93,16 @@ export function withDGGSBoundaryOptions<T extends DGGSDecoder>(
     cellToBoundary,
     cellToBoundaryFlat: (cell, options) =>
       options?.unwrap ? cellToBoundary(cell, options).flat() : decoder.cellToBoundaryFlat(cell),
-    cellToBounds: (cell, options) =>
-      options?.unwrap
-        ? getDGGSCellBounds(cellToBoundary(cell, options))
-        : decoder.cellToBounds(cell)
+    cellToBounds: (cell, options) => {
+      const bounds = decoder.cellToBounds(cell);
+      if (!options?.unwrap || bounds[1][0] - bounds[0][0] >= 360) {
+        return bounds;
+      }
+      const unwrapped = getDGGSCellBounds(cellToBoundary(cell, options));
+      // Latitude extrema may occur inside the cell or along curved edges.
+      unwrapped[0][1] = bounds[0][1];
+      unwrapped[1][1] = bounds[1][1];
+      return unwrapped;
+    }
   };
 }

@@ -67,8 +67,9 @@ const bounds = H3Decoder.cellToBounds(cell, options);
 longitudes follow the preceding vertex continuously: an edge from 179° to -179°
 becomes 179° to 181°. The optional `referenceLongitude` places the first vertex
 near the supplied longitude; it is ignored unless `unwrap` is enabled. Returned
-longitudes and bounds may lie outside [-180, 180]. Bounds are the minimum and
-maximum coordinates of the resulting boundary, not a wrapped geographic interval.
+longitudes and bounds may lie outside [-180, 180]. Bounds use the unwrapped longitude extent and preserve decoder-specific latitude
+extrema, including poles inside cells. Full-longitude bounds remain unchanged.
+The result is not a wrapped geographic interval.
 
 ### `unwrapDGGSBoundary(boundary, referenceLongitude?)`
 

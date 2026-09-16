@@ -153,8 +153,8 @@ test.each(fixtures)(
     expect(boundary[0]).toEqual(boundary.at(-1));
     expect(decoder.cellToBoundaryFlat(cell, options)).toEqual(boundary.flat());
     expect(decoder.cellToBounds(cell, options)).toEqual([
-      [Math.min(...boundary.map(p => p[0])), Math.min(...boundary.map(p => p[1]))],
-      [Math.max(...boundary.map(p => p[0])), Math.max(...boundary.map(p => p[1]))]
+      [Math.min(...boundary.map(p => p[0])), decoder.cellToBounds(cell)[0][1]],
+      [Math.max(...boundary.map(p => p[0])), decoder.cellToBounds(cell)[1][1]]
     ]);
     expect(original).toEqual(snapshot);
     expect(decoder.cellToBoundary(cell)).toEqual(snapshot);
@@ -186,3 +186,13 @@ test.each(fixtures.slice(0, 2))(
     ).toBeLessThan(180);
   }
 );
+
+test.each(['5', 'b'])('preserves the full extent of polar S2 root %s', cell => {
+  const expected = S2Decoder.cellToBounds(cell);
+  expect(expected[0][0]).toBe(-180);
+  expect(expected[1][0]).toBe(180);
+  expect(cell === '5' ? expected[1][1] : expected[0][1]).toBe(cell === '5' ? 90 : -90);
+  for (const referenceLongitude of [undefined, 180, 720]) {
+    expect(S2Decoder.cellToBounds(cell, {unwrap: true, referenceLongitude})).toEqual(expected);
+  }
+});
