@@ -4,10 +4,15 @@
 
 import {cellToBoundary, cellToLonLat, hexToU64, u64ToHex} from 'a5-js';
 import {type Bounds2D} from '@math.gl/types';
-import {type DGGSCell, type DGGSDecoder, getDGGSCellBounds} from './dggs-decoder';
+import {
+  withDGGSBoundaryOptions,
+  type DGGSCell,
+  type DGGSDecoder,
+  getDGGSCellBounds
+} from './dggs-decoder';
 
 /** Lightweight cell geometry decoder for the A5 pentagonal DGGS. */
-export const A5Decoder = {
+export const A5Decoder = withDGGSBoundaryOptions({
   name: 'a5',
   hasNumericRepresentation: true,
   cellColumnNames: [
@@ -27,7 +32,7 @@ export const A5Decoder = {
   cellToBoundary: (cell: DGGSCell): [number, number][] => getA5Boundary(cell),
   cellToBoundaryFlat: (cell: DGGSCell): number[] => getA5Boundary(cell).flat(),
   cellToBounds: (cell: DGGSCell): Bounds2D => getDGGSCellBounds(getA5Boundary(cell))
-} as const satisfies DGGSDecoder;
+} as const satisfies DGGSDecoder);
 
 function getA5CellIndex(cell: DGGSCell): bigint {
   return typeof cell === 'bigint' ? cell : hexToU64(removeHexPrefix(cell));

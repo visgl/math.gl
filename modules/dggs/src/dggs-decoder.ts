@@ -3,6 +3,15 @@
 // Copyright (c) vis.gl contributors
 
 import {type Bounds2D} from '@math.gl/types';
+import {unwrapDGGSBoundary} from './unwrap-dggs-boundary';
+
+/** Optional continuous-longitude geometry output for DGGS decoders. */
+export type DGGSBoundaryOptions = {
+  /** Unwrap ordinary antimeridian crossings. Defaults to false. */
+  unwrap?: boolean;
+  /** Place the first longitude near this value, in degrees. Used only with unwrap. */
+  referenceLongitude?: number;
+};
 
 /** Cell identifiers used by the lightweight decoder API. */
 export type DGGSCell = string | bigint;
@@ -28,12 +37,12 @@ export type DGGSDecoder = {
   /** Return the center of the cell as `[longitude, latitude]`. */
   cellToLngLat: (cell: DGGSCell) => [number, number];
   /** Return the closed cell boundary as longitude/latitude pairs. */
-  cellToBoundary: (cell: DGGSCell) => [number, number][];
+  cellToBoundary: (cell: DGGSCell, options?: DGGSBoundaryOptions) => [number, number][];
 
   /** @returns the boundary of the cell, as a flat array */
-  cellToBoundaryFlat: (cell: DGGSCell) => number[];
+  cellToBoundaryFlat: (cell: DGGSCell, options?: DGGSBoundaryOptions) => number[];
   /** @returns the longitude/latitude bounds of the cell */
-  cellToBounds: (cell: DGGSCell) => Bounds2D;
+  cellToBounds: (cell: DGGSCell, options?: DGGSBoundaryOptions) => Bounds2D;
 };
 
 /** A cell column and the decoder selected for it. */
@@ -68,4 +77,25 @@ export function getDGGSCellBounds(boundary: [number, number][]): Bounds2D {
     [west, south],
     [east, north]
   ];
+}
+
+/** @internal Apply the shared opt-in geometry policy to a decoder. */
+export function withDGGSBoundaryOptions<T extends DGGSDecoder>(
+  decoder: T
+): Omit<T, 'cellToBoundary' | 'cellToBoundaryFlat' | 'cellToBounds'> &
+  Pick<DGGSDecoder, 'cellToBoundary' | 'cellToBoundaryFlat' | 'cellToBounds'> {
+  const cellToBoundary = (cell: DGGSCell, options?: DGGSBoundaryOptions): [number, number][] => {
+    const boundary = decoder.cellToBoundary(cell);
+    return options?.unwrap ? unwrapDGGSBoundary(boundary, options.referenceLongitude) : boundary;
+  };
+  return {
+    ...decoder,
+    cellToBoundary,
+    cellToBoundaryFlat: (cell, options) =>
+      options?.unwrap ? cellToBoundary(cell, options).flat() : decoder.cellToBoundaryFlat(cell),
+    cellToBounds: (cell, options) =>
+      options?.unwrap
+        ? getDGGSCellBounds(cellToBoundary(cell, options))
+        : decoder.cellToBounds(cell)
+  };
 }

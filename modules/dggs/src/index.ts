@@ -10,7 +10,9 @@ import {PlusCodeDecoder} from './plus-code-decoder';
 import {QuadkeyDecoder} from './quadkey-decoder';
 import {S2Decoder} from './s2-decoder';
 
+export {type DGGSBoundaryOptions} from './dggs-decoder';
 export {type DGGSCell, type DGGSCellColumn, type DGGSDecoder};
+export {unwrapDGGSBoundary} from './unwrap-dggs-boundary';
 export {A5Decoder};
 export {GeohashDecoder};
 export {H3Decoder};

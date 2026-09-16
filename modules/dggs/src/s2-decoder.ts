@@ -3,14 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import {type Bounds2D} from '@math.gl/types';
-import {type DGGSCell, type DGGSDecoder} from './dggs-decoder';
+import {withDGGSBoundaryOptions, type DGGSCell, type DGGSDecoder} from './dggs-decoder';
 
 import {getS2IndexFromToken, getS2TokenFromIndex} from './s2-geometry/s2-token';
 import {getS2GeoBounds} from './s2-geometry/s2-to-boundary';
 import {getS2Cell, IJToST, STToUV, FaceUVToXYZ, XYZToLngLat} from './s2-geometry/s2-geometry';
 
 /** Decoder for the S2 DGGS */
-export const S2Decoder = {
+export const S2Decoder = withDGGSBoundaryOptions({
   name: 's2',
   hasNumericRepresentation: true,
   cellColumnNames: ['s2', 's2Token', 's2_token', 's2Cell', 's2_cell', 's2CellId', 's2_cell_id'],
@@ -20,7 +20,7 @@ export const S2Decoder = {
   cellToBoundary: (cell: DGGSCell): [number, number][] => getS2Boundary(cell),
   cellToBoundaryFlat: (cell: DGGSCell): number[] => getS2BoundaryFlat(cell),
   cellToBounds: (cell: DGGSCell): Bounds2D => getS2Bounds(cell)
-} as const satisfies DGGSDecoder;
+} as const satisfies DGGSDecoder);
 
 /**
  * Retrieve S2 geometry center
