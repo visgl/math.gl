@@ -5,27 +5,74 @@
 import type {WellKnownDimension, WellKnownGeometry} from './types';
 import {getWellKnownDimensionSize, inferWellKnownGeometryDimension} from './types';
 
+/** Options for parsing WKT text. */
+export type WKTParseOptions = Readonly<{
+  /** Infer unmarked coordinate dimensions for legacy WKT such as POINT (1 2 3). */
+  inferDimensions?: boolean;
+}>;
+
+/** One parsed WKT geometry and its semantic dimension, including collection children. */
+export type WKTParseResult = Readonly<{
+  geometry: WellKnownGeometry;
+  dimension: WellKnownDimension;
+  children?: readonly WKTParseResult[];
+}>;
+
 /** Parses one WKT geometry, including Z/M/ZM, collections, alternate MultiPoint, and empties. */
-export function parseWKT(text: string): WellKnownGeometry {
+export function parseWKT(text: string, options?: WKTParseOptions): WellKnownGeometry {
+  return parseWKTWithMetadata(text, options).geometry;
+}
+
+/** Parses WKT while preserving each geometry's declared or inferred semantic dimension. */
+export function parseWKTWithMetadata(text: string, options: WKTParseOptions = {}): WKTParseResult {
   const parser = new WKTParser(text);
-  const geometry = parser.parseGeometry(2);
+  const result = parser.parseGeometry('xy', options);
   parser.assertComplete();
-  return geometry;
+  return result;
 }
 
 /** Formats one geometry as WKT using an explicit or tuple-inferred semantic dimension. */
 export function formatWKT(
-  geometry: WellKnownGeometry,
-  dimension: WellKnownDimension = inferWellKnownGeometryDimension(geometry)
+  geometry: WellKnownGeometry | WKTParseResult,
+  dimension?: WellKnownDimension
 ): string {
-  const dimensionToken = dimension === 'xy' ? '' : ` ${dimension.slice(2).toUpperCase()}`;
+  if (isWKTParseResult(geometry)) {
+    return dimension === undefined
+      ? formatWKTResult(geometry)
+      : formatWKTGeometry(geometry.geometry, dimension);
+  }
+  return formatWKTGeometry(geometry, dimension ?? inferWellKnownGeometryDimension(geometry));
+}
+
+function formatWKTResult(result: WKTParseResult): string {
+  return formatWKTGeometry(result.geometry, result.dimension, result.children);
+}
+
+function formatWKTGeometry(
+  geometry: WellKnownGeometry,
+  dimension: WellKnownDimension,
+  children?: readonly WKTParseResult[]
+): string {
+  const dimensionToken = dimension === 'xy' ? '' : ' ' + dimension.slice(2).toUpperCase();
   if (geometry.type === 'GeometryCollection') {
-    if (geometry.geometries.length === 0) return `GEOMETRYCOLLECTION${dimensionToken} EMPTY`;
-    return `GEOMETRYCOLLECTION${dimensionToken} (${geometry.geometries.map(child => formatWKT(child, dimension)).join(', ')})`;
+    if (geometry.geometries.length === 0) return 'GEOMETRYCOLLECTION' + dimensionToken + ' EMPTY';
+    const formattedChildren = children
+      ? children.map(formatWKTResult)
+      : geometry.geometries.map(child => formatWKTGeometry(child, dimension));
+    return 'GEOMETRYCOLLECTION' + dimensionToken + ' (' + formattedChildren.join(', ') + ')';
   }
   const type = geometry.type.toUpperCase();
-  if (isEmptyCoordinates(geometry.coordinates)) return `${type}${dimensionToken} EMPTY`;
-  return `${type}${dimensionToken} ${formatCoordinateNesting(geometry.coordinates, getGeometryDepth(geometry.type))}`;
+  if (isEmptyCoordinates(geometry.coordinates)) return type + dimensionToken + ' EMPTY';
+  return (
+    type +
+    dimensionToken +
+    ' ' +
+    formatCoordinateNesting(geometry.coordinates, getGeometryDepth(geometry.type))
+  );
+}
+
+function isWKTParseResult(value: WellKnownGeometry | WKTParseResult): value is WKTParseResult {
+  return 'geometry' in value && 'dimension' in value;
 }
 
 class WKTParser {
@@ -36,36 +83,56 @@ class WKTParser {
     this.tokens = tokenizeWKT(text);
   }
 
-  parseGeometry(inheritedDimensionSize: number): WellKnownGeometry {
+  parseGeometry(inheritedDimension: WellKnownDimension, options: WKTParseOptions): WKTParseResult {
     const type = this.takeWord().toUpperCase();
-    let dimensionSize = inheritedDimensionSize;
+    let dimension = inheritedDimension;
+    let hasExplicitDimension = false;
     if (['Z', 'M', 'ZM'].includes(this.peek().toUpperCase())) {
-      const dimension = this.take().toUpperCase();
-      dimensionSize = dimension === 'ZM' ? 4 : 3;
+      const token = this.take().toUpperCase();
+      dimension = token === 'Z' ? 'xyz' : token === 'M' ? 'xym' : 'xyzm';
+      hasExplicitDimension = true;
     }
+    const dimensionSize = getWellKnownDimensionSize(dimension);
     if (this.peek().toUpperCase() === 'EMPTY') {
       this.take();
-      return makeEmptyGeometry(type, dimensionSize);
+      return {geometry: makeEmptyGeometry(type, dimensionSize), dimension};
     }
     if (type === 'GEOMETRYCOLLECTION') {
       this.expect('(');
-      const geometries: WellKnownGeometry[] = [];
+      const children: WKTParseResult[] = [];
       if (this.peek() !== ')') {
-        do geometries.push(this.parseGeometry(dimensionSize));
+        do children.push(this.parseGeometry(dimension, options));
         while (this.takeIf(','));
       }
       this.expect(')');
-      return {type: 'GeometryCollection', geometries};
+      return {
+        geometry: {type: 'GeometryCollection', geometries: children.map(child => child.geometry)},
+        dimension,
+        children
+      };
     }
-    const coordinates = this.parseCoordinateNesting(getWKTDepth(type), dimensionSize);
-    return makeGeometry(type, coordinates);
+    const inferDimension = Boolean(
+      options.inferDimensions && !hasExplicitDimension && inheritedDimension === 'xy'
+    );
+    const coordinates = this.parseCoordinateNesting(
+      getWKTDepth(type),
+      inferDimension ? null : dimensionSize
+    );
+    const coordinateValues = coordinates as readonly unknown[];
+    if (inferDimension) {
+      const inferredSize = inferCoordinateSize(coordinateValues);
+      if (inferredSize !== null) dimension = getDimensionForSize(inferredSize);
+    } else if (hasExplicitDimension) {
+      assertCoordinateSize(coordinateValues, dimensionSize);
+    }
+    return {geometry: makeGeometry(type, coordinates), dimension};
   }
 
   assertComplete(): void {
     if (this.index !== this.tokens.length) throw new Error(`Unexpected WKT token ${this.peek()}`);
   }
 
-  private parseCoordinateNesting(depth: number, dimensionSize: number): unknown {
+  private parseCoordinateNesting(depth: number, dimensionSize: number | null): unknown {
     this.expect('(');
     if (depth === 0) {
       const coordinate = this.readCoordinate(dimensionSize);
@@ -86,12 +153,16 @@ class WKTParser {
     return values;
   }
 
-  private readCoordinate(dimensionSize: number): number[] {
+  private readCoordinate(dimensionSize: number | null): number[] {
     const values: number[] = [];
-    while (values.length < dimensionSize && isNumberToken(this.peek())) {
+    while (
+      (dimensionSize === null || values.length < dimensionSize) &&
+      isNumberToken(this.peek())
+    ) {
       values.push(Number(this.take()));
     }
     if (values.length < 2) throw new Error('WKT coordinate requires at least two numbers');
+    if (values.length > 4) throw new Error('WKT coordinates cannot contain more than four numbers');
     return values;
   }
 
@@ -119,6 +190,46 @@ class WKTParser {
   private expect(token: string): void {
     const actual = this.take();
     if (actual !== token) throw new Error(`Expected WKT token ${token}, found ${actual}`);
+  }
+}
+
+function inferCoordinateSize(value: readonly unknown[]): number | null {
+  let coordinateSize: number | null = null;
+  const visit = (coordinates: readonly unknown[]): void => {
+    if (coordinates.length === 0) return;
+    if (typeof coordinates[0] === 'number') {
+      if (coordinates.length < 2 || coordinates.length > 4) {
+        throw new Error('WKT coordinates must contain between two and four numbers');
+      }
+      if (coordinateSize !== null && coordinateSize !== coordinates.length) {
+        throw new Error('WKT geometry contains inconsistent coordinate dimensions');
+      }
+      coordinateSize = coordinates.length;
+      return;
+    }
+    for (const child of coordinates) visit(child as readonly unknown[]);
+  };
+  visit(value);
+  return coordinateSize;
+}
+
+function assertCoordinateSize(value: readonly unknown[], expectedSize: number): void {
+  const actualSize = inferCoordinateSize(value);
+  if (actualSize !== null && actualSize !== expectedSize) {
+    throw new Error('WKT coordinate dimension does not match declared dimension ' + expectedSize);
+  }
+}
+
+function getDimensionForSize(size: number): WellKnownDimension {
+  switch (size) {
+    case 2:
+      return 'xy';
+    case 3:
+      return 'xyz';
+    case 4:
+      return 'xyzm';
+    default:
+      throw new Error('Unsupported WKT coordinate dimension ' + size);
   }
 }
 
