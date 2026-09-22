@@ -213,6 +213,16 @@ test('WKT optionally infers dimensions independently for legacy collection child
   );
 });
 
+test('WKT validates dimensions inherited from geometry collections', () => {
+  expect(() => parseWKTWithMetadata('GEOMETRYCOLLECTION Z (POINT (1 2))')).toThrow(
+    /does not match declared dimension/
+  );
+
+  const result = parseWKTWithMetadata('GEOMETRYCOLLECTION Z (POINT (1 2 3))');
+  expect(result.children?.[0].dimension).toBe('xyz');
+  expect(formatWKT(result)).toBe('GEOMETRYCOLLECTION Z (POINT Z (1 2 3))');
+});
+
 test('WKT rejects malformed structure and every unrecognized character', () => {
   expect(() => parseWKT('POLYGON (0 0, 1 1)')).toThrow();
   expect(() => parseWKT('NOTAGEOMETRY (0 0)')).toThrow(/Unsupported/);

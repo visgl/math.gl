@@ -122,7 +122,7 @@ class WKTParser {
     if (inferDimension) {
       const inferredSize = inferCoordinateSize(coordinateValues);
       if (inferredSize !== null) dimension = getDimensionForSize(inferredSize);
-    } else if (hasExplicitDimension) {
+    } else {
       assertCoordinateSize(coordinateValues, dimensionSize);
     }
     return {geometry: makeGeometry(type, coordinates), dimension};
