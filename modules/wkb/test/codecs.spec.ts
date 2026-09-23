@@ -8,6 +8,7 @@ import {
   inferWellKnownGeometryDimension,
   parseWKB,
   parseWKT,
+  parseWKTWithMetadata,
   writeWKB,
   type WellKnownDimension,
   type WellKnownGeometry
@@ -175,6 +176,51 @@ test('WKT accepts dimensions, empties, nested collections, and both MultiPoint s
       }
     ]
   });
+});
+
+test('WKT metadata preserves semantic dimensions in nested geometry collections', () => {
+  const result = parseWKTWithMetadata(
+    'GEOMETRYCOLLECTION (POINT Z (1 2 3), GEOMETRYCOLLECTION (POINT M (4 5 6)))'
+  );
+
+  expect(result.dimension).toBe('xy');
+  expect(result.children?.map(child => child.dimension)).toEqual(['xyz', 'xy']);
+  expect(result.children?.[1].children?.[0].dimension).toBe('xym');
+  expect(formatWKT(result)).toBe(
+    'GEOMETRYCOLLECTION (POINT Z (1 2 3), GEOMETRYCOLLECTION (POINT M (4 5 6)))'
+  );
+  expect(result.geometry).toEqual({
+    type: 'GeometryCollection',
+    geometries: [
+      {type: 'Point', coordinates: [1, 2, 3]},
+      {type: 'GeometryCollection', geometries: [{type: 'Point', coordinates: [4, 5, 6]}]}
+    ]
+  });
+});
+
+test('WKT optionally infers dimensions independently for legacy collection children', () => {
+  const result = parseWKTWithMetadata(
+    'GEOMETRYCOLLECTION (POINT (1 2), POINT (3 4 5), POINT (6 7 8 9))',
+    {inferDimensions: true}
+  );
+
+  expect(result.children?.map(child => child.dimension)).toEqual(['xy', 'xyz', 'xyzm']);
+  expect(formatWKT(result)).toBe(
+    'GEOMETRYCOLLECTION (POINT (1 2), POINT Z (3 4 5), POINT ZM (6 7 8 9))'
+  );
+  expect(() => parseWKTWithMetadata('LINESTRING (1 2, 3 4 5)', {inferDimensions: true})).toThrow(
+    /inconsistent coordinate dimensions/
+  );
+});
+
+test('WKT validates dimensions inherited from geometry collections', () => {
+  expect(() => parseWKTWithMetadata('GEOMETRYCOLLECTION Z (POINT (1 2))')).toThrow(
+    /does not match declared dimension/
+  );
+
+  const result = parseWKTWithMetadata('GEOMETRYCOLLECTION Z (POINT (1 2 3))');
+  expect(result.children?.[0].dimension).toBe('xyz');
+  expect(formatWKT(result)).toBe('GEOMETRYCOLLECTION Z (POINT Z (1 2 3))');
 });
 
 test('WKT rejects malformed structure and every unrecognized character', () => {

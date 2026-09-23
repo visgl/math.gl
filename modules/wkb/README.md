@@ -184,8 +184,14 @@ The parser supports:
 - decimal and exponent notation;
 - arbitrary whitespace while rejecting every unrecognized non-whitespace character.
 
-`formatWKT` accepts an optional explicit dimension. As with WKB, pass `xym` when a three-value
-tuple represents a measure rather than elevation.
+`parseWKT` returns the geometry value. Use `parseWKTWithMetadata` when the semantic dimension must
+survive parsing, especially for measured coordinates and collections with mixed child dimensions.
+Its result is accepted directly by `formatWKT`, which then writes each geometry with its own
+declared dimension. Set `inferDimensions: true` to accept legacy unmarked XYZ/XYZM coordinates;
+three-value tuples are inferred as XYZ because tuple width alone cannot distinguish Z from M.
+
+For geometry values without parse metadata, `formatWKT` accepts an optional explicit dimension.
+Pass `xym` when a three-value tuple represents a measure rather than elevation.
 
 ## Empty geometry
 
@@ -217,14 +223,17 @@ boundary check from referencing GeoArrow or Apache Arrow.
 - `visitWKB(bytes, visitor, options?)`
 - `scanWKB(bytes, options?)`
 - `WKBBuilder`
-- `parseWKT(text)`
-- `formatWKT(geometry, dimension?)`
+- `parseWKT(text, options?)`
+- `parseWKTWithMetadata(text, options?)`
+- `formatWKT(geometryOrResult, dimension?)`
 - `getWellKnownDimensionSize(dimension)`
 - `inferWellKnownGeometryDimension(geometry)`
 - `WellKnownGeometry`
 - `WellKnownDimension`
 - `WKBParseOptions`
 - `WKBParseResult`
+- `WKTParseOptions`
+- `WKTParseResult`
 - `WKBHeader`
 - `WKBVisitor`
 - `WKBScanResult`
