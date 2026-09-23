@@ -20,13 +20,16 @@ export type WKTParseResult = Readonly<{
 
 /** Parses one WKT geometry, including Z/M/ZM, collections, alternate MultiPoint, and empties. */
 export function parseWKT(text: string, options?: WKTParseOptions): WellKnownGeometry {
-  return parseWKTWithMetadata(text, options).geometry;
+  const parser = new WKTParser(text);
+  const result = parser.parseGeometry('xy', options ?? {}, false);
+  parser.assertComplete();
+  return result.geometry;
 }
 
 /** Parses WKT while preserving each geometry's declared or inferred semantic dimension. */
 export function parseWKTWithMetadata(text: string, options: WKTParseOptions = {}): WKTParseResult {
   const parser = new WKTParser(text);
-  const result = parser.parseGeometry('xy', options);
+  const result = parser.parseGeometry('xy', options, true);
   parser.assertComplete();
   return result;
 }
@@ -83,7 +86,11 @@ class WKTParser {
     this.tokens = tokenizeWKT(text);
   }
 
-  parseGeometry(inheritedDimension: WellKnownDimension, options: WKTParseOptions): WKTParseResult {
+  parseGeometry(
+    inheritedDimension: WellKnownDimension,
+    options: WKTParseOptions,
+    validateInheritedDimensions: boolean
+  ): WKTParseResult {
     const type = this.takeWord().toUpperCase();
     let dimension = inheritedDimension;
     let hasExplicitDimension = false;
@@ -101,7 +108,7 @@ class WKTParser {
       this.expect('(');
       const children: WKTParseResult[] = [];
       if (this.peek() !== ')') {
-        do children.push(this.parseGeometry(dimension, options));
+        do children.push(this.parseGeometry(dimension, options, validateInheritedDimensions));
         while (this.takeIf(','));
       }
       this.expect(')');
@@ -122,7 +129,7 @@ class WKTParser {
     if (inferDimension) {
       const inferredSize = inferCoordinateSize(coordinateValues);
       if (inferredSize !== null) dimension = getDimensionForSize(inferredSize);
-    } else {
+    } else if (hasExplicitDimension || validateInheritedDimensions) {
       assertCoordinateSize(coordinateValues, dimensionSize);
     }
     return {geometry: makeGeometry(type, coordinates), dimension};
