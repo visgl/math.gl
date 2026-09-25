@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v5.0.0-alpha.9
+
+- feat(dggs): Add antimeridian boundary unwrapping helper (#137)
+- feat(wkb): Preserve WKT dimensions in collections (#138)
+- build: Update release tooling and development dependencies
+
 ## v5.0.0-alpha.6
 
 - feat(dggs): Add validated S2 hierarchy navigation and conservative geographic bounds (#136)
