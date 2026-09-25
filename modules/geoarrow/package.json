@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.6",
+  "version": "5.0.0-alpha.7",
   "keywords": [
     "geoarrow",
     "geospatial",
@@ -54,9 +54,9 @@
   ],
   "sideEffects": false,
   "dependencies": {
-    "@math.gl/crs": "5.0.0-alpha.6",
-    "@math.gl/polygon": "5.0.0-alpha.6",
-    "@math.gl/types": "5.0.0-alpha.6",
-    "@math.gl/wkb": "5.0.0-alpha.6"
+    "@math.gl/crs": "5.0.0-alpha.7",
+    "@math.gl/polygon": "5.0.0-alpha.7",
+    "@math.gl/types": "5.0.0-alpha.7",
+    "@math.gl/wkb": "5.0.0-alpha.7"
   }
 }
