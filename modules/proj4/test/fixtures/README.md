@@ -15,10 +15,14 @@ Reference: proj4js **2.22.0**, tag **v2.22.0**, checked September 28, 2026.
 - `upstream-2.22.0.ts` adapts 24 PROJ-string fixtures from
   [the tagged upstream test file](https://github.com/proj4js/proj4js/blob/v2.22.0/test/testData.js).
   Original definitions and coordinates are retained with line numbers and a SHA-256
-  of the original source file. Twenty-two cases execute numerically; two retain
-  explicit datum/ellipsoid rejection expectations for future tranches. Their rounded
+  of the original source file. All 24 cases now execute numerically, including NAD83 and Plessis. Their rounded
   expected coordinates use 0.02 meter / 2e-6 degree tolerances. Inverse longitude is
   compared modulo 360 degrees. Upstream attribution is in `../../PROJ4-LICENSE.md`.
+- `crs-datums.ts` and `crs-datums.spec.ts` cover equivalent WKT1/WKT2/ESRI/PROJJSON
+  definitions, shared SpatialReference metadata, axes, prime meridians, BoundCRS and
+  three/seven-parameter datum chains. Differential tests compare computed heights
+  using proj4js axis enforcement; analytic ECEF equator/pole cases provide independent
+  checks. Tests record intentional native dimension, unit and angular-format behavior.
 - Published [PROJ UTM examples](https://proj.org/en/stable/operations/projections/utm.html)
   provide independent north/south checks at their published 0.01-meter precision.
   They use default GRS80; its difference from WGS84 is below this precision. These are

@@ -65,3 +65,20 @@ if (spatialReference.crs.state === 'explicit') {
   void spatialDefinition;
   void spatialCompatibility;
 }
+
+// The native backend consumes the same readonly CRS and spatial-reference contracts.
+import {
+  TypeScriptProjection,
+  normalizeCRS,
+  checkTypeScriptCRSCompatibility,
+  projJSONCRSParser,
+  type TypeScriptCRSInput,
+  type NormalizedCRS
+} from '@math.gl/proj4/experimental';
+const nativeInput: TypeScriptCRSInput = spatialReference;
+new TypeScriptProjection({from: nativeInput, to: readonlyDefinition, parsers: [projJSONCRSParser]});
+new TypeScriptProjection({from: spatialReference.crs});
+const normalized: NormalizedCRS = normalizeCRS(geographic, {parsers: [projJSONCRSParser]});
+checkTypeScriptCRSCompatibility(nativeInput, {parsers: [projJSONCRSParser]});
+// @ts-expect-error The engine's normalized parameters are immutable.
+normalized.parameters['proj'] = 'merc';

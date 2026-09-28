@@ -102,3 +102,11 @@ describe('PROJ string codec', () => {
     ).toThrow(/Invalid PROJ parameter name/);
   });
 });
+
+test('PROJ DMS punctuation is preserved without confusing quoted values', () => {
+  const text = '+proj=merc +lon_0=12d30\'15"E +title="A quoted title"';
+  const ast = parsePROJString(text);
+  expect(ast.parameters[1].value).toBe('12d30\'15"E');
+  expect(encodePROJString(ast)).toBe(text);
+  expect(() => parsePROJString("+proj=merc +lon_0=12d30'oops")).toThrow(PROJStringSyntaxError);
+});

@@ -8,6 +8,7 @@ import {createState, forward, inverse} from '../kernels/eqdc';
 
 export const equidistantConic: ProjectionPlugin = {
   name: 'eqdc',
+  aliases: ['Equidistant_Conic'],
   parameters: [...ORIGIN_PARAMETERS, 'lat_1', 'lat_2'],
   create(context) {
     const base = kernelParameters(context);

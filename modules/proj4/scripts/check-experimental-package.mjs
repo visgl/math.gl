@@ -81,3 +81,45 @@ for (const fixture of cases) {
     );
   }
 }
+
+// CRS readers are optional even though their symbols share the public barrel.
+for (const parser of [null, 'wktCRSParser', 'projJSONCRSParser']) {
+  const contents = parser
+    ? `import {TypeScriptProjection, ${parser}} from '@math.gl/proj4/experimental'; export const create = to => new TypeScriptProjection({to, parsers: [${parser}]});`
+    : "export {TypeScriptProjection} from '@math.gl/proj4/experimental';";
+  const result = await build({
+    stdin: {contents, resolveDir: packageRoot},
+    bundle: true,
+    tsconfigRaw: {},
+    format: 'esm',
+    platform: 'browser',
+    minify: true,
+    metafile: true,
+    write: false
+  });
+  const emitted = Object.values(result.metafile.outputs).flatMap(output =>
+    Object.entries(output.inputs)
+      .filter(([, input]) => input.bytesInOutput > 0)
+      .map(([path]) => path)
+  );
+  assert.equal(
+    emitted.some(path => path.endsWith('/experimental/crs/wkt.js')),
+    parser === 'wktCRSParser'
+  );
+  assert.equal(
+    emitted.some(path => path.endsWith('/experimental/crs/projjson.js')),
+    parser === 'projJSONCRSParser'
+  );
+  assert(!emitted.some(path => /node_modules\/proj4\//.test(path)));
+}
+for (const {TypeScriptProjection, geocentric, wktCRSParser} of [esm, cjs]) {
+  assert.deepEqual(
+    new TypeScriptProjection({to: 'EPSG:4978', projections: [geocentric]}).project([0, 0]),
+    [6378137, 0, 0]
+  );
+  const source = 'GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]]';
+  assert.deepEqual(
+    new TypeScriptProjection({from: source, parsers: [wktCRSParser]}).project([0, 0]),
+    [0, 0]
+  );
+}

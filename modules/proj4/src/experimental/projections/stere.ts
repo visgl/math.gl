@@ -14,6 +14,12 @@ import {createState, forward, inverse} from '../kernels/stere';
 
 export const stereographic: ProjectionPlugin = {
   name: 'stere',
+  aliases: [
+    'Stereographic_South_Pole',
+    'Polar_Stereographic_variant_A',
+    'Polar_Stereographic_variant_B',
+    'Polar_Stereographic'
+  ],
   parameters: [...ORIGIN_PARAMETERS, ...SCALE_PARAMETERS, 'lat_ts'],
   create(context) {
     const base = kernelParameters(context);

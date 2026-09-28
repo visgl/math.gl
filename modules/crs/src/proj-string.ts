@@ -78,6 +78,9 @@ export function encodePROJString(ast: PROJStringAst, options?: EncodePROJStringO
     .join(separator);
 }
 
+// DMS marks inside an unquoted angular token are punctuation, not string delimiters.
+const DMS_VALUE = /^[+-]?\d+(?:\.\d*)?d(?:\d+(?:\.\d*)?'(?:\d+(?:\.\d*)?")?)?[NSEW]?$/i;
+
 function validateRawParameterValue(rawValue: string): void {
   if (typeof rawValue !== 'string') {
     throw new TypeError('Invalid PROJ raw parameter value');
@@ -87,7 +90,7 @@ function validateRawParameterValue(rawValue: string): void {
   }
   const first = rawValue[0];
   if (first !== '"' && first !== "'") {
-    if (/\s|["']/.test(rawValue)) {
+    if (/\s|["']/.test(rawValue) && !DMS_VALUE.test(rawValue)) {
       throw new TypeError(`Invalid PROJ raw parameter value: ${rawValue}`);
     }
     return;
@@ -170,7 +173,7 @@ function tokenizePROJString(source: string): {raw: string; offset: number}[] {
         offset++;
         continue;
       }
-      if (character === '"' || character === "'") {
+      if ((character === '"' || character === "'") && source[offset - 1] === '=') {
         quote = character;
         offset++;
         continue;
@@ -194,7 +197,7 @@ function decodeParameterValue(rawValue: string, source: string, offset: number):
   }
   const first = rawValue[0];
   if (first !== '"' && first !== "'") {
-    if (rawValue.includes('"') || rawValue.includes("'")) {
+    if ((rawValue.includes('"') || rawValue.includes("'")) && !DMS_VALUE.test(rawValue)) {
       throw new PROJStringSyntaxError('Quote must begin a PROJ parameter value', source, offset);
     }
     return rawValue;

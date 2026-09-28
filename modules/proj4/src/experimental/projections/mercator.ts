@@ -8,9 +8,19 @@ import type {ProjectionPlugin} from '../types';
 /** Spherical and ellipsoidal Mercator, using the PROJ Mercator equations. */
 export const mercator: ProjectionPlugin = {
   name: 'merc',
+  aliases: [
+    'Mercator',
+    'Popular Visualisation Pseudo Mercator',
+    'Mercator_1SP',
+    'Mercator_Auxiliary_Sphere',
+    'Mercator_Variant_A'
+  ],
   parameters: ['lon_0', 'lat_ts', 'k', 'k_0', 'x_0', 'y_0'],
   create({semiMajorAxis: a, eccentricitySquared: es, parameters}) {
     const e = Math.sqrt(es);
+    const wrap = Object.prototype.hasOwnProperty.call(parameters, 'over')
+      ? (value: number) => value
+      : wrapLongitude;
     const longitudeOrigin = numberParameter(parameters, 'lon_0', 0) * DEGREES_TO_RADIANS;
     const x0 = numberParameter(parameters, 'x_0', 0);
     const y0 = numberParameter(parameters, 'y_0', 0);
@@ -28,10 +38,7 @@ export const mercator: ProjectionPlugin = {
         }
         const isometricLatitude =
           Math.asinh(Math.tan(latitude)) - e * Math.atanh(e * Math.sin(latitude));
-        return [
-          x0 + radius * wrapLongitude(longitude - longitudeOrigin),
-          y0 + radius * isometricLatitude
-        ];
+        return [x0 + radius * wrap(longitude - longitudeOrigin), y0 + radius * isometricLatitude];
       },
       inverse(x, y) {
         const isometricLatitude = (y - y0) / radius;
@@ -41,7 +48,7 @@ export const mercator: ProjectionPlugin = {
             Math.sinh(isometricLatitude + e * Math.atanh(e * Math.sin(latitude)))
           );
           if (Math.abs(next - latitude) < 1e-13) {
-            return [wrapLongitude(longitudeOrigin + (x - x0) / radius), next];
+            return [wrap(longitudeOrigin + (x - x0) / radius), next];
           }
           latitude = next;
         }

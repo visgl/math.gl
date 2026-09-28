@@ -14,6 +14,12 @@ import {createState, forward, inverse} from '../kernels/sterea';
 
 export const obliqueStereographic: ProjectionPlugin = {
   name: 'sterea',
+  aliases: [
+    'Stereographic_North_Pole',
+    'Oblique_Stereographic',
+    'Oblique Stereographic Alternative',
+    'Double_Stereographic'
+  ],
   parameters: [...ORIGIN_PARAMETERS, ...SCALE_PARAMETERS],
   create(context) {
     const base = kernelParameters(context);

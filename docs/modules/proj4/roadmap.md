@@ -1,7 +1,7 @@
 # TypeScript proj4 parity roadmap
 
-Status: tranches 0, 1, and 2 implemented in this source tree for the documented subset.
-Later tranches are proposed; the inventory still marks projection families as partial
+Status: tranches 0 through 4 implemented in this source tree for the documented subset.
+Tranches 5–7 are proposed; the inventory still marks projection families as partial
 until their remaining CRS/parameter gaps are closed.
 Sequencing describes dependencies, not release dates.
 
@@ -60,8 +60,7 @@ the TypeScript engine must never silently fall back to proj4js.
 
 This tranche is a usable subset, not a claim of complete parity for any CRS syntax.
 See [TypeScriptProjection](./api-reference/typescript-projection.md) for the exact contract.
-One observed alias gap is upstream's `identity`: it exposes radians rather than the
-degree output of `longlat` and is currently rejected pending explicit unit semantics.
+Tranche 3 adds upstream's `identity` alias with explicit radian semantics.
 
 ### Tranche 1: make parity measurable
 
@@ -71,7 +70,7 @@ Implemented artifacts:
   modules and 30 CRS/API/transform features, with aliases, default-bundle membership,
   source hashes, fixture IDs, tests, gaps, and intentional differences.
 - `upstream-2.22.0.ts`: 24 tagged upstream coordinate fixtures with source lines and
-  source-file hash. Two retained cases explicitly test pending datum/ellipsoid gaps.
+  source-file hash. The retained NAD83 and Plessis cases now execute successfully.
 - `common-projections.ts`: authored differential cases covering spheres, ellipsoids,
   both hemispheres, origins, scales, offsets, and units.
 - Independent published PROJ UTM examples provide a second numerical reference. A
@@ -116,7 +115,7 @@ unrelated projection families are removed from browser bundles.
 Intentional fixes are tracked and regression-tested: false northing in equatorial
 ellipsoidal stereographic, the latitude sign in spherical approximate TM with a
 nonzero latitude origin, initialized defaults, and explicit singularity errors.
-Projection-name/WKT aliases and general CRS normalization remain tranche 3 work.
+Projection-name/WKT aliases and CRS normalization are implemented in tranche 3 below.
 
 
 Implement `tmerc`, `etmerc`, and `utm` first, including southern hemispheres and all
@@ -126,10 +125,18 @@ inputs instead of projection objects whose fields are implicitly initialized.
 
 For each family, test sphere/ellipsoid variants, applicable standard parallels,
 central meridians, scale/offset parameters, inverse convergence, and documented domains.
-Use WGS84 or explicit no-datum-shift definitions until tranche 4 is ready. Preserve
+Tranche 4 extends these projection kernels with datum transformations. Preserve
 upstream copyright/license notices whenever code or test data is adapted.
 
 ### Tranche 3: separate CRS normalization from execution
+
+Implemented: immutable native CRS normalization, opt-in WKT/PROJJSON adapters using
+`@math.gl/crs`, shared readonly definitions and SpatialReference inputs, explicit
+storage-order handling, backend-specific capability checks, and compound/vertical
+extraction policy. The shared PROJ parser now preserves DMS notation. Readers are
+excluded from minimal bundles. Structured method/axis variants beyond the documented
+subset remain explicit gaps rather than a claim of full standards coverage.
+
 
 Normalize PROJ strings, WKT1/WKT2 (including ESRI spellings), and upstream-supported
 PROJJSON into a typed internal CRS model. Keep parsing and metadata types in
@@ -146,6 +153,15 @@ plugins, and missing transform stages. Keep the existing proj4js compatibility h
 accurately scoped to its own backend.
 
 ### Tranche 4: datum and 3D pipeline
+
+Implemented: the `geocentric` plugin, pinned upstream ellipsoid/datum/unit/prime-meridian
+tables, three/seven-parameter Helmert transforms, WGS84 datum chaining, WKT TOWGS84 and
+BoundCRS operations. Tests cover heights, poles, geocentric units, both directions,
+axis permutations, Web Mercator datum geometry, and grid rejection. Native height
+semantics deliberately expose computed heights; fourth ordinates remain unchanged.
+Dynamic operations and grids remain unsupported. A larger independent geodetic corpus
+is still an acceptance gate for promotion.
+
 
 Add geodetic/geocentric conversions (`geocent`), ellipsoid definitions, datum identity,
 three- and seven-parameter Helmert transforms, and upstream datum chaining semantics.

@@ -21,3 +21,19 @@ export {obliqueStereographic} from './projections/sterea';
 export {azimuthalEquidistant} from './projections/aeqd';
 export {transverseMercator, extendedTransverseMercator} from './projections/transverse-mercator';
 export {universalTransverseMercator} from './projections/utm';
+
+export {geocentric} from './projections/geocentric';
+export {normalizeCRS} from './crs/normalize';
+export {checkTypeScriptCRSCompatibility} from './typescript-projection';
+export type {TypeScriptCRSCompatibility} from './typescript-projection';
+export {TypeScriptCRSError} from './crs/types';
+export type {
+  NormalizedCRS,
+  CRSParser,
+  ParsedCRS,
+  CRSNormalizationOptions,
+  CRSCompatibilityReason
+} from './crs/types';
+export {wktCRSParser} from './crs/wkt';
+export {projJSONCRSParser} from './crs/projjson';
+export type {TypeScriptCRSInput} from './crs/spatial-reference';
