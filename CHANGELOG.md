@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- fix(core): Preserve supplied output types in `SphericalCoordinates.toVector3()` and add the
+  deprecated `_SphericalCoordinates` compatibility alias, retaining the default plain array result.
+
 ## v5.0.0-alpha.9
 
 - feat(dggs): Add antimeridian boundary unwrapping helper (#137)
@@ -13,9 +16,6 @@
 - feat(dggs): Add validated S2 hierarchy navigation and conservative geographic bounds (#136)
 - chore: Prepare the website for Docusaurus v4 and publish `master` documentation under `next`
 - build(deps): Update `fast-uri` and `postcss-selector-parser`
-
-- fix(core): Restore the default `Vector3` return from `SphericalCoordinates.toVector3()`, preserve
-  supplied output types, and add the deprecated `_SphericalCoordinates` compatibility alias.
 
 ## v5.0.0-alpha.5
 

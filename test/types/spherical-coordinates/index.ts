@@ -18,13 +18,13 @@ const tuple: [number, number, number] = [0, 0, 0];
 const tupleResult = spherical.toVector3(tuple);
 const float32Result = spherical.toVector3(new Float32Array(3));
 const float64Result = spherical.toVector3(new Float64Array(3));
-assertType<Equal<typeof defaultResult, Vector3>>();
-assertType<Equal<typeof undefinedResult, Vector3>>();
+assertType<Equal<typeof defaultResult, [number, number, number]>>();
+assertType<Equal<typeof undefinedResult, [number, number, number]>>();
 assertType<Equal<typeof vectorResult, Vector3>>();
 assertType<Equal<typeof tupleResult, typeof tuple>>();
 assertType<Equal<typeof float32Result, Float32Array<ArrayBuffer>>>();
 assertType<Equal<typeof float64Result, Float64Array<ArrayBuffer>>>();
-defaultResult.subtract([1, 2, 3]);
+vectorResult.subtract([1, 2, 3]);
 
 const legacy: _SphericalCoordinates = new _SphericalCoordinates();
 const mainLegacy: MainLegacySphericalCoordinates = new MainLegacySphericalCoordinates();

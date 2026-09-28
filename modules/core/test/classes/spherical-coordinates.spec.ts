@@ -21,13 +21,15 @@ test('SphericalCoordinates#toVector3 defaults and chaining', () => {
   const spherical = new SphericalCoordinates({radius: 2});
   const first = spherical.toVector3();
   const second = spherical.toVector3(undefined);
-  expect(first).toBeInstanceOf(Vector3);
-  expect(second).toBeInstanceOf(Vector3);
+  expect(Object.getPrototypeOf(first)).toBe(Array.prototype);
+  expect(Object.getPrototypeOf(second)).toBe(Array.prototype);
   expect(second).not.toBe(first);
   expect(Array.from(first)).toEqual([0, -0, 2]);
   expect(Array.from(second)).toEqual([0, -0, 2]);
-  expect(first.subtract([1, 2, 3])).toBe(first);
-  expect(Array.from(first)).toEqual([-1, -2, -1]);
+  const vector = new Vector3();
+  expect(spherical.toVector3(vector).subtract([1, 2, 3])).toBe(vector);
+  expect(Array.from(vector)).toEqual([-1, -2, -1]);
+  first[0] = 42;
   expect(Array.from(second)).toEqual([0, -0, 2]);
 });
 

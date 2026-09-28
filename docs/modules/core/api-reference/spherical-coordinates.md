@@ -146,14 +146,18 @@ SphericalCoordinates({longitude = 0, latitude = 0, z = 1.0})
 
 ### toVector3
 
-`toVector3(): Vector3`
+`toVector3(): [number, number, number]`
 
 `toVector3<T extends Vector3Like>(result: T): T`
 
-Returns a new `Vector3` when the argument is omitted or `undefined`, supporting method chaining:
+Returns a new plain three-element array when the argument is omitted or `undefined`.
+`SphericalCoordinates` does not import `Vector3` at runtime. To use vector methods, import
+`Vector3` and supply it as the output:
 
 ```typescript
-const direction = spherical.toVector3().subtract(offset);
+import {Vector3} from '@math.gl/core';
+
+const direction = spherical.toVector3(new Vector3()).subtract(offset);
 ```
 
 When an output is supplied, writes into and returns that same object without allocating a vector.
