@@ -79,7 +79,25 @@ const METHODS: Record<string, string> = {
   modifiedazimuthalequidistant: 'aeqd',
   equidistantcylindrical: 'eqc',
   equirectangular: 'eqc',
-  platecarree: 'eqc'
+  platecarree: 'eqc',
+  bonne: 'bonne',
+  cassinisoldner: 'cass',
+  cylindricalequalarea: 'cea',
+  lambertcylindricalequalarea: 'cea',
+  eckertvi: 'eck6',
+  equalearth: 'eqearth',
+  millercylindrical: 'mill',
+  mollweide: 'moll',
+  robinson: 'robin',
+  sinusoidal: 'sinu',
+  vandergrinten: 'vandg',
+  vandergrinteni: 'vandg',
+  gnomonic: 'gnom',
+  orthographic: 'ortho',
+  polyconic: 'poly',
+  americanpolyconic: 'poly',
+  newzealandmapgrid: 'nzmg',
+  gaussschreibertransversemercator: 'gstmerc'
 };
 const PARAMETERS: Record<string, string> = {
   centralmeridian: 'lon_0',
@@ -291,7 +309,7 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
         continue;
       let name = PARAMETERS[parameterName];
       if (!name) unsupportedStage('Unsupported conversion parameter: ' + String(parameter['name']));
-      if (name === 'lat_1' && ['merc', 'webmerc', 'eqc', 'stere'].includes(projection))
+      if (name === 'lat_1' && ['merc', 'webmerc', 'eqc', 'stere', 'cea'].includes(projection))
         name = 'lat_ts';
       if (parameters[name] !== undefined)
         throw new Error('Duplicate conversion parameter: ' + name);

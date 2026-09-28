@@ -82,12 +82,19 @@
         "Bonne (Werner lat_1=90)"
       ],
       "upstreamSHA256": "406216c124f8401ed5a732f54bfe2578aa9644d1bf1609d9088132b9d1cadbce",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=bonne",
+      "fixtureIds": [
+        "bonne-ellipsoid",
+        "bonne-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-bonne"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -100,12 +107,19 @@
         "cass"
       ],
       "upstreamSHA256": "d9d379f2ce75c96ef0a2a7d56c466863c0f9f8b17f7107a00fc9f9816a62f5ff",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=cass",
+      "fixtureIds": [
+        "cass-ellipsoid",
+        "cass-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-cass"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -116,12 +130,19 @@
         "cea"
       ],
       "upstreamSHA256": "a4a0d6c1f54740d6dca5c2f5293faa2c76ed531067da38cb6ee85bc9abe0b10a",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=cea",
+      "fixtureIds": [
+        "cea-ellipsoid",
+        "cea-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-cea"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -133,12 +154,19 @@
         "eck6"
       ],
       "upstreamSHA256": "d2b39ea3d8a32fc422f3eea1de02881c0300977e89f840021fb296c49769d1d7",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=eck6",
+      "fixtureIds": [
+        "eck6-ellipsoid",
+        "eck6-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-eck6"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -200,12 +228,19 @@
         "Equal_Earth"
       ],
       "upstreamSHA256": "ea87e1af30832202c6f96191bb7c4428fe2c8723ea0a2c7a61929e83b2c05455",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=eqearth",
+      "fixtureIds": [
+        "eqearth-ellipsoid",
+        "eqearth-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-eqearth"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -216,12 +251,19 @@
         "equi"
       ],
       "upstreamSHA256": "5a33b68ab5da0be4b3ee31259d95e0d86ce313d3224fde0ee76f25b2b450bd25",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=equi",
+      "fixtureIds": [
+        "equi-ellipsoid",
+        "equi-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-equi"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -306,12 +348,21 @@
         "geos"
       ],
       "upstreamSHA256": "e220ba6d35209dab8543592a21b1b67535ed59a568a8da6b3dd7193a4e58e002",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=geos",
+      "fixtureIds": [
+        "geos-x-false",
+        "geos-x-true",
+        "geos-y-false",
+        "geos-y-true"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-geos"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -322,12 +373,19 @@
         "gnom"
       ],
       "upstreamSHA256": "dff0c2eac1465920be8eb779ecb1e232270613f74f84330265df57da58e598c0",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=gnom",
+      "fixtureIds": [
+        "gnom-ellipsoid",
+        "gnom-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-gnom"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -339,12 +397,19 @@
         "gstmerc"
       ],
       "upstreamSHA256": "8930d07be5d1b6702b7ccfff6e23938170f5a11fbb3a08f6a261fef9a4c2a749",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=gstmerc",
+      "fixtureIds": [
+        "gstmerc-ellipsoid",
+        "gstmerc-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-gstmerc"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -359,12 +424,19 @@
         "krovak"
       ],
       "upstreamSHA256": "a8f2451249868103eb605052a006fa57f89a30d608e5920e6fe90c347827e64c",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=krovak",
+      "fixtureIds": [
+        "krovak",
+        "krovak-czech"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-krovak"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -482,12 +554,19 @@
         "mill"
       ],
       "upstreamSHA256": "cb858986bc90a47c739aebecbf9666fbfcceda44ae4c15774eaccd9940214a41",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=mill",
+      "fixtureIds": [
+        "mill-ellipsoid",
+        "mill-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-mill"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -499,12 +578,19 @@
         "moll"
       ],
       "upstreamSHA256": "6c49e010ffdd3b00220a500c2a6a253763805899a142ee80db690e3e56d241be",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=moll",
+      "fixtureIds": [
+        "moll-ellipsoid",
+        "moll-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-moll"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -516,12 +602,19 @@
         "nzmg"
       ],
       "upstreamSHA256": "e52fe4511d202169e828c94a4a8c75d1fadac710f26eb219f9e1db8f68faad56",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=nzmg",
+      "fixtureIds": [
+        "nzmg-1",
+        "nzmg-2"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-nzmg"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -534,12 +627,16 @@
         "ob_tran"
       ],
       "upstreamSHA256": "bd7e61f5a446d178085c1371b0aec6aec745dc9b64895b791ad48d7f4632b145",
-      "status": "unsupported",
-      "nativeSelection": null,
+      "status": "partial",
+      "nativeSelection": "obliqueTransformation(wrappedPlugin) or obliqueTransformation(\"longlat\")",
       "fixtureIds": [],
-      "tests": [],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-ob_tran"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -558,12 +655,21 @@
         "omerc"
       ],
       "upstreamSHA256": "4d51f38493f567fbed6d810a395dcf993604ad54fc8970b11b58ce4fcd623c66",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=omerc",
+      "fixtureIds": [
+        "omerc-alpha",
+        "omerc-no-offset",
+        "omerc-no-rotation",
+        "omerc-two-point"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-omerc"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -574,12 +680,19 @@
         "ortho"
       ],
       "upstreamSHA256": "187c2f62a97fd57e12291f23a25850483ba5acf02c58ace44d796ab4621078d8",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=ortho",
+      "fixtureIds": [
+        "ortho-ellipsoid",
+        "ortho-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-ortho"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -592,12 +705,19 @@
         "poly"
       ],
       "upstreamSHA256": "47cf48e887e6390b20fa4f9d4cc78216ab9671e805ea264e77518efe34d1622d",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=poly",
+      "fixtureIds": [
+        "poly-ellipsoid",
+        "poly-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-poly"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -610,12 +730,23 @@
         "qsc"
       ],
       "upstreamSHA256": "b63a7f4705fbea6d0136953615ce6764b5cb4dd15f9ea58b73b7c179fc50af49",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=qsc",
+      "fixtureIds": [
+        "qsc-0",
+        "qsc-1",
+        "qsc-2",
+        "qsc-3",
+        "qsc-4",
+        "qsc-5"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-qsc"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -627,12 +758,19 @@
         "robin"
       ],
       "upstreamSHA256": "8a409614a9f339f5b2631b1664753152db5ced5edec103c659939813167801b0",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=robin",
+      "fixtureIds": [
+        "robin-ellipsoid",
+        "robin-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-robin"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -644,12 +782,19 @@
         "sinu"
       ],
       "upstreamSHA256": "9e746f5fd43a5e2243077d928f964c44d2a8a902dcf850e7069510e87b3a0e6f",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=sinu",
+      "fixtureIds": [
+        "sinu-ellipsoid",
+        "sinu-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-sinu"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -660,12 +805,18 @@
         "somerc"
       ],
       "upstreamSHA256": "be1313048122f117b6c3e7e1c44585f9d7201391213b889357305108496cff98",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=somerc",
+      "fixtureIds": [
+        "somerc"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-somerc"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -753,12 +904,19 @@
         "tpers"
       ],
       "upstreamSHA256": "fe81e79ac956c6a744953d2c97fff7774b0a2b1680563694d86d6c28ca9b7a47",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=tpers",
+      "fixtureIds": [
+        "tpers-0",
+        "tpers-20"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-tpers"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     },
     {
@@ -796,12 +954,19 @@
         "vandg"
       ],
       "upstreamSHA256": "7a347023f660d0f528d37f6cd44a1c2f913ff0c8050fe63a0070e5f8de471211",
-      "status": "unsupported",
-      "nativeSelection": null,
-      "fixtureIds": [],
-      "tests": [],
+      "status": "partial",
+      "nativeSelection": "+proj=vandg",
+      "fixtureIds": [
+        "vandg-ellipsoid",
+        "vandg-sphere"
+      ],
+      "tests": [
+        "test/lib/catalogue-projections.spec.ts"
+      ],
       "gapIds": [
-        "projection-vandg"
+        "crs-normalization",
+        "projection-parameters",
+        "native-proj-corpus"
       ]
     }
   ],
@@ -822,7 +987,8 @@
       "id": "wkt1-ogc",
       "status": "partial",
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/catalogue-projections.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -873,7 +1039,8 @@
       "id": "projjson-projected",
       "status": "partial",
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/catalogue-projections.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -914,7 +1081,8 @@
       "status": "partial",
       "tests": [
         "test/lib/typescript-projection.spec.ts",
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/catalogue-projections.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -924,7 +1092,8 @@
       "id": "axis-enforcement",
       "status": "verified",
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/catalogue-projections.spec.ts"
       ],
       "gapIds": []
     },
@@ -941,7 +1110,8 @@
       "status": "partial",
       "tests": [
         "test/lib/typescript-projection.spec.ts",
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/catalogue-projections.spec.ts"
       ],
       "gapIds": [
         "projection-parameters"
@@ -952,7 +1122,8 @@
       "status": "partial",
       "tests": [
         "test/lib/common-projections.spec.ts",
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/catalogue-projections.spec.ts"
       ],
       "gapIds": [
         "projection-parameters"
@@ -1052,7 +1223,8 @@
       "status": "partial",
       "tests": [
         "test/lib/common-projections.spec.ts",
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/catalogue-projections.spec.ts"
       ],
       "gapIds": [
         "native-proj-corpus"
@@ -1063,7 +1235,8 @@
       "status": "partial",
       "tests": [
         "test/lib/common-projections.spec.ts",
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/catalogue-projections.spec.ts"
       ],
       "gapIds": [
         "native-proj-corpus"
@@ -1074,10 +1247,11 @@
       "status": "partial",
       "tests": [
         "test/lib/common-projections.spec.ts",
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/catalogue-projections.spec.ts"
       ],
       "gapIds": [
-        "recent-upstream-regressions"
+        "projection-parameters"
       ]
     },
     {
@@ -1102,13 +1276,13 @@
   "gaps": [
     {
       "id": "crs-normalization",
-      "tranche": 5,
-      "reason": "Extend WKT/PROJJSON method mappings with remaining projection plugins; uncommon derived, axis-meridian and vertical-first structured CRS variants remain explicit unsupported stages."
+      "tranche": 7,
+      "reason": "Catalogue world/regional method mappings are covered through shared CRS readers. Composite/perspective and Hotine/Krovak structured method variants, derived CRSs, axis-meridian and vertical-first structured axes still need explicit mappings and fixtures."
     },
     {
       "id": "projection-parameters",
-      "tranche": 5,
-      "reason": "Documented defaults, units, axes, prime meridians and longitude wrapping are implemented; remaining projection-specific parameters and authalic-radius variants need coverage."
+      "tranche": 7,
+      "reason": "All upstream algorithm modules now have native coverage; exhaustive parameter combinations, inverse domain boundaries, and uncommon structured variants still need an independent corpus before promotion."
     },
     {
       "id": "ntv2",
@@ -1124,126 +1298,6 @@
       "id": "native-proj-corpus",
       "tranche": 7,
       "reason": "Independent checks currently use published PROJ UTM examples. Expand into a reproducibly generated native PROJ/EPSG corpus; the local PROJ executable is incompatible with this host."
-    },
-    {
-      "id": "recent-upstream-regressions",
-      "tranche": 5,
-      "reason": "Orthographic false easting, oblique Mercator/Robinson enforced-axis z preservation, nzmg inverse iteration and vandg boundary fixes need fixtures as those plugins are added."
-    },
-    {
-      "id": "projection-bonne",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module bonne."
-    },
-    {
-      "id": "projection-cass",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module cass."
-    },
-    {
-      "id": "projection-cea",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module cea."
-    },
-    {
-      "id": "projection-eck6",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module eck6."
-    },
-    {
-      "id": "projection-eqearth",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module eqearth."
-    },
-    {
-      "id": "projection-equi",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module equi."
-    },
-    {
-      "id": "projection-geos",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module geos."
-    },
-    {
-      "id": "projection-gnom",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module gnom."
-    },
-    {
-      "id": "projection-gstmerc",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module gstmerc."
-    },
-    {
-      "id": "projection-krovak",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module krovak."
-    },
-    {
-      "id": "projection-mill",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module mill."
-    },
-    {
-      "id": "projection-moll",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module moll."
-    },
-    {
-      "id": "projection-nzmg",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module nzmg."
-    },
-    {
-      "id": "projection-ob_tran",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module ob_tran."
-    },
-    {
-      "id": "projection-omerc",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module omerc."
-    },
-    {
-      "id": "projection-ortho",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module ortho."
-    },
-    {
-      "id": "projection-poly",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module poly."
-    },
-    {
-      "id": "projection-qsc",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module qsc."
-    },
-    {
-      "id": "projection-robin",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module robin."
-    },
-    {
-      "id": "projection-sinu",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module sinu."
-    },
-    {
-      "id": "projection-somerc",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module somerc."
-    },
-    {
-      "id": "projection-tpers",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module tpers."
-    },
-    {
-      "id": "projection-vandg",
-      "tranche": 5,
-      "reason": "No native implementation for upstream module vandg."
     }
   ],
   "exceptions": [
@@ -1306,6 +1360,36 @@
       "id": "explicit-flattening-and-wgs72",
       "description": "Explicit f=0/rf=0 selects a sphere unless b overrides it, including named ellipsoids with a stored semi-minor axis. WGS72 corrects the upstream WGS7 lookup typo.",
       "test": "test/lib/crs-datums.spec.ts"
+    },
+    {
+      "id": "catalogue-offsets",
+      "description": "Native catalogue adapters apply false easting/northing consistently in both directions, including upstream sinu/eck6/geos/tpers branches that omit them. Differential tests compare zero-offset upstream results plus the declared offsets.",
+      "test": "test/lib/catalogue-projections.spec.ts"
+    },
+    {
+      "id": "catalogue-inverse-origins",
+      "description": "Native equi returns the inverse point; gnom and tpers return their configured geographic origin at zero radius; vandg handles its equator analytically instead of a singular cubic.",
+      "test": "test/lib/catalogue-projections.spec.ts"
+    },
+    {
+      "id": "southern-bonne",
+      "description": "Native Bonne inverse preserves the signed radius for a negative standard parallel; forward comparisons retain upstream parity.",
+      "test": "test/lib/catalogue-projections.spec.ts"
+    },
+    {
+      "id": "mollweide-poles",
+      "description": "Native Mollweide uses an analytical pole limit and bounded iteration, retaining the southern sign during inverse clamping.",
+      "test": "test/lib/catalogue-projections.spec.ts"
+    },
+    {
+      "id": "perspective-domains",
+      "description": "Native perspective plugins reject invisible points; orthographic inverse rejects coordinates outside its disk. Upstream may return approximations, NaN or a clamped finite inverse.",
+      "test": "test/lib/catalogue-projections.spec.ts"
+    },
+    {
+      "id": "explicit-oblique-dependency",
+      "description": "ob_tran requires an explicitly supplied wrapped plugin or longlat; o_proj must agree with it. It cannot wrap geocentric or another ob_tran plugin.",
+      "test": "test/lib/catalogue-projections.spec.ts"
     }
   ]
 }

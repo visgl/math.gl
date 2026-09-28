@@ -1,7 +1,7 @@
 {
   "name": "@math.gl/proj4",
   "description": "Proj4js wrapper for conversion between geospatial CRS (coordinate reference systems)",
-  "license": "MIT",
+  "license": "MIT AND Apache-2.0",
   "type": "module",
   "publishConfig": {
     "access": "public"
@@ -44,7 +44,9 @@
   "files": [
     "dist",
     "src",
-    "PROJ4-LICENSE.md"
+    "PROJ4-LICENSE.md",
+    "APACHE-2.0-LICENSE.txt",
+    "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
     "@math.gl/core": "5.0.0-alpha.9",
