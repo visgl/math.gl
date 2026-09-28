@@ -17,16 +17,43 @@ for (const {TypeScriptProjection, mercator} of [esm, cjs]) {
   assert.deepEqual(projection.project([0, 0]), [0, 0]);
 }
 
-for (const useMercator of [false, true]) {
+for (const {TypeScriptProjection, universalTransverseMercator} of [esm, cjs]) {
+  const projection = new TypeScriptProjection({
+    to: 'EPSG:32631',
+    projections: [universalTransverseMercator]
+  });
+  assert(Math.abs(projection.project([3, 0])[0] - 500000) < 1e-8);
+}
+
+const cases = [
+  {plugin: null, to: null, kernels: [], projections: []},
+  {plugin: 'mercator', to: 'EPSG:3857', kernels: [], projections: ['mercator']},
+  {
+    plugin: 'universalTransverseMercator',
+    to: 'EPSG:32631',
+    kernels: ['tmerc', 'etmerc'],
+    projections: ['utm', 'transverse-mercator']
+  },
+  {
+    plugin: 'lambertConformalConic',
+    to: '+proj=lcc +lat_1=30 +lat_2=60',
+    kernels: ['lcc'],
+    projections: ['lcc']
+  }
+];
+for (const fixture of cases) {
+  const contents = fixture.plugin
+    ? 'import {TypeScriptProjection, ' +
+      fixture.plugin +
+      "} from '@math.gl/proj4/experimental'; export const projection = new TypeScriptProjection({to: " +
+      JSON.stringify(fixture.to) +
+      ', projections: [' +
+      fixture.plugin +
+      ']});'
+    : "export {TypeScriptProjection} from '@math.gl/proj4/experimental';";
   const result = await build({
-    stdin: {
-      contents: useMercator
-        ? "import {TypeScriptProjection, mercator} from '@math.gl/proj4/experimental'; export const projection = new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});"
-        : "export {TypeScriptProjection} from '@math.gl/proj4/experimental';",
-      resolveDir: packageRoot
-    },
+    stdin: {contents, resolveDir: packageRoot},
     bundle: true,
-    // Resolve the published package exports, bypassing monorepo source aliases.
     tsconfigRaw: {},
     format: 'esm',
     platform: 'browser',
@@ -43,13 +70,14 @@ for (const useMercator of [false, true]) {
       .filter(([, input]) => input.bytesInOutput > 0)
       .map(([path]) => path)
   );
-  assert(
-    !included.some(path => path.includes('equidistant-cylindrical')),
-    'Unused eqc plugin must be removed'
-  );
-  assert.equal(
-    included.some(path => path.endsWith('/projections/mercator.js')),
-    useMercator,
-    'Mercator must only be included when imported and used'
-  );
+  for (const directory of ['kernels', 'projections']) {
+    const names = included
+      .filter(path => path.includes('/experimental/' + directory + '/'))
+      .map(path => path.slice(path.lastIndexOf('/') + 1).replace(/\.js$/, ''));
+    assert.deepEqual(
+      names.sort(),
+      [...fixture[directory]].sort(),
+      'Unexpected bundled ' + directory + ' for ' + fixture.plugin
+    );
+  }
 }

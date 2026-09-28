@@ -94,6 +94,17 @@ function compileCRS(
       ? aliases[definition]
       : ALIASES[definition];
   }
+  const utm = /^EPSG:(326|327)(\d{2})$/.exec(definition);
+  if (utm && Number(utm[2]) >= 1 && Number(utm[2]) <= 60) {
+    definition =
+      '+proj=utm +datum=WGS84 +zone=' + Number(utm[2]) + (utm[1] === '327' ? ' +south' : '');
+  }
+  if (definition === 'EPSG:5041' || definition === 'EPSG:5042') {
+    definition =
+      '+proj=stere +datum=WGS84 +lat_0=' +
+      (definition === 'EPSG:5041' ? '90' : '-90') +
+      ' +lon_0=0 +k_0=0.994 +x_0=2000000 +y_0=2000000';
+  }
   if (typeof definition !== 'string' || !/^\s*\+?proj=/.test(definition)) {
     throw new Error(
       `Unsupported CRS definition: ${definition}. Expected an alias or PROJ string starting with +proj=`
@@ -113,7 +124,11 @@ function compileCRS(
   const allowed = new Set([...CORE_PARAMETERS, ...(geographic ? [] : plugin.parameters)]);
   for (const key of Object.keys(parameters)) {
     if (!allowed.has(key)) throw new Error(`Unsupported PROJ parameter: +${key}`);
-    if (key !== 'no_defs' && (parameters[key] === undefined || parameters[key] === '')) {
+    if (
+      key !== 'no_defs' &&
+      !plugin?.flags?.includes(key) &&
+      (parameters[key] === undefined || parameters[key] === '')
+    ) {
       throw new Error(`PROJ parameter requires a value: +${key}`);
     }
   }

@@ -23,5 +23,7 @@ export type ProjectionPlugin = {
   readonly name: string;
   /** Projection-specific PROJ parameters accepted in addition to the core parameters. */
   readonly parameters: readonly string[];
+  /** Parameters accepted without a value, such as +south. */
+  readonly flags?: readonly string[];
   create(context: ProjectionContext): ProjectionImplementation;
 };
