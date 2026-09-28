@@ -94,7 +94,7 @@ horizontal components.
 
 Create a new `Proj4Projection` instance that can convert between the specified coordinate systems.
 
-- `from` and `to` are `Proj4CRSDefinition` values. They can be named coordinate systems, PROJ strings, WKT strings, or the `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` PROJJSON object kinds supported by proj4js 2.20.9. Both default to `WGS84`.
+- `from` and `to` are `Proj4CRSDefinition` values. They can be named coordinate systems, PROJ strings, WKT strings, or the `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` PROJJSON object kinds supported by proj4js 2.22.0. Both default to `WGS84`.
 - `enforceAxis` defaults to `false`. Set it to `true` to respect the axis order declared by the source and destination coordinate systems.
 
 ### `project(coord: number[]): number[]`

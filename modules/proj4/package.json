@@ -34,6 +34,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./experimental": {
+      "types": "./dist/experimental/index.d.ts",
+      "import": "./dist/experimental/index.js",
+      "require": "./dist/experimental/index.cjs"
     }
   },
   "files": [
@@ -43,7 +48,8 @@
   "dependencies": {
     "@math.gl/core": "5.0.0-alpha.9",
     "@math.gl/crs": "5.0.0-alpha.9",
-    "proj4": "2.21.0"
+    "proj4": "2.22.0"
   },
-  "gitHead": "e1a95300cb225a90da6e90333d4adf290f7ba501"
+  "gitHead": "e1a95300cb225a90da6e90333d4adf290f7ba501",
+  "sideEffects": false
 }

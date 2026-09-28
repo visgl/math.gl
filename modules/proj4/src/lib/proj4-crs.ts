@@ -5,12 +5,12 @@
 import proj4 from 'proj4';
 import type {PROJJSONCRSByType, ReadonlyCRSDefinition, ReadonlyPROJJSONCRS} from '@math.gl/crs';
 
-/** PROJJSON object variants currently parsed by proj4js 2.20.9. */
+/** PROJJSON object variants currently parsed by proj4js 2.22.0. */
 export type Proj4PROJJSONCRS = PROJJSONCRSByType<
   'GeographicCRS' | 'GeodeticCRS' | 'ProjectedCRS' | 'BoundCRS'
 >;
 
-/** A CRS definition currently accepted by proj4js 2.20.9. */
+/** A CRS definition currently accepted by proj4js 2.22.0. */
 export type Proj4CRSDefinition = ReadonlyCRSDefinition<Proj4PROJJSONCRS>;
 
 export type Proj4CRSConversionMode = 'strict' | 'horizontal';
