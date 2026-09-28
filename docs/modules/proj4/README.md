@@ -14,6 +14,15 @@ The `@math.gl/proj4` module provides support for conversion between major geospa
 | Class             | Description        |
 | ----------------- | ------------------ |
 | `Proj4Projection` | A projection class |
+| [`TypeScriptProjection`](./api-reference/typescript-projection.md) | Experimental independent TypeScript engine with explicit projection plugins |
+
+The experimental implementation is available from `@math.gl/proj4/experimental`.
+It starts with geographic, Mercator, and equidistant cylindrical coordinates, and can
+be used alongside the proj4js-backed API. See its documentation for supported
+parameters, limitations, and custom plugins.
+
+The [TypeScript parity roadmap](./roadmap.md) defines staged implementation and
+acceptance gates against the pinned upstream release.
 
 ## Usage
 
@@ -34,7 +43,7 @@ const reprojectedPosition = projection.project(wgs84Position);
 
 There are an infinite number of possible coordinate systems; therefore strict syntax is required to describe the parameters of any given CRS. Standard, proj4-independent definitions are provided by [`@math.gl/crs`](../crs/README.md). This module supports authority codes, PROJ strings, WKT1 and WKT2 strings, and a subset of PROJJSON objects.
 
-PROJJSON is an OSGeo/PROJ specification designed as a lossless JSON encoding of OGC WKT2:2019 / ISO 19162:2019; it is not independently an OGC or ISO standard. `@math.gl/crs` models the full PROJJSON v0.7 CRS union, while proj4js 2.20.9 currently transforms `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` objects. `Proj4CRSDefinition` exposes that narrower, deeply readonly object subset at compile time. Mutable definitions remain assignable, and frozen definitions from `SpatialReference` can be passed directly to the compatibility utilities. Valid `CompoundCRS` and `VerticalCRS` objects can still be represented with `PROJJSONCRS`, but cannot be passed to `Proj4Projection` without explicit compatible conversion.
+PROJJSON is an OSGeo/PROJ specification designed as a lossless JSON encoding of OGC WKT2:2019 / ISO 19162:2019; it is not independently an OGC or ISO standard. `@math.gl/crs` models the full PROJJSON v0.7 CRS union, while proj4js 2.22.0 currently transforms `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` objects. `Proj4CRSDefinition` exposes that narrower, deeply readonly object subset at compile time. Mutable definitions remain assignable, and frozen definitions from `SpatialReference` can be passed directly to the compatibility utilities. Valid `CompoundCRS` and `VerticalCRS` objects can still be represented with `PROJJSONCRS`, but cannot be passed to `Proj4Projection` without explicit compatible conversion.
 
 Within WKT there exists both OGC WKT and ESRI WKT syntax; both are generally supported though some more-obscure projection keywords may not be used. WKT definitions remain strings at this API boundary. Note that PROJ strings [can be slightly more accurate](https://github.com/proj4js/proj4js/issues/222) in some circumstances than WKT strings.
 

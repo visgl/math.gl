@@ -8,7 +8,7 @@ Writeups of directions in major areas of interest
 
 | Roadmap | Description |
 | ------- | ----------- |
-| N/A     | TBD         |
+| [TypeScript proj4 parity](../../docs/modules/proj4/roadmap.md) | Independent engine, pluggable projections, and staged parity with proj4js |
 
 ## v3.0 RFCs
 
