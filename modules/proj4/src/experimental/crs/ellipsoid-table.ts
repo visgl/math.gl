@@ -208,7 +208,7 @@ const ellipsoids: Record<string, {a: number; b?: number; rf?: number; ellipseNam
     rf: 298.25,
     ellipseName: 'WGS 66'
   },
-  WGS7: {
+  WGS72: {
     a: 6378135,
     rf: 298.26,
     ellipseName: 'WGS 72'

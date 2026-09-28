@@ -402,3 +402,57 @@ test('Explicit datum-none disables shifts and custom linear units apply to all g
   });
   close(native.project([0, 90, 0]), [0, 0, 6356752.314245179 / 2]);
 });
+
+for (const ellipsoid of ['WGS84', 'clrk66', 'airy']) {
+  for (const flattening of ['+f=0', '+rf=0']) {
+    test(`Explicit zero flattening makes ${ellipsoid} spherical (${flattening})`, () => {
+      const geometry = `+ellps=${ellipsoid} ${flattening}`;
+      const normalized = normalizeCRS(`+proj=longlat ${geometry}`);
+      const radius = normalized.ellipsoid.semiMajorAxis;
+      expect(normalized.ellipsoid.semiMinorAxis).toBe(radius);
+      expect(normalized.ellipsoid.eccentricitySquared).toBe(0);
+      const native = new TypeScriptProjection({to: `+proj=merc ${geometry}`, projections});
+      const sphere = new TypeScriptProjection({to: `+proj=merc +R=${radius}`, projections});
+      close(native.project([20, 45]), sphere.project([20, 45]));
+      close(native.unproject(sphere.project([20, 45])), [20, 45]);
+      const cartesian = new TypeScriptProjection({to: `+proj=geocent ${geometry}`, projections});
+      close(cartesian.project([0, 90, 100]), [0, 0, radius + 100]);
+      close(cartesian.unproject([0, 0, radius + 100]), [0, 90, 100]);
+    });
+  }
+}
+
+test('Explicit dimensions retain precedence over named ellipsoid defaults', () => {
+  const named = normalizeCRS('+proj=longlat +ellps=clrk66').ellipsoid;
+  expect(named.semiMinorAxis).toBe(6356583.8);
+  expect(named.eccentricitySquared).toBeGreaterThan(0);
+  for (const flattening of ['+f=0', '+rf=0', '+f=0.01 +rf=0']) {
+    const custom = normalizeCRS(`+proj=longlat +ellps=clrk66 ${flattening} +a=7000000`).ellipsoid;
+    expect(custom.semiMinorAxis).toBe(7000000);
+    const explicitB = normalizeCRS(
+      `+proj=longlat +ellps=clrk66 ${flattening} +b=6300000`
+    ).ellipsoid;
+    expect(explicitB.semiMinorAxis).toBe(6300000);
+  }
+});
+
+test('WGS72 resolves its standard lookup name and numeric dimensions', () => {
+  const numeric = new TypeScriptProjection({
+    to: '+proj=geocent +a=6378135 +rf=298.26',
+    projections
+  });
+  for (const name of ['WGS72', 'wgs72', 'WGS_72']) {
+    const native = new TypeScriptProjection({to: `+proj=geocent +ellps=${name}`, projections});
+    const normalized = normalizeCRS(`+proj=longlat +ellps=${name}`).ellipsoid;
+    expect(normalized.semiMajorAxis).toBe(6378135);
+    expect(normalized.semiMinorAxis).toBe(6378135 * (1 - 1 / 298.26));
+    for (const point of [
+      [0, 0, 0],
+      [12, 48, 250],
+      [0, 90, 0]
+    ]) {
+      close(native.project(point), numeric.project(point));
+      close(native.unproject(numeric.project(point)), point);
+    }
+  }
+});

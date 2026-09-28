@@ -235,3 +235,37 @@ test('LCC opposite pole follows the cone sign for mixed standard parallels', () 
     expect(projection.project([0, 90]).every(Number.isFinite)).toBe(true);
   }
 });
+
+for (const name of ['lcc', 'eqdc']) {
+  for (const geometry of ['+ellps=WGS84', '+R=6371000']) {
+    test(`${name} preserves an equatorial second parallel (${geometry})`, () => {
+      for (const parallel of [-30, 30]) {
+        const base = `+proj=${name} ${geometry} +lon_0=10 +lat_0=0 +x_0=500 +y_0=-250`;
+        const native = new TypeScriptProjection({
+          to: `${base} +lat_1=${parallel} +lat_2=0`,
+          projections
+        });
+        const swappedDefinition = `${base} +lat_1=0 +lat_2=${parallel}`;
+        const swapped = new TypeScriptProjection({to: swappedDefinition, projections});
+        // Upstream also loses a zero second parallel. Its swapped definition avoids that bug.
+        const reference = new Proj4Projection({to: swappedDefinition});
+        for (const point of [
+          [12, 0],
+          [25, parallel / 2],
+          [-5, parallel]
+        ]) {
+          const expected = reference.project(point);
+          close(native.project(point), expected, 1e-5);
+          close(native.project(point), swapped.project(point), 1e-5);
+          close(native.unproject(expected), point, 1e-7);
+        }
+        const omitted = new TypeScriptProjection({to: `${base} +lat_1=${parallel}`, projections});
+        const tangent = new TypeScriptProjection({
+          to: `${base} +lat_1=${parallel} +lat_2=${parallel}`,
+          projections
+        });
+        close(omitted.project([25, parallel / 2]), tangent.project([25, parallel / 2]), 1e-8);
+      }
+    });
+  }
+}

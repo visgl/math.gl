@@ -1296,6 +1296,16 @@
       "id": "explicit-datum-none",
       "description": "Native datum=none explicitly disables supplied Helmert parameters; malformed or conflicting declarations remain subject to validation.",
       "test": "test/lib/crs-datums.spec.ts"
+    },
+    {
+      "id": "equatorial-conic-parallel",
+      "description": "Native LCC and EQDC preserve explicit lat_2=0; upstream truthiness defaults replace it with lat_1. Regression comparisons use the equivalent swapped-parallel definition.",
+      "test": "test/lib/common-projections.spec.ts"
+    },
+    {
+      "id": "explicit-flattening-and-wgs72",
+      "description": "Explicit f=0/rf=0 selects a sphere unless b overrides it, including named ellipsoids with a stored semi-minor axis. WGS72 corrects the upstream WGS7 lookup typo.",
+      "test": "test/lib/crs-datums.spec.ts"
     }
   ]
 }

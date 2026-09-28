@@ -239,7 +239,11 @@ function getEllipsoid(parameters: ProjectionParameters, datumEllipsoid?: string)
   const b = numberParameter(
     parameters,
     'b',
-    rf ? a * (1 - 1 / rf) : parameters['a'] ? a : definition.b || a
+    rf
+      ? a * (1 - 1 / rf)
+      : own(parameters, 'f') || own(parameters, 'rf') || own(parameters, 'a')
+        ? a
+        : definition.b || a
   );
   const radius = numberParameter(parameters, 'R', 0);
   if (

@@ -147,7 +147,8 @@ that TM/UTM require `+approx` for a sphere. The default TM algorithm is the exte
 series, matching proj4js's registration of the name `tmerc`.
 
 Conics require `lat_1`; `lat_2` defaults to `lat_1`. Opposite standard parallels
-and parallels at the poles are rejected. `sterea` requires a non-polar origin;
+and parallels at the poles are rejected. An explicit equatorial `lat_2=0` is retained
+for LCC and EQDC, correcting an upstream truthiness fallback. `sterea` requires a non-polar origin;
 use `stere` for polar projections. UTM requires an integer `zone` from 1 through 60;
 `south` and `approx` are flags without values. UTM fixes its origin, scale, and false
 offsets according to its zone/hemisphere. Use `tmerc` for custom TM parameters.
@@ -177,7 +178,9 @@ set height units. `k_0` overrides `k`; Mercator's `lat_ts` overrides scale.
 
 Geometry defaults to WGS84 and accepts upstream ellipsoid names, `a`, `b`, `rf`, `f`,
 and spherical `R`. Named datum ellipsoids take precedence over `ellps`; explicit
-numeric dimensions override those defaults. `b` overrides flattening, and `R`
+numeric dimensions override those defaults. Explicit `f=0` or `rf=0` selects a sphere
+unless `b` is supplied. The WGS 72 lookup uses the standard `WGS72` name, correcting
+the upstream `WGS7` typo. `b` overrides flattening, and `R`
 selects a sphere. Invalid dimensions are rejected even when overridden.
 
 Named datum tables and `towgs84` implement translations (meters) or seven-parameter
