@@ -29,7 +29,9 @@ The API and its supported subset may change as coverage expands.
 All options are optional. `from` and `to` default to `'WGS84'`. Definitions can be
 the built-in aliases `WGS84`, `EPSG:4326`, and `EPSG:3857`, instance-local aliases,
 or PROJ strings beginning with `+proj=` (the leading `+` is optional).
-`EPSG:3857` requires the `mercator` plugin.
+`EPSG:3857` requires the `mercator` plugin. `EPSG:32601`–`EPSG:32660` and
+`EPSG:32701`–`EPSG:32760` require `universalTransverseMercator`; `EPSG:5041` and
+`EPSG:5042` require `stereographic`. Aliases never register plugins automatically.
 
 `projections` is an array of `ProjectionPlugin` objects. Duplicate names and names
 reserved for geographic coordinates are rejected. `aliases` maps names to definitions
@@ -47,13 +49,50 @@ are `[easting, northing]` in the specified linear units. Any trailing ordinates 
 copied unchanged; heights and measures are not transformed. Non-finite x/y values,
 invalid geographic latitudes, and singularities such as Mercator's poles throw errors.
 
-## Initial coverage
+## Current coverage
 
 | Projection | Plugin | Parameters |
 | --- | --- | --- |
 | Geographic (`longlat`, `latlong`, `latlon`, `lonlat`) | Built into the core | Degrees only |
 | Mercator (`merc`), spherical or ellipsoidal | `mercator` | `lon_0`, `lat_ts`, `k`, `k_0`, `x_0`, `y_0` |
 | Equidistant cylindrical (`eqc`), spherical equations | `equidistantCylindrical` | `lon_0`, `lat_0`, `lat_ts`, `x_0`, `y_0` |
+| Transverse Mercator (`tmerc`) | `transverseMercator` | Origin, scale, `approx` |
+| Extended Transverse Mercator (`etmerc`) | `extendedTransverseMercator` | Origin, scale, `approx` |
+| UTM (`utm`) | `universalTransverseMercator` | `zone`, `south`, `approx` |
+| Lambert conformal conic (`lcc`) | `lambertConformalConic` | Origin, scale, `lat_1`, `lat_2` |
+| Albers equal area (`aea`) | `albersEqualArea` | Origin, `lat_1`, `lat_2` |
+| Equidistant conic (`eqdc`) | `equidistantConic` | Origin, `lat_1`, `lat_2` |
+| Lambert azimuthal equal area (`laea`) | `lambertAzimuthalEqualArea` | Origin |
+| Stereographic (`stere`) | `stereographic` | Origin, scale, `lat_ts` |
+| Oblique stereographic (`sterea`) | `obliqueStereographic` | Origin, scale |
+| Azimuthal equidistant (`aeqd`) | `azimuthalEquidistant` | Origin |
+
+For these common projections, **origin** means `lon_0`, `lat_0`, `x_0`, and `y_0`;
+**scale** means `k` or `k_0`. All support spherical and ellipsoidal forms, except
+that TM/UTM require `+approx` for a sphere. The default TM algorithm is the extended
+series, matching proj4js's registration of the name `tmerc`.
+
+Conics require `lat_1`; `lat_2` defaults to `lat_1`. Opposite standard parallels
+and parallels at the poles are rejected. `sterea` requires a non-polar origin;
+use `stere` for polar projections. UTM requires an integer `zone` from 1 through 60;
+`south` and `approx` are flags without values. UTM fixes its origin, scale, and false
+offsets according to its zone/hemisphere. Use `tmerc` for custom TM parameters.
+
+```typescript
+import {TypeScriptProjection, universalTransverseMercator} from '@math.gl/proj4/experimental';
+
+const utm = new TypeScriptProjection({
+  to: 'EPSG:32756',
+  projections: [universalTransverseMercator]
+});
+utm.project([151.2, -33.9]);
+```
+
+The implementation deliberately fixes two upstream 2.22.0 behaviors: equatorial
+ellipsoidal `stere` includes false northing, and spherical `tmerc +approx` uses the
+correct inverse latitude sign with a nonzero `lat_0`. It also initializes omitted
+origins/offsets and throws at singularities instead of returning upstream sentinels.
+The parity inventory records these differences and outstanding coverage gaps.
 
 Angles in PROJ parameters must be finite decimal degrees. False easting and northing
 are in meters. Projected output units can be `m`, `km`, `ft`, or `us-ft`, or a positive
@@ -75,7 +114,8 @@ Use `Proj4Projection` for definitions outside this subset; there is no implicit 
 
 ## Custom plugins
 
-A plugin declares its PROJ name and additional accepted parameters, then creates a
+A plugin declares its PROJ name and additional accepted parameters, optionally lists
+value-free parameters in `flags`, then creates a
 forward/inverse implementation. The engine supplies an immutable parameter map,
 semi-major axis, and eccentricity squared. The plugin validates its own parameter
 values and domain. Forward input and inverse output are longitude/latitude in radians;

@@ -43,7 +43,8 @@
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "PROJ4-LICENSE.md"
   ],
   "dependencies": {
     "@math.gl/core": "5.0.0-alpha.9",

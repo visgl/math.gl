@@ -1,6 +1,8 @@
 # TypeScript proj4 parity roadmap
 
-Status: tranche 0 implemented in this source tree; later tranches are proposed.
+Status: tranches 0, 1, and 2 implemented in this source tree for the documented subset.
+Later tranches are proposed; the inventory still marks projection families as partial
+until their remaining CRS/parameter gaps are closed.
 Sequencing describes dependencies, not release dates.
 
 ## Target and upstream baseline
@@ -63,6 +65,21 @@ degree output of `longlat` and is currently rejected pending explicit unit seman
 
 ### Tranche 1: make parity measurable
 
+Implemented artifacts:
+
+- `modules/proj4/test/fixtures/parity-inventory.json`: all 38 upstream projection/helper
+  modules and 30 CRS/API/transform features, with aliases, default-bundle membership,
+  source hashes, fixture IDs, tests, gaps, and intentional differences.
+- `upstream-2.22.0.ts`: 24 tagged upstream coordinate fixtures with source lines and
+  source-file hash. Two retained cases explicitly test pending datum/ellipsoid gaps.
+- `common-projections.ts`: authored differential cases covering spheres, ellipsoids,
+  both hemispheres, origins, scales, offsets, and units.
+- Independent published PROJ UTM examples provide a second numerical reference. A
+  larger reproducibly generated native PROJ corpus remains tracked in the inventory.
+- `check-parity-inventory.mjs` fails on reference-version drift, unclassified upstream
+  modules, changed source hashes, missing tests, or invalid fixture/gap references.
+
+
 Create a checked-in inventory from the tagged upstream `lib/projections`, projection
 registry, included-projection list, CRS parsers, datum code, and tests. Distinguish
 algorithms, aliases, helpers, default-bundle availability, and custom-build modules.
@@ -84,6 +101,23 @@ The preceding 2.21.0 release includes longitude wrapping and several projection 
 these belong in the eventual regression corpus as well.
 
 ### Tranche 2: common projections
+
+Implemented: `tmerc`, `etmerc`, `utm`, `lcc`, `aea`, `eqdc`, `laea`, `stere`,
+`sterea`, and `aeqd`, with explicit typed kernel state and numerical helper inputs.
+All 120 WGS84 UTM aliases and both UPS aliases resolve without loading their plugins
+implicitly. `tmerc` uses the extended algorithm by default; `+approx` selects the
+upstream fast algorithm and permits spherical TM/UTM.
+
+Acceptance coverage includes forward/inverse differential comparisons, round trips,
+3D/4D passthrough, parameter rejection, antimeridian/zone/pole boundaries, inverse
+nonconvergence, and singular antipodes. UTM and conic package checks verify that
+unrelated projection families are removed from browser bundles.
+
+Intentional fixes are tracked and regression-tested: false northing in equatorial
+ellipsoidal stereographic, the latitude sign in spherical approximate TM with a
+nonzero latitude origin, initialized defaults, and explicit singularity errors.
+Projection-name/WKT aliases and general CRS normalization remain tranche 3 work.
+
 
 Implement `tmerc`, `etmerc`, and `utm` first, including southern hemispheres and all
 WGS84 UTM aliases. Follow with `lcc`, `aea`, `eqdc`, `laea`, `stere`, `sterea`, and
@@ -178,4 +212,5 @@ yarn exec vitest run --project node modules/proj4/test
 yarn exec tsc --noEmit --project modules/proj4/tsconfig.json
 yarn exec ocular-build proj4
 node modules/proj4/scripts/check-experimental-package.mjs
+node modules/proj4/scripts/check-parity-inventory.mjs
 ```

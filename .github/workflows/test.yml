@@ -60,6 +60,11 @@ jobs:
       - name: Check WKB package boundary
         run: yarn check:wkb-boundary
 
+      - name: Check Proj4 parity inventory and package boundaries
+        run: |
+          node modules/proj4/scripts/check-parity-inventory.mjs
+          node modules/proj4/scripts/check-experimental-package.mjs
+
       - name: Check CRS type boundaries
         run: yarn check:crs-types
 

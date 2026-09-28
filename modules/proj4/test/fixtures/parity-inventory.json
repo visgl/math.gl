@@ -1,0 +1,1262 @@
+{
+  "schemaVersion": 1,
+  "upstream": {
+    "package": "proj4",
+    "version": "2.22.0",
+    "tag": "v2.22.0",
+    "checkedOn": "2026-09-28",
+    "source": "https://github.com/proj4js/proj4js/tree/v2.22.0",
+    "files": {
+      "lib/projections.js": "0f40f09737eec488f3771801505a1c6b7e9165666b5b887d3076363fa343d45e",
+      "lib/includedProjections.js": "d078bc3e270e6683239f2007fd62d39008ed878b1e2e7ad768b37d2979624bd1",
+      "lib/global.js": "6a7592e4f1cc3d3a7d0bb4f90947fcfa7f04b40ca86409aa6dc1458be961de67",
+      "lib/projString.js": "d02ff30e630352272a0828501a4d58eeca84e60fba5f206b28b6709719338f7e",
+      "lib/parseCode.js": "ee0981433b69e1846f1ebca2c932f137c3f0d91b8633e8b01fc10e2e9c11e5bc",
+      "lib/transform.js": "fd5ca23edff8e56b8dac3fb189c76b4af780bcb802124f52fc6a41e5015909d3",
+      "lib/datum_transform.js": "f9e5c5c9ee7ed3325a4e23a072bcf03ffdbb04082edef2d19e8a7d9df60399c6",
+      "lib/nadgrid.js": "89f39fd5ac197624c068f1df9ca6d951e2f5613d926f9db174e9eb9655dd965f"
+    }
+  },
+  "projections": [
+    {
+      "id": "aea",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Albers_Conic_Equal_Area",
+        "Albers_Equal_Area",
+        "Albers",
+        "aea"
+      ],
+      "upstreamSHA256": "55c64dff493117ba407071cee848fd9d450575357f6dddb98bb9cd841caaeba9",
+      "status": "partial",
+      "nativeSelection": "+proj=aea",
+      "fixtureIds": [
+        "aea-north",
+        "aea-south",
+        "aea-sphere",
+        "aea-tangent"
+      ],
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "aeqd",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Azimuthal_Equidistant",
+        "aeqd"
+      ],
+      "upstreamSHA256": "de2705e2650cc1aa50d5c2de923a82fc877a09c01c8f9d37d886a23c300cca36",
+      "status": "partial",
+      "nativeSelection": "+proj=aeqd",
+      "fixtureIds": [
+        "aeqd-0-ellipsoid",
+        "aeqd-90-sphere"
+      ],
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "bonne",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "bonne",
+        "Bonne (Werner lat_1=90)"
+      ],
+      "upstreamSHA256": "406216c124f8401ed5a732f54bfe2578aa9644d1bf1609d9088132b9d1cadbce",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-bonne"
+      ]
+    },
+    {
+      "id": "cass",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Cassini",
+        "Cassini_Soldner",
+        "cass"
+      ],
+      "upstreamSHA256": "d9d379f2ce75c96ef0a2a7d56c466863c0f9f8b17f7107a00fc9f9816a62f5ff",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-cass"
+      ]
+    },
+    {
+      "id": "cea",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "cea"
+      ],
+      "upstreamSHA256": "a4a0d6c1f54740d6dca5c2f5293faa2c76ed531067da38cb6ee85bc9abe0b10a",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-cea"
+      ]
+    },
+    {
+      "id": "eck6",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Eckert_VI",
+        "eck6"
+      ],
+      "upstreamSHA256": "d2b39ea3d8a32fc422f3eea1de02881c0300977e89f840021fb296c49769d1d7",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-eck6"
+      ]
+    },
+    {
+      "id": "eqc",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Equirectangular",
+        "Equidistant_Cylindrical",
+        "Equidistant_Cylindrical_Spherical",
+        "eqc"
+      ],
+      "upstreamSHA256": "15815ea0969e3498f73863bfd8dab78b4de7eac255449664e439d5e2fb293a5b",
+      "status": "partial",
+      "nativeSelection": "+proj=eqc",
+      "fixtureIds": [
+        "foundation"
+      ],
+      "tests": [
+        "test/lib/typescript-projection.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "eqdc",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Equidistant_Conic",
+        "eqdc"
+      ],
+      "upstreamSHA256": "35209f044f07d928d6dd8c6e976b9db0ba8a6fd636d012ac3dd086d6d618ad40",
+      "status": "partial",
+      "nativeSelection": "+proj=eqdc",
+      "fixtureIds": [
+        "eqdc-north",
+        "eqdc-south",
+        "eqdc-sphere",
+        "eqdc-tangent"
+      ],
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "eqearth",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "eqearth",
+        "Equal Earth",
+        "Equal_Earth"
+      ],
+      "upstreamSHA256": "ea87e1af30832202c6f96191bb7c4428fe2c8723ea0a2c7a61929e83b2c05455",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-eqearth"
+      ]
+    },
+    {
+      "id": "equi",
+      "kind": "projection",
+      "defaultBundle": false,
+      "upstreamAliases": [
+        "equi"
+      ],
+      "upstreamSHA256": "5a33b68ab5da0be4b3ee31259d95e0d86ce313d3224fde0ee76f25b2b450bd25",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-equi"
+      ]
+    },
+    {
+      "id": "etmerc",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Extended_Transverse_Mercator",
+        "Extended Transverse Mercator",
+        "etmerc",
+        "Transverse_Mercator",
+        "Transverse Mercator",
+        "Gauss Kruger",
+        "Gauss_Kruger",
+        "tmerc"
+      ],
+      "upstreamSHA256": "805888fb109de0234bf5424ecef9cded95310038fce036384841882bf222a856",
+      "status": "partial",
+      "nativeSelection": "+proj=etmerc",
+      "fixtureIds": [
+        "etmerc-ellipsoid",
+        "tmerc-ellipsoid"
+      ],
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "gauss",
+      "kind": "helper",
+      "defaultBundle": false,
+      "upstreamAliases": [
+        "gauss"
+      ],
+      "upstreamSHA256": "ae5b7e364eb4b215c55a3414317a2f23138e1d69e6afb10d82d2085650acbed0",
+      "status": "partial",
+      "nativeSelection": "internal helper for +proj=sterea",
+      "fixtureIds": [
+        "sterea-ellipsoid",
+        "sterea-sphere"
+      ],
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "geocent",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Geocentric",
+        "geocentric",
+        "geocent",
+        "Geocent"
+      ],
+      "upstreamSHA256": "f21476e63756d035bcbdc804a3450e51282e4634fef462a2f3e860d24dbb1f60",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-geocent"
+      ]
+    },
+    {
+      "id": "geos",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Geostationary Satellite View",
+        "Geostationary_Satellite",
+        "geos"
+      ],
+      "upstreamSHA256": "e220ba6d35209dab8543592a21b1b67535ed59a568a8da6b3dd7193a4e58e002",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-geos"
+      ]
+    },
+    {
+      "id": "gnom",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "gnom"
+      ],
+      "upstreamSHA256": "dff0c2eac1465920be8eb779ecb1e232270613f74f84330265df57da58e598c0",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-gnom"
+      ]
+    },
+    {
+      "id": "gstmerc",
+      "kind": "projection",
+      "defaultBundle": false,
+      "upstreamAliases": [
+        "gstmerg",
+        "gstmerc"
+      ],
+      "upstreamSHA256": "8930d07be5d1b6702b7ccfff6e23938170f5a11fbb3a08f6a261fef9a4c2a749",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-gstmerc"
+      ]
+    },
+    {
+      "id": "krovak",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Krovak",
+        "Krovak Modified",
+        "Krovak (North Orientated)",
+        "Krovak Modified (North Orientated)",
+        "krovak"
+      ],
+      "upstreamSHA256": "a8f2451249868103eb605052a006fa57f89a30d608e5920e6fe90c347827e64c",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-krovak"
+      ]
+    },
+    {
+      "id": "laea",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Lambert Azimuthal Equal Area",
+        "Lambert_Azimuthal_Equal_Area",
+        "laea"
+      ],
+      "upstreamSHA256": "c45a04c1bffdd8172764cf527837e7b53ada5c549537067ef2cb4046f1412b22",
+      "status": "partial",
+      "nativeSelection": "+proj=laea",
+      "fixtureIds": [
+        "laea-0-sphere",
+        "laea-45-ellipsoid",
+        "laea-90-ellipsoid"
+      ],
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "lcc",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Lambert Tangential Conformal Conic Projection",
+        "Lambert_Conformal_Conic",
+        "Lambert_Conformal_Conic_1SP",
+        "Lambert_Conformal_Conic_2SP",
+        "lcc",
+        "Lambert Conic Conformal (1SP)",
+        "Lambert Conic Conformal (2SP)"
+      ],
+      "upstreamSHA256": "5424d1f0b48aed80ce1329af46cb83281e9a5da84649092edcdbdec115fc4326",
+      "status": "partial",
+      "nativeSelection": "+proj=lcc",
+      "fixtureIds": [
+        "lcc-north",
+        "lcc-south",
+        "lcc-sphere",
+        "lcc-tangent"
+      ],
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "longlat",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "longlat",
+        "identity",
+        "lonlat",
+        "latlon",
+        "latlong"
+      ],
+      "upstreamSHA256": "3d872b2e54f3a8e7eb334d5d0c20a0befeebe8d1d5f2e36534ebc58c0995d8c7",
+      "status": "partial",
+      "nativeSelection": "+proj=longlat",
+      "fixtureIds": [
+        "foundation"
+      ],
+      "tests": [
+        "test/lib/typescript-projection.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters",
+        "identity-units"
+      ]
+    },
+    {
+      "id": "merc",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Mercator",
+        "Popular Visualisation Pseudo Mercator",
+        "Mercator_1SP",
+        "Mercator_Auxiliary_Sphere",
+        "Mercator_Variant_A",
+        "merc"
+      ],
+      "upstreamSHA256": "8cd7b72cd741843217d3bf000546fc91e2f4f9ac5de728c7cab442c00b736c00",
+      "status": "partial",
+      "nativeSelection": "+proj=merc",
+      "fixtureIds": [
+        "foundation"
+      ],
+      "tests": [
+        "test/lib/typescript-projection.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "mill",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Miller_Cylindrical",
+        "mill"
+      ],
+      "upstreamSHA256": "cb858986bc90a47c739aebecbf9666fbfcceda44ae4c15774eaccd9940214a41",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-mill"
+      ]
+    },
+    {
+      "id": "moll",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Mollweide",
+        "moll"
+      ],
+      "upstreamSHA256": "6c49e010ffdd3b00220a500c2a6a253763805899a142ee80db690e3e56d241be",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-moll"
+      ]
+    },
+    {
+      "id": "nzmg",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "New_Zealand_Map_Grid",
+        "nzmg"
+      ],
+      "upstreamSHA256": "e52fe4511d202169e828c94a4a8c75d1fadac710f26eb219f9e1db8f68faad56",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-nzmg"
+      ]
+    },
+    {
+      "id": "ob_tran",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "General Oblique Transformation",
+        "General_Oblique_Transformation",
+        "ob_tran"
+      ],
+      "upstreamSHA256": "bd7e61f5a446d178085c1371b0aec6aec745dc9b64895b791ad48d7f4632b145",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-ob_tran"
+      ]
+    },
+    {
+      "id": "omerc",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Hotine_Oblique_Mercator",
+        "Hotine Oblique Mercator",
+        "Hotine_Oblique_Mercator_variant_A",
+        "Hotine_Oblique_Mercator_Variant_B",
+        "Hotine_Oblique_Mercator_Azimuth_Natural_Origin",
+        "Hotine_Oblique_Mercator_Two_Point_Natural_Origin",
+        "Hotine_Oblique_Mercator_Azimuth_Center",
+        "Oblique_Mercator",
+        "omerc"
+      ],
+      "upstreamSHA256": "4d51f38493f567fbed6d810a395dcf993604ad54fc8970b11b58ce4fcd623c66",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-omerc"
+      ]
+    },
+    {
+      "id": "ortho",
+      "kind": "projection",
+      "defaultBundle": false,
+      "upstreamAliases": [
+        "ortho"
+      ],
+      "upstreamSHA256": "187c2f62a97fd57e12291f23a25850483ba5acf02c58ace44d796ab4621078d8",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-ortho"
+      ]
+    },
+    {
+      "id": "poly",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Polyconic",
+        "American_Polyconic",
+        "poly"
+      ],
+      "upstreamSHA256": "47cf48e887e6390b20fa4f9d4cc78216ab9671e805ea264e77518efe34d1622d",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-poly"
+      ]
+    },
+    {
+      "id": "qsc",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Quadrilateralized Spherical Cube",
+        "Quadrilateralized_Spherical_Cube",
+        "qsc"
+      ],
+      "upstreamSHA256": "b63a7f4705fbea6d0136953615ce6764b5cb4dd15f9ea58b73b7c179fc50af49",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-qsc"
+      ]
+    },
+    {
+      "id": "robin",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Robinson",
+        "robin"
+      ],
+      "upstreamSHA256": "8a409614a9f339f5b2631b1664753152db5ced5edec103c659939813167801b0",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-robin"
+      ]
+    },
+    {
+      "id": "sinu",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Sinusoidal",
+        "sinu"
+      ],
+      "upstreamSHA256": "9e746f5fd43a5e2243077d928f964c44d2a8a902dcf850e7069510e87b3a0e6f",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-sinu"
+      ]
+    },
+    {
+      "id": "somerc",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "somerc"
+      ],
+      "upstreamSHA256": "be1313048122f117b6c3e7e1c44585f9d7201391213b889357305108496cff98",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-somerc"
+      ]
+    },
+    {
+      "id": "stere",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "stere",
+        "Stereographic_South_Pole",
+        "Polar_Stereographic_variant_A",
+        "Polar_Stereographic_variant_B",
+        "Polar_Stereographic"
+      ],
+      "upstreamSHA256": "0b60fc764313e86578a9c470121a3963f1a08638fdd90290d1620f75fcf833ff",
+      "status": "partial",
+      "nativeSelection": "+proj=stere",
+      "fixtureIds": [
+        "stere-0-ellipsoid",
+        "stere-true-scale-north",
+        "stere-true-scale-south"
+      ],
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "sterea",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Stereographic_North_Pole",
+        "Oblique_Stereographic",
+        "sterea",
+        "Oblique Stereographic Alternative",
+        "Double_Stereographic"
+      ],
+      "upstreamSHA256": "241cc2a91cfef3b99d961166a0b45d27975066c721eb093e4075e8e055c4cfd1",
+      "status": "partial",
+      "nativeSelection": "+proj=sterea",
+      "fixtureIds": [
+        "sterea-ellipsoid",
+        "sterea-sphere"
+      ],
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "tmerc",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Fast_Transverse_Mercator",
+        "Fast Transverse Mercator"
+      ],
+      "upstreamSHA256": "17d0a888f6e05240429c3d509064e322e9d1ad809a490532cb29de1bff05e70d",
+      "status": "partial",
+      "nativeSelection": "+proj=tmerc +approx",
+      "fixtureIds": [
+        "tmerc-approx-ellipsoid",
+        "tmerc-approx-sphere"
+      ],
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "tpers",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Tilted_Perspective",
+        "tpers"
+      ],
+      "upstreamSHA256": "fe81e79ac956c6a744953d2c97fff7774b0a2b1680563694d86d6c28ca9b7a47",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-tpers"
+      ]
+    },
+    {
+      "id": "utm",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Universal Transverse Mercator System",
+        "utm"
+      ],
+      "upstreamSHA256": "22b67c0e52f94278ad6a1cf8576e6df5e6212f593c7238ab34759078984fdcbe",
+      "status": "partial",
+      "nativeSelection": "+proj=utm",
+      "fixtureIds": [
+        "utm-north",
+        "utm-south",
+        "utm-sphere"
+      ],
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "vandg",
+      "kind": "projection",
+      "defaultBundle": true,
+      "upstreamAliases": [
+        "Van_der_Grinten_I",
+        "VanDerGrinten",
+        "Van_der_Grinten",
+        "vandg"
+      ],
+      "upstreamSHA256": "7a347023f660d0f528d37f6cd44a1c2f913ff0c8050fe63a0070e5f8de471211",
+      "status": "unsupported",
+      "nativeSelection": null,
+      "fixtureIds": [],
+      "tests": [],
+      "gapIds": [
+        "projection-vandg"
+      ]
+    }
+  ],
+  "features": [
+    {
+      "id": "proj-strings",
+      "status": "partial",
+      "tests": [
+        "test/lib/typescript-projection.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization",
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "wkt1-ogc",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "crs-normalization"
+      ]
+    },
+    {
+      "id": "wkt1-esri",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "crs-normalization"
+      ]
+    },
+    {
+      "id": "wkt2",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "crs-normalization"
+      ]
+    },
+    {
+      "id": "projjson-geographic",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "crs-normalization"
+      ]
+    },
+    {
+      "id": "projjson-geodetic",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "crs-normalization",
+        "ellipsoid-datum"
+      ]
+    },
+    {
+      "id": "projjson-projected",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "crs-normalization"
+      ]
+    },
+    {
+      "id": "projjson-bound",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "crs-normalization",
+        "ellipsoid-datum"
+      ]
+    },
+    {
+      "id": "compound-vertical-policy",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "compound-vertical"
+      ]
+    },
+    {
+      "id": "authority-and-user-aliases",
+      "status": "partial",
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization"
+      ]
+    },
+    {
+      "id": "projection-name-aliases",
+      "status": "partial",
+      "tests": [
+        "test/lib/typescript-projection.spec.ts"
+      ],
+      "gapIds": [
+        "crs-normalization"
+      ]
+    },
+    {
+      "id": "axis-enforcement",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "crs-normalization"
+      ]
+    },
+    {
+      "id": "prime-meridians",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "longitude-wrapping",
+      "status": "partial",
+      "tests": [
+        "test/lib/typescript-projection.spec.ts"
+      ],
+      "gapIds": [
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "units",
+      "status": "partial",
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "parameter-defaults-precedence",
+      "status": "partial",
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "projection-parameters"
+      ]
+    },
+    {
+      "id": "ellipsoids",
+      "status": "partial",
+      "tests": [
+        "test/lib/typescript-projection.spec.ts"
+      ],
+      "gapIds": [
+        "ellipsoid-datum"
+      ]
+    },
+    {
+      "id": "datum-none-wgs84",
+      "status": "partial",
+      "tests": [
+        "test/lib/typescript-projection.spec.ts"
+      ],
+      "gapIds": [
+        "ellipsoid-datum"
+      ]
+    },
+    {
+      "id": "geocentric-3d",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "ellipsoid-datum"
+      ]
+    },
+    {
+      "id": "helmert-3-parameter",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "ellipsoid-datum"
+      ]
+    },
+    {
+      "id": "helmert-7-parameter",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "ellipsoid-datum"
+      ]
+    },
+    {
+      "id": "datum-chaining",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "ellipsoid-datum"
+      ]
+    },
+    {
+      "id": "ntv2-grids",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "ntv2"
+      ]
+    },
+    {
+      "id": "geotiff-grids",
+      "status": "unsupported",
+      "tests": [],
+      "gapIds": [
+        "geotiff-grid"
+      ]
+    },
+    {
+      "id": "xy-forward-inverse",
+      "status": "partial",
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "native-proj-corpus"
+      ]
+    },
+    {
+      "id": "trailing-ordinates",
+      "status": "partial",
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "ellipsoid-datum"
+      ]
+    },
+    {
+      "id": "domain-errors",
+      "status": "partial",
+      "tests": [
+        "test/lib/common-projections.spec.ts"
+      ],
+      "gapIds": [
+        "recent-upstream-regressions"
+      ]
+    },
+    {
+      "id": "callable-overloads",
+      "status": "out-of-scope",
+      "tests": [],
+      "gapIds": []
+    },
+    {
+      "id": "point-and-mgrs",
+      "status": "out-of-scope",
+      "tests": [],
+      "gapIds": []
+    },
+    {
+      "id": "global-mutable-registry",
+      "status": "out-of-scope",
+      "tests": [],
+      "gapIds": []
+    }
+  ],
+  "gaps": [
+    {
+      "id": "crs-normalization",
+      "tranche": 3,
+      "reason": "WKT/PROJJSON interpretation, projection-name normalization, angular formats, permissive PROJ parsing and general aliases are not implemented."
+    },
+    {
+      "id": "projection-parameters",
+      "tranche": 3,
+      "reason": "Only the documented parameter subset is supported; +over, +lon_wrap, prime meridians and general unit semantics remain unsupported."
+    },
+    {
+      "id": "ellipsoid-datum",
+      "tranche": 4,
+      "reason": "Named ellipsoids other than WGS84/sphere, named datum tables, 3D/geocentric and Helmert operations remain unsupported."
+    },
+    {
+      "id": "ntv2",
+      "tranche": 6,
+      "reason": "NTv2 loading, grid selection, interpolation, inverse iteration and error-field options are not implemented."
+    },
+    {
+      "id": "geotiff-grid",
+      "tranche": 6,
+      "reason": "Optional asynchronous GeoTIFF datum grids are not implemented."
+    },
+    {
+      "id": "identity-units",
+      "tranche": 3,
+      "reason": "Upstream identity alias returns radians; native geographic aliases return degrees and identity is rejected."
+    },
+    {
+      "id": "native-proj-corpus",
+      "tranche": 7,
+      "reason": "Independent checks currently use published PROJ UTM examples. Expand into a reproducibly generated native PROJ/EPSG corpus; the local PROJ executable is incompatible with this host."
+    },
+    {
+      "id": "recent-upstream-regressions",
+      "tranche": 5,
+      "reason": "Orthographic false easting, oblique Mercator/Robinson enforced-axis z preservation, nzmg inverse iteration and vandg boundary fixes need fixtures as those plugins are added."
+    },
+    {
+      "id": "compound-vertical",
+      "tranche": 3,
+      "reason": "Compound/vertical metadata need an explicit executable policy; no implicit horizontal extraction or height transformation."
+    },
+    {
+      "id": "projection-bonne",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module bonne."
+    },
+    {
+      "id": "projection-cass",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module cass."
+    },
+    {
+      "id": "projection-cea",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module cea."
+    },
+    {
+      "id": "projection-eck6",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module eck6."
+    },
+    {
+      "id": "projection-eqearth",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module eqearth."
+    },
+    {
+      "id": "projection-equi",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module equi."
+    },
+    {
+      "id": "projection-geocent",
+      "tranche": 4,
+      "reason": "No native implementation for upstream module geocent."
+    },
+    {
+      "id": "projection-geos",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module geos."
+    },
+    {
+      "id": "projection-gnom",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module gnom."
+    },
+    {
+      "id": "projection-gstmerc",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module gstmerc."
+    },
+    {
+      "id": "projection-krovak",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module krovak."
+    },
+    {
+      "id": "projection-mill",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module mill."
+    },
+    {
+      "id": "projection-moll",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module moll."
+    },
+    {
+      "id": "projection-nzmg",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module nzmg."
+    },
+    {
+      "id": "projection-ob_tran",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module ob_tran."
+    },
+    {
+      "id": "projection-omerc",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module omerc."
+    },
+    {
+      "id": "projection-ortho",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module ortho."
+    },
+    {
+      "id": "projection-poly",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module poly."
+    },
+    {
+      "id": "projection-qsc",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module qsc."
+    },
+    {
+      "id": "projection-robin",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module robin."
+    },
+    {
+      "id": "projection-sinu",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module sinu."
+    },
+    {
+      "id": "projection-somerc",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module somerc."
+    },
+    {
+      "id": "projection-tpers",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module tpers."
+    },
+    {
+      "id": "projection-vandg",
+      "tranche": 5,
+      "reason": "No native implementation for upstream module vandg."
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "equatorial-stereographic-y0",
+      "description": "Native stere includes false northing in the ellipsoidal equatorial forward branch; upstream 2.22.0 omits it. Other branches retain parity.",
+      "test": "test/lib/common-projections.spec.ts"
+    },
+    {
+      "id": "explicit-errors",
+      "description": "Invalid definitions, singular antipodes, nonconvergence and non-finite kernel results throw instead of upstream null/undefined/NaN/sentinel results.",
+      "test": "test/lib/common-projections.spec.ts"
+    },
+    {
+      "id": "initialized-defaults",
+      "description": "Native projection parameters always initialize origin and false offsets to zero. Some upstream kernels return NaN when these parameters are omitted; differential cases supply them explicitly.",
+      "test": "test/lib/common-projections.spec.ts"
+    },
+    {
+      "id": "strict-utm-zone",
+      "description": "Native UTM requires integer zone 1..60 and value-free south/approx flags. Inferred zones, negative zones and permissive flag values are outside the supported subset.",
+      "test": "test/lib/common-projections.spec.ts"
+    },
+    {
+      "id": "spherical-tmerc-latitude-sign",
+      "description": "Native +approx spherical TM uses the absolute latitude sign in its inverse. Upstream uses northing relative to lat_0, which flips some latitudes when lat_0 is nonzero.",
+      "test": "test/lib/common-projections.spec.ts"
+    },
+    {
+      "id": "conic-opposite-pole",
+      "description": "Native LCC rejects its opposite pole instead of upstream latitude clamping that returns a huge finite value.",
+      "test": "test/lib/common-projections.spec.ts"
+    }
+  ]
+}

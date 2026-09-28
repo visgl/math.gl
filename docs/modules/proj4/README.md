@@ -17,7 +17,8 @@ The `@math.gl/proj4` module provides support for conversion between major geospa
 | [`TypeScriptProjection`](./api-reference/typescript-projection.md) | Experimental independent TypeScript engine with explicit projection plugins |
 
 The experimental implementation is available from `@math.gl/proj4/experimental`.
-It starts with geographic, Mercator, and equidistant cylindrical coordinates, and can
+It supports geographic coordinates and common Mercator, UTM, conic, and azimuthal
+projections, and can
 be used alongside the proj4js-backed API. See its documentation for supported
 parameters, limitations, and custom plugins.
 
