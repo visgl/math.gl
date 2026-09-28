@@ -14,6 +14,9 @@
 - chore: Prepare the website for Docusaurus v4 and publish `master` documentation under `next`
 - build(deps): Update `fast-uri` and `postcss-selector-parser`
 
+- fix(core): Restore the default `Vector3` return from `SphericalCoordinates.toVector3()`, preserve
+  supplied output types, and add the deprecated `_SphericalCoordinates` compatibility alias.
+
 ## v5.0.0-alpha.5
 
 - chore: use npm trusted publishing (#130)

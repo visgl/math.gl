@@ -146,9 +146,22 @@ SphericalCoordinates({longitude = 0, latitude = 0, z = 1.0})
 
 ### toVector3
 
-`toVector3(result: Vector3Like = [0, 0, 0])`
+`toVector3(): Vector3`
 
-Returns the supplied result object, or a plain three-element array when omitted. `Vector3Like` accepts tuples, typed arrays, and `Vector3` instances.
+`toVector3<T extends Vector3Like>(result: T): T`
+
+Returns a new `Vector3` when the argument is omitted or `undefined`, supporting method chaining:
+
+```typescript
+const direction = spherical.toVector3().subtract(offset);
+```
+
+When an output is supplied, writes into and returns that same object without allocating a vector.
+The concrete output type is preserved. `Vector3Like` accepts tuples, supported typed arrays, and
+`Vector3` instances.
+
+`SphericalCoordinates` is the canonical name. The deprecated `_SphericalCoordinates` export is an
+alias of the same constructor, available from both `@math.gl/core` and `math.gl` for migration.
 
 // TODO - add parameter for orientation of sphere? up vector etc?
 

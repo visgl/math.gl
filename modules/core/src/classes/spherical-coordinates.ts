@@ -4,7 +4,7 @@
 // Copyright (c) 2017 Uber Technologies, Inc.
 
 // Adaptation of THREE.js Spherical class, under MIT license
-import type {Vector3Like} from './vector3';
+import {Vector3, type Vector3Like} from './vector3';
 import {formatValue, equals, config, degrees, radians, clamp} from '../lib/common';
 
 type SphericalCoordinatesOptions = {
@@ -180,7 +180,9 @@ export class SphericalCoordinates {
     return this.check();
   }
 
-  toVector3(result: Vector3Like = [-0, -0, -0]): Vector3Like {
+  toVector3(result?: undefined): Vector3;
+  toVector3<T extends Vector3Like>(result: T): T;
+  toVector3(result: Vector3Like = new Vector3()): Vector3Like {
     const sinTheta = Math.sin(this.theta);
     const cosTheta = Math.cos(this.theta);
     const sinPhi = Math.sin(this.phi);

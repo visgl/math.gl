@@ -5,7 +5,42 @@
 
 /* eslint-disable max-statements, max-depth */
 import {test, expect} from 'vitest';
-import {SphericalCoordinates, Vector3, equals} from '@math.gl/core';
+import {SphericalCoordinates, _SphericalCoordinates, Vector3, equals} from '@math.gl/core';
+import {
+  SphericalCoordinates as MainSphericalCoordinates,
+  _SphericalCoordinates as MainLegacySphericalCoordinates
+} from 'math.gl';
+
+test('SphericalCoordinates#compatibility exports', () => {
+  expect(_SphericalCoordinates).toBe(SphericalCoordinates);
+  expect(MainSphericalCoordinates).toBe(SphericalCoordinates);
+  expect(MainLegacySphericalCoordinates).toBe(SphericalCoordinates);
+});
+
+test('SphericalCoordinates#toVector3 defaults and chaining', () => {
+  const spherical = new SphericalCoordinates({radius: 2});
+  const first = spherical.toVector3();
+  const second = spherical.toVector3(undefined);
+  expect(first).toBeInstanceOf(Vector3);
+  expect(second).toBeInstanceOf(Vector3);
+  expect(second).not.toBe(first);
+  expect(Array.from(first)).toEqual([0, -0, 2]);
+  expect(Array.from(second)).toEqual([0, -0, 2]);
+  expect(first.subtract([1, 2, 3])).toBe(first);
+  expect(Array.from(first)).toEqual([-1, -2, -1]);
+  expect(Array.from(second)).toEqual([0, -0, 2]);
+});
+
+test('SphericalCoordinates#toVector3 output reuse', () => {
+  const spherical = new SphericalCoordinates({radius: 2, theta: Math.PI / 2, phi: Math.PI / 2});
+  const tuple: [number, number, number] = [9, 9, 9];
+  for (const output of [new Vector3(9, 9, 9), tuple, new Float32Array(3), new Float64Array(3)]) {
+    expect(spherical.toVector3(output)).toBe(output);
+    expect(output[0]).toBeCloseTo(2);
+    expect(output[1]).toBeCloseTo(0);
+    expect(output[2]).toBeCloseTo(0);
+  }
+});
 
 const REPRESENTATION_TEST_CASES = [
   {
