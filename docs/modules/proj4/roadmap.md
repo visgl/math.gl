@@ -1,7 +1,7 @@
 # TypeScript proj4 parity roadmap
 
-Status: tranches 0 through 4 implemented in this source tree for the documented subset.
-Tranches 5–7 are proposed; the inventory still marks projection families as partial
+Status: tranches 0 through 5 implemented in this source tree for the documented subset.
+Tranches 6–7 are proposed; the inventory still marks projection families as partial
 until their remaining CRS/parameter gaps are closed.
 Sequencing describes dependencies, not release dates.
 
@@ -175,7 +175,17 @@ tranche 6 rather than approximating a grid transformation silently.
 
 ### Tranche 5: complete the projection inventory
 
-Use the tranche 1 inventory as the completion checklist. Proposed groups are:
+Implemented: 22 additional numerical plugins and the explicit-dependency
+`obliqueTransformation(wrappedPlugin)` factory cover the remaining algorithms.
+All 38 upstream projection/helper entries are now implemented or classified:
+`gauss` remains an internal helper for oblique stereographic. Coverage includes
+sphere/ellipsoid variants, both directions, offsets, units, aliases, all six QSC
+faces, rotated geographic/projected coordinates, and recent upstream regressions.
+WKT/PROJJSON world and regional method mappings reuse the existing math.gl/crs readers.
+All families remain marked partial pending exhaustive parameter/domain coverage and
+the independent reference corpus in tranche 7.
+
+Implemented groups:
 
 - World maps: `cea`, `mill`, `sinu`, `eck6`, `moll`, `robin`, `eqearth`, `vandg`, `bonne`.
 - Regional systems: `cass`, `poly`, `somerc`, `omerc`, `krovak`, `nzmg`, `gstmerc`.
@@ -184,9 +194,16 @@ Use the tranche 1 inventory as the completion checklist. Proposed groups are:
 - Audit remaining modules such as `equi` and `gauss` for exposed algorithms versus
   internal helpers; close every inventory entry rather than relying on this shortlist.
 
-Add opt-in convenience presets only as separate exports. Importing the minimal engine
-must continue to exclude the complete projection catalogue and CRS parser adapters
-that a consumer does not use.
+Bundle checks cover individual world projections, shared Eckert VI/Sinusoidal
+helpers, and a rotated Mollweide plugin. Importing the minimal engine excludes
+unused projections and optional CRS readers; no global catalogue is registered.
+
+Intentional numerical corrections are recorded in the inventory: consistent false
+offsets, southern Bonne inversion, equi's missing inverse return, zero-radius origins,
+Mollweide pole handling, Van der Grinten's equator, and explicit visibility errors.
+Direct numerical ports name proj4js 2.22.0 in their source headers. Original adapters
+are identified separately. Equal Earth's Apache-2.0 notice and full license are
+retained alongside the upstream MIT license and third-party notices.
 
 ### Tranche 6: grids
 

@@ -27,6 +27,9 @@ for (const {TypeScriptProjection, universalTransverseMercator} of [esm, cjs]) {
 
 const cases = [
   {plugin: null, to: null, kernels: [], projections: []},
+  {plugin: 'equalEarth', to: '+proj=eqearth', kernels: ['eqearth'], projections: ['eqearth']},
+  {plugin: 'eckertVI', to: '+proj=eck6', kernels: ['eck6','sinu'], projections: ['eck6']},
+  {plugin: 'obliqueTransformation,mollweide', expression: 'obliqueTransformation(mollweide)', to: '+proj=ob_tran +o_lat_p=45 +o_lon_p=0', kernels: ['moll'], projections: ['moll','ob-tran']},
   {plugin: 'mercator', to: 'EPSG:3857', kernels: [], projections: ['mercator']},
   {
     plugin: 'universalTransverseMercator',
@@ -48,7 +51,7 @@ for (const fixture of cases) {
       "} from '@math.gl/proj4/experimental'; export const projection = new TypeScriptProjection({to: " +
       JSON.stringify(fixture.to) +
       ', projections: [' +
-      fixture.plugin +
+      (fixture.expression || fixture.plugin) +
       ']});'
     : "export {TypeScriptProjection} from '@math.gl/proj4/experimental';";
   const result = await build({

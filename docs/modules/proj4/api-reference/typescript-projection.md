@@ -195,6 +195,55 @@ wrapping, and geographic `lon_wrap` chooses the center of the output longitude i
 Unknown or duplicate parameters throw. `no_defs`, `title`, and `type=crs` are metadata.
 Use `Proj4Projection` for definitions outside the native subset; there is no implicit fallback.
 
+
+### Remaining projection catalogue
+
+Each export is an opt-in plugin. All accept `lon_0`, `x_0`, and `y_0`,
+with additional parameters listed below. Geometry and unit parameters use the shared
+CRS pipeline.
+
+| Export | PROJ name | Additional parameters |
+| --- | --- | --- |
+| `bonne` | bonne | required nonzero lat_1 |
+| `cassiniSoldner` | cass | lat_0 |
+| `cylindricalEqualArea` | cea | lat_ts |
+| `eckertVI`, `equalEarth` | eck6, eqearth | — |
+| `equirectangular` | equi | lat_0 (true-scale parallel; use eqc for the usual latitude-origin convention) |
+| `millerCylindrical`, `mollweide`, `robinson` | mill, moll, robin | — |
+| `sinusoidal`, `vanDerGrinten` | sinu, vandg | — |
+| `gaussSchreiberTransverseMercator` | gstmerc | lat_0, k/k_0 |
+| `krovak` | krovak | lat_0, k/k_0, czech flag |
+| `newZealandMapGrid` | nzmg | required lat_0/lon_0, iterations (integer 0–10; default 1) |
+| `obliqueMercator` | omerc | lat_0, k/k_0; alpha/gamma + lonc, or lon_1/lat_1/lon_2/lat_2; no_off/no_uoff/no_rot flags |
+| `polyconic`, `swissObliqueMercator` | poly, somerc | lat_0; somerc also k/k_0 |
+| `gnomonic`, `orthographic` | gnom, ortho | lat_0 |
+| `geostationary` | geos | required positive h, sweep=x/y |
+| `tiltedPerspective` | tpers | lat_0, positive h (default 100000 m), tilt, azi (degrees) |
+| `quadrilateralizedSphericalCube` | qsc | lat_0 |
+
+`obliqueTransformation` is a factory with an explicit dependency:
+
+```typescript
+import {TypeScriptProjection, obliqueTransformation, mollweide} from '@math.gl/proj4/experimental';
+
+const rotated = new TypeScriptProjection({
+  to: '+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=-90',
+  projections: [obliqueTransformation(mollweide)]
+});
+```
+
+The wrapped plugin is included directly and need not be separately registered.
+Use `obliqueTransformation('longlat')` for rotated geographic degrees.
+If supplied, `o_proj` must match the dependency. Rotation accepts one complete
+set: `o_alpha/o_lon_c/o_lat_c`, `o_lat_p/o_lon_p`, or
+`o_lon_1/o_lat_1/o_lon_2/o_lat_2`. Nested oblique and geocentric
+dependencies are rejected. Wrapped projection parameters remain available.
+
+Krovak retains upstream defaults (49.5° latitude, 24.8333333333° longitude,
+0.9999 scale); geometry must still be supplied for the intended CRS. Perspective
+plugins reject invisible points. Exhaustive structured method variants and domain
+coverage remain tracked gaps; see the parity inventory.
+
 ## Custom plugins
 
 A plugin declares its PROJ name and additional accepted parameters, optionally lists
@@ -232,3 +281,7 @@ experimental engine opt-in until the required compatibility and accuracy are ver
 The existing `checkProj4CRSCompatibility` utility checks proj4js, not this engine.
 
 Mercator equations follow the [PROJ Mercator documentation](https://proj.org/en/stable/operations/projections/merc.html).
+
+Numerical kernel headers identify direct TypeScript ports of proj4js 2.22.0; original
+adapters and inspired equation implementations are identified separately. Distributed
+notices include the upstream MIT license and Equal Earth's retained Apache-2.0 license.

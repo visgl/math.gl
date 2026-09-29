@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Geocentric and Helmert equations adapted from proj4js 2.22.0 datumUtils.js.
+// Geocentric and Helmert equations directly adapted from proj4js 2.22.0 datumUtils.js.
 // Copyright (c) 2014, proj4js authors. See ../../PROJ4-LICENSE.md.
 import type {Datum, Ellipsoid} from './crs/types';
 export type Coordinate3D = [number, number, number];

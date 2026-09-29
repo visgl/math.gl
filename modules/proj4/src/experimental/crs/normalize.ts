@@ -129,7 +129,30 @@ export function normalizeCRS(
     parsed = parser.parse(definition, options);
   }
   const parameters = {...parsed.parameters};
-  for (const name of ['lon_0', 'lat_0', 'lat_1', 'lat_2', 'lat_ts', 'lon_wrap']) {
+  for (const name of [
+    'lon_0',
+    'lat_0',
+    'lat_1',
+    'lat_2',
+    'lat_ts',
+    'lon_wrap',
+    'lon_1',
+    'lon_2',
+    'lonc',
+    'alpha',
+    'gamma',
+    'tilt',
+    'azi',
+    'o_alpha',
+    'o_lon_c',
+    'o_lat_c',
+    'o_lon_p',
+    'o_lat_p',
+    'o_lon_1',
+    'o_lat_1',
+    'o_lon_2',
+    'o_lat_2'
+  ]) {
     if (parameters[name] !== undefined) parameters[name] = String(parseAngle(parameters[name]));
   }
   const suppliedName = parameters['proj'];

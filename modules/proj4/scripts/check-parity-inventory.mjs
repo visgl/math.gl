@@ -50,8 +50,16 @@ const compiled = await transform(
 const {commonProjectionCases} = await import(
   'data:text/javascript;base64,' + Buffer.from(compiled.code).toString('base64')
 );
-const fixtureIds = new Set(['foundation', ...commonProjectionCases.map(fixture => fixture.id)]);
-assert.equal(fixtureIds.size, commonProjectionCases.length + 1, 'Fixture IDs must be unique');
+const catalogueCompiled = await transform(
+  await readFile(join(root, 'test/fixtures/catalogue-projections.ts'), 'utf8'),
+  {loader: 'ts', format: 'esm'}
+);
+const {catalogueProjectionCases} = await import(
+  'data:text/javascript;base64,' + Buffer.from(catalogueCompiled.code).toString('base64')
+);
+const allCases = [...commonProjectionCases, ...catalogueProjectionCases];
+const fixtureIds = new Set(['foundation', ...allCases.map(fixture => fixture.id)]);
+assert.equal(fixtureIds.size, allCases.length + 1, 'Fixture IDs must be unique');
 const gapIds = new Set(inventory.gaps.map(gap => gap.id));
 assert.equal(gapIds.size, inventory.gaps.length, 'Gap IDs must be unique');
 for (const entry of [...inventory.projections, ...inventory.features]) {

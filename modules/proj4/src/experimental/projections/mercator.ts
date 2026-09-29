@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
+// Original implementation of projection equations; compatibility informed by proj4js 2.22.0.
 
 import {DEGREES_TO_RADIANS, latitudeParameter, numberParameter, wrapLongitude} from '../parameters';
 import type {ProjectionPlugin} from '../types';
