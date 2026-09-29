@@ -113,6 +113,16 @@ The descriptor can retain alternate source representations and a coordinate epoc
 definitions and descriptor-owned arrays are cloned and recursively frozen. See the
 [Spatial Reference API](/docs/modules/crs/api-reference/spatial-reference).
 
+## Optional syntax entry points
+
+The root entry point remains available. Applications that split optional parsing code
+can instead import `parseWKTCRS` and related WKT APIs from `@math.gl/crs/wkt`, PROJ
+string APIs from `@math.gl/crs/proj-string`, and metadata helpers from
+`@math.gl/crs/spatial-reference`. Each subpath includes ESM, CommonJS and declarations.
+Separate imports prevent a shared root barrel from pulling an otherwise deferred
+WKT parser into an eager bundle. Types can still be imported from the root with
+`import type`. Inspect the application's emitted chunks when combining import styles.
+
 ## API
 
 - `CRSDefinition<T extends PROJJSONCRS = PROJJSONCRS>` — a string definition or PROJJSON object.

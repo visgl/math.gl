@@ -5,8 +5,8 @@ explicit projection plugins, optional CRS readers, and in-place typed-array tran
 Applications choose the algorithms and data they need, and can load them on demand.
 It is an entry point of **`@math.gl/proj4`**, not a separately installed package.
 
-The engine is experimental. The current upstream coordinate corpus passes **228/242**
-cases in both directions, with 14 explicit construction rejections and no silent
+The engine is experimental. The current upstream coordinate corpus passes **233/242**
+cases in both directions, with nine intentional strict-input construction rejections and no silent
 mismatches in the accepted cases. This is not a measure of complete geodetic accuracy.
 See the [parity audit](./parity-audit.md) for remaining coverage and qualification work.
 The existing `Proj4Projection` remains available from `@math.gl/proj4` and uses proj4js.
@@ -96,20 +96,20 @@ and shared ellipsoid and datum tables. Selecting one projection does not remove
 those tables. Adding WKT pulls in syntax parsing and structured-CRS interpretation;
 PROJJSON objects already provide structured input and need less reader code.
 
-Measured September 29, 2026 for the structured-method follow-up, with esbuild,
+Measured September 29, 2026 for the axis and entry-point follow-up, with esbuild,
 browser ESM, ES2020, minification, and gzip level 9. Each row is a separate retained
 bundle, not an increment or an application-wide download estimate. **KiB = 1,024 bytes.**
 
 | Retained functionality | Minified KiB | Gzip KiB |
 | --- | ---: | ---: |
-| Engine core | 41.3 | 15.2 |
-| Engine + Mercator | 42.6 | 15.7 |
-| Engine + UTM | 49.3 | 18.4 |
-| Engine + Mercator + WKT reader | 64.5 | 22.9 |
-| Engine + Mercator + PROJJSON reader | 52.4 | 19.0 |
-| Engine + Mercator + NTv2 decoder | 45.7 | 16.9 |
-| Engine + Mercator + GeoTIFF grid adapter | 45.7 | 16.9 |
-| Every native export, including readers and grid adapters | 137.5 | 47.2 |
+| Engine core | 41.5 | 15.4 |
+| Engine + Mercator | 42.8 | 15.8 |
+| Engine + UTM | 49.5 | 18.5 |
+| Engine + Mercator + WKT reader | 65.7 | 23.3 |
+| Engine + Mercator + PROJJSON reader | 53.2 | 19.4 |
+| Engine + Mercator + NTv2 decoder | 45.9 | 17.0 |
+| Engine + Mercator + GeoTIFF grid adapter | 45.9 | 17.0 |
+| Every native export, including readers and grid adapters | 138.8 | 47.4 |
 | Existing proj4js-backed wrapper | 128.8 | 42.4 |
 
 The GeoTIFF row excludes an external TIFF decoder, workers, and grid files. No row
@@ -131,27 +131,24 @@ that selected bundles exclude unrelated kernels and the upstream runtime. See
 
 ## Load less-used projections on demand
 
-Tree shaking removes unused code at build time. Dynamic imports defer code that an
-application may use later. They solve different parts of the loading problem.
-The projection constructor is synchronous; await the necessary modules first.
-
-For a small lazy feature, put **static named imports in an application-owned module**,
-then dynamically import that module. This gives the bundler a narrow set of exports
-at the lazy boundary. The following two files defer a UTM feature, including its engine, until requested.
-This example assumes the initial application entry does not otherwise import the
-experimental runtime:
+Use the core and projection subpaths when the application already uses the engine
+and needs another algorithm later. The constructor is synchronous: import the
+plugin first, then supply it explicitly to a new instance.
 
 ```typescript title="projection-loader.ts"
+import {TypeScriptProjection} from '@math.gl/proj4/experimental/core';
+import {mercator} from '@math.gl/proj4/experimental/projections/merc';
+
+// Available in the initial application bundle.
+export const webMercator = new TypeScriptProjection({
+  to: 'EPSG:3857',
+  projections: [mercator]
+});
+
+// UTM's algorithm is loaded only when requested.
 export async function loadUTM31Projection() {
-  const {createUTM31Projection} = await import('./utm31-projection');
-  return createUTM31Projection();
-}
-```
-
-```typescript title="utm31-projection.ts"
-import {TypeScriptProjection, universalTransverseMercator} from '@math.gl/proj4/experimental';
-
-export function createUTM31Projection() {
+  const {universalTransverseMercator} =
+    await import('@math.gl/proj4/experimental/projections/utm');
   return new TypeScriptProjection({
     to: 'EPSG:32631',
     projections: [universalTransverseMercator]
@@ -160,35 +157,88 @@ export function createUTM31Projection() {
 ```
 
 Call `await loadUTM31Projection()` when the feature is needed, then reuse the
-returned instance. JavaScript caches a successfully loaded module; cache projection
+returned instance. JavaScript caches successful module loads; cache projection
 instances separately if construction is frequent. Handle rejected imports in your
 application's loading/error UI.
 
-Enable ESM code splitting in your bundler. It may extract common engine code into
-shared chunks; inspect its output to see which chunks belong to the initial load
-and which are deferred. Loading both features eventually still incurs the cost of
-both, plus any chunk overhead. This pattern does not promise one independent file
-per projection or a particular chunk size.
+Optional WKT interpretation can also be deferred. The adapter uses isolated
+`@math.gl/crs` syntax entry points so its parser stays on the lazy side:
 
-**Watch for eager imports of the same package entry point.** With the current
-package layout, an esbuild test that eagerly imports Mercator and lazily imports
-the UTM wrapper above puts both algorithms in an initially loaded shared chunk;
-the lazy chunk then contains only the small factory. Named imports still remove
-unreferenced algorithms, but this arrangement does not defer UTM's kernel. The
-fully deferred feature example above avoids that eager import and was verified
-with code splitting. If your application already uses the engine, check its chunk
-graph rather than assuming another dynamic import reduces the initial download.
-Dedicated public projection subpaths remain a packaging follow-up.
+```typescript
+import {TypeScriptProjection} from '@math.gl/proj4/experimental/core';
+import {mercator} from '@math.gl/proj4/experimental/projections/merc';
 
-A direct `await import('@math.gl/proj4/experimental')` can be convenient, but depending
-on how its namespace is used and the bundler's analysis, it can retain the whole
-catalogue in the lazy chunk. It does not itself request “only UTM.” The package
-currently exposes `.` and `./experimental`, not supported per-projection subpaths;
-avoid importing private `src` or `dist` paths to create smaller chunks.
+export async function loadMercatorWKT(to: string) {
+  const {wktCRSParser} = await import('@math.gl/proj4/experimental/parsers/wkt');
+  return new TypeScriptProjection({to, projections: [mercator], parsers: [wktCRSParser]});
+}
+```
 
-The same application-module pattern can defer WKT support or grid decoding. Prefer
-explicit loader choices for features or known CRS families; an arbitrary EPSG code
-does not tell the engine where to download definitions, plugins, or grids.
+The definition must select an algorithm supplied in `projections`. The WKT reader
+does not download plugins, definitions or grids for an arbitrary EPSG code.
+Use an explicit application loader map for the CRS families you support.
+
+### Public subpaths
+
+All paths below have the `@math.gl/proj4/` prefix and support ESM, CommonJS and types.
+The existing `experimental` barrel remains compatible.
+
+| Subpath | Exports |
+| --- | --- |
+| `experimental/core` | Engine, normalization, capability checks, shared types and errors |
+| `experimental/projections/<id>` | One plugin or factory, using its existing export name |
+| `experimental/parsers/wkt` | `wktCRSParser` |
+| `experimental/parsers/projjson` | `projJSONCRSParser` |
+| `experimental/grids/ntv2` | `parseNTv2Grid` and its options type |
+| `experimental/grids/geotiff` | `loadGeoTIFFGrid` and adapter types; excludes a TIFF decoder |
+
+Projection IDs follow their canonical PROJ names:
+
+```text
+aea, aeqd, bonne, cass, cea, eck6, eqc, eqearth, equi, eqdc, etmerc,
+geocent, geos, gnom, gstmerc, krovak, laea, lcc, merc, mill, moll,
+nzmg, ob_tran, omerc, ortho, poly, qsc, robin, sinu, somerc, stere,
+sterea, tmerc, tpers, utm, vandg
+```
+
+For example, `merc` exports `mercator`, `utm` exports
+`universalTransverseMercator`, and `ob_tran` exports the
+`obliqueTransformation(wrappedPlugin)` factory. Supply a wrapped projection
+explicitly, including when both plugins are dynamically imported. Geographic
+coordinates need no plugin; the internal Gauss helper is not a public projection.
+Import public subpaths rather than private `src` or `dist` files.
+
+### Measured split bundles
+
+Enable ESM code splitting in the bundler. CI verifies the transitive initial static
+graph contains neither the deferred algorithms nor optional WKT syntax, then executes
+the emitted chunks. The measurements below start with an eager core and Mercator.
+Sizes are sums across the relevant emitted files, with gzip applied to each file.
+
+| Deferred feature | Initial minified / gzip KiB | Additional minified / gzip KiB |
+| --- | ---: | ---: |
+| UTM | 43.1 / 16.2 | 7.8 / 3.4 |
+| WKT reader and syntax | 43.2 / 16.0 | 22.9 / 7.9 |
+| Rotated Mollweide (factory plus wrapped plugin) | 43.2 / 16.4 | 5.3 / 2.5 |
+
+These are esbuild browser/ES2020 measurements, not universal chunk sizes. Bundlers
+may extract shared helpers, so one plugin does not necessarily mean one file. Loading
+all features eventually pays for all retained code and chunk overhead. CommonJS
+subpaths select APIs but do not provide this browser download guarantee.
+
+Reproduce and enforce the split-bundle budgets after building:
+
+```sh
+node modules/proj4/scripts/check-lazy-package.mjs
+```
+
+Keep imports on the isolated subpaths throughout the eager and lazy features.
+Mixing in eager imports from the full `experimental` or `@math.gl/crs` barrels
+can cause a bundler to hoist otherwise lazy code. A direct
+`await import('@math.gl/proj4/experimental')` can retain the entire catalogue;
+it does not mean “only UTM.” Inspect the application's chunk graph, not just the
+presence of an `import()` expression. Tree shaking and deferred loading remain
+distinct: the former removes unused code, while the latter postpones code that is used.
 
 ## Work with @math.gl/crs
 
@@ -343,8 +393,9 @@ the execution and plugin architecture is math.gl code. Source comments and distr
 notices distinguish ports from original code. The package includes MIT attribution
 and the Apache-2.0 notice retained by Equal Earth.
 
-Remaining upstream-corpus differences include five structured axis-orientation cases
-and nine deliberate strict-input rejections. Broader grid coverage, independent
+The nine remaining upstream-corpus differences are deliberate strict-input rejections,
+[dispositioned individually](./parity-audit.md#strict-input-policy). Cardinal polar-axis
+mappings are supported; arbitrary axis rotations remain outside the subset. Broader grid coverage, independent
 accuracy references, and regional projection validity limits still need qualification.
 Keep any fallback to `Proj4Projection` an explicit application decision: it adds the
 upstream runtime and has some different dimension and validation behavior. The

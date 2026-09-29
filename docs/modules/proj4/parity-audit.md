@@ -9,6 +9,43 @@ This audit measures runtime revision `bf28217d` (PR #148) against proj4js **2.22
 still npm's latest release when checked. It adds evidence beyond the existing
 selected fixtures and synthetic grids. The original results below are preserved for comparison.
 
+## Axis and packaging follow-up
+
+The five remaining axis-orientation fixtures now pass in both directions, bringing
+numeric passes to **233/242**: PROJ 108/116, WKT 111/112, PROJJSON 8/8, aliases 6/6.
+The nine remaining construction rejections are intentional strict-input differences;
+accepted corpus cases have no execution rejections or numeric mismatches.
+
+Polar WKT2 and PROJJSON axis meridians map to signed cardinal axes relative to the
+projection's central meridian. Legacy WKT direction strings and explicitly named
+Easting/Northing UNKNOWN axes are supported. Tests cover enforced axis order, signs,
+prime meridians, angular units, scalar/batch transforms and stored-order overrides.
+Non-cardinal rotations and non-polar axis meridians still reject explicitly. The
+[OGC axis specification](https://docs.ogc.org/is/18-010r7/18-010r7.html)
+describes meridians as the directions followed from a pole, relative to the CRS prime meridian.
+
+Public projection/core/reader subpaths and a split-bundle CI gate now support an
+already-loaded engine with deferred algorithms. This packaging qualification does
+not establish independent geodetic accuracy or complete structured CRS coverage.
+
+### Strict-input policy
+
+The native engine deliberately retains these nine rejections. Its `mode` option
+controls horizontal extraction, not input permissiveness. There is no implicit
+fallback to proj4js or switch that silently discards parameters.
+
+| Corpus indices (zero-based) | Retained policy | Application action |
+| --- | --- | --- |
+| 112 | Reject a malformed trailing quote in a PROJ token. | Correct the definition at its source. |
+| 174, 175, 176, 178, 228, 229 | Reject parameters unused by the selected projection, including redundant standard parallels and zone fields. | Remove a parameter only after confirming the intended operation; the engine will not assume it is harmless. |
+| 179 | Require an explicit UTM zone instead of inferring it from `lon_0`. | Supply `+zone` and remove the irrelevant longitude parameter. |
+| 205 | Reject embedded WKT EXTENSION operations rather than ignoring executable metadata. | Supply an explicitly supported operation or deliberately select another backend. |
+
+Each fixture asserts its exact rejection in Node and Chromium. These decisions keep
+malformed or ambiguous definitions observable, and are reviewed compatibility exceptions,
+not numeric passes. Real-grid edge behavior, regional validity limits, broader parameter
+coverage and independent PROJ reference generation remain release gates.
+
 ## Structured-method follow-up
 
 The next follow-up repairs **30 more corpus cases**, bringing numeric passes from
@@ -29,8 +66,8 @@ uses the oblique alternative away from a pole and the polar kernel at a pole.
 All 30 exceptions have been removed, so these cases now assert both original
 coordinate directions. Additional tests exercise unit conversion, zero rectified
 angles, duplicate/conflicting parameters, invalid fixed constants, and Swiss-origin
-round trips. The remaining exceptions comprise **five axis-orientation coverage
-gaps** and **nine deliberate strict-input differences**. Grid-edge policy, regional
+round trips. At that stage the remaining exceptions comprised **five axis-orientation coverage
+gaps** and **nine deliberate strict-input differences**; the axis follow-up above closes the five gaps. Grid-edge policy, regional
 validity limits and independent native PROJ accuracy qualification remain open.
 
 See the [TypeScript engine guide](./typescript-engine.md) for registration, dynamic
@@ -201,9 +238,7 @@ only establish that a CRS can be constructed, not that its coordinates are corre
    precedence, and angular roundoff. Import regression fixtures for all 11 silent
    mismatches and five pole-definition failures. Unsupported operations must reject
    explicitly instead of silently selecting another interpretation.
-2. **Structured compatibility (corpus method gaps fixed; axis mappings open):** enumerate and implement the missing method/parameter/
-   axis mappings; disposition each strict-input rejection. Run the entire coordinate
-   corpus continuously, with individually reviewed exceptions rather than a total pass count.
+2. **Structured compatibility (corpus gaps closed):** method and cardinal-axis mappings now cover all non-policy rejections in the coordinate corpus. The nine strict-input differences are dispositioned above and continuously asserted. Broader structured definitions, oblique axes and uncommon parameter combinations still need independent qualification.
 3. **Grid and domain policy:** resolve the two real-grid edge differences, add licensed
    maintained real datasets, and define projection validity/accuracy limits, particularly
    for regional approximations. Separate intentional rejections from wrong finite output.

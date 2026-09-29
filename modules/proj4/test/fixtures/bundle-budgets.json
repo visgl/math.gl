@@ -1,5 +1,5 @@
 {
-  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes. Optional-reader rows added in the structured-method/docs follow-up; existing limits retained.",
+  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes. Optional-reader rows added in the structured-method/docs follow-up; existing limits retained. Lazy scenarios sum emitted chunk sizes (gzip per file), with 10% deferred headroom rounded to 100 bytes; each initial static graph retains the existing Mercator limit.",
   "baseline": {
     "core": {
       "minified": 42306,
@@ -74,6 +74,52 @@
     "mercatorWithGeoTIFFAdapter": {
       "minified": 51500,
       "gzip": 19100
+    }
+  },
+  "lazyBaseline": {
+    "utm": {
+      "initial": {
+        "minified": 44128,
+        "gzip": 16570
+      },
+      "deferred": {
+        "minified": 8028,
+        "gzip": 3485
+      }
+    },
+    "wkt": {
+      "initial": {
+        "minified": 44225,
+        "gzip": 16402
+      },
+      "deferred": {
+        "minified": 23440,
+        "gzip": 8080
+      }
+    },
+    "rotated": {
+      "initial": {
+        "minified": 44283,
+        "gzip": 16763
+      },
+      "deferred": {
+        "minified": 5429,
+        "gzip": 2518
+      }
+    }
+  },
+  "lazyLimits": {
+    "utm": {
+      "minified": 8900,
+      "gzip": 3900
+    },
+    "wkt": {
+      "minified": 25800,
+      "gzip": 8900
+    },
+    "rotated": {
+      "minified": 6000,
+      "gzip": 2800
     }
   }
 }

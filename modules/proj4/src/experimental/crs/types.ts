@@ -57,7 +57,17 @@ export type CRSCompatibilityReason =
   | 'missing-plugin'
   | 'missing-transform-stage'
   | 'invalid-definition';
+// CJS subpaths are independently bundled; keep instanceof and capability reasons
+// stable when a parser and the core come from different public entry points.
+const CRS_ERROR = Symbol.for('@math.gl/proj4/TypeScriptCRSError');
 export class TypeScriptCRSError extends Error {
+  readonly [CRS_ERROR] = true;
+  static override [Symbol.hasInstance](value: unknown): boolean {
+    if (this !== TypeScriptCRSError)
+      return Function.prototype[Symbol.hasInstance].call(this, value);
+    return value instanceof Error && (value as TypeScriptCRSError)[CRS_ERROR] === true;
+  }
+
   constructor(
     readonly reason: CRSCompatibilityReason,
     message: string

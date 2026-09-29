@@ -1,38 +1,10 @@
 [
   {
-    "index": 89,
-    "sourceLine": 1254,
-    "disposition": "open-axis-orientation",
-    "error": "Unsupported axis direction: UNKNOWN",
-    "note": "Requires a defined orientation mapping, including enforceAxis behavior."
-  },
-  {
-    "index": 91,
-    "sourceLine": 1262,
-    "disposition": "open-axis-orientation",
-    "error": "Axis meridians require an orientation operation",
-    "note": "Requires a defined orientation mapping, including enforceAxis behavior."
-  },
-  {
     "index": 112,
     "sourceLine": 1397,
     "disposition": "intentional-strict-input",
     "error": "Unsupported PROJ parameter: +no_defs\"",
     "note": "Reject malformed trailing quotes."
-  },
-  {
-    "index": 116,
-    "sourceLine": 1414,
-    "disposition": "open-axis-orientation",
-    "error": "Unsupported axis direction: North along 90 deg East",
-    "note": "Requires a defined orientation mapping, including enforceAxis behavior."
-  },
-  {
-    "index": 117,
-    "sourceLine": 1418,
-    "disposition": "open-axis-orientation",
-    "error": "Axis meridians require an orientation operation",
-    "note": "Requires a defined orientation mapping, including enforceAxis behavior."
   },
   {
     "index": 174,
@@ -75,13 +47,6 @@
     "disposition": "intentional-strict-input",
     "error": "Unsupported WKT dynamic/extension operation",
     "note": "Reject embedded WKT EXTENSION operations rather than silently ignoring them."
-  },
-  {
-    "index": 221,
-    "sourceLine": 2484,
-    "disposition": "open-axis-orientation",
-    "error": "Axis meridians require an orientation operation",
-    "note": "Requires a defined orientation mapping, including enforceAxis behavior."
   },
   {
     "index": 228,

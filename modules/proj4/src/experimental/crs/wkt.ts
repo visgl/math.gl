@@ -1,7 +1,10 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-import {inferCRSRepresentation, parseWKTCRS} from '@math.gl/crs';
+// Original adapter; named-axis fallback inspired by proj4js 2.22.0 / wkt-parser
+// (MIT). See ../../../PROJ4-LICENSE.md for upstream attribution.
+import {inferCRSRepresentation} from '@math.gl/crs/spatial-reference';
+import {parseWKTCRS} from '@math.gl/crs/wkt';
 import type {WKTCRSNode} from '@math.gl/crs';
 import type {CRSParser} from './types';
 import {unsupportedStage} from './types';
@@ -23,6 +26,22 @@ function value(node: WKTCRSNode, index = 0): string | number | undefined {
 }
 function units(node?: WKTCRSNode): unknown {
   return node ? {name: value(node), conversion_factor: value(node, 1)} : undefined;
+}
+// Original WKT adapters. UNKNOWN is only recoverable from an explicit grid-axis name.
+function legacyAxisDirection(axis: WKTCRSNode, projected: boolean): string | number | undefined {
+  const direction = value(axis, 1);
+  if (projected && String(direction).toLowerCase() === 'unknown') {
+    const name = String(value(axis)).toLowerCase();
+    const match = /^(easting|northing|westing|southing)(?:\s*\([a-z]\))?$/.exec(name);
+    if (match)
+      return {easting: 'east', northing: 'north', westing: 'west', southing: 'south'}[match[1]];
+  }
+  return direction;
+}
+function axisMeridian(axis: WKTCRSNode): RecordValue | undefined {
+  const meridian = child(axis, 'MERIDIAN');
+  if (!meridian) return undefined;
+  return {longitude: {value: value(meridian), unit: units(child(meridian, 'ANGLEUNIT'))}};
 }
 function operation(node: WKTCRSNode): RecordValue {
   const method = child(node, 'METHOD', 'PROJECTION');
@@ -108,14 +127,14 @@ function readWKT(node: WKTCRSNode): RecordValue {
       direction:
         keyword === 'GEOCCS'
           ? ['geocentricX', 'geocentricY', 'geocentricZ'][index]
-          : value(axis, 1),
+          : legacyAxisDirection(axis, projected),
       unit: units(
         child(axis, 'ANGLEUNIT', 'LENGTHUNIT') ||
           (!geocentric && !projected && /^(up|down)$/i.test(String(value(axis, 1)))
             ? undefined
             : localUnit)
       ),
-      meridian: child(axis, 'MERIDIAN') ? true : undefined
+      meridian: axisMeridian(axis)
     }));
   if (!axes.length) {
     for (const direction of geocentric

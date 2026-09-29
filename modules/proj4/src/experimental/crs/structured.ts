@@ -319,18 +319,6 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
   )
     unsupportedStage('Unsupported coordinate system subtype');
   if (geocentric) parameters['proj'] = 'geocent';
-  let axis = '';
-  for (const entry of axes) {
-    if (entry['meridian'] !== undefined)
-      unsupportedStage('Axis meridians require an orientation operation');
-    const direction = DIRECTIONS[key(entry['direction'])];
-    if (!direction) unsupportedStage('Unsupported axis direction: ' + String(entry['direction']));
-    axis += direction;
-  }
-  if (axis.length === 2) axis += 'u';
-  if (!geocentric && /[ud]/.test(axis.slice(0, 2)))
-    unsupportedStage('Structured CRS vertical-first axes require an explicit PROJ axis definition');
-  if (axis) parameters['axis'] = axis;
   const angularUnit = unit(base['angular_unit'], DEGREES_TO_RADIANS);
   const factor = unit(axes[0]?.['unit'], type === 'ProjectedCRS' || geocentric ? 1 : angularUnit);
   if (axes[1] && unit(axes[1]['unit'], factor) !== factor)
@@ -442,10 +430,66 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
       parameters['nadgrids'] = '@null';
     }
   }
+  let axis = axes
+    .map(entry => readAxisDirection(entry, parameters, type === 'ProjectedCRS'))
+    .join('');
+  if (axis.length === 2) axis += 'u';
+  if (!geocentric && /[ud]/.test(axis.slice(0, 2)))
+    unsupportedStage('Structured CRS vertical-first axes require an explicit PROJ axis definition');
+  if (axis) parameters['axis'] = axis;
   if (type === 'ProjectedCRS' || geocentric) parameters['to_meter'] = String(factor);
   return {
     parameters,
     angularUnit: type === 'ProjectedCRS' || geocentric ? angularUnit : factor,
     verticalUnit: geocentric ? 1 : unit(axes[2]?.['unit'], 1)
   };
+}
+
+/** Interpret polar axis meridians in the projection's central-meridian frame.
+ * Original adapter following OGC WKT2 axis semantics, not a proj4js numerical port.
+ * Only cardinal orientations are representable by the engine's signed axis order.
+ */
+function readAxisDirection(
+  entry: RecordValue,
+  parameters: Record<string, string | undefined>,
+  projected: boolean
+): string {
+  let direction = String(entry['direction']);
+  let meridian = entry['meridian'];
+  // Legacy WKT1 exporters spell out the same WKT2 MERIDIAN metadata.
+  const along = /^(north|south) along ([+-]?(?:\d+(?:\.\d*)?|\.\d+)) deg(?: (east|west))?$/i.exec(
+    direction
+  );
+  if (along) {
+    if (meridian !== undefined) throw new Error('Duplicate axis meridian');
+    direction = along[1];
+    meridian = {longitude: Number(along[2]) * (along[3]?.toLowerCase() === 'west' ? -1 : 1)};
+  }
+  if (meridian !== undefined) {
+    const latitude = Number(parameters['lat_0']);
+    const north = latitude === 90;
+    if (
+      !projected ||
+      parameters['proj'] !== 'stere' ||
+      Math.abs(latitude) !== 90 ||
+      key(direction) !== (north ? 'south' : 'north')
+    )
+      unsupportedStage('Axis meridians require an outward-facing polar stereographic axis');
+    const longitude = object(meridian)['longitude'];
+    const degrees =
+      typeof longitude === 'number'
+        ? finite(longitude)
+        : (finite(object(longitude)['value']) *
+            unit(object(longitude)['unit'], DEGREES_TO_RADIANS)) /
+          DEGREES_TO_RADIANS;
+    // Axis meridians and lon_0 are relative to the same CRS prime meridian.
+    const quarterTurns = finite((degrees - Number(parameters['lon_0'] || 0)) / 90);
+    if (Math.abs(quarterTurns - Math.round(quarterTurns)) > 1e-12)
+      unsupportedStage('Non-cardinal axis meridians require an orientation operation');
+    const quadrant = ((Math.round(quarterTurns) % 4) + 4) % 4;
+    return (north ? 'senw' : 'nesw')[quadrant];
+  }
+  const result = DIRECTIONS[key(direction)];
+  if (!result) unsupportedStage('Unsupported axis direction: ' + direction);
+  return result;
 }

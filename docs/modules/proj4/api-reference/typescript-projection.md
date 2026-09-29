@@ -1,7 +1,7 @@
 # TypeScriptProjection (experimental)
 
 An independent TypeScript implementation being developed alongside `Proj4Projection`.
-Import it from `@math.gl/proj4/experimental`. The existing `Proj4Projection` continues to
+Import it from `@math.gl/proj4/experimental` or the isolated `@math.gl/proj4/experimental/core` entry point. The existing `Proj4Projection` continues to
 use proj4js and provides the broader CRS support.
 
 ```typescript
@@ -24,6 +24,20 @@ The API and its supported subset may change as coverage expands.
 
 See the [engine guide](../typescript-engine.md) for pluggability, lazy loading, bundle
 size comparisons, and application integration.
+
+## Isolated entry points
+
+Use `@math.gl/proj4/experimental/core` for the class, normalization, capability checks
+and shared contracts. Import a plugin from `@math.gl/proj4/experimental/projections/<id>`
+using its canonical PROJ name, for example `merc`, `utm`, `etmerc`, `geocent` or
+`ob_tran`. Export names are identical to the barrel's names. Geographic coordinates
+need no plugin or `longlat` subpath; the internal `gauss` helper is not public.
+
+Readers are available from `experimental/parsers/wkt`, `experimental/parsers/projjson`,
+`experimental/grids/ntv2` and `experimental/grids/geotiff`, with the package name prefix.
+All subpaths support ESM, CommonJS and TypeScript. ESM code splitting is required for
+browser lazy downloads; CommonJS subpaths select APIs but do not promise shared bundles.
+See the [lazy-loading guide](../typescript-engine.md#load-less-used-projections-on-demand).
 
 ## Constructor
 
@@ -91,8 +105,12 @@ Use `parsers: [wktCRSParser, projJSONCRSParser]` for WKT1, WKT2, ESRI WKT, and
 GeographicCRS/GeodeticCRS/ProjectedCRS objects. Projection methods must map to supported
 plugins; unknown methods and conversion parameters fail explicitly. BoundCRS supports
 three-parameter translations and seven-parameter position-vector/coordinate-frame
-operations to WGS84. WKT1 TOWGS84 is also supported. Axis-meridian operations,
-vertical-first structured axes, derived CRSs, and time-dependent operations remain
+operations to WGS84. WKT1 TOWGS84 is also supported. Polar stereographic axis meridians
+that align with signed cardinal axes relative to the central meridian are supported,
+including WKT2 angular units, PROJJSON meridians and legacy WKT direction spellings.
+WKT UNKNOWN directions are inferred only from explicit Easting/Northing/Westing/Southing
+axis names. Other UNKNOWN directions reject. Non-cardinal or non-polar axis-meridian
+operations, vertical-first structured axes, derived CRSs, and time-dependent operations remain
 outside this subset. PROJ axis permutations support vertical-first ordering.
 
 `normalizeCRS(input, options)` produces an immutable execution model with distinct

@@ -47,6 +47,7 @@
     "paths": {
       "@math.gl/core/*": ["./modules/core/src/*"],
       "@math.gl/core/test/*": ["./modules/core/test/*"],
+      "@math.gl/crs/wkt": ["./modules/crs/src/wkt-crs.ts"],
       "@math.gl/crs/*": ["./modules/crs/src/*"],
       "@math.gl/crs/test/*": ["./modules/crs/test/*"],
       "@math.gl/culling/*": ["./modules/culling/src/*"],
@@ -69,6 +70,8 @@
       "@math.gl/polygon/test/*": ["./modules/polygon/test/*"],
       "@math.gl/proj/*": ["./modules/proj/src/*"],
       "@math.gl/proj/test/*": ["./modules/proj/test/*"],
+      "@math.gl/proj4/experimental/projections/*": ["./modules/proj4/src/experimental/entries/projections/*"],
+      "@math.gl/proj4/experimental/parsers/*": ["./modules/proj4/src/experimental/crs/*"],
       "@math.gl/proj4/*": ["./modules/proj4/src/*"],
       "@math.gl/proj4/test/*": ["./modules/proj4/test/*"],
       "@math.gl/sun/*": ["./modules/sun/src/*"],

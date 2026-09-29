@@ -6,9 +6,9 @@ release promotion remains gated. The inventory still marks projection families a
 until their remaining CRS/parameter gaps are closed.
 Sequencing describes dependencies, not release dates.
 
-The [parity audit and correctness follow-up](./parity-audit.md) now pass 228 of 242
+The [parity audit and correctness follow-up](./parity-audit.md) now pass 233 of 242
 upstream coordinate fixtures, with all 11 audited silent mismatches fixed. The full
-corpus runs continuously with 14 explicit construction-rejection exceptions. Full
+corpus runs continuously with nine intentional strict-input construction rejections. Full
 compatibility and release promotion remain blocked; see the audit for remaining work.
 
 
@@ -277,16 +277,27 @@ available for migration and comparison. Decide separately whether to expose a ba
 choice, promote the TypeScript class, or change defaults in a major release. Removing
 the runtime proj4 dependency requires its own compatibility and migration decision.
 
-## Packaging follow-up: independently lazy projection entry points
+## Axis compatibility and lazy entry points: implemented follow-up
 
-The [engine guide](./typescript-engine.md#load-less-used-projections-on-demand)
-documents a verified fully deferred feature module. The current single experimental
-barrel can cause esbuild to hoist a lazily referenced projection into a shared chunk
-when another feature imports the engine eagerly. Add supported public projection
-subpaths before promising independent kernel downloads in that arrangement. The
-acceptance gate should inspect the initial dependency graph, exercise the deferred
-chunk, and enforce byte budgets with an already-eager core; a dynamic import by
-itself is insufficient evidence. Keep existing experimental imports compatible.
+The five outstanding corpus axis cases now pass: legacy named UNKNOWN axes,
+polar direction spellings, and cardinal WKT2/PROJJSON meridians relative to the
+central meridian. Scalar and typed-array tests exercise default/enforced order,
+signs, units, both hemispheres, and explicit stored order. All nine remaining corpus
+rejections are deliberate strict-input policies; see the [audit](./parity-audit.md#strict-input-policy).
+Oblique axis rotations, non-polar meridian operations and broader structured variants
+remain outside the supported subset.
+
+Public core, projection, parser and grid subpaths preserve the existing experimental
+barrel. Corresponding CRS syntax subpaths prevent optional WKT syntax from being
+hoisted through a shared dependency. CI inspects the initial static dependency graph
+with an eagerly loaded core/Mercator, executes the deferred UTM, WKT and composite
+chunks, enforces byte budgets, and checks every subpath in packed ESM/CommonJS and
+TypeScript consumers. See the [engine guide](./typescript-engine.md#load-less-used-projections-on-demand).
+
+Remaining release work: real-grid edge policy and maintained datasets, regional
+accuracy limits, independent native PROJ qualification, broader browser/startup
+performance baselines, and the explicit promotion/migration decision. These are
+separate gates from completing this upstream coordinate corpus.
 
 ## Maintaining the reference version
 
