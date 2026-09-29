@@ -234,8 +234,8 @@ interior checks. Intentional corrections include inclusive outer edges, stricter
 inverse convergence, nodata handling and destination-grid execution even when
 effective ellipsoids match.
 
-The inventory keeps grid features partial until licensed real-world datasets and
-independent native PROJ reference coordinates are added in tranche 7. Vertical
+The inventory keeps grid features partial despite the tranche 7 real-grid baseline;
+additional datasets, formats and operation semantics still need qualification. Vertical
 grids, generalized GeoTIFF metadata/band conventions and structured grid operation
 selection remain outside this horizontal subset.
 
@@ -260,9 +260,10 @@ allocation improve for the measured workloads, while native construction costs m
 The full native export surface (including optional readers) is larger than the
 wrapper; selected projection bundles are smaller.
 
-Still required before promotion: licensed real-world grids, a larger independent
-native PROJ corpus, exhaustive structured CRS/parameter variants, reviewed numerical
-exceptions, broader browser performance baselines and a migration decision. Sampled
+An independent PROJ corpus and licensed real-grid baseline are now implemented; see
+the qualification follow-up below. Still required before promotion: denser regional
+accuracy checks and improvements, broader grid and structured CRS/parameter variants,
+reviewed numerical exceptions, browser performance baselines and a migration decision. Sampled
 allocation estimates are not exact allocation counts. First construction after imports
 is measured separately from warm construction; process/module startup is not yet profiled.
 This tranche does not promote the engine or remove the upstream dependency.
@@ -294,10 +295,26 @@ with an eagerly loaded core/Mercator, executes the deferred UTM, WKT and composi
 chunks, enforces byte budgets, and checks every subpath in packed ESM/CommonJS and
 TypeScript consumers. See the [engine guide](./typescript-engine.md#load-less-used-projections-on-demand).
 
-Remaining release work: real-grid edge policy and maintained datasets, regional
-accuracy limits, independent native PROJ qualification, broader browser/startup
-performance baselines, and the explicit promotion/migration decision. These are
-separate gates from completing this upstream coordinate corpus.
+The independent-reference follow-up below adds maintained datasets and an explicit
+edge disposition. Remaining gates include denser regional accuracy qualification,
+additional grid operations, broader browser/startup performance baselines, and the
+explicit promotion/migration decision. These are separate from upstream corpus parity.
+
+## Independent projection and real-grid qualification: implemented baseline
+
+- Native PROJ 9.5.1 / pyproj 3.7.2 references for every named algorithm: 118
+  configurations and 1,612 points, including separate inverse and Float64 comparisons.
+- Pinned, licensed German/Canadian horizontal GeoTIFFs: 80 independent reference
+  points across 15 images, plus boundary and explicit fallback tests.
+- Offline Node/Chromium CI and integrity checks; reproducible generation with no
+  PROJ or Python runtime dependency.
+- AEQD relative-origin correction, explicit legacy-definition translations, measured
+  Cassini/Robinson limits and a disposition for the Canadian inverse edge failures.
+
+See [independent validation](./independent-validation.md). This completes the initial
+maintained independent-reference and real-GeoTIFF baseline. Tranche 7 remains open
+for denser domain qualification, accuracy improvements, real NTv2 and additional
+operations, performance breadth and the explicit promotion/migration decision.
 
 ## Maintaining the reference version
 

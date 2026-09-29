@@ -80,7 +80,8 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
       return p;
     } else {
       // Default case
-      if (Math.abs(lon) < EPSLN && Math.abs(lat - state.lat0) < EPSLN) {
+      // Correct the upstream origin shortcut to use longitude relative to lon_0.
+      if (Math.abs(dlon) < EPSLN && Math.abs(lat - state.lat0) < EPSLN) {
         p.x = state.x0;
         p.y = state.y0;
         return p;

@@ -43,6 +43,7 @@
     "@vis.gl/ts-plugins": "^2.0.0-alpha.6",
     "@vitest/coverage-v8": "4.1.10",
     "ajv": "^8.20.0",
+    "geotiff": "3.0.5",
     "json-schema-to-typescript": "^16.0.0",
     "playwright": "^1.62.1",
     "pre-commit": "^2.0.0",

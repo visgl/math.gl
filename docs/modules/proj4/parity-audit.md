@@ -9,6 +9,25 @@ This audit measures runtime revision `bf28217d` (PR #148) against proj4js **2.22
 still npm's latest release when checked. It adds evidence beyond the existing
 selected fixtures and synthetic grids. The original results below are preserved for comparison.
 
+## Independent reference and real-grid follow-up
+
+A maintained native PROJ 9.5.1 / pyproj 3.7.2 corpus now covers all 37 named algorithms,
+118 configurations and 1,612 points. It compares both directions independently in
+scalar and Float64 paths. Licensed, pinned German and Canadian GeoTIFFs add 80
+independent reference points, including nested-grid boundaries. All run offline in
+Node and Chromium, with source/generator/data hash checks in CI.
+
+This found and corrected an ellipsoidal AEQD origin shortcut that could misplace
+longitude-zero points by hundreds of kilometres. Wider probes also quantify Cassini
+and Robinson approximation limits. The two Canadian western-edge audit failures are
+retained strict-coverage differences: the inverse source falls outside the grid,
+including in PROJ's approximate result. See [independent validation](./independent-validation.md)
+for the exact semantics, budgets, edge disposition and reproduction commands.
+
+The upstream compatibility result remains 233/242; these new independent checks do
+not imply full-domain accuracy or complete CRS parity. Dense regional sampling,
+additional grid formats/operations, accuracy improvements and promotion remain open.
+
 ## Axis and packaging follow-up
 
 The five remaining axis-orientation fixtures now pass in both directions, bringing
