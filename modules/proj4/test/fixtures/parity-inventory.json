@@ -4,7 +4,7 @@
     "package": "proj4",
     "version": "2.22.0",
     "tag": "v2.22.0",
-    "checkedOn": "2026-09-28",
+    "checkedOn": "2026-09-29",
     "source": "https://github.com/proj4js/proj4js/tree/v2.22.0",
     "files": {
       "lib/projections.js": "0f40f09737eec488f3771801505a1c6b7e9165666b5b887d3076363fa343d45e",
@@ -1093,7 +1093,8 @@
       "status": "verified",
       "tests": [
         "test/lib/crs-datums.spec.ts",
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/datum-grids.spec.ts"
       ],
       "gapIds": []
     },
@@ -1101,7 +1102,8 @@
       "id": "prime-meridians",
       "status": "verified",
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/datum-grids.spec.ts"
       ],
       "gapIds": []
     },
@@ -1156,7 +1158,8 @@
       "status": "partial",
       "tests": [
         "test/lib/typescript-projection.spec.ts",
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/datum-grids.spec.ts"
       ],
       "gapIds": [
         "native-proj-corpus"
@@ -1196,7 +1199,8 @@
       "id": "datum-chaining",
       "status": "partial",
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/datum-grids.spec.ts"
       ],
       "gapIds": [
         "native-proj-corpus"
@@ -1204,18 +1208,22 @@
     },
     {
       "id": "ntv2-grids",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/datum-grids.spec.ts"
+      ],
       "gapIds": [
-        "ntv2"
+        "grid-reference-corpus"
       ]
     },
     {
       "id": "geotiff-grids",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/datum-grids.spec.ts"
+      ],
       "gapIds": [
-        "geotiff-grid"
+        "grid-reference-corpus"
       ]
     },
     {
@@ -1236,7 +1244,8 @@
       "tests": [
         "test/lib/common-projections.spec.ts",
         "test/lib/crs-datums.spec.ts",
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/datum-grids.spec.ts"
       ],
       "gapIds": [
         "native-proj-corpus"
@@ -1248,7 +1257,8 @@
       "tests": [
         "test/lib/common-projections.spec.ts",
         "test/lib/crs-datums.spec.ts",
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/datum-grids.spec.ts"
       ],
       "gapIds": [
         "projection-parameters"
@@ -1285,19 +1295,14 @@
       "reason": "All upstream algorithm modules now have native coverage; exhaustive parameter combinations, inverse domain boundaries, and uncommon structured variants still need an independent corpus before promotion."
     },
     {
-      "id": "ntv2",
-      "tranche": 6,
-      "reason": "NTv2 loading, grid selection, interpolation, inverse iteration and error-field options are not implemented."
-    },
-    {
-      "id": "geotiff-grid",
-      "tranche": 6,
-      "reason": "Optional asynchronous GeoTIFF datum grids are not implemented."
-    },
-    {
       "id": "native-proj-corpus",
       "tranche": 7,
       "reason": "Independent checks currently use published PROJ UTM examples. Expand into a reproducibly generated native PROJ/EPSG corpus; the local PROJ executable is incompatible with this host."
+    },
+    {
+      "id": "grid-reference-corpus",
+      "tranche": 7,
+      "reason": "Horizontal NTv2 and the upstream two-band GeoTIFF subset are implemented with analytic synthetic and upstream differential fixtures. Add licensed real-world grids and independent reference outputs before promotion; broader GeoTIFF metadata/band conventions and vertical grids are outside this tranche."
     }
   ],
   "exceptions": [
@@ -1338,7 +1343,7 @@
     },
     {
       "id": "strict-crs-boundaries",
-      "description": "Unknown/absent CRS metadata, dynamic datums, unsupported structured operations and non-null grid lists fail explicitly. Compound extraction is opt-in and reports lossy.",
+      "description": "Unknown/absent CRS metadata, dynamic datums and unsupported structured operations fail explicitly. Compound extraction is opt-in and reports lossy; horizontal grid registrations are now handled by tranche 6.",
       "test": "test/lib/crs-datums.spec.ts"
     },
     {
@@ -1395,6 +1400,26 @@
       "id": "mollweide-unwrapped-longitude",
       "description": "Native Mollweide inverse retains longitudes outside ±180 degrees when +over is enabled. Upstream 2.22.0 clamps after its over-aware longitude adjustment; the native inverse clamps only when wrapping is enabled.",
       "test": "test/lib/catalogue-projections.spec.ts"
+    },
+    {
+      "id": "grid-edges-and-inverse",
+      "description": "Native bilinear interpolation includes final rows/columns, and inverse shifts require both ordinates to converge within 20 iterations. Shifted boundary coordinates are solved within a displacement envelope and must return to the true source extent; no approximate edge inverse is accepted.",
+      "test": "test/lib/datum-grids.spec.ts"
+    },
+    {
+      "id": "grid-nodata",
+      "description": "Non-finite shift nodes and GeoTIFF GDAL nodata are treated as unavailable cells, with fallback to later subgrids/grids. Zero-weight invalid neighbors do not invalidate an exact usable node.",
+      "test": "test/lib/datum-grids.spec.ts"
+    },
+    {
+      "id": "grid-destination",
+      "description": "Native destination grid shifts run even when the effective source/destination ellipsoids are both WGS84; upstream datum_transform can return early before the destination inverse grid stage.",
+      "test": "test/lib/datum-grids.spec.ts"
+    },
+    {
+      "id": "grid-registration",
+      "description": "Prepared grids are registered through each instance's datumGrids map and captured at construction. All required entries preceding a null fallback must be loaded; unavailable optional grids are skipped, and exhausted coverage throws. No global registry or implicit network loading.",
+      "test": "test/lib/datum-grids.spec.ts"
     }
   ]
 }

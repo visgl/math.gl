@@ -1,7 +1,7 @@
 # TypeScript proj4 parity roadmap
 
-Status: tranches 0 through 5 implemented in this source tree for the documented subset.
-Tranches 6–7 are proposed; the inventory still marks projection families as partial
+Status: tranches 0 through 6 implemented in this source tree for the documented subset.
+Tranche 7 is proposed; the inventory still marks projection families as partial
 until their remaining CRS/parameter gaps are closed.
 Sequencing describes dependencies, not release dates.
 
@@ -12,7 +12,7 @@ the existing proj4js wrapper. Keep projection algorithms explicitly pluggable an
 ESM imports tree-shakeable throughout implementation.
 
 The initial parity reference is **proj4js 2.22.0**, the latest npm release verified
-on September 28, 2026. The module dependency is pinned to that exact version so
+on September 29, 2026. The module dependency is pinned to that exact version so
 tests remain reproducible. [Upstream release](https://github.com/proj4js/proj4js/releases/tag/v2.22.0),
 [tagged source](https://github.com/proj4js/proj4js/tree/v2.22.0).
 
@@ -159,7 +159,7 @@ tables, three/seven-parameter Helmert transforms, WGS84 datum chaining, WKT TOWG
 BoundCRS operations. Tests cover heights, poles, geocentric units, both directions,
 axis permutations, Web Mercator datum geometry, and grid rejection. Native height
 semantics deliberately expose computed heights; fourth ordinates remain unchanged.
-Dynamic operations and grids remain unsupported. A larger independent geodetic corpus
+Dynamic operations remain unsupported; tranche 6 adds horizontal grids. A larger independent geodetic corpus
 is still an acceptance gate for promotion.
 
 
@@ -207,16 +207,30 @@ retained alongside the upstream MIT license and third-party notices.
 
 ### Tranche 6: grids
 
-Start with the NTv2 registration surface exposed by `Proj4Projection.registerDatumGrid`,
-then match upstream's optional GeoTIFF grid support through an isolated adapter.
-Separate byte decoding/loading from synchronous transformation over prepared grids.
-Keep optional readers and grid data out of minimal bundles.
+Implemented: `parseNTv2Grid` for both byte orders and standard/compact records,
+and an async `loadGeoTIFFGrid` adapter for the pinned upstream two-band horizontal
+offset convention. Prepared grids are supplied through each instance's
+`datumGrids` map. There is no global registry, network loading, implicit
+GeoTIFF dependency or asynchronous work during coordinate transformation.
 
-Test grid selection, nested subgrids, interpolation at cell/boundary edges, inverse
-iteration, nodata, optional versus required grids, null-grid behavior, byte order,
-error-field options, loading failures, and caller-controlled data ownership. Match
-only the grid/vertical semantics actually supported by the pinned upstream release;
-broader geoid and native PROJ capabilities are separate scope.
+The datum pipeline supports ordered required/optional/null grids, source and inverse
+destination shifts, grid-to-grid transforms, and composition with Helmert/geocentric
+operations. NTv2 preserves subgrid file order; GeoTIFF images run last-to-first.
+Grid data is owned after preparation and registrations are captured at construction.
+ESM bundle checks exclude unused readers and interpolation from minimal engines.
+
+Tests cover nested subgrids, nodata fallback, cell/boundary edges, shifted inverse
+extents, two-axis inverse convergence, malformed data, both byte orders, error-field
+record layouts, axis/prime-meridian composition, loading failure and data ownership.
+Synthetic fields supply analytic expected coordinates and upstream differential
+interior checks. Intentional corrections include inclusive outer edges, stricter
+inverse convergence, nodata handling and destination-grid execution even when
+effective ellipsoids match.
+
+The inventory keeps grid features partial until licensed real-world datasets and
+independent native PROJ reference coordinates are added in tranche 7. Vertical
+grids, generalized GeoTIFF metadata/band conventions and structured grid operation
+selection remain outside this horizontal subset.
 
 ### Tranche 7: promote only after evidence
 

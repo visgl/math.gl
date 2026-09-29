@@ -176,8 +176,15 @@ export function normalizeCRS(
   if (datumName && datumName !== 'none' && !datum) unsupportedStage('Unknown datum: ' + datumName);
   const ellipsoid = getEllipsoid(parameters, datum?.ellipse);
   const grids = parameters['nadgrids'] ?? datum?.nadgrids;
-  if (grids !== undefined && grids !== '@null' && grids !== 'null')
-    unsupportedStage('Grid shifts are not implemented: ' + grids);
+  const gridReferences =
+    grids === undefined
+      ? undefined
+      : grids.split(',').map(entry => {
+          const optional = entry.startsWith('@');
+          const name = optional ? entry.slice(1) : entry;
+          if (!name || /\s/.test(name)) throw new Error('Invalid datum grid name');
+          return Object.freeze({name, optional});
+        });
   const rawShift = parameters['towgs84'] ?? datum?.towgs84;
   let shift: readonly number[] | undefined;
   if (rawShift !== undefined) {
@@ -191,7 +198,7 @@ export function normalizeCRS(
     }
   }
   if (datumName === 'none') shift = undefined;
-  if (grids === '@null' || grids === 'null') shift = [0, 0, 0];
+  if (gridReferences && datumName !== 'none') shift = [0, 0, 0];
   const datumEllipsoid =
     grids === '@null' || grids === 'null' ? getEllipsoid({ellps: 'WGS84'}) : ellipsoid;
   const axis = parameters['axis'] || 'enu';
@@ -219,7 +226,14 @@ export function normalizeCRS(
       projection: name,
       parameters: Object.freeze(parameters),
       ellipsoid,
-      datum: Object.freeze({ellipsoid: datumEllipsoid, towgs84: shift && Object.freeze(shift)}),
+      datum: Object.freeze({
+        ellipsoid: datumEllipsoid,
+        towgs84: shift && Object.freeze(shift),
+        grids:
+          datumName === 'none' || grids === '@null' || grids === 'null'
+            ? undefined
+            : gridReferences && Object.freeze(gridReferences)
+      }),
       angularUnit,
       toMeter,
       verticalUnit,

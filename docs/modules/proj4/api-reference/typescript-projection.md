@@ -24,7 +24,7 @@ The API and its supported subset may change as coverage expands.
 
 ## Constructor
 
-`new TypeScriptProjection({from, to, projections, aliases, parsers, enforceAxis, mode})`
+`new TypeScriptProjection({from, to, projections, aliases, parsers, datumGrids, enforceAxis, mode})`
 
 All options are optional. Omitted `from` and `to` default to WGS84.
 Both accept `ReadonlyCRSDefinition`, `CRSReference`, or `SpatialReference` from
@@ -52,7 +52,7 @@ instance's readonly `lossy` flag reports this extraction. Extracted horizontal t
 use zero height internally and preserve supplied vertical ordinates without interpreting
 or transforming them; combining this extraction with geocentric coordinates is rejected.
 VerticalCRS alone, dynamic
-datums, coordinate epochs, and grid transformations are rejected.
+datums, coordinate epochs, and vertical grid transformations are rejected.
 
 ## Integration with @math.gl/crs
 
@@ -187,7 +187,7 @@ Named datum tables and `towgs84` implement translations (meters) or seven-parame
 Helmert operations (meters, arcseconds, ppm). Nonzero operations chain through WGS84.
 No declared operation, or explicit `datum=none`, leaves the datum unchanged.
 `nadgrids=@null` uses WGS84 datum geometry separately from projection geometry,
-including Web Mercator's sphere. Other grid lists fail until the grid tranche.
+including Web Mercator's sphere. Other horizontal grid lists use the prepared grids described below.
 
 `pm` accepts named or numeric prime meridians. `over` disables projection longitude
 wrapping, and geographic `lon_wrap` chooses the center of the output longitude interval.
@@ -243,6 +243,81 @@ Krovak retains upstream defaults (49.5° latitude, 24.8333333333° longitude,
 0.9999 scale); geometry must still be supplied for the intended CRS. Perspective
 plugins reject invisible points. Exhaustive structured method variants and domain
 coverage remain tracked gaps; see the parity inventory.
+
+
+## Horizontal datum grids
+
+Grid decoding/loading is separate from synchronous coordinate transformation.
+Register prepared grids per instance through `datumGrids`; the native engine has no
+global registry. This replaces the global registration pattern of the existing
+`Proj4Projection.registerDatumGrid` wrapper.
+
+```typescript
+import {TypeScriptProjection, parseNTv2Grid} from '@math.gl/proj4/experimental';
+
+const grid = parseNTv2Grid(ntv2ArrayBuffer);
+const projection = new TypeScriptProjection({
+  from: '+proj=longlat +ellps=clrk66 +nadgrids=local.gsb',
+  to: 'EPSG:4326',
+  datumGrids: {'local.gsb': grid}
+});
+```
+
+`parseNTv2Grid(buffer, {includeErrorFields})` supports both byte orders and
+NTv2 SECONDS grids. The default reads 16-byte node records, including unused accuracy
+fields. Set `includeErrorFields: false` only for compact files with 8-byte records;
+it does not simply discard accuracy fields from a standard file. Invalid headers,
+dimensions, unsupported units and truncated data throw at preparation time.
+
+`loadGeoTIFFGrid(decodedTIFF)` asynchronously prepares a decoded geotiff.js v2/v3
+object. Callers load the file or URL with their chosen GeoTIFF library and await the
+result before construction:
+
+```typescript
+import {loadGeoTIFFGrid, TypeScriptProjection} from '@math.gl/proj4/experimental';
+
+const grid = await loadGeoTIFFGrid(decodedTIFF);
+const projection = new TypeScriptProjection({
+  from: '+proj=longlat +ellps=GRS80 +nadgrids=local.tif',
+  datumGrids: {'local.tif': grid}
+});
+```
+
+This adapter follows the pinned upstream horizontal convention: geographic degree
+coordinates, positive ModelPixelScale, latitude offsets in band 0 and east-positive
+longitude offsets in band 1, both in arcseconds. It recognizes GDAL nodata.
+It does not infer arbitrary band units, rotated rasters, vertical grids or other PROJ
+grid metadata. It imports no GeoTIFF library and performs no network requests.
+Unused grid readers and interpolation code are removed from core-only ESM bundles.
+
+Prepared readers own their decoded data; buffers/rasters can be changed or released
+after preparation completes. Each projection captures its registration map at
+construction. Replacing a map entry affects subsequently constructed instances.
+The existing wrapper's global grid registry is independent.
+
+Lists such as `+nadgrids=@regional.gsb,required.gsb,@null` are tried in order.
+All required entries before a null fallback must be registered at construction;
+missing `@optional` entries are skipped. A registered grid outside coverage or
+with unusable interpolation nodes falls through to the next entry. The reserved
+`null`/`@null` entry is an explicit identity fallback. Exhausting a list
+without a match throws. Optional does not mean an implicit identity transform.
+
+NTv2 subgrids retain file order, matching proj4js; place a child before its parent
+when it should take precedence. GeoTIFF images are tried last-to-first, matching
+upstream child-before-parent ordering. Bilinear interpolation includes the final
+rows and columns. Inverse shifts solve both ordinates within a bounded iteration;
+they must converge inside the source grid and never return an approximate edge fix.
+
+Source grids shift into the WGS84 datum frame; destination grids apply the inverse.
+They take precedence over Helmert parameters on the same CRS and compose with
+the other CRS's Helmert/geocentric stage. Grid shifts themselves preserve height;
+later geocentric/Helmert stages can change it. `datum=none` disables grid operations.
+Capability checks verify required registrations but cannot guarantee coordinate
+coverage. Named NAD27's optional grid list likewise requires usable data at execution.
+
+Synthetic analytic and upstream differential fixtures cover the implemented subset.
+Licensed real-world grids and independent reference coordinates remain a release
+acceptance gate in tranche 7.
 
 ## Custom plugins
 

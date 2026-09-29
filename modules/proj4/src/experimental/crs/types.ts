@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 import type {ReadonlyCRSDefinition} from '@math.gl/crs';
 import type {ProjectionParameters} from '../types';
+import type {DatumGridReference} from '../grids/types';
 
 export type CRSNormalizationOptions = {
   aliases?: Readonly<Record<string, ReadonlyCRSDefinition>>;
@@ -32,6 +33,8 @@ export type Datum = {
   readonly ellipsoid: Ellipsoid;
   /** undefined disables datum conversion; values use meters, arcseconds and ppm. */
   readonly towgs84?: readonly number[];
+  /** Ordered horizontal grids; compiled instances capture the supplied grid objects. */
+  readonly grids?: readonly DatumGridReference[];
 };
 export type NormalizedCRS = {
   readonly kind: 'geographic' | 'projected' | 'geocentric' | 'identity';

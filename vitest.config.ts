@@ -27,12 +27,15 @@ export default getVitestConfig({
       }
     },
     browser: {
+      // Prebundle the grid oracle so browser tests do not reload midway through a run.
+      optimizeDeps: {include: ['proj4/lib/datum_transform']},
       test: {
         include: includePatterns,
         setupFiles: ['./test/utils/test-setup.ts']
       }
     },
     headless: {
+      optimizeDeps: {include: ['proj4/lib/datum_transform']},
       test: {
         include: includePatterns,
         setupFiles: ['./test/utils/test-setup.ts']

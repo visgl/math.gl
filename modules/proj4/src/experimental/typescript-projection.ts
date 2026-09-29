@@ -9,6 +9,7 @@ import type {CRSCompatibilityReason, CRSNormalizationOptions, NormalizedCRS} fro
 import {transformDatum} from './datum';
 import type {Coordinate3D} from './datum';
 import {wrapLongitude} from './parameters';
+import type {DatumGridCollection} from './grids/types';
 
 export type TypeScriptProjectionOptions = CRSNormalizationOptions & {
   from?: TypeScriptCRSInput;
@@ -17,6 +18,8 @@ export type TypeScriptProjectionOptions = CRSNormalizationOptions & {
   projections?: readonly ProjectionPlugin[];
   /** Honor declared axis order/direction. Default false, matching proj4js. */
   enforceAxis?: boolean;
+  /** Prepared horizontal grids keyed by the names used in +nadgrids. No global registry. */
+  datumGrids?: DatumGridCollection;
 };
 type CompiledCRS = NormalizedCRS & {implementation?: ProjectionImplementation};
 /** Experimental independent CRS engine. Third ordinates are ellipsoidal height or geocentric Z. */
@@ -89,7 +92,7 @@ function registry(projections: readonly ProjectionPlugin[]): Map<string, Project
 function compileCRS(
   definition: TypeScriptCRSInput,
   plugins: ReadonlyMap<string, ProjectionPlugin>,
-  options: CRSNormalizationOptions
+  options: TypeScriptProjectionOptions
 ): CompiledCRS {
   const crs = normalizeCRS(definition, options);
   const plugin = plugins.get(pluginKey(crs.projection));
@@ -119,7 +122,24 @@ function compileCRS(
   const implementation = plugin?.create({...crs.ellipsoid, parameters});
   if (crs.kind === 'geocentric' && (!implementation?.forward3D || !implementation?.inverse3D))
     throw new Error('Geocentric plugin must implement 3D operations');
-  return {...crs, implementation};
+  const references = crs.datum.grids;
+  const nullIndex = references?.findIndex(reference => reference.name === 'null') ?? -1;
+  const grids = references?.slice(0, nullIndex < 0 ? undefined : nullIndex + 1).map(reference => {
+    const grid = Object.prototype.hasOwnProperty.call(options.datumGrids || {}, reference.name)
+      ? options.datumGrids[reference.name]
+      : undefined;
+    if (grid && typeof grid.shift !== 'function')
+      throw new Error('Invalid prepared datum grid: ' + reference.name);
+    return Object.freeze({...reference, grid});
+  });
+  // A null fallback terminates the list. Later entries can never be consulted.
+  for (const reference of grids || []) {
+    if (reference.name === 'null') break;
+    if (!reference.optional && !reference.grid)
+      unsupportedStage('Required datum grid is not registered: ' + reference.name);
+  }
+  const datum = grids ? Object.freeze({...crs.datum, grids: Object.freeze(grids)}) : crs.datum;
+  return {...crs, datum, implementation};
 }
 function axisTransform(point: Coordinate3D, axis: string, inverse: boolean): Coordinate3D {
   const result: Coordinate3D = [0, 0, 0];

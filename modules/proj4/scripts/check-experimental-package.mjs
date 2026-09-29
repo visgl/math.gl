@@ -126,3 +126,42 @@ for (const {TypeScriptProjection, geocentric, wktCRSParser} of [esm, cjs]) {
     [0, 0]
   );
 }
+
+// Prepared grids are injected; core/projection bundles must not retain grid readers or interpolation.
+for (const reader of [null, 'parseNTv2Grid', 'loadGeoTIFFGrid']) {
+  const contents = reader
+    ? "export {" + reader + "} from '@math.gl/proj4/experimental';"
+    : "export {TypeScriptProjection} from '@math.gl/proj4/experimental';";
+  const result = await build({
+    stdin: {contents, resolveDir: packageRoot},
+    bundle: true, tsconfigRaw: {}, format: 'esm', platform: 'browser',
+    minify: true, metafile: true, write: false
+  });
+  const emitted = Object.values(result.metafile.outputs).flatMap(output =>
+    Object.entries(output.inputs).filter(([, input]) => input.bytesInOutput > 0).map(([path]) => path)
+  );
+  assert.equal(emitted.some(path => path.endsWith('/grids/ntv2.js')), reader === 'parseNTv2Grid');
+  assert.equal(emitted.some(path => path.endsWith('/grids/geotiff.js')), reader === 'loadGeoTIFFGrid');
+  assert.equal(emitted.some(path => path.endsWith('/grids/grid.js')), reader !== null);
+  assert(!emitted.some(path => /node_modules\/(proj4|geotiff)\//.test(path)));
+}
+for (const {TypeScriptProjection, loadGeoTIFFGrid} of [esm, cjs]) {
+  const grid = await loadGeoTIFFGrid({
+    getImageCount: async () => 1,
+    getImage: async () => ({
+      getWidth: () => 2, getHeight: () => 2,
+      getBoundingBox: () => [-1,-1,1,1],
+      fileDirectory: {ModelPixelScale: [1,1,0]},
+      readRasters: async () => [new Float32Array(4).fill(1),new Float32Array(4).fill(-2)]
+    })
+  });
+  const projection = new TypeScriptProjection({
+    from: '+proj=longlat +nadgrids=local',
+    datumGrids: {local: grid}
+  });
+  const point = [-0.5,0.5,123];
+  const projected = projection.project(point);
+  assert(Math.abs(projected[0] - (point[0] - 2/3600)) < 1e-12);
+  assert(Math.abs(projected[1] - (point[1] + 1/3600)) < 1e-12);
+  projection.unproject(projected).forEach((value,i) => assert(Math.abs(value-point[i]) < 1e-10));
+}
