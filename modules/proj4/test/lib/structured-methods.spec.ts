@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 // Authored method-normalization regressions against the proj4js 2.22.0 reference.
-import {expect, test} from 'vitest';
+import {expect, test, vi} from 'vitest';
 import proj4 from 'proj4';
 import type {PROJJSONCRSByType} from '@math.gl/crs';
 import {
@@ -230,5 +230,26 @@ test('Right-angle Hotine azimuth stays finite through ellipsoid roundoff at the 
     const projected = projection.project(point);
     close(projected, [0, 0], 0.2);
     close(projection.unproject(projected), point, 1e-7);
+  }
+});
+
+// Reproduce libm/V8 rounding on either side of the right-angle asin boundary.
+test('Hotine right-angle origin is stable across machine-precision changes in gamma', () => {
+  const asin = Math.asin;
+  for (const delta of [-Number.EPSILON, 0, Number.EPSILON]) {
+    const mock = vi.spyOn(Math, 'asin').mockImplementationOnce(value => asin(value) + delta);
+    let projection: TypeScriptProjection;
+    try {
+      projection = new TypeScriptProjection({
+        from: '+proj=longlat +datum=none',
+        to: '+proj=omerc +ellps=bessel +lat_0=46.95240555555556 +lonc=7.43958333333333 +alpha=90 +gamma=90',
+        projections
+      });
+    } finally {
+      mock.mockRestore();
+    }
+    const point = [7.43958333333333, 46.95240555555556];
+    close(projection.project(point), [0, 0], 1e-7);
+    close(projection.unproject(projection.project(point)), point, 1e-7);
   }
 });

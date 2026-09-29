@@ -159,11 +159,16 @@ function initialize(state: State): void {
       alpha_c = Math.asin(D * Math.sin(gamma0));
     }
     // At a right-angle azimuth the argument is mathematically ±1. Ellipsoid
-    // rounding can push it a few ULPs outside asin's domain (e.g. Swiss LV03).
-    // Clamp roundoff only; larger invalid arguments remain non-finite.
+    // rounding can move it a few ULPs to either side of the boundary (Swiss
+    // LV03). Even inward roundoff is amplified by asin into an origin shift.
+    // Snap inward roundoff only for a right angle; preserve nearby azimuths.
     let longitudeArgument = 0.5 * (F - 1 / F) * Math.tan(gamma0);
-    if (Math.abs(longitudeArgument) > 1 && Math.abs(longitudeArgument) <= 1 + 8 * Number.EPSILON)
+    if (
+      Math.abs(Math.abs(longitudeArgument) - 1) <= 8 * Number.EPSILON &&
+      (Math.abs(longitudeArgument) > 1 || Math.abs(Math.cos(alpha_c)) <= 8 * Number.EPSILON)
+    ) {
       longitudeArgument = Math.sign(longitudeArgument);
+    }
     state.lam0 = lamc - Math.asin(longitudeArgument) / state.B;
   } else {
     H = Math.pow(tsfnz(state.e, phi1, Math.sin(phi1)), state.B);
