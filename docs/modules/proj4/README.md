@@ -17,10 +17,10 @@ The `@math.gl/proj4` module provides support for conversion between major geospa
 | [`TypeScriptProjection`](./api-reference/typescript-projection.md) | Experimental independent TypeScript engine with explicit projection plugins |
 
 The experimental implementation is available from `@math.gl/proj4/experimental`.
-It supports geographic coordinates and common Mercator, UTM, conic, and azimuthal
-projections, and can
-be used alongside the proj4js-backed API. See its documentation for supported
-parameters, limitations, and custom plugins.
+Start with the [TypeScript engine guide](./typescript-engine.md) for plugin selection,
+dynamic loading, measured bundle sizes, CRS readers, and typed-array transforms.
+The [API reference](./api-reference/typescript-projection.md) lists supported
+parameters, limitations, and custom plugin contracts.
 
 The [TypeScript parity roadmap](./roadmap.md) defines staged implementation and
 acceptance gates against the pinned upstream release.
@@ -160,7 +160,7 @@ This module is a wrapper around [`proj4js`](http://proj4js.org/), which has a pe
 See [TypeScript benchmark results and methodology](./benchmarks.md) for scalar and
 in-place typed-array comparisons with proj4js, construction costs and bundle budgets.
 
-The [parity audit and correctness follow-up](./parity-audit.md) now pass 198 of 242
+The [parity audit and correctness follow-up](./parity-audit.md) now pass 228 of 242
 upstream coordinate fixtures, with all 11 audited silent mismatches fixed. The full
-corpus runs continuously with 44 explicit construction-rejection exceptions. Full
+corpus runs continuously with 14 explicit construction-rejection exceptions. Full
 compatibility and release promotion remain blocked; see the audit for remaining work.

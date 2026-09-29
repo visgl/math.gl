@@ -6,9 +6,9 @@ release promotion remains gated. The inventory still marks projection families a
 until their remaining CRS/parameter gaps are closed.
 Sequencing describes dependencies, not release dates.
 
-The [parity audit and correctness follow-up](./parity-audit.md) now pass 198 of 242
+The [parity audit and correctness follow-up](./parity-audit.md) now pass 228 of 242
 upstream coordinate fixtures, with all 11 audited silent mismatches fixed. The full
-corpus runs continuously with 44 explicit construction-rejection exceptions. Full
+corpus runs continuously with 14 explicit construction-rejection exceptions. Full
 compatibility and release promotion remain blocked; see the audit for remaining work.
 
 
@@ -276,6 +276,17 @@ Review every intentional behavioral difference. Keep the proj4js-backed implemen
 available for migration and comparison. Decide separately whether to expose a backend
 choice, promote the TypeScript class, or change defaults in a major release. Removing
 the runtime proj4 dependency requires its own compatibility and migration decision.
+
+## Packaging follow-up: independently lazy projection entry points
+
+The [engine guide](./typescript-engine.md#load-less-used-projections-on-demand)
+documents a verified fully deferred feature module. The current single experimental
+barrel can cause esbuild to hoist a lazily referenced projection into a shared chunk
+when another feature imports the engine eagerly. Add supported public projection
+subpaths before promising independent kernel downloads in that arrangement. The
+acceptance gate should inspect the initial dependency graph, exercise the deferred
+chunk, and enforce byte budgets with an already-eager core; a dynamic import by
+itself is insufficient evidence. Keep existing experimental imports compatible.
 
 ## Maintaining the reference version
 

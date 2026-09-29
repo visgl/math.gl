@@ -56,11 +56,13 @@ algorithms stay listed as gaps until their fixtures can execute.
   fixtures and suite-level aliases, with source lines, hashes and MIT attribution.
   `upstream-corpus.spec.ts` exercises both directions at the original per-fixture
   tolerances (X/Y only) in Node and Chromium. The reference passes all 242; native
-  passes 198. The 44 construction rejections are listed individually in
-  `upstream-corpus-exceptions.json` with exact errors and dispositions: 35 open
-  coverage gaps and nine deliberate strict-input differences. These are asserted
+  passes 228. The 14 construction rejections are listed individually in
+  `upstream-corpus-exceptions.json` with exact errors and dispositions: five open
+  axis-orientation gaps and nine deliberate strict-input differences. These are asserted
   rejections, not skipped tests or claimed numeric passes. Remove an exception only
   after reviewing its semantics and verifying the original coordinates.
   Regenerate only inputs/expectations with `audit-upstream-parity.mjs`'s
   `--fixtures-output` option; exceptions require separate review. The historical
-  audit snapshot remains unchanged so the 17 repaired cases stay traceable.
+  audit snapshot remains unchanged so the 17 correctness repairs stay traceable. The structured-method follow-up removes
+  another 30 exceptions and adds authored parameter/unit/roundoff regressions in
+  `structured-methods.spec.ts`.

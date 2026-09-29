@@ -158,7 +158,13 @@ function initialize(state: State): void {
       gamma0 = gamma;
       alpha_c = Math.asin(D * Math.sin(gamma0));
     }
-    state.lam0 = lamc - Math.asin(0.5 * (F - 1 / F) * Math.tan(gamma0)) / state.B;
+    // At a right-angle azimuth the argument is mathematically ±1. Ellipsoid
+    // rounding can push it a few ULPs outside asin's domain (e.g. Swiss LV03).
+    // Clamp roundoff only; larger invalid arguments remain non-finite.
+    let longitudeArgument = 0.5 * (F - 1 / F) * Math.tan(gamma0);
+    if (Math.abs(longitudeArgument) > 1 && Math.abs(longitudeArgument) <= 1 + 8 * Number.EPSILON)
+      longitudeArgument = Math.sign(longitudeArgument);
+    state.lam0 = lamc - Math.asin(longitudeArgument) / state.B;
   } else {
     H = Math.pow(tsfnz(state.e, phi1, Math.sin(phi1)), state.B);
     L = Math.pow(tsfnz(state.e, phi2, Math.sin(phi2)), state.B);
