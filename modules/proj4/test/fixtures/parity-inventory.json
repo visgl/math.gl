@@ -988,7 +988,8 @@
       "status": "partial",
       "tests": [
         "test/lib/crs-datums.spec.ts",
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/polar-axes.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -998,7 +999,8 @@
       "id": "wkt1-esri",
       "status": "partial",
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/polar-axes.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -1008,7 +1010,8 @@
       "id": "wkt2",
       "status": "partial",
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/polar-axes.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -1040,7 +1043,8 @@
       "status": "partial",
       "tests": [
         "test/lib/crs-datums.spec.ts",
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/polar-axes.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -1094,7 +1098,8 @@
       "tests": [
         "test/lib/crs-datums.spec.ts",
         "test/lib/catalogue-projections.spec.ts",
-        "test/lib/datum-grids.spec.ts"
+        "test/lib/datum-grids.spec.ts",
+        "test/lib/polar-axes.spec.ts"
       ],
       "gapIds": []
     },
@@ -1295,7 +1300,7 @@
     {
       "id": "crs-normalization",
       "tranche": 7,
-      "reason": "The structured-method follow-up passes 228/242 upstream coordinate fixtures, with no silent mismatches or execution rejections in the accepted cases. All corpus method mappings are implemented. The remaining exact-error exceptions in test/fixtures/upstream-corpus-exceptions.json comprise five structured axis-orientation gaps and nine intentional strict-input differences. Derived CRSs, broader composite/perspective method parameters and axis-meridian operations remain incomplete. See docs/modules/proj4/parity-audit.md."
+      "reason": "The axis follow-up passes 233/242 upstream coordinate fixtures with no numeric mismatches or execution rejections in accepted cases. All corpus method and axis mappings are implemented; the nine exact-error exceptions are intentional strict-input differences, dispositioned in docs/modules/proj4/parity-audit.md. Derived CRSs, broader composite/perspective parameters, non-cardinal axis rotations and non-polar axis meridians remain incomplete."
     },
     {
       "id": "projection-parameters",

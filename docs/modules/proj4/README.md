@@ -160,7 +160,7 @@ This module is a wrapper around [`proj4js`](http://proj4js.org/), which has a pe
 See [TypeScript benchmark results and methodology](./benchmarks.md) for scalar and
 in-place typed-array comparisons with proj4js, construction costs and bundle budgets.
 
-The [parity audit and correctness follow-up](./parity-audit.md) now pass 228 of 242
+The [parity audit and correctness follow-up](./parity-audit.md) now pass 233 of 242
 upstream coordinate fixtures, with all 11 audited silent mismatches fixed. The full
-corpus runs continuously with 14 explicit construction-rejection exceptions. Full
+corpus runs continuously with nine intentional strict-input construction rejections. Full
 compatibility and release promotion remain blocked; see the audit for remaining work.

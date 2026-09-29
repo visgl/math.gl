@@ -28,7 +28,22 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./projjson.schema.json": "./schemas/projjson.schema.json"
+    "./projjson.schema.json": "./schemas/projjson.schema.json",
+    "./wkt": {
+      "types": "./dist/wkt-crs.d.ts",
+      "import": "./dist/wkt-crs.js",
+      "require": "./dist/wkt-crs.cjs"
+    },
+    "./proj-string": {
+      "types": "./dist/proj-string.d.ts",
+      "import": "./dist/proj-string.js",
+      "require": "./dist/proj-string.cjs"
+    },
+    "./spatial-reference": {
+      "types": "./dist/spatial-reference.d.ts",
+      "import": "./dist/spatial-reference.js",
+      "require": "./dist/spatial-reference.cjs"
+    }
   },
   "files": [
     "dist",

@@ -13,6 +13,7 @@ Build the packages before measuring their published entry points:
 yarn build
 node modules/proj4/scripts/benchmark.mjs --points 50000 --samples 7 --allocations --output /tmp/proj4-benchmark.json
 node modules/proj4/scripts/check-bundle-budget.mjs
+node modules/proj4/scripts/check-lazy-package.mjs
 node modules/proj4/scripts/check-packed-package.mjs
 ```
 
