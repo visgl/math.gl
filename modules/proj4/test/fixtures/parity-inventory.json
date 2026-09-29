@@ -1295,7 +1295,7 @@
     {
       "id": "crs-normalization",
       "tranche": 7,
-      "reason": "The 2026-09-29 full upstream corpus audit finds 11 silent structured-CRS mismatches (polar WKT and datum name/EPSG lookup), five pole-origin roundoff rejections, and unsupported method/parameter/axis mappings. See docs/modules/proj4/parity-audit.md and test/fixtures/parity-audit-2026-09-29.json. Composite/perspective and Hotine/Krovak structured variants, derived CRSs and axis-meridian operations remain incomplete."
+      "reason": "The correctness follow-up passes 198/242 upstream coordinate fixtures, fixing all 11 audited silent mismatches, five pole roundoff rejections and the NAD27 execution failure. The full corpus runs in test/lib/upstream-corpus.spec.ts with individually maintained exceptions in test/fixtures/upstream-corpus-exceptions.json (35 open gaps, nine intentional strict-input differences). Structured Hotine/Krovak and other method/parameter mappings, derived CRSs and axis-meridian operations remain incomplete. See docs/modules/proj4/parity-audit.md."
     },
     {
       "id": "projection-parameters",

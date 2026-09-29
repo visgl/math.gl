@@ -1,6 +1,9 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
+// Original adapter; datum aliases/authority precedence and polar WKT semantics are
+// adapted from proj4js 2.22.0 and its MIT-licensed wkt-parser dependency.
+// Copyright (c) 2014, proj4js authors. See ../../../PROJ4-LICENSE.md.
 import datums from './datum-table';
 import {DEGREES_TO_RADIANS} from '../parameters';
 import {unsupportedStage} from './types';
@@ -250,9 +253,27 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
     parameters['datum'] = 'NAD83';
   if (['nad27', 'northamericandatum1927', 'dnorthamerican1927'].includes(datumName))
     parameters['datum'] = 'NAD27';
-  // WKT1's explicit operation takes priority over a datum-name lookup.
-  if (datum['towgs84'] !== undefined)
+  // WKT1 spellings used by ESRI and older exporters.
+  const datumAlias: Record<string, string> = {
+    newzealand1949: 'nzgd49',
+    belge1972: 'rnb72'
+  };
+  const alias = datumAlias[datumName.replace(/^d/, '')];
+  if (alias) parameters['datum'] = alias;
+  // Only the geographic base ID identifies a datum-table entry. A projected CRS
+  // or datum object's ID belongs to a different authority namespace.
+  if (type === 'ProjectedCRS' && base['id']) {
+    const id = object(base['id']);
+    const authorityDatum = String(id['authority']) + '_' + String(id['code']);
+    if (Object.prototype.hasOwnProperty.call(datums, authorityDatum))
+      parameters['datum'] = authorityDatum;
+  }
+  // WKT1's explicit operation takes priority over a datum-name or authority lookup.
+  if (datum['towgs84'] !== undefined) {
     parameters['towgs84'] = array(datum['towgs84']).map(finite).join(',');
+    // Do not inherit named datum grids over an explicit Helmert operation.
+    delete parameters['datum'];
+  }
   const cs = crs['coordinate_system'] ? object(crs['coordinate_system']) : {};
   const axes = array(cs['axis']).map(object);
   const geocentric = key(cs['subtype']) === 'cartesian' && type === 'GeodeticCRS';
@@ -317,14 +338,26 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
         continue;
       const angle = name.startsWith('lat') || name.startsWith('lon');
       const length = name === 'x_0' || name === 'y_0';
-      parameters[name] = String(
+      let converted =
         (finite(parameter['value']) *
           unit(parameter['unit'], angle ? angularUnit : length ? factor : 1)) /
-          (angle ? DEGREES_TO_RADIANS : 1)
-      );
+        (angle ? DEGREES_TO_RADIANS : 1);
+      // Decimal unit factors can put an exact pole a few ULPs outside ±90°.
+      // Keep this tolerance local to structured latitude unit conversion.
+      if (name.startsWith('lat') && Math.abs(Math.abs(converted) - 90) <= 4 * Number.EPSILON * 90)
+        converted = Math.sign(converted) * 90;
+      parameters[name] = String(converted);
     }
     if (projection === 'lcc' && parameters['lat_1'] === undefined)
       parameters['lat_1'] = parameters['lat_0'];
+    if (method === 'polarstereographic' && parameters['lat_0'] !== undefined) {
+      // WKT1 latitude_of_origin is the latitude of true scale for this method.
+      // WKT2 variant A keeps its actual pole origin and scale factor.
+      if (parameters['lat_ts'] !== undefined)
+        throw new Error('Duplicate polar stereographic latitude of true scale');
+      parameters['lat_ts'] = parameters['lat_0'];
+      delete parameters['lat_0'];
+    }
     if (projection === 'stere' && method.includes('polar') && parameters['lat_0'] === undefined)
       parameters['lat_0'] = Number(parameters['lat_ts'] || 90) < 0 ? '-90' : '90';
     if (projection === 'webmerc') {

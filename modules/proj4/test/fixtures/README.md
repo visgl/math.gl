@@ -51,3 +51,16 @@ algorithms stay listed as gaps until their fixtures can execute.
   seeded kernel sweep and external real-grid checks at runtime revision `bf28217d`.
   It records open failures; it is not a passing compatibility baseline. See the
   documented parity audit and `scripts/audit-*.mjs` for reproduction.
+
+- `upstream-corpus-2.22.0.json` contains all 242 unchanged tagged upstream coordinate
+  fixtures and suite-level aliases, with source lines, hashes and MIT attribution.
+  `upstream-corpus.spec.ts` exercises both directions at the original per-fixture
+  tolerances (X/Y only) in Node and Chromium. The reference passes all 242; native
+  passes 198. The 44 construction rejections are listed individually in
+  `upstream-corpus-exceptions.json` with exact errors and dispositions: 35 open
+  coverage gaps and nine deliberate strict-input differences. These are asserted
+  rejections, not skipped tests or claimed numeric passes. Remove an exception only
+  after reviewing its semantics and verifying the original coordinates.
+  Regenerate only inputs/expectations with `audit-upstream-parity.mjs`'s
+  `--fixtures-output` option; exceptions require separate review. The historical
+  audit snapshot remains unchanged so the 17 repaired cases stay traceable.

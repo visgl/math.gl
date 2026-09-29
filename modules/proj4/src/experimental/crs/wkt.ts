@@ -123,9 +123,12 @@ function readWKT(node: WKTCRSNode): RecordValue {
       : ['east', 'north'])
       axes.push({name: direction, direction, unit: units(localUnit), meridian: undefined});
   }
+  const id = keyword === 'GEOGCS' ? undefined : child(node, 'ID');
   const result: RecordValue = {
     type: projected ? 'ProjectedCRS' : geocentric ? 'GeodeticCRS' : 'GeographicCRS',
     name: value(node),
+    // WKT1 uses datum names; WKT2 base-CRS IDs select the upstream authority table.
+    id: id ? {authority: value(id), code: value(id, 1)} : undefined,
     coordinate_system: {subtype: projected || geocentric ? 'Cartesian' : 'ellipsoidal', axis: axes}
   };
   if (projected) {
