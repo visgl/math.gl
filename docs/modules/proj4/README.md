@@ -14,16 +14,17 @@ The `@math.gl/proj4` module provides support for conversion between major geospa
 | Class             | Description        |
 | ----------------- | ------------------ |
 | `Proj4Projection` | A projection class |
-| [`TypeScriptProjection`](./api-reference/typescript-projection.md) | Experimental independent TypeScript engine with explicit projection plugins |
+| [`TypeScriptProjection`](./api-reference/typescript-projection.md) | Supported opt-in TypeScript engine with explicit projection plugins |
 
-The experimental implementation is available from `@math.gl/proj4/experimental`.
+The native implementation is available from `@math.gl/proj4/native`.
 Start with the [TypeScript engine guide](./typescript-engine.md) for plugin selection,
 dynamic loading, measured bundle sizes, CRS readers, and typed-array transforms.
 The [API reference](./api-reference/typescript-projection.md) lists supported
 parameters, limitations, and custom plugin contracts.
 
 The [TypeScript parity roadmap](./roadmap.md) defines staged implementation and
-acceptance gates against the pinned upstream release.
+acceptance gates against the pinned upstream release. See the [support and migration
+contract](./native-support.md) for the promoted API and compatibility boundaries.
 
 ## Usage
 

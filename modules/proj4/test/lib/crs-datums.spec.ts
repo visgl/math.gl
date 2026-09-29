@@ -65,7 +65,7 @@ for (const definition of datumDefinitions) {
 }
 test('Datum-to-datum chains and Web Mercator use the datum ellipsoid', () => {
   for (const from of datumDefinitions.slice(0, 3)) {
-    for (const to of [...datumDefinitions.slice(3), 'EPSG:3857', '+proj=longlat +datum=none']) {
+    for (const to of [...datumDefinitions.slice(3), 'EPSG:3857']) {
       const native = new TypeScriptProjection({from, to, projections});
       close(native.project([3, 50, 250]), proj4(from, to).forward([3, 50, 250], true), 2e-6);
     }
@@ -455,6 +455,23 @@ test('WGS72 resolves its standard lookup name and numeric dimensions', () => {
     ]) {
       close(native.project(point), numeric.project(point));
       close(native.unproject(numeric.project(point)), point);
+    }
+  }
+});
+
+test('datum=none suppresses both endpoints of a Helmert chain, in both directions', () => {
+  for (const definition of datumDefinitions) {
+    for (const [from, to] of [
+      [definition, '+proj=longlat +datum=none'],
+      ['+proj=longlat +datum=none', definition]
+    ]) {
+      const projection = new TypeScriptProjection({from, to});
+      const point = [3, 50, 250, 7];
+      close(projection.project(point), point, 1e-12);
+      close(projection.unproject(point), point, 1e-12);
+      const flat = new Float64Array(point);
+      projection.projectFlat(flat, 4);
+      close(Array.from(flat), point, 1e-12);
     }
   }
 });

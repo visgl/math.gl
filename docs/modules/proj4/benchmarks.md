@@ -1,6 +1,6 @@
 # TypeScript projection benchmarks
 
-The experimental engine offers `projectFlat` and `unprojectFlat` for interleaved
+The native engine offers `projectFlat` and `unprojectFlat` for interleaved
 Float32/Float64 buffers. Reuse the projection instance: normalization and plugin
 initialization are more expensive than the existing proj4 constructor in the initial
 measurements, while repeated transformations are faster.
@@ -109,3 +109,67 @@ fetching or publishing anything.
 Performance and packaging do not establish geodetic parity. The engine stays opt-in;
 the [roadmap](./roadmap.md) retains independent reference, real-world grid, structured
 CRS coverage and migration-review gates before promotion.
+
+
+## Native release qualification measurements
+
+The checked-in raw reports under `modules/proj4/test/fixtures/qualification/` include
+source SHA-256 fingerprints, all samples, exact engine versions and methodology.
+Measured September 29, 2026 on Apple M2 / macOS arm64, Node 24.5.0, with 20,000
+points and seven samples. These are distinct from the earlier baseline above.
+
+Selected Float64/2D forward throughput, in million points/second:
+
+| Engine | Projection | Native batch | proj4 import |
+| --- | --- | ---: | ---: |
+| chromium 151.0.7922.34 | Mercator | 14.29 | 5.41 |
+| chromium 151.0.7922.34 | UTM | 3.77 | 2.67 |
+| webkit 26.5 | Mercator | 10.00 | 10.00 |
+| webkit 26.5 | UTM | 4.00 | 4.00 |
+| Node 24.5.0 | Web Mercator | 18.77 | 4.70 |
+| Node 24.5.0 | UTM 31N | 4.09 | 2.45 |
+| Node 24.5.0 | Lambert conic | 9.47 | 3.63 |
+| Node 24.5.0 | Helmert to Mercator | 4.13 | 2.26 |
+
+WebKit's coarse timer quantizes short workloads: its equal displayed values are
+not evidence of exactly equal performance. Firefox startup stalls on this macOS 27
+host; Linux CI runs all three engines, checks all independent projection fixtures,
+and uploads its own versioned performance report. No Firefox result is inferred
+from Chromium or WebKit.
+
+Fresh Node process medians (OS caches warm; separate process/module registries):
+
+| Import | Process lifetime (ms) | Module load (ms) | First construction (µs) |
+| --- | ---: | ---: | ---: |
+| native-selected | 40.02 | 7.43 | 1416.29 |
+| native-barrel | 67.98 | 33.40 | 1396.17 |
+| proj4 | 67.40 | 25.35 | 94.08 |
+| wrapper | 59.00 | 26.82 | 108.21 |
+
+Selected native subpaths reduce module-loading work compared with the full barrel.
+Native first construction remains more expensive than proj4's: prepare and reuse
+converters rather than constructing one per coordinate. Browser cold measurements
+separately record bundle fetch/parse/evaluation, first construction and first projection
+in fresh contexts; they do not flush operating-system caches.
+
+Sampled allocation estimates for native batch versus proj4 were approximately
+0 versus 595 bytes/point for Mercator, 49 versus 641 for UTM, 0 versus 595 for LCC,
+and 78 versus 977 for Helmert-to-Mercator. Zero samples do not prove zero allocation;
+these are V8 statistical estimates, including collected objects, not exact allocation
+counts. Scalar APIs allocate output arrays; mutable batch hooks avoid those arrays.
+
+Reproduce the additional qualification after building:
+
+```sh
+node modules/proj4/scripts/benchmark-startup.mjs --samples 7 --output /tmp/startup.json
+yarn playwright install --with-deps chromium firefox webkit
+node modules/proj4/scripts/benchmark-browser.mjs --points 20000 --samples 7 --output /tmp/browsers.json
+```
+
+Each browser first measures separate native/proj4/wrapper bundles, then checks all
+independent projection references. Warm workloads cover both directions, both float
+precisions and 2D/4D buffers. The runner bounds each browser to 180 seconds. CI keeps
+performance data as a downloadable artifact and gates correctness, not noisy timing
+ratios. The Node startup runner also checks the first computed coordinate in every
+fresh process. Existing packed-consumer, tree-shaking and bundle-size checks now
+exercise the supported native paths; experimental aliases remain checked as well.

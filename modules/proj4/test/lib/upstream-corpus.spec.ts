@@ -9,6 +9,8 @@ import upstreamManifest from 'proj4/package.json';
 import * as native from '@math.gl/proj4/experimental';
 import type {TypeScriptCRSInput, ProjectionPlugin} from '@math.gl/proj4/experimental';
 import corpus from '../fixtures/upstream-corpus-2.22.0.json';
+import corrections from '../fixtures/upstream-corpus-numeric-corrections.json';
+import independent from '../fixtures/native-proj-reference.json';
 import exceptions from '../fixtures/upstream-corpus-exceptions.json';
 import {geographicWKT, projectedJSON, projectedWKT2} from '../fixtures/crs-datums';
 
@@ -47,6 +49,12 @@ test('Upstream coordinate corpus version, completeness and exception integrity',
     Array.from({length: 242}, (_, index) => index)
   );
   expect(rejections.size).toBe(exceptions.length);
+  expect(new Set(corrections.map(row => row.index)).size).toBe(corrections.length);
+  for (const correction of corrections) {
+    expect(rejections.has(correction.index)).toBe(false);
+    expect(corpus.fixtures[correction.index].sourceLine).toBe(correction.sourceLine);
+    expect(independent.cases.some(row => row.id === correction.referenceId)).toBe(true);
+  }
   for (const entry of exceptions) {
     expect(corpus.fixtures[entry.index].sourceLine).toBe(entry.sourceLine);
     expect(entry.note.length).toBeGreaterThan(0);
@@ -77,7 +85,15 @@ for (const fixture of corpus.fixtures) {
         );
       } else {
         const projection = new native.TypeScriptProjection(nativeOptions);
-        close(projection.project(fixture.ll), fixture.xy, forwardTolerance);
+        const correction = corrections.find(row => row.index === fixture.index);
+        if (correction) {
+          expect(correction.sourceLine).toBe(fixture.sourceLine);
+          const expected = independent.cases.find(row => row.id === correction.referenceId)!
+            .results[0];
+          expect(expected.input).toEqual(fixture.ll);
+          close(projection.project(fixture.ll), expected.forward, 1e-5);
+          close(projection.unproject(expected.forward), fixture.ll, 1e-8);
+        } else close(projection.project(fixture.ll), fixture.xy, forwardTolerance);
         close(projection.unproject(fixture.xy), fixture.ll, inverseTolerance);
       }
     }

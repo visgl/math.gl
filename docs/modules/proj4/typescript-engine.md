@@ -1,15 +1,15 @@
 # TypeScript projection engine
 
-`@math.gl/proj4/experimental` is a TypeScript coordinate transformation engine with
+`@math.gl/proj4/native` is a TypeScript coordinate transformation engine with
 explicit projection plugins, optional CRS readers, and in-place typed-array transforms.
 Applications choose the algorithms and data they need, and can load them on demand.
 It is an entry point of **`@math.gl/proj4`**, not a separately installed package.
+Existing `@math.gl/proj4/experimental` paths remain compatibility aliases.
 
-The engine is experimental. The current upstream coordinate corpus passes **233/242**
-cases in both directions, with nine intentional strict-input construction rejections and no silent
-mismatches in the accepted cases. This is not a measure of complete geodetic accuracy.
-An independent PROJ corpus also checks all 37 named algorithms across 1,612 points
-and two real grids, with explicit accuracy limits. See [independent validation](./independent-validation.md)
+The native entry point supports the [documented API and transformation profile](./native-support.md). The upstream coordinate corpus has **232 original numeric matches, one reviewed
+Robinson correction, and nine intentional input rejections out of 242**. This is not a measure of complete geodetic accuracy.
+An independent PROJ corpus also checks all 37 named algorithms across 2,354 points,
+with additional structured CRS, datum-chain and real NTv2/GeoTIFF checks, with explicit accuracy limits. See [independent validation](./independent-validation.md)
 and the [parity audit](./parity-audit.md) for coverage and remaining qualification work.
 The existing `Proj4Projection` remains available from `@math.gl/proj4` and uses proj4js.
 
@@ -20,7 +20,7 @@ these examples describe the current source-tree API. Import named exports from t
 entry point:
 
 ```typescript title="mercator-projection.ts"
-import {TypeScriptProjection, mercator} from '@math.gl/proj4/experimental';
+import {TypeScriptProjection, mercator} from '@math.gl/proj4/native';
 
 export const projection = new TypeScriptProjection({
   from: 'EPSG:4326',
@@ -44,7 +44,7 @@ import {
   TypeScriptProjection,
   mercator,
   universalTransverseMercator
-} from '@math.gl/proj4/experimental';
+} from '@math.gl/proj4/native';
 
 const projection = new TypeScriptProjection({
   from: 'EPSG:3857',
@@ -87,7 +87,7 @@ Use named ESM imports and register a small, explicit list. The package declares
 remove unused projection kernels and optional readers. Type-only imports add no
 runtime code.
 
-The experimental entry point does not import the proj4js runtime. The npm package
+The native entry point does not import the proj4js runtime. The npm package
 still depends on proj4js for the existing wrapper, so **installation size and browser
 bundle size are different measurements**. Importing the wrapper elsewhere in the
 same application can retain both engines. CommonJS consumers are supported, but the
@@ -138,8 +138,8 @@ and needs another algorithm later. The constructor is synchronous: import the
 plugin first, then supply it explicitly to a new instance.
 
 ```typescript title="projection-loader.ts"
-import {TypeScriptProjection} from '@math.gl/proj4/experimental/core';
-import {mercator} from '@math.gl/proj4/experimental/projections/merc';
+import {TypeScriptProjection} from '@math.gl/proj4/native/core';
+import {mercator} from '@math.gl/proj4/native/projections/merc';
 
 // Available in the initial application bundle.
 export const webMercator = new TypeScriptProjection({
@@ -150,7 +150,7 @@ export const webMercator = new TypeScriptProjection({
 // UTM's algorithm is loaded only when requested.
 export async function loadUTM31Projection() {
   const {universalTransverseMercator} =
-    await import('@math.gl/proj4/experimental/projections/utm');
+    await import('@math.gl/proj4/native/projections/utm');
   return new TypeScriptProjection({
     to: 'EPSG:32631',
     projections: [universalTransverseMercator]
@@ -167,11 +167,11 @@ Optional WKT interpretation can also be deferred. The adapter uses isolated
 `@math.gl/crs` syntax entry points so its parser stays on the lazy side:
 
 ```typescript
-import {TypeScriptProjection} from '@math.gl/proj4/experimental/core';
-import {mercator} from '@math.gl/proj4/experimental/projections/merc';
+import {TypeScriptProjection} from '@math.gl/proj4/native/core';
+import {mercator} from '@math.gl/proj4/native/projections/merc';
 
 export async function loadMercatorWKT(to: string) {
-  const {wktCRSParser} = await import('@math.gl/proj4/experimental/parsers/wkt');
+  const {wktCRSParser} = await import('@math.gl/proj4/native/parsers/wkt');
   return new TypeScriptProjection({to, projections: [mercator], parsers: [wktCRSParser]});
 }
 ```
@@ -237,7 +237,7 @@ node modules/proj4/scripts/check-lazy-package.mjs
 Keep imports on the isolated subpaths throughout the eager and lazy features.
 Mixing in eager imports from the full `experimental` or `@math.gl/crs` barrels
 can cause a bundler to hoist otherwise lazy code. A direct
-`await import('@math.gl/proj4/experimental')` can retain the entire catalogue;
+`await import('@math.gl/proj4/native')` can retain the entire catalogue;
 it does not mean “only UTM.” Inspect the application's chunk graph, not just the
 presence of an `import()` expression. Tree shaking and deferred loading remain
 distinct: the former removes unused code, while the latter postpones code that is used.
@@ -257,7 +257,7 @@ import {
   transverseMercator,
   wktCRSParser,
   projJSONCRSParser
-} from '@math.gl/proj4/experimental';
+} from '@math.gl/proj4/native';
 
 export function createMapProjection(from: ReadonlyCRSDefinition) {
   return new TypeScriptProjection({
@@ -289,7 +289,7 @@ decode them before creating an instance; coordinate transforms then stay synchro
 The application chooses the grid source, caching, and error handling.
 
 ```typescript title="grid-projection.ts"
-import {TypeScriptProjection, parseNTv2Grid} from '@math.gl/proj4/experimental';
+import {TypeScriptProjection, parseNTv2Grid} from '@math.gl/proj4/native';
 
 export async function createGridProjection(url: string) {
   const response = await fetch(url);
@@ -319,7 +319,7 @@ and general time-dependent transformations remain unsupported.
 Use `projectFlat` and `unprojectFlat` for interleaved coordinate buffers:
 
 ```typescript
-import {TypeScriptProjection, mercator} from '@math.gl/proj4/experimental';
+import {TypeScriptProjection, mercator} from '@math.gl/proj4/native';
 
 const projection = new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});
 const positions = new Float64Array([12, 55, 13, 56]);
@@ -352,7 +352,7 @@ minimal spherical cylindrical example illustrates the contract; it intentionally
 supports no origin, scale, or offset parameters:
 
 ```typescript title="custom-projection.ts"
-import type {ProjectionPlugin} from '@math.gl/proj4/experimental';
+import type {ProjectionPlugin} from '@math.gl/proj4/native';
 
 export const simpleCylindrical: ProjectionPlugin = {
   name: 'simple_cylindrical',

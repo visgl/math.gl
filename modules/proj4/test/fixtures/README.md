@@ -94,3 +94,32 @@ Mollweide, Robinson, geocentric height and Cassini regional probes have explicit
 exceptions in the manifest. These are sampled regression ceilings, not guarantees
 of global accuracy. See `docs/modules/proj4/independent-validation.md` for limits,
 definition translations, the AEQD origin correction, and remaining promotion gates.
+
+
+## Completed native qualification profile
+
+The current baseline supersedes the initial counts above: `native-proj-cases.json`
+contains 134 configurations / 2,354 points. `structured-proj-reference.json` adds
+15 CRS definitions in four serializations; `datum-proj-reference.json` adds 12
+explicit 3D datum chains / 144 points. Three real grid files cover 87 points,
+including original BETA2007 NTv2. All generators pin PROJ 9.5.1, pyproj 3.7.2 and
+EPSG database v11.022 (2024-11-05).
+
+The structured CRS serializations are selected definitions from the EPSG Geodetic
+Parameter Dataset, distributed with PROJ 9.5.1. EPSG is maintained by the
+International Association of Oil & Gas Producers (IOGP); see
+[EPSG terms of use](https://epsg.org/terms-of-use.html) and the
+[pinned PROJ database provenance](https://github.com/OSGeo/PROJ/blob/9.5.1/data/sql/README.md).
+These serializations are generated test representations, not an official EPSG
+registry distribution or an endorsement of math.gl. Numerical outputs are computed
+by the pinned PROJ engine. The generator checks EPSG.VERSION before regeneration.
+
+`upstream-corpus-numeric-corrections.json` explicitly records Robinson case 165's
+modern-PROJ correction. The old upstream fixture remains unchanged. Current upstream
+classification: 232 numeric matches, one independently verified correction, nine
+strict-input rejections. `release-qualification.json` records the supported opt-in
+API decision, acceptance counts and every reviewed compatibility exception.
+
+`qualification/` contains measured browser, Node startup and allocation baselines.
+They include source fingerprints, runtime/hardware metadata, raw samples and
+methodology. Timing is descriptive; CI asserts correctness and byte budgets instead.

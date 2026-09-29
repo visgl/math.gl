@@ -9,6 +9,25 @@ This audit measures runtime revision `bf28217d` (PR #148) against proj4js **2.22
 still npm's latest release when checked. It adds evidence beyond the existing
 selected fixtures and synthetic grids. The original results below are preserved for comparison.
 
+## Combined qualification and native API follow-up
+
+The supported native profile now has 134 projection configurations / 2,354 independent
+points, 15 EPSG systems in four structured formats, 12 independent 3D datum chains,
+and 87 real-grid points across NTv2 and GeoTIFF. Cassini series/inverse and Robinson
+precision corrections improve the measured accuracy. New fixtures also fix datum=none
+suppression across the whole chain and ESRI polar stereographic/Krovak interpretation.
+
+The upstream count is now **232 original numeric matches + 1 reviewed numeric
+correction + 9 deliberate construction rejections**. Robinson case 165 differs from
+the old upstream forward coordinate by about two metres; its original fixture is
+retained and the native result is checked against PROJ. This is a deliberate accuracy
+correction, not an unclassified mismatch or a silently relaxed tolerance.
+
+The [native support contract](./native-support.md) promotes the documented opt-in API,
+retains experimental aliases and the default wrapper, and records the remaining
+out-of-profile operations. CI covers three browser engines and emits performance
+artifacts; see [benchmarks](./benchmarks.md). Earlier audit results below are historical.
+
 ## Independent reference and real-grid follow-up
 
 A maintained native PROJ 9.5.1 / pyproj 3.7.2 corpus now covers all 37 named algorithms,

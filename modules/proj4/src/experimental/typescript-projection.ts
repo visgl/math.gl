@@ -28,7 +28,7 @@ type CoordinateTransform = {
   geocentricOutput: boolean;
 };
 type CompiledCRS = NormalizedCRS & {implementation?: ProjectionImplementation};
-/** Experimental independent CRS engine. Third ordinates are ellipsoidal height or geocentric Z. */
+/** Opt-in native CRS engine; see the documented supported subset and accuracy limits. Third ordinates are ellipsoidal height or geocentric Z. */
 export class TypeScriptProjection {
   private readonly from: CompiledCRS;
   private readonly to: CompiledCRS;

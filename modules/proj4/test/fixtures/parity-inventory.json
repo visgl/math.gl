@@ -1026,7 +1026,8 @@
       "tests": [
         "test/lib/crs-datums.spec.ts",
         "test/lib/catalogue-projections.spec.ts",
-        "test/lib/polar-axes.spec.ts"
+        "test/lib/polar-axes.spec.ts",
+        "test/lib/qualification-crs.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -1037,7 +1038,8 @@
       "status": "partial",
       "tests": [
         "test/lib/crs-datums.spec.ts",
-        "test/lib/polar-axes.spec.ts"
+        "test/lib/polar-axes.spec.ts",
+        "test/lib/qualification-crs.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -1048,7 +1050,8 @@
       "status": "partial",
       "tests": [
         "test/lib/crs-datums.spec.ts",
-        "test/lib/polar-axes.spec.ts"
+        "test/lib/polar-axes.spec.ts",
+        "test/lib/qualification-crs.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -1058,7 +1061,8 @@
       "id": "projjson-geographic",
       "status": "partial",
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/qualification-crs.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -1068,7 +1072,8 @@
       "id": "projjson-geodetic",
       "status": "partial",
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/qualification-crs.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -1081,7 +1086,8 @@
       "tests": [
         "test/lib/crs-datums.spec.ts",
         "test/lib/catalogue-projections.spec.ts",
-        "test/lib/polar-axes.spec.ts"
+        "test/lib/polar-axes.spec.ts",
+        "test/lib/qualification-crs.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -1091,7 +1097,8 @@
       "id": "projjson-bound",
       "status": "partial",
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/qualification-crs.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -1201,7 +1208,8 @@
       "tests": [
         "test/lib/typescript-projection.spec.ts",
         "test/lib/crs-datums.spec.ts",
-        "test/lib/datum-grids.spec.ts"
+        "test/lib/datum-grids.spec.ts",
+        "test/lib/qualification-crs.spec.ts"
       ],
       "gapIds": [
         "native-proj-corpus"
@@ -1221,7 +1229,8 @@
       "id": "helmert-3-parameter",
       "status": "partial",
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/qualification-crs.spec.ts"
       ],
       "gapIds": [
         "native-proj-corpus"
@@ -1231,7 +1240,8 @@
       "id": "helmert-7-parameter",
       "status": "partial",
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/qualification-crs.spec.ts"
       ],
       "gapIds": [
         "native-proj-corpus"
@@ -1242,7 +1252,8 @@
       "status": "partial",
       "tests": [
         "test/lib/crs-datums.spec.ts",
-        "test/lib/datum-grids.spec.ts"
+        "test/lib/datum-grids.spec.ts",
+        "test/lib/qualification-crs.spec.ts"
       ],
       "gapIds": [
         "native-proj-corpus"
@@ -1252,7 +1263,8 @@
       "id": "ntv2-grids",
       "status": "partial",
       "tests": [
-        "test/lib/datum-grids.spec.ts"
+        "test/lib/datum-grids.spec.ts",
+        "test/lib/real-grids.spec.ts"
       ],
       "gapIds": [
         "grid-reference-corpus"
@@ -1262,7 +1274,8 @@
       "id": "geotiff-grids",
       "status": "partial",
       "tests": [
-        "test/lib/datum-grids.spec.ts"
+        "test/lib/datum-grids.spec.ts",
+        "test/lib/real-grids.spec.ts"
       ],
       "gapIds": [
         "grid-reference-corpus"
@@ -1337,22 +1350,22 @@
     {
       "id": "crs-normalization",
       "tranche": 7,
-      "reason": "The axis follow-up passes 233/242 upstream coordinate fixtures with no numeric mismatches or execution rejections in accepted cases. All corpus method and axis mappings are implemented; the nine exact-error exceptions are intentional strict-input differences, dispositioned in docs/modules/proj4/parity-audit.md. Derived CRSs, broader composite/perspective parameters, non-cardinal axis rotations and non-polar axis meridians remain incomplete."
+      "reason": "Supported native profile qualified against 15 EPSG systems in WKT1/WKT2/ESRI/PROJJSON. Upstream corpus: 232 original numeric matches, one independently corrected Robinson case, nine intentional rejections. Derived CRSs, non-cardinal axes and unlisted operation variants remain outside the supported profile."
     },
     {
       "id": "projection-parameters",
       "tranche": 7,
-      "reason": "All upstream algorithm modules now have native coverage; exhaustive parameter combinations, inverse domain boundaries, and uncommon structured variants still need an independent corpus before promotion."
+      "reason": "All 37 named algorithms have independent forward/inverse coverage. The supported profile uses sampled domain/parameter budgets; exhaustive combinations and global geodetic accuracy are not claimed. New parameter/domain combinations need qualification before expanding the profile."
     },
     {
       "id": "native-proj-corpus",
       "tranche": 7,
-      "reason": "Independent PROJ 9.5.1 / pyproj 3.7.2 corpus covers all 37 named algorithms, 118 configurations and 1612 sampled points. Denser regional/domain qualification, Cassini/Robinson accuracy improvements, and broader independent datum/structured-operation references remain open."
+      "reason": "Maintained PROJ 9.5.1 references include 134 projection configurations/2354 points, 15 structured CRSs and 12 independent 3D datum chains. Cassini series/inverse and Robinson coefficient precision are corrected. Additional oracle versions, higher eccentricities and unsampled domains are future qualification work."
     },
     {
       "id": "grid-reference-corpus",
       "tranche": 7,
-      "reason": "Pinned licensed BETA2007 and NA83SCRS GeoTIFFs have 80 independent PROJ reference points and offline Node/Chromium tests. Canadian western-edge inverse rejections are deliberate strict coverage (the approximate PROJ source lies outside). Real NTv2 bytes, more datasets/metadata conventions and structured operations remain unqualified; vertical grids are outside the horizontal subset."
+      "reason": "Maintained real BETA2007 NTv2 and German/Canadian GeoTIFF fixtures have 87 independent PROJ points. Strict Canadian inverse-edge rejection is reviewed. Other band conventions, time-dependent/vertical grids and automatic structured operation selection remain outside the native profile."
     }
   ],
   "exceptions": [
@@ -1480,6 +1493,26 @@
       "id": "aeqd-relative-origin",
       "description": "Ellipsoidal AEQD tests longitude relative to lon_0 at its origin. Upstream 2.22.0 incorrectly collapses longitude zero at lat_0 to the false origin even with a nonzero lon_0.",
       "test": "test/lib/native-reference.spec.ts"
+    },
+    {
+      "id": "cassini-series-refinement",
+      "description": "Native Cassini corrects forward/inverse series signs and refines its inverse against the actual forward equations, following PROJ 9.5.1. It uses the higher-order meridional helper.",
+      "test": "test/lib/native-reference.spec.ts"
+    },
+    {
+      "id": "robinson-proj-table",
+      "description": "Native Robinson follows PROJ 9.5.1 float coefficients and snaps exact inverse knots. The old upstream corpus case 165 is an explicit numeric correction; independent reference tests replace no original fixture data.",
+      "test": "test/lib/upstream-corpus.spec.ts"
+    },
+    {
+      "id": "datum-none-entire-chain",
+      "description": "datum=none on either endpoint suppresses the entire datum conversion, including nonzero Helmert parameters at the other endpoint. Upstream can still execute one side of its WGS84 chain.",
+      "test": "test/lib/crs-datums.spec.ts"
+    },
+    {
+      "id": "esri-projection-variants",
+      "description": "ESRI North Pole stereographic without an explicit scale uses the true-scale polar kernel. The legacy explicit-scale oblique spelling remains supported. ESRI Krovak accepts only its complete standard (-1,1,90-degree) axis adjustment.",
+      "test": "test/lib/qualification-crs.spec.ts"
     }
   ]
 }

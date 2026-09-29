@@ -1,0 +1,238 @@
+{
+  "metadata": {
+    "sourceSHA256": "0a04e98d6a35b7e98d4b927efca5655f302f86143828fadedd71920164e3c65d",
+    "date": "2026-09-29T21:52:54.617Z",
+    "node": "v24.5.0",
+    "cpu": "Apple M2",
+    "platform": "darwin",
+    "arch": "arm64",
+    "samples": 7
+  },
+  "methodology": "A new Node process/module registry per sample. Process time includes spawning and exit; module, first construction and first transform are measured inside it. OS disk caches are not flushed. Each first transform is checked. No timing threshold in CI.",
+  "results": [
+    {
+      "implementation": "native-selected",
+      "sample": 0,
+      "processMilliseconds": 43.314917,
+      "moduleMilliseconds": 9.236832999999999,
+      "constructionMicroseconds": 1452.7089999999987,
+      "projectionMicroseconds": 106.45799999999994
+    },
+    {
+      "implementation": "native-barrel",
+      "sample": 0,
+      "processMilliseconds": 72.64025,
+      "moduleMilliseconds": 36.181458,
+      "constructionMicroseconds": 1412.8749999999995,
+      "projectionMicroseconds": 104.58400000000267
+    },
+    {
+      "implementation": "proj4",
+      "sample": 0,
+      "processMilliseconds": 59.619,
+      "moduleMilliseconds": 25.649416000000002,
+      "constructionMicroseconds": 98.91700000000014,
+      "projectionMicroseconds": 230.91699999999804
+    },
+    {
+      "implementation": "wrapper",
+      "sample": 0,
+      "processMilliseconds": 59.907791,
+      "moduleMilliseconds": 26.579667,
+      "constructionMicroseconds": 109.66700000000174,
+      "projectionMicroseconds": 261.8749999999963
+    },
+    {
+      "implementation": "native-selected",
+      "sample": 1,
+      "processMilliseconds": 39.83754200000004,
+      "moduleMilliseconds": 7.2670829999999995,
+      "constructionMicroseconds": 1399.2499999999986,
+      "projectionMicroseconds": 117.54200000000026
+    },
+    {
+      "implementation": "native-barrel",
+      "sample": 1,
+      "processMilliseconds": 67.95625000000001,
+      "moduleMilliseconds": 33.392334000000005,
+      "constructionMicroseconds": 1396.1659999999938,
+      "projectionMicroseconds": 105.66700000000395
+    },
+    {
+      "implementation": "proj4",
+      "sample": 1,
+      "processMilliseconds": 56.36616600000002,
+      "moduleMilliseconds": 23.806458,
+      "constructionMicroseconds": 93.04200000000407,
+      "projectionMicroseconds": 215.70799999999934
+    },
+    {
+      "implementation": "wrapper",
+      "sample": 1,
+      "processMilliseconds": 68.042416,
+      "moduleMilliseconds": 28.325499999999998,
+      "constructionMicroseconds": 114.91699999999838,
+      "projectionMicroseconds": 222.62500000000074
+    },
+    {
+      "implementation": "native-selected",
+      "sample": 2,
+      "processMilliseconds": 42.54562499999997,
+      "moduleMilliseconds": 7.726042,
+      "constructionMicroseconds": 1427.9580000000003,
+      "projectionMicroseconds": 106.50000000000048
+    },
+    {
+      "implementation": "native-barrel",
+      "sample": 2,
+      "processMilliseconds": 72.43679200000008,
+      "moduleMilliseconds": 36.033209,
+      "constructionMicroseconds": 1477.8750000000045,
+      "projectionMicroseconds": 108.62499999999642
+    },
+    {
+      "implementation": "proj4",
+      "sample": 2,
+      "processMilliseconds": 69.668541,
+      "moduleMilliseconds": 25.600334000000004,
+      "constructionMicroseconds": 94.0829999999977,
+      "projectionMicroseconds": 219.0000000000012
+    },
+    {
+      "implementation": "wrapper",
+      "sample": 2,
+      "processMilliseconds": 57.08325000000002,
+      "moduleMilliseconds": 25.299292,
+      "constructionMicroseconds": 108.20799999999764,
+      "projectionMicroseconds": 219.08400000000228
+    },
+    {
+      "implementation": "native-selected",
+      "sample": 3,
+      "processMilliseconds": 39.90483299999994,
+      "moduleMilliseconds": 7.308792,
+      "constructionMicroseconds": 1416.2919999999986,
+      "projectionMicroseconds": 105.66599999999937
+    },
+    {
+      "implementation": "native-barrel",
+      "sample": 3,
+      "processMilliseconds": 67.98000000000002,
+      "moduleMilliseconds": 33.596916,
+      "constructionMicroseconds": 1433.6249999999993,
+      "projectionMicroseconds": 104.2500000000004
+    },
+    {
+      "implementation": "proj4",
+      "sample": 3,
+      "processMilliseconds": 68.06724999999994,
+      "moduleMilliseconds": 25.431625,
+      "constructionMicroseconds": 94.95799999999832,
+      "projectionMicroseconds": 230.91699999999804
+    },
+    {
+      "implementation": "wrapper",
+      "sample": 3,
+      "processMilliseconds": 58.67445800000007,
+      "moduleMilliseconds": 26.823834,
+      "constructionMicroseconds": 101.49999999999437,
+      "projectionMicroseconds": 209.70800000000622
+    },
+    {
+      "implementation": "native-selected",
+      "sample": 4,
+      "processMilliseconds": 42.393542000000025,
+      "moduleMilliseconds": 7.884292,
+      "constructionMicroseconds": 1458.9159999999986,
+      "projectionMicroseconds": 105.16700000000156
+    },
+    {
+      "implementation": "native-barrel",
+      "sample": 4,
+      "processMilliseconds": 69.26170799999989,
+      "moduleMilliseconds": 33.397042,
+      "constructionMicroseconds": 1392.5829999999949,
+      "projectionMicroseconds": 104.95800000000344
+    },
+    {
+      "implementation": "proj4",
+      "sample": 4,
+      "processMilliseconds": 56.16645799999992,
+      "moduleMilliseconds": 24.651125,
+      "constructionMicroseconds": 91.25000000000227,
+      "projectionMicroseconds": 223.33299999999667
+    },
+    {
+      "implementation": "wrapper",
+      "sample": 4,
+      "processMilliseconds": 56.32574999999997,
+      "moduleMilliseconds": 24.170375,
+      "constructionMicroseconds": 109.7079999999977,
+      "projectionMicroseconds": 223.83400000000364
+    },
+    {
+      "implementation": "native-selected",
+      "sample": 5,
+      "processMilliseconds": 39.85416699999996,
+      "moduleMilliseconds": 7.425875000000001,
+      "constructionMicroseconds": 1381.9589999999985,
+      "projectionMicroseconds": 104.62499999999864
+    },
+    {
+      "implementation": "native-barrel",
+      "sample": 5,
+      "processMilliseconds": 67.29037500000004,
+      "moduleMilliseconds": 33.205,
+      "constructionMicroseconds": 1391.2089999999964,
+      "projectionMicroseconds": 107.79099999999886
+    },
+    {
+      "implementation": "proj4",
+      "sample": 5,
+      "processMilliseconds": 67.82616699999994,
+      "moduleMilliseconds": 25.326207999999998,
+      "constructionMicroseconds": 93.29200000000526,
+      "projectionMicroseconds": 218.29199999999815
+    },
+    {
+      "implementation": "wrapper",
+      "sample": 5,
+      "processMilliseconds": 59.47795899999983,
+      "moduleMilliseconds": 27.591791999999998,
+      "constructionMicroseconds": 104.41700000000509,
+      "projectionMicroseconds": 213.6250000000004
+    },
+    {
+      "implementation": "native-selected",
+      "sample": 6,
+      "processMilliseconds": 40.01520899999991,
+      "moduleMilliseconds": 7.227959,
+      "constructionMicroseconds": 1356.791000000001,
+      "projectionMicroseconds": 105.20899999999855
+    },
+    {
+      "implementation": "native-barrel",
+      "sample": 6,
+      "processMilliseconds": 67.77162500000009,
+      "moduleMilliseconds": 33.240207999999996,
+      "constructionMicroseconds": 1376.4590000000042,
+      "projectionMicroseconds": 103.87499999999505
+    },
+    {
+      "implementation": "proj4",
+      "sample": 6,
+      "processMilliseconds": 67.39904200000001,
+      "moduleMilliseconds": 25.351917,
+      "constructionMicroseconds": 94.99999999999886,
+      "projectionMicroseconds": 214.70800000000168
+    },
+    {
+      "implementation": "wrapper",
+      "sample": 6,
+      "processMilliseconds": 58.99741700000004,
+      "moduleMilliseconds": 27.197417,
+      "constructionMicroseconds": 105.83299999999696,
+      "projectionMicroseconds": 214.54200000000156
+    }
+  ]
+}

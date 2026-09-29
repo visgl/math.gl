@@ -1,16 +1,14 @@
 # TypeScript proj4 parity roadmap
 
-Status: tranches 0 through 6 implemented in this source tree for the documented subset.
-Tranche 7 now implements batch transforms and performance/package qualification;
-release promotion remains gated. The inventory still marks projection families as partial
-until their remaining CRS/parameter gaps are closed.
-Sequencing describes dependencies, not release dates.
+Status: tranches **0–6 and qualification tranches 7A–7D are implemented** for the
+[documented native support profile](./native-support.md). The supported opt-in
+`@math.gl/proj4/native` entry points retain `experimental` compatibility aliases.
+The root wrapper remains the default. No package is published by this work.
 
-The [parity audit and correctness follow-up](./parity-audit.md) now pass 233 of 242
-upstream coordinate fixtures, with all 11 audited silent mismatches fixed. The full
-corpus runs continuously with nine intentional strict-input construction rejections. Full
-compatibility and release promotion remain blocked; see the audit for remaining work.
-
+The upstream corpus has 232 original numeric matches, one independently corrected
+Robinson case and nine deliberate input rejections. All 37 named algorithms have
+independent references; partial inventory statuses describe the difference from
+unrestricted upstream behavior, not a claim of full-domain geodetic accuracy.
 
 ## Target and upstream baseline
 
@@ -46,7 +44,7 @@ the TypeScript engine must never silently fall back to proj4js.
 | 4 — Geocentric and datum transforms | 3D geodetic/geocentric conversion, ellipsoid/datum tables, Helmert transforms | Known datum fixtures, height behavior, inverse transforms, and datum chaining agree with the reference |
 | 5 — Remaining projections | Remaining world, regional, perspective, and composite projection plugins | No unclassified projection gaps; forward/inverse coverage for all inventoried algorithms and aliases |
 | 6 — Grid transforms | NTv2 and upstream-supported GeoTIFF grid loading/interpolation | Grid-edge, missing-grid, optional-grid, inverse, and asynchronous loading fixtures pass |
-| 7 — Compatibility release | Package/API stabilization, performance and bundle budgets, migration decision | Full compatibility matrix green or explicitly documented exceptions; release review approves promotion |
+| 7A–7D — Native qualification | Numerical fixes, CRS/datum/grid references, cross-browser/startup/allocation measurements, supported opt-in API | Passing independent/compatibility checks, reviewed exceptions, preserved aliases/default wrapper, documented migration |
 
 ### Tranche 0: implemented foundation
 
@@ -81,7 +79,7 @@ Implemented artifacts:
 - `common-projections.ts`: authored differential cases covering spheres, ellipsoids,
   both hemispheres, origins, scales, offsets, and units.
 - Independent published PROJ UTM examples provide a second numerical reference. A
-  larger reproducibly generated native PROJ corpus remains tracked in the inventory.
+  larger reproducibly generated native PROJ corpus is now included in tranche 7A.
 - `check-parity-inventory.mjs` fails on reference-version drift, unclassified upstream
   modules, changed source hashes, missing tests, or invalid fixture/gap references.
 
@@ -166,8 +164,7 @@ tables, three/seven-parameter Helmert transforms, WGS84 datum chaining, WKT TOWG
 BoundCRS operations. Tests cover heights, poles, geocentric units, both directions,
 axis permutations, Web Mercator datum geometry, and grid rejection. Native height
 semantics deliberately expose computed heights; fourth ordinates remain unchanged.
-Dynamic operations remain unsupported; tranche 6 adds horizontal grids. A larger independent geodetic corpus
-is still an acceptance gate for promotion.
+Dynamic operations remain unsupported; tranche 6 adds horizontal grids. Tranche 7B adds independent geodetic datum-chain references.
 
 
 Add geodetic/geocentric conversions (`geocent`), ellipsoid definitions, datum identity,
@@ -189,8 +186,8 @@ All 38 upstream projection/helper entries are now implemented or classified:
 sphere/ellipsoid variants, both directions, offsets, units, aliases, all six QSC
 faces, rotated geographic/projected coordinates, and recent upstream regressions.
 WKT/PROJJSON world and regional method mappings reuse the existing math.gl/crs readers.
-All families remain marked partial pending exhaustive parameter/domain coverage and
-the independent reference corpus in tranche 7.
+All families remain marked partial relative to exhaustive parameter/domain coverage;
+tranche 7 qualifies the supported profile with independent references.
 
 Implemented groups:
 
@@ -239,44 +236,20 @@ additional datasets, formats and operation semantics still need qualification. V
 grids, generalized GeoTIFF metadata/band conventions and structured grid operation
 selection remain outside this horizontal subset.
 
-### Tranche 7: batch performance and qualification; promotion still gated
+### Tranches 7A–7D: completed qualification profile
 
-Implemented in this tranche:
+| Tranche | Implemented result |
+| --- | --- |
+| 7A — Numerical accuracy | Correct Cassini series signs and refine its inverse; align Robinson's coefficient precision and stabilize exact knots. Independent reference coverage expands to 134 configurations / 2,354 points, including dense regional, near-pole, horizon and longitude-boundary probes. |
+| 7B — CRS and datums | Fifteen EPSG systems in WKT1/WKT2/ESRI/PROJJSON; twelve independent 3D datum chains; real BETA2007 NTv2 plus maintained GeoTIFFs. Correct whole-chain datum=none suppression and ESRI polar/Krovak interpretation. |
+| 7C — Performance | Node throughput/allocation and fresh-process measurements; isolated browser load/construction timing and Float32/Float64 forward/inverse workloads. Chromium, Firefox and WebKit qualification runs in CI, including the independent projection corpus. Timing results are artifacts; correctness and package-size budgets are gates. |
+| 7D — Stabilization | Supported native entry points alias the same implementation as experimental imports. Packed ESM/CommonJS/type checks cover both families. The documented contract reviews numerical/strict-input exceptions and describes migration while preserving the default wrapper. |
 
-- In-place Float32/Float64 transformations with explicit record dimensions, shared
-  scalar/batch equations, mutable plugin hooks and prepared-grid interpolation.
-- Batch/scalar tests across the projection catalogue, both precisions, axes, datum
-  chains, grid fallback, view boundaries, malformed layouts and partial failures.
-- Reproducible comparisons with the imported proj4 function and existing wrapper:
-  forward/inverse throughput, construction cost and sampled allocation estimates.
-  Browser and Node benchmark suites include native scalar and typed-array paths.
-- Actual npm-packed ESM/CommonJS/type consumers and deterministic minified/gzip
-  budgets for core, Mercator, UTM, all native exports and the existing wrapper.
-  CI checks package/bundle gates and a small benchmark correctness smoke run;
-  timing thresholds are intentionally excluded from shared CI machines.
-
-See [benchmark methodology and baseline](./benchmarks.md). Native throughput and
-allocation improve for the measured workloads, while native construction costs more.
-The full native export surface (including optional readers) is larger than the
-wrapper; selected projection bundles are smaller.
-
-An independent PROJ corpus and licensed real-grid baseline are now implemented; see
-the qualification follow-up below. Still required before promotion: denser regional
-accuracy checks and improvements, broader grid and structured CRS/parameter variants,
-reviewed numerical exceptions, browser performance baselines and a migration decision. Sampled
-allocation estimates are not exact allocation counts. First construction after imports
-is measured separately from warm construction; process/module startup is not yet profiled.
-This tranche does not promote the engine or remove the upstream dependency.
-
-Run the complete matrix in Node and supported browsers, test packed ESM/CommonJS
-packages and declarations, and record cold construction cost, transform throughput,
-allocation counts, and gzip/minified bytes for core-only, Mercator, UTM, and full presets.
-Set regression budgets from measured baselines.
-
-Review every intentional behavioral difference. Keep the proj4js-backed implementation
-available for migration and comparison. Decide separately whether to expose a backend
-choice, promote the TypeScript class, or change defaults in a major release. Removing
-the runtime proj4 dependency requires its own compatibility and migration decision.
+See [independent validation](./independent-validation.md), [performance measurements](./benchmarks.md)
+and the [support/migration contract](./native-support.md). The machine-readable release
+profile checks fixture counts and the reviewed exception list. Publication is a
+separate release action; changing the default backend or removing proj4 remains a
+separate compatibility decision.
 
 ## Axis compatibility and lazy entry points: implemented follow-up
 
@@ -296,9 +269,8 @@ chunks, enforces byte budgets, and checks every subpath in packed ESM/CommonJS a
 TypeScript consumers. See the [engine guide](./typescript-engine.md#load-less-used-projections-on-demand).
 
 The independent-reference follow-up below adds maintained datasets and an explicit
-edge disposition. Remaining gates include denser regional accuracy qualification,
-additional grid operations, broader browser/startup performance baselines, and the
-explicit promotion/migration decision. These are separate from upstream corpus parity.
+edge disposition. The completed qualification profile is described above; additional operations and
+unsampled domains remain future extensions rather than an unrestricted parity claim.
 
 ## Independent projection and real-grid qualification: implemented baseline
 
@@ -312,9 +284,8 @@ explicit promotion/migration decision. These are separate from upstream corpus p
   Cassini/Robinson limits and a disposition for the Canadian inverse edge failures.
 
 See [independent validation](./independent-validation.md). This completes the initial
-maintained independent-reference and real-GeoTIFF baseline. Tranche 7 remains open
-for denser domain qualification, accuracy improvements, real NTv2 and additional
-operations, performance breadth and the explicit promotion/migration decision.
+maintained independent-reference and real-GeoTIFF baseline. Tranches 7A–7D above extend this initial baseline and make the supported-profile
+promotion decision explicit.
 
 ## Maintaining the reference version
 

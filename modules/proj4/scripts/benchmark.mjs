@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 // Run after building proj4. All comparisons use the published entry points.
+import {codeFingerprint} from './benchmark-metadata.mjs';
 import assert from 'node:assert/strict';
 import {writeFileSync} from 'node:fs';
 import {cpus} from 'node:os';
@@ -221,6 +222,7 @@ if (values.allocations) {
 assert(Number.isFinite(checksum));
 const report = {
   metadata: {
+    sourceSHA256: codeFingerprint(),
     date: new Date().toISOString(),
     node: process.version,
     v8: process.versions.v8,

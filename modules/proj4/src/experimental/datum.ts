@@ -102,8 +102,9 @@ export function createDatumTransform(
   source: Datum,
   destination: Datum
 ): DatumOperation | undefined {
+  // datum=none disables the entire chain, including a shifted opposite endpoint.
+  if (!source.towgs84 || !destination.towgs84) return undefined;
   if (source.grids || destination.grids) {
-    if (!source.towgs84 || !destination.towgs84) return undefined;
     if (
       source.grids &&
       destination.grids &&

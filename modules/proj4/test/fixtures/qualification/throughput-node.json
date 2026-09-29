@@ -1,0 +1,2510 @@
+{
+  "metadata": {
+    "sourceSHA256": "0a04e98d6a35b7e98d4b927efca5655f302f86143828fadedd71920164e3c65d",
+    "date": "2026-09-29T21:53:06.978Z",
+    "node": "v24.5.0",
+    "v8": "13.6.233.10-node.21",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M2",
+    "proj4": "2.22.0",
+    "points": 20000,
+    "samples": 7
+  },
+  "methodology": "Median of warmed full-buffer transforms; reset excluded; preconstructed converters; reused scalar input arrays; default axes except Helmert cases, which enforce axes for computed height; all outputs parity-checked before timing. First construction is after imports, not process startup. Allocation estimates sample all JS allocations including collected objects, not exact counts or retained heap; profiling is separate from timing. No timing CI threshold.",
+  "construction": [
+    {
+      "case": "Web Mercator",
+      "implementation": "native",
+      "firstMicroseconds": 1338.6670000000008,
+      "medianMicroseconds": 30.417910000000035
+    },
+    {
+      "case": "Web Mercator",
+      "implementation": "proj4",
+      "firstMicroseconds": 138.20800000000588,
+      "medianMicroseconds": 2.671659999999889
+    },
+    {
+      "case": "Web Mercator",
+      "implementation": "wrapper",
+      "firstMicroseconds": 31.374999999997044,
+      "medianMicroseconds": 1.1220799999999542
+    },
+    {
+      "case": "UTM 31N",
+      "implementation": "native",
+      "firstMicroseconds": 613.9579999999114,
+      "medianMicroseconds": 29.610000000000127
+    },
+    {
+      "case": "UTM 31N",
+      "implementation": "proj4",
+      "firstMicroseconds": 353.0000000000655,
+      "medianMicroseconds": 4.970000000000709
+    },
+    {
+      "case": "UTM 31N",
+      "implementation": "wrapper",
+      "firstMicroseconds": 8.667000000059488,
+      "medianMicroseconds": 2.2516600000017206
+    },
+    {
+      "case": "Lambert conic",
+      "implementation": "native",
+      "firstMicroseconds": 545.9580000001552,
+      "medianMicroseconds": 31.63332999999966
+    },
+    {
+      "case": "Lambert conic",
+      "implementation": "proj4",
+      "firstMicroseconds": 217.91699999994307,
+      "medianMicroseconds": 5.308340000001408
+    },
+    {
+      "case": "Lambert conic",
+      "implementation": "wrapper",
+      "firstMicroseconds": 4.417000000103144,
+      "medianMicroseconds": 2.8504100000009203
+    },
+    {
+      "case": "Helmert to Mercator",
+      "implementation": "native",
+      "firstMicroseconds": 257.33299999956216,
+      "medianMicroseconds": 20.930420000004233
+    },
+    {
+      "case": "Helmert to Mercator",
+      "implementation": "proj4",
+      "firstMicroseconds": 209.49999999993452,
+      "medianMicroseconds": 4.690829999999551
+    },
+    {
+      "case": "Helmert to Mercator",
+      "implementation": "wrapper",
+      "firstMicroseconds": 5.083000000013271,
+      "medianMicroseconds": 3.680000000003929
+    }
+  ],
+  "results": [
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 1.0653750000000173,
+      "millionPointsPerSecond": 18.77273260588964,
+      "samplesMilliseconds": [
+        1.099917000000005,
+        1.0691659999999956,
+        1.062375000000003,
+        1.0653750000000173,
+        1.064582999999999,
+        1.0745000000000005,
+        1.063541000000015
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 1.6812089999999955,
+      "millionPointsPerSecond": 11.8962008887652,
+      "samplesMilliseconds": [
+        1.6377499999999827,
+        1.6996249999999975,
+        1.6812089999999955,
+        1.6379169999999874,
+        1.6347499999999968,
+        1.6883750000000077,
+        1.688999999999993
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 4.2540839999999776,
+      "millionPointsPerSecond": 4.701364618094074,
+      "samplesMilliseconds": [
+        4.271541999999982,
+        4.181083000000001,
+        4.2540839999999776,
+        4.242957999999987,
+        4.254583999999994,
+        4.2227080000000115,
+        4.262625000000014
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 4.259833000000015,
+      "millionPointsPerSecond": 4.695019734341682,
+      "samplesMilliseconds": [
+        4.2304169999999885,
+        4.342083000000002,
+        4.253707999999989,
+        4.243249999999989,
+        4.302541999999988,
+        4.295166999999992,
+        4.259833000000015
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 1.5559999999999832,
+      "millionPointsPerSecond": 12.853470437018133,
+      "samplesMilliseconds": [
+        1.5725840000000062,
+        1.5464159999999652,
+        1.5703340000000026,
+        1.545458999999994,
+        1.551417000000015,
+        1.561667,
+        1.5559999999999832
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 1.839749999999981,
+      "millionPointsPerSecond": 10.871042261176903,
+      "samplesMilliseconds": [
+        1.8292500000000018,
+        1.8282920000000331,
+        1.823582999999985,
+        1.875249999999994,
+        1.8508749999999736,
+        1.839749999999981,
+        1.842375000000004
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 4.418374999999969,
+      "millionPointsPerSecond": 4.526551051008604,
+      "samplesMilliseconds": [
+        4.418374999999969,
+        4.416666999999961,
+        4.427500000000009,
+        4.3760840000000485,
+        4.418915999999967,
+        4.427041999999972,
+        4.413125000000036
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 4.157249999999976,
+      "millionPointsPerSecond": 4.810872572012776,
+      "samplesMilliseconds": [
+        4.157249999999976,
+        4.166500000000042,
+        4.158874999999966,
+        4.088082999999983,
+        4.154124999999965,
+        4.091375000000028,
+        4.157250000000033
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 1.4017920000000004,
+      "millionPointsPerSecond": 14.267451947221838,
+      "samplesMilliseconds": [
+        1.3580420000000117,
+        1.4017920000000004,
+        1.4104579999999487,
+        1.4223340000000917,
+        1.449124999999981,
+        1.3530830000000833,
+        1.3393749999999045
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 1.7607080000000224,
+      "millionPointsPerSecond": 11.359066920806713,
+      "samplesMilliseconds": [
+        1.695875000000001,
+        1.7593749999999204,
+        1.8092909999999165,
+        1.7699999999999818,
+        1.9922090000000026,
+        1.7607080000000224,
+        1.691791999999964
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 4.076999999999998,
+      "millionPointsPerSecond": 4.905567819475106,
+      "samplesMilliseconds": [
+        4.003125000000011,
+        4.068707999999901,
+        4.206292000000076,
+        4.153166999999939,
+        4.356290999999942,
+        4.076999999999998,
+        3.9710420000000113
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 3.7970830000000433,
+      "millionPointsPerSecond": 5.267201164683462,
+      "samplesMilliseconds": [
+        3.706124999999986,
+        3.7970830000000433,
+        3.96220900000003,
+        3.863917000000015,
+        3.93754100000001,
+        3.682209000000057,
+        3.699292000000014
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 1.733041000000071,
+      "millionPointsPerSecond": 11.540407872634969,
+      "samplesMilliseconds": [
+        1.8278340000000526,
+        1.7461660000000165,
+        1.662916999999993,
+        1.733041000000071,
+        1.7722500000000991,
+        1.587582999999995,
+        1.594791999999984
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 2.060707999999977,
+      "millionPointsPerSecond": 9.705402220984354,
+      "samplesMilliseconds": [
+        2.2002089999999725,
+        2.0922500000000355,
+        2.0531670000000304,
+        2.0384169999999813,
+        2.071374999999989,
+        2.060707999999977,
+        1.8926669999999604
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 5.128708000000074,
+      "millionPointsPerSecond": 3.8996176034977448,
+      "samplesMilliseconds": [
+        5.278833000000077,
+        5.071791999999959,
+        5.128708000000074,
+        5.1687500000000455,
+        5.142459000000031,
+        5.069792000000007,
+        4.630750000000035
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 4.804250000000025,
+      "millionPointsPerSecond": 4.162980694177009,
+      "samplesMilliseconds": [
+        4.959959000000026,
+        4.856999999999971,
+        4.753000000000043,
+        4.854791999999975,
+        4.7369169999999485,
+        4.804250000000025,
+        4.416249999999991
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 1.3851250000000164,
+      "millionPointsPerSecond": 14.439130042414774,
+      "samplesMilliseconds": [
+        1.3913330000000315,
+        1.387790999999993,
+        1.3835830000000442,
+        1.4062079999999924,
+        1.3842079999999441,
+        1.3851250000000164,
+        1.3846250000000282
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 1.7150000000000318,
+      "millionPointsPerSecond": 11.661807580174711,
+      "samplesMilliseconds": [
+        1.7150000000000318,
+        1.783584000000019,
+        1.7112919999999576,
+        1.7618340000000217,
+        1.7667079999999942,
+        1.712083000000007,
+        1.7106249999999363
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 4.856457999999975,
+      "millionPointsPerSecond": 4.118227728933331,
+      "samplesMilliseconds": [
+        4.878874999999994,
+        4.828916999999933,
+        4.935040999999956,
+        4.839707999999973,
+        4.825667000000067,
+        4.873874999999998,
+        4.856457999999975
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 4.582583999999997,
+      "millionPointsPerSecond": 4.364349895168319,
+      "samplesMilliseconds": [
+        4.575874999999996,
+        4.597250000000031,
+        4.582583999999997,
+        4.531292000000008,
+        4.601374999999962,
+        4.585792000000083,
+        4.580874999999992
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 1.625,
+      "millionPointsPerSecond": 12.307692307692308,
+      "samplesMilliseconds": [
+        1.625,
+        1.6316250000002128,
+        1.6263749999998254,
+        1.6195000000000164,
+        1.6221250000000964,
+        1.620332999999846,
+        1.631750000000011
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 1.8742500000000746,
+      "millionPointsPerSecond": 10.670935040682515,
+      "samplesMilliseconds": [
+        1.8679169999999203,
+        1.8727499999999964,
+        1.8778749999999036,
+        1.8742500000000746,
+        1.8765829999999823,
+        1.8824580000000424,
+        1.8696670000001632
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 5.483332999999902,
+      "millionPointsPerSecond": 3.64741663510138,
+      "samplesMilliseconds": [
+        5.543792000000053,
+        5.483332999999902,
+        5.442375000000084,
+        5.511541999999963,
+        5.475750000000062,
+        5.452833000000055,
+        5.503666000000067
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 5.2193749999999,
+      "millionPointsPerSecond": 3.831876421985464,
+      "samplesMilliseconds": [
+        5.228665999999976,
+        5.2193749999999,
+        5.2466249999999945,
+        5.217374999999947,
+        5.19466599999987,
+        5.234208999999964,
+        5.216666000000032
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 1.3940000000000055,
+      "millionPointsPerSecond": 14.34720229555231,
+      "samplesMilliseconds": [
+        1.5730419999999867,
+        1.3947089999999207,
+        1.3922499999998763,
+        1.4285420000001068,
+        1.3927499999999782,
+        1.3940000000000055,
+        1.3920000000000528
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 1.7641249999999218,
+      "millionPointsPerSecond": 11.33706511726827,
+      "samplesMilliseconds": [
+        2.2181250000001,
+        1.9385409999999865,
+        1.7575420000000577,
+        1.7641249999999218,
+        1.7619999999999436,
+        1.76949999999988,
+        1.7607920000000377
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 4.051707999999962,
+      "millionPointsPerSecond": 4.936189873505245,
+      "samplesMilliseconds": [
+        4.037832999999864,
+        4.726042000000007,
+        4.508584000000155,
+        4.032584000000043,
+        4.1242919999999685,
+        4.051707999999962,
+        4.0287080000000515
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 3.7324579999999514,
+      "millionPointsPerSecond": 5.358399210386362,
+      "samplesMilliseconds": [
+        3.8057920000001104,
+        3.7312080000001515,
+        4.23958400000015,
+        3.721708000000035,
+        3.7267080000001442,
+        3.8671669999998812,
+        3.7324579999999514
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 1.6378339999998843,
+      "millionPointsPerSecond": 12.211249735932586,
+      "samplesMilliseconds": [
+        1.640374999999949,
+        1.6392080000000533,
+        1.6371670000000904,
+        1.634457999999995,
+        1.6342090000000553,
+        1.711084000000028,
+        1.6378339999998843
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 1.9282090000001517,
+      "millionPointsPerSecond": 10.372319598134034,
+      "samplesMilliseconds": [
+        1.9751249999999345,
+        1.93100000000004,
+        1.9240419999998721,
+        1.9263330000001133,
+        2.0294169999999667,
+        1.9282090000001517,
+        1.9262920000001031
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 4.696416999999883,
+      "millionPointsPerSecond": 4.258565625667503,
+      "samplesMilliseconds": [
+        4.688999999999851,
+        5.032750000000078,
+        4.689333000000033,
+        4.696416999999883,
+        4.680749999999989,
+        4.781083000000081,
+        4.872082999999975
+      ]
+    },
+    {
+      "case": "Web Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 4.382290999999896,
+      "millionPointsPerSecond": 4.563822895376067,
+      "samplesMilliseconds": [
+        4.378875000000107,
+        4.391957999999931,
+        4.495374999999967,
+        4.375666999999794,
+        4.379500000000007,
+        4.382290999999896,
+        4.69079099999999
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 4.889750000000049,
+      "millionPointsPerSecond": 4.0901886599519,
+      "samplesMilliseconds": [
+        4.889750000000049,
+        5.053124999999909,
+        4.896541999999954,
+        4.855041999999912,
+        4.859416999999894,
+        5.011207999999897,
+        4.866250000000036
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 5.189000000000078,
+      "millionPointsPerSecond": 3.854307188282848,
+      "samplesMilliseconds": [
+        5.197791000000052,
+        5.189000000000078,
+        5.326250000000073,
+        5.179417000000058,
+        5.156625000000076,
+        5.174874999999929,
+        5.263333999999986
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 8.155500000000075,
+      "millionPointsPerSecond": 2.4523327815584355,
+      "samplesMilliseconds": [
+        8.155500000000075,
+        8.130792000000156,
+        8.177249999999958,
+        8.232666000000108,
+        8.115542000000005,
+        8.13129200000003,
+        8.191332999999986
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 7.94295800000009,
+      "millionPointsPerSecond": 2.517953638933981,
+      "samplesMilliseconds": [
+        8.016667000000098,
+        7.925208999999995,
+        7.963665999999876,
+        7.94295800000009,
+        7.964915999999903,
+        7.873458000000028,
+        7.90666699999997
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 4.3491250000001855,
+      "millionPointsPerSecond": 4.598626160434374,
+      "samplesMilliseconds": [
+        4.372292000000016,
+        4.391375000000153,
+        4.348332999999911,
+        4.3491250000001855,
+        4.448417000000063,
+        4.33862500000032,
+        4.320250000000215
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 4.692457999999988,
+      "millionPointsPerSecond": 4.26215855315062,
+      "samplesMilliseconds": [
+        4.692457999999988,
+        4.722999999999956,
+        4.804374999999936,
+        4.688791999999921,
+        4.683291999999938,
+        4.781249999999773,
+        4.679042000000209
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 7.875541999999996,
+      "millionPointsPerSecond": 2.539507757053421,
+      "samplesMilliseconds": [
+        7.882458999999926,
+        7.875541999999996,
+        7.916750000000093,
+        7.851499999999987,
+        7.832791999999927,
+        7.8379580000000715,
+        7.969541999999819
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 7.556208999999853,
+      "millionPointsPerSecond": 2.646829911666073,
+      "samplesMilliseconds": [
+        7.95108399999981,
+        7.679624999999987,
+        7.556208999999853,
+        7.563665999999785,
+        7.547666999999819,
+        7.550042000000303,
+        7.535499999999956
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 4.937290999999732,
+      "millionPointsPerSecond": 4.05080437835264,
+      "samplesMilliseconds": [
+        4.937290999999732,
+        4.903041999999914,
+        4.951750000000175,
+        4.945208999999977,
+        4.918499999999767,
+        4.940625000000182,
+        4.931582999999591
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 5.243334000000232,
+      "millionPointsPerSecond": 3.8143669657510118,
+      "samplesMilliseconds": [
+        5.229874999999993,
+        5.226583000000119,
+        5.355167000000165,
+        5.243334000000232,
+        5.31708400000025,
+        5.253208000000086,
+        5.228625000000193
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 7.469333000000006,
+      "millionPointsPerSecond": 2.677615256944627,
+      "samplesMilliseconds": [
+        7.469333000000006,
+        7.43820900000037,
+        7.519083000000137,
+        7.441124999999829,
+        7.460458000000017,
+        7.523083000000042,
+        7.602249999999913
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 7.248874999999771,
+      "millionPointsPerSecond": 2.7590488179201094,
+      "samplesMilliseconds": [
+        7.559083000000101,
+        7.320208999999977,
+        7.227917000000161,
+        7.193209000000024,
+        7.248874999999771,
+        7.248917000000347,
+        7.235666999999921
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 4.3586669999999685,
+      "millionPointsPerSecond": 4.588558841499051,
+      "samplesMilliseconds": [
+        4.363207999999759,
+        4.352332999999817,
+        4.3586669999999685,
+        4.341583999999784,
+        4.343124999999873,
+        4.398750000000291,
+        4.40420899999981
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 4.7330839999999625,
+      "millionPointsPerSecond": 4.22557469928701,
+      "samplesMilliseconds": [
+        4.75933299999997,
+        4.719375000000127,
+        4.7330839999999625,
+        4.714291999999659,
+        4.710750000000189,
+        4.7352920000003,
+        5.070083000000068
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 7.0948749999997744,
+      "millionPointsPerSecond": 2.818936203950124,
+      "samplesMilliseconds": [
+        7.073624999999993,
+        7.035374999999931,
+        7.19733400000041,
+        7.0948749999997744,
+        7.170958000000155,
+        7.060167000000092,
+        7.162499999999909
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 6.943166999999903,
+      "millionPointsPerSecond": 2.880529879232385,
+      "samplesMilliseconds": [
+        7.167625000000044,
+        6.8302920000000995,
+        6.860957999999755,
+        6.943166999999903,
+        6.802374999999756,
+        6.945958000000246,
+        6.953791999999794
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 4.899916999999732,
+      "millionPointsPerSecond": 4.0817017920918035,
+      "samplesMilliseconds": [
+        4.916584000000057,
+        4.89383399999997,
+        4.891541000000416,
+        4.904125000000022,
+        4.885999999999967,
+        4.914209000000028,
+        4.899916999999732
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 5.286999999999807,
+      "millionPointsPerSecond": 3.782863627766357,
+      "samplesMilliseconds": [
+        5.500500000000102,
+        5.30074999999988,
+        5.1937080000002425,
+        5.187832999999955,
+        5.286999999999807,
+        5.290292000000136,
+        5.251208000000133
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 8.200000000000273,
+      "millionPointsPerSecond": 2.4390243902438216,
+      "samplesMilliseconds": [
+        8.188000000000102,
+        8.186083000000053,
+        8.299958999999944,
+        8.19379200000003,
+        8.200000000000273,
+        8.238291000000117,
+        8.309166000000005
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 7.945709000000079,
+      "millionPointsPerSecond": 2.517081861417251,
+      "samplesMilliseconds": [
+        7.9560419999997976,
+        7.913792000000285,
+        7.913499999999658,
+        8.07425000000012,
+        7.913666999999805,
+        8.010957999999846,
+        7.945709000000079
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 4.345957999999882,
+      "millionPointsPerSecond": 4.601977285560639,
+      "samplesMilliseconds": [
+        4.345957999999882,
+        4.346291999999721,
+        4.335374999999658,
+        4.362833000000137,
+        4.324333999999908,
+        4.343584000000192,
+        4.3648339999999735
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 4.701790999999957,
+      "millionPointsPerSecond": 4.253698218402345,
+      "samplesMilliseconds": [
+        4.696917000000212,
+        4.727832999999919,
+        4.692583000000013,
+        4.694624999999633,
+        4.710083999999824,
+        4.701790999999957,
+        4.7291660000000775
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 7.968166999999994,
+      "millionPointsPerSecond": 2.509987554226714,
+      "samplesMilliseconds": [
+        8.18933300000026,
+        7.9897500000001855,
+        7.978583999999955,
+        7.883333000000221,
+        7.968166999999994,
+        7.908500000000004,
+        7.922208999999839
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 7.674125000000004,
+      "millionPointsPerSecond": 2.606160311436156,
+      "samplesMilliseconds": [
+        7.566541000000143,
+        7.5873750000000655,
+        7.676707999999962,
+        7.674125000000004,
+        7.662457999999788,
+        7.700792000000092,
+        7.7042499999997744
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 4.9325840000001335,
+      "millionPointsPerSecond": 4.054669925539931,
+      "samplesMilliseconds": [
+        4.924250000000029,
+        4.9325840000001335,
+        4.928458999999748,
+        4.942333999999846,
+        4.936083000000053,
+        4.9256249999998545,
+        4.994416999999885
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 5.285000000000309,
+      "millionPointsPerSecond": 3.7842951750234306,
+      "samplesMilliseconds": [
+        5.548416999999972,
+        5.246415999999954,
+        5.285000000000309,
+        5.344916000000012,
+        5.2709579999996095,
+        5.223791999999776,
+        5.360625000000255
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 7.523834000000079,
+      "millionPointsPerSecond": 2.65821920047675,
+      "samplesMilliseconds": [
+        7.4942080000000715,
+        7.646082999999635,
+        7.523834000000079,
+        7.5151670000000195,
+        7.657999999999902,
+        7.504500000000007,
+        7.540707999999995
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 7.260834000000159,
+      "millionPointsPerSecond": 2.7545045100878993,
+      "samplesMilliseconds": [
+        7.206708000000162,
+        7.260834000000159,
+        7.309374999999818,
+        7.267374999999902,
+        7.22045799999978,
+        7.310750000000098,
+        7.236249999999927
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 4.40033399999993,
+      "millionPointsPerSecond": 4.545109530322089,
+      "samplesMilliseconds": [
+        4.401666000000205,
+        4.403957999999875,
+        4.39883299999974,
+        4.453500000000076,
+        4.40033399999993,
+        4.370167000000038,
+        4.366250000000036
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 4.730250000000069,
+      "millionPointsPerSecond": 4.228106336874311,
+      "samplesMilliseconds": [
+        4.719499999999698,
+        4.735000000000127,
+        4.73891599999979,
+        4.730250000000069,
+        4.72787500000004,
+        4.815791999999874,
+        4.7229590000001735
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 7.195917000000009,
+      "millionPointsPerSecond": 2.7793539030536314,
+      "samplesMilliseconds": [
+        7.434250000000247,
+        7.263083999999708,
+        7.13391700000011,
+        7.237250000000131,
+        7.109792000000198,
+        7.084374999999909,
+        7.195917000000009
+      ]
+    },
+    {
+      "case": "UTM 31N",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 6.830417000000125,
+      "millionPointsPerSecond": 2.9280789152404068,
+      "samplesMilliseconds": [
+        6.830417000000125,
+        6.814750000000004,
+        6.93362500000012,
+        6.844749999999749,
+        6.83883300000025,
+        6.813874999999825,
+        6.805166999999983
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 2.1125419999998485,
+      "millionPointsPerSecond": 9.467267396341201,
+      "samplesMilliseconds": [
+        2.1125419999998485,
+        2.1107919999999467,
+        2.1122919999997976,
+        2.110874999999851,
+        2.112916999999925,
+        2.116207999999915,
+        2.1242920000004233
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 2.418500000000222,
+      "millionPointsPerSecond": 8.26958858796699,
+      "samplesMilliseconds": [
+        2.4158330000000205,
+        2.418500000000222,
+        2.41662499999984,
+        2.4272909999999683,
+        2.41604099999995,
+        2.420582999999624,
+        2.4468750000005457
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 5.504374999999982,
+      "millionPointsPerSecond": 3.633473373452947,
+      "samplesMilliseconds": [
+        5.49212499999976,
+        5.492832999999791,
+        5.641999999999825,
+        5.4839170000000195,
+        5.590958000000228,
+        5.504374999999982,
+        5.511415999999372
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 5.265292000000045,
+      "millionPointsPerSecond": 3.7984598005200527,
+      "samplesMilliseconds": [
+        5.609875000000102,
+        5.254500000000007,
+        5.257666999999856,
+        5.360166999999819,
+        5.245332999999846,
+        5.37683399999969,
+        5.265292000000045
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 8.664499999999862,
+      "millionPointsPerSecond": 2.3082693750361036,
+      "samplesMilliseconds": [
+        8.689750000000458,
+        8.664499999999862,
+        8.677500000000691,
+        8.64495799999986,
+        8.6299999999992,
+        8.699499999999716,
+        8.643207999999504
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 8.978708000000552,
+      "millionPointsPerSecond": 2.2274919732325373,
+      "samplesMilliseconds": [
+        8.981834000000163,
+        8.98108400000001,
+        8.978708000000552,
+        8.954332999999679,
+        8.963916000000609,
+        9.045290999999452,
+        8.95458299999973
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 12.004167000000052,
+      "millionPointsPerSecond": 1.666088117567834,
+      "samplesMilliseconds": [
+        12.30474999999933,
+        11.944499999999607,
+        11.94158299999981,
+        12.004167000000052,
+        12.064124999999876,
+        12.146709000000556,
+        11.984292000000096
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 11.780958000000282,
+      "millionPointsPerSecond": 1.6976548087175525,
+      "samplesMilliseconds": [
+        11.697667000000365,
+        11.82537499999944,
+        11.701375000000553,
+        11.808791999999812,
+        11.800000000000182,
+        11.716833000000406,
+        11.780958000000282
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 2.150832999999693,
+      "millionPointsPerSecond": 9.298722866909172,
+      "samplesMilliseconds": [
+        2.158208000000741,
+        2.4585830000005444,
+        2.13220900000033,
+        2.143000000000029,
+        2.1534999999994398,
+        2.150832999999693,
+        2.1375830000006317
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 2.4452909999999974,
+      "millionPointsPerSecond": 8.178985650378634,
+      "samplesMilliseconds": [
+        2.436666999999943,
+        2.468667000000096,
+        2.4439999999995052,
+        2.4452909999999974,
+        2.459708000000319,
+        2.4774170000000595,
+        2.4297910000004777
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 4.646082999999635,
+      "millionPointsPerSecond": 4.304701401159121,
+      "samplesMilliseconds": [
+        4.646082999999635,
+        5.006916999999703,
+        4.645541000000776,
+        4.7034169999997175,
+        4.732375000000502,
+        4.638790999999401,
+        4.638750000000073
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 4.442417000000205,
+      "millionPointsPerSecond": 4.502053724357501,
+      "samplesMilliseconds": [
+        4.442541999999776,
+        4.396125000000211,
+        4.5317919999997684,
+        4.405541000000085,
+        4.442417000000205,
+        4.511249999999563,
+        4.4065410000002885
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 8.67658399999982,
+      "millionPointsPerSecond": 2.3050546159641185,
+      "samplesMilliseconds": [
+        8.666083000000071,
+        8.736582999999882,
+        8.721292000000176,
+        8.649540999999772,
+        8.654915999999503,
+        8.67658399999982,
+        8.76391700000022
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 9.04045799999949,
+      "millionPointsPerSecond": 2.2122772983405405,
+      "samplesMilliseconds": [
+        8.982374999999593,
+        9.114833000000544,
+        9.022249999999985,
+        9.018833999999515,
+        9.12683300000026,
+        9.04045799999949,
+        9.217792000000372
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 11.261083000000326,
+      "millionPointsPerSecond": 1.776028113814579,
+      "samplesMilliseconds": [
+        11.270958000000064,
+        11.610625000000255,
+        11.250583999999435,
+        11.218917000000147,
+        11.261083000000326,
+        11.343959000000723,
+        11.190582999999606
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 10.959958999999799,
+      "millionPointsPerSecond": 1.824824344689644,
+      "samplesMilliseconds": [
+        10.927625000000262,
+        10.959958999999799,
+        11.074207999999999,
+        10.960084000000279,
+        10.95324999999957,
+        10.947791999999936,
+        10.985915999999634
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 2.139709000000039,
+      "millionPointsPerSecond": 9.347065418708635,
+      "samplesMilliseconds": [
+        2.133125000000291,
+        2.129083000000719,
+        2.139709000000039,
+        2.1205409999993208,
+        2.2576669999998558,
+        2.362290999999459,
+        2.234457999999904
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 2.578708000000006,
+      "millionPointsPerSecond": 7.755821907715008,
+      "samplesMilliseconds": [
+        2.4193750000004,
+        2.418291999999383,
+        2.521625000000313,
+        2.643583000000035,
+        2.578708000000006,
+        2.661583000000064,
+        2.59020800000053
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 5.953958000000057,
+      "millionPointsPerSecond": 3.3591100239537814,
+      "samplesMilliseconds": [
+        5.878041999999368,
+        5.563041000000339,
+        5.515207999999802,
+        5.988166999999521,
+        6.196249999999964,
+        6.189542000000074,
+        5.953958000000057
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 5.366500000000087,
+      "millionPointsPerSecond": 3.7268238144041135,
+      "samplesMilliseconds": [
+        5.319625000000087,
+        5.366500000000087,
+        5.273834000000534,
+        5.258291999999528,
+        5.719583999999486,
+        5.76904100000047,
+        5.720208000000639
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 8.636625000000095,
+      "millionPointsPerSecond": 2.315719392702564,
+      "samplesMilliseconds": [
+        8.629667000000154,
+        8.68420800000058,
+        8.63958300000013,
+        8.636625000000095,
+        8.615832999999839,
+        8.619583000000603,
+        8.639333000000079
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 8.94287500000064,
+      "millionPointsPerSecond": 2.2364172595500404,
+      "samplesMilliseconds": [
+        9.006207999999788,
+        8.99670900000001,
+        8.932708999999704,
+        8.930709000000206,
+        9.086833999999726,
+        8.92133399999966,
+        8.94287500000064
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 12.036874999999782,
+      "millionPointsPerSecond": 1.6615608287034933,
+      "samplesMilliseconds": [
+        12.352499999999964,
+        12.219916999999441,
+        12.036874999999782,
+        11.974458000000595,
+        11.97900000000027,
+        12.052208000000064,
+        11.963542000000416
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 11.76129100000071,
+      "millionPointsPerSecond": 1.7004935937728938,
+      "samplesMilliseconds": [
+        11.751541999999972,
+        11.795667000000321,
+        11.845917000000554,
+        11.731917000000067,
+        11.76129100000071,
+        11.71679099999983,
+        11.847749999999905
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 2.15295900000001,
+      "millionPointsPerSecond": 9.289540581125747,
+      "samplesMilliseconds": [
+        2.148540999999568,
+        2.164582999999766,
+        2.161292000000685,
+        2.1511669999999867,
+        2.1475409999993644,
+        2.15295900000001,
+        2.154125000000022
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 2.465791999999965,
+      "millionPointsPerSecond": 8.110984219269218,
+      "samplesMilliseconds": [
+        2.465791999999965,
+        2.4662909999997282,
+        2.4978330000003552,
+        2.4628340000008393,
+        2.4682919999995647,
+        2.4612919999999576,
+        2.4559589999998934
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 4.669292000000496,
+      "millionPointsPerSecond": 4.283304620914236,
+      "samplesMilliseconds": [
+        4.648415999999997,
+        4.95325000000048,
+        4.669292000000496,
+        4.766082999999526,
+        4.665084000000206,
+        4.7540829999998095,
+        4.661207999999533
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 4.443583000000217,
+      "millionPointsPerSecond": 4.500872381589142,
+      "samplesMilliseconds": [
+        4.451791999999841,
+        4.413209000000279,
+        4.559457999999722,
+        4.443583000000217,
+        4.43224999999984,
+        4.411875000000691,
+        4.520333000000392
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 8.667083999999704,
+      "millionPointsPerSecond": 2.3075811887828346,
+      "samplesMilliseconds": [
+        8.655416999999943,
+        8.70391600000039,
+        8.667083999999704,
+        8.633166999999958,
+        8.658042000000023,
+        8.7246669999995,
+        8.682958999999755
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 9.027458000000479,
+      "millionPointsPerSecond": 2.215463090495568,
+      "samplesMilliseconds": [
+        9.01708299999973,
+        9.027458000000479,
+        8.987707999999657,
+        9.054791999999907,
+        9.211457999999766,
+        9.2153330000001,
+        9.014791999999943
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 11.341833000000406,
+      "millionPointsPerSecond": 1.7633833966695933,
+      "samplesMilliseconds": [
+        11.235374999999294,
+        11.236541999999645,
+        11.85070799999994,
+        11.341833000000406,
+        11.719874999999774,
+        11.615208999999595,
+        11.210250000000087
+      ]
+    },
+    {
+      "case": "Lambert conic",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 10.98595800000021,
+      "millionPointsPerSecond": 1.8205057765558195,
+      "samplesMilliseconds": [
+        10.929165999999896,
+        10.98595800000021,
+        11.653790999999728,
+        10.94549999999981,
+        11.565958000000137,
+        10.968917000000147,
+        11.02245800000037
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 4.843916999999237,
+      "millionPointsPerSecond": 4.1288899045964556,
+      "samplesMilliseconds": [
+        4.8446249999997235,
+        4.96716699999979,
+        4.843916999999237,
+        4.830500000000029,
+        4.864083999999821,
+        4.81066600000031,
+        4.833583000000544
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 5.154916999999841,
+      "millionPointsPerSecond": 3.8797908870308904,
+      "samplesMilliseconds": [
+        5.154916999999841,
+        5.15349999999944,
+        5.155541000000085,
+        5.3205830000006245,
+        5.140875000000051,
+        5.1582500000004075,
+        5.1504580000000715
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 8.84625000000051,
+      "millionPointsPerSecond": 2.260844990815187,
+      "samplesMilliseconds": [
+        9.30487500000072,
+        8.88366700000006,
+        8.893417000000227,
+        8.821792000000642,
+        8.84625000000051,
+        8.840833000000202,
+        8.843375000000378
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 8.592750000000706,
+      "millionPointsPerSecond": 2.3275435687059858,
+      "samplesMilliseconds": [
+        8.592750000000706,
+        8.578875000000153,
+        8.58245899999929,
+        8.594250000000102,
+        8.716333999999733,
+        8.555292000000009,
+        8.681249999999636
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 15.826583000000028,
+      "millionPointsPerSecond": 1.2636966551781874,
+      "samplesMilliseconds": [
+        15.874541000000136,
+        15.815375000000131,
+        15.84320899999966,
+        15.801582999999482,
+        15.826583000000028,
+        15.82825000000048,
+        15.759250000000065
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 16.276874999999563,
+      "millionPointsPerSecond": 1.2287370886610935,
+      "samplesMilliseconds": [
+        16.70379200000025,
+        16.304665999999997,
+        16.29674999999952,
+        16.250041999999667,
+        16.276874999999563,
+        16.24525000000085,
+        16.208290999999917
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 15.326292000000649,
+      "millionPointsPerSecond": 1.30494708048099,
+      "samplesMilliseconds": [
+        15.326292000000649,
+        15.243000000000393,
+        15.33166700000038,
+        15.24212499999976,
+        15.492708000000675,
+        15.241791999999805,
+        15.440583000000515
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 15.015709000000243,
+      "millionPointsPerSecond": 1.3319384386045092,
+      "samplesMilliseconds": [
+        14.997542000000067,
+        15.54950000000008,
+        15.015709000000243,
+        15.136375000000044,
+        14.943458000000646,
+        15.016583999999966,
+        14.923874999999498
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 5.330457999999453,
+      "millionPointsPerSecond": 3.752022809297447,
+      "samplesMilliseconds": [
+        5.3165829999998095,
+        5.343249999999898,
+        5.325083000000632,
+        5.321208000000297,
+        5.330457999999453,
+        5.380541999999878,
+        5.3373750000000655
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 5.663209000000279,
+      "millionPointsPerSecond": 3.5315666435759328,
+      "samplesMilliseconds": [
+        5.677708000000166,
+        5.6614589999999225,
+        5.647208999999748,
+        5.669917000000169,
+        5.649416000000201,
+        5.684500000000298,
+        5.663209000000279
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 8.25866600000063,
+      "millionPointsPerSecond": 2.4216986133109724,
+      "samplesMilliseconds": [
+        8.576292000000649,
+        8.120874999999614,
+        8.36212500000056,
+        8.25866600000063,
+        8.118749999999636,
+        8.316708999999719,
+        8.10216599999967
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 7.863957999999911,
+      "millionPointsPerSecond": 2.5432485778790053,
+      "samplesMilliseconds": [
+        7.861916999999266,
+        7.890875000000051,
+        7.857874999999694,
+        7.861207999999351,
+        7.866541000000325,
+        7.863957999999911,
+        7.880207999999584
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 15.894374999999854,
+      "millionPointsPerSecond": 1.2583067909244736,
+      "samplesMilliseconds": [
+        15.894374999999854,
+        15.889750000000276,
+        15.93487500000083,
+        15.902792000000773,
+        15.865083000000595,
+        15.908417000000554,
+        15.878124999999272
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 16.204791000000114,
+      "millionPointsPerSecond": 1.23420289715553,
+      "samplesMilliseconds": [
+        16.272374999998647,
+        16.204791000000114,
+        16.225166000000172,
+        16.197791999999026,
+        16.176166999999623,
+        16.219208000000435,
+        16.195999999999913
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 14.513667000001078,
+      "millionPointsPerSecond": 1.378011497714431,
+      "samplesMilliseconds": [
+        15.017166999999972,
+        14.532499999999345,
+        14.513667000001078,
+        14.499916000000667,
+        14.53204100000039,
+        14.491792000000714,
+        14.504582999999911
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float64Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 14.388042000000496,
+      "millionPointsPerSecond": 1.3900432039327737,
+      "samplesMilliseconds": [
+        14.299000000000888,
+        14.633749999999054,
+        14.247832999999446,
+        14.435083000000304,
+        14.388042000000496,
+        14.247792000000118,
+        14.434957999999824
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 5.3269580000014685,
+      "millionPointsPerSecond": 3.7544880211172096,
+      "samplesMilliseconds": [
+        5.34545799999978,
+        5.3265420000007,
+        5.3269580000014685,
+        5.328458000001774,
+        5.313500000000204,
+        5.326583999998547,
+        5.586416000000099
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 5.644041999999899,
+      "millionPointsPerSecond": 3.543559739633468,
+      "samplesMilliseconds": [
+        5.634625000000597,
+        5.681542000000263,
+        5.644041999999899,
+        5.639084000000366,
+        5.643457999998645,
+        5.660500000001775,
+        5.653707999999824
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 8.83704200000102,
+      "millionPointsPerSecond": 2.2632007407000776,
+      "samplesMilliseconds": [
+        8.80329200000051,
+        8.81158300000061,
+        8.976040999999896,
+        8.964833999998518,
+        8.83704200000102,
+        8.936666999999943,
+        8.808582999999999
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 8.588292000000365,
+      "millionPointsPerSecond": 2.328751747145899,
+      "samplesMilliseconds": [
+        8.933042000000569,
+        8.573040999999648,
+        8.564833000000363,
+        8.619041999998444,
+        8.588292000000365,
+        8.566082999999708,
+        8.730083000000377
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 15.81237499999952,
+      "millionPointsPerSecond": 1.2648321330603787,
+      "samplesMilliseconds": [
+        15.81237499999952,
+        15.931000000000495,
+        15.822333000000071,
+        15.76312499999949,
+        15.81854100000055,
+        15.761125000000902,
+        15.80291600000055
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 16.200042000000394,
+      "millionPointsPerSecond": 1.2345647005112403,
+      "samplesMilliseconds": [
+        16.197916999999507,
+        16.211499999999432,
+        16.183915999999954,
+        16.335417000000234,
+        16.200042000000394,
+        16.177707999999257,
+        16.203084000000672
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 15.22637500000019,
+      "millionPointsPerSecond": 1.313510274113159,
+      "samplesMilliseconds": [
+        15.851582999999664,
+        15.22637500000019,
+        15.229832999999417,
+        15.242707999999766,
+        15.199082999999519,
+        15.21099999999933,
+        15.191125000001193
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 2,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 14.99237499999981,
+      "millionPointsPerSecond": 1.3340114558233938,
+      "samplesMilliseconds": [
+        14.99237499999981,
+        14.964958000000479,
+        14.991415999998935,
+        14.972792000000481,
+        15.092540999999983,
+        14.994333000000552,
+        15.078625000000102
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native batch",
+      "medianMilliseconds": 5.346332999999504,
+      "millionPointsPerSecond": 3.7408818343342727,
+      "samplesMilliseconds": [
+        5.333749999999782,
+        5.34270800000013,
+        5.346332999999504,
+        5.358292000000802,
+        5.333708000000115,
+        5.350624999999127,
+        5.348125000000437
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "native scalar",
+      "medianMilliseconds": 5.710124999999607,
+      "millionPointsPerSecond": 3.5025502944333753,
+      "samplesMilliseconds": [
+        5.670042000001558,
+        6.167583000000377,
+        5.724833000000217,
+        5.710124999999607,
+        5.714874999999665,
+        5.680207999999766,
+        5.679709000000003
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 8.119416999999885,
+      "millionPointsPerSecond": 2.4632310423273354,
+      "samplesMilliseconds": [
+        8.124417000000903,
+        8.100040999999692,
+        8.108957999998893,
+        8.109957999999097,
+        8.282709000000978,
+        8.119416999999885,
+        8.276459000000614
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "forward",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 7.883791000000201,
+      "millionPointsPerSecond": 2.5368506090533716,
+      "samplesMilliseconds": [
+        7.878334000000905,
+        7.871832999999242,
+        8.03058400000009,
+        7.867292000000816,
+        7.883791000000201,
+        7.891999999999825,
+        7.960167000001093
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native batch",
+      "medianMilliseconds": 15.95483299999978,
+      "millionPointsPerSecond": 1.253538661294686,
+      "samplesMilliseconds": [
+        15.897499999999127,
+        15.956333000000086,
+        15.892375000001266,
+        15.95483299999978,
+        15.91070800000125,
+        17.31841600000007,
+        17.348916000000827
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "native scalar",
+      "medianMilliseconds": 16.228916000000027,
+      "millionPointsPerSecond": 1.2323682000695528,
+      "samplesMilliseconds": [
+        16.59283299999879,
+        16.228916000000027,
+        16.228832999999213,
+        16.209874999998647,
+        16.200917000000118,
+        16.441875000000437,
+        17.214375000001382
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 import",
+      "medianMilliseconds": 14.531709000000774,
+      "millionPointsPerSecond": 1.3763006126807888,
+      "samplesMilliseconds": [
+        14.531709000000774,
+        14.506165999999212,
+        14.500332999999955,
+        14.508875000001353,
+        14.534166999999798,
+        14.599625000000742,
+        16.063249999999243
+      ]
+    },
+    {
+      "case": "Helmert to Mercator",
+      "array": "Float32Array",
+      "dimension": 3,
+      "direction": "inverse",
+      "implementation": "proj4 wrapper",
+      "medianMilliseconds": 14.473291000000245,
+      "millionPointsPerSecond": 1.3818557230694568,
+      "samplesMilliseconds": [
+        14.256750000000466,
+        14.69195800000125,
+        14.250541999999768,
+        14.420584000001327,
+        14.473291000000245,
+        14.616874999999709,
+        15.522249999999985
+      ]
+    }
+  ],
+  "allocations": [
+    {
+      "case": "Web Mercator",
+      "implementation": "native batch",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "case": "Web Mercator",
+      "implementation": "native scalar",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 158.13756,
+      "sampleCount": 7654
+    },
+    {
+      "case": "Web Mercator",
+      "implementation": "proj4 import",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 594.60668,
+      "sampleCount": 28485
+    },
+    {
+      "case": "Web Mercator",
+      "implementation": "proj4 wrapper",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 606.607,
+      "sampleCount": 29108
+    },
+    {
+      "case": "UTM 31N",
+      "implementation": "native batch",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 49.16628,
+      "sampleCount": 2397
+    },
+    {
+      "case": "UTM 31N",
+      "implementation": "native scalar",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 207.08048,
+      "sampleCount": 10041
+    },
+    {
+      "case": "UTM 31N",
+      "implementation": "proj4 import",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 641.10644,
+      "sampleCount": 30785
+    },
+    {
+      "case": "UTM 31N",
+      "implementation": "proj4 wrapper",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 649.5298,
+      "sampleCount": 31185
+    },
+    {
+      "case": "Lambert conic",
+      "implementation": "native batch",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "case": "Lambert conic",
+      "implementation": "native scalar",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 153.69536,
+      "sampleCount": 7441
+    },
+    {
+      "case": "Lambert conic",
+      "implementation": "proj4 import",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 595.02044,
+      "sampleCount": 28537
+    },
+    {
+      "case": "Lambert conic",
+      "implementation": "proj4 wrapper",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 604.7544,
+      "sampleCount": 29002
+    },
+    {
+      "case": "Helmert to Mercator",
+      "implementation": "native batch",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 78.34552,
+      "sampleCount": 3818
+    },
+    {
+      "case": "Helmert to Mercator",
+      "implementation": "native scalar",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 239.3664,
+      "sampleCount": 11615
+    },
+    {
+      "case": "Helmert to Mercator",
+      "implementation": "proj4 import",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 976.73708,
+      "sampleCount": 47000
+    },
+    {
+      "case": "Helmert to Mercator",
+      "implementation": "proj4 wrapper",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 947.51232,
+      "sampleCount": 45579
+    }
+  ],
+  "checksum": 22074839.927994728
+}

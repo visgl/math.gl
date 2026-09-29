@@ -1,0 +1,8 @@
+[
+  {
+    "index": 165,
+    "sourceLine": 2041,
+    "referenceId": "robin-upstream-165",
+    "reason": "Native Robinson uses the PROJ 9.5.1 float coefficient table, correcting a roughly two-metre difference from proj4js. Exact inverse knots use their tabulated latitude."
+  }
+]
