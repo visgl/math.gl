@@ -1,7 +1,8 @@
 # TypeScript proj4 parity roadmap
 
 Status: tranches 0 through 6 implemented in this source tree for the documented subset.
-Tranche 7 is proposed; the inventory still marks projection families as partial
+Tranche 7 now implements batch transforms and performance/package qualification;
+release promotion remains gated. The inventory still marks projection families as partial
 until their remaining CRS/parameter gaps are closed.
 Sequencing describes dependencies, not release dates.
 
@@ -67,7 +68,7 @@ Tranche 3 adds upstream's `identity` alias with explicit radian semantics.
 Implemented artifacts:
 
 - `modules/proj4/test/fixtures/parity-inventory.json`: all 38 upstream projection/helper
-  modules and 30 CRS/API/transform features, with aliases, default-bundle membership,
+  modules and 31 CRS/API/transform features, with aliases, default-bundle membership,
   source hashes, fixture IDs, tests, gaps, and intentional differences.
 - `upstream-2.22.0.ts`: 24 tagged upstream coordinate fixtures with source lines and
   source-file hash. The retained NAD83 and Plessis cases now execute successfully.
@@ -232,7 +233,33 @@ independent native PROJ reference coordinates are added in tranche 7. Vertical
 grids, generalized GeoTIFF metadata/band conventions and structured grid operation
 selection remain outside this horizontal subset.
 
-### Tranche 7: promote only after evidence
+### Tranche 7: batch performance and qualification; promotion still gated
+
+Implemented in this tranche:
+
+- In-place Float32/Float64 transformations with explicit record dimensions, shared
+  scalar/batch equations, mutable plugin hooks and prepared-grid interpolation.
+- Batch/scalar tests across the projection catalogue, both precisions, axes, datum
+  chains, grid fallback, view boundaries, malformed layouts and partial failures.
+- Reproducible comparisons with the imported proj4 function and existing wrapper:
+  forward/inverse throughput, construction cost and sampled allocation estimates.
+  Browser and Node benchmark suites include native scalar and typed-array paths.
+- Actual npm-packed ESM/CommonJS/type consumers and deterministic minified/gzip
+  budgets for core, Mercator, UTM, all native exports and the existing wrapper.
+  CI checks package/bundle gates and a small benchmark correctness smoke run;
+  timing thresholds are intentionally excluded from shared CI machines.
+
+See [benchmark methodology and baseline](./benchmarks.md). Native throughput and
+allocation improve for the measured workloads, while native construction costs more.
+The full native export surface (including optional readers) is larger than the
+wrapper; selected projection bundles are smaller.
+
+Still required before promotion: licensed real-world grids, a larger independent
+native PROJ corpus, exhaustive structured CRS/parameter variants, reviewed numerical
+exceptions, broader browser performance baselines and a migration decision. Sampled
+allocation estimates are not exact allocation counts. First construction after imports
+is measured separately from warm construction; process/module startup is not yet profiled.
+This tranche does not promote the engine or remove the upstream dependency.
 
 Run the complete matrix in Node and supported browsers, test packed ESM/CommonJS
 packages and declarations, and record cold construction cost, transform throughput,
@@ -260,4 +287,7 @@ yarn exec tsc --noEmit --project modules/proj4/tsconfig.json
 yarn exec ocular-build proj4
 node modules/proj4/scripts/check-experimental-package.mjs
 node modules/proj4/scripts/check-parity-inventory.mjs
+node modules/proj4/scripts/check-packed-package.mjs
+node modules/proj4/scripts/check-bundle-budget.mjs
+node modules/proj4/scripts/benchmark.mjs --allocations --output /tmp/proj4-benchmark.json
 ```

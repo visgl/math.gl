@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 // Original implementation of projection equations; compatibility informed by proj4js 2.22.0.
 
+import {createProjection} from '../mutable-projection';
 import {DEGREES_TO_RADIANS, latitudeParameter, numberParameter, wrapLongitude} from '../parameters';
 import type {ProjectionPlugin} from '../types';
 
@@ -20,19 +21,15 @@ export const equidistantCylindrical: ProjectionPlugin = {
     const parallelScale = Math.cos(latitudeParameter(parameters, 'lat_ts'));
     const x0 = numberParameter(parameters, 'x_0', 0);
     const y0 = numberParameter(parameters, 'y_0', 0);
-    return {
-      forward(longitude, latitude) {
-        return [
-          x0 + a * parallelScale * wrap(longitude - longitudeOrigin),
-          y0 + a * (latitude - latitudeOrigin)
-        ];
+    return createProjection(
+      point => {
+        point.x = x0 + a * parallelScale * wrap(point.x - longitudeOrigin);
+        point.y = y0 + a * (point.y - latitudeOrigin);
       },
-      inverse(x, y) {
-        return [
-          wrap(longitudeOrigin + (x - x0) / (a * parallelScale)),
-          latitudeOrigin + (y - y0) / a
-        ];
+      point => {
+        point.x = wrap(longitudeOrigin + (point.x - x0) / (a * parallelScale));
+        point.y = latitudeOrigin + (point.y - y0) / a;
       }
-    };
+    );
   }
 };

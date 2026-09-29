@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 // Original implementation of projection equations; compatibility informed by proj4js 2.22.0.
 
+import {createProjection} from '../mutable-projection';
 import {DEGREES_TO_RADIANS, latitudeParameter, numberParameter, wrapLongitude} from '../parameters';
 import type {ProjectionPlugin} from '../types';
 
@@ -32,16 +33,21 @@ export const mercator: ProjectionPlugin = {
     }
     if (scale <= 0) throw new Error('Mercator scale must be positive');
     const radius = a * scale;
-    return {
-      forward(longitude, latitude) {
+    return createProjection(
+      point => {
+        const longitude = point.x,
+          latitude = point.y;
         if (Math.abs(latitude) >= Math.PI / 2) {
           throw new Error('Mercator is undefined at the poles');
         }
         const isometricLatitude =
           Math.asinh(Math.tan(latitude)) - e * Math.atanh(e * Math.sin(latitude));
-        return [x0 + radius * wrap(longitude - longitudeOrigin), y0 + radius * isometricLatitude];
+        point.x = x0 + radius * wrap(longitude - longitudeOrigin);
+        point.y = y0 + radius * isometricLatitude;
       },
-      inverse(x, y) {
+      point => {
+        const x = point.x,
+          y = point.y;
         const isometricLatitude = (y - y0) / radius;
         let latitude = Math.atan(Math.sinh(isometricLatitude));
         for (let iteration = 0; iteration < 30; iteration++) {
@@ -49,12 +55,14 @@ export const mercator: ProjectionPlugin = {
             Math.sinh(isometricLatitude + e * Math.atanh(e * Math.sin(latitude)))
           );
           if (Math.abs(next - latitude) < 1e-13) {
-            return [wrap(longitudeOrigin + (x - x0) / radius), next];
+            point.x = wrap(longitudeOrigin + (x - x0) / radius);
+            point.y = next;
+            return;
           }
           latitude = next;
         }
         throw new Error('Mercator inverse did not converge');
       }
-    };
+    );
   }
 };

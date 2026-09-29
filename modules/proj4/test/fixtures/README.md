@@ -3,7 +3,7 @@
 Reference: proj4js **2.22.0**, tag **v2.22.0**, checked September 29, 2026.
 
 - `parity-inventory.json` inventories all 38 upstream projection/helper files, their
-  aliases/default-bundle inclusion, and 30 input/API/transformation features. A partial
+  aliases/default-bundle inclusion, and 31 input/API/transformation features. A partial
   status means numerical support for the documented subset, with unresolved CRS or
   parameter gaps. Unsupported rows have a named gap and target tranche. Explicitly
   out-of-scope APIs are those math.gl does not expose, such as MGRS and mutable globals.

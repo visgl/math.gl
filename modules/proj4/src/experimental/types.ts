@@ -5,8 +5,14 @@
 /** Raw PROJ parameters. Angles are decimal degrees and lengths are meters. */
 export type ProjectionParameters = Readonly<Record<string, string | undefined>>;
 
+/** Mutable scratch owned by the caller. Hooks must update synchronously and never retain it. */
+export type ProjectionPoint = {x: number; y: number; z: number};
+
 /** A projection operates on radians and meters; the engine handles CRS units. */
 export type ProjectionImplementation = {
+  /** Optional mutable hooks avoid scalar coordinate arrays; preserve z for horizontal projections. */
+  forwardInPlace?(point: ProjectionPoint): void;
+  inverseInPlace?(point: ProjectionPoint): void;
   /** Optional Cartesian operations used by geocentric plugins. */
   forward3D?(point: [number, number, number]): [number, number, number];
   inverse3D?(point: [number, number, number]): [number, number, number];

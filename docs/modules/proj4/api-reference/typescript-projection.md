@@ -121,6 +121,42 @@ This deliberately differs from proj4js's default array API, which restores the i
 height for many datum operations. Differential height tests use its enforced-axis
 mode to compare the computed values. Geocentric units also apply consistently to Z.
 
+## In-place typed arrays
+
+`projectInPlace(coordinates, dimension = 2)` and
+`unprojectInPlace(coordinates, dimension = 2)` transform a `Float64Array` or
+`Float32Array` and return that same typed-array view. Records are interleaved:
+
+```typescript
+const coordinates = new Float64Array([-74, 40.7, -122.4, 37.8]);
+projection.projectInPlace(coordinates, 2);
+projection.unprojectInPlace(coordinates, 2);
+
+// XYZM: transforms XYZ as required by the CRS, preserves M.
+const vertices = new Float32Array([-74, 40.7, 120, 1, -122.4, 37.8, 200, 2]);
+projection.projectInPlace(vertices, 4);
+```
+
+- `dimension` is the record width: an integer at least 2 that divides the view's
+  length. Width 2 uses an internal zero height. Width 3 adds height or geocentric Z;
+  width 4 and above preserve every ordinate after the third, including non-finite M values.
+- Geocentric input **or output**, and axes placing height before a horizontal
+  component, require width 3 or greater. The batch API cannot append a missing Z.
+- Empty arrays are accepted with a valid layout. Use `subarray` to transform a
+  selected range; values outside the view are untouched.
+- Layout errors throw before mutation. Coordinate errors stop at the failing record:
+  earlier records remain transformed, and the failing and subsequent records are unchanged.
+  X/Y/Z must be finite; Float32 output overflow throws before committing that record.
+- Float32 output rounds to Float32 precision. Use Float64 for precision-sensitive
+  work; transforming back cannot recover precision lost during storage.
+
+The engine compiles axis, datum and projection dispatch at construction. Each batch
+call reuses one mutable point through the built-in projection, Helmert and prepared-grid
+stages, without temporary JavaScript coordinate arrays per record. Some numerical
+kernels and the JavaScript runtime can still allocate objects; this is not a promise
+of zero heap allocation. Legacy custom plugins/grids remain supported through their
+scalar methods and may allocate arrays. See [benchmarks](../benchmarks.md) for measurements.
+
 ## Current coverage
 
 | Projection | Plugin | Parameters |
@@ -344,6 +380,19 @@ const simpleCylindrical: ProjectionPlugin = {
   }
 };
 ```
+
+Plugins can additionally supply `forwardInPlace(point)` and
+`inverseInPlace(point)`. These hooks update a `ProjectionPoint` containing numeric
+`x`, `y`, and `z` fields synchronously. They use the same units as the scalar methods
+and must preserve `z` for horizontal projections. Geocentric hooks transform all
+three fields. Both scalar and batch calls prefer these hooks when present; the
+existing scalar methods remain part of the plugin contract for compatibility.
+Do not retain the point or use it asynchronously: it is reused for the next record.
+Scratch points belong to each call, so reentrant calls do not overwrite an outer call's point.
+
+Custom prepared grids can similarly provide `shiftInPlace(point, inverse): boolean`.
+Return true for a successful horizontal shift. On false, leave x/y unchanged so
+later grids can be tried; always preserve height. Built-in grid readers provide this hook.
 
 ## Expansion path
 

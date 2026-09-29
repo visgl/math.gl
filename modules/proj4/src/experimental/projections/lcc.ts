@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {ProjectionPlugin} from '../types';
+import {createProjection} from '../mutable-projection';
 import {
   bindKernel,
   kernelParameters,
@@ -28,14 +29,12 @@ export const lambertConformalConic: ProjectionPlugin = {
     validateConic(base, context.parameters);
     const state = createState(base);
     const implementation = bindKernel('lcc', state, forward, inverse);
-    return {
-      forward(longitude, latitude) {
-        if (Math.abs(latitude) === Math.PI / 2 && latitude * state.ns < 0) {
-          throw new Error('Lambert conformal conic is undefined at the opposite pole');
-        }
-        return implementation.forward(longitude, latitude);
-      },
-      inverse: implementation.inverse
-    };
+    return createProjection(point => {
+      const latitude = point.y;
+      if (Math.abs(latitude) === Math.PI / 2 && latitude * state.ns < 0) {
+        throw new Error('Lambert conformal conic is undefined at the opposite pole');
+      }
+      implementation.forwardInPlace!(point);
+    }, implementation.inverseInPlace!);
   }
 };

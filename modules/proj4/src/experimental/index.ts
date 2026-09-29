@@ -3,8 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 export {TypeScriptProjection} from './typescript-projection';
-export type {TypeScriptProjectionOptions} from './typescript-projection';
+export type {TypeScriptProjectionOptions, ProjectionArray} from './typescript-projection';
 export type {
+  ProjectionPoint,
   ProjectionContext,
   ProjectionImplementation,
   ProjectionParameters,

@@ -1281,6 +1281,14 @@
       "status": "out-of-scope",
       "tests": [],
       "gapIds": []
+    },
+    {
+      "id": "typed-array-batches",
+      "status": "verified",
+      "tests": [
+        "test/lib/batch-projection.spec.ts"
+      ],
+      "gapIds": []
     }
   ],
   "gaps": [
@@ -1420,6 +1428,11 @@
       "id": "grid-registration",
       "description": "Prepared grids are registered through each instance's datumGrids map and captured at construction. All required entries preceding a null fallback must be loaded; unavailable optional grids are skipped, and exhausted coverage throws. No global registry or implicit network loading.",
       "test": "test/lib/datum-grids.spec.ts"
+    },
+    {
+      "id": "typed-array-batches",
+      "description": "Native-only Float32Array/Float64Array in-place APIs use complete interleaved records, require space for geocentric Z, preserve trailing ordinates and commit earlier records before an error. Built-in mutable hooks avoid temporary coordinate arrays; legacy custom plugins retain scalar fallback.",
+      "test": "test/lib/batch-projection.spec.ts"
     }
   ]
 }

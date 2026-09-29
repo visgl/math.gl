@@ -5,6 +5,7 @@
 // Copyright (c) 2014, proj4js authors. See ../../../PROJ4-LICENSE.md.
 // Modified to use an explicitly supplied plugin instead of proj4js's global registry.
 import type {ProjectionPlugin, ProjectionParameters} from '../types';
+import {createProjection, projectionOperation} from '../mutable-projection';
 import {numberParameter, wrapLongitude} from '../parameters';
 import {TypeScriptCRSError} from '../crs/types';
 
@@ -104,20 +105,24 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
       };
       for (const name of rotationParameters) delete innerParameters[name];
       const inner = geographic
-        ? {
-            forward: (x: number, y: number): [number, number] => [
-              (x * 180) / Math.PI,
-              (y * 180) / Math.PI
-            ],
-            inverse: (x: number, y: number): [number, number] => [
-              (x * Math.PI) / 180,
-              (y * Math.PI) / 180
-            ]
-          }
+        ? createProjection(
+            point => {
+              point.x *= 180 / Math.PI;
+              point.y *= 180 / Math.PI;
+            },
+            point => {
+              point.x *= Math.PI / 180;
+              point.y *= Math.PI / 180;
+            }
+          )
         : wrapped.create({...context, parameters: Object.freeze(innerParameters)});
+      const forward = projectionOperation(inner, false),
+        inverse = projectionOperation(inner, true);
       const asin = (value: number): number => Math.asin(Math.max(-1, Math.min(1, value)));
-      return {
-        forward(longitude, latitude) {
+      return createProjection(
+        point => {
+          const longitude = point.x,
+            latitude = point.y;
           const lam = over
             ? longitude - longitudeOrigin
             : wrapLongitude(longitude - longitudeOrigin);
@@ -131,10 +136,14 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
             ) + lamp
           );
           const lat = asin(oblique ? sphip * sinphi - cphip * cosphi * coslam : -cosphi * coslam);
-          return inner.forward(lon, lat);
+          point.x = lon;
+          point.y = lat;
+          forward(point);
         },
-        inverse(x, y) {
-          const [innerLongitude, latitude] = inner.inverse(x, y);
+        point => {
+          inverse(point);
+          const innerLongitude = point.x,
+            latitude = point.y;
           const lam = innerLongitude - lamp,
             coslam = Math.cos(lam),
             sinphi = Math.sin(latitude),
@@ -144,9 +153,10 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
             oblique ? sphip * cosphi * coslam - cphip * sinphi : -sinphi
           );
           const lat = asin(oblique ? sphip * sinphi + cphip * cosphi * coslam : cosphi * coslam);
-          return [wrapLongitude(lon + longitudeOrigin), lat];
+          point.x = wrapLongitude(lon + longitudeOrigin);
+          point.y = lat;
         }
-      };
+      );
     }
   };
 }

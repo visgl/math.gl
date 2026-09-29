@@ -2,11 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Direct TypeScript port of proj4js 2.22.0. Copyright (c) 2014, proj4js authors.
 // See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// Modified to write the complex result into caller-owned scratch storage.
 
 import sinh from './sinh';
 import cosh from './cosh';
 
-export default function (pp: readonly number[], arg_r: number, arg_i: number) {
+export default function (
+  pp: readonly number[],
+  arg_r: number,
+  arg_i: number,
+  output: {x: number; y: number}
+) {
   var sin_arg_r = Math.sin(arg_r);
   var cos_arg_r = Math.cos(arg_r);
   var sinh_arg_i = sinh(arg_i);
@@ -33,5 +39,6 @@ export default function (pp: readonly number[], arg_r: number, arg_i: number) {
   r = sin_arg_r * cosh_arg_i;
   i = cos_arg_r * sinh_arg_i;
 
-  return [r * hr - i * hi, r * hi + i * hr];
+  output.x = r * hr - i * hi;
+  output.y = r * hi + i * hr;
 }

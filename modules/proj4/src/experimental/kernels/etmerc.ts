@@ -115,10 +115,10 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
   Ce = Math.atan2(sin_Ce * cos_Cn, hypot(sin_Cn, cos_Cn * cos_Ce));
   Ce = asinhy(Math.tan(Ce));
 
-  var tmp = clens_cmplx(state.gtu, 2 * Cn, 2 * Ce);
+  clens_cmplx(state.gtu, 2 * Cn, 2 * Ce, p);
 
-  Cn = Cn + tmp[0];
-  Ce = Ce + tmp[1];
+  Cn = Cn + p.x;
+  Ce = Ce + p.y;
 
   var x;
   var y;
@@ -148,10 +148,10 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
   var lat;
 
   if (Math.abs(Ce) <= 2.623395162778) {
-    var tmp = clens_cmplx(state.utg, 2 * Cn, 2 * Ce);
+    clens_cmplx(state.utg, 2 * Cn, 2 * Ce, p);
 
-    Cn = Cn + tmp[0];
-    Ce = Ce + tmp[1];
+    Cn = Cn + p.x;
+    Ce = Ce + p.y;
     Ce = Math.atan(sinh(Ce));
 
     var sin_Cn = Math.sin(Cn);

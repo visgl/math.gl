@@ -4,6 +4,7 @@
 // Geocentric and Helmert equations directly adapted from proj4js 2.22.0 datumUtils.js.
 // Copyright (c) 2014, proj4js authors. See ../../PROJ4-LICENSE.md.
 import type {Datum, Ellipsoid} from './crs/types';
+import type {ProjectionPoint} from './types';
 export type Coordinate3D = [number, number, number];
 const ARC_SECOND = Math.PI / (180 * 3600);
 const WGS84: Datum = {
@@ -15,29 +16,35 @@ const WGS84: Datum = {
   towgs84: [0, 0, 0]
 };
 
-export function geodeticToGeocentric(
-  [lon, lat, height]: Coordinate3D,
-  ellipsoid: Ellipsoid
-): Coordinate3D {
+export function geodeticToGeocentricInPlace(point: ProjectionPoint, ellipsoid: Ellipsoid): void {
+  const lon = point.x,
+    lat = point.y,
+    height = point.z;
   const {semiMajorAxis: a, eccentricitySquared: es} = ellipsoid;
   if (Math.abs(lat) > Math.PI / 2) throw new Error('Latitude outside geocentric domain');
   const sin = Math.sin(lat),
     cos = Math.cos(lat);
   const radius = a / Math.sqrt(1 - es * sin * sin);
-  return [
-    (radius + height) * cos * Math.cos(lon),
-    (radius + height) * cos * Math.sin(lon),
-    (radius * (1 - es) + height) * sin
-  ];
+  point.x = (radius + height) * cos * Math.cos(lon);
+  point.y = (radius + height) * cos * Math.sin(lon);
+  point.z = (radius * (1 - es) + height) * sin;
 }
 
 /** Hannover iteration, including explicit polar and undefined-center handling. */
-export function geocentricToGeodetic([x, y, z]: Coordinate3D, ellipsoid: Ellipsoid): Coordinate3D {
+export function geocentricToGeodeticInPlace(point: ProjectionPoint, ellipsoid: Ellipsoid): void {
+  const x = point.x,
+    y = point.y,
+    z = point.z;
   const {semiMajorAxis: a, semiMinorAxis: b, eccentricitySquared: es} = ellipsoid;
   const p = Math.hypot(x, y),
     rr = Math.hypot(x, y, z);
   if (rr === 0) throw new Error('Geodetic coordinates are undefined at the Earth center');
-  if (p < 1e-12 * a) return [0, (Math.sign(z) * Math.PI) / 2, Math.abs(z) - b];
+  if (p < 1e-12 * a) {
+    point.x = 0;
+    point.y = (Math.sign(z) * Math.PI) / 2;
+    point.z = Math.abs(z) - b;
+    return;
+  }
   const ct = z / rr,
     st = p / rr;
   let rx = 1 / Math.sqrt(1 - es * (2 - es) * st * st);
@@ -50,16 +57,25 @@ export function geocentricToGeodetic([x, y, z]: Coordinate3D, ellipsoid: Ellipso
     rx = 1 / Math.sqrt(1 - rk * (2 - rk) * st * st);
     const nextCos = st * (1 - rk) * rx,
       nextSin = ct * rx;
-    if (Math.abs(nextSin * cos - nextCos * sin) <= 1e-12)
-      return [Math.atan2(y, x), Math.atan2(nextSin, Math.abs(nextCos)), height];
+    if (Math.abs(nextSin * cos - nextCos * sin) <= 1e-12) {
+      point.x = Math.atan2(y, x);
+      point.y = Math.atan2(nextSin, Math.abs(nextCos));
+      point.z = height;
+      return;
+    }
     cos = nextCos;
     sin = nextSin;
   }
   throw new Error('Geocentric inverse did not converge');
 }
-function helmert(point: Coordinate3D, values: readonly number[], inverse: boolean): Coordinate3D {
-  let [x, y, z] = point;
-  const [dx, dy, dz] = values;
+
+function helmert(point: ProjectionPoint, values: readonly number[], inverse: boolean): void {
+  let x = point.x,
+    y = point.y,
+    z = point.z;
+  const dx = values[0],
+    dy = values[1],
+    dz = values[2];
   const rx = (values[3] || 0) * ARC_SECOND,
     ry = (values[4] || 0) * ARC_SECOND,
     rz = (values[5] || 0) * ARC_SECOND;
@@ -68,25 +84,26 @@ function helmert(point: Coordinate3D, values: readonly number[], inverse: boolea
     x = (x - dx) / scale;
     y = (y - dy) / scale;
     z = (z - dz) / scale;
-    return [x + rz * y - ry * z, -rz * x + y + rx * z, ry * x - rx * y + z];
+    point.x = x + rz * y - ry * z;
+    point.y = -rz * x + y + rx * z;
+    point.z = ry * x - rx * y + z;
+  } else {
+    point.x = scale * (x - rz * y + ry * z) + dx;
+    point.y = scale * (rz * x + y - rx * z) + dy;
+    point.z = scale * (-ry * x + rx * y + z) + dz;
   }
-  return [
-    scale * (x - rz * y + ry * z) + dx,
-    scale * (rz * x + y - rx * z) + dy,
-    scale * (-ry * x + rx * y + z) + dz
-  ];
 }
 function shifted(datum: Datum): boolean {
   return Boolean(datum.towgs84?.some(value => value !== 0));
 }
-export function transformDatum(
-  point: Coordinate3D,
+type DatumOperation = (point: ProjectionPoint) => void;
+/** Resolve identity, grid and Helmert stages once, outside coordinate loops. */
+export function createDatumTransform(
   source: Datum,
   destination: Datum
-): Coordinate3D {
+): DatumOperation | undefined {
   if (source.grids || destination.grids) {
-    if (!source.towgs84 || !destination.towgs84) return point;
-    // Applying the same prepared grid in both directions is a datum identity.
+    if (!source.towgs84 || !destination.towgs84) return undefined;
     if (
       source.grids &&
       destination.grids &&
@@ -100,54 +117,85 @@ export function transformDatum(
           entry.grid === destination.grids[i].grid
       )
     )
-      return point;
-    if (source.grids) point = applyDatumGrids(point, source, false);
-    point = transformDatum(
-      point,
+      return undefined;
+    const middle = createDatumTransform(
       source.grids ? WGS84 : source,
       destination.grids ? WGS84 : destination
     );
-    return destination.grids ? applyDatumGrids(point, destination, true) : point;
+    return point => {
+      if (source.grids) applyDatumGrids(point, source, false);
+      middle?.(point);
+      if (destination.grids) applyDatumGrids(point, destination, true);
+    };
   }
   if (shifted(source) || shifted(destination)) {
-    return convertDatum(convertDatum(point, source, WGS84), WGS84, destination);
+    const first = convertDatum(source, WGS84),
+      second = convertDatum(WGS84, destination);
+    return point => {
+      first?.(point);
+      second?.(point);
+    };
   }
-  return convertDatum(point, source, destination);
+  return convertDatum(source, destination);
 }
-function convertDatum(point: Coordinate3D, from: Datum, to: Datum): Coordinate3D {
-  if (!from.towgs84 || !to.towgs84) return point;
+function convertDatum(from: Datum, to: Datum): DatumOperation | undefined {
+  if (!from.towgs84 || !to.towgs84) return undefined;
   const a = from.ellipsoid,
     b = to.ellipsoid;
+  let sameParameters = true;
+  for (let i = 0; i < 7; i++)
+    if ((from.towgs84[i] || 0) !== (to.towgs84[i] || 0)) sameParameters = false;
   if (
     a.semiMajorAxis === b.semiMajorAxis &&
     Math.abs(a.eccentricitySquared - b.eccentricitySquared) <= 5e-11 &&
-    Array.from({length: 7}, (_, i) => (from.towgs84[i] || 0) === (to.towgs84[i] || 0)).every(
-      Boolean
-    )
+    sameParameters
   )
-    return point;
-  let cartesian = geodeticToGeocentric(point, a);
-  if (shifted(from)) cartesian = helmert(cartesian, from.towgs84, false);
-  if (shifted(to)) cartesian = helmert(cartesian, to.towgs84, true);
-  return geocentricToGeodetic(cartesian, b);
+    return undefined;
+  const sourceShift = shifted(from),
+    targetShift = shifted(to);
+  return point => {
+    geodeticToGeocentricInPlace(point, a);
+    if (sourceShift) helmert(point, from.towgs84, false);
+    if (targetShift) helmert(point, to.towgs84, true);
+    geocentricToGeodeticInPlace(point, b);
+  };
 }
-
 /** Original per-instance dispatch informed by proj4js grid list semantics. */
-function applyDatumGrids(point: Coordinate3D, datum: Datum, inverse: boolean): Coordinate3D {
+function applyDatumGrids(point: ProjectionPoint, datum: Datum, inverse: boolean): void {
   for (const reference of datum.grids) {
-    if (reference.name === 'null') return point;
+    if (reference.name === 'null') return;
     if (!reference.grid) {
       if (reference.optional) continue;
       throw new Error('Required datum grid is not registered: ' + reference.name);
     }
-    const shifted = reference.grid.shift(point[0], point[1], inverse);
-    if (shifted) {
-      if (!shifted.every(Number.isFinite) || Math.abs(shifted[1]) > Math.PI / 2)
+    let found = false;
+    if (reference.grid.shiftInPlace) found = reference.grid.shiftInPlace(point, inverse);
+    else {
+      const output = reference.grid.shift(point.x, point.y, inverse);
+      if (output) {
+        point.x = output[0];
+        point.y = output[1];
+        found = true;
+      }
+    }
+    if (found) {
+      if (!Number.isFinite(point.x) || !Number.isFinite(point.y) || Math.abs(point.y) > Math.PI / 2)
         throw new Error('Datum grid produced a coordinate outside the geographic domain');
-      return [shifted[0], shifted[1], point[2]];
+      return;
     }
   }
   throw new Error(
     'No datum grid covers coordinate: ' + datum.grids.map(grid => grid.name).join(',')
   );
+}
+// Scalar adapters retain the internal tuple API for existing callers.
+export function geodeticToGeocentric(coordinate: Coordinate3D, ellipsoid: Ellipsoid): Coordinate3D {
+  const point = {x: coordinate[0], y: coordinate[1], z: coordinate[2]};
+  geodeticToGeocentricInPlace(point, ellipsoid);
+  return [point.x, point.y, point.z];
+}
+export function geocentricToGeodetic(coordinate: Coordinate3D, ellipsoid: Ellipsoid): Coordinate3D {
+  const point = {x: coordinate[0], y: coordinate[1], z: coordinate[2]};
+  geocentricToGeodeticInPlace(point, ellipsoid);
+  return [point.x, point.y, point.z];
 }
