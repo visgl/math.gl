@@ -6,6 +6,11 @@ release promotion remains gated. The inventory still marks projection families a
 until their remaining CRS/parameter gaps are closed.
 Sequencing describes dependencies, not release dates.
 
+The [September 29 parity audit](./parity-audit.md) passes 181 of 242 upstream
+coordinate fixtures and identifies 11 silent numerical mismatches. Full compatibility
+and release promotion remain blocked; see the audit for concrete follow-up tranches.
+
+
 ## Target and upstream baseline
 
 Build an independent TypeScript engine inside `@math.gl/proj4`, initially alongside

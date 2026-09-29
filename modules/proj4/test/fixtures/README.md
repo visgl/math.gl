@@ -46,3 +46,8 @@ algorithms stay listed as gaps until their fixtures can execute.
   differential interior checks. Grid tests use 1e-9 degrees unless an explicitly
   looser tolerance is needed for a Helmert round trip. Real-world grid datasets and
   independent native PROJ outputs remain a promotion gate.
+
+- `parity-audit-2026-09-29.json` records the full upstream coordinate-corpus audit,
+  seeded kernel sweep and external real-grid checks at runtime revision `bf28217d`.
+  It records open failures; it is not a passing compatibility baseline. See the
+  documented parity audit and `scripts/audit-*.mjs` for reproduction.
