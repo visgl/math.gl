@@ -1390,6 +1390,11 @@
       "id": "explicit-oblique-dependency",
       "description": "ob_tran requires an explicitly supplied wrapped plugin or longlat; o_proj must agree with it. It cannot wrap geocentric or another ob_tran plugin.",
       "test": "test/lib/catalogue-projections.spec.ts"
+    },
+    {
+      "id": "mollweide-unwrapped-longitude",
+      "description": "Native Mollweide inverse retains longitudes outside ±180 degrees when +over is enabled. Upstream 2.22.0 clamps after its over-aware longitude adjustment; the native inverse clamps only when wrapping is enabled.",
+      "test": "test/lib/catalogue-projections.spec.ts"
     }
   ]
 }

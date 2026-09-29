@@ -381,3 +381,25 @@ test('ob_tran preserves wrapped Hotine variant aliases and flags', () => {
   close(variant.project([20, 30, 123]), explicit.project([20, 30, 123]), 1e-8);
   close(variant.unproject(variant.project([20, 30, 123])), [20, 30, 123], 1e-8);
 });
+
+test('Mollweide preserves unwrapped longitude only when over is enabled', () => {
+  for (const geometry of ['+ellps=WGS84', '+R=6371000']) {
+    for (const origin of [0, 30]) {
+      const to = '+proj=moll ' + geometry + ' +lon_0=' + origin + ' +x_0=123 +y_0=-456';
+      const unwrapped = new native.TypeScriptProjection({
+        to: to + ' +over',
+        projections: [native.mollweide]
+      });
+      const wrapped = new native.TypeScriptProjection({to, projections: [native.mollweide]});
+      for (const point of [
+        [200, 0, 123, 7],
+        [-200, 30, 123, 7],
+        [240, -45, 123, 7]
+      ]) {
+        close(unwrapped.unproject(unwrapped.project(point)), point, 1e-8);
+        const longitude = ((((point[0] + 180) % 360) + 360) % 360) - 180;
+        close(wrapped.unproject(wrapped.project(point)), [longitude, ...point.slice(1)], 1e-8);
+      }
+    }
+  }
+});

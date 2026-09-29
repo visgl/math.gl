@@ -77,10 +77,10 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
     state.long0 + p.x / (0.900316316158 * state.a * Math.cos(theta)),
     state.over
   );
-  if (lon < -Math.PI) {
+  if (!state.over && lon < -Math.PI) {
     lon = -Math.PI;
   }
-  if (lon > Math.PI) {
+  if (!state.over && lon > Math.PI) {
     lon = Math.PI;
   }
   arg = (2 * theta + Math.sin(2 * theta)) / Math.PI;
