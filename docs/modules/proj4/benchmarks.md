@@ -1,6 +1,6 @@
 # TypeScript projection benchmarks
 
-The experimental engine offers `projectInPlace` and `unprojectInPlace` for interleaved
+The experimental engine offers `projectFlat` and `unprojectFlat` for interleaved
 Float32/Float64 buffers. Reuse the projection instance: normalization and plugin
 initialization are more expensive than the existing proj4 constructor in the initial
 measurements, while repeated transformations are faster.

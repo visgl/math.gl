@@ -125,7 +125,7 @@ for (const fixture of cases) {
           scalarRunner(point => instances.proj4.forward(point, enforceAxis), dimension)(input);
         const method = direction === 'forward' ? 'project' : 'unproject';
         const runners = {
-          'native batch': buffer => instances.native[method + 'InPlace'](buffer, dimension),
+          'native batch': buffer => instances.native[method + 'Flat'](buffer, dimension),
           'native scalar': scalarRunner(instances.native[method], dimension),
           'proj4 import': scalarRunner(
             point => instances.proj4[direction](point, enforceAxis),

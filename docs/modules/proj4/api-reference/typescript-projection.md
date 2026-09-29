@@ -121,20 +121,20 @@ This deliberately differs from proj4js's default array API, which restores the i
 height for many datum operations. Differential height tests use its enforced-axis
 mode to compare the computed values. Geocentric units also apply consistently to Z.
 
-## In-place typed arrays
+## Flat typed arrays (in place)
 
-`projectInPlace(coordinates, dimension = 2)` and
-`unprojectInPlace(coordinates, dimension = 2)` transform a `Float64Array` or
+`projectFlat(coordinates, dimension = 2)` and
+`unprojectFlat(coordinates, dimension = 2)` transform a `Float64Array` or
 `Float32Array` and return that same typed-array view. Records are interleaved:
 
 ```typescript
 const coordinates = new Float64Array([-74, 40.7, -122.4, 37.8]);
-projection.projectInPlace(coordinates, 2);
-projection.unprojectInPlace(coordinates, 2);
+projection.projectFlat(coordinates, 2);
+projection.unprojectFlat(coordinates, 2);
 
 // XYZM: transforms XYZ as required by the CRS, preserves M.
 const vertices = new Float32Array([-74, 40.7, 120, 1, -122.4, 37.8, 200, 2]);
-projection.projectInPlace(vertices, 4);
+projection.projectFlat(vertices, 4);
 ```
 
 - `dimension` is the record width: an integer at least 2 that divides the view's

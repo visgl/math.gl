@@ -41,9 +41,9 @@ try {
     const projection = new api.TypeScriptProjection({to: 'EPSG:3857', projections: [api.mercator]});
     const input = new Float64Array([12, 48, 123, 7]);
     const scalar = projection.project(Array.from(input));
-    assert.equal(projection.projectInPlace(input, 4), input);
+    assert.equal(projection.projectFlat(input, 4), input);
     assert.deepEqual(Array.from(input), scalar);
-    projection.unprojectInPlace(input, 4);
+    projection.unprojectFlat(input, 4);
     assert(Math.abs(input[0] - 12) < 1e-10);
     assert(Math.abs(input[1] - 48) < 1e-10);
     assert.equal(input[2], 123);
@@ -68,11 +68,11 @@ try {
     `
     import {TypeScriptProjection, mercator, type ProjectionPoint} from '@math.gl/proj4/experimental';
     const projection = new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});
-    const a: Float32Array = projection.projectInPlace(new Float32Array([1, 2]));
-    const b: Float64Array = projection.unprojectInPlace(new Float64Array([1, 2]));
+    const a: Float32Array = projection.projectFlat(new Float32Array([1, 2]));
+    const b: Float64Array = projection.unprojectFlat(new Float64Array([1, 2]));
     const point: ProjectionPoint = {x: 0, y: 0, z: 0};
     // @ts-expect-error Integer buffers are not supported.
-    projection.projectInPlace(new Int32Array([1, 2]));
+    projection.projectFlat(new Int32Array([1, 2]));
   `
   );
   writeFileSync(

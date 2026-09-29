@@ -46,7 +46,7 @@ export function proj4Bench(suite: Bench): Bench {
         .group(`Proj4 ${to} ${ArrayType.name} (${points} points, reset included)`)
         .add('TypeScript batch in place', () => {
           buffer.set(source);
-          return native.projectInPlace(buffer);
+          return native.projectFlat(buffer);
         })
         .add('TypeScript scalar', scalar(native.project))
         .add('proj4 import', scalar(reference.forward))

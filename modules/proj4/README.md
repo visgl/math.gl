@@ -8,7 +8,7 @@ This module contains support for conversion between geospatial coordinate system
 provides an independent TypeScript engine with explicitly supplied projection plugins.
 It supports the documented projection catalogue, shared math.gl/crs WKT/PROJJSON
 readers, geocentric/Helmert transforms and prepared horizontal datum grids.
-`projectInPlace` and `unprojectInPlace` transform interleaved Float32/Float64 buffers
+`projectFlat` and `unprojectFlat` transform interleaved Float32/Float64 buffers
 without temporary coordinate arrays in the built-in pipeline. The engine remains
 experimental; unsupported CRS variants fail explicitly.
 The versioned parity inventory and roadmap track remaining compatibility work.

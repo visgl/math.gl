@@ -49,7 +49,7 @@ function compare(projection: native.TypeScriptProjection, points: number[][]): v
         offset
       );
     }
-    expect(projection.projectInPlace(input, dimension)).toBe(input);
+    expect(projection.projectFlat(input, dimension)).toBe(input);
     expect(input).toEqual(expected);
     for (let offset = 0; offset < input.length; offset += dimension) {
       expected.set(
@@ -57,7 +57,7 @@ function compare(projection: native.TypeScriptProjection, points: number[][]): v
         offset
       );
     }
-    expect(projection.unprojectInPlace(input, dimension)).toBe(input);
+    expect(projection.unprojectFlat(input, dimension)).toBe(input);
     expect(input).toEqual(expected);
   }
 }
@@ -91,12 +91,12 @@ test('batch Mercator/eqc/oblique composition, stride and view boundaries', () =>
     ]);
     const backing = new Float64Array([999, 12, 48, 100, 7, -999]);
     const view = backing.subarray(1, 5);
-    const {projectInPlace, unprojectInPlace} = projection;
-    expect(projectInPlace(view, 4)).toBe(view);
+    const {projectFlat, unprojectFlat} = projection;
+    expect(projectFlat(view, 4)).toBe(view);
     expect(backing[0]).toBe(999);
     expect(backing[5]).toBe(-999);
     expect(view[3]).toBe(7);
-    unprojectInPlace(view, 4);
+    unprojectFlat(view, 4);
     expect(view[0]).toBeCloseTo(12, 8);
     expect(view[1]).toBeCloseTo(48, 8);
   }
@@ -165,22 +165,22 @@ test('batch rejects malformed layouts before writing and accepts empty buffers',
   const projection = new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});
   for (const dimension of [0, 1, -2, 2.5, NaN, Infinity, 3]) {
     const buffer = new Float64Array([1, 2, 3, 4]);
-    expect(() => projection.projectInPlace(buffer, dimension)).toThrow('Dimension');
+    expect(() => projection.projectFlat(buffer, dimension)).toThrow('Dimension');
     expect(buffer).toEqual(new Float64Array([1, 2, 3, 4]));
   }
   for (const buffer of [[1, 2], new Int32Array([1, 2]), new DataView(new ArrayBuffer(16))]) {
     // @ts-expect-error Runtime validation for JavaScript callers.
-    expect(() => projection.projectInPlace(buffer)).toThrow('Float32Array or Float64Array');
+    expect(() => projection.projectFlat(buffer)).toThrow('Float32Array or Float64Array');
   }
   const empty = new Float32Array();
-  expect(projection.projectInPlace(empty)).toBe(empty);
+  expect(projection.projectFlat(empty)).toBe(empty);
   const geocentricProjection = new TypeScriptProjection({
     to: 'EPSG:4978',
     projections: [geocentric]
   });
   const pair = new Float64Array([1, 2]);
-  expect(() => geocentricProjection.projectInPlace(pair)).toThrow('at least 3');
-  expect(() => geocentricProjection.unprojectInPlace(pair)).toThrow('at least 3');
+  expect(() => geocentricProjection.projectFlat(pair)).toThrow('at least 3');
+  expect(() => geocentricProjection.unprojectFlat(pair)).toThrow('at least 3');
   expect(pair).toEqual(new Float64Array([1, 2]));
 });
 
@@ -188,7 +188,7 @@ test('batch commits whole records and stops at invalid coordinates', () => {
   const projection = new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});
   for (const invalid of [NaN, Infinity, 90, 91]) {
     const buffer = new Float64Array([1, 2, 3, 0, invalid, 4, 5, 6, 7]);
-    expect(() => projection.projectInPlace(buffer, 3)).toThrow();
+    expect(() => projection.projectFlat(buffer, 3)).toThrow();
     expect(Array.from(buffer.subarray(0, 3))).toEqual(projection.project([1, 2, 3]));
     expect(Array.from(buffer.subarray(3))).toEqual([0, invalid, 4, 5, 6, 7]);
   }
@@ -199,7 +199,7 @@ test('batch commits whole records and stops at invalid coordinates', () => {
   };
   const native = new TypeScriptProjection({to: '+proj=overflow', projections: [overflow]});
   const buffer = new Float32Array([1, 2]);
-  expect(() => native.projectInPlace(buffer)).toThrow('Float32 range');
+  expect(() => native.projectFlat(buffer)).toThrow('Float32 range');
   expect(buffer).toEqual(new Float32Array([1, 2]));
 });
 
@@ -217,7 +217,7 @@ test('custom plugins retain scalar fallback or reuse a caller-owned scratch poin
         points.add(point);
         if (!nested) {
           nested = true;
-          projection.projectInPlace(new Float64Array([0, 0]));
+          projection.projectFlat(new Float64Array([0, 0]));
         }
         point.x += 1;
         point.y -= 1;
@@ -230,10 +230,10 @@ test('custom plugins retain scalar fallback or reuse a caller-owned scratch poin
   };
   projection = new TypeScriptProjection({to: '+proj=custom', projections: [plugin]});
   const buffer = new Float64Array([0, 0, 10, 0, 0, 20]);
-  projection.projectInPlace(buffer, 3);
+  projection.projectFlat(buffer, 3);
   expect(points.size).toBe(2); // One outer scratch point plus one reentrant call's scratch point.
   expect(Array.from(buffer)).toEqual([1, -1, 10, 1, -1, 20]);
-  projection.unprojectInPlace(buffer, 3);
+  projection.unprojectFlat(buffer, 3);
   expect(Array.from(buffer)).toEqual([0, 0, 10, 0, 0, 20]);
   compare(
     new TypeScriptProjection({

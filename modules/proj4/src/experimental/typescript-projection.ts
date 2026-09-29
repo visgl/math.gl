@@ -48,8 +48,8 @@ export class TypeScriptProjection {
     this.inverseTransform = compileTransform(this.to, this.from, Boolean(options.enforceAxis));
     this.project = this.project.bind(this);
     this.unproject = this.unproject.bind(this);
-    this.projectInPlace = this.projectInPlace.bind(this);
-    this.unprojectInPlace = this.unprojectInPlace.bind(this);
+    this.projectFlat = this.projectFlat.bind(this);
+    this.unprojectFlat = this.unprojectFlat.bind(this);
   }
   /** Returns a new array. Missing geographic/projected height defaults to zero internally. */
   project(coordinate: readonly number[]): number[] {
@@ -58,11 +58,12 @@ export class TypeScriptProjection {
   unproject(coordinate: readonly number[]): number[] {
     return transformScalar(coordinate, this.inverseTransform);
   }
-  /** Mutate complete interleaved records. Earlier records remain changed if a later record fails. */
-  projectInPlace<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
+  /** Project a flat interleaved buffer in place. Earlier records remain changed on failure. */
+  projectFlat<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
     return transformInPlace(coordinates, dimension, this.forwardTransform);
   }
-  unprojectInPlace<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
+  /** Unproject a flat interleaved buffer in place; returns the same typed-array view. */
+  unprojectFlat<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
     return transformInPlace(coordinates, dimension, this.inverseTransform);
   }
 }
