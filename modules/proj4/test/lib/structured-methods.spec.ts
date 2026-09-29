@@ -253,3 +253,31 @@ test('Hotine right-angle origin is stable across machine-precision changes in ga
     close(projection.unproject(projection.project(point)), point, 1e-7);
   }
 });
+
+test('Right-angle Hotine origins stay accurate at low latitudes in both hemispheres', () => {
+  for (const latitude of [5, 10, -5, -10, 0, 1, -1, 45, -45, 80, -80]) {
+    const definitions = [
+      '+proj=omerc +datum=WGS84 +lat_0=' + latitude + ' +lonc=10 +alpha=90 +gamma=90',
+      'PROJCS["Right-angle Hotine",' +
+        geographicWKT +
+        ',PROJECTION["Hotine_Oblique_Mercator_Azimuth_Center"],' +
+        'PARAMETER["latitude_of_center",' +
+        latitude +
+        '],' +
+        'PARAMETER["longitude_of_center",10],PARAMETER["azimuth",90],' +
+        'PARAMETER["rectified_grid_angle",90],PARAMETER["scale_factor",1],' +
+        'PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1]]'
+    ];
+    for (const to of definitions) {
+      const projection = new TypeScriptProjection({to, parsers, projections});
+      close(projection.project([10, latitude]), [0, 0], 1e-7);
+      for (const point of [
+        [10, latitude],
+        [10.1, latitude + 0.1],
+        [9.9, latitude - 0.1]
+      ]) {
+        close(projection.unproject(projection.project(point)), point, 1e-7);
+      }
+    }
+  }
+});

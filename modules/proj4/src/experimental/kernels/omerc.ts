@@ -158,15 +158,17 @@ function initialize(state: State): void {
       gamma0 = gamma;
       alpha_c = Math.asin(D * Math.sin(gamma0));
     }
-    // At a right-angle azimuth the argument is mathematically ±1. Ellipsoid
-    // rounding can move it a few ULPs to either side of the boundary (Swiss
-    // LV03). Even inward roundoff is amplified by asin into an origin shift.
-    // Snap inward roundoff only for a right angle; preserve nearby azimuths.
     let longitudeArgument = 0.5 * (F - 1 / F) * Math.tan(gamma0);
-    if (
-      Math.abs(Math.abs(longitudeArgument) - 1) <= 8 * Number.EPSILON &&
-      (Math.abs(longitudeArgument) > 1 || Math.abs(Math.cos(alpha_c)) <= 8 * Number.EPSILON)
+    if (D > 1 && Math.abs(Math.cos(alpha_c)) <= 8 * Number.EPSILON) {
+      // For a right-angle azimuth away from the equator, the exact argument
+      // is ±1. Near the equator, cancellation in F and rounding in gamma0
+      // can exceed any fixed ULP window. Use the analytic limit instead.
+      longitudeArgument = Math.sign(state.lat0) * Math.sign(Math.sin(alpha_c));
+    } else if (
+      Math.abs(longitudeArgument) > 1 &&
+      Math.abs(longitudeArgument) <= 1 + 8 * Number.EPSILON
     ) {
+      // Preserve nearby azimuths and clamp only small domain overshoots.
       longitudeArgument = Math.sign(longitudeArgument);
     }
     state.lam0 = lamc - Math.asin(longitudeArgument) / state.B;
