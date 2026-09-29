@@ -86,6 +86,11 @@ jobs:
       - name: Build website
         run: yarn workspace project-website build
 
+      - name: Build next website
+        env:
+          WEBSITE_BASE_URL: /math.gl/next/
+        run: yarn workspace project-website build
+
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
