@@ -209,7 +209,6 @@ export const upstreamFixtures = [
   },
   {
     id: 'upstream-line-2612',
-    gapId: 'ellipsoid-datum',
     sourceLine: 2612,
     to: '+proj=lcc +lat_1=38.43333333333333 +lat_2=37.06666666666667 +lat_0=36.5 +lon_0=-120.5 +x_0=2000000 +y_0=500000 +datum=NAD83 +units=m +no_defs',
     ll: [-122.4194, 37.7749],
@@ -219,7 +218,6 @@ export const upstreamFixtures = [
   },
   {
     id: 'upstream-line-2638',
-    gapId: 'ellipsoid-datum',
     sourceLine: 2638,
     to: '+proj=merc +ellps=plessis +lon_0=0 +x_0=0 +y_0=0 +units=m +no_defs',
     ll: [10, 50],

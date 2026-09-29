@@ -8,6 +8,7 @@ import {createState, forward, inverse} from '../kernels/aeqd';
 
 export const azimuthalEquidistant: ProjectionPlugin = {
   name: 'aeqd',
+  aliases: ['Azimuthal_Equidistant'],
   parameters: ORIGIN_PARAMETERS,
   create(context) {
     const base = kernelParameters(context);

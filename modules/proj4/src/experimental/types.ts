@@ -7,6 +7,9 @@ export type ProjectionParameters = Readonly<Record<string, string | undefined>>;
 
 /** A projection operates on radians and meters; the engine handles CRS units. */
 export type ProjectionImplementation = {
+  /** Optional Cartesian operations used by geocentric plugins. */
+  forward3D?(point: [number, number, number]): [number, number, number];
+  inverse3D?(point: [number, number, number]): [number, number, number];
   forward(longitude: number, latitude: number): [number, number];
   inverse(x: number, y: number): [number, number];
 };
@@ -21,6 +24,7 @@ export type ProjectionContext = {
 /** Explicit registration avoids global state and imports of unused projections. */
 export type ProjectionPlugin = {
   readonly name: string;
+  readonly aliases?: readonly string[];
   /** Projection-specific PROJ parameters accepted in addition to the core parameters. */
   readonly parameters: readonly string[];
   /** Parameters accepted without a value, such as +south. */

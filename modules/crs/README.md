@@ -57,6 +57,13 @@ TypeScript declarations. This package has no runtime dependencies. Its runtime A
 and validate serialization syntax only: they do not perform registry lookup, semantic equivalence,
 coordinate transformation, or general conversion between WKT, PROJ, and PROJJSON.
 
+The experimental `TypeScriptProjection` in `@math.gl/proj4/experimental` directly accepts
+these readonly definitions, `CRSReference`, and `SpatialReference` descriptors. Its optional
+WKT/PROJJSON adapters use this package's types and parsers; execution support is checked
+by `checkTypeScriptCRSCompatibility`. Unknown/absent metadata remains unresolved.
+See the [native projection API](https://math.gl/docs/modules/proj4/api-reference/typescript-projection)
+for the supported transformation subset and storage-order behavior.
+
 See the [PROJJSON specification](https://proj.org/en/stable/specifications/projjson.html).
 See the math.gl [Coordinate Reference Systems guide](https://math.gl/docs/developer-guide/geospatial/coordinate-reference-systems)
 for representations, epochs, axis order, vertical CRS, and transformation guidance.

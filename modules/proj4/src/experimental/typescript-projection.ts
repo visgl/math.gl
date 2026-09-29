@@ -1,223 +1,193 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
+import type {TypeScriptCRSInput} from './crs/spatial-reference';
+import type {ProjectionImplementation, ProjectionPlugin} from './types';
+import {CORE_FLAGS, CORE_PARAMETERS, normalizeCRS} from './crs/normalize';
+import {TypeScriptCRSError, unsupportedStage} from './crs/types';
+import type {CRSCompatibilityReason, CRSNormalizationOptions, NormalizedCRS} from './crs/types';
+import {transformDatum} from './datum';
+import type {Coordinate3D} from './datum';
+import {wrapLongitude} from './parameters';
 
-import {parsePROJString} from '@math.gl/crs';
-import {DEGREES_TO_RADIANS, numberParameter} from './parameters';
-import type {ProjectionImplementation, ProjectionParameters, ProjectionPlugin} from './types';
-
-export type TypeScriptProjectionOptions = {
-  /** Built-in alias, user alias or a supported PROJ string. Defaults to WGS84. */
-  from?: string;
-  to?: string;
+export type TypeScriptProjectionOptions = CRSNormalizationOptions & {
+  from?: TypeScriptCRSInput;
+  to?: TypeScriptCRSInput;
   /** Only these projection implementations are available to this instance. */
   projections?: readonly ProjectionPlugin[];
-  /** Instance-local aliases; these do not affect Proj4Projection or other instances. */
-  aliases?: Readonly<Record<string, string>>;
+  /** Honor declared axis order/direction. Default false, matching proj4js. */
+  enforceAxis?: boolean;
 };
-
-const ALIASES: Readonly<Record<string, string>> = {
-  WGS84: '+proj=longlat +datum=WGS84',
-  'EPSG:4326': '+proj=longlat +datum=WGS84',
-  'EPSG:3857': '+proj=merc +a=6378137 +b=6378137 +units=m'
-};
-const CORE_PARAMETERS = [
-  'proj',
-  'datum',
-  'ellps',
-  'a',
-  'b',
-  'rf',
-  'R',
-  'units',
-  'to_meter',
-  'no_defs',
-  'type'
-];
-const UNITS: Readonly<Record<string, number>> = {m: 1, km: 1000, ft: 0.3048, 'us-ft': 1200 / 3937};
-const GEOGRAPHIC_NAMES = ['longlat', 'latlong', 'latlon', 'lonlat'];
-
-type CompiledCRS = {
-  geographic: boolean;
-  toMeter: number;
-  implementation?: ProjectionImplementation;
-};
-
-/** Experimental, independent 2D projection engine. Datum transformations are not supported. */
+type CompiledCRS = NormalizedCRS & {implementation?: ProjectionImplementation};
+/** Experimental independent CRS engine. Third ordinates are ellipsoidal height or geocentric Z. */
 export class TypeScriptProjection {
   private readonly from: CompiledCRS;
   private readonly to: CompiledCRS;
-
-  constructor({
-    from = 'WGS84',
-    to = 'WGS84',
-    projections = [],
-    aliases = {}
-  }: TypeScriptProjectionOptions = {}) {
-    const plugins = new Map<string, ProjectionPlugin>();
-    for (const plugin of projections) {
-      if (!plugin.name || GEOGRAPHIC_NAMES.includes(plugin.name) || plugins.has(plugin.name)) {
-        throw new Error(`Duplicate or reserved projection plugin: ${plugin.name}`);
-      }
-      plugins.set(plugin.name, plugin);
-    }
-    this.from = compileCRS(from, plugins, aliases);
-    this.to = compileCRS(to, plugins, aliases);
+  private readonly enforceAxis: boolean;
+  readonly lossy: boolean;
+  constructor(options: TypeScriptProjectionOptions = {}) {
+    const plugins = registry(options.projections || []);
+    this.from = compileCRS(options.from ?? 'WGS84', plugins, options);
+    this.to = compileCRS(options.to ?? 'WGS84', plugins, options);
+    this.lossy = this.from.lossy || this.to.lossy;
+    if (this.lossy && (this.from.kind === 'geocentric' || this.to.kind === 'geocentric'))
+      unsupportedStage(
+        'Horizontal extraction cannot supply ellipsoidal height for geocentric coordinates'
+      );
+    this.enforceAxis = Boolean(options.enforceAxis);
     this.project = this.project.bind(this);
     this.unproject = this.unproject.bind(this);
   }
-
-  /** Transform x/y, returning a new array and preserving any trailing ordinates. */
+  /** Returns a new array. Missing geographic/projected height defaults to zero internally. */
   project(coordinate: readonly number[]): number[] {
-    return transform(coordinate, this.from, this.to);
+    return transform(coordinate, this.from, this.to, this.enforceAxis);
   }
-
-  /** Transform in the opposite direction. */
   unproject(coordinate: readonly number[]): number[] {
-    return transform(coordinate, this.to, this.from);
+    return transform(coordinate, this.to, this.from, this.enforceAxis);
   }
 }
-
+export type TypeScriptCRSCompatibility = {
+  status: 'supported' | 'unsupported' | 'unknown';
+  lossy: boolean;
+  reason?: CRSCompatibilityReason;
+  message?: string;
+};
+/** Check construction with this backend and this exact set of registered plugins/readers. */
+export function checkTypeScriptCRSCompatibility(
+  definition: TypeScriptCRSInput,
+  options: TypeScriptProjectionOptions = {}
+): TypeScriptCRSCompatibility {
+  try {
+    const crs = compileCRS(definition, registry(options.projections || []), options);
+    return {status: 'supported', lossy: crs.lossy};
+  } catch (error) {
+    const reason = error instanceof TypeScriptCRSError ? error.reason : 'invalid-definition';
+    return {
+      status: reason === 'unknown-syntax' ? 'unknown' : 'unsupported',
+      lossy: false,
+      reason,
+      message: error instanceof Error ? error.message : String(error)
+    };
+  }
+}
+const pluginKey = (name: string): string => name.toLowerCase().replace(/[\s_-]/g, '');
+function registry(projections: readonly ProjectionPlugin[]): Map<string, ProjectionPlugin> {
+  const plugins = new Map<string, ProjectionPlugin>();
+  for (const plugin of projections) {
+    for (const name of new Set([plugin.name, ...(plugin.aliases || [])].map(pluginKey))) {
+      if (
+        !name ||
+        ['longlat', 'latlong', 'latlon', 'lonlat', 'identity'].includes(name) ||
+        plugins.has(name)
+      )
+        throw new Error('Duplicate or reserved projection plugin: ' + name);
+      plugins.set(name, plugin);
+    }
+  }
+  return plugins;
+}
 function compileCRS(
-  definition: string,
+  definition: TypeScriptCRSInput,
   plugins: ReadonlyMap<string, ProjectionPlugin>,
-  aliases: Readonly<Record<string, string>>
+  options: CRSNormalizationOptions
 ): CompiledCRS {
-  const visited = new Set<string>();
-  while (
-    Object.prototype.hasOwnProperty.call(aliases, definition) ||
-    Object.prototype.hasOwnProperty.call(ALIASES, definition)
-  ) {
-    if (visited.has(definition)) throw new Error(`Circular CRS alias: ${definition}`);
-    visited.add(definition);
-    definition = Object.prototype.hasOwnProperty.call(aliases, definition)
-      ? aliases[definition]
-      : ALIASES[definition];
-  }
-  const utm = /^EPSG:(326|327)(\d{2})$/.exec(definition);
-  if (utm && Number(utm[2]) >= 1 && Number(utm[2]) <= 60) {
-    definition =
-      '+proj=utm +datum=WGS84 +zone=' + Number(utm[2]) + (utm[1] === '327' ? ' +south' : '');
-  }
-  if (definition === 'EPSG:5041' || definition === 'EPSG:5042') {
-    definition =
-      '+proj=stere +datum=WGS84 +lat_0=' +
-      (definition === 'EPSG:5041' ? '90' : '-90') +
-      ' +lon_0=0 +k_0=0.994 +x_0=2000000 +y_0=2000000';
-  }
-  if (typeof definition !== 'string' || !/^\s*\+?proj=/.test(definition)) {
-    throw new Error(
-      `Unsupported CRS definition: ${definition}. Expected an alias or PROJ string starting with +proj=`
+  const crs = normalizeCRS(definition, options);
+  const plugin = plugins.get(pluginKey(crs.projection));
+  if (!['geographic', 'identity'].includes(crs.kind) && !plugin)
+    throw new TypeScriptCRSError(
+      'missing-plugin',
+      'Projection plugin is not registered: ' + crs.projection
     );
+  const allowed = new Set([...CORE_PARAMETERS, ...(plugin?.parameters || [])]);
+  for (const key of Object.keys(crs.parameters)) {
+    if (!allowed.has(key))
+      throw new TypeScriptCRSError(
+        'missing-transform-stage',
+        'Unsupported PROJ parameter: +' + key
+      );
+    const flag = CORE_FLAGS.includes(key) || plugin?.flags?.includes(key);
+    if (flag && crs.parameters[key] !== undefined)
+      throw new Error('Expected a flag without a value: +' + key);
+    if (!flag && !crs.parameters[key]) throw new Error('PROJ parameter requires a value: +' + key);
   }
-  const parameters: Record<string, string | undefined> = Object.create(null);
-  for (const parameter of parsePROJString(definition).parameters) {
-    if (Object.prototype.hasOwnProperty.call(parameters, parameter.name)) {
-      throw new Error(`Duplicate PROJ parameter: +${parameter.name}`);
-    }
-    parameters[parameter.name] = parameter.value;
-  }
-  const name = parameters['proj'];
-  const geographic = GEOGRAPHIC_NAMES.includes(name);
-  const plugin = plugins.get(name);
-  if (!geographic && !plugin) throw new Error(`Projection plugin is not registered: ${name}`);
-  const allowed = new Set([...CORE_PARAMETERS, ...(geographic ? [] : plugin.parameters)]);
-  for (const key of Object.keys(parameters)) {
-    if (!allowed.has(key)) throw new Error(`Unsupported PROJ parameter: +${key}`);
-    if (
-      key !== 'no_defs' &&
-      !plugin?.flags?.includes(key) &&
-      (parameters[key] === undefined || parameters[key] === '')
-    ) {
-      throw new Error(`PROJ parameter requires a value: +${key}`);
-    }
-  }
-  if (parameters['type'] !== undefined && parameters['type'] !== 'crs') {
+  if (crs.parameters['type'] && crs.parameters['type'] !== 'crs')
     throw new Error('Only +type=crs is supported');
+  const parameters =
+    pluginKey(crs.projection) === 'fasttransversemercator'
+      ? Object.freeze({...crs.parameters, approx: undefined})
+      : crs.parameters;
+  const implementation = plugin?.create({...crs.ellipsoid, parameters});
+  if (crs.kind === 'geocentric' && (!implementation?.forward3D || !implementation?.inverse3D))
+    throw new Error('Geocentric plugin must implement 3D operations');
+  return {...crs, implementation};
+}
+function axisTransform(point: Coordinate3D, axis: string, inverse: boolean): Coordinate3D {
+  const result: Coordinate3D = [0, 0, 0];
+  for (let i = 0; i < 3; i++) {
+    const char = axis[i],
+      component = 'ew'.includes(char) ? 0 : 'ns'.includes(char) ? 1 : 2;
+    const sign = 'wsd'.includes(char) ? -1 : 1;
+    if (inverse) result[i] = sign * point[component];
+    else result[component] = sign * point[i];
   }
-  if (parameters['datum'] !== undefined && !['WGS84', 'none'].includes(parameters['datum'])) {
-    throw new Error(`Unsupported datum: ${parameters['datum']}. Datum shifts are not implemented`);
-  }
-  const geometry = getEllipsoid(parameters);
-  const units = parameters['units'];
-  let toMeter = 1;
-  if (geographic) {
-    if (
-      (units !== undefined && units !== 'degrees') ||
-      Object.prototype.hasOwnProperty.call(parameters, 'to_meter')
-    ) {
-      throw new Error('Geographic coordinates must use degrees');
-    }
+  return result;
+}
+function transform(
+  coordinate: readonly number[],
+  from: CompiledCRS,
+  to: CompiledCRS,
+  enforceAxis: boolean
+): number[] {
+  if (coordinate.length < 2 || coordinate.slice(0, 3).some(value => !Number.isFinite(value)))
+    throw new Error('Coordinates must contain finite x, y and optional z values');
+  if (from.kind === 'geocentric' && coordinate.length < 3)
+    throw new Error('Geocentric input requires x, y and z');
+  const fromAxis = from.storedAxis || (enforceAxis ? from.axis : 'enu');
+  const toAxis = to.storedAxis || (enforceAxis ? to.axis : 'enu');
+  if (
+    coordinate.length < 3 &&
+    (/[ud]/.test(fromAxis.slice(0, 2)) || /[ud]/.test(toAxis.slice(0, 2)))
+  )
+    throw new Error('This axis permutation requires three ordinates');
+  let point: Coordinate3D = [coordinate[0], coordinate[1], coordinate[2] ?? 0];
+  point = axisTransform(point, fromAxis, false);
+  const horizontalOnly = from.lossy || to.lossy;
+  const preservedHeight = point[2];
+  if (horizontalOnly) point[2] = 0;
+  if (from.kind === 'geocentric') {
+    point = from.implementation.inverse3D(point.map(value => value * from.toMeter) as Coordinate3D);
   } else {
-    if (units !== undefined && !Object.prototype.hasOwnProperty.call(UNITS, units))
-      throw new Error(`Unsupported units: ${units}`);
-    toMeter = numberParameter(parameters, 'to_meter', units === undefined ? 1 : UNITS[units]);
-    if (toMeter <= 0) throw new Error('+to_meter must be positive');
+    const xy =
+      from.kind === 'geographic'
+        ? [point[0] * from.angularUnit, point[1] * from.angularUnit]
+        : from.kind === 'identity'
+          ? [point[0] * from.toMeter, point[1] * from.toMeter]
+          : from.implementation.inverse(point[0] * from.toMeter, point[1] * from.toMeter);
+    point = [xy[0], xy[1], point[2] * from.verticalUnit];
   }
-  return {
-    geographic,
-    toMeter,
-    implementation: geographic
-      ? undefined
-      : plugin.create({...geometry, parameters: Object.freeze(parameters)})
-  };
-}
-
-function getEllipsoid(parameters: ProjectionParameters): {
-  semiMajorAxis: number;
-  eccentricitySquared: number;
-} {
-  const ellipsoid = parameters['ellps'];
-  if (ellipsoid !== undefined && ellipsoid !== 'WGS84' && ellipsoid !== 'sphere') {
-    throw new Error(`Unsupported ellipsoid: ${ellipsoid}`);
-  }
-  const a = numberParameter(parameters, 'a', ellipsoid === 'sphere' ? 6370997 : 6378137);
-  const rf = numberParameter(parameters, 'rf', ellipsoid === 'sphere' ? 0 : 298.257223563);
-  const b = numberParameter(parameters, 'b', rf === 0 ? a : a * (1 - 1 / rf));
-  const radius = numberParameter(parameters, 'R', 0);
-  if (
-    a <= 0 ||
-    b <= 0 ||
-    b > a ||
-    rf < 0 ||
-    (rf > 0 && rf <= 1) ||
-    (Object.prototype.hasOwnProperty.call(parameters, 'R') && radius <= 0)
-  ) {
-    throw new Error('Invalid ellipsoid dimensions');
-  }
-  // Non-WGS84 ellipsoids require an explicit opt-out of datum transformations.
-  if (
-    !radius &&
-    a !== b &&
-    (a !== 6378137 || Math.abs(b - 6356752.314245179) > 1e-6) &&
-    parameters['datum'] !== 'none'
-  ) {
-    throw new Error('Custom ellipsoids require +datum=none; datum shifts are not implemented');
-  }
-  return {
-    semiMajorAxis: radius || a,
-    eccentricitySquared: radius ? 0 : 1 - (b / a) ** 2
-  };
-}
-
-function transform(coordinate: readonly number[], from: CompiledCRS, to: CompiledCRS): number[] {
-  if (coordinate.length < 2 || !Number.isFinite(coordinate[0]) || !Number.isFinite(coordinate[1])) {
-    throw new Error('Coordinates must contain finite x and y values');
-  }
-  const [longitude, latitude] = from.geographic
-    ? [coordinate[0] * DEGREES_TO_RADIANS, coordinate[1] * DEGREES_TO_RADIANS]
-    : from.implementation.inverse(coordinate[0] * from.toMeter, coordinate[1] * from.toMeter);
-  if (
-    !Number.isFinite(longitude) ||
-    !Number.isFinite(latitude) ||
-    Math.abs(latitude) > Math.PI / 2
-  ) {
+  if (Math.abs(point[1]) > Math.PI / 2 || point.some(value => !Number.isFinite(value)))
     throw new Error('Coordinate is outside the geographic domain');
+  point[0] += from.primeMeridian;
+  point = transformDatum(point, from.datum, to.datum);
+  point[0] -= to.primeMeridian;
+  if (to.kind === 'geocentric') {
+    point = to.implementation.forward3D(point).map(value => value / to.toMeter) as Coordinate3D;
+  } else {
+    if (to.kind === 'geographic' && to.longitudeWrap !== undefined)
+      point[0] = to.longitudeWrap + wrapLongitude(point[0] - to.longitudeWrap);
+    const xy =
+      to.kind === 'geographic'
+        ? [point[0] / to.angularUnit, point[1] / to.angularUnit]
+        : to.kind === 'identity'
+          ? [point[0] / to.toMeter, point[1] / to.toMeter]
+          : to.implementation.forward(point[0], point[1]).map(value => value / to.toMeter);
+    point = [xy[0], xy[1], point[2] / to.verticalUnit];
   }
-  const [x, y] = to.geographic
-    ? [longitude / DEGREES_TO_RADIANS, latitude / DEGREES_TO_RADIANS]
-    : to.implementation.forward(longitude, latitude).map(value => value / to.toMeter);
-  if (!Number.isFinite(x) || !Number.isFinite(y))
+  if (horizontalOnly) point[2] = preservedHeight;
+  point = axisTransform(point, toAxis, true);
+  if (point.some(value => !Number.isFinite(value)))
     throw new Error('Projection produced non-finite coordinates');
-  return [x, y, ...coordinate.slice(2)];
+  return coordinate.length >= 3 || to.kind === 'geocentric'
+    ? [...point, ...coordinate.slice(3)]
+    : point.slice(0, 2);
 }

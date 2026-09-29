@@ -39,7 +39,7 @@ function initialize(state: State): void {
   if (Math.abs(state.lat1 + state.lat2) < EPSLN) {
     return;
   }
-  state.lat2 = state.lat2 || state.lat1;
+  // kernelParameters defaults omitted parallels; an explicit zero is meaningful.
   state.temp = state.b / state.a;
   state.es = 1 - Math.pow(state.temp, 2);
   state.e = Math.sqrt(state.es);

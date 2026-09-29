@@ -24,36 +24,110 @@ The API and its supported subset may change as coverage expands.
 
 ## Constructor
 
-`new TypeScriptProjection({from, to, projections, aliases})`
+`new TypeScriptProjection({from, to, projections, aliases, parsers, enforceAxis, mode})`
 
-All options are optional. `from` and `to` default to `'WGS84'`. Definitions can be
-the built-in aliases `WGS84`, `EPSG:4326`, and `EPSG:3857`, instance-local aliases,
-or PROJ strings beginning with `+proj=` (the leading `+` is optional).
-`EPSG:3857` requires the `mercator` plugin. `EPSG:32601`–`EPSG:32660` and
-`EPSG:32701`–`EPSG:32760` require `universalTransverseMercator`; `EPSG:5041` and
-`EPSG:5042` require `stereographic`. Aliases never register plugins automatically.
+All options are optional. Omitted `from` and `to` default to WGS84.
+Both accept `ReadonlyCRSDefinition`, `CRSReference`, or `SpatialReference` from
+`@math.gl/crs`. Definitions can be PROJ strings, built-in or instance-local aliases,
+and supported WKT/PROJJSON when their readers are registered.
 
-`projections` is an array of `ProjectionPlugin` objects. Duplicate names and names
-reserved for geographic coordinates are rejected. `aliases` maps names to definitions
-or other aliases; cyclic aliases are rejected. Neither option changes other instances
-or the proj4js-backed implementation.
+`projections` registers algorithms per instance. `parsers` registers optional
+`wktCRSParser` and `projJSONCRSParser` adapters. Unused readers and projections are
+removed by ESM bundlers. `aliases` maps names to readonly definitions or other aliases;
+cycles and duplicate plugin names/aliases are rejected.
 
-## Methods
+Built-ins include WGS84/EPSG:4326, EPSG:4269 (NAD83), EPSG:4979 (WGS84 3D),
+EPSG:3857 and its legacy aliases, all WGS84 UTM zones, and UPS north/south.
+EPSG:4978 requires `geocentric`, EPSG:3857 requires `mercator`, UTM requires
+`universalTransverseMercator`, and UPS requires `stereographic`.
+Aliases never register algorithms automatically. This is not an EPSG database lookup.
 
-`project(coordinate)` transforms from the source CRS to the target CRS.
-`unproject(coordinate)` transforms in the opposite direction. Both methods are bound
-to the instance, accept readonly number arrays, and return new arrays.
+`enforceAxis` defaults to false, matching proj4js. Set it to honor declared CRS axis
+order and signs. A SpatialReference's explicit `coordinateOrder` describes stored
+coordinates and takes precedence independently of this option.
 
-Geographic coordinates are `[longitude, latitude]` in degrees. Projected coordinates
-are `[easting, northing]` in the specified linear units. Any trailing ordinates are
-copied unchanged; heights and measures are not transformed. Non-finite x/y values,
-invalid geographic latitudes, and singularities such as Mercator's poles throw errors.
+`mode` defaults to `strict`. Use `horizontal` to explicitly extract the sole horizontal
+component of a CompoundCRS or discard separately declared vertical metadata. The
+instance's readonly `lossy` flag reports this extraction. Extracted horizontal transforms
+use zero height internally and preserve supplied vertical ordinates without interpreting
+or transforming them; combining this extraction with geocentric coordinates is rejected.
+VerticalCRS alone, dynamic
+datums, coordinate epochs, and grid transformations are rejected.
+
+## Integration with @math.gl/crs
+
+Syntax parsing, lossless AST encoding, readonly CRS definitions, and source metadata
+belong to `@math.gl/crs`. The native backend interprets those definitions into
+execution parameters without adding projection dependencies to the CRS module.
+
+`SpatialReference.crs` must be explicit or default; absent/unknown states are errors,
+never implicit WGS84. The preferred definition is used without discarding or rewriting
+provenance and alternatives. Stored coordinate order is honored; declared units and
+coordinate frame must agree with the executable definition. Inputs are not mutated.
+
+```typescript
+import {createSpatialReference} from '@math.gl/crs';
+import {TypeScriptProjection, mercator} from '@math.gl/proj4/experimental';
+
+const source = createSpatialReference({
+  crs: {
+    state: 'explicit', definition: 'EPSG:4326', representation: 'identifier',
+    provenance: 'metadata'
+  },
+  coordinateFrame: 'geographic',
+  coordinateOrder: ['latitude', 'longitude', 'height'],
+  units: ['degree', 'degree', 'metre']
+});
+const projection = new TypeScriptProjection({
+  from: source, to: 'EPSG:3857', projections: [mercator]
+});
+projection.project([40.7, -74, 100]);
+```
+
+Use `parsers: [wktCRSParser, projJSONCRSParser]` for WKT1, WKT2, ESRI WKT, and
+GeographicCRS/GeodeticCRS/ProjectedCRS objects. Projection methods must map to supported
+plugins; unknown methods and conversion parameters fail explicitly. BoundCRS supports
+three-parameter translations and seven-parameter position-vector/coordinate-frame
+operations to WGS84. WKT1 TOWGS84 is also supported. Axis-meridian operations,
+vertical-first structured axes, derived CRSs, and time-dependent operations remain
+outside this subset. PROJ axis permutations support vertical-first ordering.
+
+`normalizeCRS(input, options)` produces an immutable execution model with distinct
+projection and datum ellipsoids, units, prime meridian, axes, and datum parameters.
+Normalization alone does not verify a projection plugin's parameter support.
+`checkTypeScriptCRSCompatibility(input, options)` checks construction with the selected
+readers/plugins and reports `supported`, `unsupported`, or `unknown`, with reasons
+`unknown-syntax`, `missing-parser`, `missing-plugin`, `missing-transform-stage`, or
+`invalid-definition`. It does not assess accuracy or a particular coordinate's domain.
+The existing `checkProj4CRSCompatibility` remains scoped to proj4js.
+
+## Methods and dimensions
+
+`project(coordinate)` transforms source to target; `unproject(coordinate)` reverses it.
+Both are bound methods accepting readonly arrays and returning new arrays.
+
+Geographic x/y use degrees for PROJ definitions, or the angular units declared by
+structured CRSs. Projected x/y use the CRS's linear units. A third ordinate is
+ellipsoidal height (meters unless vertical units are specified); datum operations
+transform it. Fourth and later ordinates are copied unchanged.
+
+Two-dimensional inputs use height zero internally and return two ordinates, except
+that geocentric output always includes X/Y/Z. Geocentric input requires three ordinates;
+all three Cartesian components use the CRS's linear units. Axis permutations placing
+height before a horizontal component require three input ordinates. Non-finite x/y/z,
+invalid latitudes, singularities, and the undefined geocentric Earth center throw.
+
+This deliberately differs from proj4js's default array API, which restores the input
+height for many datum operations. Differential height tests use its enforced-axis
+mode to compare the computed values. Geocentric units also apply consistently to Z.
 
 ## Current coverage
 
 | Projection | Plugin | Parameters |
 | --- | --- | --- |
-| Geographic (`longlat`, `latlong`, `latlon`, `lonlat`) | Built into the core | Degrees only |
+| Geographic (`longlat`, `latlong`, `latlon`, `lonlat`) | Built into the core | CRS angular units |
+| Raw geographic radians (`identity`) | Built into the core | Optional unit factor |
+| Geocentric (`geocent`) | `geocentric` | Three Cartesian components |
 | Mercator (`merc`), spherical or ellipsoidal | `mercator` | `lon_0`, `lat_ts`, `k`, `k_0`, `x_0`, `y_0` |
 | Equidistant cylindrical (`eqc`), spherical equations | `equidistantCylindrical` | `lon_0`, `lat_0`, `lat_ts`, `x_0`, `y_0` |
 | Transverse Mercator (`tmerc`) | `transverseMercator` | Origin, scale, `approx` |
@@ -73,7 +147,8 @@ that TM/UTM require `+approx` for a sphere. The default TM algorithm is the exte
 series, matching proj4js's registration of the name `tmerc`.
 
 Conics require `lat_1`; `lat_2` defaults to `lat_1`. Opposite standard parallels
-and parallels at the poles are rejected. `sterea` requires a non-polar origin;
+and parallels at the poles are rejected. An explicit equatorial `lat_2=0` is retained
+for LCC and EQDC, correcting an upstream truthiness fallback. `sterea` requires a non-polar origin;
 use `stere` for polar projections. UTM requires an integer `zone` from 1 through 60;
 `south` and `approx` are flags without values. UTM fixes its origin, scale, and false
 offsets according to its zone/hemisphere. Use `tmerc` for custom TM parameters.
@@ -94,23 +169,31 @@ correct inverse latitude sign with a nonzero `lat_0`. It also initializes omitte
 origins/offsets and throws at singularities instead of returning upstream sentinels.
 The parity inventory records these differences and outstanding coverage gaps.
 
-Angles in PROJ parameters must be finite decimal degrees. False easting and northing
-are in meters. Projected output units can be `m`, `km`, `ft`, or `us-ft`, or a positive
-`to_meter` factor. `to_meter` overrides named units. Mercator's `lat_ts` overrides the
-scale factor; `k_0` overrides `k`.
+PROJ angles accept finite decimal degrees, radians suffixed with `r`, or DMS such as
+`12d30'0"E`. The shared `@math.gl/crs` parser preserves DMS tokens losslessly.
+DMS/radian interpretation is an intentional extension beyond proj4js 2.22.0.
+False easting/northing are meters. Named units use the pinned upstream unit table;
+`to_meter` overrides named units regardless of parameter order. `vunits`/`vto_meter`
+set height units. `k_0` overrides `k`; Mercator's `lat_ts` overrides scale.
 
-The default ellipsoid is WGS84. Geometry parameters include `ellps=WGS84`,
-`ellps=sphere` (radius 6370997 meters), `a`, `b`, `rf`, and `R`. `b` overrides `rf`;
-`R` selects a sphere. Dimensions must be valid even when overridden. A custom
-non-WGS84 ellipsoid requires `datum=none` to explicitly opt out of datum shifts.
-`eqc` uses the semi-major axis as its spherical radius, matching proj4js's formulation.
+Geometry defaults to WGS84 and accepts upstream ellipsoid names, `a`, `b`, `rf`, `f`,
+and spherical `R`. Named datum ellipsoids take precedence over `ellps`; explicit
+numeric dimensions override those defaults. Explicit `f=0` or `rf=0` selects a sphere
+unless `b` is supplied. The WGS 72 lookup uses the standard `WGS72` name, correcting
+the upstream `WGS7` typo. `b` overrides flattening, and `R`
+selects a sphere. Invalid dimensions are rejected even when overridden.
 
-This first version converts through shared geographic longitude/latitude. It **does
-not perform datum transformations**. It accepts `datum=WGS84` or `datum=none`, and
-rejects other named datums, grid shifts, Helmert parameters, prime meridians, axis
-changes, pipelines, WKT, and PROJJSON. Unknown or duplicate parameters throw instead
-of being silently ignored. `no_defs` and `type=crs` are accepted as metadata.
-Use `Proj4Projection` for definitions outside this subset; there is no implicit fallback.
+Named datum tables and `towgs84` implement translations (meters) or seven-parameter
+Helmert operations (meters, arcseconds, ppm). Nonzero operations chain through WGS84.
+No declared operation, or explicit `datum=none`, leaves the datum unchanged.
+`nadgrids=@null` uses WGS84 datum geometry separately from projection geometry,
+including Web Mercator's sphere. Other grid lists fail until the grid tranche.
+
+`pm` accepts named or numeric prime meridians. `over` disables projection longitude
+wrapping, and geographic `lon_wrap` chooses the center of the output longitude interval.
+`axis` accepts each east/west, north/south, up/down component exactly once.
+Unknown or duplicate parameters throw. `no_defs`, `title`, and `type=crs` are metadata.
+Use `Proj4Projection` for definitions outside the native subset; there is no implicit fallback.
 
 ## Custom plugins
 
@@ -120,7 +203,8 @@ forward/inverse implementation. The engine supplies an immutable parameter map,
 semi-major axis, and eccentricity squared. The plugin validates its own parameter
 values and domain. Forward input and inverse output are longitude/latitude in radians;
 forward output and inverse input are projected meters, including any false offsets.
-The engine handles geographic degrees, output units, and trailing ordinates.
+The engine handles CRS units, axes, prime meridians, datum transformations, and heights.
+Geocentric plugins additionally implement `forward3D`/`inverse3D` over three-element tuples.
 
 ```typescript
 import type {ProjectionPlugin} from '@math.gl/proj4/experimental';

@@ -14,7 +14,12 @@
       "lib/parseCode.js": "ee0981433b69e1846f1ebca2c932f137c3f0d91b8633e8b01fc10e2e9c11e5bc",
       "lib/transform.js": "fd5ca23edff8e56b8dac3fb189c76b4af780bcb802124f52fc6a41e5015909d3",
       "lib/datum_transform.js": "f9e5c5c9ee7ed3325a4e23a072bcf03ffdbb04082edef2d19e8a7d9df60399c6",
-      "lib/nadgrid.js": "89f39fd5ac197624c068f1df9ca6d951e2f5613d926f9db174e9eb9655dd965f"
+      "lib/nadgrid.js": "89f39fd5ac197624c068f1df9ca6d951e2f5613d926f9db174e9eb9655dd965f",
+      "lib/datumUtils.js": "f443adc95634fc5f3e309214fe512d994d27755f627bf4f9ad33d52384f1d753",
+      "lib/constants/Datum.js": "e0c7e328abfccf0d8c76758343845512c55c58d84c9d8b55663eaa3113493602",
+      "lib/constants/Ellipsoid.js": "66a78f0410eb3bc020e4c680f330e4b83c73425e166b83574e4932d718150b82",
+      "lib/constants/PrimeMeridian.js": "16dba7800ec9e407222a5ce37b32a6818a0138f29efdb44a3b205f060193014d",
+      "lib/constants/units.js": "9fc82d87d93ae7c4ecbf39df6e024815cf033076f611f8f90686244fd547be64"
     }
   },
   "projections": [
@@ -281,12 +286,14 @@
         "Geocent"
       ],
       "upstreamSHA256": "f21476e63756d035bcbdc804a3450e51282e4634fef462a2f3e860d24dbb1f60",
-      "status": "unsupported",
-      "nativeSelection": null,
+      "status": "partial",
+      "nativeSelection": "+proj=geocent",
       "fixtureIds": [],
-      "tests": [],
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
       "gapIds": [
-        "projection-geocent"
+        "native-proj-corpus"
       ]
     },
     {
@@ -437,8 +444,7 @@
       ],
       "gapIds": [
         "crs-normalization",
-        "projection-parameters",
-        "identity-units"
+        "projection-parameters"
       ]
     },
     {
@@ -804,7 +810,8 @@
       "id": "proj-strings",
       "status": "partial",
       "tests": [
-        "test/lib/typescript-projection.spec.ts"
+        "test/lib/typescript-projection.spec.ts",
+        "test/lib/crs-datums.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -813,75 +820,90 @@
     },
     {
       "id": "wkt1-ogc",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
       "gapIds": [
         "crs-normalization"
       ]
     },
     {
       "id": "wkt1-esri",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
       "gapIds": [
         "crs-normalization"
       ]
     },
     {
       "id": "wkt2",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
       "gapIds": [
         "crs-normalization"
       ]
     },
     {
       "id": "projjson-geographic",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
       "gapIds": [
         "crs-normalization"
       ]
     },
     {
       "id": "projjson-geodetic",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
       "gapIds": [
         "crs-normalization",
-        "ellipsoid-datum"
+        "native-proj-corpus"
       ]
     },
     {
       "id": "projjson-projected",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
       "gapIds": [
         "crs-normalization"
       ]
     },
     {
       "id": "projjson-bound",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
       "gapIds": [
         "crs-normalization",
-        "ellipsoid-datum"
+        "native-proj-corpus"
       ]
     },
     {
       "id": "compound-vertical-policy",
-      "status": "unsupported",
-      "tests": [],
-      "gapIds": [
-        "compound-vertical"
-      ]
+      "status": "verified",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
+      "gapIds": []
     },
     {
       "id": "authority-and-user-aliases",
       "status": "partial",
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/crs-datums.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -891,7 +913,8 @@
       "id": "projection-name-aliases",
       "status": "partial",
       "tests": [
-        "test/lib/typescript-projection.spec.ts"
+        "test/lib/typescript-projection.spec.ts",
+        "test/lib/crs-datums.spec.ts"
       ],
       "gapIds": [
         "crs-normalization"
@@ -899,25 +922,26 @@
     },
     {
       "id": "axis-enforcement",
-      "status": "unsupported",
-      "tests": [],
-      "gapIds": [
-        "crs-normalization"
-      ]
+      "status": "verified",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
+      "gapIds": []
     },
     {
       "id": "prime-meridians",
-      "status": "unsupported",
-      "tests": [],
-      "gapIds": [
-        "projection-parameters"
-      ]
+      "status": "verified",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
+      "gapIds": []
     },
     {
       "id": "longitude-wrapping",
       "status": "partial",
       "tests": [
-        "test/lib/typescript-projection.spec.ts"
+        "test/lib/typescript-projection.spec.ts",
+        "test/lib/crs-datums.spec.ts"
       ],
       "gapIds": [
         "projection-parameters"
@@ -927,7 +951,8 @@
       "id": "units",
       "status": "partial",
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/crs-datums.spec.ts"
       ],
       "gapIds": [
         "projection-parameters"
@@ -937,7 +962,8 @@
       "id": "parameter-defaults-precedence",
       "status": "partial",
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/crs-datums.spec.ts"
       ],
       "gapIds": [
         "projection-parameters"
@@ -947,52 +973,62 @@
       "id": "ellipsoids",
       "status": "partial",
       "tests": [
-        "test/lib/typescript-projection.spec.ts"
+        "test/lib/typescript-projection.spec.ts",
+        "test/lib/crs-datums.spec.ts"
       ],
       "gapIds": [
-        "ellipsoid-datum"
+        "native-proj-corpus"
       ]
     },
     {
       "id": "datum-none-wgs84",
       "status": "partial",
       "tests": [
-        "test/lib/typescript-projection.spec.ts"
+        "test/lib/typescript-projection.spec.ts",
+        "test/lib/crs-datums.spec.ts"
       ],
       "gapIds": [
-        "ellipsoid-datum"
+        "native-proj-corpus"
       ]
     },
     {
       "id": "geocentric-3d",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
       "gapIds": [
-        "ellipsoid-datum"
+        "native-proj-corpus"
       ]
     },
     {
       "id": "helmert-3-parameter",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
       "gapIds": [
-        "ellipsoid-datum"
+        "native-proj-corpus"
       ]
     },
     {
       "id": "helmert-7-parameter",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
       "gapIds": [
-        "ellipsoid-datum"
+        "native-proj-corpus"
       ]
     },
     {
       "id": "datum-chaining",
-      "status": "unsupported",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        "test/lib/crs-datums.spec.ts"
+      ],
       "gapIds": [
-        "ellipsoid-datum"
+        "native-proj-corpus"
       ]
     },
     {
@@ -1015,7 +1051,8 @@
       "id": "xy-forward-inverse",
       "status": "partial",
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/crs-datums.spec.ts"
       ],
       "gapIds": [
         "native-proj-corpus"
@@ -1025,17 +1062,19 @@
       "id": "trailing-ordinates",
       "status": "partial",
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/crs-datums.spec.ts"
       ],
       "gapIds": [
-        "ellipsoid-datum"
+        "native-proj-corpus"
       ]
     },
     {
       "id": "domain-errors",
       "status": "partial",
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/crs-datums.spec.ts"
       ],
       "gapIds": [
         "recent-upstream-regressions"
@@ -1063,18 +1102,13 @@
   "gaps": [
     {
       "id": "crs-normalization",
-      "tranche": 3,
-      "reason": "WKT/PROJJSON interpretation, projection-name normalization, angular formats, permissive PROJ parsing and general aliases are not implemented."
+      "tranche": 5,
+      "reason": "Extend WKT/PROJJSON method mappings with remaining projection plugins; uncommon derived, axis-meridian and vertical-first structured CRS variants remain explicit unsupported stages."
     },
     {
       "id": "projection-parameters",
-      "tranche": 3,
-      "reason": "Only the documented parameter subset is supported; +over, +lon_wrap, prime meridians and general unit semantics remain unsupported."
-    },
-    {
-      "id": "ellipsoid-datum",
-      "tranche": 4,
-      "reason": "Named ellipsoids other than WGS84/sphere, named datum tables, 3D/geocentric and Helmert operations remain unsupported."
+      "tranche": 5,
+      "reason": "Documented defaults, units, axes, prime meridians and longitude wrapping are implemented; remaining projection-specific parameters and authalic-radius variants need coverage."
     },
     {
       "id": "ntv2",
@@ -1087,11 +1121,6 @@
       "reason": "Optional asynchronous GeoTIFF datum grids are not implemented."
     },
     {
-      "id": "identity-units",
-      "tranche": 3,
-      "reason": "Upstream identity alias returns radians; native geographic aliases return degrees and identity is rejected."
-    },
-    {
       "id": "native-proj-corpus",
       "tranche": 7,
       "reason": "Independent checks currently use published PROJ UTM examples. Expand into a reproducibly generated native PROJ/EPSG corpus; the local PROJ executable is incompatible with this host."
@@ -1100,11 +1129,6 @@
       "id": "recent-upstream-regressions",
       "tranche": 5,
       "reason": "Orthographic false easting, oblique Mercator/Robinson enforced-axis z preservation, nzmg inverse iteration and vandg boundary fixes need fixtures as those plugins are added."
-    },
-    {
-      "id": "compound-vertical",
-      "tranche": 3,
-      "reason": "Compound/vertical metadata need an explicit executable policy; no implicit horizontal extraction or height transformation."
     },
     {
       "id": "projection-bonne",
@@ -1135,11 +1159,6 @@
       "id": "projection-equi",
       "tranche": 5,
       "reason": "No native implementation for upstream module equi."
-    },
-    {
-      "id": "projection-geocent",
-      "tranche": 4,
-      "reason": "No native implementation for upstream module geocent."
     },
     {
       "id": "projection-geos",
@@ -1257,6 +1276,36 @@
       "id": "conic-opposite-pole",
       "description": "Native LCC rejects its opposite pole instead of upstream latitude clamping that returns a huge finite value.",
       "test": "test/lib/common-projections.spec.ts"
+    },
+    {
+      "id": "computed-heights",
+      "description": "Native arrays expose transformed height; proj4js normally restores input Z unless axes are enforced. Geocentric output always has three components and scales X/Y/Z consistently.",
+      "test": "test/lib/crs-datums.spec.ts"
+    },
+    {
+      "id": "strict-crs-boundaries",
+      "description": "Unknown/absent CRS metadata, dynamic datums, unsupported structured operations and non-null grid lists fail explicitly. Compound extraction is opt-in and reports lossy.",
+      "test": "test/lib/crs-datums.spec.ts"
+    },
+    {
+      "id": "angular-formats",
+      "description": "Native DMS/radian PROJ angles normalize to decimal degrees; proj4js 2.22.0 does not interpret these forms. Explicit to_meter overrides named units independent of token order.",
+      "test": "test/lib/crs-datums.spec.ts"
+    },
+    {
+      "id": "explicit-datum-none",
+      "description": "Native datum=none explicitly disables supplied Helmert parameters; malformed or conflicting declarations remain subject to validation.",
+      "test": "test/lib/crs-datums.spec.ts"
+    },
+    {
+      "id": "equatorial-conic-parallel",
+      "description": "Native LCC and EQDC preserve explicit lat_2=0; upstream truthiness defaults replace it with lat_1. Regression comparisons use the equivalent swapped-parallel definition.",
+      "test": "test/lib/common-projections.spec.ts"
+    },
+    {
+      "id": "explicit-flattening-and-wgs72",
+      "description": "Explicit f=0/rf=0 selects a sphere unless b overrides it, including named ellipsoids with a stored semi-minor axis. WGS72 corrects the upstream WGS7 lookup typo.",
+      "test": "test/lib/crs-datums.spec.ts"
     }
   ]
 }

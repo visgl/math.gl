@@ -112,19 +112,10 @@ test('TypeScriptProjection rejects unsupported CRS features instead of ignoring 
     'EPSG:32631',
     'GEOGCS["WGS 84"]',
     '+proj=utm +zone=31',
-    '+proj=identity',
-    '+proj=merc +datum=NAD83',
-    '+proj=merc +ellps=GRS80',
-    '+proj=merc +towgs84=1,2,3',
-    '+proj=merc +nadgrids=@null',
-    '+proj=merc +axis=neu',
-    '+proj=merc +pm=paris',
-    '+proj=merc +over',
     '+proj=merc +lat_0=10',
     '+proj=longlat +units=m',
     '+proj=longlat +to_meter=2',
-    '+proj=merc +type=pipeline',
-    '+proj=merc +a=7000000 +b=6900000'
+    '+proj=merc +type=pipeline'
   ]) {
     expect(() => new TypeScriptProjection({to, projections})).toThrow();
   }
@@ -143,7 +134,6 @@ test('TypeScriptProjection validates parameters and domains', () => {
     '+proj=merc +lon_0=NaN',
     '+proj=merc +lon_0=1e999',
     '+proj=merc +lon_0=0x20',
-    '+proj=merc +lon_0=30r',
     '+proj=merc +lon_0',
     '+proj=merc +lon_0=',
     '+proj=merc +lon_0=10 +lon_0=20',

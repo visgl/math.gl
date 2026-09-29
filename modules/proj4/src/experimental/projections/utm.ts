@@ -9,6 +9,7 @@ import {createTransverseMercator} from './transverse-mercator';
 
 export const universalTransverseMercator: ProjectionPlugin = {
   name: 'utm',
+  aliases: ['Universal Transverse Mercator System'],
   parameters: ['zone', 'south', 'approx'],
   flags: ['south', 'approx'],
   create(context) {

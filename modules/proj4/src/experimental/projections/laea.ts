@@ -8,6 +8,7 @@ import {createState, forward, inverse} from '../kernels/laea';
 
 export const lambertAzimuthalEqualArea: ProjectionPlugin = {
   name: 'laea',
+  aliases: ['Lambert Azimuthal Equal Area', 'Lambert_Azimuthal_Equal_Area'],
   parameters: ORIGIN_PARAMETERS,
   create(context) {
     const base = kernelParameters(context);

@@ -33,6 +33,14 @@ export function createTransverseMercator(context: ProjectionContext): Projection
 /** Matches proj4js: tmerc uses the extended algorithm unless +approx is supplied. */
 export const transverseMercator: ProjectionPlugin = {
   name: 'tmerc',
+  aliases: [
+    'Fast_Transverse_Mercator',
+    'Fast Transverse Mercator',
+    'Transverse_Mercator',
+    'Transverse Mercator',
+    'Gauss Kruger',
+    'Gauss_Kruger'
+  ],
   parameters: [...ORIGIN_PARAMETERS, ...SCALE_PARAMETERS, 'approx'],
   flags: ['approx'],
   create: createTransverseMercator
@@ -40,6 +48,7 @@ export const transverseMercator: ProjectionPlugin = {
 
 export const extendedTransverseMercator: ProjectionPlugin = {
   name: 'etmerc',
+  aliases: ['Extended_Transverse_Mercator', 'Extended Transverse Mercator'],
   parameters: [...ORIGIN_PARAMETERS, ...SCALE_PARAMETERS, 'approx'],
   flags: ['approx'],
   create: createTransverseMercator

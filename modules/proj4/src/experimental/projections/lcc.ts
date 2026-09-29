@@ -14,6 +14,14 @@ import {createState, forward, inverse} from '../kernels/lcc';
 
 export const lambertConformalConic: ProjectionPlugin = {
   name: 'lcc',
+  aliases: [
+    'Lambert Tangential Conformal Conic Projection',
+    'Lambert_Conformal_Conic',
+    'Lambert_Conformal_Conic_1SP',
+    'Lambert_Conformal_Conic_2SP',
+    'Lambert Conic Conformal (1SP)',
+    'Lambert Conic Conformal (2SP)'
+  ],
   parameters: [...ORIGIN_PARAMETERS, ...SCALE_PARAMETERS, 'lat_1', 'lat_2'],
   create(context) {
     const base = kernelParameters(context);

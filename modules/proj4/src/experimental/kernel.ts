@@ -63,7 +63,7 @@ export function kernelParameters({
     e: Math.sqrt(es),
     ep2: es / (1 - es),
     sphere: es === 0,
-    over: false,
+    over: flagParameter(parameters, 'over'),
     long0: angleParameter(parameters, 'lon_0'),
     lat0: angleParameter(parameters, 'lat_0'),
     lat1: angleParameter(parameters, 'lat_1'),
