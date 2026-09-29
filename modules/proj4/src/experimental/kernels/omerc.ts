@@ -158,7 +158,20 @@ function initialize(state: State): void {
       gamma0 = gamma;
       alpha_c = Math.asin(D * Math.sin(gamma0));
     }
-    state.lam0 = lamc - Math.asin(0.5 * (F - 1 / F) * Math.tan(gamma0)) / state.B;
+    let longitudeArgument = 0.5 * (F - 1 / F) * Math.tan(gamma0);
+    if (D > 1 && Math.abs(Math.cos(alpha_c)) <= 8 * Number.EPSILON) {
+      // For a right-angle azimuth away from the equator, the exact argument
+      // is ±1. Near the equator, cancellation in F and rounding in gamma0
+      // can exceed any fixed ULP window. Use the analytic limit instead.
+      longitudeArgument = Math.sign(state.lat0) * Math.sign(Math.sin(alpha_c));
+    } else if (
+      Math.abs(longitudeArgument) > 1 &&
+      Math.abs(longitudeArgument) <= 1 + 8 * Number.EPSILON
+    ) {
+      // Preserve nearby azimuths and clamp only small domain overshoots.
+      longitudeArgument = Math.sign(longitudeArgument);
+    }
+    state.lam0 = lamc - Math.asin(longitudeArgument) / state.B;
   } else {
     H = Math.pow(tsfnz(state.e, phi1, Math.sin(phi1)), state.B);
     L = Math.pow(tsfnz(state.e, phi2, Math.sin(phi2)), state.B);

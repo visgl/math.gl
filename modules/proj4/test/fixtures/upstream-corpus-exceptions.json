@@ -1,94 +1,10 @@
 [
   {
-    "index": 6,
-    "sourceLine": 30,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Hotine_Oblique_Mercator_Azimuth_Center",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 7,
-    "sourceLine": 38,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Hotine_Oblique_Mercator_Azimuth_Center",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 8,
-    "sourceLine": 46,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Hotine Oblique Mercator (variant B)",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 9,
-    "sourceLine": 98,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Hotine Oblique Mercator (variant B)",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 61,
-    "sourceLine": 820,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Cassini",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 65,
-    "sourceLine": 891,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Equidistant Cylindrical (Spherical)",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 74,
-    "sourceLine": 978,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Krovak",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 75,
-    "sourceLine": 982,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Krovak",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 76,
-    "sourceLine": 987,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Krovak",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 84,
-    "sourceLine": 1137,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Hotine_Oblique_Mercator_Azimuth_Center",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 85,
-    "sourceLine": 1145,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Hotine Oblique Mercator (variant B)",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
     "index": 89,
     "sourceLine": 1254,
     "disposition": "open-axis-orientation",
     "error": "Unsupported axis direction: UNKNOWN",
     "note": "Requires a defined orientation mapping, including enforceAxis behavior."
-  },
-  {
-    "index": 90,
-    "sourceLine": 1258,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Stereographic_North_Pole",
-    "note": "Implement this method and its parameter semantics before removing this exception."
   },
   {
     "index": 91,
@@ -117,76 +33,6 @@
     "disposition": "open-axis-orientation",
     "error": "Axis meridians require an orientation operation",
     "note": "Requires a defined orientation mapping, including enforceAxis behavior."
-  },
-  {
-    "index": 118,
-    "sourceLine": 1469,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Stereographic_North_Pole",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 141,
-    "sourceLine": 1807,
-    "disposition": "open-krovak-parameter",
-    "error": "Unsupported PROJ parameter: +alpha",
-    "note": "Validate the fixed Krovak azimuth before accepting alpha; the kernel does not support arbitrary alpha."
-  },
-  {
-    "index": 142,
-    "sourceLine": 1812,
-    "disposition": "open-krovak-parameter",
-    "error": "Unsupported PROJ parameter: +alpha",
-    "note": "Validate the fixed Krovak azimuth before accepting alpha; the kernel does not support arbitrary alpha."
-  },
-  {
-    "index": 143,
-    "sourceLine": 1817,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Krovak (North Orientated)",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 153,
-    "sourceLine": 1977,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Quadrilateralized_Spherical_Cube",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 154,
-    "sourceLine": 1982,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Quadrilateralized_Spherical_Cube",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 155,
-    "sourceLine": 1987,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Quadrilateralized_Spherical_Cube",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 156,
-    "sourceLine": 1992,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Quadrilateralized_Spherical_Cube",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 157,
-    "sourceLine": 1998,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Quadrilateralized_Spherical_Cube",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 158,
-    "sourceLine": 2004,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Quadrilateralized_Spherical_Cube",
-    "note": "Implement this method and its parameter semantics before removing this exception."
   },
   {
     "index": 174,
@@ -222,62 +68,6 @@
     "disposition": "intentional-strict-input",
     "error": "Unsupported PROJ parameter: +lon_0",
     "note": "Require an explicit UTM zone and reject irrelevant parameters rather than inferring a zone."
-  },
-  {
-    "index": 193,
-    "sourceLine": 2193,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Hotine_Oblique_Mercator_Azimuth_Center",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 195,
-    "sourceLine": 2212,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Hotine_Oblique_Mercator",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 196,
-    "sourceLine": 2221,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Hotine Oblique Mercator (variant A)",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 198,
-    "sourceLine": 2240,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Hotine_Oblique_Mercator",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 199,
-    "sourceLine": 2249,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Hotine_Oblique_Mercator",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 201,
-    "sourceLine": 2291,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Oblique_Mercator",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 202,
-    "sourceLine": 2301,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported projection method: Oblique_Mercator",
-    "note": "Implement this method and its parameter semantics before removing this exception."
-  },
-  {
-    "index": 203,
-    "sourceLine": 2306,
-    "disposition": "open-structured-mapping",
-    "error": "Unsupported conversion parameter: semi_minor",
-    "note": "Resolve the embedded semi-minor-axis override without silently changing datum geometry."
   },
   {
     "index": 205,

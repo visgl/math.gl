@@ -22,6 +22,9 @@ are explicitly supplied per instance, with no global registration or automatical
 included projected coordinate systems. ESM bundlers can remove unused plugins.
 The API and its supported subset may change as coverage expands.
 
+See the [engine guide](../typescript-engine.md) for pluggability, lazy loading, bundle
+size comparisons, and application integration.
+
 ## Constructor
 
 `new TypeScriptProjection({from, to, projections, aliases, parsers, datumGrids, enforceAxis, mode})`
@@ -248,7 +251,7 @@ CRS pipeline.
 | `millerCylindrical`, `mollweide`, `robinson` | mill, moll, robin | — |
 | `sinusoidal`, `vanDerGrinten` | sinu, vandg | — |
 | `gaussSchreiberTransverseMercator` | gstmerc | lat_0, k/k_0 |
-| `krovak` | krovak | lat_0, k/k_0, czech flag |
+| `krovak` | krovak | lat_0, k/k_0, czech flag; fixed alpha and lat_ts values only |
 | `newZealandMapGrid` | nzmg | required lat_0/lon_0, iterations (integer 0–10; default 1) |
 | `obliqueMercator` | omerc | lat_0, k/k_0; alpha/gamma + lonc, or lon_1/lat_1/lon_2/lat_2; no_off/no_uoff/no_rot flags |
 | `polyconic`, `swissObliqueMercator` | poly, somerc | lat_0; somerc also k/k_0 |
@@ -256,6 +259,16 @@ CRS pipeline.
 | `geostationary` | geos | required positive h, sweep=x/y |
 | `tiltedPerspective` | tpers | lat_0, positive h (default 100000 m), tilt, azi (degrees) |
 | `quadrilateralizedSphericalCube` | qsc | lat_0 |
+
+Structured readers map Hotine variants A/B and legacy aliases, Krovak/North Orientated,
+QSC, Cassini, and spherical equidistant cylindrical methods to these plugins. Hotine
+variant A sets `no_uoff`; variant B uses the projection-centre offset. Angular and
+linear parameter units are converted before kernel construction. The legacy
+`Stereographic_North_Pole` method uses `sterea` away from a pole and `stere` at a pole.
+Krovak accepts only its fixed pseudo standard parallel (`lat_ts=78.5`) and the legacy
+PROJ/EPSG spellings of its fixed cone-axis co-latitude (`alpha=30.28813972222222`
+or `30.28813975277778`, with 1e-10-degree rounding tolerance). Custom values reject
+instead of being silently ignored by the fixed kernel.
 
 `obliqueTransformation` is a factory with an explicit dependency:
 

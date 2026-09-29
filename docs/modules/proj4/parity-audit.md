@@ -9,11 +9,38 @@ This audit measures runtime revision `bf28217d` (PR #148) against proj4js **2.22
 still npm's latest release when checked. It adds evidence beyond the existing
 selected fixtures and synthetic grids. The original results below are preserved for comparison.
 
-## Correctness follow-up
+## Structured-method follow-up
+
+The next follow-up repairs **30 more corpus cases**, bringing numeric passes from
+**198/242 to 228/242**: PROJ 108/116, WKT 106/112, PROJJSON 8/8, and aliases 6/6.
+There are **14 construction rejections**, no execution rejections, and no silent
+mismatches in the accepted cases. Eight PROJJSON samples still do not establish
+complete PROJJSON support.
+
+The repaired cases cover Hotine variants A/B and legacy spellings, Krovak and its
+North Orientated spelling, QSC, Cassini, spherical equidistant cylindrical, the
+legacy North Pole stereographic method, and a redundant pseudo-Mercator semi-minor
+radius hint. Variant-specific offsets and parameter units are preserved. Krovak's
+fixed angles and the pseudo-Mercator radius hint are validated; arbitrary values
+are not silently ignored. A bounded inverse-sine roundoff correction makes the
+right-angle Swiss Hotine definitions finite. The North Pole stereographic spelling
+uses the oblique alternative away from a pole and the polar kernel at a pole.
+
+All 30 exceptions have been removed, so these cases now assert both original
+coordinate directions. Additional tests exercise unit conversion, zero rectified
+angles, duplicate/conflicting parameters, invalid fixed constants, and Swiss-origin
+round trips. The remaining exceptions comprise **five axis-orientation coverage
+gaps** and **nine deliberate strict-input differences**. Grid-edge policy, regional
+validity limits and independent native PROJ accuracy qualification remain open.
+
+See the [TypeScript engine guide](./typescript-engine.md) for registration, dynamic
+loading, optional readers and measured bundle costs.
+
+## Correctness follow-up (PR #149)
 
 The follow-up fixes all **11 silent coordinate mismatches**, the **five pole/origin
-roundoff rejections**, and the **NAD27 execution rejection**. The same unchanged
-upstream corpus now passes **198/242** cases in both directions:
+roundoff rejections**, and the **NAD27 execution rejection**. At this stage the unchanged
+upstream corpus passed **198/242** cases in both directions:
 
 | Input | Passes | Construction rejections | Execution rejections | Silent mismatches |
 | --- | ---: | ---: | ---: | ---: |
@@ -38,14 +65,15 @@ operation-selection database or independent geodetic validation.
 
 All 242 original coordinate fixtures, tolerances and suite aliases are now checked
 in with source hashes and attribution. Node and Chromium run them continuously.
-The 44 remaining rejections are individually listed in
+The 44 rejections at this stage were individually listed in
 `modules/proj4/test/fixtures/upstream-corpus-exceptions.json`: **35 open coverage
-gaps** and **nine intentional strict-input differences**. Each exception must still
+gaps** and **nine intentional strict-input differences**. The structured-method
+follow-up above removes 30 of those entries. Each exception must still
 throw its exact expected error; it cannot mask a new silent mismatch. Newly accepted
 cases fail the exception check until their exception is removed and their coordinates
 pass. Passing tests for expected rejections does **not** mean 242/242 parity.
 
-This completes follow-up tranche 1 and the continuous-corpus gate from tranche 2.
+This completed follow-up tranche 1 and the continuous-corpus gate from tranche 2.
 Remaining method/parameter/axis mappings, grid coverage policy, regional validity
 limits and independent native PROJ qualification remain open. The original kernel
 and grid audit measurements below are unchanged by these normalization fixes.
@@ -173,7 +201,7 @@ only establish that a CRS can be constructed, not that its coordinates are corre
    precedence, and angular roundoff. Import regression fixtures for all 11 silent
    mismatches and five pole-definition failures. Unsupported operations must reject
    explicitly instead of silently selecting another interpretation.
-2. **Structured compatibility (continuous corpus in place; mappings open):** enumerate and implement the missing method/parameter/
+2. **Structured compatibility (corpus method gaps fixed; axis mappings open):** enumerate and implement the missing method/parameter/
    axis mappings; disposition each strict-input rejection. Run the entire coordinate
    corpus continuously, with individually reviewed exceptions rather than a total pass count.
 3. **Grid and domain policy:** resolve the two real-grid edge differences, add licensed

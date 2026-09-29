@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Original adapter; datum aliases/authority precedence and polar WKT semantics are
+// Original adapter; datum lookup and method/parameter normalization rules are
 // adapted from proj4js 2.22.0 and its MIT-licensed wkt-parser dependency.
 // Copyright (c) 2014, proj4js authors. See ../../../PROJ4-LICENSE.md.
 import datums from './datum-table';
@@ -53,6 +53,15 @@ export function unit(value: unknown, fallback: number): number {
   return factor;
 }
 const METHODS: Record<string, string> = {
+  hotineobliquemercator: 'omerc',
+  hotineobliquemercatorvarianta: 'omerc',
+  hotineobliquemercatorvariantb: 'omerc',
+  hotineobliquemercatorazimuthnaturalorigin: 'omerc',
+  hotineobliquemercatorazimuthcenter: 'omerc',
+  obliquemercator: 'omerc',
+  krovak: 'krovak',
+  krovaknorthorientated: 'krovak',
+  quadrilateralizedsphericalcube: 'qsc',
   transversemercator: 'tmerc',
   transversemercatorsouthorientated: 'unsupported-south-tmerc',
   mercator: 'merc',
@@ -73,6 +82,8 @@ const METHODS: Record<string, string> = {
   equidistantconic: 'eqdc',
   lambertazimuthalequalarea: 'laea',
   stereographic: 'stere',
+  stereographicnorthpole: 'sterea',
+  stereographicsouthpole: 'stere',
   polarstereographic: 'stere',
   polarstereographicvarianta: 'stere',
   polarstereographicvariantb: 'stere',
@@ -81,10 +92,12 @@ const METHODS: Record<string, string> = {
   azimuthalequidistant: 'aeqd',
   modifiedazimuthalequidistant: 'aeqd',
   equidistantcylindrical: 'eqc',
+  equidistantcylindricalspherical: 'eqc',
   equirectangular: 'eqc',
   platecarree: 'eqc',
   bonne: 'bonne',
   cassinisoldner: 'cass',
+  cassini: 'cass',
   cylindricalequalarea: 'cea',
   lambertcylindricalequalarea: 'cea',
   eckertvi: 'eck6',
@@ -128,6 +141,27 @@ const PARAMETERS: Record<string, string> = {
   falsenorthing: 'y_0',
   eastingatfalseorigin: 'x_0',
   northingatfalseorigin: 'y_0'
+};
+// Projection-specific names must not leak into unrelated method interpretations.
+const METHOD_PARAMETERS: Record<string, Record<string, string>> = {
+  omerc: {
+    longitudeofcenter: 'lonc',
+    longitudeofprojectioncentre: 'lonc',
+    azimuth: 'alpha',
+    azimuthatprojectioncentre: 'alpha',
+    rectifiedgridangle: 'gamma',
+    anglefromrectifiedtoskewgrid: 'gamma',
+    scalefactoratprojectioncentre: 'k_0',
+    eastingatprojectioncentre: 'x_0',
+    northingatprojectioncentre: 'y_0'
+  },
+  krovak: {
+    azimuth: 'alpha',
+    colatitudeofconeaxis: 'alpha',
+    pseudostandardparallel1: 'lat_ts',
+    latitudeofpseudostandardparallel: 'lat_ts',
+    scalefactoronpseudostandardparallel: 'k_0'
+  }
 };
 const DIRECTIONS: Record<string, string> = {
   east: 'e',
@@ -319,6 +353,7 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
         'Unsupported projection method: ' + String(object(conversion['method'])['name'])
       );
     parameters['proj'] = projection === 'webmerc' ? 'merc' : projection;
+    let hasSemiMinor = false;
     for (const entry of array(conversion['parameters'])) {
       const parameter = object(entry),
         parameterName = key(parameter['name']);
@@ -328,15 +363,30 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
         parameter['value'] === 0
       )
         continue;
-      let name = PARAMETERS[parameterName];
+      if (parameterName === 'semiminor' && projection === 'webmerc') {
+        if (hasSemiMinor) throw new Error('Duplicate conversion parameter: semi_minor');
+        hasSemiMinor = true;
+        // This legacy pseudo-Mercator hint may only confirm the projection sphere.
+        // It must not override the geographic datum ellipsoid or choose another radius.
+        const radius = finite(parameter['value']) * unit(parameter['unit'], 1);
+        if (
+          Math.abs(radius - Number(parameters['a'])) >
+          4 * Number.EPSILON * Number(parameters['a'])
+        )
+          unsupportedStage('Pseudo-Mercator semi_minor must equal the semi-major axis');
+        continue;
+      }
+      let name = METHOD_PARAMETERS[projection]?.[parameterName] || PARAMETERS[parameterName];
       if (!name) unsupportedStage('Unsupported conversion parameter: ' + String(parameter['name']));
-      if (name === 'lat_1' && ['merc', 'webmerc', 'eqc', 'stere', 'cea'].includes(projection))
+      if (name === 'lat_1' && method === 'stereographicnorthpole') name = 'lat_0';
+      else if (name === 'lat_1' && ['merc', 'webmerc', 'eqc', 'stere', 'cea'].includes(projection))
         name = 'lat_ts';
       if (parameters[name] !== undefined)
         throw new Error('Duplicate conversion parameter: ' + name);
       if (['merc', 'webmerc'].includes(projection) && name === 'lat_0' && parameter['value'] === 0)
         continue;
-      const angle = name.startsWith('lat') || name.startsWith('lon');
+      const angle =
+        name.startsWith('lat') || name.startsWith('lon') || name === 'alpha' || name === 'gamma';
       const length = name === 'x_0' || name === 'y_0';
       let converted =
         (finite(parameter['value']) *
@@ -348,6 +398,28 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
         converted = Math.sign(converted) * 90;
       parameters[name] = String(converted);
     }
+    if (
+      projection === 'omerc' &&
+      [
+        'hotineobliquemercator',
+        'hotineobliquemercatorvarianta',
+        'hotineobliquemercatorazimuthnaturalorigin'
+      ].includes(method)
+    )
+      parameters['no_uoff'] = undefined;
+    if (
+      projection === 'omerc' &&
+      parameters['lon_0'] !== undefined &&
+      parameters['lonc'] !== undefined
+    ) {
+      if (Math.abs(Number(parameters['lon_0']) - Number(parameters['lonc'])) > 1e-10)
+        unsupportedStage('Oblique Mercator central meridian conflicts with projection centre');
+      delete parameters['lon_0'];
+    }
+    // The legacy North_Pole alias uses the oblique alternative away from a pole.
+    // At a pole use the equivalent polar kernel; sterea's inverse is singular there.
+    if (method === 'stereographicnorthpole' && Math.abs(Number(parameters['lat_0'])) === 90)
+      parameters['proj'] = 'stere';
     if (projection === 'lcc' && parameters['lat_1'] === undefined)
       parameters['lat_1'] = parameters['lat_0'];
     if (method === 'polarstereographic' && parameters['lat_0'] !== undefined) {
@@ -358,7 +430,11 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
       parameters['lat_ts'] = parameters['lat_0'];
       delete parameters['lat_0'];
     }
-    if (projection === 'stere' && method.includes('polar') && parameters['lat_0'] === undefined)
+    if (
+      projection === 'stere' &&
+      (method.includes('polar') || method === 'stereographicsouthpole') &&
+      parameters['lat_0'] === undefined
+    )
       parameters['lat_0'] = Number(parameters['lat_ts'] || 90) < 0 ? '-90' : '90';
     if (projection === 'webmerc') {
       parameters['b'] = parameters['a'];

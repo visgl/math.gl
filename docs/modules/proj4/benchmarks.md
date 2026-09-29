@@ -79,6 +79,10 @@ baseline, not a production latency promise.
 
 ## Bundle budgets and release gates
 
+The table below preserves the initial tranche 7 baseline. For current measurements,
+including optional WKT/PROJJSON readers and grid adapters, see the
+[TypeScript engine guide](./typescript-engine.md#tree-shaking-and-bundle-size).
+
 `bundle-budgets.json` records measured baselines and explicit limits with approximately
 10% headroom, rounded up to 100 bytes. The check uses esbuild browser ESM targeting
 ES2020, minification and gzip level 9. It exercises retained public exports rather

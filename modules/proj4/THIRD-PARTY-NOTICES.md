@@ -29,7 +29,7 @@ source, not a claim of an independently authored algorithm.
 
 The plugin adapters, normalization/execution pipeline, and WKT/PROJJSON execution
 adapters are original math.gl code informed by proj4js behavior. The datum alias/
-authority lookup and polar WKT rules in `crs/structured.ts` are directly adapted
+authority lookup and method/parameter normalization rules in `crs/structured.ts` are directly adapted
 from proj4js 2.22.0 and its MIT-licensed wkt-parser dependency, with attribution
 in the source. Mercator and
 equidistant cylindrical are original equation implementations with proj4js parity

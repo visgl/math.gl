@@ -1,5 +1,5 @@
 {
-  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes.",
+  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes. Optional-reader rows added in the structured-method/docs follow-up; existing limits retained.",
   "baseline": {
     "core": {
       "minified": 42306,
@@ -20,6 +20,22 @@
     "proj4Wrapper": {
       "minified": 131932,
       "gzip": 43443
+    },
+    "mercatorWithWKT": {
+      "minified": 66075,
+      "gzip": 23401
+    },
+    "mercatorWithPROJJSON": {
+      "minified": 53637,
+      "gzip": 19459
+    },
+    "mercatorWithNTv2": {
+      "minified": 46789,
+      "gzip": 17345
+    },
+    "mercatorWithGeoTIFFAdapter": {
+      "minified": 46790,
+      "gzip": 17313
     }
   },
   "limits": {
@@ -42,6 +58,22 @@
     "proj4Wrapper": {
       "minified": 145200,
       "gzip": 47800
+    },
+    "mercatorWithWKT": {
+      "minified": 72700,
+      "gzip": 25800
+    },
+    "mercatorWithPROJJSON": {
+      "minified": 59100,
+      "gzip": 21500
+    },
+    "mercatorWithNTv2": {
+      "minified": 51500,
+      "gzip": 19100
+    },
+    "mercatorWithGeoTIFFAdapter": {
+      "minified": 51500,
+      "gzip": 19100
     }
   }
 }

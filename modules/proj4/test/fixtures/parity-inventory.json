@@ -1295,7 +1295,7 @@
     {
       "id": "crs-normalization",
       "tranche": 7,
-      "reason": "The correctness follow-up passes 198/242 upstream coordinate fixtures, fixing all 11 audited silent mismatches, five pole roundoff rejections and the NAD27 execution failure. The full corpus runs in test/lib/upstream-corpus.spec.ts with individually maintained exceptions in test/fixtures/upstream-corpus-exceptions.json (35 open gaps, nine intentional strict-input differences). Structured Hotine/Krovak and other method/parameter mappings, derived CRSs and axis-meridian operations remain incomplete. See docs/modules/proj4/parity-audit.md."
+      "reason": "The structured-method follow-up passes 228/242 upstream coordinate fixtures, with no silent mismatches or execution rejections in the accepted cases. All corpus method mappings are implemented. The remaining exact-error exceptions in test/fixtures/upstream-corpus-exceptions.json comprise five structured axis-orientation gaps and nine intentional strict-input differences. Derived CRSs, broader composite/perspective method parameters and axis-meridian operations remain incomplete. See docs/modules/proj4/parity-audit.md."
     },
     {
       "id": "projection-parameters",
