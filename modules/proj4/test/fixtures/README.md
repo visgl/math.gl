@@ -120,6 +120,8 @@ classification: 232 numeric matches, one independently verified correction, nine
 strict-input rejections. `release-qualification.json` records the supported opt-in
 API decision, acceptance counts and every reviewed compatibility exception.
 
-`qualification/` contains measured browser, Node startup and allocation baselines.
+`qualification/` contains measured macOS and Linux browser, Node startup and allocation baselines.
+`browser-linux.json` is the unmodified artifact from GitHub Actions run 36636932010;
+Chromium, Firefox and WebKit each pass the full independent projection corpus.
 They include source fingerprints, runtime/hardware metadata, raw samples and
 methodology. Timing is descriptive; CI asserts correctness and byte budgets instead.

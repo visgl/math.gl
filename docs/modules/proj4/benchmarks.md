@@ -107,8 +107,8 @@ and distributed licenses. The installed third-party proj4 dependency is reused w
 fetching or publishing anything.
 
 Performance and packaging do not establish geodetic parity. The engine stays opt-in;
-the [roadmap](./roadmap.md) retains independent reference, real-world grid, structured
-CRS coverage and migration-review gates before promotion.
+the [support profile](./native-support.md) defines the scope of the native API
+and the separately reviewed decision required to change the default backend.
 
 
 ## Native release qualification measurements
@@ -136,6 +136,24 @@ not evidence of exactly equal performance. Firefox startup stalls on this macOS 
 host; Linux CI runs all three engines, checks all independent projection fixtures,
 and uploads its own versioned performance report. No Firefox result is inferred
 from Chromium or WebKit.
+
+The same-day [Linux CI run](https://github.com/visgl/math.gl/actions/runs/36636932010)
+passed in all three engines on an AMD EPYC 9V74 / Linux x64 runner. Its raw report
+is preserved as `qualification/browser-linux.json`, using the same runtime source
+fingerprint, point count and sample count. Each engine verified all 134 configurations /
+2,354 reference points and completed 64 warm workloads and 21 cold samples.
+
+| Linux engine | Projection | Native batch (Mpoints/s) | proj4 import (Mpoints/s) |
+| --- | --- | ---: | ---: |
+| Chromium 151.0.7922.34 | Mercator | 7.69 | 3.08 |
+| Chromium 151.0.7922.34 | UTM | 2.06 | 1.46 |
+| Firefox 153.0 | Mercator | 6.67 | 3.33 |
+| Firefox 153.0 | UTM | 2.50 | 2.00 |
+| WebKit 26.5 | Mercator | 6.67 | 6.67 |
+| WebKit 26.5 | UTM | 2.86 | 3.33 |
+
+These shared-runner measurements also have timer quantization. Native batches are
+not uniformly faster in every engine/workload: WebKit UTM was slower in this run.
 
 Fresh Node process medians (OS caches warm; separate process/module registries):
 
