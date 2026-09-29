@@ -28,11 +28,16 @@ are retained in that source file. Its full license is included in
 source, not a claim of an independently authored algorithm.
 
 The plugin adapters, normalization/execution pipeline, and WKT/PROJJSON execution
-adapters are original math.gl code informed by proj4js behavior. Mercator and
+adapters are original math.gl code informed by proj4js behavior. The datum alias/
+authority lookup and polar WKT rules in `crs/structured.ts` are directly adapted
+from proj4js 2.22.0 and its MIT-licensed wkt-parser dependency, with attribution
+in the source. Mercator and
 equidistant cylindrical are original equation implementations with proj4js parity
 tests. They are MIT-licensed to the vis.gl contributors. Syntax parsing is provided
 by `@math.gl/crs`; the experimental runtime does not import proj4js.
 
 Authored differential fixtures use the pinned upstream implementation as an oracle.
 Fixtures copied from upstream tests retain their source tag, line numbers, hash and
-MIT attribution in `test/fixtures/upstream-2.22.0.ts`.
+MIT attribution in `test/fixtures/upstream-2.22.0.ts` and the complete
+`test/fixtures/upstream-corpus-2.22.0.json`. The latter includes all 242 coordinate
+fixtures and suite-level alias definitions, extracted without executing upstream tests.

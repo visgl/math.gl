@@ -17,7 +17,8 @@ import * as native from '@math.gl/proj4/experimental';
 const {values} = parseArgs({
   options: {
     'upstream-tests': {type: 'string'},
-    output: {type: 'string'}
+    output: {type: 'string'},
+    'fixtures-output': {type: 'string'}
   }
 });
 assert(values['upstream-tests'], 'Supply --upstream-tests /path/to/proj4js/test from tag v2.22.0');
@@ -72,6 +73,31 @@ for (const statement of suite.statements) {
     aliases[name] = definition;
     proj4.defs(name, definition);
   }
+}
+// Export only unchanged upstream inputs/expectations, never native outputs.
+if (values['fixtures-output']) {
+  writeFileSync(
+    values['fixtures-output'],
+    JSON.stringify(
+      {
+        source: {
+          version: proj4.version,
+          url: 'https://github.com/proj4js/proj4js/blob/v2.22.0/test/testData.js',
+          hashes,
+          license: 'MIT; copyright (c) 2014, proj4js authors. See ../../PROJ4-LICENSE.md.'
+        },
+        aliases,
+        fixtures: fixtures.map((fixture, index) => ({
+          index,
+          sourceLine:
+            data.getLineAndCharacterOfPosition(initializer.elements[index].getStart()).line + 1,
+          ...fixture
+        }))
+      },
+      null,
+      2
+    ) + '\n'
+  );
 }
 const plugins = Object.values(native).filter(
   value => value && typeof value === 'object' && typeof value.create === 'function'

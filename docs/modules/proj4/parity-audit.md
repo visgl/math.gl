@@ -1,15 +1,56 @@
 # Native proj4 parity audit — September 29, 2026
 
 **The native engine has broad algorithm coverage, but has not reached proj4js parity.**
-The performance PR does not qualify it as a replacement. The important new finding
-is that some accepted structured CRS definitions return incorrect coordinates,
-not merely that some definitions are rejected.
+The performance PR does not qualify it as a replacement. The original audit found accepted structured CRS definitions returning incorrect
+coordinates, in addition to rejected definitions. The correctness follow-up below
+fixes those demonstrated silent errors; broader qualification remains open.
 
 This audit measures runtime revision `bf28217d` (PR #148) against proj4js **2.22.0**,
 still npm's latest release when checked. It adds evidence beyond the existing
-selected fixtures and synthetic grids. No correctness fixes are included in this audit.
+selected fixtures and synthetic grids. The original results below are preserved for comparison.
 
-## Full upstream coordinate corpus
+## Correctness follow-up
+
+The follow-up fixes all **11 silent coordinate mismatches**, the **five pole/origin
+roundoff rejections**, and the **NAD27 execution rejection**. The same unchanged
+upstream corpus now passes **198/242** cases in both directions:
+
+| Input | Passes | Construction rejections | Execution rejections | Silent mismatches |
+| --- | ---: | ---: | ---: | ---: |
+| PROJ strings | 106/116 | 10 | 0 | 0 |
+| WKT | 81/112 | 31 | 0 | 0 |
+| PROJJSON | 5/8 | 3 | 0 | 0 |
+| Aliases | 6/6 | 0 | 0 | 0 |
+| **Total** | **198/242** | **44** | **0** | **0** |
+
+WKT1 polar stereographic latitude-of-origin now sets the latitude of true scale;
+the actual origin is the corresponding pole. WKT2 variant A retains its pole and
+scale factor. Structured latitude conversion tolerates only a few ULPs of pole
+roundoff; invalid PROJ or structured latitude values still reject.
+
+WKT1 recognizes the NZGD49 and Belge 1972 datum aliases. WKT2/PROJJSON projected
+CRSs use a recognized geographic base-CRS authority ID before a datum-name lookup,
+matching upstream's existing transformation table. Unknown IDs retain the name
+fallback, and IDs on the projected CRS or datum itself are not interpreted as
+geographic CRS IDs. Explicit TOWGS84 and BoundCRS transformations take priority,
+including over named grids. These are compatibility choices, not a geographic
+operation-selection database or independent geodetic validation.
+
+All 242 original coordinate fixtures, tolerances and suite aliases are now checked
+in with source hashes and attribution. Node and Chromium run them continuously.
+The 44 remaining rejections are individually listed in
+`modules/proj4/test/fixtures/upstream-corpus-exceptions.json`: **35 open coverage
+gaps** and **nine intentional strict-input differences**. Each exception must still
+throw its exact expected error; it cannot mask a new silent mismatch. Newly accepted
+cases fail the exception check until their exception is removed and their coordinates
+pass. Passing tests for expected rejections does **not** mean 242/242 parity.
+
+This completes follow-up tranche 1 and the continuous-corpus gate from tranche 2.
+Remaining method/parameter/axis mappings, grid coverage policy, regional validity
+limits and independent native PROJ qualification remain open. The original kernel
+and grid audit measurements below are unchanged by these normalization fixes.
+
+## Original full upstream coordinate corpus
 
 All 242 entries in upstream's tagged
 [`test/testData.js`](https://github.com/proj4js/proj4js/blob/v2.22.0/test/testData.js)
@@ -128,11 +169,11 @@ only establish that a CRS can be constructed, not that its coordinates are corre
 
 ## Follow-up tranches before promotion
 
-1. **Correctness first:** polar WKT semantics, structured datum IDs/name aliases and
+1. **Correctness first (completed):** polar WKT semantics, structured datum IDs/name aliases and
    precedence, and angular roundoff. Import regression fixtures for all 11 silent
    mismatches and five pole-definition failures. Unsupported operations must reject
    explicitly instead of silently selecting another interpretation.
-2. **Structured compatibility:** enumerate and implement the missing method/parameter/
+2. **Structured compatibility (continuous corpus in place; mappings open):** enumerate and implement the missing method/parameter/
    axis mappings; disposition each strict-input rejection. Run the entire coordinate
    corpus continuously, with individually reviewed exceptions rather than a total pass count.
 3. **Grid and domain policy:** resolve the two real-grid edge differences, add licensed
@@ -143,6 +184,12 @@ only establish that a CRS can be constructed, not that its coordinates are corre
    remains a separate decision after these gates, not a consequence of faster benchmarks.
 
 ## Reproduce
+
+The checked-in corpus runs without downloads with `yarn test-node modules/proj4/test`
+and `yarn test-headless modules/proj4/test`. To re-extract its inputs and expectations,
+add `--fixtures-output modules/proj4/test/fixtures/upstream-corpus-2.22.0.json`
+to the corpus audit command. Exception dispositions are maintained separately and
+are never generated by the audit command.
 
 Build the current packages with `yarn build`. Obtain the unmodified files from the
 [tagged upstream test directory](https://github.com/proj4js/proj4js/tree/v2.22.0/test)
