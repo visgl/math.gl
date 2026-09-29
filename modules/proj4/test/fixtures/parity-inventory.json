@@ -43,7 +43,8 @@
         "aea-tangent"
       ],
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -66,7 +67,8 @@
         "aeqd-90-sphere"
       ],
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -89,7 +91,8 @@
         "bonne-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -114,7 +117,8 @@
         "cass-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -137,7 +141,8 @@
         "cea-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -161,7 +166,8 @@
         "eck6-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -186,7 +192,8 @@
         "foundation"
       ],
       "tests": [
-        "test/lib/typescript-projection.spec.ts"
+        "test/lib/typescript-projection.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -211,7 +218,8 @@
         "eqdc-tangent"
       ],
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -235,7 +243,8 @@
         "eqearth-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -258,7 +267,8 @@
         "equi-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -288,7 +298,8 @@
         "tmerc-ellipsoid"
       ],
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -332,7 +343,8 @@
       "nativeSelection": "+proj=geocent",
       "fixtureIds": [],
       "tests": [
-        "test/lib/crs-datums.spec.ts"
+        "test/lib/crs-datums.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "native-proj-corpus"
@@ -357,7 +369,8 @@
         "geos-y-true"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -380,7 +393,8 @@
         "gnom-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -404,7 +418,8 @@
         "gstmerc-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -431,7 +446,8 @@
         "krovak-czech"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -457,7 +473,8 @@
         "laea-90-ellipsoid"
       ],
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -487,7 +504,8 @@
         "lcc-tangent"
       ],
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -512,7 +530,8 @@
         "foundation"
       ],
       "tests": [
-        "test/lib/typescript-projection.spec.ts"
+        "test/lib/typescript-projection.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -538,7 +557,8 @@
         "foundation"
       ],
       "tests": [
-        "test/lib/typescript-projection.spec.ts"
+        "test/lib/typescript-projection.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -561,7 +581,8 @@
         "mill-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -585,7 +606,8 @@
         "moll-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -609,7 +631,8 @@
         "nzmg-2"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -631,7 +654,8 @@
       "nativeSelection": "obliqueTransformation(wrappedPlugin) or obliqueTransformation(\"longlat\")",
       "fixtureIds": [],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -664,7 +688,8 @@
         "omerc-two-point"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -687,7 +712,8 @@
         "ortho-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -712,7 +738,8 @@
         "poly-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -741,7 +768,8 @@
         "qsc-5"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -765,7 +793,8 @@
         "robin-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -789,7 +818,8 @@
         "sinu-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -811,7 +841,8 @@
         "somerc"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -839,7 +870,8 @@
         "stere-true-scale-south"
       ],
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -865,7 +897,8 @@
         "sterea-sphere"
       ],
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -888,7 +921,8 @@
         "tmerc-approx-sphere"
       ],
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -911,7 +945,8 @@
         "tpers-20"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -936,7 +971,8 @@
         "utm-sphere"
       ],
       "tests": [
-        "test/lib/common-projections.spec.ts"
+        "test/lib/common-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -961,7 +997,8 @@
         "vandg-sphere"
       ],
       "tests": [
-        "test/lib/catalogue-projections.spec.ts"
+        "test/lib/catalogue-projections.spec.ts",
+        "test/lib/native-reference.spec.ts"
       ],
       "gapIds": [
         "crs-normalization",
@@ -1310,12 +1347,12 @@
     {
       "id": "native-proj-corpus",
       "tranche": 7,
-      "reason": "Independent checks currently use published PROJ UTM examples. Expand into a reproducibly generated native PROJ/EPSG corpus; the local PROJ executable is incompatible with this host."
+      "reason": "Independent PROJ 9.5.1 / pyproj 3.7.2 corpus covers all 37 named algorithms, 118 configurations and 1612 sampled points. Denser regional/domain qualification, Cassini/Robinson accuracy improvements, and broader independent datum/structured-operation references remain open."
     },
     {
       "id": "grid-reference-corpus",
       "tranche": 7,
-      "reason": "Synthetic fixtures pass. The 2026-09-29 external real-grid audit passes 24/26 upstream cases; two GeoTIFF western-edge cases are rejected by the native strict-coverage policy and need explicit disposition. Add maintained licensed real-world fixtures and independent reference outputs before promotion; broader metadata/band conventions and vertical grids remain outside the horizontal subset."
+      "reason": "Pinned licensed BETA2007 and NA83SCRS GeoTIFFs have 80 independent PROJ reference points and offline Node/Chromium tests. Canadian western-edge inverse rejections are deliberate strict coverage (the approximate PROJ source lies outside). Real NTv2 bytes, more datasets/metadata conventions and structured operations remain unqualified; vertical grids are outside the horizontal subset."
     }
   ],
   "exceptions": [
@@ -1411,7 +1448,7 @@
     },
     {
       "id": "mollweide-unwrapped-longitude",
-      "description": "Native Mollweide inverse retains longitudes outside ±180 degrees when +over is enabled. Upstream 2.22.0 clamps after its over-aware longitude adjustment; the native inverse clamps only when wrapping is enabled.",
+      "description": "Native Mollweide inverse retains longitudes outside \u00b1180 degrees when +over is enabled. Upstream 2.22.0 clamps after its over-aware longitude adjustment; the native inverse clamps only when wrapping is enabled.",
       "test": "test/lib/catalogue-projections.spec.ts"
     },
     {
@@ -1438,6 +1475,11 @@
       "id": "typed-array-batches",
       "description": "Native-only Float32Array/Float64Array in-place APIs use complete interleaved records, require space for geocentric Z, preserve trailing ordinates and commit earlier records before an error. Built-in mutable hooks avoid temporary coordinate arrays; legacy custom plugins retain scalar fallback.",
       "test": "test/lib/batch-projection.spec.ts"
+    },
+    {
+      "id": "aeqd-relative-origin",
+      "description": "Ellipsoidal AEQD tests longitude relative to lon_0 at its origin. Upstream 2.22.0 incorrectly collapses longitude zero at lat_0 to the false origin even with a nonzero lon_0.",
+      "test": "test/lib/native-reference.spec.ts"
     }
   ]
 }

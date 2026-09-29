@@ -8,7 +8,9 @@ It is an entry point of **`@math.gl/proj4`**, not a separately installed package
 The engine is experimental. The current upstream coordinate corpus passes **233/242**
 cases in both directions, with nine intentional strict-input construction rejections and no silent
 mismatches in the accepted cases. This is not a measure of complete geodetic accuracy.
-See the [parity audit](./parity-audit.md) for remaining coverage and qualification work.
+An independent PROJ corpus also checks all 37 named algorithms across 1,612 points
+and two real grids, with explicit accuracy limits. See [independent validation](./independent-validation.md)
+and the [parity audit](./parity-audit.md) for coverage and remaining qualification work.
 The existing `Proj4Projection` remains available from `@math.gl/proj4` and uses proj4js.
 
 ## Start with the projections you need

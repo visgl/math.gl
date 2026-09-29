@@ -22,6 +22,12 @@ try {
         join(root, 'modules', name)
       )
     );
+    if (name === 'proj4') {
+      assert(
+        manifest.files.every(file => !file.path.startsWith('test/')),
+        'Test grids must not ship in npm'
+      );
+    }
     const directory = join(temporary, 'node_modules', '@math.gl', name);
     mkdirSync(directory, {recursive: true});
     run('tar', [

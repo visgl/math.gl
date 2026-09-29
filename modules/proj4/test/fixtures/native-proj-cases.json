@@ -1,0 +1,7654 @@
+{
+  "description": "Authored projection configurations. Existing common/catalogue inputs reused; expectations generated independently by native PROJ, never proj4js.",
+  "cases": [
+    {
+      "id": "tmerc-ellipsoid",
+      "definition": "+proj=tmerc +lon_0=9 +lat_0=10 +k_0=0.9996 +x_0=500000 +y_0=1234 +ellps=WGS84",
+      "oracle": "+proj=tmerc +lon_0=9 +lat_0=10 +k_0=0.9996 +x_0=500000 +y_0=1234 +ellps=WGS84",
+      "points": [
+        [
+          8.5,
+          44.5
+        ],
+        [
+          8.5,
+          45
+        ],
+        [
+          8.5,
+          45.5
+        ],
+        [
+          9,
+          44.5
+        ],
+        [
+          9,
+          45
+        ],
+        [
+          9,
+          45.5
+        ],
+        [
+          9.5,
+          44.5
+        ],
+        [
+          9.5,
+          45
+        ],
+        [
+          9.5,
+          45.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "etmerc-ellipsoid",
+      "definition": "+proj=etmerc +lon_0=-69 +lat_0=-10 +k=0.99 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=etmerc +lon_0=-69 +lat_0=-10 +k=0.99 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          -69.5,
+          -35.5
+        ],
+        [
+          -69.5,
+          -35
+        ],
+        [
+          -69.5,
+          -34.5
+        ],
+        [
+          -69,
+          -35.5
+        ],
+        [
+          -69,
+          -35
+        ],
+        [
+          -69,
+          -34.5
+        ],
+        [
+          -68.5,
+          -35.5
+        ],
+        [
+          -68.5,
+          -35
+        ],
+        [
+          -68.5,
+          -34.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "tmerc-approx-ellipsoid",
+      "definition": "+proj=tmerc +approx +lon_0=9 +k_0=0.9996 +ellps=WGS84",
+      "oracle": "+proj=tmerc +approx +lon_0=9 +k_0=0.9996 +ellps=WGS84",
+      "points": [
+        [
+          8.5,
+          44.5
+        ],
+        [
+          8.5,
+          45
+        ],
+        [
+          8.5,
+          45.5
+        ],
+        [
+          9,
+          44.5
+        ],
+        [
+          9,
+          45
+        ],
+        [
+          9,
+          45.5
+        ],
+        [
+          9.5,
+          44.5
+        ],
+        [
+          9.5,
+          45
+        ],
+        [
+          9.5,
+          45.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "tmerc-approx-sphere",
+      "definition": "+proj=tmerc +approx +R=6371000 +lon_0=9 +x_0=123 +y_0=456",
+      "oracle": "+proj=tmerc +approx +R=6371000 +lon_0=9 +x_0=123 +y_0=456",
+      "points": [
+        [
+          8.5,
+          -35.5
+        ],
+        [
+          8.5,
+          -35
+        ],
+        [
+          8.5,
+          -34.5
+        ],
+        [
+          9,
+          -35.5
+        ],
+        [
+          9,
+          -35
+        ],
+        [
+          9,
+          -34.5
+        ],
+        [
+          9.5,
+          -35.5
+        ],
+        [
+          9.5,
+          -35
+        ],
+        [
+          9.5,
+          -34.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "etmerc-approx-sphere",
+      "definition": "+proj=etmerc +approx +R=6371000 +lon_0=9",
+      "oracle": "+proj=tmerc +approx +R=6371000 +lon_0=9",
+      "points": [
+        [
+          8.5,
+          44.5
+        ],
+        [
+          8.5,
+          45
+        ],
+        [
+          8.5,
+          45.5
+        ],
+        [
+          9,
+          44.5
+        ],
+        [
+          9,
+          45
+        ],
+        [
+          9,
+          45.5
+        ],
+        [
+          9.5,
+          44.5
+        ],
+        [
+          9.5,
+          45
+        ],
+        [
+          9.5,
+          45.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "The proj4js etmerc +approx switch selects approximate transverse Mercator; use PROJ tmerc +approx explicitly."
+    },
+    {
+      "id": "utm-north",
+      "definition": "+proj=utm +zone=31 +datum=WGS84",
+      "oracle": "+proj=utm +zone=31 +datum=WGS84",
+      "points": [
+        [
+          2.5,
+          44.5
+        ],
+        [
+          2.5,
+          45
+        ],
+        [
+          2.5,
+          45.5
+        ],
+        [
+          3,
+          44.5
+        ],
+        [
+          3,
+          45
+        ],
+        [
+          3,
+          45.5
+        ],
+        [
+          3.5,
+          44.5
+        ],
+        [
+          3.5,
+          45
+        ],
+        [
+          3.5,
+          45.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "utm-south",
+      "definition": "+proj=utm +zone=56 +south +datum=WGS84",
+      "oracle": "+proj=utm +zone=56 +south +datum=WGS84",
+      "points": [
+        [
+          152.5,
+          -33.5
+        ],
+        [
+          152.5,
+          -33
+        ],
+        [
+          152.5,
+          -32.5
+        ],
+        [
+          153,
+          -33.5
+        ],
+        [
+          153,
+          -33
+        ],
+        [
+          153,
+          -32.5
+        ],
+        [
+          153.5,
+          -33.5
+        ],
+        [
+          153.5,
+          -33
+        ],
+        [
+          153.5,
+          -32.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "utm-sphere",
+      "definition": "+proj=utm +zone=31 +approx +R=6371000",
+      "oracle": "+proj=tmerc +approx +R=6371000 +lon_0=3 +lat_0=0 +k_0=0.9996 +x_0=500000 +y_0=0",
+      "points": [
+        [
+          2.5,
+          44.5
+        ],
+        [
+          2.5,
+          45
+        ],
+        [
+          2.5,
+          45.5
+        ],
+        [
+          3,
+          44.5
+        ],
+        [
+          3,
+          45
+        ],
+        [
+          3,
+          45.5
+        ],
+        [
+          3.5,
+          44.5
+        ],
+        [
+          3.5,
+          45
+        ],
+        [
+          3.5,
+          45.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "PROJ rejects spherical UTM. Compare its equivalent spherical transverse Mercator with explicit zone 31 constants."
+    },
+    {
+      "id": "lcc-north",
+      "definition": "+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=1000 +y_0=2000 +k_0=0.99 +ellps=WGS84",
+      "oracle": "+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=1000 +y_0=2000 +k_0=0.99 +ellps=WGS84",
+      "points": [
+        [
+          -96.5,
+          38.5
+        ],
+        [
+          -96.5,
+          39
+        ],
+        [
+          -96.5,
+          39.5
+        ],
+        [
+          -96,
+          38.5
+        ],
+        [
+          -96,
+          39
+        ],
+        [
+          -96,
+          39.5
+        ],
+        [
+          -95.5,
+          38.5
+        ],
+        [
+          -95.5,
+          39
+        ],
+        [
+          -95.5,
+          39.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "lcc-south",
+      "definition": "+proj=lcc +lat_1=-18 +lat_2=-36 +lat_0=-25 +lon_0=135 +ellps=WGS84",
+      "oracle": "+proj=lcc +lat_1=-18 +lat_2=-36 +lat_0=-25 +lon_0=135 +ellps=WGS84",
+      "points": [
+        [
+          134.5,
+          -25.5
+        ],
+        [
+          134.5,
+          -25
+        ],
+        [
+          134.5,
+          -24.5
+        ],
+        [
+          135,
+          -25.5
+        ],
+        [
+          135,
+          -25
+        ],
+        [
+          135,
+          -24.5
+        ],
+        [
+          135.5,
+          -25.5
+        ],
+        [
+          135.5,
+          -25
+        ],
+        [
+          135.5,
+          -24.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "lcc-tangent",
+      "definition": "+proj=lcc +lat_1=45 +lat_0=45 +ellps=WGS84",
+      "oracle": "+proj=lcc +lat_1=45 +lat_0=45 +ellps=WGS84",
+      "points": [
+        [
+          -0.5,
+          44.5
+        ],
+        [
+          -0.5,
+          45
+        ],
+        [
+          -0.5,
+          45.5
+        ],
+        [
+          0,
+          44.5
+        ],
+        [
+          0,
+          45
+        ],
+        [
+          0,
+          45.5
+        ],
+        [
+          0.5,
+          44.5
+        ],
+        [
+          0.5,
+          45
+        ],
+        [
+          0.5,
+          45.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "lcc-sphere",
+      "definition": "+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +R=6371000",
+      "oracle": "+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +R=6371000",
+      "points": [
+        [
+          -0.5,
+          38.5
+        ],
+        [
+          -0.5,
+          39
+        ],
+        [
+          -0.5,
+          39.5
+        ],
+        [
+          0,
+          38.5
+        ],
+        [
+          0,
+          39
+        ],
+        [
+          0,
+          39.5
+        ],
+        [
+          0.5,
+          38.5
+        ],
+        [
+          0.5,
+          39
+        ],
+        [
+          0.5,
+          39.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "lcc-polar-origin",
+      "definition": "+proj=lcc +lat_1=-60 +lat_2=-80 +lat_0=-90 +ellps=WGS84",
+      "oracle": "+proj=lcc +lat_1=-60 +lat_2=-80 +lat_0=-90 +ellps=WGS84",
+      "points": [
+        [
+          -0.5,
+          -80.5
+        ],
+        [
+          -0.5,
+          -80
+        ],
+        [
+          -0.5,
+          -79.5
+        ],
+        [
+          0,
+          -80.5
+        ],
+        [
+          0,
+          -80
+        ],
+        [
+          0,
+          -79.5
+        ],
+        [
+          0.5,
+          -80.5
+        ],
+        [
+          0.5,
+          -80
+        ],
+        [
+          0.5,
+          -79.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aea-north",
+      "definition": "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=100 +y_0=-100 +ellps=WGS84",
+      "oracle": "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=100 +y_0=-100 +ellps=WGS84",
+      "points": [
+        [
+          -96.5,
+          34.5
+        ],
+        [
+          -96.5,
+          35
+        ],
+        [
+          -96.5,
+          35.5
+        ],
+        [
+          -96,
+          34.5
+        ],
+        [
+          -96,
+          35
+        ],
+        [
+          -96,
+          35.5
+        ],
+        [
+          -95.5,
+          34.5
+        ],
+        [
+          -95.5,
+          35
+        ],
+        [
+          -95.5,
+          35.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aea-south",
+      "definition": "+proj=aea +lat_1=-18 +lat_2=-36 +lat_0=-25 +lon_0=135 +ellps=WGS84",
+      "oracle": "+proj=aea +lat_1=-18 +lat_2=-36 +lat_0=-25 +lon_0=135 +ellps=WGS84",
+      "points": [
+        [
+          134.5,
+          -25.5
+        ],
+        [
+          134.5,
+          -25
+        ],
+        [
+          134.5,
+          -24.5
+        ],
+        [
+          135,
+          -25.5
+        ],
+        [
+          135,
+          -25
+        ],
+        [
+          135,
+          -24.5
+        ],
+        [
+          135.5,
+          -25.5
+        ],
+        [
+          135.5,
+          -25
+        ],
+        [
+          135.5,
+          -24.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aea-sphere",
+      "definition": "+proj=aea +lat_1=30 +lat_2=60 +R=6371000",
+      "oracle": "+proj=aea +lat_1=30 +lat_2=60 +R=6371000",
+      "points": [
+        [
+          -0.5,
+          39.5
+        ],
+        [
+          -0.5,
+          40
+        ],
+        [
+          -0.5,
+          40.5
+        ],
+        [
+          0,
+          39.5
+        ],
+        [
+          0,
+          40
+        ],
+        [
+          0,
+          40.5
+        ],
+        [
+          0.5,
+          39.5
+        ],
+        [
+          0.5,
+          40
+        ],
+        [
+          0.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aea-tangent",
+      "definition": "+proj=aea +lat_1=40 +lat_2=40 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=aea +lat_1=40 +lat_2=40 +lat_0=40 +ellps=WGS84",
+      "points": [
+        [
+          -0.5,
+          39.5
+        ],
+        [
+          -0.5,
+          40
+        ],
+        [
+          -0.5,
+          40.5
+        ],
+        [
+          0,
+          39.5
+        ],
+        [
+          0,
+          40
+        ],
+        [
+          0,
+          40.5
+        ],
+        [
+          0.5,
+          39.5
+        ],
+        [
+          0.5,
+          40
+        ],
+        [
+          0.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "eqdc-north",
+      "definition": "+proj=eqdc +lat_1=20 +lat_2=60 +lat_0=40 +x_0=1500 +y_0=-200 +ellps=WGS84",
+      "oracle": "+proj=eqdc +lat_1=20 +lat_2=60 +lat_0=40 +x_0=1500 +y_0=-200 +ellps=WGS84",
+      "points": [
+        [
+          -0.5,
+          39.5
+        ],
+        [
+          -0.5,
+          40
+        ],
+        [
+          -0.5,
+          40.5
+        ],
+        [
+          0,
+          39.5
+        ],
+        [
+          0,
+          40
+        ],
+        [
+          0,
+          40.5
+        ],
+        [
+          0.5,
+          39.5
+        ],
+        [
+          0.5,
+          40
+        ],
+        [
+          0.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "eqdc-south",
+      "definition": "+proj=eqdc +lat_1=-20 +lat_2=-60 +lat_0=-40 +ellps=WGS84",
+      "oracle": "+proj=eqdc +lat_1=-20 +lat_2=-60 +lat_0=-40 +ellps=WGS84",
+      "points": [
+        [
+          -0.5,
+          -40.5
+        ],
+        [
+          -0.5,
+          -40
+        ],
+        [
+          -0.5,
+          -39.5
+        ],
+        [
+          0,
+          -40.5
+        ],
+        [
+          0,
+          -40
+        ],
+        [
+          0,
+          -39.5
+        ],
+        [
+          0.5,
+          -40.5
+        ],
+        [
+          0.5,
+          -40
+        ],
+        [
+          0.5,
+          -39.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "eqdc-sphere",
+      "definition": "+proj=eqdc +lat_1=20 +lat_2=60 +lat_0=40 +R=6371000",
+      "oracle": "+proj=eqdc +lat_1=20 +lat_2=60 +lat_0=40 +R=6371000",
+      "points": [
+        [
+          -0.5,
+          39.5
+        ],
+        [
+          -0.5,
+          40
+        ],
+        [
+          -0.5,
+          40.5
+        ],
+        [
+          0,
+          39.5
+        ],
+        [
+          0,
+          40
+        ],
+        [
+          0,
+          40.5
+        ],
+        [
+          0.5,
+          39.5
+        ],
+        [
+          0.5,
+          40
+        ],
+        [
+          0.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "eqdc-tangent",
+      "definition": "+proj=eqdc +lat_1=40 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=eqdc +lat_1=40 +lat_0=40 +ellps=WGS84 +lat_2=40",
+      "points": [
+        [
+          -0.5,
+          39.5
+        ],
+        [
+          -0.5,
+          40
+        ],
+        [
+          -0.5,
+          40.5
+        ],
+        [
+          0,
+          39.5
+        ],
+        [
+          0,
+          40
+        ],
+        [
+          0,
+          40.5
+        ],
+        [
+          0.5,
+          39.5
+        ],
+        [
+          0.5,
+          40
+        ],
+        [
+          0.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "math.gl/proj4js default the omitted second parallel to lat_1; PROJ defaults it to zero. Make the tangent definition explicit."
+    },
+    {
+      "id": "laea-0-ellipsoid",
+      "definition": "+proj=laea +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=laea +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          -0.5
+        ],
+        [
+          14.5,
+          0
+        ],
+        [
+          14.5,
+          0.5
+        ],
+        [
+          15,
+          -0.5
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          15,
+          0.5
+        ],
+        [
+          15.5,
+          -0.5
+        ],
+        [
+          15.5,
+          0
+        ],
+        [
+          15.5,
+          0.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "laea-0-sphere",
+      "definition": "+proj=laea +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=laea +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          -0.5
+        ],
+        [
+          14.5,
+          0
+        ],
+        [
+          14.5,
+          0.5
+        ],
+        [
+          15,
+          -0.5
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          15,
+          0.5
+        ],
+        [
+          15.5,
+          -0.5
+        ],
+        [
+          15.5,
+          0
+        ],
+        [
+          15.5,
+          0.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "laea-45-ellipsoid",
+      "definition": "+proj=laea +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=laea +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          44.5
+        ],
+        [
+          14.5,
+          45
+        ],
+        [
+          14.5,
+          45.5
+        ],
+        [
+          15,
+          44.5
+        ],
+        [
+          15,
+          45
+        ],
+        [
+          15,
+          45.5
+        ],
+        [
+          15.5,
+          44.5
+        ],
+        [
+          15.5,
+          45
+        ],
+        [
+          15.5,
+          45.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "laea-45-sphere",
+      "definition": "+proj=laea +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=laea +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          44.5
+        ],
+        [
+          14.5,
+          45
+        ],
+        [
+          14.5,
+          45.5
+        ],
+        [
+          15,
+          44.5
+        ],
+        [
+          15,
+          45
+        ],
+        [
+          15,
+          45.5
+        ],
+        [
+          15.5,
+          44.5
+        ],
+        [
+          15.5,
+          45
+        ],
+        [
+          15.5,
+          45.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "laea--45-ellipsoid",
+      "definition": "+proj=laea +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=laea +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          -45.5
+        ],
+        [
+          14.5,
+          -45
+        ],
+        [
+          14.5,
+          -44.5
+        ],
+        [
+          15,
+          -45.5
+        ],
+        [
+          15,
+          -45
+        ],
+        [
+          15,
+          -44.5
+        ],
+        [
+          15.5,
+          -45.5
+        ],
+        [
+          15.5,
+          -45
+        ],
+        [
+          15.5,
+          -44.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "laea--45-sphere",
+      "definition": "+proj=laea +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=laea +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          -45.5
+        ],
+        [
+          14.5,
+          -45
+        ],
+        [
+          14.5,
+          -44.5
+        ],
+        [
+          15,
+          -45.5
+        ],
+        [
+          15,
+          -45
+        ],
+        [
+          15,
+          -44.5
+        ],
+        [
+          15.5,
+          -45.5
+        ],
+        [
+          15.5,
+          -45
+        ],
+        [
+          15.5,
+          -44.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "laea-90-ellipsoid",
+      "definition": "+proj=laea +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=laea +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          79.5
+        ],
+        [
+          14.5,
+          80
+        ],
+        [
+          14.5,
+          80.5
+        ],
+        [
+          15,
+          79.5
+        ],
+        [
+          15,
+          80
+        ],
+        [
+          15,
+          80.5
+        ],
+        [
+          15.5,
+          79.5
+        ],
+        [
+          15.5,
+          80
+        ],
+        [
+          15.5,
+          80.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "laea-90-sphere",
+      "definition": "+proj=laea +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=laea +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          79.5
+        ],
+        [
+          14.5,
+          80
+        ],
+        [
+          14.5,
+          80.5
+        ],
+        [
+          15,
+          79.5
+        ],
+        [
+          15,
+          80
+        ],
+        [
+          15,
+          80.5
+        ],
+        [
+          15.5,
+          79.5
+        ],
+        [
+          15.5,
+          80
+        ],
+        [
+          15.5,
+          80.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "laea--90-ellipsoid",
+      "definition": "+proj=laea +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=laea +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          -80.5
+        ],
+        [
+          14.5,
+          -80
+        ],
+        [
+          14.5,
+          -79.5
+        ],
+        [
+          15,
+          -80.5
+        ],
+        [
+          15,
+          -80
+        ],
+        [
+          15,
+          -79.5
+        ],
+        [
+          15.5,
+          -80.5
+        ],
+        [
+          15.5,
+          -80
+        ],
+        [
+          15.5,
+          -79.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "laea--90-sphere",
+      "definition": "+proj=laea +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=laea +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          -80.5
+        ],
+        [
+          14.5,
+          -80
+        ],
+        [
+          14.5,
+          -79.5
+        ],
+        [
+          15,
+          -80.5
+        ],
+        [
+          15,
+          -80
+        ],
+        [
+          15,
+          -79.5
+        ],
+        [
+          15.5,
+          -80.5
+        ],
+        [
+          15.5,
+          -80
+        ],
+        [
+          15.5,
+          -79.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "stere-0-ellipsoid",
+      "definition": "+proj=stere +lat_0=0 +lon_0=15 +x_0=100 +y_0=0 +ellps=WGS84",
+      "oracle": "+proj=stere +lat_0=0 +lon_0=15 +x_0=100 +y_0=0 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          -0.5
+        ],
+        [
+          14.5,
+          0
+        ],
+        [
+          14.5,
+          0.5
+        ],
+        [
+          15,
+          -0.5
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          15,
+          0.5
+        ],
+        [
+          15.5,
+          -0.5
+        ],
+        [
+          15.5,
+          0
+        ],
+        [
+          15.5,
+          0.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "stere-0-sphere",
+      "definition": "+proj=stere +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=stere +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          -0.5
+        ],
+        [
+          14.5,
+          0
+        ],
+        [
+          14.5,
+          0.5
+        ],
+        [
+          15,
+          -0.5
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          15,
+          0.5
+        ],
+        [
+          15.5,
+          -0.5
+        ],
+        [
+          15.5,
+          0
+        ],
+        [
+          15.5,
+          0.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "stere-45-ellipsoid",
+      "definition": "+proj=stere +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=stere +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          44.5
+        ],
+        [
+          14.5,
+          45
+        ],
+        [
+          14.5,
+          45.5
+        ],
+        [
+          15,
+          44.5
+        ],
+        [
+          15,
+          45
+        ],
+        [
+          15,
+          45.5
+        ],
+        [
+          15.5,
+          44.5
+        ],
+        [
+          15.5,
+          45
+        ],
+        [
+          15.5,
+          45.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "stere-45-sphere",
+      "definition": "+proj=stere +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=stere +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          44.5
+        ],
+        [
+          14.5,
+          45
+        ],
+        [
+          14.5,
+          45.5
+        ],
+        [
+          15,
+          44.5
+        ],
+        [
+          15,
+          45
+        ],
+        [
+          15,
+          45.5
+        ],
+        [
+          15.5,
+          44.5
+        ],
+        [
+          15.5,
+          45
+        ],
+        [
+          15.5,
+          45.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "stere--45-ellipsoid",
+      "definition": "+proj=stere +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=stere +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          -45.5
+        ],
+        [
+          14.5,
+          -45
+        ],
+        [
+          14.5,
+          -44.5
+        ],
+        [
+          15,
+          -45.5
+        ],
+        [
+          15,
+          -45
+        ],
+        [
+          15,
+          -44.5
+        ],
+        [
+          15.5,
+          -45.5
+        ],
+        [
+          15.5,
+          -45
+        ],
+        [
+          15.5,
+          -44.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "stere--45-sphere",
+      "definition": "+proj=stere +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=stere +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          -45.5
+        ],
+        [
+          14.5,
+          -45
+        ],
+        [
+          14.5,
+          -44.5
+        ],
+        [
+          15,
+          -45.5
+        ],
+        [
+          15,
+          -45
+        ],
+        [
+          15,
+          -44.5
+        ],
+        [
+          15.5,
+          -45.5
+        ],
+        [
+          15.5,
+          -45
+        ],
+        [
+          15.5,
+          -44.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "stere-90-ellipsoid",
+      "definition": "+proj=stere +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=stere +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          79.5
+        ],
+        [
+          14.5,
+          80
+        ],
+        [
+          14.5,
+          80.5
+        ],
+        [
+          15,
+          79.5
+        ],
+        [
+          15,
+          80
+        ],
+        [
+          15,
+          80.5
+        ],
+        [
+          15.5,
+          79.5
+        ],
+        [
+          15.5,
+          80
+        ],
+        [
+          15.5,
+          80.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "stere-90-sphere",
+      "definition": "+proj=stere +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=stere +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          79.5
+        ],
+        [
+          14.5,
+          80
+        ],
+        [
+          14.5,
+          80.5
+        ],
+        [
+          15,
+          79.5
+        ],
+        [
+          15,
+          80
+        ],
+        [
+          15,
+          80.5
+        ],
+        [
+          15.5,
+          79.5
+        ],
+        [
+          15.5,
+          80
+        ],
+        [
+          15.5,
+          80.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "stere--90-ellipsoid",
+      "definition": "+proj=stere +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=stere +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          -80.5
+        ],
+        [
+          14.5,
+          -80
+        ],
+        [
+          14.5,
+          -79.5
+        ],
+        [
+          15,
+          -80.5
+        ],
+        [
+          15,
+          -80
+        ],
+        [
+          15,
+          -79.5
+        ],
+        [
+          15.5,
+          -80.5
+        ],
+        [
+          15.5,
+          -80
+        ],
+        [
+          15.5,
+          -79.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "stere--90-sphere",
+      "definition": "+proj=stere +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=stere +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          -80.5
+        ],
+        [
+          14.5,
+          -80
+        ],
+        [
+          14.5,
+          -79.5
+        ],
+        [
+          15,
+          -80.5
+        ],
+        [
+          15,
+          -80
+        ],
+        [
+          15,
+          -79.5
+        ],
+        [
+          15.5,
+          -80.5
+        ],
+        [
+          15.5,
+          -80
+        ],
+        [
+          15.5,
+          -79.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aeqd-0-ellipsoid",
+      "definition": "+proj=aeqd +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=aeqd +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          -0.5
+        ],
+        [
+          14.5,
+          0
+        ],
+        [
+          14.5,
+          0.5
+        ],
+        [
+          15,
+          -0.5
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          15,
+          0.5
+        ],
+        [
+          15.5,
+          -0.5
+        ],
+        [
+          15.5,
+          0
+        ],
+        [
+          15.5,
+          0.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aeqd-0-sphere",
+      "definition": "+proj=aeqd +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=aeqd +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          -0.5
+        ],
+        [
+          14.5,
+          0
+        ],
+        [
+          14.5,
+          0.5
+        ],
+        [
+          15,
+          -0.5
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          15,
+          0.5
+        ],
+        [
+          15.5,
+          -0.5
+        ],
+        [
+          15.5,
+          0
+        ],
+        [
+          15.5,
+          0.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aeqd-45-ellipsoid",
+      "definition": "+proj=aeqd +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=aeqd +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          44.5
+        ],
+        [
+          14.5,
+          45
+        ],
+        [
+          14.5,
+          45.5
+        ],
+        [
+          15,
+          44.5
+        ],
+        [
+          15,
+          45
+        ],
+        [
+          15,
+          45.5
+        ],
+        [
+          15.5,
+          44.5
+        ],
+        [
+          15.5,
+          45
+        ],
+        [
+          15.5,
+          45.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aeqd-45-sphere",
+      "definition": "+proj=aeqd +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=aeqd +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          44.5
+        ],
+        [
+          14.5,
+          45
+        ],
+        [
+          14.5,
+          45.5
+        ],
+        [
+          15,
+          44.5
+        ],
+        [
+          15,
+          45
+        ],
+        [
+          15,
+          45.5
+        ],
+        [
+          15.5,
+          44.5
+        ],
+        [
+          15.5,
+          45
+        ],
+        [
+          15.5,
+          45.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aeqd--45-ellipsoid",
+      "definition": "+proj=aeqd +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=aeqd +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          -45.5
+        ],
+        [
+          14.5,
+          -45
+        ],
+        [
+          14.5,
+          -44.5
+        ],
+        [
+          15,
+          -45.5
+        ],
+        [
+          15,
+          -45
+        ],
+        [
+          15,
+          -44.5
+        ],
+        [
+          15.5,
+          -45.5
+        ],
+        [
+          15.5,
+          -45
+        ],
+        [
+          15.5,
+          -44.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aeqd--45-sphere",
+      "definition": "+proj=aeqd +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=aeqd +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          -45.5
+        ],
+        [
+          14.5,
+          -45
+        ],
+        [
+          14.5,
+          -44.5
+        ],
+        [
+          15,
+          -45.5
+        ],
+        [
+          15,
+          -45
+        ],
+        [
+          15,
+          -44.5
+        ],
+        [
+          15.5,
+          -45.5
+        ],
+        [
+          15.5,
+          -45
+        ],
+        [
+          15.5,
+          -44.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aeqd-90-ellipsoid",
+      "definition": "+proj=aeqd +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=aeqd +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          79.5
+        ],
+        [
+          14.5,
+          80
+        ],
+        [
+          14.5,
+          80.5
+        ],
+        [
+          15,
+          79.5
+        ],
+        [
+          15,
+          80
+        ],
+        [
+          15,
+          80.5
+        ],
+        [
+          15.5,
+          79.5
+        ],
+        [
+          15.5,
+          80
+        ],
+        [
+          15.5,
+          80.5
+        ]
+      ],
+      "forwardTolerance": 0.001,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "accuracyNotes": "Polar meridional-arc approximation: millimetre forward budget on this local sample."
+    },
+    {
+      "id": "aeqd-90-sphere",
+      "definition": "+proj=aeqd +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=aeqd +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          79.5
+        ],
+        [
+          14.5,
+          80
+        ],
+        [
+          14.5,
+          80.5
+        ],
+        [
+          15,
+          79.5
+        ],
+        [
+          15,
+          80
+        ],
+        [
+          15,
+          80.5
+        ],
+        [
+          15.5,
+          79.5
+        ],
+        [
+          15.5,
+          80
+        ],
+        [
+          15.5,
+          80.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aeqd--90-ellipsoid",
+      "definition": "+proj=aeqd +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=aeqd +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "points": [
+        [
+          14.5,
+          -80.5
+        ],
+        [
+          14.5,
+          -80
+        ],
+        [
+          14.5,
+          -79.5
+        ],
+        [
+          15,
+          -80.5
+        ],
+        [
+          15,
+          -80
+        ],
+        [
+          15,
+          -79.5
+        ],
+        [
+          15.5,
+          -80.5
+        ],
+        [
+          15.5,
+          -80
+        ],
+        [
+          15.5,
+          -79.5
+        ]
+      ],
+      "forwardTolerance": 0.001,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "accuracyNotes": "Polar meridional-arc approximation: millimetre forward budget on this local sample."
+    },
+    {
+      "id": "aeqd--90-sphere",
+      "definition": "+proj=aeqd +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "oracle": "+proj=aeqd +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "points": [
+        [
+          14.5,
+          -80.5
+        ],
+        [
+          14.5,
+          -80
+        ],
+        [
+          14.5,
+          -79.5
+        ],
+        [
+          15,
+          -80.5
+        ],
+        [
+          15,
+          -80
+        ],
+        [
+          15,
+          -79.5
+        ],
+        [
+          15.5,
+          -80.5
+        ],
+        [
+          15.5,
+          -80
+        ],
+        [
+          15.5,
+          -79.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "stere-true-scale-north",
+      "definition": "+proj=stere +lat_0=90 +lat_ts=70 +k_0=0.8 +ellps=WGS84",
+      "oracle": "+proj=stere +lat_0=90 +lat_ts=70 +ellps=WGS84",
+      "points": [
+        [
+          -0.5,
+          79.5
+        ],
+        [
+          -0.5,
+          80
+        ],
+        [
+          -0.5,
+          80.5
+        ],
+        [
+          0,
+          79.5
+        ],
+        [
+          0,
+          80
+        ],
+        [
+          0,
+          80.5
+        ],
+        [
+          0.5,
+          79.5
+        ],
+        [
+          0.5,
+          80
+        ],
+        [
+          0.5,
+          80.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "math.gl/proj4js derive scale from lat_ts, overriding k_0. PROJ rejects simultaneous conflicting scale; omit the overridden k_0 in the oracle."
+    },
+    {
+      "id": "stere-true-scale-south",
+      "definition": "+proj=stere +lat_0=-90 +lat_ts=-71 +ellps=WGS84",
+      "oracle": "+proj=stere +lat_0=-90 +lat_ts=-71 +ellps=WGS84",
+      "points": [
+        [
+          -0.5,
+          -80.5
+        ],
+        [
+          -0.5,
+          -80
+        ],
+        [
+          -0.5,
+          -79.5
+        ],
+        [
+          0,
+          -80.5
+        ],
+        [
+          0,
+          -80
+        ],
+        [
+          0,
+          -79.5
+        ],
+        [
+          0.5,
+          -80.5
+        ],
+        [
+          0.5,
+          -80
+        ],
+        [
+          0.5,
+          -79.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "sterea-ellipsoid",
+      "definition": "+proj=sterea +lat_0=52 +lon_0=5 +k_0=0.9999 +x_0=155000 +y_0=463000 +ellps=WGS84",
+      "oracle": "+proj=sterea +lat_0=52 +lon_0=5 +k_0=0.9999 +x_0=155000 +y_0=463000 +ellps=WGS84",
+      "points": [
+        [
+          4.5,
+          51.5
+        ],
+        [
+          4.5,
+          52
+        ],
+        [
+          4.5,
+          52.5
+        ],
+        [
+          5,
+          51.5
+        ],
+        [
+          5,
+          52
+        ],
+        [
+          5,
+          52.5
+        ],
+        [
+          5.5,
+          51.5
+        ],
+        [
+          5.5,
+          52
+        ],
+        [
+          5.5,
+          52.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "sterea-sphere",
+      "definition": "+proj=sterea +lat_0=-30 +lon_0=150 +R=6371000 +k=0.9",
+      "oracle": "+proj=sterea +lat_0=-30 +lon_0=150 +R=6371000 +k=0.9",
+      "points": [
+        [
+          149.5,
+          -30.5
+        ],
+        [
+          149.5,
+          -30
+        ],
+        [
+          149.5,
+          -29.5
+        ],
+        [
+          150,
+          -30.5
+        ],
+        [
+          150,
+          -30
+        ],
+        [
+          150,
+          -29.5
+        ],
+        [
+          150.5,
+          -30.5
+        ],
+        [
+          150.5,
+          -30
+        ],
+        [
+          150.5,
+          -29.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "cea-ellipsoid",
+      "definition": "+proj=cea +lon_0=10 +lat_ts=30 +ellps=WGS84",
+      "oracle": "+proj=cea +lon_0=10 +lat_ts=30 +ellps=WGS84",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 2e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "accuracyNotes": "Authalic latitude inverse series: 2e-8 degree budget on the sampled domain."
+    },
+    {
+      "id": "cea-sphere",
+      "definition": "+proj=cea +lon_0=10 +lat_ts=30 +R=6371000",
+      "oracle": "+proj=cea +lon_0=10 +lat_ts=30 +R=6371000",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "eck6-ellipsoid",
+      "definition": "+proj=eck6 +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=eck6 +lon_0=10 +ellps=WGS84",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "eck6-sphere",
+      "definition": "+proj=eck6 +lon_0=10 +R=6371000",
+      "oracle": "+proj=eck6 +lon_0=10 +R=6371000",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "eqearth-ellipsoid",
+      "definition": "+proj=eqearth +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=eqearth +lon_0=10 +ellps=WGS84",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "eqearth-sphere",
+      "definition": "+proj=eqearth +lon_0=10 +R=6371000",
+      "oracle": "+proj=eqearth +lon_0=10 +R=6371000",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "equi-ellipsoid",
+      "definition": "+proj=equi +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=eqc +lon_0=10 +ellps=WGS84",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Legacy proj4js equi is equidistant cylindrical. Use PROJ eqc with zero standard parallel and origin."
+    },
+    {
+      "id": "equi-sphere",
+      "definition": "+proj=equi +lon_0=10 +R=6371000",
+      "oracle": "+proj=eqc +lon_0=10 +R=6371000",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Legacy proj4js equi is equidistant cylindrical. Use PROJ eqc with zero standard parallel and origin."
+    },
+    {
+      "id": "mill-ellipsoid",
+      "definition": "+proj=mill +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=mill +lon_0=10 +R=6378137",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics."
+    },
+    {
+      "id": "mill-sphere",
+      "definition": "+proj=mill +lon_0=10 +R=6371000",
+      "oracle": "+proj=mill +lon_0=10 +R=6371000",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "moll-ellipsoid",
+      "definition": "+proj=moll +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=moll +lon_0=10 +ellps=WGS84",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 2e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "accuracyNotes": "Iterative Mollweide forward: 20 micrometres on the sampled domain."
+    },
+    {
+      "id": "moll-sphere",
+      "definition": "+proj=moll +lon_0=10 +R=6371000",
+      "oracle": "+proj=moll +lon_0=10 +R=6371000",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 2e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "accuracyNotes": "Iterative Mollweide forward: 20 micrometres on the sampled domain."
+    },
+    {
+      "id": "robin-ellipsoid",
+      "definition": "+proj=robin +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=robin +lon_0=10 +ellps=WGS84",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 2,
+      "inverseTolerance": 2e-05,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "accuracyNotes": "Legacy Robinson polynomial/interpolation differs from PROJ. These are regression ceilings, not sub-metre inverse accuracy qualification."
+    },
+    {
+      "id": "robin-sphere",
+      "definition": "+proj=robin +lon_0=10 +R=6371000",
+      "oracle": "+proj=robin +lon_0=10 +R=6371000",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 2,
+      "inverseTolerance": 2e-05,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "accuracyNotes": "Legacy Robinson polynomial/interpolation differs from PROJ. These are regression ceilings, not sub-metre inverse accuracy qualification."
+    },
+    {
+      "id": "sinu-ellipsoid",
+      "definition": "+proj=sinu +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=sinu +lon_0=10 +ellps=WGS84",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "sinu-sphere",
+      "definition": "+proj=sinu +lon_0=10 +R=6371000",
+      "oracle": "+proj=sinu +lon_0=10 +R=6371000",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "vandg-ellipsoid",
+      "definition": "+proj=vandg +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=vandg +lon_0=10 +R=6378137",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics."
+    },
+    {
+      "id": "vandg-sphere",
+      "definition": "+proj=vandg +lon_0=10 +R=6371000",
+      "oracle": "+proj=vandg +lon_0=10 +R=6371000",
+      "points": [
+        [
+          29.5,
+          39.5
+        ],
+        [
+          29.5,
+          40
+        ],
+        [
+          29.5,
+          40.5
+        ],
+        [
+          30,
+          39.5
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          30,
+          40.5
+        ],
+        [
+          30.5,
+          39.5
+        ],
+        [
+          30.5,
+          40
+        ],
+        [
+          30.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "cass-ellipsoid",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "cass-sphere",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +R=6371000",
+      "oracle": "+proj=cass +lon_0=10 +lat_0=40 +R=6371000",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "poly-ellipsoid",
+      "definition": "+proj=poly +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=poly +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "poly-sphere",
+      "definition": "+proj=poly +lon_0=10 +lat_0=40 +R=6371000",
+      "oracle": "+proj=poly +lon_0=10 +lat_0=40 +R=6371000",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "gstmerc-ellipsoid",
+      "definition": "+proj=gstmerc +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=gstmerc +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "gstmerc-sphere",
+      "definition": "+proj=gstmerc +lon_0=10 +lat_0=40 +R=6371000",
+      "oracle": "+proj=gstmerc +lon_0=10 +lat_0=40 +R=6371000",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "gnom-ellipsoid",
+      "definition": "+proj=gnom +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=gnom +lon_0=10 +lat_0=40 +R=6378137",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics."
+    },
+    {
+      "id": "gnom-sphere",
+      "definition": "+proj=gnom +lon_0=10 +lat_0=40 +R=6371000",
+      "oracle": "+proj=gnom +lon_0=10 +lat_0=40 +R=6371000",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "ortho-ellipsoid",
+      "definition": "+proj=ortho +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=ortho +lon_0=10 +lat_0=40 +R=6378137",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics."
+    },
+    {
+      "id": "ortho-sphere",
+      "definition": "+proj=ortho +lon_0=10 +lat_0=40 +R=6371000",
+      "oracle": "+proj=ortho +lon_0=10 +lat_0=40 +R=6371000",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "bonne-ellipsoid",
+      "definition": "+proj=bonne +lat_1=45 +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=bonne +lat_1=45 +lon_0=10 +ellps=WGS84",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "bonne-sphere",
+      "definition": "+proj=bonne +lat_1=45 +lon_0=10 +R=6371000",
+      "oracle": "+proj=bonne +lat_1=45 +lon_0=10 +R=6371000",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "krovak",
+      "definition": "+proj=krovak +ellps=bessel",
+      "oracle": "+proj=krovak +ellps=bessel",
+      "points": [
+        [
+          14.5,
+          49.5
+        ],
+        [
+          14.5,
+          50
+        ],
+        [
+          14.5,
+          50.5
+        ],
+        [
+          15,
+          49.5
+        ],
+        [
+          15,
+          50
+        ],
+        [
+          15,
+          50.5
+        ],
+        [
+          15.5,
+          49.5
+        ],
+        [
+          15.5,
+          50
+        ],
+        [
+          15.5,
+          50.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "krovak-czech",
+      "definition": "+proj=krovak +ellps=bessel +czech",
+      "oracle": "+proj=krovak +ellps=bessel +czech",
+      "points": [
+        [
+          14.5,
+          49.5
+        ],
+        [
+          14.5,
+          50
+        ],
+        [
+          14.5,
+          50.5
+        ],
+        [
+          15,
+          49.5
+        ],
+        [
+          15,
+          50
+        ],
+        [
+          15,
+          50.5
+        ],
+        [
+          15.5,
+          49.5
+        ],
+        [
+          15.5,
+          50
+        ],
+        [
+          15.5,
+          50.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "nzmg-1",
+      "definition": "+proj=nzmg +ellps=intl +lon_0=173 +lat_0=-41 +iterations=1 +x_0=2510000 +y_0=6023150",
+      "oracle": "+proj=nzmg +ellps=intl +lon_0=173 +lat_0=-41 +x_0=2510000 +y_0=6023150",
+      "points": [
+        [
+          172.5,
+          -41.5
+        ],
+        [
+          172.5,
+          -41
+        ],
+        [
+          172.5,
+          -40.5
+        ],
+        [
+          173,
+          -41.5
+        ],
+        [
+          173,
+          -41
+        ],
+        [
+          173,
+          -40.5
+        ],
+        [
+          173.5,
+          -41.5
+        ],
+        [
+          173.5,
+          -41
+        ],
+        [
+          173.5,
+          -40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Use standard NZMG false offsets in both engines (PROJ hard-codes these). iterations is a proj4js-only inverse refinement control, omitted from PROJ."
+    },
+    {
+      "id": "nzmg-2",
+      "definition": "+proj=nzmg +ellps=intl +lon_0=173 +lat_0=-41 +iterations=2 +x_0=2510000 +y_0=6023150",
+      "oracle": "+proj=nzmg +ellps=intl +lon_0=173 +lat_0=-41 +x_0=2510000 +y_0=6023150",
+      "points": [
+        [
+          172.5,
+          -41.5
+        ],
+        [
+          172.5,
+          -41
+        ],
+        [
+          172.5,
+          -40.5
+        ],
+        [
+          173,
+          -41.5
+        ],
+        [
+          173,
+          -41
+        ],
+        [
+          173,
+          -40.5
+        ],
+        [
+          173.5,
+          -41.5
+        ],
+        [
+          173.5,
+          -41
+        ],
+        [
+          173.5,
+          -40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Use standard NZMG false offsets in both engines (PROJ hard-codes these). iterations is a proj4js-only inverse refinement control, omitted from PROJ."
+    },
+    {
+      "id": "omerc-alpha",
+      "definition": "+proj=omerc +lat_0=4 +lonc=115 +alpha=53.31582047222222 +gamma=53.13010236111111 +k=0.99984 +ellps=WGS84",
+      "oracle": "+proj=omerc +lat_0=4 +lonc=115 +alpha=53.31582047222222 +gamma=53.13010236111111 +k=0.99984 +ellps=WGS84",
+      "points": [
+        [
+          114.5,
+          4.5
+        ],
+        [
+          114.5,
+          5
+        ],
+        [
+          114.5,
+          5.5
+        ],
+        [
+          115,
+          4.5
+        ],
+        [
+          115,
+          5
+        ],
+        [
+          115,
+          5.5
+        ],
+        [
+          115.5,
+          4.5
+        ],
+        [
+          115.5,
+          5
+        ],
+        [
+          115.5,
+          5.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "omerc-no-offset",
+      "definition": "+proj=omerc +lat_0=4 +lonc=115 +alpha=53 +no_off +ellps=WGS84",
+      "oracle": "+proj=omerc +lat_0=4 +lonc=115 +alpha=53 +no_off +ellps=WGS84",
+      "points": [
+        [
+          114.5,
+          4.5
+        ],
+        [
+          114.5,
+          5
+        ],
+        [
+          114.5,
+          5.5
+        ],
+        [
+          115,
+          4.5
+        ],
+        [
+          115,
+          5
+        ],
+        [
+          115,
+          5.5
+        ],
+        [
+          115.5,
+          4.5
+        ],
+        [
+          115.5,
+          5
+        ],
+        [
+          115.5,
+          5.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "omerc-no-rotation",
+      "definition": "+proj=omerc +lat_0=4 +lonc=115 +alpha=53 +no_rot +ellps=WGS84",
+      "oracle": "+proj=omerc +lat_0=4 +lonc=115 +alpha=53 +no_rot +ellps=WGS84",
+      "points": [
+        [
+          114.5,
+          4.5
+        ],
+        [
+          114.5,
+          5
+        ],
+        [
+          114.5,
+          5.5
+        ],
+        [
+          115,
+          4.5
+        ],
+        [
+          115,
+          5
+        ],
+        [
+          115,
+          5.5
+        ],
+        [
+          115.5,
+          4.5
+        ],
+        [
+          115.5,
+          5
+        ],
+        [
+          115.5,
+          5.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "omerc-two-point",
+      "definition": "+proj=omerc +lat_0=4 +lon_1=110 +lat_1=5 +lon_2=120 +lat_2=10 +ellps=WGS84",
+      "oracle": "+proj=omerc +lat_0=4 +lon_1=110 +lat_1=5 +lon_2=120 +lat_2=10 +ellps=WGS84",
+      "points": [
+        [
+          114.5,
+          4.5
+        ],
+        [
+          114.5,
+          5
+        ],
+        [
+          114.5,
+          5.5
+        ],
+        [
+          115,
+          4.5
+        ],
+        [
+          115,
+          5
+        ],
+        [
+          115,
+          5.5
+        ],
+        [
+          115.5,
+          4.5
+        ],
+        [
+          115.5,
+          5
+        ],
+        [
+          115.5,
+          5.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "somerc",
+      "definition": "+proj=somerc +ellps=bessel +lat_0=46.95240555555556 +lon_0=7.43958333333333 +k_0=1",
+      "oracle": "+proj=somerc +ellps=bessel +lat_0=46.95240555555556 +lon_0=7.43958333333333 +k_0=1",
+      "points": [
+        [
+          6.94,
+          46.45
+        ],
+        [
+          6.94,
+          46.95
+        ],
+        [
+          6.94,
+          47.45
+        ],
+        [
+          7.44,
+          46.45
+        ],
+        [
+          7.44,
+          46.95
+        ],
+        [
+          7.44,
+          47.45
+        ],
+        [
+          7.94,
+          46.45
+        ],
+        [
+          7.94,
+          46.95
+        ],
+        [
+          7.94,
+          47.45
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "geos-x-false",
+      "definition": "+proj=geos +lon_0=0 +h=35785831 +sweep=x +ellps=WGS84",
+      "oracle": "+proj=geos +lon_0=0 +h=35785831 +sweep=x +ellps=WGS84",
+      "points": [
+        [
+          19.5,
+          19.5
+        ],
+        [
+          19.5,
+          20
+        ],
+        [
+          19.5,
+          20.5
+        ],
+        [
+          20,
+          19.5
+        ],
+        [
+          20,
+          20
+        ],
+        [
+          20,
+          20.5
+        ],
+        [
+          20.5,
+          19.5
+        ],
+        [
+          20.5,
+          20
+        ],
+        [
+          20.5,
+          20.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "geos-x-true",
+      "definition": "+proj=geos +lon_0=0 +h=35785831 +sweep=x +R=6371000",
+      "oracle": "+proj=geos +lon_0=0 +h=35785831 +sweep=x +R=6371000",
+      "points": [
+        [
+          19.5,
+          19.5
+        ],
+        [
+          19.5,
+          20
+        ],
+        [
+          19.5,
+          20.5
+        ],
+        [
+          20,
+          19.5
+        ],
+        [
+          20,
+          20
+        ],
+        [
+          20,
+          20.5
+        ],
+        [
+          20.5,
+          19.5
+        ],
+        [
+          20.5,
+          20
+        ],
+        [
+          20.5,
+          20.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "geos-y-false",
+      "definition": "+proj=geos +lon_0=0 +h=35785831 +sweep=y +ellps=WGS84",
+      "oracle": "+proj=geos +lon_0=0 +h=35785831 +sweep=y +ellps=WGS84",
+      "points": [
+        [
+          19.5,
+          19.5
+        ],
+        [
+          19.5,
+          20
+        ],
+        [
+          19.5,
+          20.5
+        ],
+        [
+          20,
+          19.5
+        ],
+        [
+          20,
+          20
+        ],
+        [
+          20,
+          20.5
+        ],
+        [
+          20.5,
+          19.5
+        ],
+        [
+          20.5,
+          20
+        ],
+        [
+          20.5,
+          20.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "geos-y-true",
+      "definition": "+proj=geos +lon_0=0 +h=35785831 +sweep=y +R=6371000",
+      "oracle": "+proj=geos +lon_0=0 +h=35785831 +sweep=y +R=6371000",
+      "points": [
+        [
+          19.5,
+          19.5
+        ],
+        [
+          19.5,
+          20
+        ],
+        [
+          19.5,
+          20.5
+        ],
+        [
+          20,
+          19.5
+        ],
+        [
+          20,
+          20
+        ],
+        [
+          20,
+          20.5
+        ],
+        [
+          20.5,
+          19.5
+        ],
+        [
+          20.5,
+          20
+        ],
+        [
+          20.5,
+          20.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "tpers-0",
+      "definition": "+proj=tpers +lon_0=10 +lat_0=40 +h=1000000 +azi=45 +tilt=0 +ellps=WGS84",
+      "oracle": "+proj=tpers +lon_0=10 +lat_0=40 +h=1000000 +azi=45 +tilt=0 +ellps=WGS84",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "tpers-20",
+      "definition": "+proj=tpers +lon_0=10 +lat_0=40 +h=1000000 +azi=45 +tilt=20 +ellps=WGS84",
+      "oracle": "+proj=tpers +lon_0=10 +lat_0=40 +h=1000000 +azi=45 +tilt=20 +ellps=WGS84",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "qsc-0",
+      "definition": "+proj=qsc +lon_0=0 +lat_0=0 +ellps=WGS84",
+      "oracle": "+proj=qsc +lon_0=0 +lat_0=0 +ellps=WGS84",
+      "points": [
+        [
+          -0.5,
+          -0.5
+        ],
+        [
+          -0.5,
+          0
+        ],
+        [
+          -0.5,
+          0.5
+        ],
+        [
+          0,
+          -0.5
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0.5
+        ],
+        [
+          0.5,
+          -0.5
+        ],
+        [
+          0.5,
+          0
+        ],
+        [
+          0.5,
+          0.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "qsc-1",
+      "definition": "+proj=qsc +lon_0=90 +lat_0=0 +ellps=WGS84",
+      "oracle": "+proj=qsc +lon_0=90 +lat_0=0 +ellps=WGS84",
+      "points": [
+        [
+          89.5,
+          -0.5
+        ],
+        [
+          89.5,
+          0
+        ],
+        [
+          89.5,
+          0.5
+        ],
+        [
+          90,
+          -0.5
+        ],
+        [
+          90,
+          0
+        ],
+        [
+          90,
+          0.5
+        ],
+        [
+          90.5,
+          -0.5
+        ],
+        [
+          90.5,
+          0
+        ],
+        [
+          90.5,
+          0.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "qsc-2",
+      "definition": "+proj=qsc +lon_0=-90 +lat_0=0 +ellps=WGS84",
+      "oracle": "+proj=qsc +lon_0=-90 +lat_0=0 +ellps=WGS84",
+      "points": [
+        [
+          -90.5,
+          -0.5
+        ],
+        [
+          -90.5,
+          0
+        ],
+        [
+          -90.5,
+          0.5
+        ],
+        [
+          -90,
+          -0.5
+        ],
+        [
+          -90,
+          0
+        ],
+        [
+          -90,
+          0.5
+        ],
+        [
+          -89.5,
+          -0.5
+        ],
+        [
+          -89.5,
+          0
+        ],
+        [
+          -89.5,
+          0.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "qsc-3",
+      "definition": "+proj=qsc +lon_0=180 +lat_0=0 +ellps=WGS84",
+      "oracle": "+proj=qsc +lon_0=180 +lat_0=0 +ellps=WGS84",
+      "points": [
+        [
+          177.5,
+          -0.5
+        ],
+        [
+          177.5,
+          0
+        ],
+        [
+          177.5,
+          0.5
+        ],
+        [
+          178,
+          -0.5
+        ],
+        [
+          178,
+          0
+        ],
+        [
+          178,
+          0.5
+        ],
+        [
+          178.5,
+          -0.5
+        ],
+        [
+          178.5,
+          0
+        ],
+        [
+          178.5,
+          0.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "qsc-4",
+      "definition": "+proj=qsc +lon_0=0 +lat_0=90 +ellps=WGS84",
+      "oracle": "+proj=qsc +lon_0=0 +lat_0=90 +ellps=WGS84",
+      "points": [
+        [
+          -0.5,
+          87.5
+        ],
+        [
+          -0.5,
+          88
+        ],
+        [
+          -0.5,
+          88.5
+        ],
+        [
+          0,
+          87.5
+        ],
+        [
+          0,
+          88
+        ],
+        [
+          0,
+          88.5
+        ],
+        [
+          0.5,
+          87.5
+        ],
+        [
+          0.5,
+          88
+        ],
+        [
+          0.5,
+          88.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "qsc-5",
+      "definition": "+proj=qsc +lon_0=0 +lat_0=-90 +ellps=WGS84",
+      "oracle": "+proj=qsc +lon_0=0 +lat_0=-90 +ellps=WGS84",
+      "points": [
+        [
+          -0.5,
+          -88.5
+        ],
+        [
+          -0.5,
+          -88
+        ],
+        [
+          -0.5,
+          -87.5
+        ],
+        [
+          0,
+          -88.5
+        ],
+        [
+          0,
+          -88
+        ],
+        [
+          0,
+          -87.5
+        ],
+        [
+          0.5,
+          -88.5
+        ],
+        [
+          0.5,
+          -88
+        ],
+        [
+          0.5,
+          -87.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "merc-ellipsoid",
+      "definition": "+proj=merc +ellps=WGS84",
+      "oracle": "+proj=merc +ellps=WGS84",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "merc-sphere",
+      "definition": "+proj=merc +R=6371000",
+      "oracle": "+proj=merc +R=6371000",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "eqc",
+      "definition": "+proj=eqc +lat_ts=30 +lat_0=10 +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=eqc +lat_ts=30 +lat_0=10 +lon_0=10 +ellps=WGS84",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "geocent",
+      "definition": "+proj=geocent +ellps=WGS84",
+      "oracle": "+proj=geocent +ellps=WGS84",
+      "points": [
+        [
+          9.5,
+          39.5,
+          123
+        ],
+        [
+          9.5,
+          40,
+          123
+        ],
+        [
+          9.5,
+          40.5,
+          123
+        ],
+        [
+          10,
+          39.5,
+          123
+        ],
+        [
+          10,
+          40,
+          123
+        ],
+        [
+          10,
+          40.5,
+          123
+        ],
+        [
+          10.5,
+          39.5,
+          123
+        ],
+        [
+          10.5,
+          40,
+          123
+        ],
+        [
+          10.5,
+          40.5,
+          123
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-06,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "accuracyNotes": "Inverse tolerance also applies to ellipsoidal height in metres."
+    },
+    {
+      "id": "longlat",
+      "definition": "+proj=longlat +ellps=WGS84",
+      "oracle": "+proj=longlat +ellps=WGS84",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ],
+        [
+          -110,
+          -60
+        ],
+        [
+          -110,
+          -30
+        ],
+        [
+          -110,
+          0
+        ],
+        [
+          -110,
+          30
+        ],
+        [
+          -110,
+          60
+        ],
+        [
+          -50,
+          -60
+        ],
+        [
+          -50,
+          -30
+        ],
+        [
+          -50,
+          0
+        ],
+        [
+          -50,
+          30
+        ],
+        [
+          -50,
+          60
+        ],
+        [
+          10,
+          -60
+        ],
+        [
+          10,
+          -30
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          60
+        ],
+        [
+          70,
+          -60
+        ],
+        [
+          70,
+          -30
+        ],
+        [
+          70,
+          0
+        ],
+        [
+          70,
+          30
+        ],
+        [
+          70,
+          60
+        ],
+        [
+          130,
+          -60
+        ],
+        [
+          130,
+          -30
+        ],
+        [
+          130,
+          0
+        ],
+        [
+          130,
+          30
+        ],
+        [
+          130,
+          60
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "ob-tran-moll",
+      "definition": "+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=0 +ellps=WGS84",
+      "oracle": "+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=0 +ellps=WGS84",
+      "points": [
+        [
+          9.5,
+          39.5
+        ],
+        [
+          9.5,
+          40
+        ],
+        [
+          9.5,
+          40.5
+        ],
+        [
+          10,
+          39.5
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          40.5
+        ],
+        [
+          10.5,
+          39.5
+        ],
+        [
+          10.5,
+          40
+        ],
+        [
+          10.5,
+          40.5
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+    },
+    {
+      "id": "aeqd-origin-regression-north",
+      "definition": "+proj=aeqd +lon_0=10 +lat_0=40 +x_0=1234 +y_0=5678 +ellps=WGS84",
+      "oracle": "+proj=aeqd +lon_0=10 +lat_0=40 +x_0=1234 +y_0=5678 +ellps=WGS84",
+      "oracleNotes": "Identical explicit parameters. Longitude zero at the origin latitude must not collapse to the false origin.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "points": [
+        [
+          0,
+          30
+        ],
+        [
+          0,
+          40
+        ],
+        [
+          0,
+          50
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          50
+        ],
+        [
+          20,
+          30
+        ],
+        [
+          20,
+          40
+        ],
+        [
+          20,
+          50
+        ]
+      ]
+    },
+    {
+      "id": "aeqd-origin-regression-south",
+      "definition": "+proj=aeqd +lon_0=-10 +lat_0=-40 +x_0=1234 +y_0=5678 +ellps=WGS84",
+      "oracle": "+proj=aeqd +lon_0=-10 +lat_0=-40 +x_0=1234 +y_0=5678 +ellps=WGS84",
+      "oracleNotes": "Identical explicit parameters. Longitude zero at the origin latitude must not collapse to the false origin.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "points": [
+        [
+          -20,
+          -50
+        ],
+        [
+          -20,
+          -40
+        ],
+        [
+          -20,
+          -30
+        ],
+        [
+          -10,
+          -50
+        ],
+        [
+          -10,
+          -40
+        ],
+        [
+          -10,
+          -30
+        ],
+        [
+          0,
+          -50
+        ],
+        [
+          0,
+          -40
+        ],
+        [
+          0,
+          -30
+        ]
+      ]
+    },
+    {
+      "id": "cass-regional-1",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "Identical explicit parameters.",
+      "forwardTolerance": 0.001,
+      "inverseTolerance": 2e-08,
+      "accuracyNotes": "Known Cassini approximation ceiling at offsets up to 1 degrees from (10,40). A regression bound, not geodetic accuracy qualification.",
+      "points": [
+        [
+          9,
+          39
+        ],
+        [
+          9,
+          40
+        ],
+        [
+          9,
+          41
+        ],
+        [
+          10,
+          39
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          41
+        ],
+        [
+          11,
+          39
+        ],
+        [
+          11,
+          40
+        ],
+        [
+          11,
+          41
+        ]
+      ]
+    },
+    {
+      "id": "cass-regional-3",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "Identical explicit parameters.",
+      "forwardTolerance": 0.1,
+      "inverseTolerance": 3e-06,
+      "accuracyNotes": "Known Cassini approximation ceiling at offsets up to 3 degrees from (10,40). A regression bound, not geodetic accuracy qualification.",
+      "points": [
+        [
+          7,
+          37
+        ],
+        [
+          7,
+          40
+        ],
+        [
+          7,
+          43
+        ],
+        [
+          10,
+          37
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          43
+        ],
+        [
+          13,
+          37
+        ],
+        [
+          13,
+          40
+        ],
+        [
+          13,
+          43
+        ]
+      ]
+    },
+    {
+      "id": "cass-regional-5",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "Identical explicit parameters.",
+      "forwardTolerance": 1,
+      "inverseTolerance": 5e-05,
+      "accuracyNotes": "Known Cassini approximation ceiling at offsets up to 5 degrees from (10,40). A regression bound, not geodetic accuracy qualification.",
+      "points": [
+        [
+          5,
+          35
+        ],
+        [
+          5,
+          40
+        ],
+        [
+          5,
+          45
+        ],
+        [
+          10,
+          35
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          45
+        ],
+        [
+          15,
+          35
+        ],
+        [
+          15,
+          40
+        ],
+        [
+          15,
+          45
+        ]
+      ]
+    },
+    {
+      "id": "cass-regional-10",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "Identical explicit parameters.",
+      "forwardTolerance": 25,
+      "inverseTolerance": 0.002,
+      "accuracyNotes": "Known Cassini approximation ceiling at offsets up to 10 degrees from (10,40). A regression bound, not geodetic accuracy qualification.",
+      "points": [
+        [
+          0,
+          30
+        ],
+        [
+          0,
+          40
+        ],
+        [
+          0,
+          50
+        ],
+        [
+          10,
+          30
+        ],
+        [
+          10,
+          40
+        ],
+        [
+          10,
+          50
+        ],
+        [
+          20,
+          30
+        ],
+        [
+          20,
+          40
+        ],
+        [
+          20,
+          50
+        ]
+      ]
+    }
+  ]
+}
