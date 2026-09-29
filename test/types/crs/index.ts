@@ -82,3 +82,23 @@ const normalized: NormalizedCRS = normalizeCRS(geographic, {parsers: [projJSONCR
 checkTypeScriptCRSCompatibility(nativeInput, {parsers: [projJSONCRSParser]});
 // @ts-expect-error The engine's normalized parameters are immutable.
 normalized.parameters['proj'] = 'merc';
+
+// Grid preparation is optional and registration stays local to the native instance.
+import {
+  parseNTv2Grid,
+  loadGeoTIFFGrid,
+  type DatumGrid,
+  type DatumGridCollection,
+  type DatumGridGeoTIFF
+} from '@math.gl/proj4/experimental';
+const preparedGrid: DatumGrid = parseNTv2Grid(new ArrayBuffer(0), {includeErrorFields: false});
+const gridCollection: DatumGridCollection = Object.freeze({local: preparedGrid});
+new TypeScriptProjection({from: '+proj=longlat +nadgrids=local', datumGrids: gridCollection});
+checkTypeScriptCRSCompatibility('+proj=longlat +nadgrids=local', {datumGrids: gridCollection});
+declare const tiff: DatumGridGeoTIFF;
+const preparedTIFF: Promise<DatumGrid> = loadGeoTIFFGrid(tiff);
+void preparedTIFF;
+// @ts-expect-error Grid preparation must finish before synchronous projection construction.
+new TypeScriptProjection({datumGrids: {local: preparedTIFF}});
+// @ts-expect-error Prepared grid metadata is immutable.
+preparedGrid.subgridCount = 2;

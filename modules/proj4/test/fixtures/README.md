@@ -1,6 +1,6 @@
 # Proj4 parity fixtures
 
-Reference: proj4js **2.22.0**, tag **v2.22.0**, checked September 28, 2026.
+Reference: proj4js **2.22.0**, tag **v2.22.0**, checked September 29, 2026.
 
 - `parity-inventory.json` inventories all 38 upstream projection/helper files, their
   aliases/default-bundle inclusion, and 30 input/API/transformation features. A partial
@@ -39,3 +39,10 @@ refresh the module/alias inventory and source hashes from that tag, import new
 fixtures with attribution, and rerun both checks. Do not overwrite expectations with
 the new native implementation's own outputs. Recent upstream fixes in not-yet-ported
 algorithms stay listed as gaps until their fixtures can execute.
+
+- `datum-grids.ts` creates synthetic NTv2 bytes (both byte orders and node strides)
+  and decoded GeoTIFF-shaped rasters. Known constant and linear shifts provide
+  analytic expected coordinates; the pinned upstream grid loader/kernel supplies
+  differential interior checks. Grid tests use 1e-9 degrees unless an explicitly
+  looser tolerance is needed for a Helmert round trip. Real-world grid datasets and
+  independent native PROJ outputs remain a promotion gate.

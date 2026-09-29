@@ -13,6 +13,13 @@ The geocentric/Helmert equations in `datum.ts` and rotation equations in
 `projections/ob-tran.ts` are likewise directly adapted from proj4js, with attribution
 in those files.
 
+The NTv2 decoder, GeoTIFF node orientation and interpolation/inverse equations in
+`src/experimental/grids/` are directly adapted from proj4js 2.22.0
+`lib/nadgrid.js` and `lib/datum_transform.js`. Their headers retain upstream
+MIT attribution. The per-instance grid registration contract is original math.gl
+code informed by upstream grid-list behavior. Synthetic grid fixtures are authored
+for math.gl and include no externally licensed grid datasets.
+
 `kernels/eqearth.ts` retains its original **Apache-2.0** notice:
 Copyright 2018 Bernie Jenny, Monash University, Melbourne, Australia.
 The original credits to Bojan Savric, Tom Patterson, Matthew Bloch and Andreas Hocevar

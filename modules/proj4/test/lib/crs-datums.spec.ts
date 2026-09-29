@@ -284,7 +284,9 @@ test('Capability checks distinguish syntax, readers, plugins and transformation 
   ];
   for (const [definition, reason] of checks)
     expect(checkTypeScriptCRSCompatibility(definition).reason).toBe(reason);
-  expect(() => new TypeScriptProjection({to: '+proj=longlat +datum=NAD27'})).toThrow('Grid shifts');
+  expect(() =>
+    new TypeScriptProjection({to: '+proj=longlat +datum=NAD27'}).project([-100, 40])
+  ).toThrow('No datum grid covers');
   for (const to of [
     '+proj=longlat +towgs84=1,2',
     '+proj=longlat +towgs84=1,2,NaN',

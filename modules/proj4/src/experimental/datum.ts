@@ -84,6 +84,31 @@ export function transformDatum(
   source: Datum,
   destination: Datum
 ): Coordinate3D {
+  if (source.grids || destination.grids) {
+    if (!source.towgs84 || !destination.towgs84) return point;
+    // Applying the same prepared grid in both directions is a datum identity.
+    if (
+      source.grids &&
+      destination.grids &&
+      source.ellipsoid.semiMajorAxis === destination.ellipsoid.semiMajorAxis &&
+      source.ellipsoid.eccentricitySquared === destination.ellipsoid.eccentricitySquared &&
+      source.grids.length === destination.grids.length &&
+      source.grids.every(
+        (entry, i) =>
+          entry.name === destination.grids[i].name &&
+          entry.optional === destination.grids[i].optional &&
+          entry.grid === destination.grids[i].grid
+      )
+    )
+      return point;
+    if (source.grids) point = applyDatumGrids(point, source, false);
+    point = transformDatum(
+      point,
+      source.grids ? WGS84 : source,
+      destination.grids ? WGS84 : destination
+    );
+    return destination.grids ? applyDatumGrids(point, destination, true) : point;
+  }
   if (shifted(source) || shifted(destination)) {
     return convertDatum(convertDatum(point, source, WGS84), WGS84, destination);
   }
@@ -105,4 +130,24 @@ function convertDatum(point: Coordinate3D, from: Datum, to: Datum): Coordinate3D
   if (shifted(from)) cartesian = helmert(cartesian, from.towgs84, false);
   if (shifted(to)) cartesian = helmert(cartesian, to.towgs84, true);
   return geocentricToGeodetic(cartesian, b);
+}
+
+/** Original per-instance dispatch informed by proj4js grid list semantics. */
+function applyDatumGrids(point: Coordinate3D, datum: Datum, inverse: boolean): Coordinate3D {
+  for (const reference of datum.grids) {
+    if (reference.name === 'null') return point;
+    if (!reference.grid) {
+      if (reference.optional) continue;
+      throw new Error('Required datum grid is not registered: ' + reference.name);
+    }
+    const shifted = reference.grid.shift(point[0], point[1], inverse);
+    if (shifted) {
+      if (!shifted.every(Number.isFinite) || Math.abs(shifted[1]) > Math.PI / 2)
+        throw new Error('Datum grid produced a coordinate outside the geographic domain');
+      return [shifted[0], shifted[1], point[2]];
+    }
+  }
+  throw new Error(
+    'No datum grid covers coordinate: ' + datum.grids.map(grid => grid.name).join(',')
+  );
 }

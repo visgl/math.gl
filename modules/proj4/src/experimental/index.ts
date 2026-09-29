@@ -60,3 +60,9 @@ export {swissObliqueMercator} from './projections/somerc';
 export {tiltedPerspective} from './projections/tpers';
 export {vanDerGrinten} from './projections/vandg';
 export {obliqueTransformation} from './projections/ob-tran';
+
+export {parseNTv2Grid} from './grids/ntv2';
+export type {NTv2GridOptions} from './grids/ntv2';
+export {loadGeoTIFFGrid} from './grids/geotiff';
+export type {DatumGridGeoTIFF, DatumGridGeoTIFFImage} from './grids/geotiff';
+export type {DatumGrid, DatumGridCollection} from './grids/types';
