@@ -240,7 +240,7 @@ selection remain outside this horizontal subset.
 
 | Tranche | Implemented result |
 | --- | --- |
-| 7A — Numerical accuracy | Correct Cassini series signs and refine its inverse; align Robinson's coefficient precision and stabilize exact knots. Independent reference coverage expands to 134 configurations / 2,354 points, including dense regional, near-pole, horizon and longitude-boundary probes. |
+| 7A — Numerical accuracy | Correct Cassini series signs and refine its inverse; align Robinson's coefficient precision and stabilize exact knots. Independent reference coverage expands to 134 configurations / 2,386 points, including dense regional, near-pole, horizon and longitude-boundary probes. |
 | 7B — CRS and datums | Fifteen EPSG systems in WKT1/WKT2/ESRI/PROJJSON; twelve independent 3D datum chains; real BETA2007 NTv2 plus maintained GeoTIFFs. Correct whole-chain datum=none suppression and ESRI polar/Krovak interpretation. |
 | 7C — Performance | Node throughput/allocation and fresh-process measurements; isolated browser load/construction timing and Float32/Float64 forward/inverse workloads. Chromium, Firefox and WebKit qualification runs in CI, including the independent projection corpus. Timing results are artifacts; correctness and package-size budgets are gates. |
 | 7D — Stabilization | Supported native entry points alias the same implementation as experimental imports. Packed ESM/CommonJS/type checks cover both families. The documented contract reviews numerical/strict-input exceptions and describes migration while preserving the default wrapper. |

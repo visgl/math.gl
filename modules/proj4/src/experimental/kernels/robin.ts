@@ -109,7 +109,8 @@ export function forward(state: State, ll: Point): Point | null | undefined | num
   if (i < 0) {
     i = 0;
   } else if (i >= NODES) {
-    i = NODES - 1;
+    // The final table row represents the exact pole, as in PROJ.
+    i = NODES;
   }
   dphi = R2D * (dphi - RC1 * i);
   var xy = {

@@ -8,7 +8,7 @@ Existing `@math.gl/proj4/experimental` paths remain compatibility aliases.
 
 The native entry point supports the [documented API and transformation profile](./native-support.md). The upstream coordinate corpus has **232 original numeric matches, one reviewed
 Robinson correction, and nine intentional input rejections out of 242**. This is not a measure of complete geodetic accuracy.
-An independent PROJ corpus also checks all 37 named algorithms across 2,354 points,
+An independent PROJ corpus also checks all 37 named algorithms across 2,386 points,
 with additional structured CRS, datum-chain and real NTv2/GeoTIFF checks, with explicit accuracy limits. See [independent validation](./independent-validation.md)
 and the [parity audit](./parity-audit.md) for coverage and remaining qualification work.
 The existing `Proj4Projection` remains available from `@math.gl/proj4` and uses proj4js.

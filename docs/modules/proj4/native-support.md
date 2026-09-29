@@ -26,7 +26,7 @@ uniform accuracy everywhere that an algorithm returns a finite value.
 The compatibility corpus has **232 original numeric matches, one reviewed numerical
 correction, and nine intentional input rejections out of 242**. The correction is
 Robinson's coefficient table; the original upstream coordinates remain in the repository.
-Independent PROJ qualification covers **134 configurations / 2,354 projection points**,
+Independent PROJ qualification covers **134 configurations / 2,386 projection points**,
 **15 EPSG systems in four formats**, **12 three-dimensional datum chains / 144 points**,
 and **87 real-grid points in NTv2 and GeoTIFF**. See [independent validation](./independent-validation.md)
 for domains, accuracy budgets, source versions and the grid-edge policy.

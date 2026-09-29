@@ -2,7 +2,7 @@
 
 The native engine now has reference coordinates from **PROJ 9.5.1**, generated with
 **pyproj 3.7.2** independently of proj4js. The corpus covers all **37 named algorithms**
-with **134 configurations and 2,354 points**, plus **87 points in real horizontal
+with **134 configurations and 2,386 points**, plus **87 points in real horizontal
 GeoTIFF and NTv2 datasets**. The internal Gauss helper is exercised through its parent projections.
 These are sampled accuracy checks, not a claim of full-domain or full-CRS parity.
 
@@ -70,7 +70,9 @@ Robinson now uses the same float-valued coefficient table and interval selection
 PROJ 9.5.1. This removes the roughly 1.6 m forward discrepancy on the original matrix.
 Polynomial pieces have small discontinuities at 5° knots: floating-point de-scaling
 can make even PROJ select a neighbouring interval. The native inverse recognizes
-exact tabulated knots and returns their tabulated latitude. Tests check those results
+exact tabulated knots and returns their tabulated latitude. Exact poles use the final
+coefficient row; independent spherical/ellipsoidal cases cover ±90° and nearby
+latitudes at four longitudes. Pole inverses retain the strict 1e-8° budget. Tests check those results
 against the independently projected input, while separately recording the larger
 PROJ-inverse comparison budget. This exception does not loosen off-knot accuracy.
 

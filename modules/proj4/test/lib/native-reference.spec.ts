@@ -42,7 +42,9 @@ for (const [index, fixture] of inputs.cases.entries()) {
       projections
     });
     const inverseTolerance = (input: number[]) =>
-      'knotInverseTolerance' in fixture && Math.abs(input[1] / 5 - Math.round(input[1] / 5)) < 1e-12
+      'knotInverseTolerance' in fixture &&
+      Math.abs(input[1]) < 90 &&
+      Math.abs(input[1] / 5 - Math.round(input[1] / 5)) < 1e-12
         ? fixture.knotInverseTolerance!
         : fixture.inverseTolerance;
     const results = reference.cases[index].results;

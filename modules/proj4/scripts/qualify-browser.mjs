@@ -25,6 +25,7 @@ export function qualify(inputs, reference) {
     for (const row of reference.cases[index].results) {
       const knot =
         fixture.knotInverseTolerance &&
+        Math.abs(row.input[1]) < 90 &&
         Math.abs(row.input[1] / 5 - Math.round(row.input[1] / 5)) < 1e-12;
       const inverseTolerance = knot ? fixture.knotInverseTolerance : fixture.inverseTolerance;
       close(projection.project(row.input), row.forward, fixture.forwardTolerance);

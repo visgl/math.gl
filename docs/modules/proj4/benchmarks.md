@@ -115,6 +115,8 @@ and the separately reviewed decision required to change the default backend.
 
 The checked-in raw reports under `modules/proj4/test/fixtures/qualification/` include
 source SHA-256 fingerprints, all samples, exact engine versions and methodology.
+These recorded timings predate the Robinson pole correction and its 32 additional
+reference points; subsequent CI artifacts qualify the updated source and corpus.
 Measured September 29, 2026 on Apple M2 / macOS arm64, Node 24.5.0, with 20,000
 points and seven samples. These are distinct from the earlier baseline above.
 

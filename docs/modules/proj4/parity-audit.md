@@ -11,7 +11,7 @@ selected fixtures and synthetic grids. The original results below are preserved 
 
 ## Combined qualification and native API follow-up
 
-The supported native profile now has 134 projection configurations / 2,354 independent
+The supported native profile now has 134 projection configurations / 2,386 independent
 points, 15 EPSG systems in four structured formats, 12 independent 3D datum chains,
 and 87 real-grid points across NTv2 and GeoTIFF. Cassini series/inverse and Robinson
 precision corrections improve the measured accuracy. New fixtures also fix datum=none

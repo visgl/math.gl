@@ -99,7 +99,7 @@ definition translations, the AEQD origin correction, and remaining promotion gat
 ## Completed native qualification profile
 
 The current baseline supersedes the initial counts above: `native-proj-cases.json`
-contains 134 configurations / 2,354 points. `structured-proj-reference.json` adds
+contains 134 configurations / 2,386 points. `structured-proj-reference.json` adds
 15 CRS definitions in four serializations; `datum-proj-reference.json` adds 12
 explicit 3D datum chains / 144 points. Three real grid files cover 87 points,
 including original BETA2007 NTv2. All generators pin PROJ 9.5.1, pyproj 3.7.2 and
