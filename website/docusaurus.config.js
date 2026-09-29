@@ -1,7 +1,9 @@
 const {getDocusaurusConfig} = require('@vis.gl/docusaurus-website');
 const {resolve} = require('path');
 
-const websiteBaseUrl = process.env.WEBSITE_BASE_URL;
+const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/math.gl/';
+const isNext = websiteBaseUrl.endsWith('/next/');
+const stableSiteUrl = 'https://visgl.github.io/math.gl';
 
 const config = getDocusaurusConfig({
   projectName: 'math.gl',
@@ -16,6 +18,17 @@ const config = getDocusaurusConfig({
 
   search: 'local',
 
+  navbarItems: [
+    {
+      label: isNext ? 'Next' : 'Stable',
+      position: 'right',
+      items: [
+        {label: 'Stable', href: `${stableSiteUrl}/docs`, target: '_self'},
+        {label: 'Next', href: `${stableSiteUrl}/next/docs`, target: '_self'}
+      ]
+    }
+  ],
+
   webpackConfig: {
     resolve: {
       alias: {
@@ -25,8 +38,14 @@ const config = getDocusaurusConfig({
   }
 });
 
-if (websiteBaseUrl) {
-  config.baseUrl = websiteBaseUrl;
+config.baseUrl = websiteBaseUrl;
+
+if (isNext) {
+  config.themeConfig.announcementBar = {
+    id: 'next-release-docs',
+    content: `You are viewing documentation for the upcoming major release. <a href="${stableSiteUrl}/docs">View the stable documentation</a>.`,
+    isCloseable: false
+  };
 }
 
 // Opt into all currently documented Docusaurus v4 behavior while v4 is in development.

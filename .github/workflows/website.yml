@@ -23,9 +23,9 @@ jobs:
 
       - name: Get version
         id: get_version
+        if: github.ref_name != 'master'
         run: |
-          packageFile=$(if [ -d modules ]; then ls modules/*/package.json | head -n 1; else echo package.json; fi)
-          packageName=$(jq -r '.name' $packageFile)
+          packageName=$(jq -r '.name' modules/core/package.json)
           LATEST=$(npm show "${packageName}@latest" version | grep -o -E "^[0-9]+\.[0-9]+")
           echo "latest=${LATEST}-release" >> "$GITHUB_OUTPUT"
 
