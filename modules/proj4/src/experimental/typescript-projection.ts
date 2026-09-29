@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
-import type {ProjectionImplementation, ProjectionPlugin} from './types';
+import type {ProjectionImplementation, ProjectionPlugin, ProjectionPoint} from './types';
+import {projectionOperation} from './mutable-projection';
 import {CORE_FLAGS, CORE_PARAMETERS, normalizeCRS} from './crs/normalize';
 import {TypeScriptCRSError, unsupportedStage} from './crs/types';
 import type {CRSCompatibilityReason, CRSNormalizationOptions, NormalizedCRS} from './crs/types';
-import {transformDatum} from './datum';
-import type {Coordinate3D} from './datum';
+import {createDatumTransform} from './datum';
 import {wrapLongitude} from './parameters';
 import type {DatumGridCollection} from './grids/types';
 
@@ -21,12 +21,19 @@ export type TypeScriptProjectionOptions = CRSNormalizationOptions & {
   /** Prepared horizontal grids keyed by the names used in +nadgrids. No global registry. */
   datumGrids?: DatumGridCollection;
 };
+export type ProjectionArray = Float32Array | Float64Array;
+type CoordinateTransform = {
+  run(point: ProjectionPoint): void;
+  requiresInputZ: boolean;
+  geocentricOutput: boolean;
+};
 type CompiledCRS = NormalizedCRS & {implementation?: ProjectionImplementation};
 /** Experimental independent CRS engine. Third ordinates are ellipsoidal height or geocentric Z. */
 export class TypeScriptProjection {
   private readonly from: CompiledCRS;
   private readonly to: CompiledCRS;
-  private readonly enforceAxis: boolean;
+  private readonly forwardTransform: CoordinateTransform;
+  private readonly inverseTransform: CoordinateTransform;
   readonly lossy: boolean;
   constructor(options: TypeScriptProjectionOptions = {}) {
     const plugins = registry(options.projections || []);
@@ -37,16 +44,27 @@ export class TypeScriptProjection {
       unsupportedStage(
         'Horizontal extraction cannot supply ellipsoidal height for geocentric coordinates'
       );
-    this.enforceAxis = Boolean(options.enforceAxis);
+    this.forwardTransform = compileTransform(this.from, this.to, Boolean(options.enforceAxis));
+    this.inverseTransform = compileTransform(this.to, this.from, Boolean(options.enforceAxis));
     this.project = this.project.bind(this);
     this.unproject = this.unproject.bind(this);
+    this.projectFlat = this.projectFlat.bind(this);
+    this.unprojectFlat = this.unprojectFlat.bind(this);
   }
   /** Returns a new array. Missing geographic/projected height defaults to zero internally. */
   project(coordinate: readonly number[]): number[] {
-    return transform(coordinate, this.from, this.to, this.enforceAxis);
+    return transformScalar(coordinate, this.forwardTransform);
   }
   unproject(coordinate: readonly number[]): number[] {
-    return transform(coordinate, this.to, this.from, this.enforceAxis);
+    return transformScalar(coordinate, this.inverseTransform);
+  }
+  /** Project a flat interleaved buffer in place. Earlier records remain changed on failure. */
+  projectFlat<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
+    return transformInPlace(coordinates, dimension, this.forwardTransform);
+  }
+  /** Unproject a flat interleaved buffer in place; returns the same typed-array view. */
+  unprojectFlat<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
+    return transformInPlace(coordinates, dimension, this.inverseTransform);
   }
 }
 export type TypeScriptCRSCompatibility = {
@@ -141,73 +159,147 @@ function compileCRS(
   const datum = grids ? Object.freeze({...crs.datum, grids: Object.freeze(grids)}) : crs.datum;
   return {...crs, datum, implementation};
 }
-function axisTransform(point: Coordinate3D, axis: string, inverse: boolean): Coordinate3D {
-  const result: Coordinate3D = [0, 0, 0];
+
+function finite(point: ProjectionPoint): boolean {
+  return Number.isFinite(point.x) && Number.isFinite(point.y) && Number.isFinite(point.z);
+}
+function compileAxis(
+  axis: string,
+  inverse: boolean
+): ((point: ProjectionPoint) => void) | undefined {
+  if (axis === 'enu') return undefined;
+  const indexes = [0, 0, 0],
+    signs = [0, 0, 0];
   for (let i = 0; i < 3; i++) {
     const char = axis[i],
       component = 'ew'.includes(char) ? 0 : 'ns'.includes(char) ? 1 : 2;
-    const sign = 'wsd'.includes(char) ? -1 : 1;
-    if (inverse) result[i] = sign * point[component];
-    else result[component] = sign * point[i];
+    indexes[inverse ? i : component] = inverse ? component : i;
+    signs[inverse ? i : component] = 'wsd'.includes(char) ? -1 : 1;
   }
-  return result;
+  return point => {
+    const x = point.x,
+      y = point.y,
+      z = point.z;
+    point.x = signs[0] * (indexes[0] === 0 ? x : indexes[0] === 1 ? y : z);
+    point.y = signs[1] * (indexes[1] === 0 ? x : indexes[1] === 1 ? y : z);
+    point.z = signs[2] * (indexes[2] === 0 ? x : indexes[2] === 1 ? y : z);
+  };
 }
-function transform(
-  coordinate: readonly number[],
+function compileTransform(
   from: CompiledCRS,
   to: CompiledCRS,
   enforceAxis: boolean
-): number[] {
-  if (coordinate.length < 2 || coordinate.slice(0, 3).some(value => !Number.isFinite(value)))
-    throw new Error('Coordinates must contain finite x, y and optional z values');
-  if (from.kind === 'geocentric' && coordinate.length < 3)
-    throw new Error('Geocentric input requires x, y and z');
+): CoordinateTransform {
   const fromAxis = from.storedAxis || (enforceAxis ? from.axis : 'enu');
   const toAxis = to.storedAxis || (enforceAxis ? to.axis : 'enu');
-  if (
-    coordinate.length < 3 &&
-    (/[ud]/.test(fromAxis.slice(0, 2)) || /[ud]/.test(toAxis.slice(0, 2)))
-  )
-    throw new Error('This axis permutation requires three ordinates');
-  let point: Coordinate3D = [coordinate[0], coordinate[1], coordinate[2] ?? 0];
-  point = axisTransform(point, fromAxis, false);
+  const inputAxis = compileAxis(fromAxis, false),
+    outputAxis = compileAxis(toAxis, true);
+  const source =
+    from.implementation &&
+    projectionOperation(from.implementation, true, from.kind === 'geocentric');
+  const target =
+    to.implementation && projectionOperation(to.implementation, false, to.kind === 'geocentric');
+  const datum = createDatumTransform(from.datum, to.datum);
   const horizontalOnly = from.lossy || to.lossy;
-  const preservedHeight = point[2];
-  if (horizontalOnly) point[2] = 0;
-  if (from.kind === 'geocentric') {
-    point = from.implementation.inverse3D(point.map(value => value * from.toMeter) as Coordinate3D);
-  } else {
-    const xy =
-      from.kind === 'geographic'
-        ? [point[0] * from.angularUnit, point[1] * from.angularUnit]
-        : from.kind === 'identity'
-          ? [point[0] * from.toMeter, point[1] * from.toMeter]
-          : from.implementation.inverse(point[0] * from.toMeter, point[1] * from.toMeter);
-    point = [xy[0], xy[1], point[2] * from.verticalUnit];
+  return {
+    requiresInputZ:
+      from.kind === 'geocentric' ||
+      /[ud]/.test(fromAxis.slice(0, 2)) ||
+      /[ud]/.test(toAxis.slice(0, 2)),
+    geocentricOutput: to.kind === 'geocentric',
+    run(point) {
+      if (!finite(point))
+        throw new Error('Coordinates must contain finite x, y and optional z values');
+      inputAxis?.(point);
+      const preservedHeight = point.z;
+      if (horizontalOnly) point.z = 0;
+      if (from.kind === 'geocentric') {
+        point.x *= from.toMeter;
+        point.y *= from.toMeter;
+        point.z *= from.toMeter;
+        source(point);
+      } else {
+        if (from.kind === 'geographic') {
+          point.x *= from.angularUnit;
+          point.y *= from.angularUnit;
+        } else {
+          point.x *= from.toMeter;
+          point.y *= from.toMeter;
+          if (from.kind !== 'identity') source(point);
+        }
+        point.z *= from.verticalUnit;
+      }
+      if (Math.abs(point.y) > Math.PI / 2 || !finite(point))
+        throw new Error('Coordinate is outside the geographic domain');
+      point.x += from.primeMeridian;
+      datum?.(point);
+      point.x -= to.primeMeridian;
+      if (to.kind === 'geocentric') {
+        target(point);
+        point.x /= to.toMeter;
+        point.y /= to.toMeter;
+        point.z /= to.toMeter;
+      } else {
+        if (to.kind === 'geographic') {
+          if (to.longitudeWrap !== undefined)
+            point.x = to.longitudeWrap + wrapLongitude(point.x - to.longitudeWrap);
+          point.x /= to.angularUnit;
+          point.y /= to.angularUnit;
+        } else {
+          if (to.kind !== 'identity') target(point);
+          point.x /= to.toMeter;
+          point.y /= to.toMeter;
+        }
+        point.z /= to.verticalUnit;
+      }
+      if (horizontalOnly) point.z = preservedHeight;
+      outputAxis?.(point);
+      if (!finite(point)) throw new Error('Projection produced non-finite coordinates');
+    }
+  };
+}
+function transformScalar(coordinate: readonly number[], operation: CoordinateTransform): number[] {
+  if (coordinate.length < 2)
+    throw new Error('Coordinates must contain finite x, y and optional z values');
+  if (coordinate.length < 3 && operation.requiresInputZ)
+    throw new Error('This transform requires three ordinates');
+  const point = {x: coordinate[0], y: coordinate[1], z: coordinate.length >= 3 ? coordinate[2] : 0};
+  operation.run(point);
+  const output = coordinate.slice();
+  output[0] = point.x;
+  output[1] = point.y;
+  if (coordinate.length >= 3 || operation.geocentricOutput) output[2] = point.z;
+  return output;
+}
+function transformInPlace<T extends ProjectionArray>(
+  coordinates: T,
+  dimension: number,
+  operation: CoordinateTransform
+): T {
+  if (!(coordinates instanceof Float32Array || coordinates instanceof Float64Array))
+    throw new Error('In-place projection requires a Float32Array or Float64Array');
+  if (!Number.isSafeInteger(dimension) || dimension < 2 || coordinates.length % dimension !== 0)
+    throw new Error('Dimension must be an integer >= 2 and divide the typed array length');
+  if (dimension < 3 && (operation.requiresInputZ || operation.geocentricOutput))
+    throw new Error('This transform requires a dimension of at least 3');
+  const point = {x: 0, y: 0, z: 0};
+  const float32 = coordinates instanceof Float32Array;
+  for (let offset = 0; offset < coordinates.length; offset += dimension) {
+    point.x = coordinates[offset];
+    point.y = coordinates[offset + 1];
+    point.z = dimension >= 3 ? coordinates[offset + 2] : 0;
+    operation.run(point);
+    // Commit only a complete finite record; do not silently overflow Float32 storage.
+    if (
+      float32 &&
+      (Math.abs(point.x) > 3.4028234663852886e38 ||
+        Math.abs(point.y) > 3.4028234663852886e38 ||
+        (dimension >= 3 && Math.abs(point.z) > 3.4028234663852886e38))
+    )
+      throw new Error('Projected coordinate exceeds Float32 range');
+    coordinates[offset] = point.x;
+    coordinates[offset + 1] = point.y;
+    if (dimension >= 3) coordinates[offset + 2] = point.z;
   }
-  if (Math.abs(point[1]) > Math.PI / 2 || point.some(value => !Number.isFinite(value)))
-    throw new Error('Coordinate is outside the geographic domain');
-  point[0] += from.primeMeridian;
-  point = transformDatum(point, from.datum, to.datum);
-  point[0] -= to.primeMeridian;
-  if (to.kind === 'geocentric') {
-    point = to.implementation.forward3D(point).map(value => value / to.toMeter) as Coordinate3D;
-  } else {
-    if (to.kind === 'geographic' && to.longitudeWrap !== undefined)
-      point[0] = to.longitudeWrap + wrapLongitude(point[0] - to.longitudeWrap);
-    const xy =
-      to.kind === 'geographic'
-        ? [point[0] / to.angularUnit, point[1] / to.angularUnit]
-        : to.kind === 'identity'
-          ? [point[0] / to.toMeter, point[1] / to.toMeter]
-          : to.implementation.forward(point[0], point[1]).map(value => value / to.toMeter);
-    point = [xy[0], xy[1], point[2] / to.verticalUnit];
-  }
-  if (horizontalOnly) point[2] = preservedHeight;
-  point = axisTransform(point, toAxis, true);
-  if (point.some(value => !Number.isFinite(value)))
-    throw new Error('Projection produced non-finite coordinates');
-  return coordinate.length >= 3 || to.kind === 'geocentric'
-    ? [...point, ...coordinate.slice(3)]
-    : point.slice(0, 2);
+  return coordinates;
 }

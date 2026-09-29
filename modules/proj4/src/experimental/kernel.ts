@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createProjection, projectionOperation} from './mutable-projection';
 import {DEGREES_TO_RADIANS, numberParameter} from './parameters';
 import type {ProjectionContext, ProjectionImplementation, ProjectionParameters} from './types';
 
@@ -95,19 +96,22 @@ export function bindKernel<State>(
   forward: (state: State, point: Point) => Point | null | undefined | number,
   inverse: (state: State, point: Point) => Point | null | undefined | number
 ): ProjectionImplementation {
-  const run = (operation: typeof forward, x: number, y: number): [number, number] => {
-    const result = operation(state, {x, y});
+  const run = (operation: typeof forward, point: Point): void => {
+    const result = operation(state, point);
     if (
       !result ||
       typeof result !== 'object' ||
       !Number.isFinite(result.x) ||
       !Number.isFinite(result.y)
-    ) {
+    )
       throw new Error(name + ': coordinate outside projection domain or inverse did not converge');
-    }
-    return [result.x, result.y];
+    point.x = result.x;
+    point.y = result.y;
   };
-  return {forward: (x, y) => run(forward, x, y), inverse: (x, y) => run(inverse, x, y)};
+  return createProjection(
+    point => run(forward, point),
+    point => run(inverse, point)
+  );
 }
 
 /** Azimuthal antipodes have no unique azimuth; reject even when roundoff is finite. */
@@ -115,18 +119,20 @@ export function guardAzimuthalDomain(
   base: KernelParameters,
   implementation: ProjectionImplementation
 ): ProjectionImplementation {
-  return {
-    forward(longitude, latitude) {
+  const forward = projectionOperation(implementation, false);
+  return createProjection(
+    point => {
+      const longitude = point.x,
+        latitude = point.y;
       const delta = Math.atan2(Math.sin(longitude - base.long0), Math.cos(longitude - base.long0));
       const polar = Math.abs(Math.abs(base.lat0) - Math.PI / 2) < 1e-10;
       if (
         Math.abs(latitude + base.lat0) < 1e-10 &&
         (polar || Math.abs(Math.abs(delta) - Math.PI) < 1e-10)
-      ) {
+      )
         throw new Error('Azimuthal projection is undefined at the antipode');
-      }
-      return implementation.forward(longitude, latitude);
+      forward(point);
     },
-    inverse: implementation.inverse
-  };
+    projectionOperation(implementation, true)
+  );
 }

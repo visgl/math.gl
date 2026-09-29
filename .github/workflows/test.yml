@@ -64,6 +64,9 @@ jobs:
         run: |
           node modules/proj4/scripts/check-parity-inventory.mjs
           node modules/proj4/scripts/check-experimental-package.mjs
+          node modules/proj4/scripts/check-packed-package.mjs
+          node modules/proj4/scripts/check-bundle-budget.mjs
+          node modules/proj4/scripts/benchmark.mjs --points 100 --samples 3
 
       - name: Check CRS type boundaries
         run: yarn check:crs-types

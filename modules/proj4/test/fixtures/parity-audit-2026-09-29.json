@@ -1,0 +1,725 @@
+{
+  "date": "2026-09-29",
+  "metadata": {
+    "engineRevision": "bf28217ddf998c6b2943ddfef56acd1519c235e6",
+    "upstream": "2.22.0",
+    "hashes": {
+      "testData.js": "d39e13b963eece8774cf8fa07290e85a7b3454a2579188865f46c1838fca1136",
+      "proj4.test.mjs": "584c01e8046e153a50aae41d03cf214fd54e982a0dbdafc396d5288c9008d66b"
+    },
+    "fixtureCount": 242,
+    "methodology": "Both directions against unchanged upstream fixture coordinates at each fixture tolerance. Default axis policy. All native plugins/readers and upstream suite aliases registered. Coordinate X/Y only, matching upstream fixture assertions. This is an audit, not a passing parity gate."
+  },
+  "corpus": {
+    "all": {
+      "fixtures": 242,
+      "upstreamPass": 242,
+      "nativePass": 181,
+      "constructionRejected": 49,
+      "executionRejected": 1,
+      "numericMismatch": 11
+    },
+    "byKind": {
+      "PROJ": {
+        "fixtures": 116,
+        "upstreamPass": 116,
+        "nativePass": 106,
+        "constructionRejected": 10,
+        "executionRejected": 0,
+        "numericMismatch": 0
+      },
+      "WKT": {
+        "fixtures": 112,
+        "upstreamPass": 112,
+        "nativePass": 67,
+        "constructionRejected": 36,
+        "executionRejected": 1,
+        "numericMismatch": 8
+      },
+      "PROJJSON": {
+        "fixtures": 8,
+        "upstreamPass": 8,
+        "nativePass": 2,
+        "constructionRejected": 3,
+        "executionRejected": 0,
+        "numericMismatch": 3
+      },
+      "alias": {
+        "fixtures": 6,
+        "upstreamPass": 6,
+        "nativePass": 6,
+        "constructionRejected": 0,
+        "executionRejected": 0,
+        "numericMismatch": 0
+      }
+    }
+  },
+  "failures": [
+    {
+      "index": 6,
+      "line": 30,
+      "kind": "WKT",
+      "label": "PROJCS[\"CH1903 / LV03\",GEOGCS[\"CH1903\",DATUM[\"D_CH1903\",SPHEROID[\"Bessel_1841\",6377397.155,299.1528128]],PRIME",
+      "constructionError": "Unsupported projection method: Hotine_Oblique_Mercator_Azimuth_Center",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 7,
+      "line": 38,
+      "kind": "WKT",
+      "label": "PROJCS[\"CH1903 / LV03\",GEOGCS[\"CH1903\",DATUM[\"CH1903\",SPHEROID[\"Bessel 1841\",6377397.155,299.1528128,AUTHORITY",
+      "constructionError": "Unsupported projection method: Hotine_Oblique_Mercator_Azimuth_Center",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 8,
+      "line": 46,
+      "kind": "WKT",
+      "label": "PROJCRS[\"CH1903 / LV03\",\n    BASEGEOGCRS[\"CH1903\",\n        DATUM[\"CH1903\",\n            ELLIPSOID[\"Bessel 1841\"",
+      "constructionError": "Unsupported projection method: Hotine Oblique Mercator (variant B)",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 9,
+      "line": 98,
+      "kind": "PROJJSON",
+      "label": "CH1903 / LV03",
+      "constructionError": "Unsupported projection method: Hotine Oblique Mercator (variant B)",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 26,
+      "line": 329,
+      "kind": "WKT",
+      "label": "PROJCRS[\"NAD83(CSRS) / UTM zone 17N\",\n    BASEGEOGCRS[\"NAD83(CSRS)\",\n        DATUM[\"NAD83 Canadian Spatial Ref",
+      "forwardTolerance": 0.7943282347242815,
+      "inverseTolerance": 0.00001,
+      "liveForwardDelta": 0.9195553911849856,
+      "liveInverseDelta": 0.000008243947348773872
+    },
+    {
+      "index": 30,
+      "line": 442,
+      "kind": "WKT",
+      "label": "PROJCRS[\"NAD27 / UTM zone 14N\",\n    BASEGEOGCRS[\"NAD27\",\n        DATUM[\"North American Datum 1927\",\n          ",
+      "forwardError": "No datum grid covers coordinate: conus,alaska,ntv2_0.gsb,ntv1_can.dat",
+      "inverseError": "No datum grid covers coordinate: conus,alaska,ntv2_0.gsb,ntv1_can.dat",
+      "forwardTolerance": 10,
+      "inverseTolerance": 0.0001,
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 43,
+      "line": 684,
+      "kind": "WKT",
+      "label": "PROJCRS[\"North_Pole_Azimuthal_Equidistant\",\n    BASEGEOGCRS[\"WGS 84\",\n        DATUM[\"World Geodetic System 198",
+      "constructionError": "Latitude parameter must be between -90 and 90 degrees: +lat_0",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 61,
+      "line": 820,
+      "kind": "WKT",
+      "label": "PROJCS[\"Mount Dillon / Tobago Grid\",GEOGCS[\"Mount Dillon\",DATUM[\"D_Mount_Dillon\",SPHEROID[\"Clarke_1858\",637829",
+      "constructionError": "Unsupported projection method: Cassini",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 65,
+      "line": 891,
+      "kind": "PROJJSON",
+      "label": "World Equidistant Cylindrical (Sphere)",
+      "constructionError": "Unsupported projection method: Equidistant Cylindrical (Spherical)",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 68,
+      "line": 908,
+      "kind": "PROJJSON",
+      "label": "Segara / NEIEZ",
+      "forwardTolerance": 0.1,
+      "inverseTolerance": 0.000001,
+      "liveForwardDelta": 4.483040344086476,
+      "liveInverseDelta": 0.00004066168522853797
+    },
+    {
+      "index": 74,
+      "line": 978,
+      "kind": "WKT",
+      "label": "PROJCS[\"S-JTSK (Ferro) / Krovak\",GEOGCS[\"S-JTSK (Ferro)\",DATUM[\"S_JTSK_Ferro\",SPHEROID[\"Bessel 1841\",6377397.1",
+      "constructionError": "Unsupported projection method: Krovak",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 75,
+      "line": 982,
+      "kind": "WKT",
+      "label": "PROJCS[\"S-JTSK (Ferro) / Krovak\",GEOGCS[\"S-JTSK (Ferro)\",DATUM[\"D_S_JTSK\",SPHEROID[\"Bessel_1841\",6377397.155,2",
+      "constructionError": "Unsupported projection method: Krovak",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 76,
+      "line": 987,
+      "kind": "WKT",
+      "label": "PROJCRS[\"S-JTSK (Ferro) / Krovak\",\n    BASEGEOGCRS[\"S-JTSK (Ferro)\",\n        DATUM[\"System of the Unified Trig",
+      "constructionError": "Unsupported projection method: Krovak",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 81,
+      "line": 1091,
+      "kind": "WKT",
+      "label": "PROJCS[\"NZGD49 / New Zealand Map Grid\",GEOGCS[\"NZGD49\",DATUM[\"D_New_Zealand_1949\",SPHEROID[\"International_1924",
+      "forwardTolerance": 0.01,
+      "inverseTolerance": 0.000001,
+      "liveForwardDelta": 192.36029578372836,
+      "liveInverseDelta": 0.001731349155669193
+    },
+    {
+      "index": 84,
+      "line": 1137,
+      "kind": "WKT",
+      "label": "PROJCS[\"Rassadiran / Nakhl e Taqi\", GEOGCS[\"Rassadiran\", DATUM[\"Rassadiran\", SPHEROID[\"International 1924\",637",
+      "constructionError": "Unsupported projection method: Hotine_Oblique_Mercator_Azimuth_Center",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 85,
+      "line": 1145,
+      "kind": "WKT",
+      "label": "PROJCRS[\"Rassadiran / Nakhl e Taqi\",\n    BASEGEOGCRS[\"Rassadiran\",\n        DATUM[\"Rassadiran\",\n            ELL",
+      "constructionError": "Unsupported projection method: Hotine Oblique Mercator (variant B)",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 89,
+      "line": 1254,
+      "kind": "WKT",
+      "label": "PROJCS[\"WGS 84 / UPS North\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY",
+      "constructionError": "Unsupported axis direction: UNKNOWN",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 90,
+      "line": 1258,
+      "kind": "WKT",
+      "label": "PROJCS[\"WGS 84 / UPS North\",GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137,298.257223563",
+      "constructionError": "Unsupported projection method: Stereographic_North_Pole",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 91,
+      "line": 1262,
+      "kind": "WKT",
+      "label": "PROJCRS[\"WGS 84 / UPS North (N,E)\",\n    BASEGEOGCRS[\"WGS 84\",\n        ENSEMBLE[\"World Geodetic System 1984 ens",
+      "constructionError": "Axis meridians require an orientation operation",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 112,
+      "line": 1397,
+      "kind": "PROJ",
+      "label": "+proj=stere +lat_0=-90 +lat_ts=-70 +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs\"",
+      "constructionError": "Unsupported PROJ parameter: +no_defs\"",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 116,
+      "line": 1414,
+      "kind": "WKT",
+      "label": "PROJCS[\"WGS 84 / NSIDC Sea Ice Polar Stereographic South\", GEOGCS[\"WGS 84\", DATUM[\"World Geodetic System 1984\"",
+      "constructionError": "Unsupported axis direction: North along 90 deg East",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 117,
+      "line": 1418,
+      "kind": "WKT",
+      "label": "PROJCRS[\"WGS 84 / NSIDC Sea Ice Polar Stereographic South\",\n    BASEGEOGCRS[\"WGS 84\",\n        ENSEMBLE[\"World ",
+      "constructionError": "Axis meridians require an orientation operation",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 118,
+      "line": 1469,
+      "kind": "WKT",
+      "label": "PROJCS[\"NAD83(CSRS98) / New Brunswick Stereo (deprecated)\",GEOGCS[\"NAD83(CSRS98)\",DATUM[\"D_North_American_1983",
+      "constructionError": "Unsupported projection method: Stereographic_North_Pole",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 129,
+      "line": 1633,
+      "kind": "WKT",
+      "label": "PROJCS[\"Belge 1972 / Belgian Lambert 72\",GEOGCS[\"Belge 1972\",DATUM[\"D_Belge_1972\",SPHEROID[\"International_1924",
+      "forwardTolerance": 0.01,
+      "inverseTolerance": 0.000001,
+      "liveForwardDelta": 118.48682450782508,
+      "liveInverseDelta": 0.0012502004361132357
+    },
+    {
+      "index": 130,
+      "line": 1638,
+      "kind": "WKT",
+      "label": "PROJCS[\"Belge 1972 / Belgian Lambert 72\",GEOGCS[\"Belge 1972\",DATUM[\"Reseau_National_Belge_1972\",SPHEROID[\"Inte",
+      "constructionError": "Latitude parameter must be between -90 and 90 degrees: +lat_0",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 131,
+      "line": 1643,
+      "kind": "WKT",
+      "label": "PROJCS[\"Belge 1972 / Belgian Lambert 72\",GEOGCS[\"Belge 1972\",DATUM[\"Reseau_National_Belge_1972\",SPHEROID[\"Inte",
+      "constructionError": "Latitude parameter must be between -90 and 90 degrees: +lat_0",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 132,
+      "line": 1648,
+      "kind": "WKT",
+      "label": "PROJCS[\"Belge 1972 / Belgian Lambert 72\",GEOGCS[\"Belge 1972\",DATUM[\"Reseau_National_Belge_1972\",SPHEROID[\"Inte",
+      "constructionError": "Latitude parameter must be between -90 and 90 degrees: +lat_0",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 134,
+      "line": 1658,
+      "kind": "WKT",
+      "label": "PROJCRS[\"BD72 / Belgian Lambert 72\",\n    BASEGEOGCRS[\"BD72\",\n        DATUM[\"Reseau National Belge 1972\",\n     ",
+      "constructionError": "Latitude parameter must be between -90 and 90 degrees: +lat_0",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 135,
+      "line": 1703,
+      "kind": "PROJJSON",
+      "label": "BD72 / Belgian Lambert 72",
+      "forwardTolerance": 0.01,
+      "inverseTolerance": 0.000001,
+      "liveForwardDelta": 175.86658653368067,
+      "liveInverseDelta": 0.0025003119056057344
+    },
+    {
+      "index": 141,
+      "line": 1807,
+      "kind": "PROJ",
+      "label": "+proj=krovak +lat_0=49.5 +lon_0=24.83333333333333 +alpha=30.28813972222222 +k=0.9999 +x_0=0 +y_0=0 +ellps=bess",
+      "constructionError": "Unsupported PROJ parameter: +alpha",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 142,
+      "line": 1812,
+      "kind": "PROJ",
+      "label": "+proj=krovak +lat_0=49.5 +lon_0=24.83333333333333 +alpha=30.28813972222222 +ellps=bessel +pm=greenwich +units=",
+      "constructionError": "Unsupported PROJ parameter: +alpha",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 143,
+      "line": 1817,
+      "kind": "WKT",
+      "label": "PROJCRS[\"S-JTSK [JTSK03] / Krovak East North\",BASEGEOGCRS[\"S-JTSK [JTSK03]\",DATUM[\"System of the Unified Trigo",
+      "constructionError": "Unsupported projection method: Krovak (North Orientated)",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 145,
+      "line": 1827,
+      "kind": "WKT",
+      "label": "PROJCRS[\"MGI / Austria GK M34\",\n    BASEGEOGCRS[\"MGI\",\n        DATUM[\"Militar-Geographische Institut\",\n       ",
+      "forwardTolerance": 0.01,
+      "inverseTolerance": 0.000001,
+      "liveForwardDelta": 0.44201682915445417,
+      "liveInverseDelta": 0.00000581730829374294
+    },
+    {
+      "index": 153,
+      "line": 1977,
+      "kind": "WKT",
+      "label": "PROJCS[\"unnamed\",GEOGCS[\"WGS 84\",DATUM[\"unknown\",SPHEROID[\"WGS84\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0",
+      "constructionError": "Unsupported projection method: Quadrilateralized_Spherical_Cube",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 154,
+      "line": 1982,
+      "kind": "WKT",
+      "label": "PROJCS[\"unnamed\",GEOGCS[\"WGS 84\",DATUM[\"unknown\",SPHEROID[\"WGS84\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0",
+      "constructionError": "Unsupported projection method: Quadrilateralized_Spherical_Cube",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 155,
+      "line": 1987,
+      "kind": "WKT",
+      "label": "PROJCS[\"unnamed\",GEOGCS[\"WGS 84\",DATUM[\"unknown\",SPHEROID[\"WGS84\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0",
+      "constructionError": "Unsupported projection method: Quadrilateralized_Spherical_Cube",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 156,
+      "line": 1992,
+      "kind": "WKT",
+      "label": "PROJCS[\"unnamed\",GEOGCS[\"WGS 84\",DATUM[\"unknown\",SPHEROID[\"WGS84\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0",
+      "constructionError": "Unsupported projection method: Quadrilateralized_Spherical_Cube",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 157,
+      "line": 1998,
+      "kind": "WKT",
+      "label": "PROJCS[\"unnamed\",GEOGCS[\"WGS 84\",DATUM[\"unknown\",SPHEROID[\"WGS84\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0",
+      "constructionError": "Unsupported projection method: Quadrilateralized_Spherical_Cube",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 158,
+      "line": 2004,
+      "kind": "WKT",
+      "label": "PROJCS[\"unnamed\",GEOGCS[\"WGS 84\",DATUM[\"unknown\",SPHEROID[\"WGS84\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0",
+      "constructionError": "Unsupported projection method: Quadrilateralized_Spherical_Cube",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 174,
+      "line": 2095,
+      "kind": "PROJ",
+      "label": "+proj=tmerc +ellps=GRS80 +lat_1=0.5 +lat_2=2 +n=0.5",
+      "constructionError": "Unsupported PROJ parameter: +lat_1",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 175,
+      "line": 2100,
+      "kind": "PROJ",
+      "label": "+proj=tmerc +approx +a=6400000 +lat_1=0.5 +lat_2=2 +n=0.5",
+      "constructionError": "Unsupported PROJ parameter: +lat_1",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 176,
+      "line": 2105,
+      "kind": "PROJ",
+      "label": "+proj=etmerc +zone=30 +ellps=GRS80 +lat_1=0.5 +lat_2=2 +n=0.5",
+      "constructionError": "Unsupported PROJ parameter: +zone",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 178,
+      "line": 2115,
+      "kind": "PROJ",
+      "label": "+proj=utm +zone=30 +ellps=GRS80 +lat_1=0.5 +lat_2=2 +n=0.5",
+      "constructionError": "Unsupported PROJ parameter: +lat_1",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 179,
+      "line": 2120,
+      "kind": "PROJ",
+      "label": "+proj=utm +lon_0=-3 +ellps=GRS80 +lat_1=0.5 +lat_2=2 +n=0.5",
+      "constructionError": "Unsupported PROJ parameter: +lon_0",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 193,
+      "line": 2193,
+      "kind": "WKT",
+      "label": "PROJCS[\"CUSTOM_OBLIQUE_MERCATOR\", GEOGCS[\"WGS 84\", DATUM[\"World Geodetic System 1984\", SPHEROID[\"WGS 84\", 6378",
+      "constructionError": "Unsupported projection method: Hotine_Oblique_Mercator_Azimuth_Center",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 195,
+      "line": 2212,
+      "kind": "WKT",
+      "label": "PROJCS[\"GDM2000 / Peninsula RSO\", GEOGCS[\"GDM2000\", DATUM[\"Geodetic_Datum_of_Malaysia_2000\", SPHEROID[\"GRS 198",
+      "constructionError": "Unsupported projection method: Hotine_Oblique_Mercator",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 196,
+      "line": 2221,
+      "kind": "PROJJSON",
+      "label": "_GDM2000 / Peninsula RSO",
+      "constructionError": "Unsupported projection method: Hotine Oblique Mercator (variant A)",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 198,
+      "line": 2240,
+      "kind": "WKT",
+      "label": "PROJCS[\"NAD83(NSRS2007) / Alaska zone 1\", GEOGCS[\"NAD83(NSRS2007)\", DATUM[\"NAD83_National_Spatial_Reference_Sy",
+      "constructionError": "Unsupported projection method: Hotine_Oblique_Mercator",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 199,
+      "line": 2249,
+      "kind": "WKT",
+      "label": "PROJCS[\"NAD83(NSRS2007) / Alaska zone 1\",\n    GEOGCS[\"NAD83(NSRS2007)\",\n        DATUM[\"NAD83_National_Spatial_",
+      "constructionError": "Unsupported projection method: Hotine_Oblique_Mercator",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 201,
+      "line": 2291,
+      "kind": "WKT",
+      "label": "PROJCS[\"UNK / Oblique_Mercator\",GEOGCS[\"UNK\",DATUM[\"Unknown datum\",SPHEROID[\"WGS 84\", 6378137.0, 298.257223563",
+      "constructionError": "Unsupported projection method: Oblique_Mercator",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 202,
+      "line": 2301,
+      "kind": "WKT",
+      "label": "PROJCS[\"UNK / Oblique_Mercator\",GEOGCS[\"UNK\",DATUM[\"Unknown datum\",SPHEROID[\"WGS 84\", 6378137.0, 298.257223563",
+      "constructionError": "Unsupported projection method: Oblique_Mercator",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 203,
+      "line": 2306,
+      "kind": "WKT",
+      "label": "PROJCS[\"WGS 84 / Pseudo-Mercator\", GEOGCS[\"WGS 84\", DATUM[\"World Geodetic System 1984\", SPHEROID[\"WGS 84\", 637",
+      "constructionError": "Unsupported conversion parameter: semi_minor",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 205,
+      "line": 2359,
+      "kind": "WKT",
+      "label": "PROJCS[\"WGS 84 / Pseudo-Mercator\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUT",
+      "constructionError": "Unsupported WKT dynamic/extension operation",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 220,
+      "line": 2479,
+      "kind": "WKT",
+      "label": "PROJCS[\"WGS 84 / Arctic Polar Stereographic\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.25",
+      "forwardTolerance": 0.01,
+      "inverseTolerance": 0.000001,
+      "liveForwardDelta": 2141829.324122243,
+      "liveInverseDelta": 19.000000000000014
+    },
+    {
+      "index": 221,
+      "line": 2484,
+      "kind": "WKT",
+      "label": "PROJCRS[\"WGS 84 / Arctic Polar Stereographic\",\n    BASEGEOGCRS[\"WGS 84\",\n        ENSEMBLE[\"World Geodetic Syst",
+      "constructionError": "Axis meridians require an orientation operation",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 222,
+      "line": 2536,
+      "kind": "WKT",
+      "label": "PROJCS[\"WGS 84 / Arctic Polar Stereographic\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.25",
+      "forwardTolerance": 0.01,
+      "inverseTolerance": 0.000001,
+      "liveForwardDelta": 3315485.356710188,
+      "liveInverseDelta": 17.62727500916656
+    },
+    {
+      "index": 223,
+      "line": 2542,
+      "kind": "WKT",
+      "label": "PROJCS[\"WGS 84 / Antarctic Polar Stereographic\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298",
+      "forwardTolerance": 0.01,
+      "inverseTolerance": 0.000001,
+      "liveForwardDelta": 2141829.3241222505,
+      "liveInverseDelta": 19.000000000000085
+    },
+    {
+      "index": 224,
+      "line": 2547,
+      "kind": "WKT",
+      "label": "PROJCS[\"WGS 84 / Antarctic Polar Stereographic\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298",
+      "forwardTolerance": 0.01,
+      "inverseTolerance": 0.000001,
+      "liveForwardDelta": 3315485.3567102067,
+      "liveInverseDelta": 17.627275009166674
+    },
+    {
+      "index": 228,
+      "line": 2567,
+      "kind": "PROJ",
+      "label": "+proj=bonne +a=6400000 +lat_1=0.5 +lat_2=2",
+      "constructionError": "Unsupported PROJ parameter: +lat_2",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 229,
+      "line": 2572,
+      "kind": "PROJ",
+      "label": "+proj=bonne +ellps=GRS80 +lat_1=0.5 +lat_2=2",
+      "constructionError": "Unsupported PROJ parameter: +lat_2",
+      "liveForwardDelta": null,
+      "liveInverseDelta": null
+    },
+    {
+      "index": 230,
+      "line": 2577,
+      "kind": "PROJJSON",
+      "label": "Amersfoort / RD New",
+      "forwardTolerance": 0.01,
+      "inverseTolerance": 0.000001,
+      "liveForwardDelta": 111.07702842465369,
+      "liveInverseDelta": 0.0009990972759723604
+    }
+  ],
+  "kernels": {
+    "seed": "0x7a11deed",
+    "configurations": 109,
+    "totals": {
+      "nearby": {
+        "tested": 27904,
+        "bothFinite": 27904,
+        "forwardMismatch": 0,
+        "inverseMismatch": 0,
+        "nativeRejectsFinite": 0,
+        "referenceRejects": 0,
+        "sharedRoundtripFailures": 114
+      },
+      "global": {
+        "tested": 27904,
+        "bothFinite": 26262,
+        "forwardMismatch": 2,
+        "inverseMismatch": 554,
+        "nativeRejectsFinite": 1060,
+        "referenceRejects": 582,
+        "sharedRoundtripFailures": 1532
+      }
+    },
+    "sharedNearbyRoundtripFailures": [
+      {
+        "id": "cass-ellipsoid",
+        "count": 114
+      }
+    ]
+  },
+  "grids": {
+    "files": [
+      {
+        "name": "BETA2007.gsb",
+        "size": 83696,
+        "sha256": "6588e7b5fcca7dfad848085b7b621bf4b2e73866a0af3c459daa955deaacc3da"
+      },
+      {
+        "name": "ntv2_0_downsampled.gsb",
+        "size": 245824,
+        "sha256": "adf5357f48a3cc8374b89ed5e1ed6bc9b361f1b5e839e5a741fd47946777d027"
+      },
+      {
+        "name": "ntv2_0_downsampled_no_error_columns.gsb",
+        "size": 123616,
+        "sha256": "19d580224a37100f06bce73b4b4b9d691b38923da76dc6101c758f8f896e4120"
+      },
+      {
+        "name": "ca_nrc_NA83SCRS.tif",
+        "size": 1385768,
+        "sha256": "67a09bf04e05458308cfc4236a9188fd9e99c20ca6191f2b6cfa5da64c9a9dfc"
+      }
+    ],
+    "cases": 26,
+    "upstreamPass": 26,
+    "nativePass": 24,
+    "failures": [
+      {
+        "name": "GeoTIFF",
+        "input": [
+          -80,
+          44.92
+        ],
+        "expected": [
+          -208368.553747228,
+          4996155.4666270735
+        ],
+        "inverse": false,
+        "tolerance": 0.000001,
+        "error": "No datum grid covers coordinate: audit-tiff",
+        "ref": [
+          -208368.553747228,
+          4996155.4666270735
+        ],
+        "actualDelta": null,
+        "referenceDelta": 0,
+        "pass": false,
+        "referencePass": true
+      },
+      {
+        "name": "GeoTIFF",
+        "input": [
+          -208368.553747228,
+          4996155.4666270735
+        ],
+        "expected": [
+          -80,
+          44.92
+        ],
+        "inverse": true,
+        "tolerance": 0.000001,
+        "error": "No datum grid covers coordinate: audit-tiff",
+        "ref": [
+          -79.99999999999999,
+          44.92
+        ],
+        "actualDelta": null,
+        "referenceDelta": 1.4210854715202004e-14,
+        "pass": false,
+        "referencePass": true
+      }
+    ]
+  }
+}

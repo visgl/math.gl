@@ -1281,13 +1281,21 @@
       "status": "out-of-scope",
       "tests": [],
       "gapIds": []
+    },
+    {
+      "id": "typed-array-batches",
+      "status": "verified",
+      "tests": [
+        "test/lib/batch-projection.spec.ts"
+      ],
+      "gapIds": []
     }
   ],
   "gaps": [
     {
       "id": "crs-normalization",
       "tranche": 7,
-      "reason": "Catalogue world/regional method mappings are covered through shared CRS readers. Composite/perspective and Hotine/Krovak structured method variants, derived CRSs, axis-meridian and vertical-first structured axes still need explicit mappings and fixtures."
+      "reason": "The 2026-09-29 full upstream corpus audit finds 11 silent structured-CRS mismatches (polar WKT and datum name/EPSG lookup), five pole-origin roundoff rejections, and unsupported method/parameter/axis mappings. See docs/modules/proj4/parity-audit.md and test/fixtures/parity-audit-2026-09-29.json. Composite/perspective and Hotine/Krovak structured variants, derived CRSs and axis-meridian operations remain incomplete."
     },
     {
       "id": "projection-parameters",
@@ -1302,7 +1310,7 @@
     {
       "id": "grid-reference-corpus",
       "tranche": 7,
-      "reason": "Horizontal NTv2 and the upstream two-band GeoTIFF subset are implemented with analytic synthetic and upstream differential fixtures. Add licensed real-world grids and independent reference outputs before promotion; broader GeoTIFF metadata/band conventions and vertical grids are outside this tranche."
+      "reason": "Synthetic fixtures pass. The 2026-09-29 external real-grid audit passes 24/26 upstream cases; two GeoTIFF western-edge cases are rejected by the native strict-coverage policy and need explicit disposition. Add maintained licensed real-world fixtures and independent reference outputs before promotion; broader metadata/band conventions and vertical grids remain outside the horizontal subset."
     }
   ],
   "exceptions": [
@@ -1420,6 +1428,11 @@
       "id": "grid-registration",
       "description": "Prepared grids are registered through each instance's datumGrids map and captured at construction. All required entries preceding a null fallback must be loaded; unavailable optional grids are skipped, and exhausted coverage throws. No global registry or implicit network loading.",
       "test": "test/lib/datum-grids.spec.ts"
+    },
+    {
+      "id": "typed-array-batches",
+      "description": "Native-only Float32Array/Float64Array in-place APIs use complete interleaved records, require space for geocentric Z, preserve trailing ordinates and commit earlier records before an error. Built-in mutable hooks avoid temporary coordinate arrays; legacy custom plugins retain scalar fallback.",
+      "test": "test/lib/batch-projection.spec.ts"
     }
   ]
 }

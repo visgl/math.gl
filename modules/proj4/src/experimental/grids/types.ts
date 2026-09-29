@@ -4,6 +4,8 @@
 /** Prepared horizontal datum grid. Inputs/outputs are east-positive longitude/latitude radians. */
 export type DatumGrid = {
   readonly subgridCount: number;
+  /** Optional mutable hook. On false, x/y must remain unchanged; always preserve z. */
+  shiftInPlace?(point: {x: number; y: number}, inverse: boolean): boolean;
   /** undefined means no usable subgrid covers this coordinate; other failures throw. */
   shift(longitude: number, latitude: number, inverse: boolean): [number, number] | undefined;
 };

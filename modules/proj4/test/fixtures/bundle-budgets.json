@@ -1,0 +1,47 @@
+{
+  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes.",
+  "baseline": {
+    "core": {
+      "minified": 42306,
+      "gzip": 15612
+    },
+    "mercator": {
+      "minified": 43672,
+      "gzip": 16090
+    },
+    "utm": {
+      "minified": 50526,
+      "gzip": 18834
+    },
+    "allNativeExports": {
+      "minified": 138144,
+      "gzip": 47432
+    },
+    "proj4Wrapper": {
+      "minified": 131932,
+      "gzip": 43443
+    }
+  },
+  "limits": {
+    "core": {
+      "minified": 46600,
+      "gzip": 17200
+    },
+    "mercator": {
+      "minified": 48100,
+      "gzip": 17700
+    },
+    "utm": {
+      "minified": 55600,
+      "gzip": 20800
+    },
+    "allNativeExports": {
+      "minified": 152000,
+      "gzip": 52200
+    },
+    "proj4Wrapper": {
+      "minified": 145200,
+      "gzip": 47800
+    }
+  }
+}

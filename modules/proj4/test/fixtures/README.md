@@ -3,7 +3,7 @@
 Reference: proj4js **2.22.0**, tag **v2.22.0**, checked September 29, 2026.
 
 - `parity-inventory.json` inventories all 38 upstream projection/helper files, their
-  aliases/default-bundle inclusion, and 30 input/API/transformation features. A partial
+  aliases/default-bundle inclusion, and 31 input/API/transformation features. A partial
   status means numerical support for the documented subset, with unresolved CRS or
   parameter gaps. Unsupported rows have a named gap and target tranche. Explicitly
   out-of-scope APIs are those math.gl does not expose, such as MGRS and mutable globals.
@@ -46,3 +46,8 @@ algorithms stay listed as gaps until their fixtures can execute.
   differential interior checks. Grid tests use 1e-9 degrees unless an explicitly
   looser tolerance is needed for a Helmert round trip. Real-world grid datasets and
   independent native PROJ outputs remain a promotion gate.
+
+- `parity-audit-2026-09-29.json` records the full upstream coordinate-corpus audit,
+  seeded kernel sweep and external real-grid checks at runtime revision `bf28217d`.
+  It records open failures; it is not a passing compatibility baseline. See the
+  documented parity audit and `scripts/audit-*.mjs` for reproduction.

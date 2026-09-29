@@ -102,3 +102,14 @@ void preparedTIFF;
 new TypeScriptProjection({datumGrids: {local: preparedTIFF}});
 // @ts-expect-error Prepared grid metadata is immutable.
 preparedGrid.subgridCount = 2;
+
+// Batch methods preserve the concrete typed-array type.
+const batchProjection = new TypeScriptProjection();
+const float32Output: Float32Array = batchProjection.projectFlat(new Float32Array([0, 0]));
+const float64Output: Float64Array = batchProjection.unprojectFlat(new Float64Array([0, 0]));
+void float32Output;
+void float64Output;
+// @ts-expect-error Integer buffers cannot represent projected coordinates.
+batchProjection.projectFlat(new Int32Array([0, 0]));
+// @ts-expect-error The scalar array API is deliberately separate.
+batchProjection.projectFlat([0, 0]);

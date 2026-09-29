@@ -156,3 +156,10 @@ GEOGCS["WGS 84",
 ## Attribution
 
 This module is a wrapper around [`proj4js`](http://proj4js.org/), which has a permissive [license](https://github.com/proj4js/proj4js/blob/master/LICENSE.md). A part of the [MetaCRS](https://trac.osgeo.org/metacrs/wiki) libraries.
+
+See [TypeScript benchmark results and methodology](./benchmarks.md) for scalar and
+in-place typed-array comparisons with proj4js, construction costs and bundle budgets.
+
+The [September 29 parity audit](./parity-audit.md) passes 181 of 242 upstream
+coordinate fixtures and identifies 11 silent numerical mismatches. Full compatibility
+and release promotion remain blocked; see the audit for concrete follow-up tranches.
