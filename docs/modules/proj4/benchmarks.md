@@ -1,9 +1,37 @@
 # TypeScript projection benchmarks
 
+import BrowserOnly from '@docusaurus/BrowserOnly';
+
 The TypeScript engine offers `projectFlat` and `unprojectFlat` for interleaved
 Float32/Float64 buffers. Reuse the projection instance: normalization and plugin
 initialization are more expensive than the existing proj4 constructor in the initial
 measurements, while repeated transformations are faster.
+
+## Live benchmarks
+
+Compare the current TypeScript implementation with the classic proj4js backend on
+your own browser and hardware. Choose a buffer layout and direction, then run the
+inline benchmark. Nothing runs until you press **Run benchmarks**.
+
+<BrowserOnly fallback={<p>Live benchmarks are available in a browser with JavaScript enabled.</p>}>
+  {() => {
+    const Proj4Benchmarks = require('@site/src/components/proj4-benchmarks').default;
+    return <Proj4Benchmarks />;
+  }}
+</BrowserOnly>
+
+The TypeScript columns use the default `Proj4Projection`, through its in-place and
+scalar APIs. The classic column uses `@math.gl/proj4/classic`; the direct column
+uses the pinned `proj4` dependency. All four process the same coordinates into
+the same typed-array layout. Scalar paths reuse an input array and copy returned
+coordinates into the output buffer. Every coordinate is checked before timing,
+including height and trailing ordinates. Implementation order rotates between samples.
+
+These are warmed transformation measurements, excluding loading and construction.
+Inverse runs start from coordinates projected by the reference implementation.
+The table reports median time for the entire buffer and the corresponding throughput;
+it does not measure allocations, startup or bundle size. The work runs in a dedicated
+worker, with Stop and rerun controls.
 
 ## Reproduce
 

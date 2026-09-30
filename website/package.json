@@ -13,8 +13,10 @@
   },
   "dependencies": {
     "@docusaurus/core": "^3.10.2",
+    "@math.gl/proj4": "workspace:*",
     "@mdx-js/react": "^3.1.1",
     "@vis.gl/docusaurus-website": "2.0.0-alpha.6",
+    "proj4": "2.22.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

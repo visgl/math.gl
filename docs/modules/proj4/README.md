@@ -168,8 +168,9 @@ from proj4js and PROJ. Source headers distinguish ports from inspired implementa
 and retain upstream notices. The package includes third-party notices and license
 files. The `classic` subpath wraps [`proj4js`](https://proj4js.org/).
 
-See [TypeScript benchmark results and methodology](./benchmarks.md) for scalar and
-in-place typed-array comparisons with proj4js, construction costs and bundle budgets.
+Run the [live browser benchmarks](./benchmarks.md#live-benchmarks) to compare TypeScript
+scalar and in-place transforms with classic proj4 on your own device. The benchmark
+page also documents recorded results, construction costs and bundle budgets.
 
 The [parity audit and correctness follow-up](./parity-audit.md) now pass 233 of 242
 upstream coordinate fixtures, with all 11 audited silent mismatches fixed. The full
