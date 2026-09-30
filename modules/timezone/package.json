@@ -1,0 +1,43 @@
+{
+  "name": "@math.gl/timezone",
+  "description": "Timezone offsets and lazy geographic timezone lookup",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "5.0.0-alpha.9",
+  "keywords": [
+    "timezone",
+    "geospatial",
+    "latitude",
+    "longitude"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./lookup": {
+      "types": "./dist/lookup.d.ts",
+      "import": "./dist/lookup.js",
+      "require": "./dist/lookup.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@photostructure/tz-lookup": "^11.7.0"
+  }
+}

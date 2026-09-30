@@ -57,6 +57,11 @@ jobs:
       - name: Check GeoArrow package boundary
         run: yarn check:geoarrow-boundary
 
+      - name: Check timezone package boundaries and public types
+        run: |
+          yarn check:timezone-boundary
+          yarn check:timezone-types
+
       - name: Check WKB package boundary
         run: yarn check:wkb-boundary
 

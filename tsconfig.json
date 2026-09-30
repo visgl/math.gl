@@ -76,6 +76,8 @@
       "@math.gl/proj4/test/*": ["./modules/proj4/test/*"],
       "@math.gl/sun/*": ["./modules/sun/src/*"],
       "@math.gl/sun/test/*": ["./modules/sun/test/*"],
+      "@math.gl/timezone/lookup": ["./modules/timezone/src/lookup.ts"],
+      "@math.gl/timezone/*": ["./modules/timezone/src/*"],
       "@math.gl/types/*": ["./modules/types/src/*"],
       "@math.gl/types/test/*": ["./modules/types/test/*"],
       "@math.gl/wkb/*": ["./modules/wkb/src/*"],
