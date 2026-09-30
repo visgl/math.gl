@@ -113,9 +113,9 @@ bundle, not an increment or an application-wide download estimate. **KiB = 1,024
 | Engine + Mercator + NTv2 decoder | 51.0 | 18.7 |
 | Engine + Mercator + GeoTIFF grid adapter | 51.0 | 18.6 |
 | Engine + Mercator + GTX decoder | 49.4 | 18.1 |
-| Engine + Mercator + vertical GeoTIFF adapter | 52.4 | 19.2 |
+| Engine + Mercator + vertical GeoTIFF adapter | 52.8 | 19.3 |
 | Default TypeScript wrapper (all plugins and readers) | 143.9 | 49.3 |
-| Every root export, including wrapper, readers and grid adapters | 152.0 | 52.1 |
+| Every root export, including wrapper, readers and grid adapters | 152.4 | 52.3 |
 | Classic proj4js-backed wrapper | 128.8 | 42.8 |
 
 Tranche 12A adds about 1.1 KiB minified / 0.3 KiB gzip to the core stage machinery.
@@ -456,6 +456,13 @@ dynamic datums and automatic operation selection remain future work.
 Use it for modern GeoTIFF geoid models; `loadGeoTIFFGrid` remains the separate adapter
 for horizontal latitude/longitude shifts. Both receive a decoded TIFF object and import
 no TIFF decoder. Fetching, compression and worker choices belong to the application.
+
+The reader also accepts a plain `VerticalGridGeoTIFFData` dataset, structurally
+compatible with loaders.gl's `GeoTIFFRasterLoader` output. Pass the decoded dataset
+directly to `loadVerticalGeoTIFFGrid(dataset)`. It preserves original band indices,
+so band zero must be included. Image order, unscaled samples, per-image/per-band
+GDAL metadata, GeoKeys, nodata and geometry tags have the same validation as the
+geotiff.js input. No runtime dependency on loaders.gl is added.
 
 ```typescript
 import {TypeScriptProjection} from '@math.gl/proj4/core';

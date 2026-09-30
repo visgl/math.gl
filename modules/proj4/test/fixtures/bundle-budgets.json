@@ -64,8 +64,8 @@
       "gzip": 20800
     },
     "allNativeExports": {
-      "minified": 155800,
-      "gzip": 53500
+      "minified": 156200,
+      "gzip": 53600
     },
     "proj4Wrapper": {
       "minified": 145200,

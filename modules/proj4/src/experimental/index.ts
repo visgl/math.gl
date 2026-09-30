@@ -50,4 +50,8 @@ export {createVerticalGrid, createGeoidGrid} from './grids/vertical';
 export type {VerticalGridOptions} from './grids/vertical';
 
 export {loadVerticalGeoTIFFGrid} from './grids/vertical-geotiff';
-export type {VerticalGridGeoTIFF, VerticalGridGeoTIFFImage} from './grids/vertical-geotiff';
+export type {
+  VerticalGridGeoTIFF,
+  VerticalGridGeoTIFFImage,
+  VerticalGridGeoTIFFData
+} from './grids/vertical-geotiff';

@@ -328,13 +328,12 @@ coverage rules. Seven authored TIFFs / 30 XYZM points are independently qualifie
 PROJ 9.5.1; Node and browser tests decode the actual bytes. This completes the vertical
 GeoTIFF format portion of 12B; typed pipeline composition remains 12B2.
 
-A loaders.gl integration follow-up should expose unresampled typed raster bands with
-per-image/per-band geodetic metadata (registration, nodata, scale/offset, grid type and
-subgrid identity). The existing RGB loader output is not suitable for geoid values.
-Build on its numeric raster-source support and use a plain data contract at the
-math.gl boundary; retain application-owned fetching/decoding and avoid runtime coupling
-between math.gl and loaders.gl. The current GeoTIFF-style structural adapter is an
-interim integration path, not direct compatibility with today's GeoTIFFLoader output.
+The reader accepts plain `VerticalGridGeoTIFFData` as well as geotiff.js-style input.
+This contract preserves unresampled typed bands, per-image/per-band GDAL metadata,
+GeoKeys, nodata and original geometry tags. It supports direct integration with the
+new loaders.gl `GeoTIFFRasterLoader`; the existing RGB loader remains unsuitable for
+geoid samples. Fetching/decoding stays application-owned, with no runtime coupling
+between math.gl and loaders.gl.
 
 ## Remaining performance and geodetic roadmap
 

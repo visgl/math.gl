@@ -303,3 +303,34 @@ test('disjoint interiors may share a node edge; later image wins that edge', asy
   expect(grid.getOffset(11 * radians, 40 * radians)).toBeCloseTo(50);
   expect(grid.getOffset(10 * radians, 40 * radians)).toBeCloseTo(10);
 });
+
+test('plain loaders.gl raster shape accepts original band zero, preserves scale and owns samples', async () => {
+  const source = image();
+  const values = new Int16Array([30, 40, 10, 20]);
+  const data = {
+    images: [
+      {
+        width: 2,
+        height: 2,
+        bands: [
+          {index: 1, data: new Float32Array(4), metadata: null},
+          {
+            index: 0,
+            data: values,
+            metadata: {DESCRIPTION: 'geoid_undulation', SCALE: '0.5', OFFSET: '-2'}
+          }
+        ],
+        geoKeys: source.getGeoKeys(),
+        metadata: await source.getGDALMetadata(),
+        noData: null,
+        fileDirectory: {ModelTiepoint: [0, 0, 0, 10, 41, 0], ModelPixelScale: [1, 1, 0]}
+      }
+    ]
+  };
+  const grid = await loadVerticalGeoTIFFGrid(structuredClone(data));
+  values.fill(999);
+  expect(grid.getOffset(10.5 * radians, 40.5 * radians)).toBeCloseTo(10.5);
+  data.images[0].bands = data.images[0].bands.slice(0, 1);
+  await expect(loadVerticalGeoTIFFGrid(data)).rejects.toThrow('original band zero');
+  await expect(loadVerticalGeoTIFFGrid({images: []})).rejects.toThrow('at least one image');
+});

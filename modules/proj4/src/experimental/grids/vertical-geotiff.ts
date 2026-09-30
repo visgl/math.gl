@@ -26,6 +26,50 @@ export type VerticalGridGeoTIFF = {
   getImage(index: number): Promise<VerticalGridGeoTIFFImage>;
 };
 
+/** Plain decoded raster input, structurally compatible with loaders.gl GeoTIFFRasterData. */
+export type VerticalGridGeoTIFFData = {
+  /** Images in original file order, with parents before nested children. */
+  images: readonly {
+    /** Original dimensions in pixels. */
+    width: number;
+    /** Original dimensions in pixels. */
+    height: number;
+    /** Raw bands; original band zero must be present. */
+    bands: readonly {
+      /** Original zero-based sample index, retained when selecting bands. */
+      index: number;
+      /** Native, unscaled samples in TIFF row order. */
+      data: ArrayLike<number>;
+      /** Per-band GDAL metadata. */
+      metadata: Metadata;
+    }[];
+    /** Decoded CRS and pixel-registration GeoKeys. */
+    geoKeys: Metadata;
+    /** Image-level GDAL metadata. */
+    metadata: Metadata;
+    /** Declared nodata value, before scale/offset. */
+    noData: number | null;
+    /** Original geometry and image-kind tags. */
+    fileDirectory: Partial<Record<DirectoryTag, unknown>>;
+  }[];
+};
+
+/** Adapts plain numeric rasters without importing or retaining a TIFF decoder. */
+function getRasterImage(data: VerticalGridGeoTIFFData, index: number): VerticalGridGeoTIFFImage {
+  const image = data.images[index];
+  const band = image.bands.find(candidate => candidate.index === 0);
+  if (!band) throw new Error('Vertical GeoTIFF requires original band zero');
+  return {
+    getWidth: () => image.width,
+    getHeight: () => image.height,
+    getGeoKeys: () => image.geoKeys,
+    getGDALMetadata: sample => (sample === 0 ? band.metadata : image.metadata),
+    getGDALNoData: () => image.noData,
+    fileDirectory: image.fileDirectory,
+    readRasters: async () => [band.data]
+  };
+}
+
 function number(value: unknown, fallback: number): number {
   if (value === undefined) return fallback;
   if (
@@ -50,8 +94,10 @@ function vector(value: unknown, length: number): number[] {
  * Later nested images take precedence. Overviews, ambiguous overlaps, rotations,
  * non-metre bands and other operation types are rejected rather than inferred.
  */
-export async function loadVerticalGeoTIFFGrid(tiff: VerticalGridGeoTIFF): Promise<VerticalGrid> {
-  const count = await tiff.getImageCount();
+export async function loadVerticalGeoTIFFGrid(
+  tiff: VerticalGridGeoTIFF | VerticalGridGeoTIFFData
+): Promise<VerticalGrid> {
+  const count = 'images' in tiff ? tiff.images.length : await tiff.getImageCount();
   if (!Number.isSafeInteger(count) || count < 1)
     throw new Error('Vertical GeoTIFF requires at least one image');
   const prepared: {
@@ -64,7 +110,7 @@ export async function loadVerticalGeoTIFFGrid(tiff: VerticalGridGeoTIFF): Promis
     dy: number;
   }[] = [];
   for (let n = 0; n < count; n++) {
-    const image = await tiff.getImage(n);
+    const image = 'images' in tiff ? getRasterImage(tiff, n) : await tiff.getImage(n);
     const directory = image.fileDirectory;
     const tag = (name: DirectoryTag) =>
       'getValue' in directory ? directory.getValue(name) : directory[name];
