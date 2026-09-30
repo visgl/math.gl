@@ -8,19 +8,19 @@ import {gzipSync} from 'node:zlib';
 import {build} from 'esbuild';
 
 const fixtures = {
-  core: "export {TypeScriptProjection} from '@math.gl/proj4/experimental';",
+  core: "export {TypeScriptProjection} from '@math.gl/proj4/native';",
   mercator:
-    "import {TypeScriptProjection, mercator} from '@math.gl/proj4/experimental'; export const create = () => new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});",
-  utm: "import {TypeScriptProjection, universalTransverseMercator} from '@math.gl/proj4/experimental'; export const create = () => new TypeScriptProjection({to: 'EPSG:32631', projections: [universalTransverseMercator]});",
+    "import {TypeScriptProjection, mercator} from '@math.gl/proj4/native'; export const create = () => new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});",
+  utm: "import {TypeScriptProjection, universalTransverseMercator} from '@math.gl/proj4/native'; export const create = () => new TypeScriptProjection({to: 'EPSG:32631', projections: [universalTransverseMercator]});",
   mercatorWithWKT:
-    "import {TypeScriptProjection, mercator, wktCRSParser} from '@math.gl/proj4/experimental'; export const create = to => new TypeScriptProjection({to, projections: [mercator], parsers: [wktCRSParser]});",
+    "import {TypeScriptProjection, mercator, wktCRSParser} from '@math.gl/proj4/native'; export const create = to => new TypeScriptProjection({to, projections: [mercator], parsers: [wktCRSParser]});",
   mercatorWithPROJJSON:
-    "import {TypeScriptProjection, mercator, projJSONCRSParser} from '@math.gl/proj4/experimental'; export const create = to => new TypeScriptProjection({to, projections: [mercator], parsers: [projJSONCRSParser]});",
+    "import {TypeScriptProjection, mercator, projJSONCRSParser} from '@math.gl/proj4/native'; export const create = to => new TypeScriptProjection({to, projections: [mercator], parsers: [projJSONCRSParser]});",
   mercatorWithNTv2:
-    "import {TypeScriptProjection, mercator} from '@math.gl/proj4/experimental'; export {parseNTv2Grid} from '@math.gl/proj4/experimental'; export const create = (from, datumGrids) => new TypeScriptProjection({from, to: 'EPSG:3857', projections: [mercator], datumGrids});",
+    "import {TypeScriptProjection, mercator} from '@math.gl/proj4/native'; export {parseNTv2Grid} from '@math.gl/proj4/native'; export const create = (from, datumGrids) => new TypeScriptProjection({from, to: 'EPSG:3857', projections: [mercator], datumGrids});",
   mercatorWithGeoTIFFAdapter:
-    "import {TypeScriptProjection, mercator} from '@math.gl/proj4/experimental'; export {loadGeoTIFFGrid} from '@math.gl/proj4/experimental'; export const create = (from, datumGrids) => new TypeScriptProjection({from, to: 'EPSG:3857', projections: [mercator], datumGrids});",
-  allNativeExports: "export * from '@math.gl/proj4/experimental';",
+    "import {TypeScriptProjection, mercator} from '@math.gl/proj4/native'; export {loadGeoTIFFGrid} from '@math.gl/proj4/native'; export const create = (from, datumGrids) => new TypeScriptProjection({from, to: 'EPSG:3857', projections: [mercator], datumGrids});",
+  allNativeExports: "export * from '@math.gl/proj4/native';",
   proj4Wrapper: "export {Proj4Projection} from '@math.gl/proj4';"
 };
 const budgets = process.argv.includes('--measure')

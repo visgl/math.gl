@@ -18,6 +18,7 @@ import pyproj
 ROOT = Path(__file__).resolve().parents[1] / 'test' / 'fixtures'
 assert pyproj.__version__ == '3.7.2', 'Use the pinned pyproj version'
 assert pyproj.proj_version_str == '9.5.1', 'Use the pinned native PROJ version'
+assert pyproj.database.get_database_metadata('EPSG.VERSION') == 'v11.022', 'Use the pinned EPSG database'
 pyproj.network.set_network_enabled(False)
 
 
@@ -50,6 +51,7 @@ def samples(transformer, points):
 def write_reference(name, source, cases):
     value = {
         'pyproj': pyproj.__version__, 'proj': pyproj.proj_version_str,
+        'epsgVersion': pyproj.database.get_database_metadata('EPSG.VERSION'),
         'source': source, 'sourceSHA256': sha256(ROOT / source),
         'generatorSHA256': sha256(Path(__file__)), 'cases': cases
     }
@@ -83,3 +85,21 @@ for grid in read_json('real-grid-cases.json')['grids']:
     cases.append({'id': grid['id'], 'gridSHA256': grid['sha256'],
                   'results': results, 'boundaryInverse': boundary_inverse})
 write_reference('real-grid-reference.json', 'real-grid-cases.json', cases)
+
+# EPSG definitions exercise the shared CRS readers; only the conversion from the
+# CRS's own geodetic base is selected, so this is not an implicit datum operation.
+cases = []
+for case in read_json('structured-proj-cases.json')['cases']:
+    crs = pyproj.CRS.from_epsg(case['epsg'])
+    transformer = pyproj.Transformer.from_crs(crs.geodetic_crs, crs, always_xy=True)
+    cases.append({'id': case['id'], 'projjson': crs.to_json_dict(),
+                  'wkt2': crs.to_wkt('WKT2_2019'), 'wkt1': crs.to_wkt('WKT1_GDAL'),
+                  'esri': crs.to_wkt('WKT1_ESRI'),
+                  'results': samples(transformer, case['points'])})
+write_reference('structured-proj-reference.json', 'structured-proj-cases.json', cases)
+
+cases = []
+for case in read_json('datum-proj-cases.json')['cases']:
+    transformer = pyproj.Transformer.from_pipeline('+proj=pipeline +step ' + case['pipeline'])
+    cases.append({'id': case['id'], 'results': samples(transformer, case['points'])})
+write_reference('datum-proj-reference.json', 'datum-proj-cases.json', cases)

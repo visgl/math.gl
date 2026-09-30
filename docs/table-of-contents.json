@@ -185,6 +185,7 @@
           "modules/proj4/benchmarks",
           "modules/proj4/parity-audit",
           "modules/proj4/independent-validation",
+          "modules/proj4/native-support",
           "modules/proj4/roadmap"
         ]
       },

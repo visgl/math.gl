@@ -73,8 +73,19 @@ jobs:
       - name: Check CRS type boundaries
         run: yarn check:crs-types
 
-      - name: Install Playwright Chromium
-        run: yarn playwright:install
+      - name: Install Playwright browsers
+        run: yarn playwright install --with-deps chromium firefox webkit
+
+      - name: Check native projection startup and browser benchmark correctness
+        run: |
+          node modules/proj4/scripts/benchmark-startup.mjs --samples 3
+          node modules/proj4/scripts/benchmark-browser.mjs --points 20000 --samples 7 --output /tmp/proj4-browser-qualification.json
+
+      - name: Upload browser qualification measurements
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: proj4-browser-qualification
+          path: /tmp/proj4-browser-qualification.json
 
       - name: Run Node tests
         run: yarn test-node

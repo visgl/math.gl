@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Direct TypeScript port of proj4js 2.22.0. Copyright (c) 2014, proj4js authors.
 // See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// Table precision and interval selection follow PROJ 9.5.1 robin.cpp.
+// See ../../../PROJ-LICENSE.txt for PROJ attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {};
@@ -56,6 +58,11 @@ var COEFS_Y = [
   [1.0, 0.00328947, -0.000319159, -4.2106e-6]
 ];
 
+// PROJ defines the published polynomial coefficients as float constants. Preserve
+// those values instead of silently changing the interpolation table to doubles.
+COEFS_X = COEFS_X.map(row => row.map(Math.fround));
+COEFS_Y = COEFS_Y.map(row => row.map(Math.fround));
+
 var FXC = 0.8487;
 var FYC = 1.3523;
 var C1 = R2D / 5; // rad to 5-degree interval
@@ -98,11 +105,12 @@ export function forward(state: State, ll: Point): Point | null | undefined | num
   var lon = adjust_lon(ll.x - state.long0, state.over);
 
   var dphi = Math.abs(ll.y);
-  var i = Math.floor(dphi * C1);
+  var i = Math.floor(dphi * C1 + 1e-15);
   if (i < 0) {
     i = 0;
   } else if (i >= NODES) {
-    i = NODES - 1;
+    // The final table row represents the exact pole, as in PROJ.
+    i = NODES;
   }
   dphi = R2D * (dphi - RC1 * i);
   var xy = {
@@ -125,6 +133,15 @@ export function inverse(state: State, xy: Point): Point | null | undefined | num
     y: Math.abs(xy.y - state.y0) / (state.a * FYC)
   };
 
+  // Polynomial pieces have small discontinuities at table knots. Roundoff in
+  // de-scaling must not select a neighbouring piece for an exact knot output.
+  for (let knot = 0; knot <= NODES; knot++) {
+    if (Math.abs(ll.y - COEFS_Y[knot][0]) <= 8 * Number.EPSILON) {
+      ll.x = adjust_lon(ll.x / COEFS_X[knot][0] + state.long0, state.over);
+      ll.y = (xy.y < state.y0 ? -1 : 1) * knot * 5 * D2R;
+      return ll;
+    }
+  }
   if (ll.y >= 1) {
     // pathologic case
     ll.x /= COEFS_X[NODES][0];

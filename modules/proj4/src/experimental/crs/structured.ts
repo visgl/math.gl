@@ -335,16 +335,42 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
   if (type === 'ProjectedCRS') {
     const conversion = object(crs['conversion']),
       method = key(object(conversion['method'])['name']);
-    const projection = METHODS[method];
+    // ESRI's true-scale North Pole spelling omits scale_factor. Preserve the
+    // older explicit-scale oblique spelling separately for compatibility.
+    const conversionParameters = array(conversion['parameters']).map(object);
+    const polarTrueScale =
+      method === 'stereographicnorthpole' &&
+      !conversionParameters.some(parameter => key(parameter['name']).startsWith('scalefactor'));
+    const projection = polarTrueScale ? 'stere' : METHODS[method];
+    const esriKrovak = conversionParameters.filter(parameter =>
+      ['xscale', 'yscale', 'xyplanerotation'].includes(key(parameter['name']))
+    );
+    if (esriKrovak.length) {
+      const expected: Record<string, number> = {xscale: -1, yscale: 1, xyplanerotation: 90};
+      if (
+        projection !== 'krovak' ||
+        esriKrovak.length !== 3 ||
+        new Set(esriKrovak.map(parameter => key(parameter['name']))).size !== 3 ||
+        esriKrovak.some(parameter => {
+          const name = key(parameter['name']);
+          const factor =
+            name === 'xyplanerotation'
+              ? unit(parameter['unit'], angularUnit) / DEGREES_TO_RADIANS
+              : unit(parameter['unit'], 1);
+          return Math.abs(finite(parameter['value']) * factor - expected[name]) > 1e-10;
+        })
+      )
+        unsupportedStage('Unsupported ESRI Krovak axis adjustment');
+    }
     if (!projection || projection.startsWith('unsupported'))
       unsupportedStage(
         'Unsupported projection method: ' + String(object(conversion['method'])['name'])
       );
     parameters['proj'] = projection === 'webmerc' ? 'merc' : projection;
     let hasSemiMinor = false;
-    for (const entry of array(conversion['parameters'])) {
-      const parameter = object(entry),
-        parameterName = key(parameter['name']);
+    for (const parameter of conversionParameters) {
+      const parameterName = key(parameter['name']);
+      if (esriKrovak.includes(parameter)) continue;
       if (
         parameterName === 'auxiliaryspheretype' &&
         projection === 'webmerc' &&
@@ -366,7 +392,8 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
       }
       let name = METHOD_PARAMETERS[projection]?.[parameterName] || PARAMETERS[parameterName];
       if (!name) unsupportedStage('Unsupported conversion parameter: ' + String(parameter['name']));
-      if (name === 'lat_1' && method === 'stereographicnorthpole') name = 'lat_0';
+      if (name === 'lat_1' && method === 'stereographicnorthpole' && !polarTrueScale)
+        name = 'lat_0';
       else if (name === 'lat_1' && ['merc', 'webmerc', 'eqc', 'stere', 'cea'].includes(projection))
         name = 'lat_ts';
       if (parameters[name] !== undefined)
@@ -420,7 +447,7 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
     }
     if (
       projection === 'stere' &&
-      (method.includes('polar') || method === 'stereographicsouthpole') &&
+      (method.includes('polar') || method === 'stereographicsouthpole' || polarTrueScale) &&
       parameters['lat_0'] === undefined
     )
       parameters['lat_0'] = Number(parameters['lat_ts'] || 90) < 0 ? '-90' : '90';

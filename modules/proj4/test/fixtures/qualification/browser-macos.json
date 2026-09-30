@@ -1,0 +1,2640 @@
+{
+  "metadata": {
+    "sourceSHA256": "0a04e98d6a35b7e98d4b927efca5655f302f86143828fadedd71920164e3c65d",
+    "date": "2026-09-29T21:52:16.815Z",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M2",
+    "points": 20000,
+    "samples": 7
+  },
+  "methodology": "Separate minified bundles; fresh contexts for cold module fetch/parse/evaluation, first construction and first projection. Warm transforms use preconstructed converters, rotated execution order, reused scalar input and buffer reset outside timing. All coordinates compared before timing. OS caches not flushed; browser clocks may quantize short samples. No CI timing thresholds.",
+  "results": [
+    {
+      "browser": "chromium",
+      "version": "151.0.7922.34",
+      "cold": [
+        {
+          "backend": "native",
+          "loadMilliseconds": 9.700000047683716,
+          "firstConstructionMicroseconds": 2799.999952316284,
+          "firstProjectionMicroseconds": 100.00002384185791
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 7.199999988079071,
+          "firstConstructionMicroseconds": 100.00002384185791,
+          "firstProjectionMicroseconds": 500
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6.199999988079071,
+          "firstConstructionMicroseconds": 100.00002384185791,
+          "firstProjectionMicroseconds": 99.99996423721313
+        },
+        {
+          "backend": "native",
+          "loadMilliseconds": 3.900000035762787,
+          "firstConstructionMicroseconds": 1000,
+          "firstProjectionMicroseconds": 99.99996423721313
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 8,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 199.99998807907104
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6.599999964237213,
+          "firstConstructionMicroseconds": 100.00002384185791,
+          "firstProjectionMicroseconds": 100.00002384185791
+        },
+        {
+          "backend": "native",
+          "loadMilliseconds": 3.599999964237213,
+          "firstConstructionMicroseconds": 1100.000023841858,
+          "firstProjectionMicroseconds": 199.99998807907104
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 6.200000047683716,
+          "firstConstructionMicroseconds": 99.99996423721313,
+          "firstProjectionMicroseconds": 100.00002384185791
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 100.00002384185791,
+          "firstProjectionMicroseconds": 199.99998807907104
+        },
+        {
+          "backend": "native",
+          "loadMilliseconds": 3.800000011920929,
+          "firstConstructionMicroseconds": 1100.000023841858,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 100.00002384185791,
+          "firstProjectionMicroseconds": 199.99998807907104
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6.099999964237213,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 199.99998807907104
+        },
+        {
+          "backend": "native",
+          "loadMilliseconds": 3.599999964237213,
+          "firstConstructionMicroseconds": 1100.000023841858,
+          "firstProjectionMicroseconds": 199.99998807907104
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 5.899999976158142,
+          "firstConstructionMicroseconds": 100.00002384185791,
+          "firstProjectionMicroseconds": 199.99998807907104
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6.100000023841858,
+          "firstConstructionMicroseconds": 99.99996423721313,
+          "firstProjectionMicroseconds": 199.99998807907104
+        },
+        {
+          "backend": "native",
+          "loadMilliseconds": 3.600000023841858,
+          "firstConstructionMicroseconds": 1100.000023841858,
+          "firstProjectionMicroseconds": 99.99996423721313
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 100.00002384185791,
+          "firstProjectionMicroseconds": 99.99996423721313
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6.099999964237213,
+          "firstConstructionMicroseconds": 100.00002384185791,
+          "firstProjectionMicroseconds": 199.99998807907104
+        },
+        {
+          "backend": "native",
+          "loadMilliseconds": 3.599999964237213,
+          "firstConstructionMicroseconds": 1100.000023841858,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 6.100000023841858,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 199.99998807907104
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6.099999964237213,
+          "firstConstructionMicroseconds": 100.00002384185791,
+          "firstProjectionMicroseconds": 100.00002384185791
+        }
+      ],
+      "independent": {
+        "configurations": 134,
+        "points": 2354
+      },
+      "construction": [
+        {
+          "name": "Mercator",
+          "backend": "native",
+          "medianMicroseconds": 25,
+          "samplesMicroseconds": [
+            43.00000011920929,
+            41.99999988079071,
+            31.00000023841858,
+            25,
+            23.99999976158142,
+            25,
+            25
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4",
+          "medianMicroseconds": 1.9999998807907104,
+          "samplesMicroseconds": [
+            3.0000001192092896,
+            1.9999998807907104,
+            1.9999998807907104,
+            1.9999998807907104,
+            1.9999998807907104,
+            1.000000238418579,
+            1.9999998807907104
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper",
+          "medianMicroseconds": 1.9999998807907104,
+          "samplesMicroseconds": [
+            4.000000357627869,
+            0.9999996423721313,
+            1.9999998807907104,
+            2.000000476837158,
+            1.9999998807907104,
+            0.9999996423721313,
+            0
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native",
+          "medianMicroseconds": 29.00000035762787,
+          "samplesMicroseconds": [
+            33.00000011920929,
+            30,
+            29.00000035762787,
+            28.99999976158142,
+            30,
+            28.00000011920929,
+            25.99999964237213
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4",
+          "medianMicroseconds": 3.999999761581421,
+          "samplesMicroseconds": [
+            3.999999761581421,
+            3.999999761581421,
+            2.000000476837158,
+            3.999999761581421,
+            3.0000001192092896,
+            3.999999761581421,
+            1.000000238418579
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper",
+          "medianMicroseconds": 3.0000001192092896,
+          "samplesMicroseconds": [
+            3.999999761581421,
+            3.999999761581421,
+            3.0000001192092896,
+            1.9999998807907104,
+            3.0000001192092896,
+            3.0000001192092896,
+            1.9999998807907104
+          ]
+        }
+      ],
+      "timings": [
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 1.7999999523162842,
+          "samplesMilliseconds": [
+            1.7999999523162842,
+            1.7999999523162842,
+            1.899999976158142,
+            1.699999988079071,
+            1.7000000476837158,
+            1.7000000476837158,
+            1.800000011920929
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 3.299999952316284,
+          "samplesMilliseconds": [
+            3.400000035762787,
+            3.399999976158142,
+            3.199999988079071,
+            3.300000011920929,
+            3.299999952316284,
+            3.199999988079071,
+            3.199999988079071
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 3.199999988079071,
+          "samplesMilliseconds": [
+            3.300000011920929,
+            3.199999988079071,
+            3.200000047683716,
+            3.100000023841858,
+            3.200000047683716,
+            3.199999988079071,
+            3.099999964237213
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 1.199999988079071,
+          "samplesMilliseconds": [
+            1.199999988079071,
+            1.2000000476837158,
+            1.199999988079071,
+            1.300000011920929,
+            1.199999988079071,
+            1.199999988079071,
+            1.199999988079071
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 2.399999976158142,
+          "samplesMilliseconds": [
+            2.400000035762787,
+            4.099999964237213,
+            2.399999976158142,
+            2.400000035762787,
+            2.300000011920929,
+            2.399999976158142,
+            2.199999988079071
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 3.699999988079071,
+          "samplesMilliseconds": [
+            4.899999976158142,
+            4,
+            3.699999988079071,
+            3.699999988079071,
+            3.800000011920929,
+            3.599999964237213,
+            3.5
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 3.600000023841858,
+          "samplesMilliseconds": [
+            3.600000023841858,
+            3.5,
+            3.600000023841858,
+            3.699999988079071,
+            3.699999988079071,
+            3.600000023841858,
+            3.400000035762787
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            2.100000023841858,
+            2,
+            2,
+            1.899999976158142,
+            1.800000011920929
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            1.899999976158142,
+            2,
+            1.899999976158142,
+            1.9000000357627869,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 3.199999988079071,
+          "samplesMilliseconds": [
+            3.199999988079071,
+            3.300000011920929,
+            3.199999988079071,
+            3.199999988079071,
+            3.199999988079071,
+            3.199999988079071,
+            3.100000023841858
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 3.100000023841858,
+          "samplesMilliseconds": [
+            3.100000023841858,
+            3.199999988079071,
+            3.299999952316284,
+            3.100000023841858,
+            3.199999988079071,
+            3.100000023841858,
+            3
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 1.4000000357627869,
+          "samplesMilliseconds": [
+            1.399999976158142,
+            1.4000000357627869,
+            1.4000000357627869,
+            1.4000000357627869,
+            1.300000011920929,
+            1.399999976158142,
+            1.5
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 2.399999976158142,
+          "samplesMilliseconds": [
+            2.5,
+            4,
+            2.399999976158142,
+            2.400000035762787,
+            2.399999976158142,
+            2.399999976158142,
+            2.399999976158142
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 4.099999964237213,
+          "samplesMilliseconds": [
+            4.300000011920929,
+            4.300000011920929,
+            4.199999988079071,
+            4.099999964237213,
+            4,
+            4,
+            3.899999976158142
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 3.900000035762787,
+          "samplesMilliseconds": [
+            4.399999976158142,
+            4.199999988079071,
+            4,
+            3.900000035762787,
+            3.899999976158142,
+            3.900000035762787,
+            3.800000011920929
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 1.899999976158142,
+          "samplesMilliseconds": [
+            2,
+            2,
+            1.800000011920929,
+            1.800000011920929,
+            1.800000011920929,
+            1.899999976158142,
+            1.9000000357627869
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2.100000023841858,
+            2,
+            2,
+            4.199999988079071,
+            1.899999976158142,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 3.699999988079071,
+          "samplesMilliseconds": [
+            3.899999976158142,
+            6.799999952316284,
+            3.699999988079071,
+            3.699999988079071,
+            3.5,
+            3.600000023841858,
+            3.5
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 3.5,
+          "samplesMilliseconds": [
+            4.300000011920929,
+            3.700000047683716,
+            3.5,
+            3.5,
+            3.5,
+            3.5,
+            3.400000035762787
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 1.4000000357627869,
+          "samplesMilliseconds": [
+            1.600000023841858,
+            1.399999976158142,
+            1.399999976158142,
+            1.4000000357627869,
+            1.5,
+            1.2999999523162842,
+            1.4000000357627869
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 2.300000011920929,
+          "samplesMilliseconds": [
+            2.300000011920929,
+            2.5,
+            2.399999976158142,
+            2.399999976158142,
+            2.300000011920929,
+            2.300000011920929,
+            2.300000011920929
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 4.400000035762787,
+          "samplesMilliseconds": [
+            4.5,
+            4.399999976158142,
+            4.399999976158142,
+            4.400000035762787,
+            4.300000011920929,
+            4.5,
+            4.5
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 4.300000011920929,
+          "samplesMilliseconds": [
+            4.300000011920929,
+            4.200000047683716,
+            4.199999988079071,
+            4.299999952316284,
+            4.5,
+            4.300000011920929,
+            4.300000011920929
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 1.9000000357627869,
+          "samplesMilliseconds": [
+            2,
+            1.899999976158142,
+            1.9000000357627869,
+            1.9000000357627869,
+            1.7999999523162842,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 2.199999988079071,
+          "samplesMilliseconds": [
+            2.199999988079071,
+            2.300000011920929,
+            2.200000047683716,
+            2.199999988079071,
+            2.100000023841858,
+            2.100000023841858,
+            2.100000023841858
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 3.399999976158142,
+          "samplesMilliseconds": [
+            3.5,
+            3.700000047683716,
+            3.399999976158142,
+            5.900000035762787,
+            3.399999976158142,
+            3.300000011920929,
+            3.300000011920929
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 3.199999988079071,
+          "samplesMilliseconds": [
+            3.199999988079071,
+            3.299999952316284,
+            3.300000011920929,
+            3.199999988079071,
+            3.300000011920929,
+            3.199999988079071,
+            3.199999988079071
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 1.5,
+          "samplesMilliseconds": [
+            1.5,
+            1.399999976158142,
+            1.399999976158142,
+            1.5,
+            1.5,
+            1.5,
+            1.399999976158142
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 2.5,
+          "samplesMilliseconds": [
+            2.5,
+            3.800000011920929,
+            2.399999976158142,
+            2.5,
+            2.399999976158142,
+            2.399999976158142,
+            2.5
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 4.100000023841858,
+          "samplesMilliseconds": [
+            4.199999988079071,
+            4.199999988079071,
+            4.100000023841858,
+            4.100000023841858,
+            4,
+            4.100000023841858,
+            4
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 4,
+          "samplesMilliseconds": [
+            4.100000023841858,
+            4.199999988079071,
+            4,
+            4,
+            4,
+            3.899999976158142,
+            4
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 1.9000000357627869,
+          "samplesMilliseconds": [
+            1.9000000357627869,
+            2,
+            2.100000023841858,
+            1.899999976158142,
+            1.899999976158142,
+            1.899999976158142,
+            1.9000000357627869
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 5.5,
+          "samplesMilliseconds": [
+            5.5,
+            5.5,
+            5.5,
+            5.599999964237213,
+            5.399999976158142,
+            5.5,
+            5.5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 7.599999964237213,
+          "samplesMilliseconds": [
+            7.699999988079071,
+            7.5,
+            7.5,
+            7.400000035762787,
+            7.600000023841858,
+            7.600000023841858,
+            7.599999964237213
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 7.5,
+          "samplesMilliseconds": [
+            7.5,
+            7.600000023841858,
+            7.5,
+            7.400000035762787,
+            7.5,
+            7.5,
+            7.599999964237213
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5.099999964237213,
+            5,
+            5.100000023841858,
+            5,
+            4.899999976158142,
+            5,
+            5.600000023841858
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5.200000047683716,
+            4.899999976158142,
+            5,
+            5,
+            5.099999964237213,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 7,
+          "samplesMilliseconds": [
+            7.199999988079071,
+            7,
+            7,
+            7,
+            7,
+            7,
+            7.100000023841858
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 7,
+          "samplesMilliseconds": [
+            9.099999964237213,
+            7.100000023841858,
+            7,
+            6.899999976158142,
+            7.100000023841858,
+            7,
+            6.899999976158142
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 4.599999964237213,
+          "samplesMilliseconds": [
+            4.5,
+            4.600000023841858,
+            4.600000023841858,
+            4.599999964237213,
+            4.5,
+            4.5,
+            4.600000023841858
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 5.599999964237213,
+          "samplesMilliseconds": [
+            5.700000047683716,
+            5.5,
+            5.600000023841858,
+            5.699999988079071,
+            5.5,
+            5.5,
+            5.599999964237213
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 7,
+          "samplesMilliseconds": [
+            9.199999988079071,
+            7,
+            7,
+            7,
+            7,
+            7.099999964237213,
+            7
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 7,
+          "samplesMilliseconds": [
+            7,
+            7,
+            6.900000035762787,
+            7,
+            7,
+            7,
+            7.100000023841858
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 5.100000023841858,
+          "samplesMilliseconds": [
+            5.100000023841858,
+            5.100000023841858,
+            5.099999964237213,
+            5,
+            5,
+            5.199999988079071,
+            5.100000023841858
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5.100000023841858,
+            4.899999976158142,
+            5.100000023841858,
+            5.200000047683716,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 6.599999964237213,
+          "samplesMilliseconds": [
+            6.699999988079071,
+            6.5,
+            6.599999964237213,
+            6.5,
+            6.599999964237213,
+            6.599999964237213,
+            6.699999988079071
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 6.699999988079071,
+          "samplesMilliseconds": [
+            6.5,
+            6.599999964237213,
+            6.600000023841858,
+            6.699999988079071,
+            6.700000047683716,
+            6.699999988079071,
+            6.700000047683716
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 4.5,
+          "samplesMilliseconds": [
+            4.600000023841858,
+            4.600000023841858,
+            4.599999964237213,
+            4.5,
+            4.5,
+            4.5,
+            4.5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 5.600000023841858,
+          "samplesMilliseconds": [
+            5.5,
+            5.600000023841858,
+            5.600000023841858,
+            5.600000023841858,
+            6.299999952316284,
+            6,
+            6
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 7.5,
+          "samplesMilliseconds": [
+            7.5,
+            7.400000035762787,
+            7.399999976158142,
+            7.399999976158142,
+            8.400000035762787,
+            8.100000023841858,
+            8.200000047683716
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 7.5,
+          "samplesMilliseconds": [
+            7.400000035762787,
+            7.5,
+            7.399999976158142,
+            7.5,
+            8.199999988079071,
+            8.099999964237213,
+            8.199999988079071
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 5.299999952316284,
+          "samplesMilliseconds": [
+            5.299999952316284,
+            5.099999964237213,
+            5,
+            5.100000023841858,
+            5.399999976158142,
+            5.400000035762787,
+            5.5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5.100000023841858,
+            5,
+            5,
+            5.100000023841858,
+            4.899999976158142,
+            5,
+            5.099999964237213
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 7,
+          "samplesMilliseconds": [
+            7,
+            7,
+            7,
+            7,
+            7,
+            7,
+            7.199999988079071
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 7,
+          "samplesMilliseconds": [
+            7,
+            7,
+            7.099999964237213,
+            7,
+            7.200000047683716,
+            7,
+            7.199999988079071
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 4.5,
+          "samplesMilliseconds": [
+            4.599999964237213,
+            4.5,
+            4.5,
+            4.5,
+            4.5,
+            4.599999964237213,
+            4.700000047683716
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 5.599999964237213,
+          "samplesMilliseconds": [
+            5.599999964237213,
+            5.600000023841858,
+            5.599999964237213,
+            5.600000023841858,
+            5.599999964237213,
+            5.700000047683716,
+            5.599999964237213
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 7.100000023841858,
+          "samplesMilliseconds": [
+            7.100000023841858,
+            7,
+            7.100000023841858,
+            7.100000023841858,
+            7.100000023841858,
+            7.199999988079071,
+            7.100000023841858
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 7,
+          "samplesMilliseconds": [
+            7,
+            7,
+            7,
+            7,
+            7.099999964237213,
+            7,
+            7
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 5.100000023841858,
+          "samplesMilliseconds": [
+            5.099999964237213,
+            5.199999988079071,
+            5.100000023841858,
+            5.099999964237213,
+            5.200000047683716,
+            5,
+            5.199999988079071
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 5.099999964237213,
+          "samplesMilliseconds": [
+            5.099999964237213,
+            5.100000023841858,
+            5.099999964237213,
+            5.100000023841858,
+            5.099999964237213,
+            5,
+            5.099999964237213
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 6.699999988079071,
+          "samplesMilliseconds": [
+            6.700000047683716,
+            6.699999988079071,
+            6.699999988079071,
+            6.699999988079071,
+            6.700000047683716,
+            6.5,
+            6.700000047683716
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 6.600000023841858,
+          "samplesMilliseconds": [
+            6.599999964237213,
+            6.699999988079071,
+            6.600000023841858,
+            6.600000023841858,
+            6.599999964237213,
+            6.599999964237213,
+            6.699999988079071
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 4.600000023841858,
+          "samplesMilliseconds": [
+            4.600000023841858,
+            4.5,
+            4.600000023841858,
+            4.5,
+            4.600000023841858,
+            4.700000047683716,
+            4.5
+          ]
+        }
+      ],
+      "checksum": 205615074.81308
+    },
+    {
+      "browser": "webkit",
+      "version": "26.5",
+      "cold": [
+        {
+          "backend": "native",
+          "loadMilliseconds": 4,
+          "firstConstructionMicroseconds": 1000,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "native",
+          "loadMilliseconds": 3,
+          "firstConstructionMicroseconds": 1000,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 5,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 1000
+        },
+        {
+          "backend": "native",
+          "loadMilliseconds": 2,
+          "firstConstructionMicroseconds": 2000,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "native",
+          "loadMilliseconds": 3,
+          "firstConstructionMicroseconds": 1000,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "native",
+          "loadMilliseconds": 2,
+          "firstConstructionMicroseconds": 1000,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "native",
+          "loadMilliseconds": 2,
+          "firstConstructionMicroseconds": 1000,
+          "firstProjectionMicroseconds": 1000
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "native",
+          "loadMilliseconds": 2,
+          "firstConstructionMicroseconds": 2000,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "proj4",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        },
+        {
+          "backend": "wrapper",
+          "loadMilliseconds": 6,
+          "firstConstructionMicroseconds": 0,
+          "firstProjectionMicroseconds": 0
+        }
+      ],
+      "independent": {
+        "configurations": 134,
+        "points": 2354
+      },
+      "construction": [
+        {
+          "name": "Mercator",
+          "backend": "native",
+          "medianMicroseconds": 40,
+          "samplesMicroseconds": [
+            40,
+            30,
+            40,
+            40,
+            30,
+            40,
+            30
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4",
+          "medianMicroseconds": 0,
+          "samplesMicroseconds": [
+            10,
+            0,
+            0,
+            0,
+            10,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper",
+          "medianMicroseconds": 0,
+          "samplesMicroseconds": [
+            10,
+            0,
+            0,
+            0,
+            0,
+            10,
+            0
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native",
+          "medianMicroseconds": 30,
+          "samplesMicroseconds": [
+            40,
+            40,
+            40,
+            30,
+            30,
+            30,
+            30
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4",
+          "medianMicroseconds": 0,
+          "samplesMicroseconds": [
+            10,
+            0,
+            0,
+            10,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper",
+          "medianMicroseconds": 0,
+          "samplesMicroseconds": [
+            0,
+            0,
+            10,
+            0,
+            0,
+            10,
+            0
+          ]
+        }
+      ],
+      "timings": [
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            1,
+            2,
+            1,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 1,
+          "samplesMilliseconds": [
+            2,
+            1,
+            1,
+            2,
+            2,
+            1,
+            1
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            2,
+            1,
+            1,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            1,
+            1
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 3,
+          "samplesMilliseconds": [
+            2,
+            3,
+            3,
+            3,
+            3,
+            3,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 1,
+          "samplesMilliseconds": [
+            2,
+            1,
+            2,
+            1,
+            1,
+            1,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            1,
+            2,
+            1,
+            2,
+            2,
+            2,
+            1
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            3,
+            2,
+            2,
+            2,
+            2,
+            2,
+            3
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            3,
+            3,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 3,
+          "samplesMilliseconds": [
+            2,
+            3,
+            2,
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            3,
+            3,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            1,
+            1,
+            2,
+            2,
+            1,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 3,
+          "samplesMilliseconds": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 3,
+          "samplesMilliseconds": [
+            3,
+            2,
+            3,
+            2,
+            3,
+            2,
+            3
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 3,
+          "samplesMilliseconds": [
+            3,
+            3,
+            3,
+            3,
+            2,
+            3,
+            3
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            2,
+            2,
+            3,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            2,
+            2,
+            3,
+            2,
+            1
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            2,
+            2,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 3,
+          "samplesMilliseconds": [
+            3,
+            2,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 1,
+          "samplesMilliseconds": [
+            1,
+            1,
+            2,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            3,
+            2,
+            2,
+            2,
+            3,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            3,
+            2,
+            2,
+            3,
+            2,
+            3,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            2,
+            2,
+            3,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            3,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            1,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 3,
+          "samplesMilliseconds": [
+            2,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            3,
+            3,
+            2,
+            2,
+            3,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            3,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        {
+          "name": "Mercator",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 2,
+          "samplesMilliseconds": [
+            2,
+            2,
+            2,
+            3,
+            2,
+            2,
+            3
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            6,
+            5,
+            5,
+            5,
+            5,
+            6,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            6
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            6,
+            6,
+            6,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            6
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            5,
+            6,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            4,
+            4,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 6,
+          "samplesMilliseconds": [
+            6,
+            5,
+            6,
+            6,
+            5,
+            5,
+            6
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 6,
+          "samplesMilliseconds": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            7,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 6,
+          "samplesMilliseconds": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            4,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            6,
+            5,
+            5,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 6,
+          "samplesMilliseconds": [
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 6,
+          "samplesMilliseconds": [
+            6,
+            6,
+            5,
+            6,
+            6,
+            5,
+            6
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float32Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            4,
+            5,
+            5,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            6,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            4,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            6,
+            5,
+            5,
+            6,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "project",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            4,
+            5,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            4,
+            5,
+            5,
+            4,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 2,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            4,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 6,
+          "samplesMilliseconds": [
+            6,
+            5,
+            6,
+            5,
+            5,
+            6,
+            6
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 6,
+          "samplesMilliseconds": [
+            5,
+            6,
+            6,
+            6,
+            6,
+            6,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 6,
+          "samplesMilliseconds": [
+            6,
+            6,
+            5,
+            6,
+            6,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "project",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            6,
+            5,
+            6,
+            5,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "proj4-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 6,
+          "samplesMilliseconds": [
+            6,
+            6,
+            5,
+            6,
+            5,
+            6,
+            5
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "wrapper-scalar",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            6,
+            5,
+            6,
+            5,
+            6
+          ]
+        },
+        {
+          "name": "UTM",
+          "backend": "native-batch",
+          "array": "Float64Array",
+          "dimension": 4,
+          "direction": "unproject",
+          "medianMilliseconds": 5,
+          "samplesMilliseconds": [
+            5,
+            5,
+            4,
+            5,
+            4,
+            5,
+            5
+          ]
+        }
+      ],
+      "checksum": 205615074.81308
+    }
+  ]
+}

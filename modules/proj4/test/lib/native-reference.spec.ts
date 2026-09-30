@@ -41,6 +41,12 @@ for (const [index, fixture] of inputs.cases.entries()) {
       to: fixture.definition,
       projections
     });
+    const inverseTolerance = (input: number[]) =>
+      'knotInverseTolerance' in fixture &&
+      Math.abs(input[1]) < 90 &&
+      Math.abs(input[1] / 5 - Math.round(input[1] / 5)) < 1e-12
+        ? fixture.knotInverseTolerance!
+        : fixture.inverseTolerance;
     const results = reference.cases[index].results;
     expect(results.map(row => row.input)).toEqual(fixture.points);
     const forward = new Float64Array(results.length * 4);
@@ -48,7 +54,13 @@ for (const [index, fixture] of inputs.cases.entries()) {
     for (const [pointIndex, row] of results.entries()) {
       // Inverse starts from PROJ output, never from math.gl's own forward result.
       close(projection.project(row.input), row.forward, fixture.forwardTolerance);
-      close(projection.unproject(row.forward), row.inverse, fixture.inverseTolerance);
+      close(projection.unproject(row.forward), row.inverse, inverseTolerance(row.input));
+      if (
+        'knotInverseTolerance' in fixture &&
+        inverseTolerance(row.input) !== fixture.inverseTolerance
+      ) {
+        close(projection.unproject(row.forward), row.input, 1e-8);
+      }
       forward.set([row.input[0], row.input[1], row.input[2] ?? 123, 8], pointIndex * 4);
       inverse.set([row.forward[0], row.forward[1], row.forward[2] ?? 123, 8], pointIndex * 4);
     }
@@ -63,7 +75,7 @@ for (const [index, fixture] of inputs.cases.entries()) {
       close(
         inverse.subarray(pointIndex * 4, pointIndex * 4 + 4),
         [row.inverse[0], row.inverse[1], row.inverse[2] ?? 123, 8],
-        fixture.inverseTolerance
+        inverseTolerance(row.input)
       );
     }
   });

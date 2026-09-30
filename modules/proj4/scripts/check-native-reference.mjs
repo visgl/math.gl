@@ -33,11 +33,14 @@ for (const grid of grids.grids) {
 }
 for (const [name, inputs] of [
   ['native-proj', projections.cases],
-  ['real-grid', grids.grids]
+  ['real-grid', grids.grids],
+  ['structured-proj', (await json('structured-proj-cases.json')).cases],
+  ['datum-proj', (await json('datum-proj-cases.json')).cases]
 ]) {
   const reference = await json(name + '-reference.json');
   assert.equal(reference.pyproj, '3.7.2');
   assert.equal(reference.proj, '9.5.1');
+  assert.equal(reference.epsgVersion, 'v11.022');
   assert.equal(reference.source, name + '-cases.json');
   assert.equal(
     reference.sourceSHA256,
@@ -80,3 +83,38 @@ for (const row of projections.cases) {
   if (row.oracle !== row.definition) assert(!row.oracleNotes.startsWith('Identical'));
 }
 console.log('Independent PROJ references, all named projections, and pinned grid hashes verified.');
+
+const qualification = await json('release-qualification.json');
+assert.equal(qualification.apiStatus, 'supported-opt-in');
+assert.equal(qualification.defaultBackend, 'proj4');
+assert.deepEqual(
+  qualification.reviewedExceptions,
+  inventory.exceptions.map(row => row.id)
+);
+const rejections = await json('upstream-corpus-exceptions.json');
+const corrections = await json('upstream-corpus-numeric-corrections.json');
+assert.equal(rejections.length, qualification.upstreamCorpus.strictRejections);
+assert.equal(corrections.length, qualification.upstreamCorpus.numericCorrections);
+assert.equal(
+  qualification.upstreamCorpus.numericMatches + rejections.length + corrections.length,
+  qualification.upstreamCorpus.total
+);
+assert.equal(projections.cases.length, qualification.independent.projectionConfigurations);
+assert.equal(
+  projections.cases.reduce((sum, row) => sum + row.points.length, 0),
+  qualification.independent.projectionPoints
+);
+assert.equal(grids.grids.length, qualification.independent.gridDatasets);
+assert.equal(
+  grids.grids.reduce((sum, row) => sum + row.points.length, 0),
+  qualification.independent.gridPoints
+);
+const structured = await json('structured-proj-cases.json');
+const datums = await json('datum-proj-cases.json');
+assert.equal(structured.cases.length, qualification.independent.structuredCRSs);
+assert.equal(datums.cases.length, qualification.independent.datumChains);
+assert.equal(
+  datums.cases.reduce((sum, row) => sum + row.points.length, 0),
+  qualification.independent.datumPoints
+);
+console.log('Native support profile counts and reviewed exceptions verified.');

@@ -12,6 +12,7 @@ import upstreamGstmerc from 'proj4/lib/projections/gstmerc';
 // @ts-expect-error Upstream ships no declarations for individual kernels.
 import upstreamEqui from 'proj4/lib/projections/equi';
 import * as native from '@math.gl/proj4/experimental';
+import independent from '../fixtures/native-proj-reference.json';
 import {catalogueProjectionCases} from '../fixtures/catalogue-projections';
 proj4.Proj.projections.add(upstreamOrtho);
 proj4.Proj.projections.add(upstreamGstmerc);
@@ -79,7 +80,19 @@ for (const fixture of catalogueProjectionCases) {
             123,
             7
           ]);
-          const expected = reference.forward([...coordinate]);
+          // Cassini signs/refinement and Robinson coefficients intentionally improve
+          // on proj4js. Keep their offset/unit checks tied to native PROJ references.
+          const corrected = fixture.id.startsWith('cass') || fixture.id.startsWith('robin');
+          const oracle = corrected
+            ? independent.cases
+                .find(row => row.id === fixture.id)!
+                .results.find(
+                  row => row.input[0] === coordinate[0] && row.input[1] === coordinate[1]
+                )!
+            : undefined;
+          const expected = oracle
+            ? [...oracle.forward, 123, 7]
+            : reference.forward([...coordinate]);
           const result = projection.project(coordinate);
           close(
             result,
@@ -89,6 +102,7 @@ for (const fixture of catalogueProjectionCases) {
           close(projection.unproject(result), coordinate, fixture.tolerance || 1e-7);
           // equi's upstream inverse omits its return; gnom's origin inverse uses an undefined latitude.
           if (
+            !corrected &&
             !fixture.id.startsWith('equi') &&
             !(fixture.id.startsWith('gnom') && dx === 0 && dy === 0) &&
             !(fixture.id.startsWith('tpers') && dx === 0 && dy === 0)
@@ -182,7 +196,17 @@ test('world projections cover both hemispheres and longitude wrapping', () => {
     for (const lon of [-179, -120, 10, 100, 179])
       for (const lat of [-80, -45, 0, 45, 80]) {
         const point = [lon, lat, 123, 7];
-        close(projection.project(point), reference.forward(point), 1e-5);
+        const expected =
+          plugin.name === 'robin'
+            ? [
+                ...independent.cases
+                  .find(row => row.id === 'robin-world-wrapping')!
+                  .results.find(row => row.input[0] === lon && row.input[1] === lat)!.forward,
+                123,
+                7
+              ]
+            : reference.forward(point);
+        close(projection.project(point), expected, 1e-5);
         close(
           projection.unproject(projection.project(point)),
           point,
@@ -232,7 +256,15 @@ test('oblique Mercator and Robinson preserve height with enforced axes', () => {
     const projection = new native.TypeScriptProjection({to, projections, enforceAxis: true});
     const reference = proj4('+proj=longlat +datum=none', to);
     const point = definition.includes('omerc') ? [115, 5, 123, 7] : [20, 30, 123, 7];
-    close(projection.project(point), reference.forward(point, true), 1e-6);
+    const corrected = independent.cases.find(row => row.id === 'robin-axis-regression')!.results[0]
+      .forward;
+    close(
+      projection.project(point),
+      definition.includes('robin')
+        ? [corrected[1], corrected[0], 123, 7]
+        : reference.forward(point, true),
+      1e-6
+    );
     close(projection.unproject(projection.project(point)), point, 1e-7);
   }
 });

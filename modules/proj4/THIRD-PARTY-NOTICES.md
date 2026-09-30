@@ -1,6 +1,6 @@
 # Native projection source provenance
 
-The experimental implementation uses proj4js **2.22.0** as its pinned compatibility
+The native implementation uses proj4js **2.22.0** as its pinned compatibility
 reference: https://github.com/proj4js/proj4js/tree/v2.22.0.
 
 The numerical kernels under `src/experimental/kernels/`, numerical helpers under
@@ -41,3 +41,16 @@ Fixtures copied from upstream tests retain their source tag, line numbers, hash 
 MIT attribution in `test/fixtures/upstream-2.22.0.ts` and the complete
 `test/fixtures/upstream-corpus-2.22.0.json`. The latter includes all 242 coordinate
 fixtures and suite-level alias definitions, extracted without executing upstream tests.
+
+
+Cassini series signs/inverse refinement and Robinson coefficient precision/interval
+selection are adapted from [PROJ 9.5.1](https://github.com/OSGeo/PROJ/tree/9.5.1/src/projections).
+The Cassini Newton solver and Robinson exact-knot handling are original math.gl
+modifications. Both files retain their proj4js port notices and identify the PROJ
+adaptations. PROJ's MIT-style terms and attribution are reproduced in `PROJ-LICENSE.txt`.
+
+Independent reference coordinates are generated with pyproj 3.7.2 / PROJ 9.5.1.
+Structured CRS fixtures reproduce selected definitions from the EPSG dataset v11.022
+(2024-11-05), distributed in PROJ's database; see the fixture README for source and
+terms. Licensed real grids are test-only assets with separate redistribution notices
+under `test/fixtures/real-grids`; none are included in the npm package.

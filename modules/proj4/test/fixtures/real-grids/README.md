@@ -3,7 +3,7 @@
 These files are test data under their original redistribution terms, **not** the
 math.gl source-code license. They are not included in the published npm package.
 
-Both GeoTIFFs are unmodified files from
+The two GeoTIFFs are unmodified files from
 [OSGeo/PROJ-data commit cdab44864a36a9f3c3e90a36637c5d8a86e624c6](https://github.com/OSGeo/PROJ-data/tree/cdab44864a36a9f3c3e90a36637c5d8a86e624c6).
 Exact download URLs and SHA-256 hashes are in `../real-grid-cases.json` and are
 checked offline in CI and in the Node/Chromium tests. `ca_nrc_README.txt` and
@@ -22,3 +22,12 @@ and the loader's documented band/metadata conventions.
 To restore the pinned bytes, run `node modules/proj4/scripts/check-native-reference.mjs --download-grids`.
 Downloads are opt-in and must match the checked-in hashes before being written.
 Ordinary CI runs the same script without that flag and needs no network or Python.
+
+
+`BETA2007.gsb` is the original-format AdV/BKG NTv2 grid, retrieved unchanged from
+[proj4js v2.22.0](https://github.com/proj4js/proj4js/blob/v2.22.0/test/BETA2007.gsb).
+It retains the BETA2007 redistribution terms documented above and in
+`de_adv_README.txt`; inclusion in proj4js does not relabel the grid as MIT code.
+Its own immutable source URL/hash and independently generated PROJ outputs are in
+the real-grid manifests. The NTv2 and GeoTIFF variants are both exercised, including
+outer nodes, shifted inverses and explicit fallback behavior.

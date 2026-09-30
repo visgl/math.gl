@@ -40,17 +40,29 @@ try {
   }
   // Only the unmodified third-party dependency uses the already installed package and its dependencies.
   symlinkSync(join(root, 'node_modules', 'proj4'), join(temporary, 'node_modules', 'proj4'), 'dir');
-  for (const name of ['PROJ4-LICENSE.md', 'APACHE-2.0-LICENSE.txt', 'THIRD-PARTY-NOTICES.md']) {
+  for (const name of [
+    'PROJ4-LICENSE.md',
+    'PROJ-LICENSE.txt',
+    'APACHE-2.0-LICENSE.txt',
+    'THIRD-PARTY-NOTICES.md'
+  ]) {
     assert(readFileSync(join(temporary, 'node_modules/@math.gl/proj4', name), 'utf8').length > 100);
   }
   const packageManifest = JSON.parse(
     readFileSync(join(root, 'modules/proj4/package.json'), 'utf8')
   );
-  const subpaths = Object.keys(packageManifest.exports).filter(path =>
-    path.startsWith('./experimental/')
+  const subpaths = Object.keys(packageManifest.exports).filter(
+    path => path.startsWith('./experimental/') || path.startsWith('./native/')
   );
   // Enumerate the manifest so every newly supported subpath must work in a real tarball.
+  for (const [path, entry] of Object.entries(packageManifest.exports)) {
+    if (path.startsWith('./native'))
+      assert.deepEqual(entry, packageManifest.exports[path.replace('./native', './experimental')]);
+  }
   const entrySmoke = `
+    const stable = await load('@math.gl/proj4/native');
+    assert.equal(stable.TypeScriptProjection, api.TypeScriptProjection);
+    assert.equal(stable.mercator, api.mercator);
     const subpaths = ${JSON.stringify(subpaths)};
     for (const subpath of subpaths) {
       const entry = await load('@math.gl/proj4' + subpath.slice(1));

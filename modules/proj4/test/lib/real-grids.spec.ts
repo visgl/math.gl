@@ -5,14 +5,15 @@
 // Dataset attribution and redistribution terms: ../fixtures/real-grids/README.md.
 import {beforeAll, expect, test} from 'vitest';
 import {fromArrayBuffer} from 'geotiff';
-import {loadGeoTIFFGrid, TypeScriptProjection} from '@math.gl/proj4/experimental';
+import {loadGeoTIFFGrid, parseNTv2Grid, TypeScriptProjection} from '@math.gl/proj4/experimental';
 import type {DatumGrid} from '@math.gl/proj4/experimental';
 import inputs from '../fixtures/real-grid-cases.json';
 import reference from '../fixtures/real-grid-reference.json';
 
 const urls = [
   new URL('../fixtures/real-grids/ca_nrc_NA83SCRS.tif', import.meta.url),
-  new URL('../fixtures/real-grids/de_adv_BETA2007.tif', import.meta.url)
+  new URL('../fixtures/real-grids/de_adv_BETA2007.tif', import.meta.url),
+  new URL('../fixtures/real-grids/BETA2007.gsb', import.meta.url)
 ];
 const grids: DatumGrid[] = [];
 const degrees = 180 / Math.PI;
@@ -34,7 +35,11 @@ beforeAll(async () => {
       byte.toString(16).padStart(2, '0')
     ).join('');
     expect(hash).toBe(inputs.grids[index].sha256);
-    grids.push(await loadGeoTIFFGrid(await fromArrayBuffer(buffer)));
+    grids.push(
+      inputs.grids[index].file.endsWith('.gsb')
+        ? parseNTv2Grid(buffer)
+        : await loadGeoTIFFGrid(await fromArrayBuffer(buffer))
+    );
   }
 });
 
