@@ -5,7 +5,6 @@
 import proj4 from 'proj4';
 import proj4Metadata from 'proj4/package.json';
 import {Proj4Projection as TypeScriptProjection} from '@math.gl/proj4';
-import {Proj4Projection as ClassicProjection} from '@math.gl/proj4/classic';
 
 import {IMPLEMENTATIONS, SAMPLE_COUNT, SCENARIOS} from './live-bench-types';
 import type {BenchmarkOptions, BenchmarkRow} from './live-bench-types';
@@ -25,16 +24,19 @@ export function runLiveBenchmark(options: BenchmarkOptions, onRow: (row: Benchma
   const ArrayType = precision === 'Float32' ? Float32Array : Float64Array;
   let checksum = 0;
   for (const scenario of SCENARIOS) {
-    const typescript = new TypeScriptProjection({to: scenario.to});
-    const classic = new ClassicProjection({to: scenario.to});
-    const direct = proj4('WGS84', scenario.to);
+    const from = scenario.from || 'WGS84';
+    const enforceAxis = Boolean(scenario.from); // Compare computed heights for datum shifts.
+    const typescript = new TypeScriptProjection({from, to: scenario.to, enforceAxis});
+    const direct = proj4(from, scenario.to);
+    const forward = (point: number[]) => direct.forward(point, enforceAxis);
+    const inverse = (point: number[]) => direct.inverse(point, enforceAxis);
     const source = new ArrayType(points * dimension);
     const buffer = new ArrayType(source.length);
     for (let i = 0; i < points; i++) {
       let coordinate = [scenario.longitude + (i % 100) / 100, scenario.latitude + (i % 71) / 100];
       if (dimension > 2) coordinate.push(123);
       if (dimension > 3) coordinate.push(7);
-      if (direction === 'unproject') coordinate = direct.forward(coordinate);
+      if (direction === 'unproject') coordinate = forward(coordinate);
       source.set(coordinate, i * dimension);
     }
     const scalar = (project: (point: number[]) => number[]) => {
@@ -51,18 +53,17 @@ export function runLiveBenchmark(options: BenchmarkOptions, onRow: (row: Benchma
       () =>
         typescript[direction === 'project' ? 'projectFlat' : 'unprojectFlat'](buffer, dimension),
       scalar(typescript[direction]),
-      scalar(classic[direction]),
-      scalar(direction === 'project' ? direct.forward : direct.inverse)
+      scalar(direction === 'project' ? forward : inverse)
     ];
     buffer.set(source);
-    runners[3]();
+    runners[2]();
     const reference = buffer.slice();
     for (const [index, run] of runners.entries()) {
       buffer.set(source);
       run();
       for (let i = 0; i < buffer.length; i++) {
         const tolerance = Math.max(
-          direction === 'project' ? 2e-5 : 1e-8,
+          i % dimension === 2 ? 1e-4 : direction === 'project' ? 2e-5 : 1e-8,
           precision === 'Float32' ? Math.abs(reference[i]) * 2e-7 : 0
         );
         if (!Number.isFinite(buffer[i]) || Math.abs(buffer[i] - reference[i]) > tolerance)

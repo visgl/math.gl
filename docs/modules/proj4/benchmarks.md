@@ -21,16 +21,25 @@ inline benchmark. Nothing runs until you press **Run benchmarks**.
 </BrowserOnly>
 
 The TypeScript columns use the default `Proj4Projection`, through its in-place and
-scalar APIs. The classic column uses `@math.gl/proj4/classic`; the direct column
-uses the pinned `proj4` dependency. All four process the same coordinates into
+scalar APIs, labeled **math.gl flat** and **math.gl scalar**. The **proj4js 2.22.0**
+column uses the pinned `proj4` dependency directly. All three process the same coordinates into
 the same typed-array layout. Scalar paths reuse an input array and copy returned
 coordinates into the output buffer. Every coordinate is checked before timing,
-including height and trailing ordinates. Implementation order rotates between samples.
+including height and trailing ordinates. Datum-shift cases enable axis enforcement
+to compare computed heights consistently. Implementation order rotates between samples.
+
+The twelve cases cover spherical and ellipsoidal Mercator, UTM in both hemispheres,
+Lambert conformal conic, Albers, Lambert azimuthal equal area, polar stereographic,
+Equal Earth, Mollweide, and three- and seven-parameter datum shifts.
 
 These are warmed transformation measurements, excluding loading and construction.
 Inverse runs start from coordinates projected by the reference implementation.
 The table reports median time for the entire buffer and the corresponding throughput;
-it does not measure allocations, startup or bundle size. The work runs in a dedicated
+the **M** suffix means million coordinates per second. Green dots mark the fastest
+result in each row, including ties. Small multipliers show math.gl throughput relative
+to proj4js: **3×** means three times as many coordinates per second. No multiplier
+is shown when either time is below timer resolution. The live benchmark does not
+measure allocations, startup or bundle size. The work runs in a dedicated
 worker, with Stop and rerun controls.
 
 ## Reproduce

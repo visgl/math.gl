@@ -33,6 +33,24 @@ export const mercator: ProjectionPlugin = {
     }
     if (scale <= 0) throw new Error('Mercator scale must be positive');
     const radius = a * scale;
+    // Select the spherical equations once, avoiding ellipsoidal corrections and
+    // inverse iteration for every Web Mercator coordinate.
+    if (e === 0) {
+      return createProjection(
+        point => {
+          const latitude = point.y;
+          if (Math.abs(latitude) >= Math.PI / 2) {
+            throw new Error('Mercator is undefined at the poles');
+          }
+          point.x = x0 + radius * wrap(point.x - longitudeOrigin);
+          point.y = y0 + radius * (Math.asinh(Math.tan(latitude)) + 0);
+        },
+        point => {
+          point.x = wrap(longitudeOrigin + (point.x - x0) / radius);
+          point.y = Math.atan(Math.sinh((point.y - y0) / radius + 0));
+        }
+      );
+    }
     return createProjection(
       point => {
         const longitude = point.x,

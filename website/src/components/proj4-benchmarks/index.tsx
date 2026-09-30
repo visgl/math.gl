@@ -198,6 +198,7 @@ export default function Proj4Benchmarks() {
             <tbody>
               {rows.map(row => {
                 const fastest = Math.min(...row.measurements.map(result => result.milliseconds));
+                const referenceTime = row.measurements[2].milliseconds;
                 return (
                   <tr key={row.name}>
                     <th scope="row">{row.name}</th>
@@ -207,13 +208,23 @@ export default function Proj4Benchmarks() {
                         className={result.milliseconds === fastest ? styles.fastest : undefined}
                       >
                         {result.milliseconds > 0
-                          ? (options.points / result.milliseconds / 1000).toFixed(2)
+                          ? (options.points / result.milliseconds / 1000).toFixed(2) + 'M'
                           : 'Below timer resolution'}
+                        {index < 2 && result.milliseconds > 0 && referenceTime > 0 && (
+                          <span className={styles.ratio} title="Throughput relative to proj4js">
+                            {(referenceTime / result.milliseconds).toFixed(1)}×
+                          </span>
+                        )}
                         <small>
+                          {result.milliseconds === fastest && result.milliseconds > 0 && (
+                            <span
+                              className={styles.fastestDot}
+                              role="img"
+                              aria-label="Fastest"
+                              title="Fastest"
+                            />
+                          )}
                           {result.milliseconds.toFixed(2)} ms
-                          {result.milliseconds === fastest && result.milliseconds > 0
-                            ? ' · Fastest'
-                            : ''}
                         </small>
                       </td>
                     ))}
@@ -225,9 +236,10 @@ export default function Proj4Benchmarks() {
         </div>
       )}
       <p className={styles.note}>
-        {SAMPLE_COUNT} warmed samples per implementation; median shown. Imports, construction and
-        buffer resets are excluded. Keep this tab visible while running. Results depend on your
-        browser and hardware.
+        {SAMPLE_COUNT} warmed samples per implementation; median shown. Green dots mark the fastest
+        result (including ties). Multipliers compare throughput with proj4js; 3× means three times
+        as many coordinates per second. Imports, construction and buffer resets are excluded. Keep
+        this tab visible while running. Results depend on your browser and hardware.
       </p>
       {version && (
         <p className={styles.note}>
