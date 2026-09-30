@@ -99,22 +99,22 @@ and shared ellipsoid and datum tables. Selecting one projection does not remove
 those tables. Adding WKT pulls in syntax parsing and structured-CRS interpretation;
 PROJJSON objects already provide structured input and need less reader code.
 
-Measured September 30, 2026 for the TypeScript default and descriptor API, with esbuild,
+Measured September 30, 2026 including tranche 10 batch kernels, with Node 24.14.0, esbuild,
 browser ESM, ES2020, minification, and gzip level 9. Each row is a separate retained
 bundle, not an increment or an application-wide download estimate. **KiB = 1,024 bytes.**
 
 | Retained functionality | Minified KiB | Gzip KiB |
 | --- | ---: | ---: |
-| Engine core | 44.2 | 16.1 |
-| Engine + Mercator | 45.5 | 16.6 |
-| Engine + UTM | 52.2 | 19.3 |
-| Engine + Mercator + WKT reader | 68.9 | 24.3 |
-| Engine + Mercator + PROJJSON reader | 56.4 | 20.3 |
-| Engine + Mercator + NTv2 decoder | 48.6 | 17.8 |
-| Engine + Mercator + GeoTIFF grid adapter | 48.6 | 17.8 |
-| Default TypeScript wrapper (all plugins and readers) | 141.4 | 48.3 |
-| Every root export, including wrapper, readers and grid adapters | 144.2 | 49.4 |
-| Classic proj4js-backed wrapper | 128.8 | 42.4 |
+| Engine core | 44.4 | 16.4 |
+| Engine + Mercator | 46.8 | 17.1 |
+| Engine + UTM | 53.4 | 19.8 |
+| Engine + Mercator + WKT reader | 70.1 | 24.8 |
+| Engine + Mercator + PROJJSON reader | 57.6 | 20.9 |
+| Engine + Mercator + NTv2 decoder | 49.8 | 18.4 |
+| Engine + Mercator + GeoTIFF grid adapter | 49.8 | 18.3 |
+| Default TypeScript wrapper (all plugins and readers) | 142.7 | 49.0 |
+| Every root export, including wrapper, readers and grid adapters | 145.4 | 50.1 |
+| Classic proj4js-backed wrapper | 128.8 | 42.8 |
 
 The GeoTIFF row excludes an external TIFF decoder, workers, and grid files. No row
 includes downloaded datum-grid data. Different bundlers, targets, compression,
@@ -270,10 +270,10 @@ Sizes are sums across the relevant emitted files, with gzip applied to each file
 
 | Deferred feature | Initial minified / gzip KiB | Additional minified / gzip KiB |
 | --- | ---: | ---: |
-| Automatic catalogue (`LazyProjection`) | 53.0 / 19.8 | 77.5 / 36.5 |
-| UTM descriptor | 46.0 / 17.0 | 7.8 / 3.4 |
-| WKT reader and syntax | 45.9 / 16.7 | 23.4 / 8.1 |
-| Rotated Mollweide (factory plus wrapped plugin) | 45.9 / 17.1 | 5.3 / 2.5 |
+| Automatic catalogue (`LazyProjection`) | 54.3 / 20.7 | 77.8 / 36.9 |
+| UTM descriptor | 47.3 / 17.7 | 7.9 / 3.5 |
+| WKT reader and syntax | 47.1 / 17.1 | 23.4 / 8.1 |
+| Rotated Mollweide (factory plus wrapped plugin) | 47.2 / 17.6 | 5.3 / 2.5 |
 
 The catalogue row sums all available deferred algorithm chunks, not the download
 for its first UTM operation. Other rows retain only their selected feature.
@@ -399,6 +399,37 @@ A coordinate error stops the batch after any earlier records have been transform
 Copy the input first if the operation must be atomic. See the
 [flat-array contract](./api-reference/typescript-projection.md#flat-typed-arrays-in-place)
 for exact failure and dimension behavior.
+
+### Projection-specific batch execution
+
+Mercator, transverse Mercator/UTM, Lambert conformal conic, Albers and equidistant
+conic supply prepared whole-buffer operations. For eligible geographic/projected
+pairs, these fuse unit conversion, validation and the projection equation into one
+traversal, bypassing per-coordinate dispatch through the general transformation pipeline.
+The numerical equations are shared with the scalar API; there is no reduced-accuracy mode.
+Z and every trailing ordinate remain in storage, including the sign of zero and NaN measures.
+
+Selection happens at construction. Datum/grid operations, axis permutations, nonzero
+prime meridians, vertical unit conversions, longitude wrapping, lossy horizontal
+extraction, geocentric coordinates and projected-to-projected chains use the general
+pipeline. Scalar calls and plugins without batch hooks retain their existing behavior.
+Lazy-loaded plugins gain the same specialization once loaded; no additional imports or
+application configuration are needed.
+
+Advanced plugins can implement optional `createForwardFlat(context)` and
+`createInverseFlat(context)` methods on `ProjectionImplementation`. They receive a frozen
+`ProjectionFlatContext` with `inputScale` and `outputScale`, and return a synchronous
+`ProjectionFlatOperation` or `undefined` to decline specialization. These types are
+exported from `@math.gl/proj4/core`. Factories run once per direction at construction;
+operations receive the entire view and stride, after the engine validates both.
+
+A custom operation must multiply input XY by `inputScale`, apply the forward/inverse
+equations, then divide XY by `outputScale`. It must enforce the geographic domain and
+finite XYZ contract, preserve Z/trailing ordinates, check Float32 representability before
+writing, and leave the failing and subsequent records untouched. Scratch belongs to each
+call; retaining it or the buffer breaks reentrancy. Use the ordinary mutable hooks unless
+you need and can uphold this whole-buffer contract. Built-in factories decline when a
+decorator replaces their corresponding mutable hook, preserving custom behavior.
 
 ## Add a custom projection
 

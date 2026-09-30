@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createFlatProjection} from '../flat-projection';
 import type {ProjectionPlugin} from '../types';
 import {bindKernel, kernelParameters, ORIGIN_PARAMETERS, validateConic} from '../kernel';
 import {createState, forward, inverse} from '../kernels/aea';
@@ -13,6 +14,6 @@ export const albersEqualArea: ProjectionPlugin = {
   create(context) {
     const base = kernelParameters(context);
     validateConic(base, context.parameters);
-    return bindKernel('aea', createState(base), forward, inverse);
+    return bindKernel('aea', createState(base), forward, inverse, createFlatProjection);
   }
 };

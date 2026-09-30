@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createFlatProjection} from '../flat-projection';
 import type {ProjectionPlugin} from '../types';
 import {bindKernel, kernelParameters, ORIGIN_PARAMETERS, validateConic} from '../kernel';
 import {createState, forward, inverse} from '../kernels/eqdc';
@@ -13,6 +14,6 @@ export const equidistantConic: ProjectionPlugin = {
   create(context) {
     const base = kernelParameters(context);
     validateConic(base, context.parameters);
-    return bindKernel('eqdc', createState(base), forward, inverse);
+    return bindKernel('eqdc', createState(base), forward, inverse, createFlatProjection);
   }
 };

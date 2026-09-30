@@ -111,9 +111,9 @@ try {
   for (const name of names) {
     const browser = await browsers[name].launch({headless: true});
     const watchdog = setTimeout(() => {
-      console.error(name + ' qualification exceeded 180 seconds');
+      console.error(name + ' qualification exceeded 300 seconds');
       void browser.close();
-    }, 180000);
+    }, 300000);
     try {
       const cold = [];
       // Fresh contexts isolate module registries and HTTP caches, not OS disk caches.

@@ -73,6 +73,12 @@ export const SCENARIOS: readonly BenchmarkScenario[] = [
     latitude: 39
   },
   {
+    name: 'Equidistant conic',
+    to: '+proj=eqdc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84',
+    longitude: 0,
+    latitude: 40
+  },
+  {
     name: 'Lambert azimuthal equal area',
     to: '+proj=laea +lat_0=45 +lon_0=15 +x_0=0 +y_0=0 +datum=WGS84',
     longitude: 12,

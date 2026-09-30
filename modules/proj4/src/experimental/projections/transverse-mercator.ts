@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createFlatProjection} from '../flat-projection';
 import type {ProjectionContext, ProjectionImplementation, ProjectionPlugin} from '../types';
 import {
   bindKernel,
@@ -24,10 +25,22 @@ import {
 export function createTransverseMercator(context: ProjectionContext): ProjectionImplementation {
   const base = kernelParameters(context);
   if (flagParameter(context.parameters, 'approx')) {
-    return bindKernel('tmerc +approx', createFast(base), fastForward, fastInverse);
+    return bindKernel(
+      'tmerc +approx',
+      createFast(base),
+      fastForward,
+      fastInverse,
+      createFlatProjection
+    );
   }
   if (base.sphere) throw new Error('Spherical transverse Mercator requires +approx');
-  return bindKernel('etmerc', createExtended(base), extendedForward, extendedInverse);
+  return bindKernel(
+    'etmerc',
+    createExtended(base),
+    extendedForward,
+    extendedInverse,
+    createFlatProjection
+  );
 }
 
 /** Matches proj4js: tmerc uses the extended algorithm unless +approx is supplied. */
