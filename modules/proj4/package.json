@@ -885,6 +885,36 @@
       "types": "./dist/experimental/lazy-projections/ob_tran.d.ts",
       "import": "./dist/experimental/lazy-projections/ob_tran.js",
       "require": "./dist/experimental/lazy-projections/ob_tran.cjs"
+    },
+    "./grids/vertical": {
+      "types": "./dist/experimental/grids/vertical.d.ts",
+      "import": "./dist/experimental/grids/vertical.js",
+      "require": "./dist/experimental/grids/vertical.cjs"
+    },
+    "./grids/gtx": {
+      "types": "./dist/experimental/grids/gtx.d.ts",
+      "import": "./dist/experimental/grids/gtx.js",
+      "require": "./dist/experimental/grids/gtx.cjs"
+    },
+    "./experimental/grids/vertical": {
+      "types": "./dist/experimental/grids/vertical.d.ts",
+      "import": "./dist/experimental/grids/vertical.js",
+      "require": "./dist/experimental/grids/vertical.cjs"
+    },
+    "./experimental/grids/gtx": {
+      "types": "./dist/experimental/grids/gtx.d.ts",
+      "import": "./dist/experimental/grids/gtx.js",
+      "require": "./dist/experimental/grids/gtx.cjs"
+    },
+    "./native/grids/vertical": {
+      "types": "./dist/experimental/grids/vertical.d.ts",
+      "import": "./dist/experimental/grids/vertical.js",
+      "require": "./dist/experimental/grids/vertical.cjs"
+    },
+    "./native/grids/gtx": {
+      "types": "./dist/experimental/grids/gtx.d.ts",
+      "import": "./dist/experimental/grids/gtx.js",
+      "require": "./dist/experimental/grids/gtx.cjs"
     }
   },
   "files": [

@@ -99,22 +99,27 @@ and shared ellipsoid and datum tables. Selecting one projection does not remove
 those tables. Adding WKT pulls in syntax parsing and structured-CRS interpretation;
 PROJJSON objects already provide structured input and need less reader code.
 
-Measured September 30, 2026 including tranche 10 batch kernels, with Node 24.14.0, esbuild,
+Measured September 30, 2026 including tranche 12A vertical-height stages, with Node 24.14.0, esbuild,
 browser ESM, ES2020, minification, and gzip level 9. Each row is a separate retained
 bundle, not an increment or an application-wide download estimate. **KiB = 1,024 bytes.**
 
 | Retained functionality | Minified KiB | Gzip KiB |
 | --- | ---: | ---: |
-| Engine core | 44.4 | 16.4 |
-| Engine + Mercator | 46.8 | 17.1 |
-| Engine + UTM | 53.4 | 19.8 |
-| Engine + Mercator + WKT reader | 70.1 | 24.8 |
-| Engine + Mercator + PROJJSON reader | 57.6 | 20.9 |
-| Engine + Mercator + NTv2 decoder | 49.8 | 18.4 |
-| Engine + Mercator + GeoTIFF grid adapter | 49.8 | 18.3 |
-| Default TypeScript wrapper (all plugins and readers) | 142.7 | 49.0 |
-| Every root export, including wrapper, readers and grid adapters | 145.4 | 50.1 |
+| Engine core | 45.5 | 16.7 |
+| Engine + Mercator | 47.9 | 17.4 |
+| Engine + UTM | 54.6 | 20.2 |
+| Engine + Mercator + WKT reader | 71.3 | 25.1 |
+| Engine + Mercator + PROJJSON reader | 58.8 | 21.2 |
+| Engine + Mercator + NTv2 decoder | 51.0 | 18.7 |
+| Engine + Mercator + GeoTIFF grid adapter | 51.0 | 18.6 |
+| Engine + Mercator + GTX decoder | 49.4 | 18.1 |
+| Default TypeScript wrapper (all plugins and readers) | 143.9 | 49.3 |
+| Every root export, including wrapper, readers and grid adapters | 148.5 | 51.0 |
 | Classic proj4js-backed wrapper | 128.8 | 42.8 |
+
+Tranche 12A adds about 1.1 KiB minified / 0.3 KiB gzip to the core stage machinery.
+The GTX reader and bilinear interpolation remain optional and are included only in
+the GTX and all-exports rows.
 
 The GeoTIFF row excludes an external TIFF decoder, workers, and grid files. No row
 includes downloaded datum-grid data. Different bundlers, targets, compression,
@@ -270,10 +275,10 @@ Sizes are sums across the relevant emitted files, with gzip applied to each file
 
 | Deferred feature | Initial minified / gzip KiB | Additional minified / gzip KiB |
 | --- | ---: | ---: |
-| Automatic catalogue (`LazyProjection`) | 54.3 / 20.7 | 77.8 / 36.9 |
-| UTM descriptor | 47.3 / 17.7 | 7.9 / 3.5 |
-| WKT reader and syntax | 47.1 / 17.1 | 23.4 / 8.1 |
-| Rotated Mollweide (factory plus wrapped plugin) | 47.2 / 17.6 | 5.3 / 2.5 |
+| Automatic catalogue (`LazyProjection`) | 55.5 / 21.0 | 77.7 / 36.8 |
+| UTM descriptor | 48.4 / 18.0 | 7.9 / 3.5 |
+| WKT reader and syntax | 48.3 / 17.4 | 23.4 / 8.1 |
+| Rotated Mollweide (factory plus wrapped plugin) | 48.3 / 18.0 | 5.3 / 2.5 |
 
 The catalogue row sums all available deferred algorithm chunks, not the download
 for its first UTM operation. Other rows retain only their selected feature.
@@ -366,8 +371,81 @@ For supported horizontal GeoTIFF grids, `loadGeoTIFFGrid(decodedTIFF)` prepares 
 object returned by a separately chosen TIFF reader. The adapter imports no TIFF
 library. That reader and its workers have their own bundle costs and can also be
 loaded on demand. See [datum grids](./api-reference/typescript-projection.md#horizontal-datum-grids)
-for band conventions, ownership, coverage, and inverse-edge behavior. Vertical grids
-and general time-dependent transformations remain unsupported.
+for band conventions, ownership, coverage, and inverse-edge behavior. Explicit vertical
+height conversion is described below; general time-dependent transformations remain unsupported.
+
+## Convert geoid heights
+
+Register a prepared `VerticalGrid` under the name used by `+geoidgrids`. A source grid
+converts gravity-related height **H** to ellipsoidal height **h** using **h = H + N**;
+a destination grid applies **H = h - N**. The supplied offsets **N** are geoid undulations
+in metres. Source conversion runs before the horizontal datum transformation; destination
+conversion runs after it. Each grid is sampled in its own CRS's horizontal datum, at
+Greenwich longitude and geographic latitude. These are explicit stages following
+[PROJ's vertical-grid convention](https://proj.org/en/stable/operations/transformations/vgridshift.html).
+
+```typescript
+import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {parseGTXGrid} from '@math.gl/proj4/grids/gtx';
+
+const response = await fetch('/grids/local.gtx');
+if (!response.ok) throw new Error('Could not load vertical grid');
+const local = parseGTXGrid(await response.arrayBuffer());
+const projection = new TypeScriptProjection({
+  from: '+proj=longlat +datum=WGS84 +geoidgrids=local',
+  to: 'EPSG:4979',
+  verticalGrids: {local}
+});
+const positions = new Float64Array([12, 41, 100, 7]);
+projection.projectFlat(positions, 4); // height changes; measure 7 is preserved
+```
+
+Choose a model whose horizontal datum, vertical datum, tide convention and area of use
+match your data. The key `local` is an application registration name, not an EPSG vertical
+CRS or an automatically selected model. An ellipsoid alone does not enable a horizontal
+datum shift: declare the datum or explicit `+towgs84` parameters when a shift is needed.
+
+`Projection`, `TypeScriptProjection` and `LazyProjection` accept the same per-instance
+`verticalGrids` map. Load grid data before constructing the projection. Lazy projection
+algorithms can still preload separately. No file, network request, TIFF decoder or geoid
+model is imported implicitly. The optional readers can themselves be dynamically imported.
+
+For an already loaded `@math.gl/geoid` model, use the structural adapter:
+
+```typescript
+import {createGeoidGrid} from '@math.gl/proj4/grids/vertical';
+
+// geoid is a previously prepared @math.gl/geoid Geoid instance.
+const verticalGrids = {local: createGeoidGrid(geoid)};
+```
+
+The adapter calls `getHeight(latitudeDegrees, longitudeDegrees)` and retains the model's
+interpolation and ownership rules. It adds no runtime dependency on `@math.gl/geoid`.
+`createVerticalGrid({origin, step, size, offsets, noData})` instead snapshots a regular
+bilinear grid. Origin and positive spacing are degrees; rows run south to north and
+columns west to east. `parseGTXGrid(ArrayBuffer)` snapshots big-endian float32 metre
+offsets from the [GTX format](https://gdal.org/en/stable/drivers/raster/gtx.html).
+Its conventional -88.8888 sentinel, non-finite nodes, and values outside ±1000 metres
+are treated as nodata, consistent with PROJ's GTX reader.
+
+Both snapshot readers include the outer nodes and do not extrapolate. Longitudes can
+be expressed in equivalent 360-degree turns, including bounded grids crossing the
+antimeridian. A missing global seam cell is not synthesized; the grid must cover the
+requested coordinate. A nodata corner with nonzero interpolation weight makes that
+sample uncovered. Ordered `+geoidgrids=regional,global` lists try the first covering
+grid. Prefix an optional registration with `@`; use an explicit final `null` for a
+zero-offset fallback. Missing required registrations fail construction; uncovered
+coordinates and non-finite custom offsets throw during transformation.
+
+Vertical transformations require XYZ or XYZM, including flat arrays; M and later
+ordinates remain measures. `+vunits`/`+vto_meter` and requested axes are applied around
+the metre-based height stage. A failing flat record is left unchanged along with all
+later records; earlier records may have completed. A vertical grid cannot be attached
+to a geocentric or identity CRS or combined with lossy horizontal extraction.
+
+This is the explicit vertical-grid subset (tranche 12A). Vertical GeoTIFF decoding,
+compound/vertical WKT or PROJJSON execution, arbitrary operation pipelines, epochs,
+dynamic datums and automatic operation selection remain future work.
 
 ## Transform flat buffers in place
 

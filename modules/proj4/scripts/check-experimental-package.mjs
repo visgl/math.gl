@@ -135,7 +135,14 @@ for (const {TypeScriptProjection, geocentric, wktCRSParser} of [esm, cjs]) {
 }
 
 // Prepared grids are injected; core/projection bundles must not retain grid readers or interpolation.
-for (const reader of [null, 'parseNTv2Grid', 'loadGeoTIFFGrid']) {
+for (const reader of [
+  null,
+  'parseNTv2Grid',
+  'loadGeoTIFFGrid',
+  'parseGTXGrid',
+  'createVerticalGrid',
+  'createGeoidGrid'
+]) {
   const contents = reader
     ? 'export {' + reader + "} from '@math.gl/proj4';"
     : "export {TypeScriptProjection} from '@math.gl/proj4';";
@@ -164,9 +171,18 @@ for (const reader of [null, 'parseNTv2Grid', 'loadGeoTIFFGrid']) {
   );
   assert.equal(
     emitted.some(path => path.endsWith('/grids/grid.js')),
-    reader !== null
+    reader === 'parseNTv2Grid' || reader === 'loadGeoTIFFGrid'
+  );
+  assert.equal(
+    emitted.some(path => path.endsWith('/grids/gtx.js')),
+    reader === 'parseGTXGrid'
+  );
+  assert.equal(
+    emitted.some(path => path.endsWith('/grids/vertical.js')),
+    ['parseGTXGrid', 'createVerticalGrid', 'createGeoidGrid'].includes(reader)
   );
   assert(!emitted.some(path => /node_modules\/(proj4|geotiff)\//.test(path)));
+  assert(!emitted.some(path => path.includes('/geoid/')));
 }
 for (const {TypeScriptProjection, loadGeoTIFFGrid} of [esm, cjs]) {
   const grid = await loadGeoTIFFGrid({

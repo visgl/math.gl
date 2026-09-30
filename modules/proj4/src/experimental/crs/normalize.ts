@@ -44,6 +44,7 @@ export const CORE_PARAMETERS = [
   'title',
   'towgs84',
   'nadgrids',
+  'geoidgrids',
   'axis',
   'pm',
   'over',

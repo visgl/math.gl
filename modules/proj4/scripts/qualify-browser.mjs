@@ -47,3 +47,31 @@ export function qualify(inputs, reference) {
   }
   return {configurations: inputs.cases.length, points};
 }
+
+// Explicit vertical stages are qualified in all three browser engines too.
+import verticalInputs from '../test/fixtures/vertical-grid-cases.json';
+import verticalReference from '../test/fixtures/vertical-grid-reference.json';
+export function qualifyVertical() {
+  const local = native.parseGTXGrid(new Uint8Array(verticalReference.gridBytes).buffer);
+  let points = 0;
+  for (const [i, fixture] of verticalInputs.cases.entries()) {
+    const projection = new native.TypeScriptProjection({
+      from: fixture.from,
+      to: fixture.to,
+      enforceAxis: true,
+      projections,
+      verticalGrids: {local}
+    });
+    for (const row of verticalReference.cases[i].results) {
+      close(projection.project(row.input), row.forward, 1e-5);
+      close(projection.unproject(row.forward), row.inverse, 1e-5);
+      const flat = new Float64Array(row.input);
+      projection.projectFlat(flat, 4);
+      close(flat, row.forward, 1e-5);
+      projection.unprojectFlat(flat, 4);
+      close(flat, row.inverse, 1e-5);
+      points++;
+    }
+  }
+  return {configurations: verticalInputs.cases.length, points};
+}
