@@ -278,5 +278,28 @@ these references in Chromium, Firefox and WebKit.
 These are synthetic grids for checking operation semantics, not a claim of geoid-model
 accuracy. Additional tests cover the prepared `@math.gl/geoid` adapter, horizontal-grid
 ordering, nodata/coverage, optional/null fallbacks, buffer ownership, missing Z and partial
-flat-array writes. Vertical GeoTIFF, compound/vertical CRS execution, epochs and general
+flat-array writes. Compound/vertical CRS execution, epochs and general
 pipeline parsing remain outside this subset.
+
+
+## Vertical GeoTIFF format qualification
+
+Seven small authored MIT TIFF files / 30 XYZM points cover PixelIsPoint, PixelIsArea,
+Deflate, big-endian scaled int16, nonzero tiepoint indices, nested images, nodata and
+antimeridian sampling. A standard-library TIFF encoder writes the fixtures; pyproj
+3.7.2 / PROJ 9.5.1 reads their exact bytes and supplies explicit `vgridshift` forward
+and inverse expectations. The generator, input JSON and each TIFF are SHA-256 checked.
+These are synthetic format tests, not geoid model accuracy claims.
+
+Node/Chromium tests decode them with geotiff.js and check scalar/Float64 XYZM results
+at 1e-5, preserve M, and separately exercise Float32 rounding. The three-browser
+qualification runner decodes the same files after benchmark timing completes, so the
+optional test decoder is excluded from measured projection bundles. Strict metadata,
+ownership, fallback and rejection cases supplement those numerical references.
+
+Regenerate with `modules/proj4/scripts/generate-vertical-geotiff-reference.py` using
+the pinned oracle environment; verify offline with
+`node modules/proj4/scripts/check-vertical-geotiff-reference.mjs`.
+The adapter does not claim general raster or arbitrary PROJ grid support: other grid
+operation types, projected/rotated rasters, overviews, non-metre units, non-bilinear
+interpolation and ambiguous overlapping image layouts remain unsupported.

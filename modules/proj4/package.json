@@ -915,6 +915,21 @@
       "types": "./dist/experimental/grids/gtx.d.ts",
       "import": "./dist/experimental/grids/gtx.js",
       "require": "./dist/experimental/grids/gtx.cjs"
+    },
+    "./grids/vertical-geotiff": {
+      "types": "./dist/experimental/grids/vertical-geotiff.d.ts",
+      "import": "./dist/experimental/grids/vertical-geotiff.js",
+      "require": "./dist/experimental/grids/vertical-geotiff.cjs"
+    },
+    "./experimental/grids/vertical-geotiff": {
+      "types": "./dist/experimental/grids/vertical-geotiff.d.ts",
+      "import": "./dist/experimental/grids/vertical-geotiff.js",
+      "require": "./dist/experimental/grids/vertical-geotiff.cjs"
+    },
+    "./native/grids/vertical-geotiff": {
+      "types": "./dist/experimental/grids/vertical-geotiff.d.ts",
+      "import": "./dist/experimental/grids/vertical-geotiff.js",
+      "require": "./dist/experimental/grids/vertical-geotiff.cjs"
     }
   },
   "files": [

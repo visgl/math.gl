@@ -314,15 +314,33 @@ Ten authored configurations (28 XYZM points) are checked against pinned PROJ 9.5
 pipelines, including source/destination grids, Helmert ordering, feet, axes and prime
 meridians. Browser qualification exercises the same independent references.
 
-This does not complete tranche 12: compound/vertical CRS execution, vertical GeoTIFF,
+This does not complete tranche 12: compound/vertical CRS execution,
 general pipeline composition, epochs and automatic operation selection remain open.
 See the [height conversion guide](./typescript-engine.md#convert-geoid-heights).
+
+## Tranche 12B1: vertical GeoTIFF — implemented
+
+The optional `loadVerticalGeoTIFFGrid` adapter decodes no files itself and adds no TIFF
+dependency to the runtime. It validates geoid metadata and geographic geometry, handles
+point/area raster registration and scale/offset/nodata, and prepares owned bilinear
+snapshots for the existing height stage. Ordered nested/disjoint images have explicit
+coverage rules. Seven authored TIFFs / 30 XYZM points are independently qualified with
+PROJ 9.5.1; Node and browser tests decode the actual bytes. This completes the vertical
+GeoTIFF format portion of 12B; typed pipeline composition remains 12B2.
+
+A loaders.gl integration follow-up should expose unresampled typed raster bands with
+per-image/per-band geodetic metadata (registration, nodata, scale/offset, grid type and
+subgrid identity). The existing RGB loader output is not suitable for geoid values.
+Build on its numeric raster-source support and use a plain data contract at the
+math.gl boundary; retain application-owned fetching/decoding and avoid runtime coupling
+between math.gl and loaders.gl. The current GeoTIFF-style structural adapter is an
+interim integration path, not direct compatibility with today's GeoTIFFLoader output.
 
 ## Remaining performance and geodetic roadmap
 
 | Tranche | Work | Acceptance gate |
 | --- | --- | --- |
-| 12B — Explicit operation pipelines | Typed operation composition and vertical GeoTIFF; keep missing operations explicit | Independent forward/inverse fixtures and package boundaries |
+| 12B2 — Explicit operation pipelines | Typed operation composition; keep missing operations explicit | Independent forward/inverse fixtures and package boundaries |
 | 12C — Time-dependent operations | Epochs, dynamic datums and operation selection | Explicit epoch API separate from M, independent time-dependent references |
 | 13 — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
 
