@@ -47,9 +47,12 @@ The p10–p90 spread describes sample variation; it is not a confidence interval
 
 Green dots mark the fastest result in each row, including ties. Small multipliers show
 math.gl throughput relative to proj4js: **3×** means three times as many coordinates per
-second. Dots and multipliers are suppressed when the minimum duration cannot be reached
-or any implementation's p10–p90 range exceeds 25% of its median. These flags help expose
-timer limits and interference from other work; they do not establish statistical significance.
+second. Bold values and dots identify the fastest measured median even when timings vary.
+Timing notices remain visible when the minimum duration cannot be reached or any
+implementation's p10–p90 range exceeds 25% of its median. These flags help expose timer
+limits and interference from other work; rerun to check consistency. Ratios and highlights
+do not establish statistical significance. Medians below timer resolution cannot be ranked
+or used to calculate a ratio.
 **Download results** saves the raw aggregate samples, normalized statistics, seed,
 settings and browser metadata. The benchmark runs in a dedicated worker with Stop and
 rerun controls. It does not measure allocations, startup or bundle size.
