@@ -2,15 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {assertTimezone, getInstant} from './instant';
+
 /** Returns minutes east of UTC at an instant (epoch milliseconds or Date; defaults to now). */
 export function getTimezoneOffset(timezone: string, date: Date | number = Date.now()): number {
-  const instant = new Date(date instanceof Date ? date.getTime() : date);
-  if (!Number.isFinite(instant.getTime())) {
-    throw new RangeError('Date must represent a valid instant');
-  }
-  if (typeof timezone !== 'string' || !timezone) {
-    throw new RangeError('Timezone must be a valid timezone identifier');
-  }
+  const instant = getInstant(date);
+  assertTimezone(timezone);
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: timezone,
     timeZoneName: 'longOffset'
