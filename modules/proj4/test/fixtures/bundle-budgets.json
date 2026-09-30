@@ -1,5 +1,5 @@
 {
-  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes. Optional-reader rows added in the structured-method/docs follow-up; existing limits retained. Lazy scenarios sum emitted chunk sizes (gzip per file), with 10% deferred headroom rounded to 100 bytes; each initial static graph retains the existing Mercator limit. TypeScript default wrapper baseline added September 30, 2026 with the same headroom; existing limits retained. Automatic LazyProjection catalogue adds a separate initial/deferred budget while existing bundle limits remain unchanged.",
+  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes. Optional-reader rows added in the structured-method/docs follow-up; existing limits retained. Lazy scenarios sum emitted chunk sizes (gzip per file), with 10% deferred headroom rounded to 100 bytes; each initial static graph retains the existing Mercator limit. TypeScript default wrapper baseline added September 30, 2026 with the same headroom; existing limits retained. Automatic LazyProjection catalogue adds a separate initial/deferred budget while existing bundle limits remain unchanged. Tranche 9 compiled pipeline constants measure 17,720 gzip bytes in the rotated initial graph on Node 24.14.0; its gzip allowance increases by 100 bytes to 17,800. All other limits stay unchanged.",
   "baseline": {
     "core": {
       "minified": 42306,
@@ -148,6 +148,10 @@
     "catalogue": {
       "minified": 59700,
       "gzip": 22400
+    },
+    "rotated": {
+      "minified": 48100,
+      "gzip": 17800
     }
   }
 }

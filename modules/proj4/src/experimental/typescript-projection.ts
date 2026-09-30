@@ -55,7 +55,7 @@ export class TypeScriptProjection<P extends ProjectionRegistration = ProjectionP
   readonly lossy: boolean;
   constructor(options: TypeScriptProjectionOptions<P> = {}) {
     const registrations = options.projections || [];
-    registry(registrations);
+    const plugins = registry(registrations);
     if (registrations.some(projection => !('create' in projection))) {
       // Inspect definitions without fetching any algorithms. Importing descriptors
       // and constructing an instance never starts a dynamic import.
@@ -65,9 +65,9 @@ export class TypeScriptProjection<P extends ProjectionRegistration = ProjectionP
       this.deferred = {options: {...options, projections: [...registrations]}};
     } else {
       const eager = options as TypeScriptProjectionOptions;
-      const plugins = registry(eager.projections || []);
-      const from = compileCRS(eager.from ?? 'WGS84', plugins, eager);
-      const to = compileCRS(eager.to ?? 'WGS84', plugins, eager);
+      const eagerPlugins = plugins as ReadonlyMap<string, ProjectionPlugin>;
+      const from = compileCRS(eager.from ?? 'WGS84', eagerPlugins, eager);
+      const to = compileCRS(eager.to ?? 'WGS84', eagerPlugins, eager);
       this.lossy = from.lossy || to.lossy;
       if (this.lossy && (from.kind === 'geocentric' || to.kind === 'geocentric'))
         unsupportedStage(
@@ -326,6 +326,15 @@ function compileTransform(
     to.implementation && projectionOperation(to.implementation, false, to.kind === 'geocentric');
   const datum = createDatumTransform(from.datum, to.datum);
   const horizontalOnly = from.lossy || to.lossy;
+  // Resolve CRS kinds and scalar constants once, outside the coordinate loop.
+  const fromGeocentric = from.kind === 'geocentric';
+  const inputScale = from.kind === 'geographic' ? from.angularUnit : from.toMeter;
+  const outputScale = to.kind === 'geographic' ? to.angularUnit : to.toMeter;
+  const inputVerticalScale = fromGeocentric ? 1 : from.verticalUnit,
+    outputVerticalScale = to.kind === 'geocentric' ? outputScale : to.verticalUnit;
+  const fromPrime = from.primeMeridian,
+    toPrime = to.primeMeridian;
+  const longitudeWrap = to.kind === 'geographic' ? to.longitudeWrap : undefined;
   return {
     requiresInputZ:
       from.kind === 'geocentric' ||
@@ -338,45 +347,26 @@ function compileTransform(
       inputAxis?.(point);
       const preservedHeight = point.z;
       if (horizontalOnly) point.z = 0;
-      if (from.kind === 'geocentric') {
-        point.x *= from.toMeter;
-        point.y *= from.toMeter;
-        point.z *= from.toMeter;
-        source(point);
-      } else {
-        if (from.kind === 'geographic') {
-          point.x *= from.angularUnit;
-          point.y *= from.angularUnit;
-        } else {
-          point.x *= from.toMeter;
-          point.y *= from.toMeter;
-          if (from.kind !== 'identity') source(point);
-        }
-        point.z *= from.verticalUnit;
+      if (inputScale !== 1) {
+        point.x *= inputScale;
+        point.y *= inputScale;
+        if (fromGeocentric) point.z *= inputScale;
       }
+      source?.(point);
+      if (inputVerticalScale !== 1) point.z *= inputVerticalScale;
       if (Math.abs(point.y) > Math.PI / 2 || !finite(point))
         throw new Error('Coordinate is outside the geographic domain');
-      point.x += from.primeMeridian;
+      point.x += fromPrime;
       datum?.(point);
-      point.x -= to.primeMeridian;
-      if (to.kind === 'geocentric') {
-        target(point);
-        point.x /= to.toMeter;
-        point.y /= to.toMeter;
-        point.z /= to.toMeter;
-      } else {
-        if (to.kind === 'geographic') {
-          if (to.longitudeWrap !== undefined)
-            point.x = to.longitudeWrap + wrapLongitude(point.x - to.longitudeWrap);
-          point.x /= to.angularUnit;
-          point.y /= to.angularUnit;
-        } else {
-          if (to.kind !== 'identity') target(point);
-          point.x /= to.toMeter;
-          point.y /= to.toMeter;
-        }
-        point.z /= to.verticalUnit;
+      point.x -= toPrime;
+      if (longitudeWrap !== undefined)
+        point.x = longitudeWrap + wrapLongitude(point.x - longitudeWrap);
+      target?.(point);
+      if (outputScale !== 1) {
+        point.x /= outputScale;
+        point.y /= outputScale;
       }
+      if (outputVerticalScale !== 1) point.z /= outputVerticalScale;
       if (horizontalOnly) point.z = preservedHeight;
       outputAxis?.(point);
       if (!finite(point)) throw new Error('Projection produced non-finite coordinates');

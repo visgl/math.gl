@@ -69,10 +69,8 @@ export function geocentricToGeodeticInPlace(point: ProjectionPoint, ellipsoid: E
   throw new Error('Geocentric inverse did not converge');
 }
 
-function helmert(point: ProjectionPoint, values: readonly number[], inverse: boolean): void {
-  let x = point.x,
-    y = point.y,
-    z = point.z;
+/** Convert rotation units and scale once for the lifetime of a compiled datum stage. */
+function createHelmert(values: readonly number[], inverse: boolean): DatumOperation {
   const dx = values[0],
     dy = values[1],
     dz = values[2];
@@ -80,18 +78,23 @@ function helmert(point: ProjectionPoint, values: readonly number[], inverse: boo
     ry = (values[4] || 0) * ARC_SECOND,
     rz = (values[5] || 0) * ARC_SECOND;
   const scale = 1 + (values[6] || 0) / 1e6;
-  if (inverse) {
-    x = (x - dx) / scale;
-    y = (y - dy) / scale;
-    z = (z - dz) / scale;
-    point.x = x + rz * y - ry * z;
-    point.y = -rz * x + y + rx * z;
-    point.z = ry * x - rx * y + z;
-  } else {
-    point.x = scale * (x - rz * y + ry * z) + dx;
-    point.y = scale * (rz * x + y - rx * z) + dy;
-    point.z = scale * (-ry * x + rx * y + z) + dz;
-  }
+  return inverse
+    ? point => {
+        const x = (point.x - dx) / scale,
+          y = (point.y - dy) / scale,
+          z = (point.z - dz) / scale;
+        point.x = x + rz * y - ry * z;
+        point.y = -rz * x + y + rx * z;
+        point.z = ry * x - rx * y + z;
+      }
+    : point => {
+        const x = point.x,
+          y = point.y,
+          z = point.z;
+        point.x = scale * (x - rz * y + ry * z) + dx;
+        point.y = scale * (rz * x + y - rx * z) + dy;
+        point.z = scale * (-ry * x + rx * y + z) + dz;
+      };
 }
 function shifted(datum: Datum): boolean {
   return Boolean(datum.towgs84?.some(value => value !== 0));
@@ -152,12 +155,12 @@ function convertDatum(from: Datum, to: Datum): DatumOperation | undefined {
     sameParameters
   )
     return undefined;
-  const sourceShift = shifted(from),
-    targetShift = shifted(to);
+  const sourceShift = shifted(from) ? createHelmert(from.towgs84, false) : undefined,
+    targetShift = shifted(to) ? createHelmert(to.towgs84, true) : undefined;
   return point => {
     geodeticToGeocentricInPlace(point, a);
-    if (sourceShift) helmert(point, from.towgs84, false);
-    if (targetShift) helmert(point, to.towgs84, true);
+    sourceShift?.(point);
+    targetShift?.(point);
     geocentricToGeodeticInPlace(point, b);
   };
 }
