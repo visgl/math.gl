@@ -82,7 +82,7 @@ jobs:
           node modules/proj4/scripts/check-packed-package.mjs
           node modules/proj4/scripts/check-bundle-budget.mjs
           node modules/proj4/scripts/check-lazy-package.mjs
-          node modules/proj4/scripts/benchmark.mjs --points 100 --samples 3
+          node modules/proj4/scripts/benchmark.mjs --points 100 --samples 3 --min-sample-ms 0
 
       - name: Check CRS type boundaries
         run: yarn check:crs-types
@@ -100,6 +100,22 @@ jobs:
         with:
           name: proj4-browser-qualification
           path: /tmp/proj4-browser-qualification.json
+
+      - name: Compare projection performance against the PR base
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          node modules/proj4/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --scenarios 'Web Mercator,UTM 31N,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/proj4-performance-comparison.json
+
+      - name: Upload paired performance measurements
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: proj4-performance-comparison
+          path: /tmp/proj4-performance-comparison.json
+          if-no-files-found: ignore
 
       - name: Run Node tests
         run: yarn test-node

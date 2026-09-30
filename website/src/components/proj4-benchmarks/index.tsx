@@ -6,6 +6,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
   IMPLEMENTATIONS,
   SAMPLE_COUNT,
+  MIN_SAMPLE_MS,
   SCENARIOS
 } from '../../../../modules/proj4/test/live-bench-types';
 import type {BenchmarkOptions, BenchmarkRow} from '../../../../modules/proj4/test/live-bench-types';
@@ -19,12 +20,14 @@ export default function Proj4Benchmarks() {
     points: 10000,
     precision: 'Float64',
     dimension: 2,
-    direction: 'project'
+    direction: 'project',
+    distribution: 'regional'
   });
   const [status, setStatus] = useState<Status>('idle');
   const [rows, setRows] = useState<BenchmarkRow[]>([]);
   const [error, setError] = useState('');
   const [version, setVersion] = useState('');
+  const [summary, setSummary] = useState<Record<string, unknown> | null>(null);
   const workerRef = useRef<Worker | null>(null);
   const running = status === 'running';
   useEffect(
@@ -39,6 +42,7 @@ export default function Proj4Benchmarks() {
     setOptions(previous => ({...previous, ...next}));
     setRows([]);
     setStatus('idle');
+    setSummary(null);
     setError('');
   }
   function stop() {
@@ -51,6 +55,7 @@ export default function Proj4Benchmarks() {
     setRows([]);
     setError('');
     setStatus('running');
+    setSummary(null);
     try {
       const worker = new Worker(new URL('./benchmark.worker.ts', import.meta.url), {
         type: 'module'
@@ -65,6 +70,7 @@ export default function Proj4Benchmarks() {
         if (data.type === 'row') setRows(previous => [...previous, data.row]);
         if (data.type === 'complete') {
           setVersion(data.summary.proj4Version);
+          setSummary(data.summary);
           setStatus('complete');
           finish();
         }
@@ -91,6 +97,28 @@ export default function Proj4Benchmarks() {
     }
   }
 
+  function download() {
+    const report = {
+      schemaVersion: 2,
+      metadata: {
+        ...summary,
+        options,
+        userAgent: navigator.userAgent,
+        url: location.href,
+        implementations: IMPLEMENTATIONS
+      },
+      rows
+    };
+    const url = URL.createObjectURL(
+      new Blob([JSON.stringify(report, null, 2)], {type: 'application/json'})
+    );
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'math-gl-projection-benchmark.json';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
   const statusText = {
     idle: 'Ready to run in your browser.',
     running: `Running… ${rows.length} of ${SCENARIOS.length} projections complete.`,
@@ -113,6 +141,8 @@ export default function Proj4Benchmarks() {
             <option value={2000}>2,000</option>
             <option value={10000}>10,000</option>
             <option value={50000}>50,000</option>
+            <option value={100000}>100,000</option>
+            <option value={1000000}>1,000,000</option>
           </select>
         </label>
         <label>
@@ -155,6 +185,19 @@ export default function Proj4Benchmarks() {
             <option value="unproject">Inverse</option>
           </select>
         </label>
+        <label>
+          Distribution
+          <select
+            aria-label="Distribution"
+            value={options.distribution}
+            onChange={event =>
+              change({distribution: event.target.value as BenchmarkOptions['distribution']})
+            }
+          >
+            <option value="regional">Across the region</option>
+            <option value="clustered">Clustered locations</option>
+          </select>
+        </label>
       </fieldset>
       <div className={styles.actions}>
         <button type="button" className="button button--primary" onClick={run} disabled={running}>
@@ -163,6 +206,11 @@ export default function Proj4Benchmarks() {
         {running && (
           <button type="button" className="button button--secondary" onClick={stop}>
             Stop
+          </button>
+        )}
+        {status === 'complete' && (
+          <button type="button" className="button button--secondary" onClick={download}>
+            Download results
           </button>
         )}
         <span role="status">{statusText}</span>
@@ -201,30 +249,57 @@ export default function Proj4Benchmarks() {
                 const referenceTime = row.measurements[2].milliseconds;
                 return (
                   <tr key={row.name}>
-                    <th scope="row">{row.name}</th>
+                    <th scope="row">
+                      {row.name}
+                      {row.unstable && <small>Variable timings</small>}
+                      {row.timingLimited && (
+                        <small title="The sample duration remained below the target within the memory limit.">
+                          Timing limited
+                        </small>
+                      )}
+                    </th>
                     {row.measurements.map((result, index) => (
                       <td
                         key={IMPLEMENTATIONS[index]}
-                        className={result.milliseconds === fastest ? styles.fastest : undefined}
+                        className={
+                          !row.timingLimited && !row.unstable && result.milliseconds === fastest
+                            ? styles.fastest
+                            : undefined
+                        }
                       >
                         {result.milliseconds > 0
                           ? (options.points / result.milliseconds / 1000).toFixed(2) + 'M'
                           : 'Below timer resolution'}
-                        {index < 2 && result.milliseconds > 0 && referenceTime > 0 && (
-                          <span className={styles.ratio} title="Throughput relative to proj4js">
-                            {(referenceTime / result.milliseconds).toFixed(1)}×
-                          </span>
-                        )}
-                        <small>
-                          {result.milliseconds === fastest && result.milliseconds > 0 && (
-                            <span
-                              className={styles.fastestDot}
-                              role="img"
-                              aria-label="Fastest"
-                              title="Fastest"
-                            />
+                        {index < 2 &&
+                          !row.timingLimited &&
+                          !row.unstable &&
+                          result.milliseconds > 0 &&
+                          referenceTime > 0 && (
+                            <span className={styles.ratio} title="Throughput relative to proj4js">
+                              {(referenceTime / result.milliseconds).toFixed(1)}×
+                            </span>
                           )}
+                        <small
+                          title={`p10–p90: ${result.p10.toFixed(3)}–${result.p90.toFixed(3)} ms per buffer; ${row.iterations} buffers per sample`}
+                        >
+                          {!row.timingLimited &&
+                            !row.unstable &&
+                            result.milliseconds === fastest &&
+                            result.milliseconds > 0 && (
+                              <span
+                                className={styles.fastestDot}
+                                role="img"
+                                aria-label="Fastest"
+                                title="Fastest"
+                              />
+                            )}
                           {result.milliseconds.toFixed(2)} ms
+                          {result.milliseconds > 0 && (
+                            <span className={styles.ratio}>
+                              {(((result.p90 - result.p10) / result.milliseconds) * 100).toFixed(0)}
+                              % spread
+                            </span>
+                          )}
                         </small>
                       </td>
                     ))}
@@ -237,9 +312,13 @@ export default function Proj4Benchmarks() {
       )}
       <p className={styles.note}>
         {SAMPLE_COUNT} warmed samples per implementation; median shown. Green dots mark the fastest
-        result (including ties). Multipliers compare throughput with proj4js; 3× means three times
-        as many coordinates per second. Imports, construction and buffer resets are excluded. Keep
-        this tab visible while running. Results depend on your browser and hardware.
+        median (including ties). Spread is the p10–p90 range relative to the median, not a
+        confidence interval. Samples target at least {MIN_SAMPLE_MS} ms using independent buffer
+        copies; timings are normalized to one buffer. Timing-limited or highly variable rows have no
+        winner or ratio; rerun to compare them. Multipliers compare throughput with proj4js; 3×
+        means three times as many coordinates per second. Imports, construction and buffer resets
+        are excluded. Keep this tab visible while running. Results depend on your browser and
+        hardware.
       </p>
       {version && (
         <p className={styles.note}>

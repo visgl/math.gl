@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 // Original browser qualification of the proj4js-inspired native API.
-import {codeFingerprint} from './benchmark-metadata.mjs';
+import {codeFingerprint, benchmarkFingerprint} from './benchmark-metadata.mjs';
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
 import {chromium, firefox, webkit} from 'playwright';
@@ -16,26 +16,33 @@ const {values} = parseArgs({
     browsers: {type: 'string', default: 'chromium,firefox,webkit'},
     points: {type: 'string', default: '20000'},
     samples: {type: 'string', default: '7'},
-    output: {type: 'string'}
+    output: {type: 'string'},
+    'min-sample-ms': {type: 'string', default: '12'},
+    distribution: {type: 'string', default: 'regional'}
   }
 });
 const points = Number(values.points),
   samples = Number(values.samples);
 assert(Number.isSafeInteger(points) && points >= 10 && points <= 1e6);
-assert(Number.isSafeInteger(samples) && samples >= 3 && samples <= 30);
+assert(Number.isSafeInteger(samples) && samples >= 3 && samples <= 31);
+assert(
+  Number.isFinite(Number(values['min-sample-ms'])) &&
+    Number(values['min-sample-ms']) >= 0 &&
+    Number(values['min-sample-ms']) <= 100
+);
+assert(['regional', 'clustered'].includes(values.distribution));
 const browsers = {chromium, firefox, webkit},
   names = values.browsers.split(',');
 assert(names.length > 0 && names.every(name => name in browsers));
 const entries = {
-  native: `import {TypeScriptProjection,mercator,universalTransverseMercator} from '@math.gl/proj4';
-    export function create(to) {return new TypeScriptProjection({to,projections:[mercator,universalTransverseMercator]});}`,
-  proj4: `import proj4 from 'proj4';export function create(to){const p=proj4('WGS84',to);return {project:p.forward,unproject:p.inverse};}`,
-  wrapper: `import {Proj4Projection} from '@math.gl/proj4/classic';export function create(to){return new Proj4Projection({to});}`
+  typescript: new URL('../test/benchmark-typescript.ts', import.meta.url),
+  proj4: new URL('../test/benchmark-proj4.ts', import.meta.url)
 };
 const assets = new Map();
-for (const [name, contents] of Object.entries(entries)) {
+for (const [name, entry] of Object.entries(entries)) {
   const result = await build({
-    stdin: {contents, resolveDir: fileURLToPath(new URL('../../../', import.meta.url))},
+    entryPoints: [fileURLToPath(entry)],
+    tsconfigRaw: {},
     bundle: true,
     format: 'esm',
     platform: 'browser',
@@ -44,10 +51,33 @@ for (const [name, contents] of Object.entries(entries)) {
   });
   assets.set('/' + name + '.js', result.outputFiles[0].contents);
 }
-assets.set(
-  '/workload.js',
-  readFileSync(new URL('./benchmark-browser-workload.mjs', import.meta.url))
-);
+// Cold measurements exclude the shared workload and synthetic grid fixture.
+for (const [name, contents] of Object.entries({
+  typescript:
+    "import {Projection} from '@math.gl/proj4'; export const create = () => new Projection({to: 'EPSG:3857'});",
+  proj4:
+    "import proj4 from 'proj4'; export const create = () => {const converter = proj4('WGS84', 'EPSG:3857'); return {project: point => converter.forward(point)};};"
+})) {
+  const result = await build({
+    stdin: {contents, resolveDir: fileURLToPath(new URL('../', import.meta.url))},
+    bundle: true,
+    format: 'esm',
+    platform: 'browser',
+    minify: true,
+    write: false,
+    tsconfigRaw: {}
+  });
+  assets.set('/cold-' + name + '.js', result.outputFiles[0].contents);
+}
+const workload = await build({
+  entryPoints: [fileURLToPath(new URL('../test/benchmark-workload.ts', import.meta.url))],
+  bundle: true,
+  format: 'esm',
+  platform: 'browser',
+  write: false,
+  tsconfigRaw: {}
+});
+assets.set('/workload.js', workload.outputFiles[0].contents);
 const accuracy = await build({
   entryPoints: [fileURLToPath(new URL('./qualify-browser.mjs', import.meta.url))],
   bundle: true,
@@ -96,9 +126,9 @@ try {
             cold.push(
               await page.evaluate(async backend => {
                 const start = performance.now();
-                const api = await import('/' + backend + '.js');
+                const api = await import('/cold-' + backend + '.js');
                 const loaded = performance.now();
-                const instance = api.create('EPSG:3857');
+                const instance = api.create();
                 const constructed = performance.now();
                 const point = instance.project([12, 55]);
                 const projected = performance.now();
@@ -122,13 +152,17 @@ try {
         async options => {
           const {measure} = await import('/workload.js');
           const modules = {
-            native: await import('/native.js'),
-            proj4: await import('/proj4.js'),
-            wrapper: await import('/wrapper.js')
+            typescript: await import('/typescript.js'),
+            proj4: await import('/proj4.js')
           };
           return measure(modules, options);
         },
-        {points, samples}
+        {
+          points,
+          samples,
+          minSampleMs: Number(values['min-sample-ms']),
+          distribution: values.distribution
+        }
       );
       const independent = await page.evaluate(async () => {
         const {qualify} = await import('/accuracy.js');
@@ -140,7 +174,7 @@ try {
       console.log(
         name +
           ': correctness passed; ' +
-          warm.timings.length +
+          warm.rows.length * 3 +
           ' warm workloads and ' +
           cold.length +
           ' cold samples'
@@ -154,17 +188,21 @@ try {
   await new Promise(resolve => server.close(resolve));
 }
 const report = {
+  schemaVersion: 2,
   metadata: {
+    workloadSHA256: benchmarkFingerprint(),
     sourceSHA256: codeFingerprint(),
     date: new Date().toISOString(),
     platform: process.platform,
     arch: process.arch,
     cpu: cpus()[0]?.model,
     points,
-    samples
+    samples,
+    minSampleMs: Number(values['min-sample-ms']),
+    distribution: values.distribution
   },
   methodology:
-    'Separate minified bundles; fresh contexts for cold module fetch/parse/evaluation, first construction and first projection. Warm transforms use preconstructed converters, rotated execution order, reused scalar input and buffer reset outside timing. All coordinates compared before timing. OS caches not flushed; browser clocks may quantize short samples. No CI timing thresholds.',
+    'Separate minified bundles; fresh contexts for cold module fetch/parse/evaluation, first construction and first projection. Warm transforms use the shared seeded scenario matrix and adaptive independent buffer copies, preconstructed converters, rotated execution order, reused scalar input and buffer resets outside timing. Median/p10/p90 are per-buffer; raw samples are aggregate milliseconds. All coordinates compared before timing. OS caches not flushed; browser clocks may quantize short samples. No CI timing thresholds.',
   results
 };
 if (values.output) writeFileSync(values.output, JSON.stringify(report, null, 2) + '\n');

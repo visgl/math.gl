@@ -4,8 +4,8 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 
 The TypeScript engine offers `projectFlat` and `unprojectFlat` for interleaved
 Float32/Float64 buffers. Reuse the projection instance: normalization and plugin
-initialization are more expensive than the existing proj4 constructor in the initial
-measurements, while repeated transformations are faster.
+initialization are setup costs that should be amortized over many coordinates.
+Performance depends on the projection, layout, runtime and hardware.
 
 ## Live benchmarks
 
@@ -28,19 +28,31 @@ coordinates into the output buffer. Every coordinate is checked before timing,
 including height and trailing ordinates. Datum-shift cases enable axis enforcement
 to compare computed heights consistently. Implementation order rotates between samples.
 
-The twelve cases cover spherical and ellipsoidal Mercator, UTM in both hemispheres,
+The sixteen shared cases cover spherical and ellipsoidal Mercator, UTM in both hemispheres,
 Lambert conformal conic, Albers, Lambert azimuthal equal area, polar stereographic,
-Equal Earth, Mollweide, and three- and seven-parameter datum shifts.
+Equal Earth, Mollweide, three- and seven-parameter datum shifts, UTM-to-Mercator,
+US survey feet, north/east axis order, and an authored synthetic NTv2 grid.
+Regional samples cover each projection's useful domain; clustered samples concentrate
+in four smaller regions. Both are reproducible from a fixed seed. XY, XYZ and XYZM
+share the same horizontal coordinates; heights vary, and M is preserved. The buffer
+selector supports up to one million coordinates.
 
 These are warmed transformation measurements, excluding loading and construction.
 Inverse runs start from coordinates projected by the reference implementation.
-The table reports median time for the entire buffer and the corresponding throughput;
-the **M** suffix means million coordinates per second. Green dots mark the fastest
-result in each row, including ties. Small multipliers show math.gl throughput relative
-to proj4js: **3×** means three times as many coordinates per second. No multiplier
-is shown when either time is below timer resolution. The live benchmark does not
-measure allocations, startup or bundle size. The work runs in a dedicated
-worker, with Stop and rerun controls.
+Each of seven samples transforms independent buffer copies, with resets outside timing.
+Calibration targets at least 12 ms for the fastest implementation, up to one million
+coordinates or 256 buffers per sample. The table reports the median normalized to one
+selected buffer, and throughput in **million coordinates per second** (the **M** suffix).
+The p10–p90 spread describes sample variation; it is not a confidence interval.
+
+Green dots mark the fastest result in each row, including ties. Small multipliers show
+math.gl throughput relative to proj4js: **3×** means three times as many coordinates per
+second. Dots and multipliers are suppressed when the minimum duration cannot be reached
+or any implementation's p10–p90 range exceeds 25% of its median. These flags help expose
+timer limits and interference from other work; they do not establish statistical significance.
+**Download results** saves the raw aggregate samples, normalized statistics, seed,
+settings and browser metadata. The benchmark runs in a dedicated worker with Stop and
+rerun controls. It does not measure allocations, startup or bundle size.
 
 ## Reproduce
 
@@ -54,25 +66,51 @@ node modules/proj4/scripts/check-lazy-package.mjs
 node modules/proj4/scripts/check-packed-package.mjs
 ```
 
-The standalone benchmark compares the TypeScript batch API, TypeScript scalar API, direct
-`proj4` import, and `Proj4Projection` wrapper. Cases cover Web Mercator, UTM, Lambert
-conic, and a seven-parameter Helmert-to-Mercator chain, in both directions, 2D/3D,
-and Float32/Float64. Every output is checked against the pinned proj4 2.22.0 reference
-before timing. Inverse measurements start from the same reference-projected buffer.
+The standalone Node runner and browser qualification runner use the same workload as
+the live page: sixteen scenarios, Float32/Float64, XY/XYZ/XYZM and both directions
+(192 rows, with three implementations per row). Select regional or clustered inputs
+with `--distribution regional|clustered`; set `--min-sample-ms` between 0 and 100 to
+control adaptive sampling. Zero disables calibration for correctness smoke checks and
+marks timings as limited. Buffer sizes range from 10 to 1,000,000 points.
 
-Converters and buffers are prepared outside timing. The scalar competitors reuse
-an input coordinate array; their output arrays are copied to the same typed-buffer
-layout. Buffer resets are excluded, timings cover whole buffers, implementation
-order rotates between samples, and output contributes to a checksum. All methods use
-default axes except the Helmert case, where axis enforcement exposes computed heights
-consistently across the two backends. Float32 comparisons allow storage rounding.
+Converters and buffers are prepared outside timing. Scalar competitors reuse an input
+coordinate array and copy results into the same typed-buffer layout. Every ordinate is
+validated against pinned proj4js 2.22.0 before timing, including axes and computed heights;
+Float32 tolerances account for storage rounding. Buffer resets are excluded, execution
+order rotates, and output contributes to a checksum.
 
-Results include individual timings, medians, machine/runtime metadata, first construction
-after imports and warmed constructor timings. The first construction numbers are
-order-dependent and exclude module loading/process startup; they are not a cold-start
-comparison. Throughput is not a universal guarantee, particularly for tiny buffers,
-different browsers or projection domains. CI only runs a small correctness smoke
-benchmark, not a machine-dependent speed threshold.
+Schema-version-2 JSON reports retain individual aggregate samples, per-buffer medians
+and p10/p90, repetition counts, seed, workload/source fingerprints and runtime metadata.
+Warmed constructor measurements are separate. Browser qualification additionally measures
+module loading and first use in fresh contexts. CI uploads performance artifacts and
+gates correctness and bundle sizes; it does not gate noisy speed ratios.
+
+### Compare a runtime change with its base
+
+```sh
+node modules/proj4/scripts/benchmark-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --output /tmp/proj4-comparison.json
+```
+
+The comparison compiles baseline runtime sources from Git and current sources with the
+same bundler, package manifests and installed dependencies. It uses the current shared
+workload for both versions, validates both against proj4js, and rotates baseline/candidate
+flat/scalar execution order. It covers XY and XYZM in both precisions and directions;
+constructor batches alternate separately. `--scenarios` accepts comma-separated scenario
+names to focus a run. On pull requests, CI measures five representative scenarios against
+the actual base commit and uploads `proj4-performance-comparison`.
+
+`--clock thread-cpu` (Node 24.14 or later) is an optional diagnostic using main-thread CPU
+time. It reduces scheduler interference but excludes time spent off the thread; **it is
+not elapsed throughput** and must not be compared directly with the live table. Default
+reports use elapsed wall time. Always inspect sample variation before interpreting ratios.
+
+Tranche 9 removes duplicate plugin-registry construction and resolves CRS kinds, unit
+factors and Helmert coefficients once per compiled transform. It retains operation order,
+validation, height handling and partial batch commit behavior. On the local Apple M2,
+a paired CPU-time diagnostic against `a0d70d7c` showed 1.38–1.51× constructor throughput
+across five cases. Transformation changes were smaller and mixed; elapsed measurements
+on the busy host were too variable to support a general speedup claim. CI artifacts
+provide the corresponding elapsed-time comparison for each PR revision.
 
 `--allocations` uses V8's sampling heap profiler with a 4096-byte sampling interval,
 including allocations collected by minor/major GC, in a separate untimed run. Reported
@@ -86,7 +124,7 @@ The standard Node/browser benchmark suites also include proj4 comparisons for bo
 float types. Those suite timings include an identical buffer reset in every contender;
 use the standalone runner for separate forward/inverse, dimension and allocation results.
 
-## Initial measurements
+## Historical initial measurements
 
 Measured September 29, 2026 on Apple M2 / macOS arm64, Node v24.5.0
 (V8 13.6.233.10-node.21), proj4 2.22.0. Median of 7 warmed
@@ -143,13 +181,17 @@ temporary consumer, and tests ESM, CommonJS, strict NodeNext declarations, batch
 and distributed licenses. The installed third-party proj4 dependency is reused without
 fetching or publishing anything.
 
+Tranche 9 compiled pipeline constants bring the rotated lazy example’s initial graph
+to 17,720 gzip bytes on Node 24.14.0. Its allowance increases from 17,700 to 17,800
+bytes; all other byte limits remain unchanged.
+
 Performance and packaging do not establish geodetic parity. The TypeScript engine is now the default;
 the [support profile](./typescript-support.md) defines the scope of the TypeScript API
 and the migration to the default TypeScript wrapper. Historical wrapper timings
 refer to the proj4js implementation now imported from `classic`.
 
 
-## Native release qualification measurements
+## Historical release qualification measurements
 
 The checked-in raw reports under `modules/proj4/test/fixtures/qualification/` include
 source SHA-256 fingerprints, all samples, exact engine versions and methodology.
@@ -224,10 +266,11 @@ yarn playwright install --with-deps chromium firefox webkit
 node modules/proj4/scripts/benchmark-browser.mjs --points 20000 --samples 7 --output /tmp/browsers.json
 ```
 
-Each browser first measures separate TypeScript/proj4/classic-wrapper bundles, then checks all
-independent projection references. Warm workloads cover both directions, both float
-precisions and 2D/4D buffers. The runner bounds each browser to 180 seconds. CI keeps
-performance data as a downloadable artifact and gates correctness, not noisy timing
-ratios. The Node startup runner also checks the first computed coordinate in every
-fresh process. Existing packed-consumer, tree-shaking and bundle-size checks now
-exercise the canonical TypeScript paths; experimental aliases remain checked as well.
+Each browser first measures separate TypeScript and direct-proj4 bundles, then checks
+all independent projection references. Current warm workloads use the sixteen-scenario
+shared matrix described above, including XYZ. The historical tables retain their older
+workload and wrapper column for provenance; they are not current benchmark results.
+The runner bounds each browser to 180 seconds. CI keeps downloadable measurements and
+gates correctness. The Node startup runner also checks the first computed coordinate in
+every fresh process. Packed-consumer, tree-shaking and bundle-size checks exercise the
+canonical TypeScript paths and retained compatibility aliases.

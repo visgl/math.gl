@@ -21,3 +21,15 @@ export function codeFingerprint() {
   for (const name of ['core', 'crs', 'proj4', 'types']) visit(name + '/src');
   return hash.digest('hex');
 }
+
+/** Fingerprint the shared workload separately from the engine under test. */
+export function benchmarkFingerprint() {
+  const root = fileURLToPath(new URL('../test/', import.meta.url));
+  const hash = createHash('sha256');
+  for (const name of [
+    ...readdirSync(root).filter(name => /^(benchmark|live-bench).*\.ts$/.test(name)),
+    'fixtures/datum-grids.ts'
+  ].sort())
+    hash.update(name + '\0').update(readFileSync(join(root, name)));
+  return hash.digest('hex');
+}

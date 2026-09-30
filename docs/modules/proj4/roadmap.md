@@ -1,8 +1,8 @@
 # TypeScript proj4 parity roadmap
 
-Status: tranches **0–6 and qualification tranches 7A–7D are implemented** for the
-[documented TypeScript support profile](./typescript-support.md). The package root uses the TypeScript engine; `Proj4Projection` supplies the classic
-wrapper API and `TypeScriptProjection` allows explicit plugins. The old wrapper is
+Status: tranches **0–9, including qualification tranches 7A–7D, are implemented** for the
+[documented TypeScript support profile](./typescript-support.md). The package root uses the TypeScript engine; `Projection` supplies the compatible
+wrapper API (`Proj4Projection` is a deprecated alias) and `TypeScriptProjection` allows explicit plugins. The old wrapper is
 available from `@math.gl/proj4/classic`; prior engine subpaths remain aliases. No package is published by this work.
 
 The upstream corpus has 232 original numeric matches, one independently corrected
@@ -250,6 +250,34 @@ and the [support/migration contract](./typescript-support.md). The machine-reada
 profile checks fixture counts and the reviewed exception list. Publication is a
 separate release action; the default now uses TypeScript, while removing the installed proj4 dependency
 remains a separate compatibility decision.
+
+## Tranche 8: shared performance measurements — implemented
+
+Node, browser qualification and the live documentation share sixteen seeded scenarios,
+regional/clustered distributions, Float32/Float64, XY/XYZ/XYZM and both directions. Cases
+include projected-to-projected transforms, unit conversions, axes and a synthetic NTv2
+field. The live page supports million-coordinate buffers and downloadable raw results.
+Adaptive independent-buffer samples, rotated execution order, median/p10/p90 statistics
+and explicit timing-limit/variation flags make comparisons more inspectable. Correctness
+is checked before timing. Browser CI covers Chromium, Firefox and WebKit; all-coordinate
+and independent-reference checks remain gates rather than timing thresholds.
+
+## Tranche 9: compiled pipeline overhead — implemented
+
+Construct the plugin registry once, capture CRS kind/unit/prime-meridian choices outside
+the coordinate loop, skip identity scale operations, and precompute Helmert coefficients.
+Preserve arithmetic order, finite/domain checks, axes, Z/M behavior, custom-plugin fallbacks
+and partial batch commits. Existing numerical, ownership and package-size checks apply.
+
+A paired source comparison runner validates and measures baseline/current runtimes on the
+same seeded workload without changing checkouts. CI records elapsed results against the
+PR base; a separately labeled thread-CPU diagnostic is available locally. Constructor
+improvement is clear in the local diagnostic, while transform gains vary by case; see
+[methodology and observations](./benchmarks.md#compare-a-runtime-change-with-its-base).
+
+Further kernel-specific optimization, SIMD/Wasm experiments and broader geodetic operation
+support require separate measurements and accuracy qualification. These tranches do not
+establish unrestricted PROJ parity or a state-of-the-art performance claim.
 
 ## Axis compatibility and lazy entry points: implemented follow-up
 
