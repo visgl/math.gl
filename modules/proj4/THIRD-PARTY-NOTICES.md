@@ -14,7 +14,7 @@ The geocentric/Helmert equations in `datum.ts` and rotation equations in
 in those files.
 
 The NTv2 decoder, GeoTIFF node orientation and interpolation/inverse equations in
-`src/experimental/grids/` are directly adapted from proj4js 2.22.0
+`src/experimental/grids/grid.ts`, `grids/ntv2.ts` and `grids/geotiff.ts` are directly adapted from proj4js 2.22.0
 `lib/nadgrid.js` and `lib/datum_transform.js`. Their headers retain upstream
 MIT attribution. The per-instance grid registration contract is original math.gl
 code informed by upstream grid-list behavior. Synthetic grid fixtures are authored
@@ -54,3 +54,12 @@ Structured CRS fixtures reproduce selected definitions from the EPSG dataset v11
 (2024-11-05), distributed in PROJ's database; see the fixture README for source and
 terms. Licensed real grids are test-only assets with separate redistribution notices
 under `test/fixtures/real-grids`; none are included in the npm package.
+
+The explicit height stage (`src/experimental/vertical-datum.ts`), regular-grid
+interpolator/geoid adapter (`grids/vertical.ts`) and GTX reader (`grids/gtx.ts`) are
+original math.gl implementations. Their public registration follows the existing
+proj4-style engine API; geoid-height signs and GTX layout/nodata conventions follow
+PROJ/GDAL documentation. No proj4js or PROJ implementation was copied into these files.
+Independent expectations use PROJ 9.5.1; the tiny GTX model is authored MIT test data.
+The structural geoid adapter does not copy or import GeographicLib or `@math.gl/geoid`
+code. Applications providing a geoid model retain that model's own license and data terms.

@@ -165,10 +165,14 @@ try {
         }
       );
       const independent = await page.evaluate(async () => {
-        const {qualify, qualifyAccuracy} = await import('/accuracy.js');
+        const {qualify, qualifyAccuracy, qualifyVertical} = await import('/accuracy.js');
         const inputs = await (await fetch('/native-proj-cases.json')).json();
         const reference = await (await fetch('/native-proj-reference.json')).json();
-        return {...qualify(inputs, reference), accuracy: qualifyAccuracy()};
+        return {
+          ...qualify(inputs, reference),
+          accuracy: qualifyAccuracy(),
+          vertical: qualifyVertical()
+        };
       });
       results.push({browser: name, version: browser.version(), cold, independent, ...warm});
       console.log(

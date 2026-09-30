@@ -33,14 +33,14 @@ using its canonical PROJ name, for example `merc`, `utm`, `etmerc`, `geocent` or
 need no plugin or `longlat` subpath; the internal `gauss` helper is not public.
 
 Readers are available from `parsers/wkt`, `parsers/projjson`,
-`grids/ntv2` and `grids/geotiff`, with the package name prefix.
+`grids/ntv2`, `grids/geotiff`, `grids/gtx` and `grids/vertical`, with the package name prefix.
 All subpaths support ESM, CommonJS and TypeScript. ESM code splitting is required for
 browser lazy downloads; CommonJS subpaths select APIs but do not promise shared bundles.
 See the [lazy-loading guide](../typescript-engine.md#load-less-used-projections-on-demand).
 
 ## Constructor
 
-`new TypeScriptProjection({from, to, projections, aliases, parsers, datumGrids, enforceAxis, mode})`
+`new TypeScriptProjection({from, to, projections, aliases, parsers, datumGrids, verticalGrids, enforceAxis, mode})`
 
 All options are optional. Omitted `from` and `to` default to WGS84.
 Both accept `ReadonlyCRSDefinition`, `CRSReference`, or `SpatialReference` from
@@ -66,7 +66,7 @@ coordinates and takes precedence independently of this option.
 component of a CompoundCRS or discard separately declared vertical metadata. The
 instance's readonly `lossy` flag reports this extraction. Extracted horizontal transforms
 use zero height internally and preserve supplied vertical ordinates without interpreting
-or transforming them; combining this extraction with geocentric coordinates is rejected.
+or transforming them; combining this extraction with geocentric coordinates or vertical-grid transforms is rejected.
 VerticalCRS alone, dynamic
 datums, coordinate epochs, and vertical grid transformations are rejected.
 
@@ -128,7 +128,7 @@ Both are bound methods accepting readonly arrays and returning new arrays.
 
 Geographic x/y use degrees for PROJ definitions, or the angular units declared by
 structured CRSs. Projected x/y use the CRS's linear units. A third ordinate is
-ellipsoidal height (meters unless vertical units are specified); datum operations
+height (ellipsoidal by default, gravity-related with `+geoidgrids`; meters unless vertical units are specified); datum operations
 transform it. Fourth and later ordinates are copied unchanged.
 
 Two-dimensional inputs use height zero internally and return two ordinates, except
@@ -465,3 +465,18 @@ Readers, aliases and grids remain explicit options. Coordinate methods return
 promises; `preload()` and the sync variants follow the descriptor contract above.
 `LazyProjection.create(options)` optionally resolves the catalogue into a prepared
 synchronous `TypeScriptProjection` instance. See the [loading guide](../typescript-engine.md#load-less-used-projections-on-demand).
+
+## Vertical height grids
+
+All TypeScript engine variants accept `verticalGrids?: VerticalGridCollection`.
+A `VerticalGrid` implements `getOffset(longitudeRadians, latitudeRadians): number | undefined`:
+return geoid undulation in metres, or `undefined` outside coverage. Longitudes are Greenwich
+referenced in the associated CRS's horizontal datum. Register implementations per instance
+and reference their names with `+geoidgrids`; scalar and flat transforms then require Z.
+
+`parseGTXGrid` is exported from `@math.gl/proj4/grids/gtx`.
+`createVerticalGrid`, `createGeoidGrid` and `VerticalGridOptions` are exported from
+`@math.gl/proj4/grids/vertical`. The public root and compatibility experimental/native
+entry points also export these helpers; `/core` exports only the contract and engine.
+See [height conversion](../typescript-engine.md#convert-geoid-heights) for loading,
+units, axes, fallback, coverage, datum ordering and the limits of this explicit subset.

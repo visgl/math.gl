@@ -1365,7 +1365,7 @@
     {
       "id": "grid-reference-corpus",
       "tranche": 7,
-      "reason": "Maintained real BETA2007 NTv2 and German/Canadian GeoTIFF fixtures have 87 independent PROJ points. Strict Canadian inverse-edge rejection is reviewed. Other band conventions, time-dependent/vertical grids and automatic structured operation selection remain outside the native profile."
+      "reason": "Maintained real BETA2007 NTv2 and German/Canadian GeoTIFF fixtures have 87 independent PROJ points. Strict Canadian inverse-edge rejection is reviewed. Tranche 12A adds explicit vertical GTX/prepared-grid stages with 28 independent PROJ XYZM points. Other band conventions, vertical GeoTIFF, time-dependent grids and automatic structured operation selection remain outside the supported profile."
     }
   ],
   "exceptions": [

@@ -47,9 +47,12 @@ import {
 } from '../experimental/index';
 import {CORE_PARAMETERS} from '../experimental/crs/normalize';
 import type {ProjectionPlugin} from '../experimental/types';
-import type {DatumGrid} from '../experimental/grids/types';
+import type {DatumGrid, VerticalGridCollection} from '../experimental/grids/types';
 import type {Proj4CRSDefinition} from './proj4-crs';
 import type {Proj4ProjectionOptions, Proj4DatumGridOptions} from './proj4-projection';
+
+/** Compatibility options with explicit, per-instance vertical grids. */
+export type ProjectionOptions = Proj4ProjectionOptions & {verticalGrids?: VerticalGridCollection};
 
 const aliases: Record<string, Proj4CRSDefinition> = Object.create(null);
 const grids: Record<string, DatumGrid> = Object.create(null);
@@ -139,11 +142,17 @@ export class Projection extends TypeScriptProjection {
     grids[name] = parseNTv2Grid(grid, options);
   }
 
-  constructor({from = 'WGS84', to = 'WGS84', enforceAxis = false}: Proj4ProjectionOptions) {
+  constructor({
+    from = 'WGS84',
+    to = 'WGS84',
+    enforceAxis = false,
+    verticalGrids
+  }: ProjectionOptions) {
     super({
       from,
       to,
       enforceAxis,
+      verticalGrids,
       projections: defaultProjections(),
       parsers: [wktCRSParser, projJSONCRSParser],
       aliases,

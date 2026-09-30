@@ -304,11 +304,26 @@ document conditioning limits and remaining series approximations. Broader parame
 coverage and singularity analysis remain ongoing numerical work, not unrestricted
 PROJ parity.
 
+## Tranche 12A: explicit vertical grids — implemented
+
+Per-instance `verticalGrids` and `+geoidgrids` convert height before/after horizontal
+datum transformations. Optional GTX and regular-grid readers snapshot their data;
+a structural adapter accepts a prepared `@math.gl/geoid` model. Scalar and in-place
+Float32/Float64 XYZM paths preserve M and enforce coverage, height and nodata checks.
+Ten authored configurations (28 XYZM points) are checked against pinned PROJ 9.5.1
+pipelines, including source/destination grids, Helmert ordering, feet, axes and prime
+meridians. Browser qualification exercises the same independent references.
+
+This does not complete tranche 12: compound/vertical CRS execution, vertical GeoTIFF,
+general pipeline composition, epochs and automatic operation selection remain open.
+See the [height conversion guide](./typescript-engine.md#convert-geoid-heights).
+
 ## Remaining performance and geodetic roadmap
 
 | Tranche | Work | Acceptance gate |
 | --- | --- | --- |
-| 12 — Modern geodetic transformations | Vertical grids, explicit pipelines, epochs, dynamic datums and operation selection | Independent fixtures and explicit handling of unavailable operations; M remains a measure |
+| 12B — Explicit operation pipelines | Typed operation composition and vertical GeoTIFF; keep missing operations explicit | Independent forward/inverse fixtures and package boundaries |
+| 12C — Time-dependent operations | Epochs, dynamic datums and operation selection | Explicit epoch API separate from M, independent time-dependent references |
 | 13 — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
 
 Further optimization and operation support require separate measurements and accuracy

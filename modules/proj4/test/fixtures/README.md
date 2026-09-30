@@ -144,3 +144,22 @@ The identical corpus runs in Node and all three CI browser engines. These are
 sampled errors within explicit rectangles, not proofs of global accuracy. See the
 independent-validation documentation for units, conditioning and intentional
 CEA/EQDC differences from proj4js.
+
+## Vertical height reference
+
+`vertical-grid-cases.json` is authored math.gl test data (MIT), not a redistributed geoid
+model. `generate-vertical-reference.py` encodes its regular grid as a big-endian GTX
+file, feeds that exact file to explicit PROJ pipelines, and records its bytes and SHA-256
+in `vertical-grid-reference.json`. Source and generator hashes prevent stale expectations.
+Regenerate with pyproj 3.7.2 / PROJ 9.5.1 and networking disabled:
+
+```sh
+python modules/proj4/scripts/generate-vertical-reference.py
+node modules/proj4/scripts/check-vertical-reference.mjs
+```
+
+The 10 configurations / 28 XYZM points exercise H→h, h→H, both grids around a Helmert
+shift, vertical feet, projection, axis order and Greenwich sampling. Scalar forward/inverse
+and Float64 results are checked independently at 1e-5 (metres for projected/height
+ordinates, degrees for geographic ordinates); Float32 tests additionally allow rounding.
+These small synthetic models validate pipeline behavior, not real-world geoid accuracy.

@@ -1,5 +1,5 @@
 {
-  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes. Optional-reader rows added in the structured-method/docs follow-up; existing limits retained. Lazy scenarios sum emitted chunk sizes (gzip per file), with 10% deferred headroom rounded to 100 bytes; each initial static graph retains the existing Mercator limit. TypeScript default wrapper baseline added September 30, 2026 with the same headroom; existing limits retained. Automatic LazyProjection catalogue adds a separate initial/deferred budget while existing bundle limits remain unchanged. Tranche 9 compiled pipeline constants measure 17,720 gzip bytes in the rotated initial graph on Node 24.14.0; its gzip allowance increases by 100 bytes to 17,800. All other limits stay unchanged. Tranche 10 shares the optional fused batch adapter between eligible Mercator/UTM/conic plugins. Reviewed lazy initial graphs on Node 24.14.0: UTM 48,390/18,137, WKT 48,258/17,503, rotated 48,316/18,073 minified/gzip bytes; per-scenario limits rounded up to 100 bytes. Static bundle, catalogue and deferred limits remain unchanged.",
+  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes. Optional-reader rows added in the structured-method/docs follow-up; existing limits retained. Lazy scenarios sum emitted chunk sizes (gzip per file), with 10% deferred headroom rounded to 100 bytes; each initial static graph retains the existing Mercator limit. TypeScript default wrapper baseline added September 30, 2026 with the same headroom; existing limits retained. Automatic LazyProjection catalogue adds a separate initial/deferred budget while existing bundle limits remain unchanged. Tranche 9 compiled pipeline constants measure 17,720 gzip bytes in the rotated initial graph on Node 24.14.0; its gzip allowance increases by 100 bytes to 17,800. All other limits stay unchanged. Tranche 10 shares the optional fused batch adapter between eligible Mercator/UTM/conic plugins. Reviewed lazy initial graphs on Node 24.14.0: UTM 48,390/18,137, WKT 48,258/17,503, rotated 48,316/18,073 minified/gzip bytes; per-scenario limits rounded up to 100 bytes. Static bundle, catalogue and deferred limits remain unchanged. Tranche 12A adds the explicit vertical-height stage (+1154 minified / +317 gzip bytes for core on Node 24.14.0). Increased only exceeded limits, rounded up to 100 bytes with 100 bytes rounding headroom. Optional GTX baseline measured separately; its initial allowance is 10%. Deferred limits are unchanged.",
   "baseline": {
     "core": {
       "minified": 42306,
@@ -40,48 +40,56 @@
     "typescriptWrapper": {
       "minified": 144805,
       "gzip": 49484
+    },
+    "mercatorWithGTX": {
+      "minified": 50588,
+      "gzip": 18532
     }
   },
   "limits": {
     "core": {
-      "minified": 46600,
+      "minified": 46800,
       "gzip": 17200
     },
     "mercator": {
-      "minified": 48100,
-      "gzip": 17700
+      "minified": 49200,
+      "gzip": 18000
     },
     "utm": {
-      "minified": 55600,
+      "minified": 56000,
       "gzip": 20800
     },
     "allNativeExports": {
-      "minified": 152000,
-      "gzip": 52200
+      "minified": 152200,
+      "gzip": 52400
     },
     "proj4Wrapper": {
       "minified": 145200,
       "gzip": 47800
     },
     "mercatorWithWKT": {
-      "minified": 72700,
+      "minified": 73100,
       "gzip": 25800
     },
     "mercatorWithPROJJSON": {
-      "minified": 59100,
-      "gzip": 21500
+      "minified": 60300,
+      "gzip": 21900
     },
     "mercatorWithNTv2": {
-      "minified": 51500,
-      "gzip": 19100
+      "minified": 52300,
+      "gzip": 19300
     },
     "mercatorWithGeoTIFFAdapter": {
-      "minified": 51500,
+      "minified": 52300,
       "gzip": 19100
     },
     "typescriptWrapper": {
       "minified": 159300,
       "gzip": 54500
+    },
+    "mercatorWithGTX": {
+      "minified": 55600,
+      "gzip": 20400
     }
   },
   "lazyBaseline": {
@@ -150,16 +158,16 @@
       "gzip": 22400
     },
     "rotated": {
-      "minified": 48400,
-      "gzip": 18100
+      "minified": 49600,
+      "gzip": 18500
     },
     "utm": {
-      "minified": 48400,
-      "gzip": 18200
+      "minified": 49700,
+      "gzip": 18600
     },
     "wkt": {
-      "minified": 48300,
-      "gzip": 17700
+      "minified": 49600,
+      "gzip": 18000
     }
   }
 }

@@ -44,3 +44,7 @@ export {parseNTv2Grid} from './grids/ntv2';
 export type {NTv2GridOptions} from './grids/ntv2';
 export {loadGeoTIFFGrid} from './grids/geotiff';
 export type {DatumGridGeoTIFF, DatumGridGeoTIFFImage} from './grids/geotiff';
+
+export {parseGTXGrid} from './grids/gtx';
+export {createVerticalGrid, createGeoidGrid} from './grids/vertical';
+export type {VerticalGridOptions} from './grids/vertical';

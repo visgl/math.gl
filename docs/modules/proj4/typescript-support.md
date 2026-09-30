@@ -135,6 +135,11 @@ Compare representative production coordinates in both directions before switchin
 Pay particular attention to computed heights, strict errors, Cassini/Robinson/CEA/EQDC
 corrections and inverse grid boundaries. Use the classic wrapper where its behavior is required.
 
+Explicit `+geoidgrids` height conversion supports prepared grids, GTX snapshots and a
+structural `@math.gl/geoid` adapter. See [vertical heights](./typescript-engine.md#convert-geoid-heights)
+for the supported domain and grid loading contract. This does not add compound/vertical
+CRS execution or implicit model selection.
+
 ## Default backend and future work
 
 The package root now selects the TypeScript backend. This is a breaking backend
@@ -143,7 +148,7 @@ subpath retains the former implementation; no release is published by this chang
 and the installed proj4 dependency remains for classic users.
 
 Broader derived/compound CRS execution, arbitrary axis rotations, uncommon GeoTIFF
-band conventions, dynamic datums, vertical grids and automatic operation selection
+band conventions, dynamic datums, vertical GeoTIFF and automatic operation selection
 are outside this profile. More datasets and denser sampling can expand the profile
 without representing unfinished work in the four qualification tranches. Exact
 allocation counts and guarantees about every browser/device are also not claimed;

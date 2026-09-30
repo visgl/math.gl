@@ -29,7 +29,12 @@ export type {
   CRSCompatibilityReason
 } from './crs/types';
 export type {TypeScriptCRSInput} from './crs/spatial-reference';
-export type {DatumGrid, DatumGridCollection} from './grids/types';
+export type {
+  DatumGrid,
+  DatumGridCollection,
+  VerticalGrid,
+  VerticalGridCollection
+} from './grids/types';
 
 export {
   createProjectionDescriptor,

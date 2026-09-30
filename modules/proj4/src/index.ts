@@ -4,8 +4,8 @@
 
 export * from './experimental/index';
 export {Projection, Proj4Projection} from './lib/typescript-proj4-projection';
+export type {ProjectionOptions} from './lib/typescript-proj4-projection';
 export type {
-  Proj4ProjectionOptions as ProjectionOptions,
   Proj4DatumGridOptions as DatumGridOptions,
   Proj4ProjectionOptions,
   Proj4DatumGridOptions

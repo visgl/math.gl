@@ -16,7 +16,8 @@ import {TypeScriptCRSError, unsupportedStage} from './crs/types';
 import type {CRSCompatibilityReason, CRSNormalizationOptions, NormalizedCRS} from './crs/types';
 import {createDatumTransform} from './datum';
 import {wrapLongitude} from './parameters';
-import type {DatumGridCollection} from './grids/types';
+import {compileVerticalGrid} from './vertical-datum';
+import type {DatumGridCollection, VerticalGridCollection} from './grids/types';
 
 type ProjectionRegistration = ProjectionPlugin | ProjectionDescriptor;
 type ProjectionResult<P, Result> =
@@ -31,6 +32,8 @@ export type TypeScriptProjectionOptions<P extends ProjectionRegistration = Proje
     enforceAxis?: boolean;
     /** Prepared horizontal grids keyed by the names used in +nadgrids. No global registry. */
     datumGrids?: DatumGridCollection;
+    /** Prepared geoid undulations keyed by +geoidgrids names. No implicit fetching. */
+    verticalGrids?: VerticalGridCollection;
   };
 export type TypeScriptProjectionCreateOptions = TypeScriptProjectionOptions<ProjectionRegistration>;
 export type ProjectionArray = Float32Array | Float64Array;
@@ -40,8 +43,13 @@ type CoordinateTransform = {
   requiresInputZ: boolean;
   geocentricOutput: boolean;
 };
-type CompiledCRS = NormalizedCRS & {implementation?: ProjectionImplementation};
-/** Configurable TypeScript CRS engine; see the documented supported subset and accuracy limits. Third ordinates are ellipsoidal height or geocentric Z. */
+type CompiledCRS = NormalizedCRS & {
+  implementation?: ProjectionImplementation;
+  verticalGrid?: (longitude: number, latitude: number) => number;
+};
+/** Configurable TypeScript CRS engine; see the documented supported subset and accuracy limits.
+ * Third ordinates are height (gravity-related with +geoidgrids) or geocentric Z.
+ */
 export class TypeScriptProjection<P extends ProjectionRegistration = ProjectionPlugin> {
   /** Resolve required descriptors once, then return an ordinary synchronous instance. */
   static async create(
@@ -79,6 +87,8 @@ export class TypeScriptProjection<P extends ProjectionRegistration = ProjectionP
         unsupportedStage(
           'Horizontal extraction cannot supply ellipsoidal height for geocentric coordinates'
         );
+      if (this.lossy && (from.verticalGrid || to.verticalGrid))
+        unsupportedStage('Horizontal extraction cannot be combined with vertical grids');
       this.forwardTransform = compileTransform(from, to, Boolean(options.enforceAxis));
       this.inverseTransform = compileTransform(to, from, Boolean(options.enforceAxis));
     }
@@ -288,7 +298,10 @@ function compileCRS(
       unsupportedStage('Required datum grid is not registered: ' + reference.name);
   }
   const datum = grids ? Object.freeze({...crs.datum, grids: Object.freeze(grids)}) : crs.datum;
-  return {...crs, datum, implementation};
+  const verticalGrid = compileVerticalGrid(crs.parameters['geoidgrids'], options.verticalGrids);
+  if (verticalGrid && (crs.kind === 'geocentric' || crs.kind === 'identity' || crs.lossy))
+    unsupportedStage('Vertical grids require a non-lossy geographic or projected CRS');
+  return {...crs, datum, implementation, verticalGrid};
 }
 
 function finite(point: ProjectionPoint): boolean {
@@ -344,6 +357,8 @@ function compileTransform(
   let flat: ProjectionFlatOperation | undefined;
   if (
     !datum &&
+    !from.verticalGrid &&
+    !to.verticalGrid &&
     !horizontalOnly &&
     !inputAxis &&
     !outputAxis &&
@@ -362,6 +377,7 @@ function compileTransform(
   return {
     flat,
     requiresInputZ:
+      Boolean(from.verticalGrid || to.verticalGrid) ||
       from.kind === 'geocentric' ||
       /[ud]/.test(fromAxis.slice(0, 2)) ||
       /[ud]/.test(toAxis.slice(0, 2)),
@@ -382,7 +398,11 @@ function compileTransform(
       if (Math.abs(point.y) > Math.PI / 2 || !finite(point))
         throw new Error('Coordinate is outside the geographic domain');
       point.x += fromPrime;
+      // Source H -> h before datum conversion; destination h -> H after it.
+      // Sample Greenwich geographic coordinates in each grid's horizontal datum.
+      if (from.verticalGrid) point.z += from.verticalGrid(point.x, point.y);
       datum?.(point);
+      if (to.verticalGrid) point.z -= to.verticalGrid(point.x, point.y);
       point.x -= toPrime;
       if (longitudeWrap !== undefined)
         point.x = longitudeWrap + wrapLongitude(point.x - longitudeWrap);

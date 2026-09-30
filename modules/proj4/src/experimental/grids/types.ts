@@ -23,3 +23,12 @@ export type Subgrid = {
   readonly size: readonly [number, number];
   readonly shifts: readonly (readonly [number, number])[];
 };
+
+/** Geoid undulation N in metres: ellipsoidal height h = gravity-related height H + N.
+ * Inputs are east-positive Greenwich longitude and latitude in radians, in the
+ * horizontal datum of the CRS carrying +geoidgrids. Undefined means no coverage.
+ */
+export type VerticalGrid = {
+  getOffset(longitude: number, latitude: number): number | undefined;
+};
+export type VerticalGridCollection = Readonly<Record<string, VerticalGrid>>;
