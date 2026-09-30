@@ -78,11 +78,19 @@ jobs:
         run: |
           node modules/proj4/scripts/check-parity-inventory.mjs
           node modules/proj4/scripts/check-native-reference.mjs
+          node modules/proj4/scripts/measure-accuracy.mjs --output /tmp/proj4-accuracy.json
           node modules/proj4/scripts/check-experimental-package.mjs
           node modules/proj4/scripts/check-packed-package.mjs
           node modules/proj4/scripts/check-bundle-budget.mjs
           node modules/proj4/scripts/check-lazy-package.mjs
           node modules/proj4/scripts/benchmark.mjs --points 100 --samples 3 --min-sample-ms 0
+
+      - name: Upload projection accuracy measurements
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: proj4-accuracy
+          path: /tmp/proj4-accuracy.json
+          if-no-files-found: error
 
       - name: Check CRS type boundaries
         run: yarn check:crs-types

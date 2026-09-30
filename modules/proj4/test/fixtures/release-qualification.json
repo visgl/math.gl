@@ -21,7 +21,9 @@
     "datumChains": 12,
     "datumPoints": 144,
     "gridDatasets": 3,
-    "gridPoints": 87
+    "gridPoints": 87,
+    "accuracyDomains": 15,
+    "accuracyPoints": 4005
   },
   "reviewedExceptions": [
     "equatorial-stereographic-y0",
@@ -52,7 +54,9 @@
     "cassini-series-refinement",
     "robinson-proj-table",
     "datum-none-entire-chain",
-    "esri-projection-variants"
+    "esri-projection-variants",
+    "cea-near-pole-inverse",
+    "eqdc-meridional-series"
   ],
   "scope": "docs/modules/proj4/typescript-support.md"
 }

@@ -1,6 +1,6 @@
 # TypeScript proj4 parity roadmap
 
-Status: tranches **0–10, including qualification tranches 7A–7D, are implemented** for the
+Status: tranches **0–11, including qualification tranches 7A–7D, are implemented** for the
 [documented TypeScript support profile](./typescript-support.md). The package root uses the TypeScript engine; `Projection` supplies the compatible
 wrapper API (`Proj4Projection` is a deprecated alias) and `TypeScriptProjection` allows explicit plugins. The old wrapper is
 available from `@math.gl/proj4/classic`; prior engine subpaths remain aliases. No package is published by this work.
@@ -290,11 +290,24 @@ scalar API or ownership contract. The demonstrated opportunity is avoiding repea
 dispatch and Z/M writes in existing typed-array calls. Results and limits are documented in
 the [benchmark guide](./benchmarks.md).
 
+## Tranche 11: numerical excellence — implemented
+
+An additional 4,005 independent PROJ samples cover 15 explicitly bounded configurations
+with seeded interior and boundary-biased probes. Published scalar/Float64 error reports
+include forward, independent inverse and roundtrip maxima and their worst coordinates.
+Equidistant conic now uses a higher-order meridional series; cylindrical equal-area
+preserves near-pole latitudes instead of snapping them to the pole. Node and all three
+browser engines enforce the budgets alongside the existing 37-algorithm corpus.
+
+The [accuracy domains and error report](./independent-validation.md#seeded-accuracy-domains)
+document conditioning limits and remaining series approximations. Broader parameter
+coverage and singularity analysis remain ongoing numerical work, not unrestricted
+PROJ parity.
+
 ## Remaining performance and geodetic roadmap
 
 | Tranche | Work | Acceptance gate |
 | --- | --- | --- |
-| 11 — Numerical excellence | Broader independent PROJ comparisons, randomized boundary probes and improved weak regional inverses | Published accuracy envelopes per algorithm and domain |
 | 12 — Modern geodetic transformations | Vertical grids, explicit pipelines, epochs, dynamic datums and operation selection | Independent fixtures and explicit handling of unavailable operations; M remains a measure |
 | 13 — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
 

@@ -132,7 +132,7 @@ Use `checkTypeScriptCRSCompatibility` on each definition with the same plugin/pa
 options as construction. A supported result establishes construction support; it does
 not prove grid coverage, coordinate-domain validity or application-specific accuracy.
 Compare representative production coordinates in both directions before switching.
-Pay particular attention to computed heights, strict errors, Cassini/Robinson
+Pay particular attention to computed heights, strict errors, Cassini/Robinson/CEA/EQDC
 corrections and inverse grid boundaries. Use the classic wrapper where its behavior is required.
 
 ## Default backend and future work

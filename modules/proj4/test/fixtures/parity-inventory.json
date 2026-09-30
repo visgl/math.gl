@@ -1513,6 +1513,16 @@
       "id": "esri-projection-variants",
       "description": "ESRI North Pole stereographic without an explicit scale uses the true-scale polar kernel. The legacy explicit-scale oblique spelling remains supported. ESRI Krovak accepts only its complete standard (-1,1,90-degree) axis adjustment.",
       "test": "test/lib/qualification-crs.spec.ts"
+    },
+    {
+      "id": "cea-near-pole-inverse",
+      "description": "CEA inverse uses a floating-point pole cutoff instead of the upstream q=1e-6 cutoff, preserving near-pole latitudes instead of snapping them to 90 degrees. Out-of-domain northings are rejected.",
+      "test": "test/lib/accuracy.spec.ts"
+    },
+    {
+      "id": "eqdc-meridional-series",
+      "description": "EQDC uses the higher-order meridional series and inverse shared with Cassini. Independent PROJ probes show micrometre agreement; proj4js comparisons explicitly allow the sub-millimetre correction.",
+      "test": "test/lib/accuracy.spec.ts"
     }
   ]
 }

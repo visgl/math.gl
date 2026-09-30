@@ -245,7 +245,12 @@ export default function Proj4Benchmarks() {
             </thead>
             <tbody>
               {rows.map(row => {
-                const fastest = Math.min(...row.measurements.map(result => result.milliseconds));
+                const comparable = row.measurements.every(
+                  result => Number.isFinite(result.milliseconds) && result.milliseconds > 0
+                );
+                const fastest = comparable
+                  ? Math.min(...row.measurements.map(result => result.milliseconds))
+                  : NaN;
                 const referenceTime = row.measurements[2].milliseconds;
                 return (
                   <tr key={row.name}>
@@ -261,38 +266,27 @@ export default function Proj4Benchmarks() {
                     {row.measurements.map((result, index) => (
                       <td
                         key={IMPLEMENTATIONS[index]}
-                        className={
-                          !row.timingLimited && !row.unstable && result.milliseconds === fastest
-                            ? styles.fastest
-                            : undefined
-                        }
+                        className={result.milliseconds === fastest ? styles.fastest : undefined}
                       >
                         {result.milliseconds > 0
                           ? (options.points / result.milliseconds / 1000).toFixed(2) + 'M'
                           : 'Below timer resolution'}
-                        {index < 2 &&
-                          !row.timingLimited &&
-                          !row.unstable &&
-                          result.milliseconds > 0 &&
-                          referenceTime > 0 && (
-                            <span className={styles.ratio} title="Throughput relative to proj4js">
-                              {(referenceTime / result.milliseconds).toFixed(1)}×
-                            </span>
-                          )}
+                        {index < 2 && result.milliseconds > 0 && referenceTime > 0 && (
+                          <span className={styles.ratio} title="Throughput relative to proj4js">
+                            {(referenceTime / result.milliseconds).toFixed(1)}×
+                          </span>
+                        )}
                         <small
                           title={`p10–p90: ${result.p10.toFixed(3)}–${result.p90.toFixed(3)} ms per buffer; ${row.iterations} buffers per sample`}
                         >
-                          {!row.timingLimited &&
-                            !row.unstable &&
-                            result.milliseconds === fastest &&
-                            result.milliseconds > 0 && (
-                              <span
-                                className={styles.fastestDot}
-                                role="img"
-                                aria-label="Fastest"
-                                title="Fastest"
-                              />
-                            )}
+                          {result.milliseconds === fastest && result.milliseconds > 0 && (
+                            <span
+                              className={styles.fastestDot}
+                              role="img"
+                              aria-label="Fastest"
+                              title="Fastest"
+                            />
+                          )}
                           {result.milliseconds.toFixed(2)} ms
                           {result.milliseconds > 0 && (
                             <span className={styles.ratio}>
@@ -314,11 +308,11 @@ export default function Proj4Benchmarks() {
         {SAMPLE_COUNT} warmed samples per implementation; median shown. Green dots mark the fastest
         median (including ties). Spread is the p10–p90 range relative to the median, not a
         confidence interval. Samples target at least {MIN_SAMPLE_MS} ms using independent buffer
-        copies; timings are normalized to one buffer. Timing-limited or highly variable rows have no
-        winner or ratio; rerun to compare them. Multipliers compare throughput with proj4js; 3×
-        means three times as many coordinates per second. Imports, construction and buffer resets
-        are excluded. Keep this tab visible while running. Results depend on your browser and
-        hardware.
+        copies; timings are normalized to one buffer. Ratios and highlights show the measured
+        medians even on timing-limited or variable rows; rerun those rows to check consistency.
+        Multipliers compare throughput with proj4js; 3× means three times as many coordinates per
+        second. Imports, construction and buffer resets are excluded. Keep this tab visible while
+        running. Results depend on your browser and hardware.
       </p>
       {version && (
         <p className={styles.note}>
