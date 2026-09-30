@@ -1,7 +1,7 @@
 {
-  "apiStatus": "supported-opt-in",
-  "entryPoint": "@math.gl/proj4/native",
-  "defaultBackend": "proj4",
+  "apiStatus": "supported-default",
+  "entryPoint": "@math.gl/proj4",
+  "defaultBackend": "typescript",
   "upstreamCorpus": {
     "total": 242,
     "numericMatches": 232,
@@ -54,5 +54,5 @@
     "datum-none-entire-chain",
     "esri-projection-variants"
   ],
-  "scope": "docs/modules/proj4/native-support.md"
+  "scope": "docs/modules/proj4/typescript-support.md"
 }

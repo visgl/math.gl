@@ -1,14 +1,18 @@
-# Native API support and migration
+# TypeScript API support and migration
 
-`@math.gl/proj4/native` is the supported, opt-in TypeScript projection API in this
-source tree. It is available in package releases containing these exports. The
-`@math.gl/proj4` root continues to expose the proj4js-backed `Proj4Projection`.
-The `experimental` paths remain compatibility aliases to exactly the same modules,
-classes and plugins; existing callers receive the numerical corrections too.
+`@math.gl/proj4` uses the TypeScript engine by default. `Projection` supplies
+all projection plugins and WKT/PROJJSON readers behind the existing wrapper API.
+`TypeScriptProjection` exposes per-instance configuration for smaller bundles.
+The original proj4js-backed wrapper and its compatibility helpers are available
+from `@math.gl/proj4/classic`.
 
-This promotes the **documented API and supported transformation profile**. It does
-not claim full native-PROJ functionality, arbitrary EPSG operation selection, or
-uniform accuracy everywhere that an algorithm returns a finite value.
+The old `native` and `experimental` subpaths remain compatibility aliases for the
+configurable engine; use the root, `core`, `projections/*`, `parsers/*` and `grids/*`
+paths in new code. This API is available in releases containing these exports.
+
+API compatibility does not imply identical numerical results or accepted inputs.
+The documented corrections and strict-input exceptions below still apply. Neither
+wrapper silently falls back to the other engine.
 
 ## Supported profile
 
@@ -37,12 +41,21 @@ partial relative to unrestricted upstream behavior; that distinction is delibera
 
 ## API guarantees
 
-Construction is synchronous and resolves the supplied plugins, parsers, aliases and
-prepared grids. It performs no network requests and does not register global state.
+Eager construction is synchronous and resolves plugins, parsers, aliases and prepared grids.
+With projection descriptors, construction reads definitions but algorithms load on the
+first asynchronous coordinate call. `projectSync`/`unprojectSync` and their flat variants
+require preloading; they never start an import. See the [loading guide](./typescript-engine.md#load-less-used-projections-on-demand).
+The eager engine and default wrapper perform no network requests. Descriptor imports
+can fetch application chunks through the bundler runtime. The configurable `TypeScriptProjection` keeps plugin registration per instance and
+shares only the descriptor implementation cache. The convenience `Projection` preserves the classic static registration
+API: aliases and NTv2 grids affect subsequently constructed wrappers of that backend.
+Existing instances retain their compiled configuration. Registries are independent
+between TypeScript and classic wrappers.
 Unsupported definitions and missing stages fail explicitly. There is no automatic
 fallback to another engine. Reuse an instance for repeated transformations.
 
-`project` and `unproject` leave the input unchanged and return a new array.
+`project` and `unproject` leave the input unchanged and return a new array (or a
+promise for descriptor-backed instances).
 `projectFlat` and `unprojectFlat` modify the supplied typed-array view and return
 that same view. Dimension must be an integer of at least two and divide the view's
 length. Geocentric transformations require room for three ordinates. Data outside
@@ -67,12 +80,40 @@ No sub-metre/global-domain guarantee follows from API stability.
 
 ## Migration
 
-Choose a backend explicitly and register the algorithms required by **both** ends:
+The default wrapper retains the same constructor options (`from`, `to`, `enforceAxis`),
+bound `project`/`unproject` methods, `defineProjectionAliases` static method, and
+`registerDatumGrid` static method, including `includeErrorFields`. It also exposes
+`projectFlat`/`unprojectFlat` for typed arrays. No plugin setup is required:
 
 ```typescript
-import {TypeScriptProjection} from '@math.gl/proj4/native/core';
-import {mercator} from '@math.gl/proj4/native/projections/merc';
-import {universalTransverseMercator} from '@math.gl/proj4/native/projections/utm';
+import {Projection} from '@math.gl/proj4';
+const projection = new Projection({to: 'EPSG:3857'});
+const projected = projection.project([12, 55]);
+```
+
+`Proj4Projection` at the root is a deprecated alias of `Projection`, with identical
+constructor identity, methods and static registries. Existing imports continue to work.
+New code can use `ProjectionOptions` and `DatumGridOptions`; the existing option type
+names remain available.
+
+To retain the original backend, use the classic entry point:
+
+```typescript
+import {Proj4Projection as Projection} from '@math.gl/proj4/classic';
+```
+
+The proj4js-specific `checkProj4CRSCompatibility`, `toProj4CRSDefinition` and
+`Proj4CRSCompatibilityError` exports also move to `classic`. Use
+`checkTypeScriptCRSCompatibility` with explicit plugins/readers to check the
+configurable TypeScript engine. Legacy registry calls must use the same backend
+as the instances that consume them.
+
+For selective bundles, register algorithms required by **both** ends:
+
+```typescript
+import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {mercator} from '@math.gl/proj4/projections/merc';
+import {universalTransverseMercator} from '@math.gl/proj4/projections/utm';
 
 const projection = new TypeScriptProjection({
   from: 'EPSG:3857',
@@ -92,16 +133,14 @@ options as construction. A supported result establishes construction support; it
 not prove grid coverage, coordinate-domain validity or application-specific accuracy.
 Compare representative production coordinates in both directions before switching.
 Pay particular attention to computed heights, strict errors, Cassini/Robinson
-corrections and inverse grid boundaries. Keep the wrapper available where its
-behavior is required.
+corrections and inverse grid boundaries. Use the classic wrapper where its behavior is required.
 
-## Promotion decision and future work
+## Default backend and future work
 
-The combined qualification tranche introduces a supported native entry point while
-retaining the wrapper default and experimental aliases. It does not publish a
-release or remove the installed proj4 dependency. Changing the default backend,
-removing that dependency, or changing the public contract requires a separate
-compatibility decision and migration plan.
+The package root now selects the TypeScript backend. This is a breaking backend
+change for the next package release, recorded in the changelog. The `classic`
+subpath retains the former implementation; no release is published by this change
+and the installed proj4 dependency remains for classic users.
 
 Broader derived/compound CRS execution, arbitrary axis rotations, uncommon GeoTIFF
 band conventions, dynamic datums, vertical grids and automatic operation selection

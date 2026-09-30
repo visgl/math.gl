@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 // Independent PROJ fixtures, exercised in the same engines as browser benchmarks.
-import * as native from '@math.gl/proj4/native';
+import * as native from '@math.gl/proj4';
 const projections = Object.values(native).filter(
   value => value && typeof value === 'object' && 'create' in value
 );

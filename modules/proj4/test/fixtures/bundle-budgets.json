@@ -1,5 +1,5 @@
 {
-  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes. Optional-reader rows added in the structured-method/docs follow-up; existing limits retained. Lazy scenarios sum emitted chunk sizes (gzip per file), with 10% deferred headroom rounded to 100 bytes; each initial static graph retains the existing Mercator limit.",
+  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes. Optional-reader rows added in the structured-method/docs follow-up; existing limits retained. Lazy scenarios sum emitted chunk sizes (gzip per file), with 10% deferred headroom rounded to 100 bytes; each initial static graph retains the existing Mercator limit. TypeScript default wrapper baseline added September 30, 2026 with the same headroom; existing limits retained. Automatic LazyProjection catalogue adds a separate initial/deferred budget while existing bundle limits remain unchanged.",
   "baseline": {
     "core": {
       "minified": 42306,
@@ -36,6 +36,10 @@
     "mercatorWithGeoTIFFAdapter": {
       "minified": 46790,
       "gzip": 17313
+    },
+    "typescriptWrapper": {
+      "minified": 144805,
+      "gzip": 49484
     }
   },
   "limits": {
@@ -74,6 +78,10 @@
     "mercatorWithGeoTIFFAdapter": {
       "minified": 51500,
       "gzip": 19100
+    },
+    "typescriptWrapper": {
+      "minified": 159300,
+      "gzip": 54500
     }
   },
   "lazyBaseline": {
@@ -106,6 +114,16 @@
         "minified": 5429,
         "gzip": 2518
       }
+    },
+    "catalogue": {
+      "initial": {
+        "minified": 54249,
+        "gzip": 20276
+      },
+      "deferred": {
+        "minified": 79372,
+        "gzip": 37339
+      }
     }
   },
   "lazyLimits": {
@@ -120,6 +138,16 @@
     "rotated": {
       "minified": 6000,
       "gzip": 2800
+    },
+    "catalogue": {
+      "minified": 87400,
+      "gzip": 41100
+    }
+  },
+  "lazyInitialLimits": {
+    "catalogue": {
+      "minified": 59700,
+      "gzip": 22400
     }
   }
 }

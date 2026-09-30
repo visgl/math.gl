@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Proj4Projection} from '@math.gl/proj4';
+import {Proj4Projection} from '@math.gl/proj4/classic';
 import {TypeScriptProjection, mercator, equidistantCylindrical} from '@math.gl/proj4/experimental';
 import type {ProjectionPlugin} from '@math.gl/proj4/experimental';
 
@@ -13,6 +13,7 @@ const definitions = [
   '+proj=merc +datum=WGS84',
   '+proj=merc +ellps=WGS84 +lon_0=15 +lat_ts=30 +x_0=1200 +y_0=-3400 +units=us-ft',
   '+proj=merc +R=6371000 +lon_0=-20 +k_0=0.9 +to_meter=1000',
+  '+proj=merc +R=6371000 +lon_0=15 +lat_ts=30 +x_0=1200 +y_0=-3400',
   '+proj=merc +a=7000000 +b=6900000 +datum=none +k=1.2',
   '+proj=eqc +R=6371000 +lon_0=10 +lat_ts=30 +x_0=150 +y_0=-90',
   '+proj=eqc +ellps=WGS84 +lat_0=0 +units=km'
@@ -166,3 +167,33 @@ test('TypeScriptProjection supports the eqc latitude origin', () => {
   expectCoordinates(projection.project([10, 20]), [0, 0], 1e-10);
   expectCoordinates(projection.unproject(projection.project([45, -60])), [45, -60], 1e-10);
 });
+
+// Exercise the spherical specialization through scalar and mutable public APIs.
+for (const ArrayType of [Float32Array, Float64Array]) {
+  test(`spherical Mercator preserves flat ordinates and pole errors in ${ArrayType.name}`, () => {
+    const projection = new TypeScriptProjection({to: 'EPSG:3857', projections});
+    const reference = new Proj4Projection({to: 'EPSG:3857'});
+    const input = new ArrayType([179, 89.99, 123, 7, -179, -89.99, -23, 9, 0, 0, 0, 0]);
+    const expected = input.slice();
+    for (let offset = 0; offset < input.length; offset += 4) {
+      expected.set(reference.project(Array.from(input.slice(offset, offset + 4))), offset);
+    }
+    const projected = projection.projectFlat(input.slice(), 4);
+    for (let index = 0; index < input.length; index++) {
+      expect(Math.abs(projected[index] - expected[index])).toBeLessThanOrEqual(1e-5);
+    }
+    const roundTrip = projection.unprojectFlat(projected, 4);
+    for (let index = 0; index < input.length; index++) {
+      // Float32 metre storage can lose one float32 longitude ULP on the round trip.
+      expect(Math.abs(roundTrip[index] - input[index])).toBeLessThanOrEqual(
+        ArrayType === Float32Array ? 2e-5 : 1e-9
+      );
+    }
+    for (const latitude of [-90, 90]) {
+      const invalid = new ArrayType([12, latitude, 123, 7]);
+      expect(() => projection.projectFlat(invalid, 4)).toThrow('poles');
+      expect(Array.from(invalid)).toEqual([12, latitude, 123, 7]);
+      expect(() => projection.project([12, latitude])).toThrow('poles');
+    }
+  });
+}

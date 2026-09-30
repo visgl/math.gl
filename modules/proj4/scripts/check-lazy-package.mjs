@@ -17,20 +17,28 @@ const budgets = JSON.parse(
 );
 const measurements = {};
 const scenarios = {
+  catalogue: {
+    imports: "import {LazyProjection} from '@math.gl/proj4/projections/lazy';",
+    load: "return new LazyProjection({to: 'EPSG:32631'});",
+    deferred: '/experimental/kernels/etmerc.js',
+    expected: [500000, 0],
+    point: [3, 0]
+  },
   utm: {
-    load: "const {universalTransverseMercator} = await import('@math.gl/proj4/native/projections/utm'); return new TypeScriptProjection({to: 'EPSG:32631', projections: [universalTransverseMercator]});",
+    imports: "import {lazyUniversalTransverseMercator} from '@math.gl/proj4/projections/lazy/utm';",
+    load: "return new TypeScriptProjection({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});",
     deferred: '/experimental/kernels/etmerc.js',
     expected: [500000, 0],
     point: [3, 0]
   },
   wkt: {
-    load: `const {wktCRSParser} = await import('@math.gl/proj4/native/parsers/wkt'); return new TypeScriptProjection({to: 'GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]]', parsers: [wktCRSParser]});`,
+    load: `const {wktCRSParser} = await import('@math.gl/proj4/parsers/wkt'); return new TypeScriptProjection({to: 'GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]]', parsers: [wktCRSParser]});`,
     deferred: '/experimental/crs/wkt.js',
     expected: [3, 0],
     point: [3, 0]
   },
   rotated: {
-    load: "const [{obliqueTransformation}, {mollweide}] = await Promise.all([import('@math.gl/proj4/native/projections/ob_tran'), import('@math.gl/proj4/native/projections/moll')]); return new TypeScriptProjection({to: '+proj=ob_tran +o_lat_p=45 +o_lon_p=0', projections: [obliqueTransformation(mollweide)]});",
+    load: "const [{obliqueTransformation}, {mollweide}] = await Promise.all([import('@math.gl/proj4/projections/ob_tran'), import('@math.gl/proj4/projections/moll')]); return new TypeScriptProjection({to: '+proj=ob_tran +o_lat_p=45 +o_lon_p=0', projections: [obliqueTransformation(mollweide)]});",
     deferred: '/experimental/kernels/moll.js',
     point: [3, 30]
   }
@@ -39,8 +47,9 @@ try {
   for (const [name, scenario] of Object.entries(scenarios)) {
     const result = await build({
       stdin: {
-        contents: `import {TypeScriptProjection} from '@math.gl/proj4/native/core';
-import {mercator} from '@math.gl/proj4/native/projections/merc';
+        contents: `import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {mercator} from '@math.gl/proj4/projections/merc';
+${scenario.imports || ''}
 export const eager = new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});
 export async function load() {${scenario.load}}`,
         resolveDir: packageRoot,
@@ -127,9 +136,11 @@ export async function load() {${scenario.load}}`,
     };
     if (!process.argv.includes('--measure')) {
       for (const metric of ['minified', 'gzip']) {
+        const initialSize = measurements[name].initial[metric];
+        const initialLimit = (budgets.lazyInitialLimits?.[name] || budgets.limits.mercator)[metric];
         assert(
-          measurements[name].initial[metric] <= budgets.limits.mercator[metric],
-          `${name}: initial ${metric} exceeds eager Mercator budget`
+          initialSize <= initialLimit,
+          `${name}: initial ${metric} ${initialSize} exceeds budget ${initialLimit}`
         );
         assert(
           measurements[name].deferred[metric] <= budgets.lazyLimits[name][metric],
@@ -141,14 +152,17 @@ export async function load() {${scenario.load}}`,
     const application = await import(pathToFileURL(entry).href);
     assert.deepEqual(application.eager.project([0, 0]), [0, 0]);
     const projection = await application.load();
-    const xy = projection.project(scenario.point);
+    if (['utm', 'catalogue'].includes(name))
+      assert.throws(() => projection.projectSync(scenario.point), /preload/);
+    const xy = await projection.project(scenario.point);
     if (scenario.expected)
       xy.forEach((value, i) => assert(Math.abs(value - scenario.expected[i]) < 1e-7));
-    projection
-      .unproject(xy)
-      .forEach((value, i) => assert(Math.abs(value - scenario.point[i]) < 1e-7));
+    (await projection.unproject(xy)).forEach((value, i) =>
+      assert(Math.abs(value - scenario.point[i]) < 1e-7)
+    );
     const flat = new Float64Array(scenario.point);
-    projection.projectFlat(flat);
+    await projection.projectFlat(flat);
+    if (name === 'utm') assert.deepEqual(projection.projectSync(scenario.point), xy);
     assert.deepEqual([...flat], xy);
   }
   console.log(JSON.stringify(measurements, null, 2));

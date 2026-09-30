@@ -1,9 +1,46 @@
 # TypeScript projection benchmarks
 
-The native engine offers `projectFlat` and `unprojectFlat` for interleaved
+import BrowserOnly from '@docusaurus/BrowserOnly';
+
+The TypeScript engine offers `projectFlat` and `unprojectFlat` for interleaved
 Float32/Float64 buffers. Reuse the projection instance: normalization and plugin
 initialization are more expensive than the existing proj4 constructor in the initial
 measurements, while repeated transformations are faster.
+
+## Live benchmarks
+
+Compare the current TypeScript implementation with the classic proj4js backend on
+your own browser and hardware. Choose a buffer layout and direction, then run the
+inline benchmark. Nothing runs until you press **Run benchmarks**.
+
+<BrowserOnly fallback={<p>Live benchmarks are available in a browser with JavaScript enabled.</p>}>
+  {() => {
+    const Proj4Benchmarks = require('@site/src/components/proj4-benchmarks').default;
+    return <Proj4Benchmarks />;
+  }}
+</BrowserOnly>
+
+The TypeScript columns use the default `Projection`, through its in-place and
+scalar APIs, labeled **math.gl flat** and **math.gl scalar**. The **proj4js 2.22.0**
+column uses the pinned `proj4` dependency directly. All three process the same coordinates into
+the same typed-array layout. Scalar paths reuse an input array and copy returned
+coordinates into the output buffer. Every coordinate is checked before timing,
+including height and trailing ordinates. Datum-shift cases enable axis enforcement
+to compare computed heights consistently. Implementation order rotates between samples.
+
+The twelve cases cover spherical and ellipsoidal Mercator, UTM in both hemispheres,
+Lambert conformal conic, Albers, Lambert azimuthal equal area, polar stereographic,
+Equal Earth, Mollweide, and three- and seven-parameter datum shifts.
+
+These are warmed transformation measurements, excluding loading and construction.
+Inverse runs start from coordinates projected by the reference implementation.
+The table reports median time for the entire buffer and the corresponding throughput;
+the **M** suffix means million coordinates per second. Green dots mark the fastest
+result in each row, including ties. Small multipliers show math.gl throughput relative
+to proj4js: **3×** means three times as many coordinates per second. No multiplier
+is shown when either time is below timer resolution. The live benchmark does not
+measure allocations, startup or bundle size. The work runs in a dedicated
+worker, with Stop and rerun controls.
 
 ## Reproduce
 
@@ -17,7 +54,7 @@ node modules/proj4/scripts/check-lazy-package.mjs
 node modules/proj4/scripts/check-packed-package.mjs
 ```
 
-The standalone benchmark compares the native batch API, native scalar API, direct
+The standalone benchmark compares the TypeScript batch API, TypeScript scalar API, direct
 `proj4` import, and `Proj4Projection` wrapper. Cases cover Web Mercator, UTM, Lambert
 conic, and a seven-parameter Helmert-to-Mercator chain, in both directions, 2D/3D,
 and Float32/Float64. Every output is checked against the pinned proj4 2.22.0 reference
@@ -72,7 +109,7 @@ implementation, separate profiling run):
 | Lambert conic | 0.44 | 159.33 | 600.47 | 598.27 |
 | Helmert to Mercator | 79.07 | 239.64 | 957.04 | 953.60 |
 
-Warmed constructor medians ranged from 21.0–33.7 µs for the native engine,
+Warmed constructor medians ranged from 21.0–33.7 µs for the TypeScript engine,
 versus 2.4–5.4 µs for the direct import. Prefer one compiled instance per
 CRS pair. Construction order/JIT state affect these figures; use them as a local
 baseline, not a production latency promise.
@@ -106,9 +143,10 @@ temporary consumer, and tests ESM, CommonJS, strict NodeNext declarations, batch
 and distributed licenses. The installed third-party proj4 dependency is reused without
 fetching or publishing anything.
 
-Performance and packaging do not establish geodetic parity. The engine stays opt-in;
-the [support profile](./native-support.md) defines the scope of the native API
-and the separately reviewed decision required to change the default backend.
+Performance and packaging do not establish geodetic parity. The TypeScript engine is now the default;
+the [support profile](./typescript-support.md) defines the scope of the TypeScript API
+and the migration to the default TypeScript wrapper. Historical wrapper timings
+refer to the proj4js implementation now imported from `classic`.
 
 
 ## Native release qualification measurements
@@ -166,13 +204,13 @@ Fresh Node process medians (OS caches warm; separate process/module registries):
 | proj4 | 67.40 | 25.35 | 94.08 |
 | wrapper | 59.00 | 26.82 | 108.21 |
 
-Selected native subpaths reduce module-loading work compared with the full barrel.
+Selected TypeScript subpaths reduce module-loading work compared with the full barrel.
 Native first construction remains more expensive than proj4's: prepare and reuse
 converters rather than constructing one per coordinate. Browser cold measurements
 separately record bundle fetch/parse/evaluation, first construction and first projection
 in fresh contexts; they do not flush operating-system caches.
 
-Sampled allocation estimates for native batch versus proj4 were approximately
+Sampled allocation estimates for TypeScript batch versus proj4 were approximately
 0 versus 595 bytes/point for Mercator, 49 versus 641 for UTM, 0 versus 595 for LCC,
 and 78 versus 977 for Helmert-to-Mercator. Zero samples do not prove zero allocation;
 these are V8 statistical estimates, including collected objects, not exact allocation
@@ -186,10 +224,10 @@ yarn playwright install --with-deps chromium firefox webkit
 node modules/proj4/scripts/benchmark-browser.mjs --points 20000 --samples 7 --output /tmp/browsers.json
 ```
 
-Each browser first measures separate native/proj4/wrapper bundles, then checks all
+Each browser first measures separate TypeScript/proj4/classic-wrapper bundles, then checks all
 independent projection references. Warm workloads cover both directions, both float
 precisions and 2D/4D buffers. The runner bounds each browser to 180 seconds. CI keeps
 performance data as a downloadable artifact and gates correctness, not noisy timing
 ratios. The Node startup runner also checks the first computed coordinate in every
 fresh process. Existing packed-consumer, tree-shaking and bundle-size checks now
-exercise the supported native paths; experimental aliases remain checked as well.
+exercise the canonical TypeScript paths; experimental aliases remain checked as well.

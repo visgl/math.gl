@@ -52,15 +52,26 @@ try {
     readFileSync(join(root, 'modules/proj4/package.json'), 'utf8')
   );
   const subpaths = Object.keys(packageManifest.exports).filter(
-    path => path.startsWith('./experimental/') || path.startsWith('./native/')
+    path => path !== '.' && path !== './classic'
   );
   // Enumerate the manifest so every newly supported subpath must work in a real tarball.
   for (const [path, entry] of Object.entries(packageManifest.exports)) {
     if (path.startsWith('./native'))
       assert.deepEqual(entry, packageManifest.exports[path.replace('./native', './experimental')]);
   }
+  // CJS descriptors must keep their package imports deferred, too.
+  const packedRoot = join(temporary, 'node_modules/@math.gl/proj4');
+  for (const [path, entry] of Object.entries(packageManifest.exports)) {
+    if (!path.startsWith('./projections/lazy/')) continue;
+    const cjs = readFileSync(join(packedRoot, entry.require), 'utf8');
+    assert(
+      cjs.includes('import("@math.gl/proj4/projections/'),
+      path + ' must retain a dynamic import'
+    );
+    assert(!cjs.includes('function clenshaw'), path + ' must not inline a projection kernel');
+  }
   const entrySmoke = `
-    const stable = await load('@math.gl/proj4/native');
+    const stable = await load('@math.gl/proj4');
     assert.equal(stable.TypeScriptProjection, api.TypeScriptProjection);
     assert.equal(stable.mercator, api.mercator);
     const subpaths = ${JSON.stringify(subpaths)};
@@ -68,16 +79,30 @@ try {
       const entry = await load('@math.gl/proj4' + subpath.slice(1));
       assert(Object.keys(entry).length > 0, subpath);
       for (const [name, value] of Object.entries(entry)) {
+        if (subpath.startsWith('./projections/lazy')) {
+          if (typeof value === 'function') assert(['lazyObliqueTransformation', 'LazyProjection'].includes(name));
+          else { assert.equal(typeof value.preload, 'function'); assert.equal((await value.preload()).name, value.name); }
+          continue;
+        }
         assert(name in api, 'Unexpected public export: ' + name);
         assert.equal(typeof value, typeof api[name]);
         if (value && typeof value === 'object' && 'create' in value) assert.equal(value.name, api[name].name);
       }
     }
-    const core = await load('@math.gl/proj4/experimental/core');
-    const {universalTransverseMercator} = await load('@math.gl/proj4/experimental/projections/utm');
+    const {LazyProjection} = await load('@math.gl/proj4/projections/lazy');
+    const automatic = new LazyProjection({to: 'EPSG:32631'});
+    assert(Math.abs((await automatic.project([3, 0]))[0] - 500000) < 1e-7);
+    assert(Math.abs(automatic.projectSync([3, 0])[0] - 500000) < 1e-7);
+    const core = await load('@math.gl/proj4/core');
+    const descriptors = await load('@math.gl/proj4/projections/lazy/utm');
+    const lazy = new core.TypeScriptProjection({to: 'EPSG:32631', projections: [descriptors.lazyUniversalTransverseMercator]});
+    await descriptors.lazyUniversalTransverseMercator.preload();
+    assert(Math.abs(lazy.projectSync([3, 0])[0] - 500000) < 1e-7);
+    assert(Math.abs((await lazy.project([3, 0]))[0] - 500000) < 1e-7);
+    const {universalTransverseMercator} = await load('@math.gl/proj4/projections/utm');
     const utm = new core.TypeScriptProjection({to: 'EPSG:32631', projections: [universalTransverseMercator]});
     assert(Math.abs(utm.project([3, 0])[0] - 500000) < 1e-7);
-    const {wktCRSParser} = await load('@math.gl/proj4/experimental/parsers/wkt');
+    const {wktCRSParser} = await load('@math.gl/proj4/parsers/wkt');
     const unsupported = 'PROJCS["Unsupported",GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]],PROJECTION["Unimplemented"],UNIT["metre",1]]';
     assert.equal(core.checkTypeScriptCRSCompatibility(unsupported, {parsers: [wktCRSParser]}).reason, 'missing-transform-stage');
     assert.throws(() => core.normalizeCRS(unsupported, {parsers: [wktCRSParser]}), error =>
@@ -94,6 +119,17 @@ try {
     assert.equal(inferCRSRepresentation('EPSG:4326'), 'identifier');
   `;
   const smoke = `
+    assert.equal(api.Projection, api.Proj4Projection);
+    assert.notEqual(api.Projection, wrapper.Proj4Projection);
+    for (const Wrapper of [api.Projection, wrapper.Proj4Projection]) {
+      Wrapper.defineProjectionAliases({'PACKED:UTM': '+proj=utm +zone=31 +datum=WGS84'});
+      const p = new Wrapper({to: 'PACKED:UTM'});
+      const project = p.project;
+      const unproject = p.unproject;
+      assert(Math.abs(project([3, 0])[0] - 500000) < 1e-8);
+      assert(Math.abs(unproject([500000, 0])[0] - 3) < 1e-8);
+    }
+    assert(new api.Proj4Projection({}) instanceof api.TypeScriptProjection);
     const projection = new api.TypeScriptProjection({to: 'EPSG:3857', projections: [api.mercator]});
     const input = new Float64Array([12, 48, 123, 7]);
     const scalar = projection.project(Array.from(input));
@@ -108,14 +144,14 @@ try {
   `;
   writeFileSync(
     join(temporary, 'smoke.mjs'),
-    "import assert from 'node:assert/strict'; import * as api from '@math.gl/proj4/experimental'; import * as wrapper from '@math.gl/proj4';\n" +
+    "import assert from 'node:assert/strict'; import * as api from '@math.gl/proj4'; import * as wrapper from '@math.gl/proj4/classic';\n" +
       smoke +
       '\nconst load = specifier => import(specifier);\n' +
       entrySmoke
   );
   writeFileSync(
     join(temporary, 'smoke.cjs'),
-    "const assert = require('node:assert/strict'); const api = require('@math.gl/proj4/experimental'); const wrapper = require('@math.gl/proj4');\n" +
+    "const assert = require('node:assert/strict'); const api = require('@math.gl/proj4'); const wrapper = require('@math.gl/proj4/classic');\n" +
       smoke +
       '\nconst load = specifier => Promise.resolve(require(specifier));\n(async () => {' +
       entrySmoke +
@@ -128,8 +164,34 @@ try {
     join(temporary, 'consumer.ts'),
     `
     ${subpaths.map((path, index) => 'import * as entry' + index + " from '@math.gl/proj4" + path.slice(1) + "';\nvoid entry" + index + ';').join('\n')}
-    import {TypeScriptProjection, type ProjectionPoint} from '@math.gl/proj4/experimental/core';
-    import {mercator} from '@math.gl/proj4/experimental/projections/merc';
+    import {LazyProjection, type LazyProjectionOptions} from '@math.gl/proj4/projections/lazy';
+    const lazyOptions: LazyProjectionOptions = {to: 'EPSG:32631'};
+    const automatic = new LazyProjection(lazyOptions);
+    const automaticResult: Promise<number[]> = automatic.project([3, 0]);
+    const automaticFlat: Promise<Float32Array> = automatic.projectFlat(new Float32Array([3, 0]));
+    import {TypeScriptProjection, type ProjectionPoint} from '@math.gl/proj4/core';
+    import {Projection, Proj4Projection, type ProjectionOptions, type DatumGridOptions, type Proj4ProjectionOptions, type Proj4DatumGridOptions} from '@math.gl/proj4';
+    import {Proj4Projection as Classic, type Proj4ProjectionOptions as ClassicOptions, type Proj4DatumGridOptions as ClassicGridOptions} from '@math.gl/proj4/classic';
+    type WrapperAPI = Pick<Classic, keyof Classic>;
+    const compatible: WrapperAPI = new Projection({});
+    const legacy: Proj4Projection = new Projection({});
+    const modern: Projection = new Proj4Projection({});
+    const options: ProjectionOptions = {} as Proj4ProjectionOptions;
+    const gridOptions: DatumGridOptions = {} as Proj4DatumGridOptions;
+    const methods: Pick<typeof Classic, 'defineProjectionAliases' | 'registerDatumGrid'> = Proj4Projection;
+    const ctor: new (options: ClassicOptions) => WrapperAPI = Proj4Projection;
+    const tsOptions: Proj4ProjectionOptions = {} as ClassicOptions;
+    const classicOptions: ClassicOptions = {} as Proj4ProjectionOptions;
+    const tsGrid: Proj4DatumGridOptions = {} as ClassicGridOptions;
+    const classicGrid: ClassicGridOptions = {} as Proj4DatumGridOptions;
+    import {lazyUniversalTransverseMercator} from '@math.gl/proj4/projections/lazy/utm';
+    const lazy = new TypeScriptProjection({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});
+    const asyncResult: Promise<number[]> = lazy.project([3, 0]);
+    const syncResult: number[] = lazy.projectSync([3, 0]);
+    const asyncBuffer: Promise<Float64Array> = lazy.projectFlat(new Float64Array([3, 0]));
+    const mixed = new TypeScriptProjection({to: 'EPSG:32631', projections: [mercator, lazyUniversalTransverseMercator]});
+    const mixedResult: Promise<number[]> = mixed.project([3, 0]);
+    import {mercator} from '@math.gl/proj4/projections/merc';
     import {parseWKTCRS} from '@math.gl/crs/wkt';
     import {parsePROJString} from '@math.gl/crs/proj-string';
     import {inferCRSRepresentation} from '@math.gl/crs/spatial-reference';

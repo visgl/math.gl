@@ -23,8 +23,8 @@ the old upstream forward coordinate by about two metres; its original fixture is
 retained and the native result is checked against PROJ. This is a deliberate accuracy
 correction, not an unclassified mismatch or a silently relaxed tolerance.
 
-The [native support contract](./native-support.md) promotes the documented opt-in API,
-retains experimental aliases and the default wrapper, and records the remaining
+The [TypeScript support contract](./typescript-support.md) documents the default TypeScript API,
+retains engine aliases and the original wrapper at `classic`, and records the remaining
 out-of-profile operations. CI covers three browser engines and emits performance
 artifacts; see [benchmarks](./benchmarks.md). Earlier audit results below are historical.
 

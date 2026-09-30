@@ -4,7 +4,7 @@
 // @ts-expect-error tsconfig configuration issue?
 import type {Bench} from '@probe.gl/bench';
 import proj4 from 'proj4';
-import {Proj4Projection} from '../src';
+import {Proj4Projection} from '../src/classic';
 import {
   TypeScriptProjection,
   mercator,
@@ -18,7 +18,12 @@ export function proj4Bench(suite: Bench): Bench {
   for (const [to, plugin, longitude, latitude] of [
     ['EPSG:3857', mercator, 0, 30],
     ['EPSG:32631', universalTransverseMercator, 3, 45],
-    ['+proj=lcc +lat_1=33 +lat_2=45 +lon_0=-96', lambertConformalConic, -96, 39]
+    [
+      '+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +datum=WGS84',
+      lambertConformalConic,
+      -96,
+      39
+    ]
   ] as const) {
     const native = new TypeScriptProjection({to, projections: [plugin]});
     const reference = proj4('WGS84', to);
@@ -50,7 +55,7 @@ export function proj4Bench(suite: Bench): Bench {
         })
         .add('TypeScript scalar', scalar(native.project))
         .add('proj4 import', scalar(reference.forward))
-        .add('Proj4Projection wrapper', scalar(wrapper.project));
+        .add('Classic proj4 wrapper', scalar(wrapper.project));
     }
   }
   return suite;

@@ -13,10 +13,14 @@ The `@math.gl/proj4` module provides support for conversion between major geospa
 
 | Class             | Description        |
 | ----------------- | ------------------ |
-| `Proj4Projection` | A projection class |
-| [`TypeScriptProjection`](./api-reference/typescript-projection.md) | Supported opt-in TypeScript engine with explicit projection plugins |
+| [`Projection`](./api-reference/proj4-projection.md) | TypeScript-backed wrapper with the full catalogue and classic-compatible API |
+| `LazyProjection` (`/projections/lazy`) | Full descriptor catalogue; algorithms loaded automatically on demand |
+| [`TypeScriptProjection`](./api-reference/typescript-projection.md) | Configurable TypeScript engine with explicit projection plugins |
 
-The native implementation is available from `@math.gl/proj4/native`.
+The package root uses the TypeScript implementation. `Proj4Projection` is a deprecated
+alias of `Projection`; both names share the same constructor and static registrations. Import the original
+proj4js-backed `Proj4Projection` from `@math.gl/proj4/classic` when its behavior
+is required. Both wrappers use the same constructor and static registration API.
 Start with the [TypeScript engine guide](./typescript-engine.md) for plugin selection,
 dynamic loading, measured bundle sizes, CRS readers, and typed-array transforms.
 The [API reference](./api-reference/typescript-projection.md) lists supported
@@ -24,18 +28,18 @@ parameters, limitations, and custom plugin contracts.
 
 The [TypeScript parity roadmap](./roadmap.md) defines staged implementation and
 acceptance gates against the pinned upstream release. See the [support and migration
-contract](./native-support.md) for the promoted API and compatibility boundaries.
+contract](./typescript-support.md) for the promoted API and compatibility boundaries.
 
 ## Usage
 
 Reproject WGS84 coordinates to another CRS
 
 ```js
-import {Proj4Projection} from '@math.gl/proj4';
+import {Projection} from '@math.gl/proj4';
 
 const nad83Proj =
   '+title=NAD83 (long/lat) +proj=longlat +a=6378137.0 +b=6356752.31414036 +ellps=GRS80 +datum=NAD83 +units=degrees';
-const projection = new Proj4Projection({from: 'WGS84', to: nad83Proj});
+const projection = new Projection({from: 'WGS84', to: nad83Proj});
 
 const wgs84Position = [21, 78, 5000];
 const reprojectedPosition = projection.project(wgs84Position);
@@ -49,7 +53,11 @@ PROJJSON is an OSGeo/PROJ specification designed as a lossless JSON encoding of 
 
 Within WKT there exists both OGC WKT and ESRI WKT syntax; both are generally supported though some more-obscure projection keywords may not be used. WKT definitions remain strings at this API boundary. Note that PROJ strings [can be slightly more accurate](https://github.com/proj4js/proj4js/issues/222) in some circumstances than WKT strings.
 
-### Checking CRS compatibility
+### Checking classic CRS compatibility
+
+The classic-specific compatibility helpers move to `@math.gl/proj4/classic`.
+For the configurable engine, use `checkTypeScriptCRSCompatibility` with the same
+plugins/readers as construction.
 
 Use `checkProj4CRSCompatibility` when CRS metadata may be broader than proj4js's executable CRS
 model. The result distinguishes a definition that proj4js constructed successfully from one that is
@@ -57,7 +65,7 @@ unsupported or has not been checked. Metadata resolution or preservation does no
 coordinates have been transformed.
 
 ```js
-import {checkProj4CRSCompatibility, toProj4CRSDefinition} from '@math.gl/proj4';
+import {checkProj4CRSCompatibility, toProj4CRSDefinition} from '@math.gl/proj4/classic';
 
 const compatibility = checkProj4CRSCompatibility(crs);
 if (compatibility.status === 'supported') {
@@ -121,7 +129,7 @@ GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORI
 
 ### Aliases
 
-Note that Proj4Projection allows aliases to be defined and comes with the following pre-installed aliases.
+Note that Projection allows aliases to be defined and comes with the following pre-installed aliases.
 
 | Coordinate system    | Aliases                                                          |
 | -------------------- | ---------------------------------------------------------------- |
@@ -156,12 +164,16 @@ GEOGCS["WGS 84",
 
 ## Attribution
 
-This module is a wrapper around [`proj4js`](http://proj4js.org/), which has a permissive [license](https://github.com/proj4js/proj4js/blob/master/LICENSE.md). A part of the [MetaCRS](https://trac.osgeo.org/metacrs/wiki) libraries.
+The TypeScript engine combines original math.gl code with numerical kernels ported
+from proj4js and PROJ. Source headers distinguish ports from inspired implementations
+and retain upstream notices. The package includes third-party notices and license
+files. The `classic` subpath wraps [`proj4js`](https://proj4js.org/).
 
-See [TypeScript benchmark results and methodology](./benchmarks.md) for scalar and
-in-place typed-array comparisons with proj4js, construction costs and bundle budgets.
+Run the [live browser benchmarks](./benchmarks.md#live-benchmarks) to compare TypeScript
+scalar and in-place transforms with classic proj4 on your own device. The benchmark
+page also documents recorded results, construction costs and bundle budgets.
 
 The [parity audit and correctness follow-up](./parity-audit.md) now pass 233 of 242
 upstream coordinate fixtures, with all 11 audited silent mismatches fixed. The full
-corpus runs continuously with nine intentional strict-input construction rejections. Full
-compatibility and release promotion remain blocked; see the audit for remaining work.
+corpus runs continuously with nine intentional strict-input construction rejections. The TypeScript engine is now the default; full proj4js behavioral parity remains
+outside the supported profile. See the audit and migration contract for exceptions.

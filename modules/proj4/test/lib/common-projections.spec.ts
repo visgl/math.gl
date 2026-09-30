@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Proj4Projection} from '@math.gl/proj4';
+import {Proj4Projection} from '@math.gl/proj4/classic';
 import {
   TypeScriptProjection,
   mercator,

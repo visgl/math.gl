@@ -23,6 +23,13 @@
       "@math.gl/polygon": ["./modules/polygon/src/index.ts"],
       "@math.gl/proj": ["./modules/proj/src/index.ts"],
       "@math.gl/proj4": ["./modules/proj4/src/index.ts"],
+      "@math.gl/proj4/classic": ["./modules/proj4/src/classic.ts"],
+      "@math.gl/proj4/core": ["./modules/proj4/src/experimental/core.ts"],
+      "@math.gl/proj4/projections/*": ["./modules/proj4/src/experimental/entries/projections/*"],
+      "@math.gl/proj4/projections/lazy": ["./modules/proj4/src/experimental/lazy-projections/index.ts"],
+      "@math.gl/proj4/projections/lazy/*": ["./modules/proj4/src/experimental/lazy-projections/*"],
+      "@math.gl/proj4/parsers/*": ["./modules/proj4/src/experimental/crs/*"],
+      "@math.gl/proj4/grids/*": ["./modules/proj4/src/experimental/grids/*"],
       "@math.gl/sun": ["./modules/sun/src/index.ts"],
       "@math.gl/types": ["./modules/types/src/index.ts"],
       "@math.gl/web-mercator": ["./modules/web-mercator/src/index.ts"]

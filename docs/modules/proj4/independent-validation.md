@@ -175,5 +175,5 @@ Do not regenerate expectations from math.gl or proj4js, and review definition
 translations and accuracy budgets whenever changing the oracle version.
 
 The completed qualification profile and promotion decision are described in the
-[native support and migration contract](./native-support.md). Unlisted parameter/domain
+[native support and migration contract](./typescript-support.md). Unlisted parameter/domain
 combinations and additional CRS/grid operations remain possible future extensions.

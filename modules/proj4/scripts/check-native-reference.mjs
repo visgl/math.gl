@@ -85,8 +85,8 @@ for (const row of projections.cases) {
 console.log('Independent PROJ references, all named projections, and pinned grid hashes verified.');
 
 const qualification = await json('release-qualification.json');
-assert.equal(qualification.apiStatus, 'supported-opt-in');
-assert.equal(qualification.defaultBackend, 'proj4');
+assert.equal(qualification.apiStatus, 'supported-default');
+assert.equal(qualification.defaultBackend, 'typescript');
 assert.deepEqual(
   qualification.reviewedExceptions,
   inventory.exceptions.map(row => row.id)

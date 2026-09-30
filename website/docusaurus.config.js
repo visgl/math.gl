@@ -38,6 +38,15 @@ const config = getDocusaurusConfig({
   }
 });
 
+// Keep the CRS root source alias from shadowing its public /wkt and other subpaths.
+const webpackPlugin = config.plugins.find(
+  plugin =>
+    Array.isArray(plugin) && plugin[0] === '@vis.gl/docusaurus-website/plugin-webpack-config'
+);
+const aliases = webpackPlugin[1].resolve.alias;
+aliases['@math.gl/crs$'] = aliases['@math.gl/crs'];
+delete aliases['@math.gl/crs'];
+
 config.baseUrl = websiteBaseUrl;
 
 if (isNext) {
