@@ -82,8 +82,13 @@ order rotates, and output contributes to a checksum.
 Schema-version-2 JSON reports retain individual aggregate samples, per-buffer medians
 and p10/p90, repetition counts, seed, workload/source fingerprints and runtime metadata.
 Warmed constructor measurements are separate. Browser qualification additionally measures
-module loading and first use in fresh contexts. CI uploads performance artifacts and
-gates correctness and bundle sizes; it does not gate noisy speed ratios.
+module loading and first use in fresh contexts. CI uploads browser artifacts and gates
+correctness and bundle sizes; it does not gate noisy speed ratios. Pull requests use 20,000 points, three samples and
+`--min-sample-ms 0`: all 612 workloads and independent references still run, but
+adaptive timing repetitions are disabled. These PR browser measurements are marked
+`timingLimited` and serve as correctness checks, not performance evidence. Pushes to
+master retain seven samples and a 12 ms calibration target for full browser reports.
+The separate paired Node performance comparison remains unchanged on every PR.
 
 ### Compare a runtime change with its base
 
@@ -304,7 +309,7 @@ Each browser first measures separate TypeScript and direct-proj4 bundles, then c
 all independent projection references. Current warm workloads use the seventeen-scenario
 shared matrix described above, including XYZ. The historical tables retain their older
 workload and wrapper column for provenance; they are not current benchmark results.
-The runner bounds each browser to 180 seconds. CI keeps downloadable measurements and
+The runner bounds each browser to 300 seconds. CI keeps downloadable measurements and
 gates correctness. The Node startup runner also checks the first computed coordinate in
 every fresh process. Packed-consumer, tree-shaking and bundle-size checks exercise the
 canonical TypeScript paths and retained compatibility aliases.

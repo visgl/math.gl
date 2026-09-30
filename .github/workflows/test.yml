@@ -190,9 +190,14 @@ jobs:
       - name: Install selected Playwright browser
         run: yarn playwright install --with-deps ${{ matrix.browser }}
 
+      # PRs validate the entire coordinate/workload matrix without repeatedly
+      # expanding buffers for timing precision. Master retains full measurements.
       - name: Check browser projection correctness and performance
         timeout-minutes: 6
-        run: node modules/proj4/scripts/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples 7 --output /tmp/proj4-browser-qualification.json
+        env:
+          BROWSER_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
+          BROWSER_MIN_SAMPLE_MS: ${{ github.event_name == 'pull_request' && '0' || '12' }}
+        run: node modules/proj4/scripts/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/proj4-browser-qualification.json
 
       - name: Upload browser qualification measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
