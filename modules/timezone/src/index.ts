@@ -4,3 +4,6 @@
 
 export {getTimezoneOffset} from './timezone-offset';
 export {lookupTimezoneAsync} from './lookup-async';
+export {getLocalDateTime} from './local-date-time';
+export {getTimezoneLabel, isTimezoneSupported} from './timezone-label';
+export type {LocalDateTime} from './types';

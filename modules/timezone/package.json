@@ -1,6 +1,6 @@
 {
   "name": "@math.gl/timezone",
-  "description": "Timezone offsets and lazy geographic timezone lookup",
+  "description": "Geographic timezone lookup and local calendar computations complementary to Intl",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
@@ -30,6 +30,11 @@
       "types": "./dist/lookup.d.ts",
       "import": "./dist/lookup.js",
       "require": "./dist/lookup.cjs"
+    },
+    "./temporal": {
+      "types": "./dist/temporal.d.ts",
+      "import": "./dist/temporal.js",
+      "require": "./dist/temporal.cjs"
     }
   },
   "files": [
@@ -38,6 +43,7 @@
   ],
   "sideEffects": false,
   "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
     "@photostructure/tz-lookup": "^11.7.0"
   }
 }

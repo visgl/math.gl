@@ -24,6 +24,7 @@ export default {
       'test/size/sun.js',
       'test/size/timezone.js',
       'test/size/timezone-lookup.js',
+      'test/size/timezone-temporal.js',
       'test/size/web-mercator.js'
     ]
   }
