@@ -10,7 +10,8 @@
   Numerical corrections and strict-input differences remain documented; this is API
   compatibility, not unrestricted numerical parity.
 
-- Add lightweight projection descriptors under `loaders/*`. Coordinate methods load
+- Add `LazyProjection` with the full descriptor catalogue and automatic algorithm
+  selection on first use. Add lightweight projection descriptors under `projections/lazy/*`. Coordinate methods load
   requested algorithms on demand; explicit synchronous methods use the shared
   implementation cache after `preload()`. Eager plugin instances remain synchronous.
 

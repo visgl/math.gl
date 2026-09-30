@@ -62,7 +62,7 @@ try {
   // CJS descriptors must keep their package imports deferred, too.
   const packedRoot = join(temporary, 'node_modules/@math.gl/proj4');
   for (const [path, entry] of Object.entries(packageManifest.exports)) {
-    if (!path.startsWith('./loaders/')) continue;
+    if (!path.startsWith('./projections/lazy/')) continue;
     const cjs = readFileSync(join(packedRoot, entry.require), 'utf8');
     assert(
       cjs.includes('import("@math.gl/proj4/projections/'),
@@ -79,8 +79,8 @@ try {
       const entry = await load('@math.gl/proj4' + subpath.slice(1));
       assert(Object.keys(entry).length > 0, subpath);
       for (const [name, value] of Object.entries(entry)) {
-        if (subpath.startsWith('./loaders')) {
-          if (typeof value === 'function') assert.equal(name, 'obliqueTransformationLoader');
+        if (subpath.startsWith('./projections/lazy')) {
+          if (typeof value === 'function') assert(['lazyObliqueTransformation', 'LazyProjection'].includes(name));
           else { assert.equal(typeof value.preload, 'function'); assert.equal((await value.preload()).name, value.name); }
           continue;
         }
@@ -89,10 +89,14 @@ try {
         if (value && typeof value === 'object' && 'create' in value) assert.equal(value.name, api[name].name);
       }
     }
+    const {LazyProjection} = await load('@math.gl/proj4/projections/lazy');
+    const automatic = new LazyProjection({to: 'EPSG:32631'});
+    assert(Math.abs((await automatic.project([3, 0]))[0] - 500000) < 1e-7);
+    assert(Math.abs(automatic.projectSync([3, 0])[0] - 500000) < 1e-7);
     const core = await load('@math.gl/proj4/core');
-    const loaders = await load('@math.gl/proj4/loaders/utm');
-    const lazy = new core.TypeScriptProjection({to: 'EPSG:32631', projections: [loaders.universalTransverseMercatorLoader]});
-    await loaders.universalTransverseMercatorLoader.preload();
+    const descriptors = await load('@math.gl/proj4/projections/lazy/utm');
+    const lazy = new core.TypeScriptProjection({to: 'EPSG:32631', projections: [descriptors.lazyUniversalTransverseMercator]});
+    await descriptors.lazyUniversalTransverseMercator.preload();
     assert(Math.abs(lazy.projectSync([3, 0])[0] - 500000) < 1e-7);
     assert(Math.abs((await lazy.project([3, 0]))[0] - 500000) < 1e-7);
     const {universalTransverseMercator} = await load('@math.gl/proj4/projections/utm');
@@ -159,6 +163,11 @@ try {
     join(temporary, 'consumer.ts'),
     `
     ${subpaths.map((path, index) => 'import * as entry' + index + " from '@math.gl/proj4" + path.slice(1) + "';\nvoid entry" + index + ';').join('\n')}
+    import {LazyProjection, type LazyProjectionOptions} from '@math.gl/proj4/projections/lazy';
+    const lazyOptions: LazyProjectionOptions = {to: 'EPSG:32631'};
+    const automatic = new LazyProjection(lazyOptions);
+    const automaticResult: Promise<number[]> = automatic.project([3, 0]);
+    const automaticFlat: Promise<Float32Array> = automatic.projectFlat(new Float32Array([3, 0]));
     import {TypeScriptProjection, type ProjectionPoint} from '@math.gl/proj4/core';
     import {Proj4Projection, type Proj4ProjectionOptions, type Proj4DatumGridOptions} from '@math.gl/proj4';
     import {Proj4Projection as Classic, type Proj4ProjectionOptions as ClassicOptions, type Proj4DatumGridOptions as ClassicGridOptions} from '@math.gl/proj4/classic';
@@ -170,12 +179,12 @@ try {
     const classicOptions: ClassicOptions = {} as Proj4ProjectionOptions;
     const tsGrid: Proj4DatumGridOptions = {} as ClassicGridOptions;
     const classicGrid: ClassicGridOptions = {} as Proj4DatumGridOptions;
-    import {universalTransverseMercatorLoader} from '@math.gl/proj4/loaders/utm';
-    const lazy = new TypeScriptProjection({to: 'EPSG:32631', projections: [universalTransverseMercatorLoader]});
+    import {lazyUniversalTransverseMercator} from '@math.gl/proj4/projections/lazy/utm';
+    const lazy = new TypeScriptProjection({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});
     const asyncResult: Promise<number[]> = lazy.project([3, 0]);
     const syncResult: number[] = lazy.projectSync([3, 0]);
     const asyncBuffer: Promise<Float64Array> = lazy.projectFlat(new Float64Array([3, 0]));
-    const mixed = new TypeScriptProjection({to: 'EPSG:32631', projections: [mercator, universalTransverseMercatorLoader]});
+    const mixed = new TypeScriptProjection({to: 'EPSG:32631', projections: [mercator, lazyUniversalTransverseMercator]});
     const mixedResult: Promise<number[]> = mixed.project([3, 0]);
     import {mercator} from '@math.gl/proj4/projections/merc';
     import {parseWKTCRS} from '@math.gl/crs/wkt';

@@ -17,9 +17,16 @@ const budgets = JSON.parse(
 );
 const measurements = {};
 const scenarios = {
+  catalogue: {
+    imports: "import {LazyProjection} from '@math.gl/proj4/projections/lazy';",
+    load: "return new LazyProjection({to: 'EPSG:32631'});",
+    deferred: '/experimental/kernels/etmerc.js',
+    expected: [500000, 0],
+    point: [3, 0]
+  },
   utm: {
-    imports: "import {universalTransverseMercatorLoader} from '@math.gl/proj4/loaders/utm';",
-    load: "return new TypeScriptProjection({to: 'EPSG:32631', projections: [universalTransverseMercatorLoader]});",
+    imports: "import {lazyUniversalTransverseMercator} from '@math.gl/proj4/projections/lazy/utm';",
+    load: "return new TypeScriptProjection({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});",
     deferred: '/experimental/kernels/etmerc.js',
     expected: [500000, 0],
     point: [3, 0]
@@ -130,7 +137,8 @@ export async function load() {${scenario.load}}`,
     if (!process.argv.includes('--measure')) {
       for (const metric of ['minified', 'gzip']) {
         assert(
-          measurements[name].initial[metric] <= budgets.limits.mercator[metric],
+          measurements[name].initial[metric] <=
+            (budgets.lazyInitialLimits?.[name] || budgets.limits.mercator)[metric],
           `${name}: initial ${metric} exceeds eager Mercator budget`
         );
         assert(
@@ -143,7 +151,8 @@ export async function load() {${scenario.load}}`,
     const application = await import(pathToFileURL(entry).href);
     assert.deepEqual(application.eager.project([0, 0]), [0, 0]);
     const projection = await application.load();
-    if (name === 'utm') assert.throws(() => projection.projectSync(scenario.point), /preload/);
+    if (['utm', 'catalogue'].includes(name))
+      assert.throws(() => projection.projectSync(scenario.point), /preload/);
     const xy = await projection.project(scenario.point);
     if (scenario.expected)
       xy.forEach((value, i) => assert(Math.abs(value - scenario.expected[i]) < 1e-7));

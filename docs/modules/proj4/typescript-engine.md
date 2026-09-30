@@ -113,7 +113,7 @@ bundle, not an increment or an application-wide download estimate. **KiB = 1,024
 | Engine + Mercator + NTv2 decoder | 48.6 | 17.8 |
 | Engine + Mercator + GeoTIFF grid adapter | 48.6 | 17.8 |
 | Default TypeScript wrapper (all plugins and readers) | 141.4 | 48.3 |
-| Every root export, including wrapper, readers and grid adapters | 144.2 | 49.3 |
+| Every root export, including wrapper, readers and grid adapters | 144.2 | 49.4 |
 | Classic proj4js-backed wrapper | 128.8 | 42.4 |
 
 The GeoTIFF row excludes an external TIFF decoder, workers, and grid files. No row
@@ -134,21 +134,46 @@ that selected bundles exclude unrelated kernels and the upstream runtime. See
 
 ## Load less-used projections on demand
 
+For automatic selection, use `LazyProjection`. It supplies all built-in projection
+descriptors and imports only the algorithms needed by the source and destination CRS:
+
+```typescript
+import {LazyProjection} from '@math.gl/proj4/projections/lazy';
+
+const projection = new LazyProjection({to: 'EPSG:32631'});
+const xy = await projection.project([3, 45]);
+
+await projection.preload();
+projection.projectFlatSync(new Float64Array([3, 45]));
+```
+
+Use this isolated entry point to keep the algorithms deferred; the package root
+exports eager implementations. Construction starts no imports. Coordinate methods always return promises; the
+explicit sync methods use the shared implementation cache after preloading.
+Rotated projections automatically resolve their wrapped algorithms, including
+different children at the two endpoints. Aliases, readers and prepared grids use
+the same options as `TypeScriptProjection`; WKT/PROJJSON readers remain opt-in.
+
+The full descriptor catalogue adds metadata to the initial bundle and lets a
+splitting bundler emit chunks for every built-in algorithm. Only requested
+algorithms are fetched at runtime. For a smaller set or custom algorithms, use
+`TypeScriptProjection` with an explicit list:
+
 Import lightweight descriptors and pass them in the same `projections` list as
 eager plugins. Descriptor imports and instance construction do not import algorithm
 implementations. The first coordinate operation selects the required source and
 destination algorithms and loads them internally:
 
-```typescript title="projection-loader.ts"
+```typescript title="projection-descriptor.ts"
 import {TypeScriptProjection} from '@math.gl/proj4/core';
 import {mercator} from '@math.gl/proj4/projections/merc';
-import {universalTransverseMercatorLoader} from '@math.gl/proj4/loaders/utm';
+import {lazyUniversalTransverseMercator} from '@math.gl/proj4/projections/lazy/utm';
 
 export const webMercator = new TypeScriptProjection({
   to: 'EPSG:3857', projections: [mercator]
 });
 export const utm31 = new TypeScriptProjection({
-  to: 'EPSG:32631', projections: [mercator, universalTransverseMercatorLoader]
+  to: 'EPSG:32631', projections: [mercator, lazyUniversalTransverseMercator]
 });
 
 const xy = await utm31.project([3, 45]); // Loads UTM automatically; no manual import.
@@ -165,7 +190,7 @@ Explicit synchronous methods never start imports. Preload the descriptor or inst
 before using them; they throw a clear error if a required algorithm is not cached:
 
 ```typescript
-await universalTransverseMercatorLoader.preload(); // Optional application warm-up.
+await lazyUniversalTransverseMercator.preload(); // Optional application warm-up.
 const xySync = utm31.projectSync([3, 45]);
 utm31.projectFlatSync(new Float64Array([3, 45]));
 // Alternatively: await utm31.preload() loads and prepares both ends of this CRS pair.
@@ -179,12 +204,12 @@ descriptors are not loaded. Separate descriptors with the same name are not conf
 it without loading anything. `TypeScriptProjection.create(options)` is an optional
 async factory returning a fully prepared instance with synchronous coordinate methods.
 
-Every named projection has a descriptor at `loaders/<id>` (for example,
-`mercatorLoader` and `universalTransverseMercatorLoader`). The `loaders` barrel exports
+Every named projection has a descriptor at `projections/lazy/<id>` (for example,
+`lazyMercator` and `lazyUniversalTransverseMercator`). The `projections/lazy` barrel exports
 them all. Composite projections use
-`obliqueTransformationLoader(mollweideLoader)` or `obliqueTransformationLoader('longlat')`.
-Custom descriptors can use `createProjectionLoader({name, aliases}, async () => plugin)`.
-These loaders defer algorithm code; CRS definitions and grid files remain application inputs.
+`lazyObliqueTransformation(lazyMollweide)` or `lazyObliqueTransformation('longlat')`.
+Custom descriptors can use `createProjectionDescriptor({name, aliases}, async () => plugin)`.
+These descriptors defer algorithm code; CRS definitions and grid files remain application inputs.
 
 Optional WKT interpretation can also be deferred. The adapter uses isolated
 `@math.gl/crs` syntax entry points so its parser stays on the lazy side:
@@ -201,7 +226,7 @@ export async function loadMercatorWKT(to: string) {
 
 The definition must select an algorithm supplied in `projections`. The WKT reader
 does not download plugins, definitions or grids for an arbitrary EPSG code.
-Use an explicit application loader map for the CRS families you support.
+Register the optional readers for the CRS representations your application accepts.
 
 ### Public subpaths
 
@@ -211,9 +236,9 @@ paths remain legacy aliases; new code can use the shorter paths below.
 
 | Subpath | Exports |
 | --- | --- |
-| `core` | Engine, normalization, capability checks, loader/cache utilities, shared types and errors |
-| `loaders/<id>` | Lightweight projection descriptors; defer algorithm imports |
-| `loaders` | Descriptor barrel, including the oblique descriptor factory |
+| `core` | Engine, normalization, capability checks, descriptor/cache utilities, shared types and errors |
+| `projections/lazy/<id>` | Lightweight projection descriptors; defer algorithm imports |
+| `projections/lazy` | `LazyProjection`, descriptors and the oblique descriptor factory |
 | `projections/<id>` | One plugin or factory, using its existing export name |
 | `parsers/wkt` | `wktCRSParser` |
 | `parsers/projjson` | `projJSONCRSParser` |
@@ -245,9 +270,13 @@ Sizes are sums across the relevant emitted files, with gzip applied to each file
 
 | Deferred feature | Initial minified / gzip KiB | Additional minified / gzip KiB |
 | --- | ---: | ---: |
+| Automatic catalogue (`LazyProjection`) | 53.0 / 19.8 | 77.5 / 36.5 |
 | UTM descriptor | 46.0 / 17.0 | 7.8 / 3.4 |
 | WKT reader and syntax | 45.9 / 16.7 | 23.4 / 8.1 |
 | Rotated Mollweide (factory plus wrapped plugin) | 45.9 / 17.1 | 5.3 / 2.5 |
+
+The catalogue row sums all available deferred algorithm chunks, not the download
+for its first UTM operation. Other rows retain only their selected feature.
 
 These are esbuild browser/ES2020 measurements, not universal chunk sizes. Bundlers
 may extract shared helpers, so one plugin does not necessarily mean one file. Loading

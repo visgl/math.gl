@@ -426,7 +426,7 @@ later grids can be tried; always preserve height. Built-in grid readers provide 
 
 ## Projection descriptors and synchronous variants
 
-The `projections` option also accepts `ProjectionLoader` descriptors. With any
+The `projections` option also accepts `ProjectionDescriptor` descriptors. With any
 descriptor in the list, coordinate methods return promises and load only the
 algorithms used by the CRS pair on first use. Eager-only instances keep their
 synchronous return types. Imports and constructors do not preload algorithms.
@@ -455,3 +455,13 @@ Mercator equations follow the [PROJ Mercator documentation](https://proj.org/en/
 Numerical kernel headers identify direct TypeScript ports of proj4js 2.22.0; original
 adapters and inspired equation implementations are identified separately. Distributed
 notices include the upstream MIT license and Equal Earth's retained Apache-2.0 license.
+
+## LazyProjection
+
+Import `LazyProjection` and `LazyProjectionOptions` from
+`@math.gl/proj4/projections/lazy`. Its constructor takes the same options except
+`projections`: the full built-in descriptor catalogue is supplied automatically.
+Readers, aliases and grids remain explicit options. Coordinate methods return
+promises; `preload()` and the sync variants follow the descriptor contract above.
+`LazyProjection.create(options)` optionally resolves the catalogue into a prepared
+synchronous `TypeScriptProjection` instance. See the [loading guide](../typescript-engine.md#load-less-used-projections-on-demand).

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
-import type {ProjectionLoader} from './projection-loader';
-import {getLoadedProjection, preloadProjection} from './projection-loader';
+import type {ProjectionDescriptor} from './projection-descriptor';
+import {getLoadedProjection, preloadProjection} from './projection-descriptor';
 import type {ProjectionImplementation, ProjectionPlugin, ProjectionPoint} from './types';
 import {projectionOperation} from './mutable-projection';
 import {CORE_FLAGS, CORE_PARAMETERS, normalizeCRS} from './crs/normalize';
@@ -13,9 +13,9 @@ import {createDatumTransform} from './datum';
 import {wrapLongitude} from './parameters';
 import type {DatumGridCollection} from './grids/types';
 
-type ProjectionRegistration = ProjectionPlugin | ProjectionLoader;
+type ProjectionRegistration = ProjectionPlugin | ProjectionDescriptor;
 type ProjectionResult<P, Result> =
-  Extract<P, ProjectionLoader> extends never ? Result : Promise<Result>;
+  Extract<P, ProjectionDescriptor> extends never ? Result : Promise<Result>;
 export type TypeScriptProjectionOptions<P extends ProjectionRegistration = ProjectionPlugin> =
   CRSNormalizationOptions & {
     from?: TypeScriptCRSInput;
@@ -176,7 +176,7 @@ export class TypeScriptProjection<P extends ProjectionRegistration = ProjectionP
 }
 function requiredProjections(options: TypeScriptProjectionCreateOptions): ProjectionRegistration[] {
   const available = registry(options.projections || []);
-  const required = new Set<ProjectionPlugin | ProjectionLoader>();
+  const required = new Set<ProjectionPlugin | ProjectionDescriptor>();
   for (const definition of [options.from ?? 'WGS84', options.to ?? 'WGS84']) {
     const crs = normalizeCRS(definition, options);
     if (['geographic', 'identity'].includes(crs.kind)) continue;

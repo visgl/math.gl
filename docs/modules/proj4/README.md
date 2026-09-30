@@ -14,6 +14,7 @@ The `@math.gl/proj4` module provides support for conversion between major geospa
 | Class             | Description        |
 | ----------------- | ------------------ |
 | `Proj4Projection` | TypeScript-backed wrapper with the full catalogue and classic-compatible API |
+| `LazyProjection` (`/projections/lazy`) | Full descriptor catalogue; algorithms loaded automatically on demand |
 | [`TypeScriptProjection`](./api-reference/typescript-projection.md) | Configurable TypeScript engine with explicit projection plugins |
 
 The package root uses the TypeScript implementation. Import the original

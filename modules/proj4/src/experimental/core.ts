@@ -29,5 +29,9 @@ export type {
 export type {TypeScriptCRSInput} from './crs/spatial-reference';
 export type {DatumGrid, DatumGridCollection} from './grids/types';
 
-export {createProjectionLoader, preloadProjection, getLoadedProjection} from './projection-loader';
-export type {ProjectionLoader} from './projection-loader';
+export {
+  createProjectionDescriptor,
+  preloadProjection,
+  getLoadedProjection
+} from './projection-descriptor';
+export type {ProjectionDescriptor} from './projection-descriptor';
