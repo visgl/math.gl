@@ -13,11 +13,12 @@ The `@math.gl/proj4` module provides support for conversion between major geospa
 
 | Class             | Description        |
 | ----------------- | ------------------ |
-| `Proj4Projection` | TypeScript-backed wrapper with the full catalogue and classic-compatible API |
+| [`Projection`](./api-reference/proj4-projection.md) | TypeScript-backed wrapper with the full catalogue and classic-compatible API |
 | `LazyProjection` (`/projections/lazy`) | Full descriptor catalogue; algorithms loaded automatically on demand |
 | [`TypeScriptProjection`](./api-reference/typescript-projection.md) | Configurable TypeScript engine with explicit projection plugins |
 
-The package root uses the TypeScript implementation. Import the original
+The package root uses the TypeScript implementation. `Proj4Projection` is a deprecated
+alias of `Projection`; both names share the same constructor and static registrations. Import the original
 proj4js-backed `Proj4Projection` from `@math.gl/proj4/classic` when its behavior
 is required. Both wrappers use the same constructor and static registration API.
 Start with the [TypeScript engine guide](./typescript-engine.md) for plugin selection,
@@ -34,11 +35,11 @@ contract](./typescript-support.md) for the promoted API and compatibility bounda
 Reproject WGS84 coordinates to another CRS
 
 ```js
-import {Proj4Projection} from '@math.gl/proj4';
+import {Projection} from '@math.gl/proj4';
 
 const nad83Proj =
   '+title=NAD83 (long/lat) +proj=longlat +a=6378137.0 +b=6356752.31414036 +ellps=GRS80 +datum=NAD83 +units=degrees';
-const projection = new Proj4Projection({from: 'WGS84', to: nad83Proj});
+const projection = new Projection({from: 'WGS84', to: nad83Proj});
 
 const wgs84Position = [21, 78, 5000];
 const reprojectedPosition = projection.project(wgs84Position);
@@ -128,7 +129,7 @@ GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORI
 
 ### Aliases
 
-Note that Proj4Projection allows aliases to be defined and comes with the following pre-installed aliases.
+Note that Projection allows aliases to be defined and comes with the following pre-installed aliases.
 
 | Coordinate system    | Aliases                                                          |
 | -------------------- | ---------------------------------------------------------------- |

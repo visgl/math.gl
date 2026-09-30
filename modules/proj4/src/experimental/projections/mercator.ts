@@ -33,24 +33,6 @@ export const mercator: ProjectionPlugin = {
     }
     if (scale <= 0) throw new Error('Mercator scale must be positive');
     const radius = a * scale;
-    // Select the spherical equations once, avoiding ellipsoidal corrections and
-    // inverse iteration for every Web Mercator coordinate.
-    if (e === 0) {
-      return createProjection(
-        point => {
-          const latitude = point.y;
-          if (Math.abs(latitude) >= Math.PI / 2) {
-            throw new Error('Mercator is undefined at the poles');
-          }
-          point.x = x0 + radius * wrap(point.x - longitudeOrigin);
-          point.y = y0 + radius * (Math.asinh(Math.tan(latitude)) + 0);
-        },
-        point => {
-          point.x = wrap(longitudeOrigin + (point.x - x0) / radius);
-          point.y = Math.atan(Math.sinh((point.y - y0) / radius + 0));
-        }
-      );
-    }
     return createProjection(
       point => {
         const longitude = point.x,
@@ -58,16 +40,27 @@ export const mercator: ProjectionPlugin = {
         if (Math.abs(latitude) >= Math.PI / 2) {
           throw new Error('Mercator is undefined at the poles');
         }
-        const isometricLatitude =
-          Math.asinh(Math.tan(latitude)) - e * Math.atanh(e * Math.sin(latitude));
+        const isometricLatitude = Math.asinh(Math.tan(latitude));
         point.x = x0 + radius * wrap(longitude - longitudeOrigin);
-        point.y = y0 + radius * isometricLatitude;
+        // Spherical Mercator has no ellipsoidal correction. Normalize signed zero.
+        point.y =
+          y0 +
+          radius *
+            (e === 0
+              ? isometricLatitude + 0
+              : isometricLatitude - e * Math.atanh(e * Math.sin(latitude)));
       },
       point => {
         const x = point.x,
           y = point.y;
         const isometricLatitude = (y - y0) / radius;
         let latitude = Math.atan(Math.sinh(isometricLatitude));
+        // The spherical inverse is already exact; no iteration is needed.
+        if (e === 0) {
+          point.x = wrap(longitudeOrigin + (x - x0) / radius);
+          point.y = latitude + 0;
+          return;
+        }
         for (let iteration = 0; iteration < 30; iteration++) {
           const next = Math.atan(
             Math.sinh(isometricLatitude + e * Math.atanh(e * Math.sin(latitude)))

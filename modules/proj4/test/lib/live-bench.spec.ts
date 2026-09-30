@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 import {expect, test, vi} from 'vitest';
-import {Proj4Projection} from '@math.gl/proj4';
+import {Projection} from '@math.gl/proj4';
 import {runLiveBenchmark} from '../live-bench';
 import type {BenchmarkOptions, BenchmarkRow} from '../live-bench-types';
 
@@ -40,7 +40,7 @@ for (const precision of ['Float32', 'Float64'] as const)
       });
 
 test('incorrect coordinates cannot produce a benchmark result', () => {
-  const project = vi.spyOn(Proj4Projection.prototype, 'project').mockReturnValue([NaN, NaN]);
+  const project = vi.spyOn(Projection.prototype, 'project').mockReturnValue([NaN, NaN]);
   const onRow = vi.fn();
   try {
     expect(() =>

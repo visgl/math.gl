@@ -1,6 +1,6 @@
 # TypeScript API support and migration
 
-`@math.gl/proj4` uses the TypeScript engine by default. `Proj4Projection` supplies
+`@math.gl/proj4` uses the TypeScript engine by default. `Projection` supplies
 all projection plugins and WKT/PROJJSON readers behind the existing wrapper API.
 `TypeScriptProjection` exposes per-instance configuration for smaller bundles.
 The original proj4js-backed wrapper and its compatibility helpers are available
@@ -47,7 +47,7 @@ first asynchronous coordinate call. `projectSync`/`unprojectSync` and their flat
 require preloading; they never start an import. See the [loading guide](./typescript-engine.md#load-less-used-projections-on-demand).
 The eager engine and default wrapper perform no network requests. Descriptor imports
 can fetch application chunks through the bundler runtime. The configurable `TypeScriptProjection` keeps plugin registration per instance and
-shares only the descriptor implementation cache. The convenience `Proj4Projection` preserves the classic static registration
+shares only the descriptor implementation cache. The convenience `Projection` preserves the classic static registration
 API: aliases and NTv2 grids affect subsequently constructed wrappers of that backend.
 Existing instances retain their compiled configuration. Registries are independent
 between TypeScript and classic wrappers.
@@ -86,15 +86,20 @@ bound `project`/`unproject` methods, `defineProjectionAliases` static method, an
 `projectFlat`/`unprojectFlat` for typed arrays. No plugin setup is required:
 
 ```typescript
-import {Proj4Projection} from '@math.gl/proj4';
-const projection = new Proj4Projection({to: 'EPSG:3857'});
+import {Projection} from '@math.gl/proj4';
+const projection = new Projection({to: 'EPSG:3857'});
 const projected = projection.project([12, 55]);
 ```
 
-To retain the original backend, change only the import:
+`Proj4Projection` at the root is a deprecated alias of `Projection`, with identical
+constructor identity, methods and static registries. Existing imports continue to work.
+New code can use `ProjectionOptions` and `DatumGridOptions`; the existing option type
+names remain available.
+
+To retain the original backend, use the classic entry point:
 
 ```typescript
-import {Proj4Projection} from '@math.gl/proj4/classic';
+import {Proj4Projection as Projection} from '@math.gl/proj4/classic';
 ```
 
 The proj4js-specific `checkProj4CRSCompatibility`, `toProj4CRSDefinition` and

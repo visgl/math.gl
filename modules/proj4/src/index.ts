@@ -3,6 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 export * from './experimental/index';
-export {Proj4Projection} from './lib/typescript-proj4-projection';
-export type {Proj4ProjectionOptions, Proj4DatumGridOptions} from './lib/proj4-projection';
+export {Projection, Proj4Projection} from './lib/typescript-proj4-projection';
+export type {
+  Proj4ProjectionOptions as ProjectionOptions,
+  Proj4DatumGridOptions as DatumGridOptions,
+  Proj4ProjectionOptions,
+  Proj4DatumGridOptions
+} from './lib/proj4-projection';
 export type {Proj4CRSDefinition, Proj4PROJJSONCRS} from './lib/proj4-crs';

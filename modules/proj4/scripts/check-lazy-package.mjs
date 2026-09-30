@@ -136,10 +136,11 @@ export async function load() {${scenario.load}}`,
     };
     if (!process.argv.includes('--measure')) {
       for (const metric of ['minified', 'gzip']) {
+        const initialSize = measurements[name].initial[metric];
+        const initialLimit = (budgets.lazyInitialLimits?.[name] || budgets.limits.mercator)[metric];
         assert(
-          measurements[name].initial[metric] <=
-            (budgets.lazyInitialLimits?.[name] || budgets.limits.mercator)[metric],
-          `${name}: initial ${metric} exceeds eager Mercator budget`
+          initialSize <= initialLimit,
+          `${name}: initial ${metric} ${initialSize} exceeds budget ${initialLimit}`
         );
         assert(
           measurements[name].deferred[metric] <= budgets.lazyLimits[name][metric],

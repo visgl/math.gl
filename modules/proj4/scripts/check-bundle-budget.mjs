@@ -20,7 +20,7 @@ const fixtures = {
     "import {TypeScriptProjection, mercator} from '@math.gl/proj4'; export {parseNTv2Grid} from '@math.gl/proj4'; export const create = (from, datumGrids) => new TypeScriptProjection({from, to: 'EPSG:3857', projections: [mercator], datumGrids});",
   mercatorWithGeoTIFFAdapter:
     "import {TypeScriptProjection, mercator} from '@math.gl/proj4'; export {loadGeoTIFFGrid} from '@math.gl/proj4'; export const create = (from, datumGrids) => new TypeScriptProjection({from, to: 'EPSG:3857', projections: [mercator], datumGrids});",
-  typescriptWrapper: "export {Proj4Projection} from '@math.gl/proj4';",
+  typescriptWrapper: "export {Projection} from '@math.gl/proj4';",
   allNativeExports: "export * from '@math.gl/proj4';",
   proj4Wrapper: "export {Proj4Projection} from '@math.gl/proj4/classic';"
 };

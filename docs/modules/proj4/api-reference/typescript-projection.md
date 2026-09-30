@@ -1,6 +1,6 @@
 # TypeScriptProjection
 
-The configurable TypeScript engine underlying the default `Proj4Projection`; see the [support and migration contract](../typescript-support.md).
+The configurable TypeScript engine underlying the default `Projection`; see the [support and migration contract](../typescript-support.md).
 Import it from `@math.gl/proj4` or the isolated `@math.gl/proj4/core` entry point. The original wrapper is available from `@math.gl/proj4/classic`.
 
 ```typescript
@@ -316,7 +316,7 @@ coverage remain tracked gaps; see the parity inventory.
 Grid decoding/loading is separate from synchronous coordinate transformation.
 Register prepared grids per instance through `datumGrids`; the TypeScript engine has no
 global registry. This replaces the global registration pattern of the existing
-`Proj4Projection.registerDatumGrid` wrapper.
+`Projection.registerDatumGrid` wrapper.
 
 ```typescript
 import {TypeScriptProjection, parseNTv2Grid} from '@math.gl/proj4';
@@ -434,7 +434,7 @@ synchronous return types. Imports and constructors do not preload algorithms.
 `await instance.preload()` prepares required implementations ahead of time.
 `projectSync`, `unprojectSync`, `projectFlatSync` and `unprojectFlatSync` never import
 algorithms: preload first, or these methods throw. Preloading a descriptor directly
-also enables sync methods on any instance that uses it. The default `Proj4Projection`
+also enables sync methods on any instance that uses it. The default `Projection`
 wrapper contains eager plugins and preserves its synchronous API.
 
 See [descriptor loading and cache behavior](../typescript-engine.md#load-less-used-projections-on-demand)

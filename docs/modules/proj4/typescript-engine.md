@@ -11,7 +11,7 @@ Robinson correction, and nine intentional input rejections out of 242**. This is
 An independent PROJ corpus also checks all 37 named algorithms across 2,386 points,
 with additional structured CRS, datum-chain and real NTv2/GeoTIFF checks, with explicit accuracy limits. See [independent validation](./independent-validation.md)
 and the [parity audit](./parity-audit.md) for coverage and remaining qualification work.
-The root `Proj4Projection` uses this engine with all plugins/readers configured.
+The root `Projection` uses this engine with all plugins/readers configured.
 Import `Proj4Projection` from `@math.gl/proj4/classic` to use proj4js.
 The convenience wrapper includes the full catalogue; use `TypeScriptProjection`
 and selective subpaths for smaller bundles.
@@ -454,7 +454,7 @@ The nine remaining upstream-corpus differences are deliberate strict-input rejec
 [dispositioned individually](./parity-audit.md#strict-input-policy). Cardinal polar-axis
 mappings are supported; arbitrary axis rotations remain outside the subset. Broader grid coverage, independent
 accuracy references, and regional projection validity limits still need qualification.
-Keep any fallback to `Proj4Projection` an explicit application decision: it adds the
+Keep any fallback to `Proj4Projection` from `@math.gl/proj4/classic` an explicit application decision: it adds the
 upstream runtime and has some different dimension and validation behavior. The
 [roadmap](./roadmap.md), [audit](./parity-audit.md), and
 [API reference](./api-reference/typescript-projection.md) describe those boundaries.

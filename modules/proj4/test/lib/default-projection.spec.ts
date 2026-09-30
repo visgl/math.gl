@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {Proj4Projection, TypeScriptProjection} from '@math.gl/proj4';
+import {Projection, Proj4Projection, TypeScriptProjection} from '@math.gl/proj4';
 import {Proj4Projection as ClassicProjection} from '@math.gl/proj4/classic';
 import {makeNTv2} from '../fixtures/datum-grids';
 import structured from '../fixtures/structured-proj-reference.json';
@@ -14,8 +14,8 @@ function close(actual: number[], expected: number[], tolerance = 1e-7): void {
   );
 }
 
-for (const Wrapper of [Proj4Projection, ClassicProjection]) {
-  const backend = Wrapper === Proj4Projection ? 'TypeScript' : 'classic';
+for (const Wrapper of [Projection, ClassicProjection]) {
+  const backend = Wrapper === Projection ? 'TypeScript' : 'classic';
   test(backend + ' wrapper keeps defaults, bound methods and array ownership', () => {
     const projection = new Wrapper({});
     const input = [12, 45, 123, 7];
@@ -68,12 +68,12 @@ for (const Wrapper of [Proj4Projection, ClassicProjection]) {
 }
 
 test('default wrapper uses TypeScript and keeps its registries separate from classic and core', () => {
-  expect(new Proj4Projection({})).toBeInstanceOf(TypeScriptProjection);
-  Proj4Projection.defineProjectionAliases({'BACKEND:ONLY': '+proj=utm +zone=31 +datum=WGS84'});
+  expect(new Projection({})).toBeInstanceOf(TypeScriptProjection);
+  Projection.defineProjectionAliases({'BACKEND:ONLY': '+proj=utm +zone=31 +datum=WGS84'});
   expect(() => new ClassicProjection({to: 'BACKEND:ONLY'})).toThrow();
   expect(() => new TypeScriptProjection({to: 'BACKEND:ONLY'})).toThrow();
   expect(() => new TypeScriptProjection({to: 'EPSG:3857'})).toThrow('not registered');
-  const p = new Proj4Projection({to: 'EPSG:3857'});
+  const p = new Projection({to: 'EPSG:3857'});
   const input = new Float64Array([12, 45, 123, 7]);
   const expected = p.project(Array.from(input));
   expect(p.projectFlat(input, 4)).toBe(input);
@@ -83,9 +83,9 @@ test('default wrapper uses TypeScript and keeps its registries separate from cla
 test('default wrapper resolves both oblique projection dependencies independently', () => {
   const from = '+proj=ob_tran +o_proj=merc +o_lat_p=45 +o_lon_p=0 +datum=WGS84';
   const to = '+proj=ob_tran +o_proj=eqearth +o_lat_p=30 +o_lon_p=20 +datum=WGS84';
-  const p = new Proj4Projection({from, to});
-  const source = new Proj4Projection({to: from}).project([12, 45]);
-  const expected = new Proj4Projection({to}).project([12, 45]);
+  const p = new Projection({from, to});
+  const source = new Projection({to: from}).project([12, 45]);
+  const expected = new Projection({to}).project([12, 45]);
   // This composes iterative kernels; independent fixtures test their accuracy separately.
   close(p.project(source), expected, 0.01);
   close(p.unproject(expected), source, 0.01);
@@ -95,5 +95,16 @@ test('default wrapper resolves both oblique projection dependencies independentl
     '+proj=ob_tran +o_proj=geocent +o_lat_p=45 +o_lon_p=0',
     '+proj=ob_tran +o_proj=longlat +o_lat_p=45 +o_lon_p=0 +zone=31'
   ])
-    expect(() => new Proj4Projection({to: definition})).toThrow();
+    expect(() => new Projection({to: definition})).toThrow();
+});
+
+test('deprecated Proj4Projection is the same constructor and shares static registrations', () => {
+  expect(Proj4Projection).toBe(Projection);
+  const legacy: Proj4Projection = new Projection({to: 'EPSG:3857'});
+  expect(legacy).toBeInstanceOf(Proj4Projection);
+  expect(new Proj4Projection({})).toBeInstanceOf(Projection);
+  Proj4Projection.defineProjectionAliases({'ALIAS:NEW': '+proj=utm +zone=31 +datum=WGS84'});
+  close(new Projection({to: 'ALIAS:NEW'}).project([3, 0]), [500000, 0]);
+  Projection.defineProjectionAliases({'ALIAS:OLD': '+proj=utm +zone=32 +datum=WGS84'});
+  close(new Proj4Projection({to: 'ALIAS:OLD'}).project([9, 0]), [500000, 0]);
 });

@@ -4,7 +4,7 @@
 // Original browser benchmark; proj4js supplies the independent comparison path.
 import proj4 from 'proj4';
 import proj4Metadata from 'proj4/package.json';
-import {Proj4Projection as TypeScriptProjection} from '@math.gl/proj4';
+import {Projection} from '@math.gl/proj4';
 
 import {IMPLEMENTATIONS, SAMPLE_COUNT, SCENARIOS} from './live-bench-types';
 import type {BenchmarkOptions, BenchmarkRow} from './live-bench-types';
@@ -26,7 +26,7 @@ export function runLiveBenchmark(options: BenchmarkOptions, onRow: (row: Benchma
   for (const scenario of SCENARIOS) {
     const from = scenario.from || 'WGS84';
     const enforceAxis = Boolean(scenario.from); // Compare computed heights for datum shifts.
-    const typescript = new TypeScriptProjection({from, to: scenario.to, enforceAxis});
+    const typescript = new Projection({from, to: scenario.to, enforceAxis});
     const direct = proj4(from, scenario.to);
     const forward = (point: number[]) => direct.forward(point, enforceAxis);
     const inverse = (point: number[]) => direct.inverse(point, enforceAxis);

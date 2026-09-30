@@ -20,7 +20,7 @@ inline benchmark. Nothing runs until you press **Run benchmarks**.
   }}
 </BrowserOnly>
 
-The TypeScript columns use the default `Proj4Projection`, through its in-place and
+The TypeScript columns use the default `Projection`, through its in-place and
 scalar APIs, labeled **math.gl flat** and **math.gl scalar**. The **proj4js 2.22.0**
 column uses the pinned `proj4` dependency directly. All three process the same coordinates into
 the same typed-array layout. Scalar paths reuse an input array and copy returned

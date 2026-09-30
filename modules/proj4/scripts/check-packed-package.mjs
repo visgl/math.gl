@@ -119,8 +119,9 @@ try {
     assert.equal(inferCRSRepresentation('EPSG:4326'), 'identifier');
   `;
   const smoke = `
-    assert.notEqual(api.Proj4Projection, wrapper.Proj4Projection);
-    for (const Wrapper of [api.Proj4Projection, wrapper.Proj4Projection]) {
+    assert.equal(api.Projection, api.Proj4Projection);
+    assert.notEqual(api.Projection, wrapper.Proj4Projection);
+    for (const Wrapper of [api.Projection, wrapper.Proj4Projection]) {
       Wrapper.defineProjectionAliases({'PACKED:UTM': '+proj=utm +zone=31 +datum=WGS84'});
       const p = new Wrapper({to: 'PACKED:UTM'});
       const project = p.project;
@@ -169,10 +170,14 @@ try {
     const automaticResult: Promise<number[]> = automatic.project([3, 0]);
     const automaticFlat: Promise<Float32Array> = automatic.projectFlat(new Float32Array([3, 0]));
     import {TypeScriptProjection, type ProjectionPoint} from '@math.gl/proj4/core';
-    import {Proj4Projection, type Proj4ProjectionOptions, type Proj4DatumGridOptions} from '@math.gl/proj4';
+    import {Projection, Proj4Projection, type ProjectionOptions, type DatumGridOptions, type Proj4ProjectionOptions, type Proj4DatumGridOptions} from '@math.gl/proj4';
     import {Proj4Projection as Classic, type Proj4ProjectionOptions as ClassicOptions, type Proj4DatumGridOptions as ClassicGridOptions} from '@math.gl/proj4/classic';
     type WrapperAPI = Pick<Classic, keyof Classic>;
-    const compatible: WrapperAPI = new Proj4Projection({});
+    const compatible: WrapperAPI = new Projection({});
+    const legacy: Proj4Projection = new Projection({});
+    const modern: Projection = new Proj4Projection({});
+    const options: ProjectionOptions = {} as Proj4ProjectionOptions;
+    const gridOptions: DatumGridOptions = {} as Proj4DatumGridOptions;
     const methods: Pick<typeof Classic, 'defineProjectionAliases' | 'registerDatumGrid'> = Proj4Projection;
     const ctor: new (options: ClassicOptions) => WrapperAPI = Proj4Projection;
     const tsOptions: Proj4ProjectionOptions = {} as ClassicOptions;

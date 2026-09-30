@@ -124,7 +124,7 @@ function defaultProjections(): readonly ProjectionPlugin[] {
 }
 
 /** Classic wrapper API, executed by the TypeScript engine with all built-in plugins and readers. */
-export class Proj4Projection extends TypeScriptProjection {
+export class Projection extends TypeScriptProjection {
   /** Register aliases for subsequently constructed TypeScript wrappers. */
   static defineProjectionAliases(definitions: {[name: string]: Proj4CRSDefinition}): void {
     for (const name of Object.keys(definitions)) {
@@ -151,3 +151,8 @@ export class Proj4Projection extends TypeScriptProjection {
     });
   }
 }
+
+/** @deprecated Use Projection from @math.gl/proj4 instead. */
+export const Proj4Projection = Projection;
+/** @deprecated Use Projection from @math.gl/proj4 instead. */
+export type Proj4Projection = Projection;
