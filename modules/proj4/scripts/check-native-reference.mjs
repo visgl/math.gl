@@ -118,3 +118,5 @@ assert.equal(
   qualification.independent.datumPoints
 );
 console.log('Native support profile counts and reviewed exceptions verified.');
+
+await import('./check-accuracy-reference.mjs');

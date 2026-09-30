@@ -140,7 +140,7 @@ export function prepareWorkload(
         i % dimension === 2
           ? 1e-4
           : direction === 'project'
-            ? 2e-5
+            ? (scenario.forwardTolerance ?? 2e-5)
             : (scenario.inverseTolerance ?? 1e-8),
         precision === 'Float32' ? Math.abs(reference[i]) * 2e-7 : 0
       );

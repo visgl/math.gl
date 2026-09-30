@@ -1,13 +1,18 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Direct TypeScript port of proj4js 2.22.0. Copyright (c) 2014, proj4js authors.
+// Adapted from proj4js 2.22.0. Copyright (c) 2014, proj4js authors.
 // See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
 
 import {HALF_PI} from './constants';
 
+// Original math.gl correction: the pole cutoff is roundoff-sized, not 1e-6
+// in authalic q (which collapsed latitudes as far as 0.05 degrees from a pole).
+
 export default function (eccent: number, q: number) {
   var temp = 1 - ((1 - eccent * eccent) / (2 * eccent)) * Math.log((1 - eccent) / (1 + eccent));
-  if (Math.abs(Math.abs(q) - temp) < 1.0e-6) {
+  const roundoff = 4 * Number.EPSILON * temp;
+  if (Math.abs(q) > temp + roundoff) return NaN;
+  if (Math.abs(Math.abs(q) - temp) <= roundoff) {
     if (q < 0) {
       return -1 * HALF_PI;
     } else {

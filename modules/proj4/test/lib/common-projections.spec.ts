@@ -60,7 +60,15 @@ for (const fixture of commonProjectionCases) {
         const input = Object.freeze([...point]);
         const xy = native.project(input);
         const expected = reference.project(point);
-        close(xy, expected, units.includes('us-ft') ? 3e-5 : 1e-5);
+        // EQDC now uses a higher-order meridional series: PROJ is the accuracy
+        // oracle, while this comparison bounds the intentional proj4js difference.
+        const metres = fixture.id.startsWith('eqdc-') ? 1e-3 : 1e-5;
+        const tolerance = units.includes('us-ft')
+          ? metres / (1200 / 3937)
+          : units
+            ? metres / 1000
+            : metres;
+        close(xy, expected, tolerance);
         close(native.unproject(expected), reference.unproject(expected), 1e-8);
         close(native.unproject(xy), point, fixture.roundTripTolerance || 1e-7);
         expect(input).toEqual(point);
@@ -165,7 +173,10 @@ test('native common projections initialize omitted origin and offsets', () => {
     '+proj=sterea'
   ]) {
     const native = new TypeScriptProjection({to, projections});
-    const complete = new Proj4Projection({to: to + ' +lat_0=0 +lon_0=0 +x_0=0 +y_0=0'});
+    const complete = new TypeScriptProjection({
+      to: to + ' +lat_0=0 +lon_0=0 +x_0=0 +y_0=0',
+      projections
+    });
     close(native.project([2, 35]), complete.project([2, 35]), 1e-6);
   }
 });
@@ -255,7 +266,7 @@ for (const name of ['lcc', 'eqdc']) {
           [-5, parallel]
         ]) {
           const expected = reference.project(point);
-          close(native.project(point), expected, 1e-5);
+          close(native.project(point), expected, name === 'eqdc' ? 1e-3 : 1e-5);
           close(native.project(point), swapped.project(point), 1e-5);
           close(native.unproject(expected), point, 1e-7);
         }

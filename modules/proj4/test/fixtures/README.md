@@ -125,3 +125,22 @@ API decision, acceptance counts and every reviewed compatibility exception.
 Chromium, Firefox and WebKit each pass the full independent projection corpus.
 They include source fingerprints, runtime/hardware metadata, raw samples and
 methodology. Timing is descriptive; CI asserts correctness and byte budgets instead.
+
+
+## Seeded accuracy domains (tranche 11)
+
+`accuracy-cases.json` defines 15 parameter/domain combinations, a fixed seed and
+per-domain forward/inverse/roundtrip ceilings. `accuracy-reference.json` contains
+4,005 independent PROJ 9.5.1 / pyproj 3.7.2 samples, including uniform, edge-biased
+and exact-boundary probes. Regenerate with `generate-accuracy-reference.py` in the
+same pinned Python environment as the other references. No math.gl or proj4js output
+is used to generate expectations; unexpected PROJ failures abort generation.
+
+`check-accuracy-reference.mjs` verifies provenance, bounds, authored probes and
+counts offline, and is called by the main reference check. `measure-accuracy.mjs`
+enforces the scalar/Float64 budgets and emits measured maxima with their input
+coordinates. `qualification/accuracy-node.json` records the initial measured report.
+The identical corpus runs in Node and all three CI browser engines. These are
+sampled errors within explicit rectangles, not proofs of global accuracy. See the
+independent-validation documentation for units, conditioning and intentional
+CEA/EQDC differences from proj4js.

@@ -42,6 +42,8 @@ export type BenchmarkScenario = {
   grid?: boolean;
   /** Horizontal output tolerance in the source CRS when running the inverse. */
   inverseTolerance?: number;
+  /** Explicit allowance for an independently verified difference from proj4js. */
+  forwardTolerance?: number;
 };
 export const SCENARIOS: readonly BenchmarkScenario[] = [
   {
@@ -74,6 +76,8 @@ export const SCENARIOS: readonly BenchmarkScenario[] = [
   },
   {
     name: 'Equidistant conic',
+    // Higher-order meridional series; independent PROJ budgets remain 1e-5 m.
+    forwardTolerance: 1e-3,
     to: '+proj=eqdc +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84',
     longitude: 0,
     latitude: 40
