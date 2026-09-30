@@ -27,10 +27,10 @@ const browsers = {chromium, firefox, webkit},
   names = values.browsers.split(',');
 assert(names.length > 0 && names.every(name => name in browsers));
 const entries = {
-  native: `import {TypeScriptProjection,mercator,universalTransverseMercator} from '@math.gl/proj4/native';
+  native: `import {TypeScriptProjection,mercator,universalTransverseMercator} from '@math.gl/proj4';
     export function create(to) {return new TypeScriptProjection({to,projections:[mercator,universalTransverseMercator]});}`,
   proj4: `import proj4 from 'proj4';export function create(to){const p=proj4('WGS84',to);return {project:p.forward,unproject:p.inverse};}`,
-  wrapper: `import {Proj4Projection} from '@math.gl/proj4';export function create(to){return new Proj4Projection({to});}`
+  wrapper: `import {Proj4Projection} from '@math.gl/proj4/classic';export function create(to){return new Proj4Projection({to});}`
 };
 const assets = new Map();
 for (const [name, contents] of Object.entries(entries)) {

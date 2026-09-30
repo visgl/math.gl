@@ -9,13 +9,13 @@ import {cpus} from 'node:os';
 import {Session} from 'node:inspector/promises';
 import {parseArgs} from 'node:util';
 import proj4 from 'proj4';
-import {Proj4Projection} from '@math.gl/proj4';
+import {Proj4Projection} from '@math.gl/proj4/classic';
 import {
   TypeScriptProjection,
   mercator,
   universalTransverseMercator,
   lambertConformalConic
-} from '@math.gl/proj4/experimental';
+} from '@math.gl/proj4';
 
 const {values} = parseArgs({
   options: {

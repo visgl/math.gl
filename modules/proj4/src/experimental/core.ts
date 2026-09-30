@@ -6,6 +6,7 @@
 export {TypeScriptProjection, checkTypeScriptCRSCompatibility} from './typescript-projection';
 export type {
   TypeScriptProjectionOptions,
+  TypeScriptProjectionCreateOptions,
   ProjectionArray,
   TypeScriptCRSCompatibility
 } from './typescript-projection';
@@ -27,3 +28,6 @@ export type {
 } from './crs/types';
 export type {TypeScriptCRSInput} from './crs/spatial-reference';
 export type {DatumGrid, DatumGridCollection} from './grids/types';
+
+export {createProjectionLoader, preloadProjection, getLoadedProjection} from './projection-loader';
+export type {ProjectionLoader} from './projection-loader';

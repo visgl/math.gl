@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **Breaking (proj4):** The root `Proj4Projection` now uses the TypeScript engine with
+  the same constructor, bound coordinate methods, alias registration and NTv2 grid
+  registration API. Import from `@math.gl/proj4/classic` to retain the proj4js wrapper
+  and its CRS compatibility helpers. The configurable engine and plugins are exposed
+  at the root and shorter `core`, `projections/*`, `parsers/*`, and `grids/*` subpaths.
+  Numerical corrections and strict-input differences remain documented; this is API
+  compatibility, not unrestricted numerical parity.
+
+- Add lightweight projection descriptors under `loaders/*`. Coordinate methods load
+  requested algorithms on demand; explicit synchronous methods use the shared
+  implementation cache after `preload()`. Eager plugin instances remain synchronous.
+
 ## v5.0.0-alpha.9
 
 - feat(dggs): Add antimeridian boundary unwrapping helper (#137)

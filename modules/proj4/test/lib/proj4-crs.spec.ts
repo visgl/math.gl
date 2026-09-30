@@ -7,7 +7,7 @@ import {
   checkProj4CRSCompatibility,
   Proj4CRSCompatibilityError,
   toProj4CRSDefinition
-} from '@math.gl/proj4';
+} from '@math.gl/proj4/classic';
 import {createSpatialReference} from '@math.gl/crs';
 import {
   egm2008VerticalCRS,

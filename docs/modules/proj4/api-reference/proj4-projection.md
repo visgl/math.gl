@@ -4,6 +4,16 @@
   <img src="https://img.shields.io/badge/From-v3.3-blue.svg?style=flat-square" alt="From-v3.3" />
 </p>
 
+The root export uses the TypeScript engine with the full projection catalogue and
+WKT/PROJJSON readers. The original proj4js-backed class has the same constructor,
+`project`/`unproject`, `defineProjectionAliases`, and `registerDatumGrid` API at
+`@math.gl/proj4/classic`. Callbacks remain bound to their instance. Numerical and
+strict-input differences are listed in the [migration guide](../typescript-support.md).
+Static registries are separate for each backend and affect new instances.
+
+The TypeScript wrapper additionally provides `projectFlat`/`unprojectFlat`; for
+selective bundles and instance-local configuration use `TypeScriptProjection`.
+
 ## Usage
 
 Reproject WGS84 coordinates to another CRS
@@ -66,7 +76,9 @@ Defines projection aliases from authority codes, PROJ strings, WKT strings, or P
 
 Registers an NTv2 datum grid that projection definitions can reference with `+nadgrids=<name>`. Set `options.includeErrorFields` to `false` when the grid does not contain latitude and longitude error columns.
 
-## CRS compatibility utilities
+## Classic CRS compatibility utilities
+
+Import these helpers from `@math.gl/proj4/classic`; they check the classic backend.
 
 ### `checkProj4CRSCompatibility(definition, options?)`
 
@@ -94,7 +106,7 @@ horizontal components.
 
 Create a new `Proj4Projection` instance that can convert between the specified coordinate systems.
 
-- `from` and `to` are `Proj4CRSDefinition` values. They can be named coordinate systems, PROJ strings, WKT strings, or the `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` PROJJSON object kinds supported by proj4js 2.22.0. Both default to `WGS84`.
+- `from` and `to` are `Proj4CRSDefinition` values. They can be named coordinate systems, PROJ strings, WKT strings, or the `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` PROJJSON object kinds. The method and parameter limits depend on the selected backend; see the migration guide. Both default to `WGS84`.
 - `enforceAxis` defaults to `false`. Set it to `true` to respect the axis order declared by the source and destination coordinate systems.
 
 ### `project(coord: number[]): number[]`

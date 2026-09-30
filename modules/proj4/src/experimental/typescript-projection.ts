@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
+import type {ProjectionLoader} from './projection-loader';
+import {getLoadedProjection, preloadProjection} from './projection-loader';
 import type {ProjectionImplementation, ProjectionPlugin, ProjectionPoint} from './types';
 import {projectionOperation} from './mutable-projection';
 import {CORE_FLAGS, CORE_PARAMETERS, normalizeCRS} from './crs/normalize';
@@ -11,16 +13,21 @@ import {createDatumTransform} from './datum';
 import {wrapLongitude} from './parameters';
 import type {DatumGridCollection} from './grids/types';
 
-export type TypeScriptProjectionOptions = CRSNormalizationOptions & {
-  from?: TypeScriptCRSInput;
-  to?: TypeScriptCRSInput;
-  /** Only these projection implementations are available to this instance. */
-  projections?: readonly ProjectionPlugin[];
-  /** Honor declared axis order/direction. Default false, matching proj4js. */
-  enforceAxis?: boolean;
-  /** Prepared horizontal grids keyed by the names used in +nadgrids. No global registry. */
-  datumGrids?: DatumGridCollection;
-};
+type ProjectionRegistration = ProjectionPlugin | ProjectionLoader;
+type ProjectionResult<P, Result> =
+  Extract<P, ProjectionLoader> extends never ? Result : Promise<Result>;
+export type TypeScriptProjectionOptions<P extends ProjectionRegistration = ProjectionPlugin> =
+  CRSNormalizationOptions & {
+    from?: TypeScriptCRSInput;
+    to?: TypeScriptCRSInput;
+    /** Only these projection implementations are available to this instance. */
+    projections?: readonly P[];
+    /** Honor declared axis order/direction. Default false, matching proj4js. */
+    enforceAxis?: boolean;
+    /** Prepared horizontal grids keyed by the names used in +nadgrids. No global registry. */
+    datumGrids?: DatumGridCollection;
+  };
+export type TypeScriptProjectionCreateOptions = TypeScriptProjectionOptions<ProjectionRegistration>;
 export type ProjectionArray = Float32Array | Float64Array;
 type CoordinateTransform = {
   run(point: ProjectionPoint): void;
@@ -28,44 +35,160 @@ type CoordinateTransform = {
   geocentricOutput: boolean;
 };
 type CompiledCRS = NormalizedCRS & {implementation?: ProjectionImplementation};
-/** Opt-in native CRS engine; see the documented supported subset and accuracy limits. Third ordinates are ellipsoidal height or geocentric Z. */
-export class TypeScriptProjection {
-  private readonly from: CompiledCRS;
-  private readonly to: CompiledCRS;
-  private readonly forwardTransform: CoordinateTransform;
-  private readonly inverseTransform: CoordinateTransform;
+/** Configurable TypeScript CRS engine; see the documented supported subset and accuracy limits. Third ordinates are ellipsoidal height or geocentric Z. */
+export class TypeScriptProjection<P extends ProjectionRegistration = ProjectionPlugin> {
+  /** Resolve required descriptors once, then return an ordinary synchronous instance. */
+  static async create(
+    options: TypeScriptProjectionCreateOptions = {}
+  ): Promise<TypeScriptProjection> {
+    const projections = await Promise.all(requiredProjections(options).map(preloadProjection));
+    return new TypeScriptProjection({...options, projections});
+  }
+
+  private readonly forwardTransform?: CoordinateTransform;
+  private readonly inverseTransform?: CoordinateTransform;
+  private readonly deferred?: {
+    options: TypeScriptProjectionCreateOptions;
+    pending?: Promise<TypeScriptProjection>;
+    implementation?: TypeScriptProjection;
+  };
   readonly lossy: boolean;
-  constructor(options: TypeScriptProjectionOptions = {}) {
-    const plugins = registry(options.projections || []);
-    this.from = compileCRS(options.from ?? 'WGS84', plugins, options);
-    this.to = compileCRS(options.to ?? 'WGS84', plugins, options);
-    this.lossy = this.from.lossy || this.to.lossy;
-    if (this.lossy && (this.from.kind === 'geocentric' || this.to.kind === 'geocentric'))
-      unsupportedStage(
-        'Horizontal extraction cannot supply ellipsoidal height for geocentric coordinates'
-      );
-    this.forwardTransform = compileTransform(this.from, this.to, Boolean(options.enforceAxis));
-    this.inverseTransform = compileTransform(this.to, this.from, Boolean(options.enforceAxis));
+  constructor(options: TypeScriptProjectionOptions<P> = {}) {
+    const registrations = options.projections || [];
+    registry(registrations);
+    if (registrations.some(projection => !('create' in projection))) {
+      // Inspect definitions without fetching any algorithms. Importing descriptors
+      // and constructing an instance never starts a dynamic import.
+      const from = normalizeCRS(options.from ?? 'WGS84', options);
+      const to = normalizeCRS(options.to ?? 'WGS84', options);
+      this.lossy = from.lossy || to.lossy;
+      this.deferred = {options: {...options, projections: [...registrations]}};
+    } else {
+      const eager = options as TypeScriptProjectionOptions;
+      const plugins = registry(eager.projections || []);
+      const from = compileCRS(eager.from ?? 'WGS84', plugins, eager);
+      const to = compileCRS(eager.to ?? 'WGS84', plugins, eager);
+      this.lossy = from.lossy || to.lossy;
+      if (this.lossy && (from.kind === 'geocentric' || to.kind === 'geocentric'))
+        unsupportedStage(
+          'Horizontal extraction cannot supply ellipsoidal height for geocentric coordinates'
+        );
+      this.forwardTransform = compileTransform(from, to, Boolean(options.enforceAxis));
+      this.inverseTransform = compileTransform(to, from, Boolean(options.enforceAxis));
+    }
     this.project = this.project.bind(this);
     this.unproject = this.unproject.bind(this);
     this.projectFlat = this.projectFlat.bind(this);
     this.unprojectFlat = this.unprojectFlat.bind(this);
+    this.projectSync = this.projectSync.bind(this);
+    this.unprojectSync = this.unprojectSync.bind(this);
+    this.projectFlatSync = this.projectFlatSync.bind(this);
+    this.unprojectFlatSync = this.unprojectFlatSync.bind(this);
   }
-  /** Returns a new array. Missing geographic/projected height defaults to zero internally. */
-  project(coordinate: readonly number[]): number[] {
-    return transformScalar(coordinate, this.forwardTransform);
+  private load(): Promise<TypeScriptProjection> {
+    const state = this.deferred;
+    if (!state) return Promise.resolve(this as unknown as TypeScriptProjection);
+    if (state.implementation) return Promise.resolve(state.implementation);
+    state.pending ||= TypeScriptProjection.create(state.options)
+      .then(projection => {
+        state.implementation = projection;
+        return projection;
+      })
+      .catch(error => {
+        state.pending = undefined;
+        throw error;
+      });
+    return state.pending;
   }
-  unproject(coordinate: readonly number[]): number[] {
-    return transformScalar(coordinate, this.inverseTransform);
+  private loadSync(): TypeScriptProjection {
+    const state = this.deferred;
+    if (!state) return this as unknown as TypeScriptProjection;
+    if (!state.implementation) {
+      const projections = requiredProjections(state.options).map(descriptor => {
+        const plugin = getLoadedProjection(descriptor);
+        if (!plugin)
+          throw new Error(
+            'Projection is not preloaded: ' + descriptor.name + '. Call preload() first.'
+          );
+        return plugin;
+      });
+      state.implementation = new TypeScriptProjection({...state.options, projections});
+    }
+    return state.implementation;
   }
-  /** Project a flat interleaved buffer in place. Earlier records remain changed on failure. */
-  projectFlat<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
-    return transformInPlace(coordinates, dimension, this.forwardTransform);
+  /** Synchronous variants never import algorithms; descriptors must be preloaded. */
+  projectSync(coordinate: readonly number[]): number[] {
+    return this.deferred
+      ? this.loadSync().project(coordinate)
+      : transformScalar(coordinate, this.forwardTransform);
   }
-  /** Unproject a flat interleaved buffer in place; returns the same typed-array view. */
-  unprojectFlat<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
-    return transformInPlace(coordinates, dimension, this.inverseTransform);
+  unprojectSync(coordinate: readonly number[]): number[] {
+    return this.deferred
+      ? this.loadSync().unproject(coordinate)
+      : transformScalar(coordinate, this.inverseTransform);
   }
+  projectFlatSync<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
+    return this.deferred
+      ? this.loadSync().projectFlat(coordinates, dimension)
+      : transformInPlace(coordinates, dimension, this.forwardTransform);
+  }
+  unprojectFlatSync<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
+    return this.deferred
+      ? this.loadSync().unprojectFlat(coordinates, dimension)
+      : transformInPlace(coordinates, dimension, this.inverseTransform);
+  }
+  /** Optional warm-up. Coordinate methods also load automatically on first use. */
+  async preload(): Promise<void> {
+    await this.load();
+  }
+  /** Eager plugins return arrays; descriptor-backed instances return promises. */
+  project(coordinate: readonly number[]): ProjectionResult<P, number[]> {
+    const result = this.deferred
+      ? this.projectLoaded(coordinate, false)
+      : transformScalar(coordinate, this.forwardTransform);
+    return result as ProjectionResult<P, number[]>;
+  }
+  unproject(coordinate: readonly number[]): ProjectionResult<P, number[]> {
+    const result = this.deferred
+      ? this.projectLoaded(coordinate, true)
+      : transformScalar(coordinate, this.inverseTransform);
+    return result as ProjectionResult<P, number[]>;
+  }
+  private projectLoaded(coordinate: readonly number[], inverse: boolean): Promise<number[]> {
+    const input = coordinate.slice();
+    return this.load().then(projection =>
+      inverse ? projection.unproject(input) : projection.project(input)
+    );
+  }
+  /** In-place; descriptor callers must await completion before reusing the buffer. */
+  projectFlat<T extends ProjectionArray>(coordinates: T, dimension = 2): ProjectionResult<P, T> {
+    const result = this.deferred
+      ? this.load().then(projection => projection.projectFlat(coordinates, dimension))
+      : transformInPlace(coordinates, dimension, this.forwardTransform);
+    return result as ProjectionResult<P, T>;
+  }
+  unprojectFlat<T extends ProjectionArray>(coordinates: T, dimension = 2): ProjectionResult<P, T> {
+    const result = this.deferred
+      ? this.load().then(projection => projection.unprojectFlat(coordinates, dimension))
+      : transformInPlace(coordinates, dimension, this.inverseTransform);
+    return result as ProjectionResult<P, T>;
+  }
+}
+function requiredProjections(options: TypeScriptProjectionCreateOptions): ProjectionRegistration[] {
+  const available = registry(options.projections || []);
+  const required = new Set<ProjectionPlugin | ProjectionLoader>();
+  for (const definition of [options.from ?? 'WGS84', options.to ?? 'WGS84']) {
+    const crs = normalizeCRS(definition, options);
+    if (['geographic', 'identity'].includes(crs.kind)) continue;
+    const projection = available.get(pluginKey(crs.projection));
+    if (!projection)
+      throw new TypeScriptCRSError(
+        'missing-plugin',
+        'Projection plugin is not registered: ' + crs.projection
+      );
+    required.add(projection);
+  }
+  return [...required];
 }
 export type TypeScriptCRSCompatibility = {
   status: 'supported' | 'unsupported' | 'unknown';
@@ -92,8 +215,10 @@ export function checkTypeScriptCRSCompatibility(
   }
 }
 const pluginKey = (name: string): string => name.toLowerCase().replace(/[\s_-]/g, '');
-function registry(projections: readonly ProjectionPlugin[]): Map<string, ProjectionPlugin> {
-  const plugins = new Map<string, ProjectionPlugin>();
+function registry<T extends Pick<ProjectionPlugin, 'name' | 'aliases'>>(
+  projections: readonly T[]
+): Map<string, T> {
+  const plugins = new Map<string, T>();
   for (const plugin of projections) {
     for (const name of new Set([plugin.name, ...(plugin.aliases || [])].map(pluginKey))) {
       if (

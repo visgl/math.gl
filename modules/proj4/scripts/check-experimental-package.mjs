@@ -10,8 +10,8 @@ import {build} from 'esbuild';
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url));
 const require = createRequire(import.meta.url);
-const esm = await import('@math.gl/proj4/experimental');
-const cjs = require('@math.gl/proj4/experimental');
+const esm = await import('@math.gl/proj4');
+const cjs = require('@math.gl/proj4');
 for (const {TypeScriptProjection, mercator} of [esm, cjs]) {
   const projection = new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});
   assert.deepEqual(projection.project([0, 0]), [0, 0]);
@@ -28,8 +28,14 @@ for (const {TypeScriptProjection, universalTransverseMercator} of [esm, cjs]) {
 const cases = [
   {plugin: null, to: null, kernels: [], projections: []},
   {plugin: 'equalEarth', to: '+proj=eqearth', kernels: ['eqearth'], projections: ['eqearth']},
-  {plugin: 'eckertVI', to: '+proj=eck6', kernels: ['eck6','sinu'], projections: ['eck6']},
-  {plugin: 'obliqueTransformation,mollweide', expression: 'obliqueTransformation(mollweide)', to: '+proj=ob_tran +o_lat_p=45 +o_lon_p=0', kernels: ['moll'], projections: ['moll','ob-tran']},
+  {plugin: 'eckertVI', to: '+proj=eck6', kernels: ['eck6', 'sinu'], projections: ['eck6']},
+  {
+    plugin: 'obliqueTransformation,mollweide',
+    expression: 'obliqueTransformation(mollweide)',
+    to: '+proj=ob_tran +o_lat_p=45 +o_lon_p=0',
+    kernels: ['moll'],
+    projections: ['moll', 'ob-tran']
+  },
   {plugin: 'mercator', to: 'EPSG:3857', kernels: [], projections: ['mercator']},
   {
     plugin: 'universalTransverseMercator',
@@ -48,12 +54,12 @@ for (const fixture of cases) {
   const contents = fixture.plugin
     ? 'import {TypeScriptProjection, ' +
       fixture.plugin +
-      "} from '@math.gl/proj4/experimental'; export const projection = new TypeScriptProjection({to: " +
+      "} from '@math.gl/proj4'; export const projection = new TypeScriptProjection({to: " +
       JSON.stringify(fixture.to) +
       ', projections: [' +
       (fixture.expression || fixture.plugin) +
       ']});'
-    : "export {TypeScriptProjection} from '@math.gl/proj4/experimental';";
+    : "export {TypeScriptProjection} from '@math.gl/proj4';";
   const result = await build({
     stdin: {contents, resolveDir: packageRoot},
     bundle: true,
@@ -66,7 +72,7 @@ for (const fixture of cases) {
   });
   assert(
     !Object.keys(result.metafile.inputs).some(path => /node_modules\/proj4\//.test(path)),
-    'Experimental entry point must not import proj4js'
+    'TypeScript entry point must not import proj4js'
   );
   const included = Object.values(result.metafile.outputs).flatMap(output =>
     Object.entries(output.inputs)
@@ -88,8 +94,8 @@ for (const fixture of cases) {
 // CRS readers are optional even though their symbols share the public barrel.
 for (const parser of [null, 'wktCRSParser', 'projJSONCRSParser']) {
   const contents = parser
-    ? `import {TypeScriptProjection, ${parser}} from '@math.gl/proj4/experimental'; export const create = to => new TypeScriptProjection({to, parsers: [${parser}]});`
-    : "export {TypeScriptProjection} from '@math.gl/proj4/experimental';";
+    ? `import {TypeScriptProjection, ${parser}} from '@math.gl/proj4'; export const create = to => new TypeScriptProjection({to, parsers: [${parser}]});`
+    : "export {TypeScriptProjection} from '@math.gl/proj4';";
   const result = await build({
     stdin: {contents, resolveDir: packageRoot},
     bundle: true,
@@ -120,7 +126,8 @@ for (const {TypeScriptProjection, geocentric, wktCRSParser} of [esm, cjs]) {
     new TypeScriptProjection({to: 'EPSG:4978', projections: [geocentric]}).project([0, 0]),
     [6378137, 0, 0]
   );
-  const source = 'GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]]';
+  const source =
+    'GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]]';
   assert.deepEqual(
     new TypeScriptProjection({from: source, parsers: [wktCRSParser]}).project([0, 0]),
     [0, 0]
@@ -130,38 +137,70 @@ for (const {TypeScriptProjection, geocentric, wktCRSParser} of [esm, cjs]) {
 // Prepared grids are injected; core/projection bundles must not retain grid readers or interpolation.
 for (const reader of [null, 'parseNTv2Grid', 'loadGeoTIFFGrid']) {
   const contents = reader
-    ? "export {" + reader + "} from '@math.gl/proj4/experimental';"
-    : "export {TypeScriptProjection} from '@math.gl/proj4/experimental';";
+    ? 'export {' + reader + "} from '@math.gl/proj4';"
+    : "export {TypeScriptProjection} from '@math.gl/proj4';";
   const result = await build({
     stdin: {contents, resolveDir: packageRoot},
-    bundle: true, tsconfigRaw: {}, format: 'esm', platform: 'browser',
-    minify: true, metafile: true, write: false
+    bundle: true,
+    tsconfigRaw: {},
+    format: 'esm',
+    platform: 'browser',
+    minify: true,
+    metafile: true,
+    write: false
   });
   const emitted = Object.values(result.metafile.outputs).flatMap(output =>
-    Object.entries(output.inputs).filter(([, input]) => input.bytesInOutput > 0).map(([path]) => path)
+    Object.entries(output.inputs)
+      .filter(([, input]) => input.bytesInOutput > 0)
+      .map(([path]) => path)
   );
-  assert.equal(emitted.some(path => path.endsWith('/grids/ntv2.js')), reader === 'parseNTv2Grid');
-  assert.equal(emitted.some(path => path.endsWith('/grids/geotiff.js')), reader === 'loadGeoTIFFGrid');
-  assert.equal(emitted.some(path => path.endsWith('/grids/grid.js')), reader !== null);
+  assert.equal(
+    emitted.some(path => path.endsWith('/grids/ntv2.js')),
+    reader === 'parseNTv2Grid'
+  );
+  assert.equal(
+    emitted.some(path => path.endsWith('/grids/geotiff.js')),
+    reader === 'loadGeoTIFFGrid'
+  );
+  assert.equal(
+    emitted.some(path => path.endsWith('/grids/grid.js')),
+    reader !== null
+  );
   assert(!emitted.some(path => /node_modules\/(proj4|geotiff)\//.test(path)));
 }
 for (const {TypeScriptProjection, loadGeoTIFFGrid} of [esm, cjs]) {
   const grid = await loadGeoTIFFGrid({
     getImageCount: async () => 1,
     getImage: async () => ({
-      getWidth: () => 2, getHeight: () => 2,
-      getBoundingBox: () => [-1,-1,1,1],
-      fileDirectory: {ModelPixelScale: [1,1,0]},
-      readRasters: async () => [new Float32Array(4).fill(1),new Float32Array(4).fill(-2)]
+      getWidth: () => 2,
+      getHeight: () => 2,
+      getBoundingBox: () => [-1, -1, 1, 1],
+      fileDirectory: {ModelPixelScale: [1, 1, 0]},
+      readRasters: async () => [new Float32Array(4).fill(1), new Float32Array(4).fill(-2)]
     })
   });
   const projection = new TypeScriptProjection({
     from: '+proj=longlat +nadgrids=local',
     datumGrids: {local: grid}
   });
-  const point = [-0.5,0.5,123];
+  const point = [-0.5, 0.5, 123];
   const projected = projection.project(point);
-  assert(Math.abs(projected[0] - (point[0] - 2/3600)) < 1e-12);
-  assert(Math.abs(projected[1] - (point[1] + 1/3600)) < 1e-12);
-  projection.unproject(projected).forEach((value,i) => assert(Math.abs(value-point[i]) < 1e-10));
+  assert(Math.abs(projected[0] - (point[0] - 2 / 3600)) < 1e-12);
+  assert(Math.abs(projected[1] - (point[1] + 1 / 3600)) < 1e-12);
+  projection.unproject(projected).forEach((value, i) => assert(Math.abs(value - point[i]) < 1e-10));
 }
+
+// Selecting the default convenience wrapper must also exclude the classic runtime.
+const defaultBundle = await build({
+  stdin: {contents: "export {Proj4Projection} from '@math.gl/proj4';", resolveDir: packageRoot},
+  bundle: true,
+  tsconfigRaw: {},
+  format: 'esm',
+  platform: 'browser',
+  minify: true,
+  metafile: true,
+  write: false
+});
+assert(
+  !Object.keys(defaultBundle.metafile.inputs).some(path => /node_modules\/proj4\//.test(path))
+);

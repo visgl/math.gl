@@ -1,11 +1,10 @@
 # TypeScriptProjection
 
-An opt-in TypeScript implementation alongside `Proj4Projection`; see the [support and migration contract](../native-support.md).
-Import it from `@math.gl/proj4/native` or the isolated `@math.gl/proj4/native/core` entry point. The existing `Proj4Projection` continues to
-use proj4js and provides the broader CRS support.
+The configurable TypeScript engine underlying the default `Proj4Projection`; see the [support and migration contract](../typescript-support.md).
+Import it from `@math.gl/proj4` or the isolated `@math.gl/proj4/core` entry point. The original wrapper is available from `@math.gl/proj4/classic`.
 
 ```typescript
-import {TypeScriptProjection, mercator} from '@math.gl/proj4/native';
+import {TypeScriptProjection, mercator} from '@math.gl/proj4';
 
 const projection = new TypeScriptProjection({
   from: 'EPSG:4326',
@@ -17,24 +16,24 @@ projection.project([-74, 40.7]);
 projection.unproject([-8237642.318702244, 4968191.930188206]);
 ```
 
-The native entry point has no runtime dependency on proj4js. Projection plugins
+The TypeScript entry point has no runtime dependency on proj4js. Projection plugins
 are explicitly supplied per instance, with no global registration or automatically
 included projected coordinate systems. ESM bundlers can remove unused plugins.
-The API and its supported subset may change as coverage expands.
+See the support contract for compatibility guarantees and numerical limits.
 
 See the [engine guide](../typescript-engine.md) for pluggability, lazy loading, bundle
 size comparisons, and application integration.
 
 ## Isolated entry points
 
-Use `@math.gl/proj4/native/core` for the class, normalization, capability checks
-and shared contracts. Import a plugin from `@math.gl/proj4/native/projections/<id>`
+Use `@math.gl/proj4/core` for the class, normalization, capability checks
+and shared contracts. Import a plugin from `@math.gl/proj4/projections/<id>`
 using its canonical PROJ name, for example `merc`, `utm`, `etmerc`, `geocent` or
 `ob_tran`. Export names are identical to the barrel's names. Geographic coordinates
 need no plugin or `longlat` subpath; the internal `gauss` helper is not public.
 
-Readers are available from `experimental/parsers/wkt`, `experimental/parsers/projjson`,
-`experimental/grids/ntv2` and `experimental/grids/geotiff`, with the package name prefix.
+Readers are available from `parsers/wkt`, `parsers/projjson`,
+`grids/ntv2` and `grids/geotiff`, with the package name prefix.
 All subpaths support ESM, CommonJS and TypeScript. ESM code splitting is required for
 browser lazy downloads; CommonJS subpaths select APIs but do not promise shared bundles.
 See the [lazy-loading guide](../typescript-engine.md#load-less-used-projections-on-demand).
@@ -74,7 +73,7 @@ datums, coordinate epochs, and vertical grid transformations are rejected.
 ## Integration with @math.gl/crs
 
 Syntax parsing, lossless AST encoding, readonly CRS definitions, and source metadata
-belong to `@math.gl/crs`. The native backend interprets those definitions into
+belong to `@math.gl/crs`. The TypeScript backend interprets those definitions into
 execution parameters without adding projection dependencies to the CRS module.
 
 `SpatialReference.crs` must be explicit or default; absent/unknown states are errors,
@@ -84,7 +83,7 @@ coordinate frame must agree with the executable definition. Inputs are not mutat
 
 ```typescript
 import {createSpatialReference} from '@math.gl/crs';
-import {TypeScriptProjection, mercator} from '@math.gl/proj4/native';
+import {TypeScriptProjection, mercator} from '@math.gl/proj4';
 
 const source = createSpatialReference({
   crs: {
@@ -211,7 +210,7 @@ use `stere` for polar projections. UTM requires an integer `zone` from 1 through
 offsets according to its zone/hemisphere. Use `tmerc` for custom TM parameters.
 
 ```typescript
-import {TypeScriptProjection, universalTransverseMercator} from '@math.gl/proj4/native';
+import {TypeScriptProjection, universalTransverseMercator} from '@math.gl/proj4';
 
 const utm = new TypeScriptProjection({
   to: 'EPSG:32756',
@@ -250,7 +249,7 @@ including Web Mercator's sphere. Other horizontal grid lists use the prepared gr
 wrapping, and geographic `lon_wrap` chooses the center of the output longitude interval.
 `axis` accepts each east/west, north/south, up/down component exactly once.
 Unknown or duplicate parameters throw. `no_defs`, `title`, and `type=crs` are metadata.
-Use `Proj4Projection` for definitions outside the native subset; there is no implicit fallback.
+Use `Proj4Projection` from `@math.gl/proj4/classic` where its broader behavior is needed; there is no implicit fallback.
 
 
 ### Remaining projection catalogue
@@ -291,7 +290,7 @@ instead of being silently ignored by the fixed kernel.
 `obliqueTransformation` is a factory with an explicit dependency:
 
 ```typescript
-import {TypeScriptProjection, obliqueTransformation, mollweide} from '@math.gl/proj4/native';
+import {TypeScriptProjection, obliqueTransformation, mollweide} from '@math.gl/proj4';
 
 const rotated = new TypeScriptProjection({
   to: '+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=-90',
@@ -315,12 +314,12 @@ coverage remain tracked gaps; see the parity inventory.
 ## Horizontal datum grids
 
 Grid decoding/loading is separate from synchronous coordinate transformation.
-Register prepared grids per instance through `datumGrids`; the native engine has no
+Register prepared grids per instance through `datumGrids`; the TypeScript engine has no
 global registry. This replaces the global registration pattern of the existing
 `Proj4Projection.registerDatumGrid` wrapper.
 
 ```typescript
-import {TypeScriptProjection, parseNTv2Grid} from '@math.gl/proj4/native';
+import {TypeScriptProjection, parseNTv2Grid} from '@math.gl/proj4';
 
 const grid = parseNTv2Grid(ntv2ArrayBuffer);
 const projection = new TypeScriptProjection({
@@ -341,7 +340,7 @@ object. Callers load the file or URL with their chosen GeoTIFF library and await
 result before construction:
 
 ```typescript
-import {loadGeoTIFFGrid, TypeScriptProjection} from '@math.gl/proj4/native';
+import {loadGeoTIFFGrid, TypeScriptProjection} from '@math.gl/proj4';
 
 const grid = await loadGeoTIFFGrid(decodedTIFF);
 const projection = new TypeScriptProjection({
@@ -398,7 +397,7 @@ The engine handles CRS units, axes, prime meridians, datum transformations, and 
 Geocentric plugins additionally implement `forward3D`/`inverse3D` over three-element tuples.
 
 ```typescript
-import type {ProjectionPlugin} from '@math.gl/proj4/native';
+import type {ProjectionPlugin} from '@math.gl/proj4';
 
 const simpleCylindrical: ProjectionPlugin = {
   name: 'simple_cylindrical',
@@ -425,15 +424,31 @@ Custom prepared grids can similarly provide `shiftInPlace(point, inverse): boole
 Return true for a successful horizontal shift. On false, leave x/y unchanged so
 later grids can be tried; always preserve height. Built-in grid readers provide this hook.
 
+## Projection descriptors and synchronous variants
+
+The `projections` option also accepts `ProjectionLoader` descriptors. With any
+descriptor in the list, coordinate methods return promises and load only the
+algorithms used by the CRS pair on first use. Eager-only instances keep their
+synchronous return types. Imports and constructors do not preload algorithms.
+
+`await instance.preload()` prepares required implementations ahead of time.
+`projectSync`, `unprojectSync`, `projectFlatSync` and `unprojectFlatSync` never import
+algorithms: preload first, or these methods throw. Preloading a descriptor directly
+also enables sync methods on any instance that uses it. The default `Proj4Projection`
+wrapper contains eager plugins and preserves its synchronous API.
+
+See [descriptor loading and cache behavior](../typescript-engine.md#load-less-used-projections-on-demand)
+for examples, shared caching, retry behavior and custom descriptors.
+
 ## Expansion path
 
 The [parity roadmap](../roadmap.md) defines tranches and acceptance gates against
 the pinned proj4js 2.22.0 reference.
 
 Add projection plugins with forward/inverse parity tests against proj4js, then extend
-CRS normalization, ellipsoid/datum handling, and grid support independently. Keep the
-experimental engine opt-in until the required compatibility and accuracy are verified.
-The existing `checkProj4CRSCompatibility` utility checks proj4js, not this engine.
+CRS normalization, ellipsoid/datum handling, and grid support independently.
+The default wrapper uses this engine; the explicit `classic` subpath retains proj4js.
+Its `checkProj4CRSCompatibility` utility checks that backend.
 
 Mercator equations follow the [PROJ Mercator documentation](https://proj.org/en/stable/operations/projections/merc.html).
 

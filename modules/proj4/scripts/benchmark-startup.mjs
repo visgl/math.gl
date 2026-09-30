@@ -14,10 +14,10 @@ const {values} = parseArgs({
 const samples = Number(values.samples);
 assert(Number.isSafeInteger(samples) && samples >= 3 && samples <= 30);
 const entries = {
-  'native-selected': `const [{TypeScriptProjection},{mercator}]=await Promise.all([import('@math.gl/proj4/native/core'),import('@math.gl/proj4/native/projections/merc')]);const create=()=>new TypeScriptProjection({to:'EPSG:3857',projections:[mercator]});`,
-  'native-barrel': `const {TypeScriptProjection,mercator}=await import('@math.gl/proj4/native');const create=()=>new TypeScriptProjection({to:'EPSG:3857',projections:[mercator]});`,
+  'native-selected': `const [{TypeScriptProjection},{mercator}]=await Promise.all([import('@math.gl/proj4/core'),import('@math.gl/proj4/projections/merc')]);const create=()=>new TypeScriptProjection({to:'EPSG:3857',projections:[mercator]});`,
+  'native-barrel': `const {TypeScriptProjection,mercator}=await import('@math.gl/proj4');const create=()=>new TypeScriptProjection({to:'EPSG:3857',projections:[mercator]});`,
   proj4: `const {default:proj4}=await import('proj4');const create=()=>{const p=proj4('WGS84','EPSG:3857');return {project:p.forward};};`,
-  wrapper: `const {Proj4Projection}=await import('@math.gl/proj4');const create=()=>new Proj4Projection({to:'EPSG:3857'});`
+  wrapper: `const {Proj4Projection}=await import('@math.gl/proj4/classic');const create=()=>new Proj4Projection({to:'EPSG:3857'});`
 };
 const results = [];
 for (let sample = 0; sample < samples; sample++)

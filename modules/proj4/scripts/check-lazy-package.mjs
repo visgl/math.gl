@@ -18,19 +18,20 @@ const budgets = JSON.parse(
 const measurements = {};
 const scenarios = {
   utm: {
-    load: "const {universalTransverseMercator} = await import('@math.gl/proj4/native/projections/utm'); return new TypeScriptProjection({to: 'EPSG:32631', projections: [universalTransverseMercator]});",
+    imports: "import {universalTransverseMercatorLoader} from '@math.gl/proj4/loaders/utm';",
+    load: "return new TypeScriptProjection({to: 'EPSG:32631', projections: [universalTransverseMercatorLoader]});",
     deferred: '/experimental/kernels/etmerc.js',
     expected: [500000, 0],
     point: [3, 0]
   },
   wkt: {
-    load: `const {wktCRSParser} = await import('@math.gl/proj4/native/parsers/wkt'); return new TypeScriptProjection({to: 'GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]]', parsers: [wktCRSParser]});`,
+    load: `const {wktCRSParser} = await import('@math.gl/proj4/parsers/wkt'); return new TypeScriptProjection({to: 'GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]]', parsers: [wktCRSParser]});`,
     deferred: '/experimental/crs/wkt.js',
     expected: [3, 0],
     point: [3, 0]
   },
   rotated: {
-    load: "const [{obliqueTransformation}, {mollweide}] = await Promise.all([import('@math.gl/proj4/native/projections/ob_tran'), import('@math.gl/proj4/native/projections/moll')]); return new TypeScriptProjection({to: '+proj=ob_tran +o_lat_p=45 +o_lon_p=0', projections: [obliqueTransformation(mollweide)]});",
+    load: "const [{obliqueTransformation}, {mollweide}] = await Promise.all([import('@math.gl/proj4/projections/ob_tran'), import('@math.gl/proj4/projections/moll')]); return new TypeScriptProjection({to: '+proj=ob_tran +o_lat_p=45 +o_lon_p=0', projections: [obliqueTransformation(mollweide)]});",
     deferred: '/experimental/kernels/moll.js',
     point: [3, 30]
   }
@@ -39,8 +40,9 @@ try {
   for (const [name, scenario] of Object.entries(scenarios)) {
     const result = await build({
       stdin: {
-        contents: `import {TypeScriptProjection} from '@math.gl/proj4/native/core';
-import {mercator} from '@math.gl/proj4/native/projections/merc';
+        contents: `import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {mercator} from '@math.gl/proj4/projections/merc';
+${scenario.imports || ''}
 export const eager = new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});
 export async function load() {${scenario.load}}`,
         resolveDir: packageRoot,
@@ -141,14 +143,16 @@ export async function load() {${scenario.load}}`,
     const application = await import(pathToFileURL(entry).href);
     assert.deepEqual(application.eager.project([0, 0]), [0, 0]);
     const projection = await application.load();
-    const xy = projection.project(scenario.point);
+    if (name === 'utm') assert.throws(() => projection.projectSync(scenario.point), /preload/);
+    const xy = await projection.project(scenario.point);
     if (scenario.expected)
       xy.forEach((value, i) => assert(Math.abs(value - scenario.expected[i]) < 1e-7));
-    projection
-      .unproject(xy)
-      .forEach((value, i) => assert(Math.abs(value - scenario.point[i]) < 1e-7));
+    (await projection.unproject(xy)).forEach((value, i) =>
+      assert(Math.abs(value - scenario.point[i]) < 1e-7)
+    );
     const flat = new Float64Array(scenario.point);
-    projection.projectFlat(flat);
+    await projection.projectFlat(flat);
+    if (name === 'utm') assert.deepEqual(projection.projectSync(scenario.point), xy);
     assert.deepEqual([...flat], xy);
   }
   console.log(JSON.stringify(measurements, null, 2));

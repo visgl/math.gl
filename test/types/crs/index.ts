@@ -8,7 +8,7 @@ import {
   toProj4CRSDefinition,
   type Proj4CRSCompatibilityResult,
   type Proj4CRSDefinition
-} from '@math.gl/proj4';
+} from '@math.gl/proj4/classic';
 import {
   createSpatialReference,
   inferCRSRepresentation,

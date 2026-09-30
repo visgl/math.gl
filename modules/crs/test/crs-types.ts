@@ -13,7 +13,7 @@ import type {
   SpatialReference,
   WKTCRSNode
 } from '@math.gl/crs';
-import type {Proj4CRSDefinition} from '@math.gl/proj4';
+import type {Proj4CRSDefinition} from '@math.gl/proj4/classic';
 
 import {
   egm2008VerticalCRS,

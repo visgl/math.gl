@@ -1,26 +1,27 @@
 # TypeScript projection engine
 
-`@math.gl/proj4/native` is a TypeScript coordinate transformation engine with
+`@math.gl/proj4` is a TypeScript coordinate transformation engine with
 explicit projection plugins, optional CRS readers, and in-place typed-array transforms.
 Applications choose the algorithms and data they need, and can load them on demand.
 It is an entry point of **`@math.gl/proj4`**, not a separately installed package.
 Existing `@math.gl/proj4/experimental` paths remain compatibility aliases.
 
-The native entry point supports the [documented API and transformation profile](./native-support.md). The upstream coordinate corpus has **232 original numeric matches, one reviewed
+The TypeScript engine supports the [documented API and transformation profile](./typescript-support.md). The upstream coordinate corpus has **232 original numeric matches, one reviewed
 Robinson correction, and nine intentional input rejections out of 242**. This is not a measure of complete geodetic accuracy.
 An independent PROJ corpus also checks all 37 named algorithms across 2,386 points,
 with additional structured CRS, datum-chain and real NTv2/GeoTIFF checks, with explicit accuracy limits. See [independent validation](./independent-validation.md)
 and the [parity audit](./parity-audit.md) for coverage and remaining qualification work.
-The existing `Proj4Projection` remains available from `@math.gl/proj4` and uses proj4js.
+The root `Proj4Projection` uses this engine with all plugins/readers configured.
+Import `Proj4Projection` from `@math.gl/proj4/classic` to use proj4js.
+The convenience wrapper includes the full catalogue; use `TypeScriptProjection`
+and selective subpaths for smaller bundles.
 
 ## Start with the projections you need
 
-Use a package build of `@math.gl/proj4` that includes the experimental entry point;
-these examples describe the current source-tree API. Import named exports from that
-entry point:
+These examples use the configurable engine exported by the package root:
 
 ```typescript title="mercator-projection.ts"
-import {TypeScriptProjection, mercator} from '@math.gl/proj4/native';
+import {TypeScriptProjection, mercator} from '@math.gl/proj4';
 
 export const projection = new TypeScriptProjection({
   from: 'EPSG:4326',
@@ -44,7 +45,7 @@ import {
   TypeScriptProjection,
   mercator,
   universalTransverseMercator
-} from '@math.gl/proj4/native';
+} from '@math.gl/proj4';
 
 const projection = new TypeScriptProjection({
   from: 'EPSG:3857',
@@ -87,9 +88,9 @@ Use named ESM imports and register a small, explicit list. The package declares
 remove unused projection kernels and optional readers. Type-only imports add no
 runtime code.
 
-The native entry point does not import the proj4js runtime. The npm package
-still depends on proj4js for the existing wrapper, so **installation size and browser
-bundle size are different measurements**. Importing the wrapper elsewhere in the
+The TypeScript entry points do not import the proj4js runtime. The npm package
+still depends on proj4js for the classic wrapper, so **installation size and browser
+bundle size are different measurements**. Importing the classic wrapper elsewhere in the
 same application can retain both engines. CommonJS consumers are supported, but the
 size measurements below rely on an ESM bundler with tree shaking.
 
@@ -98,27 +99,27 @@ and shared ellipsoid and datum tables. Selecting one projection does not remove
 those tables. Adding WKT pulls in syntax parsing and structured-CRS interpretation;
 PROJJSON objects already provide structured input and need less reader code.
 
-Measured September 29, 2026 for the axis and entry-point follow-up, with esbuild,
+Measured September 30, 2026 for the TypeScript default and descriptor API, with esbuild,
 browser ESM, ES2020, minification, and gzip level 9. Each row is a separate retained
 bundle, not an increment or an application-wide download estimate. **KiB = 1,024 bytes.**
 
 | Retained functionality | Minified KiB | Gzip KiB |
 | --- | ---: | ---: |
-| Engine core | 41.5 | 15.4 |
-| Engine + Mercator | 42.8 | 15.8 |
-| Engine + UTM | 49.5 | 18.5 |
-| Engine + Mercator + WKT reader | 65.7 | 23.3 |
-| Engine + Mercator + PROJJSON reader | 53.2 | 19.4 |
-| Engine + Mercator + NTv2 decoder | 45.9 | 17.0 |
-| Engine + Mercator + GeoTIFF grid adapter | 45.9 | 17.0 |
-| Every native export, including readers and grid adapters | 138.8 | 47.4 |
-| Existing proj4js-backed wrapper | 128.8 | 42.4 |
+| Engine core | 44.2 | 16.1 |
+| Engine + Mercator | 45.5 | 16.6 |
+| Engine + UTM | 52.2 | 19.3 |
+| Engine + Mercator + WKT reader | 68.9 | 24.3 |
+| Engine + Mercator + PROJJSON reader | 56.4 | 20.3 |
+| Engine + Mercator + NTv2 decoder | 48.6 | 17.8 |
+| Engine + Mercator + GeoTIFF grid adapter | 48.6 | 17.8 |
+| Default TypeScript wrapper (all plugins and readers) | 141.4 | 48.3 |
+| Every root export, including wrapper, readers and grid adapters | 144.2 | 49.3 |
+| Classic proj4js-backed wrapper | 128.8 | 42.4 |
 
 The GeoTIFF row excludes an external TIFF decoder, workers, and grid files. No row
 includes downloaded datum-grid data. Different bundlers, targets, compression,
-shared dependencies, and import patterns change these totals. Keeping every native
-export can cost more than the wrapper; the size benefit comes from selecting a subset.
-Avoid a runtime lookup such as `nativeExports[name]` over the entire module namespace
+shared dependencies, and import patterns change these totals. The full TypeScript wrapper and root export set cost more than the classic wrapper; the size benefit comes from selecting a subset.
+Avoid a runtime lookup such as `projectionExports[name]` over the entire module namespace
 when you want the bundler to discard unused algorithms.
 
 To reproduce the byte counts after building the repository:
@@ -133,45 +134,67 @@ that selected bundles exclude unrelated kernels and the upstream runtime. See
 
 ## Load less-used projections on demand
 
-Use the core and projection subpaths when the application already uses the engine
-and needs another algorithm later. The constructor is synchronous: import the
-plugin first, then supply it explicitly to a new instance.
+Import lightweight descriptors and pass them in the same `projections` list as
+eager plugins. Descriptor imports and instance construction do not import algorithm
+implementations. The first coordinate operation selects the required source and
+destination algorithms and loads them internally:
 
 ```typescript title="projection-loader.ts"
-import {TypeScriptProjection} from '@math.gl/proj4/native/core';
-import {mercator} from '@math.gl/proj4/native/projections/merc';
+import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {mercator} from '@math.gl/proj4/projections/merc';
+import {universalTransverseMercatorLoader} from '@math.gl/proj4/loaders/utm';
 
-// Available in the initial application bundle.
 export const webMercator = new TypeScriptProjection({
-  to: 'EPSG:3857',
-  projections: [mercator]
+  to: 'EPSG:3857', projections: [mercator]
+});
+export const utm31 = new TypeScriptProjection({
+  to: 'EPSG:32631', projections: [mercator, universalTransverseMercatorLoader]
 });
 
-// UTM's algorithm is loaded only when requested.
-export async function loadUTM31Projection() {
-  const {universalTransverseMercator} =
-    await import('@math.gl/proj4/native/projections/utm');
-  return new TypeScriptProjection({
-    to: 'EPSG:32631',
-    projections: [universalTransverseMercator]
-  });
-}
+const xy = await utm31.project([3, 45]); // Loads UTM automatically; no manual import.
+const lonLat = await utm31.unproject(xy);
 ```
 
-Call `await loadUTM31Projection()` when the feature is needed, then reuse the
-returned instance. JavaScript caches successful module loads; cache projection
-instances separately if construction is frequent. Handle rejected imports in your
-application's loading/error UI.
+Instances configured only with eager plugins retain synchronous coordinate methods.
+Instances configured with descriptors return promises from `project`, `unproject`,
+`projectFlat` and `unprojectFlat`, including after loading. TypeScript infers the return
+shape from the supplied list. Await a batch operation before reading, changing or
+reusing its typed-array buffer. Scalar inputs are captured when the method is called.
+
+Explicit synchronous methods never start imports. Preload the descriptor or instance
+before using them; they throw a clear error if a required algorithm is not cached:
+
+```typescript
+await universalTransverseMercatorLoader.preload(); // Optional application warm-up.
+const xySync = utm31.projectSync([3, 45]);
+utm31.projectFlatSync(new Float64Array([3, 45]));
+// Alternatively: await utm31.preload() loads and prepares both ends of this CRS pair.
+```
+
+A shared cache, keyed by descriptor identity, holds pending imports and loaded
+implementations across instances and ESM/CommonJS entry points. Concurrent requests
+share a load. Failures propagate to the coordinate call and can be retried. Unused
+descriptors are not loaded. Separate descriptors with the same name are not conflated.
+`preloadProjection(descriptor)` also warms the cache, and `getLoadedProjection` reads
+it without loading anything. `TypeScriptProjection.create(options)` is an optional
+async factory returning a fully prepared instance with synchronous coordinate methods.
+
+Every named projection has a descriptor at `loaders/<id>` (for example,
+`mercatorLoader` and `universalTransverseMercatorLoader`). The `loaders` barrel exports
+them all. Composite projections use
+`obliqueTransformationLoader(mollweideLoader)` or `obliqueTransformationLoader('longlat')`.
+Custom descriptors can use `createProjectionLoader({name, aliases}, async () => plugin)`.
+These loaders defer algorithm code; CRS definitions and grid files remain application inputs.
 
 Optional WKT interpretation can also be deferred. The adapter uses isolated
 `@math.gl/crs` syntax entry points so its parser stays on the lazy side:
 
 ```typescript
-import {TypeScriptProjection} from '@math.gl/proj4/native/core';
-import {mercator} from '@math.gl/proj4/native/projections/merc';
+import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {mercator} from '@math.gl/proj4/projections/merc';
 
 export async function loadMercatorWKT(to: string) {
-  const {wktCRSParser} = await import('@math.gl/proj4/native/parsers/wkt');
+  const {wktCRSParser} = await import('@math.gl/proj4/parsers/wkt');
   return new TypeScriptProjection({to, projections: [mercator], parsers: [wktCRSParser]});
 }
 ```
@@ -183,16 +206,19 @@ Use an explicit application loader map for the CRS families you support.
 ### Public subpaths
 
 All paths below have the `@math.gl/proj4/` prefix and support ESM, CommonJS and types.
-The existing `experimental` barrel remains compatible.
+The `classic` subpath exports the original wrapper. `native` and `experimental`
+paths remain legacy aliases; new code can use the shorter paths below.
 
 | Subpath | Exports |
 | --- | --- |
-| `experimental/core` | Engine, normalization, capability checks, shared types and errors |
-| `experimental/projections/<id>` | One plugin or factory, using its existing export name |
-| `experimental/parsers/wkt` | `wktCRSParser` |
-| `experimental/parsers/projjson` | `projJSONCRSParser` |
-| `experimental/grids/ntv2` | `parseNTv2Grid` and its options type |
-| `experimental/grids/geotiff` | `loadGeoTIFFGrid` and adapter types; excludes a TIFF decoder |
+| `core` | Engine, normalization, capability checks, loader/cache utilities, shared types and errors |
+| `loaders/<id>` | Lightweight projection descriptors; defer algorithm imports |
+| `loaders` | Descriptor barrel, including the oblique descriptor factory |
+| `projections/<id>` | One plugin or factory, using its existing export name |
+| `parsers/wkt` | `wktCRSParser` |
+| `parsers/projjson` | `projJSONCRSParser` |
+| `grids/ntv2` | `parseNTv2Grid` and its options type |
+| `grids/geotiff` | `loadGeoTIFFGrid` and adapter types; excludes a TIFF decoder |
 
 Projection IDs follow their canonical PROJ names:
 
@@ -219,9 +245,9 @@ Sizes are sums across the relevant emitted files, with gzip applied to each file
 
 | Deferred feature | Initial minified / gzip KiB | Additional minified / gzip KiB |
 | --- | ---: | ---: |
-| UTM | 43.1 / 16.2 | 7.8 / 3.4 |
-| WKT reader and syntax | 43.2 / 16.0 | 22.9 / 7.9 |
-| Rotated Mollweide (factory plus wrapped plugin) | 43.2 / 16.4 | 5.3 / 2.5 |
+| UTM descriptor | 46.0 / 17.0 | 7.8 / 3.4 |
+| WKT reader and syntax | 45.9 / 16.7 | 23.4 / 8.1 |
+| Rotated Mollweide (factory plus wrapped plugin) | 45.9 / 17.1 | 5.3 / 2.5 |
 
 These are esbuild browser/ES2020 measurements, not universal chunk sizes. Bundlers
 may extract shared helpers, so one plugin does not necessarily mean one file. Loading
@@ -235,9 +261,9 @@ node modules/proj4/scripts/check-lazy-package.mjs
 ```
 
 Keep imports on the isolated subpaths throughout the eager and lazy features.
-Mixing in eager imports from the full `experimental` or `@math.gl/crs` barrels
+Mixing in eager imports from the full `@math.gl/proj4` or `@math.gl/crs` barrels
 can cause a bundler to hoist otherwise lazy code. A direct
-`await import('@math.gl/proj4/native')` can retain the entire catalogue;
+`await import('@math.gl/proj4')` can retain the entire catalogue;
 it does not mean “only UTM.” Inspect the application's chunk graph, not just the
 presence of an `import()` expression. Tree shaking and deferred loading remain
 distinct: the former removes unused code, while the latter postpones code that is used.
@@ -257,7 +283,7 @@ import {
   transverseMercator,
   wktCRSParser,
   projJSONCRSParser
-} from '@math.gl/proj4/native';
+} from '@math.gl/proj4';
 
 export function createMapProjection(from: ReadonlyCRSDefinition) {
   return new TypeScriptProjection({
@@ -289,7 +315,7 @@ decode them before creating an instance; coordinate transforms then stay synchro
 The application chooses the grid source, caching, and error handling.
 
 ```typescript title="grid-projection.ts"
-import {TypeScriptProjection, parseNTv2Grid} from '@math.gl/proj4/native';
+import {TypeScriptProjection, parseNTv2Grid} from '@math.gl/proj4';
 
 export async function createGridProjection(url: string) {
   const response = await fetch(url);
@@ -319,7 +345,7 @@ and general time-dependent transformations remain unsupported.
 Use `projectFlat` and `unprojectFlat` for interleaved coordinate buffers:
 
 ```typescript
-import {TypeScriptProjection, mercator} from '@math.gl/proj4/native';
+import {TypeScriptProjection, mercator} from '@math.gl/proj4';
 
 const projection = new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});
 const positions = new Float64Array([12, 55, 13, 56]);
@@ -352,7 +378,7 @@ minimal spherical cylindrical example illustrates the contract; it intentionally
 supports no origin, scale, or offset parameters:
 
 ```typescript title="custom-projection.ts"
-import type {ProjectionPlugin} from '@math.gl/proj4/native';
+import type {ProjectionPlugin} from '@math.gl/proj4';
 
 export const simpleCylindrical: ProjectionPlugin = {
   name: 'simple_cylindrical',

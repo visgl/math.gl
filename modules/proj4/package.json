@@ -1,6 +1,6 @@
 {
   "name": "@math.gl/proj4",
-  "description": "Pluggable native TypeScript coordinate transformations and proj4js compatibility wrapper",
+  "description": "Pluggable TypeScript coordinate transformations and proj4js compatibility wrapper",
   "license": "MIT AND Apache-2.0",
   "type": "module",
   "publishConfig": {
@@ -34,6 +34,252 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./classic": {
+      "types": "./dist/classic.d.ts",
+      "import": "./dist/classic.js",
+      "require": "./dist/classic.cjs"
+    },
+    "./core": {
+      "types": "./dist/experimental/core.d.ts",
+      "import": "./dist/experimental/core.js",
+      "require": "./dist/experimental/core.cjs"
+    },
+    "./projections/merc": {
+      "source": "./src/experimental/entries/projections/merc.ts",
+      "types": "./dist/experimental/entries/projections/merc.d.ts",
+      "import": "./dist/experimental/entries/projections/merc.js",
+      "require": "./dist/experimental/entries/projections/merc.cjs"
+    },
+    "./projections/eqc": {
+      "source": "./src/experimental/entries/projections/eqc.ts",
+      "types": "./dist/experimental/entries/projections/eqc.d.ts",
+      "import": "./dist/experimental/entries/projections/eqc.js",
+      "require": "./dist/experimental/entries/projections/eqc.cjs"
+    },
+    "./projections/lcc": {
+      "source": "./src/experimental/entries/projections/lcc.ts",
+      "types": "./dist/experimental/entries/projections/lcc.d.ts",
+      "import": "./dist/experimental/entries/projections/lcc.js",
+      "require": "./dist/experimental/entries/projections/lcc.cjs"
+    },
+    "./projections/aea": {
+      "source": "./src/experimental/entries/projections/aea.ts",
+      "types": "./dist/experimental/entries/projections/aea.d.ts",
+      "import": "./dist/experimental/entries/projections/aea.js",
+      "require": "./dist/experimental/entries/projections/aea.cjs"
+    },
+    "./projections/eqdc": {
+      "source": "./src/experimental/entries/projections/eqdc.ts",
+      "types": "./dist/experimental/entries/projections/eqdc.d.ts",
+      "import": "./dist/experimental/entries/projections/eqdc.js",
+      "require": "./dist/experimental/entries/projections/eqdc.cjs"
+    },
+    "./projections/laea": {
+      "source": "./src/experimental/entries/projections/laea.ts",
+      "types": "./dist/experimental/entries/projections/laea.d.ts",
+      "import": "./dist/experimental/entries/projections/laea.js",
+      "require": "./dist/experimental/entries/projections/laea.cjs"
+    },
+    "./projections/stere": {
+      "source": "./src/experimental/entries/projections/stere.ts",
+      "types": "./dist/experimental/entries/projections/stere.d.ts",
+      "import": "./dist/experimental/entries/projections/stere.js",
+      "require": "./dist/experimental/entries/projections/stere.cjs"
+    },
+    "./projections/sterea": {
+      "source": "./src/experimental/entries/projections/sterea.ts",
+      "types": "./dist/experimental/entries/projections/sterea.d.ts",
+      "import": "./dist/experimental/entries/projections/sterea.js",
+      "require": "./dist/experimental/entries/projections/sterea.cjs"
+    },
+    "./projections/aeqd": {
+      "source": "./src/experimental/entries/projections/aeqd.ts",
+      "types": "./dist/experimental/entries/projections/aeqd.d.ts",
+      "import": "./dist/experimental/entries/projections/aeqd.js",
+      "require": "./dist/experimental/entries/projections/aeqd.cjs"
+    },
+    "./projections/tmerc": {
+      "source": "./src/experimental/entries/projections/tmerc.ts",
+      "types": "./dist/experimental/entries/projections/tmerc.d.ts",
+      "import": "./dist/experimental/entries/projections/tmerc.js",
+      "require": "./dist/experimental/entries/projections/tmerc.cjs"
+    },
+    "./projections/etmerc": {
+      "source": "./src/experimental/entries/projections/etmerc.ts",
+      "types": "./dist/experimental/entries/projections/etmerc.d.ts",
+      "import": "./dist/experimental/entries/projections/etmerc.js",
+      "require": "./dist/experimental/entries/projections/etmerc.cjs"
+    },
+    "./projections/utm": {
+      "source": "./src/experimental/entries/projections/utm.ts",
+      "types": "./dist/experimental/entries/projections/utm.d.ts",
+      "import": "./dist/experimental/entries/projections/utm.js",
+      "require": "./dist/experimental/entries/projections/utm.cjs"
+    },
+    "./projections/geocent": {
+      "source": "./src/experimental/entries/projections/geocent.ts",
+      "types": "./dist/experimental/entries/projections/geocent.d.ts",
+      "import": "./dist/experimental/entries/projections/geocent.js",
+      "require": "./dist/experimental/entries/projections/geocent.cjs"
+    },
+    "./projections/bonne": {
+      "source": "./src/experimental/entries/projections/bonne.ts",
+      "types": "./dist/experimental/entries/projections/bonne.d.ts",
+      "import": "./dist/experimental/entries/projections/bonne.js",
+      "require": "./dist/experimental/entries/projections/bonne.cjs"
+    },
+    "./projections/cass": {
+      "source": "./src/experimental/entries/projections/cass.ts",
+      "types": "./dist/experimental/entries/projections/cass.d.ts",
+      "import": "./dist/experimental/entries/projections/cass.js",
+      "require": "./dist/experimental/entries/projections/cass.cjs"
+    },
+    "./projections/cea": {
+      "source": "./src/experimental/entries/projections/cea.ts",
+      "types": "./dist/experimental/entries/projections/cea.d.ts",
+      "import": "./dist/experimental/entries/projections/cea.js",
+      "require": "./dist/experimental/entries/projections/cea.cjs"
+    },
+    "./projections/eck6": {
+      "source": "./src/experimental/entries/projections/eck6.ts",
+      "types": "./dist/experimental/entries/projections/eck6.d.ts",
+      "import": "./dist/experimental/entries/projections/eck6.js",
+      "require": "./dist/experimental/entries/projections/eck6.cjs"
+    },
+    "./projections/eqearth": {
+      "source": "./src/experimental/entries/projections/eqearth.ts",
+      "types": "./dist/experimental/entries/projections/eqearth.d.ts",
+      "import": "./dist/experimental/entries/projections/eqearth.js",
+      "require": "./dist/experimental/entries/projections/eqearth.cjs"
+    },
+    "./projections/equi": {
+      "source": "./src/experimental/entries/projections/equi.ts",
+      "types": "./dist/experimental/entries/projections/equi.d.ts",
+      "import": "./dist/experimental/entries/projections/equi.js",
+      "require": "./dist/experimental/entries/projections/equi.cjs"
+    },
+    "./projections/geos": {
+      "source": "./src/experimental/entries/projections/geos.ts",
+      "types": "./dist/experimental/entries/projections/geos.d.ts",
+      "import": "./dist/experimental/entries/projections/geos.js",
+      "require": "./dist/experimental/entries/projections/geos.cjs"
+    },
+    "./projections/gnom": {
+      "source": "./src/experimental/entries/projections/gnom.ts",
+      "types": "./dist/experimental/entries/projections/gnom.d.ts",
+      "import": "./dist/experimental/entries/projections/gnom.js",
+      "require": "./dist/experimental/entries/projections/gnom.cjs"
+    },
+    "./projections/gstmerc": {
+      "source": "./src/experimental/entries/projections/gstmerc.ts",
+      "types": "./dist/experimental/entries/projections/gstmerc.d.ts",
+      "import": "./dist/experimental/entries/projections/gstmerc.js",
+      "require": "./dist/experimental/entries/projections/gstmerc.cjs"
+    },
+    "./projections/krovak": {
+      "source": "./src/experimental/entries/projections/krovak.ts",
+      "types": "./dist/experimental/entries/projections/krovak.d.ts",
+      "import": "./dist/experimental/entries/projections/krovak.js",
+      "require": "./dist/experimental/entries/projections/krovak.cjs"
+    },
+    "./projections/mill": {
+      "source": "./src/experimental/entries/projections/mill.ts",
+      "types": "./dist/experimental/entries/projections/mill.d.ts",
+      "import": "./dist/experimental/entries/projections/mill.js",
+      "require": "./dist/experimental/entries/projections/mill.cjs"
+    },
+    "./projections/moll": {
+      "source": "./src/experimental/entries/projections/moll.ts",
+      "types": "./dist/experimental/entries/projections/moll.d.ts",
+      "import": "./dist/experimental/entries/projections/moll.js",
+      "require": "./dist/experimental/entries/projections/moll.cjs"
+    },
+    "./projections/nzmg": {
+      "source": "./src/experimental/entries/projections/nzmg.ts",
+      "types": "./dist/experimental/entries/projections/nzmg.d.ts",
+      "import": "./dist/experimental/entries/projections/nzmg.js",
+      "require": "./dist/experimental/entries/projections/nzmg.cjs"
+    },
+    "./projections/omerc": {
+      "source": "./src/experimental/entries/projections/omerc.ts",
+      "types": "./dist/experimental/entries/projections/omerc.d.ts",
+      "import": "./dist/experimental/entries/projections/omerc.js",
+      "require": "./dist/experimental/entries/projections/omerc.cjs"
+    },
+    "./projections/ortho": {
+      "source": "./src/experimental/entries/projections/ortho.ts",
+      "types": "./dist/experimental/entries/projections/ortho.d.ts",
+      "import": "./dist/experimental/entries/projections/ortho.js",
+      "require": "./dist/experimental/entries/projections/ortho.cjs"
+    },
+    "./projections/poly": {
+      "source": "./src/experimental/entries/projections/poly.ts",
+      "types": "./dist/experimental/entries/projections/poly.d.ts",
+      "import": "./dist/experimental/entries/projections/poly.js",
+      "require": "./dist/experimental/entries/projections/poly.cjs"
+    },
+    "./projections/qsc": {
+      "source": "./src/experimental/entries/projections/qsc.ts",
+      "types": "./dist/experimental/entries/projections/qsc.d.ts",
+      "import": "./dist/experimental/entries/projections/qsc.js",
+      "require": "./dist/experimental/entries/projections/qsc.cjs"
+    },
+    "./projections/robin": {
+      "source": "./src/experimental/entries/projections/robin.ts",
+      "types": "./dist/experimental/entries/projections/robin.d.ts",
+      "import": "./dist/experimental/entries/projections/robin.js",
+      "require": "./dist/experimental/entries/projections/robin.cjs"
+    },
+    "./projections/sinu": {
+      "source": "./src/experimental/entries/projections/sinu.ts",
+      "types": "./dist/experimental/entries/projections/sinu.d.ts",
+      "import": "./dist/experimental/entries/projections/sinu.js",
+      "require": "./dist/experimental/entries/projections/sinu.cjs"
+    },
+    "./projections/somerc": {
+      "source": "./src/experimental/entries/projections/somerc.ts",
+      "types": "./dist/experimental/entries/projections/somerc.d.ts",
+      "import": "./dist/experimental/entries/projections/somerc.js",
+      "require": "./dist/experimental/entries/projections/somerc.cjs"
+    },
+    "./projections/tpers": {
+      "source": "./src/experimental/entries/projections/tpers.ts",
+      "types": "./dist/experimental/entries/projections/tpers.d.ts",
+      "import": "./dist/experimental/entries/projections/tpers.js",
+      "require": "./dist/experimental/entries/projections/tpers.cjs"
+    },
+    "./projections/vandg": {
+      "source": "./src/experimental/entries/projections/vandg.ts",
+      "types": "./dist/experimental/entries/projections/vandg.d.ts",
+      "import": "./dist/experimental/entries/projections/vandg.js",
+      "require": "./dist/experimental/entries/projections/vandg.cjs"
+    },
+    "./projections/ob_tran": {
+      "source": "./src/experimental/entries/projections/ob_tran.ts",
+      "types": "./dist/experimental/entries/projections/ob_tran.d.ts",
+      "import": "./dist/experimental/entries/projections/ob_tran.js",
+      "require": "./dist/experimental/entries/projections/ob_tran.cjs"
+    },
+    "./parsers/wkt": {
+      "types": "./dist/experimental/crs/wkt.d.ts",
+      "import": "./dist/experimental/crs/wkt.js",
+      "require": "./dist/experimental/crs/wkt.cjs"
+    },
+    "./parsers/projjson": {
+      "types": "./dist/experimental/crs/projjson.d.ts",
+      "import": "./dist/experimental/crs/projjson.js",
+      "require": "./dist/experimental/crs/projjson.cjs"
+    },
+    "./grids/ntv2": {
+      "types": "./dist/experimental/grids/ntv2.d.ts",
+      "import": "./dist/experimental/grids/ntv2.js",
+      "require": "./dist/experimental/grids/ntv2.cjs"
+    },
+    "./grids/geotiff": {
+      "types": "./dist/experimental/grids/geotiff.d.ts",
+      "import": "./dist/experimental/grids/geotiff.js",
+      "require": "./dist/experimental/grids/geotiff.cjs"
     },
     "./experimental": {
       "types": "./dist/experimental/index.d.ts",
@@ -454,6 +700,191 @@
       "types": "./dist/experimental/grids/geotiff.d.ts",
       "import": "./dist/experimental/grids/geotiff.js",
       "require": "./dist/experimental/grids/geotiff.cjs"
+    },
+    "./loaders/merc": {
+      "types": "./dist/experimental/loaders/merc.d.ts",
+      "import": "./dist/experimental/loaders/merc.js",
+      "require": "./dist/experimental/loaders/merc.cjs"
+    },
+    "./loaders/eqc": {
+      "types": "./dist/experimental/loaders/eqc.d.ts",
+      "import": "./dist/experimental/loaders/eqc.js",
+      "require": "./dist/experimental/loaders/eqc.cjs"
+    },
+    "./loaders/lcc": {
+      "types": "./dist/experimental/loaders/lcc.d.ts",
+      "import": "./dist/experimental/loaders/lcc.js",
+      "require": "./dist/experimental/loaders/lcc.cjs"
+    },
+    "./loaders/aea": {
+      "types": "./dist/experimental/loaders/aea.d.ts",
+      "import": "./dist/experimental/loaders/aea.js",
+      "require": "./dist/experimental/loaders/aea.cjs"
+    },
+    "./loaders/eqdc": {
+      "types": "./dist/experimental/loaders/eqdc.d.ts",
+      "import": "./dist/experimental/loaders/eqdc.js",
+      "require": "./dist/experimental/loaders/eqdc.cjs"
+    },
+    "./loaders/laea": {
+      "types": "./dist/experimental/loaders/laea.d.ts",
+      "import": "./dist/experimental/loaders/laea.js",
+      "require": "./dist/experimental/loaders/laea.cjs"
+    },
+    "./loaders/stere": {
+      "types": "./dist/experimental/loaders/stere.d.ts",
+      "import": "./dist/experimental/loaders/stere.js",
+      "require": "./dist/experimental/loaders/stere.cjs"
+    },
+    "./loaders/sterea": {
+      "types": "./dist/experimental/loaders/sterea.d.ts",
+      "import": "./dist/experimental/loaders/sterea.js",
+      "require": "./dist/experimental/loaders/sterea.cjs"
+    },
+    "./loaders/aeqd": {
+      "types": "./dist/experimental/loaders/aeqd.d.ts",
+      "import": "./dist/experimental/loaders/aeqd.js",
+      "require": "./dist/experimental/loaders/aeqd.cjs"
+    },
+    "./loaders/tmerc": {
+      "types": "./dist/experimental/loaders/tmerc.d.ts",
+      "import": "./dist/experimental/loaders/tmerc.js",
+      "require": "./dist/experimental/loaders/tmerc.cjs"
+    },
+    "./loaders/etmerc": {
+      "types": "./dist/experimental/loaders/etmerc.d.ts",
+      "import": "./dist/experimental/loaders/etmerc.js",
+      "require": "./dist/experimental/loaders/etmerc.cjs"
+    },
+    "./loaders/utm": {
+      "types": "./dist/experimental/loaders/utm.d.ts",
+      "import": "./dist/experimental/loaders/utm.js",
+      "require": "./dist/experimental/loaders/utm.cjs"
+    },
+    "./loaders/geocent": {
+      "types": "./dist/experimental/loaders/geocent.d.ts",
+      "import": "./dist/experimental/loaders/geocent.js",
+      "require": "./dist/experimental/loaders/geocent.cjs"
+    },
+    "./loaders/bonne": {
+      "types": "./dist/experimental/loaders/bonne.d.ts",
+      "import": "./dist/experimental/loaders/bonne.js",
+      "require": "./dist/experimental/loaders/bonne.cjs"
+    },
+    "./loaders/cass": {
+      "types": "./dist/experimental/loaders/cass.d.ts",
+      "import": "./dist/experimental/loaders/cass.js",
+      "require": "./dist/experimental/loaders/cass.cjs"
+    },
+    "./loaders/cea": {
+      "types": "./dist/experimental/loaders/cea.d.ts",
+      "import": "./dist/experimental/loaders/cea.js",
+      "require": "./dist/experimental/loaders/cea.cjs"
+    },
+    "./loaders/eck6": {
+      "types": "./dist/experimental/loaders/eck6.d.ts",
+      "import": "./dist/experimental/loaders/eck6.js",
+      "require": "./dist/experimental/loaders/eck6.cjs"
+    },
+    "./loaders/eqearth": {
+      "types": "./dist/experimental/loaders/eqearth.d.ts",
+      "import": "./dist/experimental/loaders/eqearth.js",
+      "require": "./dist/experimental/loaders/eqearth.cjs"
+    },
+    "./loaders/equi": {
+      "types": "./dist/experimental/loaders/equi.d.ts",
+      "import": "./dist/experimental/loaders/equi.js",
+      "require": "./dist/experimental/loaders/equi.cjs"
+    },
+    "./loaders/geos": {
+      "types": "./dist/experimental/loaders/geos.d.ts",
+      "import": "./dist/experimental/loaders/geos.js",
+      "require": "./dist/experimental/loaders/geos.cjs"
+    },
+    "./loaders/gnom": {
+      "types": "./dist/experimental/loaders/gnom.d.ts",
+      "import": "./dist/experimental/loaders/gnom.js",
+      "require": "./dist/experimental/loaders/gnom.cjs"
+    },
+    "./loaders/gstmerc": {
+      "types": "./dist/experimental/loaders/gstmerc.d.ts",
+      "import": "./dist/experimental/loaders/gstmerc.js",
+      "require": "./dist/experimental/loaders/gstmerc.cjs"
+    },
+    "./loaders/krovak": {
+      "types": "./dist/experimental/loaders/krovak.d.ts",
+      "import": "./dist/experimental/loaders/krovak.js",
+      "require": "./dist/experimental/loaders/krovak.cjs"
+    },
+    "./loaders/mill": {
+      "types": "./dist/experimental/loaders/mill.d.ts",
+      "import": "./dist/experimental/loaders/mill.js",
+      "require": "./dist/experimental/loaders/mill.cjs"
+    },
+    "./loaders/moll": {
+      "types": "./dist/experimental/loaders/moll.d.ts",
+      "import": "./dist/experimental/loaders/moll.js",
+      "require": "./dist/experimental/loaders/moll.cjs"
+    },
+    "./loaders/nzmg": {
+      "types": "./dist/experimental/loaders/nzmg.d.ts",
+      "import": "./dist/experimental/loaders/nzmg.js",
+      "require": "./dist/experimental/loaders/nzmg.cjs"
+    },
+    "./loaders/omerc": {
+      "types": "./dist/experimental/loaders/omerc.d.ts",
+      "import": "./dist/experimental/loaders/omerc.js",
+      "require": "./dist/experimental/loaders/omerc.cjs"
+    },
+    "./loaders/ortho": {
+      "types": "./dist/experimental/loaders/ortho.d.ts",
+      "import": "./dist/experimental/loaders/ortho.js",
+      "require": "./dist/experimental/loaders/ortho.cjs"
+    },
+    "./loaders/poly": {
+      "types": "./dist/experimental/loaders/poly.d.ts",
+      "import": "./dist/experimental/loaders/poly.js",
+      "require": "./dist/experimental/loaders/poly.cjs"
+    },
+    "./loaders/qsc": {
+      "types": "./dist/experimental/loaders/qsc.d.ts",
+      "import": "./dist/experimental/loaders/qsc.js",
+      "require": "./dist/experimental/loaders/qsc.cjs"
+    },
+    "./loaders/robin": {
+      "types": "./dist/experimental/loaders/robin.d.ts",
+      "import": "./dist/experimental/loaders/robin.js",
+      "require": "./dist/experimental/loaders/robin.cjs"
+    },
+    "./loaders/sinu": {
+      "types": "./dist/experimental/loaders/sinu.d.ts",
+      "import": "./dist/experimental/loaders/sinu.js",
+      "require": "./dist/experimental/loaders/sinu.cjs"
+    },
+    "./loaders/somerc": {
+      "types": "./dist/experimental/loaders/somerc.d.ts",
+      "import": "./dist/experimental/loaders/somerc.js",
+      "require": "./dist/experimental/loaders/somerc.cjs"
+    },
+    "./loaders/tpers": {
+      "types": "./dist/experimental/loaders/tpers.d.ts",
+      "import": "./dist/experimental/loaders/tpers.js",
+      "require": "./dist/experimental/loaders/tpers.cjs"
+    },
+    "./loaders/vandg": {
+      "types": "./dist/experimental/loaders/vandg.d.ts",
+      "import": "./dist/experimental/loaders/vandg.js",
+      "require": "./dist/experimental/loaders/vandg.cjs"
+    },
+    "./loaders": {
+      "types": "./dist/experimental/loaders/index.d.ts",
+      "import": "./dist/experimental/loaders/index.js",
+      "require": "./dist/experimental/loaders/index.cjs"
+    },
+    "./loaders/ob_tran": {
+      "types": "./dist/experimental/loaders/ob_tran.d.ts",
+      "import": "./dist/experimental/loaders/ob_tran.js",
+      "require": "./dist/experimental/loaders/ob_tran.cjs"
     }
   },
   "files": [
