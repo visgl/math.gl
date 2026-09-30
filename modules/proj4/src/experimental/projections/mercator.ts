@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 // Original implementation of projection equations; compatibility informed by proj4js 2.22.0.
 
-import {createProjection} from '../mutable-projection';
+import {createFlatProjection as createProjection} from '../flat-projection';
 import {DEGREES_TO_RADIANS, latitudeParameter, numberParameter, wrapLongitude} from '../parameters';
 import type {ProjectionPlugin} from '../types';
 

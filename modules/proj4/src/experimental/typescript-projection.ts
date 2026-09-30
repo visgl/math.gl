@@ -4,7 +4,12 @@
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
 import type {ProjectionDescriptor} from './projection-descriptor';
 import {getLoadedProjection, preloadProjection} from './projection-descriptor';
-import type {ProjectionImplementation, ProjectionPlugin, ProjectionPoint} from './types';
+import type {
+  ProjectionImplementation,
+  ProjectionPlugin,
+  ProjectionPoint,
+  ProjectionFlatOperation
+} from './types';
 import {projectionOperation} from './mutable-projection';
 import {CORE_FLAGS, CORE_PARAMETERS, normalizeCRS} from './crs/normalize';
 import {TypeScriptCRSError, unsupportedStage} from './crs/types';
@@ -30,6 +35,7 @@ export type TypeScriptProjectionOptions<P extends ProjectionRegistration = Proje
 export type TypeScriptProjectionCreateOptions = TypeScriptProjectionOptions<ProjectionRegistration>;
 export type ProjectionArray = Float32Array | Float64Array;
 type CoordinateTransform = {
+  flat?: ProjectionFlatOperation;
   run(point: ProjectionPoint): void;
   requiresInputZ: boolean;
   geocentricOutput: boolean;
@@ -335,7 +341,26 @@ function compileTransform(
   const fromPrime = from.primeMeridian,
     toPrime = to.primeMeridian;
   const longitudeWrap = to.kind === 'geographic' ? to.longitudeWrap : undefined;
+  let flat: ProjectionFlatOperation | undefined;
+  if (
+    !datum &&
+    !horizontalOnly &&
+    !inputAxis &&
+    !outputAxis &&
+    !fromPrime &&
+    !toPrime &&
+    from.verticalUnit === 1 &&
+    to.verticalUnit === 1 &&
+    longitudeWrap === undefined
+  ) {
+    const context = Object.freeze({inputScale, outputScale});
+    if (from.kind === 'geographic' && to.kind === 'projected')
+      flat = to.implementation?.createForwardFlat?.(context);
+    if (from.kind === 'projected' && to.kind === 'geographic')
+      flat = from.implementation?.createInverseFlat?.(context);
+  }
   return {
+    flat,
     requiresInputZ:
       from.kind === 'geocentric' ||
       /[ud]/.test(fromAxis.slice(0, 2)) ||
@@ -397,6 +422,10 @@ function transformInPlace<T extends ProjectionArray>(
     throw new Error('Dimension must be an integer >= 2 and divide the typed array length');
   if (dimension < 3 && (operation.requiresInputZ || operation.geocentricOutput))
     throw new Error('This transform requires a dimension of at least 3');
+  if (operation.flat) {
+    operation.flat(coordinates, dimension);
+    return coordinates;
+  }
   const point = {x: 0, y: 0, z: 0};
   const float32 = coordinates instanceof Float32Array;
   for (let offset = 0; offset < coordinates.length; offset += dimension) {

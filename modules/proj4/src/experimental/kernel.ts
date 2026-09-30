@@ -94,7 +94,8 @@ export function bindKernel<State>(
   name: string,
   state: State,
   forward: (state: State, point: Point) => Point | null | undefined | number,
-  inverse: (state: State, point: Point) => Point | null | undefined | number
+  inverse: (state: State, point: Point) => Point | null | undefined | number,
+  adapt = createProjection
 ): ProjectionImplementation {
   const run = (operation: typeof forward, point: Point): void => {
     const result = operation(state, point);
@@ -108,7 +109,7 @@ export function bindKernel<State>(
     point.x = result.x;
     point.y = result.y;
   };
-  return createProjection(
+  return adapt(
     point => run(forward, point),
     point => run(inverse, point)
   );

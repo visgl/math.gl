@@ -23,6 +23,7 @@ for (const precision of ['Float32', 'Float64'] as const)
           'UTM 56S',
           'Lambert conformal conic',
           'Albers equal area',
+          'Equidistant conic',
           'Lambert azimuthal equal area',
           'Polar stereographic',
           'Equal Earth',

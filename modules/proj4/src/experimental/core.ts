@@ -12,6 +12,8 @@ export type {
 } from './typescript-projection';
 export type {
   ProjectionPoint,
+  ProjectionFlatContext,
+  ProjectionFlatOperation,
   ProjectionContext,
   ProjectionImplementation,
   ProjectionParameters,

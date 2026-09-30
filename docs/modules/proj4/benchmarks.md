@@ -28,8 +28,8 @@ coordinates into the output buffer. Every coordinate is checked before timing,
 including height and trailing ordinates. Datum-shift cases enable axis enforcement
 to compare computed heights consistently. Implementation order rotates between samples.
 
-The sixteen shared cases cover spherical and ellipsoidal Mercator, UTM in both hemispheres,
-Lambert conformal conic, Albers, Lambert azimuthal equal area, polar stereographic,
+The seventeen shared cases cover spherical and ellipsoidal Mercator, UTM in both hemispheres,
+Lambert conformal conic, Albers, equidistant conic, Lambert azimuthal equal area, polar stereographic,
 Equal Earth, Mollweide, three- and seven-parameter datum shifts, UTM-to-Mercator,
 US survey feet, north/east axis order, and an authored synthetic NTv2 grid.
 Regional samples cover each projection's useful domain; clustered samples concentrate
@@ -67,8 +67,8 @@ node modules/proj4/scripts/check-packed-package.mjs
 ```
 
 The standalone Node runner and browser qualification runner use the same workload as
-the live page: sixteen scenarios, Float32/Float64, XY/XYZ/XYZM and both directions
-(192 rows, with three implementations per row). Select regional or clustered inputs
+the live page: seventeen scenarios, Float32/Float64, XY/XYZ/XYZM and both directions
+(204 rows, with three implementations per row). Select regional or clustered inputs
 with `--distribution regional|clustered`; set `--min-sample-ms` between 0 and 100 to
 control adaptive sampling. Zero disables calibration for correctness smoke checks and
 marks timings as limited. Buffer sizes range from 10 to 1,000,000 points.
@@ -96,7 +96,7 @@ same bundler, package manifests and installed dependencies. It uses the current 
 workload for both versions, validates both against proj4js, and rotates baseline/candidate
 flat/scalar execution order. It covers XY and XYZM in both precisions and directions;
 constructor batches alternate separately. `--scenarios` accepts comma-separated scenario
-names to focus a run. On pull requests, CI measures five representative scenarios against
+names to focus a run. On pull requests, CI measures nine representative scenarios against
 the actual base commit and uploads `proj4-performance-comparison`.
 
 `--clock thread-cpu` (Node 24.14 or later) is an optional diagnostic using main-thread CPU
@@ -123,6 +123,34 @@ or retain their allocating scalar fallback.
 The standard Node/browser benchmark suites also include proj4 comparisons for both
 float types. Those suite timings include an identical buffer reset in every contender;
 use the standalone runner for separate forward/inverse, dimension and allocation results.
+
+## Tranche 10 batch-kernel measurements
+
+The optional whole-buffer path fuses the simple geographic/projected pipeline around
+Mercator, transverse Mercator/UTM and common conic equations. It preserves the equations,
+validation and per-record commit contract; it does not change the scalar API.
+
+Measured September 30, 2026 on Apple M2, Node 24.14.0, against master
+`494d6fa5`, using 20,000 points and 11 rotated adaptive samples.
+These are **main-thread CPU-time speedups**, not browser or elapsed throughput.
+The ranges below span Float64 XY/XYZM and forward/inverse medians, not confidence intervals:
+
+| Projection | Batch CPU-time speedup range |
+| --- | ---: |
+| Web Mercator | 1.16–1.58× |
+| Ellipsoidal Mercator | 1.01–1.15× |
+| UTM 31N | 0.98–1.05× |
+| Lambert conformal conic | 1.03–1.14× |
+| Albers equal area | 1.04–1.10× |
+| Equidistant conic | 1.02–1.30× |
+
+UTM is dominated by its projection equations and shows little change; there is no
+uniform gain across every projection or direction. Scalar and construction results
+remain mixed. Raw samples, variation, clock and source/workload fingerprints are retained
+in [the diagnostic report](https://github.com/visgl/math.gl/blob/master/modules/proj4/test/fixtures/qualification/batch-kernels-cpu.json).
+Use the CI comparison artifact for elapsed measurements on each PR revision. Browser
+qualification validates 612 warm workloads per engine, including the independent PROJ
+reference corpus. Reuse compiled instances to amortize batch-factory setup.
 
 ## Historical initial measurements
 
@@ -183,7 +211,13 @@ fetching or publishing anything.
 
 Tranche 9 compiled pipeline constants bring the rotated lazy example’s initial graph
 to 17,720 gzip bytes on Node 24.14.0. Its allowance increases from 17,700 to 17,800
-bytes; all other byte limits remain unchanged.
+bytes; other byte limits remained unchanged in that tranche.
+
+Tranche 10 adds the shared batch adapter to eligible projection bundles. Static bundles
+retain their existing limits. The UTM, WKT and rotated lazy initial graphs now measure
+48,390/18,137, 48,258/17,503 and 48,316/18,073 minified/gzip bytes respectively. Their
+initial limits are reviewed and rounded up to 100 bytes; catalogue and deferred limits
+remain unchanged. See the [current size tables](./typescript-engine.md#tree-shaking-and-bundle-size).
 
 Performance and packaging do not establish geodetic parity. The TypeScript engine is now the default;
 the [support profile](./typescript-support.md) defines the scope of the TypeScript API
@@ -267,7 +301,7 @@ node modules/proj4/scripts/benchmark-browser.mjs --points 20000 --samples 7 --ou
 ```
 
 Each browser first measures separate TypeScript and direct-proj4 bundles, then checks
-all independent projection references. Current warm workloads use the sixteen-scenario
+all independent projection references. Current warm workloads use the seventeen-scenario
 shared matrix described above, including XYZ. The historical tables retain their older
 workload and wrapper column for provenance; they are not current benchmark results.
 The runner bounds each browser to 180 seconds. CI keeps downloadable measurements and

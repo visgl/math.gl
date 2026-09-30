@@ -107,7 +107,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
-          node modules/proj4/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --scenarios 'Web Mercator,UTM 31N,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/proj4-performance-comparison.json
+          node modules/proj4/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/proj4-performance-comparison.json
 
       - name: Upload paired performance measurements
         if: always() && github.event_name == 'pull_request'

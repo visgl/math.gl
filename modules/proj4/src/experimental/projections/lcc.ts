@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {ProjectionPlugin} from '../types';
-import {createProjection} from '../mutable-projection';
+import {createFlatProjection as createProjection} from '../flat-projection';
 import {
   bindKernel,
   kernelParameters,

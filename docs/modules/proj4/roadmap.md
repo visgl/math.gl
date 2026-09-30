@@ -1,6 +1,6 @@
 # TypeScript proj4 parity roadmap
 
-Status: tranches **0–9, including qualification tranches 7A–7D, are implemented** for the
+Status: tranches **0–10, including qualification tranches 7A–7D, are implemented** for the
 [documented TypeScript support profile](./typescript-support.md). The package root uses the TypeScript engine; `Projection` supplies the compatible
 wrapper API (`Proj4Projection` is a deprecated alias) and `TypeScriptProjection` allows explicit plugins. The old wrapper is
 available from `@math.gl/proj4/classic`; prior engine subpaths remain aliases. No package is published by this work.
@@ -275,9 +275,32 @@ PR base; a separately labeled thread-CPU diagnostic is available locally. Constr
 improvement is clear in the local diagnostic, while transform gains vary by case; see
 [methodology and observations](./benchmarks.md#compare-a-runtime-change-with-its-base).
 
-Further kernel-specific optimization, SIMD/Wasm experiments and broader geodetic operation
-support require separate measurements and accuracy qualification. These tranches do not
-establish unrestricted PROJ parity or a state-of-the-art performance claim.
+## Tranche 10: projection-specific batch kernels — implemented
+
+Optional whole-buffer plugin factories compile eligible geographic/projected pipelines.
+Mercator, transverse Mercator/UTM and the LCC, Albers and equidistant conic families reuse
+their scalar equations while fusing units and validation into a single traversal. Complex
+chains and existing custom plugins retain the general pipeline. Exact scalar/batch tests
+cover both precisions, both directions, strides 2/3/4/6, preserved Z/M, decorated plugins,
+invalid records and overflow; the independent PROJ corpus also exercises the batch path.
+The shared benchmark adds equidistant conic and CI compares these families with the PR base.
+
+Reusable scalar output buffers were considered but are deferred: this tranche changes no
+scalar API or ownership contract. The demonstrated opportunity is avoiding repeated pipeline
+dispatch and Z/M writes in existing typed-array calls. Results and limits are documented in
+the [benchmark guide](./benchmarks.md).
+
+## Remaining performance and geodetic roadmap
+
+| Tranche | Work | Acceptance gate |
+| --- | --- | --- |
+| 11 — Numerical excellence | Broader independent PROJ comparisons, randomized boundary probes and improved weak regional inverses | Published accuracy envelopes per algorithm and domain |
+| 12 — Modern geodetic transformations | Vertical grids, explicit pipelines, epochs, dynamic datums and operation selection | Independent fixtures and explicit handling of unavailable operations; M remains a measure |
+| 13 — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
+
+Further optimization and operation support require separate measurements and accuracy
+qualification. These tranches do not establish unrestricted PROJ parity or a state-of-the-art
+performance claim.
 
 ## Axis compatibility and lazy entry points: implemented follow-up
 

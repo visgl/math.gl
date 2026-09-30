@@ -8,8 +8,28 @@ export type ProjectionParameters = Readonly<Record<string, string | undefined>>;
 /** Mutable scratch owned by the caller. Hooks must update synchronously and never retain it. */
 export type ProjectionPoint = {x: number; y: number; z: number};
 
+/** Engine-validated interleaved floating-point storage. */
+export type ProjectionFlatOperation = (
+  coordinates: Float32Array | Float64Array,
+  dimension: number
+) => void;
+/** Unit conversion for a horizontal geographic/projected batch, in pipeline order. */
+export type ProjectionFlatContext = {
+  readonly inputScale: number;
+  readonly outputScale: number;
+};
+
 /** A projection operates on radians and meters; the engine handles CRS units. */
 export type ProjectionImplementation = {
+  /** Optional whole-buffer specialization. Return undefined to keep the general pipeline.
+   * Called only for geographic/projected pairs without datum, axis, prime-meridian,
+   * vertical-unit, longitude-wrap or lossy stages. The engine validates storage and stride.
+   * The operation must validate each XYZ, scale XY before/after projection, check domains
+   * and Float32 range, preserve Z/trailing ordinates, and commit only completed records.
+   * Factories run at construction; operations must not retain buffers or scratch across calls.
+   */
+  createForwardFlat?(context: ProjectionFlatContext): ProjectionFlatOperation | undefined;
+  createInverseFlat?(context: ProjectionFlatContext): ProjectionFlatOperation | undefined;
   /** Optional mutable hooks avoid scalar coordinate arrays; preserve z for horizontal projections. */
   forwardInPlace?(point: ProjectionPoint): void;
   inverseInPlace?(point: ProjectionPoint): void;
