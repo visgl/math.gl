@@ -39,6 +39,8 @@ export type {Matrix4Like} from './classes/matrix4';
 
 // experimental
 export {SphericalCoordinates} from './classes/spherical-coordinates';
+/** @deprecated Use SphericalCoordinates instead. */
+export {SphericalCoordinates as _SphericalCoordinates} from './classes/spherical-coordinates';
 export {Pose} from './classes/pose';
 export {Euler} from './classes/euler';
 export type {EulerLike, EulerRotationOrder} from './classes/euler-types';

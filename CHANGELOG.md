@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- fix(core): Preserve supplied output types in `SphericalCoordinates.toVector3()` and add the
+  deprecated `_SphericalCoordinates` compatibility alias, retaining the default plain array result.
+
 ## v5.0.0-alpha.9
 
 - feat(dggs): Add antimeridian boundary unwrapping helper (#137)
