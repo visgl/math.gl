@@ -22,6 +22,8 @@ export default {
       'test/size/geospatial.js',
       'test/size/polygon.js',
       'test/size/sun.js',
+      'test/size/timezone.js',
+      'test/size/timezone-lookup.js',
       'test/size/web-mercator.js'
     ]
   }

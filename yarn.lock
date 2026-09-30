@@ -4280,6 +4280,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@math.gl/timezone@workspace:modules/timezone":
+  version: 0.0.0-use.local
+  resolution: "@math.gl/timezone@workspace:modules/timezone"
+  dependencies:
+    "@photostructure/tz-lookup": "npm:^11.7.0"
+  languageName: unknown
+  linkType: soft
+
 "@math.gl/types@npm:5.0.0-alpha.9, @math.gl/types@workspace:modules/types":
   version: 0.0.0-use.local
   resolution: "@math.gl/types@workspace:modules/types"
@@ -5150,6 +5158,13 @@ __metadata:
   version: 3.9.3
   resolution: "@petamoriken/float16@npm:3.9.3"
   checksum: 10c0/de0a1a0224862cba16e6b614e6a5dd557c545c3f0372db21f61d7bcce7595fa63a28d10512c908acfbe177d209a39cea406f190159936f5891b3c095d460fdc2
+  languageName: node
+  linkType: hard
+
+"@photostructure/tz-lookup@npm:^11.7.0":
+  version: 11.7.0
+  resolution: "@photostructure/tz-lookup@npm:11.7.0"
+  checksum: 10c0/955760d41844c06243129d9b42cebacc0d3f26b5eafb60eafb25ba6ef903803f65b65d6d9c9b9670dac0aa64239668b555715ebfaa52db4f12a2f1cb92d973c9
   languageName: node
   linkType: hard
 

@@ -200,6 +200,11 @@
       },
       {
         "type": "category",
+        "label": "@math.gl/timezone",
+        "items": ["modules/timezone/README", "modules/timezone/api-reference/timezone"]
+      },
+      {
+        "type": "category",
         "label": "@math.gl/web-mercator",
         "items": [
           "modules/web-mercator/README",
