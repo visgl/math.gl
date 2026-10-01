@@ -2,18 +2,31 @@
 
 ## Unreleased
 
-- **Breaking (proj4):** The root `Proj4Projection` now uses the TypeScript engine with
-  the same constructor, bound coordinate methods, alias registration and NTv2 grid
-  registration API. Import from `@math.gl/proj4/classic` to retain the proj4js wrapper
-  and its CRS compatibility helpers. The configurable engine and plugins are exposed
-  at the root and shorter `core`, `projections/*`, `parsers/*`, and `grids/*` subpaths.
-  Numerical corrections and strict-input differences remain documented; this is API
-  compatibility, not unrestricted numerical parity.
+## v5.0.0-alpha.10
 
-- Add `LazyProjection` with the full descriptor catalogue and automatic algorithm
-  selection on first use. Add lightweight projection descriptors under `projections/lazy/*`. Coordinate methods load
-  requested algorithms on demand; explicit synchronous methods use the shared
-  implementation cache after `preload()`. Eager plugin instances remain synchronous.
+- feat(proj4): Add experimental TypeScript engine and parity roadmap (#142)
+- feat(proj4): Add parity inventory and common projection plugins (#143)
+- feat(proj4): Integrate CRS and datum transforms (tranches 3–4) (#144)
+- feat(proj4): Add projection catalogue (tranche 5) (#145)
+- build(deps): Bump undici from 6.28.0 to 6.29.0 (#146)
+- feat(proj4): Add horizontal datum grids (tranche 6) (#147)
+- feat(proj4): Add typed-array batches and benchmarks (tranche 7) (#148)
+- fix(proj4): Correct parity audit normalization errors (#149)
+- feat(proj4): Expand structured CRS support and add native engine guide (#150)
+- feat(website): Distinguish next release docs and validate both builds (#151)
+- feat(proj4): Close corpus axis gaps and add lazy plugin entry points (#152)
+- build(deps): Bump joi from 17.13.6 to 17.13.8 (#153)
+- feat(proj4): Qualify named projections and real grids against native PROJ (#154)
+- feat(proj4): Complete native accuracy and release qualification (#155)
+- feat(proj4): Make TypeScript Projection the default with lazy loading and live benchmarks (#156)
+- fix(website): Resolve CRS subpaths from source in clean builds (#157)
+- feat(timezone): Add module with lazy geographic lookup (#158)
+- feat(proj4): Strengthen benchmarks and compile transform constants (#159)
+- feat(proj4): Add projection-specific batch kernels (tranche 10) (#160)
+- feat(proj4): Qualify accuracy domains and refine numerical kernels (tranche 11) (#161)
+- feat(timezone): Add local calendar and timezone transition utilities (#162)
+- ci: Shorten PR browser qualification without reducing coverage (#163)
+- feat(proj4): Add explicit vertical-grid height transformations (#164)
 
 ## v5.0.0-alpha.9
 

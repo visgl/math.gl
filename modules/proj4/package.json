@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.9",
+  "version": "5.0.0-alpha.10",
   "keywords": [
     "webgl",
     "javascript",
@@ -926,8 +926,8 @@
     "PROJ-LICENSE.txt"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-alpha.9",
-    "@math.gl/crs": "5.0.0-alpha.9",
+    "@math.gl/core": "5.0.0-alpha.10",
+    "@math.gl/crs": "5.0.0-alpha.10",
     "proj4": "2.22.0"
   },
   "gitHead": "e1a95300cb225a90da6e90333d4adf290f7ba501",
