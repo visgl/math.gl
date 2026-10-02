@@ -494,6 +494,12 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
         requireState('geographic', ['rad', 'rad']);
         if (typeof step.grids !== 'string') throw new Error('Horizontal grid names required');
         const crs = normalizeCRS(definition('longlat', {nadgrids: step.grids}));
+        // Normalization collapses sole null/@null lists to no datum-grid metadata.
+        if (!crs.datum.grids)
+          return pair(
+            () => {},
+            () => {}
+          );
         const grids = crs.datum.grids.map(reference => {
           const grid = own(options.datumGrids || {}, reference.name)
             ? options.datumGrids[reference.name]

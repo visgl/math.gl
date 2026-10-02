@@ -233,6 +233,31 @@ test('Float32 pipeline rounds only final outputs and rejects overflow without co
   expect(Array.from(data)).toEqual(original);
 });
 
+for (const grids of ['null', '@null'])
+  for (const inverse of [false, true])
+    test(`sole ${grids} horizontal-grid fallback is a no-op (inverse=${inverse})`, () => {
+      const pipeline = new ProjectionPipeline({
+        input: {space: 'geographic', units: ['rad', 'rad', 'm']},
+        steps: [{type: 'hgridshift', grids, inverse}]
+      });
+      const point = [0.2, 0.7, 123, NaN, Infinity];
+      expect(pipeline.project(point)).toEqual(point);
+      expect(pipeline.unproject(point)).toEqual(point);
+      for (const ArrayType of [Float32Array, Float64Array]) {
+        for (const dimension of [2, 3, 4, 5]) {
+          const buffer = new ArrayType([
+            ...point.slice(0, dimension),
+            ...point.slice(0, dimension)
+          ]);
+          const original = Array.from(buffer);
+          expect(pipeline.projectFlat(buffer, dimension)).toBe(buffer);
+          expect(Array.from(buffer)).toEqual(original);
+          expect(pipeline.unprojectFlat(buffer, dimension)).toBe(buffer);
+          expect(Array.from(buffer)).toEqual(original);
+        }
+      }
+    });
+
 test('grid callbacks are reentrant and horizontal legacy/mutable hooks preserve height', () => {
   let entered = false;
   const grid = {
