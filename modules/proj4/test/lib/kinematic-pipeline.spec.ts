@@ -85,6 +85,61 @@ test('epoch views, shared non-overlapping storage, strides and both buffer preci
     }
 });
 
+test.skipIf(typeof SharedArrayBuffer === 'undefined')(
+  'cloned shared epoch wrappers reject possible aliasing before mutation',
+  () => {
+    const pipeline = new ProjectionPipeline({input: xyz, steps: [step]});
+    const source = [10, 20, 30, 8, 40, 50, 60, 9, 70, 80, 90, 10];
+    for (const ArrayType of [Float32Array, Float64Array]) {
+      const shared = new SharedArrayBuffer(source.length * ArrayType.BYTES_PER_ELEMENT);
+      const coordinates = new ArrayType(shared);
+      coordinates.set(source);
+      const cloned = structuredClone(shared);
+      expect(cloned).not.toBe(shared);
+      const epochs = new ArrayType(cloned, 0, 3);
+      // This tag is application-owned; do not use it as a backing-store identity.
+      Object.defineProperty(cloned, Symbol.toStringTag, {value: 'ArrayBuffer'});
+      for (const transform of [pipeline.projectFlatSync, pipeline.unprojectFlatSync]) {
+        expect(() => transform(coordinates, 4, epochs)).toThrow('alias shared storage');
+        expect(Array.from(coordinates)).toEqual(source);
+      }
+      // Different shared stores cannot be proved distinct from wrappers alone.
+      const separate = new ArrayType(new SharedArrayBuffer(3 * ArrayType.BYTES_PER_ELEMENT));
+      separate.fill(2020);
+      expect(() => pipeline.projectFlat(coordinates, 4, separate)).toThrow('alias shared storage');
+      // A single epoch and an ordinary epoch buffer do not alias shared coordinates.
+      const expected = source.flatMap((_, i) =>
+        i % 4 === 0 ? pipeline.project(source.slice(i, i + 4), 2020) : []
+      );
+      pipeline.projectFlat(coordinates, 4, 2020);
+      expect(Array.from(coordinates)).toEqual(Array.from(new ArrayType(expected)));
+      coordinates.set(source);
+      pipeline.projectFlat(coordinates, 4, new Float64Array([2020, 2020, 2020]));
+      expect(Array.from(coordinates)).toEqual(Array.from(new ArrayType(expected)));
+      const ordinaryCoordinates = new ArrayType(source);
+      pipeline.projectFlat(ordinaryCoordinates, 4, separate);
+      expect(Array.from(ordinaryCoordinates)).toEqual(Array.from(new ArrayType(expected)));
+    }
+  }
+);
+
+test.skipIf(typeof SharedArrayBuffer === 'undefined')(
+  'cloned shared views with disjoint byte ranges remain supported',
+  () => {
+    const pipeline = new ProjectionPipeline({input: xyz, steps: [step]});
+    const shared = new SharedArrayBuffer(10 * Float64Array.BYTES_PER_ELEMENT);
+    const storage = new Float64Array(shared);
+    storage.set([10, 20, 30, 8, 40, 50, 60, 9, 2000, 2020]);
+    const coordinates = storage.subarray(0, 8);
+    const epochs = new Float64Array(structuredClone(shared), 8 * Float64Array.BYTES_PER_ELEMENT, 2);
+    expect(pipeline.projectFlat(coordinates, 4, epochs)).toBe(coordinates);
+    expect(Array.from(coordinates)).toEqual([11, 22, 33, 8, 43, 48, 69, 9]);
+    pipeline.unprojectFlat(coordinates, 4, epochs);
+    expect(Array.from(coordinates)).toEqual([10, 20, 30, 8, 40, 50, 60, 9]);
+    expect(Array.from(epochs)).toEqual([2000, 2020]);
+  }
+);
+
 test('rate definitions and reference epoch validate and snapshot; failing coefficient updates are reusable', () => {
   const bad = (extra: object) => () =>
     new ProjectionPipeline({input: xyz, steps: [{...step, ...extra} as PipelineStep]});

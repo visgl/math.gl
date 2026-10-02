@@ -135,6 +135,10 @@ or in M is never inferred or accepted as an observation time.
 An epoch buffer is read-only during the call and contains one value per coordinate
 record. Subarray views are supported, including non-overlapping views of shared
 storage; overlap with the coordinate view is rejected before any records change.
+SharedArrayBuffer wrappers can refer to the same memory even when they are different
+objects. If both views are shared-backed, overlapping byte ranges are conservatively
+rejected, including buffers that appear separately allocated. Disjoint byte ranges,
+a single batch epoch, or an ordinary epoch buffer remain supported.
 Wrong buffer types/lengths and a missing or invalid batch epoch are also rejected
 before transformation. A non-finite per-record epoch or invalid time-adjusted scale
 follows the usual partial-error contract: completed records stay transformed, and

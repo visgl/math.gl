@@ -118,8 +118,8 @@ bundle, not an increment or an application-wide download estimate. **KiB = 1,024
 | Engine + Mercator + GTX decoder | 49.4 | 18.1 |
 | Engine + Mercator + vertical GeoTIFF adapter | 52.8 | 19.3 |
 | Default Projection wrapper (all plugins and readers) | 143.9 | 49.3 |
-| Explicit operation pipeline (no projection algorithms or readers) | 52.4 | 19.3 |
-| Every root export, including wrapper, readers, grids and pipelines | 168.3 | 57.5 |
+| Explicit operation pipeline (no projection algorithms or readers) | 52.6 | 19.4 |
+| Every root export, including wrapper, readers, grids and pipelines | 168.5 | 57.6 |
 | Classic proj4js-backed wrapper | 128.8 | 42.8 |
 
 Tranche 12A adds about 1.1 KiB minified / 0.3 KiB gzip to the core stage machinery.
@@ -129,7 +129,8 @@ bytes to the core or ordinary projection bundles. Typed [operation pipelines](./
 are also optional and add no bytes to these selective bundles. Exact Helmert rotations,
 ordinate stacks and direction-specific steps add about 3.8 KiB minified / 1.4 KiB gzip
 to a retained pipeline compared with tranche 12B2. Kinematic epoch/rate support adds
-about 2.9 KiB minified / 1.0 KiB gzip compared with 12B3. The core and default wrapper stay unchanged.
+about 3.1 KiB minified / 1.1 KiB gzip compared with 12B3, including shared-memory
+overlap validation. The core and default wrapper stay unchanged.
 
 Both GeoTIFF rows exclude an external TIFF decoder, workers, and grid files. No row
 includes downloaded datum-grid data. Different bundlers, targets, compression,

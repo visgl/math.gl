@@ -104,6 +104,18 @@ type State = {
   stacks: StackEntry[][];
 };
 const EMPTY_STACK = new Float64Array(0);
+// Typed-array buffers are ordinary or shared. The intrinsic getter checks the
+// backing-store brand across realms and cannot be fooled by Symbol.toStringTag.
+const ordinaryByteLength = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength').get;
+function sharedBuffer(buffer: ArrayBufferLike): boolean {
+  try {
+    ordinaryByteLength.call(buffer);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
 type Pair = {forward: Operation; inverse: Operation};
 type Factory = () => Pair;
 const factors: Record<PipelineUnit, number> = {
@@ -370,11 +382,12 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       )
         throw new Error('Epoch buffer requires one Float32/Float64 value per coordinate record');
       if (
-        epochs.buffer === coordinates.buffer &&
         epochs.byteOffset < coordinates.byteOffset + coordinates.byteLength &&
-        coordinates.byteOffset < epochs.byteOffset + epochs.byteLength
+        coordinates.byteOffset < epochs.byteOffset + epochs.byteLength &&
+        (epochs.buffer === coordinates.buffer ||
+          (sharedBuffer(epochs.buffer) && sharedBuffer(coordinates.buffer)))
       )
-        throw new Error('Epoch and coordinate buffers must not overlap');
+        throw new Error('Epoch and coordinate buffers must not overlap or alias shared storage');
     }
     const operations = this.operations(inverse),
       point = {x: 0, y: 0, z: 0};
