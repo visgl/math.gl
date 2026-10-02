@@ -314,8 +314,9 @@ Ten authored configurations (28 XYZM points) are checked against pinned PROJ 9.5
 pipelines, including source/destination grids, Helmert ordering, feet, axes and prime
 meridians. Browser qualification exercises the same independent references.
 
-This does not complete tranche 12: compound/vertical CRS execution,
-general pipeline composition, epochs and automatic operation selection remain open.
+Vertical GeoTIFF and typed pipeline composition have since landed in 12B1 and
+12B2 below. Compound/vertical CRS execution, broader pipeline operators, epochs
+and automatic operation selection remain open.
 See the [height conversion guide](./typescript-engine.md#convert-geoid-heights).
 
 ## Tranche 12B1: vertical GeoTIFF — implemented
@@ -326,7 +327,7 @@ point/area raster registration and scale/offset/nodata, and prepares owned bilin
 snapshots for the existing height stage. Ordered nested/disjoint images have explicit
 coverage rules. Seven authored TIFFs / 30 XYZM points are independently qualified with
 PROJ 9.5.1; Node and browser tests decode the actual bytes. This completes the vertical
-GeoTIFF format portion of 12B; typed pipeline composition remains 12B2.
+GeoTIFF format portion of 12B; typed pipeline composition is implemented in 12B2 below.
 
 The reader accepts plain `VerticalGridGeoTIFFData` as well as geotiff.js-style input.
 This contract preserves unresampled typed bands, per-image/per-band GDAL metadata,
@@ -348,19 +349,69 @@ run in CI. See [the operation pipeline contract](./operation-pipelines.md).
 
 This completes the typed composition profile, not arbitrary PROJ pipeline parsing.
 Exact rotations, `ob_tran` output-unit contracts, push/pop, omitted directions and
-additional operators remain explicit gaps. Dynamic datums and operation selection
-remain 12C, with an epoch separate from M.
+additional operators remain explicit gaps tracked in 12B3. Dynamic operations are
+split into 12C1–12C2, with an epoch separate from M; operation selection is 12E.
 
 ## Remaining performance and geodetic roadmap
 
-| Tranche | Work | Acceptance gate |
+Updated October 2, 2026 after the vertical GeoTIFF, typed pipeline and projection API
+naming changes landed. The public APIs are `Projection`, `ProjectionEngine`,
+`LazyProjection` and `ProjectionPipeline`; the configurable alpha API no longer
+exports `TypeScriptProjection`.
+
+The SOTA goal combines measured throughput, independently checked numerical accuracy,
+and support for modern geodetic operations. These are separate acceptance criteria:
+a faster benchmark does not establish accuracy or complete PROJ parity.
+
+### Completed SOTA foundations
+
+| Tranche | Landed result |
+| --- | --- |
+| 8 — Shared performance measurements | Seeded scalar/flat workloads, live browser benchmarks, distributions and timing diagnostics. |
+| 9 — Compiled transformation overhead | Reused registries, prepared constants and reduced per-coordinate dispatch. |
+| 10 — Projection-specific batch kernels | Whole-buffer operations for eligible Mercator, TM/UTM and conic transformations. |
+| 11 — Numerical excellence | Additional independently checked accuracy domains and refined numerical kernels. |
+| 12A — Explicit vertical grids | Prepared geoid grids, GTX and the `@math.gl/geoid` adapter. |
+| 12B1 — Vertical GeoTIFF | Optional numeric-grid adapter, independent fixtures and loaders.gl integration. |
+| 12B2 — Typed operation pipelines | Explicit units, axes, equations, geocentric/static Helmert and horizontal/vertical grid steps. |
+
+### Remaining tranches
+
+All rows below are planned. Existing implementations and their documented limits
+remain the baseline; no acceleration backend or dynamic operation is implied to exist.
+The former broad 12C is split below, with CRS-driven operation selection tracked in 12E.
+
+| Tranche | Deliverable | Acceptance gate |
 | --- | --- | --- |
-| 12C — Time-dependent operations | Epochs, dynamic datums and operation selection | Explicit epoch API separate from M, independent time-dependent references |
-| 13 — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
+| 12B3 — Pipeline completeness | Opt-in exact Helmert rotations and inverse, explicit `ob_tran` output spaces/units, push/pop and direction-specific steps. Define the supported subset before adding any PROJ pipeline-string reader. | Independent forward/inverse references for each added operator, state/unit validation and preserved XYZM/partial-error behavior; optional features stay out of core bundles. |
+| 12C1 — Observation epochs and kinematic Helmert | Explicit decimal-year epochs and translation/rotation/scale rates with a reference epoch. Support one epoch for a batch and a separately supplied per-point epoch buffer; preserve M. | Independent multi-epoch references for both rotation conventions, inverse transformations, missing/invalid epoch errors and unchanged static-operation results. |
+| 12C2 — Deformation models | Optional prepared velocity/deformation grids and explicit source/target epoch propagation; application-owned model loading. | Licensed, pinned real-model fixtures, units/time/coverage/nodata checks and independently checked forward/inverse results; unused models add no core bundle cost. |
+| 12D — Structured compound and vertical CRS execution | Interpret supported horizontal + vertical CRS combinations through `@math.gl/crs`, with explicit height units, axes, datums and supplied operations/models. Extend derived CRS support only where its operation is executable. | Equivalent WKT/PROJJSON/readonly CRS inputs produce the same qualified transformation; unsupported or missing operations fail explicitly and metadata remains unchanged. |
+| 12E — CRS-driven operation selection | Optional operation catalogue with area-of-interest, accuracy, epoch and grid-availability filters; expose the chosen operation and alternatives. | Pinned catalogue provenance, deterministic selection against reviewed PROJ cases, explicit missing-resource/ambiguity behavior and no implicit grid downloads or runtime dependency in core. |
+| 13A — Further JavaScript batch performance | Profile the general transformation and typed pipeline paths; extend useful whole-buffer specializations and reduce grid/datum/XYZM overhead. Evaluate reusable scalar output buffers separately. | Paired warmed measurements against the PR base and direct proj4js, representative projected-to-projected/grid/XYZM cases, unchanged accuracy and ownership/error contracts, allocation and bundle-size reports. |
+| 13B — Optional Wasm/SIMD | Prototype selected kernels behind the projection plugin contract with explicit preparation and a JavaScript fallback. | End-to-end crossover measurements include startup, compilation, copying and memory cost; Node/browser numerical qualification and optional chunk-size budgets. Ship only a demonstrated improvement. |
+| 13C — Worker execution | Optional asynchronous large-buffer projection with explicit transfer/ownership, cancellation and bounded scheduling. | Compare single-thread and worker latency/throughput including startup and transfers, verify scalar/flat equivalence and error propagation, and document when workers help. |
+| 13D — Visualization GPU paths | Explore an optional rendering-oriented path with explicit precision/domain limits and buffer integration. | Measure upload, dispatch and readback where applicable; publish device/precision error envelopes and keep unsupported geodetic operations explicit. This is a separate visualization profile. |
+| 14 — Broader numerical and performance qualification | Expand parameter/singularity coverage, real grids and dynamic-operation references; maintain comparable browser/device benchmarks as the preceding tranches land. | Reproducible error reports with worst coordinates, versioned/licensed fixtures and raw performance data; document corrections, exceptions and tested domains instead of a universal accuracy or speed claim. |
+
+### Suggested order
+
+Start with 12B3 to finish the explicit operation API and 13A to identify the next
+measured throughput gains. Then add 12C1 before 12C2. Structured CRS execution in
+12D and a reviewed catalogue provide the prerequisites for 12E. Keep qualification
+work from 14 alongside every tranche. Evaluate 13B and 13C after profiling establishes
+which workloads could benefit; 13D remains an optional visualization investigation.
+
+Dynamic-operation scope follows PROJ's [kinematic Helmert contract](https://proj.org/en/stable/operations/transformations/helmert.html)
+and [deformation operations](https://proj.org/en/stable/operations/transformations/deformation.html).
+Operation selection is a separate concern described by PROJ's
+[CRS-to-CRS operation computation](https://proj.org/en/stable/operations/operations_computation.html).
+These sources guide future contracts; the existing pinned numerical fixtures remain
+unchanged by this roadmap update.
 
 Further optimization and operation support require separate measurements and accuracy
-qualification. These tranches do not establish unrestricted PROJ parity or a state-of-the-art
-performance claim.
+qualification. Completing these tranches would expand the supported profile; it would
+not establish unrestricted PROJ parity or a universal state-of-the-art performance claim.
 
 ## Axis compatibility and lazy entry points: implemented follow-up
 
