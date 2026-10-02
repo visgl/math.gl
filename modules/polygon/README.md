@@ -9,3 +9,5 @@ For documentation please visit the [website](https://math.gl).
 ## Projection-aware subdivision
 
 `subdividePolyline` subdivides source edges through a supplied coordinate transform using a tolerance in target units. It returns source and target coordinates plus edge attribution for interpolating other data. See the [API reference](https://math.gl/docs/modules/polygon/api-reference/subdivide-polyline) for domains, limits, accuracy, and polygon-ring usage.
+
+`subdivideTriangleMesh` refines indexed triangle meshes with shared-edge conformity and interpolation weights for UVs and other vertex attributes. It supports filled polygons after triangulation and textured bitmap meshes. See the [mesh API reference](https://math.gl/docs/modules/polygon/api-reference/subdivide-triangle-mesh).

@@ -73,3 +73,5 @@ Limits produce `RangeError` instead of returning incomplete geometry. Transform 
 For a polygon, process the exterior and each hole as separate, explicitly closed polylines. Closure is preserved when the closing vertex is supplied. Rebuild hole offsets from the new vertex counts before passing the transformed rings to [earcut](./earcut.md). Subdivision approximates boundaries; it does not repair self-intersections, split seams, triangulate the interior, or adapt triangle interiors to a nonlinear projection.
 
 GPU buffers, layer updates, screen-space tolerance selection, and clipping policy remain the caller's responsibility.
+
+For filled polygons and bitmaps that need interior deformation, use [subdivideTriangleMesh](./subdivide-triangle-mesh.md) after source-space triangulation.
