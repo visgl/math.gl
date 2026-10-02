@@ -67,7 +67,7 @@ for (const fixture of catalogueProjectionCases) {
       [' +units=us-ft', 1200 / 3937],
       [' +to_meter=1000', 1000]
     ] as const) {
-      const projection = new native.TypeScriptProjection({
+      const projection = new native.ProjectionEngine({
         from: '+proj=longlat +datum=none',
         to: referenceDefinition + ' +x_0=123 +y_0=-456' + units,
         projections
@@ -127,7 +127,7 @@ for (const parameters of [
         ' ' +
         parameters +
         ' +lon_0=12 +datum=none';
-      const projection = new native.TypeScriptProjection({
+      const projection = new native.ProjectionEngine({
         to,
         projections: [native.obliqueTransformation(wrapped)]
       });
@@ -144,7 +144,7 @@ for (const parameters of [
   });
 }
 test('orthographic false easting and inverse domain; visible horizon', () => {
-  const projection = new native.TypeScriptProjection({
+  const projection = new native.ProjectionEngine({
     to: '+proj=ortho +R=6371000 +lon_0=0 +lat_0=0 +x_0=123 +y_0=456',
     projections
   });
@@ -162,17 +162,17 @@ test('catalogue parameter validation and explicit wrapped dependencies', () => {
     '+proj=omerc +alpha=30',
     '+proj=tpers +tilt=90'
   ])
-    expect(() => new native.TypeScriptProjection({to, projections})).toThrow();
+    expect(() => new native.ProjectionEngine({to, projections})).toThrow();
   expect(
     () =>
-      new native.TypeScriptProjection({
+      new native.ProjectionEngine({
         to: '+proj=ob_tran +o_proj=robin +o_lat_p=45 +o_lon_p=0',
         projections: [native.obliqueTransformation(native.mollweide)]
       })
   ).toThrow();
   expect(
     () =>
-      new native.TypeScriptProjection({
+      new native.ProjectionEngine({
         to: '+proj=ob_tran +o_lat_p=45',
         projections: [native.obliqueTransformation(native.mollweide)]
       })
@@ -191,7 +191,7 @@ test('world projections cover both hemispheres and longitude wrapping', () => {
     native.vanDerGrinten
   ]) {
     const to = '+proj=' + plugin.name + ' +lon_0=10 +x_0=0 +y_0=0 +datum=none';
-    const projection = new native.TypeScriptProjection({to, projections: [plugin]});
+    const projection = new native.ProjectionEngine({to, projections: [plugin]});
     const reference = proj4('+proj=longlat +datum=none', to + ' +lat_0=0');
     for (const lon of [-179, -120, 10, 100, 179])
       for (const lat of [-80, -45, 0, 45, 80]) {
@@ -222,12 +222,12 @@ test('catalogue aliases resolve to the same local plugin', () => {
     );
     expect(fixture, plugin.name).toBeDefined();
     if (!fixture) continue;
-    const projection = new native.TypeScriptProjection({
+    const projection = new native.ProjectionEngine({
       to: fixture.definition,
       projections: [plugin]
     });
     for (const alias of plugin.aliases || []) {
-      const aliased = new native.TypeScriptProjection({
+      const aliased = new native.ProjectionEngine({
         to: fixture.definition.replace('+proj=' + plugin.name, '+proj="' + alias + '"'),
         projections: [plugin]
       });
@@ -238,7 +238,7 @@ test('catalogue aliases resolve to the same local plugin', () => {
           'hotineobliquemercatorvarianta',
           'hotineobliquemercatorazimuthnaturalorigin'
         ].includes(alias.toLowerCase().replace(/[^a-z]/g, ''))
-          ? new native.TypeScriptProjection({
+          ? new native.ProjectionEngine({
               to: fixture.definition + ' +no_off',
               projections: [plugin]
             }).project(fixture.center)
@@ -253,7 +253,7 @@ test('oblique Mercator and Robinson preserve height with enforced axes', () => {
     catalogueProjectionCases.find(entry => entry.id === 'omerc-alpha')!.definition
   ]) {
     const to = definition + ' +axis=neu +datum=none +x_0=0 +y_0=0';
-    const projection = new native.TypeScriptProjection({to, projections, enforceAxis: true});
+    const projection = new native.ProjectionEngine({to, projections, enforceAxis: true});
     const reference = proj4('+proj=longlat +datum=none', to);
     const point = definition.includes('omerc') ? [115, 5, 123, 7] : [20, 30, 123, 7];
     const corrected = independent.cases.find(row => row.id === 'robin-axis-regression')!.results[0]
@@ -269,7 +269,7 @@ test('oblique Mercator and Robinson preserve height with enforced axes', () => {
   }
 });
 test('Mollweide poles remain finite and hemisphere-correct', () => {
-  const projection = new native.TypeScriptProjection({to: '+proj=moll +R=6371000', projections});
+  const projection = new native.ProjectionEngine({to: '+proj=moll +R=6371000', projections});
   for (const sign of [-1, 1]) {
     close(projection.project([0, sign * 90]), [0, sign * Math.SQRT2 * 6371000], 1e-7);
     close(projection.unproject(projection.project([0, sign * 90])), [0, sign * 90], 1e-6);
@@ -277,7 +277,7 @@ test('Mollweide poles remain finite and hemisphere-correct', () => {
 });
 test('Van der Grinten equator, central meridian and poles', () => {
   const to = '+proj=vandg +lon_0=10 +R=6371000 +x_0=0 +y_0=0';
-  const projection = new native.TypeScriptProjection({to, projections});
+  const projection = new native.ProjectionEngine({to, projections});
   const reference = proj4(to);
   for (const point of [
     [10, 0],
@@ -294,7 +294,7 @@ test('Van der Grinten equator, central meridian and poles', () => {
 test('southern Bonne inverse retains the signed radius', () => {
   for (const geometry of ['+ellps=WGS84', '+R=6371000']) {
     const to = '+proj=bonne +lat_1=-45 +lon_0=10 +datum=none ' + geometry;
-    const projection = new native.TypeScriptProjection({to, projections});
+    const projection = new native.ProjectionEngine({to, projections});
     const reference = proj4('+proj=longlat +datum=none', to);
     for (const point of [
       [10, -45],
@@ -314,7 +314,7 @@ test('perspective kernels reject coordinates behind the horizon', () => {
     '+proj=geos +h=35785831 +R=6371000',
     '+proj=tpers +h=1000000 +lat_0=0'
   ]) {
-    const projection = new native.TypeScriptProjection({to, projections});
+    const projection = new native.ProjectionEngine({to, projections});
     expect(() => projection.project([180, 0])).toThrow();
     close(projection.unproject(projection.project([0, 0])), [0, 0], 1e-8);
   }
@@ -383,13 +383,13 @@ test('catalogue methods share the math.gl/crs WKT and PROJJSON readers', () => {
         ]
       }
     };
-    const expected = new native.TypeScriptProjection({
+    const expected = new native.ProjectionEngine({
       to: '+proj=' + code + ' +lon_0=10 +x_0=123 +y_0=456' + (regional ? ' +lat_0=40' : ''),
       projections
     }).project([11, 41, 123]);
     for (const to of [wkt, json])
       close(
-        new native.TypeScriptProjection({
+        new native.ProjectionEngine({
           to,
           projections,
           parsers: [native.wktCRSParser, native.projJSONCRSParser]
@@ -402,11 +402,11 @@ test('catalogue methods share the math.gl/crs WKT and PROJJSON readers', () => {
 test('ob_tran preserves wrapped Hotine variant aliases and flags', () => {
   const base = '+proj=ob_tran +o_lat_p=45 +o_lon_p=0 +lat_0=4 +lonc=115 +alpha=53';
   const projections = [native.obliqueTransformation(native.obliqueMercator)];
-  const variant = new native.TypeScriptProjection({
+  const variant = new native.ProjectionEngine({
     to: base + ' +o_proj=Hotine_Oblique_Mercator_variant_A',
     projections
   });
-  const explicit = new native.TypeScriptProjection({
+  const explicit = new native.ProjectionEngine({
     to: base + ' +o_proj=omerc +no_off',
     projections
   });
@@ -418,11 +418,11 @@ test('Mollweide preserves unwrapped longitude only when over is enabled', () => 
   for (const geometry of ['+ellps=WGS84', '+R=6371000']) {
     for (const origin of [0, 30]) {
       const to = '+proj=moll ' + geometry + ' +lon_0=' + origin + ' +x_0=123 +y_0=-456';
-      const unwrapped = new native.TypeScriptProjection({
+      const unwrapped = new native.ProjectionEngine({
         to: to + ' +over',
         projections: [native.mollweide]
       });
-      const wrapped = new native.TypeScriptProjection({to, projections: [native.mollweide]});
+      const wrapped = new native.ProjectionEngine({to, projections: [native.mollweide]});
       for (const point of [
         [200, 0, 123, 7],
         [-200, 30, 123, 7],

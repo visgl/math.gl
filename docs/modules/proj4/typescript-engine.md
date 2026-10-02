@@ -1,29 +1,32 @@
-# TypeScript projection engine
+# Projection engine
 
-`@math.gl/proj4` is a TypeScript coordinate transformation engine with
-explicit projection plugins, optional CRS readers, and in-place typed-array transforms.
-Applications choose the algorithms and data they need, and can load them on demand.
-It is an entry point of **`@math.gl/proj4`**, not a separately installed package.
-Existing `@math.gl/proj4/experimental` paths remain compatibility aliases.
+Use the math.gl projection engine to convert coordinates between geographic,
+projected and geocentric coordinate reference systems. It supports scalar coordinates,
+in-place typed arrays, custom projections and loading algorithms on demand.
 
-The TypeScript engine supports the [documented API and transformation profile](./typescript-support.md). The upstream coordinate corpus has **232 original numeric matches, one reviewed
-Robinson correction, and nine intentional input rejections out of 242**. This is not a measure of complete geodetic accuracy.
-An independent PROJ corpus also checks all 37 named algorithms across 2,386 points,
-with additional structured CRS, datum-chain and real NTv2/GeoTIFF checks, with explicit accuracy limits. See [independent validation](./independent-validation.md)
-and the [parity audit](./parity-audit.md) for coverage and remaining qualification work.
-The root `Projection` uses this engine with all plugins/readers configured.
-Import `Proj4Projection` from `@math.gl/proj4/classic` to use proj4js.
-The convenience wrapper includes the full catalogue; use `TypeScriptProjection`
-and selective subpaths for smaller bundles.
+Choose the API that fits your application:
+
+| API | Use it when |
+| --- | --- |
+| `Projection` | You want a ready-to-use converter with all built-in projections and CRS readers. |
+| `ProjectionEngine` | You want to supply the projections, readers and grid data your application needs. |
+| `LazyProjection` | You want built-in projection algorithms to load automatically when requested. |
+| `ProjectionPipeline` | You need to specify the order of individual coordinate operations. |
+
+All are exported by `@math.gl/proj4` or its documented subpaths. Selective imports
+reduce the initial bundle; reuse a converter to transform many coordinates between
+the same pair of CRSs. See [supported transformations and migration](./typescript-support.md)
+for input limits, and [independent validation](./independent-validation.md) for accuracy.
+The original proj4js wrapper remains available at `@math.gl/proj4/classic`.
 
 ## Start with the projections you need
 
 These examples use the configurable engine exported by the package root:
 
 ```typescript title="mercator-projection.ts"
-import {TypeScriptProjection, mercator} from '@math.gl/proj4';
+import {ProjectionEngine, mercator} from '@math.gl/proj4';
 
-export const projection = new TypeScriptProjection({
+export const projection = new ProjectionEngine({
   from: 'EPSG:4326',
   to: 'EPSG:3857',
   projections: [mercator]
@@ -42,12 +45,12 @@ example, Web Mercator → UTM needs both `mercator` and `universalTransverseMerc
 
 ```typescript
 import {
-  TypeScriptProjection,
+  ProjectionEngine,
   mercator,
   universalTransverseMercator
 } from '@math.gl/proj4';
 
-const projection = new TypeScriptProjection({
+const projection = new ProjectionEngine({
   from: 'EPSG:3857',
   to: 'EPSG:32631',
   projections: [mercator, universalTransverseMercator]
@@ -88,7 +91,7 @@ Use named ESM imports and register a small, explicit list. The package declares
 remove unused projection kernels and optional readers. Type-only imports add no
 runtime code.
 
-The TypeScript entry points do not import the proj4js runtime. The npm package
+The math.gl entry points do not import the proj4js runtime. The npm package
 still depends on proj4js for the classic wrapper, so **installation size and browser
 bundle size are different measurements**. Importing the classic wrapper elsewhere in the
 same application can retain both engines. CommonJS consumers are supported, but the
@@ -114,7 +117,7 @@ bundle, not an increment or an application-wide download estimate. **KiB = 1,024
 | Engine + Mercator + GeoTIFF grid adapter | 51.0 | 18.6 |
 | Engine + Mercator + GTX decoder | 49.4 | 18.1 |
 | Engine + Mercator + vertical GeoTIFF adapter | 52.8 | 19.3 |
-| Default TypeScript wrapper (all plugins and readers) | 143.9 | 49.3 |
+| Default Projection wrapper (all plugins and readers) | 143.9 | 49.3 |
 | Explicit operation pipeline (no projection algorithms or readers) | 45.6 | 16.8 |
 | Every root export, including wrapper, readers, grids and pipelines | 161.6 | 55.2 |
 | Classic proj4js-backed wrapper | 128.8 | 42.8 |
@@ -127,7 +130,7 @@ are also optional and add no bytes to these selective bundles.
 
 Both GeoTIFF rows exclude an external TIFF decoder, workers, and grid files. No row
 includes downloaded datum-grid data. Different bundlers, targets, compression,
-shared dependencies, and import patterns change these totals. The full TypeScript wrapper and root export set cost more than the classic wrapper; the size benefit comes from selecting a subset.
+shared dependencies, and import patterns change these totals. The full Projection wrapper and root export set cost more than the classic wrapper; the size benefit comes from selecting a subset.
 Avoid a runtime lookup such as `projectionExports[name]` over the entire module namespace
 when you want the bundler to discard unused algorithms.
 
@@ -161,12 +164,12 @@ exports eager implementations. Construction starts no imports. Coordinate method
 explicit sync methods use the shared implementation cache after preloading.
 Rotated projections automatically resolve their wrapped algorithms, including
 different children at the two endpoints. Aliases, readers and prepared grids use
-the same options as `TypeScriptProjection`; WKT/PROJJSON readers remain opt-in.
+the same options as `ProjectionEngine`; WKT/PROJJSON readers remain opt-in.
 
 The full descriptor catalogue adds metadata to the initial bundle and lets a
 splitting bundler emit chunks for every built-in algorithm. Only requested
 algorithms are fetched at runtime. For a smaller set or custom algorithms, use
-`TypeScriptProjection` with an explicit list:
+`ProjectionEngine` with an explicit list:
 
 Import lightweight descriptors and pass them in the same `projections` list as
 eager plugins. Descriptor imports and instance construction do not import algorithm
@@ -174,14 +177,14 @@ implementations. The first coordinate operation selects the required source and
 destination algorithms and loads them internally:
 
 ```typescript title="projection-descriptor.ts"
-import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {ProjectionEngine} from '@math.gl/proj4/core';
 import {mercator} from '@math.gl/proj4/projections/merc';
 import {lazyUniversalTransverseMercator} from '@math.gl/proj4/projections/lazy/utm';
 
-export const webMercator = new TypeScriptProjection({
+export const webMercator = new ProjectionEngine({
   to: 'EPSG:3857', projections: [mercator]
 });
-export const utm31 = new TypeScriptProjection({
+export const utm31 = new ProjectionEngine({
   to: 'EPSG:32631', projections: [mercator, lazyUniversalTransverseMercator]
 });
 
@@ -210,7 +213,7 @@ implementations across instances and ESM/CommonJS entry points. Concurrent reque
 share a load. Failures propagate to the coordinate call and can be retried. Unused
 descriptors are not loaded. Separate descriptors with the same name are not conflated.
 `preloadProjection(descriptor)` also warms the cache, and `getLoadedProjection` reads
-it without loading anything. `TypeScriptProjection.create(options)` is an optional
+it without loading anything. `ProjectionEngine.create(options)` is an optional
 async factory returning a fully prepared instance with synchronous coordinate methods.
 
 Every named projection has a descriptor at `projections/lazy/<id>` (for example,
@@ -224,12 +227,12 @@ Optional WKT interpretation can also be deferred. The adapter uses isolated
 `@math.gl/crs` syntax entry points so its parser stays on the lazy side:
 
 ```typescript
-import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {ProjectionEngine} from '@math.gl/proj4/core';
 import {mercator} from '@math.gl/proj4/projections/merc';
 
 export async function loadMercatorWKT(to: string) {
   const {wktCRSParser} = await import('@math.gl/proj4/parsers/wkt');
-  return new TypeScriptProjection({to, projections: [mercator], parsers: [wktCRSParser]});
+  return new ProjectionEngine({to, projections: [mercator], parsers: [wktCRSParser]});
 }
 ```
 
@@ -317,7 +320,7 @@ its coordinate operation is implemented.
 ```typescript
 import type {ReadonlyCRSDefinition} from '@math.gl/crs';
 import {
-  TypeScriptProjection,
+  ProjectionEngine,
   mercator,
   transverseMercator,
   wktCRSParser,
@@ -325,7 +328,7 @@ import {
 } from '@math.gl/proj4';
 
 export function createMapProjection(from: ReadonlyCRSDefinition) {
-  return new TypeScriptProjection({
+  return new ProjectionEngine({
     from,
     to: 'EPSG:3857',
     projections: [mercator, transverseMercator],
@@ -341,7 +344,7 @@ the constructor. Stored coordinate order is honored; declared axis order is opti
 through `enforceAxis`. See the [CRS integration reference](./api-reference/typescript-projection.md#integration-with-mathglcrs)
 for height, units, provenance, compound CRSs, and horizontal extraction.
 
-`checkTypeScriptCRSCompatibility(definition, options)` reports whether a CRS can be
+`checkProjectionCompatibility(definition, options)` reports whether a CRS can be
 constructed with the exact plugins, readers, and grids supplied. A successful check
 is not an accuracy certificate or a guarantee that every coordinate is inside the
 projection's domain or a grid's coverage. Validate the CRS and coordinate region
@@ -354,13 +357,13 @@ decode them before creating an instance; coordinate transforms then stay synchro
 The application chooses the grid source, caching, and error handling.
 
 ```typescript title="grid-projection.ts"
-import {TypeScriptProjection, parseNTv2Grid} from '@math.gl/proj4';
+import {ProjectionEngine, parseNTv2Grid} from '@math.gl/proj4';
 
 export async function createGridProjection(url: string) {
   const response = await fetch(url);
   if (!response.ok) throw new Error('Could not load datum grid: ' + response.status);
   const grid = parseNTv2Grid(await response.arrayBuffer());
-  return new TypeScriptProjection({
+  return new ProjectionEngine({
     from: '+proj=longlat +ellps=clrk66 +nadgrids=regional.gsb',
     to: 'EPSG:4326',
     datumGrids: {'regional.gsb': grid}
@@ -390,13 +393,13 @@ Greenwich longitude and geographic latitude. These are explicit stages following
 [PROJ's vertical-grid convention](https://proj.org/en/stable/operations/transformations/vgridshift.html).
 
 ```typescript
-import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {ProjectionEngine} from '@math.gl/proj4/core';
 import {parseGTXGrid} from '@math.gl/proj4/grids/gtx';
 
 const response = await fetch('/grids/local.gtx');
 if (!response.ok) throw new Error('Could not load vertical grid');
 const local = parseGTXGrid(await response.arrayBuffer());
-const projection = new TypeScriptProjection({
+const projection = new ProjectionEngine({
   from: '+proj=longlat +datum=WGS84 +geoidgrids=local',
   to: 'EPSG:4979',
   verticalGrids: {local}
@@ -410,7 +413,7 @@ match your data. The key `local` is an application registration name, not an EPS
 CRS or an automatically selected model. An ellipsoid alone does not enable a horizontal
 datum shift: declare the datum or explicit `+towgs84` parameters when a shift is needed.
 
-`Projection`, `TypeScriptProjection` and `LazyProjection` accept the same per-instance
+`Projection`, `ProjectionEngine` and `LazyProjection` accept the same per-instance
 `verticalGrids` map. Load grid data before constructing the projection. Lazy projection
 algorithms can still preload separately. No file, network request, TIFF decoder or geoid
 model is imported implicitly. The optional readers can themselves be dynamically imported.
@@ -468,7 +471,7 @@ GDAL metadata, GeoKeys, nodata and geometry tags have the same validation as the
 geotiff.js input. No runtime dependency on loaders.gl is added.
 
 ```typescript
-import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {ProjectionEngine} from '@math.gl/proj4/core';
 import {loadVerticalGeoTIFFGrid} from '@math.gl/proj4/grids/vertical-geotiff';
 import {fromArrayBuffer} from 'geotiff'; // separately installed, application-owned decoder
 
@@ -477,7 +480,7 @@ if (!response.ok) throw new Error('Could not load geoid grid');
 const geoid = await loadVerticalGeoTIFFGrid(
   await fromArrayBuffer(await response.arrayBuffer())
 );
-const projection = new TypeScriptProjection({
+const projection = new ProjectionEngine({
   from: '+proj=longlat +datum=WGS84 +geoidgrids=geoid',
   to: 'EPSG:4979',
   verticalGrids: {geoid}
@@ -518,9 +521,9 @@ projection bundles do not retain this reader.
 Use `projectFlat` and `unprojectFlat` for interleaved coordinate buffers:
 
 ```typescript
-import {TypeScriptProjection, mercator} from '@math.gl/proj4';
+import {ProjectionEngine, mercator} from '@math.gl/proj4';
 
-const projection = new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});
+const projection = new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});
 const positions = new Float64Array([12, 55, 13, 56]);
 projection.projectFlat(positions, 2); // returns the same view
 projection.unprojectFlat(positions, 2);
@@ -544,36 +547,15 @@ Copy the input first if the operation must be atomic. See the
 [flat-array contract](./api-reference/typescript-projection.md#flat-typed-arrays-in-place)
 for exact failure and dimension behavior.
 
-### Projection-specific batch execution
+<span id="projection-specific-batch-execution" />
 
-Mercator, transverse Mercator/UTM, Lambert conformal conic, Albers and equidistant
-conic supply prepared whole-buffer operations. For eligible geographic/projected
-pairs, these fuse unit conversion, validation and the projection equation into one
-traversal, bypassing per-coordinate dispatch through the general transformation pipeline.
-The numerical equations are shared with the scalar API; there is no reduced-accuracy mode.
-Z and every trailing ordinate remain in storage, including the sign of zero and NaN measures.
+### Batch performance
 
-Selection happens at construction. Datum/grid operations, axis permutations, nonzero
-prime meridians, vertical unit conversions, longitude wrapping, lossy horizontal
-extraction, geocentric coordinates and projected-to-projected chains use the general
-pipeline. Scalar calls and plugins without batch hooks retain their existing behavior.
-Lazy-loaded plugins gain the same specialization once loaded; no additional imports or
-application configuration are needed.
-
-Advanced plugins can implement optional `createForwardFlat(context)` and
-`createInverseFlat(context)` methods on `ProjectionImplementation`. They receive a frozen
-`ProjectionFlatContext` with `inputScale` and `outputScale`, and return a synchronous
-`ProjectionFlatOperation` or `undefined` to decline specialization. These types are
-exported from `@math.gl/proj4/core`. Factories run once per direction at construction;
-operations receive the entire view and stride, after the engine validates both.
-
-A custom operation must multiply input XY by `inputScale`, apply the forward/inverse
-equations, then divide XY by `outputScale`. It must enforce the geographic domain and
-finite XYZ contract, preserve Z/trailing ordinates, check Float32 representability before
-writing, and leave the failing and subsequent records untouched. Scratch belongs to each
-call; retaining it or the buffer breaks reentrancy. Use the ordinary mutable hooks unless
-you need and can uphold this whole-buffer contract. Built-in factories decline when a
-decorator replaces their corresponding mutable hook, preserving custom behavior.
+Common projections automatically use bulk operations where the CRS pair permits it.
+Use `projectFlat` for large buffers and reuse the converter; no extra application
+configuration is needed. Datum, grid and axis operations retain the same coordinate
+and precision guarantees. Custom plugin authors can supply
+[whole-buffer hooks](./api-reference/typescript-projection.md#whole-buffer-plugin-hooks).
 
 ## Add a custom projection
 
@@ -620,9 +602,8 @@ a plugin does not register it globally. See the
 
 ## Compatibility and provenance
 
-The numerical kernels are predominantly direct TypeScript ports of proj4js 2.22.0;
-the execution and plugin architecture is math.gl code. Source comments and distributed
-notices distinguish ports from original code. The package includes MIT attribution
+The projection engine includes algorithms adapted from proj4js and PROJ, as well as
+original math.gl code. Source comments and distributed notices identify their origins. The package includes MIT attribution
 and the Apache-2.0 notice retained by Equal Earth.
 
 The nine remaining upstream-corpus differences are deliberate strict-input rejections,

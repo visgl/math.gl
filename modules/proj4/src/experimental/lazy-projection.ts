@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 // Original convenience API over projection descriptors. Deferred kernels retain
 // their proj4js/PROJ port notices and licenses.
-import {TypeScriptProjection} from './typescript-projection';
-import type {TypeScriptProjectionOptions} from './typescript-projection';
+import {ProjectionEngine} from './typescript-projection';
+import type {ProjectionEngineOptions} from './typescript-projection';
 import {createProjectionDescriptor, preloadProjection} from './projection-descriptor';
 import type {ProjectionDescriptor} from './projection-descriptor';
 import type {ProjectionPlugin} from './types';
@@ -47,7 +47,7 @@ import {lazyUniversalTransverseMercator} from './lazy-projections/utm';
 import {lazyVanDerGrinten} from './lazy-projections/vandg';
 
 export type LazyProjectionOptions = Omit<
-  TypeScriptProjectionOptions<ProjectionDescriptor>,
+  ProjectionEngineOptions<ProjectionDescriptor>,
   'projections'
 >;
 const catalogue: readonly ProjectionDescriptor[] = [
@@ -90,13 +90,13 @@ const catalogue: readonly ProjectionDescriptor[] = [
 const key = (name: string) => name.toLowerCase().replace(/[\s_-]/g, '');
 
 /** All built-in projection descriptors, with algorithms imported only on use. */
-export class LazyProjection extends TypeScriptProjection<ProjectionDescriptor> {
+export class LazyProjection extends ProjectionEngine<ProjectionDescriptor> {
   constructor(options: LazyProjectionOptions = {}) {
     super({...options, projections: configuredProjections(options)});
   }
   /** Resolve this catalogue into an ordinary synchronous engine instance. */
-  static override async create(options: LazyProjectionOptions = {}): Promise<TypeScriptProjection> {
-    return TypeScriptProjection.create({...options, projections: configuredProjections(options)});
+  static override async create(options: LazyProjectionOptions = {}): Promise<ProjectionEngine> {
+    return ProjectionEngine.create({...options, projections: configuredProjections(options)});
   }
 }
 

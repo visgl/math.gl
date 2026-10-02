@@ -3,12 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 // Engine and contracts only: no projection catalogue or optional readers.
-export {TypeScriptProjection, checkTypeScriptCRSCompatibility} from './typescript-projection';
+export {ProjectionEngine, checkProjectionCompatibility} from './typescript-projection';
 export type {
-  TypeScriptProjectionOptions,
-  TypeScriptProjectionCreateOptions,
-  ProjectionArray,
-  TypeScriptCRSCompatibility
+  ProjectionEngineOptions,
+  ProjectionEngineCreateOptions,
+  ProjectionCompatibility,
+  ProjectionArray
 } from './typescript-projection';
 export type {
   ProjectionPoint,

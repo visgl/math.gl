@@ -1,8 +1,8 @@
-# TypeScript proj4 parity roadmap
+# Projection engine roadmap
 
 Status: tranches **0–11, including qualification tranches 7A–7D, are implemented** for the
-[documented TypeScript support profile](./typescript-support.md). The package root uses the TypeScript engine; `Projection` supplies the compatible
-wrapper API (`Proj4Projection` is a deprecated alias) and `TypeScriptProjection` allows explicit plugins. The old wrapper is
+[documented projection support profile](./typescript-support.md). The package root uses the math.gl projection engine; `Projection` supplies the compatible
+wrapper API (`Proj4Projection` is a deprecated alias) and `ProjectionEngine` allows explicit plugins. The old wrapper is
 available from `@math.gl/proj4/classic`; prior engine subpaths remain aliases. No package is published by this work.
 
 The upstream corpus has 232 original numeric matches, one independently corrected
@@ -12,7 +12,7 @@ unrestricted upstream behavior, not a claim of full-domain geodetic accuracy.
 
 ## Target and upstream baseline
 
-Build an independent TypeScript engine inside `@math.gl/proj4`, initially alongside
+Build an independent math.gl projection engine inside `@math.gl/proj4`, initially alongside
 the existing proj4js wrapper. Keep projection algorithms explicitly pluggable and
 ESM imports tree-shakeable throughout implementation.
 
@@ -31,7 +31,7 @@ database or operation-selection engine.
 
 Intentional differences, including stricter invalid-input errors, must be recorded
 and reviewed before claiming compatibility. Unsupported cases must remain observable;
-the TypeScript engine must never silently fall back to proj4js.
+the math.gl projection engine must never silently fall back to proj4js.
 
 ## Tranches
 
@@ -44,11 +44,11 @@ the TypeScript engine must never silently fall back to proj4js.
 | 4 — Geocentric and datum transforms | 3D geodetic/geocentric conversion, ellipsoid/datum tables, Helmert transforms | Known datum fixtures, height behavior, inverse transforms, and datum chaining agree with the reference |
 | 5 — Remaining projections | Remaining world, regional, perspective, and composite projection plugins | No unclassified projection gaps; forward/inverse coverage for all inventoried algorithms and aliases |
 | 6 — Grid transforms | NTv2 and upstream-supported GeoTIFF grid loading/interpolation | Grid-edge, missing-grid, optional-grid, inverse, and asynchronous loading fixtures pass |
-| 7A–7D — Native qualification | Numerical fixes, CRS/datum/grid references, cross-browser/startup/allocation measurements, supported TypeScript API | Passing independent/compatibility checks, reviewed exceptions, preserved engine aliases and explicit classic wrapper, documented migration |
+| 7A–7D — Projection qualification | Numerical fixes, CRS/datum/grid references, cross-browser/startup/allocation measurements, supported projection API | Passing independent/compatibility checks, reviewed exceptions, preserved engine aliases and explicit classic wrapper, documented migration |
 
 ### Tranche 0: implemented foundation
 
-- `@math.gl/proj4/experimental` exports `TypeScriptProjection`, plugin types,
+- `@math.gl/proj4/experimental` exports `ProjectionEngine`, plugin types,
   `mercator`, and `equidistantCylindrical` without importing proj4js.
 - Plugins and aliases are supplied per instance. Geographic coordinates work without
   plugins; no global projection registry is populated as an import side effect.
@@ -64,7 +64,7 @@ the TypeScript engine must never silently fall back to proj4js.
   bundles, and removal of unused projection plugins.
 
 This tranche is a usable subset, not a claim of complete parity for any CRS syntax.
-See [TypeScriptProjection](./api-reference/typescript-projection.md) for the exact contract.
+See [ProjectionEngine](./api-reference/typescript-projection.md) for the exact contract.
 Tranche 3 adds upstream's `identity` alias with explicit radian semantics.
 
 ### Tranche 1: make parity measurable
@@ -162,7 +162,7 @@ accurately scoped to its own backend.
 Implemented: the `geocentric` plugin, pinned upstream ellipsoid/datum/unit/prime-meridian
 tables, three/seven-parameter Helmert transforms, WGS84 datum chaining, WKT TOWGS84 and
 BoundCRS operations. Tests cover heights, poles, geocentric units, both directions,
-axis permutations, Web Mercator datum geometry, and grid rejection. Native height
+axis permutations, Web Mercator datum geometry, and grid rejection. math.gl height
 semantics deliberately expose computed heights; fourth ordinates remain unchanged.
 Dynamic operations remain unsupported; tranche 6 adds horizontal grids. Tranche 7B adds independent geodetic datum-chain references.
 
@@ -248,7 +248,7 @@ selection remain outside this horizontal subset.
 See [independent validation](./independent-validation.md), [performance measurements](./benchmarks.md)
 and the [support/migration contract](./typescript-support.md). The machine-readable release
 profile checks fixture counts and the reviewed exception list. Publication is a
-separate release action; the default now uses TypeScript, while removing the installed proj4 dependency
+separate release action; the default now uses the math.gl projection engine, while removing the installed proj4 dependency
 remains a separate compatibility decision.
 
 ## Tranche 8: shared performance measurements — implemented

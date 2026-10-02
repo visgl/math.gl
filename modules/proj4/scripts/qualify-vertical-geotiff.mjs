@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 // Test-only decoder and authored fixtures; loaded after browser timing samples finish.
 import {fromArrayBuffer} from 'geotiff';
-import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {ProjectionEngine} from '@math.gl/proj4/core';
 import {loadVerticalGeoTIFFGrid} from '@math.gl/proj4/grids/vertical-geotiff';
 import reference from '../test/fixtures/vertical-geotiff-reference.json';
 function close(actual, expected) {
@@ -17,7 +17,7 @@ export async function qualifyVerticalGeoTIFF() {
     const response = await fetch('/' + fixture.file);
     if (!response.ok) throw new Error('Missing GeoTIFF fixture');
     const grid = await loadVerticalGeoTIFFGrid(await fromArrayBuffer(await response.arrayBuffer()));
-    const projection = new TypeScriptProjection({
+    const projection = new ProjectionEngine({
       from: '+proj=longlat +datum=WGS84 +geoidgrids=local',
       verticalGrids: {local: grid}
     });

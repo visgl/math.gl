@@ -6,10 +6,10 @@ import proj4 from 'proj4';
 // @ts-expect-error Upstream exposes no declaration for its internal grid kernel.
 import {applyGridShift} from 'proj4/lib/datum_transform';
 import {
-  TypeScriptProjection,
+  ProjectionEngine,
   parseNTv2Grid,
   loadGeoTIFFGrid,
-  checkTypeScriptCRSCompatibility,
+  checkProjectionCompatibility,
   normalizeCRS,
   mercator,
   geocentric
@@ -25,8 +25,8 @@ function close(actual: readonly number[], expected: readonly number[], tolerance
     )
   );
 }
-function projection(grid: DatumGrid, list = 'test'): TypeScriptProjection {
-  return new TypeScriptProjection({
+function projection(grid: DatumGrid, list = 'test'): ProjectionEngine {
+  return new ProjectionEngine({
     from: '+proj=longlat +ellps=WGS84 +nadgrids=' + list,
     datumGrids: {test: grid}
   });
@@ -100,12 +100,12 @@ test('prepared grids own data and construction snapshots registrations', () => {
   const bytes = makeNTv2([{shift: () => [2, 1]}]),
     grid = parseNTv2Grid(bytes),
     datumGrids = {test: grid};
-  const native = new TypeScriptProjection({from: '+proj=longlat +nadgrids=test', datumGrids});
+  const native = new ProjectionEngine({from: '+proj=longlat +nadgrids=test', datumGrids});
   new Uint8Array(bytes).fill(0);
   datumGrids.test = parseNTv2Grid(makeNTv2([{shift: () => [4, 3]}]));
   close(native.project([-1, 1]), [-1 - 2 / 3600, 1 + 1 / 3600]);
   expect(Object.isFrozen(grid)).toBe(true);
-  expect(() => new TypeScriptProjection({from: '+proj=longlat +nadgrids=test'})).toThrow(
+  expect(() => new ProjectionEngine({from: '+proj=longlat +nadgrids=test'})).toThrow(
     'not registered'
   );
 });
@@ -119,10 +119,9 @@ test('ordered required/optional grids, null fallback and coordinate coverage', (
   expect(() => projection(grid, 'test').project([-10, 10])).toThrow('covers');
   expect(() => projection(grid, 'test,,@null')).toThrow('Invalid datum grid');
   expect(
-    checkTypeScriptCRSCompatibility('+proj=longlat +nadgrids=test', {datumGrids: {test: grid}})
-      .status
+    checkProjectionCompatibility('+proj=longlat +nadgrids=test', {datumGrids: {test: grid}}).status
   ).toBe('supported');
-  expect(checkTypeScriptCRSCompatibility('+proj=longlat +nadgrids=test').reason).toBe(
+  expect(checkProjectionCompatibility('+proj=longlat +nadgrids=test').reason).toBe(
     'missing-transform-stage'
   );
   expect(normalizeCRS('+proj=longlat +nadgrids=@test,@null').datum.grids?.map(g => g.name)).toEqual(
@@ -136,13 +135,13 @@ test('grid-to-grid, Helmert chains, datum none, projected and geocentric targets
   const from = '+proj=longlat +ellps=clrk66 +nadgrids=test +towgs84=100,200,300';
   const point = [-1, 1, 123, 7],
     wgs = [-1 - 2 / 3600, 1 + 1 / 3600, 123, 7];
-  const source = new TypeScriptProjection({from, datumGrids});
+  const source = new ProjectionEngine({from, datumGrids});
   close(source.project(point), wgs);
   close(source.unproject(wgs), point);
-  const target = new TypeScriptProjection({to: from, datumGrids});
+  const target = new ProjectionEngine({to: from, datumGrids});
   close(target.project(wgs), point);
   close(
-    new TypeScriptProjection({
+    new ProjectionEngine({
       from,
       to: '+proj=longlat +ellps=GRS80 +nadgrids=other',
       datumGrids
@@ -155,20 +154,20 @@ test('grid-to-grid, Helmert chains, datum none, projected and geocentric targets
     '+proj=longlat +ellps=GRS80 +towgs84=1,2,3,0.1,0.2,0.3,1'
   ]) {
     const options = {to, projections: [mercator, geocentric]};
-    const native = new TypeScriptProjection({...options, from, datumGrids});
-    close(native.project(point), new TypeScriptProjection(options).project(wgs), 1e-7);
+    const native = new ProjectionEngine({...options, from, datumGrids});
+    close(native.project(point), new ProjectionEngine(options).project(wgs), 1e-7);
     // The seven-parameter inverse retains the existing first-order rotation approximation.
     const roundTrip = native.unproject(native.project(point));
     close(roundTrip.slice(0, 2), point.slice(0, 2), 1e-8);
     close(roundTrip.slice(2), point.slice(2), 3e-5);
   }
-  const none = new TypeScriptProjection({from: from + ' +datum=none'});
+  const none = new ProjectionEngine({from: from + ' +datum=none'});
   close(none.project(point), point);
   close(
-    new TypeScriptProjection({from, to: '+proj=longlat +datum=none', datumGrids}).project(point),
+    new ProjectionEngine({from, to: '+proj=longlat +datum=none', datumGrids}).project(point),
     point
   );
-  close(new TypeScriptProjection({from, to: from, datumGrids}).project([-20, 30]), [-20, 30]);
+  close(new ProjectionEngine({from, to: from, datumGrids}).project([-20, 30]), [-20, 30]);
 });
 test('inverse iteration converges both ordinates and rejects nonconvergence', () => {
   const native = projection(parseNTv2Grid(makeNTv2([{shift: x => [x * 360, 0]}])));
@@ -274,7 +273,7 @@ test('inverse solves variable shifts at every source boundary without an edge ap
 });
 test('grid interpolation works with enforced axes and prime meridians', () => {
   const grid = parseNTv2Grid(makeNTv2([{shift: () => [2, 1]}]));
-  const native = new TypeScriptProjection({
+  const native = new ProjectionEngine({
     from: '+proj=longlat +ellps=WGS84 +nadgrids=test +pm=1 +axis=neu',
     to: '+proj=longlat +datum=WGS84 +pm=2 +axis=wsu',
     datumGrids: {test: grid},
@@ -324,7 +323,7 @@ test('registered grid lists fall through uncovered and nodata entries in declare
   const local = parseNTv2Grid(makeNTv2([{shift: () => [2, 1]}]));
   const alternate = parseNTv2Grid(makeNTv2([{shift: () => [4, 3]}]));
   const datumGrids = {remote, empty, local, alternate};
-  const native = new TypeScriptProjection({
+  const native = new ProjectionEngine({
     from: '+proj=longlat +nadgrids=remote,empty,local,alternate',
     datumGrids
   });
@@ -332,7 +331,7 @@ test('registered grid lists fall through uncovered and nodata entries in declare
   close(native.unproject(native.project([-1, 1])), [-1, 1]);
 });
 test('null fallback terminates registration lookup as well as execution', () => {
-  const native = new TypeScriptProjection({
+  const native = new ProjectionEngine({
     from: '+proj=longlat +nadgrids=@null,unreachable',
     datumGrids: {
       get unreachable(): DatumGrid {

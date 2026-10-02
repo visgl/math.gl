@@ -8,15 +8,15 @@
 **deprecated alias** of the same constructor; existing code continues to work.
 The original `Proj4Projection` in `@math.gl/proj4/classic` is unchanged.
 
-The root export uses the TypeScript engine with the full projection catalogue and
+The root export uses the math.gl projection engine with the full projection catalogue and
 WKT/PROJJSON readers. The original proj4js-backed class has the same constructor,
 `project`/`unproject`, `defineProjectionAliases`, and `registerDatumGrid` API at
 `@math.gl/proj4/classic`. Callbacks remain bound to their instance. Numerical and
 strict-input differences are listed in the [migration guide](../typescript-support.md).
 Static registries are separate for each backend and affect new instances.
 
-The TypeScript wrapper additionally provides `projectFlat`/`unprojectFlat`; for
-selective bundles and instance-local configuration use `TypeScriptProjection`.
+The math.gl wrapper additionally provides `projectFlat`/`unprojectFlat`; for
+selective bundles and instance-local configuration use `ProjectionEngine`.
 
 ## Usage
 

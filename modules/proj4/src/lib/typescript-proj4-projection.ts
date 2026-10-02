@@ -1,9 +1,9 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-// Original compatibility wrapper around the TypeScript engine. Projection kernels
+// Original compatibility wrapper around the math.gl projection engine. Projection kernels
 // retain their proj4js/PROJ port notices and licenses in ../experimental/.
-import {TypeScriptProjection} from '../experimental/typescript-projection';
+import {ProjectionEngine} from '../experimental/typescript-projection';
 import {
   mercator,
   equidistantCylindrical,
@@ -126,8 +126,8 @@ function defaultProjections(): readonly ProjectionPlugin[] {
   return preset;
 }
 
-/** Classic wrapper API, executed by the TypeScript engine with all built-in plugins and readers. */
-export class Projection extends TypeScriptProjection {
+/** Classic wrapper API, executed by the math.gl projection engine with all built-in plugins and readers. */
+export class Projection extends ProjectionEngine {
   /** Register aliases for subsequently constructed TypeScript wrappers. */
   static defineProjectionAliases(definitions: {[name: string]: Proj4CRSDefinition}): void {
     for (const name of Object.keys(definitions)) {

@@ -79,7 +79,7 @@ for (const [to, expected, tolerance] of [
     0.01
   ]
 ]) {
-  const p = new n.TypeScriptProjection({
+  const p = new n.ProjectionEngine({
       from: betaFrom,
       to,
       projections: plugins,
@@ -104,7 +104,7 @@ for (const compact of [false, true]) {
   proj4.nadgrid('audit-ntv2', data, options);
   const grid = n.parseNTv2Grid(data, options),
     from = '+proj=longlat +ellps=clrk66 +nadgrids=@ignorable,audit-ntv2,null';
-  const p = new n.TypeScriptProjection({from, datumGrids: {'audit-ntv2': grid}}),
+  const p = new n.ProjectionEngine({from, datumGrids: {'audit-ntv2': grid}}),
     r = proj4(from, 'WGS84');
   for (const point of points)
     test('NTv2 ' + compact, p, r, point.slice(0, 2), point.slice(2), false, 1e-6);
@@ -116,7 +116,7 @@ await proj4.nadgrid('audit-tiff', tiff).ready;
 const grid = await n.loadGeoTIFFGrid(tiff);
 const to =
   '+proj=tmerc +lat_0=0 +lon_0=-73.5 +k=0.9999 +x_0=304800 +y_0=0 +ellps=GRS80 +nadgrids=audit-tiff +units=m';
-const p = new n.TypeScriptProjection({to, projections: plugins, datumGrids: {'audit-tiff': grid}}),
+const p = new n.ProjectionEngine({to, projections: plugins, datumGrids: {'audit-tiff': grid}}),
   r = proj4('WGS84', to);
 for (const point of [
   [-70.37, 53.354, 513165.91761279816, 5917993.370260495],

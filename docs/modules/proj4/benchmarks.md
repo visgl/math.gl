@@ -1,15 +1,15 @@
-# TypeScript projection benchmarks
+# Projection benchmarks
 
 import BrowserOnly from '@docusaurus/BrowserOnly';
 
-The TypeScript engine offers `projectFlat` and `unprojectFlat` for interleaved
+The math.gl projection engine offers `projectFlat` and `unprojectFlat` for interleaved
 Float32/Float64 buffers. Reuse the projection instance: normalization and plugin
 initialization are setup costs that should be amortized over many coordinates.
 Performance depends on the projection, layout, runtime and hardware.
 
 ## Live benchmarks
 
-Compare the current TypeScript implementation with the classic proj4js backend on
+Compare the current math.gl projection engine with the classic proj4js backend on
 your own browser and hardware. Choose a buffer layout and direction, then run the
 inline benchmark. Nothing runs until you press **Run benchmarks**.
 
@@ -20,7 +20,7 @@ inline benchmark. Nothing runs until you press **Run benchmarks**.
   }}
 </BrowserOnly>
 
-The TypeScript columns use the default `Projection`, through its in-place and
+The math.gl columns use the default `Projection`, through its in-place and
 scalar APIs, labeled **math.gl flat** and **math.gl scalar**. The **proj4js 2.22.0**
 column uses the pinned `proj4` dependency directly. All three process the same coordinates into
 the same typed-array layout. Scalar paths reuse an input array and copy returned
@@ -166,7 +166,7 @@ Measured September 29, 2026 on Apple M2 / macOS arm64, Node v24.5.0
 (V8 13.6.233.10-node.21), proj4 2.22.0. Median of 7 warmed
 passes over 50,000 points. Selected Float64, 2D forward results, in **million points/second**:
 
-| Case | Native batch | Native scalar | proj4 import | Wrapper | Batch/import |
+| Case | math.gl flat | math.gl scalar | proj4 import | Wrapper | Batch/import |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Web Mercator | 18.68 | 11.93 | 4.42 | 4.39 | 4.22× |
 | UTM 31N | 4.04 | 3.81 | 2.44 | 2.50 | 1.65× |
@@ -176,14 +176,14 @@ passes over 50,000 points. Selected Float64, 2D forward results, in **million po
 Sampled estimated allocation bytes/point for the same cases (500,000 points per
 implementation, separate profiling run):
 
-| Case | Native batch | Native scalar | proj4 import | Wrapper |
+| Case | math.gl flat | math.gl scalar | proj4 import | Wrapper |
 | --- | ---: | ---: | ---: | ---: |
 | Web Mercator | 0.04 | 159.70 | 601.33 | 607.11 |
 | UTM 31N | 48.27 | 206.20 | 651.58 | 648.47 |
 | Lambert conic | 0.44 | 159.33 | 600.47 | 598.27 |
 | Helmert to Mercator | 79.07 | 239.64 | 957.04 | 953.60 |
 
-Warmed constructor medians ranged from 21.0–33.7 µs for the TypeScript engine,
+Warmed constructor medians ranged from 21.0–33.7 µs for the math.gl projection engine,
 versus 2.4–5.4 µs for the direct import. Prefer one compiled instance per
 CRS pair. Construction order/JIT state affect these figures; use them as a local
 baseline, not a production latency promise.
@@ -193,7 +193,7 @@ baseline, not a production latency promise.
 
 The table below preserves the initial tranche 7 baseline. For current measurements,
 including optional WKT/PROJJSON readers and grid adapters, see the
-[TypeScript engine guide](./typescript-engine.md#tree-shaking-and-bundle-size).
+[projection engine guide](./typescript-engine.md#tree-shaking-and-bundle-size).
 
 `bundle-budgets.json` records measured baselines and explicit limits with approximately
 10% headroom, rounded up to 100 bytes. The check uses esbuild browser ESM targeting
@@ -227,9 +227,9 @@ retain their existing limits. The UTM, WKT and rotated lazy initial graphs now m
 initial limits are reviewed and rounded up to 100 bytes; catalogue and deferred limits
 remain unchanged. See the [current size tables](./typescript-engine.md#tree-shaking-and-bundle-size).
 
-Performance and packaging do not establish geodetic parity. The TypeScript engine is now the default;
-the [support profile](./typescript-support.md) defines the scope of the TypeScript API
-and the migration to the default TypeScript wrapper. Historical wrapper timings
+Performance and packaging do not establish geodetic parity. The math.gl projection engine is now the default;
+the [support profile](./typescript-support.md) defines the scope of the projection API
+and the migration to the default Projection wrapper. Historical wrapper timings
 refer to the proj4js implementation now imported from `classic`.
 
 
@@ -244,7 +244,7 @@ points and seven samples. These are distinct from the earlier baseline above.
 
 Selected Float64/2D forward throughput, in million points/second:
 
-| Engine | Projection | Native batch | proj4 import |
+| Engine | Projection | math.gl flat | proj4 import |
 | --- | --- | ---: | ---: |
 | chromium 151.0.7922.34 | Mercator | 14.29 | 5.41 |
 | chromium 151.0.7922.34 | UTM | 3.77 | 2.67 |
@@ -267,7 +267,7 @@ is preserved as `qualification/browser-linux.json`, using the same runtime sourc
 fingerprint, point count and sample count. Each engine verified all 134 configurations /
 2,354 reference points and completed 64 warm workloads and 21 cold samples.
 
-| Linux engine | Projection | Native batch (Mpoints/s) | proj4 import (Mpoints/s) |
+| Linux engine | Projection | math.gl flat (Mpoints/s) | proj4 import (Mpoints/s) |
 | --- | --- | ---: | ---: |
 | Chromium 151.0.7922.34 | Mercator | 7.69 | 3.08 |
 | Chromium 151.0.7922.34 | UTM | 2.06 | 1.46 |
@@ -276,7 +276,7 @@ fingerprint, point count and sample count. Each engine verified all 134 configur
 | WebKit 26.5 | Mercator | 6.67 | 6.67 |
 | WebKit 26.5 | UTM | 2.86 | 3.33 |
 
-These shared-runner measurements also have timer quantization. Native batches are
+These shared-runner measurements also have timer quantization. math.gl flates are
 not uniformly faster in every engine/workload: WebKit UTM was slower in this run.
 
 Fresh Node process medians (OS caches warm; separate process/module registries):
@@ -288,13 +288,13 @@ Fresh Node process medians (OS caches warm; separate process/module registries):
 | proj4 | 67.40 | 25.35 | 94.08 |
 | wrapper | 59.00 | 26.82 | 108.21 |
 
-Selected TypeScript subpaths reduce module-loading work compared with the full barrel.
-Native first construction remains more expensive than proj4's: prepare and reuse
+Selected math.gl subpaths reduce module-loading work compared with the full barrel.
+math.gl first construction remains more expensive than proj4's: prepare and reuse
 converters rather than constructing one per coordinate. Browser cold measurements
 separately record bundle fetch/parse/evaluation, first construction and first projection
 in fresh contexts; they do not flush operating-system caches.
 
-Sampled allocation estimates for TypeScript batch versus proj4 were approximately
+Sampled allocation estimates for math.gl batch versus proj4 were approximately
 0 versus 595 bytes/point for Mercator, 49 versus 641 for UTM, 0 versus 595 for LCC,
 and 78 versus 977 for Helmert-to-Mercator. Zero samples do not prove zero allocation;
 these are V8 statistical estimates, including collected objects, not exact allocation
@@ -308,11 +308,11 @@ yarn playwright install --with-deps chromium firefox webkit
 node modules/proj4/scripts/benchmark-browser.mjs --points 20000 --samples 7 --output /tmp/browsers.json
 ```
 
-Each browser first measures separate TypeScript and direct-proj4 bundles, then checks
+Each browser first measures separate math.gl and direct-proj4 bundles, then checks
 all independent projection references. Current warm workloads use the seventeen-scenario
 shared matrix described above, including XYZ. The historical tables retain their older
 workload and wrapper column for provenance; they are not current benchmark results.
 The runner bounds each browser to 300 seconds. CI keeps downloadable measurements and
 gates correctness. The Node startup runner also checks the first computed coordinate in
 every fresh process. Packed-consumer, tree-shaking and bundle-size checks exercise the
-canonical TypeScript paths and retained compatibility aliases.
+canonical projection paths and retained compatibility aliases.

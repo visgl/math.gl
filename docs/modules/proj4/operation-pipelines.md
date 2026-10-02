@@ -2,7 +2,7 @@
 
 `ProjectionPipeline` composes a known coordinate operation from typed steps. Use it
 when you need to choose the order of projection, datum and height operations yourself.
-For ordinary CRS-to-CRS conversion, use [Projection or TypeScriptProjection](./typescript-engine.md).
+For ordinary CRS-to-CRS conversion, use [Projection or ProjectionEngine](./typescript-engine.md).
 A pipeline does not find an EPSG operation or select grids automatically.
 
 ```typescript
@@ -100,7 +100,7 @@ by [PROJ pipelines](https://proj.org/en/stable/operations/pipeline.html) and
 
 ## Lazy projections and synchronous methods
 
-Use the same descriptors and shared implementation cache as `TypeScriptProjection`.
+Use the same descriptors and shared implementation cache as `ProjectionEngine`.
 Construction starts no imports; only projection names used by steps are preloaded.
 
 ```typescript
@@ -135,10 +135,9 @@ stride of at least two. Steps using height or geocentric Z require a stride of a
 three. M and all further ordinates are copied/preserved without validation or epoch
 interpretation. Empty valid buffers are accepted.
 
-Built-in mutable equation and grid hooks use one scratch point per call and no
-intermediate coordinate arrays per record. Custom legacy plugin/grid methods may
-allocate their own arrays. Operations run in JavaScript double precision; a Float32
-buffer is rounded only on final record output. Non-finite X/Y/Z and Float32 output
+Reuse a pipeline and use the flat methods to process large buffers in place.
+Operations run in double precision; a Float32 buffer is rounded only on final
+record output. Non-finite X/Y/Z and Float32 output
 overflow are errors. Records completed before an error remain transformed; the
 failing record and remaining records are untouched. Scalar input is never modified.
 

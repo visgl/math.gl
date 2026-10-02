@@ -13,20 +13,20 @@ The `@math.gl/proj4` module provides support for conversion between major geospa
 
 | Class             | Description        |
 | ----------------- | ------------------ |
-| [`Projection`](./api-reference/proj4-projection.md) | TypeScript-backed wrapper with the full catalogue and classic-compatible API |
+| [`Projection`](./api-reference/proj4-projection.md) | Ready-to-use projection engine with the full catalogue and classic-compatible API |
 | `LazyProjection` (`/projections/lazy`) | Full descriptor catalogue; algorithms loaded automatically on demand |
-| [`TypeScriptProjection`](./api-reference/typescript-projection.md) | Configurable TypeScript engine with explicit projection plugins |
+| [`ProjectionEngine`](./api-reference/typescript-projection.md) | Projection engine with an explicit choice of algorithms and readers |
 
-The package root uses the TypeScript implementation. `Proj4Projection` is a deprecated
+The package root uses the math.gl projection engine. `Proj4Projection` is a deprecated
 alias of `Projection`; both names share the same constructor and static registrations. Import the original
 proj4js-backed `Proj4Projection` from `@math.gl/proj4/classic` when its behavior
 is required. Both wrappers use the same constructor and static registration API.
-Start with the [TypeScript engine guide](./typescript-engine.md) for plugin selection,
+Start with the [projection engine guide](./typescript-engine.md) for plugin selection,
 dynamic loading, measured bundle sizes, CRS readers, and typed-array transforms.
 The [API reference](./api-reference/typescript-projection.md) lists supported
 parameters, limitations, and custom plugin contracts.
 
-The [TypeScript parity roadmap](./roadmap.md) defines staged implementation and
+The [projection roadmap](./roadmap.md) defines staged implementation and
 acceptance gates against the pinned upstream release. See the [support and migration
 contract](./typescript-support.md) for the promoted API and compatibility boundaries.
 
@@ -56,7 +56,7 @@ Within WKT there exists both OGC WKT and ESRI WKT syntax; both are generally sup
 ### Checking classic CRS compatibility
 
 The classic-specific compatibility helpers move to `@math.gl/proj4/classic`.
-For the configurable engine, use `checkTypeScriptCRSCompatibility` with the same
+For the configurable engine, use `checkProjectionCompatibility` with the same
 plugins/readers as construction.
 
 Use `checkProj4CRSCompatibility` when CRS metadata may be broader than proj4js's executable CRS
@@ -167,16 +167,16 @@ For explicit unit, axis, datum and grid ordering, use the optional
 
 ## Attribution
 
-The TypeScript engine combines original math.gl code with numerical kernels ported
+The math.gl projection engine combines original math.gl code with numerical kernels ported
 from proj4js and PROJ. Source headers distinguish ports from inspired implementations
 and retain upstream notices. The package includes third-party notices and license
 files. The `classic` subpath wraps [`proj4js`](https://proj4js.org/).
 
-Run the [live browser benchmarks](./benchmarks.md#live-benchmarks) to compare TypeScript
+Run the [live browser benchmarks](./benchmarks.md#live-benchmarks) to compare math.gl
 scalar and in-place transforms with classic proj4 on your own device. The benchmark
 page also documents recorded results, construction costs and bundle budgets.
 
 The [parity audit and correctness follow-up](./parity-audit.md) now pass 233 of 242
 upstream coordinate fixtures, with all 11 audited silent mismatches fixed. The full
-corpus runs continuously with nine intentional strict-input construction rejections. The TypeScript engine is now the default; full proj4js behavioral parity remains
+corpus runs continuously with nine intentional strict-input construction rejections. The math.gl projection engine is now the default; full proj4js behavioral parity remains
 outside the supported profile. See the audit and migration contract for exceptions.

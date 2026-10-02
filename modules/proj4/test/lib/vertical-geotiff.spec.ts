@@ -4,7 +4,7 @@
 // Original format and integration tests; numeric expectations are from PROJ 9.5.1.
 import {beforeAll, expect, test} from 'vitest';
 import {fromArrayBuffer} from 'geotiff';
-import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {ProjectionEngine} from '@math.gl/proj4/core';
 import {loadVerticalGeoTIFFGrid} from '@math.gl/proj4/grids/vertical-geotiff';
 import type {VerticalGridGeoTIFFImage} from '@math.gl/proj4/grids/vertical-geotiff';
 import reference from '../fixtures/vertical-geotiff-reference.json';
@@ -51,7 +51,7 @@ for (const [index, fixture] of reference.cases.entries()) {
     expect(fixture.results.map(row => row.input)).toEqual(inputs.cases[index].points);
     const grid = await loadVerticalGeoTIFFGrid(await fromArrayBuffer(buffers[index]));
     if (fixture.id === 'nodata') expect(grid.getOffset(10 * radians, 40 * radians)).toBeUndefined();
-    const projection = new TypeScriptProjection({
+    const projection = new ProjectionEngine({
       from: '+proj=longlat +datum=WGS84 +geoidgrids=local',
       verticalGrids: {local: grid}
     });
@@ -109,7 +109,7 @@ test('owned snapshots, metre defaults, band selection and explicit coverage', as
   expect(grid.getOffset(11 * radians, 41 * radians)).toBeCloseTo(40);
   expect(grid.getOffset(10.5 * radians, 40.5 * radians)).toBeCloseTo(25);
   expect(grid.getOffset(9.99 * radians, 40 * radians)).toBeUndefined();
-  const projection = new TypeScriptProjection({
+  const projection = new ProjectionEngine({
     from: '+proj=longlat +geoidgrids=local',
     verticalGrids: {local: grid}
   });

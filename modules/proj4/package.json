@@ -1,6 +1,6 @@
 {
   "name": "@math.gl/proj4",
-  "description": "Pluggable TypeScript coordinate transformations and proj4js compatibility wrapper",
+  "description": "Pluggable coordinate transformations and proj4js compatibility wrapper",
   "license": "MIT AND Apache-2.0",
   "type": "module",
   "publishConfig": {
