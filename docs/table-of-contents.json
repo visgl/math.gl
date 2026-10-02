@@ -180,6 +180,7 @@
         "items": [
           "modules/proj4/README",
           "modules/proj4/typescript-engine",
+          "modules/proj4/operation-pipelines",
           "modules/proj4/api-reference/proj4-projection",
           "modules/proj4/api-reference/typescript-projection",
           "modules/proj4/benchmarks",

@@ -75,3 +75,5 @@ export function qualifyVertical() {
   }
   return {configurations: verticalInputs.cases.length, points};
 }
+
+export {qualifyPipelines} from '../test/pipeline-workload';

@@ -70,3 +70,13 @@ against the PROJ Geodetic TIFF Grid format, not a direct proj4js or PROJ fork. I
 not copy or import a TIFF decoder. The optional decoding library is chosen by the
 application. Authored synthetic TIFF fixtures and their standard-library encoder are
 MIT math.gl test data/code; PROJ 9.5.1 supplies independent numeric expectations.
+
+## Typed operation pipelines
+
+`src/experimental/projection-pipeline.ts` is original math.gl orchestration inspired
+by PROJ's explicit operation/units model, not a direct PROJ fork. It reuses projection
+kernels and the geocentric/static Helmert equations directly adapted from proj4js in
+`datum.ts`, with their existing attribution and `PROJ4-LICENSE.md`. Independent pipeline
+expectations use pyproj 3.7.2 / PROJ 9.5.1. Authored pipeline cases are MIT math.gl test
+data; the reused BETA2007 NTv2 grid retains its attribution in
+`test/fixtures/real-grids/README.md` and is not shipped in the package.

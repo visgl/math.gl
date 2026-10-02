@@ -176,3 +176,26 @@ points exercise point/area registration, Deflate, big-endian scaled int16, nonze
 tiepoints, nested subgrids, nodata and antimeridian sampling. Test TIFFs are excluded
 from the published package. The numerical tolerance is 1e-5; application geoid accuracy
 and arbitrary operation/grid support are not implied.
+
+## Typed operation pipeline references
+
+`operation-pipeline-cases.json` is authored math.gl MIT test data. The generator
+`generate-pipeline-reference.py` uses pyproj 3.7.2 / PROJ 9.5.1 with networking disabled.
+It reuses the authored GTX bytes above and the independently licensed BETA2007 NTv2
+grid; see `real-grids/README.md`. Source, generator and both grid hashes are verified
+offline by `check-pipeline-reference.mjs`.
+
+Authored JSON uses `null` for valueless projection flags; the test adapter maps them
+to `undefined` in the public parameter contract.
+
+pyproj presents angular endpoints in degrees by default. The generator adapts declared
+raw-radian endpoints at the Python API boundary; all equation results still come from
+PROJ. Forward references and inverse references from PROJ's own forward outputs are
+independently compared in Node and three browser engines. Float32 checks compare
+final output rounding on rounded inputs; Float64 checks retain per-case oracle tolerances.
+These sampled configurations do not imply support for arbitrary PROJ pipelines.
+
+```sh
+python modules/proj4/scripts/generate-pipeline-reference.py
+node modules/proj4/scripts/check-pipeline-reference.mjs
+```

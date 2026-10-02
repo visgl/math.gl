@@ -335,11 +335,26 @@ new loaders.gl `GeoTIFFRasterLoader`; the existing RGB loader remains unsuitable
 geoid samples. Fetching/decoding stays application-owned, with no runtime coupling
 between math.gl and loaders.gl.
 
+## Tranche 12B2: typed operation pipelines — implemented
+
+The optional `ProjectionPipeline` composes typed unit conversions, signed axis changes,
+registered projection equations, geocentric conversions, static Helmert shifts and
+prepared horizontal/vertical grids. It checks adjacent coordinate spaces and units,
+reverses order/direction for inverse execution, supports XY/XYZ/XYZM typed buffers,
+and shares lazy projection implementations without eager imports. Scalar and Float64
+results are independently qualified against PROJ 9.5.1; Float32 execution rounds only
+final records. Packed ESM/CJS/types, optional bundle boundaries and browser qualification
+run in CI. See [the operation pipeline contract](./operation-pipelines.md).
+
+This completes the typed composition profile, not arbitrary PROJ pipeline parsing.
+Exact rotations, `ob_tran` output-unit contracts, push/pop, omitted directions and
+additional operators remain explicit gaps. Dynamic datums and operation selection
+remain 12C, with an epoch separate from M.
+
 ## Remaining performance and geodetic roadmap
 
 | Tranche | Work | Acceptance gate |
 | --- | --- | --- |
-| 12B2 — Explicit operation pipelines | Typed operation composition; keep missing operations explicit | Independent forward/inverse fixtures and package boundaries |
 | 12C — Time-dependent operations | Epochs, dynamic datums and operation selection | Explicit epoch API separate from M, independent time-dependent references |
 | 13 — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
 

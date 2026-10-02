@@ -55,3 +55,5 @@ export type {
   VerticalGridGeoTIFFImage,
   VerticalGridGeoTIFFData
 } from './grids/vertical-geotiff';
+
+export * from './projection-pipeline';

@@ -930,6 +930,11 @@
       "types": "./dist/experimental/grids/vertical-geotiff.d.ts",
       "import": "./dist/experimental/grids/vertical-geotiff.js",
       "require": "./dist/experimental/grids/vertical-geotiff.cjs"
+    },
+    "./pipeline": {
+      "types": "./dist/pipeline.d.ts",
+      "import": "./dist/pipeline.js",
+      "require": "./dist/pipeline.cjs"
     }
   },
   "files": [

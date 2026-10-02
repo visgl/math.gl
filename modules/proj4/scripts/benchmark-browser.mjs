@@ -39,6 +39,7 @@ const entries = {
   proj4: new URL('../test/benchmark-proj4.ts', import.meta.url)
 };
 const assets = new Map();
+assets.set('/pipeline-horizontal.gsb', readFileSync(new URL('../test/fixtures/real-grids/BETA2007.gsb', import.meta.url)));
 for (const [name, entry] of Object.entries(entries)) {
   const result = await build({
     entryPoints: [fileURLToPath(entry)],
@@ -182,7 +183,7 @@ try {
         }
       );
       const independent = await page.evaluate(async () => {
-        const {qualify, qualifyAccuracy, qualifyVertical} = await import('/accuracy.js');
+        const {qualify, qualifyAccuracy, qualifyVertical, qualifyPipelines} = await import('/accuracy.js');
         const {qualifyVerticalGeoTIFF} = await import('/vertical-geotiff.js');
         const inputs = await (await fetch('/native-proj-cases.json')).json();
         const reference = await (await fetch('/native-proj-reference.json')).json();
@@ -190,7 +191,8 @@ try {
           ...qualify(inputs, reference),
           accuracy: qualifyAccuracy(),
           vertical: qualifyVertical(),
-          verticalGeoTIFF: await qualifyVerticalGeoTIFF()
+          verticalGeoTIFF: await qualifyVerticalGeoTIFF(),
+          pipelines: qualifyPipelines(await (await fetch('/pipeline-horizontal.gsb')).arrayBuffer())
         };
       });
       results.push({browser: name, version: browser.version(), cold, independent, ...warm});

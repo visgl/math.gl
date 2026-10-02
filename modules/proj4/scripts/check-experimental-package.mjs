@@ -227,3 +227,35 @@ const defaultBundle = await build({
 assert(
   !Object.keys(defaultBundle.metafile.inputs).some(path => /node_modules\/proj4\//.test(path))
 );
+
+// Optional pipelines must not retain projection kernels, readers or the CRS engine.
+for (const entry of [
+  "export {ProjectionPipeline} from '@math.gl/proj4/pipeline';",
+  "export {TypeScriptProjection} from '@math.gl/proj4/core';"
+]) {
+  const result = await build({
+    stdin: {contents: entry, resolveDir: packageRoot},
+    bundle: true,
+    format: 'esm',
+    platform: 'browser',
+    minify: true,
+    metafile: true,
+    write: false,
+    tsconfigRaw: {}
+  });
+  const retained = Object.values(result.metafile.outputs).flatMap(output =>
+    Object.entries(output.inputs)
+      .filter(([, input]) => input.bytesInOutput > 0)
+      .map(([path]) => path)
+  );
+  assert(!retained.some(path => /node_modules\/proj4\//.test(path)));
+  assert(!retained.some(path => /experimental\/(projections|kernels|grids)\//.test(path)));
+  assert(!retained.some(path => /experimental\/crs\/(wkt|projjson)\.js$/.test(path)));
+  assert(
+    !retained.some(path =>
+      entry.includes('/core')
+        ? path.endsWith('/projection-pipeline.js')
+        : path.endsWith('/typescript-projection.js')
+    )
+  );
+}
