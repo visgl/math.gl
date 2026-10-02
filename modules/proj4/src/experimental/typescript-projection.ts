@@ -465,18 +465,3 @@ function transformInPlace<T extends ProjectionArray>(
   }
   return coordinates;
 }
-
-/** @deprecated Use ProjectionEngine. */
-export const TypeScriptProjection = ProjectionEngine;
-/** @deprecated Use ProjectionEngine. */
-export type TypeScriptProjection<P extends ProjectionRegistration = ProjectionPlugin> =
-  ProjectionEngine<P>;
-/** @deprecated Use ProjectionEngineOptions. */
-export type TypeScriptProjectionOptions<P extends ProjectionRegistration = ProjectionPlugin> =
-  ProjectionEngineOptions<P>;
-/** @deprecated Use ProjectionEngineCreateOptions. */
-export type TypeScriptProjectionCreateOptions = ProjectionEngineCreateOptions;
-/** @deprecated Use ProjectionCompatibility. */
-export type TypeScriptCRSCompatibility = ProjectionCompatibility;
-/** @deprecated Use checkProjectionCompatibility. */
-export const checkTypeScriptCRSCompatibility = checkProjectionCompatibility;

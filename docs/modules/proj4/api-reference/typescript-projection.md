@@ -2,8 +2,7 @@
 
 The configurable math.gl projection engine underlying the default `Projection`; see the [support and migration contract](../typescript-support.md).
 Import it from `@math.gl/proj4` or the isolated `@math.gl/proj4/core` entry point.
-`TypeScriptProjection` is a deprecated alias of this constructor. The original
-proj4js wrapper is available from `@math.gl/proj4/classic`.
+The original proj4js wrapper is available from `@math.gl/proj4/classic`.
 
 ```typescript
 import {ProjectionEngine, mercator} from '@math.gl/proj4';

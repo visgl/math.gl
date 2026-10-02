@@ -17,7 +17,7 @@ function close(actual, expected, tolerance) {
 export function qualify(inputs, reference) {
   let points = 0;
   for (const [index, fixture] of inputs.cases.entries()) {
-    const projection = new native.TypeScriptProjection({
+    const projection = new native.ProjectionEngine({
       from: '+proj=longlat +datum=none',
       to: fixture.definition,
       projections
@@ -55,7 +55,7 @@ export function qualifyVertical() {
   const local = native.parseGTXGrid(new Uint8Array(verticalReference.gridBytes).buffer);
   let points = 0;
   for (const [i, fixture] of verticalInputs.cases.entries()) {
-    const projection = new native.TypeScriptProjection({
+    const projection = new native.ProjectionEngine({
       from: fixture.from,
       to: fixture.to,
       enforceAxis: true,

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {Projection, Proj4Projection, TypeScriptProjection} from '@math.gl/proj4';
+import {Projection, Proj4Projection, ProjectionEngine} from '@math.gl/proj4';
 import {Proj4Projection as ClassicProjection} from '@math.gl/proj4/classic';
 import {makeNTv2} from '../fixtures/datum-grids';
 import structured from '../fixtures/structured-proj-reference.json';
@@ -67,12 +67,12 @@ for (const Wrapper of [Projection, ClassicProjection]) {
   }
 }
 
-test('default wrapper uses TypeScript and keeps its registries separate from classic and core', () => {
-  expect(new Projection({})).toBeInstanceOf(TypeScriptProjection);
+test('default wrapper uses the math.gl engine and keeps its registries separate from classic and core', () => {
+  expect(new Projection({})).toBeInstanceOf(ProjectionEngine);
   Projection.defineProjectionAliases({'BACKEND:ONLY': '+proj=utm +zone=31 +datum=WGS84'});
   expect(() => new ClassicProjection({to: 'BACKEND:ONLY'})).toThrow();
-  expect(() => new TypeScriptProjection({to: 'BACKEND:ONLY'})).toThrow();
-  expect(() => new TypeScriptProjection({to: 'EPSG:3857'})).toThrow('not registered');
+  expect(() => new ProjectionEngine({to: 'BACKEND:ONLY'})).toThrow();
+  expect(() => new ProjectionEngine({to: 'EPSG:3857'})).toThrow('not registered');
   const p = new Projection({to: 'EPSG:3857'});
   const input = new Float64Array([12, 45, 123, 7]);
   const expected = p.project(Array.from(input));

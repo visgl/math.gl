@@ -73,9 +73,8 @@ try {
   const entrySmoke = `
     const stable = await load('@math.gl/proj4');
     assert.equal(stable.ProjectionEngine, api.ProjectionEngine);
-    assert.equal(stable.TypeScriptProjection, api.TypeScriptProjection);
-    assert.equal(api.ProjectionEngine, api.TypeScriptProjection);
-    assert.equal(api.checkProjectionCompatibility, api.checkTypeScriptCRSCompatibility);
+    assert(!('TypeScriptProjection' in api));
+    assert(!('checkTypeScriptCRSCompatibility' in api));
     assert.equal(stable.mercator, api.mercator);
     const subpaths = ${JSON.stringify(subpaths)};
     for (const subpath of subpaths) {
@@ -97,8 +96,8 @@ try {
     assert(Math.abs((await automatic.project([3, 0]))[0] - 500000) < 1e-7);
     assert(Math.abs(automatic.projectSync([3, 0])[0] - 500000) < 1e-7);
     const core = await load('@math.gl/proj4/core');
-    assert.equal(core.ProjectionEngine, core.TypeScriptProjection);
-    assert.equal(core.checkProjectionCompatibility, core.checkTypeScriptCRSCompatibility);
+    assert(!('TypeScriptProjection' in core));
+    assert(!('checkTypeScriptCRSCompatibility' in core));
     assert.deepEqual(new core.ProjectionEngine({}).project([12, 55, 123, 8]), [12, 55, 123, 8]);
     const {ProjectionPipeline} = await load('@math.gl/proj4/pipeline');
     const pipeline = new ProjectionPipeline({input: {space: 'geographic', units: ['deg', 'deg', 'm']}, steps: [
@@ -113,7 +112,7 @@ try {
     const {parseGTXGrid} = await load('@math.gl/proj4/grids/gtx');
     const {createVerticalGrid} = await load('@math.gl/proj4/grids/vertical');
     const local = createVerticalGrid({origin: [0, 0], step: [1, 1], size: [2, 2], offsets: [10, 20, 30, 40]});
-    const height = new core.TypeScriptProjection({from: '+proj=longlat +datum=WGS84 +geoidgrids=local', verticalGrids: {local}});
+    const height = new core.ProjectionEngine({from: '+proj=longlat +datum=WGS84 +geoidgrids=local', verticalGrids: {local}});
     assert.deepEqual(height.project([0, 0, 100, 7]), [0, 0, 110, 7]);
     const heights = new Float64Array([0, 0, 100, 7]);
     assert.equal(height.projectFlat(heights, 4), heights);
@@ -132,18 +131,18 @@ try {
       readRasters: async () => [new Float32Array(4).fill(15)]
     })});
     assert.equal(tiffGrid.getOffset(0, 0), 15);
-    assert.deepEqual(new core.TypeScriptProjection({from: '+proj=longlat +geoidgrids=tiff', verticalGrids: {tiff: tiffGrid}}).project([0, 0, 100, 7]), [0, 0, 115, 7]);
+    assert.deepEqual(new core.ProjectionEngine({from: '+proj=longlat +geoidgrids=tiff', verticalGrids: {tiff: tiffGrid}}).project([0, 0, 100, 7]), [0, 0, 115, 7]);
     const descriptors = await load('@math.gl/proj4/projections/lazy/utm');
-    const lazy = new core.TypeScriptProjection({to: 'EPSG:32631', projections: [descriptors.lazyUniversalTransverseMercator]});
+    const lazy = new core.ProjectionEngine({to: 'EPSG:32631', projections: [descriptors.lazyUniversalTransverseMercator]});
     await descriptors.lazyUniversalTransverseMercator.preload();
     assert(Math.abs(lazy.projectSync([3, 0])[0] - 500000) < 1e-7);
     assert(Math.abs((await lazy.project([3, 0]))[0] - 500000) < 1e-7);
     const {universalTransverseMercator} = await load('@math.gl/proj4/projections/utm');
-    const utm = new core.TypeScriptProjection({to: 'EPSG:32631', projections: [universalTransverseMercator]});
+    const utm = new core.ProjectionEngine({to: 'EPSG:32631', projections: [universalTransverseMercator]});
     assert(Math.abs(utm.project([3, 0])[0] - 500000) < 1e-7);
     const {wktCRSParser} = await load('@math.gl/proj4/parsers/wkt');
     const unsupported = 'PROJCS["Unsupported",GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]],PROJECTION["Unimplemented"],UNIT["metre",1]]';
-    assert.equal(core.checkTypeScriptCRSCompatibility(unsupported, {parsers: [wktCRSParser]}).reason, 'missing-transform-stage');
+    assert.equal(core.checkProjectionCompatibility(unsupported, {parsers: [wktCRSParser]}).reason, 'missing-transform-stage');
     assert.throws(() => core.normalizeCRS(unsupported, {parsers: [wktCRSParser]}), error =>
       error instanceof core.TypeScriptCRSError && error instanceof api.TypeScriptCRSError);
     assert(!(new Error('unbranded') instanceof core.TypeScriptCRSError));
@@ -168,8 +167,8 @@ try {
       assert(Math.abs(project([3, 0])[0] - 500000) < 1e-8);
       assert(Math.abs(unproject([500000, 0])[0] - 3) < 1e-8);
     }
-    assert(new api.Proj4Projection({}) instanceof api.TypeScriptProjection);
-    const projection = new api.TypeScriptProjection({to: 'EPSG:3857', projections: [api.mercator]});
+    assert(new api.Proj4Projection({}) instanceof api.ProjectionEngine);
+    const projection = new api.ProjectionEngine({to: 'EPSG:3857', projections: [api.mercator]});
     const input = new Float64Array([12, 48, 123, 7]);
     const scalar = projection.project(Array.from(input));
     assert.equal(projection.projectFlat(input, 4), input);
@@ -208,12 +207,10 @@ try {
     const automatic = new LazyProjection(lazyOptions);
     const automaticResult: Promise<number[]> = automatic.project([3, 0]);
     const automaticFlat: Promise<Float32Array> = automatic.projectFlat(new Float32Array([3, 0]));
-    import {ProjectionEngine, TypeScriptProjection, checkProjectionCompatibility, type ProjectionPoint, type ProjectionEngineOptions, type ProjectionEngineCreateOptions, type ProjectionCompatibility, type TypeScriptProjectionOptions, type TypeScriptProjectionCreateOptions} from '@math.gl/proj4/core';
-    const engineOptions: ProjectionEngineOptions = {} as TypeScriptProjectionOptions;
-    const formerOptions: TypeScriptProjectionOptions = {} as ProjectionEngineOptions;
-    const createOptions: ProjectionEngineCreateOptions = {} as TypeScriptProjectionCreateOptions;
-    const renamed: ProjectionEngine = new TypeScriptProjection(engineOptions);
-    const former: TypeScriptProjection = new ProjectionEngine(formerOptions);
+    import {ProjectionEngine, checkProjectionCompatibility, type ProjectionPoint, type ProjectionEngineOptions, type ProjectionEngineCreateOptions, type ProjectionCompatibility} from '@math.gl/proj4/core';
+    const engineOptions: ProjectionEngineOptions = {};
+    const createOptions: ProjectionEngineCreateOptions = engineOptions;
+    const configured: ProjectionEngine = new ProjectionEngine(engineOptions);
     const capability: ProjectionCompatibility = checkProjectionCompatibility('EPSG:4326');
     const eagerEngine: number[] = new ProjectionEngine({}).project([0, 0]);
     const createdEngine: Promise<ProjectionEngine> = ProjectionEngine.create(createOptions);
@@ -252,15 +249,11 @@ try {
     const tsGrid: Proj4DatumGridOptions = {} as ClassicGridOptions;
     const classicGrid: ClassicGridOptions = {} as Proj4DatumGridOptions;
     import {lazyUniversalTransverseMercator} from '@math.gl/proj4/projections/lazy/utm';
-    const lazy = new TypeScriptProjection({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});
-    const canonicalLazy = new ProjectionEngine({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});
-    const canonicalAsync: Promise<number[]> = canonicalLazy.project([3, 0]);
-    const canonicalSync: number[] = canonicalLazy.projectSync([3, 0]);
-    const canonicalFlat: Promise<Float32Array> = canonicalLazy.projectFlat(new Float32Array([3, 0]));
+    const lazy = new ProjectionEngine({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});
     const asyncResult: Promise<number[]> = lazy.project([3, 0]);
     const syncResult: number[] = lazy.projectSync([3, 0]);
     const asyncBuffer: Promise<Float64Array> = lazy.projectFlat(new Float64Array([3, 0]));
-    const mixed = new TypeScriptProjection({to: 'EPSG:32631', projections: [mercator, lazyUniversalTransverseMercator]});
+    const mixed = new ProjectionEngine({to: 'EPSG:32631', projections: [mercator, lazyUniversalTransverseMercator]});
     const mixedResult: Promise<number[]> = mixed.project([3, 0]);
     import {ProjectionPipeline, type PipelineStep, type ProjectionPipelineOptions} from '@math.gl/proj4/pipeline';
     const pipelineOptions: ProjectionPipelineOptions = {input: {space: 'geographic', units: ['deg', 'deg', 'm']}, steps: [{type: 'unitconvert', xy: {from: 'deg', to: 'rad'}}]};
@@ -284,7 +277,7 @@ try {
     import {parsePROJString} from '@math.gl/crs/proj-string';
     import {inferCRSRepresentation} from '@math.gl/crs/spatial-reference';
     void [parseWKTCRS, parsePROJString, inferCRSRepresentation];
-    const projection = new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});
+    const projection = new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});
     const a: Float32Array = projection.projectFlat(new Float32Array([1, 2]));
     const b: Float64Array = projection.unprojectFlat(new Float64Array([1, 2]));
     const point: ProjectionPoint = {x: 0, y: 0, z: 0};

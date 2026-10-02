@@ -2,8 +2,8 @@
 
 ## Unreleased
 
-- feat(proj4): Name the configurable API `ProjectionEngine`, preserve deprecated
-  `TypeScriptProjection` aliases, and focus documentation on using the math.gl projection engine.
+- feat(proj4): Rename the configurable alpha API to `ProjectionEngine` and focus
+  documentation on using the math.gl projection engine.
 
 ## v5.0.0-alpha.10
 

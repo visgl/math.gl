@@ -68,18 +68,18 @@ if (spatialReference.crs.state === 'explicit') {
 
 // The native backend consumes the same readonly CRS and spatial-reference contracts.
 import {
-  TypeScriptProjection,
+  ProjectionEngine,
   normalizeCRS,
-  checkTypeScriptCRSCompatibility,
+  checkProjectionCompatibility,
   projJSONCRSParser,
   type TypeScriptCRSInput,
   type NormalizedCRS
 } from '@math.gl/proj4/experimental';
 const nativeInput: TypeScriptCRSInput = spatialReference;
-new TypeScriptProjection({from: nativeInput, to: readonlyDefinition, parsers: [projJSONCRSParser]});
-new TypeScriptProjection({from: spatialReference.crs});
+new ProjectionEngine({from: nativeInput, to: readonlyDefinition, parsers: [projJSONCRSParser]});
+new ProjectionEngine({from: spatialReference.crs});
 const normalized: NormalizedCRS = normalizeCRS(geographic, {parsers: [projJSONCRSParser]});
-checkTypeScriptCRSCompatibility(nativeInput, {parsers: [projJSONCRSParser]});
+checkProjectionCompatibility(nativeInput, {parsers: [projJSONCRSParser]});
 // @ts-expect-error The engine's normalized parameters are immutable.
 normalized.parameters['proj'] = 'merc';
 
@@ -93,18 +93,18 @@ import {
 } from '@math.gl/proj4/experimental';
 const preparedGrid: DatumGrid = parseNTv2Grid(new ArrayBuffer(0), {includeErrorFields: false});
 const gridCollection: DatumGridCollection = Object.freeze({local: preparedGrid});
-new TypeScriptProjection({from: '+proj=longlat +nadgrids=local', datumGrids: gridCollection});
-checkTypeScriptCRSCompatibility('+proj=longlat +nadgrids=local', {datumGrids: gridCollection});
+new ProjectionEngine({from: '+proj=longlat +nadgrids=local', datumGrids: gridCollection});
+checkProjectionCompatibility('+proj=longlat +nadgrids=local', {datumGrids: gridCollection});
 declare const tiff: DatumGridGeoTIFF;
 const preparedTIFF: Promise<DatumGrid> = loadGeoTIFFGrid(tiff);
 void preparedTIFF;
 // @ts-expect-error Grid preparation must finish before synchronous projection construction.
-new TypeScriptProjection({datumGrids: {local: preparedTIFF}});
+new ProjectionEngine({datumGrids: {local: preparedTIFF}});
 // @ts-expect-error Prepared grid metadata is immutable.
 preparedGrid.subgridCount = 2;
 
 // Batch methods preserve the concrete typed-array type.
-const batchProjection = new TypeScriptProjection();
+const batchProjection = new ProjectionEngine();
 const float32Output: Float32Array = batchProjection.projectFlat(new Float32Array([0, 0]));
 const float64Output: Float64Array = batchProjection.unprojectFlat(new Float64Array([0, 0]));
 void float32Output;

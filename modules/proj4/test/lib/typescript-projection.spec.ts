@@ -4,7 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {Proj4Projection} from '@math.gl/proj4/classic';
-import {TypeScriptProjection, mercator, equidistantCylindrical} from '@math.gl/proj4/experimental';
+import {ProjectionEngine, mercator, equidistantCylindrical} from '@math.gl/proj4/experimental';
 import type {ProjectionPlugin} from '@math.gl/proj4/experimental';
 
 const projections = [mercator, equidistantCylindrical];
@@ -27,8 +27,8 @@ function expectCoordinates(actual: number[], expected: number[], tolerance: numb
 }
 
 for (const definition of definitions) {
-  test(`TypeScriptProjection agrees with proj4js: ${definition}`, () => {
-    const native = new TypeScriptProjection({to: definition, projections});
+  test(`ProjectionEngine agrees with proj4js: ${definition}`, () => {
+    const native = new ProjectionEngine({to: definition, projections});
     const reference = new Proj4Projection({to: definition});
     for (const longitude of [-179, -120, -1, 0, 12, 90, 179]) {
       for (const latitude of [-85, -45, 0, 30, 80, 85]) {
@@ -42,12 +42,12 @@ for (const definition of definitions) {
   });
 }
 
-test('TypeScriptProjection transforms between projected CRSs and preserves input', () => {
+test('ProjectionEngine transforms between projected CRSs and preserves input', () => {
   const from = definitions[2];
   const to = definitions[5];
   const coordinate = new Proj4Projection({to: from}).project([12, 48, 23, 99]);
   const frozen = Object.freeze(coordinate);
-  const projection = new TypeScriptProjection({from, to, projections});
+  const projection = new ProjectionEngine({from, to, projections});
   const reference = new Proj4Projection({from, to});
   const {project, unproject} = projection;
   // proj4js's iterative Mercator inverse stops at a looser angular tolerance.
@@ -57,33 +57,33 @@ test('TypeScriptProjection transforms between projected CRSs and preserves input
   expect(project(frozen)).not.toBe(frozen);
 });
 
-test('TypeScriptProjection has an independent geographic default', () => {
-  const identity = new TypeScriptProjection();
+test('ProjectionEngine has an independent geographic default', () => {
+  const identity = new ProjectionEngine();
   expectCoordinates(identity.project([180, 90]), [180, 90], 1e-12);
   expectCoordinates(identity.unproject([-180, -90]), [-180, -90], 1e-12);
-  expect(() => new TypeScriptProjection({to: 'EPSG:3857'})).toThrow('not registered');
+  expect(() => new ProjectionEngine({to: 'EPSG:3857'})).toThrow('not registered');
   expectCoordinates(
-    new TypeScriptProjection({to: 'EPSG:3857', projections}).project([0, 0]),
+    new ProjectionEngine({to: 'EPSG:3857', projections}).project([0, 0]),
     [0, 0],
     1e-12
   );
   expectCoordinates(
-    new TypeScriptProjection({to: 'EPSG:3857', projections}).project([180, 0]),
+    new ProjectionEngine({to: 'EPSG:3857', projections}).project([180, 0]),
     [20037508.342789244, 0],
     1e-8
   );
 });
 
-test('TypeScriptProjection supports the geographic aliases in proj4js 2.22.0', () => {
+test('ProjectionEngine supports the geographic aliases in proj4js 2.22.0', () => {
   for (const name of ['longlat', 'latlong', 'latlon', 'lonlat']) {
     const to = `+proj=${name} +datum=WGS84`;
-    const native = new TypeScriptProjection({to});
+    const native = new ProjectionEngine({to});
     const reference = new Proj4Projection({to});
     expectCoordinates(native.project([12, 48, 100]), reference.project([12, 48, 100]), 1e-12);
   }
 });
 
-test('TypeScriptProjection aliases and plugins are local to each instance', () => {
+test('ProjectionEngine aliases and plugins are local to each instance', () => {
   const custom: ProjectionPlugin = {
     name: 'custom',
     parameters: ['offset'],
@@ -96,19 +96,19 @@ test('TypeScriptProjection aliases and plugins are local to each instance', () =
     }
   };
   const aliases = {LOCAL: '+proj=custom +offset=10', INDIRECT: 'LOCAL'};
-  const native = new TypeScriptProjection({to: 'INDIRECT', projections: [custom], aliases});
+  const native = new ProjectionEngine({to: 'INDIRECT', projections: [custom], aliases});
   expect(native.project([0, 0])).toEqual([10, 0]);
   expectCoordinates(native.unproject([11, 1]), [180 / Math.PI, 180 / Math.PI], 1e-12);
-  expect(() => new TypeScriptProjection({to: 'LOCAL', projections: [custom]})).toThrow(
+  expect(() => new ProjectionEngine({to: 'LOCAL', projections: [custom]})).toThrow(
     'Unsupported CRS'
   );
-  expect(() => new TypeScriptProjection({to: 'LOCAL', aliases})).toThrow('not registered');
-  expect(() => new TypeScriptProjection({projections: [custom, custom]})).toThrow('Duplicate');
-  expect(() => new TypeScriptProjection({to: 'A', aliases: {A: 'B', B: 'A'}})).toThrow('Circular');
-  expect(() => new TypeScriptProjection({to: 'toString'})).toThrow('Unsupported CRS');
+  expect(() => new ProjectionEngine({to: 'LOCAL', aliases})).toThrow('not registered');
+  expect(() => new ProjectionEngine({projections: [custom, custom]})).toThrow('Duplicate');
+  expect(() => new ProjectionEngine({to: 'A', aliases: {A: 'B', B: 'A'}})).toThrow('Circular');
+  expect(() => new ProjectionEngine({to: 'toString'})).toThrow('Unsupported CRS');
 });
 
-test('TypeScriptProjection rejects unsupported CRS features instead of ignoring them', () => {
+test('ProjectionEngine rejects unsupported CRS features instead of ignoring them', () => {
   for (const to of [
     'EPSG:32631',
     'GEOGCS["WGS 84"]',
@@ -118,11 +118,11 @@ test('TypeScriptProjection rejects unsupported CRS features instead of ignoring 
     '+proj=longlat +to_meter=2',
     '+proj=merc +type=pipeline'
   ]) {
-    expect(() => new TypeScriptProjection({to, projections})).toThrow();
+    expect(() => new ProjectionEngine({to, projections})).toThrow();
   }
 });
 
-test('TypeScriptProjection validates parameters and domains', () => {
+test('ProjectionEngine validates parameters and domains', () => {
   for (const to of [
     '+proj=merc +k_0=0',
     '+proj=merc +k=-1',
@@ -141,9 +141,9 @@ test('TypeScriptProjection validates parameters and domains', () => {
     '+proj=merc +units=invalid',
     '+proj=merc +to_meter=0'
   ]) {
-    expect(() => new TypeScriptProjection({to, projections})).toThrow();
+    expect(() => new ProjectionEngine({to, projections})).toThrow();
   }
-  const native = new TypeScriptProjection({to: 'EPSG:3857', projections});
+  const native = new ProjectionEngine({to: 'EPSG:3857', projections});
   for (const coordinate of [
     [],
     [1],
@@ -159,8 +159,8 @@ test('TypeScriptProjection validates parameters and domains', () => {
   expect(() => native.unproject([Infinity, 0])).toThrow();
 });
 
-test('TypeScriptProjection supports the eqc latitude origin', () => {
-  const projection = new TypeScriptProjection({
+test('ProjectionEngine supports the eqc latitude origin', () => {
+  const projection = new ProjectionEngine({
     to: '+proj=eqc +R=6371000 +lat_0=20 +lat_ts=30 +lon_0=10',
     projections
   });
@@ -171,7 +171,7 @@ test('TypeScriptProjection supports the eqc latitude origin', () => {
 // Exercise the spherical specialization through scalar and mutable public APIs.
 for (const ArrayType of [Float32Array, Float64Array]) {
   test(`spherical Mercator preserves flat ordinates and pole errors in ${ArrayType.name}`, () => {
-    const projection = new TypeScriptProjection({to: 'EPSG:3857', projections});
+    const projection = new ProjectionEngine({to: 'EPSG:3857', projections});
     const reference = new Proj4Projection({to: 'EPSG:3857'});
     const input = new ArrayType([179, 89.99, 123, 7, -179, -89.99, -23, 9, 0, 0, 0, 0]);
     const expected = input.slice();

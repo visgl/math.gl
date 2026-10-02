@@ -6,7 +6,7 @@ import type {Bench} from '@probe.gl/bench';
 import proj4 from 'proj4';
 import {Proj4Projection} from '../src/classic';
 import {
-  TypeScriptProjection,
+  ProjectionEngine,
   mercator,
   universalTransverseMercator,
   lambertConformalConic
@@ -25,7 +25,7 @@ export function proj4Bench(suite: Bench): Bench {
       39
     ]
   ] as const) {
-    const native = new TypeScriptProjection({to, projections: [plugin]});
+    const native = new ProjectionEngine({to, projections: [plugin]});
     const reference = proj4('WGS84', to);
     const wrapper = new Proj4Projection({to});
     for (const ArrayType of [Float32Array, Float64Array]) {

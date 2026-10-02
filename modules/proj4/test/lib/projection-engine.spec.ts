@@ -2,31 +2,18 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {
-  ProjectionEngine,
-  Projection,
-  TypeScriptProjection,
-  checkProjectionCompatibility,
-  checkTypeScriptCRSCompatibility
-} from '@math.gl/proj4';
-import {
-  ProjectionEngine as CoreEngine,
-  TypeScriptProjection as LegacyCoreEngine,
-  createProjectionDescriptor
-} from '@math.gl/proj4/core';
+import {ProjectionEngine, Projection, checkProjectionCompatibility} from '@math.gl/proj4';
+import {ProjectionEngine as CoreEngine, createProjectionDescriptor} from '@math.gl/proj4/core';
 import {mercator} from '@math.gl/proj4/projections/merc';
 import {LazyProjection} from '@math.gl/proj4/projections/lazy';
 
-test('ProjectionEngine is the canonical constructor and legacy aliases keep identity', () => {
+test('ProjectionEngine supports the ready-to-use wrappers and subclassing', () => {
   expect(ProjectionEngine.name).toBe('ProjectionEngine');
-  expect(TypeScriptProjection).toBe(ProjectionEngine);
-  expect(LegacyCoreEngine).toBe(CoreEngine);
-  expect(checkTypeScriptCRSCompatibility).toBe(checkProjectionCompatibility);
+  expect(CoreEngine).toBe(ProjectionEngine);
   expect(new Projection({})).toBeInstanceOf(ProjectionEngine);
   expect(new LazyProjection({})).toBeInstanceOf(ProjectionEngine);
-  expect(new TypeScriptProjection({})).toBeInstanceOf(ProjectionEngine);
-  class ExistingSubclass extends TypeScriptProjection {}
-  expect(new ExistingSubclass({}).project([12, 55, 123, 8])).toEqual([12, 55, 123, 8]);
+  class CustomProjection extends ProjectionEngine {}
+  expect(new CustomProjection({}).project([12, 55, 123, 8])).toEqual([12, 55, 123, 8]);
   expect(checkProjectionCompatibility('EPSG:3857', {projections: [mercator]}).status).toBe(
     'supported'
   );
@@ -53,7 +40,7 @@ test('renamed engine retains selective eager and lazy scalar/flat behavior', asy
   const restored = deferred.unprojectFlatSync(buffer, 4);
   expect(restored[0]).toBeCloseTo(12, 10);
   expect(restored[1]).toBeCloseTo(55, 10);
-  const created = await TypeScriptProjection.create({to: 'EPSG:3857', projections: [lazy]});
+  const created = await ProjectionEngine.create({to: 'EPSG:3857', projections: [lazy]});
   expect(created).toBeInstanceOf(ProjectionEngine);
   expect(created.project(point)).toEqual(engine.project(point));
 });

@@ -24,7 +24,7 @@ for (const fixture of structured.cases) {
   for (const format of ['wkt2', 'wkt1', 'esri', 'projjson'] as const) {
     test('independent structured conversion ' + fixture.id + ' / ' + format, () => {
       const definition = fixture[format];
-      const projection = new native.TypeScriptProjection({
+      const projection = new native.ProjectionEngine({
         from: '+proj=longlat +datum=none',
         to: definition as native.TypeScriptCRSInput,
         projections,
@@ -46,7 +46,7 @@ for (const fixture of structured.cases) {
 for (const [index, fixture] of datumInputs.cases.entries()) {
   test('independent 3D datum chain ' + fixture.id, () => {
     expect(datums.cases[index].id).toBe(fixture.id);
-    const projection = new native.TypeScriptProjection({from: fixture.fromCRS, to: fixture.toCRS});
+    const projection = new native.ProjectionEngine({from: fixture.fromCRS, to: fixture.toCRS});
     for (const row of datums.cases[index].results) {
       close(projection.project(row.input), row.forward, true);
       close(projection.unproject(row.forward), row.inverse, true);
@@ -69,14 +69,14 @@ test('ESRI Krovak accepts only the complete supported axis adjustment', () => {
     definition.replace('"XY_Plane_Rotation",90.0', '"XY_Plane_Rotation",45.0'),
     definition.replace('PROJECTION["Krovak"]', 'PROJECTION["Transverse_Mercator"]')
   ]) {
-    expect(() => new native.TypeScriptProjection({to: invalid, projections, parsers})).toThrow(
+    expect(() => new native.ProjectionEngine({to: invalid, projections, parsers})).toThrow(
       'ESRI Krovak axis adjustment'
     );
   }
 });
 
 test('Cassini exact poles and nonconvergent inverse fail observably', () => {
-  const projection = new native.TypeScriptProjection({
+  const projection = new native.ProjectionEngine({
     to: '+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84',
     projections
   });

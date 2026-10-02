@@ -16,13 +16,12 @@ wrapper silently falls back to the other engine.
 
 ## Renamed configurable API
 
-`ProjectionEngine` is the configurable projection API. `TypeScriptProjection` remains
-a deprecated alias of the same constructor, so existing instances, imports, subclassing
-and static methods continue to work. Prefer `ProjectionEngineOptions`,
-`ProjectionEngineCreateOptions`, `ProjectionCompatibility` and
-`checkProjectionCompatibility` in new code; the former TypeScript-prefixed names
-remain deprecated aliases. `Projection` continues to provide the ready-to-use API,
-and `LazyProjection` continues to load built-in algorithms on demand.
+`ProjectionEngine` replaces `TypeScriptProjection` during the alpha release cycle;
+the former name is no longer exported. Update imports and constructors, and use
+`ProjectionEngineOptions`, `ProjectionEngineCreateOptions`, `ProjectionCompatibility`
+and `checkProjectionCompatibility` in place of the former TypeScript-prefixed names.
+`Projection` provides the ready-to-use API, and `LazyProjection` loads built-in
+algorithms on demand.
 
 ## Supported profile
 

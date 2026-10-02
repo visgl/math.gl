@@ -7,7 +7,7 @@ import {parsePGM} from '@math.gl/geoid';
 import {wgs84Egm2008CompoundCRS} from '@math.gl/crs/test/projjson-fixtures';
 import {
   Projection,
-  TypeScriptProjection,
+  ProjectionEngine,
   mercator,
   geocentric,
   projJSONCRSParser
@@ -32,7 +32,7 @@ const close = (actual: ArrayLike<number>, expected: number[], tolerance = 1e-5) 
 
 for (const [index, fixture] of inputs.cases.entries()) {
   test('vertical grid vs independent PROJ: ' + fixture.id, () => {
-    const projection = new TypeScriptProjection({
+    const projection = new ProjectionEngine({
       ...options,
       from: fixture.from,
       to: fixture.to,
@@ -113,25 +113,25 @@ test('bilinear grid snapshot, nodata, antimeridian and longitude equivalence', (
 });
 
 test('ordered coverage, optional names, explicit null fallback, captured registry', () => {
-  const projection = new TypeScriptProjection({
+  const projection = new ProjectionEngine({
     ...options,
     from: definition.replace('local', '@absent,local,null')
   });
   close(projection.project([0, 0, 100, 7]), [0, 0, 100, 7]);
   close(projection.project([10, 40, 100, 7]), [10, 40, 112.5, 7]);
   expect(
-    () => new TypeScriptProjection({...options, from: definition.replace('local', 'absent,local')})
+    () => new ProjectionEngine({...options, from: definition.replace('local', 'absent,local')})
   ).toThrow('not registered');
   expect(() =>
-    new TypeScriptProjection({...options, from: definition.replace('local', '@absent')}).project([
+    new ProjectionEngine({...options, from: definition.replace('local', '@absent')}).project([
       10, 40, 100
     ])
   ).toThrow('covers');
   const registry = {local: grid};
-  const captured = new TypeScriptProjection({...options, verticalGrids: registry});
+  const captured = new ProjectionEngine({...options, verticalGrids: registry});
   registry.local = {getOffset: () => 999};
   close(captured.project([10, 40, 100]), [10, 40, 112.5]);
-  const bad = new TypeScriptProjection({
+  const bad = new ProjectionEngine({
     ...options,
     verticalGrids: {local: {getOffset: () => NaN}}
   });
@@ -139,7 +139,7 @@ test('ordered coverage, optional names, explicit null fallback, captured registr
 });
 
 test('vertical transforms require Z, preserve trailing measures and commit only successful records', () => {
-  const projection = new TypeScriptProjection(options);
+  const projection = new ProjectionEngine(options);
   expect(() => projection.project([10, 40])).toThrow('three ordinates');
   expect(() => projection.unproject([10, 40])).toThrow('three ordinates');
   expect(() => projection.projectFlat(new Float64Array([10, 40]), 2)).toThrow();
@@ -149,7 +149,7 @@ test('vertical transforms require Z, preserve trailing measures and commit only 
   const flat = new Float64Array([10, 40, 100, 7, 0, 0, 100, 8, 10, 40, 100, 9]);
   expect(() => projection.projectFlat(flat, 4)).toThrow('covers');
   close(flat, [10, 40, 112.5, 7, 0, 0, 100, 8, 10, 40, 100, 9]);
-  const overflow = new TypeScriptProjection({
+  const overflow = new ProjectionEngine({
     ...options,
     verticalGrids: {local: {getOffset: () => 1e40}}
   });
@@ -161,16 +161,16 @@ test('vertical transforms require Z, preserve trailing measures and commit only 
 test('height stage rejects geocentric attachment and missing grid registrations', () => {
   expect(
     () =>
-      new TypeScriptProjection({
+      new ProjectionEngine({
         ...options,
         from: '+proj=geocent +ellps=WGS84 +geoidgrids=local',
         projections: [geocentric]
       })
   ).toThrow('Vertical');
-  expect(() => new TypeScriptProjection({from: definition})).toThrow('not registered');
+  expect(() => new ProjectionEngine({from: definition})).toThrow('not registered');
   expect(
     () =>
-      new TypeScriptProjection({
+      new ProjectionEngine({
         ...options,
         to: wgs84Egm2008CompoundCRS,
         mode: 'horizontal',
@@ -201,7 +201,7 @@ test('prepared math.gl/geoid model retains its degree order and height units', (
   for (let i = 0; i < 12; i++) view.setUint16(header.length + i * 2, 20 + i);
   const geoid = parsePGM(data, {cubic: false});
   const adapted = createGeoidGrid(geoid);
-  const projection = new TypeScriptProjection({...options, verticalGrids: {local: adapted}});
+  const projection = new ProjectionEngine({...options, verticalGrids: {local: adapted}});
   for (const [lon, lat] of [
     [10, 40],
     [-120, -45],
@@ -215,7 +215,7 @@ test('prepared math.gl/geoid model retains its degree order and height units', (
 });
 
 test('horizontal grid stages sample source and destination heights on their own side', () => {
-  const projection = new TypeScriptProjection({
+  const projection = new ProjectionEngine({
     from: '+proj=longlat +datum=WGS84 +nadgrids=shift +geoidgrids=local',
     to: '+proj=longlat +datum=WGS84 +geoidgrids=local',
     verticalGrids: {local: {getOffset: longitude => longitude / radians}},
