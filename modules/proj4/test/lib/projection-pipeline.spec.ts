@@ -131,7 +131,8 @@ test('typed operations reject unsupported metadata, rates, units, operator names
     () =>
       new ProjectionPipeline({...options, steps: steps as PipelineStep[], ...extra});
   expect(bad([])).toThrow('at least');
-  expect(bad([{type: 'push'}])).toThrow('Unsupported pipeline operation');
+  expect(bad([{type: 'push'}])).toThrow('Stack components');
+  expect(bad([{type: 'affine'}])).toThrow('Unsupported pipeline operation');
   expect(bad([{type: 'unitconvert', xy: {from: 'deg', to: 'm'}}])).toThrow('Incompatible');
   expect(bad([{type: 'unitconvert', xy: {from: 'rad', to: 'deg'}}])).toThrow('mismatch');
   expect(bad([projection])).toThrow('requires geographic');

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- feat(proj4): Extend typed pipelines with exact Helmert rotations, ordinate stacks,
+  direction-specific steps and explicit rotated-projection output units.
+
 - feat(proj4): Rename the configurable alpha API to `ProjectionEngine` and focus
   documentation on using the math.gl projection engine.
 

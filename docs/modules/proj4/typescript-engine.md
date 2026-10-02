@@ -102,7 +102,7 @@ and shared ellipsoid and datum tables. Selecting one projection does not remove
 those tables. Adding WKT pulls in syntax parsing and structured-CRS interpretation;
 PROJJSON objects already provide structured input and need less reader code.
 
-Measured October 2, 2026 including tranche 12B2 typed operation pipelines, with Node 24.14.0, esbuild,
+Measured October 2, 2026 including tranche 12B3 pipeline extensions, with Node 24.14.0, esbuild,
 browser ESM, ES2020, minification, and gzip level 9. Each row is a separate retained
 bundle, not an increment or an application-wide download estimate. **KiB = 1,024 bytes.**
 
@@ -118,15 +118,17 @@ bundle, not an increment or an application-wide download estimate. **KiB = 1,024
 | Engine + Mercator + GTX decoder | 49.4 | 18.1 |
 | Engine + Mercator + vertical GeoTIFF adapter | 52.8 | 19.3 |
 | Default Projection wrapper (all plugins and readers) | 143.9 | 49.3 |
-| Explicit operation pipeline (no projection algorithms or readers) | 45.6 | 16.8 |
-| Every root export, including wrapper, readers, grids and pipelines | 161.6 | 55.2 |
+| Explicit operation pipeline (no projection algorithms or readers) | 49.4 | 18.2 |
+| Every root export, including wrapper, readers, grids and pipelines | 165.4 | 56.5 |
 | Classic proj4js-backed wrapper | 128.8 | 42.8 |
 
 Tranche 12A adds about 1.1 KiB minified / 0.3 KiB gzip to the core stage machinery.
 The grid readers and bilinear interpolation remain optional, retained only in the
 corresponding reader rows and all-exports row. The vertical GeoTIFF adapter adds no
 bytes to the core or ordinary projection bundles. Typed [operation pipelines](./operation-pipelines.md)
-are also optional and add no bytes to these selective bundles.
+are also optional and add no bytes to these selective bundles. Exact Helmert rotations,
+ordinate stacks and direction-specific steps add about 3.8 KiB minified / 1.4 KiB gzip
+to a retained pipeline compared with tranche 12B2; the core and default wrapper stay unchanged.
 
 Both GeoTIFF rows exclude an external TIFF decoder, workers, and grid files. No row
 includes downloaded datum-grid data. Different bundlers, targets, compression,

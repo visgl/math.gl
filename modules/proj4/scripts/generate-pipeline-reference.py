@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import tempfile
+import struct
 import pyproj
 from pyproj.enums import TransformDirection
 assert pyproj.__version__ == '3.7.2'
@@ -14,24 +15,32 @@ assert pyproj.proj_version_str == '9.5.1'
 pyproj.network.set_network_enabled(False)
 root = Path(__file__).resolve().parent.parent / 'test' / 'fixtures'
 source = root / 'operation-pipeline-cases.json'
+inputs = json.loads(source.read_text())
+grid = inputs['additionalVerticalGrid']
+directional = struct.pack('>ddddii', grid['origin'][1], grid['origin'][0], grid['step'][1], grid['step'][0], grid['size'][1], grid['size'][0]) + struct.pack('>4f', *grid['offsets'])
 sha = lambda data: hashlib.sha256(data).hexdigest()
 vertical = bytes(json.loads((root / 'vertical-grid-reference.json').read_text())['gridBytes'])
 horizontal = (root / 'real-grids' / 'BETA2007.gsb').read_bytes()
 reference = dict(pyproj=pyproj.__version__, proj=pyproj.proj_version_str,
                  source=source.name, sourceSHA256=sha(source.read_bytes()),
                  generatorSHA256=sha(Path(__file__).read_bytes()),
-                 verticalSHA256=sha(vertical), horizontalSHA256=sha(horizontal), cases=[])
+                 verticalSHA256=sha(vertical), horizontalSHA256=sha(horizontal),
+                 additionalVerticalGridBytes=list(directional), additionalVerticalSHA256=sha(directional), cases=[])
 with tempfile.TemporaryDirectory() as temp:
     vertical_path, horizontal_path = Path(temp) / 'local.gtx', Path(temp) / 'horizontal.gsb'
     vertical_path.write_bytes(vertical)
     horizontal_path.write_bytes(horizontal)
-    for case in json.loads(source.read_text())['cases']:
-        pipeline = '+proj=pipeline ' + case['pipeline'].replace('{vertical}', str(vertical_path)).replace('{horizontal}', str(horizontal_path))
+    directional_path = Path(temp) / 'directional.gtx'
+    directional_path.write_bytes(directional)
+    for case in inputs['cases']:
+        pipeline = '+proj=pipeline ' + case['pipeline'].replace('{vertical}', str(vertical_path)).replace('{horizontal}', str(horizontal_path)).replace('{directionalVertical}', str(directional_path))
         transform = pyproj.Transformer.from_pipeline(pipeline)
         # pyproj presents angular pipeline endpoints in degrees by default,
         # including raw-radian endpoints. Adapt only the API boundary, never equations.
         units = list(case['input']['units'])
+        stacks = [[], [], []]
         for step in case['steps']:
+            if step.get('omitForward'): continue
             inverse_step = step.get('inverse', False)
             if step['type'] == 'unitconvert':
                 for key, indices in [('xy', [0, 1]), ('z', [2])]:
@@ -47,7 +56,14 @@ with tempfile.TemporaryDirectory() as temp:
                     order = reversed_order
                 units = [units[abs(index) - 1] for index in order]
             elif step['type'] == 'projection':
-                units[:2] = ['rad', 'rad'] if inverse_step else ['m', 'm']
+                unit = step.get('output', {}).get('unit', 'm')
+                units[:2] = ['rad', 'rad'] if inverse_step else [unit, unit]
+            elif step['type'] in ['push', 'pop']:
+                pushing = (step['type'] == 'push') != inverse_step
+                for component in step['components']:
+                    index = component - 1
+                    if pushing: stacks[index].append(units[index])
+                    else: units[index] = stacks[index].pop()
             elif step['type'] == 'cart':
                 units = ['rad', 'rad', 'm'] if inverse_step else ['m', 'm', 'm']
         def api_input(point, endpoint_units):

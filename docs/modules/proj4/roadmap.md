@@ -347,9 +347,26 @@ final records. Packed ESM/CJS/types, optional bundle boundaries and browser qual
 run in CI. See [the operation pipeline contract](./operation-pipelines.md).
 
 This completes the typed composition profile, not arbitrary PROJ pipeline parsing.
-Exact rotations, `ob_tran` output-unit contracts, push/pop, omitted directions and
-additional operators remain explicit gaps. Dynamic datums and operation selection
+The follow-up below adds exact rotations, explicit `ob_tran` output units, ordinate
+stacks and direction-specific steps. Other operators and arbitrary string parsing
+remain outside the typed profile. Dynamic datums and operation selection
 remain 12C, with an epoch separate from M.
+
+## Tranche 12B3: pipeline completeness — implemented
+
+Opt-in exact static Helmert rotations and mathematical inverses preserve the default
+small-angle model. Explicit `ob_tran` contracts cover rotated geographic radians/degrees
+and projected metres. Balanced, nested X/Y/Z stacks and `omitForward`/`omitInverse`
+steps support height-only adjustments in a separate interpolation frame. Both paths
+are validated for units, spaces and stack state; each batch owns reusable stack storage.
+Thirty-seven authored pipelines / 102 XYZM points now have independent PROJ 9.5.1
+forward/inverse expectations, including real BETA2007 interpolation and an authored
+GTX field. Scalar, Float64 and Float32 ownership/rounding checks run with Node and
+browser qualification. See [the pipeline guide](./operation-pipelines.md).
+
+This completes the declared typed-operator extension. M remains an uninterpreted
+measure; epoch operations, general PROJ pipeline-string parsing and further operators
+remain separate work. A pipeline that omits or discards information need not roundtrip.
 
 ## Remaining performance and geodetic roadmap
 
