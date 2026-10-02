@@ -359,11 +359,24 @@ naming changes landed. The public APIs are `Projection`, `ProjectionEngine`,
 `LazyProjection` and `ProjectionPipeline`; the configurable alpha API no longer
 exports `TypeScriptProjection`.
 
-The SOTA goal combines measured throughput, independently checked numerical accuracy,
-and support for modern geodetic operations. These are separate acceptance criteria:
-a faster benchmark does not establish accuracy or complete PROJ parity.
+These are module-specific milestones within the [six library-wide SOTA tranches](../../sota-roadmap.md).
+Keep the library tranche numbers 1–6 and the projection milestone numbers 8–14 distinct:
 
-### Completed SOTA foundations
+| Library-wide priority | Projection milestones |
+| --- | --- |
+| 1 — Consolidation and baselines | Implemented 8–12B2 foundations; ongoing qualification in 14. |
+| 2 — Numerical robustness | Implemented 11; remaining pipeline accuracy in 12B3 and broader domains in 14. |
+| 3 — WebGPU projection conventions | Core graphics matrix, projection/unprojection and culling APIs. This is separate from projection GPU acceleration in 13D. |
+| 4 — Allocation-efficient bulk operations | Implemented 10; remaining general pipeline, grid/datum and XYZM performance in 13A. |
+| 5 — Global geospatial correctness | 12B3, 12C1–12C2, 12D, bounded optional operation selection in 12E, and 14. |
+| 6 — Measured acceleration | Profile in 13A; evaluate optional Wasm/SIMD, workers and GPU paths in 13B–13D. |
+
+The broader plan excludes BLAS, tensor frameworks and general GIS engines. This module
+keeps algorithms, readers, grid data and any future operation catalogue optional.
+Independent accuracy, measured speed and supported geodetic operations have separate
+acceptance criteria; a faster benchmark does not establish accuracy or complete PROJ parity.
+
+### Completed projection milestones
 
 | Tranche | Landed result |
 | --- | --- |
@@ -387,7 +400,7 @@ The former broad 12C is split below, with CRS-driven operation selection tracked
 | 12C1 — Observation epochs and kinematic Helmert | Explicit decimal-year epochs and translation/rotation/scale rates with a reference epoch. Support one epoch for a batch and a separately supplied per-point epoch buffer; preserve M. | Independent multi-epoch references for both rotation conventions, inverse transformations, missing/invalid epoch errors and unchanged static-operation results. |
 | 12C2 — Deformation models | Optional prepared velocity/deformation grids and explicit source/target epoch propagation; application-owned model loading. | Licensed, pinned real-model fixtures, units/time/coverage/nodata checks and independently checked forward/inverse results; unused models add no core bundle cost. |
 | 12D — Structured compound and vertical CRS execution | Interpret supported horizontal + vertical CRS combinations through `@math.gl/crs`, with explicit height units, axes, datums and supplied operations/models. Extend derived CRS support only where its operation is executable. | Equivalent WKT/PROJJSON/readonly CRS inputs produce the same qualified transformation; unsupported or missing operations fail explicitly and metadata remains unchanged. |
-| 12E — CRS-driven operation selection | Optional operation catalogue with area-of-interest, accuracy, epoch and grid-availability filters; expose the chosen operation and alternatives. | Pinned catalogue provenance, deterministic selection against reviewed PROJ cases, explicit missing-resource/ambiguity behavior and no implicit grid downloads or runtime dependency in core. |
+| 12E — CRS-driven operation selection | Select from a bounded, optional operation catalogue with area-of-interest, accuracy, epoch and grid-availability filters; expose the chosen operation and alternatives. A full CRS/operation database is outside scope. | Pinned catalogue provenance, deterministic selection against reviewed PROJ cases, explicit missing-resource/ambiguity behavior and no implicit grid downloads or runtime dependency in core. |
 | 13A — Further JavaScript batch performance | Profile the general transformation and typed pipeline paths; extend useful whole-buffer specializations and reduce grid/datum/XYZM overhead. Evaluate reusable scalar output buffers separately. | Paired warmed measurements against the PR base and direct proj4js, representative projected-to-projected/grid/XYZM cases, unchanged accuracy and ownership/error contracts, allocation and bundle-size reports. |
 | 13B — Optional Wasm/SIMD | Prototype selected kernels behind the projection plugin contract with explicit preparation and a JavaScript fallback. | End-to-end crossover measurements include startup, compilation, copying and memory cost; Node/browser numerical qualification and optional chunk-size budgets. Ship only a demonstrated improvement. |
 | 13C — Worker execution | Optional asynchronous large-buffer projection with explicit transfer/ownership, cancellation and bounded scheduling. | Compare single-thread and worker latency/throughput including startup and transfers, verify scalar/flat equivalence and error propagation, and document when workers help. |
