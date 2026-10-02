@@ -2,8 +2,12 @@
 
 ## Unreleased
 
+## v5.0.0-alpha.11
+
+- feat(proj4): Support vertical GeoTIFF geoid grids (#165)
+- feat(proj4): Compose typed operation pipelines (tranche 12B2) (#168)
 - feat(proj4): Rename the configurable alpha API to `ProjectionEngine` and focus
-  documentation on using the math.gl projection engine.
+  documentation on using the math.gl projection engine (#169)
 
 ## v5.0.0-alpha.10
 
