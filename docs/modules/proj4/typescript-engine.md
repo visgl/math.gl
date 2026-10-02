@@ -116,10 +116,12 @@ bundle, not an increment or an application-wide download estimate. **KiB = 1,024
 | Engine + Mercator + NTv2 decoder | 51.0 | 18.7 |
 | Engine + Mercator + GeoTIFF grid adapter | 51.0 | 18.6 |
 | Engine + Mercator + GTX decoder | 49.4 | 18.1 |
-| Engine + Mercator + vertical GeoTIFF adapter | 52.8 | 19.3 |
+| Engine + Mercator + vertical GeoTIFF adapter | 52.9 | 19.3 |
 | Default Projection wrapper (all plugins and readers) | 143.9 | 49.3 |
-| Explicit operation pipeline (no projection algorithms or readers) | 52.7 | 19.4 |
-| Every root export, including wrapper, readers, grids and pipelines | 168.7 | 57.6 |
+| Explicit operation pipeline (no projection algorithms, models or readers) | 53.4 | 19.5 |
+| Optional deformation model + regular velocity grid | 4.0 | 1.8 |
+| Optional deformation model + velocity GeoTIFF adapter | 9.0 | 3.5 |
+| Every root export, including wrapper, readers, grids and pipelines | 169.4 | 57.8 |
 | Classic proj4js-backed wrapper | 128.8 | 42.8 |
 
 Tranche 12A adds about 1.1 KiB minified / 0.3 KiB gzip to the core stage machinery.
@@ -132,8 +134,11 @@ to a retained pipeline compared with tranche 12B2. Kinematic epoch/rate support 
 about 3.1 KiB minified / 1.1 KiB gzip compared with 12B3, including shared-memory
 overlap validation. Tranche 13A adds about 0.18 KiB minified / 0.01 KiB gzip
 for typed epoch/coefficient storage and prepared axis/unit constants. The core and default wrapper stay unchanged.
+The deformation step adds about 0.7 KiB minified / 0.2 KiB gzip to a pipeline;
+the separate model and velocity readers are retained only when explicitly imported.
+See [deformation models](./deformation-models.md).
 
-Both GeoTIFF rows exclude an external TIFF decoder, workers, and grid files. No row
+All GeoTIFF rows exclude an external TIFF decoder, workers, and grid files. No row
 includes downloaded datum-grid data. Different bundlers, targets, compression,
 shared dependencies, and import patterns change these totals. The full Projection wrapper and root export set cost more than the classic wrapper; the size benefit comes from selecting a subset.
 Avoid a runtime lookup such as `projectionExports[name]` over the entire module namespace

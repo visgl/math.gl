@@ -77,9 +77,21 @@ try {
     assert(!('checkTypeScriptCRSCompatibility' in api));
     assert.equal(stable.mercator, api.mercator);
     const subpaths = ${JSON.stringify(subpaths)};
+    const optionalEntries = {
+      './deformation': ['createDeformationModel'],
+      './grids/velocity': ['createVelocityGrid'],
+      './grids/velocity-geotiff': ['loadVelocityGeoTIFFGrid']
+    };
+    for (const names of Object.values(optionalEntries)) for (const name of names)
+      assert(!(name in api), name + ' must remain outside the root');
     for (const subpath of subpaths) {
       const entry = await load('@math.gl/proj4' + subpath.slice(1));
       assert(Object.keys(entry).length > 0, subpath);
+      if (optionalEntries[subpath]) {
+        assert.deepEqual(Object.keys(entry).sort(), optionalEntries[subpath].slice().sort());
+        for (const name of optionalEntries[subpath]) assert.equal(typeof entry[name], 'function');
+        continue;
+      }
       for (const [name, value] of Object.entries(entry)) {
         if (subpath.startsWith('./projections/lazy')) {
           if (typeof value === 'function') assert(['lazyObliqueTransformation', 'LazyProjection'].includes(name));
@@ -167,6 +179,19 @@ try {
     })});
     assert.equal(tiffGrid.getOffset(0, 0), 15);
     assert.deepEqual(new core.ProjectionEngine({from: '+proj=longlat +geoidgrids=tiff', verticalGrids: {tiff: tiffGrid}}).project([0, 0, 100, 7]), [0, 0, 115, 7]);
+    const {createVelocityGrid} = await load('@math.gl/proj4/grids/velocity');
+    const {createDeformationModel} = await load('@math.gl/proj4/deformation');
+    const velocityGrid = createVelocityGrid({origin: [-1, -1], step: [2, 2], size: [2, 2], units: 'm/year', east: [1,1,1,1], north: [2,2,2,2], up: [3,3,3,3]});
+    const deformation = createDeformationModel({grid: velocityGrid, epochRange: [2000,2030]});
+    const propagation = new ProjectionPipeline({input: {space: 'geocentric', units: ['m','m','m']}, steps: [{type:'deformation', model:deformation, sourceEpoch:2010, targetEpoch:2020}]});
+    assert.deepEqual(propagation.project([6378137,0,0,7]), [6378167,10,20,7]);
+    const restored = propagation.unproject([6378167,10,20,7]);
+    assert(Math.hypot(restored[0]-6378137,restored[1],restored[2]) < 1e-8);
+    const {loadVelocityGeoTIFFGrid} = await load('@math.gl/proj4/grids/velocity-geotiff');
+    const decodedVelocity = await loadVelocityGeoTIFFGrid({images:[{width:2,height:2,bands:[0,1,2].map(index => ({index,data:new Float32Array(4).fill(index+1),metadata:{DESCRIPTION:['east_velocity','north_velocity','up_velocity'][index],UNITTYPE:'mm/year'}})),geoKeys:{GTModelTypeGeoKey:2,GTRasterTypeGeoKey:2},metadata:{TYPE:'VELOCITY'},noData:null,fileDirectory:{ModelPixelScale:[2,2,0],ModelTiepoint:[0,0,0,-1,1,0]}}]});
+    const sampled = {x:0,y:0,z:0};
+    assert(decodedVelocity.sample(0,0,sampled));
+    assert.deepEqual(sampled,{x:0.001,y:0.002,z:0.003});
     const descriptors = await load('@math.gl/proj4/projections/lazy/utm');
     const lazy = new core.ProjectionEngine({to: 'EPSG:32631', projections: [descriptors.lazyUniversalTransverseMercator]});
     await descriptors.lazyUniversalTransverseMercator.preload();
@@ -252,6 +277,21 @@ try {
 
     import {Projection, Proj4Projection, type ProjectionOptions, type DatumGridOptions, type Proj4ProjectionOptions, type Proj4DatumGridOptions} from '@math.gl/proj4';
     import {Proj4Projection as Classic, type Proj4ProjectionOptions as ClassicOptions, type Proj4DatumGridOptions as ClassicGridOptions} from '@math.gl/proj4/classic';
+    import {createDeformationModel, type DeformationModel, type DeformationModelOptions} from '@math.gl/proj4/deformation';
+    import {createVelocityGrid, type VelocityGrid, type VelocityGridOptions} from '@math.gl/proj4/grids/velocity';
+    import {loadVelocityGeoTIFFGrid, type VelocityGridGeoTIFFData, type VelocityGridGeoTIFF} from '@math.gl/proj4/grids/velocity-geotiff';
+    const velocityOptions: VelocityGridOptions = {origin:[0,0],step:[1,1],size:[2,2],units:'mm/year',east:[1,1,1,1],north:[2,2,2,2],up:[3,3,3,3]};
+    const velocity: VelocityGrid = createVelocityGrid(velocityOptions);
+    const modelOptions: DeformationModelOptions = {grid:velocity,epochRange:[2000,2030]};
+    const deformation: DeformationModel = createDeformationModel(modelOptions);
+    const step: import('@math.gl/proj4/pipeline').PipelineStep = {type:'deformation',model:deformation,sourceEpoch:'coordinate',targetEpoch:2020};
+    const deferredVelocity: Promise<VelocityGrid> = loadVelocityGeoTIFFGrid({images:[]} satisfies VelocityGridGeoTIFFData);
+    const tiffVelocity: VelocityGridGeoTIFF = {getImageCount:async()=>0,getImage:async()=>geoTIFFImage};
+    loadVelocityGeoTIFFGrid(tiffVelocity);
+    // @ts-expect-error dimensional units must be explicit
+    createVelocityGrid({...velocityOptions,units:'m'});
+    // @ts-expect-error epochs cannot be omitted
+    const missingEpoch: import('@math.gl/proj4/pipeline').PipelineStep = {type:'deformation',model:deformation,targetEpoch:2020};
     import {parseGTXGrid} from '@math.gl/proj4/grids/gtx';
     import {loadVerticalGeoTIFFGrid, type VerticalGridGeoTIFF, type VerticalGridGeoTIFFImage} from '@math.gl/proj4/grids/vertical-geotiff';
     const geoTIFFImage: VerticalGridGeoTIFFImage = {

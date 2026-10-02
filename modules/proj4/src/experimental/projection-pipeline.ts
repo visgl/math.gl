@@ -5,6 +5,7 @@
 // Projection, geocentric and static Helmert equations reuse the proj4js adaptations
 // in this package; see datum.ts and ../../PROJ4-LICENSE.md. The separate exact
 // Helmert matrix is adapted from PROJ; see exact-helmert.ts and ../../PROJ-LICENSE.txt.
+import type {DeformationModel} from './deformation';
 import {CORE_PARAMETERS, normalizeCRS} from './crs/normalize';
 import {unsupportedStage} from './crs/types';
 import {
@@ -82,6 +83,13 @@ export type PipelineStep = Direction &
         /** Decimal year at which the base parameters apply. Required with rates. */
         readonly referenceEpoch?: number;
         readonly rates?: PipelineHelmertRates;
+      }
+    | {
+        readonly type: 'deformation';
+        readonly model: DeformationModel;
+        /** 'coordinate' uses the separate scalar/batch/per-record epoch argument. */
+        readonly sourceEpoch: number | 'coordinate';
+        readonly targetEpoch: number;
       }
     | {readonly type: 'push' | 'pop'; readonly components: readonly (1 | 2 | 3)[]}
     | {readonly type: 'hgridshift'; readonly grids: string}
@@ -457,6 +465,7 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
         'referenceEpoch',
         'rates'
       ],
+      deformation: ['model', 'sourceEpoch', 'targetEpoch'],
       push: ['components'],
       pop: ['components'],
       hgridshift: ['grids'],
@@ -730,6 +739,31 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
           scale
         ];
         return pair(createHelmert(values, false), createHelmert(values, true));
+      }
+      case 'deformation': {
+        requireState('geocentric', ['m', 'm', 'm']);
+        this.requiresZ = true;
+        const source = step.sourceEpoch,
+          target = step.targetEpoch;
+        if (
+          (source !== 'coordinate' && (typeof source !== 'number' || !Number.isFinite(source))) ||
+          typeof target !== 'number' ||
+          !Number.isFinite(target)
+        )
+          throw new Error('Explicit finite deformation source/target epochs required');
+        if (
+          !step.model ||
+          typeof step.model.forward !== 'function' ||
+          typeof step.model.inverse !== 'function'
+        )
+          throw new Error('Prepared deformation model required');
+        this.requiresEpoch ||= source === 'coordinate';
+        const forward = step.model.forward.bind(step.model),
+          backward = step.model.inverse.bind(step.model);
+        return pair(
+          (p, _stack, epoch) => forward(p, source === 'coordinate' ? epoch : source, target),
+          (p, _stack, epoch) => backward(p, source === 'coordinate' ? epoch : source, target)
+        );
       }
       case 'push':
       case 'pop': {

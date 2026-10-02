@@ -98,3 +98,15 @@ existing attributed proj4js `datum.ts` adaptation. The kinematic fixture paramet
 example is documented by PROJ; authored finite rotations/epochs are MIT test data,
 not an authoritative CRS operation catalogue. Numerical expectations are generated
 independently with pinned pyproj 3.7.2 / PROJ 9.5.1, with observation time separate from M.
+
+## Prepared velocity models
+
+The optional deformation model, velocity-grid preparation and velocity GeoTIFF
+adapter are original math.gl code inspired by PROJ's documented deformation/GTG
+contracts, not direct PROJ or proj4js forks. The model uses an original ENU basis
+rotation and inverse solver, while reusing the existing attributed proj4js geocentric
+conversion in datum.ts. No new upstream code or third-party model data is included.
+The synthetic velocity TIFF and its encoder are original MIT math.gl test assets,
+excluded from the published package. Native PROJ 9.5.1 forward evaluations generate
+independent references; the legacy inverse is retained separately for comparison.
+Application-provided model files and decoders retain their own terms.

@@ -39,7 +39,10 @@ const entries = {
   proj4: new URL('../test/benchmark-proj4.ts', import.meta.url)
 };
 const assets = new Map();
-assets.set('/pipeline-horizontal.gsb', readFileSync(new URL('../test/fixtures/real-grids/BETA2007.gsb', import.meta.url)));
+assets.set(
+  '/pipeline-horizontal.gsb',
+  readFileSync(new URL('../test/fixtures/real-grids/BETA2007.gsb', import.meta.url))
+);
 for (const [name, entry] of Object.entries(entries)) {
   const result = await build({
     entryPoints: [fileURLToPath(entry)],
@@ -87,6 +90,19 @@ const accuracy = await build({
   write: false
 });
 assets.set('/accuracy.js', accuracy.outputFiles[0].contents);
+const deformation = await build({
+  entryPoints: [fileURLToPath(new URL('./qualify-deformation.mjs', import.meta.url))],
+  bundle: true,
+  format: 'esm',
+  platform: 'browser',
+  write: false,
+  tsconfigRaw: {}
+});
+assets.set('/deformation.js', deformation.outputFiles[0].contents);
+assets.set(
+  '/deformation/linear-enu.tif',
+  readFileSync(new URL('../test/fixtures/deformation/linear-enu.tif', import.meta.url))
+);
 const verticalGeoTIFF = await build({
   entryPoints: [fileURLToPath(new URL('./qualify-vertical-geotiff.mjs', import.meta.url))],
   bundle: true,
@@ -183,8 +199,15 @@ try {
         }
       );
       const independent = await page.evaluate(async () => {
-        const {qualify, qualifyAccuracy, qualifyVertical, qualifyPipelines, qualifyKinematicPipelines} = await import('/accuracy.js');
+        const {
+          qualify,
+          qualifyAccuracy,
+          qualifyVertical,
+          qualifyPipelines,
+          qualifyKinematicPipelines
+        } = await import('/accuracy.js');
         const {qualifyVerticalGeoTIFF} = await import('/vertical-geotiff.js');
+        const {qualifyDeformation} = await import('/deformation.js');
         const inputs = await (await fetch('/native-proj-cases.json')).json();
         const reference = await (await fetch('/native-proj-reference.json')).json();
         return {
@@ -192,8 +215,11 @@ try {
           accuracy: qualifyAccuracy(),
           vertical: qualifyVertical(),
           verticalGeoTIFF: await qualifyVerticalGeoTIFF(),
-          pipelines: qualifyPipelines(await (await fetch('/pipeline-horizontal.gsb')).arrayBuffer()),
-          kinematicPipelines: qualifyKinematicPipelines()
+          pipelines: qualifyPipelines(
+            await (await fetch('/pipeline-horizontal.gsb')).arrayBuffer()
+          ),
+          kinematicPipelines: qualifyKinematicPipelines(),
+          deformation: await qualifyDeformation()
         };
       });
       results.push({browser: name, version: browser.version(), cold, independent, ...warm});

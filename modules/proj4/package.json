@@ -935,6 +935,21 @@
       "types": "./dist/pipeline.d.ts",
       "import": "./dist/pipeline.js",
       "require": "./dist/pipeline.cjs"
+    },
+    "./deformation": {
+      "types": "./dist/deformation.d.ts",
+      "import": "./dist/deformation.js",
+      "require": "./dist/deformation.cjs"
+    },
+    "./grids/velocity": {
+      "types": "./dist/grids/velocity.d.ts",
+      "import": "./dist/grids/velocity.js",
+      "require": "./dist/grids/velocity.cjs"
+    },
+    "./grids/velocity-geotiff": {
+      "types": "./dist/experimental/grids/velocity-geotiff.d.ts",
+      "import": "./dist/experimental/grids/velocity-geotiff.js",
+      "require": "./dist/experimental/grids/velocity-geotiff.cjs"
     }
   },
   "files": [
