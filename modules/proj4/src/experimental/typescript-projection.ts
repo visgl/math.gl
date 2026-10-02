@@ -22,7 +22,7 @@ import type {DatumGridCollection, VerticalGridCollection} from './grids/types';
 type ProjectionRegistration = ProjectionPlugin | ProjectionDescriptor;
 type ProjectionResult<P, Result> =
   Extract<P, ProjectionDescriptor> extends never ? Result : Promise<Result>;
-export type TypeScriptProjectionOptions<P extends ProjectionRegistration = ProjectionPlugin> =
+export type ProjectionEngineOptions<P extends ProjectionRegistration = ProjectionPlugin> =
   CRSNormalizationOptions & {
     from?: TypeScriptCRSInput;
     to?: TypeScriptCRSInput;
@@ -35,7 +35,7 @@ export type TypeScriptProjectionOptions<P extends ProjectionRegistration = Proje
     /** Prepared geoid undulations keyed by +geoidgrids names. No implicit fetching. */
     verticalGrids?: VerticalGridCollection;
   };
-export type TypeScriptProjectionCreateOptions = TypeScriptProjectionOptions<ProjectionRegistration>;
+export type ProjectionEngineCreateOptions = ProjectionEngineOptions<ProjectionRegistration>;
 export type ProjectionArray = Float32Array | Float64Array;
 type CoordinateTransform = {
   flat?: ProjectionFlatOperation;
@@ -47,27 +47,25 @@ type CompiledCRS = NormalizedCRS & {
   implementation?: ProjectionImplementation;
   verticalGrid?: (longitude: number, latitude: number) => number;
 };
-/** Configurable TypeScript CRS engine; see the documented supported subset and accuracy limits.
+/** Configurable math.gl projection engine; see the documented supported subset and accuracy limits.
  * Third ordinates are height (gravity-related with +geoidgrids) or geocentric Z.
  */
-export class TypeScriptProjection<P extends ProjectionRegistration = ProjectionPlugin> {
+export class ProjectionEngine<P extends ProjectionRegistration = ProjectionPlugin> {
   /** Resolve required descriptors once, then return an ordinary synchronous instance. */
-  static async create(
-    options: TypeScriptProjectionCreateOptions = {}
-  ): Promise<TypeScriptProjection> {
+  static async create(options: ProjectionEngineCreateOptions = {}): Promise<ProjectionEngine> {
     const projections = await Promise.all(requiredProjections(options).map(preloadProjection));
-    return new TypeScriptProjection({...options, projections});
+    return new ProjectionEngine({...options, projections});
   }
 
   private readonly forwardTransform?: CoordinateTransform;
   private readonly inverseTransform?: CoordinateTransform;
   private readonly deferred?: {
-    options: TypeScriptProjectionCreateOptions;
-    pending?: Promise<TypeScriptProjection>;
-    implementation?: TypeScriptProjection;
+    options: ProjectionEngineCreateOptions;
+    pending?: Promise<ProjectionEngine>;
+    implementation?: ProjectionEngine;
   };
   readonly lossy: boolean;
-  constructor(options: TypeScriptProjectionOptions<P> = {}) {
+  constructor(options: ProjectionEngineOptions<P> = {}) {
     const registrations = options.projections || [];
     const plugins = registry(registrations);
     if (registrations.some(projection => !('create' in projection))) {
@@ -78,7 +76,7 @@ export class TypeScriptProjection<P extends ProjectionRegistration = ProjectionP
       this.lossy = from.lossy || to.lossy;
       this.deferred = {options: {...options, projections: [...registrations]}};
     } else {
-      const eager = options as TypeScriptProjectionOptions;
+      const eager = options as ProjectionEngineOptions;
       const eagerPlugins = plugins as ReadonlyMap<string, ProjectionPlugin>;
       const from = compileCRS(eager.from ?? 'WGS84', eagerPlugins, eager);
       const to = compileCRS(eager.to ?? 'WGS84', eagerPlugins, eager);
@@ -101,11 +99,11 @@ export class TypeScriptProjection<P extends ProjectionRegistration = ProjectionP
     this.projectFlatSync = this.projectFlatSync.bind(this);
     this.unprojectFlatSync = this.unprojectFlatSync.bind(this);
   }
-  private load(): Promise<TypeScriptProjection> {
+  private load(): Promise<ProjectionEngine> {
     const state = this.deferred;
-    if (!state) return Promise.resolve(this as unknown as TypeScriptProjection);
+    if (!state) return Promise.resolve(this as unknown as ProjectionEngine);
     if (state.implementation) return Promise.resolve(state.implementation);
-    state.pending ||= TypeScriptProjection.create(state.options)
+    state.pending ||= ProjectionEngine.create(state.options)
       .then(projection => {
         state.implementation = projection;
         return projection;
@@ -116,9 +114,9 @@ export class TypeScriptProjection<P extends ProjectionRegistration = ProjectionP
       });
     return state.pending;
   }
-  private loadSync(): TypeScriptProjection {
+  private loadSync(): ProjectionEngine {
     const state = this.deferred;
-    if (!state) return this as unknown as TypeScriptProjection;
+    if (!state) return this as unknown as ProjectionEngine;
     if (!state.implementation) {
       const projections = requiredProjections(state.options).map(descriptor => {
         const plugin = getLoadedProjection(descriptor);
@@ -128,7 +126,7 @@ export class TypeScriptProjection<P extends ProjectionRegistration = ProjectionP
           );
         return plugin;
       });
-      state.implementation = new TypeScriptProjection({...state.options, projections});
+      state.implementation = new ProjectionEngine({...state.options, projections});
     }
     return state.implementation;
   }
@@ -190,7 +188,7 @@ export class TypeScriptProjection<P extends ProjectionRegistration = ProjectionP
     return result as ProjectionResult<P, T>;
   }
 }
-function requiredProjections(options: TypeScriptProjectionCreateOptions): ProjectionRegistration[] {
+function requiredProjections(options: ProjectionEngineCreateOptions): ProjectionRegistration[] {
   const available = registry(options.projections || []);
   const required = new Set<ProjectionPlugin | ProjectionDescriptor>();
   for (const definition of [options.from ?? 'WGS84', options.to ?? 'WGS84']) {
@@ -206,17 +204,17 @@ function requiredProjections(options: TypeScriptProjectionCreateOptions): Projec
   }
   return [...required];
 }
-export type TypeScriptCRSCompatibility = {
+export type ProjectionCompatibility = {
   status: 'supported' | 'unsupported' | 'unknown';
   lossy: boolean;
   reason?: CRSCompatibilityReason;
   message?: string;
 };
 /** Check construction with this backend and this exact set of registered plugins/readers. */
-export function checkTypeScriptCRSCompatibility(
+export function checkProjectionCompatibility(
   definition: TypeScriptCRSInput,
-  options: TypeScriptProjectionOptions = {}
-): TypeScriptCRSCompatibility {
+  options: ProjectionEngineOptions = {}
+): ProjectionCompatibility {
   try {
     const crs = compileCRS(definition, registry(options.projections || []), options);
     return {status: 'supported', lossy: crs.lossy};
@@ -251,7 +249,7 @@ function registry<T extends Pick<ProjectionPlugin, 'name' | 'aliases'>>(
 function compileCRS(
   definition: TypeScriptCRSInput,
   plugins: ReadonlyMap<string, ProjectionPlugin>,
-  options: TypeScriptProjectionOptions
+  options: ProjectionEngineOptions
 ): CompiledCRS {
   const crs = normalizeCRS(definition, options);
   const plugin = plugins.get(pluginKey(crs.projection));
@@ -467,3 +465,18 @@ function transformInPlace<T extends ProjectionArray>(
   }
   return coordinates;
 }
+
+/** @deprecated Use ProjectionEngine. */
+export const TypeScriptProjection = ProjectionEngine;
+/** @deprecated Use ProjectionEngine. */
+export type TypeScriptProjection<P extends ProjectionRegistration = ProjectionPlugin> =
+  ProjectionEngine<P>;
+/** @deprecated Use ProjectionEngineOptions. */
+export type TypeScriptProjectionOptions<P extends ProjectionRegistration = ProjectionPlugin> =
+  ProjectionEngineOptions<P>;
+/** @deprecated Use ProjectionEngineCreateOptions. */
+export type TypeScriptProjectionCreateOptions = ProjectionEngineCreateOptions;
+/** @deprecated Use ProjectionCompatibility. */
+export type TypeScriptCRSCompatibility = ProjectionCompatibility;
+/** @deprecated Use checkProjectionCompatibility. */
+export const checkTypeScriptCRSCompatibility = checkProjectionCompatibility;

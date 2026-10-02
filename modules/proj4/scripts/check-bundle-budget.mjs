@@ -8,22 +8,22 @@ import {gzipSync} from 'node:zlib';
 import {build} from 'esbuild';
 
 const fixtures = {
-  core: "export {TypeScriptProjection} from '@math.gl/proj4';",
+  core: "export {ProjectionEngine} from '@math.gl/proj4';",
   mercator:
-    "import {TypeScriptProjection, mercator} from '@math.gl/proj4'; export const create = () => new TypeScriptProjection({to: 'EPSG:3857', projections: [mercator]});",
-  utm: "import {TypeScriptProjection, universalTransverseMercator} from '@math.gl/proj4'; export const create = () => new TypeScriptProjection({to: 'EPSG:32631', projections: [universalTransverseMercator]});",
+    "import {ProjectionEngine, mercator} from '@math.gl/proj4'; export const create = () => new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});",
+  utm: "import {ProjectionEngine, universalTransverseMercator} from '@math.gl/proj4'; export const create = () => new ProjectionEngine({to: 'EPSG:32631', projections: [universalTransverseMercator]});",
   mercatorWithWKT:
-    "import {TypeScriptProjection, mercator, wktCRSParser} from '@math.gl/proj4'; export const create = to => new TypeScriptProjection({to, projections: [mercator], parsers: [wktCRSParser]});",
+    "import {ProjectionEngine, mercator, wktCRSParser} from '@math.gl/proj4'; export const create = to => new ProjectionEngine({to, projections: [mercator], parsers: [wktCRSParser]});",
   mercatorWithPROJJSON:
-    "import {TypeScriptProjection, mercator, projJSONCRSParser} from '@math.gl/proj4'; export const create = to => new TypeScriptProjection({to, projections: [mercator], parsers: [projJSONCRSParser]});",
+    "import {ProjectionEngine, mercator, projJSONCRSParser} from '@math.gl/proj4'; export const create = to => new ProjectionEngine({to, projections: [mercator], parsers: [projJSONCRSParser]});",
   mercatorWithNTv2:
-    "import {TypeScriptProjection, mercator} from '@math.gl/proj4'; export {parseNTv2Grid} from '@math.gl/proj4'; export const create = (from, datumGrids) => new TypeScriptProjection({from, to: 'EPSG:3857', projections: [mercator], datumGrids});",
+    "import {ProjectionEngine, mercator} from '@math.gl/proj4'; export {parseNTv2Grid} from '@math.gl/proj4'; export const create = (from, datumGrids) => new ProjectionEngine({from, to: 'EPSG:3857', projections: [mercator], datumGrids});",
   mercatorWithGeoTIFFAdapter:
-    "import {TypeScriptProjection, mercator} from '@math.gl/proj4'; export {loadGeoTIFFGrid} from '@math.gl/proj4'; export const create = (from, datumGrids) => new TypeScriptProjection({from, to: 'EPSG:3857', projections: [mercator], datumGrids});",
+    "import {ProjectionEngine, mercator} from '@math.gl/proj4'; export {loadGeoTIFFGrid} from '@math.gl/proj4'; export const create = (from, datumGrids) => new ProjectionEngine({from, to: 'EPSG:3857', projections: [mercator], datumGrids});",
   mercatorWithGTX:
-    "import {TypeScriptProjection, mercator} from '@math.gl/proj4'; export {parseGTXGrid} from '@math.gl/proj4/grids/gtx'; export const create = (from, verticalGrids) => new TypeScriptProjection({from, to: 'EPSG:3857', projections: [mercator], verticalGrids});",
+    "import {ProjectionEngine, mercator} from '@math.gl/proj4'; export {parseGTXGrid} from '@math.gl/proj4/grids/gtx'; export const create = (from, verticalGrids) => new ProjectionEngine({from, to: 'EPSG:3857', projections: [mercator], verticalGrids});",
   mercatorWithVerticalGeoTIFF:
-    "import {TypeScriptProjection, mercator} from '@math.gl/proj4'; export {loadVerticalGeoTIFFGrid} from '@math.gl/proj4/grids/vertical-geotiff'; export const create = (from, verticalGrids) => new TypeScriptProjection({from, to: 'EPSG:3857', projections: [mercator], verticalGrids});",
+    "import {ProjectionEngine, mercator} from '@math.gl/proj4'; export {loadVerticalGeoTIFFGrid} from '@math.gl/proj4/grids/vertical-geotiff'; export const create = (from, verticalGrids) => new ProjectionEngine({from, to: 'EPSG:3857', projections: [mercator], verticalGrids});",
   operationPipeline: "export {ProjectionPipeline} from '@math.gl/proj4/pipeline';",
   typescriptWrapper: "export {Projection} from '@math.gl/proj4';",
   allNativeExports: "export * from '@math.gl/proj4';",

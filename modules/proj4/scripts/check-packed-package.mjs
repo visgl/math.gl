@@ -72,7 +72,10 @@ try {
   }
   const entrySmoke = `
     const stable = await load('@math.gl/proj4');
+    assert.equal(stable.ProjectionEngine, api.ProjectionEngine);
     assert.equal(stable.TypeScriptProjection, api.TypeScriptProjection);
+    assert.equal(api.ProjectionEngine, api.TypeScriptProjection);
+    assert.equal(api.checkProjectionCompatibility, api.checkTypeScriptCRSCompatibility);
     assert.equal(stable.mercator, api.mercator);
     const subpaths = ${JSON.stringify(subpaths)};
     for (const subpath of subpaths) {
@@ -94,6 +97,9 @@ try {
     assert(Math.abs((await automatic.project([3, 0]))[0] - 500000) < 1e-7);
     assert(Math.abs(automatic.projectSync([3, 0])[0] - 500000) < 1e-7);
     const core = await load('@math.gl/proj4/core');
+    assert.equal(core.ProjectionEngine, core.TypeScriptProjection);
+    assert.equal(core.checkProjectionCompatibility, core.checkTypeScriptCRSCompatibility);
+    assert.deepEqual(new core.ProjectionEngine({}).project([12, 55, 123, 8]), [12, 55, 123, 8]);
     const {ProjectionPipeline} = await load('@math.gl/proj4/pipeline');
     const pipeline = new ProjectionPipeline({input: {space: 'geographic', units: ['deg', 'deg', 'm']}, steps: [
       {type: 'unitconvert', xy: {from: 'deg', to: 'rad'}}, {type: 'projection', name: 'merc', parameters: {a: '6378137', b: '6378137'}}
@@ -202,7 +208,16 @@ try {
     const automatic = new LazyProjection(lazyOptions);
     const automaticResult: Promise<number[]> = automatic.project([3, 0]);
     const automaticFlat: Promise<Float32Array> = automatic.projectFlat(new Float32Array([3, 0]));
-    import {TypeScriptProjection, type ProjectionPoint} from '@math.gl/proj4/core';
+    import {ProjectionEngine, TypeScriptProjection, checkProjectionCompatibility, type ProjectionPoint, type ProjectionEngineOptions, type ProjectionEngineCreateOptions, type ProjectionCompatibility, type TypeScriptProjectionOptions, type TypeScriptProjectionCreateOptions} from '@math.gl/proj4/core';
+    const engineOptions: ProjectionEngineOptions = {} as TypeScriptProjectionOptions;
+    const formerOptions: TypeScriptProjectionOptions = {} as ProjectionEngineOptions;
+    const createOptions: ProjectionEngineCreateOptions = {} as TypeScriptProjectionCreateOptions;
+    const renamed: ProjectionEngine = new TypeScriptProjection(engineOptions);
+    const former: TypeScriptProjection = new ProjectionEngine(formerOptions);
+    const capability: ProjectionCompatibility = checkProjectionCompatibility('EPSG:4326');
+    const eagerEngine: number[] = new ProjectionEngine({}).project([0, 0]);
+    const createdEngine: Promise<ProjectionEngine> = ProjectionEngine.create(createOptions);
+
     import {Projection, Proj4Projection, type ProjectionOptions, type DatumGridOptions, type Proj4ProjectionOptions, type Proj4DatumGridOptions} from '@math.gl/proj4';
     import {Proj4Projection as Classic, type Proj4ProjectionOptions as ClassicOptions, type Proj4DatumGridOptions as ClassicGridOptions} from '@math.gl/proj4/classic';
     import {parseGTXGrid} from '@math.gl/proj4/grids/gtx';
@@ -238,6 +253,10 @@ try {
     const classicGrid: ClassicGridOptions = {} as Proj4DatumGridOptions;
     import {lazyUniversalTransverseMercator} from '@math.gl/proj4/projections/lazy/utm';
     const lazy = new TypeScriptProjection({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});
+    const canonicalLazy = new ProjectionEngine({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});
+    const canonicalAsync: Promise<number[]> = canonicalLazy.project([3, 0]);
+    const canonicalSync: number[] = canonicalLazy.projectSync([3, 0]);
+    const canonicalFlat: Promise<Float32Array> = canonicalLazy.projectFlat(new Float32Array([3, 0]));
     const asyncResult: Promise<number[]> = lazy.project([3, 0]);
     const syncResult: number[] = lazy.projectSync([3, 0]);
     const asyncBuffer: Promise<Float64Array> = lazy.projectFlat(new Float64Array([3, 0]));

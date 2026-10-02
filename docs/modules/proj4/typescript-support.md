@@ -1,8 +1,8 @@
-# TypeScript API support and migration
+# Projection API support and migration
 
-`@math.gl/proj4` uses the TypeScript engine by default. `Projection` supplies
+`@math.gl/proj4` uses the math.gl projection engine by default. `Projection` supplies
 all projection plugins and WKT/PROJJSON readers behind the existing wrapper API.
-`TypeScriptProjection` exposes per-instance configuration for smaller bundles.
+`ProjectionEngine` exposes per-instance configuration for smaller bundles.
 The original proj4js-backed wrapper and its compatibility helpers are available
 from `@math.gl/proj4/classic`.
 
@@ -13,6 +13,16 @@ paths in new code. This API is available in releases containing these exports.
 API compatibility does not imply identical numerical results or accepted inputs.
 The documented corrections and strict-input exceptions below still apply. Neither
 wrapper silently falls back to the other engine.
+
+## Renamed configurable API
+
+`ProjectionEngine` is the configurable projection API. `TypeScriptProjection` remains
+a deprecated alias of the same constructor, so existing instances, imports, subclassing
+and static methods continue to work. Prefer `ProjectionEngineOptions`,
+`ProjectionEngineCreateOptions`, `ProjectionCompatibility` and
+`checkProjectionCompatibility` in new code; the former TypeScript-prefixed names
+remain deprecated aliases. `Projection` continues to provide the ready-to-use API,
+and `LazyProjection` continues to load built-in algorithms on demand.
 
 ## Supported profile
 
@@ -46,11 +56,11 @@ With projection descriptors, construction reads definitions but algorithms load 
 first asynchronous coordinate call. `projectSync`/`unprojectSync` and their flat variants
 require preloading; they never start an import. See the [loading guide](./typescript-engine.md#load-less-used-projections-on-demand).
 The eager engine and default wrapper perform no network requests. Descriptor imports
-can fetch application chunks through the bundler runtime. The configurable `TypeScriptProjection` keeps plugin registration per instance and
+can fetch application chunks through the bundler runtime. The configurable `ProjectionEngine` keeps plugin registration per instance and
 shares only the descriptor implementation cache. The convenience `Projection` preserves the classic static registration
 API: aliases and NTv2 grids affect subsequently constructed wrappers of that backend.
 Existing instances retain their compiled configuration. Registries are independent
-between TypeScript and classic wrappers.
+between math.gl and classic wrappers.
 Unsupported definitions and missing stages fail explicitly. There is no automatic
 fallback to another engine. Reuse an instance for repeated transformations.
 
@@ -104,18 +114,18 @@ import {Proj4Projection as Projection} from '@math.gl/proj4/classic';
 
 The proj4js-specific `checkProj4CRSCompatibility`, `toProj4CRSDefinition` and
 `Proj4CRSCompatibilityError` exports also move to `classic`. Use
-`checkTypeScriptCRSCompatibility` with explicit plugins/readers to check the
-configurable TypeScript engine. Legacy registry calls must use the same backend
+`checkProjectionCompatibility` with explicit plugins/readers to check the
+configurable math.gl projection engine. Legacy registry calls must use the same backend
 as the instances that consume them.
 
 For selective bundles, register algorithms required by **both** ends:
 
 ```typescript
-import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {ProjectionEngine} from '@math.gl/proj4/core';
 import {mercator} from '@math.gl/proj4/projections/merc';
 import {universalTransverseMercator} from '@math.gl/proj4/projections/utm';
 
-const projection = new TypeScriptProjection({
+const projection = new ProjectionEngine({
   from: 'EPSG:3857',
   to: 'EPSG:32631',
   projections: [mercator, universalTransverseMercator]
@@ -128,7 +138,7 @@ For WKT/PROJJSON, register the matching optional reader. For grids, load and pre
 all required data before constructing the instance. The [engine guide](./typescript-engine.md)
 shows dynamic imports, grid loading and minimal bundles.
 
-Use `checkTypeScriptCRSCompatibility` on each definition with the same plugin/parser
+Use `checkProjectionCompatibility` on each definition with the same plugin/parser
 options as construction. A supported result establishes construction support; it does
 not prove grid coverage, coordinate-domain validity or application-specific accuracy.
 Compare representative production coordinates in both directions before switching.
@@ -142,7 +152,7 @@ CRS execution or implicit model selection.
 
 ## Default backend and future work
 
-The package root now selects the TypeScript backend. This is a breaking backend
+The package root now selects the math.gl projection engine. This is a breaking backend
 change for the next package release, recorded in the changelog. The `classic`
 subpath retains the former implementation; no release is published by this change
 and the installed proj4 dependency remains for classic users.

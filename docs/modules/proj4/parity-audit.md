@@ -1,4 +1,4 @@
-# Native proj4 parity audit — September 29, 2026
+# Projection parity audit — September 29, 2026
 
 **The native engine has broad algorithm coverage, but has not reached proj4js parity.**
 The performance PR does not qualify it as a replacement. The original audit found accepted structured CRS definitions returning incorrect
@@ -23,7 +23,7 @@ the old upstream forward coordinate by about two metres; its original fixture is
 retained and the native result is checked against PROJ. This is a deliberate accuracy
 correction, not an unclassified mismatch or a silently relaxed tolerance.
 
-The [TypeScript support contract](./typescript-support.md) documents the default TypeScript API,
+The [projection support contract](./typescript-support.md) documents the default projection API,
 retains engine aliases and the original wrapper at `classic`, and records the remaining
 out-of-profile operations. CI covers three browser engines and emits performance
 artifacts; see [benchmarks](./benchmarks.md). Earlier audit results below are historical.
@@ -108,7 +108,7 @@ round trips. At that stage the remaining exceptions comprised **five axis-orient
 gaps** and **nine deliberate strict-input differences**; the axis follow-up above closes the five gaps. Grid-edge policy, regional
 validity limits and independent native PROJ accuracy qualification remain open.
 
-See the [TypeScript engine guide](./typescript-engine.md) for registration, dynamic
+See the [projection engine guide](./typescript-engine.md) for registration, dynamic
 loading, optional readers and measured bundle costs.
 
 ## Correctness follow-up (PR #149)
@@ -163,7 +163,7 @@ coordinates and the tolerances calculated by
 The reference passes all 242. All native plugins, optional WKT/PROJJSON readers,
 and the upstream suite's registered aliases were supplied.
 
-| Input | Fixtures | Native passes both directions | Rejected | Returns out-of-tolerance coordinates |
+| Input | Fixtures | math.gl passes both directions | Rejected | Returns out-of-tolerance coordinates |
 | --- | ---: | ---: | ---: | ---: |
 | PROJ strings | 116 | 106 | 10 | 0 |
 | WKT | 112 | 67 | 37 | 8 |
@@ -242,7 +242,7 @@ The audit additionally downloaded upstream's BETA2007 NTv2, downsampled Canadian
 (with and without accuracy columns), and `ca_nrc_NA83SCRS.tif`. Files were kept external
 to the repository, and their hashes are recorded. GeoTIFF was decoded with version 3.0.5.
 
-| Grid cases | Upstream passes | Native passes |
+| Grid cases | Upstream passes | math.gl passes |
 | --- | ---: | ---: |
 | BETA2007, three CRS targets, both directions | 6/6 | 6/6 |
 | Canadian NTv2, two record layouts | 14/14 | 14/14 |
@@ -250,7 +250,7 @@ to the repository, and their hashes are recorded. GeoTIFF was decoded with versi
 
 Both GeoTIFF failures concern the western-edge point `[-80, 44.92]`. Upstream's
 projected result corresponds to an underlying source-grid longitude of approximately
-`-80.0000002894`, just outside the source extent. Native strict coverage rejects it.
+`-80.0000002894`, just outside the source extent. math.gl strict coverage rejects it.
 This aligns with the documented decision to reject approximate/extrapolated edge
 solutions, but fails an actual upstream fixture and needs an explicit policy review.
 Interior and overlapping-subgrid cases pass. These few real fixtures do not establish

@@ -1,12 +1,14 @@
-# TypeScriptProjection
+# ProjectionEngine
 
-The configurable TypeScript engine underlying the default `Projection`; see the [support and migration contract](../typescript-support.md).
-Import it from `@math.gl/proj4` or the isolated `@math.gl/proj4/core` entry point. The original wrapper is available from `@math.gl/proj4/classic`.
+The configurable math.gl projection engine underlying the default `Projection`; see the [support and migration contract](../typescript-support.md).
+Import it from `@math.gl/proj4` or the isolated `@math.gl/proj4/core` entry point.
+`TypeScriptProjection` is a deprecated alias of this constructor. The original
+proj4js wrapper is available from `@math.gl/proj4/classic`.
 
 ```typescript
-import {TypeScriptProjection, mercator} from '@math.gl/proj4';
+import {ProjectionEngine, mercator} from '@math.gl/proj4';
 
-const projection = new TypeScriptProjection({
+const projection = new ProjectionEngine({
   from: 'EPSG:4326',
   to: 'EPSG:3857',
   projections: [mercator]
@@ -16,7 +18,7 @@ projection.project([-74, 40.7]);
 projection.unproject([-8237642.318702244, 4968191.930188206]);
 ```
 
-The TypeScript entry point has no runtime dependency on proj4js. Projection plugins
+The math.gl entry point has no runtime dependency on proj4js. Projection plugins
 are explicitly supplied per instance, with no global registration or automatically
 included projected coordinate systems. ESM bundlers can remove unused plugins.
 See the support contract for compatibility guarantees and numerical limits.
@@ -40,7 +42,7 @@ See the [lazy-loading guide](../typescript-engine.md#load-less-used-projections-
 
 ## Constructor
 
-`new TypeScriptProjection({from, to, projections, aliases, parsers, datumGrids, verticalGrids, enforceAxis, mode})`
+`new ProjectionEngine({from, to, projections, aliases, parsers, datumGrids, verticalGrids, enforceAxis, mode})`
 
 All options are optional. Omitted `from` and `to` default to WGS84.
 Both accept `ReadonlyCRSDefinition`, `CRSReference`, or `SpatialReference` from
@@ -73,7 +75,7 @@ datums, coordinate epochs, and vertical grid transformations are rejected.
 ## Integration with @math.gl/crs
 
 Syntax parsing, lossless AST encoding, readonly CRS definitions, and source metadata
-belong to `@math.gl/crs`. The TypeScript backend interprets those definitions into
+belong to `@math.gl/crs`. The math.gl projection engine interprets those definitions into
 execution parameters without adding projection dependencies to the CRS module.
 
 `SpatialReference.crs` must be explicit or default; absent/unknown states are errors,
@@ -83,7 +85,7 @@ coordinate frame must agree with the executable definition. Inputs are not mutat
 
 ```typescript
 import {createSpatialReference} from '@math.gl/crs';
-import {TypeScriptProjection, mercator} from '@math.gl/proj4';
+import {ProjectionEngine, mercator} from '@math.gl/proj4';
 
 const source = createSpatialReference({
   crs: {
@@ -94,7 +96,7 @@ const source = createSpatialReference({
   coordinateOrder: ['latitude', 'longitude', 'height'],
   units: ['degree', 'degree', 'metre']
 });
-const projection = new TypeScriptProjection({
+const projection = new ProjectionEngine({
   from: source, to: 'EPSG:3857', projections: [mercator]
 });
 projection.project([40.7, -74, 100]);
@@ -115,7 +117,7 @@ outside this subset. PROJ axis permutations support vertical-first ordering.
 `normalizeCRS(input, options)` produces an immutable execution model with distinct
 projection and datum ellipsoids, units, prime meridian, axes, and datum parameters.
 Normalization alone does not verify a projection plugin's parameter support.
-`checkTypeScriptCRSCompatibility(input, options)` checks construction with the selected
+`checkProjectionCompatibility(input, options)` checks construction with the selected
 readers/plugins and reports `supported`, `unsupported`, or `unknown`, with reasons
 `unknown-syntax`, `missing-parser`, `missing-plugin`, `missing-transform-stage`, or
 `invalid-definition`. It does not assess accuracy or a particular coordinate's domain.
@@ -210,9 +212,9 @@ use `stere` for polar projections. UTM requires an integer `zone` from 1 through
 offsets according to its zone/hemisphere. Use `tmerc` for custom TM parameters.
 
 ```typescript
-import {TypeScriptProjection, universalTransverseMercator} from '@math.gl/proj4';
+import {ProjectionEngine, universalTransverseMercator} from '@math.gl/proj4';
 
-const utm = new TypeScriptProjection({
+const utm = new ProjectionEngine({
   to: 'EPSG:32756',
   projections: [universalTransverseMercator]
 });
@@ -290,9 +292,9 @@ instead of being silently ignored by the fixed kernel.
 `obliqueTransformation` is a factory with an explicit dependency:
 
 ```typescript
-import {TypeScriptProjection, obliqueTransformation, mollweide} from '@math.gl/proj4';
+import {ProjectionEngine, obliqueTransformation, mollweide} from '@math.gl/proj4';
 
-const rotated = new TypeScriptProjection({
+const rotated = new ProjectionEngine({
   to: '+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=-90',
   projections: [obliqueTransformation(mollweide)]
 });
@@ -314,15 +316,15 @@ coverage remain tracked gaps; see the parity inventory.
 ## Horizontal datum grids
 
 Grid decoding/loading is separate from synchronous coordinate transformation.
-Register prepared grids per instance through `datumGrids`; the TypeScript engine has no
+Register prepared grids per instance through `datumGrids`; the math.gl projection engine has no
 global registry. This replaces the global registration pattern of the existing
 `Projection.registerDatumGrid` wrapper.
 
 ```typescript
-import {TypeScriptProjection, parseNTv2Grid} from '@math.gl/proj4';
+import {ProjectionEngine, parseNTv2Grid} from '@math.gl/proj4';
 
 const grid = parseNTv2Grid(ntv2ArrayBuffer);
-const projection = new TypeScriptProjection({
+const projection = new ProjectionEngine({
   from: '+proj=longlat +ellps=clrk66 +nadgrids=local.gsb',
   to: 'EPSG:4326',
   datumGrids: {'local.gsb': grid}
@@ -340,10 +342,10 @@ object. Callers load the file or URL with their chosen GeoTIFF library and await
 result before construction:
 
 ```typescript
-import {loadGeoTIFFGrid, TypeScriptProjection} from '@math.gl/proj4';
+import {loadGeoTIFFGrid, ProjectionEngine} from '@math.gl/proj4';
 
 const grid = await loadGeoTIFFGrid(decodedTIFF);
-const projection = new TypeScriptProjection({
+const projection = new ProjectionEngine({
   from: '+proj=longlat +ellps=GRS80 +nadgrids=local.tif',
   datumGrids: {'local.tif': grid}
 });
@@ -424,6 +426,23 @@ Custom prepared grids can similarly provide `shiftInPlace(point, inverse): boole
 Return true for a successful horizontal shift. On false, leave x/y unchanged so
 later grids can be tried; always preserve height. Built-in grid readers provide this hook.
 
+### Whole-buffer plugin hooks
+
+Advanced plugins can implement optional `createForwardFlat(context)` and
+`createInverseFlat(context)` methods on `ProjectionImplementation`. They receive a frozen
+`ProjectionFlatContext` with `inputScale` and `outputScale`, and return a synchronous
+`ProjectionFlatOperation` or `undefined` to decline specialization. These types are
+exported from `@math.gl/proj4/core`. Factories run once per direction at construction;
+operations receive the entire view and stride, after the engine validates both.
+
+A custom operation must multiply input XY by `inputScale`, apply the forward/inverse
+equations, then divide XY by `outputScale`. It must enforce the geographic domain and
+finite XYZ contract, preserve Z/trailing ordinates, check Float32 representability before
+writing, and leave the failing and subsequent records untouched. Scratch belongs to each
+call; retaining it or the buffer breaks reentrancy. Use the ordinary mutable hooks unless
+you need and can uphold this whole-buffer contract. Built-in factories decline when a
+decorator replaces their corresponding mutable hook, preserving custom behavior.
+
 ## Projection descriptors and synchronous variants
 
 The `projections` option also accepts `ProjectionDescriptor` descriptors. With any
@@ -464,11 +483,11 @@ Import `LazyProjection` and `LazyProjectionOptions` from
 Readers, aliases and grids remain explicit options. Coordinate methods return
 promises; `preload()` and the sync variants follow the descriptor contract above.
 `LazyProjection.create(options)` optionally resolves the catalogue into a prepared
-synchronous `TypeScriptProjection` instance. See the [loading guide](../typescript-engine.md#load-less-used-projections-on-demand).
+synchronous `ProjectionEngine` instance. See the [loading guide](../typescript-engine.md#load-less-used-projections-on-demand).
 
 ## Vertical height grids
 
-All TypeScript engine variants accept `verticalGrids?: VerticalGridCollection`.
+All math.gl projection engine variants accept `verticalGrids?: VerticalGridCollection`.
 A `VerticalGrid` implements `getOffset(longitudeRadians, latitudeRadians): number | undefined`:
 return geoid undulation in metres, or `undefined` outside coverage. Longitudes are Greenwich
 referenced in the associated CRS's horizontal datum. Register implementations per instance
@@ -493,5 +512,5 @@ entry points also export it. Metadata may be synchronous (geotiff.js v2) or asyn
 
 The accepted metadata, geometry, nesting, coverage and units are specified in the
 [vertical GeoTIFF guide](../typescript-engine.md#vertical-geotiff-geoid-models). The
-result plugs into `verticalGrids` on all TypeScript engine variants. This function
+result plugs into `verticalGrids` on all math.gl projection engine variants. This function
 neither loads files nor selects a vertical datum operation automatically.
