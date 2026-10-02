@@ -141,7 +141,8 @@ for (const reader of [
   'loadGeoTIFFGrid',
   'parseGTXGrid',
   'createVerticalGrid',
-  'createGeoidGrid'
+  'createGeoidGrid',
+  'loadVerticalGeoTIFFGrid'
 ]) {
   const contents = reader
     ? 'export {' + reader + "} from '@math.gl/proj4';"
@@ -179,7 +180,13 @@ for (const reader of [
   );
   assert.equal(
     emitted.some(path => path.endsWith('/grids/vertical.js')),
-    ['parseGTXGrid', 'createVerticalGrid', 'createGeoidGrid'].includes(reader)
+    ['parseGTXGrid', 'createVerticalGrid', 'createGeoidGrid', 'loadVerticalGeoTIFFGrid'].includes(
+      reader
+    )
+  );
+  assert.equal(
+    emitted.some(path => path.endsWith('/grids/vertical-geotiff.js')),
+    reader === 'loadVerticalGeoTIFFGrid'
   );
   assert(!emitted.some(path => /node_modules\/(proj4|geotiff)\//.test(path)));
   assert(!emitted.some(path => path.includes('/geoid/')));

@@ -86,6 +86,23 @@ const accuracy = await build({
   write: false
 });
 assets.set('/accuracy.js', accuracy.outputFiles[0].contents);
+const verticalGeoTIFF = await build({
+  entryPoints: [fileURLToPath(new URL('./qualify-vertical-geotiff.mjs', import.meta.url))],
+  bundle: true,
+  format: 'esm',
+  platform: 'browser',
+  write: false,
+  tsconfigRaw: {}
+});
+assets.set('/vertical-geotiff.js', verticalGeoTIFF.outputFiles[0].contents);
+const verticalGeoTIFFReference = JSON.parse(
+  readFileSync(new URL('../test/fixtures/vertical-geotiff-reference.json', import.meta.url))
+);
+for (const fixture of verticalGeoTIFFReference.cases)
+  assets.set(
+    '/' + fixture.file,
+    readFileSync(new URL('../test/fixtures/' + fixture.file, import.meta.url))
+  );
 for (const name of ['native-proj-cases', 'native-proj-reference'])
   assets.set(
     '/' + name + '.json',
@@ -166,12 +183,14 @@ try {
       );
       const independent = await page.evaluate(async () => {
         const {qualify, qualifyAccuracy, qualifyVertical} = await import('/accuracy.js');
+        const {qualifyVerticalGeoTIFF} = await import('/vertical-geotiff.js');
         const inputs = await (await fetch('/native-proj-cases.json')).json();
         const reference = await (await fetch('/native-proj-reference.json')).json();
         return {
           ...qualify(inputs, reference),
           accuracy: qualifyAccuracy(),
-          vertical: qualifyVertical()
+          vertical: qualifyVertical(),
+          verticalGeoTIFF: await qualifyVerticalGeoTIFF()
         };
       });
       results.push({browser: name, version: browser.version(), cold, independent, ...warm});

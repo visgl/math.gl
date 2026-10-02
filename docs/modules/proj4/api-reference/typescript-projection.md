@@ -33,7 +33,7 @@ using its canonical PROJ name, for example `merc`, `utm`, `etmerc`, `geocent` or
 need no plugin or `longlat` subpath; the internal `gauss` helper is not public.
 
 Readers are available from `parsers/wkt`, `parsers/projjson`,
-`grids/ntv2`, `grids/geotiff`, `grids/gtx` and `grids/vertical`, with the package name prefix.
+`grids/ntv2`, `grids/geotiff`, `grids/gtx`, `grids/vertical` and `grids/vertical-geotiff`, with the package name prefix.
 All subpaths support ESM, CommonJS and TypeScript. ESM code splitting is required for
 browser lazy downloads; CommonJS subpaths select APIs but do not promise shared bundles.
 See the [lazy-loading guide](../typescript-engine.md#load-less-used-projections-on-demand).
@@ -480,3 +480,18 @@ and reference their names with `+geoidgrids`; scalar and flat transforms then re
 entry points also export these helpers; `/core` exports only the contract and engine.
 See [height conversion](../typescript-engine.md#convert-geoid-heights) for loading,
 units, axes, fallback, coverage, datum ordering and the limits of this explicit subset.
+
+
+### loadVerticalGeoTIFFGrid
+
+`loadVerticalGeoTIFFGrid(tiff: VerticalGridGeoTIFF): Promise<VerticalGrid>` prepares an
+owned geoid snapshot from a caller-decoded TIFF. Import it and its structural types
+`VerticalGridGeoTIFF` / `VerticalGridGeoTIFFImage` from
+`@math.gl/proj4/grids/vertical-geotiff`. The root and experimental/native compatibility
+entry points also export it. Metadata may be synchronous (geotiff.js v2) or asynchronous
+(v3); numeric sample arrays must be raw, without decoder-applied scale/offset.
+
+The accepted metadata, geometry, nesting, coverage and units are specified in the
+[vertical GeoTIFF guide](../typescript-engine.md#vertical-geotiff-geoid-models). The
+result plugs into `verticalGrids` on all TypeScript engine variants. This function
+neither loads files nor selects a vertical datum operation automatically.

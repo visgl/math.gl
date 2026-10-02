@@ -99,7 +99,7 @@ and shared ellipsoid and datum tables. Selecting one projection does not remove
 those tables. Adding WKT pulls in syntax parsing and structured-CRS interpretation;
 PROJJSON objects already provide structured input and need less reader code.
 
-Measured September 30, 2026 including tranche 12A vertical-height stages, with Node 24.14.0, esbuild,
+Measured September 30, 2026 including tranche 12B1 vertical GeoTIFF support, with Node 24.14.0, esbuild,
 browser ESM, ES2020, minification, and gzip level 9. Each row is a separate retained
 bundle, not an increment or an application-wide download estimate. **KiB = 1,024 bytes.**
 
@@ -113,15 +113,17 @@ bundle, not an increment or an application-wide download estimate. **KiB = 1,024
 | Engine + Mercator + NTv2 decoder | 51.0 | 18.7 |
 | Engine + Mercator + GeoTIFF grid adapter | 51.0 | 18.6 |
 | Engine + Mercator + GTX decoder | 49.4 | 18.1 |
+| Engine + Mercator + vertical GeoTIFF adapter | 52.8 | 19.3 |
 | Default TypeScript wrapper (all plugins and readers) | 143.9 | 49.3 |
-| Every root export, including wrapper, readers and grid adapters | 148.5 | 51.0 |
+| Every root export, including wrapper, readers and grid adapters | 152.4 | 52.3 |
 | Classic proj4js-backed wrapper | 128.8 | 42.8 |
 
 Tranche 12A adds about 1.1 KiB minified / 0.3 KiB gzip to the core stage machinery.
-The GTX reader and bilinear interpolation remain optional and are included only in
-the GTX and all-exports rows.
+The grid readers and bilinear interpolation remain optional, retained only in the
+corresponding reader rows and all-exports row. The vertical GeoTIFF adapter adds no
+bytes to the core or ordinary projection bundles.
 
-The GeoTIFF row excludes an external TIFF decoder, workers, and grid files. No row
+Both GeoTIFF rows exclude an external TIFF decoder, workers, and grid files. No row
 includes downloaded datum-grid data. Different bundlers, targets, compression,
 shared dependencies, and import patterns change these totals. The full TypeScript wrapper and root export set cost more than the classic wrapper; the size benefit comes from selecting a subset.
 Avoid a runtime lookup such as `projectionExports[name]` over the entire module namespace
@@ -443,9 +445,70 @@ the metre-based height stage. A failing flat record is left unchanged along with
 later records; earlier records may have completed. A vertical grid cannot be attached
 to a geocentric or identity CRS or combined with lossy horizontal extraction.
 
-This is the explicit vertical-grid subset (tranche 12A). Vertical GeoTIFF decoding,
-compound/vertical WKT or PROJJSON execution, arbitrary operation pipelines, epochs,
+This is the explicit vertical-grid subset (tranches 12A/12B1).
+Compound/vertical WKT or PROJJSON execution, arbitrary operation pipelines, epochs,
 dynamic datums and automatic operation selection remain future work.
+
+### Vertical GeoTIFF geoid models
+
+`loadVerticalGeoTIFFGrid` prepares the geoid subset of
+[PROJ Geodetic TIFF Grids](https://proj.org/en/stable/specifications/geodetictiffgrids.html).
+Use it for modern GeoTIFF geoid models; `loadGeoTIFFGrid` remains the separate adapter
+for horizontal latitude/longitude shifts. Both receive a decoded TIFF object and import
+no TIFF decoder. Fetching, compression and worker choices belong to the application.
+
+The reader also accepts a plain `VerticalGridGeoTIFFData` dataset, structurally
+compatible with loaders.gl's `GeoTIFFRasterLoader` output. Pass the decoded dataset
+directly to `loadVerticalGeoTIFFGrid(dataset)`. It preserves original band indices,
+so band zero must be included. Image order, unscaled samples, per-image/per-band
+GDAL metadata, GeoKeys, nodata and geometry tags have the same validation as the
+geotiff.js input. No runtime dependency on loaders.gl is added.
+
+```typescript
+import {TypeScriptProjection} from '@math.gl/proj4/core';
+import {loadVerticalGeoTIFFGrid} from '@math.gl/proj4/grids/vertical-geotiff';
+import {fromArrayBuffer} from 'geotiff'; // separately installed, application-owned decoder
+
+const response = await fetch('/grids/local-geoid.tif');
+if (!response.ok) throw new Error('Could not load geoid grid');
+const geoid = await loadVerticalGeoTIFFGrid(
+  await fromArrayBuffer(await response.arrayBuffer())
+);
+const projection = new TypeScriptProjection({
+  from: '+proj=longlat +datum=WGS84 +geoidgrids=geoid',
+  to: 'EPSG:4979',
+  verticalGrids: {geoid}
+});
+projection.project([12, 41, 100]); // synchronous after grid preparation
+```
+
+The adapter requires geographic degree coordinates, explicit PixelIsPoint or PixelIsArea,
+positive north-up pixel spacing, and one tiepoint. PixelIsArea is shifted to cell centres;
+nonzero tiepoint pixel indices are honored. Explicit non-Greenwich prime meridians,
+rotated/projected rasters, overviews and masks are rejected. It does not transform or
+resolve the interpolation CRS: the application must verify the file's geographic datum
+and longitude reference match the CRS supplied to the projection.
+
+Dataset metadata must declare `TYPE=VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL`, and band
+zero must declare `DESCRIPTION=geoid_undulation`. Its unit must be `metre` (also the
+default if absent). Raw nodata is compared in the decoded band precision (including float32 rounding)
+before `raw * SCALE + OFFSET`; absent scale
+and offset default to 1 and 0. Only band zero is decoded, so optional uncertainty bands
+are excluded. Horizontal, velocity, ellipsoidal-height-offset and vertical-to-vertical
+grids are rejected, as are requested non-bilinear interpolation and non-metre bands.
+
+Prepared offsets are copied. TIFF objects and decoded arrays can be released after
+loading. Multiple images must be ordered parent before nested child, or have disjoint
+interiors; later images take precedence, including on a shared edge. A child's uncovered
+or nodata sample falls back to an earlier covering image. This is an explicit fallback
+policy, not a promise of matching every PROJ subgrid-selection edge case. Bounded
+antimeridian grids use equivalent longitudes; no missing seam cells are synthesized.
+
+Independent tests decode seven small authored files using `geotiff` and compare with
+PROJ 9.5.1: point/area registration, Deflate, big-endian scaled int16, nonzero tiepoints,
+nested grids, nodata and antimeridian sampling. See [validation](./independent-validation.md#vertical-geotiff-format-qualification)
+for scope. The adapter and decoder can both be dynamically imported; normal core and
+projection bundles do not retain this reader.
 
 ## Transform flat buffers in place
 

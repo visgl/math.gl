@@ -63,3 +63,10 @@ PROJ/GDAL documentation. No proj4js or PROJ implementation was copied into these
 Independent expectations use PROJ 9.5.1; the tiny GTX model is authored MIT test data.
 The structural geoid adapter does not copy or import GeographicLib or `@math.gl/geoid`
 code. Applications providing a geoid model retain that model's own license and data terms.
+
+
+`src/experimental/grids/vertical-geotiff.ts` is original math.gl adapter code written
+against the PROJ Geodetic TIFF Grid format, not a direct proj4js or PROJ fork. It does
+not copy or import a TIFF decoder. The optional decoding library is chosen by the
+application. Authored synthetic TIFF fixtures and their standard-library encoder are
+MIT math.gl test data/code; PROJ 9.5.1 supplies independent numeric expectations.

@@ -163,3 +163,16 @@ shift, vertical feet, projection, axis order and Greenwich sampling. Scalar forw
 and Float64 results are checked independently at 1e-5 (metres for projected/height
 ordinates, degrees for geographic ordinates); Float32 tests additionally allow rounding.
 These small synthetic models validate pipeline behavior, not real-world geoid accuracy.
+
+
+## Vertical GeoTIFF references
+
+`vertical-geotiff-cases.json` and `vertical-geotiff/*.tif` are authored math.gl MIT test
+data, not redistributed geoid models. The TIFF encoder in
+`generate-vertical-geotiff-reference.py` uses only Python's standard library; numeric
+references use pyproj 3.7.2 / PROJ 9.5.1 with networking disabled. File, input and generator
+hashes are checked by `check-vertical-geotiff-reference.mjs`. Seven files / 30 XYZM
+points exercise point/area registration, Deflate, big-endian scaled int16, nonzero
+tiepoints, nested subgrids, nodata and antimeridian sampling. Test TIFFs are excluded
+from the published package. The numerical tolerance is 1e-5; application geoid accuracy
+and arbitrary operation/grid support are not implied.

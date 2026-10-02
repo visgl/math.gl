@@ -107,6 +107,16 @@ try {
     data.setInt32(32, 2); data.setInt32(36, 2);
     for (let i = 0; i < 4; i++) data.setFloat32(40 + i * 4, 25);
     assert.equal(parseGTXGrid(gtx).getOffset(0, 0), 25);
+    const {loadVerticalGeoTIFFGrid} = await load('@math.gl/proj4/grids/vertical-geotiff');
+    const tiffGrid = await loadVerticalGeoTIFFGrid({getImageCount: async () => 1, getImage: async () => ({
+      getWidth: () => 2, getHeight: () => 2,
+      getGeoKeys: () => ({GTModelTypeGeoKey: 2, GTRasterTypeGeoKey: 2}),
+      getGDALMetadata: sample => sample === 0 ? {DESCRIPTION: 'geoid_undulation'} : {TYPE: 'VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL'},
+      fileDirectory: {ModelPixelScale: [1, 1, 0], ModelTiepoint: [0, 0, 0, 0, 1, 0]},
+      readRasters: async () => [new Float32Array(4).fill(15)]
+    })});
+    assert.equal(tiffGrid.getOffset(0, 0), 15);
+    assert.deepEqual(new core.TypeScriptProjection({from: '+proj=longlat +geoidgrids=tiff', verticalGrids: {tiff: tiffGrid}}).project([0, 0, 100, 7]), [0, 0, 115, 7]);
     const descriptors = await load('@math.gl/proj4/projections/lazy/utm');
     const lazy = new core.TypeScriptProjection({to: 'EPSG:32631', projections: [descriptors.lazyUniversalTransverseMercator]});
     await descriptors.lazyUniversalTransverseMercator.preload();
@@ -186,6 +196,16 @@ try {
     import {Projection, Proj4Projection, type ProjectionOptions, type DatumGridOptions, type Proj4ProjectionOptions, type Proj4DatumGridOptions} from '@math.gl/proj4';
     import {Proj4Projection as Classic, type Proj4ProjectionOptions as ClassicOptions, type Proj4DatumGridOptions as ClassicGridOptions} from '@math.gl/proj4/classic';
     import {parseGTXGrid} from '@math.gl/proj4/grids/gtx';
+    import {loadVerticalGeoTIFFGrid, type VerticalGridGeoTIFF, type VerticalGridGeoTIFFImage} from '@math.gl/proj4/grids/vertical-geotiff';
+    const geoTIFFImage: VerticalGridGeoTIFFImage = {
+      getWidth: () => 2, getHeight: () => 2,
+      getGeoKeys: () => ({GTModelTypeGeoKey: 2, GTRasterTypeGeoKey: 2}),
+      getGDALMetadata: async sample => sample === 0 ? {DESCRIPTION: 'geoid_undulation'} : {TYPE: 'VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL'},
+      fileDirectory: {getValue: name => name === 'ModelPixelScale' ? [1, 1, 0] : undefined},
+      readRasters: async options => [new Float32Array(4)]
+    };
+    const geoTIFF: VerticalGridGeoTIFF = {getImageCount: async () => 1, getImage: async () => geoTIFFImage};
+    const loadedGeoTIFF: Promise<import('@math.gl/proj4/core').VerticalGrid> = loadVerticalGeoTIFFGrid(geoTIFF);
     import {createGeoidGrid, createVerticalGrid, type VerticalGridOptions} from '@math.gl/proj4/grids/vertical';
     import type {VerticalGridCollection} from '@math.gl/proj4/core';
     const verticalOptions: VerticalGridOptions = {origin: [0, 0], step: [1, 1], size: [2, 2], offsets: [1, 2, 3, 4]};
