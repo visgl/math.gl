@@ -80,6 +80,7 @@ jobs:
           node modules/proj4/scripts/check-native-reference.mjs
           node modules/proj4/scripts/check-vertical-reference.mjs
           node modules/proj4/scripts/check-vertical-geotiff-reference.mjs
+          node modules/proj4/scripts/check-pipeline-reference.mjs
           node modules/proj4/scripts/measure-accuracy.mjs --output /tmp/proj4-accuracy.json
           node modules/proj4/scripts/check-experimental-package.mjs
           node modules/proj4/scripts/check-packed-package.mjs

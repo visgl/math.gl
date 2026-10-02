@@ -94,6 +94,16 @@ try {
     assert(Math.abs((await automatic.project([3, 0]))[0] - 500000) < 1e-7);
     assert(Math.abs(automatic.projectSync([3, 0])[0] - 500000) < 1e-7);
     const core = await load('@math.gl/proj4/core');
+    const {ProjectionPipeline} = await load('@math.gl/proj4/pipeline');
+    const pipeline = new ProjectionPipeline({input: {space: 'geographic', units: ['deg', 'deg', 'm']}, steps: [
+      {type: 'unitconvert', xy: {from: 'deg', to: 'rad'}}, {type: 'projection', name: 'merc', parameters: {a: '6378137', b: '6378137'}}
+    ], projections: [api.mercator]});
+    const pipelinePoint = [11, 41, 123, 8];
+    const pipelineBuffer = new Float64Array(pipelinePoint);
+    assert.equal(pipeline.projectFlat(pipelineBuffer, 4), pipelineBuffer);
+    assert.deepEqual(Array.from(pipelineBuffer), pipeline.project(pipelinePoint));
+    assert(Math.abs(pipeline.unproject(pipeline.project(pipelinePoint))[0] - 11) < 1e-10);
+
     const {parseGTXGrid} = await load('@math.gl/proj4/grids/gtx');
     const {createVerticalGrid} = await load('@math.gl/proj4/grids/vertical');
     const local = createVerticalGrid({origin: [0, 0], step: [1, 1], size: [2, 2], offsets: [10, 20, 30, 40]});
@@ -233,6 +243,23 @@ try {
     const asyncBuffer: Promise<Float64Array> = lazy.projectFlat(new Float64Array([3, 0]));
     const mixed = new TypeScriptProjection({to: 'EPSG:32631', projections: [mercator, lazyUniversalTransverseMercator]});
     const mixedResult: Promise<number[]> = mixed.project([3, 0]);
+    import {ProjectionPipeline, type PipelineStep, type ProjectionPipelineOptions} from '@math.gl/proj4/pipeline';
+    const pipelineOptions: ProjectionPipelineOptions = {input: {space: 'geographic', units: ['deg', 'deg', 'm']}, steps: [{type: 'unitconvert', xy: {from: 'deg', to: 'rad'}}]};
+    const pipeline = new ProjectionPipeline(pipelineOptions);
+    const pipelineScalar: number[] = pipeline.project([0, 0]);
+    const pipelineFlat: Float32Array = pipeline.projectFlat(new Float32Array([0, 0]));
+    const deferredPipeline = new ProjectionPipeline({...pipelineOptions, projections: [lazyUniversalTransverseMercator]});
+    const deferredScalar: Promise<number[]> = deferredPipeline.project([0, 0]);
+    const deferredFlat: Promise<Float64Array> = deferredPipeline.projectFlat(new Float64Array([0, 0]));
+    const explicitSync: number[] = deferredPipeline.projectSync([0, 0]);
+    // @ts-expect-error Integer buffers are not supported.
+    pipeline.projectFlat(new Int32Array([0, 0]));
+    // @ts-expect-error Unknown operations are not supported.
+    const unknownStep: PipelineStep = {type: 'push'};
+    // @ts-expect-error Unknown unit names are not supported.
+    const unknownUnits: PipelineStep = {type: 'unitconvert', xy: {from: 'degree', to: 'rad'}};
+    // @ts-expect-error Time-dependent parameters are not supported.
+    const dynamicStep: PipelineStep = {type: 'helmert', translation: [0, 0, 0], epoch: 2020};
     import {mercator} from '@math.gl/proj4/projections/merc';
     import {parseWKTCRS} from '@math.gl/crs/wkt';
     import {parsePROJString} from '@math.gl/crs/proj-string';

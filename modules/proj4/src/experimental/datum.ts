@@ -70,7 +70,7 @@ export function geocentricToGeodeticInPlace(point: ProjectionPoint, ellipsoid: E
 }
 
 /** Convert rotation units and scale once for the lifetime of a compiled datum stage. */
-function createHelmert(values: readonly number[], inverse: boolean): DatumOperation {
+export function createHelmert(values: readonly number[], inverse: boolean): DatumOperation {
   const dx = values[0],
     dy = values[1],
     dz = values[2];
@@ -165,7 +165,7 @@ function convertDatum(from: Datum, to: Datum): DatumOperation | undefined {
   };
 }
 /** Original per-instance dispatch informed by proj4js grid list semantics. */
-function applyDatumGrids(point: ProjectionPoint, datum: Datum, inverse: boolean): void {
+export function applyDatumGrids(point: ProjectionPoint, datum: Datum, inverse: boolean): void {
   for (const reference of datum.grids) {
     if (reference.name === 'null') return;
     if (!reference.grid) {

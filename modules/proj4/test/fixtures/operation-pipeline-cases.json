@@ -1,0 +1,1094 @@
+{
+  "cases": [
+    {
+      "id": "mercator",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "projection",
+          "name": "merc",
+          "parameters": {
+            "a": "6378137",
+            "b": "6378137"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=merc +a=6378137 +b=6378137",
+      "points": [
+        [
+          11,
+          41,
+          123,
+          8
+        ],
+        [
+          12.25,
+          42.5,
+          -25,
+          19
+        ],
+        [
+          10.25,
+          40.25,
+          0,
+          -3
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "utm-height-us-feet",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "us-ft"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          },
+          "z": {
+            "from": "us-ft",
+            "to": "m"
+          }
+        },
+        {
+          "type": "projection",
+          "name": "utm",
+          "parameters": {
+            "zone": "31"
+          }
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "m",
+            "to": "ft"
+          },
+          "z": {
+            "from": "m",
+            "to": "ft"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +z_in=us-ft +z_out=m +step +proj=utm +zone=31 +ellps=WGS84 +step +proj=unitconvert +xy_in=m +xy_out=ft +z_in=m +z_out=ft",
+      "points": [
+        [
+          3,
+          0,
+          123,
+          8
+        ],
+        [
+          6,
+          52,
+          -20,
+          9
+        ],
+        [
+          1.5,
+          43,
+          0,
+          10
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "signed-geographic-axis",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "axisswap",
+          "order": [
+            -2,
+            1
+          ]
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "projection",
+          "name": "merc",
+          "parameters": {
+            "a": "6378137",
+            "b": "6378137"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=axisswap +order=-2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=merc +a=6378137 +b=6378137",
+      "points": [
+        [
+          41,
+          -11,
+          123,
+          8
+        ],
+        [
+          42.5,
+          -12.25,
+          25,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "xyz-axis-cycle",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "axisswap",
+          "order": [
+            3,
+            -1,
+            2
+          ]
+        }
+      ],
+      "pipeline": "+step +proj=axisswap +order=3,-1,2",
+      "points": [
+        [
+          123,
+          456,
+          789,
+          8
+        ],
+        [
+          -200,
+          30,
+          90,
+          5
+        ]
+      ],
+      "forwardTolerance": 1e-10,
+      "inverseTolerance": 1e-10
+    },
+    {
+      "id": "inverse-axis-cycle",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "axisswap",
+          "order": [
+            3,
+            -1,
+            2
+          ],
+          "inverse": true
+        }
+      ],
+      "pipeline": "+step +inv +proj=axisswap +order=3,-1,2",
+      "points": [
+        [
+          123,
+          456,
+          789,
+          8
+        ],
+        [
+          -200,
+          30,
+          90,
+          5
+        ]
+      ],
+      "forwardTolerance": 1e-10,
+      "inverseTolerance": 1e-10
+    },
+    {
+      "id": "cart-wgs84",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "WGS84"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart +ellps=WGS84",
+      "points": [
+        [
+          11,
+          41,
+          123,
+          8
+        ],
+        [
+          12.25,
+          42.5,
+          -25,
+          19
+        ],
+        [
+          10.25,
+          40.25,
+          0,
+          -3
+        ],
+        [
+          0,
+          89.999,
+          12,
+          99
+        ],
+        [
+          180,
+          -89.9,
+          30,
+          55
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "cart-sphere",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "R": "6371000"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart +R=6371000",
+      "points": [
+        [
+          11,
+          41,
+          123,
+          8
+        ],
+        [
+          12.25,
+          42.5,
+          -25,
+          19
+        ],
+        [
+          10.25,
+          40.25,
+          0,
+          -3
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "helmert-translation",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            100,
+            -200,
+            30
+          ]
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=100 +y=-200 +z=30",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ]
+      ],
+      "forwardTolerance": 1e-09,
+      "inverseTolerance": 1e-09
+    },
+    {
+      "id": "helmert-position_vector",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            1.2,
+            -2.3,
+            3.4
+          ],
+          "rotation": [
+            0.12,
+            -0.25,
+            0.31
+          ],
+          "scalePPM": 1.7,
+          "convention": "position_vector"
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=1.2 +y=-2.3 +z=3.4 +rx=.12 +ry=-.25 +rz=.31 +s=1.7 +convention=position_vector",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "helmert-coordinate_frame",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            1.2,
+            -2.3,
+            3.4
+          ],
+          "rotation": [
+            0.12,
+            -0.25,
+            0.31
+          ],
+          "scalePPM": 1.7,
+          "convention": "coordinate_frame"
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=1.2 +y=-2.3 +z=3.4 +rx=.12 +ry=-.25 +rz=.31 +s=1.7 +convention=coordinate_frame",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "datum-to-projection",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "intl"
+          }
+        },
+        {
+          "type": "helmert",
+          "translation": [
+            1.2,
+            -2.3,
+            3.4
+          ],
+          "rotation": [
+            0.12,
+            -0.25,
+            0.31
+          ],
+          "scalePPM": 1.7,
+          "convention": "position_vector"
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "WGS84"
+          },
+          "inverse": true
+        },
+        {
+          "type": "projection",
+          "name": "merc",
+          "parameters": {
+            "a": "6378137",
+            "b": "6378137"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=cart +ellps=intl +step +proj=helmert +x=1.2 +y=-2.3 +z=3.4 +rx=.12 +ry=-.25 +rz=.31 +s=1.7 +convention=position_vector +step +inv +proj=cart +ellps=WGS84 +step +proj=merc +a=6378137 +b=6378137",
+      "points": [
+        [
+          11,
+          41,
+          123,
+          8
+        ],
+        [
+          12.25,
+          42.5,
+          -25,
+          19
+        ],
+        [
+          10.25,
+          40.25,
+          0,
+          -3
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "projection-inverse-step",
+      "input": {
+        "space": "projected",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "projection",
+          "name": "merc",
+          "parameters": {
+            "a": "6378137",
+            "b": "6378137"
+          },
+          "inverse": true
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "pipeline": "+step +inv +proj=merc +a=6378137 +b=6378137 +step +proj=unitconvert +xy_in=rad +xy_out=deg",
+      "points": [
+        [
+          1000000,
+          5000000,
+          20,
+          8
+        ],
+        [
+          0,
+          0,
+          -20,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "inverse-unit-step",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "rad",
+          "rad",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          },
+          "inverse": true
+        }
+      ],
+      "pipeline": "+step +inv +proj=unitconvert +xy_in=deg +xy_out=rad",
+      "points": [
+        [
+          0.2,
+          0.7,
+          123,
+          8
+        ],
+        [
+          -0.3,
+          -0.8,
+          0,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-10,
+      "inverseTolerance": 1e-10
+    },
+    {
+      "id": "vertical-default",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "vgridshift",
+          "grids": "local"
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids={vertical} +step +proj=unitconvert +xy_in=rad +xy_out=deg",
+      "points": [
+        [
+          11,
+          41,
+          123,
+          8
+        ],
+        [
+          12.25,
+          42.5,
+          -25,
+          19
+        ],
+        [
+          10.25,
+          40.25,
+          0,
+          -3
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "vertical-inverse-multiplier",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "vgridshift",
+          "grids": "@missing,local,null",
+          "multiplier": 2,
+          "inverse": true
+        },
+        {
+          "type": "projection",
+          "name": "merc",
+          "parameters": {
+            "a": "6378137",
+            "b": "6378137"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +inv +proj=vgridshift +grids=@missing,{vertical},null +multiplier=2 +step +proj=merc +a=6378137 +b=6378137",
+      "points": [
+        [
+          11,
+          41,
+          123,
+          8
+        ],
+        [
+          12.25,
+          42.5,
+          -25,
+          19
+        ],
+        [
+          10.25,
+          40.25,
+          0,
+          -3
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "vertical-around-helmert",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "vgridshift",
+          "grids": "local",
+          "multiplier": 1
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "WGS84"
+          }
+        },
+        {
+          "type": "helmert",
+          "translation": [
+            1.2,
+            -2.3,
+            3.4
+          ],
+          "rotation": [
+            0.12,
+            -0.25,
+            0.31
+          ],
+          "scalePPM": 1.7,
+          "convention": "position_vector"
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "WGS84"
+          },
+          "inverse": true
+        },
+        {
+          "type": "vgridshift",
+          "grids": "local"
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids={vertical} +multiplier=1 +step +proj=cart +ellps=WGS84 +step +proj=helmert +x=1.2 +y=-2.3 +z=3.4 +rx=.12 +ry=-.25 +rz=.31 +s=1.7 +convention=position_vector +step +inv +proj=cart +ellps=WGS84 +step +proj=vgridshift +grids={vertical} +step +proj=unitconvert +xy_in=rad +xy_out=deg",
+      "points": [
+        [
+          11,
+          41,
+          123,
+          8
+        ],
+        [
+          12.25,
+          42.5,
+          -25,
+          19
+        ],
+        [
+          10.25,
+          40.25,
+          0,
+          -3
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "horizontal-to-utm",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "hgridshift",
+          "grids": "@missing,horizontal,null"
+        },
+        {
+          "type": "projection",
+          "name": "utm",
+          "parameters": {
+            "zone": "32"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=hgridshift +grids=@missing,{horizontal},null +step +proj=utm +zone=32 +ellps=WGS84",
+      "points": [
+        [
+          10,
+          50,
+          123,
+          8
+        ],
+        [
+          12,
+          52,
+          -20,
+          9
+        ],
+        [
+          0,
+          0,
+          0,
+          10
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "horizontal-inverse",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "hgridshift",
+          "grids": "horizontal",
+          "inverse": true
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +inv +proj=hgridshift +grids={horizontal} +step +proj=unitconvert +xy_in=rad +xy_out=deg",
+      "points": [
+        [
+          10,
+          50,
+          123,
+          8
+        ],
+        [
+          12,
+          52,
+          -20,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "mercator-unwrapped",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "projection",
+          "name": "merc",
+          "parameters": {
+            "a": "6378137",
+            "b": "6378137",
+            "over": null
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=merc +a=6378137 +b=6378137 +over",
+      "points": [
+        [
+          210,
+          30,
+          123,
+          8
+        ],
+        [
+          -210,
+          -45,
+          -20,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "helmert-inverse-step",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            1.2,
+            -2.3,
+            3.4
+          ],
+          "rotation": [
+            0.12,
+            -0.25,
+            0.31
+          ],
+          "scalePPM": 1.7,
+          "convention": "position_vector",
+          "inverse": true
+        }
+      ],
+      "pipeline": "+step +inv +proj=helmert +x=1.2 +y=-2.3 +z=3.4 +rx=.12 +ry=-.25 +rz=.31 +s=1.7 +convention=position_vector",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "utm-south-flag",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "projection",
+          "name": "utm",
+          "parameters": {
+            "zone": "31",
+            "south": null
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=utm +zone=31 +south +ellps=WGS84",
+      "points": [
+        [
+          3,
+          -30,
+          123,
+          8
+        ],
+        [
+          6,
+          -52,
+          -20,
+          9
+        ],
+        [
+          1,
+          -43,
+          0,
+          10
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    }
+  ]
+}

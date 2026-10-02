@@ -162,6 +162,9 @@ GEOGCS["WGS 84",
     AUTHORITY["EPSG","4326"]]
 ```
 
+For explicit unit, axis, datum and grid ordering, use the optional
+[typed operation pipeline](./operation-pipelines.md).
+
 ## Attribution
 
 The TypeScript engine combines original math.gl code with numerical kernels ported
