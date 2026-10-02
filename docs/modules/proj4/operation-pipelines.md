@@ -286,7 +286,7 @@ not provide browser code splitting. See [bundle measurements](./typescript-engin
 ## Qualified profile and remaining work
 
 The source/generator/grid hashes and independent forward/inverse references are
-checked in CI. Thirty-seven authored pipelines / 102 XYZM points cover units, axes, Mercator,
+checked in CI. Thirty-nine authored pipelines / 108 XYZM points cover units, axes, Mercator,
 UTM, geocentric conversion, both static Helmert conventions, explicit inverse steps,
 horizontal/vertical grid placement, exact rotations, nested stacks, skipped directions
 and geographic/projected oblique output. Scalar and Float64 results are checked against

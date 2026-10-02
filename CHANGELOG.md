@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- perf(proj4): Reduce mixed-epoch Helmert allocation and prepare fixed unit/axis
+  constants; add paired pipeline timing/allocation reports and independent projected-to-projected references.
+
 - feat(proj4): Add explicit coordinate epochs and kinematic Helmert rates to pipelines,
   with constant-batch and separate per-record epoch inputs that preserve M.
 

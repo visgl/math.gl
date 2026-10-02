@@ -193,6 +193,8 @@ raw-radian endpoints at the Python API boundary; all equation results still come
 PROJ. Forward references and inverse references from PROJ's own forward outputs are
 independently compared in Node and three browser engines. Float32 checks compare
 final output rounding on rounded inputs; Float64 checks retain per-case oracle tolerances.
+The tranche 13A follow-up adds Mercator-to-UTM and a projected units/signed-axis
+chain: 39 configurations / 108 XYZM points total. All earlier results remain unchanged.
 These sampled configurations do not imply support for arbitrary PROJ pipelines.
 
 ```sh

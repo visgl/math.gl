@@ -316,3 +316,51 @@ The runner bounds each browser to 300 seconds. CI keeps downloadable measurement
 gates correctness. The Node startup runner also checks the first computed coordinate in
 every fresh process. Packed-consumer, tree-shaking and bundle-size checks exercise the
 canonical projection paths and retained compatibility aliases.
+
+### Compare operation pipeline performance
+
+```sh
+node modules/proj4/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --allocations --output /tmp/proj4-pipeline-comparison.json
+```
+
+This runner compares the historical and current `ProjectionPipeline` using the same
+source bundler and installed dependencies. The base must support the tested static
+and kinematic pipeline APIs. It covers 15 scenarios in both precisions, XYZ/XYZM and
+both directions (120 rows): units, signed axes, Mercator-to-UTM, static and exact
+Helmert, horizontal/vertical grids, ordinate stacks and batch/mixed observation epochs.
+Coordinates have repeatable bounded jitter around the independently checked fixtures.
+One epoch buffer is supplied separately and stays unchanged; M varies by record.
+
+Both runtimes pass pinned PROJ forward/inverse anchors before measurement. Every
+seeded output is then checked against the baseline scalar result with precision-aware
+tolerances, including exact M preservation. Mercator, Mercator-to-UTM and the static
+datum-to-Mercator pair also include direct **proj4js 2.22.0** measurements, validated
+within `1e-4` output units. Other rows omit this comparator: proj4js does not implement
+the typed pipeline, exact Helmert or kinematic epoch contracts being measured.
+
+The report labels baseline/current flat and scalar implementations separately. Setup,
+fixture checks, coordinate preparation and buffer resets stay outside timing. Adaptive
+sampling and rotating execution order match the existing comparison runner. Raw samples,
+median/p10–p90, timing warnings, seed, workload/source/grid fingerprints, versions and
+machine metadata are retained. `--scenarios` accepts comma-separated case names.
+`--clock thread-cpu` provides the same optional CPU-time diagnostic; its timings describe
+main-thread work rather than elapsed throughput. Allocation sampling starts after every timing row has finished, so profiling
+does not affect later timing rows. Its untimed pass reports sampled estimates,
+including collected objects.
+
+Tranche 13A keeps mutable kinematic coefficients and their cached epoch in owned
+Float64 storage, reducing numeric boxing when epochs change. It also prepares fixed
+unit factors and signed-axis selections once. It preserves equation/operation order
+and checks
+intermediate coordinates, so an invalid intermediate cannot be hidden by a later stack
+restore. Float32 rounds only when each completed record is committed. All chains
+keep general dispatch. These changes retain one scratch point and optional stack per
+flat call, with no new per-record arrays, objects or dynamic code generation.
+
+CI uploads `proj4-pipeline-comparison.json` alongside the ordinary projection comparison,
+using 10,000 points and seven samples. It validates results and records measurements;
+it does not require a speed ratio. Core, ordinary wrapper and selective projection
+bundles are unchanged; the retained pipeline adds about 0.18 KiB minified / 0.01 KiB gzip.
+Grid/datum-heavy and mixed-epoch workloads still need further profiling and do not have
+a blanket speedup claim. The live table above continues to compare the ordinary
+projection APIs; this paired pipeline report is a separate developer tool.
