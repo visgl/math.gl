@@ -27,8 +27,13 @@ export function benchmarkFingerprint() {
   const root = fileURLToPath(new URL('../test/', import.meta.url));
   const hash = createHash('sha256');
   for (const name of [
-    ...readdirSync(root).filter(name => /^(benchmark|live-bench).*\.ts$/.test(name)),
-    'fixtures/datum-grids.ts'
+    ...readdirSync(root).filter(name => /^(benchmark|live-bench|pipeline-benchmark|pipeline-workload|kinematic-workload).*\.ts$/.test(name)),
+    'fixtures/datum-grids.ts',
+    'fixtures/operation-pipeline-cases.json',
+    'fixtures/operation-pipeline-reference.json',
+    'fixtures/kinematic-pipeline-cases.json',
+    'fixtures/kinematic-pipeline-reference.json',
+    'fixtures/vertical-grid-reference.json'
   ].sort())
     hash.update(name + '\0').update(readFileSync(join(root, name)));
   return hash.digest('hex');

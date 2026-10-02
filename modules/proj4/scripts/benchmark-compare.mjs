@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 // Paired, alternating before/after measurements without changing the working tree.
-import {build} from 'esbuild';
+import {bundleRuntime} from './benchmark-runtime.mjs';
 import {execFileSync} from 'node:child_process';
-import {readFileSync, existsSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
-import {join, relative} from 'node:path';
+import {mkdtempSync, rmSync, writeFileSync} from 'node:fs';
+import {join} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {tmpdir, cpus} from 'node:os';
 import {parseArgs} from 'node:util';
@@ -68,50 +68,12 @@ try {
   const engines = [];
   for (const baseline of [true, false]) {
     const outfile = join(directory, baseline ? 'baseline.mjs' : 'candidate.mjs');
-    await build({
-      entryPoints: [join(root, 'modules/proj4/src/lib/typescript-proj4-projection.ts')],
+    await bundleRuntime(
+      root,
+      'modules/proj4/src/lib/typescript-proj4-projection.ts',
       outfile,
-      bundle: true,
-      format: 'esm',
-      platform: 'browser',
-      target: 'es2020',
-      tsconfigRaw: {},
-      plugins: [
-        {
-          name: 'historical-runtime-sources',
-          setup(builder) {
-            builder.onResolve({filter: /^@math\.gl\//}, args => {
-              const parts = args.path.split('/'),
-                module = parts[1],
-                subpath = parts.slice(2).join('/');
-              const packagePath = join(root, 'modules', module, 'package.json');
-              const metadata = JSON.parse(readFileSync(packagePath, 'utf8'));
-              const entry = metadata.exports[subpath ? './' + subpath : '.'];
-              const source = join(
-                root,
-                'modules',
-                module,
-                (typeof entry === 'string' ? entry : entry.import)
-                  .replace('./dist/', 'src/')
-                  .replace(/\.js$/, '.ts')
-              );
-              if (!existsSync(source))
-                throw new Error('Cannot resolve runtime source: ' + args.path);
-              return {path: source};
-            });
-            if (baseline)
-              builder.onLoad({filter: /\/modules\/.*\/src\/.*\.(ts|json)$/}, args => ({
-                contents: execFileSync(
-                  'git',
-                  ['show', baselineCommit + ':' + relative(root, args.path)],
-                  {cwd: root, encoding: 'utf8'}
-                ),
-                loader: args.path.endsWith('.json') ? 'json' : 'ts'
-              }));
-          }
-        }
-      ]
-    });
+      baseline ? baselineCommit : undefined
+    );
     const {Projection} = await import(pathToFileURL(outfile).href);
     Projection.registerDatumGrid('benchmark-grid', benchmarkGrid());
     engines.push({

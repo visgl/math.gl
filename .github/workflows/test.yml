@@ -258,11 +258,19 @@ jobs:
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
           node modules/proj4/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/proj4-performance-comparison.json
 
+      - name: Compare pipeline performance against the PR base
+        timeout-minutes: 5
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node modules/proj4/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --allocations --output /tmp/proj4-pipeline-comparison.json
+
       - name: Upload paired performance measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: proj4-performance-comparison
-          path: /tmp/proj4-performance-comparison.json
+          path: |
+            /tmp/proj4-performance-comparison.json
+            /tmp/proj4-pipeline-comparison.json
           if-no-files-found: error
 
   # Preserve the required check name and fail it if any qualification job fails.

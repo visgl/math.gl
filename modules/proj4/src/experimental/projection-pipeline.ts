@@ -506,16 +506,17 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
           }
         }
         this.requiresZ ||= Boolean(step.z);
+        const [xScale, yScale, zScale] = scale;
         return pair(
           p => {
-            p.x *= scale[0];
-            p.y *= scale[1];
-            p.z *= scale[2];
+            p.x *= xScale;
+            p.y *= yScale;
+            p.z *= zScale;
           },
           p => {
-            p.x /= scale[0];
-            p.y /= scale[1];
-            p.z /= scale[2];
+            p.x /= xScale;
+            p.y /= yScale;
+            p.z /= zScale;
           }
         );
       }
@@ -538,18 +539,16 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
         });
         const selected = inverse ? reverse : order;
         state.units = selected.map(index => state.units[Math.abs(index) - 1]) as typeof state.units;
-        const value = (index: number, x: number, y: number, z: number) =>
-          Math.sign(index) * (Math.abs(index) === 1 ? x : Math.abs(index) === 2 ? y : z);
-        const operation =
-          (indices: number[]): Operation =>
-          p => {
-            const x = p.x,
-              y = p.y,
-              z = p.z;
-            p.x = value(indices[0], x, y, z);
-            p.y = value(indices[1], x, y, z);
-            p.z = value(indices[2], x, y, z);
+        const operation = (indices: number[]): Operation => {
+          const [a, b, c] = indices.map(Math.abs);
+          const [sx, sy, sz] = indices.map(Math.sign);
+          return p => {
+            const {x, y, z} = p;
+            p.x = sx * (a === 1 ? x : a === 2 ? y : z);
+            p.y = sy * (b === 1 ? x : b === 2 ? y : z);
+            p.z = sz * (c === 1 ? x : c === 2 ? y : z);
           };
+        };
         return pair(operation(order), operation(reverse));
       }
       case 'projection': {

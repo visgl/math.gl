@@ -28,24 +28,16 @@ export function createKinematicHelmert(
     rates.scalePPM || 0
   ];
   const arcsecond = Math.PI / (180 * 3600);
-  let preparedEpoch: number | undefined;
-  let dx = 0,
-    dy = 0,
-    dz = 0,
-    scale = 1;
-  let r00 = 1,
-    r01 = 0,
-    r02 = 0,
-    r10 = 0,
-    r11 = 1,
-    r12 = 0,
-    r20 = 0,
-    r21 = 0,
-    r22 = 1;
+  // Updating captured numeric bindings can box each changed coefficient. Keep
+  // mutable coefficients and the last epoch in owned typed storage instead.
+  // Row-major rotation [0..8], translation [9..11], scale [12], epoch [13].
+  const coefficients = new Float64Array(14);
+  coefficients[0] = coefficients[4] = coefficients[8] = coefficients[12] = 1;
+  coefficients[13] = NaN;
   function prepare(epoch: number | undefined): void {
     if (typeof epoch !== 'number' || !Number.isFinite(epoch))
       throw new Error('Kinematic Helmert requires a finite coordinate epoch');
-    if (epoch === preparedEpoch) return;
+    if (epoch === coefficients[13]) return;
     const elapsed = epoch - referenceEpoch;
     const x = base[0] + velocity[0] * elapsed,
       y = base[1] + velocity[1] * elapsed,
@@ -72,58 +64,64 @@ export function createKinematicHelmert(
         sy = Math.sin(ry),
         cz = Math.cos(rz),
         sz = Math.sin(rz);
-      r00 = cy * cz;
-      r01 = cx * sz + sx * sy * cz;
-      r02 = sx * sz - cx * sy * cz;
-      r10 = -cy * sz;
-      r11 = cx * cz - sx * sy * sz;
-      r12 = sx * cz + cx * sy * sz;
-      r20 = sy;
-      r21 = -sx * cy;
-      r22 = cx * cy;
+      coefficients[0] = cy * cz;
+      coefficients[1] = cx * sz + sx * sy * cz;
+      coefficients[2] = sx * sz - cx * sy * cz;
+      coefficients[3] = -cy * sz;
+      coefficients[4] = cx * cz - sx * sy * sz;
+      coefficients[5] = sx * cz + cx * sy * sz;
+      coefficients[6] = sy;
+      coefficients[7] = -sx * cy;
+      coefficients[8] = cx * cy;
       if (!coordinateFrame) {
         // Transpose the full matrix without destructuring's temporary arrays.
-        let saved = r01;
-        r01 = r10;
-        r10 = saved;
-        saved = r02;
-        r02 = r20;
-        r20 = saved;
-        saved = r12;
-        r12 = r21;
-        r21 = saved;
+        let saved = coefficients[1];
+        coefficients[1] = coefficients[3];
+        coefficients[3] = saved;
+        saved = coefficients[2];
+        coefficients[2] = coefficients[6];
+        coefficients[6] = saved;
+        saved = coefficients[5];
+        coefficients[5] = coefficients[7];
+        coefficients[7] = saved;
       }
     } else {
       const sign = coordinateFrame ? -1 : 1;
-      r01 = -sign * rz;
-      r02 = sign * ry;
-      r10 = sign * rz;
-      r12 = -sign * rx;
-      r20 = -sign * ry;
-      r21 = sign * rx;
+      coefficients[1] = -sign * rz;
+      coefficients[2] = sign * ry;
+      coefficients[3] = sign * rz;
+      coefficients[5] = -sign * rx;
+      coefficients[6] = -sign * ry;
+      coefficients[7] = sign * rx;
     }
-    dx = x;
-    dy = y;
-    dz = z;
-    scale = nextScale;
-    preparedEpoch = epoch;
+    coefficients[9] = x;
+    coefficients[10] = y;
+    coefficients[11] = z;
+    coefficients[12] = nextScale;
+    coefficients[13] = epoch;
   }
   return {
     forward(point, epoch) {
       prepare(epoch);
       const {x, y, z} = point;
-      point.x = scale * (r00 * x + r01 * y + r02 * z) + dx;
-      point.y = scale * (r10 * x + r11 * y + r12 * z) + dy;
-      point.z = scale * (r20 * x + r21 * y + r22 * z) + dz;
+      point.x =
+        coefficients[12] * (coefficients[0] * x + coefficients[1] * y + coefficients[2] * z) +
+        coefficients[9];
+      point.y =
+        coefficients[12] * (coefficients[3] * x + coefficients[4] * y + coefficients[5] * z) +
+        coefficients[10];
+      point.z =
+        coefficients[12] * (coefficients[6] * x + coefficients[7] * y + coefficients[8] * z) +
+        coefficients[11];
     },
     inverse(point, epoch) {
       prepare(epoch);
-      const x = (point.x - dx) / scale,
-        y = (point.y - dy) / scale,
-        z = (point.z - dz) / scale;
-      point.x = r00 * x + r10 * y + r20 * z;
-      point.y = r01 * x + r11 * y + r21 * z;
-      point.z = r02 * x + r12 * y + r22 * z;
+      const x = (point.x - coefficients[9]) / coefficients[12],
+        y = (point.y - coefficients[10]) / coefficients[12],
+        z = (point.z - coefficients[11]) / coefficients[12];
+      point.x = coefficients[0] * x + coefficients[3] * y + coefficients[6] * z;
+      point.y = coefficients[1] * x + coefficients[4] * y + coefficients[7] * z;
+      point.z = coefficients[2] * x + coefficients[5] * y + coefficients[8] * z;
     }
   };
 }

@@ -2037,6 +2037,129 @@
       ],
       "forwardTolerance": 1e-08,
       "inverseTolerance": 1e-08
+    },
+    {
+      "id": "mercator-to-utm",
+      "input": {
+        "space": "projected",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "projection",
+          "name": "merc",
+          "parameters": {
+            "a": "6378137",
+            "b": "6378137"
+          },
+          "inverse": true
+        },
+        {
+          "type": "projection",
+          "name": "utm",
+          "parameters": {
+            "zone": "31"
+          }
+        }
+      ],
+      "pipeline": "+step +inv +proj=merc +a=6378137 +b=6378137 +step +proj=utm +zone=31 +ellps=WGS84",
+      "points": [
+        [
+          333958.4723798207,
+          6800125.454397307,
+          123,
+          8
+        ],
+        [
+          0,
+          0,
+          -20,
+          9
+        ],
+        [
+          500000,
+          4000000,
+          0,
+          10
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "projected-units-signed-axes",
+      "input": {
+        "space": "projected",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "projection",
+          "name": "merc",
+          "parameters": {
+            "a": "6378137",
+            "b": "6378137"
+          },
+          "inverse": true
+        },
+        {
+          "type": "projection",
+          "name": "utm",
+          "parameters": {
+            "zone": "31"
+          }
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "m",
+            "to": "ft"
+          },
+          "z": {
+            "from": "m",
+            "to": "ft"
+          }
+        },
+        {
+          "type": "axisswap",
+          "order": [
+            -2,
+            1,
+            -3
+          ]
+        }
+      ],
+      "pipeline": "+step +inv +proj=merc +a=6378137 +b=6378137 +step +proj=utm +zone=31 +ellps=WGS84 +step +proj=unitconvert +xy_in=m +xy_out=ft +z_in=m +z_out=ft +step +proj=axisswap +order=-2,1,-3",
+      "points": [
+        [
+          333958.4723798207,
+          6800125.454397307,
+          123,
+          8
+        ],
+        [
+          0,
+          0,
+          -20,
+          9
+        ],
+        [
+          500000,
+          4000000,
+          0,
+          10
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
     }
   ],
   "additionalVerticalGrid": {

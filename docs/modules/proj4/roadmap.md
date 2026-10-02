@@ -387,13 +387,35 @@ propagates coordinates between epochs nor infers time from M or CRS metadata.
 Prepared deformation models, time-dependent grids and automatic operation selection
 remain future work. See [coordinate epochs](./operation-pipelines.md#coordinate-epochs-and-moving-reference-frames).
 
+## Tranche 13A: pipeline batch performance — implemented first pass
+
+Kinematic Helmert coefficients and their cached epoch use owned Float64 storage
+to reduce mixed-epoch allocation. Fixed unit factors and signed axis selections are
+prepared once. Arithmetic and operation order, intermediate
+finiteness checks, final Float32 rounding, per-record commits and M preservation
+remain unchanged. All chains retain the general runner; no dynamic code generation
+or additional per-record storage is used.
+
+A paired benchmark covers 15 scenarios: units/axes, projected-to-projected operations,
+static/exact Helmert, horizontal/vertical grids, stacks and batch/mixed epochs in
+Float32/Float64 XYZ/XYZM layouts and both directions. Historical and current engines
+are first checked against pinned PROJ anchors, then every generated output is compared.
+Equivalent CRS pairs also compare directly with proj4js. CI publishes timings and
+separate allocation estimates without noisy speed gates. The independent static
+pipeline corpus expands to 39 configurations / 108 XYZM points.
+
+This completes the measured coefficient/constant pass, not every JavaScript optimization in 13A.
+Grid/datum-heavy and mixed-epoch chains remain profiling targets. See
+[paired pipeline benchmarks](./benchmarks.md#compare-operation-pipeline-performance).
+
 ## Remaining performance and geodetic roadmap
 
 | Tranche | Work | Acceptance gate |
 | --- | --- | --- |
 | 12C2 — Deformation models | Optional prepared velocity/deformation grids and explicit source/target epoch propagation | Licensed model fixtures, independently checked results and explicit units/coverage/time behavior |
 | 12E — Operation selection | A bounded optional catalogue with explicit epoch, area, accuracy and grid availability | Pinned provenance, deterministic reviewed selection and no implicit grid downloads |
-| 13 — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
+| 13A — Further JavaScript performance | Profile grid/datum-heavy and mixed-epoch pipelines; evaluate additional whole-buffer specializations and reusable scalar outputs | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
+| 13B–13D — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
 
 Further optimization and operation support require separate measurements and accuracy
 qualification. These tranches do not establish unrestricted PROJ parity or a state-of-the-art
