@@ -109,6 +109,28 @@ try {
     assert.deepEqual(Array.from(pipelineBuffer), pipeline.project(pipelinePoint));
     assert(Math.abs(pipeline.unproject(pipeline.project(pipelinePoint))[0] - 11) < 1e-10);
 
+    const exact = new ProjectionPipeline({input: {space: 'geocentric', units: ['m', 'm', 'm']}, steps: [
+      {type: 'push', components: [3]},
+      {type: 'helmert', translation: [100, -200, 30], rotation: [15000, -7000, 3000], convention: 'position_vector', exact: true},
+      {type: 'pop', components: [3]}
+    ]});
+    const exactInput = [4000000, 1000000, 4800000, 8];
+    const exactBuffer = new Float64Array(exactInput);
+    exact.projectFlat(exactBuffer, 4);
+    assert.deepEqual(Array.from(exactBuffer), exact.project(exactInput));
+    assert.equal(exactBuffer[2], exactInput[2]);
+    assert.equal(exactBuffer[3], 8);
+    const fullExact = new ProjectionPipeline({input: exact.input, steps: [
+      {type: 'helmert', translation: [100, -200, 30], rotation: [15000, -7000, 3000], convention: 'position_vector', exact: true}
+    ]});
+    fullExact.unproject(fullExact.project(exactInput)).forEach((value, index) => assert(Math.abs(value - exactInput[index]) < 1e-8));
+    const {obliqueTransformation} = await load('@math.gl/proj4/projections/ob_tran');
+    const rotated = new ProjectionPipeline({input: {space: 'geographic', units: ['rad', 'rad', 'm']}, projections: [obliqueTransformation('longlat')], steps: [
+      {type: 'projection', name: 'ob_tran', parameters: {o_proj: 'longlat', o_lat_p: '45', o_lon_p: '-90'}, output: {space: 'geographic', unit: 'rad'}}
+    ]});
+    const rotatedPoint = [0.2, 0.7, 123, 8];
+    rotated.unproject(rotated.project(rotatedPoint)).forEach((value, index) => assert(Math.abs(value - rotatedPoint[index]) < 1e-12));
+
     const {parseGTXGrid} = await load('@math.gl/proj4/grids/gtx');
     const {createVerticalGrid} = await load('@math.gl/proj4/grids/vertical');
     const local = createVerticalGrid({origin: [0, 0], step: [1, 1], size: [2, 2], offsets: [10, 20, 30, 40]});
@@ -255,8 +277,15 @@ try {
     const asyncBuffer: Promise<Float64Array> = lazy.projectFlat(new Float64Array([3, 0]));
     const mixed = new ProjectionEngine({to: 'EPSG:32631', projections: [mercator, lazyUniversalTransverseMercator]});
     const mixedResult: Promise<number[]> = mixed.project([3, 0]);
-    import {ProjectionPipeline, type PipelineStep, type ProjectionPipelineOptions} from '@math.gl/proj4/pipeline';
+    import {ProjectionPipeline, type PipelineStep, type ProjectionPipelineOptions, type PipelineProjectionOutput} from '@math.gl/proj4/pipeline';
     const pipelineOptions: ProjectionPipelineOptions = {input: {space: 'geographic', units: ['deg', 'deg', 'm']}, steps: [{type: 'unitconvert', xy: {from: 'deg', to: 'rad'}}]};
+    const rotationOutput: PipelineProjectionOutput = {space: 'geographic', unit: 'rad'};
+    const stackSteps: PipelineStep[] = [{type: 'push', components: [3]}, {type: 'pop', components: [3]}];
+    const exactStep: PipelineStep = {type: 'helmert', translation: [1, 2, 3], rotation: [1, 2, 3], convention: 'position_vector', exact: true, omitInverse: true};
+    // @ts-expect-error M is preserved, never used as an ordinate stack or epoch.
+    const measureStack: PipelineStep = {type: 'push', components: [4]};
+    // @ts-expect-error Geographic helper output cannot have linear units.
+    const mixedOutput: PipelineProjectionOutput = {space: 'geographic', unit: 'm'};
     const pipeline = new ProjectionPipeline(pipelineOptions);
     const pipelineScalar: number[] = pipeline.project([0, 0]);
     const pipelineFlat: Float32Array = pipeline.projectFlat(new Float32Array([0, 0]));
@@ -267,7 +296,7 @@ try {
     // @ts-expect-error Integer buffers are not supported.
     pipeline.projectFlat(new Int32Array([0, 0]));
     // @ts-expect-error Unknown operations are not supported.
-    const unknownStep: PipelineStep = {type: 'push'};
+    const unknownStep: PipelineStep = {type: 'affine'};
     // @ts-expect-error Unknown unit names are not supported.
     const unknownUnits: PipelineStep = {type: 'unitconvert', xy: {from: 'degree', to: 'rad'}};
     // @ts-expect-error Time-dependent parameters are not supported.

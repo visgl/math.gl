@@ -16,6 +16,7 @@ assert.equal(
   reference.generatorSHA256,
   sha(readFileSync(new URL('./generate-pipeline-reference.py', import.meta.url)))
 );
+assert.equal(reference.additionalVerticalSHA256, sha(new Uint8Array(reference.additionalVerticalGridBytes)));
 assert.equal(reference.horizontalSHA256, sha(read('real-grids/BETA2007.gsb')));
 assert.equal(
   reference.verticalSHA256,

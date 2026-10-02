@@ -1089,6 +1089,974 @@
       ],
       "forwardTolerance": 1e-05,
       "inverseTolerance": 1e-05
+    },
+    {
+      "id": "exact-position_vector-20",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            100,
+            -200,
+            30
+          ],
+          "rotation": [
+            20,
+            -35,
+            55
+          ],
+          "scalePPM": 12.5,
+          "convention": "position_vector",
+          "exact": true
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=100 +y=-200 +z=30 +rx=20 +ry=-35 +rz=55 +s=12.5 +convention=position_vector +exact",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ],
+        [
+          0,
+          0,
+          0,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "exact-position_vector-15000",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            100,
+            -200,
+            30
+          ],
+          "rotation": [
+            15000,
+            -7000,
+            3000
+          ],
+          "scalePPM": 12.5,
+          "convention": "position_vector",
+          "exact": true
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=100 +y=-200 +z=30 +rx=15000 +ry=-7000 +rz=3000 +s=12.5 +convention=position_vector +exact",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ],
+        [
+          0,
+          0,
+          0,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "exact-inverse-position_vector",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            100,
+            -200,
+            30
+          ],
+          "rotation": [
+            20,
+            -35,
+            55
+          ],
+          "scalePPM": -25,
+          "convention": "position_vector",
+          "exact": true,
+          "inverse": true
+        }
+      ],
+      "pipeline": "+step +inv +proj=helmert +x=100 +y=-200 +z=30 +rx=20 +ry=-35 +rz=55 +s=-25 +convention=position_vector +exact",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ],
+        [
+          0,
+          0,
+          0,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "exact-coordinate_frame-20",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            100,
+            -200,
+            30
+          ],
+          "rotation": [
+            20,
+            -35,
+            55
+          ],
+          "scalePPM": 12.5,
+          "convention": "coordinate_frame",
+          "exact": true
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=100 +y=-200 +z=30 +rx=20 +ry=-35 +rz=55 +s=12.5 +convention=coordinate_frame +exact",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ],
+        [
+          0,
+          0,
+          0,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "exact-coordinate_frame-15000",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            100,
+            -200,
+            30
+          ],
+          "rotation": [
+            15000,
+            -7000,
+            3000
+          ],
+          "scalePPM": 12.5,
+          "convention": "coordinate_frame",
+          "exact": true
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=100 +y=-200 +z=30 +rx=15000 +ry=-7000 +rz=3000 +s=12.5 +convention=coordinate_frame +exact",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ],
+        [
+          0,
+          0,
+          0,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "exact-inverse-coordinate_frame",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            100,
+            -200,
+            30
+          ],
+          "rotation": [
+            20,
+            -35,
+            55
+          ],
+          "scalePPM": -25,
+          "convention": "coordinate_frame",
+          "exact": true,
+          "inverse": true
+        }
+      ],
+      "pipeline": "+step +inv +proj=helmert +x=100 +y=-200 +z=30 +rx=20 +ry=-35 +rz=55 +s=-25 +convention=coordinate_frame +exact",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ],
+        [
+          0,
+          0,
+          0,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "exact-translation-scale",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            1,
+            -2,
+            3
+          ],
+          "exact": true,
+          "scalePPM": 25
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=1 +y=-2 +z=3 +s=25 +exact",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ],
+        [
+          0,
+          0,
+          0,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "height-stack-around-datum",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "push",
+          "components": [
+            3
+          ]
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "WGS84"
+          }
+        },
+        {
+          "type": "helmert",
+          "translation": [
+            3000,
+            1000,
+            2000
+          ]
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "WGS84"
+          },
+          "inverse": true
+        },
+        {
+          "type": "pop",
+          "components": [
+            3
+          ]
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 +step +proj=cart +ellps=WGS84 +step +proj=helmert +x=3000 +y=1000 +z=2000 +step +inv +proj=cart +ellps=WGS84 +step +proj=pop +v_3 +step +proj=unitconvert +xy_in=rad +xy_out=deg",
+      "points": [
+        [
+          11,
+          41,
+          123,
+          8
+        ],
+        [
+          12.25,
+          42.5,
+          -25,
+          19
+        ],
+        [
+          10.25,
+          40.25,
+          0,
+          -3
+        ]
+      ],
+      "forwardTolerance": 1e-06,
+      "inverseTolerance": 1e-06
+    },
+    {
+      "id": "nested-per-axis-stacks",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "push",
+          "components": [
+            1,
+            3
+          ]
+        },
+        {
+          "type": "push",
+          "components": [
+            1
+          ]
+        },
+        {
+          "type": "axisswap",
+          "order": [
+            -1,
+            2,
+            -3
+          ]
+        },
+        {
+          "type": "pop",
+          "components": [
+            1
+          ]
+        },
+        {
+          "type": "pop",
+          "components": [
+            1,
+            3
+          ]
+        }
+      ],
+      "pipeline": "+step +proj=push +v_1 +v_3 +step +proj=push +v_1 +step +proj=axisswap +order=-1,2,-3 +step +proj=pop +v_1 +step +proj=pop +v_1 +v_3",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ],
+        [
+          0,
+          0,
+          0,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "inverse-oriented-stacks",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "pop",
+          "components": [
+            2
+          ],
+          "inverse": true
+        },
+        {
+          "type": "axisswap",
+          "order": [
+            1,
+            -2,
+            3
+          ]
+        },
+        {
+          "type": "push",
+          "components": [
+            2
+          ],
+          "inverse": true
+        }
+      ],
+      "pipeline": "+step +inv +proj=pop +v_2 +step +proj=axisswap +order=1,-2,3 +step +inv +proj=push +v_2",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ],
+        [
+          0,
+          0,
+          0,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "stack-restores-height-unit",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "push",
+          "components": [
+            3
+          ]
+        },
+        {
+          "type": "unitconvert",
+          "z": {
+            "from": "m",
+            "to": "ft"
+          },
+          "omitInverse": true
+        },
+        {
+          "type": "pop",
+          "components": [
+            3
+          ]
+        }
+      ],
+      "pipeline": "+step +proj=push +v_3 +step +proj=unitconvert +z_in=m +z_out=ft +omit_inv +step +proj=pop +v_3",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ],
+        [
+          0,
+          0,
+          0,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "direction-specific-helmert",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            100,
+            -200,
+            30
+          ],
+          "rotation": [
+            20,
+            -35,
+            55
+          ],
+          "convention": "position_vector",
+          "exact": true,
+          "omitInverse": true
+        },
+        {
+          "type": "helmert",
+          "translation": [
+            100,
+            -200,
+            30
+          ],
+          "rotation": [
+            20,
+            -35,
+            55
+          ],
+          "convention": "position_vector",
+          "exact": true,
+          "inverse": true,
+          "omitForward": true
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=100 +y=-200 +z=30 +rx=20 +ry=-35 +rz=55 +convention=position_vector +exact +omit_inv +step +inv +proj=helmert +x=100 +y=-200 +z=30 +rx=20 +ry=-35 +rz=55 +convention=position_vector +exact +omit_fwd",
+      "points": [
+        [
+          4000000,
+          1000000,
+          4800000,
+          8
+        ],
+        [
+          -3500000,
+          3000000,
+          4500000,
+          -4
+        ],
+        [
+          0,
+          0,
+          0,
+          9
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "rotated-geographic-rad",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "projection",
+          "name": "ob_tran",
+          "parameters": {
+            "o_proj": "longlat",
+            "o_lat_p": "45",
+            "o_lon_p": "-90",
+            "R": "6371000"
+          },
+          "output": {
+            "space": "geographic",
+            "unit": "rad"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=ob_tran +o_proj=longlat +o_lat_p=45 +o_lon_p=-90 +R=6371000 +step +proj=unitconvert +xy_in=rad +xy_out=rad",
+      "points": [
+        [
+          11,
+          41,
+          123,
+          8
+        ],
+        [
+          12.25,
+          42.5,
+          -25,
+          19
+        ],
+        [
+          10.25,
+          40.25,
+          0,
+          -3
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08,
+      "referenceNotes": "The identity endpoint conversion declares angular output to pyproj; ob_tran alone reports Cartesian output metadata despite returning radians."
+    },
+    {
+      "id": "rotated-geographic-deg",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "projection",
+          "name": "ob_tran",
+          "parameters": {
+            "o_proj": "longlat",
+            "o_lat_p": "45",
+            "o_lon_p": "-90",
+            "R": "6371000"
+          },
+          "output": {
+            "space": "geographic",
+            "unit": "deg"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=ob_tran +o_proj=longlat +o_lat_p=45 +o_lon_p=-90 +R=6371000 +step +proj=unitconvert +xy_in=rad +xy_out=deg",
+      "points": [
+        [
+          11,
+          41,
+          123,
+          8
+        ],
+        [
+          12.25,
+          42.5,
+          -25,
+          19
+        ],
+        [
+          10.25,
+          40.25,
+          0,
+          -3
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
+    },
+    {
+      "id": "rotated-mollweide",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "projection",
+          "name": "ob_tran",
+          "parameters": {
+            "o_proj": "moll",
+            "o_lat_p": "45",
+            "o_lon_p": "-90",
+            "R": "6371000"
+          },
+          "output": {
+            "space": "projected",
+            "unit": "m"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=-90 +R=6371000",
+      "points": [
+        [
+          11,
+          41,
+          123,
+          8
+        ],
+        [
+          12.25,
+          42.5,
+          -25,
+          19
+        ],
+        [
+          10.25,
+          40.25,
+          0,
+          -3
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "direction-specific-real-grid-height",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "push",
+          "components": [
+            1,
+            2
+          ]
+        },
+        {
+          "type": "hgridshift",
+          "grids": "horizontal",
+          "omitInverse": true
+        },
+        {
+          "type": "vgridshift",
+          "grids": "directional",
+          "multiplier": 1
+        },
+        {
+          "type": "hgridshift",
+          "grids": "horizontal",
+          "inverse": true,
+          "omitForward": true
+        },
+        {
+          "type": "pop",
+          "components": [
+            1,
+            2
+          ]
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_1 +v_2 +step +proj=hgridshift +grids={horizontal} +omit_inv +step +proj=vgridshift +grids={directionalVertical} +multiplier=1 +step +inv +proj=hgridshift +grids={horizontal} +omit_fwd +step +proj=pop +v_1 +v_2 +step +proj=unitconvert +xy_in=rad +xy_out=deg",
+      "points": [
+        [
+          7.3,
+          51.3,
+          100,
+          8
+        ],
+        [
+          13,
+          52,
+          250,
+          9
+        ],
+        [
+          10,
+          49,
+          -3,
+          10
+        ]
+      ],
+      "forwardTolerance": 1e-08,
+      "inverseTolerance": 1e-08
     }
-  ]
+  ],
+  "additionalVerticalGrid": {
+    "origin": [
+      -180,
+      -90
+    ],
+    "step": [
+      360,
+      180
+    ],
+    "size": [
+      2,
+      2
+    ],
+    "offsets": [
+      -18,
+      18,
+      -18,
+      18
+    ]
+  }
 }

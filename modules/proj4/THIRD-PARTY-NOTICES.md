@@ -80,3 +80,12 @@ kernels and the geocentric/static Helmert equations directly adapted from proj4j
 expectations use pyproj 3.7.2 / PROJ 9.5.1. Authored pipeline cases are MIT math.gl test
 data; the reused BETA2007 NTv2 grid retains its attribution in
 `test/fixtures/real-grids/README.md` and is not shipped in the package.
+
+`src/experimental/exact-helmert.ts` directly adapts the exact rotation matrix and
+convention transpose from PROJ 9.5.1 `src/transformations/helmert.cpp` (Copyright
+(c) 2016, Thomas Knudsen / SDFE), under the MIT-style terms in `PROJ-LICENSE.txt`.
+It is modified into prepared typed point operations; the existing approximate
+Helmert equations remain the attributed proj4js adaptation in `datum.ts`.
+Ordinate-stack and direction-specific orchestration are original math.gl code
+inspired by PROJ pipeline contracts, not direct PROJ or proj4js forks.
+The additional two-by-two GTX is authored MIT test data, not a distributed geoid model.

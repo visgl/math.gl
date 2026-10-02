@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- feat(proj4): Extend typed pipelines with exact Helmert rotations, ordinate stacks,
+  direction-specific steps and explicit rotated-projection output units (#171).
+
 ## v5.0.0-alpha.11
 
 - feat(proj4): Support vertical GeoTIFF geoid grids (#165)

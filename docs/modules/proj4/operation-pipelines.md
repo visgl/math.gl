@@ -40,16 +40,24 @@ is the application's responsibility. Changes to definition arrays, parameter rec
 and grid registrations after construction do not change the compiled operation.
 Grid implementations remain application-owned objects.
 
-Each step accepts `inverse: true`. `unproject` reverses the step order and reverses
-each step's direction, including steps that were already marked inverse.
+Each step accepts `inverse: true`, `omitForward: true` and `omitInverse: true`.
+The omit flags skip that step in the corresponding coordinate methods; setting both
+is an error. Both programs are checked for unit/space consistency and balanced stacks
+at construction. The reverse program must end in the declared input space/units.
+
+For ordinary steps, `unproject` reverses the step order and reverses
+each step's direction, including steps that were already marked inverse. Skipping
+steps or restoring saved ordinates can discard information: the reverse program is
+not necessarily the mathematical inverse of the forward program.
 
 | Step | Contract |
 | --- | --- |
 | `unitconvert` | `xy: {from, to}` and/or `z: {from, to}`; angular-to-angular or linear-to-linear only. A supplied Z conversion requires XYZ records. |
 | `axisswap` | `order: [2, 1]`, `[-2, 1]`, or any signed permutation of three ordinates. Two-axis steps preserve Z; three-axis steps require XYZ. M stays untouched. |
-| `projection` | `name` selects a registered plugin; `parameters` supplies its PROJ parameter strings/flags and ellipsoid geometry. Forward: geographic radians → projected metres. Inverse: projected metres → geographic radians. Z units stay unchanged. |
+| `projection` | `name` selects a registered plugin; `parameters` supplies its PROJ parameter strings/flags and ellipsoid geometry. Forward: geographic radians → projected metres. Inverse: projected metres → geographic radians. Z units stay unchanged. `ob_tran` requires an explicit `output` space/unit and matching `o_proj`. |
 | `cart` | Geographic radians/metre height → geocentric XYZ metres. Optional `ellipsoid` accepts `ellps`, `a`, `b`, `rf`, `f`, or `R` string parameters; default WGS84. Requires XYZ. |
-| `helmert` | Static geocentric XYZ metres. `translation: [x, y, z]` is in metres, optional `rotation` is in arcseconds, and `scalePPM` defaults to zero. Rotation requires `position_vector` or `coordinate_frame` convention. Scale must be positive. Requires XYZ. |
+| `helmert` | Static geocentric XYZ metres. `translation: [x, y, z]` is in metres, optional `rotation` is in arcseconds, and `scalePPM` defaults to zero. Rotation requires `position_vector` or `coordinate_frame` convention. Scale must be positive. Requires XYZ. `exact: true` uses a full rotation matrix and its mathematical inverse. |
+| `push` / `pop` | `components: [1, 2]`, `[3]`, or another nonempty selection of X/Y/Z. Independent nested stacks preserve values and units; inverse execution swaps push/pop. M and later ordinates are never stacked. |
 | `hgridshift` | Geographic radians; `grids` names prepared `datumGrids`, in priority order. Preserves height. Uses the grid's forward/inverse shift methods. |
 | `vgridshift` | Geographic radians/metre height; `grids` names prepared `verticalGrids`. Adds `multiplier * offset` in the forward direction. Multiplier defaults to **−1**, following PROJ. Requires XYZ. |
 
@@ -58,15 +66,71 @@ angular parameters use degrees or supported DMS/radian strings, and a flag can b
 `undefined`. `over` permits the existing plugins' unwrapped-longitude behavior.
 CRS metadata such as `datum`, `towgs84`, `units`, `axis`, `pm`, `nadgrids` and
 `geoidgrids` is rejected on projection steps: express these operations as separate
-steps. Use `cart` for geocentric conversion. The `ob_tran` helper is currently rejected
-because its output can be geographic degrees or projected metres; this API does not
-infer an output-unit contract for that helper. Custom projection plugins must honor
+steps. Use `cart` for geocentric conversion. The `ob_tran` helper can return geographic or projected coordinates; supply the
+output contract explicitly as shown below. Custom projection plugins must honor
 the radians/metres contract above.
 
-Helmert uses the package's existing small-angle seven-parameter equations. Its
+Helmert defaults to the package's existing small-angle seven-parameter equations. Its
 inverse applies the transposed small-angle rotation, matching PROJ's default
-approximation; it is not an exact matrix inverse. Exact rotations, transformation
-rates, observation epochs and time-dependent grids are not supported here.
+approximation; it is not an exact matrix inverse. `exact: true` uses full rotations,
+transposes the complete matrix for the position-vector convention, and uses the
+transpose/reciprocal scale for inverse execution. Choose the mode expected by your
+transformation parameters; parameters fitted to a small-angle model should retain
+the default. Transformation rates, observation epochs and time-dependent grids remain
+outside this profile.
+
+## Save ordinates and choose direction-specific steps
+
+Use `push`/`pop` to keep original heights during a horizontal datum operation, or to
+sample a height grid in another horizontal frame while retaining the original X/Y.
+For the latter, omit the redundant horizontal operation in each direction:
+
+```typescript
+const heightOnly = new ProjectionPipeline({
+  input: {space: 'geographic', units: ['rad', 'rad', 'm']},
+  datumGrids: {interpolationFrame: preparedHorizontalGrid},
+  verticalGrids: {height: preparedHeightGrid},
+  steps: [
+    {type: 'push', components: [1, 2]},
+    {type: 'hgridshift', grids: 'interpolationFrame', omitInverse: true},
+    {type: 'vgridshift', grids: 'height', multiplier: 1},
+    {type: 'hgridshift', grids: 'interpolationFrame', inverse: true, omitForward: true},
+    {type: 'pop', components: [1, 2]}
+  ]
+});
+```
+
+Stacks are independent for X/Y/Z, nested, and local to a coordinate call. The flat
+path reuses storage across records without allocating coordinate arrays per record.
+Underflow and unbalanced stacks are construction errors, unlike PROJ's permissive
+empty-stack behavior. Restoring X/Y from different coordinate spaces is rejected;
+restoring both horizontal components together can restore their saved space/units.
+There is no fourth stack: M remains an uninterpreted measure, separate from future epochs.
+
+## Rotated geographic and projected coordinates
+
+Register `obliqueTransformation` with its child algorithm and state its output
+explicitly. Geographic output accepts degrees or radians; projected output is metres.
+The `o_proj` parameter must match the registered child:
+
+```typescript
+import {obliqueTransformation} from '@math.gl/proj4/projections/ob_tran';
+
+const rotated = new ProjectionPipeline({
+  input: {space: 'geographic', units: ['rad', 'rad', 'm']},
+  projections: [obliqueTransformation('longlat')],
+  steps: [{
+    type: 'projection', name: 'ob_tran',
+    parameters: {o_proj: 'longlat', o_lat_p: '45', o_lon_p: '-90'},
+    output: {space: 'geographic', unit: 'rad'}
+  }]
+});
+```
+
+For a rotated Mollweide map, register `obliqueTransformation(mollweide)` and use
+`o_proj: 'moll'` with `output: {space: 'projected', unit: 'm'}`. Ordinary projection
+steps retain the geographic-radians/projected-metres contract. Lazy descriptors work
+with the same output declaration and preload/synchronous behavior.
 
 ## Explicit grids and height operations
 
@@ -150,14 +214,15 @@ not provide browser code splitting. See [bundle measurements](./typescript-engin
 ## Qualified profile and remaining work
 
 The source/generator/grid hashes and independent forward/inverse references are
-checked in CI. Twenty-one authored pipelines / 54 XYZM points cover units, axes, Mercator,
+checked in CI. Thirty-seven authored pipelines / 102 XYZM points cover units, axes, Mercator,
 UTM, geocentric conversion, both static Helmert conventions, explicit inverse steps,
-and horizontal/vertical grid placement. Scalar and Float64 results are checked against
+horizontal/vertical grid placement, exact rotations, nested stacks, skipped directions
+and geographic/projected oblique output. Scalar and Float64 results are checked against
 pyproj 3.7.2 / PROJ 9.5.1 in Node, Chromium, Firefox and WebKit; Float32 checks cover
 final rounding on rounded inputs. These are fixture tolerances, not global accuracy
 proofs or geoid-model accuracy claims.
 
 This is typed composition, not a parser for arbitrary `+proj=pipeline` strings. Unknown
-operators and parameters throw instead of being skipped. PROJ `push`/`pop`, omitted
-forward/inverse steps, arbitrary operators, epochs, automatic EPSG operation selection
-and dynamic datums remain outside this profile. See the [remaining roadmap](./roadmap.md).
+operators and parameters throw instead of being skipped. Stack support covers X/Y/Z
+with stricter balance validation; arbitrary operators, epochs, automatic EPSG operation
+selection and dynamic datums remain outside this profile. See the [remaining roadmap](./roadmap.md).
