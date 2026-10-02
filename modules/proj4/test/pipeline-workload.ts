@@ -4,6 +4,7 @@
 // Original qualification workload; numeric expectations are independent PROJ results.
 import {ProjectionPipeline} from '@math.gl/proj4/pipeline';
 import type {ProjectionPipelineOptions} from '@math.gl/proj4/pipeline';
+import {obliqueTransformation, mollweide} from '@math.gl/proj4';
 import {mercator} from '@math.gl/proj4/projections/merc';
 import {universalTransverseMercator} from '@math.gl/proj4/projections/utm';
 import {parseNTv2Grid} from '@math.gl/proj4/grids/ntv2';
@@ -29,9 +30,20 @@ export function pipelineOptions(index: number, horizontal: ArrayBuffer): Project
           }
         : step
     ) as ProjectionPipelineOptions['steps'],
-    projections: [mercator, universalTransverseMercator],
+    projections: [
+      mercator,
+      universalTransverseMercator,
+      obliqueTransformation(
+        fixture.steps.some(step => step.type === 'projection' && step.parameters?.o_proj === 'moll')
+          ? mollweide
+          : 'longlat'
+      )
+    ],
     datumGrids: {horizontal: parseNTv2Grid(horizontal)},
-    verticalGrids: {local: parseGTXGrid(new Uint8Array(verticalReference.gridBytes).buffer)}
+    verticalGrids: {
+      local: parseGTXGrid(new Uint8Array(verticalReference.gridBytes).buffer),
+      directional: parseGTXGrid(new Uint8Array(reference.additionalVerticalGridBytes).buffer)
+    }
   };
 }
 function close(actual: ArrayLike<number>, expected: ArrayLike<number>, tolerance: number): void {

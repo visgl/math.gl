@@ -13,6 +13,9 @@ done by Gerald Evenden.
 
 Copyright information can be found in source files.
 
+Exact Helmert rotation matrix adapted from src/transformations/helmert.cpp:
+Copyright (c) 2016, Thomas Knudsen / SDFE.
+
  --------------
 
  Permission is hereby granted, free of charge, to any person obtaining a

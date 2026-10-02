@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 // Original typed orchestration inspired by PROJ's explicit pipeline model.
 // Projection, geocentric and static Helmert equations reuse the proj4js adaptations
-// in this package; see datum.ts and ../../PROJ4-LICENSE.md. No PROJ code is copied.
+// in this package; see datum.ts and ../../PROJ4-LICENSE.md. The separate exact
+// Helmert matrix is adapted from PROJ; see exact-helmert.ts and ../../PROJ-LICENSE.txt.
 import {CORE_PARAMETERS, normalizeCRS} from './crs/normalize';
 import {unsupportedStage} from './crs/types';
 import {
@@ -13,6 +14,7 @@ import {
   geodeticToGeocentricInPlace
 } from './datum';
 import {projectionOperation} from './mutable-projection';
+import {createExactHelmert} from './exact-helmert';
 import {getLoadedProjection, preloadProjection} from './projection-descriptor';
 import {compileVerticalGrid} from './vertical-datum';
 import type {ProjectionDescriptor} from './projection-descriptor';
@@ -29,7 +31,16 @@ export type PipelineCoordinateSystem = {
 export type PipelineEllipsoid = Readonly<
   Partial<Record<'ellps' | 'a' | 'b' | 'rf' | 'f' | 'R', string>>
 >;
-type Direction = {readonly inverse?: boolean};
+export type PipelineProjectionOutput =
+  | {readonly space: 'geographic'; readonly unit: 'deg' | 'rad'}
+  | {readonly space: 'projected'; readonly unit: 'm'};
+type Direction = {
+  readonly inverse?: boolean;
+  /** Omit this step when calling project/projectFlat. */
+  readonly omitForward?: boolean;
+  /** Omit this step when calling unproject/unprojectFlat. */
+  readonly omitInverse?: boolean;
+};
 export type PipelineStep = Direction &
   (
     | {
@@ -45,6 +56,8 @@ export type PipelineStep = Direction &
         readonly type: 'projection';
         readonly name: string;
         readonly parameters?: ProjectionParameters;
+        /** Required for ob_tran; geographic helper output can be degrees or radians. */
+        readonly output?: PipelineProjectionOutput;
       }
     | {readonly type: 'cart'; readonly ellipsoid?: PipelineEllipsoid}
     | {
@@ -53,7 +66,10 @@ export type PipelineStep = Direction &
         readonly rotation?: readonly [number, number, number];
         readonly scalePPM?: number;
         readonly convention?: 'position_vector' | 'coordinate_frame';
+        /** Use a full rotation matrix and its mathematical inverse. Default false. */
+        readonly exact?: boolean;
       }
+    | {readonly type: 'push' | 'pop'; readonly components: readonly (1 | 2 | 3)[]}
     | {readonly type: 'hgridshift'; readonly grids: string}
     | {readonly type: 'vgridshift'; readonly grids: string; readonly multiplier?: number}
   );
@@ -66,7 +82,14 @@ export type ProjectionPipelineOptions<P extends Registration = ProjectionPlugin>
   readonly datumGrids?: DatumGridCollection;
   readonly verticalGrids?: VerticalGridCollection;
 };
-type Operation = (point: ProjectionPoint) => void;
+type Operation = (point: ProjectionPoint, stack: Float64Array) => void;
+type StackEntry = {unit: PipelineUnit; space: PipelineCoordinateSystem['space']; slot: number};
+type State = {
+  space: PipelineCoordinateSystem['space'];
+  units: [PipelineUnit, PipelineUnit, PipelineUnit];
+  stacks: StackEntry[][];
+};
+const EMPTY_STACK = new Float64Array(0);
 type Pair = {forward: Operation; inverse: Operation};
 type Factory = () => Pair;
 const factors: Record<PipelineUnit, number> = {
@@ -116,14 +139,16 @@ function triple(values: readonly number[]): void {
     throw new Error('Expected three finite Helmert parameters');
 }
 
-/** Explicit, reversible operations; no CRS/epoch inference or string pipeline parser.
+/** Explicit forward/reverse operations; no CRS/epoch inference or string pipeline parser.
  * Built-in steps use one scratch point per call and never allocate coordinate arrays
  * inside the flat loop. M and additional ordinates are preserved, never interpreted.
  */
 export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
   readonly input: PipelineCoordinateSystem;
   readonly output: PipelineCoordinateSystem;
-  private readonly factories: Factory[] = [];
+  private readonly forwardFactories: Factory[] = [];
+  private readonly inverseFactories: Factory[] = [];
+  private stackSize = 0;
   private readonly required: Registration[] = [];
   private readonly deferred: boolean;
   private requiresZ = false;
@@ -152,12 +177,44 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       space,
       units: Object.freeze([...units]) as PipelineCoordinateSystem['units']
     });
-    const state = {space, units: [...units] as [PipelineUnit, PipelineUnit, PipelineUnit]};
+    const state: State = {space, units: [...units] as State['units'], stacks: [[], [], []]};
     const projections = [...(options.projections || [])];
     this.deferred = projections.some(projection => !('create' in projection));
-    for (const step of options.steps)
-      this.factories.push(this.prepare(step, state, {...options, projections}));
-    this.output = Object.freeze({space: state.space, units: Object.freeze(state.units)});
+    // Each direction has its own validated metadata and stack layout. Share equation
+    // implementations by step so custom plugin factories still run once per step.
+    const caches = options.steps.map(() => ({}) as {pair?: Pair});
+    for (const [index, step] of options.steps.entries()) {
+      for (const name of ['inverse', 'omitForward', 'omitInverse'] as const)
+        if (step?.[name] !== undefined && typeof step[name] !== 'boolean')
+          throw new Error('Invalid pipeline ' + name + ' flag');
+      if (step?.omitForward && step.omitInverse)
+        throw new Error('A pipeline step cannot omit both directions');
+      if (!step?.omitForward)
+        this.forwardFactories.push(
+          this.prepare(step, state, {...options, projections}, caches[index])
+        );
+    }
+    this.balanced(state);
+    this.output = Object.freeze({
+      space: state.space,
+      units: Object.freeze([...state.units]) as PipelineCoordinateSystem['units']
+    });
+    const reverse: State = {space: state.space, units: [...state.units], stacks: [[], [], []]};
+    for (let index = options.steps.length - 1; index >= 0; index--) {
+      const step = options.steps[index];
+      if (!step.omitInverse)
+        this.inverseFactories.push(
+          this.prepare(
+            {...step, inverse: !step.inverse},
+            reverse,
+            {...options, projections},
+            caches[index]
+          )
+        );
+    }
+    this.balanced(reverse);
+    if (reverse.space !== space || reverse.units.some((unit, index) => unit !== units[index]))
+      throw new Error('Inverse pipeline output does not match declared input space/units');
     if (this.required.every(projection => getLoadedProjection(projection))) this.compile();
     this.project = this.project.bind(this);
     this.unproject = this.unproject.bind(this);
@@ -229,10 +286,9 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
     for (const registration of this.required)
       if (!getLoadedProjection(registration))
         unsupportedStage('Pipeline projection requires preload(): ' + registration.name);
-    const pairs = this.factories.map(factory => factory());
     this.compiled = {
-      forward: pairs.map(pair => pair.forward),
-      inverse: pairs.map(pair => pair.inverse).reverse()
+      forward: this.forwardFactories.map(factory => factory().forward),
+      inverse: this.inverseFactories.map(factory => factory().forward)
     };
   }
   private operations(inverse: boolean): Operation[] {
@@ -248,7 +304,7 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       y: coordinate[1],
       z: coordinate.length >= 3 ? coordinate[2] : 0
     };
-    this.run(point, operations);
+    this.run(point, operations, this.stackSize ? new Float64Array(this.stackSize) : EMPTY_STACK);
     const output = [...coordinate];
     output[0] = point.x;
     output[1] = point.y;
@@ -266,11 +322,12 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
     const operations = this.operations(inverse),
       point = {x: 0, y: 0, z: 0};
     const float32 = coordinates instanceof Float32Array;
+    const stack = this.stackSize ? new Float64Array(this.stackSize) : EMPTY_STACK;
     for (let i = 0; i < coordinates.length; i += dimension) {
       point.x = coordinates[i];
       point.y = coordinates[i + 1];
       point.z = dimension >= 3 ? coordinates[i + 2] : 0;
-      this.run(point, operations);
+      this.run(point, operations, stack);
       if (
         float32 &&
         Math.max(Math.abs(point.x), Math.abs(point.y), Math.abs(point.z)) > 3.4028234663852886e38
@@ -282,33 +339,37 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
     }
     return coordinates;
   }
-  private run(point: ProjectionPoint, operations: readonly Operation[]): void {
+  private run(point: ProjectionPoint, operations: readonly Operation[], stack: Float64Array): void {
     finite(point);
     for (const operation of operations) {
-      operation(point);
+      operation(point, stack);
       finite(point);
     }
   }
+  private balanced(state: State): void {
+    if (state.stacks.some(stack => stack.length))
+      throw new Error('Pipeline stack has unbalanced push/pop operations');
+  }
   private prepare(
     step: PipelineStep,
-    state: {
-      space: PipelineCoordinateSystem['space'];
-      units: [PipelineUnit, PipelineUnit, PipelineUnit];
-    },
-    options: ProjectionPipelineOptions<Registration>
+    state: State,
+    options: ProjectionPipelineOptions<Registration>,
+    cache: {pair?: Pair}
   ): Factory {
     const allowed: Record<PipelineStep['type'], string[]> = {
       unitconvert: ['xy', 'z'],
       axisswap: ['order'],
-      projection: ['name', 'parameters'],
+      projection: ['name', 'parameters', 'output'],
       cart: ['ellipsoid'],
-      helmert: ['translation', 'rotation', 'scalePPM', 'convention'],
+      helmert: ['translation', 'rotation', 'scalePPM', 'convention', 'exact'],
+      push: ['components'],
+      pop: ['components'],
       hgridshift: ['grids'],
       vgridshift: ['grids', 'multiplier']
     };
     if (!step || !own(allowed, step.type))
       unsupportedStage('Unsupported pipeline operation: ' + step?.type);
-    keys(step, ['type', 'inverse', ...allowed[step.type]]);
+    keys(step, ['type', 'inverse', 'omitForward', 'omitInverse', ...allowed[step.type]]);
     if (step.inverse !== undefined && typeof step.inverse !== 'boolean')
       throw new Error('Invalid pipeline inverse flag');
     const inverse = Boolean(step.inverse);
@@ -316,8 +377,10 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       inverse ? {forward: pair.inverse, inverse: pair.forward} : pair;
     const pair =
       (forward: Operation, backward: Operation): Factory =>
-      () =>
-        orient({forward, inverse: backward});
+      () => {
+        cache.pair ||= {forward, inverse: backward};
+        return orient(cache.pair);
+      };
     const requireState = (
       space: PipelineCoordinateSystem['space'],
       expected: readonly PipelineUnit[]
@@ -395,9 +458,21 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
         return pair(operation(order), operation(reverse));
       }
       case 'projection': {
-        requireState(inverse ? 'projected' : 'geographic', inverse ? ['m', 'm'] : ['rad', 'rad']);
-        state.space = inverse ? 'geographic' : 'projected';
-        state.units[0] = state.units[1] = inverse ? 'rad' : 'm';
+        const output: PipelineProjectionOutput =
+          step.output === undefined ? {space: 'projected', unit: 'm'} : {...step.output};
+        keys(output, ['space', 'unit']);
+        if (
+          output.space === 'geographic'
+            ? !['rad', 'deg'].includes(output.unit)
+            : output.space !== 'projected' || output.unit !== 'm'
+        )
+          throw new Error('Invalid projection output space/unit contract');
+        requireState(
+          inverse ? output.space : 'geographic',
+          inverse ? [output.unit, output.unit] : ['rad', 'rad']
+        );
+        state.space = inverse ? 'geographic' : output.space;
+        state.units[0] = state.units[1] = inverse ? 'rad' : output.unit;
         const key = (name: string) => name.toLowerCase().replace(/[\s_-]/g, '');
         if (typeof step.name !== 'string') throw new Error('Invalid projection name');
         const registration = options.projections?.find(p =>
@@ -409,15 +484,30 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
         for (const name of Object.keys(parameters))
           if (CORE_PARAMETERS.includes(name) && !geometryKeys.includes(name) && name !== 'over')
             unsupportedStage('Unsupported pipeline parameter: ' + name);
-        if (key(registration.name) === 'obtran')
-          unsupportedStage('Oblique helper pipelines require an explicit output-unit contract');
+        const oblique = key(registration.name) === 'obtran';
+        const geographicChild = ['longlat', 'latlong', 'latlon', 'lonlat', 'identity'].includes(
+          key(parameters['o_proj'] || '')
+        );
+        if (oblique && (!step.output || !parameters['o_proj']))
+          unsupportedStage(
+            'Oblique helper pipelines require an explicit output-unit contract and o_proj'
+          );
+        if ((oblique && geographicChild) !== (output.space === 'geographic'))
+          throw new Error('Projection output contract does not match its algorithm');
+        const scale = geographicChild && output.unit === 'rad' ? Math.PI / 180 : 1;
         const normalized = normalizeCRS(definition(registration.name, parameters));
         if (normalized.kind !== 'projected')
           unsupportedStage('Use a cart step for geocentric conversion');
         return () => {
+          if (cache.pair) return orient(cache.pair);
           const plugin = getLoadedProjection(registration);
           if (!plugin)
             unsupportedStage('Pipeline projection requires preload(): ' + registration.name);
+          if ((key(plugin.name) === 'obtran') !== oblique)
+            unsupportedStage(
+              'Pipeline projection requires a matching projected-metre output contract: ' +
+                plugin.name
+            );
           if (
             [
               'geocent',
@@ -426,8 +516,7 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
               'longlat',
               'latlong',
               'latlon',
-              'lonlat',
-              'obtran'
+              'lonlat'
             ].includes(key(plugin.name))
           )
             unsupportedStage(
@@ -446,10 +535,26 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
             semiMajorAxis: normalized.ellipsoid.semiMajorAxis,
             eccentricitySquared: normalized.ellipsoid.eccentricitySquared
           });
-          return orient({
-            forward: projectionOperation(implementation, false),
-            inverse: projectionOperation(implementation, true)
-          });
+          const forward = projectionOperation(implementation, false),
+            backward = projectionOperation(implementation, true);
+          cache.pair = oblique
+            ? {
+                forward: p => {
+                  if (Math.abs(p.y) > Math.PI / 2) throw new Error('Invalid geographic latitude');
+                  forward(p);
+                  p.x *= scale;
+                  p.y *= scale;
+                },
+                inverse: p => {
+                  if (geographicChild && Math.abs(p.y) > (output.unit === 'deg' ? 90 : Math.PI / 2))
+                    throw new Error('Invalid rotated geographic latitude');
+                  p.x /= scale;
+                  p.y /= scale;
+                  backward(p);
+                }
+              }
+            : {forward, inverse: backward};
+          return orient(cache.pair);
         };
       }
       case 'cart': {
@@ -482,6 +587,17 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
         const scale = step.scalePPM ?? 0;
         if (!Number.isFinite(scale) || scale <= -1e6)
           throw new Error('Helmert requires positive finite scale');
+        if (step.exact !== undefined && typeof step.exact !== 'boolean')
+          throw new Error('Invalid exact Helmert flag');
+        if (step.exact) {
+          const exact = createExactHelmert(
+            step.translation,
+            step.rotation || [0, 0, 0],
+            scale,
+            step.convention === 'coordinate_frame'
+          );
+          return pair(exact.forward, exact.inverse);
+        }
         const sign = step.convention === 'coordinate_frame' ? -1 : 1;
         const values = [
           ...step.translation,
@@ -489,6 +605,64 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
           scale
         ];
         return pair(createHelmert(values, false), createHelmert(values, true));
+      }
+      case 'push':
+      case 'pop': {
+        if (
+          !Array.isArray(step.components) ||
+          !step.components.length ||
+          step.components.some(
+            component => !Number.isInteger(component) || component < 1 || component > 3
+          ) ||
+          new Set(step.components).size !== step.components.length
+        )
+          throw new Error('Stack components must be distinct ordinates 1, 2 or 3');
+        const components = [...step.components];
+        this.requiresZ ||= components.includes(3);
+        const pushing = (step.type === 'push') !== inverse;
+        const entries = components.map(component => {
+          const index = component - 1;
+          if (pushing) {
+            const entry = {unit: state.units[index], space: state.space, slot: this.stackSize++};
+            state.stacks[index].push(entry);
+            return entry;
+          }
+          const entry = state.stacks[index].pop();
+          if (!entry) throw new Error('Pipeline stack underflow for ordinate ' + component);
+          return entry;
+        });
+        if (!pushing) {
+          const horizontal = components
+            .map((component, index) => ({component, entry: entries[index]}))
+            .filter(({component}) => component < 3);
+          const space = horizontal[0]?.entry.space || state.space;
+          if (
+            horizontal.some(({entry}) => entry.space !== space) ||
+            (horizontal.length === 1 && space !== state.space)
+          )
+            throw new Error('Stack restore would mix horizontal coordinate spaces');
+          state.space = space;
+          components.forEach((component, index) => {
+            state.units[component - 1] = entries[index].unit;
+          });
+        }
+        const save: Operation = (p, stack) => {
+          for (let index = 0; index < components.length; index++)
+            stack[entries[index].slot] =
+              components[index] === 1 ? p.x : components[index] === 2 ? p.y : p.z;
+        };
+        const restore: Operation = (p, stack) => {
+          for (let index = 0; index < components.length; index++) {
+            const value = stack[entries[index].slot];
+            if (components[index] === 1) p.x = value;
+            else if (components[index] === 2) p.y = value;
+            else p.z = value;
+          }
+        };
+        // Unlike equations, stack slots are direction-local and must not use the
+        // shared pair cache. Their matching push is known at construction.
+        return () =>
+          pushing ? {forward: save, inverse: restore} : {forward: restore, inverse: save};
       }
       case 'hgridshift': {
         requireState('geographic', ['rad', 'rad']);

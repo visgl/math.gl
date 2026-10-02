@@ -22,7 +22,7 @@ validation command. Baselines record workloads, versions, platform, samples and
 numerical tolerances. Correctness and reviewed bundle budgets gate changes; shared
 runner timings are evidence with variability, rather than universal speed guarantees.
 
-Projection progress: tranches 8–12B2 provide an implemented measurement and correctness
+Projection progress: tranches 8–12B3 provide an implemented measurement and correctness
 foundation. Maintain it through tranche 14 as new operations are added. Their completion
 does not imply that every math.gl package has completed this library-wide tranche.
 
@@ -37,7 +37,7 @@ Acceptance: report forward/inverse error and worst inputs against independent
 references, including boundary and degenerate cases. Round trips supplement the
 oracle; they do not prove accuracy. Document precision limits and rejected domains.
 
-Projection milestones: completed tranche 11, pipeline accuracy work in 12B3, and
+Projection milestones: completed tranche 11 and the declared 12B3 pipeline profile, with
 continued parameter/singularity qualification in 14.
 
 ## 3. Add WebGPU-compatible projection conventions
@@ -83,7 +83,9 @@ height/axis cases pass documented forward/inverse budgets. Unknown CRS metadata,
 missing resources and unsupported transformations fail explicitly. Epochs are supplied
 separately from M; model accuracy and numerical interpolation accuracy are distinct.
 
-Projection milestones: 12B3, 12C1–12C2, 12D and continued qualification in 14. Tranche
+Projection milestones: landed 12B3, 12C1 pending in
+[PR #172](https://github.com/visgl/math.gl/pull/172), planned 12C2 and 12D, and
+continued qualification in 14. Tranche
 12E may select from a bounded, optional operation catalogue with visible provenance;
 it does not introduce an unrestricted EPSG/GIS engine.
 

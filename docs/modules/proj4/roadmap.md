@@ -348,14 +348,31 @@ final records. Packed ESM/CJS/types, optional bundle boundaries and browser qual
 run in CI. See [the operation pipeline contract](./operation-pipelines.md).
 
 This completes the typed composition profile, not arbitrary PROJ pipeline parsing.
-Exact rotations, `ob_tran` output-unit contracts, push/pop, omitted directions and
-additional operators remain explicit gaps tracked in 12B3. Dynamic operations are
-split into 12C1–12C2, with an epoch separate from M; operation selection is 12E.
+The follow-up below adds exact rotations, explicit `ob_tran` output units, ordinate
+stacks and direction-specific steps. Other operators and arbitrary string parsing
+remain outside the typed profile. Dynamic operations are split into 12C1–12C2,
+with an epoch separate from M; operation selection is 12E.
+
+## Tranche 12B3: pipeline completeness — implemented
+
+Opt-in exact static Helmert rotations and mathematical inverses preserve the default
+small-angle model. Explicit `ob_tran` contracts cover rotated geographic radians/degrees
+and projected metres. Balanced, nested X/Y/Z stacks and `omitForward`/`omitInverse`
+steps support height-only adjustments in a separate interpolation frame. Both paths
+are validated for units, spaces and stack state; each batch owns reusable stack storage.
+Thirty-seven authored pipelines / 102 XYZM points now have independent PROJ 9.5.1
+forward/inverse expectations, including real BETA2007 interpolation and an authored
+GTX field. Scalar, Float64 and Float32 ownership/rounding checks run with Node and
+browser qualification. See [the pipeline guide](./operation-pipelines.md).
+
+This completes the declared typed-operator extension. M remains an uninterpreted
+measure; epoch operations, general PROJ pipeline-string parsing and further operators
+remain separate work. A pipeline that omits or discards information need not roundtrip.
 
 ## Remaining performance and geodetic roadmap
 
-Updated October 2, 2026 after the vertical GeoTIFF, typed pipeline and projection API
-naming changes landed. The public APIs are `Projection`, `ProjectionEngine`,
+Updated October 2, 2026 after pipeline completeness (12B3) landed in
+[PR #171](https://github.com/visgl/math.gl/pull/171). The public APIs are `Projection`, `ProjectionEngine`,
 `LazyProjection` and `ProjectionPipeline`; the configurable alpha API no longer
 exports `TypeScriptProjection`.
 
@@ -364,11 +381,11 @@ Keep the library tranche numbers 1–6 and the projection milestone numbers 8–
 
 | Library-wide priority | Projection milestones |
 | --- | --- |
-| 1 — Consolidation and baselines | Implemented 8–12B2 foundations; ongoing qualification in 14. |
-| 2 — Numerical robustness | Implemented 11; remaining pipeline accuracy in 12B3 and broader domains in 14. |
+| 1 — Consolidation and baselines | Implemented 8–12B3 foundations; ongoing qualification in 14. |
+| 2 — Numerical robustness | Implemented 11 and the declared 12B3 pipeline profile; broader domains remain in 14. |
 | 3 — WebGPU projection conventions | Core graphics matrix, projection/unprojection and culling APIs. This is separate from projection GPU acceleration in 13D. |
 | 4 — Allocation-efficient bulk operations | Implemented 10; remaining general pipeline, grid/datum and XYZM performance in 13A. |
-| 5 — Global geospatial correctness | 12B3, 12C1–12C2, 12D, bounded optional operation selection in 12E, and 14. |
+| 5 — Global geospatial correctness | Implemented 12B3; remaining 12C1–12C2, 12D, bounded optional operation selection in 12E, and 14. |
 | 6 — Measured acceleration | Profile in 13A; evaluate optional Wasm/SIMD, workers and GPU paths in 13B–13D. |
 
 The broader plan excludes BLAS, tensor frameworks and general GIS engines. This module
@@ -387,16 +404,17 @@ acceptance criteria; a faster benchmark does not establish accuracy or complete 
 | 12A — Explicit vertical grids | Prepared geoid grids, GTX and the `@math.gl/geoid` adapter. |
 | 12B1 — Vertical GeoTIFF | Optional numeric-grid adapter, independent fixtures and loaders.gl integration. |
 | 12B2 — Typed operation pipelines | Explicit units, axes, equations, geocentric/static Helmert and horizontal/vertical grid steps. |
+| 12B3 — Pipeline completeness | Exact Helmert rotations/inverses, explicit oblique output contracts, ordinate stacks and direction-specific steps; 37 independent pipelines / 102 XYZM points. |
 
 ### Remaining tranches
 
-All rows below are planned. Existing implementations and their documented limits
-remain the baseline; no acceleration backend or dynamic operation is implied to exist.
+12C1 is implemented in [PR #172](https://github.com/visgl/math.gl/pull/172), pending
+merge. Other rows are planned. Landed implementations and their documented limits
+remain the baseline; no acceleration backend or deformation model is implied to exist.
 The former broad 12C is split below, with CRS-driven operation selection tracked in 12E.
 
 | Tranche | Deliverable | Acceptance gate |
 | --- | --- | --- |
-| 12B3 — Pipeline completeness | Opt-in exact Helmert rotations and inverse, explicit `ob_tran` output spaces/units, push/pop and direction-specific steps. Define the supported subset before adding any PROJ pipeline-string reader. | Independent forward/inverse references for each added operator, state/unit validation and preserved XYZM/partial-error behavior; optional features stay out of core bundles. |
 | 12C1 — Observation epochs and kinematic Helmert | Explicit decimal-year epochs and translation/rotation/scale rates with a reference epoch. Support one epoch for a batch and a separately supplied per-point epoch buffer; preserve M. | Independent multi-epoch references for both rotation conventions, inverse transformations, missing/invalid epoch errors and unchanged static-operation results. |
 | 12C2 — Deformation models | Optional prepared velocity/deformation grids and explicit source/target epoch propagation; application-owned model loading. | Licensed, pinned real-model fixtures, units/time/coverage/nodata checks and independently checked forward/inverse results; unused models add no core bundle cost. |
 | 12D — Structured compound and vertical CRS execution | Interpret supported horizontal + vertical CRS combinations through `@math.gl/crs`, with explicit height units, axes, datums and supplied operations/models. Extend derived CRS support only where its operation is executable. | Equivalent WKT/PROJJSON/readonly CRS inputs produce the same qualified transformation; unsupported or missing operations fail explicitly and metadata remains unchanged. |
@@ -409,8 +427,8 @@ The former broad 12C is split below, with CRS-driven operation selection tracked
 
 ### Suggested order
 
-Start with 12B3 to finish the explicit operation API and 13A to identify the next
-measured throughput gains. Then add 12C1 before 12C2. Structured CRS execution in
+Complete the 12C1 review and use 13A to identify the next measured throughput gains.
+Add 12C2 after the explicit epoch API lands. Structured CRS execution in
 12D and a reviewed catalogue provide the prerequisites for 12E. Keep qualification
 work from 14 alongside every tranche. Evaluate 13B and 13C after profiling establishes
 which workloads could benefit; 13D remains an optional visualization investigation.

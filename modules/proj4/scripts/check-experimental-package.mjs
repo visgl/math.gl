@@ -254,7 +254,7 @@ for (const entry of [
   assert(
     !retained.some(path =>
       entry.includes('/core')
-        ? path.endsWith('/projection-pipeline.js')
+        ? path.endsWith('/projection-pipeline.js') || path.endsWith('/exact-helmert.js')
         : path.endsWith('/typescript-projection.js')
     )
   );
