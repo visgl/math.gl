@@ -23,3 +23,6 @@ export {cutPolylineByMercatorBounds, cutPolygonByMercatorBounds} from './cut-by-
 
 /** @deprecated */
 export {Polygon as _Polygon} from './polygon';
+
+export {subdividePolyline} from './subdivide-polyline';
+export type {SubdividePolylineOptions, SubdividedPolyline} from './subdivide-polyline';
