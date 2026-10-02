@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- feat(proj4): Add explicit coordinate epochs and kinematic Helmert rates to pipelines,
+  with constant-batch and separate per-record epoch inputs that preserve M.
+
 - feat(proj4): Extend typed pipelines with exact Helmert rotations, ordinate stacks,
   direction-specific steps and explicit rotated-projection output units (#171).
 

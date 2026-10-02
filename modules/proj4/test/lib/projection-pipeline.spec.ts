@@ -125,7 +125,7 @@ test('failed descriptor imports retry; direct descriptor preload unlocks pipelin
   expect(attempts).toBe(2);
 });
 
-test('typed operations reject unsupported metadata, rates, units, operator names and missing plugins', () => {
+test('typed operations reject unsupported metadata, units, operator names and missing plugins', () => {
   const bad =
     (steps: unknown, extra = {}) =>
     () =>

@@ -349,8 +349,9 @@ run in CI. See [the operation pipeline contract](./operation-pipelines.md).
 This completes the typed composition profile, not arbitrary PROJ pipeline parsing.
 The follow-up below adds exact rotations, explicit `ob_tran` output units, ordinate
 stacks and direction-specific steps. Other operators and arbitrary string parsing
-remain outside the typed profile. Dynamic datums and operation selection
-remain 12C, with an epoch separate from M.
+remain outside the typed profile. Kinematic Helmert epochs/rates follow in 12C1 below;
+deformation models and operation selection remain separate work, with epochs separate
+from M.
 
 ## Tranche 12B3: pipeline completeness — implemented
 
@@ -365,14 +366,33 @@ GTX field. Scalar, Float64 and Float32 ownership/rounding checks run with Node a
 browser qualification. See [the pipeline guide](./operation-pipelines.md).
 
 This completes the declared typed-operator extension. M remains an uninterpreted
-measure; epoch operations, general PROJ pipeline-string parsing and further operators
-remain separate work. A pipeline that omits or discards information need not roundtrip.
+measure. The following tranche adds explicit observation epochs; general PROJ
+pipeline-string parsing and further operators remain separate work. A pipeline that
+omits or discards information need not roundtrip.
+
+## Tranche 12C1: observation epochs and kinematic Helmert — implemented
+
+`ProjectionPipeline` accepts explicit decimal-year observation epochs on scalar and
+flat methods. A flat call can use one epoch for a batch or a separate Float64/Float32
+epoch buffer with one value per record; M and later ordinates stay untouched.
+Helmert steps snapshot translation/rotation/scale rates and a required reference epoch,
+cache repeated-epoch coefficients and update mixed epochs without per-record objects.
+Both rotation conventions and small-angle/exact modes are qualified against 12
+independent PROJ 9.5.1 pipelines / 48 coordinate/epoch pairs. Unit/space validation,
+reverse execution, lazy loading and ownership/partial-error contracts are preserved.
+The core and ordinary wrapper bundles remain unchanged.
+
+This is explicit reference-frame transformation at an observation epoch. It neither
+propagates coordinates between epochs nor infers time from M or CRS metadata.
+Prepared deformation models, time-dependent grids and automatic operation selection
+remain future work. See [coordinate epochs](./operation-pipelines.md#coordinate-epochs-and-moving-reference-frames).
 
 ## Remaining performance and geodetic roadmap
 
 | Tranche | Work | Acceptance gate |
 | --- | --- | --- |
-| 12C — Time-dependent operations | Epochs, dynamic datums and operation selection | Explicit epoch API separate from M, independent time-dependent references |
+| 12C2 — Deformation models | Optional prepared velocity/deformation grids and explicit source/target epoch propagation | Licensed model fixtures, independently checked results and explicit units/coverage/time behavior |
+| 12E — Operation selection | A bounded optional catalogue with explicit epoch, area, accuracy and grid availability | Pinned provenance, deterministic reviewed selection and no implicit grid downloads |
 | 13 — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
 
 Further optimization and operation support require separate measurements and accuracy

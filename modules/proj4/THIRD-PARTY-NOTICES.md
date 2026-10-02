@@ -89,3 +89,12 @@ Helmert equations remain the attributed proj4js adaptation in `datum.ts`.
 Ordinate-stack and direction-specific orchestration are original math.gl code
 inspired by PROJ pipeline contracts, not direct PROJ or proj4js forks.
 The additional two-by-two GTX is authored MIT test data, not a distributed geoid model.
+
+`src/experimental/kinematic-helmert.ts` is original epoch/rate orchestration following
+PROJ's documented parameter propagation contract. Its exact matrix/convention
+transpose directly adapts PROJ 9.5.1 `helmert.cpp`, with the Thomas Knudsen / SDFE
+copyright and `PROJ-LICENSE.txt` terms above; its small-angle equations follow the
+existing attributed proj4js `datum.ts` adaptation. The kinematic fixture parameter
+example is documented by PROJ; authored finite rotations/epochs are MIT test data,
+not an authoritative CRS operation catalogue. Numerical expectations are generated
+independently with pinned pyproj 3.7.2 / PROJ 9.5.1, with observation time separate from M.

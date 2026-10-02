@@ -56,7 +56,7 @@ not necessarily the mathematical inverse of the forward program.
 | `axisswap` | `order: [2, 1]`, `[-2, 1]`, or any signed permutation of three ordinates. Two-axis steps preserve Z; three-axis steps require XYZ. M stays untouched. |
 | `projection` | `name` selects a registered plugin; `parameters` supplies its PROJ parameter strings/flags and ellipsoid geometry. Forward: geographic radians → projected metres. Inverse: projected metres → geographic radians. Z units stay unchanged. `ob_tran` requires an explicit `output` space/unit and matching `o_proj`. |
 | `cart` | Geographic radians/metre height → geocentric XYZ metres. Optional `ellipsoid` accepts `ellps`, `a`, `b`, `rf`, `f`, or `R` string parameters; default WGS84. Requires XYZ. |
-| `helmert` | Static geocentric XYZ metres. `translation: [x, y, z]` is in metres, optional `rotation` is in arcseconds, and `scalePPM` defaults to zero. Rotation requires `position_vector` or `coordinate_frame` convention. Scale must be positive. Requires XYZ. `exact: true` uses a full rotation matrix and its mathematical inverse. |
+| `helmert` | Geocentric XYZ metres. `translation: [x, y, z]` is in metres, optional `rotation` is in arcseconds, and `scalePPM` defaults to zero. Rotation requires `position_vector` or `coordinate_frame` convention. Scale must be positive. Requires XYZ. `exact: true` uses a full rotation matrix and its mathematical inverse. Optional `rates` and `referenceEpoch` enable kinematic parameters; coordinate epochs are supplied separately. |
 | `push` / `pop` | `components: [1, 2]`, `[3]`, or another nonempty selection of X/Y/Z. Independent nested stacks preserve values and units; inverse execution swaps push/pop. M and later ordinates are never stacked. |
 | `hgridshift` | Geographic radians; `grids` names prepared `datumGrids`, in priority order. Preserves height. Uses the grid's forward/inverse shift methods. |
 | `vgridshift` | Geographic radians/metre height; `grids` names prepared `verticalGrids`. Adds `multiplier * offset` in the forward direction. Multiplier defaults to **−1**, following PROJ. Requires XYZ. |
@@ -76,8 +76,76 @@ approximation; it is not an exact matrix inverse. `exact: true` uses full rotati
 transposes the complete matrix for the position-vector convention, and uses the
 transpose/reciprocal scale for inverse execution. Choose the mode expected by your
 transformation parameters; parameters fitted to a small-angle model should retain
-the default. Transformation rates, observation epochs and time-dependent grids remain
-outside this profile.
+the default. Kinematic parameters use explicit coordinate epochs as shown below. Time-dependent
+grids and deformation models remain outside this profile.
+
+## Coordinate epochs and moving reference frames
+
+Use a kinematic Helmert step when supplied reference-frame parameters include annual
+rates. `referenceEpoch` is the decimal year at which the base parameters apply.
+Translation rates are metres/year, rotation rates are arcseconds/year and `scalePPM`
+within `rates` is ppm/year. Every parameter uses `base + rate * (epoch - referenceEpoch)`.
+The rotation convention is required when either base rotations or rotation rates are
+specified. `exact: true` also works with rates; choose the model used to fit the parameters.
+
+```typescript
+const movingFrame = new ProjectionPipeline({
+  input: {space: 'geocentric', units: ['m', 'm', 'm']},
+  steps: [{
+    type: 'helmert',
+    translation: [0.0127, 0.0065, -0.0209],
+    rotation: [-0.00039, 0.00080, -0.00114],
+    scalePPM: 0.00195,
+    convention: 'position_vector',
+    referenceEpoch: 1988,
+    rates: {
+      translation: [-0.0029, -0.0002, -0.0006],
+      rotation: [-0.00011, -0.00019, 0.00007],
+      scalePPM: 0.00001
+    }
+  }]
+});
+
+const point = [3657660.66, 255768.55, 5201382.11, 8]; // XYZM; M stays 8.
+const transformed = movingFrame.project(point, 2010.25);
+const restored = movingFrame.unproject(transformed, 2010.25);
+
+const coordinates = new Float64Array([...point, ...point]);
+movingFrame.projectFlat(coordinates, 4, 2020); // One epoch for the entire batch.
+const epochs = new Float64Array([2020, 2020]);
+movingFrame.unprojectFlat(coordinates, 4, epochs); // Or one epoch per record.
+```
+
+These are explicitly chosen operations and parameter sets, following
+[PROJ's kinematic Helmert contract](https://proj.org/en/stable/operations/transformations/helmert.html).
+The example parameters do not select a CRS or establish an operation's area, validity
+period or accuracy. Check those properties with the parameter provider. A Helmert
+step changes the reference frame at the supplied observation epoch; it does not move
+a coordinate from one observation epoch to another. Inverse execution uses the same
+epoch and preserves the default small-angle inverse approximation unless `exact` is chosen.
+
+Scalar methods accept an optional decimal-year number as their second argument.
+Flat methods accept a number or `Float64Array`/`Float32Array` as their third argument,
+after the stride. The `*Sync` and lazy methods have the same epoch arguments.
+A pipeline containing rates requires explicit epochs in both directions, even when
+rates are zero or a particular direction omits that step. Static pipelines require
+none; supplying valid epochs leaves their results unchanged. An epoch on the step
+or in M is never inferred or accepted as an observation time.
+
+An epoch buffer is read-only during the call and contains one value per coordinate
+record. Subarray views are supported, including non-overlapping views of shared
+storage; overlap with the coordinate view is rejected before any records change.
+Wrong buffer types/lengths and a missing or invalid batch epoch are also rejected
+before transformation. A non-finite per-record epoch or invalid time-adjusted scale
+follows the usual partial-error contract: completed records stay transformed, and
+the failing/remaining records stay unchanged. Use Float64 epochs for fractional-year
+precision; Float32 epochs use their stored rounded value. Callers must keep borrowed
+coordinate and epoch inputs stable until an asynchronous operation completes.
+
+Prepared parameter snapshots cache the last epoch; repeated-epoch batches reuse
+coefficients. Mixed epochs update coefficients without allocating per-record arrays
+or objects. Empty batches accept an empty epoch buffer. Epochs remain separate from
+M and are not converted between calendars or time units by this API.
 
 ## Save ordinates and choose direction-specific steps
 
@@ -220,9 +288,11 @@ horizontal/vertical grid placement, exact rotations, nested stacks, skipped dire
 and geographic/projected oblique output. Scalar and Float64 results are checked against
 pyproj 3.7.2 / PROJ 9.5.1 in Node, Chromium, Firefox and WebKit; Float32 checks cover
 final rounding on rounded inputs. These are fixture tolerances, not global accuracy
-proofs or geoid-model accuracy claims.
+proofs or geoid-model accuracy claims. A separate kinematic corpus adds 12 pipelines /
+48 coordinate/epoch pairs for approximate/exact rotations, both conventions, inverse
+steps and a geographic-to-UTM height-preserving chain.
 
 This is typed composition, not a parser for arbitrary `+proj=pipeline` strings. Unknown
 operators and parameters throw instead of being skipped. Stack support covers X/Y/Z
-with stricter balance validation; arbitrary operators, epochs, automatic EPSG operation
-selection and dynamic datums remain outside this profile. See the [remaining roadmap](./roadmap.md).
+with stricter balance validation; arbitrary operators, deformation models, automatic
+EPSG operation selection and dynamic CRS inference remain outside this profile. See the [remaining roadmap](./roadmap.md).

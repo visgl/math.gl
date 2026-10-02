@@ -124,6 +124,19 @@ try {
       {type: 'helmert', translation: [100, -200, 30], rotation: [15000, -7000, 3000], convention: 'position_vector', exact: true}
     ]});
     fullExact.unproject(fullExact.project(exactInput)).forEach((value, index) => assert(Math.abs(value - exactInput[index]) < 1e-8));
+    const moving = new ProjectionPipeline({input: exact.input, steps: [
+      {type: 'helmert', translation: [1, 2, 3], referenceEpoch: 2000, rates: {translation: [0.1, -0.2, 0.3]}}
+    ]});
+    assert.throws(() => moving.project([10, 20, 30, 2020]), /epoch/);
+    assert.deepEqual(moving.project([10, 20, 30, 8], 2020), [13, 18, 39, 8]);
+    const epochBuffer = new Float64Array([2000, 2020]);
+    const movingBuffer = new Float64Array([10, 20, 30, 8, 10, 20, 30, 9]);
+    moving.projectFlat(movingBuffer, 4, epochBuffer);
+    assert.deepEqual(Array.from(movingBuffer), [11, 22, 33, 8, 13, 18, 39, 9]);
+    moving.unprojectFlat(movingBuffer, 4, epochBuffer);
+    assert.deepEqual(Array.from(movingBuffer), [10, 20, 30, 8, 10, 20, 30, 9]);
+    assert.deepEqual(Array.from(epochBuffer), [2000, 2020]);
+
     const {obliqueTransformation} = await load('@math.gl/proj4/projections/ob_tran');
     const rotated = new ProjectionPipeline({input: {space: 'geographic', units: ['rad', 'rad', 'm']}, projections: [obliqueTransformation('longlat')], steps: [
       {type: 'projection', name: 'ob_tran', parameters: {o_proj: 'longlat', o_lat_p: '45', o_lon_p: '-90'}, output: {space: 'geographic', unit: 'rad'}}
@@ -277,7 +290,7 @@ try {
     const asyncBuffer: Promise<Float64Array> = lazy.projectFlat(new Float64Array([3, 0]));
     const mixed = new ProjectionEngine({to: 'EPSG:32631', projections: [mercator, lazyUniversalTransverseMercator]});
     const mixedResult: Promise<number[]> = mixed.project([3, 0]);
-    import {ProjectionPipeline, type PipelineStep, type ProjectionPipelineOptions, type PipelineProjectionOutput} from '@math.gl/proj4/pipeline';
+    import {ProjectionPipeline, type PipelineStep, type ProjectionPipelineOptions, type PipelineProjectionOutput, type PipelineHelmertRates, type PipelineEpochs} from '@math.gl/proj4/pipeline';
     const pipelineOptions: ProjectionPipelineOptions = {input: {space: 'geographic', units: ['deg', 'deg', 'm']}, steps: [{type: 'unitconvert', xy: {from: 'deg', to: 'rad'}}]};
     const rotationOutput: PipelineProjectionOutput = {space: 'geographic', unit: 'rad'};
     const stackSteps: PipelineStep[] = [{type: 'push', components: [3]}, {type: 'pop', components: [3]}];
@@ -286,6 +299,16 @@ try {
     const measureStack: PipelineStep = {type: 'push', components: [4]};
     // @ts-expect-error Geographic helper output cannot have linear units.
     const mixedOutput: PipelineProjectionOutput = {space: 'geographic', unit: 'm'};
+    const rates: PipelineHelmertRates = {translation: [0.1, 0.2, 0.3], rotation: [0, 0, 0], scalePPM: 0.1};
+    const moving = new ProjectionPipeline({input: {space: 'geocentric', units: ['m', 'm', 'm']}, steps: [{type: 'helmert', translation: [1, 2, 3], referenceEpoch: 2000, rates, convention: 'position_vector'}]});
+    const epochs: PipelineEpochs = new Float64Array([2000]);
+    const timedScalar: number[] = moving.project([1, 2, 3], 2020);
+    const timedFlat: Float32Array = moving.projectFlat(new Float32Array([1, 2, 3]), 3, epochs);
+    moving.unprojectFlatSync(timedFlat, 3, 2020);
+    // @ts-expect-error Time is separate; scalar coordinates do not accept an epoch buffer.
+    moving.project([1, 2, 3], new Float64Array([2020]));
+    // @ts-expect-error Epochs must be decimal-year float buffers, not integer arrays.
+    moving.projectFlat(new Float64Array([1, 2, 3]), 3, new Int32Array([2020]));
     const pipeline = new ProjectionPipeline(pipelineOptions);
     const pipelineScalar: number[] = pipeline.project([0, 0]);
     const pipelineFlat: Float32Array = pipeline.projectFlat(new Float32Array([0, 0]));
@@ -299,7 +322,7 @@ try {
     const unknownStep: PipelineStep = {type: 'affine'};
     // @ts-expect-error Unknown unit names are not supported.
     const unknownUnits: PipelineStep = {type: 'unitconvert', xy: {from: 'degree', to: 'rad'}};
-    // @ts-expect-error Time-dependent parameters are not supported.
+    // @ts-expect-error Observation epoch is supplied separately, not in a step.
     const dynamicStep: PipelineStep = {type: 'helmert', translation: [0, 0, 0], epoch: 2020};
     import {mercator} from '@math.gl/proj4/projections/merc';
     import {parseWKTCRS} from '@math.gl/crs/wkt';
