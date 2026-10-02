@@ -183,7 +183,7 @@ try {
         }
       );
       const independent = await page.evaluate(async () => {
-        const {qualify, qualifyAccuracy, qualifyVertical, qualifyPipelines} = await import('/accuracy.js');
+        const {qualify, qualifyAccuracy, qualifyVertical, qualifyPipelines, qualifyKinematicPipelines} = await import('/accuracy.js');
         const {qualifyVerticalGeoTIFF} = await import('/vertical-geotiff.js');
         const inputs = await (await fetch('/native-proj-cases.json')).json();
         const reference = await (await fetch('/native-proj-reference.json')).json();
@@ -192,7 +192,8 @@ try {
           accuracy: qualifyAccuracy(),
           vertical: qualifyVertical(),
           verticalGeoTIFF: await qualifyVerticalGeoTIFF(),
-          pipelines: qualifyPipelines(await (await fetch('/pipeline-horizontal.gsb')).arrayBuffer())
+          pipelines: qualifyPipelines(await (await fetch('/pipeline-horizontal.gsb')).arrayBuffer()),
+          kinematicPipelines: qualifyKinematicPipelines()
         };
       });
       results.push({browser: name, version: browser.version(), cold, independent, ...warm});

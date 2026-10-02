@@ -15,6 +15,7 @@ import {
 } from './datum';
 import {projectionOperation} from './mutable-projection';
 import {createExactHelmert} from './exact-helmert';
+import {createKinematicHelmert} from './kinematic-helmert';
 import {getLoadedProjection, preloadProjection} from './projection-descriptor';
 import {compileVerticalGrid} from './vertical-datum';
 import type {ProjectionDescriptor} from './projection-descriptor';
@@ -22,6 +23,16 @@ import type {ProjectionParameters, ProjectionPlugin, ProjectionPoint} from './ty
 import type {ProjectionArray} from './typescript-projection';
 import type {DatumGridCollection, VerticalGridCollection} from './grids/types';
 
+/** Decimal years; a flat call accepts one epoch or one per coordinate record. */
+export type PipelineEpochs = number | Float32Array | Float64Array;
+export type PipelineHelmertRates = {
+  /** Metres per decimal year. */
+  readonly translation?: readonly [number, number, number];
+  /** Arcseconds per decimal year, using the step's rotation convention. */
+  readonly rotation?: readonly [number, number, number];
+  /** Parts per million per decimal year. */
+  readonly scalePPM?: number;
+};
 export type PipelineUnit = 'deg' | 'rad' | 'm' | 'ft' | 'us-ft';
 export type PipelineCoordinateSystem = {
   readonly space: 'geographic' | 'projected' | 'geocentric';
@@ -68,6 +79,9 @@ export type PipelineStep = Direction &
         readonly convention?: 'position_vector' | 'coordinate_frame';
         /** Use a full rotation matrix and its mathematical inverse. Default false. */
         readonly exact?: boolean;
+        /** Decimal year at which the base parameters apply. Required with rates. */
+        readonly referenceEpoch?: number;
+        readonly rates?: PipelineHelmertRates;
       }
     | {readonly type: 'push' | 'pop'; readonly components: readonly (1 | 2 | 3)[]}
     | {readonly type: 'hgridshift'; readonly grids: string}
@@ -82,7 +96,7 @@ export type ProjectionPipelineOptions<P extends Registration = ProjectionPlugin>
   readonly datumGrids?: DatumGridCollection;
   readonly verticalGrids?: VerticalGridCollection;
 };
-type Operation = (point: ProjectionPoint, stack: Float64Array) => void;
+type Operation = (point: ProjectionPoint, stack: Float64Array, epoch?: number) => void;
 type StackEntry = {unit: PipelineUnit; space: PipelineCoordinateSystem['space']; slot: number};
 type State = {
   space: PipelineCoordinateSystem['space'];
@@ -90,6 +104,18 @@ type State = {
   stacks: StackEntry[][];
 };
 const EMPTY_STACK = new Float64Array(0);
+// Typed-array buffers are ordinary or shared. The intrinsic getter checks the
+// backing-store brand across realms and cannot be fooled by Symbol.toStringTag.
+const ordinaryByteLength = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength').get;
+function sharedBuffer(buffer: ArrayBufferLike): boolean {
+  try {
+    ordinaryByteLength.call(buffer);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
 type Pair = {forward: Operation; inverse: Operation};
 type Factory = () => Pair;
 const factors: Record<PipelineUnit, number> = {
@@ -152,6 +178,7 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
   private readonly required: Registration[] = [];
   private readonly deferred: boolean;
   private requiresZ = false;
+  private requiresEpoch = false;
   private compiled?: {forward: Operation[]; inverse: Operation[]};
   private pending?: Promise<this>;
 
@@ -240,45 +267,61 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       });
     return this.pending;
   }
-  project(coordinate: readonly number[]): Result<P, number[]> {
+  project(coordinate: readonly number[], epoch?: number): Result<P, number[]> {
     return (
       this.deferred
-        ? this.preload().then(() => this.projectSync(coordinate))
-        : this.projectSync(coordinate)
+        ? this.preload().then(() => this.projectSync(coordinate, epoch))
+        : this.projectSync(coordinate, epoch)
     ) as Result<P, number[]>;
   }
-  unproject(coordinate: readonly number[]): Result<P, number[]> {
+  unproject(coordinate: readonly number[], epoch?: number): Result<P, number[]> {
     return (
       this.deferred
-        ? this.preload().then(() => this.unprojectSync(coordinate))
-        : this.unprojectSync(coordinate)
+        ? this.preload().then(() => this.unprojectSync(coordinate, epoch))
+        : this.unprojectSync(coordinate, epoch)
     ) as Result<P, number[]>;
   }
-  projectFlat<T extends ProjectionArray>(coordinates: T, dimension = 2): Result<P, T> {
+  projectFlat<T extends ProjectionArray>(
+    coordinates: T,
+    dimension = 2,
+    epochs?: PipelineEpochs
+  ): Result<P, T> {
     return (
       this.deferred
-        ? this.preload().then(() => this.projectFlatSync(coordinates, dimension))
-        : this.projectFlatSync(coordinates, dimension)
+        ? this.preload().then(() => this.projectFlatSync(coordinates, dimension, epochs))
+        : this.projectFlatSync(coordinates, dimension, epochs)
     ) as Result<P, T>;
   }
-  unprojectFlat<T extends ProjectionArray>(coordinates: T, dimension = 2): Result<P, T> {
+  unprojectFlat<T extends ProjectionArray>(
+    coordinates: T,
+    dimension = 2,
+    epochs?: PipelineEpochs
+  ): Result<P, T> {
     return (
       this.deferred
-        ? this.preload().then(() => this.unprojectFlatSync(coordinates, dimension))
-        : this.unprojectFlatSync(coordinates, dimension)
+        ? this.preload().then(() => this.unprojectFlatSync(coordinates, dimension, epochs))
+        : this.unprojectFlatSync(coordinates, dimension, epochs)
     ) as Result<P, T>;
   }
-  projectSync(coordinate: readonly number[]): number[] {
-    return this.scalar(coordinate, false);
+  projectSync(coordinate: readonly number[], epoch?: number): number[] {
+    return this.scalar(coordinate, false, epoch);
   }
-  unprojectSync(coordinate: readonly number[]): number[] {
-    return this.scalar(coordinate, true);
+  unprojectSync(coordinate: readonly number[], epoch?: number): number[] {
+    return this.scalar(coordinate, true, epoch);
   }
-  projectFlatSync<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
-    return this.flat(coordinates, dimension, false);
+  projectFlatSync<T extends ProjectionArray>(
+    coordinates: T,
+    dimension = 2,
+    epochs?: PipelineEpochs
+  ): T {
+    return this.flat(coordinates, dimension, false, epochs);
   }
-  unprojectFlatSync<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
-    return this.flat(coordinates, dimension, true);
+  unprojectFlatSync<T extends ProjectionArray>(
+    coordinates: T,
+    dimension = 2,
+    epochs?: PipelineEpochs
+  ): T {
+    return this.flat(coordinates, dimension, true, epochs);
   }
 
   private compile(): void {
@@ -295,7 +338,8 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
     this.compile();
     return inverse ? this.compiled.inverse : this.compiled.forward;
   }
-  private scalar(coordinate: readonly number[], inverse: boolean): number[] {
+  private scalar(coordinate: readonly number[], inverse: boolean, epoch?: number): number[] {
+    this.coordinateEpoch(epoch);
     if (coordinate.length < (this.requiresZ ? 3 : 2))
       throw new Error('Pipeline requires ' + (this.requiresZ ? 'XYZ' : 'XY') + ' coordinates');
     const operations = this.operations(inverse);
@@ -304,14 +348,24 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       y: coordinate[1],
       z: coordinate.length >= 3 ? coordinate[2] : 0
     };
-    this.run(point, operations, this.stackSize ? new Float64Array(this.stackSize) : EMPTY_STACK);
+    this.run(
+      point,
+      operations,
+      this.stackSize ? new Float64Array(this.stackSize) : EMPTY_STACK,
+      epoch
+    );
     const output = [...coordinate];
     output[0] = point.x;
     output[1] = point.y;
     if (coordinate.length >= 3) output[2] = point.z;
     return output;
   }
-  private flat<T extends ProjectionArray>(coordinates: T, dimension: number, inverse: boolean): T {
+  private flat<T extends ProjectionArray>(
+    coordinates: T,
+    dimension: number,
+    inverse: boolean,
+    epochs?: PipelineEpochs
+  ): T {
     if (
       !(coordinates instanceof Float32Array || coordinates instanceof Float64Array) ||
       !Number.isSafeInteger(dimension) ||
@@ -319,15 +373,37 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       coordinates.length % dimension
     )
       throw new Error('Pipeline requires Float32Array/Float64Array and a valid XY/XYZ stride');
+    if (epochs === undefined) this.coordinateEpoch(undefined);
+    else if (typeof epochs === 'number') this.coordinateEpoch(epochs);
+    else {
+      if (
+        !(epochs instanceof Float32Array || epochs instanceof Float64Array) ||
+        epochs.length !== coordinates.length / dimension
+      )
+        throw new Error('Epoch buffer requires one Float32/Float64 value per coordinate record');
+      if (
+        epochs.byteOffset < coordinates.byteOffset + coordinates.byteLength &&
+        coordinates.byteOffset < epochs.byteOffset + epochs.byteLength &&
+        (epochs.buffer === coordinates.buffer ||
+          (sharedBuffer(epochs.buffer) && sharedBuffer(coordinates.buffer)))
+      )
+        throw new Error('Epoch and coordinate buffers must not overlap or alias shared storage');
+    }
     const operations = this.operations(inverse),
       point = {x: 0, y: 0, z: 0};
     const float32 = coordinates instanceof Float32Array;
     const stack = this.stackSize ? new Float64Array(this.stackSize) : EMPTY_STACK;
+    const epochBuffer = typeof epochs === 'number' ? undefined : epochs;
+    let epoch = typeof epochs === 'number' ? epochs : undefined;
     for (let i = 0; i < coordinates.length; i += dimension) {
       point.x = coordinates[i];
       point.y = coordinates[i + 1];
       point.z = dimension >= 3 ? coordinates[i + 2] : 0;
-      this.run(point, operations, stack);
+      if (epochBuffer) {
+        epoch = epochBuffer[i / dimension];
+        this.coordinateEpoch(epoch);
+      }
+      this.run(point, operations, stack, epoch);
       if (
         float32 &&
         Math.max(Math.abs(point.x), Math.abs(point.y), Math.abs(point.z)) > 3.4028234663852886e38
@@ -339,10 +415,21 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
     }
     return coordinates;
   }
-  private run(point: ProjectionPoint, operations: readonly Operation[], stack: Float64Array): void {
+  private coordinateEpoch(epoch: number | undefined): void {
+    if (epoch === undefined) {
+      if (this.requiresEpoch) throw new Error('Pipeline requires an explicit coordinate epoch');
+    } else if (typeof epoch !== 'number' || !Number.isFinite(epoch))
+      throw new Error('Coordinate epoch must be a finite decimal year');
+  }
+  private run(
+    point: ProjectionPoint,
+    operations: readonly Operation[],
+    stack: Float64Array,
+    epoch?: number
+  ): void {
     finite(point);
     for (const operation of operations) {
-      operation(point, stack);
+      operation(point, stack, epoch);
       finite(point);
     }
   }
@@ -361,7 +448,15 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       axisswap: ['order'],
       projection: ['name', 'parameters', 'output'],
       cart: ['ellipsoid'],
-      helmert: ['translation', 'rotation', 'scalePPM', 'convention', 'exact'],
+      helmert: [
+        'translation',
+        'rotation',
+        'scalePPM',
+        'convention',
+        'exact',
+        'referenceEpoch',
+        'rates'
+      ],
       push: ['components'],
       pop: ['components'],
       hgridshift: ['grids'],
@@ -577,7 +672,7 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
         this.requiresZ = true;
         triple(step.translation);
         if (step.rotation) triple(step.rotation);
-        if (step.rotation && !step.convention)
+        if ((step.rotation || step.rates?.rotation) && !step.convention)
           throw new Error('Helmert rotation requires a convention');
         if (
           step.convention !== undefined &&
@@ -589,6 +684,37 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
           throw new Error('Helmert requires positive finite scale');
         if (step.exact !== undefined && typeof step.exact !== 'boolean')
           throw new Error('Invalid exact Helmert flag');
+        if (step.rates !== undefined) {
+          keys(step.rates, ['translation', 'rotation', 'scalePPM']);
+          if (
+            step.rates.translation === undefined &&
+            step.rates.rotation === undefined &&
+            step.rates.scalePPM === undefined
+          )
+            throw new Error('Helmert rates require at least one parameter');
+          if (step.rates.translation !== undefined) triple(step.rates.translation);
+          if (step.rates.rotation !== undefined) triple(step.rates.rotation);
+          if (step.rates.scalePPM !== undefined && !Number.isFinite(step.rates.scalePPM))
+            throw new Error('Helmert scale rate must be finite');
+          if (typeof step.referenceEpoch !== 'number' || !Number.isFinite(step.referenceEpoch))
+            throw new Error('Helmert rates require a finite referenceEpoch');
+          this.requiresEpoch = true;
+          const operation = createKinematicHelmert(
+            step.translation,
+            step.rotation || [0, 0, 0],
+            scale,
+            step.rates,
+            step.referenceEpoch,
+            step.convention === 'coordinate_frame',
+            Boolean(step.exact)
+          );
+          return pair(
+            (p, _stack, epoch) => operation.forward(p, epoch),
+            (p, _stack, epoch) => operation.inverse(p, epoch)
+          );
+        }
+        if (step.referenceEpoch !== undefined)
+          throw new Error('Helmert referenceEpoch requires rates');
         if (step.exact) {
           const exact = createExactHelmert(
             step.translation,

@@ -77,3 +77,5 @@ export function qualifyVertical() {
 }
 
 export {qualifyPipelines} from '../test/pipeline-workload';
+
+export {qualifyKinematicPipelines} from '../test/kinematic-workload';
