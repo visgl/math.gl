@@ -16,10 +16,10 @@ const result = subdividePolyline([0, 0, 1, 0], {
 
 The transform can wrap a CRS converter. The utility does not interpret CRS identifiers, choose a projection, or require a projection library. An application can scale projection output into its rendering coordinate space before returning it. `tolerance` then uses those same units. A renderer can derive that tolerance from the camera and desired visual quality.
 
-For example, a polar CRS converter supplied by `@math.gl/proj4` can be used without adding a dependency to the polygon utility:
+For example, a polar CRS converter supplied by `@math.gl/projection` can be used without adding a dependency to the polygon utility:
 
 ```ts
-import {Projection} from '@math.gl/proj4';
+import {Projection} from '@math.gl/projection';
 
 const projection = new Projection({
   from: 'WGS84',
