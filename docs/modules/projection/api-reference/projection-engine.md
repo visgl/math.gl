@@ -142,6 +142,49 @@ This deliberately differs from proj4js's default array API, which restores the i
 height for many datum operations. Differential height tests use its enforced-axis
 mode to compare the computed values. Geocentric units also apply consistently to Z.
 
+## Reusable scalar outputs
+
+`projectTo(coordinate, output)` and `unprojectTo(coordinate, output)` write a single
+coordinate into caller-owned storage and return that exact output object. `Projection`,
+`ProjectionEngine` and `LazyProjection` expose these bound methods. Use them when a scalar
+loop should reuse its result instead of creating an array on each call:
+
+```typescript
+const input = new Float64Array([-74, 40.7, 120, 8]);
+const output = new Float64Array(4);
+projection.projectTo(input, output);
+projection.unprojectTo(output, output); // The same view can be used in place.
+```
+
+Inputs accept readonly number arrays, `Float32Array` or `Float64Array`; outputs accept
+writable number arrays or either floating-point typed array. The exported
+`ProjectionCoordinate` and `ProjectionOutput` types describe these choices. Preallocate
+at least the input length, or three ordinates for geocentric output. Spare output capacity
+is untouched. Height and trailing ordinates follow the scalar dimensional contract above.
+Float32 storage rounds every written ordinate, including M; a finite trailing value outside
+Float32 range is rejected instead of becoming infinity. Non-finite M values remain allowed.
+
+Using the exact same input/output object is supported. Distinct typed views with overlapping
+input and written output byte ranges are rejected before execution; disjoint views are
+supported. Shared-backed overlapping ranges are conservatively rejected even across different
+buffer wrappers, including apparently separate shared buffers. Storage/layout, numerical and
+Float32 overflow errors leave ordinary stable output arrays/views unchanged. Supply writable
+storage and keep buffers, accessors and custom hooks stable during execution: resizing,
+detaching or mutating storage from getters, setters or hooks is outside this contract.
+
+Eager projection lists return the output synchronously. Lists containing lazy descriptors
+return `Promise<output>`, snapshot the input before loading, and borrow the output until the
+promise settles; do not read or modify that output while the request is pending. After
+`preload()`, use `projectToSync(coordinate, output)` or `unprojectToSync(coordinate, output)`
+to avoid the deferred path's input snapshot and promise. These methods never import and throw
+when a required projection has not been loaded.
+
+Successful synchronous calls reuse the engine's working point and create no public result
+array. Recursive hooks receive independent scratch storage, and custom plugins or JavaScript
+runtime behavior can still allocate. The existing `project` and `unproject` methods continue
+to return new, independently owned number arrays. For large buffers, the flat methods below
+avoid repeated scalar dispatch and validation.
+
 ## Flat typed arrays (in place)
 
 `projectFlat(coordinates, dimension = 2)` and

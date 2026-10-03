@@ -54,6 +54,11 @@ for (const [index, fixture] of inputs.cases.entries()) {
     for (const [pointIndex, row] of results.entries()) {
       // Inverse starts from PROJ output, never from math.gl's own forward result.
       close(projection.project(row.input), row.forward, fixture.forwardTolerance);
+      const reusable = new Float64Array(row.forward.length);
+      expect(projection.projectToSync(row.input, reusable)).toBe(reusable);
+      close(reusable, row.forward, fixture.forwardTolerance);
+      expect(projection.unprojectToSync(row.forward, reusable)).toBe(reusable);
+      close(reusable, row.inverse, inverseTolerance(row.input));
       close(projection.unproject(row.forward), row.inverse, inverseTolerance(row.input));
       if (
         'knotInverseTolerance' in fixture &&

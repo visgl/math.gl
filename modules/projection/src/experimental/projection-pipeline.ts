@@ -13,6 +13,9 @@ import {
 } from './datum';
 import {projectionOperation} from './mutable-projection';
 import {ProjectionScratch} from './projection-scratch';
+import {validateScalarOutput, writeScalarOutput} from './scalar-output';
+import type {ProjectionCoordinate, ProjectionOutput} from './scalar-output';
+export type {ProjectionCoordinate, ProjectionOutput} from './scalar-output';
 import {createExactHelmert} from './exact-helmert';
 import {createKinematicHelmert} from './kinematic-helmert';
 import {getLoadedProjection, preloadProjection} from './projection-descriptor';
@@ -255,6 +258,10 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
     this.unproject = this.unproject.bind(this);
     this.projectSync = this.projectSync.bind(this);
     this.unprojectSync = this.unprojectSync.bind(this);
+    this.projectTo = this.projectTo.bind(this);
+    this.unprojectTo = this.unprojectTo.bind(this);
+    this.projectToSync = this.projectToSync.bind(this);
+    this.unprojectToSync = this.unprojectToSync.bind(this);
     this.projectFlat = this.projectFlat.bind(this);
     this.unprojectFlat = this.unprojectFlat.bind(this);
     this.projectFlatSync = this.projectFlatSync.bind(this);
@@ -288,6 +295,59 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
         ? this.preload().then(() => this.unprojectSync(coordinate, epoch))
         : this.unprojectSync(coordinate, epoch)
     ) as Result<P, number[]>;
+  }
+  /** Reuse a scalar output; the epoch remains separate from all coordinate ordinates. */
+  projectTo<T extends ProjectionOutput>(
+    coordinate: ProjectionCoordinate,
+    output: T,
+    epoch?: number
+  ): Result<P, T> {
+    return (
+      this.deferred
+        ? this.scalarToLoaded(coordinate, output, false, epoch)
+        : this.projectToSync(coordinate, output, epoch)
+    ) as Result<P, T>;
+  }
+  unprojectTo<T extends ProjectionOutput>(
+    coordinate: ProjectionCoordinate,
+    output: T,
+    epoch?: number
+  ): Result<P, T> {
+    return (
+      this.deferred
+        ? this.scalarToLoaded(coordinate, output, true, epoch)
+        : this.unprojectToSync(coordinate, output, epoch)
+    ) as Result<P, T>;
+  }
+  projectToSync<T extends ProjectionOutput>(
+    coordinate: ProjectionCoordinate,
+    output: T,
+    epoch?: number
+  ): T {
+    validateScalarOutput(coordinate, output, coordinate.length);
+    return this.scalar(coordinate, false, epoch, output);
+  }
+  unprojectToSync<T extends ProjectionOutput>(
+    coordinate: ProjectionCoordinate,
+    output: T,
+    epoch?: number
+  ): T {
+    validateScalarOutput(coordinate, output, coordinate.length);
+    return this.scalar(coordinate, true, epoch, output);
+  }
+  private scalarToLoaded<T extends ProjectionOutput>(
+    coordinate: ProjectionCoordinate,
+    output: T,
+    inverse: boolean,
+    epoch?: number
+  ): Promise<T> {
+    validateScalarOutput(coordinate, output, coordinate.length);
+    const input = coordinate.slice();
+    return this.preload().then(() =>
+      inverse
+        ? this.unprojectToSync(input, output, epoch)
+        : this.projectToSync(input, output, epoch)
+    );
   }
   projectFlat<T extends ProjectionArray>(
     coordinates: T,
@@ -346,7 +406,12 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
     this.compile();
     return inverse ? this.compiled.inverse : this.compiled.forward;
   }
-  private scalar(coordinate: readonly number[], inverse: boolean, epoch?: number): number[] {
+  private scalar<T extends ProjectionOutput = number[]>(
+    coordinate: ProjectionCoordinate,
+    inverse: boolean,
+    epoch?: number,
+    output?: T
+  ): T {
     this.coordinateEpoch(epoch);
     if (coordinate.length < (this.requiresZ ? 3 : 2))
       throw new Error('Pipeline requires ' + (this.requiresZ ? 'XYZ' : 'XY') + ' coordinates');
@@ -366,11 +431,12 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
         }
       }
       this.run(point, operations, stack, epoch);
-      const output = [...coordinate];
-      output[0] = point.x;
-      output[1] = point.y;
-      if (coordinate.length >= 3) output[2] = point.z;
-      return output;
+      if (output) return writeScalarOutput(coordinate, output, point, coordinate.length);
+      const result = [...coordinate];
+      result[0] = point.x;
+      result[1] = point.y;
+      if (coordinate.length >= 3) result[2] = point.z;
+      return result as T;
     } finally {
       this.scalarScratch.release(point);
     }

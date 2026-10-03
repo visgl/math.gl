@@ -1,7 +1,7 @@
 # Projection allocation audit
 
 The October 2026 audit reads every TypeScript runtime source in `modules/projection/src`
-(218 files), then reviews coordinate dispatch, all named algorithms and their numerical
+(219 files), then reviews coordinate dispatch, all named algorithms and their numerical
 helpers, grid readers/samplers, datum/height/epoch operations and lazy loading. Allocation
 reduction is valuable even when throughput differences are within measurement noise:
 small objects increase allocation traffic and the work required of the garbage collector.
@@ -31,8 +31,10 @@ implementations need separate heap profiling.
   pipeline scalar calls reuse owned scratch; recursive hooks receive independent working
   points/stacks, released in `finally` even when input getters or callbacks throw. Internal
   geocentric tuple adapters still construct a working point and returned tuple; built-in
-  bulk paths use their mutable variants. Future reusable-output APIs can also avoid the
-  public result arrays while keeping ownership/reentrancy explicit.
+  bulk paths use their mutable variants. `projectToSync` / `unprojectToSync` avoid public
+  result arrays by borrowing caller-owned storage, with explicit capacity, alias and
+  Float32 overflow checks. `*To` is synchronous for eager lists; deferred lists still
+  snapshot input and create promises even after preloading.
 - `projectFlat` / `unprojectFlat` reuse one working point per batch. Pipelines with
   ordinate stacks allocate one typed stack per batch, independent of record count.
   Fused flat adapters retain the same completed-record commit and Float32 overflow rules.
@@ -54,7 +56,7 @@ node modules/projection/scripts/audit-allocations.mjs --check --output /tmp/proj
 The TypeScript AST inventory records every object/array/regexp literal, `new`, closure
 and common allocating method, with file/line and enclosing scopes. The CI check rejects
 explicit allocations in numerical kernels/helpers, mutable equation callbacks, selected
-coordinate dispatch/samplers and bulk record loops. Reviewed setup exceptions cover
+coordinate dispatch/samplers, reusable-output validation/commit helpers and bulk record loops. Reviewed setup exceptions cover
 coefficient builders, Oblique Mercator type selection and Robinson's module-level table
 rounding. The guard is intentionally a source regression check, not a complete static
 call graph or an allocation profiler. Review inventory entries outside its checked scopes
@@ -63,7 +65,7 @@ when adding new helpers or APIs.
 Independent PROJ anchors, scalar/flat differential checks and Node/Chromium tests cover
 the five modified algorithms. Dense analytic cross-term grids additionally exercise node
 orientation, rectangular row strides, edges, nodata and owned input snapshots. Scalar
-output arrays remain private, and Z/M preservation and partial batch failure contracts
+owned scalar outputs remain independently allocated, and Z/M preservation and partial batch failure contracts
 remain unchanged. Guarded scalar scratch adds about 0.1–0.2 KiB gzip to selected
 bundles. Static/initial allowances increase where exceeded; the all-root gzip allowance
 also restores rounding headroom. Deferred budgets stay unchanged.

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- feat(projection): Add `projectTo` / `unprojectTo` and synchronous variants for reusable
+  scalar outputs on projections and pipelines. Support arrays, floating-point typed
+  arrays, in-place use and explicit pipeline epochs; qualify ownership/error behavior
+  and record paired timing, allocation estimates and bundle cost.
+
 - perf(projection): Pack horizontal grid nodes into owned Float64 storage and remove
   coordinate temporaries in five projection algorithms. Reuse scalar scratch/stack
   storage with recursive-call isolation. Add source allocation auditing,
