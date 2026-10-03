@@ -182,6 +182,7 @@ export class SphericalCoordinates {
 
   toVector3(result?: undefined): [number, number, number];
   toVector3<T extends Vector3Like>(result: T): T;
+  toVector3(result: Vector3Like | undefined): Vector3Like;
   toVector3(result: Vector3Like = [-0, -0, -0]): Vector3Like {
     const sinTheta = Math.sin(this.theta);
     const cosTheta = Math.cos(this.theta);
