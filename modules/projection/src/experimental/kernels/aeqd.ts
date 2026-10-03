@@ -36,7 +36,7 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
   var sinphi = Math.sin(p.y);
   var cosphi = Math.cos(p.y);
   var dlon = adjust_lon(lon - state.long0, state.over);
-  var e0, e1, e2, e3, Mlp, Ml, c, kp, cos_c, vars, azi1;
+  var e0, e1, e2, e3, Mlp, Ml, c, kp, cos_c, azi1;
   if (state.sphere) {
     if (Math.abs(state.sin_p12 - 1) <= EPSLN) {
       // North Pole case
@@ -86,10 +86,11 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
         p.y = state.y0;
         return p;
       }
-      vars = vincentyInverse(state.lat0, state.long0, lat, lon, state.a, state.f);
-      azi1 = vars.azi1;
-      p.x = state.x0 + vars.s12 * Math.sin(azi1);
-      p.y = state.y0 + vars.s12 * Math.cos(azi1);
+      vincentyInverse(state.lat0, state.long0, lat, lon, state.a, state.f, p);
+      azi1 = p.x;
+      const distance = p.y;
+      p.x = state.x0 + distance * Math.sin(azi1);
+      p.y = state.y0 + distance * Math.cos(azi1);
       return p;
     }
   }
@@ -98,7 +99,7 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
 export function inverse(state: State, p: Point): Point | null | undefined | number {
   p.x -= state.x0;
   p.y -= state.y0;
-  var rh, z, sinz, cosz, lon, lat, con, e0, e1, e2, e3, Mlp, M, azi1, s12, vars;
+  var rh, z, sinz, cosz, lon, lat, con, e0, e1, e2, e3, Mlp, M, azi1, s12;
   if (state.sphere) {
     rh = Math.sqrt(p.x * p.x + p.y * p.y);
     if (rh > 2 * HALF_PI * state.a) {
@@ -163,10 +164,7 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
       // default case
       azi1 = Math.atan2(p.x, p.y);
       s12 = Math.sqrt(p.x * p.x + p.y * p.y);
-      vars = vincentyDirect(state.lat0, state.long0, azi1, s12, state.a, state.f);
-
-      p.x = vars.lon2;
-      p.y = vars.lat2;
+      vincentyDirect(state.lat0, state.long0, azi1, s12, state.a, state.f, p);
       return p;
     }
   }

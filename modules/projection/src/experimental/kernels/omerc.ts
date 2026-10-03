@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0, modified to reuse the caller-owned point instead of allocating coordinate results. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -224,7 +224,7 @@ function initialize(state: State): void {
 /* Oblique Mercator forward equations--mapping lat,long to x,y
     ---------------------------------------------------------- */
 export function forward(state: State, p: Point): Point | null | undefined | number {
-  var coords: Point = {x: 0, y: 0};
+  var coords = p;
   var S, T, U, V, W, temp, u, v;
   p.x = p.x - state.lam0;
 
@@ -271,7 +271,7 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
 
 export function inverse(state: State, p: Point): Point | null | undefined | number {
   var u, v, Qp, Sp, Tp, Vp, Up;
-  var coords: Point = {x: 0, y: 0};
+  var coords = p;
 
   p.x = (p.x - state.x0) * (1.0 / state.a);
   p.y = (p.y - state.y0) * (1.0 / state.a);

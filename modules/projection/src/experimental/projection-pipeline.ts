@@ -12,6 +12,7 @@ import {
   geodeticToGeocentricInPlace
 } from './datum';
 import {projectionOperation} from './mutable-projection';
+import {ProjectionScratch} from './projection-scratch';
 import {createExactHelmert} from './exact-helmert';
 import {createKinematicHelmert} from './kinematic-helmert';
 import {getLoadedProjection, preloadProjection} from './projection-descriptor';
@@ -180,6 +181,8 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
   private readonly forwardFactories: Factory[] = [];
   private readonly inverseFactories: Factory[] = [];
   private stackSize = 0;
+  private readonly scalarScratch = new ProjectionScratch();
+  private scalarStack?: Float64Array;
   private readonly required: Registration[] = [];
   private readonly deferred: boolean;
   private requiresZ = false;
@@ -348,22 +351,29 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
     if (coordinate.length < (this.requiresZ ? 3 : 2))
       throw new Error('Pipeline requires ' + (this.requiresZ ? 'XYZ' : 'XY') + ' coordinates');
     const operations = this.operations(inverse);
-    const point = {
-      x: coordinate[0],
-      y: coordinate[1],
-      z: coordinate.length >= 3 ? coordinate[2] : 0
-    };
-    this.run(
-      point,
-      operations,
-      this.stackSize ? new Float64Array(this.stackSize) : EMPTY_STACK,
-      epoch
-    );
-    const output = [...coordinate];
-    output[0] = point.x;
-    output[1] = point.y;
-    if (coordinate.length >= 3) output[2] = point.z;
-    return output;
+    const point = this.scalarScratch.acquire();
+    try {
+      point.x = coordinate[0];
+      point.y = coordinate[1];
+      point.z = coordinate.length >= 3 ? coordinate[2] : 0;
+      let stack: Float64Array = EMPTY_STACK;
+      if (this.stackSize) {
+        if (point === this.scalarScratch.point) {
+          this.scalarStack ||= new Float64Array(this.stackSize);
+          stack = this.scalarStack;
+        } else {
+          stack = new Float64Array(this.stackSize);
+        }
+      }
+      this.run(point, operations, stack, epoch);
+      const output = [...coordinate];
+      output[0] = point.x;
+      output[1] = point.y;
+      if (coordinate.length >= 3) output[2] = point.z;
+      return output;
+    } finally {
+      this.scalarScratch.release(point);
+    }
   }
   private flat<T extends ProjectionArray>(
     coordinates: T,

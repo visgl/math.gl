@@ -109,6 +109,42 @@ export const SCENARIOS: readonly BenchmarkScenario[] = [
     bounds: [-175, -80, 175, 80]
   },
   {
+    name: 'Azimuthal equidistant',
+    to: '+proj=aeqd +lat_0=45 +lon_0=15 +datum=WGS84',
+    longitude: 15,
+    latitude: 45
+  },
+  {
+    name: 'Robinson',
+    // PROJ uses float-rounded coefficient tables; proj4js retains doubles.
+    // Independent PROJ budgets remain 1e-5 m / 1e-8 degrees away from table knots.
+    forwardTolerance: 0.5,
+    inverseTolerance: 1e-4,
+    to: '+proj=robin +datum=WGS84',
+    longitude: 12,
+    latitude: 45,
+    bounds: [-175, -80, 175, 80]
+  },
+  {
+    name: 'Oblique Mercator',
+    to: '+proj=omerc +lon_0=0 +x_0=0 +y_0=0 +lat_0=4 +lonc=115 +alpha=53.31582047222222 +gamma=53.13010236111111 +k=0.99984 +datum=WGS84',
+    longitude: 115,
+    latitude: 5
+  },
+  {
+    name: 'QSC',
+    to: '+proj=qsc +lon_0=0 +lat_0=0 +datum=WGS84',
+    longitude: 15,
+    latitude: 20,
+    bounds: [5, 10, 35, 35]
+  },
+  {
+    name: 'Tilted perspective',
+    to: '+proj=tpers +lon_0=10 +lat_0=40 +h=1000000 +azi=45 +tilt=20 +datum=WGS84',
+    longitude: 10,
+    latitude: 40
+  },
+  {
     name: 'Three-parameter datum shift',
     from: '+proj=longlat +ellps=clrk66 +towgs84=1,2,3',
     to: '+proj=merc +datum=WGS84',

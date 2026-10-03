@@ -21,7 +21,8 @@ export type Subgrid = {
   readonly origin: readonly [number, number];
   readonly step: readonly [number, number];
   readonly size: readonly [number, number];
-  readonly shifts: readonly (readonly [number, number])[];
+  /** Reader-owned west-positive longitude/latitude shift pairs in radians. */
+  readonly shifts: Float64Array;
 };
 
 /** Geoid undulation N in metres: ellipsoidal height h = gravity-related height H + N.

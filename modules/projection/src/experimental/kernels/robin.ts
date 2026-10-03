@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution. Table precision and interval selection follow PROJ 9.5.1 robin.cpp. See ../../../PROJ-LICENSE.txt for PROJ attribution.
+// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0, modified to reuse the input point and avoid per-coordinate result objects and Newton callbacks. See ../../../PROJ4-LICENSE.md for the upstream license and attribution. Table precision and interval selection follow PROJ 9.5.1 robin.cpp. See ../../../PROJ-LICENSE.txt for PROJ attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {};
@@ -76,14 +76,15 @@ var poly3_der = function (coefs: readonly number[], x: number) {
 };
 
 function newton_rapshon(
-  f_df: (x: number) => number,
+  coefs: readonly number[],
+  target: number,
   start: number,
   max_err: number,
   iters: number
 ) {
   var x = start;
   for (; iters; --iters) {
-    var upd = f_df(x);
+    var upd = (poly3_val(coefs, x) - target) / poly3_der(coefs, x);
     x -= upd;
     if (Math.abs(upd) < max_err) {
       break;
@@ -111,39 +112,37 @@ export function forward(state: State, ll: Point): Point | null | undefined | num
     i = NODES;
   }
   dphi = R2D * (dphi - RC1 * i);
-  var xy = {
-    x: poly3_val(COEFS_X[i], dphi) * lon,
-    y: poly3_val(COEFS_Y[i], dphi)
-  };
+  var x = poly3_val(COEFS_X[i], dphi) * lon;
+  var y = poly3_val(COEFS_Y[i], dphi);
   if (ll.y < 0) {
-    xy.y = -xy.y;
+    y = -y;
   }
 
-  xy.x = xy.x * state.a * FXC + state.x0;
-  xy.y = xy.y * state.a * FYC + state.y0;
+  ll.x = x * state.a * FXC + state.x0;
+  ll.y = y * state.a * FYC + state.y0;
 
-  return xy;
+  return ll;
 }
 
 export function inverse(state: State, xy: Point): Point | null | undefined | number {
-  var ll = {
-    x: (xy.x - state.x0) / (state.a * FXC),
-    y: Math.abs(xy.y - state.y0) / (state.a * FYC)
-  };
+  var originalY = xy.y;
+  var ll = xy;
+  ll.x = (ll.x - state.x0) / (state.a * FXC);
+  ll.y = Math.abs(originalY - state.y0) / (state.a * FYC);
 
   // Polynomial pieces have small discontinuities at table knots. Roundoff in
   // de-scaling must not select a neighbouring piece for an exact knot output.
   for (let knot = 0; knot <= NODES; knot++) {
     if (Math.abs(ll.y - COEFS_Y[knot][0]) <= 8 * Number.EPSILON) {
       ll.x = adjust_lon(ll.x / COEFS_X[knot][0] + state.long0, state.over);
-      ll.y = (xy.y < state.y0 ? -1 : 1) * knot * 5 * D2R;
+      ll.y = (originalY < state.y0 ? -1 : 1) * knot * 5 * D2R;
       return ll;
     }
   }
   if (ll.y >= 1) {
     // pathologic case
     ll.x /= COEFS_X[NODES][0];
-    ll.y = xy.y < 0 ? -HALF_PI : HALF_PI;
+    ll.y = originalY < 0 ? -HALF_PI : HALF_PI;
   } else {
     // find table interval
     var i = Math.floor(ll.y * NODES);
@@ -165,18 +164,11 @@ export function inverse(state: State, xy: Point): Point | null | undefined | num
     var coefs = COEFS_Y[i];
     var t = (5 * (ll.y - coefs[0])) / (COEFS_Y[i + 1][0] - coefs[0]);
     // find t so that poly3_val(coefs, t) = ll.y
-    t = newton_rapshon(
-      function (x: number) {
-        return (poly3_val(coefs, x) - ll.y) / poly3_der(coefs, x);
-      },
-      t,
-      EPSLN,
-      100
-    );
+    t = newton_rapshon(coefs, ll.y, t, EPSLN, 100);
 
     ll.x /= poly3_val(COEFS_X[i], t);
     ll.y = (5 * i + t) * D2R;
-    if (xy.y < 0) {
+    if (originalY < 0) {
       ll.y = -ll.y;
     }
   }

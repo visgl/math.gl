@@ -80,6 +80,7 @@ jobs:
       - name: Check projection parity inventory and package boundaries
         run: |
           node modules/projection/scripts/check-attribution.mjs
+          node modules/projection/scripts/audit-allocations.mjs --check
           node modules/projection/scripts/check-parity-inventory.mjs
           node modules/projection/scripts/check-native-reference.mjs
           node modules/projection/scripts/check-vertical-reference.mjs
@@ -270,6 +271,12 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --allocations --output /tmp/projection-pipeline-comparison.json
 
+      - name: Check paired grid preparation benchmark
+        timeout-minutes: 2
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node modules/projection/scripts/benchmark-grid-compare.mjs --baseline-ref "$BASE_SHA" --sizes 17,65 --samples 3 --output /tmp/projection-grid-comparison.json
+
       - name: Upload paired performance measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -277,6 +284,7 @@ jobs:
           path: |
             /tmp/projection-performance-comparison.json
             /tmp/projection-pipeline-comparison.json
+            /tmp/projection-grid-comparison.json
           if-no-files-found: error
 
   # Preserve the required check name and fail it if any qualification job fails.
