@@ -13,6 +13,8 @@ import {
 } from './datum';
 import {projectionOperation} from './mutable-projection';
 import {ProjectionScratch} from './projection-scratch';
+import {createNumericFlat} from './numeric-flat';
+import type {NumericStep, NumericFlatOperation} from './numeric-flat';
 import {validateScalarOutput, writeScalarOutput} from './scalar-output';
 import type {ProjectionCoordinate, ProjectionOutput} from './scalar-output';
 export type {ProjectionCoordinate, ProjectionOutput} from './scalar-output';
@@ -125,7 +127,19 @@ function sharedBuffer(buffer: ArrayBufferLike): boolean {
   }
 }
 
-type Pair = {forward: Operation; inverse: Operation};
+type Pair = {
+  forward: Operation;
+  inverse: Operation;
+  forwardNumeric?: NumericStep;
+  inverseNumeric?: NumericStep;
+};
+function numericFlat(pairs: readonly Pair[]): NumericFlatOperation | undefined {
+  // Pure axis measurements were inconsistent; retain general dispatch for that subset.
+  return pairs.every(pair => pair.forwardNumeric) &&
+    pairs.some(pair => pair.forwardNumeric[0] !== 2)
+    ? createNumericFlat(pairs.map(pair => pair.forwardNumeric))
+    : undefined;
+}
 type Factory = () => Pair;
 const factors: Record<PipelineUnit, number> = {
   deg: Math.PI / 180,
@@ -184,13 +198,18 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
   private readonly forwardFactories: Factory[] = [];
   private readonly inverseFactories: Factory[] = [];
   private stackSize = 0;
-  private readonly scalarScratch = new ProjectionScratch();
-  private scalarStack?: Float64Array;
+  private readonly coordinateScratch = new ProjectionScratch();
+  private coordinateStack?: Float64Array;
   private readonly required: Registration[] = [];
   private readonly deferred: boolean;
   private requiresZ = false;
   private requiresEpoch = false;
-  private compiled?: {forward: Operation[]; inverse: Operation[]};
+  private compiled?: {
+    forward: Operation[];
+    inverse: Operation[];
+    forwardFlat?: NumericFlatOperation;
+    inverseFlat?: NumericFlatOperation;
+  };
   private pending?: Promise<this>;
 
   constructor(options: ProjectionPipelineOptions<P>) {
@@ -397,9 +416,13 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
     for (const registration of this.required)
       if (!getLoadedProjection(registration))
         unsupportedStage('Pipeline projection requires preload(): ' + registration.name);
+    const forward = this.forwardFactories.map(factory => factory()),
+      inverse = this.inverseFactories.map(factory => factory());
     this.compiled = {
-      forward: this.forwardFactories.map(factory => factory().forward),
-      inverse: this.inverseFactories.map(factory => factory().forward)
+      forward: forward.map(pair => pair.forward),
+      inverse: inverse.map(pair => pair.forward),
+      forwardFlat: numericFlat(forward),
+      inverseFlat: numericFlat(inverse)
     };
   }
   private operations(inverse: boolean): Operation[] {
@@ -416,16 +439,16 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
     if (coordinate.length < (this.requiresZ ? 3 : 2))
       throw new Error('Pipeline requires ' + (this.requiresZ ? 'XYZ' : 'XY') + ' coordinates');
     const operations = this.operations(inverse);
-    const point = this.scalarScratch.acquire();
+    const point = this.coordinateScratch.acquire();
     try {
       point.x = coordinate[0];
       point.y = coordinate[1];
       point.z = coordinate.length >= 3 ? coordinate[2] : 0;
       let stack: Float64Array = EMPTY_STACK;
       if (this.stackSize) {
-        if (point === this.scalarScratch.point) {
-          this.scalarStack ||= new Float64Array(this.stackSize);
-          stack = this.scalarStack;
+        if (point === this.coordinateScratch.point) {
+          this.coordinateStack ||= new Float64Array(this.stackSize);
+          stack = this.coordinateStack;
         } else {
           stack = new Float64Array(this.stackSize);
         }
@@ -438,7 +461,7 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       if (coordinate.length >= 3) result[2] = point.z;
       return result as T;
     } finally {
-      this.scalarScratch.release(point);
+      this.coordinateScratch.release(point);
     }
   }
   private flat<T extends ProjectionArray>(
@@ -470,31 +493,46 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       )
         throw new Error('Epoch and coordinate buffers must not overlap or alias shared storage');
     }
-    const operations = this.operations(inverse),
-      point = {x: 0, y: 0, z: 0};
-    const float32 = coordinates instanceof Float32Array;
-    const stack = this.stackSize ? new Float64Array(this.stackSize) : EMPTY_STACK;
-    const epochBuffer = typeof epochs === 'number' ? undefined : epochs;
-    let epoch = typeof epochs === 'number' ? epochs : undefined;
-    for (let i = 0; i < coordinates.length; i += dimension) {
-      point.x = coordinates[i];
-      point.y = coordinates[i + 1];
-      point.z = dimension >= 3 ? coordinates[i + 2] : 0;
-      if (epochBuffer) {
-        epoch = epochBuffer[i / dimension];
-        this.coordinateEpoch(epoch);
-      }
-      this.run(point, operations, stack, epoch);
-      if (
-        float32 &&
-        Math.max(Math.abs(point.x), Math.abs(point.y), Math.abs(point.z)) > 3.4028234663852886e38
-      )
-        throw new Error('Pipeline output exceeds Float32 range');
-      coordinates[i] = point.x;
-      coordinates[i + 1] = point.y;
-      if (dimension >= 3) coordinates[i + 2] = point.z;
+    const operations = this.operations(inverse);
+    const specialized = inverse ? this.compiled.inverseFlat : this.compiled.forwardFlat;
+    if (specialized) {
+      specialized(coordinates, dimension, epochs);
+      return coordinates;
     }
-    return coordinates;
+    const point = this.coordinateScratch.acquire();
+    try {
+      const float32 = coordinates instanceof Float32Array;
+      let stack: Float64Array = EMPTY_STACK;
+      if (this.stackSize) {
+        if (point === this.coordinateScratch.point) {
+          this.coordinateStack ||= new Float64Array(this.stackSize);
+          stack = this.coordinateStack;
+        } else stack = new Float64Array(this.stackSize);
+      }
+      const epochBuffer = typeof epochs === 'number' ? undefined : epochs;
+      let epoch = typeof epochs === 'number' ? epochs : undefined;
+      for (let i = 0; i < coordinates.length; i += dimension) {
+        point.x = coordinates[i];
+        point.y = coordinates[i + 1];
+        point.z = dimension >= 3 ? coordinates[i + 2] : 0;
+        if (epochBuffer) {
+          epoch = epochBuffer[i / dimension];
+          this.coordinateEpoch(epoch);
+        }
+        this.run(point, operations, stack, epoch);
+        if (
+          float32 &&
+          Math.max(Math.abs(point.x), Math.abs(point.y), Math.abs(point.z)) > 3.4028234663852886e38
+        )
+          throw new Error('Pipeline output exceeds Float32 range');
+        coordinates[i] = point.x;
+        coordinates[i + 1] = point.y;
+        if (dimension >= 3) coordinates[i + 2] = point.z;
+      }
+      return coordinates;
+    } finally {
+      this.coordinateScratch.release(point);
+    }
   }
   private coordinateEpoch(epoch: number | undefined): void {
     if (epoch === undefined) {
@@ -551,11 +589,23 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       throw new Error('Invalid pipeline inverse flag');
     const inverse = Boolean(step.inverse);
     const orient = (pair: Pair): Pair =>
-      inverse ? {forward: pair.inverse, inverse: pair.forward} : pair;
+      inverse
+        ? {
+            forward: pair.inverse,
+            inverse: pair.forward,
+            forwardNumeric: pair.inverseNumeric,
+            inverseNumeric: pair.forwardNumeric
+          }
+        : pair;
     const pair =
-      (forward: Operation, backward: Operation): Factory =>
+      (
+        forward: Operation,
+        backward: Operation,
+        forwardNumeric?: NumericStep,
+        inverseNumeric?: NumericStep
+      ): Factory =>
       () => {
-        cache.pair ||= {forward, inverse: backward};
+        cache.pair ||= {forward, inverse: backward, forwardNumeric, inverseNumeric};
         return orient(cache.pair);
       };
     const requireState = (
@@ -599,7 +649,9 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
             p.x /= xScale;
             p.y /= yScale;
             p.z /= zScale;
-          }
+          },
+          [0, xScale, yScale, zScale],
+          [1, xScale, yScale, zScale]
         );
       }
       case 'axisswap': {
@@ -631,7 +683,12 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
             p.z = sz * (c === 1 ? x : c === 2 ? y : z);
           };
         };
-        return pair(operation(order), operation(reverse));
+        return pair(
+          operation(order),
+          operation(reverse),
+          [2, order[0], order[1], order[2]],
+          [2, reverse[0], reverse[1], reverse[2]]
+        );
       }
       case 'projection': {
         const output: PipelineProjectionOutput =

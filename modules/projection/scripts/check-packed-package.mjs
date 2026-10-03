@@ -128,6 +128,15 @@ try {
     const pipelineOutput = [77, 77, 77, 77];
     assert.equal(pipeline.projectToSync([11, 41, 123, 8], pipelineOutput), pipelineOutput);
     assert.deepEqual(pipelineOutput, pipeline.project([11, 41, 123, 8]));
+    const angular = new ProjectionPipeline({input: {space: 'geographic', units: ['rad', 'rad', 'm']}, steps: [
+      {type: 'unitconvert', xy: {from: 'rad', to: 'deg'}}, {type: 'axisswap', order: [-2, 1]}
+    ]});
+    const angularInput = [0.3, 0.7, 123, 8], angularBuffer = new Float64Array(angularInput);
+    assert.equal(angular.projectFlatSync(angularBuffer, 4), angularBuffer);
+    assert.deepEqual(Array.from(angularBuffer), angular.project(angularInput));
+    const angularInverse = angular.unproject(Array.from(angularBuffer));
+    assert.equal(angular.unprojectFlatSync(angularBuffer, 4), angularBuffer);
+    assert.deepEqual(Array.from(angularBuffer), angularInverse);
     const pipelinePoint = [11, 41, 123, 8];
     const pipelineBuffer = new Float64Array(pipelinePoint);
     assert.equal(pipeline.projectFlat(pipelineBuffer, 4), pipelineBuffer);

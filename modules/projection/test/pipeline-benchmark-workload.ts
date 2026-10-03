@@ -29,6 +29,8 @@ export const PIPELINE_SCENARIOS: readonly PipelineBenchmarkScenario[] = [
   },
   {id: 'Projected units and signed axes', fixture: 'projected-units-signed-axes'},
   {id: 'XYZ axis cycle', fixture: 'xyz-axis-cycle'},
+  {id: 'Inverse axis cycle', fixture: 'inverse-axis-cycle'},
+  {id: 'Inverse angular units', fixture: 'inverse-unit-step'},
   {id: 'Static Helmert', fixture: 'helmert-position_vector'},
   {id: 'Exact Helmert', fixture: 'exact-position_vector-20'},
   {

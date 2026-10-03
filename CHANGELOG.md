@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- perf(projection): Compile unit/axis-only pipelines into whole-buffer operations.
+  Share guarded point/stack scratch across scalar and bulk calls, preserve per-step
+  arithmetic and validation, and expand paired benchmarks and recursion/rounding tests.
+
 - feat(projection): Add `projectTo` / `unprojectTo` and synchronous variants for reusable
   scalar outputs on projections and pipelines. Support arrays, floating-point typed
   arrays, in-place use and explicit pipeline epochs; qualify ownership/error behavior

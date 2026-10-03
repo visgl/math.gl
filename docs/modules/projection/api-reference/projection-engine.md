@@ -215,8 +215,10 @@ projection.projectFlat(vertices, 4);
   work; transforming back cannot recover precision lost during storage.
 
 The engine compiles axis, datum and projection dispatch at construction. Each batch
-call reuses one mutable point through the built-in projection, Helmert and prepared-grid
-stages, without temporary JavaScript coordinate arrays per record. Some numerical
+call borrows the same instance-owned mutable point used by scalar calls through the built-in projection, Helmert and prepared-grid
+stages, without temporary JavaScript coordinate arrays per record. Recursive hooks receive
+independent scratch, and failures release the lease. Specialized flat adapters use local
+numbers without borrowing that point. Some numerical
 kernels and the JavaScript runtime can still allocate objects; this is not a promise
 of zero heap allocation. Legacy custom plugins/grids remain supported through their
 scalar methods and may allocate arrays. See [benchmarks](../benchmarks.md) for measurements.

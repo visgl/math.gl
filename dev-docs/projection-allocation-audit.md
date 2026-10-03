@@ -1,7 +1,7 @@
 # Projection allocation audit
 
 The October 2026 audit reads every TypeScript runtime source in `modules/projection/src`
-(219 files), then reviews coordinate dispatch, all named algorithms and their numerical
+(220 files), then reviews coordinate dispatch, all named algorithms and their numerical
 helpers, grid readers/samplers, datum/height/epoch operations and lazy loading. Allocation
 reduction is valuable even when throughput differences are within measurement noise:
 small objects increase allocation traffic and the work required of the garbage collector.
@@ -16,7 +16,7 @@ small objects increase allocation traffic and the work required of the garbage c
 | Oblique Mercator | One result object in each direction | Reuses the caller's point after input-dependent arithmetic finishes |
 | QSC | Coordinate result and boxed area objects in each direction | Caller-owned point plus local numeric coordinates and area; all six face equations retained |
 | Tilted perspective | One temporary inverse coordinate object | Two local numbers, preserving the original branch/equation order |
-| Scalar engine/plugin/pipeline dispatch | A working point on each scalar call; a typed stack on each scalar pipeline call that uses stacks | One owned point per instance/adapter and a lazily cached pipeline stack; nested hooks use independent fallback storage |
+| Scalar/bulk engine/plugin/pipeline dispatch | A working point on each call; a typed stack on each pipeline call that uses stacks | One owned point per instance/adapter, shared between scalar and general bulk calls, plus a lazily cached pipeline stack; nested hooks use independent fallback storage |
 
 Mutable built-in projection hooks now have no explicit successful per-coordinate
 object/array/function creation in the audited numerical paths. Datum conversion,
@@ -35,9 +35,11 @@ implementations need separate heap profiling.
   result arrays by borrowing caller-owned storage, with explicit capacity, alias and
   Float32 overflow checks. `*To` is synchronous for eager lists; deferred lists still
   snapshot input and create promises even after preloading.
-- `projectFlat` / `unprojectFlat` reuse one working point per batch. Pipelines with
-  ordinate stacks allocate one typed stack per batch, independent of record count.
-  Fused flat adapters retain the same completed-record commit and Float32 overflow rules.
+- Ordinary `projectFlat` / `unprojectFlat` calls borrow the same instance point/stack
+  lease used by scalar calls. Pipeline stacks allocate on first use and remain cached;
+  recursive calls allocate independent fallback storage. Unit/axis-only pipelines use
+  local numeric coordinates and a construction-time instruction buffer. Other fused flat
+  adapters likewise retain completed-record commits and Float32 overflow rules.
 - Legacy custom plugins/grids can allocate array results inside a bulk operation.
   Implement `forwardInPlace` / `inverseInPlace` or `shiftInPlace` to avoid that fallback;
   velocity models receive an explicit output point. User hooks control their own allocations.
@@ -56,7 +58,8 @@ node modules/projection/scripts/audit-allocations.mjs --check --output /tmp/proj
 The TypeScript AST inventory records every object/array/regexp literal, `new`, closure
 and common allocating method, with file/line and enclosing scopes. The CI check rejects
 explicit allocations in numerical kernels/helpers, mutable equation callbacks, selected
-coordinate dispatch/samplers, reusable-output validation/commit helpers and bulk record loops. Reviewed setup exceptions cover
+coordinate dispatch/samplers, reusable-output validation/commit helpers and bulk record loops, including the numeric
+unit/axis runner. Reviewed setup exceptions cover
 coefficient builders, Oblique Mercator type selection and Robinson's module-level table
 rounding. The guard is intentionally a source regression check, not a complete static
 call graph or an allocation profiler. Review inventory entries outside its checked scopes
@@ -64,8 +67,7 @@ when adding new helpers or APIs.
 
 Independent PROJ anchors, scalar/flat differential checks and Node/Chromium tests cover
 the five modified algorithms. Dense analytic cross-term grids additionally exercise node
-orientation, rectangular row strides, edges, nodata and owned input snapshots. Scalar
-owned scalar outputs remain independently allocated, and Z/M preservation and partial batch failure contracts
+orientation, rectangular row strides, edges, nodata and owned input snapshots. Owned scalar outputs remain independently allocated, and Z/M preservation and partial batch failure contracts
 remain unchanged. Guarded scalar scratch adds about 0.1–0.2 KiB gzip to selected
 bundles. Static/initial allowances increase where exceeded; the all-root gzip allowance
 also restores rounding headroom. Deferred budgets stay unchanged.
