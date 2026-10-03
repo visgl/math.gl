@@ -194,5 +194,6 @@ projection singularities, grid edges and datum boundaries.
 6. Check compatibility, then validate representative coordinates against independent references.
 
 See [independent validation](./independent-validation.md) for the package's qualified
-accuracy profile. General operation selection and complete PROJ/EPSG database
-behavior are outside the supported subset.
+accuracy profile. The optional [operation catalogue](./operation-selection.md) filters
+application-reviewed candidates; general EPSG operation discovery and complete
+PROJ/EPSG database behavior are outside the supported subset.

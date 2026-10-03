@@ -150,7 +150,7 @@ remains for compatibility tests and benchmarks. This rename and wrapper removal
 are breaking alpha API changes; no release is published by this work.
 
 Broader derived/compound CRS execution, arbitrary axis rotations, uncommon GeoTIFF
-band conventions, dynamic datums and automatic operation selection
+band conventions, dynamic datums and automatic EPSG operation lookup
 are outside this profile. More datasets and denser sampling can expand the profile
 without representing unfinished work in the four qualification tranches. Exact
 allocation counts and guarantees about every browser/device are also not claimed;

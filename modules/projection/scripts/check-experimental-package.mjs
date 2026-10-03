@@ -230,6 +230,7 @@ assert(
 
 // Optional pipelines must not retain projection kernels, readers or the CRS engine.
 for (const entry of [
+  "export {OperationCatalog} from '@math.gl/projection/operations';",
   "export {ProjectionPipeline} from '@math.gl/projection/pipeline';",
   "export {ProjectionEngine} from '@math.gl/projection/core';"
 ]) {
@@ -249,6 +250,11 @@ for (const entry of [
       .map(([path]) => path)
   );
   assert(!retained.some(path => /node_modules\/proj4\//.test(path)));
+  if (entry.includes('/operations')) {
+    assert(retained.every(path => path.endsWith('/operations.js')), 'Operation selection must retain only metadata selection code');
+  } else {
+    assert(!retained.some(path => path.endsWith('/operations.js')), 'Operation selection must remain optional');
+  }
   assert(!retained.some(path => /experimental\/(projections|kernels|grids)\//.test(path)));
   assert(
     !retained.some(path => path.endsWith('/deformation.js')),

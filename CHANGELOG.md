@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- feat(projection): Add optional `OperationCatalog` for deterministic selection of
+  application-reviewed operations by full area/epoch coverage, declared accuracy and
+  available grid revisions, with rejection diagnostics and pinned provenance.
+  Preserve execution/bundle isolation and include no third-party database or model data.
+
 - perf(projection): Compile unit/axis-only pipelines into whole-buffer operations.
   Share guarded point/stack scratch across scalar and bulk calls, preserve per-step
   arithmetic and validation, and expand paired benchmarks and recursion/rounding tests.

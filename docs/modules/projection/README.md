@@ -34,6 +34,7 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 | [Coordinate systems](./coordinate-systems.md) | Distinguish projection, ellipsoid, datum, height and coordinate epoch |
 | [Projection catalogue](./projections.md) | Choose an algorithm and understand its useful domain |
 | [Operation pipelines](./operation-pipelines.md) | Order units, axes, projections, datum shifts and time-dependent operations explicitly |
+| [Operation selection](./operation-selection.md) | Select application-reviewed operations by area, epoch, accuracy and prepared grids |
 | [Deformation models](./deformation-models.md) | Propagate coordinates between epochs with prepared velocity grids |
 | [Support and migration](./support.md) | Understand accepted definitions and differences from proj4js |
 | [Benchmarks](./benchmarks.md#live-benchmarks) | Compare math.gl flat and scalar transforms with proj4js in your browser |
@@ -47,11 +48,12 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 | [`ProjectionEngine`](./api-reference/projection-engine.md) | You want an explicit list of plugins, readers and grids for a smaller bundle |
 | `LazyProjection` (`/projections/lazy`) | You want built-in algorithms to load automatically when requested |
 | `ProjectionPipeline` (`/pipeline`) | You need explicit operation order or coordinate epochs |
+| `OperationCatalog` (`/operations`) | You need to select among application-reviewed transformations |
 
 The package root exports the convenience class and configurable engine. `/core`
 contains the engine without the catalogue. `/projections/<id>` contains an
 individual algorithm; `/projections/lazy/<id>` contains its deferred descriptor.
-Readers, grids, pipelines and deformation models have optional subpaths. See the
+Readers, grids, pipelines, operation selection and deformation models have optional subpaths. See the
 [entry-point reference](./projection-engine.md#public-subpaths).
 
 [`@math.gl/crs`](../crs/README.md) provides CRS definitions, syntax readers and spatial

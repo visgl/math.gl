@@ -332,4 +332,6 @@ steps and a geographic-to-UTM height-preserving chain.
 This is typed composition, not a parser for arbitrary `+proj=pipeline` strings. Unknown
 operators and parameters throw instead of being skipped. Stack support covers X/Y/Z
 with stricter balance validation; arbitrary operators, time-varying deformation components, automatic
-EPSG operation selection and dynamic CRS inference remain outside this profile. See the [remaining roadmap](./roadmap.md).
+EPSG operation lookup and dynamic CRS inference remain outside this profile.
+Use the optional [operation catalogue](./operation-selection.md) to choose among
+application-reviewed pipelines before execution. See the [remaining roadmap](./roadmap.md).

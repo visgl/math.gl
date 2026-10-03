@@ -80,6 +80,7 @@ try {
     assert.equal(stable.mercator, api.mercator);
     const subpaths = ${JSON.stringify(subpaths)};
     const optionalEntries = {
+      './operations': ['OperationCatalog'],
       './deformation': ['createDeformationModel'],
       './grids/velocity': ['createVelocityGrid'],
       './grids/velocity-geotiff': ['loadVelocityGeoTIFFGrid']
@@ -113,6 +114,19 @@ try {
     assert(!('TypeScriptProjection' in core));
     assert(!('checkTypeScriptCRSCompatibility' in core));
     assert.deepEqual(new core.ProjectionEngine({}).project([12, 55, 123, 8]), [12, 55, 123, 8]);
+    const {OperationCatalog} = await load('@math.gl/projection/operations');
+    const createOperation = () => new core.ProjectionEngine({});
+    const selection = new OperationCatalog([{
+      id:'authored',sourceCRS:'app:source',targetCRS:'app:target',area:[-180,-90,180,90],
+      epochRange:[2000,2030],accuracyMeters:1,grids:[{id:'local',revision:'1'}],
+      provenance:{authority:'math.gl tests',version:'1',reference:'authored synthetic metadata'},operation:createOperation
+    }]);
+    const selectionRequest = {sourceCRS:'app:source',targetCRS:'app:target',area:[170,-10,-170,10],epoch:2020};
+    assert.equal(selection.select(selectionRequest), undefined);
+    assert.deepEqual(selection.inspect(selectionRequest).rejected[0].reasons, ['grid']);
+    const chosen = selection.select({...selectionRequest,availableGrids:[{id:'local',revision:'1'}]});
+    assert.equal(chosen.operation, createOperation);
+    assert.deepEqual(chosen.operation().project([12,55,100,8]), [12,55,100,8]);
     const {ProjectionPipeline} = await load('@math.gl/projection/pipeline');
     const pipeline = new ProjectionPipeline({input: {space: 'geographic', units: ['deg', 'deg', 'm']}, steps: [
       {type: 'unitconvert', xy: {from: 'deg', to: 'rad'}}, {type: 'projection', name: 'merc', parameters: {a: '6378137', b: '6378137'}}
@@ -306,6 +320,29 @@ try {
     const eagerEngine: number[] = new ProjectionEngine({}).project([0, 0]);
     const createdEngine: Promise<ProjectionEngine> = ProjectionEngine.create(createOptions);
 
+    import {OperationCatalog, type CoordinateOperation, type OperationArea, type OperationEpochRange,
+      type OperationGrid, type OperationProvenance, type OperationSelectionRequest,
+      type OperationSelection, type OperationRejection, type OperationRejectionReason} from '@math.gl/projection/operations';
+    const selectionArea: OperationArea = [-180,-90,180,90];
+    const selectionEpoch: OperationEpochRange = [2000,2030];
+    const selectionGrid: OperationGrid = {id:'local',revision:'1'};
+    const selectionProvenance: OperationProvenance = {authority:'app',version:'1',reference:'authored'};
+    const selectedDefinition: CoordinateOperation<() => ProjectionEngine> = {
+      id:'local',sourceCRS:'app:source',targetCRS:'app:target',area:selectionArea,epochRange:selectionEpoch,
+      accuracyMeters:1,grids:[selectionGrid],provenance:selectionProvenance,operation:()=>new ProjectionEngine({})
+    };
+    const operationCatalog = new OperationCatalog([selectedDefinition]);
+    const operationRequest: OperationSelectionRequest = {sourceCRS:'app:source',targetCRS:'app:target',area:selectionArea,epoch:2020,availableGrids:[selectionGrid]};
+    const selectionResult: OperationSelection<() => ProjectionEngine> = operationCatalog.inspect(operationRequest);
+    const selectionFailure: OperationRejection<() => ProjectionEngine> | undefined = selectionResult.rejected[0];
+    const selectionReason: OperationRejectionReason | undefined = selectionFailure?.reasons[0];
+    const selectedEngine: ProjectionEngine | undefined = operationCatalog.select(operationRequest)?.operation();
+    // @ts-expect-error area requires four ordinates
+    operationCatalog.select({...operationRequest,area:[0,0]});
+    // @ts-expect-error declared accuracy is numeric metres
+    new OperationCatalog([{...selectedDefinition,accuracyMeters:'1'}]);
+    // @ts-expect-error reviewed metadata cannot be mutated
+    selectedDefinition.epochRange = null;
     import {Projection, type ProjectionOptions, type DatumGridOptions} from '@math.gl/projection';
     import {createDeformationModel, type DeformationModel, type DeformationModelOptions} from '@math.gl/projection/deformation';
     import {createVelocityGrid, type VelocityGrid, type VelocityGridOptions} from '@math.gl/projection/grids/velocity';

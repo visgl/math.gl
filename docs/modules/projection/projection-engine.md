@@ -108,20 +108,21 @@ bundle, not an increment or an application-wide download estimate. **KiB = 1,024
 
 | Retained functionality | Minified KiB | Gzip KiB |
 | --- | ---: | ---: |
-| Engine core | 45.6 | 16.7 |
-| Engine + Mercator | 47.9 | 17.4 |
-| Engine + UTM | 54.6 | 20.2 |
-| Engine + Mercator + WKT reader | 71.3 | 25.1 |
-| Engine + Mercator + PROJJSON reader | 58.8 | 21.2 |
-| Engine + Mercator + NTv2 decoder | 51.0 | 18.7 |
-| Engine + Mercator + GeoTIFF grid adapter | 51.0 | 18.6 |
-| Engine + Mercator + GTX decoder | 49.4 | 18.1 |
-| Engine + Mercator + vertical GeoTIFF adapter | 52.9 | 19.3 |
-| Default Projection wrapper (all plugins and readers) | 143.9 | 49.3 |
-| Explicit operation pipeline (no projection algorithms, models or readers) | 53.4 | 19.5 |
+| Engine core | 48.1 | 17.4 |
+| Engine + Mercator | 50.5 | 18.2 |
+| Engine + UTM | 57.2 | 20.9 |
+| Engine + Mercator + WKT reader | 73.9 | 25.9 |
+| Engine + Mercator + PROJJSON reader | 61.4 | 22.0 |
+| Engine + Mercator + NTv2 decoder | 53.6 | 19.5 |
+| Engine + Mercator + GeoTIFF grid adapter | 53.6 | 19.4 |
+| Engine + Mercator + GTX decoder | 52.0 | 18.9 |
+| Engine + Mercator + vertical GeoTIFF adapter | 55.5 | 20.1 |
+| Default Projection wrapper (all plugins and readers) | 146.1 | 50.0 |
+| Explicit operation pipeline (no projection algorithms, models or readers) | 57.4 | 20.6 |
+| Optional operation selector (no catalogue data or operation payloads) | 4.4 | 1.6 |
 | Optional deformation model + regular velocity grid | 4.0 | 1.8 |
 | Optional deformation model + velocity GeoTIFF adapter | 9.0 | 3.5 |
-| Every root export, including wrapper, readers, grids and pipelines | 169.4 | 57.8 |
+| Every root export, including wrapper, readers, grids and pipelines | 174.2 | 59.1 |
 
 Tranche 12A adds about 1.1 KiB minified / 0.3 KiB gzip to the core stage machinery.
 The grid readers and bilinear interpolation remain optional, retained only in the
@@ -257,6 +258,7 @@ shorter paths below. The former `classic` subpath is removed.
 
 | Subpath | Exports |
 | --- | --- |
+| `operations` | Optional `OperationCatalog` and selection metadata/diagnostics; no database or execution code |
 | `pipeline` | `ProjectionPipeline` and typed explicit operation contracts; no catalogue/readers |
 | `core` | Engine, normalization, capability checks, descriptor/cache utilities, shared types and errors |
 | `projections/lazy/<id>` | Lightweight projection descriptors; defer algorithm imports |
@@ -462,7 +464,8 @@ to a geocentric or identity CRS or combined with lossy horizontal extraction.
 
 This is the explicit vertical-grid subset (tranches 12A/12B1).
 Compound/vertical WKT or PROJJSON execution, dynamic datum interpretation and
-automatic operation selection remain future work. Explicit typed pipelines and
+automatic EPSG operation lookup remain outside the supported subset. Optional
+[operation selection](./operation-selection.md) filters application-reviewed candidates. Explicit typed pipelines and
 coordinate epochs are available through the optional [pipeline API](./operation-pipelines.md).
 
 ### Vertical GeoTIFF geoid models

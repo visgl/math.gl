@@ -1,7 +1,7 @@
 # Projection allocation audit
 
 The October 2026 audit reads every TypeScript runtime source in `modules/projection/src`
-(220 files), then reviews coordinate dispatch, all named algorithms and their numerical
+(221 files), then reviews coordinate dispatch, all named algorithms and their numerical
 helpers, grid readers/samplers, datum/height/epoch operations and lazy loading. Allocation
 reduction is valuable even when throughput differences are within measurement noise:
 small objects increase allocation traffic and the work required of the garbage collector.
@@ -26,6 +26,11 @@ an optimizing JavaScript engine: number boxing, iterator handling, built-ins and
 implementations need separate heap profiling.
 
 ## Allocations deliberately retained
+
+- Optional `OperationCatalog` snapshots selection metadata during construction and
+  prepares request metadata during `select` / `inspect`. Diagnostic arrays are owned
+  results. Select once before a batch; this metadata API adds no allocations to
+  coordinate execution loops.
 
 - `project` / `unproject` return a new coordinate array. Ordinary engine, plugin and
   pipeline scalar calls reuse owned scratch; recursive hooks receive independent working
