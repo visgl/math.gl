@@ -327,8 +327,8 @@ node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref or
 
 This runner compares the historical and current `ProjectionPipeline` using the same
 source bundler and installed dependencies. The base must support the tested static
-and kinematic pipeline APIs. It covers 17 scenarios in both precisions, XYZ/XYZM and
-both directions (136 rows): units, signed axes, Mercator-to-UTM, static and exact
+and kinematic pipeline APIs. It covers 22 scenarios in both precisions, XYZ/XYZM and
+both directions (176 rows): units, signed axes, Mercator-to-UTM, static and exact
 Helmert, horizontal/vertical grids, ordinate stacks and batch/mixed observation epochs.
 Coordinates have repeatable bounded jitter around the independently checked fixtures.
 One epoch buffer is supplied separately and stays unchanged; M varies by record.
@@ -505,8 +505,8 @@ default. Correctness/package budgets are enforced without speed thresholds.
 ### Unit conversion batches and repeated bulk calls
 
 Pipelines containing only unit/axis steps, with at least one unit conversion in the
-selected direction, use a whole-buffer numeric runner. Pure axis programs and other
-operations keep general dispatch. Multiplication and division remain distinct, each
+selected direction, use a whole-buffer numeric runner. Pure axis programs keep general dispatch; the separately qualified static Helmert
+subset is described below. Mixed programs retain general dispatch. Multiplication and division remain distinct, each
 intermediate must be finite, and Float32 rounds only on a completed record. Stride,
 height, trailing ordinates, epoch validation and partial-error behavior are unchanged.
 General scalar/bulk calls share one instance point and a lazily cached pipeline stack;
@@ -521,7 +521,7 @@ Scalar timings were mixed, including slower axis rows; this is a targeted batch 
 not a general throughput claim. See the
 [raw batch report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/numeric-batches-node.json)
 for all 48 rows, samples and separate allocation estimates. The full bounded CI runner
-qualifies all 17 scenarios / 136 rows, including both baseline/current output modes where
+qualifies all 22 scenarios / 176 rows, including both baseline/current output modes where
 available, without a speed threshold.
 
 Large buffers amortize point/stack setup. To expose allocation traffic in repeated short
@@ -543,3 +543,56 @@ The optional pipeline import measures 58,759 minified / 21,108 gzip bytes: +1,74
 versus the reusable-output tranche. Core/selective imports add 150 minified bytes with
 negligible gzip changes. Deferred projection chunks and deformation-only profiles are
 unchanged. Only exceeded bundle allowances increase with reviewed rounding headroom.
+
+
+### Static Helmert coordinate buffers
+
+A pipeline direction with exactly one active static Helmert step now transforms
+Float32/Float64 buffers with numeric locals. This covers translation/scale, small-angle
+and exact rotations, both position-vector and coordinate-frame conventions, and
+inverse-oriented steps. Scalar calls keep their existing point operations. Mixed
+unit/axis/datum chains, grids, stacks and kinematic rates keep general dispatch.
+
+The buffer runner preserves each scalar equation's multiplication, division and
+addition order. Exact rotations use the same prepared matrix as the scalar stage;
+the inverse subtracts translation and divides by scale before applying its transpose.
+It does not fold a whole operation into an affine matrix, omit terms with zero
+coefficients or change small-angle inverse semantics. Every record validates finite
+XYZ and supplied epochs, checks output/Float32 range before writing, and preserves M
+and all later ordinates. On failure, completed records remain transformed and the
+failing record and tail remain unchanged.
+
+Qualification combines the pinned PROJ pipeline corpus with seeded bit-for-bit
+scalar/general-dispatch comparisons, both precisions, XYZ/XYZM and six-component
+buffer views. Tests cover both conventions, inverse/omitted directions, caller
+parameter snapshots, explicit epoch requirements, recursive hooks and failure
+commits. The source allocation guard includes the new buffer loop. No objects,
+arrays or functions are created inside its successful coordinate path; sampled
+allocation remains a diagnostic rather than a guarantee about all JavaScript engines.
+
+
+The October 2026 Apple M2 / Node 24.14.0 diagnostic compares against `fefea8f7`
+with 50,000 points, nine 12 ms thread-CPU samples and matched baseline/current
+reusable-output modes. Independent anchors and every seeded ordinate pass before
+measurement. Across 32 translation/small-angle layout/direction rows, the median
+flat ratio is 1.76×; across 24 exact-rotation rows it is 1.38×. Every measured static
+Helmert flat row improves in this run. The three control-scenario medians are
+0.99× (angular units), 1.00× (horizontal grid to UTM) and 1.03× (mixed epochs).
+Scalar medians are approximately unchanged.
+
+Local CPU contention and GC produced spread warnings: 54 of 80 rows flag at least
+one implementation, and 20 hit the aggregate-iteration limit. Among the 56 static
+Helmert rows, 27 flag spread in a flat implementation and 13 are timing-limited.
+These flags, raw samples and p10–p90 remain in the
+[raw report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/helmert-batches-node.json).
+Treat ratios as targeted CPU-time observations, not elapsed throughput guarantees
+or a state-of-the-art claim. Repeat on the application's browser and hardware.
+
+Untimed allocation sampling follows all timing. Most static flat profiles sample
+zero for both baseline and current; these measurements do not establish an
+allocation reduction or prove zero allocation. The new loop avoids mutable point
+field writes and contains no explicit successful per-coordinate allocation sites.
+Pipeline/all-root bundles measure 60,140/179,812 minified and 21,591/60,993 gzip bytes:
++1,381/+1,383 minified and +483/+497 gzip versus the operation-selection tranche.
+Core, wrapper, selective, operation catalogue, deformation and lazy initial/deferred
+profiles remain unchanged. Only exceeded pipeline/all-root allowances increase.

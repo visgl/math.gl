@@ -335,3 +335,17 @@ with stricter balance validation; arbitrary operators, time-varying deformation 
 EPSG operation lookup and dynamic CRS inference remain outside this profile.
 Use the optional [operation catalogue](./operation-selection.md) to choose among
 application-reviewed pipelines before execution. See the [remaining roadmap](./roadmap.md).
+
+
+## Static Helmert batches
+
+For a direction with exactly one active static `helmert` step, `projectFlat` and
+`unprojectFlat` operate directly on the coordinate buffer using numeric locals.
+Translation/scale, small-angle and exact rotations use the same arithmetic as
+scalar calls. Both rotation conventions and inverse-oriented steps are supported.
+The public API, Z/M handling, explicit epochs and partial failure behavior stay
+the same; no additional option or preparation call is needed.
+
+Mixed pipelines and time-dependent rates keep general execution. See the
+[measured scope and qualification](./benchmarks.md#static-helmert-coordinate-buffers)
+for the performance evidence and limits of this optimization.

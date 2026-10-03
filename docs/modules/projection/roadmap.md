@@ -479,13 +479,39 @@ This completes the bounded application-catalogue milestone, not unrestricted EPS
 operation discovery, dynamic CRS inference or a geodetic accuracy certification.
 See the [operation selection guide](./operation-selection.md).
 
+## Tranche 13A — Static Helmert coordinate buffers: implemented follow-up
+
+A pipeline direction with one active static Helmert step now executes directly over
+Float32/Float64 buffers using numeric locals. It covers translation/scale, small-angle
+and exact rotations, both conventions and inverse-oriented steps. Exact batches reuse
+the scalar stage's prepared matrix. Per-step equation order, finite/Float32 validation,
+explicit epochs, Z/M/tails and partial-failure commits remain unchanged. Mixed chains,
+grids, stacks and kinematic rates continue through general execution.
+
+Independent PROJ anchors and seeded exact scalar/general-dispatch comparisons qualify
+the implementation. Tests cover XYZ/XYZM/six-component views, both directions/conventions,
+parameter snapshots, omitted-stage epoch requirements, error recovery and recursive hooks.
+The allocation audit guards the new buffer loop. Packed ESM/CommonJS/types and byte budgets
+cover the implementation; upstream proj4js/PROJ notices remain attached to derived equations.
+The shared paired pipeline matrix expands to 22 scenarios / 176 layout/direction rows.
+A separate 80-row Apple M2 / Node 24.14.0 CPU-time diagnostic observes median flat
+ratios of 1.76× for translation/small-angle and 1.38× for exact rotations, with
+control medians within about 3% of baseline. Raw samples retain local contention,
+spread and aggregate-limit warnings; allocation samples do not establish a reduction.
+
+Pipeline/all-root bundles add about 1.35/1.35 KiB minified and 0.47/0.49 KiB gzip respectively.
+Core, wrapper, selective, catalogue, deformation and deferred imports remain unchanged.
+Only exceeded optional pipeline/all-root allowances increase with reviewed rounding headroom.
+See the [benchmark evidence](./benchmarks.md#static-helmert-coordinate-buffers) for the
+measured scope; this does not establish a general throughput or state-of-the-art claim.
+
 ## Remaining performance and geodetic roadmap
 
 | Tranche | Work | Acceptance gate |
 | --- | --- | --- |
 | 12C2 — Broader deformation qualification | Independently qualify application-provided real models and evaluate nonlinear/time-varying components | Reviewed data terms without distributing third-party models; explicit time/coverage/accuracy bounds |
 | 12E2 — Broader operation qualification | Independently qualify application-provided operation catalogues and irregular coverage/accuracy policies | Reviewed metadata/data terms, conservative coverage and comparable accuracy definitions; no bundled third-party database or implicit downloads |
-| 13A — Further JavaScript performance | Profile grid/datum-heavy and mixed-epoch pipelines; evaluate additional whole-buffer specializations and remaining runtime allocation/boxing | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
+| 13A — Further JavaScript performance | Profile grid/datum-heavy and mixed-epoch pipelines; evaluate mixed-stage whole-buffer specializations and remaining runtime allocation/boxing | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
 | 13B–13D — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
 
 Further optimization and operation support require separate measurements and accuracy

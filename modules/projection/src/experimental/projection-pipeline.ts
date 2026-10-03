@@ -18,6 +18,7 @@ import type {NumericStep, NumericFlatOperation} from './numeric-flat';
 import {validateScalarOutput, writeScalarOutput} from './scalar-output';
 import type {ProjectionCoordinate, ProjectionOutput} from './scalar-output';
 export type {ProjectionCoordinate, ProjectionOutput} from './scalar-output';
+import {createHelmertFlat} from './helmert-flat';
 import {createExactHelmert} from './exact-helmert';
 import {createKinematicHelmert} from './kinematic-helmert';
 import {getLoadedProjection, preloadProjection} from './projection-descriptor';
@@ -132,8 +133,11 @@ type Pair = {
   inverse: Operation;
   forwardNumeric?: NumericStep;
   inverseNumeric?: NumericStep;
+  forwardFlat?: NumericFlatOperation;
+  inverseFlat?: NumericFlatOperation;
 };
-function numericFlat(pairs: readonly Pair[]): NumericFlatOperation | undefined {
+function compileFlat(pairs: readonly Pair[]): NumericFlatOperation | undefined {
+  if (pairs.length === 1 && pairs[0].forwardFlat) return pairs[0].forwardFlat;
   // Pure axis measurements were inconsistent; retain general dispatch for that subset.
   return pairs.every(pair => pair.forwardNumeric) &&
     pairs.some(pair => pair.forwardNumeric[0] !== 2)
@@ -189,8 +193,8 @@ function triple(values: readonly number[]): void {
 }
 
 /** Explicit forward/reverse operations; no CRS/epoch inference or string pipeline parser.
- * Built-in steps use one scratch point per call and never allocate coordinate arrays
- * inside the flat loop. M and additional ordinates are preserved, never interpreted.
+ * General execution reuses guarded scratch; specialized flat stages use numeric
+ * locals and never allocate coordinate arrays inside the flat loop. M and additional ordinates are preserved, never interpreted.
  */
 export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
   readonly input: PipelineCoordinateSystem;
@@ -421,8 +425,8 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
     this.compiled = {
       forward: forward.map(pair => pair.forward),
       inverse: inverse.map(pair => pair.forward),
-      forwardFlat: numericFlat(forward),
-      inverseFlat: numericFlat(inverse)
+      forwardFlat: compileFlat(forward),
+      inverseFlat: compileFlat(inverse)
     };
   }
   private operations(inverse: boolean): Operation[] {
@@ -594,7 +598,9 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
             forward: pair.inverse,
             inverse: pair.forward,
             forwardNumeric: pair.inverseNumeric,
-            inverseNumeric: pair.forwardNumeric
+            inverseNumeric: pair.forwardNumeric,
+            forwardFlat: pair.inverseFlat,
+            inverseFlat: pair.forwardFlat
           }
         : pair;
     const pair =
@@ -602,10 +608,19 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
         forward: Operation,
         backward: Operation,
         forwardNumeric?: NumericStep,
-        inverseNumeric?: NumericStep
+        inverseNumeric?: NumericStep,
+        forwardFlat?: NumericFlatOperation,
+        inverseFlat?: NumericFlatOperation
       ): Factory =>
       () => {
-        cache.pair ||= {forward, inverse: backward, forwardNumeric, inverseNumeric};
+        cache.pair ||= {
+          forward,
+          inverse: backward,
+          forwardNumeric,
+          inverseNumeric,
+          forwardFlat,
+          inverseFlat
+        };
         return orient(cache.pair);
       };
     const requireState = (
@@ -860,7 +875,14 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
             scale,
             step.convention === 'coordinate_frame'
           );
-          return pair(exact.forward, exact.inverse);
+          return pair(
+            exact.forward,
+            exact.inverse,
+            undefined,
+            undefined,
+            createHelmertFlat(exact.coefficients, false, true),
+            createHelmertFlat(exact.coefficients, true, true)
+          );
         }
         const sign = step.convention === 'coordinate_frame' ? -1 : 1;
         const values = [
@@ -868,7 +890,30 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
           ...(step.rotation || [0, 0, 0]).map(value => sign * value),
           scale
         ];
-        return pair(createHelmert(values, false), createHelmert(values, true));
+        const radians = Math.PI / (180 * 3600);
+        const coefficients = [
+          (values[3] || 0) * radians,
+          (values[4] || 0) * radians,
+          (values[5] || 0) * radians,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          values[0],
+          values[1],
+          values[2],
+          1 + (values[6] || 0) / 1e6
+        ];
+        return pair(
+          createHelmert(values, false),
+          createHelmert(values, true),
+          undefined,
+          undefined,
+          createHelmertFlat(coefficients, false, false),
+          createHelmertFlat(coefficients, true, false)
+        );
       }
       case 'deformation': {
         requireState('geocentric', ['m', 'm', 'm']);

@@ -33,6 +33,11 @@ export const PIPELINE_SCENARIOS: readonly PipelineBenchmarkScenario[] = [
   {id: 'Inverse angular units', fixture: 'inverse-unit-step'},
   {id: 'Static Helmert', fixture: 'helmert-position_vector'},
   {id: 'Exact Helmert', fixture: 'exact-position_vector-20'},
+  {id: 'Translation Helmert', fixture: 'helmert-translation'},
+  {id: 'Static coordinate-frame Helmert', fixture: 'helmert-coordinate_frame'},
+  {id: 'Inverse static Helmert', fixture: 'helmert-inverse-step'},
+  {id: 'Exact coordinate-frame Helmert', fixture: 'exact-coordinate_frame-20'},
+  {id: 'Inverse exact Helmert', fixture: 'exact-inverse-coordinate_frame'},
   {
     id: 'Datum to Mercator',
     fixture: 'datum-to-projection',

@@ -171,6 +171,18 @@ try {
     const fullExact = new ProjectionPipeline({input: exact.input, steps: [
       {type: 'helmert', translation: [100, -200, 30], rotation: [15000, -7000, 3000], convention: 'position_vector', exact: true}
     ]});
+    const fullExactBuffer = new Float64Array([...exactInput, ...exactInput]);
+    assert.equal(fullExact.projectFlatSync(fullExactBuffer, 4), fullExactBuffer);
+    assert.deepEqual(Array.from(fullExactBuffer), [...fullExact.projectSync(exactInput), ...fullExact.projectSync(exactInput)]);
+    fullExact.unprojectFlatSync(fullExactBuffer, 4);
+    fullExactBuffer.forEach((value, index) => assert(Math.abs(value - exactInput[index % 4]) < 1e-8));
+    const smallHelmert = new ProjectionPipeline({input: exact.input, steps: [
+      {type:'helmert',translation:[1.2,-2.3,3.4],rotation:[.12,-.25,.31],scalePPM:1.7,convention:'coordinate_frame',inverse:true}
+    ]});
+    const smallBuffer = new Float32Array(exactInput);
+    const smallExpected = new Float32Array(smallHelmert.projectSync(Array.from(smallBuffer)));
+    assert.equal(smallHelmert.projectFlatSync(smallBuffer,4),smallBuffer);
+    assert.deepEqual(Array.from(smallBuffer),Array.from(smallExpected));
     fullExact.unproject(fullExact.project(exactInput)).forEach((value, index) => assert(Math.abs(value - exactInput[index]) < 1e-8));
     const moving = new ProjectionPipeline({input: exact.input, steps: [
       {type: 'helmert', translation: [1, 2, 3], referenceEpoch: 2000, rates: {translation: [0.1, -0.2, 0.3]}}

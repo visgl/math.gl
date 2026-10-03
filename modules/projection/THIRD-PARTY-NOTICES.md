@@ -88,6 +88,13 @@ convention transpose from PROJ 9.5.1 `src/transformations/helmert.cpp` (Copyrigh
 (c) 2016, Thomas Knudsen / SDFE), under the MIT-style terms in `PROJ-LICENSE.txt`.
 It is modified into prepared typed point operations; the existing approximate
 Helmert equations remain the attributed proj4js adaptation in `datum.ts`.
+
+`src/experimental/helmert-flat.ts` adds original direct-buffer traversal around
+these existing attributed equations. Its small-angle arithmetic follows the
+proj4js adaptation in `datum.ts`; exact matrix application follows the PROJ
+adaptation in `exact-helmert.ts` and consumes that stage's prepared matrix.
+Its SPDX headers retain both upstream copyright credits and point to the existing
+`PROJ4-LICENSE.md` and `PROJ-LICENSE.txt`. No new third-party model data is added.
 Ordinate-stack and direction-specific orchestration are original math.gl code
 inspired by PROJ pipeline contracts, not direct PROJ or proj4js forks.
 The additional two-by-two GTX is authored MIT test data, not a distributed geoid model.
