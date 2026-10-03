@@ -3,7 +3,7 @@
   "proj": "9.5.1",
   "source": "vertical-geotiff-cases.json",
   "sourceSHA256": "9ec62ba6de531a41e62ddb9df63b8607ca73159a20b9169cc9c4c33babda013c",
-  "generatorSHA256": "1e24c65629d5a2729b86989f9cf63cc22fababadf74037ff3a47603f49ee1926",
+  "generatorSHA256": "f4c645edbfd4fb9b486585349851a28cc30891023bf408bf91fa9d2b11dabad8",
   "cases": [
     {
       "id": "point-float32",
