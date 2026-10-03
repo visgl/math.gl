@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `@math.gl/polygon` adds `subdividePolyline` for adaptive edge subdivision through application-supplied coordinate transforms, including source/target buffers, attribute interpolation metadata, and explicit resource limits. See [subdividePolyline](./modules/polygon/api-reference/subdivide-polyline.md).
+
 - `@math.gl/dggs` adds `unwrapDGGSBoundary` and optional unwrapping on decoder boundary, flat-boundary, and bounds methods. Antimeridian-crossing cells can use continuous longitudes while existing calls retain their output. See [DGGSDecoder](./modules/dggs/api-reference/dggs-decoder.md).
 
 <table style={{border: 0, align: "center"}}>
