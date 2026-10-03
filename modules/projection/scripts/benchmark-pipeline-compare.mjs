@@ -22,6 +22,7 @@ const {values} = parseArgs({
     clock: {type: 'string', default: 'wall'},
     scenarios: {type: 'string'},
     allocations: {type: 'boolean', default: false},
+    'reusable-results': {type: 'boolean', default: false},
     output: {type: 'string'}
   }
 });
@@ -122,6 +123,14 @@ try {
               'baseline scalar',
               'math.gl scalar'
             ];
+            if (values['reusable-results']) {
+              const operation = direction === 'project' ? pipelines[1].projectToSync : pipelines[1].unprojectToSync;
+              if (!operation) throw new Error('Candidate requires reusable scalar result APIs');
+              for (const typed of [false, true]) {
+                runners.push(harness.scalarResultRunner(operation, options, typed, epochs));
+                implementations.push(typed ? 'math.gl scalar typed output' : 'math.gl scalar array output');
+              }
+            }
             const expected = source.slice();
             scalar[0](expected);
             const savedEpochs = typeof epochs === 'number' || !epochs ? epochs : epochs.slice();
@@ -159,7 +168,9 @@ try {
               scalarSpeedup: ratio(
                 result.measurements[2].milliseconds,
                 result.measurements[3].milliseconds
-              )
+              ),
+              arrayOutputSpeedup: values['reusable-results'] ? ratio(result.measurements[3].milliseconds, result.measurements[4].milliseconds) : undefined,
+              typedOutputSpeedup: values['reusable-results'] ? ratio(result.measurements[3].milliseconds, result.measurements[5].milliseconds) : undefined
             });
             if (profiler && precision === 'Float64' && dimension === 4 && direction === 'project')
               allocationJobs.push({id: scenario.id, source, runners, implementations});
@@ -217,11 +228,12 @@ const report = {
     arch: process.arch,
     clock: values.clock,
     proj4js: classicVersion,
+    reusableResults: values['reusable-results'],
     seed,
     ...settings
   },
   methodology:
-    'Identical source bundler and installed dependencies; historical runtime sources read from Git. Independent PROJ anchors and all-coordinate baseline/candidate validation precede timing. Seeded bounded jitter, both precisions, XYZ/XYZM, both directions, static/batch/mixed epochs. Direct proj4js only for equivalent supported CRS pairs, at an absolute 1e-4 output-unit tolerance; it does not implement typed pipelines or kinematic epochs. Prepared instances, independent copies, resets outside timing, adaptive samples and rotated execution order. Median/p10/p90 are per-buffer; raw samples are aggregate milliseconds. Thread CPU time is diagnostic, not elapsed throughput. Allocation estimates are sampled after all timing in a separate untimed run; zero is not proof of zero allocation. No speed thresholds.',
+    'Identical source bundler and installed dependencies; historical runtime sources read from Git. Independent PROJ anchors and all-coordinate baseline/candidate validation precede timing. Seeded bounded jitter, both precisions, XYZ/XYZM, both directions, static/batch/mixed epochs. Direct proj4js only for equivalent supported CRS pairs, at an absolute 1e-4 output-unit tolerance; it does not implement typed pipelines or kinematic epochs. Optional reusable-result rows compare current array/typed outputs with the current owned-array scalar API, reusing both input and result without per-record subarrays. Prepared instances, independent copies, resets outside timing, adaptive samples and rotated execution order. Median/p10/p90 are per-buffer; raw samples are aggregate milliseconds. Thread CPU time is diagnostic, not elapsed throughput. Allocation estimates are sampled after all timing in a separate untimed run; zero is not proof of zero allocation. No speed thresholds.',
   rows,
   allocations
 };

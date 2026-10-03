@@ -265,11 +265,13 @@ jobs:
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
           node modules/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
 
+      # Keep every scenario/layout/direction and seven samples; bound aggregate windows
+      # as reusable-output modes add implementations. Longer local runs keep the 12 ms default.
       - name: Compare pipeline performance against the PR base
         timeout-minutes: 5
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --allocations --output /tmp/projection-pipeline-comparison.json
+        run: node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --min-sample-ms 4 --allocations --reusable-results --output /tmp/projection-pipeline-comparison.json
 
       - name: Check paired grid preparation benchmark
         timeout-minutes: 2

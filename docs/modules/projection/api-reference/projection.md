@@ -86,11 +86,19 @@ Create a new `Projection` instance that can convert between the specified coordi
 
 ### `project(coord: number[]): number[]`
 
-Project a coordinate project from first to second coordinate system
+Transform a coordinate from the source to the target coordinate system.
 
 ### `unproject(coord: number[]): number[]`
 
-Project a coordinate project from second to first coordinate system
+Transform a coordinate from the target to the source coordinate system.
+
+### `projectTo(coordinate, output)` / `unprojectTo(coordinate, output)`
+
+Write a coordinate into a preallocated number array, `Float32Array` or `Float64Array`
+and return the same output object. Exact input/output identity supports in-place use.
+The inherited `projectToSync` and `unprojectToSync` methods have the same storage contract.
+See [reusable scalar outputs](./projection-engine.md#reusable-scalar-outputs) for capacity,
+overlap, rounding, error and lazy-loading behavior.
 
 ### `projectFlat(coordinates, dimension = 2)` / `unprojectFlat(coordinates, dimension = 2)`
 

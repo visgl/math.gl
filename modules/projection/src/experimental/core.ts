@@ -42,3 +42,5 @@ export {
   getLoadedProjection
 } from './projection-descriptor';
 export type {ProjectionDescriptor} from './projection-descriptor';
+
+export type {ProjectionCoordinate, ProjectionOutput} from './scalar-output';

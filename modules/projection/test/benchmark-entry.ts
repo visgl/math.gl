@@ -7,3 +7,5 @@ export const backends = {typescript, proj4};
 export * from './benchmark-workload';
 export * from './live-bench-types';
 export {benchmarkGrid} from './benchmark-grid';
+
+export {scalarResultRunner} from './benchmark-scalar-results';

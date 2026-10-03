@@ -27,7 +27,11 @@ const coordinateFunctions = new Set([
   'apply',
   'coordinateEpoch',
   'forwardInPlace',
-  'inverseInPlace'
+  'inverseInPlace',
+  'validateScalarOutput',
+  'writeScalarOutput',
+  'projectToSync',
+  'unprojectToSync'
 ]);
 const arrayMethods = new Set([
   'map',

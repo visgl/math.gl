@@ -15,6 +15,7 @@ import {
 } from '../pipeline-benchmark-workload';
 import proj4 from 'proj4';
 import {scalarRunner} from '../benchmark-workload';
+import {scalarResultRunner} from '../benchmark-scalar-results';
 
 let horizontal: ArrayBuffer;
 beforeAll(async () => {
@@ -46,6 +47,16 @@ for (const scenario of PIPELINE_SCENARIOS)
             buffer => expect(operation(buffer, dimension, epochs)).toBe(buffer),
             dimension
           );
+          for (const typed of [false, true]) {
+            const scalarTo =
+              direction === 'project' ? pipeline.projectToSync : pipeline.unprojectToSync;
+            validatePipelineRunner(
+              source,
+              expected,
+              scalarResultRunner(scalarTo, options, typed, epochs),
+              dimension
+            );
+          }
           if (typeof epochs !== 'number' && epochs) expect(epochs).toEqual(savedEpochs);
           if (scenario.classic) {
             const classic = proj4(scenario.classic.from, scenario.classic.to);

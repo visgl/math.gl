@@ -125,7 +125,8 @@ step changes the reference frame at the supplied observation epoch; it does not 
 a coordinate from one observation epoch to another. Inverse execution uses the same
 epoch and preserves the default small-angle inverse approximation unless `exact` is chosen.
 
-Scalar methods accept an optional decimal-year number as their second argument.
+`project` and `unproject` accept an optional decimal-year number as their second argument.
+`projectTo` and `unprojectTo` accept it as their third argument, after the output.
 Flat methods accept a number or `Float64Array`/`Float32Array` as their third argument,
 after the stride. The `*Sync` and lazy methods have the same epoch arguments.
 A pipeline containing rates requires explicit epochs in both directions, even when
@@ -265,6 +266,29 @@ also enables these methods. Concurrent requests share imports, and failed import
 can be retried. Unrecognized algorithm-specific parameters on unloaded descriptors
 are rejected when the implementation is available.
 
+## Reusable scalar outputs
+
+`projectTo(coordinate, output, epoch?)` and `unprojectTo(coordinate, output, epoch?)`
+reuse a preallocated number array, `Float32Array` or `Float64Array` and return that exact
+output. Their bound `*Sync` counterparts never import and require preloaded implementations.
+Epochs stay explicit; M is never used as time:
+
+```typescript
+const output = new Float64Array(4);
+movingFrame.projectTo(point, output, 2010.25);
+movingFrame.unprojectTo(output, output, 2010.25);
+```
+
+The input types, capacity, spare output, in-place identity, distinct-view overlap checks,
+Float32 rounding/overflow and stable-storage requirements follow the
+[engine's reusable-output contract](./api-reference/projection-engine.md#reusable-scalar-outputs).
+The `/pipeline` subpath also exports `ProjectionCoordinate` and `ProjectionOutput`.
+Pipelines reuse their working point and cached ordinate stack; nested calls use isolated
+scratch. Existing `project` and `unproject` still return independently owned arrays.
+Descriptor-backed `*To` calls return promises and snapshot input before loading. Keep their
+output untouched until the promise settles; use `*ToSync` after preloading to avoid those
+snapshots and promises.
+
 ## Typed arrays, validation and package boundaries
 
 `projectFlat` and `unprojectFlat` accept `Float32Array` or `Float64Array` and a record
@@ -276,7 +300,8 @@ Reuse a pipeline and use the flat methods to process large buffers in place.
 Operations run in double precision; a Float32 buffer is rounded only on final
 record output. Non-finite X/Y/Z and Float32 output
 overflow are errors. Records completed before an error remain transformed; the
-failing record and remaining records are untouched. Scalar input is never modified.
+failing record and remaining records are untouched. `project` and `unproject` never modify
+scalar input; the reusable-output methods can explicitly use that same object in place.
 
 `/pipeline` exports the class and its types without the CRS engine, projection catalogue,
 WKT/PROJJSON readers, grid decoders or proj4js runtime. Add plugins/readers explicitly.

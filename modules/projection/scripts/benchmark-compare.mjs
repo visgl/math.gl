@@ -19,6 +19,7 @@ const {values} = parseArgs({
     'min-sample-ms': {type: 'string', default: '12'},
     output: {type: 'string'},
     scenarios: {type: 'string'},
+    'reusable-results': {type: 'boolean', default: false},
     clock: {type: 'string', default: 'wall'}
   }
 });
@@ -36,7 +37,8 @@ const {
   validateOptions,
   backends,
   SCENARIOS,
-  benchmarkGrid
+  benchmarkGrid,
+  scalarResultRunner
 } = await loadBenchmark();
 if (!['wall', 'thread-cpu'].includes(values.clock)) throw new Error('Unknown clock');
 const now =
@@ -114,14 +116,32 @@ try {
             workloads[0].runners[1],
             workloads[1].runners[1]
           ];
+          const implementations = ['baseline flat', 'math.gl flat', 'baseline scalar', 'math.gl scalar'];
+          if (values['reusable-results']) {
+            const projection = factories[1]();
+            const operation = direction === 'project' ? projection.projectToSync : projection.unprojectToSync;
+            if (!operation) throw new Error('Candidate requires reusable scalar result APIs');
+            const expected = source.slice(); workloads[1].runners[1](expected);
+            for (const typed of [false, true]) {
+              const run = scalarResultRunner(operation, options, typed);
+              const output = source.slice(); run(output);
+              if (output.some((value, index) => value !== expected[index]))
+                throw new Error('Reusable scalar differs from the qualified current scalar result');
+              runners.push(run);
+              implementations.push(typed ? 'math.gl scalar typed output' : 'math.gl scalar array output');
+            }
+          }
           // Both versions have independently passed all-coordinate validation against proj4js.
           const row = measureWorkload({source, runners, factories: []}, options, settings);
           results.push({
             name: scenario.name,
             ...options,
+            implementations,
             ...row,
             flatSpeedup: row.measurements[0].milliseconds / row.measurements[1].milliseconds,
-            scalarSpeedup: row.measurements[2].milliseconds / row.measurements[3].milliseconds
+            scalarSpeedup: row.measurements[2].milliseconds / row.measurements[3].milliseconds,
+            arrayOutputSpeedup: values['reusable-results'] ? row.measurements[3].milliseconds / row.measurements[4].milliseconds : undefined,
+            typedOutputSpeedup: values['reusable-results'] ? row.measurements[3].milliseconds / row.measurements[5].milliseconds : undefined
           });
         }
   }
@@ -141,10 +161,11 @@ const report = {
     arch: process.arch,
     date: new Date().toISOString(),
     clock: values.clock,
+    reusableResults: values['reusable-results'],
     ...settings
   },
   methodology:
-    'Same source bundler and dependencies; baseline runtime sources read from Git. Shared seeded workload, all-coordinate proj4js validation, adaptive samples and rotated runner order. Measurement order: baseline flat, candidate flat, baseline scalar, candidate scalar. Constructor order alternates separately. Speedups are local observations; p10/p90 ranges describe sample variation.',
+    'Same source bundler and dependencies; baseline runtime sources read from Git. Shared seeded workload, all-coordinate proj4js validation, adaptive samples and rotated runner order. Measurement order: baseline flat, candidate flat, baseline scalar, candidate scalar. Optional reusable-result rows append current scalar array/typed outputs; all their ordinates match the qualified current scalar result before timing. Constructor order alternates separately. Speedups are local observations; p10/p90 ranges describe sample variation.',
   construction,
   results
 };

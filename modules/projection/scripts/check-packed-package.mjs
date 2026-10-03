@@ -117,6 +117,17 @@ try {
     const pipeline = new ProjectionPipeline({input: {space: 'geographic', units: ['deg', 'deg', 'm']}, steps: [
       {type: 'unitconvert', xy: {from: 'deg', to: 'rad'}}, {type: 'projection', name: 'merc', parameters: {a: '6378137', b: '6378137'}}
     ], projections: [api.mercator]});
+    const ownedOutput = new Float64Array(4);
+    const convenience = new stable.Projection({to: 'EPSG:3857'});
+    assert.equal(convenience.projectTo([11, 41, 123, 8], ownedOutput), ownedOutput);
+    assert.deepEqual(Array.from(ownedOutput), convenience.project([11, 41, 123, 8]));
+    assert.equal(convenience.unprojectToSync(ownedOutput, ownedOutput), ownedOutput);
+    const lazyOutput = new Float32Array(4);
+    assert.equal(await automatic.projectTo([3, 0, 123, 8], lazyOutput), lazyOutput);
+    assert.deepEqual(Array.from(lazyOutput), [500000, 0, 123, 8]);
+    const pipelineOutput = [77, 77, 77, 77];
+    assert.equal(pipeline.projectToSync([11, 41, 123, 8], pipelineOutput), pipelineOutput);
+    assert.deepEqual(pipelineOutput, pipeline.project([11, 41, 123, 8]));
     const pipelinePoint = [11, 41, 123, 8];
     const pipelineBuffer = new Float64Array(pipelinePoint);
     assert.equal(pipeline.projectFlat(pipelineBuffer, 4), pipelineBuffer);
@@ -272,6 +283,17 @@ try {
     const createOptions: ProjectionEngineCreateOptions = engineOptions;
     const configured: ProjectionEngine = new ProjectionEngine(engineOptions);
     const capability: ProjectionCompatibility = checkProjectionCompatibility('EPSG:4326');
+    import type {ProjectionCoordinate, ProjectionOutput} from '@math.gl/projection/core';
+    const resultInput: ProjectionCoordinate = new Float64Array([1, 2, 3, 8]);
+    const outputStorage: ProjectionOutput = [0, 0, 0, 0];
+    const typedResult: Float32Array = configured.projectTo(resultInput, new Float32Array(4));
+    const arrayResult: number[] = configured.unprojectToSync(resultInput, outputStorage);
+    // @ts-expect-error only floating typed outputs or number arrays are supported
+    configured.projectTo(resultInput, new Int32Array(4));
+    // @ts-expect-error result storage is required
+    configured.projectTo(resultInput);
+    // @ts-expect-error readonly arrays cannot be used as writable results
+    configured.projectTo(resultInput, [1, 2] as readonly number[]);
     const eagerEngine: number[] = new ProjectionEngine({}).project([0, 0]);
     const createdEngine: Promise<ProjectionEngine> = ProjectionEngine.create(createOptions);
 
@@ -317,6 +339,8 @@ try {
     import {lazyUniversalTransverseMercator} from '@math.gl/projection/projections/lazy/utm';
     const lazy = new ProjectionEngine({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});
     const asyncResult: Promise<number[]> = lazy.project([3, 0]);
+    const asyncTypedResult: Promise<Float64Array> = lazy.projectTo(resultInput, new Float64Array(4));
+    const preloadedTypedResult: Float32Array = lazy.projectToSync(resultInput, new Float32Array(4));
     const syncResult: number[] = lazy.projectSync([3, 0]);
     const asyncBuffer: Promise<Float64Array> = lazy.projectFlat(new Float64Array([3, 0]));
     const mixed = new ProjectionEngine({to: 'EPSG:32631', projections: [mercator, lazyUniversalTransverseMercator]});
@@ -342,9 +366,14 @@ try {
     moving.projectFlat(new Float64Array([1, 2, 3]), 3, new Int32Array([2020]));
     const pipeline = new ProjectionPipeline(pipelineOptions);
     const pipelineScalar: number[] = pipeline.project([0, 0]);
+    const reusablePipeline: Float32Array = pipeline.projectTo(resultInput, new Float32Array(4));
+    const epochResult: Float64Array = moving.projectToSync(resultInput, new Float64Array(4), 2020);
+    const pipelineCoordinate: import('@math.gl/projection/pipeline').ProjectionCoordinate = resultInput;
+    const pipelineResult: import('@math.gl/projection/pipeline').ProjectionOutput = outputStorage;
     const pipelineFlat: Float32Array = pipeline.projectFlat(new Float32Array([0, 0]));
     const deferredPipeline = new ProjectionPipeline({...pipelineOptions, projections: [lazyUniversalTransverseMercator]});
     const deferredScalar: Promise<number[]> = deferredPipeline.project([0, 0]);
+    const deferredOutput: Promise<Float32Array> = deferredPipeline.projectTo(resultInput, new Float32Array(4));
     const deferredFlat: Promise<Float64Array> = deferredPipeline.projectFlat(new Float64Array([0, 0]));
     const explicitSync: number[] = deferredPipeline.projectSync([0, 0]);
     // @ts-expect-error Integer buffers are not supported.

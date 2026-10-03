@@ -426,9 +426,14 @@ from AEQD, Robinson, Oblique Mercator, QSC and tilted perspective. Source-wide a
 auditing guards the numerical paths, and guarded scalar scratch/stack storage avoids
 repeated allocations while preserving recursive-hook isolation. Paired grid preparation
 benchmarks separate loading
-and retained memory from point throughput. Datum-heavy and mixed-epoch chains, reusable
-scalar outputs, remaining implicit allocation/boxing costs and further whole-buffer
-specializations remain profiling targets. See
+and retained memory from point throughput. The next pass adds caller-owned scalar outputs:
+`projectTo` / `unprojectTo` and explicit synchronous variants reuse number arrays or floating
+point typed arrays, including in-place identity, pipeline epochs and lazy loading. Independent
+projection/pipeline references qualify both directions. Paired timing and separate allocation
+sampling show lower allocation traffic without a consistent throughput improvement, at about
+0.46–0.71 KiB gzip depending on the retained entry point. Datum-heavy and mixed-epoch chains,
+remaining implicit allocation/boxing costs and further whole-buffer specializations remain
+profiling targets. See
 [paired pipeline benchmarks](./benchmarks.md#compare-operation-pipeline-performance).
 
 ## Remaining performance and geodetic roadmap
@@ -437,7 +442,7 @@ specializations remain profiling targets. See
 | --- | --- | --- |
 | 12C2 — Broader deformation qualification | Independently qualify application-provided real models and evaluate nonlinear/time-varying components | Reviewed data terms without distributing third-party models; explicit time/coverage/accuracy bounds |
 | 12E — Operation selection | A bounded optional catalogue with explicit epoch, area, accuracy and grid availability | Pinned provenance, deterministic reviewed selection and no implicit grid downloads |
-| 13A — Further JavaScript performance | Profile grid/datum-heavy and mixed-epoch pipelines; evaluate additional whole-buffer specializations and reusable scalar outputs | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
+| 13A — Further JavaScript performance | Profile grid/datum-heavy and mixed-epoch pipelines; evaluate additional whole-buffer specializations and remaining runtime allocation/boxing | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
 | 13B–13D — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
 
 Further optimization and operation support require separate measurements and accuracy

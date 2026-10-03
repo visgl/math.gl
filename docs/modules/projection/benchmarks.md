@@ -442,3 +442,53 @@ exact counts or a throughput promise. Public result arrays still allocate, and f
 paths still show some engine allocations despite having no explicit per-record objects.
 See the [paired pipeline report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/allocation-pipeline-node.json)
 for all allocation samples and timing rows.
+
+
+### Compare reusable scalar outputs
+
+Both paired runners accept `--reusable-results`. This adds **math.gl scalar array output**
+and **math.gl scalar typed output** alongside the existing allocating scalar/flat modes.
+The runners reuse input and output storage, call `projectToSync` / `unprojectToSync`, and
+copy results into the same final typed-buffer layout. Setup is outside timing, no per-point
+subarrays are created, and every output ordinate is checked before measuring. Pipeline
+observation epochs remain separate from M. The live table retains its three existing columns.
+
+```sh
+node modules/projection/scripts/benchmark-compare.mjs --baseline-ref origin/master --reusable-results --points 10000 --samples 7 --output /tmp/projection-scalar-results.json
+node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --reusable-results --allocations --points 10000 --samples 7 --output /tmp/projection-pipeline-results.json
+```
+
+`arrayOutputSpeedup` and `typedOutputSpeedup` divide the current allocating scalar median
+by the current reusable-output median. Values above one indicate faster reusable outputs.
+Historical/current scalar and flat ratios remain separately reported. The pipeline runner
+samples allocation only after all timings; these are estimated allocated bytes, including
+collected objects, rather than exact counts or proof of zero allocation.
+
+An October 2026 Apple M2 / Node 24.14.0 diagnostic compared commit `c213a0b4` with these
+APIs using 10,000 points and seven thread-CPU samples. Each report contains 32 rows across
+four scenarios, both precisions/layouts and both directions. Reusing array outputs had median
+speed ratios of 0.97× for ordinary projections and 0.99× for pipelines; typed outputs were
+0.96× in both reports. This is an allocation reduction with no consistent throughput gain.
+Selected pipeline allocation estimates were:
+
+| Pipeline | Owned-array scalar | Reused array output | Reused typed output |
+| --- | --- | --- | --- |
+| Mercator | 74.7 B/point | 0.08 B/point | 0 sampled B/point |
+| Horizontal grid to UTM | 224.8 B/point | 147.2 B/point | 144.5 B/point |
+| Height stack and datum | 156.7 B/point | 78.2 B/point | 78.0 B/point |
+| Mixed epoch Helmert | 96.2 B/point | 17.0 B/point | 15.3 B/point |
+
+The [ordinary raw report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/reusable-scalar-projections-node.json)
+and [pipeline raw report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/reusable-scalar-pipelines-node.json)
+retain timings, sample variation, runtime/source/workload provenance and allocation estimates.
+Grid/datum and mixed-epoch runtime allocations remain profiling targets. Use flat APIs for
+large buffers; deferred scalar requests still snapshot inputs and allocate promises, so use
+explicit synchronous methods after preloading when reusing scalar storage.
+
+The added APIs cost 619 gzip bytes for core, 624 for selective Mercator and 472 for a
+pipeline-only import (browser ESM/es2020, minified, gzip level 9). All-root exports add 723
+bytes. Only exceeded static/initial bundle limits are increased with rounding headroom;
+deferred projection chunks and optional deformation-model profiles are unchanged. CI records
+reusable-output pipeline measurements with seven samples and a shorter 4 ms aggregate
+window across the full scenario/layout/direction matrix. Developer runs retain the 12 ms
+default. Correctness/package budgets are enforced without speed thresholds.

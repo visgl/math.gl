@@ -12,6 +12,8 @@ import type {
 } from './types';
 import {projectionOperation} from './mutable-projection';
 import {ProjectionScratch} from './projection-scratch';
+import {validateScalarOutput, writeScalarOutput} from './scalar-output';
+import type {ProjectionCoordinate, ProjectionOutput} from './scalar-output';
 import {CORE_FLAGS, CORE_PARAMETERS, normalizeCRS} from './crs/normalize';
 import {TypeScriptCRSError, unsupportedStage} from './crs/types';
 import type {CRSCompatibilityReason, CRSNormalizationOptions, NormalizedCRS} from './crs/types';
@@ -94,6 +96,10 @@ export class ProjectionEngine<P extends ProjectionRegistration = ProjectionPlugi
     }
     this.project = this.project.bind(this);
     this.unproject = this.unproject.bind(this);
+    this.projectTo = this.projectTo.bind(this);
+    this.unprojectTo = this.unprojectTo.bind(this);
+    this.projectToSync = this.projectToSync.bind(this);
+    this.unprojectToSync = this.unprojectToSync.bind(this);
     this.projectFlat = this.projectFlat.bind(this);
     this.unprojectFlat = this.unprojectFlat.bind(this);
     this.projectSync = this.projectSync.bind(this);
@@ -169,6 +175,56 @@ export class ProjectionEngine<P extends ProjectionRegistration = ProjectionPlugi
       ? this.projectLoaded(coordinate, true)
       : transformScalar(coordinate, this.inverseTransform, this.scalarScratch);
     return result as ProjectionResult<P, number[]>;
+  }
+  /** Write one coordinate into caller-owned storage; return that same output. */
+  projectTo<T extends ProjectionOutput>(
+    coordinate: ProjectionCoordinate,
+    output: T
+  ): ProjectionResult<P, T> {
+    return (
+      this.deferred
+        ? this.projectToLoaded(coordinate, output, false)
+        : this.projectToSync(coordinate, output)
+    ) as ProjectionResult<P, T>;
+  }
+  unprojectTo<T extends ProjectionOutput>(
+    coordinate: ProjectionCoordinate,
+    output: T
+  ): ProjectionResult<P, T> {
+    return (
+      this.deferred
+        ? this.projectToLoaded(coordinate, output, true)
+        : this.unprojectToSync(coordinate, output)
+    ) as ProjectionResult<P, T>;
+  }
+  projectToSync<T extends ProjectionOutput>(coordinate: ProjectionCoordinate, output: T): T {
+    if (this.deferred) return this.loadSync().projectTo(coordinate, output);
+    validateScalarOutput(
+      coordinate,
+      output,
+      Math.max(coordinate.length, this.forwardTransform.geocentricOutput ? 3 : 2)
+    );
+    return transformScalar(coordinate, this.forwardTransform, this.scalarScratch, output);
+  }
+  unprojectToSync<T extends ProjectionOutput>(coordinate: ProjectionCoordinate, output: T): T {
+    if (this.deferred) return this.loadSync().unprojectTo(coordinate, output);
+    validateScalarOutput(
+      coordinate,
+      output,
+      Math.max(coordinate.length, this.inverseTransform.geocentricOutput ? 3 : 2)
+    );
+    return transformScalar(coordinate, this.inverseTransform, this.scalarScratch, output);
+  }
+  private projectToLoaded<T extends ProjectionOutput>(
+    coordinate: ProjectionCoordinate,
+    output: T,
+    inverse: boolean
+  ): Promise<T> {
+    validateScalarOutput(coordinate, output, coordinate.length);
+    const input = coordinate.slice();
+    return this.load().then(projection =>
+      inverse ? projection.unprojectTo(input, output) : projection.projectTo(input, output)
+    );
   }
   private projectLoaded(coordinate: readonly number[], inverse: boolean): Promise<number[]> {
     const input = coordinate.slice();
@@ -418,26 +474,30 @@ function compileTransform(
     }
   };
 }
-function transformScalar(
-  coordinate: readonly number[],
+function transformScalar<T extends ProjectionOutput = number[]>(
+  coordinate: ProjectionCoordinate,
   operation: CoordinateTransform,
-  scratch: ProjectionScratch
-): number[] {
+  scratch: ProjectionScratch,
+  output?: T
+): T {
   if (coordinate.length < 2)
     throw new Error('Coordinates must contain finite x, y and optional z values');
   if (coordinate.length < 3 && operation.requiresInputZ)
     throw new Error('This transform requires three ordinates');
+  const length = Math.max(coordinate.length, operation.geocentricOutput ? 3 : 2);
   const point = scratch.acquire();
   try {
     point.x = coordinate[0];
     point.y = coordinate[1];
     point.z = coordinate.length >= 3 ? coordinate[2] : 0;
     operation.run(point);
-    const output = coordinate.slice();
-    output[0] = point.x;
-    output[1] = point.y;
-    if (coordinate.length >= 3 || operation.geocentricOutput) output[2] = point.z;
-    return output;
+    if (output) return writeScalarOutput(coordinate, output, point, length);
+    // Only the legacy number-array methods omit output; retain their owned result contract.
+    const result = (coordinate as readonly number[]).slice();
+    result[0] = point.x;
+    result[1] = point.y;
+    if (coordinate.length >= 3 || operation.geocentricOutput) result[2] = point.z;
+    return result as T;
   } finally {
     scratch.release(point);
   }
