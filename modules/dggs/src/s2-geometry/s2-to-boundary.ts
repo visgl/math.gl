@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {IJToST, STToUV, FaceUVToXYZ, XYZToLngLat, getS2Cell} from './s2-geometry';
 

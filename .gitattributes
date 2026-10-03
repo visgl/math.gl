@@ -1,5 +1,5 @@
 yarn.lock -diff
 
 # Generated oracle coordinates and benchmark measurements; authored inputs remain reviewable.
-modules/proj4/test/fixtures/*-reference.json linguist-generated=true
-modules/proj4/test/fixtures/qualification/*.json linguist-generated=true
+modules/projection/test/fixtures/*-reference.json linguist-generated=true
+modules/projection/test/fixtures/qualification/*.json linguist-generated=true

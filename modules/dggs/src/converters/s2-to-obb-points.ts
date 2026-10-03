@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {getS2Cell} from '../s2-geometry/s2-geometry';
 import {getS2Region} from './s2-to-region';

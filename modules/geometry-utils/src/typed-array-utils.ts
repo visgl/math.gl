@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /** Concatenates the visible bytes of multiple typed-array or DataView instances. */
 export function concatTypedArrays(arrays: readonly ArrayBufferView[] = []): Uint8Array {

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /** 2 dimensional bounds [[minX, minY], [maxX, maxY]] */
 export type Bounds2D = [[number, number], [number, number]];

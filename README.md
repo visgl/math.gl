@@ -31,6 +31,11 @@ math.gl was inspired by, and includes code, documentation and ideas from some of
 
 The generous open source licenses of those libraries encouraged reuse which enabled math.gl to be built.
 
+Source headers use `SPDX-License-Identifier` for licenses,
+`SPDX-FileCopyrightText` for copyright holders and `SPDX-FileComment` for
+provenance where applicable. Existing upstream notices and license texts are
+retained. See the [source header convention](dev-docs/source-headers.md).
+
 ## License
 
 MIT license. All code that math.gl has forked is also licensed under MIT or an MIT compatible permissive licenses.

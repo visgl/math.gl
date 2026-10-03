@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {assert} from './assert';
 import {log2, clamp} from './math-utils';
 import {MAX_LATITUDE, lngLatToWorld, worldToLngLat} from './web-mercator-utils';

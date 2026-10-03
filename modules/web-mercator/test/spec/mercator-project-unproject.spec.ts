@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 import {WebMercatorViewport} from '@math.gl/web-mercator';
 import {config, equals} from '@math.gl/core';

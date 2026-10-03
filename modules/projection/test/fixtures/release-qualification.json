@@ -1,0 +1,62 @@
+{
+  "apiStatus": "supported-default",
+  "entryPoint": "@math.gl/projection",
+  "defaultBackend": "typescript",
+  "upstreamCorpus": {
+    "total": 242,
+    "numericMatches": 232,
+    "strictRejections": 9,
+    "numericCorrections": 1
+  },
+  "independent": {
+    "projectionConfigurations": 134,
+    "projectionPoints": 2386,
+    "structuredCRSs": 15,
+    "structuredFormats": [
+      "wkt1",
+      "wkt2",
+      "esri",
+      "projjson"
+    ],
+    "datumChains": 12,
+    "datumPoints": 144,
+    "gridDatasets": 3,
+    "gridPoints": 87,
+    "accuracyDomains": 15,
+    "accuracyPoints": 4005
+  },
+  "reviewedExceptions": [
+    "equatorial-stereographic-y0",
+    "explicit-errors",
+    "initialized-defaults",
+    "strict-utm-zone",
+    "spherical-tmerc-latitude-sign",
+    "conic-opposite-pole",
+    "computed-heights",
+    "strict-crs-boundaries",
+    "angular-formats",
+    "explicit-datum-none",
+    "equatorial-conic-parallel",
+    "explicit-flattening-and-wgs72",
+    "catalogue-offsets",
+    "catalogue-inverse-origins",
+    "southern-bonne",
+    "mollweide-poles",
+    "perspective-domains",
+    "explicit-oblique-dependency",
+    "mollweide-unwrapped-longitude",
+    "grid-edges-and-inverse",
+    "grid-nodata",
+    "grid-destination",
+    "grid-registration",
+    "typed-array-batches",
+    "aeqd-relative-origin",
+    "cassini-series-refinement",
+    "robinson-proj-table",
+    "datum-none-entire-chain",
+    "esri-projection-variants",
+    "cea-near-pole-inverse",
+    "eqdc-meridional-series"
+  ],
+  "scope": "docs/modules/projection/support.md"
+}

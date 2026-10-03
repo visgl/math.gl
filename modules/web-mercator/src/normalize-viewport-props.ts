@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {worldToLngLat} from './web-mercator-utils';
 import {mod, log2} from './math-utils';
 

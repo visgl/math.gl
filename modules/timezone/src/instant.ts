@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /** Normalize an instant without consulting the host timezone or parsing local strings. */
 export function getInstant(date: Date | number): Date {

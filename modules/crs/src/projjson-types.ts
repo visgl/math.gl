@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 // Generated from PROJJSON v0.7. Do not edit by hand.
 // Source: https://proj.org/schemas/v0.7/projjson.schema.json

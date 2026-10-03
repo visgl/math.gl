@@ -1,6 +1,9 @@
 // math.gl
-// SPDX-License-Identifier: MIT and ISC
-// Copyright (c) vis.gl contributors
+// SPDX-License-Identifier: MIT AND ISC
+// SPDX-FileCopyrightText: Copyright (c) 2012-2016, Jon Atkins <github@jonatkins.com>
+// SPDX-FileCopyrightText: Copyright (c) 2016, AJ ONeal <aj@daplie.com>
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Adapted from s2-geometry. Original ISC notice retained below.
 
 // math.gl, MIT license
 /*

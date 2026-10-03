@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {TruncatedConeGeometry, type TruncatedConeGeometryProps} from './truncated-cone-geometry';
 

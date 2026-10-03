@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // This file contains webpack configuration settings that allow
 // examples to be built against the source code in this repo instead
 // of building against their installed version.

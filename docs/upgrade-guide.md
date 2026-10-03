@@ -61,9 +61,9 @@ The available subpaths are `@math.gl/core/mat3`, `/mat4`, `/quat`, `/vec2`, `/ve
 ### CRS and proj4 definitions
 
 - Use `CRSDefinition`, PROJJSON types, syntax codecs, and spatial-reference descriptors from the new proj4-independent `@math.gl/crs` package. Authority codes, WKT, and PROJ definitions remain strings, while PROJJSON is the typed semantic object model.
-- `@math.gl/proj4` now uses proj4js 2.20.9. Existing string definitions continue to work. Its `Proj4CRSDefinition` object type intentionally accepts only the `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` PROJJSON variants that proj4js can execute.
-- Check broader CRS metadata with `checkProj4CRSCompatibility()` before constructing a projection. `CompoundCRS` and `VerticalCRS` remain valid `@math.gl/crs` definitions but are not directly executable by proj4js; horizontal extraction from a compound definition must be requested explicitly.
-- Axis-order enforcement remains opt-in through `enforceAxis: true`. Register NTv2 grids with `Proj4Projection.registerDatumGrid()` before using definitions that reference them.
+- `@math.gl/proj4` is renamed to `@math.gl/projection`. Update package dependencies and imports, and replace `Proj4Projection` with `Projection`. The deprecated alias, `/classic` wrapper and proj4js-specific compatibility helpers are removed during the alpha cycle. Install `proj4` directly if its upstream API is required.
+- The package uses the math.gl projection engine and has no proj4js runtime dependency. Use `ProjectionEngine` for explicit plugins/readers and `checkProjectionCompatibility()` for capability checks. See the [migration contract](./modules/projection/support.md).
+- Axis-order enforcement remains opt-in through `enforceAxis: true`. Register NTv2 grids with `Projection.registerDatumGrid()` before using definitions that reference them.
 
 ### DGGS packages
 

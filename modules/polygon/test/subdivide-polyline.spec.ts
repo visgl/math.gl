@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
 import {subdividePolyline} from '@math.gl/polygon';
@@ -127,7 +127,7 @@ test('a transform that mutates its argument cannot change source positions', () 
 });
 
 test('polar CRS adapter approximates a curved latitude edge in meter units', async () => {
-  const {Projection} = await import('@math.gl/proj4');
+  const {Projection} = await import('@math.gl/projection');
   const projection = new Projection({
     from: 'WGS84',
     to: '+proj=stere +lat_0=90 +lat_ts=70 +lon_0=0 +datum=WGS84 +units=m'

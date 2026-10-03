@@ -14,6 +14,10 @@
 - feat(proj4): Extend typed pipelines with exact Helmert rotations, ordinate stacks,
   direction-specific steps and explicit rotated-projection output units (#171).
 
+- Rename `@math.gl/proj4` to `@math.gl/projection` and use `Projection` as the convenience class. Remove the deprecated `Proj4Projection` alias, `/classic` wrapper and proj4js-specific CRS helpers; proj4js is now development-only for comparisons and tests.
+- Standardize SPDX copyright headers across all tracked math.gl source files and enforce them in CI. Add machine-readable projection provenance and proj4js/PROJ credits; preserve upstream notices and license terms, including Equal Earth's Apache-2.0 notice.
+- Add a projection catalogue and a guide to coordinate systems, ellipsoids, datums, heights and epochs. Expand module attribution and migration documentation.
+
 ## v5.0.0-alpha.11
 
 - feat(proj4): Support vertical GeoTIFF geoid grids (#165)

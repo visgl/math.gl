@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Inspired by SunCalc; equations follow https://www.aa.quae.nl/en/reken/zonpositie.html.
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
 const DAY_IN_MS = 1000 * 60 * 60 * 24;

@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 
 import {configure, Vector4, Matrix4} from '@math.gl/core';
 import * as mat4 from '@math.gl/core/mat4';

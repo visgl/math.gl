@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 // Float16Array is declared in a separate TypeScript library. This reference affects types only.
 // eslint-disable-next-line spaced-comment
