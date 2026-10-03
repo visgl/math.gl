@@ -28,6 +28,7 @@ const fixtures = {
     "export {createDeformationModel} from '@math.gl/projection/deformation'; export {createVelocityGrid} from '@math.gl/projection/grids/velocity';",
   deformationWithGeoTIFF:
     "export {createDeformationModel} from '@math.gl/projection/deformation'; export {loadVelocityGeoTIFFGrid} from '@math.gl/projection/grids/velocity-geotiff';",
+  operationCatalog: "export {OperationCatalog} from '@math.gl/projection/operations';",
   operationPipeline: "export {ProjectionPipeline} from '@math.gl/projection/pipeline';",
   typescriptWrapper: "export {Projection} from '@math.gl/projection';",
   allNativeExports: "export * from '@math.gl/projection';"

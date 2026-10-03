@@ -456,12 +456,35 @@ chains have no consistent throughput gain. Short-call stack/datum allocation est
 fall from about 109 to 77 B/point; timing-limited short-call rows support allocation
 comparisons rather than throughput claims. Raw reports retain the measured scope. Grid/datum and mixed-epoch allocation/boxing remain profiling targets.
 
+## Tranche 12E — Reviewed operation selection: implemented bounded profile
+
+`OperationCatalog` is available only through the optional `/operations` entry point.
+Applications provide directed operations with conservative geographic bounds, explicit
+epoch limits, declared metre accuracy, pinned provenance and required grid revisions.
+Selection requires full area/epoch coverage, matches available assets exactly, excludes
+unknown-accuracy and ballpark candidates by default, and ranks eligible candidates
+deterministically. `inspect` reports every rejected gate and missing grid.
+
+The catalogue snapshots reviewed metadata and never constructs, preloads or executes
+payloads. It has no network access or bundled database/model data. Select once before
+using the existing scalar or flat execution APIs. Qualification covers an independent
+2,401-arc longitude oracle, seam/polar/global and epoch boundaries, quality policies,
+asset revisions, stable ranking, metadata ownership and explicit factory execution.
+Packed ESM/CommonJS/types and isolated bundle budgets cover the optional entry point;
+the retained selector measures 4.4 KiB minified / 1.6 KiB gzip on Node 24.14.0.
+Existing projection, pipeline, root and lazy imports retain no selection code and
+existing bundle limits are unchanged.
+
+This completes the bounded application-catalogue milestone, not unrestricted EPSG
+operation discovery, dynamic CRS inference or a geodetic accuracy certification.
+See the [operation selection guide](./operation-selection.md).
+
 ## Remaining performance and geodetic roadmap
 
 | Tranche | Work | Acceptance gate |
 | --- | --- | --- |
 | 12C2 — Broader deformation qualification | Independently qualify application-provided real models and evaluate nonlinear/time-varying components | Reviewed data terms without distributing third-party models; explicit time/coverage/accuracy bounds |
-| 12E — Operation selection | A bounded optional catalogue with explicit epoch, area, accuracy and grid availability | Pinned provenance, deterministic reviewed selection and no implicit grid downloads |
+| 12E2 — Broader operation qualification | Independently qualify application-provided operation catalogues and irregular coverage/accuracy policies | Reviewed metadata/data terms, conservative coverage and comparable accuracy definitions; no bundled third-party database or implicit downloads |
 | 13A — Further JavaScript performance | Profile grid/datum-heavy and mixed-epoch pipelines; evaluate additional whole-buffer specializations and remaining runtime allocation/boxing | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
 | 13B–13D — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
 

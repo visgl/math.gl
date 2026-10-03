@@ -185,6 +185,7 @@
           "modules/projection/projections",
           "modules/projection/projection-engine",
           "modules/projection/operation-pipelines",
+          "modules/projection/operation-selection",
           "modules/projection/deformation-models",
           "modules/projection/api-reference/projection",
           "modules/projection/api-reference/projection-engine",
