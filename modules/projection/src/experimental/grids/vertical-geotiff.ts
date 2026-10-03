@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original adapter for PROJ's GTG conventions; no upstream decoder code is copied.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original adapter for PROJ's GTG conventions; no upstream decoder code is copied.
 import {prepareScalarGeoTIFFGrids} from './scalar-geotiff';
 import type {VerticalGrid} from './types';
 import type {VerticalGridGeoTIFF, VerticalGridGeoTIFFData} from './scalar-geotiff';

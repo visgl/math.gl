@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {ReadonlyCRSDefinition} from '@math.gl/crs';
 import type {ProjectionParameters} from '../types';
 import type {DatumGridReference} from '../grids/types';

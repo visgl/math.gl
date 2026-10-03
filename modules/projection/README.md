@@ -22,5 +22,7 @@ For documentation please visit the [website](https://math.gl).
 
 The engine is derived from proj4js, with an independently designed modular runtime
 and additional coordinate operations. Direct ports and adaptations retain their
-upstream notices; see [THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md) and the
+upstream notices. Source headers use `SPDX-License-Identifier` for the license,
+`SPDX-FileCopyrightText` for ownership and `SPDX-FileComment` for provenance; see
+[THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md) and the
 [documentation](https://visgl.github.io/math.gl/next/docs/modules/projection).

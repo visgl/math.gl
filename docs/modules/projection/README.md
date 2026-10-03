@@ -103,9 +103,10 @@ much of the newer pipeline and epoch functionality are original math.gl work.
 Source headers distinguish direct ports, adaptations and implementations inspired
 by upstream work. Distributed license files and
 [third-party notices](https://github.com/visgl/math.gl/blob/master/modules/projection/THIRD-PARTY-NOTICES.md)
-retain the applicable upstream credits and terms. Derived source files use SPDX
-license identifiers and `SPDX-FileCopyrightText` credits; Equal Earth retains its
-Apache-2.0 license and original authorship. Removing the proj4js runtime
+retain the applicable upstream credits and terms. Engine source headers use
+`SPDX-License-Identifier` for licenses, `SPDX-FileCopyrightText` for copyright
+holders and `SPDX-FileComment` for provenance and modifications. Equal Earth
+retains its Apache-2.0 license and original authorship. Removing the proj4js runtime
 dependency does not remove attribution for derived code.
 
 The implementation has diverged through selective imports, deferred algorithms,

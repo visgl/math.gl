@@ -1,9 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original ENU basis rotation and inverse, inspired by PROJ's documented
-// deformation contract; no PROJ implementation is copied or forked.
-// Geocentric conversion reuses the attributed proj4js adaptation in datum.ts.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original ENU basis rotation and inverse, inspired by PROJ's documented deformation contract; no PROJ implementation is copied or forked. Geocentric conversion reuses the attributed proj4js adaptation in datum.ts.
 import {geocentricToGeodeticInPlace} from './datum';
 import type {ProjectionPoint} from './types';
 import type {VelocityGrid} from './grids/velocity';

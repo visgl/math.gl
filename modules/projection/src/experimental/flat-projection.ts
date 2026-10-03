@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original batch adapter; numerical equations retain their own proj4js provenance.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original batch adapter; numerical equations retain their own proj4js provenance.
 import {createProjection} from './mutable-projection';
 import type {ProjectionFlatContext, ProjectionFlatOperation, ProjectionPoint} from './types';
 

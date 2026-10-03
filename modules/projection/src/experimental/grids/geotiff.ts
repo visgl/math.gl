@@ -1,10 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// Copyright (c) vis.gl contributors
-// GeoTIFF node orientation directly adapted from proj4js 2.22.0 lib/nadgrid.js.
-// Copyright (c) 2014, proj4js authors. See ../../../PROJ4-LICENSE.md.
-// Modified for explicit async loading, validation and nodata handling; no geotiff runtime import.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: GeoTIFF node orientation directly adapted from proj4js 2.22.0 lib/nadgrid.js. See ../../../PROJ4-LICENSE.md. Modified for explicit async loading, validation and nodata handling; no geotiff runtime import.
 import {createDatumGrid} from './grid';
 import type {DatumGrid, Subgrid} from './types';
 

@@ -1,8 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original descriptor/cache implementation, following loaders.gl's distinction
-// between lightweight metadata and cached runtime implementations.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original descriptor/cache implementation, following loaders.gl's distinction between lightweight metadata and cached runtime implementations.
 import type {ProjectionPlugin} from './types';
 
 export type ProjectionDescriptor = {

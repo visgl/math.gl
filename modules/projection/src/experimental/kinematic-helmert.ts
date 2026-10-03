@@ -1,10 +1,9 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original epoch propagation follows PROJ's kinematic Helmert contract.
-// Exact matrix/convention transpose adapted from PROJ 9.5.1 helmert.cpp,
-// Copyright (c) 2016, Thomas Knudsen / SDFE. See ../../PROJ-LICENSE.txt.
-// Small-angle equations follow the attributed proj4js adaptation in datum.ts.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) 2016, Thomas Knudsen / SDFE (PROJ)
+// SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
+// SPDX-FileComment: Original epoch propagation follows PROJ's kinematic Helmert contract. Exact matrix/convention transpose adapted from PROJ 9.5.1 helmert.cpp. See ../../PROJ-LICENSE.txt. Small-angle equations follow the attributed proj4js adaptation in datum.ts. See ../../PROJ4-LICENSE.md for the small-angle adaptation license.
 import type {ProjectionPoint} from './types';
 import type {PipelineHelmertRates} from './projection-pipeline';
 

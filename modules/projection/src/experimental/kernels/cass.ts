@@ -1,10 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// Direct TypeScript port of proj4js 2.22.0. Copyright (c) 2014, proj4js authors.
-// See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
-// Corrected series signs and inverse refinement informed by PROJ 9.5.1 cass.cpp.
-// See ../../../PROJ-LICENSE.txt. Newton solver implementation is original math.gl code.
+// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution. Corrected series signs and inverse refinement informed by PROJ 9.5.1 cass.cpp. See ../../../PROJ-LICENSE.txt. Newton solver implementation is original math.gl code.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {

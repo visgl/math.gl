@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {inferCRSRepresentation} from '@math.gl/crs/spatial-reference';
 import {parsePROJString} from '@math.gl/crs/proj-string';
 import {applySpatialReference, resolveCRSInput} from './spatial-reference';

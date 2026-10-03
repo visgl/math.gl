@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {createProjection, projectionOperation} from './mutable-projection';
 import {DEGREES_TO_RADIANS, numberParameter} from './parameters';

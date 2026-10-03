@@ -1,8 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original convenience API over projection descriptors. Deferred kernels retain
-// their proj4js/PROJ port notices and licenses.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original convenience API over projection descriptors. Deferred kernels retain their proj4js/PROJ port notices and licenses.
 import {ProjectionEngine} from './typescript-projection';
 import type {ProjectionEngineOptions} from './typescript-projection';
 import {createProjectionDescriptor, preloadProjection} from './projection-descriptor';

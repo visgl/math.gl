@@ -1,8 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original bilinear vertical grid and structural math.gl/geoid adapter.
-// PROJ supplies independent numeric references; no upstream code is copied.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original bilinear vertical grid and structural math.gl/geoid adapter. PROJ supplies independent numeric references; no upstream code is copied.
 import type {VerticalGrid} from './types';
 export type {VerticalGrid, VerticalGridCollection} from './types';
 

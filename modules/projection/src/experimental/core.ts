@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 // Engine and contracts only: no projection catalogue or optional readers.
 export {ProjectionEngine, checkProjectionCompatibility} from './typescript-projection';

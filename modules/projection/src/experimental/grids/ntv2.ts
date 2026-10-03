@@ -1,10 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// Copyright (c) vis.gl contributors
-// NTv2 decoding directly adapted from proj4js 2.22.0 lib/nadgrid.js.
-// Copyright (c) 2014, proj4js authors. See ../../../PROJ4-LICENSE.md.
-// Modified for explicit ownership, bounds/geometry validation and no global registration.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: NTv2 decoding directly adapted from proj4js 2.22.0 lib/nadgrid.js. See ../../../PROJ4-LICENSE.md. Modified for explicit ownership, bounds/geometry validation and no global registration.
 import {createDatumGrid} from './grid';
 import type {DatumGrid, Subgrid} from './types';
 

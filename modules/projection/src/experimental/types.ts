@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /** Raw PROJ parameters. Angles are decimal degrees and lengths are meters. */
 export type ProjectionParameters = Readonly<Record<string, string | undefined>>;

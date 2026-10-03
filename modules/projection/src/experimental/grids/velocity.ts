@@ -1,8 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original ENU grid preparation inspired by PROJ's velocity grid conventions.
-// Bilinear interpolation reuses original math.gl vertical grids; no upstream fork.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original ENU grid preparation inspired by PROJ's velocity grid conventions. Bilinear interpolation reuses original math.gl vertical grids; no upstream fork.
 import {createVerticalGrid} from './vertical';
 import type {VerticalGridOptions} from './vertical';
 import type {ProjectionPoint} from '../types';

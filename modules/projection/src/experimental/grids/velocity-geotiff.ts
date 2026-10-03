@@ -1,8 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original adapter inspired by PROJ's Geodetic TIFF Grid specification, not a fork.
-// Caller-owned TIFF decoding; no proj4js, PROJ or TIFF decoder code is copied here.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original adapter inspired by PROJ's Geodetic TIFF Grid specification, not a fork. Caller-owned TIFF decoding; no proj4js, PROJ or TIFF decoder code is copied here.
 import {prepareScalarGeoTIFFGrids} from './scalar-geotiff';
 import {velocityGridFromComponents} from './velocity';
 import type {VelocityGrid} from './velocity';

@@ -6,8 +6,9 @@ reference: https://github.com/proj4js/proj4js/tree/v2.22.0.
 The numerical kernels under `src/experimental/kernels/`, numerical helpers under
 `src/experimental/common/`, and CRS datum/ellipsoid/unit/prime-meridian tables are
 **direct TypeScript ports** of the corresponding proj4js sources. Source comments
-retain attribution to the proj4js authors, with SPDX license identifiers and
-`SPDX-FileCopyrightText` credits naming the upstream copyright holders. They have been modified to use explicit
+retain attribution to the proj4js authors, with `SPDX-License-Identifier` license
+expressions, `SPDX-FileCopyrightText` credits naming the upstream copyright holders,
+and `SPDX-FileComment` provenance. They have been modified to use explicit
 state, typed inputs, bounded iterations, strict errors, and the corrections recorded
 in the parity inventory. The MIT license is reproduced in `PROJ4-LICENSE.md`.
 The geocentric/Helmert equations in `datum.ts` and rotation equations in
@@ -111,3 +112,18 @@ The synthetic velocity TIFF and its encoder are original MIT math.gl test assets
 excluded from the published package. Native PROJ 9.5.1 forward evaluations generate
 independent references; the legacy inverse is retained separately for comparison.
 Application-provided model files and decoders retain their own terms.
+
+## Source header convention
+
+All projection engine source files declare their license with
+`SPDX-License-Identifier` and ownership with `SPDX-FileCopyrightText`. Files with
+multiple copyright holders use a separate copyright tag for each notice. Years
+are retained when supplied by the original notice; none are invented.
+
+`SPDX-FileComment` records direct ports, adaptations, inspiration and modifications,
+with links to retained license files where applicable. Each file comment occupies
+one line so source scanning can extract the complete provenance. Original wrappers
+and adapters retain their own copyright; importing an attributed kernel does not
+make the adapter a port. These tags follow the [SPDX source file tag convention](https://spdx.github.io/spdx-spec/v2.3/file-tags/).
+The original Equal Earth Apache notice and all distributed upstream license texts
+remain intact. CI checks every source header and the proj4js/PROJ credits.

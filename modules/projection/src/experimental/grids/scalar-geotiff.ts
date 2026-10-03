@@ -1,8 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original adapter for PROJ's Geodetic TIFF Grid specification, not a proj4js/PROJ fork.
-// Decoding is caller-owned; no TIFF library is imported at runtime.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original adapter for PROJ's Geodetic TIFF Grid specification, not a proj4js/PROJ fork. Decoding is caller-owned; no TIFF library is imported at runtime.
 import {createVerticalGrid} from './vertical';
 import type {VerticalGrid} from './types';
 

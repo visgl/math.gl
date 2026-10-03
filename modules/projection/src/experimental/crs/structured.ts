@@ -1,10 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// Copyright (c) vis.gl contributors
-// Original adapter; datum lookup and method/parameter normalization rules are
-// adapted from proj4js 2.22.0 and its MIT-licensed wkt-parser dependency.
-// Copyright (c) 2014, proj4js authors. See ../../../PROJ4-LICENSE.md.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original adapter; datum lookup and method/parameter normalization rules are adapted from proj4js 2.22.0 and its MIT-licensed wkt-parser dependency. See ../../../PROJ4-LICENSE.md.
 import datums from './datum-table';
 import {DEGREES_TO_RADIANS} from '../parameters';
 import {unsupportedStage} from './types';

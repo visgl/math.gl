@@ -1,8 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original explicit vertical-grid stage, following PROJ geoid-height conventions.
-// No proj4js or PROJ implementation code is copied.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original explicit vertical-grid stage, following PROJ geoid-height conventions. No proj4js or PROJ implementation code is copied.
 import {unsupportedStage} from './crs/types';
 import type {VerticalGridCollection} from './grids/types';
 

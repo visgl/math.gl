@@ -1,10 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// Adapted from proj4js 2.22.0. Copyright (c) 2014, proj4js authors.
-// See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
-// math.gl uses the higher-order meridional series shared with Cassini, rather
-// than the upstream truncated e0/e1/e2/e3 series. Qualified against PROJ 9.5.1.
+// SPDX-FileComment: Adapted from proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution. math.gl uses the higher-order meridional series shared with Cassini, rather than the upstream truncated e0/e1/e2/e3 series. Qualified against PROJ 9.5.1.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {

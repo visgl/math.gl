@@ -1,8 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// Adapted from proj4js 2.22.0. Copyright (c) 2014, proj4js authors.
-// See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Adapted from proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
 
 import {HALF_PI} from './constants';
 

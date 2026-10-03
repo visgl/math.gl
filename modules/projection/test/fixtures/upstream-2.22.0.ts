@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Adapted from proj4js 2.22.0 test/testData.js. See ../../PROJ4-LICENSE.md.
+// SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
+// SPDX-FileComment: Adapted from proj4js 2.22.0 test/testData.js. See ../../PROJ4-LICENSE.md.
 
 export const upstreamFixtureSource = {
   url: 'https://github.com/proj4js/proj4js/blob/v2.22.0/test/testData.js',

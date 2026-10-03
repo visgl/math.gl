@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original adapter for kernels directly ported from proj4js 2.22.0.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original adapter for kernels directly ported from proj4js 2.22.0.
 import {createProjection} from './mutable-projection';
 import {bindKernel, kernelParameters} from './kernel';
 import type {KernelParameters, Point} from './kernel';

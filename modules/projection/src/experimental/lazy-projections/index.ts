@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 export {lazyMercator} from './merc';
 export {lazyEquidistantCylindrical} from './eqc';
 export {lazyLambertConformalConic} from './lcc';

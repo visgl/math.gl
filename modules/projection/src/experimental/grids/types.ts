@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 /** Prepared horizontal datum grid. Inputs/outputs are east-positive longitude/latitude radians. */
 export type DatumGrid = {
   readonly subgridCount: number;

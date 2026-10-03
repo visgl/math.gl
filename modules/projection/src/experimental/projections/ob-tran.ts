@@ -1,10 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// Copyright (c) vis.gl contributors
-// Rotation equations directly ported from proj4js 2.22.0 lib/projections/ob_tran.js.
-// Copyright (c) 2014, proj4js authors. See ../../../PROJ4-LICENSE.md.
-// Modified to use an explicitly supplied plugin instead of proj4js's global registry.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Rotation equations directly ported from proj4js 2.22.0 lib/projections/ob_tran.js. See ../../../PROJ4-LICENSE.md. Modified to use an explicitly supplied plugin instead of proj4js's global registry.
 import type {ProjectionPlugin, ProjectionParameters} from '../types';
 import {createProjection, projectionOperation} from '../mutable-projection';
 import {numberParameter, wrapLongitude} from '../parameters';

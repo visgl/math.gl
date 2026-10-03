@@ -1,8 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original compatibility wrapper around the math.gl projection engine. Projection kernels
-// retain their proj4js/PROJ port notices and licenses in ../experimental/.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original compatibility wrapper around the math.gl projection engine. Projection kernels retain their proj4js/PROJ port notices and licenses in ../experimental/.
 import {ProjectionEngine} from '../experimental/typescript-projection';
 import {
   mercator,

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
 import type {ProjectionDescriptor} from './projection-descriptor';
 import {getLoadedProjection, preloadProjection} from './projection-descriptor';

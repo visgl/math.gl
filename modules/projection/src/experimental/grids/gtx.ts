@@ -1,8 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original reader for the NOAA GTX format documented by GDAL and PROJ.
-// No upstream implementation is copied. Independent tests use PROJ 9.5.1.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original reader for the NOAA GTX format documented by GDAL and PROJ. No upstream implementation is copied. Independent tests use PROJ 9.5.1.
 import {createVerticalGrid} from './vertical';
 import type {VerticalGrid} from './types';
 

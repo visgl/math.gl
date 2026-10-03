@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {ProjectionImplementation, ProjectionPoint} from './types';
 
 /** One equation implementation shared by scalar adapters and the mutable pipeline. */

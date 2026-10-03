@@ -1,10 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original typed orchestration inspired by PROJ's explicit pipeline model.
-// Projection, geocentric and static Helmert equations reuse the proj4js adaptations
-// in this package; see datum.ts and ../../PROJ4-LICENSE.md. The separate exact
-// Helmert matrix is adapted from PROJ; see exact-helmert.ts and ../../PROJ-LICENSE.txt.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original typed orchestration inspired by PROJ's explicit pipeline model. Projection, geocentric and static Helmert equations reuse the proj4js adaptations in this package; see datum.ts and ../../PROJ4-LICENSE.md. The separate exact Helmert matrix is adapted from PROJ; see exact-helmert.ts and ../../PROJ-LICENSE.txt.
 import type {DeformationModel} from './deformation';
 import {CORE_PARAMETERS, normalizeCRS} from './crs/normalize';
 import {unsupportedStage} from './crs/types';

@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Original implementation of projection equations; compatibility informed by proj4js 2.22.0.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original implementation of projection equations; compatibility informed by proj4js 2.22.0.
 
 import {createFlatProjection as createProjection} from '../flat-projection';
 import {DEGREES_TO_RADIANS, latitudeParameter, numberParameter, wrapLongitude} from '../parameters';

@@ -1,9 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2018 Bernie Jenny, Monash University, Melbourne, Australia (Equal Earth, ported through proj4js)
-// Direct TypeScript port of proj4js 2.22.0 lib/projections/eqearth.js.
-// Modified to use explicit TypeScript state. Original Apache-2.0 notice retained below.
-// See ../../../APACHE-2.0-LICENSE.txt and ../../../THIRD-PARTY-NOTICES.md.
+// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0 lib/projections/eqearth.js. Modified to use explicit TypeScript state. Original Apache-2.0 notice retained below. See ../../../APACHE-2.0-LICENSE.txt and ../../../THIRD-PARTY-NOTICES.md.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
