@@ -26,3 +26,10 @@ export {Polygon as _Polygon} from './polygon';
 
 export {subdividePolyline} from './subdivide-polyline';
 export type {SubdividePolylineOptions, SubdividedPolyline} from './subdivide-polyline';
+
+export {subdivideTriangleMesh} from './subdivide-triangle-mesh';
+export type {
+  TriangleMesh,
+  SubdivideTriangleMeshOptions,
+  SubdividedTriangleMesh
+} from './subdivide-triangle-mesh';

@@ -163,6 +163,7 @@
           "modules/polygon/api-reference/clip-polygon",
           "modules/polygon/api-reference/clip-polyline",
           "modules/polygon/api-reference/subdivide-polyline",
+          "modules/polygon/api-reference/subdivide-triangle-mesh",
           "modules/polygon/api-reference/cut-polygon-by-grid",
           "modules/polygon/api-reference/cut-polyline-by-grid",
           "modules/polygon/api-reference/cut-polygon-by-mercator-bounds",
