@@ -176,19 +176,21 @@
       },
       {
         "type": "category",
-        "label": "@math.gl/proj4",
+        "label": "@math.gl/projection",
         "items": [
-          "modules/proj4/README",
-          "modules/proj4/typescript-engine",
-          "modules/proj4/operation-pipelines",
-          "modules/proj4/deformation-models",
-          "modules/proj4/api-reference/proj4-projection",
-          "modules/proj4/api-reference/typescript-projection",
-          "modules/proj4/benchmarks",
-          "modules/proj4/parity-audit",
-          "modules/proj4/independent-validation",
-          "modules/proj4/typescript-support",
-          "modules/proj4/roadmap"
+          "modules/projection/README",
+          "modules/projection/coordinate-systems",
+          "modules/projection/projections",
+          "modules/projection/projection-engine",
+          "modules/projection/operation-pipelines",
+          "modules/projection/deformation-models",
+          "modules/projection/api-reference/projection",
+          "modules/projection/api-reference/projection-engine",
+          "modules/projection/benchmarks",
+          "modules/projection/parity-audit",
+          "modules/projection/independent-validation",
+          "modules/projection/support",
+          "modules/projection/roadmap"
         ]
       },
       {

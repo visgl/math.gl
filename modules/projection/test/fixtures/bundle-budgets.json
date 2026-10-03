@@ -1,0 +1,201 @@
+{
+  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes. Optional-reader rows added in the structured-method/docs follow-up; existing limits retained. Lazy scenarios sum emitted chunk sizes (gzip per file), with 10% deferred headroom rounded to 100 bytes; each initial static graph retains the existing Mercator limit. TypeScript default wrapper baseline added September 30, 2026 with the same headroom; existing limits retained. Automatic LazyProjection catalogue adds a separate initial/deferred budget while existing bundle limits remain unchanged. Tranche 9 compiled pipeline constants measure 17,720 gzip bytes in the rotated initial graph on Node 24.14.0; its gzip allowance increases by 100 bytes to 17,800. All other limits stay unchanged. Tranche 10 shares the optional fused batch adapter between eligible Mercator/UTM/conic plugins. Reviewed lazy initial graphs on Node 24.14.0: UTM 48,390/18,137, WKT 48,258/17,503, rotated 48,316/18,073 minified/gzip bytes; per-scenario limits rounded up to 100 bytes. Static bundle, catalogue and deferred limits remain unchanged. Tranche 12A adds the explicit vertical-height stage (+1154 minified / +317 gzip bytes for core on Node 24.14.0). Increased only exceeded limits, rounded up to 100 bytes with 100 bytes rounding headroom. Optional GTX baseline measured separately; its initial allowance is 10%. Deferred limits are unchanged. Tranche 12B1 adds an optional geoid GeoTIFF adapter: Mercator plus adapter measures 53,670 minified / 19,625 gzip bytes on Node 24.14.0 (decoder excluded), with a separate 10% allowance. Core and ordinary projection sizes are unchanged. Only the all-exports allowance increases for the new retained reader (155,646 / 53,392 bytes), rounded up to 100 bytes plus 100 bytes headroom; existing selective and lazy limits are unchanged. Tranche 12B2 optional typed pipelines measure 46,725 minified / 17,252 gzip bytes on Node 24.14.0, with a separate 10% budget. Selective core, projection and wrapper sizes/limits are unchanged. Only the all-exports allowance increases for retained pipeline orchestration (165,439 / 56,498 bytes), rounded to 100 bytes plus 100 bytes headroom. Tranche 12B3 adds exact Helmert, ordinate stacks, direction-specific steps and oblique output contracts to optional pipelines (50,629 minified / 18,686 gzip bytes on Node 24.14.0). The existing pipeline budget passes. Only the all-exports allowance increases for this retained code (169,334 / 57,866 bytes), rounded up to 100 bytes plus 100 bytes headroom. Core, wrapper, selective and lazy limits stay unchanged. Tranche 12C1 adds explicit decimal-year inputs and kinematic Helmert rates to optional pipelines (53,643 minified / 19,733 gzip bytes on Node 24.14.0). Reviewed pipeline and all-exports allowances increase only where exceeded, rounded up to 100 bytes plus 100 bytes headroom; all-exports measures 172,364 / 58,882 bytes. Core, wrapper, selective and lazy budgets stay unchanged. The 12C1 review fix conservatively rejects overlapping shared-backed epoch views even across cloned wrappers (+189 minified / +85 gzip bytes on Node 24.14.0). Pipeline measures 53,832 / 19,818 and all-exports 172,553 / 58,967 bytes. Only exceeded minified limits increase, rounded up to 100 bytes plus 100 bytes headroom; gzip, core, wrapper, selective and lazy limits stay unchanged. Tranche 13A stores mutable kinematic coefficients/epoch in owned Float64 storage and captures fixed unit/axis constants. Pipeline measures 54,012 / 19,830 bytes (+180 minified / +12 gzip versus 12C1) and all-exports 172,719 / 58,992 bytes on Node 24.14.0. Only exceeded minified pipeline/all-exports limits increase, rounded up to 100 bytes plus 100 bytes headroom. Gzip, core, wrapper, selective and lazy limits stay unchanged. Tranche 12C2 adds optional model/regular-grid and model/GeoTIFF profiles of 4074/1805 and 9171/3618 minified/gzip bytes on Node 24.14.0 (no decoder or data), each with 10% headroom. A pipeline-only import retains no model/reader code and measures 54695/20000; all-root exports measure 173460/59173. Only exceeded pipeline/all-root budgets increase, rounded up to 100 bytes plus 100 bytes headroom. Core, default wrapper, selective and lazy limits stay unchanged. The package rename removes the shipped classic wrapper; proj4js remains development-only. Historical wrapper size is retained in baseline for provenance.",
+  "baseline": {
+    "core": {
+      "minified": 42306,
+      "gzip": 15612
+    },
+    "mercator": {
+      "minified": 43672,
+      "gzip": 16090
+    },
+    "utm": {
+      "minified": 50526,
+      "gzip": 18834
+    },
+    "allNativeExports": {
+      "minified": 138144,
+      "gzip": 47432
+    },
+    "proj4Wrapper": {
+      "minified": 131932,
+      "gzip": 43443
+    },
+    "mercatorWithWKT": {
+      "minified": 66075,
+      "gzip": 23401
+    },
+    "mercatorWithPROJJSON": {
+      "minified": 53637,
+      "gzip": 19459
+    },
+    "mercatorWithNTv2": {
+      "minified": 46789,
+      "gzip": 17345
+    },
+    "mercatorWithGeoTIFFAdapter": {
+      "minified": 46790,
+      "gzip": 17313
+    },
+    "typescriptWrapper": {
+      "minified": 144805,
+      "gzip": 49484
+    },
+    "mercatorWithGTX": {
+      "minified": 50588,
+      "gzip": 18532
+    },
+    "mercatorWithVerticalGeoTIFF": {
+      "minified": 53670,
+      "gzip": 19625
+    },
+    "operationPipeline": {
+      "minified": 46725,
+      "gzip": 17252
+    },
+    "deformationModel": {
+      "minified": 4074,
+      "gzip": 1805
+    },
+    "deformationWithGeoTIFF": {
+      "minified": 9171,
+      "gzip": 3618
+    }
+  },
+  "limits": {
+    "core": {
+      "minified": 46800,
+      "gzip": 17200
+    },
+    "mercator": {
+      "minified": 49200,
+      "gzip": 18000
+    },
+    "utm": {
+      "minified": 56000,
+      "gzip": 20800
+    },
+    "allNativeExports": {
+      "minified": 173600,
+      "gzip": 59300
+    },
+    "mercatorWithWKT": {
+      "minified": 73100,
+      "gzip": 25800
+    },
+    "mercatorWithPROJJSON": {
+      "minified": 60300,
+      "gzip": 21900
+    },
+    "mercatorWithNTv2": {
+      "minified": 52300,
+      "gzip": 19300
+    },
+    "mercatorWithGeoTIFFAdapter": {
+      "minified": 52300,
+      "gzip": 19100
+    },
+    "typescriptWrapper": {
+      "minified": 159300,
+      "gzip": 54500
+    },
+    "mercatorWithGTX": {
+      "minified": 55600,
+      "gzip": 20400
+    },
+    "mercatorWithVerticalGeoTIFF": {
+      "minified": 59100,
+      "gzip": 21600
+    },
+    "operationPipeline": {
+      "minified": 54800,
+      "gzip": 20100
+    },
+    "deformationModel": {
+      "minified": 4500,
+      "gzip": 2000
+    },
+    "deformationWithGeoTIFF": {
+      "minified": 10100,
+      "gzip": 4000
+    }
+  },
+  "lazyBaseline": {
+    "utm": {
+      "initial": {
+        "minified": 44128,
+        "gzip": 16570
+      },
+      "deferred": {
+        "minified": 8028,
+        "gzip": 3485
+      }
+    },
+    "wkt": {
+      "initial": {
+        "minified": 44225,
+        "gzip": 16402
+      },
+      "deferred": {
+        "minified": 23440,
+        "gzip": 8080
+      }
+    },
+    "rotated": {
+      "initial": {
+        "minified": 44283,
+        "gzip": 16763
+      },
+      "deferred": {
+        "minified": 5429,
+        "gzip": 2518
+      }
+    },
+    "catalogue": {
+      "initial": {
+        "minified": 54249,
+        "gzip": 20276
+      },
+      "deferred": {
+        "minified": 79372,
+        "gzip": 37339
+      }
+    }
+  },
+  "lazyLimits": {
+    "utm": {
+      "minified": 8900,
+      "gzip": 3900
+    },
+    "wkt": {
+      "minified": 25800,
+      "gzip": 8900
+    },
+    "rotated": {
+      "minified": 6000,
+      "gzip": 2800
+    },
+    "catalogue": {
+      "minified": 87400,
+      "gzip": 41100
+    }
+  },
+  "lazyInitialLimits": {
+    "catalogue": {
+      "minified": 59700,
+      "gzip": 22400
+    },
+    "rotated": {
+      "minified": 49600,
+      "gzip": 18500
+    },
+    "utm": {
+      "minified": 49700,
+      "gzip": 18600
+    },
+    "wkt": {
+      "minified": 49600,
+      "gzip": 18000
+    }
+  }
+}

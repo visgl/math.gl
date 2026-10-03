@@ -52,6 +52,7 @@ aliases['@math.gl/crs/spatial-reference$'] = resolve(__dirname, '../modules/crs/
 delete aliases['@math.gl/crs'];
 
 config.baseUrl = websiteBaseUrl;
+config.plugins.push(require('./projection-redirects.cjs'));
 
 if (isNext) {
   config.themeConfig.announcementBar = {

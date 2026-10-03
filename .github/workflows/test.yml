@@ -74,27 +74,28 @@ jobs:
       - name: Check WKB package boundary
         run: yarn check:wkb-boundary
 
-      - name: Check Proj4 parity inventory and package boundaries
+      - name: Check projection parity inventory and package boundaries
         run: |
-          node modules/proj4/scripts/check-parity-inventory.mjs
-          node modules/proj4/scripts/check-native-reference.mjs
-          node modules/proj4/scripts/check-vertical-reference.mjs
-          node modules/proj4/scripts/check-vertical-geotiff-reference.mjs
-          node modules/proj4/scripts/check-pipeline-reference.mjs
-          node modules/proj4/scripts/check-kinematic-reference.mjs
-          node modules/proj4/scripts/check-deformation-reference.mjs
-          node modules/proj4/scripts/measure-accuracy.mjs --output /tmp/proj4-accuracy.json
-          node modules/proj4/scripts/check-experimental-package.mjs
-          node modules/proj4/scripts/check-packed-package.mjs
-          node modules/proj4/scripts/check-bundle-budget.mjs
-          node modules/proj4/scripts/check-lazy-package.mjs
-          node modules/proj4/scripts/benchmark.mjs --points 100 --samples 3 --min-sample-ms 0
+          node modules/projection/scripts/check-attribution.mjs
+          node modules/projection/scripts/check-parity-inventory.mjs
+          node modules/projection/scripts/check-native-reference.mjs
+          node modules/projection/scripts/check-vertical-reference.mjs
+          node modules/projection/scripts/check-vertical-geotiff-reference.mjs
+          node modules/projection/scripts/check-pipeline-reference.mjs
+          node modules/projection/scripts/check-kinematic-reference.mjs
+          node modules/projection/scripts/check-deformation-reference.mjs
+          node modules/projection/scripts/measure-accuracy.mjs --output /tmp/projection-accuracy.json
+          node modules/projection/scripts/check-experimental-package.mjs
+          node modules/projection/scripts/check-packed-package.mjs
+          node modules/projection/scripts/check-bundle-budget.mjs
+          node modules/projection/scripts/check-lazy-package.mjs
+          node modules/projection/scripts/benchmark.mjs --points 100 --samples 3 --min-sample-ms 0
 
       - name: Upload projection accuracy measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: proj4-accuracy
-          path: /tmp/proj4-accuracy.json
+          name: projection-accuracy
+          path: /tmp/projection-accuracy.json
           if-no-files-found: error
 
       - name: Check CRS type boundaries
@@ -103,8 +104,8 @@ jobs:
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
 
-      - name: Check native projection startup correctness
-        run: node modules/proj4/scripts/benchmark-startup.mjs --samples 3
+      - name: Check projection startup correctness
+        run: node modules/projection/scripts/benchmark-startup.mjs --samples 3
 
       - name: Run Node tests
         run: yarn test-node
@@ -210,13 +211,13 @@ jobs:
         env:
           BROWSER_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
           BROWSER_MIN_SAMPLE_MS: ${{ github.event_name == 'pull_request' && '0' || '12' }}
-        run: node modules/proj4/scripts/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/proj4-browser-qualification.json
+        run: node modules/projection/scripts/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/projection-browser-qualification.json
 
       - name: Upload browser qualification measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: proj4-browser-qualification-${{ matrix.browser }}
-          path: /tmp/proj4-browser-qualification.json
+          name: projection-browser-qualification-${{ matrix.browser }}
+          path: /tmp/projection-browser-qualification.json
           if-no-files-found: error
 
   projection-performance:
@@ -258,21 +259,21 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
-          node modules/proj4/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/proj4-performance-comparison.json
+          node modules/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
 
       - name: Compare pipeline performance against the PR base
         timeout-minutes: 5
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: node modules/proj4/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --allocations --output /tmp/proj4-pipeline-comparison.json
+        run: node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --allocations --output /tmp/projection-pipeline-comparison.json
 
       - name: Upload paired performance measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: proj4-performance-comparison
+          name: projection-performance-comparison
           path: |
-            /tmp/proj4-performance-comparison.json
-            /tmp/proj4-pipeline-comparison.json
+            /tmp/projection-performance-comparison.json
+            /tmp/projection-pipeline-comparison.json
           if-no-files-found: error
 
   # Preserve the required check name and fail it if any qualification job fails.

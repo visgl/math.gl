@@ -138,9 +138,11 @@ Highlights:
 - Moves reusable GeoArrow math out of loaders.gl and luma.gl prototypes while leaving runtime
   adapters, worker scheduling, and GPU resources with their owning libraries.
 
-**`@math.gl/proj4`**
+**`@math.gl/projection`**
 
-- Updates proj4js to v2.20.9 and accepts modern WKT2 definitions and the supported PROJJSON CRS object types.
+- Renames `@math.gl/proj4` to `@math.gl/projection`, with a pluggable math.gl projection engine, lazy algorithms, in-place buffers and explicit coordinate operations.
+- Removes the deprecated `Proj4Projection` alias and `/classic` wrapper. The package has no proj4js runtime dependency; comparisons and compatibility tests use a pinned development dependency.
+- Adds a [projection catalogue](./modules/projection/projections.md) and a [guide to ellipsoids, datums, heights and epochs](./modules/projection/coordinate-systems.md).
 - Adds optional CRS axis-order enforcement and NTv2 datum-grid registration.
 - Defines aliases for WGS84 UTM and UPS EPSG coordinate systems automatically.
 

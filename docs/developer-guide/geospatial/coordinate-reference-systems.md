@@ -13,7 +13,7 @@ operations.
 
 - Use [`@math.gl/crs`](/docs/modules/crs) to type CRS definitions, preserve WKT or PROJ syntax, and
   describe how a dataset references its coordinates.
-- Use [`@math.gl/proj4`](/docs/modules/proj4) to execute a supported horizontal, projected,
+- Use [`@math.gl/projection`](/docs/modules/projection) to execute a supported horizontal, projected,
   geocentric, or datum-grid transformation.
 - Use [`@math.gl/geospatial`](/docs/modules/geospatial) for ellipsoid, cartographic/ECEF, and local
   tangent-plane mathematics.
@@ -295,18 +295,18 @@ only two corners. Applications may need edge sampling, geometry-derived bounds, 
 logic, or projection-specific methods. Z and M components must be preserved or transformed under an
 explicit contract.
 
-`@math.gl/proj4` wraps proj4js for supported coordinate transformations:
+`@math.gl/projection` wraps proj4js for supported coordinate transformations:
 
 ```ts
-import {Proj4Projection} from '@math.gl/proj4';
+import {Projection} from '@math.gl/projection';
 
-const projection = new Proj4Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+const projection = new Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
 const webMercatorPosition = projection.project([12.49, 41.89]);
 ```
 
 Support is intentionally narrower than `CRSDefinition`. For example, a valid compound or vertical
 PROJJSON object may not be executable by proj4js. Parsing or typing a definition is never a promise
-that `@math.gl/proj4` can transform it.
+that `@math.gl/projection` can transform it.
 
 ## Vertical coordinates
 

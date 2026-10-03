@@ -1,0 +1,45 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
+// Direct TypeScript port of proj4js 2.22.0. Copyright (c) 2014, proj4js authors.
+// See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// Modified to write the complex result into caller-owned scratch storage.
+
+import sinh from './sinh';
+import cosh from './cosh';
+
+export default function (
+  pp: readonly number[],
+  arg_r: number,
+  arg_i: number,
+  output: {x: number; y: number}
+) {
+  var sin_arg_r = Math.sin(arg_r);
+  var cos_arg_r = Math.cos(arg_r);
+  var sinh_arg_i = sinh(arg_i);
+  var cosh_arg_i = cosh(arg_i);
+  var r = 2 * cos_arg_r * cosh_arg_i;
+  var i = -2 * sin_arg_r * sinh_arg_i;
+  var j = pp.length - 1;
+  var hr = pp[j];
+  var hi1 = 0;
+  var hr1 = 0;
+  var hi = 0;
+  var hr2;
+  var hi2;
+
+  while (--j >= 0) {
+    hr2 = hr1;
+    hi2 = hi1;
+    hr1 = hr;
+    hi1 = hi;
+    hr = -hr2 + r * hr1 - i * hi1 + pp[j];
+    hi = -hi2 + i * hr1 + r * hi1;
+  }
+
+  r = sin_arg_r * cosh_arg_i;
+  i = cos_arg_r * sinh_arg_i;
+
+  output.x = r * hr - i * hi;
+  output.y = r * hi + i * hr;
+}

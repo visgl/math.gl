@@ -16,7 +16,7 @@ math.gl is **optimized for use with WebGL and WebGPU**, however it is not a GPU 
 
 - **Core classes** - Basic vectors and matrices: **`@math.gl/types`**, **`@math.gl/core`**
 - **Expression parsing** - Parse and evaluate compact JavaScript-style expressions: **`@math.gl/expressions`**
-- **Geospatial projections** - CRS definitions and support for a variety of geospatial projections **`@math.gl/crs`**, **`@math.gl/geospatial`**, **`@math.gl/geoid`**, **`@math.gl/proj4`**, **`@math.gl/web-mercator`**
+- **Geospatial projections** - CRS definitions and support for a variety of geospatial projections **`@math.gl/crs`**, **`@math.gl/geospatial`**, **`@math.gl/geoid`**, **`@math.gl/projection`**, **`@math.gl/web-mercator`**
 - **Geospatial utilities** - Cutting polygons and calculating sun position and direction **`@math.gl/polygon`**, **`@math.gl/sun`**
 - **Discrete global grids** - Lightweight geometry decoders and cell-column detection for common grid encodings. **`@math.gl/dggs`**
 - **3D math** - 3D primitives, geometry processing and culling: **`@math.gl/geometry`**, **`@math.gl/geometry-utils`**, **`@math.gl/culling`**
@@ -37,7 +37,7 @@ math.gl is a toolbox that offers a suite of composable modules.
 | ![geospatial](./images/geospatial.svg 'geospatial') | **`@math.gl/geospatial`**            | Ellipsoidal math for WGS84 coordinates.            |
 | ![geoid](./images/geoid.png 'geoid')                | **`@math.gl/geoid`**                 | Earth Gravity Model support .                      |
 |                                                     | **`@math.gl/polygon`**               | Polygon math, including geospatial cutting etc.    |
-|                                                     | **`@math.gl/proj4`**                 | Conversion between coordinate reference systems.   |
+|                                                     | **`@math.gl/projection`**                 | Conversion between coordinate reference systems.   |
 |                                                     | **`@math.gl/sun`**                   | Solar position / direction from position and time. |
 |                                                     | **`@math.gl/web-mercator`**          | Supports 3D Web Mercator (spherical) projections.  |
 

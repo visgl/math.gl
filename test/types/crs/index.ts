@@ -2,13 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {
-  checkProj4CRSCompatibility,
-  Proj4Projection,
-  toProj4CRSDefinition,
-  type Proj4CRSCompatibilityResult,
-  type Proj4CRSDefinition
-} from '@math.gl/proj4/classic';
+import {Projection} from '@math.gl/projection';
 import {
   createSpatialReference,
   inferCRSRepresentation,
@@ -31,14 +25,10 @@ const geographic: PROJJSONCRSByType<'GeographicCRS'> = {
     }
   }
 };
-const definition: Proj4CRSDefinition = geographic;
+const definition: ReadonlyCRSDefinition = geographic;
 const readonlyDefinition: ReadonlyCRSDefinition = geographic;
-const convertedDefinition: Proj4CRSDefinition = toProj4CRSDefinition(geographic);
-const compatibility: Proj4CRSCompatibilityResult = checkProj4CRSCompatibility(geographic);
 
-new Proj4Projection({from: definition, to: serialized});
-void convertedDefinition;
-void compatibility;
+new Projection({from: definition, to: serialized});
 
 if (typeof readonlyDefinition === 'object') {
   // @ts-expect-error Spatial-reference PROJJSON definitions are deeply readonly.
@@ -59,11 +49,8 @@ const spatialReference: SpatialReference = createSpatialReference({
 
 if (spatialReference.crs.state === 'explicit') {
   const spatialDefinition: ReadonlyCRSDefinition = spatialReference.crs.definition;
-  const spatialCompatibility = checkProj4CRSCompatibility(spatialReference.crs.definition);
-  const executableSpatialDefinition = toProj4CRSDefinition(spatialReference.crs.definition);
-  new Proj4Projection({from: executableSpatialDefinition, to: serialized});
+  new Projection({from: spatialDefinition, to: serialized});
   void spatialDefinition;
-  void spatialCompatibility;
 }
 
 // The native backend consumes the same readonly CRS and spatial-reference contracts.
@@ -74,7 +61,7 @@ import {
   projJSONCRSParser,
   type TypeScriptCRSInput,
   type NormalizedCRS
-} from '@math.gl/proj4/experimental';
+} from '@math.gl/projection/experimental';
 const nativeInput: TypeScriptCRSInput = spatialReference;
 new ProjectionEngine({from: nativeInput, to: readonlyDefinition, parsers: [projJSONCRSParser]});
 new ProjectionEngine({from: spatialReference.crs});
@@ -90,7 +77,7 @@ import {
   type DatumGrid,
   type DatumGridCollection,
   type DatumGridGeoTIFF
-} from '@math.gl/proj4/experimental';
+} from '@math.gl/projection/experimental';
 const preparedGrid: DatumGrid = parseNTv2Grid(new ArrayBuffer(0), {includeErrorFields: false});
 const gridCollection: DatumGridCollection = Object.freeze({local: preparedGrid});
 new ProjectionEngine({from: '+proj=longlat +nadgrids=local', datumGrids: gridCollection});
