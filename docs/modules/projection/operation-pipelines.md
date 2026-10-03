@@ -297,6 +297,13 @@ three. M and all further ordinates are copied/preserved without validation or ep
 interpretation. Empty valid buffers are accepted.
 
 Reuse a pipeline and use the flat methods to process large buffers in place.
+Programs containing only unit/axis steps and at least one unit conversion use a
+whole-buffer path. Pure axis programs retain general dispatch. Each step retains its original
+multiplication or division and intermediate finite checks; steps are not combined
+algebraically. Projection, grid, stack and datum steps retain the general runner.
+General scalar/bulk calls share an instance-owned working point and a lazily cached
+ordinate stack. Recursive hooks use independent storage; failures release the lease.
+The cached stack remains allocated until the pipeline is collected.
 Operations run in double precision; a Float32 buffer is rounded only on final
 record output. Non-finite X/Y/Z and Float32 output
 overflow are errors. Records completed before an error remain transformed; the

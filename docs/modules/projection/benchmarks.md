@@ -327,8 +327,8 @@ node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref or
 
 This runner compares the historical and current `ProjectionPipeline` using the same
 source bundler and installed dependencies. The base must support the tested static
-and kinematic pipeline APIs. It covers 15 scenarios in both precisions, XYZ/XYZM and
-both directions (120 rows): units, signed axes, Mercator-to-UTM, static and exact
+and kinematic pipeline APIs. It covers 17 scenarios in both precisions, XYZ/XYZM and
+both directions (136 rows): units, signed axes, Mercator-to-UTM, static and exact
 Helmert, horizontal/vertical grids, ordinate stacks and batch/mixed observation epochs.
 Coordinates have repeatable bounded jitter around the independently checked fixtures.
 One epoch buffer is supplied separately and stays unchanged; M varies by record.
@@ -348,16 +348,19 @@ machine metadata are retained. `--scenarios` accepts comma-separated case names.
 `--clock thread-cpu` provides the same optional CPU-time diagnostic; its timings describe
 main-thread work rather than elapsed throughput. Allocation sampling starts after every timing row has finished, so profiling
 does not affect later timing rows. Its untimed pass reports sampled estimates,
-including collected objects.
+including collected objects. `--allocation-iterations` controls the untimed repetitions
+(default 10, maximum 100,000), allowing allocation sampling of short repeated batches
+without changing timing sample counts or default CI work.
 
 Tranche 13A keeps mutable kinematic coefficients and their cached epoch in owned
 Float64 storage, reducing numeric boxing when epochs change. It also prepares fixed
 unit factors and signed-axis selections once. It preserves equation/operation order
 and checks
 intermediate coordinates, so an invalid intermediate cannot be hidden by a later stack
-restore. Float32 rounds only when each completed record is committed. All chains
-keep general dispatch. These changes retain one scratch point and optional stack per
-flat call, with no new per-record arrays, objects or dynamic code generation.
+restore. Float32 rounds only when each completed record is committed. That initial pass
+kept general dispatch and one point/optional stack per flat call. The later unit/axis
+pass below shares guarded scratch across calls and specializes eligible programs.
+Neither pass adds per-record arrays, objects or dynamic code generation.
 
 CI uploads `proj4-pipeline-comparison.json` alongside the ordinary projection comparison,
 using 10,000 points and seven samples. It validates results and records measurements;
@@ -460,7 +463,12 @@ node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref or
 
 `arrayOutputSpeedup` and `typedOutputSpeedup` divide the current allocating scalar median
 by the current reusable-output median. Values above one indicate faster reusable outputs.
-Historical/current scalar and flat ratios remain separately reported. The pipeline runner
+Historical/current scalar and flat ratios remain separately reported. When the baseline
+supports reusable outputs, both versions run those modes with the same storage/return-type
+mix during warm-up. `pairedArrayOutputSpeedup` and `pairedTypedOutputSpeedup` compare the
+baseline reusable-output median with the corresponding current median. Baselines predating
+these APIs keep the current-only rows. This matters because JavaScript optimization can
+respond differently to mixed return-storage types. The pipeline runner
 samples allocation only after all timings; these are estimated allocated bytes, including
 collected objects, rather than exact counts or proof of zero allocation.
 
@@ -492,3 +500,46 @@ deferred projection chunks and optional deformation-model profiles are unchanged
 reusable-output pipeline measurements with seven samples and a shorter 4 ms aggregate
 window across the full scenario/layout/direction matrix. Developer runs retain the 12 ms
 default. Correctness/package budgets are enforced without speed thresholds.
+
+
+### Unit conversion batches and repeated bulk calls
+
+Pipelines containing only unit/axis steps, with at least one unit conversion in the
+selected direction, use a whole-buffer numeric runner. Pure axis programs and other
+operations keep general dispatch. Multiplication and division remain distinct, each
+intermediate must be finite, and Float32 rounds only on a completed record. Stride,
+height, trailing ordinates, epoch validation and partial-error behavior are unchanged.
+General scalar/bulk calls share one instance point and a lazily cached pipeline stack;
+recursive hooks receive independent scratch, and failures release the lease.
+
+The October 2026 Apple M2 / Node 24.14.0 paired diagnostic against `1ce5edef` uses
+10,000 points, seven 12 ms thread-CPU samples and matching baseline/current reusable-output
+modes. Across eight layout/direction rows, inverse angular-unit conversion has a median
+1.80× flat speed ratio. Pure axis results varied across runs, so that subset keeps general
+dispatch. Mixed grid/datum and mixed-epoch flat ratios were approximately 1.00×.
+Scalar timings were mixed, including slower axis rows; this is a targeted batch improvement,
+not a general throughput claim. See the
+[raw batch report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/numeric-batches-node.json)
+for all 48 rows, samples and separate allocation estimates. The full bounded CI runner
+qualifies all 17 scenarios / 136 rows, including both baseline/current output modes where
+available, without a speed threshold.
+
+Large buffers amortize point/stack setup. To expose allocation traffic in repeated short
+calls, increase untimed allocation repetitions while keeping timing samples independent:
+
+```sh
+node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --points 10 --samples 7 --min-sample-ms 4 --allocations --allocation-iterations 10000 --scenarios 'Height stack and datum,Horizontal grid to UTM' --output /tmp/projection-bulk-leases.json
+```
+
+For ten-point calls, the sampled stack/datum estimate decreased from 109.3 to 77.1 B/point;
+the horizontal-grid chain decreased from 147.5 to 142.9 B/point. These estimates include
+collected JavaScript objects, are not exact allocation counts, and do not measure GC pauses.
+All short-call timing rows hit the aggregate-iteration cap and are flagged `timingLimited`;
+use this run for allocation evidence rather than a throughput claim. The
+[raw bulk-lease report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/bulk-leases-node.json)
+retains runtime/source/workload provenance and 100,000 coordinates per allocation profile.
+
+The optional pipeline import measures 58,759 minified / 21,108 gzip bytes: +1,746 / +499
+versus the reusable-output tranche. Core/selective imports add 150 minified bytes with
+negligible gzip changes. Deferred projection chunks and deformation-only profiles are
+unchanged. Only exceeded bundle allowances increase with reviewed rounding headroom.

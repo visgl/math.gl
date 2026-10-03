@@ -436,6 +436,26 @@ remaining implicit allocation/boxing costs and further whole-buffer specializati
 profiling targets. See
 [paired pipeline benchmarks](./benchmarks.md#compare-operation-pipeline-performance).
 
+### Whole-buffer unit/axis execution and bulk leases
+
+Pipelines containing only unit/axis steps and at least one unit conversion compile a
+numeric buffer runner per eligible direction, including inverse/omitted steps. Pure
+axis programs retain general dispatch because measured gains were inconsistent. Multiplication and division remain distinct, operations retain
+order and finite checks, and Float32 rounds only on a completed record. Other stages
+retain general dispatch. Scalar and general bulk calls now share guarded point/stack
+storage; recursive calls remain isolated and failures release the lease. Repeated ordinary
+bulk calls no longer allocate a point and pipeline stack on each invocation.
+
+Qualification covers all 48 signed XYZ permutations, exact scalar rounding, XY/XYZM
+views/tails, epochs and failure commits, plus independent existing PROJ references.
+The paired pipeline matrix expands to 17 scenarios / 136 rows with inverse-only axes
+and angular units. Untimed allocation iterations can be increased for short batches.
+The optional pipeline import adds about 0.49 KiB gzip; deferred projection chunks remain
+unchanged. A paired diagnostic observes about 1.8× for angular-unit batches, while other
+chains have no consistent throughput gain. Short-call stack/datum allocation estimates
+fall from about 109 to 77 B/point; timing-limited short-call rows support allocation
+comparisons rather than throughput claims. Raw reports retain the measured scope. Grid/datum and mixed-epoch allocation/boxing remain profiling targets.
+
 ## Remaining performance and geodetic roadmap
 
 | Tranche | Work | Acceptance gate |

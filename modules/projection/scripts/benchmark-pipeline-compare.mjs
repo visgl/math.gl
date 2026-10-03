@@ -22,10 +22,14 @@ const {values} = parseArgs({
     clock: {type: 'string', default: 'wall'},
     scenarios: {type: 'string'},
     allocations: {type: 'boolean', default: false},
+    'allocation-iterations': {type: 'string', default: '10'},
     'reusable-results': {type: 'boolean', default: false},
     output: {type: 'string'}
   }
 });
+const allocationIterations = Number(values['allocation-iterations']);
+if (!Number.isSafeInteger(allocationIterations) || allocationIterations < 1 || allocationIterations > 100000)
+  throw new Error('Allocation iterations must be an integer from 1 through 100000');
 if (!['wall', 'thread-cpu'].includes(values.clock)) throw new Error('Unknown clock');
 if (values.clock === 'thread-cpu' && !process.threadCpuUsage)
   throw new Error('thread-cpu requires Node 24.14 or later');
@@ -123,12 +127,19 @@ try {
               'baseline scalar',
               'math.gl scalar'
             ];
+            let baselineOutputs = false;
             if (values['reusable-results']) {
               const operation = direction === 'project' ? pipelines[1].projectToSync : pipelines[1].unprojectToSync;
               if (!operation) throw new Error('Candidate requires reusable scalar result APIs');
               for (const typed of [false, true]) {
                 runners.push(harness.scalarResultRunner(operation, options, typed, epochs));
                 implementations.push(typed ? 'math.gl scalar typed output' : 'math.gl scalar array output');
+              }
+              const historical = direction === 'project' ? pipelines[0].projectToSync : pipelines[0].unprojectToSync;
+              baselineOutputs = typeof historical === 'function';
+              if (baselineOutputs) for (const typed of [false, true]) {
+                runners.push(harness.scalarResultRunner(historical, options, typed, epochs));
+                implementations.push(typed ? 'baseline scalar typed output' : 'baseline scalar array output');
               }
             }
             const expected = source.slice();
@@ -170,7 +181,9 @@ try {
                 result.measurements[3].milliseconds
               ),
               arrayOutputSpeedup: values['reusable-results'] ? ratio(result.measurements[3].milliseconds, result.measurements[4].milliseconds) : undefined,
-              typedOutputSpeedup: values['reusable-results'] ? ratio(result.measurements[3].milliseconds, result.measurements[5].milliseconds) : undefined
+              typedOutputSpeedup: values['reusable-results'] ? ratio(result.measurements[3].milliseconds, result.measurements[5].milliseconds) : undefined,
+              pairedArrayOutputSpeedup: baselineOutputs ? ratio(result.measurements[6].milliseconds, result.measurements[4].milliseconds) : undefined,
+              pairedTypedOutputSpeedup: baselineOutputs ? ratio(result.measurements[7].milliseconds, result.measurements[5].milliseconds) : undefined
             });
             if (profiler && precision === 'Float64' && dimension === 4 && direction === 'project')
               allocationJobs.push({id: scenario.id, source, runners, implementations});
@@ -189,7 +202,7 @@ try {
         });
         let profile;
         try {
-          for (let i = 0; i < 10; i++) {
+          for (let i = 0; i < allocationIterations; i++) {
             buffer.set(source);
             run(buffer);
           }
@@ -201,8 +214,8 @@ try {
         allocations.push({
           id,
           implementation: implementations[index],
-          points: settings.points * 10,
-          sampledEstimatedBytesPerPoint: sum(profile.head) / (settings.points * 10),
+          points: settings.points * allocationIterations,
+          sampledEstimatedBytesPerPoint: sum(profile.head) / (settings.points * allocationIterations),
           sampleCount: profile.samples.length
         });
       }
@@ -228,12 +241,13 @@ const report = {
     arch: process.arch,
     clock: values.clock,
     proj4js: classicVersion,
+    allocationIterations: values.allocations ? allocationIterations : undefined,
     reusableResults: values['reusable-results'],
     seed,
     ...settings
   },
   methodology:
-    'Identical source bundler and installed dependencies; historical runtime sources read from Git. Independent PROJ anchors and all-coordinate baseline/candidate validation precede timing. Seeded bounded jitter, both precisions, XYZ/XYZM, both directions, static/batch/mixed epochs. Direct proj4js only for equivalent supported CRS pairs, at an absolute 1e-4 output-unit tolerance; it does not implement typed pipelines or kinematic epochs. Optional reusable-result rows compare current array/typed outputs with the current owned-array scalar API, reusing both input and result without per-record subarrays. Prepared instances, independent copies, resets outside timing, adaptive samples and rotated execution order. Median/p10/p90 are per-buffer; raw samples are aggregate milliseconds. Thread CPU time is diagnostic, not elapsed throughput. Allocation estimates are sampled after all timing in a separate untimed run; zero is not proof of zero allocation. No speed thresholds.',
+    'Identical source bundler and installed dependencies; historical runtime sources read from Git. Independent PROJ anchors and all-coordinate baseline/candidate validation precede timing. Seeded bounded jitter, both precisions, XYZ/XYZM, both directions, static/batch/mixed epochs. Direct proj4js only for equivalent supported CRS pairs, at an absolute 1e-4 output-unit tolerance; it does not implement typed pipelines or kinematic epochs. Optional reusable-result rows compare current array/typed outputs with the current owned-array scalar API, reusing both input and result without per-record subarrays. Baselines supporting these APIs also run both output modes, matching warm-up/storage call shapes; earlier baselines retain current-only output rows. Prepared instances, independent copies, resets outside timing, adaptive samples and rotated execution order. Median/p10/p90 are per-buffer; raw samples are aggregate milliseconds. Thread CPU time is diagnostic, not elapsed throughput. Allocation estimates are sampled after all timing in a separate untimed run; zero is not proof of zero allocation. No speed thresholds.',
   rows,
   allocations
 };

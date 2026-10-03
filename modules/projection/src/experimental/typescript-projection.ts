@@ -60,7 +60,7 @@ export class ProjectionEngine<P extends ProjectionRegistration = ProjectionPlugi
     return new ProjectionEngine({...options, projections});
   }
 
-  private readonly scalarScratch = new ProjectionScratch();
+  private readonly coordinateScratch = new ProjectionScratch();
   private readonly forwardTransform?: CoordinateTransform;
   private readonly inverseTransform?: CoordinateTransform;
   private readonly deferred?: {
@@ -142,22 +142,22 @@ export class ProjectionEngine<P extends ProjectionRegistration = ProjectionPlugi
   projectSync(coordinate: readonly number[]): number[] {
     return this.deferred
       ? this.loadSync().project(coordinate)
-      : transformScalar(coordinate, this.forwardTransform, this.scalarScratch);
+      : transformScalar(coordinate, this.forwardTransform, this.coordinateScratch);
   }
   unprojectSync(coordinate: readonly number[]): number[] {
     return this.deferred
       ? this.loadSync().unproject(coordinate)
-      : transformScalar(coordinate, this.inverseTransform, this.scalarScratch);
+      : transformScalar(coordinate, this.inverseTransform, this.coordinateScratch);
   }
   projectFlatSync<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
     return this.deferred
       ? this.loadSync().projectFlat(coordinates, dimension)
-      : transformInPlace(coordinates, dimension, this.forwardTransform);
+      : transformInPlace(coordinates, dimension, this.forwardTransform, this.coordinateScratch);
   }
   unprojectFlatSync<T extends ProjectionArray>(coordinates: T, dimension = 2): T {
     return this.deferred
       ? this.loadSync().unprojectFlat(coordinates, dimension)
-      : transformInPlace(coordinates, dimension, this.inverseTransform);
+      : transformInPlace(coordinates, dimension, this.inverseTransform, this.coordinateScratch);
   }
   /** Optional warm-up. Coordinate methods also load automatically on first use. */
   async preload(): Promise<void> {
@@ -167,13 +167,13 @@ export class ProjectionEngine<P extends ProjectionRegistration = ProjectionPlugi
   project(coordinate: readonly number[]): ProjectionResult<P, number[]> {
     const result = this.deferred
       ? this.projectLoaded(coordinate, false)
-      : transformScalar(coordinate, this.forwardTransform, this.scalarScratch);
+      : transformScalar(coordinate, this.forwardTransform, this.coordinateScratch);
     return result as ProjectionResult<P, number[]>;
   }
   unproject(coordinate: readonly number[]): ProjectionResult<P, number[]> {
     const result = this.deferred
       ? this.projectLoaded(coordinate, true)
-      : transformScalar(coordinate, this.inverseTransform, this.scalarScratch);
+      : transformScalar(coordinate, this.inverseTransform, this.coordinateScratch);
     return result as ProjectionResult<P, number[]>;
   }
   /** Write one coordinate into caller-owned storage; return that same output. */
@@ -204,7 +204,7 @@ export class ProjectionEngine<P extends ProjectionRegistration = ProjectionPlugi
       output,
       Math.max(coordinate.length, this.forwardTransform.geocentricOutput ? 3 : 2)
     );
-    return transformScalar(coordinate, this.forwardTransform, this.scalarScratch, output);
+    return transformScalar(coordinate, this.forwardTransform, this.coordinateScratch, output);
   }
   unprojectToSync<T extends ProjectionOutput>(coordinate: ProjectionCoordinate, output: T): T {
     if (this.deferred) return this.loadSync().unprojectTo(coordinate, output);
@@ -213,7 +213,7 @@ export class ProjectionEngine<P extends ProjectionRegistration = ProjectionPlugi
       output,
       Math.max(coordinate.length, this.inverseTransform.geocentricOutput ? 3 : 2)
     );
-    return transformScalar(coordinate, this.inverseTransform, this.scalarScratch, output);
+    return transformScalar(coordinate, this.inverseTransform, this.coordinateScratch, output);
   }
   private projectToLoaded<T extends ProjectionOutput>(
     coordinate: ProjectionCoordinate,
@@ -236,13 +236,13 @@ export class ProjectionEngine<P extends ProjectionRegistration = ProjectionPlugi
   projectFlat<T extends ProjectionArray>(coordinates: T, dimension = 2): ProjectionResult<P, T> {
     const result = this.deferred
       ? this.load().then(projection => projection.projectFlat(coordinates, dimension))
-      : transformInPlace(coordinates, dimension, this.forwardTransform);
+      : transformInPlace(coordinates, dimension, this.forwardTransform, this.coordinateScratch);
     return result as ProjectionResult<P, T>;
   }
   unprojectFlat<T extends ProjectionArray>(coordinates: T, dimension = 2): ProjectionResult<P, T> {
     const result = this.deferred
       ? this.load().then(projection => projection.unprojectFlat(coordinates, dimension))
-      : transformInPlace(coordinates, dimension, this.inverseTransform);
+      : transformInPlace(coordinates, dimension, this.inverseTransform, this.coordinateScratch);
     return result as ProjectionResult<P, T>;
   }
 }
@@ -505,7 +505,8 @@ function transformScalar<T extends ProjectionOutput = number[]>(
 function transformInPlace<T extends ProjectionArray>(
   coordinates: T,
   dimension: number,
-  operation: CoordinateTransform
+  operation: CoordinateTransform,
+  scratch: ProjectionScratch
 ): T {
   if (!(coordinates instanceof Float32Array || coordinates instanceof Float64Array))
     throw new Error('In-place projection requires a Float32Array or Float64Array');
@@ -517,24 +518,28 @@ function transformInPlace<T extends ProjectionArray>(
     operation.flat(coordinates, dimension);
     return coordinates;
   }
-  const point = {x: 0, y: 0, z: 0};
-  const float32 = coordinates instanceof Float32Array;
-  for (let offset = 0; offset < coordinates.length; offset += dimension) {
-    point.x = coordinates[offset];
-    point.y = coordinates[offset + 1];
-    point.z = dimension >= 3 ? coordinates[offset + 2] : 0;
-    operation.run(point);
-    // Commit only a complete finite record; do not silently overflow Float32 storage.
-    if (
-      float32 &&
-      (Math.abs(point.x) > 3.4028234663852886e38 ||
-        Math.abs(point.y) > 3.4028234663852886e38 ||
-        (dimension >= 3 && Math.abs(point.z) > 3.4028234663852886e38))
-    )
-      throw new Error('Projected coordinate exceeds Float32 range');
-    coordinates[offset] = point.x;
-    coordinates[offset + 1] = point.y;
-    if (dimension >= 3) coordinates[offset + 2] = point.z;
+  const point = scratch.acquire();
+  try {
+    const float32 = coordinates instanceof Float32Array;
+    for (let offset = 0; offset < coordinates.length; offset += dimension) {
+      point.x = coordinates[offset];
+      point.y = coordinates[offset + 1];
+      point.z = dimension >= 3 ? coordinates[offset + 2] : 0;
+      operation.run(point);
+      // Commit only a complete finite record; do not silently overflow Float32 storage.
+      if (
+        float32 &&
+        (Math.abs(point.x) > 3.4028234663852886e38 ||
+          Math.abs(point.y) > 3.4028234663852886e38 ||
+          (dimension >= 3 && Math.abs(point.z) > 3.4028234663852886e38))
+      )
+        throw new Error('Projected coordinate exceeds Float32 range');
+      coordinates[offset] = point.x;
+      coordinates[offset + 1] = point.y;
+      if (dimension >= 3) coordinates[offset + 2] = point.z;
+    }
+    return coordinates;
+  } finally {
+    scratch.release(point);
   }
-  return coordinates;
 }
