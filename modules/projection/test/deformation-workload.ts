@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Independent PROJ 9.5.1 qualification, shared by tests and browser benchmarks.
 import {ProjectionPipeline} from '@math.gl/projection/pipeline';
 import type {PipelineStep} from '@math.gl/projection/pipeline';

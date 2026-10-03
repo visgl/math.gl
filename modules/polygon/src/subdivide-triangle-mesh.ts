@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /** A flat, indexed triangle mesh. Vertices at attribute seams must have distinct indices. */
 export type TriangleMesh = {

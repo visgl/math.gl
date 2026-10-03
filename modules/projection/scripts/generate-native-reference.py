@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # math.gl
 # SPDX-License-Identifier: MIT
-# Copyright (c) vis.gl contributors
+# SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 # Original test tooling for the proj4js-inspired API; no proj4js numeric output is used.
 """Regenerate offline reference coordinates with pyproj 3.7.2 / PROJ 9.5.1.
 

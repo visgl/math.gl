@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original synthetic grid and format contract tests; no third-party model data.
 import {expect, test} from 'vitest';
 import {createVelocityGrid} from '@math.gl/projection/grids/velocity';

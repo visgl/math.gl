@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original qualification tests for the proj4js-inspired API, using native PROJ expectations.
 import {expect, test} from 'vitest';
 import * as native from '@math.gl/projection/experimental';

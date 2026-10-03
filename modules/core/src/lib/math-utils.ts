@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original compatibility helpers for Cesium-derived tests.
 
 // NOTE: Added to make Cesium-derived test cases work
 // TODO: Determine if/how to keep

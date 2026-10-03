@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /** Semantic coordinate dimensions used by WKB and WKT. M is distinct from Z. */
 export type WellKnownDimension = 'xy' | 'xyz' | 'xym' | 'xyzm';

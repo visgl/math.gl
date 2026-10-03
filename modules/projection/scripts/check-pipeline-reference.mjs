@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import './check-kinematic-reference.mjs';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';

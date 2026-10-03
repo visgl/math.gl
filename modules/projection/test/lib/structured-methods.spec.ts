@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Authored method-normalization regressions against the proj4js 2.22.0 reference.
 import {expect, test, vi} from 'vitest';
 import proj4 from 'proj4';

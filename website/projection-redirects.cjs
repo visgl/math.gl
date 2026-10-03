@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 const {mkdir, writeFile} = require('node:fs/promises');
 const {dirname, join} = require('node:path');
 

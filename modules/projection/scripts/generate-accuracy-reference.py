@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # math.gl
 # SPDX-License-Identifier: MIT
-# Copyright (c) vis.gl contributors
+# SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 # Original seeded validation tooling for the proj4js-inspired projection API.
 """Generate independent samples using pinned pyproj 3.7.2 / PROJ 9.5.1, offline.
 

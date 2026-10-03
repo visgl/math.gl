@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 import {parsePGM, Geoid} from '@math.gl/geoid';
 import {openFile} from './utils/file-utils';

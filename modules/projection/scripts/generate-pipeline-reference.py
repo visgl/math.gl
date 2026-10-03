@@ -1,6 +1,6 @@
 # math.gl
 # SPDX-License-Identifier: MIT
-# Copyright (c) vis.gl contributors
+# SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 # Original authored pipelines; PROJ supplies expectations, never math.gl/proj4js.
 import math
 import hashlib

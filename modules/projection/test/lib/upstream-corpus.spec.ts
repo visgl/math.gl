@@ -1,6 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Fixture data adapted from proj4js 2.22.0 tests. See modules/projection/PROJ4-LICENSE.md for upstream attribution and MIT terms.
 // Fixture inputs and tolerance semantics adapted from proj4js 2.22.0 tests (MIT).
 // Copyright (c) 2014, proj4js authors. See ../../PROJ4-LICENSE.md.
 import {expect, test} from 'vitest';

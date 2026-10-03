@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original tests, inspired by the proj4js real-grid audit; expectations come from native PROJ.
 // Dataset attribution and redistribution terms: ../fixtures/real-grids/README.md.
 import {beforeAll, expect, test} from 'vitest';

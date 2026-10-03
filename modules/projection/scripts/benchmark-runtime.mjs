@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {build} from 'esbuild';
 import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';

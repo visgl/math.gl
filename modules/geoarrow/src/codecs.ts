@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {formatWKT, inspectWKBHeader, parseWKT, visitWKB} from '@math.gl/wkb';
 import type {WKBHeader, WKBTraversalOptions} from '@math.gl/wkb';

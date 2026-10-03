@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Run after building projection. Same cases, seeded inputs and sampling as the live page.
 import {codeFingerprint, benchmarkFingerprint} from './benchmark-metadata.mjs';
 import {loadBenchmark} from './load-benchmark.mjs';

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original tests of explicit composition and independent PROJ pipeline fixtures.
 import {beforeAll, expect, test} from 'vitest';
 import {ProjectionPipeline} from '@math.gl/projection/pipeline';

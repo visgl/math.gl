@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {getVitestConfig} from '@vis.gl/dev-tools';
 
 const includePatterns = [

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original contracts/analytic tests; real grid references come from native PROJ.
 import {beforeAll, expect, test} from 'vitest';
 import {fromArrayBuffer} from 'geotiff';

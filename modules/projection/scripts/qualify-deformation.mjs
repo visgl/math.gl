@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original synthetic model qualification against independent native PROJ references.
 import {fromArrayBuffer} from 'geotiff';
 import {loadVelocityGeoTIFFGrid} from '@math.gl/projection/grids/velocity-geotiff';

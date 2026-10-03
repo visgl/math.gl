@@ -3,7 +3,7 @@
 ## Unreleased
 
 - Rename `@math.gl/proj4` to `@math.gl/projection` and use `Projection` as the convenience class. Remove the deprecated `Proj4Projection` alias, `/classic` wrapper and proj4js-specific CRS helpers; proj4js is now development-only for comparisons and tests.
-- Add SPDX copyright credits and a CI attribution check for source files derived from proj4js. Preserve upstream licenses, including Equal Earth's Apache-2.0 notice.
+- Standardize SPDX copyright headers across all tracked math.gl source files and enforce them in CI. Add machine-readable projection provenance and proj4js/PROJ credits; preserve upstream notices and license terms, including Equal Earth's Apache-2.0 notice.
 - Add a projection catalogue and a guide to coordinate systems, ellipsoids, datums, heights and epochs. Expand module attribution and migration documentation.
 
 ## Unreleased

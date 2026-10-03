@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Authored tests against the pinned proj4js 2.22.0 reference.
 import {expect, test} from 'vitest';
 import proj4 from 'proj4';

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Verify deferred code in the transitive initial graph, not merely a dynamic import.
 import assert from 'node:assert/strict';
 import {mkdtempSync, readFileSync, rmSync} from 'node:fs';

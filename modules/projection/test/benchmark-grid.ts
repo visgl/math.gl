@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {makeNTv2} from './fixtures/datum-grids';
 
 /** Smooth synthetic field spanning multiple cells; setup is excluded from timing. */

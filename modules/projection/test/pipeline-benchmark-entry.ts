@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 export {ProjectionPipeline} from '@math.gl/projection/pipeline';
 export * from './pipeline-benchmark-workload';
 export {BENCHMARK_SEED} from './live-bench-types';

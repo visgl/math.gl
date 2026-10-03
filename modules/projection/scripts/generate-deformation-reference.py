@@ -1,6 +1,6 @@
 # math.gl
 # SPDX-License-Identifier: MIT
-# Copyright (c) vis.gl contributors
+# SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 # Original synthetic test grid encoder; numeric oracle is native PROJ, not math.gl.
 import hashlib
 import json

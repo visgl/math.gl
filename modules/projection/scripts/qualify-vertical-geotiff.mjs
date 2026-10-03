@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Test-only decoder and authored fixtures; loaded after browser timing samples finish.
 import {fromArrayBuffer} from 'geotiff';
 import {ProjectionEngine} from '@math.gl/projection/core';

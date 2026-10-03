@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original explicit-epoch contracts, ownership and independent reference tests.
 import {expect, test} from 'vitest';
 import {ProjectionPipeline} from '@math.gl/projection/pipeline';

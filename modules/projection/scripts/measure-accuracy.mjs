@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original PROJ-reference accuracy reporting for the proj4js-inspired API.
 import {build} from 'esbuild';
 import {mkdtempSync, rmSync, writeFileSync, readFileSync} from 'node:fs';

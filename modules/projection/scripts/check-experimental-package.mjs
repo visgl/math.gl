@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 // Run after `ocular-build projection` to verify published entry points and tree shaking.
 import assert from 'node:assert/strict';

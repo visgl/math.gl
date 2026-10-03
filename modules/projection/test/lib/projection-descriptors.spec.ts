@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test, vi} from 'vitest';
 import {ProjectionEngine, createProjectionDescriptor, mercator} from '@math.gl/projection';
 import {lazyUniversalTransverseMercator} from '../../src/experimental/lazy-projections/utm';

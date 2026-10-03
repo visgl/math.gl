@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 const {getDocusaurusConfig} = require('@vis.gl/docusaurus-website');
 const {resolve} = require('path');
 

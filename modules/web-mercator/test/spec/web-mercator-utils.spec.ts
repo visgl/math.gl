@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 import destination from '@turf/destination';
 import {toLowPrecision} from '../utils/test-utils';

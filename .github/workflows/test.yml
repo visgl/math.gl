@@ -48,6 +48,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Check source license and copyright headers
+        run: yarn check:source-headers
+
       - name: Check generated CRS declarations
         run: yarn check:projjson-types
 

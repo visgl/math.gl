@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {readFile, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
@@ -22,7 +22,7 @@ const crsSchema = {
 const generated = await compile(crsSchema, 'PROJJSONCRS', {
   bannerComment: `// math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 // Generated from PROJJSON v0.7. Do not edit by hand.
 // Source: https://proj.org/schemas/v0.7/projjson.schema.json`,

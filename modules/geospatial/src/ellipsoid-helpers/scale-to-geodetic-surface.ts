@@ -1,6 +1,8 @@
 // math.gl
-// SPDX-License-Identifier: MIT and Apache-2.0
-// Copyright (c) vis.gl contributors
+// SPDX-License-Identifier: MIT AND Apache-2.0
+// SPDX-FileCopyrightText: Copyright 2011-2018 CesiumJS Contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
 /* eslint-disable */
 import {Vector3, _MathUtils} from '@math.gl/core';

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import proj4 from 'proj4';
 import type {ReadonlyCRSDefinition as Proj4CRSDefinition} from '@math.gl/crs';

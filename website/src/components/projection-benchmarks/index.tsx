@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original UI following the inline documentation benchmark pattern in loaders.gl.
 import React, {useEffect, useRef, useState} from 'react';
 import {

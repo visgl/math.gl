@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original fixtures; independent PROJ 9.5.1 pipelines supply numeric expectations.
 import {expect, test} from 'vitest';
 import {parsePGM} from '@math.gl/geoid';

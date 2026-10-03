@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original format and integration tests; numeric expectations are from PROJ 9.5.1.
 import {beforeAll, expect, test} from 'vitest';
 import {fromArrayBuffer} from 'geotiff';

@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // View and Projection Matrix calculations for mapbox-js style map view properties
 import {createMat4} from './math-utils';
 

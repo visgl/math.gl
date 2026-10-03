@@ -1,6 +1,8 @@
 // math.gl
-// SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-License-Identifier: MIT AND Apache-2.0
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright 2011-2018 CesiumJS Contributors
+// SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
 // Derived from Cesium under the Apache 2.0 license.
 // https://github.com/CesiumGS/cesium/blob/main/LICENSE.md

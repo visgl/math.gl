@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import proj4Metadata from 'proj4/package.json';
 import * as typescript from './benchmark-typescript';
 import * as proj4 from './benchmark-proj4';

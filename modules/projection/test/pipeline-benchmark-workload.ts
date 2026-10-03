@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original bounded performance workload. Qualification anchors are pinned PROJ results.
 import type {ProjectionPipeline, PipelineEpochs} from '@math.gl/projection/pipeline';
 import type {BenchmarkOptions} from './live-bench-types';

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Seeded differential stress audit; agreement with upstream is not an accuracy guarantee.
 import fs from 'node:fs';
 import {createRequire} from 'node:module';

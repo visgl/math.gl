@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Authored differential cases using proj4js 2.22.0 as the compatibility reference.
 export type CatalogueCase = {
   id: string;

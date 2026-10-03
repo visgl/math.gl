@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 export type LibraryId = 'math' | 'geospatial' | 'geohash' | 'quadkey' | 's2';
 
 export type ExpressionSample = {

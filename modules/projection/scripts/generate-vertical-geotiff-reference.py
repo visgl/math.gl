@@ -1,6 +1,6 @@
 # math.gl
 # SPDX-License-Identifier: MIT
-# Copyright (c) vis.gl contributors
+# SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 # Original tiny TIFF fixture encoder and independent PROJ oracle; no upstream code/data copied.
 import hashlib
 import json

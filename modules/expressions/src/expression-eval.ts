@@ -1,6 +1,9 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) 2013 Stephen Oney
+// SPDX-FileCopyrightText: Copyright (c) 2023 Don McCurdy
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Sources include jsep and expression-eval under MIT. Original source credits retained below.
 
 /**
  * Sources:

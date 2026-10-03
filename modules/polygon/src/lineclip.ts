@@ -1,6 +1,8 @@
 // math.gl
-// SPDX-License-Identifier: MIT and ISC
-// Copyright (c) vis.gl contributors
+// SPDX-License-Identifier: MIT AND ISC
+// SPDX-FileCopyrightText: Copyright (c) 2015, Mapbox
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Adapted from Mapbox lineclip for flat arrays and 3D positions. Original ISC notice retained below.
 
 /*
   Adapted from https://github.com/mapbox/lineclip to work with flat arrays

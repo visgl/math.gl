@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {useCallback, useEffect, useMemo, useRef, useState, type ReactElement} from 'react';
 import {
   BASIC_MATH_FUNCTION_LIBRARY,

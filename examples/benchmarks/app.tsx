@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // biome-ignore lint/correctness/noUnusedImports: React is required by this example's classic JSX runtime.
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom'; // eslint-disable-line

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original lifecycle, unit-state and ownership tests for typed pipeline extensions.
 import {expect, test} from 'vitest';
 import {ProjectionPipeline} from '@math.gl/projection/pipeline';

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Independent PROJ fixtures, exercised in the same engines as browser benchmarks.
 export {qualifyAccuracy} from '../test/accuracy-workload';
 import * as native from '@math.gl/projection';

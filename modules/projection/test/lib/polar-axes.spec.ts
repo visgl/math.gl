@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Authored axis regressions; imported corpus retains its proj4js attribution.
 import {expect, test} from 'vitest';
 import {createSpatialReference} from '@math.gl/crs';

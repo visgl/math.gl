@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /** Decodes a packed RGB565 value into 8-bit RGB components. */
 export function decodeRGB565(rgb565: number, target: number[] = [0, 0, 0]): number[] {

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Exercise actual npm tarballs in a temporary consumer, with no workspace source aliases.
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';

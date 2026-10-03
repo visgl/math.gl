@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 export {S2Decoder, getS2Bounds, getS2LngLat, getS2BoundaryFlat} from './s2-decoder';
 export {

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Independent accuracy and regressions for the proj4js-inspired projection API.
 import {expect, test} from 'vitest';
 import {Projection} from '@math.gl/projection';

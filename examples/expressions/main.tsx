@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {createRoot} from 'react-dom/client';
 import ExpressionPlayground from './app';
 

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Offline provenance/shape checks for authored grids and independent PROJ references.
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';

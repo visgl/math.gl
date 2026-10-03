@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original browser qualification of the proj4js-inspired native API.
 import {codeFingerprint, benchmarkFingerprint} from './benchmark-metadata.mjs';
 import assert from 'node:assert/strict';

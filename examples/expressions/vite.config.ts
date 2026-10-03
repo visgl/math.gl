@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 /* eslint-disable import/no-extraneous-dependencies */
 import fs from 'fs/promises';
 import {fileURLToPath} from 'url';

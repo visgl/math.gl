@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Paired, alternating before/after measurements without changing the working tree.
 import {bundleRuntime} from './benchmark-runtime.mjs';
 import {execFileSync} from 'node:child_process';

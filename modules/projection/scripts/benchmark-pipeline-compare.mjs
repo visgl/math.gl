@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Paired pipeline measurements; no runtime mutation, implicit downloads or speed gates.
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';

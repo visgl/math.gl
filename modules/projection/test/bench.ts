@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // @ts-expect-error tsconfig configuration issue?
 import type {Bench} from '@probe.gl/bench';
 import proj4 from 'proj4';

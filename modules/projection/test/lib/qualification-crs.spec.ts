@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original independent PROJ tests of the proj4js-inspired CRS/datum API.
 import {expect, test} from 'vitest';
 import * as native from '@math.gl/projection/experimental';

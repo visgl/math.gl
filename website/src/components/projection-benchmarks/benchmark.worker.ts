@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {runLiveBenchmark} from '../../../../modules/projection/test/live-bench';
 import type {BenchmarkOptions} from '../../../../modules/projection/test/live-bench-types';
 

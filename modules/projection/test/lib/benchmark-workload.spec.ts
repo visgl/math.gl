@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test, vi} from 'vitest';
 import {geographicPoints, measureWorkload, summarize, validateOptions} from '../benchmark-workload';
 import {SCENARIOS} from '../live-bench-types';

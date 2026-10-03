@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original independent-reference integrity checks for the proj4js-inspired API.
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';

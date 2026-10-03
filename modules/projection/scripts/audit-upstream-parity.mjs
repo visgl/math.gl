@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original audit harness. Tolerance semantics follow proj4js 2.22.0 test/proj4.test.mjs
 // (MIT; copyright (c) 2014, proj4js authors; see ../PROJ4-LICENSE.md).
 // Reads external tagged fixture files as literal data; never executes upstream test code.

@@ -1,6 +1,6 @@
 # math.gl
 # SPDX-License-Identifier: MIT
-# Copyright (c) vis.gl contributors
+# SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 # Original authored epoch pipelines; independent PROJ expectations, never math.gl.
 import hashlib
 import json

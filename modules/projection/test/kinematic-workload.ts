@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original qualification workload using independent PROJ spatial/time expectations.
 import {ProjectionPipeline} from '@math.gl/projection/pipeline';
 import type {ProjectionPipelineOptions} from '@math.gl/projection/pipeline';

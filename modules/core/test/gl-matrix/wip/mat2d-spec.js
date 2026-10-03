@@ -1,3 +1,8 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV. (gl-matrix)
+// SPDX-FileComment: Adapted from gl-matrix. See the repository LICENSE for upstream attribution and terms.
 // @ts-nocheck
 /* eslint-disable */
 
