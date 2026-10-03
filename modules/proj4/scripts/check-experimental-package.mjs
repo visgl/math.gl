@@ -250,11 +250,17 @@ for (const entry of [
   );
   assert(!retained.some(path => /node_modules\/proj4\//.test(path)));
   assert(!retained.some(path => /experimental\/(projections|kernels|grids)\//.test(path)));
+  assert(
+    !retained.some(path => path.endsWith('/deformation.js')),
+    'Model implementation must remain optional'
+  );
   assert(!retained.some(path => /experimental\/crs\/(wkt|projjson)\.js$/.test(path)));
   assert(
     !retained.some(path =>
       entry.includes('/core')
-        ? path.endsWith('/projection-pipeline.js') || path.endsWith('/exact-helmert.js') || path.endsWith('/kinematic-helmert.js')
+        ? path.endsWith('/projection-pipeline.js') ||
+          path.endsWith('/exact-helmert.js') ||
+          path.endsWith('/kinematic-helmert.js')
         : path.endsWith('/typescript-projection.js')
     )
   );

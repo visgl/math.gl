@@ -163,7 +163,8 @@ GEOGCS["WGS 84",
 ```
 
 For explicit unit, axis, datum and grid ordering, use the optional
-[typed operation pipeline](./operation-pipelines.md).
+[typed operation pipeline](./operation-pipelines.md). For coordinate propagation
+between explicit epochs, see [deformation models](./deformation-models.md).
 
 ## Attribution
 

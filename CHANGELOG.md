@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- feat(proj4): Add optional prepared ENU velocity models and GeoTIFF raster adapters
+  for explicit coordinate epoch propagation in scalar and typed-array pipelines.
+
 - perf(proj4): Reduce mixed-epoch Helmert allocation and prepare fixed unit/axis
   constants; add paired pipeline timing/allocation reports and independent projected-to-projected references.
 

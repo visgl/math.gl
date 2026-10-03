@@ -24,6 +24,10 @@ const fixtures = {
     "import {ProjectionEngine, mercator} from '@math.gl/proj4'; export {parseGTXGrid} from '@math.gl/proj4/grids/gtx'; export const create = (from, verticalGrids) => new ProjectionEngine({from, to: 'EPSG:3857', projections: [mercator], verticalGrids});",
   mercatorWithVerticalGeoTIFF:
     "import {ProjectionEngine, mercator} from '@math.gl/proj4'; export {loadVerticalGeoTIFFGrid} from '@math.gl/proj4/grids/vertical-geotiff'; export const create = (from, verticalGrids) => new ProjectionEngine({from, to: 'EPSG:3857', projections: [mercator], verticalGrids});",
+  deformationModel:
+    "export {createDeformationModel} from '@math.gl/proj4/deformation'; export {createVelocityGrid} from '@math.gl/proj4/grids/velocity';",
+  deformationWithGeoTIFF:
+    "export {createDeformationModel} from '@math.gl/proj4/deformation'; export {loadVelocityGeoTIFFGrid} from '@math.gl/proj4/grids/velocity-geotiff';",
   operationPipeline: "export {ProjectionPipeline} from '@math.gl/proj4/pipeline';",
   typescriptWrapper: "export {Projection} from '@math.gl/proj4';",
   allNativeExports: "export * from '@math.gl/proj4';",

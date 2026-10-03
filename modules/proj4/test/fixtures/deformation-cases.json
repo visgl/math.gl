@@ -1,0 +1,1086 @@
+{
+  "model": {
+    "file": "deformation/linear-enu.tif",
+    "description": "Original authored math.gl MIT test grid; not an authoritative deformation model",
+    "epochRange": [
+      2010,
+      2030
+    ],
+    "ellipsoid": {
+      "semiMajorAxis": 6378137,
+      "flattening": 0.003352810681182319
+    },
+    "grid": {
+      "origin": [
+        -130,
+        40
+      ],
+      "step": [
+        10,
+        10
+      ],
+      "size": [
+        8,
+        5
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "geographic-2010-2020",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          }
+        },
+        {
+          "type": "deformation",
+          "sourceEpoch": 2010,
+          "targetEpoch": 2020
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          },
+          "inverse": true
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000002,
+      "inverseTolerance": 0.000002
+    },
+    {
+      "id": "geographic-2010-2020-inverse",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          }
+        },
+        {
+          "type": "deformation",
+          "sourceEpoch": 2010,
+          "targetEpoch": 2020,
+          "inverse": true
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          },
+          "inverse": true
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000002,
+      "inverseTolerance": 0.000002
+    },
+    {
+      "id": "geographic-2020-2010",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          }
+        },
+        {
+          "type": "deformation",
+          "sourceEpoch": 2020,
+          "targetEpoch": 2010
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          },
+          "inverse": true
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000002,
+      "inverseTolerance": 0.000002
+    },
+    {
+      "id": "geographic-2020-2010-inverse",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          }
+        },
+        {
+          "type": "deformation",
+          "sourceEpoch": 2020,
+          "targetEpoch": 2010,
+          "inverse": true
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          },
+          "inverse": true
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000002,
+      "inverseTolerance": 0.000002
+    },
+    {
+      "id": "geographic-2020-2020",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          }
+        },
+        {
+          "type": "deformation",
+          "sourceEpoch": 2020,
+          "targetEpoch": 2020
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          },
+          "inverse": true
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000002,
+      "inverseTolerance": 0.000002
+    },
+    {
+      "id": "geographic-2020-2020-inverse",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          }
+        },
+        {
+          "type": "deformation",
+          "sourceEpoch": 2020,
+          "targetEpoch": 2020,
+          "inverse": true
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          },
+          "inverse": true
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000002,
+      "inverseTolerance": 0.000002
+    },
+    {
+      "id": "geographic-coordinate-2025",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          }
+        },
+        {
+          "type": "deformation",
+          "sourceEpoch": "coordinate",
+          "targetEpoch": 2025
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          },
+          "inverse": true
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000002,
+      "inverseTolerance": 0.000002
+    },
+    {
+      "id": "geographic-coordinate-2025-inverse",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          }
+        },
+        {
+          "type": "deformation",
+          "sourceEpoch": "coordinate",
+          "targetEpoch": 2025,
+          "inverse": true
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          },
+          "inverse": true
+        },
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "rad",
+            "to": "deg"
+          }
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000002,
+      "inverseTolerance": 0.000002
+    },
+    {
+      "id": "geocentric-2010-2020",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "deformation",
+          "sourceEpoch": 2010,
+          "targetEpoch": 2020
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000005,
+      "inverseTolerance": 0.000005
+    },
+    {
+      "id": "geocentric-2010-2020-inverse",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "deformation",
+          "sourceEpoch": 2010,
+          "targetEpoch": 2020,
+          "inverse": true
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000005,
+      "inverseTolerance": 0.000005
+    },
+    {
+      "id": "geocentric-2020-2010",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "deformation",
+          "sourceEpoch": 2020,
+          "targetEpoch": 2010
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000005,
+      "inverseTolerance": 0.000005
+    },
+    {
+      "id": "geocentric-2020-2010-inverse",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "deformation",
+          "sourceEpoch": 2020,
+          "targetEpoch": 2010,
+          "inverse": true
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000005,
+      "inverseTolerance": 0.000005
+    },
+    {
+      "id": "geocentric-2020-2020",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "deformation",
+          "sourceEpoch": 2020,
+          "targetEpoch": 2020
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000005,
+      "inverseTolerance": 0.000005
+    },
+    {
+      "id": "geocentric-2020-2020-inverse",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "deformation",
+          "sourceEpoch": 2020,
+          "targetEpoch": 2020,
+          "inverse": true
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000005,
+      "inverseTolerance": 0.000005
+    },
+    {
+      "id": "geocentric-coordinate-2025",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "deformation",
+          "sourceEpoch": "coordinate",
+          "targetEpoch": 2025
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000005,
+      "inverseTolerance": 0.000005
+    },
+    {
+      "id": "geocentric-coordinate-2025-inverse",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "steps": [
+        {
+          "type": "deformation",
+          "sourceEpoch": "coordinate",
+          "targetEpoch": 2025,
+          "inverse": true
+        }
+      ],
+      "points": [
+        [
+          -123.1,
+          49.25,
+          20,
+          7
+        ],
+        [
+          -75.7,
+          45.4,
+          123.5,
+          -8
+        ],
+        [
+          -65,
+          60,
+          1500,
+          2025
+        ],
+        [
+          -110,
+          70,
+          -30,
+          9
+        ]
+      ],
+      "epochs": [
+        2010,
+        2015.5,
+        2020,
+        2025
+      ],
+      "forwardTolerance": 0.000005,
+      "inverseTolerance": 0.000005
+    }
+  ]
+}

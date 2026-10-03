@@ -57,6 +57,7 @@ not necessarily the mathematical inverse of the forward program.
 | `projection` | `name` selects a registered plugin; `parameters` supplies its PROJ parameter strings/flags and ellipsoid geometry. Forward: geographic radians → projected metres. Inverse: projected metres → geographic radians. Z units stay unchanged. `ob_tran` requires an explicit `output` space/unit and matching `o_proj`. |
 | `cart` | Geographic radians/metre height → geocentric XYZ metres. Optional `ellipsoid` accepts `ellps`, `a`, `b`, `rf`, `f`, or `R` string parameters; default WGS84. Requires XYZ. |
 | `helmert` | Geocentric XYZ metres. `translation: [x, y, z]` is in metres, optional `rotation` is in arcseconds, and `scalePPM` defaults to zero. Rotation requires `position_vector` or `coordinate_frame` convention. Scale must be positive. Requires XYZ. `exact: true` uses a full rotation matrix and its mathematical inverse. Optional `rates` and `referenceEpoch` enable kinematic parameters; coordinate epochs are supplied separately. |
+| `deformation` | Geocentric XYZ metres; a prepared `model`, explicit `sourceEpoch` (decimal year or `'coordinate'`) and fixed `targetEpoch` propagate a position through a velocity field. Requires XYZ. See [deformation models](./deformation-models.md). |
 | `push` / `pop` | `components: [1, 2]`, `[3]`, or another nonempty selection of X/Y/Z. Independent nested stacks preserve values and units; inverse execution swaps push/pop. M and later ordinates are never stacked. |
 | `hgridshift` | Geographic radians; `grids` names prepared `datumGrids`, in priority order. Preserves height. Uses the grid's forward/inverse shift methods. |
 | `vgridshift` | Geographic radians/metre height; `grids` names prepared `verticalGrids`. Adds `multiplier * offset` in the forward direction. Multiplier defaults to **−1**, following PROJ. Requires XYZ. |
@@ -76,8 +77,8 @@ approximation; it is not an exact matrix inverse. `exact: true` uses full rotati
 transposes the complete matrix for the position-vector convention, and uses the
 transpose/reciprocal scale for inverse execution. Choose the mode expected by your
 transformation parameters; parameters fitted to a small-angle model should retain
-the default. Kinematic parameters use explicit coordinate epochs as shown below. Time-dependent
-grids and deformation models remain outside this profile.
+the default. Kinematic parameters use explicit coordinate epochs as shown below. A separate [deformation step](./deformation-models.md) propagates coordinates between epochs;
+time-varying model components remain outside this profile.
 
 ## Coordinate epochs and moving reference frames
 
@@ -298,5 +299,5 @@ steps and a geographic-to-UTM height-preserving chain.
 
 This is typed composition, not a parser for arbitrary `+proj=pipeline` strings. Unknown
 operators and parameters throw instead of being skipped. Stack support covers X/Y/Z
-with stricter balance validation; arbitrary operators, deformation models, automatic
+with stricter balance validation; arbitrary operators, time-varying deformation components, automatic
 EPSG operation selection and dynamic CRS inference remain outside this profile. See the [remaining roadmap](./roadmap.md).

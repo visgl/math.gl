@@ -384,8 +384,24 @@ The core and ordinary wrapper bundles remain unchanged.
 
 This is explicit reference-frame transformation at an observation epoch. It neither
 propagates coordinates between epochs nor infers time from M or CRS metadata.
-Prepared deformation models, time-dependent grids and automatic operation selection
-remain future work. See [coordinate epochs](./operation-pipelines.md#coordinate-epochs-and-moving-reference-frames).
+Prepared linear velocity models are available in the bounded 12C2 profile below.
+Time-varying components and automatic operation selection remain future work. See [coordinate epochs](./operation-pipelines.md#coordinate-epochs-and-moving-reference-frames).
+
+## Tranche 12C2: linear velocity models — implemented bounded profile
+
+Optional prepared ENU velocity grids and GeoTIFF raster adapters support explicit
+source/target epoch propagation in geocentric pipelines. A source can be fixed or
+supplied through the separate batch/per-record epoch argument; M remains untouched.
+Application-reviewed validity ranges, whole-vector coverage/nodata, a bounded mathematical
+inverse and failure/ownership contracts are explicit. Original authored TIFF data
+and pinned native PROJ forward evaluations independently qualify 16 configurations /
+64 coordinate-epoch pairs in Node and browsers. No third-party model files or new
+third-party code/dependencies are added. Models and readers remain outside core,
+ordinary wrappers and a pipeline-only static graph.
+
+This completes the linear, time-invariant profile. Real-model accuracy qualification
+and nonlinear/time-varying components are still separate work. See
+[deformation models](./deformation-models.md).
 
 ## Tranche 13A: pipeline batch performance — implemented first pass
 
@@ -412,7 +428,7 @@ Grid/datum-heavy and mixed-epoch chains remain profiling targets. See
 
 | Tranche | Work | Acceptance gate |
 | --- | --- | --- |
-| 12C2 — Deformation models | Optional prepared velocity/deformation grids and explicit source/target epoch propagation | Licensed model fixtures, independently checked results and explicit units/coverage/time behavior |
+| 12C2 — Broader deformation qualification | Independently qualify application-provided real models and evaluate nonlinear/time-varying components | Reviewed data terms without distributing third-party models; explicit time/coverage/accuracy bounds |
 | 12E — Operation selection | A bounded optional catalogue with explicit epoch, area, accuracy and grid availability | Pinned provenance, deterministic reviewed selection and no implicit grid downloads |
 | 13A — Further JavaScript performance | Profile grid/datum-heavy and mixed-epoch pipelines; evaluate additional whole-buffer specializations and reusable scalar outputs | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
 | 13B–13D — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
