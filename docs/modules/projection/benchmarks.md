@@ -28,9 +28,10 @@ coordinates into the output buffer. Every coordinate is checked before timing,
 including height and trailing ordinates. Datum-shift cases enable axis enforcement
 to compare computed heights consistently. Implementation order rotates between samples.
 
-The seventeen shared cases cover spherical and ellipsoidal Mercator, UTM in both hemispheres,
+The twenty-two shared cases cover spherical and ellipsoidal Mercator, UTM in both hemispheres,
 Lambert conformal conic, Albers, equidistant conic, Lambert azimuthal equal area, polar stereographic,
-Equal Earth, Mollweide, three- and seven-parameter datum shifts, UTM-to-Mercator,
+Equal Earth, Mollweide, azimuthal equidistant, Robinson, Oblique Mercator, QSC,
+tilted perspective, three- and seven-parameter datum shifts, UTM-to-Mercator,
 US survey feet, north/east axis order, and an authored synthetic NTv2 grid.
 Regional samples cover each projection's useful domain; clustered samples concentrate
 in four smaller regions. Both are reproducible from a fixed seed. XY, XYZ and XYZM
@@ -70,8 +71,8 @@ node modules/projection/scripts/check-packed-package.mjs
 ```
 
 The standalone Node runner and browser qualification runner use the same workload as
-the live page: seventeen scenarios, Float32/Float64, XY/XYZ/XYZM and both directions
-(204 rows, with three implementations per row). Select regional or clustered inputs
+the live page: twenty-two scenarios, Float32/Float64, XY/XYZ/XYZM and both directions
+(264 rows, with three implementations per row). Select regional or clustered inputs
 with `--distribution regional|clustered`; set `--min-sample-ms` between 0 and 100 to
 control adaptive sampling. Zero disables calibration for correctness smoke checks and
 marks timings as limited. Buffer sizes range from 10 to 1,000,000 points.
@@ -87,7 +88,7 @@ and p10/p90, repetition counts, seed, workload/source fingerprints and runtime m
 Warmed constructor measurements are separate. Browser qualification additionally measures
 module loading and first use in fresh contexts. CI uploads browser artifacts and gates
 correctness and bundle sizes; it does not gate noisy speed ratios. Pull requests use 20,000 points, three samples and
-`--min-sample-ms 0`: all 612 workloads and independent references still run, but
+`--min-sample-ms 0`: all 792 workloads and independent references still run, but
 adaptive timing repetitions are disabled. These PR browser measurements are marked
 `timingLimited` and serve as correctness checks, not performance evidence. Pushes to
 master retain seven samples and a 12 ms calibration target for full browser reports.
@@ -157,7 +158,7 @@ uniform gain across every projection or direction. Scalar and construction resul
 remain mixed. Raw samples, variation, clock and source/workload fingerprints are retained
 in [the diagnostic report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/batch-kernels-cpu.json).
 Use the CI comparison artifact for elapsed measurements on each PR revision. Browser
-qualification validates 612 warm workloads per engine, including the independent PROJ
+qualification validates 792 warm workloads per engine, including the independent PROJ
 reference corpus. Reuse compiled instances to amortize batch-factory setup.
 
 ## Historical initial measurements
@@ -310,7 +311,7 @@ node modules/projection/scripts/benchmark-browser.mjs --points 20000 --samples 7
 ```
 
 Each browser first measures separate math.gl and direct-proj4 bundles, then checks
-all independent projection references. Current warm workloads use the seventeen-scenario
+all independent projection references. Current warm workloads use the twenty-two-scenario
 shared matrix described above, including XYZ. The historical tables retain their older
 workload and wrapper column for provenance; they are not current benchmark results.
 The runner bounds each browser to 300 seconds. CI keeps downloadable measurements and
@@ -361,7 +362,83 @@ flat call, with no new per-record arrays, objects or dynamic code generation.
 CI uploads `proj4-pipeline-comparison.json` alongside the ordinary projection comparison,
 using 10,000 points and seven samples. It validates results and records measurements;
 it does not require a speed ratio. Core, ordinary wrapper and selective projection
-bundles are unchanged; the retained pipeline adds about 0.18 KiB minified / 0.01 KiB gzip.
+bundles were unchanged in that initial pass; the retained pipeline adds about 0.18 KiB minified / 0.01 KiB gzip.
 Grid/datum-heavy and mixed-epoch workloads still need further profiling and do not have
 a blanket speedup claim. The live table above continues to compare the ordinary
 projection APIs; this paired pipeline report is a separate developer tool.
+
+### Compare grid preparation and retained memory
+
+```sh
+node --expose-gc modules/projection/scripts/benchmark-grid-compare.mjs --baseline-ref origin/master --sizes 65,257,1025 --samples 11 --memory --output /tmp/projection-grid-comparison.json
+```
+
+This compares the historical and current horizontal grid readers with identical authored
+bilinear fields. NTv2 bytes and already decoded GeoTIFF bands are prepared outside timing;
+network and TIFF decoding are excluded. The reader must pass analytic forward/inverse
+checks at edges and interior points. Samples alternate baseline/current order and retain
+raw timings and machine/source/workload provenance. `--clock thread-cpu` optionally measures
+main-thread CPU work on Node 24.14 or later; this is distinct from elapsed loading time.
+
+Horizontal grids keep longitude/latitude node pairs in one owned Float64Array per subgrid,
+using 16 bytes per node and avoiding a small JavaScript array for each pair. Preparing a
+1025 × 1025 grid removes 1,050,625 such arrays. Reader ownership, node orientation, bilinear
+summation order, nodata handling, coverage and inverse iteration limits remain unchanged.
+This targets preparation and GC pressure; it does not imply a blanket point-throughput gain.
+
+`--memory` runs three separate fresh processes for each reader/size/revision. Each measures
+the change in `heapUsed + arrayBuffers` after full GC while retaining one prepared grid;
+input bytes/bands are excluded. These engine-dependent estimates describe retained storage,
+not total allocated bytes, peak memory or garbage-collection pauses. Small-grid differences
+can be noisy. Omit `--memory` for timing only; `--expose-gc` also enables untimed collection
+before timing samples. CI uses two small grids and three samples to check the runner and
+upload a report; it applies no performance or memory threshold.
+
+An October 2026 diagnostic on Apple M2 / Node 24.14.0 compared seven thread-CPU
+samples against commit `6b2b154`. For 1025 × 1025 nodes:
+
+| Reader | Preparation CPU, baseline → current | Retained storage, baseline → current |
+| --- | --- | --- |
+| NTv2 | 87.36 → 26.69 ms | 77.70 → 16.84 MB |
+| GeoTIFF adapter | 96.14 → 40.70 ms | 77.70 → 16.84 MB |
+
+These results describe synthetic grid preparation on one machine. Smaller-grid CPU
+results were mixed, including slower medians at 65 × 65, and ordinary coordinate
+throughput did not improve consistently. The
+[raw grid report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/grid-preparation-node.json)
+retains all sizes, samples and provenance. The
+[paired coordinate report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/allocation-projections-node.json)
+covers the five changed algorithms and NTv2, both precisions, XY/XYZM and both directions.
+
+### Allocation checks
+
+The live comparison also includes AEQD, Robinson, Oblique Mercator, QSC and tilted
+perspective. Their mutable equations reuse the working point or local numbers instead of
+creating coordinate result objects; Robinson's Newton solver avoids a per-point callback.
+Robinson follows PROJ's float-rounded tables, while proj4js uses double coefficients.
+Its comparator allows 0.5 metres forward and 1e-4 degrees inverse; the independent PROJ
+accuracy budgets remain unchanged, including the documented table-knot exceptions.
+Scalar methods still return owned arrays, while reusing one private working point.
+Scalar pipelines also cache their ordinate stack. Recursive hooks receive isolated
+fallback storage; exceptions release the scratch lease. The safeguards add approximately
+0.1–0.2 KiB gzip to selected core/Mercator/pipeline bundles, with the existing deferred
+budgets retained. Flat methods keep one working point and an
+optional typed ordinate stack per call, rather than per record. Custom plugins/grids should
+provide mutable hooks to avoid the legacy array-returning fallback.
+
+```sh
+node modules/projection/scripts/audit-allocations.mjs --check --output /tmp/projection-allocations.json
+```
+
+The source-wide AST inventory covers all projection runtime files. CI checks the numerical
+paths for explicit object/array/function creation and allocating methods. Setup, returned
+scalar arrays and failure diagnostics are reviewed separately. This helps prevent regressions;
+JIT numeric boxing and external hook behavior still need heap profiling.
+
+The separate untimed Inspector sampling pass estimated 487.7 → 157.1 allocated bytes
+per point for the scalar stack-and-datum chain and 188.7 → 100.5 for the mixed-epoch
+Helmert chain. These are sampled estimates, including collected objects, rather than
+exact counts or a throughput promise. Public result arrays still allocate, and flat
+paths still show some engine allocations despite having no explicit per-record objects.
+See the [paired pipeline report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/allocation-pipeline-node.json)
+for all allocation samples and timing rows.

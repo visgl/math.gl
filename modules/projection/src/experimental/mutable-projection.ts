@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {ProjectionScratch} from './projection-scratch';
 import type {ProjectionImplementation, ProjectionPoint} from './types';
 
 /** One equation implementation shared by scalar adapters and the mutable pipeline. */
@@ -8,16 +9,29 @@ export function createProjection(
   forward: (point: ProjectionPoint) => void,
   inverse: (point: ProjectionPoint) => void
 ): ProjectionImplementation {
+  const scratch = new ProjectionScratch();
+  const scalar = (
+    x: number,
+    y: number,
+    operation: (point: ProjectionPoint) => void
+  ): [number, number] => {
+    const point = scratch.acquire();
+    try {
+      point.x = x;
+      point.y = y;
+      point.z = 0;
+      operation(point);
+      return [point.x, point.y];
+    } finally {
+      scratch.release(point);
+    }
+  };
   return {
     forward(x, y) {
-      const point = {x, y, z: 0};
-      forward(point);
-      return [point.x, point.y];
+      return scalar(x, y, forward);
     },
     inverse(x, y) {
-      const point = {x, y, z: 0};
-      inverse(point);
-      return [point.x, point.y];
+      return scalar(x, y, inverse);
     },
     forwardInPlace: forward,
     inverseInPlace: inverse

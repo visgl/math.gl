@@ -270,3 +270,51 @@ test('rotated helper output contracts validate algorithms and remain lazy', asyn
         })
     ).toThrow('contract');
 });
+
+test('scalar pipeline scratch reuses point/stack safely across repeated, nested and failed calls', () => {
+  const points = new Set<object>();
+  let nested = false,
+    fail = false;
+  const pipeline = new ProjectionPipeline({
+    input: geo,
+    steps: [
+      {type: 'push', components: [1, 2]},
+      {type: 'hgridshift', grids: 'scratch'},
+      {type: 'pop', components: [1, 2]}
+    ],
+    datumGrids: {
+      scratch: {
+        subgridCount: 1,
+        shift: () => {
+          throw new Error('mutable hook required');
+        },
+        shiftInPlace(point, inverse) {
+          points.add(point);
+          if (nested) {
+            nested = false;
+            expect(pipeline.project([0.4, 0.5, 200, 8])).toEqual([0.4, 0.5, 200, 8]);
+          }
+          point.x += inverse ? -0.1 : 0.1;
+          if (fail) throw new Error('callback failed');
+          return true;
+        }
+      }
+    }
+  });
+  const input = Object.freeze([0.2, 0.3, 100, 9]);
+  const first = pipeline.project(input);
+  expect(first).toEqual(input);
+  expect(pipeline.project(input)).toEqual(input);
+  expect(points.size).toBe(1);
+  nested = true;
+  expect(pipeline.project(input)).toEqual(input);
+  expect(points.size).toBe(2);
+  fail = true;
+  expect(() => pipeline.project(input)).toThrow('callback failed');
+  fail = false;
+  expect(pipeline.project(input)).toEqual(input);
+  expect(pipeline.unproject(input)).toEqual(input);
+  expect(points.size).toBe(2);
+  expect(first).toEqual(input);
+  expect(first).not.toBe(pipeline.project(input));
+});

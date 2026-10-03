@@ -1,7 +1,9 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0, modified to write into caller-owned storage without temporary result objects. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+
+import type {Point} from '../kernel';
 
 /**
  * Calculates the inverse geodesic problem using Vincenty's formulae.
@@ -14,9 +16,7 @@
  * @param {number} lon2 Longitude of the second point in radians.
  * @param {number} a Semi-major axis of the ellipsoid (meters).
  * @param {number} f Flattening of the ellipsoid.
- * @returns {{ azi1: number, s12: number }} An object containing:
- *   - azi1: Forward azimuth from the first point to the second point (radians).
- *   - s12: Ellipsoidal distance between the two points (meters).
+ * @param output Caller-owned storage: x is forward azimuth (radians), y is distance (meters).
  */
 export function vincentyInverse(
   lat1: number,
@@ -24,8 +24,9 @@ export function vincentyInverse(
   lat2: number,
   lon2: number,
   a: number,
-  f: number
-) {
+  f: number,
+  output: Point
+): void {
   const L = lon2 - lon1;
   const U1 = Math.atan((1 - f) * Math.tan(lat1));
   const U2 = Math.atan((1 - f) * Math.tan(lat2));
@@ -48,7 +49,9 @@ export function vincentyInverse(
         (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda)
     );
     if (sinSigma === 0) {
-      return {azi1: 0, s12: 0}; // coincident points
+      output.x = 0;
+      output.y = 0;
+      return; // coincident points
     }
     cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
     sigma = Math.atan2(sinSigma, cosSigma);
@@ -66,7 +69,9 @@ export function vincentyInverse(
   } while (Math.abs(lambda - lambdaP) > 1e-12 && --iterLimit > 0);
 
   if (iterLimit === 0) {
-    return {azi1: NaN, s12: NaN}; // formula failed to converge
+    output.x = NaN;
+    output.y = NaN;
+    return; // formula failed to converge
   }
 
   uSq = (cos2Alpha * (a * a - a * (1 - f) * (a * (1 - f)))) / (a * (1 - f) * (a * (1 - f)));
@@ -88,7 +93,8 @@ export function vincentyInverse(
   // Forward azimuth
   const azi1 = Math.atan2(cosU2 * sinLambda, cosU1 * sinU2 - sinU1 * cosU2 * cosLambda);
 
-  return {azi1, s12: s};
+  output.x = azi1;
+  output.y = s;
 }
 
 /**
@@ -101,7 +107,7 @@ export function vincentyInverse(
  * @param {number} s12 Distance to travel from the starting point in meters.
  * @param {number} a Semi-major axis of the ellipsoid in meters.
  * @param {number} f Flattening of the ellipsoid.
- * @returns {{lat2: number, lon2: number}} The latitude and longitude (in radians) of the destination point.
+ * @param output Caller-owned storage: x is destination longitude, y is latitude (radians).
  */
 export function vincentyDirect(
   lat1: number,
@@ -109,8 +115,9 @@ export function vincentyDirect(
   azi1: number,
   s12: number,
   a: number,
-  f: number
-) {
+  f: number,
+  output: Point
+): void {
   const U1 = Math.atan((1 - f) * Math.tan(lat1));
   const sinU1 = Math.sin(U1),
     cosU1 = Math.cos(U1);
@@ -148,7 +155,9 @@ export function vincentyDirect(
   } while (Math.abs(sigma - sigmaP) > 1e-12 && --iterLimit > 0);
 
   if (iterLimit === 0) {
-    return {lat2: NaN, lon2: NaN};
+    output.x = NaN;
+    output.y = NaN;
+    return;
   }
 
   const tmp = sinU1 * sinSigma - cosU1 * cosSigma * cosAlpha1;
@@ -166,5 +175,6 @@ export function vincentyDirect(
       (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
   const lon2 = lon1 + L;
 
-  return {lat2, lon2};
+  output.x = lon2;
+  output.y = lat2;
 }

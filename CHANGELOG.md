@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- perf(projection): Pack horizontal grid nodes into owned Float64 storage and remove
+  coordinate temporaries in five projection algorithms. Reuse scalar scratch/stack
+  storage with recursive-call isolation. Add source allocation auditing,
+  grid preparation/memory benchmarks and live cases for the affected algorithms.
+
 - feat(proj4): Add optional prepared ENU velocity models and GeoTIFF raster adapters
   for explicit coordinate epoch propagation in scalar and typed-array pipelines.
 

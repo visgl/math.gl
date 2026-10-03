@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0, modified to keep inverse temporary coordinates in local numbers. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -115,7 +115,8 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
 export function inverse(state: State, p: Point): Point | null | undefined | number {
   p.x /= state.a;
   p.y /= state.a;
-  var r = {x: p.x, y: p.y};
+  var rx = p.x,
+    ry = p.y;
 
   // Un-Tilt
   var bm, bq, yt;
@@ -127,8 +128,8 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
 
   var rh = hypot(p.x, p.y);
   if (Math.abs(rh) < EPSLN) {
-    r.x = 0;
-    r.y = state.lat0;
+    rx = 0;
+    ry = state.lat0;
   } else {
     var cosz, sinz;
     sinz = 1 - rh * rh * state.pfact;
@@ -136,28 +137,28 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
     cosz = Math.sqrt(1 - sinz * sinz);
     switch (state.mode) {
       case mode.OBLIQ:
-        r.y = Math.asin(cosz * state.sinph0 + (p.y * sinz * state.cosph0) / rh);
-        p.y = (cosz - state.sinph0 * Math.sin(r.y)) * rh;
+        ry = Math.asin(cosz * state.sinph0 + (p.y * sinz * state.cosph0) / rh);
+        p.y = (cosz - state.sinph0 * Math.sin(ry)) * rh;
         p.x *= sinz * state.cosph0;
         break;
       case mode.EQUIT:
-        r.y = Math.asin((p.y * sinz) / rh);
+        ry = Math.asin((p.y * sinz) / rh);
         p.y = cosz * rh;
         p.x *= sinz;
         break;
       case mode.N_POLE:
-        r.y = Math.asin(cosz);
+        ry = Math.asin(cosz);
         p.y = -p.y;
         break;
       case mode.S_POLE:
-        r.y = -Math.asin(cosz);
+        ry = -Math.asin(cosz);
         break;
     }
-    r.x = Math.atan2(p.x, p.y);
+    rx = Math.atan2(p.x, p.y);
   }
 
-  p.x = r.x + state.long0;
-  p.y = r.y;
+  p.x = rx + state.long0;
+  p.y = ry;
   return p;
 }
 

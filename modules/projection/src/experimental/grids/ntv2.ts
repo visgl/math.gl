@@ -54,12 +54,11 @@ export function parseNTv2Grid(data: ArrayBuffer, options: NTv2GridOptions = {}):
     const start = offset + 176,
       end = start + nodes * stride;
     if (end > view.byteLength) throw new Error('Truncated NTv2 node records');
-    const shifts: [number, number][] = [];
-    for (let i = 0; i < nodes; i++)
-      shifts.push([
-        view.getFloat32(start + i * stride + 4, little) * ARC_SECOND,
-        view.getFloat32(start + i * stride, little) * ARC_SECOND
-      ]);
+    const shifts = new Float64Array(nodes * 2);
+    for (let i = 0; i < nodes; i++) {
+      shifts[i * 2] = view.getFloat32(start + i * stride + 4, little) * ARC_SECOND;
+      shifts[i * 2 + 1] = view.getFloat32(start + i * stride, little) * ARC_SECOND;
+    }
     subgrids.push({
       origin: [lowerLon * ARC_SECOND, lowerLat * ARC_SECOND],
       step: [lonStep * ARC_SECOND, latStep * ARC_SECOND],

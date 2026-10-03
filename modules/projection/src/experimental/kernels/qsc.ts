@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0, modified to reuse the caller-owned point and represent area/temporary coordinates as local numbers. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -62,12 +62,12 @@ function initialize(state: State): void {
 // QSC forward equations--mapping lat,long to x,y
 // -----------------------------------------------------------------
 export function forward(state: State, p: Point): Point | null | undefined | number {
-  var xy = {x: 0, y: 0};
+  var xy = p;
   var lat, lon;
   var theta, phi;
   var t, mu;
   /* nu; */
-  var area = {value: 0};
+  var area = 0;
 
   // move lon according to projection's lon
   p.x -= state.long0;
@@ -87,35 +87,35 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
    * For the top and bottom face, we can compute theta and phi
    * directly from phi, lam. For the other faces, we must use
    * unit sphere cartesian coordinates as an intermediate step. */
-  lon = p.x; // lon = lp.lam;
+  lon = p.x; // lon = lam;
   if (state.face === FACE_ENUM.TOP) {
     phi = HALF_PI - lat;
     if (lon >= FORTPI && lon <= HALF_PI + FORTPI) {
-      area.value = AREA_ENUM.AREA_0;
+      area = AREA_ENUM.AREA_0;
       theta = lon - HALF_PI;
     } else if (lon > HALF_PI + FORTPI || lon <= -(HALF_PI + FORTPI)) {
-      area.value = AREA_ENUM.AREA_1;
+      area = AREA_ENUM.AREA_1;
       theta = lon > 0.0 ? lon - SPI : lon + SPI;
     } else if (lon > -(HALF_PI + FORTPI) && lon <= -FORTPI) {
-      area.value = AREA_ENUM.AREA_2;
+      area = AREA_ENUM.AREA_2;
       theta = lon + HALF_PI;
     } else {
-      area.value = AREA_ENUM.AREA_3;
+      area = AREA_ENUM.AREA_3;
       theta = lon;
     }
   } else if (state.face === FACE_ENUM.BOTTOM) {
     phi = HALF_PI + lat;
     if (lon >= FORTPI && lon <= HALF_PI + FORTPI) {
-      area.value = AREA_ENUM.AREA_0;
+      area = AREA_ENUM.AREA_0;
       theta = -lon + HALF_PI;
     } else if (lon < FORTPI && lon >= -FORTPI) {
-      area.value = AREA_ENUM.AREA_1;
+      area = AREA_ENUM.AREA_1;
       theta = -lon;
     } else if (lon < -FORTPI && lon >= -(HALF_PI + FORTPI)) {
-      area.value = AREA_ENUM.AREA_2;
+      area = AREA_ENUM.AREA_2;
       theta = -lon - HALF_PI;
     } else {
-      area.value = AREA_ENUM.AREA_3;
+      area = AREA_ENUM.AREA_3;
       theta = lon > 0.0 ? -lon + SPI : -lon - SPI;
     }
   } else {
@@ -140,20 +140,31 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
 
     if (state.face === FACE_ENUM.FRONT) {
       phi = Math.acos(q);
-      theta = qsc_fwd_equat_face_theta(phi, s, r, area);
+      theta = qsc_fwd_equat_face_theta(phi, s, r);
     } else if (state.face === FACE_ENUM.RIGHT) {
       phi = Math.acos(r);
-      theta = qsc_fwd_equat_face_theta(phi, s, -q, area);
+      theta = qsc_fwd_equat_face_theta(phi, s, -q);
     } else if (state.face === FACE_ENUM.BACK) {
       phi = Math.acos(-q);
-      theta = qsc_fwd_equat_face_theta(phi, s, -r, area);
+      theta = qsc_fwd_equat_face_theta(phi, s, -r);
     } else if (state.face === FACE_ENUM.LEFT) {
       phi = Math.acos(-r);
-      theta = qsc_fwd_equat_face_theta(phi, s, q, area);
+      theta = qsc_fwd_equat_face_theta(phi, s, q);
     } else {
       /* Impossible */
       phi = theta = 0;
-      area.value = AREA_ENUM.AREA_0;
+    }
+    if (Math.abs(theta) <= FORTPI) {
+      area = AREA_ENUM.AREA_0;
+    } else if (theta > FORTPI && theta <= HALF_PI + FORTPI) {
+      area = AREA_ENUM.AREA_1;
+      theta -= HALF_PI;
+    } else if (theta > HALF_PI + FORTPI || theta <= -(HALF_PI + FORTPI)) {
+      area = AREA_ENUM.AREA_2;
+      theta = theta >= 0.0 ? theta - SPI : theta + SPI;
+    } else {
+      area = AREA_ENUM.AREA_3;
+      theta += HALF_PI;
     }
   }
 
@@ -168,11 +179,11 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
   );
 
   /* Apply the result to the real area. */
-  if (area.value === AREA_ENUM.AREA_1) {
+  if (area === AREA_ENUM.AREA_1) {
     mu += HALF_PI;
-  } else if (area.value === AREA_ENUM.AREA_2) {
+  } else if (area === AREA_ENUM.AREA_2) {
     mu += SPI;
-  } else if (area.value === AREA_ENUM.AREA_3) {
+  } else if (area === AREA_ENUM.AREA_3) {
     mu += 1.5 * SPI;
   }
 
@@ -182,19 +193,18 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
   xy.x = xy.x * state.a + state.x0;
   xy.y = xy.y * state.a + state.y0;
 
-  p.x = xy.x;
-  p.y = xy.y;
   return p;
 }
 
 // QSC inverse equations--mapping x,y to lat/long
 // -----------------------------------------------------------------
 export function inverse(state: State, p: Point): Point | null | undefined | number {
-  var lp = {lam: 0, phi: 0};
+  var lam = 0,
+    latitude = 0;
   var mu, nu, cosmu, tannu;
   var tantheta, theta, cosphi, phi;
   var t;
-  var area = {value: 0};
+  var area = 0;
 
   /* de-offset */
   p.x = (p.x - state.x0) / state.a;
@@ -205,15 +215,15 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
   nu = Math.atan(Math.sqrt(p.x * p.x + p.y * p.y));
   mu = Math.atan2(p.y, p.x);
   if (p.x >= 0.0 && p.x >= Math.abs(p.y)) {
-    area.value = AREA_ENUM.AREA_0;
+    area = AREA_ENUM.AREA_0;
   } else if (p.y >= 0.0 && p.y >= Math.abs(p.x)) {
-    area.value = AREA_ENUM.AREA_1;
+    area = AREA_ENUM.AREA_1;
     mu -= HALF_PI;
   } else if (p.x < 0.0 && -p.x >= Math.abs(p.y)) {
-    area.value = AREA_ENUM.AREA_2;
+    area = AREA_ENUM.AREA_2;
     mu = mu < 0.0 ? mu + SPI : mu - SPI;
   } else {
-    area.value = AREA_ENUM.AREA_3;
+    area = AREA_ENUM.AREA_3;
     mu += HALF_PI;
   }
 
@@ -240,27 +250,27 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
    * as an intermediate step. */
   if (state.face === FACE_ENUM.TOP) {
     phi = Math.acos(cosphi);
-    lp.phi = HALF_PI - phi;
-    if (area.value === AREA_ENUM.AREA_0) {
-      lp.lam = theta + HALF_PI;
-    } else if (area.value === AREA_ENUM.AREA_1) {
-      lp.lam = theta < 0.0 ? theta + SPI : theta - SPI;
-    } else if (area.value === AREA_ENUM.AREA_2) {
-      lp.lam = theta - HALF_PI;
-    } /* area.value == AREA_ENUM.AREA_3 */ else {
-      lp.lam = theta;
+    latitude = HALF_PI - phi;
+    if (area === AREA_ENUM.AREA_0) {
+      lam = theta + HALF_PI;
+    } else if (area === AREA_ENUM.AREA_1) {
+      lam = theta < 0.0 ? theta + SPI : theta - SPI;
+    } else if (area === AREA_ENUM.AREA_2) {
+      lam = theta - HALF_PI;
+    } /* area == AREA_ENUM.AREA_3 */ else {
+      lam = theta;
     }
   } else if (state.face === FACE_ENUM.BOTTOM) {
     phi = Math.acos(cosphi);
-    lp.phi = phi - HALF_PI;
-    if (area.value === AREA_ENUM.AREA_0) {
-      lp.lam = -theta + HALF_PI;
-    } else if (area.value === AREA_ENUM.AREA_1) {
-      lp.lam = -theta;
-    } else if (area.value === AREA_ENUM.AREA_2) {
-      lp.lam = -theta - HALF_PI;
-    } /* area.value == AREA_ENUM.AREA_3 */ else {
-      lp.lam = theta < 0.0 ? -theta - SPI : -theta + SPI;
+    latitude = phi - HALF_PI;
+    if (area === AREA_ENUM.AREA_0) {
+      lam = -theta + HALF_PI;
+    } else if (area === AREA_ENUM.AREA_1) {
+      lam = -theta;
+    } else if (area === AREA_ENUM.AREA_2) {
+      lam = -theta - HALF_PI;
+    } /* area == AREA_ENUM.AREA_3 */ else {
+      lam = theta < 0.0 ? -theta - SPI : -theta + SPI;
     }
   } else {
     /* Compute phi and lam via cartesian unit sphere coordinates. */
@@ -279,14 +289,14 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
       r = Math.sqrt(1 - t);
     }
     /* Rotate q,r,s into the correct area. */
-    if (area.value === AREA_ENUM.AREA_1) {
+    if (area === AREA_ENUM.AREA_1) {
       t = r;
       r = -s;
       s = t;
-    } else if (area.value === AREA_ENUM.AREA_2) {
+    } else if (area === AREA_ENUM.AREA_2) {
       r = -r;
       s = -s;
-    } else if (area.value === AREA_ENUM.AREA_3) {
+    } else if (area === AREA_ENUM.AREA_3) {
       t = r;
       r = s;
       s = -t;
@@ -305,14 +315,14 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
       r = -t;
     }
     /* Now compute phi and lam from the unit sphere coordinates. */
-    lp.phi = Math.acos(-s) - HALF_PI;
-    lp.lam = Math.atan2(r, q);
+    latitude = Math.acos(-s) - HALF_PI;
+    lam = Math.atan2(r, q);
     if (state.face === FACE_ENUM.RIGHT) {
-      lp.lam = qsc_shift_lon_origin(lp.lam, -HALF_PI);
+      lam = qsc_shift_lon_origin(lam, -HALF_PI);
     } else if (state.face === FACE_ENUM.BACK) {
-      lp.lam = qsc_shift_lon_origin(lp.lam, -SPI);
+      lam = qsc_shift_lon_origin(lam, -SPI);
     } else if (state.face === FACE_ENUM.LEFT) {
-      lp.lam = qsc_shift_lon_origin(lp.lam, +HALF_PI);
+      lam = qsc_shift_lon_origin(lam, +HALF_PI);
     }
   }
 
@@ -321,44 +331,24 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
   if (state.es !== 0) {
     var invert_sign;
     var tanphi, xa;
-    invert_sign = lp.phi < 0 ? 1 : 0;
-    tanphi = Math.tan(lp.phi);
+    invert_sign = latitude < 0 ? 1 : 0;
+    tanphi = Math.tan(latitude);
     xa = state.b / Math.sqrt(tanphi * tanphi + state.one_minus_f_squared);
-    lp.phi = Math.atan(Math.sqrt(state.a * state.a - xa * xa) / (state.one_minus_f * xa));
+    latitude = Math.atan(Math.sqrt(state.a * state.a - xa * xa) / (state.one_minus_f * xa));
     if (invert_sign) {
-      lp.phi = -lp.phi;
+      latitude = -latitude;
     }
   }
 
-  lp.lam += state.long0;
-  p.x = lp.lam;
-  p.y = lp.phi;
+  lam += state.long0;
+  p.x = lam;
+  p.y = latitude;
   return p;
 }
 
-/* Helper function for forward projection: compute the theta angle
- * and determine the area number. */
-function qsc_fwd_equat_face_theta(phi: number, y: number, x: number, area: {value: number}) {
-  var theta;
-  if (phi < EPSLN) {
-    area.value = AREA_ENUM.AREA_0;
-    theta = 0.0;
-  } else {
-    theta = Math.atan2(y, x);
-    if (Math.abs(theta) <= FORTPI) {
-      area.value = AREA_ENUM.AREA_0;
-    } else if (theta > FORTPI && theta <= HALF_PI + FORTPI) {
-      area.value = AREA_ENUM.AREA_1;
-      theta -= HALF_PI;
-    } else if (theta > HALF_PI + FORTPI || theta <= -(HALF_PI + FORTPI)) {
-      area.value = AREA_ENUM.AREA_2;
-      theta = theta >= 0.0 ? theta - SPI : theta + SPI;
-    } else {
-      area.value = AREA_ENUM.AREA_3;
-      theta += HALF_PI;
-    }
-  }
-  return theta;
+/* Equatorial-face theta before scalar area selection in forward. */
+function qsc_fwd_equat_face_theta(phi: number, y: number, x: number): number {
+  return phi < EPSLN ? 0.0 : Math.atan2(y, x);
 }
 
 /* Helper function: shift the longitude. */

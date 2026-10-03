@@ -10,7 +10,13 @@ const TOLERANCE = 1e-12;
 type PreparedSubgrid = Subgrid & {maxShift: readonly [number, number]};
 
 type Point = {x: number; y: number};
-function interpolate(grid: Subgrid, x: number, y: number, output: Point, clamp = false): boolean {
+function interpolate(
+  grid: PreparedSubgrid,
+  x: number,
+  y: number,
+  output: Point,
+  clamp = false
+): boolean {
   let col = (x - grid.origin[0]) / grid.step[0],
     row = (y - grid.origin[1]) / grid.step[1];
   const width = grid.size[0],
@@ -33,10 +39,12 @@ function interpolate(grid: Subgrid, x: number, y: number, output: Point, clamp =
       upper = n > 1;
     const weight = (right ? u : 1 - u) * (upper ? v : 1 - v);
     if (weight === 0) continue;
-    const node = grid.shifts[(j + (upper ? 1 : 0)) * width + i + right];
-    if (!Number.isFinite(node[0]) || !Number.isFinite(node[1])) return false;
-    dx += weight * node[0];
-    dy += weight * node[1];
+    const index = ((j + (upper ? 1 : 0)) * width + i + right) * 2;
+    const xShift = grid.shifts[index],
+      yShift = grid.shifts[index + 1];
+    if (!Number.isFinite(xShift) || !Number.isFinite(yShift)) return false;
+    dx += weight * xShift;
+    dy += weight * yShift;
   }
   output.x = dx;
   output.y = dy;
@@ -90,15 +98,17 @@ export function createDatumGrid(subgrids: Subgrid[]): DatumGrid {
     const [width, height] = grid.size;
     if (
       ![width, height].every(n => Number.isSafeInteger(n) && n >= 2) ||
-      width * height !== grid.shifts.length ||
+      width * height * 2 !== grid.shifts.length ||
       !grid.origin.every(Number.isFinite) ||
       !grid.step.every(n => Number.isFinite(n) && n > 0)
     )
       throw new Error('Invalid datum subgrid geometry or node count');
     const maxShift: [number, number] = [0, 0];
-    for (const node of grid.shifts)
-      for (let i = 0; i < 2; i++)
-        if (Number.isFinite(node[i])) maxShift[i] = Math.max(maxShift[i], Math.abs(node[i]));
+    for (let index = 0; index < grid.shifts.length; index++) {
+      const value = grid.shifts[index];
+      if (Number.isFinite(value))
+        maxShift[index % 2] = Math.max(maxShift[index % 2], Math.abs(value));
+    }
     return {...grid, maxShift};
   });
   const shiftInPlace = (point: Point, inverse: boolean): boolean => {

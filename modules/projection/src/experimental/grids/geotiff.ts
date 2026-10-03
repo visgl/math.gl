@@ -62,17 +62,17 @@ export async function loadGeoTIFFGrid(tiff: DatumGridGeoTIFF): Promise<DatumGrid
     )
       throw new Error('GeoTIFF requires latitude and longitude offset bands');
     const nodata = image.getGDALNoData?.();
-    const shifts: [number, number][] = [];
+    const shifts = new Float64Array(width * height * 2);
+    let node = 0;
     for (let row = height - 1; row >= 0; row--)
       for (let col = width - 1; col >= 0; col--) {
         const index = row * width + col,
           lat = latitude[index],
           lon = longitude[index];
-        shifts.push(
-          lat === nodata || lon === nodata || !Number.isFinite(lat) || !Number.isFinite(lon)
-            ? [NaN, NaN]
-            : [(-lon * Math.PI) / 648000, (lat * Math.PI) / 648000]
-        );
+        const missing =
+          lat === nodata || lon === nodata || !Number.isFinite(lat) || !Number.isFinite(lon);
+        shifts[node++] = missing ? NaN : (-lon * Math.PI) / 648000;
+        shifts[node++] = missing ? NaN : (lat * Math.PI) / 648000;
       }
     subgrids.push({
       origin: [

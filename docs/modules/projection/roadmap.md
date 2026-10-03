@@ -421,7 +421,14 @@ separate allocation estimates without noisy speed gates. The independent static
 pipeline corpus expands to 39 configurations / 108 XYZM points.
 
 This completes the measured coefficient/constant pass, not every JavaScript optimization in 13A.
-Grid/datum-heavy and mixed-epoch chains remain profiling targets. See
+A follow-up packs horizontal grid nodes and removes per-coordinate objects/callbacks
+from AEQD, Robinson, Oblique Mercator, QSC and tilted perspective. Source-wide allocation
+auditing guards the numerical paths, and guarded scalar scratch/stack storage avoids
+repeated allocations while preserving recursive-hook isolation. Paired grid preparation
+benchmarks separate loading
+and retained memory from point throughput. Datum-heavy and mixed-epoch chains, reusable
+scalar outputs, remaining implicit allocation/boxing costs and further whole-buffer
+specializations remain profiling targets. See
 [paired pipeline benchmarks](./benchmarks.md#compare-operation-pipeline-performance).
 
 ## Remaining performance and geodetic roadmap

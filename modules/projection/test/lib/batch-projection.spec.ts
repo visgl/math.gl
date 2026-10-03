@@ -254,3 +254,62 @@ test('custom plugins retain scalar fallback or reuse a caller-owned scratch poin
     ]
   );
 });
+
+test('scalar scratch is reused, recursive hooks are isolated and failures release the lease', () => {
+  const points = new Set<ProjectionPoint>();
+  let nested = false,
+    fail = false;
+  let projection: native.ProjectionEngine;
+  const input = Object.freeze([10, 20, 100, 9]);
+  const expected = [(10 * Math.PI) / 180 + 1, (20 * Math.PI) / 180 - 1, 100, 9];
+  const plugin: ProjectionPlugin = {
+    name: 'scratch',
+    parameters: [],
+    create: () => ({
+      forward: () => {
+        throw new Error('mutable hook required');
+      },
+      inverse: () => {
+        throw new Error('mutable hook required');
+      },
+      forwardInPlace(point) {
+        points.add(point);
+        if (nested) {
+          nested = false;
+          expect(projection.project([0, 0, 200, 8])).toEqual([1, -1, 200, 8]);
+        }
+        point.x += 1;
+        point.y -= 1;
+        if (fail) throw new Error('callback failed');
+      },
+      inverseInPlace(point) {
+        point.x -= 1;
+        point.y += 1;
+      }
+    })
+  };
+  projection = new ProjectionEngine({to: '+proj=scratch', projections: [plugin]});
+  const first = projection.project(input);
+  expect(first).toEqual(expected);
+  expect(projection.project(input)).toEqual(expected);
+  expect(points.size).toBe(1);
+  nested = true;
+  expect(projection.project(input)).toEqual(expected);
+  expect(points.size).toBe(2);
+  fail = true;
+  expect(() => projection.project(input)).toThrow('callback failed');
+  fail = false;
+  expect(projection.project(input)).toEqual(expected);
+  const badInput = [0, 0];
+  Object.defineProperty(badInput, '0', {
+    get: () => {
+      throw new Error('input getter failed');
+    }
+  });
+  expect(() => projection.project(badInput)).toThrow('input getter failed');
+  expect(projection.project(input)).toEqual(expected);
+  expect(points.size).toBe(2);
+  expect(first).toEqual(expected);
+  expect(first).not.toBe(projection.project(input));
+  expect(input).toEqual([10, 20, 100, 9]);
+});

@@ -341,3 +341,102 @@ test('null fallback terminates registration lookup as well as execution', () => 
   });
   close(native.project([-1, 1]), [-1, 1]);
 });
+
+const crossTermShift = (x: number, y: number): [number, number] => [
+  2 + x / 8 + (x * y) / 32,
+  1 - y / 4 + (x * y) / 64
+];
+for (const reader of ['NTv2 BE', 'NTv2 LE', 'NTv2 compact', 'GeoTIFF v2', 'GeoTIFF v3']) {
+  test('dense horizontal cross-term field, edges and XYZM ownership: ' + reader, async () => {
+    const fixture = {size: 33, step: 0.5, shift: crossTermShift};
+    const grid = reader.startsWith('NTv2')
+      ? parseNTv2Grid(makeNTv2([fixture], reader !== 'NTv2 BE', reader !== 'NTv2 compact'), {
+          includeErrorFields: reader !== 'NTv2 compact'
+        })
+      : await loadGeoTIFFGrid(makeGeoTIFF([fixture], reader === 'GeoTIFF v3'));
+    const native = projection(grid);
+    const points = [
+      [0, 0],
+      [16, 16],
+      [0, 16],
+      [16, 0],
+      [8, 8]
+    ];
+    for (let i = 0; i < 25; i++) points.push([0.125 + i * 0.625, 15.875 - i * 0.375]);
+    for (const ArrayType of [Float64Array, Float32Array]) {
+      const input = new ArrayType(points.flatMap(([x, y], i) => [-x, y, 100 + i, 700 + i]));
+      const output = input.slice();
+      const expected: number[] = [];
+      for (let i = 0; i < input.length; i += 4) {
+        const [longitude, latitude, height, measure] = input.slice(i, i + 4);
+        const [dx, dy] = crossTermShift(-longitude, latitude);
+        expected.push(longitude - dx / 3600, latitude + dy / 3600, height, measure);
+        close(native.project([longitude, latitude, height, measure]), expected.slice(-4), 1e-10);
+      }
+      expect(native.projectFlat(output, 4)).toBe(output);
+      close(
+        Array.from(output),
+        Array.from(new ArrayType(expected)),
+        ArrayType === Float32Array ? 2e-6 : 1e-10
+      );
+      // Float32 rounding of shifted outer nodes can place the inverse outside true coverage.
+      // Keep forward edge checks; roundtrip the interiors in Float32 and all nodes in Float64.
+      const inverse = ArrayType === Float32Array ? output.slice(20) : output;
+      const original = ArrayType === Float32Array ? input.slice(20) : input;
+      expect(native.unprojectFlat(inverse, 4)).toBe(inverse);
+      close(Array.from(inverse), Array.from(original), ArrayType === Float32Array ? 2e-6 : 1e-9);
+      for (let i = 0; i < output.length; i += 4) {
+        expect(output[i + 2]).toBe(input[i + 2]);
+        expect(output[i + 3]).toBe(input[i + 3]);
+      }
+    }
+  });
+}
+
+test('rectangular GeoTIFF packed rows retain orientation, nodata and owned raster snapshot', async () => {
+  const width = 7,
+    height = 5,
+    sx = 0.5,
+    sy = 0.25;
+  const latitude = new Float64Array(width * height),
+    longitude = latitude.slice();
+  for (let row = 0; row < height; row++)
+    for (let col = 0; col < width; col++) {
+      const [dx, dy] = crossTermShift((width - 1 - col) * sx, (height - 1 - row) * sy);
+      longitude[row * width + col] = -dx;
+      latitude[row * width + col] = dy;
+    }
+  // Northwest raster node is the northeast west-positive node of the prepared grid.
+  latitude[0] = -9999;
+  const grid = await loadGeoTIFFGrid({
+    getImageCount: async () => 1,
+    getImage: async () => ({
+      getWidth: () => width,
+      getHeight: () => height,
+      getBoundingBox: () => [-3, -sy, sx, 1],
+      fileDirectory: {ModelPixelScale: [sx, sy, 0]},
+      readRasters: async () => [latitude, longitude],
+      getGDALNoData: () => -9999
+    })
+  });
+  const native = projection(grid);
+  for (const [x, y] of [
+    [0, 0],
+    [0, 1],
+    [3, 0],
+    [1.25, 0.625],
+    [2, 1]
+  ]) {
+    const [dx, dy] = crossTermShift(x, y);
+    close(native.project([-x, y]), [-x - dx / 3600, y + dy / 3600], 1e-10);
+    close(native.unproject(native.project([-x, y])), [-x, y], 1e-9);
+  }
+  const point = {x: -3 * D2R, y: D2R, z: 123};
+  expect(grid.shiftInPlace!(point, false)).toBe(false);
+  expect(point).toEqual({x: -3 * D2R, y: D2R, z: 123});
+  expect(() => native.project([-2.75, 0.875])).toThrow('covers');
+  const expected = native.project([-1.25, 0.625]);
+  longitude.fill(0);
+  latitude.fill(0);
+  close(native.project([-1.25, 0.625]), expected, 0);
+});
