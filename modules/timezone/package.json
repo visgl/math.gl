@@ -35,11 +35,16 @@
       "types": "./dist/temporal.d.ts",
       "import": "./dist/temporal.js",
       "require": "./dist/temporal.cjs"
-    }
+    },
+    "./timezone-geometry-low.json": "./data/timezone-geometry-low.json",
+    "./timezone-geometry-low.parquet": "./data/timezone-geometry-low.parquet",
+    "./timezone-geometry-hi.json": "./data/timezone-geometry-hi.json",
+    "./timezone-geometry-hi.parquet": "./data/timezone-geometry-hi.parquet"
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "data"
   ],
   "sideEffects": false,
   "dependencies": {

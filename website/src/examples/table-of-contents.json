@@ -12,5 +12,10 @@
     "type": "doc",
     "label": "Expressions (experimental)",
     "id": "expressions"
+  },
+  {
+    "type": "doc",
+    "label": "Timezone globe",
+    "id": "timezone-globe"
   }
 ]
