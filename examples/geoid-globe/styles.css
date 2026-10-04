@@ -1,0 +1,109 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+
+.geoid-globe {
+  position: relative;
+  isolation: isolate;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #07121e;
+  color: #e7f1fa;
+  font:
+    14px/1.5 system-ui,
+    sans-serif;
+}
+.geoid-globe [data-role='globe'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.geoid-globe aside {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  box-sizing: border-box;
+  width: min(300px, calc(100% - 48px));
+  padding: 20px;
+  border: 1px solid #496078;
+  border-radius: 16px;
+  background: #0d2035ed;
+}
+.geoid-globe h1 {
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 0;
+}
+.geoid-globe p {
+  color: #b8c9d9;
+}
+.geoid-globe label {
+  display: block;
+  margin-top: 12px;
+}
+.geoid-globe output {
+  display: block;
+  font-weight: bold;
+}
+.geoid-globe input,
+.geoid-globe select {
+  width: 100%;
+  accent-color: #ffd875;
+}
+.geoid-globe select {
+  padding: 8px;
+  background: #19344e;
+  color: white;
+  border: 1px solid #6c8195;
+  border-radius: 6px;
+}
+.geoid-globe .legend {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(to right, hsl(240, 65%, 55%), hsl(129, 65%, 55%), hsl(0, 65%, 55%));
+}
+.geoid-globe .legend-labels {
+  display: flex;
+  justify-content: space-between;
+}
+.geoid-globe .credits {
+  font-size: 11px;
+}
+.geoid-globe a {
+  color: #97d6ff;
+}
+@media (max-width: 600px) {
+  .geoid-globe aside {
+    top: 12px;
+    left: 12px;
+    padding: 12px;
+  }
+  .geoid-globe h1 {
+    font-size: 18px;
+  }
+  .geoid-globe aside > p:first-of-type {
+    display: none;
+  }
+}
+.geoid-globe .legend {
+  background: linear-gradient(to right, rgb(37, 99, 235), rgb(238, 242, 245), rgb(220, 38, 38));
+}
+@media (max-width: 600px) {
+  .geoid-globe aside {
+    width: 200px;
+    font-size: 11px;
+  }
+  .geoid-globe aside > p:not([data-role='status']) {
+    display: none;
+  }
+  .geoid-globe label {
+    margin-top: 6px;
+  }
+  .geoid-globe select {
+    padding: 4px;
+  }
+}

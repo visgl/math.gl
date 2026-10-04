@@ -12,16 +12,28 @@
     "deploy": "docusaurus deploy"
   },
   "dependencies": {
+    "@deck.gl/core": "~9.4.0",
+    "@deck.gl/layers": "~9.4.0",
     "@docusaurus/core": "^3.10.2",
+    "@fontsource-variable/source-sans-3": "^5.2.7",
+    "@fontsource-variable/space-grotesk": "^5.2.7",
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "@loaders.gl/core": "^4.4.3",
+    "@luma.gl/core": "~9.4.0",
+    "@luma.gl/engine": "~9.4.0",
+    "@luma.gl/shadertools": "~9.4.0",
     "@math.gl/projection": "workspace:*",
+    "@math.gl/timezone": "workspace:*",
     "@mdx-js/react": "^3.1.1",
     "@vis.gl/docusaurus-website": "2.0.0-alpha.6",
+    "prism-react-renderer": "^2.4.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
-    "proj4": "2.22.0"
+    "proj4": "2.22.0",
+    "webpack": "^5.109.2"
   },
   "browserslist": [
     ">0.2% and supports async-functions",

@@ -42,3 +42,37 @@ WEBSITE_BASE_URL=/math.gl/next/ yarn workspace project-website serve
 Without `WEBSITE_BASE_URL`, the site builds at `/math.gl/`. The next build displays
 an upcoming-release banner. Both builds include a Stable/Next menu linking to the
 published documentation. CI builds both paths.
+
+## Embedded timezone globe
+
+The examples sidebar and timezone overview both render
+`src/components/timezone-globe`. As in loaders.gl's `ClientExample` and
+`DocLiveExample` patterns, the renderer loads lazily behind `BrowserOnly`, and the
+inline documentation frame enables interaction in fullscreen so globe controls do
+not capture page scrolling. Unmounting finalizes Deck and cancels data requests.
+
+The renderer and scoped styles are shared with `examples/timezone-globe`.
+`modules/timezone/data` is a static directory; `useBaseUrl` supplies geometry URLs
+for both `/math.gl/` and `/math.gl/next/`. Low geometry loads initially, and high
+geometry is fetched when selected. The static directory also provides the data
+license and provenance manifest.
+
+## Website styling
+
+`src/styles.css` adapts loaders.gl's typography, theme colors, and documentation
+spacing. Source Sans 3, Space Grotesk, and IBM Plex Mono are self-hosted through
+Fontsource; code highlighting uses GitHub in light mode and Dracula in dark mode.
+The site defaults to dark mode and keeps the theme switch. Navbar logos are local
+assets. The inline globe frame follows loaders.gl's `DocLiveExample` styling.
+Example styles are scoped to their own containers so they do not override the
+website's typography or navigation.
+
+## Embedded geoid globe
+
+The geoid overview and examples sidebar render `src/components/geoid-globe` using
+`src/components/live-globe`, the fullscreen frame shared with the timezone globe.
+The renderer and scoped styles are shared with `examples/geoid-globe`.
+`modules/geoid/data` supplies the optional EGM96 PGM assets as static files;
+`useBaseUrl` preserves deployment prefixes. The 1° preview loads first, and the
+original 15′ grid loads when selected. Hover heights use `getHeight` with the
+selected interpolation; the colored texture uses the same fixed signed scale.

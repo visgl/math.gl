@@ -1,32 +1,58 @@
 # Overview
 
-<p class="badges">
-  <img src="https://img.shields.io/badge/From-v3.4-blue.svg?style=flat-square" alt="From-v3.4" />
-</p>
+The `@math.gl/geoid` module evaluates geoid heights from Earth gravity model grids.
 
-The `@math.gl/geoid` module provides support for irregular Earth models defined by earth gravity model files.
+import GeoidGlobe from '@site/src/components/geoid-globe';
 
-![Earth Gravitational Model 1996](./images/Earth_Gravitational_Model_1996.png)
+## Geoid globe
 
-<center>A view of the Earth's geoid, as provided by EGM96 (Earth Gravitational Model 1996). <br/>
-Attribution: From <a href="https://en.wikipedia.org/wiki/Earth_Gravitational_Model#/media/File:Earth_Gravitational_Model_1996.png">wikipedia</a>, Public Domain.</center>
+<GeoidGlobe inline />
 
-## Background
+[Open the live example](/examples/geoid-globe) to rotate the globe, inspect signed
+heights, and compare grid resolutions and interpolation methods.
 
-While spherical and ellipsoidal models of the earth can be very useful, the Earth is ultimately an irregular object, with lumps of higher density etc. This irregular model of the earth is usually referred to as a "geoid" (essentially, an irregular "ellipsoid").
+## Geoid height
 
-Earth gravity models can be used to describe this geoid. The models implemented by `@math.gl/geoid` use a superposition of spherical harmonics to approximate measured gravity.
+The geoid approximates an equipotential surface near mean sea level. Its height
+**N** relative to the WGS84 ellipsoid varies around the globe. It is not terrain
+elevation. Ellipsoidal height **h** and orthometric height **H** satisfy **h = H + N**.
+`geoid.getHeight(latitude, longitude)` returns N in meters.
 
-Calculates difference between mean see level height and WGS84 ellipsoid height
+## Optional EGM96 data
 
-## Earth Gravity Model Data Files
+| Package export                       | Grid                     | Size    |
+| ------------------------------------ | ------------------------ | ------- |
+| `@math.gl/geoid/geoid-egm96-low.pgm` | 1° preview, 360 × 181    | 130 KB  |
+| `@math.gl/geoid/geoid-egm96-hi.pgm`  | 15′ original, 1440 × 721 | 2.08 MB |
 
-Gravity Height Model data files tend to be stored in PGM format.
+Data remain separate from the JavaScript entry point. The low grid is downsampled
+for visualization; use the high grid for height conversion. The original grid's
+interpolation error estimates do not apply to the preview.
 
-- Calculates difference between mean see level height and WGS84 ellipsoid height
-- Input data have to be loaded from "Earth Gravity Model" \*.pgm file with "PGMLoader"
-- A particular model file can be loaded on https://geographiclib.sourceforge.io/html/geoid.html
+With a bundler supporting asset URL imports (such as Vite):
+
+```js
+import { parsePGM } from "@math.gl/geoid";
+import gridUrl from "@math.gl/geoid/geoid-egm96-hi.pgm?url";
+
+const response = await fetch(gridUrl);
+if (!response.ok) throw new Error(`Grid request failed: ${response.status}`);
+const geoid = parsePGM(new Uint8Array(await response.arrayBuffer()), {
+  cubic: true,
+});
+const N = geoid.getHeight(51.5, 0); // latitude, longitude; meters
+```
+
+In Node.js, resolve the asset with
+`import.meta.resolve('@math.gl/geoid/geoid-egm96-hi.pgm')` and read it using
+`readFile` from `node:fs/promises`. Other GeographicLib PGM grids can also be passed
+to `parsePGM`.
 
 ## Attribution
 
-This implementation is a JavaScript port of selected code from [GeographicLib-1.50.1](https://geographiclib.sourceforge.io/html/index.html), listed as Copyright Charles Karney charles@karney.com, under the MIT license.
+NGA EGM96 model data are public domain. The grids come from
+[GeographicLib](https://geographiclib.sourceforge.io/C++/doc/geoid.html); the package
+includes provenance, generation instructions, and checksum metadata in `data/`.
+
+The JavaScript implementation is a port of selected GeographicLib 1.50.1 code,
+copyright Charles Karney, under the MIT license.

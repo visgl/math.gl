@@ -1,0 +1,91 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+
+.timezone-globe {
+  position: relative;
+  isolation: isolate;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #07121e;
+  color: #e7f1fa;
+  font:
+    14px/1.5 system-ui,
+    sans-serif;
+}
+.timezone-globe [data-role='globe'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.timezone-globe aside {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  box-sizing: border-box;
+  width: min(300px, calc(100% - 48px));
+  padding: 20px;
+  border: 1px solid #496078;
+  border-radius: 16px;
+  background: #0d2035ed;
+}
+.timezone-globe h1 {
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 0;
+}
+.timezone-globe p {
+  color: #b8c9d9;
+}
+.timezone-globe label {
+  display: block;
+  margin-top: 12px;
+}
+.timezone-globe output {
+  display: block;
+  font-weight: bold;
+}
+.timezone-globe input,
+.timezone-globe select {
+  width: 100%;
+  accent-color: #ffd875;
+}
+.timezone-globe select {
+  padding: 8px;
+  background: #19344e;
+  color: white;
+  border: 1px solid #6c8195;
+  border-radius: 6px;
+}
+.timezone-globe .legend {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(to right, hsl(240, 65%, 55%), hsl(129, 65%, 55%), hsl(0, 65%, 55%));
+}
+.timezone-globe .legend-labels {
+  display: flex;
+  justify-content: space-between;
+}
+.timezone-globe .credits {
+  font-size: 11px;
+}
+.timezone-globe a {
+  color: #97d6ff;
+}
+@media (max-width: 600px) {
+  .timezone-globe aside {
+    top: 12px;
+    left: 12px;
+    padding: 12px;
+  }
+  .timezone-globe h1 {
+    font-size: 18px;
+  }
+  .timezone-globe aside > p:first-of-type {
+    display: none;
+  }
+}

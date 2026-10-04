@@ -36,7 +36,8 @@
     "test-headless": "ocular-test headless",
     "test-node": "ocular-test node",
     "test-coverage": "ocular-test headless --coverage",
-    "test-pre-commit": "yarn lint && ocular-test node"
+    "test-pre-commit": "yarn lint && ocular-test node",
+    "check:timezone-geometry": "python3 modules/timezone/scripts/check-geometry.py"
   },
   "devDependencies": {
     "@probe.gl/bench": "^4.1.1",
