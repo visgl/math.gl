@@ -55,7 +55,7 @@ test('planet sky agrees with independent JPL Horizons topocentric astrometric po
   }
 });
 
-test('planet sky provides finite rendering geometry, phases and explicit unavailable moon photometry', () => {
+test('planet sky provides finite rendering geometry, phases and satellite photometry', () => {
   const bodies = getPlanetSkyInfo(new Date('2024-01-01T00:00:00Z'), 37.8, -122.4);
   expect(bodies.map(row => row.name)).toEqual([
     'Mercury',
@@ -83,7 +83,10 @@ test('planet sky provides finite rendering geometry, phases and explicit unavail
     expect(body.illuminatedFraction).toBeLessThanOrEqual(1);
     expect(Math.sin(body.altitude)).toBeCloseTo(body.direction[2], 12);
     if (body.parent) {
-      expect(body.magnitude).toBeNull();
+      expect(body.magnitude).toBeGreaterThan(3);
+      expect(body.magnitude).toBeLessThan(8);
+      expect(body.sunlitFraction).toBeGreaterThanOrEqual(0);
+      expect(body.sunlitFraction).toBeLessThanOrEqual(1);
       expect(Math.hypot(...body.jupiterOffset!)).toBeGreaterThan(3e5);
       expect(Math.hypot(...body.jupiterOffset!)).toBeLessThan(2e6);
     } else {

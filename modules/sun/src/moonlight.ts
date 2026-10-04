@@ -13,6 +13,8 @@ export type MoonLightOptions = {
   distance?: number;
   /** Aerosol optical depth at 550 nm. Default 0.1. */
   aerosolOpticalDepth?: number;
+  /** Atmospheric pressure in hPa. Default 1013.25. */
+  pressure?: number;
   /** Averaged cloud coverage in [0, 1]. Default 0. */
   cloudCover?: number;
   /** Vertical cloud optical depth, nonnegative. Default 10. */
@@ -32,6 +34,7 @@ export function getMoonLight(altitude: number, options: MoonLightOptions = {}): 
     phaseAngle = 0,
     distance = 384400,
     aerosolOpticalDepth = 0.1,
+    pressure = 1013.25,
     cloudCover = 0,
     cloudOpticalDepth = 10
   } = options;
@@ -39,6 +42,7 @@ export function getMoonLight(altitude: number, options: MoonLightOptions = {}): 
   validateRange('Phase angle', phaseAngle, 0, Math.PI);
   validateRange('Moon distance', distance, 1737.4, Number.MAX_VALUE);
   validateRange('Aerosol optical depth', aerosolOpticalDepth, 0, Number.MAX_VALUE);
+  validateRange('Pressure', pressure, 0, 1100);
   validateRange('Cloud cover', cloudCover, 0, 1);
   validateRange('Cloud optical depth', cloudOpticalDepth, 0, Number.MAX_VALUE);
   const radius = Math.asin(1737.4 / distance);
@@ -69,7 +73,7 @@ export function getMoonLight(altitude: number, options: MoonLightOptions = {}): 
       scale *
       Math.exp(
         -airMass *
-          (0.008735 * Math.pow(wavelength, -4.08) +
+          ((0.008735 * Math.pow(wavelength, -4.08) * pressure) / 1013.25 +
             aerosolOpticalDepth * Math.pow(wavelength / 0.55, -1.3))
       )
   );

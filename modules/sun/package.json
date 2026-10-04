@@ -32,6 +32,11 @@
       "types": "./dist/planets.d.ts",
       "import": "./dist/planets.js",
       "require": "./dist/planets.cjs"
+    },
+    "./astronomy": {
+      "types": "./dist/astronomy.d.ts",
+      "import": "./dist/astronomy.js",
+      "require": "./dist/astronomy.cjs"
     }
   },
   "files": [

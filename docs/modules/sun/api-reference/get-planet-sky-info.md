@@ -52,12 +52,14 @@ Earth, the Sun, Earth's Moon, dwarf planets and other satellites are not include
 | `angularDiameter` | Full disk diameter in radians; uses a spherical mean radius. |
 | `phaseAngle`, `illuminatedFraction` | Sun/body/observer angle in radians and sunlit fraction of the disk; angle 0 is full phase. |
 | `sunDirection` | Body-to-Sun unit vector in the observer's local ENU axes, for shading. |
-| `magnitude` | Planet visual magnitude from Astronomy Engine's empirical photometry, before atmospheric extinction; `null` for moons. |
+| `magnitude` | Planet visual magnitude from Astronomy Engine's empirical photometry, before atmospheric extinction; Lambert approximation for moons. |
 | `visibility` | Current approximate naked-eye detectability, limiting/extincted magnitudes and rendering fade; `null` for moons. |
 | `jupiterOffset` | Apparent moon-center offset from Jupiter in ENU kilometers; `null` for planets. |
 | `occultation` | `'none'`, `'partial'` or `'total'` obscuration of a moon by Jupiter's spherical disk. |
 | `transiting` | Moon overlaps Jupiter's projected disk on its near side. |
-| `inJupiterShadow` | Moon center lies in Jupiter's approximate conical umbra. |
+| `inJupiterShadow` | Moon center sees a completely obscured solar disk. |
+| `sunlitFraction`, `visibleDiskFraction` | Unblocked Sun and unocculted satellite disk fractions. |
+| `apparentMagnitude` | Satellite magnitude including eclipse/occultation; null at zero flux. |
 
 Sky directions point **towards** each body. Existing `getSunDirection` and
 `getMoonDirection` describe incoming light and point the other way. At the zenith,
@@ -68,9 +70,8 @@ the star-field's mean-frame approximation omits the nutation included here.
 
 For unresolved planets, visual magnitude provides relative point-source brightness:
 `10 ** (-0.4 * magnitude)`, on an arbitrary magnitude-zero scale. This is not solar
-or lunar light intensity. Use exposure and tone mapping in the renderer. Magnitudes
-for the moons are deliberately unavailable; their reflectance and eclipse photometry
-are not modeled by this adapter. No RGB colors or surface textures are supplied.
+or lunar light intensity. Use exposure and tone mapping in the renderer. Moon magnitudes now use an approximate Lambert phase law and NASA geometric
+albedos, with eclipse and occultation attenuation reported separately. No RGB colors or surface textures are supplied.
 
 ## When planets become visible
 
@@ -116,8 +117,9 @@ sensitivity; its model and charts are not implemented or copied here. Sky bright
 varies with direction, and haze, clouds, lunar glare, dark adaptation and eyesight
 are not modeled. Sun separation is a simple cutoff, rather than a glare model.
 Daylight detection is conservatively disabled even though Venus can sometimes be
-seen during the day. Galilean moon visibility remains `null` because their magnitudes,
-Jupiter's glare and viewing optics are not modeled. Neptune normally has no naked-eye
+seen during the day. Select the optional [contrast model](./sky.md) for directional
+sky brightness, clouds, haze and daylight detection. Galilean moon visibility remains
+`null` because Jupiter's glare and viewing optics are not modeled. Neptune normally has no naked-eye
 visibility interval with the default dark-sky limit; telescope detection is not modeled.
 
 ### Rise/set and visibility windows
@@ -182,8 +184,9 @@ throughout the range. Reference tests compare independent JPL Horizons astrometr
 positions and relative satellite offsets.
 
 Jupiter is treated as a sphere with its mean radius for occultations, transits and
-umbra geometry. `inJupiterShadow` tests the **moon center**; it does not calculate
-partial eclipse brightness, penumbra, limb overlap or shadows on Jupiter's surface.
+eclipse geometry. `sunlitFraction` includes partial solar-disk eclipse at the **moon
+center**, and `visibleDiskFraction` includes limb overlap. Resolved surface penumbrae
+and shadows on Jupiter's surface are not calculated.
 No mutual moon eclipses or occultations are evaluated. A transit is not an occultation:
 render the moon in front of Jupiter. Use angular size and depth to handle partial disk
 coverage. Saturn's rings, oblateness, rotational surface orientation and texture
