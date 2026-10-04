@@ -9,6 +9,27 @@ import ts from 'typescript';
 const root = new URL('../../../', import.meta.url);
 const scopes = new Map([
   [
+    'modules/projection/src/bulk.ts',
+    new Set([
+      'isBuffer',
+      'shared',
+      'overlap',
+      'capacity',
+      'projectFlatTo',
+      'unprojectFlatTo',
+      'projectColumnsTo',
+      'unprojectColumnsTo',
+      'range',
+      'epochStorage',
+      'aliases',
+      'epochAlias',
+      'transform',
+      'floatRange',
+      'flat',
+      'columns'
+    ])
+  ],
+  [
     'modules/geospatial/src/ellipsoid.ts',
     new Set(['cartesianToCartographic', 'cartographicToCartesian'])
   ],

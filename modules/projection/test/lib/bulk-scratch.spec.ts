@@ -99,6 +99,12 @@ for (const kind of ['engine', 'pipeline']) {
       }
     }
     const afterRecursion = points.size;
+    expect(afterRecursion).toBe(2);
+    for (let i = 0; i < 5; i++) {
+      recurse = 'scalar';
+      operation.project(input);
+    }
+    expect(points.size).toBe(afterRecursion);
     fail = true;
     const failing = new Float64Array(input),
       before = failing.slice();

@@ -89,6 +89,7 @@ try {
     assert.equal(stable.mercator, api.mercator);
     const subpaths = ${JSON.stringify(subpaths)};
     const optionalEntries = {
+      './bulk': ['ProjectionBuffer'],
       './operations': ['OperationCatalog'],
       './analysis': ['ProjectionAnalysis', 'createProjectionJacobian', 'createProjectionFactors'],
       './deformation': ['createDeformationModel'],
@@ -169,6 +170,17 @@ try {
     assert(!('TypeScriptProjection' in core));
     assert(!('checkTypeScriptCRSCompatibility' in core));
     assert.deepEqual(new core.ProjectionEngine({}).project([12, 55, 123, 8]), [12, 55, 123, 8]);
+    const {ProjectionBuffer} = await load('@math.gl/projection/bulk');
+    const bufferProjection = new core.ProjectionEngine({to:'EPSG:3857',projections:[api.mercator]});
+    const bufferInput = new Float64Array([3,40,12,7,4,50,20,9]);
+    const bufferOutput = new Float32Array(8);
+    const buffers = new ProjectionBuffer({projection:bufferProjection,dimension:4});
+    assert.equal(buffers.projectFlatTo(bufferInput,bufferOutput),bufferOutput);
+    assert.deepEqual([...bufferOutput], [...new Float32Array(bufferProjection.project(bufferInput.slice(0,4))),...new Float32Array(bufferProjection.project(bufferInput.slice(4)))]);
+    const bufferColumns = [new Float64Array([3,4]),new Float64Array([40,50]),new Float64Array([12,20]),new Float64Array([7,9])];
+    const bufferColumnOutput = bufferColumns.map(()=>new Float32Array(2));
+    assert.equal(buffers.projectColumnsTo(bufferColumns,bufferColumnOutput),bufferColumnOutput);
+    for(let i=0;i<4;i++) for(let j=0;j<2;j++) assert.equal(bufferColumnOutput[i][j],bufferOutput[j*4+i]);
     const {ProjectionAnalysis, createProjectionFactors, createProjectionJacobian} = await load('@math.gl/projection/analysis');
     const inspected = new ProjectionAnalysis({projection: api.mercator, context: {semiMajorAxis:10,eccentricitySquared:0,parameters:{}}, domain:{west:-1,east:1,south:-1,north:1}});
     const factors = createProjectionFactors(), jacobian = createProjectionJacobian();
@@ -448,6 +460,13 @@ try {
     const automatic = new LazyProjection(lazyOptions);
     const automaticResult: Promise<number[]> = automatic.project([3, 0]);
     const automaticFlat: Promise<Float32Array> = automatic.projectFlat(new Float32Array([3, 0]));
+    import {ProjectionBuffer, type BulkProjection, type ProjectionBufferOptions} from '@math.gl/projection/bulk';
+    const bufferTransform: BulkProjection = automatic;
+    const bufferOptions: ProjectionBufferOptions = {projection:bufferTransform,dimension:4,inputStride:6,outputStride:7};
+    const bufferProjection = new ProjectionBuffer(bufferOptions);
+    const separateResult:Float32Array = bufferProjection.projectFlatTo(new Float64Array(6),new Float32Array(7),1,0,new Float64Array([2020]));
+    const columnOutputs = [new Float32Array(1),new Float64Array(1),new Float64Array(1),new Float64Array(1)] as const;
+    const columnResult:typeof columnOutputs = bufferProjection.unprojectColumnsTo(columnOutputs,columnOutputs,1,0,2020);
     import {ProjectionAnalysis, createProjectionFactors, createProjectionJacobian, type ProjectionAnalysisOptions, type ProjectionDomain, type ProjectionFactors, type ProjectionJacobian} from '@math.gl/projection/analysis';
     const analysisDomain: ProjectionDomain = {west:-1,east:1,south:-1,north:1};
     const analysisOptions: ProjectionAnalysisOptions = {projection:mercator,context:{semiMajorAxis:10,eccentricitySquared:0,parameters:{}},domain:analysisDomain};

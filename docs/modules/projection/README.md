@@ -33,6 +33,7 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 | [Projection engine](./projection-engine.md) | Select plugins, load algorithms on demand, transform typed arrays and control bundle size |
 | [Coordinate systems](./coordinate-systems.md) | Distinguish projection, ellipsoid, datum, height and coordinate epoch |
 | [Projection catalogue](./projections.md) | Choose an algorithm and understand its useful domain |
+| [Reusable coordinate buffers](./bulk-layouts.md) | Transform separate, strided and column buffers with reusable scratch and explicit ownership |
 | [Operation pipelines](./operation-pipelines.md) | Order units, axes, projections, datum shifts and time-dependent operations explicitly |
 | [Operation selection](./operation-selection.md) | Select application-reviewed operations by area, epoch, accuracy and prepared grids |
 | [Deformation models](./deformation-models.md) | Propagate coordinates between epochs with prepared velocity grids |

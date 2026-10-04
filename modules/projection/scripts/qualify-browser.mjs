@@ -109,3 +109,5 @@ export function qualifyFactors() {
   }
   return {points, oracle: 'PROJ 9.5.1'};
 }
+
+export {qualifyBulkLayouts} from '../test/bulk-workload';
