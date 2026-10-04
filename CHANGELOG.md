@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- perf(projection): Transform single-stage kinematic Helmert coordinate buffers
+  directly with numeric locals. Prepare constant batch epochs once, preserve mixed
+  observation epochs and scalar arithmetic, and qualify ownership/failure behavior
+  with independent benchmarks, allocation checks and packed consumers.
+
 - perf(projection): Execute single-stage static Helmert batches directly on
   coordinate buffers, preserving scalar arithmetic, precision, epochs and failure
   commits. Qualify both rotation conventions and inverse steps with expanded

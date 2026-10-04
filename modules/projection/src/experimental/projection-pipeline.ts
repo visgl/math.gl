@@ -863,7 +863,11 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
           );
           return pair(
             (p, _stack, epoch) => operation.forward(p, epoch),
-            (p, _stack, epoch) => operation.inverse(p, epoch)
+            (p, _stack, epoch) => operation.inverse(p, epoch),
+            undefined,
+            undefined,
+            operation.forwardFlat,
+            operation.inverseFlat
           );
         }
         if (step.referenceEpoch !== undefined)

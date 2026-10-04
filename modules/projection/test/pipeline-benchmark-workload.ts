@@ -51,6 +51,22 @@ export const PIPELINE_SCENARIOS: readonly PipelineBenchmarkScenario[] = [
   {id: 'Height stack and datum', fixture: 'height-stack-around-datum'},
   {id: 'Batch epoch Helmert', fixture: 'exact-position_vector', epoch: 'batch'},
   {id: 'Mixed epoch Helmert', fixture: 'exact-position_vector', epoch: 'mixed'},
+  {id: 'Batch epoch approximate Helmert', fixture: 'approximate-position_vector', epoch: 'batch'},
+  {
+    id: 'Mixed epoch coordinate-frame Helmert',
+    fixture: 'approximate-coordinate_frame',
+    epoch: 'mixed'
+  },
+  {
+    id: 'Batch epoch exact coordinate-frame Helmert',
+    fixture: 'exact-coordinate_frame',
+    epoch: 'batch'
+  },
+  {
+    id: 'Mixed epoch inverse exact Helmert',
+    fixture: 'exact-coordinate_frame-inverse-step',
+    epoch: 'mixed'
+  },
   {
     id: 'Mixed epochs with height stack and UTM',
     fixture: 'geographic-height-stack-to-utm',

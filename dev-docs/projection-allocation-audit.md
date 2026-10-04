@@ -1,7 +1,7 @@
 # Projection allocation audit
 
 The October 2026 audit reads every TypeScript runtime source in `modules/projection/src`
-(222 files), then reviews coordinate dispatch, all named algorithms and their numerical
+(223 files), then reviews coordinate dispatch, all named algorithms and their numerical
 helpers, grid readers/samplers, datum/height/epoch operations and lazy loading. Allocation
 reduction is valuable even when throughput differences are within measurement noise:
 small objects increase allocation traffic and the work required of the garbage collector.
@@ -17,6 +17,7 @@ small objects increase allocation traffic and the work required of the garbage c
 | QSC | Coordinate result and boxed area objects in each direction | Caller-owned point plus local numeric coordinates and area; all six face equations retained |
 | Tilted perspective | One temporary inverse coordinate object | Two local numbers, preserving the original branch/equation order |
 | Static Helmert bulk direction | Mutable point fields per record in general dispatch | Numeric locals for a single active static stage; no point writes or coordinate objects in the loop |
+| Kinematic Helmert bulk direction | Mutable point fields and per-record matrix reads in general dispatch | Numeric locals for a single active rate stage; constant epochs prepare once, mixed epochs share owned scalar coefficients; no coordinate objects in the loop |
 | Scalar/bulk engine/plugin/pipeline dispatch | A working point on each call; a typed stack on each pipeline call that uses stacks | One owned point per instance/adapter, shared between scalar and general bulk calls, plus a lazily cached pipeline stack; nested hooks use independent fallback storage |
 
 Mutable built-in projection hooks now have no explicit successful per-coordinate
@@ -65,7 +66,7 @@ The TypeScript AST inventory records every object/array/regexp literal, `new`, c
 and common allocating method, with file/line and enclosing scopes. The CI check rejects
 explicit allocations in numerical kernels/helpers, mutable equation callbacks, selected
 coordinate dispatch/samplers, reusable-output validation/commit helpers and bulk record loops, including the numeric
-unit/axis and direct static Helmert runners. Reviewed setup exceptions cover
+unit/axis and direct static/kinematic Helmert runners. Reviewed setup exceptions cover
 coefficient builders, Oblique Mercator type selection and Robinson's module-level table
 rounding. The guard is intentionally a source regression check, not a complete static
 call graph or an allocation profiler. Review inventory entries outside its checked scopes

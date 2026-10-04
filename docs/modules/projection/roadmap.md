@@ -486,7 +486,8 @@ Float32/Float64 buffers using numeric locals. It covers translation/scale, small
 and exact rotations, both conventions and inverse-oriented steps. Exact batches reuse
 the scalar stage's prepared matrix. Per-step equation order, finite/Float32 validation,
 explicit epochs, Z/M/tails and partial-failure commits remain unchanged. Mixed chains,
-grids, stacks and kinematic rates continue through general execution.
+grids and stacks continue through general execution. The kinematic follow-up below
+extends this single-stage optimization to rates.
 
 Independent PROJ anchors and seeded exact scalar/general-dispatch comparisons qualify
 the implementation. Tests cover XYZ/XYZM/six-component views, both directions/conventions,
@@ -505,13 +506,36 @@ Only exceeded optional pipeline/all-root allowances increase with reviewed round
 See the [benchmark evidence](./benchmarks.md#static-helmert-coordinate-buffers) for the
 measured scope; this does not establish a general throughput or state-of-the-art claim.
 
+## Tranche 13A — Kinematic Helmert coordinate buffers: implemented follow-up
+
+Single-active-stage directions with Helmert rates now execute directly over
+Float32/Float64 buffers. Constant batch epochs prepare once; typed per-record
+epochs share the scalar epoch preparation and cache. Both conventions, exact and
+small-angle rotations and inverse-oriented steps retain scalar arithmetic,
+Z/M/tails, epoch validation, empty-buffer behavior and partial failure commits.
+
+Independent anchors and seeded bit-for-bit scalar/general-dispatch tests qualify
+all variants. Source allocation checks guard the new loop; packed ESM/CommonJS
+consumers exercise both epoch modes. The shared benchmark matrix now covers 26
+scenarios / 208 rows, adding approximate, coordinate-frame and inverse rate cases.
+The [paired diagnostic](./benchmarks.md#kinematic-helmert-coordinate-buffers)
+records CPU timing, spread warnings, allocation sampling and optional bundle cost.
+A longer-sample Apple M2 / Node confirmation observes 2.86×/1.26× median flat ratios
+for constant/mixed epochs, with remaining spread/aggregate-limit warnings. Optional
+pipeline/root bundles add 342/353 gzip bytes; selective and lazy imports stay unchanged.
+No new public API, models or third-party data are included.
+
+This completes a targeted single-stage rate optimization. Mixed-stage chains,
+grid/datum-heavy workloads, further allocation/boxing investigation and optional
+acceleration remain subject to separate correctness and performance qualification.
+
 ## Remaining performance and geodetic roadmap
 
 | Tranche | Work | Acceptance gate |
 | --- | --- | --- |
 | 12C2 — Broader deformation qualification | Independently qualify application-provided real models and evaluate nonlinear/time-varying components | Reviewed data terms without distributing third-party models; explicit time/coverage/accuracy bounds |
 | 12E2 — Broader operation qualification | Independently qualify application-provided operation catalogues and irregular coverage/accuracy policies | Reviewed metadata/data terms, conservative coverage and comparable accuracy definitions; no bundled third-party database or implicit downloads |
-| 13A — Further JavaScript performance | Profile grid/datum-heavy and mixed-epoch pipelines; evaluate mixed-stage whole-buffer specializations and remaining runtime allocation/boxing | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
+| 13A — Further JavaScript performance | Profile grid/datum-heavy and mixed-stage epoch pipelines; evaluate mixed-stage whole-buffer specializations and remaining runtime allocation/boxing | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
 | 13B–13D — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
 
 Further optimization and operation support require separate measurements and accuracy
