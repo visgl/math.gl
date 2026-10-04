@@ -195,7 +195,8 @@
         "items": [
           "modules/sun/README",
           "modules/sun/api-reference/get-sun",
-          "modules/sun/api-reference/get-sun-direction"
+          "modules/sun/api-reference/get-sun-direction",
+          "modules/sun/api-reference/get-sun-light"
         ]
       },
       {

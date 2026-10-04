@@ -1,6 +1,8 @@
+<!-- SPDX-License-Identifier: MIT -->
+
 # Overview
 
-`@math.gl/sun` is a tiny JavaScript library for calculating sun position for the given location and time.
+`@math.gl/sun` is a tiny JavaScript library for calculating sun position for the given location and time, and estimating direct sunlight color and intensity.
 
 ## Installation
 
@@ -17,6 +19,12 @@ const longitude = -122.4194;
 const sunDir = getSunDirection(Date.now(), latitude, longitude);
 ```
 
+## Sunlight
+
+Use [getSunLight](./api-reference/get-sun-light.md) with the altitude returned by `getSunPosition` to estimate normalized linear RGB and relative direct-light intensity. The Hošek–Wilkie model supplies sun and diffuse sky illumination with configurable turbidity. A separate cloud approximation redistributes direct sunlight into diffuse lighting.
+
 ## Attribution
 
-This module is a fork of @mourner's [SunCalc](https://github.com/mourner/suncalc) under BSD 2-clause license.
+Sunlight lookup data is derived from the [Hošek–Wilkie 1.4a reference implementation](https://cgg.mff.cuni.cz/projects/SkylightModelling/) under BSD-3-Clause. The full notice is shipped in `LICENSE-HOSEK-WILKIE`; see the [API documentation](./api-reference/get-sun-light.md) for model provenance and limits.
+
+The solar position calculation is a fork of @mourner's [SunCalc](https://github.com/mourner/suncalc) under BSD 2-clause license.
