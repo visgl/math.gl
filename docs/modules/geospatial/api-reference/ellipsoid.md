@@ -174,7 +174,11 @@ or unrepresentable inputs, or when its bounded inverse cannot converge; an exist
 result is left unchanged. Sphere/oblate surface and exterior conversions use the
 shared [spheroid helpers](../../core/api-reference/spheroid.md). Three-radius and
 interior surface inversion retain the 64-update bound. The center-neighborhood
-radial fallback remains an approximation for deep interior positions.
+radial fallback remains an approximation for deep interior positions. A defined
+interior result does not guarantee the nearest-normal representation, including
+some inputs whose nearest solution is unique. See
+[ellipsoid accuracy and interior boundaries](../../projection/ellipsoid-qualification.md)
+for independent references and the distinction between accuracy and fallback checks.
 
 - `cartesian` The Cartesian position to convert to cartographic representation.
 - `result` Optional object onto which to store the result.

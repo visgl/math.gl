@@ -183,6 +183,7 @@
         "items": [
           "modules/projection/README",
           "modules/projection/coordinate-systems",
+          "modules/projection/ellipsoid-qualification",
           "modules/projection/projections",
           "modules/projection/projection-engine",
           "modules/projection/operation-pipelines",

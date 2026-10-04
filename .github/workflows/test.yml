@@ -51,6 +51,11 @@ jobs:
       - name: Check source license and copyright headers
         run: yarn check:source-headers
 
+      - name: Check independent interior references and qualification
+        run: |
+          python3 modules/projection/scripts/generate-interior-reference.py --check
+          node modules/projection/scripts/qualify-interiors.mjs --output /tmp/interior-qualification.json
+
       - name: Check generated CRS declarations
         run: yarn check:projjson-types
 
@@ -210,6 +215,10 @@ jobs:
       - name: Install selected Playwright browser
         run: yarn playwright install --with-deps ${{ matrix.browser }}
 
+      - name: Qualify independent interior references
+        timeout-minutes: 2
+        run: node modules/projection/scripts/qualify-interiors.mjs --browser ${{ matrix.browser }} --output /tmp/interior-qualification-${{ matrix.browser }}.json
+
       # PRs validate the entire coordinate/workload matrix without repeatedly
       # expanding buffers for timing precision. Master retains full measurements.
       - name: Check browser projection correctness and performance
@@ -223,7 +232,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: projection-browser-qualification-${{ matrix.browser }}
-          path: /tmp/projection-browser-qualification.json
+          path: |
+            /tmp/projection-browser-qualification.json
+            /tmp/interior-qualification-${{ matrix.browser }}.json
           if-no-files-found: error
 
   projection-performance:

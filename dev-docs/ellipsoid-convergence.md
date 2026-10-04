@@ -117,8 +117,29 @@ The existing proj4js equations retain their SPDX attribution and full packaged M
 notice in core; no Cesium code is moved/relicensed and no new upstream code/data
 is introduced. Kernel sharing is scoped consolidation, not a general speed claim.
 
-Further sharing requires independently reviewed behavior for broader interior
-ambiguities, unusual axes/flattening and any proposed local-frame contracts.
+## Broader interior qualification: implemented
+
+An original Decimal oracle now computes nearest-footpoint references from exact
+stored binary64 inputs. The corpus includes 198 inputs across two scales, four
+interior offsets, both hemispheres, near-pole/equator normals, oblate/prolate/
+triaxial shapes and six probes around the oblate equatorial cusp. References
+certify the nearest footpoint with a positive-definite multiplier interval and
+a surface residual below 1e-60, independently of production conversion code.
+
+144 path checks enforce sampled angular/height accuracy; 322 additional probes
+record errors/rejections and check only finiteness and failure ownership. The
+geospatial radial approximation and alternative normal branches remain explicit
+limitations, including some unique nearest solutions. Analytic tests cover
+multiple normal representations, extreme finite radii, squared-ratio underflow,
+aliased failure, flat views/M and recovery. No production solver is replaced and
+no per-coordinate allocation is added. CI verifies reference reproducibility and
+qualified rows without promoting diagnostic matches to support.
+
+See [the public qualification page](../docs/modules/projection/ellipsoid-qualification.md)
+for allowances, recorded outcomes and reproduction commands. Further inverse
+sharing requires a branch-selection contract and a safeguarded interior solver,
+with independent qualification before replacing retained fallbacks. Local-frame
+contracts remain a separate scope.
 
 Optional local-frame convergence and celestial frame/time-scale work are later
 scopes. No third-party model data, new projection kernels or acceleration backend
