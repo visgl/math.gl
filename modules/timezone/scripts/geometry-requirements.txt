@@ -1,2 +1,2 @@
 shapely==2.1.2
-pyarrow==21.0.0
+pyarrow==23.0.1
