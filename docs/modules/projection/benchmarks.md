@@ -740,3 +740,65 @@ wrapper and all-root profiles, with 6–16 gzip bytes. Pipeline-only, core, sele
 projection, catalogue and deformation profiles are unchanged. Existing static and
 lazy bundle allowances remain unchanged. The private working point is retained once
 per prepared grid; owned result arrays and runtime numeric boxing remain.
+
+
+### Spheroid numerical boundaries
+
+The retained measurement snapshot precedes the later master merge; its source
+fingerprint identifies the measured candidate. The numerical kernels are unchanged
+by that merge. Final bundle checks include the landed grid scratch adapter.
+
+The ellipsoid convergence follow-up improves near-pole latitude and bounds surface
+inversion, while preserving separate projection/geospatial contracts. The paired
+[spheroid report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/spheroid-boundaries-node.json)
+compares master `7bc0ba63` with candidate `c52156b4` on Apple M2 / Node 24.14.0: 5,000
+points, seven samples, a 4 ms thread-CPU aggregate, Float64 XYZM, both directions
+and regional/near-pole inputs for WGS84, a sphere and a 2:1 flattened spheroid.
+
+Every coordinate is checked against an authored unit-normal support-point
+construction before timing. Projection flat and reusable scalar outputs are
+compared alongside geospatial reusable scalar outputs. The baseline geospatial
+near-pole latitude keeps its recorded 1e-6° allowance; the candidate and projection
+use 1e-9°. Cartesian/height allowance is 10 μm. This is a bounded test profile,
+not a global inverse error bound. At ±89.999999° the baseline geospatial latitude
+error is about 2.1e-7° on WGS84/sphere and 4.8e-7° on the flattened case; the
+candidate has zero sampled latitude difference from these anchors.
+
+All twelve timing rows flag spread and one hits the aggregate limit. Some inverse
+ratios regress, so these measurements do not establish a speedup. The accuracy
+and bounded-execution changes are retained for correctness. Setup, loading and
+input generation are excluded; kernel consolidation still needs setup and wider
+domain measurements.
+
+Separate heap sampling follows **all** timing, including collected allocations.
+For geospatial reusable-output inverses, sampled bytes per point are:
+
+| Shape / region | Baseline → candidate |
+| --- | ---: |
+| WGS84 regional | 126.7 → 90.0 |
+| WGS84 near poles | 124.4 → 89.5 |
+| Sphere regional | 121.1 → 92.5 |
+| Sphere near poles | 129.7 → 89.7 |
+| Flattened regional | 128.2 → 92.1 |
+| Flattened near poles | 124.9 → 94.3 |
+
+These samples include runtime boxing and profiler effects; they are not exact
+object sizes or a zero-GC proof. Two explicit inverse arrays are removed, and a
+source guard covers the five modified numeric functions. Owned default results
+and failure errors are allowed. Caller-provided outputs, aliased buffers, preserved
+M, unsupported-input recovery and recursive setters have Node/Chromium coverage.
+
+```sh
+node modules/projection/scripts/benchmark-spheroid-compare.mjs \
+  --baseline-ref 7bc0ba63 --points 5000 --samples 7 --min-sample-ms 4 \
+  --clock thread-cpu --allocations --output /tmp/spheroid-comparison.json
+node modules/projection/scripts/check-spheroid-allocations.mjs
+```
+
+The analytic spherical inverse adds 148 minified bytes to retained projection
+profiles. Core/pipeline/all-root measure 49,411/61,378/181,066 minified and
+17,871/21,964/61,391 gzip bytes. Only exceeded core/UTM/WKT/PROJJSON minified and
+WKT/rotated lazy initial allowances increase; gzip/deferred allowances stay intact.
+Projection still has no production dependency on the geospatial class. Existing
+CesiumJS/proj4js SPDX attribution remains attached, and no external model data or
+conversion code is added.

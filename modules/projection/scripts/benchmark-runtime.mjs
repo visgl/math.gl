@@ -85,8 +85,13 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
           if (!baselineCommit) return;
           builder.onResolve({filter: /^\.\.?\//, namespace: 'historical'}, args => {
             const base = resolve(dirname(args.importer), args.path);
-            for (const suffix of ['', '.ts', '.json', '/index.ts']) {
-              const path = base + suffix;
+            for (const path of [
+              base,
+              base.replace(/\.js$/, '.ts'),
+              base + '.ts',
+              base + '.json',
+              base + '/index.ts'
+            ]) {
               try {
                 git(historicalPath(relative(root, path)));
                 return sourceResult(path);
@@ -103,8 +108,12 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
           builder.onResolve({filter: /^\.\.?\//, namespace: 'file'}, args => {
             const base = resolve(args.resolveDir, args.path);
             if (!/\/modules\/.*\/src\//.test(base)) return;
-            for (const suffix of ['', '.ts', '/index.ts']) {
-              const path = base + suffix;
+            for (const path of [
+              base,
+              base.replace(/\.js$/, '.ts'),
+              base + '.ts',
+              base + '/index.ts'
+            ]) {
               try {
                 git(historicalPath(relative(root, path)));
                 return sourceResult(path);
@@ -114,10 +123,10 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
             }
             throw new Error('Cannot resolve historical source: ' + args.path);
           });
-          builder.onLoad({filter: /\.(ts|json)$/, namespace: 'historical'}, args => ({
+          builder.onLoad({filter: /\.(ts|js|json)$/, namespace: 'historical'}, args => ({
             contents: git(historicalPath(relative(root, args.path))),
             resolveDir: dirname(args.path),
-            loader: args.path.endsWith('.json') ? 'json' : 'ts'
+            loader: args.path.endsWith('.json') ? 'json' : args.path.endsWith('.js') ? 'js' : 'ts'
           }));
         }
       }

@@ -1,0 +1,2628 @@
+{
+  "schemaVersion": 1,
+  "metadata": {
+    "baselineCommit": "7bc0ba631c5bd498cfd6c305eeeea9dbcbddee95",
+    "candidateSourceSHA256": "3a9c4184410b8b22d7801c10c9cd6f61a6825ef6a2ab8b0eb390fb271eac36fa",
+    "workloadSHA256": "0ff6459ccb77bca9df468db63141e571933c19ca4827d867c4a84204d86cb91c",
+    "date": "2026-10-04T02:39:39.404Z",
+    "node": "v24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "cpu": "Apple M2",
+    "platform": "darwin",
+    "arch": "arm64",
+    "clock": "thread-cpu",
+    "points": 5000,
+    "samples": 7,
+    "minSampleMs": 4,
+    "allocations": true
+  },
+  "methodology": "Identical current workload and source bundler for historical/candidate runtime sources. Independently authored unit-normal support points qualify every coordinate before timing; baseline geospatial near-pole latitude uses its explicitly recorded 1e-6 degree allowance, candidate and projection use 1e-9 degrees, Cartesian/height use 1e-5 metres. Float64 XYZM; regional/near-pole, both directions, WGS84/sphere/flattened spheroid. Instances and reused scalar input/output arrays are prepared outside timing. Adaptive aggregates, rotated execution order and reset copies outside timing; retained raw samples and spread/aggregate flags. Setup/loading, input generation and validation are excluded. Separate heap samples after ALL timing include collected allocations; zero is not an allocation proof. Thread CPU is diagnostic rather than elapsed throughput. No universal accuracy or speed claim.",
+  "rows": [
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "forward",
+      "measurements": [
+        {
+          "milliseconds": 0.9698750000000018,
+          "p10": 0.9241500000000002,
+          "p90": 1.0096999999999965,
+          "aggregateMilliseconds": 15.518000000000029,
+          "samples": [
+            15.518000000000029,
+            16.78099999999995,
+            15.557999999999993,
+            15.737999999999943,
+            15.039999999999964,
+            15.259999999999991,
+            14.406000000000063
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            1.862645149230957e-8,
+            2.0489096641540527e-8,
+            1.1175870895385742e-8
+          ]
+        },
+        {
+          "milliseconds": 0.5950625000000045,
+          "p10": 0.5570500000000009,
+          "p90": 0.6667374999999979,
+          "aggregateMilliseconds": 9.521000000000072,
+          "samples": [
+            9.156999999999925,
+            10.458999999999946,
+            8.628999999999905,
+            10.980999999999995,
+            10.075000000000045,
+            9.521000000000072,
+            9.10200000000009
+          ],
+          "implementation": "projection scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            1.862645149230957e-8,
+            2.2351741790771484e-8,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 0.46831249999999613,
+          "p10": 0.3925499999999985,
+          "p90": 0.549887499999997,
+          "aggregateMilliseconds": 7.492999999999938,
+          "samples": [
+            6.673000000000002,
+            6.054000000000087,
+            8.07000000000005,
+            7.492999999999938,
+            9.09699999999998,
+            6.431999999999903,
+            8.598999999999933
+          ],
+          "implementation": "projection flat",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            1.862645149230957e-8,
+            2.2351741790771484e-8,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 1.061124999999997,
+          "p10": 1.0158749999999999,
+          "p90": 1.126862499999993,
+          "aggregateMilliseconds": 16.977999999999952,
+          "samples": [
+            17.563000000000102,
+            16.701999999999998,
+            16.977999999999952,
+            15.581999999999994,
+            18.654999999999973,
+            16.74700000000007,
+            17.61299999999983
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            1.862645149230957e-8,
+            2.0489096641540527e-8,
+            1.1175870895385742e-8
+          ]
+        },
+        {
+          "milliseconds": 0.6203750000000028,
+          "p10": 0.5107375000000005,
+          "p90": 0.8432749999999999,
+          "aggregateMilliseconds": 9.926000000000045,
+          "samples": [
+            8.485000000000014,
+            7.701999999999998,
+            10.080000000000041,
+            9.315000000000055,
+            13.041999999999916,
+            9.926000000000045,
+            14.16800000000012
+          ],
+          "implementation": "projection scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            1.862645149230957e-8,
+            2.2351741790771484e-8,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 0.42931250000000176,
+          "p10": 0.32469999999999855,
+          "p90": 0.4868875000000017,
+          "aggregateMilliseconds": 6.869000000000028,
+          "samples": [
+            6.869000000000028,
+            6.486999999999966,
+            4.692999999999984,
+            7.0470000000000255,
+            7.521000000000072,
+            5.529999999999973,
+            8.19399999999996
+          ],
+          "implementation": "projection flat",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            1.862645149230957e-8,
+            2.2351741790771484e-8,
+            7.450580596923828e-9
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": -743155154.5824093,
+      "speedups": [
+        {
+          "implementation": "geospatial scalar output",
+          "ratio": 0.9140063611732874
+        },
+        {
+          "implementation": "projection scalar output",
+          "ratio": 0.9591980656860799
+        },
+        {
+          "implementation": "projection flat",
+          "ratio": 1.09084291745522
+        }
+      ]
+    },
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "inverse",
+      "measurements": [
+        {
+          "milliseconds": 1.2132500000000164,
+          "p10": 1.043600000000015,
+          "p90": 1.2492499999999835,
+          "aggregateMilliseconds": 4.8530000000000655,
+          "samples": [
+            5.002999999999929,
+            4.811999999999898,
+            4.8530000000000655,
+            4.992999999999938,
+            4.869999999999891,
+            3.6679999999998927,
+            4.512000000000171
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            4.263256414560601e-14,
+            0.0000019073486328125
+          ]
+        },
+        {
+          "milliseconds": 1.30600000000004,
+          "p10": 1.227899999999977,
+          "p90": 1.5994000000000028,
+          "aggregateMilliseconds": 5.22400000000016,
+          "samples": [
+            5.22400000000016,
+            5.0659999999998035,
+            5.129999999999882,
+            5.989000000000033,
+            6.6099999999999,
+            4.680000000000064,
+            6.2560000000000855
+          ],
+          "implementation": "projection scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            2.1316282072803006e-14,
+            2.9802322387695312e-8
+          ]
+        },
+        {
+          "milliseconds": 1.1450000000000387,
+          "p10": 1.0725000000000022,
+          "p90": 1.2254999999999767,
+          "aggregateMilliseconds": 4.580000000000155,
+          "samples": [
+            4.801999999999907,
+            4.580000000000155,
+            4.6099999999999,
+            4.250999999999976,
+            5.051999999999907,
+            4.375999999999976,
+            4.316000000000031
+          ],
+          "implementation": "projection flat",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            2.1316282072803006e-14,
+            2.9802322387695312e-8
+          ]
+        },
+        {
+          "milliseconds": 1.6657499999999459,
+          "p10": 1.4825500000000034,
+          "p90": 1.7931500000000142,
+          "aggregateMilliseconds": 6.6629999999997835,
+          "samples": [
+            6.6189999999999145,
+            7.085000000000036,
+            5.601999999999862,
+            6.6629999999997835,
+            6.149000000000115,
+            7.304000000000087,
+            6.861000000000104
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            2.1316282072803006e-14,
+            0.0000019073486328125
+          ]
+        },
+        {
+          "milliseconds": 1.3875000000000455,
+          "p10": 1.150900000000013,
+          "p90": 1.4488500000000157,
+          "aggregateMilliseconds": 5.550000000000182,
+          "samples": [
+            4.288000000000011,
+            5.823000000000093,
+            5.550000000000182,
+            5.404999999999973,
+            4.814000000000078,
+            5.763999999999896,
+            5.777000000000044
+          ],
+          "implementation": "projection scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            2.1316282072803006e-14,
+            2.9802322387695312e-8
+          ]
+        },
+        {
+          "milliseconds": 1.159249999999986,
+          "p10": 1.092699999999968,
+          "p90": 1.4284499999999867,
+          "aggregateMilliseconds": 4.636999999999944,
+          "samples": [
+            4.2849999999998545,
+            4.636999999999944,
+            4.6319999999998345,
+            5.092000000000098,
+            4.427999999999884,
+            5.676999999999907,
+            5.7690000000000055
+          ],
+          "implementation": "projection flat",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            2.1316282072803006e-14,
+            2.9802322387695312e-8
+          ]
+        }
+      ],
+      "iterations": 4,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 809802,
+      "speedups": [
+        {
+          "implementation": "geospatial scalar output",
+          "ratio": 0.7283505928260878
+        },
+        {
+          "implementation": "projection scalar output",
+          "ratio": 0.9412612612612593
+        },
+        {
+          "implementation": "projection flat",
+          "ratio": 0.9877075695493229
+        }
+      ]
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "forward",
+      "measurements": [
+        {
+          "milliseconds": 0.8750625000000127,
+          "p10": 0.7956625000000059,
+          "p90": 1.0247749999999995,
+          "aggregateMilliseconds": 14.001000000000204,
+          "samples": [
+            13.635999999999967,
+            16.550000000000182,
+            14.001000000000204,
+            13.5150000000001,
+            11.554000000000087,
+            15.992999999999938,
+            16.29399999999987
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            2.7755575615628914e-16,
+            3.885780586188048e-16,
+            0
+          ]
+        },
+        {
+          "milliseconds": 0.8429374999999908,
+          "p10": 0.7072125000000028,
+          "p90": 0.8930749999999904,
+          "aggregateMilliseconds": 13.486999999999853,
+          "samples": [
+            14.207999999999856,
+            10.15800000000013,
+            12.086999999999989,
+            12.260999999999967,
+            14.41099999999983,
+            13.486999999999853,
+            14.036000000000058
+          ],
+          "implementation": "projection scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            2.7755575615628914e-16,
+            3.608224830031759e-16,
+            9.313225746154785e-10
+          ]
+        },
+        {
+          "milliseconds": 0.5208749999999895,
+          "p10": 0.44771250000000007,
+          "p90": 0.6453874999999982,
+          "aggregateMilliseconds": 8.333999999999833,
+          "samples": [
+            9.264999999999873,
+            7.809999999999945,
+            11.91800000000012,
+            8.333999999999833,
+            6.98700000000008,
+            8.412000000000035,
+            7.280999999999949
+          ],
+          "implementation": "projection flat",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            2.7755575615628914e-16,
+            3.608224830031759e-16,
+            9.313225746154785e-10
+          ]
+        },
+        {
+          "milliseconds": 0.9303125000000136,
+          "p10": 0.8795625000000115,
+          "p90": 1.0310499999999934,
+          "aggregateMilliseconds": 14.885000000000218,
+          "samples": [
+            13.734000000000151,
+            15.044000000000096,
+            14.885000000000218,
+            16.977999999999838,
+            14.434999999999945,
+            14.299000000000206,
+            16.17599999999993
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            2.7755575615628914e-16,
+            3.885780586188048e-16,
+            0
+          ]
+        },
+        {
+          "milliseconds": 0.8131249999999994,
+          "p10": 0.7263374999999911,
+          "p90": 0.8827250000000049,
+          "aggregateMilliseconds": 13.009999999999991,
+          "samples": [
+            14.258000000000038,
+            12.254999999999882,
+            14.034000000000106,
+            13.009999999999991,
+            13.204999999999927,
+            12.980999999999995,
+            10.670999999999822
+          ],
+          "implementation": "projection scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            2.7755575615628914e-16,
+            3.608224830031759e-16,
+            9.313225746154785e-10
+          ]
+        },
+        {
+          "milliseconds": 0.5692500000000109,
+          "p10": 0.4843624999999975,
+          "p90": 0.5906999999999982,
+          "aggregateMilliseconds": 9.108000000000175,
+          "samples": [
+            7.875,
+            9.289999999999964,
+            9.108000000000175,
+            7.561999999999898,
+            9.692999999999984,
+            7.972999999999956,
+            9.196999999999662
+          ],
+          "implementation": "projection flat",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            2.7755575615628914e-16,
+            3.608224830031759e-16,
+            9.313225746154785e-10
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 3359420.9605574436,
+      "speedups": [
+        {
+          "implementation": "geospatial scalar output",
+          "ratio": 0.9406113537117903
+        },
+        {
+          "implementation": "projection scalar output",
+          "ratio": 1.0366641045349625
+        },
+        {
+          "implementation": "projection flat",
+          "ratio": 0.9150197628458139
+        }
+      ]
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "inverse",
+      "measurements": [
+        {
+          "milliseconds": 1.1637499999999932,
+          "p10": 0.9907999999999901,
+          "p90": 1.298174999999992,
+          "aggregateMilliseconds": 9.309999999999945,
+          "samples": [
+            8.199999999999818,
+            9.405999999999949,
+            10.063000000000102,
+            9.309999999999945,
+            10.868999999999687,
+            7.516000000000076,
+            9.294999999999618
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            2.0741826745052094e-7,
+            2.0384050003485754e-9
+          ]
+        },
+        {
+          "milliseconds": 1.2421249999999873,
+          "p10": 1.0686999999999784,
+          "p90": 1.3684249999999907,
+          "aggregateMilliseconds": 9.936999999999898,
+          "samples": [
+            10.965999999999894,
+            9.78899999999976,
+            8.897999999999683,
+            9.936999999999898,
+            8.027000000000044,
+            10.934999999999945,
+            10.652000000000044
+          ],
+          "implementation": "projection scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 1.0602499999999964,
+          "p10": 0.9490999999999985,
+          "p90": 1.165199999999993,
+          "aggregateMilliseconds": 8.481999999999971,
+          "samples": [
+            8.13000000000011,
+            8.079999999999927,
+            9.24599999999964,
+            8.481999999999971,
+            6.86200000000008,
+            9.4350000000004,
+            8.66000000000031
+          ],
+          "implementation": "projection flat",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 1.2060000000000173,
+          "p10": 1.085125000000005,
+          "p90": 1.3820250000000103,
+          "aggregateMilliseconds": 9.648000000000138,
+          "samples": [
+            12.173999999999978,
+            9.648000000000138,
+            9.697999999999865,
+            10.31100000000015,
+            9.547000000000025,
+            9.221000000000004,
+            7.871000000000095
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            2.0384050003485754e-9
+          ]
+        },
+        {
+          "milliseconds": 1.340750000000014,
+          "p10": 1.1846750000000044,
+          "p90": 1.425949999999989,
+          "aggregateMilliseconds": 10.726000000000113,
+          "samples": [
+            11.337999999999738,
+            9.904999999999745,
+            9.489000000000033,
+            11.512000000000171,
+            10.726000000000113,
+            9.460000000000036,
+            10.965999999999894
+          ],
+          "implementation": "projection scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 1.0480000000000018,
+          "p10": 0.9638249999999857,
+          "p90": 1.14699999999998,
+          "aggregateMilliseconds": 8.384000000000015,
+          "samples": [
+            8.815000000000055,
+            9.509000000000015,
+            7.836999999999989,
+            8.953999999999724,
+            8.244000000000142,
+            8.384000000000015,
+            7.520999999999731
+          ],
+          "implementation": "projection flat",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            7.450580596923828e-9
+          ]
+        }
+      ],
+      "iterations": 8,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 1619604,
+      "speedups": [
+        {
+          "implementation": "geospatial scalar output",
+          "ratio": 0.9649668325041264
+        },
+        {
+          "implementation": "projection scalar output",
+          "ratio": 0.9264404251351663
+        },
+        {
+          "implementation": "projection flat",
+          "ratio": 1.0116889312977047
+        }
+      ]
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "forward",
+      "measurements": [
+        {
+          "milliseconds": 0.86424999999997,
+          "p10": 0.7664749999999799,
+          "p90": 1.0210000000000037,
+          "aggregateMilliseconds": 6.91399999999976,
+          "samples": [
+            6.5909999999998945,
+            8.094000000000051,
+            7.460000000000036,
+            6.540999999999713,
+            5.518000000000029,
+            6.91399999999976,
+            8.278999999999996
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            2.2351741790771484e-8,
+            2.0489096641540527e-8,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 0.7685000000000173,
+          "p10": 0.6072500000000332,
+          "p90": 0.8115500000000111,
+          "aggregateMilliseconds": 6.148000000000138,
+          "samples": [
+            6.4340000000001965,
+            6.346999999999753,
+            4.928000000000338,
+            5.507000000000062,
+            4.753000000000156,
+            6.579999999999927,
+            6.148000000000138
+          ],
+          "implementation": "projection scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            1.862645149230957e-8,
+            2.0489096641540527e-8,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 0.48237499999999045,
+          "p10": 0.4414499999999748,
+          "p90": 0.5043499999999994,
+          "aggregateMilliseconds": 3.8589999999999236,
+          "samples": [
+            4.114000000000033,
+            3.7599999999997635,
+            3.8589999999999236,
+            3.9760000000001128,
+            3.981999999999971,
+            3.188999999999851,
+            3.850000000000364
+          ],
+          "implementation": "projection flat",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            1.862645149230957e-8,
+            2.0489096641540527e-8,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 0.89224999999999,
+          "p10": 0.7510249999999814,
+          "p90": 1.0337999999999625,
+          "aggregateMilliseconds": 7.13799999999992,
+          "samples": [
+            7.108000000000175,
+            8.600999999999658,
+            5.880999999999858,
+            7.583000000000084,
+            6.092999999999847,
+            7.13799999999992,
+            8.049999999999727
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            2.2351741790771484e-8,
+            2.0489096641540527e-8,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 0.7408750000000168,
+          "p10": 0.6458250000000021,
+          "p90": 0.8571500000000128,
+          "aggregateMilliseconds": 5.927000000000135,
+          "samples": [
+            5.898000000000138,
+            6.635999999999967,
+            5.746999999999844,
+            5.927000000000135,
+            4.2960000000002765,
+            7.189000000000306,
+            5.992000000000189
+          ],
+          "implementation": "projection scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            1.862645149230957e-8,
+            2.0489096641540527e-8,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 0.5229999999999677,
+          "p10": 0.4032500000000141,
+          "p90": 0.5787999999999557,
+          "aggregateMilliseconds": 4.183999999999742,
+          "samples": [
+            4.183999999999742,
+            4.251999999999953,
+            4.305999999999585,
+            3.3710000000000946,
+            3.0790000000001783,
+            5.116999999999734,
+            3.324000000000069
+          ],
+          "implementation": "projection flat",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            1.862645149230957e-8,
+            2.0489096641540527e-8,
+            7.450580596923828e-9
+          ]
+        }
+      ],
+      "iterations": 8,
+      "timingLimited": true,
+      "unstable": true,
+      "checksum": -369947484.0611148,
+      "speedups": [
+        {
+          "implementation": "geospatial scalar output",
+          "ratio": 0.968618660689246
+        },
+        {
+          "implementation": "projection scalar output",
+          "ratio": 1.0372869917327483
+        },
+        {
+          "implementation": "projection flat",
+          "ratio": 0.9223231357552968
+        }
+      ]
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "inverse",
+      "measurements": [
+        {
+          "milliseconds": 1.1356666666666417,
+          "p10": 0.9293666666666619,
+          "p90": 1.229599999999982,
+          "aggregateMilliseconds": 6.813999999999851,
+          "samples": [
+            6.9780000000000655,
+            7.33199999999988,
+            5.967000000000098,
+            6.585000000000036,
+            4.989999999999782,
+            6.813999999999851,
+            7.445999999999913
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            2.842170943040401e-14,
+            1.4901161193847656e-8
+          ]
+        },
+        {
+          "milliseconds": 1.2714999999999843,
+          "p10": 1.160033333333331,
+          "p90": 1.307166666666702,
+          "aggregateMilliseconds": 7.628999999999905,
+          "samples": [
+            7.981000000000222,
+            6.682999999999993,
+            7.628999999999905,
+            7.751000000000204,
+            7.305000000000291,
+            7.144999999999982,
+            7.664999999999964
+          ],
+          "implementation": "projection scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            2.1316282072803006e-14,
+            2.2351741790771484e-8
+          ]
+        },
+        {
+          "milliseconds": 1.1116666666666788,
+          "p10": 1.0186666666666193,
+          "p90": 1.204166666666682,
+          "aggregateMilliseconds": 6.670000000000073,
+          "samples": [
+            6.670000000000073,
+            6.567000000000007,
+            7.119000000000142,
+            6.16399999999976,
+            6.033999999999651,
+            7.108000000000175,
+            7.3840000000000146
+          ],
+          "implementation": "projection flat",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            2.1316282072803006e-14,
+            2.2351741790771484e-8
+          ]
+        },
+        {
+          "milliseconds": 1.2758333333333667,
+          "p10": 1.2403666666666746,
+          "p90": 1.3793666666666617,
+          "aggregateMilliseconds": 7.6550000000002,
+          "samples": [
+            7.407999999999902,
+            8.202999999999975,
+            8.079000000000178,
+            7.4650000000001455,
+            8.385999999999967,
+            7.572999999999865,
+            7.6550000000002
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            2.1316282072803006e-14,
+            1.4901161193847656e-8
+          ]
+        },
+        {
+          "milliseconds": 1.0323333333334024,
+          "p10": 1.0026666666666644,
+          "p90": 1.2335333333333287,
+          "aggregateMilliseconds": 6.194000000000415,
+          "samples": [
+            7.967000000000098,
+            6.194000000000415,
+            6.11200000000008,
+            5.871999999999844,
+            6.523999999999887,
+            6.126999999999953,
+            7.023999999999887
+          ],
+          "implementation": "projection scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            2.1316282072803006e-14,
+            1.4901161193847656e-8
+          ]
+        },
+        {
+          "milliseconds": 0.8366666666666637,
+          "p10": 0.7872666666666192,
+          "p90": 0.8898999999999736,
+          "aggregateMilliseconds": 5.019999999999982,
+          "samples": [
+            5.486999999999625,
+            5.019999999999982,
+            5.2409999999999854,
+            5.030999999999949,
+            4.7199999999998,
+            4.9900000000002365,
+            4.725999999999658
+          ],
+          "implementation": "projection flat",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            2.1316282072803006e-14,
+            1.4901161193847656e-8
+          ]
+        }
+      ],
+      "iterations": 6,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 1214703,
+      "speedups": [
+        {
+          "implementation": "geospatial scalar output",
+          "ratio": 0.8901371652514268
+        },
+        {
+          "implementation": "projection scalar output",
+          "ratio": 1.2316758153050364
+        },
+        {
+          "implementation": "projection flat",
+          "ratio": 1.3286852589641627
+        }
+      ]
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "forward",
+      "measurements": [
+        {
+          "milliseconds": 1.0372500000000098,
+          "p10": 0.8545500000000024,
+          "p90": 1.0704999999999851,
+          "aggregateMilliseconds": 12.447000000000116,
+          "samples": [
+            13.121999999999844,
+            12.105000000000018,
+            12.447000000000116,
+            12.661999999999807,
+            12.588000000000193,
+            10.128000000000156,
+            10.338999999999942
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            3.3306690738754696e-16,
+            3.608224830031759e-16,
+            9.313225746154785e-10
+          ]
+        },
+        {
+          "milliseconds": 0.8147500000000036,
+          "p10": 0.6645999999999882,
+          "p90": 0.9000666666666425,
+          "aggregateMilliseconds": 9.777000000000044,
+          "samples": [
+            10.223999999999705,
+            8.347999999999956,
+            10.148999999999887,
+            11.665999999999713,
+            9.777000000000044,
+            7.415999999999713,
+            8.577999999999975
+          ],
+          "implementation": "projection scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            3.3306690738754696e-16,
+            3.885780586188048e-16,
+            9.313225746154785e-10
+          ]
+        },
+        {
+          "milliseconds": 0.48500000000001364,
+          "p10": 0.437083333333347,
+          "p90": 0.5768166666666806,
+          "aggregateMilliseconds": 5.820000000000164,
+          "samples": [
+            5.532999999999902,
+            6.26700000000028,
+            5.499000000000251,
+            7.903999999999996,
+            6.152000000000044,
+            4.864000000000033,
+            5.820000000000164
+          ],
+          "implementation": "projection flat",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            3.3306690738754696e-16,
+            3.885780586188048e-16,
+            9.313225746154785e-10
+          ]
+        },
+        {
+          "milliseconds": 0.8920000000000149,
+          "p10": 0.820399999999995,
+          "p90": 1.0319500000000061,
+          "aggregateMilliseconds": 10.704000000000178,
+          "samples": [
+            10.367999999999938,
+            11.907000000000153,
+            10.399999999999636,
+            13.097999999999956,
+            11.260000000000218,
+            10.704000000000178,
+            9.059999999999945
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            3.3306690738754696e-16,
+            3.608224830031759e-16,
+            9.313225746154785e-10
+          ]
+        },
+        {
+          "milliseconds": 0.8328333333333452,
+          "p10": 0.7060500000000047,
+          "p90": 0.9261166666666668,
+          "aggregateMilliseconds": 9.994000000000142,
+          "samples": [
+            10.007000000000062,
+            9.605999999999767,
+            9.994000000000142,
+            12.106999999999971,
+            9.548999999999978,
+            10.451000000000022,
+            6.858000000000175
+          ],
+          "implementation": "projection scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            3.3306690738754696e-16,
+            3.885780586188048e-16,
+            9.313225746154785e-10
+          ]
+        },
+        {
+          "milliseconds": 0.48516666666667635,
+          "p10": 0.3901833333333267,
+          "p90": 0.6409833333333306,
+          "aggregateMilliseconds": 5.822000000000116,
+          "samples": [
+            5.822000000000116,
+            7.429000000000087,
+            4.3840000000000146,
+            6.346999999999753,
+            8.085999999999785,
+            5.7029999999999745,
+            4.880999999999858
+          ],
+          "implementation": "projection flat",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            3.3306690738754696e-16,
+            3.885780586188048e-16,
+            9.313225746154785e-10
+          ]
+        }
+      ],
+      "iterations": 12,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 2519565.971896143,
+      "speedups": [
+        {
+          "implementation": "geospatial scalar output",
+          "ratio": 1.1628363228699468
+        },
+        {
+          "implementation": "projection scalar output",
+          "ratio": 0.9782869721833004
+        },
+        {
+          "implementation": "projection flat",
+          "ratio": 0.999656475438002
+        }
+      ]
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "inverse",
+      "measurements": [
+        {
+          "milliseconds": 0.9700000000000273,
+          "p10": 0.842049999999972,
+          "p90": 1.0904000000000225,
+          "aggregateMilliseconds": 7.760000000000218,
+          "samples": [
+            6.664999999999964,
+            7.5659999999998035,
+            8.99499999999989,
+            8.447000000000116,
+            6.783999999999651,
+            7.760000000000218,
+            8.542000000000371
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            2.0741826745052094e-7,
+            2.235083229606971e-9
+          ]
+        },
+        {
+          "milliseconds": 1.096749999999986,
+          "p10": 1.0060249999999997,
+          "p90": 1.1276499999999714,
+          "aggregateMilliseconds": 8.773999999999887,
+          "samples": [
+            8.773999999999887,
+            9.04699999999957,
+            9.003999999999905,
+            8.961999999999534,
+            8.516999999999825,
+            7.588000000000648,
+            8.354999999999563
+          ],
+          "implementation": "projection scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 0.8576250000000982,
+          "p10": 0.7963500000000294,
+          "p90": 1.011949999999979,
+          "aggregateMilliseconds": 6.861000000000786,
+          "samples": [
+            7.136999999999716,
+            6.0239999999994325,
+            8.470000000000255,
+            6.861000000000786,
+            6.74199999999928,
+            7.845999999999549,
+            6.602000000000771
+          ],
+          "implementation": "projection flat",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 1.1553749999999354,
+          "p10": 0.9055750000000102,
+          "p90": 1.2383000000000721,
+          "aggregateMilliseconds": 9.242999999999483,
+          "samples": [
+            7.253000000000156,
+            9.910000000000764,
+            9.695999999999913,
+            9.904000000000451,
+            9.001999999999498,
+            9.242999999999483,
+            7.231999999999971
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            2.235083229606971e-9
+          ]
+        },
+        {
+          "milliseconds": 0.8045000000000755,
+          "p10": 0.7231999999999971,
+          "p90": 1.0612000000000081,
+          "aggregateMilliseconds": 6.436000000000604,
+          "samples": [
+            5.773000000000138,
+            8.054000000000087,
+            9.143000000000029,
+            6.436000000000604,
+            5.793999999999869,
+            6.371000000000095,
+            6.720999999999549
+          ],
+          "implementation": "projection scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            7.450580596923828e-9
+          ]
+        },
+        {
+          "milliseconds": 0.5912499999999454,
+          "p10": 0.49650000000001454,
+          "p90": 0.6290999999999712,
+          "aggregateMilliseconds": 4.729999999999563,
+          "samples": [
+            4.293999999999869,
+            4.729999999999563,
+            5.057999999999993,
+            5.015999999999622,
+            4.86200000000008,
+            4.442000000000007,
+            3.4890000000004875
+          ],
+          "implementation": "projection flat",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            7.450580596923828e-9
+          ]
+        }
+      ],
+      "iterations": 8,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 1619604,
+      "speedups": [
+        {
+          "implementation": "geospatial scalar output",
+          "ratio": 0.8395542572758468
+        },
+        {
+          "implementation": "projection scalar output",
+          "ratio": 1.3632691112490776
+        },
+        {
+          "implementation": "projection flat",
+          "ratio": 1.4505285412265156
+        }
+      ]
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "forward",
+      "measurements": [
+        {
+          "milliseconds": 0.8741250000000491,
+          "p10": 0.8114124999999831,
+          "p90": 0.9109000000000037,
+          "aggregateMilliseconds": 13.986000000000786,
+          "samples": [
+            12.261999999999716,
+            14.470000000000255,
+            13.986000000000786,
+            13.462999999999738,
+            14.730999999999767,
+            14.17200000000048,
+            13.469000000000051
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            3.552713678800501e-14,
+            3.197442310920451e-14,
+            1.4210854715202004e-14
+          ]
+        },
+        {
+          "milliseconds": 0.6943124999999668,
+          "p10": 0.5677374999999983,
+          "p90": 0.7631499999999847,
+          "aggregateMilliseconds": 11.108999999999469,
+          "samples": [
+            9.963999999999942,
+            12.135999999999513,
+            12.322000000000116,
+            11.108999999999469,
+            8.701000000000022,
+            12.104999999999563,
+            9.338999999999942
+          ],
+          "implementation": "projection scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            3.552713678800501e-14,
+            3.197442310920451e-14,
+            7.105427357601002e-15
+          ]
+        },
+        {
+          "milliseconds": 0.4654375000000073,
+          "p10": 0.37323749999999334,
+          "p90": 0.5047250000000191,
+          "aggregateMilliseconds": 7.447000000000116,
+          "samples": [
+            5.963999999999942,
+            8.539999999999964,
+            7.447000000000116,
+            6.729999999999563,
+            5.976999999999862,
+            7.766000000000531,
+            7.606000000000677
+          ],
+          "implementation": "projection flat",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            3.552713678800501e-14,
+            3.197442310920451e-14,
+            7.105427357601002e-15
+          ]
+        },
+        {
+          "milliseconds": 0.8368125000000077,
+          "p10": 0.7615999999999872,
+          "p90": 0.9591749999999933,
+          "aggregateMilliseconds": 13.389000000000124,
+          "samples": [
+            11.49499999999989,
+            15.470999999999549,
+            13.197000000000116,
+            13.389000000000124,
+            15.264000000000124,
+            12.64599999999973,
+            13.92700000000059
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            3.552713678800501e-14,
+            3.197442310920451e-14,
+            1.4210854715202004e-14
+          ]
+        },
+        {
+          "milliseconds": 0.6634374999999864,
+          "p10": 0.6176000000000158,
+          "p90": 0.7404375000000414,
+          "aggregateMilliseconds": 10.614999999999782,
+          "samples": [
+            11.65100000000075,
+            10.614999999999782,
+            12.141000000000531,
+            9.766999999999825,
+            9.958000000000538,
+            10.50500000000011,
+            11.555999999999585
+          ],
+          "implementation": "projection scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            3.552713678800501e-14,
+            3.197442310920451e-14,
+            7.105427357601002e-15
+          ]
+        },
+        {
+          "milliseconds": 0.4285624999999982,
+          "p10": 0.40418750000003456,
+          "p90": 0.5490125000000035,
+          "aggregateMilliseconds": 6.856999999999971,
+          "samples": [
+            6.833999999999833,
+            8.527000000000044,
+            5.972000000000662,
+            6.856999999999971,
+            6.79700000000048,
+            7.240000000000691,
+            9.170000000000073
+          ],
+          "implementation": "projection flat",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            3.552713678800501e-14,
+            3.197442310920451e-14,
+            7.105427357601002e-15
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 3357261.524538449,
+      "speedups": [
+        {
+          "implementation": "geospatial scalar output",
+          "ratio": 1.044588841586426
+        },
+        {
+          "implementation": "projection scalar output",
+          "ratio": 1.0465379180404801
+        },
+        {
+          "implementation": "projection flat",
+          "ratio": 1.0860434592387558
+        }
+      ]
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "inverse",
+      "measurements": [
+        {
+          "milliseconds": 1.35349999999994,
+          "p10": 1.2041999999999462,
+          "p90": 1.4397999999998774,
+          "aggregateMilliseconds": 5.41399999999976,
+          "samples": [
+            4.761000000000422,
+            5.6899999999996,
+            4.85399999999936,
+            5.17699999999968,
+            5.4780000000000655,
+            5.41399999999976,
+            5.862999999999374
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            1.1169731806148775e-11,
+            4.749403778245287e-12
+          ]
+        },
+        {
+          "milliseconds": 1.75974999999994,
+          "p10": 1.6388000000000829,
+          "p90": 1.9535499999999502,
+          "aggregateMilliseconds": 7.03899999999976,
+          "samples": [
+            6.826000000000022,
+            7.140000000000327,
+            7.770999999999731,
+            6.574000000000524,
+            7.03899999999976,
+            6.527000000000044,
+            7.878999999999905
+          ],
+          "implementation": "projection scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            1.7337242752546445e-12,
+            6.394884621840902e-14
+          ]
+        },
+        {
+          "milliseconds": 1.5854999999999109,
+          "p10": 1.4817000000000007,
+          "p90": 1.776799999999912,
+          "aggregateMilliseconds": 6.3419999999996435,
+          "samples": [
+            5.80199999999968,
+            6.257999999999811,
+            7.07799999999952,
+            6.427999999999884,
+            6.010000000000218,
+            6.3419999999996435,
+            7.15099999999984
+          ],
+          "implementation": "projection flat",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            1.7337242752546445e-12,
+            6.394884621840902e-14
+          ]
+        },
+        {
+          "milliseconds": 1.5775000000001,
+          "p10": 1.3457500000000437,
+          "p90": 1.9160999999999604,
+          "aggregateMilliseconds": 6.3100000000004,
+          "samples": [
+            7.811999999999898,
+            6.110000000000582,
+            7.5659999999998035,
+            5.221000000000458,
+            6.3770000000004075,
+            6.3100000000004,
+            5.4909999999999854
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            1.1171508162988175e-11,
+            4.749403778245287e-12
+          ]
+        },
+        {
+          "milliseconds": 1.8247499999999945,
+          "p10": 1.7375000000000456,
+          "p90": 2.0191500000000815,
+          "aggregateMilliseconds": 7.298999999999978,
+          "samples": [
+            6.730999999999767,
+            7.439000000000306,
+            8.268000000000029,
+            7.949000000000524,
+            7.096000000000458,
+            7.298999999999978,
+            7.269000000000233
+          ],
+          "implementation": "projection scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            1.7337242752546445e-12,
+            6.394884621840902e-14
+          ]
+        },
+        {
+          "milliseconds": 1.5432499999999436,
+          "p10": 1.4681499999999232,
+          "p90": 1.6208000000000085,
+          "aggregateMilliseconds": 6.1729999999997744,
+          "samples": [
+            5.835999999999331,
+            5.8969999999999345,
+            6.572000000000116,
+            5.948999999999614,
+            6.423999999999978,
+            6.217000000000553,
+            6.1729999999997744
+          ],
+          "implementation": "projection flat",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            1.7337242752546445e-12,
+            6.394884621840902e-14
+          ]
+        }
+      ],
+      "iterations": 4,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 809802,
+      "speedups": [
+        {
+          "implementation": "geospatial scalar output",
+          "ratio": 0.8580031695720153
+        },
+        {
+          "implementation": "projection scalar output",
+          "ratio": 0.9643786820112044
+        },
+        {
+          "implementation": "projection flat",
+          "ratio": 1.0273772881904868
+        }
+      ]
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "forward",
+      "measurements": [
+        {
+          "milliseconds": 0.8952499999999759,
+          "p10": 0.8620499999999766,
+          "p90": 0.971062500000005,
+          "aggregateMilliseconds": 14.323999999999614,
+          "samples": [
+            14.05999999999949,
+            13.391999999999825,
+            14.265999999999622,
+            15.458999999999833,
+            15.654000000000451,
+            14.323999999999614,
+            14.601000000000568
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            5.293955920339377e-22,
+            6.88214269644119e-22,
+            1.7763568394002505e-15
+          ]
+        },
+        {
+          "milliseconds": 0.7682500000000232,
+          "p10": 0.5984124999999949,
+          "p90": 0.7960750000000075,
+          "aggregateMilliseconds": 12.292000000000371,
+          "samples": [
+            13.018000000000029,
+            9.537999999999556,
+            12.550000000000182,
+            11.978000000000065,
+            9.59900000000016,
+            12.292000000000371,
+            12.322000000000116
+          ],
+          "implementation": "projection scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            6.352747104407253e-22,
+            6.28657265540301e-22,
+            8.881784197001252e-16
+          ]
+        },
+        {
+          "milliseconds": 0.4456250000000068,
+          "p10": 0.4060249999999769,
+          "p90": 0.48557499999999437,
+          "aggregateMilliseconds": 7.130000000000109,
+          "samples": [
+            7.130000000000109,
+            6.643000000000029,
+            6.507999999999811,
+            7.878999999999905,
+            6.47899999999936,
+            7.695999999999913,
+            7.529999999999745
+          ],
+          "implementation": "projection flat",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            6.352747104407253e-22,
+            6.28657265540301e-22,
+            8.881784197001252e-16
+          ]
+        },
+        {
+          "milliseconds": 0.8627500000000055,
+          "p10": 0.8347125000000005,
+          "p90": 0.9090499999999907,
+          "aggregateMilliseconds": 13.804000000000087,
+          "samples": [
+            13.658000000000357,
+            14.305999999999585,
+            13.229999999999563,
+            13.804000000000087,
+            13.439000000000306,
+            14.903000000000247,
+            14.0600000000004
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            5.293955920339377e-22,
+            6.88214269644119e-22,
+            1.7763568394002505e-15
+          ]
+        },
+        {
+          "milliseconds": 0.6798749999999814,
+          "p10": 0.6469375000000241,
+          "p90": 0.7336375000000203,
+          "aggregateMilliseconds": 10.877999999999702,
+          "samples": [
+            10.40900000000056,
+            10.264000000000124,
+            10.441000000000713,
+            11.170000000000073,
+            10.877999999999702,
+            11.941000000000713,
+            11.603000000000065
+          ],
+          "implementation": "projection scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            6.352747104407253e-22,
+            6.28657265540301e-22,
+            8.881784197001252e-16
+          ]
+        },
+        {
+          "milliseconds": 0.4883750000000191,
+          "p10": 0.4348374999999919,
+          "p90": 0.5136375000000044,
+          "aggregateMilliseconds": 7.814000000000306,
+          "samples": [
+            7.140999999999622,
+            6.82300000000032,
+            7.046999999999571,
+            8.019000000000233,
+            7.939000000000306,
+            7.814000000000306,
+            8.516999999999825
+          ],
+          "implementation": "projection flat",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            6.352747104407253e-22,
+            6.28657265540301e-22,
+            8.881784197001252e-16
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 3359495.9997655232,
+      "speedups": [
+        {
+          "implementation": "geospatial scalar output",
+          "ratio": 1.0376702405099627
+        },
+        {
+          "implementation": "projection scalar output",
+          "ratio": 1.129987129987195
+        },
+        {
+          "implementation": "projection flat",
+          "ratio": 0.912464806757081
+        }
+      ]
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "inverse",
+      "measurements": [
+        {
+          "milliseconds": 0.8876666666666703,
+          "p10": 0.8505333333332904,
+          "p90": 1.1241666666667394,
+          "aggregateMilliseconds": 5.326000000000022,
+          "samples": [
+            4.915999999999258,
+            6.787000000000262,
+            6.032000000000153,
+            5.326000000000022,
+            5.2280000000000655,
+            5.314000000000306,
+            6.717000000000553
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            4.787793415061969e-7,
+            7.105427357601002e-15
+          ]
+        },
+        {
+          "milliseconds": 1.2115000000000389,
+          "p10": 1.1058000000000598,
+          "p90": 1.458333333333303,
+          "aggregateMilliseconds": 7.269000000000233,
+          "samples": [
+            8.936000000000604,
+            7.269000000000233,
+            8.625999999999294,
+            6.848999999999251,
+            6.782000000000153,
+            6.414000000000669,
+            8.067000000000007
+          ],
+          "implementation": "projection scalar output",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            1.4210854715202004e-14
+          ]
+        },
+        {
+          "milliseconds": 0.9733333333333576,
+          "p10": 0.9298333333333479,
+          "p90": 1.0625666666666802,
+          "aggregateMilliseconds": 5.8400000000001455,
+          "samples": [
+            6.496000000000095,
+            5.6159999999999854,
+            5.591000000000349,
+            5.560999999999694,
+            6.295000000000073,
+            5.8400000000001455,
+            6.106999999999971
+          ],
+          "implementation": "projection flat",
+          "revision": "baseline",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            1.4210854715202004e-14
+          ]
+        },
+        {
+          "milliseconds": 1.2181666666665478,
+          "p10": 0.9839999999999539,
+          "p90": 1.2833333333333334,
+          "aggregateMilliseconds": 7.308999999999287,
+          "samples": [
+            7.321000000000822,
+            7.329999999999927,
+            5.867999999999483,
+            7.308999999999287,
+            5.927999999999884,
+            8.25500000000011,
+            6.673999999999978
+          ],
+          "implementation": "geospatial scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            7.105427357601002e-15
+          ]
+        },
+        {
+          "milliseconds": 1.3368333333332885,
+          "p10": 1.1361999999999475,
+          "p90": 1.3920333333333474,
+          "aggregateMilliseconds": 8.02099999999973,
+          "samples": [
+            6.2039999999997235,
+            8.331000000000131,
+            8.282999999999447,
+            8.02099999999973,
+            7.225999999999658,
+            7.277999999999338,
+            8.384000000000015
+          ],
+          "implementation": "projection scalar output",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            1.4210854715202004e-14
+          ]
+        },
+        {
+          "milliseconds": 1.0860000000000885,
+          "p10": 0.9230666666666366,
+          "p90": 1.2047999999999774,
+          "aggregateMilliseconds": 6.516000000000531,
+          "samples": [
+            5.805000000000291,
+            5.5330000000003565,
+            6.6359999999995125,
+            5.541999999999462,
+            7.171999999999571,
+            7.314000000000306,
+            6.516000000000531
+          ],
+          "implementation": "projection flat",
+          "revision": "candidate",
+          "maxAbsoluteErrors": [
+            0,
+            0,
+            1.4210854715202004e-14
+          ]
+        }
+      ],
+      "iterations": 6,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 1214703,
+      "speedups": [
+        {
+          "implementation": "geospatial scalar output",
+          "ratio": 0.7286906553564839
+        },
+        {
+          "implementation": "projection scalar output",
+          "ratio": 0.9062461039771197
+        },
+        {
+          "implementation": "projection flat",
+          "ratio": 0.8962553713934422
+        }
+      ]
+    }
+  ],
+  "allocations": [
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "geospatial scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 206.3808,
+      "sampleCount": 2483
+    },
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "projection scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "projection flat",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "geospatial scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 191.74448,
+      "sampleCount": 2306
+    },
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "projection scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "projection flat",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "geospatial scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 126.68736,
+      "sampleCount": 1536
+    },
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "projection scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 79.45376,
+      "sampleCount": 968
+    },
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "projection flat",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 76.3344,
+      "sampleCount": 930
+    },
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "geospatial scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 89.96176,
+      "sampleCount": 1096
+    },
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "projection scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 79.53568,
+      "sampleCount": 969
+    },
+    {
+      "shape": "WGS84",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "projection flat",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 77.81216,
+      "sampleCount": 948
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "geospatial scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 222.08592,
+      "sampleCount": 2675
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "projection scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "projection flat",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0.084,
+      "sampleCount": 1
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "geospatial scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 186.31648,
+      "sampleCount": 2241
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "projection scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0.24928,
+      "sampleCount": 3
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "projection flat",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "geospatial scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 124.37056,
+      "sampleCount": 1509
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "projection scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 77.56576,
+      "sampleCount": 945
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "projection flat",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 81.34144,
+      "sampleCount": 991
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "geospatial scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 89.54944,
+      "sampleCount": 1091
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "projection scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 77.72992,
+      "sampleCount": 947
+    },
+    {
+      "shape": "WGS84",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "projection flat",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 79.9472,
+      "sampleCount": 974
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "geospatial scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 205.27904,
+      "sampleCount": 2470
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "projection scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0.08256,
+      "sampleCount": 1
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "projection flat",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "geospatial scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 187.00992,
+      "sampleCount": 2247
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "projection scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0.16544,
+      "sampleCount": 2
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "projection flat",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0.08256,
+      "sampleCount": 1
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "geospatial scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 121.0768,
+      "sampleCount": 1468
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "projection scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 72.55904,
+      "sampleCount": 884
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "projection flat",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 67.46976,
+      "sampleCount": 822
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "geospatial scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 92.50432,
+      "sampleCount": 1127
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "projection scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 70.26256,
+      "sampleCount": 856
+    },
+    {
+      "shape": "Sphere",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "projection flat",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 69.1936,
+      "sampleCount": 843
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "geospatial scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 216.8464,
+      "sampleCount": 2611
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "projection scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0.08208,
+      "sampleCount": 1
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "projection flat",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "geospatial scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 198.32832,
+      "sampleCount": 2383
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "projection scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "projection flat",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "geospatial scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 129.7232,
+      "sampleCount": 1573
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "projection scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 61.64224,
+      "sampleCount": 751
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "projection flat",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 64.7616,
+      "sampleCount": 789
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "geospatial scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 89.7136,
+      "sampleCount": 1093
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "projection scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 65.74624,
+      "sampleCount": 801
+    },
+    {
+      "shape": "Sphere",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "projection flat",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 62.79136,
+      "sampleCount": 765
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "geospatial scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 211.09184,
+      "sampleCount": 2540
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "projection scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "projection flat",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "geospatial scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 197.10368,
+      "sampleCount": 2369
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "projection scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "forward",
+      "implementation": "projection flat",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0.248,
+      "sampleCount": 3
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "geospatial scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 128.16352,
+      "sampleCount": 1554
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "projection scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 84.46048,
+      "sampleCount": 1029
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "projection flat",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 78.63264,
+      "sampleCount": 958
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "geospatial scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 92.09408,
+      "sampleCount": 1122
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "projection scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 78.47056,
+      "sampleCount": 956
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "regional",
+      "direction": "inverse",
+      "implementation": "projection flat",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 81.42544,
+      "sampleCount": 992
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "geospatial scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 226.17056,
+      "sampleCount": 2724
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "projection scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "projection flat",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0.08288,
+      "sampleCount": 1
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "geospatial scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 199.0288,
+      "sampleCount": 2393
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "projection scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "forward",
+      "implementation": "projection flat",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 0.16688,
+      "sampleCount": 2
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "geospatial scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 124.9408,
+      "sampleCount": 1515
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "projection scalar output",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 79.28928,
+      "sampleCount": 967
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "projection flat",
+      "revision": "baseline",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 75.10368,
+      "sampleCount": 915
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "geospatial scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 94.31072,
+      "sampleCount": 1149
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "projection scalar output",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 79.78208,
+      "sampleCount": 972
+    },
+    {
+      "shape": "Flattened spheroid",
+      "region": "near poles",
+      "direction": "inverse",
+      "implementation": "projection flat",
+      "revision": "candidate",
+      "points": 50000,
+      "sampledEstimatedBytesPerPoint": 77.32208,
+      "sampleCount": 942
+    }
+  ]
+}

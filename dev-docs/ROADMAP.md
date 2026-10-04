@@ -25,6 +25,7 @@
 ## Ellipsoid convergence
 
 The [ellipsoid convergence plan](./ellipsoid-convergence.md) starts with shared
-geometry adapters and cross-module qualification. Sharing conversion kernels is a
+geometry adapters and cross-module qualification. The numerical follow-up improves
+near-pole latitude, bounds surface inversion and qualifies allocation costs. Sharing conversion kernels is a
 follow-up, gated on boundary behavior, numerical accuracy and allocation/bundle
 measurements.

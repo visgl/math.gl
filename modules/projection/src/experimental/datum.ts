@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Geocentric and Helmert equations directly adapted from proj4js 2.22.0 datumUtils.js. See ../../PROJ4-LICENSE.md.
+// SPDX-FileComment: Geocentric and Helmert equations directly adapted from proj4js 2.22.0 datumUtils.js. See ../../PROJ4-LICENSE.md. The analytic spherical inverse boundary is original math.gl code.
 import type {Datum, Ellipsoid} from './crs/types';
 import type {ProjectionPoint} from './types';
 export type Coordinate3D = [number, number, number];
@@ -39,6 +39,14 @@ export function geocentricToGeodeticInPlace(point: ProjectionPoint, ellipsoid: E
   const p = Math.hypot(x, y),
     rr = Math.hypot(x, y, z);
   if (rr === 0) throw new Error('Geodetic coordinates are undefined at the Earth center');
+  if (!Number.isFinite(rr)) throw new Error('Geocentric radius must be finite');
+  // Original spherical boundary: there is no eccentricity iteration or polar threshold.
+  if (es === 0) {
+    point.x = p === 0 ? 0 : Math.atan2(y, x);
+    point.y = Math.atan2(z, p);
+    point.z = rr - a;
+    return;
+  }
   if (p < 1e-12 * a) {
     point.x = 0;
     point.y = (Math.sign(z) * Math.PI) / 2;

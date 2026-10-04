@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT AND Apache-2.0
 // SPDX-FileCopyrightText: Copyright 2011-2018 CesiumJS Contributors
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
+// SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms. The numeric-component cartographic adapter is original math.gl code.
 
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
@@ -114,6 +114,32 @@ export function toCartographicFromRadians<T extends Cartographic>(
   cartographic: T
 ): T {
   return toCartographic(vector, cartographic, config._cartographicRadians ? identity : toDegrees);
+}
+
+/** Original numeric adapter: snapshot values before writing application-owned outputs. */
+export function toCartographicFromRadiansComponents<T extends Cartographic>(
+  longitude: number,
+  latitude: number,
+  height: number,
+  cartographic: T
+): T {
+  const map = config._cartographicRadians ? identity : toDegrees;
+  const mappedLongitude = map(longitude),
+    mappedLatitude = map(latitude);
+  if ('longitude' in cartographic) {
+    cartographic.longitude = mappedLongitude;
+    cartographic.latitude = mappedLatitude;
+    cartographic.height = height;
+  } else if ('x' in cartographic) {
+    cartographic.x = mappedLongitude;
+    cartographic.y = mappedLatitude;
+    cartographic.z = height;
+  } else {
+    cartographic[0] = mappedLongitude;
+    cartographic[1] = mappedLatitude;
+    cartographic[2] = height;
+  }
+  return cartographic;
 }
 
 export function toCartographicFromDegrees<T extends Cartographic>(
