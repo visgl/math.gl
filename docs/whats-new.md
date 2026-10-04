@@ -404,3 +404,13 @@ math.gl classes now pass large parts of the THREE.js test suite, which should ma
 Release date: Jan 9, 2018
 
 Initial release.
+
+## Shared globe geometry
+
+- `@math.gl/geospatial`: `EllipsoidOccluder` adds true ray-hit intervals, altitude-aware
+  segment occlusion and exact limb ellipses. `getGlobeHorizonBounds` and
+  `splitGlobeBounds` supply conservative spherical imagery coverage across poles
+  and the antimeridian.
+- `@math.gl/polygon`: `subdivideGlobeMesh` composes bounded conforming subdivision
+  with shared spheroid conversion and preserved attribute provenance.
+- A standalone globe example combines these primitives without Kepler dependencies.
