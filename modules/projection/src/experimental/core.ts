@@ -44,3 +44,5 @@ export {
 export type {ProjectionDescriptor} from './projection-descriptor';
 
 export type {ProjectionCoordinate, ProjectionOutput} from './scalar-output';
+
+export type {SpheroidParameters} from '@math.gl/core';

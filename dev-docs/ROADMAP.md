@@ -21,3 +21,10 @@
 
 - An ambition is that math.gl should be able to serve a general purpose 3D math library, enabling the creation of framework-independent 3D and Geospatial code that interoperates with a variety of frameworks.
 - math.gl modules (such as geospatial math) should be usable by applications using other frameworks, without having to use the core math.gl classes.
+
+## Ellipsoid convergence
+
+The [ellipsoid convergence plan](./ellipsoid-convergence.md) starts with shared
+geometry adapters and cross-module qualification. Sharing conversion kernels is a
+follow-up, gated on boundary behavior, numerical accuracy and allocation/bundle
+measurements.
