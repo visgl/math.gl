@@ -1,0 +1,109 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.math-playground {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  background: #07121e;
+  color: #e7f1fa;
+  font:
+    14px/1.5 var(--ifm-font-family-base, system-ui),
+    sans-serif;
+  overflow: auto;
+}
+.math-playground aside {
+  padding: 20px;
+  background: #0d2035;
+  overflow: auto;
+}
+.math-playground h2 {
+  font-size: 22px;
+  color: inherit;
+  margin: 0 0 12px;
+}
+.math-playground p {
+  color: #b8c9d9;
+}
+.math-playground label {
+  display: block;
+  margin: 10px 0;
+}
+.math-playground input[type='range'] {
+  width: 100%;
+  accent-color: #70c7ff;
+}
+.math-playground button,
+.math-playground select {
+  padding: 6px 10px;
+  background: #19344e;
+  color: white;
+  border: 1px solid #6c8195;
+  border-radius: 6px;
+  font: inherit;
+}
+.math-playground button {
+  margin: 4px;
+  cursor: pointer;
+}
+.math-playground svg {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  touch-action: none;
+}
+.math-playground .vertex {
+  cursor: grab;
+}
+.math-playground .vertex:focus {
+  stroke: #fff;
+  stroke-width: 4;
+  outline: none;
+}
+.math-playground pre {
+  font: 12px/1.6 monospace;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+@media (max-width: 600px) {
+  .math-playground {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(300px, 1fr);
+  }
+  .math-playground aside {
+    padding: 12px;
+  }
+  .math-playground label {
+    display: inline-block;
+    margin: 4px 8px;
+  }
+  .math-playground p {
+    margin: 6px 0;
+  }
+  .math-playground pre {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 600px) {
+  .math-playground {
+    display: flex;
+    flex-direction: column;
+  }
+  .math-playground aside {
+    flex: none;
+    overflow: visible;
+  }
+  .math-playground > svg {
+    height: 320px;
+    flex: none;
+  }
+  .math-playground label {
+    width: calc(50% - 16px);
+    font-size: 12px;
+  }
+}
