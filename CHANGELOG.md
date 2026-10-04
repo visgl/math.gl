@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- feat(geospatial): Add explicit spheroid parameter adapters for interoperability
+  with projection ellipsoids. Share the geometry type and qualify both modules
+  against independent anchors, preserving their existing conversion contracts.
+
 - perf(projection): Transform single-stage kinematic Helmert coordinate buffers
   directly with numeric locals. Prepare constant batch epochs once, preserve mixed
   observation epochs and scalar arithmetic, and qualify ownership/failure behavior

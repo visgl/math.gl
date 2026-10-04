@@ -40,3 +40,5 @@ export {
 } from './float16';
 
 export type {Bounds, Bounds2D, Bounds3D} from './bounds-types';
+
+export type {SpheroidParameters} from './spheroid';

@@ -14,7 +14,7 @@ function run(command, args, cwd = temporary) {
   return execFileSync(command, args, {cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']});
 }
 try {
-  for (const name of ['types', 'core', 'crs', 'projection']) {
+  for (const name of ['types', 'core', 'culling', 'crs', 'geospatial', 'projection']) {
     const [manifest] = JSON.parse(
       run(
         'npm',
@@ -111,6 +111,18 @@ try {
     assert(Math.abs((await automatic.project([3, 0]))[0] - 500000) < 1e-7);
     assert(Math.abs(automatic.projectSync([3, 0])[0] - 500000) < 1e-7);
     const core = await load('@math.gl/projection/core');
+    const {Ellipsoid} = await load('@math.gl/geospatial');
+    const shape = Ellipsoid.fromSpheroid(core.normalizeCRS('EPSG:4326').ellipsoid);
+    const axes = shape.toSpheroid();
+    assert(Object.isFrozen(axes));
+    assert.deepEqual(axes, {semiMajorAxis: 6378137, semiMinorAxis: 6356752.314245179});
+    const geocentric = new core.ProjectionEngine({to: 'EPSG:4978', projections: [api.geocentric]});
+    const llh = [12, 55, 100];
+    const expectedXYZ = geocentric.project(llh);
+    const actualXYZ = shape.cartographicToCartesian(llh);
+    for (let i = 0; i < 3; i++) assert(Math.abs(actualXYZ[i] - expectedXYZ[i]) < 1e-5);
+    assert.throws(() => new Ellipsoid(1, 2, 3).toSpheroid());
+
     assert(!('TypeScriptProjection' in core));
     assert(!('checkTypeScriptCRSCompatibility' in core));
     assert.deepEqual(new core.ProjectionEngine({}).project([12, 55, 123, 8]), [12, 55, 123, 8]);
@@ -325,6 +337,24 @@ try {
     join(temporary, 'consumer.ts'),
     `
     ${subpaths.map((path, index) => 'import * as entry' + index + " from '@math.gl/projection" + path.slice(1) + "';\nvoid entry" + index + ';').join('\n')}
+    import {Ellipsoid, type SpheroidParameters as GeospatialSpheroid} from '@math.gl/geospatial';
+    import type {SpheroidParameters as TypesSpheroid} from '@math.gl/types';
+    import type {SpheroidParameters as CoreSpheroid} from '@math.gl/core';
+    import {normalizeCRS, type SpheroidParameters as ProjectionSpheroid} from '@math.gl/projection/core';
+    const shape = Ellipsoid.fromSpheroid(normalizeCRS('EPSG:4326').ellipsoid);
+    const axes: GeospatialSpheroid = shape.toSpheroid();
+    const sharedAxes: TypesSpheroid = axes;
+    const coreAxes: CoreSpheroid = sharedAxes;
+    const projectionAxes: ProjectionSpheroid = coreAxes;
+    const importedShape: Ellipsoid = Ellipsoid.fromSpheroid(projectionAxes);
+    // @ts-expect-error Geometry snapshots have readonly axes.
+    axes.semiMajorAxis = 1;
+    // @ts-expect-error Both axes are required; no implicit WGS84 polar radius.
+    Ellipsoid.fromSpheroid({semiMajorAxis: 6378137});
+    // @ts-expect-error PROJ string parameters are a distinct contract.
+    Ellipsoid.fromSpheroid({a: '6378137', b: '6356752'});
+    // @ts-expect-error The axes are numeric metres.
+    Ellipsoid.fromSpheroid({semiMajorAxis: '6378137', semiMinorAxis: 6356752});
     import {LazyProjection, type LazyProjectionOptions} from '@math.gl/projection/projections/lazy';
     const lazyOptions: LazyProjectionOptions = {to: 'EPSG:32631'};
     const automatic = new LazyProjection(lazyOptions);

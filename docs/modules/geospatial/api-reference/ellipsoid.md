@@ -10,7 +10,8 @@ The main use of this class is to convert between the "cartesian" and "cartograph
 
 Cartographic positions are represented as `[longitude, latitude, height]`. Longitude and latitude are in degrees, and height is in meters above the ellipsoid.
 
-Rather than constructing this object directly, one of the provided constants is used.
+Use `Ellipsoid.WGS84` for the standard Earth shape, construct three radii directly,
+or use `Ellipsoid.fromSpheroid` to import two-axis geometry from a projection CRS.
 
 ## Usage
 
@@ -38,11 +39,44 @@ const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
 ```
 
+## Projection interoperability
+
+`@math.gl/projection` uses spheres and oblate spheroids: its X/Y equatorial radii
+are equal. `Ellipsoid` also supports three independent radii. The adapters exchange
+only the common geometry; they do not transfer a datum, axis order, units or epoch.
+
+```ts
+import {Ellipsoid} from '@math.gl/geospatial';
+import {normalizeCRS} from '@math.gl/projection/core';
+
+const crs = normalizeCRS('+proj=longlat +ellps=GRS80');
+const shape = Ellipsoid.fromSpheroid(crs.ellipsoid);
+const parameters = shape.toSpheroid(); // {semiMajorAxis, semiMinorAxis}, in metres
+```
+
+Create/cache the adapter result during setup. Coordinate conversions still use
+the existing geospatial implementation. The projection module does not import
+geospatial at runtime. See [coordinate-system concepts](../../projection/coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
+for the units and boundary conventions.
+
 ## Static Fields
 
 ### Ellipsoid.WGS84 : Ellipsoid (readonly)
 
 An Ellipsoid instance initialized to the WGS84 standard.
+
+## Static Methods
+
+### Ellipsoid.fromSpheroid(parameters: SpheroidParameters): Ellipsoid
+
+Constructs radii `[semiMajorAxis, semiMajorAxis, semiMinorAxis]` from an owned
+snapshot of the supplied axes. Accepts the geometry returned by
+`normalizeCRS(...).ellipsoid`. Additional fields such as `eccentricitySquared`
+are not imported; the axes determine the shape.
+
+Throws if either axis is non-finite or non-positive, or the polar axis is larger
+than the equatorial axis. These checks apply to this adapter; the existing
+three-radius constructor retains its broader geometry support.
 
 ## Members
 
@@ -95,6 +129,13 @@ Duplicates an Ellipsoid instance.
 Returns
 
 - The cloned `Ellipsoid`.
+
+### toSpheroid(): SpheroidParameters
+
+Returns a new frozen `{semiMajorAxis, semiMinorAxis}` snapshot in metres.
+The snapshot remains independent of subsequent changes to the radii vector.
+Throws for unequal X/Y radii, a prolate spheroid, non-finite axes or zero radii.
+It never approximates a triaxial ellipsoid by discarding one radius.
 
 ### equals(right : Ellipsoid) : Boolean
 
