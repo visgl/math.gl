@@ -955,6 +955,11 @@
       "types": "./dist/analysis.d.ts",
       "import": "./dist/analysis.js",
       "require": "./dist/analysis.cjs"
+    },
+    "./bulk": {
+      "types": "./dist/bulk.d.ts",
+      "import": "./dist/bulk.js",
+      "require": "./dist/bulk.cjs"
     }
   },
   "files": [

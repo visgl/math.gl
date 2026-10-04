@@ -555,15 +555,15 @@ This adds no public API, model data or acceleration backend.
 
 ## SOTA roadmap
 
-Stable S identifiers distinguish this numerical/performance roadmap from the completed original parity tranches. S1–S3 establish stronger mathematical contracts; they do not establish a universal SOTA claim.
+Stable S identifiers distinguish this numerical/performance roadmap from the completed original parity tranches. S1–S3 establish stronger mathematical contracts; S4–S5 add qualified scratch reuse and bulk layouts; they do not establish a universal SOTA claim.
 
 | Tranche | Status and work | Acceptance gate |
 | --- | --- | --- |
 | **S1 — Safeguarded ellipsoid inverse** | Implemented for sphere/oblate nearest normals: deep interiors, cusp policy, compensated extreme-flattening arithmetic | 434 independent high precision accuracy checks; bounded updates and untouched failure outputs. Prolate/triaxial legacy interior limitations remain explicit. |
 | **S2 — Accuracy and domain contracts** | Implemented: 42 seeded domains, all 37 named algorithms independently referenced, polar meridian and Van der Grinten fixes, optional explicit domain enforcement | Independent forward and inverse values; per-profile sampled ceilings and oracle limitations in the accuracy scorecard. Latest proj4js reference remains pinned at 2.22.0. |
 | **S3 — Factors and derivatives** | Implemented optional `/analysis`: reusable Jacobians, scales, convergence, angular distortion and principal scales | 450 independent PROJ comparisons plus analytic and failure/reentry tests; no root/core bundle inclusion or successful hot-path object creation. Numerical stencil limits remain explicit. |
-| **S4 — CPU mixed-pipeline performance** | Next: grid/datum-heavy and mixed unit/axis/Helmert chains; reduce runtime boxing and coordinate allocations | Paired measurements after heterogeneous warmup; unchanged accuracy, ownership and no sampled allocation regressions. |
-| **S5 — Reusable bulk layouts** | Next: separate input/output, offsets/strides and chunked buffers | Explicit overlap and failed-record contracts; mixed layouts, Float32/64, M and reusable storage; measured end-to-end costs. |
+| **S4 — CPU mixed-pipeline performance** | Implemented reusable point/stack storage per observed recursive depth, batch scratch and cheaper inverse classification; mixed/grid-heavy comparisons retained. Runtime boxing and broader numeric fusion remain follow-ups | Paired measurements after heterogeneous warmup; unchanged accuracy/ownership, lower aggregate sampled allocation estimates in the recorded profiles. No broad throughput or zero-allocation claim. |
+| **S5 — Reusable bulk layouts** | Implemented optional `/bulk`: separate input/output, offsets/strides, XYZM columns and chunks | 2,616 independent layout/epoch checks, all 31 mixed pipeline scenarios, Float32/64/payload/alias/failure/reentry tests; measured gather/transform/scatter costs. |
 | **S6 — Real-model and operation qualification** | Application-owned models, irregular coverage and compound/dynamic CRS metadata | Reviewed data terms, conservative coverage/time/accuracy bounds; no bundled third-party database or implicit downloads. |
 | **S7 — Temporal models and events** | Rates and event components with defined forward/inverse epoch semantics | Independent references and explicit temporal validity; distinguish sampled propagation from trajectory integration. |
 | **S8 — Optional acceleration** | Evaluate Wasm/SIMD, workers and visualization GPU paths when justified | End-to-end gains include loading, transfer and bundle cost. |

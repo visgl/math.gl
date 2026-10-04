@@ -906,3 +906,60 @@ These source profiles differ from the packaged-entry budget profiles above. Grap
 checks require no runtime dependencies in the leaf, no geometry/culling in
 projection and no retained local-frame leaf in the three unchanged graphs.
 Successful coordinate source allocations are separately guarded in eleven functions.
+
+## Reusable scratch and buffer layouts
+
+The S4–S5 follow-up reuses projection points, batch working points and pipeline
+ordinate stacks at each observed recursive call depth. A normalized squared-norm
+classification also avoids an extra `hypot` in spheroid inverse dispatch. Existing
+independent numerical and recursive ownership checks qualify these changes.
+The optional [`ProjectionBuffer`](./bulk-layouts.md) adds separate arrays, padded
+records, columns, chunk ranges and pipeline epochs without per-record source
+objects, arrays or subviews.
+
+Retained diagnostics in `modules/projection/test/fixtures/qualification/` include:
+
+- `reusable-mixed-pipelines.json`: paired historical/current runtime measurements
+  for six mixed/grid-heavy scenarios, both directions, XYZ/XYZM and Float32/64;
+  reusable scalar comparisons and source-site heap sampling after heterogeneous warmup.
+- `reusable-spheroid-costs.json`: paired forward/inverse and construction diagnostics
+  across WGS84, sphere and flattened spheroid; independent accuracy gates precede timing.
+- `reusable-bulk-layouts.json`: five qualified pipelines, both directions/precisions,
+  interleaved/column layouts; adapter, 256-record chunks, reusable scalar and reusable
+  gather/flat/scatter comparators. Gathering, transformation and scattering are timed.
+- `reusable-bulk-bundles.json`: selective source graphs and optional adapter costs;
+  `/bulk` retains one original source file and is absent from existing imports.
+
+The recorded Apple M2 / Node 24.14.0 run uses seven adaptive thread-CPU samples
+and 1,000 records. Mixed Float64 XYZM forward flat ratios span approximately
+0.96–1.18×; spread flags prevent a general speed claim. Aggregate sampled bytes per
+point for the six mixed profiles decline from 113.1 to 83.7 for flat, 104.5 to
+84.6 for reusable array outputs, and 111.5 to 80.8 for reusable typed outputs.
+These are sampling diagnostics across particular workloads, not zero-allocation
+proofs or guarantees for individual projections. Numeric boxing remains observable,
+including in some column/chunk profiles. Allocation-free source loops do not imply
+an allocation-free JavaScript runtime.
+
+Separate-layout adapter throughput is generally close to a reusable scalar loop;
+reusable compact-flat staging can be faster. Choose storage contracts based on the
+application and measure the complete path. The packed optional adapter measures
+5,469 minified / 1,721 gzip bytes; retained scratch/classification changes add about
+139/65 minified/gzip bytes to core and 54/74 bytes to an optional pipeline in this
+build. The optional adapter itself adds no bytes to either graph.
+
+```sh
+node modules/projection/scripts/benchmark-pipeline-compare.mjs \
+  --baseline-ref b6f38ef5 --points 1000 --samples 7 --min-sample-ms 4 \
+  --clock thread-cpu --allocations --allocation-sites --reusable-results \
+  --scenarios 'Mercator to UTM,Datum to Mercator,Horizontal grid to UTM,Height stack and datum,Static Helmert with units and axes,Mixed epochs with height stack and UTM' \
+  --output /tmp/mixed-scratch.json
+node modules/projection/scripts/benchmark-bulk-layouts.mjs \
+  --points 1000 --samples 7 --allocations --output /tmp/bulk-layouts.json
+node modules/projection/scripts/check-spheroid-boundary.mjs \
+  --baseline-ref b6f38ef5 --output /tmp/bulk-bundles.json
+```
+
+Thread-CPU commands require Node 24.14 or later. Shared browser CI now also checks
+2,616 independent layout/epoch comparisons across 54 configurations. Browser
+performance, further mixed-pipeline fusion and runtime boxing reduction remain
+separate follow-ups in the [SOTA roadmap](./roadmap.md#sota-roadmap).

@@ -189,6 +189,7 @@
           "modules/projection/ellipsoid-qualification",
           "modules/projection/projections",
           "modules/projection/projection-engine",
+          "modules/projection/bulk-layouts",
           "modules/projection/operation-pipelines",
           "modules/projection/operation-selection",
           "modules/projection/deformation-models",

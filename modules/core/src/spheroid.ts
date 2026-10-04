@@ -51,7 +51,9 @@ export function cartesianToSpheroid(
   if (!(rr > 0) || !Number.isFinite(rr)) return false;
   if (es === 0) return commit(result, p === 0 ? 0 : Math.atan2(y, x), Math.atan2(z, p), rr - a);
   if (p === 0) return commit(result, 0, (Math.sign(z) * Math.PI) / 2, Math.abs(z) - b);
-  if (Math.hypot(p / a, z / b) < 1 - 8 * Number.EPSILON)
+  const horizontal = p / a,
+    vertical = z / b;
+  if (horizontal * horizontal + vertical * vertical < 1 - 16 * Number.EPSILON)
     return interiorInverse(x, y, z, p, a, b, result);
   if (es >= 0.9) return exteriorInverse(x, y, z, p, a, b, result);
   const ct = z / rr,

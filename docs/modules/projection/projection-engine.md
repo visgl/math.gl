@@ -267,6 +267,8 @@ shorter paths below. The former `classic` subpath is removed.
 | Subpath | Exports |
 | --- | --- |
 | `operations` | Optional `OperationCatalog` and selection metadata/diagnostics; no database or execution code |
+| `analysis` | `ProjectionAnalysis`, reusable factors/Jacobians and explicit mathematical domain enforcement |
+| `bulk` | `ProjectionBuffer` for separate, strided, column and chunked buffers; no projection algorithms/readers |
 | `pipeline` | `ProjectionPipeline` and typed explicit operation contracts; no catalogue/readers |
 | `core` | Engine, normalization, capability checks, descriptor/cache utilities, shared types and errors |
 | `projections/lazy/<id>` | Lightweight projection descriptors; defer algorithm imports |
@@ -635,3 +637,8 @@ Keep any fallback to a separately installed `proj4` runtime an explicit applicat
 decision: it adds another implementation with different dimension and validation behavior. The
 [roadmap](./roadmap.md), [audit](./parity-audit.md), and
 [API reference](./api-reference/projection-engine.md) describe those boundaries.
+
+For separate output buffers, padded records or X/Y/Z/M columns, see
+[reusable coordinate buffers](./bulk-layouts.md). The optional `/bulk` adapter
+keeps the supplied projection's CRS and epoch behavior and requires lazy
+projections to have completed `preload()` before synchronous coordinate calls.

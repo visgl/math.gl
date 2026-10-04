@@ -22,6 +22,7 @@ const baselineCommit = values['baseline-ref']
   : undefined;
 const directory = mkdtempSync(join(tmpdir(), 'math-gl-spheroid-graphs-'));
 const fixtures = {
+  projectionBulk: "export * from '@math.gl/projection/bulk';",
   projectionAnalysis: "export * from '@math.gl/projection/analysis';",
   numericLeaf: "export * from '@math.gl/core/spheroid';",
   coreRoot: "export * from '@math.gl/core';",
@@ -35,7 +36,8 @@ try {
     const entry = join(directory, name + '.ts');
     writeFileSync(entry, contents);
     const measurements = [];
-    for (const revision of baselineCommit && !['numericLeaf', 'projectionAnalysis'].includes(name)
+    for (const revision of baselineCommit &&
+    !['numericLeaf', 'projectionAnalysis', 'projectionBulk'].includes(name)
       ? ['baseline', 'candidate']
       : ['candidate']) {
       const outfile = join(directory, name + '-' + revision + '.mjs');
@@ -47,13 +49,18 @@ try {
       );
       const inputs = Object.keys(result.metafile.inputs).map(path => path.replaceAll('\\', '/'));
       if (revision === 'candidate') {
+        if (name !== 'projectionBulk')
+          assert(
+            inputs.every(path => !path.endsWith('modules/projection/src/bulk.ts')),
+            'Optional bulk must stay outside existing graphs'
+          );
         if (name !== 'projectionAnalysis')
           assert(
             inputs.every(path => !path.endsWith('modules/projection/src/analysis.ts')),
             'Optional analysis must stay outside existing graphs'
           );
         const leaf = inputs.filter(path => path.endsWith('modules/core/src/spheroid.ts'));
-        if (name === 'projectionAnalysis') {
+        if (['projectionAnalysis', 'projectionBulk'].includes(name)) {
           assert.equal(leaf.length, 0);
           assert.equal(inputs.filter(path => /modules\/.*\/src\//.test(path)).length, 1);
         } else if (name === 'coreRoot')
@@ -93,6 +100,11 @@ try {
         'Reviewed standalone leaf size budget'
       );
     }
+    if (name === 'projectionBulk')
+      assert(
+        candidate.minified <= 6500 && candidate.gzip <= 2100,
+        'Reviewed optional bulk size budget'
+      );
     if (name === 'projectionAnalysis')
       assert(
         candidate.minified <= 4900 && candidate.gzip <= 1800,

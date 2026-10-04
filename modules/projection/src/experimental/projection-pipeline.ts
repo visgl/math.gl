@@ -203,7 +203,7 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
   private readonly inverseFactories: Factory[] = [];
   private stackSize = 0;
   private readonly coordinateScratch = new ProjectionScratch();
-  private coordinateStack?: Float64Array;
+  private readonly coordinateStacks: Float64Array[] = [];
   private readonly required: Registration[] = [];
   private readonly deferred: boolean;
   private requiresZ = false;
@@ -450,12 +450,8 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       point.z = coordinate.length >= 3 ? coordinate[2] : 0;
       let stack: Float64Array = EMPTY_STACK;
       if (this.stackSize) {
-        if (point === this.coordinateScratch.point) {
-          this.coordinateStack ||= new Float64Array(this.stackSize);
-          stack = this.coordinateStack;
-        } else {
-          stack = new Float64Array(this.stackSize);
-        }
+        const depth = this.coordinateScratch.depth - 1;
+        stack = this.coordinateStacks[depth] ||= new Float64Array(this.stackSize);
       }
       this.run(point, operations, stack, epoch);
       if (output) return writeScalarOutput(coordinate, output, point, coordinate.length);
@@ -508,10 +504,8 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
       const float32 = coordinates instanceof Float32Array;
       let stack: Float64Array = EMPTY_STACK;
       if (this.stackSize) {
-        if (point === this.coordinateScratch.point) {
-          this.coordinateStack ||= new Float64Array(this.stackSize);
-          stack = this.coordinateStack;
-        } else stack = new Float64Array(this.stackSize);
+        const depth = this.coordinateScratch.depth - 1;
+        stack = this.coordinateStacks[depth] ||= new Float64Array(this.stackSize);
       }
       const epochBuffer = typeof epochs === 'number' ? undefined : epochs;
       let epoch = typeof epochs === 'number' ? epochs : undefined;
