@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {getTimezoneOffset, lookupTimezoneAsync} from '@math.gl/timezone';
 import {lookupTimezone} from '@math.gl/timezone/lookup';
 

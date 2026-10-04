@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 import {flyToViewport, getFlyToDuration} from '@math.gl/web-mercator';
 import {toLowPrecision} from '../utils/test-utils';

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {WellKnownDimension, WellKnownGeometry} from './types';
 import {getWellKnownDimensionSize} from './types';

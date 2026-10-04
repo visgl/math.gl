@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Copyright © 2010-2018 three.js authors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright © 2010-2018 three.js authors
 
 // @author bhouston / http://exocortex.com
 // @author TristanVALCKE / https://github.com/Itee

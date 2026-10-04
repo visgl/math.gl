@@ -1,0 +1,1002 @@
+{
+  "provenance": "Authored math.gl tests; the approximate parameter set follows the documented PROJ ITRF2000 to ITRF93 example. Finite exact rotations and mixed observation epochs are deliberate tests, not an operation catalogue.",
+  "cases": [
+    {
+      "id": "approximate-position_vector",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "outputUnits": [
+        "m",
+        "m",
+        "m"
+      ],
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            0.0127,
+            0.0065,
+            -0.0209
+          ],
+          "rotation": [
+            -0.00039,
+            0.0008,
+            -0.00114
+          ],
+          "scalePPM": 0.00195,
+          "referenceEpoch": 1988,
+          "rates": {
+            "translation": [
+              -0.0029,
+              -0.0002,
+              -0.0006
+            ],
+            "rotation": [
+              -0.00011,
+              -0.00019,
+              7e-05
+            ],
+            "scalePPM": 1e-05
+          },
+          "convention": "position_vector",
+          "exact": false,
+          "inverse": false
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=0.0127 +y=0.0065 +z=-0.0209 +rx=-0.00039 +ry=0.0008 +rz=-0.00114 +s=0.00195 +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +drx=-0.00011 +dry=-0.00019 +drz=7e-05 +ds=1e-05 +t_epoch=1988 +convention=position_vector",
+      "points": [
+        [
+          3657660.66,
+          255768.55,
+          5201382.11,
+          8
+        ],
+        [
+          4000000,
+          1000000,
+          4800000,
+          -3
+        ],
+        [
+          -2700000,
+          4300000,
+          3850000,
+          2020
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "epochs": [
+        1988,
+        2010.25,
+        2020,
+        1980.5
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "approximate-position_vector-inverse-step",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "outputUnits": [
+        "m",
+        "m",
+        "m"
+      ],
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            0.0127,
+            0.0065,
+            -0.0209
+          ],
+          "rotation": [
+            -0.00039,
+            0.0008,
+            -0.00114
+          ],
+          "scalePPM": 0.00195,
+          "referenceEpoch": 1988,
+          "rates": {
+            "translation": [
+              -0.0029,
+              -0.0002,
+              -0.0006
+            ],
+            "rotation": [
+              -0.00011,
+              -0.00019,
+              7e-05
+            ],
+            "scalePPM": 1e-05
+          },
+          "convention": "position_vector",
+          "exact": false,
+          "inverse": true
+        }
+      ],
+      "pipeline": "+step +proj=helmert +inv +x=0.0127 +y=0.0065 +z=-0.0209 +rx=-0.00039 +ry=0.0008 +rz=-0.00114 +s=0.00195 +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +drx=-0.00011 +dry=-0.00019 +drz=7e-05 +ds=1e-05 +t_epoch=1988 +convention=position_vector",
+      "points": [
+        [
+          3657660.66,
+          255768.55,
+          5201382.11,
+          8
+        ],
+        [
+          4000000,
+          1000000,
+          4800000,
+          -3
+        ],
+        [
+          -2700000,
+          4300000,
+          3850000,
+          2020
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "epochs": [
+        1988,
+        2010.25,
+        2020,
+        1980.5
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "exact-position_vector",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "outputUnits": [
+        "m",
+        "m",
+        "m"
+      ],
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            0.0127,
+            0.0065,
+            -0.0209
+          ],
+          "rotation": [
+            15000,
+            -7000,
+            3000
+          ],
+          "scalePPM": 0.00195,
+          "referenceEpoch": 1988,
+          "rates": {
+            "translation": [
+              -0.0029,
+              -0.0002,
+              -0.0006
+            ],
+            "rotation": [
+              3,
+              -2,
+              1
+            ],
+            "scalePPM": 1e-05
+          },
+          "convention": "position_vector",
+          "exact": true,
+          "inverse": false
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=0.0127 +y=0.0065 +z=-0.0209 +rx=15000 +ry=-7000 +rz=3000 +s=0.00195 +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +drx=3 +dry=-2 +drz=1 +ds=1e-05 +t_epoch=1988 +convention=position_vector +exact",
+      "points": [
+        [
+          3657660.66,
+          255768.55,
+          5201382.11,
+          8
+        ],
+        [
+          4000000,
+          1000000,
+          4800000,
+          -3
+        ],
+        [
+          -2700000,
+          4300000,
+          3850000,
+          2020
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "epochs": [
+        1988,
+        2010.25,
+        2020,
+        1980.5
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "exact-position_vector-inverse-step",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "outputUnits": [
+        "m",
+        "m",
+        "m"
+      ],
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            0.0127,
+            0.0065,
+            -0.0209
+          ],
+          "rotation": [
+            15000,
+            -7000,
+            3000
+          ],
+          "scalePPM": 0.00195,
+          "referenceEpoch": 1988,
+          "rates": {
+            "translation": [
+              -0.0029,
+              -0.0002,
+              -0.0006
+            ],
+            "rotation": [
+              3,
+              -2,
+              1
+            ],
+            "scalePPM": 1e-05
+          },
+          "convention": "position_vector",
+          "exact": true,
+          "inverse": true
+        }
+      ],
+      "pipeline": "+step +proj=helmert +inv +x=0.0127 +y=0.0065 +z=-0.0209 +rx=15000 +ry=-7000 +rz=3000 +s=0.00195 +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +drx=3 +dry=-2 +drz=1 +ds=1e-05 +t_epoch=1988 +convention=position_vector +exact",
+      "points": [
+        [
+          3657660.66,
+          255768.55,
+          5201382.11,
+          8
+        ],
+        [
+          4000000,
+          1000000,
+          4800000,
+          -3
+        ],
+        [
+          -2700000,
+          4300000,
+          3850000,
+          2020
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "epochs": [
+        1988,
+        2010.25,
+        2020,
+        1980.5
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "approximate-coordinate_frame",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "outputUnits": [
+        "m",
+        "m",
+        "m"
+      ],
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            0.0127,
+            0.0065,
+            -0.0209
+          ],
+          "rotation": [
+            -0.00039,
+            0.0008,
+            -0.00114
+          ],
+          "scalePPM": 0.00195,
+          "referenceEpoch": 1988,
+          "rates": {
+            "translation": [
+              -0.0029,
+              -0.0002,
+              -0.0006
+            ],
+            "rotation": [
+              -0.00011,
+              -0.00019,
+              7e-05
+            ],
+            "scalePPM": 1e-05
+          },
+          "convention": "coordinate_frame",
+          "exact": false,
+          "inverse": false
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=0.0127 +y=0.0065 +z=-0.0209 +rx=-0.00039 +ry=0.0008 +rz=-0.00114 +s=0.00195 +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +drx=-0.00011 +dry=-0.00019 +drz=7e-05 +ds=1e-05 +t_epoch=1988 +convention=coordinate_frame",
+      "points": [
+        [
+          3657660.66,
+          255768.55,
+          5201382.11,
+          8
+        ],
+        [
+          4000000,
+          1000000,
+          4800000,
+          -3
+        ],
+        [
+          -2700000,
+          4300000,
+          3850000,
+          2020
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "epochs": [
+        1988,
+        2010.25,
+        2020,
+        1980.5
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "approximate-coordinate_frame-inverse-step",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "outputUnits": [
+        "m",
+        "m",
+        "m"
+      ],
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            0.0127,
+            0.0065,
+            -0.0209
+          ],
+          "rotation": [
+            -0.00039,
+            0.0008,
+            -0.00114
+          ],
+          "scalePPM": 0.00195,
+          "referenceEpoch": 1988,
+          "rates": {
+            "translation": [
+              -0.0029,
+              -0.0002,
+              -0.0006
+            ],
+            "rotation": [
+              -0.00011,
+              -0.00019,
+              7e-05
+            ],
+            "scalePPM": 1e-05
+          },
+          "convention": "coordinate_frame",
+          "exact": false,
+          "inverse": true
+        }
+      ],
+      "pipeline": "+step +proj=helmert +inv +x=0.0127 +y=0.0065 +z=-0.0209 +rx=-0.00039 +ry=0.0008 +rz=-0.00114 +s=0.00195 +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +drx=-0.00011 +dry=-0.00019 +drz=7e-05 +ds=1e-05 +t_epoch=1988 +convention=coordinate_frame",
+      "points": [
+        [
+          3657660.66,
+          255768.55,
+          5201382.11,
+          8
+        ],
+        [
+          4000000,
+          1000000,
+          4800000,
+          -3
+        ],
+        [
+          -2700000,
+          4300000,
+          3850000,
+          2020
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "epochs": [
+        1988,
+        2010.25,
+        2020,
+        1980.5
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "exact-coordinate_frame",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "outputUnits": [
+        "m",
+        "m",
+        "m"
+      ],
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            0.0127,
+            0.0065,
+            -0.0209
+          ],
+          "rotation": [
+            15000,
+            -7000,
+            3000
+          ],
+          "scalePPM": 0.00195,
+          "referenceEpoch": 1988,
+          "rates": {
+            "translation": [
+              -0.0029,
+              -0.0002,
+              -0.0006
+            ],
+            "rotation": [
+              3,
+              -2,
+              1
+            ],
+            "scalePPM": 1e-05
+          },
+          "convention": "coordinate_frame",
+          "exact": true,
+          "inverse": false
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=0.0127 +y=0.0065 +z=-0.0209 +rx=15000 +ry=-7000 +rz=3000 +s=0.00195 +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +drx=3 +dry=-2 +drz=1 +ds=1e-05 +t_epoch=1988 +convention=coordinate_frame +exact",
+      "points": [
+        [
+          3657660.66,
+          255768.55,
+          5201382.11,
+          8
+        ],
+        [
+          4000000,
+          1000000,
+          4800000,
+          -3
+        ],
+        [
+          -2700000,
+          4300000,
+          3850000,
+          2020
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "epochs": [
+        1988,
+        2010.25,
+        2020,
+        1980.5
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "exact-coordinate_frame-inverse-step",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "outputUnits": [
+        "m",
+        "m",
+        "m"
+      ],
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            0.0127,
+            0.0065,
+            -0.0209
+          ],
+          "rotation": [
+            15000,
+            -7000,
+            3000
+          ],
+          "scalePPM": 0.00195,
+          "referenceEpoch": 1988,
+          "rates": {
+            "translation": [
+              -0.0029,
+              -0.0002,
+              -0.0006
+            ],
+            "rotation": [
+              3,
+              -2,
+              1
+            ],
+            "scalePPM": 1e-05
+          },
+          "convention": "coordinate_frame",
+          "exact": true,
+          "inverse": true
+        }
+      ],
+      "pipeline": "+step +proj=helmert +inv +x=0.0127 +y=0.0065 +z=-0.0209 +rx=15000 +ry=-7000 +rz=3000 +s=0.00195 +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +drx=3 +dry=-2 +drz=1 +ds=1e-05 +t_epoch=1988 +convention=coordinate_frame +exact",
+      "points": [
+        [
+          3657660.66,
+          255768.55,
+          5201382.11,
+          8
+        ],
+        [
+          4000000,
+          1000000,
+          4800000,
+          -3
+        ],
+        [
+          -2700000,
+          4300000,
+          3850000,
+          2020
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "epochs": [
+        1988,
+        2010.25,
+        2020,
+        1980.5
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "translation-rates",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "outputUnits": [
+        "m",
+        "m",
+        "m"
+      ],
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            1,
+            2,
+            3
+          ],
+          "referenceEpoch": 2000,
+          "rates": {
+            "translation": [
+              0.1,
+              -0.2,
+              0.3
+            ]
+          }
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=1 +y=2 +z=3 +rx=0 +ry=0 +rz=0 +s=0 +dx=0.1 +dy=-0.2 +dz=0.3 +drx=0 +dry=0 +drz=0 +ds=0 +t_epoch=2000",
+      "points": [
+        [
+          3657660.66,
+          255768.55,
+          5201382.11,
+          8
+        ],
+        [
+          4000000,
+          1000000,
+          4800000,
+          -3
+        ],
+        [
+          -2700000,
+          4300000,
+          3850000,
+          2020
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "epochs": [
+        1988,
+        2010.25,
+        2020,
+        1980.5
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "scale-rate-exact",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "outputUnits": [
+        "m",
+        "m",
+        "m"
+      ],
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            1,
+            2,
+            3
+          ],
+          "scalePPM": 2,
+          "referenceEpoch": 2000,
+          "rates": {
+            "scalePPM": -0.5
+          },
+          "exact": true
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=1 +y=2 +z=3 +rx=0 +ry=0 +rz=0 +s=2 +dx=0 +dy=0 +dz=0 +drx=0 +dry=0 +drz=0 +ds=-0.5 +t_epoch=2000 +exact",
+      "points": [
+        [
+          3657660.66,
+          255768.55,
+          5201382.11,
+          8
+        ],
+        [
+          4000000,
+          1000000,
+          4800000,
+          -3
+        ],
+        [
+          -2700000,
+          4300000,
+          3850000,
+          2020
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "epochs": [
+        1988,
+        2010.25,
+        2020,
+        1980.5
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "rotation-rate-with-zero-base",
+      "input": {
+        "space": "geocentric",
+        "units": [
+          "m",
+          "m",
+          "m"
+        ]
+      },
+      "outputUnits": [
+        "m",
+        "m",
+        "m"
+      ],
+      "steps": [
+        {
+          "type": "helmert",
+          "translation": [
+            0,
+            0,
+            0
+          ],
+          "referenceEpoch": 1988,
+          "rates": {
+            "rotation": [
+              0.00011,
+              -0.00019,
+              7e-05
+            ]
+          },
+          "convention": "coordinate_frame"
+        }
+      ],
+      "pipeline": "+step +proj=helmert +x=0 +y=0 +z=0 +rx=0 +ry=0 +rz=0 +s=0 +dx=0 +dy=0 +dz=0 +drx=0.00011 +dry=-0.00019 +drz=7e-05 +ds=0 +t_epoch=1988 +convention=coordinate_frame",
+      "points": [
+        [
+          3657660.66,
+          255768.55,
+          5201382.11,
+          8
+        ],
+        [
+          4000000,
+          1000000,
+          4800000,
+          -3
+        ],
+        [
+          -2700000,
+          4300000,
+          3850000,
+          2020
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "epochs": [
+        1988,
+        2010.25,
+        2020,
+        1980.5
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    },
+    {
+      "id": "geographic-height-stack-to-utm",
+      "input": {
+        "space": "geographic",
+        "units": [
+          "deg",
+          "deg",
+          "m"
+        ]
+      },
+      "outputUnits": [
+        "m",
+        "m",
+        "m"
+      ],
+      "steps": [
+        {
+          "type": "unitconvert",
+          "xy": {
+            "from": "deg",
+            "to": "rad"
+          }
+        },
+        {
+          "type": "push",
+          "components": [
+            3
+          ]
+        },
+        {
+          "type": "cart",
+          "ellipsoid": {
+            "ellps": "GRS80"
+          }
+        },
+        {
+          "type": "helmert",
+          "translation": [
+            0.0127,
+            0.0065,
+            -0.0209
+          ],
+          "rotation": [
+            -0.00039,
+            0.0008,
+            -0.00114
+          ],
+          "scalePPM": 0.00195,
+          "referenceEpoch": 1988,
+          "rates": {
+            "translation": [
+              -0.0029,
+              -0.0002,
+              -0.0006
+            ],
+            "rotation": [
+              -0.00011,
+              -0.00019,
+              7e-05
+            ],
+            "scalePPM": 1e-05
+          },
+          "convention": "position_vector",
+          "exact": true
+        },
+        {
+          "type": "cart",
+          "inverse": true
+        },
+        {
+          "type": "pop",
+          "components": [
+            3
+          ]
+        },
+        {
+          "type": "projection",
+          "name": "utm",
+          "parameters": {
+            "zone": "31"
+          }
+        }
+      ],
+      "pipeline": "+step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=push +v_3 +step +proj=cart +ellps=GRS80 +step +proj=helmert +x=0.0127 +y=0.0065 +z=-0.0209 +rx=-0.00039 +ry=0.0008 +rz=-0.00114 +s=0.00195 +dx=-0.0029 +dy=-0.0002 +dz=-0.0006 +drx=-0.00011 +dry=-0.00019 +drz=7e-05 +ds=1e-05 +t_epoch=1988 +convention=position_vector +exact +step +proj=cart +inv +ellps=WGS84 +step +proj=pop +v_3 +step +proj=utm +zone=31 +ellps=WGS84",
+      "points": [
+        [
+          3,
+          52,
+          100,
+          8
+        ],
+        [
+          4,
+          40,
+          -25,
+          -3
+        ],
+        [
+          6,
+          60,
+          0,
+          2020
+        ],
+        [
+          1,
+          -30,
+          2000,
+          0
+        ]
+      ],
+      "epochs": [
+        1988,
+        2010.25,
+        2020,
+        1980.5
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-05
+    }
+  ]
+}

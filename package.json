@@ -17,6 +17,7 @@
   "scripts": {
     "bootstrap": "yarn && ocular-bootstrap && yarn build",
     "build": "ocular-clean && time ocular-build",
+    "check:source-headers": "node scripts/check-source-headers.mjs",
     "check:crs-types": "npx tsc --project test/types/crs/tsconfig.json",
     "check:geoarrow-boundary": "node modules/geoarrow/scripts/check-package-boundary.mjs",
     "check:timezone-types": "npx tsc --project test/types/timezone/tsconfig.json",

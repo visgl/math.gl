@@ -1,4 +1,6 @@
+// math.gl
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Oracle: BSD-3-Clause Hošek-Wilkie 1.4a, integrated at twice the table's angular resolution.
 // https://cgg.mff.cuni.cz/projects/SkylightModelling/
 import {test, expect} from 'vitest';

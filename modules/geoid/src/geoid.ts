@@ -1,6 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) Charles Karney (2009-2018) <charles@karney.com>
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Ported from GeographicLib-1.50.1 under MIT/X11. Original source attribution retained below.
 
 /**
  * Code is ported from GeographicLib-1.50.1

@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {
   CRSReference,
@@ -13,7 +13,6 @@ import type {
   SpatialReference,
   WKTCRSNode
 } from '@math.gl/crs';
-import type {Proj4CRSDefinition} from '@math.gl/proj4/classic';
 
 import {
   egm2008VerticalCRS,
@@ -42,17 +41,16 @@ const geodeticCRS = {
   ...wgs84GeographicCRS,
   type: 'GeodeticCRS' as const
 };
-export const proj4Definitions: Proj4CRSDefinition[] = [
+// CRS metadata can describe compound and vertical definitions even when execution
+// requires an explicit supported operation in @math.gl/projection.
+export const projectionDefinitions: ReadonlyCRSDefinition[] = [
   wgs84GeographicCRS,
   geodeticCRS,
   utm31NProjectedCRS,
-  etrs89BoundCRS
+  etrs89BoundCRS,
+  wgs84Egm2008CompoundCRS,
+  egm2008VerticalCRS
 ];
-
-// @ts-expect-error proj4js does not transform CompoundCRS objects.
-export const unsupportedCompoundCRS: Proj4CRSDefinition = wgs84Egm2008CompoundCRS;
-// @ts-expect-error proj4js does not transform VerticalCRS objects.
-export const unsupportedVerticalCRS: Proj4CRSDefinition = egm2008VerticalCRS;
 
 const wktRoot: WKTCRSNode = {
   type: 'node',

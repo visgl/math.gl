@@ -1,0 +1,11 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
+// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+
+export default function (x: number) {
+  if (Math.abs(x) > 1) {
+    x = x > 1 ? 1 : -1;
+  }
+  return Math.asin(x);
+}

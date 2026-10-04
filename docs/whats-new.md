@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `@math.gl/polygon` adds `subdivideTriangleMesh` for adaptive transformation of polygon and bitmap triangle meshes, with edge/interior error probes, conforming shared-edge refinement, and UV/attribute interpolation weights. See [subdivideTriangleMesh](./modules/polygon/api-reference/subdivide-triangle-mesh.md).
+
+- `@math.gl/polygon` adds `subdividePolyline` for adaptive edge subdivision through application-supplied coordinate transforms, including source/target buffers, attribute interpolation metadata, and explicit resource limits. See [subdividePolyline](./modules/polygon/api-reference/subdivide-polyline.md).
+
 - `@math.gl/dggs` adds `unwrapDGGSBoundary` and optional unwrapping on decoder boundary, flat-boundary, and bounds methods. Antimeridian-crossing cells can use continuous longitudes while existing calls retain their output. See [DGGSDecoder](./modules/dggs/api-reference/dggs-decoder.md).
 
 <table style={{border: 0, align: "center"}}>
@@ -138,9 +142,11 @@ Highlights:
 - Moves reusable GeoArrow math out of loaders.gl and luma.gl prototypes while leaving runtime
   adapters, worker scheduling, and GPU resources with their owning libraries.
 
-**`@math.gl/proj4`**
+**`@math.gl/projection`**
 
-- Updates proj4js to v2.20.9 and accepts modern WKT2 definitions and the supported PROJJSON CRS object types.
+- Renames `@math.gl/proj4` to `@math.gl/projection`, with a pluggable math.gl projection engine, lazy algorithms, in-place buffers and explicit coordinate operations.
+- Removes the deprecated `Proj4Projection` alias and `/classic` wrapper. The package has no proj4js runtime dependency; comparisons and compatibility tests use a pinned development dependency.
+- Adds a [projection catalogue](./modules/projection/projections.md) and a [guide to ellipsoids, datums, heights and epochs](./modules/projection/coordinate-systems.md).
 - Adds optional CRS axis-order enforcement and NTv2 datum-grid registration.
 - Defines aliases for WGS84 UTM and UPS EPSG coordinate systems automatically.
 

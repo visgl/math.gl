@@ -1,4 +1,6 @@
+// math.gl
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Reference: https://cgg.mff.cuni.cz/projects/SkylightModelling/
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';

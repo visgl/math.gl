@@ -1,6 +1,6 @@
 // math.gl
-// SPDX-License-Identifier: MIT and ISC
-// Copyright (c) vis.gl contributors
+// SPDX-License-Identifier: MIT AND ISC
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /* eslint-disable max-statements, max-depth, complexity, no-unused-expressions */
 

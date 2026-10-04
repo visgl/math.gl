@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import OpenLocationCodePackage, {type OpenLocationCodeArea} from 'open-location-code';
 import {type Bounds2D} from '@math.gl/types';

@@ -1,0 +1,14 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
+// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+
+import hypot from './hypot';
+import log1py from './log1py';
+
+export default function (x: number) {
+  var y = Math.abs(x);
+  y = log1py(y * (1 + y / (hypot(1, y) + 1)));
+
+  return x < 0 ? -y : y;
+}

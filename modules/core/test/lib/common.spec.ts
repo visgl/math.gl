@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
-// Copyright (c) 2017 Uber Technologies, Inc.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) 2017 Uber Technologies, Inc.
 
 import {test, expect} from 'vitest';
 import {Vector2, Vector3, Pose, _MathUtils} from '@math.gl/core';

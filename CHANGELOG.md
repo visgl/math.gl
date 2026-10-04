@@ -2,6 +2,58 @@
 
 ## Unreleased
 
+- perf(projection): Transform single-stage kinematic Helmert coordinate buffers
+  directly with numeric locals. Prepare constant batch epochs once, preserve mixed
+  observation epochs and scalar arithmetic, and qualify ownership/failure behavior
+  with independent benchmarks, allocation checks and packed consumers.
+
+- perf(projection): Execute single-stage static Helmert batches directly on
+  coordinate buffers, preserving scalar arithmetic, precision, epochs and failure
+  commits. Qualify both rotation conventions and inverse steps with expanded
+  independent benchmarks, allocation checks and package coverage.
+
+- feat(projection): Add optional `OperationCatalog` for deterministic selection of
+  application-reviewed operations by full area/epoch coverage, declared accuracy and
+  available grid revisions, with rejection diagnostics and pinned provenance.
+  Preserve execution/bundle isolation and include no third-party database or model data.
+
+- perf(projection): Compile unit/axis-only pipelines into whole-buffer operations.
+  Share guarded point/stack scratch across scalar and bulk calls, preserve per-step
+  arithmetic and validation, and expand paired benchmarks and recursion/rounding tests.
+
+- feat(projection): Add `projectTo` / `unprojectTo` and synchronous variants for reusable
+  scalar outputs on projections and pipelines. Support arrays, floating-point typed
+  arrays, in-place use and explicit pipeline epochs; qualify ownership/error behavior
+  and record paired timing, allocation estimates and bundle cost.
+
+- perf(projection): Pack horizontal grid nodes into owned Float64 storage and remove
+  coordinate temporaries in five projection algorithms. Reuse scalar scratch/stack
+  storage with recursive-call isolation. Add source allocation auditing,
+  grid preparation/memory benchmarks and live cases for the affected algorithms.
+
+- feat(proj4): Add optional prepared ENU velocity models and GeoTIFF raster adapters
+  for explicit coordinate epoch propagation in scalar and typed-array pipelines.
+
+- perf(proj4): Reduce mixed-epoch Helmert allocation and prepare fixed unit/axis
+  constants; add paired pipeline timing/allocation reports and independent projected-to-projected references.
+
+- feat(proj4): Add explicit coordinate epochs and kinematic Helmert rates to pipelines,
+  with constant-batch and separate per-record epoch inputs that preserve M.
+
+- feat(proj4): Extend typed pipelines with exact Helmert rotations, ordinate stacks,
+  direction-specific steps and explicit rotated-projection output units (#171).
+
+- Rename `@math.gl/proj4` to `@math.gl/projection` and use `Projection` as the convenience class. Remove the deprecated `Proj4Projection` alias, `/classic` wrapper and proj4js-specific CRS helpers; proj4js is now development-only for comparisons and tests.
+- Standardize SPDX copyright headers across all tracked math.gl source files and enforce them in CI. Add machine-readable projection provenance and proj4js/PROJ credits; preserve upstream notices and license terms, including Equal Earth's Apache-2.0 notice.
+- Add a projection catalogue and a guide to coordinate systems, ellipsoids, datums, heights and epochs. Expand module attribution and migration documentation.
+
+## v5.0.0-alpha.11
+
+- feat(proj4): Support vertical GeoTIFF geoid grids (#165)
+- feat(proj4): Compose typed operation pipelines (tranche 12B2) (#168)
+- feat(proj4): Rename the configurable alpha API to `ProjectionEngine` and focus
+  documentation on using the math.gl projection engine (#169)
+
 ## v5.0.0-alpha.10
 
 - feat(proj4): Add experimental TypeScript engine and parity roadmap (#142)

@@ -1,5 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {mkdtemp, rm} from 'node:fs/promises';

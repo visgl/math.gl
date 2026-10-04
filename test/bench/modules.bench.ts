@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // math.gl, MIT license
 
 // @ts-expect-error tsconfig configuration issue?
@@ -7,7 +10,7 @@ import {coreBench} from '../../modules/core/test/bench';
 import {geospatialBench} from '../../modules/geospatial/test/bench';
 import {cullingBench} from '../../modules/culling/test/bench';
 import {polygonBench} from '../../modules/polygon/test/bench';
-import {proj4Bench} from '../../modules/proj4/test/bench';
+import {projectionBench} from '../../modules/projection/test/bench';
 import {geoarrowBench} from '../../modules/geoarrow/test/bench';
 
 export default function addBenchmarks(suite: Bench, addReferenceBenchmarks: boolean): Bench {
@@ -16,7 +19,7 @@ export default function addBenchmarks(suite: Bench, addReferenceBenchmarks: bool
   cullingBench(suite, addReferenceBenchmarks);
   polygonBench(suite, addReferenceBenchmarks);
   geoarrowBench(suite);
-  proj4Bench(suite);
+  projectionBench(suite);
 
   return suite;
 }

@@ -1,4 +1,6 @@
+// math.gl
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original integration code using the BSD-3-Clause Hošek-Wilkie 1.4a reference API.
 // Reference: https://cgg.mff.cuni.cz/projects/SkylightModelling/
 // Color matching: Wyman, Sloan & Shirley (2013), Equation 4 / Table 1 (not copied code).

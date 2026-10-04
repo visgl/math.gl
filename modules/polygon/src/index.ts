@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 export {Polygon} from './polygon';
 
@@ -23,3 +23,13 @@ export {cutPolylineByMercatorBounds, cutPolygonByMercatorBounds} from './cut-by-
 
 /** @deprecated */
 export {Polygon as _Polygon} from './polygon';
+
+export {subdividePolyline} from './subdivide-polyline';
+export type {SubdividePolylineOptions, SubdividedPolyline} from './subdivide-polyline';
+
+export {subdivideTriangleMesh} from './subdivide-triangle-mesh';
+export type {
+  TriangleMesh,
+  SubdivideTriangleMeshOptions,
+  SubdividedTriangleMesh
+} from './subdivide-triangle-mesh';

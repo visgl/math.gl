@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /** WKT-CRS standards and common compatibility dialects understood by the validator. */
 export type WKTCRSProfile = 'wkt1' | 'wkt2:2015' | 'wkt2:2019' | 'gdal' | 'esri';

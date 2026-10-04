@@ -1,5 +1,7 @@
+// math.gl
 // SPDX-License-Identifier: MIT
-// Model/data reference: https://cgg.mff.cuni.cz/projects/SkylightModelling/
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original wrapper of derived Hošek-Wilkie data; reference: https://cgg.mff.cuni.cz/projects/SkylightModelling/
 // Derived BSD-3-Clause data and notices: ./data/sunlight.ts and ../LICENSE-HOSEK-WILKIE.
 import {SUNLIGHT_DATA} from './data/sunlight';
 

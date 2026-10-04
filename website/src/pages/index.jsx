@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React from 'react';
 import {Home} from '@vis.gl/docusaurus-website/components';
 import useBaseUrl from '@docusaurus/useBaseUrl';

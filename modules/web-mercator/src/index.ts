@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Classic web-mercator-project
 export {WebMercatorViewport} from './web-mercator-viewport';
 

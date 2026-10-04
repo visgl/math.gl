@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Geometry, type GeometryAttributeInput} from '../lib/geometry';
 import {assertPositive, makeIndices, type PrimitiveGeometryProps} from './geometry-helpers';

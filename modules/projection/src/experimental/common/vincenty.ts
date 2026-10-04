@@ -1,0 +1,180 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
+// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0, modified to write into caller-owned storage without temporary result objects. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+
+import type {Point} from '../kernel';
+
+/**
+ * Calculates the inverse geodesic problem using Vincenty's formulae.
+ * Computes the forward azimuth and ellipsoidal distance between two points
+ * specified by latitude and longitude on the surface of an ellipsoid.
+ *
+ * @param {number} lat1 Latitude of the first point in radians.
+ * @param {number} lon1 Longitude of the first point in radians.
+ * @param {number} lat2 Latitude of the second point in radians.
+ * @param {number} lon2 Longitude of the second point in radians.
+ * @param {number} a Semi-major axis of the ellipsoid (meters).
+ * @param {number} f Flattening of the ellipsoid.
+ * @param output Caller-owned storage: x is forward azimuth (radians), y is distance (meters).
+ */
+export function vincentyInverse(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+  a: number,
+  f: number,
+  output: Point
+): void {
+  const L = lon2 - lon1;
+  const U1 = Math.atan((1 - f) * Math.tan(lat1));
+  const U2 = Math.atan((1 - f) * Math.tan(lat2));
+  const sinU1 = Math.sin(U1),
+    cosU1 = Math.cos(U1);
+  const sinU2 = Math.sin(U2),
+    cosU2 = Math.cos(U2);
+
+  let lambda = L,
+    lambdaP,
+    iterLimit = 100;
+  let sinLambda, cosLambda, sinSigma, cosSigma, sigma, sinAlpha, cos2Alpha, cos2SigmaM, C;
+  let uSq, A, B, deltaSigma, s;
+
+  do {
+    sinLambda = Math.sin(lambda);
+    cosLambda = Math.cos(lambda);
+    sinSigma = Math.sqrt(
+      cosU2 * sinLambda * (cosU2 * sinLambda) +
+        (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda)
+    );
+    if (sinSigma === 0) {
+      output.x = 0;
+      output.y = 0;
+      return; // coincident points
+    }
+    cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
+    sigma = Math.atan2(sinSigma, cosSigma);
+    sinAlpha = (cosU1 * cosU2 * sinLambda) / sinSigma;
+    cos2Alpha = 1 - sinAlpha * sinAlpha;
+    cos2SigmaM = cos2Alpha !== 0 ? cosSigma - (2 * sinU1 * sinU2) / cos2Alpha : 0;
+    C = (f / 16) * cos2Alpha * (4 + f * (4 - 3 * cos2Alpha));
+    lambdaP = lambda;
+    lambda =
+      L +
+      (1 - C) *
+        f *
+        sinAlpha *
+        (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
+  } while (Math.abs(lambda - lambdaP) > 1e-12 && --iterLimit > 0);
+
+  if (iterLimit === 0) {
+    output.x = NaN;
+    output.y = NaN;
+    return; // formula failed to converge
+  }
+
+  uSq = (cos2Alpha * (a * a - a * (1 - f) * (a * (1 - f)))) / (a * (1 - f) * (a * (1 - f)));
+  A = 1 + (uSq / 16384) * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
+  B = (uSq / 1024) * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
+  deltaSigma =
+    B *
+    sinSigma *
+    (cos2SigmaM +
+      (B / 4) *
+        (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) -
+          (B / 6) *
+            cos2SigmaM *
+            (-3 + 4 * sinSigma * sinSigma) *
+            (-3 + 4 * cos2SigmaM * cos2SigmaM)));
+
+  s = a * (1 - f) * A * (sigma - deltaSigma);
+
+  // Forward azimuth
+  const azi1 = Math.atan2(cosU2 * sinLambda, cosU1 * sinU2 - sinU1 * cosU2 * cosLambda);
+
+  output.x = azi1;
+  output.y = s;
+}
+
+/**
+ * Solves the direct geodetic problem using Vincenty's formulae.
+ * Given a starting point, initial azimuth, and distance, computes the destination point on the ellipsoid.
+ *
+ * @param {number} lat1 Latitude of the starting point in radians.
+ * @param {number} lon1 Longitude of the starting point in radians.
+ * @param {number} azi1 Initial azimuth (forward azimuth) in radians.
+ * @param {number} s12 Distance to travel from the starting point in meters.
+ * @param {number} a Semi-major axis of the ellipsoid in meters.
+ * @param {number} f Flattening of the ellipsoid.
+ * @param output Caller-owned storage: x is destination longitude, y is latitude (radians).
+ */
+export function vincentyDirect(
+  lat1: number,
+  lon1: number,
+  azi1: number,
+  s12: number,
+  a: number,
+  f: number,
+  output: Point
+): void {
+  const U1 = Math.atan((1 - f) * Math.tan(lat1));
+  const sinU1 = Math.sin(U1),
+    cosU1 = Math.cos(U1);
+  const sinAlpha1 = Math.sin(azi1),
+    cosAlpha1 = Math.cos(azi1);
+
+  const sigma1 = Math.atan2(sinU1, cosU1 * cosAlpha1);
+  const sinAlpha = cosU1 * sinAlpha1;
+  const cos2Alpha = 1 - sinAlpha * sinAlpha;
+  const uSq = (cos2Alpha * (a * a - a * (1 - f) * (a * (1 - f)))) / (a * (1 - f) * (a * (1 - f)));
+  const A = 1 + (uSq / 16384) * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
+  const B = (uSq / 1024) * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
+
+  let sigma = s12 / (a * (1 - f) * A),
+    sigmaP,
+    iterLimit = 100;
+  let cos2SigmaM, sinSigma, cosSigma, deltaSigma;
+
+  do {
+    cos2SigmaM = Math.cos(2 * sigma1 + sigma);
+    sinSigma = Math.sin(sigma);
+    cosSigma = Math.cos(sigma);
+    deltaSigma =
+      B *
+      sinSigma *
+      (cos2SigmaM +
+        (B / 4) *
+          (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) -
+            (B / 6) *
+              cos2SigmaM *
+              (-3 + 4 * sinSigma * sinSigma) *
+              (-3 + 4 * cos2SigmaM * cos2SigmaM)));
+    sigmaP = sigma;
+    sigma = s12 / (a * (1 - f) * A) + deltaSigma;
+  } while (Math.abs(sigma - sigmaP) > 1e-12 && --iterLimit > 0);
+
+  if (iterLimit === 0) {
+    output.x = NaN;
+    output.y = NaN;
+    return;
+  }
+
+  const tmp = sinU1 * sinSigma - cosU1 * cosSigma * cosAlpha1;
+  const lat2 = Math.atan2(
+    sinU1 * cosSigma + cosU1 * sinSigma * cosAlpha1,
+    (1 - f) * Math.sqrt(sinAlpha * sinAlpha + tmp * tmp)
+  );
+  const lambda = Math.atan2(sinSigma * sinAlpha1, cosU1 * cosSigma - sinU1 * sinSigma * cosAlpha1);
+  const C = (f / 16) * cos2Alpha * (4 + f * (4 - 3 * cos2Alpha));
+  const L =
+    lambda -
+    (1 - C) *
+      f *
+      sinAlpha *
+      (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
+  const lon2 = lon1 + L;
+
+  output.x = lon2;
+  output.y = lat2;
+}

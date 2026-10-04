@@ -1,0 +1,669 @@
+# Projection benchmarks
+
+import BrowserOnly from '@docusaurus/BrowserOnly';
+
+The math.gl projection engine offers `projectFlat` and `unprojectFlat` for interleaved
+Float32/Float64 buffers. Reuse the projection instance: normalization and plugin
+initialization are setup costs that should be amortized over many coordinates.
+Performance depends on the projection, layout, runtime and hardware.
+
+## Live benchmarks
+
+Compare the current math.gl projection engine with the classic proj4js backend on
+your own browser and hardware. Choose a buffer layout and direction, then run the
+inline benchmark. Nothing runs until you press **Run benchmarks**.
+
+<BrowserOnly fallback={<p>Live benchmarks are available in a browser with JavaScript enabled.</p>}>
+  {() => {
+    const Proj4Benchmarks = require('@site/src/components/projection-benchmarks').default;
+    return <Proj4Benchmarks />;
+  }}
+</BrowserOnly>
+
+The math.gl columns use the default `Projection`, through its in-place and
+scalar APIs, labeled **math.gl flat** and **math.gl scalar**. The **proj4js 2.22.0**
+column uses the pinned `proj4` dependency directly. All three process the same coordinates into
+the same typed-array layout. Scalar paths reuse an input array and copy returned
+coordinates into the output buffer. Every coordinate is checked before timing,
+including height and trailing ordinates. Datum-shift cases enable axis enforcement
+to compare computed heights consistently. Implementation order rotates between samples.
+
+The twenty-two shared cases cover spherical and ellipsoidal Mercator, UTM in both hemispheres,
+Lambert conformal conic, Albers, equidistant conic, Lambert azimuthal equal area, polar stereographic,
+Equal Earth, Mollweide, azimuthal equidistant, Robinson, Oblique Mercator, QSC,
+tilted perspective, three- and seven-parameter datum shifts, UTM-to-Mercator,
+US survey feet, north/east axis order, and an authored synthetic NTv2 grid.
+Regional samples cover each projection's useful domain; clustered samples concentrate
+in four smaller regions. Both are reproducible from a fixed seed. XY, XYZ and XYZM
+share the same horizontal coordinates; heights vary, and M is preserved. The buffer
+selector supports up to one million coordinates.
+
+These are warmed transformation measurements, excluding loading and construction.
+Inverse runs start from coordinates projected by the reference implementation.
+Each of seven samples transforms independent buffer copies, with resets outside timing.
+Calibration targets at least 12 ms for the fastest implementation, up to one million
+coordinates or 256 buffers per sample. The table reports the median normalized to one
+selected buffer, and throughput in **million coordinates per second** (the **M** suffix).
+The p10–p90 spread describes sample variation; it is not a confidence interval.
+
+Green dots mark the fastest result in each row, including ties. Small multipliers show
+math.gl throughput relative to proj4js: **3×** means three times as many coordinates per
+second. Bold values and dots identify the fastest measured median even when timings vary.
+Timing notices remain visible when the minimum duration cannot be reached or any
+implementation's p10–p90 range exceeds 25% of its median. These flags help expose timer
+limits and interference from other work; rerun to check consistency. Ratios and highlights
+do not establish statistical significance. Medians below timer resolution cannot be ranked
+or used to calculate a ratio.
+**Download results** saves the raw aggregate samples, normalized statistics, seed,
+settings and browser metadata. The benchmark runs in a dedicated worker with Stop and
+rerun controls. It does not measure allocations, startup or bundle size.
+
+## Reproduce
+
+Build the packages before measuring their published entry points:
+
+```sh
+yarn build
+node modules/projection/scripts/benchmark.mjs --points 50000 --samples 7 --allocations --output /tmp/proj4-benchmark.json
+node modules/projection/scripts/check-bundle-budget.mjs
+node modules/projection/scripts/check-lazy-package.mjs
+node modules/projection/scripts/check-packed-package.mjs
+```
+
+The standalone Node runner and browser qualification runner use the same workload as
+the live page: twenty-two scenarios, Float32/Float64, XY/XYZ/XYZM and both directions
+(264 rows, with three implementations per row). Select regional or clustered inputs
+with `--distribution regional|clustered`; set `--min-sample-ms` between 0 and 100 to
+control adaptive sampling. Zero disables calibration for correctness smoke checks and
+marks timings as limited. Buffer sizes range from 10 to 1,000,000 points.
+
+Converters and buffers are prepared outside timing. Scalar competitors reuse an input
+coordinate array and copy results into the same typed-buffer layout. Every ordinate is
+validated against pinned proj4js 2.22.0 before timing, including axes and computed heights;
+Float32 tolerances account for storage rounding. Buffer resets are excluded, execution
+order rotates, and output contributes to a checksum.
+
+Schema-version-2 JSON reports retain individual aggregate samples, per-buffer medians
+and p10/p90, repetition counts, seed, workload/source fingerprints and runtime metadata.
+Warmed constructor measurements are separate. Browser qualification additionally measures
+module loading and first use in fresh contexts. CI uploads browser artifacts and gates
+correctness and bundle sizes; it does not gate noisy speed ratios. Pull requests use 20,000 points, three samples and
+`--min-sample-ms 0`: all 792 workloads and independent references still run, but
+adaptive timing repetitions are disabled. These PR browser measurements are marked
+`timingLimited` and serve as correctness checks, not performance evidence. Pushes to
+master retain seven samples and a 12 ms calibration target for full browser reports.
+The separate paired Node performance comparison remains unchanged on every PR.
+
+### Compare a runtime change with its base
+
+```sh
+node modules/projection/scripts/benchmark-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --output /tmp/proj4-comparison.json
+```
+
+The comparison compiles baseline runtime sources from Git and current sources with the
+same bundler, package manifests and installed dependencies. It uses the current shared
+workload for both versions, validates both against proj4js, and rotates baseline/candidate
+flat/scalar execution order. It covers XY and XYZM in both precisions and directions;
+constructor batches alternate separately. `--scenarios` accepts comma-separated scenario
+names to focus a run. On pull requests, CI measures nine representative scenarios against
+the actual base commit and uploads `proj4-performance-comparison`.
+
+`--clock thread-cpu` (Node 24.14 or later) is an optional diagnostic using main-thread CPU
+time. It reduces scheduler interference but excludes time spent off the thread; **it is
+not elapsed throughput** and must not be compared directly with the live table. Default
+reports use elapsed wall time. Always inspect sample variation before interpreting ratios.
+
+Tranche 9 removes duplicate plugin-registry construction and resolves CRS kinds, unit
+factors and Helmert coefficients once per compiled transform. It retains operation order,
+validation, height handling and partial batch commit behavior. On the local Apple M2,
+a paired CPU-time diagnostic against `a0d70d7c` showed 1.38–1.51× constructor throughput
+across five cases. Transformation changes were smaller and mixed; elapsed measurements
+on the busy host were too variable to support a general speedup claim. CI artifacts
+provide the corresponding elapsed-time comparison for each PR revision.
+
+`--allocations` uses V8's sampling heap profiler with a 4096-byte sampling interval,
+including allocations collected by minor/major GC, in a separate untimed run. Reported
+bytes per point are **sampled estimates of all JS allocations**, not retained heap,
+exact counts, or counts of coordinate arrays. Near-zero samples do not prove zero
+allocation. Built-in execution avoids temporary coordinate arrays; some kernels and
+runtime operations still allocate objects. Custom plugins can provide mutable hooks
+or retain their allocating scalar fallback.
+
+The standard Node/browser benchmark suites also include proj4 comparisons for both
+float types. Those suite timings include an identical buffer reset in every contender;
+use the standalone runner for separate forward/inverse, dimension and allocation results.
+
+## Tranche 10 batch-kernel measurements
+
+The optional whole-buffer path fuses the simple geographic/projected pipeline around
+Mercator, transverse Mercator/UTM and common conic equations. It preserves the equations,
+validation and per-record commit contract; it does not change the scalar API.
+
+Measured September 30, 2026 on Apple M2, Node 24.14.0, against master
+`494d6fa5`, using 20,000 points and 11 rotated adaptive samples.
+These are **main-thread CPU-time speedups**, not browser or elapsed throughput.
+The ranges below span Float64 XY/XYZM and forward/inverse medians, not confidence intervals:
+
+| Projection | Batch CPU-time speedup range |
+| --- | ---: |
+| Web Mercator | 1.16–1.58× |
+| Ellipsoidal Mercator | 1.01–1.15× |
+| UTM 31N | 0.98–1.05× |
+| Lambert conformal conic | 1.03–1.14× |
+| Albers equal area | 1.04–1.10× |
+| Equidistant conic | 1.02–1.30× |
+
+UTM is dominated by its projection equations and shows little change; there is no
+uniform gain across every projection or direction. Scalar and construction results
+remain mixed. Raw samples, variation, clock and source/workload fingerprints are retained
+in [the diagnostic report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/batch-kernels-cpu.json).
+Use the CI comparison artifact for elapsed measurements on each PR revision. Browser
+qualification validates 792 warm workloads per engine, including the independent PROJ
+reference corpus. Reuse compiled instances to amortize batch-factory setup.
+
+## Historical initial measurements
+
+Measured September 29, 2026 on Apple M2 / macOS arm64, Node v24.5.0
+(V8 13.6.233.10-node.21), proj4 2.22.0. Median of 7 warmed
+passes over 50,000 points. Selected Float64, 2D forward results, in **million points/second**:
+
+| Case | math.gl flat | math.gl scalar | proj4 import | Wrapper | Batch/import |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Web Mercator | 18.68 | 11.93 | 4.42 | 4.39 | 4.22× |
+| UTM 31N | 4.04 | 3.81 | 2.44 | 2.50 | 1.65× |
+| Lambert conic | 9.39 | 8.15 | 3.51 | 3.69 | 2.67× |
+| Helmert to Mercator | 4.12 | 3.84 | 2.21 | 2.29 | 1.86× |
+
+Sampled estimated allocation bytes/point for the same cases (500,000 points per
+implementation, separate profiling run):
+
+| Case | math.gl flat | math.gl scalar | proj4 import | Wrapper |
+| --- | ---: | ---: | ---: | ---: |
+| Web Mercator | 0.04 | 159.70 | 601.33 | 607.11 |
+| UTM 31N | 48.27 | 206.20 | 651.58 | 648.47 |
+| Lambert conic | 0.44 | 159.33 | 600.47 | 598.27 |
+| Helmert to Mercator | 79.07 | 239.64 | 957.04 | 953.60 |
+
+Warmed constructor medians ranged from 21.0–33.7 µs for the math.gl projection engine,
+versus 2.4–5.4 µs for the direct import. Prefer one compiled instance per
+CRS pair. Construction order/JIT state affect these figures; use them as a local
+baseline, not a production latency promise.
+
+
+## Bundle budgets and release gates
+
+The table below preserves the initial tranche 7 baseline. For current measurements,
+including optional WKT/PROJJSON readers and grid adapters, see the
+[projection engine guide](./projection-engine.md#tree-shaking-and-bundle-size).
+
+`bundle-budgets.json` records measured baselines and explicit limits with approximately
+10% headroom, rounded up to 100 bytes. The check uses esbuild browser ESM targeting
+ES2020, minification and gzip level 9. It exercises retained public exports rather
+than an empty tree-shaken program. `allNativeExports` deliberately retains all plugins
+and optional CRS/grid readers; it is not a default global projection preset.
+
+| Retained entry | Minified bytes | Gzip bytes |
+| --- | ---: | ---: |
+| core | 42,306 | 15,612 |
+| mercator | 43,672 | 16,090 |
+| utm | 50,526 | 18,834 |
+| allNativeExports | 138,144 | 47,432 |
+| proj4Wrapper | 131,932 | 43,443 |
+
+
+`check-experimental-package.mjs` separately checks that selected bundles exclude
+unrelated plugins, readers and the upstream runtime. `check-packed-package.mjs` creates
+real npm tarballs for proj4 and its math.gl dependencies, extracts them into an isolated
+temporary consumer, and tests ESM, CommonJS, strict NodeNext declarations, batch behavior
+and distributed licenses. The installed third-party proj4 dependency is reused without
+fetching or publishing anything.
+
+Tranche 9 compiled pipeline constants bring the rotated lazy example’s initial graph
+to 17,720 gzip bytes on Node 24.14.0. Its allowance increases from 17,700 to 17,800
+bytes; other byte limits remained unchanged in that tranche.
+
+Tranche 10 adds the shared batch adapter to eligible projection bundles. Static bundles
+retain their existing limits. The UTM, WKT and rotated lazy initial graphs now measure
+48,390/18,137, 48,258/17,503 and 48,316/18,073 minified/gzip bytes respectively. Their
+initial limits are reviewed and rounded up to 100 bytes; catalogue and deferred limits
+remain unchanged. See the [current size tables](./projection-engine.md#tree-shaking-and-bundle-size).
+
+Performance and packaging do not establish geodetic parity. The math.gl projection engine is now the default;
+the [support profile](./support.md) defines the scope of the projection API
+and the migration to the default Projection wrapper. Historical wrapper timings
+refer to the upstream proj4js implementation. The historical wrapper was removed
+when the package was renamed; current comparisons import `proj4` directly.
+
+
+## Historical release qualification measurements
+
+The checked-in raw reports under `modules/projection/test/fixtures/qualification/` include
+source SHA-256 fingerprints, all samples, exact engine versions and methodology.
+These recorded timings predate the Robinson pole correction and its 32 additional
+reference points; subsequent CI artifacts qualify the updated source and corpus.
+Measured September 29, 2026 on Apple M2 / macOS arm64, Node 24.5.0, with 20,000
+points and seven samples. These are distinct from the earlier baseline above.
+
+Selected Float64/2D forward throughput, in million points/second:
+
+| Engine | Projection | math.gl flat | proj4 import |
+| --- | --- | ---: | ---: |
+| chromium 151.0.7922.34 | Mercator | 14.29 | 5.41 |
+| chromium 151.0.7922.34 | UTM | 3.77 | 2.67 |
+| webkit 26.5 | Mercator | 10.00 | 10.00 |
+| webkit 26.5 | UTM | 4.00 | 4.00 |
+| Node 24.5.0 | Web Mercator | 18.77 | 4.70 |
+| Node 24.5.0 | UTM 31N | 4.09 | 2.45 |
+| Node 24.5.0 | Lambert conic | 9.47 | 3.63 |
+| Node 24.5.0 | Helmert to Mercator | 4.13 | 2.26 |
+
+WebKit's coarse timer quantizes short workloads: its equal displayed values are
+not evidence of exactly equal performance. Firefox startup stalls on this macOS 27
+host; Linux CI runs all three engines, checks all independent projection fixtures,
+and uploads its own versioned performance report. No Firefox result is inferred
+from Chromium or WebKit.
+
+The same-day [Linux CI run](https://github.com/visgl/math.gl/actions/runs/36636932010)
+passed in all three engines on an AMD EPYC 9V74 / Linux x64 runner. Its raw report
+is preserved as `qualification/browser-linux.json`, using the same runtime source
+fingerprint, point count and sample count. Each engine verified all 134 configurations /
+2,354 reference points and completed 64 warm workloads and 21 cold samples.
+
+| Linux engine | Projection | math.gl flat (Mpoints/s) | proj4 import (Mpoints/s) |
+| --- | --- | ---: | ---: |
+| Chromium 151.0.7922.34 | Mercator | 7.69 | 3.08 |
+| Chromium 151.0.7922.34 | UTM | 2.06 | 1.46 |
+| Firefox 153.0 | Mercator | 6.67 | 3.33 |
+| Firefox 153.0 | UTM | 2.50 | 2.00 |
+| WebKit 26.5 | Mercator | 6.67 | 6.67 |
+| WebKit 26.5 | UTM | 2.86 | 3.33 |
+
+These shared-runner measurements also have timer quantization. math.gl flates are
+not uniformly faster in every engine/workload: WebKit UTM was slower in this run.
+
+Fresh Node process medians (OS caches warm; separate process/module registries):
+
+| Import | Process lifetime (ms) | Module load (ms) | First construction (µs) |
+| --- | ---: | ---: | ---: |
+| native-selected | 40.02 | 7.43 | 1416.29 |
+| native-barrel | 67.98 | 33.40 | 1396.17 |
+| proj4 | 67.40 | 25.35 | 94.08 |
+| wrapper | 59.00 | 26.82 | 108.21 |
+
+Selected math.gl subpaths reduce module-loading work compared with the full barrel.
+math.gl first construction remains more expensive than proj4's: prepare and reuse
+converters rather than constructing one per coordinate. Browser cold measurements
+separately record bundle fetch/parse/evaluation, first construction and first projection
+in fresh contexts; they do not flush operating-system caches.
+
+Sampled allocation estimates for math.gl batch versus proj4 were approximately
+0 versus 595 bytes/point for Mercator, 49 versus 641 for UTM, 0 versus 595 for LCC,
+and 78 versus 977 for Helmert-to-Mercator. Zero samples do not prove zero allocation;
+these are V8 statistical estimates, including collected objects, not exact allocation
+counts. Scalar APIs allocate output arrays; mutable batch hooks avoid those arrays.
+
+Reproduce the additional qualification after building:
+
+```sh
+node modules/projection/scripts/benchmark-startup.mjs --samples 7 --output /tmp/startup.json
+yarn playwright install --with-deps chromium firefox webkit
+node modules/projection/scripts/benchmark-browser.mjs --points 20000 --samples 7 --output /tmp/browsers.json
+```
+
+Each browser first measures separate math.gl and direct-proj4 bundles, then checks
+all independent projection references. Current warm workloads use the twenty-two-scenario
+shared matrix described above, including XYZ. The historical tables retain their older
+workload and wrapper column for provenance; they are not current benchmark results.
+The runner bounds each browser to 300 seconds. CI keeps downloadable measurements and
+gates correctness. The Node startup runner also checks the first computed coordinate in
+every fresh process. Packed-consumer, tree-shaking and bundle-size checks exercise the
+canonical projection paths and retained compatibility aliases.
+
+### Compare operation pipeline performance
+
+```sh
+node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --allocations --output /tmp/proj4-pipeline-comparison.json
+```
+
+This runner compares the historical and current `ProjectionPipeline` using the same
+source bundler and installed dependencies. The base must support the tested static
+and kinematic pipeline APIs. It covers 26 scenarios in both precisions, XYZ/XYZM and
+both directions (208 rows): units, signed axes, Mercator-to-UTM, static and exact
+Helmert, horizontal/vertical grids, ordinate stacks and batch/mixed observation epochs.
+Coordinates have repeatable bounded jitter around the independently checked fixtures.
+One epoch buffer is supplied separately and stays unchanged; M varies by record.
+
+Both runtimes pass pinned PROJ forward/inverse anchors before measurement. Every
+seeded output is then checked against the baseline scalar result with precision-aware
+tolerances, including exact M preservation. Mercator, Mercator-to-UTM and the static
+datum-to-Mercator pair also include direct **proj4js 2.22.0** measurements, validated
+within `1e-4` output units. Other rows omit this comparator: proj4js does not implement
+the typed pipeline, exact Helmert or kinematic epoch contracts being measured.
+
+The report labels baseline/current flat and scalar implementations separately. Setup,
+fixture checks, coordinate preparation and buffer resets stay outside timing. Adaptive
+sampling and rotating execution order match the existing comparison runner. Raw samples,
+median/p10–p90, timing warnings, seed, workload/source/grid fingerprints, versions and
+machine metadata are retained. `--scenarios` accepts comma-separated case names.
+`--clock thread-cpu` provides the same optional CPU-time diagnostic; its timings describe
+main-thread work rather than elapsed throughput. Allocation sampling starts after every timing row has finished, so profiling
+does not affect later timing rows. Its untimed pass reports sampled estimates,
+including collected objects. `--allocation-iterations` controls the untimed repetitions
+(default 10, maximum 100,000), allowing allocation sampling of short repeated batches
+without changing timing sample counts or default CI work.
+
+Tranche 13A keeps mutable kinematic coefficients and their cached epoch in owned
+Float64 storage, reducing numeric boxing when epochs change. It also prepares fixed
+unit factors and signed-axis selections once. It preserves equation/operation order
+and checks
+intermediate coordinates, so an invalid intermediate cannot be hidden by a later stack
+restore. Float32 rounds only when each completed record is committed. That initial pass
+kept general dispatch and one point/optional stack per flat call. The later unit/axis
+pass below shares guarded scratch across calls and specializes eligible programs.
+Neither pass adds per-record arrays, objects or dynamic code generation.
+
+CI uploads `proj4-pipeline-comparison.json` alongside the ordinary projection comparison,
+using 10,000 points and seven samples. It validates results and records measurements;
+it does not require a speed ratio. Core, ordinary wrapper and selective projection
+bundles were unchanged in that initial pass; the retained pipeline adds about 0.18 KiB minified / 0.01 KiB gzip.
+Grid/datum-heavy and mixed-epoch workloads still need further profiling and do not have
+a blanket speedup claim. The live table above continues to compare the ordinary
+projection APIs; this paired pipeline report is a separate developer tool.
+
+### Compare grid preparation and retained memory
+
+```sh
+node --expose-gc modules/projection/scripts/benchmark-grid-compare.mjs --baseline-ref origin/master --sizes 65,257,1025 --samples 11 --memory --output /tmp/projection-grid-comparison.json
+```
+
+This compares the historical and current horizontal grid readers with identical authored
+bilinear fields. NTv2 bytes and already decoded GeoTIFF bands are prepared outside timing;
+network and TIFF decoding are excluded. The reader must pass analytic forward/inverse
+checks at edges and interior points. Samples alternate baseline/current order and retain
+raw timings and machine/source/workload provenance. `--clock thread-cpu` optionally measures
+main-thread CPU work on Node 24.14 or later; this is distinct from elapsed loading time.
+
+Horizontal grids keep longitude/latitude node pairs in one owned Float64Array per subgrid,
+using 16 bytes per node and avoiding a small JavaScript array for each pair. Preparing a
+1025 × 1025 grid removes 1,050,625 such arrays. Reader ownership, node orientation, bilinear
+summation order, nodata handling, coverage and inverse iteration limits remain unchanged.
+This targets preparation and GC pressure; it does not imply a blanket point-throughput gain.
+
+`--memory` runs three separate fresh processes for each reader/size/revision. Each measures
+the change in `heapUsed + arrayBuffers` after full GC while retaining one prepared grid;
+input bytes/bands are excluded. These engine-dependent estimates describe retained storage,
+not total allocated bytes, peak memory or garbage-collection pauses. Small-grid differences
+can be noisy. Omit `--memory` for timing only; `--expose-gc` also enables untimed collection
+before timing samples. CI uses two small grids and three samples to check the runner and
+upload a report; it applies no performance or memory threshold.
+
+An October 2026 diagnostic on Apple M2 / Node 24.14.0 compared seven thread-CPU
+samples against commit `6b2b154`. For 1025 × 1025 nodes:
+
+| Reader | Preparation CPU, baseline → current | Retained storage, baseline → current |
+| --- | --- | --- |
+| NTv2 | 87.36 → 26.69 ms | 77.70 → 16.84 MB |
+| GeoTIFF adapter | 96.14 → 40.70 ms | 77.70 → 16.84 MB |
+
+These results describe synthetic grid preparation on one machine. Smaller-grid CPU
+results were mixed, including slower medians at 65 × 65, and ordinary coordinate
+throughput did not improve consistently. The
+[raw grid report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/grid-preparation-node.json)
+retains all sizes, samples and provenance. The
+[paired coordinate report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/allocation-projections-node.json)
+covers the five changed algorithms and NTv2, both precisions, XY/XYZM and both directions.
+
+### Allocation checks
+
+The live comparison also includes AEQD, Robinson, Oblique Mercator, QSC and tilted
+perspective. Their mutable equations reuse the working point or local numbers instead of
+creating coordinate result objects; Robinson's Newton solver avoids a per-point callback.
+Robinson follows PROJ's float-rounded tables, while proj4js uses double coefficients.
+Its comparator allows 0.5 metres forward and 1e-4 degrees inverse; the independent PROJ
+accuracy budgets remain unchanged, including the documented table-knot exceptions.
+Scalar methods still return owned arrays, while reusing one private working point.
+Scalar pipelines also cache their ordinate stack. Recursive hooks receive isolated
+fallback storage; exceptions release the scratch lease. The safeguards add approximately
+0.1–0.2 KiB gzip to selected core/Mercator/pipeline bundles, with the existing deferred
+budgets retained. Flat methods keep one working point and an
+optional typed ordinate stack per call, rather than per record. Custom plugins/grids should
+provide mutable hooks to avoid the legacy array-returning fallback.
+
+```sh
+node modules/projection/scripts/audit-allocations.mjs --check --output /tmp/projection-allocations.json
+```
+
+The source-wide AST inventory covers all projection runtime files. CI checks the numerical
+paths for explicit object/array/function creation and allocating methods. Setup, returned
+scalar arrays and failure diagnostics are reviewed separately. This helps prevent regressions;
+JIT numeric boxing and external hook behavior still need heap profiling.
+
+The separate untimed Inspector sampling pass estimated 487.7 → 157.1 allocated bytes
+per point for the scalar stack-and-datum chain and 188.7 → 100.5 for the mixed-epoch
+Helmert chain. These are sampled estimates, including collected objects, rather than
+exact counts or a throughput promise. Public result arrays still allocate, and flat
+paths still show some engine allocations despite having no explicit per-record objects.
+See the [paired pipeline report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/allocation-pipeline-node.json)
+for all allocation samples and timing rows.
+
+
+### Compare reusable scalar outputs
+
+Both paired runners accept `--reusable-results`. This adds **math.gl scalar array output**
+and **math.gl scalar typed output** alongside the existing allocating scalar/flat modes.
+The runners reuse input and output storage, call `projectToSync` / `unprojectToSync`, and
+copy results into the same final typed-buffer layout. Setup is outside timing, no per-point
+subarrays are created, and every output ordinate is checked before measuring. Pipeline
+observation epochs remain separate from M. The live table retains its three existing columns.
+
+```sh
+node modules/projection/scripts/benchmark-compare.mjs --baseline-ref origin/master --reusable-results --points 10000 --samples 7 --output /tmp/projection-scalar-results.json
+node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --reusable-results --allocations --points 10000 --samples 7 --output /tmp/projection-pipeline-results.json
+```
+
+`arrayOutputSpeedup` and `typedOutputSpeedup` divide the current allocating scalar median
+by the current reusable-output median. Values above one indicate faster reusable outputs.
+Historical/current scalar and flat ratios remain separately reported. When the baseline
+supports reusable outputs, both versions run those modes with the same storage/return-type
+mix during warm-up. `pairedArrayOutputSpeedup` and `pairedTypedOutputSpeedup` compare the
+baseline reusable-output median with the corresponding current median. Baselines predating
+these APIs keep the current-only rows. This matters because JavaScript optimization can
+respond differently to mixed return-storage types. The pipeline runner
+samples allocation only after all timings; these are estimated allocated bytes, including
+collected objects, rather than exact counts or proof of zero allocation.
+
+An October 2026 Apple M2 / Node 24.14.0 diagnostic compared commit `c213a0b4` with these
+APIs using 10,000 points and seven thread-CPU samples. Each report contains 32 rows across
+four scenarios, both precisions/layouts and both directions. Reusing array outputs had median
+speed ratios of 0.97× for ordinary projections and 0.99× for pipelines; typed outputs were
+0.96× in both reports. This is an allocation reduction with no consistent throughput gain.
+Selected pipeline allocation estimates were:
+
+| Pipeline | Owned-array scalar | Reused array output | Reused typed output |
+| --- | --- | --- | --- |
+| Mercator | 74.7 B/point | 0.08 B/point | 0 sampled B/point |
+| Horizontal grid to UTM | 224.8 B/point | 147.2 B/point | 144.5 B/point |
+| Height stack and datum | 156.7 B/point | 78.2 B/point | 78.0 B/point |
+| Mixed epoch Helmert | 96.2 B/point | 17.0 B/point | 15.3 B/point |
+
+The [ordinary raw report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/reusable-scalar-projections-node.json)
+and [pipeline raw report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/reusable-scalar-pipelines-node.json)
+retain timings, sample variation, runtime/source/workload provenance and allocation estimates.
+Grid/datum and mixed-epoch runtime allocations remain profiling targets. Use flat APIs for
+large buffers; deferred scalar requests still snapshot inputs and allocate promises, so use
+explicit synchronous methods after preloading when reusing scalar storage.
+
+The added APIs cost 619 gzip bytes for core, 624 for selective Mercator and 472 for a
+pipeline-only import (browser ESM/es2020, minified, gzip level 9). All-root exports add 723
+bytes. Only exceeded static/initial bundle limits are increased with rounding headroom;
+deferred projection chunks and optional deformation-model profiles are unchanged. CI records
+reusable-output pipeline measurements with seven samples and a shorter 4 ms aggregate
+window across the full scenario/layout/direction matrix. Developer runs retain the 12 ms
+default. Correctness/package budgets are enforced without speed thresholds.
+
+
+### Unit conversion batches and repeated bulk calls
+
+Pipelines containing only unit/axis steps, with at least one unit conversion in the
+selected direction, use a whole-buffer numeric runner. Pure axis programs keep general dispatch; the separately qualified static Helmert
+subset is described below. Mixed programs retain general dispatch. Multiplication and division remain distinct, each
+intermediate must be finite, and Float32 rounds only on a completed record. Stride,
+height, trailing ordinates, epoch validation and partial-error behavior are unchanged.
+General scalar/bulk calls share one instance point and a lazily cached pipeline stack;
+recursive hooks receive independent scratch, and failures release the lease.
+
+The October 2026 Apple M2 / Node 24.14.0 paired diagnostic against `1ce5edef` uses
+10,000 points, seven 12 ms thread-CPU samples and matching baseline/current reusable-output
+modes. Across eight layout/direction rows, inverse angular-unit conversion has a median
+1.80× flat speed ratio. Pure axis results varied across runs, so that subset keeps general
+dispatch. Mixed grid/datum and mixed-epoch flat ratios were approximately 1.00×.
+Scalar timings were mixed, including slower axis rows; this is a targeted batch improvement,
+not a general throughput claim. See the
+[raw batch report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/numeric-batches-node.json)
+for all 48 rows, samples and separate allocation estimates. The full bounded CI runner
+qualified the then-current 22 scenarios / 176 rows, including both baseline/current output modes where
+available, without a speed threshold.
+
+Large buffers amortize point/stack setup. To expose allocation traffic in repeated short
+calls, increase untimed allocation repetitions while keeping timing samples independent:
+
+```sh
+node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --points 10 --samples 7 --min-sample-ms 4 --allocations --allocation-iterations 10000 --scenarios 'Height stack and datum,Horizontal grid to UTM' --output /tmp/projection-bulk-leases.json
+```
+
+For ten-point calls, the sampled stack/datum estimate decreased from 109.3 to 77.1 B/point;
+the horizontal-grid chain decreased from 147.5 to 142.9 B/point. These estimates include
+collected JavaScript objects, are not exact allocation counts, and do not measure GC pauses.
+All short-call timing rows hit the aggregate-iteration cap and are flagged `timingLimited`;
+use this run for allocation evidence rather than a throughput claim. The
+[raw bulk-lease report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/bulk-leases-node.json)
+retains runtime/source/workload provenance and 100,000 coordinates per allocation profile.
+
+The optional pipeline import measures 58,759 minified / 21,108 gzip bytes: +1,746 / +499
+versus the reusable-output tranche. Core/selective imports add 150 minified bytes with
+negligible gzip changes. Deferred projection chunks and deformation-only profiles are
+unchanged. Only exceeded bundle allowances increase with reviewed rounding headroom.
+
+
+### Static Helmert coordinate buffers
+
+A pipeline direction with exactly one active static Helmert step now transforms
+Float32/Float64 buffers with numeric locals. This covers translation/scale, small-angle
+and exact rotations, both position-vector and coordinate-frame conventions, and
+inverse-oriented steps. Scalar calls keep their existing point operations. Mixed
+unit/axis/datum chains, grids and stacks keep general dispatch. Kinematic rates
+now also have the single-stage specialization described below.
+
+The buffer runner preserves each scalar equation's multiplication, division and
+addition order. Exact rotations use the same prepared matrix as the scalar stage;
+the inverse subtracts translation and divides by scale before applying its transpose.
+It does not fold a whole operation into an affine matrix, omit terms with zero
+coefficients or change small-angle inverse semantics. Every record validates finite
+XYZ and supplied epochs, checks output/Float32 range before writing, and preserves M
+and all later ordinates. On failure, completed records remain transformed and the
+failing record and tail remain unchanged.
+
+Qualification combines the pinned PROJ pipeline corpus with seeded bit-for-bit
+scalar/general-dispatch comparisons, both precisions, XYZ/XYZM and six-component
+buffer views. Tests cover both conventions, inverse/omitted directions, caller
+parameter snapshots, explicit epoch requirements, recursive hooks and failure
+commits. The source allocation guard includes the new buffer loop. No objects,
+arrays or functions are created inside its successful coordinate path; sampled
+allocation remains a diagnostic rather than a guarantee about all JavaScript engines.
+
+
+The October 2026 Apple M2 / Node 24.14.0 diagnostic compares against `fefea8f7`
+with 50,000 points, nine 12 ms thread-CPU samples and matched baseline/current
+reusable-output modes. Independent anchors and every seeded ordinate pass before
+measurement. Across 32 translation/small-angle layout/direction rows, the median
+flat ratio is 1.76×; across 24 exact-rotation rows it is 1.38×. Every measured static
+Helmert flat row improves in this run. The three control-scenario medians are
+0.99× (angular units), 1.00× (horizontal grid to UTM) and 1.03× (mixed epochs).
+Scalar medians are approximately unchanged.
+
+Local CPU contention and GC produced spread warnings: 54 of 80 rows flag at least
+one implementation, and 20 hit the aggregate-iteration limit. Among the 56 static
+Helmert rows, 27 flag spread in a flat implementation and 13 are timing-limited.
+These flags, raw samples and p10–p90 remain in the
+[raw report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/helmert-batches-node.json).
+Treat ratios as targeted CPU-time observations, not elapsed throughput guarantees
+or a state-of-the-art claim. Repeat on the application's browser and hardware.
+
+Untimed allocation sampling follows all timing. Most static flat profiles sample
+zero for both baseline and current; these measurements do not establish an
+allocation reduction or prove zero allocation. The new loop avoids mutable point
+field writes and contains no explicit successful per-coordinate allocation sites.
+Pipeline/all-root bundles measure 60,140/179,812 minified and 21,591/60,993 gzip bytes:
++1,381/+1,383 minified and +483/+497 gzip versus the operation-selection tranche.
+Core, wrapper, selective, operation catalogue, deformation and lazy initial/deferred
+profiles remain unchanged. Only exceeded pipeline/all-root allowances increase.
+
+
+### Kinematic Helmert coordinate buffers
+
+A direction with exactly one active kinematic Helmert step now transforms
+Float32/Float64 buffers using numeric locals and the scalar stage's owned
+coefficients. A constant batch epoch prepares and reads the matrix once; separate
+per-record epochs use the existing epoch preparation and cache. Both rotation
+conventions, exact and small-angle rotations and inverse-oriented steps preserve
+the full scalar matrix arithmetic, including zero terms and division order.
+Mixed-stage chains continue through general dispatch.
+
+Tests compare every ordinate bit-for-bit with scalar and general dispatch across
+both precisions, XYZ/XYZM and six-component views, repeated/alternating epochs and
+both directions. Independent PROJ anchors cover all 12 kinematic configurations /
+48 coordinate-epoch pairs. Failure tests check epoch/XYZ validation precedence,
+invalid adjusted parameters, Float32 overflow, completed-record commits, cache
+recovery, parameter snapshots, empty buffers and recursive hooks. Epoch buffers
+remain borrowed and cannot overlap coordinates; M and all later ordinates remain
+untouched. Packed ESM/CommonJS consumers exercise exact rotations and typed epochs.
+
+The source allocation guard includes the new record loop. It creates no explicit
+objects, arrays or functions in successful coordinate execution and avoids mutable
+point field writes. Epoch preparation remains shared with scalar calls; heap
+sampling remains diagnostic and does not establish zero allocation or a GC benefit.
+
+
+The October 2026 Apple M2 / Node 24.14.0 diagnostic compares against `a1b36de3`
+with 10,000 points and seven 4 ms thread-CPU samples. The four matched runners are
+baseline/current flat and ordinary scalar calls; reusable-output modes are excluded
+from this targeted comparison. Independent anchors and every seeded ordinate pass
+before timing. Across 24 constant-epoch rows the median flat ratio is 2.91×;
+across 24 mixed-epoch rows it is 1.35×. Scalar medians are approximately unchanged.
+Control flat medians are 1.03× for static Helmert and 1.01× for horizontal grid to UTM.
+
+The report flags spread in at least one implementation for 57 of 64 rows and
+aggregate limits for five. Forty of the 48 targeted rows flag spread in a flat
+implementation; four mixed-epoch Float32 rows are at or below baseline, including
+one at 0.66×. These ratios are CPU-time observations with substantial variation,
+not guaranteed elapsed throughput or a state-of-the-art claim. Keep the
+[raw samples and warnings](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/kinematic-helmert-batches-node.json)
+when interpreting the result, and repeat on the application's browser and hardware.
+
+A longer-sample confirmation repeats the exact batch, exact mixed and inverse exact
+mixed cases plus both controls: 20,000 points, nine 8 ms thread-CPU samples and no
+allocation sampling. The eight constant-epoch rows have a 2.86× median; all 16 mixed
+rows improve, with a 1.26× median and a 1.16–1.53× range. Static/grid control medians
+are 1.01×/1.01×. Eighteen of 40 rows still flag spread in at least one runner, and
+six hit the aggregate limit. The
+[confirmation report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/kinematic-helmert-batches-confirmation-node.json)
+retains those warnings; it supports the targeted optimization without proving
+universal gains.
+
+```sh
+node modules/projection/scripts/benchmark-pipeline-compare.mjs \
+  --baseline-ref a1b36de3 --points 20000 --samples 9 --min-sample-ms 8 \
+  --clock thread-cpu \
+  --scenarios 'Batch epoch Helmert,Mixed epoch Helmert,Mixed epoch inverse exact Helmert,Static Helmert,Horizontal grid to UTM' \
+  --output /tmp/kinematic-helmert-confirmation.json
+```
+
+Untimed allocation sampling follows all timing: constant-epoch flat profiles sample
+zero in both versions; mixed-epoch flat estimates remain roughly 14.5–17.6 B/point.
+The profiles do not establish an allocation reduction. The source guard separately
+checks explicit allocation sites in the new loop.
+
+Pipeline/all-root bundles measure 61,230/180,906 minified and 21,933/61,346 gzip bytes:
++1,090/+1,094 minified and +342/+353 gzip versus static Helmert buffers. Core, wrapper,
+selective, catalogue, deformation and all lazy initial/deferred profiles remain
+unchanged. Only exceeded pipeline/all-root allowances increase with rounding headroom.

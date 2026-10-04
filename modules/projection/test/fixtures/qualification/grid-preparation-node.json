@@ -1,0 +1,392 @@
+{
+  "schemaVersion": 1,
+  "metadata": {
+    "baselineCommit": "6b2b1548144c103613664e5fa6a1cd5b575ff9bb",
+    "candidateSourceSHA256": "4765726a68bf1f09caf3f97a7452ca5628adb5c9cdab85efd2e7fac1046e4b83",
+    "workloadSHA256": "d73af768dfd4f816500bfa6fcaef3f794755628a98de7cc2b8550a5c6fdc616c",
+    "date": "2026-10-03T15:40:36.953Z",
+    "node": "v24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "cpu": "Apple M2",
+    "platform": "darwin",
+    "arch": "arm64",
+    "clock": "thread-cpu",
+    "samples": 7,
+    "memory": true
+  },
+  "methodology": "Authored bilinear cross-term fields; the same NTv2 bytes and decoded GeoTIFF bands feed both historical/current source bundles. Input generation, network, TIFF decoding, bundling and untimed full GC are excluded. Three warmups, rotated baseline/candidate order and analytic forward/inverse checks before and after timing. Preparation includes allocation and any GC triggered by it. Memory is a separate three-sample experiment, each in a fresh process: the difference in heapUsed + arrayBuffers after full GC while holding one prepared grid, excluding input bytes/bands. Small-grid deltas are noisy; retained bytes are engine-specific estimates, not peak memory or allocated bytes. Thread CPU time is diagnostic, not elapsed throughput. No CI speed or memory thresholds.",
+  "rows": [
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "nodes": 4225,
+      "baseline": {
+        "milliseconds": {
+          "median": 1.3930000000000007,
+          "p10": 1.2800000000000011,
+          "p90": 2.144999999999982,
+          "samples": [
+            1.695999999999998,
+            1.740000000000009,
+            1.3370000000000175,
+            1.2800000000000011,
+            2.144999999999982,
+            1.3930000000000007,
+            1.3400000000000034
+          ]
+        },
+        "retainedBytes": {
+          "median": 330992,
+          "p10": 322496,
+          "p90": 332248,
+          "samples": [
+            330992,
+            322496,
+            332248
+          ]
+        }
+      },
+      "candidate": {
+        "milliseconds": {
+          "median": 1.7060000000000173,
+          "p10": 0.625,
+          "p90": 2.7439999999999998,
+          "samples": [
+            1.2129999999999939,
+            0.625,
+            2.7439999999999998,
+            2.5439999999999827,
+            2.65300000000002,
+            1.7060000000000173,
+            1.6970000000000027
+          ]
+        },
+        "retainedBytes": {
+          "median": 83064,
+          "p10": 81288,
+          "p90": 92936,
+          "samples": [
+            92936,
+            83064,
+            81288
+          ]
+        }
+      },
+      "preparationSpeedup": 0.8165298944900273,
+      "retainedMemoryRatio": 3.9847828180679956
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "nodes": 4225,
+      "baseline": {
+        "milliseconds": {
+          "median": 1.7819999999999823,
+          "p10": 1.3759999999999764,
+          "p90": 3.10299999999998,
+          "samples": [
+            3.10299999999998,
+            1.6610000000000014,
+            1.7819999999999823,
+            1.9660000000000082,
+            1.8500000000000227,
+            1.3759999999999764,
+            1.6940000000000168
+          ]
+        },
+        "retainedBytes": {
+          "median": 334440,
+          "p10": 333904,
+          "p90": 334608,
+          "samples": [
+            334440,
+            334608,
+            333904
+          ]
+        }
+      },
+      "candidate": {
+        "milliseconds": {
+          "median": 1.88900000000001,
+          "p10": 1.3380000000000223,
+          "p90": 2.664999999999992,
+          "samples": [
+            1.6640000000000157,
+            2.664999999999992,
+            1.656000000000006,
+            1.9110000000000014,
+            1.88900000000001,
+            1.3380000000000223,
+            1.9430000000000405
+          ]
+        },
+        "retainedBytes": {
+          "median": 94536,
+          "p10": 94448,
+          "p90": 95104,
+          "samples": [
+            95104,
+            94448,
+            94536
+          ]
+        }
+      },
+      "preparationSpeedup": 0.943356273160388,
+      "retainedMemoryRatio": 3.5376999238385376
+    },
+    {
+      "format": "NTv2",
+      "size": [
+        257,
+        257
+      ],
+      "nodes": 66049,
+      "baseline": {
+        "milliseconds": {
+          "median": 7.591000000000008,
+          "p10": 3.649000000000001,
+          "p90": 12.465000000000032,
+          "samples": [
+            9.978999999999985,
+            9.314999999999998,
+            12.465000000000032,
+            4.666000000000054,
+            7.591000000000008,
+            3.649000000000001,
+            5.820999999999913
+          ]
+        },
+        "retainedBytes": {
+          "median": 4864096,
+          "p10": 4859056,
+          "p90": 4864144,
+          "samples": [
+            4859056,
+            4864096,
+            4864144
+          ]
+        }
+      },
+      "candidate": {
+        "milliseconds": {
+          "median": 4.864000000000033,
+          "p10": 2.9969999999999573,
+          "p90": 10.446000000000026,
+          "samples": [
+            4.864000000000033,
+            7.180000000000007,
+            10.446000000000026,
+            3.805000000000007,
+            3.634999999999934,
+            5.708999999999946,
+            2.9969999999999573
+          ]
+        },
+        "retainedBytes": {
+          "median": 1082152,
+          "p10": 1080880,
+          "p90": 1082240,
+          "samples": [
+            1082152,
+            1080880,
+            1082240
+          ]
+        }
+      },
+      "preparationSpeedup": 1.5606496710526228,
+      "retainedMemoryRatio": 4.494836215245178
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        257,
+        257
+      ],
+      "nodes": 66049,
+      "baseline": {
+        "milliseconds": {
+          "median": 5.062000000000012,
+          "p10": 2.522999999999911,
+          "p90": 6.523000000000025,
+          "samples": [
+            6.274000000000001,
+            4.573000000000093,
+            3.7409999999999854,
+            5.062000000000012,
+            6.076999999999998,
+            2.522999999999911,
+            6.523000000000025
+          ]
+        },
+        "retainedBytes": {
+          "median": 4866000,
+          "p10": 4865944,
+          "p90": 4866000,
+          "samples": [
+            4865944,
+            4866000,
+            4866000
+          ]
+        }
+      },
+      "candidate": {
+        "milliseconds": {
+          "median": 1.580000000000041,
+          "p10": 1.3490000000000464,
+          "p90": 3.4659999999998945,
+          "samples": [
+            3.4659999999998945,
+            3.120999999999981,
+            1.5439999999999827,
+            1.580000000000041,
+            1.6700000000000728,
+            1.4080000000000155,
+            1.3490000000000464
+          ]
+        },
+        "retainedBytes": {
+          "median": 1083912,
+          "p10": 1082640,
+          "p90": 1084000,
+          "samples": [
+            1082640,
+            1084000,
+            1083912
+          ]
+        }
+      },
+      "preparationSpeedup": 3.203797468354355,
+      "retainedMemoryRatio": 4.489294333857361
+    },
+    {
+      "format": "NTv2",
+      "size": [
+        1025,
+        1025
+      ],
+      "nodes": 1050625,
+      "baseline": {
+        "milliseconds": {
+          "median": 87.35699999999974,
+          "p10": 73.07600000000002,
+          "p90": 103.50800000000004,
+          "samples": [
+            87.69100000000003,
+            94.61200000000008,
+            103.50800000000004,
+            76.10799999999995,
+            73.07600000000002,
+            86.644,
+            87.35699999999974
+          ]
+        },
+        "retainedBytes": {
+          "median": 77700536,
+          "p10": 77700528,
+          "p90": 77700560,
+          "samples": [
+            77700536,
+            77700560,
+            77700528
+          ]
+        }
+      },
+      "candidate": {
+        "milliseconds": {
+          "median": 26.68899999999985,
+          "p10": 18.988000000000056,
+          "p90": 35.31399999999985,
+          "samples": [
+            30.27500000000009,
+            34.225999999999885,
+            19.891000000000076,
+            18.988000000000056,
+            35.31399999999985,
+            22.073000000000093,
+            26.68899999999985
+          ]
+        },
+        "retainedBytes": {
+          "median": 16835376,
+          "p10": 16835296,
+          "p90": 16835448,
+          "samples": [
+            16835448,
+            16835376,
+            16835296
+          ]
+        }
+      },
+      "preparationSpeedup": 3.273146240023989,
+      "retainedMemoryRatio": 4.615313373458365
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        1025,
+        1025
+      ],
+      "nodes": 1050625,
+      "baseline": {
+        "milliseconds": {
+          "median": 96.13599999999997,
+          "p10": 85.20800000000008,
+          "p90": 111.30600000000004,
+          "samples": [
+            85.55400000000009,
+            94.71199999999999,
+            104.31200000000035,
+            96.13599999999997,
+            85.20800000000008,
+            100.28800000000001,
+            111.30600000000004
+          ]
+        },
+        "retainedBytes": {
+          "median": 77702312,
+          "p10": 77702168,
+          "p90": 77702432,
+          "samples": [
+            77702312,
+            77702168,
+            77702432
+          ]
+        }
+      },
+      "candidate": {
+        "milliseconds": {
+          "median": 40.70499999999993,
+          "p10": 30.108000000000175,
+          "p90": 106.77299999999968,
+          "samples": [
+            40.70499999999993,
+            45.427000000000135,
+            41.35400000000027,
+            39.90700000000015,
+            106.77299999999968,
+            38.1579999999999,
+            30.108000000000175
+          ]
+        },
+        "retainedBytes": {
+          "median": 16837128,
+          "p10": 16837080,
+          "p90": 16837200,
+          "samples": [
+            16837080,
+            16837128,
+            16837200
+          ]
+        }
+      },
+      "preparationSpeedup": 2.361773737870044,
+      "retainedMemoryRatio": 4.614938604731163
+    }
+  ]
+}

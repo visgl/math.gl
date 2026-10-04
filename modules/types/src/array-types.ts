@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 // Float16Array is declared in a separate TypeScript library. Preserve this reference so
 // published declarations remain self-contained without changing the target or emitting runtime code.

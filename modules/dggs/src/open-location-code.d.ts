@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 declare module 'open-location-code' {
   export type OpenLocationCodeArea = {
     latitudeLo: number;

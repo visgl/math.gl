@@ -1,3 +1,6 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {configure} from '@math.gl/core';
 
 // The aggregate Tape harness inherited this tolerance from its first loaded math.gl package.
