@@ -266,6 +266,15 @@ test('rejects incomplete matrices, invented percentiles, incorrect normalization
       f.node.throughput.rows[0].measurements[0].samples[1] = 30;
     },
     f => {
+      f.node.throughput.rows[0].measurements[0].p90 = 2.09;
+    },
+    f => {
+      f.node.throughput.rows[0].measurements[0].aggregateMilliseconds = 4.1;
+    },
+    f => {
+      f.manifest.bundleMethodology.decoderAndDataIncluded = true;
+    },
+    f => {
       f.node.throughput.allocations[0].sampledEstimatedBytesPerPoint = -1;
     },
     f => {

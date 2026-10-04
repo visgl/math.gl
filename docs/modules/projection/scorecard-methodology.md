@@ -77,3 +77,10 @@ limits before replacing it. CI artifacts provide subsequent source-matched runs.
 node --test modules/projection/scripts/scorecard.test.mjs
 node modules/projection/scripts/benchmark-memory.mjs --points 20000 --samples 3 --output /tmp/memory.json
 ```
+
+To regenerate the documentation from the checked-in scorecard without rerunning
+measurements:
+
+```sh
+node --input-type=module -e "import {readFileSync,writeFileSync} from 'node:fs'; import {renderScorecard} from './modules/projection/scripts/scorecard.mjs'; writeFileSync('docs/modules/projection/scorecard.md', renderScorecard(JSON.parse(readFileSync('modules/projection/test/fixtures/qualification/scorecard.json','utf8'))));"
+```

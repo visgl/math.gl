@@ -457,12 +457,19 @@ export function renderScorecard(report) {
     '**; math.gl ' +
     escape(report.dependencies.projectionVersion) +
     '. Each environment retains its own hardware, version, date and sampling settings. Results are observed measurements, with no overall SOTA ranking.\n\n';
+  if (report.environments.some(e => e.metadata.samples === 3))
+    out +=
+      'This snapshot includes three-sample diagnostic timings. Use the full measurement profile for performance decisions; short runs can show substantial variation.\n\n';
   out +=
     'Source fingerprint: `' +
     report.sourceSHA256 +
     '`. Workload fingerprint: `' +
     report.workloadSHA256 +
     '`.\n\n';
+  out +=
+    'Full measurements and raw samples: [machine-readable snapshot](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/scorecard.json). Collection commit: `' +
+    escape(report.provenance?.nodeGitCommit || 'not supplied') +
+    '`. See [publication provenance](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/README.md) for the generating CI run and raw artifacts.\n\n';
   out +=
     '## Accuracy\n\nThe independent ' +
     escape(report.accuracyReference.oracle) +
@@ -549,7 +556,7 @@ export function renderScorecard(report) {
     out += '\n';
   }
   out +=
-    '## Cold startup\n\nNode uses a fresh process per sample; browser samples use fresh contexts and minified bundles. Module times include their respective import/fetch/parse/evaluate paths. OS disk caches are not flushed. Node and browser cold paths are different experiments.\n\n| Environment | math.gl selected module median (ms) | proj4js module median (ms) |\n| --- | --- | --- |\n';
+    '## Cold startup\n\nNode uses a fresh process per sample; browser samples use fresh contexts and minified bundles. Module times include their respective import/fetch/parse/evaluate paths. OS disk caches are not flushed. Node math.gl imports core plus Mercator; the browser imports the convenience Projection bundle. Node and browser cold paths are different experiments.\n\n| Environment | math.gl module median (ms) | proj4js module median (ms) |\n| --- | --- | --- |\n';
   for (const env of report.environments) {
     const samples = env.runtime === 'node' ? env.cold.results : env.cold;
     const get = backend =>
@@ -665,6 +672,11 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
     node[name] = JSON.parse(bytes);
     inputs.push({kind: name, file: basename(path), sha256: entry.sha256});
   }
+  assert.equal(
+    node.accuracy.referenceSHA256,
+    hash(readFileSync(new URL('../test/fixtures/accuracy-reference.json', import.meta.url))),
+    'Independent accuracy reference is stale'
+  );
   const browserReports = (values['browser-report'] || []).map(path => {
     const bytes = readFileSync(resolve(path));
     inputs.push({kind: 'browser', file: basename(path), sha256: hash(bytes)});
