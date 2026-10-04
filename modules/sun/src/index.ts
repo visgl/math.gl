@@ -8,3 +8,5 @@ export type {MoonLight, MoonLightOptions} from './moonlight';
 export {getStarfieldRotation} from './starfield';
 export type {StarfieldOptions} from './starfield';
 export {getSunPosition, getSunDirection} from './suncalc';
+export {getSunLight} from './sunlight';
+export type {LightColor, SunLight, SunLightOptions} from './sunlight';
