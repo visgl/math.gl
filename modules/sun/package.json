@@ -37,13 +37,19 @@
       "types": "./dist/astronomy.d.ts",
       "import": "./dist/astronomy.js",
       "require": "./dist/astronomy.cjs"
+    },
+    "./stars": {
+      "types": "./dist/stars.d.ts",
+      "import": "./dist/stars.js",
+      "require": "./dist/stars.cjs"
     }
   },
   "files": [
     "dist",
     "src",
     "LICENSE-HOSEK-WILKIE",
-    "LICENSE-SUNCALC"
+    "LICENSE-SUNCALC",
+    "LICENSE-BRIGHT-STARS"
   ],
   "peerDependencies": {
     "astronomy-engine": "^2.1.19"
