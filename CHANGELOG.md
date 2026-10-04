@@ -11,6 +11,9 @@
   with projection ellipsoids. Share the geometry type and qualify both modules
   against independent anchors, preserving their existing conversion contracts.
 
+- perf(projection): Reuse horizontal-grid tuple working points. Expand mixed-pipeline
+  correctness cases and add paired grid coordinate/allocation diagnostics, source-site
+  profiles and bounded CI measurements.
 - perf(projection): Transform single-stage kinematic Helmert coordinate buffers
   directly with numeric locals. Prepare constant batch epochs once, preserve mixed
   observation epochs and scalar arithmetic, and qualify ownership/failure behavior

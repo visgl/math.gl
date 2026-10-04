@@ -4287,6 +4287,13 @@ __metadata:
 "@math.gl/sun@workspace:modules/sun":
   version: 0.0.0-use.local
   resolution: "@math.gl/sun@workspace:modules/sun"
+  dependencies:
+    astronomy-engine: "npm:2.1.19"
+  peerDependencies:
+    astronomy-engine: ^2.1.19
+  peerDependenciesMeta:
+    astronomy-engine:
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -7697,6 +7704,13 @@ __metadata:
   bin:
     astring: bin/astring
   checksum: 10c0/e7519544d9824494e80ef0e722bb3a0c543a31440d59691c13aeaceb75b14502af536b23f08db50aa6c632dafaade54caa25f0788aa7550b6b2d6e2df89e0830
+  languageName: node
+  linkType: hard
+
+"astronomy-engine@npm:2.1.19":
+  version: 2.1.19
+  resolution: "astronomy-engine@npm:2.1.19"
+  checksum: 10c0/585ee4a1fc220713660413369922f0be59ce287a4941364fb8072282b88c1bc366b6eda1a96e0b10057c8e135af5f74fb5b6de6cd6b3f8a0c7bb8f973f61db7b
   languageName: node
   linkType: hard
 

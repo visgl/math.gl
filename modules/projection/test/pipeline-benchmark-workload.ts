@@ -16,6 +16,7 @@ export type PipelineBenchmarkScenario = {
   id: string;
   fixture: string;
   epoch?: 'batch' | 'mixed';
+  unitsAxes?: boolean;
   classic?: {from: string; to: string};
 };
 export const PIPELINE_SCENARIOS: readonly PipelineBenchmarkScenario[] = [
@@ -48,7 +49,22 @@ export const PIPELINE_SCENARIOS: readonly PipelineBenchmarkScenario[] = [
   },
   {id: 'Vertical grid', fixture: 'vertical-default'},
   {id: 'Horizontal grid to UTM', fixture: 'horizontal-to-utm'},
+  {id: 'Horizontal grid', fixture: 'horizontal-inverse'},
   {id: 'Height stack and datum', fixture: 'height-stack-around-datum'},
+  {id: 'Static Helmert with units and axes', fixture: 'helmert-position_vector', unitsAxes: true},
+  {id: 'Exact Helmert with units and axes', fixture: 'exact-position_vector-20', unitsAxes: true},
+  {
+    id: 'Batch epoch Helmert with units and axes',
+    fixture: 'exact-position_vector',
+    epoch: 'batch',
+    unitsAxes: true
+  },
+  {
+    id: 'Mixed epoch Helmert with units and axes',
+    fixture: 'exact-position_vector',
+    epoch: 'mixed',
+    unitsAxes: true
+  },
   {id: 'Batch epoch Helmert', fixture: 'exact-position_vector', epoch: 'batch'},
   {id: 'Mixed epoch Helmert', fixture: 'exact-position_vector', epoch: 'mixed'},
   {id: 'Batch epoch approximate Helmert', fixture: 'approximate-position_vector', epoch: 'batch'},
@@ -88,7 +104,35 @@ export function benchmarkPipelineOptions(
   horizontal: ArrayBuffer
 ) {
   const {index} = fixture(scenario);
-  return scenario.epoch ? kinematicOptions(index) : pipelineOptions(index, horizontal);
+  const options = scenario.epoch ? kinematicOptions(index) : pipelineOptions(index, horizontal);
+  return scenario.unitsAxes
+    ? {
+        ...options,
+        steps: [
+          ...options.steps,
+          {type: 'axisswap' as const, order: [-3, 1, -2]},
+          {
+            type: 'unitconvert' as const,
+            xy: {from: 'm' as const, to: 'ft' as const},
+            z: {from: 'm' as const, to: 'us-ft' as const}
+          }
+        ]
+      }
+    : options;
+}
+/** Authored boundary oracle: signed XYZ axes, international feet and US survey feet. */
+function mixedOutput(
+  scenario: PipelineBenchmarkScenario,
+  point: readonly number[]
+): readonly number[] {
+  return scenario.unitsAxes
+    ? [
+        -point[2] * (1 / 0.3048),
+        point[0] * (1 / 0.3048),
+        -point[1] * (1 / (1200 / 3937)),
+        ...point.slice(3)
+      ]
+    : point;
 }
 /** Verify both historical and candidate runtimes against the same independent anchors. */
 export function qualifyBenchmarkPipeline(
@@ -102,9 +146,11 @@ export function qualifyBenchmarkPipeline(
   for (const row of reference.cases[index].results) {
     const epoch = 'epoch' in row ? row.epoch : undefined;
     for (const inverse of [false, true]) {
-      const point = inverse ? row.forward : row.input;
-      const expected = inverse ? row.inverse : row.forward;
-      const tolerance = inverse ? input.inverseTolerance : input.forwardTolerance;
+      const point = inverse ? mixedOutput(scenario, row.forward) : row.input;
+      const expected = inverse ? row.inverse : mixedOutput(scenario, row.forward);
+      const tolerance = inverse
+        ? input.inverseTolerance
+        : input.forwardTolerance * (scenario.unitsAxes ? 4 : 1);
       const scalar = (inverse ? pipeline.unprojectSync : pipeline.projectSync)(point, epoch);
       const flat = new Float64Array(point);
       (inverse ? pipeline.unprojectFlatSync : pipeline.projectFlatSync)(flat, 4, epoch);

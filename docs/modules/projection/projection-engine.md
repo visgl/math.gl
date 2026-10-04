@@ -122,7 +122,7 @@ bundle, not an increment or an application-wide download estimate. **KiB = 1,024
 | Optional operation selector (no catalogue data or operation payloads) | 4.4 | 1.6 |
 | Optional deformation model + regular velocity grid | 4.1 | 1.8 |
 | Optional deformation model + velocity GeoTIFF adapter | 9.1 | 3.6 |
-| Every root export, including wrapper, readers, grids and pipelines | 176.8 | 59.9 |
+| Every root export, including wrapper, readers, grids and pipelines | 176.8 | 60.0 |
 
 Tranche 12A adds about 1.1 KiB minified / 0.3 KiB gzip to the core stage machinery.
 The grid readers and bilinear interpolation remain optional, retained only in the

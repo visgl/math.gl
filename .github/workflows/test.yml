@@ -278,7 +278,7 @@ jobs:
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: node modules/projection/scripts/benchmark-grid-compare.mjs --baseline-ref "$BASE_SHA" --sizes 17,65 --samples 3 --output /tmp/projection-grid-comparison.json
+        run: node modules/projection/scripts/benchmark-grid-compare.mjs --baseline-ref "$BASE_SHA" --sizes 17,65 --samples 3 --coordinates --allocations --points 1000 --output /tmp/projection-grid-comparison.json
 
       - name: Compare spheroid conversion correctness and costs
         timeout-minutes: 2
