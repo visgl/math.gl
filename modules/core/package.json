@@ -66,6 +66,11 @@
       "import": "./dist/vec4.js",
       "require": "./dist/vec4.cjs"
     },
+    "./local-frame": {
+      "types": "./dist/local-frame.d.ts",
+      "import": "./dist/local-frame.js",
+      "require": "./dist/local-frame.cjs"
+    },
     "./spheroid": {
       "types": "./dist/spheroid.d.ts",
       "import": "./dist/spheroid.js",

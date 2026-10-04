@@ -88,6 +88,20 @@ leave the failing record and later records unchanged. Float32 rounds only the fi
 XYZ record; choose Float64 when sub-metre ECEF displacements matter. Built-in model
 and grid operations create no per-record arrays or objects.
 
+## Local velocity orientation
+
+VelocityGrid's `sample(longitude, latitude, result)` receives **radians** and writes
+ENU velocities in metres/year. The regular grid's setup coordinates remain degrees;
+its sampler performs that conversion. Deformation rotates these velocities using
+the normal at the inverse geodetic position, then integrates over the decimal-year
+interval in fixed XYZ metres. It shares the reusable
+[local-frame functions](../core/api-reference/local-frame.md) with geospatial.
+
+Sharing does not change geospatial's Cartesian-gradient normal choice at height,
+or the existing geocentric near-axis longitude convention. Custom samplers may
+recursively call a model: its owned basis is populated after sampling returns.
+No per-coordinate basis object or intermediate vector is created.
+
 ## Load a velocity GeoTIFF
 
 `loadVelocityGeoTIFFGrid` prepares numeric rasters after the application has fetched

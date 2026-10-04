@@ -41,3 +41,10 @@ Some of the design goals for the math.gl core library
 - **Debug Friendly** - math.gl offers **optional** error checking after every math operation which makes quick work of locating coding errors and bad input data. Printing support for objects (`toString`) also simplifies debugging.
 
 - **Size Conscious** - math.gl is published as multiple modules to let applications cherry-pick required functionality, and is optimizes dependencies for tree-shaking to make sure you only pay for (bundle) what you use.
+
+## Numeric local frames
+
+The optional [`@math.gl/core/local-frame`](./api-reference/local-frame.md) entry
+provides ENU/XYZ rotations and ENU/NED matrices with reusable outputs. Angles are
+explicit radians, distances retain their units, and the leaf has no runtime
+imports. It is not reexported from the core root.

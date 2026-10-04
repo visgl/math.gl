@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original ENU basis rotation and inverse, inspired by PROJ's documented deformation contract; no PROJ implementation is copied or forked. Geocentric conversion reuses the attributed proj4js adaptation in datum.ts.
+import {createLocalFrameBasis, eastNorthUpBasis, localToFixed} from '@math.gl/core/local-frame';
 import {geocentricToGeodeticInPlace} from './datum';
 import type {ProjectionPoint} from './types';
 import type {VelocityGrid} from './grids/velocity';
@@ -64,24 +65,17 @@ export function createDeformationModel(options: DeformationModelOptions): Deform
     if (!Number.isFinite(dt)) throw new Error('Non-finite deformation duration');
     return dt;
   };
+  // Setup-owned scratch is filled AFTER custom sampling returns. The rotation captures
+  // its components before output setters, so recursive sampling/writes remain isolated.
+  const frame = createLocalFrameBasis();
   // Scratch belongs to the caller. Recursive custom sampling cannot overwrite shared state.
   const velocity = (point: ProjectionPoint): void => {
     geocentricToGeodeticInPlace(point, ellipsoid);
     const longitude = point.x,
       latitude = point.y;
     if (!sample(longitude, latitude, point)) throw new Error('No velocity grid covers coordinate');
-    const east = point.x,
-      north = point.y,
-      up = point.z;
-    const sp = Math.sin(latitude),
-      cp = Math.cos(latitude),
-      sl = Math.sin(longitude),
-      cl = Math.cos(longitude);
-    // Rotate north/up into the radial/Z plane, then rotate radial/east by longitude.
-    const radial = up * cp - north * sp;
-    point.x = radial * cl - east * sl;
-    point.y = radial * sl + east * cl;
-    point.z = up * sp + north * cp;
+    if (!eastNorthUpBasis(longitude, latitude, frame) || !localToFixed(point, frame))
+      throw new Error('Non-finite deformation output');
   };
   const apply = (
     point: ProjectionPoint,

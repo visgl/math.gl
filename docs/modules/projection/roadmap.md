@@ -645,8 +645,13 @@ diagnostic error/rejection is retained separately. See
 [ellipsoid accuracy and interior boundaries](./ellipsoid-qualification.md).
 
 Further interior algorithm work needs an explicit normal-branch selection
-contract and a safeguarded, independently qualified solver. Remaining convergence
-work includes any expansion of shared geometry/local frames. Datums/epochs remain explicit projection concerns.
+contract and a safeguarded, independently qualified solver.
+
+
+Local-frame convergence is implemented in the qualified sphere/oblate domain:
+shared original ENU/XYZ basis and ENU/NED matrix commits, preserved height/pole
+normal conventions, reusable outputs and recursive sampling/setter qualification.
+See [the local-frame measurements](./benchmarks.md#shared-local-frames). Datums/epochs remain explicit projection concerns.
 Existing CesiumJS/proj4js provenance stays attached, and the core package includes
 the full upstream MIT notice. No new third-party source or model data is added.
 
@@ -662,6 +667,8 @@ node modules/projection/scripts/check-packed-package.mjs
 python3 modules/projection/scripts/generate-interior-reference.py --check
 node modules/projection/scripts/qualify-interiors.mjs
 node modules/projection/scripts/check-spheroid-allocations.mjs
+node modules/projection/scripts/check-local-frame-allocations.mjs
+node modules/projection/scripts/check-local-frame-boundary.mjs
 node modules/projection/scripts/check-bundle-budget.mjs
 node modules/projection/scripts/benchmark.mjs --allocations --output /tmp/proj4-benchmark.json
 ```
