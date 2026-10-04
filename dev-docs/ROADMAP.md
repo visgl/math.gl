@@ -29,3 +29,10 @@ geometry adapters and cross-module qualification. The numerical follow-up improv
 near-pole latitude, bounds surface inversion and qualifies allocation costs. Qualified sphere/oblate conversions now share an optional numeric leaf after
 expanded boundary, ownership, allocation, setup and selective bundle qualification.
 Three-radius/interior geometry and future local-frame convergence retain separate contracts.
+
+## Sun and sky
+
+The [six-tranche sun and sky roadmap](../docs/modules/sun/roadmap.md) tracks shared
+coordinates, visibility, atmosphere, celestial appearance, stars, and accuracy/performance
+tiers. The sky and bright-star APIs are delivered; observational calibration, shared
+star visibility and formal tier budgets remain follow-ups.

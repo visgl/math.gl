@@ -23,6 +23,8 @@ const sunDir = getSunDirection(Date.now(), latitude, longitude);
 
 Use [getSunLight](./api-reference/get-sun-light.md) with the altitude returned by `getSunPosition` to estimate normalized linear RGB and relative direct-light intensity. The Hošek–Wilkie model supplies sun and diffuse sky illumination with configurable turbidity. A separate cloud approximation redistributes direct sunlight into diffuse lighting.
 
+Use [getCloudLighting](./api-reference/cloud-lighting.md) for elevated cloud samples: spherical Earth shadowing, spectral dawn/dusk sunlight, approximate ambient/scattered colors and explicit Sun/view ray depths. High clouds can remain illuminated after ground sunset.
+
 ## Moon and star field
 
 The module also provides [moon position, direction, phase and direct moonlight](./api-reference/moon.md), plus a [star-field rotation](./api-reference/get-starfield-rotation.md) for orienting an equatorial cubemap at the observer’s location and time.
@@ -44,3 +46,5 @@ The solar position calculation is a fork of @mourner's [SunCalc](https://github.
 The adapted lunar code and numeric reference samples use SunCalc 1.9.0 under BSD-2-Clause. The full notice is shipped in `LICENSE-SUNCALC`, and SPDX comments record the original owner and provenance. Original moonlight and star-field calculations use math.gl’s MIT license.
 
 The optional [`@math.gl/sun/stars`](./api-reference/stars.md) entry point contains 7,000 bright stars, projected proper motions, distance-aware motion and brightness where measurements exist, an illustrative Galactic orbit model, and a procedural Milky Way background. Numeric Julian epochs support long animations independently of the observer’s rendering date.
+
+See the [six-tranche sun and sky roadmap](./roadmap.md) for delivered features and remaining qualification work.

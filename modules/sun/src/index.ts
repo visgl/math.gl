@@ -39,3 +39,5 @@ export {
   getSkyGlobePosition,
   skyRotationToGlobe
 } from './sky-globe';
+export {getCloudLighting} from './cloud-lighting';
+export type {CloudLighting, CloudLightingOptions} from './cloud-lighting';
