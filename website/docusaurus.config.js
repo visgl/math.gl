@@ -92,7 +92,7 @@ config.plugins.push(() => ({
 
 config.baseUrl = websiteBaseUrl;
 // Serve the optional geometry independently of the JavaScript bundle.
-config.staticDirectories = ['static', '../modules/timezone/data'];
+config.staticDirectories = ['static', '../modules/timezone/data', '../modules/geoid/data'];
 config.plugins.push(require('./projection-redirects.cjs'));
 
 if (isNext) {

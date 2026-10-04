@@ -66,3 +66,13 @@ The site defaults to dark mode and keeps the theme switch. Navbar logos are loca
 assets. The inline globe frame follows loaders.gl's `DocLiveExample` styling.
 Example styles are scoped to their own containers so they do not override the
 website's typography or navigation.
+
+## Embedded geoid globe
+
+The geoid overview and examples sidebar render `src/components/geoid-globe` using
+`src/components/live-globe`, the fullscreen frame shared with the timezone globe.
+The renderer and scoped styles are shared with `examples/geoid-globe`.
+`modules/geoid/data` supplies the optional EGM96 PGM assets as static files;
+`useBaseUrl` preserves deployment prefixes. The 1° preview loads first, and the
+original 15′ grid loads when selected. Hover heights use `getHeight` with the
+selected interpolation; the colored texture uses the same fixed signed scale.

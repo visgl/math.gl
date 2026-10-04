@@ -33,11 +33,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./geoid-egm96-low.pgm": "./data/geoid-egm96-low.pgm",
+    "./geoid-egm96-hi.pgm": "./data/geoid-egm96-hi.pgm"
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "data"
   ],
   "dependencies": {
     "@math.gl/core": "5.0.0-alpha.12"

@@ -157,16 +157,19 @@ html[data-theme='dark'] .theme-doc-sidebar-container {
 .table-of-contents__link--active {
   color: var(--docs-accent-text);
 }
-.timezone-globe.timezone-globe {
+.timezone-globe.timezone-globe,
+.geoid-globe.geoid-globe {
   font-family: var(--ifm-font-family-base);
 }
-.timezone-globe h1 {
+.timezone-globe h1,
+.geoid-globe h1 {
   font-family: var(--ifm-heading-font-family);
   font-weight: var(--ifm-heading-font-weight);
   letter-spacing: -0.03em;
 }
 .timezone-globe input,
-.timezone-globe select {
+.timezone-globe select,
+.geoid-globe select {
   font: inherit;
 }
 @media (max-width: 760px) {
