@@ -1,0 +1,17 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.culling-example { grid-template-columns: 280px minmax(0, 1fr); }
+.culling-example input[type='range'] { display: block; width: 100%; accent-color: #70c7ff; }
+.culling-example output { float: right; }
+.culling-example .inside { color: #40d98c; }
+.culling-example .intersecting { color: #ffb833; }
+.culling-example .outside { color: #f24d59; }
+.culling-example .culling-result { font-weight: bold; }
+.culling-legend { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+.culling-example button { background: #07121e; color: #eef5ff; border: 1px solid #526b84; border-radius: 4px; padding: 6px 10px; margin-bottom: 12px; cursor: pointer; }
+.culling-example summary { cursor: pointer; }
+@media (max-width: 650px) {
+  .culling-example .geometry-canvas { min-height: 420px; }
+}

@@ -37,5 +37,10 @@
     "type": "doc",
     "label": "Geometry viewer",
     "id": "geometry-viewer"
+  },
+  {
+    "type": "doc",
+    "label": "Frustum culling",
+    "id": "culling-playground"
   }
 ]
