@@ -98,7 +98,7 @@ function coordinateScope(node, path, source) {
     )
       return true;
     if (coordinateFunctions.has(name)) return true;
-    if (inLoop && ['flat', 'transformInPlace', 'createFlatOperation', 'createNumericFlat', 'createHelmertFlat'].includes(name)) return true;
+    if (inLoop && ['flat', 'transformInPlace', 'createFlatOperation', 'createNumericFlat', 'createHelmertFlat', 'createKinematicHelmertFlat'].includes(name)) return true;
   }
   return false;
 }

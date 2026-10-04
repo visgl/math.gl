@@ -118,11 +118,11 @@ bundle, not an increment or an application-wide download estimate. **KiB = 1,024
 | Engine + Mercator + GTX decoder | 52.0 | 18.9 |
 | Engine + Mercator + vertical GeoTIFF adapter | 55.5 | 20.1 |
 | Default Projection wrapper (all plugins and readers) | 146.1 | 50.0 |
-| Explicit operation pipeline (no projection algorithms, models or readers) | 58.7 | 21.1 |
+| Explicit operation pipeline (no projection algorithms, models or readers) | 59.8 | 21.4 |
 | Optional operation selector (no catalogue data or operation payloads) | 4.4 | 1.6 |
 | Optional deformation model + regular velocity grid | 4.0 | 1.8 |
 | Optional deformation model + velocity GeoTIFF adapter | 9.0 | 3.5 |
-| Every root export, including wrapper, readers, grids and pipelines | 175.6 | 59.6 |
+| Every root export, including wrapper, readers, grids and pipelines | 176.7 | 59.9 |
 
 Tranche 12A adds about 1.1 KiB minified / 0.3 KiB gzip to the core stage machinery.
 The grid readers and bilinear interpolation remain optional, retained only in the
@@ -140,7 +140,11 @@ See [deformation models](./deformation-models.md).
 Single-stage static Helmert buffer specialization adds about 1.35 KiB minified /
 0.47 KiB gzip to a retained pipeline, without adding bytes to the core, default
 wrapper, operation catalogue or lazy initial/deferred imports. See the
-[paired benchmark evidence](./benchmarks.md#static-helmert-coordinate-buffers).
+[paired benchmark evidence](./benchmarks.md#static-helmert-coordinate-buffers). Kinematic
+single-stage buffers add another 1.06 KiB minified / 0.33 KiB gzip to a retained
+pipeline. They reuse scalar epoch preparation and introduce no bytes to core,
+wrapper, catalogue, deformation or lazy chunks. See the
+[kinematic measurements](./benchmarks.md#kinematic-helmert-coordinate-buffers).
 
 All GeoTIFF rows exclude an external TIFF decoder, workers, and grid files. No row
 includes downloaded datum-grid data. Different bundlers, targets, compression,

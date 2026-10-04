@@ -327,8 +327,8 @@ node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref or
 
 This runner compares the historical and current `ProjectionPipeline` using the same
 source bundler and installed dependencies. The base must support the tested static
-and kinematic pipeline APIs. It covers 22 scenarios in both precisions, XYZ/XYZM and
-both directions (176 rows): units, signed axes, Mercator-to-UTM, static and exact
+and kinematic pipeline APIs. It covers 26 scenarios in both precisions, XYZ/XYZM and
+both directions (208 rows): units, signed axes, Mercator-to-UTM, static and exact
 Helmert, horizontal/vertical grids, ordinate stacks and batch/mixed observation epochs.
 Coordinates have repeatable bounded jitter around the independently checked fixtures.
 One epoch buffer is supplied separately and stays unchanged; M varies by record.
@@ -521,7 +521,7 @@ Scalar timings were mixed, including slower axis rows; this is a targeted batch 
 not a general throughput claim. See the
 [raw batch report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/numeric-batches-node.json)
 for all 48 rows, samples and separate allocation estimates. The full bounded CI runner
-qualifies all 22 scenarios / 176 rows, including both baseline/current output modes where
+qualified the then-current 22 scenarios / 176 rows, including both baseline/current output modes where
 available, without a speed threshold.
 
 Large buffers amortize point/stack setup. To expose allocation traffic in repeated short
@@ -551,7 +551,8 @@ A pipeline direction with exactly one active static Helmert step now transforms
 Float32/Float64 buffers with numeric locals. This covers translation/scale, small-angle
 and exact rotations, both position-vector and coordinate-frame conventions, and
 inverse-oriented steps. Scalar calls keep their existing point operations. Mixed
-unit/axis/datum chains, grids, stacks and kinematic rates keep general dispatch.
+unit/axis/datum chains, grids and stacks keep general dispatch. Kinematic rates
+now also have the single-stage specialization described below.
 
 The buffer runner preserves each scalar equation's multiplication, division and
 addition order. Exact rotations use the same prepared matrix as the scalar stage;
@@ -596,3 +597,73 @@ Pipeline/all-root bundles measure 60,140/179,812 minified and 21,591/60,993 gzip
 +1,381/+1,383 minified and +483/+497 gzip versus the operation-selection tranche.
 Core, wrapper, selective, operation catalogue, deformation and lazy initial/deferred
 profiles remain unchanged. Only exceeded pipeline/all-root allowances increase.
+
+
+### Kinematic Helmert coordinate buffers
+
+A direction with exactly one active kinematic Helmert step now transforms
+Float32/Float64 buffers using numeric locals and the scalar stage's owned
+coefficients. A constant batch epoch prepares and reads the matrix once; separate
+per-record epochs use the existing epoch preparation and cache. Both rotation
+conventions, exact and small-angle rotations and inverse-oriented steps preserve
+the full scalar matrix arithmetic, including zero terms and division order.
+Mixed-stage chains continue through general dispatch.
+
+Tests compare every ordinate bit-for-bit with scalar and general dispatch across
+both precisions, XYZ/XYZM and six-component views, repeated/alternating epochs and
+both directions. Independent PROJ anchors cover all 12 kinematic configurations /
+48 coordinate-epoch pairs. Failure tests check epoch/XYZ validation precedence,
+invalid adjusted parameters, Float32 overflow, completed-record commits, cache
+recovery, parameter snapshots, empty buffers and recursive hooks. Epoch buffers
+remain borrowed and cannot overlap coordinates; M and all later ordinates remain
+untouched. Packed ESM/CommonJS consumers exercise exact rotations and typed epochs.
+
+The source allocation guard includes the new record loop. It creates no explicit
+objects, arrays or functions in successful coordinate execution and avoids mutable
+point field writes. Epoch preparation remains shared with scalar calls; heap
+sampling remains diagnostic and does not establish zero allocation or a GC benefit.
+
+
+The October 2026 Apple M2 / Node 24.14.0 diagnostic compares against `a1b36de3`
+with 10,000 points and seven 4 ms thread-CPU samples. The four matched runners are
+baseline/current flat and ordinary scalar calls; reusable-output modes are excluded
+from this targeted comparison. Independent anchors and every seeded ordinate pass
+before timing. Across 24 constant-epoch rows the median flat ratio is 2.91×;
+across 24 mixed-epoch rows it is 1.35×. Scalar medians are approximately unchanged.
+Control flat medians are 1.03× for static Helmert and 1.01× for horizontal grid to UTM.
+
+The report flags spread in at least one implementation for 57 of 64 rows and
+aggregate limits for five. Forty of the 48 targeted rows flag spread in a flat
+implementation; four mixed-epoch Float32 rows are at or below baseline, including
+one at 0.66×. These ratios are CPU-time observations with substantial variation,
+not guaranteed elapsed throughput or a state-of-the-art claim. Keep the
+[raw samples and warnings](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/kinematic-helmert-batches-node.json)
+when interpreting the result, and repeat on the application's browser and hardware.
+
+A longer-sample confirmation repeats the exact batch, exact mixed and inverse exact
+mixed cases plus both controls: 20,000 points, nine 8 ms thread-CPU samples and no
+allocation sampling. The eight constant-epoch rows have a 2.86× median; all 16 mixed
+rows improve, with a 1.26× median and a 1.16–1.53× range. Static/grid control medians
+are 1.01×/1.01×. Eighteen of 40 rows still flag spread in at least one runner, and
+six hit the aggregate limit. The
+[confirmation report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/kinematic-helmert-batches-confirmation-node.json)
+retains those warnings; it supports the targeted optimization without proving
+universal gains.
+
+```sh
+node modules/projection/scripts/benchmark-pipeline-compare.mjs \
+  --baseline-ref a1b36de3 --points 20000 --samples 9 --min-sample-ms 8 \
+  --clock thread-cpu \
+  --scenarios 'Batch epoch Helmert,Mixed epoch Helmert,Mixed epoch inverse exact Helmert,Static Helmert,Horizontal grid to UTM' \
+  --output /tmp/kinematic-helmert-confirmation.json
+```
+
+Untimed allocation sampling follows all timing: constant-epoch flat profiles sample
+zero in both versions; mixed-epoch flat estimates remain roughly 14.5–17.6 B/point.
+The profiles do not establish an allocation reduction. The source guard separately
+checks explicit allocation sites in the new loop.
+
+Pipeline/all-root bundles measure 61,230/180,906 minified and 21,933/61,346 gzip bytes:
++1,090/+1,094 minified and +342/+353 gzip versus static Helmert buffers. Core, wrapper,
+selective, catalogue, deformation and all lazy initial/deferred profiles remain
+unchanged. Only exceeded pipeline/all-root allowances increase with rounding headroom.

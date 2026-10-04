@@ -346,6 +346,31 @@ scalar calls. Both rotation conventions and inverse-oriented steps are supported
 The public API, Z/M handling, explicit epochs and partial failure behavior stay
 the same; no additional option or preparation call is needed.
 
-Mixed pipelines and time-dependent rates keep general execution. See the
+Mixed pipelines keep general execution. Single-stage time-dependent rates are also
+optimized as described below. See the
 [measured scope and qualification](./benchmarks.md#static-helmert-coordinate-buffers)
 for the performance evidence and limits of this optimization.
+
+
+## Kinematic Helmert batches
+
+A direction with one active `helmert` step with `rates` also runs directly over
+Float32/Float64 buffers. Pass an explicit decimal-year observation epoch as the
+third argument: a number applies to the whole batch; a `Float32Array` or
+`Float64Array` supplies one epoch per record. M is preserved and never used as time.
+
+```typescript
+const coordinates = new Float64Array([4000000, 1000000, 4800000, 8]);
+pipeline.projectFlatSync(coordinates, 4, 2020);
+// Or provide one observation epoch per coordinate record:
+pipeline.unprojectFlatSync(coordinates, 4, new Float64Array([2020]));
+```
+
+A constant batch prepares the epoch-adjusted coefficients once, after validating
+the first coordinate. Mixed epochs use the same preparation and last-epoch cache
+as scalar calls. Both rotation conventions, exact/small-angle rotations and
+inverse-oriented steps retain scalar equation order, Float32 validation and
+completed-record commits. A failing record and its tail stay untouched. Empty
+buffers still validate the epoch argument but do not prepare adjusted parameters.
+No new option, loading step or public API is required. See the
+[paired measurements](./benchmarks.md#kinematic-helmert-coordinate-buffers).

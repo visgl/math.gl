@@ -208,6 +208,23 @@ try {
     moving.unprojectFlat(movingBuffer, 4, epochBuffer);
     assert.deepEqual(Array.from(movingBuffer), [10, 20, 30, 8, 10, 20, 30, 9]);
     assert.deepEqual(Array.from(epochBuffer), [2000, 2020]);
+    for (const convention of ['position_vector','coordinate_frame']) {
+      const rotating = new ProjectionPipeline({input: exact.input, steps: [{
+        type:'helmert',translation:[1,2,3],rotation:[15000,-7000,3000],scalePPM:12.5,
+        referenceEpoch:2000,rates:{translation:[.1,-.2,.3],rotation:[.01,-.02,.03],scalePPM:.5},
+        exact:true,convention,inverse:true
+      }]});
+      for (const inverse of [false,true]) for (const epochs of [2020,epochBuffer]) {
+        const buffer = new Float32Array([...exactInput,...exactInput]);
+        const expected = buffer.slice();
+        for (let offset=0;offset<buffer.length;offset+=4) expected.set(
+          (inverse ? rotating.unprojectSync : rotating.projectSync)(Array.from(buffer.subarray(offset,offset+4)),
+          typeof epochs==='number' ? epochs : epochs[offset/4]),offset);
+        assert.equal((inverse ? rotating.unprojectFlatSync : rotating.projectFlatSync)(buffer,4,epochs),buffer);
+        assert.deepEqual(Array.from(buffer),Array.from(expected));
+      }
+    }
+
 
     const {obliqueTransformation} = await load('@math.gl/projection/projections/ob_tran');
     const rotated = new ProjectionPipeline({input: {space: 'geographic', units: ['rad', 'rad', 'm']}, projections: [obliqueTransformation('longlat')], steps: [

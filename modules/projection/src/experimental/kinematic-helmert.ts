@@ -4,6 +4,8 @@
 // SPDX-FileCopyrightText: Copyright (c) 2016, Thomas Knudsen / SDFE (PROJ)
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileComment: Original epoch propagation follows PROJ's kinematic Helmert contract. Exact matrix/convention transpose adapted from PROJ 9.5.1 helmert.cpp. See ../../PROJ-LICENSE.txt. Small-angle equations follow the attributed proj4js adaptation in datum.ts. See ../../PROJ4-LICENSE.md for the small-angle adaptation license.
+import {createKinematicHelmertFlat} from './kinematic-helmert-flat';
+import type {NumericFlatOperation} from './numeric-flat';
 import type {ProjectionPoint} from './types';
 import type {PipelineHelmertRates} from './projection-pipeline';
 
@@ -19,6 +21,8 @@ export function createKinematicHelmert(
 ): {
   forward: (point: ProjectionPoint, epoch?: number) => void;
   inverse: (point: ProjectionPoint, epoch?: number) => void;
+  forwardFlat: NumericFlatOperation;
+  inverseFlat: NumericFlatOperation;
 } {
   const base = [...translation, ...rotation, scalePPM];
   const velocity = [
@@ -100,6 +104,8 @@ export function createKinematicHelmert(
     coefficients[13] = epoch;
   }
   return {
+    forwardFlat: createKinematicHelmertFlat(coefficients, prepare, false),
+    inverseFlat: createKinematicHelmertFlat(coefficients, prepare, true),
     forward(point, epoch) {
       prepare(epoch);
       const {x, y, z} = point;
