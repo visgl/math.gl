@@ -65,11 +65,17 @@
       "types": "./dist/vec4.d.ts",
       "import": "./dist/vec4.js",
       "require": "./dist/vec4.cjs"
+    },
+    "./spheroid": {
+      "types": "./dist/spheroid.d.ts",
+      "import": "./dist/spheroid.js",
+      "require": "./dist/spheroid.cjs"
     }
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "PROJ4-LICENSE.md"
   ],
   "sideEffects": [
     "./src/lib/common.js"

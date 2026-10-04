@@ -8,13 +8,23 @@ import {fileURLToPath} from 'node:url';
 import ts from 'typescript';
 const root = new URL('../../../', import.meta.url);
 const scopes = new Map([
-  ['modules/geospatial/src/ellipsoid.ts', new Set(['cartesianToCartographic'])],
+  [
+    'modules/geospatial/src/ellipsoid.ts',
+    new Set(['cartesianToCartographic', 'cartographicToCartesian'])
+  ],
   [
     'modules/geospatial/src/ellipsoid-helpers/scale-to-geodetic-surface.ts',
     new Set(['scaleToGeodeticSurface', 'writeResult'])
   ],
+  [
+    'modules/core/src/spheroid.ts',
+    new Set(['spheroidToCartesian', 'cartesianToSpheroid', 'exteriorInverse', 'commit'])
+  ],
   ['modules/geospatial/src/type-utils.ts', new Set(['toCartographicFromRadiansComponents'])],
-  ['modules/projection/src/experimental/datum.ts', new Set(['geocentricToGeodeticInPlace'])]
+  [
+    'modules/projection/src/experimental/datum.ts',
+    new Set(['geodeticToGeocentricInPlace', 'geocentricToGeodeticInPlace'])
+  ]
 ]);
 const violations = [],
   found = new Set();
@@ -58,7 +68,7 @@ for (const [path, names] of scopes) {
         violations.push(`${path}:${line + 1} (${scope})`);
       }
     }
-    ts.forEachChild(node, child => visit(child, scope));
+    ts.forEachChild(node, (child) => visit(child, scope));
   }
   visit(source);
 }

@@ -621,11 +621,24 @@ reusable scalar and flat paths with separate allocation samples. CI records thos
 diagnostics without speed gates. See [coordinate-system boundaries](./coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
 and [the measurements](./benchmarks.md#spheroid-numerical-boundaries).
 
-This completes the identified near-pole precision fix and the first bounded-domain
-qualification. It does not consolidate kernels or infer datums/epochs from shape.
-Deep-interior ambiguity, broader eccentricities, setup costs and selective common-leaf
-placement still need independent qualification before sharing arithmetic. Existing
-CesiumJS/proj4js provenance remains attached; no external model data or code is added.
+The next qualification and sharing tranche is implemented: independent surface/
+exterior anchors extend from spheres to b/a = 0.000001; ordinary interior offsets
+and ambiguous/radial interior behavior have separate tests. The geocentric plugin
+retains the supplied polar axis instead of recovering it from eccentricity.
+
+The shared arithmetic lives in the optional `@math.gl/core/spheroid` numeric leaf.
+Both modules share spheroid forward conversion and the qualified surface/exterior
+inverse. Geospatial keeps its three-radius/interior kernel, radial approximation,
+angle units and exact-pole convention. Reusable scratch captures numeric
+results before public output setters; no coordinate arrays/objects are created by
+the shared functions. Setup, scalar/flat, sampled allocations and selective bundle
+costs are recorded separately. See [shared conversion measurements](./benchmarks.md#shared-spheroid-conversions).
+
+This completes common-leaf placement for the qualified domain. Remaining work is
+broader independent interior/eccentricity qualification and any future expansion
+of shared geometry/local frames. Datums/epochs remain explicit projection concerns.
+Existing CesiumJS/proj4js provenance stays attached, and the core package includes
+the full upstream MIT notice. No new third-party source or model data is added.
 
 ## Validation commands
 

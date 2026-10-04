@@ -47,10 +47,11 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
     path,
     ...(baselineCommit && /\/modules\/.*\/src\//.test(path) ? {namespace: 'historical'} : {})
   });
-  await build({
+  return await build({
     entryPoints: [join(root, entry)],
     outfile,
     bundle: true,
+    metafile: true,
     format: 'esm',
     platform: 'browser',
     target: 'es2020',

@@ -26,6 +26,6 @@
 
 The [ellipsoid convergence plan](./ellipsoid-convergence.md) starts with shared
 geometry adapters and cross-module qualification. The numerical follow-up improves
-near-pole latitude, bounds surface inversion and qualifies allocation costs. Sharing conversion kernels is a
-follow-up, gated on boundary behavior, numerical accuracy and allocation/bundle
-measurements.
+near-pole latitude, bounds surface inversion and qualifies allocation costs. Qualified sphere/oblate conversions now share an optional numeric leaf after
+expanded boundary, ownership, allocation, setup and selective bundle qualification.
+Three-radius/interior geometry and future local-frame convergence retain separate contracts.

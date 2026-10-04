@@ -109,7 +109,10 @@ retain the applicable upstream credits and terms. Engine source headers use
 `SPDX-License-Identifier` for licenses, `SPDX-FileCopyrightText` for copyright
 holders and `SPDX-FileComment` for provenance and modifications. Equal Earth
 retains its Apache-2.0 license and original authorship. Removing the proj4js runtime
-dependency does not remove attribution for derived code.
+dependency does not remove attribution for derived code. The shared spheroid
+arithmetic in `@math.gl/core/spheroid` retains the existing proj4js MIT attribution
+and full notice in the core package. Geospatial's retained three-radius/interior
+kernels preserve their CesiumJS/Apache-2.0 provenance.
 
 The implementation has diverged through selective imports, deferred algorithms,
 in-place buffers and additional explicit operations. Performance advantages depend
