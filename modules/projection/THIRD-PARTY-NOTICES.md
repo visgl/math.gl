@@ -108,6 +108,15 @@ example is documented by PROJ; authored finite rotations/epochs are MIT test dat
 not an authoritative CRS operation catalogue. Numerical expectations are generated
 independently with pinned pyproj 3.7.2 / PROJ 9.5.1, with observation time separate from M.
 
+
+`src/experimental/kinematic-helmert-flat.ts` adds original coordinate-buffer
+traversal using the epoch preparation and owned coefficients in `kinematic-helmert.ts`.
+The exact matrix application follows that file's existing PROJ adaptation; the
+small-angle matrix application follows its attributed proj4js adaptation. Both
+upstream copyrights and license references remain in the source header. This
+optimization introduces no model files, databases or additional third-party code.
+
+
 ## Prepared velocity models
 
 The optional deformation model, velocity-grid preparation and velocity GeoTIFF

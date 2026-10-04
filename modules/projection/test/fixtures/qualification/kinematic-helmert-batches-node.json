@@ -1,0 +1,5500 @@
+{
+  "schemaVersion": 2,
+  "metadata": {
+    "baselineCommit": "a1b36de3d399880b2f0980871665e719b525070b",
+    "candidateSourceSHA256": "12b5a629e08092bb889b7d0f57d2d38be66607bb2a5922a4a613ef12b66586e8",
+    "workloadSHA256": "66a09f648b7936e08b2fe055ea93d4728b4a7ffcc59151818e76777d205484d3",
+    "horizontalGridSHA256": "6588e7b5fcca7dfad848085b7b621bf4b2e73866a0af3c459daa955deaacc3da",
+    "date": "2026-10-04T00:12:15.130Z",
+    "node": "v24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "cpu": "Apple M2",
+    "platform": "darwin",
+    "arch": "arm64",
+    "clock": "thread-cpu",
+    "proj4js": "2.22.0",
+    "allocationIterations": 10,
+    "reusableResults": false,
+    "seed": 1906950659,
+    "points": 10000,
+    "samples": 7,
+    "minSampleMs": 4
+  },
+  "methodology": "Identical source bundler and installed dependencies; historical runtime sources read from Git. Independent PROJ anchors and all-coordinate baseline/candidate validation precede timing. Seeded bounded jitter, both precisions, XYZ/XYZM, both directions, static/batch/mixed epochs. Direct proj4js only for equivalent supported CRS pairs, at an absolute 1e-4 output-unit tolerance; it does not implement typed pipelines or kinematic epochs. Optional reusable-result rows compare current array/typed outputs with the current owned-array scalar API, reusing both input and result without per-record subarrays. Baselines supporting these APIs also run both output modes, matching warm-up/storage call shapes; earlier baselines retain current-only output rows. Prepared instances, independent copies, resets outside timing, adaptive samples and rotated execution order. Median/p10/p90 are per-buffer; raw samples are aggregate milliseconds. Thread CPU time is diagnostic, not elapsed throughput. Allocation estimates are sampled after all timing in a separate untimed run; zero is not proof of zero allocation. No speed thresholds.",
+  "rows": [
+    {
+      "id": "Static Helmert",
+      "fixture": "helmert-position_vector",
+      "epochMode": "static",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.11543749999999875,
+          "p10": 0.09443333333333519,
+          "p90": 0.15762083333333218,
+          "aggregateMilliseconds": 5.54099999999994,
+          "samples": [
+            5.54099999999994,
+            8.941000000000031,
+            3.955000000000041,
+            5.774000000000115,
+            5.469000000000051,
+            6.648999999999887,
+            4.91800000000012
+          ]
+        },
+        {
+          "milliseconds": 0.10454166666666727,
+          "p10": 0.08515833333333422,
+          "p90": 0.14009583333333495,
+          "aggregateMilliseconds": 5.018000000000029,
+          "samples": [
+            5.9809999999999945,
+            6.319000000000074,
+            4.1299999999999955,
+            4.024000000000115,
+            7.333000000000084,
+            5.018000000000029,
+            4.682999999999993
+          ]
+        },
+        {
+          "milliseconds": 0.5751041666666671,
+          "p10": 0.5220916666666682,
+          "p90": 0.6229375000000005,
+          "aggregateMilliseconds": 27.605000000000018,
+          "samples": [
+            29.355000000000018,
+            30.720000000000027,
+            24.469999999999914,
+            27.605000000000018,
+            27.31600000000003,
+            25.45400000000018,
+            28.395999999999958
+          ]
+        },
+        {
+          "milliseconds": 0.5338749999999995,
+          "p10": 0.45475833333333265,
+          "p90": 0.549845833333335,
+          "aggregateMilliseconds": 25.625999999999976,
+          "samples": [
+            25.84800000000007,
+            22.529999999999973,
+            20.775999999999954,
+            25.625999999999976,
+            27.133000000000038,
+            25.899000000000115,
+            24.92100000000005
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 11424026829.990784,
+      "flatSpeedup": 1.1042247907532698,
+      "scalarSpeedup": 1.0772262545851887
+    },
+    {
+      "id": "Static Helmert",
+      "fixture": "helmert-position_vector",
+      "epochMode": "static",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.12622916666666603,
+          "p10": 0.10253750000000157,
+          "p90": 0.15257083333333318,
+          "aggregateMilliseconds": 6.058999999999969,
+          "samples": [
+            7.192999999999984,
+            6.689999999999827,
+            5.274000000000115,
+            4.985000000000127,
+            6.058999999999969,
+            4.826999999999998,
+            7.5190000000000055
+          ]
+        },
+        {
+          "milliseconds": 0.12339583333333337,
+          "p10": 0.09263749999999978,
+          "p90": 0.15754166666666738,
+          "aggregateMilliseconds": 5.923000000000002,
+          "samples": [
+            5.923000000000002,
+            6.236000000000104,
+            4.419000000000096,
+            4.729999999999791,
+            4.464999999999918,
+            6.600000000000136,
+            9.004999999999882
+          ]
+        },
+        {
+          "milliseconds": 0.5667708333333318,
+          "p10": 0.5104541666666658,
+          "p90": 0.653095833333334,
+          "aggregateMilliseconds": 27.204999999999927,
+          "samples": [
+            32.36200000000008,
+            24.77299999999991,
+            25.712999999999965,
+            24.095000000000027,
+            27.204999999999927,
+            30.673000000000002,
+            28.4079999999999
+          ]
+        },
+        {
+          "milliseconds": 0.5631875000000027,
+          "p10": 0.5428500000000024,
+          "p90": 0.6677333333333366,
+          "aggregateMilliseconds": 27.03300000000013,
+          "samples": [
+            26.764000000000124,
+            24.996000000000095,
+            26.971000000000004,
+            29.394000000000005,
+            35.02300000000014,
+            27.03300000000013,
+            30.070000000000164
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 11424014421.431393,
+      "flatSpeedup": 1.0229613371602173,
+      "scalarSpeedup": 1.0063625938667478
+    },
+    {
+      "id": "Static Helmert",
+      "fixture": "helmert-position_vector",
+      "epochMode": "static",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.12706250000000097,
+          "p10": 0.0962750000000014,
+          "p90": 0.15784374999999926,
+          "aggregateMilliseconds": 8.132000000000062,
+          "samples": [
+            10.35400000000027,
+            6.342000000000098,
+            5.891000000000076,
+            6.631999999999607,
+            9.933999999999742,
+            8.132000000000062,
+            9.124000000000251
+          ]
+        },
+        {
+          "milliseconds": 0.09303124999999568,
+          "p10": 0.0903749999999988,
+          "p90": 0.16118750000000265,
+          "aggregateMilliseconds": 5.9539999999997235,
+          "samples": [
+            6.003000000000156,
+            5.850999999999658,
+            5.744999999999891,
+            5.9539999999997235,
+            5.809999999999945,
+            7.844000000000051,
+            14.024000000000342
+          ]
+        },
+        {
+          "milliseconds": 0.5316562499999975,
+          "p10": 0.5035062500000009,
+          "p90": 0.688240625000003,
+          "aggregateMilliseconds": 34.02599999999984,
+          "samples": [
+            32.110999999999876,
+            32.30000000000018,
+            38.75999999999976,
+            34.02599999999984,
+            32.452999999999975,
+            43.54500000000007,
+            44.801000000000386
+          ]
+        },
+        {
+          "milliseconds": 0.5018593750000022,
+          "p10": 0.45439062499999777,
+          "p90": 0.6399531249999981,
+          "aggregateMilliseconds": 32.11900000000014,
+          "samples": [
+            32.11900000000014,
+            30.378000000000156,
+            29.027000000000044,
+            29.116999999999734,
+            43.48900000000003,
+            35.38999999999987,
+            39.26899999999978
+          ]
+        }
+      ],
+      "iterations": 64,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 7185936427.357764,
+      "flatSpeedup": 1.365804501175754,
+      "scalarSpeedup": 1.0593729568168277
+    },
+    {
+      "id": "Static Helmert",
+      "fixture": "helmert-position_vector",
+      "epochMode": "static",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.11749999999999734,
+          "p10": 0.09964166666666378,
+          "p90": 0.13694166666666283,
+          "aggregateMilliseconds": 5.639999999999873,
+          "samples": [
+            6.109999999999673,
+            5.639999999999873,
+            7.268000000000029,
+            4.893999999999778,
+            6.016999999999825,
+            4.6159999999999854,
+            4.996000000000095
+          ]
+        },
+        {
+          "milliseconds": 0.11570833333333515,
+          "p10": 0.10206249999999385,
+          "p90": 0.1591583333333366,
+          "aggregateMilliseconds": 5.554000000000087,
+          "samples": [
+            5.222999999999956,
+            4.906999999999698,
+            6.660000000000309,
+            5.554000000000087,
+            8.66800000000012,
+            6.954000000000178,
+            4.886999999999716
+          ]
+        },
+        {
+          "milliseconds": 0.7251666666666665,
+          "p10": 0.6503208333333323,
+          "p90": 0.7602166666666675,
+          "aggregateMilliseconds": 34.80799999999999,
+          "samples": [
+            31.391000000000076,
+            37.172000000000025,
+            36.03600000000006,
+            32.74499999999989,
+            35.16100000000006,
+            34.80799999999999,
+            30.95199999999977
+          ]
+        },
+        {
+          "milliseconds": 0.7132083333333318,
+          "p10": 0.6582166666666657,
+          "p90": 0.7750208333333357,
+          "aggregateMilliseconds": 34.233999999999924,
+          "samples": [
+            36.21300000000019,
+            38.68299999999999,
+            31.13299999999981,
+            33.79499999999962,
+            34.233999999999924,
+            34.7829999999999,
+            31.902000000000044
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 5389451407.441222,
+      "flatSpeedup": 1.015484335613933,
+      "scalarSpeedup": 1.0167669568265487
+    },
+    {
+      "id": "Static Helmert",
+      "fixture": "helmert-position_vector",
+      "epochMode": "static",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.14909523809524217,
+          "p10": 0.11687619047618551,
+          "p90": 0.1685904761904805,
+          "aggregateMilliseconds": 6.262000000000171,
+          "samples": [
+            7.777999999999793,
+            5.029999999999745,
+            6.61600000000044,
+            6.262000000000171,
+            6.257999999999811,
+            4.726999999999862,
+            6.313999999999851
+          ]
+        },
+        {
+          "milliseconds": 0.1436666666666692,
+          "p10": 0.12311904761904553,
+          "p90": 0.188309523809522,
+          "aggregateMilliseconds": 6.0340000000001055,
+          "samples": [
+            6.696000000000367,
+            5.545000000000073,
+            6.0340000000001055,
+            7.257000000000062,
+            4.609999999999673,
+            8.886999999999716,
+            5.980000000000018
+          ]
+        },
+        {
+          "milliseconds": 0.706523809523809,
+          "p10": 0.6591761904761911,
+          "p90": 0.8347904761904763,
+          "aggregateMilliseconds": 29.673999999999978,
+          "samples": [
+            27.47900000000027,
+            29.384000000000015,
+            33.42599999999993,
+            33.66800000000012,
+            27.822999999999865,
+            29.673999999999978,
+            37.15099999999984
+          ]
+        },
+        {
+          "milliseconds": 0.6791666666666688,
+          "p10": 0.6095809523809532,
+          "p90": 0.7600761904761969,
+          "aggregateMilliseconds": 28.52500000000009,
+          "samples": [
+            28.52500000000009,
+            28.908000000000357,
+            31.682000000000244,
+            26.19900000000007,
+            25.940000000000055,
+            25.096000000000004,
+            32.28500000000031
+          ]
+        }
+      ],
+      "iterations": 42,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 9996023520,
+      "flatSpeedup": 1.0377858800132682,
+      "scalarSpeedup": 1.0402804557405745
+    },
+    {
+      "id": "Static Helmert",
+      "fixture": "helmert-position_vector",
+      "epochMode": "static",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.1543250000000171,
+          "p10": 0.11890000000000782,
+          "p90": 0.17261999999998806,
+          "aggregateMilliseconds": 6.173000000000684,
+          "samples": [
+            4.766000000000531,
+            5.545000000000073,
+            6.718999999999141,
+            4.7409999999999854,
+            6.173000000000684,
+            6.85399999999936,
+            6.980999999999767
+          ]
+        },
+        {
+          "milliseconds": 0.13630000000000564,
+          "p10": 0.11491999999999733,
+          "p90": 0.15186000000000605,
+          "aggregateMilliseconds": 5.4520000000002256,
+          "samples": [
+            4.791000000000167,
+            4.546999999999571,
+            6.23700000000008,
+            4.630000000000109,
+            5.4520000000002256,
+            5.966000000000349,
+            5.556000000000495
+          ]
+        },
+        {
+          "milliseconds": 0.5133749999999964,
+          "p10": 0.49664000000000214,
+          "p90": 0.658020000000006,
+          "aggregateMilliseconds": 20.534999999999854,
+          "samples": [
+            20.830000000000837,
+            20.158000000000357,
+            19.42699999999968,
+            20.534999999999854,
+            20.217000000000553,
+            21.832000000000335,
+            33.05400000000009
+          ]
+        },
+        {
+          "milliseconds": 0.5744249999999965,
+          "p10": 0.541299999999992,
+          "p90": 0.6611399999999958,
+          "aggregateMilliseconds": 22.97699999999986,
+          "samples": [
+            22.528000000000247,
+            21.496000000000095,
+            25.24200000000019,
+            21.755999999999403,
+            24.547999999999774,
+            28.250999999999294,
+            22.97699999999986
+          ]
+        }
+      ],
+      "iterations": 40,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 9520012040,
+      "flatSpeedup": 1.132245047689,
+      "scalarSpeedup": 0.8937198067632841
+    },
+    {
+      "id": "Static Helmert",
+      "fixture": "helmert-position_vector",
+      "epochMode": "static",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.10779999999999745,
+          "p10": 0.10486499999999979,
+          "p90": 0.15416000000000624,
+          "aggregateMilliseconds": 4.311999999999898,
+          "samples": [
+            5.318000000000211,
+            4.805000000000291,
+            7.439000000000306,
+            4.179000000000087,
+            4.311999999999898,
+            4.231999999999971,
+            4.204999999999927
+          ]
+        },
+        {
+          "milliseconds": 0.141599999999994,
+          "p10": 0.10743999999999232,
+          "p90": 0.15047000000000027,
+          "aggregateMilliseconds": 5.66399999999976,
+          "samples": [
+            5.71599999999944,
+            6.265999999999622,
+            5.66399999999976,
+            4.657000000000153,
+            4.3859999999995125,
+            5.854000000000269,
+            4.164999999999964
+          ]
+        },
+        {
+          "milliseconds": 0.6309500000000071,
+          "p10": 0.5751099999999951,
+          "p90": 0.6525700000000006,
+          "aggregateMilliseconds": 25.238000000000284,
+          "samples": [
+            24.77299999999923,
+            23.435999999999694,
+            25.238000000000284,
+            22.35699999999997,
+            25.409999999999854,
+            27.01299999999992,
+            25.496000000000095
+          ]
+        },
+        {
+          "milliseconds": 0.6413500000000113,
+          "p10": 0.6046750000000065,
+          "p90": 0.7933149999999888,
+          "aggregateMilliseconds": 25.65400000000045,
+          "samples": [
+            28.085000000000036,
+            25.65400000000045,
+            34.287999999999556,
+            24.619000000000597,
+            23.53899999999976,
+            30.02899999999954,
+            25.64800000000014
+          ]
+        }
+      ],
+      "iterations": 40,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 4491210360,
+      "flatSpeedup": 0.7612994350282628,
+      "scalarSpeedup": 0.9837842051921665
+    },
+    {
+      "id": "Static Helmert",
+      "fixture": "helmert-position_vector",
+      "epochMode": "static",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.11379999999999199,
+          "p10": 0.11152999999999338,
+          "p90": 0.12972000000000664,
+          "aggregateMilliseconds": 4.55199999999968,
+          "samples": [
+            5.100000000000364,
+            4.489999999999782,
+            4.5440000000007785,
+            4.55199999999968,
+            4.417999999999665,
+            4.968000000000757,
+            5.322000000000116
+          ]
+        },
+        {
+          "milliseconds": 0.119399999999996,
+          "p10": 0.1115149999999994,
+          "p90": 0.14330499999999574,
+          "aggregateMilliseconds": 4.77599999999984,
+          "samples": [
+            5.110999999999876,
+            6.66399999999976,
+            4.488999999999578,
+            4.418000000000575,
+            4.77599999999984,
+            4.507999999999811,
+            4.993999999999687
+          ]
+        },
+        {
+          "milliseconds": 0.6695750000000089,
+          "p10": 0.6070899999999984,
+          "p90": 0.8481000000000085,
+          "aggregateMilliseconds": 26.783000000000357,
+          "samples": [
+            33.85400000000027,
+            34.02900000000045,
+            29.44499999999971,
+            24.546000000000276,
+            25.341999999999643,
+            23.889999999999418,
+            26.783000000000357
+          ]
+        },
+        {
+          "milliseconds": 0.6199500000000171,
+          "p10": 0.5532799999999952,
+          "p90": 0.7264249999999903,
+          "aggregateMilliseconds": 24.798000000000684,
+          "samples": [
+            25.97099999999955,
+            33.685999999999694,
+            25.29199999999946,
+            24.798000000000684,
+            22.847999999999956,
+            21.055999999999585,
+            23.075000000000728
+          ]
+        }
+      ],
+      "iterations": 40,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 4491209520,
+      "flatSpeedup": 0.9530988274706517,
+      "scalarSpeedup": 1.0800467779659495
+    },
+    {
+      "id": "Horizontal grid to UTM",
+      "fixture": "horizontal-to-utm",
+      "epochMode": "static",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 3.704000000000633,
+          "p10": 3.352000000000044,
+          "p90": 4.542799999999989,
+          "aggregateMilliseconds": 3.704000000000633,
+          "samples": [
+            3.5100000000002183,
+            3.704000000000633,
+            3.80199999999968,
+            3.1539999999995416,
+            3.738999999999578,
+            3.4840000000003783,
+            5.654000000000451
+          ]
+        },
+        {
+          "milliseconds": 3.605999999999767,
+          "p10": 3.5218000000002574,
+          "p90": 4.286199999999917,
+          "aggregateMilliseconds": 3.605999999999767,
+          "samples": [
+            3.5230000000001382,
+            4.108000000000175,
+            3.5200000000004366,
+            3.5359999999991487,
+            4.375,
+            3.605999999999767,
+            4.226999999999862
+          ]
+        },
+        {
+          "milliseconds": 4.024999999999636,
+          "p10": 3.7435999999996055,
+          "p90": 5.045799999999872,
+          "aggregateMilliseconds": 4.024999999999636,
+          "samples": [
+            3.923999999999978,
+            4.988999999999578,
+            3.6649999999999636,
+            4.510000000000218,
+            5.131000000000313,
+            3.795999999999367,
+            4.024999999999636
+          ]
+        },
+        {
+          "milliseconds": 4.600000000000364,
+          "p10": 4.140399999999863,
+          "p90": 5.9113999999995945,
+          "aggregateMilliseconds": 4.600000000000364,
+          "samples": [
+            4.13799999999992,
+            4.807999999999993,
+            4.600000000000364,
+            4.141999999999825,
+            4.210000000000036,
+            6.643999999999323,
+            5.4229999999997744
+          ]
+        }
+      ],
+      "iterations": 1,
+      "timingLimited": true,
+      "unstable": true,
+      "checksum": 16009857.893404558,
+      "flatSpeedup": 1.0271769273435585,
+      "scalarSpeedup": 0.8749999999998517
+    },
+    {
+      "id": "Horizontal grid to UTM",
+      "fixture": "horizontal-to-utm",
+      "epochMode": "static",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 3.95049999999992,
+          "p10": 3.604899999999907,
+          "p90": 4.751200000000063,
+          "aggregateMilliseconds": 7.90099999999984,
+          "samples": [
+            9.664999999999964,
+            7.927999999999884,
+            7.484999999999673,
+            7.222999999999956,
+            7.90099999999984,
+            7.1899999999996,
+            9.394000000000233
+          ]
+        },
+        {
+          "milliseconds": 3.7229999999999563,
+          "p10": 3.6279999999999744,
+          "p90": 3.888999999999942,
+          "aggregateMilliseconds": 7.445999999999913,
+          "samples": [
+            7.108999999999469,
+            7.445999999999913,
+            7.367000000000189,
+            8.171000000000276,
+            7.466000000000349,
+            7.354000000000269,
+            7.515999999999622
+          ]
+        },
+        {
+          "milliseconds": 4.210500000000138,
+          "p10": 3.847899999999845,
+          "p90": 4.724099999999817,
+          "aggregateMilliseconds": 8.421000000000276,
+          "samples": [
+            7.555999999999585,
+            7.8419999999996435,
+            10.179000000000087,
+            8.421000000000276,
+            8.96099999999933,
+            8.88799999999992,
+            7.78899999999976
+          ]
+        },
+        {
+          "milliseconds": 4.205500000000029,
+          "p10": 3.8776000000000748,
+          "p90": 4.395199999999841,
+          "aggregateMilliseconds": 8.411000000000058,
+          "samples": [
+            8.411000000000058,
+            8.414999999999964,
+            8.617999999999483,
+            7.595000000000255,
+            7.86200000000008,
+            7.996000000000095,
+            9.048999999999978
+          ]
+        }
+      ],
+      "iterations": 2,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 7531.633720693248,
+      "flatSpeedup": 1.0611066344345867,
+      "scalarSpeedup": 1.0011889192724073
+    },
+    {
+      "id": "Horizontal grid to UTM",
+      "fixture": "horizontal-to-utm",
+      "epochMode": "static",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 3.286000000000058,
+          "p10": 3.2019000000001143,
+          "p90": 4.059800000000086,
+          "aggregateMilliseconds": 6.572000000000116,
+          "samples": [
+            6.399000000000342,
+            8.127999999999702,
+            6.572000000000116,
+            6.407000000000153,
+            6.8659999999999854,
+            6.443000000000211,
+            8.114000000000487
+          ]
+        },
+        {
+          "milliseconds": 3.5729999999998654,
+          "p10": 3.200699999999961,
+          "p90": 3.9449000000001435,
+          "aggregateMilliseconds": 7.145999999999731,
+          "samples": [
+            6.444999999999709,
+            6.33600000000024,
+            7.145999999999731,
+            8.344000000000051,
+            7.0130000000008295,
+            7.425000000000182,
+            7.587000000000444
+          ]
+        },
+        {
+          "milliseconds": 3.7145000000000437,
+          "p10": 3.559900000000016,
+          "p90": 4.661899999999969,
+          "aggregateMilliseconds": 7.429000000000087,
+          "samples": [
+            8.399000000000342,
+            7.23700000000008,
+            6.976999999999862,
+            10.71099999999933,
+            7.429000000000087,
+            8.280999999999949,
+            7.2150000000001455
+          ]
+        },
+        {
+          "milliseconds": 3.8229999999998654,
+          "p10": 3.486999999999989,
+          "p90": 4.014700000000085,
+          "aggregateMilliseconds": 7.645999999999731,
+          "samples": [
+            6.9780000000000655,
+            6.967999999999847,
+            8.17699999999968,
+            7.645999999999731,
+            7.466000000000349,
+            7.769999999999527,
+            7.931000000000495
+          ]
+        }
+      ],
+      "iterations": 2,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 32572702.204819366,
+      "flatSpeedup": 0.9196753428491973,
+      "scalarSpeedup": 0.9716191472665903
+    },
+    {
+      "id": "Horizontal grid to UTM",
+      "fixture": "horizontal-to-utm",
+      "epochMode": "static",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 4.4675000000002,
+          "p10": 3.6539000000000668,
+          "p90": 5.165100000000257,
+          "aggregateMilliseconds": 8.9350000000004,
+          "samples": [
+            7.83600000000024,
+            9.65100000000075,
+            11.34900000000016,
+            7.300000000000182,
+            7.313000000000102,
+            8.9350000000004,
+            9.042999999999665
+          ]
+        },
+        {
+          "milliseconds": 4.135999999999967,
+          "p10": 3.6173000000000686,
+          "p90": 4.950799999999981,
+          "aggregateMilliseconds": 8.271999999999935,
+          "samples": [
+            7.9760000000005675,
+            9.206000000000131,
+            8.271999999999935,
+            7.338999999999942,
+            7.078000000000429,
+            8.854999999999563,
+            10.944999999999709
+          ]
+        },
+        {
+          "milliseconds": 5.089500000000044,
+          "p10": 4.282200000000103,
+          "p90": 5.656199999999808,
+          "aggregateMilliseconds": 10.179000000000087,
+          "samples": [
+            8.543999999999869,
+            10.672999999999774,
+            11.733000000000175,
+            9.559000000000196,
+            10.179000000000087,
+            8.57800000000043,
+            11.031999999999243
+          ]
+        },
+        {
+          "milliseconds": 5.471000000000004,
+          "p10": 4.397900000000027,
+          "p90": 6.038500000000022,
+          "aggregateMilliseconds": 10.942000000000007,
+          "samples": [
+            11.819999999999709,
+            9.381000000000313,
+            11.903000000000247,
+            9.234999999999673,
+            8.137000000000626,
+            12.337999999999738,
+            10.942000000000007
+          ]
+        }
+      ],
+      "iterations": 2,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 560518.0517309413,
+      "flatSpeedup": 1.080149903288258,
+      "scalarSpeedup": 0.9302686894534894
+    },
+    {
+      "id": "Horizontal grid to UTM",
+      "fixture": "horizontal-to-utm",
+      "epochMode": "static",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 4.04950000000008,
+          "p10": 3.6676000000001294,
+          "p90": 4.4378000000000615,
+          "aggregateMilliseconds": 8.09900000000016,
+          "samples": [
+            8.333999999999833,
+            8.09900000000016,
+            7.540999999999258,
+            8.971000000000458,
+            7.262000000000626,
+            8.811999999999898,
+            7.3840000000000146
+          ]
+        },
+        {
+          "milliseconds": 4.055499999999938,
+          "p10": 3.493199999999888,
+          "p90": 4.621800000000166,
+          "aggregateMilliseconds": 8.110999999999876,
+          "samples": [
+            8.801000000000386,
+            9.708000000000538,
+            8.934000000000196,
+            7.391999999999825,
+            6.377999999999702,
+            8.110999999999876,
+            7.970999999999549
+          ]
+        },
+        {
+          "milliseconds": 4.98050000000012,
+          "p10": 4.285399999999936,
+          "p90": 5.686799999999858,
+          "aggregateMilliseconds": 9.96100000000024,
+          "samples": [
+            9.96100000000024,
+            7.335999999999331,
+            10.82799999999952,
+            9.552999999999884,
+            9.998000000000502,
+            9.394000000000233,
+            12.192000000000007
+          ]
+        },
+        {
+          "milliseconds": 5.004999999999654,
+          "p10": 4.748900000000231,
+          "p90": 5.398699999999826,
+          "aggregateMilliseconds": 10.009999999999309,
+          "samples": [
+            10.432999999999993,
+            9.322000000000116,
+            9.832999999999629,
+            9.615000000000691,
+            10.86700000000019,
+            10.750999999999294,
+            10.009999999999309
+          ]
+        }
+      ],
+      "iterations": 2,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 32019718.08215332,
+      "flatSpeedup": 0.9985205276784963,
+      "scalarSpeedup": 0.9951048951049878
+    },
+    {
+      "id": "Horizontal grid to UTM",
+      "fixture": "horizontal-to-utm",
+      "epochMode": "static",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 4.601999999999862,
+          "p10": 4.028599999999824,
+          "p90": 6.029199999999946,
+          "aggregateMilliseconds": 4.601999999999862,
+          "samples": [
+            6.0789999999997235,
+            5.996000000000095,
+            4.296999999999571,
+            4.402000000000044,
+            3.6260000000002037,
+            5.371000000000095,
+            4.601999999999862
+          ]
+        },
+        {
+          "milliseconds": 5.1159999999999854,
+          "p10": 3.9082000000002153,
+          "p90": 6.235399999999936,
+          "aggregateMilliseconds": 5.1159999999999854,
+          "samples": [
+            3.730000000000473,
+            6.36200000000008,
+            5.1159999999999854,
+            4.6899999999996,
+            4.027000000000044,
+            6.15099999999984,
+            5.2590000000000146
+          ]
+        },
+        {
+          "milliseconds": 5.289999999999964,
+          "p10": 4.705000000000291,
+          "p90": 5.666599999999744,
+          "aggregateMilliseconds": 5.289999999999964,
+          "samples": [
+            5.335000000000036,
+            5.747000000000298,
+            5.289999999999964,
+            4.164999999999964,
+            5.065000000000509,
+            5.612999999999374,
+            5.138999999999214
+          ]
+        },
+        {
+          "milliseconds": 4.344000000000051,
+          "p10": 3.990200000000004,
+          "p90": 5.625799999999799,
+          "aggregateMilliseconds": 4.344000000000051,
+          "samples": [
+            3.8900000000003274,
+            5.2150000000001455,
+            4.344000000000051,
+            4.056999999999789,
+            6.24199999999928,
+            4.805000000000291,
+            4.193000000000211
+          ]
+        }
+      ],
+      "iterations": 1,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 3765.816951751709,
+      "flatSpeedup": 0.899530883502712,
+      "scalarSpeedup": 1.2177716390423345
+    },
+    {
+      "id": "Horizontal grid to UTM",
+      "fixture": "horizontal-to-utm",
+      "epochMode": "static",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 4.61200000000008,
+          "p10": 4.290400000000045,
+          "p90": 4.90779999999977,
+          "aggregateMilliseconds": 4.61200000000008,
+          "samples": [
+            4.932999999999993,
+            4.890999999999622,
+            4.344000000000051,
+            4.210000000000036,
+            4.4099999999998545,
+            4.73700000000008,
+            4.61200000000008
+          ]
+        },
+        {
+          "milliseconds": 4.23200000000088,
+          "p10": 3.7468000000004396,
+          "p90": 5.240399999999863,
+          "aggregateMilliseconds": 4.23200000000088,
+          "samples": [
+            5.268000000000029,
+            5.186999999999898,
+            5.221999999999753,
+            4.065000000000509,
+            3.8060000000004948,
+            3.6580000000003565,
+            4.23200000000088
+          ]
+        },
+        {
+          "milliseconds": 4.889999999999418,
+          "p10": 3.9877999999995155,
+          "p90": 5.183399999999528,
+          "aggregateMilliseconds": 4.889999999999418,
+          "samples": [
+            5.261999999999716,
+            5.1229999999995925,
+            5.130999999999403,
+            4.2590000000000146,
+            3.7789999999995416,
+            4.126999999999498,
+            4.889999999999418
+          ]
+        },
+        {
+          "milliseconds": 5.532999999999447,
+          "p10": 3.6408000000001266,
+          "p90": 5.895600000000013,
+          "aggregateMilliseconds": 5.532999999999447,
+          "samples": [
+            5.833999999999833,
+            3.494999999999891,
+            5.550999999999476,
+            5.532999999999447,
+            5.988000000000284,
+            3.7380000000002838,
+            4.613000000000284
+          ]
+        }
+      ],
+      "iterations": 1,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 16286352.25,
+      "flatSpeedup": 1.0897920604912856,
+      "scalarSpeedup": 0.8837881800108272
+    },
+    {
+      "id": "Horizontal grid to UTM",
+      "fixture": "horizontal-to-utm",
+      "epochMode": "static",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 4.32950000000028,
+          "p10": 3.5939000000000307,
+          "p90": 5.287600000000021,
+          "aggregateMilliseconds": 8.65900000000056,
+          "samples": [
+            8.858999999999469,
+            7.32300000000032,
+            12.091999999999643,
+            6.984999999999673,
+            8.65900000000056,
+            9.564000000000306,
+            7.971999999999753
+          ]
+        },
+        {
+          "milliseconds": 4.550499999999829,
+          "p10": 4.16329999999989,
+          "p90": 5.607399999999962,
+          "aggregateMilliseconds": 9.100999999999658,
+          "samples": [
+            9.100999999999658,
+            11.61200000000008,
+            7.752999999999702,
+            8.970999999999549,
+            8.708999999999833,
+            9.26299999999992,
+            10.949999999999818
+          ]
+        },
+        {
+          "milliseconds": 4.644500000000335,
+          "p10": 4.357200000000193,
+          "p90": 6.103899999999976,
+          "aggregateMilliseconds": 9.28900000000067,
+          "samples": [
+            12.067000000000007,
+            8.788000000000466,
+            9.28900000000067,
+            8.60400000000027,
+            12.418999999999869,
+            8.984000000000378,
+            11.398000000000138
+          ]
+        },
+        {
+          "milliseconds": 5.180499999999938,
+          "p10": 4.633899999999903,
+          "p90": 6.148300000000382,
+          "aggregateMilliseconds": 10.360999999999876,
+          "samples": [
+            9.8149999999996,
+            8.447000000000116,
+            13.27100000000064,
+            10.873000000000502,
+            10.360999999999876,
+            10.01299999999992,
+            11.647000000000844
+          ]
+        }
+      ],
+      "iterations": 2,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 560518.0517501831,
+      "flatSpeedup": 0.9514339083618158,
+      "scalarSpeedup": 0.8965350834862253
+    },
+    {
+      "id": "Batch epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "batch",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.28265277777778564,
+          "p10": 0.24347222222222628,
+          "p90": 0.31936944444443927,
+          "aggregateMilliseconds": 20.351000000000568,
+          "samples": [
+            22.516999999999825,
+            19.333999999998923,
+            23.71099999999933,
+            20.657000000001062,
+            16.47400000000016,
+            18.23400000000038,
+            20.351000000000568
+          ]
+        },
+        {
+          "milliseconds": 0.13577777777777555,
+          "p10": 0.0835333333333185,
+          "p90": 0.15033333333333554,
+          "aggregateMilliseconds": 9.77599999999984,
+          "samples": [
+            6.5019999999985885,
+            11.055000000000291,
+            10.670000000000073,
+            9.77599999999984,
+            5.282999999999447,
+            7.447000000000116,
+            10.647000000000844
+          ]
+        },
+        {
+          "milliseconds": 0.636027777777776,
+          "p10": 0.6012805555555587,
+          "p90": 0.6782166666666651,
+          "aggregateMilliseconds": 45.79399999999987,
+          "samples": [
+            48.42400000000089,
+            49.409999999999854,
+            45.79399999999987,
+            48.44599999999991,
+            45.27400000000125,
+            42.40300000000025,
+            43.88500000000022
+          ]
+        },
+        {
+          "milliseconds": 0.667902777777777,
+          "p10": 0.521316666666654,
+          "p90": 0.8348777777777641,
+          "aggregateMilliseconds": 48.08899999999994,
+          "samples": [
+            64.79899999999907,
+            56.98599999999897,
+            48.08899999999994,
+            46.68499999999949,
+            37.60399999999936,
+            37.430999999998676,
+            50.849999999998545
+          ]
+        }
+      ],
+      "iterations": 72,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 7002122635.250254,
+      "flatSpeedup": 2.081730769230861,
+      "scalarSpeedup": 0.9522759882717446
+    },
+    {
+      "id": "Batch epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "batch",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.27305357142859066,
+          "p10": 0.26298928571427493,
+          "p90": 0.3397785714285614,
+          "aggregateMilliseconds": 15.291000000001077,
+          "samples": [
+            20.71599999999853,
+            15.291000000001077,
+            14.894999999998618,
+            14.476000000000568,
+            17.902000000000044,
+            17.463999999999942,
+            14.93499999999949
+          ]
+        },
+        {
+          "milliseconds": 0.11032142857142649,
+          "p10": 0.09383571428569927,
+          "p90": 0.1484821428571325,
+          "aggregateMilliseconds": 6.177999999999884,
+          "samples": [
+            10.028000000000247,
+            5.942000000000917,
+            5.807999999999083,
+            4.424999999999272,
+            6.304000000000087,
+            7.172999999998865,
+            6.177999999999884
+          ]
+        },
+        {
+          "milliseconds": 0.6844107142857021,
+          "p10": 0.5933500000000029,
+          "p90": 0.7520321428571476,
+          "aggregateMilliseconds": 38.326999999999316,
+          "samples": [
+            38.42199999999866,
+            38.326999999999316,
+            29.104999999999563,
+            35.97600000000057,
+            36.693999999999505,
+            46.63900000000103,
+            39.09699999999975
+          ]
+        },
+        {
+          "milliseconds": 0.6640357142857088,
+          "p10": 0.552303571428573,
+          "p90": 0.6950285714285851,
+          "aggregateMilliseconds": 37.185999999999694,
+          "samples": [
+            36.26499999999942,
+            39.251000000000204,
+            29.959999999999127,
+            31.575000000000728,
+            37.185999999999694,
+            38.702000000001135,
+            37.63800000000083
+          ]
+        }
+      ],
+      "iterations": 56,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 5735228739.839086,
+      "flatSpeedup": 2.475072839106728,
+      "scalarSpeedup": 1.0306835905986025
+    },
+    {
+      "id": "Batch epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "batch",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.3086428571428509,
+          "p10": 0.2567000000000072,
+          "p90": 0.3555571428571446,
+          "aggregateMilliseconds": 17.28399999999965,
+          "samples": [
+            15.636000000000422,
+            17.28399999999965,
+            22.295000000000073,
+            18.322000000000116,
+            17.412000000000262,
+            12.484000000000378,
+            16.661000000000058
+          ]
+        },
+        {
+          "milliseconds": 0.11439285714283999,
+          "p10": 0.077064285714284,
+          "p90": 0.13296785714286932,
+          "aggregateMilliseconds": 6.40599999999904,
+          "samples": [
+            6.574000000000524,
+            6.40599999999904,
+            6.595000000001164,
+            4.792000000001281,
+            4.29700000000048,
+            8.722999999999956,
+            4.32799999999952
+          ]
+        },
+        {
+          "milliseconds": 0.7120714285714322,
+          "p10": 0.5889249999999915,
+          "p90": 0.7836892857142824,
+          "aggregateMilliseconds": 39.876000000000204,
+          "samples": [
+            41.01599999999962,
+            39.876000000000204,
+            36.615999999999985,
+            41.40300000000025,
+            35.498999999999796,
+            47.61199999999917,
+            29.200999999999112
+          ]
+        },
+        {
+          "milliseconds": 0.628660714285713,
+          "p10": 0.5774178571428624,
+          "p90": 0.7541464285714353,
+          "aggregateMilliseconds": 35.20499999999993,
+          "samples": [
+            34.552999999999884,
+            35.20499999999993,
+            39.32500000000073,
+            42.72600000000057,
+            41.90300000000025,
+            32.887000000000626,
+            31.50799999999981
+          ]
+        }
+      ],
+      "iterations": 56,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 5461774375.383134,
+      "flatSpeedup": 2.698095535435879,
+      "scalarSpeedup": 1.1326800170430418
+    },
+    {
+      "id": "Batch epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "batch",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.3054791666666385,
+          "p10": 0.2564916666666856,
+          "p90": 0.3569458333333387,
+          "aggregateMilliseconds": 14.662999999998647,
+          "samples": [
+            18.10900000000038,
+            11.054000000000087,
+            16.483000000000175,
+            13.150000000001455,
+            14.662999999998647,
+            15.037000000000262,
+            14.09100000000035
+          ]
+        },
+        {
+          "milliseconds": 0.11743750000001303,
+          "p10": 0.08089583333332181,
+          "p90": 0.14408750000000056,
+          "aggregateMilliseconds": 5.637000000000626,
+          "samples": [
+            3.958999999998923,
+            5.665000000000873,
+            4.661999999998443,
+            5.637000000000626,
+            6.882999999999811,
+            6.966000000000349,
+            3.769000000000233
+          ]
+        },
+        {
+          "milliseconds": 0.7626666666666703,
+          "p10": 0.6596999999999904,
+          "p90": 0.853099999999995,
+          "aggregateMilliseconds": 36.608000000000175,
+          "samples": [
+            30.605999999999767,
+            36.608000000000175,
+            32.37199999999939,
+            38.23899999999958,
+            34.530000000000655,
+            43.016999999999825,
+            39.56999999999971
+          ]
+        },
+        {
+          "milliseconds": 0.7658333333333379,
+          "p10": 0.6612166666666554,
+          "p90": 0.8756041666666761,
+          "aggregateMilliseconds": 36.76000000000022,
+          "samples": [
+            31.935999999999694,
+            39.650000000001455,
+            36.64899999999943,
+            36.76000000000022,
+            41.77900000000045,
+            42.40400000000045,
+            31.441999999999098
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 4929347334.465751,
+      "flatSpeedup": 2.6012063154154728,
+      "scalarSpeedup": 0.9958650707290521
+    },
+    {
+      "id": "Batch epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "batch",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.25614583333333485,
+          "p10": 0.23272916666665724,
+          "p90": 0.32594166666666907,
+          "aggregateMilliseconds": 24.590000000000146,
+          "samples": [
+            26.183000000000902,
+            29.394000000000233,
+            22.693999999999505,
+            21.813999999998487,
+            24.590000000000146,
+            34.13500000000022,
+            23.10699999999997
+          ]
+        },
+        {
+          "milliseconds": 0.08293749999999515,
+          "p10": 0.07894374999999249,
+          "p90": 0.13378541666667162,
+          "aggregateMilliseconds": 7.961999999999534,
+          "samples": [
+            7.961999999999534,
+            7.712999999999738,
+            7.956000000000131,
+            7.3769999999985885,
+            11.293000000001484,
+            14.14600000000064,
+            11.975000000000364
+          ]
+        },
+        {
+          "milliseconds": 0.6469062499999912,
+          "p10": 0.5809437499999944,
+          "p90": 0.6953124999999925,
+          "aggregateMilliseconds": 62.102999999999156,
+          "samples": [
+            62.102999999999156,
+            69.80999999999949,
+            52.49399999999878,
+            57.95499999999993,
+            61.03600000000006,
+            62.12299999999959,
+            64.70999999999913
+          ]
+        },
+        {
+          "milliseconds": 0.6486875000000131,
+          "p10": 0.5613374999999944,
+          "p90": 0.7324291666666606,
+          "aggregateMilliseconds": 62.27400000000125,
+          "samples": [
+            62.27400000000125,
+            66.09599999999955,
+            63.181000000000495,
+            52.2599999999984,
+            62.132000000001426,
+            76.63899999999921,
+            54.97400000000016
+          ]
+        }
+      ],
+      "iterations": 96,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 9336163583.295996,
+      "flatSpeedup": 3.0884199949763356,
+      "scalarSpeedup": 0.997254070719689
+    },
+    {
+      "id": "Batch epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "batch",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.29648214285712776,
+          "p10": 0.2686357142857105,
+          "p90": 0.36867857142856336,
+          "aggregateMilliseconds": 16.602999999999156,
+          "samples": [
+            15.845999999999549,
+            21.761999999998807,
+            15.989999999999782,
+            13.840000000000146,
+            18.040000000000873,
+            19.902000000000044,
+            16.602999999999156
+          ]
+        },
+        {
+          "milliseconds": 0.09998214285714571,
+          "p10": 0.08250357142857345,
+          "p90": 0.11002500000001549,
+          "aggregateMilliseconds": 5.59900000000016,
+          "samples": [
+            5.8290000000015425,
+            5.726999999998952,
+            5.322000000000116,
+            4.570999999999913,
+            5.59900000000016,
+            4.653000000000247,
+            6.6599999999998545
+          ]
+        },
+        {
+          "milliseconds": 0.6134285714285852,
+          "p10": 0.5662000000000132,
+          "p90": 0.6994928571428513,
+          "aggregateMilliseconds": 34.35200000000077,
+          "samples": [
+            35.2549999999992,
+            33.70000000000073,
+            38.814000000000306,
+            33.11200000000099,
+            34.35200000000077,
+            29.600000000000364,
+            39.70799999999872
+          ]
+        },
+        {
+          "milliseconds": 0.6512499999999883,
+          "p10": 0.5399142857142774,
+          "p90": 0.7121285714285802,
+          "aggregateMilliseconds": 36.469999999999345,
+          "samples": [
+            36.469999999999345,
+            31.65899999999965,
+            37.16600000000108,
+            30.014999999999418,
+            30.381999999999607,
+            40.240999999999985,
+            39.63800000000083
+          ]
+        }
+      ],
+      "iterations": 56,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 5735228900.295772,
+      "flatSpeedup": 2.965350955527537,
+      "scalarSpeedup": 0.9419248697560019
+    },
+    {
+      "id": "Batch epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "batch",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.2598571428571371,
+          "p10": 0.2412571428571547,
+          "p90": 0.31631785714285543,
+          "aggregateMilliseconds": 14.55199999999968,
+          "samples": [
+            18.596999999999753,
+            14.55199999999968,
+            15.329999999999927,
+            14.36200000000099,
+            12.233000000000175,
+            14.463999999999942,
+            17.125
+          ]
+        },
+        {
+          "milliseconds": 0.09462499999998338,
+          "p10": 0.08303928571428644,
+          "p90": 0.1262178571428714,
+          "aggregateMilliseconds": 5.298999999999069,
+          "samples": [
+            7.105999999999767,
+            4.841000000000349,
+            6.081999999998516,
+            4.922999999998865,
+            5.298999999999069,
+            7.043000000001484,
+            4.363999999999578
+          ]
+        },
+        {
+          "milliseconds": 0.6795892857142982,
+          "p10": 0.6208178571428432,
+          "p90": 0.7535428571428708,
+          "aggregateMilliseconds": 38.0570000000007,
+          "samples": [
+            36.78900000000067,
+            41.23999999999978,
+            38.0570000000007,
+            34.0049999999992,
+            41.78400000000147,
+            35.27299999999923,
+            42.81999999999971
+          ]
+        },
+        {
+          "milliseconds": 0.6470535714285818,
+          "p10": 0.5798928571428664,
+          "p90": 0.7581464285714187,
+          "aggregateMilliseconds": 36.23500000000058,
+          "samples": [
+            40.50699999999961,
+            35.54199999999946,
+            28.91899999999987,
+            34.84400000000096,
+            39.02900000000045,
+            36.23500000000058,
+            45.3799999999992
+          ]
+        }
+      ],
+      "iterations": 56,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 5461774416,
+      "flatSpeedup": 2.7461785242502805,
+      "scalarSpeedup": 1.0502828756726947
+    },
+    {
+      "id": "Batch epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "batch",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.3288750000000012,
+          "p10": 0.2581749999999829,
+          "p90": 0.46036666666667164,
+          "aggregateMilliseconds": 7.893000000000029,
+          "samples": [
+            7.893000000000029,
+            10.902000000000044,
+            11.269000000000233,
+            6.733000000000175,
+            5.996999999999389,
+            6.3289999999997235,
+            8.983000000000175
+          ]
+        },
+        {
+          "milliseconds": 0.10074999999998606,
+          "p10": 0.09040833333333466,
+          "p90": 0.12318333333331187,
+          "aggregateMilliseconds": 2.4179999999996653,
+          "samples": [
+            2.290999999999258,
+            2.6270000000004075,
+            2.4179999999996653,
+            1.9880000000011933,
+            2.4170000000012806,
+            3.094999999999345,
+            2.863999999999578
+          ]
+        },
+        {
+          "milliseconds": 0.670958333333374,
+          "p10": 0.5438749999999951,
+          "p90": 0.8404583333333147,
+          "aggregateMilliseconds": 16.103000000000975,
+          "samples": [
+            22.909999999999854,
+            13.070999999999913,
+            16.103000000000975,
+            14.131999999999607,
+            18.344999999999345,
+            17.22900000000118,
+            13.02599999999984
+          ]
+        },
+        {
+          "milliseconds": 0.6852083333333212,
+          "p10": 0.6424416666666729,
+          "p90": 0.7169666666666217,
+          "aggregateMilliseconds": 16.44499999999971,
+          "samples": [
+            17.11199999999917,
+            15.949000000000524,
+            17.349999999998545,
+            16.089999999998327,
+            14.622999999999593,
+            16.595000000001164,
+            16.44499999999971
+          ]
+        }
+      ],
+      "iterations": 24,
+      "timingLimited": true,
+      "unstable": true,
+      "checksum": 2464673736,
+      "flatSpeedup": 3.2642679900749054,
+      "scalarSpeedup": 0.9792034052904385
+    },
+    {
+      "id": "Mixed epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "mixed",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.9313000000000102,
+          "p10": 0.6696399999999995,
+          "p90": 1.1491399999999339,
+          "aggregateMilliseconds": 9.313000000000102,
+          "samples": [
+            10.943999999999505,
+            11.09099999999853,
+            12.092000000000553,
+            7.414000000000669,
+            9.313000000000102,
+            7.085999999999331,
+            6.1120000000009895
+          ]
+        },
+        {
+          "milliseconds": 0.7247999999999593,
+          "p10": 0.5086800000000221,
+          "p90": 0.8471200000000682,
+          "aggregateMilliseconds": 7.2479999999995925,
+          "samples": [
+            6.029999999998836,
+            7.338999999999942,
+            5.306000000000495,
+            9.814000000000306,
+            7.576000000000931,
+            7.2479999999995925,
+            4.757999999999811
+          ]
+        },
+        {
+          "milliseconds": 1.3932999999999083,
+          "p10": 1.193580000000038,
+          "p90": 1.665600000000013,
+          "aggregateMilliseconds": 13.932999999999083,
+          "samples": [
+            13.932999999999083,
+            10.667999999999665,
+            13.117999999998574,
+            17.78099999999904,
+            15.906000000000859,
+            15.215000000000146,
+            12.781000000000859
+          ]
+        },
+        {
+          "milliseconds": 1.4203999999999724,
+          "p10": 1.2534000000000014,
+          "p90": 1.6377200000000087,
+          "aggregateMilliseconds": 14.203999999999724,
+          "samples": [
+            13.817000000000917,
+            14.458000000000538,
+            12.994000000000597,
+            15.066000000000713,
+            14.203999999999724,
+            18.34399999999914,
+            11.843999999999141
+          ]
+        }
+      ],
+      "iterations": 10,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 972970435.1869799,
+      "flatSpeedup": 1.2849061810155389,
+      "scalarSpeedup": 0.9809208673612612
+    },
+    {
+      "id": "Mixed epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "mixed",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.88412500000004,
+          "p10": 0.7215750000000298,
+          "p90": 1.1270499999998722,
+          "aggregateMilliseconds": 7.07300000000032,
+          "samples": [
+            5.268000000000029,
+            7.277000000000044,
+            11.083999999998923,
+            7.6379999999990105,
+            7.039000000000669,
+            6.109000000000378,
+            7.07300000000032
+          ]
+        },
+        {
+          "milliseconds": 0.6366249999998672,
+          "p10": 0.49434999999994034,
+          "p90": 0.7335000000000037,
+          "aggregateMilliseconds": 5.092999999998938,
+          "samples": [
+            6.230999999999767,
+            4.10399999999936,
+            5.40599999999904,
+            4.962999999999738,
+            5.092999999998938,
+            3.730999999999767,
+            5.626000000000204
+          ]
+        },
+        {
+          "milliseconds": 1.1207499999998163,
+          "p10": 0.9628249999999298,
+          "p90": 1.2537249999998494,
+          "aggregateMilliseconds": 8.96599999999853,
+          "samples": [
+            11.209999999999127,
+            9.039999999999054,
+            8.96599999999853,
+            8.537000000000262,
+            8.240999999999985,
+            6.894999999998618,
+            9.242999999998574
+          ]
+        },
+        {
+          "milliseconds": 1.3203750000000127,
+          "p10": 0.8758249999999862,
+          "p90": 1.6055749999999536,
+          "aggregateMilliseconds": 10.563000000000102,
+          "samples": [
+            7.210999999999331,
+            12.300999999999476,
+            9.251000000000204,
+            13.659999999999854,
+            10.563000000000102,
+            6.700000000000728,
+            10.8849999999984
+          ]
+        }
+      ],
+      "iterations": 8,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 819317876.5478406,
+      "flatSpeedup": 1.3887688984884734,
+      "scalarSpeedup": 0.8488118905612462
+    },
+    {
+      "id": "Mixed epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "mixed",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.7703749999998308,
+          "p10": 0.6490500000000339,
+          "p90": 1.2032249999998839,
+          "aggregateMilliseconds": 6.162999999998647,
+          "samples": [
+            7.743999999998778,
+            4.902000000000044,
+            5.3990000000012515,
+            5.386000000000422,
+            9.45299999999952,
+            9.8849999999984,
+            6.162999999998647
+          ]
+        },
+        {
+          "milliseconds": 0.5385000000001128,
+          "p10": 0.473450000000048,
+          "p90": 0.6347249999998439,
+          "aggregateMilliseconds": 4.308000000000902,
+          "samples": [
+            5.060999999999694,
+            3.7630000000008295,
+            5.074999999998909,
+            5.081999999998516,
+            3.8040000000000873,
+            4.177999999999884,
+            4.308000000000902
+          ]
+        },
+        {
+          "milliseconds": 1.2386249999999563,
+          "p10": 1.0361499999998613,
+          "p90": 1.804550000000154,
+          "aggregateMilliseconds": 9.90899999999965,
+          "samples": [
+            9.052999999999884,
+            8.41399999999885,
+            9.90899999999965,
+            8.101999999998952,
+            16.06000000000131,
+            13.354000000001179,
+            11.114999999999782
+          ]
+        },
+        {
+          "milliseconds": 1.1145000000001346,
+          "p10": 1.005600000000004,
+          "p90": 1.3301249999999982,
+          "aggregateMilliseconds": 8.916000000001077,
+          "samples": [
+            8.916000000001077,
+            8.816000000000713,
+            7.8840000000000146,
+            11.622000000001208,
+            9.98699999999917,
+            9.298999999999069,
+            8.152000000000044
+          ]
+        }
+      ],
+      "iterations": 8,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 780615953.3621787,
+      "flatSpeedup": 1.4305942432677243,
+      "scalarSpeedup": 1.1113728129204188
+    },
+    {
+      "id": "Mixed epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "mixed",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.6798750000000382,
+          "p10": 0.6062500000000455,
+          "p90": 0.9480750000000171,
+          "aggregateMilliseconds": 5.439000000000306,
+          "samples": [
+            5.012000000000626,
+            6.8070000000006985,
+            5.439000000000306,
+            7.155000000000655,
+            5.402999999998428,
+            4.606999999999971,
+            8.22899999999936
+          ]
+        },
+        {
+          "milliseconds": 0.6122499999999036,
+          "p10": 0.5353749999999764,
+          "p90": 0.7852999999999156,
+          "aggregateMilliseconds": 4.897999999999229,
+          "samples": [
+            7.059999999999491,
+            4.897999999999229,
+            4.813000000000102,
+            4.472999999999956,
+            5.294999999998254,
+            5.763999999999214,
+            3.9979999999995925
+          ]
+        },
+        {
+          "milliseconds": 1.1642499999998108,
+          "p10": 1.0014250000000176,
+          "p90": 1.348675000000003,
+          "aggregateMilliseconds": 9.313999999998487,
+          "samples": [
+            10.643000000000029,
+            7.408999999999651,
+            11.009000000000015,
+            9.229000000001179,
+            10.455000000001746,
+            8.413000000000466,
+            9.313999999998487
+          ]
+        },
+        {
+          "milliseconds": 1.005500000000211,
+          "p10": 0.96899999999996,
+          "p90": 1.150974999999926,
+          "aggregateMilliseconds": 8.044000000001688,
+          "samples": [
+            8.061000000001513,
+            7.67699999999968,
+            7.949999999998909,
+            10.520000000000437,
+            8.33299999999872,
+            8.044000000001688,
+            7.80199999999968
+          ]
+        }
+      ],
+      "iterations": 8,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 821557889.0776415,
+      "flatSpeedup": 1.1104532462231853,
+      "scalarSpeedup": 1.1578816509195091
+    },
+    {
+      "id": "Mixed epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "mixed",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.857833333333474,
+          "p10": 0.6940666666665493,
+          "p90": 1.1578000000000126,
+          "aggregateMilliseconds": 5.147000000000844,
+          "samples": [
+            4.511999999998807,
+            4.95600000000195,
+            5.147000000000844,
+            5.212999999999738,
+            3.643000000000029,
+            6.768000000000029,
+            7.2150000000001455
+          ]
+        },
+        {
+          "milliseconds": 0.767166666666526,
+          "p10": 0.6938999999998486,
+          "p90": 0.980766666666629,
+          "aggregateMilliseconds": 4.602999999999156,
+          "samples": [
+            4.666999999997643,
+            4.22899999999936,
+            4.492000000002008,
+            7.711000000002969,
+            4.06499999999869,
+            4.602999999999156,
+            4.602999999999156
+          ]
+        },
+        {
+          "milliseconds": 1.0219999999996314,
+          "p10": 0.8894999999998011,
+          "p90": 1.383799999999974,
+          "aggregateMilliseconds": 6.131999999997788,
+          "samples": [
+            5.352999999999156,
+            5.312999999998283,
+            8.162000000000262,
+            6.686999999998079,
+            6.131999999997788,
+            8.513999999999214,
+            5.427999999999884
+          ]
+        },
+        {
+          "milliseconds": 1.037666666666458,
+          "p10": 0.9876333333332393,
+          "p90": 1.210266666666818,
+          "aggregateMilliseconds": 6.2259999999987485,
+          "samples": [
+            5.828000000001339,
+            6.361000000000786,
+            5.9909999999981665,
+            7.912000000000262,
+            6.828000000001339,
+            6.025000000001455,
+            6.2259999999987485
+          ]
+        }
+      ],
+      "iterations": 6,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 583782278.0905552,
+      "flatSpeedup": 1.1181837931787504,
+      "scalarSpeedup": 0.9849020237711246
+    },
+    {
+      "id": "Mixed epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "mixed",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.8582857142854274,
+          "p10": 0.631000000000079,
+          "p90": 1.022285714285577,
+          "aggregateMilliseconds": 6.007999999997992,
+          "samples": [
+            4.288000000000466,
+            4.503000000000611,
+            6.007999999997992,
+            7.007999999997992,
+            5.629000000000815,
+            7.378000000000611,
+            6.8179999999993015
+          ]
+        },
+        {
+          "milliseconds": 0.8997142857141236,
+          "p10": 0.7440000000000249,
+          "p90": 1.0595714285709878,
+          "aggregateMilliseconds": 6.297999999998865,
+          "samples": [
+            6.186000000001513,
+            5.040000000000873,
+            7.002999999996973,
+            6.297999999998865,
+            5.319999999999709,
+            6.6229999999995925,
+            8.037999999996828
+          ]
+        },
+        {
+          "milliseconds": 1.0749999999996882,
+          "p10": 0.953714285714107,
+          "p90": 1.274999999999896,
+          "aggregateMilliseconds": 7.524999999997817,
+          "samples": [
+            7.041999999997643,
+            7.265000000003056,
+            8.230000000003201,
+            9.128999999997177,
+            6.1270000000004075,
+            8.78900000000067,
+            7.524999999997817
+          ]
+        },
+        {
+          "milliseconds": 0.9648571428567395,
+          "p10": 0.9075714285714119,
+          "p90": 1.402885714285471,
+          "aggregateMilliseconds": 6.753999999997177,
+          "samples": [
+            6.065000000002328,
+            6.753999999997177,
+            7.438999999998487,
+            7.628999999997177,
+            6.544999999998254,
+            13.106999999999971,
+            6.677999999999884
+          ]
+        }
+      ],
+      "iterations": 7,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 716903162.0364225,
+      "flatSpeedup": 0.9539536360747976,
+      "scalarSpeedup": 1.1141545750667698
+    },
+    {
+      "id": "Mixed epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "mixed",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.7801428571427615,
+          "p10": 0.6043714285715917,
+          "p90": 1.003285714285968,
+          "aggregateMilliseconds": 5.460999999999331,
+          "samples": [
+            7.212000000003172,
+            4.221000000001368,
+            4.2370000000009895,
+            5.460999999999331,
+            6.032999999999447,
+            6.897000000000844,
+            5.179000000000087
+          ]
+        },
+        {
+          "milliseconds": 0.7827142857141942,
+          "p10": 0.6909142857145135,
+          "p90": 1.050885714285583,
+          "aggregateMilliseconds": 5.47899999999936,
+          "samples": [
+            4.8620000000009895,
+            4.798000000002503,
+            6.161000000000058,
+            5.47899999999936,
+            5.377999999996973,
+            5.555000000000291,
+            9.148999999997613
+          ]
+        },
+        {
+          "milliseconds": 1.0981428571425826,
+          "p10": 0.9375999999998645,
+          "p90": 1.264685714285692,
+          "aggregateMilliseconds": 7.686999999998079,
+          "samples": [
+            8.268000000000029,
+            7.078000000001339,
+            6.581999999998516,
+            6.5349999999998545,
+            8.234000000000378,
+            7.686999999998079,
+            9.729999999999563
+          ]
+        },
+        {
+          "milliseconds": 1.0274285714284426,
+          "p10": 0.9164857142856427,
+          "p90": 1.4837428571429752,
+          "aggregateMilliseconds": 7.191999999999098,
+          "samples": [
+            9.016999999999825,
+            6.8729999999995925,
+            6.444999999999709,
+            6.370999999999185,
+            7.191999999999098,
+            10.377000000000407,
+            10.400000000001455
+          ]
+        }
+      ],
+      "iterations": 7,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 683038979,
+      "flatSpeedup": 0.996714728965134,
+      "scalarSpeedup": 1.068826473859711
+    },
+    {
+      "id": "Mixed epoch Helmert",
+      "fixture": "exact-position_vector",
+      "epochMode": "mixed",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.6454999999996289,
+          "p10": 0.6061249999998836,
+          "p90": 0.920274999999947,
+          "aggregateMilliseconds": 5.163999999997031,
+          "samples": [
+            5.113000000001193,
+            8.653999999998632,
+            4.822000000000116,
+            5.9650000000001455,
+            6.501000000000204,
+            5.163999999997031,
+            4.86699999999837
+          ]
+        },
+        {
+          "milliseconds": 0.7222499999998035,
+          "p10": 0.6850999999998748,
+          "p90": 1.0748499999998786,
+          "aggregateMilliseconds": 5.777999999998428,
+          "samples": [
+            5.777999999998428,
+            5.620999999999185,
+            6.2260000000023865,
+            5.460999999999331,
+            9.85399999999936,
+            7.761999999998807,
+            5.493999999998778
+          ]
+        },
+        {
+          "milliseconds": 0.9757499999996071,
+          "p10": 0.9232500000000983,
+          "p90": 1.3703000000003158,
+          "aggregateMilliseconds": 7.805999999996857,
+          "samples": [
+            7.422999999998865,
+            10.44600000000355,
+            7.805999999996857,
+            7.888999999999214,
+            7.418000000001484,
+            11.73700000000099,
+            7.337999999999738
+          ]
+        },
+        {
+          "milliseconds": 1.0760000000000218,
+          "p10": 1.0156750000001011,
+          "p90": 1.4025500000003377,
+          "aggregateMilliseconds": 8.608000000000175,
+          "samples": [
+            8.354999999999563,
+            12.223000000001775,
+            10.552000000003318,
+            8.608000000000175,
+            8.086999999999534,
+            9.91400000000067,
+            8.151000000001659
+          ]
+        }
+      ],
+      "iterations": 8,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 821557912,
+      "flatSpeedup": 0.8937348563514081,
+      "scalarSpeedup": 0.9068308550182038
+    },
+    {
+      "id": "Batch epoch approximate Helmert",
+      "fixture": "approximate-position_vector",
+      "epochMode": "batch",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.2658333333333,
+          "p10": 0.24412916666663778,
+          "p90": 0.3511375000000044,
+          "aggregateMilliseconds": 12.7599999999984,
+          "samples": [
+            11.656999999999243,
+            16.739000000001397,
+            17.02799999999843,
+            15.128000000000611,
+            12.139999999999418,
+            12.7599999999984,
+            11.758999999998196
+          ]
+        },
+        {
+          "milliseconds": 0.08112500000000485,
+          "p10": 0.07888333333332108,
+          "p90": 0.10259166666669445,
+          "aggregateMilliseconds": 3.894000000000233,
+          "samples": [
+            3.756999999997788,
+            4.064000000002125,
+            6.2150000000001455,
+            3.8469999999979336,
+            3.9069999999992433,
+            3.894000000000233,
+            3.8060000000004948
+          ]
+        },
+        {
+          "milliseconds": 0.5516874999999951,
+          "p10": 0.5184791666667025,
+          "p90": 0.8022583333333234,
+          "aggregateMilliseconds": 26.480999999999767,
+          "samples": [
+            24.488000000001193,
+            26.480999999999767,
+            38.550999999999476,
+            38.47999999999956,
+            25.19800000000032,
+            25.153000000002066,
+            27.18500000000131
+          ]
+        },
+        {
+          "milliseconds": 0.5823750000000322,
+          "p10": 0.5150708333333266,
+          "p90": 0.8250666666666803,
+          "aggregateMilliseconds": 27.954000000001543,
+          "samples": [
+            27.954000000001543,
+            50.248999999999796,
+            32.40400000000227,
+            32.50600000000122,
+            24.28900000000067,
+            25.01299999999901,
+            26.162000000000262
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": true,
+      "unstable": true,
+      "checksum": 4915910017.263895,
+      "flatSpeedup": 3.2768361581914838,
+      "scalarSpeedup": 0.9473062889031374
+    },
+    {
+      "id": "Batch epoch approximate Helmert",
+      "fixture": "approximate-position_vector",
+      "epochMode": "batch",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.2972708333333382,
+          "p10": 0.2739999999999933,
+          "p90": 0.4223875000000589,
+          "aggregateMilliseconds": 14.269000000000233,
+          "samples": [
+            20.481000000003405,
+            16.267000000003463,
+            14.269000000000233,
+            12.122999999999593,
+            13.837999999999738,
+            20.137000000002445,
+            14.108000000000175
+          ]
+        },
+        {
+          "milliseconds": 0.12454166666664908,
+          "p10": 0.10098749999998896,
+          "p90": 0.17301249999998922,
+          "aggregateMilliseconds": 5.977999999999156,
+          "samples": [
+            6.566000000002532,
+            5.316999999999098,
+            7.78099999999904,
+            5.977999999999156,
+            5.617999999998574,
+            4.143000000000029,
+            9.090000000000146
+          ]
+        },
+        {
+          "milliseconds": 0.6473750000000109,
+          "p10": 0.5562624999999571,
+          "p90": 0.7794874999999593,
+          "aggregateMilliseconds": 31.074000000000524,
+          "samples": [
+            34.474999999998545,
+            33.47400000000198,
+            41.82599999999729,
+            31.074000000000524,
+            25.28099999999904,
+            27.692000000002736,
+            27.646999999997206
+          ]
+        },
+        {
+          "milliseconds": 0.6398333333333994,
+          "p10": 0.5609749999999925,
+          "p90": 0.8087125000000167,
+          "aggregateMilliseconds": 30.712000000003172,
+          "samples": [
+            38.96099999999933,
+            26.403000000002066,
+            38.723000000001775,
+            30.712000000003172,
+            27.27599999999802,
+            29.075000000000728,
+            34.38300000000163
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 4915910348.433507,
+      "flatSpeedup": 2.3869187019073683,
+      "scalarSpeedup": 1.0117869236779538
+    },
+    {
+      "id": "Batch epoch approximate Helmert",
+      "fixture": "approximate-position_vector",
+      "epochMode": "batch",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.3132857142857444,
+          "p10": 0.26607142857142857,
+          "p90": 0.37801428571428913,
+          "aggregateMilliseconds": 17.544000000001688,
+          "samples": [
+            16.21099999999933,
+            20.592000000000553,
+            15.423999999999069,
+            18.574000000000524,
+            22.03399999999965,
+            17.544000000001688,
+            14.114000000001397
+          ]
+        },
+        {
+          "milliseconds": 0.09296428571432054,
+          "p10": 0.07986785714284841,
+          "p90": 0.11895714285712011,
+          "aggregateMilliseconds": 5.20600000000195,
+          "samples": [
+            4.476999999998952,
+            4.466000000000349,
+            5.382999999997992,
+            8.016999999999825,
+            5.20600000000195,
+            5.757999999997992,
+            4.9060000000026776
+          ]
+        },
+        {
+          "milliseconds": 0.6236250000000447,
+          "p10": 0.5829178571428981,
+          "p90": 0.696692857142872,
+          "aggregateMilliseconds": 34.9230000000025,
+          "samples": [
+            30.022000000000844,
+            34.9230000000025,
+            39.220000000001164,
+            37.897000000000844,
+            34.897000000000844,
+            34.39100000000326,
+            38.87800000000061
+          ]
+        },
+        {
+          "milliseconds": 0.6303035714286125,
+          "p10": 0.5845749999999887,
+          "p90": 0.7570428571428237,
+          "aggregateMilliseconds": 35.2970000000023,
+          "samples": [
+            30.662000000000262,
+            34.11899999999878,
+            36.88799999999901,
+            42.185999999997875,
+            34.59700000000157,
+            42.706999999998516,
+            35.2970000000023
+          ]
+        }
+      ],
+      "iterations": 56,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 5750904900.054685,
+      "flatSpeedup": 3.36995774106706,
+      "scalarSpeedup": 0.9894041986571162
+    },
+    {
+      "id": "Batch epoch approximate Helmert",
+      "fixture": "approximate-position_vector",
+      "epochMode": "batch",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.326750000000023,
+          "p10": 0.2775500000000496,
+          "p90": 0.375608333333336,
+          "aggregateMilliseconds": 15.684000000001106,
+          "samples": [
+            13.014000000002852,
+            19.522000000000844,
+            15.684000000001106,
+            13.528000000002066,
+            17.03399999999965,
+            16.751000000000204,
+            13.924999999999272
+          ]
+        },
+        {
+          "milliseconds": 0.09360416666671274,
+          "p10": 0.08682083333336171,
+          "p90": 0.18570416666667977,
+          "aggregateMilliseconds": 4.493000000002212,
+          "samples": [
+            10.526000000001659,
+            4.493000000002212,
+            4.162000000000262,
+            4.1710000000020955,
+            4.213999999999942,
+            4.907999999999447,
+            7.838999999999942
+          ]
+        },
+        {
+          "milliseconds": 0.6655416666666648,
+          "p10": 0.5980041666666845,
+          "p90": 0.7315458333333179,
+          "aggregateMilliseconds": 31.945999999999913,
+          "samples": [
+            33.72999999999956,
+            31.53900000000067,
+            33.758999999998196,
+            31.945999999999913,
+            37.147000000000844,
+            27.827000000001135,
+            29.28900000000067
+          ]
+        },
+        {
+          "milliseconds": 0.7222708333332927,
+          "p10": 0.6198374999999791,
+          "p90": 0.7869083333333492,
+          "aggregateMilliseconds": 34.66899999999805,
+          "samples": [
+            34.66899999999805,
+            38.470000000001164,
+            31.235000000000582,
+            28.269000000000233,
+            30.740999999998166,
+            37.306000000000495,
+            35.809000000001106
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 4929347334.465751,
+      "flatSpeedup": 3.4907634097470255,
+      "scalarSpeedup": 0.9214572096109409
+    },
+    {
+      "id": "Batch epoch approximate Helmert",
+      "fixture": "approximate-position_vector",
+      "epochMode": "batch",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.30657291666663394,
+          "p10": 0.28018125000000205,
+          "p90": 0.4256395833333424,
+          "aggregateMilliseconds": 29.430999999996857,
+          "samples": [
+            24.13799999999901,
+            28.73700000000099,
+            28.830999999998312,
+            29.430999999996857,
+            32.64900000000125,
+            41.822000000000116,
+            40.22100000000137
+          ]
+        },
+        {
+          "milliseconds": 0.12030208333332364,
+          "p10": 0.09611874999999752,
+          "p90": 0.1320104166666776,
+          "aggregateMilliseconds": 11.548999999999069,
+          "samples": [
+            11.640999999999622,
+            7.69800000000032,
+            10.343000000000757,
+            12.527000000001863,
+            10.246999999999389,
+            11.548999999999069,
+            12.891999999999825
+          ]
+        },
+        {
+          "milliseconds": 0.67512499999998,
+          "p10": 0.6054520833333451,
+          "p90": 0.782041666666684,
+          "aggregateMilliseconds": 64.81199999999808,
+          "samples": [
+            56.33899999999994,
+            59.31300000000192,
+            62.61699999999837,
+            64.81199999999808,
+            79.05400000000009,
+            71.73099999999977,
+            72.4240000000027
+          ]
+        },
+        {
+          "milliseconds": 0.7303333333333436,
+          "p10": 0.6461041666666613,
+          "p90": 0.7458104166666771,
+          "aggregateMilliseconds": 70.11200000000099,
+          "samples": [
+            58.46799999999712,
+            70.11200000000099,
+            71.22100000000137,
+            64.39800000000105,
+            72.16300000000047,
+            70.66100000000006,
+            65.05499999999665
+          ]
+        }
+      ],
+      "iterations": 96,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 9831820192.149029,
+      "flatSpeedup": 2.54835916529563,
+      "scalarSpeedup": 0.9244066636238756
+    },
+    {
+      "id": "Batch epoch approximate Helmert",
+      "fixture": "approximate-position_vector",
+      "epochMode": "batch",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.3382291666666788,
+          "p10": 0.30970000000002074,
+          "p90": 0.42322083333331956,
+          "aggregateMilliseconds": 16.235000000000582,
+          "samples": [
+            15.514999999999418,
+            14.882000000001426,
+            16.235000000000582,
+            18.592000000000553,
+            18.656999999999243,
+            14.84100000000035,
+            22.800999999999476
+          ]
+        },
+        {
+          "milliseconds": 0.10635416666665758,
+          "p10": 0.09075000000001031,
+          "p90": 0.1385333333333165,
+          "aggregateMilliseconds": 5.104999999999563,
+          "samples": [
+            4.167000000001281,
+            4.790999999997439,
+            5.831999999998516,
+            5.104999999999563,
+            7.876000000000204,
+            4.481999999999971,
+            5.309000000001106
+          ]
+        },
+        {
+          "milliseconds": 0.7089999999999842,
+          "p10": 0.6154375000000224,
+          "p90": 0.7776583333333443,
+          "aggregateMilliseconds": 34.03199999999924,
+          "samples": [
+            37.05400000000009,
+            30.971000000001368,
+            35.20900000000256,
+            37.73800000000119,
+            33.67900000000009,
+            34.03199999999924,
+            27.39600000000064
+          ]
+        },
+        {
+          "milliseconds": 0.6930208333333212,
+          "p10": 0.6412666666666761,
+          "p90": 0.7560083333333295,
+          "aggregateMilliseconds": 33.26499999999942,
+          "samples": [
+            33.26499999999942,
+            30.12199999999939,
+            35.30199999999968,
+            37.76800000000003,
+            32.992999999998574,
+            31.220000000001164,
+            33.31999999999971
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 4915910485.967799,
+      "flatSpeedup": 3.1802154750248715,
+      "scalarSpeedup": 1.0230572673981613
+    },
+    {
+      "id": "Batch epoch approximate Helmert",
+      "fixture": "approximate-position_vector",
+      "epochMode": "batch",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.3087916666666691,
+          "p10": 0.2598874999999907,
+          "p90": 0.35991249999999586,
+          "aggregateMilliseconds": 29.644000000000233,
+          "samples": [
+            29.77600000000166,
+            24.743999999998778,
+            29.644000000000233,
+            36.53399999999965,
+            26.15899999999965,
+            25.08599999999933,
+            33.22999999999956
+          ]
+        },
+        {
+          "milliseconds": 0.10109374999998029,
+          "p10": 0.08531874999998006,
+          "p90": 0.11520000000000437,
+          "aggregateMilliseconds": 9.704999999998108,
+          "samples": [
+            8.28099999999904,
+            9.570999999999913,
+            11.516999999999825,
+            9.704999999998108,
+            10.239000000001397,
+            8.054999999996653,
+            10.754000000000815
+          ]
+        },
+        {
+          "milliseconds": 0.6690520833333267,
+          "p10": 0.6321083333333263,
+          "p90": 0.8261729166666631,
+          "aggregateMilliseconds": 64.22899999999936,
+          "samples": [
+            57.47599999999875,
+            63.51400000000285,
+            62.81999999999971,
+            87.76299999999901,
+            73.67900000000009,
+            65.14400000000023,
+            64.22899999999936
+          ]
+        },
+        {
+          "milliseconds": 0.6612291666666579,
+          "p10": 0.6007875000000088,
+          "p90": 0.7673062500000091,
+          "aggregateMilliseconds": 63.477999999999156,
+          "samples": [
+            56.27700000000186,
+            58.608000000000175,
+            76.25700000000143,
+            71.9310000000005,
+            69.89600000000064,
+            60.352999999999156,
+            63.477999999999156
+          ]
+        }
+      ],
+      "iterations": 96,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 9858694272,
+      "flatSpeedup": 3.0545079855750656,
+      "scalarSpeedup": 1.0118308705378274
+    },
+    {
+      "id": "Batch epoch approximate Helmert",
+      "fixture": "approximate-position_vector",
+      "epochMode": "batch",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.2959166666666988,
+          "p10": 0.2774416666666487,
+          "p90": 0.32989166666667796,
+          "aggregateMilliseconds": 14.204000000001543,
+          "samples": [
+            15.39799999999741,
+            15.479999999999563,
+            14.037000000000262,
+            12.781999999999243,
+            14.204000000001543,
+            16.367000000002008,
+            13.673999999999069
+          ]
+        },
+        {
+          "milliseconds": 0.10149999999998727,
+          "p10": 0.08792083333335843,
+          "p90": 0.13178333333330558,
+          "aggregateMilliseconds": 4.871999999999389,
+          "samples": [
+            6.1159999999981665,
+            4.162000000000262,
+            6.639999999999418,
+            4.45600000000195,
+            4.2590000000018335,
+            5.920000000001892,
+            4.871999999999389
+          ]
+        },
+        {
+          "milliseconds": 0.6860416666666728,
+          "p10": 0.586945833333372,
+          "p90": 0.7466625000000021,
+          "aggregateMilliseconds": 32.93000000000029,
+          "samples": [
+            32.93000000000029,
+            34.16700000000128,
+            29.471999999997934,
+            27.23199999999997,
+            28.801000000003114,
+            38.34899999999834,
+            33.60200000000259
+          ]
+        },
+        {
+          "milliseconds": 0.6618333333333339,
+          "p10": 0.6047000000000026,
+          "p90": 0.6968374999999923,
+          "aggregateMilliseconds": 31.76800000000003,
+          "samples": [
+            28.293000000001484,
+            32.742999999998574,
+            29.513999999999214,
+            31.888999999999214,
+            31.76800000000003,
+            34.50600000000122,
+            29.76599999999962
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 4929347472,
+      "flatSpeedup": 2.915435139573753,
+      "scalarSpeedup": 1.0365776882397464
+    },
+    {
+      "id": "Mixed epoch coordinate-frame Helmert",
+      "fixture": "approximate-coordinate_frame",
+      "epochMode": "mixed",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.34837500000003274,
+          "p10": 0.3342624999999771,
+          "p90": 0.40697499999987485,
+          "aggregateMilliseconds": 5.574000000000524,
+          "samples": [
+            6.271999999997206,
+            6.870999999999185,
+            6.19800000000032,
+            5.574000000000524,
+            5.536000000000058,
+            5.361000000000786,
+            5.3289999999979045
+          ]
+        },
+        {
+          "milliseconds": 0.26206249999995634,
+          "p10": 0.25476250000001527,
+          "p90": 0.29146249999998874,
+          "aggregateMilliseconds": 4.1929999999993015,
+          "samples": [
+            4.32300000000032,
+            5.173999999999069,
+            4.224000000001979,
+            4.088999999999942,
+            4.1929999999993015,
+            4.097999999998137,
+            4.0570000000006985
+          ]
+        },
+        {
+          "milliseconds": 0.6518125000000055,
+          "p10": 0.6143249999999171,
+          "p90": 0.6676250000000892,
+          "aggregateMilliseconds": 10.429000000000087,
+          "samples": [
+            10.429000000000087,
+            10.808000000000902,
+            10.598000000001775,
+            9.915999999997439,
+            10.459000000002561,
+            10.047999999998865,
+            9.699000000000524
+          ]
+        },
+        {
+          "milliseconds": 0.6199375000001055,
+          "p10": 0.6069249999998647,
+          "p90": 0.7779999999999746,
+          "aggregateMilliseconds": 9.919000000001688,
+          "samples": [
+            10.45799999999872,
+            9.80399999999645,
+            15.433000000000902,
+            10.278999999998632,
+            9.912000000000262,
+            9.570999999999913,
+            9.919000000001688
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 1638635728.764498,
+      "flatSpeedup": 1.3293584545674821,
+      "scalarSpeedup": 1.0514164734346518
+    },
+    {
+      "id": "Mixed epoch coordinate-frame Helmert",
+      "fixture": "approximate-coordinate_frame",
+      "epochMode": "mixed",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.34874999999988177,
+          "p10": 0.3461749999999938,
+          "p90": 0.3646500000000742,
+          "aggregateMilliseconds": 5.579999999998108,
+          "samples": [
+            5.841000000000349,
+            5.579999999998108,
+            5.830000000001746,
+            5.547999999998865,
+            5.525000000001455,
+            5.554000000000087,
+            5.625
+          ]
+        },
+        {
+          "milliseconds": 0.25737499999991087,
+          "p10": 0.2530749999999443,
+          "p90": 0.2621500000001106,
+          "aggregateMilliseconds": 4.117999999998574,
+          "samples": [
+            4.117999999998574,
+            4.049999999999272,
+            4.120000000002619,
+            4.047999999998865,
+            4.210000000002765,
+            4.184000000001106,
+            4.080999999998312
+          ]
+        },
+        {
+          "milliseconds": 0.61525000000006,
+          "p10": 0.6092375000001085,
+          "p90": 0.6199874999999337,
+          "aggregateMilliseconds": 9.84400000000096,
+          "samples": [
+            9.77900000000227,
+            9.84400000000096,
+            9.898999999997613,
+            9.824000000000524,
+            9.701000000000931,
+            9.951000000000931,
+            9.886000000002241
+          ]
+        },
+        {
+          "milliseconds": 0.6254375000000891,
+          "p10": 0.6149124999999913,
+          "p90": 0.6338749999999891,
+          "aggregateMilliseconds": 10.007000000001426,
+          "samples": [
+            9.837999999999738,
+            10.031999999999243,
+            9.838999999999942,
+            10.183999999997468,
+            10.114000000001397,
+            9.890999999999622,
+            10.007000000001426
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": false,
+      "unstable": false,
+      "checksum": 1638635753.095699,
+      "flatSpeedup": 1.3550267119961246,
+      "scalarSpeedup": 0.9837114020185428
+    },
+    {
+      "id": "Mixed epoch coordinate-frame Helmert",
+      "fixture": "approximate-coordinate_frame",
+      "epochMode": "mixed",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.34020833333321815,
+          "p10": 0.33037500000003395,
+          "p90": 0.34566666666663276,
+          "aggregateMilliseconds": 8.164999999997235,
+          "samples": [
+            8.076000000000931,
+            8.41899999999805,
+            7.985000000000582,
+            7.845000000001164,
+            8.171999999998661,
+            8.213999999999942,
+            8.164999999997235
+          ]
+        },
+        {
+          "milliseconds": 0.24945833333337455,
+          "p10": 0.24555833333333796,
+          "p90": 0.26317500000004657,
+          "aggregateMilliseconds": 5.9870000000009895,
+          "samples": [
+            5.91899999999805,
+            6.016999999999825,
+            6.095000000001164,
+            5.949000000000524,
+            5.9870000000009895,
+            5.855000000003201,
+            6.648000000001048
+          ]
+        },
+        {
+          "milliseconds": 0.6262083333332763,
+          "p10": 0.6114000000000185,
+          "p90": 0.6456833333333635,
+          "aggregateMilliseconds": 15.028999999998632,
+          "samples": [
+            14.670000000001892,
+            14.675999999999476,
+            14.677999999999884,
+            15.181000000000495,
+            15.028999999998632,
+            15.965000000000146,
+            15.184000000001106
+          ]
+        },
+        {
+          "milliseconds": 0.6247499999999491,
+          "p10": 0.6154000000000148,
+          "p90": 0.6323500000000423,
+          "aggregateMilliseconds": 14.993999999998778,
+          "samples": [
+            14.936000000001513,
+            14.797999999998865,
+            14.993999999998778,
+            14.72700000000259,
+            15.114000000001397,
+            15.270000000000437,
+            15.014000000002852
+          ]
+        }
+      ],
+      "iterations": 24,
+      "timingLimited": false,
+      "unstable": false,
+      "checksum": 2464673668.1301484,
+      "flatSpeedup": 1.3637882077828438,
+      "scalarSpeedup": 1.0023342670401398
+    },
+    {
+      "id": "Mixed epoch coordinate-frame Helmert",
+      "fixture": "approximate-coordinate_frame",
+      "epochMode": "mixed",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.363562500000171,
+          "p10": 0.3626625000000786,
+          "p90": 0.4034875000000739,
+          "aggregateMilliseconds": 5.817000000002736,
+          "samples": [
+            5.815000000002328,
+            7.0240000000012515,
+            5.7960000000020955,
+            6.077000000001135,
+            5.8070000000006985,
+            5.817000000002736,
+            5.995000000002619
+          ]
+        },
+        {
+          "milliseconds": 0.2672499999998763,
+          "p10": 0.26042499999998653,
+          "p90": 0.2751125000000229,
+          "aggregateMilliseconds": 4.275999999998021,
+          "samples": [
+            4.275999999998021,
+            4.193999999999505,
+            4.290999999997439,
+            4.126000000000204,
+            4.352999999999156,
+            4.199000000000524,
+            4.475000000002183
+          ]
+        },
+        {
+          "milliseconds": 0.6704374999999345,
+          "p10": 0.6616999999999734,
+          "p90": 0.7531999999998333,
+          "aggregateMilliseconds": 10.726999999998952,
+          "samples": [
+            11.231999999999971,
+            11.94999999999709,
+            10.531999999999243,
+            10.645000000000437,
+            10.726999999998952,
+            10.623999999999796,
+            12.2029999999977
+          ]
+        },
+        {
+          "milliseconds": 0.6548124999999345,
+          "p10": 0.6483750000000328,
+          "p90": 0.7367000000000644,
+          "aggregateMilliseconds": 10.476999999998952,
+          "samples": [
+            11.407999999999447,
+            11.180000000000291,
+            10.476999999998952,
+            10.434000000001106,
+            10.46900000000096,
+            10.28399999999965,
+            12.356000000003405
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": false,
+      "unstable": false,
+      "checksum": 1643115778.155293,
+      "flatSpeedup": 1.3603835360162366,
+      "scalarSpeedup": 1.0238617924978548
+    },
+    {
+      "id": "Mixed epoch coordinate-frame Helmert",
+      "fixture": "approximate-coordinate_frame",
+      "epochMode": "mixed",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.3541250000000673,
+          "p10": 0.344787499999984,
+          "p90": 0.3682624999999007,
+          "aggregateMilliseconds": 5.666000000001077,
+          "samples": [
+            5.886999999998807,
+            5.666000000001077,
+            5.578000000001339,
+            5.548999999999069,
+            5.899999999997817,
+            5.66899999999805,
+            5.468000000000757
+          ]
+        },
+        {
+          "milliseconds": 0.24987499999997453,
+          "p10": 0.24473749999992833,
+          "p90": 0.2531624999999167,
+          "aggregateMilliseconds": 3.9979999999995925,
+          "samples": [
+            4.095000000001164,
+            4.006000000001222,
+            3.9140000000006694,
+            3.9169999999976426,
+            4.020999999997002,
+            3.963999999999942,
+            3.9979999999995925
+          ]
+        },
+        {
+          "milliseconds": 0.6236875000001874,
+          "p10": 0.6133874999999989,
+          "p90": 0.6777125000000525,
+          "aggregateMilliseconds": 9.979000000002998,
+          "samples": [
+            11.540000000000873,
+            9.829000000001543,
+            9.866000000001804,
+            10.067999999999302,
+            9.791999999997643,
+            9.979000000002998,
+            10.379000000000815
+          ]
+        },
+        {
+          "milliseconds": 0.6166874999998981,
+          "p10": 0.6124874999999974,
+          "p90": 0.6599749999998494,
+          "aggregateMilliseconds": 9.86699999999837,
+          "samples": [
+            9.951000000000931,
+            9.850999999998749,
+            10.165999999997439,
+            9.86699999999837,
+            11.149999999997817,
+            9.820999999999913,
+            9.768000000000029
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": true,
+      "unstable": false,
+      "checksum": 1638635774.011041,
+      "flatSpeedup": 1.417208604302565,
+      "scalarSpeedup": 1.0113509678731778
+    },
+    {
+      "id": "Mixed epoch coordinate-frame Helmert",
+      "fixture": "approximate-coordinate_frame",
+      "epochMode": "mixed",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.36712499999998727,
+          "p10": 0.36003749999995305,
+          "p90": 0.37868750000002366,
+          "aggregateMilliseconds": 5.873999999999796,
+          "samples": [
+            5.9979999999995925,
+            5.998999999999796,
+            5.873999999999796,
+            5.828000000001339,
+            5.78099999999904,
+            5.729999999999563,
+            6.1490000000012515
+          ]
+        },
+        {
+          "milliseconds": 0.25337500000000546,
+          "p10": 0.24877500000006875,
+          "p90": 0.25837500000002367,
+          "aggregateMilliseconds": 4.054000000000087,
+          "samples": [
+            4.004000000000815,
+            4.054000000000087,
+            3.992000000002008,
+            3.962999999999738,
+            4.099000000001979,
+            4.123999999999796,
+            4.1490000000012515
+          ]
+        },
+        {
+          "milliseconds": 0.6324999999999363,
+          "p10": 0.6272874999998749,
+          "p90": 0.6968500000000404,
+          "aggregateMilliseconds": 10.119999999998981,
+          "samples": [
+            10.119999999998981,
+            10.677999999999884,
+            11.75499999999738,
+            10.036999999996624,
+            10.036000000000058,
+            10.11200000000099,
+            10.746000000002823
+          ]
+        },
+        {
+          "milliseconds": 0.6385000000000218,
+          "p10": 0.627500000000009,
+          "p90": 0.6649875000000975,
+          "aggregateMilliseconds": 10.21600000000035,
+          "samples": [
+            10.090000000000146,
+            10.41700000000128,
+            10.34400000000096,
+            9.965000000000146,
+            10.21600000000035,
+            10.138999999999214,
+            10.974000000001979
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": false,
+      "unstable": false,
+      "checksum": 1638635798.9404056,
+      "flatSpeedup": 1.448939319190841,
+      "scalarSpeedup": 0.9906029757242204
+    },
+    {
+      "id": "Mixed epoch coordinate-frame Helmert",
+      "fixture": "approximate-coordinate_frame",
+      "epochMode": "mixed",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.36200000000008004,
+          "p10": 0.3513250000000426,
+          "p90": 0.4097625000000335,
+          "aggregateMilliseconds": 5.792000000001281,
+          "samples": [
+            7.14600000000064,
+            5.691999999999098,
+            5.792000000001281,
+            5.515000000003056,
+            5.691999999999098,
+            6.163000000000466,
+            6.100000000002183
+          ]
+        },
+        {
+          "milliseconds": 0.25681250000002365,
+          "p10": 0.24899999999997818,
+          "p90": 0.3444999999998345,
+          "aggregateMilliseconds": 4.109000000000378,
+          "samples": [
+            4.6819999999970605,
+            6.756999999997788,
+            4.109000000000378,
+            4,
+            3.959999999999127,
+            4.006000000001222,
+            4.282999999999447
+          ]
+        },
+        {
+          "milliseconds": 0.6749374999999418,
+          "p10": 0.6447625000000698,
+          "p90": 0.6990875000000415,
+          "aggregateMilliseconds": 10.798999999999069,
+          "samples": [
+            11.59100000000035,
+            10.798999999999069,
+            10.915000000000873,
+            10.276000000001659,
+            10.369999999998981,
+            10.343000000000757,
+            10.83299999999872
+          ]
+        },
+        {
+          "milliseconds": 0.6755000000000564,
+          "p10": 0.6547749999999724,
+          "p90": 0.7779625000000124,
+          "aggregateMilliseconds": 10.808000000000902,
+          "samples": [
+            13.66899999999805,
+            10.691000000002532,
+            11.63300000000163,
+            10.49199999999837,
+            10.453000000001339,
+            10.808000000000902,
+            11.040999999997439
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 1643115824,
+      "flatSpeedup": 1.4095887077149543,
+      "scalarSpeedup": 0.9991672834935388
+    },
+    {
+      "id": "Mixed epoch coordinate-frame Helmert",
+      "fixture": "approximate-coordinate_frame",
+      "epochMode": "mixed",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.375374999999849,
+          "p10": 0.3645249999999578,
+          "p90": 0.41271250000008874,
+          "aggregateMilliseconds": 6.005999999997584,
+          "samples": [
+            5.9650000000001455,
+            6.718000000000757,
+            6.065000000002328,
+            5.809000000001106,
+            5.847999999998137,
+            6.527000000001863,
+            6.005999999997584
+          ]
+        },
+        {
+          "milliseconds": 0.2621874999999818,
+          "p10": 0.25448750000000475,
+          "p90": 0.26588750000005346,
+          "aggregateMilliseconds": 4.194999999999709,
+          "samples": [
+            4.07300000000032,
+            4.246999999999389,
+            4.194999999999709,
+            4.069999999999709,
+            4.265000000003056,
+            4.147000000000844,
+            4.207000000002154
+          ]
+        },
+        {
+          "milliseconds": 0.702750000000151,
+          "p10": 0.6670999999999822,
+          "p90": 0.7614500000000589,
+          "aggregateMilliseconds": 11.244000000002416,
+          "samples": [
+            11.244000000002416,
+            12.770000000000437,
+            11.79200000000128,
+            10.99199999999837,
+            10.652000000001863,
+            10.687999999998283,
+            11.443999999999505
+          ]
+        },
+        {
+          "milliseconds": 0.6990624999998545,
+          "p10": 0.6767625000000408,
+          "p90": 0.7184999999998581,
+          "aggregateMilliseconds": 11.184999999997672,
+          "samples": [
+            11.44999999999709,
+            11.184999999997672,
+            11.411000000000058,
+            11.56499999999869,
+            10.944999999999709,
+            10.653000000002066,
+            10.980999999999767
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": false,
+      "unstable": false,
+      "checksum": 1643115824,
+      "flatSpeedup": 1.4317044100114424,
+      "scalarSpeedup": 1.0052749217706531
+    },
+    {
+      "id": "Batch epoch exact coordinate-frame Helmert",
+      "fixture": "exact-coordinate_frame",
+      "epochMode": "batch",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.25929166666666487,
+          "p10": 0.24972499999998946,
+          "p90": 0.3583333333333258,
+          "aggregateMilliseconds": 24.891999999999825,
+          "samples": [
+            23.787000000000262,
+            24.497999999999593,
+            24.097999999998137,
+            24.891999999999825,
+            32.39099999999962,
+            34.87700000000041,
+            34.081999999998516
+          ]
+        },
+        {
+          "milliseconds": 0.09073958333332637,
+          "p10": 0.08112083333332976,
+          "p90": 0.09683541666667377,
+          "aggregateMilliseconds": 8.71099999999933,
+          "samples": [
+            7.804000000000087,
+            7.7629999999990105,
+            8.045000000001892,
+            8.71099999999933,
+            9.097999999998137,
+            9.189000000002125,
+            9.456999999998516
+          ]
+        },
+        {
+          "milliseconds": 0.5650000000000167,
+          "p10": 0.5137958333333169,
+          "p90": 0.6454916666666577,
+          "aggregateMilliseconds": 54.2400000000016,
+          "samples": [
+            49.61999999999898,
+            48.880999999997584,
+            54.2400000000016,
+            50.71100000000297,
+            61.74399999999878,
+            57.322000000000116,
+            62.30199999999968
+          ]
+        },
+        {
+          "milliseconds": 0.5667812500000006,
+          "p10": 0.5128270833333469,
+          "p90": 0.7198562499999904,
+          "aggregateMilliseconds": 54.41100000000006,
+          "samples": [
+            49.70300000000134,
+            48.52400000000125,
+            54.41100000000006,
+            53.77799999999843,
+            67.33699999999953,
+            71.7599999999984,
+            63.34100000000035
+          ]
+        }
+      ],
+      "iterations": 96,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 10325776174.8704,
+      "flatSpeedup": 2.8575364481691814,
+      "scalarSpeedup": 0.9968572531289914
+    },
+    {
+      "id": "Batch epoch exact coordinate-frame Helmert",
+      "fixture": "exact-coordinate_frame",
+      "epochMode": "batch",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.3207916666666885,
+          "p10": 0.2862791666666605,
+          "p90": 0.4054624999999608,
+          "aggregateMilliseconds": 15.398000000001048,
+          "samples": [
+            13.729999999999563,
+            15.097000000001572,
+            18.812999999998283,
+            20.435999999997875,
+            16.5,
+            15.398000000001048,
+            13.748999999999796
+          ]
+        },
+        {
+          "milliseconds": 0.09047916666668243,
+          "p10": 0.08845000000004195,
+          "p90": 0.10557499999996861,
+          "aggregateMilliseconds": 4.343000000000757,
+          "samples": [
+            4.343000000000757,
+            4.469999999997526,
+            5.963999999999942,
+            4.218000000000757,
+            4.318999999999505,
+            4.359999999996944,
+            4.264000000002852
+          ]
+        },
+        {
+          "milliseconds": 0.639041666666723,
+          "p10": 0.5443041666666583,
+          "p90": 0.7386291666666542,
+          "aggregateMilliseconds": 30.674000000002707,
+          "samples": [
+            38.38999999999942,
+            30.434000000001106,
+            33.49699999999939,
+            25.56199999999808,
+            33.14899999999761,
+            30.674000000002707,
+            26.50300000000061
+          ]
+        },
+        {
+          "milliseconds": 0.7184375000000122,
+          "p10": 0.6012916666667024,
+          "p90": 0.8148875000000014,
+          "aggregateMilliseconds": 34.48500000000058,
+          "samples": [
+            34.48500000000058,
+            26.957000000002154,
+            38.431000000000495,
+            39.224999999998545,
+            39.04100000000108,
+            34.13600000000224,
+            30.132000000001426
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 4915910348.433507,
+      "flatSpeedup": 3.5454754777799597,
+      "scalarSpeedup": 0.8894881832681509
+    },
+    {
+      "id": "Batch epoch exact coordinate-frame Helmert",
+      "fixture": "exact-coordinate_frame",
+      "epochMode": "batch",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.3048750000000057,
+          "p10": 0.2663071428571389,
+          "p90": 0.3559428571428856,
+          "aggregateMilliseconds": 17.07300000000032,
+          "samples": [
+            21.728000000002794,
+            18.736000000000786,
+            17.404999999998836,
+            16.979999999999563,
+            14.993999999998778,
+            17.07300000000032,
+            14.79200000000128
+          ]
+        },
+        {
+          "milliseconds": 0.1383392857142748,
+          "p10": 0.08748928571429652,
+          "p90": 0.17129285714282952,
+          "aggregateMilliseconds": 7.746999999999389,
+          "samples": [
+            7.746999999999389,
+            10.222999999998137,
+            5.169000000001688,
+            8.400999999998021,
+            9.171999999998661,
+            4.494999999998981,
+            6.27100000000064
+          ]
+        },
+        {
+          "milliseconds": 0.6759999999999958,
+          "p10": 0.6017321428571839,
+          "p90": 0.7114857142856896,
+          "aggregateMilliseconds": 37.85599999999977,
+          "samples": [
+            37.85599999999977,
+            38.23800000000119,
+            34.17499999999927,
+            41.01499999999942,
+            33.229000000003,
+            39.06199999999808,
+            34.00900000000183
+          ]
+        },
+        {
+          "milliseconds": 0.6944642857142753,
+          "p10": 0.6084214285714162,
+          "p90": 0.7694285714285797,
+          "aggregateMilliseconds": 38.88999999999942,
+          "samples": [
+            41.53600000000006,
+            44.18000000000029,
+            35.04999999999927,
+            42.36000000000058,
+            32.60399999999936,
+            38.88999999999942,
+            36.01600000000326
+          ]
+        }
+      ],
+      "iterations": 56,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 6039043520.792356,
+      "flatSpeedup": 2.203820833871391,
+      "scalarSpeedup": 0.9734121882232022
+    },
+    {
+      "id": "Batch epoch exact coordinate-frame Helmert",
+      "fixture": "exact-coordinate_frame",
+      "epochMode": "batch",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.2903333333332891,
+          "p10": 0.26134583333332556,
+          "p90": 0.3397833333333286,
+          "aggregateMilliseconds": 13.935999999997875,
+          "samples": [
+            16.304000000000087,
+            12.775000000001455,
+            14.509000000001834,
+            16.3179999999993,
+            13.481999999999971,
+            13.935999999997875,
+            12.198999999996886
+          ]
+        },
+        {
+          "milliseconds": 0.11297916666664302,
+          "p10": 0.10563749999999648,
+          "p90": 0.12907083333332897,
+          "aggregateMilliseconds": 5.422999999998865,
+          "samples": [
+            4.971000000001368,
+            5.136999999998807,
+            5.335999999999331,
+            5.795000000001892,
+            5.422999999998865,
+            6.412000000000262,
+            6.050999999999476
+          ]
+        },
+        {
+          "milliseconds": 0.701458333333297,
+          "p10": 0.6048833333333278,
+          "p90": 0.7424583333333278,
+          "aggregateMilliseconds": 33.669999999998254,
+          "samples": [
+            27.33400000000256,
+            30.167999999997846,
+            35.97999999999956,
+            34.00399999999718,
+            33.669999999998254,
+            35.409999999999854,
+            30.875
+          ]
+        },
+        {
+          "milliseconds": 0.6456458333332952,
+          "p10": 0.5743166666666487,
+          "p90": 0.7076083333333069,
+          "aggregateMilliseconds": 30.990999999998166,
+          "samples": [
+            27.601999999998952,
+            31.24199999999837,
+            38.04999999999927,
+            30.09100000000035,
+            27.514999999999418,
+            30.990999999998166,
+            31.172999999998865
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 4929347334.465751,
+      "flatSpeedup": 2.5697953162457665,
+      "scalarSpeedup": 1.086444451614993
+    },
+    {
+      "id": "Batch epoch exact coordinate-frame Helmert",
+      "fixture": "exact-coordinate_frame",
+      "epochMode": "batch",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.33580357142857664,
+          "p10": 0.2982535714285534,
+          "p90": 0.3997928571428409,
+          "aggregateMilliseconds": 18.80500000000029,
+          "samples": [
+            16.74499999999898,
+            21.713999999999942,
+            22.072000000000116,
+            22.862999999997555,
+            18.80500000000029,
+            16.63799999999901,
+            16.816999999999098
+          ]
+        },
+        {
+          "milliseconds": 0.12344642857143688,
+          "p10": 0.10954999999999668,
+          "p90": 0.1664285714286052,
+          "aggregateMilliseconds": 6.913000000000466,
+          "samples": [
+            6.245999999999185,
+            10.940000000002328,
+            8.2400000000016,
+            5.968000000000757,
+            8.029999999998836,
+            6.304999999996653,
+            6.913000000000466
+          ]
+        },
+        {
+          "milliseconds": 0.8229999999999953,
+          "p10": 0.6831535714285695,
+          "p90": 0.8914785714285504,
+          "aggregateMilliseconds": 46.08799999999974,
+          "samples": [
+            48.92199999999866,
+            46.84399999999732,
+            51.42399999999907,
+            46.08799999999974,
+            41.4890000000014,
+            41.431000000000495,
+            33.49499999999898
+          ]
+        },
+        {
+          "milliseconds": 0.8205714285714488,
+          "p10": 0.7684571428571222,
+          "p90": 0.8644857142857161,
+          "aggregateMilliseconds": 45.952000000001135,
+          "samples": [
+            44.81300000000192,
+            50.822000000000116,
+            44.367999999998574,
+            46.80400000000009,
+            45.952000000001135,
+            46.13100000000122,
+            41.03199999999924
+          ]
+        }
+      ],
+      "iterations": 56,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 6023369722.548828,
+      "flatSpeedup": 2.7202372341963006,
+      "scalarSpeedup": 1.0029596100278246
+    },
+    {
+      "id": "Batch epoch exact coordinate-frame Helmert",
+      "fixture": "exact-coordinate_frame",
+      "epochMode": "batch",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.41360416666664906,
+          "p10": 0.30484583333333526,
+          "p90": 0.5023500000000088,
+          "aggregateMilliseconds": 19.852999999999156,
+          "samples": [
+            25.485000000000582,
+            15.861000000000786,
+            23.19800000000032,
+            21.116000000001804,
+            19.852999999999156,
+            14.367999999998574,
+            14.809000000001106
+          ]
+        },
+        {
+          "milliseconds": 0.11441666666663271,
+          "p10": 0.09638333333332412,
+          "p90": 0.1600833333333109,
+          "aggregateMilliseconds": 5.49199999999837,
+          "samples": [
+            5.49199999999837,
+            4.673999999999069,
+            4.555000000000291,
+            7.441999999999098,
+            8.046999999998661,
+            6.188999999998487,
+            5.2039999999979045
+          ]
+        },
+        {
+          "milliseconds": 0.7433750000000146,
+          "p10": 0.5589750000000094,
+          "p90": 0.8491125000000315,
+          "aggregateMilliseconds": 35.6820000000007,
+          "samples": [
+            27.461999999999534,
+            25.884000000001834,
+            33.94499999999971,
+            39.439000000002125,
+            42.73500000000058,
+            35.6820000000007,
+            39.19699999999648
+          ]
+        },
+        {
+          "milliseconds": 0.7630208333333334,
+          "p10": 0.6846583333333456,
+          "p90": 0.828566666666696,
+          "aggregateMilliseconds": 36.625,
+          "samples": [
+            31.351000000002387,
+            41.030000000002474,
+            38.9320000000007,
+            37.358000000000175,
+            33.87199999999939,
+            35.34300000000076,
+            36.625
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 4915910485.967694,
+      "flatSpeedup": 3.6148943918435994,
+      "scalarSpeedup": 0.9742525597269814
+    },
+    {
+      "id": "Batch epoch exact coordinate-frame Helmert",
+      "fixture": "exact-coordinate_frame",
+      "epochMode": "batch",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.27714285714279996,
+          "p10": 0.26000000000003637,
+          "p90": 0.3123892857142502,
+          "aggregateMilliseconds": 15.519999999996799,
+          "samples": [
+            16.489000000001397,
+            17.334999999999127,
+            15.519999999996799,
+            14.948000000003958,
+            14.925999999999476,
+            14.011000000005879,
+            17.731999999996333
+          ]
+        },
+        {
+          "milliseconds": 0.08642857142850906,
+          "p10": 0.08033928571429506,
+          "p90": 0.09153928571431606,
+          "aggregateMilliseconds": 4.8399999999965075,
+          "samples": [
+            4.472000000001572,
+            4.8399999999965075,
+            4.9210000000020955,
+            4.6120000000009895,
+            4.516999999999825,
+            4.870999999999185,
+            5.434000000001106
+          ]
+        },
+        {
+          "milliseconds": 0.6454999999998888,
+          "p10": 0.5889321428571878,
+          "p90": 0.7433071428571826,
+          "aggregateMilliseconds": 36.14799999999377,
+          "samples": [
+            33.395000000004075,
+            36.14799999999377,
+            36.48199999999633,
+            38.05200000000332,
+            35.41000000000349,
+            32.358000000000175,
+            46.98500000000058
+          ]
+        },
+        {
+          "milliseconds": 0.6313035714286214,
+          "p10": 0.6138321428572194,
+          "p90": 0.7019785714285848,
+          "aggregateMilliseconds": 35.353000000002794,
+          "samples": [
+            34.71800000000076,
+            35.846999999994296,
+            34.58100000000559,
+            37.54200000000128,
+            41.96399999999994,
+            34.06500000000233,
+            35.353000000002794
+          ]
+        }
+      ],
+      "iterations": 56,
+      "timingLimited": false,
+      "unstable": false,
+      "checksum": 6039043808,
+      "flatSpeedup": 3.2066115702495863,
+      "scalarSpeedup": 1.0224874833816342
+    },
+    {
+      "id": "Batch epoch exact coordinate-frame Helmert",
+      "fixture": "exact-coordinate_frame",
+      "epochMode": "batch",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.306604166666754,
+          "p10": 0.26997083333335464,
+          "p90": 0.33285416666664486,
+          "aggregateMilliseconds": 14.717000000004191,
+          "samples": [
+            14.717000000004191,
+            12.849999999998545,
+            13.031000000002678,
+            13.483000000000175,
+            15.19999999999709,
+            16.02799999999843,
+            15.942999999999302
+          ]
+        },
+        {
+          "milliseconds": 0.1058541666666315,
+          "p10": 0.08933749999999539,
+          "p90": 0.13546666666667687,
+          "aggregateMilliseconds": 5.080999999998312,
+          "samples": [
+            6.114000000001397,
+            4.406999999999243,
+            5.0239999999976135,
+            4.110000000000582,
+            7.084999999999127,
+            5.977999999995518,
+            5.080999999998312
+          ]
+        },
+        {
+          "milliseconds": 0.6835833333332934,
+          "p10": 0.6015041666667155,
+          "p90": 0.7238791666666353,
+          "aggregateMilliseconds": 32.81199999999808,
+          "samples": [
+            29.422000000005937,
+            28.243999999998778,
+            35.6359999999986,
+            34.15299999999843,
+            33.275000000001455,
+            29.291000000004715,
+            32.81199999999808
+          ]
+        },
+        {
+          "milliseconds": 0.7001874999999321,
+          "p10": 0.6157541666666172,
+          "p90": 0.7675250000000232,
+          "aggregateMilliseconds": 33.60899999999674,
+          "samples": [
+            37.791000000004715,
+            29.09599999999773,
+            34.81100000000151,
+            30.37199999999575,
+            33.60899999999674,
+            36.20799999999872,
+            29.862999999997555
+          ]
+        }
+      ],
+      "iterations": 48,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 4929347472,
+      "flatSpeedup": 2.8964770714444166,
+      "scalarSpeedup": 0.9762861138385927
+    },
+    {
+      "id": "Mixed epoch inverse exact Helmert",
+      "fixture": "exact-coordinate_frame-inverse-step",
+      "epochMode": "mixed",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.8140000000003056,
+          "p10": 0.6574499999998806,
+          "p90": 0.8707999999998719,
+          "aggregateMilliseconds": 6.512000000002445,
+          "samples": [
+            6.936000000001513,
+            6.512000000002445,
+            7.011999999995169,
+            5.461999999999534,
+            4.955999999998312,
+            6.5460000000020955,
+            5.869000000006054
+          ]
+        },
+        {
+          "milliseconds": 0.6026250000004438,
+          "p10": 0.49182499999969875,
+          "p90": 1.0462499999997816,
+          "aggregateMilliseconds": 4.821000000003551,
+          "samples": [
+            8.267999999996391,
+            7.716000000000349,
+            4.821000000003551,
+            4.102999999995518,
+            3.6820000000006985,
+            8.523000000001048,
+            4.3289999999979045
+          ]
+        },
+        {
+          "milliseconds": 1.1869999999998981,
+          "p10": 1.1064249999997628,
+          "p90": 1.2929249999995591,
+          "aggregateMilliseconds": 9.495999999999185,
+          "samples": [
+            8.35399999999936,
+            9.182999999997264,
+            10.75499999999738,
+            10.068999999995867,
+            9.495999999999185,
+            9.275999999998021,
+            9.992999999994936
+          ]
+        },
+        {
+          "milliseconds": 1.1837500000001455,
+          "p10": 1.1520500000000538,
+          "p90": 1.4408499999995912,
+          "aggregateMilliseconds": 9.470000000001164,
+          "samples": [
+            10.175999999999476,
+            9.132999999994354,
+            11.511999999995169,
+            9.434999999997672,
+            11.548999999999069,
+            9.470000000001164,
+            9.272000000004482
+          ]
+        }
+      ],
+      "iterations": 8,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 778376367.4525625,
+      "flatSpeedup": 1.3507571043347124,
+      "scalarSpeedup": 1.0027455121434021
+    },
+    {
+      "id": "Mixed epoch inverse exact Helmert",
+      "fixture": "exact-coordinate_frame-inverse-step",
+      "epochMode": "mixed",
+      "precision": "Float64",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.6497500000004948,
+          "p10": 0.5774999999997817,
+          "p90": 0.8247499999997672,
+          "aggregateMilliseconds": 5.198000000003958,
+          "samples": [
+            4.802999999999884,
+            4.59599999999773,
+            4.635999999998603,
+            6.173000000002503,
+            6.864999999997963,
+            6.419999999998254,
+            5.198000000003958
+          ]
+        },
+        {
+          "milliseconds": 0.5217500000007931,
+          "p10": 0.45847500000018043,
+          "p90": 0.8824250000001485,
+          "aggregateMilliseconds": 4.174000000006345,
+          "samples": [
+            6.93300000000454,
+            3.632999999994354,
+            7.248999999996158,
+            3.7839999999996508,
+            4.174000000006345,
+            3.69100000000617,
+            5.673000000002503
+          ]
+        },
+        {
+          "milliseconds": 1.0045000000000073,
+          "p10": 0.8921000000000276,
+          "p90": 1.492950000000383,
+          "aggregateMilliseconds": 8.036000000000058,
+          "samples": [
+            8.328000000001339,
+            16.148999999997613,
+            8.036000000000058,
+            9.140000000006694,
+            6.874000000003434,
+            7.5349999999962165,
+            7.311999999998079
+          ]
+        },
+        {
+          "milliseconds": 0.9816250000003492,
+          "p10": 0.8587000000001354,
+          "p90": 1.4318499999997585,
+          "aggregateMilliseconds": 7.853000000002794,
+          "samples": [
+            11.735000000000582,
+            10.779999999998836,
+            6.811999999998079,
+            7.35399999999936,
+            6.908000000003085,
+            11.267999999996391,
+            7.853000000002794
+          ]
+        }
+      ],
+      "iterations": 8,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 819317876.5478406,
+      "flatSpeedup": 1.2453282223277569,
+      "scalarSpeedup": 1.0233031962303831
+    },
+    {
+      "id": "Mixed epoch inverse exact Helmert",
+      "fixture": "exact-coordinate_frame-inverse-step",
+      "epochMode": "mixed",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.6794999999992797,
+          "p10": 0.5712999999999738,
+          "p90": 0.9733500000002097,
+          "aggregateMilliseconds": 5.435999999994237,
+          "samples": [
+            4.699000000000524,
+            7.190000000002328,
+            8.682000000000698,
+            4.622000000003027,
+            4.492999999994936,
+            7.010999999998603,
+            5.435999999994237
+          ]
+        },
+        {
+          "milliseconds": 0.49799999999959255,
+          "p10": 0.4569249999998647,
+          "p90": 0.7579250000004323,
+          "aggregateMilliseconds": 3.9839999999967404,
+          "samples": [
+            5.321000000003551,
+            7.177000000003318,
+            3.661000000000058,
+            3.646999999997206,
+            3.9839999999967404,
+            3.8590000000040163,
+            4.3289999999979045
+          ]
+        },
+        {
+          "milliseconds": 0.9890000000004875,
+          "p10": 0.8841499999994994,
+          "p90": 1.351950000000579,
+          "aggregateMilliseconds": 7.9120000000039,
+          "samples": [
+            7.847999999998137,
+            10.664000000004307,
+            11.043000000005122,
+            7.111999999993714,
+            8.617000000005646,
+            7.014999999999418,
+            7.9120000000039
+          ]
+        },
+        {
+          "milliseconds": 0.8631249999998545,
+          "p10": 0.8516249999996944,
+          "p90": 1.470750000000044,
+          "aggregateMilliseconds": 6.904999999998836,
+          "samples": [
+            6.838000000003376,
+            15.49500000000262,
+            9.279999999998836,
+            6.820999999996275,
+            6.800999999999476,
+            6.904999999998836,
+            7.473000000005413
+          ]
+        }
+      ],
+      "iterations": 8,
+      "timingLimited": true,
+      "unstable": true,
+      "checksum": 780615946.4610509,
+      "flatSpeedup": 1.3644578313249711,
+      "scalarSpeedup": 1.1458363504714315
+    },
+    {
+      "id": "Mixed epoch inverse exact Helmert",
+      "fixture": "exact-coordinate_frame-inverse-step",
+      "epochMode": "mixed",
+      "precision": "Float64",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.6247499999999491,
+          "p10": 0.5843500000000859,
+          "p90": 0.6637625000001208,
+          "aggregateMilliseconds": 9.995999999999185,
+          "samples": [
+            9.538000000000466,
+            10.467000000004191,
+            10.849999999998545,
+            9.995999999999185,
+            10.130999999993946,
+            9.20799999999872,
+            9.444000000003143
+          ]
+        },
+        {
+          "milliseconds": 0.4759375000003274,
+          "p10": 0.4654874999999265,
+          "p90": 0.6214124999999513,
+          "aggregateMilliseconds": 7.615000000005239,
+          "samples": [
+            8.317000000002736,
+            12.380999999993946,
+            7.615000000005239,
+            7.614000000001397,
+            7.374000000003434,
+            7.496999999995751,
+            7.746999999995751
+          ]
+        },
+        {
+          "milliseconds": 1.0005000000001019,
+          "p10": 0.9370500000001811,
+          "p90": 1.2655875000003107,
+          "aggregateMilliseconds": 16.00800000000163,
+          "samples": [
+            17.220000000001164,
+            20.880000000004657,
+            19.82900000000518,
+            15.789000000004307,
+            16.00800000000163,
+            14.402999999998428,
+            15.386000000005879
+          ]
+        },
+        {
+          "milliseconds": 0.9505625000001601,
+          "p10": 0.8937624999998661,
+          "p90": 1.1049750000000131,
+          "aggregateMilliseconds": 15.209000000002561,
+          "samples": [
+            15.209000000002561,
+            20.447999999996682,
+            15.834000000002561,
+            14.552999999999884,
+            13.92099999999482,
+            15.349000000001979,
+            14.764999999999418
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 1643115778.155293,
+      "flatSpeedup": 1.312672357188747,
+      "scalarSpeedup": 1.052534683411068
+    },
+    {
+      "id": "Mixed epoch inverse exact Helmert",
+      "fixture": "exact-coordinate_frame-inverse-step",
+      "epochMode": "mixed",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.5923124999999345,
+          "p10": 0.5654499999996915,
+          "p90": 0.6391125000001011,
+          "aggregateMilliseconds": 9.476999999998952,
+          "samples": [
+            10.419000000001688,
+            9.347000000001572,
+            9.000999999996566,
+            9.077999999994063,
+            9.476999999998952,
+            10.014999999999418,
+            10.097000000001572
+          ]
+        },
+        {
+          "milliseconds": 0.5204374999998436,
+          "p10": 0.4559000000002925,
+          "p90": 0.5899625000001834,
+          "aggregateMilliseconds": 8.326999999997497,
+          "samples": [
+            10.148000000001048,
+            8.326999999997497,
+            8.485999999997148,
+            7.6710000000020955,
+            7.0460000000020955,
+            8.967000000004191,
+            7.460000000006403
+          ]
+        },
+        {
+          "milliseconds": 0.9141875000000255,
+          "p10": 0.8391375000000153,
+          "p90": 1.0417374999999993,
+          "aggregateMilliseconds": 14.627000000000407,
+          "samples": [
+            18.82600000000093,
+            14.627000000000407,
+            13.385999999998603,
+            14.110999999997148,
+            13.453000000001339,
+            15.182000000000698,
+            15.22899999999936
+          ]
+        },
+        {
+          "milliseconds": 0.8792499999999563,
+          "p10": 0.8640749999999571,
+          "p90": 0.9320875000002161,
+          "aggregateMilliseconds": 14.067999999999302,
+          "samples": [
+            15.694000000003143,
+            13.961999999999534,
+            13.943999999995867,
+            13.647000000004482,
+            14.139000000002852,
+            14.067999999999302,
+            14.393000000003667
+          ]
+        }
+      ],
+      "iterations": 16,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 1556752793.983026,
+      "flatSpeedup": 1.138104959769641,
+      "scalarSpeedup": 1.0397355700882238
+    },
+    {
+      "id": "Mixed epoch inverse exact Helmert",
+      "fixture": "exact-coordinate_frame-inverse-step",
+      "epochMode": "mixed",
+      "precision": "Float32",
+      "dimension": 3,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.6781250000003638,
+          "p10": 0.5998250000000553,
+          "p90": 1.0111249999999927,
+          "aggregateMilliseconds": 5.42500000000291,
+          "samples": [
+            4.841000000000349,
+            9.289000000004307,
+            7.288999999997031,
+            4.735000000000582,
+            5.197999999996682,
+            5.42500000000291,
+            6.665000000000873
+          ]
+        },
+        {
+          "milliseconds": 1.030374999999367,
+          "p10": 0.4475750000001426,
+          "p90": 1.1676500000003216,
+          "aggregateMilliseconds": 8.242999999994936,
+          "samples": [
+            4.069000000003143,
+            8.349999999998545,
+            10.486000000004424,
+            8.578000000001339,
+            3.5650000000023283,
+            8.242999999994936,
+            3.5910000000003492
+          ]
+        },
+        {
+          "milliseconds": 1.0412500000002183,
+          "p10": 0.8503999999997177,
+          "p90": 1.4831000000000132,
+          "aggregateMilliseconds": 8.330000000001746,
+          "samples": [
+            8.330000000001746,
+            7.705999999998312,
+            10.536000000000058,
+            13.858000000000175,
+            6.792999999997846,
+            6.809999999997672,
+            10.084999999999127
+          ]
+        },
+        {
+          "milliseconds": 1.0410000000001673,
+          "p10": 0.8891250000000582,
+          "p90": 1.4845000000001165,
+          "aggregateMilliseconds": 8.328000000001339,
+          "samples": [
+            12.599000000001979,
+            7.129000000000815,
+            11.235999999997148,
+            7.088999999999942,
+            8.328000000001339,
+            7.911000000000058,
+            11.394000000000233
+          ]
+        }
+      ],
+      "iterations": 8,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 819317899.4701984,
+      "flatSpeedup": 0.6581341744518068,
+      "scalarSpeedup": 1.0002401536984158
+    },
+    {
+      "id": "Mixed epoch inverse exact Helmert",
+      "fixture": "exact-coordinate_frame-inverse-step",
+      "epochMode": "mixed",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "project",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.9451250000001892,
+          "p10": 0.7948499999993146,
+          "p90": 1.210449999999946,
+          "aggregateMilliseconds": 7.561000000001513,
+          "samples": [
+            6.185999999994237,
+            7.3070000000006985,
+            6.473999999994703,
+            9.911000000000058,
+            8.18800000000192,
+            7.561000000001513,
+            9.531999999999243
+          ]
+        },
+        {
+          "milliseconds": 0.6142500000005384,
+          "p10": 0.5163250000001426,
+          "p90": 0.9555749999999534,
+          "aggregateMilliseconds": 4.914000000004307,
+          "samples": [
+            4.38300000000163,
+            4.914000000004307,
+            7.826999999997497,
+            7.523000000001048,
+            6.455000000001746,
+            4.60399999999936,
+            3.7520000000004075
+          ]
+        },
+        {
+          "milliseconds": 1.1802499999994325,
+          "p10": 1.0005999999999404,
+          "p90": 1.7211750000000394,
+          "aggregateMilliseconds": 9.44199999999546,
+          "samples": [
+            7.639999999999418,
+            9.44199999999546,
+            9.88799999999901,
+            16.08600000000297,
+            12.224999999998545,
+            8.247999999999593,
+            9.389000000002852
+          ]
+        },
+        {
+          "milliseconds": 1.3583749999997963,
+          "p10": 1.1589250000000901,
+          "p90": 1.6959749999998168,
+          "aggregateMilliseconds": 10.86699999999837,
+          "samples": [
+            9.88300000000163,
+            13.014999999999418,
+            10.438999999998487,
+            12.857000000003609,
+            14.396999999997206,
+            8.35399999999936,
+            10.86699999999837
+          ]
+        }
+      ],
+      "iterations": 8,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 780615976,
+      "flatSpeedup": 1.538665038663998,
+      "scalarSpeedup": 0.8688690530962433
+    },
+    {
+      "id": "Mixed epoch inverse exact Helmert",
+      "fixture": "exact-coordinate_frame-inverse-step",
+      "epochMode": "mixed",
+      "precision": "Float32",
+      "dimension": 4,
+      "direction": "unproject",
+      "implementations": [
+        "baseline flat",
+        "math.gl flat",
+        "baseline scalar",
+        "math.gl scalar"
+      ],
+      "measurements": [
+        {
+          "milliseconds": 0.862571428571495,
+          "p10": 0.5877428571433744,
+          "p90": 1.1095142857140412,
+          "aggregateMilliseconds": 6.038000000000466,
+          "samples": [
+            7.841000000000349,
+            6.038000000000466,
+            4.143000000003667,
+            7.511000000005879,
+            4.071000000003551,
+            7.716999999996915,
+            4.198000000003958
+          ]
+        },
+        {
+          "milliseconds": 0.5892857142857143,
+          "p10": 0.5045142857141659,
+          "p90": 0.8817714285714569,
+          "aggregateMilliseconds": 4.125,
+          "samples": [
+            4.017999999996391,
+            6.099999999998545,
+            4.125,
+            3.5599999999976717,
+            6.2810000000026776,
+            4.381999999997788,
+            3.489000000001397
+          ]
+        },
+        {
+          "milliseconds": 1.2231428571425826,
+          "p10": 1.0123714285707268,
+          "p90": 1.5029714285707867,
+          "aggregateMilliseconds": 8.56199999999808,
+          "samples": [
+            12.150999999998021,
+            7.702999999994063,
+            8.56199999999808,
+            6.161999999996624,
+            7.971000000005006,
+            9.43399999999383,
+            9.394000000000233
+          ]
+        },
+        {
+          "milliseconds": 1.2217142857147596,
+          "p10": 1.0568285714286112,
+          "p90": 1.4180285714288143,
+          "aggregateMilliseconds": 8.552000000003318,
+          "samples": [
+            10.302999999999884,
+            7.455000000001746,
+            7.311999999998079,
+            7.982000000003609,
+            9.67500000000291,
+            9.201000000000931,
+            8.552000000003318
+          ]
+        }
+      ],
+      "iterations": 7,
+      "timingLimited": false,
+      "unstable": true,
+      "checksum": 718863173,
+      "flatSpeedup": 1.4637575757576886,
+      "scalarSpeedup": 1.0011693171181897
+    }
+  ],
+  "allocations": [
+    {
+      "id": "Static Helmert",
+      "implementation": "baseline flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "id": "Static Helmert",
+      "implementation": "math.gl flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "id": "Static Helmert",
+      "implementation": "baseline scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 77.72488,
+      "sampleCount": 1889
+    },
+    {
+      "id": "Static Helmert",
+      "implementation": "math.gl scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 80.28336,
+      "sampleCount": 1950
+    },
+    {
+      "id": "Horizontal grid to UTM",
+      "implementation": "baseline flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 143.22976,
+      "sampleCount": 3490
+    },
+    {
+      "id": "Horizontal grid to UTM",
+      "implementation": "math.gl flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 144.03648,
+      "sampleCount": 3506
+    },
+    {
+      "id": "Horizontal grid to UTM",
+      "implementation": "baseline scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 221.6952,
+      "sampleCount": 5396
+    },
+    {
+      "id": "Horizontal grid to UTM",
+      "implementation": "math.gl scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 221.58264,
+      "sampleCount": 5393
+    },
+    {
+      "id": "Batch epoch Helmert",
+      "implementation": "baseline flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "id": "Batch epoch Helmert",
+      "implementation": "math.gl flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "id": "Batch epoch Helmert",
+      "implementation": "baseline scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 79.90544,
+      "sampleCount": 1941
+    },
+    {
+      "id": "Batch epoch Helmert",
+      "implementation": "math.gl scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 81.67448,
+      "sampleCount": 1984
+    },
+    {
+      "id": "Mixed epoch Helmert",
+      "implementation": "baseline flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 16.29368,
+      "sampleCount": 397
+    },
+    {
+      "id": "Mixed epoch Helmert",
+      "implementation": "math.gl flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 14.52864,
+      "sampleCount": 354
+    },
+    {
+      "id": "Mixed epoch Helmert",
+      "implementation": "baseline scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 93.85696,
+      "sampleCount": 2281
+    },
+    {
+      "id": "Mixed epoch Helmert",
+      "implementation": "math.gl scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 94.06048,
+      "sampleCount": 2286
+    },
+    {
+      "id": "Batch epoch approximate Helmert",
+      "implementation": "baseline flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "id": "Batch epoch approximate Helmert",
+      "implementation": "math.gl flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "id": "Batch epoch approximate Helmert",
+      "implementation": "baseline scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 78.26016,
+      "sampleCount": 1901
+    },
+    {
+      "id": "Batch epoch approximate Helmert",
+      "implementation": "math.gl scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 78.8784,
+      "sampleCount": 1916
+    },
+    {
+      "id": "Mixed epoch coordinate-frame Helmert",
+      "implementation": "baseline flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 16.62128,
+      "sampleCount": 405
+    },
+    {
+      "id": "Mixed epoch coordinate-frame Helmert",
+      "implementation": "math.gl flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 16.1288,
+      "sampleCount": 393
+    },
+    {
+      "id": "Mixed epoch coordinate-frame Helmert",
+      "implementation": "baseline scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 99.12416,
+      "sampleCount": 2409
+    },
+    {
+      "id": "Mixed epoch coordinate-frame Helmert",
+      "implementation": "math.gl scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 99.53744,
+      "sampleCount": 2419
+    },
+    {
+      "id": "Batch epoch exact coordinate-frame Helmert",
+      "implementation": "baseline flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "id": "Batch epoch exact coordinate-frame Helmert",
+      "implementation": "math.gl flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 0,
+      "sampleCount": 0
+    },
+    {
+      "id": "Batch epoch exact coordinate-frame Helmert",
+      "implementation": "baseline scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 79.33312,
+      "sampleCount": 1927
+    },
+    {
+      "id": "Batch epoch exact coordinate-frame Helmert",
+      "implementation": "math.gl scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 79.53616,
+      "sampleCount": 1932
+    },
+    {
+      "id": "Mixed epoch inverse exact Helmert",
+      "implementation": "baseline flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 16.99056,
+      "sampleCount": 414
+    },
+    {
+      "id": "Mixed epoch inverse exact Helmert",
+      "implementation": "math.gl flat",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 17.5656,
+      "sampleCount": 428
+    },
+    {
+      "id": "Mixed epoch inverse exact Helmert",
+      "implementation": "baseline scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 92.1672,
+      "sampleCount": 2240
+    },
+    {
+      "id": "Mixed epoch inverse exact Helmert",
+      "implementation": "math.gl scalar",
+      "points": 100000,
+      "sampledEstimatedBytesPerPoint": 100.15344,
+      "sampleCount": 2434
+    }
+  ]
+}
