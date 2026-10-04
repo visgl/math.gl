@@ -126,8 +126,22 @@ jobs:
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
 
-      - name: Check projection startup correctness
-        run: node modules/projection/scripts/benchmark-startup.mjs --samples 3
+      - name: Check projection scorecard integrity and collect Node evidence
+        timeout-minutes: 5
+        env:
+          SCORECARD_POINTS: ${{ github.event_name == 'pull_request' && '2000' || '20000' }}
+          SCORECARD_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
+          SCORECARD_WINDOW: ${{ github.event_name == 'pull_request' && '4' || '12' }}
+        run: |
+          node --test modules/projection/scripts/scorecard.test.mjs
+          node modules/projection/scripts/collect-scorecard-node.mjs --directory /tmp/projection-scorecard-node --points "$SCORECARD_POINTS" --samples "$SCORECARD_SAMPLES" --min-sample-ms "$SCORECARD_WINDOW"
+
+      - name: Upload Node scorecard evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: projection-scorecard-node
+          path: /tmp/projection-scorecard-node
+          if-no-files-found: error
 
       - name: Run Node tests
         run: yarn test-node
@@ -232,13 +246,13 @@ jobs:
           node modules/projection/scripts/qualify-interiors.mjs --browser ${{ matrix.browser }} --output /tmp/interior-qualification-${{ matrix.browser }}.json
           node modules/projection/scripts/qualify-deformation-stress.mjs --browser ${{ matrix.browser }} --output /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
 
-      # PRs validate the entire coordinate/workload matrix without repeatedly
-      # expanding buffers for timing precision. Master retains full measurements.
+      # Retain the complete matrix and three samples in PRs. A bounded 4 ms
+      # window supports scorecard diagnostics; master retains the 12 ms profile.
       - name: Check browser projection correctness and performance
         timeout-minutes: 6
         env:
           BROWSER_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
-          BROWSER_MIN_SAMPLE_MS: ${{ github.event_name == 'pull_request' && '0' || '12' }}
+          BROWSER_MIN_SAMPLE_MS: ${{ github.event_name == 'pull_request' && '4' || '12' }}
         run: node modules/projection/scripts/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/projection-browser-qualification.json
 
       - name: Evaluate optional worker correctness and costs
@@ -335,10 +349,47 @@ jobs:
             /tmp/projection-local-frame-comparison.json
           if-no-files-found: error
 
+  projection-scorecard:
+    needs: [checks, projection-browsers]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Setup Node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: '.nvmrc'
+      - name: Download Node evidence
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: projection-scorecard-node
+          path: /tmp/projection-scorecard-node
+      - name: Download browser evidence
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: projection-browser-qualification-*
+          path: /tmp/projection-scorecard-browsers
+      - name: Consolidate matched evidence
+        run: |
+          node modules/projection/scripts/scorecard.mjs --node /tmp/projection-scorecard-node \
+            --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-chromium/projection-browser-qualification.json \
+            --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-firefox/projection-browser-qualification.json \
+            --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-webkit/projection-browser-qualification.json \
+            --output /tmp/projection-scorecard.json --markdown /tmp/projection-scorecard.md
+      - name: Upload scorecard and publication page
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: projection-scorecard
+          path: |
+            /tmp/projection-scorecard.json
+            /tmp/projection-scorecard.md
+          if-no-files-found: error
+
   # Preserve the required check name and fail it if any qualification job fails.
   test:
     if: always()
-    needs: [checks, projection-browsers, projection-performance]
+    needs: [checks, projection-browsers, projection-performance, projection-scorecard]
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -347,10 +398,12 @@ jobs:
           CHECKS_RESULT: ${{ needs.checks.result }}
           BROWSERS_RESULT: ${{ needs.projection-browsers.result }}
           PERFORMANCE_RESULT: ${{ needs.projection-performance.result }}
+          SCORECARD_RESULT: ${{ needs.projection-scorecard.result }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           test "$CHECKS_RESULT" = success
           test "$BROWSERS_RESULT" = success
+          test "$SCORECARD_RESULT" = success
           if [ "$EVENT_NAME" = pull_request ]; then
             test "$PERFORMANCE_RESULT" = success
           else

@@ -567,7 +567,7 @@ Stable S identifiers distinguish this numerical/performance roadmap from the com
 | **S6 — Real-model and operation qualification** | Implemented qualification harness: hashed local assets, conservative coverage cells, compound/dynamic frame identity and model revisions/terms. Authoritative data qualification remains application-owned | Reviewed data terms, conservative coverage/time/accuracy bounds; no bundled third-party database or implicit downloads. |
 | **S7 — Temporal models and events** | Implemented optional `/temporal`: velocity, acceleration, step and exponential relaxation; original-epoch bounded Newton inverse | 96 independent Decimal forward/inverse cases; explicit units, event endpoints, validity and failure recovery. Source sampling is distinct from trajectory integration. |
 | **S8 — Optional acceleration** | Implemented worker evaluation/recipe and three-browser CI: persistent two-worker UTM gains on measured large buffers. Wasm/SIMD/GPU algorithm backends remain deferred, capability probes only | Warm copy/partition/transfer/scheduling and cold startup/bundle costs recorded separately; exact Float32/64 outputs and failure ownership are gates. No automatic backend or universal speed claim. |
-| **S9 — Published scorecard** | Accuracy, throughput, allocation, startup, memory and bundle measurements across Node and three browsers | Pinned competitors and explicit hardware/domain qualifications; bounded claims from measured evidence. |
+| **S9 — Published scorecard** | Implemented source-matched Node/three-browser evidence and required CI publication: accuracy, throughput, allocation, startup, isolated memory and bundles. Portable browser heap/allocation metrics remain explicitly unavailable | Actual pinned comparator bytes, complete matrices and reviewed accuracy gates; raw samples, separate environments and timer/variation flags. No pooled ranking or universal SOTA claim. |
 
 The target is a browser-native projection and coordinate transformation library. General GIS engines, BLAS and tensors remain outside scope. Unrestricted native PROJ parity is not claimed. The earlier 12C2/12E2 follow-ups map to S6–S7; 13A maps to S4–S5, and 13B–13D to S8.
 
@@ -696,4 +696,5 @@ temporal laws with independent references. See
 [deformation qualification](./deformation-qualification.md), [temporal models](./temporal-models.md)
 and [optional acceleration](./acceleration.md).
 S6–S8 add original code/reference generation only, with no new runtime dependencies
-or third-party datasets. S9 remains the consolidated publication/scorecard tranche.
+or third-party datasets. S9 consolidates these results in the [published scorecard](./scorecard.md);
+[measurement limits and commands](./scorecard-methodology.md) preserve the bounded scope.

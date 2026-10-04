@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original fresh-process qualification against the proj4 import.
-import {codeFingerprint} from './benchmark-metadata.mjs';
+import {codeFingerprint, benchmarkDependencies} from './benchmark-metadata.mjs';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {writeFileSync} from 'node:fs';
@@ -38,6 +38,7 @@ for (let sample = 0; sample < samples; sample++)
   }
 const report = {
   metadata: {
+    dependencies: benchmarkDependencies(),
     sourceSHA256: codeFingerprint(),
     date: new Date().toISOString(),
     node: process.version,
