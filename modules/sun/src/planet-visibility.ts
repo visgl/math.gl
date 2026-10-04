@@ -1,13 +1,23 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Original, uncalibrated twilight visibility heuristic; no reference code copied.
+// SPDX-FileComment: Independently implemented legacy twilight heuristic and optional Crumey contrast equations; no reference code copied.
+// Crumey (2014): https://arxiv.org/abs/1405.4209
 // Air mass: Kasten & Young (1989), https://doi.org/10.1364/AO.28.004735
 // Visibility context only (not a reproduction of its model): Tousey & Koomen (1953),
 // https://doi.org/10.1364/JOSA.43.000177
 import {validateRange} from './celestial';
+import {getSkyLuminance, getSkyTransmission} from './sky-brightness';
+import type {SkyAtmosphereOptions} from './sky-brightness';
 
 export type PlanetVisibilityOptions = {
+  /** Published contrast model, or backward-compatible twilight heuristic. Default legacy. */
+  model?: 'legacy' | 'contrast';
+  atmosphere?: SkyAtmosphereOptions;
+  /** Human visual field factor in the contrast model. Default 2. */
+  observerFactor?: number;
+  /** Additional directional luminance (e.g. scattered moonlight), cd/m². Default 0. */
+  additionalSkyLuminance?: number;
   /** Faintest extincted magnitude at a fully dark sky. Default 6. */
   darkSkyLimitingMagnitude?: number;
   /** Atmospheric extinction in visual magnitudes per air mass. Default 0.2. */
@@ -34,7 +44,8 @@ export type PlanetVisibility = {
 
 /**
  * Rendering estimate of naked-eye detectability during twilight and darkness.
- * Angle arguments use radians. No daylight detection, lunar glare or cloud model.
+ * Angle arguments use radians. Default legacy model excludes daylight;
+ * optional contrast model uses directional sky background and atmospheric transmission.
  */
 export function getPlanetVisibility(
   magnitude: number,
@@ -61,7 +72,21 @@ export function getPlanetVisibility(
   const elevation = Math.max(0, altitude);
   const airMass =
     1 / (Math.sin(elevation) + 0.50572 * Math.pow(elevation * degrees + 6.07995, -1.6364));
-  const extinctedMagnitude = magnitude + extinction * airMass;
+  if (options.model !== undefined && options.model !== 'legacy' && options.model !== 'contrast')
+    throw new RangeError('Unknown visibility model');
+  const contrastModel = options.model === 'contrast';
+  const observerFactor = options.observerFactor ?? 2;
+  validateRange('Observer factor', observerFactor, 1, 100);
+  validateRange(
+    'Additional sky luminance',
+    options.additionalSkyLuminance ?? 0,
+    0,
+    Number.MAX_VALUE
+  );
+  const extinctedMagnitude = contrastModel
+    ? magnitude -
+      2.5 * Math.log10(Math.max(1e-30, getSkyTransmission(altitude, options.atmosphere)))
+    : magnitude + extinction * airMass;
   // Original illustrative anchors, not a fit to the cited visibility paper:
   // Sun 0/-6/-12/-18 degrees -> limiting magnitude -4/1/4.5/6.
   const sunDegrees = sunAltitude * degrees;
@@ -71,12 +96,28 @@ export function getPlanetVisibility(
   else if (sunDegrees >= -18)
     twilightLimit = 4.5 + ((-sunDegrees - 12) * (darkSkyLimitingMagnitude - 4.5)) / 6;
   else twilightLimit = darkSkyLimitingMagnitude;
-  const limitingMagnitude = Math.min(darkSkyLimitingMagnitude, twilightLimit);
+  // Crumey (2014), point-source Blackwell threshold. Original implementation:
+  // https://arxiv.org/abs/1405.4209 ; illuminance-to-magnitude zero point -13.99.
+  const background = Math.max(
+    1e-5,
+    getSkyLuminance(sunAltitude, altitude, sunSeparation, options.atmosphere) +
+      (options.additionalSkyLuminance ?? 0)
+  );
+  const threshold =
+    background <= 0.0708
+      ? Math.pow(6.505e-4 * background ** 0.25 - 8.461e-4 * background ** 0.5, 2)
+      : Math.pow(1.772e-4 * background ** 0.25 + 7.167e-5 * background ** 0.5, 2);
+  const limitingMagnitude = Math.min(
+    darkSkyLimitingMagnitude,
+    contrastModel ? -2.5 * Math.log10(threshold * observerFactor) - 13.99 : twilightLimit
+  );
   const brightnessMargin = limitingMagnitude - extinctedMagnitude;
   const eligible =
-    sunAltitude < 0 && altitude >= minimumAltitude && sunSeparation >= minimumSunSeparation;
+    (contrastModel || sunAltitude < 0) &&
+    altitude >= minimumAltitude &&
+    sunSeparation >= minimumSunSeparation;
   const fade =
-    sunAltitude >= 0
+    !contrastModel && sunAltitude >= 0
       ? 0
       : smoothstep(-0.5, 0.5, brightnessMargin) *
         smoothstep(minimumAltitude - Math.PI / 180, minimumAltitude + Math.PI / 180, altitude) *
@@ -85,7 +126,7 @@ export function getPlanetVisibility(
           minimumSunSeparation + (2 * Math.PI) / 180,
           sunSeparation
         ) *
-        smoothstep(0, Math.PI / 360, -sunAltitude);
+        (contrastModel ? 1 : smoothstep(0, Math.PI / 360, -sunAltitude));
   return {
     visible: eligible && brightnessMargin >= 0,
     fade,

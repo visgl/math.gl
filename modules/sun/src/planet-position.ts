@@ -5,6 +5,7 @@
 // API/model provenance: https://github.com/cosinekitty/astronomy/tree/v2.1.19/source/js
 // Physical mean radii: https://ssd.jpl.nasa.gov/planets/phys_par.html
 // Galilean mean radii: https://ssd.jpl.nasa.gov/sats/phys_par/
+// Galilean geometric albedos: https://nssdc.gsfc.nasa.gov/planetary/factsheet/joviansatfact.html
 import {
   AstroTime,
   Body,
@@ -22,11 +23,16 @@ import {
 import type {RotationMatrix} from 'astronomy-engine';
 import {getPlanetVisibility} from './planet-visibility';
 import type {PlanetVisibility, PlanetVisibilityOptions} from './planet-visibility';
+import {createSkyTime} from './sky-time';
+import type {SkyTimeScales} from './sky-time';
 
 type Triple = [number, number, number];
 export type PlanetName = 'Mercury' | 'Venus' | 'Mars' | 'Jupiter' | 'Saturn' | 'Uranus' | 'Neptune';
 export type GalileanMoonName = 'Io' | 'Europa' | 'Ganymede' | 'Callisto';
 export type PlanetSkyOptions = {
+  timeScales?: SkyTimeScales;
+  /** Local terrain horizon altitude in radians at south-to-west azimuth. */
+  horizon?: (azimuth: number) => number;
   /** Observer elevation above sea level in meters. Default 0. */
   elevation?: number;
   /** Include Io, Europa, Ganymede and Callisto. Default true. */
@@ -54,7 +60,7 @@ export type PlanetSkyBody = {
   illuminatedFraction: number;
   /** Body-to-Sun unit vector in local ENU, for shading a sphere. */
   sunDirection: Triple;
-  /** Planetary visual magnitude before extinction. Null for Galilean moons. */
+  /** Visual magnitude before extinction/occultation; Lambert approximation for satellites. */
   magnitude: number | null;
   /** Approximate current naked-eye detectability; null for Galilean moons. */
   visibility: PlanetVisibility | null;
@@ -64,8 +70,14 @@ export type PlanetSkyBody = {
   occultation: 'none' | 'partial' | 'total';
   /** Galilean moon overlaps Jupiter's disk in front of it. */
   transiting: boolean;
-  /** Moon center lies in Jupiter's conical umbra; ignores penumbra. */
+  /** Entire solar disk is obscured at the satellite center. */
   inJupiterShadow: boolean;
+  /** Unblocked solar disk fraction at satellite center, including penumbra. */
+  sunlitFraction: number;
+  /** Approximate unocculted satellite disk fraction. */
+  visibleDiskFraction: number;
+  /** Satellite magnitude including eclipse/occultation; null when completely dark. */
+  apparentMagnitude: number | null;
 };
 
 const PLANETS: [PlanetName, Body, number][] = [
@@ -112,7 +124,7 @@ export function getPlanetSkyInfo(
   const year = date.getUTCFullYear();
   // Deliberately restrict this rendering adapter to a documented modern range.
   if (year < 1900 || year > 2100) throw new RangeError('Planet sky dates must be within 1900–2100');
-  const time = new AstroTime(date);
+  const time = createSkyTime(date, options.timeScales);
   const observer = new Observer(latitude, longitude % 360, elevation);
   const rotation = Rotation_EQJ_HOR(time, observer);
   const earth = HelioVector(Body.Earth, time);
@@ -128,12 +140,22 @@ export function getPlanetSkyInfo(
     const heliocentric = HelioVector(body, relative.t);
     const info = renderInfo(name, null, radius, relative, heliocentric, rotation, time);
     info.magnitude = Illumination(body, time).mag;
+    info.apparentMagnitude = info.magnitude;
+    const horizonAltitude = options.horizon?.(info.azimuth);
     info.visibility = getPlanetVisibility(
       info.magnitude,
       info.altitude,
       sunAltitude,
       angularSeparation(info.direction, sunView),
-      options.visibility
+      horizonAltitude === undefined
+        ? options.visibility
+        : {
+            ...options.visibility,
+            minimumAltitude: Math.max(
+              options.visibility?.minimumAltitude ?? (5 * Math.PI) / 180,
+              horizonAltitude
+            )
+          }
     );
     return {relative, info};
   });
@@ -180,16 +202,33 @@ export function getPlanetSkyInfo(
       info.occultation = separation + moonRadius < planetRadius ? 'total' : 'partial';
     }
     info.transiting = info.distance < jupiter.info.distance && overlaps;
-    // Geometric conical umbra using Jupiter's spherical mean radius.
-    const towardSun = normalized([-planet.x, -planet.y, -planet.z]);
-    const moonOffset = [offset.x * KM_PER_AU, offset.y * KM_PER_AU, offset.z * KM_PER_AU];
-    const depth = -dot(moonOffset, towardSun);
-    const radialDistance = Math.hypot(
-      ...moonOffset.map((value, i) => value + depth * towardSun[i])
+    // Finite solar disk: spherical Jupiter obscures part or all of the Sun.
+    // Original circle-overlap geometry; geometric center illumination, not a
+    // resolved penumbra across the satellite surface.
+    const moonToSun = normalized([-heliocentric.x, -heliocentric.y, -heliocentric.z]);
+    const moonToPlanet = normalized([-offset.x, -offset.y, -offset.z]);
+    const sunRadius = Math.asin(SUN_RADIUS / (heliocentric.Length() * KM_PER_AU));
+    const jupiterRadius = Math.asin(
+      JUPITER_RADIUS / (Math.hypot(offset.x, offset.y, offset.z) * KM_PER_AU)
     );
-    const umbraRadius =
-      JUPITER_RADIUS - (depth * (SUN_RADIUS - JUPITER_RADIUS)) / (planet.Length() * KM_PER_AU);
-    info.inJupiterShadow = depth > 0 && umbraRadius > 0 && radialDistance < umbraRadius;
+    info.sunlitFraction =
+      1 - diskOverlapFraction(sunRadius, jupiterRadius, angularSeparation(moonToSun, moonToPlanet));
+    info.inJupiterShadow = info.sunlitFraction === 0;
+    info.visibleDiskFraction =
+      info.distance > jupiter.info.distance
+        ? 1 - diskOverlapFraction(moonRadius, planetRadius, separation)
+        : 1;
+    const albedo = {Io: 0.62, Europa: 0.68, Ganymede: 0.44, Callisto: 0.19}[name];
+    const phase =
+      (Math.sin(info.phaseAngle) + (Math.PI - info.phaseAngle) * Math.cos(info.phaseAngle)) /
+      Math.PI;
+    const flux =
+      (albedo * (radius / KM_PER_AU) ** 2 * phase) /
+      (heliocentric.Length() ** 2 * relative.Length() ** 2);
+    info.magnitude = -26.74 - 2.5 * Math.log10(flux);
+    const transmission = info.sunlitFraction * info.visibleDiskFraction;
+    info.apparentMagnitude =
+      transmission > 0 ? info.magnitude - 2.5 * Math.log10(transmission) : null;
     result.push(info);
   }
   return result;
@@ -227,8 +266,23 @@ function renderInfo(
     jupiterOffset: null,
     occultation: 'none',
     transiting: false,
-    inJupiterShadow: false
+    inJupiterShadow: false,
+    sunlitFraction: 1,
+    visibleDiskFraction: 1,
+    apparentMagnitude: null
   };
+}
+
+/** Fraction of disk r covered by disk R separated by d (small-angle disk geometry). */
+function diskOverlapFraction(r: number, R: number, d: number): number {
+  if (d >= r + R) return 0;
+  if (d <= Math.abs(R - r)) return R >= r ? 1 : (R / r) ** 2;
+  const clamp = (x: number) => Math.max(-1, Math.min(1, x));
+  const area =
+    r * r * Math.acos(clamp((d * d + r * r - R * R) / (2 * d * r))) +
+    R * R * Math.acos(clamp((d * d + R * R - r * r) / (2 * d * R))) -
+    0.5 * Math.sqrt(Math.max(0, (-d + r + R) * (d + r - R) * (d - r + R) * (d + r + R)));
+  return Math.max(0, Math.min(1, area / (Math.PI * r * r)));
 }
 
 function enu(vector: Vector, rotation: RotationMatrix): Triple {
