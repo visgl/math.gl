@@ -205,3 +205,17 @@ node modules/proj4/scripts/check-pipeline-reference.mjs
 - `factors-reference.json`: original eighteen configurations and 450 offline PROJ 9.5.1 factor sets, physical derivatives in metres/radian and angles in radians. Regenerate with pinned pyproj 3.7.2 using `generate-factors-reference.py`; the accuracy integrity check enforces its hash and field inventory.
 - Dense accuracy now covers 42 domains and 11,160 independent inputs. `qualification/accuracy-domains.json` retains parameters, worst inputs, observed errors and sample-specific ceilings. `generate-accuracy-atlas.mjs` maintains the documentation scorecard.
 - `generate-vandg-reference.py`: standard-library 80-digit Decimal evaluation of the near-equator regression, independent of production code and PROJ/proj4js output.
+
+## Temporal and worker qualification
+
+`temporal-reference.json` contains 96 original math.gl synthetic rate/event cases,
+not observed model data. The standard-library `generate-temporal-reference.py`
+uses 90-digit Decimal calculations and independent forward/inverse targets; fixture
+hashes cover both temporal and shared original spatial generators. The sampled
+Float64 tolerance is 5e-8 metres. Node tests and three-browser CI qualify the same
+corpus; no Python or third-party model dependency is shipped.
+
+`qualification/worker-evaluation-{chromium,webkit}.json` retains local original
+worker experiments: raw samples, cold startup, engine/bootstrap bytes, capabilities
+and source/workload hashes. These are diagnostics, not universal speed thresholds
+or evidence of a Wasm/WebGPU algorithm. Regenerate using `benchmark-workers.mjs`.

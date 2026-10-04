@@ -564,9 +564,9 @@ Stable S identifiers distinguish this numerical/performance roadmap from the com
 | **S3 — Factors and derivatives** | Implemented optional `/analysis`: reusable Jacobians, scales, convergence, angular distortion and principal scales | 450 independent PROJ comparisons plus analytic and failure/reentry tests; no root/core bundle inclusion or successful hot-path object creation. Numerical stencil limits remain explicit. |
 | **S4 — CPU mixed-pipeline performance** | Implemented reusable point/stack storage per observed recursive depth, batch scratch and cheaper inverse classification; mixed/grid-heavy comparisons retained. Runtime boxing and broader numeric fusion remain follow-ups | Paired measurements after heterogeneous warmup; unchanged accuracy/ownership, lower aggregate sampled allocation estimates in the recorded profiles. No broad throughput or zero-allocation claim. |
 | **S5 — Reusable bulk layouts** | Implemented optional `/bulk`: separate input/output, offsets/strides, XYZM columns and chunks | 2,616 independent layout/epoch checks, all 31 mixed pipeline scenarios, Float32/64/payload/alias/failure/reentry tests; measured gather/transform/scatter costs. |
-| **S6 — Real-model and operation qualification** | Application-owned models, irregular coverage and compound/dynamic CRS metadata | Reviewed data terms, conservative coverage/time/accuracy bounds; no bundled third-party database or implicit downloads. |
-| **S7 — Temporal models and events** | Rates and event components with defined forward/inverse epoch semantics | Independent references and explicit temporal validity; distinguish sampled propagation from trajectory integration. |
-| **S8 — Optional acceleration** | Evaluate Wasm/SIMD, workers and visualization GPU paths when justified | End-to-end gains include loading, transfer and bundle cost. |
+| **S6 — Real-model and operation qualification** | Implemented qualification harness: hashed local assets, conservative coverage cells, compound/dynamic frame identity and model revisions/terms. Authoritative data qualification remains application-owned | Reviewed data terms, conservative coverage/time/accuracy bounds; no bundled third-party database or implicit downloads. |
+| **S7 — Temporal models and events** | Implemented optional `/temporal`: velocity, acceleration, step and exponential relaxation; original-epoch bounded Newton inverse | 96 independent Decimal forward/inverse cases; explicit units, event endpoints, validity and failure recovery. Source sampling is distinct from trajectory integration. |
+| **S8 — Optional acceleration** | Implemented worker evaluation/recipe and three-browser CI: persistent two-worker UTM gains on measured large buffers. Wasm/SIMD/GPU algorithm backends remain deferred, capability probes only | Warm copy/partition/transfer/scheduling and cold startup/bundle costs recorded separately; exact Float32/64 outputs and failure ownership are gates. No automatic backend or universal speed claim. |
 | **S9 — Published scorecard** | Accuracy, throughput, allocation, startup, memory and bundle measurements across Node and three browsers | Pinned competitors and explicit hardware/domain qualifications; bounded claims from measured evidence. |
 
 The target is a browser-native projection and coordinate transformation library. General GIS engines, BLAS and tensors remain outside scope. Unrestricted native PROJ parity is not claimed. The earlier 12C2/12E2 follow-ups map to S6–S7; 13A maps to S4–S5, and 13B–13D to S8.
@@ -689,7 +689,11 @@ reviewed application-owned models without distributing their data. Node and brow
 CI retains error/provenance reports; the generator uses Python's standard library.
 
 Tests distinguish source-sampled displacement from trajectory integration and
-static velocity from temporal rate/event laws. Authoritative model qualification,
-nonlinear temporal components and events remain 12C2 follow-ups. See
-[deformation qualification](./deformation-qualification.md). No production API,
-coordinate allocation, package dependency or bundle budget changes.
+static velocity from temporal rate/event laws. Authoritative model certification
+remains application-owned. S6 adds pinned local
+asset and operation metadata qualification; S7 implements the four explicit
+temporal laws with independent references. See
+[deformation qualification](./deformation-qualification.md), [temporal models](./temporal-models.md)
+and [optional acceleration](./acceleration.md).
+S6–S8 add original code/reference generation only, with no new runtime dependencies
+or third-party datasets. S9 remains the consolidated publication/scorecard tranche.

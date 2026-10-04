@@ -17,12 +17,31 @@ export type OperationProvenance = {
   readonly reference: string;
 };
 
+/** Reviewed compound/frame identities; frame epoch is not the coordinate epoch. */
+export type OperationCRSMetadata = {
+  readonly horizontalCRS: string;
+  readonly verticalCRS?: string;
+  readonly referenceFrame: string;
+  readonly frameKind: 'static' | 'dynamic';
+  readonly frameEpoch?: number;
+};
+/** Application-owned model revision and reviewed data terms, not a license certificate. */
+export type OperationModel = OperationGrid & {
+  readonly license: string;
+  readonly termsReference: string;
+};
+
 /** A directed, application-reviewed operation; the payload is never called or copied. */
 export type CoordinateOperation<T> = {
   readonly id: string;
   readonly sourceCRS: string;
   readonly targetCRS: string;
   readonly area: OperationArea;
+  /** Conservative covered rectangles. A request must fit entirely in one cell. */
+  readonly coverage?: readonly OperationArea[];
+  readonly sourceMetadata?: OperationCRSMetadata;
+  readonly targetMetadata?: OperationCRSMetadata;
+  readonly models?: readonly OperationModel[];
   /** null explicitly declares that this operation has no epoch restriction. */
   readonly epochRange: OperationEpochRange | null;
   /** Declared accuracy in metres; null means unknown, not zero. */
@@ -40,6 +59,9 @@ export type OperationSelectionRequest = {
   /** A coordinate epoch or the inclusive range of a batch's epochs. */
   readonly epoch?: number | OperationEpochRange;
   readonly availableGrids?: readonly OperationGrid[];
+  readonly availableModels?: readonly OperationGrid[];
+  readonly sourceMetadata?: OperationCRSMetadata;
+  readonly targetMetadata?: OperationCRSMetadata;
   readonly maxAccuracyMeters?: number;
   readonly allowUnknownAccuracy?: boolean;
   readonly allowBallpark?: boolean;
@@ -54,12 +76,17 @@ export type OperationRejectionReason =
   | 'grid'
   | 'accuracy-unknown'
   | 'accuracy'
-  | 'ballpark';
+  | 'ballpark'
+  | 'coverage'
+  | 'source-metadata'
+  | 'target-metadata'
+  | 'model';
 
 export type OperationRejection<T> = {
   readonly candidate: CoordinateOperation<T>;
   readonly reasons: readonly OperationRejectionReason[];
   readonly missingGrids: readonly OperationGrid[];
+  readonly missingModels: readonly OperationModel[];
 };
 export type OperationSelection<T> = {
   readonly selected: CoordinateOperation<T> | undefined;
@@ -74,6 +101,9 @@ type Request = {
   area: OperationArea;
   epoch: OperationEpochRange | undefined;
   grids: Map<string, Set<string>>;
+  models: readonly OperationGrid[];
+  sourceMetadata?: OperationCRSMetadata;
+  targetMetadata?: OperationCRSMetadata;
   maxAccuracyMeters: number | undefined;
   allowUnknownAccuracy: boolean;
   allowBallpark: boolean;
@@ -87,7 +117,11 @@ const REASONS: readonly OperationRejectionReason[] = [
   'grid',
   'accuracy-unknown',
   'accuracy',
-  'ballpark'
+  'ballpark',
+  'coverage',
+  'source-metadata',
+  'target-metadata',
+  'model'
 ];
 
 /**
@@ -138,7 +172,10 @@ export class OperationCatalog<T> {
           Object.freeze({
             candidate,
             reasons: Object.freeze(reasons),
-            missingGrids: Object.freeze(missingGrids)
+            missingGrids: Object.freeze(missingGrids),
+            missingModels: Object.freeze(
+              (candidate.models || []).filter(model => !hasModel(normalized, model))
+            )
           })
         );
       }
@@ -179,7 +216,30 @@ function rejectionMask<T>(candidate: CoordinateOperation<T>, request: Request): 
   )
     mask |= 1 << 7;
   if (candidate.ballpark && !request.allowBallpark) mask |= 1 << 8;
+  if (candidate.coverage && !candidate.coverage.some(cell => containsArea(cell, request.area)))
+    mask |= 1 << 9;
+  if (!sameMetadata(candidate.sourceMetadata, request.sourceMetadata)) mask |= 1 << 10;
+  if (!sameMetadata(candidate.targetMetadata, request.targetMetadata)) mask |= 1 << 11;
+  if (candidate.models?.some(model => !hasModel(request, model))) mask |= 1 << 12;
   return mask;
+}
+function hasModel(request: Request, model: OperationModel): boolean {
+  return request.models.some(
+    available => available.id === model.id && available.revision === model.revision
+  );
+}
+function sameMetadata(
+  a: OperationCRSMetadata | undefined,
+  b: OperationCRSMetadata | undefined
+): boolean {
+  if (!a || !b) return a === b;
+  return (
+    a.horizontalCRS === b.horizontalCRS &&
+    a.verticalCRS === b.verticalCRS &&
+    a.referenceFrame === b.referenceFrame &&
+    a.frameKind === b.frameKind &&
+    a.frameEpoch === b.frameEpoch
+  );
 }
 
 function hasGrid(request: Request, grid: OperationGrid): boolean {
@@ -232,7 +292,40 @@ function snapshotOperation<T>(candidate: CoordinateOperation<T>): CoordinateOper
   const sourceCRS = text(candidate.sourceCRS, 'sourceCRS');
   const targetCRS = text(candidate.targetCRS, 'targetCRS');
   const area = snapshotArea(candidate.area);
+  const sourceMetadata = snapshotMetadata(candidate.sourceMetadata),
+    targetMetadata = snapshotMetadata(candidate.targetMetadata);
+  let coverage: readonly OperationArea[] | undefined;
+  if (candidate.coverage !== undefined) {
+    if (!Array.isArray(candidate.coverage) || !candidate.coverage.length)
+      throw new Error('Nonempty conservative coverage cells required');
+    coverage = Object.freeze(
+      candidate.coverage.map(cell => {
+        const snapshot = snapshotArea(cell);
+        if (!containsArea(area, snapshot))
+          throw new Error('Coverage cells must fit operation area');
+        return snapshot;
+      })
+    );
+  }
+  let models: readonly OperationModel[] | undefined;
+  if (candidate.models !== undefined) {
+    const identities = snapshotGrids(candidate.models);
+    models = Object.freeze(
+      identities.map((identity, i) =>
+        Object.freeze({
+          ...identity,
+          license: text(candidate.models[i].license, 'model license'),
+          termsReference: text(candidate.models[i].termsReference, 'model termsReference')
+        })
+      )
+    );
+  }
   const epochRange = candidate.epochRange === null ? null : snapshotEpoch(candidate.epochRange);
+  if (
+    (sourceMetadata?.frameKind === 'dynamic' || targetMetadata?.frameKind === 'dynamic') &&
+    !epochRange
+  )
+    throw new Error('Dynamic frame operations require a reviewed epochRange');
   const accuracyMeters = candidate.accuracyMeters;
   if (accuracyMeters !== null) nonnegative(accuracyMeters, 'accuracyMeters');
   const ballpark = optionalBoolean(candidate.ballpark, 'ballpark');
@@ -247,6 +340,10 @@ function snapshotOperation<T>(candidate: CoordinateOperation<T>): CoordinateOper
     sourceCRS,
     targetCRS,
     area,
+    coverage,
+    sourceMetadata,
+    targetMetadata,
+    models,
     epochRange,
     accuracyMeters,
     ballpark,
@@ -288,6 +385,9 @@ function normalizeRequest(request: OperationSelectionRequest): Request {
     area,
     epoch,
     grids,
+    models: snapshotGrids(request.availableModels),
+    sourceMetadata: snapshotMetadata(request.sourceMetadata),
+    targetMetadata: snapshotMetadata(request.targetMetadata),
     maxAccuracyMeters,
     allowUnknownAccuracy,
     allowBallpark
@@ -355,4 +455,25 @@ function optionalBoolean(value: boolean | undefined, label: string): boolean {
   if (value !== undefined && typeof value !== 'boolean')
     throw new Error(`Operation ${label} must be boolean`);
   return value === true;
+}
+
+function snapshotMetadata(
+  value: OperationCRSMetadata | undefined
+): OperationCRSMetadata | undefined {
+  if (value === undefined) return undefined;
+  if (!value || (value.frameKind !== 'static' && value.frameKind !== 'dynamic'))
+    throw new Error('Explicit static/dynamic frame metadata required');
+  if (
+    (value.frameKind === 'dynamic' && !Number.isFinite(value.frameEpoch)) ||
+    (value.frameKind === 'static' && value.frameEpoch !== undefined)
+  )
+    throw new Error('Dynamic frame requires finite frameEpoch; static frame has none');
+  return Object.freeze({
+    horizontalCRS: text(value.horizontalCRS, 'horizontalCRS'),
+    verticalCRS:
+      value.verticalCRS === undefined ? undefined : text(value.verticalCRS, 'verticalCRS'),
+    referenceFrame: text(value.referenceFrame, 'referenceFrame'),
+    frameKind: value.frameKind,
+    frameEpoch: value.frameEpoch
+  });
 }

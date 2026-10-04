@@ -136,7 +136,10 @@ overlap validation. Tranche 13A adds about 0.18 KiB minified / 0.01 KiB gzip
 for typed epoch/coefficient storage and prepared axis/unit constants. The core and default wrapper stay unchanged.
 The deformation step adds about 0.7 KiB minified / 0.2 KiB gzip to a pipeline;
 the separate model and velocity readers are retained only when explicitly imported.
-See [deformation models](./deformation-models.md).
+See [deformation models](./deformation-models.md). The optional
+[`/temporal`](./temporal-models.md) model measures 9.0 KiB minified / 3.6 KiB gzip
+on Node 24.14.0; it is absent from static-model, root, core and pipeline-only
+imports. Application fields and model data are additional costs.
 Single-stage static Helmert buffer specialization adds about 1.35 KiB minified /
 0.47 KiB gzip to a retained pipeline, without adding bytes to the core, default
 wrapper, operation catalogue or lazy initial/deferred imports. See the
@@ -266,6 +269,8 @@ shorter paths below. The former `classic` subpath is removed.
 
 | Subpath | Exports |
 | --- | --- |
+| `temporal` | `createTemporalDeformationModel` and explicit field/rate/event types; no datasets |
+| `deformation` | `createDeformationModel` for prepared static velocity fields |
 | `operations` | Optional `OperationCatalog` and selection metadata/diagnostics; no database or execution code |
 | `analysis` | `ProjectionAnalysis`, reusable factors/Jacobians and explicit mathematical domain enforcement |
 | `bulk` | `ProjectionBuffer` for separate, strided, column and chunked buffers; no projection algorithms/readers |

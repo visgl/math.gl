@@ -7,6 +7,7 @@ import {execFileSync} from 'node:child_process';
 import {mkdtempSync, writeFileSync, readFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'math-gl-application-deformation-'));
@@ -77,6 +78,68 @@ try {
   ]) {
     writeFileSync(reference, JSON.stringify(invalid));
     assert.throws(run, 'Malformed provenance/units/epochs or mismatched inverse must fail');
+  }
+  // Authored application-like metadata/assets; no external geodetic model data.
+  const assetPath = join(directory, 'authored-model.txt');
+  writeFileSync(assetPath, 'authored constant-x amplitude 0.01');
+  const metadata = {
+    horizontalCRS: 'app:horizontal',
+    verticalCRS: 'app:height',
+    referenceFrame: 'app:frame',
+    frameKind: 'dynamic',
+    frameEpoch: 2010
+  };
+  const operation = {
+    id: 'authored:model',
+    sourceCRS: 'app:source',
+    targetCRS: 'app:target',
+    sourceMetadata: metadata,
+    targetMetadata: metadata,
+    area: [-10, -10, 10, 10],
+    coverage: [
+      [2, -10, 10, 10],
+      [-10, -10, -2, 10]
+    ],
+    epochRange: [2000, 2030],
+    accuracyMeters: null,
+    models: [
+      {id: 'authored', revision: '1', license: 'MIT', termsReference: 'math.gl authored fixture'}
+    ],
+    provenance: fixture.provenance
+  };
+  const scoped = {
+    ...fixture,
+    operation,
+    assets: [
+      {
+        id: 'authored',
+        revision: '1',
+        kind: 'model',
+        path: 'authored-model.txt',
+        sha256: createHash('sha256').update(readFileSync(assetPath)).digest('hex')
+      }
+    ],
+    cases: fixture.cases.map(row => ({
+      ...row,
+      sourceCRS: 'app:source',
+      targetCRS: 'app:target',
+      sourceMetadata: metadata,
+      targetMetadata: metadata,
+      area: [3, 0, 3, 0]
+    }))
+  };
+  writeFileSync(reference, JSON.stringify(scoped));
+  run();
+  assert.equal(JSON.parse(readFileSync(output, 'utf8')).modelAssets[0].revision, '1');
+  for (const invalid of [
+    {...scoped, assets: []},
+    {...scoped, assets: [{...scoped.assets[0], sha256: '0'.repeat(64)}]},
+    {...scoped, cases: [{...scoped.cases[0], area: [0, 0, 0, 0]}]},
+    {...scoped, cases: [{...scoped.cases[0], sourceMetadata: {...metadata, frameEpoch: 2000}}]},
+    {...scoped, operation: {...operation, models: [{...operation.models[0], license: ''}]}}
+  ]) {
+    writeFileSync(reference, JSON.stringify(invalid));
+    assert.throws(run, 'Unreviewed assets/coverage/frame metadata must fail');
   }
   console.log(
     'Application-owned deformation factory/reference qualification and rejection checks passed'

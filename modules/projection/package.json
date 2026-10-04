@@ -960,6 +960,11 @@
       "types": "./dist/bulk.d.ts",
       "import": "./dist/bulk.js",
       "require": "./dist/bulk.cjs"
+    },
+    "./temporal": {
+      "types": "./dist/temporal.d.ts",
+      "import": "./dist/temporal.js",
+      "require": "./dist/temporal.cjs"
     }
   },
   "files": [

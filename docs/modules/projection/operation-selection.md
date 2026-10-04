@@ -7,7 +7,7 @@ choose among **operations it has supplied and reviewed**.
 
 Import it from `@math.gl/projection/operations`. It is a separate, optional entry
 point: ordinary projections, pipelines and the package root do not include it.
-A retained browser ESM selector measures 4.4 KiB minified / 1.6 KiB gzip
+A retained browser ESM selector measures 6.3 KiB minified / 2.2 KiB gzip
 (Node 24.14.0, esbuild, ES2020, gzip level 9); catalogue data and operation payloads
 are separate application costs. Existing import sizes are unchanged.
 Selection reads metadata and returns a payload. It does not create a projection,
@@ -172,7 +172,7 @@ quality policies when the application needs different eligibility constraints.
 Use `inspect(request)` to see every eligible candidate and rejected candidate. It
 returns `{selected, candidates, rejected}`; candidates are in the same rank order
 used by `select`. Each rejection contains its `candidate`, all failed `reasons` and
-all `missingGrids`. Results and diagnostic arrays are frozen.
+all `missingGrids` and `missingModels`. Results and diagnostic arrays are frozen.
 
 ```typescript
 const decision = catalog.inspect({
@@ -189,7 +189,7 @@ for (const rejected of decision.rejected) {
 ```
 
 Reason codes, reported in fixed order, are `source-crs`, `target-crs`, `area`,
-`epoch-required`, `epoch`, `grid`, `accuracy-unknown`, `accuracy` and `ballpark`.
+`epoch-required`, `epoch`, `grid`, `accuracy-unknown`, `accuracy`, `ballpark`, `coverage`, `source-metadata`, `target-metadata` and `model`.
 Inspection does not probe an operation, invoke its factory or preload its payload.
 Re-select explicitly when grid availability or the requested extent changes; an
 already returned decision is not updated automatically.
@@ -211,3 +211,43 @@ parser, model or grid implementation and adds no code to existing imports.
 
 See the [remaining roadmap](./roadmap.md#sota-roadmap)
 for broader geodetic qualification and measured performance work.
+
+## Irregular coverage and frame/model identity
+
+An optional `coverage` list supplies reviewed covered geographic rectangles
+within the candidate's bounding `area`. The complete requested extent must fit
+**one** cell. Holes and gaps are rejected. This conservative contract may reject
+an extent crossing adjacent cells even if their union covers it; it never assumes
+a bounding box covers an irregular model or reconstructs polygon topology.
+Antimeridian and ±180° seam endpoints follow the existing area rules.
+
+Optional `sourceMetadata` and `targetMetadata` have this shape:
+
+```typescript
+const sourceMetadata = {
+  horizontalCRS: 'app:horizontal-v1', verticalCRS: 'app:height-v1',
+  referenceFrame: 'app:dynamic-frame-v1', frameKind: 'dynamic' as const,
+  frameEpoch: 2010
+};
+```
+
+Static metadata omits `frameEpoch`; dynamic metadata requires a finite frame epoch
+and a candidate with a bounded `epochRange`. Requests match every field exactly,
+including presence. A metadata-bearing request cannot select a legacy candidate
+that lacks those fields. Frame epoch identifies the reference frame; request
+`epoch` is the observation epoch or whole propagation interval. These are distinct.
+This metadata does not enable implicit dynamic WKT/PROJJSON interpretation or
+choose/execute a deformation model.
+
+Candidate `models` entries are `{id, revision, license, termsReference}`. All four
+strings must be nonempty. Requests declare prepared exact identities through
+`availableModels: [{id, revision}]`; changed revisions do not match. Grid and
+model readiness are separate requirements. Terms record an application's review;
+the selector does not interpret a license or certify rights. Coverage, metadata
+and model lists are snapshotted and frozen with the existing candidate metadata.
+`inspect` reports every failed constraint and missing exact model identity.
+
+The [application qualification harness](./deformation-qualification.md#pinned-assets-and-reviewed-operation-metadata)
+checks local asset hashes and those selection constraints before comparing supplied
+independent coordinates. Physical authority, reference independence and real
+model validation remain application responsibilities.

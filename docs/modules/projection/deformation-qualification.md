@@ -120,7 +120,41 @@ produce a different result: it is not a trajectory integrator.
 A static velocity does not execute time-varying rates or event offsets. For example,
 a rate `0.01 + 0.002(t − 2010)` metres/year integrated from 2010 to 2020, plus a
 0.1 metre event, yields 0.3 metres; a static 0.01 metre/year sampler yields 0.1.
-An explicit epoch alone does not select or execute those components. Built-in
-nonlinear temporal laws, events and authoritative real-model certification remain
-follow-up work; an application-provided model needs its own reviewed forward,
-inverse, temporal and failure contracts.
+An explicit epoch alone does not select or execute those components. The optional [temporal model](./temporal-models.md) now executes explicit rate,
+acceleration, step and relaxation components. Authoritative real-model certification
+remains application-owned; each model needs reviewed forward, inverse, temporal
+and failure contracts.
+
+## Pinned assets and reviewed operation metadata
+
+The local reference JSON can additionally include an `operation` candidate using
+the [operation catalogue](./operation-selection.md) contract, plus `assets`:
+
+```json
+{"assets": [{
+  "kind": "model", "id": "app:reviewed-model", "revision": "v1",
+  "path": "./reviewed-model.bin", "sha256": "<exact 64 lowercase hex digits>"
+}]}
+```
+
+Kinds are `model`, `grid` and `module`. Paths resolve relative to the local reference
+file. Every declared asset is read and checked against its exact SHA256; duplicate
+kind/id/revision identities, missing files and mismatches fail. Model/grid entries
+supply readiness identities; module entries pin additional factory dependencies.
+An operation candidate requires the manifest, even when no data assets are needed.
+The application must list every relevant imported factory dependency: the harness
+does not discover dependency graphs or assert that a list is complete.
+
+Each reference case then supplies `sourceCRS`, `targetCRS`, `area` and matching
+`sourceMetadata`/`targetMetadata` when used by the candidate. The harness selects
+the candidate against each case's complete original source/target epoch interval
+and required exact assets before executing numerical comparisons. Gaps, different
+frame epochs, missing model revisions and invalid terms are rejected. Case areas
+are supplied reviewed extents, not inferred from geocentric XYZ. The report retains
+asset identities/content hashes and reviewed operation metadata along with the
+existing factory/reference/source hashes and numerical errors.
+
+This strengthens reproducibility and contract checks for **application-owned**
+real-model qualification. It does not bundle an authoritative dataset, certify
+physical model accuracy or verify legal permission. Keep the sample locations,
+CRS/frame/height meaning and observational accuracy independently reviewed.

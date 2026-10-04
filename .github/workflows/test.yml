@@ -59,6 +59,7 @@ jobs:
       - name: Check independent deformation stress references and qualification
         run: |
           python3 modules/projection/scripts/generate-deformation-stress-reference.py --check
+          python3 modules/projection/scripts/generate-temporal-reference.py --check
           node modules/projection/scripts/qualify-deformation-stress.mjs --output /tmp/deformation-stress-qualification.json
           node modules/projection/scripts/check-application-deformation-qualification.mjs
 
@@ -240,6 +241,10 @@ jobs:
           BROWSER_MIN_SAMPLE_MS: ${{ github.event_name == 'pull_request' && '0' || '12' }}
         run: node modules/projection/scripts/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/projection-browser-qualification.json
 
+      - name: Evaluate optional worker correctness and costs
+        timeout-minutes: 2
+        run: node modules/projection/scripts/benchmark-workers.mjs --browser ${{ matrix.browser }} --points 1000,100000 --samples 3 --output /tmp/projection-worker-evaluation-${{ matrix.browser }}.json
+
       - name: Upload browser qualification measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -248,6 +253,7 @@ jobs:
             /tmp/projection-browser-qualification.json
             /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
             /tmp/interior-qualification-${{ matrix.browser }}.json
+            /tmp/projection-worker-evaluation-${{ matrix.browser }}.json
           if-no-files-found: error
 
   projection-performance:

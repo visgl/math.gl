@@ -154,3 +154,10 @@ are distributed. Spatially nonlinear application samplers have an additional ind
 profile and offline model/reference harness; see [model qualification](./deformation-qualification.md).
 Event offsets, time-varying components, trajectory integration, automatic model
 selection, dynamic CRS inference and model extrapolation are outside this profile.
+
+## Time-varying rates and events
+
+This constructor keeps its static velocity contract. Use the optional
+[temporal model](./temporal-models.md) for explicit acceleration, event steps and
+exponential relaxation at the source position. Both produce `DeformationModel`
+objects for the same pipeline step and original-epoch inverse contract.
