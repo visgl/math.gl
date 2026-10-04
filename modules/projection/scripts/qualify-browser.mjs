@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Independent PROJ fixtures, exercised in the same engines as browser benchmarks.
+import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/projection/analysis';
+import factorsReference from '../test/fixtures/factors-reference.json';
 export {qualifyAccuracy} from '../test/accuracy-workload';
 import * as native from '@math.gl/projection';
 const projections = Object.values(native).filter(
@@ -79,3 +81,31 @@ export function qualifyVertical() {
 export {qualifyPipelines} from '../test/pipeline-workload';
 
 export {qualifyKinematicPipelines} from '../test/kinematic-workload';
+
+export function qualifyFactors() {
+  let points = 0;
+  for (const fixture of factorsReference.cases) {
+    const crs = native.normalizeCRS(fixture.definition);
+    const plugin = projections.find(value => value.name === crs.projection);
+    const analysis = new ProjectionAnalysis({
+      projection: plugin,
+      context: {...crs.ellipsoid, parameters: crs.parameters},
+      domain: {west: -Math.PI, east: Math.PI, south: -1.4, north: 1.4}
+    });
+    const result = createProjectionFactors();
+    for (const row of fixture.results) {
+      if (!analysis.factors((row.input[0] * Math.PI) / 180, (row.input[1] * Math.PI) / 180, result))
+        throw new Error('Factors rejected: ' + fixture.definition);
+      for (const [key, expected] of Object.entries(row.factors)) {
+        const tolerance =
+          key.startsWith('dxD') || key.startsWith('dyD')
+            ? 0.2
+            : 2e-7 * Math.max(1, Math.abs(expected));
+        if (Math.abs(result[key] - expected) > tolerance)
+          throw new Error('Independent factor mismatch: ' + key);
+      }
+      points++;
+    }
+  }
+  return {points, oracle: 'PROJ 9.5.1'};
+}

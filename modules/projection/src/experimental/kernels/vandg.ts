@@ -1,7 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Cancellation-resistant rationalization of forward/inverse numerators is original math.gl code. Remaining equations ported from of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -51,15 +52,13 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
   var sinth = Math.sin(theta);
   var costh = Math.cos(theta);
 
-  var g = costh / (sinth + costh - 1);
+  var g = costh / (sinth - 2 * Math.sin(theta / 2) ** 2);
   var gsq = g * g;
   var m = g * (2 / sinth - 1);
   var msq = m * m;
-  var con =
-    (Math.PI *
-      state.R *
-      (al * (g - msq) + Math.sqrt(asq * (g - msq) * (g - msq) - (msq + asq) * (gsq - msq)))) /
-    (msq + asq);
+  // Rationalize sqrt(B) + A to avoid cancellation near the equator/central meridian.
+  var root = Math.sqrt(asq * (g - msq) * (g - msq) - (msq + asq) * (gsq - msq));
+  var con = (Math.PI * state.R * (msq - gsq)) / (root - al * (g - msq));
   if (dlon < 0) {
     con = -con;
   }
@@ -67,7 +66,8 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
   // con = Math.abs(con / (Math.PI * state.R));
   var q = asq + g;
   con =
-    (Math.PI * state.R * (m * q - al * Math.sqrt((msq + asq) * (asq + 1) - q * q))) / (msq + asq);
+    (Math.PI * state.R * (asq * (2 * g - 1) + gsq)) /
+    (m * q + al * Math.sqrt((msq + asq) * (asq + 1) - q * q));
   if (lat >= 0) {
     // y = state.y0 + Math.PI * state.R * Math.sqrt(1 - con * con - 2 * al * con);
     y = state.y0 + con;
@@ -130,7 +130,7 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
   } else {
     lon = adjust_lon(
       state.long0 +
-        (Math.PI * (xys - 1 + Math.sqrt(1 + 2 * (xx * xx - yy * yy) + xys * xys))) / 2 / xx,
+        (2 * Math.PI * xx) / (Math.sqrt(1 + 2 * (xx * xx - yy * yy) + xys * xys) + 1 - xys),
       state.over
     );
   }

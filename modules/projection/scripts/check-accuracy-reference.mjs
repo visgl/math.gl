@@ -28,10 +28,16 @@ assert.deepEqual(
 );
 let points = 0;
 for (const [index, fixture] of inputs.cases.entries()) {
+  const algorithm = /\+proj=(\w+)/.exec(fixture.definition)[1];
+  let equivalent = fixture.definition;
+  if (algorithm === 'equi') equivalent = equivalent.replace('+proj=equi ', '+proj=eqc ');
+  if (['mill', 'vandg', 'gnom', 'ortho'].includes(algorithm))
+    equivalent = equivalent.replace('+ellps=WGS84', '+R=6378137');
+  if (algorithm === 'nzmg') equivalent = equivalent.replace(' +iterations=1', '');
   assert.equal(
     fixture.oracle,
-    fixture.definition,
-    'Document a separate oracle translation if needed'
+    equivalent,
+    'Only explicitly documented oracle translations are accepted'
   );
   assert(fixture.oracleNotes);
   for (const key of ['forwardTolerance', 'inverseTolerance', 'roundtripTolerance']) {
@@ -65,3 +71,23 @@ assert.equal(qualification.independent.accuracyPoints, points);
 console.log(
   `Seeded PROJ accuracy reference verified: ${inputs.cases.length} domains, ${points} points.`
 );
+
+const factors = JSON.parse(read('factors-reference.json'));
+assert.equal(factors.provenance.pyproj, '3.7.2');
+assert.equal(factors.provenance.proj, '9.5.1');
+assert.equal(
+  factors.provenance.generatorSHA256,
+  sha(readFileSync(new URL('./generate-factors-reference.py', import.meta.url)))
+);
+assert.equal(factors.cases.length, 18);
+assert.equal(
+  factors.cases.reduce((total, row) => total + row.results.length, 0),
+  450
+);
+for (const row of factors.cases)
+  for (const point of row.results) {
+    assert(point.input.length === 2 && point.input.every(Number.isFinite));
+    assert.equal(Object.keys(point.factors).length, 12);
+    assert(Object.values(point.factors).every(Number.isFinite));
+  }
+console.log('Independent factor reference integrity verified: 450 points.');

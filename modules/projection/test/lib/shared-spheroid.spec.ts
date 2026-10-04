@@ -152,24 +152,20 @@ for (const ratio of [1, 0.9966471893352525, 0.5, 0.1, 0.01, 0.001, 0.000001]) {
   );
 }
 
-test('deep interior: retained radial approximation and normal ambiguity are explicit', () =>
+test('deep interior: nearest-normal inversion and ambiguous equatorial rejection', () =>
   inDegrees(() => {
     const ellipsoid = new Ellipsoid(10, 10, 5),
       engine = geometry(10, 5);
-    // Inside the oblate evolute, the equatorial normal representation is not unique.
-    // The existing projection adapter chooses the equatorial branch for this cardinal input.
-    close(engine.unproject([1, 0, 0]), [0, 0, -9], 1e-12);
+    // Reject the equally near north/south normal pair instead of selecting an equatorial branch.
+    expect(() => engine.unproject([1, 0, 0])).toThrow(/did not converge/);
     const output = [7, 8, 9];
-    close(ellipsoid.cartesianToCartographic([1, 0, 0], output), [0, 0, -9], 1e-12);
-    // A radial footpoint is retained by geometry at low scaled norm, even though the
-    // off-axis deep interior point does not reconstruct along a geodetic normal.
+    expect(ellipsoid.cartesianToCartographic([1, 0, 0], output)).toBeUndefined();
+    expect(output).toEqual([7, 8, 9]);
     const xyz = [0.1, 0.2, 0.3];
     const llh = ellipsoid.cartesianToCartographic(xyz);
-    const reconstructed = ellipsoid.cartographicToCartesian(llh);
-    expect(Math.hypot(...reconstructed.map((value, i) => value - xyz[i]))).toBeGreaterThan(0.01);
-    // Extremely flattened deep interior is outside the new exterior solver's contract.
+    close(ellipsoid.cartographicToCartesian(llh), xyz, 1e-12);
     expect(cartesianToSpheroid(0.01, 0, 0.0001, 10, 0.1, 0.9999, new Float64Array([7, 8, 9]))).toBe(
-      false
+      true
     );
   }));
 

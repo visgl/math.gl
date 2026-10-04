@@ -950,6 +950,11 @@
       "types": "./dist/operations.d.ts",
       "import": "./dist/operations.js",
       "require": "./dist/operations.cjs"
+    },
+    "./analysis": {
+      "types": "./dist/analysis.d.ts",
+      "import": "./dist/analysis.js",
+      "require": "./dist/analysis.cjs"
     }
   },
   "files": [

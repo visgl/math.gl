@@ -553,18 +553,23 @@ single-stage specializations remain intact. Further work must qualify allocation
 behavior after heterogeneous warmup as well as throughput, accuracy and bundle cost.
 This adds no public API, model data or acceleration backend.
 
-## Remaining performance and geodetic roadmap
+## SOTA roadmap
 
-| Tranche | Work | Acceptance gate |
+Stable S identifiers distinguish this numerical/performance roadmap from the completed original parity tranches. S1–S3 establish stronger mathematical contracts; they do not establish a universal SOTA claim.
+
+| Tranche | Status and work | Acceptance gate |
 | --- | --- | --- |
-| 12C2 — Broader deformation qualification | Apply the independent model/reference harness to reviewed real models and evaluate time-varying components | Reviewed data terms without distributing third-party models; explicit time/coverage/accuracy bounds |
-| 12E2 — Broader operation qualification | Independently qualify application-provided operation catalogues and irregular coverage/accuracy policies | Reviewed metadata/data terms, conservative coverage and comparable accuracy definitions; no bundled third-party database or implicit downloads |
-| 13A — Further JavaScript performance | Profile grid/datum-heavy workloads, mixed unit/axis-Helmert chains and per-record epochs; avoid sampled allocation regressions after varied workloads | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
-| 13B–13D — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
+| **S1 — Safeguarded ellipsoid inverse** | Implemented for sphere/oblate nearest normals: deep interiors, cusp policy, compensated extreme-flattening arithmetic | 434 independent high precision accuracy checks; bounded updates and untouched failure outputs. Prolate/triaxial legacy interior limitations remain explicit. |
+| **S2 — Accuracy and domain contracts** | Implemented: 42 seeded domains, all 37 named algorithms independently referenced, polar meridian and Van der Grinten fixes, optional explicit domain enforcement | Independent forward and inverse values; per-profile sampled ceilings and oracle limitations in the accuracy scorecard. Latest proj4js reference remains pinned at 2.22.0. |
+| **S3 — Factors and derivatives** | Implemented optional `/analysis`: reusable Jacobians, scales, convergence, angular distortion and principal scales | 450 independent PROJ comparisons plus analytic and failure/reentry tests; no root/core bundle inclusion or successful hot-path object creation. Numerical stencil limits remain explicit. |
+| **S4 — CPU mixed-pipeline performance** | Next: grid/datum-heavy and mixed unit/axis/Helmert chains; reduce runtime boxing and coordinate allocations | Paired measurements after heterogeneous warmup; unchanged accuracy, ownership and no sampled allocation regressions. |
+| **S5 — Reusable bulk layouts** | Next: separate input/output, offsets/strides and chunked buffers | Explicit overlap and failed-record contracts; mixed layouts, Float32/64, M and reusable storage; measured end-to-end costs. |
+| **S6 — Real-model and operation qualification** | Application-owned models, irregular coverage and compound/dynamic CRS metadata | Reviewed data terms, conservative coverage/time/accuracy bounds; no bundled third-party database or implicit downloads. |
+| **S7 — Temporal models and events** | Rates and event components with defined forward/inverse epoch semantics | Independent references and explicit temporal validity; distinguish sampled propagation from trajectory integration. |
+| **S8 — Optional acceleration** | Evaluate Wasm/SIMD, workers and visualization GPU paths when justified | End-to-end gains include loading, transfer and bundle cost. |
+| **S9 — Published scorecard** | Accuracy, throughput, allocation, startup, memory and bundle measurements across Node and three browsers | Pinned competitors and explicit hardware/domain qualifications; bounded claims from measured evidence. |
 
-Further optimization and operation support require separate measurements and accuracy
-qualification. These tranches do not establish unrestricted PROJ parity or a state-of-the-art
-performance claim.
+The target is a browser-native projection and coordinate transformation library. General GIS engines, BLAS and tensors remain outside scope. Unrestricted native PROJ parity is not claimed. The earlier 12C2/12E2 follow-ups map to S6–S7; 13A maps to S4–S5, and 13B–13D to S8.
 
 ## Axis compatibility and lazy entry points: implemented follow-up
 

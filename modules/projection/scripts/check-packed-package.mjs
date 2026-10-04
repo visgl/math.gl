@@ -90,6 +90,7 @@ try {
     const subpaths = ${JSON.stringify(subpaths)};
     const optionalEntries = {
       './operations': ['OperationCatalog'],
+      './analysis': ['ProjectionAnalysis', 'createProjectionJacobian', 'createProjectionFactors'],
       './deformation': ['createDeformationModel'],
       './grids/velocity': ['createVelocityGrid'],
       './grids/velocity-geotiff': ['loadVelocityGeoTIFFGrid']
@@ -168,6 +169,12 @@ try {
     assert(!('TypeScriptProjection' in core));
     assert(!('checkTypeScriptCRSCompatibility' in core));
     assert.deepEqual(new core.ProjectionEngine({}).project([12, 55, 123, 8]), [12, 55, 123, 8]);
+    const {ProjectionAnalysis, createProjectionFactors, createProjectionJacobian} = await load('@math.gl/projection/analysis');
+    const inspected = new ProjectionAnalysis({projection: api.mercator, context: {semiMajorAxis:10,eccentricitySquared:0,parameters:{}}, domain:{west:-1,east:1,south:-1,north:1}});
+    const factors = createProjectionFactors(), jacobian = createProjectionJacobian();
+    assert(inspected.factors(0,0,factors)); assert(inspected.jacobian(0,0,jacobian));
+    assert(Math.abs(factors.meridionalScale - 1) < 1e-10);
+    assert(Math.abs(jacobian.dxDLongitude - 10) < 1e-10);
     const {OperationCatalog} = await load('@math.gl/projection/operations');
     const createOperation = () => new core.ProjectionEngine({});
     const selection = new OperationCatalog([{
@@ -441,6 +448,16 @@ try {
     const automatic = new LazyProjection(lazyOptions);
     const automaticResult: Promise<number[]> = automatic.project([3, 0]);
     const automaticFlat: Promise<Float32Array> = automatic.projectFlat(new Float32Array([3, 0]));
+    import {ProjectionAnalysis, createProjectionFactors, createProjectionJacobian, type ProjectionAnalysisOptions, type ProjectionDomain, type ProjectionFactors, type ProjectionJacobian} from '@math.gl/projection/analysis';
+    const analysisDomain: ProjectionDomain = {west:-1,east:1,south:-1,north:1};
+    const analysisOptions: ProjectionAnalysisOptions = {projection:mercator,context:{semiMajorAxis:10,eccentricitySquared:0,parameters:{}},domain:analysisDomain};
+    const inspected = new ProjectionAnalysis(analysisOptions);
+    const factors: ProjectionFactors = createProjectionFactors(), jacobian: ProjectionJacobian = createProjectionJacobian();
+    inspected.factors(0,0,factors); inspected.jacobian(0,0,jacobian);
+    // @ts-expect-error Reusable factors storage is required.
+    inspected.factors(0,0);
+    // @ts-expect-error Analysis requires an explicit application domain.
+    new ProjectionAnalysis({projection:mercator,context:analysisOptions.context});
     import {ProjectionEngine, checkProjectionCompatibility, type ProjectionPoint, type ProjectionEngineOptions, type ProjectionEngineCreateOptions, type ProjectionCompatibility} from '@math.gl/projection/core';
     const engineOptions: ProjectionEngineOptions = {};
     const createOptions: ProjectionEngineCreateOptions = engineOptions;

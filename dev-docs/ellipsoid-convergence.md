@@ -2,7 +2,7 @@
 
 The first step shares geometry and establishes conversion baselines between
 `@math.gl/geospatial` and `@math.gl/projection`. Qualified sphere/oblate conversion kernels now share a small optional numeric leaf;
-three-radius and interior geospatial behavior remain separate.
+three-radius geospatial surface inversion remains separate. Sphere/oblate cartographic interiors now share the safeguarded nearest-normal solver; see S1 below.
 
 ## Shared scope and boundaries
 
@@ -164,3 +164,9 @@ workloads, collected allocation sampling and selective bundles have separate
 reports. See [the qualification measurements](../docs/modules/projection/benchmarks.md#shared-local-frames).
 Further interior convergence, unusual geometry and celestial frame/time-scale
 work retain separate scopes.
+
+## S1: safeguarded nearest-normal interiors — implemented
+
+The shared sphere/oblate cartographic inverse now covers unique deep interiors. Original shifted-multiplier Newton/bisection with compensated radius/axis arithmetic is bounded by 128 updates. Equatorial interiors below the evolute cusp reject their equally near hemisphere pair. Failure ownership and adapter longitude conventions remain intact. This supersedes the earlier shared surface/exterior restriction and ordinary Hannover interior branch described above.
+
+The original 110-digit Decimal oracle now enforces 434 accuracy checks out of 466 paths, including `b/a=1e-6` and both sides of the cusp. The remaining 32 deep prolate/triaxial paths retain diagnostic status. Prolate/triaxial cartographic inversion and the separate `scaleToGeodeticSurface` method retain their legacy kernel. No new third-party implementation or model is copied.

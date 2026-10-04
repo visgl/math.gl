@@ -84,33 +84,28 @@ test('equatorial interior has multiple normal representations, including two nea
     close([point.x, point.y, point.z], [x, 0, 0], 1e-15);
   }
   expect(Math.abs(nearestHeight)).toBeLessThan(1 - x);
-  // Preserve the historical cardinal branch; a defined inverse is not a promise
-  // to choose the closest of these representations.
-  close(engine(1, 0.5).unproject([x, 0, 0]), [0, 0, x - 1], 1e-15);
+  // No arbitrary hemisphere selection when two nearest normals are equally valid.
+  expect(() => engine(1, 0.5).unproject([x, 0, 0])).toThrow(/did not converge/);
+  close(engine(1, 0.5).unproject([0.75, 0, 0]), [0, 0, -0.25], 1e-15);
 });
 
-test('flattened non-cardinal interiors reject atomically, including aliased and flat outputs', () => {
-  const row = cases.find(row => row.id === 'flat/1/.5/north')!;
-  const shape = {semiMajorAxis: 1, semiMinorAxis: 0.1, eccentricitySquared: 0.99};
-  const point = {x: row.xyz[0], y: row.xyz[1], z: row.xyz[2]};
-  const snapshot = {...point};
+test('ambiguous interiors reject atomically, including aliased and flat outputs', () => {
+  const shape = {semiMajorAxis: 1, semiMinorAxis: 0.5, eccentricitySquared: 0.75};
+  const point = {x: 0.5, y: 0, z: 0};
   expect(cartesianToSpheroid(point, shape)).toBe(false);
-  expect(point).toEqual(snapshot);
-  const projection = engine(1, 0.1);
+  expect(point).toEqual({x: 0.5, y: 0, z: 0});
+  const projection = engine(1, 0.5);
   const output = [7, 8, 9, 42];
-  expect(() => projection.unprojectTo([...row.xyz, 99], output)).toThrow(/did not converge/);
+  expect(() => projection.unprojectTo([0.5, 0, 0, 99], output)).toThrow(/did not converge/);
   expect(output).toEqual([7, 8, 9, 42]);
   for (const ArrayType of [Float32Array, Float64Array]) {
-    const data = new ArrayType([888, 1, 0, 0, 11, ...row.xyz, 22, 999]);
+    const data = new ArrayType([888, 1, 0, 0, 11, 0.5, 0, 0, 22, 999]);
     const view = data.subarray(1, 9);
-    const rejectedRecord = Array.from(view.slice(4));
     expect(() => projection.unprojectFlat(view, 4)).toThrow(/did not converge/);
-    expect(Array.from(view.slice(0, 4))).toEqual([0, 0, 0, 11]);
-    expect(Array.from(view.slice(4))).toEqual(rejectedRecord);
+    expect(Array.from(view)).toEqual([0, 0, 0, 11, 0.5, 0, 0, 22]);
     expect(data[0]).toBe(888);
     expect(data[9]).toBe(999);
   }
-  // A failed row leaves the engine usable, without modifying the failed record.
   close(projection.unproject([1, 0, 0]), [0, 0, 0], 0);
 });
 

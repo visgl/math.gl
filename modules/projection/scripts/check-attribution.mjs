@@ -65,7 +65,11 @@ function visit(directory) {
     const apache = name === 'experimental/kernels/eqearth.ts';
     const license = header.match(/^\/\/ SPDX-License-Identifier: (.+)$/m)?.[1];
     assert.equal(license, apache ? 'Apache-2.0' : 'MIT', name + ' must declare its source license');
-    if (/^experimental\/(kernels|common)\//.test(name) || derived.has(name)) {
+    if (
+      (/^experimental\/(kernels|common)\//.test(name) &&
+        name !== 'experimental/common/meridian-distance.ts') ||
+      derived.has(name)
+    ) {
       assert(
         /^\/\/ SPDX-FileComment: .*proj4js/m.test(header),
         name + ' must identify its provenance with SPDX'

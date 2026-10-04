@@ -50,8 +50,11 @@ for fixture in inputs['cases']:
             elif edge == 2: v = distance
             else: v = 1 - distance
         points.append([west + (east - west) * u, south + (north - south) * v])
+    operation = fixture['oracle']
+    if '+proj=longlat ' in operation:
+        operation += ' +step +proj=unitconvert +xy_in=rad +xy_out=deg'
     transformer = pyproj.Transformer.from_pipeline(
-        '+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step ' + fixture['oracle'])
+        '+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step ' + operation)
     results = []
     for point in points:
         forward = list(transformer.transform(*point, errcheck=True))
@@ -61,5 +64,16 @@ for fixture in inputs['cases']:
 report = {'pyproj': pyproj.__version__, 'proj': pyproj.proj_version_str,
           'epsgVersion': 'v11.022', 'source': source.name, 'sourceSHA256': sha(source),
           'generatorSHA256': sha(Path(__file__)), 'cases': cases}
-(ROOT / 'accuracy-reference.json').write_text(json.dumps(report, indent=2, allow_nan=False) + '\n')
+# Preserve the original pretty-printed domains; use one row per added sample so
+# expanded machine-generated references remain practical to review in a PR.
+header = json.dumps({k: v for k, v in report.items() if k != 'cases'}, indent=2, allow_nan=False)
+blocks = []
+for index, case in enumerate(cases):
+    if index < 15:
+        block = json.dumps(case, indent=2, allow_nan=False)
+    else:
+        rows = ',\n'.join('    ' + json.dumps(row, separators=(',', ':'), allow_nan=False) for row in case['results'])
+        block = '{\n  "id": ' + json.dumps(case['id']) + ',\n  "results": [\n' + rows + '\n  ]\n}'
+    blocks.append('\n'.join('    ' + line for line in block.splitlines()))
+(ROOT / 'accuracy-reference.json').write_text(header[:-2] + ',\n  "cases": [\n' + ',\n'.join(blocks) + '\n  ]\n}\n')
 print(len(cases), 'domains;', sum(len(c['results']) for c in cases), 'independent points')

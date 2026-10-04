@@ -179,16 +179,13 @@ export class Ellipsoid {
     const y = 'x' in cartesian ? object.y : cartesian[1];
     const z = 'x' in cartesian ? object.z : cartesian[2];
     if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) return undefined;
-    // Shared inverse is qualified for the unambiguous surface/exterior domain.
-    // Interior/radial-fallback and non-spheroid behavior retain the Cesium kernel.
-    const a = this.radii.x,
-      b = this.radii.z;
-    const normSquared = (x / a) ** 2 + (y / a) ** 2 + (z / b) ** 2;
+    // Sphere/oblate conversion chooses the unique nearest normal, including interiors.
+    // Preserve legacy geometry magnitude limits; prolate/triaxial keep their own kernel.
     if (
       this.spheroidGeometry &&
-      Number.isFinite(normSquared) &&
-      normSquared >= 1 - 16 * Number.EPSILON &&
-      Number.isFinite(x * x + y * y + z * z)
+      Number.isFinite(x * x + y * y + z * z) &&
+      Number.isFinite(this.oneOverRadiiSquared.x) &&
+      Number.isFinite(this.oneOverRadiiSquared.z)
     ) {
       spheroidScratch.x = x;
       spheroidScratch.y = y;

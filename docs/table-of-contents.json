@@ -198,6 +198,8 @@
           "modules/projection/benchmarks",
           "modules/projection/parity-audit",
           "modules/projection/independent-validation",
+          "modules/projection/accuracy-domains",
+          "modules/projection/projection-analysis",
           "modules/projection/support",
           "modules/projection/roadmap"
         ]
