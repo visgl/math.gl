@@ -29,3 +29,10 @@ geometry adapters and cross-module qualification. The numerical follow-up improv
 near-pole latitude, bounds surface inversion and qualifies allocation costs. Sharing conversion kernels is a
 follow-up, gated on boundary behavior, numerical accuracy and allocation/bundle
 measurements.
+
+## Sun and sky
+
+The [six-tranche sun and sky roadmap](../docs/modules/sun/roadmap.md) tracks shared
+coordinates, visibility, atmosphere, celestial appearance, stars, and accuracy/performance
+tiers. The sky and bright-star APIs are delivered; observational calibration, shared
+star visibility and formal tier budgets remain follow-ups.
