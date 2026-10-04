@@ -17,6 +17,12 @@ const longitude = -122.4194;
 const sunDir = getSunDirection(Date.now(), latitude, longitude);
 ```
 
+## Moon and star field
+
+The module also provides [moon position, direction, phase and direct moonlight](./api-reference/moon.md), plus a [star-field rotation](./api-reference/get-starfield-rotation.md) for orienting an equatorial cubemap at the observer’s location and time.
+
 ## Attribution
 
 This module is a fork of @mourner's [SunCalc](https://github.com/mourner/suncalc) under BSD 2-clause license.
+
+The adapted lunar code and numeric reference samples use SunCalc 1.9.0 under BSD-2-Clause. The full notice is shipped in `LICENSE-SUNCALC`, and SPDX comments record the original owner and provenance. Original moonlight and star-field calculations use math.gl’s MIT license.

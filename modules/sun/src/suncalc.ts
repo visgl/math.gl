@@ -74,21 +74,25 @@ function toJulianDay(timestamp: number | Date): number {
   return ts / DAY_IN_MS - 0.5 + JD1970;
 }
 
-function toDays(timestamp: number | Date): number {
+export function toDays(timestamp: number | Date): number {
   return toJulianDay(timestamp) - JD2000;
 }
 
-function getRightAscension(eclipticLongitude: number, b: number): number {
+export function getRightAscension(eclipticLongitude: number, b: number): number {
   const lambda = eclipticLongitude;
   return Math.atan2(Math.sin(lambda) * Math.cos(e) - Math.tan(b) * Math.sin(e), Math.cos(lambda));
 }
 
-function getDeclination(eclipticLongitude: number, b: number): number {
+export function getDeclination(eclipticLongitude: number, b: number): number {
   const lambda = eclipticLongitude;
   return Math.asin(Math.sin(b) * Math.cos(e) + Math.cos(b) * Math.sin(e) * Math.sin(lambda));
 }
 
-function getAzimuth(hourAngle: number, latitudeInRadians: number, declination: number): number {
+export function getAzimuth(
+  hourAngle: number,
+  latitudeInRadians: number,
+  declination: number
+): number {
   const H = hourAngle;
   const phi = latitudeInRadians;
   const delta = declination;
@@ -123,7 +127,7 @@ function getEclipticLongitude(meanAnomaly: number): number {
   return M + C + P + Math.PI;
 }
 
-function getSunCoords(dates: number): {
+export function getSunCoords(dates: number): {
   declination: number;
   rightAscension: number;
 } {
