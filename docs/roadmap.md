@@ -15,3 +15,9 @@ Some of the high-level goals for future and past versions
 # v3.6
 
 - Full typescript support
+
+## Shared globe primitives
+
+The [Kepler globe convergence roadmap](https://github.com/visgl/math.gl/blob/master/dev-docs/kepler-globe-convergence.md)
+tracks shared geometry, astronomy and cross-library support for rebuilding Kepler
+globe rendering on general vis.gl primitives.
