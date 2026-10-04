@@ -89,6 +89,7 @@ try {
     assert.equal(stable.mercator, api.mercator);
     const subpaths = ${JSON.stringify(subpaths)};
     const optionalEntries = {
+      './temporal': ['createTemporalDeformationModel'],
       './bulk': ['ProjectionBuffer'],
       './operations': ['OperationCatalog'],
       './analysis': ['ProjectionAnalysis', 'createProjectionJacobian', 'createProjectionFactors'],
@@ -170,6 +171,9 @@ try {
     assert(!('TypeScriptProjection' in core));
     assert(!('checkTypeScriptCRSCompatibility' in core));
     assert.deepEqual(new core.ProjectionEngine({}).project([12, 55, 123, 8]), [12, 55, 123, 8]);
+    const {createTemporalDeformationModel} = await load('@math.gl/projection/temporal');
+    const temporalModel=createTemporalDeformationModel({epochRange:[2000,2030],ellipsoid:{semiMajorAxis:10,flattening:0},components:[{id:'event',units:'m',timeFunction:{type:'step',epoch:2015},field:{sample(lon,lat,p){p.x=0;p.y=0;p.z=.1;return true;}}}]});
+    const temporalPoint={x:10,y:0,z:0};temporalModel.forward(temporalPoint,2010,2020);assert(Math.abs(temporalPoint.x-10.1)<1e-14);temporalModel.inverse(temporalPoint,2010,2020);assert(Math.abs(temporalPoint.x-10)<1e-8);
     const {ProjectionBuffer} = await load('@math.gl/projection/bulk');
     const bufferProjection = new core.ProjectionEngine({to:'EPSG:3857',projections:[api.mercator]});
     const bufferInput = new Float64Array([3,40,12,7,4,50,20,9]);
@@ -460,6 +464,11 @@ try {
     const automatic = new LazyProjection(lazyOptions);
     const automaticResult: Promise<number[]> = automatic.project([3, 0]);
     const automaticFlat: Promise<Float32Array> = automatic.projectFlat(new Float32Array([3, 0]));
+    import {createTemporalDeformationModel, type TemporalFunction, type DeformationField, type TemporalDeformationOptions} from '@math.gl/projection/temporal';
+    const timeLaw:TemporalFunction={type:'exponential',epoch:2015,timeConstantYears:2};
+    const temporalField:DeformationField={sample(lon,lat,p){p.x=0;p.y=0;p.z=1;return true;}};
+    const temporalOptions:TemporalDeformationOptions={epochRange:[2000,2030],components:[{id:'relaxation',units:'m',timeFunction:timeLaw,field:temporalField}]};
+    const temporalModel=createTemporalDeformationModel(temporalOptions);temporalModel.forward({x:6378137,y:0,z:0},2010,2020);
     import {ProjectionBuffer, type BulkProjection, type ProjectionBufferOptions} from '@math.gl/projection/bulk';
     const bufferTransform: BulkProjection = automatic;
     const bufferOptions: ProjectionBufferOptions = {projection:bufferTransform,dimension:4,inputStride:6,outputStride:7};
@@ -496,6 +505,9 @@ try {
     const eagerEngine: number[] = new ProjectionEngine({}).project([0, 0]);
     const createdEngine: Promise<ProjectionEngine> = ProjectionEngine.create(createOptions);
 
+    import type {OperationCRSMetadata,OperationModel} from '@math.gl/projection/operations';
+    const dynamicMetadata:OperationCRSMetadata={horizontalCRS:'app:horizontal',verticalCRS:'app:height',referenceFrame:'app:frame',frameKind:'dynamic',frameEpoch:2010};
+    const reviewedModel:OperationModel={id:'authored',revision:'1',license:'MIT',termsReference:'fixture terms'};
     import {OperationCatalog, type CoordinateOperation, type OperationArea, type OperationEpochRange,
       type OperationGrid, type OperationProvenance, type OperationSelectionRequest,
       type OperationSelection, type OperationRejection, type OperationRejectionReason} from '@math.gl/projection/operations';

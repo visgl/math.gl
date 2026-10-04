@@ -36,6 +36,8 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 | [Reusable coordinate buffers](./bulk-layouts.md) | Transform separate, strided and column buffers with reusable scratch and explicit ownership |
 | [Operation pipelines](./operation-pipelines.md) | Order units, axes, projections, datum shifts and time-dependent operations explicitly |
 | [Operation selection](./operation-selection.md) | Select application-reviewed operations by area, epoch, accuracy and prepared grids |
+| [Temporal models](./temporal-models.md) | Combine velocities, acceleration, events and relaxation with explicit epochs |
+| [Optional acceleration](./acceleration.md) | Evaluate persistent workers, ownership and complete application costs |
 | [Deformation models](./deformation-models.md) | Propagate coordinates between epochs with prepared velocity grids |
 | [Support and migration](./support.md) | Understand accepted definitions and differences from proj4js |
 | [Benchmarks](./benchmarks.md#live-benchmarks) | Compare math.gl flat and scalar transforms with proj4js in your browser |

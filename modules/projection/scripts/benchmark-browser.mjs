@@ -204,6 +204,7 @@ try {
           qualifyAccuracy,
           qualifyFactors,
           qualifyBulkLayouts,
+          qualifyTemporalModels,
           qualifyVertical,
           qualifyPipelines,
           qualifyKinematicPipelines
@@ -217,6 +218,7 @@ try {
           accuracy: qualifyAccuracy(),
           factors: qualifyFactors(),
           bulkLayouts: qualifyBulkLayouts(),
+          temporalModels: qualifyTemporalModels(),
           vertical: qualifyVertical(),
           verticalGeoTIFF: await qualifyVerticalGeoTIFF(),
           pipelines: qualifyPipelines(

@@ -963,3 +963,13 @@ Thread-CPU commands require Node 24.14 or later. Shared browser CI now also chec
 2,616 independent layout/epoch comparisons across 54 configurations. Browser
 performance, further mixed-pipeline fusion and runtime boxing reduction remain
 separate follow-ups in the [SOTA roadmap](./roadmap.md#sota-roadmap).
+
+## Persistent worker evaluation
+
+The optional S8 runner measures both directions/precisions, copies, partitioning,
+transfer and scheduling, with cold worker preparation reported separately.
+Measured large UTM buffers benefit from two persistent workers on the tested Apple
+M2; small batches and Mercator depend more on browser and timer resolution. See
+[the measurements, ownership recipe and backend boundaries](./acceleration.md).
+CI records all three browser results without a speed gate. Wasm SIMD and WebGPU
+capability probes do not benchmark projection implementations.

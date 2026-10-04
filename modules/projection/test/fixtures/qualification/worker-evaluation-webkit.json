@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "metadata": {
+    "date": "2026-10-04T17:26:02.942Z",
+    "browser": "webkit",
+    "version": "26.5",
+    "cpu": "Apple M2",
+    "platform": "darwin",
+    "arch": "arm64",
+    "sourceSHA256": "b701953e7365f8fe9352784b1a44685b30bcc6ef3a7addab55408564008e5bf2",
+    "workloadSHA256": "16c53b6293d43694aedca7cd1a4cbabb503a8389ea29fd039fa08ca98cc05841",
+    "points": [
+      1000,
+      10000,
+      100000
+    ],
+    "samples": 7,
+    "engineModuleBytes": 63381,
+    "engineGzipBytes": 22899,
+    "workerBootstrapBytes": 437,
+    "workerBootstrapGzipBytes": 249
+  },
+  "methodology": "Prepared engine versus persistent one/two application workers, both precisions/directions, XYZM. Main-thread clone, worker clone/partition, transfer and scheduling included in warm elapsed timing. Worker import/preparation measured separately with no-store assets. Three warmups and rotated samples; exact numeric/signed-zero/NaN/payload comparisons precede timing. Capability probes do not benchmark or qualify Wasm/SIMD/WebGPU algorithms. No production backend selected or implicit workers created.",
+  "startup": [
+    {
+      "to": "EPSG:3857",
+      "milliseconds": 43
+    },
+    {
+      "to": "EPSG:3857",
+      "milliseconds": 29
+    },
+    {
+      "to": "EPSG:32631",
+      "milliseconds": 17
+    },
+    {
+      "to": "EPSG:32631",
+      "milliseconds": 10
+    }
+  ],
+  "mainModuleImportMs": 7,
+  "mainPreparation": [
+    {
+      "to": "EPSG:3857",
+      "milliseconds": 6
+    },
+    {
+      "to": "EPSG:32631",
+      "milliseconds": 1
+    }
+  ],
+  "capabilities": {
+    "webAssembly": true,
+    "wasmSIMD": true,
+    "webGPU": true
+  },
+  "rows": [
+    {"to":"EPSG:3857","type":"Float64Array","count":1000,"inverse":false,"measurements":[{"implementation":"main thread","medianMs":1,"p10Ms":0,"p90Ms":1,"resolutionLimited":false,"unstable":true,"samples":[1,1,1,0,0,0,1]},{"implementation":"one worker","medianMs":0,"p10Ms":0,"p90Ms":0,"resolutionLimited":true,"unstable":true,"samples":[0,1,0,0,0,0,0]},{"implementation":"two workers","medianMs":0,"p10Ms":0,"p90Ms":1,"resolutionLimited":true,"unstable":true,"samples":[0,1,0,1,1,0,0]}]},
+    {"to":"EPSG:3857","type":"Float64Array","count":1000,"inverse":true,"measurements":[{"implementation":"main thread","medianMs":0,"p10Ms":0,"p90Ms":0,"resolutionLimited":true,"unstable":true,"samples":[0,0,0,0,0,1,0]},{"implementation":"one worker","medianMs":0,"p10Ms":0,"p90Ms":0,"resolutionLimited":true,"unstable":false,"samples":[0,0,0,0,0,0,0]},{"implementation":"two workers","medianMs":0,"p10Ms":0,"p90Ms":0,"resolutionLimited":true,"unstable":true,"samples":[0,1,0,0,0,0,0]}]},
+    {"to":"EPSG:3857","type":"Float64Array","count":10000,"inverse":false,"measurements":[{"implementation":"main thread","medianMs":1,"p10Ms":0,"p90Ms":1,"resolutionLimited":false,"unstable":true,"samples":[1,0,1,1,0,1,0]},{"implementation":"one worker","medianMs":1,"p10Ms":0,"p90Ms":2,"resolutionLimited":false,"unstable":true,"samples":[0,2,1,0,1,1,7]},{"implementation":"two workers","medianMs":1,"p10Ms":1,"p90Ms":1,"resolutionLimited":false,"unstable":true,"samples":[1,12,1,1,1,1,1]}]},
+    {"to":"EPSG:3857","type":"Float64Array","count":10000,"inverse":true,"measurements":[{"implementation":"main thread","medianMs":0,"p10Ms":0,"p90Ms":2,"resolutionLimited":true,"unstable":true,"samples":[0,2,2,0,0,1,0]},{"implementation":"one worker","medianMs":1,"p10Ms":0,"p90Ms":2,"resolutionLimited":false,"unstable":true,"samples":[3,2,1,1,0,0,2]},{"implementation":"two workers","medianMs":1,"p10Ms":0,"p90Ms":2,"resolutionLimited":false,"unstable":true,"samples":[2,0,0,1,1,1,7]}]},
+    {"to":"EPSG:3857","type":"Float64Array","count":100000,"inverse":false,"measurements":[{"implementation":"main thread","medianMs":3,"p10Ms":2,"p90Ms":3,"resolutionLimited":false,"unstable":true,"samples":[3,3,5,3,3,2,3]},{"implementation":"one worker","medianMs":4,"p10Ms":3,"p90Ms":9,"resolutionLimited":false,"unstable":true,"samples":[4,4,9,3,9,3,7]},{"implementation":"two workers","medianMs":5,"p10Ms":3,"p90Ms":6,"resolutionLimited":false,"unstable":true,"samples":[6,6,5,3,4,6,5]}]},
+    {"to":"EPSG:3857","type":"Float64Array","count":100000,"inverse":true,"measurements":[{"implementation":"main thread","medianMs":2,"p10Ms":2,"p90Ms":2,"resolutionLimited":false,"unstable":false,"samples":[2,2,2,2,2,2,2]},{"implementation":"one worker","medianMs":3,"p10Ms":2,"p90Ms":3,"resolutionLimited":false,"unstable":true,"samples":[3,2,2,3,3,3,6]},{"implementation":"two workers","medianMs":2,"p10Ms":1,"p90Ms":3,"resolutionLimited":false,"unstable":true,"samples":[6,1,3,1,3,1,2]}]},
+    {"to":"EPSG:3857","type":"Float32Array","count":1000,"inverse":false,"measurements":[{"implementation":"main thread","medianMs":0,"p10Ms":0,"p90Ms":1,"resolutionLimited":true,"unstable":true,"samples":[1,1,0,0,0,0,0]},{"implementation":"one worker","medianMs":0,"p10Ms":0,"p90Ms":1,"resolutionLimited":true,"unstable":true,"samples":[0,0,0,1,1,1,0]},{"implementation":"two workers","medianMs":0,"p10Ms":0,"p90Ms":1,"resolutionLimited":true,"unstable":true,"samples":[0,1,0,0,0,0,1]}]},
+    {"to":"EPSG:3857","type":"Float32Array","count":1000,"inverse":true,"measurements":[{"implementation":"main thread","medianMs":0,"p10Ms":0,"p90Ms":0,"resolutionLimited":true,"unstable":true,"samples":[0,0,0,0,0,0,1]},{"implementation":"one worker","medianMs":0,"p10Ms":0,"p90Ms":1,"resolutionLimited":true,"unstable":true,"samples":[1,0,1,0,0,0,0]},{"implementation":"two workers","medianMs":0,"p10Ms":0,"p90Ms":1,"resolutionLimited":true,"unstable":true,"samples":[0,1,0,1,0,1,0]}]},
+    {"to":"EPSG:3857","type":"Float32Array","count":10000,"inverse":false,"measurements":[{"implementation":"main thread","medianMs":1,"p10Ms":0,"p90Ms":1,"resolutionLimited":false,"unstable":true,"samples":[1,0,1,0,1,2,1]},{"implementation":"one worker","medianMs":1,"p10Ms":1,"p90Ms":1,"resolutionLimited":false,"unstable":true,"samples":[1,1,1,2,1,1,1]},{"implementation":"two workers","medianMs":1,"p10Ms":1,"p90Ms":2,"resolutionLimited":false,"unstable":true,"samples":[2,1,3,1,1,1,1]}]},
+    {"to":"EPSG:3857","type":"Float32Array","count":10000,"inverse":true,"measurements":[{"implementation":"main thread","medianMs":1,"p10Ms":0,"p90Ms":1,"resolutionLimited":false,"unstable":true,"samples":[0,1,1,1,1,1,0]},{"implementation":"one worker","medianMs":1,"p10Ms":1,"p90Ms":1,"resolutionLimited":false,"unstable":true,"samples":[1,1,1,1,2,1,1]},{"implementation":"two workers","medianMs":1,"p10Ms":1,"p90Ms":2,"resolutionLimited":false,"unstable":true,"samples":[1,2,1,1,1,1,2]}]},
+    {"to":"EPSG:3857","type":"Float32Array","count":100000,"inverse":false,"measurements":[{"implementation":"main thread","medianMs":4,"p10Ms":3,"p90Ms":8,"resolutionLimited":false,"unstable":true,"samples":[8,8,4,5,3,4,4]},{"implementation":"one worker","medianMs":5,"p10Ms":4,"p90Ms":7,"resolutionLimited":false,"unstable":true,"samples":[7,5,4,4,7,4,15]},{"implementation":"two workers","medianMs":6,"p10Ms":4,"p90Ms":7,"resolutionLimited":false,"unstable":true,"samples":[6,6,7,5,4,7,4]}]},
+    {"to":"EPSG:3857","type":"Float32Array","count":100000,"inverse":true,"measurements":[{"implementation":"main thread","medianMs":3,"p10Ms":3,"p90Ms":4,"resolutionLimited":false,"unstable":true,"samples":[3,3,3,3,4,7,3]},{"implementation":"one worker","medianMs":7,"p10Ms":6,"p90Ms":8,"resolutionLimited":false,"unstable":false,"samples":[8,6,8,8,6,6,7]},{"implementation":"two workers","medianMs":3,"p10Ms":2,"p90Ms":4,"resolutionLimited":false,"unstable":true,"samples":[4,3,2,3,3,3,4]}]},
+    {"to":"EPSG:32631","type":"Float64Array","count":1000,"inverse":false,"measurements":[{"implementation":"main thread","medianMs":1,"p10Ms":0,"p90Ms":1,"resolutionLimited":false,"unstable":true,"samples":[1,1,1,1,0,1,0]},{"implementation":"one worker","medianMs":1,"p10Ms":0,"p90Ms":1,"resolutionLimited":false,"unstable":true,"samples":[1,1,0,0,1,1,1]},{"implementation":"two workers","medianMs":0,"p10Ms":0,"p90Ms":0,"resolutionLimited":true,"unstable":true,"samples":[0,0,0,0,1,0,0]}]},
+    {"to":"EPSG:32631","type":"Float64Array","count":1000,"inverse":true,"measurements":[{"implementation":"main thread","medianMs":1,"p10Ms":0,"p90Ms":1,"resolutionLimited":false,"unstable":true,"samples":[0,0,0,1,1,1,1]},{"implementation":"one worker","medianMs":0,"p10Ms":0,"p90Ms":0,"resolutionLimited":true,"unstable":true,"samples":[1,0,0,0,0,0,0]},{"implementation":"two workers","medianMs":0,"p10Ms":0,"p90Ms":1,"resolutionLimited":true,"unstable":true,"samples":[0,1,1,1,0,0,0]}]},
+    {"to":"EPSG:32631","type":"Float64Array","count":10000,"inverse":false,"measurements":[{"implementation":"main thread","medianMs":3,"p10Ms":3,"p90Ms":4,"resolutionLimited":false,"unstable":false,"samples":[3,3,4,3,3,4,4]},{"implementation":"one worker","medianMs":4,"p10Ms":2,"p90Ms":4,"resolutionLimited":false,"unstable":true,"samples":[5,3,4,4,4,4,2]},{"implementation":"two workers","medianMs":3,"p10Ms":1,"p90Ms":3,"resolutionLimited":false,"unstable":true,"samples":[3,4,2,2,3,1,3]}]},
+    {"to":"EPSG:32631","type":"Float64Array","count":10000,"inverse":true,"measurements":[{"implementation":"main thread","medianMs":3,"p10Ms":3,"p90Ms":4,"resolutionLimited":false,"unstable":false,"samples":[4,4,3,3,3,3,3]},{"implementation":"one worker","medianMs":2,"p10Ms":2,"p90Ms":4,"resolutionLimited":false,"unstable":true,"samples":[2,2,4,2,3,4,2]},{"implementation":"two workers","medianMs":2,"p10Ms":2,"p90Ms":4,"resolutionLimited":false,"unstable":true,"samples":[2,2,2,4,3,5,2]}]},
+    {"to":"EPSG:32631","type":"Float64Array","count":100000,"inverse":false,"measurements":[{"implementation":"main thread","medianMs":27,"p10Ms":25,"p90Ms":27,"resolutionLimited":false,"unstable":false,"samples":[27,25,26,26,28,27,27]},{"implementation":"one worker","medianMs":31,"p10Ms":22,"p90Ms":31,"resolutionLimited":false,"unstable":false,"samples":[25,28,31,31,31,31,22]},{"implementation":"two workers","medianMs":11,"p10Ms":10,"p90Ms":13,"resolutionLimited":false,"unstable":true,"samples":[16,11,11,10,13,13,10]}]},
+    {"to":"EPSG:32631","type":"Float64Array","count":100000,"inverse":true,"measurements":[{"implementation":"main thread","medianMs":23,"p10Ms":21,"p90Ms":26,"resolutionLimited":false,"unstable":false,"samples":[23,23,25,27,26,21,22]},{"implementation":"one worker","medianMs":25,"p10Ms":23,"p90Ms":32,"resolutionLimited":false,"unstable":false,"samples":[23,25,33,24,32,24,28]},{"implementation":"two workers","medianMs":16,"p10Ms":12,"p90Ms":17,"resolutionLimited":false,"unstable":false,"samples":[14,17,15,18,16,12,17]}]},
+    {"to":"EPSG:32631","type":"Float32Array","count":1000,"inverse":false,"measurements":[{"implementation":"main thread","medianMs":0,"p10Ms":0,"p90Ms":1,"resolutionLimited":true,"unstable":true,"samples":[1,0,1,0,1,0,0]},{"implementation":"one worker","medianMs":1,"p10Ms":0,"p90Ms":1,"resolutionLimited":false,"unstable":true,"samples":[0,1,1,0,0,1,1]},{"implementation":"two workers","medianMs":0,"p10Ms":0,"p90Ms":1,"resolutionLimited":true,"unstable":true,"samples":[1,1,0,2,0,0,0]}]},
+    {"to":"EPSG:32631","type":"Float32Array","count":1000,"inverse":true,"measurements":[{"implementation":"main thread","medianMs":0,"p10Ms":0,"p90Ms":0,"resolutionLimited":true,"unstable":true,"samples":[0,0,1,0,0,0,0]},{"implementation":"one worker","medianMs":1,"p10Ms":0,"p90Ms":1,"resolutionLimited":false,"unstable":true,"samples":[1,1,0,1,1,1,1]},{"implementation":"two workers","medianMs":0,"p10Ms":0,"p90Ms":1,"resolutionLimited":true,"unstable":true,"samples":[0,1,0,0,1,0,0]}]},
+    {"to":"EPSG:32631","type":"Float32Array","count":10000,"inverse":false,"measurements":[{"implementation":"main thread","medianMs":2,"p10Ms":2,"p90Ms":3,"resolutionLimited":false,"unstable":false,"samples":[2,2,3,2,2,2,3]},{"implementation":"one worker","medianMs":4,"p10Ms":3,"p90Ms":5,"resolutionLimited":false,"unstable":true,"samples":[4,4,6,3,5,3,3]},{"implementation":"two workers","medianMs":2,"p10Ms":1,"p90Ms":3,"resolutionLimited":false,"unstable":true,"samples":[1,3,2,2,3,1,2]}]},
+    {"to":"EPSG:32631","type":"Float32Array","count":10000,"inverse":true,"measurements":[{"implementation":"main thread","medianMs":2,"p10Ms":2,"p90Ms":3,"resolutionLimited":false,"unstable":false,"samples":[3,2,2,2,2,2,3]},{"implementation":"one worker","medianMs":4,"p10Ms":2,"p90Ms":4,"resolutionLimited":false,"unstable":true,"samples":[4,4,4,3,3,5,2]},{"implementation":"two workers","medianMs":1,"p10Ms":1,"p90Ms":2,"resolutionLimited":false,"unstable":true,"samples":[2,1,1,1,1,2,2]}]},
+    {"to":"EPSG:32631","type":"Float32Array","count":100000,"inverse":false,"measurements":[{"implementation":"main thread","medianMs":24,"p10Ms":21,"p90Ms":29,"resolutionLimited":false,"unstable":true,"samples":[36,29,23,23,24,24,21]},{"implementation":"one worker","medianMs":30,"p10Ms":24,"p90Ms":37,"resolutionLimited":false,"unstable":true,"samples":[42,37,24,30,31,25,27]},{"implementation":"two workers","medianMs":18,"p10Ms":11,"p90Ms":24,"resolutionLimited":false,"unstable":true,"samples":[22,26,18,24,18,13,11]}]},
+    {"to":"EPSG:32631","type":"Float32Array","count":100000,"inverse":true,"measurements":[{"implementation":"main thread","medianMs":23,"p10Ms":21,"p90Ms":25,"resolutionLimited":false,"unstable":false,"samples":[22,21,23,22,26,24,25]},{"implementation":"one worker","medianMs":27,"p10Ms":22,"p90Ms":28,"resolutionLimited":false,"unstable":true,"samples":[22,26,28,27,22,35,27]},{"implementation":"two workers","medianMs":14,"p10Ms":11,"p90Ms":16,"resolutionLimited":false,"unstable":false,"samples":[13,11,16,11,16,14,15]}]}
+  ]
+}

@@ -22,6 +22,8 @@ const baselineCommit = values['baseline-ref']
   : undefined;
 const directory = mkdtempSync(join(tmpdir(), 'math-gl-spheroid-graphs-'));
 const fixtures = {
+  temporalModel: "export * from '@math.gl/projection/temporal';",
+  staticModel: "export {createDeformationModel} from '@math.gl/projection/deformation';",
   projectionBulk: "export * from '@math.gl/projection/bulk';",
   projectionAnalysis: "export * from '@math.gl/projection/analysis';",
   numericLeaf: "export * from '@math.gl/core/spheroid';",
@@ -37,7 +39,13 @@ try {
     writeFileSync(entry, contents);
     const measurements = [];
     for (const revision of baselineCommit &&
-    !['numericLeaf', 'projectionAnalysis', 'projectionBulk'].includes(name)
+    ![
+      'numericLeaf',
+      'projectionAnalysis',
+      'projectionBulk',
+      'temporalModel',
+      'staticModel'
+    ].includes(name)
       ? ['baseline', 'candidate']
       : ['candidate']) {
       const outfile = join(directory, name + '-' + revision + '.mjs');
@@ -49,6 +57,18 @@ try {
       );
       const inputs = Object.keys(result.metafile.inputs).map(path => path.replaceAll('\\', '/'));
       if (revision === 'candidate') {
+        if (name !== 'temporalModel')
+          assert(
+            inputs.every(
+              path => !path.endsWith('modules/projection/src/experimental/deformation-inverse.ts')
+            ),
+            'Optional temporal inverse must stay outside existing graphs'
+          );
+        if (name !== 'temporalModel')
+          assert(
+            inputs.every(path => !path.endsWith('modules/projection/src/temporal.ts')),
+            'Optional temporal component code must stay outside existing graphs'
+          );
         if (name !== 'projectionBulk')
           assert(
             inputs.every(path => !path.endsWith('modules/projection/src/bulk.ts')),

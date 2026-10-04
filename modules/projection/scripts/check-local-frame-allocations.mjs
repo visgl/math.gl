@@ -25,7 +25,7 @@ const scopes = new Map([
     'modules/geospatial/src/ellipsoid-helpers/ellipsoid-transform.ts',
     new Set(['localFrameToFixedFrame'])
   ],
-  ['modules/projection/src/experimental/deformation.ts', new Set(['velocity', 'apply'])]
+  ['modules/projection/src/experimental/spatial-deformation.ts', new Set(['displacement', 'apply'])]
 ]);
 const violations = [],
   found = new Set();

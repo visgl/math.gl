@@ -8,7 +8,7 @@ import {mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {createServer} from 'node:http';
 import {chromium, firefox, webkit} from 'playwright';
-import {join, resolve} from 'node:path';
+import {join, resolve, dirname} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {parseArgs} from 'node:util';
 import {bundleRuntime} from './benchmark-runtime.mjs';
@@ -78,6 +78,8 @@ try {
   const runtime = await import(pathToFileURL(outfile).href);
   let reference = runtime.reference;
   let modelEntrySHA256;
+  let modelAssets;
+  let reviewedOperation;
   let evaluation;
   if (values.model) {
     reference = JSON.parse(readFileSync(resolve(values.reference), 'utf8'));
@@ -111,6 +113,36 @@ try {
           Number.isFinite(epoch) && epoch >= range[0] && epoch <= range[1],
           'Reference epoch outside declared interval'
         );
+    }
+    if (reference.operation !== undefined) {
+      assert(
+        Array.isArray(reference.assets),
+        'Model qualification requires a pinned local asset manifest'
+      );
+      const identities = new Set();
+      modelAssets = reference.assets.map(asset => {
+        assert(
+          asset &&
+            ['model', 'grid', 'module'].includes(asset.kind) &&
+            ['id', 'revision', 'path'].every(
+              key => typeof asset[key] === 'string' && asset[key].trim()
+            ),
+          'Named local model assets required'
+        );
+        assert(
+          typeof asset.sha256 === 'string' && /^[a-f0-9]{64}$/.test(asset.sha256),
+          'Asset SHA256 required'
+        );
+        const identity = asset.kind + '\0' + asset.id + '\0' + asset.revision;
+        assert(!identities.has(identity), 'Duplicate model asset identity');
+        identities.add(identity);
+        const sha256 = createHash('sha256')
+          .update(readFileSync(resolve(dirname(resolve(values.reference)), asset.path)))
+          .digest('hex');
+        assert.equal(sha256, asset.sha256, 'Pinned application asset content mismatch');
+        return {id: asset.id, revision: asset.revision, kind: asset.kind, sha256};
+      });
+      reviewedOperation = runtime.qualifyApplicationOperation(reference, modelAssets);
     }
     const modulePath = resolve(values.model);
     modelEntrySHA256 = createHash('sha256').update(readFileSync(modulePath)).digest('hex');
@@ -158,6 +190,8 @@ try {
       )
       .digest('hex'),
     modelEntrySHA256,
+    modelAssets,
+    reviewedOperation,
     profile: values.model ? 'application-provided' : 'authored-stress',
     epochRange: reference.epochRange,
     environment: {

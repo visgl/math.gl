@@ -205,6 +205,8 @@
           "modules/projection/operation-pipelines",
           "modules/projection/operation-selection",
           "modules/projection/deformation-models",
+          "modules/projection/temporal-models",
+          "modules/projection/acceleration",
           "modules/projection/deformation-qualification",
           "modules/projection/api-reference/projection",
           "modules/projection/api-reference/projection-engine",

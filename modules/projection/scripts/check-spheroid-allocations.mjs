@@ -9,6 +9,12 @@ import ts from 'typescript';
 const root = new URL('../../../', import.meta.url);
 const scopes = new Map([
   [
+    'modules/projection/src/experimental/spatial-deformation.ts',
+    new Set(['validateEpochs', 'displacement', 'apply'])
+  ],
+  ['modules/projection/src/experimental/deformation-inverse.ts', new Set(['inverseDisplacement'])],
+  ['modules/projection/src/temporal.ts', new Set(['temporalDifference', 'sampleComponents'])],
+  [
     'modules/projection/src/bulk.ts',
     new Set([
       'isBuffer',

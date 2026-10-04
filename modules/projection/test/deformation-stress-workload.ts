@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original authored spatial velocity field and independent-reference qualification, not model data from an external authority.
+import {OperationCatalog} from '@math.gl/projection/operations';
 import {createDeformationModel} from '@math.gl/projection/deformation';
 import type {DeformationModel} from '@math.gl/projection/deformation';
 import type {VelocityGrid} from '@math.gl/projection/grids/velocity';
@@ -113,4 +114,29 @@ export function qualifyAuthoredDeformations() {
     shape,
     ...qualifyDeformationModel(stressModel(rows[0]), rows, reference.forwardToleranceMeters)
   }));
+}
+
+/** Application qualification validates declared metadata; it cannot infer model/frame identity. */
+export function qualifyApplicationOperation(reference, assets) {
+  const catalog = new OperationCatalog([reference.operation]);
+  for (const row of reference.cases) {
+    const selected = catalog.select({
+      sourceCRS: row.sourceCRS,
+      targetCRS: row.targetCRS,
+      sourceMetadata: row.sourceMetadata,
+      targetMetadata: row.targetMetadata,
+      area: row.area,
+      epoch: [
+        Math.min(row.sourceEpoch, row.targetEpoch),
+        Math.max(row.sourceEpoch, row.targetEpoch)
+      ],
+      availableModels: assets.filter(asset => asset.kind === 'model'),
+      availableGrids: assets.filter(asset => asset.kind === 'grid'),
+      maxAccuracyMeters: reference.operation.accuracyMeters ?? undefined,
+      allowUnknownAccuracy: true
+    });
+    if (!selected)
+      throw new Error('Application model operation metadata/coverage/revision mismatch: ' + row.id);
+  }
+  return catalog.operations[0];
 }

@@ -111,3 +111,5 @@ export function qualifyFactors() {
 }
 
 export {qualifyBulkLayouts} from '../test/bulk-workload';
+
+export {qualifyTemporalModels} from '../test/temporal-workload';
