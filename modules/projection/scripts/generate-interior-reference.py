@@ -85,8 +85,8 @@ def generate():
                         xyz = [float((r * r + multiplier) * n / support) for r, n in zip(axes, normal)]
                         radii = [float(r) for r in axes]
                         reference = nearest(radii, xyz)
-                        ordinary = label in ['earth-ratio', 'flattened']
-                        geo_qualified = D(depth) <= D('.5') and label != 'very-flat'
+                        ordinary = label in ['earth-ratio', 'flattened', 'flat', 'very-flat']
+                        geo_qualified = ordinary or (D(depth) <= D('.5') and label != 'very-flat')
                         cases.append({
                             'id': '/'.join([label, scale, depth, direction]),
                             'shape': label,
@@ -94,7 +94,7 @@ def generate():
                             'xyz': xyz,
                             'qualified': {
                                 'geospatial': geo_qualified,
-                                'projection': ordinary and D(depth) <= D('.5'),
+                                'projection': ordinary,
                             },
                             'reference': reference,
                         })
@@ -109,7 +109,7 @@ def generate():
                     'shape': 'flattened',
                     'radii': radii,
                     'xyz': xyz,
-                    'qualified': {'geospatial': False, 'projection': False},
+                    'qualified': {'geospatial': True, 'projection': True},
                     'reference': nearest(radii, xyz),
                 })
     return {

@@ -22,6 +22,7 @@ const baselineCommit = values['baseline-ref']
   : undefined;
 const directory = mkdtempSync(join(tmpdir(), 'math-gl-spheroid-graphs-'));
 const fixtures = {
+  projectionAnalysis: "export * from '@math.gl/projection/analysis';",
   numericLeaf: "export * from '@math.gl/core/spheroid';",
   coreRoot: "export * from '@math.gl/core';",
   projectionCore: "export {ProjectionEngine} from '@math.gl/projection/core';",
@@ -34,7 +35,7 @@ try {
     const entry = join(directory, name + '.ts');
     writeFileSync(entry, contents);
     const measurements = [];
-    for (const revision of baselineCommit && name !== 'numericLeaf'
+    for (const revision of baselineCommit && !['numericLeaf', 'projectionAnalysis'].includes(name)
       ? ['baseline', 'candidate']
       : ['candidate']) {
       const outfile = join(directory, name + '-' + revision + '.mjs');
@@ -44,22 +45,30 @@ try {
         outfile,
         revision === 'baseline' ? baselineCommit : undefined
       );
-      const inputs = Object.keys(result.metafile.inputs).map((path) => path.replaceAll('\\', '/'));
+      const inputs = Object.keys(result.metafile.inputs).map(path => path.replaceAll('\\', '/'));
       if (revision === 'candidate') {
-        const leaf = inputs.filter((path) => path.endsWith('modules/core/src/spheroid.ts'));
-        if (name === 'coreRoot')
+        if (name !== 'projectionAnalysis')
+          assert(
+            inputs.every(path => !path.endsWith('modules/projection/src/analysis.ts')),
+            'Optional analysis must stay outside existing graphs'
+          );
+        const leaf = inputs.filter(path => path.endsWith('modules/core/src/spheroid.ts'));
+        if (name === 'projectionAnalysis') {
+          assert.equal(leaf.length, 0);
+          assert.equal(inputs.filter(path => /modules\/.*\/src\//.test(path)).length, 1);
+        } else if (name === 'coreRoot')
           assert.equal(leaf.length, 0, 'Core root must not retain the optional spheroid leaf');
         else assert.equal(leaf.length, 1, 'Exactly one shared numeric source per selected graph');
         if (name === 'numericLeaf') {
           assert.equal(
-            inputs.filter((path) => /(?:^|\/)modules\//.test(path)).length,
+            inputs.filter(path => /(?:^|\/)modules\//.test(path)).length,
             1,
             'Numeric leaf must have no runtime dependencies'
           );
         }
         if (name.startsWith('projection'))
           assert(
-            inputs.every((path) => !/modules\/(geospatial|culling)\//.test(path)),
+            inputs.every(path => !/modules\/(geospatial|culling)\//.test(path)),
             'Projection cannot import geometry classes/culling'
           );
       }
@@ -73,17 +82,22 @@ try {
         minified: Buffer.byteLength(code),
         gzip: gzipSync(code, {level: 9}).length,
         runtimeSources: inputs.filter(
-          (path) => /(?:^|\/)modules\//.test(path) && path.includes('/src/')
+          path => /(?:^|\/)modules\//.test(path) && path.includes('/src/')
         )
       });
     }
     const candidate = measurements.at(-1);
     if (name === 'numericLeaf') {
       assert(
-        candidate.minified <= 2000 && candidate.gzip <= 900,
+        candidate.minified <= 3200 && candidate.gzip <= 1500,
         'Reviewed standalone leaf size budget'
       );
     }
+    if (name === 'projectionAnalysis')
+      assert(
+        candidate.minified <= 4900 && candidate.gzip <= 1800,
+        'Reviewed optional analysis size budget'
+      );
     rows.push({
       name,
       measurements,

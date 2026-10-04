@@ -1,0 +1,2443 @@
+{
+  "oracle": "pyproj 3.7.2 / PROJ 9.5.1",
+  "upstreamComparison": "proj4js 2.22.0",
+  "scope": "Observed maxima at exact stored sampled inputs; configured test ceilings are regression gates, not mathematical global bounds.",
+  "cases": [
+    {
+      "id": "merc-ellipsoid",
+      "bounds": {
+        "west": -179.99,
+        "east": 179.99,
+        "south": -85,
+        "north": 85
+      },
+      "points": 267,
+      "errors": {
+        "forward": {
+          "maximum": 3.725290298461914e-9,
+          "input": [
+            -42.33531984453555,
+            84.95991542472817
+          ]
+        },
+        "inverse": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            169.68025220217186,
+            18.227170172613114
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            179.98999907563882,
+            -46.477977251634
+          ]
+        },
+        "flatForward": {
+          "maximum": 3.725290298461914e-9,
+          "input": [
+            -42.33531984453555,
+            84.95991542472817
+          ]
+        },
+        "flatInverse": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            169.68025220217186,
+            18.227170172613114
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            179.98999907563882,
+            -46.477977251634
+          ]
+        }
+      },
+      "definition": "+proj=merc +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "merc-sphere",
+      "bounds": {
+        "west": -179.99,
+        "east": 179.99,
+        "south": -85,
+        "north": 85
+      },
+      "points": 267,
+      "errors": {
+        "forward": {
+          "maximum": 3.725290298461914e-9,
+          "input": [
+            -179.99,
+            -85
+          ]
+        },
+        "inverse": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            179.36941262809484,
+            -26.031173402443528
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            179.98998801754686,
+            23.66237291134894
+          ]
+        },
+        "flatForward": {
+          "maximum": 3.725290298461914e-9,
+          "input": [
+            -179.99,
+            -85
+          ]
+        },
+        "flatInverse": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            179.36941262809484,
+            -26.031173402443528
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            179.98998801754686,
+            23.66237291134894
+          ]
+        }
+      },
+      "definition": "+proj=merc +R=6371000",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "tmerc-ellipsoid",
+      "bounds": {
+        "west": -15,
+        "east": 33,
+        "south": -80,
+        "north": 84
+      },
+      "points": 267,
+      "errors": {
+        "forward": {
+          "maximum": 1.862645149230957e-9,
+          "input": [
+            -15,
+            -80
+          ]
+        },
+        "inverse": {
+          "maximum": 6.039613253960852e-14,
+          "input": [
+            22.775340143591166,
+            83.99999552564356
+          ]
+        },
+        "roundtrip": {
+          "maximum": 7.105427357601002e-14,
+          "input": [
+            29.00292683020234,
+            83.99961105332594
+          ]
+        },
+        "flatForward": {
+          "maximum": 1.862645149230957e-9,
+          "input": [
+            -15,
+            -80
+          ]
+        },
+        "flatInverse": {
+          "maximum": 6.039613253960852e-14,
+          "input": [
+            22.775340143591166,
+            83.99999552564356
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 7.105427357601002e-14,
+          "input": [
+            29.00292683020234,
+            83.99961105332594
+          ]
+        }
+      },
+      "definition": "+proj=tmerc +lon_0=9 +lat_0=10 +k_0=0.9996 +x_0=500000 +y_0=1234 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "utm-north",
+      "bounds": {
+        "west": 0,
+        "east": 6,
+        "south": 0,
+        "north": 84
+      },
+      "points": 267,
+      "errors": {
+        "forward": {
+          "maximum": 2.7939677238464355e-9,
+          "input": [
+            1.896159423528435e-8,
+            74.10225765500218
+          ]
+        },
+        "inverse": {
+          "maximum": 5.88418203051333e-14,
+          "input": [
+            0.5091606290079653,
+            83.99561387816395
+          ]
+        },
+        "roundtrip": {
+          "maximum": 6.217248937900877e-14,
+          "input": [
+            4.259353250730783,
+            83.99992781705583
+          ]
+        },
+        "flatForward": {
+          "maximum": 2.7939677238464355e-9,
+          "input": [
+            1.896159423528435e-8,
+            74.10225765500218
+          ]
+        },
+        "flatInverse": {
+          "maximum": 5.88418203051333e-14,
+          "input": [
+            0.5091606290079653,
+            83.99561387816395
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 6.217248937900877e-14,
+          "input": [
+            4.259353250730783,
+            83.99992781705583
+          ]
+        }
+      },
+      "definition": "+proj=utm +zone=31 +datum=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "utm-south",
+      "bounds": {
+        "west": 150,
+        "east": 156,
+        "south": -80,
+        "north": 0
+      },
+      "points": 267,
+      "errors": {
+        "forward": {
+          "maximum": 1.862645149230957e-9,
+          "input": [
+            150,
+            -80
+          ]
+        },
+        "inverse": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            150,
+            -80
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            150,
+            -80
+          ]
+        },
+        "flatForward": {
+          "maximum": 1.862645149230957e-9,
+          "input": [
+            150,
+            -80
+          ]
+        },
+        "flatInverse": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            150,
+            -80
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            150,
+            -80
+          ]
+        }
+      },
+      "definition": "+proj=utm +zone=56 +south +datum=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "lcc-north",
+      "bounds": {
+        "west": -125,
+        "east": -65,
+        "south": 15,
+        "north": 65
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 4.0745362639427185e-9,
+          "input": [
+            -102.62136064004153,
+            30.703927702270448
+          ]
+        },
+        "inverse": {
+          "maximum": 1.7635670701565687e-11,
+          "input": [
+            -111.2673468189314,
+            47.25024715065956
+          ]
+        },
+        "roundtrip": {
+          "maximum": 1.7642776128923288e-11,
+          "input": [
+            -111.2673468189314,
+            47.25024715065956
+          ]
+        },
+        "flatForward": {
+          "maximum": 4.0745362639427185e-9,
+          "input": [
+            -102.62136064004153,
+            30.703927702270448
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.7635670701565687e-11,
+          "input": [
+            -111.2673468189314,
+            47.25024715065956
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 1.7642776128923288e-11,
+          "input": [
+            -111.2673468189314,
+            47.25024715065956
+          ]
+        }
+      },
+      "definition": "+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=1000 +y_0=2000 +k_0=0.99 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "lcc-south",
+      "bounds": {
+        "west": 105,
+        "east": 165,
+        "south": -65,
+        "north": -10
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 5.587935447692871e-9,
+          "input": [
+            137.21660390496254,
+            -64.999991473971
+          ]
+        },
+        "inverse": {
+          "maximum": 1.7621459846850485e-11,
+          "input": [
+            156.92209500353783,
+            -47.26264466531575
+          ]
+        },
+        "roundtrip": {
+          "maximum": 1.7642776128923288e-11,
+          "input": [
+            156.92209500353783,
+            -47.26264466531575
+          ]
+        },
+        "flatForward": {
+          "maximum": 5.587935447692871e-9,
+          "input": [
+            137.21660390496254,
+            -64.999991473971
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.7621459846850485e-11,
+          "input": [
+            156.92209500353783,
+            -47.26264466531575
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 1.7642776128923288e-11,
+          "input": [
+            156.92209500353783,
+            -47.26264466531575
+          ]
+        }
+      },
+      "definition": "+proj=lcc +lat_1=-18 +lat_2=-36 +lat_0=-25 +lon_0=135 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "aea-north",
+      "bounds": {
+        "west": -125,
+        "east": -65,
+        "south": 15,
+        "north": 65
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 1.0244548320770264e-8,
+          "input": [
+            -95,
+            65
+          ]
+        },
+        "inverse": {
+          "maximum": 1.2789769243681803e-13,
+          "input": [
+            -88.24192315340042,
+            58.3559704455547
+          ]
+        },
+        "roundtrip": {
+          "maximum": 1.1368683772161603e-13,
+          "input": [
+            -105.54649495054036,
+            64.7137751430273
+          ]
+        },
+        "flatForward": {
+          "maximum": 1.0244548320770264e-8,
+          "input": [
+            -95,
+            65
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.2789769243681803e-13,
+          "input": [
+            -88.24192315340042,
+            58.3559704455547
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 1.1368683772161603e-13,
+          "input": [
+            -105.54649495054036,
+            64.7137751430273
+          ]
+        }
+      },
+      "definition": "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=100 +y_0=-100 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "eqdc-north",
+      "bounds": {
+        "west": -60,
+        "east": 60,
+        "south": 0,
+        "north": 85
+      },
+      "points": 267,
+      "errors": {
+        "forward": {
+          "maximum": 0.000004514586180448532,
+          "input": [
+            5.803247820585966,
+            70.41309163090773
+          ]
+        },
+        "inverse": {
+          "maximum": 1.1966250212935847e-10,
+          "input": [
+            -60,
+            85
+          ]
+        },
+        "roundtrip": {
+          "maximum": 3.019806626980426e-14,
+          "input": [
+            -15.470621539279819,
+            8.50742829265073
+          ]
+        },
+        "flatForward": {
+          "maximum": 0.000004514586180448532,
+          "input": [
+            5.803247820585966,
+            70.41309163090773
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.1966250212935847e-10,
+          "input": [
+            -60,
+            85
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 3.019806626980426e-14,
+          "input": [
+            -15.470621539279819,
+            8.50742829265073
+          ]
+        }
+      },
+      "definition": "+proj=eqdc +lat_1=20 +lat_2=60 +lat_0=40 +x_0=1500 +y_0=-200 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "eqdc-south",
+      "bounds": {
+        "west": -60,
+        "east": 60,
+        "south": -85,
+        "north": 0
+      },
+      "points": 267,
+      "errors": {
+        "forward": {
+          "maximum": 0.000004536472260951996,
+          "input": [
+            2.1538708359003067,
+            -70.70492404629476
+          ]
+        },
+        "inverse": {
+          "maximum": 1.1966250212935847e-10,
+          "input": [
+            -60,
+            -85
+          ]
+        },
+        "roundtrip": {
+          "maximum": 3.197442310920451e-14,
+          "input": [
+            15.183806028217077,
+            -4.917763703269884
+          ]
+        },
+        "flatForward": {
+          "maximum": 0.000004536472260951996,
+          "input": [
+            2.1538708359003067,
+            -70.70492404629476
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.1966250212935847e-10,
+          "input": [
+            -60,
+            -85
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 3.197442310920451e-14,
+          "input": [
+            15.183806028217077,
+            -4.917763703269884
+          ]
+        }
+      },
+      "definition": "+proj=eqdc +lat_1=-20 +lat_2=-60 +lat_0=-40 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "cea-ellipsoid",
+      "bounds": {
+        "west": -169.99,
+        "east": 179.99,
+        "south": -89.99,
+        "north": 89.99
+      },
+      "points": 273,
+      "errors": {
+        "forward": {
+          "maximum": 7.450580596923828e-9,
+          "input": [
+            90.87559435554317,
+            89.94049217452296
+          ]
+        },
+        "inverse": {
+          "maximum": 1.4201354758824891e-8,
+          "input": [
+            -169.98531056215526,
+            20.76563054088038
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.475530891388189e-10,
+          "input": [
+            -169.99,
+            -89.99
+          ]
+        },
+        "flatForward": {
+          "maximum": 7.450580596923828e-9,
+          "input": [
+            90.87559435554317,
+            89.94049217452296
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.4201354758824891e-8,
+          "input": [
+            -169.98531056215526,
+            20.76563054088038
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.475530891388189e-10,
+          "input": [
+            -169.99,
+            -89.99
+          ]
+        }
+      },
+      "definition": "+proj=cea +lon_0=10 +lat_ts=30 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 2e-8
+    },
+    {
+      "id": "cass-dense-domain",
+      "bounds": {
+        "west": 0,
+        "east": 20,
+        "south": -75,
+        "north": 75
+      },
+      "points": 267,
+      "errors": {
+        "forward": {
+          "maximum": 0.000005256384611129761,
+          "input": [
+            10.87114678695798,
+            -72.54809484584257
+          ]
+        },
+        "inverse": {
+          "maximum": 9.154632607533131e-11,
+          "input": [
+            10.66215006634593,
+            -74.65109256517248
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.730704551368035e-12,
+          "input": [
+            2.2001445991918445,
+            74.99908430265242
+          ]
+        },
+        "flatForward": {
+          "maximum": 0.000005256384611129761,
+          "input": [
+            10.87114678695798,
+            -72.54809484584257
+          ]
+        },
+        "flatInverse": {
+          "maximum": 9.154632607533131e-11,
+          "input": [
+            10.66215006634593,
+            -74.65109256517248
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.730704551368035e-12,
+          "input": [
+            2.2001445991918445,
+            74.99908430265242
+          ]
+        }
+      },
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "Identical explicit parameters.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "robin-ellipsoid",
+      "bounds": {
+        "west": -169.99,
+        "east": 179.99,
+        "south": -89.99,
+        "north": 89.99
+      },
+      "points": 267,
+      "errors": {
+        "forward": {
+          "maximum": 3.725290298461914e-9,
+          "input": [
+            -169.98994472943124,
+            1.3935253512812835
+          ]
+        },
+        "inverse": {
+          "maximum": 1.4210854715202004e-13,
+          "input": [
+            163.19975187484175,
+            -89.989999711962
+          ]
+        },
+        "roundtrip": {
+          "maximum": 1.4210854715202004e-13,
+          "input": [
+            -169.98999970135065,
+            89.68699019519146
+          ]
+        },
+        "flatForward": {
+          "maximum": 3.725290298461914e-9,
+          "input": [
+            -169.98994472943124,
+            1.3935253512812835
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.4210854715202004e-13,
+          "input": [
+            163.19975187484175,
+            -89.989999711962
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 1.4210854715202004e-13,
+          "input": [
+            -169.98999970135065,
+            89.68699019519146
+          ]
+        }
+      },
+      "definition": "+proj=robin +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "eqearth-ellipsoid",
+      "bounds": {
+        "west": -169.99,
+        "east": 179.99,
+        "south": -85,
+        "north": 85
+      },
+      "points": 267,
+      "errors": {
+        "forward": {
+          "maximum": 2.7939677238464355e-8,
+          "input": [
+            -165.55413864275442,
+            -84.9999997732041
+          ]
+        },
+        "inverse": {
+          "maximum": 6.22046769649387e-9,
+          "input": [
+            -115.3421051721368,
+            45.138753878418356
+          ]
+        },
+        "roundtrip": {
+          "maximum": 1.9849441201813534e-8,
+          "input": [
+            179.96258974030405,
+            18.429635856300592
+          ]
+        },
+        "flatForward": {
+          "maximum": 2.7939677238464355e-8,
+          "input": [
+            -165.55413864275442,
+            -84.9999997732041
+          ]
+        },
+        "flatInverse": {
+          "maximum": 6.22046769649387e-9,
+          "input": [
+            -115.3421051721368,
+            45.138753878418356
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 1.9849441201813534e-8,
+          "input": [
+            179.96258974030405,
+            18.429635856300592
+          ]
+        }
+      },
+      "definition": "+proj=eqearth +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "moll-sphere",
+      "bounds": {
+        "west": -169.99,
+        "east": 179.99,
+        "south": -89,
+        "north": 89
+      },
+      "points": 267,
+      "errors": {
+        "forward": {
+          "maximum": 0.00001788884401321411,
+          "input": [
+            -169.99,
+            0
+          ]
+        },
+        "inverse": {
+          "maximum": 3.034585915884236e-10,
+          "input": [
+            -169.07174726334867,
+            88.9999934478686
+          ]
+        },
+        "roundtrip": {
+          "maximum": 4.945377440890297e-12,
+          "input": [
+            168.61737360310275,
+            88.9994912747855
+          ]
+        },
+        "flatForward": {
+          "maximum": 0.00001788884401321411,
+          "input": [
+            -169.99,
+            0
+          ]
+        },
+        "flatInverse": {
+          "maximum": 3.034585915884236e-10,
+          "input": [
+            -169.07174726334867,
+            88.9999934478686
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 4.945377440890297e-12,
+          "input": [
+            168.61737360310275,
+            88.9994912747855
+          ]
+        }
+      },
+      "definition": "+proj=moll +lon_0=10 +R=6371000",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00002,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-etmerc-ellipsoid",
+      "bounds": {
+        "west": -69.5,
+        "east": -68.5,
+        "south": -35.5,
+        "north": -34.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 1.3969838619232178e-9,
+          "input": [
+            -69,
+            -35
+          ]
+        },
+        "inverse": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            -68.52342261606827,
+            -34.79394307057373
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.1316282072803006e-14,
+          "input": [
+            -68.72718456201255,
+            -34.647015972295776
+          ]
+        },
+        "flatForward": {
+          "maximum": 1.3969838619232178e-9,
+          "input": [
+            -69,
+            -35
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            -68.52342261606827,
+            -34.79394307057373
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.1316282072803006e-14,
+          "input": [
+            -68.72718456201255,
+            -34.647015972295776
+          ]
+        }
+      },
+      "definition": "+proj=etmerc +lon_0=-69 +lat_0=-10 +k=0.99 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-laea-0-ellipsoid",
+      "bounds": {
+        "west": 14.5,
+        "east": 15.5,
+        "south": -0.5,
+        "north": 0.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 4.285539034754038e-9,
+          "input": [
+            14.654126632260159,
+            0.36863081343472004
+          ]
+        },
+        "inverse": {
+          "maximum": 3.240994694841959e-10,
+          "input": [
+            14.90443622879684,
+            -0.4999998948314435
+          ]
+        },
+        "roundtrip": {
+          "maximum": 8.830234876633369e-10,
+          "input": [
+            15.330306530930102,
+            -0.4999998182981128
+          ]
+        },
+        "flatForward": {
+          "maximum": 4.285539034754038e-9,
+          "input": [
+            14.654126632260159,
+            0.36863081343472004
+          ]
+        },
+        "flatInverse": {
+          "maximum": 3.240994694841959e-10,
+          "input": [
+            14.90443622879684,
+            -0.4999998948314435
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 8.830234876633369e-10,
+          "input": [
+            15.330306530930102,
+            -0.4999998182981128
+          ]
+        }
+      },
+      "definition": "+proj=laea +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-stere-0-ellipsoid",
+      "bounds": {
+        "west": 14.5,
+        "east": 15.5,
+        "south": -0.5,
+        "north": 0.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 2.8448994271457195e-9,
+          "input": [
+            15.367020776728168,
+            0.49445142690092325
+          ]
+        },
+        "inverse": {
+          "maximum": 2.5424107263916085e-14,
+          "input": [
+            14.500000000320226,
+            0.40444943797774613
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.4476903143222373e-11,
+          "input": [
+            14.64487030939199,
+            -0.01219132449477911
+          ]
+        },
+        "flatForward": {
+          "maximum": 2.8448994271457195e-9,
+          "input": [
+            15.367020776728168,
+            0.49445142690092325
+          ]
+        },
+        "flatInverse": {
+          "maximum": 2.5424107263916085e-14,
+          "input": [
+            14.500000000320226,
+            0.40444943797774613
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.4476903143222373e-11,
+          "input": [
+            14.64487030939199,
+            -0.01219132449477911
+          ]
+        }
+      },
+      "definition": "+proj=stere +lat_0=0 +lon_0=15 +x_0=100 +y_0=0 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-aeqd-0-ellipsoid",
+      "bounds": {
+        "west": 14.5,
+        "east": 15.5,
+        "south": -0.5,
+        "north": 0.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 0.000006382222636602819,
+          "input": [
+            15.45301079354249,
+            0.49999999985738774
+          ]
+        },
+        "inverse": {
+          "maximum": 4.795630559328856e-11,
+          "input": [
+            15.479478566907346,
+            0.29764942335896194
+          ]
+        },
+        "roundtrip": {
+          "maximum": 8.703260334641527e-11,
+          "input": [
+            15.3421528597828,
+            0.22499793814495206
+          ]
+        },
+        "flatForward": {
+          "maximum": 0.000006382222636602819,
+          "input": [
+            15.45301079354249,
+            0.49999999985738774
+          ]
+        },
+        "flatInverse": {
+          "maximum": 4.795630559328856e-11,
+          "input": [
+            15.479478566907346,
+            0.29764942335896194
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 8.703260334641527e-11,
+          "input": [
+            15.3421528597828,
+            0.22499793814495206
+          ]
+        }
+      },
+      "definition": "+proj=aeqd +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-sterea-ellipsoid",
+      "bounds": {
+        "west": 4.5,
+        "east": 5.5,
+        "south": 51.5,
+        "north": 52.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 3.725290298461914e-9,
+          "input": [
+            5.49999999632606,
+            52.47045797947794
+          ]
+        },
+        "inverse": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            4.876743601169437,
+            51.87880453024991
+          ]
+        },
+        "roundtrip": {
+          "maximum": 4.263256414560601e-14,
+          "input": [
+            4.760006187250838,
+            51.53490167343989
+          ]
+        },
+        "flatForward": {
+          "maximum": 3.725290298461914e-9,
+          "input": [
+            5.49999999632606,
+            52.47045797947794
+          ]
+        },
+        "flatInverse": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            4.876743601169437,
+            51.87880453024991
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 4.263256414560601e-14,
+          "input": [
+            4.760006187250838,
+            51.53490167343989
+          ]
+        }
+      },
+      "definition": "+proj=sterea +lat_0=52 +lon_0=5 +k_0=0.9999 +x_0=155000 +y_0=463000 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-eck6-ellipsoid",
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 3.725290298461914e-9,
+          "input": [
+            25.90151660144329,
+            -59.999863620069
+          ]
+        },
+        "inverse": {
+          "maximum": 4.263256414560601e-14,
+          "input": [
+            -109.10219378769398,
+            -59.999997015956446
+          ]
+        },
+        "roundtrip": {
+          "maximum": 4.263256414560601e-14,
+          "input": [
+            -65.68038813769817,
+            -59.83393993425176
+          ]
+        },
+        "flatForward": {
+          "maximum": 3.725290298461914e-9,
+          "input": [
+            25.90151660144329,
+            -59.999863620069
+          ]
+        },
+        "flatInverse": {
+          "maximum": 4.263256414560601e-14,
+          "input": [
+            -109.10219378769398,
+            -59.999997015956446
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 4.263256414560601e-14,
+          "input": [
+            -65.68038813769817,
+            -59.83393993425176
+          ]
+        }
+      },
+      "definition": "+proj=eck6 +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-equi-ellipsoid",
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 0,
+          "input": [
+            -110,
+            -60
+          ]
+        },
+        "inverse": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            129.99999081073847,
+            42.14744322001934
+          ]
+        },
+        "roundtrip": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            -110,
+            -60
+          ]
+        },
+        "flatForward": {
+          "maximum": 0,
+          "input": [
+            -110,
+            -60
+          ]
+        },
+        "flatInverse": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            129.99999081073847,
+            42.14744322001934
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            -110,
+            -60
+          ]
+        }
+      },
+      "definition": "+proj=equi +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Legacy proj4js equi is equidistant cylindrical. Use PROJ eqc with zero standard parallel and origin.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-mill-ellipsoid",
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 7.450580596923828e-9,
+          "input": [
+            -6.69021038338542,
+            59.99999768033213
+          ]
+        },
+        "inverse": {
+          "maximum": 3.552713678800501e-14,
+          "input": [
+            -109.99902921158547,
+            42.868639742955565
+          ]
+        },
+        "roundtrip": {
+          "maximum": 3.552713678800501e-14,
+          "input": [
+            25.571748558431864,
+            59.99999403106618
+          ]
+        },
+        "flatForward": {
+          "maximum": 7.450580596923828e-9,
+          "input": [
+            -6.69021038338542,
+            59.99999768033213
+          ]
+        },
+        "flatInverse": {
+          "maximum": 3.552713678800501e-14,
+          "input": [
+            -109.99902921158547,
+            42.868639742955565
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 3.552713678800501e-14,
+          "input": [
+            25.571748558431864,
+            59.99999403106618
+          ]
+        }
+      },
+      "definition": "+proj=mill +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-sinu-ellipsoid",
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 0.0000033034011721611023,
+          "input": [
+            44.52199473977089,
+            -59.99999990925081
+          ]
+        },
+        "inverse": {
+          "maximum": 1.0737721822806634e-10,
+          "input": [
+            130,
+            -60
+          ]
+        },
+        "roundtrip": {
+          "maximum": 4.263256414560601e-14,
+          "input": [
+            -107.93797134568446,
+            29.92884616367519
+          ]
+        },
+        "flatForward": {
+          "maximum": 0.0000033034011721611023,
+          "input": [
+            44.52199473977089,
+            -59.99999990925081
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.0737721822806634e-10,
+          "input": [
+            130,
+            -60
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 4.263256414560601e-14,
+          "input": [
+            -107.93797134568446,
+            29.92884616367519
+          ]
+        }
+      },
+      "definition": "+proj=sinu +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-vandg-ellipsoid",
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 0.000020863735699094832,
+          "input": [
+            1.5755094960331917,
+            0.8000990655273199
+          ]
+        },
+        "inverse": {
+          "maximum": 1.5756285165480222e-12,
+          "input": [
+            11.796456314623356,
+            -48.44829403795302
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.2737367544323206e-13,
+          "input": [
+            11.495824381709099,
+            -53.13236108981073
+          ]
+        },
+        "flatForward": {
+          "maximum": 0.000020863735699094832,
+          "input": [
+            1.5755094960331917,
+            0.8000990655273199
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.5756285165480222e-12,
+          "input": [
+            11.796456314623356,
+            -48.44829403795302
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.2737367544323206e-13,
+          "input": [
+            11.495824381709099,
+            -53.13236108981073
+          ]
+        }
+      },
+      "definition": "+proj=vandg +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics. PROJ differs by 20.864 micrometres at the authored dense regression; original 80-digit Decimal evaluation agrees with math.gl within 1e-8 m. This comparison allowance includes oracle cancellation, not a relaxed math.gl accuracy target.",
+      "forwardTolerance": 0.00003,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-poly-ellipsoid",
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 0.000009467788913752884,
+          "input": [
+            10.037241160636768,
+            40.49999998834589
+          ]
+        },
+        "inverse": {
+          "maximum": 8.527223371856962e-11,
+          "input": [
+            9.750922877108678,
+            40.4999988314898
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            10.08070500078611,
+            40.49903326990127
+          ]
+        },
+        "flatForward": {
+          "maximum": 0.000009467788913752884,
+          "input": [
+            10.037241160636768,
+            40.49999998834589
+          ]
+        },
+        "flatInverse": {
+          "maximum": 8.527223371856962e-11,
+          "input": [
+            9.750922877108678,
+            40.4999988314898
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            10.08070500078611,
+            40.49903326990127
+          ]
+        }
+      },
+      "definition": "+proj=poly +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-gstmerc-ellipsoid",
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 5.144102033227682e-9,
+          "input": [
+            10.44604743947275,
+            40.35025635175407
+          ]
+        },
+        "inverse": {
+          "maximum": 2.2026824808563106e-13,
+          "input": [
+            9.83191919629462,
+            39.53628027625382
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.4158453015843406e-13,
+          "input": [
+            9.554578772746027,
+            39.50000003872684
+          ]
+        },
+        "flatForward": {
+          "maximum": 5.144102033227682e-9,
+          "input": [
+            10.44604743947275,
+            40.35025635175407
+          ]
+        },
+        "flatInverse": {
+          "maximum": 2.2026824808563106e-13,
+          "input": [
+            9.83191919629462,
+            39.53628027625382
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.4158453015843406e-13,
+          "input": [
+            9.554578772746027,
+            39.50000003872684
+          ]
+        }
+      },
+      "definition": "+proj=gstmerc +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-gnom-ellipsoid",
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 1.3606040738523006e-9,
+          "input": [
+            9.680870642652735,
+            40.44252951676026
+          ]
+        },
+        "inverse": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            9.519195527769625,
+            40.171928708208725
+          ]
+        },
+        "roundtrip": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            9.755933660781011,
+            39.7127794851549
+          ]
+        },
+        "flatForward": {
+          "maximum": 1.3606040738523006e-9,
+          "input": [
+            9.680870642652735,
+            40.44252951676026
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            9.519195527769625,
+            40.171928708208725
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            9.755933660781011,
+            39.7127794851549
+          ]
+        }
+      },
+      "definition": "+proj=gnom +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-ortho-ellipsoid",
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 8.512870408594608e-10,
+          "input": [
+            9.939981313655153,
+            39.63217981625348
+          ]
+        },
+        "inverse": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            9.500000004321018,
+            40.47488926840015
+          ]
+        },
+        "roundtrip": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            9.500000004321018,
+            40.47488926840015
+          ]
+        },
+        "flatForward": {
+          "maximum": 8.512870408594608e-10,
+          "input": [
+            9.939981313655153,
+            39.63217981625348
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            9.500000004321018,
+            40.47488926840015
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            9.500000004321018,
+            40.47488926840015
+          ]
+        }
+      },
+      "definition": "+proj=ortho +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-bonne-ellipsoid",
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 4.3248292058706284e-7,
+          "input": [
+            10.171134363859892,
+            39.500004143609
+          ]
+        },
+        "inverse": {
+          "maximum": 3.90087961932295e-12,
+          "input": [
+            10.096452316269279,
+            39.50040434161659
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.1316282072803006e-14,
+          "input": [
+            10.096452316269279,
+            39.50040434161659
+          ]
+        },
+        "flatForward": {
+          "maximum": 4.3248292058706284e-7,
+          "input": [
+            10.171134363859892,
+            39.500004143609
+          ]
+        },
+        "flatInverse": {
+          "maximum": 3.90087961932295e-12,
+          "input": [
+            10.096452316269279,
+            39.50040434161659
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.1316282072803006e-14,
+          "input": [
+            10.096452316269279,
+            39.50040434161659
+          ]
+        }
+      },
+      "definition": "+proj=bonne +lat_1=45 +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-krovak",
+      "bounds": {
+        "west": 14.5,
+        "east": 15.5,
+        "south": 49.5,
+        "north": 50.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 1.5832483768463135e-8,
+          "input": [
+            14.500034267427482,
+            49.914092351915315
+          ]
+        },
+        "inverse": {
+          "maximum": 2.5579538487363607e-12,
+          "input": [
+            15.313149821944535,
+            49.50000053160029
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.5721647034515627e-12,
+          "input": [
+            15.474950083065778,
+            49.52308303699829
+          ]
+        },
+        "flatForward": {
+          "maximum": 1.5832483768463135e-8,
+          "input": [
+            14.500034267427482,
+            49.914092351915315
+          ]
+        },
+        "flatInverse": {
+          "maximum": 2.5579538487363607e-12,
+          "input": [
+            15.313149821944535,
+            49.50000053160029
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.5721647034515627e-12,
+          "input": [
+            15.474950083065778,
+            49.52308303699829
+          ]
+        }
+      },
+      "definition": "+proj=krovak +ellps=bessel",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-nzmg-1",
+      "bounds": {
+        "west": 172.5,
+        "east": 173.5,
+        "south": -41.5,
+        "north": -40.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 9.313225746154785e-10,
+          "input": [
+            173.391062944429,
+            -40.71635635383427
+          ]
+        },
+        "inverse": {
+          "maximum": 7.105427357601002e-15,
+          "input": [
+            172.70979619631544,
+            -41.250260073458776
+          ]
+        },
+        "roundtrip": {
+          "maximum": 4.657607632907457e-11,
+          "input": [
+            172.5,
+            -40.5
+          ]
+        },
+        "flatForward": {
+          "maximum": 9.313225746154785e-10,
+          "input": [
+            173.391062944429,
+            -40.71635635383427
+          ]
+        },
+        "flatInverse": {
+          "maximum": 7.105427357601002e-15,
+          "input": [
+            172.70979619631544,
+            -41.250260073458776
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 4.657607632907457e-11,
+          "input": [
+            172.5,
+            -40.5
+          ]
+        }
+      },
+      "definition": "+proj=nzmg +ellps=intl +lon_0=173 +lat_0=-41 +iterations=1 +x_0=2510000 +y_0=6023150",
+      "oracleNotes": "Use standard NZMG false offsets in both engines (PROJ hard-codes these). iterations is a proj4js-only inverse refinement control, omitted from PROJ.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-omerc-alpha",
+      "bounds": {
+        "west": 114.5,
+        "east": 115.5,
+        "south": 4.5,
+        "north": 5.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 4.249159246683121e-9,
+          "input": [
+            115.49999990531019,
+            5.442330930382013
+          ]
+        },
+        "inverse": {
+          "maximum": 4.760636329592671e-13,
+          "input": [
+            114.5500579548534,
+            5.499999999865003
+          ]
+        },
+        "roundtrip": {
+          "maximum": 4.902744876744691e-13,
+          "input": [
+            115.00586002040654,
+            5.386535175843164
+          ]
+        },
+        "flatForward": {
+          "maximum": 4.249159246683121e-9,
+          "input": [
+            115.49999990531019,
+            5.442330930382013
+          ]
+        },
+        "flatInverse": {
+          "maximum": 4.760636329592671e-13,
+          "input": [
+            114.5500579548534,
+            5.499999999865003
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 4.902744876744691e-13,
+          "input": [
+            115.00586002040654,
+            5.386535175843164
+          ]
+        }
+      },
+      "definition": "+proj=omerc +lat_0=4 +lonc=115 +alpha=53.31582047222222 +gamma=53.13010236111111 +k=0.99984 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-somerc",
+      "bounds": {
+        "west": 6.94,
+        "east": 7.94,
+        "south": 46.45,
+        "north": 47.45
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 5.580659490078688e-9,
+          "input": [
+            6.940003229830961,
+            46.55855661542155
+          ]
+        },
+        "inverse": {
+          "maximum": 1.410583649885666e-9,
+          "input": [
+            7.236967523172498,
+            46.45000003947661
+          ]
+        },
+        "roundtrip": {
+          "maximum": 1.410583649885666e-9,
+          "input": [
+            7.846811333261431,
+            46.45000000114017
+          ]
+        },
+        "flatForward": {
+          "maximum": 5.580659490078688e-9,
+          "input": [
+            6.940003229830961,
+            46.55855661542155
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.410583649885666e-9,
+          "input": [
+            7.236967523172498,
+            46.45000003947661
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 1.410583649885666e-9,
+          "input": [
+            7.846811333261431,
+            46.45000000114017
+          ]
+        }
+      },
+      "definition": "+proj=somerc +ellps=bessel +lat_0=46.95240555555556 +lon_0=7.43958333333333 +k_0=1",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-geos-x-false",
+      "bounds": {
+        "west": 19.5,
+        "east": 20.5,
+        "south": 19.5,
+        "north": 20.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 1.3969838619232178e-9,
+          "input": [
+            20.38590856292285,
+            19.68676713015884
+          ]
+        },
+        "inverse": {
+          "maximum": 6.750155989720952e-14,
+          "input": [
+            19.982007132144645,
+            19.657701037824154
+          ]
+        },
+        "roundtrip": {
+          "maximum": 9.947598300641403e-14,
+          "input": [
+            20.499987917478503,
+            20.18543586228043
+          ]
+        },
+        "flatForward": {
+          "maximum": 1.3969838619232178e-9,
+          "input": [
+            20.38590856292285,
+            19.68676713015884
+          ]
+        },
+        "flatInverse": {
+          "maximum": 6.750155989720952e-14,
+          "input": [
+            19.982007132144645,
+            19.657701037824154
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 9.947598300641403e-14,
+          "input": [
+            20.499987917478503,
+            20.18543586228043
+          ]
+        }
+      },
+      "definition": "+proj=geos +lon_0=0 +h=35785831 +sweep=x +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-tpers-0",
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 6.397158358595334e-10,
+          "input": [
+            9.503430194454268,
+            40.38049196265638
+          ]
+        },
+        "inverse": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            9.945920332800597,
+            40.278022886486724
+          ]
+        },
+        "roundtrip": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            9.741179225733504,
+            39.58678203308955
+          ]
+        },
+        "flatForward": {
+          "maximum": 6.397158358595334e-10,
+          "input": [
+            9.503430194454268,
+            40.38049196265638
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            9.945920332800597,
+            40.278022886486724
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            9.741179225733504,
+            39.58678203308955
+          ]
+        }
+      },
+      "definition": "+proj=tpers +lon_0=10 +lat_0=40 +h=1000000 +azi=45 +tilt=0 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-qsc-0",
+      "bounds": {
+        "west": -0.5,
+        "east": 0.5,
+        "south": -0.5,
+        "north": 0.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 3.259629011154175e-8,
+          "input": [
+            -0.5,
+            -0.5
+          ]
+        },
+        "inverse": {
+          "maximum": 2.8438917887285697e-12,
+          "input": [
+            -0.47252847463823855,
+            -0.22317924117669463
+          ]
+        },
+        "roundtrip": {
+          "maximum": 5.118107294314195e-10,
+          "input": [
+            0.17042084923014045,
+            0.00013277237303555012
+          ]
+        },
+        "flatForward": {
+          "maximum": 3.259629011154175e-8,
+          "input": [
+            -0.5,
+            -0.5
+          ]
+        },
+        "flatInverse": {
+          "maximum": 2.8438917887285697e-12,
+          "input": [
+            -0.47252847463823855,
+            -0.22317924117669463
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 5.118107294314195e-10,
+          "input": [
+            0.17042084923014045,
+            0.00013277237303555012
+          ]
+        }
+      },
+      "definition": "+proj=qsc +lon_0=0 +lat_0=0 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-eqc",
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 1.862645149230957e-9,
+          "input": [
+            129.986487303949,
+            -26.25566728413105
+          ]
+        },
+        "inverse": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            130,
+            -60
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            116.14799009636045,
+            -20.064271073788404
+          ]
+        },
+        "flatForward": {
+          "maximum": 1.862645149230957e-9,
+          "input": [
+            129.986487303949,
+            -26.25566728413105
+          ]
+        },
+        "flatInverse": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            130,
+            -60
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.842170943040401e-14,
+          "input": [
+            116.14799009636045,
+            -20.064271073788404
+          ]
+        }
+      },
+      "definition": "+proj=eqc +lat_ts=30 +lat_0=10 +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-longlat",
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            124.31872803717852,
+            18.721199026331306
+          ]
+        },
+        "inverse": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            124.31872803717852,
+            18.721199026331306
+          ]
+        },
+        "roundtrip": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            124.31872803717852,
+            18.721199026331306
+          ]
+        },
+        "flatForward": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            124.31872803717852,
+            18.721199026331306
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            124.31872803717852,
+            18.721199026331306
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 1.4210854715202004e-14,
+          "input": [
+            124.31872803717852,
+            18.721199026331306
+          ]
+        }
+      },
+      "definition": "+proj=longlat +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "domain-ob-tran-moll",
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 8.05361196398735e-7,
+          "input": [
+            10.5,
+            39.5
+          ]
+        },
+        "inverse": {
+          "maximum": 1.0315304166397254e-11,
+          "input": [
+            10.499999694027581,
+            40.39377589896321
+          ]
+        },
+        "roundtrip": {
+          "maximum": 2.1316282072803006e-14,
+          "input": [
+            10.436178176663816,
+            39.50000773712018
+          ]
+        },
+        "flatForward": {
+          "maximum": 8.05361196398735e-7,
+          "input": [
+            10.5,
+            39.5
+          ]
+        },
+        "flatInverse": {
+          "maximum": 1.0315304166397254e-11,
+          "input": [
+            10.499999694027581,
+            40.39377589896321
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 2.1316282072803006e-14,
+          "input": [
+            10.436178176663816,
+            39.50000773712018
+          ]
+        }
+      },
+      "definition": "+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=0 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "aeqd-polar--1",
+      "bounds": {
+        "west": -179,
+        "east": 179,
+        "south": -89,
+        "north": 89
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 7.450580596923828e-9,
+          "input": [
+            -2.7060022386722267,
+            88.99999559236065
+          ]
+        },
+        "inverse": {
+          "maximum": 7.105427357601002e-14,
+          "input": [
+            178.90862497902168,
+            64.97532955370843
+          ]
+        },
+        "roundtrip": {
+          "maximum": 8.526512829121202e-14,
+          "input": [
+            77.78994321729988,
+            79.42683699401096
+          ]
+        },
+        "flatForward": {
+          "maximum": 7.450580596923828e-9,
+          "input": [
+            -2.7060022386722267,
+            88.99999559236065
+          ]
+        },
+        "flatInverse": {
+          "maximum": 7.105427357601002e-14,
+          "input": [
+            178.90862497902168,
+            64.97532955370843
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 8.526512829121202e-14,
+          "input": [
+            77.78994321729988,
+            79.42683699401096
+          ]
+        }
+      },
+      "definition": "+proj=aeqd +lat_0=-90 +lon_0=0 +ellps=WGS84",
+      "oracleNotes": "Original polar meridian quadrature checked against PROJ; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    },
+    {
+      "id": "aeqd-polar-1",
+      "bounds": {
+        "west": -179,
+        "east": 179,
+        "south": -89,
+        "north": 89
+      },
+      "points": 265,
+      "errors": {
+        "forward": {
+          "maximum": 1.1175870895385742e-8,
+          "input": [
+            -178.55340853810037,
+            -83.63303819810972
+          ]
+        },
+        "inverse": {
+          "maximum": 7.105427357601002e-14,
+          "input": [
+            151.6272432692349,
+            -88.85759490080699
+          ]
+        },
+        "roundtrip": {
+          "maximum": 7.105427357601002e-14,
+          "input": [
+            -178.55340853810037,
+            -83.63303819810972
+          ]
+        },
+        "flatForward": {
+          "maximum": 1.1175870895385742e-8,
+          "input": [
+            -178.55340853810037,
+            -83.63303819810972
+          ]
+        },
+        "flatInverse": {
+          "maximum": 7.105427357601002e-14,
+          "input": [
+            151.6272432692349,
+            -88.85759490080699
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 7.105427357601002e-14,
+          "input": [
+            -178.55340853810037,
+            -83.63303819810972
+          ]
+        }
+      },
+      "definition": "+proj=aeqd +lat_0=90 +lon_0=0 +ellps=WGS84",
+      "oracleNotes": "Original polar meridian quadrature checked against PROJ; no datum operation.",
+      "forwardTolerance": 0.00001,
+      "inverseTolerance": 1e-8
+    }
+  ]
+}

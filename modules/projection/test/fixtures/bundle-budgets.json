@@ -1,5 +1,5 @@
 {
-  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes. Optional-reader rows added in the structured-method/docs follow-up; existing limits retained. Lazy scenarios sum emitted chunk sizes (gzip per file), with 10% deferred headroom rounded to 100 bytes; each initial static graph retains the existing Mercator limit. TypeScript default wrapper baseline added September 30, 2026 with the same headroom; existing limits retained. Automatic LazyProjection catalogue adds a separate initial/deferred budget while existing bundle limits remain unchanged. Tranche 9 compiled pipeline constants measure 17,720 gzip bytes in the rotated initial graph on Node 24.14.0; its gzip allowance increases by 100 bytes to 17,800. All other limits stay unchanged. Tranche 10 shares the optional fused batch adapter between eligible Mercator/UTM/conic plugins. Reviewed lazy initial graphs on Node 24.14.0: UTM 48,390/18,137, WKT 48,258/17,503, rotated 48,316/18,073 minified/gzip bytes; per-scenario limits rounded up to 100 bytes. Static bundle, catalogue and deferred limits remain unchanged. Tranche 12A adds the explicit vertical-height stage (+1154 minified / +317 gzip bytes for core on Node 24.14.0). Increased only exceeded limits, rounded up to 100 bytes with 100 bytes rounding headroom. Optional GTX baseline measured separately; its initial allowance is 10%. Deferred limits are unchanged. Tranche 12B1 adds an optional geoid GeoTIFF adapter: Mercator plus adapter measures 53,670 minified / 19,625 gzip bytes on Node 24.14.0 (decoder excluded), with a separate 10% allowance. Core and ordinary projection sizes are unchanged. Only the all-exports allowance increases for the new retained reader (155,646 / 53,392 bytes), rounded up to 100 bytes plus 100 bytes headroom; existing selective and lazy limits are unchanged. Tranche 12B2 optional typed pipelines measure 46,725 minified / 17,252 gzip bytes on Node 24.14.0, with a separate 10% budget. Selective core, projection and wrapper sizes/limits are unchanged. Only the all-exports allowance increases for retained pipeline orchestration (165,439 / 56,498 bytes), rounded to 100 bytes plus 100 bytes headroom. Tranche 12B3 adds exact Helmert, ordinate stacks, direction-specific steps and oblique output contracts to optional pipelines (50,629 minified / 18,686 gzip bytes on Node 24.14.0). The existing pipeline budget passes. Only the all-exports allowance increases for this retained code (169,334 / 57,866 bytes), rounded up to 100 bytes plus 100 bytes headroom. Core, wrapper, selective and lazy limits stay unchanged. Tranche 12C1 adds explicit decimal-year inputs and kinematic Helmert rates to optional pipelines (53,643 minified / 19,733 gzip bytes on Node 24.14.0). Reviewed pipeline and all-exports allowances increase only where exceeded, rounded up to 100 bytes plus 100 bytes headroom; all-exports measures 172,364 / 58,882 bytes. Core, wrapper, selective and lazy budgets stay unchanged. The 12C1 review fix conservatively rejects overlapping shared-backed epoch views even across cloned wrappers (+189 minified / +85 gzip bytes on Node 24.14.0). Pipeline measures 53,832 / 19,818 and all-exports 172,553 / 58,967 bytes. Only exceeded minified limits increase, rounded up to 100 bytes plus 100 bytes headroom; gzip, core, wrapper, selective and lazy limits stay unchanged. Tranche 13A stores mutable kinematic coefficients/epoch in owned Float64 storage and captures fixed unit/axis constants. Pipeline measures 54,012 / 19,830 bytes (+180 minified / +12 gzip versus 12C1) and all-exports 172,719 / 58,992 bytes on Node 24.14.0. Only exceeded minified pipeline/all-exports limits increase, rounded up to 100 bytes plus 100 bytes headroom. Gzip, core, wrapper, selective and lazy limits stay unchanged. Tranche 12C2 adds optional model/regular-grid and model/GeoTIFF profiles of 4074/1805 and 9171/3618 minified/gzip bytes on Node 24.14.0 (no decoder or data), each with 10% headroom. A pipeline-only import retains no model/reader code and measures 54695/20000; all-root exports measure 173460/59173. Only exceeded pipeline/all-root budgets increase, rounded up to 100 bytes plus 100 bytes headroom. Core, default wrapper, selective and lazy limits stay unchanged. The package rename removes the shipped classic wrapper; proj4js remains development-only. Historical wrapper size is retained in baseline for provenance. The allocation audit adds guarded per-instance scalar point/stack reuse. Compared with the same packed-grid/kernel implementation without scalar leases, core/Mercator/pipeline add 322/379/413 minified and 114/163/139 gzip bytes on Node 24.14.0. Final core is 46967/17225, Mercator 49435/18009, pipeline 55118/20137, all-root 173686/59299. Exceeded static/initial limits increase, rounded to 100 bytes plus 100 bytes headroom; the all-root gzip allowance also restores rounding headroom (59299 measured versus the previous 59300 limit). Deferred, default-wrapper and other unaffected limits remain unchanged. Scalar allocation samples and retained-grid measurements are separate from timing and are not CI speed gates. Reusable scalar output methods add 2146/619 minified/gzip bytes to core, 2148/624 to Mercator, 1895/472 to pipelines and 2847/723 to all-root exports on Node 24.14.0. Final core/Mercator/pipeline/all-root sizes are 49113/17844, 51583/18633, 57013/20609 and 176533/60022. Only exceeded static and initial lazy limits increase, rounded up to 100 bytes plus 100 bytes headroom; default-wrapper, catalogue initial, deferred and deformation-profile limits remain unchanged. Provided-output correctness is a gate; timing and sampled allocation are diagnostic. The whole-buffer unit/axis pass and shared scalar/bulk leases measure core 49263/17837, Mercator 51733/18633, pipeline 58759/21108 and all-root 178429/60496 minified/gzip bytes on Node 24.14.0. Pipeline adds 1746/499 and all-root 1896/474 bytes against the reusable-output tranche; core/selective imports add 150 minified bytes with negligible gzip changes. Increase only exceeded static/initial limits, rounded up to 100 bytes plus 100 bytes headroom. Deferred chunks and deformation-only profiles are unchanged; original projection equations and per-step arithmetic/validation remain intact. Tranche 12E optional operation selection measures 4506/1684 minified/gzip bytes on Node 24.14.0, with a separate 10% allowance rounded to 100 bytes. It retains only original metadata selection code; core, pipeline, root and lazy import sizes and limits are unchanged. Tranche 13A direct static Helmert batches measure pipeline 60140/21591 and all-root 179812/60993 minified/gzip bytes on Node 24.14.0 (+1381/483 and +1383/497 versus operation selection). Increase only exceeded pipeline/all-root limits, rounded to 100 bytes plus 100 bytes headroom. Core, wrapper, selective, operation catalogue, deformation and deferred limits remain unchanged. Single-stage kinematic Helmert buffers measure 61,230 / 21,933 bytes for pipelines and 180,906 / 61,346 for all root exports on Node 24.14.0, adding 1,090 / 342 and 1,094 / 353 bytes respectively versus static Helmert buffers. Only exceeded pipeline/all-root limits increase, rounded up to 100 bytes plus 100 bytes headroom. Core, wrapper, selective, catalogue, deformation and lazy limits remain unchanged. Spheroid numerical qualification adds an original analytic spherical inverse and finite-radius boundary. Core/pipeline/all-root bundles measure 49411/17871, 61378/21964 and 181054/61375 minified/gzip bytes on Node 24.14.0 (+148 minified versus master for each). Only exceeded core, UTM, WKT and PROJJSON minified allowances increase, rounded up to 100 bytes plus 100 bytes headroom; existing gzip, pipeline, all-root, wrapper, catalogue and deformation limits remain unchanged. Geospatial kernels remain outside projection production dependencies. Lazy WKT/rotated initial minified profiles measure 52245/52307 bytes; only those exceeded initial allowances increase with the same rounding policy. Deferred limits and all lazy gzip allowances remain unchanged. After merging landed grid scratch work, all-root/wrapper bundles measure 181066/61391 and 149789/51228 minified/gzip bytes; limits remain unchanged. Shared spheroid conversion adds the bounded exterior fallback, reusable points and the normalized polar-axis adapter. Pinned Node 24.14.0 packed ESM core/pipeline/all-root measurements are 50744/18340, 62749/22409 and 182457/61880 minified/gzip bytes (+1333/469, +1371/445 and +1391/489 versus the preceding qualification). The separately measured numeric source graph is 1734/803 with no runtime dependencies; core root is unchanged and projection retains no geospatial/culling graph. Increase only exceeded static/deformation and initial lazy limits, rounded to 100 bytes plus 100 bytes headroom. Other limits, including deferred graphs, remain unchanged. Coordinate allocation samples, complete construction costs and timing regressions are separately reported diagnostics, not general speed claims. Local-frame convergence adds an original optional ENU basis, shared rotation and matrix commits. Pinned Node 24.14.0 packaged deformation/model-with-GeoTIFF measure 6050/2427 and 11148/4246 minified/gzip bytes. Increase only these exceeded limits, rounded up to 100 bytes plus 100 bytes headroom. Core, projection, model-free pipeline, root and lazy allowances remain unchanged. Source graphs and sampled allocation/timing costs are separately qualified.",
+  "description": "Initial tranche 7 baseline: browser ESM, es2020, minified, gzip level 9; 10% headroom rounded up to 100 bytes. Update only after reviewing bundle changes. Optional-reader rows added in the structured-method/docs follow-up; existing limits retained. Lazy scenarios sum emitted chunk sizes (gzip per file), with 10% deferred headroom rounded to 100 bytes; each initial static graph retains the existing Mercator limit. TypeScript default wrapper baseline added September 30, 2026 with the same headroom; existing limits retained. Automatic LazyProjection catalogue adds a separate initial/deferred budget while existing bundle limits remain unchanged. Tranche 9 compiled pipeline constants measure 17,720 gzip bytes in the rotated initial graph on Node 24.14.0; its gzip allowance increases by 100 bytes to 17,800. All other limits stay unchanged. Tranche 10 shares the optional fused batch adapter between eligible Mercator/UTM/conic plugins. Reviewed lazy initial graphs on Node 24.14.0: UTM 48,390/18,137, WKT 48,258/17,503, rotated 48,316/18,073 minified/gzip bytes; per-scenario limits rounded up to 100 bytes. Static bundle, catalogue and deferred limits remain unchanged. Tranche 12A adds the explicit vertical-height stage (+1154 minified / +317 gzip bytes for core on Node 24.14.0). Increased only exceeded limits, rounded up to 100 bytes with 100 bytes rounding headroom. Optional GTX baseline measured separately; its initial allowance is 10%. Deferred limits are unchanged. Tranche 12B1 adds an optional geoid GeoTIFF adapter: Mercator plus adapter measures 53,670 minified / 19,625 gzip bytes on Node 24.14.0 (decoder excluded), with a separate 10% allowance. Core and ordinary projection sizes are unchanged. Only the all-exports allowance increases for the new retained reader (155,646 / 53,392 bytes), rounded up to 100 bytes plus 100 bytes headroom; existing selective and lazy limits are unchanged. Tranche 12B2 optional typed pipelines measure 46,725 minified / 17,252 gzip bytes on Node 24.14.0, with a separate 10% budget. Selective core, projection and wrapper sizes/limits are unchanged. Only the all-exports allowance increases for retained pipeline orchestration (165,439 / 56,498 bytes), rounded to 100 bytes plus 100 bytes headroom. Tranche 12B3 adds exact Helmert, ordinate stacks, direction-specific steps and oblique output contracts to optional pipelines (50,629 minified / 18,686 gzip bytes on Node 24.14.0). The existing pipeline budget passes. Only the all-exports allowance increases for this retained code (169,334 / 57,866 bytes), rounded up to 100 bytes plus 100 bytes headroom. Core, wrapper, selective and lazy limits stay unchanged. Tranche 12C1 adds explicit decimal-year inputs and kinematic Helmert rates to optional pipelines (53,643 minified / 19,733 gzip bytes on Node 24.14.0). Reviewed pipeline and all-exports allowances increase only where exceeded, rounded up to 100 bytes plus 100 bytes headroom; all-exports measures 172,364 / 58,882 bytes. Core, wrapper, selective and lazy budgets stay unchanged. The 12C1 review fix conservatively rejects overlapping shared-backed epoch views even across cloned wrappers (+189 minified / +85 gzip bytes on Node 24.14.0). Pipeline measures 53,832 / 19,818 and all-exports 172,553 / 58,967 bytes. Only exceeded minified limits increase, rounded up to 100 bytes plus 100 bytes headroom; gzip, core, wrapper, selective and lazy limits stay unchanged. Tranche 13A stores mutable kinematic coefficients/epoch in owned Float64 storage and captures fixed unit/axis constants. Pipeline measures 54,012 / 19,830 bytes (+180 minified / +12 gzip versus 12C1) and all-exports 172,719 / 58,992 bytes on Node 24.14.0. Only exceeded minified pipeline/all-exports limits increase, rounded up to 100 bytes plus 100 bytes headroom. Gzip, core, wrapper, selective and lazy limits stay unchanged. Tranche 12C2 adds optional model/regular-grid and model/GeoTIFF profiles of 4074/1805 and 9171/3618 minified/gzip bytes on Node 24.14.0 (no decoder or data), each with 10% headroom. A pipeline-only import retains no model/reader code and measures 54695/20000; all-root exports measure 173460/59173. Only exceeded pipeline/all-root budgets increase, rounded up to 100 bytes plus 100 bytes headroom. Core, default wrapper, selective and lazy limits stay unchanged. The package rename removes the shipped classic wrapper; proj4js remains development-only. Historical wrapper size is retained in baseline for provenance. The allocation audit adds guarded per-instance scalar point/stack reuse. Compared with the same packed-grid/kernel implementation without scalar leases, core/Mercator/pipeline add 322/379/413 minified and 114/163/139 gzip bytes on Node 24.14.0. Final core is 46967/17225, Mercator 49435/18009, pipeline 55118/20137, all-root 173686/59299. Exceeded static/initial limits increase, rounded to 100 bytes plus 100 bytes headroom; the all-root gzip allowance also restores rounding headroom (59299 measured versus the previous 59300 limit). Deferred, default-wrapper and other unaffected limits remain unchanged. Scalar allocation samples and retained-grid measurements are separate from timing and are not CI speed gates. Reusable scalar output methods add 2146/619 minified/gzip bytes to core, 2148/624 to Mercator, 1895/472 to pipelines and 2847/723 to all-root exports on Node 24.14.0. Final core/Mercator/pipeline/all-root sizes are 49113/17844, 51583/18633, 57013/20609 and 176533/60022. Only exceeded static and initial lazy limits increase, rounded up to 100 bytes plus 100 bytes headroom; default-wrapper, catalogue initial, deferred and deformation-profile limits remain unchanged. Provided-output correctness is a gate; timing and sampled allocation are diagnostic. The whole-buffer unit/axis pass and shared scalar/bulk leases measure core 49263/17837, Mercator 51733/18633, pipeline 58759/21108 and all-root 178429/60496 minified/gzip bytes on Node 24.14.0. Pipeline adds 1746/499 and all-root 1896/474 bytes against the reusable-output tranche; core/selective imports add 150 minified bytes with negligible gzip changes. Increase only exceeded static/initial limits, rounded up to 100 bytes plus 100 bytes headroom. Deferred chunks and deformation-only profiles are unchanged; original projection equations and per-step arithmetic/validation remain intact. Tranche 12E optional operation selection measures 4506/1684 minified/gzip bytes on Node 24.14.0, with a separate 10% allowance rounded to 100 bytes. It retains only original metadata selection code; core, pipeline, root and lazy import sizes and limits are unchanged. Tranche 13A direct static Helmert batches measure pipeline 60140/21591 and all-root 179812/60993 minified/gzip bytes on Node 24.14.0 (+1381/483 and +1383/497 versus operation selection). Increase only exceeded pipeline/all-root limits, rounded to 100 bytes plus 100 bytes headroom. Core, wrapper, selective, operation catalogue, deformation and deferred limits remain unchanged. Single-stage kinematic Helmert buffers measure 61,230 / 21,933 bytes for pipelines and 180,906 / 61,346 for all root exports on Node 24.14.0, adding 1,090 / 342 and 1,094 / 353 bytes respectively versus static Helmert buffers. Only exceeded pipeline/all-root limits increase, rounded up to 100 bytes plus 100 bytes headroom. Core, wrapper, selective, catalogue, deformation and lazy limits remain unchanged. Spheroid numerical qualification adds an original analytic spherical inverse and finite-radius boundary. Core/pipeline/all-root bundles measure 49411/17871, 61378/21964 and 181054/61375 minified/gzip bytes on Node 24.14.0 (+148 minified versus master for each). Only exceeded core, UTM, WKT and PROJJSON minified allowances increase, rounded up to 100 bytes plus 100 bytes headroom; existing gzip, pipeline, all-root, wrapper, catalogue and deformation limits remain unchanged. Geospatial kernels remain outside projection production dependencies. Lazy WKT/rotated initial minified profiles measure 52245/52307 bytes; only those exceeded initial allowances increase with the same rounding policy. Deferred limits and all lazy gzip allowances remain unchanged. After merging landed grid scratch work, all-root/wrapper bundles measure 181066/61391 and 149789/51228 minified/gzip bytes; limits remain unchanged. Shared spheroid conversion adds the bounded exterior fallback, reusable points and the normalized polar-axis adapter. Pinned Node 24.14.0 packed ESM core/pipeline/all-root measurements are 50744/18340, 62749/22409 and 182457/61880 minified/gzip bytes (+1333/469, +1371/445 and +1391/489 versus the preceding qualification). The separately measured numeric source graph is 1734/803 with no runtime dependencies; core root is unchanged and projection retains no geospatial/culling graph. Increase only exceeded static/deformation and initial lazy limits, rounded to 100 bytes plus 100 bytes headroom. Other limits, including deferred graphs, remain unchanged. Coordinate allocation samples, complete construction costs and timing regressions are separately reported diagnostics, not general speed claims. Local-frame convergence adds an original optional ENU basis, shared rotation and matrix commits. Pinned Node 24.14.0 packaged deformation/model-with-GeoTIFF measure 6050/2427 and 11148/4246 minified/gzip bytes. Increase only these exceeded limits, rounded up to 100 bytes plus 100 bytes headroom. Core, projection, model-free pipeline, root and lazy allowances remain unchanged. Source graphs and sampled allocation/timing costs are separately qualified. S1 nearest-normal interiors and S2 polar/Van der Grinten corrections increase numeric graphs. S3 optional analysis measures 4329/1445 minified/gzip bytes on Node 24.14.0. Only exceeded packed limits increase, rounded up to 100 bytes plus 100 bytes headroom; source graph checks exclude analysis from existing entry points. Only exceeded lazy initial/deferred limits increase under the same measurement and rounding policy.",
   "baseline": {
     "core": {
       "minified": 42306,
@@ -68,64 +68,68 @@
   },
   "limits": {
     "core": {
-      "minified": 50900,
-      "gzip": 18500
+      "minified": 52200,
+      "gzip": 19100
     },
     "mercator": {
-      "minified": 53400,
-      "gzip": 19300
+      "minified": 54700,
+      "gzip": 19900
     },
     "utm": {
-      "minified": 60200,
-      "gzip": 22000
+      "minified": 61500,
+      "gzip": 22600
     },
     "allNativeExports": {
-      "minified": 182600,
-      "gzip": 62000
+      "minified": 184300,
+      "gzip": 62800
     },
     "mercatorWithWKT": {
-      "minified": 77300,
-      "gzip": 27100
+      "minified": 78600,
+      "gzip": 27700
     },
     "mercatorWithPROJJSON": {
-      "minified": 64500,
-      "gzip": 23100
+      "minified": 65800,
+      "gzip": 23700
     },
     "mercatorWithNTv2": {
-      "minified": 56600,
-      "gzip": 20600
+      "minified": 57900,
+      "gzip": 21200
     },
     "mercatorWithGeoTIFFAdapter": {
-      "minified": 56600,
-      "gzip": 20500
+      "minified": 57900,
+      "gzip": 21100
     },
     "typescriptWrapper": {
       "minified": 159300,
       "gzip": 54500
     },
     "mercatorWithGTX": {
-      "minified": 55600,
-      "gzip": 20400
+      "minified": 56200,
+      "gzip": 20600
     },
     "mercatorWithVerticalGeoTIFF": {
-      "minified": 59100,
-      "gzip": 21600
+      "minified": 59700,
+      "gzip": 21800
     },
     "operationPipeline": {
-      "minified": 62900,
-      "gzip": 22600
+      "minified": 64200,
+      "gzip": 23100
     },
     "deformationModel": {
-      "minified": 6200,
-      "gzip": 2600
+      "minified": 7500,
+      "gzip": 3100
     },
     "deformationWithGeoTIFF": {
-      "minified": 11300,
-      "gzip": 4400
+      "minified": 12600,
+      "gzip": 4900
     },
     "operationCatalog": {
       "minified": 5000,
       "gzip": 1900
+    },
+    "projectionAnalysis": {
+      "minified": 4500,
+      "gzip": 1600
     }
   },
   "lazyBaseline": {
@@ -190,20 +194,20 @@
   },
   "lazyInitialLimits": {
     "catalogue": {
-      "minified": 61100,
-      "gzip": 22900
+      "minified": 62400,
+      "gzip": 23300
     },
     "rotated": {
-      "minified": 53800,
-      "gzip": 19900
+      "minified": 55100,
+      "gzip": 20300
     },
     "utm": {
-      "minified": 53900,
-      "gzip": 19900
+      "minified": 55200,
+      "gzip": 20300
     },
     "wkt": {
-      "minified": 53700,
-      "gzip": 19100
+      "minified": 55000,
+      "gzip": 19700
     }
   }
 }

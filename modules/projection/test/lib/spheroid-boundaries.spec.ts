@@ -120,8 +120,7 @@ test('bounded surface inverse leaves outputs untouched for unrepresentable input
       [0, 0, 0],
       [NaN, 1, 2],
       [Infinity, 1, 2],
-      [1e200, 1, 2],
-      [1e-150, 1e-150, 1e-150]
+      [1e200, 1, 2]
     ]) {
       for (const result of [[7, 8, 9], new Vector3(7, 8, 9)]) {
         expect(ellipsoid.scaleToGeodeticSurface(point, result)).toBeUndefined();
@@ -134,7 +133,7 @@ test('bounded surface inverse leaves outputs untouched for unrepresentable input
     }
   }));
 
-test('near-center radial fallback remains distinct from a geodetic inverse', () =>
+test('surface radial fallback remains separate from safeguarded cartographic inversion', () =>
   degrees(() => {
     const ellipsoid = Ellipsoid.fromSpheroid({semiMajorAxis: 10, semiMinorAxis: 5});
     const source = [0.1, 0.2, 0.3];
@@ -146,7 +145,7 @@ test('near-center radial fallback remains distinct from a geodetic inverse', () 
     // The retained radial approximation is not the normal footpoint for deep interior points.
     const llh = ellipsoid.cartesianToCartographic(source);
     const roundtrip = ellipsoid.cartographicToCartesian(llh);
-    expect(Math.hypot(...roundtrip.map((value, i) => value - source[i]))).toBeGreaterThan(0.01);
+    close(roundtrip, source, 1e-12);
   }));
 
 test('numeric cartographic and surface commits survive recursive output setters', () =>
@@ -193,8 +192,9 @@ test('deep-interior singular Newton updates leave outputs untouched', () => {
   const result = [7, 8, 9];
   expect(ellipsoid.scaleToGeodeticSurface(point, result)).toBeUndefined();
   expect(result).toEqual([7, 8, 9]);
-  expect(ellipsoid.cartesianToCartographic(point, result)).toBeUndefined();
-  expect(result).toEqual([7, 8, 9]);
+  // The independent nearest-normal solve succeeds where legacy surface Newton fails.
+  expect(ellipsoid.cartesianToCartographic(point, result)).toBe(result);
+  close(ellipsoid.cartographicToCartesian(result), point, 1e-12);
   expect(ellipsoid.scaleToGeodeticSurface([2, 0, 0], result)).toBe(result);
   close(result, [1, 0, 0], 1e-14);
 });

@@ -8,6 +8,7 @@ import {gzipSync} from 'node:zlib';
 import {build} from 'esbuild';
 
 const fixtures = {
+  projectionAnalysis: "export * from '@math.gl/projection/analysis';",
   core: "export {ProjectionEngine} from '@math.gl/projection';",
   mercator:
     "import {ProjectionEngine, mercator} from '@math.gl/projection'; export const create = () => new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});",

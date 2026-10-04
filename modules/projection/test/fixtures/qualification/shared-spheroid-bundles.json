@@ -1,15 +1,28 @@
 {
   "schemaVersion": 1,
-  "baselineCommit": "66b70d5ef8bc17764db79b898170757e133ca76b",
+  "baselineCommit": "01864645418a718d51385f93ebb2ff5c700583de",
   "methodology": "Identical source-level ESM entries and historical/current source resolver; browser/es2020, esbuild minification and gzip level 9. Numeric leaf is new, with no historical equivalent. Graph checks require no class/culling dependencies for projection, no runtime dependency for the leaf, and no retained leaf in core root. Module loading/setup timing is measured separately.",
   "rows": [
+    {
+      "name": "projectionAnalysis",
+      "measurements": [
+        {
+          "revision": "candidate",
+          "minified": 4634,
+          "gzip": 1570,
+          "runtimeSources": [
+            "modules/projection/src/analysis.ts"
+          ]
+        }
+      ]
+    },
     {
       "name": "numericLeaf",
       "measurements": [
         {
           "revision": "candidate",
-          "minified": 1734,
-          "gzip": 803,
+          "minified": 3003,
+          "gzip": 1336,
           "runtimeSources": [
             "modules/core/src/spheroid.ts"
           ]
@@ -22,7 +35,7 @@
         {
           "revision": "baseline",
           "minified": 42048,
-          "gzip": 12150,
+          "gzip": 12033,
           "runtimeSources": [
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/core/src/lib/math-utils.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/core/src/lib/common.ts",
@@ -54,7 +67,7 @@
         {
           "revision": "candidate",
           "minified": 42048,
-          "gzip": 12150,
+          "gzip": 12033,
           "runtimeSources": [
             "modules/core/src/lib/math-utils.ts",
             "modules/core/src/lib/common.ts",
@@ -94,8 +107,8 @@
       "measurements": [
         {
           "revision": "baseline",
-          "minified": 49986,
-          "gzip": 18047,
+          "minified": 51320,
+          "gzip": 18364,
           "runtimeSources": [
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/projection-descriptor.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/projection-scratch.ts",
@@ -111,6 +124,7 @@
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/crs/primemeridian-table.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/crs/units-table.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/crs/normalize.ts",
+            "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/core/src/spheroid.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/datum.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/vertical-datum.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/typescript-projection.ts",
@@ -119,8 +133,8 @@
         },
         {
           "revision": "candidate",
-          "minified": 51320,
-          "gzip": 18522,
+          "minified": 52640,
+          "gzip": 18929,
           "runtimeSources": [
             "modules/projection/src/experimental/projection-descriptor.ts",
             "modules/projection/src/experimental/projection-scratch.ts",
@@ -145,8 +159,8 @@
         }
       ],
       "delta": {
-        "minified": 1334,
-        "gzip": 475
+        "minified": 1320,
+        "gzip": 565
       }
     },
     {
@@ -154,8 +168,8 @@
       "measurements": [
         {
           "revision": "baseline",
-          "minified": 62101,
-          "gzip": 22133,
+          "minified": 63474,
+          "gzip": 22382,
           "runtimeSources": [
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/crs/src/spatial-reference.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/crs/src/proj-string.ts",
@@ -167,6 +181,7 @@
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/crs/primemeridian-table.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/crs/units-table.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/crs/normalize.ts",
+            "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/core/src/spheroid.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/datum.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/projection-scratch.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/projection/src/experimental/mutable-projection.ts",
@@ -184,8 +199,8 @@
         },
         {
           "revision": "candidate",
-          "minified": 63474,
-          "gzip": 22556,
+          "minified": 64788,
+          "gzip": 22958,
           "runtimeSources": [
             "modules/crs/src/spatial-reference.ts",
             "modules/crs/src/proj-string.ts",
@@ -215,8 +230,8 @@
         }
       ],
       "delta": {
-        "minified": 1373,
-        "gzip": 423
+        "minified": 1314,
+        "gzip": 576
       }
     },
     {
@@ -224,8 +239,8 @@
       "measurements": [
         {
           "revision": "baseline",
-          "minified": 34196,
-          "gzip": 10836,
+          "minified": 38889,
+          "gzip": 12259,
           "runtimeSources": [
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/core/src/lib/math-utils.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/core/src/lib/common.ts",
@@ -252,9 +267,11 @@
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/core/src/classes/euler.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/core/src/classes/pose.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/core/src/index.ts",
+            "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/core/src/spheroid.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/core/src/vec3.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/geospatial/src/constants.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/geospatial/src/type-utils.ts",
+            "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/core/src/local-frame.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/geospatial/src/ellipsoid-helpers/ellipsoid-transform.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/geospatial/src/ellipsoid-helpers/scale-to-geodetic-surface.ts",
             "historical:/Users/ibgreen/.codex/worktrees/projection-sota-roadmap/math.gl/modules/geospatial/src/ellipsoid.ts",
@@ -286,8 +303,8 @@
         },
         {
           "revision": "candidate",
-          "minified": 36558,
-          "gzip": 11688,
+          "minified": 40175,
+          "gzip": 12792,
           "runtimeSources": [
             "modules/core/src/lib/math-utils.ts",
             "modules/core/src/lib/common.ts",
@@ -318,6 +335,7 @@
             "modules/core/src/vec3.ts",
             "modules/geospatial/src/constants.ts",
             "modules/geospatial/src/type-utils.ts",
+            "modules/core/src/local-frame.ts",
             "modules/geospatial/src/ellipsoid-helpers/ellipsoid-transform.ts",
             "modules/geospatial/src/ellipsoid-helpers/scale-to-geodetic-surface.ts",
             "modules/geospatial/src/ellipsoid.ts",
@@ -349,8 +367,8 @@
         }
       ],
       "delta": {
-        "minified": 2362,
-        "gzip": 852
+        "minified": 1286,
+        "gzip": 533
       }
     }
   ]

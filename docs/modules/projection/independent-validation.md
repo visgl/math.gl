@@ -1,14 +1,13 @@
 # Independent projection validation
 
-The native engine now has reference coordinates from **PROJ 9.5.1**, generated with
+The math.gl projection engine now has reference coordinates from **PROJ 9.5.1**, generated with
 **pyproj 3.7.2** independently of proj4js. The corpus covers all **37 named algorithms**
 with **134 configurations and 2,386 points**, plus **87 points in real horizontal
 GeoTIFF and NTv2 datasets**. The internal Gauss helper is exercised through its parent projections.
-A separate seeded corpus adds **15 explicit domains / 4,005 points** for common
-regional and world-map configurations. These are sampled accuracy checks, not a claim of full-domain or full-CRS parity.
+A separate seeded corpus adds **42 explicit domains / 11,160 points** covering every named horizontal algorithm. The [accuracy domain scorecard](./accuracy-domains.md) records parameters, tested regions, observed maxima and regression ceilings. These are sampled accuracy checks, not a claim of full-domain or full-CRS parity.
 
 The proj4js compatibility baseline remains **2.22.0**, checked against npm's latest
-tag on September 29, 2026. Its separate upstream corpus has 232 original numeric matches, one independently
+tag on October 4, 2026. Its separate upstream corpus has 232 original numeric matches, one independently
 corrected Robinson result, and nine deliberate input rejections. An independent oracle matters because a
 TypeScript port can reproduce a bug in the JavaScript implementation exactly.
 
@@ -39,7 +38,8 @@ Each fixture declares its budget; exceptions are explicit:
 
 | Case | Regression ceiling | Interpretation |
 | --- | --- | --- |
-| Polar ellipsoidal AEQD | 0.001 m forward | Meridional-arc approximation; observed maximum about 0.000564 m. |
+| Polar ellipsoidal AEQD | 1e-5 m forward | Original bounded meridional-radius quadrature replaces the truncated series. Both polar seeded profiles pass. |
+| Van der Grinten dense domain | 3e-5 m forward vs PROJ | A separate 80-digit Decimal regression agrees with math.gl within 1e-8 m; pinned PROJ cancellation accounts for a 20.864 micrometre difference. |
 | Mollweide | 0.00002 m forward | Iterative forward approximation over the wider matrix. |
 | Ellipsoidal CEA | 2e-8° inverse | Difference from PROJ 9.5.1's authalic-latitude inverse series; math.gl solves the inverse iteratively. |
 | Robinson | 1e-5 m forward / 1e-8° inverse away from exact knots | Uses PROJ coefficient precision. Exact knots are checked against their original latitude/longitude to 1e-8°; a separately declared 1e-4° comparison budget accommodates PROJ's unstable neighbouring-piece selection at knots. |
@@ -226,7 +226,7 @@ Outer nodes, shifted inverse boundaries, uncovered coordinates and explicit `nul
 fallbacks also have policy tests. The two earlier Canadian western-edge audit failures
 are now an explicit strict-coverage decision: inverting `[-80, 44.92]` produces an
 approximate source longitude of **−80.00000028943268°** in PROJ, just outside the grid.
-The native engine rejects this inverse instead of accepting an extrapolated source.
+The math.gl projection engine rejects this inverse instead of accepting an extrapolated source.
 The fixture preserves PROJ's result to make the difference observable. Inverting a
 valid shifted boundary point succeeds; `null` fallback is available only when declared.
 

@@ -209,5 +209,5 @@ pipeline execution in Node and Chromium. Packed ESM/CommonJS and TypeScript cons
 check the public entry point. Bundle checks enforce that selection retains no projection,
 parser, model or grid implementation and adds no code to existing imports.
 
-See the [remaining roadmap](./roadmap.md#remaining-performance-and-geodetic-roadmap)
+See the [remaining roadmap](./roadmap.md#sota-roadmap)
 for broader geodetic qualification and measured performance work.

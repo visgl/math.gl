@@ -171,14 +171,7 @@ Returns
 Converts the provided Cartesian position to cartographic representation. Latitude
 retains precision near the poles. Returns `undefined` at the center, for non-finite
 or unrepresentable inputs, or when its bounded inverse cannot converge; an existing
-result is left unchanged. Sphere/oblate surface and exterior conversions use the
-shared [spheroid helpers](../../core/api-reference/spheroid.md). Three-radius and
-interior surface inversion retain the 64-update bound. The center-neighborhood
-radial fallback remains an approximation for deep interior positions. A defined
-interior result does not guarantee the nearest-normal representation, including
-some inputs whose nearest solution is unique. See
-[ellipsoid accuracy and interior boundaries](../../projection/ellipsoid-qualification.md)
-for independent references and the distinction between accuracy and fallback checks.
+result is left unchanged. Sphere/oblate cartographic conversion uses the shared [spheroid helpers](../../core/api-reference/spheroid.md), including the safeguarded nearest-normal interior inverse. Equatorial interiors with two equally near normals reject. Prolate/triaxial conversion retains the 64-update surface algorithm and its approximate near-center radial fallback. The separate `scaleToGeodeticSurface` method retains that three-radius behavior for all shapes. See [ellipsoid accuracy and interior boundaries](../../projection/ellipsoid-qualification.md) for independent references, branch selection and sampled accuracy limits.
 
 - `cartesian` The Cartesian position to convert to cartographic representation.
 - `result` Optional object onto which to store the result.

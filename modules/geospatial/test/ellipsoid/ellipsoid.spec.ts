@@ -179,21 +179,16 @@ test('Ellipsoid#cartesianToCartographic works with a Cartesian result parameter'
   expect(equals(returnedResult.height, surfaceCartographic.z, _MathUtils.EPSILON8)).toBe(true);
 });
 
-test('Ellipsoid#cartesianToCartographic works close to center', () => {
-  const expected = new Vector3(
-    toDegrees(9.999999999999999e-11),
-    toDegrees(1.0067394967422763e-20),
-    -6378137.0
-  );
-  const returnedResult = Ellipsoid.WGS84.cartesianToCartographic(new Vector3(1e-50, 1e-60, 1e-70));
-  expect(equals(returnedResult, expected, _MathUtils.EPSILON8), 'close to center').toBe(true);
-});
-
-test('Ellipsoid#cartesianToCartographic return undefined very close to center', () => {
-  const returnedResult = Ellipsoid.WGS84.cartesianToCartographic(
-    new Vector3(1e-150, 1e-150, 1e-150)
-  );
-  expect(returnedResult).toBe(undefined);
+test('Ellipsoid#cartesianToCartographic selects the nearest polar normal close to center', () => {
+  for (const source of [
+    [1e-50, 1e-60, 1e-70],
+    [1e-150, 1e-150, 1e-150]
+  ]) {
+    const result = Ellipsoid.WGS84.cartesianToCartographic(source);
+    expect(Math.abs(result[1] - 90)).toBeLessThan(1e-8);
+    expect(Math.abs(result[2] + Ellipsoid.WGS84.radii.z)).toBeLessThan(1e-8);
+    expect(Math.abs(result[0] - toDegrees(Math.atan2(source[1], source[0])))).toBeLessThan(1e-8);
+  }
 });
 
 test('Ellipsoid#cartesianToCartographic return undefined at center', () => {

@@ -18,7 +18,32 @@ const scopes = new Map([
   ],
   [
     'modules/core/src/spheroid.ts',
-    new Set(['spheroidToCartesian', 'cartesianToSpheroid', 'exteriorInverse', 'commit'])
+    new Set([
+      'spheroidToCartesian',
+      'cartesianToSpheroid',
+      'exteriorInverse',
+      'interiorInverse',
+      'sumError',
+      'productError',
+      'commit'
+    ])
+  ],
+  [
+    'modules/projection/src/analysis.ts',
+    new Set([
+      'contains',
+      'projectTo',
+      'unprojectTo',
+      'jacobian',
+      'factors',
+      'sample',
+      'difference',
+      'calculate'
+    ])
+  ],
+  [
+    'modules/projection/src/experimental/common/meridian-distance.ts',
+    new Set(['radius', 'pair', 'meridianDistance', 'inverseMeridianDistance'])
   ],
   ['modules/geospatial/src/type-utils.ts', new Set(['toCartographicFromRadiansComponents'])],
   [
@@ -68,7 +93,7 @@ for (const [path, names] of scopes) {
         violations.push(`${path}:${line + 1} (${scope})`);
       }
     }
-    ts.forEachChild(node, (child) => visit(child, scope));
+    ts.forEachChild(node, child => visit(child, scope));
   }
   visit(source);
 }

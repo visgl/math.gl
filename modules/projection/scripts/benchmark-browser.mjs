@@ -202,6 +202,7 @@ try {
         const {
           qualify,
           qualifyAccuracy,
+          qualifyFactors,
           qualifyVertical,
           qualifyPipelines,
           qualifyKinematicPipelines
@@ -213,6 +214,7 @@ try {
         return {
           ...qualify(inputs, reference),
           accuracy: qualifyAccuracy(),
+          factors: qualifyFactors(),
           vertical: qualifyVertical(),
           verticalGeoTIFF: await qualifyVerticalGeoTIFF(),
           pipelines: qualifyPipelines(

@@ -66,27 +66,15 @@ allowances account for angle roundoff amplified by extreme flattening; at Earth
 size the most flattened near-pole cases permit about 2.6 millimetres.
 These are sampled regression allowances, not a universal error bound.
 
-Shallow and ordinary interior normal offsets have separate regression tests.
-Deep interior representations can be ambiguous. The retained ordinary Hannover
-branch does not establish a unique normal representation; highly flattened
-non-cardinal interior points are outside the exterior fallback's contract. The
-center, overflowing Cartesian radius and non-finite inputs fail without writing.
+Unique sphere/oblate interiors use the bounded nearest-footpoint solve. The shifted multiplier and compensated radius/axis arithmetic address deep interiors and extreme flattening. Equatorial points below the oblate evolute cusp have two equally near normals and reject; the center also rejects. All failures leave existing outputs untouched. Exterior points retain the Hannover path and safeguarded fallback.
 
-Geospatial retains its original three-radius/interior surface algorithm and
-near-center radial approximation; only the qualified sphere/oblate
-surface/exterior inverse is shared. Its exact-pole signed-zero longitude and
-`undefined` failure convention remain distinct from projection's canonical
-longitude and thrown errors.
+Geospatial shares this cartographic inverse for sphere/oblate shapes, preserving its signed-zero pole longitude and `undefined` failure convention. Projection retains its near-axis longitude convention and throws on failure. Prolate/triaxial cartographic conversion and the separate geospatial `scaleToGeodeticSurface` method retain their own kernel, including its radial approximation.
 
-A `true` result certifies finite numeric output, not a nearest-normal solution for
-arbitrary interior points. Some unique nearest solutions near the equatorial cusp
-still reject. Finite positive axes alone do not guarantee representable derived
-values. See [ellipsoid accuracy and interior boundaries](../../projection/ellipsoid-qualification.md)
-for independent references, sampled accuracy limits and recorded unsupported cases.
+The independent [interior qualification](../../projection/ellipsoid-qualification.md) covers 434 accuracy checks, including thin spheroids and both sides of the cusp. The 128-update interior bound is a convergence limit, not a global accuracy guarantee. Squared-axis/ratio underflow and other unrepresentable intermediates can reject.
 
 ## Attribution
 
 The forward geocentric equations and Hannover inverse retain the existing
 proj4js 2.22.0-derived arithmetic, MIT terms and SPDX attribution. The core
-package includes its full `PROJ4-LICENSE.md`. The safeguarded exterior inverse,
+package includes its full `PROJ4-LICENSE.md`. The safeguarded exterior/interior inverses and compensated arithmetic,
 reusable scratch adapters and independent anchors are original math.gl work.

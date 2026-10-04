@@ -62,7 +62,9 @@ for (const fixture of commonProjectionCases) {
         const expected = reference.project(point);
         // EQDC now uses a higher-order meridional series: PROJ is the accuracy
         // oracle, while this comparison bounds the intentional proj4js difference.
-        const metres = fixture.id.startsWith('eqdc-') ? 1e-3 : 1e-5;
+        // proj4js polar AEQD retains a truncated meridian series; PROJ accuracy is separately gated.
+        const metres =
+          fixture.id.startsWith('eqdc-') || /^aeqd--?90-ellipsoid$/.test(fixture.id) ? 1e-3 : 1e-5;
         const tolerance = units.includes('us-ft')
           ? metres / (1200 / 3937)
           : units

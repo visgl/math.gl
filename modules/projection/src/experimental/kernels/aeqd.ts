@@ -1,7 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Adapted from proj4js 2.22.0; polar meridian integration/inversion is original math.gl code. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -11,13 +12,8 @@ export type State = KernelParameters & {
 };
 import adjust_lon from '../common/adjust_lon';
 import {HALF_PI, EPSLN} from '../common/constants';
-import mlfn from '../common/mlfn';
-import e0fn from '../common/e0fn';
-import e1fn from '../common/e1fn';
-import e2fn from '../common/e2fn';
-import e3fn from '../common/e3fn';
 import asinz from '../common/asinz';
-import imlfn from '../common/imlfn';
+import {meridianDistance, inverseMeridianDistance} from '../common/meridian-distance';
 import {vincentyDirect, vincentyInverse} from '../common/vincenty';
 
 function initialize(state: State): void {
@@ -36,7 +32,7 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
   var sinphi = Math.sin(p.y);
   var cosphi = Math.cos(p.y);
   var dlon = adjust_lon(lon - state.long0, state.over);
-  var e0, e1, e2, e3, Mlp, Ml, c, kp, cos_c, azi1;
+  var distance, c, kp, cos_c, azi1;
   if (state.sphere) {
     if (Math.abs(state.sin_p12 - 1) <= EPSLN) {
       // North Pole case
@@ -60,23 +56,17 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
       return p;
     }
   } else {
-    e0 = e0fn(state.es);
-    e1 = e1fn(state.es);
-    e2 = e2fn(state.es);
-    e3 = e3fn(state.es);
     if (Math.abs(state.sin_p12 - 1) <= EPSLN) {
       // North Pole case
-      Mlp = state.a * mlfn(e0, e1, e2, e3, HALF_PI);
-      Ml = state.a * mlfn(e0, e1, e2, e3, lat);
-      p.x = state.x0 + (Mlp - Ml) * Math.sin(dlon);
-      p.y = state.y0 - (Mlp - Ml) * Math.cos(dlon);
+      distance = meridianDistance(state.a, state.es, lat, HALF_PI);
+      p.x = state.x0 + distance * Math.sin(dlon);
+      p.y = state.y0 - distance * Math.cos(dlon);
       return p;
     } else if (Math.abs(state.sin_p12 + 1) <= EPSLN) {
       // South Pole case
-      Mlp = state.a * mlfn(e0, e1, e2, e3, HALF_PI);
-      Ml = state.a * mlfn(e0, e1, e2, e3, lat);
-      p.x = state.x0 + (Mlp + Ml) * Math.sin(dlon);
-      p.y = state.y0 + (Mlp + Ml) * Math.cos(dlon);
+      distance = meridianDistance(state.a, state.es, -HALF_PI, lat);
+      p.x = state.x0 + distance * Math.sin(dlon);
+      p.y = state.y0 + distance * Math.cos(dlon);
       return p;
     } else {
       // Default case
@@ -99,7 +89,7 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
 export function inverse(state: State, p: Point): Point | null | undefined | number {
   p.x -= state.x0;
   p.y -= state.y0;
-  var rh, z, sinz, cosz, lon, lat, con, e0, e1, e2, e3, Mlp, M, azi1, s12;
+  var rh, z, sinz, cosz, lon, lat, con, Mlp, M, azi1, s12;
   if (state.sphere) {
     rh = Math.sqrt(p.x * p.x + p.y * p.y);
     if (rh > 2 * HALF_PI * state.a) {
@@ -118,6 +108,7 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
       con = Math.abs(state.lat0) - HALF_PI;
       if (Math.abs(con) <= EPSLN) {
         if (state.lat0 >= 0) {
+          if (!Number.isFinite(lat)) return null;
           lon = adjust_lon(state.long0 + Math.atan2(p.x, -p.y), state.over);
         } else {
           lon = adjust_lon(state.long0 - Math.atan2(-p.x, p.y), state.over);
@@ -135,27 +126,25 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
     p.y = lat;
     return p;
   } else {
-    e0 = e0fn(state.es);
-    e1 = e1fn(state.es);
-    e2 = e2fn(state.es);
-    e3 = e3fn(state.es);
     if (Math.abs(state.sin_p12 - 1) <= EPSLN) {
       // North pole case
-      Mlp = state.a * mlfn(e0, e1, e2, e3, HALF_PI);
+      Mlp = meridianDistance(state.a, state.es, 0, HALF_PI);
       rh = Math.sqrt(p.x * p.x + p.y * p.y);
       M = Mlp - rh;
-      lat = imlfn(M / state.a, e0, e1, e2, e3);
+      lat = inverseMeridianDistance(state.a, state.es, M);
+      if (!Number.isFinite(lat)) return null;
       lon = adjust_lon(state.long0 + Math.atan2(p.x, -1 * p.y), state.over);
       p.x = lon;
       p.y = lat;
       return p;
     } else if (Math.abs(state.sin_p12 + 1) <= EPSLN) {
       // South pole case
-      Mlp = state.a * mlfn(e0, e1, e2, e3, HALF_PI);
+      Mlp = meridianDistance(state.a, state.es, 0, HALF_PI);
       rh = Math.sqrt(p.x * p.x + p.y * p.y);
       M = rh - Mlp;
 
-      lat = imlfn(M / state.a, e0, e1, e2, e3);
+      lat = inverseMeridianDistance(state.a, state.es, M);
+      if (!Number.isFinite(lat)) return null;
       lon = adjust_lon(state.long0 + Math.atan2(p.x, p.y), state.over);
       p.x = lon;
       p.y = lat;

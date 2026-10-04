@@ -374,6 +374,438 @@
           0
         ]
       ]
+    },
+    {
+      "id": "domain-etmerc-ellipsoid",
+      "definition": "+proj=etmerc +lon_0=-69 +lat_0=-10 +k=0.99 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=etmerc +lon_0=-69 +lat_0=-10 +k=0.99 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": -69.5,
+        "east": -68.5,
+        "south": -35.5,
+        "north": -34.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-laea-0-ellipsoid",
+      "definition": "+proj=laea +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=laea +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 14.5,
+        "east": 15.5,
+        "south": -0.5,
+        "north": 0.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-stere-0-ellipsoid",
+      "definition": "+proj=stere +lat_0=0 +lon_0=15 +x_0=100 +y_0=0 +ellps=WGS84",
+      "oracle": "+proj=stere +lat_0=0 +lon_0=15 +x_0=100 +y_0=0 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 14.5,
+        "east": 15.5,
+        "south": -0.5,
+        "north": 0.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-aeqd-0-ellipsoid",
+      "definition": "+proj=aeqd +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracle": "+proj=aeqd +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 14.5,
+        "east": 15.5,
+        "south": -0.5,
+        "north": 0.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-sterea-ellipsoid",
+      "definition": "+proj=sterea +lat_0=52 +lon_0=5 +k_0=0.9999 +x_0=155000 +y_0=463000 +ellps=WGS84",
+      "oracle": "+proj=sterea +lat_0=52 +lon_0=5 +k_0=0.9999 +x_0=155000 +y_0=463000 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 4.5,
+        "east": 5.5,
+        "south": 51.5,
+        "north": 52.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-eck6-ellipsoid",
+      "definition": "+proj=eck6 +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=eck6 +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-equi-ellipsoid",
+      "definition": "+proj=equi +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=eqc +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Legacy proj4js equi is equidistant cylindrical. Use PROJ eqc with zero standard parallel and origin.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-mill-ellipsoid",
+      "definition": "+proj=mill +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=mill +lon_0=10 +R=6378137",
+      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-sinu-ellipsoid",
+      "definition": "+proj=sinu +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=sinu +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-vandg-ellipsoid",
+      "definition": "+proj=vandg +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=vandg +lon_0=10 +R=6378137",
+      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics. PROJ differs by 20.864 micrometres at the authored dense regression; original 80-digit Decimal evaluation agrees with math.gl within 1e-8 m. This comparison allowance includes oracle cancellation, not a relaxed math.gl accuracy target.",
+      "forwardTolerance": 3e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-poly-ellipsoid",
+      "definition": "+proj=poly +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=poly +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-gstmerc-ellipsoid",
+      "definition": "+proj=gstmerc +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=gstmerc +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-gnom-ellipsoid",
+      "definition": "+proj=gnom +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=gnom +lon_0=10 +lat_0=40 +R=6378137",
+      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-ortho-ellipsoid",
+      "definition": "+proj=ortho +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracle": "+proj=ortho +lon_0=10 +lat_0=40 +R=6378137",
+      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-bonne-ellipsoid",
+      "definition": "+proj=bonne +lat_1=45 +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=bonne +lat_1=45 +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-krovak",
+      "definition": "+proj=krovak +ellps=bessel",
+      "oracle": "+proj=krovak +ellps=bessel",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 14.5,
+        "east": 15.5,
+        "south": 49.5,
+        "north": 50.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-nzmg-1",
+      "definition": "+proj=nzmg +ellps=intl +lon_0=173 +lat_0=-41 +iterations=1 +x_0=2510000 +y_0=6023150",
+      "oracle": "+proj=nzmg +ellps=intl +lon_0=173 +lat_0=-41 +x_0=2510000 +y_0=6023150",
+      "oracleNotes": "Use standard NZMG false offsets in both engines (PROJ hard-codes these). iterations is a proj4js-only inverse refinement control, omitted from PROJ.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 172.5,
+        "east": 173.5,
+        "south": -41.5,
+        "north": -40.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-omerc-alpha",
+      "definition": "+proj=omerc +lat_0=4 +lonc=115 +alpha=53.31582047222222 +gamma=53.13010236111111 +k=0.99984 +ellps=WGS84",
+      "oracle": "+proj=omerc +lat_0=4 +lonc=115 +alpha=53.31582047222222 +gamma=53.13010236111111 +k=0.99984 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 114.5,
+        "east": 115.5,
+        "south": 4.5,
+        "north": 5.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-somerc",
+      "definition": "+proj=somerc +ellps=bessel +lat_0=46.95240555555556 +lon_0=7.43958333333333 +k_0=1",
+      "oracle": "+proj=somerc +ellps=bessel +lat_0=46.95240555555556 +lon_0=7.43958333333333 +k_0=1",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 6.94,
+        "east": 7.94,
+        "south": 46.45,
+        "north": 47.45
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-geos-x-false",
+      "definition": "+proj=geos +lon_0=0 +h=35785831 +sweep=x +ellps=WGS84",
+      "oracle": "+proj=geos +lon_0=0 +h=35785831 +sweep=x +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 19.5,
+        "east": 20.5,
+        "south": 19.5,
+        "north": 20.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-tpers-0",
+      "definition": "+proj=tpers +lon_0=10 +lat_0=40 +h=1000000 +azi=45 +tilt=0 +ellps=WGS84",
+      "oracle": "+proj=tpers +lon_0=10 +lat_0=40 +h=1000000 +azi=45 +tilt=0 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-qsc-0",
+      "definition": "+proj=qsc +lon_0=0 +lat_0=0 +ellps=WGS84",
+      "oracle": "+proj=qsc +lon_0=0 +lat_0=0 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": -0.5,
+        "east": 0.5,
+        "south": -0.5,
+        "north": 0.5
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-eqc",
+      "definition": "+proj=eqc +lat_ts=30 +lat_0=10 +lon_0=10 +ellps=WGS84",
+      "oracle": "+proj=eqc +lat_ts=30 +lat_0=10 +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-longlat",
+      "definition": "+proj=longlat +ellps=WGS84",
+      "oracle": "+proj=longlat +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": -110,
+        "east": 130,
+        "south": -60,
+        "north": 60
+      },
+      "probes": []
+    },
+    {
+      "id": "domain-ob-tran-moll",
+      "definition": "+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=0 +ellps=WGS84",
+      "oracle": "+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=0 +ellps=WGS84",
+      "oracleNotes": "Identical explicit projection parameters; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": 9.5,
+        "east": 10.5,
+        "south": 39.5,
+        "north": 40.5
+      },
+      "probes": []
+    },
+    {
+      "id": "aeqd-polar--1",
+      "definition": "+proj=aeqd +lat_0=-90 +lon_0=0 +ellps=WGS84",
+      "oracle": "+proj=aeqd +lat_0=-90 +lon_0=0 +ellps=WGS84",
+      "oracleNotes": "Original polar meridian quadrature checked against PROJ; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": -179,
+        "east": 179,
+        "south": -89,
+        "north": 89
+      },
+      "probes": []
+    },
+    {
+      "id": "aeqd-polar-1",
+      "definition": "+proj=aeqd +lat_0=90 +lon_0=0 +ellps=WGS84",
+      "oracle": "+proj=aeqd +lat_0=90 +lon_0=0 +ellps=WGS84",
+      "oracleNotes": "Original polar meridian quadrature checked against PROJ; no datum operation.",
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "roundtripTolerance": 1e-08,
+      "bounds": {
+        "west": -179,
+        "east": 179,
+        "south": -89,
+        "north": 89
+      },
+      "probes": []
     }
   ]
 }

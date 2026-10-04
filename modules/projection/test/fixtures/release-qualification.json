@@ -22,8 +22,8 @@
     "datumPoints": 144,
     "gridDatasets": 3,
     "gridPoints": 87,
-    "accuracyDomains": 15,
-    "accuracyPoints": 4005
+    "accuracyDomains": 42,
+    "accuracyPoints": 11160
   },
   "reviewedExceptions": [
     "equatorial-stereographic-y0",
