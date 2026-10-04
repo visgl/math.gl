@@ -75,3 +75,16 @@ export function runners(shape: Shape, inverse: boolean) {
   };
   return [geometry, scalar, flat];
 }
+
+/** Complete public construction, including owned geometry snapshots/CRS parsing. */
+export function factories(shape: Shape) {
+  return [
+    () => Ellipsoid.fromSpheroid({semiMajorAxis: shape.a, semiMinorAxis: shape.b}),
+    () =>
+      new ProjectionEngine({
+        from: `+proj=longlat +a=${shape.a} +b=${shape.b}`,
+        to: `+proj=geocent +a=${shape.a} +b=${shape.b}`,
+        projections: [geocentric]
+      })
+  ];
+}

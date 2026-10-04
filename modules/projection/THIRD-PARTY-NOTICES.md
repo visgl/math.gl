@@ -151,3 +151,13 @@ remain intact. CI checks every source header and the proj4js/PROJ credits.
 adapter. This original adapter change retains the existing attributed interpolation
 and inverse kernel described above. Successful calls still return an owned tuple.
 No additional third-party code or model data is included.
+
+## Shared spheroid arithmetic
+
+The existing proj4js-derived geocentric forward equations and Hannover inverse from
+`datum.ts` now live in `@math.gl/core/spheroid`, used by projection and the qualified
+sphere/oblate geometry paths. The numeric leaf retains the proj4js SPDX copyright,
+MIT identifier and full `PROJ4-LICENSE.md` in the core package. The safeguarded
+surface/exterior fallback and adapters are original math.gl work. No new upstream
+source or model data is introduced. Geospatial retains its existing Cesium-derived
+three-radius/interior kernels and Apache-2.0 attribution.

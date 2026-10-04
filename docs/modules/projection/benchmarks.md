@@ -802,3 +802,55 @@ WKT/rotated lazy initial allowances increase; gzip/deferred allowances stay inta
 Projection still has no production dependency on the geospatial class. Existing
 CesiumJS/proj4js SPDX attribution remains attached, and no external model data or
 conversion code is added.
+
+
+### Shared spheroid conversions
+
+The shared-conversion [paired report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/shared-spheroid-node.json)
+uses Apple M2 / Node 24.14.0, 5,000 Float64 XYZM points, seven samples and 4 ms
+thread-CPU aggregates. Baseline `66b70d5e` contains the landed #187 spheroid code;
+the candidate source fingerprint identifies this extraction. Both runtimes use
+the same independently authored normal-support workload, with every output
+validated before timing. Sphere, WGS84 and 2:1 flattened shapes are sampled in
+regional/near-pole regions, both directions, scalar reusable outputs and flat
+buffers. The extended extreme-flattening/interior tests are separate correctness
+qualification, not timing scenarios that the historical runtime supports.
+
+Complete public constructor factories are now timed separately in rotated order,
+20 instances per aggregate; these include shape snapshots and CRS parsing but
+exclude module loading. Coordinate timing excludes construction, source generation,
+reset copies and validation. Heap samples run after all timing and include collected
+allocations. Geospatial now reuses a plain scratch point and a setup-time shape
+snapshot; projection writes directly to its existing owned point. The shared leaf
+creates no coordinate arrays/objects. The source guard covers 11 numeric functions;
+runtime boxing remains separately sampled.
+
+The measured geospatial forward ratios range from 1.52 to 1.92x baseline
+in this snapshot. Several projection scalar/flat and flattened inverse cases
+regress, and 11 of the twelve rows flag timing spread. There is no overall throughput claim. Geospatial forward
+samples fall from roughly 200 bytes/point to near zero; inverse samples are lower
+for geospatial and generally similar for projection in this run. Zero samples
+are not a zero-allocation or zero-GC proof. The extraction deliberately avoids
+passing large numeric argument lists or vector-class outputs across the shared
+inverse boundary, which increased sampled allocations in local diagnostics.
+
+The [selective source-graph report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/shared-spheroid-bundles.json)
+compares identical historical/current source-level entries, browser ESM/es2020,
+esbuild minification and gzip level 9. Core's root graph is unchanged; the numeric
+leaf has no runtime imports, and projection graphs retain no geospatial/culling
+classes. The new leaf measures 1,734 minified / 803 gzip bytes. Source-graph deltas are
++1,334/+475 for projection core, +1,373/+423 for pipelines and +2,362/+852 for the
+Ellipsoid entry; core root adds zero bytes. Packed ESM core/pipeline/all-root
+measure 50,744/62,749/182,457 minified and 18,340/22,409/61,880 gzip bytes.
+Source-graph and packed ESM budgets use separately recorded bundling methods. New fallback support and public adapters have a bundle cost;
+only measured exceeded allowances are updated. Full upstream MIT attribution
+ships in the core package; no new third-party source or model data is added.
+
+```sh
+node modules/projection/scripts/benchmark-spheroid-compare.mjs \
+  --baseline-ref 66b70d5e --points 5000 --samples 7 --min-sample-ms 4 \
+  --clock thread-cpu --allocations --output /tmp/shared-spheroid-comparison.json
+node modules/projection/scripts/check-spheroid-boundary.mjs \
+  --baseline-ref 66b70d5e --output /tmp/shared-spheroid-bundles.json
+node modules/projection/scripts/check-spheroid-allocations.mjs
+```

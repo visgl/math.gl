@@ -80,7 +80,10 @@ projection and produces different northings.
 [`Ellipsoid`](../geospatial/api-reference/ellipsoid.md) supports surface geometry,
 local frames and three independent radii. Projection CRS definitions use the
 sphere/oblate-spheroid subset. Both modules share `SpheroidParameters`, a type-only
-contract for the two axes in metres.
+contract for the two axes in metres. They also share the low-level
+[spheroid conversions](../core/api-reference/spheroid.md) for forward conversion
+and the qualified sphere/oblate surface/exterior inverse. Geospatial retains its
+three-radius and interior geometry paths.
 
 ```ts
 import {Ellipsoid} from '@math.gl/geospatial';

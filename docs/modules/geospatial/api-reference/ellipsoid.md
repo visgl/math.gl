@@ -170,8 +170,10 @@ Returns
 
 Converts the provided Cartesian position to cartographic representation. Latitude
 retains precision near the poles. Returns `undefined` at the center, for non-finite
-or unrepresentable inputs, or when surface inversion cannot converge within its
-64-update bound; an existing result is left unchanged. The center-neighborhood
+or unrepresentable inputs, or when its bounded inverse cannot converge; an existing
+result is left unchanged. Sphere/oblate surface and exterior conversions use the
+shared [spheroid helpers](../../core/api-reference/spheroid.md). Three-radius and
+interior surface inversion retain the 64-update bound. The center-neighborhood
 radial fallback remains an approximation for deep interior positions.
 
 - `cartesian` The Cartesian position to convert to cartographic representation.

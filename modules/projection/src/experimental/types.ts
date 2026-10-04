@@ -42,6 +42,8 @@ export type ProjectionImplementation = {
 
 /** Initialized geometry shared by projection plugins. No datum shift is implied. */
 export type ProjectionContext = {
+  /** Preserve the normalized polar axis; recovering it from eccentricity can lose precision. */
+  readonly semiMinorAxis?: number;
   readonly semiMajorAxis: number;
   readonly eccentricitySquared: number;
   readonly parameters: ProjectionParameters;

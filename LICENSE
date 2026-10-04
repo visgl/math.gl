@@ -138,3 +138,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+---
+
+The shared numeric spheroid entry in @math.gl/core retains the existing
+proj4js-derived forward geocentric and Hannover inverse arithmetic. The core
+package includes its full upstream MIT notice in modules/core/PROJ4-LICENSE.md;
+the projection package retains its corresponding PROJ4-LICENSE.md.
