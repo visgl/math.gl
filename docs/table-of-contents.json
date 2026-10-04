@@ -190,6 +190,7 @@
           "modules/projection/operation-pipelines",
           "modules/projection/operation-selection",
           "modules/projection/deformation-models",
+          "modules/projection/deformation-qualification",
           "modules/projection/api-reference/projection",
           "modules/projection/api-reference/projection-engine",
           "modules/projection/benchmarks",

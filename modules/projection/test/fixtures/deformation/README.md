@@ -9,6 +9,13 @@ data is copied. Test assets are excluded from the npm package.
 The accompanying JSON references pin pyproj 3.7.2 / PROJ 9.5.1, source/generator
 and TIFF hashes, native forward evaluations and independent inverse roots obtained
 by querying that forward operation. Legacy PROJ inverse outputs remain separate.
-Run `node modules/proj4/scripts/check-deformation-reference.mjs` to verify the
+Run `node modules/projection/scripts/check-deformation-reference.mjs` to verify the
 checked-in data offline. Regeneration requires the pinned Python environment;
 ordinary CI needs neither Python nor network access.
+
+The separate `deformation-stress-reference.json` contains original nonlinear spatial
+field references from an 80-digit Decimal normal-footpoint/coupled Newton oracle.
+It consumes exact stored binary64 coordinates and certifies inverse forward residuals
+below 1e-40 metres. Regenerate with `generate-deformation-stress-reference.py`; CI
+uses `--check` for exact reproducibility with no third-party Python packages.
+These references qualify sampled numerical contracts, not authoritative model accuracy.
