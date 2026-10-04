@@ -204,7 +204,8 @@
           "modules/sun/api-reference/get-sun",
           "modules/sun/api-reference/get-sun-direction",
           "modules/sun/api-reference/moon",
-          "modules/sun/api-reference/get-starfield-rotation"
+          "modules/sun/api-reference/get-starfield-rotation",
+          "modules/sun/api-reference/get-planet-sky-info"
         ]
       },
       {

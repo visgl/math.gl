@@ -27,11 +27,27 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./planets": {
+      "types": "./dist/planets.d.ts",
+      "import": "./dist/planets.js",
+      "require": "./dist/planets.cjs"
     }
   },
   "files": [
     "dist",
     "src",
     "LICENSE-SUNCALC"
-  ]
+  ],
+  "peerDependencies": {
+    "astronomy-engine": "^2.1.19"
+  },
+  "peerDependenciesMeta": {
+    "astronomy-engine": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "astronomy-engine": "2.1.19"
+  }
 }

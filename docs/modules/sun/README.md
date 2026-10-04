@@ -21,6 +21,10 @@ const sunDir = getSunDirection(Date.now(), latitude, longitude);
 
 The module also provides [moon position, direction, phase and direct moonlight](./api-reference/moon.md), plus a [star-field rotation](./api-reference/get-starfield-rotation.md) for orienting an equatorial cubemap at the observer’s location and time.
 
+## Planets
+
+The optional [planet sky API](./api-reference/get-planet-sky-info.md) returns positions, disk sizes, phases and planet magnitudes, including the four Galilean moons. It also estimates twilight visibility and searches rise/set and visible time windows. Install `astronomy-engine` and import from `@math.gl/sun/planets`.
+
 ## Attribution
 
 This module is a fork of @mourner's [SunCalc](https://github.com/mourner/suncalc) under BSD 2-clause license.
