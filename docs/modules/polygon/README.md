@@ -1,5 +1,13 @@
 # Overview
 
+import Example from '@site/src/components/polygon-playground';
+
+## Polygon playground
+
+<Example inline />
+
+[Open the interactive example](/examples/polygon-playground).
+
 ## Installation
 
 ```bash
@@ -9,7 +17,7 @@ npm install @math.gl/polygon
 ## Usage
 
 ```js
-import {Vector2} from '@math.gl/polygon';
+import {earcut, getPolygonSignedArea} from '@math.gl/polygon';
 ```
 
 ## Attribution

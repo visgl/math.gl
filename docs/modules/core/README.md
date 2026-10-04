@@ -2,6 +2,14 @@
 
 Basic 3D math classes (vectors, matrices, quaternions etc) for JavaScript.
 
+import Example from '@site/src/components/core-transforms';
+
+## Core transforms
+
+<Example inline />
+
+[Open the interactive example](/examples/core-transforms).
+
 ## Installation
 
 ```bash
