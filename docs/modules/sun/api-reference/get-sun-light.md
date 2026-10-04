@@ -107,19 +107,22 @@ instantaneous cloud shadows or a forecast of measured irradiance.
 - [NOAA, The Color of Clouds](https://www.noaa.gov/jetstream/clouds/color-of-clouds): cloud
   scattering and preservation of incoming sunlight color.
 
-The original TypeScript API and integration tools use math.gl's MIT license and have
-`SPDX-License-Identifier: MIT` comments. The BSD-3-Clause notice remains applicable to the
-derived model data; the MIT package declaration does not relicense it.
+The original TypeScript API and generator wrapper use math.gl's MIT license and carry
+`SPDX-License-Identifier: MIT` comments. The JavaScript model evaluator is adapted from
+the reference implementation and carries BSD-3-Clause SPDX attribution, as do the derived
+model data. The MIT package declaration does not relicense those files.
 
 ## Reproducing the tables
 
 Download the published `HosekWilkie_SkylightModel_C_Source.1.4a.zip` from the reference page,
-then run (requires a C compiler and `unzip`):
+then run with Node.js and `unzip`:
 
 ```bash
 node modules/sun/scripts/generate-sunlight.mjs /path/to/HosekWilkie_SkylightModel_C_Source.1.4a.zip
 ```
 
-The generator verifies the archive SHA-256 before compiling the reference. Generated
-fixtures use twice the tables' angular quadrature resolution and include off-grid
-altitude/turbidity cases. Runtime use requires no compiler, downloads, or dependencies.
+The generator verifies the archive SHA-256 and parses its numeric coefficient arrays.
+The model evaluation and spectral integration run entirely in JavaScript; no native code
+is compiled or executed. Generated fixtures use twice the tables' angular quadrature
+resolution and include off-grid altitude/turbidity cases. Runtime use requires no
+downloads or dependencies.

@@ -8,39 +8,26 @@ import {mkdtempSync, readFileSync, writeFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {readCoefficients, sampleSunlight} from './sample-sunlight.mjs';
 
 // No automatic downloads: supply the unmodified, published reference ZIP explicitly.
 const archive = process.argv[2];
 if (!archive)
-  throw new Error(
-    'Usage: node modules/sun/scripts/generate-sunlight.mjs <reference.zip>'
-  );
+  throw new Error('Usage: node modules/sun/scripts/generate-sunlight.mjs <reference.zip>');
 const digest = createHash('sha256').update(readFileSync(archive)).digest('hex');
-if (
-  digest !== '743e81a7fcbed06408490a303dcf1315083d7988a11fc69608e66f6e5417f9de'
-) {
-  throw new Error(
-    'Expected the published Hošek-Wilkie 1.4a archive (SHA-256 mismatch)'
-  );
+if (digest !== '743e81a7fcbed06408490a303dcf1315083d7988a11fc69608e66f6e5417f9de') {
+  throw new Error('Expected the published Hošek-Wilkie 1.4a archive (SHA-256 mismatch)');
 }
 const moduleRoot = fileURLToPath(new URL('../', import.meta.url));
 const temporary = mkdtempSync(join(tmpdir(), 'math-gl-sun-'));
 try {
   execFileSync('unzip', ['-q', resolve(archive), '-d', temporary]);
   const source = join(temporary, 'HosekWilkie_SkylightModel_C_Source.1.4a');
-  const executable = join(temporary, 'sample-sunlight');
-  execFileSync('cc', [
-    '-O2',
-    '-I',
-    source,
-    join(moduleRoot, 'scripts/sample-sunlight.c'),
-    join(source, 'ArHosekSkyModel.c'),
-    '-lm',
-    '-o',
-    executable
-  ]);
-  const data = JSON.parse(
-    execFileSync(executable, [], {encoding: 'utf8', maxBuffer: 2e6})
+  const coefficients = readCoefficients(
+    readFileSync(join(source, 'ArHosekSkyModelData_Spectral.h'), 'utf8')
+  );
+  const data = Array.from({length: 10}, (_, i) =>
+    Array.from({length: 91}, (_, altitude) => sampleSunlight(coefficients, altitude, i + 1, 32))
   );
   const notice = readFileSync(join(moduleRoot, 'LICENSE-HOSEK-WILKIE'), 'utf8');
   const header =
@@ -52,8 +39,7 @@ try {
     notice +
     '*/\n';
   const rows = data.map(
-    (table) =>
-      '[\n' + table.map((row) => '  ' + JSON.stringify(row)).join(',\n') + '\n]'
+    table => '[\n' + table.map(row => '  ' + JSON.stringify(row)).join(',\n') + '\n]'
   );
   writeFileSync(
     join(moduleRoot, 'src/data/sunlight.ts'),
@@ -76,11 +62,7 @@ try {
   const fixtures = cases.map(([altitude, turbidity]) => ({
     altitude,
     turbidity,
-    irradiance: JSON.parse(
-      execFileSync(executable, [String(altitude), String(turbidity)], {
-        encoding: 'utf8'
-      })
-    )
+    irradiance: sampleSunlight(coefficients, altitude, turbidity, 64)
   }));
   writeFileSync(
     join(moduleRoot, 'test/data/sunlight-reference.ts'),
