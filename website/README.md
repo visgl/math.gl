@@ -86,3 +86,12 @@ frame. The polygon example uses deck.gl-community editing in Cartesian coordinat
 and math.gl triangulation/area/winding; invalid geometries are rejected. The core
 example evaluates `Matrix4` transforms and uses luma.gl `OrbitControls` to move a
 separate camera. Unmounting disposes controls, Deck, observers, and render loops.
+
+## Geometry viewer
+
+`src/components/geometry-viewer` embeds the shared `examples/geometry-viewer` renderer
+in the overview and each primitive reference page. Pass `geometry` for a CPU mesh,
+or `geometryType` and `geometryProps` for a primitive constructor and its options.
+The gallery offers all nine primitives. luma.gl `Model` renders depth-tested meshes
+and triangle edges; `OrbitControls` handles the camera. Bounds fitting uses a copy
+of the position data. Changing geometry releases the previous canvas and GPU resources.
