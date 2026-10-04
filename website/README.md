@@ -79,9 +79,10 @@ selected interpolation; the colored texture uses the same fixed signed scale.
 
 ## Polygon and core playgrounds
 
-`examples/polygon-playground` and `examples/core-transforms` share their React/SVG
+`examples/polygon-playground` and `examples/core-transforms` share their React
 renderers with the website sidebar and module overviews. Each can run standalone
-with its workspace `start` script. They use the lazy fullscreen documentation
-frame. Polygon vertices support pointer dragging and arrow keys; invalid outlines
-are rejected before triangulation. Core controls evaluate an actual `Matrix4` and
-display the transformed cube, matrix rows, and a sample transformed point.
+with its workspace `start` script. Both use the lazy fullscreen documentation
+frame. The polygon example uses deck.gl-community editing in Cartesian coordinates
+and math.gl triangulation/area/winding; invalid geometries are rejected. The core
+example evaluates `Matrix4` transforms and uses luma.gl `OrbitControls` to move a
+separate camera. Unmounting disposes controls, Deck, observers, and render loops.

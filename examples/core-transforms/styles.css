@@ -119,7 +119,7 @@
   min-height: 220px;
   height: 0;
 }
-.core-transforms-view > div {
+.core-transforms-view > div:not(.core-camera-view) {
   flex: none;
 }
 @media (max-width: 600px) {
@@ -127,4 +127,24 @@
     flex: none;
     height: 500px;
   }
+}
+.core-camera-view {
+  position: relative;
+  flex: 1;
+  min-height: 220px;
+}
+.core-camera-view canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.core-camera-view canvas:focus-visible {
+  outline: 2px solid #70c7ff;
+  outline-offset: -2px;
+}
+.core-camera-view .camera-reset {
+  position: absolute;
+  top: 8px;
+  left: 8px;
 }

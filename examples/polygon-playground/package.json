@@ -9,7 +9,19 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@deck.gl-community/editable-layers": "^9.4.1",
+    "@deck.gl/core": "~9.4.0",
+    "@deck.gl/extensions": "~9.4.0",
+    "@deck.gl/geo-layers": "~9.4.0",
+    "@deck.gl/layers": "~9.4.0",
+    "@deck.gl/mesh-layers": "~9.4.0",
+    "@loaders.gl/core": "^4.4.3",
+    "@luma.gl/constants": "~9.4.0",
+    "@luma.gl/core": "~9.4.0",
+    "@luma.gl/engine": "~9.4.0",
+    "@luma.gl/shadertools": "~9.4.0",
     "@math.gl/polygon": "workspace:*",
+    "h3-js": "^4.2.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
