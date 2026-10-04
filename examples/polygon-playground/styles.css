@@ -107,3 +107,26 @@
     font-size: 12px;
   }
 }
+.polygon-editor-view {
+  position: relative;
+  min-height: 0;
+}
+.polygon-editor-view canvas {
+  position: absolute;
+  inset: 0;
+}
+.math-playground input[type='number'] {
+  width: 100%;
+  box-sizing: border-box;
+  background: #19344e;
+  color: white;
+  border: 1px solid #6c8195;
+  border-radius: 4px;
+  padding: 4px;
+}
+@media (max-width: 600px) {
+  .polygon-editor-view {
+    height: 360px;
+    flex: none;
+  }
+}
