@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import type {SpheroidParameters} from '@math.gl/core';
 import type {ReadonlyCRSDefinition} from '@math.gl/crs';
 import type {ProjectionParameters} from '../types';
 import type {DatumGridReference} from '../grids/types';
@@ -24,9 +25,7 @@ export type CRSParser = {
   canParse(definition: ReadonlyCRSDefinition): boolean;
   parse(definition: ReadonlyCRSDefinition, options: CRSNormalizationOptions): ParsedCRS;
 };
-export type Ellipsoid = {
-  readonly semiMajorAxis: number;
-  readonly semiMinorAxis: number;
+export type Ellipsoid = SpheroidParameters & {
   readonly eccentricitySquared: number;
 };
 export type Datum = {

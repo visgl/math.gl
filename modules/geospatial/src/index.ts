@@ -8,3 +8,5 @@ export {LngLatRectangle} from './lng-lat-rectangle';
 export {makeOBBFromRegion} from './make-obb-from-region';
 export type {GeodeticRegion, MakeOBBFromRegionOptions} from './make-obb-from-region';
 export {isWGS84} from './type-utils';
+
+export type {SpheroidParameters} from '@math.gl/types';

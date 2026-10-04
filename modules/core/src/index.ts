@@ -68,3 +68,5 @@ export {
   lerp,
   withEpsilon
 } from './lib/common';
+
+export type {SpheroidParameters} from '@math.gl/types';

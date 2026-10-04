@@ -11,3 +11,5 @@ For documentation please visit the [website](https://math.gl).
 Sunlight color and intensity use derived Hošek–Wilkie 1.4a model data under BSD-3-Clause.
 The complete copyright and license notice is included in `LICENSE-HOSEK-WILKIE`.
 Original math.gl code is MIT-licensed; generated data carries its own SPDX notice.
+
+Lunar ephemeris and illumination calculations are adapted from SunCalc 1.9.0 under BSD-2-Clause. The full notice is included in `LICENSE-SUNCALC`. Original moonlight and star-field rotation code is MIT-licensed; source files carry SPDX ownership and provenance comments.

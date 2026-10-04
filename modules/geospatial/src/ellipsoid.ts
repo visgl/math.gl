@@ -9,6 +9,7 @@
 
 /* eslint-disable */
 import {Vector3, Matrix4, assert, equals, _MathUtils, NumericArray} from '@math.gl/core';
+import type {SpheroidParameters} from '@math.gl/types';
 import * as vec3 from '@math.gl/core/vec3';
 
 import {WGS84_RADIUS_X, WGS84_RADIUS_Y, WGS84_RADIUS_Z} from './constants';
@@ -33,6 +34,15 @@ const scratchCartesian = new Vector3();
 export class Ellipsoid {
   /** An Ellipsoid instance initialized to the WGS84 standard. */
   static readonly WGS84: Ellipsoid = new Ellipsoid(WGS84_RADIUS_X, WGS84_RADIUS_Y, WGS84_RADIUS_Z);
+
+  /** Construct from two-axis geometry, including normalized projection ellipsoids.
+   * The equatorial X/Y radii are equal; no CRS or datum information is inferred.
+   */
+  static fromSpheroid(parameters: SpheroidParameters): Ellipsoid {
+    const {semiMajorAxis, semiMinorAxis} = parameters;
+    validateSpheroid(semiMajorAxis, semiMinorAxis);
+    return new Ellipsoid(semiMajorAxis, semiMajorAxis, semiMinorAxis);
+  }
 
   readonly radii: Vector3;
   readonly radiiSquared: Vector3;
@@ -80,6 +90,17 @@ export class Ellipsoid {
     }
 
     Object.freeze(this);
+  }
+
+  /** Return an owned geometry snapshot for a sphere or oblate spheroid.
+   * Triaxial, prolate and degenerate ellipsoids cannot be represented by this contract.
+   * Call during setup, outside coordinate loops.
+   */
+  toSpheroid(): SpheroidParameters {
+    const {x, y, z} = this.radii;
+    if (x !== y) throw new Error('Spheroid requires equal X/Y radii');
+    validateSpheroid(x, z);
+    return Object.freeze({semiMajorAxis: x, semiMinorAxis: z});
   }
 
   /** Compares this Ellipsoid against the provided Ellipsoid componentwise */
@@ -280,4 +301,10 @@ export class Ellipsoid {
 
     return scratchPosition.set(0.0, 0.0, z).to(result);
   }
+}
+
+// Original parameter adapter; conversion and surface kernels above retain Cesium attribution.
+function validateSpheroid(a: number, b: number): void {
+  if (!Number.isFinite(a) || !Number.isFinite(b) || a <= 0 || b <= 0 || b > a)
+    throw new Error('Spheroid requires finite positive axes with semiMinorAxis <= semiMajorAxis');
 }

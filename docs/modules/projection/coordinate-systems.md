@@ -75,6 +75,46 @@ with latitude. It is convenient for tiled basemaps; its planar meters should not
 be treated as accurate ground distances. Ellipsoidal Mercator is a different
 projection and produces different northings.
 
+### Interoperating with geospatial ellipsoids
+
+[`Ellipsoid`](../geospatial/api-reference/ellipsoid.md) supports surface geometry,
+local frames and three independent radii. Projection CRS definitions use the
+sphere/oblate-spheroid subset. Both modules share `SpheroidParameters`, a type-only
+contract for the two axes in metres.
+
+```ts
+import {Ellipsoid} from '@math.gl/geospatial';
+import {normalizeCRS, ProjectionEngine} from '@math.gl/projection/core';
+import {geocentric} from '@math.gl/projection/projections/geocent';
+
+const normalized = normalizeCRS('+proj=longlat +ellps=GRS80');
+const shape = Ellipsoid.fromSpheroid(normalized.ellipsoid);
+const {semiMajorAxis: a, semiMinorAxis: b} = shape.toSpheroid();
+const geometry = `+a=${a} +b=${b}`;
+const conversion = new ProjectionEngine({
+  from: `+proj=longlat ${geometry}`,
+  to: `+proj=geocent ${geometry}`,
+  projections: [geocentric]
+});
+// Same shape, longitude/latitude degrees and ellipsoidal height metres.
+const xyz = conversion.project([12, 55, 100]);
+```
+
+The adapters transfer geometry only. They do not reconstruct a CRS or identify a
+datum transformation. Triaxial and prolate geospatial ellipsoids cannot be
+represented by this projection contract and are rejected by `toSpheroid()`.
+Keep adapter calls outside coordinate loops; projection imports do not load the
+geospatial class.
+
+Geospatial conversions use degrees by default, or radians when
+`config._cartographicRadians` is enabled. Projection's public CRS conversions use
+the declared CRS units independently of that global setting; a pipeline `cart`
+step requires radians. At the center, geospatial returns `undefined` while
+projection throws. At exact poles, projection canonicalizes longitude to zero.
+Near exact poles, geospatial's surface-normal inverse can also lose more latitude
+precision than the projection inverse. These existing contracts and numerical
+limitations are recorded in cross-module tests; their kernels have not been combined.
+
 ## Datums: the reference frame
 
 An ellipsoid provides a shape. A geodetic datum or reference frame establishes how
