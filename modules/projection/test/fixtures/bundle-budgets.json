@@ -203,7 +203,7 @@
     },
     "utm": {
       "minified": 55200,
-      "gzip": 20300
+      "gzip": 20500
     },
     "wkt": {
       "minified": 55000,
