@@ -71,3 +71,9 @@ This library was initially created as part of a bigger collaboration between the
 ## Attribution
 
 This code is a fork of selected classes in the [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) code base, under the Apache 2 License.
+
+## Globe queries
+
+[EllipsoidOccluder and globe horizon bounds](./api-reference/globe-queries.md) provide
+true ray intersections, elevated-point occlusion, exact limb ellipses and wrapped
+conservative imagery coverage without a viewport or rendering dependency.

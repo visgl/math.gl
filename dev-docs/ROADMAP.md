@@ -38,11 +38,3 @@ The [six-tranche sun and sky roadmap](../docs/modules/sun/roadmap.md) tracks sha
 coordinates, visibility, atmosphere, celestial appearance, stars, and accuracy/performance
 tiers. The sky and bright-star APIs are delivered; observational calibration, shared
 star visibility and formal tier budgets remain follow-ups.
-
-## Shared globe primitives
-
-The [Kepler globe convergence roadmap](./kepler-globe-convergence.md) stages the
-rebuild of Kepler globe support on general math.gl, luma.gl, loaders.gl, deck.gl
-and deck.gl-community primitives. It records merged source improvements, package
-ownership, reusable geometry gaps and qualification gates for replacing application
-workarounds with supported library APIs.

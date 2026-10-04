@@ -1,0 +1,13 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MIT -->
+<!-- SPDX-FileCopyrightText: Copyright (c) vis.gl contributors -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Shared globe primitives</title>
+<style>body{margin:0;background:#081321;color:#e4eefb;font:16px system-ui}main{max-width:1100px;margin:36px auto;padding:20px}h1{font-size:32px}p{color:#b8cbe0;line-height:1.5}.layout{display:grid;grid-template-columns:1fr 310px;gap:28px}canvas{width:100%;background:#040b14;border-radius:16px}label{display:block;margin:20px 0}input{width:100%}pre{font:13px monospace;white-space:pre-wrap;line-height:1.7}.key{color:#ffbd69}button{background:#20374e;border:0;color:white;padding:9px;border-radius:6px;cursor:pointer}@media(max-width:750px){.layout{display:block}}</style></head>
+<body><main><h1>One globe. Shared geometry.</h1><p>Ray casting, horizon coverage, elevated labels and curved meshes use math.gl APIs. This scene runs without Kepler or a rendering framework.</p><div class="layout"><canvas id="globe" width="640" height="640" aria-label="Globe with curved mesh, limb and elevated marker"></canvas><aside>
+<label>Camera longitude <output id="longitude-value"></output><input id="longitude" type="range" min="-180" max="180" value="0"></label>
+<label>Camera latitude <output id="latitude-value"></output><input id="latitude" type="range" min="-90" max="90" value="20"></label>
+<label>Camera distance <output id="distance-value"></output><input id="distance" type="range" min="1.2" max="5" step="0.05" value="2.5"></label>
+<label>Marker height <output id="height-value"></output><input id="height" type="range" min="0" max="1" step="0.02" value="0.5"></label>
+<label>Mesh tolerance <output id="tolerance-value"></output><input id="tolerance" type="range" min="0.001" max="0.03" step="0.001" value="0.01"></label>
+<button id="dateline">Dateline view</button> <button id="pole">Polar view</button>
+<p><span class="key">Orange</span>: exact limb ellipse. Cyan: bounded curved mesh. Gold marker at longitude 90° rises above the horizon as its height increases.</p><pre id="metrics"></pre></aside></div><p id="picking">Move over the globe: true ray hits and misses distinguish surface from sky.</p></main><script type="module" src="./app.js"></script></body></html>

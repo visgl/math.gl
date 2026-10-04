@@ -33,3 +33,6 @@ export type {
   SubdivideTriangleMeshOptions,
   SubdividedTriangleMesh
 } from './subdivide-triangle-mesh';
+
+export {subdivideGlobeMesh} from './subdivide-globe-mesh';
+export type {SubdivideGlobeMeshOptions} from './subdivide-globe-mesh';

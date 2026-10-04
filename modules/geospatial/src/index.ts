@@ -10,3 +10,8 @@ export type {GeodeticRegion, MakeOBBFromRegionOptions} from './make-obb-from-reg
 export {isWGS84} from './type-utils';
 
 export type {SpheroidParameters} from '@math.gl/types';
+
+export {EllipsoidOccluder} from './ellipsoid-occluder';
+export type {EllipsoidHorizon} from './ellipsoid-occluder';
+export {getGlobeHorizonBounds, splitGlobeBounds} from './globe-horizon-bounds';
+export type {GlobeBounds} from './globe-horizon-bounds';
