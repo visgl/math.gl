@@ -327,8 +327,8 @@ node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref or
 
 This runner compares the historical and current `ProjectionPipeline` using the same
 source bundler and installed dependencies. The base must support the tested static
-and kinematic pipeline APIs. It covers 26 scenarios in both precisions, XYZ/XYZM and
-both directions (208 rows): units, signed axes, Mercator-to-UTM, static and exact
+and kinematic pipeline APIs. It covers 31 scenarios in both precisions, XYZ/XYZM and
+both directions (248 rows): units, signed axes, Mercator-to-UTM, static and exact
 Helmert, horizontal/vertical grids, ordinate stacks and batch/mixed observation epochs.
 Coordinates have repeatable bounded jitter around the independently checked fixtures.
 One epoch buffer is supplied separately and stays unchanged; M varies by record.
@@ -350,7 +350,10 @@ main-thread work rather than elapsed throughput. Allocation sampling starts afte
 does not affect later timing rows. Its untimed pass reports sampled estimates,
 including collected objects. `--allocation-iterations` controls the untimed repetitions
 (default 10, maximum 100,000), allowing allocation sampling of short repeated batches
-without changing timing sample counts or default CI work.
+without changing timing sample counts or default CI work. Optional `--allocation-sites`
+requires `--allocations` and adds the largest sampled sites with compiled bundle positions
+and call stacks. These positions are not source lines or counts of explicit object
+creation, and sampling cannot prove an allocation-free runtime.
 
 Tranche 13A keeps mutable kinematic coefficients and their cached epoch in owned
 Float64 storage, reducing numeric boxing when epochs change. It also prepares fixed
@@ -506,7 +509,7 @@ default. Correctness/package budgets are enforced without speed thresholds.
 
 Pipelines containing only unit/axis steps, with at least one unit conversion in the
 selected direction, use a whole-buffer numeric runner. Pure axis programs keep general dispatch; the separately qualified static Helmert
-subset is described below. Mixed programs retain general dispatch. Multiplication and division remain distinct, each
+subset is described below. Mixed programs retain general dispatch; their expanded qualification is described at the end of this page. Multiplication and division remain distinct, each
 intermediate must be finite, and Float32 rounds only on a completed record. Stride,
 height, trailing ordinates, epoch validation and partial-error behavior are unchanged.
 General scalar/bulk calls share one instance point and a lazily cached pipeline stack;
@@ -667,3 +670,73 @@ Pipeline/all-root bundles measure 61,230/180,906 minified and 21,933/61,346 gzip
 +1,090/+1,094 minified and +342/+353 gzip versus static Helmert buffers. Core, wrapper,
 selective, catalogue, deformation and all lazy initial/deferred profiles remain
 unchanged. Only exceeded pipeline/all-root allowances increase with rounding headroom.
+
+
+### Grid scratch and mixed-pipeline qualification
+
+The shared pipeline matrix adds horizontal-grid sampling and approximate/exact
+Helmert chains with units, signed axes and batch/per-record epochs. It now covers
+31 scenarios / 248 layout-direction rows, with independent authored unit/axis
+oracles composed with pinned PROJ anchors.
+
+A numeric-buffer prototype for mixed unit/axis and Helmert chains improved throughput
+but showed intermittent sampled allocation regressions after heterogeneous warmup.
+Narrowing it to constant-epoch rate stages did not remove that regression, so the
+prototype was not retained. Per-record epoch specialization also lacked repeatable
+speed gains. Mixed pipelines keep the existing general runner. The new cases and
+optional `--allocation-sites` diagnostics establish the next qualification gate;
+throughput alone is insufficient.
+
+```sh
+node modules/projection/scripts/benchmark-pipeline-compare.mjs \
+  --baseline-ref 4f0d3ae2 --points 10000 --samples 7 --min-sample-ms 4 \
+  --clock thread-cpu --allocations --allocation-sites \
+  --scenarios 'Static Helmert with units and axes,Exact Helmert with units and axes,Batch epoch Helmert with units and axes,Mixed epoch Helmert with units and axes,Static Helmert' \
+  --output /tmp/mixed-helmert-comparison.json
+```
+
+Prepared horizontal grids separately reuse a private working point for their
+owned-tuple `shift()` API. The interpolation and bounded inverse kernel are unchanged;
+`shiftInPlace()` still borrows the caller's point, while every successful `shift()`
+returns a new pair. Scratch never escapes and is reset before each call, including
+calls following coverage failures or inverse errors. This removes an explicit small
+object even when JIT timing or heap samples are inconclusive.
+
+```sh
+node modules/projection/scripts/benchmark-grid-compare.mjs \
+  --baseline-ref 4f0d3ae2 --sizes 65 --samples 9 --clock thread-cpu \
+  --coordinates --allocations --points 20000 \
+  --output /tmp/grid-coordinate-comparison.json
+```
+
+`--coordinates` times forward/inverse sampling separately for matching owned tuples
+and mutable outputs. Prepared grids, input generation and result buffers are outside
+timing; twenty warmups, rotated order and exact all-coordinate comparisons supplement
+the authored bilinear anchors. `--allocations` runs afterward and requires
+`--coordinates`; it reports sampled collected allocations, including runtime boxing.
+The existing preparation/retained-memory measurements stay separate. CI records
+bounded coordinate/allocation runs alongside the preparation reports.
+
+
+The [grid coordinate report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/grid-coordinate-scratch-node.json)
+uses 65 × 65 nodes, 20,000 coordinates and nine samples. All timing rows flag wide
+spread, so they do not establish a speedup. Separate owned-tuple allocation samples
+show:
+
+| Reader / direction | Baseline → scratch, sampled bytes/point |
+| --- | ---: |
+| NTv2 forward | 183.6 → 111.6 |
+| NTv2 inverse | 279.9 → 210.4 |
+| GeoTIFF adapter forward | 183.8 → 112.2 |
+| GeoTIFF adapter inverse | 283.8 → 214.1 |
+
+Mutable-output controls measure about 31–34 B/point forward and 129–133 B/point
+inverse. These are V8 sampling estimates, including numeric boxing and collected
+allocations; they are not exact object sizes or GC-pause measurements. The source
+guard independently prevents reintroducing a working object inside the tuple adapter.
+
+On Node 24.14.0 the grid adapter adds 12 minified bytes to horizontal-reader,
+wrapper and all-root profiles, with 6–16 gzip bytes. Pipeline-only, core, selective
+projection, catalogue and deformation profiles are unchanged. Existing static and
+lazy bundle allowances remain unchanged. The private working point is retained once
+per prepared grid; owned result arrays and runtime numeric boxing remain.

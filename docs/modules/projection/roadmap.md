@@ -529,13 +529,37 @@ This completes a targeted single-stage rate optimization. Mixed-stage chains,
 grid/datum-heavy workloads, further allocation/boxing investigation and optional
 acceleration remain subject to separate correctness and performance qualification.
 
+## Tranche 13A — Grid scratch and mixed-pipeline qualification: implemented follow-up
+
+Horizontal grids reuse a private working point for tuple-returning `shift()` calls.
+The returned pair remains an owned result; the mutable interpolation/inverse kernel
+is unchanged. Tests cover failure recovery and recursive application setters without
+exposing scratch. Timing is noisy, so allocation evidence does not imply a grid
+throughput claim.
+
+The shared benchmark matrix now covers 31 scenarios / 248 rows. Authored unit/axis
+oracles compose pinned PROJ Helmert anchors. New mixed-chain tests cover exact/scalar
+arithmetic, epochs, signed zero, strides and intermediate errors. Grid diagnostics
+separate owned tuples and mutable outputs, both directions and both reader formats.
+Optional heap source-site profiles help distinguish explicit allocations from runtime
+boxing. CI uploads bounded coordinate/allocation measurements alongside preparation
+reports. See [the measurements](./benchmarks.md#grid-scratch-and-mixed-pipeline-qualification).
+
+A mixed unit/axis and Helmert numeric-buffer prototype improved throughput but
+regressed sampled allocations after varied workloads, including when narrowed to
+constant-epoch rate stages. It was not retained. Per-record epoch specialization
+also failed to show repeatable gains. Mixed chains keep general dispatch; existing
+single-stage specializations remain intact. Further work must qualify allocation
+behavior after heterogeneous warmup as well as throughput, accuracy and bundle cost.
+This adds no public API, model data or acceleration backend.
+
 ## Remaining performance and geodetic roadmap
 
 | Tranche | Work | Acceptance gate |
 | --- | --- | --- |
 | 12C2 — Broader deformation qualification | Independently qualify application-provided real models and evaluate nonlinear/time-varying components | Reviewed data terms without distributing third-party models; explicit time/coverage/accuracy bounds |
 | 12E2 — Broader operation qualification | Independently qualify application-provided operation catalogues and irregular coverage/accuracy policies | Reviewed metadata/data terms, conservative coverage and comparable accuracy definitions; no bundled third-party database or implicit downloads |
-| 13A — Further JavaScript performance | Profile grid/datum-heavy and mixed-stage epoch pipelines; evaluate mixed-stage whole-buffer specializations and remaining runtime allocation/boxing | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
+| 13A — Further JavaScript performance | Profile grid/datum-heavy workloads, mixed unit/axis-Helmert chains and per-record epochs; avoid sampled allocation regressions after varied workloads | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
 | 13B–13D — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
 
 Further optimization and operation support require separate measurements and accuracy

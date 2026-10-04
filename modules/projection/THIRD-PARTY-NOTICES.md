@@ -143,3 +143,11 @@ and adapters retain their own copyright; importing an attributed kernel does not
 make the adapter a port. These tags follow the [SPDX source file tag convention](https://spdx.github.io/spdx-spec/v2.3/file-tags/).
 The original Equal Earth Apache notice and all distributed upstream license texts
 remain intact. CI checks every source header and the proj4js/PROJ credits.
+
+
+## Horizontal grid tuple adapter
+
+`src/experimental/grids/grid.ts` reuses a private working point in the tuple-returning
+adapter. This original adapter change retains the existing attributed interpolation
+and inverse kernel described above. Successful calls still return an owned tuple.
+No additional third-party code or model data is included.

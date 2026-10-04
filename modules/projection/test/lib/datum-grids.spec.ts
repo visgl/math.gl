@@ -440,3 +440,53 @@ test('rectangular GeoTIFF packed rows retain orientation, nodata and owned raste
   latitude.fill(0);
   close(native.project([-1.25, 0.625]), expected, 0);
 });
+
+test('prepared grid scratch remains isolated during recursive output setters', () => {
+  const grid = parseNTv2Grid(makeNTv2([{shift: () => [2, 1]}]));
+  const original = [-1 * D2R, 1 * D2R],
+    other = [-2 * D2R, 2 * D2R];
+  const expected = grid.shift(original[0], original[1], false)!;
+  let longitude = original[0],
+    latitude = original[1],
+    calls = 0;
+  const point = {
+    get x() {
+      return longitude;
+    },
+    set x(value: number) {
+      longitude = value;
+      calls++;
+      const nested = grid.shift(other[0], other[1], false)!;
+      expect(nested).toEqual(grid.shift(other[0], other[1], false));
+    },
+    get y() {
+      return latitude;
+    },
+    set y(value: number) {
+      latitude = value;
+    },
+    z: 123
+  };
+  expect(grid.shiftInPlace!(point, false)).toBe(true);
+  expect([longitude, latitude]).toEqual(expected);
+  expect(point.z).toBe(123);
+  expect(calls).toBeGreaterThan(0);
+  expected[0] = 999;
+  expect(grid.shift(original[0], original[1], false)![0]).not.toBe(999);
+});
+
+test('prepared grid scratch does not leak failed samples into caller coordinates', () => {
+  const grid = parseNTv2Grid(makeNTv2([{shift: () => [NaN, NaN]}]));
+  for (const inverse of [false, true]) {
+    const point = {x: -D2R, y: D2R, z: 123};
+    expect(grid.shiftInPlace!(point, inverse)).toBe(false);
+    expect(point).toEqual({x: -D2R, y: D2R, z: 123});
+    expect(grid.shift(-D2R, D2R, inverse)).toBeUndefined();
+  }
+  const divergent = parseNTv2Grid(makeNTv2([{shift: x => [(x - 1.5) * 3240, 0]}]));
+  const point = {x: -1.6 * D2R, y: D2R, z: 123};
+  expect(() => divergent.shift(-1.6 * D2R, D2R, true)).toThrow(/converge/);
+  const reference = divergent.shift(-D2R, D2R, false)!;
+  expect(divergent.shiftInPlace!(point, false)).toBe(true);
+  expect(divergent.shift(-D2R, D2R, false)).toEqual(reference);
+});

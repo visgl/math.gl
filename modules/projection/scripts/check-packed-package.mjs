@@ -226,6 +226,27 @@ try {
     }
 
 
+    for (const rates of [undefined, {translation:[.1,-.2,.3], rotation:[.01,-.02,.03], scalePPM:.5}]) {
+      const mixed = new ProjectionPipeline({input: exact.input, steps: [
+        {type:'unitconvert',xy:{from:'m',to:'ft'},z:{from:'m',to:'us-ft'}},
+        {type:'unitconvert',xy:{from:'ft',to:'m'},z:{from:'us-ft',to:'m'}},
+        {type:'helmert',translation:[1,2,3],rotation:[15000,-7000,3000],scalePPM:12.5,
+          exact:true,convention:'coordinate_frame',...(rates ? {rates,referenceEpoch:2000} : {})},
+        {type:'axisswap',order:[-3,1,-2]},
+        {type:'unitconvert',xy:{from:'m',to:'ft'},z:{from:'m',to:'us-ft'}}
+      ]});
+      for (const ArrayType of [Float32Array,Float64Array]) for (const inverse of [false,true])
+        for (const epochs of [2020,epochBuffer]) {
+          const buffer = new ArrayType([...exactInput,...exactInput]);
+          const expected = buffer.slice();
+          for (let offset=0;offset<buffer.length;offset+=4) expected.set(
+            (inverse ? mixed.unprojectSync : mixed.projectSync)(Array.from(buffer.subarray(offset,offset+4)),
+              typeof epochs==='number' ? epochs : epochs[offset/4]),offset);
+          assert.equal((inverse ? mixed.unprojectFlatSync : mixed.projectFlatSync)(buffer,4,epochs),buffer);
+          assert.deepEqual(Array.from(buffer),Array.from(expected));
+        }
+    }
+
     const {obliqueTransformation} = await load('@math.gl/projection/projections/ob_tran');
     const rotated = new ProjectionPipeline({input: {space: 'geographic', units: ['rad', 'rad', 'm']}, projections: [obliqueTransformation('longlat')], steps: [
       {type: 'projection', name: 'ob_tran', parameters: {o_proj: 'longlat', o_lat_p: '45', o_lon_p: '-90'}, output: {space: 'geographic', unit: 'rad'}}
