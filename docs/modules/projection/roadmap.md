@@ -557,7 +557,7 @@ This adds no public API, model data or acceleration backend.
 
 | Tranche | Work | Acceptance gate |
 | --- | --- | --- |
-| 12C2 — Broader deformation qualification | Independently qualify application-provided real models and evaluate nonlinear/time-varying components | Reviewed data terms without distributing third-party models; explicit time/coverage/accuracy bounds |
+| 12C2 — Broader deformation qualification | Apply the independent model/reference harness to reviewed real models and evaluate time-varying components | Reviewed data terms without distributing third-party models; explicit time/coverage/accuracy bounds |
 | 12E2 — Broader operation qualification | Independently qualify application-provided operation catalogues and irregular coverage/accuracy policies | Reviewed metadata/data terms, conservative coverage and comparable accuracy definitions; no bundled third-party database or implicit downloads |
 | 13A — Further JavaScript performance | Profile grid/datum-heavy workloads, mixed unit/axis-Helmert chains and per-record epochs; avoid sampled allocation regressions after varied workloads | Paired gains with unchanged accuracy, ownership/error contracts, allocations and bundle cost |
 | 13B–13D — Optional acceleration | Evaluate Wasm/SIMD, workers and visualization-oriented GPU paths | End-to-end gains include loading, memory transfer and bundle cost |
@@ -672,3 +672,19 @@ node modules/projection/scripts/check-local-frame-boundary.mjs
 node modules/projection/scripts/check-bundle-budget.mjs
 node modules/projection/scripts/benchmark.mjs --allocations --output /tmp/proj4-benchmark.json
 ```
+
+## Deformation qualification follow-up: authored stress and application harness
+
+108 independent Decimal/Newton references qualify a nonlinear spatial field on
+WGS84, sphere and flattened spheroid, including separate inverse targets,
+hemispheres/poles/dateline-adjacent points, heights and positive/negative/zero/fractional
+epoch intervals. Bulk checks preserve views, M/tails and epochs with explicit
+Float32 rounding limits. A local factory/reference CLI supports independently
+reviewed application-owned models without distributing their data. Node and browser
+CI retains error/provenance reports; the generator uses Python's standard library.
+
+Tests distinguish source-sampled displacement from trajectory integration and
+static velocity from temporal rate/event laws. Authoritative model qualification,
+nonlinear temporal components and events remain 12C2 follow-ups. See
+[deformation qualification](./deformation-qualification.md). No production API,
+coordinate allocation, package dependency or bundle budget changes.

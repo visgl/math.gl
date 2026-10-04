@@ -56,6 +56,12 @@ jobs:
           python3 modules/projection/scripts/generate-interior-reference.py --check
           node modules/projection/scripts/qualify-interiors.mjs --output /tmp/interior-qualification.json
 
+      - name: Check independent deformation stress references and qualification
+        run: |
+          python3 modules/projection/scripts/generate-deformation-stress-reference.py --check
+          node modules/projection/scripts/qualify-deformation-stress.mjs --output /tmp/deformation-stress-qualification.json
+          node modules/projection/scripts/check-application-deformation-qualification.mjs
+
       - name: Check generated CRS declarations
         run: yarn check:projjson-types
 
@@ -108,7 +114,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: projection-accuracy
-          path: /tmp/projection-accuracy.json
+          path: |
+            /tmp/projection-accuracy.json
+            /tmp/deformation-stress-qualification.json
           if-no-files-found: error
 
       - name: Check CRS type boundaries
@@ -217,9 +225,11 @@ jobs:
       - name: Install selected Playwright browser
         run: yarn playwright install --with-deps ${{ matrix.browser }}
 
-      - name: Qualify independent interior references
+      - name: Qualify independent interior and deformation references
         timeout-minutes: 2
-        run: node modules/projection/scripts/qualify-interiors.mjs --browser ${{ matrix.browser }} --output /tmp/interior-qualification-${{ matrix.browser }}.json
+        run: |
+          node modules/projection/scripts/qualify-interiors.mjs --browser ${{ matrix.browser }} --output /tmp/interior-qualification-${{ matrix.browser }}.json
+          node modules/projection/scripts/qualify-deformation-stress.mjs --browser ${{ matrix.browser }} --output /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
 
       # PRs validate the entire coordinate/workload matrix without repeatedly
       # expanding buffers for timing precision. Master retains full measurements.
@@ -236,6 +246,7 @@ jobs:
           name: projection-browser-qualification-${{ matrix.browser }}
           path: |
             /tmp/projection-browser-qualification.json
+            /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
             /tmp/interior-qualification-${{ matrix.browser }}.json
           if-no-files-found: error
 

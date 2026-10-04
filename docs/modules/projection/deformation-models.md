@@ -150,5 +150,7 @@ browser engines and checks fixture hashes and packed ESM/CommonJS/types.
 
 These authored fixtures validate the implemented contract, not a real model's
 accuracy or unrestricted PROJ parity. No third-party model files or new dependencies
-are distributed. Event offsets, nonlinear/time-varying components, automatic model
+are distributed. Spatially nonlinear application samplers have an additional independent stress
+profile and offline model/reference harness; see [model qualification](./deformation-qualification.md).
+Event offsets, time-varying components, trajectory integration, automatic model
 selection, dynamic CRS inference and model extrapolation are outside this profile.
