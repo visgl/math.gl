@@ -41,6 +41,7 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 | [Deformation models](./deformation-models.md) | Propagate coordinates between epochs with prepared velocity grids |
 | [Support and migration](./support.md) | Understand accepted definitions and differences from proj4js |
 | [Benchmarks](./benchmarks.md#live-benchmarks) | Compare math.gl flat and scalar transforms with proj4js in your browser |
+| [Projection scorecard](./scorecard.md) | Inspect source-matched accuracy, throughput, startup, allocation, memory and bundle evidence |
 | [Independent validation](./independent-validation.md) | Inspect numerical references and qualification limits |
 
 ## Choose an API

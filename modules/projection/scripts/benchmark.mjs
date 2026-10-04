@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Run after building projection. Same cases, seeded inputs and sampling as the live page.
-import {codeFingerprint, benchmarkFingerprint} from './benchmark-metadata.mjs';
+import {
+  codeFingerprint,
+  benchmarkFingerprint,
+  benchmarkDependencies
+} from './benchmark-metadata.mjs';
 import {loadBenchmark} from './load-benchmark.mjs';
 import {writeFileSync} from 'node:fs';
 import {cpus} from 'node:os';
@@ -68,6 +72,7 @@ if (values.allocations) {
 const report = {
   schemaVersion: 2,
   metadata: {
+    dependencies: benchmarkDependencies(),
     sourceSHA256: codeFingerprint(),
     workloadSHA256: benchmarkFingerprint(),
     date: new Date().toISOString(),

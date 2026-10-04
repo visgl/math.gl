@@ -973,3 +973,10 @@ M2; small batches and Mercator depend more on browser and timer resolution. See
 [the measurements, ownership recipe and backend boundaries](./acceleration.md).
 CI records all three browser results without a speed gate. Wasm SIMD and WebGPU
 capability probes do not benchmark projection implementations.
+
+## Consolidated scorecard
+
+The [projection scorecard](./scorecard.md) combines these measurements with
+independent accuracy, allocation sampling, isolated memory checkpoints, startup
+and bundle costs. Environments stay separate and missing browser heap evidence
+is explicit. See [the publication gates and commands](./scorecard-methodology.md).

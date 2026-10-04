@@ -211,6 +211,8 @@
           "modules/projection/api-reference/projection",
           "modules/projection/api-reference/projection-engine",
           "modules/projection/benchmarks",
+          "modules/projection/scorecard",
+          "modules/projection/scorecard-methodology",
           "modules/projection/parity-audit",
           "modules/projection/independent-validation",
           "modules/projection/accuracy-domains",

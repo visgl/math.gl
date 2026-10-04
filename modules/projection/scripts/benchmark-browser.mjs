@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original browser qualification of the proj4js-inspired native API.
-import {codeFingerprint, benchmarkFingerprint} from './benchmark-metadata.mjs';
+import {
+  codeFingerprint,
+  benchmarkFingerprint,
+  benchmarkDependencies
+} from './benchmark-metadata.mjs';
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
 import {chromium, firefox, webkit} from 'playwright';
@@ -249,6 +253,7 @@ const report = {
   schemaVersion: 2,
   metadata: {
     workloadSHA256: benchmarkFingerprint(),
+    dependencies: benchmarkDependencies(),
     sourceSHA256: codeFingerprint(),
     date: new Date().toISOString(),
     platform: process.platform,
