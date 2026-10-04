@@ -51,9 +51,7 @@ for (const geometry of geometries) {
             close(destination, xyz);
             geographicClose(engine.unproject(xyz), llh);
             expect(ellipsoid.cartesianToCartographic(xyz, destination)).toBe(destination);
-            // The surface-normal inverse uses asin(z); ±89.999999° loses angular precision.
-            const polarTolerance = Math.abs(lat) === 89.999999 ? 1e-6 : 1e-9;
-            geographicClose(destination, llh, polarTolerance);
+            geographicClose(destination, llh);
           }
     } finally {
       config._cartographicRadians = previous;

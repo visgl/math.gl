@@ -108,21 +108,21 @@ bundle, not an increment or an application-wide download estimate. **KiB = 1,024
 
 | Retained functionality | Minified KiB | Gzip KiB |
 | --- | ---: | ---: |
-| Engine core | 48.1 | 17.4 |
-| Engine + Mercator | 50.5 | 18.2 |
-| Engine + UTM | 57.2 | 20.9 |
-| Engine + Mercator + WKT reader | 73.9 | 25.9 |
-| Engine + Mercator + PROJJSON reader | 61.4 | 22.0 |
-| Engine + Mercator + NTv2 decoder | 53.6 | 19.5 |
-| Engine + Mercator + GeoTIFF grid adapter | 53.6 | 19.4 |
-| Engine + Mercator + GTX decoder | 52.0 | 18.9 |
-| Engine + Mercator + vertical GeoTIFF adapter | 55.5 | 20.1 |
-| Default Projection wrapper (all plugins and readers) | 146.1 | 50.0 |
-| Explicit operation pipeline (no projection algorithms, models or readers) | 59.8 | 21.4 |
+| Engine core | 48.3 | 17.5 |
+| Engine + Mercator | 50.7 | 18.2 |
+| Engine + UTM | 57.3 | 20.9 |
+| Engine + Mercator + WKT reader | 74.0 | 25.9 |
+| Engine + Mercator + PROJJSON reader | 61.5 | 22.0 |
+| Engine + Mercator + NTv2 decoder | 53.8 | 19.5 |
+| Engine + Mercator + GeoTIFF grid adapter | 53.8 | 19.4 |
+| Engine + Mercator + GTX decoder | 52.2 | 18.9 |
+| Engine + Mercator + vertical GeoTIFF adapter | 55.6 | 20.1 |
+| Default Projection wrapper (all plugins and readers) | 146.3 | 50.0 |
+| Explicit operation pipeline (no projection algorithms, models or readers) | 59.9 | 21.4 |
 | Optional operation selector (no catalogue data or operation payloads) | 4.4 | 1.6 |
-| Optional deformation model + regular velocity grid | 4.0 | 1.8 |
-| Optional deformation model + velocity GeoTIFF adapter | 9.0 | 3.5 |
-| Every root export, including wrapper, readers, grids and pipelines | 176.7 | 59.9 |
+| Optional deformation model + regular velocity grid | 4.1 | 1.8 |
+| Optional deformation model + velocity GeoTIFF adapter | 9.1 | 3.6 |
+| Every root export, including wrapper, readers, grids and pipelines | 176.8 | 59.9 |
 
 Tranche 12A adds about 1.1 KiB minified / 0.3 KiB gzip to the core stage machinery.
 The grid readers and bilinear interpolation remain optional, retained only in the

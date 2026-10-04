@@ -38,12 +38,44 @@ separate until their numerical and ownership contracts are qualified together.
   do not acquire geospatial; it is a test-only dependency.
 
 The sampled Earth-scale domain uses 10 μm Cartesian/height and 1e-9 degree angular
-comparison tolerances. The geospatial inverse uses a separate 1e-6 degree latitude
-allowance at ±89.999999°, where its surface-normal `asin` loses angular precision;
-the projection inverse keeps 1e-9 degrees there. This is an identified follow-up,
-not evidence of uniform angular accuracy. Float32 batch quantization is qualified separately. These
-are regression tolerances, not a bound on arbitrary eccentricities, deep interior
-coordinates, extreme finite radii or the whole mathematical domain.
+comparison tolerances, including ±89.999999° after the numerical follow-up below.
+Float32 batch quantization is qualified separately. These are regression tolerances,
+not a bound on arbitrary eccentricities, deep interior coordinates, extreme finite
+radii or the whole mathematical domain.
+
+## Numerical boundaries: implemented follow-up
+
+- Geospatial derives latitude with `atan2(normal.z, hypot(normal.x, normal.y))` to
+  retain near-pole angular precision. The existing three-radius surface kernel,
+  degree/radian boundary and exact-pole longitude convention remain separate.
+- Surface inversion validates numeric inputs before debug vectors, stops after at
+  most 64 Newton updates and returns `undefined` on non-finite intermediates,
+  singular updates or exhausted iteration. Caller outputs remain untouched on
+  those failures. Center-neighborhood radial fallback remains an approximation;
+  it is not equivalent to projection's geodetic inverse.
+- Two temporary inverse arrays are removed. Numeric output commits snapshot
+  ordinates before invoking application setters, so recursive output writes cannot
+  replace later values with shared scratch contents.
+- Projection uses the analytic spherical inverse rather than an eccentricity
+  iteration/polar threshold when eccentricity is zero. Nonzero near-center/near-axis
+  vectors retain their directions; exact poles retain canonical zero longitude.
+  Center and overflowing Cartesian radius fail before output commit. The oblate
+  Hannover iteration and its 30-update bound remain intact.
+- Authored sphere/cardinal/normal anchors qualify flattened, prolate and triaxial
+  geometry, finite failure recovery, aliasing, preserved M and recursive outputs.
+  No external code or model data is added; existing SPDX attribution stays attached
+  to each CesiumJS/proj4js-derived file.
+- A paired diagnostic covers WGS84, a sphere and a 2:1 flattened spheroid in regional
+  and near-pole domains, both directions, reusable scalar outputs and projection
+  flat buffers. It records all-coordinate analytic checks, source/workload hashes,
+  sampled allocations, raw timing and spread/aggregate warnings. See
+  [the benchmark report](../docs/modules/projection/benchmarks.md#spheroid-numerical-boundaries).
+
+The candidate meets the tighter near-pole regression allowance but does not establish
+universal inverse accuracy or a speedup. Input generation/setup/loading are outside
+timing; shared-kernel setup and broader singular-domain qualification remain future
+work. A dedicated source guard rejects successful coordinate allocations in the five
+modified numeric functions while allowing owned default results and failure errors.
 
 ## Follow-up: shared spheroid conversion kernels
 

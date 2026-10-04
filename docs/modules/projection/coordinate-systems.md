@@ -111,9 +111,13 @@ Geospatial conversions use degrees by default, or radians when
 the declared CRS units independently of that global setting; a pipeline `cart`
 step requires radians. At the center, geospatial returns `undefined` while
 projection throws. At exact poles, projection canonicalizes longitude to zero.
-Near exact poles, geospatial's surface-normal inverse can also lose more latitude
-precision than the projection inverse. These existing contracts and numerical
-limitations are recorded in cross-module tests; their kernels have not been combined.
+Geospatial retains near-pole latitude precision using both the horizontal and
+vertical surface-normal components. Non-finite or unrepresentable surface inverses
+return `undefined` without changing caller outputs; surface iteration is bounded.
+Its center-neighborhood radial fallback is an approximation and can differ from a
+geodetic inverse. Projection's spherical inverse preserves nonzero near-axis directions;
+its oblate inverse retains a separate convergence policy. Cross-module tests record
+these boundaries; the kernels have not been combined.
 
 ## Datums: the reference frame
 
