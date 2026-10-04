@@ -25,12 +25,12 @@ try {
     if (name === 'projection') {
       assert(
         manifest.files.every(
-          (file) => !file.path.startsWith('src/classic.') && !file.path.startsWith('dist/classic.')
+          file => !file.path.startsWith('src/classic.') && !file.path.startsWith('dist/classic.')
         ),
         'Removed classic wrapper must not ship in npm'
       );
       assert(
-        manifest.files.every((file) => !file.path.startsWith('test/')),
+        manifest.files.every(file => !file.path.startsWith('test/')),
         'Test grids must not ship in npm'
       );
     }
@@ -64,7 +64,7 @@ try {
   );
   assert(!('proj4' in packageManifest.dependencies));
   assert(!('./classic' in packageManifest.exports));
-  const subpaths = Object.keys(packageManifest.exports).filter((path) => path !== '.');
+  const subpaths = Object.keys(packageManifest.exports).filter(path => path !== '.');
   // Enumerate the manifest so every newly supported subpath must work in a real tarball.
   for (const [path, entry] of Object.entries(packageManifest.exports)) {
     if (path.startsWith('./native'))
@@ -129,7 +129,22 @@ try {
     assert.deepEqual(numericOutput,{x:0,y:0,z:3});
     assert(!cartesianToSpheroid({x:0,y:0,z:0},numericGeometry,numericOutput));
     assert.deepEqual(numericOutput,{x:0,y:0,z:3});
+    const frames = await load('@math.gl/core/local-frame');
+    const basis = frames.createLocalFrameBasis();
+    assert(frames.eastNorthUpBasis(0,0,basis));
+    const velocityPoint = {x:1,y:2,z:3};
+    assert(frames.localToFixed(velocityPoint,basis));
+    assert.deepEqual(velocityPoint,{x:3,y:1,z:2});
+    assert(frames.fixedToLocal(velocityPoint,basis));
+    assert.deepEqual(velocityPoint,{x:1,y:2,z:3});
+    assert(frames.eastNorthUpBasisFromDirections({x:0,y:1,z:0},{x:1,y:0,z:0},basis));
+    const frameMatrix = new Float64Array(16);
+    assert(frames.localFrameToMatrix(basis,{x:10,y:0,z:0},'north','east','down',frameMatrix));
+    [0,0,1,0,0,1,0,0,-1,0,0,0,10,0,0,1].forEach((v,i)=>assert(Math.abs(frameMatrix[i]-v)<1e-15));
+    assert(!frames.eastNorthUpBasis(0,Infinity,basis));
     const {Ellipsoid} = await load('@math.gl/geospatial');
+    const equatorialFrame = new Ellipsoid(10,10,5).eastNorthUpToFixedFrame([10,0,0],[]);
+    [0,1,0,0,0,0,1,0,1,0,0,0,10,0,0,1].forEach((v,i)=>assert(Math.abs(equatorialFrame[i]-v)<1e-15));
     const shape = Ellipsoid.fromSpheroid(core.normalizeCRS('EPSG:4326').ellipsoid);
     const axes = shape.toSpheroid();
     assert(Object.isFrozen(axes));
@@ -385,6 +400,18 @@ try {
     join(temporary, 'consumer.ts'),
     `
     ${subpaths.map((path, index) => 'import * as entry' + index + " from '@math.gl/projection" + path.slice(1) + "';\nvoid entry" + index + ';').join('\n')}
+    import {createLocalFrameBasis, eastNorthUpBasis, eastNorthUpBasisFromDirections, localToFixed, fixedToLocal, localFrameToMatrix, type LocalFrameBasis, type LocalFramePoint, type LocalFrameAxis} from '@math.gl/core/local-frame';
+    const basis: LocalFrameBasis = createLocalFrameBasis();
+    const framePoint: LocalFramePoint = {x:1,y:2,z:3};
+    const axis: LocalFrameAxis = 'east';
+    const frameStatus: boolean = eastNorthUpBasis(0,0,basis);
+    eastNorthUpBasisFromDirections({x:0,y:1,z:0},{x:1,y:0,z:0},basis);
+    localToFixed(framePoint,basis); fixedToLocal(framePoint,basis,framePoint);
+    localFrameToMatrix(basis,framePoint,axis,'north','up',new Float64Array(16));
+    // @ts-expect-error Result basis is required.
+    eastNorthUpBasis(0,0);
+    // @ts-expect-error Axes are named signed local directions.
+    localFrameToMatrix(basis,framePoint,'x','y','z',[]);
     import {spheroidToCartesian, cartesianToSpheroid, type SpheroidPoint, type SpheroidGeometry} from '@math.gl/core/spheroid';
     const numericPoint: SpheroidPoint = {x:0,y:0,z:0};
     const numericGeometry: SpheroidGeometry = {semiMajorAxis:10,semiMinorAxis:5,eccentricitySquared:.75};

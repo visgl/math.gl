@@ -88,6 +88,8 @@ jobs:
           node modules/projection/scripts/audit-allocations.mjs --check
           node modules/projection/scripts/check-spheroid-allocations.mjs
           node modules/projection/scripts/check-spheroid-boundary.mjs
+          node modules/projection/scripts/check-local-frame-allocations.mjs
+          node modules/projection/scripts/check-local-frame-boundary.mjs
           node modules/projection/scripts/check-parity-inventory.mjs
           node modules/projection/scripts/check-native-reference.mjs
           node modules/projection/scripts/check-vertical-reference.mjs
@@ -298,6 +300,12 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node modules/projection/scripts/benchmark-spheroid-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-spheroid-comparison.json
 
+      - name: Compare shared local-frame correctness and costs
+        timeout-minutes: 2
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: node modules/projection/scripts/benchmark-local-frame-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-local-frame-comparison.json
+
       - name: Upload paired performance measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -307,6 +315,7 @@ jobs:
             /tmp/projection-pipeline-comparison.json
             /tmp/projection-grid-comparison.json
             /tmp/projection-spheroid-comparison.json
+            /tmp/projection-local-frame-comparison.json
           if-no-files-found: error
 
   # Preserve the required check name and fail it if any qualification job fails.

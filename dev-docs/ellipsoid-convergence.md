@@ -13,7 +13,7 @@ three-radius and interior geospatial behavior remain separate.
 | Angular units | Degrees by default; global `_cartographicRadians` can select radians | CRS units normalized explicitly; `cart` stages use radians | Preserve each public boundary |
 | Undefined center | Returns `undefined` | Throws | Keep distinct adapters around any common kernel |
 | Exact polar longitude | `atan2` of the Cartesian normal; signed zero can yield 180° | Canonical zero in the polar branch | Document/qualify the convention; do not equate undefined longitude |
-| Surface normals, tangent planes, scaled space, local frames | Public geometry APIs | Internal ENU basis for deformation | Continue as separate capabilities |
+| Surface normals, tangent planes, scaled space, local frames | Public geometry APIs | Internal ENU basis for deformation | Local-frame numeric basis shared; other geometry remains separate |
 | Datums, grids, Helmert transforms and epochs | Not supplied by the Ellipsoid class | Explicit CRS/pipeline operations | Shape adapters cannot infer these semantics |
 
 ## Geometry adapters: implemented preparation
@@ -139,8 +139,28 @@ See [the public qualification page](../docs/modules/projection/ellipsoid-qualifi
 for allowances, recorded outcomes and reproduction commands. Further inverse
 sharing requires a branch-selection contract and a safeguarded interior solver,
 with independent qualification before replacing retained fallbacks. Local-frame
-contracts remain a separate scope.
+convergence is qualified separately below.
 
-Optional local-frame convergence and celestial frame/time-scale work are later
-scopes. No third-party model data, new projection kernels or acceleration backend
-is introduced by this preparation PR.
+## Local-frame convergence: qualified contracts implemented
+
+The optional original `@math.gl/core/local-frame` leaf now provides a factored ENU
+basis, transpose rotations and right-handed signed-axis matrix commits. It has no
+runtime imports and remains absent from core root, projection core and model-free
+pipeline graphs. Projection deformation and sphere/oblate geospatial matrices
+share it. No CesiumJS code is moved or relicensed; no upstream source/data is added.
+
+Geospatial retains its Cartesian-gradient up at height, exact/near Cartesian pole
+threshold and singular center matrix; three-radius/prolate matrices stay on the
+legacy path. Deformation retains its inverse-geodetic up, explicit epoch/velocity
+units, near-axis longitude and bounded inverse. Surface equality is qualified;
+off-surface normals are intentionally different. All 24 signed right-handed axis
+triples, degree/radian global-state independence, reusable points/matrices,
+Float32/64 views, M/epochs, failures and recursive sampling/output writes are tested.
+Numeric components are captured before public setters, including the legacy path.
+
+A targeted AST guard covers eleven successful coordinate functions; factory
+objects are allocated once at setup. Paired public construction, varied coordinate
+workloads, collected allocation sampling and selective bundles have separate
+reports. See [the qualification measurements](../docs/modules/projection/benchmarks.md#shared-local-frames).
+Further interior convergence, unusual geometry and celestial frame/time-scale
+work retain separate scopes.

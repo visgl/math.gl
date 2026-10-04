@@ -222,6 +222,22 @@ Returns
 
 - A 4x4 transformation matrix from a reference frame, with first axis and second axis compliant with the parameters, in the modified `result` parameter or a new `Matrix4` instance if none was provided.
 
+### Local-frame conventions
+
+`eastNorthUpToFixedFrame` and `localFrameToFixedFrame` use a Cartesian origin in
+the ellipsoid's distance units; `config._cartographicRadians` does not affect them.
+Their column-major matrix rotates local axes and translates by that origin.
+Supply a reusable `Matrix4` or `number[]` to avoid a new result per call.
+
+Up is the normalized Cartesian origin divided by squared radii. On the surface
+this is the surface normal; at height it can differ from the normal at the inverse
+geodetic position used by deformation. Sphere/oblate frames share the original
+[`@math.gl/core/local-frame`](../../core/api-reference/local-frame.md) basis and
+matrix functions while retaining this normal choice. Three-radius/prolate frames
+retain the historical geometry path. At Cartesian poles (|x| and |y| ≤ 1e-14), east
+is +Y and north/up use the sign of z. The historical center matrix is singular;
+it is not a usable orthonormal frame.
+
 ### geocentricSurfaceNormal(cartesian : Number[3], result : Number[3]) : Vector3 | Number[3]
 
 Computes the unit vector directed from the center of this ellipsoid toward the provided Cartesian position.

@@ -6,12 +6,18 @@
 
 import {NumericArray} from '@math.gl/types';
 import {Vector3, assert, equals as equalsEpsilon} from '@math.gl/core';
+import {
+  createLocalFrameBasis,
+  eastNorthUpBasisFromDirections,
+  localFrameToMatrix
+} from '@math.gl/core/local-frame';
 
 import type {Ellipsoid} from '../ellipsoid';
 
 const EPSILON14 = 1e-14;
 
 const scratchOrigin = new Vector3();
+const scratchBasis = createLocalFrameBasis();
 
 export type AxisDirection = 'up' | 'down' | 'north' | 'east' | 'south' | 'west';
 
@@ -105,6 +111,32 @@ export function localFrameToFixedFrame(
   // If x and y are zero, assume origin is at a pole, which is a special case.
   const atPole = equalsEpsilon(origin.x, 0.0, EPSILON14) && equalsEpsilon(origin.y, 0.0, EPSILON14);
 
+  // Only the qualified sphere/oblate basis is shared. Three-radius and center
+  // conventions keep the retained Cesium path, without changing its normal choice.
+  const radii = ellipsoid.radii;
+  if (
+    radii.x === radii.y &&
+    radii.x > 0 &&
+    radii.z > 0 &&
+    radii.z <= radii.x &&
+    (!atPole || origin.z !== 0)
+  ) {
+    const {east, up} = scratchAxisVectors;
+    if (atPole) {
+      east.set(0, 1, 0);
+      up.set(0, 0, Math.sign(origin.z));
+    } else {
+      east.set(-origin.y, origin.x, 0).normalize();
+      ellipsoid.geodeticSurfaceNormal(origin, up);
+    }
+    if (
+      !eastNorthUpBasisFromDirections(east, up, scratchBasis) ||
+      !localFrameToMatrix(scratchBasis, origin, firstAxis, secondAxis, thirdAxis, result)
+    )
+      throw new Error('Unsupported local frame');
+    return result;
+  }
+
   if (atPole) {
     // Look up axis value and adjust
     const sign = Math.sign(origin.z);
@@ -143,22 +175,35 @@ export function localFrameToFixedFrame(
     thirdAxisVector = scratchAxisVectors[thirdAxis];
   }
 
-  // TODO - assuming the result is column-major
-  result[0] = firstAxisVector.x;
-  result[1] = firstAxisVector.y;
-  result[2] = firstAxisVector.z;
+  // Snapshot the retained three-radius/center path too: application result setters
+  // can recursively invoke either path and overwrite all module scratch vectors.
+  const ax = firstAxisVector.x,
+    ay = firstAxisVector.y,
+    az = firstAxisVector.z;
+  const bx = secondAxisVector.x,
+    by = secondAxisVector.y,
+    bz = secondAxisVector.z;
+  const cx = thirdAxisVector.x,
+    cy = thirdAxisVector.y,
+    cz = thirdAxisVector.z;
+  const x = origin.x,
+    y = origin.y,
+    z = origin.z;
+  result[0] = ax;
+  result[1] = ay;
+  result[2] = az;
   result[3] = 0.0;
-  result[4] = secondAxisVector.x;
-  result[5] = secondAxisVector.y;
-  result[6] = secondAxisVector.z;
+  result[4] = bx;
+  result[5] = by;
+  result[6] = bz;
   result[7] = 0.0;
-  result[8] = thirdAxisVector.x;
-  result[9] = thirdAxisVector.y;
-  result[10] = thirdAxisVector.z;
+  result[8] = cx;
+  result[9] = cy;
+  result[10] = cz;
   result[11] = 0.0;
-  result[12] = origin.x;
-  result[13] = origin.y;
-  result[14] = origin.z;
+  result[12] = x;
+  result[13] = y;
+  result[14] = z;
   result[15] = 1.0;
   return result;
 }

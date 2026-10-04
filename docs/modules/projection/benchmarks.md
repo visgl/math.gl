@@ -854,3 +854,55 @@ node modules/projection/scripts/check-spheroid-boundary.mjs \
   --baseline-ref 66b70d5e --output /tmp/shared-spheroid-bundles.json
 node modules/projection/scripts/check-spheroid-allocations.mjs
 ```
+
+## Shared local frames
+
+The optional `@math.gl/core/local-frame` entry shares original ENU rotation and
+ENU/NED matrix arithmetic between geospatial and deformation. It creates no
+coordinate objects; basis storage is allocated once at setup. Cartesian-gradient
+up for geometry and inverse-geodetic up for deformation remain distinct at height.
+The paired diagnostic validates every output independently before timing.
+
+```sh
+node modules/projection/scripts/benchmark-local-frame-compare.mjs \
+  --baseline-ref f59efba9 --points 5000 --samples 7 --min-sample-ms 4 \
+  --clock thread-cpu --allocations --output /tmp/local-frame-comparison.json
+node modules/projection/scripts/check-local-frame-boundary.mjs \
+  --baseline-ref f59efba9 --output /tmp/local-frame-bundles.json
+```
+
+Thread CPU timing requires Node 24.14 or later. Wall time is the default. The
+workload covers WGS84, sphere and 2:1 flattened shapes, both hemispheres,
+regional/near/exact poles, surface/elevated origins, ENU/NED matrix commits,
+direct deformation, reusable pipeline scalar output and Float64 XYZM batches.
+Exact-pole anchors choose canonical zero longitude; separate tests qualify the
+adapters' distinct pole conventions. Deformation is forward-only in this timing
+profile; inverse contracts have separate regression tests.
+
+Preparation, loading, result allocation and buffer resets are outside coordinate
+timing. Public geometry/model construction has separate samples. Raw timings,
+rotated execution order, spread/aggregate warnings, source/workload hashes and
+collected allocation samples after all varied timings are retained in the report.
+CI runs a smaller diagnostic and uploads JSON; it does not enforce a speed gate.
+
+Local Node 24.14.0 measurements show noisy timing, with improvements in some
+geospatial frame rows and mixed deformation/pipeline results. Sampled median
+allocation traffic does not increase versus master; numeric boxing remains visible
+in both versions. Zero heap samples would not prove zero allocations. This is
+scoped consolidation and ownership qualification, not a universal speedup claim.
+
+Selective source bundles (esbuild browser/es2020, minification and gzip level 9):
+
+| Import | Minified bytes | Gzip bytes | Gzip change vs master |
+| --- | ---: | ---: | ---: |
+| Whole local-frame leaf | 2,711 | 1,000 | New optional entry |
+| Deformation model | 4,500 | 1,775 | +174 |
+| Geospatial Ellipsoid | 38,889 | 12,259 | +695 |
+| Core root | 42,048 | 12,033 | 0 |
+| Projection core | 51,320 | 18,364 | 0 |
+| Model-free pipeline | 63,474 | 22,382 | 0 |
+
+These source profiles differ from the packaged-entry budget profiles above. Graph
+checks require no runtime dependencies in the leaf, no geometry/culling in
+projection and no retained local-frame leaf in the three unchanged graphs.
+Successful coordinate source allocations are separately guarded in eleven functions.
