@@ -22,13 +22,20 @@ const {values} = parseArgs({
     clock: {type: 'string', default: 'wall'},
     scenarios: {type: 'string'},
     allocations: {type: 'boolean', default: false},
+    'allocation-sites': {type: 'boolean', default: false},
     'allocation-iterations': {type: 'string', default: '10'},
     'reusable-results': {type: 'boolean', default: false},
     output: {type: 'string'}
   }
 });
+if (values['allocation-sites'] && !values.allocations)
+  throw new Error('Allocation sites require --allocations');
 const allocationIterations = Number(values['allocation-iterations']);
-if (!Number.isSafeInteger(allocationIterations) || allocationIterations < 1 || allocationIterations > 100000)
+if (
+  !Number.isSafeInteger(allocationIterations) ||
+  allocationIterations < 1 ||
+  allocationIterations > 100000
+)
   throw new Error('Allocation iterations must be an integer from 1 through 100000');
 if (!['wall', 'thread-cpu'].includes(values.clock)) throw new Error('Unknown clock');
 if (values.clock === 'thread-cpu' && !process.threadCpuUsage)
@@ -129,18 +136,25 @@ try {
             ];
             let baselineOutputs = false;
             if (values['reusable-results']) {
-              const operation = direction === 'project' ? pipelines[1].projectToSync : pipelines[1].unprojectToSync;
+              const operation =
+                direction === 'project' ? pipelines[1].projectToSync : pipelines[1].unprojectToSync;
               if (!operation) throw new Error('Candidate requires reusable scalar result APIs');
               for (const typed of [false, true]) {
                 runners.push(harness.scalarResultRunner(operation, options, typed, epochs));
-                implementations.push(typed ? 'math.gl scalar typed output' : 'math.gl scalar array output');
+                implementations.push(
+                  typed ? 'math.gl scalar typed output' : 'math.gl scalar array output'
+                );
               }
-              const historical = direction === 'project' ? pipelines[0].projectToSync : pipelines[0].unprojectToSync;
+              const historical =
+                direction === 'project' ? pipelines[0].projectToSync : pipelines[0].unprojectToSync;
               baselineOutputs = typeof historical === 'function';
-              if (baselineOutputs) for (const typed of [false, true]) {
-                runners.push(harness.scalarResultRunner(historical, options, typed, epochs));
-                implementations.push(typed ? 'baseline scalar typed output' : 'baseline scalar array output');
-              }
+              if (baselineOutputs)
+                for (const typed of [false, true]) {
+                  runners.push(harness.scalarResultRunner(historical, options, typed, epochs));
+                  implementations.push(
+                    typed ? 'baseline scalar typed output' : 'baseline scalar array output'
+                  );
+                }
             }
             const expected = source.slice();
             scalar[0](expected);
@@ -180,10 +194,18 @@ try {
                 result.measurements[2].milliseconds,
                 result.measurements[3].milliseconds
               ),
-              arrayOutputSpeedup: values['reusable-results'] ? ratio(result.measurements[3].milliseconds, result.measurements[4].milliseconds) : undefined,
-              typedOutputSpeedup: values['reusable-results'] ? ratio(result.measurements[3].milliseconds, result.measurements[5].milliseconds) : undefined,
-              pairedArrayOutputSpeedup: baselineOutputs ? ratio(result.measurements[6].milliseconds, result.measurements[4].milliseconds) : undefined,
-              pairedTypedOutputSpeedup: baselineOutputs ? ratio(result.measurements[7].milliseconds, result.measurements[5].milliseconds) : undefined
+              arrayOutputSpeedup: values['reusable-results']
+                ? ratio(result.measurements[3].milliseconds, result.measurements[4].milliseconds)
+                : undefined,
+              typedOutputSpeedup: values['reusable-results']
+                ? ratio(result.measurements[3].milliseconds, result.measurements[5].milliseconds)
+                : undefined,
+              pairedArrayOutputSpeedup: baselineOutputs
+                ? ratio(result.measurements[6].milliseconds, result.measurements[4].milliseconds)
+                : undefined,
+              pairedTypedOutputSpeedup: baselineOutputs
+                ? ratio(result.measurements[7].milliseconds, result.measurements[5].milliseconds)
+                : undefined
             });
             if (profiler && precision === 'Float64' && dimension === 4 && direction === 'project')
               allocationJobs.push({id: scenario.id, source, runners, implementations});
@@ -211,12 +233,31 @@ try {
         }
         const sum = node =>
           node.selfSize + node.children.reduce((total, child) => total + sum(child), 0);
+        const sites = [];
+        function visit(node, stack = []) {
+          const frame = node.callFrame;
+          const trace = [...stack, frame.functionName || '(anonymous)'];
+          if (node.selfSize)
+            sites.push({
+              estimatedBytes: node.selfSize,
+              source: frame.url?.replace(/^.*\/(baseline|candidate)\.mjs$/, '$1.mjs'),
+              line: frame.lineNumber + 1,
+              column: frame.columnNumber + 1,
+              stack: trace
+            });
+          for (const child of node.children) visit(child, trace);
+        }
+        if (values['allocation-sites']) visit(profile.head);
         allocations.push({
           id,
           implementation: implementations[index],
           points: settings.points * allocationIterations,
-          sampledEstimatedBytesPerPoint: sum(profile.head) / (settings.points * allocationIterations),
-          sampleCount: profile.samples.length
+          sampledEstimatedBytesPerPoint:
+            sum(profile.head) / (settings.points * allocationIterations),
+          sampleCount: profile.samples.length,
+          ...(values['allocation-sites']
+            ? {sites: sites.sort((a, b) => b.estimatedBytes - a.estimatedBytes).slice(0, 12)}
+            : {})
         });
       }
     }
@@ -243,11 +284,12 @@ const report = {
     proj4js: classicVersion,
     allocationIterations: values.allocations ? allocationIterations : undefined,
     reusableResults: values['reusable-results'],
+    allocationSites: values['allocation-sites'],
     seed,
     ...settings
   },
   methodology:
-    'Identical source bundler and installed dependencies; historical runtime sources read from Git. Independent PROJ anchors and all-coordinate baseline/candidate validation precede timing. Seeded bounded jitter, both precisions, XYZ/XYZM, both directions, static/batch/mixed epochs. Direct proj4js only for equivalent supported CRS pairs, at an absolute 1e-4 output-unit tolerance; it does not implement typed pipelines or kinematic epochs. Optional reusable-result rows compare current array/typed outputs with the current owned-array scalar API, reusing both input and result without per-record subarrays. Baselines supporting these APIs also run both output modes, matching warm-up/storage call shapes; earlier baselines retain current-only output rows. Prepared instances, independent copies, resets outside timing, adaptive samples and rotated execution order. Median/p10/p90 are per-buffer; raw samples are aggregate milliseconds. Thread CPU time is diagnostic, not elapsed throughput. Allocation estimates are sampled after all timing in a separate untimed run; zero is not proof of zero allocation. No speed thresholds.',
+    'Identical source bundler and installed dependencies; historical runtime sources read from Git. Independent PROJ anchors and all-coordinate baseline/candidate validation precede timing. Seeded bounded jitter, both precisions, XYZ/XYZM, both directions, static/batch/mixed epochs. Direct proj4js only for equivalent supported CRS pairs, at an absolute 1e-4 output-unit tolerance; it does not implement typed pipelines or kinematic epochs. Optional reusable-result rows compare current array/typed outputs with the current owned-array scalar API, reusing both input and result without per-record subarrays. Baselines supporting these APIs also run both output modes, matching warm-up/storage call shapes; earlier baselines retain current-only output rows. Prepared instances, independent copies, resets outside timing, adaptive samples and rotated execution order. Median/p10/p90 are per-buffer; raw samples are aggregate milliseconds. Thread CPU time is diagnostic, not elapsed throughput. Allocation estimates are sampled after all timing in a separate untimed run; zero is not proof of zero allocation. Optional allocation-sites records the twelve largest sampled self-size sites with compiled-module line/column and call stacks, excluding absolute temporary module paths; these are sampled diagnostics, not source allocation counts. No speed thresholds.',
   rows,
   allocations
 };

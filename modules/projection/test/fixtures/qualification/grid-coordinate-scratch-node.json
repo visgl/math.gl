@@ -1,0 +1,677 @@
+{
+  "schemaVersion": 1,
+  "metadata": {
+    "baselineCommit": "4f0d3ae2ff654b6a59f39e1766ff5397b6f7a3e4",
+    "candidateSourceSHA256": "9df87ff6e9ac8a1be6c23cfb17201508cc47e831393d9eae739768973b902ad6",
+    "workloadSHA256": "431578e2deba15f5c55c55f37ec772a40dd889dbb371b5da72a0821eb52efde5",
+    "date": "2026-10-04T02:06:06.934Z",
+    "node": "v24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "cpu": "Apple M2",
+    "platform": "darwin",
+    "arch": "arm64",
+    "clock": "thread-cpu",
+    "samples": 9,
+    "memory": false,
+    "coordinates": true,
+    "points": 20000,
+    "allocations": true
+  },
+  "methodology": "Authored bilinear cross-term fields; the same NTv2 bytes and decoded GeoTIFF bands feed both historical/current source bundles. Input generation, network, TIFF decoding, bundling and untimed full GC are excluded. Three warmups, rotated baseline/candidate order and analytic forward/inverse checks before and after timing. Preparation includes allocation and any GC triggered by it. Memory is a separate three-sample experiment, each in a fresh process: the difference in heapUsed + arrayBuffers after full GC while holding one prepared grid, excluding input bytes/bands. Small-grid deltas are noisy; retained bytes are engine-specific estimates, not peak memory or allocated bytes. Thread CPU time is diagnostic, not elapsed throughput. Optional coordinate rows use prepared grids, matched owned tuples/mutable outputs, 20 warmups and rotated execution order, with exact all-coordinate baseline/candidate checks plus the analytic anchors. Separate sampled allocations run after all timing; zero is not an allocation proof. No CI speed or memory thresholds.",
+  "rows": [
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "nodes": 4225,
+      "baseline": {
+        "milliseconds": {
+          "median": 0.33799999999999386,
+          "p10": 0.15000000000000568,
+          "p90": 0.5110000000000241,
+          "samples": [
+            0.4830000000000041,
+            0.5110000000000241,
+            0.15399999999999636,
+            0.39400000000000546,
+            0.38700000000000045,
+            0.27599999999998204,
+            0.33799999999999386,
+            0.15000000000000568,
+            0.26599999999999113
+          ]
+        }
+      },
+      "candidate": {
+        "milliseconds": {
+          "median": 0.31100000000000705,
+          "p10": 0.20400000000000773,
+          "p90": 0.7069999999999936,
+          "samples": [
+            0.6499999999999773,
+            0.7069999999999936,
+            0.2920000000000016,
+            0.42900000000000205,
+            0.20400000000000773,
+            0.3439999999999941,
+            0.31100000000000705,
+            0.3100000000000023,
+            0.29300000000000637
+          ]
+        }
+      },
+      "preparationSpeedup": 1.0868167202571903
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "nodes": 4225,
+      "baseline": {
+        "milliseconds": {
+          "median": 0.3890000000001237,
+          "p10": 0.10800000000017462,
+          "p90": 0.5720000000001164,
+          "samples": [
+            0.3890000000001237,
+            0.40599999999994907,
+            0.5380000000000109,
+            0.2339999999999236,
+            0.44000000000005457,
+            0.11999999999989086,
+            0.10800000000017462,
+            0.5720000000001164,
+            0.2840000000001055
+          ]
+        }
+      },
+      "candidate": {
+        "milliseconds": {
+          "median": 1.0750000000000455,
+          "p10": 0.13999999999987267,
+          "p90": 1.65300000000002,
+          "samples": [
+            1.65300000000002,
+            1.3859999999999673,
+            0.27299999999991087,
+            1.56899999999996,
+            1.3010000000001583,
+            1.0750000000000455,
+            0.24100000000021282,
+            0.13999999999987267,
+            0.15599999999994907
+          ]
+        }
+      },
+      "preparationSpeedup": 0.3618604651163788
+    }
+  ],
+  "coordinateRows": [
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "forward",
+      "mode": "mutable output",
+      "points": 20000,
+      "baseline": {
+        "median": 1.5910000000000082,
+        "p10": 1.122000000000014,
+        "p90": 2.1189999999999714,
+        "samples": [
+          1.3829999999999814,
+          2.078999999999951,
+          1.2930000000000064,
+          1.5910000000000082,
+          1.2549999999999955,
+          2.1189999999999714,
+          1.7299999999999613,
+          1.9920000000000186,
+          1.122000000000014
+        ]
+      },
+      "candidate": {
+        "median": 1.600999999999999,
+        "p10": 1.0209999999999582,
+        "p90": 2.302000000000021,
+        "samples": [
+          2.302000000000021,
+          1.9119999999999777,
+          1.5680000000000405,
+          1.9180000000000064,
+          1.600999999999999,
+          1.4300000000000068,
+          1.0209999999999582,
+          1.733000000000004,
+          1.478999999999985
+        ]
+      },
+      "speedup": 0.9937539038101244,
+      "unstable": true
+    },
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "forward",
+      "mode": "owned tuple",
+      "points": 20000,
+      "baseline": {
+        "median": 2.132000000000005,
+        "p10": 1.3899999999999864,
+        "p90": 2.6610000000000014,
+        "samples": [
+          2.0720000000000027,
+          1.5739999999999554,
+          1.7040000000000077,
+          1.3899999999999864,
+          2.132000000000005,
+          2.6610000000000014,
+          2.3279999999999745,
+          2.3240000000000123,
+          2.5200000000000387
+        ]
+      },
+      "candidate": {
+        "median": 2.1399999999999864,
+        "p10": 1.6429999999999723,
+        "p90": 3.002999999999986,
+        "samples": [
+          2.5219999999999914,
+          2.133000000000038,
+          2.0399999999999636,
+          2.319000000000017,
+          1.6449999999999818,
+          3.002999999999986,
+          2.1399999999999864,
+          1.6429999999999723,
+          2.516999999999996
+        ]
+      },
+      "speedup": 0.9962616822429994,
+      "unstable": true
+    },
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "inverse",
+      "mode": "mutable output",
+      "points": 20000,
+      "baseline": {
+        "median": 5.523000000000025,
+        "p10": 4.778999999999996,
+        "p90": 5.920999999999935,
+        "samples": [
+          4.778999999999996,
+          5.61200000000008,
+          5.083000000000084,
+          5.76400000000001,
+          5.464999999999918,
+          5.523000000000025,
+          5.920999999999935,
+          5.130999999999972,
+          5.68100000000004
+        ]
+      },
+      "candidate": {
+        "median": 5.608000000000061,
+        "p10": 3.59699999999998,
+        "p90": 6.619999999999891,
+        "samples": [
+          3.7630000000000337,
+          3.59699999999998,
+          6.217999999999961,
+          5.329000000000065,
+          5.608000000000061,
+          6.619999999999891,
+          6.013000000000034,
+          5.896000000000072,
+          5.388000000000034
+        ]
+      },
+      "speedup": 0.9848430813124045,
+      "unstable": true
+    },
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "inverse",
+      "mode": "owned tuple",
+      "points": 20000,
+      "baseline": {
+        "median": 6.126999999999953,
+        "p10": 4.224999999999909,
+        "p90": 6.8940000000000055,
+        "samples": [
+          6.33299999999997,
+          4.6340000000000146,
+          4.224999999999909,
+          6.126999999999953,
+          6.296000000000049,
+          5.616999999999962,
+          6.163999999999987,
+          6.8940000000000055,
+          5.719000000000051
+        ]
+      },
+      "candidate": {
+        "median": 5.416000000000054,
+        "p10": 4.682999999999993,
+        "p90": 6.711000000000013,
+        "samples": [
+          6.711000000000013,
+          5.416000000000054,
+          4.682999999999993,
+          6.485000000000127,
+          5.311999999999898,
+          4.844000000000051,
+          5.574000000000069,
+          4.879999999999882,
+          6.667999999999893
+        ]
+      },
+      "speedup": 1.131277695716376,
+      "unstable": true
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "forward",
+      "mode": "mutable output",
+      "points": 20000,
+      "baseline": {
+        "median": 1.7829999999999018,
+        "p10": 1.0030000000001564,
+        "p90": 1.875,
+        "samples": [
+          1.3979999999999109,
+          1.2719999999999345,
+          1.8339999999998327,
+          1.7950000000000728,
+          1.7829999999999018,
+          1.0030000000001564,
+          1.2329999999999472,
+          1.8600000000001273,
+          1.875
+        ]
+      },
+      "candidate": {
+        "median": 1.413000000000011,
+        "p10": 0.9969999999998436,
+        "p90": 2.1690000000000964,
+        "samples": [
+          0.9969999999998436,
+          1.413000000000011,
+          2.1159999999999854,
+          1.2920000000001437,
+          1.1849999999999454,
+          1.8730000000000473,
+          1.4279999999998836,
+          1.0929999999998472,
+          2.1690000000000964
+        ]
+      },
+      "speedup": 1.2618542108987176,
+      "unstable": true
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "forward",
+      "mode": "owned tuple",
+      "points": 20000,
+      "baseline": {
+        "median": 1.93100000000004,
+        "p10": 1.1890000000000782,
+        "p90": 2.505999999999858,
+        "samples": [
+          1.1890000000000782,
+          1.5570000000000164,
+          1.3769999999999527,
+          2.505999999999858,
+          1.93100000000004,
+          2.171999999999798,
+          1.51299999999992,
+          2.048999999999978,
+          2.091999999999871
+        ]
+      },
+      "candidate": {
+        "median": 1.6790000000000873,
+        "p10": 0.9980000000000473,
+        "p90": 2.380000000000109,
+        "samples": [
+          1.6790000000000873,
+          1.1590000000001055,
+          1.066000000000031,
+          0.9980000000000473,
+          1.3999999999998636,
+          2.048999999999978,
+          2.0730000000000928,
+          2.380000000000109,
+          2.3619999999998527
+        ]
+      },
+      "speedup": 1.1500893388921618,
+      "unstable": true
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "inverse",
+      "mode": "mutable output",
+      "points": 20000,
+      "baseline": {
+        "median": 5.038000000000011,
+        "p10": 4.22199999999998,
+        "p90": 5.895999999999958,
+        "samples": [
+          4.22199999999998,
+          5.038000000000011,
+          5.552000000000135,
+          5.389000000000124,
+          4.747000000000071,
+          4.45699999999988,
+          5.530999999999949,
+          4.940000000000055,
+          5.895999999999958
+        ]
+      },
+      "candidate": {
+        "median": 5.229000000000042,
+        "p10": 4.5779999999999745,
+        "p90": 6.469000000000051,
+        "samples": [
+          4.591999999999871,
+          4.696999999999889,
+          6.469000000000051,
+          5.348000000000184,
+          4.875999999999976,
+          5.229000000000042,
+          4.5779999999999745,
+          5.528999999999996,
+          6.320999999999913
+        ]
+      },
+      "speedup": 0.9634729393765482,
+      "unstable": true
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "inverse",
+      "mode": "owned tuple",
+      "points": 20000,
+      "baseline": {
+        "median": 5.105000000000018,
+        "p10": 3.6929999999999836,
+        "p90": 7.0219999999999345,
+        "samples": [
+          5.126999999999953,
+          5.522999999999911,
+          4.889000000000124,
+          7.0219999999999345,
+          5.105000000000018,
+          4.975000000000136,
+          3.6929999999999836,
+          6.226999999999862,
+          4.605000000000018
+        ]
+      },
+      "candidate": {
+        "median": 5.538000000000011,
+        "p10": 4.7029999999999745,
+        "p90": 5.995999999999867,
+        "samples": [
+          5.68100000000004,
+          4.7029999999999745,
+          5.995999999999867,
+          5.538000000000011,
+          5.942999999999984,
+          5.383999999999787,
+          5.942999999999984,
+          5.132000000000062,
+          5.481999999999971
+        ]
+      },
+      "speedup": 0.9218129288551838,
+      "unstable": true
+    }
+  ],
+  "allocations": [
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "forward",
+      "mode": "mutable output",
+      "implementation": "baseline",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 34.09496,
+      "sampleCount": 1661
+    },
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "forward",
+      "mode": "mutable output",
+      "implementation": "candidate",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 31.76504,
+      "sampleCount": 1549
+    },
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "forward",
+      "mode": "owned tuple",
+      "implementation": "baseline",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 183.58004,
+      "sampleCount": 8891
+    },
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "forward",
+      "mode": "owned tuple",
+      "implementation": "candidate",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 111.61088,
+      "sampleCount": 5421
+    },
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "inverse",
+      "mode": "mutable output",
+      "implementation": "baseline",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 129.29716,
+      "sampleCount": 6301
+    },
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "inverse",
+      "mode": "mutable output",
+      "implementation": "candidate",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 132.70304,
+      "sampleCount": 6467
+    },
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "inverse",
+      "mode": "owned tuple",
+      "implementation": "baseline",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 279.9022,
+      "sampleCount": 13585
+    },
+    {
+      "format": "NTv2",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "inverse",
+      "mode": "owned tuple",
+      "implementation": "candidate",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 210.42184,
+      "sampleCount": 10236
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "forward",
+      "mode": "mutable output",
+      "implementation": "baseline",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 31.23144,
+      "sampleCount": 1522
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "forward",
+      "mode": "mutable output",
+      "implementation": "candidate",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 31.76504,
+      "sampleCount": 1548
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "forward",
+      "mode": "owned tuple",
+      "implementation": "baseline",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 183.79544,
+      "sampleCount": 8901
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "forward",
+      "mode": "owned tuple",
+      "implementation": "candidate",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 112.18712,
+      "sampleCount": 5449
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "inverse",
+      "mode": "mutable output",
+      "implementation": "baseline",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 131.36972,
+      "sampleCount": 6402
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "inverse",
+      "mode": "mutable output",
+      "implementation": "candidate",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 128.92736,
+      "sampleCount": 6283
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "inverse",
+      "mode": "owned tuple",
+      "implementation": "baseline",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 283.84116,
+      "sampleCount": 13776
+    },
+    {
+      "format": "GeoTIFF adapter",
+      "size": [
+        65,
+        65
+      ],
+      "direction": "inverse",
+      "mode": "owned tuple",
+      "implementation": "candidate",
+      "points": 200000,
+      "sampledEstimatedBytesPerPoint": 214.09504,
+      "sampleCount": 10415
+    }
+  ]
+}

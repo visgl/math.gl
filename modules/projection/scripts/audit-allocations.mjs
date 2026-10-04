@@ -97,6 +97,10 @@ function coordinateScope(node, path, source) {
       parent.parent.expression.getText(source) === 'createProjection'
     )
       return true;
+    // Public grid tuples own their result array; reject other explicit allocations
+    // in that adapter, including a new temporary working point.
+    if (path === 'experimental/grids/grid.ts' && name === 'shift')
+      return !ts.isArrayLiteralExpression(node);
     if (coordinateFunctions.has(name)) return true;
     if (inLoop && ['flat', 'transformInPlace', 'createFlatOperation', 'createNumericFlat', 'createHelmertFlat', 'createKinematicHelmertFlat'].includes(name)) return true;
   }

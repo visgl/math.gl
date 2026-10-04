@@ -4,6 +4,7 @@
 // Paired reader preparation and retained-memory measurements, separate from point throughput.
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
+import {Session} from 'node:inspector/promises';
 import {mkdtempSync, rmSync, writeFileSync} from 'node:fs';
 import {cpus, tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -19,9 +20,18 @@ const {values} = parseArgs({
     samples: {type: 'string', default: '11'},
     clock: {type: 'string', default: 'wall'},
     memory: {type: 'boolean', default: false},
+    coordinates: {type: 'boolean', default: false},
+    allocations: {type: 'boolean', default: false},
+    points: {type: 'string', default: '10000'},
     output: {type: 'string'}
   }
 });
+const points = Number(values.points);
+assert(
+  Number.isSafeInteger(points) && points >= 1 && points <= 1000000,
+  'Points must be 1..1000000'
+);
+assert(!values.allocations || values.coordinates, 'Allocation sampling requires --coordinates');
 const sizes = values.sizes.split(',').map(Number),
   samples = Number(values.samples);
 assert(
@@ -119,7 +129,50 @@ function memorySample(outfile, format, size) {
   );
   return result.heap + result.buffers; // external already includes arrayBuffers; do not count it twice.
 }
-const rows = [];
+const rows = [],
+  coordinateRows = [],
+  allocationJobs = [],
+  allocations = [];
+function coordinateCase(grids, inverse, tuple) {
+  const source = new Float64Array(points * 2),
+    expected = new Float64Array(points * 2);
+  for (let record = 0; record < points; record++) {
+    const x = (0.25 + ((record % 113) * 15.5) / 113) * -radians;
+    const y = (0.25 + ((record % 127) * 15.5) / 127) * radians;
+    const point = inverse ? grids[0].shift(x, y, false) : [x, y];
+    source.set(point, record * 2);
+    expected.set(grids[0].shift(point[0], point[1], inverse), record * 2);
+  }
+  const outputs = grids.map(() => new Float64Array(source.length));
+  const runners = grids.map((grid, index) => {
+    const point = {x: NaN, y: NaN},
+      output = outputs[index];
+    const shift = grid.shift.bind(grid),
+      mutable = grid.shiftInPlace.bind(grid);
+    return () => {
+      for (let offset = 0; offset < source.length; offset += 2) {
+        if (tuple) {
+          const result = shift(source[offset], source[offset + 1], inverse);
+          if (!result) throw new Error('Benchmark coordinate not covered');
+          output[offset] = result[0];
+          output[offset + 1] = result[1];
+        } else {
+          point.x = source[offset];
+          point.y = source[offset + 1];
+          if (!mutable(point, inverse)) throw new Error('Benchmark coordinate not covered');
+          output[offset] = point.x;
+          output[offset + 1] = point.y;
+        }
+      }
+    };
+  });
+  for (const [index, run] of runners.entries()) {
+    run();
+    assert.deepEqual(outputs[index], expected, 'Grid coordinate arithmetic differs');
+    for (let warmup = 0; warmup < 20; warmup++) run();
+  }
+  return {runners, outputs, expected};
+}
 try {
   const engines = [],
     outfiles = [];
@@ -166,6 +219,41 @@ try {
             memory[index].push(memorySample(outfiles[index], format, size));
           }
       }
+      if (values.coordinates) {
+        const grids = await Promise.all(readers.map(read => read()));
+        grids.forEach(qualify);
+        for (const inverse of [false, true])
+          for (const tuple of [false, true]) {
+            const {runners, outputs, expected} = coordinateCase(grids, inverse, tuple);
+            const measured = [[], []];
+            for (let sample = 0; sample < samples; sample++)
+              for (let offset = 0; offset < 2; offset++) {
+                const index = (sample + offset) % 2;
+                const start = now();
+                runners[index]();
+                measured[index].push(now() - start);
+              }
+            outputs.forEach(output => assert.deepEqual(output, expected));
+            const id = {
+              format,
+              size: [size, size],
+              direction: inverse ? 'inverse' : 'forward',
+              mode: tuple ? 'owned tuple' : 'mutable output'
+            };
+            coordinateRows.push({
+              ...id,
+              points,
+              baseline: summary(measured[0]),
+              candidate: summary(measured[1]),
+              speedup: median(measured[0]) / median(measured[1]),
+              unstable: measured.some(numbers => {
+                const data = summary(numbers);
+                return data.p90 - data.p10 > data.median * 0.25;
+              })
+            });
+            if (values.allocations) allocationJobs.push({id, runners});
+          }
+      }
       rows.push({
         format,
         size: [size, size],
@@ -183,6 +271,38 @@ try {
       });
     }
   }
+  // Inspector sampling starts only after every preparation/coordinate timing.
+  if (values.allocations) {
+    const profiler = new Session();
+    profiler.connect();
+    try {
+      for (const {id, runners} of allocationJobs)
+        for (const [index, run] of runners.entries()) {
+          await profiler.post('HeapProfiler.startSampling', {
+            samplingInterval: 4096,
+            includeObjectsCollectedByMajorGC: true,
+            includeObjectsCollectedByMinorGC: true
+          });
+          let profile;
+          try {
+            for (let iteration = 0; iteration < 10; iteration++) run();
+          } finally {
+            ({profile} = await profiler.post('HeapProfiler.stopSampling'));
+          }
+          const sum = node =>
+            node.selfSize + node.children.reduce((total, child) => total + sum(child), 0);
+          allocations.push({
+            ...id,
+            implementation: index === 0 ? 'baseline' : 'candidate',
+            points: points * 10,
+            sampledEstimatedBytesPerPoint: sum(profile.head) / (points * 10),
+            sampleCount: profile.samples.length
+          });
+        }
+    } finally {
+      profiler.disconnect();
+    }
+  }
   const report = {
     schemaVersion: 1,
     metadata: {
@@ -197,11 +317,16 @@ try {
       arch: process.arch,
       clock: values.clock,
       samples,
-      memory: values.memory
+      memory: values.memory,
+      coordinates: values.coordinates,
+      points: values.coordinates ? points : undefined,
+      allocations: values.allocations
     },
     methodology:
-      'Authored bilinear cross-term fields; the same NTv2 bytes and decoded GeoTIFF bands feed both historical/current source bundles. Input generation, network, TIFF decoding, bundling and untimed full GC are excluded. Three warmups, rotated baseline/candidate order and analytic forward/inverse checks before and after timing. Preparation includes allocation and any GC triggered by it. Memory is a separate three-sample experiment, each in a fresh process: the difference in heapUsed + arrayBuffers after full GC while holding one prepared grid, excluding input bytes/bands. Small-grid deltas are noisy; retained bytes are engine-specific estimates, not peak memory or allocated bytes. Thread CPU time is diagnostic, not elapsed throughput. No CI speed or memory thresholds.',
-    rows
+      'Authored bilinear cross-term fields; the same NTv2 bytes and decoded GeoTIFF bands feed both historical/current source bundles. Input generation, network, TIFF decoding, bundling and untimed full GC are excluded. Three warmups, rotated baseline/candidate order and analytic forward/inverse checks before and after timing. Preparation includes allocation and any GC triggered by it. Memory is a separate three-sample experiment, each in a fresh process: the difference in heapUsed + arrayBuffers after full GC while holding one prepared grid, excluding input bytes/bands. Small-grid deltas are noisy; retained bytes are engine-specific estimates, not peak memory or allocated bytes. Thread CPU time is diagnostic, not elapsed throughput. Optional coordinate rows use prepared grids, matched owned tuples/mutable outputs, 20 warmups and rotated execution order, with exact all-coordinate baseline/candidate checks plus the analytic anchors. Separate sampled allocations run after all timing; zero is not an allocation proof. No CI speed or memory thresholds.',
+    rows,
+    ...(values.coordinates ? {coordinateRows} : {}),
+    ...(values.allocations ? {allocations} : {})
   };
   console.table(
     rows.map(row => ({
@@ -213,6 +338,17 @@ try {
       memoryRatio: row.retainedMemoryRatio?.toFixed(2)
     }))
   );
+  if (values.coordinates)
+    console.table(
+      coordinateRows.map(row => ({
+        format: row.format,
+        mode: row.mode,
+        direction: row.direction,
+        speedup: row.speedup.toFixed(2),
+        unstable: row.unstable
+      }))
+    );
+  if (values.allocations) console.table(allocations);
   if (values.output) writeFileSync(values.output, JSON.stringify(report, null, 2) + '\n');
 } finally {
   rmSync(directory, {recursive: true, force: true});

@@ -126,12 +126,16 @@ export function createDatumGrid(subgrids: Subgrid[]): DatumGrid {
     point.y = latitude;
     return false;
   };
+  // This private point never escapes or invokes application hooks. A returned
+  // tuple owns its values; the next call resets both coordinates even after failure.
+  const tupleScratch: Point = {x: NaN, y: NaN};
   return Object.freeze({
     subgridCount: prepared.length,
     shiftInPlace,
     shift(longitude: number, latitude: number, inverse: boolean): [number, number] | undefined {
-      const point = {x: longitude, y: latitude};
-      return shiftInPlace(point, inverse) ? [point.x, point.y] : undefined;
+      tupleScratch.x = longitude;
+      tupleScratch.y = latitude;
+      return shiftInPlace(tupleScratch, inverse) ? [tupleScratch.x, tupleScratch.y] : undefined;
     }
   });
 }
