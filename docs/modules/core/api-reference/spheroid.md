@@ -78,6 +78,12 @@ surface/exterior inverse is shared. Its exact-pole signed-zero longitude and
 `undefined` failure convention remain distinct from projection's canonical
 longitude and thrown errors.
 
+A `true` result certifies finite numeric output, not a nearest-normal solution for
+arbitrary interior points. Some unique nearest solutions near the equatorial cusp
+still reject. Finite positive axes alone do not guarantee representable derived
+values. See [ellipsoid accuracy and interior boundaries](../../projection/ellipsoid-qualification.md)
+for independent references, sampled accuracy limits and recorded unsupported cases.
+
 ## Attribution
 
 The forward geocentric equations and Hannover inverse retain the existing

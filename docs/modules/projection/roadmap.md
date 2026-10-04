@@ -634,9 +634,19 @@ results before public output setters; no coordinate arrays/objects are created b
 the shared functions. Setup, scalar/flat, sampled allocations and selective bundle
 costs are recorded separately. See [shared conversion measurements](./benchmarks.md#shared-spheroid-conversions).
 
-This completes common-leaf placement for the qualified domain. Remaining work is
-broader independent interior/eccentricity qualification and any future expansion
-of shared geometry/local frames. Datums/epochs remain explicit projection concerns.
+This completes common-leaf placement for the qualified domain. The subsequent
+interior qualification tranche is also implemented: 198 independently generated
+binary64 inputs, 144 accuracy checks and 322 explicitly diagnostic path checks.
+High-precision nearest-footpoint references cover deep interiors, extreme
+flattening, prolate/triaxial axes and either side of the equatorial cusp. Analytic
+checks extend finite-axis/underflow boundaries and flat failure ownership. CI
+checks fixture reproducibility, sampled accuracy and failure contracts; every
+diagnostic error/rejection is retained separately. See
+[ellipsoid accuracy and interior boundaries](./ellipsoid-qualification.md).
+
+Further interior algorithm work needs an explicit normal-branch selection
+contract and a safeguarded, independently qualified solver. Remaining convergence
+work includes any expansion of shared geometry/local frames. Datums/epochs remain explicit projection concerns.
 Existing CesiumJS/proj4js provenance stays attached, and the core package includes
 the full upstream MIT notice. No new third-party source or model data is added.
 
@@ -649,6 +659,8 @@ yarn exec ocular-build projection
 node modules/projection/scripts/check-experimental-package.mjs
 node modules/projection/scripts/check-parity-inventory.mjs
 node modules/projection/scripts/check-packed-package.mjs
+python3 modules/projection/scripts/generate-interior-reference.py --check
+node modules/projection/scripts/qualify-interiors.mjs
 node modules/projection/scripts/check-spheroid-allocations.mjs
 node modules/projection/scripts/check-bundle-budget.mjs
 node modules/projection/scripts/benchmark.mjs --allocations --output /tmp/proj4-benchmark.json
