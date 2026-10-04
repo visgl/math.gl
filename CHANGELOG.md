@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- fix(geospatial): Preserve near-pole latitude precision, bound surface inversion
+  and remove inverse temporary arrays with safe numeric output commits.
+- fix(projection): Use an analytic spherical inverse for nonzero near-axis vectors;
+  qualify shared spheroid boundaries with paired accuracy/allocation diagnostics.
+
 - feat(geospatial): Add explicit spheroid parameter adapters for interoperability
   with projection ellipsoids. Share the geometry type and qualify both modules
   against independent anchors, preserving their existing conversion contracts.

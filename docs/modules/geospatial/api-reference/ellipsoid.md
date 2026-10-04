@@ -168,14 +168,18 @@ Returns
 
 ### cartesianToCartographic(cartesian : Number[3], result : Number[3]) : Vector3 | Number[3] | `undefined`
 
-Converts the provided Cartesian position to cartographic representation. The result is `undefined` when the Cartesian position is at the center of the ellipsoid.
+Converts the provided Cartesian position to cartographic representation. Latitude
+retains precision near the poles. Returns `undefined` at the center, for non-finite
+or unrepresentable inputs, or when surface inversion cannot converge within its
+64-update bound; an existing result is left unchanged. The center-neighborhood
+radial fallback remains an approximation for deep interior positions.
 
 - `cartesian` The Cartesian position to convert to cartographic representation.
 - `result` Optional object onto which to store the result.
 
 Returns
 
-- The modified result parameter, a new `Vector3` instance if none was provided, or `undefined` if the Cartesian position is at the center of the ellipsoid. A defined result contains `[longitude, latitude, height]`, with longitude and latitude in degrees and height in meters above the ellipsoid.
+- The modified result parameter, a new `Vector3` instance if none was provided, or `undefined` if the inverse is undefined or unsupported. A defined result contains `[longitude, latitude, height]`, with longitude and latitude in degrees and height in meters above the ellipsoid.
 
 ### eastNorthUpToFixedFrame(origin : Number[3], result : Number[16]) : Matrix4 | Number[16]
 
@@ -247,14 +251,18 @@ Returns
 
 ### scaleToGeodeticSurface(cartesian : Number[3], result : Number[3]]) : Vector3 | Number[3] | `undefined`
 
-Scales the provided Cartesian position along the geodetic surface normal so that it is on the surface of this ellipsoid. If the position is at the center of the ellipsoid, this function returns `undefined`.
+Scales the provided Cartesian position along the geodetic surface normal onto the
+ellipsoid. Returns `undefined` at the center, for non-finite or unrepresentable
+inputs, singular updates, or after 64 unsuccessful Newton updates. Caller output
+is unchanged on failure. Close to the center, the retained radial intersection is
+an approximation rather than a normal footpoint.
 
 - `cartesian` The Cartesian position to scale.
 - `result` Optional object onto which to store the result.
 
 Returns
 
-- The modified result parameter, a new `Vector3` instance if none was provided, or undefined if the position is at the center.
+- The modified result parameter, a new `Vector3` instance if none was provided, or `undefined` if the surface inverse is undefined or unsupported.
 
 ### scaleToGeocentricSurface(cartesian : Number[3], result : Number[3]]) : Vector3 | Number[3]
 

@@ -121,6 +121,15 @@ try {
     const expectedXYZ = geocentric.project(llh);
     const actualXYZ = shape.cartographicToCartesian(llh);
     for (let i = 0; i < 3; i++) assert(Math.abs(actualXYZ[i] - expectedXYZ[i]) < 1e-5);
+    const polarXYZ = shape.cartographicToCartesian([123,89.999999,100]);
+    const polarOutput = [7,8,9];
+    assert.equal(shape.cartesianToCartographic(polarXYZ,polarOutput),polarOutput);
+    assert(Math.abs(polarOutput[1]-89.999999)<1e-9);
+    const untouched = [7,8,9];
+    assert.equal(shape.cartesianToCartographic([Infinity,1,2],untouched),undefined);
+    assert.deepEqual(untouched,[7,8,9]);
+    const spherical = new core.ProjectionEngine({from:'+proj=longlat +R=2',to:'+proj=geocent +R=2',projections:[api.geocentric]});
+    assert(Math.abs(spherical.unproject([1e-13,1e-13,0])[0]-45)<1e-12);
     assert.throws(() => new Ellipsoid(1, 2, 3).toSpheroid());
 
     assert(!('TypeScriptProjection' in core));

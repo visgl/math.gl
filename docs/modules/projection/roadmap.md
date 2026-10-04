@@ -610,6 +610,23 @@ suite and differential corpus, and update the inventory for new algorithms, defa
 aliases, or bug fixes. Record the tested version with fixture provenance. Do not use
 an unpinned `latest` dependency or equate passing an older subset with current parity.
 
+## Ellipsoid convergence — numerical qualification follow-up
+
+The shared spheroid preparation now has a numerical follow-up: stable near-pole
+geospatial latitude, bounded surface inversion and explicit unsupported-input
+behavior, numeric inverse output commits, and an analytic spherical projection
+inverse. Authored anchors qualify center/near-axis boundaries, flattened/prolate/
+triaxial geometry, aliasing and recursive outputs; matched benchmarks compare
+reusable scalar and flat paths with separate allocation samples. CI records those
+diagnostics without speed gates. See [coordinate-system boundaries](./coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
+and [the measurements](./benchmarks.md#spheroid-numerical-boundaries).
+
+This completes the identified near-pole precision fix and the first bounded-domain
+qualification. It does not consolidate kernels or infer datums/epochs from shape.
+Deep-interior ambiguity, broader eccentricities, setup costs and selective common-leaf
+placement still need independent qualification before sharing arithmetic. Existing
+CesiumJS/proj4js provenance remains attached; no external model data or code is added.
+
 ## Validation commands
 
 ```sh
@@ -619,6 +636,7 @@ yarn exec ocular-build projection
 node modules/projection/scripts/check-experimental-package.mjs
 node modules/projection/scripts/check-parity-inventory.mjs
 node modules/projection/scripts/check-packed-package.mjs
+node modules/projection/scripts/check-spheroid-allocations.mjs
 node modules/projection/scripts/check-bundle-budget.mjs
 node modules/projection/scripts/benchmark.mjs --allocations --output /tmp/proj4-benchmark.json
 ```

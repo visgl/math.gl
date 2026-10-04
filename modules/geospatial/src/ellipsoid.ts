@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT AND Apache-2.0
 // SPDX-FileCopyrightText: Copyright 2011-2018 CesiumJS Contributors
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
+// SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms. Original math.gl follow-up uses stable atan2 latitude and numeric cartographic output.
 
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
@@ -13,7 +13,7 @@ import type {SpheroidParameters} from '@math.gl/types';
 import * as vec3 from '@math.gl/core/vec3';
 
 import {WGS84_RADIUS_X, WGS84_RADIUS_Y, WGS84_RADIUS_Z} from './constants';
-import {fromCartographicToRadians, toCartographicFromRadians} from './type-utils';
+import {fromCartographicToRadians, toCartographicFromRadiansComponents} from './type-utils';
 
 import type {AxisDirection} from './ellipsoid-helpers/ellipsoid-transform';
 import {localFrameToFixedFrame} from './ellipsoid-helpers/ellipsoid-transform';
@@ -146,7 +146,12 @@ export class Ellipsoid {
   cartesianToCartographic(cartesian: Readonly<NumericArray>, result?: number[]): number[];
 
   cartesianToCartographic(cartesian: Readonly<NumericArray>, result = [0, 0, 0]) {
-    scratchCartesian.from(cartesian);
+    const object = cartesian as unknown as {x: number; y: number; z: number};
+    const x = 'x' in cartesian ? object.x : cartesian[0];
+    const y = 'x' in cartesian ? object.y : cartesian[1];
+    const z = 'x' in cartesian ? object.z : cartesian[2];
+    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) return undefined;
+    scratchCartesian.set(x, y, z);
     const point = this.scaleToGeodeticSurface(scratchCartesian, scratchPosition);
 
     if (!point) {
@@ -159,10 +164,11 @@ export class Ellipsoid {
     h.copy(scratchCartesian).subtract(point);
 
     const longitude = Math.atan2(normal.y, normal.x);
-    const latitude = Math.asin(normal.z);
+    // atan2 retains latitude precision when the normal is almost vertical.
+    const latitude = Math.atan2(normal.z, Math.hypot(normal.x, normal.y));
     const height = Math.sign(vec3.dot(h, scratchCartesian)) * vec3.length(h);
 
-    return toCartographicFromRadians([longitude, latitude, height], result);
+    return toCartographicFromRadiansComponents(longitude, latitude, height, result);
   }
 
   /** Computes a 4x4 transformation matrix from a reference frame with an east-north-up axes
