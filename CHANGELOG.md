@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- perf(projection): Execute single-stage static Helmert batches directly on
+  coordinate buffers, preserving scalar arithmetic, precision, epochs and failure
+  commits. Qualify both rotation conventions and inverse steps with expanded
+  independent benchmarks, allocation checks and package coverage.
+
 - feat(projection): Add optional `OperationCatalog` for deterministic selection of
   application-reviewed operations by full area/epoch coverage, declared accuracy and
   available grid revisions, with rejection diagnostics and pinned provenance.

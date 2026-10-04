@@ -11,7 +11,7 @@ export function createExactHelmert(
   rotation: readonly number[],
   scalePPM: number,
   coordinateFrame: boolean
-): {forward: Operation; inverse: Operation} {
+): {forward: Operation; inverse: Operation; coefficients: readonly number[]} {
   const radians = Math.PI / (180 * 3600);
   const [rx, ry, rz] = rotation.map(angle => angle * radians);
   const cx = Math.cos(rx),
@@ -39,6 +39,7 @@ export function createExactHelmert(
   const scale = 1 + scalePPM / 1e6;
   const [dx, dy, dz] = translation;
   return {
+    coefficients: [r00, r01, r02, r10, r11, r12, r20, r21, r22, dx, dy, dz, scale],
     forward(point) {
       const {x, y, z} = point;
       point.x = scale * (r00 * x + r01 * y + r02 * z) + dx;
