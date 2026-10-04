@@ -1,5 +1,9 @@
 # Overview
 
+import CullingExample from '@site/src/components/culling-playground';
+
+<CullingExample inline />
+
 The `@math.gl/culling` module provides primitives for implementing frustum culling:
 
 - Bounding boxes and intersection logic

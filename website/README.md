@@ -95,3 +95,11 @@ or `geometryType` and `geometryProps` for a primitive constructor and its option
 The gallery offers all nine primitives. luma.gl `Model` renders depth-tested meshes
 and triangle edges; `OrbitControls` handles the camera. Bounds fitting uses a copy
 of the position data. Changing geometry releases the previous canvas and GPU resources.
+
+## Culling playground
+
+One shared frustum-culling scene is available in the examples sidebar and culling overview.
+Its six inward-facing planes classify spheres and axis-aligned/oriented boxes with
+`CullingVolume.computeVisibility`. The luma.gl observer camera is separate from the test
+frustum. The geometry renderer supports vertex colors and live mesh updates while retaining
+that camera; controls, models, buffers and devices are disposed on unmount.

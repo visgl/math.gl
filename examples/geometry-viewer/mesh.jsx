@@ -21,15 +21,19 @@ const viewer = {
 };
 const vs = `#version 300 es
 in vec3 positions;
+in vec3 colors;
 out vec3 position;
+out vec3 vertexColor;
 void main() {
   position = positions;
+  vertexColor = colors;
   gl_Position = viewer.mvp * vec4(positions, 1.0);
   gl_PointSize = 5.0;
 }`;
 const fs = `#version 300 es
 precision highp float;
 in vec3 position;
+in vec3 vertexColor;
 out vec4 fragColor;
 void main() {
   float light = 1.0;
@@ -37,7 +41,7 @@ void main() {
     vec3 normal = normalize(cross(dFdx(position), dFdy(position)));
     light = 0.35 + 0.65 * abs(dot(normal, normalize(vec3(1.0, 2.0, 3.0))));
   }
-  fragColor = vec4(viewer.color.rgb * light, 1.0);
+  fragColor = vec4(viewer.color.rgb * vertexColor * light, 1.0);
 }`;
 
 /** Adapts math.gl CPU meshes to luma.gl and fits arbitrary mesh bounds to the orbit camera. */
@@ -81,7 +85,13 @@ export function prepareMesh(geometry) {
       addEdge(c, a);
     }
   }
-  const attributes = {positions: {size: 3, value: normalized}};
+  const attributes = {
+    positions: {size: 3, value: normalized},
+    colors: {
+      size: 3,
+      value: geometry.attributes.COLOR_0?.value || new Float32Array(positions.length).fill(1)
+    }
+  };
   return {
     surface: new LumaGeometry({
       topology: geometry.topology,
@@ -100,10 +110,18 @@ export default function Mesh(props) {
   if (version.current.geometry !== props.geometry) {
     version.current = {geometry: props.geometry, key: version.current.key + 1};
   }
-  return <MeshRenderer key={version.current.key} {...props} />;
+  return <MeshRenderer key={props.preserveCamera ? 0 : version.current.key} {...props} />;
 }
 
-function MeshRenderer({geometry, wireframe}) {
+function MeshRenderer({
+  geometry,
+  wireframe,
+  initialCamera,
+  ariaLabel = 'Orbit camera around geometry'
+}) {
+  const cameraConfig = useRef({...camera, ...initialCamera});
+  const source = useRef(geometry);
+  source.current = geometry;
   const canvas = useRef(null),
     controlsRef = useRef(null),
     wire = useRef(wireframe);
@@ -119,7 +137,8 @@ function MeshRenderer({geometry, wireframe}) {
     setError(null);
     delete canvas.current.dataset.rendered;
     const initialize = async () => {
-      const mesh = prepareMesh(geometry);
+      let current = source.current;
+      const mesh = prepareMesh(current);
       device = await luma.createDevice({
         type: 'webgl',
         adapters: [webgl2Adapter],
@@ -142,10 +161,23 @@ function MeshRenderer({geometry, wireframe}) {
         });
       surface = makeModel(mesh.surface, true);
       edges = mesh.edges && makeModel(mesh.edges, false);
-      controls = new OrbitControls(canvas.current, {...camera, minDistance: 1.5, maxDistance: 12});
+      controls = new OrbitControls(canvas.current, {
+        ...cameraConfig.current,
+        minDistance: 1.5,
+        maxDistance: 12
+      });
       controlsRef.current = controls;
       let previous = '';
       const render = time => {
+        if (current !== source.current) {
+          current = source.current;
+          const updated = prepareMesh(current);
+          surface.setGeometry(updated.surface);
+          edges?.destroy();
+          edges = updated.edges && makeModel(updated.edges, false);
+          previous = '';
+          delete canvas.current.dataset.rendered;
+        }
         controls.update(time);
         const context = device.getDefaultCanvasContext();
         const framebuffer = context.getCurrentFramebuffer();
@@ -159,7 +191,10 @@ function MeshRenderer({geometry, wireframe}) {
           surface.shaderInputs.setProps({
             viewer: {
               mvp,
-              color: [0.22, 0.65, 0.85, geometry.topology.startsWith('triangle') ? 1 : 0]
+              color: [
+                ...(current.attributes.COLOR_0 ? [1, 1, 1] : [0.22, 0.65, 0.85]),
+                current.topology.startsWith('triangle') ? 1 : 0
+              ]
             }
           });
           edges?.shaderInputs.setProps({viewer: {mvp, color: [0.85, 0.94, 1, 0]}});
@@ -196,13 +231,13 @@ function MeshRenderer({geometry, wireframe}) {
       edges?.destroy();
       device?.destroy();
     };
-  }, [geometry]);
+  }, []);
   return (
     <div className="geometry-canvas">
       <canvas
         ref={canvas}
         tabIndex="0"
-        aria-label="Orbit camera around geometry"
+        aria-label={ariaLabel}
         onKeyDown={event => {
           const controls = controlsRef.current;
           if (!controls) return;
@@ -226,7 +261,7 @@ function MeshRenderer({geometry, wireframe}) {
         type="button"
         className="geometry-reset"
         onClick={() => {
-          controlsRef.current?.setProps(camera);
+          controlsRef.current?.setProps(cameraConfig.current);
           controlsRef.current?.reset();
         }}
       >

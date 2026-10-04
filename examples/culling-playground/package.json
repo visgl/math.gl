@@ -1,0 +1,25 @@
+{
+  "name": "math.gl-culling-playground",
+  "version": "5.0.0-alpha.12",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@luma.gl/core": "~9.4.2",
+    "@luma.gl/engine": "~9.4.2",
+    "@luma.gl/shadertools": "~9.4.2",
+    "@luma.gl/webgl": "~9.4.2",
+    "@math.gl/core": "workspace:*",
+    "@math.gl/culling": "workspace:*",
+    "@math.gl/geometry": "workspace:*",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "vite": "^8.2.2"
+  }
+}
