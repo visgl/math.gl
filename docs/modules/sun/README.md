@@ -33,6 +33,10 @@ The optional [planet sky API](./api-reference/get-planet-sky-info.md) returns po
 
 ## Attribution
 
+See [sky snapshots, daylight Moon visibility and globe rendering](./api-reference/sky.md)
+for a shared observer/atmosphere, lux-based lighting, planet and lunar orientations,
+globe coordinates, reusable contexts and visibility searches.
+
 Sunlight lookup data is derived from the [Hošek–Wilkie 1.4a reference implementation](https://cgg.mff.cuni.cz/projects/SkylightModelling/) under BSD-3-Clause. The full notice is shipped in `LICENSE-HOSEK-WILKIE`; see the [API documentation](./api-reference/get-sun-light.md) for model provenance and limits.
 
 The solar position calculation is a fork of @mourner's [SunCalc](https://github.com/mourner/suncalc) under BSD 2-clause license.
