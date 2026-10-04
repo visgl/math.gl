@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.11",
+  "version": "5.0.0-alpha.12",
   "keywords": [
     "javascript",
     "math",
@@ -39,9 +39,9 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-alpha.11",
-    "@math.gl/dggs": "5.0.0-alpha.11",
-    "@math.gl/geospatial": "5.0.0-alpha.11",
+    "@math.gl/core": "5.0.0-alpha.12",
+    "@math.gl/dggs": "5.0.0-alpha.12",
+    "@math.gl/geospatial": "5.0.0-alpha.12",
     "jsep": "^1.4.0"
   }
 }
