@@ -6,7 +6,7 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 import styles from './styles.module.css';
 
 /** Browser-only lazy demo with loaders.gl's styled fullscreen frame. */
-export default function LiveGlobe({Globe, label, height = 520, inline = false}) {
+export default function LiveGlobe({Globe, label, height = 520, inline = false, exampleProps}) {
   const frame = useRef(null);
   const [fullscreen, setFullscreen] = useState(false);
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function LiveGlobe({Globe, label, height = 520, inline = false}) 
         <BrowserOnly fallback={fallback}>
           {() => (
             <Suspense fallback={fallback}>
-              <Globe />
+              <Globe {...exampleProps} />
             </Suspense>
           )}
         </BrowserOnly>

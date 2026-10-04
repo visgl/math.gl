@@ -97,7 +97,19 @@
       {
         "type": "category",
         "label": "@math.gl/geometry",
-        "items": ["modules/geometry/README"]
+        "items": [
+          "modules/geometry/README",
+          "modules/geometry/api-reference/geometry",
+          "modules/geometry/api-reference/box-geometry",
+          "modules/geometry/api-reference/cube-geometry",
+          "modules/geometry/api-reference/capsule-geometry",
+          "modules/geometry/api-reference/cylinder-geometry",
+          "modules/geometry/api-reference/cone-geometry",
+          "modules/geometry/api-reference/truncated-cone-geometry",
+          "modules/geometry/api-reference/plane-geometry",
+          "modules/geometry/api-reference/sphere-geometry",
+          "modules/geometry/api-reference/ico-sphere-geometry"
+        ]
       },
       {
         "type": "category",

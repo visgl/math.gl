@@ -4875,7 +4875,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@luma.gl/webgl@npm:^9.4.0":
+"@luma.gl/webgl@npm:^9.4.0, @luma.gl/webgl@npm:~9.4.2":
   version: 9.4.2
   resolution: "@luma.gl/webgl@npm:9.4.2"
   dependencies:
@@ -5010,7 +5010,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/geometry@workspace:modules/geometry":
+"@math.gl/geometry@workspace:*, @math.gl/geometry@workspace:modules/geometry":
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry@workspace:modules/geometry"
   dependencies:
@@ -15306,6 +15306,22 @@ __metadata:
     "@luma.gl/engine": "npm:~9.4.0"
     "@luma.gl/shadertools": "npm:~9.4.0"
     "@math.gl/geoid": "workspace:*"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
+"math.gl-geometry-viewer@workspace:examples/geometry-viewer":
+  version: 0.0.0-use.local
+  resolution: "math.gl-geometry-viewer@workspace:examples/geometry-viewer"
+  dependencies:
+    "@luma.gl/core": "npm:~9.4.2"
+    "@luma.gl/engine": "npm:~9.4.2"
+    "@luma.gl/shadertools": "npm:~9.4.2"
+    "@luma.gl/webgl": "npm:~9.4.2"
+    "@math.gl/core": "workspace:*"
+    "@math.gl/geometry": "workspace:*"
+    react: "npm:^19.2.8"
+    react-dom: "npm:^19.2.8"
     vite: "npm:^8.2.2"
   languageName: unknown
   linkType: soft

@@ -32,5 +32,10 @@
     "type": "doc",
     "label": "Core transforms",
     "id": "core-transforms"
+  },
+  {
+    "type": "doc",
+    "label": "Geometry viewer",
+    "id": "geometry-viewer"
   }
 ]

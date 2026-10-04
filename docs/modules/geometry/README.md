@@ -1,5 +1,9 @@
 # @math.gl/geometry
 
+import GeometryViewer from '@site/src/components/geometry-viewer';
+
+<GeometryViewer geometryType="SphereGeometry" inline />
+
 The `@math.gl/geometry` module provides renderer-independent CPU mesh data and primitive
 tessellators. Built-in box, capsule, cylinder, plane and sphere dimensions follow the glTF 2.1
 [draft shape proposal](https://github.com/KhronosGroup/glTF/blob/726e078dea6b42c7ed0efb038c2f610a7cfca4c5/specification/2.1/Specification.adoc#shapes).
@@ -22,3 +26,16 @@ more than 65,535 vertices.
 An infinite glTF plane cannot be tessellated, so `PlaneGeometry` requires finite `sizeX` and `sizeZ`
 values. Use `PlaneShape` from `@math.gl/culling` when infinite or partially infinite analytic
 planes are required.
+
+## Primitive reference
+
+- [BoxGeometry](./api-reference/box-geometry.md)
+- [CubeGeometry](./api-reference/cube-geometry.md)
+- [CapsuleGeometry](./api-reference/capsule-geometry.md)
+- [CylinderGeometry](./api-reference/cylinder-geometry.md)
+- [ConeGeometry](./api-reference/cone-geometry.md)
+- [TruncatedConeGeometry](./api-reference/truncated-cone-geometry.md)
+- [PlaneGeometry](./api-reference/plane-geometry.md)
+- [SphereGeometry](./api-reference/sphere-geometry.md)
+- [IcoSphereGeometry](./api-reference/ico-sphere-geometry.md)
+- [Geometry](./api-reference/geometry.md)
