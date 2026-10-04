@@ -82,6 +82,7 @@ jobs:
           node modules/projection/scripts/check-attribution.mjs
           node modules/projection/scripts/audit-allocations.mjs --check
           node modules/projection/scripts/check-spheroid-allocations.mjs
+          node modules/projection/scripts/check-spheroid-boundary.mjs
           node modules/projection/scripts/check-parity-inventory.mjs
           node modules/projection/scripts/check-native-reference.mjs
           node modules/projection/scripts/check-vertical-reference.mjs

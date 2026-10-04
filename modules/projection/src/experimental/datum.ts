@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Geocentric and Helmert equations directly adapted from proj4js 2.22.0 datumUtils.js. See ../../PROJ4-LICENSE.md. The analytic spherical inverse boundary is original math.gl code.
+// SPDX-FileComment: Helmert equations directly adapted from proj4js 2.22.0 datumUtils.js. See ../../PROJ4-LICENSE.md. Geocentric equations now delegate to the attributed @math.gl/core/spheroid leaf.
+import {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core/spheroid';
 import type {Datum, Ellipsoid} from './crs/types';
 import type {ProjectionPoint} from './types';
 export type Coordinate3D = [number, number, number];
@@ -17,64 +18,35 @@ const WGS84: Datum = {
 };
 
 export function geodeticToGeocentricInPlace(point: ProjectionPoint, ellipsoid: Ellipsoid): void {
-  const lon = point.x,
-    lat = point.y,
-    height = point.z;
-  const {semiMajorAxis: a, eccentricitySquared: es} = ellipsoid;
-  if (Math.abs(lat) > Math.PI / 2) throw new Error('Latitude outside geocentric domain');
-  const sin = Math.sin(lat),
-    cos = Math.cos(lat);
-  const radius = a / Math.sqrt(1 - es * sin * sin);
-  point.x = (radius + height) * cos * Math.cos(lon);
-  point.y = (radius + height) * cos * Math.sin(lon);
-  point.z = (radius * (1 - es) + height) * sin;
+  if (Math.abs(point.y) > Math.PI / 2) throw new Error('Latitude outside geocentric domain');
+  if (!spheroidToCartesian(point, ellipsoid))
+    throw new Error('Geocentric coordinate must be finite');
 }
 
-/** Hannover iteration, including explicit polar and undefined-center handling. */
+/** Projection retains its center error and historical near-axis canonicalization. */
 export function geocentricToGeodeticInPlace(point: ProjectionPoint, ellipsoid: Ellipsoid): void {
   const x = point.x,
     y = point.y,
     z = point.z;
   const {semiMajorAxis: a, semiMinorAxis: b, eccentricitySquared: es} = ellipsoid;
-  const p = Math.hypot(x, y),
-    rr = Math.hypot(x, y, z);
-  if (rr === 0) throw new Error('Geodetic coordinates are undefined at the Earth center');
-  if (!Number.isFinite(rr)) throw new Error('Geocentric radius must be finite');
-  // Original spherical boundary: there is no eccentricity iteration or polar threshold.
-  if (es === 0) {
-    point.x = p === 0 ? 0 : Math.atan2(y, x);
-    point.y = Math.atan2(z, p);
-    point.z = rr - a;
-    return;
-  }
-  if (p < 1e-12 * a) {
+  if (x === 0 && y === 0 && z === 0)
+    throw new Error('Geodetic coordinates are undefined at the Earth center');
+  if (
+    es !== 0 &&
+    Math.abs(x) < 1e-12 * a &&
+    Math.abs(y) < 1e-12 * a &&
+    Math.hypot(x, y) < 1e-12 * a
+  ) {
+    if (!Number.isFinite(Math.hypot(x, y, z))) throw new Error('Geocentric radius must be finite');
     point.x = 0;
     point.y = (Math.sign(z) * Math.PI) / 2;
     point.z = Math.abs(z) - b;
     return;
   }
-  const ct = z / rr,
-    st = p / rr;
-  let rx = 1 / Math.sqrt(1 - es * (2 - es) * st * st);
-  let cos = st * (1 - es) * rx,
-    sin = ct * rx;
-  for (let i = 0; i < 30; i++) {
-    const rn = a / Math.sqrt(1 - es * sin * sin);
-    const height = p * cos + z * sin - rn * (1 - es * sin * sin);
-    const rk = (es * rn) / (rn + height);
-    rx = 1 / Math.sqrt(1 - rk * (2 - rk) * st * st);
-    const nextCos = st * (1 - rk) * rx,
-      nextSin = ct * rx;
-    if (Math.abs(nextSin * cos - nextCos * sin) <= 1e-12) {
-      point.x = Math.atan2(y, x);
-      point.y = Math.atan2(nextSin, Math.abs(nextCos));
-      point.z = height;
-      return;
-    }
-    cos = nextCos;
-    sin = nextSin;
+  if (!cartesianToSpheroid(point, ellipsoid)) {
+    if (!Number.isFinite(Math.hypot(x, y, z))) throw new Error('Geocentric radius must be finite');
+    throw new Error('Geocentric inverse did not converge');
   }
-  throw new Error('Geocentric inverse did not converge');
 }
 
 /** Convert rotation units and scale once for the lifetime of a compiled datum stage. */

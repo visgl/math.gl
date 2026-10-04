@@ -53,13 +53,13 @@ const cesiumDerived = new Set([
 const extensions = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.py', '.css', '.html']);
 const files = execFileSync('git', ['ls-files', '-z'], {cwd: root, encoding: 'utf8'})
   .split('\0')
-  .filter(file => extensions.has(extname(file)));
+  .filter((file) => extensions.has(extname(file)));
 assert(files.length > 0, 'Source header check must inspect tracked source files');
 for (const file of files) {
   const header = readFileSync(resolve(root, file), 'utf8')
     .split('\n')
     .slice(0, 16)
-    .map(line => line.replace(/^\s*(?:\/\/|#|\*|<!--)?\s*/, ''))
+    .map((line) => line.replace(/^\s*(?:\/\/|#|\*|<!--)?\s*/, ''))
     .join('\n');
   assert(
     /^SPDX-License-Identifier: \S.+$/m.test(header),
@@ -69,6 +69,15 @@ for (const file of files) {
     /^SPDX-FileCopyrightText: \S.+$/m.test(header),
     file + ' must declare its copyright holders with SPDX'
   );
+  if (file === 'modules/core/src/spheroid.ts') {
+    assert(
+      header.includes('proj4js') &&
+        header.includes('Mike Adair') &&
+        header.includes('Calvin Metcalf'),
+      'Shared spheroid arithmetic must retain proj4js attribution'
+    );
+    assert(header.includes('PROJ4-LICENSE.md'), 'Shared arithmetic must link its packaged license');
+  }
   if (cesiumDerived.has(file)) {
     assert(
       /^SPDX-FileCopyrightText: Copyright 2011-2018 CesiumJS Contributors$/m.test(header),

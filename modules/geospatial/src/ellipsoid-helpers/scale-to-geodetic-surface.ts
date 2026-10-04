@@ -126,7 +126,7 @@ export function scaleToGeodeticSurface(
 }
 
 /** Original numeric commit: application setters cannot overwrite remaining scratch ordinates. */
-function writeResult(result: number[], x: number, y: number, z: number): number[] {
+export function writeResult(result: number[], x: number, y: number, z: number): number[] {
   if (isArray(result)) {
     result[0] = x;
     result[1] = y;

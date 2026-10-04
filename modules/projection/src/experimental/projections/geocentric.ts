@@ -12,11 +12,11 @@ export const geocentric: ProjectionPlugin = {
   name: 'geocent',
   aliases: ['Geocentric', 'geocentric', 'Geocent'],
   parameters: [],
-  create({semiMajorAxis, eccentricitySquared}) {
+  create({semiMajorAxis, semiMinorAxis, eccentricitySquared}) {
     const ellipsoid = {
       semiMajorAxis,
       eccentricitySquared,
-      semiMinorAxis: semiMajorAxis * Math.sqrt(1 - eccentricitySquared)
+      semiMinorAxis: semiMinorAxis ?? semiMajorAxis * Math.sqrt(1 - eccentricitySquared)
     };
     return {
       forward() {

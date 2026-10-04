@@ -68,7 +68,8 @@ const entry = 'modules/projection/test/spheroid-benchmark-entry.ts';
 const directory = mkdtempSync(join(tmpdir(), 'math-gl-spheroids-'));
 const rows = [],
   jobs = [],
-  allocations = [];
+  allocations = [],
+  construction = [];
 const labels = ['geospatial scalar output', 'projection scalar output', 'projection flat'];
 try {
   const engines = [];
@@ -77,11 +78,36 @@ try {
     await bundleRuntime(root, entry, outfile, ref);
     engines.push(await import(pathToFileURL(outfile).href));
   }
+  for (const shape of engines[1].shapes) {
+    const factories = engines.flatMap((engine) => engine.factories(shape));
+    const samples = factories.map(() => []);
+    let sink;
+    for (const create of factories) sink = create();
+    for (let sample = 0; sample < settings.samples; sample++) {
+      for (let offset = 0; offset < factories.length; offset++) {
+        const index = (sample + offset) % factories.length;
+        const start = now();
+        for (let i = 0; i < 20; i++) sink = factories[index]();
+        samples[index].push(((now() - start) * 1000) / 20);
+      }
+    }
+    assert(sink, 'Construction must produce a public instance');
+    construction.push(
+      ...samples.map((times, index) => ({
+        shape: shape.id,
+        implementation: index % 2 ? 'projection engine' : 'geospatial ellipsoid',
+        revision: index < 2 ? 'baseline' : 'candidate',
+        medianMicroseconds: [...times].sort((a, b) => a - b)[Math.floor(times.length / 2)],
+        samplesMicroseconds: times,
+        instancesPerAggregate: 20
+      }))
+    );
+  }
   for (const shape of engines[1].shapes)
     for (const polar of [false, true])
       for (const inverse of [false, true]) {
         const {buffer: source, expected} = engines[1].source(shape, polar, inverse, points);
-        const runs = engines.flatMap(engine => engine.runners(shape, inverse));
+        const runs = engines.flatMap((engine) => engine.runners(shape, inverse));
         const id = {
           shape: shape.id,
           region: polar ? 'near poles' : 'regional',
@@ -157,7 +183,7 @@ try {
           } finally {
             ({profile} = await session.post('HeapProfiler.stopSampling'));
           }
-          const sum = node =>
+          const sum = (node) =>
             node.selfSize + node.children.reduce((total, child) => total + sum(child), 0);
           allocations.push({
             ...id,
@@ -193,13 +219,14 @@ try {
       allocations: values.allocations
     },
     methodology:
-      'Identical current workload and source bundler for historical/candidate runtime sources. Independently authored unit-normal support points qualify every coordinate before timing; baseline geospatial near-pole latitude uses its explicitly recorded 1e-6 degree allowance, candidate and projection use 1e-9 degrees, Cartesian/height use 1e-5 metres. Float64 XYZM; regional/near-pole, both directions, WGS84/sphere/flattened spheroid. Instances and reused scalar input/output arrays are prepared outside timing. Adaptive aggregates, rotated execution order and reset copies outside timing; retained raw samples and spread/aggregate flags. Setup/loading, input generation and validation are excluded. Separate heap samples after ALL timing include collected allocations; zero is not an allocation proof. Thread CPU is diagnostic rather than elapsed throughput. No universal accuracy or speed claim.',
+      'Identical current workload and source bundler for historical/candidate runtime sources. Independently authored unit-normal support points qualify every coordinate before timing; baseline geospatial near-pole latitude uses its explicitly recorded 1e-6 degree allowance, candidate and projection use 1e-9 degrees, Cartesian/height use 1e-5 metres. Float64 XYZM; regional/near-pole, both directions, WGS84/sphere/flattened spheroid. Instances and reused scalar input/output arrays are prepared outside timing. Adaptive aggregates, rotated execution order and reset copies outside timing; retained raw samples and spread/aggregate flags. Coordinate timing excludes setup/loading, input generation and validation. Separate construction samples time complete public factories in rotated order, 20 instances per aggregate; construction includes owned snapshots and CRS parsing, excludes module loading, and is diagnostic. Separate heap samples after ALL timing include collected allocations; zero is not an allocation proof. Thread CPU is diagnostic rather than elapsed throughput. No universal accuracy or speed claim.',
     rows,
+    construction,
     allocations
   };
   console.table(
-    rows.flatMap(row =>
-      row.speedups.map(speedup => ({
+    rows.flatMap((row) =>
+      row.speedups.map((speedup) => ({
         shape: row.shape,
         region: row.region,
         direction: row.direction,

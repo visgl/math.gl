@@ -10,6 +10,11 @@
 /* eslint-disable */
 import {Vector3, Matrix4, assert, equals, _MathUtils, NumericArray} from '@math.gl/core';
 import type {SpheroidParameters} from '@math.gl/types';
+import {
+  spheroidToCartesian,
+  cartesianToSpheroid,
+  type SpheroidGeometry
+} from '@math.gl/core/spheroid';
 import * as vec3 from '@math.gl/core/vec3';
 
 import {WGS84_RADIUS_X, WGS84_RADIUS_Y, WGS84_RADIUS_Z} from './constants';
@@ -17,8 +22,9 @@ import {fromCartographicToRadians, toCartographicFromRadiansComponents} from './
 
 import type {AxisDirection} from './ellipsoid-helpers/ellipsoid-transform';
 import {localFrameToFixedFrame} from './ellipsoid-helpers/ellipsoid-transform';
-import {scaleToGeodeticSurface} from './ellipsoid-helpers/scale-to-geodetic-surface';
+import {scaleToGeodeticSurface, writeResult} from './ellipsoid-helpers/scale-to-geodetic-surface';
 
+const spheroidScratch = {x: 0, y: 0, z: 0};
 const scratchVector = new Vector3();
 const scratchNormal = new Vector3();
 const scratchK = new Vector3();
@@ -53,6 +59,7 @@ export class Ellipsoid {
   readonly maximumRadius: number;
   readonly centerToleranceSquared: number = _MathUtils.EPSILON1;
   readonly squaredXOverSquaredZ: number;
+  private readonly spheroidGeometry?: SpheroidGeometry;
 
   /** Creates an Ellipsoid from a Cartesian specifying the radii in x, y, and z directions. */
   constructor(x: number, y: number, z: number);
@@ -89,6 +96,19 @@ export class Ellipsoid {
       this.squaredXOverSquaredZ = this.radiiSquared.x / this.radiiSquared.z;
     }
 
+    // Setup only: retain the three-radius path for unsupported/lossy shapes.
+    if (
+      x === y &&
+      z > 0 &&
+      z <= x &&
+      Number.isFinite(this.radiiSquared.x) &&
+      this.radiiSquared.z > 0
+    )
+      this.spheroidGeometry = Object.freeze({
+        semiMajorAxis: x,
+        semiMinorAxis: z,
+        eccentricitySquared: 1 - this.radiiSquared.z / this.radiiSquared.x
+      });
     Object.freeze(this);
   }
 
@@ -121,6 +141,14 @@ export class Ellipsoid {
   cartographicToCartesian(cartographic: number[], result?: number[]): number[];
 
   cartographicToCartesian(cartographic: Readonly<NumericArray>, result = [0, 0, 0]) {
+    if (this.spheroidGeometry) {
+      const llh = fromCartographicToRadians(cartographic, scratchCartesian);
+      spheroidScratch.x = llh[0];
+      spheroidScratch.y = llh[1];
+      spheroidScratch.z = llh[2];
+      if (!spheroidToCartesian(spheroidScratch, this.spheroidGeometry)) return undefined;
+      return writeResult(result, spheroidScratch.x, spheroidScratch.y, spheroidScratch.z);
+    }
     const normal = scratchNormal;
     const k = scratchK;
 
@@ -151,6 +179,30 @@ export class Ellipsoid {
     const y = 'x' in cartesian ? object.y : cartesian[1];
     const z = 'x' in cartesian ? object.z : cartesian[2];
     if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) return undefined;
+    // Shared inverse is qualified for the unambiguous surface/exterior domain.
+    // Interior/radial-fallback and non-spheroid behavior retain the Cesium kernel.
+    const a = this.radii.x,
+      b = this.radii.z;
+    const normSquared = (x / a) ** 2 + (y / a) ** 2 + (z / b) ** 2;
+    if (
+      this.spheroidGeometry &&
+      Number.isFinite(normSquared) &&
+      normSquared >= 1 - 16 * Number.EPSILON &&
+      Number.isFinite(x * x + y * y + z * z)
+    ) {
+      spheroidScratch.x = x;
+      spheroidScratch.y = y;
+      spheroidScratch.z = z;
+      if (!cartesianToSpheroid(spheroidScratch, this.spheroidGeometry)) return undefined;
+      // Preserve signed-zero atan2 at exact poles rather than projection's canonical zero.
+      const longitude = x === 0 && y === 0 ? Math.atan2(y, x) : spheroidScratch.x;
+      return toCartographicFromRadiansComponents(
+        longitude,
+        spheroidScratch.y,
+        spheroidScratch.z,
+        result
+      );
+    }
     scratchCartesian.set(x, y, z);
     const point = this.scaleToGeodeticSurface(scratchCartesian, scratchPosition);
 

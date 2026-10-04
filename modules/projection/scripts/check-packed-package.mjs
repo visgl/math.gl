@@ -23,10 +23,14 @@ try {
       )
     );
     if (name === 'projection') {
-      assert(manifest.files.every(file => !file.path.startsWith('src/classic.') && !file.path.startsWith('dist/classic.')),
-        'Removed classic wrapper must not ship in npm');
       assert(
-        manifest.files.every(file => !file.path.startsWith('test/')),
+        manifest.files.every(
+          (file) => !file.path.startsWith('src/classic.') && !file.path.startsWith('dist/classic.')
+        ),
+        'Removed classic wrapper must not ship in npm'
+      );
+      assert(
+        manifest.files.every((file) => !file.path.startsWith('test/')),
         'Test grids must not ship in npm'
       );
     }
@@ -46,16 +50,21 @@ try {
     'APACHE-2.0-LICENSE.txt',
     'THIRD-PARTY-NOTICES.md'
   ]) {
-    assert(readFileSync(join(temporary, 'node_modules/@math.gl/projection', name), 'utf8').length > 100);
+    assert(
+      readFileSync(join(temporary, 'node_modules/@math.gl/projection', name), 'utf8').length > 100
+    );
   }
+  assert(
+    readFileSync(join(temporary, 'node_modules/@math.gl/core/PROJ4-LICENSE.md'), 'utf8').includes(
+      'Calvin Metcalf'
+    )
+  );
   const packageManifest = JSON.parse(
     readFileSync(join(root, 'modules/projection/package.json'), 'utf8')
   );
   assert(!('proj4' in packageManifest.dependencies));
   assert(!('./classic' in packageManifest.exports));
-  const subpaths = Object.keys(packageManifest.exports).filter(
-    path => path !== '.'
-  );
+  const subpaths = Object.keys(packageManifest.exports).filter((path) => path !== '.');
   // Enumerate the manifest so every newly supported subpath must work in a real tarball.
   for (const [path, entry] of Object.entries(packageManifest.exports)) {
     if (path.startsWith('./native'))
@@ -111,6 +120,15 @@ try {
     assert(Math.abs((await automatic.project([3, 0]))[0] - 500000) < 1e-7);
     assert(Math.abs(automatic.projectSync([3, 0])[0] - 500000) < 1e-7);
     const core = await load('@math.gl/projection/core');
+    const {spheroidToCartesian, cartesianToSpheroid} = await load('@math.gl/core/spheroid');
+    const numericOutput = {x:0,y:0,z:3};
+    const numericGeometry = {semiMajorAxis:10,semiMinorAxis:5,eccentricitySquared:.75};
+    assert(spheroidToCartesian(numericOutput,numericGeometry));
+    assert.deepEqual(numericOutput,{x:13,y:0,z:0});
+    assert(cartesianToSpheroid(numericOutput,numericGeometry));
+    assert.deepEqual(numericOutput,{x:0,y:0,z:3});
+    assert(!cartesianToSpheroid({x:0,y:0,z:0},numericGeometry,numericOutput));
+    assert.deepEqual(numericOutput,{x:0,y:0,z:3});
     const {Ellipsoid} = await load('@math.gl/geospatial');
     const shape = Ellipsoid.fromSpheroid(core.normalizeCRS('EPSG:4326').ellipsoid);
     const axes = shape.toSpheroid();
@@ -367,6 +385,12 @@ try {
     join(temporary, 'consumer.ts'),
     `
     ${subpaths.map((path, index) => 'import * as entry' + index + " from '@math.gl/projection" + path.slice(1) + "';\nvoid entry" + index + ';').join('\n')}
+    import {spheroidToCartesian, cartesianToSpheroid, type SpheroidPoint, type SpheroidGeometry} from '@math.gl/core/spheroid';
+    const numericPoint: SpheroidPoint = {x:0,y:0,z:0};
+    const numericGeometry: SpheroidGeometry = {semiMajorAxis:10,semiMinorAxis:5,eccentricitySquared:.75};
+    const forwardStatus: boolean = spheroidToCartesian(numericPoint,numericGeometry);
+    const inverseStatus: boolean = cartesianToSpheroid(numericPoint,numericGeometry);
+    void forwardStatus; void inverseStatus;
     import {Ellipsoid, type SpheroidParameters as GeospatialSpheroid} from '@math.gl/geospatial';
     import type {SpheroidParameters as TypesSpheroid} from '@math.gl/types';
     import type {SpheroidParameters as CoreSpheroid} from '@math.gl/core';

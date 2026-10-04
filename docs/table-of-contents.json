@@ -74,6 +74,7 @@
           "modules/core/api-reference/pose",
           "modules/core/api-reference/quaternion",
           "modules/core/api-reference/spherical-coordinates",
+          "modules/core/api-reference/spheroid",
           "modules/core/api-reference/utilities",
           "modules/core/api-reference/vector",
           "modules/core/api-reference/vector2",

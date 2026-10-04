@@ -781,6 +781,7 @@ export class ProjectionPipeline<P extends Registration = ProjectionPlugin> {
           const implementation = plugin.create({
             parameters: {...normalized.parameters, proj: plugin.name},
             semiMajorAxis: normalized.ellipsoid.semiMajorAxis,
+            semiMinorAxis: normalized.ellipsoid.semiMinorAxis,
             eccentricitySquared: normalized.ellipsoid.eccentricitySquared
           });
           const forward = projectionOperation(implementation, false),
