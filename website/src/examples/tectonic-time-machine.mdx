@@ -4,17 +4,35 @@ import Example from '@site/src/components/tectonic-time-machine';
 
 <Example height="calc(100vh - 140px)" />
 
-Animate continental blocks from **500 million years ago** to **300 million years
+Animate continental blocks from **1.8 billion years ago** to **300 million years
 into the future**. Scrub the timeline, play continuously, visit Pangaea assembly
 and breakup, or switch between a globe and seven map projections. Drag to rotate
 or pan; scroll to zoom.
 
-The history uses [Müller et al. (2022)](https://doi.org/10.5194/se-13-1127-2022)
-finite rotations served by [GPlates](https://gwsdoc.gplates.org/models/), with
-[Merdith et al. (2021)](https://doi.org/10.1016/j.earscirev.2020.103477)
-coastline templates fetched at runtime. Optional region colors identify present-day regional blocks,
-not the names of ancient continents. This is a rigid-block reconstruction:
-shoreline evolution, sea level, subduction and changing plate boundaries are not simulated.
+Use the **Data source** selector to choose a published reconstruction:
+
+| Source | Historical range | What it shows |
+| --- | --- | --- |
+| [Cao et al. (2024)](https://doi.org/10.1016/j.gsf.2024.101922), default | 0–1800 Ma | Continental blocks reaching Nuna (Columbia) and Rodinia |
+| [Müller et al. (2022)](https://doi.org/10.5194/se-13-1127-2022) | 0–1000 Ma | Mantle-frame rotations with Merdith et al. coastline templates |
+
+Geometry and finite rotations are fetched from [GPlates](https://gwsdoc.gplates.org/models/).
+Each source keeps its own matching geometry, rotations and reference frame. Switching
+sources adjusts the timeline range; the two models are never mixed. CAO2024 is in a
+paleomagnetic frame, while MULLER2022 is in a mantle frame, so their longitudes can differ.
+
+CAO2024's [published dataset](https://zenodo.org/records/13628813) by Xianzhi Cao,
+Alan Collins, Sergei Pisarevsky, Nicolas Flament, Sanzhong Li, Derrick Hasterok and Dietmar Müller is licensed
+[CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). The geometry used here was
+verified against that record and is pinned by checksum. Geometry is simplified and
+triangulated for display, and rotations are interpolated between 10 Ma samples.
+MULLER2022 uses [Merdith et al. (2021)](https://doi.org/10.1016/j.earscirev.2020.103477)
+coastline templates; see its [data record](https://zenodo.org/records/13636799) for source terms.
+
+Optional region colors identify present-day regional blocks, not ancient continents.
+This is a rigid-block visualization: shoreline evolution, sea level, subduction and
+changing plate boundaries are not simulated. Older reconstructions carry greater
+uncertainty, especially in longitude.
 
 **Future motion is illustrative, not a forecast.** The two original assembly
 scenarios rotate present-day regional blocks toward Atlantic or polar arrangements
@@ -28,8 +46,10 @@ renders the globe and Cartesian maps.
 
 Scientific data is loaded from external services and retains its source terms and
 attribution. No GPlates implementation, rotation table or coastline dataset is
-bundled in math.gl. Network access and browser gzip decompression support are required;
-a service failure shows a retry message rather than substituted scientific data.
+bundled in math.gl. Network access and browser gzip/ZIP decompression support are required. Rotation
+windows load on demand and are cached; playback pauses while a missing window loads
+and resumes when it is ready. A service failure shows a retry message rather than
+substituted scientific data.
 
 Playback uses deck.gl's [`TimelineWidget`](https://deck.gl/docs/api-reference/widgets/timeline-widget)
 (experimental in deck.gl 9.4). Changing projections smoothly interpolates a shared
@@ -49,7 +69,7 @@ The Play / Stop button works directly in the embedded example. Sources and scien
 limits are available in the compact **About this reconstruction** box.
 
 
-Named timeline chapters include Gondwana, Laurussia, Pangaea and the later
+Named timeline chapters include Nuna (also called Columbia), Rodinia, Gondwana, Laurussia, Pangaea and the later
 Laurasia / Gondwana breakup. Large centered titles fade in and out with geological
 time, including during scrubbing; future titles follow the selected illustrative scenario.
 Dates are approximate chapter markers, not exact assembly boundaries. Laurussia's
@@ -57,5 +77,5 @@ assembly and its later collision with Gondwana are described by the
 [British Geological Survey](https://earthwise.bgs.ac.uk/index.php/Geotectonic_setting_of_Wales).
 Gondwana's earlier assembly is described by
 [Veevers (2004)](https://doi.org/10.1016/j.earscirev.2004.05.002).
-Rodinia and Columbia (Nuna) predate the displayed 500 Ma interval. Proposed
-Pannotia also predates it; its existence and configuration remain debated.
+Nuna is available with CAO2024; Rodinia is available with either source. Proposed
+Pannotia is not labeled because its existence and configuration remain debated.

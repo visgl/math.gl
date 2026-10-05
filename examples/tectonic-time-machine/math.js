@@ -68,9 +68,9 @@ export function rotateToLonLat(q, xyz, offset, out, target) {
   out[target] = Math.atan2(ry, rx) / DEG;
   out[target + 1] = Math.atan2(rz, Math.hypot(rx, ry)) / DEG;
 }
-export function historicalRotation(table, pid, age, out) {
+export function historicalRotation(table, pid, age, out, maxAge = 500) {
   const low = Math.floor(age / 10) * 10,
-    high = Math.min(500, low + 10);
+    high = age === low ? low : Math.min(maxAge, low + 10);
   const a = table[String(low)]?.[pid],
     b = table[String(high)]?.[pid];
   if (!a || !b) return false;
