@@ -78,6 +78,9 @@ jobs:
       - name: Build code
         run: yarn build
 
+      - name: Check curves package exports, public types and tree shaking
+        run: yarn check:curves-package
+
       - name: Check GeoArrow package boundary
         run: yarn check:geoarrow-boundary
 

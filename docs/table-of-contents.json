@@ -96,6 +96,15 @@
       },
       {
         "type": "category",
+        "label": "@math.gl/curves",
+        "items": [
+          "modules/curves/README",
+          "modules/curves/api-reference/curves",
+          "modules/curves/api-reference/curve-arc-length"
+        ]
+      },
+      {
+        "type": "category",
         "label": "@math.gl/geometry",
         "items": [
           "modules/geometry/README",

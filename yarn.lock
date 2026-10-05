@@ -4998,6 +4998,14 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@math.gl/curves@workspace:modules/curves":
+  version: 0.0.0-use.local
+  resolution: "@math.gl/curves@workspace:modules/curves"
+  dependencies:
+    "@math.gl/types": "npm:5.0.0-alpha.12"
+  languageName: unknown
+  linkType: soft
+
 "@math.gl/dggs@npm:5.0.0-alpha.12, @math.gl/dggs@workspace:modules/dggs":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs@workspace:modules/dggs"

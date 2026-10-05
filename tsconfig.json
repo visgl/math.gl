@@ -50,6 +50,7 @@
       "@math.gl/crs/wkt": ["./modules/crs/src/wkt-crs.ts"],
       "@math.gl/crs/*": ["./modules/crs/src/*"],
       "@math.gl/crs/test/*": ["./modules/crs/test/*"],
+      "@math.gl/curves/*": ["./modules/curves/src/*"],
       "@math.gl/culling/*": ["./modules/culling/src/*"],
       "@math.gl/culling/test/*": ["./modules/culling/test/*"],
       "@math.gl/dggs/*": ["./modules/dggs/src/*"],
