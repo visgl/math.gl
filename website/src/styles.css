@@ -122,14 +122,29 @@ html[data-theme='dark'] .theme-doc-sidebar-container {
 .theme-doc-markdown > header h1,
 .theme-doc-markdown > h1 {
   font-family: var(--ifm-heading-font-family);
+  font-size: clamp(2.5rem, 5vw, 4rem);
   letter-spacing: -0.045em;
-  line-height: 1.08;
+  line-height: 1.02;
+  margin-bottom: 1.5rem;
 }
 .theme-doc-markdown > h2 {
+  position: relative;
   font-size: clamp(1.75rem, 3vw, 2.5rem);
   letter-spacing: -0.045em;
   line-height: 1.1;
   margin-top: 3.5rem;
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.8rem;
+}
+.theme-doc-markdown > h2::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 52px;
+  height: 3px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--ifm-color-primary), transparent);
+  content: '';
 }
 .theme-doc-markdown > h3 {
   font-size: clamp(1.25rem, 2vw, 1.7rem);
@@ -149,6 +164,48 @@ html[data-theme='dark'] .theme-doc-sidebar-container {
   border: 1px solid var(--docs-border-subtle);
   border-radius: 14px;
   overflow: hidden;
+  box-shadow: 0 10px 28px rgba(2, 10, 24, 0.12);
+  margin: 1.6rem 0 2rem;
+}
+.theme-doc-markdown table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--docs-table-border);
+  border-radius: 12px;
+  box-shadow: var(--docs-table-shadow);
+  overflow: hidden;
+}
+.theme-doc-markdown th {
+  background: var(--docs-table-header-background);
+  color: var(--docs-text-strong);
+  font-family: var(--ifm-heading-font-family);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+.theme-doc-markdown td,
+.theme-doc-markdown th {
+  border-color: var(--docs-table-divider);
+  padding: 0.8rem 1rem;
+}
+.theme-doc-markdown blockquote {
+  border-left-color: var(--ifm-color-primary);
+  border-left-width: 3px;
+  border-radius: 0 10px 10px 0;
+  background: var(--docs-surface-muted);
+  padding: 0.8rem 1.2rem;
+}
+.theme-doc-markdown .alert {
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(2, 10, 24, 0.1);
+}
+.theme-doc-markdown img {
+  border-radius: 12px;
+}
+.theme-doc-markdown hr {
+  height: 1px;
+  margin: 3rem 0;
+  border: 0;
+  background: linear-gradient(90deg, var(--ifm-color-primary), var(--docs-border-subtle) 40%, transparent);
 }
 .table-of-contents__link {
   font-size: 0.84rem;
