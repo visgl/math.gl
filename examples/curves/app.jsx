@@ -270,96 +270,101 @@ export default function CurvesExample() {
   );
   return (
     <div className="curves-example">
-      <aside className="curves-panel">
-        <span className="curves-eyebrow">@math.gl/curves</span>
-        <h2>Curve flight lab</h2>
-        <p>
-          One path. Two clocks. Watch the pink traveler accelerate while cyan covers equal
-          distances.
-        </p>
-        <label>
-          Path
-          <select
-            aria-label="Path"
-            value={preset}
-            onChange={event => setPreset(event.target.value)}
-          >
-            <option value="knot">Trefoil knot · closed Catmull–Rom</option>
-            <option value="spiral">Expanding spiral · Catmull–Rom</option>
-            <option value="bezier">Cubic Bézier swoop</option>
-            <option value="hermite">Hermite flight</option>
-          </select>
-        </label>
-        {(preset === 'knot' || preset === 'spiral') && (
+      <CurveCanvas {...{scene, paused, speed, showControls, showSamples}} />
+      <details className="curves-panel">
+        <summary>
+          <span>Curve flight lab</span>
+          <span className="curves-panel-toggle">Controls</span>
+        </summary>
+        <div className="curves-panel-content">
+          <span className="curves-eyebrow">@math.gl/curves</span>
+          <p>
+            One path. Two clocks. Watch the pink traveler accelerate while cyan covers equal
+            distances.
+          </p>
           <label>
-            Knot spacing
+            Path
             <select
-              aria-label="Knot spacing"
-              value={parameterization}
-              onChange={event => setParameterization(event.target.value)}
+              aria-label="Path"
+              value={preset}
+              onChange={event => setPreset(event.target.value)}
             >
-              <option value="centripetal">Centripetal</option>
-              <option value="chordal">Chordal</option>
-              <option value="uniform">Uniform</option>
+              <option value="knot">Trefoil knot · closed Catmull–Rom</option>
+              <option value="spiral">Expanding spiral · Catmull–Rom</option>
+              <option value="bezier">Cubic Bézier swoop</option>
+              <option value="hermite">Hermite flight</option>
             </select>
           </label>
-        )}
-        <label>
-          Vertical reach <output>{height.toFixed(1)}</output>
-          <input
-            aria-label="Vertical reach"
-            type="range"
-            min="0.5"
-            max="3.5"
-            step="0.1"
-            value={height}
-            onChange={event => setHeight(Number(event.target.value))}
-          />
-        </label>
-        <label>
-          Flight speed <output>{speed.toFixed(1)}×</output>
-          <input
-            aria-label="Flight speed"
-            type="range"
-            min="0.2"
-            max="2"
-            step="0.1"
-            value={speed}
-            onChange={event => setSpeed(Number(event.target.value))}
-          />
-        </label>
-        <label className="curves-check">
-          <input
-            type="checkbox"
-            checked={showControls}
-            onChange={event => setShowControls(event.target.checked)}
-          />{' '}
-          Control points
-        </label>
-        <label className="curves-check">
-          <input
-            type="checkbox"
-            checked={showSamples}
-            onChange={event => setShowSamples(event.target.checked)}
-          />{' '}
-          Equal-distance samples
-        </label>
-        <button type="button" aria-pressed={paused} onClick={() => setPaused(!paused)}>
-          {paused ? 'Resume flight' : 'Pause flight'}
-        </button>
-        <div className="curves-metric">
-          <span>Approximate path length</span>
-          <strong>
-            {scene.table.length.toFixed(2)} <small>units</small>
-          </strong>
+          {(preset === 'knot' || preset === 'spiral') && (
+            <label>
+              Knot spacing
+              <select
+                aria-label="Knot spacing"
+                value={parameterization}
+                onChange={event => setParameterization(event.target.value)}
+              >
+                <option value="centripetal">Centripetal</option>
+                <option value="chordal">Chordal</option>
+                <option value="uniform">Uniform</option>
+              </select>
+            </label>
+          )}
+          <label>
+            Vertical reach <output>{height.toFixed(1)}</output>
+            <input
+              aria-label="Vertical reach"
+              type="range"
+              min="0.5"
+              max="3.5"
+              step="0.1"
+              value={height}
+              onChange={event => setHeight(Number(event.target.value))}
+            />
+          </label>
+          <label>
+            Flight speed <output>{speed.toFixed(1)}×</output>
+            <input
+              aria-label="Flight speed"
+              type="range"
+              min="0.2"
+              max="2"
+              step="0.1"
+              value={speed}
+              onChange={event => setSpeed(Number(event.target.value))}
+            />
+          </label>
+          <label className="curves-check">
+            <input
+              type="checkbox"
+              checked={showControls}
+              onChange={event => setShowControls(event.target.checked)}
+            />{' '}
+            Control points
+          </label>
+          <label className="curves-check">
+            <input
+              type="checkbox"
+              checked={showSamples}
+              onChange={event => setShowSamples(event.target.checked)}
+            />{' '}
+            Equal-distance samples
+          </label>
+          <button type="button" aria-pressed={paused} onClick={() => setPaused(!paused)}>
+            {paused ? 'Resume flight' : 'Pause flight'}
+          </button>
+          <div className="curves-metric">
+            <span>Approximate path length</span>
+            <strong>
+              {scene.table.length.toFixed(2)} <small>units</small>
+            </strong>
+          </div>
+          <p className="curves-hint">
+            Drag to orbit · scroll to zoom
+            <br />
+            The white whisker shows the tangent.
+          </p>
         </div>
-        <p className="curves-hint">
-          Drag to orbit · scroll to zoom
-          <br />
-          The white whisker shows the tangent.
-        </p>
-      </aside>
-      <CurveCanvas {...{scene, paused, speed, showControls, showSamples}} />
+      </details>
     </div>
   );
 }
