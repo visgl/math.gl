@@ -36,3 +36,11 @@ export {
 } from './attribute-compression';
 
 export {emod} from './coordinates';
+
+export {
+  transformGeometry,
+  mergeGeometries,
+  weldGeometry,
+  getDegenerateTriangles
+} from './mesh-processing';
+export type {WeldGeometryOptions, WeldGeometryResult} from './mesh-processing';
