@@ -5,15 +5,9 @@ import React, {useEffect, useRef, useState} from 'react';
 import {mountScene, VIEWS} from './scene.js';
 import {loadModel, MODEL} from './data.js';
 import {REGIONS, timeLabel} from './math.js';
+import {LANDMASS_CHAPTERS, chapterOpacity, timelineMilestones} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
-const milestones = [
-  [-500, '500 Ma'],
-  [-300, 'Pangaea'],
-  [-200, 'Breakup'],
-  [0, 'Present'],
-  [250, 'Future assembly']
-];
 export default function TectonicTimeMachine() {
   const canvas = useRef(null),
     stage = useRef(null),
@@ -130,6 +124,18 @@ export default function TectonicTimeMachine() {
             <span aria-hidden="true">{playing ? '■' : '▶'}</span> {playing ? 'Stop' : 'Play'}
           </button>
         </div>
+        <div className="tectonic-chapters" aria-hidden="true">
+          {LANDMASS_CHAPTERS.map(chapter => (
+            <div
+              key={chapter.name}
+              className={`tectonic-chapter${chapter.name.includes('&') ? ' tectonic-chapter-pair' : ''}`}
+              style={{opacity: ready && !error ? chapterOpacity(chapter, time, scenario) : 0}}
+            >
+              <strong>{chapter.name}</strong>
+              <span>{chapter.detail}</span>
+            </div>
+          ))}
+        </div>
         <div className="tectonic-instructions">
           Drag to {view === 'globe' ? 'rotate' : 'pan'} · scroll to zoom
         </div>
@@ -230,6 +236,12 @@ export default function TectonicTimeMachine() {
             arrangement to +300 Ma. They are not geological forecasts.
           </p>
           <p className="tectonic-note">
+            Landmass names mark approximate geological chapters, not exact assembly dates or labels
+            for individual coastline templates. Gondwana, Laurussia and Pangaea precede the Laurasia
+            / Gondwana breakup. Rodinia and Columbia (Nuna) predate this timeline; proposed Pannotia
+            also predates it, and its existence and configuration are debated.
+          </p>
+          <p className="tectonic-note">
             Terrain is modern NASA imagery carried with each rigid block. Ancient mountains,
             vegetation and ice are not reconstructed. Ocean ripples and lighting are visual effects.
           </p>
@@ -274,7 +286,7 @@ export default function TectonicTimeMachine() {
       <footer className="tectonic-timeline">
         <div ref={timeline} className="tectonic-widget" aria-label="Geological playback timeline" />
         <div className="tectonic-milestones">
-          {milestones.map(([value, label]) => (
+          {timelineMilestones(scenario).map(({time: value, name: label}) => (
             <button key={value} onClick={() => seek(value)}>
               {label}
               <small>
