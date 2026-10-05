@@ -40,6 +40,11 @@
   },
   {
     "type": "doc",
+    "label": "Curve flight lab",
+    "id": "curves"
+  },
+  {
+    "type": "doc",
     "label": "Geometry viewer",
     "id": "geometry-viewer"
   },

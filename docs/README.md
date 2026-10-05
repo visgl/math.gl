@@ -47,6 +47,7 @@ math.gl is a toolbox that offers a suite of composable modules.
 
 | **3D math libraries**                      | Module <span style={{width: 300}} /> | Description                                |
 | ------------------------------------------ | ------------------------------------ | ------------------------------------------ |
+|                                            | **`@math.gl/curves`**                | Parametric curves and arc-length sampling. |
 |                                            | **`@math.gl/geometry`**              | CPU primitive meshes and tessellation.     |
 | ![culling](./images/culling.png 'culling') | **`@math.gl/culling`**               | Bounding volumes and intersection testing. |
 |                                            | **`@math.gl/geometry-utils`**         | Typed-array geometry processing utilities. |

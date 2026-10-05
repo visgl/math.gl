@@ -62,6 +62,7 @@ const webpackPlugin = config.plugins.find(
     Array.isArray(plugin) && plugin[0] === '@vis.gl/docusaurus-website/plugin-webpack-config'
 );
 const aliases = webpackPlugin[1].resolve.alias;
+aliases['@math.gl/curves$'] = resolve(__dirname, '../modules/curves/src/index.ts');
 aliases['@math.gl/crs$'] = aliases['@math.gl/crs'];
 aliases['@math.gl/crs/wkt$'] = resolve(__dirname, '../modules/crs/src/wkt-crs.ts');
 aliases['@math.gl/crs/proj-string$'] = resolve(__dirname, '../modules/crs/src/proj-string.ts');
