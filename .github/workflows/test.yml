@@ -126,6 +126,13 @@ jobs:
       - name: Check CRS type boundaries
         run: yarn check:crs-types
 
+      # Keep browser downloads across runs; --with-deps still installs OS libraries.
+      - name: Cache Playwright browser
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('yarn.lock') }}
+
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
 
@@ -240,6 +247,13 @@ jobs:
       - name: Build code
         run: yarn build
 
+      # Keep browser downloads across runs; --with-deps still installs OS libraries.
+      - name: Cache Playwright browser
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ matrix.browser }}-${{ hashFiles('yarn.lock') }}
+
       - name: Install selected Playwright browser
         run: yarn playwright install --with-deps ${{ matrix.browser }}
 
@@ -306,13 +320,14 @@ jobs:
       - name: Build code
         run: yarn build
 
+      # Retain all coordinates, layouts and 11 samples; bound adaptive timing windows.
       - name: Compare projection performance against the PR base
         timeout-minutes: 10
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
-          node modules/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
+          node modules/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --min-sample-ms 4 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
 
       # Keep every scenario/layout/direction and seven samples; bound aggregate windows
       # as reusable-output modes add implementations. Longer local runs keep the 12 ms default.
