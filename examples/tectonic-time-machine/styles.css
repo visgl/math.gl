@@ -1,0 +1,65 @@
+/* math.gl
+SPDX-License-Identifier: MIT
+SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+*/
+.tectonic-example {height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 230px;grid-template-rows:minmax(360px,1fr) auto;background:#07131e;color:#eaf3f7;font:14px/1.45 system-ui,sans-serif;overflow:hidden;}
+.tectonic-stage {position:relative;min-width:0;min-height:0;overflow:hidden;background:radial-gradient(ellipse at 50% 50%,#102b3c,#07131e 75%);}
+.tectonic-stage canvas {position:absolute;inset:0;width:100%;height:100%;outline:none;}
+.tectonic-heading {position:absolute;z-index:1;left:26px;top:22px;pointer-events:none;}
+.tectonic-heading>span {letter-spacing:.16em;font-size:10px;color:#8eacbc;}
+.tectonic-heading h2 {margin:5px 0;font-size:clamp(22px,3vw,36px);font-weight:500;letter-spacing:-.03em;color:#f1f8fb;}
+.tectonic-heading p {margin:0;color:#9db8c6;font-size:12px;}
+.tectonic-instructions {position:absolute;bottom:15px;left:26px;color:#809aab;font-size:11px;pointer-events:none;}
+.tectonic-controls {background:#0b1b28;border-left:1px solid #263b49;padding:19px 18px;overflow:auto;min-height:0;}
+.tectonic-controls-title h3 {font-size:16px;color:inherit;margin:0 0 7px;}
+.tectonic-badge {display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid #497b75;color:#9ad6c7;padding:3px 6px;margin-bottom:16px;border-radius:3px;}
+.tectonic-badge.future {border-color:#806342;color:#e9c78d;}
+.tectonic-controls label {display:block;margin:0 0 14px;color:#abc0cc;font-size:12px;}
+.tectonic-controls select {display:block;margin-top:5px;width:100%;padding:7px;background:#102737;border:1px solid #345064;border-radius:4px;color:#eef6fa;font:12px system-ui;}
+.tectonic-controls input[type=range] {width:calc(100% - 40px);margin:8px 10px 0 0;vertical-align:middle;accent-color:#79bbce;}
+.tectonic-check {display:flex!important;align-items:center;gap:6px;}
+.tectonic-check input {accent-color:#79bbce;}
+.tectonic-legend {display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;color:#b6c8d1;margin:16px 0;}
+.tectonic-legend i {display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;}
+.tectonic-note,.tectonic-credits {font-size:10px;color:#8eabba;margin:12px 0;}
+.tectonic-status {font-size:10px;color:#aec8d5;padding-top:12px;border-top:1px solid #243e4d;}
+.tectonic-credits a {color:#a5d4df;}
+.tectonic-timeline {grid-column:1/-1;border-top:1px solid #2b4453;padding:13px 22px 16px;background:#0c1f2d;}
+.tectonic-playback {display:flex;gap:8px;align-items:center;}
+.tectonic-example button {border:1px solid #345265;border-radius:4px;background:#153448;color:#dfeef6;padding:6px 13px;font:12px system-ui;cursor:pointer;}
+.tectonic-example button:hover {background:#22516b;}
+.tectonic-example button:disabled {opacity:.4;cursor:wait;}
+.tectonic-playback output {margin-left:auto;color:#8faeba;font:12px ui-monospace,monospace;}
+.tectonic-range-label {font-size:0;display:block;}
+.tectonic-range-label input {width:100%;margin:12px 0;accent-color:#77bacc;}
+.tectonic-milestones {display:flex;justify-content:space-between;gap:8px;}
+.tectonic-milestones button {background:transparent;border:0;padding:0;text-align:left;color:#aac7d7;font-size:11px;}
+.tectonic-milestones small {display:block;font:9px ui-monospace,monospace;color:#688ea5;}
+.tectonic-loading {position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#07131ebd;color:#bdd6e2;z-index:2;text-align:center;padding:40px;}
+@media(max-width:650px) {.tectonic-example {grid-template-columns:1fr;grid-template-rows:320px minmax(260px,auto) auto;overflow:auto;}.tectonic-controls {border-left:0;border-top:1px solid #263b49;min-height:260px;}.tectonic-controls .tectonic-note {display:inline;}.tectonic-legend {grid-template-columns:repeat(4,1fr);}.tectonic-controls label {display:inline-block;width:48%;margin-right:2%;}.tectonic-timeline {grid-column:1;}.tectonic-heading {left:16px;top:16px;}}
+
+.tectonic-widget {position:relative;min-height:62px;margin-bottom:10px;--widget-font-family:system-ui,sans-serif;--widget-background:#153448;--widget-color:#dfeef6;}
+.tectonic-widget .deck-widget {position:relative;width:100%;}
+.tectonic-widget[inert] {opacity:.45;}
+
+.tectonic-widget {--widget-margin:0px;--button-stroke:#284656;--button-background:#153448;--icon-fill:#dfeef6;--menu-background:#153448;--menu-text:#c1dce8;--range-handle-background:#87c9d9;--range-track-background:#264858;}
+.tectonic-widget .deck-widget-button-group {width:100%;padding:14px 8px;gap:12px;height:56px;}
+.tectonic-widget .deck-widget-range--horizontal {flex:1;min-width:0;}
+.tectonic-widget .deck-widget-timeline-label {font-size:10px;}
+
+.tectonic-widget {--button-icon-idle:#dfeef6;--button-icon-hover:#fff;}
+.tectonic-widget button {padding:0;}
+
+.tectonic-heading {pointer-events:auto;}
+.tectonic-primary-play {margin-top:12px!important;display:flex;align-items:center;gap:8px;background:#d1ebf3!important;color:#123349!important;border:1px solid #b3dae8!important;box-shadow:0 4px 20px #0004;font-weight:650!important;padding:8px 15px!important;}
+.tectonic-info {background:#102837;border:1px solid #2f4c5c;border-radius:6px;padding:10px;margin-top:12px;color:#b8d1dd;}
+.tectonic-info summary {cursor:pointer;font-size:11px;}
+.tectonic-info p {font-size:10px;}
+
+.tectonic-appearance-status {font-size:10px;line-height:1.4;color:#8eabba;margin:10px 0;}
+
+.tectonic-widget .deck-widget-timeline-label {white-space:nowrap;transform:translateX(-50%);font-size:10px;}
+.tectonic-widget .deck-widget-range {width:calc(100% - 42px);}
+
+.tectonic-coordinate-tooltip {position:absolute;z-index:3;pointer-events:none;white-space:nowrap;padding:6px 9px;border:1px solid #477185;border-radius:5px;background:#081c2eee;color:#eaf3f7;font:11px ui-monospace,monospace;box-shadow:0 3px 12px #0005;}
+.tectonic-coordinate-tooltip[hidden] {display:none;}

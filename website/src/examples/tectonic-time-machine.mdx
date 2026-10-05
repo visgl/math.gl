@@ -1,0 +1,49 @@
+# Tectonic time machine
+
+import Example from '@site/src/components/tectonic-time-machine';
+
+<Example height="calc(100vh - 140px)" />
+
+Animate continental blocks from **500 million years ago** to **300 million years
+into the future**. Scrub the timeline, play continuously, visit Pangaea assembly
+and breakup, or switch between a globe and seven map projections. Drag to rotate
+or pan; scroll to zoom.
+
+The history uses [Müller et al. (2022)](https://doi.org/10.5194/se-13-1127-2022)
+finite rotations served by [GPlates](https://gwsdoc.gplates.org/models/), with
+[Merdith et al. (2021)](https://doi.org/10.1016/j.earscirev.2020.103477)
+coastline templates fetched at runtime. Optional region colors identify present-day regional blocks,
+not the names of ancient continents. This is a rigid-block reconstruction:
+shoreline evolution, sea level, subduction and changing plate boundaries are not simulated.
+
+**Future motion is illustrative, not a forecast.** The two original assembly
+scenarios rotate present-day regional blocks toward Atlantic or polar arrangements
+by +250 Ma, then hold those arrangements until +300 Ma. They do not reproduce
+published Amasia, Aurica or Pangaea Proxima models.
+
+Map coordinates use the [math.gl projection engine](/docs/modules/projection),
+including `projectFlatSync` on typed arrays. The [polygon module](/docs/modules/polygon)
+cuts rings at the dateline and handles polar closure before projection; deck.gl
+renders the globe and Cartesian maps.
+
+Scientific data is loaded from external services and retains its source terms and
+attribution. No GPlates implementation, rotation table or coastline dataset is
+bundled in math.gl. Network access and browser gzip decompression support are required;
+a service failure shows a retry message rather than substituted scientific data.
+
+Playback uses deck.gl's [`TimelineWidget`](https://deck.gl/docs/api-reference/widgets/timeline-widget)
+(experimental in deck.gl 9.4). Changing projections smoothly interpolates a shared
+triangulated surface over 1.2 seconds while geological playback continues. A new
+selection during a transition begins from the current interpolated shape. Globe
+and map endpoints use the same current reconstruction, rather than frozen snapshots.
+The intermediate shapes are visual transitions, not additional cartographic projections.
+
+Natural terrain uses NASA [Blue Marble imagery](https://science.nasa.gov/earth/earth-observatory/the-blue-marble-true-color-global-imagery-at-1km-resolution/),
+credited to NASA Goddard, Reto Stöckli and Robert Simmon, with USGS topographic shading.
+It is included under NASA imagery usage terms, separately from the MIT example code;
+no NASA endorsement is implied. Modern terrain follows moving blocks for visual context;
+ancient or future mountains, vegetation and ice are not reconstructed. Animated ocean
+ripples and specular reflections use luma.gl’s public water material.
+
+The Play / Stop button works directly in the embedded example. Sources and scientific
+limits are available in the compact **About this reconstruction** box.
