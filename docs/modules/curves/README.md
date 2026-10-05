@@ -1,5 +1,9 @@
 # @math.gl/curves
 
+import CurvesExample from '@site/src/components/curves';
+
+<CurvesExample inline interactive height={580} />
+
 The curves module provides renderer-independent parametric curves for 2D and 3D Cartesian
 coordinates. Use it for camera paths, trajectories, interpolation, and sampled line geometry.
 

@@ -1,0 +1,205 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.curves-example {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  height: 100%;
+  min-height: 520px;
+  background: #07121e;
+  color: #e5f3ff;
+  font:
+    14px/1.5 system-ui,
+    sans-serif;
+  overflow: auto;
+}
+.curves-panel {
+  padding: 24px;
+  background: linear-gradient(155deg, #14273c, #091522);
+  overflow: auto;
+}
+.curves-eyebrow {
+  font: 11px monospace;
+  color: #5de8fa;
+  letter-spacing: 0.08em;
+}
+.curves-panel h2 {
+  font-size: 25px;
+  color: #fff;
+  margin: 8px 0 12px;
+  letter-spacing: -0.04em;
+}
+.curves-panel p {
+  color: #a9bed2;
+  font-size: 13px;
+}
+.curves-panel label {
+  display: block;
+  margin: 14px 0;
+  font-size: 12px;
+  color: #cbdbea;
+}
+.curves-panel output {
+  float: right;
+  color: #5de8fa;
+}
+.curves-panel select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+}
+.curves-panel select,
+.curves-example button {
+  background: #172d44;
+  color: #eaf6ff;
+  border: 1px solid #35546f;
+  border-radius: 8px;
+  padding: 9px;
+  font: inherit;
+  cursor: pointer;
+}
+.curves-panel input[type='range'] {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  accent-color: #5de8fa;
+}
+.curves-panel .curves-check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 9px 0;
+}
+.curves-panel input[type='checkbox'] {
+  accent-color: #5de8fa;
+}
+.curves-panel button {
+  width: 100%;
+  margin-top: 12px;
+}
+.curves-metric {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #263b51;
+}
+.curves-metric span {
+  display: block;
+  font-size: 11px;
+  color: #91a9be;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.curves-metric strong {
+  font-size: 28px;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.curves-metric small {
+  font-size: 12px;
+  font-weight: 400;
+  color: #91a9be;
+}
+.curves-stage {
+  position: relative;
+  min-height: 400px;
+  overflow: hidden;
+}
+.curves-stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+.curves-stage canvas:focus-visible {
+  outline: 2px solid #5de8fa;
+  outline-offset: -3px;
+}
+.curves-scene-label {
+  position: absolute;
+  top: 26px;
+  left: 26px;
+  pointer-events: none;
+}
+.curves-scene-label span {
+  display: block;
+  color: #7899b4;
+  font: 10px monospace;
+  letter-spacing: 0.15em;
+}
+.curves-scene-label strong {
+  font-size: 20px;
+  color: #eaf7ff;
+}
+.curves-legend {
+  position: absolute;
+  bottom: 24px;
+  left: 26px;
+  display: flex;
+  gap: 18px;
+  pointer-events: none;
+  font-size: 11px;
+  color: #c9deef;
+}
+.curves-legend span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.curves-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.curves-example .curves-camera {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  font-size: 11px;
+}
+@media (max-width: 650px) {
+  .curves-example {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .curves-panel {
+    padding: 16px;
+    overflow: visible;
+  }
+  .curves-panel label:not(.curves-check) {
+    display: inline-block;
+    width: calc(50% - 12px);
+    margin: 6px;
+    vertical-align: top;
+  }
+  .curves-panel .curves-check {
+    display: inline-flex;
+    margin: 6px;
+  }
+  .curves-panel h2 {
+    font-size: 22px;
+  }
+  .curves-panel p {
+    margin: 6px 0;
+  }
+  .curves-panel .curves-hint,
+  .curves-metric {
+    display: none;
+  }
+  .curves-panel button {
+    margin-top: 6px;
+  }
+  .curves-stage {
+    height: 380px;
+    min-height: 380px;
+  }
+  .curves-legend {
+    bottom: 60px;
+    left: 16px;
+  }
+  .curves-scene-label {
+    top: 16px;
+    left: 16px;
+  }
+}

@@ -4998,7 +4998,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/curves@workspace:modules/curves":
+"@math.gl/curves@workspace:*, @math.gl/curves@workspace:modules/curves":
   version: 0.0.0-use.local
   resolution: "@math.gl/curves@workspace:modules/curves"
   dependencies:
@@ -15339,6 +15339,21 @@ __metadata:
     "@math.gl/core": "workspace:*"
     "@math.gl/culling": "workspace:*"
     "@math.gl/geometry": "workspace:*"
+    react: "npm:^19.2.8"
+    react-dom: "npm:^19.2.8"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
+"math.gl-curves-example@workspace:examples/curves":
+  version: 0.0.0-use.local
+  resolution: "math.gl-curves-example@workspace:examples/curves"
+  dependencies:
+    "@luma.gl/core": "npm:~9.4.2"
+    "@luma.gl/engine": "npm:~9.4.2"
+    "@luma.gl/shadertools": "npm:~9.4.2"
+    "@math.gl/core": "workspace:*"
+    "@math.gl/curves": "workspace:*"
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
     vite: "npm:^8.2.2"
