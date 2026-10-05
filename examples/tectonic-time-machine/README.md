@@ -68,3 +68,13 @@ The intermediate shapes are visual transitions, not additional cartographic proj
 
 Hover labels report longitude and latitude at stable globe/map endpoints. They are hidden
 during projection morphs because intermediate visual shapes have no unique inverse CRS.
+
+Named chapters on the timeline include Gondwana, Laurussia, Pangaea and the
+Laurasia / Gondwana breakup. Centered titles fade according to geological time,
+so pausing holds the title and seeking updates it immediately. These chapter dates
+are approximate educational cues, not exact assembly boundaries. Future titles
+follow the selected illustrative scenario. Rodinia, Columbia (Nuna) and proposed
+Pannotia lie outside the 500 Ma reconstruction range.
+
+Background: [BGS on Laurussia and Pangaea](https://earthwise.bgs.ac.uk/index.php/Geotectonic_setting_of_Wales),
+[Veevers (2004) on Gondwana](https://doi.org/10.1016/j.earscirev.2004.05.002).

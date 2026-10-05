@@ -198,3 +198,26 @@ test('Equal Earth hover outside its outline returns no coordinate instead of a r
   const broken = {unprojectFlatSync() {throw new Error('Plugin not loaded');}};
   assert.throws(() => worldToGeographic(0, 0, 'eqearth', broken, 1, 0, 0, out), /Plugin not loaded/);
 });
+
+
+import {LANDMASS_CHAPTERS, chapterOpacity, timelineMilestones} from './timeline.js';
+test('landmass titles fade with geological time, and future names follow the selected scenario', () => {
+  for (const chapter of LANDMASS_CHAPTERS) {
+    const [start, formed, held, end] = chapter.fade;
+    const scenario = chapter.scenario || 'atlantic';
+    near(chapterOpacity(chapter, start, scenario), 0);
+    near(chapterOpacity(chapter, (start + formed) / 2, scenario), 0.5);
+    near(chapterOpacity(chapter, chapter.time, scenario), 1);
+    near(chapterOpacity(chapter, held, scenario), 1);
+    near(chapterOpacity(chapter, (held + end) / 2, scenario), 0.5);
+    near(chapterOpacity(chapter, end, scenario), 0);
+    near(chapterOpacity(chapter, NaN, scenario), 0);
+  }
+  near(chapterOpacity(LANDMASS_CHAPTERS[4], 250, 'polar'), 0);
+  near(chapterOpacity(LANDMASS_CHAPTERS[5], 250, 'atlantic'), 0);
+  assert.equal(timelineMilestones('atlantic').at(-1).name, 'Atlantic assembly');
+  assert.equal(timelineMilestones('polar').at(-1).name, 'Polar assembly');
+  for (let time = -500; time <= 300; time++) {
+    assert(LANDMASS_CHAPTERS.filter(c => chapterOpacity(c, time, 'atlantic') > 0).length <= 1);
+  }
+});

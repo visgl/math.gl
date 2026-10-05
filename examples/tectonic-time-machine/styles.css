@@ -63,3 +63,12 @@ SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 .tectonic-coordinate-tooltip {position:absolute;z-index:3;pointer-events:none;white-space:nowrap;padding:6px 9px;border:1px solid #477185;border-radius:5px;background:#081c2eee;color:#eaf3f7;font:11px ui-monospace,monospace;box-shadow:0 3px 12px #0005;}
 .tectonic-coordinate-tooltip[hidden] {display:none;}
+
+.tectonic-chapters {position:absolute;inset:0;z-index:1;pointer-events:none;}
+.tectonic-chapter {position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:100px 24px 60px;text-align:center;transition:opacity .45s ease-out;}
+.tectonic-chapter strong {font-family:'Source Sans 3 Variable','Source Sans 3',system-ui,sans-serif;font-size:clamp(36px,6vw,88px);font-weight:300;line-height:1.05;letter-spacing:.035em;color:#fff;text-shadow:0 2px 28px #000c,0 1px 5px #000c;}
+.tectonic-chapter span {max-width:34em;font-size:11px;letter-spacing:.12em;color:#e3edf2;text-shadow:0 1px 10px #000;}
+.tectonic-chapter-pair strong {font-size:clamp(30px,4.5vw,66px);}
+.tectonic-milestones button {max-width:150px;white-space:normal;}
+@media(max-width:650px) {.tectonic-chapter {padding:95px 20px 45px;gap:10px;}.tectonic-chapter span {font-size:10px;}.tectonic-milestones {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}}
+@media(prefers-reduced-motion:reduce) {.tectonic-chapter {transition:none;}}
