@@ -17,6 +17,7 @@
   "scripts": {
     "bootstrap": "yarn && ocular-bootstrap && yarn build",
     "build": "ocular-clean && time ocular-build",
+    "check:spatial-index-package": "node modules/spatial-index/scripts/check-package.mjs",
     "check:source-headers": "node scripts/check-source-headers.mjs",
     "check:curves-package": "node modules/curves/scripts/check-package.mjs",
     "check:crs-types": "npx tsc --project test/types/crs/tsconfig.json",

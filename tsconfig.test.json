@@ -32,6 +32,8 @@
       "@math.gl/projection/projections/lazy/*": ["./modules/projection/src/experimental/lazy-projections/*"],
       "@math.gl/projection/parsers/*": ["./modules/projection/src/experimental/crs/*"],
       "@math.gl/projection/grids/*": ["./modules/projection/src/experimental/grids/*"],
+      "@math.gl/spatial-index": ["./modules/spatial-index/src/index.ts"],
+      "@math.gl/spatial-index/*": ["./modules/spatial-index/src/*"],
       "@math.gl/sun": ["./modules/sun/src/index.ts"],
       "@math.gl/types": ["./modules/types/src/index.ts"],
       "@math.gl/web-mercator": ["./modules/web-mercator/src/index.ts"]

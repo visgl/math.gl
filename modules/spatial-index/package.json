@@ -1,0 +1,44 @@
+{
+  "name": "@math.gl/spatial-index",
+  "description": "Experimental static spatial indexes and triangle BVHs",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "5.0.0-alpha.12",
+  "keywords": [
+    "spatial",
+    "bvh",
+    "index",
+    "nearest",
+    "ray"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./boxes": {
+      "types": "./dist/box-index.d.ts",
+      "import": "./dist/box-index.js",
+      "require": "./dist/box-index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "@math.gl/culling": "5.0.0-alpha.12"
+  },
+  "sideEffects": false
+}

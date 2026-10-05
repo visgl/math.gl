@@ -76,6 +76,7 @@
       "@math.gl/projection/experimental/parsers/*": ["./modules/projection/src/experimental/crs/*"],
       "@math.gl/projection/*": ["./modules/projection/src/*"],
       "@math.gl/projection/test/*": ["./modules/projection/test/*"],
+      "@math.gl/spatial-index/*": ["./modules/spatial-index/src/*"],
       "@math.gl/sun/*": ["./modules/sun/src/*"],
       "@math.gl/sun/test/*": ["./modules/sun/test/*"],
       "@math.gl/timezone/lookup": ["./modules/timezone/src/lookup.ts"],
