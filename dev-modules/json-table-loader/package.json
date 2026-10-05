@@ -1,0 +1,12 @@
+{
+  "name": "math.gl-json-table-loader",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "exports": "./index.js",
+  "dependencies": {
+    "@loaders.gl/core": "5.0.0-alpha.9",
+    "@loaders.gl/json": "5.0.0-alpha.9"
+  }
+}

@@ -80,18 +80,6 @@ test('timeline distinguishes past, present and future', () => {
   assert.equal(timeLabel(250), '+250 million years');
 });
 
-test('runtime rotation decoder rejects incomplete or invalid scientific data', async () => {
-  const {validateRotations} = await import('./data.js');
-  const raw = Object.fromEntries(
-    Array.from({length: 51}, (_, i) => [`${i * 10}.0`, {701: [1, 0, 0, 0]}])
-  );
-  assert.equal(Object.keys(validateRotations(raw, [701])).length, 51);
-  assert.throws(() => validateRotations({...raw, '500.0': undefined}, [701]));
-  assert.throws(() => validateRotations({...raw, '10.0': {701: [2, 0, 0, 0]}}, [701]));
-  assert.throws(() => validateRotations({...raw, '10.0': {701: [NaN, 0, 0, 0]}}, [701]));
-  assert.throws(() => validateRotations(raw, [999]));
-});
-
 import {makeMesh, blendWeights, transformMesh, worldToGeographic} from './geometry.js';
 test('geographic cell triangulation preserves holes and area before spherical morphs', () => {
   const mesh = makeMesh([
@@ -250,17 +238,17 @@ test('source ranges include Rodinia and restrict Nuna to the 1.8 Ga source', () 
   assert(timelineMilestones('atlantic', 1000).some(c => c.name === 'Rodinia'));
 });
 test('rotation windows publish all plate rows together, reuse cached samples, and recover from failures', async () => {
-  const source = DATA_SOURCES.CAO2024, ids = Array.from({length: 41}, (_, i) => 500 + i);
+  const source = DATA_SOURCES.CAO2024, ids = Array.from({length: 257}, (_, i) => 500 + i);
   let fail = true, calls = 0;
-  const cache = createRotationCache(ids, source, async (url, signal) => {
+  const cache = createRotationCache(ids, source, async function* (url, signal) {
     calls++;
     assert.equal(url.searchParams.get('model'), 'CAO2024');
     const pids = url.searchParams.get('pids').split(','), times = url.searchParams.get('times').split(',');
-    assert(pids.length <= 40); assert(times.length <= 21);
+    assert(pids.length <= 256); assert(times.length <= 21);
     assert.equal(cache.hasTime(-930), false);
     if (fail && pids.length === 1) throw new Error('Service unavailable');
     signal.throwIfAborted();
-    return Object.fromEntries(times.map(t => [t, Object.fromEntries(pids.map(pid => [pid, IDENTITY]))]));
+    yield* parseRotationBatches([bytes(Object.fromEntries(times.map(t => [t, Object.fromEntries(pids.map(pid => [pid, IDENTITY]))])))]);
   });
   const signal = new AbortController().signal;
   await assert.rejects(cache.ensureTime(-930, {signal}), /Service unavailable/);
@@ -269,7 +257,8 @@ test('rotation windows publish all plate rows together, reuse cached samples, an
   fail = false;
   await cache.ensureTime(-930, {signal});
   assert(cache.hasTime(-930));
-  assert.equal(Object.keys(cache.rotations['930']).length, 41);
+  assert.equal(cache.rotations['930'].values.length, 257 * 4);
+  assert.equal(cache.rotations['930'].indices.size, 257);
   const previousCalls = calls;
   await cache.ensureTime(-950, {signal});
   assert.equal(calls, previousCalls);
@@ -277,9 +266,9 @@ test('rotation windows publish all plate rows together, reuse cached samples, an
   const controller = new AbortController(); controller.abort();
   await assert.rejects(cache.ensureTime(-1600, {signal: controller.signal}), /abort/i);
   assert.equal(cache.hasTime(-1600), false);
-  const boundary = createRotationCache([701], source, async url => {
+  const boundary = createRotationCache([701], source, async function* (url) {
     const times = url.searchParams.get('times').split(',');
-    return Object.fromEntries(times.map(t => [t, {701: IDENTITY}]));
+    yield* parseRotationBatches([bytes(Object.fromEntries(times.map(t => [t, {701: IDENTITY}])))]);
   });
   await boundary.ensureTime(-1600, {signal});
   assert(boundary.hasTime(-1600));
@@ -317,4 +306,168 @@ test('model archive reads only the named geometry and rejects changed revisions 
   await assert.rejects(readZipEntry(new ArrayBuffer(4), name), /Invalid/);
   const corrupt = zipFixture(name, data); new DataView(corrupt).setUint32(0, 0);
   await assert.rejects(readZipEntry(corrupt, name), /Invalid/);
+});
+
+import {isMobile, shouldPreloadHistory, nextRotationTime} from './sources.js';
+import {parseRotationRows, parseRotationBatches, responseChunks, ROTATION_SCHEMA} from './rotation-stream.js';
+const bytes = value => new TextEncoder().encode(JSON.stringify(value));
+async function collect(iterable) {const result = []; for await (const item of iterable) result.push(item); return result;}
+test('desktop streams all history; mobile and save-data clients keep a smaller buffer', () => {
+  assert.equal(isMobile(undefined), false);
+  assert.equal(shouldPreloadHistory({userAgent: 'Desktop', deviceMemory: 8}), true);
+  for (const device of [
+    {userAgentData: {mobile: true}}, {userAgent: 'Android'}, {userAgent: 'iPhone'},
+    {platform: 'MacIntel', maxTouchPoints: 5}, {connection: {saveData: true}}
+  ]) assert.equal(shouldPreloadHistory(device), false);
+  assert.equal(shouldPreloadHistory({userAgent: 'Desktop', deviceMemory: 2}), true);
+  assert.equal(isMobile({userAgent: 'Macintosh', platform: 'MacIntel', maxTouchPoints: 0}), false);
+  assert.equal(nextRotationTime(-930, 1800), -790);
+  assert.equal(nextRotationTime(-1800, 1800), -1590);
+  assert.equal(nextRotationTime(-200, 1800), null);
+  assert.equal(nextRotationTime(250, 1800), null);
+});
+test('JSON-to-Arrow uses a fixed projected schema and drops unneeded columns in every batch', async () => {
+  const rows = Array.from({length: 9}, (_, i) => ({age: i * 10, plateId: 701, w: 1, x: 0, y: 0, z: 0,
+    unused: {description: 'not retained', values: [1, 2, 3]}}));
+  const batches = await collect(parseRotationRows([bytes(rows)], 4));
+  assert.deepEqual(batches.map(b => b.data.numRows), [4, 4, 1]);
+  for (const batch of batches) {
+    assert.deepEqual(batch.data.schema.fields.map(f => f.name), ROTATION_SCHEMA.fields.map(f => f.name));
+    assert.equal(batch.data.getChild('unused'), null);
+  }
+  const broken = {...rows[0]}; delete broken.x;
+  await assert.rejects(collect(parseRotationRows([bytes([broken])])), /missing field/);
+});
+test('keyed rotation JSON survives tiny byte chunks and rejects malformed quaternions or truncation', async () => {
+  const payload = bytes({'0.0': {701: [1, 0, 0, 0]}, '10.0': {701: [0, 0, 0, 1]}});
+  const batches = await collect(parseRotationBatches(Array.from(payload, b => Uint8Array.of(b)), 1));
+  assert.deepEqual(batches.map(b => b.data.getChild('age').get(0)), [0, 10]);
+  assert.equal(batches[1].data.getChild('z').get(0), 1);
+  for (const bad of [[], {0: {701: [1, 0, 0]}}, {0: {701: [1, 0, 0, 0, 0]}},
+    {0: {701: [[1], 0, 0, 0]}}, {0: {701: [1, null, 0, 0]}}, {0: {701: {w: 1}}}])
+    await assert.rejects(collect(parseRotationBatches([bytes(bad)])));
+  await assert.rejects(collect(parseRotationBatches([payload.subarray(0, payload.length - 1)])), /Unexpected end/);
+});
+const pole = [Math.SQRT1_2, 0, 0, Math.SQRT1_2];
+function serviceRows(url) {
+  const pids = url.searchParams.get('pids').split(','), times = url.searchParams.get('times').split(',');
+  return Object.fromEntries(times.map(t => [t, Object.fromEntries(pids.map(pid => [pid, pole]))]));
+}
+test('streamed samples unlock playback before the response finishes and interpolation reads packed arrays', async () => {
+  let finish; const gate = new Promise(resolve => {finish = resolve;});
+  const cache = createRotationCache([701, 702], DATA_SOURCES.CAO2024, async function* (url) {
+    const rowBatches = await collect(parseRotationBatches([bytes(serviceRows(url))], 2));
+    const first = rowBatches.find(b => b.data.getChild('age').get(0) === 800) || rowBatches[0];
+    yield first;
+    await gate;
+    yield* rowBatches.filter(b => b !== first);
+  });
+  const signal = new AbortController().signal;
+  const waiting = cache.waitForTime(-800, {signal});
+  await waiting;
+  assert(cache.hasTime(-800));
+  assert.equal(cache.hasTime(-810), false);
+  const out = new Float64Array(4);
+  assert(historicalRotation(cache.rotations, 702, 800, out, 1800));
+  near(out[0], pole[0]); near(out[3], pole[3]);
+  assert.equal(historicalRotation(cache.rotations, 999, 800, out, 1800), false);
+  finish();
+  await cache.ensureTime(-805, {signal});
+  assert(historicalRotation(cache.rotations, 702, 805, out, 1800));
+});
+test('full-history streaming deduplicates requests, covers both endpoints, and lets foreground seeks run between windows', async () => {
+  const calls = []; let release; const gate = new Promise(resolve => {release = resolve;});
+  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url) {
+    calls.push(url.searchParams.get('times').split(',').map(Number));
+    if (calls.length === 1) await gate;
+    yield* parseRotationBatches([bytes(serviceRows(url))]);
+  });
+  const signal = new AbortController().signal;
+  await cache.ensurePose(-930, {signal: new AbortController().signal, onStatus: () => {release();}});
+  calls.length = 0;
+  const loading = cache.ensureHistory(-930, {signal});
+  assert.equal(cache.ensureHistory(-930, {signal}), loading);
+  const seeking = cache.ensureTime(-1700, {signal});
+  await seeking;
+  assert(calls[1].includes(1700));
+  await loading;
+  for (let age = 0; age <= 1800; age += 10) assert(cache.hasTime(-age));
+  const count = calls.length;
+  await cache.ensureHistory(-930, {signal});
+  assert.equal(calls.length, count);
+});
+test('stream failures preserve complete samples, reject missing rows, and allow retry', async () => {
+  let fail = true;
+  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url) {
+    const raw = serviceRows(url);
+    if (fail) delete raw['810'];
+    yield* parseRotationBatches([bytes(raw)]);
+  });
+  const signal = new AbortController().signal;
+  await assert.rejects(cache.ensureTime(-850, {signal}), /Missing rotations/);
+  assert(cache.hasTime(-800)); assert.equal(cache.hasTime(-805), false);
+  fail = false;
+  await cache.ensureTime(-805, {signal}); assert(cache.hasTime(-805));
+  const duplicate = createRotationCache([701], DATA_SOURCES.CAO2024, async function* () {
+    yield* parseRotationRows([bytes([{age: 800, plateId: 701, w: 1, x: 0, y: 0, z: 0},
+      {age: 800, plateId: 701, w: 1, x: 0, y: 0, z: 0}])]);
+  });
+  await assert.rejects(duplicate.ensureTime(-850, {signal}), /duplicate/);
+});
+test('source cancellation releases the stream reader and does not publish a partial plate set', async () => {
+  let cancelled = false;
+  const controller = new AbortController();
+  const stream = new ReadableStream({cancel() {cancelled = true;}});
+  const iterator = responseChunks(stream, controller.signal)[Symbol.asyncIterator]();
+  const waiting = iterator.next();
+  controller.abort();
+  await assert.rejects(waiting, /abort/i);
+  assert(cancelled); assert.equal(stream.locked, false);
+  const cache = createRotationCache([701, 702], DATA_SOURCES.CAO2024, async function* () {
+    yield* parseRotationBatches([bytes({800: {701: pole}})]);
+  });
+  await assert.rejects(cache.ensureTime(-850, {signal: new AbortController().signal}), /Missing rotations/);
+  assert.equal(cache.hasTime(-800), false);
+});
+
+test('production cache rejects non-unit rotations and streams missing finite numbers as errors', async () => {
+  for (const quaternion of [[2, 0, 0, 0], [1, 0, null, 0]]) {
+    const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* () {
+      yield* parseRotationBatches([bytes({800: {701: quaternion}})]);
+    });
+    await assert.rejects(cache.ensurePose(-800, {signal: new AbortController().signal}));
+    assert.equal(cache.hasTime(-800), false);
+  }
+  await assert.rejects(collect(parseRotationBatches([new TextEncoder().encode('{"800":{"701":[1e400,0,0,0]}}')])), /Invalid quaternion/);
+});
+test('mobile prefetch follows a window change during a download without waiting for a miss', async () => {
+  let release; const gate = new Promise(resolve => {release = resolve;});
+  const calls = [];
+  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url) {
+    calls.push(url.searchParams.get('times').split(',').map(Number));
+    if (calls.length === 1) await gate;
+    yield* parseRotationBatches([bytes(serviceRows(url))]);
+  });
+  const signal = new AbortController().signal;
+  const first = cache.prefetchTime(-930, {signal});
+  assert.equal(cache.prefetchTime(-790, {signal}), first);
+  release();
+  await first;
+  assert(cache.hasTime(-430));
+  assert.equal(calls.length, 3);
+});
+test('cancelling a foreground seek waiter preserves the useful source-lifetime stream', async () => {
+  let release; const gate = new Promise(resolve => {release = resolve;});
+  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url, signal) {
+    await gate;
+    signal.throwIfAborted();
+    yield* parseRotationBatches([bytes(serviceRows(url))]);
+  });
+  const source = new AbortController(), seeker = new AbortController();
+  const waiting = cache.waitForTime(-805, {signal: seeker.signal, lifetimeSignal: source.signal});
+  seeker.abort();
+  await assert.rejects(waiting, /abort/i);
+  release();
+  await cache.ensureTime(-805, {signal: source.signal});
+  assert(cache.hasTime(-805));
 });

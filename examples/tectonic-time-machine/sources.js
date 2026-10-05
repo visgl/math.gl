@@ -56,3 +56,23 @@ export function rotationWindow(time, maxAge) {
   const end = Math.min(maxAge, start + 200);
   return Array.from({length: (end - start) / 10 + 1}, (_, i) => start + i * 10);
 }
+
+/** Device detection is a loading hint, not a guarantee of available memory. */
+export function isMobile(device = globalThis.navigator) {
+  if (!device) return false;
+  return Boolean(
+    device.userAgentData?.mobile ||
+    /Android|iPhone|iPad|iPod|Mobile/i.test(device.userAgent || '') ||
+    (/Mac/.test(device.platform || '') && device.maxTouchPoints > 1)
+  );
+}
+export function shouldPreloadHistory(device = globalThis.navigator) {
+  return !isMobile(device) && !device?.connection?.saveData;
+}
+/** The younger adjacent window follows the direction of geological playback. */
+export function nextRotationTime(time, maxAge) {
+  rotationBracket(time, maxAge);
+  const age = Math.max(0, -time);
+  const start = Math.min(Math.max(0, Math.ceil(age / 200) - 1) * 200, maxAge - 200);
+  return start > 0 ? -(start - 10) : null;
+}

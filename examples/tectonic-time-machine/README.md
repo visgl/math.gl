@@ -33,7 +33,7 @@ not a paleogeographic shoreline model.
 Each source uses its matching GPML geometry and explicitly selected GPlates rotation
 model. The original parser reads feature identity, plate ID, rings and validity
 intervals; positions in GPML are latitude/longitude. Rotation samples are requested
-in bounded 200 Ma windows at 10 Ma intervals and reused during the session. The service
+at 10 Ma intervals and reused during the session. The service
 may update rotations; the example is not a revision-certified reconstruction.
 Switching sources cancels pending requests and clamps time to the new source's range.
 Different models have different reference frames and are never mixed.
@@ -66,10 +66,26 @@ Mercator is displayed with its ±85.05112878° latitude cap. Globe and map rende
 use deck.gl; no basemap, service credentials or map API key is required.
 
 Geometry loads when a source is selected, with cancellation on unmount or source change.
-Playback pauses while missing rotation windows load in sequential bounded batches and
-resumes after successful loading. Windows are published to the cache only after all
-plate rows have been validated. Network errors are explicit and retryable. Service
-and browser failures never fall back to fabricated historical motion.
+The initial pose loads first so playback can start without waiting for the complete history.
+Desktop clients then stream the entire historical range in the background. Mobile clients
+and clients requesting reduced data use keep a smaller buffer and prefetch the current and next 200 Ma windows. Playback pauses only when it reaches
+a missing pose and resumes as soon as the two required samples are available. Seeking takes
+priority over further background windows; source changes cancel streaming.
+
+The GPlates keyed JSON response is adapted incrementally to rows and read by loaders.gl's
+JSON-to-Arrow loader in 4,096-row batches. An explicit schema retains only `age`, `plateId`,
+`w`, `x`, `y`, and `z`; `onExtraField: 'drop'` discards unselected columns during Arrow
+conversion, while missing required fields remain errors. This bounds temporary row storage;
+it does not claim to avoid every parser allocation. Validated rotations are retained in
+one packed Float64Array per time sample, rather than a small array per plate rotation.
+Only complete time samples containing every requested plate become available to playback.
+HTTP requests remain bounded to 256 plate IDs and 21 ages, and the render loop can run
+between Arrow batches. The loader's published v5 prerelease is isolated in a private
+workspace so deck.gl can retain its v4 loader integration.
+
+Network errors are explicit and retryable when a needed pose fails to load. Background
+failures keep previously validated samples playable. Service and browser failures never
+fall back to fabricated historical motion.
 
 A visible Play / Stop button works directly in the inline documentation example.
 The compact expandable info box includes sources and scientific limits.

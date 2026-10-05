@@ -13,8 +13,9 @@ export function unitVector(lon, lat, out = new Float64Array(3)) {
   out[2] = Math.sin(phi);
   return out;
 }
-export function slerp(a, b, t, out) {
-  let dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+export function slerp(a, b, t, out, aOffset = 0, bOffset = 0) {
+  let dot = 0;
+  for (let i = 0; i < 4; i++) dot += a[aOffset + i] * b[bOffset + i];
   const sign = dot < 0 ? -1 : 1;
   dot = Math.min(1, Math.abs(dot));
   let left = 1 - t,
@@ -27,7 +28,7 @@ export function slerp(a, b, t, out) {
   }
   let length = 0;
   for (let i = 0; i < 4; i++) {
-    out[i] = left * a[i] + right * sign * b[i];
+    out[i] = left * a[aOffset + i] + right * sign * b[bOffset + i];
     length += out[i] * out[i];
   }
   length = Math.sqrt(length);
@@ -71,17 +72,21 @@ export function rotateToLonLat(q, xyz, offset, out, target) {
 export function historicalRotation(table, pid, age, out, maxAge = 500) {
   const low = Math.floor(age / 10) * 10,
     high = age === low ? low : Math.min(maxAge, low + 10);
-  const a = table[String(low)]?.[pid],
-    b = table[String(high)]?.[pid];
-  if (!a || !b) return false;
+  const lower = table[String(low)], upper = table[String(high)];
+  // Packed samples share one plate index and one Float64Array per time slice.
+  // Legacy row fixtures remain useful for the scalar math tests.
+  const a = lower?.values || lower?.[pid], b = upper?.values || upper?.[pid];
+  const aOffset = lower?.values ? lower.indices.get(pid) * 4 : 0;
+  const bOffset = upper?.values ? upper.indices.get(pid) * 4 : 0;
+  if (!a || !b || !Number.isFinite(aOffset) || !Number.isFinite(bOffset)) return false;
   // GWS returns identity for absent reconstruction-tree IDs. Do not depict those as measured stationary blocks.
-  if (age > 0 && pid !== 0 && ((low > 0 && isIdentity(a)) || (high > 0 && isIdentity(b))))
+  if (age > 0 && pid !== 0 && ((low > 0 && isIdentity(a, aOffset)) || (high > 0 && isIdentity(b, bOffset))))
     return false;
-  slerp(a, b, (age - low) / 10, out);
+  slerp(a, b, (age - low) / 10, out, aOffset, bOffset);
   return true;
 }
-function isIdentity(q) {
-  return Math.abs(q[0]) > 0.999999999 && Math.hypot(q[1], q[2], q[3]) < 1e-10;
+function isIdentity(q, offset) {
+  return Math.abs(q[offset]) > 0.999999999 && Math.hypot(q[offset + 1], q[offset + 2], q[offset + 3]) < 1e-10;
 }
 export const REGIONS = {
   'North America': {

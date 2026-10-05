@@ -61,6 +61,9 @@ const webpackPlugin = config.plugins.find(
   plugin =>
     Array.isArray(plugin) && plugin[0] === '@vis.gl/docusaurus-website/plugin-webpack-config'
 );
+// Respect package-local dependencies before the website plugin's root fallbacks.
+// The private JSON-table adapter uses loaders.gl v5 while deck.gl remains on v4.
+webpackPlugin[1].resolve.modules.unshift('node_modules');
 const aliases = webpackPlugin[1].resolve.alias;
 aliases['@math.gl/culling/queries$'] = resolve(__dirname, '../modules/culling/src/queries.ts');
 aliases['@math.gl/curves$'] = resolve(__dirname, '../modules/curves/src/index.ts');

@@ -46,10 +46,12 @@ renders the globe and Cartesian maps.
 
 Scientific data is loaded from external services and retains its source terms and
 attribution. No GPlates implementation, rotation table or coastline dataset is
-bundled in math.gl. Network access and browser gzip/ZIP decompression support are required. Rotation
-windows load on demand and are cached; playback pauses while a missing window loads
-and resumes when it is ready. A service failure shows a retry message rather than
-substituted scientific data.
+bundled in math.gl. Network access and browser gzip/ZIP decompression support are required.
+The initial pose loads first, so playback can start while more history streams in.
+Desktop loads the full historical range in the background; mobile keeps a smaller buffer
+and prefetches ahead. JSON-to-Arrow batches retain only the needed rotation columns.
+Playback pauses if it reaches a missing pose and resumes as soon as its samples are ready.
+A service failure shows a retry message rather than substituted scientific data.
 
 Playback uses deck.gl's [`TimelineWidget`](https://deck.gl/docs/api-reference/widgets/timeline-widget)
 (experimental in deck.gl 9.4). Changing projections smoothly interpolates a shared
