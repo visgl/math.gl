@@ -15345,6 +15345,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"math.gl-culling-queries@workspace:examples/culling-queries":
+  version: 0.0.0-use.local
+  resolution: "math.gl-culling-queries@workspace:examples/culling-queries"
+  dependencies:
+    "@luma.gl/core": "npm:~9.4.2"
+    "@luma.gl/engine": "npm:~9.4.2"
+    "@luma.gl/shadertools": "npm:~9.4.2"
+    "@math.gl/core": "workspace:*"
+    "@math.gl/culling": "workspace:*"
+    react: "npm:^19.2.8"
+    react-dom: "npm:^19.2.8"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
 "math.gl-curves-example@workspace:examples/curves":
   version: 0.0.0-use.local
   resolution: "math.gl-curves-example@workspace:examples/curves"
