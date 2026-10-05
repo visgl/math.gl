@@ -1,0 +1,73 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.query-example {
+  position: relative;
+  height: 100%;
+  min-height: 360px;
+  background: #071321;
+  color: #e5f3ff;
+  font:
+    13px/1.5 system-ui,
+    sans-serif;
+  overflow: hidden;
+}
+.query-example details {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  z-index: 2;
+  width: min(290px, calc(100% - 76px));
+  max-height: calc(100% - 78px);
+  overflow: auto;
+  border: 1px solid #35546f;
+  border-radius: 12px;
+  background: #0b1e30ed;
+  backdrop-filter: blur(12px);
+}
+.query-example summary {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-weight: 650;
+  background: #142b40;
+  position: sticky;
+  top: 0;
+}
+.query-example .query-controls {
+  padding: 16px;
+}
+.query-example label {
+  display: block;
+  margin: 12px 0;
+}
+.query-example input[type='range'],
+.query-example select {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  accent-color: #5de8fa;
+}
+.query-example select,
+.query-example button {
+  background: #172d44;
+  color: #eaf6ff;
+  border: 1px solid #35546f;
+  border-radius: 7px;
+  padding: 7px;
+  font: inherit;
+}
+.query-example p {
+  color: #b4cbdf;
+}
+.query-example .query-caption {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  background: #0b1e30dc;
+  border-radius: 10px;
+  padding: 10px 14px;
+  pointer-events: none;
+  color: #cfeaff;
+}

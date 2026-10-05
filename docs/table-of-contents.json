@@ -125,6 +125,7 @@
         "label": "@math.gl/culling",
         "items": [
           "modules/culling/README",
+          "modules/culling/api-reference/queries",
           "modules/culling/api-reference/axis-aligned-bounding-box",
           "modules/culling/api-reference/bounding-sphere",
           "modules/culling/api-reference/bounding-volume",
