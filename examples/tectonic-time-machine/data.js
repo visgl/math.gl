@@ -3,10 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original GPML reader and runtime-only data adapter. Remote scientific data is not bundled or relicensed as MIT.
 import {unitVector, regionFor} from './math.js';
-export const MODEL = 'MULLER2022';
+import {sourceFor, rotationBracket, rotationWindow} from './sources.js';
+import {modelXML} from './archive.js';
 export const SERVICE = 'https://gws.gplates.org';
-export const COASTLINES_URL =
-  'https://raw.githubusercontent.com/GPlates/gplates-web-service/2b2bb1e25737668d4d3ec3d5d1c327279f30279e/django/GWS/data/deprecated/MODELS/MULLER2022/shapes_coastlines_Merdith_et_al_v2.gpmlz';
 const GML = 'http://www.opengis.net/gml',
   GPML = 'http://www.gplates.org/gplates';
 const first = (node, ns, name) => node.getElementsByTagNameNS(ns, name)[0];
@@ -112,9 +111,9 @@ export function parseCoastlines(xml) {
   }
   return features;
 }
-export function validateRotations(raw, pids) {
+export function validateRotations(raw, pids, times = Array.from({length: 51}, (_, i) => i * 10)) {
   const table = {};
-  for (let time = 0; time <= 500; time += 10) {
+  for (const time of times) {
     const row = raw[`${time}.0`] || raw[String(time)];
     if (!row) throw new Error(`Missing rotations at ${time} Ma`);
     table[String(time)] = {};
@@ -138,27 +137,55 @@ async function response(url, signal) {
   if (!r.ok) throw new Error(`Data service returned HTTP ${r.status}`);
   return r;
 }
-export async function loadModel({signal, onStatus}) {
-  onStatus('Loading coastline templates…');
-  const r = await response(COASTLINES_URL, signal);
-  if (typeof DecompressionStream === 'undefined')
-    throw new Error('This browser needs gzip DecompressionStream support');
-  const xml = await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).text();
-  if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+/** Rows become visible atomically only after every plate batch has validated. */
+export function createRotationCache(
+  pids,
+  source,
+  fetchJSON = async (url, signal) => (await response(url, signal)).json()
+) {
+  const rotations = {},
+    loaded = new Set();
+  return {
+    rotations,
+    hasTime(time) {
+      const [low, high] = rotationBracket(time, source.maxAge);
+      return loaded.has(low) && loaded.has(high);
+    },
+    async ensureTime(time, {signal, onStatus = () => {}}) {
+      const times = rotationWindow(time, source.maxAge).filter(t => !loaded.has(t));
+      if (!times.length) return;
+      const incoming = {};
+      for (let start = 0; start < pids.length; start += 40) {
+        signal.throwIfAborted();
+        onStatus(
+          `Loading ${source.citation} rotations · ${times[0]}–${times.at(-1)} Ma · ${Math.round((start / pids.length) * 100)}%`
+        );
+        const ids = pids.slice(start, start + 40),
+          url = new URL('/rotation/get_quaternions', SERVICE);
+        url.searchParams.set('model', source.id);
+        url.searchParams.set('pids', ids.join(','));
+        url.searchParams.set('times', times.join(','));
+        const raw = await fetchJSON(url, signal),
+          batch = validateRotations(raw, ids, times);
+        for (const [age, row] of Object.entries(batch)) incoming[age] = {...incoming[age], ...row};
+      }
+      signal.throwIfAborted();
+      for (const age of times) {
+        rotations[age] = incoming[age];
+        loaded.add(age);
+      }
+    }
+  };
+}
+export async function loadModel({sourceId, time, signal, onStatus}) {
+  const source = sourceFor(sourceId);
+  onStatus(`Loading ${source.citation} ${source.geometry}…`);
+  const r = await response(source.url, signal);
+  const xml = await modelXML(await r.arrayBuffer(), source);
+  signal.throwIfAborted();
   const features = parseCoastlines(xml),
     pids = [...new Set(features.map(f => f.pid))];
-  const rotations = {};
-  // Limit URL length and service work per request; requests remain sequential and cancellable.
-  for (let start = 0; start < pids.length; start += 40) {
-    onStatus(`Loading published rotations… ${Math.round((start / pids.length) * 100)}%`);
-    const ids = pids.slice(start, start + 40),
-      url = new URL('/rotation/get_quaternions', SERVICE);
-    url.searchParams.set('model', MODEL);
-    url.searchParams.set('pids', ids.join(','));
-    url.searchParams.set('times', Array.from({length: 51}, (_, i) => i * 10).join(','));
-    const raw = await (await response(url, signal)).json();
-    const batch = validateRotations(raw, ids);
-    for (const [time, row] of Object.entries(batch)) rotations[time] = {...rotations[time], ...row};
-  }
-  return {features, rotations, pids};
+  const cache = createRotationCache(pids, source);
+  await cache.ensureTime(time, {signal, onStatus});
+  return {features, pids, source, ...cache};
 }

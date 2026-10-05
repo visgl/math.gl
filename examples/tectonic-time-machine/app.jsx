@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useEffect, useRef, useState} from 'react';
 import {mountScene, VIEWS} from './scene.js';
-import {loadModel, MODEL} from './data.js';
+import {loadModel} from './data.js';
+import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime} from './sources.js';
 import {REGIONS, timeLabel} from './math.js';
 import {LANDMASS_CHAPTERS, chapterOpacity, timelineMilestones} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
@@ -12,15 +13,18 @@ export default function TectonicTimeMachine() {
   const canvas = useRef(null),
     stage = useRef(null),
     scene = useRef(null),
-    clock = useRef(-300),
+    clock = useRef(-930),
     timeline = useRef(null),
     playback = useRef(null);
-  const [time, setTime] = useState(-300),
+  const [time, setTime] = useState(-930),
     [playing, setPlaying] = useState(false),
     [ready, setReady] = useState(false),
     [status, setStatus] = useState('Ready to load published history'),
     [error, setError] = useState(''),
     [attempt, setAttempt] = useState(0);
+  const [sourceId, setSourceId] = useState(DEFAULT_SOURCE),
+    [model, setModel] = useState(null);
+  const source = sourceFor(sourceId);
   const [view, setView] = useState('globe'),
     [longitude, setLongitude] = useState(0),
     [scenario, setScenario] = useState('atlantic'),
@@ -51,14 +55,22 @@ export default function TectonicTimeMachine() {
   useEffect(() => {
     const abort = new AbortController();
     setReady(false);
+    setPlaying(false);
     setError('');
-    loadModel({signal: abort.signal, onStatus: setStatus})
-      .then(model => {
+    setModel(null);
+    scene.current?.setModel(null);
+    clock.current = clampTime(clock.current, source.maxAge);
+    setTime(clock.current);
+    loadModel({sourceId, time: clock.current, signal: abort.signal, onStatus: setStatus})
+      .then(loaded => {
         if (abort.signal.aborted) return;
-        scene.current?.setModel(model);
+        setModel(loaded);
+        scene.current?.setModel(loaded);
         setCounts(scene.current?.render(clock.current, true));
         setReady(true);
-        setStatus(`${model.pids.length} plate IDs · published rotations sampled every 10 Ma`);
+        setStatus(
+          `${loaded.pids.length} plate IDs · ${source.citation} · rotations sampled every 10 Ma`
+        );
       })
       .catch(e => {
         if (!abort.signal.aborted) {
@@ -68,7 +80,29 @@ export default function TectonicTimeMachine() {
         }
       });
     return () => abort.abort();
-  }, [attempt]);
+  }, [attempt, sourceId]);
+  useEffect(() => {
+    if (!model || model.source.id !== sourceId || model.hasTime(time)) return;
+    const abort = new AbortController(),
+      resume = playing;
+    setReady(false);
+    setPlaying(false);
+    model
+      .ensureTime(time, {signal: abort.signal, onStatus: setStatus})
+      .then(() => {
+        if (abort.signal.aborted) return;
+        setCounts(scene.current?.render(time, true));
+        setReady(true);
+        setStatus(
+          `${model.pids.length} plate IDs · ${source.citation} · rotations sampled every 10 Ma`
+        );
+        setPlaying(resume);
+      })
+      .catch(e => {
+        if (!abort.signal.aborted) setError(e.message);
+      });
+    return () => abort.abort();
+  }, [time, model, sourceId]);
   useEffect(() => {
     scene.current?.setOptions({view, longitude, scenario, grid, regionColors});
   }, [view, longitude, scenario, grid, regionColors]);
@@ -80,22 +114,22 @@ export default function TectonicTimeMachine() {
     }
   }, [time, ready, playing]);
   useEffect(() => {
-    scene.current?.setPlayback({time, playing, ready, speed});
-  }, [time, playing, ready, speed]);
+    scene.current?.setPlayback({time, playing, ready, speed, maxAge: source.maxAge});
+  }, [time, playing, ready, speed, sourceId]);
   const seek = value => {
-    clock.current = Number(value);
+    clock.current = clampTime(Number(value), source.maxAge);
     setPlaying(false);
     setTime(clock.current);
   };
   playback.current = {
     advance(value) {
-      clock.current = Number(value);
+      clock.current = clampTime(Number(value), source.maxAge);
       setTime(clock.current);
       const result = scene.current?.render(clock.current);
       if (result) setCounts(result);
     },
     play(value) {
-      if (value && clock.current >= 300) clock.current = -500;
+      if (value && clock.current >= 300) clock.current = -source.maxAge;
       setTime(clock.current);
       setPlaying(value);
     }
@@ -113,7 +147,7 @@ export default function TectonicTimeMachine() {
           <p>
             {time > 0
               ? 'Illustrative future · not a prediction'
-              : `${MODEL} · rigid-block reconstruction`}
+              : `${source.id} · rigid-block reconstruction`}
           </p>
           <button
             className="tectonic-primary-play"
@@ -129,7 +163,12 @@ export default function TectonicTimeMachine() {
             <div
               key={chapter.name}
               className={`tectonic-chapter${chapter.name.includes('&') ? ' tectonic-chapter-pair' : ''}`}
-              style={{opacity: ready && !error ? chapterOpacity(chapter, time, scenario) : 0}}
+              style={{
+                opacity:
+                  ready && !error && -chapter.time <= source.maxAge
+                    ? chapterOpacity(chapter, time, scenario)
+                    : 0
+              }}
             >
               <strong>{chapter.name}</strong>
               <span>{chapter.detail}</span>
@@ -153,6 +192,23 @@ export default function TectonicTimeMachine() {
             {time > 0 ? 'SCENARIO' : 'RECONSTRUCTION'}
           </span>
         </div>
+        <label>
+          Data source
+          <select
+            aria-label="Data source"
+            value={sourceId}
+            onChange={e => setSourceId(e.target.value)}
+          >
+            {Object.values(DATA_SOURCES).map(item => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <p className="tectonic-source-summary">
+          {source.frame} · {source.geometry}
+        </p>
         <label>
           View
           <select aria-label="View" value={view} onChange={e => setView(e.target.value)}>
@@ -227,9 +283,9 @@ export default function TectonicTimeMachine() {
         <details className="tectonic-info">
           <summary>About this reconstruction</summary>
           <p className="tectonic-note">
-            Past: published finite rotations with interpolation. Colored regions identify
-            present-day blocks, not ancient continent names. Coastline templates do not simulate sea
-            level or evolving plate boundaries.
+            Past: {source.citation} published finite rotations with interpolation. Colored regions
+            identify present-day blocks, not ancient continent names. Continental templates do not
+            simulate sea level or evolving plate boundaries.
           </p>
           <p className="tectonic-note">
             Future: original illustrative paths assemble continents by +250 Ma and hold the
@@ -237,13 +293,15 @@ export default function TectonicTimeMachine() {
           </p>
           <p className="tectonic-note">
             Landmass names mark approximate geological chapters, not exact assembly dates or labels
-            for individual coastline templates. Gondwana, Laurussia and Pangaea precede the Laurasia
-            / Gondwana breakup. Rodinia and Columbia (Nuna) predate this timeline; proposed Pannotia
-            also predates it, and its existence and configuration are debated.
+            for individual templates. Gondwana, Laurussia and Pangaea precede the Laurasia
+            / Gondwana breakup. Rodinia is included in both sources; Nuna (Columbia) is included in
+            Cao et al. (2024). Pannotia’s existence and configuration are debated, so no separate
+            assembly is labeled here.
           </p>
           <p className="tectonic-note">
-            Terrain is modern NASA imagery carried with each rigid block. Ancient mountains,
-            vegetation and ice are not reconstructed. Ocean ripples and lighting are visual effects.
+            Older reconstructions carry greater uncertainty, especially in longitude. Terrain is
+            modern NASA imagery carried with each rigid block. Ancient mountains, vegetation and ice
+            are not reconstructed. Ocean ripples and lighting are visual effects.
           </p>
           <p className="tectonic-credits">
             Terrain:{' '}
@@ -264,18 +322,35 @@ export default function TectonicTimeMachine() {
           </p>
           <p className="tectonic-credits">
             History:{' '}
-            <a href="https://doi.org/10.5194/se-13-1127-2022" target="_blank" rel="noreferrer">
-              Müller et al. (2022)
+            <a href={source.reference} target="_blank" rel="noreferrer">
+              {source.citation}
             </a>
-            ; coastline templates:{' '}
-            <a
-              href="https://doi.org/10.1016/j.earscirev.2020.103477"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Merdith et al. (2021)
+            {' · '}
+            <a href={source.dataset} target="_blank" rel="noreferrer">
+              Dataset / {source.license}
             </a>
-            . Served by{' '}
+            {sourceId === 'CAO2024' && (
+              <>
+                {' '}
+                · Cao, Collins, Pisarevsky, Flament, Li, Hasterok and Müller. CC-BY-4.0 permits
+                reuse with attribution. Continental geometry is simplified for display.
+              </>
+            )}
+            {sourceId === 'MULLER2022' && (
+              <>
+                {' '}
+                · Coastline templates:{' '}
+                <a
+                  href="https://doi.org/10.1016/j.earscirev.2020.103477"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Merdith et al. (2021)
+                </a>
+                .
+              </>
+            )}{' '}
+            Served by{' '}
             <a href="https://gwsdoc.gplates.org/models/" target="_blank" rel="noreferrer">
               GPlates / EarthByte
             </a>
@@ -286,8 +361,8 @@ export default function TectonicTimeMachine() {
       <footer className="tectonic-timeline">
         <div ref={timeline} className="tectonic-widget" aria-label="Geological playback timeline" />
         <div className="tectonic-milestones">
-          {timelineMilestones(scenario).map(({time: value, name: label}) => (
-            <button key={value} onClick={() => seek(value)}>
+          {timelineMilestones(scenario, source.maxAge).map(({time: value, name: label}) => (
+            <button key={value} disabled={!ready || Boolean(error)} onClick={() => seek(value)}>
               {label}
               <small>
                 {value < 0 ? `${-value} Ma ago` : value === 0 ? '0 Ma' : `+${value} Ma`}

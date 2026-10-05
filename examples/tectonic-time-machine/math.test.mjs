@@ -213,11 +213,108 @@ test('landmass titles fade with geological time, and future names follow the sel
     near(chapterOpacity(chapter, end, scenario), 0);
     near(chapterOpacity(chapter, NaN, scenario), 0);
   }
-  near(chapterOpacity(LANDMASS_CHAPTERS[4], 250, 'polar'), 0);
-  near(chapterOpacity(LANDMASS_CHAPTERS[5], 250, 'atlantic'), 0);
+  near(chapterOpacity(LANDMASS_CHAPTERS.find(c => c.scenario === 'atlantic'), 250, 'polar'), 0);
+  near(chapterOpacity(LANDMASS_CHAPTERS.find(c => c.scenario === 'polar'), 250, 'atlantic'), 0);
   assert.equal(timelineMilestones('atlantic').at(-1).name, 'Atlantic assembly');
   assert.equal(timelineMilestones('polar').at(-1).name, 'Polar assembly');
   for (let time = -500; time <= 300; time++) {
     assert(LANDMASS_CHAPTERS.filter(c => chapterOpacity(c, time, 'atlantic') > 0).length <= 1);
   }
+});
+
+
+import {DATA_SOURCES, rotationBracket, rotationWindow, clampTime, sourceFor} from './sources.js';
+import {createRotationCache} from './data.js';
+import {readZipEntry, modelXML} from './archive.js';
+import {gzipSync, deflateRawSync} from 'node:zlib';
+import {createHash} from 'node:crypto';
+test('source ranges include Rodinia and restrict Nuna to the 1.8 Ga source', () => {
+  assert.equal(sourceFor('CAO2024').license, 'CC-BY-4.0');
+  assert.throws(() => sourceFor('unknown'), /Unknown/);
+  assert.throws(() => sourceFor('toString'), /Unknown/);
+  assert.deepEqual(rotationBracket(-1800, 1800), [1800, 1800]);
+  assert.deepEqual(rotationBracket(-1000, 1000), [1000, 1000]);
+  assert.deepEqual(rotationBracket(-929.5, 1800), [920, 930]);
+  assert.deepEqual(rotationBracket(250, 1800), [0, 0]);
+  assert.throws(() => rotationBracket(-1001, 1000), /range/);
+  assert.equal(clampTime(-1600, 1000), -1000);
+  assert.equal(rotationWindow(-1800, 1800).at(-1), 1800);
+  assert.equal(rotationWindow(-930, 1800).length, 21);
+  assert.equal(rotationWindow(-1600, 1800)[0], 1400);
+  assert.equal(rotationWindow(-1600, 1800).at(-1), 1600);
+  assert.equal(rotationWindow(0, 1800)[0], 0);
+  assert.deepEqual(rotationBracket(-1600, 1800), [1600, 1600]);
+  assert.deepEqual(rotationBracket(-1599.5, 1800), [1590, 1600]);
+  assert(timelineMilestones('atlantic', 1800).some(c => c.name === 'Nuna'));
+  assert(!timelineMilestones('atlantic', 1000).some(c => c.name === 'Nuna'));
+  assert(timelineMilestones('atlantic', 1000).some(c => c.name === 'Rodinia'));
+});
+test('rotation windows publish all plate rows together, reuse cached samples, and recover from failures', async () => {
+  const source = DATA_SOURCES.CAO2024, ids = Array.from({length: 41}, (_, i) => 500 + i);
+  let fail = true, calls = 0;
+  const cache = createRotationCache(ids, source, async (url, signal) => {
+    calls++;
+    assert.equal(url.searchParams.get('model'), 'CAO2024');
+    const pids = url.searchParams.get('pids').split(','), times = url.searchParams.get('times').split(',');
+    assert(pids.length <= 40); assert(times.length <= 21);
+    assert.equal(cache.hasTime(-930), false);
+    if (fail && pids.length === 1) throw new Error('Service unavailable');
+    signal.throwIfAborted();
+    return Object.fromEntries(times.map(t => [t, Object.fromEntries(pids.map(pid => [pid, IDENTITY]))]));
+  });
+  const signal = new AbortController().signal;
+  await assert.rejects(cache.ensureTime(-930, {signal}), /Service unavailable/);
+  assert.equal(cache.hasTime(-930), false);
+  assert.deepEqual(cache.rotations, {});
+  fail = false;
+  await cache.ensureTime(-930, {signal});
+  assert(cache.hasTime(-930));
+  assert.equal(Object.keys(cache.rotations['930']).length, 41);
+  const previousCalls = calls;
+  await cache.ensureTime(-950, {signal});
+  assert.equal(calls, previousCalls);
+  assert.equal(cache.hasTime(-1600), false);
+  const controller = new AbortController(); controller.abort();
+  await assert.rejects(cache.ensureTime(-1600, {signal: controller.signal}), /abort/i);
+  assert.equal(cache.hasTime(-1600), false);
+  const boundary = createRotationCache([701], source, async url => {
+    const times = url.searchParams.get('times').split(',');
+    return Object.fromEntries(times.map(t => [t, {701: IDENTITY}]));
+  });
+  await boundary.ensureTime(-1600, {signal});
+  assert(boundary.hasTime(-1600));
+  assert(boundary.hasTime(-1599.5));
+});
+test('historical interpolation reaches deep-time endpoints without the previous 500 Ma clamp', () => {
+  const q = new Float64Array(4), pole = [Math.SQRT1_2, 0, 0, Math.SQRT1_2];
+  const table = {1790: {701: pole}, 1800: {701: pole}};
+  assert(historicalRotation(table, 701, 1795, q, 1800));
+  assert(historicalRotation(table, 701, 1800, q, 1800));
+  near(q[0], pole[0]);
+  assert(historicalRotation({1600: {701: pole}}, 701, 1600, q, 1800));
+  assert(historicalRotation({0: {701: IDENTITY}}, 701, 0, q, 1800));
+});
+function zipFixture(name, data, method = 0) {
+  const file = Buffer.from(name), payload = method === 8 ? deflateRawSync(data) : data;
+  const local = Buffer.alloc(30); local.writeUInt32LE(0x04034b50); local.writeUInt16LE(method, 8);
+  local.writeUInt32LE(payload.length, 18); local.writeUInt32LE(data.length, 22); local.writeUInt16LE(file.length, 26);
+  const central = Buffer.alloc(46); central.writeUInt32LE(0x02014b50); central.writeUInt16LE(method, 10);
+  central.writeUInt32LE(payload.length, 20); central.writeUInt32LE(data.length, 24); central.writeUInt16LE(file.length, 28);
+  const footer = Buffer.alloc(22); footer.writeUInt32LE(0x06054b50); footer.writeUInt16LE(1, 8); footer.writeUInt16LE(1, 10);
+  footer.writeUInt32LE(central.length + file.length, 12); footer.writeUInt32LE(local.length + file.length + payload.length, 16);
+  return Uint8Array.from(Buffer.concat([local, file, payload, central, file, footer])).buffer;
+}
+test('model archive reads only the named geometry and rejects changed revisions or malformed files', async () => {
+  const name = 'ContinentalPolygons/shapes_continents.gpmlz', xml = '<original-test-geometry/>', data = gzipSync(xml);
+  for (const method of [0, 8]) {
+    const buffer = zipFixture(name, data, method);
+    assert.deepEqual(Buffer.from(await readZipEntry(buffer, name)), data);
+    const sha256 = createHash('sha256').update(new Uint8Array(buffer)).digest('hex');
+    assert.equal(await modelXML(buffer, {archiveEntry: name, sha256}), xml);
+    await assert.rejects(modelXML(buffer, {archiveEntry: name, sha256: 'wrong'}), /checksum/);
+    await assert.rejects(readZipEntry(buffer, 'missing'), /Missing/);
+  }
+  await assert.rejects(readZipEntry(new ArrayBuffer(4), name), /Invalid/);
+  const corrupt = zipFixture(name, data); new DataView(corrupt).setUint32(0, 0);
+  await assert.rejects(readZipEntry(corrupt, name), /Invalid/);
 });
