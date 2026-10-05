@@ -1,0 +1,21 @@
+NASA imagery usage terms
+
+Source: https://www.nasa.gov/nasa-brand-center/images-and-media/
+Verified 2026-10-04.
+
+NASA permits use of its imagery for educational and informational purposes,
+including computer graphical simulations and Internet pages. NASA should be
+acknowledged as the source. Use must not imply NASA endorsement. Third-party
+copyrighted material identified by NASA is excluded from this general permission.
+NASA logos, identifiers, and identifiable persons have separate restrictions.
+
+The bundled image is Blue Marble (2002), Land Surface, Shallow Water, and Shaded
+Topography. NASA explicitly makes these images freely available to educators,
+scientists, museums and the public, and credits NASA Goddard Space Flight Center,
+Reto Stöckli, Robert Simmon, and USGS topography. No third-party copyright notice
+is identified on that image record. The image contains no logo or identifiable person.
+
+Record: https://science.nasa.gov/earth/earth-observatory/the-blue-marble-true-color-global-imagery-at-1km-resolution/
+
+This notice records the source permission for this image; it does not relicense
+NASA imagery under the MIT license of the surrounding original example code.

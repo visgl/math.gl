@@ -25,6 +25,11 @@
   },
   {
     "type": "doc",
+    "label": "Tectonic time machine",
+    "id": "tectonic-time-machine"
+  },
+  {
+    "type": "doc",
     "label": "Polygon playground",
     "id": "polygon-playground"
   },

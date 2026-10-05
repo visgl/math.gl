@@ -1,9 +1,27 @@
 # Overview
 
+import Admonition from '@theme/Admonition';
+
+import TectonicTimeMachine from '@site/src/components/tectonic-time-machine';
+
 `@math.gl/projection` converts coordinates between geographic, projected and
 geocentric coordinate reference systems. Use it for map coordinates, in-place
 coordinate buffers, explicit datum transformations and coordinate propagation
 between epochs.
+
+## Tectonic time machine
+
+<TectonicTimeMachine inline height={600} />
+
+<Admonition type="info" title="About this example">
+Play continental motion from **500 Ma ago** to **300 Ma into the future**, and change
+projections while playback continues. Past positions use published GPlates rotations;
+future assembly is **illustrative, not a forecast**. Terrain shows modern NASA imagery
+carried with the blocks, not reconstructed ancient landscapes.
+[Open the full example](/examples/tectonic-time-machine) for data credits and limits.
+</Admonition>
+
+## Quick start
 
 ```typescript
 import {Projection} from '@math.gl/projection';
@@ -15,11 +33,6 @@ const longitudeLatitude = projection.unproject(meters);
 const positions = new Float64Array([12, 55, 13, 56]);
 projection.projectFlat(positions, 2); // transforms the same buffer
 ```
-
-Geographic arrays normally use longitude, latitude, then optional height.
-Projected arrays use easting, northing, then optional height. A fourth component
-is a measure and is preserved; time is supplied separately when using an explicit
-operation pipeline.
 
 ## Learn about projections
 

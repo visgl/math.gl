@@ -6,7 +6,14 @@ import BrowserOnly from '@docusaurus/BrowserOnly';
 import styles from './styles.module.css';
 
 /** Browser-only lazy demo with loaders.gl's styled fullscreen frame. */
-export default function LiveGlobe({Globe, label, height = 520, inline = false, exampleProps}) {
+export default function LiveGlobe({
+  Globe,
+  label,
+  height = 520,
+  inline = false,
+  interactive = false,
+  exampleProps
+}) {
   const frame = useRef(null);
   const [fullscreen, setFullscreen] = useState(false);
   useEffect(() => {
@@ -29,8 +36,8 @@ export default function LiveGlobe({Globe, label, height = 520, inline = false, e
     >
       <div
         className={styles.content}
-        style={{pointerEvents: inline && !fullscreen ? 'none' : 'auto'}}
-        inert={inline && !fullscreen ? true : undefined}
+        style={{pointerEvents: inline && !fullscreen && !interactive ? 'none' : 'auto'}}
+        inert={inline && !fullscreen && !interactive ? true : undefined}
       >
         <BrowserOnly fallback={fallback}>
           {() => (
@@ -51,7 +58,7 @@ export default function LiveGlobe({Globe, label, height = 520, inline = false, e
           >
             <span aria-hidden="true">{fullscreen ? '×' : '⛶'}</span>
           </button>
-          {!fullscreen && (
+          {!fullscreen && !interactive && (
             <button type="button" onClick={toggleFullscreen} className={styles.interactionGate}>
               <span>
                 <span aria-hidden="true">⛶</span> Explore fullscreen
