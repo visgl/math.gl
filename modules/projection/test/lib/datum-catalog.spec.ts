@@ -220,3 +220,30 @@ test('catalogue validation is reused within a normalization configuration', () =
   ];
   expect(normalizeCRS('+proj=longlat +datum=local', options).datum.towgs84).toEqual([7, 8, 9]);
 });
+
+test('registered structured fallback names take priority over legacy aliases', () => {
+  const catalogs: readonly DatumCatalogPlugin[] = [
+    {
+      name: 'legacy-name-overrides',
+      datums: {
+        New_Zealand_1949: {ellipse: 'WGS84', towgs84: '1,2,3'},
+        Belge_1972: {ellipse: 'WGS84', towgs84: '4,5,6'}
+      }
+    }
+  ];
+  for (const name of Object.keys(catalogs[0].datums)) {
+    const proj = '+proj=longlat +datum=' + name;
+    const expected = new ProjectionEngine({from: proj, datumCatalogs: catalogs}).project(point);
+    const datumName = 'D_' + name;
+    const json = {...geographicJSON, datum: {...geographicJSON.datum, name: datumName}};
+    const wkt =
+      'GEOGCS["local",DATUM["' +
+      datumName +
+      '",SPHEROID["WGS84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.017453292519943295]]';
+    for (const from of [json, wkt])
+      close(
+        new ProjectionEngine({from, parsers, datumCatalogs: catalogs}).project(point),
+        expected
+      );
+  }
+});
