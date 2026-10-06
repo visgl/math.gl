@@ -984,3 +984,15 @@ The [projection scorecard](./scorecard.md) combines these measurements with
 independent accuracy, allocation sampling, isolated memory checkpoints, startup
 and bundle costs. Environments stay separate and missing browser heap evidence
 is explicit. See [the publication gates and commands](./scorecard-methodology.md).
+
+### CI comparison jobs
+
+Pull requests run projection and pipeline comparisons on separate runners so their
+elapsed times do not add together. Each runner compares the candidate with the same
+PR base commit and retains its existing scenarios, coordinates, samples, allocation
+checks and reusable-result checks. The required `test` check requires both jobs to
+succeed; both comparison jobs are skipped on pushes to master.
+
+The `projection-performance-comparison` artifact contains projection, grid, spheroid
+and local-frame reports. The pipeline report is uploaded separately as
+`projection-pipeline-comparison`.

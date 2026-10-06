@@ -335,14 +335,6 @@ jobs:
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
           node modules/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --min-sample-ms 4 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
 
-      # Keep every scenario/layout/direction and seven samples; bound aggregate windows
-      # as reusable-output modes add implementations. Longer local runs keep the 12 ms default.
-      - name: Compare pipeline performance against the PR base
-        timeout-minutes: 5
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --min-sample-ms 4 --allocations --reusable-results --output /tmp/projection-pipeline-comparison.json
-
       - name: Check paired grid preparation benchmark
         timeout-minutes: 2
         env:
@@ -367,10 +359,59 @@ jobs:
           name: projection-performance-comparison
           path: |
             /tmp/projection-performance-comparison.json
-            /tmp/projection-pipeline-comparison.json
             /tmp/projection-grid-comparison.json
             /tmp/projection-spheroid-comparison.json
             /tmp/projection-local-frame-comparison.json
+          if-no-files-found: error
+
+  projection-pipeline-performance:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Node (with Corepack)
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack / Yarn 4
+        run: |
+          corepack enable
+          corepack prepare yarn@4.18.0 --activate
+          yarn -v
+
+      - name: Cache Yarn Berry artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.yarn/berry/cache
+            .yarn/install-state.gz
+          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json') }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build code
+        run: yarn build
+
+      # Keep every scenario/layout/direction and seven samples; bound aggregate windows
+      # as reusable-output modes add implementations. Longer local runs keep the 12 ms default.
+      - name: Compare pipeline performance against the PR base
+        timeout-minutes: 5
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --min-sample-ms 4 --allocations --reusable-results --output /tmp/projection-pipeline-comparison.json
+
+      - name: Upload pipeline performance measurements
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: projection-pipeline-comparison
+          path: /tmp/projection-pipeline-comparison.json
           if-no-files-found: error
 
   projection-scorecard:
@@ -413,7 +454,7 @@ jobs:
   # Preserve the required check name and fail it if any qualification job fails.
   test:
     if: always()
-    needs: [checks, projection-browsers, projection-performance, projection-scorecard]
+    needs: [checks, projection-browsers, projection-performance, projection-pipeline-performance, projection-scorecard]
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
@@ -422,6 +463,7 @@ jobs:
           CHECKS_RESULT: ${{ needs.checks.result }}
           BROWSERS_RESULT: ${{ needs.projection-browsers.result }}
           PERFORMANCE_RESULT: ${{ needs.projection-performance.result }}
+          PIPELINE_RESULT: ${{ needs.projection-pipeline-performance.result }}
           SCORECARD_RESULT: ${{ needs.projection-scorecard.result }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
@@ -430,6 +472,8 @@ jobs:
           test "$SCORECARD_RESULT" = success
           if [ "$EVENT_NAME" = pull_request ]; then
             test "$PERFORMANCE_RESULT" = success
+            test "$PIPELINE_RESULT" = success
           else
             test "$PERFORMANCE_RESULT" = skipped
+            test "$PIPELINE_RESULT" = skipped
           fi
