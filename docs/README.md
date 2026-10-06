@@ -66,6 +66,7 @@ Geometry operations, geographic indexing and columnar data.
 | Module | Description |
 | --- | --- |
 | [`@math.gl/polygon`](./modules/polygon/README.md) | Clipping, subdivision and polygon and line geometry operations. |
+| [`@math.gl/spatial-index`](./modules/spatial-index/README.md) | Static box, point and triangle indexes for range, ray and nearest queries (POC). |
 | [`@math.gl/dggs`](./modules/dggs/README.md) | Decode boundaries and columns for common global grid encodings. |
 | [`@math.gl/geoarrow`](./modules/geoarrow/README.md) | Columnar geospatial layouts and kernels over typed-array buffers. |
 | [`@math.gl/wkb`](./modules/wkb/README.md) | WKB, EWKB and WKT geometry codecs. |

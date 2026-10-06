@@ -85,6 +85,7 @@ const webpackPlugin = config.plugins.find(
 // The private JSON-table adapter uses loaders.gl v5 while deck.gl remains on v4.
 webpackPlugin[1].resolve.modules.unshift('node_modules');
 const aliases = webpackPlugin[1].resolve.alias;
+aliases['@math.gl/spatial-index$'] = resolve(__dirname, '../modules/spatial-index/src/index.ts');
 aliases['@math.gl/culling/queries$'] = resolve(__dirname, '../modules/culling/src/queries.ts');
 aliases['@math.gl/curves$'] = resolve(__dirname, '../modules/curves/src/index.ts');
 aliases['@math.gl/crs$'] = aliases['@math.gl/crs'];

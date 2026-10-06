@@ -87,6 +87,9 @@ jobs:
       - name: Check curves package exports, public types and tree shaking
         run: yarn check:curves-package
 
+      - name: Check spatial index POC package
+        run: yarn check:spatial-index-package
+
       - name: Check GeoArrow package boundary
         run: yarn check:geoarrow-boundary
 
