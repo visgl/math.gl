@@ -66,6 +66,15 @@
 - feat(wkb): Preserve WKT dimensions in collections (#138)
 - build: Update release tooling and development dependencies
 
+## v5.0.0-alpha.8
+
+- feat(dggs): Add antimeridian boundary unwrapping helper (#137)
+- feat(wkb): Preserve WKT dimensions in collections (#138)
+
+## v5.0.0-alpha.7
+
+- chore: Bump workspace package versions; no additional source changes.
+
 ## v5.0.0-alpha.6
 
 - feat(dggs): Add validated S2 hierarchy navigation and conservative geographic bounds (#136)
@@ -110,6 +119,13 @@
 - feat(crs): Add spatial reference descriptors (#115)
 - feat(proj4): Add CRS compatibility utilities (#114)
 - fix(crs): Reject malformed quoted values (#113)
+
+## v4.2.0-alpha.6
+
+- feat(crs): Add spatial reference descriptors (#115)
+- feat(proj): Add lightweight EPSG3857 utilities (#117)
+- feat: Use string literal API constants (#116)
+- chore: Improve coverage reporting
 
 ## v4.2.0-alpha.5
 
