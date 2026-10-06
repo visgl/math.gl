@@ -15,6 +15,7 @@
       "@math.gl/dggs/test/*": ["./modules/dggs/test/*"],
       "@math.gl/dggs/*": ["./modules/dggs/src/*"],
       "@math.gl/geometry": ["./modules/geometry/src/index.ts"],
+      "@math.gl/geometry/parametric": ["./modules/geometry/src/parametric.ts"],
       "@math.gl/geometry-utils": ["./modules/geometry-utils/src/index.ts"],
       "@math.gl/dggs-geohash": ["./modules/dggs-geohash/src/index.ts"],
       "@math.gl/dggs-quadkey": ["./modules/dggs-quadkey/src/index.ts"],
