@@ -1,0 +1,41 @@
+[
+  {
+    "id": "earth",
+    "label": "Earth",
+    "description": "Coordinate reference systems, Earth models, maps and time.",
+    "modules": [
+      "crs",
+      "projection",
+      "web-mercator",
+      "geospatial",
+      "geoid",
+      "timezone",
+      "sun"
+    ]
+  },
+  {
+    "id": "3d",
+    "label": "3D",
+    "description": "Math foundations, curves, meshes and visibility.",
+    "modules": [
+      "core",
+      "types",
+      "expressions",
+      "curves",
+      "geometry",
+      "geometry-utils",
+      "culling"
+    ]
+  },
+  {
+    "id": "spatial",
+    "label": "Spatial",
+    "description": "Geometry operations, geographic indexing and columnar data.",
+    "modules": [
+      "polygon",
+      "dggs",
+      "geoarrow",
+      "wkb"
+    ]
+  }
+]

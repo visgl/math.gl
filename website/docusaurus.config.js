@@ -6,6 +6,25 @@ const {resolve} = require('path');
 const {themes} = require('prism-react-renderer');
 const {NormalModuleReplacementPlugin} = require('webpack');
 const resolveMathGlDependency = require('./resolve-math-gl-dependency.cjs');
+const moduleGroups = require('./module-groups.json');
+const docsTableOfContents = require('../docs/table-of-contents.json');
+const apiReference = docsTableOfContents.find(section => section.label === 'API Reference');
+const moduleReferences = new Map(apiReference.items.map(item => [item.label.split(' ')[0], item]));
+apiReference.items = moduleGroups.map(group => ({
+  type: 'category',
+  label: group.label,
+  items: group.modules.map(moduleId => {
+    const reference = moduleReferences.get('@math.gl/' + moduleId);
+    if (!reference) throw new Error('Missing API reference for module: ' + moduleId);
+    moduleReferences.delete('@math.gl/' + moduleId);
+    return reference;
+  })
+}));
+if (moduleReferences.size) {
+  throw new Error(
+    'Assign modules to website/module-groups.json: ' + [...moduleReferences.keys()].join(', ')
+  );
+}
 
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/math.gl/';
 const isNext = websiteBaseUrl.endsWith('/next/');
@@ -17,7 +36,7 @@ const config = getDocusaurusConfig({
   siteUrl: 'https://visgl.github.io/math.gl',
   repoUrl: 'https://github.com/visgl/math.gl',
 
-  docsTableOfContents: require('../docs/table-of-contents.json'),
+  docsTableOfContents,
 
   examplesDir: './src/examples',
   exampleTableOfContents: require('./src/examples/table-of-contents.json'),

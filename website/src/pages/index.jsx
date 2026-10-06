@@ -5,8 +5,17 @@ import React from 'react';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
 import styles from './index.module.css';
+import moduleGroups from '../../module-groups.json';
 
 const modules = [
+  {
+    name: 'Curves',
+    packageName: '@math.gl/curves',
+    description: 'Parametric curves, interpolation, and arc-length sampling in 2D and 3D.',
+    image: 'examples/curves.jpg',
+    imageAlt: 'Interactive parametric curve example',
+    theme: 'violet'
+  },
   {
     name: 'Core',
     packageName: '@math.gl/core',
@@ -146,6 +155,8 @@ const modules = [
   }
 ];
 
+const modulesById = new Map(modules.map(module => [module.packageName.replace('@math.gl/', ''), module]));
+
 function ModuleCard({module, baseUrl}) {
   const docsUrl = `${baseUrl}docs/modules/${module.packageName.replace('@math.gl/', '')}`;
   return (
@@ -200,9 +211,20 @@ export default function IndexPage() {
               global grids, and time-aware geospatial analysis.
             </p>
           </div>
-          <div className={styles.grid}>
-            {modules.map(module => <ModuleCard key={module.packageName} module={module} baseUrl={baseUrl} />)}
-          </div>
+          <nav className={styles.categoryLinks} aria-label="Module categories">
+            {moduleGroups.map(group => <a key={group.id} href={`#${group.id}`}>{group.label}</a>)}
+          </nav>
+          {moduleGroups.map(group => (
+            <section className={styles.moduleGroup} key={group.id} aria-labelledby={group.id}>
+              <div className={styles.groupHeading}>
+                <h2 id={group.id}>{group.label}</h2>
+                <p>{group.description}</p>
+              </div>
+              <div className={styles.grid}>
+                {group.modules.map(moduleId => <ModuleCard key={moduleId} module={modulesById.get(moduleId)} baseUrl={baseUrl} />)}
+              </div>
+            </section>
+          ))}
         </main>
       </>
     </Layout>
