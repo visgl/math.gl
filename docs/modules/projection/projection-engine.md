@@ -360,8 +360,8 @@ a plugin does not register it globally. See the
 
 ## Tree shaking and bundle size
 
-The lean default engine in this change measures 32,744 minified bytes / 11,859 gzip
-bytes, down from 52,183 / 18,824: **37.3% / 37.0%** smaller. The table below retains
+The lean default engine in this change measures 32,880 minified bytes / 11,905 gzip
+bytes, down from 52,183 / 18,824: **37.0% / 36.8%** smaller. The table below retains
 the published alpha.12 baseline; current measurements are recorded in
 `modules/projection/test/fixtures/bundle-budgets.json` under `leanDatumBaseline`.
 
