@@ -11,7 +11,7 @@ const builtins: Readonly<Record<string, DatumDefinition>> = {
   nad83,
   North_American_Datum_1983: nad83
 };
-const keyOf = (name: string): string => name.toLowerCase().replace(/[\s_-]/g, '');
+export const datumNameKey = (name: string): string => name.toLowerCase().replace(/[\s_-]/g, '');
 
 /** Resolve catalogues without global registration or a dependency on the regional table. */
 export function getDatumDefinitions(
@@ -20,12 +20,15 @@ export function getDatumDefinitions(
   if (!options.datumCatalogs?.length) return builtins;
   const definitions: Record<string, DatumDefinition> = Object.assign(Object.create(null), builtins);
   const names = new Map(
-    Object.entries(builtins).map(([name, definition]) => [keyOf(name), {definition, owner: -1}])
+    Object.entries(builtins).map(([name, definition]) => [
+      datumNameKey(name),
+      {definition, owner: -1}
+    ])
   );
   options.datumCatalogs.forEach((catalog, owner) => {
     if (!catalog.name || !catalog.datums) throw new Error('Invalid datum catalogue plugin');
     for (const [name, definition] of Object.entries(catalog.datums)) {
-      const key = keyOf(name);
+      const key = datumNameKey(name);
       if (
         !key ||
         key === 'none' ||

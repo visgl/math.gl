@@ -154,3 +154,42 @@ test('static creation and deferred projection paths retain catalogue options', a
   close((await LazyProjection.create(options)).project(point), expected);
   expect(() => new LazyProjection({from: regional, to: 'EPSG:3857'})).toThrow('datumCatalogs');
 });
+
+test('structured names prefer exact catalogue matches over broader aliases', () => {
+  const first = {ellipse: 'WGS84', towgs84: '1,2,3'};
+  const second = {ellipse: 'WGS84', towgs84: '100,200,300'};
+  const catalog: DatumCatalogPlugin = {
+    name: 'distinct-names',
+    datums: {local: first, D_Local: second, foobar: first, 'foo.bar': second, WGS_1984: second}
+  };
+  const catalogs = [catalog];
+  for (const name of Object.keys(catalog.datums)) {
+    const json = {...geographicJSON, datum: {...geographicJSON.datum, name}};
+    const wkt =
+      'GEOGCS["local",DATUM["' +
+      name +
+      '",SPHEROID["WGS84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.017453292519943295]]';
+    const proj = '+proj=longlat +datum=' + name;
+    const expected = new ProjectionEngine({from: proj, datumCatalogs: catalogs}).project(point);
+    for (const from of [json, wkt]) {
+      expect(normalizeCRS(from, {parsers, datumCatalogs: catalogs}).datum.towgs84).toEqual(
+        normalizeCRS(proj, {datumCatalogs: catalogs}).datum.towgs84
+      );
+      close(
+        new ProjectionEngine({from, parsers, datumCatalogs: catalogs}).project(point),
+        expected
+      );
+    }
+  }
+  const ambiguous = {...geographicJSON, datum: {...geographicJSON.datum, name: 'D_foo..bar'}};
+  expect(() => normalizeCRS(ambiguous, {parsers, datumCatalogs: catalogs})).toThrow(
+    'Ambiguous structured datum'
+  );
+  const equivalent: DatumCatalogPlugin = {
+    name: 'equivalent-fallbacks',
+    datums: {foobar: first, 'foo.bar': {...first}}
+  };
+  expect(normalizeCRS(ambiguous, {parsers, datumCatalogs: [equivalent]}).datum.towgs84).toEqual([
+    1, 2, 3
+  ]);
+});
