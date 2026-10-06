@@ -258,7 +258,12 @@ export function materializeGeometryRow(
   const geometryType = getGeoArrowGeometryType(encoding);
   if (!geometryType || geometryType === 'GeometryCollection') return null;
   const depth = getEncodingDepth(encoding);
-  const coordinates = readNestedCoordinates(array, rowIndex, depth);
+  const coordinates = readNestedCoordinates(
+    array,
+    rowIndex,
+    depth,
+    geometryType === 'Point' || geometryType === 'MultiPoint'
+  );
   if (!coordinates) return null;
   return {type: geometryType, coordinates} as GeoArrowGeometryValue;
 }
@@ -360,16 +365,23 @@ function visitNestedCoordinates(
   }
 }
 
-function readNestedCoordinates(array: GeoArrowArray, index: number, depth: number): unknown {
+function readNestedCoordinates(
+  array: GeoArrowArray,
+  index: number,
+  depth: number,
+  normalizeEmptyPoints: boolean
+): unknown {
   if (depth === 0) {
     const coordinate = readCoordinate(array, index);
-    return coordinate?.every(value => !Number.isFinite(value)) ? [] : coordinate;
+    return normalizeEmptyPoints && coordinate?.every(value => !Number.isFinite(value))
+      ? []
+      : coordinate;
   }
   if (array.kind !== 'list' || !isGeoArrowValueValid(array.validity, index)) return null;
   const [first, last] = getListRange(array, index);
   const values: unknown[] = [];
   for (let childIndex = first; childIndex < last; childIndex++) {
-    const value = readNestedCoordinates(array.child, childIndex, depth - 1);
+    const value = readNestedCoordinates(array.child, childIndex, depth - 1, normalizeEmptyPoints);
     if (value !== null) values.push(value);
   }
   return values;

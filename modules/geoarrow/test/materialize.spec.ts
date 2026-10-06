@@ -130,6 +130,45 @@ test('materialization preserves union child nulls and geometry collections', () 
   expect(materializeGeoArrowRows(makeGeoArrowColumnFromGeometryRows(rows))).toEqual(rows);
 });
 
+test('materialization only normalizes empty point coordinates', () => {
+  const points = GeoArrowBuilder.build(
+    [
+      {
+        type: 'MultiPoint',
+        coordinates: [
+          [NaN, NaN],
+          [1, 2]
+        ]
+      }
+    ],
+    {encoding: 'geoarrow.multipoint'}
+  );
+  expect(materializeGeoArrowRows(points)).toEqual([
+    {type: 'MultiPoint', coordinates: [[], [1, 2]]}
+  ]);
+  const lines = GeoArrowBuilder.build(
+    [
+      {
+        type: 'LineString',
+        coordinates: [
+          [NaN, NaN],
+          [1, 2]
+        ]
+      }
+    ],
+    {encoding: 'geoarrow.linestring'}
+  );
+  expect(materializeGeoArrowRows(lines)).toEqual([
+    {
+      type: 'LineString',
+      coordinates: [
+        [NaN, NaN],
+        [1, 2]
+      ]
+    }
+  ]);
+});
+
 test.each(['geoarrow.wkb', 'geoarrow.wkt'] as const)(
   'materialization requires explicit decoding of %s',
   encoding => {
