@@ -131,7 +131,14 @@ export default function Example() {
         <p>Choose a primitive or define your own surface function over a UV grid.</p>
         <label>
           Surface
-          <select aria-label="Surface" value={shape} onChange={e => setShape(e.target.value)}>
+          <select
+            aria-label="Surface"
+            value={shape}
+            onChange={e => {
+              if (e.target.value === 'function') setCustomGeometry(displayed);
+              setShape(e.target.value);
+            }}
+          >
             <option value="torus">Torus</option>
             <option value="lathe">Lathe vase</option>
             <option value="wave">Wave surface</option>
@@ -147,6 +154,8 @@ export default function Example() {
             <button
               type="button"
               onClick={() => {
+                setCustomGeometry(displayed);
+                setStarter('');
                 setSource(presetFunctions[shape]);
                 setAppliedSource(presetFunctions[shape]);
                 setRevision(value => value + 1);
@@ -173,6 +182,9 @@ export default function Example() {
                   setRevision(value => value + 1);
                 }}
               >
+                <option value="" disabled>
+                  Custom function
+                </option>
                 {Object.keys(functions).map(name => (
                   <option key={name}>{name}</option>
                 ))}
@@ -183,7 +195,10 @@ export default function Example() {
               <textarea
                 aria-label="Surface function"
                 value={source}
-                onChange={event => setSource(event.target.value)}
+                onChange={event => {
+                  setSource(event.target.value);
+                  setStarter('');
+                }}
                 spellCheck={false}
                 rows={7}
               />
