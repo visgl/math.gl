@@ -4,6 +4,18 @@
 // Approximate chapter dates are educational cues, not measured assembly boundaries.
 export const LANDMASS_CHAPTERS = [
   {
+    time: -1600,
+    name: 'Nuna',
+    detail: 'Also called Columbia · an early supercontinent',
+    fade: [-1700, -1630, -1540, -1400]
+  },
+  {
+    time: -930,
+    name: 'Rodinia',
+    detail: 'A Precambrian supercontinent',
+    fade: [-1070, -970, -900, -800]
+  },
+  {
     time: -500,
     name: 'Gondwana',
     detail: 'Southern continents assembled',
@@ -38,12 +50,13 @@ export const LANDMASS_CHAPTERS = [
   }
 ];
 const present = {time: 0, name: 'Present'};
-const milestones = {
-  atlantic: [...LANDMASS_CHAPTERS.slice(0, 4), present, LANDMASS_CHAPTERS[4]],
-  polar: [...LANDMASS_CHAPTERS.slice(0, 4), present, LANDMASS_CHAPTERS[5]]
-};
-export function timelineMilestones(scenario) {
-  return milestones[scenario] || milestones.atlantic;
+export function timelineMilestones(scenario, maxAge = 500) {
+  return [
+    ...LANDMASS_CHAPTERS.filter(c => c.time < 0 && -c.time <= maxAge),
+    present,
+    LANDMASS_CHAPTERS.find(c => c.scenario === scenario) ||
+      LANDMASS_CHAPTERS.find(c => c.scenario === 'atlantic')
+  ];
 }
 function smoothstep(t) {
   return t * t * (3 - 2 * t);

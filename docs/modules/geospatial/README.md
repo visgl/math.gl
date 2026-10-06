@@ -22,6 +22,16 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 | `EllipsoidTangentPlane` | Projects WGS84 Cartesian positions into a local east-north plane.           |
 | `LngLatRectangle`       | Represents a longitude-latitude rectangle, including antimeridian crossing. |
 
+## Geographic tile queries
+
+import GeographicTiles from '@site/src/components/geographic-tiles';
+
+<GeographicTiles inline height={500} />
+
+[Geographic tile helpers](./api-reference/geographic-tiles.md) address degree coordinates
+and cover geographic regions with compact tile ranges, including antimeridian crossings.
+Expand the infobox to explore query regions and levels.
+
 ## Functions
 
 | Function            | Description                                                     |

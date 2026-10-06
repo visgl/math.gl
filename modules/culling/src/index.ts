@@ -33,3 +33,6 @@ export {
   makeOrientedBoundingBoxFromPoints
 } from './lib/algorithms/bounding-box-from-points';
 export {computeEigenDecomposition} from './lib/algorithms/compute-eigen-decomposition';
+
+export {intersectRayBounds, intersectRayTriangle, getClosestPointOnTriangle} from './queries';
+export type {QueryPoint, TriangleRayHit} from './queries';

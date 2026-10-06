@@ -66,6 +66,9 @@ jobs:
       - name: Check generated CRS declarations
         run: yarn check:projjson-types
 
+      - name: Test website dependency resolution
+        run: node --test website/resolve-math-gl-dependency.test.cjs
+
       # Match website deployment: build from source before any package dist files exist.
       - name: Build website
         run: yarn workspace project-website build
@@ -77,6 +80,9 @@ jobs:
 
       - name: Build code
         run: yarn build
+
+      - name: Test tectonic time machine streaming
+        run: yarn workspace math.gl-tectonic-time-machine test
 
       - name: Check curves package exports, public types and tree shaking
         run: yarn check:curves-package
@@ -125,6 +131,13 @@ jobs:
 
       - name: Check CRS type boundaries
         run: yarn check:crs-types
+
+      # Keep browser downloads across runs; --with-deps still installs OS libraries.
+      - name: Cache Playwright browser
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('yarn.lock') }}
 
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
@@ -240,6 +253,13 @@ jobs:
       - name: Build code
         run: yarn build
 
+      # Keep browser downloads across runs; --with-deps still installs OS libraries.
+      - name: Cache Playwright browser
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ matrix.browser }}-${{ hashFiles('yarn.lock') }}
+
       - name: Install selected Playwright browser
         run: yarn playwright install --with-deps ${{ matrix.browser }}
 
@@ -306,13 +326,14 @@ jobs:
       - name: Build code
         run: yarn build
 
+      # Retain all coordinates, layouts and 11 samples; bound adaptive timing windows.
       - name: Compare projection performance against the PR base
         timeout-minutes: 10
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
-          node modules/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
+          node modules/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --min-sample-ms 4 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
 
       # Keep every scenario/layout/direction and seven samples; bound aggregate windows
       # as reusable-output modes add implementations. Longer local runs keep the 12 ms default.
@@ -352,28 +373,37 @@ jobs:
             /tmp/projection-local-frame-comparison.json
           if-no-files-found: error
 
-  projection-scorecard:
-    needs: [checks, projection-browsers]
+  # Consolidate evidence and enforce the required check on one runner. This avoids
+  # queueing another job after the scorecard has already completed. Publish the
+  # diagnostic scorecard before enforcing the independent performance result.
+  test:
+    if: always()
+    needs: [checks, projection-browsers, projection-performance]
     runs-on: ubuntu-22.04
     timeout-minutes: 3
     steps:
       - name: Checkout code
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Setup Node
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version-file: '.nvmrc'
       - name: Download Node evidence
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: projection-scorecard-node
           path: /tmp/projection-scorecard-node
       - name: Download browser evidence
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: projection-browser-qualification-*
           path: /tmp/projection-scorecard-browsers
       - name: Consolidate matched evidence
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         run: |
           node modules/projection/scripts/scorecard.mjs --node /tmp/projection-scorecard-node \
             --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-chromium/projection-browser-qualification.json \
@@ -381,6 +411,7 @@ jobs:
             --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-webkit/projection-browser-qualification.json \
             --output /tmp/projection-scorecard.json --markdown /tmp/projection-scorecard.md
       - name: Upload scorecard and publication page
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: projection-scorecard
@@ -389,24 +420,16 @@ jobs:
             /tmp/projection-scorecard.md
           if-no-files-found: error
 
-  # Preserve the required check name and fail it if any qualification job fails.
-  test:
-    if: always()
-    needs: [checks, projection-browsers, projection-performance, projection-scorecard]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    steps:
       - name: Require all checks to pass
+        if: always()
         env:
           CHECKS_RESULT: ${{ needs.checks.result }}
           BROWSERS_RESULT: ${{ needs.projection-browsers.result }}
           PERFORMANCE_RESULT: ${{ needs.projection-performance.result }}
-          SCORECARD_RESULT: ${{ needs.projection-scorecard.result }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           test "$CHECKS_RESULT" = success
           test "$BROWSERS_RESULT" = success
-          test "$SCORECARD_RESULT" = success
           if [ "$EVENT_NAME" = pull_request ]; then
             test "$PERFORMANCE_RESULT" = success
           else

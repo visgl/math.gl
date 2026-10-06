@@ -14,10 +14,12 @@ between epochs.
 <TectonicTimeMachine inline height={600} />
 
 <Admonition type="info" title="About this example">
-Play continental motion from **500 Ma ago** to **300 Ma into the future**, and change
+Play continental motion from **1.8 billion years ago** to **300 Ma into the future**, and change
 projections while playback continues. Past positions use published GPlates rotations;
 future assembly is **illustrative, not a forecast**. Terrain shows modern NASA imagery
 carried with the blocks, not reconstructed ancient landscapes.
+Choose a data source to visit Nuna (Columbia), Rodinia and Pangaea.
+
 [Open the full example](/examples/tectonic-time-machine) for data credits and limits.
 </Admonition>
 

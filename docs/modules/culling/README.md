@@ -11,6 +11,8 @@ The `@math.gl/culling` module provides primitives for implementing frustum culli
 
 The culling module does not attempt to be a general "physics-based" collision detection library (e.g. it does not handle time-interpolated intersections like a physics library would).
 
+See the [ray and closest-point query lab](./api-reference/queries.md) for triangle picking and shared numeric query kernels.
+
 ## Classes
 
 | Class                 | Description |

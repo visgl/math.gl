@@ -9,6 +9,7 @@
       "@math.gl/crs/*": ["./modules/crs/src/*"],
       "@math.gl/curves": ["./modules/curves/src/index.ts"],
       "@math.gl/curves/*": ["./modules/curves/src/*"],
+      "@math.gl/culling/queries": ["./modules/culling/src/queries.ts"],
       "@math.gl/culling": ["./modules/culling/src/index.ts"],
       "@math.gl/dggs": ["./modules/dggs/src/index.ts"],
       "@math.gl/dggs/test/*": ["./modules/dggs/test/*"],
