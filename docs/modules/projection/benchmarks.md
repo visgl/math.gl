@@ -989,8 +989,9 @@ is explicit. See [the publication gates and commands](./scorecard-methodology.md
 
 Projection and pipeline comparisons share a runner and run sequentially, retaining
 all workloads and sampling settings while avoiding a second installation and build.
-The required `test` job first verifies that the checks, browser qualifications and
-PR performance comparison succeeded, then consolidates and uploads the scorecard.
+The required `test` job consolidates and uploads the scorecard when the checks and
+browser qualifications succeeded, even if the independent PR performance comparison
+failed. It then verifies all prerequisite results in a final step that always runs.
 On master pushes, the performance comparison must be skipped. A failed, cancelled
 or unexpectedly skipped prerequisite fails `test`; scorecard or upload failures also
 fail that same required check. Consolidation and the final gate share one runner,

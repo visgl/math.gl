@@ -374,14 +374,54 @@ jobs:
           if-no-files-found: error
 
   # Consolidate evidence and enforce the required check on one runner. This avoids
-  # queueing another job after the scorecard has already completed.
+  # queueing another job after the scorecard has already completed. Publish the
+  # diagnostic scorecard before enforcing the independent performance result.
   test:
     if: always()
     needs: [checks, projection-browsers, projection-performance]
     runs-on: ubuntu-22.04
     timeout-minutes: 3
     steps:
+      - name: Checkout code
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Setup Node
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: '.nvmrc'
+      - name: Download Node evidence
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: projection-scorecard-node
+          path: /tmp/projection-scorecard-node
+      - name: Download browser evidence
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: projection-browser-qualification-*
+          path: /tmp/projection-scorecard-browsers
+      - name: Consolidate matched evidence
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
+        run: |
+          node modules/projection/scripts/scorecard.mjs --node /tmp/projection-scorecard-node \
+            --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-chromium/projection-browser-qualification.json \
+            --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-firefox/projection-browser-qualification.json \
+            --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-webkit/projection-browser-qualification.json \
+            --output /tmp/projection-scorecard.json --markdown /tmp/projection-scorecard.md
+      - name: Upload scorecard and publication page
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: projection-scorecard
+          path: |
+            /tmp/projection-scorecard.json
+            /tmp/projection-scorecard.md
+          if-no-files-found: error
+
       - name: Require all checks to pass
+        if: always()
         env:
           CHECKS_RESULT: ${{ needs.checks.result }}
           BROWSERS_RESULT: ${{ needs.projection-browsers.result }}
@@ -395,35 +435,3 @@ jobs:
           else
             test "$PERFORMANCE_RESULT" = skipped
           fi
-
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Setup Node
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
-        with:
-          node-version-file: '.nvmrc'
-      - name: Download Node evidence
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: projection-scorecard-node
-          path: /tmp/projection-scorecard-node
-      - name: Download browser evidence
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          pattern: projection-browser-qualification-*
-          path: /tmp/projection-scorecard-browsers
-      - name: Consolidate matched evidence
-        run: |
-          node modules/projection/scripts/scorecard.mjs --node /tmp/projection-scorecard-node \
-            --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-chromium/projection-browser-qualification.json \
-            --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-firefox/projection-browser-qualification.json \
-            --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-webkit/projection-browser-qualification.json \
-            --output /tmp/projection-scorecard.json --markdown /tmp/projection-scorecard.md
-      - name: Upload scorecard and publication page
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: projection-scorecard
-          path: |
-            /tmp/projection-scorecard.json
-            /tmp/projection-scorecard.md
-          if-no-files-found: error
