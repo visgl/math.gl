@@ -373,28 +373,37 @@ jobs:
             /tmp/projection-local-frame-comparison.json
           if-no-files-found: error
 
-  projection-scorecard:
-    needs: [checks, projection-browsers]
+  # Consolidate evidence and enforce the required check on one runner. This avoids
+  # queueing another job after the scorecard has already completed. Publish the
+  # diagnostic scorecard before enforcing the independent performance result.
+  test:
+    if: always()
+    needs: [checks, projection-browsers, projection-performance]
     runs-on: ubuntu-22.04
     timeout-minutes: 3
     steps:
       - name: Checkout code
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Setup Node
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version-file: '.nvmrc'
       - name: Download Node evidence
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: projection-scorecard-node
           path: /tmp/projection-scorecard-node
       - name: Download browser evidence
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: projection-browser-qualification-*
           path: /tmp/projection-scorecard-browsers
       - name: Consolidate matched evidence
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         run: |
           node modules/projection/scripts/scorecard.mjs --node /tmp/projection-scorecard-node \
             --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-chromium/projection-browser-qualification.json \
@@ -402,6 +411,7 @@ jobs:
             --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-webkit/projection-browser-qualification.json \
             --output /tmp/projection-scorecard.json --markdown /tmp/projection-scorecard.md
       - name: Upload scorecard and publication page
+        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: projection-scorecard
@@ -410,24 +420,16 @@ jobs:
             /tmp/projection-scorecard.md
           if-no-files-found: error
 
-  # Preserve the required check name and fail it if any qualification job fails.
-  test:
-    if: always()
-    needs: [checks, projection-browsers, projection-performance, projection-scorecard]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    steps:
       - name: Require all checks to pass
+        if: always()
         env:
           CHECKS_RESULT: ${{ needs.checks.result }}
           BROWSERS_RESULT: ${{ needs.projection-browsers.result }}
           PERFORMANCE_RESULT: ${{ needs.projection-performance.result }}
-          SCORECARD_RESULT: ${{ needs.projection-scorecard.result }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           test "$CHECKS_RESULT" = success
           test "$BROWSERS_RESULT" = success
-          test "$SCORECARD_RESULT" = success
           if [ "$EVENT_NAME" = pull_request ]; then
             test "$PERFORMANCE_RESULT" = success
           else

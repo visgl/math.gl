@@ -869,3 +869,15 @@ The [projection scorecard](../docs/modules/projection/scorecard.md) combines the
 independent accuracy, allocation sampling, isolated memory checkpoints, startup
 and bundle costs. Environments stay separate and missing browser heap evidence
 is explicit. See [the publication gates and commands](../docs/modules/projection/scorecard-methodology.md).
+
+### CI runner usage
+
+Projection and pipeline comparisons share a runner and run sequentially, retaining
+all workloads and sampling settings while avoiding a second installation and build.
+The required `test` job consolidates and uploads the scorecard when the checks and
+browser qualifications succeeded, even if the independent PR performance comparison
+failed. It then verifies all prerequisite results in a final step that always runs.
+On master pushes, the performance comparison must be skipped. A failed, cancelled
+or unexpectedly skipped prerequisite fails `test`; scorecard or upload failures also
+fail that same required check. Consolidation and the final gate share one runner,
+so completing the scorecard does not require another queued job.

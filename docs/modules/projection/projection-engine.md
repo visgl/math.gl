@@ -192,8 +192,6 @@ shorter paths below. The former `classic` subpath is removed.
 | `temporal` | `createTemporalDeformationModel` and explicit field/rate/event types; no datasets |
 | `deformation` | `createDeformationModel` for prepared static velocity fields |
 | Package root (`@math.gl/projection`) | `Projection`, the configurable engine, eager algorithms, readers and helpers |
-| `temporal` | `createTemporalDeformationModel` for explicit rates and events |
-| `deformation` | `createDeformationModel` and deformation contracts |
 | `grids/velocity` | `createVelocityGrid` |
 | `grids/velocity-geotiff` | `loadVelocityGeoTIFFGrid`; excludes a TIFF decoder |
 | `grids/vertical` | `createVerticalGrid`, `createGeoidGrid` and vertical-grid contracts |

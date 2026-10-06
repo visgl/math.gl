@@ -273,7 +273,7 @@ A paired source comparison runner validates and measures baseline/current runtim
 same seeded workload without changing checkouts. CI records elapsed results against the
 PR base; a separately labeled thread-CPU diagnostic is available locally. Constructor
 improvement is clear in the local diagnostic, while transform gains vary by case; see
-[methodology and observations](./projection-performance-history.md#compare-a-runtime-change-with-its-base).
+[methodology and observations](../docs/modules/projection/benchmarks.md#compare-a-runtime-change-with-its-base).
 
 ## Tranche 10: projection-specific batch kernels — implemented
 
