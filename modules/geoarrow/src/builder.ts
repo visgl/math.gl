@@ -282,6 +282,12 @@ export class GeoArrowBuilder {
 
   private writeCoordinateValues(coordinate: readonly number[]): void {
     const size = getGeoArrowDimensionSize(this.dimension);
+    if (
+      coordinate.length === 0 &&
+      (this.encoding === 'geoarrow.point' || this.encoding === 'geoarrow.multipoint')
+    ) {
+      coordinate = new Array(size).fill(Number.NaN);
+    }
     if (coordinate.length !== size) {
       throw new Error(`Expected ${size} coordinate values for ${this.dimension}`);
     }

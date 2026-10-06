@@ -5,6 +5,10 @@
 import {expect, test} from 'vitest';
 import {
   GeoArrowBuilder,
+  decodeGeoArrowWKB,
+  decodeGeoArrowWKT,
+  encodeGeoArrowWKB,
+  encodeGeoArrowWKT,
   makeGeoArrowColumnFromGeometryRows,
   materializeGeoArrowRows,
   sliceGeoArrowColumn,
@@ -168,6 +172,27 @@ test('materialization only normalizes empty point coordinates', () => {
     }
   ]);
 });
+
+test.each(['xy', 'xyz', 'xym', 'xyzm'] as const)(
+  'empty point rows rebuild and serialize in %s',
+  dimension => {
+    const rows = [
+      {type: 'Point' as const, coordinates: []},
+      null,
+      {type: 'MultiPoint' as const, coordinates: [[]]},
+      {type: 'GeometryCollection' as const, geometries: [{type: 'Point' as const, coordinates: []}]}
+    ];
+    const column = makeGeoArrowColumnFromGeometryRows(rows, {dimension});
+    expect(materializeGeoArrowRows(column)).toEqual(rows);
+    expect(
+      materializeGeoArrowRows(
+        makeGeoArrowColumnFromGeometryRows(materializeGeoArrowRows(column), {dimension})
+      )
+    ).toEqual(rows);
+    expect(materializeGeoArrowRows(decodeGeoArrowWKB(encodeGeoArrowWKB(column)))).toEqual(rows);
+    expect(materializeGeoArrowRows(decodeGeoArrowWKT(encodeGeoArrowWKT(column)))).toEqual(rows);
+  }
+);
 
 test.each(['geoarrow.wkb', 'geoarrow.wkt'] as const)(
   'materialization requires explicit decoding of %s',

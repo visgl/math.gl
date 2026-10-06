@@ -59,6 +59,10 @@ Null rows remain `null`; empty points have `coordinates: []`, and empty list geo
 empty coordinate arrays. Interleaved/separated coordinates, slices, chunks, dense unions, and
 geometry collections follow the same descriptor contract as the columnar kernels.
 
+`GeoArrowBuilder` and `makeGeoArrowColumnFromGeometryRows` accept empty Point coordinate arrays
+and empty MultiPoint members, writing dimension-sized non-finite tuples. WKB and WKT encoding
+preserve these empty members, including within collections.
+
 This operation allocates per-row objects and coordinate arrays. Use descriptor traversal and kernels
 for columnar processing. Decode serialized WKB/WKT columns first with `decodeGeoArrowWKB` or
 `decodeGeoArrowWKT`; direct serialized materialization throws. Box columns do not have a geometry

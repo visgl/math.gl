@@ -3,6 +3,7 @@
 ## Unreleased
 
 - feat(geoarrow): Expose `materializeGeoArrowRows` for runtime adapters and preserve empty points encoded with non-finite or null ordinates.
+- fix(geoarrow): Rebuild empty point rows and preserve empty MultiPoint members through WKB/WKT serialization.
 
 - perf(projection): Make the configurable and lazy engines lean by default; register regional named datums through `datumCatalogs` and `@math.gl/projection/datums`. WGS84/NAD83 remain built in; the `Projection` wrapper retains the full catalogue for compatibility.
 
