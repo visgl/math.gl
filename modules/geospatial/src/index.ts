@@ -15,3 +15,10 @@ export {EllipsoidOccluder} from './ellipsoid-occluder';
 export type {EllipsoidHorizon} from './ellipsoid-occluder';
 export {getGlobeHorizonBounds, splitGlobeBounds} from './globe-horizon-bounds';
 export type {GlobeBounds} from './globe-horizon-bounds';
+
+export {
+  getGeographicTile,
+  getGeographicTileBounds,
+  getGeographicTileRanges
+} from './geographic-tiles';
+export type {GeographicTile, GeographicTileRange} from './geographic-tiles';

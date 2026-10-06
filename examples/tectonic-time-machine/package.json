@@ -19,6 +19,7 @@
     "@luma.gl/shadertools": "~9.4.0",
     "@math.gl/polygon": "workspace:*",
     "@math.gl/projection": "workspace:*",
+    "math.gl-json-table-loader": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

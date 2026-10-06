@@ -72,3 +72,9 @@ SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 .tectonic-milestones button {max-width:150px;white-space:normal;}
 @media(max-width:650px) {.tectonic-chapter {padding:95px 20px 45px;gap:10px;}.tectonic-chapter span {font-size:10px;}.tectonic-milestones {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}}
 @media(prefers-reduced-motion:reduce) {.tectonic-chapter {transition:none;}}
+
+.tectonic-source-summary {font-size:10px;color:#8eabba;margin:-6px 0 14px;}
+.tectonic-milestones {flex-wrap:wrap;gap:12px;}
+.tectonic-milestones button:disabled {cursor:default;}
+
+.tectonic-stream-status {font-size:10px;line-height:1.4;color:#8eabba;margin:-6px 0 14px;}

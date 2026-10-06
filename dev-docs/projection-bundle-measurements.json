@@ -1,0 +1,131 @@
+{
+  "mathGlVersion": "5.0.0-alpha.12",
+  "sourceCommit": "17976524ff710076a508ec6211518b332b7a35b7",
+  "measuredAt": "2026-10-06",
+  "methodology": {
+    "node": "24.5.0",
+    "esbuild": "0.28.1",
+    "platform": "browser",
+    "format": "esm",
+    "target": "es2020",
+    "minified": true,
+    "gzipLevel": 9,
+    "splitGzip": "sum of separately compressed emitted files"
+  },
+  "static": {
+    "temporalModel": {
+      "minified": 9256,
+      "gzip": 3589
+    },
+    "projectionBulk": {
+      "minified": 5469,
+      "gzip": 1713
+    },
+    "projectionAnalysis": {
+      "minified": 4329,
+      "gzip": 1438
+    },
+    "core": {
+      "minified": 52183,
+      "gzip": 18824
+    },
+    "mercator": {
+      "minified": 54693,
+      "gzip": 19610
+    },
+    "utm": {
+      "minified": 61521,
+      "gzip": 22304
+    },
+    "mercatorWithWKT": {
+      "minified": 78606,
+      "gzip": 27450
+    },
+    "mercatorWithPROJJSON": {
+      "minified": 65820,
+      "gzip": 23425
+    },
+    "mercatorWithNTv2": {
+      "minified": 57895,
+      "gzip": 20899
+    },
+    "mercatorWithGeoTIFFAdapter": {
+      "minified": 57901,
+      "gzip": 20840
+    },
+    "mercatorWithGTX": {
+      "minified": 56235,
+      "gzip": 20268
+    },
+    "mercatorWithVerticalGeoTIFF": {
+      "minified": 59756,
+      "gzip": 21485
+    },
+    "deformationModel": {
+      "minified": 7403,
+      "gzip": 3000
+    },
+    "deformationWithGeoTIFF": {
+      "minified": 12512,
+      "gzip": 4807
+    },
+    "operationCatalog": {
+      "minified": 6489,
+      "gzip": 2289
+    },
+    "operationPipeline": {
+      "minified": 64096,
+      "gzip": 22860
+    },
+    "typescriptWrapper": {
+      "minified": 153061,
+      "gzip": 52180
+    },
+    "allNativeExports": {
+      "minified": 184292,
+      "gzip": 62325
+    }
+  },
+  "lazy": {
+    "catalogue": {
+      "initial": {
+        "minified": 62408,
+        "gzip": 23233
+      },
+      "deferred": {
+        "minified": 79403,
+        "gzip": 37391
+      }
+    },
+    "utm": {
+      "initial": {
+        "minified": 55201,
+        "gzip": 20237
+      },
+      "deferred": {
+        "minified": 8050,
+        "gzip": 3498
+      }
+    },
+    "wkt": {
+      "initial": {
+        "minified": 55057,
+        "gzip": 19639
+      },
+      "deferred": {
+        "minified": 23923,
+        "gzip": 8265
+      }
+    },
+    "rotated": {
+      "initial": {
+        "minified": 55128,
+        "gzip": 20193
+      },
+      "deferred": {
+        "minified": 5433,
+        "gzip": 2527
+      }
+    }
+  }
+}

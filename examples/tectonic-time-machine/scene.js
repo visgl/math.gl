@@ -196,7 +196,7 @@ export function mountScene(
           entry = {q: new Float64Array(4), valid: false};
           rotations.set(pid, entry);
         }
-        entry.valid = historicalRotation(model.rotations, pid, age, entry.q);
+        entry.valid = historicalRotation(model.rotations, pid, age, entry.q, model.source.maxAge);
       }
       for (const [region, target] of Object.entries(targets)) {
         let q = future.get(region);
@@ -230,6 +230,7 @@ export function mountScene(
   }
   function render(time, force = false) {
     lastTime = time;
+    if (model && !model.hasTime(time)) return counts;
     const now = performance.now();
     if (!force && now - lastRender < 50) return;
     lastRender = now;
@@ -380,11 +381,12 @@ export function mountScene(
   return {
     setModel(value) {
       model = value;
+      rotations.clear();
       geometryTime = NaN;
       render(lastTime, true);
     },
-    setPlayback({time, playing, ready, speed}) {
-      widget.setProps({time, playing, step: speed / 20});
+    setPlayback({time, playing, ready, speed, maxAge}) {
+      widget.setProps({time, playing, step: speed / 20, timeRange: [-maxAge, 300]});
       timelineContainer.inert = !ready;
       timelineContainer.setAttribute('aria-busy', String(!ready));
     },

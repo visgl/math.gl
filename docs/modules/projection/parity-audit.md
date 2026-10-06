@@ -149,7 +149,6 @@ throw its exact expected error; it cannot mask a new silent mismatch. Newly acce
 cases fail the exception check until their exception is removed and their coordinates
 pass. Passing tests for expected rejections does **not** mean 242/242 parity.
 
-This completed follow-up tranche 1 and the continuous-corpus gate from tranche 2.
 Remaining method/parameter/axis mappings, grid coverage policy, regional validity
 limits and independent native PROJ qualification remain open. The original kernel
 and grid audit measurements below are unchanged by these normalization fixes.
@@ -270,20 +269,6 @@ The inventory has 38 upstream files (37 projection modules and one helper), **al
 marked partial**. Its broad gap categories previously hid concrete missing behavior;
 this audit gives those gaps measurable examples. Existing API compatibility checks
 only establish that a CRS can be constructed, not that its coordinates are correct.
-
-## Follow-up tranches before promotion
-
-1. **Correctness first (completed):** polar WKT semantics, structured datum IDs/name aliases and
-   precedence, and angular roundoff. Import regression fixtures for all 11 silent
-   mismatches and five pole-definition failures. Unsupported operations must reject
-   explicitly instead of silently selecting another interpretation.
-2. **Structured compatibility (corpus gaps closed):** method and cardinal-axis mappings now cover all non-policy rejections in the coordinate corpus. The nine strict-input differences are dispositioned above and continuously asserted. Broader structured definitions, oblique axes and uncommon parameter combinations still need independent qualification.
-3. **Grid and domain policy:** resolve the two real-grid edge differences, add licensed
-   maintained real datasets, and define projection validity/accuracy limits, particularly
-   for regional approximations. Separate intentional rejections from wrong finite output.
-4. **Independent qualification:** reproducible native PROJ reference generation, wider
-   parameter/datum/pole/antimeridian coverage and supported-browser execution. Promotion
-   remains a separate decision after these gates, not a consequence of faster benchmarks.
 
 ## Reproduce
 

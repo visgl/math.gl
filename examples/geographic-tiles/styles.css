@@ -1,0 +1,18 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.geographic-example svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.geographic-example svg text {
+  fill: #9bbad0;
+  font: 5px system-ui;
+}
+.geographic-example pre {
+  font-size: 11px;
+  color: #65e9ff;
+  white-space: pre-wrap;
+}

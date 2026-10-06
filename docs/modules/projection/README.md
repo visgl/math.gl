@@ -14,10 +14,12 @@ between epochs.
 <TectonicTimeMachine inline height={600} />
 
 <Admonition type="info" title="About this example">
-Play continental motion from **500 Ma ago** to **300 Ma into the future**, and change
+Play continental motion from **1.8 billion years ago** to **300 Ma into the future**, and change
 projections while playback continues. Past positions use published GPlates rotations;
 future assembly is **illustrative, not a forecast**. Terrain shows modern NASA imagery
 carried with the blocks, not reconstructed ancient landscapes.
+Choose a data source to visit Nuna (Columbia), Rodinia and Pangaea.
+
 [Open the full example](/examples/tectonic-time-machine) for data credits and limits.
 </Admonition>
 
@@ -43,7 +45,7 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 
 | Guide | What you will learn |
 | --- | --- |
-| [Projection engine](./projection-engine.md) | Select plugins, load algorithms on demand, transform typed arrays and control bundle size |
+| [Imports, plugins and loading](./projection-engine.md) | Choose entry points, register algorithms, load on demand and compare bundle sizes |
 | [Coordinate systems](./coordinate-systems.md) | Distinguish projection, ellipsoid, datum, height and coordinate epoch |
 | [Projection catalogue](./projections.md) | Choose an algorithm and understand its useful domain |
 | [Reusable coordinate buffers](./bulk-layouts.md) | Transform separate, strided and column buffers with reusable scratch and explicit ownership |
@@ -53,7 +55,7 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 | [Optional acceleration](./acceleration.md) | Evaluate persistent workers, ownership and complete application costs |
 | [Deformation models](./deformation-models.md) | Propagate coordinates between epochs with prepared velocity grids |
 | [Support and migration](./support.md) | Understand accepted definitions and differences from proj4js |
-| [Benchmarks](./benchmarks.md#live-benchmarks) | Compare math.gl flat and scalar transforms with proj4js in your browser |
+| [Performance and live benchmarks](./benchmarks.md) | Compare math.gl flat and scalar transforms with proj4js in your browser |
 | [Projection scorecard](./scorecard.md) | Inspect source-matched accuracy, throughput, startup, allocation, memory and bundle evidence |
 | [Independent validation](./independent-validation.md) | Inspect numerical references and qualification limits |
 
@@ -136,4 +138,4 @@ in-place buffers and additional explicit operations. Performance advantages depe
 on the workload; numerical improvements and supported features are qualified
 individually. This is not a claim of unrestricted proj4js or PROJ parity. See the
 [parity audit](./parity-audit.md), [independent validation](./independent-validation.md)
-and [roadmap](./roadmap.md) for the measured scope and remaining work.
+and [support profile](./support.md) for the measured scope and current limits.

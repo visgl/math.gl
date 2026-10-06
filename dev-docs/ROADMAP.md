@@ -38,3 +38,9 @@ The [six-tranche sun and sky roadmap](../docs/modules/sun/roadmap.md) tracks sha
 coordinates, visibility, atmosphere, celestial appearance, stars, and accuracy/performance
 tiers. The sky and bright-star APIs are delivered; observational calibration, shared
 star visibility and formal tier budgets remain follow-ups.
+
+## Projection engine
+
+The [projection roadmap](./projection-roadmap.md) tracks numerical, bulk-operation and
+performance work. Historical measurements remain in the
+[performance development history](./projection-performance-history.md).

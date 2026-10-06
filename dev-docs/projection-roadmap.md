@@ -1,7 +1,7 @@
 # Projection engine roadmap
 
 Status: tranches **0–11, including qualification tranches 7A–7D, are implemented** for the
-[documented projection support profile](./support.md). The package root uses the math.gl projection engine; `Projection` supplies the compatible
+[documented projection support profile](../docs/modules/projection/support.md). The package root uses the math.gl projection engine; `Projection` supplies the compatible
 wrapper API and `ProjectionEngine` allows explicit plugins. The package is renamed
 from `@math.gl/proj4`; its deprecated wrapper alias and `/classic` subpath are removed.
 Prior engine subpaths remain aliases. No package is published by this work.
@@ -65,7 +65,7 @@ the math.gl projection engine must never silently fall back to proj4js.
   bundles, and removal of unused projection plugins.
 
 This tranche is a usable subset, not a claim of complete parity for any CRS syntax.
-See [ProjectionEngine](./api-reference/projection-engine.md) for the exact contract.
+See [ProjectionEngine](../docs/modules/projection/api-reference/projection-engine.md) for the exact contract.
 Tranche 3 adds upstream's `identity` alias with explicit radian semantics.
 
 ### Tranche 1: make parity measurable
@@ -246,8 +246,8 @@ selection remain outside this horizontal subset.
 | 7C — Performance | Node throughput/allocation and fresh-process measurements; isolated browser load/construction timing and Float32/Float64 forward/inverse workloads. Chromium, Firefox and WebKit qualification runs in CI, including the independent projection corpus. Timing results are artifacts; correctness and package-size budgets are gates. |
 | 7D — Stabilization | Supported native entry points alias the same implementation as experimental imports. Packed ESM/CommonJS/type checks cover both families. The documented contract reviews numerical/strict-input exceptions and described migration through the original `classic` wrapper, since removed during the package rename. |
 
-See [independent validation](./independent-validation.md), [performance measurements](./benchmarks.md)
-and the [support/migration contract](./support.md). The machine-readable release
+See [independent validation](../docs/modules/projection/independent-validation.md), [performance measurements](./projection-performance-history.md)
+and the [support/migration contract](../docs/modules/projection/support.md). The machine-readable release
 profile checks fixture counts and the reviewed exception list. Publication is a
 separate release action. The default uses the math.gl projection engine; proj4js is now a development dependency. The `/classic` wrapper and its helpers were removed during the alpha package rename.
 
@@ -273,7 +273,7 @@ A paired source comparison runner validates and measures baseline/current runtim
 same seeded workload without changing checkouts. CI records elapsed results against the
 PR base; a separately labeled thread-CPU diagnostic is available locally. Constructor
 improvement is clear in the local diagnostic, while transform gains vary by case; see
-[methodology and observations](./benchmarks.md#compare-a-runtime-change-with-its-base).
+[methodology and observations](../docs/modules/projection/benchmarks.md#compare-a-runtime-change-with-its-base).
 
 ## Tranche 10: projection-specific batch kernels — implemented
 
@@ -288,7 +288,7 @@ The shared benchmark adds equidistant conic and CI compares these families with 
 Reusable scalar output buffers were considered but are deferred: this tranche changes no
 scalar API or ownership contract. The demonstrated opportunity is avoiding repeated pipeline
 dispatch and Z/M writes in existing typed-array calls. Results and limits are documented in
-the [benchmark guide](./benchmarks.md).
+the [benchmark guide](./projection-performance-history.md).
 
 ## Tranche 11: numerical excellence — implemented
 
@@ -299,7 +299,7 @@ Equidistant conic now uses a higher-order meridional series; cylindrical equal-a
 preserves near-pole latitudes instead of snapping them to the pole. Node and all three
 browser engines enforce the budgets alongside the existing 37-algorithm corpus.
 
-The [accuracy domains and error report](./independent-validation.md#seeded-accuracy-domains)
+The [accuracy domains and error report](../docs/modules/projection/independent-validation.md#seeded-accuracy-domains)
 document conditioning limits and remaining series approximations. Broader parameter
 coverage and singularity analysis remain ongoing numerical work, not unrestricted
 PROJ parity.
@@ -316,7 +316,7 @@ meridians. Browser qualification exercises the same independent references.
 
 This does not complete tranche 12: compound/vertical CRS execution,
 general pipeline composition, epochs and automatic operation selection remain open.
-See the [height conversion guide](./projection-engine.md#convert-geoid-heights).
+See the [height conversion guide](../docs/modules/projection/projection-engine.md#convert-geoid-heights).
 
 ## Tranche 12B1: vertical GeoTIFF — implemented
 
@@ -344,7 +344,7 @@ reverses order/direction for inverse execution, supports XY/XYZ/XYZM typed buffe
 and shares lazy projection implementations without eager imports. Scalar and Float64
 results are independently qualified against PROJ 9.5.1; Float32 execution rounds only
 final records. Packed ESM/CJS/types, optional bundle boundaries and browser qualification
-run in CI. See [the operation pipeline contract](./operation-pipelines.md).
+run in CI. See [the operation pipeline contract](../docs/modules/projection/operation-pipelines.md).
 
 This completes the typed composition profile, not arbitrary PROJ pipeline parsing.
 The follow-up below adds exact rotations, explicit `ob_tran` output units, ordinate
@@ -363,7 +363,7 @@ are validated for units, spaces and stack state; each batch owns reusable stack 
 Thirty-seven authored pipelines / 102 XYZM points now have independent PROJ 9.5.1
 forward/inverse expectations, including real BETA2007 interpolation and an authored
 GTX field. Scalar, Float64 and Float32 ownership/rounding checks run with Node and
-browser qualification. See [the pipeline guide](./operation-pipelines.md).
+browser qualification. See [the pipeline guide](../docs/modules/projection/operation-pipelines.md).
 
 This completes the declared typed-operator extension. M remains an uninterpreted
 measure. The following tranche adds explicit observation epochs; general PROJ
@@ -385,7 +385,7 @@ The core and ordinary wrapper bundles remain unchanged.
 This is explicit reference-frame transformation at an observation epoch. It neither
 propagates coordinates between epochs nor infers time from M or CRS metadata.
 Prepared linear velocity models are available in the bounded 12C2 profile below.
-Time-varying components and automatic operation selection remain future work. See [coordinate epochs](./operation-pipelines.md#coordinate-epochs-and-moving-reference-frames).
+Time-varying components and automatic operation selection remain future work. See [coordinate epochs](../docs/modules/projection/operation-pipelines.md#coordinate-epochs-and-moving-reference-frames).
 
 ## Tranche 12C2: linear velocity models — implemented bounded profile
 
@@ -401,7 +401,7 @@ ordinary wrappers and a pipeline-only static graph.
 
 This completes the linear, time-invariant profile. Real-model accuracy qualification
 and nonlinear/time-varying components are still separate work. See
-[deformation models](./deformation-models.md).
+[deformation models](../docs/modules/projection/deformation-models.md).
 
 ## Tranche 13A: pipeline batch performance — implemented first pass
 
@@ -434,7 +434,7 @@ sampling show lower allocation traffic without a consistent throughput improveme
 0.46–0.71 KiB gzip depending on the retained entry point. Datum-heavy and mixed-epoch chains,
 remaining implicit allocation/boxing costs and further whole-buffer specializations remain
 profiling targets. See
-[paired pipeline benchmarks](./benchmarks.md#compare-operation-pipeline-performance).
+[paired pipeline benchmarks](./projection-performance-history.md#compare-operation-pipeline-performance).
 
 ### Whole-buffer unit/axis execution and bulk leases
 
@@ -477,7 +477,7 @@ existing bundle limits are unchanged.
 
 This completes the bounded application-catalogue milestone, not unrestricted EPSG
 operation discovery, dynamic CRS inference or a geodetic accuracy certification.
-See the [operation selection guide](./operation-selection.md).
+See the [operation selection guide](../docs/modules/projection/operation-selection.md).
 
 ## Tranche 13A — Static Helmert coordinate buffers: implemented follow-up
 
@@ -503,7 +503,7 @@ spread and aggregate-limit warnings; allocation samples do not establish a reduc
 Pipeline/all-root bundles add about 1.35/1.35 KiB minified and 0.47/0.49 KiB gzip respectively.
 Core, wrapper, selective, catalogue, deformation and deferred imports remain unchanged.
 Only exceeded optional pipeline/all-root allowances increase with reviewed rounding headroom.
-See the [benchmark evidence](./benchmarks.md#static-helmert-coordinate-buffers) for the
+See the [benchmark evidence](./projection-performance-history.md#static-helmert-coordinate-buffers) for the
 measured scope; this does not establish a general throughput or state-of-the-art claim.
 
 ## Tranche 13A — Kinematic Helmert coordinate buffers: implemented follow-up
@@ -518,7 +518,7 @@ Independent anchors and seeded bit-for-bit scalar/general-dispatch tests qualify
 all variants. Source allocation checks guard the new loop; packed ESM/CommonJS
 consumers exercise both epoch modes. The shared benchmark matrix now covers 26
 scenarios / 208 rows, adding approximate, coordinate-frame and inverse rate cases.
-The [paired diagnostic](./benchmarks.md#kinematic-helmert-coordinate-buffers)
+The [paired diagnostic](./projection-performance-history.md#kinematic-helmert-coordinate-buffers)
 records CPU timing, spread warnings, allocation sampling and optional bundle cost.
 A longer-sample Apple M2 / Node confirmation observes 2.86×/1.26× median flat ratios
 for constant/mixed epochs, with remaining spread/aggregate-limit warnings. Optional
@@ -543,7 +543,7 @@ arithmetic, epochs, signed zero, strides and intermediate errors. Grid diagnosti
 separate owned tuples and mutable outputs, both directions and both reader formats.
 Optional heap source-site profiles help distinguish explicit allocations from runtime
 boxing. CI uploads bounded coordinate/allocation measurements alongside preparation
-reports. See [the measurements](./benchmarks.md#grid-scratch-and-mixed-pipeline-qualification).
+reports. See [the measurements](./projection-performance-history.md#grid-scratch-and-mixed-pipeline-qualification).
 
 A mixed unit/axis and Helmert numeric-buffer prototype improved throughput but
 regressed sampled allocations after varied workloads, including when narrowed to
@@ -577,7 +577,7 @@ The five outstanding corpus axis cases now pass: legacy named UNKNOWN axes,
 polar direction spellings, and cardinal WKT2/PROJJSON meridians relative to the
 central meridian. Scalar and typed-array tests exercise default/enforced order,
 signs, units, both hemispheres, and explicit stored order. All nine remaining corpus
-rejections are deliberate strict-input policies; see the [audit](./parity-audit.md#strict-input-policy).
+rejections are deliberate strict-input policies; see the [audit](../docs/modules/projection/parity-audit.md#strict-input-policy).
 Oblique axis rotations, non-polar meridian operations and broader structured variants
 remain outside the supported subset.
 
@@ -586,7 +586,7 @@ barrel. Corresponding CRS syntax subpaths prevent optional WKT syntax from being
 hoisted through a shared dependency. CI inspects the initial static dependency graph
 with an eagerly loaded core/Mercator, executes the deferred UTM, WKT and composite
 chunks, enforces byte budgets, and checks every subpath in packed ESM/CommonJS and
-TypeScript consumers. See the [engine guide](./projection-engine.md#load-less-used-projections-on-demand).
+TypeScript consumers. See the [engine guide](../docs/modules/projection/projection-engine.md#load-less-used-projections-on-demand).
 
 The independent-reference follow-up below adds maintained datasets and an explicit
 edge disposition. The completed qualification profile is described above; additional operations and
@@ -603,7 +603,7 @@ unsampled domains remain future extensions rather than an unrestricted parity cl
 - AEQD relative-origin correction, explicit legacy-definition translations, measured
   Cassini/Robinson limits and a disposition for the Canadian inverse edge failures.
 
-See [independent validation](./independent-validation.md). This completes the initial
+See [independent validation](../docs/modules/projection/independent-validation.md). This completes the initial
 maintained independent-reference and real-GeoTIFF baseline. Tranches 7A–7D above extend this initial baseline and make the supported-profile
 promotion decision explicit.
 
@@ -623,8 +623,8 @@ behavior, numeric inverse output commits, and an analytic spherical projection
 inverse. Authored anchors qualify center/near-axis boundaries, flattened/prolate/
 triaxial geometry, aliasing and recursive outputs; matched benchmarks compare
 reusable scalar and flat paths with separate allocation samples. CI records those
-diagnostics without speed gates. See [coordinate-system boundaries](./coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
-and [the measurements](./benchmarks.md#spheroid-numerical-boundaries).
+diagnostics without speed gates. See [coordinate-system boundaries](../docs/modules/projection/coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
+and [the measurements](./projection-performance-history.md#spheroid-numerical-boundaries).
 
 The next qualification and sharing tranche is implemented: independent surface/
 exterior anchors extend from spheres to b/a = 0.000001; ordinary interior offsets
@@ -637,7 +637,7 @@ inverse. Geospatial keeps its three-radius/interior kernel, radial approximation
 angle units and exact-pole convention. Reusable scratch captures numeric
 results before public output setters; no coordinate arrays/objects are created by
 the shared functions. Setup, scalar/flat, sampled allocations and selective bundle
-costs are recorded separately. See [shared conversion measurements](./benchmarks.md#shared-spheroid-conversions).
+costs are recorded separately. See [shared conversion measurements](./projection-performance-history.md#shared-spheroid-conversions).
 
 This completes common-leaf placement for the qualified domain. The subsequent
 interior qualification tranche is also implemented: 198 independently generated
@@ -647,7 +647,7 @@ flattening, prolate/triaxial axes and either side of the equatorial cusp. Analyt
 checks extend finite-axis/underflow boundaries and flat failure ownership. CI
 checks fixture reproducibility, sampled accuracy and failure contracts; every
 diagnostic error/rejection is retained separately. See
-[ellipsoid accuracy and interior boundaries](./ellipsoid-qualification.md).
+[ellipsoid accuracy and interior boundaries](../docs/modules/projection/ellipsoid-qualification.md).
 
 Further interior algorithm work needs an explicit normal-branch selection
 contract and a safeguarded, independently qualified solver.
@@ -656,7 +656,7 @@ contract and a safeguarded, independently qualified solver.
 Local-frame convergence is implemented in the qualified sphere/oblate domain:
 shared original ENU/XYZ basis and ENU/NED matrix commits, preserved height/pole
 normal conventions, reusable outputs and recursive sampling/setter qualification.
-See [the local-frame measurements](./benchmarks.md#shared-local-frames). Datums/epochs remain explicit projection concerns.
+See [the local-frame measurements](./projection-performance-history.md#shared-local-frames). Datums/epochs remain explicit projection concerns.
 Existing CesiumJS/proj4js provenance stays attached, and the core package includes
 the full upstream MIT notice. No new third-party source or model data is added.
 
@@ -693,8 +693,8 @@ static velocity from temporal rate/event laws. Authoritative model certification
 remains application-owned. S6 adds pinned local
 asset and operation metadata qualification; S7 implements the four explicit
 temporal laws with independent references. See
-[deformation qualification](./deformation-qualification.md), [temporal models](./temporal-models.md)
-and [optional acceleration](./acceleration.md).
+[deformation qualification](../docs/modules/projection/deformation-qualification.md), [temporal models](../docs/modules/projection/temporal-models.md)
+and [optional acceleration](../docs/modules/projection/acceleration.md).
 S6–S8 add original code/reference generation only, with no new runtime dependencies
-or third-party datasets. S9 consolidates these results in the [published scorecard](./scorecard.md);
-[measurement limits and commands](./scorecard-methodology.md) preserve the bounded scope.
+or third-party datasets. S9 consolidates these results in the [published scorecard](../docs/modules/projection/scorecard.md);
+[measurement limits and commands](../docs/modules/projection/scorecard-methodology.md) preserve the bounded scope.

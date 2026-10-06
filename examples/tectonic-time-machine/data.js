@@ -3,10 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original GPML reader and runtime-only data adapter. Remote scientific data is not bundled or relicensed as MIT.
 import {unitVector, regionFor} from './math.js';
-export const MODEL = 'MULLER2022';
+import {sourceFor, rotationBracket, rotationWindow, nextRotationTime, rotationPlaybackBuffer} from './sources.js';
+import {modelXML} from './archive.js';
+import {parseRotationBatches, responseChunks} from './rotation-stream.js';
 export const SERVICE = 'https://gws.gplates.org';
-export const COASTLINES_URL =
-  'https://raw.githubusercontent.com/GPlates/gplates-web-service/2b2bb1e25737668d4d3ec3d5d1c327279f30279e/django/GWS/data/deprecated/MODELS/MULLER2022/shapes_coastlines_Merdith_et_al_v2.gpmlz';
 const GML = 'http://www.opengis.net/gml',
   GPML = 'http://www.gplates.org/gplates';
 const first = (node, ns, name) => node.getElementsByTagNameNS(ns, name)[0];
@@ -112,53 +112,171 @@ export function parseCoastlines(xml) {
   }
   return features;
 }
-export function validateRotations(raw, pids) {
-  const table = {};
-  for (let time = 0; time <= 500; time += 10) {
-    const row = raw[`${time}.0`] || raw[String(time)];
-    if (!row) throw new Error(`Missing rotations at ${time} Ma`);
-    table[String(time)] = {};
-    for (const pid of pids) {
-      const q = row[String(pid)];
-      if (
-        !Array.isArray(q) ||
-        q.length !== 4 ||
-        !q.every(Number.isFinite) ||
-        Math.abs(Math.hypot(...q) - 1) > 1e-5
-      )
-        throw new Error(`Invalid rotation for plate ${pid}`);
-      const length = Math.hypot(...q);
-      table[String(time)][pid] = q.map(n => n / length);
-    }
-  }
-  return table;
-}
 async function response(url, signal) {
   const r = await fetch(url, {signal: AbortSignal.any([signal, AbortSignal.timeout(45000)])});
   if (!r.ok) throw new Error(`Data service returned HTTP ${r.status}`);
   return r;
 }
-export async function loadModel({signal, onStatus}) {
-  onStatus('Loading coastline templates…');
-  const r = await response(COASTLINES_URL, signal);
-  if (typeof DecompressionStream === 'undefined')
-    throw new Error('This browser needs gzip DecompressionStream support');
-  const xml = await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).text();
-  if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+/** Publish complete, validated time samples while streamed Arrow batches arrive. */
+export function createRotationCache(pids, source, fetchBatches = async function* (url, signal) {
+  const r = await response(url, signal);
+  yield* parseRotationBatches(responseChunks(r.body, signal));
+}) {
+  const rotations = {}, loaded = new Set(), listeners = new Set();
+  const indices = new Map(pids.map((pid, index) => [pid, index]));
+  let tail = Promise.resolve(), background = null, history = null, retryAfter = 0, prefetchTarget = null, foreground = null;
+  function enqueue(operation) {
+    const result = tail.then(operation);
+    tail = result.catch(() => {});
+    return result;
+  }
+  function hasTime(time) {
+    const [low, high] = rotationBracket(time, source.maxAge);
+    return loaded.has(low) && loaded.has(high);
+  }
+  async function loadTimes(requested, {signal, onStatus = () => {}}) {
+    signal.throwIfAborted();
+    const times = requested.filter(t => !loaded.has(t));
+    if (!times.length) return;
+    const pending = new Map(times.map(age => [age, {
+      values: new Float64Array(pids.length * 4), seen: new Uint8Array(pids.length), count: 0
+    }]));
+    // Keep URLs and server work bounded. A full window contains up to 5,376
+    // records per request, yielding 4,096-row Arrow batches plus a final batch.
+    for (let start = 0; start < pids.length; start += 256) {
+      signal.throwIfAborted();
+      onStatus(`Loading ${source.citation} rotations · ${times[0]}–${times.at(-1)} Ma`);
+      const ids = pids.slice(start, start + 256), allowed = new Set(ids);
+      const url = new URL('/rotation/get_quaternions', SERVICE);
+      url.searchParams.set('model', source.id);
+      url.searchParams.set('pids', ids.join(','));
+      url.searchParams.set('times', times.join(','));
+      for await (const batch of fetchBatches(url, signal)) {
+        signal.throwIfAborted();
+        const columns = ['age', 'plateId', 'w', 'x', 'y', 'z'].map(name => batch.data.getChild(name));
+        for (let i = 0; i < batch.data.numRows; i++) {
+          const age = columns[0].get(i), pid = columns[1].get(i);
+          const sample = pending.get(age), index = indices.get(pid);
+          if (!sample || !allowed.has(pid) || sample.seen[index])
+            throw new Error('Unexpected or duplicate rotation sample');
+          const w = columns[2].get(i), x = columns[3].get(i), y = columns[4].get(i), z = columns[5].get(i);
+          const length = Math.hypot(w, x, y, z);
+          if (!Number.isFinite(w) || !Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z) || Math.abs(length - 1) > 1e-5)
+            throw new Error(`Invalid rotation for plate ${pid}`);
+          const offset = index * 4;
+          sample.values[offset] = w / length;
+          sample.values[offset + 1] = x / length;
+          sample.values[offset + 2] = y / length;
+          sample.values[offset + 3] = z / length;
+          sample.seen[index] = 1;
+          sample.count++;
+          if (sample.count === pids.length && !loaded.has(age)) {
+            rotations[age] = {values: sample.values, indices};
+            loaded.add(age);
+            for (const notify of listeners) notify();
+          }
+        }
+        // Parsing a large response should not monopolize the render loop.
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+      for (const age of times) {
+        const sample = pending.get(age);
+        for (const pid of ids) {
+          if (!sample.seen[indices.get(pid)]) throw new Error(`Missing rotations at ${age} Ma`);
+        }
+      }
+    }
+  }
+  function ensureTime(time, options) {
+    return enqueue(() => loadTimes(rotationWindow(time, source.maxAge), options));
+  }
+  function loadForeground(times, options) {
+    options.signal.throwIfAborted();
+    if (times.every(age => loaded.has(age))) return Promise.resolve();
+    const key = times.join(',');
+    if (foreground?.key === key && !foreground.signal.aborted) return foreground.promise;
+    // One small foreground request runs independently of the background queue.
+    // Rapid, distant seeks replace obsolete foreground work instead of piling up.
+    foreground?.abort.abort(new DOMException('Superseded seek', 'AbortError'));
+    const abort = new AbortController();
+    const job = {key, abort, signal: AbortSignal.any([options.signal, abort.signal]), promise: null};
+    foreground = job;
+    job.promise = loadTimes(times, {...options, signal: job.signal}).finally(() => {
+      if (foreground === job) foreground = null;
+    });
+    return job.promise;
+  }
+  return {
+    rotations, hasTime, ensureTime,
+    get loadedSamples() {return loaded.size;},
+    totalSamples: source.maxAge / 10 + 1,
+    waitForTime(time, {signal, lifetimeSignal = signal, onStatus}) {
+      if (hasTime(time)) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        function cleanup() {listeners.delete(check); signal.removeEventListener('abort', cancel);}
+        function check() {if (hasTime(time)) {cleanup(); resolve();}}
+        function cancel() {cleanup(); reject(signal.reason);}
+        if (signal.aborted) {cancel(); return;}
+        listeners.add(check);
+        signal.addEventListener('abort', cancel, {once: true});
+        // Cancelling a waiter alone preserves its download; a new distant seek
+        // may replace it. Resolve as soon as the requested pose exists.
+        loadForeground([...new Set(rotationBracket(time, source.maxAge))], {signal: lifetimeSignal, onStatus}).then(check, error => {
+          cleanup(); reject(error);
+        });
+      });
+    },
+    ensurePose(time, options) {
+      return loadForeground([...new Set(rotationBracket(time, source.maxAge))], options);
+    },
+    ensurePlayback(time, options) {
+      return loadForeground(rotationPlaybackBuffer(time, source.maxAge), options);
+    },
+    ensureHistory(time, options) {
+      if (history) return history;
+      // Request all history without waiting for playback to advance. Foreground
+      // pose requests use their own lane, even while this queue is busy.
+      const current = rotationWindow(time, source.maxAge), windows = [current];
+      for (let end = current[0]; end > 0; end -= 200)
+        windows.push(rotationWindow(-end, source.maxAge));
+      for (let end = current.at(-1) + 200; end <= source.maxAge; end += 200)
+        windows.push(rotationWindow(-end, source.maxAge));
+      history = (async () => {
+        for (const times of windows) await enqueue(() => loadTimes(times, options));
+      })().finally(() => {history = null;});
+      return history;
+    },
+    prefetchTime(time, options) {
+      prefetchTarget = time;
+      if (background || Date.now() < retryAfter) return background;
+      background = (async () => {
+        do {
+          const target = prefetchTarget;
+          prefetchTarget = null;
+          await ensureTime(target, options);
+          const next = nextRotationTime(target, source.maxAge);
+          if (next !== null) await ensureTime(next, options);
+          // If playback crossed a window while we were downloading, prefetch
+          // its next window too instead of waiting for another boundary miss.
+        } while (prefetchTarget !== null);
+      })().catch(() => {
+        // A speculative failure leaves the valid pose playable. A foreground
+        // miss retries and reports failures through the existing error UI.
+        retryAfter = Date.now() + 30000;
+      }).finally(() => {background = null;});
+      return background;
+    }
+  };
+}
+export async function loadModel({sourceId, time, signal, onStatus, preloadHistory = false}) {
+  const source = sourceFor(sourceId);
+  onStatus(`Loading ${source.citation} ${source.geometry}…`);
+  const r = await response(source.url, signal);
+  const xml = await modelXML(await r.arrayBuffer(), source);
+  signal.throwIfAborted();
   const features = parseCoastlines(xml),
     pids = [...new Set(features.map(f => f.pid))];
-  const rotations = {};
-  // Limit URL length and service work per request; requests remain sequential and cancellable.
-  for (let start = 0; start < pids.length; start += 40) {
-    onStatus(`Loading published rotations… ${Math.round((start / pids.length) * 100)}%`);
-    const ids = pids.slice(start, start + 40),
-      url = new URL('/rotation/get_quaternions', SERVICE);
-    url.searchParams.set('model', MODEL);
-    url.searchParams.set('pids', ids.join(','));
-    url.searchParams.set('times', Array.from({length: 51}, (_, i) => i * 10).join(','));
-    const raw = await (await response(url, signal)).json();
-    const batch = validateRotations(raw, ids);
-    for (const [time, row] of Object.entries(batch)) rotations[time] = {...rotations[time], ...row};
-  }
-  return {features, rotations, pids};
+  const cache = createRotationCache(pids, source);
+  await cache.ensurePlayback(time, {signal, onStatus});
+  return Object.assign(cache, {features, pids, source, signal, preloadHistory});
 }

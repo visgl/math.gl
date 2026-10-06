@@ -10,6 +10,16 @@ module.exports = function projectionRedirects(context) {
     name: 'projection-module-redirects',
     async postBuild({outDir, routesPaths}) {
       const prefix = context.baseUrl + 'docs/modules/projection';
+      for (const moduleName of ['projection', 'proj4']) {
+        const oldRoute = context.baseUrl + 'docs/modules/' + moduleName + '/roadmap';
+        const route = prefix + '/support';
+        const file = join(outDir, oldRoute.slice(context.baseUrl.length) + '.html');
+        await mkdir(dirname(file), {recursive: true});
+        await writeFile(
+          file,
+          `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Projection support</title><link rel="canonical" href="${route}"><meta http-equiv="refresh" content="0;url=${route}"><script>location.replace(${JSON.stringify(route)});</script></head><body><a href="${route}">Projection support</a></body></html>`
+        );
+      }
       const renamedPages = {
         '/projection-engine': '/typescript-engine',
         '/support': '/typescript-support',

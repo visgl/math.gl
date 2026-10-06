@@ -25,32 +25,58 @@ math.gl is **optimized for use with WebGL and WebGPU**, however it is not a GPU 
 
 math.gl is a toolbox that offers a suite of composable modules.
 
-| **Core math libraries**           | Module <span style={{width: 300}} /> | Description                                  |
-| --------------------------------- | ------------------------------------ | -------------------------------------------- |
-|                                   | **`@math.gl/types`**                 | Basic math type helpers (`NumericArray` etc) |
-| ![core](./images/core.png 'core') | **`@math.gl/core`**                  | Basic math classes (vectors, matrices, etc)  |
-|                                   | **`@math.gl/expressions`**           | Parse and evaluate lightweight expressions.  |
+### Foundations
 
-| **Geospatial math libraries**                       | Module <span style={{width: 300}} /> | Description                                        |
-| --------------------------------------------------- | ------------------------------------ | -------------------------------------------------- |
-|                                                     | **`@math.gl/crs`**                   | Standards-based coordinate reference system types. |
-| ![geospatial](./images/geospatial.svg 'geospatial') | **`@math.gl/geospatial`**            | Ellipsoidal math for WGS84 coordinates.            |
-| ![geoid](./images/geoid.png 'geoid')                | **`@math.gl/geoid`**                 | Earth Gravity Model support .                      |
-|                                                     | **`@math.gl/polygon`**               | Polygon math, including geospatial cutting etc.    |
-|                                                     | **`@math.gl/projection`**                 | Conversion between coordinate reference systems.   |
-|                                                     | **`@math.gl/sun`**                   | Solar position / direction from position and time. |
-|                                                     | **`@math.gl/web-mercator`**          | Supports 3D Web Mercator (spherical) projections.  |
+Vectors, matrices and shared numeric types.
 
-| **Discrete global grid libraries**               | Module <span style={{width: 300}} /> | Description                                      |
-| ------------------------------------------------ | ------------------------------------ | ------------------------------------------------ |
-| ![DDGS](./images/dggs/s2.png 'dggs')             | **`@math.gl/dggs`**                  | Decode GeoHash, Quadkey, and S2 cell geometries. |
+| Module | Description |
+| --- | --- |
+| [`@math.gl/core`](./modules/core/README.md) | Vectors, matrices, quaternions and reusable math primitives. |
+| [`@math.gl/types`](./modules/types/README.md) | Shared TypeScript contracts for numeric and geospatial data. |
 
-| **3D math libraries**                      | Module <span style={{width: 300}} /> | Description                                |
-| ------------------------------------------ | ------------------------------------ | ------------------------------------------ |
-|                                            | **`@math.gl/curves`**                | Parametric curves and arc-length sampling. |
-|                                            | **`@math.gl/geometry`**              | CPU primitive meshes and tessellation.     |
-| ![culling](./images/culling.png 'culling') | **`@math.gl/culling`**               | Bounding volumes and intersection testing. |
-|                                            | **`@math.gl/geometry-utils`**         | Typed-array geometry processing utilities. |
+### Earth
+
+Coordinate reference systems, Earth models, maps and time.
+
+| Module | Description |
+| --- | --- |
+| [`@math.gl/crs`](./modules/crs/README.md) | Coordinate reference system definitions and syntax readers. |
+| [`@math.gl/projection`](./modules/projection/README.md) | Coordinate transformations, pluggable projections and explicit epochs. |
+| [`@math.gl/web-mercator`](./modules/web-mercator/README.md) | Web Mercator map and camera utilities. |
+| [`@math.gl/geospatial`](./modules/geospatial/README.md) | Ellipsoid geometry and geographic coordinate frames. |
+| [`@math.gl/geoid`](./modules/geoid/README.md) | Earth gravity models and geoid height conversion. |
+| [`@math.gl/timezone`](./modules/timezone/README.md) | Geographic timezone lookup and local calendar calculations. |
+| [`@math.gl/sun`](./modules/sun/README.md) | Sun position, daylight and atmospheric lighting. |
+
+### 3D
+
+Curves, meshes, geometry processing and visibility.
+
+| Module | Description |
+| --- | --- |
+| [`@math.gl/curves`](./modules/curves/README.md) | Parametric curves, interpolation and arc-length sampling. |
+| [`@math.gl/geometry`](./modules/geometry/README.md) | Renderer-independent primitive meshes and tessellation. |
+| [`@math.gl/geometry-utils`](./modules/geometry-utils/README.md) | Typed-array geometry processing utilities. |
+| [`@math.gl/culling`](./modules/culling/README.md) | Bounding volumes, intersection tests and visibility. |
+
+### Spatial
+
+Geometry operations, geographic indexing and columnar data.
+
+| Module | Description |
+| --- | --- |
+| [`@math.gl/polygon`](./modules/polygon/README.md) | Clipping, subdivision and polygon and line geometry operations. |
+| [`@math.gl/dggs`](./modules/dggs/README.md) | Decode boundaries and columns for common global grid encodings. |
+| [`@math.gl/geoarrow`](./modules/geoarrow/README.md) | Columnar geospatial layouts and kernels over typed-array buffers. |
+| [`@math.gl/wkb`](./modules/wkb/README.md) | WKB, EWKB and WKT geometry codecs. |
+
+### Languages
+
+Expression parsing, evaluation and accessor compilation.
+
+| Module | Description |
+| --- | --- |
+| [`@math.gl/expressions`](./modules/expressions/README.md) | Parse and evaluate compact expressions (experimental). |
 
 <br/>
 In addition, math.gl provides a few deprecated legacy modules, to avoid breaking older applications.
