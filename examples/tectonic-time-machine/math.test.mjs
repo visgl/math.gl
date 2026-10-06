@@ -622,3 +622,15 @@ test('pose waits report progress immediately and detach after resolution or canc
   assert.equal(statuses.length,resolvedCount);assert.equal(cancelledStatuses.length,cancelledCount);
   assert.equal(lifetime.signal.aborted,false);assert.equal(cache.loadedSamples,3);
 });
+test('a new pose waiter retries a failed stream and does not inherit its stale failure',async()=>{
+  const signal=new AbortController().signal;let calls=0;
+  const cache=createRotationCache([1],{maxAge:10},async function*(){
+    if (++calls===1) throw new Error('Previous stream failed');
+    yield batch([rotationRow(0,1),rotationRow(10,1)]);
+  });
+  await assert.rejects(cache.ensureHistory(0,{signal}),/Previous stream failed/);
+  const statuses=[];
+  await cache.waitForTime(-5,{signal,onStatus:value=>statuses.push(value)});
+  assert.equal(calls,2);assert(cache.hasTime(-5));
+  assert.match(statuses[0],/0\/2/);assert.match(statuses.at(-1),/2\/2/);
+});

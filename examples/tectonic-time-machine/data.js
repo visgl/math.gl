@@ -160,7 +160,7 @@ export function createRotationCache(pids,source,stream) {
           else if (failure) {cleanup();reject(failure);}
         }
         listeners.add(check);signal.addEventListener('abort',cancel,{once:true});
-        check();start({signal:lifetimeSignal}).catch(()=>{});
+        start({signal:lifetimeSignal}).catch(()=>{});check();
       });
     }
   };
