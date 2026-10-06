@@ -210,27 +210,39 @@
         "items": [
           "modules/projection/README",
           "modules/projection/coordinate-systems",
-          "modules/projection/ellipsoid-qualification",
           "modules/projection/projections",
           "modules/projection/projection-engine",
-          "modules/projection/bulk-layouts",
-          "modules/projection/operation-pipelines",
-          "modules/projection/operation-selection",
-          "modules/projection/deformation-models",
-          "modules/projection/temporal-models",
-          "modules/projection/acceleration",
-          "modules/projection/deformation-qualification",
-          "modules/projection/api-reference/projection",
-          "modules/projection/api-reference/projection-engine",
           "modules/projection/benchmarks",
-          "modules/projection/scorecard",
-          "modules/projection/scorecard-methodology",
-          "modules/projection/parity-audit",
-          "modules/projection/independent-validation",
-          "modules/projection/accuracy-domains",
-          "modules/projection/projection-analysis",
           "modules/projection/support",
-          "modules/projection/roadmap"
+          {
+            "type": "category",
+            "label": "API reference",
+            "items": [
+              "modules/projection/api-reference/projection",
+              "modules/projection/api-reference/projection-engine",
+              "modules/projection/bulk-layouts",
+              "modules/projection/operation-pipelines",
+              "modules/projection/operation-selection",
+              "modules/projection/api-reference/datum-grids",
+              "modules/projection/deformation-models",
+              "modules/projection/temporal-models",
+              "modules/projection/projection-analysis"
+            ]
+          },
+          {
+            "type": "category",
+            "label": "Validation and measurements",
+            "items": [
+              "modules/projection/independent-validation",
+              "modules/projection/accuracy-domains",
+              "modules/projection/ellipsoid-qualification",
+              "modules/projection/deformation-qualification",
+              "modules/projection/parity-audit",
+              "modules/projection/scorecard",
+              "modules/projection/scorecard-methodology",
+              "modules/projection/acceleration"
+            ]
+          }
         ]
       },
       {

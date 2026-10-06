@@ -162,7 +162,7 @@ The third ordinate is ellipsoidal height by default. Explicit `+geoidgrids`
 conversion uses registered geoid undulations in meters, with source and destination
 height operations around the horizontal datum operation. Choose a model matching
 your datum and tide convention. See the
-[height conversion guide](./projection-engine.md#convert-geoid-heights) for loading
+[height conversion guide](./api-reference/datum-grids.md#convert-geoid-heights) for loading
 GTX or GeoTIFF grids and integrating `@math.gl/geoid`.
 
 A separately declared vertical CRS in WKT, PROJJSON or metadata is not automatically

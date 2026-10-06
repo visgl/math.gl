@@ -139,19 +139,19 @@ Pay particular attention to computed heights, strict errors, Cassini/Robinson/CE
 corrections and inverse grid boundaries. Use a separately installed proj4js runtime where its behavior is required.
 
 Explicit `+geoidgrids` height conversion supports prepared grids, GTX snapshots, the validated vertical GeoTIFF subset and a
-structural `@math.gl/geoid` adapter. See [vertical heights](./projection-engine.md#convert-geoid-heights)
+structural `@math.gl/geoid` adapter. See [vertical heights](./api-reference/datum-grids.md#convert-geoid-heights)
 for the supported domain and grid loading contract. This does not add compound/vertical
 CRS execution or implicit model selection.
 
-## Default backend and future work
+## Support boundaries
 
 The package has no runtime dependency on proj4js. The pinned development dependency
 remains for compatibility tests and benchmarks. This rename and wrapper removal
-are breaking alpha API changes; no release is published by this work.
+are breaking alpha API changes.
 
 Broader derived/compound CRS execution, arbitrary axis rotations, uncommon GeoTIFF
 band conventions, dynamic datums and automatic EPSG operation lookup
 are outside this profile. More datasets and denser sampling can expand the profile
-without representing unfinished work in the four qualification tranches. Exact
+through additional independent qualification. Exact
 allocation counts and guarantees about every browser/device are also not claimed;
 the recorded performance baselines are measurements, not service-level promises.

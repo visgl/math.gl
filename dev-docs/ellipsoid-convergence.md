@@ -69,7 +69,7 @@ radii or the whole mathematical domain.
   and near-pole domains, both directions, reusable scalar outputs and projection
   flat buffers. It records all-coordinate analytic checks, source/workload hashes,
   sampled allocations, raw timing and spread/aggregate warnings. See
-  [the benchmark report](../docs/modules/projection/benchmarks.md#spheroid-numerical-boundaries).
+  [the benchmark report](./projection-performance-history.md#spheroid-numerical-boundaries).
 
 The candidate meets the tighter near-pole regression allowance but does not establish
 universal inverse accuracy or a speedup. Input generation/setup/loading are outside
@@ -112,7 +112,7 @@ collected allocations remain separately sampled, not inferred from source alone.
 
 Paired measurements now include complete public construction, reusable scalar
 outputs, flat buffers, allocations and selective source graphs. See the
-[shared conversion report](../docs/modules/projection/benchmarks.md#shared-spheroid-conversions).
+[shared conversion report](./projection-performance-history.md#shared-spheroid-conversions).
 The existing proj4js equations retain their SPDX attribution and full packaged MIT
 notice in core; no Cesium code is moved/relicensed and no new upstream code/data
 is introduced. Kernel sharing is scoped consolidation, not a general speed claim.
@@ -161,7 +161,7 @@ Numeric components are captured before public setters, including the legacy path
 A targeted AST guard covers eleven successful coordinate functions; factory
 objects are allocated once at setup. Paired public construction, varied coordinate
 workloads, collected allocation sampling and selective bundles have separate
-reports. See [the qualification measurements](../docs/modules/projection/benchmarks.md#shared-local-frames).
+reports. See [the qualification measurements](./projection-performance-history.md#shared-local-frames).
 Further interior convergence, unusual geometry and celestial frame/time-scale
 work retain separate scopes.
 

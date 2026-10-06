@@ -208,7 +208,7 @@ with the same output declaration and preload/synchronous behavior.
 
 ## Explicit grids and height operations
 
-Prepare grids through the [grid adapters](./projection-engine.md#convert-geoid-heights)
+Prepare grids through the [grid adapters](./api-reference/datum-grids.md#convert-geoid-heights)
 and supply them to the pipeline. Fetching and decoding remain application-owned.
 Grid names support ordered lists, `@optional` names and an explicit `null` fallback;
 missing required grids and uncovered coordinates are errors.
@@ -334,7 +334,7 @@ operators and parameters throw instead of being skipped. Stack support covers X/
 with stricter balance validation; arbitrary operators, time-varying deformation components, automatic
 EPSG operation lookup and dynamic CRS inference remain outside this profile.
 Use the optional [operation catalogue](./operation-selection.md) to choose among
-application-reviewed pipelines before execution. See the [remaining roadmap](./roadmap.md).
+application-reviewed pipelines before execution.
 
 
 ## Static Helmert batches
@@ -348,8 +348,8 @@ the same; no additional option or preparation call is needed.
 
 Mixed pipelines keep general execution. Single-stage time-dependent rates are also
 optimized as described below. See the
-[measured scope and qualification](./benchmarks.md#static-helmert-coordinate-buffers)
-for the performance evidence and limits of this optimization.
+[measurement guidance](./benchmarks.md#operation-pipelines-and-grids)
+to compare your operation chain in both directions.
 
 
 ## Kinematic Helmert batches
@@ -373,4 +373,4 @@ inverse-oriented steps retain scalar equation order, Float32 validation and
 completed-record commits. A failing record and its tail stay untouched. Empty
 buffers still validate the epoch argument but do not prepare adjusted parameters.
 No new option, loading step or public API is required. See the
-[paired measurements](./benchmarks.md#kinematic-helmert-coordinate-buffers).
+[pipeline benchmark commands](./benchmarks.md#operation-pipelines-and-grids).
