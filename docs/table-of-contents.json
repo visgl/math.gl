@@ -141,7 +141,8 @@
         "label": "@math.gl/geometry-utils",
         "items": [
           "modules/geometry-utils/README",
-          "modules/geometry-utils/api-reference/geometry-utils"
+          "modules/geometry-utils/api-reference/geometry-utils",
+          "modules/geometry-utils/api-reference/mesh-processing"
         ]
       },
       {

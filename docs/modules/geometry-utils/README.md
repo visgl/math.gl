@@ -1,5 +1,9 @@
 # @math.gl/geometry-utils
 
+import Example from '@site/src/components/geometry-processing';
+
+<Example inline interactive height={540} />
+
 Utilities for processing renderer-independent geometry stored in typed arrays. The module is
 designed for loaders and applications that need to inspect, normalize, or decode geometry without
 depending on a WebGL or WebGPU runtime.
@@ -25,6 +29,12 @@ const normals = computeVertexNormals({
 
 const decodedNormal = octDecode(128, 128, new Vector3());
 ```
+
+## Mesh processing
+
+[Transform, merge, weld and inspect triangle meshes](./api-reference/mesh-processing.md).
+The inline workshop combines these operations on two sphere meshes. Expand the infobox
+to stretch or reflect a mesh, compare vertex counts, and inspect wireframe topology.
 
 ## API
 

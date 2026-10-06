@@ -1,0 +1,54 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.processing-example {
+  position: relative;
+  height: 100%;
+  background: #07121e;
+  color: #eef5ff;
+  font: 14px system-ui;
+  overflow: hidden;
+}
+.processing-example > .geometry-canvas {
+  height: 100%;
+}
+.processing-info {
+  position: absolute;
+  top: 56px;
+  right: 12px;
+  max-width: min(300px, calc(100% - 24px));
+  padding: 12px;
+  border: 1px solid #526b84;
+  border-radius: 8px;
+  background: #132538ed;
+  max-height: calc(100% - 129px);
+  overflow: auto;
+}
+.processing-info summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.processing-info p {
+  color: #b6cce0;
+  line-height: 1.5;
+}
+.processing-info label {
+  display: block;
+  margin: 12px 0;
+}
+.processing-info input[type='range'] {
+  display: block;
+  width: 100%;
+}
+.processing-caption {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  background: #132538ed;
+  pointer-events: none;
+  font-size: 12px;
+}
