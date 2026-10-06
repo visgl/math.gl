@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original adapter; datum lookup and method/parameter normalization rules are adapted from proj4js 2.22.0 and its MIT-licensed wkt-parser dependency. See ../../../PROJ4-LICENSE.md.
-import datums from './datum-table';
+import {datumNameKey, getDatumDefinitions} from './datum-catalog';
 import {DEGREES_TO_RADIANS} from '../parameters';
 import {unsupportedStage} from './types';
 import type {CRSNormalizationOptions, ParsedCRS} from './types';
@@ -267,32 +267,57 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
     parameters['b'] = String(finite(ellipsoid['semi_minor_axis']) * unit(ellipsoid['unit'], 1));
   else if (ellipsoid['radius'] !== undefined) parameters['b'] = parameters['a'];
   else throw new Error('Ellipsoid requires inverse flattening or semi-minor axis');
-  const datumName = key(datum['name']);
-  const namedDatum = Object.keys(datums).find(
-    name => key(name) === datumName || key(name) === datumName.replace(/^d/, '')
-  );
-  if (namedDatum) parameters['datum'] = namedDatum;
+  const datums = getDatumDefinitions(options);
+  const rawDatumName = String(datum['name'] || '');
+  const datumName = key(rawDatumName);
+  const names = Object.keys(datums);
+  // Match the PROJ name first; punctuation and leading-D spellings are fallbacks.
+  const exactDatum = names.find(name => datumNameKey(name) === datumNameKey(rawDatumName));
+  const matches = exactDatum
+    ? [exactDatum]
+    : names.filter(name => key(name) === datumName || key(name) === datumName.replace(/^d/, ''));
+  const namedDatum = matches[0];
+  const first = datums[namedDatum];
   if (
-    [
-      'wgs84',
-      'worldgeodeticsystem1984',
-      'worldgeodeticsystem1984ensemble',
-      'dwgs1984',
-      'wgs1984'
-    ].includes(datumName)
+    first &&
+    matches.some(name => {
+      const candidate = datums[name];
+      return (
+        candidate.ellipse !== first.ellipse ||
+        candidate.towgs84 !== first.towgs84 ||
+        candidate.nadgrids !== first.nadgrids
+      );
+    })
   )
-    parameters['datum'] = 'WGS84';
-  if (['nad83', 'northamericandatum1983', 'dnorthamerican1983'].includes(datumName))
+    throw new Error('Ambiguous structured datum name: ' + rawDatumName);
+  // Preserve unavailable names so normalization rejects missing catalogue registrations.
+  if (datumName) parameters['datum'] = namedDatum || rawDatumName;
+  if (namedDatum && datumNameKey(namedDatum) === 'wgs84') parameters['datum'] = 'WGS84';
+  if (namedDatum && ['nad83', 'northamericandatum1983'].includes(datumNameKey(namedDatum)))
     parameters['datum'] = 'NAD83';
-  if (['nad27', 'northamericandatum1927', 'dnorthamerican1927'].includes(datumName))
-    parameters['datum'] = 'NAD27';
-  // WKT1 spellings used by ESRI and older exporters.
-  const datumAlias: Record<string, string> = {
-    newzealand1949: 'nzgd49',
-    belge1972: 'rnb72'
-  };
-  const alias = datumAlias[datumName.replace(/^d/, '')];
-  if (alias) parameters['datum'] = alias;
+  if (!exactDatum) {
+    if (
+      [
+        'wgs84',
+        'worldgeodeticsystem1984',
+        'worldgeodeticsystem1984ensemble',
+        'dwgs1984',
+        'wgs1984'
+      ].includes(datumName)
+    )
+      parameters['datum'] = 'WGS84';
+    if (['nad83', 'northamericandatum1983', 'dnorthamerican1983'].includes(datumName))
+      parameters['datum'] = 'NAD83';
+    if (['nad27', 'northamericandatum1927', 'dnorthamerican1927'].includes(datumName))
+      parameters['datum'] = 'NAD27';
+    // WKT1 spellings used by ESRI and older exporters.
+    const datumAlias: Record<string, string> = {
+      newzealand1949: 'nzgd49',
+      belge1972: 'rnb72'
+    };
+    const alias = datumAlias[datumName.replace(/^d/, '')];
+    if (alias) parameters['datum'] = alias;
+  }
   // Only the geographic base ID identifies a datum-table entry. A projected CRS
   // or datum object's ID belongs to a different authority namespace.
   if (type === 'ProjectedCRS' && base['id']) {
@@ -345,7 +370,11 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
       ['xscale', 'yscale', 'xyplanerotation'].includes(key(parameter['name']))
     );
     if (esriKrovak.length) {
-      const expected: Record<string, number> = {xscale: -1, yscale: 1, xyplanerotation: 90};
+      const expected: Record<string, number> = {
+        xscale: -1,
+        yscale: 1,
+        xyplanerotation: 90
+      };
       if (
         projection !== 'krovak' ||
         esriKrovak.length !== 3 ||
@@ -489,7 +518,9 @@ function readAxisDirection(
   if (along) {
     if (meridian !== undefined) throw new Error('Duplicate axis meridian');
     direction = along[1];
-    meridian = {longitude: Number(along[2]) * (along[3]?.toLowerCase() === 'west' ? -1 : 1)};
+    meridian = {
+      longitude: Number(along[2]) * (along[3]?.toLowerCase() === 'west' ? -1 : 1)
+    };
   }
   if (meridian !== undefined) {
     const latitude = Number(parameters['lat_0']);

@@ -7,7 +7,7 @@ import {applySpatialReference, resolveCRSInput} from './spatial-reference';
 import type {TypeScriptCRSInput} from './spatial-reference';
 import {DEGREES_TO_RADIANS, numberParameter} from '../parameters';
 import type {ProjectionParameters} from '../types';
-import datums from './datum-table';
+import {getDatumDefinitions} from './datum-catalog';
 import ellipsoids from './ellipsoid-table';
 import primeMeridians from './primemeridian-table';
 import unitTable from './units-table';
@@ -88,6 +88,7 @@ export function normalizeCRS(
   input: TypeScriptCRSInput,
   options: CRSNormalizationOptions = {}
 ): NormalizedCRS {
+  const datums = getDatumDefinitions(options);
   const resolved = resolveCRSInput(input, options);
   let definition = resolved.definition;
   const aliases = options.aliases || {};
@@ -175,7 +176,8 @@ export function normalizeCRS(
         : 'projected';
   const datumName = parameters['datum'];
   const datum = datumName && datumName !== 'none' ? lookup(datums, datumName) : undefined;
-  if (datumName && datumName !== 'none' && !datum) unsupportedStage('Unknown datum: ' + datumName);
+  if (datumName && datumName !== 'none' && !datum)
+    unsupportedStage('Unknown datum: ' + datumName + '; register a datumCatalogs plugin');
   const ellipsoid = getEllipsoid(parameters, datum?.ellipse);
   const grids = parameters['nadgrids'] ?? datum?.nadgrids;
   const gridReferences =

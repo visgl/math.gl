@@ -6,7 +6,22 @@ import type {ReadonlyCRSDefinition} from '@math.gl/crs';
 import type {ProjectionParameters} from '../types';
 import type {DatumGridReference} from '../grids/types';
 
+/** Named datum metadata; shifts use metres, arcseconds and ppm in PROJ syntax. */
+export type DatumDefinition = {
+  readonly ellipse?: string;
+  readonly towgs84?: string;
+  readonly nadgrids?: string;
+};
+
+/** Per-instance named datum catalogue; importing a plugin does not register it. */
+export type DatumCatalogPlugin = {
+  readonly name: string;
+  readonly datums: Readonly<Record<string, DatumDefinition>>;
+};
+
 export type CRSNormalizationOptions = {
+  /** Additional named datums; WGS84 and NAD83 are built in. */
+  datumCatalogs?: readonly DatumCatalogPlugin[];
   aliases?: Readonly<Record<string, ReadonlyCRSDefinition>>;
   parsers?: readonly CRSParser[];
   /** Explicitly discard the vertical component of a compound CRS. */

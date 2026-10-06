@@ -25,7 +25,8 @@ const scenarios = {
     point: [3, 0]
   },
   utm: {
-    imports: "import {lazyUniversalTransverseMercator} from '@math.gl/projection/projections/lazy/utm';",
+    imports:
+      "import {lazyUniversalTransverseMercator} from '@math.gl/projection/projections/lazy/utm';",
     load: "return new ProjectionEngine({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});",
     deferred: '/experimental/kernels/etmerc.js',
     expected: [500000, 0],
@@ -68,6 +69,10 @@ export async function load() {${scenario.load}}`,
       minify: true,
       metafile: true
     });
+    assert(
+      !Object.keys(result.metafile.inputs).some(path => path.endsWith('/crs/datum-table.js')),
+      'Lazy engine and optional parsers must not import the regional datum catalogue'
+    );
     const outputs = new Map(
       Object.entries(result.metafile.outputs).map(([path, output]) => [
         resolve(packageRoot, path),

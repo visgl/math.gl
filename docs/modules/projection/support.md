@@ -10,6 +10,29 @@ The old `native` and `experimental` subpaths remain compatibility aliases for th
 configurable engine; use the root, `core`, `projections/*`, `parsers/*` and `grids/*`
 paths in new code. This API is available in releases containing these exports.
 
+## Named datum catalogue migration
+
+The default `ProjectionEngine`, `LazyProjection`, and `normalizeCRS` retain only
+WGS84 and NAD83 as named datums. Register regional definitions explicitly:
+
+```typescript
+import {ProjectionEngine} from '@math.gl/projection/core';
+import {datumCatalog} from '@math.gl/projection/datums';
+
+const projection = new ProjectionEngine({
+  from: '+proj=longlat +datum=nad27',
+  to: 'WGS84',
+  datumCatalogs: [datumCatalog]
+});
+```
+
+Supply required datum-grid data separately; the catalogue contains definitions,
+not grids. The option also applies to WKT/PROJJSON readers and capability checks.
+Explicit ellipsoid and operation parameters remain available without named datum
+registration. The `Projection` convenience wrapper includes the catalogue
+internally and preserves its existing behavior. See the
+[datum registration guide](./projection-engine.md#register-regional-datums).
+
 API compatibility does not imply identical numerical results or accepted inputs.
 The documented corrections and strict-input exceptions below still apply. The engine never silently falls back to proj4js.
 

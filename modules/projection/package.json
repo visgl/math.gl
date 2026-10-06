@@ -35,6 +35,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./datums": {
+      "types": "./dist/datums.d.ts",
+      "import": "./dist/datums.js",
+      "require": "./dist/datums.cjs"
+    },
     "./core": {
       "types": "./dist/experimental/core.d.ts",
       "import": "./dist/experimental/core.js",

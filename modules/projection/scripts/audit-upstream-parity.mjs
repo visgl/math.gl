@@ -13,6 +13,7 @@ import {parseArgs} from 'node:util';
 import ts from 'typescript';
 import proj4 from 'proj4';
 import * as native from '@math.gl/projection/experimental';
+import {datumCatalog} from '@math.gl/projection/datums';
 
 const {values} = parseArgs({
   options: {
@@ -102,6 +103,17 @@ if (values['fixtures-output']) {
 const plugins = Object.values(native).filter(
   value => value && typeof value === 'object' && typeof value.create === 'function'
 );
+// Preserve the historical corpus's explicit ellipsoid-only reference cases.
+const unshiftedNames = JSON.parse(
+  readFileSync(new URL('../test/fixtures/unshifted-structured-datum-names.json', import.meta.url), 'utf8')
+);
+const datumCatalogs = [
+  datumCatalog,
+  {
+    name: 'fixture-ellipsoid-only-datums',
+    datums: Object.fromEntries(unshiftedNames.map(name => [name, {}]))
+  }
+];
 function options(to) {
   const wrapped = JSON.stringify(to).match(/\+o_proj=([\w]+)/)?.[1] || 'longlat';
   const plugin = plugins.find(value => value.name === wrapped || value.aliases?.includes(wrapped));
@@ -111,6 +123,7 @@ function options(to) {
   );
   return {
     to,
+    datumCatalogs,
     aliases,
     projections: [...plugins, native.obliqueTransformation(plugin || 'longlat')],
     parsers: [native.wktCRSParser, native.projJSONCRSParser]

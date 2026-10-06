@@ -68,6 +68,7 @@ algorithms, create a new instance with the new plugin set.
 | --- | --- | --- |
 | Projection algorithms | `projections` | Import and register the algorithms needed by both CRSs |
 | Structured CRS execution readers | `parsers` | Register `wktCRSParser` and/or `projJSONCRSParser` when accepting those representations |
+| Regional datum definitions | `datumCatalogs` | Register the catalogue plugin or application-reviewed definitions |
 | Named definitions | `aliases` | Supply application-specific identifiers and their CRS definitions |
 | Vertical height grids | `verticalGrids` | Prepare and register a model matching the horizontal and vertical datum |
 | Horizontal datum grids | `datumGrids` | Fetch, decode, and register the correct grid data before construction |
@@ -84,6 +85,39 @@ plugin exports and their accepted parameters.
 Composition is explicit too. `obliqueTransformation(mollweide)` creates a rotated
 Mollweide plugin with its dependency supplied directly; it does not search a global
 catalogue for an algorithm named in the CRS.
+
+## Register regional datums
+
+`ProjectionEngine`, `LazyProjection`, and `normalizeCRS` include only WGS84 and NAD83
+and their existing aliases. Projection algorithms and datums are independent:
+WGS84 → Web Mercator or WGS84 UTM needs no regional datum catalogue. Converting
+coordinates in another named datum requires explicit per-instance registration:
+
+```typescript
+import {ProjectionEngine} from '@math.gl/projection/core';
+import {datumCatalog} from '@math.gl/projection/datums';
+
+const projection = new ProjectionEngine({
+  from: '+proj=longlat +datum=OSGB36',
+  to: 'WGS84',
+  datumCatalogs: [datumCatalog]
+});
+```
+
+The plugin provides all 452 regional names and aliases from the previous built-in
+catalogue. It supplies ellipsoid names, Helmert parameters, and grid registration
+names; it supplies no grid files and performs no fetching. Importing it does not
+register it globally. Pass the same option to `LazyProjection`, `normalizeCRS`, or
+`checkProjectionCompatibility`. Applications may dynamically import the plugin
+before construction, or provide a small custom `DatumCatalogPlugin` with a `name`
+and `datums` map. Explicit `+ellps`, `+towgs84`, and grid parameters remain supported
+without the catalogue when no unavailable named datum is requested.
+
+This changes the configurable engine's default supported inputs. WKT/PROJJSON
+readers also require registration for regional names; unknown names fail explicitly
+unless an explicit WKT `TOWGS84` or supported `BoundCRS` operation supplies the shift.
+The `Projection` convenience wrapper registers the full catalogue internally and
+retains its historical ellipsoid-only handling of unmatched structured datum labels.
 
 ## Load less-used projections on demand
 
@@ -200,6 +234,7 @@ shorter paths below. The former `classic` subpath is removed.
 | `operations` | Optional `OperationCatalog` and selection metadata/diagnostics; no database or execution code |
 | `analysis` | `ProjectionAnalysis`, reusable factors/Jacobians and explicit mathematical domain enforcement |
 | `bulk` | `ProjectionBuffer` for separate, strided, column and chunked buffers; no projection algorithms/readers |
+| `datums` | Regional `datumCatalog` plugin; register through `datumCatalogs` |
 | `pipeline` | `ProjectionPipeline` and typed explicit operation contracts; no catalogue/readers |
 | `core` | Engine, normalization, capability checks, descriptor/cache utilities, shared types and errors |
 | `projections/lazy/<id>` | Lightweight projection descriptors; defer algorithm imports |
@@ -325,6 +360,11 @@ a plugin does not register it globally. See the
 
 ## Tree shaking and bundle size
 
+The lean default engine in this change measures 32,880 minified bytes / 11,905 gzip
+bytes, down from 52,183 / 18,824: **37.0% / 36.8%** smaller. The table below retains
+the published alpha.12 baseline; current measurements are recorded in
+`modules/projection/test/fixtures/bundle-budgets.json` under `leanDatumBaseline`.
+
 Use named ESM imports and register a small, explicit list. The package declares
 `sideEffects: false`, and its ESM build preserves module boundaries. A bundler can
 remove unused projection kernels and optional readers. Type-only imports add no
@@ -336,8 +376,8 @@ elsewhere in an application can retain both implementations. CommonJS consumers
 are supported, but the measurements below use ESM with tree shaking.
 
 The core has a fixed cost: CRS normalization, unit/axis/datum transformation support,
-and shared ellipsoid and datum tables. Selecting one projection does not remove
-those tables. Adding WKT pulls in syntax parsing and structured-CRS interpretation;
+and the shared ellipsoid table. WGS84 and NAD83 are built in; regional datum
+definitions are retained only when registered or when using the compatibility wrapper. Adding WKT pulls in syntax parsing and structured-CRS interpretation;
 PROJJSON objects already provide structured input and need less reader code.
 
 Measured **math.gl 5.0.0-alpha.12**, source commit [`17976524`](https://github.com/visgl/math.gl/tree/17976524ff710076a508ec6211518b332b7a35b7),

@@ -6,6 +6,8 @@
 // Fixture inputs and tolerance semantics adapted from proj4js 2.22.0 tests (MIT).
 // Copyright (c) 2014, proj4js authors. See ../../PROJ4-LICENSE.md.
 import {expect, test} from 'vitest';
+import {datumCatalog} from '@math.gl/projection/datums';
+import {unshiftedStructuredDatums} from '../fixtures/unshifted-structured-datums';
 import proj4 from 'proj4';
 import upstreamManifest from 'proj4/package.json';
 import * as native from '@math.gl/projection/experimental';
@@ -20,6 +22,7 @@ const plugins = Object.values(native).filter(
   (value): value is ProjectionPlugin =>
     value && typeof value === 'object' && 'create' in value && typeof value.create === 'function'
 );
+const datumCatalogs = [datumCatalog, unshiftedStructuredDatums];
 const parsers = [native.wktCRSParser, native.projJSONCRSParser];
 const rejections = new Map(exceptions.map(entry => [entry.index, entry]));
 // Resolve aliases locally so this suite does not modify the upstream global registry.
@@ -31,6 +34,7 @@ function options(to: TypeScriptCRSInput) {
     throw new Error('Unresolved ob_tran dependency: ' + wrapped);
   return {
     to,
+    datumCatalogs,
     aliases,
     projections: [...plugins, native.obliqueTransformation(plugin || 'longlat')],
     parsers
@@ -118,7 +122,9 @@ test('Geographic base authority IDs take precedence without borrowing other CRS 
   };
   const named = [106.869, -52.2978, 103.724, -0.33657, 0.456955, -1.84218, 1];
   const authority = [-106.8686, 52.2978, -103.7239, 0.3366, -0.457, 1.8422, -1.2747];
-  expect(native.normalizeCRS(definition, {parsers}).datum.towgs84).toEqual(authority);
+  expect(native.normalizeCRS(definition, {parsers, datumCatalogs}).datum.towgs84).toEqual(
+    authority
+  );
   for (const id of [
     undefined,
     {authority: 'EPSG', code: 999999},
@@ -133,7 +139,9 @@ test('Geographic base authority IDs take precedence without borrowing other CRS 
         datum: {...datum, id: {authority: 'EPSG', code: 4313}}
       }
     };
-    expect(native.normalizeCRS(withoutBaseID, {parsers}).datum.towgs84).toEqual(named);
+    expect(native.normalizeCRS(withoutBaseID, {parsers, datumCatalogs}).datum.towgs84).toEqual(
+      named
+    );
   }
 });
 
@@ -148,7 +156,10 @@ test('Explicit WKT Helmert overrides named grids and authority shifts', () => {
         : 'PROJCRS["explicit",' +
           geographic +
           ',CONVERSION["TM",METHOD["Transverse Mercator"]],CS[Cartesian,2],AXIS["E",east],AXIS["N",north],LENGTHUNIT["metre",1]]';
-    const normalized = native.normalizeCRS(definition, {parsers});
+    const normalized = native.normalizeCRS(definition, {
+      parsers,
+      datumCatalogs
+    });
     expect(normalized.datum.towgs84).toEqual([1, 2, 3]);
     expect(normalized.datum.grids).toBeUndefined();
     const projection = new native.ProjectionEngine(options(definition));
