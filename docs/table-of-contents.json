@@ -105,6 +105,11 @@
       },
       {
         "type": "category",
+        "label": "@math.gl/spatial-index (POC)",
+        "items": ["modules/spatial-index/README"]
+      },
+      {
+        "type": "category",
         "label": "@math.gl/geometry",
         "items": [
           "modules/geometry/README",
