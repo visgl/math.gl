@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {ParquetSource} from 'math.gl-parquet-loader';
+import {snapshotRequest} from './snapshot-request.js';
 
 /** Reuse range reads from immutable, commit-pinned snapshots across column selections. */
-function remoteFile(url, size, fetchFile, signal) {
+function remoteFile(url, size, fetchFile, signal, requestTimeout) {
   if (!Number.isSafeInteger(size) || size <= 0) throw new Error('Invalid snapshot byte length');
   const ranges = new Map();
   let buffered;
@@ -20,10 +21,14 @@ function remoteFile(url, size, fetchFile, signal) {
       let pending = ranges.get(key);
       if (!pending) {
         pending = (async () => {
-          const response = await fetchFile(url, {signal, headers: {Range: `bytes=${offset}-${offset + length - 1}`}});
-          if (response.status !== 206 && response.status !== 200)
-            throw new Error(`Snapshot returned HTTP ${response.status}`);
-          const data = await response.arrayBuffer();
+          const {response, data} = await snapshotRequest(url, {
+            signal, fetchFile, timeoutMs: requestTimeout,
+            headers: {Range: `bytes=${offset}-${offset + length - 1}`}
+          }, async response => {
+            if (response.status !== 206 && response.status !== 200)
+              throw new Error(`Snapshot returned HTTP ${response.status}`);
+            return {response, data: await response.arrayBuffer()};
+          });
           signal.throwIfAborted();
           if (response.status === 200) {
             if (data.byteLength !== size) throw new Error('Incomplete snapshot download');
@@ -49,13 +54,13 @@ function remoteFile(url, size, fetchFile, signal) {
 }
 
 /** Stream selected columns and row groups through loaders.gl's TypeScript decoder. */
-export function createParquetReader(fetchFile = fetch, {worker = true, workerUrl, onTelemetry} = {}) {
+export function createParquetReader(fetchFile = fetch, {worker = true, workerUrl, onTelemetry, requestTimeout = 45000} = {}) {
   const files = new Map();
   return async function* parquetBatches(url, {columns, rowGroups, byteLength, signal}) {
     signal.throwIfAborted();
     let file = files.get(url);
     if (!file) {
-      const transport = remoteFile(url, byteLength, fetchFile, signal);
+      const transport = remoteFile(url, byteLength, fetchFile, signal, requestTimeout);
       file = new ParquetSource(url, {
         core: {worker, fetch: async (_url, options) => {
           const range = new Headers(options.headers).get('Range');
