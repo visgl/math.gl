@@ -92,7 +92,8 @@ correctness and bundle sizes; it does not gate noisy speed ratios. Pull requests
 adaptive timing repetitions are disabled. These PR browser measurements are marked
 `timingLimited` and serve as correctness checks, not performance evidence. Pushes to
 master retain seven samples and a 12 ms calibration target for full browser reports.
-The separate paired Node performance comparison remains unchanged on every PR.
+The separate paired Node performance comparison runs on every PR with 11 samples
+and a 4 ms calibration target; local runs retain the 12 ms default.
 
 ### Compare a runtime change with its base
 
@@ -106,7 +107,10 @@ workload for both versions, validates both against proj4js, and rotates baseline
 flat/scalar execution order. It covers XY and XYZM in both precisions and directions;
 constructor batches alternate separately. `--scenarios` accepts comma-separated scenario
 names to focus a run. On pull requests, CI measures nine representative scenarios against
-the actual base commit and uploads `proj4-performance-comparison`.
+the actual base commit and uploads `projection-performance-comparison`. CI keeps all
+20,000 coordinates and 11 rotated samples, but uses `--min-sample-ms 4` to limit
+adaptive repetitions. Inspect the retained spread and `timingLimited` flags when
+interpreting these shorter measurements.
 
 `--clock thread-cpu` (Node 24.14 or later) is an optional diagnostic using main-thread CPU
 time. It reduces scheduler interference but excludes time spent off the thread; **it is
