@@ -48,7 +48,7 @@ Scientific data retains its CC-BY-4.0 terms and attribution. No GPlates implemen
 rotation table or coastline dataset is bundled in math.gl. All devices use the same
 Parquet batch stream, selecting only the columns needed for geometry or rotations.
 The TypeScript decoder streams selected column chunks through HTTP byte ranges into Arrow batches, with decompression and Arrow conversion in a TypeScript worker instead of WebAssembly.
-Playback starts automatically when the initial pose is ready, while the rest of history
+Views cycle every eight seconds during playback, with a toggle for manual viewing. Playback starts automatically when the initial pose is ready, while the rest of history
 loads in 100 Ma windows. It temporarily pauses for missing samples and resumes when
 they arrive. Interrupted background loads retain valid poses and retry automatically.
 Network access is required; the Parquet decoder is packaged with the example.

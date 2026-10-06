@@ -29,6 +29,7 @@ export default function TectonicTimeMachine() {
     [model, setModel] = useState(null);
   const source = sourceFor(sourceId);
   const [view, setView] = useState('globe'),
+    [cycleViews, setCycleViews] = useState(true),
     [longitude, setLongitude] = useState(0),
     [scenario, setScenario] = useState('atlantic'),
     [grid, setGrid] = useState(false),
@@ -122,6 +123,14 @@ export default function TectonicTimeMachine() {
     });
     return () => abort.abort();
   }, [model]);
+  useEffect(() => {
+    if (!cycleViews || !playing || !ready) return;
+    const timer = setTimeout(() => {
+      const views = Object.keys(VIEWS);
+      setView(views[(views.indexOf(view) + 1) % views.length]);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [cycleViews, playing, ready, view]);
   useEffect(() => {
     scene.current?.setOptions({view, longitude, scenario, grid, regionColors});
   }, [view, longitude, scenario, grid, regionColors]);
@@ -238,6 +247,10 @@ export default function TectonicTimeMachine() {
               </option>
             ))}
           </select>
+        </label>
+        <label className="tectonic-check">
+          <input type="checkbox" checked={cycleViews} onChange={e => setCycleViews(e.target.checked)} />{' '}
+          Cycle views every 8 seconds
         </label>
         <label>
           {view === 'globe' ? 'Globe starting longitude' : 'Map central meridian'}

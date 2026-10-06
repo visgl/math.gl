@@ -114,7 +114,9 @@ is shown. Region colors remain available as an alternative.
 
 Playback uses deck.gl's [`TimelineWidget`](https://deck.gl/docs/api-reference/widgets/timeline-widget)
 (experimental in deck.gl 9.4). Changing projections smoothly interpolates a shared
-triangulated surface over 1.2 seconds while geological playback continues. A new
+triangulated surface over 1.2 seconds while geological playback continues. Views cycle
+every eight seconds during playback by default; the cycle toggle pauses automatic
+changes, and choosing a view manually restarts the countdown. A new
 selection during a transition begins from the current interpolated shape. Globe
 and map endpoints use the same current reconstruction, rather than frozen snapshots.
 The intermediate shapes are visual transitions, not additional cartographic projections.
