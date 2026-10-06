@@ -207,7 +207,17 @@ export function getGeoArrowTransferList(column: GeoArrowColumn): ArrayBuffer[] {
   return [...buffers];
 }
 
-/** Materializes column rows for codecs and structural algorithms. */
+/**
+ * Materializes native column rows as geometry values in logical chunk and row order.
+ *
+ * Null rows remain null. Empty points use an empty coordinate array, including points whose
+ * ordinates are all non-finite or null. Output geometry objects and coordinate arrays are newly
+ * allocated; input descriptors and borrowed buffers are never modified.
+ *
+ * @param column Native GeoArrow column. Decode WKB/WKT columns before calling this function.
+ * @returns One geometry value or null per logical row.
+ * @throws If the column contains serialized WKB or WKT values.
+ */
 export function materializeGeoArrowRows(
   column: GeoArrowColumn
 ): Array<GeoArrowGeometryValue | null> {
@@ -248,7 +258,12 @@ export function materializeGeometryRow(
   const geometryType = getGeoArrowGeometryType(encoding);
   if (!geometryType || geometryType === 'GeometryCollection') return null;
   const depth = getEncodingDepth(encoding);
-  const coordinates = readNestedCoordinates(array, rowIndex, depth);
+  const coordinates = readNestedCoordinates(
+    array,
+    rowIndex,
+    depth,
+    geometryType === 'Point' || geometryType === 'MultiPoint'
+  );
   if (!coordinates) return null;
   return {type: geometryType, coordinates} as GeoArrowGeometryValue;
 }
@@ -350,13 +365,23 @@ function visitNestedCoordinates(
   }
 }
 
-function readNestedCoordinates(array: GeoArrowArray, index: number, depth: number): unknown {
-  if (depth === 0) return readCoordinate(array, index);
+function readNestedCoordinates(
+  array: GeoArrowArray,
+  index: number,
+  depth: number,
+  normalizeEmptyPoints: boolean
+): unknown {
+  if (depth === 0) {
+    const coordinate = readCoordinate(array, index);
+    return normalizeEmptyPoints && coordinate?.every(value => !Number.isFinite(value))
+      ? []
+      : coordinate;
+  }
   if (array.kind !== 'list' || !isGeoArrowValueValid(array.validity, index)) return null;
   const [first, last] = getListRange(array, index);
   const values: unknown[] = [];
   for (let childIndex = first; childIndex < last; childIndex++) {
-    const value = readNestedCoordinates(array.child, childIndex, depth - 1);
+    const value = readNestedCoordinates(array.child, childIndex, depth - 1, normalizeEmptyPoints);
     if (value !== null) values.push(value);
   }
   return values;
@@ -386,6 +411,7 @@ function readCoordinate(array: GeoArrowArray, index: number): number[] | null {
 
 function readPrimitive(array: GeoArrowArray, index: number): number {
   if (array.kind !== 'primitive') throw new Error('GeoArrow coordinate child must be primitive');
+  if (!isGeoArrowValueValid(array.validity, index)) return Number.NaN;
   const valueIndex = (array.offset || 0) + index * (array.stride || 1);
   return Number(array.values[valueIndex]);
 }

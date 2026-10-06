@@ -41,6 +41,7 @@ export {
   getGeoArrowVertexCount,
   inspectGeoArrowColumn,
   isGeoArrowValueValid,
+  materializeGeoArrowRows,
   sliceGeoArrowArray,
   sliceGeoArrowColumn,
   validateGeoArrowColumn,

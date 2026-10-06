@@ -65,12 +65,20 @@ function formatWKTGeometry(
     return 'GEOMETRYCOLLECTION' + dimensionToken + ' (' + formattedChildren.join(', ') + ')';
   }
   const type = geometry.type.toUpperCase();
-  if (isEmptyCoordinates(geometry.coordinates)) return type + dimensionToken + ' EMPTY';
+  const isEmpty =
+    geometry.type === 'MultiPoint'
+      ? geometry.coordinates.length === 0
+      : isEmptyCoordinates(geometry.coordinates);
+  if (isEmpty) return type + dimensionToken + ' EMPTY';
   return (
     type +
     dimensionToken +
     ' ' +
-    formatCoordinateNesting(geometry.coordinates, getGeometryDepth(geometry.type))
+    formatCoordinateNesting(
+      geometry.coordinates,
+      getGeometryDepth(geometry.type),
+      geometry.type === 'MultiPoint'
+    )
   );
 }
 
@@ -123,7 +131,8 @@ class WKTParser {
     );
     const coordinates = this.parseCoordinateNesting(
       getWKTDepth(type),
-      inferDimension ? null : dimensionSize
+      inferDimension ? null : dimensionSize,
+      type === 'MULTIPOINT'
     );
     const coordinateValues = coordinates as readonly unknown[];
     if (inferDimension) {
@@ -139,7 +148,11 @@ class WKTParser {
     if (this.index !== this.tokens.length) throw new Error(`Unexpected WKT token ${this.peek()}`);
   }
 
-  private parseCoordinateNesting(depth: number, dimensionSize: number | null): unknown {
+  private parseCoordinateNesting(
+    depth: number,
+    dimensionSize: number | null,
+    allowEmptyPoints = false
+  ): unknown {
     this.expect('(');
     if (depth === 0) {
       const coordinate = this.readCoordinate(dimensionSize);
@@ -149,7 +162,10 @@ class WKTParser {
     const values: unknown[] = [];
     if (this.peek() !== ')') {
       do {
-        if (depth === 1 && this.peek() !== '(') {
+        if (allowEmptyPoints && depth === 1 && this.peek().toUpperCase() === 'EMPTY') {
+          this.take();
+          values.push([]);
+        } else if (depth === 1 && this.peek() !== '(') {
           values.push(this.readCoordinate(dimensionSize));
         } else {
           values.push(this.parseCoordinateNesting(depth - 1, dimensionSize));
@@ -258,11 +274,19 @@ function tokenizeWKT(text: string): string[] {
   return tokens;
 }
 
-function formatCoordinateNesting(value: readonly unknown[], depth: number): string {
+function formatCoordinateNesting(
+  value: readonly unknown[],
+  depth: number,
+  allowEmptyPoints = false
+): string {
   if (depth === 0) return `(${(value as readonly number[]).map(formatNumber).join(' ')})`;
   return `(${value
     .map(child => {
-      if (depth === 1) return (child as readonly number[]).map(formatNumber).join(' ');
+      if (depth === 1) {
+        const coordinate = child as readonly number[];
+        if (allowEmptyPoints && isEmptyCoordinates(coordinate)) return 'EMPTY';
+        return coordinate.map(formatNumber).join(' ');
+      }
       return formatCoordinateNesting(child as readonly unknown[], depth - 1);
     })
     .join(', ')})`;

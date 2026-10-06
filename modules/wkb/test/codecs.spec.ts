@@ -241,3 +241,20 @@ test('dimension inference recurses through collections and does not guess M', ()
   ).toBe('xyzm');
   expect(inferWellKnownGeometryDimension({type: 'Point', coordinates: [1, 2, 3]})).toBe('xyz');
 });
+
+test.each(['xy', 'xyz', 'xym', 'xyzm'] as const)(
+  'empty MultiPoint members round-trip through WKT and WKB (%s)',
+  dimension => {
+    const coordinate = new Array(dimension === 'xy' ? 2 : dimension === 'xyzm' ? 4 : 3).fill(1);
+    const geometry: WellKnownGeometry = {type: 'MultiPoint', coordinates: [[], coordinate]};
+    const text = formatWKT(geometry, dimension);
+    expect(text).toContain('(EMPTY, ');
+    expect(parseWKT(text)).toEqual(geometry);
+    const decoded = parseWKB(writeWKB(geometry, dimension)).geometry;
+    expect(decoded).toEqual({
+      type: 'MultiPoint',
+      coordinates: [new Array(coordinate.length).fill(NaN), coordinate]
+    });
+    expect(() => parseWKT('LINESTRING (EMPTY, 1 2)')).toThrow();
+  }
+);
