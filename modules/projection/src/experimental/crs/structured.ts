@@ -295,7 +295,7 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
   if (namedDatum && datumNameKey(namedDatum) === 'wgs84') parameters['datum'] = 'WGS84';
   if (namedDatum && ['nad83', 'northamericandatum1983'].includes(datumNameKey(namedDatum)))
     parameters['datum'] = 'NAD83';
-  if (!exactDatum) {
+  if (!namedDatum) {
     if (
       [
         'wgs84',
