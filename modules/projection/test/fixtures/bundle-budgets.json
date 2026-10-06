@@ -248,138 +248,6 @@
       "gzip": 1438
     },
     "core": {
-      "minified": 32744,
-      "gzip": 11859
-    },
-    "rootEngine": {
-      "minified": 32744,
-      "gzip": 11859
-    },
-    "coreWithDatumCatalog": {
-      "minified": 53105,
-      "gzip": 18943
-    },
-    "mercatorWithDatumCatalog": {
-      "minified": 55604,
-      "gzip": 19708
-    },
-    "mercator": {
-      "minified": 35254,
-      "gzip": 12636
-    },
-    "utm": {
-      "minified": 42082,
-      "gzip": 15353
-    },
-    "mercatorWithWKT": {
-      "minified": 59192,
-      "gzip": 20347
-    },
-    "mercatorWithPROJJSON": {
-      "minified": 46406,
-      "gzip": 16392
-    },
-    "mercatorWithNTv2": {
-      "minified": 38456,
-      "gzip": 13904
-    },
-    "mercatorWithGeoTIFFAdapter": {
-      "minified": 38462,
-      "gzip": 13842
-    },
-    "mercatorWithGTX": {
-      "minified": 36796,
-      "gzip": 13277
-    },
-    "mercatorWithVerticalGeoTIFF": {
-      "minified": 40316,
-      "gzip": 14462
-    },
-    "deformationModel": {
-      "minified": 7403,
-      "gzip": 3000
-    },
-    "deformationWithGeoTIFF": {
-      "minified": 12512,
-      "gzip": 4807
-    },
-    "operationCatalog": {
-      "minified": 6489,
-      "gzip": 2289
-    },
-    "operationPipeline": {
-      "minified": 44655,
-      "gzip": 15939
-    },
-    "typescriptWrapper": {
-      "minified": 154258,
-      "gzip": 52453
-    },
-    "allNativeExports": {
-      "minified": 185484,
-      "gzip": 62633
-    }
-  },
-  "leanDatumLazyBaseline": {
-    "catalogue": {
-      "initial": {
-        "minified": 42971,
-        "gzip": 16275
-      },
-      "deferred": {
-        "minified": 79403,
-        "gzip": 37391
-      }
-    },
-    "utm": {
-      "initial": {
-        "minified": 35762,
-        "gzip": 13276
-      },
-      "deferred": {
-        "minified": 8050,
-        "gzip": 3498
-      }
-    },
-    "wkt": {
-      "initial": {
-        "minified": 35614,
-        "gzip": 13229
-      },
-      "deferred": {
-        "minified": 23949,
-        "gzip": 8274
-      }
-    },
-    "rotated": {
-      "initial": {
-        "minified": 35689,
-        "gzip": 13245
-      },
-      "deferred": {
-        "minified": 5433,
-        "gzip": 2527
-      }
-    }
-  },
-  "leanDatumCIAllRoot": {
-    "node": "24.14.0",
-    "gzip": 63213
-  },
-  "leanDatumReviewBaseline": {
-    "temporalModel": {
-      "minified": 9256,
-      "gzip": 3589
-    },
-    "projectionBulk": {
-      "minified": 5469,
-      "gzip": 1713
-    },
-    "projectionAnalysis": {
-      "minified": 4329,
-      "gzip": 1438
-    },
-    "core": {
       "minified": 32880,
       "gzip": 11905
     },
@@ -451,5 +319,51 @@
       "minified": 185969,
       "gzip": 62802
     }
+  },
+  "leanDatumLazyBaseline": {
+    "catalogue": {
+      "initial": {
+        "minified": 42971,
+        "gzip": 16275
+      },
+      "deferred": {
+        "minified": 79403,
+        "gzip": 37391
+      }
+    },
+    "utm": {
+      "initial": {
+        "minified": 35762,
+        "gzip": 13276
+      },
+      "deferred": {
+        "minified": 8050,
+        "gzip": 3498
+      }
+    },
+    "wkt": {
+      "initial": {
+        "minified": 35614,
+        "gzip": 13229
+      },
+      "deferred": {
+        "minified": 23949,
+        "gzip": 8274
+      }
+    },
+    "rotated": {
+      "initial": {
+        "minified": 35689,
+        "gzip": 13245
+      },
+      "deferred": {
+        "minified": 5433,
+        "gzip": 2527
+      }
+    }
+  },
+  "leanDatumCIAllRoot": {
+    "node": "24.14.0",
+    "gzip": 63213
   }
 }
