@@ -72,3 +72,22 @@ packed-buffer serialization/restoration, k-nearest queries, SAH construction, an
 budgets are deferred. Rebuild after changing data. Geometry kernels are not watertight-certified;
 near-degenerate and extreme-scale numerical qualification is incomplete. This is not a tile
 scheduler, an ellipsoidal index, or a geodesic nearest-neighbor implementation.
+
+## Qualification workloads
+
+The POC includes deterministic tests of realistic workloads, rather than relying only
+on small example queries:
+
+- **16,384 three-dimensional tile boxes:** range and filtered nearest queries are
+  compared with exhaustive overlap and center-distance calculations. Across leaf sizes
+  1, 8 and 64, nearest queries must refine fewer than 1% of the stored boxes. This checks
+  pruning structurally, without a machine-dependent timing threshold.
+- **8,192 indexed terrain triangles:** ray hits and nearest surface points are checked
+  against analytic plane intersections and orthogonal projections, independently of
+  the triangle kernels used by the BVH. Distance limits and misses are included.
+- Randomized small meshes are also compared against exhaustive triangle-kernel queries;
+  boundary contact, input copying, stable ties, empty indexes and degenerate geometry
+  have focused coverage.
+
+These qualify correctness and pruning on the tested distributions, not a general
+performance guarantee. Clustered or overlapping bounds can still produce linear scans.

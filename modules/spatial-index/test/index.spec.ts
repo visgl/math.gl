@@ -166,3 +166,103 @@ test('invalid layouts and query arguments fail early', () => {
   expect(() => index.searchRay([0, 0], [0, 0])).toThrow();
   expect(() => index.search([1, 1], [0, 0])).toThrow();
 });
+
+test('16,384 tile boxes match exhaustive queries while pruning nearest refinements', () => {
+  const side = 128,
+    bounds: number[] = [],
+    centers: number[][] = [];
+  for (let y = 0; y < side; y++)
+    for (let x = 0; x < side; x++) {
+      const z = (x * 17 + y * 31) % 13;
+      bounds.push(x * 4, y * 4, z, x * 4 + 2, y * 4 + 2, z + 2);
+      centers.push([x * 4 + 1, y * 4 + 1, z + 1]);
+    }
+  const rng = random();
+  // Reuse identical queries across different tree shapes.
+  const queries = Array.from({length: 24}, () => [rng() * side * 4, rng() * side * 4, rng() * 15]);
+  for (const leafSize of [1, 8, 64]) {
+    const index = new BoxIndex({bounds, dimension: 3, leafSize});
+    for (const point of queries) {
+      const min = point.map(v => v - 6),
+        max = point.map(v => v + 6);
+      const expectedRange: number[] = [];
+      let expectedNearest = -1,
+        expectedDistance = Infinity;
+      for (let i = 0; i < centers.length; i++) {
+        if (
+          [0, 1, 2].every(
+            axis => bounds[i * 6 + axis] <= max[axis] && bounds[i * 6 + axis + 3] >= min[axis]
+          )
+        )
+          expectedRange.push(i);
+        // Application filter: ignore every third tile. Reference uses no BVH math.
+        if (i % 3 === 0) continue;
+        const distance = Math.hypot(...centers[i].map((v, axis) => v - point[axis]));
+        if (distance < expectedDistance) {
+          expectedDistance = distance;
+          expectedNearest = i;
+        }
+      }
+      let refined = 0;
+      const nearest = index.nearest(point, {
+        filter: i => i % 3 !== 0,
+        distanceToItem: i => {
+          refined++;
+          return Math.hypot(...centers[i].map((v, axis) => v - point[axis]));
+        }
+      });
+      expect(index.search(min, max)).toEqual(expectedRange);
+      expect(nearest?.index).toBe(expectedNearest);
+      expect(nearest?.distance).toBeCloseTo(expectedDistance, 11);
+      // A structural performance assertion, independent of CPU speed or timing.
+      expect(refined).toBeGreaterThan(0);
+      expect(refined).toBeLessThan(centers.length / 100);
+      expect(
+        index.nearest(point, {
+          maxDistance: expectedDistance / 2,
+          filter: i => i % 3 !== 0,
+          distanceToItem: i => Math.hypot(...centers[i].map((v, axis) => v - point[axis]))
+        })
+      ).toBeNull();
+    }
+  }
+});
+
+test('8,192 indexed terrain triangles agree with independent analytic ray and nearest answers', () => {
+  const side = 64,
+    positions: number[] = [],
+    indices: number[] = [];
+  const height = (x: number, y: number) => x * 0.25 - y * 0.125;
+  for (let y = 0; y <= side; y++)
+    for (let x = 0; x <= side; x++) positions.push(x, y, height(x, y));
+  for (let y = 0; y < side; y++)
+    for (let x = 0; x < side; x++) {
+      const a = y * (side + 1) + x,
+        b = a + 1,
+        c = a + side + 1,
+        d = c + 1;
+      indices.push(a, b, c, b, d, c);
+    }
+  const normalLength = Math.hypot(-0.25, 0.125, 1);
+  const normal = [-0.25, 0.125, 1].map(v => v / normalLength);
+  const rng = random();
+  const queries = Array.from({length: 24}, () => [2 + rng() * 60, 2 + rng() * 60, 0.5 + rng() * 3]);
+  for (const leafSize of [1, 8, 64]) {
+    const bvh = new TriangleBVH({positions, indices, leafSize});
+    expect(bvh.size).toBe(side * side * 2);
+    for (const [x, y, offset] of queries) {
+      const surface = [x, y, height(x, y)];
+      const hit = bvh.intersectRay([x, y, surface[2] + offset], [0, 0, -7]);
+      expect(hit?.distance).toBeCloseTo(offset, 10);
+      hit?.point.forEach((v, axis) => expect(v).toBeCloseTo(surface[axis], 10));
+      expect(hit?.barycentric.reduce((sum, v) => sum + v, 0)).toBeCloseTo(1, 12);
+      // Nearest is known from plane projection, independently of triangle kernels.
+      const point = surface.map((v, axis) => v + normal[axis] * offset);
+      const nearest = bvh.nearest(point);
+      expect(nearest?.distance).toBeCloseTo(offset, 10);
+      nearest?.point.forEach((v, axis) => expect(v).toBeCloseTo(surface[axis], 10));
+      expect(bvh.nearest(point, {maxDistance: offset / 2})).toBeNull();
+      expect(bvh.intersectRay([x, y, surface[2] + offset], [0, 0, 1])).toBeNull();
+    }
+  }
+});

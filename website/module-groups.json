@@ -38,6 +38,7 @@
     "label": "Spatial",
     "description": "Geometry operations, geographic indexing and columnar data.",
     "modules": [
+      "spatial-index",
       "polygon",
       "dggs",
       "geoarrow",
