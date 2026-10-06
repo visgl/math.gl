@@ -14,7 +14,8 @@ export default function SpatialIndexExample() {
     [radius, setRadius] = React.useState(15),
     [mode, setMode] = React.useState('range'),
     [source, setSource] = React.useState('boxes');
-  const canvas = useRef(null);
+  const canvas = useRef(null),
+    drawCurrent = useRef(null);
   const index = useMemo(
     () =>
       source === 'boxes'
@@ -82,11 +83,14 @@ export default function SpatialIndexExample() {
       ctx.fillStyle = '#fff';
       ctx.fill();
     };
-    const resize = new ResizeObserver(draw);
-    resize.observe(element);
+    drawCurrent.current = draw;
     draw();
-    return () => resize.disconnect();
   }, [point, radius, result, mode, source]);
+  useEffect(() => {
+    const resize = new ResizeObserver(() => drawCurrent.current?.());
+    resize.observe(canvas.current);
+    return () => resize.disconnect();
+  }, []);
   return (
     <div className="query-example">
       <canvas
