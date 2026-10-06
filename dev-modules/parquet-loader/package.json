@@ -1,0 +1,18 @@
+{
+  "name": "math.gl-parquet-loader",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": "./index.js",
+    "./worker": "./worker.js"
+  },
+  "dependencies": {
+    "@loaders.gl/core": "5.0.0-alpha.9",
+    "@loaders.gl/loader-utils": "5.0.0-alpha.9",
+    "@loaders.gl/parquet": "5.0.0-alpha.9",
+    "apache-arrow": "^21.1.0",
+    "compress-utils": "^0.8.0"
+  }
+}

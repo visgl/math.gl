@@ -79,8 +79,10 @@ export function historicalRotation(table, pid, age, out, maxAge = 500) {
   const aOffset = lower?.values ? lower.indices.get(pid) * 4 : 0;
   const bOffset = upper?.values ? upper.indices.get(pid) * 4 : 0;
   if (!a || !b || !Number.isFinite(aOffset) || !Number.isFinite(bOffset)) return false;
+  if ((lower?.available && !lower.available[aOffset / 4]) ||
+      (upper?.available && !upper.available[bOffset / 4])) return false;
   // GWS returns identity for absent reconstruction-tree IDs. Do not depict those as measured stationary blocks.
-  if (age > 0 && pid !== 0 && ((low > 0 && isIdentity(a, aOffset)) || (high > 0 && isIdentity(b, bOffset))))
+  if (!lower?.available && !upper?.available && age > 0 && pid !== 0 && ((low > 0 && isIdentity(a, aOffset)) || (high > 0 && isIdentity(b, bOffset))))
     return false;
   slerp(a, b, (age - low) / 10, out, aOffset, bOffset);
   return true;
