@@ -985,14 +985,13 @@ independent accuracy, allocation sampling, isolated memory checkpoints, startup
 and bundle costs. Environments stay separate and missing browser heap evidence
 is explicit. See [the publication gates and commands](./scorecard-methodology.md).
 
-### CI comparison jobs
+### CI runner usage
 
-Pull requests run projection and pipeline comparisons on separate runners so their
-elapsed times do not add together. Each runner compares the candidate with the same
-PR base commit and retains its existing scenarios, coordinates, samples, allocation
-checks and reusable-result checks. The required `test` check requires both jobs to
-succeed; both comparison jobs are skipped on pushes to master.
-
-The `projection-performance-comparison` artifact contains projection, grid, spheroid
-and local-frame reports. The pipeline report is uploaded separately as
-`projection-pipeline-comparison`.
+Projection and pipeline comparisons share a runner and run sequentially, retaining
+all workloads and sampling settings while avoiding a second installation and build.
+The required `test` job first verifies that the checks, browser qualifications and
+PR performance comparison succeeded, then consolidates and uploads the scorecard.
+On master pushes, the performance comparison must be skipped. A failed, cancelled
+or unexpectedly skipped prerequisite fails `test`; scorecard or upload failures also
+fail that same required check. Consolidation and the final gate share one runner,
+so completing the scorecard does not require another queued job.
