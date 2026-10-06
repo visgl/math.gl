@@ -164,3 +164,26 @@ test('degenerate area checks avoid cross-product overflow and underflow', () => 
   expect(getDegenerateTriangles(tiny)).toEqual(new Uint32Array());
   expect(getDegenerateTriangles(tiny, 1e-300)).toEqual(new Uint32Array([0]));
 });
+
+test('area fallback retains tiny components of extremely anisotropic triangles', () => {
+  const mesh: Geometry = {
+    mode: GL.TRIANGLES,
+    attributes: {
+      POSITION: {size: 3, value: new Float64Array([0, 0, 0, 1e200, 1e-130, 0, 2e200, 3e-130, 0])}
+    }
+  };
+  expect(getDegenerateTriangles(mesh)).toEqual(new Uint32Array());
+  expect(getDegenerateTriangles(mesh, 1e69)).toEqual(new Uint32Array());
+  expect(getDegenerateTriangles(mesh, 1e70)).toEqual(new Uint32Array([0]));
+  const tiny: Geometry = {
+    mode: GL.TRIANGLES,
+    attributes: {
+      POSITION: {
+        size: 3,
+        value: new Float64Array([0, 0, 0, Number.MIN_VALUE, 0, 0, 0, Number.MIN_VALUE, 0])
+      }
+    }
+  };
+  expect(getDegenerateTriangles(tiny)).toEqual(new Uint32Array());
+  expect(getDegenerateTriangles(tiny, Number.MIN_VALUE)).toEqual(new Uint32Array([0]));
+});

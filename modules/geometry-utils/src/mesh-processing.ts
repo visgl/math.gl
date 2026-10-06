@@ -236,37 +236,22 @@ export function getDegenerateTriangles(geometry: Geometry, areaEpsilon = 0): Uin
       positions[c + 1] - positions[a + 1],
       positions[c + 2] - positions[a + 2]
     ];
-    // Normalize each edge independently before multiplying components. If a
-    // difference itself overflows, first scale the three source positions.
-    let edgeScale = 1;
-    if (![...ab, ...ac].every(Number.isFinite)) {
-      edgeScale = Math.max(
-        ...[a, b, c].flatMap(offset => Array.from(positions.slice(offset, offset + 3), Math.abs))
-      );
-      for (let axis = 0; axis < 3; axis++) {
-        ab[axis] = positions[b + axis] / edgeScale - positions[a + axis] / edgeScale;
-        ac[axis] = positions[c + axis] / edgeScale - positions[a + axis] / edgeScale;
-      }
-    }
+    // Keep the common path in floating point, but use exact dyadic arithmetic
+    // when normalization loses a component or cannot distinguish collinearity.
     const scaleAB = Math.max(...ab.map(Math.abs));
     const scaleAC = Math.max(...ac.map(Math.abs));
-    const crossLength =
-      scaleAB && scaleAC
-        ? Math.hypot(
-            ...cross(
-              ab.map(v => v / scaleAB),
-              ac.map(v => v / scaleAC)
-            )
-          )
-        : 0;
-    const logArea =
-      Math.log(crossLength) +
-      Math.log(scaleAB) +
-      Math.log(scaleAC) +
-      2 * Math.log(edgeScale) -
-      Math.log(2);
-    if (crossLength === 0 || (areaEpsilon > 0 && logArea <= Math.log(areaEpsilon)))
-      result.push(i / 3);
+    const normalizedAB = ab.map(v => (scaleAB ? v / scaleAB : 0));
+    const normalizedAC = ac.map(v => (scaleAC ? v / scaleAC : 0));
+    const crossLength = Math.hypot(...cross(normalizedAB, normalizedAC));
+    const lostComponent = [ab, ac].some((edge, i) =>
+      edge.some((v, axis) => v !== 0 && (i ? normalizedAC : normalizedAB)[axis] === 0)
+    );
+    if (!Number.isFinite(crossLength) || crossLength === 0 || lostComponent) {
+      if (exactAreaAtMost(positions, a, b, c, areaEpsilon)) result.push(i / 3);
+    } else {
+      const logArea = Math.log(crossLength) + Math.log(scaleAB) + Math.log(scaleAC) - Math.log(2);
+      if (areaEpsilon > 0 && logArea <= Math.log(areaEpsilon)) result.push(i / 3);
+    }
   }
   return Uint32Array.from(result);
 }
@@ -337,4 +322,56 @@ function normalizedLinearCombination(
   );
   const length = Math.hypot(...result);
   return result.map(v => (length ? v / length : 0));
+}
+
+// Every finite binary64 value is an integer times a power of two. The fallback
+// compares squared cross lengths to 4*epsilon² without floating-point products.
+type Dyadic = {n: bigint; exponent: number};
+function exactAreaAtMost(
+  positions: TypedArray,
+  a: number,
+  b: number,
+  c: number,
+  epsilon: number
+): boolean {
+  const edge = (end: number) =>
+    [0, 1, 2].map(axis =>
+      subtractDyadic(toDyadic(positions[end + axis]), toDyadic(positions[a + axis]))
+    );
+  const ab = edge(b),
+    ac = edge(c);
+  const components = [0, 1, 2].map(axis => {
+    const j = (axis + 1) % 3,
+      k = (axis + 2) % 3;
+    return subtractDyadic(multiplyDyadic(ab[j], ac[k]), multiplyDyadic(ab[k], ac[j]));
+  });
+  if (epsilon === 0) return components.every(v => v.n === 0n);
+  const squared = components.map(v => multiplyDyadic(v, v));
+  const sum = squared.reduce((total, v) => subtractDyadic(total, {...v, n: -v.n}), {
+    n: 0n,
+    exponent: 0
+  });
+  const threshold = multiplyDyadic(toDyadic(epsilon), toDyadic(epsilon));
+  threshold.exponent += 2;
+  return subtractDyadic(sum, threshold).n <= 0n;
+}
+function toDyadic(value: number): Dyadic {
+  const bits = new DataView(new ArrayBuffer(8));
+  bits.setFloat64(0, value);
+  const high = bits.getUint32(0),
+    low = bits.getUint32(4);
+  const exponentBits = (high >>> 20) & 0x7ff;
+  const fraction = (BigInt(high & 0xfffff) << 32n) | BigInt(low);
+  const n = exponentBits ? (1n << 52n) | fraction : fraction;
+  return {n: high >>> 31 ? -n : n, exponent: exponentBits ? exponentBits - 1075 : -1074};
+}
+function subtractDyadic(a: Dyadic, b: Dyadic): Dyadic {
+  const exponent = Math.min(a.exponent, b.exponent);
+  return {
+    n: (a.n << BigInt(a.exponent - exponent)) - (b.n << BigInt(b.exponent - exponent)),
+    exponent
+  };
+}
+function multiplyDyadic(a: Dyadic, b: Dyadic): Dyadic {
+  return {n: a.n * b.n, exponent: a.exponent + b.exponent};
 }
