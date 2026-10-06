@@ -83,6 +83,11 @@ test('normal callbacks, singular samples, Uint32 promotion and validation', () =
     normal: () => [0, 0, 10]
   });
   expect(mesh.indices.value).toBeInstanceOf(Uint32Array);
+  expect(mesh.indices.value.length).toBe(256 * 256 * 6);
+  expect(Array.from(mesh.indices.value.slice(0, 6))).toEqual([0, 1, 258, 0, 258, 257]);
+  expect(Array.from(mesh.indices.value.slice(-6))).toEqual([
+    65790, 65791, 66048, 65790, 66048, 66047
+  ]);
   expect(
     new ParametricGeometry({uSegments: 1, vSegments: 1, sample: () => [0, 0, 0]}).attributes[
       'NORMAL'

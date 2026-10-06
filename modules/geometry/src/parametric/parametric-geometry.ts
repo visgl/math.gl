@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {Geometry} from '../lib/geometry';
-import {
-  assertSegments,
-  makeIndices,
-  type PrimitiveGeometryProps
-} from '../geometries/geometry-helpers';
+import {assertSegments, type PrimitiveGeometryProps} from '../geometries/geometry-helpers';
 
 export type SurfaceSampler = (u: number, v: number) => Readonly<ArrayLike<number>>;
 export type ParametricGeometryProps = PrimitiveGeometryProps & {
@@ -35,6 +31,9 @@ export class ParametricGeometry extends Geometry {
     assertSegments(uSegments, 'uSegments');
     assertSegments(vSegments, 'vSegments');
     const count = (uSegments + 1) * (vSegments + 1);
+    const indexCount = uSegments * vSegments * 6;
+    if (!Number.isSafeInteger(indexCount) || indexCount > 0xffffffff)
+      throw new RangeError('Surface exceeds 32-bit index-buffer length');
     if (!Number.isSafeInteger(count) || count > 0xffffffff)
       throw new RangeError('Surface exceeds 32-bit indexing');
     const positions = new Float32Array(count * 3),
@@ -76,20 +75,26 @@ export class ParametricGeometry extends Geometry {
     for (const value of positions)
       if (!Number.isFinite(value))
         throw new RangeError('Positions must be representable as Float32');
-    const indices: number[] = [],
-      stride = uSegments + 1;
+    const indices = count > 0xffff ? new Uint32Array(indexCount) : new Uint16Array(indexCount);
+    const stride = uSegments + 1;
+    let cursor = 0;
     for (let j = 0; j < vSegments; j++)
       for (let i = 0; i < uSegments; i++) {
         const a = j * stride + i,
           b = a + 1,
           c = a + stride,
           d = c + 1;
-        indices.push(a, b, d, a, d, c);
+        indices[cursor++] = a;
+        indices[cursor++] = b;
+        indices[cursor++] = d;
+        indices[cursor++] = a;
+        indices[cursor++] = d;
+        indices[cursor++] = c;
       }
     super({
       id: props.id,
       topology: 'triangle-list',
-      indices: makeIndices(count, indices),
+      indices,
       attributes: {
         POSITION: {size: 3, value: positions},
         NORMAL: {size: 3, value: normals},
