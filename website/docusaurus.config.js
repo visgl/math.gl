@@ -146,3 +146,7 @@ config.markdown = {
 delete config.onBrokenMarkdownLinks;
 
 module.exports = config;
+
+aliases['@math.gl/geometry/parametric$'] = resolve(__dirname, '../modules/geometry/src/parametric.ts');
+aliases['@math.gl/geometry$'] = resolve(__dirname, '../modules/geometry/src/index.ts');
+delete aliases['@math.gl/geometry'];

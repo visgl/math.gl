@@ -122,7 +122,8 @@
           "modules/geometry/api-reference/truncated-cone-geometry",
           "modules/geometry/api-reference/plane-geometry",
           "modules/geometry/api-reference/sphere-geometry",
-          "modules/geometry/api-reference/ico-sphere-geometry"
+          "modules/geometry/api-reference/ico-sphere-geometry",
+          "modules/geometry/api-reference/parametric"
         ]
       },
       {

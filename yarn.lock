@@ -15662,6 +15662,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"math.gl-parametric-geometry@workspace:examples/parametric-geometry":
+  version: 0.0.0-use.local
+  resolution: "math.gl-parametric-geometry@workspace:examples/parametric-geometry"
+  dependencies:
+    "@luma.gl/core": "npm:~9.4.2"
+    "@luma.gl/engine": "npm:~9.4.2"
+    "@luma.gl/shadertools": "npm:~9.4.2"
+    "@luma.gl/webgl": "npm:~9.4.2"
+    "@math.gl/core": "workspace:*"
+    "@math.gl/geometry": "workspace:*"
+    "@math.gl/geometry-utils": "workspace:*"
+    react: "npm:^19.2.8"
+    react-dom: "npm:^19.2.8"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
 "math.gl-polygon-playground@workspace:examples/polygon-playground":
   version: 0.0.0-use.local
   resolution: "math.gl-polygon-playground@workspace:examples/polygon-playground"

@@ -27,6 +27,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./parametric": {
+      "types": "./dist/parametric.d.ts",
+      "import": "./dist/parametric.js",
+      "require": "./dist/parametric.cjs"
     }
   },
   "files": [

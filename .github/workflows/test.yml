@@ -90,6 +90,9 @@ jobs:
       - name: Check spatial index POC package
         run: yarn check:spatial-index-package
 
+      - name: Check parametric geometry package
+        run: yarn check:parametric-package
+
       - name: Check GeoArrow package boundary
         run: yarn check:geoarrow-boundary
 

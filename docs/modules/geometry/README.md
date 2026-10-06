@@ -39,3 +39,8 @@ planes are required.
 - [SphereGeometry](./api-reference/sphere-geometry.md)
 - [IcoSphereGeometry](./api-reference/ico-sphere-geometry.md)
 - [Geometry](./api-reference/geometry.md)
+
+## Parametric surfaces
+
+The optional [`@math.gl/geometry/parametric`](./api-reference/parametric.md) subpath
+provides torus, lathe and sampled surface generators, with an interactive gallery.
