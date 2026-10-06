@@ -222,19 +222,19 @@ test('catalogue validation is reused within a normalization configuration', () =
 });
 
 test('registered structured fallback names take priority over legacy aliases', () => {
-  const catalogs: readonly DatumCatalogPlugin[] = [
-    {
-      name: 'legacy-name-overrides',
-      datums: {
-        New_Zealand_1949: {ellipse: 'WGS84', towgs84: '1,2,3'},
-        Belge_1972: {ellipse: 'WGS84', towgs84: '4,5,6'}
+  for (const [name, datumName, shift] of [
+    ['New_Zealand_1949', 'D_New_Zealand_1949', '1,2,3'],
+    ['Belge_1972', 'D_Belge_1972', '4,5,6'],
+    ['New.Zealand.1949', 'New_Zealand_1949', '7,8,9']
+  ]) {
+    const catalogs: readonly DatumCatalogPlugin[] = [
+      {
+        name: 'legacy-name-overrides',
+        datums: {[name]: {ellipse: 'WGS84', towgs84: shift}}
       }
-    }
-  ];
-  for (const name of Object.keys(catalogs[0].datums)) {
+    ];
     const proj = '+proj=longlat +datum=' + name;
     const expected = new ProjectionEngine({from: proj, datumCatalogs: catalogs}).project(point);
-    const datumName = 'D_' + name;
     const json = {...geographicJSON, datum: {...geographicJSON.datum, name: datumName}};
     const wkt =
       'GEOGCS["local",DATUM["' +
