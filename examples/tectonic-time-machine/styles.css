@@ -76,3 +76,5 @@ SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 .tectonic-source-summary {font-size:10px;color:#8eabba;margin:-6px 0 14px;}
 .tectonic-milestones {flex-wrap:wrap;gap:12px;}
 .tectonic-milestones button:disabled {cursor:default;}
+
+.tectonic-stream-status {font-size:10px;line-height:1.4;color:#8eabba;margin:-6px 0 14px;}

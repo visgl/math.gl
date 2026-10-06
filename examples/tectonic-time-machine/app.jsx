@@ -4,6 +4,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {mountScene, VIEWS} from './scene.js';
 import {loadModel} from './data.js';
+import {maintainHistory} from './history-stream.js';
 import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime, shouldPreloadHistory} from './sources.js';
 import {REGIONS, timeLabel} from './math.js';
 import {LANDMASS_CHAPTERS, chapterOpacity, timelineMilestones} from './timeline.js';
@@ -20,6 +21,7 @@ export default function TectonicTimeMachine() {
     [playing, setPlaying] = useState(false),
     [ready, setReady] = useState(false),
     [status, setStatus] = useState('Ready to load published history'),
+    [historyStatus, setHistoryStatus] = useState(''),
     [error, setError] = useState(''),
     [attempt, setAttempt] = useState(0);
   const [sourceId, setSourceId] = useState(DEFAULT_SOURCE),
@@ -59,6 +61,7 @@ export default function TectonicTimeMachine() {
     setReady(false);
     setPlaying(false);
     setError('');
+    setHistoryStatus('');
     setModel(null);
     scene.current?.setModel(null);
     clock.current = clampTime(clock.current, source.maxAge);
@@ -90,7 +93,10 @@ export default function TectonicTimeMachine() {
     setReady(false);
     setPlaying(false);
     model
-      .waitForTime(time, {signal: abort.signal, lifetimeSignal: model.signal, onStatus: setStatus})
+      .waitForTime(time, {
+        signal: abort.signal, lifetimeSignal: model.signal,
+        onStatus: value => {if (!abort.signal.aborted) setStatus(value);}
+      })
       .then(() => {
         if (abort.signal.aborted) return;
         setCounts(scene.current?.render(time, true));
@@ -107,11 +113,15 @@ export default function TectonicTimeMachine() {
   }, [time, model, sourceId]);
   useEffect(() => {
     if (!model || !model.preloadHistory) return;
-    model.ensureHistory(clock.current, {signal: model.signal})
-      .catch(() => {
-        // Keep playing validated samples. A missing interval retries explicitly.
-      });
-  }, [model, timeWindow]);
+    const abort = new AbortController();
+    const signal = AbortSignal.any([model.signal, abort.signal]);
+    maintainHistory(model, () => clock.current, {
+      signal, onStatus: value => {if (!signal.aborted) setHistoryStatus(value);}
+    }).catch(error => {
+      if (!signal.aborted) setHistoryStatus(error.message);
+    });
+    return () => abort.abort();
+  }, [model]);
   useEffect(() => {
     if (model && model.source.id === sourceId && !model.preloadHistory)
       model.prefetchTime(time, {signal: model.signal});
@@ -224,6 +234,7 @@ export default function TectonicTimeMachine() {
         <p className="tectonic-source-summary">
           {source.frame} · {source.geometry}
         </p>
+        {historyStatus && <p className="tectonic-stream-status" role="status">{historyStatus}</p>}
         <label>
           View
           <select aria-label="View" value={view} onChange={e => setView(e.target.value)}>

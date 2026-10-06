@@ -76,3 +76,10 @@ export function nextRotationTime(time, maxAge) {
   const start = Math.min(Math.max(0, Math.ceil(age / 200) - 1) * 200, maxAge - 200);
   return start > 0 ? -(start - 10) : null;
 }
+
+/** A short forward buffer gives playback time to overlap the first background fetch. */
+export function rotationPlaybackBuffer(time, maxAge) {
+  const [low, high] = rotationBracket(time, maxAge);
+  const start = Math.max(0, low - 100);
+  return Array.from({length: (high - start) / 10 + 1}, (_, i) => start + i * 10);
+}

@@ -66,11 +66,15 @@ Mercator is displayed with its ±85.05112878° latitude cap. Globe and map rende
 use deck.gl; no basemap, service credentials or map API key is required.
 
 Geometry loads when a source is selected, with cancellation on unmount or source change.
-The initial pose loads first so playback can start without waiting for the complete history.
+The initial pose and a short 100 Ma forward buffer load first, including the adjacent
+sample needed by the first playback tick. Playback can start without waiting for the
+complete history.
 Desktop clients then stream the entire historical range in the background. Mobile clients
-and clients requesting reduced data use keep a smaller buffer and prefetch the current and next 200 Ma windows. Playback pauses only when it reaches
-a missing pose and resumes as soon as the two required samples are available. Seeking takes
-priority over further background windows; source changes cancel streaming.
+and clients requesting reduced data use keep a smaller buffer and prefetch the current
+and next 200 Ma windows. Playback pauses only when it reaches a missing pose and resumes
+as soon as the two required samples are available. Foreground seeks load only the
+required pose on a separate request lane, even while a background window is loading.
+Repeated distant seeks replace obsolete foreground requests. Source changes cancel streaming.
 
 The GPlates keyed JSON response is adapted incrementally to rows and read by loaders.gl's
 JSON-to-Arrow loader in 4,096-row batches. An explicit schema retains only `age`, `plateId`,
@@ -84,7 +88,9 @@ between Arrow batches. The loader's published v5 prerelease is isolated in a pri
 workspace so deck.gl can retain its v4 loader integration.
 
 Network errors are explicit and retryable when a needed pose fails to load. Background
-failures keep previously validated samples playable. Service and browser failures never
+failures keep previously validated samples playable. Desktop history interruptions
+are shown beside the source selector and automatically retried after 30 seconds, even
+while paused. Retry timers are cancelled on unmount or source changes. Service and browser failures never
 fall back to fabricated historical motion.
 
 A visible Play / Stop button works directly in the inline documentation example.

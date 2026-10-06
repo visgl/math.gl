@@ -66,6 +66,9 @@ jobs:
       - name: Check generated CRS declarations
         run: yarn check:projjson-types
 
+      - name: Test website dependency resolution
+        run: node --test website/resolve-math-gl-dependency.test.cjs
+
       # Match website deployment: build from source before any package dist files exist.
       - name: Build website
         run: yarn workspace project-website build

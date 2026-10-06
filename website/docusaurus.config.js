@@ -5,6 +5,7 @@ const {getDocusaurusConfig} = require('@vis.gl/docusaurus-website');
 const {resolve} = require('path');
 const {themes} = require('prism-react-renderer');
 const {NormalModuleReplacementPlugin} = require('webpack');
+const resolveMathGlDependency = require('./resolve-math-gl-dependency.cjs');
 
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/math.gl/';
 const isNext = websiteBaseUrl.endsWith('/next/');
@@ -81,9 +82,7 @@ delete aliases['@math.gl/crs'];
 webpackPlugin[1].plugins = [
   new NormalModuleReplacementPlugin(/^@math\.gl\//, resource => {
     if (resource.context.includes('node_modules')) {
-      resource.request = require
-        .resolve(resource.request, {paths: [resource.context]})
-        .replace(/\.cjs$/, '.js');
+      resource.request = resolveMathGlDependency(resource.request, resource.context);
     }
   })
 ];

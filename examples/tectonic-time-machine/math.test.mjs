@@ -471,3 +471,115 @@ test('cancelling a foreground seek waiter preserves the useful source-lifetime s
   await cache.ensureTime(-805, {signal: source.signal});
   assert(cache.hasTime(-805));
 });
+
+import {rotationPlaybackBuffer} from './sources.js';
+import {maintainHistory, waitForRetry} from './history-stream.js';
+test('startup prepares a bounded forward buffer including the first interpolation interval', async () => {
+  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url) {
+    const times = url.searchParams.get('times').split(',').map(Number);
+    assert(times.length <= 12);
+    yield* parseRotationBatches([bytes(serviceRows(url))]);
+  });
+  const signal = new AbortController().signal;
+  await cache.ensurePlayback(-930, {signal});
+  assert(cache.hasTime(-930));
+  assert(cache.hasTime(-929.99));
+  assert(cache.hasTime(-830));
+  assert.equal(cache.hasTime(-829.99), false);
+  assert.equal(cache.loadedSamples, 11);
+  const out = new Float64Array(4);
+  assert(historicalRotation(cache.rotations, 701, 929.99, out, 1800));
+  near(out[0], pole[0]);
+  assert.deepEqual(rotationPlaybackBuffer(-1800, 1800).slice(-2), [1790, 1800]);
+  assert.deepEqual(rotationPlaybackBuffer(250, 1800), [0]);
+  assert.deepEqual(rotationPlaybackBuffer(-5, 1800), [0, 10]);
+});
+test('foreground poses complete while an unrelated background window is still blocked', {timeout: 2000}, async t => {
+  let release, started;
+  const gate = new Promise(resolve => {release = resolve;}), active = new Promise(resolve => {started = resolve;});
+  const calls = [];
+  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url) {
+    const times = url.searchParams.get('times').split(',').map(Number);
+    calls.push(times);
+    if (times.length > 2) {started(); await gate;}
+    yield* parseRotationBatches([bytes(serviceRows(url))]);
+  });
+  const signal = new AbortController().signal;
+  const loading = cache.ensureTime(-930, {signal});
+  t.after(async () => {release(); await loading;});
+  await active;
+  await cache.waitForTime(-1705, {signal});
+  assert(cache.hasTime(-1705));
+  assert.equal(cache.hasTime(-930), false);
+  assert.deepEqual(calls[1], [1700, 1710]);
+  await cache.waitForTime(-930, {signal});
+  const foregroundSample = cache.rotations['930'];
+  release(); await loading;
+  assert.equal(cache.rotations['930'], foregroundSample);
+});
+test('identical foreground poses share one request and distant seeks replace obsolete foreground work', async () => {
+  let entered; const started = new Promise(resolve => {entered = resolve;});
+  let calls = 0;
+  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url, signal) {
+    calls++;
+    if (calls === 1) {
+      entered();
+      await new Promise(resolve => signal.addEventListener('abort', resolve, {once: true}));
+      signal.throwIfAborted();
+    }
+    yield* parseRotationBatches([bytes(serviceRows(url))]);
+  });
+  const signal = new AbortController().signal;
+  const first = cache.waitForTime(-930, {signal});
+  const rejected = assert.rejects(first, /Superseded seek/);
+  await started;
+  const second = cache.waitForTime(-1705, {signal});
+  const duplicate = cache.waitForTime(-1705, {signal});
+  await Promise.all([rejected, second, duplicate]);
+  assert.equal(calls, 2);
+  assert(cache.hasTime(-1705));
+});
+test('idle desktop preload reports interruptions and retries remaining history at the latest time', async () => {
+  let current = -930, loaded = 11;
+  const requests = [], statuses = [];
+  const model = {
+    get loadedSamples() {return loaded;}, totalSamples: 181,
+    async ensureHistory(time, {onStatus}) {
+      requests.push(time);
+      onStatus();
+      if (requests.length === 1) throw new Error('Service unavailable');
+      loaded = 181;
+    }
+  };
+  await maintainHistory(model, () => current, {
+    signal: new AbortController().signal, onStatus: value => statuses.push(value),
+    async wait(delay, signal) {
+      assert.equal(delay, 30000);
+      signal.throwIfAborted();
+      assert.equal(loaded, 11);
+      assert(statuses.at(-1).includes('Service unavailable'));
+      assert(statuses.at(-1).includes('retrying in 30s'));
+      current = -1700;
+    }
+  });
+  assert.deepEqual(requests, [-930, -1700]);
+  assert.equal(statuses.at(-1), 'All 181 historical samples loaded');
+});
+test('source cancellation clears the idle preload retry timer', async () => {
+  const controller = new AbortController();
+  const statuses = [];
+  let attempts = 0;
+  const model = {loadedSamples: 11, totalSamples: 181, async ensureHistory() {
+    attempts++; throw new Error('Service unavailable');
+  }};
+  const running = maintainHistory(model, () => -930, {
+    signal: controller.signal, onStatus: value => statuses.push(value)
+  });
+  const rejection = assert.rejects(running, /abort/i);
+  await new Promise(resolve => setImmediate(resolve));
+  assert(statuses.at(-1).includes('retrying in 30s'));
+  controller.abort();
+  await rejection;
+  assert.equal(attempts, 1);
+  await waitForRetry(0, new AbortController().signal);
+});

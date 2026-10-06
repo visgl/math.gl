@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original GPML reader and runtime-only data adapter. Remote scientific data is not bundled or relicensed as MIT.
 import {unitVector, regionFor} from './math.js';
-import {sourceFor, rotationBracket, rotationWindow, nextRotationTime} from './sources.js';
+import {sourceFor, rotationBracket, rotationWindow, nextRotationTime, rotationPlaybackBuffer} from './sources.js';
 import {modelXML} from './archive.js';
 import {parseRotationBatches, responseChunks} from './rotation-stream.js';
 export const SERVICE = 'https://gws.gplates.org';
@@ -124,7 +124,7 @@ export function createRotationCache(pids, source, fetchBatches = async function*
 }) {
   const rotations = {}, loaded = new Set(), listeners = new Set();
   const indices = new Map(pids.map((pid, index) => [pid, index]));
-  let tail = Promise.resolve(), background = null, history = null, retryAfter = 0, prefetchTarget = null;
+  let tail = Promise.resolve(), background = null, history = null, retryAfter = 0, prefetchTarget = null, foreground = null;
   function enqueue(operation) {
     const result = tail.then(operation);
     tail = result.catch(() => {});
@@ -170,7 +170,7 @@ export function createRotationCache(pids, source, fetchBatches = async function*
           sample.values[offset + 3] = z / length;
           sample.seen[index] = 1;
           sample.count++;
-          if (sample.count === pids.length) {
+          if (sample.count === pids.length && !loaded.has(age)) {
             rotations[age] = {values: sample.values, indices};
             loaded.add(age);
             for (const notify of listeners) notify();
@@ -190,8 +190,26 @@ export function createRotationCache(pids, source, fetchBatches = async function*
   function ensureTime(time, options) {
     return enqueue(() => loadTimes(rotationWindow(time, source.maxAge), options));
   }
+  function loadForeground(times, options) {
+    options.signal.throwIfAborted();
+    if (times.every(age => loaded.has(age))) return Promise.resolve();
+    const key = times.join(',');
+    if (foreground?.key === key && !foreground.signal.aborted) return foreground.promise;
+    // One small foreground request runs independently of the background queue.
+    // Rapid, distant seeks replace obsolete foreground work instead of piling up.
+    foreground?.abort.abort(new DOMException('Superseded seek', 'AbortError'));
+    const abort = new AbortController();
+    const job = {key, abort, signal: AbortSignal.any([options.signal, abort.signal]), promise: null};
+    foreground = job;
+    job.promise = loadTimes(times, {...options, signal: job.signal}).finally(() => {
+      if (foreground === job) foreground = null;
+    });
+    return job.promise;
+  }
   return {
     rotations, hasTime, ensureTime,
+    get loadedSamples() {return loaded.size;},
+    totalSamples: source.maxAge / 10 + 1,
     waitForTime(time, {signal, lifetimeSignal = signal, onStatus}) {
       if (hasTime(time)) return Promise.resolve();
       return new Promise((resolve, reject) => {
@@ -201,20 +219,23 @@ export function createRotationCache(pids, source, fetchBatches = async function*
         if (signal.aborted) {cancel(); return;}
         listeners.add(check);
         signal.addEventListener('abort', cancel, {once: true});
-        // A new seek cancels the waiter, while the useful download continues
-        // until the source changes. Resolve as soon as the requested pose exists.
-        ensureTime(time, {signal: lifetimeSignal, onStatus}).then(check, error => {
+        // Cancelling a waiter alone preserves its download; a new distant seek
+        // may replace it. Resolve as soon as the requested pose exists.
+        loadForeground([...new Set(rotationBracket(time, source.maxAge))], {signal: lifetimeSignal, onStatus}).then(check, error => {
           cleanup(); reject(error);
         });
       });
     },
     ensurePose(time, options) {
-      return enqueue(() => loadTimes([...new Set(rotationBracket(time, source.maxAge))], options));
+      return loadForeground([...new Set(rotationBracket(time, source.maxAge))], options);
+    },
+    ensurePlayback(time, options) {
+      return loadForeground(rotationPlaybackBuffer(time, source.maxAge), options);
     },
     ensureHistory(time, options) {
       if (history) return history;
-      // Request all history without waiting for playback to advance. Release the
-      // queue between windows so a foreground seek takes priority over the next.
+      // Request all history without waiting for playback to advance. Foreground
+      // pose requests use their own lane, even while this queue is busy.
       const current = rotationWindow(time, source.maxAge), windows = [current];
       for (let end = current[0]; end > 0; end -= 200)
         windows.push(rotationWindow(-end, source.maxAge));
@@ -256,6 +277,6 @@ export async function loadModel({sourceId, time, signal, onStatus, preloadHistor
   const features = parseCoastlines(xml),
     pids = [...new Set(features.map(f => f.pid))];
   const cache = createRotationCache(pids, source);
-  await cache.ensurePose(time, {signal, onStatus});
-  return {features, pids, source, signal, preloadHistory, ...cache};
+  await cache.ensurePlayback(time, {signal, onStatus});
+  return Object.assign(cache, {features, pids, source, signal, preloadHistory});
 }
