@@ -193,3 +193,30 @@ test('structured names prefer exact catalogue matches over broader aliases', () 
     1, 2, 3
   ]);
 });
+
+test('catalogue validation is reused within a normalization configuration', () => {
+  let scans = 0;
+  const datums = new Proxy(
+    {local: {ellipse: 'WGS84', towgs84: '1,2,3'}},
+    {
+      ownKeys(target) {
+        scans++;
+        return Reflect.ownKeys(target);
+      }
+    }
+  );
+  const options = {datumCatalogs: [{name: 'local', datums}], parsers};
+  const from = {...geographicJSON, datum: {...geographicJSON.datum, name: 'local'}};
+  const engine = new ProjectionEngine({from, to: from, ...options});
+  expect(scans).toBe(1);
+  close(engine.project(point), point);
+  normalizeCRS(from, options);
+  normalizeCRS('+proj=longlat +datum=local', options);
+  expect(scans).toBe(2);
+  const other = {datumCatalogs: [{name: 'other', datums: {local: {towgs84: '4,5,6'}}}]};
+  expect(normalizeCRS('+proj=longlat +datum=local', other).datum.towgs84).toEqual([4, 5, 6]);
+  options.datumCatalogs = [
+    {name: 'replacement', datums: {local: {ellipse: 'WGS84', towgs84: '7,8,9'}}}
+  ];
+  expect(normalizeCRS('+proj=longlat +datum=local', options).datum.towgs84).toEqual([7, 8, 9]);
+});

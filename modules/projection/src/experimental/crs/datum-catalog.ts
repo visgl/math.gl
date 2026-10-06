@@ -11,6 +11,13 @@ const builtins: Readonly<Record<string, DatumDefinition>> = {
   nad83,
   North_American_Datum_1983: nad83
 };
+const resolved = new WeakMap<
+  CRSNormalizationOptions,
+  {
+    catalogs: CRSNormalizationOptions['datumCatalogs'];
+    definitions: Readonly<Record<string, DatumDefinition>>;
+  }
+>();
 export const datumNameKey = (name: string): string => name.toLowerCase().replace(/[\s_-]/g, '');
 
 /** Resolve catalogues without global registration or a dependency on the regional table. */
@@ -18,6 +25,8 @@ export function getDatumDefinitions(
   options: CRSNormalizationOptions
 ): Readonly<Record<string, DatumDefinition>> {
   if (!options.datumCatalogs?.length) return builtins;
+  const cached = resolved.get(options);
+  if (cached?.catalogs === options.datumCatalogs) return cached.definitions;
   const definitions: Record<string, DatumDefinition> = Object.assign(Object.create(null), builtins);
   const names = new Map(
     Object.entries(builtins).map(([name, definition]) => [
@@ -51,5 +60,6 @@ export function getDatumDefinitions(
       definitions[name] = definition;
     }
   });
+  resolved.set(options, {catalogs: options.datumCatalogs, definitions});
   return definitions;
 }
