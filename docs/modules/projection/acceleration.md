@@ -108,4 +108,4 @@ precision/domain/failure and payload contracts, cold loading and bundle costs,
 complete upload/dispatch/readback measurements, and a justified crossover point.
 Capability availability is not evidence of a speed advantage. GPU visualization
 coordinates cannot silently replace double-precision geodetic transformations.
-No new binary backend or third-party implementation is shipped by this tranche.
+The package supplies no binary projection backend or additional third-party implementation.

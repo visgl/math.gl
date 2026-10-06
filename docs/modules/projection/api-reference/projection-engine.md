@@ -432,9 +432,9 @@ later geocentric/Helmert stages can change it. `datum=none` disables grid operat
 Capability checks verify required registrations but cannot guarantee coordinate
 coverage. Named NAD27's optional grid list likewise requires usable data at execution.
 
-Synthetic analytic and upstream differential fixtures cover the implemented subset.
-Licensed real-world grids and independent reference coordinates remain a release
-acceptance gate in tranche 7.
+Synthetic analytic, upstream differential and independent real-grid fixtures cover
+the implemented subset. See [independent validation](../independent-validation.md)
+for datasets, reference coordinates and coverage limits.
 
 ## Custom plugins
 
@@ -508,21 +508,11 @@ wrapper contains eager plugins and preserves its synchronous API.
 See [descriptor loading and cache behavior](../projection-engine.md#load-less-used-projections-on-demand)
 for examples, shared caching, retry behavior and custom descriptors.
 
-## Expansion path
+## Compatibility
 
-The [parity roadmap](../roadmap.md) defines tranches and acceptance gates against
-the pinned proj4js 2.22.0 reference.
-
-Add projection plugins with forward/inverse parity tests against proj4js, then extend
-CRS normalization, ellipsoid/datum handling, and grid support independently.
-The default wrapper uses this engine. The former `classic` subpath and its
-proj4js-specific compatibility utility are removed.
-
-Mercator equations follow the [PROJ Mercator documentation](https://proj.org/en/stable/operations/projections/merc.html).
-
-Numerical kernel headers identify direct TypeScript ports of proj4js 2.22.0; original
-adapters and inspired equation implementations are identified separately. Distributed
-notices include the upstream MIT license and Equal Earth's retained Apache-2.0 license.
+The default `Projection` uses this engine. See the [support profile](../support.md)
+for accepted CRS definitions, strict-input behavior and migration from proj4js.
+The [module attribution](../README.md#attribution) describes algorithm origins and licenses.
 
 ## LazyProjection
 
@@ -546,7 +536,7 @@ and reference their names with `+geoidgrids`; scalar and flat transforms then re
 `createVerticalGrid`, `createGeoidGrid` and `VerticalGridOptions` are exported from
 `@math.gl/projection/grids/vertical`. The public root and compatibility experimental/native
 entry points also export these helpers; `/core` exports only the contract and engine.
-See [height conversion](../projection-engine.md#convert-geoid-heights) for loading,
+See [height conversion](./datum-grids.md#convert-geoid-heights) for loading,
 units, axes, fallback, coverage, datum ordering and the limits of this explicit subset.
 
 
@@ -560,6 +550,6 @@ entry points also export it. Metadata may be synchronous (geotiff.js v2) or asyn
 (v3); numeric sample arrays must be raw, without decoder-applied scale/offset.
 
 The accepted metadata, geometry, nesting, coverage and units are specified in the
-[vertical GeoTIFF guide](../projection-engine.md#vertical-geotiff-geoid-models). The
+[vertical GeoTIFF guide](./datum-grids.md#vertical-geotiff-geoid-models). The
 result plugs into `verticalGrids` on all math.gl projection engine variants. This function
 neither loads files nor selects a vertical datum operation automatically.

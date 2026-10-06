@@ -5,7 +5,7 @@ interleaved records with padding, or separate X/Y/Z/M columns. Capture the layou
 once and reuse the transform and storage across batches or chunks.
 
 For contiguous coordinates that can be overwritten, the existing
-[`projectFlat`](./projection-engine.md#transform-flat-buffers-in-place) remains
+[`projectFlat`](./api-reference/projection-engine.md#flat-typed-arrays-in-place) remains
 the shortest path and can use whole-buffer projection kernels.
 
 ```typescript
@@ -139,4 +139,4 @@ JavaScript runtime boxing and sampling overhead can still appear in heap profile
 These layouts provide reusable storage contracts rather than a universal throughput
 advantage. Optimized contiguous in-place paths, and gather/flat/scatter using a
 reusable compact buffer, can be faster. See the
-[paired measurements](./benchmarks.md#reusable-scratch-and-buffer-layouts).
+[performance guidance](./benchmarks.md#choose-a-coordinate-api).

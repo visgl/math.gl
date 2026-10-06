@@ -1,4 +1,4 @@
-# Projection engine
+# Imports, plugins and loading
 
 Use the math.gl projection engine to convert coordinates between geographic,
 projected and geocentric coordinate reference systems. It supports scalar coordinates,
@@ -22,10 +22,11 @@ API can install `proj4` separately.
 
 ## Start with the projections you need
 
-These examples use the configurable engine exported by the package root:
+Use isolated subpaths to make the selected algorithms explicit:
 
 ```typescript title="mercator-projection.ts"
-import {ProjectionEngine, mercator} from '@math.gl/projection';
+import {ProjectionEngine} from '@math.gl/projection/core';
+import {mercator} from '@math.gl/projection/projections/merc';
 
 export const projection = new ProjectionEngine({
   from: 'EPSG:4326',
@@ -45,11 +46,9 @@ Both ends of a transformation need their projected algorithms registered. For
 example, Web Mercator → UTM needs both `mercator` and `universalTransverseMercator`:
 
 ```typescript
-import {
-  ProjectionEngine,
-  mercator,
-  universalTransverseMercator
-} from '@math.gl/projection';
+import {ProjectionEngine} from '@math.gl/projection/core';
+import {mercator} from '@math.gl/projection/projections/merc';
+import {universalTransverseMercator} from '@math.gl/projection/projections/utm';
 
 const projection = new ProjectionEngine({
   from: 'EPSG:3857',
@@ -70,6 +69,7 @@ algorithms, create a new instance with the new plugin set.
 | Projection algorithms | `projections` | Import and register the algorithms needed by both CRSs |
 | Structured CRS execution readers | `parsers` | Register `wktCRSParser` and/or `projJSONCRSParser` when accepting those representations |
 | Named definitions | `aliases` | Supply application-specific identifiers and their CRS definitions |
+| Vertical height grids | `verticalGrids` | Prepare and register a model matching the horizontal and vertical datum |
 | Horizontal datum grids | `datumGrids` | Fetch, decode, and register the correct grid data before construction |
 | Custom algorithms | `ProjectionPlugin` | Implement the projection equations, accepted parameters, and domain validation |
 
@@ -84,86 +84,6 @@ plugin exports and their accepted parameters.
 Composition is explicit too. `obliqueTransformation(mollweide)` creates a rotated
 Mollweide plugin with its dependency supplied directly; it does not search a global
 catalogue for an algorithm named in the CRS.
-
-## Tree shaking and bundle size
-
-Use named ESM imports and register a small, explicit list. The package declares
-`sideEffects: false`, and its ESM build preserves module boundaries. A bundler can
-remove unused projection kernels and optional readers. Type-only imports add no
-runtime code.
-
-The package has no runtime dependency on proj4js; it is installed only for repository
-benchmarks and compatibility tests. Installing `proj4` separately and importing it
-elsewhere in an application can retain both implementations. CommonJS consumers
-are supported, but the measurements below use ESM with tree shaking.
-
-The core has a fixed cost: CRS normalization, unit/axis/datum transformation support,
-and shared ellipsoid and datum tables. Selecting one projection does not remove
-those tables. Adding WKT pulls in syntax parsing and structured-CRS interpretation;
-PROJJSON objects already provide structured input and need less reader code.
-
-Measured October 3, 2026 after the package rename and classic-wrapper removal, with Node 24.14.0, esbuild,
-browser ESM, ES2020, minification, and gzip level 9. Each row is a separate retained
-bundle, not an increment or an application-wide download estimate. **KiB = 1,024 bytes.**
-
-| Retained functionality | Minified KiB | Gzip KiB |
-| --- | ---: | ---: |
-| Engine core | 48.3 | 17.5 |
-| Engine + Mercator | 50.7 | 18.2 |
-| Engine + UTM | 57.3 | 20.9 |
-| Engine + Mercator + WKT reader | 74.0 | 25.9 |
-| Engine + Mercator + PROJJSON reader | 61.5 | 22.0 |
-| Engine + Mercator + NTv2 decoder | 53.8 | 19.5 |
-| Engine + Mercator + GeoTIFF grid adapter | 53.8 | 19.4 |
-| Engine + Mercator + GTX decoder | 52.2 | 18.9 |
-| Engine + Mercator + vertical GeoTIFF adapter | 55.6 | 20.1 |
-| Default Projection wrapper (all plugins and readers) | 146.3 | 50.0 |
-| Explicit operation pipeline (no projection algorithms, models or readers) | 59.9 | 21.4 |
-| Optional operation selector (no catalogue data or operation payloads) | 4.4 | 1.6 |
-| Optional deformation model + regular velocity grid | 4.1 | 1.8 |
-| Optional deformation model + velocity GeoTIFF adapter | 9.1 | 3.6 |
-| Every root export, including wrapper, readers, grids and pipelines | 176.8 | 60.0 |
-
-Tranche 12A adds about 1.1 KiB minified / 0.3 KiB gzip to the core stage machinery.
-The grid readers and bilinear interpolation remain optional, retained only in the
-corresponding reader rows and all-exports row. The vertical GeoTIFF adapter adds no
-bytes to the core or ordinary projection bundles. Typed [operation pipelines](./operation-pipelines.md)
-are also optional and add no bytes to these selective bundles. Exact Helmert rotations,
-ordinate stacks and direction-specific steps add about 3.8 KiB minified / 1.4 KiB gzip
-to a retained pipeline compared with tranche 12B2. Kinematic epoch/rate support adds
-about 3.1 KiB minified / 1.1 KiB gzip compared with 12B3, including shared-memory
-overlap validation. Tranche 13A adds about 0.18 KiB minified / 0.01 KiB gzip
-for typed epoch/coefficient storage and prepared axis/unit constants. The core and default wrapper stay unchanged.
-The deformation step adds about 0.7 KiB minified / 0.2 KiB gzip to a pipeline;
-the separate model and velocity readers are retained only when explicitly imported.
-See [deformation models](./deformation-models.md). The optional
-[`/temporal`](./temporal-models.md) model measures 9.0 KiB minified / 3.6 KiB gzip
-on Node 24.14.0; it is absent from static-model, root, core and pipeline-only
-imports. Application fields and model data are additional costs.
-Single-stage static Helmert buffer specialization adds about 1.35 KiB minified /
-0.47 KiB gzip to a retained pipeline, without adding bytes to the core, default
-wrapper, operation catalogue or lazy initial/deferred imports. See the
-[paired benchmark evidence](./benchmarks.md#static-helmert-coordinate-buffers). Kinematic
-single-stage buffers add another 1.06 KiB minified / 0.33 KiB gzip to a retained
-pipeline. They reuse scalar epoch preparation and introduce no bytes to core,
-wrapper, catalogue, deformation or lazy chunks. See the
-[kinematic measurements](./benchmarks.md#kinematic-helmert-coordinate-buffers).
-
-All GeoTIFF rows exclude an external TIFF decoder, workers, and grid files. No row
-includes downloaded datum-grid data. Different bundlers, targets, compression,
-shared dependencies, and import patterns change these totals. The size benefit comes from selecting a subset of algorithms and optional readers.
-Avoid a runtime lookup such as `projectionExports[name]` over the entire module namespace
-when you want the bundler to discard unused algorithms.
-
-To reproduce the byte counts after building the repository:
-
-```sh
-node modules/projection/scripts/check-bundle-budget.mjs --measure
-```
-
-Omit `--measure` to enforce the checked-in size limits. Package checks also verify
-that selected bundles exclude unrelated kernels and the upstream runtime. See
-[benchmarks and packaging checks](./benchmarks.md) for methodology and performance data.
 
 ## Load less-used projections on demand
 
@@ -271,6 +191,14 @@ shorter paths below. The former `classic` subpath is removed.
 | --- | --- |
 | `temporal` | `createTemporalDeformationModel` and explicit field/rate/event types; no datasets |
 | `deformation` | `createDeformationModel` for prepared static velocity fields |
+| Package root (`@math.gl/projection`) | `Projection`, the configurable engine, eager algorithms, readers and helpers |
+| `temporal` | `createTemporalDeformationModel` for explicit rates and events |
+| `deformation` | `createDeformationModel` and deformation contracts |
+| `grids/velocity` | `createVelocityGrid` |
+| `grids/velocity-geotiff` | `loadVelocityGeoTIFFGrid`; excludes a TIFF decoder |
+| `grids/vertical` | `createVerticalGrid`, `createGeoidGrid` and vertical-grid contracts |
+| `grids/gtx` | `parseGTXGrid` |
+| `grids/vertical-geotiff` | `loadVerticalGeoTIFFGrid`; excludes a TIFF decoder |
 | `operations` | Optional `OperationCatalog` and selection metadata/diagnostics; no database or execution code |
 | `analysis` | `ProjectionAnalysis`, reusable factors/Jacobians and explicit mathematical domain enforcement |
 | `bulk` | `ProjectionBuffer` for separate, strided, column and chunked buffers; no projection algorithms/readers |
@@ -299,42 +227,6 @@ For example, `merc` exports `mercator`, `utm` exports
 explicitly, including when both plugins are dynamically imported. Geographic
 coordinates need no plugin; the internal Gauss helper is not a public projection.
 Import public subpaths rather than private `src` or `dist` files.
-
-### Measured split bundles
-
-Enable ESM code splitting in the bundler. CI verifies the transitive initial static
-graph contains neither the deferred algorithms nor optional WKT syntax, then executes
-the emitted chunks. The measurements below start with an eager core and Mercator.
-Sizes are sums across the relevant emitted files, with gzip applied to each file.
-
-| Deferred feature | Initial minified / gzip KiB | Additional minified / gzip KiB |
-| --- | ---: | ---: |
-| Automatic catalogue (`LazyProjection`) | 55.5 / 21.0 | 77.7 / 36.8 |
-| UTM descriptor | 48.4 / 18.0 | 7.9 / 3.5 |
-| WKT reader and syntax | 48.3 / 17.4 | 23.4 / 8.1 |
-| Rotated Mollweide (factory plus wrapped plugin) | 48.3 / 18.0 | 5.3 / 2.5 |
-
-The catalogue row sums all available deferred algorithm chunks, not the download
-for its first UTM operation. Other rows retain only their selected feature.
-
-These are esbuild browser/ES2020 measurements, not universal chunk sizes. Bundlers
-may extract shared helpers, so one plugin does not necessarily mean one file. Loading
-all features eventually pays for all retained code and chunk overhead. CommonJS
-subpaths select APIs but do not provide this browser download guarantee.
-
-Reproduce and enforce the split-bundle budgets after building:
-
-```sh
-node modules/projection/scripts/check-lazy-package.mjs
-```
-
-Keep imports on the isolated subpaths throughout the eager and lazy features.
-Mixing in eager imports from the full `@math.gl/projection` or `@math.gl/crs` barrels
-can cause a bundler to hoist otherwise lazy code. A direct
-`await import('@math.gl/projection')` can retain the entire catalogue;
-it does not mean “only UTM.” Inspect the application's chunk graph, not just the
-presence of an `import()` expression. Tree shaking and deferred loading remain
-distinct: the former removes unused code, while the latter postpones code that is used.
 
 ## Work with @math.gl/crs
 
@@ -376,214 +268,19 @@ is not an accuracy certificate or a guarantee that every coordinate is inside th
 projection's domain or a grid's coverage. Validate the CRS and coordinate region
 that your application actually uses.
 
-## Load datum-grid data separately
+<span id="convert-geoid-heights" />
+<span id="vertical-geotiff-geoid-models" />
 
-Projection code and datum-grid data have separate lifecycles. Fetch grid files and
-decode them before creating an instance; coordinate transforms then stay synchronous.
-The application chooses the grid source, caching, and error handling.
+## Load grid readers and data separately
 
-```typescript title="grid-projection.ts"
-import {ProjectionEngine, parseNTv2Grid} from '@math.gl/projection';
+Projection algorithms and grid data have separate lifecycles. Import the decoder or
+adapter only where needed, fetch the model chosen by your application, and register
+its prepared data before construction. Grid files, TIFF decoders and workers have
+costs beyond the bundle measurements below.
 
-export async function createGridProjection(url: string) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error('Could not load datum grid: ' + response.status);
-  const grid = parseNTv2Grid(await response.arrayBuffer());
-  return new ProjectionEngine({
-    from: '+proj=longlat +ellps=clrk66 +nadgrids=regional.gsb',
-    to: 'EPSG:4326',
-    datumGrids: {'regional.gsb': grid}
-  });
-}
-```
-
-Use a grid intended for the declared source ellipsoid and datum transformation;
-`regional.gsb` is a registration key, not a built-in dataset. The engine performs no
-implicit fetches. Reuse prepared grids and projection instances for multiple batches.
-
-For supported horizontal GeoTIFF grids, `loadGeoTIFFGrid(decodedTIFF)` prepares the
-object returned by a separately chosen TIFF reader. The adapter imports no TIFF
-library. That reader and its workers have their own bundle costs and can also be
-loaded on demand. See [datum grids](./api-reference/projection-engine.md#horizontal-datum-grids)
-for band conventions, ownership, coverage, and inverse-edge behavior. Explicit vertical
-height conversion is described below; time-dependent operations use the explicit [pipeline API](./operation-pipelines.md).
-
-## Convert geoid heights
-
-Register a prepared `VerticalGrid` under the name used by `+geoidgrids`. A source grid
-converts gravity-related height **H** to ellipsoidal height **h** using **h = H + N**;
-a destination grid applies **H = h - N**. The supplied offsets **N** are geoid undulations
-in metres. Source conversion runs before the horizontal datum transformation; destination
-conversion runs after it. Each grid is sampled in its own CRS's horizontal datum, at
-Greenwich longitude and geographic latitude. These are explicit stages following
-[PROJ's vertical-grid convention](https://proj.org/en/stable/operations/transformations/vgridshift.html).
-
-```typescript
-import {ProjectionEngine} from '@math.gl/projection/core';
-import {parseGTXGrid} from '@math.gl/projection/grids/gtx';
-
-const response = await fetch('/grids/local.gtx');
-if (!response.ok) throw new Error('Could not load vertical grid');
-const local = parseGTXGrid(await response.arrayBuffer());
-const projection = new ProjectionEngine({
-  from: '+proj=longlat +datum=WGS84 +geoidgrids=local',
-  to: 'EPSG:4979',
-  verticalGrids: {local}
-});
-const positions = new Float64Array([12, 41, 100, 7]);
-projection.projectFlat(positions, 4); // height changes; measure 7 is preserved
-```
-
-Choose a model whose horizontal datum, vertical datum, tide convention and area of use
-match your data. The key `local` is an application registration name, not an EPSG vertical
-CRS or an automatically selected model. An ellipsoid alone does not enable a horizontal
-datum shift: declare the datum or explicit `+towgs84` parameters when a shift is needed.
-
-`Projection`, `ProjectionEngine` and `LazyProjection` accept the same per-instance
-`verticalGrids` map. Load grid data before constructing the projection. Lazy projection
-algorithms can still preload separately. No file, network request, TIFF decoder or geoid
-model is imported implicitly. The optional readers can themselves be dynamically imported.
-
-For an already loaded `@math.gl/geoid` model, use the structural adapter:
-
-```typescript
-import {createGeoidGrid} from '@math.gl/projection/grids/vertical';
-
-// geoid is a previously prepared @math.gl/geoid Geoid instance.
-const verticalGrids = {local: createGeoidGrid(geoid)};
-```
-
-The adapter calls `getHeight(latitudeDegrees, longitudeDegrees)` and retains the model's
-interpolation and ownership rules. It adds no runtime dependency on `@math.gl/geoid`.
-`createVerticalGrid({origin, step, size, offsets, noData})` instead snapshots a regular
-bilinear grid. Origin and positive spacing are degrees; rows run south to north and
-columns west to east. `parseGTXGrid(ArrayBuffer)` snapshots big-endian float32 metre
-offsets from the [GTX format](https://gdal.org/en/stable/drivers/raster/gtx.html).
-Its conventional -88.8888 sentinel, non-finite nodes, and values outside ±1000 metres
-are treated as nodata, consistent with PROJ's GTX reader.
-
-Both snapshot readers include the outer nodes and do not extrapolate. Longitudes can
-be expressed in equivalent 360-degree turns, including bounded grids crossing the
-antimeridian. A missing global seam cell is not synthesized; the grid must cover the
-requested coordinate. A nodata corner with nonzero interpolation weight makes that
-sample uncovered. Ordered `+geoidgrids=regional,global` lists try the first covering
-grid. Prefix an optional registration with `@`; use an explicit final `null` for a
-zero-offset fallback. Missing required registrations fail construction; uncovered
-coordinates and non-finite custom offsets throw during transformation.
-
-Vertical transformations require XYZ or XYZM, including flat arrays; M and later
-ordinates remain measures. `+vunits`/`+vto_meter` and requested axes are applied around
-the metre-based height stage. A failing flat record is left unchanged along with all
-later records; earlier records may have completed. A vertical grid cannot be attached
-to a geocentric or identity CRS or combined with lossy horizontal extraction.
-
-This is the explicit vertical-grid subset (tranches 12A/12B1).
-Compound/vertical WKT or PROJJSON execution, dynamic datum interpretation and
-automatic EPSG operation lookup remain outside the supported subset. Optional
-[operation selection](./operation-selection.md) filters application-reviewed candidates. Explicit typed pipelines and
-coordinate epochs are available through the optional [pipeline API](./operation-pipelines.md).
-
-### Vertical GeoTIFF geoid models
-
-`loadVerticalGeoTIFFGrid` prepares the geoid subset of
-[PROJ Geodetic TIFF Grids](https://proj.org/en/stable/specifications/geodetictiffgrids.html).
-Use it for modern GeoTIFF geoid models; `loadGeoTIFFGrid` remains the separate adapter
-for horizontal latitude/longitude shifts. Both receive a decoded TIFF object and import
-no TIFF decoder. Fetching, compression and worker choices belong to the application.
-
-The reader also accepts a plain `VerticalGridGeoTIFFData` dataset, structurally
-compatible with loaders.gl's `GeoTIFFRasterLoader` output. Pass the decoded dataset
-directly to `loadVerticalGeoTIFFGrid(dataset)`. It preserves original band indices,
-so band zero must be included. Image order, unscaled samples, per-image/per-band
-GDAL metadata, GeoKeys, nodata and geometry tags have the same validation as the
-geotiff.js input. No runtime dependency on loaders.gl is added.
-
-```typescript
-import {ProjectionEngine} from '@math.gl/projection/core';
-import {loadVerticalGeoTIFFGrid} from '@math.gl/projection/grids/vertical-geotiff';
-import {fromArrayBuffer} from 'geotiff'; // separately installed, application-owned decoder
-
-const response = await fetch('/grids/local-geoid.tif');
-if (!response.ok) throw new Error('Could not load geoid grid');
-const geoid = await loadVerticalGeoTIFFGrid(
-  await fromArrayBuffer(await response.arrayBuffer())
-);
-const projection = new ProjectionEngine({
-  from: '+proj=longlat +datum=WGS84 +geoidgrids=geoid',
-  to: 'EPSG:4979',
-  verticalGrids: {geoid}
-});
-projection.project([12, 41, 100]); // synchronous after grid preparation
-```
-
-The adapter requires geographic degree coordinates, explicit PixelIsPoint or PixelIsArea,
-positive north-up pixel spacing, and one tiepoint. PixelIsArea is shifted to cell centres;
-nonzero tiepoint pixel indices are honored. Explicit non-Greenwich prime meridians,
-rotated/projected rasters, overviews and masks are rejected. It does not transform or
-resolve the interpolation CRS: the application must verify the file's geographic datum
-and longitude reference match the CRS supplied to the projection.
-
-Dataset metadata must declare `TYPE=VERTICAL_OFFSET_GEOGRAPHIC_TO_VERTICAL`, and band
-zero must declare `DESCRIPTION=geoid_undulation`. Its unit must be `metre` (also the
-default if absent). Raw nodata is compared in the decoded band precision (including float32 rounding)
-before `raw * SCALE + OFFSET`; absent scale
-and offset default to 1 and 0. Only band zero is decoded, so optional uncertainty bands
-are excluded. Horizontal, velocity, ellipsoidal-height-offset and vertical-to-vertical
-grids are rejected, as are requested non-bilinear interpolation and non-metre bands.
-
-Prepared offsets are copied. TIFF objects and decoded arrays can be released after
-loading. Multiple images must be ordered parent before nested child, or have disjoint
-interiors; later images take precedence, including on a shared edge. A child's uncovered
-or nodata sample falls back to an earlier covering image. This is an explicit fallback
-policy, not a promise of matching every PROJ subgrid-selection edge case. Bounded
-antimeridian grids use equivalent longitudes; no missing seam cells are synthesized.
-
-Independent tests decode seven small authored files using `geotiff` and compare with
-PROJ 9.5.1: point/area registration, Deflate, big-endian scaled int16, nonzero tiepoints,
-nested grids, nodata and antimeridian sampling. See [validation](./independent-validation.md#vertical-geotiff-format-qualification)
-for scope. The adapter and decoder can both be dynamically imported; normal core and
-projection bundles do not retain this reader.
-
-## Transform flat buffers in place
-
-Use `projectFlat` and `unprojectFlat` for interleaved coordinate buffers:
-
-```typescript
-import {ProjectionEngine, mercator} from '@math.gl/projection';
-
-const projection = new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});
-const positions = new Float64Array([12, 55, 13, 56]);
-projection.projectFlat(positions, 2); // returns the same view
-projection.unprojectFlat(positions, 2);
-
-const vertices = new Float64Array([12, 55, 100, 7, 13, 56, 200, 8]);
-projection.projectFlat(vertices, 4); // XYZM: transforms XYZ, preserves M
-```
-
-The record width must be an integer at least 2 that divides the view length.
-`Float32Array` is supported, with Float32 storage precision; Float64 is preferable
-when large projected coordinates must retain small differences. Use a `subarray`
-view to transform a selected range. Geocentric transformations require at least
-three components per record.
-
-Built-in batch operations reuse a mutable point instead of making temporary
-JavaScript coordinate arrays for every record. This does not guarantee zero heap
-allocation, and custom scalar plugins can allocate. Calls are synchronous and do
-not yield to the UI; schedule large jobs in a worker if the application needs that.
-A coordinate error stops the batch after any earlier records have been transformed.
-Copy the input first if the operation must be atomic. See the
-[flat-array contract](./api-reference/projection-engine.md#flat-typed-arrays-in-place)
-for exact failure and dimension behavior.
-
-<span id="projection-specific-batch-execution" />
-
-### Batch performance
-
-Common projections automatically use bulk operations where the CRS pair permits it.
-Use `projectFlat` for large buffers and reuse the converter; no extra application
-configuration is needed. Datum, grid and axis operations retain the same coordinate
-and precision guarantees. Custom plugin authors can supply
-[whole-buffer hooks](./api-reference/projection-engine.md#whole-buffer-plugin-hooks).
+See [datum and height grids](./api-reference/datum-grids.md) for NTv2, horizontal
+GeoTIFF, GTX, vertical GeoTIFF and the structural `@math.gl/geoid` adapter. Readers
+can be dynamically imported; the engine never fetches models or selects them implicitly.
 
 ## Add a custom projection
 
@@ -628,22 +325,123 @@ compatibility. Duplicate names or aliases are rejected; importing or constructin
 a plugin does not register it globally. See the
 [plugin API](./api-reference/projection-engine.md#custom-plugins) for the full contract.
 
-## Compatibility and provenance
+## Tree shaking and bundle size
 
-The projection engine includes algorithms adapted from proj4js and PROJ, as well as
-original math.gl code. Source comments and distributed notices identify their origins. The package includes MIT attribution
-and the Apache-2.0 notice retained by Equal Earth.
+Use named ESM imports and register a small, explicit list. The package declares
+`sideEffects: false`, and its ESM build preserves module boundaries. A bundler can
+remove unused projection kernels and optional readers. Type-only imports add no
+runtime code.
 
-The nine remaining upstream-corpus differences are deliberate strict-input rejections,
-[dispositioned individually](./parity-audit.md#strict-input-policy). Cardinal polar-axis
-mappings are supported; arbitrary axis rotations remain outside the subset. Broader grid coverage, independent
-accuracy references, and regional projection validity limits still need qualification.
-Keep any fallback to a separately installed `proj4` runtime an explicit application
-decision: it adds another implementation with different dimension and validation behavior. The
-[roadmap](./roadmap.md), [audit](./parity-audit.md), and
-[API reference](./api-reference/projection-engine.md) describe those boundaries.
+The package has no runtime dependency on proj4js; it is installed only for repository
+benchmarks and compatibility tests. Installing `proj4` separately and importing it
+elsewhere in an application can retain both implementations. CommonJS consumers
+are supported, but the measurements below use ESM with tree shaking.
 
-For separate output buffers, padded records or X/Y/Z/M columns, see
-[reusable coordinate buffers](./bulk-layouts.md). The optional `/bulk` adapter
-keeps the supplied projection's CRS and epoch behavior and requires lazy
-projections to have completed `preload()` before synchronous coordinate calls.
+The core has a fixed cost: CRS normalization, unit/axis/datum transformation support,
+and shared ellipsoid and datum tables. Selecting one projection does not remove
+those tables. Adding WKT pulls in syntax parsing and structured-CRS interpretation;
+PROJJSON objects already provide structured input and need less reader code.
+
+Measured **math.gl 5.0.0-alpha.12**, source commit [`17976524`](https://github.com/visgl/math.gl/tree/17976524ff710076a508ec6211518b332b7a35b7),
+on October 6, 2026 with Node 24.5.0 and esbuild 0.28.1: browser ESM,
+ES2020, minification and gzip level 9. These measurements use a workspace build,
+rather than an installed npm tarball. Each row is a separate retained bundle,
+not an increment or an application-wide download estimate. **KiB = 1,024 bytes.**
+
+| Retained functionality (math.gl 5.0.0-alpha.12) | Minified KiB | Gzip KiB |
+| --- | ---: | ---: |
+| Engine core | 51.0 | 18.4 |
+| Engine + Mercator | 53.4 | 19.2 |
+| Engine + UTM | 60.1 | 21.8 |
+| Engine + Mercator + WKT reader | 76.8 | 26.8 |
+| Engine + Mercator + PROJJSON reader | 64.3 | 22.9 |
+| Engine + Mercator + NTv2 decoder | 56.5 | 20.4 |
+| Engine + Mercator + GeoTIFF grid adapter | 56.5 | 20.4 |
+| Engine + Mercator + GTX decoder | 54.9 | 19.8 |
+| Engine + Mercator + vertical GeoTIFF adapter | 58.4 | 21.0 |
+| Default Projection (all plugins and readers) | 149.5 | 51.0 |
+| Explicit operation pipeline | 62.6 | 22.3 |
+| Optional operation selector | 6.3 | 2.2 |
+| Optional projection analysis | 4.2 | 1.4 |
+| Optional reusable buffer adapter | 5.3 | 1.7 |
+| Optional deformation model + regular velocity grid | 7.2 | 2.9 |
+| Optional deformation model + velocity GeoTIFF adapter | 12.2 | 4.7 |
+| Optional temporal deformation model | 9.0 | 3.5 |
+| Every root export | 180.0 | 60.9 |
+
+Grid readers, [operation pipelines](./operation-pipelines.md),
+[operation selection](./operation-selection.md), [projection analysis](./projection-analysis.md),
+[bulk adapters](./bulk-layouts.md) and [deformation models](./deformation-models.md)
+are optional. Import their isolated subpaths to retain only the capabilities needed.
+
+All GeoTIFF rows exclude an external TIFF decoder, workers, and grid files. No row
+includes downloaded datum-grid data. Different bundlers, targets, compression,
+shared dependencies, and import patterns change these totals. The size benefit comes from selecting a subset of algorithms and optional readers.
+Avoid a runtime lookup such as `projectionExports[name]` over the entire module namespace
+when you want the bundler to discard unused algorithms.
+
+To reproduce the byte counts after building the repository:
+
+```sh
+node modules/projection/scripts/check-bundle-budget.mjs --measure
+```
+
+Omit `--measure` to enforce the checked-in size limits. Package checks also verify
+that selected bundles exclude unrelated kernels and the upstream runtime. See
+[Performance](./benchmarks.md) for runtime measurements. Packed-package checks use
+`node modules/projection/scripts/check-packed-package.mjs` to verify installed ESM,
+CommonJS and TypeScript consumers.
+
+The [raw bundle measurements](https://github.com/visgl/math.gl/blob/master/dev-docs/projection-bundle-measurements.json)
+retain exact byte counts, package version, source commit and tool settings.
+
+## Measured split bundles
+
+Enable ESM code splitting in the bundler. CI verifies the transitive initial static
+graph contains neither the deferred algorithms nor optional WKT syntax, then executes
+the emitted chunks. The measurements below start with an eager core and Mercator.
+Sizes are sums across the relevant emitted files, with gzip applied to each file.
+
+The same **math.gl 5.0.0-alpha.12** source commit and tool versions as the static
+table were measured on October 6, 2026.
+
+| Deferred feature (math.gl 5.0.0-alpha.12) | Initial minified / gzip KiB | Additional minified / gzip KiB |
+| --- | ---: | ---: |
+| Automatic catalogue (`LazyProjection`) | 60.9 / 22.7 | 77.5 / 36.5 |
+| UTM descriptor | 53.9 / 19.8 | 7.9 / 3.4 |
+| WKT reader and syntax | 53.8 / 19.2 | 23.4 / 8.1 |
+| Rotated Mollweide (factory plus wrapped plugin) | 53.8 / 19.7 | 5.3 / 2.5 |
+
+The catalogue row sums all available deferred algorithm chunks, not the download
+for its first UTM operation. Other rows retain only their selected feature.
+
+These are esbuild browser/ES2020 measurements, not universal chunk sizes. Bundlers
+may extract shared helpers, so one plugin does not necessarily mean one file. Loading
+all features eventually pays for all retained code and chunk overhead. CommonJS
+subpaths select APIs but do not provide this browser download guarantee.
+
+Reproduce the split-bundle measurements after building:
+
+```sh
+node modules/projection/scripts/check-lazy-package.mjs --measure
+```
+
+Omit `--measure` to enforce the checked-in split-bundle budgets.
+
+Keep imports on the isolated subpaths throughout the eager and lazy features.
+Mixing in eager imports from the full `@math.gl/projection` or `@math.gl/crs` barrels
+can cause a bundler to hoist otherwise lazy code. A direct
+`await import('@math.gl/projection')` can retain the entire catalogue;
+it does not mean “only UTM.” Inspect the application's chunk graph, not just the
+presence of an `import()` expression. Tree shaking and deferred loading remain
+distinct: the former removes unused code, while the latter postpones code that is used.
+
+
+<span id="transform-flat-buffers-in-place" />
+<span id="projection-specific-batch-execution" />
+
+## Coordinate performance
+
+Use [Performance](./benchmarks.md) to choose scalar, flat or reusable buffers and
+run live benchmarks. The [`ProjectionEngine` reference](./api-reference/projection-engine.md)
+defines coordinate methods, plugin contracts, readers and failure behavior.
