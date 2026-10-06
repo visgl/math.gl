@@ -1,5 +1,14 @@
 [
   {
+    "id": "foundations",
+    "label": "Foundations",
+    "description": "Vectors, matrices and shared numeric types.",
+    "modules": [
+      "core",
+      "types"
+    ]
+  },
+  {
     "id": "earth",
     "label": "Earth",
     "description": "Coordinate reference systems, Earth models, maps and time.",
@@ -16,11 +25,8 @@
   {
     "id": "3d",
     "label": "3D",
-    "description": "Math foundations, curves, meshes and visibility.",
+    "description": "Curves, meshes, geometry processing and visibility.",
     "modules": [
-      "core",
-      "types",
-      "expressions",
       "curves",
       "geometry",
       "geometry-utils",
@@ -36,6 +42,14 @@
       "dggs",
       "geoarrow",
       "wkb"
+    ]
+  },
+  {
+    "id": "languages",
+    "label": "Languages",
+    "description": "Expression parsing, evaluation and accessor compilation.",
+    "modules": [
+      "expressions"
     ]
   }
 ]

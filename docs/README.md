@@ -25,6 +25,15 @@ math.gl is **optimized for use with WebGL and WebGPU**, however it is not a GPU 
 
 math.gl is a toolbox that offers a suite of composable modules.
 
+### Foundations
+
+Vectors, matrices and shared numeric types.
+
+| Module | Description |
+| --- | --- |
+| [`@math.gl/core`](./modules/core/README.md) | Vectors, matrices, quaternions and reusable math primitives. |
+| [`@math.gl/types`](./modules/types/README.md) | Shared TypeScript contracts for numeric and geospatial data. |
+
 ### Earth
 
 Coordinate reference systems, Earth models, maps and time.
@@ -41,13 +50,10 @@ Coordinate reference systems, Earth models, maps and time.
 
 ### 3D
 
-Math foundations, curves, meshes and visibility.
+Curves, meshes, geometry processing and visibility.
 
 | Module | Description |
 | --- | --- |
-| [`@math.gl/core`](./modules/core/README.md) | Vectors, matrices, quaternions and reusable math primitives. |
-| [`@math.gl/types`](./modules/types/README.md) | Shared TypeScript contracts for numeric and geospatial data. |
-| [`@math.gl/expressions`](./modules/expressions/README.md) | Parse and evaluate compact expressions (experimental). |
 | [`@math.gl/curves`](./modules/curves/README.md) | Parametric curves, interpolation and arc-length sampling. |
 | [`@math.gl/geometry`](./modules/geometry/README.md) | Renderer-independent primitive meshes and tessellation. |
 | [`@math.gl/geometry-utils`](./modules/geometry-utils/README.md) | Typed-array geometry processing utilities. |
@@ -63,6 +69,14 @@ Geometry operations, geographic indexing and columnar data.
 | [`@math.gl/dggs`](./modules/dggs/README.md) | Decode boundaries and columns for common global grid encodings. |
 | [`@math.gl/geoarrow`](./modules/geoarrow/README.md) | Columnar geospatial layouts and kernels over typed-array buffers. |
 | [`@math.gl/wkb`](./modules/wkb/README.md) | WKB, EWKB and WKT geometry codecs. |
+
+### Languages
+
+Expression parsing, evaluation and accessor compilation.
+
+| Module | Description |
+| --- | --- |
+| [`@math.gl/expressions`](./modules/expressions/README.md) | Parse and evaluate compact expressions (experimental). |
 
 <br/>
 In addition, math.gl provides a few deprecated legacy modules, to avoid breaking older applications.
