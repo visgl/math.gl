@@ -34,6 +34,7 @@ transfer-list deduplication. Those semantics are represented directly in `GeoArr
 | Arrow field layout oracle | adapter validation plus `validateGeoArrowColumn` |
 | `inspectGeoArrowVector` | `inspectGeoArrowColumn` |
 | `getGeoarrowVertexCount` | `getGeoArrowVertexCount` |
+| Native vector-to-geometry rows | `materializeGeoArrowRows` after buffer adaptation |
 | Arrow bounds kernel | `getGeoArrowBounds` |
 | Arrow coordinate mapper | `mapGeoArrowCoordinates` or `mapGeoArrowCoordinatesInto` |
 | Arrow builder output | `GeoArrowBuilderTarget` and borrowed descriptors |

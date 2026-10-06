@@ -163,7 +163,9 @@ function writeWKBGeometry(
   };
   switch (geometry.type) {
     case 'Point':
-      writeCoordinate(geometry.coordinates);
+      writeCoordinate(
+        geometry.coordinates.length === 0 ? new Array(size).fill(Number.NaN) : geometry.coordinates
+      );
       break;
     case 'LineString':
       writeCoordinates(geometry.coordinates);
