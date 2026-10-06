@@ -2,7 +2,7 @@
 
 import Example from '@site/src/components/geometry-processing';
 
-<Example inline height={540} />
+<Example inline interactive height={540} />
 
 Utilities for processing renderer-independent geometry stored in typed arrays. The module is
 designed for loaders and applications that need to inspect, normalize, or decode geometry without

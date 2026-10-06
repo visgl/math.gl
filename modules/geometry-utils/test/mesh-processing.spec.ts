@@ -118,3 +118,49 @@ test('invalid topology, attribute layouts, indices and transforms are rejected',
   expect(() => weldGeometry(triangle(), {positionGridSize: -1})).toThrow();
   expect(() => getDegenerateTriangles(triangle(), NaN)).toThrow();
 });
+
+test('extreme invertible scales preserve normals, tangents and reflection winding', () => {
+  const input = triangle();
+  input.attributes.NORMAL = {size: 3, value: new Float64Array([1, 1, 1, 1, 1, 1, 1, 1, 1])};
+  input.attributes.TANGENT = {
+    size: 4,
+    value: new Float64Array([1, -1, 0, 1, 1, -1, 0, 1, 1, -1, 0, 1])
+  };
+  for (const scale of [
+    [1e-200, 1e-200, 1e200],
+    [1e200, 1e200, 1e-200],
+    [-1e-200, 1e-200, 1e200]
+  ]) {
+    const output = transformGeometry(input, new Matrix4().scale(scale));
+    const n = values(output, 'NORMAL').slice(0, 3);
+    const t = values(output, 'TANGENT').slice(0, 3);
+    expect(n.every(Number.isFinite)).toBe(true);
+    expect(Math.hypot(...n)).toBeCloseTo(1);
+    expect(Math.hypot(...t)).toBeCloseTo(1);
+    expect(n.reduce((sum, v, i) => sum + v * t[i], 0)).toBeCloseTo(0);
+    if (scale[0] < 0) {
+      expect(n[0]).toBeCloseTo(-1 / Math.sqrt(2));
+      expect(output.indices).toEqual(new Uint32Array([0, 2, 1]));
+      expect(values(output, 'TANGENT')[3]).toBe(-1);
+    }
+  }
+});
+
+test('degenerate area checks avoid cross-product overflow and underflow', () => {
+  const mesh = (positions: number[]): Geometry => ({
+    mode: GL.TRIANGLES,
+    attributes: {POSITION: {size: 3, value: new Float64Array(positions)}}
+  });
+  expect(getDegenerateTriangles(mesh([0, 0, 0, 1e155, 1e155, 0, 2e155, 2e155, 0]))).toEqual(
+    new Uint32Array([0])
+  );
+  expect(getDegenerateTriangles(mesh([0, 0, 0, 1e155, 0, 0, 0, 1e155, 0]))).toEqual(
+    new Uint32Array()
+  );
+  expect(getDegenerateTriangles(mesh([-1e308, 0, 0, 1e308, 0, 0, 0, 0, 0]))).toEqual(
+    new Uint32Array([0])
+  );
+  const tiny = mesh([0, 0, 0, 1e-200, 0, 0, 0, 1e-200, 0]);
+  expect(getDegenerateTriangles(tiny)).toEqual(new Uint32Array());
+  expect(getDegenerateTriangles(tiny, 1e-300)).toEqual(new Uint32Array([0]));
+});

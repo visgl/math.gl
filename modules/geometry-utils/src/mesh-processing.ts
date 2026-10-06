@@ -31,7 +31,17 @@ export function transformGeometry(
     throw new RangeError('Transform must be a finite affine column-major matrix');
   }
   const transform = new Matrix4(Array.from(matrix));
-  const determinant = transform.determinant();
+  // Factor out independent column scales before testing orientation/invertibility.
+  // A raw determinant can underflow or overflow for finite invertible matrices.
+  const columns = [0, 4, 8].map(offset => Array.from(matrix).slice(offset, offset + 3));
+  const scales = columns.map(column => Math.max(...column.map(Math.abs)));
+  const basis = columns.map((column, i) => column.map(v => (scales[i] ? v / scales[i] : 0)));
+  const cofactors = [
+    cross(basis[1], basis[2]),
+    cross(basis[2], basis[0]),
+    cross(basis[0], basis[1])
+  ];
+  const determinant = basis[0].reduce((sum, v, i) => sum + v * cofactors[0][i], 0);
   const attributes = copyAttributes(mesh.attributes);
   const normalName = attributes['NORMAL'] ? 'NORMAL' : attributes['normals'] ? 'normals' : null;
   const tangentName = attributes['TANGENT'] ? 'TANGENT' : null;
@@ -47,15 +57,15 @@ export function transformGeometry(
   if (normalName) {
     const input = mesh.attributes[normalName];
     if (input.size !== 3) throw new RangeError('Normals must have size 3');
-    const inverseTranspose = transform.clone().invert().transpose();
     const output = new Float64Array(mesh.count * 3);
     for (let i = 0; i < mesh.count; i++) {
-      const value = inverseTranspose.transformAsVector(
-        Array.from(input.value.slice(i * 3, i * 3 + 3))
+      const value = normalizedLinearCombination(
+        cofactors,
+        Array.from(input.value.slice(i * 3, i * 3 + 3)),
+        scales.map(v => -Math.log(v))
       );
-      const length = Math.hypot(...value);
       output.set(
-        value.map(v => (length ? v / length : 0)),
+        value.map(v => (determinant < 0 ? -v : v)),
         i * 3
       );
     }
@@ -66,7 +76,11 @@ export function transformGeometry(
     if (input.size !== 4) throw new RangeError('Tangents must have size 4');
     const output = new Float64Array(mesh.count * 4);
     for (let i = 0; i < mesh.count; i++) {
-      const value = transform.transformAsVector(Array.from(input.value.slice(i * 4, i * 4 + 3)));
+      const value = normalizedLinearCombination(
+        basis,
+        Array.from(input.value.slice(i * 4, i * 4 + 3)),
+        scales.map(Math.log)
+      );
       if (normalName) {
         const n = attributes[normalName].value.slice(i * 3, i * 3 + 3);
         const projection = value[0] * n[0] + value[1] * n[1] + value[2] * n[2];
@@ -222,13 +236,37 @@ export function getDegenerateTriangles(geometry: Geometry, areaEpsilon = 0): Uin
       positions[c + 1] - positions[a + 1],
       positions[c + 2] - positions[a + 2]
     ];
-    const area =
-      Math.hypot(
-        ab[1] * ac[2] - ab[2] * ac[1],
-        ab[2] * ac[0] - ab[0] * ac[2],
-        ab[0] * ac[1] - ab[1] * ac[0]
-      ) / 2;
-    if (area <= areaEpsilon) result.push(i / 3);
+    // Normalize each edge independently before multiplying components. If a
+    // difference itself overflows, first scale the three source positions.
+    let edgeScale = 1;
+    if (![...ab, ...ac].every(Number.isFinite)) {
+      edgeScale = Math.max(
+        ...[a, b, c].flatMap(offset => Array.from(positions.slice(offset, offset + 3), Math.abs))
+      );
+      for (let axis = 0; axis < 3; axis++) {
+        ab[axis] = positions[b + axis] / edgeScale - positions[a + axis] / edgeScale;
+        ac[axis] = positions[c + axis] / edgeScale - positions[a + axis] / edgeScale;
+      }
+    }
+    const scaleAB = Math.max(...ab.map(Math.abs));
+    const scaleAC = Math.max(...ac.map(Math.abs));
+    const crossLength =
+      scaleAB && scaleAC
+        ? Math.hypot(
+            ...cross(
+              ab.map(v => v / scaleAB),
+              ac.map(v => v / scaleAC)
+            )
+          )
+        : 0;
+    const logArea =
+      Math.log(crossLength) +
+      Math.log(scaleAB) +
+      Math.log(scaleAC) +
+      2 * Math.log(edgeScale) -
+      Math.log(2);
+    if (crossLength === 0 || (areaEpsilon > 0 && logArea <= Math.log(areaEpsilon)))
+      result.push(i / 3);
   }
   return Uint32Array.from(result);
 }
@@ -278,4 +316,25 @@ function copyAttributes(attributes: MeshData['attributes']): Record<string, Geom
       {size: attribute.size, value: attribute.value.slice()}
     ])
   );
+}
+
+function cross(a: number[], b: number[]): number[] {
+  return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+}
+
+/** Direction-only multiplication, avoiding overflow in scale-weighted components. */
+function normalizedLinearCombination(
+  columns: number[][],
+  vector: number[],
+  logScales: number[]
+): number[] {
+  const logs = vector.map((v, i) => (v ? Math.log(Math.abs(v)) + logScales[i] : -Infinity));
+  const largest = Math.max(...logs);
+  if (largest === -Infinity) return [0, 0, 0];
+  const weights = logs.map((v, i) => Math.sign(vector[i]) * Math.exp(v - largest));
+  const result = [0, 1, 2].map(axis =>
+    columns.reduce((sum, column, i) => sum + column[axis] * weights[i], 0)
+  );
+  const length = Math.hypot(...result);
+  return result.map(v => (length ? v / length : 0));
 }
