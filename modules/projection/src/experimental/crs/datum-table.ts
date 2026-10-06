@@ -7,11 +7,6 @@ const datums: Record<
   string,
   {towgs84?: string; nadgrids?: string; ellipse?: string; datumName?: string}
 > = {
-  wgs84: {
-    towgs84: '0,0,0',
-    ellipse: 'WGS84',
-    datumName: 'WGS84'
-  },
   ch1903: {
     towgs84: '674.374,15.056,405.346',
     ellipse: 'bessel',
@@ -21,11 +16,6 @@ const datums: Record<
     towgs84: '-199.87,74.79,246.62',
     ellipse: 'GRS80',
     datumName: 'Greek_Geodetic_Reference_System_1987'
-  },
-  nad83: {
-    towgs84: '0,0,0',
-    ellipse: 'GRS80',
-    datumName: 'North_American_Datum_1983'
   },
   nad27: {
     nadgrids: '@conus,@alaska,@ntv2_0.gsb,@ntv1_can.dat',

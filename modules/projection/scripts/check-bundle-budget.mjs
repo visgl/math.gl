@@ -11,7 +11,12 @@ const fixtures = {
   temporalModel: "export * from '@math.gl/projection/temporal';",
   projectionBulk: "export * from '@math.gl/projection/bulk';",
   projectionAnalysis: "export * from '@math.gl/projection/analysis';",
-  core: "export {ProjectionEngine} from '@math.gl/projection';",
+  core: "export {ProjectionEngine} from '@math.gl/projection/core';",
+  rootEngine: "export {ProjectionEngine} from '@math.gl/projection';",
+  coreWithDatumCatalog:
+    "import {ProjectionEngine} from '@math.gl/projection/core'; import {datumCatalog} from '@math.gl/projection/datums'; export const create = from => new ProjectionEngine({from, datumCatalogs: [datumCatalog]});",
+  mercatorWithDatumCatalog:
+    "import {ProjectionEngine} from '@math.gl/projection/core'; import {mercator} from '@math.gl/projection/projections/merc'; import {datumCatalog} from '@math.gl/projection/datums'; export const create = from => new ProjectionEngine({from, to: 'EPSG:3857', projections: [mercator], datumCatalogs: [datumCatalog]});",
   mercator:
     "import {ProjectionEngine, mercator} from '@math.gl/projection'; export const create = () => new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});",
   utm: "import {ProjectionEngine, universalTransverseMercator} from '@math.gl/projection'; export const create = () => new ProjectionEngine({to: 'EPSG:32631', projections: [universalTransverseMercator]});",
@@ -44,17 +49,40 @@ const budgets = process.argv.includes('--measure')
 const measurements = {};
 for (const [name, contents] of Object.entries(fixtures)) {
   const result = await build({
-    stdin: {contents, resolveDir: fileURLToPath(new URL('../', import.meta.url))},
+    stdin: {
+      contents,
+      resolveDir: fileURLToPath(new URL('../', import.meta.url))
+    },
     bundle: true,
     tsconfigRaw: {},
     format: 'esm',
     platform: 'browser',
     target: 'es2020',
     minify: true,
-    write: false
+    write: false,
+    metafile: true
   });
+  const retained = Object.entries(Object.values(result.metafile.outputs)[0].inputs)
+    .filter(([, input]) => input.bytesInOutput > 0)
+    .map(([path]) => path);
+  const expectsCatalog = [
+    'coreWithDatumCatalog',
+    'mercatorWithDatumCatalog',
+    'typescriptWrapper',
+    'allNativeExports'
+  ].includes(name);
+  assert.equal(
+    retained.some(path => path.endsWith('/crs/datum-table.js')),
+    expectsCatalog,
+    name + ' regional datum catalogue retention'
+  );
+  if (name === 'core')
+    assert(!Object.keys(result.metafile.inputs).some(path => path.endsWith('/crs/datum-table.js')));
   const bytes = result.outputFiles[0].contents;
-  measurements[name] = {minified: bytes.length, gzip: gzipSync(bytes, {level: 9}).length};
+  measurements[name] = {
+    minified: bytes.length,
+    gzip: gzipSync(bytes, {level: 9}).length
+  };
   if (budgets)
     for (const metric of ['minified', 'gzip']) {
       assert(

@@ -22,6 +22,8 @@ export type {
 export {normalizeCRS} from './crs/normalize';
 export {TypeScriptCRSError} from './crs/types';
 export type {
+  DatumDefinition,
+  DatumCatalogPlugin,
   NormalizedCRS,
   CRSParser,
   ParsedCRS,

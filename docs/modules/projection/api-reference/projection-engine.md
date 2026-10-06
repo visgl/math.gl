@@ -34,6 +34,9 @@ using its canonical PROJ name, for example `merc`, `utm`, `etmerc`, `geocent` or
 `ob_tran`. Export names are identical to the barrel's names. Geographic coordinates
 need no plugin or `longlat` subpath; the internal `gauss` helper is not public.
 
+The optional regional `datumCatalog` plugin is available from `@math.gl/projection/datums`.
+Its runtime export stays outside the root and `/core` entry points.
+
 Readers are available from `parsers/wkt`, `parsers/projjson`,
 `grids/ntv2`, `grids/geotiff`, `grids/gtx`, `grids/vertical` and `grids/vertical-geotiff`, with the package name prefix.
 All subpaths support ESM, CommonJS and TypeScript. ESM code splitting is required for
@@ -42,7 +45,7 @@ See the [lazy-loading guide](../projection-engine.md#load-less-used-projections-
 
 ## Constructor
 
-`new ProjectionEngine({from, to, projections, aliases, parsers, datumGrids, verticalGrids, enforceAxis, mode})`
+`new ProjectionEngine({from, to, projections, aliases, parsers, datumCatalogs, datumGrids, verticalGrids, enforceAxis, mode})`
 
 All options are optional. Omitted `from` and `to` default to WGS84.
 Both accept `ReadonlyCRSDefinition`, `CRSReference`, or `SpatialReference` from
@@ -53,6 +56,30 @@ and supported WKT/PROJJSON when their readers are registered.
 `wktCRSParser` and `projJSONCRSParser` adapters. Unused readers and projections are
 removed by ESM bundlers. `aliases` maps names to readonly definitions or other aliases;
 cycles and duplicate plugin names/aliases are rejected.
+
+`datumCatalogs` registers additional named datum definitions per instance. Only
+WGS84 and NAD83, including their existing aliases, are built in. Use
+`datumCatalogs: [datumCatalog]` for the previous full named datum coverage. This option
+also applies to normalization, compatibility checks, lazy loading and structured readers.
+Unknown datum names throw a `missing-transform-stage` error with registration guidance.
+
+```typescript
+import type {DatumDefinition, DatumCatalogPlugin} from '@math.gl/projection/core';
+
+const local: DatumDefinition = {ellipse: 'airy', towgs84: '1,2,3'};
+const catalog: DatumCatalogPlugin = {name: 'application-datums', datums: {local}};
+const projection = new ProjectionEngine({
+  from: '+proj=longlat +datum=local',
+  datumCatalogs: [catalog]
+});
+```
+
+`DatumDefinition` has optional readonly `ellipse`, `towgs84`, and `nadgrids` strings,
+using the existing PROJ ellipsoid, Helmert, and ordered grid-list syntax. Names are
+matched case-insensitively with spaces, underscores and hyphens removed. Conflicts
+with built-ins or another catalogue are rejected; equivalent aliases within one
+catalogue are allowed. An unavailable name is never replaced by WGS84.
+Grid data must still be supplied separately through `datumGrids`.
 
 Built-ins include WGS84/EPSG:4326, EPSG:4269 (NAD83), EPSG:4979 (WGS84 3D),
 EPSG:3857 and its legacy aliases, all WGS84 UTM zones, and UPS north/south.

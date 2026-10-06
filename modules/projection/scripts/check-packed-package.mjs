@@ -90,6 +90,7 @@ try {
     const subpaths = ${JSON.stringify(subpaths)};
     const optionalEntries = {
       './temporal': ['createTemporalDeformationModel'],
+      './datums': ['datumCatalog'],
       './bulk': ['ProjectionBuffer'],
       './operations': ['OperationCatalog'],
       './analysis': ['ProjectionAnalysis', 'createProjectionJacobian', 'createProjectionFactors'],
@@ -104,7 +105,7 @@ try {
       assert(Object.keys(entry).length > 0, subpath);
       if (optionalEntries[subpath]) {
         assert.deepEqual(Object.keys(entry).sort(), optionalEntries[subpath].slice().sort());
-        for (const name of optionalEntries[subpath]) assert.equal(typeof entry[name], 'function');
+        for (const name of optionalEntries[subpath]) assert.equal(typeof entry[name], subpath === './datums' ? 'object' : 'function');
         continue;
       }
       for (const [name, value] of Object.entries(entry)) {
@@ -123,6 +124,17 @@ try {
     assert(Math.abs((await automatic.project([3, 0]))[0] - 500000) < 1e-7);
     assert(Math.abs(automatic.projectSync([3, 0])[0] - 500000) < 1e-7);
     const core = await load('@math.gl/projection/core');
+    const {datumCatalog} = await load('@math.gl/projection/datums');
+    const regional = '+proj=longlat +datum=OSGB36';
+    assert.throws(() => new core.ProjectionEngine({from:regional}), /datumCatalogs/);
+    assert.equal(core.checkProjectionCompatibility(regional).status, 'unsupported');
+    const datumEngine = new core.ProjectionEngine({from:regional,datumCatalogs:[datumCatalog]});
+    const shifted = datumEngine.project([-2,52,100]);
+    assert(Math.abs(shifted[0] - (-2)) > 0.0001);
+    assert.deepEqual(new stable.Projection({from:regional}).project([-2,52,100]),shifted);
+    assert.equal(core.checkProjectionCompatibility(regional,{datumCatalogs:[datumCatalog]}).status,'supported');
+    const regionalLazy = await LazyProjection.create({from:regional,to:'EPSG:3857',datumCatalogs:[datumCatalog]});
+    assert(Number.isFinite(regionalLazy.project([-2,52])[0]));
     const {spheroidToCartesian, cartesianToSpheroid} = await load('@math.gl/core/spheroid');
     const numericOutput = {x:0,y:0,z:3};
     const numericGeometry = {semiMajorAxis:10,semiMinorAxis:5,eccentricitySquared:.75};
@@ -487,7 +499,15 @@ try {
     // @ts-expect-error Analysis requires an explicit application domain.
     new ProjectionAnalysis({projection:mercator,context:analysisOptions.context});
     import {ProjectionEngine, checkProjectionCompatibility, type ProjectionPoint, type ProjectionEngineOptions, type ProjectionEngineCreateOptions, type ProjectionCompatibility} from '@math.gl/projection/core';
-    const engineOptions: ProjectionEngineOptions = {};
+    import {datumCatalog, type DatumCatalogPlugin, type DatumDefinition} from '@math.gl/projection/datums';
+    import type {DatumCatalogPlugin as CoreDatumCatalog, DatumDefinition as CoreDatumDefinition} from '@math.gl/projection/core';
+    import type {DatumCatalogPlugin as RootDatumCatalog} from '@math.gl/projection';
+    const customDatum: DatumDefinition = {ellipse:'airy',towgs84:'1,2,3'};
+    const coreDatum: CoreDatumDefinition = customDatum;
+    const customCatalog: DatumCatalogPlugin = {name:'local',datums:{local:coreDatum}};
+    const coreCatalog: CoreDatumCatalog = customCatalog;
+    const rootCatalog: RootDatumCatalog = coreCatalog;
+    const engineOptions: ProjectionEngineOptions = {datumCatalogs:[datumCatalog,rootCatalog]};
     const createOptions: ProjectionEngineCreateOptions = engineOptions;
     const configured: ProjectionEngine = new ProjectionEngine(engineOptions);
     const capability: ProjectionCompatibility = checkProjectionCompatibility('EPSG:4326');
