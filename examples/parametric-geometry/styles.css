@@ -1,0 +1,37 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.function-editor textarea {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  resize: vertical;
+  padding: 8px;
+  margin-top: 8px;
+  border: 1px solid #526b84;
+  border-radius: 4px;
+  background: #07121e;
+  color: #e4f3ff;
+  font: 12px monospace;
+}
+.function-editor button {
+  background: #23445e;
+  color: #eef5ff;
+  border: 1px solid #70c7ff;
+  border-radius: 4px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+.function-editor .function-error {
+  color: #ffb3b3;
+}
+.processing-info select {
+  max-width: 100%;
+}
+
+.function-editor pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 12px monospace;
+}

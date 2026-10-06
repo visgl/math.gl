@@ -50,3 +50,13 @@ smooth periodic surface on that axis. Singular derivatives yield zero normals;
 discontinuous samples need an explicit normal callback or separate meshes.
 Positions must be representable as finite Float32 values. Generators do not
 validate manifoldness or repair self-intersections.
+
+## Define a surface in the gallery
+
+Choose **Function** and enter a JavaScript function `(u, v, a) => [x, y, z]`.
+`u` and `v` range from 0 to 1, and `a` follows the shape-parameter slider.
+Use **Apply function** to rebuild the surface. Wave, saddle and helicoid starters
+provide editable examples. Syntax errors and nonfinite or incorrectly shaped samples
+show feedback while retaining the previous surface. Functions run locally in a Web
+Worker, which is terminated if a build exceeds three seconds, keeping the controls
+responsive even if a function loops indefinitely.
