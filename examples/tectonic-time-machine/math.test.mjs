@@ -51,7 +51,11 @@ test('shortest interpolation crosses the dateline rather than reversing around E
 test('first historical interval moves continuously from present and absent poles are omitted', () => {
   const q = new Float64Array(4),
     ten = [Math.cos(Math.PI / 18), 0, 0, Math.sin(Math.PI / 18)];
-  const table = {0: {701: IDENTITY}, 10: {701: ten}, 20: {701: IDENTITY}};
+  const table = {
+    0: {701: IDENTITY},
+    10: {701: ten},
+    20: {701: IDENTITY}
+  };
   assert(historicalRotation(table, 701, 5, q));
   const out = new Float64Array(2);
   rotateToLonLat(q, unitVector(0, 0), 0, out, 0);
@@ -131,39 +135,62 @@ test('morph endpoints remain exact, and both views read moving coordinates durin
   assert.deepEqual(blendWeights(weights, 'globe', 1), {globe: 1});
 });
 
-
 test('terrain reference vectors undo plate motion and meridian shifts, including the dateline', () => {
   const rotation = [Math.SQRT1_2, 0, 0, Math.SQRT1_2];
   for (const longitude of [0, 120, -180]) {
-    const mesh = makeMesh([{
-      positions: [88 - longitude, -2, 92 - longitude, -2, 92 - longitude, 2, 88 - longitude, 2, 88 - longitude, -2],
-      color: [10, 20, 30], rotation, longitude
-    }]);
+    const mesh = makeMesh([
+      {
+        positions: [
+          88 - longitude,
+          -2,
+          92 - longitude,
+          -2,
+          92 - longitude,
+          2,
+          88 - longitude,
+          2,
+          88 - longitude,
+          -2
+        ],
+        color: [10, 20, 30],
+        rotation,
+        longitude
+      }
+    ]);
     assert(mesh.indices.length);
     for (let i = 0, j = 0; i < mesh.coordinates.length; i += 2, j += 3) {
       const expected = unitVector(mesh.coordinates[i] + longitude - 90, mesh.coordinates[i + 1]);
       for (let k = 0; k < 3; k++) near(mesh.reference[j + k], expected[k], 1e-6);
     }
     transformMesh(mesh, {globe: 1}, {}, {}, 37);
-    for (let j = 0; j < mesh.normals.length; j += 3) near(Math.hypot(...mesh.normals.subarray(j, j + 3)), 1, 1e-6);
+    for (let j = 0; j < mesh.normals.length; j += 3)
+      near(Math.hypot(...mesh.normals.subarray(j, j + 3)), 1, 1e-6);
   }
 });
-
 
 test('hover labels recover globe and map coordinates and reject points outside the surface', () => {
   const out = new Float64Array(2);
   assert(worldToGeographic(0, 0, 'globe', null, null, 37, 120, out));
-  near(out[0], 120); near(out[1], 37);
+  near(out[0], 120);
+  near(out[1], 37);
   assert(worldToGeographic(1, 0, 'globe', null, null, 0, 120, out));
-  near(out[0], -150); near(out[1], 0);
+  near(out[0], -150);
+  near(out[1], 0);
   assert(!worldToGeographic(1.1, 0, 'globe', null, null, 0, 0, out));
-  const engine = {unprojectFlatSync(p) {return p;}, projectFlatSync(p) {return p;}};
+  const engine = {
+    unprojectFlatSync(p) {
+      return p;
+    },
+    projectFlatSync(p) {
+      return p;
+    }
+  };
   assert(worldToGeographic(40, -20, 'eqc', engine, 2, 0, -30, out));
-  near(out[0], -10); near(out[1], -10);
+  near(out[0], -10);
+  near(out[1], -10);
   assert(!worldToGeographic(362, 0, 'eqc', engine, 2, 0, 0, out));
   assert(!worldToGeographic(0, 172, 'merc', engine, 2, 0, 0, out));
 });
-
 
 test('Equal Earth hover outside its outline returns no coordinate instead of a runtime error', async () => {
   const {ProjectionEngine, equalEarth} = await import('@math.gl/projection');
@@ -181,12 +208,19 @@ test('Equal Earth hover outside its outline returns no coordinate instead of a r
   // A failed inverse must not poison the reused buffer or projection's scratch state.
   const projected = engine.projectSync([42, 25]);
   assert(worldToGeographic(...projected, 'eqearth', engine, 1, 0, 0, out));
-  near(out[0], 42, 1e-7); near(out[1], 25, 1e-7);
+  near(out[0], 42, 1e-7);
+  near(out[1], 25, 1e-7);
   assert.equal(worldToGeographic(NaN, 0, 'eqearth', engine, 1, 0, 0, out), false);
-  const broken = {unprojectFlatSync() {throw new Error('Plugin not loaded');}};
-  assert.throws(() => worldToGeographic(0, 0, 'eqearth', broken, 1, 0, 0, out), /Plugin not loaded/);
+  const broken = {
+    unprojectFlatSync() {
+      throw new Error('Plugin not loaded');
+    }
+  };
+  assert.throws(
+    () => worldToGeographic(0, 0, 'eqearth', broken, 1, 0, 0, out),
+    /Plugin not loaded/
+  );
 });
-
 
 import {LANDMASS_CHAPTERS, chapterOpacity, timelineMilestones} from './timeline.js';
 test('landmass titles fade with geological time, and future names follow the selected scenario', () => {
@@ -201,8 +235,22 @@ test('landmass titles fade with geological time, and future names follow the sel
     near(chapterOpacity(chapter, end, scenario), 0);
     near(chapterOpacity(chapter, NaN, scenario), 0);
   }
-  near(chapterOpacity(LANDMASS_CHAPTERS.find(c => c.scenario === 'atlantic'), 250, 'polar'), 0);
-  near(chapterOpacity(LANDMASS_CHAPTERS.find(c => c.scenario === 'polar'), 250, 'atlantic'), 0);
+  near(
+    chapterOpacity(
+      LANDMASS_CHAPTERS.find(c => c.scenario === 'atlantic'),
+      250,
+      'polar'
+    ),
+    0
+  );
+  near(
+    chapterOpacity(
+      LANDMASS_CHAPTERS.find(c => c.scenario === 'polar'),
+      250,
+      'atlantic'
+    ),
+    0
+  );
   assert.equal(timelineMilestones('atlantic').at(-1).name, 'Atlantic assembly');
   assert.equal(timelineMilestones('polar').at(-1).name, 'Polar assembly');
   for (let time = -500; time <= 300; time++) {
@@ -210,14 +258,13 @@ test('landmass titles fade with geological time, and future names follow the sel
   }
 });
 
-
-import {DATA_SOURCES, rotationBracket, rotationWindow, clampTime, sourceFor} from './sources.js';
-import {createRotationCache} from './data.js';
-import {readZipEntry, modelXML} from './archive.js';
-import {gzipSync, deflateRawSync} from 'node:zlib';
-import {createHash} from 'node:crypto';
+import {DATA_SOURCES, rotationBracket, clampTime, sourceFor} from './sources.js';
+import {createRotationCache, polygonFeature, loadModel} from './data.js';
+import {rotationGroups} from './parquet-stream.js';
+import {maintainHistory, waitForRetry} from './history-stream.js';
 test('source ranges include Rodinia and restrict Nuna to the 1.8 Ga source', () => {
   assert.equal(sourceFor('CAO2024').license, 'CC-BY-4.0');
+  assert.equal(sourceFor('MULLER2022').license, 'CC-BY-4.0');
   assert.throws(() => sourceFor('unknown'), /Unknown/);
   assert.throws(() => sourceFor('toString'), /Unknown/);
   assert.deepEqual(rotationBracket(-1800, 1800), [1800, 1800]);
@@ -226,56 +273,13 @@ test('source ranges include Rodinia and restrict Nuna to the 1.8 Ga source', () 
   assert.deepEqual(rotationBracket(250, 1800), [0, 0]);
   assert.throws(() => rotationBracket(-1001, 1000), /range/);
   assert.equal(clampTime(-1600, 1000), -1000);
-  assert.equal(rotationWindow(-1800, 1800).at(-1), 1800);
-  assert.equal(rotationWindow(-930, 1800).length, 21);
-  assert.equal(rotationWindow(-1600, 1800)[0], 1400);
-  assert.equal(rotationWindow(-1600, 1800).at(-1), 1600);
-  assert.equal(rotationWindow(0, 1800)[0], 0);
-  assert.deepEqual(rotationBracket(-1600, 1800), [1600, 1600]);
-  assert.deepEqual(rotationBracket(-1599.5, 1800), [1590, 1600]);
   assert(timelineMilestones('atlantic', 1800).some(c => c.name === 'Nuna'));
   assert(!timelineMilestones('atlantic', 1000).some(c => c.name === 'Nuna'));
-  assert(timelineMilestones('atlantic', 1000).some(c => c.name === 'Rodinia'));
 });
-test('rotation windows publish all plate rows together, reuse cached samples, and recover from failures', async () => {
-  const source = DATA_SOURCES.CAO2024, ids = Array.from({length: 257}, (_, i) => 500 + i);
-  let fail = true, calls = 0;
-  const cache = createRotationCache(ids, source, async function* (url, signal) {
-    calls++;
-    assert.equal(url.searchParams.get('model'), 'CAO2024');
-    const pids = url.searchParams.get('pids').split(','), times = url.searchParams.get('times').split(',');
-    assert(pids.length <= 256); assert(times.length <= 21);
-    assert.equal(cache.hasTime(-930), false);
-    if (fail && pids.length === 1) throw new Error('Service unavailable');
-    signal.throwIfAborted();
-    yield* parseRotationBatches([bytes(Object.fromEntries(times.map(t => [t, Object.fromEntries(pids.map(pid => [pid, IDENTITY]))])))]);
-  });
-  const signal = new AbortController().signal;
-  await assert.rejects(cache.ensureTime(-930, {signal}), /Service unavailable/);
-  assert.equal(cache.hasTime(-930), false);
-  assert.deepEqual(cache.rotations, {});
-  fail = false;
-  await cache.ensureTime(-930, {signal});
-  assert(cache.hasTime(-930));
-  assert.equal(cache.rotations['930'].values.length, 257 * 4);
-  assert.equal(cache.rotations['930'].indices.size, 257);
-  const previousCalls = calls;
-  await cache.ensureTime(-950, {signal});
-  assert.equal(calls, previousCalls);
-  assert.equal(cache.hasTime(-1600), false);
-  const controller = new AbortController(); controller.abort();
-  await assert.rejects(cache.ensureTime(-1600, {signal: controller.signal}), /abort/i);
-  assert.equal(cache.hasTime(-1600), false);
-  const boundary = createRotationCache([701], source, async function* (url) {
-    const times = url.searchParams.get('times').split(',');
-    yield* parseRotationBatches([bytes(Object.fromEntries(times.map(t => [t, {701: IDENTITY}])))]);
-  });
-  await boundary.ensureTime(-1600, {signal});
-  assert(boundary.hasTime(-1600));
-  assert(boundary.hasTime(-1599.5));
-});
+const pole = [Math.SQRT1_2, 0, 0, Math.SQRT1_2];
 test('historical interpolation reaches deep-time endpoints without the previous 500 Ma clamp', () => {
-  const q = new Float64Array(4), pole = [Math.SQRT1_2, 0, 0, Math.SQRT1_2];
+  const q = new Float64Array(4),
+    pole = [Math.SQRT1_2, 0, 0, Math.SQRT1_2];
   const table = {1790: {701: pole}, 1800: {701: pole}};
   assert(historicalRotation(table, 701, 1795, q, 1800));
   assert(historicalRotation(table, 701, 1800, q, 1800));
@@ -283,267 +287,16 @@ test('historical interpolation reaches deep-time endpoints without the previous 
   assert(historicalRotation({1600: {701: pole}}, 701, 1600, q, 1800));
   assert(historicalRotation({0: {701: IDENTITY}}, 701, 0, q, 1800));
 });
-function zipFixture(name, data, method = 0) {
-  const file = Buffer.from(name), payload = method === 8 ? deflateRawSync(data) : data;
-  const local = Buffer.alloc(30); local.writeUInt32LE(0x04034b50); local.writeUInt16LE(method, 8);
-  local.writeUInt32LE(payload.length, 18); local.writeUInt32LE(data.length, 22); local.writeUInt16LE(file.length, 26);
-  const central = Buffer.alloc(46); central.writeUInt32LE(0x02014b50); central.writeUInt16LE(method, 10);
-  central.writeUInt32LE(payload.length, 20); central.writeUInt32LE(data.length, 24); central.writeUInt16LE(file.length, 28);
-  const footer = Buffer.alloc(22); footer.writeUInt32LE(0x06054b50); footer.writeUInt16LE(1, 8); footer.writeUInt16LE(1, 10);
-  footer.writeUInt32LE(central.length + file.length, 12); footer.writeUInt32LE(local.length + file.length + payload.length, 16);
-  return Uint8Array.from(Buffer.concat([local, file, payload, central, file, footer])).buffer;
-}
-test('model archive reads only the named geometry and rejects changed revisions or malformed files', async () => {
-  const name = 'ContinentalPolygons/shapes_continents.gpmlz', xml = '<original-test-geometry/>', data = gzipSync(xml);
-  for (const method of [0, 8]) {
-    const buffer = zipFixture(name, data, method);
-    assert.deepEqual(Buffer.from(await readZipEntry(buffer, name)), data);
-    const sha256 = createHash('sha256').update(new Uint8Array(buffer)).digest('hex');
-    assert.equal(await modelXML(buffer, {archiveEntry: name, sha256}), xml);
-    await assert.rejects(modelXML(buffer, {archiveEntry: name, sha256: 'wrong'}), /checksum/);
-    await assert.rejects(readZipEntry(buffer, 'missing'), /Missing/);
-  }
-  await assert.rejects(readZipEntry(new ArrayBuffer(4), name), /Invalid/);
-  const corrupt = zipFixture(name, data); new DataView(corrupt).setUint32(0, 0);
-  await assert.rejects(readZipEntry(corrupt, name), /Invalid/);
-});
-
-import {isMobile, shouldPreloadHistory, nextRotationTime} from './sources.js';
-import {parseRotationRows, parseRotationBatches, responseChunks, ROTATION_SCHEMA} from './rotation-stream.js';
-const bytes = value => new TextEncoder().encode(JSON.stringify(value));
-async function collect(iterable) {const result = []; for await (const item of iterable) result.push(item); return result;}
-test('desktop streams all history; mobile and save-data clients keep a smaller buffer', () => {
-  assert.equal(isMobile(undefined), false);
-  assert.equal(shouldPreloadHistory({userAgent: 'Desktop', deviceMemory: 8}), true);
-  for (const device of [
-    {userAgentData: {mobile: true}}, {userAgent: 'Android'}, {userAgent: 'iPhone'},
-    {platform: 'MacIntel', maxTouchPoints: 5}, {connection: {saveData: true}}
-  ]) assert.equal(shouldPreloadHistory(device), false);
-  assert.equal(shouldPreloadHistory({userAgent: 'Desktop', deviceMemory: 2}), true);
-  assert.equal(isMobile({userAgent: 'Macintosh', platform: 'MacIntel', maxTouchPoints: 0}), false);
-  assert.equal(nextRotationTime(-930, 1800), -790);
-  assert.equal(nextRotationTime(-1800, 1800), -1590);
-  assert.equal(nextRotationTime(-200, 1800), null);
-  assert.equal(nextRotationTime(250, 1800), null);
-});
-test('JSON-to-Arrow uses a fixed projected schema and drops unneeded columns in every batch', async () => {
-  const rows = Array.from({length: 9}, (_, i) => ({age: i * 10, plateId: 701, w: 1, x: 0, y: 0, z: 0,
-    unused: {description: 'not retained', values: [1, 2, 3]}}));
-  const batches = await collect(parseRotationRows([bytes(rows)], 4));
-  assert.deepEqual(batches.map(b => b.data.numRows), [4, 4, 1]);
-  for (const batch of batches) {
-    assert.deepEqual(batch.data.schema.fields.map(f => f.name), ROTATION_SCHEMA.fields.map(f => f.name));
-    assert.equal(batch.data.getChild('unused'), null);
-  }
-  const broken = {...rows[0]}; delete broken.x;
-  await assert.rejects(collect(parseRotationRows([bytes([broken])])), /missing field/);
-});
-test('keyed rotation JSON survives tiny byte chunks and rejects malformed quaternions or truncation', async () => {
-  const payload = bytes({'0.0': {701: [1, 0, 0, 0]}, '10.0': {701: [0, 0, 0, 1]}});
-  const batches = await collect(parseRotationBatches(Array.from(payload, b => Uint8Array.of(b)), 1));
-  assert.deepEqual(batches.map(b => b.data.getChild('age').get(0)), [0, 10]);
-  assert.equal(batches[1].data.getChild('z').get(0), 1);
-  for (const bad of [[], {0: {701: [1, 0, 0]}}, {0: {701: [1, 0, 0, 0, 0]}},
-    {0: {701: [[1], 0, 0, 0]}}, {0: {701: [1, null, 0, 0]}}, {0: {701: {w: 1}}}])
-    await assert.rejects(collect(parseRotationBatches([bytes(bad)])));
-  await assert.rejects(collect(parseRotationBatches([payload.subarray(0, payload.length - 1)])), /Unexpected end/);
-});
-const pole = [Math.SQRT1_2, 0, 0, Math.SQRT1_2];
-function serviceRows(url) {
-  const pids = url.searchParams.get('pids').split(','), times = url.searchParams.get('times').split(',');
-  return Object.fromEntries(times.map(t => [t, Object.fromEntries(pids.map(pid => [pid, pole]))]));
-}
-test('streamed samples unlock playback before the response finishes and interpolation reads packed arrays', async () => {
-  let finish; const gate = new Promise(resolve => {finish = resolve;});
-  const cache = createRotationCache([701, 702], DATA_SOURCES.CAO2024, async function* (url) {
-    const rowBatches = await collect(parseRotationBatches([bytes(serviceRows(url))], 2));
-    const first = rowBatches.find(b => b.data.getChild('age').get(0) === 800) || rowBatches[0];
-    yield first;
-    await gate;
-    yield* rowBatches.filter(b => b !== first);
-  });
-  const signal = new AbortController().signal;
-  const waiting = cache.waitForTime(-800, {signal});
-  await waiting;
-  assert(cache.hasTime(-800));
-  assert.equal(cache.hasTime(-810), false);
-  const out = new Float64Array(4);
-  assert(historicalRotation(cache.rotations, 702, 800, out, 1800));
-  near(out[0], pole[0]); near(out[3], pole[3]);
-  assert.equal(historicalRotation(cache.rotations, 999, 800, out, 1800), false);
-  finish();
-  await cache.ensureTime(-805, {signal});
-  assert(historicalRotation(cache.rotations, 702, 805, out, 1800));
-});
-test('full-history streaming deduplicates requests, covers both endpoints, and lets foreground seeks run between windows', async () => {
-  const calls = []; let release; const gate = new Promise(resolve => {release = resolve;});
-  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url) {
-    calls.push(url.searchParams.get('times').split(',').map(Number));
-    if (calls.length === 1) await gate;
-    yield* parseRotationBatches([bytes(serviceRows(url))]);
-  });
-  const signal = new AbortController().signal;
-  await cache.ensurePose(-930, {signal: new AbortController().signal, onStatus: () => {release();}});
-  calls.length = 0;
-  const loading = cache.ensureHistory(-930, {signal});
-  assert.equal(cache.ensureHistory(-930, {signal}), loading);
-  const seeking = cache.ensureTime(-1700, {signal});
-  await seeking;
-  assert(calls[1].includes(1700));
-  await loading;
-  for (let age = 0; age <= 1800; age += 10) assert(cache.hasTime(-age));
-  const count = calls.length;
-  await cache.ensureHistory(-930, {signal});
-  assert.equal(calls.length, count);
-});
-test('stream failures preserve complete samples, reject missing rows, and allow retry', async () => {
-  let fail = true;
-  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url) {
-    const raw = serviceRows(url);
-    if (fail) delete raw['810'];
-    yield* parseRotationBatches([bytes(raw)]);
-  });
-  const signal = new AbortController().signal;
-  await assert.rejects(cache.ensureTime(-850, {signal}), /Missing rotations/);
-  assert(cache.hasTime(-800)); assert.equal(cache.hasTime(-805), false);
-  fail = false;
-  await cache.ensureTime(-805, {signal}); assert(cache.hasTime(-805));
-  const duplicate = createRotationCache([701], DATA_SOURCES.CAO2024, async function* () {
-    yield* parseRotationRows([bytes([{age: 800, plateId: 701, w: 1, x: 0, y: 0, z: 0},
-      {age: 800, plateId: 701, w: 1, x: 0, y: 0, z: 0}])]);
-  });
-  await assert.rejects(duplicate.ensureTime(-850, {signal}), /duplicate/);
-});
-test('source cancellation releases the stream reader and does not publish a partial plate set', async () => {
-  let cancelled = false;
-  const controller = new AbortController();
-  const stream = new ReadableStream({cancel() {cancelled = true;}});
-  const iterator = responseChunks(stream, controller.signal)[Symbol.asyncIterator]();
-  const waiting = iterator.next();
-  controller.abort();
-  await assert.rejects(waiting, /abort/i);
-  assert(cancelled); assert.equal(stream.locked, false);
-  const cache = createRotationCache([701, 702], DATA_SOURCES.CAO2024, async function* () {
-    yield* parseRotationBatches([bytes({800: {701: pole}})]);
-  });
-  await assert.rejects(cache.ensureTime(-850, {signal: new AbortController().signal}), /Missing rotations/);
-  assert.equal(cache.hasTime(-800), false);
-});
-
-test('production cache rejects non-unit rotations and streams missing finite numbers as errors', async () => {
-  for (const quaternion of [[2, 0, 0, 0], [1, 0, null, 0]]) {
-    const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* () {
-      yield* parseRotationBatches([bytes({800: {701: quaternion}})]);
-    });
-    await assert.rejects(cache.ensurePose(-800, {signal: new AbortController().signal}));
-    assert.equal(cache.hasTime(-800), false);
-  }
-  await assert.rejects(collect(parseRotationBatches([new TextEncoder().encode('{"800":{"701":[1e400,0,0,0]}}')])), /Invalid quaternion/);
-});
-test('mobile prefetch follows a window change during a download without waiting for a miss', async () => {
-  let release; const gate = new Promise(resolve => {release = resolve;});
-  const calls = [];
-  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url) {
-    calls.push(url.searchParams.get('times').split(',').map(Number));
-    if (calls.length === 1) await gate;
-    yield* parseRotationBatches([bytes(serviceRows(url))]);
-  });
-  const signal = new AbortController().signal;
-  const first = cache.prefetchTime(-930, {signal});
-  assert.equal(cache.prefetchTime(-790, {signal}), first);
-  release();
-  await first;
-  assert(cache.hasTime(-430));
-  assert.equal(calls.length, 3);
-});
-test('cancelling a foreground seek waiter preserves the useful source-lifetime stream', async () => {
-  let release; const gate = new Promise(resolve => {release = resolve;});
-  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url, signal) {
-    await gate;
-    signal.throwIfAborted();
-    yield* parseRotationBatches([bytes(serviceRows(url))]);
-  });
-  const source = new AbortController(), seeker = new AbortController();
-  const waiting = cache.waitForTime(-805, {signal: seeker.signal, lifetimeSignal: source.signal});
-  seeker.abort();
-  await assert.rejects(waiting, /abort/i);
-  release();
-  await cache.ensureTime(-805, {signal: source.signal});
-  assert(cache.hasTime(-805));
-});
-
-import {rotationPlaybackBuffer} from './sources.js';
-import {maintainHistory, waitForRetry} from './history-stream.js';
-test('startup prepares a bounded forward buffer including the first interpolation interval', async () => {
-  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url) {
-    const times = url.searchParams.get('times').split(',').map(Number);
-    assert(times.length <= 12);
-    yield* parseRotationBatches([bytes(serviceRows(url))]);
-  });
-  const signal = new AbortController().signal;
-  await cache.ensurePlayback(-930, {signal});
-  assert(cache.hasTime(-930));
-  assert(cache.hasTime(-929.99));
-  assert(cache.hasTime(-830));
-  assert.equal(cache.hasTime(-829.99), false);
-  assert.equal(cache.loadedSamples, 11);
-  const out = new Float64Array(4);
-  assert(historicalRotation(cache.rotations, 701, 929.99, out, 1800));
-  near(out[0], pole[0]);
-  assert.deepEqual(rotationPlaybackBuffer(-1800, 1800).slice(-2), [1790, 1800]);
-  assert.deepEqual(rotationPlaybackBuffer(250, 1800), [0]);
-  assert.deepEqual(rotationPlaybackBuffer(-5, 1800), [0, 10]);
-});
-test('foreground poses complete while an unrelated background window is still blocked', {timeout: 2000}, async t => {
-  let release, started;
-  const gate = new Promise(resolve => {release = resolve;}), active = new Promise(resolve => {started = resolve;});
-  const calls = [];
-  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url) {
-    const times = url.searchParams.get('times').split(',').map(Number);
-    calls.push(times);
-    if (times.length > 2) {started(); await gate;}
-    yield* parseRotationBatches([bytes(serviceRows(url))]);
-  });
-  const signal = new AbortController().signal;
-  const loading = cache.ensureTime(-930, {signal});
-  t.after(async () => {release(); await loading;});
-  await active;
-  await cache.waitForTime(-1705, {signal});
-  assert(cache.hasTime(-1705));
-  assert.equal(cache.hasTime(-930), false);
-  assert.deepEqual(calls[1], [1700, 1710]);
-  await cache.waitForTime(-930, {signal});
-  const foregroundSample = cache.rotations['930'];
-  release(); await loading;
-  assert.equal(cache.rotations['930'], foregroundSample);
-});
-test('identical foreground poses share one request and distant seeks replace obsolete foreground work', async () => {
-  let entered; const started = new Promise(resolve => {entered = resolve;});
-  let calls = 0;
-  const cache = createRotationCache([701], DATA_SOURCES.CAO2024, async function* (url, signal) {
-    calls++;
-    if (calls === 1) {
-      entered();
-      await new Promise(resolve => signal.addEventListener('abort', resolve, {once: true}));
-      signal.throwIfAborted();
-    }
-    yield* parseRotationBatches([bytes(serviceRows(url))]);
-  });
-  const signal = new AbortController().signal;
-  const first = cache.waitForTime(-930, {signal});
-  const rejected = assert.rejects(first, /Superseded seek/);
-  await started;
-  const second = cache.waitForTime(-1705, {signal});
-  const duplicate = cache.waitForTime(-1705, {signal});
-  await Promise.all([rejected, second, duplicate]);
-  assert.equal(calls, 2);
-  assert(cache.hasTime(-1705));
-});
-test('idle desktop preload reports interruptions and retries remaining history at the latest time', async () => {
-  let current = -930, loaded = 11;
-  const requests = [], statuses = [];
+test('background Parquet loading reports interruptions and retries remaining history at the latest time', async () => {
+  let current = -930,
+    loaded = 11;
+  const requests = [],
+    statuses = [];
   const model = {
-    get loadedSamples() {return loaded;}, totalSamples: 181,
+    get loadedSamples() {
+      return loaded;
+    },
+    totalSamples: 181,
     async ensureHistory(time, {onStatus}) {
       requests.push(time);
       onStatus();
@@ -552,7 +305,8 @@ test('idle desktop preload reports interruptions and retries remaining history a
     }
   };
   await maintainHistory(model, () => current, {
-    signal: new AbortController().signal, onStatus: value => statuses.push(value),
+    signal: new AbortController().signal,
+    onStatus: value => statuses.push(value),
     async wait(delay, signal) {
       assert.equal(delay, 30000);
       signal.throwIfAborted();
@@ -569,11 +323,17 @@ test('source cancellation clears the idle preload retry timer', async () => {
   const controller = new AbortController();
   const statuses = [];
   let attempts = 0;
-  const model = {loadedSamples: 11, totalSamples: 181, async ensureHistory() {
-    attempts++; throw new Error('Service unavailable');
-  }};
+  const model = {
+    loadedSamples: 11,
+    totalSamples: 181,
+    async ensureHistory() {
+      attempts++;
+      throw new Error('Service unavailable');
+    }
+  };
   const running = maintainHistory(model, () => -930, {
-    signal: controller.signal, onStatus: value => statuses.push(value)
+    signal: controller.signal,
+    onStatus: value => statuses.push(value)
   });
   const rejection = assert.rejects(running, /abort/i);
   await new Promise(resolve => setImmediate(resolve));
@@ -582,4 +342,189 @@ test('source cancellation clears the idle preload retry timer', async () => {
   await rejection;
   assert.equal(attempts, 1);
   await waitForRetry(0, new AbortController().signal);
+});
+
+function batch(rows) {
+  return {data:{numRows:rows.length,getChild(name) {
+    return rows.every(row=>Object.hasOwn(row,name)) ? {get:index=>rows[index][name]} : null;
+  }}};
+}
+function rotationRow(age,plateId,available=true,q=IDENTITY) {
+  return {age,plateId,available,w:available?q[0]:null,x:available?q[1]:null,
+    y:available?q[2]:null,z:available?q[3]:null};
+}
+function deferred() {
+  let resolve;const promise=new Promise(value=>{resolve=value;});return {promise,resolve};
+}
+test('Parquet samples become playable before the stream finishes; incomplete samples stay private',async()=>{
+  const first=deferred(),tail=deferred();let calls=0;
+  const source={maxAge:20},signal=new AbortController().signal;
+  const cache=createRotationCache([1,2],source,async function*(){
+    calls++;yield batch([rotationRow(0,1)]);await first.promise;
+    yield batch([rotationRow(0,2)]);await tail.promise;
+    yield batch([rotationRow(10,1),rotationRow(10,2,false),rotationRow(20,1),rotationRow(20,2)]);
+  });
+  const history=cache.ensureHistory(0,{signal});
+  const ready=cache.waitForTime(0,{signal});
+  await new Promise(resolve=>setImmediate(resolve));assert.equal(cache.hasTime(0),false);
+  first.resolve();await ready;
+  assert.equal(cache.loadedSamples,1);assert.equal(cache.hasTime(-5),false);assert.equal(calls,1);
+  const q=new Float64Array(4);
+  assert(historicalRotation(cache.rotations,1,0,q,20));
+  tail.resolve();await history;
+  assert.equal(cache.loadedSamples,3);assert.equal(cache.hasTime(-20),true);
+  // Valid stationary blocks are preserved; unavailable source rotations stay absent.
+  assert(historicalRotation(cache.rotations,1,10,q,20));
+  assert.equal(historicalRotation(cache.rotations,2,10,q,20),false);
+});
+test('Parquet validation rejects duplicates, truncated histories, and fabricated missing rotations',async()=>{
+  const signal=new AbortController().signal;
+  for (const [rows,pattern] of [
+    [[rotationRow(0,1),rotationRow(0,1)],/Duplicate/],
+    [[rotationRow(0,1)],/Incomplete/],
+    [[{...rotationRow(0,1,false),w:1}],/null quaternion/],
+    [[rotationRow(0,1,true,[2,0,0,0])],/Invalid rotation/],
+    [[rotationRow(5,1)],/Unexpected/],
+    [[rotationRow(0,999)],/Unexpected/]
+  ]) {
+    const cache=createRotationCache([1],{maxAge:10},async function*(){yield batch(rows);});
+    await assert.rejects(cache.ensureHistory(0,{signal}),pattern);
+  }
+});
+test('cancelled seek waiters keep the source stream alive and background retries preserve complete samples',async()=>{
+  const tail=deferred(),signal=new AbortController().signal;let calls=0;
+  const cache=createRotationCache([1],{maxAge:20},async function*(){
+    calls++;yield batch([rotationRow(0,1)]);
+    if (calls===1) {await tail.promise;throw new Error('Interrupted download');}
+    yield batch([rotationRow(10,1),rotationRow(20,1)]);
+  });
+  const history=cache.ensureHistory(0,{signal});
+  await cache.waitForTime(0,{signal});const sample=cache.rotations[0];
+  const waiter=new AbortController();
+  const waiting=cache.waitForTime(-20,{signal:waiter.signal,lifetimeSignal:signal});
+  waiter.abort();await assert.rejects(waiting,/abort/i);
+  const failure=assert.rejects(history,/Interrupted/);tail.resolve();await failure;
+  assert.equal(cache.rotations[0],sample);
+  await cache.ensureHistory(0,{signal});assert(cache.hasTime(-20));assert.equal(cache.rotations[0],sample);
+});
+function polygonBytes(rings) {
+  const data=new Uint8Array(9+rings.reduce((length,ring)=>length+4+16*ring.length,0));
+  const view=new DataView(data.buffer);view.setUint8(0,1);view.setUint32(1,3,true);
+  view.setUint32(5,rings.length,true);let offset=9;
+  for (const ring of rings) {
+    view.setUint32(offset,ring.length,true);offset+=4;
+    for (const [lon,lat] of ring) {view.setFloat64(offset,lon,true);view.setFloat64(offset+8,lat,true);offset+=16;}
+  }
+  return data;
+}
+const geometryRow={featureId:'original-fixture',plateId:1,name:'Test polygon',beginAge:Infinity,endAge:0,
+  geometry:polygonBytes([[[0,0],[10,0],[10,10],[0,10],[0,0]],[[2,2],[2,4],[4,4],[4,2],[2,2]]])};
+test('snapshot WKB keeps holes and binary view offsets and rejects malformed coordinates',()=>{
+  const padded=new Uint8Array(geometryRow.geometry.length+4);padded.set(geometryRow.geometry,2);
+  const feature=polygonFeature({...geometryRow,geometry:padded.subarray(2,-2)});
+  assert.equal(feature.xyz.length,30);assert.deepEqual(feature.holes,[10]);
+  near(Math.hypot(...feature.xyz.subarray(0,3)),1);
+  assert.throws(()=>polygonFeature({...geometryRow,geometry:geometryRow.geometry.subarray(0,-1)}),/ring|Truncated/);
+  assert.throws(()=>polygonFeature({...geometryRow,geometry:polygonBytes([[[0,0],[181,0],[0,10],[0,0]]])}),/coordinate/);
+  assert.throws(()=>polygonFeature({...geometryRow,geometry:polygonBytes([[[0,0],[10,0],[0,10],[1,0]]])}),/Unclosed/);
+});
+const groupIndex=[{rowGroup:0,recordType:'geometry',minAge:null,maxAge:null},
+  ...Array.from({length:18},(_,i)=>({rowGroup:i+1,recordType:'rotation',minAge:i*100,maxAge:i===17?1800:i*100+90}))];
+test('window selection starts with both interpolation brackets and covers the full history once',()=>{
+  assert.deepEqual(rotationGroups(groupIndex,-95,1800).slice(0,2),[1,2]);
+  const order=rotationGroups(groupIndex,-930,1800);
+  assert.deepEqual(order.slice(0,4),[10,9,8,7]);
+  assert.equal(order.length,18);assert.equal(new Set(order).size,18);assert(!order.includes(0));
+  assert.equal(rotationGroups(groupIndex,-1800,1800)[0],18);
+});
+test('Cao loads geometry once and returns a playable model while column-pruned Parquet history continues',async()=>{
+  const tail=deferred(),calls=[],source=DATA_SOURCES.CAO2024,signal=new AbortController().signal;
+  const manifest={model:source.id,version:source.version,license:'CC-BY-4.0',referenceFrame:source.referenceFrame,
+    anchorPlateId:0,quaternionOrder:['w','x','y','z'],ages:{min:0,max:1800,step:10},
+    polygonRows:1,plateCount:1,files:[{path:'tectonic.parquet',rowGroupIndex:groupIndex}]};
+  const model=await loadModel({sourceId:source.id,time:-930,signal,
+    fetchManifest:async url=>{assert.equal(url,source.manifest);return {ok:true,json:async()=>manifest};},
+    readBatches:async function*(url,options){
+      calls.push({url,options});
+      if (options.columns.includes('geometry')) {yield batch([geometryRow]);return;}
+      yield batch(Array.from({length:10},(_,i)=>rotationRow(900+i*10,1)));
+      await tail.promise;
+      yield batch(Array.from({length:181},(_,i)=>i*10).filter(age=>age<900 || age>990).map(age=>rotationRow(age,1)));
+    }
+  });
+  assert(model.hasTime(-930));assert.equal(model.hasTime(-100),false);
+  assert.equal(calls.length,2);assert.equal(calls[0].url,calls[1].url);
+  assert.deepEqual(calls[0].options.rowGroups,[0]);assert.equal(calls[1].options.rowGroups[0],10);
+  assert(!calls[1].options.columns.includes('geometry'));assert(!calls[1].options.columns.includes('name'));
+  tail.resolve();await model.ensureHistory(-930,{signal});assert.equal(model.loadedSamples,181);
+});
+
+import {readFile} from 'node:fs/promises';
+import {createParquetReader} from './parquet-stream.js';
+test('published Parquet loader prunes columns and reuses one download for Cao-style geometry/rotation reads',async()=>{
+  const data=await readFile(new URL('./test-data/streaming.parquet',import.meta.url));let downloads=0;
+  const read=createParquetReader(async(url,{signal})=>{
+    signal.throwIfAborted();downloads++;return new Response(data);
+  });
+  const signal=new AbortController().signal;
+  const geometry=[];
+  for await(const item of read('https://example.test/original-fixture.parquet',{
+    signal,byteLength:data.byteLength,columns:['geometry','plateId'],rowGroups:[0]})) geometry.push(item);
+  assert.equal(geometry.length,1);assert(geometry[0].data.getChild('geometry').get(0) instanceof Uint8Array);
+  assert.equal(geometry[0].data.getChild('name'),null);
+  const rotations=[];
+  for await(const item of read('https://example.test/original-fixture.parquet',{
+    signal,byteLength:data.byteLength,columns:['age','plateId','available','w','x','y','z'],rowGroups:[1]})) rotations.push(item);
+  assert.equal(rotations[0].data.numRows,3);assert.equal(rotations[0].data.getChild('geometry'),null);
+  assert.deepEqual(Array.from(rotations[0].data.getChild('age')),[0,10,20]);assert.equal(downloads,1);
+  const aborted=new AbortController();aborted.abort();
+  await assert.rejects(async()=>{
+    for await(const item of read('https://example.test/original-fixture.parquet',{
+      signal:aborted.signal,columns:['age'],rowGroups:[1]})) assert.fail('Published after abort');
+  },/abort/i);
+});
+
+
+test('TypeScript Parquet decoder streams selected row groups and columns through byte ranges',async()=>{
+  const data=await readFile(new URL('./test-data/streaming.parquet',import.meta.url));
+  const requests=[];
+  const read=createParquetReader(async(url,{signal,headers})=>{
+    signal.throwIfAborted();
+    const [,start,end]=/^bytes=(\d+)-(\d+)$/.exec(headers.Range).map(Number);
+    requests.push([start,end]);
+    // Simulate GitHub CORS: Content-Range is not visible to browser JavaScript.
+    return new Response(data.subarray(start,end+1),{status:206});
+  });
+  const signal=new AbortController().signal;
+  const rotations=[];
+  for await(const item of read('https://example.test/streaming.parquet',{
+    signal,byteLength:data.byteLength,columns:['age','plateId'],rowGroups:[1]})) rotations.push(item);
+  assert.equal(rotations.length,1);
+  assert.deepEqual(Array.from(rotations[0].data.getChild('age')),[0,10,20]);
+  assert.equal(rotations[0].data.getChild('geometry'),null);
+  assert(requests.every(([start,end])=>end-start+1<data.byteLength));
+  assert(requests.reduce((bytes,[start,end])=>bytes+end-start+1,0)<data.byteLength);
+  const before=requests.length;
+  for await(const item of read('https://example.test/streaming.parquet',{
+    signal,byteLength:data.byteLength,columns:['age','plateId'],rowGroups:[1]}))
+    assert.equal(item.data.numRows,3);
+  assert.equal(requests.length,before,'footer and column ranges are shared');
+  const geometry=[];
+  for await(const item of read('https://example.test/streaming.parquet',{
+    signal,byteLength:data.byteLength,columns:['geometry'],rowGroups:[0]})) geometry.push(item);
+  assert.equal(geometry[0].data.numRows,1);
+  assert(geometry[0].data.getChild('geometry').get(0) instanceof Uint8Array);
+});
+
+test('snapshot byte ranges reject truncated or incorrectly addressed responses',async()=>{
+  const data=await readFile(new URL('./test-data/streaming.parquet',import.meta.url));
+  for (const wrongHeader of [false,true]) {
+    const read=createParquetReader(async()=>new Response(new Uint8Array(wrongHeader?4:3),{
+      status:206,headers:wrongHeader?{'Content-Range':`bytes 1-4/${data.byteLength}`}:{}}));
+    await assert.rejects(async()=>{
+      for await(const batch of read('https://example.test/bad.parquet',{
+        signal:new AbortController().signal,byteLength:data.byteLength,columns:['age'],rowGroups:[1]}))
+        assert.fail('Invalid range was decoded');
+    },/Unexpected snapshot byte range/);
+  }
 });

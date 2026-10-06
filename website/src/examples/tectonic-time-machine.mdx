@@ -1,6 +1,6 @@
 # Tectonic time machine
 
-import Example from '@site/src/components/tectonic-time-machine';
+import Example from "@site/src/components/tectonic-time-machine";
 
 <Example height="calc(100vh - 140px)" />
 
@@ -11,22 +11,22 @@ or pan; scroll to zoom.
 
 Use the **Data source** selector to choose a published reconstruction:
 
-| Source | Historical range | What it shows |
-| --- | --- | --- |
-| [Cao et al. (2024)](https://doi.org/10.1016/j.gsf.2024.101922), default | 0–1800 Ma | Continental blocks reaching Nuna (Columbia) and Rodinia |
-| [Müller et al. (2022)](https://doi.org/10.5194/se-13-1127-2022) | 0–1000 Ma | Mantle-frame rotations with Merdith et al. coastline templates |
+| Source                                                                   | Historical range | What it shows                                                  |
+| ------------------------------------------------------------------------ | ---------------- | -------------------------------------------------------------- |
+| [Cao et al. (2024)](https://doi.org/10.1016/j.gsf.2024.101922)           | 0–1800 Ma        | Continental blocks reaching Nuna (Columbia) and Rodinia        |
+| [Müller et al. (2022)](https://doi.org/10.5194/se-13-1127-2022), default | 0–1000 Ma        | Mantle-frame rotations with Merdith et al. coastline templates |
 
-Geometry and finite rotations are fetched from [GPlates](https://gwsdoc.gplates.org/models/).
+Geometry and finite rotations load from versioned [deck.gl-data Parquet snapshots](https://github.com/visgl/deck.gl-data/tree/master/earth/tectonic-movements/v1).
 Each source keeps its own matching geometry, rotations and reference frame. Switching
 sources adjusts the timeline range; the two models are never mixed. CAO2024 is in a
-paleomagnetic frame, while MULLER2022 is in a mantle frame, so their longitudes can differ.
+paleomagnetic frame, while MULLER2022 is in an optimised mantle frame, so their longitudes can differ.
 
 CAO2024's [published dataset](https://zenodo.org/records/13628813) by Xianzhi Cao,
 Alan Collins, Sergei Pisarevsky, Nicolas Flament, Sanzhong Li, Derrick Hasterok and Dietmar Müller is licensed
 [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). The geometry used here was
 verified against that record and is pinned by checksum. Geometry is simplified and
 triangulated for display, and rotations are interpolated between 10 Ma samples.
-MULLER2022 uses [Merdith et al. (2021)](https://doi.org/10.1016/j.earscirev.2020.103477)
+MULLER2022 is also CC-BY-4.0 and uses [Merdith et al. (2021)](https://doi.org/10.1016/j.earscirev.2020.103477)
 coastline templates; see its [data record](https://zenodo.org/records/13636799) for source terms.
 
 Optional region colors identify present-day regional blocks, not ancient continents.
@@ -44,35 +44,21 @@ including `projectFlatSync` on typed arrays. The [polygon module](/docs/modules/
 cuts rings at the dateline and handles polar closure before projection; deck.gl
 renders the globe and Cartesian maps.
 
-Scientific data is loaded from external services and retains its source terms and
-attribution. No GPlates implementation, rotation table or coastline dataset is
-bundled in math.gl. Network access and browser gzip/ZIP decompression support are required.
-The initial pose and a short forward buffer load first, so playback can start while
-more history streams in.
-Desktop loads the full historical range in the background; mobile keeps a smaller buffer
-and prefetches ahead. JSON-to-Arrow batches retain only the needed rotation columns.
-Playback pauses if it reaches a missing pose and resumes as soon as its samples are ready.
-Foreground seeks can load while background downloads continue. Interrupted desktop
-preloads show a status message and retry automatically while idle. A needed pose that
-fails to load shows a retry message rather than substituted scientific data.
+Scientific data retains its CC-BY-4.0 terms and attribution. No GPlates implementation,
+rotation table or coastline dataset is bundled in math.gl. All devices use the same
+Parquet batch stream, selecting only the columns needed for geometry or rotations.
+The TypeScript decoder streams selected column chunks through HTTP byte ranges into Arrow batches, with decompression and Arrow conversion in a TypeScript worker instead of WebAssembly.
+Views cycle every eight seconds during playback, with a toggle for manual viewing. Playback starts automatically when the initial pose is ready, while the rest of history
+loads in 100 Ma windows. It temporarily pauses for missing samples and resumes when
+they arrive. Interrupted background loads retain valid poses and retry automatically.
+Network access is required; the Parquet decoder is packaged with the example.
 
-Playback uses deck.gl's [`TimelineWidget`](https://deck.gl/docs/api-reference/widgets/timeline-widget)
-(experimental in deck.gl 9.4). Changing projections smoothly interpolates a shared
-triangulated surface over 1.2 seconds while geological playback continues. A new
-selection during a transition begins from the current interpolated shape. Globe
-and map endpoints use the same current reconstruction, rather than frozen snapshots.
-The intermediate shapes are visual transitions, not additional cartographic projections.
-
-Natural terrain uses NASA [Blue Marble imagery](https://science.nasa.gov/earth/earth-observatory/the-blue-marble-true-color-global-imagery-at-1km-resolution/),
-credited to NASA Goddard, Reto Stöckli and Robert Simmon, with USGS topographic shading.
-It is included under NASA imagery usage terms, separately from the MIT example code;
-no NASA endorsement is implied. Modern terrain follows moving blocks for visual context;
+Modern terrain follows moving blocks for visual context;
 ancient or future mountains, vegetation and ice are not reconstructed. Animated ocean
 ripples and specular reflections use luma.gl’s public water material.
 
 The Play / Stop button works directly in the embedded example. Sources and scientific
 limits are available in the compact **About this reconstruction** box.
-
 
 Named timeline chapters include Nuna (also called Columbia), Rodinia, Gondwana, Laurussia, Pangaea and the later
 Laurasia / Gondwana breakup. Large centered titles fade in and out with geological

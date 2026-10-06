@@ -18,39 +18,37 @@ credit in [ATTRIBUTION.md](./ATTRIBUTION.md).
 
 Select a published data source in the controls:
 
-| Source | Historical range | Geometry | Reference frame |
-| --- | --- | --- | --- |
-| Cao et al. (2024), `CAO2024` (default) | 0–1800 Ma | Continental blocks | Paleomagnetic |
-| Müller et al. (2022), `MULLER2022` | 0–1000 Ma | Coastline templates | Mantle |
+| Source                                       | Historical range | Geometry            | Reference frame |
+| -------------------------------------------- | ---------------- | ------------------- | --------------- |
+| Cao et al. (2024), `CAO2024`                 | 0–1800 Ma        | Continental blocks  | Paleomagnetic   |
+| Müller et al. (2022), `MULLER2022` (default) | 0–1000 Ma        | Coastline templates | Mantle          |
 
 CAO2024 reaches Nuna (also called Columbia) and Rodinia. Its
 [Zenodo v2.4 dataset](https://zenodo.org/records/13628813) is **CC-BY-4.0**.
-The GPlates geometry matches that licensed geometry byte-for-byte and is pinned by
-checksum. Authors, license and display changes are credited in the example and
-[ATTRIBUTION.md](./ATTRIBUTION.md). CAO2024 is a continental-block reconstruction,
-not a paleogeographic shoreline model.
+The snapshots retain authors, licenses, source versions, frame conventions and checksums
+in both their Parquet metadata and accompanying manifests. Authors and display changes
+are credited in [ATTRIBUTION.md](./ATTRIBUTION.md). Cao is a continental-block
+reconstruction, not a paleogeographic shoreline model. Müller v1.2.4 is also CC-BY-4.0
+and uses its complete optimised mantle rotation model with matching Merdith coastline
+templates. Alternative reference frames are not combined.
 
-Each source uses its matching GPML geometry and explicitly selected GPlates rotation
-model. The original parser reads feature identity, plate ID, rings and validity
-intervals; positions in GPML are latitude/longitude. Rotation samples are requested
-at 10 Ma intervals and reused during the session. The service
-may update rotations; the example is not a revision-certified reconstruction.
-Switching sources cancels pending requests and clamps time to the new source's range.
-Different models have different reference frames and are never mixed.
+Each source loads immutable, commit-pinned snapshots from
+[deck.gl-data](https://github.com/visgl/deck.gl-data/tree/master/earth/tectonic-movements/v1).
+Cao has one tagged Parquet file; Müller has separate geometry and rotations. Geometry
+contains WKB polygons in longitude/latitude degrees. Switching sources cancels waiters
+and clamps time to the selected source's range. Different models are never mixed.
 
 Sources: [Cao et al. 2024](https://doi.org/10.1016/j.gsf.2024.101922),
 [Müller et al. 2022](https://doi.org/10.5194/se-13-1127-2022),
 [Merdith et al. 2021](https://doi.org/10.1016/j.earscirev.2020.103477),
-[GPlates API documentation](https://gwsdoc.gplates.org/rotation/quaternions/),
 and [Müller model data record](https://zenodo.org/records/13636799).
 External data retains its source terms; MIT headers refer to this original code.
 No GPL GPlates code is imported or copied.
 
 Historical poses interpolate normalized finite rotations on the sphere, using
 shortest-path quaternion interpolation. Feature validity intervals are respected.
-Because GWS returns identity for absent plate IDs, non-anchor identity fallback
-samples in the past are conservatively omitted rather than interpreted as measured
-stationary blocks. This can omit genuinely stationary blocks; omitted-template
+Missing source rotations carry an explicit unavailable flag and are omitted. Genuine
+identity rotations remain valid; no historical motion is fabricated. Omitted-template
 counts remain visible. Present-day geometry and future poses use the present-day
 valid set. Rendering simplifies coastline vertices, so this is not a measurement
 or paleogeographic shoreline product.
@@ -61,37 +59,49 @@ Amasia/Aurica/Pangaea Proxima reconstructions or physical forecasts. Geological 
 is the animation time axis, not a CRS coordinate epoch or a trajectory integrator.
 
 `@math.gl/polygon` cuts geographic rings at the dateline, respecting holes and polar
-closure, before `ProjectionEngine.projectFlatSync` transforms numeric XY buffers.
+closure, before `CRSProjection.projectFlatSync` transforms numeric XY buffers.
 Mercator is displayed with its ±85.05112878° latitude cap. Globe and map rendering
 use deck.gl; no basemap, service credentials or map API key is required.
 
-Geometry loads when a source is selected, with cancellation on unmount or source change.
-The initial pose and a short 100 Ma forward buffer load first, including the adjacent
-sample needed by the first playback tick. Playback can start without waiting for the
-complete history.
-Desktop clients then stream the entire historical range in the background. Mobile clients
-and clients requesting reduced data use keep a smaller buffer and prefetch the current
-and next 200 Ma windows. Playback pauses only when it reaches a missing pose and resumes
-as soon as the two required samples are available. Foreground seeks load only the
-required pose on a separate request lane, even while a background window is loading.
-Repeated distant seeks replace obsolete foreground requests. Source changes cancel streaming.
+All devices use the same streaming path. Geometry loads first, then loaders.gl's
+TypeScript Parquet source reads selected columns into 4,096-row Arrow batches. HTTP
+byte-range requests retrieve the footer and selected column chunks as needed; Cao's geometry
+and rotation reads share cached ranges. Decoding streams while playback continues. Rotation row
+groups cover 100 Ma windows; the current pose's window is requested first, followed
+by younger windows in playback order and the rest of the history. Playback starts
+automatically as soon as its initial samples are complete, while history continues
+loading. A missing pose temporarily pauses playback; it resumes when both interpolation
+samples arrive. Seeking waits on the same stream instead of opening a second request lane.
 
-The GPlates keyed JSON response is adapted incrementally to rows and read by loaders.gl's
-JSON-to-Arrow loader in 4,096-row batches. An explicit schema retains only `age`, `plateId`,
-`w`, `x`, `y`, and `z`; `onExtraField: 'drop'` discards unselected columns during Arrow
-conversion, while missing required fields remain errors. This bounds temporary row storage;
-it does not claim to avoid every parser allocation. Validated rotations are retained in
-one packed Float64Array per time sample, rather than a small array per plate rotation.
-Only complete time samples containing every requested plate become available to playback.
-HTTP requests remain bounded to 256 plate IDs and 21 ages, and the render loop can run
-between Arrow batches. The loader's published v5 prerelease is isolated in a private
-workspace so deck.gl can retain its v4 loader integration.
+Only complete plate sets become playable. Samples share a plate-index map and one
+packed Float64Array plus availability flags per age. Rendering yields between batches.
+The published loaders.gl v5 parser is isolated in a private workspace so deck.gl can
+keep its v4 integration. Decoding and ZSTD decompression require no WebAssembly. The
+selective source uses `core.worker: true` and its packaged TypeScript worker, moving
+decompression and Arrow conversion off the rendering thread. Two row groups load
+concurrently while batches retain the requested playback order. Commit-pinned GitHub media URLs support range requests; their
+Content-Range header is hidden by CORS, so each response's status and byte count are
+checked against the requested range and manifest size. If a host returns a full-file
+HTTP 200 response, the small compressed file is buffered once and batches still decode incrementally.
 
-Network errors are explicit and retryable when a needed pose fails to load. Background
-failures keep previously validated samples playable. Desktop history interruptions
-are shown beside the source selector and automatically retried after 30 seconds, even
-while paused. Retry timers are cancelled on unmount or source changes. Service and browser failures never
-fall back to fabricated historical motion.
+Background failures preserve validated samples and retry after 30 seconds, including
+while playback is stopped. Needed-pose failures show the existing retry control. Source
+changes and unmounts cancel waiters and retries; batches from cancelled sources never
+publish. There are no device-specific download limits or live-service fallbacks.
+
+### Reproducing the snapshots
+
+The data repository’s [conversion script](https://github.com/visgl/deck.gl-data/blob/6b82e2df927725dc54ba729267204498d4ac6c74/earth/tectonic-movements/v1/scripts/create-parquet.py) converts pinned Cao v2.4 and Müller v1.2.4 archives to
+ZSTD level-6 Parquet. It preserves source vertices and holes and samples anchor-plate-0
+rotations every 10 Ma. Cao stores geometry once in its first row group, then rotations
+in 18 windows. Müller has ten geometry groups and ten rotation windows. Full provenance,
+counts and row-group inventories live in the footer; the sidecar adds output sizes and
+SHA-256 checksums. Scientific data retains CC-BY-4.0; conversion code is original MIT.
+pyGPlates and PyArrow are offline tools, not browser dependencies.
+
+See the data repository's
+[reproduction and validation instructions](https://github.com/visgl/deck.gl-data/tree/master/earth/tectonic-movements/v1#reproducing-and-validating)
+for pinned archives, tool versions and independent source-frame validation.
 
 A visible Play / Stop button works directly in the inline documentation example.
 The compact expandable info box includes sources and scientific limits.
@@ -104,7 +114,9 @@ is shown. Region colors remain available as an alternative.
 
 Playback uses deck.gl's [`TimelineWidget`](https://deck.gl/docs/api-reference/widgets/timeline-widget)
 (experimental in deck.gl 9.4). Changing projections smoothly interpolates a shared
-triangulated surface over 1.2 seconds while geological playback continues. A new
+triangulated surface over 1.2 seconds while geological playback continues. Views cycle
+every eight seconds during playback by default; the cycle toggle pauses automatic
+changes, and choosing a view manually restarts the countdown. A new
 selection during a transition begins from the current interpolated shape. Globe
 and map endpoints use the same current reconstruction, rather than frozen snapshots.
 The intermediate shapes are visual transitions, not additional cartographic projections.

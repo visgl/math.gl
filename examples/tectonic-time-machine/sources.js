@@ -1,8 +1,9 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// Published ranges are explicit: the service's CAO metadata has an erroneous BigTime value.
-export const DEFAULT_SOURCE = 'CAO2024';
+// Immutable CC-BY-4.0 snapshots, with matching geometry and finite rotations.
+const SNAPSHOT = 'https://media.githubusercontent.com/media/visgl/deck.gl-data/6b82e2df927725dc54ba729267204498d4ac6c74/earth/tectonic-movements/v1';
+export const DEFAULT_SOURCE = 'MULLER2022';
 export const FUTURE_END = 300;
 export const DATA_SOURCES = {
   CAO2024: {
@@ -15,9 +16,10 @@ export const DATA_SOURCES = {
     license: 'CC-BY-4.0',
     geometry: 'continental blocks',
     frame: 'Paleomagnetic reference frame',
-    url: 'https://repo.gplates.org/webdav/pmm/cao2024/ContinentalPolygons.zip',
-    archiveEntry: 'ContinentalPolygons/shapes_continents.gpmlz',
-    sha256: '5b024724d95f476427ee71c90afb086265aa13845210e08326b026400c0f01bd'
+    version: '2.4',
+    referenceFrame: 'Paleomagnetic',
+    snapshot: `${SNAPSHOT}/cao2024`,
+    manifest: `${SNAPSHOT.replace('media.githubusercontent.com/media', 'raw.githubusercontent.com')}/cao2024/manifest.json`
   },
   MULLER2022: {
     id: 'MULLER2022',
@@ -26,10 +28,13 @@ export const DATA_SOURCES = {
     citation: 'Müller et al. (2022)',
     reference: 'https://doi.org/10.5194/se-13-1127-2022',
     dataset: 'https://zenodo.org/records/13636799',
-    license: 'Source data terms',
+    license: 'CC-BY-4.0',
     geometry: 'coastline templates',
-    frame: 'Mantle reference frame',
-    url: 'https://raw.githubusercontent.com/GPlates/gplates-web-service/2b2bb1e25737668d4d3ec3d5d1c327279f30279e/django/GWS/data/deprecated/MODELS/MULLER2022/shapes_coastlines_Merdith_et_al_v2.gpmlz'
+    frame: 'Optimised mantle reference frame',
+    version: '1.2.4',
+    referenceFrame: 'Optimised mantle',
+    snapshot: `${SNAPSHOT}/muller2022`,
+    manifest: `${SNAPSHOT.replace('media.githubusercontent.com/media', 'raw.githubusercontent.com')}/muller2022/manifest.json`
   }
 };
 export function sourceFor(id) {
@@ -46,40 +51,4 @@ export function rotationBracket(time, maxAge) {
   const age = Math.max(0, -time),
     low = Math.floor(age / 10) * 10;
   return [low, age === low ? low : Math.min(maxAge, low + 10)];
-}
-/** Fetch one bounded 200 Ma window, not the entire deep-time history. */
-export function rotationWindow(time, maxAge) {
-  rotationBracket(time, maxAge);
-  const age = Math.max(0, -time);
-  // At a boundary, prepare the younger window so forward playback can continue.
-  const start = Math.min(Math.max(0, Math.ceil(age / 200) - 1) * 200, maxAge - 200);
-  const end = Math.min(maxAge, start + 200);
-  return Array.from({length: (end - start) / 10 + 1}, (_, i) => start + i * 10);
-}
-
-/** Device detection is a loading hint, not a guarantee of available memory. */
-export function isMobile(device = globalThis.navigator) {
-  if (!device) return false;
-  return Boolean(
-    device.userAgentData?.mobile ||
-    /Android|iPhone|iPad|iPod|Mobile/i.test(device.userAgent || '') ||
-    (/Mac/.test(device.platform || '') && device.maxTouchPoints > 1)
-  );
-}
-export function shouldPreloadHistory(device = globalThis.navigator) {
-  return !isMobile(device) && !device?.connection?.saveData;
-}
-/** The younger adjacent window follows the direction of geological playback. */
-export function nextRotationTime(time, maxAge) {
-  rotationBracket(time, maxAge);
-  const age = Math.max(0, -time);
-  const start = Math.min(Math.max(0, Math.ceil(age / 200) - 1) * 200, maxAge - 200);
-  return start > 0 ? -(start - 10) : null;
-}
-
-/** A short forward buffer gives playback time to overlap the first background fetch. */
-export function rotationPlaybackBuffer(time, maxAge) {
-  const [low, high] = rotationBracket(time, maxAge);
-  const start = Math.max(0, low - 100);
-  return Array.from({length: (high - start) / 10 + 1}, (_, i) => start + i * 10);
 }

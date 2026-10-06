@@ -4,8 +4,9 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {mountScene, VIEWS} from './scene.js';
 import {loadModel} from './data.js';
+import parquetWorkerUrl from 'math.gl-parquet-loader/worker';
 import {maintainHistory} from './history-stream.js';
-import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime, shouldPreloadHistory} from './sources.js';
+import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime} from './sources.js';
 import {REGIONS, timeLabel} from './math.js';
 import {LANDMASS_CHAPTERS, chapterOpacity, timelineMilestones} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
@@ -27,9 +28,8 @@ export default function TectonicTimeMachine() {
   const [sourceId, setSourceId] = useState(DEFAULT_SOURCE),
     [model, setModel] = useState(null);
   const source = sourceFor(sourceId);
-  const [preloadHistory] = useState(() => shouldPreloadHistory());
-  const timeWindow = Math.max(0, Math.ceil(Math.max(0, -time) / 200) - 1);
   const [view, setView] = useState('globe'),
+    [cycleViews, setCycleViews] = useState(true),
     [longitude, setLongitude] = useState(0),
     [scenario, setScenario] = useState('atlantic'),
     [grid, setGrid] = useState(false),
@@ -66,13 +66,14 @@ export default function TectonicTimeMachine() {
     scene.current?.setModel(null);
     clock.current = clampTime(clock.current, source.maxAge);
     setTime(clock.current);
-    loadModel({sourceId, time: clock.current, signal: abort.signal, onStatus: setStatus, preloadHistory})
+    loadModel({sourceId, time: clock.current, signal: abort.signal, onStatus: setStatus, workerUrl: parquetWorkerUrl})
       .then(loaded => {
         if (abort.signal.aborted) return;
         setModel(loaded);
         scene.current?.setModel(loaded);
         setCounts(scene.current?.render(clock.current, true));
         setReady(true);
+        setPlaying(true);
         setStatus(
           `${loaded.pids.length} plate IDs · ${source.citation} · rotations sampled every 10 Ma`
         );
@@ -112,7 +113,7 @@ export default function TectonicTimeMachine() {
     return () => abort.abort();
   }, [time, model, sourceId]);
   useEffect(() => {
-    if (!model || !model.preloadHistory) return;
+    if (!model) return;
     const abort = new AbortController();
     const signal = AbortSignal.any([model.signal, abort.signal]);
     maintainHistory(model, () => clock.current, {
@@ -123,11 +124,13 @@ export default function TectonicTimeMachine() {
     return () => abort.abort();
   }, [model]);
   useEffect(() => {
-    if (model && model.source.id === sourceId && !model.preloadHistory)
-      model.prefetchTime(time, {signal: model.signal});
-    // Prefetch once per window, not on every animation frame. These requests
-    // live until the source changes, so ordinary playback never cancels them.
-  }, [model, sourceId, timeWindow]);
+    if (!cycleViews || !playing || !ready) return;
+    const timer = setTimeout(() => {
+      const views = Object.keys(VIEWS);
+      setView(views[(views.indexOf(view) + 1) % views.length]);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [cycleViews, playing, ready, view]);
   useEffect(() => {
     scene.current?.setOptions({view, longitude, scenario, grid, regionColors});
   }, [view, longitude, scenario, grid, regionColors]);
@@ -244,6 +247,10 @@ export default function TectonicTimeMachine() {
               </option>
             ))}
           </select>
+        </label>
+        <label className="tectonic-check">
+          <input type="checkbox" checked={cycleViews} onChange={e => setCycleViews(e.target.checked)} />{' '}
+          Cycle views every 8 seconds
         </label>
         <label>
           {view === 'globe' ? 'Globe starting longitude' : 'Map central meridian'}
@@ -377,10 +384,10 @@ export default function TectonicTimeMachine() {
               </>
             )}{' '}
             Served by{' '}
-            <a href="https://gwsdoc.gplates.org/models/" target="_blank" rel="noreferrer">
-              GPlates / EarthByte
+            <a href="https://github.com/visgl/deck.gl-data/tree/master/earth/tectonic-movements/v1" target="_blank" rel="noreferrer">
+              deck.gl-data
             </a>
-            . Data loads from their services at runtime.
+            . Versioned Parquet snapshots load at runtime.
           </p>
         </details>
       </aside>
