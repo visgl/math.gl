@@ -50,6 +50,20 @@ Creates a zero-copy physical view by advancing logical offsets and bitmap bit of
 Count logical rows or native coordinate tuples directly over descriptors. Serialized columns report
 zero native vertices until decoded with the `/wkb` bridge.
 
+## Geometry materialization
+
+### `materializeGeoArrowRows(column)`
+
+Returns newly allocated geometry values in logical chunk and row order, with one value per row.
+Null rows remain `null`; empty points have `coordinates: []`, and empty list geometries retain
+empty coordinate arrays. Interleaved/separated coordinates, slices, chunks, dense unions, and
+geometry collections follow the same descriptor contract as the columnar kernels.
+
+This operation allocates per-row objects and coordinate arrays. Use descriptor traversal and kernels
+for columnar processing. Decode serialized WKB/WKT columns first with `decodeGeoArrowWKB` or
+`decodeGeoArrowWKT`; direct serialized materialization throws. Box columns do not have a geometry
+value representation and materialize as null rows. Input buffers remain borrowed and untouched.
+
 ## Bounds and coordinate transforms
 
 ### `getGeoArrowBounds(column)`

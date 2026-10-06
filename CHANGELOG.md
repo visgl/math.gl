@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- feat(geoarrow): Expose `materializeGeoArrowRows` for runtime adapters and preserve empty points encoded with non-finite or null ordinates.
+
 - perf(projection): Make the configurable and lazy engines lean by default; register regional named datums through `datumCatalogs` and `@math.gl/projection/datums`. WGS84/NAD83 remain built in; the `Projection` wrapper retains the full catalogue for compatibility.
 
 ## v5.0.0-alpha.12
