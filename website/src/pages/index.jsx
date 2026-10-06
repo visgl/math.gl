@@ -9,6 +9,14 @@ import moduleGroups from '../../module-groups.json';
 
 const modules = [
   {
+    name: 'Spatial index',
+    packageName: '@math.gl/spatial-index',
+    description: 'Static box, point and triangle indexes for range, ray and nearest queries (POC).',
+    image: 'examples/spatial-index.png',
+    imageAlt: 'Interactive spatial query explorer',
+    theme: 'teal'
+  },
+  {
     name: 'Curves',
     packageName: '@math.gl/curves',
     description: 'Parametric curves, interpolation, and arc-length sampling in 2D and 3D.',
@@ -155,7 +163,9 @@ const modules = [
   }
 ];
 
-const modulesById = new Map(modules.map(module => [module.packageName.replace('@math.gl/', ''), module]));
+const modulesById = new Map(
+  modules.map(module => [module.packageName.replace('@math.gl/', ''), module])
+);
 
 function ModuleCard({module, baseUrl}) {
   const docsUrl = `${baseUrl}docs/modules/${module.packageName.replace('@math.gl/', '')}`;
@@ -171,7 +181,9 @@ function ModuleCard({module, baseUrl}) {
           {module.experimental && <span className={styles.experimental}>Experimental</span>}
         </div>
         <p>{module.description}</p>
-        <span className={styles.cardLink}>Explore module <span aria-hidden="true">→</span></span>
+        <span className={styles.cardLink}>
+          Explore module <span aria-hidden="true">→</span>
+        </span>
       </div>
     </a>
   );
@@ -187,20 +199,36 @@ export default function IndexPage() {
           <div
             aria-hidden="true"
             className={styles.heroBackground}
-            style={{backgroundImage: `linear-gradient(90deg, rgba(8, 17, 31, 0.98) 0%, rgba(8, 17, 31, 0.88) 38%, rgba(8, 17, 31, 0.48) 72%, rgba(8, 17, 31, 0.28) 100%), url(${baseUrl}images/math-hero.webp)`}}
+            style={{
+              backgroundImage: `linear-gradient(90deg, rgba(8, 17, 31, 0.98) 0%, rgba(8, 17, 31, 0.88) 38%, rgba(8, 17, 31, 0.48) 72%, rgba(8, 17, 31, 0.28) 100%), url(${baseUrl}images/math-hero.webp)`
+            }}
           />
           <div className={styles.heroContent}>
             <p className={styles.heroEyebrow}>Geospatial &amp; 3D math for JavaScript</p>
-            <h1>Math for the shape<br />of the world.</h1>
+            <h1>
+              Math for the shape
+              <br />
+              of the world.
+            </h1>
             <p className={styles.heroLead}>
-              Composable tools for coordinates, geometry, and time—built for maps and 3D applications.
+              Composable tools for coordinates, geometry, and time—built for maps and 3D
+              applications.
             </p>
             <div className={styles.heroActions}>
-              <a className={styles.primaryAction} href={`${baseUrl}docs/developer-guide/get-started`}>Get started <span aria-hidden="true">→</span></a>
-              <a className={styles.secondaryAction} href={`${baseUrl}examples`}>Explore examples</a>
+              <a
+                className={styles.primaryAction}
+                href={`${baseUrl}docs/developer-guide/get-started`}
+              >
+                Get started <span aria-hidden="true">→</span>
+              </a>
+              <a className={styles.secondaryAction} href={`${baseUrl}examples`}>
+                Explore examples
+              </a>
             </div>
           </div>
-          <span className={styles.heroCaption} aria-hidden="true">Coordinates · Geometry · Time</span>
+          <span className={styles.heroCaption} aria-hidden="true">
+            Coordinates · Geometry · Time
+          </span>
         </header>
         <main className={styles.catalog}>
           <div className={styles.intro}>
@@ -212,7 +240,11 @@ export default function IndexPage() {
             </p>
           </div>
           <nav className={styles.categoryLinks} aria-label="Module categories">
-            {moduleGroups.map(group => <a key={group.id} href={`#${group.id}`}>{group.label}</a>)}
+            {moduleGroups.map(group => (
+              <a key={group.id} href={`#${group.id}`}>
+                {group.label}
+              </a>
+            ))}
           </nav>
           {moduleGroups.map(group => (
             <section className={styles.moduleGroup} key={group.id} aria-labelledby={group.id}>
@@ -221,7 +253,9 @@ export default function IndexPage() {
                 <p>{group.description}</p>
               </div>
               <div className={styles.grid}>
-                {group.modules.map(moduleId => <ModuleCard key={moduleId} module={modulesById.get(moduleId)} baseUrl={baseUrl} />)}
+                {group.modules.map(moduleId => (
+                  <ModuleCard key={moduleId} module={modulesById.get(moduleId)} baseUrl={baseUrl} />
+                ))}
               </div>
             </section>
           ))}
