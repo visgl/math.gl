@@ -43,7 +43,7 @@ CRS and no coordinate methods.
 
 Accepts `from`, `to`, `enforceAxis` and `mode`. Source and target default to `WGS84`;
 behavior defaults to the engine configuration. Eager engines return a
-[projection instance](./projection-transform.md) with scalar, flat-buffer and reusable-output
+[projection instance](projection-transform.md) with scalar, flat-buffer and reusable-output
 methods. Instances have independent compiled transforms and scratch storage.
 
 The `LazyCRSProjectionEngine` returns a deferred projection synchronously. Creation

@@ -120,7 +120,7 @@ produce a different result: it is not a trajectory integrator.
 A static velocity does not execute time-varying rates or event offsets. For example,
 a rate `0.01 + 0.002(t − 2010)` metres/year integrated from 2010 to 2020, plus a
 0.1 metre event, yields 0.3 metres; a static 0.01 metre/year sampler yields 0.1.
-An explicit epoch alone does not select or execute those components. The optional [temporal model](./temporal-models.md) now executes explicit rate,
+An explicit epoch alone does not select or execute those components. The optional [temporal model](temporal-models.md) now executes explicit rate,
 acceleration, step and relaxation components. Authoritative real-model certification
 remains application-owned; each model needs reviewed forward, inverse, temporal
 and failure contracts.

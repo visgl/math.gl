@@ -1,6 +1,6 @@
 # Reproduce the projection scorecard
 
-The [published scorecard](./scorecard.md) consolidates source-matched measurements
+The [published scorecard](scorecard.md) consolidates source-matched measurements
 for Node, Chromium, Firefox and WebKit. Each environment remains separate. It does
 not produce an overall ranking or claim unrestricted PROJ parity.
 

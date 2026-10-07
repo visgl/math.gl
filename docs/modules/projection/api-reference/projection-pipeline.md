@@ -61,7 +61,7 @@ not necessarily the mathematical inverse of the forward program.
 | `projection` | `name` selects a registered plugin; `parameters` supplies its PROJ parameter strings/flags and ellipsoid geometry. Forward: geographic radians → projected metres. Inverse: projected metres → geographic radians. Z units stay unchanged. `ob_tran` requires an explicit `output` space/unit and matching `o_proj`. |
 | `cart` | Geographic radians/metre height → geocentric XYZ metres. Optional `ellipsoid` accepts `ellps`, `a`, `b`, `rf`, `f`, or `R` string parameters; default WGS84. Requires XYZ. |
 | `helmert` | Geocentric XYZ metres. `translation: [x, y, z]` is in metres, optional `rotation` is in arcseconds, and `scalePPM` defaults to zero. Rotation requires `position_vector` or `coordinate_frame` convention. Scale must be positive. Requires XYZ. `exact: true` uses a full rotation matrix and its mathematical inverse. Optional `rates` and `referenceEpoch` enable kinematic parameters; coordinate epochs are supplied separately. |
-| `deformation` | Geocentric XYZ metres; a prepared `model`, explicit `sourceEpoch` (decimal year or `'coordinate'`) and fixed `targetEpoch` propagate a position through a prepared static or temporal deformation model. Requires XYZ. See [deformation models](./deformation-models.md). |
+| `deformation` | Geocentric XYZ metres; a prepared `model`, explicit `sourceEpoch` (decimal year or `'coordinate'`) and fixed `targetEpoch` propagate a position through a prepared static or temporal deformation model. Requires XYZ. See [deformation models](../developer-guide/deformation-models.md). |
 | `push` / `pop` | `components: [1, 2]`, `[3]`, or another nonempty selection of X/Y/Z. Independent nested stacks preserve values and units; inverse execution swaps push/pop. M and later ordinates are never stacked. |
 | `hgridshift` | Geographic radians; `grids` names prepared `datumGrids`, in priority order. Preserves height. Uses the grid's forward/inverse shift methods. |
 | `vgridshift` | Geographic radians/metre height; `grids` names prepared `verticalGrids`. Adds `multiplier * offset` in the forward direction. Multiplier defaults to **−1**, following PROJ. Requires XYZ. |
@@ -81,7 +81,7 @@ approximation; it is not an exact matrix inverse. `exact: true` uses full rotati
 transposes the complete matrix for the position-vector convention, and uses the
 transpose/reciprocal scale for inverse execution. Choose the mode expected by your
 transformation parameters; parameters fitted to a small-angle model should retain
-the default. Kinematic parameters use explicit coordinate epochs as shown below. A separate [deformation step](./deformation-models.md) propagates coordinates between epochs;
+the default. Kinematic parameters use explicit coordinate epochs as shown below. A separate [deformation step](../developer-guide/deformation-models.md) propagates coordinates between epochs;
 time-varying model components remain outside this profile.
 
 ## Coordinate epochs and moving reference frames
@@ -212,7 +212,7 @@ with the same output declaration and preload/synchronous behavior.
 
 ## Explicit grids and height operations
 
-Prepare grids through the [grid adapters](./api-reference/datum-grids.md#convert-geoid-heights)
+Prepare grids through the [grid adapters](datum-grids.md#convert-geoid-heights)
 and supply them to the pipeline. Fetching and decoding remain application-owned.
 Grid names support ordered lists, `@optional` names and an explicit `null` fallback;
 missing required grids and uncovered coordinates are errors.
@@ -285,7 +285,7 @@ movingFrame.unprojectTo(output, output, 2010.25);
 
 The input types, capacity, spare output, in-place identity, distinct-view overlap checks,
 Float32 rounding/overflow and stable-storage requirements follow the
-[engine's reusable-output contract](./api-reference/projection-engine.md#reusable-scalar-outputs).
+[engine's reusable-output contract](projection-transform.md#reusable-scalar-outputs).
 The `/pipeline` subpath also exports `ProjectionCoordinate` and `ProjectionOutput`.
 Pipelines reuse their working point and cached ordinate stack; nested calls use isolated
 scratch. Existing `project` and `unproject` still return independently owned arrays.
@@ -337,7 +337,7 @@ This is typed composition, not a parser for arbitrary `+proj=pipeline` strings. 
 operators and parameters throw instead of being skipped. Stack support covers X/Y/Z
 with stricter balance validation; arbitrary operators, time-varying deformation components, automatic
 EPSG operation lookup and dynamic CRS inference remain outside this profile.
-Use the optional [operation catalogue](./operation-catalog.md) to choose among
+Use the optional [operation catalogue](operation-catalog.md) to choose among
 application-reviewed pipelines before execution.
 
 
@@ -352,7 +352,7 @@ the same; no additional option or preparation call is needed.
 
 Mixed pipelines keep general execution. Single-stage time-dependent rates are also
 optimized as described below. See the
-[measurement guidance](./benchmarks.md#operation-pipelines-and-grids)
+[measurement guidance](../benchmarks.md#operation-pipelines-and-grids)
 to compare your operation chain in both directions.
 
 
@@ -377,4 +377,4 @@ inverse-oriented steps retain scalar equation order, Float32 validation and
 completed-record commits. A failing record and its tail stay untouched. Empty
 buffers still validate the epoch argument but do not prepare adjusted parameters.
 No new option, loading step or public API is required. See the
-[pipeline benchmark commands](./benchmarks.md#operation-pipelines-and-grids).
+[pipeline benchmark commands](../benchmarks.md#operation-pipelines-and-grids).

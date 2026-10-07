@@ -142,7 +142,7 @@ The model, regular grid and GeoTIFF adapter are separate optional subpaths. They
 not reexported from the root. Importing `/pipeline` alone retains the typed step
 orchestration but no deformation model, velocity interpolator or TIFF decoder.
 Core, ordinary projections and the default wrapper do not gain model code. See the
-[measured bundle table](./projection-engine.md#tree-shaking-and-bundle-size).
+[measured bundle table](projection-engine.md#tree-shaking-and-bundle-size).
 
 Sixteen configurations / 64 coordinate-epoch pairs use an original synthetic MIT
 velocity TIFF and pinned pyproj 3.7.2 / PROJ 9.5.1 forward evaluations. Forward-oracle
@@ -162,6 +162,6 @@ selection, dynamic CRS inference and model extrapolation are outside this profil
 ## Time-varying rates and events
 
 This constructor keeps its static velocity contract. Use the optional
-[temporal model](./temporal-models.md) for explicit acceleration, event steps and
+[temporal model](../temporal-models.md) for explicit acceleration, event steps and
 exponential relaxation at the source position. Both produce `DeformationModel`
 objects for the same pipeline step and original-epoch inverse contract.

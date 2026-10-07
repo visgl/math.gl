@@ -537,7 +537,7 @@ for examples, shared caching, retry behavior and custom descriptors.
 
 ## Expansion path
 
-The [parity roadmap](../../../../dev-docs/projection-roadmap.md) defines tranches and acceptance gates against
+The [parity roadmap](https://github.com/visgl/math.gl/blob/master/dev-docs/projection-roadmap.md) defines tranches and acceptance gates against
 the pinned proj4js 2.22.0 reference.
 
 Add projection plugins with forward/inverse parity tests against proj4js, then extend

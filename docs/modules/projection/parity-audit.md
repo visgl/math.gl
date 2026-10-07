@@ -27,7 +27,7 @@ The [projection support contract](developer-guide/support.md) documents the defa
 retained engine aliases and the original wrapper at `classic` (removed in the subsequent
 package rename), and records the remaining
 out-of-profile operations. CI covers three browser engines and emits performance
-artifacts; see [benchmarks](./benchmarks.md). Earlier audit results below are historical.
+artifacts; see [benchmarks](benchmarks.md). Earlier audit results below are historical.
 
 ## Independent reference and real-grid follow-up
 
@@ -41,7 +41,7 @@ This found and corrected an ellipsoidal AEQD origin shortcut that could misplace
 longitude-zero points by hundreds of kilometres. Wider probes also quantify Cassini
 and Robinson approximation limits. The two Canadian western-edge audit failures are
 retained strict-coverage differences: the inverse source falls outside the grid,
-including in PROJ's approximate result. See [independent validation](./independent-validation.md)
+including in PROJ's approximate result. See [independent validation](independent-validation.md)
 for the exact semantics, budgets, edge disposition and reproduction commands.
 
 The upstream compatibility result remains 233/242; these new independent checks do

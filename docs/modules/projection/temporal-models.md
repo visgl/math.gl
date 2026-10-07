@@ -120,6 +120,6 @@ yarn exec vitest run --project node modules/projection/test/lib/temporal.spec.ts
 
 These are original synthetic fields and references, with no new third-party
 implementation or model data. Qualify real fields separately using the
-[application model harness](./deformation-qualification.md). The vocabulary of
+[application model harness](deformation-qualification.md). The vocabulary of
 rates and event functions also appears in [OGC deformation model guidance](https://docs.ogc.org/as/22-010r4/22-010r4.html);
 this API does not parse or claim conformance with that format.

@@ -10,7 +10,7 @@ northing and gravity-related height. Units, axes, datum and sometimes time deter
 what location those numbers describe.
 
 This guide introduces the concepts used by `@math.gl/projection`. It is useful
-before choosing a [projection algorithm](./projections.md) or composing an
+before choosing a [projection algorithm](projections.md) or composing an
 [operation pipeline](../api-reference/projection-pipeline.md).
 
 ## Geographic, projected and geocentric coordinates
@@ -69,7 +69,7 @@ const sphericalMap = new Projection({
 });
 ```
 
-The [catalogue](./projections.md) identifies spherical and ellipsoidal algorithms.
+The [catalogue](projections.md) identifies spherical and ellipsoidal algorithms.
 Some world-map algorithms use spherical equations even when an ellipsoid is
 specified. That is an algorithm choice, not an ellipsoidal datum transformation.
 
@@ -166,7 +166,7 @@ The third ordinate is ellipsoidal height by default. Explicit `+geoidgrids`
 conversion uses registered geoid undulations in meters, with source and destination
 height operations around the horizontal datum operation. Choose a model matching
 your datum and tide convention. See the
-[height conversion guide](./api-reference/datum-grids.md#convert-geoid-heights) for loading
+[height conversion guide](../api-reference/datum-grids.md#convert-geoid-heights) for loading
 GTX or GeoTIFF grids and integrating `@math.gl/geoid`.
 
 A separately declared vertical CRS in WKT, PROJJSON or metadata is not automatically
@@ -211,7 +211,7 @@ movingFrame.projectFlat(xyz, 3, new Float64Array([2000, 2020]));
 ```
 
 See [kinematic Helmert operations](../api-reference/projection-pipeline.md) for inverse semantics
-and [deformation models](./deformation-models.md) for propagation with geographic ENU velocity grids
+and [deformation models](deformation-models.md) for propagation with geographic ENU velocity grids
 applied to geocentric positions. PROJ's
 [deformation reference](https://proj.org/en/stable/operations/transformations/deformation.html)
 provides background on velocity-based epoch changes.

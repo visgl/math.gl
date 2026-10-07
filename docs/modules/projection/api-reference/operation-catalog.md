@@ -60,7 +60,7 @@ const coordinates = new Float64Array([10, 20, 30, 8]);
 pipeline.projectFlatSync(coordinates, 4); // XYZ converted to feet; M stays 8
 ```
 
-Select once for a batch, then use the existing [pipeline](./projection-pipeline.md)
+Select once for a batch, then use the existing [pipeline](projection-pipeline.md)
 or [projection](../developer-guide/projection-engine.md) APIs. Selection is a setup operation and
 creates request metadata; it does not add work or objects to coordinate loops.
 
@@ -213,8 +213,8 @@ pipeline execution in Node and Chromium. Packed ESM/CommonJS and TypeScript cons
 check the public entry point. Bundle checks enforce that selection retains no projection,
 parser, model or grid implementation and adds no code to existing imports.
 
-See [independent validation](./independent-validation.md) for geodetic qualification
-and [Performance](./benchmarks.md) for measurement guidance.
+See [independent validation](../independent-validation.md) for geodetic qualification
+and [Performance](../benchmarks.md) for measurement guidance.
 
 ## Irregular coverage and frame/model identity
 
@@ -251,7 +251,7 @@ the selector does not interpret a license or certify rights. Coverage, metadata
 and model lists are snapshotted and frozen with the existing candidate metadata.
 `inspect` reports every failed constraint and missing exact model identity.
 
-The [application qualification harness](./deformation-qualification.md#pinned-assets-and-reviewed-operation-metadata)
+The [application qualification harness](../deformation-qualification.md#pinned-assets-and-reviewed-operation-metadata)
 checks local asset hashes and those selection constraints before comparing supplied
 independent coordinates. Physical authority, reference independence and real
 model validation remain application responsibilities.

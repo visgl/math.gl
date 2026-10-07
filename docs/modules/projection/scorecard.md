@@ -12,7 +12,7 @@ Full measurements and raw samples: [machine-readable snapshot](https://github.co
 
 ## Accuracy
 
-The independent pyproj 3.7.2 / PROJ 9.5.1 corpus covers 42 domains / 11160 points. Worst observed errors include scalar and Float64 bulk paths. See [accuracy domains](./accuracy-domains.md) for geographic bounds, allowances and oracle limits.
+The independent pyproj 3.7.2 / PROJ 9.5.1 corpus covers 42 domains / 11160 points. Worst observed errors include scalar and Float64 bulk paths. See [accuracy domains](accuracy-domains.md) for geographic bounds, allowances and oracle limits.
 
 | Environment | Maximum forward component error (m) | Maximum inverse component error (degrees) |
 | --- | --- | --- |
@@ -133,4 +133,4 @@ browser ESM, es2020, minified, gzip level 9; Node v24.14.0. Selective modules ex
 - Memory checkpoints are retained state/RSS, not peak memory.
 - Browser owned input bytes are a storage lower bound, not JS heap or total working set.
 
-See [measurement commands and provenance](./scorecard-methodology.md), [live browser benchmarks](./benchmarks.md#live-benchmarks) and [worker crossover measurements](./acceleration.md).
+See [measurement commands and provenance](scorecard-methodology.md), [live browser benchmarks](benchmarks.md#live-benchmarks) and [worker crossover measurements](acceleration.md).

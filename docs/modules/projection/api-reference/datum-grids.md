@@ -28,7 +28,7 @@ implicit fetches. Reuse prepared grids and projection instances for multiple bat
 For supported horizontal GeoTIFF grids, `loadGeoTIFFGrid(decodedTIFF)` prepares the
 object returned by a separately chosen TIFF reader. The adapter imports no TIFF
 library. That reader and its workers have their own bundle costs and can also be
-loaded on demand. See [datum grids](./projection-engine.md#horizontal-datum-grids)
+loaded on demand. See [datum grids](projection-engine.md#horizontal-datum-grids)
 for band conventions, ownership, coverage, and inverse-edge behavior. Explicit vertical
 height conversion is described below; time-dependent operations use the explicit [pipeline API](projection-pipeline.md).
 

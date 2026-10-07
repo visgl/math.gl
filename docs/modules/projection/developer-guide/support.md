@@ -35,7 +35,7 @@ not grids. The option also applies to WKT/PROJJSON readers and capability checks
 Explicit ellipsoid and operation parameters remain available without named datum
 registration. The `Projection` convenience wrapper includes the catalogue
 internally and preserves its existing behavior. See the
-[datum registration guide](./projection-engine.md#register-regional-datums).
+[datum registration guide](projection-engine.md#register-regional-datums).
 
 API compatibility does not imply identical numerical results or accepted inputs.
 The documented corrections and strict-input exceptions below still apply. The engine never silently falls back to proj4js.
@@ -79,7 +79,7 @@ partial relative to unrestricted upstream behavior; that distinction is delibera
 Eager construction is synchronous and resolves plugins, parsers, aliases and prepared grids.
 With projection descriptors, construction reads definitions but algorithms load on the
 first asynchronous coordinate call. `projectSync`/`unprojectSync` and their flat variants
-require preloading; they never start an import. See the [loading guide](./projection-engine.md#load-less-used-projections-on-demand).
+require preloading; they never start an import. See the [loading guide](projection-engine.md#load-less-used-projections-on-demand).
 The eager engine and default wrapper perform no network requests. Descriptor imports
 can fetch application chunks through the bundler runtime. The configurable `ProjectionTransform` keeps plugin registration per instance and
 shares only the descriptor implementation cache. The convenience `Projection` preserves the classic static registration
@@ -155,7 +155,7 @@ projection.projectFlat(coordinates, 2);
 ```
 
 For WKT/PROJJSON, register the matching optional reader. For grids, load and prepare
-all required data before constructing the instance. The [engine guide](./projection-engine.md)
+all required data before constructing the instance. The [engine guide](projection-engine.md)
 shows dynamic imports, grid loading and minimal bundles.
 
 Use `checkProjectionCompatibility` on each definition with the same plugin/parser
@@ -166,7 +166,7 @@ Pay particular attention to computed heights, strict errors, Cassini/Robinson/CE
 corrections and inverse grid boundaries. Use a separately installed proj4js runtime where its behavior is required.
 
 Explicit `+geoidgrids` height conversion supports prepared grids, GTX snapshots, the validated vertical GeoTIFF subset and a
-structural `@math.gl/geoid` adapter. See [vertical heights](./projection-engine.md#convert-geoid-heights)
+structural `@math.gl/geoid` adapter. See [vertical heights](projection-engine.md#convert-geoid-heights)
 for the supported domain and grid loading contract. This does not add compound/vertical
 CRS execution or implicit model selection.
 

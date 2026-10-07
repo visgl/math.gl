@@ -19,7 +19,7 @@ Choose the API that fits your application:
 
 All are exported by `@math.gl/projection` or its documented subpaths. Selective imports
 reduce the initial bundle; reuse a converter to transform many coordinates between
-the same pair of CRSs. See [supported transformations and migration](./support.md)
+the same pair of CRSs. See [supported transformations and migration](support.md)
 for input limits, and [independent validation](../independent-validation.md) for accuracy.
 The package has no runtime dependency on proj4js. Applications needing the upstream
 API can install `proj4` separately.
@@ -189,7 +189,7 @@ overlap validation. Tranche 13A adds about 0.18 KiB minified / 0.01 KiB gzip
 for typed epoch/coefficient storage and prepared axis/unit constants. The core and default wrapper stay unchanged.
 The deformation step adds about 0.7 KiB minified / 0.2 KiB gzip to a pipeline;
 the separate model and velocity readers are retained only when explicitly imported.
-See [deformation models](./deformation-models.md).
+See [deformation models](deformation-models.md).
 Single-stage static Helmert buffer specialization adds about 1.35 KiB minified /
 0.47 KiB gzip to a retained pipeline, without adding bytes to the core, default
 wrapper, operation catalogue or lazy initial/deferred imports. See the
@@ -688,7 +688,7 @@ mappings are supported; arbitrary axis rotations remain outside the subset. Broa
 accuracy references, and regional projection validity limits still need qualification.
 Keep any fallback to a separately installed `proj4` runtime an explicit application
 decision: it adds another implementation with different dimension and validation behavior. The
-[roadmap](../../../../dev-docs/projection-roadmap.md), [audit](../parity-audit.md), and
+[roadmap](https://github.com/visgl/math.gl/blob/master/dev-docs/projection-roadmap.md), [audit](../parity-audit.md), and
 [API reference](../api-reference/projection-engine.md) describe those boundaries.
 
 For separate output buffers, padded records or X/Y/Z/M columns, see

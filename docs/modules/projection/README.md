@@ -51,20 +51,20 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 | [Reusable coordinate buffers](api-reference/projection-buffer.md) | Transform separate, strided and column buffers with reusable scratch and explicit ownership |
 | [Operation pipelines](api-reference/projection-pipeline.md) | Order units, axes, projections, datum shifts and time-dependent operations explicitly |
 | [Operation selection](api-reference/operation-catalog.md) | Select application-reviewed operations by area, epoch, accuracy and prepared grids |
-| [Temporal models](./temporal-models.md) | Combine velocities, acceleration, events and relaxation with explicit epochs |
-| [Optional acceleration](./acceleration.md) | Evaluate persistent workers, ownership and complete application costs |
+| [Temporal models](temporal-models.md) | Combine velocities, acceleration, events and relaxation with explicit epochs |
+| [Optional acceleration](acceleration.md) | Evaluate persistent workers, ownership and complete application costs |
 | [Deformation models](developer-guide/deformation-models.md) | Propagate coordinates between epochs with prepared velocity grids |
 | [Support and migration](developer-guide/support.md) | Understand accepted definitions and differences from proj4js |
-| [Performance and live benchmarks](./benchmarks.md) | Compare math.gl flat and scalar transforms with proj4js in your browser |
-| [Projection scorecard](./scorecard.md) | Inspect source-matched accuracy, throughput, startup, allocation, memory and bundle evidence |
-| [Independent validation](./independent-validation.md) | Inspect numerical references and qualification limits |
+| [Performance and live benchmarks](benchmarks.md) | Compare math.gl flat and scalar transforms with proj4js in your browser |
+| [Projection scorecard](scorecard.md) | Inspect source-matched accuracy, throughput, startup, allocation, memory and bundle evidence |
+| [Independent validation](independent-validation.md) | Inspect numerical references and qualification limits |
 
 ## Choose an API
 
 | API | Use it when |
 | --- | --- |
-| [`Projection`](./api-reference/projection.md) | You want a ready-to-use converter with all built-in algorithms and WKT/PROJJSON readers |
-| [`ProjectionEngine`](./api-reference/projection-engine.md) | You want an explicit list of plugins, readers and grids for a smaller bundle |
+| [`Projection`](api-reference/projection.md) | You want a ready-to-use converter with all built-in algorithms and WKT/PROJJSON readers |
+| [`ProjectionEngine`](api-reference/projection-engine.md) | You want an explicit list of plugins, readers and grids for a smaller bundle |
 | `LazyProjection` (`/projections/lazy`) | You want built-in algorithms to load automatically when requested |
 | `ProjectionPipeline` (`/pipeline`) | You need explicit operation order or coordinate epochs |
 | `OperationCatalog` (`/operations`) | You need to select among application-reviewed transformations |
@@ -137,5 +137,5 @@ The implementation has diverged through selective imports, deferred algorithms,
 in-place buffers and additional explicit operations. Performance advantages depend
 on the workload; numerical improvements and supported features are qualified
 individually. This is not a claim of unrestricted proj4js or PROJ parity. See the
-[parity audit](./parity-audit.md), [independent validation](./independent-validation.md)
+[parity audit](parity-audit.md), [independent validation](independent-validation.md)
 and [support profile](developer-guide/support.md) for the measured scope and current limits.

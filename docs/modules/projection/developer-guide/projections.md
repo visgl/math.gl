@@ -56,7 +56,7 @@ For deferred imports, use `/projections/lazy/<id>` and the corresponding `lazy�
 export. `LazyProjection` at `/projections/lazy` supplies the whole descriptor catalogue.
 Async coordinate methods load requested algorithms; synchronous methods require
 `preload()` to have completed. See the
-[loading guide](./projection-engine.md#load-less-used-projections-on-demand) for the exact contract.
+[loading guide](projection-engine.md#load-less-used-projections-on-demand) for the exact contract.
 
 ## Cylindrical and transverse projections
 
@@ -176,7 +176,7 @@ and your own required tolerance.
 Equal-area maps are useful when comparing regional areas or thematic totals.
 Compromise maps favor a balanced visual appearance. An algorithm described as
 “spherical” may accept an ellipsoidal CRS but still use only a radius in its
-projection equations. See [ellipsoid concepts](./coordinate-systems.md#ellipsoids-the-shape-model).
+projection equations. See [ellipsoid concepts](coordinate-systems.md#ellipsoids-the-shape-model).
 
 ```typescript
 const worldAreas = new Projection({to: '+proj=eqearth +datum=WGS84'});
@@ -224,10 +224,10 @@ for accepted rotation parameter sets.
 in meters; `k`/`k_0` are scale factors. Not every algorithm accepts every parameter.
 `lat_ts` means a true-scale latitude where supported. Projection geometry is
 separate from datum conversion, height and coordinate epoch; see the
-[coordinate-system guide](./coordinate-systems.md).
+[coordinate-system guide](coordinate-systems.md).
 
 Construction checks supported parameters and prepares the operations. Coordinate
 calls can still fail at singularities or outside grid coverage. Successful output
-is not an area-of-use certificate. The [support contract](./support.md) and
+is not an area-of-use certificate. The [support contract](support.md) and
 [independent references](../independent-validation.md) describe tested regions,
 known numerical limits and intentional differences from upstream.
