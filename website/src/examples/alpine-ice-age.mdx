@@ -45,10 +45,12 @@ areas; Alpine totals use the original model grid's nominal 4 km² cells.
 The Alpine and global simulations have distinct sources and time ranges.
 
 The [preparation scripts and provenance](https://github.com/visgl/math.gl/tree/master/examples/alpine-ice-age)
-verify source checksums and generate the bundled, compressed display assets.
+verify source checksums and generate the upstream, compressed display assets.
 
 Global map projections cycle automatically every eight seconds, with smooth transitions.
 Disable **Cycle projections** to keep the selected view. The **Ice age names** toggle
 controls the centered phase title and regional-name subtitle.
 
 Climate readouts use the independent [Köhler et al. (2015) dataset](https://doi.pangaea.de/10.1594/PANGAEA.855449), licensed **CC-BY-3.0**. Temperature is model variant 1 rebased to its 0 ka value. Ice-albedo forcing is land-ice radiative forcing in W/m², not total planetary reflectivity. Values interpolate 2,000-year samples; albedo is unavailable below 2 ka. Regional Albers views focus the map while statistics retain global totals.
+
+Display grids and climate records are loaded from a pinned merged deck.gl-data commit, with full source datasets and Parquet counterparts available alongside them.

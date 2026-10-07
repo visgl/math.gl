@@ -19,7 +19,7 @@ The Cryosphere 12, 3265–3285.
 
 [Alpine ice sheet glacial cycle simulations continuous variables, version 3](https://doi.org/10.5281/zenodo.7802275),
 Julien Seguinot (2023). Source file: `alpcyc.2km.epic.pp.ex.1ka.nc`.
-The dataset and the derived assets in `data/` retain their
+The dataset and the derived display assets hosted in deck.gl-data retain their
 [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/)
 license. The example code is MIT. No glacier solver is bundled.
 
@@ -139,7 +139,7 @@ The global view includes independent model-derived temperature and land-ice albe
 forcing from Köhler, de Boer, von der Heydt, Stap and van de Wal (2015),
 [dataset DOI](https://doi.pangaea.de/10.1594/PANGAEA.855449),
 [study](https://doi.org/10.5194/cp-11-1801-2015).
-The derived `assets/climate.json` is **CC-BY-3.0**, separately from the MIT code;
+The upstream derived `koehler2015/climate.json` is **CC-BY-3.0**, separately from the MIT code;
 [license](https://creativecommons.org/licenses/by/3.0/). Its metadata records the
 original archive checksum and attribution. Values are subsetted to 0–120 ka,
 with all three temperature variants and their source uncertainties retained.
@@ -148,3 +148,13 @@ average or a claimed 1850–1900 baseline. Land-ice radiative forcing retains it
 source reference and is not total planetary albedo. Both series interpolate
 linearly; albedo has no 0 ka sample and is unavailable below 2 ka.
 These climate series are independent of PaleoMIST, not calculated from its ice mesh.
+
+### Upstream hosting
+
+The example fetches all ice-grid previews, preview manifests and climate JSON from
+[deck.gl-data/earth/glaciations/v1](https://github.com/visgl/deck.gl-data/tree/2a69f8a6e01e22c7c6649244a1577c20c74a02ae/earth/glaciations/v1).
+`sources.js` pins the merged repository commit; LFS gzip data uses GitHub media URLs,
+and ordinary JSON uses raw URLs. No scientific data is bundled into this example.
+Preparation scripts remain available for reproducing display assets locally.
+`yarn workspace math.gl-alpine-ice-age test` verifies the pinned public downloads,
+checksums, source provenance, dimensions and scientific reference locations.

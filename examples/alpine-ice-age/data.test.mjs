@@ -3,16 +3,27 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { readFileSync } from "node:fs";
+import { DATASETS } from "./sources.js";
+import { loadClimate } from "./climate.js";
+async function download(url) {
+  const response = await fetch(url);
+  assert(response.ok, `${url}: HTTP ${response.status}`);
+  return Buffer.from(await response.arrayBuffer());
+}
+const [manifestBytes, packed, globalManifestBytes, globalPacked, climate] =
+  await Promise.all([
+    download(DATASETS.alpineManifest),
+    download(DATASETS.alpine),
+    download(DATASETS.globalManifest),
+    download(DATASETS.global),
+    loadClimate(),
+  ]);
 import { gunzipSync } from "node:zlib";
 import { createHash } from "node:crypto";
 import { interpolateField, sampleAt } from "./data.js";
-const manifest = JSON.parse(
-  readFileSync(new URL("./data/manifest.json", import.meta.url)),
-);
-const packed = readFileSync(new URL("./data/alpine.bin.gz", import.meta.url));
+const manifest = JSON.parse(manifestBytes);
 const raw = gunzipSync(packed);
-test("the bundled simulation is complete, ordered and pinned to its published source", () => {
+test("the upstream simulation is complete, ordered and pinned to its published source", () => {
   assert.equal(manifest.source.md5, "0b59b7c26bb8d1b1797c9414638a2f32");
   assert.equal(
     createHash("sha256").update(packed).digest("hex"),
@@ -42,12 +53,7 @@ test("interpolation preserves snapshots, handles endpoints and never extrapolate
   assert.deepEqual(Array.from(interpolateField(data, 2, ages, -10)), [0, 50]);
   assert.deepEqual(sampleAt(ages, 10), { index: 0, fraction: 0 });
 });
-const globalManifest = JSON.parse(
-  readFileSync(new URL("./data/global-manifest.json", import.meta.url)),
-);
-const globalPacked = readFileSync(
-  new URL("./data/global.bin.gz", import.meta.url),
-);
+const globalManifest = JSON.parse(globalManifestBytes);
 const globalRaw = gunzipSync(globalPacked);
 test("global reconstruction preserves its full time range, source and longitude seam", () => {
   const m = globalManifest,
@@ -122,19 +128,19 @@ test("timeline chapters change phase labels while keeping regional glaciation na
 
 test("climate context preserves source samples and never extrapolates albedo", async () => {
   const { climateAt } = await import("./climate.js");
-  assert.equal(climateAt(0).temperature, 0);
-  assert.equal(climateAt(0).albedo, null);
-  assert.equal(climateAt(1).albedo, null);
-  assert.equal(climateAt(20).albedo, -3.9495);
-  assert.ok(climateAt(20).temperature < -3);
-  assert.equal(climateAt(21).albedo, (-3.9495 - 3.8135) / 2);
+  assert.equal(climateAt(0, climate).temperature, 0);
+  assert.equal(climateAt(0, climate).albedo, null);
+  assert.equal(climateAt(1, climate).albedo, null);
+  assert.equal(climateAt(20, climate).albedo, -3.9495);
+  assert.ok(climateAt(20, climate).temperature < -3);
+  assert.equal(climateAt(21, climate).albedo, (-3.9495 - 3.8135) / 2);
 });
 
-test('regional views retain native coordinates and clip cells instead of collapsing geography', async () => {
-  const { regionalCoordinate, inRegion } = await import('./regional-views.js');
-  assert.deepEqual(regionalCoordinate('albersEurope', -120, -20), [-120, -20]);
-  assert.equal(inRegion('albersEurope', -120, -20), false);
-  assert.equal(inRegion('albersEurope', 10, 60), true);
-  assert.equal(inRegion('albersNorthAmerica', -100, 60), true);
-  assert.equal(inRegion('albersNorthAmerica', 10, 60), false);
+test("regional views retain native coordinates and clip cells instead of collapsing geography", async () => {
+  const { regionalCoordinate, inRegion } = await import("./regional-views.js");
+  assert.deepEqual(regionalCoordinate("albersEurope", -120, -20), [-120, -20]);
+  assert.equal(inRegion("albersEurope", -120, -20), false);
+  assert.equal(inRegion("albersEurope", 10, 60), true);
+  assert.equal(inRegion("albersNorthAmerica", -100, 60), true);
+  assert.equal(inRegion("albersNorthAmerica", 10, 60), false);
 });

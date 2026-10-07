@@ -1,7 +1,12 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import climate from "./assets/climate.json" with { type: "json" };
+import { DATASETS } from "./sources.js";
+export async function loadClimate(signal) {
+  const response = await fetch(DATASETS.climate, { signal });
+  if (!response.ok) throw new Error(`Climate data: HTTP ${response.status}`);
+  return response.json();
+}
 function interpolate(rows, age) {
   if (age < rows[0][0] || age > rows.at(-1)[0]) return null;
   const upper = rows.findIndex((row) => row[0] >= age);
@@ -10,7 +15,7 @@ function interpolate(rows, age) {
     b = rows[upper];
   return a[1] + ((age - a[0]) / (b[0] - a[0])) * (b[1] - a[1]);
 }
-export function climateAt(age) {
+export function climateAt(age, climate) {
   const temperature = interpolate(climate.temperature, age);
   return {
     temperature:

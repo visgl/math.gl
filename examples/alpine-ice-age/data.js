@@ -1,6 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import { DATASETS } from './sources.js';
+import { loadClimate } from './climate.js';
 export function sampleAt(ages, age) {
   const value = Math.max(ages.at(-1), Math.min(ages[0], age));
   let index = 0;
@@ -15,12 +17,12 @@ export function interpolateField(values, count, ages, age, output = new Float32A
   return output;
 }
 export async function loadSimulation(signal) {
-  const manifestResponse = await fetch(new URL('./data/manifest.json', import.meta.url), {
+  const manifestResponse = await fetch(DATASETS.alpineManifest, {
     signal
   });
   if (!manifestResponse.ok) throw new Error(`Dataset manifest: HTTP ${manifestResponse.status}`);
   const manifest = await manifestResponse.json();
-  const response = await fetch(new URL('./data/alpine.bin.gz', import.meta.url), { signal });
+  const response = await fetch(DATASETS.alpine, { signal });
   if (!response.ok) throw new Error(`Glacier data: HTTP ${response.status}`);
   const raw = await new Response(
     response.body.pipeThrough(new DecompressionStream('gzip'))
@@ -36,10 +38,11 @@ export async function loadSimulation(signal) {
   };
 }
 export async function loadGlobalSimulation(signal) {
-  const response = await fetch(new URL('./data/global-manifest.json', import.meta.url), { signal });
+  const climate = await loadClimate(signal);
+  const response = await fetch(DATASETS.globalManifest, { signal });
   if (!response.ok) throw new Error(`Global manifest: HTTP ${response.status}`);
   const manifest = await response.json();
-  const asset = await fetch(new URL('./data/global.bin.gz', import.meta.url), { signal });
+  const asset = await fetch(DATASETS.global, { signal });
   if (!asset.ok) throw new Error(`Global ice data: HTTP ${asset.status}`);
   const raw = await new Response(
     asset.body.pipeThrough(new DecompressionStream('gzip'))
@@ -49,6 +52,7 @@ export async function loadGlobalSimulation(signal) {
   if (raw.byteLength !== length * 4) throw new Error('Global dataset has an unexpected length');
   return {
     manifest,
+    climate,
     count,
     bed: new Int16Array(raw, 0, length),
     ice: new Uint16Array(raw, length * 2)

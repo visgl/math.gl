@@ -79,7 +79,7 @@ export default function GlobalIceAge({ onMode }) {
   useEffect(() => {
     if (age === 0 && !repeat) setPlaying(false);
   }, [age, repeat]);
-  const climate = climateAt(age);
+  const climate = model ? climateAt(age, model.climate) : null;
   const m = model?.manifest;
   const { index, fraction } = m
     ? sampleAt(m.ages, age)
@@ -179,13 +179,15 @@ export default function GlobalIceAge({ onMode }) {
         <div className="alpine-stats alpine-climate">
           <div>
             <strong>
-              {climate.temperature.toFixed(1)} <small>°C</small>
+              {climate ? climate.temperature.toFixed(1) : "—"} <small>°C</small>
             </strong>
             <span>Global temperature Δ · model</span>
           </div>
           <div>
             <strong>
-              {climate.albedo === null ? "—" : climate.albedo.toFixed(1)}{" "}
+              {!climate || climate.albedo === null
+                ? "—"
+                : climate.albedo.toFixed(1)}{" "}
               <small>W/m²</small>
             </strong>
             <span>Ice-albedo forcing · model</span>
