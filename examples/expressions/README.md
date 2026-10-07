@@ -10,3 +10,6 @@ Run the playground from the repository root:
 ```bash
 yarn workspace math.gl-expression-playground start
 ```
+
+Basemap imagery uses NASA Blue Marble via the public GIBS EPSG:4326 WMS service,
+configured in `examples/common/blue-marble.js`. No access token is required.

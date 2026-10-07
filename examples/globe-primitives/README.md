@@ -21,3 +21,6 @@ from its common space. Bounds cover the full visible cap and may overfetch the
 screen. The displayed shader-free illumination is decorative, not photometric.
 
 Build with `node_modules/.bin/vite build examples/globe-primitives`.
+
+Basemap imagery uses NASA Blue Marble via the public GIBS EPSG:4326 WMS service,
+configured in `examples/common/blue-marble.js`. No access token is required.

@@ -55,7 +55,9 @@ export async function loadKrappSimulation(
 ) {
   let source;
   try {
-    const response = await fetch(DATASETS.krappManifest, { signal });
+    const response = await fetch(DATASETS.krappManifest, {
+      signal: AbortSignal.any([signal, AbortSignal.timeout(30000)]),
+    });
     if (!response.ok)
       throw new Error(`Krapp manifest: HTTP ${response.status}`);
     const manifest = await response.json();

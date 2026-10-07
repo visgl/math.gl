@@ -9,6 +9,7 @@ export function makeMesh(parts) {
     indices = [],
     colors = [],
     reference = [],
+    geographic = [],
     starts = [0];
   for (const part of parts) {
     for (const cell of cutPolygonByGrid(part.positions, part.holeIndices, {gridResolution: 5})) {
@@ -36,6 +37,7 @@ export function makeMesh(parts) {
         const tx = 2 * (qy * z - qz * y),
           ty = 2 * (qz * x - qx * z),
           tz = 2 * (qx * y - qy * x);
+        geographic.push(x, y, z);
         reference.push(
           x + w * tx + qy * tz - qz * ty,
           y + w * ty + qz * tx - qx * tz,
@@ -48,6 +50,8 @@ export function makeMesh(parts) {
   return {
     coordinates: new Float64Array(coordinates),
     reference: new Float32Array(reference),
+    geographic: new Float32Array(geographic),
+    iceLatitudes: new Float32Array(coordinates.filter((_, i) => i % 2).map(lat => Math.sin(lat * Math.PI / 180))),
     normals: new Float32Array((coordinates.length / 2) * 3),
     positions: new Float64Array((coordinates.length / 2) * 3),
     projected: new Float64Array(coordinates.length),
@@ -68,11 +72,25 @@ export function blendWeights(from, target, progress) {
 }
 // Every endpoint reads the same current geological coordinates. Interrupted transitions
 // begin from the current mixture, so neither time nor the displayed shape jumps backwards.
-export function transformMesh(mesh, weights, engines, scales, latitude = 15, ocean = false) {
+export function transformMesh(mesh, weights, engines, scales, latitude = 15, ocean = false, longitude = 0) {
   const {coordinates, projected, positions} = mesh;
   const tilt = (latitude * Math.PI) / 180,
     sinTilt = Math.sin(tilt),
     cosTilt = Math.cos(tilt);
+  // Ocean geometry covers the whole view, so only its material coordinates need the
+  // camera longitude. Land coordinates already contain this shift during rebuilding.
+  if (ocean && mesh.materialLongitude !== longitude) {
+    const angle = longitude * Math.PI / 180;
+    for (let i = 0, j = 0; i < coordinates.length; i += 2, j += 3) {
+      const lon = coordinates[i] * Math.PI / 180 + angle;
+      const lat = coordinates[i + 1] * Math.PI / 180;
+      mesh.geographic[j] = Math.cos(lat) * Math.cos(lon);
+      mesh.geographic[j + 1] = Math.cos(lat) * Math.sin(lon);
+      mesh.geographic[j + 2] = Math.sin(lat);
+    }
+    mesh.reference.set(mesh.geographic);
+    mesh.materialLongitude = longitude;
+  }
   positions.fill(0);
   if (mesh.normals)
     for (let i = 0, j = 0; i < coordinates.length; i += 2, j += 3) {
@@ -124,6 +142,8 @@ export function binaryMesh(mesh) {
       getPolygon: {value: mesh.positions, size: 3},
       getSurfaceNormal: {value: mesh.normals, size: 3},
       getReferencePosition: {value: mesh.reference, size: 3},
+      getGeographicPosition: {value: mesh.geographic, size: 3},
+      getIceLatitude: {value: mesh.iceLatitudes, size: 1},
       indices: {value: mesh.indices, size: 1},
       getFillColor: {value: mesh.colors, size: 4}
     }

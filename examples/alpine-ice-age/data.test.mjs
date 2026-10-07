@@ -257,3 +257,34 @@ test("Krapp failure preserves the existing reconstruction", async (t) => {
   });
   assert.equal(await loadKrappSimulation(new AbortController().signal), null);
 });
+test(
+  "a stalled Krapp manifest times out and falls back",
+  { timeout: 1000 },
+  async (t) => {
+    const timeout = new AbortController();
+    t.mock.method(AbortSignal, "timeout", (milliseconds) => {
+      assert.equal(milliseconds, 30000);
+      queueMicrotask(() =>
+        timeout.abort(new DOMException("Timeout", "TimeoutError")),
+      );
+      return timeout.signal;
+    });
+    t.mock.method(globalThis, "fetch", async (_url, { signal }) => {
+      signal.throwIfAborted();
+      return new Promise((resolve, reject) =>
+        signal.addEventListener("abort", () => reject(signal.reason), {
+          once: true,
+        }),
+      );
+    });
+    t.mock.method(console, "warn", () => {});
+    let status;
+    assert.equal(
+      await loadKrappSimulation(new AbortController().signal, (message) => {
+        status = message;
+      }),
+      null,
+    );
+    assert.match(status, /using PaleoMIST/);
+  },
+);

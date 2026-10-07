@@ -24,6 +24,7 @@ import {
   REGIONS,
   timeLabel
 } from './math.js';
+import {snowballCoverage, glaciationPlaybackSpeed} from './timeline.js';
 import {SurfaceLayer} from './surface-layer.js';
 import {loadTerrain} from './terrain.js';
 import {makeMesh, blendWeights, transformMesh, binaryMesh, worldToGeographic} from './geometry.js';
@@ -87,6 +88,7 @@ export function mountScene(
     model = null,
     scenario = 'atlantic',
     grid = false,
+    glaciations = true,
     regionColors = false,
     terrainImage = null;
   let targets = futureRotations(scenario),
@@ -236,7 +238,7 @@ export function mountScene(
     lastRender = now;
     currentWeights(now);
     if (time !== geometryTime || longitude !== geometryLongitude || !land) counts = rebuild(time);
-    transformMesh(ocean, weights, engines, scales, latitude, true);
+    transformMesh(ocean, weights, engines, scales, latitude, true, longitude);
     transformMesh(land, weights, engines, scales, latitude);
     paths = [];
     if (grid)
@@ -266,6 +268,7 @@ export function mountScene(
         new SurfaceLayer({
           ...common,
           id: 'tectonic-ocean',
+          iceCoverage: glaciations ? snowballCoverage(time) : 0,
           data: binaryMesh(ocean),
           surfaceType: 'ocean',
           globeWeight: weights.globe || 0
@@ -273,6 +276,7 @@ export function mountScene(
         new SurfaceLayer({
           ...common,
           id: 'tectonic-land',
+          iceCoverage: glaciations ? snowballCoverage(time) : 0,
           data: binaryMesh(land),
           image: terrainImage,
           regionColors,
@@ -386,7 +390,7 @@ export function mountScene(
       render(lastTime, true);
     },
     setPlayback({time, playing, ready, speed, maxAge}) {
-      widget.setProps({time, playing, step: speed / 20, timeRange: [-maxAge, 300]});
+      widget.setProps({time, playing, step: glaciationPlaybackSpeed(time, speed, glaciations) / 20, timeRange: [-maxAge, 300]});
       timelineContainer.inert = !ready;
       timelineContainer.setAttribute('aria-busy', String(!ready));
     },
@@ -412,6 +416,7 @@ export function mountScene(
         geometryTime = NaN;
       }
       grid = options.grid;
+      glaciations = options.glaciations ?? true;
       regionColors = options.regionColors;
       return render(lastTime, true);
     },
