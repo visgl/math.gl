@@ -230,3 +230,28 @@ test("footprint rasterization preserves holes and excludes the Southern Hemisphe
     1,
   );
 });
+
+import { maskFrame, krappPhase, loadKrappSimulation } from "./krapp-data.js";
+test("Krapp coverage aggregates native cells and integrates spherical area without invented volume", () => {
+  const native = new Int16Array(720 * 360).fill(2);
+  const frame = maskFrame(native);
+  assert(frame.ice.every((value) => value === 1));
+  assert(Math.abs(frame.area - 4 * Math.PI * 6371.0088 ** 2) < 0.01);
+  native.fill(0);
+  native[0] = 2;
+  const partial = maskFrame(native);
+  assert.equal(partial.ice[0], 0.25);
+  assert.equal(partial.ice[1], 0);
+  assert(partial.area > 0);
+  assert.equal(krappPhase(650), "Günz");
+  assert.equal(krappPhase(450), "Mindel");
+  assert.equal(krappPhase(160), "Riss");
+  assert.equal(krappPhase(20), "Würm");
+  assert.equal(krappPhase(0), "Holocene");
+});
+test("Krapp failure preserves the existing reconstruction", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => {
+    throw new TypeError("Network unavailable");
+  });
+  assert.equal(await loadKrappSimulation(new AbortController().signal), null);
+});
