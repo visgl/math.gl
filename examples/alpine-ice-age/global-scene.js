@@ -17,6 +17,7 @@ import {
   millerCylindrical
 } from '@math.gl/projection';
 import { interpolateField } from './data.js';
+import {nearestOSFChapter} from './osf-data.js';
 import { projectionWeights } from './projection-transition.js';
 import { REGIONAL_VIEWS, regionalCoordinate, inRegion } from './regional-views.js';
 export const GLOBAL_VIEWS = {
@@ -176,7 +177,10 @@ export function createGlobalScene(canvas, onError) {
     const { view, age, showIce, ghost, labels } = opts;
     const g = grid(view),
       size = 361 * 181;
-    const ice = interpolateField(model.ice, model.count, model.manifest.ages, age),
+    const ice = model.footprints
+      ? model.ice.subarray(model.manifest.ages.indexOf(nearestOSFChapter(age).age) * model.count,
+          (model.manifest.ages.indexOf(nearestOSFChapter(age).age) + 1) * model.count)
+      : interpolateField(model.ice, model.count, model.manifest.ages, age),
       bed = interpolateField(model.bed, model.count, model.manifest.ages, age);
     const positions = new Float32Array(size * 3),
       normals = new Float32Array(size * 3),
@@ -225,7 +229,7 @@ export function createGlobalScene(canvas, onError) {
       for (let x = 0; x <= 360; x++) {
         const i = y * 361 + x,
           j = y * 360 + (x % 360),
-          c = color(bed[j], ice[j], showIce, ghost);
+          c = color(bed[j], model.footprints ? ice[j] * 1500 : ice[j], showIce, ghost);
         const sphere = point(x - 180, y - 90);
         for (const endpoint of endpoints) {
           const p =

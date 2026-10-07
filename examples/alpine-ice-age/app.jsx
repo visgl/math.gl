@@ -9,6 +9,7 @@ import AttributionWidget from '../shared/attribution-widget.jsx';
 import {ALPINE_SOURCES} from './attribution.js';
 import { glacialPhase } from './glacial-phase.js';
 import GlobalIceAge from './global-app.jsx';
+import {useChapterTitle} from './use-chapter-title.js';
 const CHAPTERS = [
   { age: 119, name: 'Cycle begins' },
   { age: 70, name: 'Early advances' },
@@ -70,6 +71,7 @@ function AlpineView({ onMode }) {
   useEffect(() => {
     if (age === 0 && !repeat) setPlaying(false);
   }, [age, repeat]);
+  const titleVisible = useChapterTitle(glacialPhase(age), iceNames, Boolean(model));
   const m = model?.manifest;
   const { index, fraction } = m ? sampleAt(m.ages, age) : { index: 0, fraction: 0 };
   const statistic = (field) =>
@@ -101,9 +103,9 @@ function AlpineView({ onMode }) {
           <p>{age < 0.05 ? 'Present day' : `${age.toFixed(1)} thousand years ago`}</p>
         </div>
         {iceNames && (
-          <div className="alpine-phase" aria-live="polite">
-            <strong>{glacialPhase(age)}</strong>
-            {age >= 11.7 && age <= 115 && <span>{'Würm glaciation'}</span>}
+          <div className={`alpine-phase ${titleVisible ? "" : "alpine-phase-hidden"}`} aria-hidden={!titleVisible}>
+            <strong>{age >= 11.7 && age <= 115 ? 'Würm' : glacialPhase(age)}</strong>
+            {age >= 11.7 && age <= 115 && <span>{glacialPhase(age)}</span>}
           </div>
         )}
         {!model && (
@@ -280,5 +282,7 @@ function AlpineView({ onMode }) {
 
 export default function IceAge() {
   const [mode, setMode] = useState('global');
-  return mode === 'global' ? <GlobalIceAge onMode={setMode} /> : <AlpineView onMode={setMode} />;
+  return mode !== 'alpine'
+    ? <GlobalIceAge onMode={setMode} earlier={mode === 'quaternary'} />
+    : <AlpineView onMode={setMode} />;
 }

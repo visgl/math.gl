@@ -8,6 +8,13 @@ import "./style.css";
 import AttributionWidget from "../shared/attribution-widget.jsx";
 import { GLOBAL_SOURCES } from "./attribution.js";
 import { climateAt, loadClimate } from "./climate.js";
+import {
+  loadQuaternarySimulation,
+  nearestOSFChapter,
+  OSF_CHAPTERS,
+} from "./osf-data.js";
+import { useChapterTitle } from "./use-chapter-title.js";
+import { OSF_SOURCES } from "./attribution.js";
 import { glacialPhase } from "./glacial-phase.js";
 const CHAPTERS = [
   { age: 80, name: "Reconstruction begins" },
@@ -17,12 +24,16 @@ const CHAPTERS = [
   { age: 0, name: "Present" },
 ];
 const number = (value) => (value / 1e6).toFixed(1);
-export default function GlobalIceAge({ onMode }) {
+export default function GlobalIceAge({ onMode, earlier = false }) {
   const canvas = useRef(null),
     scene = useRef(null);
-  const [model, setModel] = useState(null),
+  const [baseModel, setModel] = useState(null),
     [error, setError] = useState("");
   const [climateModel, setClimateModel] = useState(null);
+  const [olderModel, setOlderModel] = useState(null);
+  const model = earlier && olderModel ? olderModel : baseModel;
+  const maxAge = model?.manifest.ages[0] ?? 80;
+  const minAge = model?.manifest.ages.at(-1) ?? 0;
   const [age, setAge] = useState(80),
     [playing, setPlaying] = useState(true),
     [speed, setSpeed] = useState(2),
@@ -44,6 +55,20 @@ export default function GlobalIceAge({ onMode }) {
       });
     return () => controller.abort();
   }, []);
+  useEffect(() => {
+    if (!baseModel) return;
+    const controller = new AbortController();
+    loadQuaternarySimulation(baseModel, controller.signal).then((value) => {
+      if (value && !controller.signal.aborted) {
+        setOlderModel(value);
+        onMode("quaternary");
+      }
+    });
+    return () => controller.abort();
+  }, [baseModel, onMode]);
+  useEffect(() => {
+    setAge(earlier && olderModel ? olderModel.manifest.ages[0] : 80);
+  }, [earlier, olderModel]);
   useEffect(() => {
     const controller = new AbortController();
     loadClimate(controller.signal)
@@ -85,28 +110,37 @@ export default function GlobalIceAge({ onMode }) {
         step = Math.min(0.15, (now - previous) / 1000) * speed;
       previous = now;
       setAge((value) =>
-        repeat && value === 0 ? 80 : Math.max(0, value - step),
+        repeat && value === minAge ? maxAge : Math.max(minAge, value - step),
       );
     }, 75);
     return () => clearInterval(timer);
-  }, [playing, model, speed, repeat]);
+  }, [playing, model, speed, repeat, minAge, maxAge]);
   useEffect(() => {
-    if (age === 0 && !repeat) setPlaying(false);
-  }, [age, repeat]);
-  const climate = climateModel ? climateAt(age, climateModel) : null;
+    if (age === minAge && !repeat) setPlaying(false);
+  }, [age, repeat, minAge]);
+  const climate =
+    !model?.footprints && climateModel ? climateAt(age, climateModel) : null;
+  const phase = model?.footprints
+    ? nearestOSFChapter(age).name
+    : glacialPhase(age);
+  const titleVisible = useChapterTitle(phase, iceNames, Boolean(model));
   const m = model?.manifest;
   const { index, fraction } = m
     ? sampleAt(m.ages, age)
     : { index: 0, fraction: 0 };
-  const statistic = (field) =>
-    m ? m[field][index] * (1 - fraction) + m[field][index + 1] * fraction : 0;
+  const statistic = (field) => {
+    if (!m) return 0;
+    if (model.footprints)
+      return m[field][m.ages.indexOf(nearestOSFChapter(age).age)];
+    return m[field][index] * (1 - fraction) + m[field][index + 1] * fraction;
+  };
   const area = statistic("areaKm2"),
     volume = statistic("volumeKm3");
   const chart = m
     ? m.areaKm2
         .map(
           (value, i) =>
-            `${(i / (m.ages.length - 1)) * 1000},${60 - (value / Math.max(...m.areaKm2)) * 55}`,
+            `${((maxAge - m.ages[i]) / (maxAge - minAge)) * 1000},${60 - (value / Math.max(...m.areaKm2)) * 55}`,
         )
         .join(" ")
     : "";
@@ -123,7 +157,7 @@ export default function GlobalIceAge({ onMode }) {
         />
         <div className="alpine-title">
           <span>GLACIER LAB / math.gl</span>
-          <h1>Global Ice Age</h1>
+          <h1>{model?.footprints ? "Earlier Ice Ages" : "Global Ice Age"}</h1>
           <p>
             {age < 0.05
               ? "Present day"
@@ -131,10 +165,26 @@ export default function GlobalIceAge({ onMode }) {
           </p>
         </div>
         {iceNames && (
-          <div className="alpine-phase" aria-live="polite">
-            <strong>{glacialPhase(age)}</strong>
-            {age >= 11.7 && age <= 115 && (
+          <div
+            className={`alpine-phase ${titleVisible ? "" : "alpine-phase-hidden"}`}
+            aria-hidden={!titleVisible}
+          >
+            <strong>
+              {model?.footprints
+                ? nearestOSFChapter(age).name.split(" · ")[0]
+                : age >= 11.7 && age <= 115
+                  ? "Würm"
+                  : glacialPhase(age)}
+            </strong>
+            {model?.footprints && (
               <span>
+                {nearestOSFChapter(age).name.split(" · ")[1]} ·{" "}
+                {nearestOSFChapter(age).range} · approximate Alpine correlation
+              </span>
+            )}
+            {!model?.footprints && age >= 11.7 && age <= 115 && (
+              <span>
+                {glacialPhase(age)} ·{" "}
                 {view === "albersNorthAmerica"
                   ? "Wisconsinan"
                   : view === "albersEurope"
@@ -157,7 +207,10 @@ export default function GlobalIceAge({ onMode }) {
         <div className="alpine-map-note">
           {view === "globe" ? "Drag to rotate" : "Drag to pan"} · scroll to zoom{" "}
           <span>
-            {cycleViews ? "Cycling projections · " : ""}PaleoMIST · 1° grid
+            {cycleViews ? "Cycling projections · " : ""}
+            {model?.footprints
+              ? "OSF · best-estimate outlines"
+              : "PaleoMIST · 1° grid"}
           </span>
         </div>
       </div>
@@ -166,28 +219,44 @@ export default function GlobalIceAge({ onMode }) {
           Explore
           <select
             aria-label="Explore"
-            value="global"
+            value={earlier ? "quaternary" : "global"}
             onChange={(e) => onMode(e.target.value)}
           >
             <option value="global">Global ice sheets</option>
             <option value="alpine">Alpine glaciers</option>
+            <option value="quaternary" disabled={!olderModel}>
+              Earlier ice ages · OSF
+            </option>
           </select>
         </label>
 
-        <span className="alpine-eyebrow">THE LAST 80,000 YEARS</span>
-        <h2>Ice across the planet</h2>
+        <span className="alpine-eyebrow">
+          {model?.footprints
+            ? "NORTHERN HEMISPHERE · QUATERNARY"
+            : "THE LAST 80,000 YEARS"}
+        </span>
+        <h2>
+          {model?.footprints ? "Earlier ice extents" : "Ice across the planet"}
+        </h2>
         <div className="alpine-stats">
           <div>
             <strong>
               {model ? number(area) : "—"} <small>Mkm²</small>
             </strong>
-            <span>Global ice area</span>
+            <span>
+              {model?.footprints
+                ? "NH footprint area · sampled"
+                : "Global ice area"}
+            </span>
           </div>
           <div>
             <strong>
-              {model ? number(volume) : "—"} <small>Mkm³</small>
+              {model && volume !== null ? number(volume) : "—"}{" "}
+              <small>Mkm³</small>
             </strong>
-            <span>Global ice volume</span>
+            <span>
+              {model?.footprints ? "Volume unavailable" : "Global ice volume"}
+            </span>
           </div>
         </div>
         <div className="alpine-stats alpine-climate">
@@ -247,7 +316,7 @@ export default function GlobalIceAge({ onMode }) {
             checked={showIce}
             onChange={(e) => setShowIce(e.target.checked)}
           />
-          Grounded ice sheets
+          {model?.footprints ? "Ice-sheet footprints" : "Grounded ice sheets"}
         </label>
         <label className="alpine-check">
           <input
@@ -284,33 +353,55 @@ export default function GlobalIceAge({ onMode }) {
 
         <div className="alpine-legend">
           <i />
-          Thin ice → thick ice
+          {model?.footprints
+            ? "Best-estimate ice-sheet footprint"
+            : "Thin ice → thick ice"}
         </div>
-        <AttributionWidget sources={GLOBAL_SOURCES} />
+        <AttributionWidget
+          sources={model?.footprints ? OSF_SOURCES : GLOBAL_SOURCES}
+        />
         <details>
           <summary>Scientific limits</summary>
-          <p>
-            Gowan et al. (2021), PaleoMIST 1.0. Corrected April 2021 grids,
-            minimal North American MIS 3 scenario. 1° grid; 2,500-year
-            snapshots.
-          </p>
-          <p>
-            Grounded ice thickness and changing base topography come from the
-            reconstruction. Sea ice and small mountain glaciers are not shown.
-            Margins and statistics interpolate between snapshots; terrain-reveal
-            colors are illustrative. Area counts ice thicker than 10 m.
-          </p>
-          <p>
-            The Alpine view uses a separate, finer simulation. Günz, Mindel and
-            Riss precede both datasets.
-          </p>
-          <p>
-            Climate: Köhler et al. (2015), CC-BY-3.0. Temperature uses variant 1
-            relative to its 0 ka value; albedo is land-ice radiative forcing,
-            not total planetary reflectivity. Independent model, linearly
-            interpolated 2,000-year samples. Albedo is unavailable below 2 ka;
-            no extrapolation.
-          </p>
+          {model?.footprints && (
+            <p>
+              Batchelor et al. (2019), Northern Hemisphere best-estimate
+              ice-sheet footprints only. The display uses one published
+              reconstruction per stage, sampled to a 1° grid over present-day
+              PaleoMIST bedrock; no thickness or volume is inferred. Snapshots
+              switch at the nearest stage midpoint, without invented
+              intermediate extents. Günz/Mindel/Riss are approximate Alpine
+              correlations, not globally synchronous stage names. Southern
+              Hemisphere ice is outside this dataset. The external files have no
+              declared redistribution license and are fetched directly from OSF.
+            </p>
+          )}
+          {!model?.footprints && (
+            <>
+              <p>
+                Gowan et al. (2021), PaleoMIST 1.0. Corrected April 2021 grids,
+                minimal North American MIS 3 scenario. 1° grid; 2,500-year
+                snapshots.
+              </p>
+              <p>
+                Grounded ice thickness and changing base topography come from
+                the reconstruction. Sea ice and small mountain glaciers are not
+                shown. Margins and statistics interpolate between snapshots;
+                terrain-reveal colors are illustrative. Area counts ice thicker
+                than 10 m.
+              </p>
+              <p>
+                The Alpine view uses a separate, finer simulation. Günz, Mindel
+                and Riss precede both datasets.
+              </p>
+              <p>
+                Climate: Köhler et al. (2015), CC-BY-3.0. Temperature uses
+                variant 1 relative to its 0 ka value; albedo is land-ice
+                radiative forcing, not total planetary reflectivity. Independent
+                model, linearly interpolated 2,000-year samples. Albedo is
+                unavailable below 2 ka; no extrapolation.
+              </p>
+            </>
+          )}
         </details>
       </aside>
       <footer className="alpine-timeline">
@@ -318,22 +409,26 @@ export default function GlobalIceAge({ onMode }) {
           <button
             disabled={!model}
             onClick={() => {
-              if (age === 0) setAge(80);
+              if (age === minAge) setAge(maxAge);
               setPlaying(!playing);
             }}
             aria-label={playing ? "Pause playback" : "Play playback"}
           >
             {playing ? "Ⅱ Pause" : "▶ Play"}
           </button>
-          <span>80,000 years ago</span>
-          <span>Ice area over time</span>
-          <span>Present</span>
+          <span>{maxAge.toLocaleString()} ka ago</span>
+          <span>
+            {model?.footprints
+              ? "Published stage footprints"
+              : "Ice area over time"}
+          </span>
+          <span>{minAge ? `${minAge} ka ago` : "Present"}</span>
         </div>
         <div className="alpine-chart">
           <svg
             viewBox="0 0 1000 65"
             preserveAspectRatio="none"
-            aria-label="Model ice area over the last glacial cycle"
+            aria-label="Ice area across the selected reconstructions"
           >
             <polyline
               points={chart}
@@ -342,8 +437,8 @@ export default function GlobalIceAge({ onMode }) {
               strokeWidth="2"
             />
             <line
-              x1={((80 - age) / 80) * 1000}
-              x2={((80 - age) / 80) * 1000}
+              x1={((maxAge - age) / (maxAge - minAge)) * 1000}
+              x2={((maxAge - age) / (maxAge - minAge)) * 1000}
               y1="0"
               y2="65"
               stroke="#fff"
@@ -352,8 +447,8 @@ export default function GlobalIceAge({ onMode }) {
           <input
             type="range"
             aria-label="Age in thousands of years before present"
-            min="0"
-            max="80"
+            min={minAge}
+            max={maxAge}
             step=".05"
             style={{ direction: "rtl" }}
             value={age}
@@ -362,7 +457,7 @@ export default function GlobalIceAge({ onMode }) {
           />
         </div>
         <div className="alpine-chapters">
-          {CHAPTERS.map((chapter) => (
+          {(model?.footprints ? OSF_CHAPTERS : CHAPTERS).map((chapter) => (
             <button
               key={chapter.age}
               disabled={!model}

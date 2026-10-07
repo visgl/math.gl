@@ -159,3 +159,74 @@ test("global ice loads independently when optional climate data fails", async (t
   assert.equal(model.ice.length, model.count * globalManifest.ages.length);
   assert.equal(model.bed.length, model.ice.length);
 });
+
+import {
+  loadQuaternarySimulation,
+  nearestOSFChapter,
+  rasterizeFootprints,
+} from "./osf-data.js";
+test("OSF failure leaves the current reconstruction available", async (t) => {
+  t.mock.method(globalThis, "fetch", async (url) => {
+    if (url === DATASETS.globalManifest)
+      return new Response(globalManifestBytes);
+    if (url === DATASETS.global) return new Response(globalPacked);
+    throw new TypeError("OSF network or CORS failure");
+  });
+  const current = await loadGlobalSimulation();
+  assert.equal(await loadQuaternarySimulation(current), null);
+  assert.equal(current.ice.length, current.count * globalManifest.ages.length);
+  assert.equal(current.manifest.ages[0], 80);
+});
+test("older extents select published stages without extrapolating a continuous reconstruction", () => {
+  assert.equal(nearestOSFChapter(650).name, "Günz · MIS 16");
+  assert.equal(nearestOSFChapter(450).name, "Mindel · MIS 12");
+  assert.equal(nearestOSFChapter(160).name, "Riss · MIS 6");
+  assert.equal(nearestOSFChapter(300).age, 161);
+});
+test("footprint rasterization preserves holes and excludes the Southern Hemisphere", () => {
+  const fills = [],
+    paths = [];
+  const pixels = new Uint8ClampedArray(2048 * 2048 * 4);
+  pixels[(1024 * 2048 + 1024) * 4 + 3] = 255;
+  const context = {
+    beginPath() {},
+    moveTo(x, y) {
+      paths.push([x, y]);
+    },
+    lineTo() {},
+    closePath() {},
+    fill(rule) {
+      fills.push(rule);
+    },
+    getImageData() {
+      return { data: pixels };
+    },
+  };
+  const canvas = {
+    getContext() {
+      return context;
+    },
+  };
+  const geometry = {
+    type: "Polygon",
+    positions: {
+      size: 2,
+      value: [0, 0, 100, 0, 100, 100, 0, 0, 10, 10, 20, 10, 10, 20, 10, 10],
+    },
+    primitivePolygonIndices: { value: [0, 4, 8] },
+  };
+  const points = new Float64Array(360 * 181 * 2);
+  points.fill(9100000);
+  points.set([0, 0], 0);
+  points.set([0, 0], 90 * 360 * 2);
+  const coverage = rasterizeFootprints([geometry], points, canvas);
+  assert.deepEqual(fills, ["evenodd"]);
+  assert.equal(paths.length, 2);
+  assert.equal(coverage[0], 0);
+  assert.equal(coverage[90 * 360], 1);
+  assert.equal(coverage[90 * 360 + 1], 0);
+  assert.equal(
+    coverage.reduce((a, b) => a + b),
+    1,
+  );
+});

@@ -318,3 +318,9 @@
 .alpine-climate {
   margin-top: 4px;
 }
+
+.alpine-phase { transition: opacity 800ms ease; }
+.alpine-phase-hidden { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .alpine-phase { transition: none; }
+}

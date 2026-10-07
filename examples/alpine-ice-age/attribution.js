@@ -49,3 +49,25 @@ export const GLOBAL_SOURCES = [
       "0–120 ka subset. Temperature variant 1 rebased to its 0 ka sample. Linear interpolation; albedo forcing unavailable below 2 ka. Independent climate model, not calculated from the displayed ice sheets.",
   },
 ];
+
+export const OSF_SOURCES = [
+  {
+    id: "batchelor2019",
+    title: "Northern Hemisphere Quaternary ice-sheet extents",
+    credit: "Batchelor et al. (2019)",
+    creators:
+      "Christine L. Batchelor, Martin Margold, Mario Krapp, Della K. Murton, April S. Dalton, Philip L. Gibbard, Chris R. Stokes, Julian B. Murton and Andrea Manica (2019).",
+    dataset: "https://osf.io/7jen3/",
+    paper: "https://doi.org/10.1038/s41467-019-11601-2",
+    license: "Dataset license undeclared",
+    licenseUrl: "https://api.osf.io/v2/nodes/7jen3/",
+    changes:
+      "MIS 16, 12 and 6 best-estimate outlines fetched directly from OSF. Rasterized to 1° display coverage; approximate footprint area. No inferred thickness or volume. Stage reconstructions switch discretely; Alpine name correlations are approximate.",
+  },
+  {
+    ...GLOBAL_SOURCES[0],
+    title: "Present-day background bedrock",
+    changes:
+      "The present-day PaleoMIST bedrock grid is used as background only; it is not a reconstruction of earlier Quaternary terrain.",
+  },
+];

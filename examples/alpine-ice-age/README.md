@@ -166,3 +166,33 @@ visible in both views. Expand **Data attribution** for the original dataset, pap
 license, pinned hosted copy and display modifications. Scientific limits are
 listed separately. The tectonic example uses the same component and updates the
 credits when the selected reconstruction changes.
+
+### Optional older OSF reconstructions
+
+After PaleoMIST loads, the explorer independently tries the public OSF file API
+for Batchelor et al. (2019), [project 7jen3](https://osf.io/7jen3/),
+[study](https://doi.org/10.1038/s41467-019-11601-2). HTTP, browser CORS, a 30-second
+timeout, missing files, unsupported projections or parse failures retain the
+current reconstruction. No OSF data is bundled or redistributed. If all three
+stages load, **Earlier ice ages · OSF** becomes available and is selected; the
+original Global ice sheets and Alpine glaciers modes remain available.
+
+The source best-estimate polygons for MIS 16 (622–677 ka), MIS 12 (429–477 ka)
+and MIS 6 (132–190 ka) describe Northern Hemisphere ice sheets. Günz, Mindel and
+Riss are approximate Alpine correlations, not universally agreed global names.
+The slider uses stage midpoints and switches to the nearest published snapshot;
+there is no invented intermediate ice extent. The original polar WGS84 Lambert
+azimuthal equal-area polygons are rasterized at approximately 9 km and sampled
+to the 1° display grid. Area is approximate sampled footprint area. Thickness,
+volume and climate readouts are unavailable. Present-day PaleoMIST bedrock is
+used as a background; Southern Hemisphere ice is outside this source's coverage.
+The OSF metadata declares no dataset license, and its two READMEs contain no
+redistribution grant; the paper's CC BY 4.0 license is not assigned to these
+external files. The attribution widget links to the source and records this.
+
+The large last-glacial-period title is **Würm**; the maximum and retreat phase
+descriptions appear underneath.
+
+Chapter titles appear for four seconds after the model loads or a phase changes,
+then fade out over 800 ms. Re-enabling Ice age names introduces the current chapter
+again. Reduced-motion preferences remove the fade.
