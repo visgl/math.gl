@@ -88,6 +88,7 @@ export function mountScene(
     model = null,
     scenario = 'atlantic',
     grid = false,
+    glaciations = true,
     regionColors = false,
     terrainImage = null;
   let targets = futureRotations(scenario),
@@ -267,7 +268,7 @@ export function mountScene(
         new SurfaceLayer({
           ...common,
           id: 'tectonic-ocean',
-          iceCoverage: snowballCoverage(time),
+          iceCoverage: glaciations ? snowballCoverage(time) : 0,
           data: binaryMesh(ocean),
           surfaceType: 'ocean',
           globeWeight: weights.globe || 0
@@ -275,7 +276,7 @@ export function mountScene(
         new SurfaceLayer({
           ...common,
           id: 'tectonic-land',
-          iceCoverage: snowballCoverage(time),
+          iceCoverage: glaciations ? snowballCoverage(time) : 0,
           data: binaryMesh(land),
           image: terrainImage,
           regionColors,
@@ -415,6 +416,7 @@ export function mountScene(
         geometryTime = NaN;
       }
       grid = options.grid;
+      glaciations = options.glaciations ?? true;
       regionColors = options.regionColors;
       return render(lastTime, true);
     },

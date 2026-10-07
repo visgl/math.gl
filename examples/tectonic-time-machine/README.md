@@ -145,6 +145,9 @@ visible beneath it, and retreats at the end
 of each interval. It follows geological time when playing or seeking, works on
 the globe and projected maps, and is absent during the nonglacial interval.
 
+The **Glaciations** checkbox turns the ice glaze and event captions on or off.
+Timeline markers remain available for seeking to the events.
+
 These chapters are educational cues, not an ice-extent dataset or climate
 simulation. Global versus partly open ocean conditions remain debated. Dates
 follow [Hoffman et al. (2017)](https://doi.org/10.1126/sciadv.1600983); see also

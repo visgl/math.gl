@@ -33,6 +33,7 @@ export default function TectonicTimeMachine() {
     [longitude, setLongitude] = useState(0),
     [scenario, setScenario] = useState('atlantic'),
     [grid, setGrid] = useState(false),
+    [glaciations, setGlaciations] = useState(true),
     [regionColors, setRegionColors] = useState(false),
     [speed, setSpeed] = useState(20),
     [counts, setCounts] = useState(null),
@@ -132,8 +133,8 @@ export default function TectonicTimeMachine() {
     return () => clearTimeout(timer);
   }, [cycleViews, playing, ready, view]);
   useEffect(() => {
-    scene.current?.setOptions({view, longitude, scenario, grid, regionColors});
-  }, [view, longitude, scenario, grid, regionColors]);
+    scene.current?.setOptions({view, longitude, scenario, grid, regionColors, glaciations});
+  }, [view, longitude, scenario, grid, regionColors, glaciations]);
   useEffect(() => {
     if (!playing) {
       clock.current = time;
@@ -193,7 +194,7 @@ export default function TectonicTimeMachine() {
               className={`tectonic-chapter${chapter.name.includes('&') ? ' tectonic-chapter-pair' : ''}`}
               style={{
                 opacity:
-                  ready && !error && -chapter.time <= source.maxAge
+                  ready && !error && -chapter.time <= source.maxAge && (glaciations || !chapter.name.startsWith('Snowball Earth'))
                     ? chapterOpacity(chapter, time, scenario)
                     : 0
               }}
@@ -290,6 +291,10 @@ export default function TectonicTimeMachine() {
         <label className="tectonic-check">
           <input type="checkbox" checked={grid} onChange={e => setGrid(e.target.checked)} />{' '}
           Graticule
+        </label>
+        <label className="tectonic-check">
+          <input type="checkbox" checked={glaciations} onChange={e => setGlaciations(e.target.checked)} />{' '}
+          Glaciations
         </label>
         <label>
           Land appearance
