@@ -4,7 +4,7 @@
   "author": "Uber Technologies, Inc.",
   "license": "MIT",
   "type": "module",
-  "version": "5.0.0-alpha.12",
+  "version": "5.0.0-alpha.13",
   "keywords": [
     "webgl",
     "javascript",
@@ -34,7 +34,7 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-alpha.12"
+    "@math.gl/core": "5.0.0-alpha.13"
   },
   "devDependencies": {
     "mock-browser": "^0.92.14"
