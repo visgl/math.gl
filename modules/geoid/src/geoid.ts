@@ -20,6 +20,8 @@
  * * https://geographiclib.sourceforge.io/
  **********************************************************************/
 
+import {isUint16Array} from '@math.gl/types';
+
 const c0_ = 240;
 
 // biome-ignore format: preserve the coefficient table layout
@@ -110,6 +112,7 @@ export class Geoid {
   private _t: number[] = [];
   private _ix: number;
   private _iy: number;
+  private _hasUint16Data: boolean;
 
   options: GeoidProps;
 
@@ -123,6 +126,7 @@ export class Geoid {
     this.options = options;
     this._ix = this.options._width;
     this._iy = this.options._height;
+    this._hasUint16Data = isUint16Array(options.data);
   }
 
   /**
@@ -252,7 +256,7 @@ export class Geoid {
       ix += ((ix < this.options._width / 2 ? 1 : -1) * this.options._width) / 2;
     }
     const sampleIndex = iy * this.options._swidth + ix;
-    if (this.options.data instanceof Uint16Array) {
+    if (this._hasUint16Data) {
       return this.options.data[this.options._datastart + sampleIndex];
     }
     const bufferPosition = this.options._datastart + PIXEL_SIZE * sampleIndex;

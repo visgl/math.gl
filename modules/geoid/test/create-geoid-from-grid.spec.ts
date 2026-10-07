@@ -5,6 +5,47 @@ import {expect, test} from 'vitest';
 import {createGeoidFromGrid, parsePGM} from '@math.gl/geoid';
 import type {GeoidGridProps} from '@math.gl/geoid';
 import {openFile} from './utils/file-utils';
+import {createForeignTypedArray} from '../../../test/utils/foreign-typed-array';
+
+test('decoded geoid accepts foreign-realm Uint16Array values for both interpolation modes', async () => {
+  const foreign = (await createForeignTypedArray('Uint16Array', 16)) as Uint16Array;
+  expect(foreign instanceof Uint16Array).toBe(false);
+  const values = foreign.subarray(2, 14);
+  values.set([100, 100, 100, 100, 200, 300, 400, 500, 600, 600, 600, 600]);
+  for (const cubic of [false, true]) {
+    const options = {width: 4, height: 3, offset: -108, scale: 0.003, cubic};
+    const grid = createGeoidFromGrid({...options, values});
+    const local = createGeoidFromGrid({...options, values: new Uint16Array(values)});
+    expect(grid.options.data).toBe(values);
+    for (const [latitude, longitude] of [
+      [90, 0],
+      [0, 0],
+      [45, 30],
+      [-89, -179],
+      [-90, 120]
+    ]) {
+      expect(grid.getHeight(latitude, longitude)).toBe(local.getHeight(latitude, longitude));
+    }
+    if (!cubic) {
+      expect(grid.getHeight(0, 0)).toBeCloseTo(-107.4, 12);
+    }
+  }
+});
+
+test.skipIf(typeof globalThis.Float16Array !== 'function')(
+  'decoded geoid rejects Float16Array values rather than interpreting floats as raw integers',
+  () => {
+    expect(() =>
+      createGeoidFromGrid({
+        width: 4,
+        height: 3,
+        values: new globalThis.Float16Array(12) as unknown as Uint16Array,
+        offset: -108,
+        scale: 0.003
+      })
+    ).toThrow('Uint16Array');
+  }
+);
 
 for (const resolution of ['low', 'hi']) {
   for (const cubic of [false, true]) {

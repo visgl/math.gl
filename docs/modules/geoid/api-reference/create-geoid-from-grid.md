@@ -40,7 +40,7 @@ Samples are row-major: `values[row * width + column]`. Height N is
 change this required grid order.
 
 The array is borrowed without copying or converting to PGM bytes. Typed-array
-subviews are supported. Keep the samples unchanged for the lifetime of the geoid:
+subviews and arrays from other JavaScript realms are supported. Keep the samples unchanged for the lifetime of the geoid:
 interpolation caches coefficients from previously queried cells.
 
 ## Decoded Parquet grids
@@ -53,6 +53,11 @@ from the manifest or `geoid` schema metadata. Assemble chunked columns first;
 restore row/column order if a query reordered rows. Filtered or incomplete tables
 cannot be used as a complete grid. Do not pass the decoded `geoid_height` column
 as raw samples.
+
+`@math.gl/types` provides `isUint16Array()` and `isFloat16Array()` to distinguish
+unsigned integer samples from native half-precision floats across realms.
+Float16Array heights and Uint16Array binary16 bit patterns are different encodings
+from GeographicLib raw samples and cannot be passed as this grid's raw values.
 
 Invalid dimensions, array type/count, or offset/scale throw an error. The factory
 does not inspect coordinates or verify the grid's provenance. Use the high grid

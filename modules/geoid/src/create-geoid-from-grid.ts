@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Geoid} from './geoid';
+import {isUint16Array} from '@math.gl/types';
 
 /** A complete global grid of raw samples in GeographicLib node order. */
 export type GeoidGridProps = {
@@ -25,7 +26,7 @@ export function createGeoidFromGrid(props: GeoidGridProps): Geoid {
   if (!Number.isSafeInteger(height) || height < 3 || height % 2 !== 1) {
     throw new Error('Geoid grid: height must be an odd integer of at least 3');
   }
-  if (!(values instanceof Uint16Array) || values.length !== width * height) {
+  if (!isUint16Array(values) || values.length !== width * height) {
     throw new Error('Geoid grid: values must be a Uint16Array with width * height samples');
   }
   if (!Number.isFinite(offset) || !Number.isFinite(scale) || scale <= 0) {

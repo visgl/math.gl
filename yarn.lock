@@ -5256,6 +5256,7 @@ __metadata:
   resolution: "@math.gl/geoid@workspace:modules/geoid"
   dependencies:
     "@math.gl/core": "npm:5.0.0-alpha.12"
+    "@math.gl/types": "npm:5.0.0-alpha.12"
   languageName: unknown
   linkType: soft
 
