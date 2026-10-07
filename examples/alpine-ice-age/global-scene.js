@@ -263,39 +263,16 @@ export function createGlobalScene(canvas, onError) {
     });
     const lines = [];
     if (labels) {
-      for (let lon = -180; lon <= 180; lon += 30) {
+      const [west, south, east, north] = REGIONAL_VIEWS[view]?.bounds || [-180, -85, 180, 85];
+      for (let lon = Math.ceil(west / 30) * 30; lon <= east; lon += 30) {
         const path = [];
-        for (let lat = -85; lat <= 85; lat += 1) path.push(blendedPoint(lon, lat, 0.6));
-        lines.push({
-          path,
-          opacity: endpoints.reduce(
-            (sum, e) =>
-              sum +
-              e.weight *
-                (!REGIONAL_VIEWS[e.id] ||
-                (lon >= REGIONAL_VIEWS[e.id].bounds[0] && lon <= REGIONAL_VIEWS[e.id].bounds[2])
-                  ? 1
-                  : 0),
-            0
-          )
-        });
+        for (let lat = south; lat <= north; lat += 1) path.push(blendedPoint(lon, lat, 0.6));
+        lines.push({ path, opacity: 1 });
       }
-      for (let lat = -60; lat <= 60; lat += 30) {
+      for (let lat = Math.ceil(south / 30) * 30; lat <= Math.min(north, 60); lat += 30) {
         const path = [];
-        for (let lon = -180; lon <= 180; lon += 1) path.push(blendedPoint(lon, lat, 0.6));
-        lines.push({
-          path,
-          opacity: endpoints.reduce(
-            (sum, e) =>
-              sum +
-              e.weight *
-                (!REGIONAL_VIEWS[e.id] ||
-                (lat >= REGIONAL_VIEWS[e.id].bounds[1] && lat <= REGIONAL_VIEWS[e.id].bounds[3])
-                  ? 1
-                  : 0),
-            0
-          )
-        });
+        for (let lon = west; lon <= east; lon += 1) path.push(blendedPoint(lon, lat, 0.6));
+        lines.push({ path, opacity: 1 });
       }
     }
     deck.setProps({
