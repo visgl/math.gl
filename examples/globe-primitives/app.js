@@ -4,6 +4,22 @@
 import {EllipsoidOccluder, getGlobeHorizonBounds, splitGlobeBounds} from '@math.gl/geospatial';
 import {subdivideGlobeMesh} from '@math.gl/polygon';
 
+import {BLUE_MARBLE_WORLD_URL} from '../common/blue-marble.js';
+
+let earthPixels;
+const earthImage = new Image();
+earthImage.crossOrigin = 'anonymous';
+earthImage.onload = () => {
+  const texture = document.createElement('canvas');
+  texture.width = 1024;
+  texture.height = 512;
+  const textureContext = texture.getContext('2d');
+  textureContext.drawImage(earthImage, 0, 0, 1024, 512);
+  earthPixels = textureContext.getImageData(0, 0, 1024, 512).data;
+  render();
+};
+earthImage.src = BLUE_MARBLE_WORLD_URL;
+
 const canvas = document.querySelector('#globe');
 const context = canvas.getContext('2d');
 const globe = new EllipsoidOccluder([1, 1, 1]);
@@ -86,7 +102,13 @@ function render() {
       if (!hit) continue;
       const point = camera.map((value, i) => value + direction[i] * hit[0]);
       const brightness = 0.2 + 0.8 * Math.max(0, dot(point, light));
-      context.fillStyle = `rgb(${12 * brightness},${84 * brightness},${140 * brightness})`;
+      const longitude = Math.atan2(point[1], point[0]);
+      const latitude = Math.asin(Math.max(-1, Math.min(1, point[2])));
+      const tx = Math.min(1023, Math.floor(((longitude + Math.PI) / (2 * Math.PI)) * 1024));
+      const ty = Math.min(511, Math.floor((0.5 - latitude / Math.PI) * 512));
+      const offset = (ty * 1024 + tx) * 4;
+      const rgb = earthPixels ? earthPixels.slice(offset, offset + 3) : [12, 84, 140];
+      context.fillStyle = `rgb(${rgb[0] * brightness},${rgb[1] * brightness},${rgb[2] * brightness})`;
       context.fillRect(x, y, 5, 5);
     }
   context.lineWidth = 0.5;

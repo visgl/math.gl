@@ -13,3 +13,6 @@ The standalone and website examples fetch pinned EGM96 PGM assets from
 `deck.gl-data/earth/geoid/v1` through `sources.js`. The geoid package retains its
 published asset exports for library consumers. These grids measure geoid
 undulation above WGS84, not terrain elevation.
+
+Basemap imagery uses NASA Blue Marble via the public GIBS EPSG:4326 WMS service,
+configured in `examples/common/blue-marble.js`. No access token is required.

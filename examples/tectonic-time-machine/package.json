@@ -7,7 +7,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "test": "node --test math.test.mjs"
+    "test": "node --test math.test.mjs snowball.test.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "~9.4.0",

@@ -3,8 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
-import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, BitmapLayer} from '@deck.gl/layers';
 import {getTimezoneOffset, getTimezoneLabel, isTimezoneSupported} from '@math.gl/timezone';
+
+import {BLUE_MARBLE_TILES, BLUE_MARBLE_CREDIT_URL} from '../common/blue-marble.js';
 
 let nextInstance = 0;
 
@@ -28,7 +30,7 @@ export function mountTimezoneGlobe(root, {lowUrl, hiUrl}) {
         <span>UTC−12</span><span>UTC</span><span>UTC+14</span>
       </div>
       <p class="credits">
-        Approximate boundaries ©
+        <a href="${BLUE_MARBLE_CREDIT_URL}">NASA Blue Marble</a>. Approximate boundaries ©
         <a href="https://www.openstreetmap.org/copyright"
           >OpenStreetMap contributors</a
         >, via
@@ -113,24 +115,17 @@ export function mountTimezoneGlobe(root, {lowUrl, hiUrl}) {
     );
     deck.setProps({
       layers: [
-        new SolidPolygonLayer({
-          id: 'earth',
-          data: [
-            [
-              [-180, 90],
-              [0, 90],
-              [180, 90],
-              [180, -90],
-              [0, -90],
-              [-180, -90]
-            ]
-          ],
-          getPolygon: polygon => polygon,
-          getFillColor: [25, 40, 55],
-          pickable: false
-        }),
+        ...BLUE_MARBLE_TILES.map(
+          (tile, index) =>
+            new BitmapLayer({
+              id: `blue-marble-${index}`,
+              ...tile,
+              pickable: false
+            })
+        ),
         new GeoJsonLayer({
           id: 'timezones',
+          opacity: 0.65,
           data,
           pickable: true,
           autoHighlight: true,
