@@ -153,6 +153,8 @@ with shaded ridges and valleys. Continent silhouettes remain visible through
 surface texture and color rather than underlying vegetation or plate colors.
 The relief is procedural visual context, not reconstructed elevation or ice thickness.
 Detail fades near the pixel scale to limit shimmer during zooms and projection changes.
+Sea-ice texture rotates with the globe, while land relief travels with its plate.
+The ice edge uses a shared geographic frame across land and ocean.
 
 The **Glaciations** checkbox turns the ice material and event captions on or off.
 Timeline markers remain available for seeking to the events. During playback,

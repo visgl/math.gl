@@ -28,6 +28,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
     getIceLatitude: {type: 'accessor', value: 0},
     getSurfaceNormal: {type: 'accessor', value: [0, 0, 1]},
     getReferencePosition: {type: 'accessor', value: [1, 0, 0]},
+    getGeographicPosition: {type: 'accessor', value: [1, 0, 0]},
     surfaceType: 'land',
     globeWeight: 1,
     regionColors: false,
@@ -38,7 +39,8 @@ export class SurfaceLayer extends SolidPolygonLayer {
     this.getAttributeManager().add({
       iceLatitudes: {size: 1, stepMode: 'dynamic', accessor: 'getIceLatitude'},
       surfaceNormals: {size: 3, stepMode: 'dynamic', accessor: 'getSurfaceNormal'},
-      referencePositions: {size: 3, stepMode: 'dynamic', accessor: 'getReferencePosition'}
+      referencePositions: {size: 3, stepMode: 'dynamic', accessor: 'getReferencePosition'},
+      geographicPositions: {size: 3, stepMode: 'dynamic', accessor: 'getGeographicPosition'}
     });
     this.setState({
       fallbackTexture: context.device.createTexture({
@@ -55,11 +57,11 @@ export class SurfaceLayer extends SolidPolygonLayer {
       ...shaders,
       modules: [...shaders.modules, waterMaterial, surface],
       inject: {
-        'vs:#decl': `in vec3 surfaceNormals; in vec3 referencePositions; in float iceLatitudes;
-        out vec3 surfaceNormal; out vec3 referencePosition; out vec3 surfacePosition; out float iceLatitude;`,
+        'vs:#decl': `in vec3 surfaceNormals; in vec3 referencePositions; in vec3 geographicPositions; in float iceLatitudes;
+        out vec3 surfaceNormal; out vec3 referencePosition; out vec3 geographicPosition; out vec3 surfacePosition; out float iceLatitude;`,
         'vs:DECKGL_FILTER_GL_POSITION': `iceLatitude=iceLatitudes;surfaceNormal=surfaceNormals;
-        referencePosition=referencePositions;surfacePosition=geometry.worldPosition;`,
-        'fs:#decl': `in vec3 surfaceNormal;in vec3 referencePosition;in vec3 surfacePosition;in float iceLatitude;
+        referencePosition=referencePositions;geographicPosition=geographicPositions;surfacePosition=geometry.worldPosition;`,
+        'fs:#decl': `in vec3 surfaceNormal;in vec3 referencePosition;in vec3 geographicPosition;in vec3 surfacePosition;in float iceLatitude;
         float tectonicIceHash(vec3 p) {
           return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);
         }
@@ -111,10 +113,11 @@ export class SurfaceLayer extends SolidPolygonLayer {
         if(tectonicSurface.iceCoverage>0.) {
           // Land detail stays attached to each plate; ocean detail stays in geographic space.
           float drift=tectonicIceDetail(reference,7.);
+          float edgeDrift=tectonicIceDetail(normalize(geographicPosition),7.);
           float grain=tectonicIceDetail(reference,120.);
           float field=tectonicIceDetail(reference,90.);
           float edge=1.08-1.16*tectonicSurface.iceCoverage;
-          float latitude=abs(iceLatitude)+(drift-.5)*.07;
+          float latitude=abs(iceLatitude)+(edgeDrift-.5)*.07;
           float ice=smoothstep(edge-.045,edge+.045,latitude)*smoothstep(0.,.08,tectonicSurface.iceCoverage);
           // Original illustrative relief, not elevation data or reconstructed ice thickness.
           // Smooth sea ice contrasts with ridges and shaded valleys on land.

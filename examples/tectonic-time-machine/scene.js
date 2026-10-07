@@ -238,7 +238,7 @@ export function mountScene(
     lastRender = now;
     currentWeights(now);
     if (time !== geometryTime || longitude !== geometryLongitude || !land) counts = rebuild(time);
-    transformMesh(ocean, weights, engines, scales, latitude, true);
+    transformMesh(ocean, weights, engines, scales, latitude, true, longitude);
     transformMesh(land, weights, engines, scales, latitude);
     paths = [];
     if (grid)
