@@ -1,5 +1,9 @@
 # Polygon
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v1.1-blue.svg?style=flat-square" alt="From v1.1" />
+</p>
+
 Allows an array of points (whether closed or non-closed) to be treated as a Polygon.
 
 Implements the [Shoelace formula](https://en.wikipedia.org/wiki/Shoelace_formula) for determining the area and winding direction of an arbitrary polygon.

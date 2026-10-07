@@ -1,11 +1,23 @@
 # CHANGELOG
 
-## Unreleased
+## v5.0.0-alpha.13
 
 - feat(geoarrow): Expose `materializeGeoArrowRows` for runtime adapters and preserve empty points encoded with non-finite or null ordinates.
 - fix(geoarrow): Rebuild empty point rows and preserve empty MultiPoint members through WKB/WKT serialization.
 
 - perf(projection): Make the configurable and lazy engines lean by default; register regional named datums through `datumCatalogs` and `@math.gl/projection/datums`. WGS84/NAD83 remain built in; the `Projection` wrapper retains the full catalogue for compatibility.
+
+- feat(curves, geometry): Add parametric curves, arc-length sampling, torus, lathe and sampled surfaces (#208, #227).
+- feat(geometry-utils, spatial-index): Add mesh processing and experimental static spatial indexes (#211, #223).
+- feat(geospatial, culling): Add geographic tile queries, globe occlusion, ray and closest-point queries (#198, #210, #213).
+- feat(core, projection): Share local frames, add domain/factor analysis and strided bulk buffers, and expand deformation and worker qualification (#193, #195, #199, #201, #204, #205).
+- fix(projection): Preserve registered datums over legacy aliases and separate reusable engines (#225, #230).
+- feat(geoid): Accept decoded grids without Arrow dependencies (#235).
+- feat(sun): Add altitude-aware spectral cloud lighting for dawn and dusk (#191).
+- feat(examples): Add interactive module workshops, globe data exports and streaming deep-time tectonic snapshots (#194, #197, #200, #202, #203, #206, #207, #209, #212, #215, #228).
+- fix(examples): Correct tectonic streaming deadlines and pose progress (#229).
+- docs: Complete sun references, organize navigation and restore prerelease history (#221, #232, #234).
+- build: Update dependencies and reduce CI queueing and benchmark time (#196, #214, #216, #217, #218, #219, #220, #222).
 
 ## v5.0.0-alpha.12
 

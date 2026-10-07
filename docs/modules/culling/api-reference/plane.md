@@ -1,5 +1,9 @@
 # Plane
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.0-blue.svg?style=flat-square" alt="From v3.0" />
+</p>
+
 A plane in Hessian Normal Form defined by `ax + by + cz + d = 0` where `[a, b, c]` is the plane's `normal`, `d` is the signed distance to the plane (from the origin along the normal), and `[x, y, z]` is any point on the plane.
 
 ## Usage

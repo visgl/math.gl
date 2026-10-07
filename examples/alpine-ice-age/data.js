@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import { DATASETS } from './sources.js';
-import { loadClimate } from './climate.js';
 export function sampleAt(ages, age) {
   const value = Math.max(ages.at(-1), Math.min(ages[0], age));
   let index = 0;
@@ -38,7 +37,6 @@ export async function loadSimulation(signal) {
   };
 }
 export async function loadGlobalSimulation(signal) {
-  const climate = await loadClimate(signal);
   const response = await fetch(DATASETS.globalManifest, { signal });
   if (!response.ok) throw new Error(`Global manifest: HTTP ${response.status}`);
   const manifest = await response.json();
@@ -52,7 +50,6 @@ export async function loadGlobalSimulation(signal) {
   if (raw.byteLength !== length * 4) throw new Error('Global dataset has an unexpected length');
   return {
     manifest,
-    climate,
     count,
     bed: new Int16Array(raw, 0, length),
     ice: new Uint16Array(raw, length * 2)

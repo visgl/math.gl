@@ -3,6 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {TypedArray, NumericArray, NumberArray} from './array-types';
+import {getTypedArrayName} from './typed-array-brand';
+
+/** Checks for unsigned 16-bit samples, including typed arrays from other realms. */
+export function isUint16Array(value: unknown): value is Uint16Array {
+  return getTypedArrayName(value) === 'Uint16Array';
+}
 
 /**
  * Check is an array is a typed array

@@ -1,7 +1,16 @@
+---
+title: Stars
+sidebar_label: Stars
+---
+
 {/* SPDX-License-Identifier: MIT */}
 {/* SPDX-FileCopyrightText: Copyright (c) vis.gl contributors */}
 
-# Bright stars and Milky Way
+# Stars
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
 
 `@math.gl/sun/stars` is an optional entry point with 7,000 real bright-star sources and proper motion. It has no Astronomy Engine dependency. Importing the main `@math.gl/sun` entry does not include this catalog.
 

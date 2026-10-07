@@ -1,5 +1,9 @@
 # Overview
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v1.0-blue.svg?style=flat-square" alt="From v1.0" />
+</p>
+
 Basic 3D math classes (vectors, matrices, quaternions etc) for JavaScript.
 
 import Example from '@site/src/components/core-transforms';

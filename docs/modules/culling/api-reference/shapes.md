@@ -1,5 +1,9 @@
 # glTF Shapes
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From v4.2" />
+</p>
+
 `@math.gl/culling` provides `BoxShape`, `CapsuleShape`, `CylinderShape`, `PlaneShape` and
 `SphereShape`. Constructor dimensions and defaults match the glTF 2.1
 [draft shape proposal](https://github.com/KhronosGroup/glTF/blob/726e078dea6b42c7ed0efb038c2f610a7cfca4c5/specification/2.1/Specification.adoc#shapes).

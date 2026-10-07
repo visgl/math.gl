@@ -1,6 +1,15 @@
+---
+title: Moon
+sidebar_label: Moon
+---
+
 {/* SPDX-License-Identifier: MIT */}
 
-# Moon position and light
+# Moon
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
 
 ```typescript
 import {getMoonPosition, getMoonDirection, getMoonIllumination, getMoonLight} from '@math.gl/sun';
@@ -96,6 +105,20 @@ the crescent's orientation and surface brightness distribution. Diffuse moonlit 
 twilight and clouds' spatial geometry are not computed.
 
 All APIs reject invalid/nonfinite numeric inputs with `RangeError`.
+
+## Daytime visibility and sky brightness
+
+The main entry point also exports `getMoonAppearance(moonAltitude, sunAltitude,
+options)` from v5.0. Unlike direct moonlight, apparent disk visibility depends on
+solar glare and the sky background. It returns physical lighting quantities plus
+`visible` and a smooth `fade` for rendering. See the complete
+[daytime Moon appearance reference](./sky.md#moon-brightness-through-the-day)
+for required phase/separation options, result fields and limitations.
+
+For the Moon's contribution to the surrounding sky, use
+[`getScatteredMoonLuminance`](./sky.md#photometry-helper-reference). For intervals
+when the disk is detectable, use [`searchSkyVisibility`](./sky.md#visibility-search-reference)
+with an appearance predicate or a cached sky snapshot.
 
 ## References and licenses
 

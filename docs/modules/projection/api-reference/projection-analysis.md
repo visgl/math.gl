@@ -4,6 +4,10 @@ slug: /modules/projection/projection-analysis
 
 # ProjectionAnalysis
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 The optional `@math.gl/projection/analysis` entry evaluates a single map projection inside an explicit application domain. It provides scales, convergence, distortion and coordinate derivatives without importing projection algorithms. Supply the same projection plugin and geometry used by your map.
 
 ```typescript

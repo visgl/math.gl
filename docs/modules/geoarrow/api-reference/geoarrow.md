@@ -1,5 +1,9 @@
 # GeoArrow API reference
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 All root functions are synchronous. Unless a function explicitly returns a new column or fills a
 caller-provided target, it treats descriptors and buffers as read-only.
 

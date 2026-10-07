@@ -1,5 +1,9 @@
 # Spheroid conversions
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 The optional `@math.gl/core/spheroid` entry provides low-level conversions between
 longitude/latitude/ellipsoidal height and Cartesian XYZ for spheres and oblate
 spheroids. It is also used by geospatial and the projection engine. It imports no

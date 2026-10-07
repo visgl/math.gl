@@ -1,5 +1,9 @@
 # Spatial Reference
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From v4.2" />
+</p>
+
 `@math.gl/crs` provides a format-neutral descriptor for reporting how a dataset's coordinates are
 referenced. It preserves discovery state and representation without performing a transformation.
 

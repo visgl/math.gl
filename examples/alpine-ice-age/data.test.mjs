@@ -20,7 +20,7 @@ const [manifestBytes, packed, globalManifestBytes, globalPacked, climate] =
   ]);
 import { gunzipSync } from "node:zlib";
 import { createHash } from "node:crypto";
-import { interpolateField, sampleAt } from "./data.js";
+import { interpolateField, sampleAt, loadGlobalSimulation } from "./data.js";
 const manifest = JSON.parse(manifestBytes);
 const raw = gunzipSync(packed);
 test("the upstream simulation is complete, ordered and pinned to its published source", () => {
@@ -143,4 +143,19 @@ test("regional views retain native coordinates and clip cells instead of collaps
   assert.equal(inRegion("albersEurope", 10, 60), true);
   assert.equal(inRegion("albersNorthAmerica", -100, 60), true);
   assert.equal(inRegion("albersNorthAmerica", 10, 60), false);
+});
+
+test("global ice loads independently when optional climate data fails", async (t) => {
+  t.mock.method(globalThis, "fetch", async (url) => {
+    if (url === DATASETS.climate) throw new Error("Climate unavailable");
+    if (url === DATASETS.globalManifest)
+      return new Response(globalManifestBytes);
+    if (url === DATASETS.global) return new Response(globalPacked);
+    throw new Error(`Unexpected asset: ${url}`);
+  });
+  await assert.rejects(loadClimate(), /Climate unavailable/);
+  const model = await loadGlobalSimulation();
+  assert.equal(model.count, globalManifest.width * globalManifest.height);
+  assert.equal(model.ice.length, model.count * globalManifest.ages.length);
+  assert.equal(model.bed.length, model.ice.length);
 });

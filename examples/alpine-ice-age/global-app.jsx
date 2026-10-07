@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { loadGlobalSimulation, sampleAt } from "./data.js";
 import { createGlobalScene, GLOBAL_VIEWS } from "./global-scene.js";
 import "./style.css";
-import { climateAt } from "./climate.js";
+import { climateAt, loadClimate } from "./climate.js";
 import { glacialPhase } from "./glacial-phase.js";
 const CHAPTERS = [
   { age: 80, name: "Reconstruction begins" },
@@ -20,6 +20,7 @@ export default function GlobalIceAge({ onMode }) {
     scene = useRef(null);
   const [model, setModel] = useState(null),
     [error, setError] = useState("");
+  const [climateModel, setClimateModel] = useState(null);
   const [age, setAge] = useState(80),
     [playing, setPlaying] = useState(true),
     [speed, setSpeed] = useState(2),
@@ -38,6 +39,17 @@ export default function GlobalIceAge({ onMode }) {
       })
       .catch((e) => {
         if (!controller.signal.aborted) setError(e.message);
+      });
+    return () => controller.abort();
+  }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    loadClimate(controller.signal)
+      .then((value) => {
+        if (!controller.signal.aborted) setClimateModel(value);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setClimateModel(null);
       });
     return () => controller.abort();
   }, []);
@@ -79,7 +91,7 @@ export default function GlobalIceAge({ onMode }) {
   useEffect(() => {
     if (age === 0 && !repeat) setPlaying(false);
   }, [age, repeat]);
-  const climate = model ? climateAt(age, model.climate) : null;
+  const climate = climateModel ? climateAt(age, climateModel) : null;
   const m = model?.manifest;
   const { index, fraction } = m
     ? sampleAt(m.ages, age)

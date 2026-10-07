@@ -1,6 +1,15 @@
+---
+title: Sky
+sidebar_label: Sky
+---
+
 {/* SPDX-License-Identifier: MIT */}
 
-# Sky snapshots, Moon visibility and globe rendering
+# Sky
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
 
 `getSkySnapshot` puts the Sun, Moon, seven planets, Galilean moons and a J2000
 star-field orientation into one consistent **geometric topocentric ENU frame**.
@@ -206,6 +215,80 @@ const moonWindows = searchSkyVisibility(now, now + 86400000,
 );
 ```
 
+## Observer and direction helpers
+
+All helpers in this section are imported from `@math.gl/sun` and are available
+from v5.0. Geographic coordinates are degrees; sky angles are radians.
+
+| API | Inputs and result |
+| --- | --- |
+| `createSkyObserver({latitude, longitude, elevation?})` | Frozen `{latitude, longitude, elevation}`. Latitude must be −90 to 90; finite longitude wraps into [−180, 180). Elevation defaults to 0 meters and must be −1000 to 100000. |
+| `getSkyDirection(altitude, azimuth)` | Outward unit ENU vector. Altitude must be −PI/2 to PI/2; finite azimuth is measured from south towards west. |
+| `reverseSkyDirection(direction)` | Negates a finite nonzero three-vector, preserving its magnitude. Converts outward body vectors to incoming light vectors and vice versa. |
+| `getSkyHorizonAltitude(azimuth, profile?)` | Interpolated terrain altitude in radians. The profile is an array of `{azimuth, altitude}` samples, sorted internally and interpolated periodically across 2PI. Empty means zero; one sample is constant. Duplicate azimuths modulo 2PI throw. |
+
+Invalid helper inputs throw `RangeError`. A terrain profile does not change the
+orbital position; use it as a visibility threshold.
+
+## Photometry helper reference
+
+These functions are exported by `@math.gl/sun` from v5.0. Angles are radians.
+
+| API | Inputs and result |
+| --- | --- |
+| `createSkyAtmosphere(options?)` | Frozen validated atmosphere with the defaults below. |
+| `getSkyAirMass(altitude)` | Relative optical path length, dimensionless. Altitude must be −PI/2 to PI/2; below-horizon values use the finite horizon value. This is not a visibility test. |
+| `getSkyTransmission(altitude, options?)` | Dimensionless V-band direct transmission using molecular/aerosol extinction and averaged cloud coverage. Below-horizon rays are not automatically zeroed. |
+| `getSkyLuminance(sunAltitude, viewAltitude, sunSeparation, options?)` | Directional background luminance in cd/m². Altitudes must be −PI/2 to PI/2, separation 0 to PI. |
+| `getSkyContrastThreshold(backgroundLuminance, solidAngle, observerFactor?)` | Dimensionless excess-contrast threshold for an extended source. Luminance is nonnegative cd/m², solid angle is positive steradians up to 4PI. Observer factor defaults to 2 and must be 1 to 100. |
+| `getScatteredMoonLuminance(phaseAngle, moonAltitude, viewAltitude, separation, options?)` | Scattered lunar cd/m². Phase is 0 for full Moon, PI for new. Separation is Moon-to-view angle, 0 to PI. Options combine the atmosphere with distance in km (default 384400) and optional V-band extinction in magnitudes/airmass (0 to 20). Returns zero for a fully hidden Moon, new Moon or view below the horizon. |
+
+| Atmosphere option | Default | Accepted range and units |
+| --- | --- | --- |
+| `pressure` | 1013.25 | 0–1100 hPa |
+| `aerosolOpticalDepth` | 0.1 | 0–10, at 550 nm |
+| `cloudCover` | 0 | 0–1 coverage fraction |
+| `cloudOpticalDepth` | 10 | 0–1000, dimensionless |
+| `darkSkyLuminance` | 0.0002 | 0–100 cd/m² |
+| `lightPollutionLuminance` | 0 | 0–100 cd/m² |
+
+Nonfinite or out-of-range arguments throw `RangeError`. Transmission and contrast
+are independent quantities: a bright object may transmit light but remain
+undetectable against the daytime background.
+
+## Globe helper reference
+
+Import these adapters from `@math.gl/sun` (from v5.0). They use deck.gl's spherical
+Earth, not the WGS84 ellipsoid. `SKY_GLOBE_EARTH_RADIUS` is 6,370,972 meters.
+
+| API | Inputs and result |
+| --- | --- |
+| `getSkyGlobeRotation(observer)` | Column-major 3×3 rotation from observer-local ENU into globe axes: +X at 90°E, −Y at Greenwich and +Z at the north pole. |
+| `skyDirectionToGlobe(direction, observer)` | Rotated finite nonzero ENU three-vector. Magnitude and incoming/outgoing sense are preserved. |
+| `getSkyGlobePosition(direction, observer, distance)` | LNGLAT `[longitude, latitude, altitude]` in degrees/degrees/meters. The ray is normalized and placed a positive finite rendering distance in meters from the observer. This distance is independent of astronomical distance. |
+| `skyRotationToGlobe(rotation, observer)` | Converts each column of a finite column-major 3×3 ENU orientation into globe axes. |
+
+Use outward rays for body positions and incoming rays for lighting. These helpers
+supply coordinates; layer depth, clipping and camera placement are renderer choices.
+
+## Visibility search reference
+
+`searchSkyVisibility(start, end, visible, options?)` is exported from
+`@math.gl/sun` from v5.0. Start/end are valid Dates or Unix milliseconds, with
+end strictly after start. The callback receives Unix milliseconds and must return
+a boolean; a different return type throws `TypeError`.
+
+`sampleSeconds` defaults to 30 and must be 0.1–3600. `transitionSeconds`
+defaults to 1 and must be 0.001–sampleSeconds. Invalid bounds or a search requiring
+more than 100000 base samples throw `RangeError`.
+
+The result is `{intervals, evaluations, sampleSeconds, transitionSeconds}`.
+Each interval has Unix-millisecond `start`/`end`, plus `startClipped` and
+`endClipped` flags when visibility extends to the requested window boundary.
+`evaluations` counts distinct callback timestamps. A search with no detected
+visibility returns an empty interval array. Short events between samples may be
+missed even with a small transition tolerance.
+
 ## References and licenses
 
 All new adapters and equations are independently written TypeScript under MIT;
@@ -222,3 +305,81 @@ source code, paper figures or paper prose are incorporated.
 
 Existing Hošek–Wilkie BSD-3-Clause derived tables and SunCalc BSD-2-Clause
 notices remain shipped in `LICENSE-HOSEK-WILKIE` and `LICENSE-SUNCALC`.
+
+
+{/* SPDX-License-Identifier: MIT */}
+
+## getStarfieldRotation
+
+Returns the full rotation for orienting a celestial star-field cubemap at a location and
+UTC time. A single vector cannot specify the cubemap's roll; a rotation matrix can.
+
+```typescript
+import {getStarfieldRotation} from '@math.gl/sun';
+
+const rotation = getStarfieldRotation(Date.now(), 37.7749, -122.4194);
+// Upload as a column-major mat3 with transpose=false.
+// Rotate equatorial sky geometry into the local sky using rotation.
+```
+
+### Parameters
+
+`getStarfieldRotation(timestamp, latitude, longitude, options?)`
+
+- `timestamp`: `Date` or milliseconds since Unix epoch.
+- `latitude`: Degrees north, in `[-90, 90]`.
+- `longitude`: Finite degrees east; wraps modulo 360°.
+- `options.epoch`: `'J2000'` (default) or `'date'`. J2000 inputs receive IAU 1976 precession
+  to the mean equator and equinox of date. Use `'date'` if the input coordinates already
+  refer to the mean equatorial frame of the current date.
+
+Invalid inputs throw `RangeError`.
+
+### Matrix and cube conventions
+
+The result is a nine-element, column-major `number[]`, compatible with `Matrix3` and
+WebGL `uniformMatrix3fv`. It transforms **outward equatorial directions to outward local
+sky directions**:
+
+| Equatorial cube axis | Definition |
+| --- | --- |
+| +X | Right ascension 0h, declination 0° |
+| +Y | Right ascension 6h, declination 0° |
+| +Z | North celestial pole, declination +90° |
+
+Output axes are **+X east, +Y north, +Z up**. This is a right-handed frame. At northern
+latitudes the mean pole of date lies north at elevation equal to latitude. Cubemaps with
+other face conventions, handedness, or vertical axes need an additional fixed asset
+rotation. The API does not infer a cubemap's axes from its pixels.
+
+When sampling a fixed equatorial cubemap using a local view direction, use the **transpose**
+of the returned matrix (its inverse):
+
+```glsl
+// localViewDirection points outward, in east/north/up coordinates.
+vec3 equatorialDirection = transpose(starfieldRotation) * localViewDirection;
+vec3 stars = texture(starfieldCube, equatorialDirection).rgb;
+```
+
+In GLSL ES 1.00, transpose the matrix on the CPU before uploading it. The cubemap sampler
+still receives its own declared axis convention. This matrix carries both daily rotation
+and the observer's latitude tilt, rather than merely pointing the cube toward Polaris.
+It does not hide below-horizon stars or reduce star brightness in daylight; those belong
+in the renderer. Moon/sun light directions point inward; negate them before using them as
+outward sky directions.
+
+### Model, accuracy and provenance
+
+Mean sidereal time follows the USNO approximation, using UTC as an approximation to UT1
+and TT. J2000 input directions receive IAU 1976 precession before the equatorial-to-local
+rotation. Nutation, annual aberration, proper motion, atmospheric refraction, polar motion,
+and precise astronomical timescale conversion are omitted. The method is intended for
+visualization near modern dates (approximately 1900–2100), not precision astrometry.
+
+This is original MIT-licensed code, independently implemented from mathematical equations.
+Its SPDX header identifies vis.gl contributors and references the equations; **no SOFA or
+other reference implementation code was copied**.
+
+- [USNO, Computing Approximate Sidereal Time](https://aa.usno.navy.mil/faq/GAST).
+- [University of Tokyo S2E, Celestial Rotation and IAU 1976 precession equations](https://www.space.t.u-tokyo.ac.jp/s2e-documents/Specifications/Environment/Spec_CelestialRotation.html).
+- [ESA Navipedia, ECEF and ENU coordinate transformations](https://gssc.esa.int/navipedia/index.php/Transformations_between_ECEF_and_ENU_coordinates).

@@ -1,5 +1,9 @@
 # Vector4
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v1.0-blue.svg?style=flat-square" alt="From v1.0" />
+</p>
+
 `Vector4` is designed to hold three dimensional coordinates in projective space. Using the projective representation allows JavaScript applications to perform the same calculations that the GPU does.
 
 A main feature of vectors is that they can be transformed by matrices and quaternions. And `Vector4`s are particular general when transformed with 4x4 matrices (`Matrix4` or just arrays of 16 numbers), as those can include translations, projections and other transformations that cannot be expressed by e.g. 3x3 matrices or quaternions alone.

@@ -5,6 +5,7 @@
 import {regionFor} from './math.js';
 import {sourceFor, rotationBracket} from './sources.js';
 import {createParquetReader, rotationGroups} from './parquet-stream.js';
+import {snapshotRequest} from './snapshot-request.js';
 
 const GEOMETRY_COLUMNS = ['featureId', 'plateId', 'name', 'beginAge', 'endAge', 'geometry'];
 const ROTATION_COLUMNS = ['age', 'plateId', 'available', 'w', 'x', 'y', 'z'];
@@ -154,22 +155,26 @@ export function createRotationCache(pids,source,stream) {
         function cleanup() {listeners.delete(check);signal.removeEventListener('abort',cancel);}
         function cancel() {cleanup();reject(signal.reason);}
         function check() {
+          onStatus(`Waiting for pose · ${loaded.size}/${source.maxAge/10+1} historical samples loaded`);
           if (hasTime(time)) {cleanup();resolve();}
           else if (failure) {cleanup();reject(failure);}
         }
         listeners.add(check);signal.addEventListener('abort',cancel,{once:true});
-        start({signal:lifetimeSignal,onStatus}).catch(()=>{});check();
+        start({signal:lifetimeSignal}).catch(()=>{});check();
       });
     }
   };
 }
-export async function loadModel({sourceId,time,signal,onStatus=()=>{},readBatches,fetchManifest=fetch,workerUrl}) {
+export async function loadModel({sourceId,time,signal,onStatus=()=>{},readBatches,fetchManifest=fetch,workerUrl,requestTimeout = 45000}) {
   const source=sourceFor(sourceId);
-  readBatches ||= createParquetReader(fetch, {workerUrl});
+  readBatches ||= createParquetReader(fetch, {workerUrl,requestTimeout});
   onStatus(`Loading ${source.citation} Parquet snapshots…`);
-  const response=await fetchManifest(source.manifest,{signal});
-  if (!response.ok) throw new Error(`Snapshot manifest returned HTTP ${response.status}`);
-  const manifest=await response.json();
+  const manifest=await snapshotRequest(source.manifest, {
+    signal,fetchFile:fetchManifest,timeoutMs:requestTimeout
+  }, async response => {
+    if (!response.ok) throw new Error(`Snapshot manifest returned HTTP ${response.status}`);
+    return await response.json();
+  });
   if (manifest.model!==source.id || manifest.version!==source.version || manifest.license!=='CC-BY-4.0' ||
       manifest.referenceFrame!==source.referenceFrame || manifest.anchorPlateId!==0 ||
       JSON.stringify(manifest.quaternionOrder)!==JSON.stringify(['w','x','y','z']) ||

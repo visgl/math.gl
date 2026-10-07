@@ -1,5 +1,9 @@
 # Overview
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.4-blue.svg?style=flat-square" alt="From v3.4" />
+</p>
+
 The `@math.gl/geoid` module evaluates geoid heights from Earth gravity model grids.
 
 import GeoidGlobe from '@site/src/components/geoid-globe';
@@ -47,6 +51,12 @@ In Node.js, resolve the asset with
 `import.meta.resolve('@math.gl/geoid/geoid-egm96-hi.pgm')` and read it using
 `readFile` from `node:fs/promises`. Other GeographicLib PGM grids can also be passed
 to `parsePGM`.
+
+## Decoded grid input
+
+Use [createGeoidFromGrid](./api-reference/create-geoid-from-grid.md) with a complete
+`Uint16Array` of raw samples, grid dimensions, offset and scale. Parquet decoding
+stays in the application; the geoid module requires no Arrow dependency.
 
 ## Attribution
 

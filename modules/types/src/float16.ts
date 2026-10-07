@@ -3,6 +3,16 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {TypedArrayConstructor} from './array-types';
+import {getTypedArrayName} from './typed-array-brand';
+
+/**
+ * Checks for native Float16Array values, including arrays from other realms.
+ * Does not identify Uint16Array binary16 storage as a decoded Float16Array.
+ * Does not require a Float16Array constructor in the current realm.
+ */
+export function isFloat16Array(value: unknown): value is Float16Array {
+  return getTypedArrayName(value) === 'Float16Array';
+}
 
 /**
  * The native `Float16Array` constructor exposed by the current JavaScript runtime.

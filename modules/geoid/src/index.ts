@@ -4,3 +4,5 @@
 
 export {parsePGM} from './parse-pgm';
 export {Geoid} from './geoid';
+export {createGeoidFromGrid} from './create-geoid-from-grid';
+export type {GeoidGridProps} from './create-geoid-from-grid';

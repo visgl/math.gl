@@ -1,5 +1,9 @@
 # Local frames
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Use `@math.gl/core/local-frame` to rotate offsets or velocities between a local
 **east, north, up (ENU)** frame and fixed Cartesian XYZ, or build a local-to-fixed
 matrix. The numeric functions accept reusable storage and have no runtime imports,

@@ -49,6 +49,6 @@ sources remain explicitly angular-only. Million-year animations illustrate the
 chosen model; they are not precise forecasts. The Milky Way glow is procedural,
 not an observed sky texture or a resolved faint-star catalog.
 
-See [shared sky APIs](./api-reference/sky.md) and
-[bright stars and rendering helpers](./api-reference/stars.md) for implemented
+See [shared sky APIs](../docs/modules/sun/api-reference/sky.md) and
+[bright stars and rendering helpers](../docs/modules/sun/api-reference/stars.md) for implemented
 interfaces, provenance, numerical units and current limits.
