@@ -27,6 +27,7 @@ const number = (value) => (value / 1e6).toFixed(1);
 export default function GlobalIceAge({
   onMode,
   onOlderReady,
+  olderModel,
   earlier = false,
 }) {
   const canvas = useRef(null),
@@ -34,7 +35,6 @@ export default function GlobalIceAge({
   const [baseModel, setModel] = useState(null),
     [error, setError] = useState("");
   const [climateModel, setClimateModel] = useState(null);
-  const [olderModel, setOlderModel] = useState(null);
   const model = earlier && olderModel ? olderModel : baseModel;
   const maxAge = model?.manifest.ages[0] ?? 80;
   const minAge = model?.manifest.ages.at(-1) ?? 0;
@@ -61,16 +61,15 @@ export default function GlobalIceAge({
     return () => controller.abort();
   }, []);
   useEffect(() => {
-    if (!baseModel) return;
+    if (!baseModel || olderModel) return;
     const controller = new AbortController();
     loadQuaternarySimulation(baseModel, controller.signal).then((value) => {
       if (value && !controller.signal.aborted) {
-        setOlderModel(value);
-        onOlderReady?.();
+        onOlderReady?.(value);
       }
     });
     return () => controller.abort();
-  }, [baseModel, onOlderReady]);
+  }, [baseModel, olderModel, onOlderReady]);
   useEffect(() => {
     setAge(maxAge);
   }, [earlier, maxAge]);

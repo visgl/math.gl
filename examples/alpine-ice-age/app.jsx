@@ -283,17 +283,18 @@ function AlpineView({ onMode, earlierAvailable }) {
 
 export default function IceAge() {
   const [mode, setMode] = useState('global');
-  const [earlierAvailable, setEarlierAvailable] = useState(false);
+  const [olderModel, setOlderModel] = useState(null);
+  const earlierAvailable = Boolean(olderModel);
   const userSelected = useRef(false);
   const chooseMode = useCallback(value => {
     userSelected.current = true;
     setMode(value);
   }, []);
-  const olderReady = useCallback(() => {
-    setEarlierAvailable(true);
+  const olderReady = useCallback(value => {
+    setOlderModel(value);
     if (!userSelected.current) setMode('quaternary');
   }, []);
   return mode !== 'alpine'
-    ? <GlobalIceAge onMode={chooseMode} onOlderReady={olderReady} earlier={mode === 'quaternary'} />
+    ? <GlobalIceAge onMode={chooseMode} onOlderReady={olderReady} olderModel={olderModel} earlier={mode === 'quaternary'} />
     : <AlpineView onMode={chooseMode} earlierAvailable={earlierAvailable} />;
 }
