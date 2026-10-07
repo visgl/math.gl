@@ -228,7 +228,9 @@ jobs:
   projection-browsers:
     name: Projection qualification (${{ matrix.browser }})
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    # Browser downloads can consume 12+ minutes; preserve time for qualification.
+    # Individual qualification steps retain their stricter execution limits.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
