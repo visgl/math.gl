@@ -27,7 +27,7 @@ for (let sample = 0; sample < samples; sample++) {
     const entry =
       index === 2
         ? "const {default:proj4}=await import('proj4');const project=proj4('WGS84','EPSG:3857').forward;"
-        : "const [{ProjectionEngine},{mercator}]=await Promise.all([import('@math.gl/projection/core'),import('@math.gl/projection/projections/merc')]);const engine=new ProjectionEngine({to:'EPSG:3857',projections:[mercator]});const project=p=>engine.project(p);";
+        : "const [{ProjectionTransform},{mercator}]=await Promise.all([import('@math.gl/projection/core'),import('@math.gl/projection/projections/merc')]);const engine=new ProjectionTransform({to:'EPSG:3857',projections:[mercator]});const project=p=>engine.project(p);";
     const source = `
       const checkpoint=()=>{global.gc();global.gc();return process.memoryUsage();};
       const before=checkpoint();
