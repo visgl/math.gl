@@ -5,5 +5,5 @@ import React, {lazy} from 'react';
 import LiveExample from '../live-globe';
 const Example = lazy(() => import('website-examples/alpine-ice-age/app'));
 export default function AlpineIceAge(props) {
-  return <LiveExample {...props} interactive Globe={Example} label="Alpine Ice Age" />;
+  return <LiveExample {...props} interactive Globe={Example} label="Glaciation Explorer" />;
 }

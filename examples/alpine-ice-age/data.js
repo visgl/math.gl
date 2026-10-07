@@ -35,3 +35,22 @@ export async function loadSimulation(signal) {
     count
   };
 }
+export async function loadGlobalSimulation(signal) {
+  const response = await fetch(new URL('./data/global-manifest.json', import.meta.url), { signal });
+  if (!response.ok) throw new Error(`Global manifest: HTTP ${response.status}`);
+  const manifest = await response.json();
+  const asset = await fetch(new URL('./data/global.bin.gz', import.meta.url), { signal });
+  if (!asset.ok) throw new Error(`Global ice data: HTTP ${asset.status}`);
+  const raw = await new Response(
+    asset.body.pipeThrough(new DecompressionStream('gzip'))
+  ).arrayBuffer();
+  const count = manifest.width * manifest.height,
+    length = count * manifest.ages.length;
+  if (raw.byteLength !== length * 4) throw new Error('Global dataset has an unexpected length');
+  return {
+    manifest,
+    count,
+    bed: new Int16Array(raw, 0, length),
+    ice: new Uint16Array(raw, length * 2)
+  };
+}

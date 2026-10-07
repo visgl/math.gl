@@ -32,3 +32,32 @@ test('interpolation preserves snapshots, handles endpoints and never extrapolate
   assert.deepEqual(Array.from(interpolateField(data, 2, ages, -10)), [0, 50]);
   assert.deepEqual(sampleAt(ages, 10), { index: 0, fraction: 0 });
 });
+const globalManifest = JSON.parse(
+  readFileSync(new URL('./data/global-manifest.json', import.meta.url))
+);
+const globalPacked = readFileSync(new URL('./data/global.bin.gz', import.meta.url));
+const globalRaw = gunzipSync(globalPacked);
+test('global reconstruction preserves its full time range, source and longitude seam', () => {
+  const m = globalManifest,
+    count = m.width * m.height,
+    length = count * m.ages.length;
+  assert.equal(m.source.sha256, 'ab6f74541339f5be44dd630dfb9c41189a6c1dfaf58fce6fc3c356430b539037');
+  assert.equal(m.source.license, 'CC-BY-4.0');
+  assert.equal(createHash('sha256').update(globalPacked).digest('hex'), m.assetSha256);
+  assert.equal(globalRaw.byteLength, length * 4);
+  assert.equal(m.width, 360);
+  assert.equal(m.height, 181);
+  assert.deepEqual(
+    m.ages,
+    Array.from({ length: 33 }, (_, i) => 80 - i * 2.5)
+  );
+  const ice = new Uint16Array(globalRaw.buffer, globalRaw.byteOffset + length * 2, length);
+  const at = (age, lon, lat) => ice[m.ages.indexOf(age) * count + (lat + 90) * 360 + (lon + 180)];
+  assert(at(20, -90, 60) > 1000, 'Laurentide ice sheet must be present at the maximum');
+  assert.equal(at(0, -90, 60), 0, 'Laurentide interior must deglaciate');
+  assert(at(0, -45, 75) > 1000, 'Greenland must retain present grounded ice');
+  assert(at(0, 0, -85) > 1000, 'Antarctica must retain present grounded ice');
+  assert.equal(at(20, 20, 0), 0, 'The equatorial continent must not gain invented ice');
+  assert(m.areaKm2[m.ages.indexOf(20)] > m.areaKm2.at(-1) * 2);
+  assert(m.volumeKm3[m.ages.indexOf(20)] > m.volumeKm3.at(-1) * 2);
+});
