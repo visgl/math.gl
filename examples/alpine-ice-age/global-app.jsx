@@ -121,9 +121,13 @@ export default function GlobalIceAge({
     }, 75);
     return () => clearInterval(timer);
   }, [playing, model, speed, repeat, minAge, maxAge]);
+  const playbackModel = useRef(null);
   useEffect(() => {
-    if (age === minAge && !repeat) setPlaying(false);
-  }, [age, repeat, minAge]);
+    const changedModel = playbackModel.current !== model;
+    playbackModel.current = model;
+    // The timeline reset runs after the first render of a new reconstruction.
+    if (!changedModel && age === minAge && !repeat) setPlaying(false);
+  }, [model, age, repeat, minAge]);
   const climate =
     !model?.maskModel && climateModel ? climateAt(age, climateModel) : null;
   const phase = model?.maskModel ? krappPhase(age) : glacialPhase(age);
