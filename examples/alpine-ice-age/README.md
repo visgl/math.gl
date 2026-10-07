@@ -1,9 +1,11 @@
 # Glaciation Explorer
 
-Animate the last Alpine glacial cycle from **119 ka to the present** using the
-published PISM output of Seguinot and colleagues. Switch between oblique relief and
-a map, scrub the ice-area chart, change playback speed or vertical exaggeration,
-and reveal terrain colors beneath the ice. Playback repeats by default; disable Repeat animation to stop at the present.
+Explore global ice masks from **799 ka to the present**, the last **80 ka** of
+global ice-sheet thickness, or the Alpine glacial cycle from **119 ka to the
+present**. Switch map projections, scrub the ice-area chart and adjust playback.
+The **Ice Age Explorer** uses licensed Krapp masks for the older interval;
+the younger thickness reconstructions remain separate modes. Playback repeats
+by default; disable Repeat animation to stop at the present.
 
 ## Run
 
@@ -36,7 +38,8 @@ are visualization, not additional model output. The terrain-reveal option blends
 terrain colors into the ice surface; it does not simulate optical transmission.
 Relief exaggeration applies to both bedrock and ice. The timeline's LGM chapter
 at 24 ka is an approximate reference, not a claim that all lobes peaked together.
-Günz, Mindel and Riss are outside this dataset and are not represented.
+Günz, Mindel and Riss are outside this Alpine dataset; use the earlier global
+ice-mask mode to explore those approximate correlations.
 
 Area and volume use the original 2 km source grid, not the display mesh. Ice area
 counts cells with thickness above 10 m; volume sums thickness times 4 km². Values
@@ -63,7 +66,7 @@ for the Cartesian orbit view, mesh shading, place labels and picking-free displa
 
 ## Global ice sheets and map projections
 
-The default **Global ice sheets** mode animates the last **80 ka**, alongside the
+The **Global ice sheets** mode animates the last **80 ka**, alongside the
 Alpine glaciers mode above. Choose Globe, Equal Earth, Mollweide, Robinson,
 Sinusoidal, Miller cylindrical, Equirectangular or Mercator. Drag the globe to
 rotate it; drag maps to pan. The projection transformations use math.gl's
@@ -188,6 +191,7 @@ and hosted copy. ICE-6G supplies 0–122 ka masks; older masks use Ganopolski & 
 The large last-glacial-period title is **Würm**; the maximum and retreat phase
 descriptions appear underneath.
 
+The center title is empty between named ice-age windows.
 Chapter titles appear for four seconds after the model loads or a phase changes,
 then fade out over 800 ms. Re-enabling Ice age names introduces the current chapter
 again. Reduced-motion preferences remove the fade.
