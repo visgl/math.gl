@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { DATASETS } from "./sources.js";
-import { loadClimate } from "./climate.js";
+import { loadClimate, climateAt } from "./climate.js";
 async function download(url) {
   const response = await fetch(url);
   assert(response.ok, `${url}: HTTP ${response.status}`);
@@ -20,7 +20,12 @@ const [manifestBytes, packed, globalManifestBytes, globalPacked, climate] =
   ]);
 import { gunzipSync } from "node:zlib";
 import { createHash } from "node:crypto";
-import { interpolateField, sampleAt, loadGlobalSimulation } from "./data.js";
+import {
+  interpolateField,
+  sampleAt,
+  loadGlobalSimulation,
+  clampAge,
+} from "./data.js";
 const manifest = JSON.parse(manifestBytes);
 const raw = gunzipSync(packed);
 test("the upstream simulation is complete, ordered and pinned to its published source", () => {
@@ -222,6 +227,22 @@ test("footprint rasterization preserves holes and excludes the Southern Hemisphe
   const coverage = rasterizeFootprints([geometry], points, canvas);
   assert.deepEqual(fills, ["evenodd"]);
   assert.equal(paths.length, 2);
+  paths.length = 0;
+  geometry.primitivePolygonIndices.value = [0, 4];
+  rasterizeFootprints([geometry], points, canvas);
+  assert.equal(
+    paths.length,
+    2,
+    "ring starts without a terminal sentinel retain the final ring",
+  );
+  paths.length = 0;
+  geometry.primitivePolygonIndices.value = [0];
+  rasterizeFootprints([geometry], points, canvas);
+  assert.equal(
+    paths.length,
+    1,
+    "a single start index retains a single-ring outline",
+  );
   assert.equal(coverage[0], 0);
   assert.equal(coverage[90 * 360], 1);
   assert.equal(coverage[90 * 360 + 1], 0);
@@ -288,3 +309,9 @@ test(
     assert.match(status, /using PaleoMIST/);
   },
 );
+
+test("returning from an older reconstruction clamps age before climate readouts", () => {
+  const age = clampAge(globalManifest.ages, 650);
+  assert.equal(age, 80);
+  assert(Number.isFinite(climateAt(age, climate).temperature));
+});

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, { useEffect, useRef, useState } from "react";
-import { loadGlobalSimulation, sampleAt } from "./data.js";
+import { loadGlobalSimulation, sampleAt, clampAge } from "./data.js";
 import { createGlobalScene, GLOBAL_VIEWS } from "./global-scene.js";
 import "./style.css";
 import AttributionWidget from "../shared/attribution-widget.jsx";
@@ -24,7 +24,11 @@ const CHAPTERS = [
   { age: 0, name: "Present" },
 ];
 const number = (value) => (value / 1e6).toFixed(1);
-export default function GlobalIceAge({ onMode, earlier = false }) {
+export default function GlobalIceAge({
+  onMode,
+  onOlderReady,
+  earlier = false,
+}) {
   const canvas = useRef(null),
     scene = useRef(null);
   const [baseModel, setModel] = useState(null),
@@ -35,10 +39,11 @@ export default function GlobalIceAge({ onMode, earlier = false }) {
   const model = earlier && olderModel ? olderModel : baseModel;
   const maxAge = model?.manifest.ages[0] ?? 80;
   const minAge = model?.manifest.ages.at(-1) ?? 0;
-  const [age, setAge] = useState(80),
+  const [requestedAge, setAge] = useState(80),
     [playing, setPlaying] = useState(true),
     [speed, setSpeed] = useState(2),
     [repeat, setRepeat] = useState(true);
+  const age = clampAge([maxAge, minAge], requestedAge);
   const [showIce, setShowIce] = useState(true),
     [ghost, setGhost] = useState(true),
     [labels, setLabels] = useState(true),
@@ -62,15 +67,15 @@ export default function GlobalIceAge({ onMode, earlier = false }) {
     loadKrappSimulation(controller.signal, setOlderStatus).then((value) => {
       if (value && !controller.signal.aborted) {
         setOlderModel(value);
-        onMode("quaternary");
-        setSpeed(20);
+        onOlderReady?.();
       }
     });
     return () => controller.abort();
-  }, [baseModel, onMode]);
+  }, [baseModel, onOlderReady]);
   useEffect(() => {
-    setAge(earlier && olderModel ? olderModel.manifest.ages[0] : 80);
-  }, [earlier, olderModel]);
+    setAge(maxAge);
+    setSpeed(earlier ? 20 : 2);
+  }, [earlier, maxAge]);
   useEffect(() => {
     const controller = new AbortController();
     loadClimate(controller.signal)
@@ -259,7 +264,10 @@ export default function GlobalIceAge({ onMode, earlier = false }) {
         <div className="alpine-stats alpine-climate">
           <div>
             <strong>
-              {climate ? climate.temperature.toFixed(1) : "—"} <small>°C</small>
+              {Number.isFinite(climate?.temperature)
+                ? climate.temperature.toFixed(1)
+                : "—"}{" "}
+              <small>°C</small>
             </strong>
             <span>Global temperature Δ · model</span>
           </div>
