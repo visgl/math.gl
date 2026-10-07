@@ -18,7 +18,7 @@ import {
 } from '@math.gl/projection';
 import { interpolateField } from './data.js';
 import { projectionWeights } from './projection-transition.js';
-import { REGIONAL_VIEWS, regionalCoordinate } from './regional-views.js';
+import { REGIONAL_VIEWS, regionalCoordinate, inRegion } from './regional-views.js';
 export const GLOBAL_VIEWS = {
   globe: 'Globe',
   eqearth: 'Equal Earth',
@@ -69,6 +69,8 @@ function grid(view) {
     maxY = -Infinity;
   if (view !== 'globe')
     for (let i = 0; i < positions.length; i += 2) {
+      const vertex = i / 2;
+      if (!inRegion(view, vertex % 361 - 180, Math.floor(vertex / 361) - 90)) continue;
       minX = Math.min(minX, positions[i]);
       maxX = Math.max(maxX, positions[i]);
       minY = Math.min(minY, positions[i + 1]);
@@ -88,10 +90,11 @@ function grid(view) {
   for (let y = 0; y < 180; y++)
     for (let x = 0; x < 360; x++) {
       const i = y * 361 + x;
+      if (!inRegion(view, x - 180, y - 90) || !inRegion(view, x - 179, y - 89)) continue;
       indices.set([i, i + 1, i + 361, i + 1, i + 362, i + 361], k);
       k += 6;
     }
-  const result = { positions, indices, maxX, maxY, centerX, centerY };
+  const result = { positions, indices: indices.slice(0, k), maxX, maxY, centerX, centerY };
   grids.set(view, result);
   return result;
 }
@@ -155,7 +158,8 @@ export function createGlobalScene(canvas, onError) {
     const now = performance.now();
     sampleTransition(now);
     const viewChanged = options?.view !== opts.view;
-    if (!weights || reducedMotion.matches) {
+    const regionalSwitch = viewChanged && (REGIONAL_VIEWS[opts.view] || Object.keys(weights || {}).some((id) => REGIONAL_VIEWS[id]));
+    if (!weights || reducedMotion.matches || regionalSwitch) {
       weights = { [opts.view]: 1 };
       transition = null;
     } else if (viewChanged) {

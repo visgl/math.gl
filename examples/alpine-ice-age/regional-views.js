@@ -14,12 +14,11 @@ export const REGIONAL_VIEWS = {
   },
 };
 export function regionalCoordinate(view, lon, lat) {
+  return [lon, view === "merc" ? Math.max(-85, Math.min(85, lat)) : lat];
+}
+export function inRegion(view, lon, lat) {
   const region = REGIONAL_VIEWS[view];
-  if (!region)
-    return [lon, view === "merc" ? Math.max(-85, Math.min(85, lat)) : lat];
+  if (!region) return true;
   const [west, south, east, north] = region.bounds;
-  return [
-    Math.max(west, Math.min(east, lon)),
-    Math.max(south, Math.min(north, lat)),
-  ];
+  return lon >= west && lon <= east && lat >= south && lat <= north;
 }

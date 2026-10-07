@@ -129,3 +129,12 @@ test("climate context preserves source samples and never extrapolates albedo", a
   assert.ok(climateAt(20).temperature < -3);
   assert.equal(climateAt(21).albedo, (-3.9495 - 3.8135) / 2);
 });
+
+test('regional views retain native coordinates and clip cells instead of collapsing geography', async () => {
+  const { regionalCoordinate, inRegion } = await import('./regional-views.js');
+  assert.deepEqual(regionalCoordinate('albersEurope', -120, -20), [-120, -20]);
+  assert.equal(inRegion('albersEurope', -120, -20), false);
+  assert.equal(inRegion('albersEurope', 10, 60), true);
+  assert.equal(inRegion('albersNorthAmerica', -100, 60), true);
+  assert.equal(inRegion('albersNorthAmerica', 10, 60), false);
+});
