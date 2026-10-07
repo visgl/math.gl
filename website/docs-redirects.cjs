@@ -30,7 +30,7 @@ module.exports = function docsRedirects(context) {
         await mkdir(dirname(file), {recursive: true});
         await writeFile(
           file,
-          `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Guide moved</title><link rel="canonical" href="${route}"><meta http-equiv="refresh" content="0;url=${route}"><script>location.replace(${JSON.stringify(route)}+location.search+location.hash);</script></head><body><a href="${route}">Continue to the guide</a></body></html>`
+          `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Guide moved</title><link rel="canonical" href="${route}"><meta http-equiv="refresh" content="0;url=${route}"><script>const destination = new URL(${JSON.stringify(route)}, location.href);destination.search = location.search;if (!destination.hash) destination.hash = location.hash;location.replace(destination.href);</script></head><body><a href="${route}">Continue to the guide</a></body></html>`
         );
       }
     }

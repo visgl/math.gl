@@ -24,12 +24,13 @@ Invert a matrix
 const inverse = matrix.invert();
 ```
 
-Transform a two- or three-element vector
+Transform a two-, three-, or four-element vector
 
 ```js
 const transform = new Matrix3();
 const vector2 = transform.transform([1, 2]);
 const vector3 = transform.transform([1, 2, 1]);
+const vector4 = transform.transform([1, 2, 3, 1]); // Transforms XYZ; preserves W
 ```
 
 ## Inheritance
@@ -164,7 +165,7 @@ During vector transformation the given translation values are added to each comp
 
 ### transform(vector, result?)
 
-Transform a two- or three-component input. Write to the supplied result, or allocate a plain array matching the input length. The input is unchanged unless it is also the result.
+Transform a two-, three-, or four-component input. For four components, transform XYZ and preserve W. Write to the supplied result, or allocate a plain array matching the input length. The input is unchanged unless it is also the result.
 
 ## Remarks
 

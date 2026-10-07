@@ -38,7 +38,7 @@ To rotate around a point, translate that point to the origin, rotate, then trans
 
 ## Inspect a transform
 
-`getTranslation()` and `getScale()` extract translation and axis magnitudes. `getRotation()` and `getRotationMatrix3()` extract the normalized rotation matrix. These are useful for transforms composed from translation, rotation, and positive scale; they are not a general decomposition of shear or reflection.
+`getTranslation()` and `getScale()` extract translation and axis magnitudes. `getRotation()` and `getRotationMatrix3()` extract a normalized rotation matrix from transforms composed of translation, rotation, and positive uniform scale. Rotation extraction does not reliably remove nonuniform scale and is not a general decomposition of shear or reflection.
 
 ```js
 const matrix = new Matrix4().translate([10, 10, 0]).rotateX(Math.PI / 4).scale(5);
