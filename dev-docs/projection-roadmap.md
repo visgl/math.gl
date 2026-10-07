@@ -1,7 +1,7 @@
 # Projection engine roadmap
 
 Status: tranches **0–11, including qualification tranches 7A–7D, are implemented** for the
-[documented projection support profile](../docs/modules/projection/support.md). The package root uses the math.gl projection engine; `Projection` supplies the compatible
+[documented projection support profile](../docs/modules/projection/developer-guide/support.md). The package root uses the math.gl projection engine; `Projection` supplies the compatible
 wrapper API and `ProjectionEngine` allows explicit plugins. The package is renamed
 from `@math.gl/proj4`; its deprecated wrapper alias and `/classic` subpath are removed.
 Prior engine subpaths remain aliases. No package is published by this work.
@@ -247,7 +247,7 @@ selection remain outside this horizontal subset.
 | 7D — Stabilization | Supported native entry points alias the same implementation as experimental imports. Packed ESM/CommonJS/type checks cover both families. The documented contract reviews numerical/strict-input exceptions and described migration through the original `classic` wrapper, since removed during the package rename. |
 
 See [independent validation](../docs/modules/projection/independent-validation.md), [performance measurements](./projection-performance-history.md)
-and the [support/migration contract](../docs/modules/projection/support.md). The machine-readable release
+and the [support/migration contract](../docs/modules/projection/developer-guide/support.md). The machine-readable release
 profile checks fixture counts and the reviewed exception list. Publication is a
 separate release action. The default uses the math.gl projection engine; proj4js is now a development dependency. The `/classic` wrapper and its helpers were removed during the alpha package rename.
 
@@ -316,7 +316,7 @@ meridians. Browser qualification exercises the same independent references.
 
 This does not complete tranche 12: compound/vertical CRS execution,
 general pipeline composition, epochs and automatic operation selection remain open.
-See the [height conversion guide](../docs/modules/projection/projection-engine.md#convert-geoid-heights).
+See the [height conversion guide](../docs/modules/projection/developer-guide/projection-engine.md#convert-geoid-heights).
 
 ## Tranche 12B1: vertical GeoTIFF — implemented
 
@@ -344,7 +344,7 @@ reverses order/direction for inverse execution, supports XY/XYZ/XYZM typed buffe
 and shares lazy projection implementations without eager imports. Scalar and Float64
 results are independently qualified against PROJ 9.5.1; Float32 execution rounds only
 final records. Packed ESM/CJS/types, optional bundle boundaries and browser qualification
-run in CI. See [the operation pipeline contract](../docs/modules/projection/operation-pipelines.md).
+run in CI. See [the operation pipeline contract](../docs/modules/projection/api-reference/projection-pipeline.md).
 
 This completes the typed composition profile, not arbitrary PROJ pipeline parsing.
 The follow-up below adds exact rotations, explicit `ob_tran` output units, ordinate
@@ -363,7 +363,7 @@ are validated for units, spaces and stack state; each batch owns reusable stack 
 Thirty-seven authored pipelines / 102 XYZM points now have independent PROJ 9.5.1
 forward/inverse expectations, including real BETA2007 interpolation and an authored
 GTX field. Scalar, Float64 and Float32 ownership/rounding checks run with Node and
-browser qualification. See [the pipeline guide](../docs/modules/projection/operation-pipelines.md).
+browser qualification. See [the pipeline guide](../docs/modules/projection/api-reference/projection-pipeline.md).
 
 This completes the declared typed-operator extension. M remains an uninterpreted
 measure. The following tranche adds explicit observation epochs; general PROJ
@@ -385,7 +385,7 @@ The core and ordinary wrapper bundles remain unchanged.
 This is explicit reference-frame transformation at an observation epoch. It neither
 propagates coordinates between epochs nor infers time from M or CRS metadata.
 Prepared linear velocity models are available in the bounded 12C2 profile below.
-Time-varying components and automatic operation selection remain future work. See [coordinate epochs](../docs/modules/projection/operation-pipelines.md#coordinate-epochs-and-moving-reference-frames).
+Time-varying components and automatic operation selection remain future work. See [coordinate epochs](../docs/modules/projection/api-reference/projection-pipeline.md#coordinate-epochs-and-moving-reference-frames).
 
 ## Tranche 12C2: linear velocity models — implemented bounded profile
 
@@ -401,7 +401,7 @@ ordinary wrappers and a pipeline-only static graph.
 
 This completes the linear, time-invariant profile. Real-model accuracy qualification
 and nonlinear/time-varying components are still separate work. See
-[deformation models](../docs/modules/projection/deformation-models.md).
+[deformation models](../docs/modules/projection/developer-guide/deformation-models.md).
 
 ## Tranche 13A: pipeline batch performance — implemented first pass
 
@@ -477,7 +477,7 @@ existing bundle limits are unchanged.
 
 This completes the bounded application-catalogue milestone, not unrestricted EPSG
 operation discovery, dynamic CRS inference or a geodetic accuracy certification.
-See the [operation selection guide](../docs/modules/projection/operation-selection.md).
+See the [operation selection guide](../docs/modules/projection/api-reference/operation-catalog.md).
 
 ## Tranche 13A — Static Helmert coordinate buffers: implemented follow-up
 
@@ -586,7 +586,7 @@ barrel. Corresponding CRS syntax subpaths prevent optional WKT syntax from being
 hoisted through a shared dependency. CI inspects the initial static dependency graph
 with an eagerly loaded core/Mercator, executes the deferred UTM, WKT and composite
 chunks, enforces byte budgets, and checks every subpath in packed ESM/CommonJS and
-TypeScript consumers. See the [engine guide](../docs/modules/projection/projection-engine.md#load-less-used-projections-on-demand).
+TypeScript consumers. See the [engine guide](../docs/modules/projection/developer-guide/projection-engine.md#load-less-used-projections-on-demand).
 
 The independent-reference follow-up below adds maintained datasets and an explicit
 edge disposition. The completed qualification profile is described above; additional operations and
@@ -623,7 +623,7 @@ behavior, numeric inverse output commits, and an analytic spherical projection
 inverse. Authored anchors qualify center/near-axis boundaries, flattened/prolate/
 triaxial geometry, aliasing and recursive outputs; matched benchmarks compare
 reusable scalar and flat paths with separate allocation samples. CI records those
-diagnostics without speed gates. See [coordinate-system boundaries](../docs/modules/projection/coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
+diagnostics without speed gates. See [coordinate-system boundaries](../docs/modules/projection/developer-guide/coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
 and [the measurements](./projection-performance-history.md#spheroid-numerical-boundaries).
 
 The next qualification and sharing tranche is implemented: independent surface/

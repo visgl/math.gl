@@ -6,7 +6,7 @@ import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
 import {
-  ProjectionEngine,
+  ProjectionTransform,
   equalEarth,
   mollweide,
   robinson,
@@ -51,7 +51,7 @@ const plugins = {
 const engines = Object.fromEntries(
   Object.entries(plugins).map(([key, plugin]) => [
     key,
-    new ProjectionEngine({
+    new ProjectionTransform({
       from: `+proj=longlat +R=${RADIUS} +no_defs`,
       to: `+proj=${key} +R=${RADIUS} +units=m +no_defs`,
       projections: [plugin]

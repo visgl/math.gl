@@ -1,3 +1,7 @@
+---
+slug: /modules/projection/projections
+---
+
 # Projection catalogue
 
 A projection chooses how a curved Earth becomes a flat map. The choice affects
@@ -6,7 +10,7 @@ shape, area, distance and direction; no global flat map preserves all four.
 their parameters, ellipsoid, datum, axes and units.
 
 Use this page to choose a family and find its import. The
-[engine API](./api-reference/projection-engine.md#current-coverage) specifies accepted
+[engine API](../api-reference/projection-transform.md#current-coverage) specifies accepted
 parameters and strict validation. PROJ's
 [projection reference](https://proj.org/en/stable/operations/projections/index.html)
 provides additional mathematical background; its larger catalogue and parameter
@@ -34,10 +38,10 @@ public import path (`@math.gl/projection/projections/<id>`), followed by the nam
 export. Geographic coordinates are built into `/core`.
 
 ```typescript
-import {ProjectionEngine} from '@math.gl/projection/core';
+import {ProjectionTransform} from '@math.gl/projection/core';
 import {albersEqualArea} from '@math.gl/projection/projections/aea';
 
-const regionalAreas = new ProjectionEngine({
+const regionalAreas = new ProjectionTransform({
   to: '+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +datum=WGS84',
   projections: [albersEqualArea]
 });
@@ -52,7 +56,7 @@ For deferred imports, use `/projections/lazy/<id>` and the corresponding `lazy�
 export. `LazyProjection` at `/projections/lazy` supplies the whole descriptor catalogue.
 Async coordinate methods load requested algorithms; synchronous methods require
 `preload()` to have completed. See the
-[loading guide](./projection-engine.md#load-less-used-projections-on-demand) for the exact contract.
+[loading guide](projection-engine.md#load-less-used-projections-on-demand) for the exact contract.
 
 ## Cylindrical and transverse projections
 
@@ -153,7 +157,7 @@ centeredAreas.project([12, 55]);
 is useful for distances from a chosen center. The math.gl ellipsoidal implementation
 retains the proj4js regional series; it is not the modern PROJ geodesic solution.
 Do not infer global geodesic accuracy from the name. For polar and far-from-center
-coordinates, check the [independent accuracy profile](./independent-validation.md)
+coordinates, check the [independent accuracy profile](../independent-validation.md)
 and your own required tolerance.
 
 ## World maps and cube faces
@@ -172,7 +176,7 @@ and your own required tolerance.
 Equal-area maps are useful when comparing regional areas or thematic totals.
 Compromise maps favor a balanced visual appearance. An algorithm described as
 “spherical” may accept an ellipsoidal CRS but still use only a radius in its
-projection equations. See [ellipsoid concepts](./coordinate-systems.md#ellipsoids-the-shape-model).
+projection equations. See [ellipsoid concepts](coordinate-systems.md#ellipsoids-the-shape-model).
 
 ```typescript
 const worldAreas = new Projection({to: '+proj=eqearth +datum=WGS84'});
@@ -182,7 +186,7 @@ worldAreas.project([12, 55]);
 [Equal Earth](https://proj.org/en/stable/operations/projections/eqearth.html) is a
 useful starting point for area-preserving world maps. A projection converts points;
 it does not choose polygon seam splits or tessellation. Use
-[`@math.gl/polygon`](../polygon/api-reference/polygon.md) for the relevant geometric
+[`@math.gl/polygon`](../../polygon/api-reference/polygon.md) for the relevant geometric
 operations. Cube-face selection and tiling likewise belong to the application.
 
 ## Satellite views and rotated maps
@@ -198,11 +202,11 @@ The oblique factory lets an application choose a rotated world map without a glo
 algorithm registry:
 
 ```typescript
-import {ProjectionEngine} from '@math.gl/projection/core';
+import {ProjectionTransform} from '@math.gl/projection/core';
 import {obliqueTransformation} from '@math.gl/projection/projections/ob_tran';
 import {mollweide} from '@math.gl/projection/projections/moll';
 
-const rotated = new ProjectionEngine({
+const rotated = new ProjectionTransform({
   to: '+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=-90 +R=6371000 +datum=none',
   projections: [obliqueTransformation(mollweide)]
 });
@@ -211,7 +215,7 @@ rotated.project([12, 55]);
 
 The child is supplied directly; nested oblique and geocentric children are rejected.
 Use `obliqueTransformation('longlat')` for a rotated geographic coordinate system.
-See the [factory reference](./api-reference/projection-engine.md#remaining-projection-catalogue)
+See the [factory reference](../api-reference/projection-transform.md#remaining-projection-catalogue)
 for accepted rotation parameter sets.
 
 ## Parameters and accuracy
@@ -220,10 +224,10 @@ for accepted rotation parameter sets.
 in meters; `k`/`k_0` are scale factors. Not every algorithm accepts every parameter.
 `lat_ts` means a true-scale latitude where supported. Projection geometry is
 separate from datum conversion, height and coordinate epoch; see the
-[coordinate-system guide](./coordinate-systems.md).
+[coordinate-system guide](coordinate-systems.md).
 
 Construction checks supported parameters and prepares the operations. Coordinate
 calls can still fail at singularities or outside grid coverage. Successful output
-is not an area-of-use certificate. The [support contract](./support.md) and
-[independent references](./independent-validation.md) describe tested regions,
+is not an area-of-use certificate. The [support contract](support.md) and
+[independent references](../independent-validation.md) describe tested regions,
 known numerical limits and intentional differences from upstream.

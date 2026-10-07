@@ -1,3 +1,7 @@
+---
+slug: /modules/projection/deformation-models
+---
+
 # Propagate coordinates between epochs
 
 A velocity model describes how a position changes over time within a reference
@@ -95,7 +99,7 @@ ENU velocities in metres/year. The regular grid's setup coordinates remain degre
 its sampler performs that conversion. Deformation rotates these velocities using
 the normal at the inverse geodetic position, then integrates over the decimal-year
 interval in fixed XYZ metres. It shares the reusable
-[local-frame functions](../core/api-reference/local-frame.md) with geospatial.
+[local-frame functions](../../core/api-reference/local-frame.md) with geospatial.
 
 Sharing does not change geospatial's Cartesian-gradient normal choice at height,
 or the existing geocentric near-axis longitude convention. Custom samplers may
@@ -138,7 +142,7 @@ The model, regular grid and GeoTIFF adapter are separate optional subpaths. They
 not reexported from the root. Importing `/pipeline` alone retains the typed step
 orchestration but no deformation model, velocity interpolator or TIFF decoder.
 Core, ordinary projections and the default wrapper do not gain model code. See the
-[measured bundle table](./projection-engine.md#tree-shaking-and-bundle-size).
+[measured bundle table](projection-engine.md#tree-shaking-and-bundle-size).
 
 Sixteen configurations / 64 coordinate-epoch pairs use an original synthetic MIT
 velocity TIFF and pinned pyproj 3.7.2 / PROJ 9.5.1 forward evaluations. Forward-oracle
@@ -151,13 +155,13 @@ browser engines and checks fixture hashes and packed ESM/CommonJS/types.
 These authored fixtures validate the implemented contract, not a real model's
 accuracy or unrestricted PROJ parity. No third-party model files or new dependencies
 are distributed. Spatially nonlinear application samplers have an additional independent stress
-profile and offline model/reference harness; see [model qualification](./deformation-qualification.md).
+profile and offline model/reference harness; see [model qualification](../deformation-qualification.md).
 Event offsets, time-varying components, trajectory integration, automatic model
 selection, dynamic CRS inference and model extrapolation are outside this profile.
 
 ## Time-varying rates and events
 
 This constructor keeps its static velocity contract. Use the optional
-[temporal model](./temporal-models.md) for explicit acceleration, event steps and
+[temporal model](../temporal-models.md) for explicit acceleration, event steps and
 exponential relaxation at the source position. Both produce `DeformationModel`
 objects for the same pipeline step and original-epoch inverse contract.

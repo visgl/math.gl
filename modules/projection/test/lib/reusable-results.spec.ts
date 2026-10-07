@@ -5,7 +5,7 @@
 import {beforeAll, expect, test} from 'vitest';
 import {
   Projection,
-  ProjectionEngine,
+  ProjectionTransform,
   ProjectionPipeline,
   mercator,
   geocentric,
@@ -70,7 +70,7 @@ for (const outputKind of ['array', 'Float32', 'Float64']) {
 }
 
 test('same-view in-place writes and disjoint backing views are supported; overlaps reject before mutation', () => {
-  const projection = new ProjectionEngine();
+  const projection = new ProjectionTransform();
   for (const ArrayType of [Float32Array, Float64Array]) {
     const storage = new ArrayType([11, 41, 100, 8, 77, 77, 77, 77]);
     const input = storage.subarray(0, 4),
@@ -94,7 +94,7 @@ test('same-view in-place writes and disjoint backing views are supported; overla
 test.skipIf(typeof SharedArrayBuffer === 'undefined')(
   'shared/cloned overlap is conservatively rejected, disjoint storage is accepted',
   () => {
-    const projection = new ProjectionEngine();
+    const projection = new ProjectionTransform();
     const buffer = new SharedArrayBuffer(64),
       clone = structuredClone(buffer);
     const input = new Float64Array(buffer, 0, 4);
@@ -107,7 +107,7 @@ test.skipIf(typeof SharedArrayBuffer === 'undefined')(
 );
 
 test('geocentric output appends generated Z only with sufficient caller capacity', () => {
-  const projection = new ProjectionEngine({
+  const projection = new ProjectionTransform({
     to: '+proj=geocent +datum=WGS84',
     projections: [geocentric]
   });
@@ -134,7 +134,7 @@ test('layout, domain and Float32 overflow failures leave caller outputs untouche
     expect(() => projection.projectTo(point, result)).toThrow();
     expect(Array.from(result)).toEqual([77, 77, 77, 77]);
   }
-  const huge = new ProjectionEngine({to: '+proj=merc +a=1e40 +b=1e40', projections: [mercator]});
+  const huge = new ProjectionTransform({to: '+proj=merc +a=1e40 +b=1e40', projections: [mercator]});
   expect(() => huge.projectTo([45, 45, 10, 9], result)).toThrow('Float32');
   expect(Array.from(result)).toEqual([77, 77, 77, 77]);
   expect(projection.projectTo([0, 0, 10, 9], result)).toBe(result);
@@ -144,7 +144,7 @@ test('reusable scratch isolates nested calls and recovers after callbacks and in
   const points = new Set<ProjectionPoint>();
   let nested = false,
     fail = false;
-  let projection: ProjectionEngine;
+  let projection: ProjectionTransform;
   const inner = new Float64Array(4),
     output = new Float64Array(4).fill(77);
   const plugin: ProjectionPlugin = {
@@ -166,7 +166,7 @@ test('reusable scratch isolates nested calls and recovers after callbacks and in
       }
     })
   };
-  projection = new ProjectionEngine({to: '+proj=scratch_output', projections: [plugin]});
+  projection = new ProjectionTransform({to: '+proj=scratch_output', projections: [plugin]});
   nested = true;
   projection.projectTo([10, 20, 100, 9], output);
   expect(Array.from(output)).toEqual([(10 * Math.PI) / 180 + 1, (20 * Math.PI) / 180 - 1, 100, 9]);
@@ -197,7 +197,7 @@ test('descriptor-backed result APIs snapshot input, defer writes and retain expl
     await gate;
     return mercator;
   });
-  const engine = new ProjectionEngine({to: 'EPSG:3857', projections: [descriptor]});
+  const engine = new ProjectionTransform({to: 'EPSG:3857', projections: [descriptor]});
   const pipeline = new ProjectionPipeline({
     input: {space: 'geographic', units: ['deg', 'deg', 'm']},
     projections: [descriptor],

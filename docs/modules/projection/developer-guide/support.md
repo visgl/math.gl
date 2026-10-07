@@ -1,8 +1,12 @@
+---
+slug: /modules/projection/support
+---
+
 # Projection API support and migration
 
 `@math.gl/projection` uses the math.gl projection engine by default. `Projection` supplies
 all projection plugins and WKT/PROJJSON readers behind the existing wrapper API.
-`ProjectionEngine` exposes per-instance configuration for smaller bundles.
+`ProjectionTransform` exposes per-instance configuration for smaller bundles.
 The former `/classic` wrapper and proj4js-specific CRS helpers are removed.
 Applications needing the upstream runtime can install `proj4` directly.
 
@@ -12,14 +16,14 @@ paths in new code. This API is available in releases containing these exports.
 
 ## Named datum catalogue migration
 
-The default `ProjectionEngine`, `LazyProjection`, and `normalizeCRS` retain only
+The default `ProjectionTransform`, `LazyProjection`, and `normalizeCRS` retain only
 WGS84 and NAD83 as named datums. Register regional definitions explicitly:
 
 ```typescript
-import {ProjectionEngine} from '@math.gl/projection/core';
+import {ProjectionTransform} from '@math.gl/projection/core';
 import {datumCatalog} from '@math.gl/projection/datums';
 
-const projection = new ProjectionEngine({
+const projection = new ProjectionTransform({
   from: '+proj=longlat +datum=nad27',
   to: 'WGS84',
   datumCatalogs: [datumCatalog]
@@ -31,16 +35,16 @@ not grids. The option also applies to WKT/PROJJSON readers and capability checks
 Explicit ellipsoid and operation parameters remain available without named datum
 registration. The `Projection` convenience wrapper includes the catalogue
 internally and preserves its existing behavior. See the
-[datum registration guide](./projection-engine.md#register-regional-datums).
+[datum registration guide](projection-engine.md#register-regional-datums).
 
 API compatibility does not imply identical numerical results or accepted inputs.
 The documented corrections and strict-input exceptions below still apply. The engine never silently falls back to proj4js.
 
 ## Renamed configurable API
 
-`ProjectionEngine` replaces `TypeScriptProjection` during the alpha release cycle;
+`ProjectionTransform` replaces `TypeScriptProjection` during the alpha release cycle;
 the former name is no longer exported. Update imports and constructors, and use
-`ProjectionEngineOptions`, `ProjectionEngineCreateOptions`, `ProjectionCompatibility`
+`ProjectionTransformOptions`, `ProjectionTransformCreateOptions`, `ProjectionCompatibility`
 and `checkProjectionCompatibility` in place of the former TypeScript-prefixed names.
 `Projection` provides the ready-to-use API, and `LazyProjection` loads built-in
 algorithms on demand.
@@ -63,7 +67,7 @@ correction, and nine intentional input rejections out of 242**. The correction i
 Robinson's coefficient table; the original upstream coordinates remain in the repository.
 Independent PROJ qualification covers **134 configurations / 2,386 projection points**,
 **15 EPSG systems in four formats**, **12 three-dimensional datum chains / 144 points**,
-and **87 real-grid points in NTv2 and GeoTIFF**. See [independent validation](./independent-validation.md)
+and **87 real-grid points in NTv2 and GeoTIFF**. See [independent validation](../independent-validation.md)
 for domains, accuracy budgets, source versions and the grid-edge policy.
 
 These counts and the complete reviewed exception list are maintained in
@@ -75,9 +79,9 @@ partial relative to unrestricted upstream behavior; that distinction is delibera
 Eager construction is synchronous and resolves plugins, parsers, aliases and prepared grids.
 With projection descriptors, construction reads definitions but algorithms load on the
 first asynchronous coordinate call. `projectSync`/`unprojectSync` and their flat variants
-require preloading; they never start an import. See the [loading guide](./projection-engine.md#load-less-used-projections-on-demand).
+require preloading; they never start an import. See the [loading guide](projection-engine.md#load-less-used-projections-on-demand).
 The eager engine and default wrapper perform no network requests. Descriptor imports
-can fetch application chunks through the bundler runtime. The configurable `ProjectionEngine` keeps plugin registration per instance and
+can fetch application chunks through the bundler runtime. The configurable `ProjectionTransform` keeps plugin registration per instance and
 shares only the descriptor implementation cache. The convenience `Projection` preserves the classic static registration
 API: aliases and NTv2 grids affect subsequently constructed wrappers of that backend.
 Existing instances retain their compiled configuration. These registries are independent of the configurable engine
@@ -137,11 +141,11 @@ runtime validation.
 For selective bundles, register algorithms required by **both** ends:
 
 ```typescript
-import {ProjectionEngine} from '@math.gl/projection/core';
+import {ProjectionTransform} from '@math.gl/projection/core';
 import {mercator} from '@math.gl/projection/projections/merc';
 import {universalTransverseMercator} from '@math.gl/projection/projections/utm';
 
-const projection = new ProjectionEngine({
+const projection = new ProjectionTransform({
   from: 'EPSG:3857',
   to: 'EPSG:32631',
   projections: [mercator, universalTransverseMercator]
@@ -151,7 +155,7 @@ projection.projectFlat(coordinates, 2);
 ```
 
 For WKT/PROJJSON, register the matching optional reader. For grids, load and prepare
-all required data before constructing the instance. The [engine guide](./projection-engine.md)
+all required data before constructing the instance. The [engine guide](projection-engine.md)
 shows dynamic imports, grid loading and minimal bundles.
 
 Use `checkProjectionCompatibility` on each definition with the same plugin/parser
@@ -162,19 +166,19 @@ Pay particular attention to computed heights, strict errors, Cassini/Robinson/CE
 corrections and inverse grid boundaries. Use a separately installed proj4js runtime where its behavior is required.
 
 Explicit `+geoidgrids` height conversion supports prepared grids, GTX snapshots, the validated vertical GeoTIFF subset and a
-structural `@math.gl/geoid` adapter. See [vertical heights](./api-reference/datum-grids.md#convert-geoid-heights)
+structural `@math.gl/geoid` adapter. See [vertical heights](projection-engine.md#convert-geoid-heights)
 for the supported domain and grid loading contract. This does not add compound/vertical
 CRS execution or implicit model selection.
 
-## Support boundaries
+## Default backend and future work
 
 The package has no runtime dependency on proj4js. The pinned development dependency
 remains for compatibility tests and benchmarks. This rename and wrapper removal
-are breaking alpha API changes.
+are breaking alpha API changes; no release is published by this work.
 
 Broader derived/compound CRS execution, arbitrary axis rotations, uncommon GeoTIFF
 band conventions, dynamic datums and automatic EPSG operation lookup
 are outside this profile. More datasets and denser sampling can expand the profile
-through additional independent qualification. Exact
+without representing unfinished work in the four qualification tranches. Exact
 allocation counts and guarantees about every browser/device are also not claimed;
 the recorded performance baselines are measurements, not service-level promises.

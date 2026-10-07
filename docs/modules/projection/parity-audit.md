@@ -23,11 +23,11 @@ the old upstream forward coordinate by about two metres; its original fixture is
 retained and the native result is checked against PROJ. This is a deliberate accuracy
 correction, not an unclassified mismatch or a silently relaxed tolerance.
 
-The [projection support contract](./support.md) documents the default projection API,
+The [projection support contract](developer-guide/support.md) documents the default projection API,
 retained engine aliases and the original wrapper at `classic` (removed in the subsequent
 package rename), and records the remaining
 out-of-profile operations. CI covers three browser engines and emits performance
-artifacts; see [benchmarks](./benchmarks.md). Earlier audit results below are historical.
+artifacts; see [benchmarks](benchmarks.md). Earlier audit results below are historical.
 
 ## Independent reference and real-grid follow-up
 
@@ -41,7 +41,7 @@ This found and corrected an ellipsoidal AEQD origin shortcut that could misplace
 longitude-zero points by hundreds of kilometres. Wider probes also quantify Cassini
 and Robinson approximation limits. The two Canadian western-edge audit failures are
 retained strict-coverage differences: the inverse source falls outside the grid,
-including in PROJ's approximate result. See [independent validation](./independent-validation.md)
+including in PROJ's approximate result. See [independent validation](independent-validation.md)
 for the exact semantics, budgets, edge disposition and reproduction commands.
 
 The upstream compatibility result remains 233/242; these new independent checks do
@@ -109,7 +109,7 @@ round trips. At that stage the remaining exceptions comprised **five axis-orient
 gaps** and **nine deliberate strict-input differences**; the axis follow-up above closes the five gaps. Grid-edge policy, regional
 validity limits and independent native PROJ accuracy qualification remain open.
 
-See the [projection engine guide](./projection-engine.md) for registration, dynamic
+See the [projection engine guide](developer-guide/projection-engine.md) for registration, dynamic
 loading, optional readers and measured bundle costs.
 
 ## Correctness follow-up (PR #149)

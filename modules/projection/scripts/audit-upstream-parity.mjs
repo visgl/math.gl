@@ -179,7 +179,7 @@ const rows = fixtures.map((fixture, index) => {
   const nativeOptions = options(code); // Harness configuration failures must not count as engine rejections.
   const upstream = run(() => proj4('WGS84', code), fixture);
   const result = run(() => {
-    const projection = new native.ProjectionEngine(nativeOptions);
+    const projection = new native.ProjectionTransform(nativeOptions);
     return {forward: projection.project, inverse: projection.unproject};
   }, fixture);
   return {

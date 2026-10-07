@@ -4,7 +4,7 @@
 import {expect, test} from 'vitest';
 import proj4 from 'proj4';
 import {
-  ProjectionEngine,
+  ProjectionTransform,
   normalizeCRS,
   checkProjectionCompatibility,
   createProjectionDescriptor,
@@ -38,7 +38,7 @@ test('default named datums are WGS84 and NAD83, with the existing aliases', () =
 });
 
 test('regional catalogue preserves datum transforms, inverse heights and flat buffers', () => {
-  const engine = new ProjectionEngine({from: regional, datumCatalogs});
+  const engine = new ProjectionTransform({from: regional, datumCatalogs});
   const expected = proj4(regional, 'WGS84').forward([...point], true);
   close(engine.project(point), expected);
   close(engine.unproject(expected), proj4('WGS84', regional).forward([...expected], true));
@@ -46,7 +46,7 @@ test('regional catalogue preserves datum transforms, inverse heights and flat bu
   engine.projectFlat(flat, 4);
   close(Array.from(flat), [...expected, 7]);
   close(new Projection({from: regional}).project(point), expected);
-  expect(() => new ProjectionEngine({from: regional})).toThrow('Unknown datum');
+  expect(() => new ProjectionTransform({from: regional})).toThrow('Unknown datum');
 });
 
 test('every regional name and alias resolves its declared operation', () => {
@@ -80,10 +80,10 @@ test('WKT and PROJJSON require the same catalogue as PROJ strings', () => {
     6377563.396 / (6377563.396 - 6356256.91) +
     ']],PRIMEM["Greenwich",0],UNIT["degree",0.017453292519943295]]';
   for (const from of [json, wkt]) {
-    expect(() => new ProjectionEngine({from, parsers})).toThrow('datumCatalogs');
+    expect(() => new ProjectionTransform({from, parsers})).toThrow('datumCatalogs');
     close(
-      new ProjectionEngine({from, parsers, datumCatalogs}).project(point),
-      new ProjectionEngine({from: regional, datumCatalogs}).project(point)
+      new ProjectionTransform({from, parsers, datumCatalogs}).project(point),
+      new ProjectionTransform({from: regional, datumCatalogs}).project(point)
     );
   }
   // An explicit WKT operation remains usable without any named catalogue.
@@ -96,7 +96,7 @@ test('compatibility wrapper retains ellipsoid-only handling of unmatched structu
     ...geographicJSON,
     datum: {...geographicJSON.datum, name: 'Application spheroid'}
   };
-  expect(() => new ProjectionEngine({from, parsers})).toThrow('Unknown datum');
+  expect(() => new ProjectionTransform({from, parsers})).toThrow('Unknown datum');
   close(new Projection({from}).project(point), point);
 });
 
@@ -106,7 +106,7 @@ test('catalogue registrations are isolated and reject normalized conflicts', () 
     name: 'local',
     datums: {local: definition, LO_CAL: {...definition}}
   };
-  const engine = new ProjectionEngine({
+  const engine = new ProjectionTransform({
     from: '+proj=longlat +datum=local',
     datumCatalogs: [custom]
   });
@@ -136,17 +136,17 @@ test('catalogue registrations are isolated and reject normalized conflicts', () 
 test('static creation and deferred projection paths retain catalogue options', async () => {
   const descriptor = createProjectionDescriptor({name: 'merc'}, async () => mercator);
   const options = {from: regional, to: 'EPSG:3857', datumCatalogs};
-  const expected = new ProjectionEngine({
+  const expected = new ProjectionTransform({
     ...options,
     projections: [mercator]
   }).project(point);
-  const deferred = new ProjectionEngine({
+  const deferred = new ProjectionTransform({
     ...options,
     projections: [descriptor]
   });
   close(await deferred.project(point), expected);
   close(
-    (await ProjectionEngine.create({...options, projections: [descriptor]})).project(point),
+    (await ProjectionTransform.create({...options, projections: [descriptor]})).project(point),
     expected
   );
   const lazy = new LazyProjection(options);
@@ -170,13 +170,13 @@ test('structured names prefer exact catalogue matches over broader aliases', () 
       name +
       '",SPHEROID["WGS84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.017453292519943295]]';
     const proj = '+proj=longlat +datum=' + name;
-    const expected = new ProjectionEngine({from: proj, datumCatalogs: catalogs}).project(point);
+    const expected = new ProjectionTransform({from: proj, datumCatalogs: catalogs}).project(point);
     for (const from of [json, wkt]) {
       expect(normalizeCRS(from, {parsers, datumCatalogs: catalogs}).datum.towgs84).toEqual(
         normalizeCRS(proj, {datumCatalogs: catalogs}).datum.towgs84
       );
       close(
-        new ProjectionEngine({from, parsers, datumCatalogs: catalogs}).project(point),
+        new ProjectionTransform({from, parsers, datumCatalogs: catalogs}).project(point),
         expected
       );
     }
@@ -207,7 +207,7 @@ test('catalogue validation is reused within a normalization configuration', () =
   );
   const options = {datumCatalogs: [{name: 'local', datums}], parsers};
   const from = {...geographicJSON, datum: {...geographicJSON.datum, name: 'local'}};
-  const engine = new ProjectionEngine({from, to: from, ...options});
+  const engine = new ProjectionTransform({from, to: from, ...options});
   expect(scans).toBe(1);
   close(engine.project(point), point);
   normalizeCRS(from, options);
@@ -234,7 +234,7 @@ test('registered structured fallback names take priority over legacy aliases', (
       }
     ];
     const proj = '+proj=longlat +datum=' + name;
-    const expected = new ProjectionEngine({from: proj, datumCatalogs: catalogs}).project(point);
+    const expected = new ProjectionTransform({from: proj, datumCatalogs: catalogs}).project(point);
     const json = {...geographicJSON, datum: {...geographicJSON.datum, name: datumName}};
     const wkt =
       'GEOGCS["local",DATUM["' +
@@ -242,7 +242,7 @@ test('registered structured fallback names take priority over legacy aliases', (
       '",SPHEROID["WGS84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.017453292519943295]]';
     for (const from of [json, wkt])
       close(
-        new ProjectionEngine({from, parsers, datumCatalogs: catalogs}).project(point),
+        new ProjectionTransform({from, parsers, datumCatalogs: catalogs}).project(point),
         expected
       );
   }

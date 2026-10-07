@@ -83,7 +83,7 @@ baseline, not a production latency promise.
 
 The table below preserves the initial tranche 7 baseline. For current measurements,
 including optional WKT/PROJJSON readers and grid adapters, see the
-[projection engine guide](../docs/modules/projection/projection-engine.md#tree-shaking-and-bundle-size).
+[projection engine guide](../docs/modules/projection/developer-guide/projection-engine.md#tree-shaking-and-bundle-size).
 
 `bundle-budgets.json` records measured baselines and explicit limits with approximately
 10% headroom, rounded up to 100 bytes. The check uses esbuild browser ESM targeting
@@ -115,10 +115,10 @@ Tranche 10 adds the shared batch adapter to eligible projection bundles. Static 
 retain their existing limits. The UTM, WKT and rotated lazy initial graphs now measure
 48,390/18,137, 48,258/17,503 and 48,316/18,073 minified/gzip bytes respectively. Their
 initial limits are reviewed and rounded up to 100 bytes; catalogue and deferred limits
-remain unchanged. See the [current size tables](../docs/modules/projection/projection-engine.md#tree-shaking-and-bundle-size).
+remain unchanged. See the [current size tables](../docs/modules/projection/developer-guide/projection-engine.md#tree-shaking-and-bundle-size).
 
 Performance and packaging do not establish geodetic parity. The math.gl projection engine is now the default;
-the [support profile](../docs/modules/projection/support.md) defines the scope of the projection API
+the [support profile](../docs/modules/projection/developer-guide/support.md) defines the scope of the projection API
 and the migration to the default Projection wrapper. Historical wrapper timings
 refer to the upstream proj4js implementation. The historical wrapper was removed
 when the package was renamed; current comparisons import `proj4` directly.
@@ -802,7 +802,7 @@ The S4–S5 follow-up reuses projection points, batch working points and pipelin
 ordinate stacks at each observed recursive call depth. A normalized squared-norm
 classification also avoids an extra `hypot` in spheroid inverse dispatch. Existing
 independent numerical and recursive ownership checks qualify these changes.
-The optional [`ProjectionBuffer`](../docs/modules/projection/bulk-layouts.md) adds separate arrays, padded
+The optional [`ProjectionBuffer`](../docs/modules/projection/api-reference/projection-buffer.md) adds separate arrays, padded
 records, columns, chunk ranges and pipeline epochs without per-record source
 objects, arrays or subviews.
 

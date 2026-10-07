@@ -1,4 +1,8 @@
-# Projection analysis
+---
+slug: /modules/projection/projection-analysis
+---
+
+# ProjectionAnalysis
 
 The optional `@math.gl/projection/analysis` entry evaluates a single map projection inside an explicit application domain. It provides scales, convergence, distortion and coordinate derivatives without importing projection algorithms. Supply the same projection plugin and geometry used by your map.
 
@@ -23,11 +27,11 @@ All input angles, domain bounds and output angles use **radians**. Projection co
 
 ## Domain and reusable coordinate outputs
 
-`domain` is required: a closed rectangle with increasing west/east and south/north bounds. It is captured at construction. Rectangles do not cross the antimeridian; split such applications into separate regions. The [accuracy scorecard](./accuracy-domains.md) supplies tested configurations and regions, not automatic global validity declarations.
+`domain` is required: a closed rectangle with increasing west/east and south/north bounds. It is captured at construction. Rectangles do not cross the antimeridian; split such applications into separate regions. The [accuracy scorecard](../accuracy-domains.md) supplies tested configurations and regions, not automatic global validity declarations.
 
 `contains(longitude, latitude)` checks the declared rectangle and finite input. `projectTo(longitude, latitude, result)` and `unprojectTo(x, y, result)` also execute the plugin and validate the result. Both return `false` for a domain violation, plugin rejection or nonfinite coordinate. Forward and inverse write only `result.x` and `result.y`; existing Z remains untouched. An inverse result must lie inside the geographic rectangle. Failure leaves the reusable result untouched.
 
-This is a single-projection mathematical interface; normal CRS transformations continue to use `Projection` or `ProjectionEngine`. Plugins must implement both mutable horizontal hooks. Pass a loaded plugin when using lazy descriptors.
+This is a single-projection mathematical interface; normal CRS transformations continue to use `Projection` or `ProjectionTransform`. Plugins must implement both mutable horizontal hooks. Pass a loaded plugin when using lazy descriptors.
 
 ## Jacobians and factors
 

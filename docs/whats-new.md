@@ -146,7 +146,7 @@ Highlights:
 
 - Renames `@math.gl/proj4` to `@math.gl/projection`, with a pluggable math.gl projection engine, lazy algorithms, in-place buffers and explicit coordinate operations.
 - Removes the deprecated `Proj4Projection` alias and `/classic` wrapper. The package has no proj4js runtime dependency; comparisons and compatibility tests use a pinned development dependency.
-- Adds a [projection catalogue](./modules/projection/projections.md) and a [guide to ellipsoids, datums, heights and epochs](./modules/projection/coordinate-systems.md).
+- Adds a [projection catalogue](modules/projection/developer-guide/projections.md) and a [guide to ellipsoids, datums, heights and epochs](modules/projection/developer-guide/coordinate-systems.md).
 - Adds optional CRS axis-order enforcement and NTv2 datum-grid registration.
 - Defines aliases for WGS84 UTM and UPS EPSG coordinate systems automatically.
 

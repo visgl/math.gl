@@ -73,7 +73,7 @@ for (const fixture of cases) {
         to += ' +' + key + '=0';
   }
   if (to.includes('+proj=utm')) to = to.replace(/\s*\+(?:x_0|y_0)=[^\s]+/g, '');
-  const n = new native.ProjectionEngine({
+  const n = new native.ProjectionTransform({
     from: '+proj=longlat +datum=none',
     to: fixture.definition.includes('+lat_0=') ? to : to.replace(/\s*\+lat_0=[^\s]+/g, ''),
     projections: plugins

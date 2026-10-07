@@ -57,7 +57,7 @@ TypeScript declarations. This package has no runtime dependencies. Its runtime A
 and validate serialization syntax only: they do not perform registry lookup, semantic equivalence,
 coordinate transformation, or general conversion between WKT, PROJ, and PROJJSON.
 
-The `ProjectionEngine` in `@math.gl/projection/core` directly accepts
+The `ProjectionTransform` in `@math.gl/projection/core` directly accepts
 these readonly definitions, `CRSReference`, and `SpatialReference` descriptors. Its optional
 WKT/PROJJSON adapters use this package's types and parsers; execution support is checked
 by `checkProjectionCompatibility`. Unknown/absent metadata remains unresolved.

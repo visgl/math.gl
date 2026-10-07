@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original buffer ownership, independent reference and reusable scratch tests.
 import {expect, test} from 'vitest';
-import {Projection, ProjectionEngine, ProjectionPipeline, mercator} from '@math.gl/projection';
+import {Projection, ProjectionTransform, ProjectionPipeline, mercator} from '@math.gl/projection';
 import {ProjectionBuffer} from '../../src/bulk';
 import type {BulkProjection} from '../../src/bulk';
 import {LazyProjection} from '@math.gl/projection/projections/lazy';
@@ -15,7 +15,7 @@ import {
   pipelineBenchmarkSource
 } from '../pipeline-benchmark-workload';
 
-const engine = () => new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});
+const engine = () => new ProjectionTransform({to: 'EPSG:3857', projections: [mercator]});
 const identity = () =>
   new ProjectionPipeline({
     input: {space: 'projected', units: ['m', 'm', 'm']},

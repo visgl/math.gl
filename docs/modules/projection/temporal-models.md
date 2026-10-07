@@ -99,7 +99,7 @@ a centred numerical displacement Jacobian, at most 16 updates and 12 halving tri
 per update. The stopping criterion is a fixed-XYZ forward residual of 1e-8 metres.
 This numerical threshold is not a claim about observational model accuracy.
 Stencil/trial positions need coverage; singular or nonconvergent inverses fail.
-Failure restores the input XYZ. The existing [static velocity model](./deformation-models.md)
+Failure restores the input XYZ. The existing [static velocity model](developer-guide/deformation-models.md)
 keeps its current fixed-point inverse and multiplication order.
 
 ## Independent qualification
@@ -120,6 +120,6 @@ yarn exec vitest run --project node modules/projection/test/lib/temporal.spec.ts
 
 These are original synthetic fields and references, with no new third-party
 implementation or model data. Qualify real fields separately using the
-[application model harness](./deformation-qualification.md). The vocabulary of
+[application model harness](deformation-qualification.md). The vocabulary of
 rates and event functions also appears in [OGC deformation model guidance](https://docs.ogc.org/as/22-010r4/22-010r4.html);
 this API does not parse or claim conformance with that format.

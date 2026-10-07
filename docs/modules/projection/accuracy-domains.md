@@ -1,6 +1,6 @@
 # Projection accuracy domains
 
-Every named algorithm has independent forward and inverse references. This scorecard expands seeded scalar and Float64 XYZM qualification to **42 configurations, 11,160 points and 36 horizontal algorithms**. Geocentric conversion is covered separately by the three-dimensional PROJ corpus and the [nearest-normal qualification](./ellipsoid-qualification.md).
+Every named algorithm has independent forward and inverse references. This scorecard expands seeded scalar and Float64 XYZM qualification to **42 configurations, 11,160 points and 36 horizontal algorithms**. Geocentric conversion is covered separately by the three-dimensional PROJ corpus and the [nearest-normal qualification](ellipsoid-qualification.md).
 
 Each rectangle below belongs to the exact parameter configuration in the [machine-readable report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/accuracy-domains.json). It is a tested region, not an inferred global validity domain. Regional formulae, approximate transverse Mercator, map seams, antipodes, projection knots and perspective visibility boundaries need their own qualified regions. The report retains the worst observed coordinate as well as every test ceiling. No rejected samples are silently removed.
 
@@ -55,7 +55,7 @@ The polar ellipsoidal azimuthal-equidistant path now integrates the meridional r
 
 Van der Grinten uses rationalized expressions to avoid subtracting nearly equal terms. At the retained near-equator regression, an original 80-digit Decimal evaluation matches math.gl within 10 nanometres, while the pinned PROJ oracle differs by 20.864 micrometres. Its 30 micrometre comparison ceiling records that oracle limitation. The independent Decimal check is a separate strict regression.
 
-To enforce an application-qualified rectangle in both directions, use the optional [ProjectionAnalysis](./projection-analysis.md) interface. Its domain is explicit; it does not automatically certify an algorithm or select a datum operation.
+To enforce an application-qualified rectangle in both directions, use the optional [ProjectionAnalysis](api-reference/projection-analysis.md) interface. Its domain is explicit; it does not automatically certify an algorithm or select a datum operation.
 
 Regenerate with the pinned oracle environment, then run:
 

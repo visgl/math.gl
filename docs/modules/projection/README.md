@@ -38,33 +38,33 @@ projection.projectFlat(positions, 2); // transforms the same buffer
 
 ## Learn about projections
 
-Start with [coordinate systems, ellipsoids, datums and epochs](./coordinate-systems.md)
-for the concepts behind a transformation. The [projection catalogue](./projections.md)
+Start with [coordinate systems, ellipsoids, datums and epochs](developer-guide/coordinate-systems.md)
+for the concepts behind a transformation. The [projection catalogue](developer-guide/projections.md)
 explains the built-in algorithms, their distortion tradeoffs and their sphere or
 ellipsoid support. It includes examples for regional, global and polar maps.
 
 | Guide | What you will learn |
 | --- | --- |
-| [Imports, plugins and loading](./projection-engine.md) | Choose entry points, register algorithms, load on demand and compare bundle sizes |
-| [Coordinate systems](./coordinate-systems.md) | Distinguish projection, ellipsoid, datum, height and coordinate epoch |
-| [Projection catalogue](./projections.md) | Choose an algorithm and understand its useful domain |
-| [Reusable coordinate buffers](./bulk-layouts.md) | Transform separate, strided and column buffers with reusable scratch and explicit ownership |
-| [Operation pipelines](./operation-pipelines.md) | Order units, axes, projections, datum shifts and time-dependent operations explicitly |
-| [Operation selection](./operation-selection.md) | Select application-reviewed operations by area, epoch, accuracy and prepared grids |
-| [Temporal models](./temporal-models.md) | Combine velocities, acceleration, events and relaxation with explicit epochs |
-| [Optional acceleration](./acceleration.md) | Evaluate persistent workers, ownership and complete application costs |
-| [Deformation models](./deformation-models.md) | Propagate coordinates between epochs with prepared velocity grids |
-| [Support and migration](./support.md) | Understand accepted definitions and differences from proj4js |
-| [Performance and live benchmarks](./benchmarks.md) | Compare math.gl flat and scalar transforms with proj4js in your browser |
-| [Projection scorecard](./scorecard.md) | Inspect source-matched accuracy, throughput, startup, allocation, memory and bundle evidence |
-| [Independent validation](./independent-validation.md) | Inspect numerical references and qualification limits |
+| [Imports, plugins and loading](developer-guide/projection-engine.md) | Choose entry points, register algorithms, load on demand and compare bundle sizes |
+| [Coordinate systems](developer-guide/coordinate-systems.md) | Distinguish projection, ellipsoid, datum, height and coordinate epoch |
+| [Projection catalogue](developer-guide/projections.md) | Choose an algorithm and understand its useful domain |
+| [Reusable coordinate buffers](api-reference/projection-buffer.md) | Transform separate, strided and column buffers with reusable scratch and explicit ownership |
+| [Operation pipelines](api-reference/projection-pipeline.md) | Order units, axes, projections, datum shifts and time-dependent operations explicitly |
+| [Operation selection](api-reference/operation-catalog.md) | Select application-reviewed operations by area, epoch, accuracy and prepared grids |
+| [Temporal models](temporal-models.md) | Combine velocities, acceleration, events and relaxation with explicit epochs |
+| [Optional acceleration](acceleration.md) | Evaluate persistent workers, ownership and complete application costs |
+| [Deformation models](developer-guide/deformation-models.md) | Propagate coordinates between epochs with prepared velocity grids |
+| [Support and migration](developer-guide/support.md) | Understand accepted definitions and differences from proj4js |
+| [Performance and live benchmarks](benchmarks.md) | Compare math.gl flat and scalar transforms with proj4js in your browser |
+| [Projection scorecard](scorecard.md) | Inspect source-matched accuracy, throughput, startup, allocation, memory and bundle evidence |
+| [Independent validation](independent-validation.md) | Inspect numerical references and qualification limits |
 
 ## Choose an API
 
 | API | Use it when |
 | --- | --- |
-| [`Projection`](./api-reference/projection.md) | You want a ready-to-use converter with all built-in algorithms and WKT/PROJJSON readers |
-| [`ProjectionEngine`](./api-reference/projection-engine.md) | You want an explicit list of plugins, readers and grids for a smaller bundle |
+| [`Projection`](api-reference/projection.md) | You want a ready-to-use converter with all built-in algorithms and WKT/PROJJSON readers |
+| [`CustomProjectionEngine`](api-reference/projection-engine.md) | You want an explicit list of plugins, readers and grids for a smaller bundle |
 | `LazyProjection` (`/projections/lazy`) | You want built-in algorithms to load automatically when requested |
 | `ProjectionPipeline` (`/pipeline`) | You need explicit operation order or coordinate epochs |
 | `OperationCatalog` (`/operations`) | You need to select among application-reviewed transformations |
@@ -73,7 +73,7 @@ The package root exports the convenience class and configurable engine. `/core`
 contains the engine without the catalogue. `/projections/<id>` contains an
 individual algorithm; `/projections/lazy/<id>` contains its deferred descriptor.
 Readers, grids, pipelines, operation selection and deformation models have optional subpaths. See the
-[entry-point reference](./projection-engine.md#public-subpaths).
+[entry-point reference](developer-guide/projection-engine.md#public-subpaths).
 
 [`@math.gl/crs`](../crs/README.md) provides CRS definitions, syntax readers and spatial
 reference metadata. This module executes supported coordinate operations. Reading
@@ -137,5 +137,5 @@ The implementation has diverged through selective imports, deferred algorithms,
 in-place buffers and additional explicit operations. Performance advantages depend
 on the workload; numerical improvements and supported features are qualified
 individually. This is not a claim of unrestricted proj4js or PROJ parity. See the
-[parity audit](./parity-audit.md), [independent validation](./independent-validation.md)
-and [support profile](./support.md) for the measured scope and current limits.
+[parity audit](parity-audit.md), [independent validation](independent-validation.md)
+and [support profile](developer-guide/support.md) for the measured scope and current limits.

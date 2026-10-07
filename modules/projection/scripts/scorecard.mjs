@@ -599,7 +599,7 @@ export function renderScorecard(report) {
     '\nBrowser JS heap/allocation values are **unavailable**, not zero. Each throughput row records exact input-buffer bytes only; this excludes adaptive copies, output/result objects, libraries and the rest of an application.\n\n## Bundle costs\n\n' +
     '**math.gl ' +
     escape(report.dependencies.projectionVersion) +
-    '**, from the source-matched snapshot above. For current import choices and split-bundle measurements, see [imports, plugins and loading](./projection-engine.md#tree-shaking-and-bundle-size).\n\n' +
+    '**, from the source-matched snapshot above. For current import choices and split-bundle measurements, see [imports, plugins and loading](./developer-guide/projection-engine.md#tree-shaking-and-bundle-size).\n\n' +
     escape(report.bundleMethodology.format) +
     ', ' +
     escape(report.bundleMethodology.target) +

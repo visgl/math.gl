@@ -67,10 +67,10 @@ coordinates. Warm throughput does not describe loading or first-use latency.
 | Input or workload | API | Storage behavior |
 | --- | --- | --- |
 | Individual coordinates | `project` / `unproject` | Returns a new coordinate array |
-| Repeated scalar calls | [`projectTo` / `unprojectTo`](./api-reference/projection-engine.md#reusable-scalar-outputs) | Reuses a caller-provided output |
+| Repeated scalar calls | [`projectTo` / `unprojectTo`](api-reference/projection-transform.md#reusable-scalar-outputs) | Reuses a caller-provided output |
 | Interleaved Float32/Float64 coordinates | `projectFlat` / `unprojectFlat` | Updates the supplied view in place |
-| Separate output, padded records or columns | [`ProjectionBuffer`](./bulk-layouts.md) | Reuses prepared layout and scratch |
-| Explicit datum or epoch operations | [`ProjectionPipeline`](./operation-pipelines.md) | Reuses the prepared operation chain |
+| Separate output, padded records or columns | [`ProjectionBuffer`](api-reference/projection-buffer.md) | Reuses prepared layout and scratch |
+| Explicit datum or epoch operations | [`ProjectionPipeline`](api-reference/projection-pipeline.md) | Reuses the prepared operation chain |
 
 ```typescript
 import {Projection} from '@math.gl/projection';
@@ -86,17 +86,17 @@ height and trailing measures, so XYZM results have different memory costs from X
 
 Built-in flat paths avoid temporary coordinate arrays for each point. Custom plugins
 may allocate; use mutable hooks when implementing a plugin. A batch commits completed
-records before an error; see the [flat-array contract](./api-reference/projection-engine.md#flat-typed-arrays-in-place).
+records before an error; see the [flat-array contract](api-reference/projection-transform.md#flat-typed-arrays-in-place).
 
 Lazy instances need `preload()` before synchronous methods. Import selection and
-loading affect startup and downloads; see [imports, plugins and bundle size](./projection-engine.md).
+loading affect startup and downloads; see [imports, plugins and bundle size](developer-guide/projection-engine.md).
 
 ## Keep the interface responsive
 
 Synchronous coordinate batches occupy the calling thread. Partition large jobs or
 move them into a persistent worker. Transferable buffers can avoid copies, but
 ownership changes and transfer, scheduling and worker preparation are real costs.
-See [worker measurements and ownership](./acceleration.md) before choosing a worker
+See [worker measurements and ownership](acceleration.md) before choosing a worker
 strategy; a faster arithmetic loop alone does not establish an application speedup.
 
 ## Interpret the measurements
@@ -105,10 +105,10 @@ Compare the same projection, direction, coordinate distribution, precision and r
 width. Keep browser and Node measurements separate, and rerun noisy cases. A faster
 median does not imply greater accuracy or a wider valid coordinate domain.
 
-The [projection scorecard](./scorecard.md) records a dated snapshot of accuracy,
+The [projection scorecard](scorecard.md) records a dated snapshot of accuracy,
 throughput, cold startup, allocation and memory evidence. Its
-[measurement methodology](./scorecard-methodology.md) explains source fingerprints,
-raw samples and the limits of each metric. Check [independent validation](./independent-validation.md)
+[measurement methodology](scorecard-methodology.md) explains source fingerprints,
+raw samples and the limits of each metric. Check [independent validation](independent-validation.md)
 when selecting an algorithm for a region or datum transformation.
 
 ## Reproduce
@@ -195,4 +195,4 @@ layouts for repeated calls; include output copies and worker transfers when thos
 are part of the application workload.
 
 Bundle measurements and packaging checks are documented with
-[imports, plugins and loading](./projection-engine.md#tree-shaking-and-bundle-size).
+[imports, plugins and loading](developer-guide/projection-engine.md#tree-shaking-and-bundle-size).

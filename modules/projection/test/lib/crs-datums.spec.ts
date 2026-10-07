@@ -14,7 +14,7 @@ import {
 } from '@math.gl/crs';
 import type {ReadonlyCRSDefinition, PROJJSONCRSByType} from '@math.gl/crs';
 import {
-  ProjectionEngine,
+  ProjectionTransform,
   normalizeCRS,
   checkProjectionCompatibility,
   mercator,
@@ -43,7 +43,7 @@ function close(actual: readonly number[], expected: readonly number[], tolerance
 }
 for (const definition of datumDefinitions) {
   test('Datum forward, inverse and heights: ' + definition, () => {
-    const native = new ProjectionEngine({datumCatalogs, from: definition});
+    const native = new ProjectionTransform({datumCatalogs, from: definition});
     for (const point of [
       [2, 48, 0],
       [-120, 30, 1200],
@@ -69,7 +69,7 @@ for (const definition of datumDefinitions) {
 test('Datum-to-datum chains and Web Mercator use the datum ellipsoid', () => {
   for (const from of datumDefinitions.slice(0, 3)) {
     for (const to of [...datumDefinitions.slice(3), 'EPSG:3857']) {
-      const native = new ProjectionEngine({
+      const native = new ProjectionTransform({
         datumCatalogs,
         from,
         to,
@@ -78,7 +78,7 @@ test('Datum-to-datum chains and Web Mercator use the datum ellipsoid', () => {
       close(native.project([3, 50, 250]), proj4(from, to).forward([3, 50, 250], true), 2e-6);
     }
   }
-  const web = new ProjectionEngine({
+  const web = new ProjectionTransform({
     datumCatalogs,
     from: 'EPSG:3857',
     to: datumDefinitions[0],
@@ -88,7 +88,7 @@ test('Datum-to-datum chains and Web Mercator use the datum ellipsoid', () => {
   close(web.project(input), proj4('EPSG:3857', datumDefinitions[0]).forward(input, true), 2e-6);
 });
 test('Geocentric operations cover poles, height, units and dimension contract', () => {
-  const native = new ProjectionEngine({
+  const native = new ProjectionTransform({
     datumCatalogs,
     to: 'EPSG:4978',
     projections
@@ -105,7 +105,7 @@ test('Geocentric operations cover poles, height, units and dimension contract', 
     close(native.project(point), proj4('WGS84', '+proj=geocent +datum=WGS84').forward(point), 1e-7);
     close(native.unproject(native.project(point)), point, 1e-7);
   }
-  const km = new ProjectionEngine({
+  const km = new ProjectionTransform({
     datumCatalogs,
     to: '+proj=geocent +datum=WGS84 +units=km',
     projections
@@ -118,7 +118,7 @@ test('Geocentric operations cover poles, height, units and dimension contract', 
 });
 test('Declared axes support signs and vertical permutations', () => {
   for (const axis of ['neu', 'wsd', 'uen', 'dwn', 'sue']) {
-    const native = new ProjectionEngine({
+    const native = new ProjectionTransform({
       datumCatalogs,
       to: '+proj=longlat +datum=WGS84 +axis=' + axis,
       enforceAxis: true
@@ -131,14 +131,14 @@ test('Declared axes support signs and vertical permutations', () => {
     close(native.unproject([...expected, 40]), [10, 20, 30, 40]);
   }
   expect(() =>
-    new ProjectionEngine({
+    new ProjectionTransform({
       datumCatalogs,
       to: '+proj=longlat +axis=uen',
       enforceAxis: true
     }).project([10, 20])
   ).toThrow('three ordinates');
   close(
-    new ProjectionEngine({
+    new ProjectionTransform({
       datumCatalogs,
       to: '+proj=longlat +axis=neu'
     }).project([10, 20]),
@@ -152,7 +152,7 @@ test('Prime meridians, wrapping, angles, precedence and units', () => {
     '+proj=merc +over',
     '+proj=merc +units=cm +to_meter=2'
   ]) {
-    const native = new ProjectionEngine({datumCatalogs, to, projections});
+    const native = new ProjectionTransform({datumCatalogs, to, projections});
     close(native.project([210, 40]), proj4('WGS84', to).forward([210, 40]), 1e-6);
   }
   for (const [angle, degrees] of [
@@ -160,7 +160,7 @@ test('Prime meridians, wrapping, angles, precedence and units', () => {
     ['12d30\'0"E', 12.5]
   ] as const) {
     close(
-      new ProjectionEngine({
+      new ProjectionTransform({
         datumCatalogs,
         to: '+proj=merc +lon_0=' + angle,
         projections
@@ -170,7 +170,7 @@ test('Prime meridians, wrapping, angles, precedence and units', () => {
     );
   }
   close(
-    new ProjectionEngine({
+    new ProjectionTransform({
       datumCatalogs,
       to: '+proj=longlat +vunits=ft'
     }).project([1, 2, 30.48]),
@@ -181,13 +181,13 @@ test('Prime meridians, wrapping, angles, precedence and units', () => {
     parsePROJString('+units=m +proj=tmerc +lon_0=3 +k_0=0.9996 +x_0=500000')
   );
   close(
-    new ProjectionEngine({
+    new ProjectionTransform({
       datumCatalogs,
       to: wkt,
       parsers,
       projections
     }).project([4, 50]),
-    new ProjectionEngine({datumCatalogs, to: proj, projections}).project([4, 50])
+    new ProjectionTransform({datumCatalogs, to: proj, projections}).project([4, 50])
   );
 });
 for (const [label, to] of [
@@ -196,7 +196,7 @@ for (const [label, to] of [
   ['PROJJSON', projectedJSON]
 ] as const) {
   test(label + ' uses shared CRS definitions and agrees with UTM', () => {
-    const native = new ProjectionEngine({
+    const native = new ProjectionTransform({
       datumCatalogs,
       to,
       parsers,
@@ -207,7 +207,7 @@ for (const [label, to] of [
   });
 }
 test('ESRI WKT uses Web Mercator projection and WGS84 datum', () => {
-  const native = new ProjectionEngine({
+  const native = new ProjectionTransform({
     datumCatalogs,
     from: datumDefinitions[0],
     to: esriWKT,
@@ -223,7 +223,7 @@ test('ESRI WKT uses Web Mercator projection and WGS84 datum', () => {
 test('Angular WKT units and prime meridian are converted independently', () => {
   const from =
     'GEOGCS["Paris",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],PRIMEM["Paris",2.5969212962963],UNIT["grad",0.015707963267948967],AXIS["lat",NORTH],AXIS["lon",EAST]]';
-  const native = new ProjectionEngine({
+  const native = new ProjectionTransform({
     datumCatalogs,
     from,
     parsers,
@@ -264,7 +264,7 @@ const bound: PROJJSONCRSByType<'BoundCRS'> = {
   }
 };
 test('BoundCRS implements Helmert operations and rejects other operations', () => {
-  const native = new ProjectionEngine({datumCatalogs, from: bound, parsers});
+  const native = new ProjectionTransform({datumCatalogs, from: bound, parsers});
   close(
     native.project([4, 50, 250]),
     proj4('+proj=longlat +ellps=intl +towgs84=12,-23,34,0.1,-0.2,0.3,2', 'WGS84').forward(
@@ -296,10 +296,10 @@ test('Compound and vertical CRS preserve strict and explicit lossy boundaries', 
       }
     ]
   };
-  expect(() => new ProjectionEngine({datumCatalogs, from: compound, parsers})).toThrow(
+  expect(() => new ProjectionTransform({datumCatalogs, from: compound, parsers})).toThrow(
     'horizontal'
   );
-  const native = new ProjectionEngine({
+  const native = new ProjectionTransform({
     datumCatalogs,
     from: compound,
     parsers,
@@ -316,7 +316,7 @@ test('Compound and vertical CRS preserve strict and explicit lossy boundaries', 
     geographicWKT +
     ',VERT_CS["height",VERT_DATUM["local",2005],UNIT["metre",1],AXIS["up",UP]]]';
   expect(
-    new ProjectionEngine({
+    new ProjectionTransform({
       datumCatalogs,
       from: wkt,
       parsers,
@@ -325,7 +325,7 @@ test('Compound and vertical CRS preserve strict and explicit lossy boundaries', 
   ).toBe(true);
   expect(
     () =>
-      new ProjectionEngine({
+      new ProjectionTransform({
         datumCatalogs,
         from: compound.components[1],
         parsers
@@ -345,7 +345,7 @@ test('SpatialReference preserves unknown states, storage order and metadata', ()
     units: ['degree', 'degree', 'metre']
   });
   const before = JSON.stringify(source);
-  const native = new ProjectionEngine({
+  const native = new ProjectionTransform({
     datumCatalogs,
     from: source,
     to: 'EPSG:3857',
@@ -355,12 +355,12 @@ test('SpatialReference preserves unknown states, storage order and metadata', ()
   close(native.project([50, 4, 123, 99]), proj4('EPSG:3857').forward([4, 50, 123, 99]), 1e-6);
   close(native.unproject(native.project([50, 4, 123])), [50, 4, 123]);
   expect(JSON.stringify(source)).toBe(before);
-  expect(() => new ProjectionEngine({datumCatalogs, from: createSpatialReference()})).toThrow(
+  expect(() => new ProjectionTransform({datumCatalogs, from: createSpatialReference()})).toThrow(
     'absent'
   );
   expect(
     () =>
-      new ProjectionEngine({
+      new ProjectionTransform({
         datumCatalogs,
         from: {...source, coordinateEpoch: 2020},
         parsers
@@ -368,13 +368,16 @@ test('SpatialReference preserves unknown states, storage order and metadata', ()
   ).toThrow('epochs');
   expect(
     () =>
-      new ProjectionEngine({
+      new ProjectionTransform({
         datumCatalogs,
         from: {...source, units: ['radian', 'radian', 'metre']},
         parsers
       })
   ).toThrow('units disagree');
-  close(new ProjectionEngine({datumCatalogs, from: source.crs, parsers}).project([4, 50]), [4, 50]);
+  close(
+    new ProjectionTransform({datumCatalogs, from: source.crs, parsers}).project([4, 50]),
+    [4, 50]
+  );
 });
 test('Capability checks distinguish syntax, readers, plugins and transformation stages', () => {
   const checks: [ReadonlyCRSDefinition, string][] = [
@@ -387,7 +390,7 @@ test('Capability checks distinguish syntax, readers, plugins and transformation 
   for (const [definition, reason] of checks)
     expect(checkProjectionCompatibility(definition).reason).toBe(reason);
   expect(() =>
-    new ProjectionEngine({
+    new ProjectionTransform({
       datumCatalogs,
       to: '+proj=longlat +datum=NAD27'
     }).project([-100, 40])
@@ -398,7 +401,7 @@ test('Capability checks distinguish syntax, readers, plugins and transformation 
     '+proj=merc +over=true',
     '+proj=longlat +pm=bogus'
   ])
-    expect(() => new ProjectionEngine({datumCatalogs, to, projections})).toThrow();
+    expect(() => new ProjectionTransform({datumCatalogs, to, projections})).toThrow();
   const normalized = normalizeCRS(projectedJSON, {parsers});
   expect(Object.isFrozen(normalized)).toBe(true);
   expect(Object.isFrozen(normalized.parameters)).toBe(true);
@@ -408,26 +411,26 @@ test('Projection aliases are local, and identity has radians semantics', () => {
   for (const name of ['Transverse_Mercator', 'Gauss_Kruger', 'Fast_Transverse_Mercator']) {
     const to = '+proj=' + name + ' +lon_0=3 +lat_0=0 +x_0=0 +y_0=0';
     close(
-      new ProjectionEngine({datumCatalogs, to, projections}).project([4, 50]),
+      new ProjectionTransform({datumCatalogs, to, projections}).project([4, 50]),
       proj4(to).forward([4, 50]),
       1e-6
     );
   }
   close(
-    new ProjectionEngine({
+    new ProjectionTransform({
       datumCatalogs,
       to: '+proj=Geocentric +datum=WGS84',
       projections
     }).project([0, 0, 0]),
     [6378137, 0, 0]
   );
-  const identity = new ProjectionEngine({
+  const identity = new ProjectionTransform({
     datumCatalogs,
     to: '+proj=identity'
   });
   close(identity.project([90, 45, 7]), [Math.PI / 2, Math.PI / 4, 7]);
   close(identity.unproject([Math.PI / 2, Math.PI / 4, 7]), [90, 45, 7]);
-  expect(() => new ProjectionEngine({datumCatalogs, to: '+proj=Transverse_Mercator'})).toThrow(
+  expect(() => new ProjectionTransform({datumCatalogs, to: '+proj=Transverse_Mercator'})).toThrow(
     'not registered'
   );
 });
@@ -435,13 +438,13 @@ test('Projection aliases are local, and identity has radians semantics', () => {
 test('WKT1 TOWGS84, WKT2 BoundCRS, and coordinate-frame rotation', () => {
   const source =
     'GEOGCS["Local",DATUM["Local",SPHEROID["International",6378388,297],TOWGS84[12,-23,34,0.1,-0.2,0.3,2]],PRIMEM["Greenwich",0],UNIT["degree",0.017453292519943295]]';
-  const expected = new ProjectionEngine({
+  const expected = new ProjectionTransform({
     datumCatalogs,
     from: bound,
     parsers
   }).project([4, 50, 250]);
   close(
-    new ProjectionEngine({datumCatalogs, from: source, parsers}).project([4, 50, 250]),
+    new ProjectionTransform({datumCatalogs, from: source, parsers}).project([4, 50, 250]),
     expected
   );
   const boundWKT =
@@ -451,7 +454,7 @@ test('WKT1 TOWGS84, WKT2 BoundCRS, and coordinate-frame rotation', () => {
     geographicWKT +
     '],ABRIDGEDTRANSFORMATION["Local to WGS84",METHOD["Position Vector transformation (geog2D domain)"],PARAMETER["X-axis translation",12],PARAMETER["Y-axis translation",-23],PARAMETER["Z-axis translation",34],PARAMETER["X-axis rotation",0.1],PARAMETER["Y-axis rotation",-0.2],PARAMETER["Z-axis rotation",0.3],PARAMETER["Scale difference",1.000002]]]';
   close(
-    new ProjectionEngine({datumCatalogs, from: boundWKT, parsers}).project([4, 50, 250]),
+    new ProjectionTransform({datumCatalogs, from: boundWKT, parsers}).project([4, 50, 250]),
     expected
   );
   const frame = {
@@ -466,7 +469,7 @@ test('WKT1 TOWGS84, WKT2 BoundCRS, and coordinate-frame rotation', () => {
     }
   };
   close(
-    new ProjectionEngine({datumCatalogs, from: frame, parsers}).project([4, 50, 250]),
+    new ProjectionTransform({datumCatalogs, from: frame, parsers}).project([4, 50, 250]),
     expected
   );
 });
@@ -503,7 +506,7 @@ test('Geocentric PROJJSON and WKT2 use shared definitions', () => {
     'GEODCRS["WGS 84",DATUM["World Geodetic System 1984",ELLIPSOID["WGS 84",6378137,298.257223563]],CS[Cartesian,3],AXIS["X",geocentricX,ORDER[1]],AXIS["Y",geocentricY,ORDER[2]],AXIS["Z",geocentricZ,ORDER[3]],LENGTHUNIT["metre",1]]';
   for (const to of [json, wkt])
     close(
-      new ProjectionEngine({datumCatalogs, to, parsers, projections}).project([0, 0, 0]),
+      new ProjectionTransform({datumCatalogs, to, parsers, projections}).project([0, 0, 0]),
       [6378137, 0, 0]
     );
 });
@@ -523,7 +526,7 @@ test('Horizontal extraction preserves vertical values without treating them as e
       provenance: 'metadata'
     }
   });
-  const native = new ProjectionEngine({
+  const native = new ProjectionTransform({
     datumCatalogs,
     from,
     mode: 'horizontal'
@@ -535,7 +538,7 @@ test('Horizontal extraction preserves vertical values without treating them as e
   expect(high[2]).toBe(2000);
   expect(
     () =>
-      new ProjectionEngine({
+      new ProjectionTransform({
         datumCatalogs,
         from,
         to: 'EPSG:4978',
@@ -547,13 +550,13 @@ test('Horizontal extraction preserves vertical values without treating them as e
 
 test('Explicit datum-none disables shifts and custom linear units apply to all geocentric components', () => {
   close(
-    new ProjectionEngine({
+    new ProjectionTransform({
       datumCatalogs,
       from: '+proj=longlat +ellps=airy +datum=none +towgs84=1,2,3'
     }).project([4, 50, 100]),
     [4, 50, 100]
   );
-  const native = new ProjectionEngine({
+  const native = new ProjectionTransform({
     datumCatalogs,
     to: '+proj=geocent +datum=WGS84 +to_meter=2',
     projections
@@ -569,19 +572,19 @@ for (const ellipsoid of ['WGS84', 'clrk66', 'airy']) {
       const radius = normalized.ellipsoid.semiMajorAxis;
       expect(normalized.ellipsoid.semiMinorAxis).toBe(radius);
       expect(normalized.ellipsoid.eccentricitySquared).toBe(0);
-      const native = new ProjectionEngine({
+      const native = new ProjectionTransform({
         datumCatalogs,
         to: `+proj=merc ${geometry}`,
         projections
       });
-      const sphere = new ProjectionEngine({
+      const sphere = new ProjectionTransform({
         datumCatalogs,
         to: `+proj=merc +R=${radius}`,
         projections
       });
       close(native.project([20, 45]), sphere.project([20, 45]));
       close(native.unproject(sphere.project([20, 45])), [20, 45]);
-      const cartesian = new ProjectionEngine({
+      const cartesian = new ProjectionTransform({
         datumCatalogs,
         to: `+proj=geocent ${geometry}`,
         projections
@@ -607,13 +610,13 @@ test('Explicit dimensions retain precedence over named ellipsoid defaults', () =
 });
 
 test('WGS72 resolves its standard lookup name and numeric dimensions', () => {
-  const numeric = new ProjectionEngine({
+  const numeric = new ProjectionTransform({
     datumCatalogs,
     to: '+proj=geocent +a=6378135 +rf=298.26',
     projections
   });
   for (const name of ['WGS72', 'wgs72', 'WGS_72']) {
-    const native = new ProjectionEngine({
+    const native = new ProjectionTransform({
       datumCatalogs,
       to: `+proj=geocent +ellps=${name}`,
       projections
@@ -638,7 +641,7 @@ test('datum=none suppresses both endpoints of a Helmert chain, in both direction
       [definition, '+proj=longlat +datum=none'],
       ['+proj=longlat +datum=none', definition]
     ]) {
-      const projection = new ProjectionEngine({datumCatalogs, from, to});
+      const projection = new ProjectionTransform({datumCatalogs, from, to});
       const point = [3, 50, 250, 7];
       close(projection.project(point), point, 1e-12);
       close(projection.unproject(point), point, 1e-12);

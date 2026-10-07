@@ -7,11 +7,11 @@
 `Projection` is the ready-to-use math.gl projection engine with all built-in
 algorithms and WKT/PROJJSON readers. Its constructor, bound coordinate methods and
 static registrations follow the former math.gl wrapper API. For smaller bundles
-and instance-local configuration, use [`ProjectionEngine`](./projection-engine.md).
+and instance-local configuration, use [`ProjectionTransform`](projection-engine.md).
 
 Static aliases and NTv2 grids affect subsequently constructed `Projection` instances.
 Existing instances retain their prepared configuration. See the
-[migration guide](../support.md) for strict-input and numerical differences from proj4js.
+[migration guide](../developer-guide/support.md) for strict-input and numerical differences from proj4js.
 
 ## Usage
 
@@ -81,7 +81,7 @@ Registers an NTv2 datum grid that projection definitions can reference with `+na
 
 Create a new `Projection` instance that can convert between the specified coordinate systems.
 
-- `from` and `to` are `ReadonlyCRSDefinition` values. They can be named coordinate systems, PROJ strings, WKT strings, or the `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` PROJJSON object kinds. See the [engine reference](./projection-engine.md) for supported methods and parameters. Both default to `WGS84`.
+- `from` and `to` are `ReadonlyCRSDefinition` values. They can be named coordinate systems, PROJ strings, WKT strings, or the `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` PROJJSON object kinds. See the [engine reference](projection-engine.md) for supported methods and parameters. Both default to `WGS84`.
 - `enforceAxis` defaults to `false`. Set it to `true` to respect the axis order declared by the source and destination coordinate systems.
 
 ### `project(coord: number[]): number[]`
@@ -97,11 +97,11 @@ Transform a coordinate from the target to the source coordinate system.
 Write a coordinate into a preallocated number array, `Float32Array` or `Float64Array`
 and return the same output object. Exact input/output identity supports in-place use.
 The inherited `projectToSync` and `unprojectToSync` methods have the same storage contract.
-See [reusable scalar outputs](./projection-engine.md#reusable-scalar-outputs) for capacity,
+See [reusable scalar outputs](projection-transform.md#reusable-scalar-outputs) for capacity,
 overlap, rounding, error and lazy-loading behavior.
 
 ### `projectFlat(coordinates, dimension = 2)` / `unprojectFlat(coordinates, dimension = 2)`
 
 Transform interleaved `Float32Array` or `Float64Array` records in place and return
 the same view. Record widths, precision and failure behavior follow the
-[engine flat-array contract](./projection-engine.md#flat-typed-arrays-in-place).
+[engine flat-array contract](projection-transform.md#flat-typed-arrays-in-place).

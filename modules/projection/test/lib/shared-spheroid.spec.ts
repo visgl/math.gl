@@ -9,7 +9,7 @@ import {
   cartesianToSpheroid as inverseKernel
 } from '@math.gl/core/spheroid';
 import {Ellipsoid} from '@math.gl/geospatial';
-import {ProjectionEngine} from '@math.gl/projection/core';
+import {ProjectionTransform} from '@math.gl/projection/core';
 import {geocentric} from '@math.gl/projection/projections/geocent';
 
 // Adapt authored array anchors to the low-level point contract, outside benchmarks.
@@ -54,7 +54,7 @@ function close(actual: ArrayLike<number>, expected: ArrayLike<number>, tolerance
 }
 function geometry(a: number, b: number) {
   const axes = `+a=${a} +b=${b}`;
-  return new ProjectionEngine({
+  return new ProjectionTransform({
     from: '+proj=longlat ' + axes,
     to: '+proj=geocent ' + axes,
     projections: [geocentric]
