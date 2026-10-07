@@ -140,7 +140,8 @@ Background: [BGS on Laurussia and Pangaea](https://earthwise.bgs.ac.uk/index.php
 
 The timeline includes Sturtian (approximately 717–660 Ma) and Marinoan
 (approximately 650–635 Ma) chapters. Their illustrative ice material advances
-from the poles, covers the ocean and reconstructed land, and retreats at the end
+from the poles, glazes the ocean and reconstructed land while keeping continents and plate colors
+visible beneath it, and retreats at the end
 of each interval. It follows geological time when playing or seeking, works on
 the globe and projected maps, and is absent during the nonglacial interval.
 

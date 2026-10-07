@@ -90,7 +90,9 @@ export class SurfaceLayer extends SolidPolygonLayer {
         float ice=smoothstep(edge-.06,edge+.06,latitude)*smoothstep(0.,.08,tectonicSurface.iceCoverage);
         float frost=.5+.5*sin(reference.x*67.+sin(reference.y*53.)+reference.z*41.);
         vec3 iceColor=mix(vec3(.64,.82,.91),vec3(.94,.98,1.),frost*.25+.65)*diffuse;
-        color.rgb=mix(color.rgb,iceColor,ice);
+        // Keep coastlines and plate colors readable beneath a translucent ice glaze.
+        float glaze=mix(.62,.78,tectonicSurface.isWater);
+        color.rgb=mix(color.rgb,iceColor,ice*glaze);
 
       `
       }
