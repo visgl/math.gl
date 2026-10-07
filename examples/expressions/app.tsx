@@ -18,10 +18,8 @@ import {
 } from '@math.gl/expressions/dggs';
 /* eslint-enable import/no-unresolved */
 import {EXPRESSION_SAMPLES, type ExpressionSample, type LibraryId} from './samples';
+import {BLUE_MARBLE_WORLD_URL, BLUE_MARBLE_CREDIT_URL} from '../common/blue-marble.js';
 import './styles.css';
-
-const WORLD_MAP_URL =
-  'https://commons.wikimedia.org/wiki/Special:FilePath/BlankMap-Equirectangular.svg';
 
 const LIBRARIES: Record<
   LibraryId,
@@ -243,12 +241,8 @@ export default function ExpressionPlayground(): ReactElement {
 
       <footer className="playground-footer">
         <span>Run with ⌘ Enter or Ctrl Enter.</span>
-        <a
-          href="https://commons.wikimedia.org/wiki/File:BlankMap-Equirectangular.svg"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Public-domain map
+        <a href={BLUE_MARBLE_CREDIT_URL} target="_blank" rel="noreferrer">
+          NASA Blue Marble
         </a>
       </footer>
     </main>
@@ -329,7 +323,7 @@ function GeometryPreview({value}: {value: unknown}): ReactElement {
         <span>{coordinates.length ? `${coordinates.length} positions` : 'No coordinates'}</span>
       </div>
       <div className="map-stage">
-        <img src={WORLD_MAP_URL} alt="Equirectangular world map" />
+        <img src={BLUE_MARBLE_WORLD_URL} alt="Equirectangular world map" />
         <canvas ref={canvasRef} aria-label="Expression geometry preview" />
       </div>
     </div>

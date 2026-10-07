@@ -8,3 +8,6 @@ The package exports PGM grids; the example loads them only when needed, evaluate
 `parsePGM` / `getHeight`, and paints an equirectangular texture on deck.gl GlobeView.
 Hover values use the selected grid and interpolation directly. Cleanup cancels
 requests and finalizes the Deck instance when navigating away.
+
+Basemap imagery uses NASA Blue Marble via the public GIBS EPSG:4326 WMS service,
+configured in `examples/common/blue-marble.js`. No access token is required.
