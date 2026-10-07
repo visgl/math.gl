@@ -1,5 +1,9 @@
 # @math.gl/curves
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 import CurvesExample from '@site/src/components/curves';
 
 <CurvesExample inline interactive height={580} />

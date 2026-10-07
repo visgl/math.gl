@@ -1,5 +1,9 @@
 # Matrix
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.0-blue.svg?style=flat-square" alt="From v3.0" />
+</p>
+
 `Matrix` is a base class for [`Matrix3`](/docs/modules/core/api-reference/vector3) and [`Matrix4`](/docs/modules/core/api-reference/vector4), providing common methods to those classes.
 
 ## Methods

@@ -1,5 +1,9 @@
 # CRS Definitions
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From v4.2" />
+</p>
+
 `@math.gl/crs` provides lightweight, proj4-independent TypeScript definitions and syntax codecs
 for coordinate reference systems. It has no runtime dependencies and is browser-safe.
 

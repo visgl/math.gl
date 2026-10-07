@@ -1,5 +1,9 @@
 # Timezone utilities
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 ## getTimezoneOffset(timezone, date?)
 
 Returns the UTC offset in **minutes east of UTC**, including daylight saving at the supplied instant. New York returns `-300` in winter and `-240` in summer. This sign is opposite to `Date.getTimezoneOffset()`.

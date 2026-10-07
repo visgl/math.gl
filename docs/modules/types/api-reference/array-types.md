@@ -1,5 +1,9 @@
 # Array Types
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.6-blue.svg?style=flat-square" alt="From v3.6" />
+</p>
+
 math.gl provides a number of numeric array types.
 
 TypeScript types to simplify working with a mix of typed arrays and standard JavaScript arrays containing numbers.

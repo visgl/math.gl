@@ -1,5 +1,9 @@
 # AxisAlignedBoundingBox
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.0-blue.svg?style=flat-square" alt="From v3.0" />
+</p>
+
 An `AxisAlignedBoundingBox` is a closed and convex cuboid that is aligned with the orthogonal axes.
 
 # Usage

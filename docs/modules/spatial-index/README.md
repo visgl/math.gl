@@ -1,5 +1,9 @@
 # @math.gl/spatial-index (POC)
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 import Example from '@site/src/components/spatial-index';
 
 <Example inline interactive height={540} />
