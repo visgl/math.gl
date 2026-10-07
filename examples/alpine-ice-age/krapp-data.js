@@ -1,5 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import { ParquetSource } from "math.gl-parquet-loader";
 import { DATASETS } from "./sources.js";
 export const KRAPP_CHAPTERS = [
