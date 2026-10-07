@@ -1,0 +1,326 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.alpine-app {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-rows: minmax(0, 1fr) 148px;
+  background: #101d25;
+  color: #ecf3f4;
+  font:
+    14px/1.5 system-ui,
+    sans-serif;
+  overflow: hidden;
+}
+.alpine-app * {
+  box-sizing: border-box;
+}
+.alpine-map {
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 45%, #2b4249, #101d25 75%);
+}
+.alpine-map canvas {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+.alpine-title {
+  position: absolute;
+  top: 28px;
+  left: 28px;
+  pointer-events: none;
+}
+.alpine-title span,
+.alpine-eyebrow {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #a3bdc6;
+}
+.alpine-title h1 {
+  font-size: 32px;
+  letter-spacing: -1px;
+  margin: 4px 0;
+}
+.alpine-title p {
+  font-size: 18px;
+  margin: 0;
+  color: #c4dde5;
+}
+.alpine-map-note {
+  position: absolute;
+  bottom: 20px;
+  left: 28px;
+  right: 28px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #b0c1c8;
+  pointer-events: none;
+}
+.alpine-controls {
+  padding: 14px 16px;
+  background: #162730;
+  border-left: 1px solid #344850;
+  overflow: auto;
+}
+.alpine-controls h2 {
+  font-size: 18px;
+  line-height: 1.2;
+  margin: 4px 0 6px;
+}
+.alpine-controls p {
+  color: #b0c5ce;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 6px 0;
+}
+.alpine-stats {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0;
+}
+.alpine-stats strong {
+  display: block;
+  font-size: 20px;
+  letter-spacing: -1px;
+}
+.alpine-stats span {
+  font-size: 10px;
+  color: #a4bac3;
+}
+.alpine-controls label {
+  display: block;
+  font-size: 12px;
+  margin: 8px 0;
+  color: #c6d8df;
+}
+.alpine-controls label b {
+  float: right;
+}
+.alpine-controls select {
+  width: 100%;
+  margin-top: 3px;
+  padding: 6px;
+  background: #1d3542;
+  color: #eaf3f6;
+  border: 1px solid #4a6370;
+  border-radius: 4px;
+}
+.alpine-controls input[type="range"] {
+  width: 100%;
+  margin-top: 5px;
+  accent-color: #b3dce7;
+}
+.alpine-controls .alpine-check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 5px 0;
+}
+.alpine-check input {
+  accent-color: #b3dce7;
+}
+.alpine-legend {
+  font-size: 10px;
+  margin: 10px 0;
+  color: #b9cdd6;
+}
+.alpine-legend i {
+  display: inline-block;
+  width: 50px;
+  height: 8px;
+  margin-right: 8px;
+  background: linear-gradient(90deg, #739eae, #eef6fb);
+}
+.alpine-controls details {
+  border-top: 1px solid #37505c;
+  padding-top: 8px;
+  font-size: 11px;
+}
+.alpine-controls summary {
+  cursor: pointer;
+  color: #dbe8ed;
+}
+.alpine-controls a {
+  color: #a9d6e7;
+}
+.alpine-timeline {
+  grid-column: 1/-1;
+  padding: 12px 22px;
+  background: #14232c;
+  border-top: 1px solid #344850;
+}
+.alpine-timeline-top {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  font-size: 11px;
+  color: #a9c0ca;
+}
+.alpine-timeline-top span:nth-child(3) {
+  flex: 1;
+  text-align: center;
+}
+.alpine-app button {
+  background: #23404c;
+  color: #deedf2;
+  border: 1px solid #3c5a65;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.alpine-app button:hover {
+  background: #325563;
+}
+.alpine-app button:disabled {
+  opacity: 0.4;
+  cursor: wait;
+}
+.alpine-timeline-top button {
+  padding: 5px 12px;
+  font-weight: 600;
+}
+.alpine-chart {
+  height: 55px;
+  position: relative;
+  margin-top: 5px;
+}
+.alpine-chart svg {
+  width: 100%;
+  height: 45px;
+  opacity: 0.85;
+}
+.alpine-chart input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0.08;
+  cursor: ew-resize;
+}
+.alpine-chart:focus-within input,
+.alpine-chart:hover input {
+  opacity: 0.6;
+  accent-color: #bfe5ef;
+}
+.alpine-chapters {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.alpine-chapters button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  font-size: 11px;
+}
+.alpine-chapters strong {
+  display: block;
+  font-weight: 500;
+}
+.alpine-chapters span {
+  font-size: 10px;
+  color: #8caab8;
+}
+.alpine-loading {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  background: #11232be8;
+  padding: 20px;
+}
+@media (max-width: 780px) {
+  .alpine-app {
+    grid-template-columns: minmax(0, 1fr) 220px;
+  }
+  .alpine-controls {
+    padding: 12px;
+  }
+  .alpine-title {
+    top: 18px;
+    left: 18px;
+  }
+  .alpine-title h1 {
+    font-size: 26px;
+  }
+  .alpine-title p {
+    font-size: 15px;
+  }
+  .alpine-stats {
+    gap: 10px;
+  }
+  .alpine-stats strong {
+    font-size: 18px;
+  }
+  .alpine-map-note span {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  .alpine-app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 350px 250px 148px;
+    overflow: auto;
+  }
+  .alpine-controls {
+    border-left: 0;
+    display: block;
+  }
+  .alpine-timeline {
+    grid-row: 3;
+  }
+  .alpine-chapters button {
+    font-size: 9px;
+  }
+  .alpine-controls h2 {
+    font-size: 18px;
+  }
+}
+
+.alpine-phase {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 92%;
+  text-align: center;
+  pointer-events: none;
+  color: #f3f7fa;
+  text-shadow:
+    0 2px 18px #091c2d,
+    0 1px 4px #091c2d;
+}
+.alpine-phase strong {
+  display: block;
+  font-size: clamp(26px, 4.5vw, 56px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+.alpine-phase span {
+  display: block;
+  margin-top: 10px;
+  font-size: clamp(11px, 1.4vw, 16px);
+  letter-spacing: 1px;
+}
+.alpine-stats strong small {
+  font-size: 11px;
+  font-weight: 400;
+}
+.alpine-climate {
+  margin-top: 4px;
+}
+
+.alpine-phase { transition: opacity 800ms ease; }
+.alpine-phase-hidden { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .alpine-phase { transition: none; }
+}

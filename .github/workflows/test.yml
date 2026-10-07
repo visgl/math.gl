@@ -84,6 +84,9 @@ jobs:
       - name: Test tectonic time machine streaming
         run: yarn workspace math.gl-tectonic-time-machine test
 
+      - name: Test Alpine Ice Age dataset and interpolation
+        run: yarn workspace math.gl-alpine-ice-age test
+
       - name: Check curves package exports, public types and tree shaking
         run: yarn check:curves-package
 
@@ -225,7 +228,9 @@ jobs:
   projection-browsers:
     name: Projection qualification (${{ matrix.browser }})
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    # Browser downloads can consume 12+ minutes; preserve time for qualification.
+    # Individual qualification steps retain their stricter execution limits.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:

@@ -11,6 +11,8 @@ import {REGIONS, timeLabel} from './math.js';
 import {TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
+import AttributionWidget from '../shared/attribution-widget.jsx';
+import {tectonicSources} from './attribution.js';
 export default function TectonicTimeMachine() {
   const canvas = useRef(null),
     stage = useRef(null),
@@ -321,6 +323,7 @@ export default function TectonicTimeMachine() {
           </div>
         )}
         <p className="tectonic-appearance-status">{appearanceStatus}</p>
+        <AttributionWidget sources={tectonicSources(source)} />
         <details className="tectonic-info">
           <summary>About this reconstruction</summary>
           <p className="tectonic-note">
@@ -344,58 +347,11 @@ export default function TectonicTimeMachine() {
             modern NASA imagery carried with each rigid block. Ancient mountains, vegetation and ice
             are not reconstructed. Ocean ripples and lighting are visual effects.
           </p>
-          <p className="tectonic-credits">
-            Terrain:{' '}
-            <a
-              href="https://science.nasa.gov/earth/earth-observatory/the-blue-marble-true-color-global-imagery-at-1km-resolution/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              NASA Blue Marble
-            </a>{' '}
-            / Reto Stöckli, Robert Simmon; topography: USGS.
-          </p>
           <p className="tectonic-status" role="status">
             {status}
             {counts && ready
               ? ` · ${counts.active} visible templates${counts.unresolved ? ` · ${counts.unresolved} unresolved templates omitted` : ''}`
               : ''}
-          </p>
-          <p className="tectonic-credits">
-            History:{' '}
-            <a href={source.reference} target="_blank" rel="noreferrer">
-              {source.citation}
-            </a>
-            {' · '}
-            <a href={source.dataset} target="_blank" rel="noreferrer">
-              Dataset / {source.license}
-            </a>
-            {sourceId === 'CAO2024' && (
-              <>
-                {' '}
-                · Cao, Collins, Pisarevsky, Flament, Li, Hasterok and Müller. CC-BY-4.0 permits
-                reuse with attribution. Continental geometry is simplified for display.
-              </>
-            )}
-            {sourceId === 'MULLER2022' && (
-              <>
-                {' '}
-                · Coastline templates:{' '}
-                <a
-                  href="https://doi.org/10.1016/j.earscirev.2020.103477"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Merdith et al. (2021)
-                </a>
-                .
-              </>
-            )}{' '}
-            Served by{' '}
-            <a href="https://github.com/visgl/deck.gl-data/tree/master/earth/tectonic-movements/v1" target="_blank" rel="noreferrer">
-              deck.gl-data
-            </a>
-            . Versioned Parquet snapshots load at runtime.
           </p>
         </details>
       </aside>

@@ -1,0 +1,56 @@
+# Glaciation Explorer
+
+import Example from "@site/src/components/alpine-ice-age";
+
+<Example height="calc(100vh - 140px)" />
+
+Explore global grounded ice sheets on a **globe or nine map projections**, or
+switch to the detailed **Alpine glaciers** terrain view. Both modes animate
+published reconstruction snapshots and support scrubbing, playback speed and
+terrain colors beneath the ice. Playback repeats by default; disable **Repeat animation**
+to stop at the present. **Ice age names** adds a centered phase title and regional subtitle for Wisconsinan,
+Weichselian and Würm, changing to Holocene at approximately 11.7 ka. These are
+regional names and broad chronological context, not synchronous glacier boundaries.
+The large centered phase title shows the last glacial period, maximum and retreat
+within those same glaciations.
+
+The global view covers **80,000 years** with [PaleoMIST 1.0](https://doi.pangaea.de/10.1594/PANGAEA.905800),
+from [Gowan and colleagues (2021)](https://doi.org/10.1038/s41467-021-21469-w).
+It retains 33 snapshots at 2,500-year intervals from the corrected April 2021
+1° grid, using the minimal North American MIS 3 scenario. Grounded ice thickness
+and changing base topography drive the ice colors and shorelines. Sea ice and
+small mountain glaciers are not included. Choose Globe, Equal Earth, Mollweide,
+Robinson, Sinusoidal, Miller cylindrical, Equirectangular, Mercator, Albers North America or Albers Europe; math.gl
+performs the map transformations. Projection switches animate the ice surface,
+grid and labels together, including interrupted transitions. Reduced-motion
+preferences switch immediately. Regional Albers views clip triangles to their geographic bounds and switch immediately, avoiding a morph between different mesh footprints. Global statistics use Mkm² and Mkm³, with one
+decimal. Mercator clips at ±85°.
+
+The Alpine view covers the **Würm glacial cycle**, from **119,000 years ago**,
+using [Seguinot and colleagues (2018)](https://doi.org/10.5194/tc-12-3265-2018) and
+[version 3 of the PISM simulation archive](https://doi.org/10.5281/zenodo.7802275).
+It samples the original 2 km grid at 4 km for display and retains all 120 snapshots
+at 1,000-year intervals. Rotate the relief, adjust vertical exaggeration or use
+the overhead view. Present model bedrock is held fixed; modern place labels
+provide geographic orientation.
+
+Both source datasets and their derived browser assets are **CC-BY-4.0**. Thickness
+and statistics interpolate between published snapshots, so intermediate ice
+margins are visualization rather than additional model output. Terrain-reveal
+colors are illustrative. Ice area counts thickness above 10 m; volume sums
+thickness times grid-cell area. Global totals use latitude-weighted spherical
+areas; Alpine totals use the original model grid's nominal 4 km² cells.
+
+**Günz, Mindel and Riss precede both datasets and are not represented.**
+The Alpine and global simulations have distinct sources and time ranges.
+
+The [preparation scripts and provenance](https://github.com/visgl/math.gl/tree/master/examples/alpine-ice-age)
+verify source checksums and generate the upstream, compressed display assets.
+
+Global map projections cycle automatically every eight seconds, with smooth transitions.
+Disable **Cycle projections** to keep the selected view. The **Ice age names** toggle
+controls the centered phase title and regional-name subtitle.
+
+Climate readouts use the independent [Köhler et al. (2015) dataset](https://doi.pangaea.de/10.1594/PANGAEA.855449), licensed **CC-BY-3.0**. Temperature is model variant 1 rebased to its 0 ka value. Ice-albedo forcing is land-ice radiative forcing in W/m², not total planetary reflectivity. Values interpolate 2,000-year samples; albedo is unavailable below 2 ka. Regional Albers views focus the map while statistics retain global totals.
+
+Display grids and climate records are loaded from a pinned merged deck.gl-data commit, with full source datasets and Parquet counterparts available alongside them.

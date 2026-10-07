@@ -72,7 +72,7 @@ website's typography or navigation.
 The geoid overview and examples sidebar render `src/components/geoid-globe` using
 `src/components/live-globe`, the fullscreen frame shared with the timezone globe.
 The renderer and scoped styles are shared with `examples/geoid-globe`.
-`modules/geoid/data` supplies the optional EGM96 PGM assets as static files;
+The geoid example fetches version-pinned EGM96 assets from deck.gl-data;
 `useBaseUrl` preserves deployment prefixes. The 1° preview loads first, and the
 original 15′ grid loads when selected. Hover heights use `getHeight` with the
 selected interpolation; the colored texture uses the same fixed signed scale.

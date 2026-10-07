@@ -1,0 +1,53 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.attribution-widget {
+  margin: 10px 0;
+  padding: 8px 0;
+  border-top: 1px solid #526873;
+  font:
+    11px/1.5 system-ui,
+    sans-serif;
+}
+.attribution-widget summary {
+  cursor: pointer;
+}
+.attribution-widget summary span {
+  font-weight: 600;
+}
+.attribution-widget summary small {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  opacity: 0.85;
+}
+.attribution-widget ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+}
+.attribution-widget li + li {
+  margin-top: 12px;
+}
+.attribution-widget strong {
+  display: block;
+}
+.attribution-widget p {
+  margin: 4px 0;
+  font-size: inherit;
+}
+.attribution-widget-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 10px;
+}
+.attribution-widget a {
+  color: #b5e3f1;
+  text-decoration: underline;
+}
+.attribution-widget a:focus-visible,
+.attribution-widget summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}

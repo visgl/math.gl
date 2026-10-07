@@ -1,0 +1,259 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { DATASETS } from "./sources.js";
+import { loadClimate, climateAt } from "./climate.js";
+async function download(url) {
+  const response = await fetch(url);
+  assert(response.ok, `${url}: HTTP ${response.status}`);
+  return Buffer.from(await response.arrayBuffer());
+}
+const [manifestBytes, packed, globalManifestBytes, globalPacked, climate] =
+  await Promise.all([
+    download(DATASETS.alpineManifest),
+    download(DATASETS.alpine),
+    download(DATASETS.globalManifest),
+    download(DATASETS.global),
+    loadClimate(),
+  ]);
+import { gunzipSync } from "node:zlib";
+import { createHash } from "node:crypto";
+import {
+  interpolateField,
+  sampleAt,
+  loadGlobalSimulation,
+  clampAge,
+} from "./data.js";
+const manifest = JSON.parse(manifestBytes);
+const raw = gunzipSync(packed);
+test("the upstream simulation is complete, ordered and pinned to its published source", () => {
+  assert.equal(manifest.source.md5, "0b59b7c26bb8d1b1797c9414638a2f32");
+  assert.equal(
+    createHash("sha256").update(packed).digest("hex"),
+    manifest.assetSha256,
+  );
+  assert.equal(
+    raw.byteLength,
+    manifest.width * manifest.height * 2 * (manifest.ages.length + 1),
+  );
+  assert.equal(manifest.ages.length, 120);
+  assert.equal(manifest.ages[0], 119);
+  assert.equal(manifest.ages.at(-1), 0);
+  manifest.ages
+    .slice(1)
+    .forEach((age, i) => assert.equal(age, manifest.ages[i] - 1));
+  assert.equal(manifest.source.license, "CC-BY-4.0");
+  assert(manifest.areaKm2[95] > manifest.areaKm2.at(-1));
+  assert(manifest.volumeKm3[95] > manifest.volumeKm3.at(-1));
+});
+test("interpolation preserves snapshots, handles endpoints and never extrapolates", () => {
+  const ages = [2, 1, 0],
+    data = new Uint16Array([0, 10, 20, 30, 0, 50]);
+  assert.deepEqual(Array.from(interpolateField(data, 2, ages, 2)), [0, 10]);
+  assert.deepEqual(Array.from(interpolateField(data, 2, ages, 1.5)), [10, 20]);
+  assert.deepEqual(Array.from(interpolateField(data, 2, ages, 1)), [20, 30]);
+  assert.deepEqual(Array.from(interpolateField(data, 2, ages, 0)), [0, 50]);
+  assert.deepEqual(Array.from(interpolateField(data, 2, ages, -10)), [0, 50]);
+  assert.deepEqual(sampleAt(ages, 10), { index: 0, fraction: 0 });
+});
+const globalManifest = JSON.parse(globalManifestBytes);
+const globalRaw = gunzipSync(globalPacked);
+test("global reconstruction preserves its full time range, source and longitude seam", () => {
+  const m = globalManifest,
+    count = m.width * m.height,
+    length = count * m.ages.length;
+  assert.equal(
+    m.source.sha256,
+    "ab6f74541339f5be44dd630dfb9c41189a6c1dfaf58fce6fc3c356430b539037",
+  );
+  assert.equal(m.source.license, "CC-BY-4.0");
+  assert.equal(
+    createHash("sha256").update(globalPacked).digest("hex"),
+    m.assetSha256,
+  );
+  assert.equal(globalRaw.byteLength, length * 4);
+  assert.equal(m.width, 360);
+  assert.equal(m.height, 181);
+  assert.deepEqual(
+    m.ages,
+    Array.from({ length: 33 }, (_, i) => 80 - i * 2.5),
+  );
+  const ice = new Uint16Array(
+    globalRaw.buffer,
+    globalRaw.byteOffset + length * 2,
+    length,
+  );
+  const at = (age, lon, lat) =>
+    ice[m.ages.indexOf(age) * count + (lat + 90) * 360 + (lon + 180)];
+  assert(
+    at(20, -90, 60) > 1000,
+    "Laurentide ice sheet must be present at the maximum",
+  );
+  assert.equal(at(0, -90, 60), 0, "Laurentide interior must deglaciate");
+  assert(at(0, -45, 75) > 1000, "Greenland must retain present grounded ice");
+  assert(at(0, 0, -85) > 1000, "Antarctica must retain present grounded ice");
+  assert.equal(
+    at(20, 20, 0),
+    0,
+    "The equatorial continent must not gain invented ice",
+  );
+  assert(m.areaKm2[m.ages.indexOf(20)] > m.areaKm2.at(-1) * 2);
+  assert(m.volumeKm3[m.ages.indexOf(20)] > m.volumeKm3.at(-1) * 2);
+});
+
+import { projectionWeights } from "./projection-transition.js";
+test("projection transitions preserve endpoints and continuous interrupted shapes", () => {
+  assert.deepEqual(projectionWeights({ globe: 1 }, "eqearth", 0), { globe: 1 });
+  assert.deepEqual(projectionWeights({ globe: 1 }, "eqearth", 1), {
+    eqearth: 1,
+  });
+  const midway = projectionWeights({ globe: 1 }, "eqearth", 0.5);
+  assert.deepEqual(midway, { globe: 0.5, eqearth: 0.5 });
+  assert.deepEqual(projectionWeights(midway, "merc", 0), midway);
+  for (let i = 0; i <= 20; i++) {
+    const values = Object.values(projectionWeights(midway, "merc", i / 20));
+    assert(values.every((value) => value >= 0 && value <= 1));
+    assert(Math.abs(values.reduce((a, b) => a + b, 0) - 1) < 1e-12);
+  }
+  assert.deepEqual(projectionWeights(midway, "merc", 1), { merc: 1 });
+});
+
+import { glacialPhase } from "./glacial-phase.js";
+test("timeline chapters change phase labels while keeping regional glaciation names meaningful", () => {
+  assert.equal(glacialPhase(119), "Last interglacial");
+  assert.equal(glacialPhase(80), "Last glacial period");
+  assert.equal(glacialPhase(60), "Last glacial period");
+  assert.equal(glacialPhase(24), "Last glacial maximum");
+  assert.equal(glacialPhase(20), "Last glacial maximum");
+  assert.equal(glacialPhase(14), "Glacial retreat");
+  assert.equal(glacialPhase(0), "Holocene");
+});
+
+test("climate context preserves source samples and never extrapolates albedo", async () => {
+  const { climateAt } = await import("./climate.js");
+  assert.equal(climateAt(0, climate).temperature, 0);
+  assert.equal(climateAt(0, climate).albedo, null);
+  assert.equal(climateAt(1, climate).albedo, null);
+  assert.equal(climateAt(20, climate).albedo, -3.9495);
+  assert.ok(climateAt(20, climate).temperature < -3);
+  assert.equal(climateAt(21, climate).albedo, (-3.9495 - 3.8135) / 2);
+});
+
+test("regional views retain native coordinates and clip cells instead of collapsing geography", async () => {
+  const { regionalCoordinate, inRegion } = await import("./regional-views.js");
+  assert.deepEqual(regionalCoordinate("albersEurope", -120, -20), [-120, -20]);
+  assert.equal(inRegion("albersEurope", -120, -20), false);
+  assert.equal(inRegion("albersEurope", 10, 60), true);
+  assert.equal(inRegion("albersNorthAmerica", -100, 60), true);
+  assert.equal(inRegion("albersNorthAmerica", 10, 60), false);
+});
+
+test("global ice loads independently when optional climate data fails", async (t) => {
+  t.mock.method(globalThis, "fetch", async (url) => {
+    if (url === DATASETS.climate) throw new Error("Climate unavailable");
+    if (url === DATASETS.globalManifest)
+      return new Response(globalManifestBytes);
+    if (url === DATASETS.global) return new Response(globalPacked);
+    throw new Error(`Unexpected asset: ${url}`);
+  });
+  await assert.rejects(loadClimate(), /Climate unavailable/);
+  const model = await loadGlobalSimulation();
+  assert.equal(model.count, globalManifest.width * globalManifest.height);
+  assert.equal(model.ice.length, model.count * globalManifest.ages.length);
+  assert.equal(model.bed.length, model.ice.length);
+});
+
+import {
+  loadQuaternarySimulation,
+  nearestOSFChapter,
+  rasterizeFootprints,
+} from "./osf-data.js";
+test("OSF failure leaves the current reconstruction available", async (t) => {
+  t.mock.method(globalThis, "fetch", async (url) => {
+    if (url === DATASETS.globalManifest)
+      return new Response(globalManifestBytes);
+    if (url === DATASETS.global) return new Response(globalPacked);
+    throw new TypeError("OSF network or CORS failure");
+  });
+  const current = await loadGlobalSimulation();
+  assert.equal(await loadQuaternarySimulation(current), null);
+  assert.equal(current.ice.length, current.count * globalManifest.ages.length);
+  assert.equal(current.manifest.ages[0], 80);
+});
+test("older extents select published stages without extrapolating a continuous reconstruction", () => {
+  assert.equal(nearestOSFChapter(650).name, "Günz · MIS 16");
+  assert.equal(nearestOSFChapter(450).name, "Mindel · MIS 12");
+  assert.equal(nearestOSFChapter(160).name, "Riss · MIS 6");
+  assert.equal(nearestOSFChapter(300).age, 161);
+});
+test("footprint rasterization preserves holes and excludes the Southern Hemisphere", () => {
+  const fills = [],
+    paths = [];
+  const pixels = new Uint8ClampedArray(2048 * 2048 * 4);
+  pixels[(1024 * 2048 + 1024) * 4 + 3] = 255;
+  const context = {
+    beginPath() {},
+    moveTo(x, y) {
+      paths.push([x, y]);
+    },
+    lineTo() {},
+    closePath() {},
+    fill(rule) {
+      fills.push(rule);
+    },
+    getImageData() {
+      return { data: pixels };
+    },
+  };
+  const canvas = {
+    getContext() {
+      return context;
+    },
+  };
+  const geometry = {
+    type: "Polygon",
+    positions: {
+      size: 2,
+      value: [0, 0, 100, 0, 100, 100, 0, 0, 10, 10, 20, 10, 10, 20, 10, 10],
+    },
+    primitivePolygonIndices: { value: [0, 4, 8] },
+  };
+  const points = new Float64Array(360 * 181 * 2);
+  points.fill(9100000);
+  points.set([0, 0], 0);
+  points.set([0, 0], 90 * 360 * 2);
+  const coverage = rasterizeFootprints([geometry], points, canvas);
+  assert.deepEqual(fills, ["evenodd"]);
+  assert.equal(paths.length, 2);
+  paths.length = 0;
+  geometry.primitivePolygonIndices.value = [0, 4];
+  rasterizeFootprints([geometry], points, canvas);
+  assert.equal(
+    paths.length,
+    2,
+    "ring starts without a terminal sentinel retain the final ring",
+  );
+  paths.length = 0;
+  geometry.primitivePolygonIndices.value = [0];
+  rasterizeFootprints([geometry], points, canvas);
+  assert.equal(
+    paths.length,
+    1,
+    "a single start index retains a single-ring outline",
+  );
+  assert.equal(coverage[0], 0);
+  assert.equal(coverage[90 * 360], 1);
+  assert.equal(coverage[90 * 360 + 1], 0);
+  assert.equal(
+    coverage.reduce((a, b) => a + b),
+    1,
+  );
+});
+
+test("returning from an older reconstruction clamps age before climate readouts", () => {
+  const age = clampAge(globalManifest.ages, 650);
+  assert.equal(age, 80);
+  assert(Number.isFinite(climateAt(age, climate).temperature));
+});

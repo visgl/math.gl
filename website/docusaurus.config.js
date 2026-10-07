@@ -119,11 +119,7 @@ config.plugins.push(() => ({
 config.baseUrl = websiteBaseUrl;
 config.favicon = 'images/visgl-favicon.png';
 // Serve the optional geometry independently of the JavaScript bundle.
-config.staticDirectories = [
-  ...config.staticDirectories,
-  '../modules/timezone/data',
-  '../modules/geoid/data'
-];
+config.staticDirectories = [...config.staticDirectories, '../modules/timezone/data'];
 config.plugins.push(require('./projection-redirects.cjs'));
 config.plugins.push(require('./docs-redirects.cjs'));
 
