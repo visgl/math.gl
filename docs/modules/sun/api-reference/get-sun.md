@@ -6,4 +6,4 @@
   <img src="https://img.shields.io/badge/From-v3.1-blue.svg?style=flat-square" alt="From v3.1" />
 </p>
 
-See the [getSun API reference](./sun.md#getsun).
+The historical `getSun` API is now exported as `getSunPosition`. See the [getSunPosition API reference](./sun.md#getsunposition).

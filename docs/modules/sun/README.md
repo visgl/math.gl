@@ -19,6 +19,28 @@ sidebar_label: Overview
 npm install @math.gl/sun
 ```
 
+## Entry points
+
+| Import | Contents | Additional dependency |
+| --- | --- | --- |
+| `@math.gl/sun` | Sun, Moon, lighting, observer, atmosphere and globe helpers. | None |
+| `@math.gl/sun/planets` | Planet/Galilean-moon positions and visibility searches. | `astronomy-engine` |
+| `@math.gl/sun/astronomy` | Consistent sky snapshots and reusable cached contexts. | `astronomy-engine` |
+| `@math.gl/sun/stars` | 7,000-star catalog, motion, layer data and Milky Way background. | None |
+
+For the optional ephemerides, run `npm install astronomy-engine`. Import these
+entry points explicitly; their APIs are not re-exported from the main module.
+All new Moon, planet, star and sky APIs are available from v5.0.
+
+## Coordinates and units
+
+Observer latitude/longitude are degrees; solar/lunar altitude and azimuth are
+radians. Local vectors use east/north/up axes. Solar and lunar light directions
+point inward; sky-body directions point outward. Light colors are linear RGB.
+`getSunLight` and `getMoonLight` return relative intensity, while
+`getSkyLighting` returns illuminance in lux. Globe positions are
+`[longitudeDegrees, latitudeDegrees, altitudeMeters]`.
+
 ## Usage
 
 ```js
@@ -42,11 +64,13 @@ The module also provides [moon position, direction, phase and direct moonlight](
 
 The optional [planet sky API](./api-reference/get-planet-sky-info.md) returns positions, disk sizes, phases and planet magnitudes, including the four Galilean moons. It also estimates twilight visibility and searches rise/set and visible time windows. Install `astronomy-engine` and import from `@math.gl/sun/planets`.
 
-## Attribution
+## Sky
 
 See [sky snapshots, daylight Moon visibility and globe rendering](./api-reference/sky.md)
 for a shared observer/atmosphere, lux-based lighting, planet and lunar orientations,
 globe coordinates, reusable contexts and visibility searches.
+
+## Attribution
 
 Sunlight lookup data is derived from the [Hošek–Wilkie 1.4a reference implementation](https://cgg.mff.cuni.cz/projects/SkylightModelling/) under BSD-3-Clause. The full notice is shipped in `LICENSE-HOSEK-WILKIE`; see the [API documentation](./api-reference/sun.md#getsunlight) for model provenance and limits.
 
