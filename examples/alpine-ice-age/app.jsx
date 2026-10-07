@@ -5,6 +5,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { loadSimulation, sampleAt } from './data.js';
 import { createScene } from './scene.js';
 import './style.css';
+import AttributionWidget from '../shared/attribution-widget.jsx';
+import {ALPINE_SOURCES} from './attribution.js';
 import { glacialPhase } from './glacial-phase.js';
 import GlobalIceAge from './global-app.jsx';
 const CHAPTERS = [
@@ -205,8 +207,9 @@ function AlpineView({ onMode }) {
           <i />
           Thin ice → thick ice
         </div>
+        <AttributionWidget sources={ALPINE_SOURCES} />
         <details>
-          <summary>Source and scientific limits</summary>
+          <summary>Scientific limits</summary>
           <p>
             Seguinot et al. (2018), PISM simulation with EPICA climate forcing and reduced
             palaeo-precipitation. 2 km source grid, 4 km display grid; one snapshot per 1,000 years.
@@ -217,17 +220,6 @@ function AlpineView({ onMode }) {
             ice threshold; statistics interpolate model-grid totals.
           </p>
           <p>Günz, Mindel and Riss precede this dataset and are not represented.</p>
-          <a
-            href="https://tc.copernicus.org/articles/12/3265/2018/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Read the study ↗
-          </a>
-          <br />
-          <a href="https://zenodo.org/records/7802275" target="_blank" rel="noreferrer">
-            Dataset · CC-BY-4.0 ↗
-          </a>
         </details>
       </aside>
       <footer className="alpine-timeline">

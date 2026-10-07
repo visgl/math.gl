@@ -5,6 +5,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { loadGlobalSimulation, sampleAt } from "./data.js";
 import { createGlobalScene, GLOBAL_VIEWS } from "./global-scene.js";
 import "./style.css";
+import AttributionWidget from "../shared/attribution-widget.jsx";
+import { GLOBAL_SOURCES } from "./attribution.js";
 import { climateAt, loadClimate } from "./climate.js";
 import { glacialPhase } from "./glacial-phase.js";
 const CHAPTERS = [
@@ -284,8 +286,9 @@ export default function GlobalIceAge({ onMode }) {
           <i />
           Thin ice → thick ice
         </div>
+        <AttributionWidget sources={GLOBAL_SOURCES} />
         <details>
-          <summary>Source and scientific limits</summary>
+          <summary>Scientific limits</summary>
           <p>
             Gowan et al. (2021), PaleoMIST 1.0. Corrected April 2021 grids,
             minimal North American MIS 3 scenario. 1° grid; 2,500-year
@@ -308,29 +311,6 @@ export default function GlobalIceAge({ onMode }) {
             interpolated 2,000-year samples. Albedo is unavailable below 2 ka;
             no extrapolation.
           </p>
-          <a
-            href="https://doi.pangaea.de/10.1594/PANGAEA.855449"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Climate dataset · CC-BY-3.0 ↗
-          </a>
-          <br />
-          <a
-            href="https://doi.org/10.1038/s41467-021-21469-w"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Read the study ↗
-          </a>
-          <br />
-          <a
-            href="https://doi.pangaea.de/10.1594/PANGAEA.905800"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Dataset · CC-BY-4.0 ↗
-          </a>
         </details>
       </aside>
       <footer className="alpine-timeline">

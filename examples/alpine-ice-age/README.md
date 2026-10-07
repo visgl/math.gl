@@ -158,3 +158,11 @@ and ordinary JSON uses raw URLs. No scientific data is bundled into this example
 Preparation scripts remain available for reproducing display assets locally.
 `yarn workspace math.gl-alpine-ice-age test` verifies the pinned public downloads,
 checksums, source provenance, dimensions and scientific reference locations.
+
+### Attribution widget
+
+The shared `examples/shared/attribution-widget.jsx` component keeps source credits
+visible in both views. Expand **Data attribution** for the original dataset, paper,
+license, pinned hosted copy and display modifications. Scientific limits are
+listed separately. The tectonic example uses the same component and updates the
+credits when the selected reconstruction changes.
