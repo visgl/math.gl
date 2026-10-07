@@ -6,9 +6,12 @@
 
 class `Geoid` - "Gravity Height Model"
 
-The `Geoid` class calculates difference between mean see level height and WGS84 ellipsoid height. It needs to be initialized with an earth gravity model file.
+The `Geoid` class calculates the difference between mean sea level height and WGS84 ellipsoid height.
 
-Input data have to be loaded from "Earth Gravity Model" \*.pgm file with "PGMLoader". A particular model file can be loaded on https://geographiclib.sourceforge.io/html/geoid.html
+Create an instance with [parsePGM](./parse-pgm.md) for GeographicLib PGM files,
+or [createGeoidFromGrid](./create-geoid-from-grid.md) for decoded `Uint16Array`
+grid samples. Model grids are available from
+[GeographicLib](https://geographiclib.sourceforge.io/html/geoid.html).
 
 ## Methods
 

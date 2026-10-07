@@ -20,6 +20,8 @@
  * * https://geographiclib.sourceforge.io/
  **********************************************************************/
 
+import {isUint16Array} from '@math.gl/types';
+
 const c0_ = 240;
 
 // biome-ignore format: preserve the coefficient table layout
@@ -91,13 +93,13 @@ export type GeoidProps = {
   _rmserror: number;
   _description: string;
   _datetime: string;
-  data: Uint8Array;
+  data: Uint8Array | Uint16Array;
 };
 
 /**
  * class Geoid - "Gravity Height Model"
  * Calculates difference between mean see level height and WGS84 ellipsoid height
- * Input data have to be loaded from "Earth Gravity Model" *.pgm file with "PGMLoader"
+ * Accepts PGM bytes through parsePGM or decoded samples through createGeoidFromGrid.
  * A particular model file can be loaded on https://geographiclib.sourceforge.io/html/geoid.html
  *
  * The implementation is ported from GeographicLib-1.50.1
@@ -110,19 +112,21 @@ export class Geoid {
   private _t: number[] = [];
   private _ix: number;
   private _iy: number;
+  private _hasUint16Data: boolean;
 
   options: GeoidProps;
 
   /**
    * @constructs
    * Create a Geoid instance.
-   * @param options - object which includes parameters parsed from *.pgm header
-   * @param options.data - binary buffer of *.pgm file
+   * @param options - grid parameters supplied by parsePGM or createGeoidFromGrid
+   * @param options.data - PGM bytes or decoded unsigned 16-bit samples
    */
   constructor(options: GeoidProps) {
     this.options = options;
     this._ix = this.options._width;
     this._iy = this.options._height;
+    this._hasUint16Data = isUint16Array(options.data);
   }
 
   /**
@@ -251,7 +255,11 @@ export class Geoid {
       iy = iy < 0 ? -iy : 2 * (this.options._height - 1) - iy;
       ix += ((ix < this.options._width / 2 ? 1 : -1) * this.options._width) / 2;
     }
-    const bufferPosition = this.options._datastart + PIXEL_SIZE * (iy * this.options._swidth + ix);
+    const sampleIndex = iy * this.options._swidth + ix;
+    if (this._hasUint16Data) {
+      return this.options.data[this.options._datastart + sampleIndex];
+    }
+    const bufferPosition = this.options._datastart + PIXEL_SIZE * sampleIndex;
     // initial values to suppress warnings in case get fails
     const a = this.options.data[bufferPosition];
     const b = this.options.data[bufferPosition + 1];

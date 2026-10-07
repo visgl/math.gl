@@ -52,6 +52,12 @@ In Node.js, resolve the asset with
 `readFile` from `node:fs/promises`. Other GeographicLib PGM grids can also be passed
 to `parsePGM`.
 
+## Decoded grid input
+
+Use [createGeoidFromGrid](./api-reference/create-geoid-from-grid.md) with a complete
+`Uint16Array` of raw samples, grid dimensions, offset and scale. Parquet decoding
+stays in the application; the geoid module requires no Arrow dependency.
+
 ## Attribution
 
 NGA EGM96 model data are public domain. The grids come from
