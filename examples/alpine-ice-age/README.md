@@ -115,3 +115,16 @@ measured ice-margin boundaries. Labels change to Holocene at approximately
 at the same date. See the [USGS Wisconsinan chronology](https://www.usgs.gov/publications/chronology-late-wisconsinan-glaciation-middle-north-america-0),
 [BGS regional terminology](https://webapps.bgs.ac.uk/memoirs/docs/B07313.html),
 the Alpine study above, and the [ICS Holocene definition](https://stratigraphy.org/gssps/holocene).
+
+Projection changes smoothly morph the surface, graticules and label positions over
+1.2 seconds. Retargeting an unfinished transition starts from the current blend.
+Reduced-motion preferences switch immediately. Global readouts use millions of
+km² for area and millions of km³ for volume, each with one decimal; Alpine
+readouts retain km² and km³ to preserve detail at that smaller scale.
+
+The heading and geographic name overlays include changing descriptive phases:
+early cycle, ice-sheet fluctuations, last glacial maximum (approximately
+26.5–19 ka), retreat, and Holocene. These broad chapters make progression visible
+within the same regional glaciation names; they are not separately reconstructed
+ice ages or exact dates of local advances and retreats.
+The approximate maximum chapter follows [Clark et al. (2009), The Last Glacial Maximum](https://pubs.usgs.gov/publication/70036965).

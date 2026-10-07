@@ -61,3 +61,29 @@ test('global reconstruction preserves its full time range, source and longitude 
   assert(m.areaKm2[m.ages.indexOf(20)] > m.areaKm2.at(-1) * 2);
   assert(m.volumeKm3[m.ages.indexOf(20)] > m.volumeKm3.at(-1) * 2);
 });
+
+import { projectionWeights } from './projection-transition.js';
+test('projection transitions preserve endpoints and continuous interrupted shapes', () => {
+  assert.deepEqual(projectionWeights({ globe: 1 }, 'eqearth', 0), { globe: 1 });
+  assert.deepEqual(projectionWeights({ globe: 1 }, 'eqearth', 1), { eqearth: 1 });
+  const midway = projectionWeights({ globe: 1 }, 'eqearth', 0.5);
+  assert.deepEqual(midway, { globe: 0.5, eqearth: 0.5 });
+  assert.deepEqual(projectionWeights(midway, 'merc', 0), midway);
+  for (let i = 0; i <= 20; i++) {
+    const values = Object.values(projectionWeights(midway, 'merc', i / 20));
+    assert(values.every((value) => value >= 0 && value <= 1));
+    assert(Math.abs(values.reduce((a, b) => a + b, 0) - 1) < 1e-12);
+  }
+  assert.deepEqual(projectionWeights(midway, 'merc', 1), { merc: 1 });
+});
+
+import { glacialPhase } from './glacial-phase.js';
+test('timeline chapters change phase labels while keeping regional glaciation names meaningful', () => {
+  assert.equal(glacialPhase(119), 'Last interglacial');
+  assert.equal(glacialPhase(80), 'Early glacial cycle');
+  assert.equal(glacialPhase(60), 'Ice-sheet fluctuations');
+  assert.equal(glacialPhase(24), 'Last glacial maximum');
+  assert.equal(glacialPhase(20), 'Last glacial maximum');
+  assert.equal(glacialPhase(14), 'Glacial retreat');
+  assert.equal(glacialPhase(0), 'Holocene');
+});

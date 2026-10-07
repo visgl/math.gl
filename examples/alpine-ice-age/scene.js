@@ -7,6 +7,7 @@ import { TextLayer } from '@deck.gl/layers';
 import { Geometry } from '@luma.gl/engine';
 import { Vector3 } from '@math.gl/core';
 import { interpolateField } from './data.js';
+import { glacialPhase } from './glacial-phase.js';
 const a = new Vector3(),
   b = new Vector3(),
   n = new Vector3();
@@ -119,7 +120,7 @@ export function createScene(canvas, onError) {
                     options.age > 115
                       ? 'LAST INTERGLACIAL'
                       : options.age >= 11.7
-                        ? 'WÜRM'
+                        ? `WÜRM\n${glacialPhase(options.age)}`
                         : 'HOLOCENE'
                 }
               ],

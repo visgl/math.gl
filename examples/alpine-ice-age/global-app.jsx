@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { loadGlobalSimulation, sampleAt } from './data.js';
 import { createGlobalScene, GLOBAL_VIEWS } from './global-scene.js';
 import './style.css';
+import { glacialPhase } from './glacial-phase.js';
 const CHAPTERS = [
   { age: 80, name: 'Reconstruction begins' },
   { age: 60, name: 'Earlier ice sheets' },
@@ -12,7 +13,7 @@ const CHAPTERS = [
   { age: 14, name: 'Retreat' },
   { age: 0, name: 'Present' }
 ];
-const number = (value) => Math.round(value).toLocaleString('en');
+const number = (value) => (value / 1e6).toFixed(1);
 export default function GlobalIceAge({ onMode }) {
   const canvas = useRef(null),
     scene = useRef(null);
@@ -91,6 +92,9 @@ export default function GlobalIceAge({ onMode }) {
           <span>GLACIER LAB / math.gl</span>
           <h1>Global Ice Age</h1>
           <p>{age < 0.05 ? 'Present day' : `${age.toFixed(1)} thousand years ago`}</p>
+          <div className="alpine-phase" aria-live="polite">
+            {glacialPhase(age)}
+          </div>
         </div>
         {!model && (
           <div className="alpine-loading" role="status">
@@ -124,11 +128,11 @@ export default function GlobalIceAge({ onMode }) {
         <div className="alpine-stats">
           <div>
             <strong>{model ? number(area) : '—'}</strong>
-            <span>Model ice area · km²</span>
+            <span>Model ice area · Mkm²</span>
           </div>
           <div>
             <strong>{model ? number(volume) : '—'}</strong>
-            <span>Model ice volume · km³</span>
+            <span>Model ice volume · Mkm³</span>
           </div>
         </div>
         <label>

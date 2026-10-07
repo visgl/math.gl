@@ -16,6 +16,8 @@ import {
   millerCylindrical
 } from '@math.gl/projection';
 import { interpolateField } from './data.js';
+import { projectionWeights } from './projection-transition.js';
+import { glacialPhase } from './glacial-phase.js';
 export const GLOBAL_VIEWS = {
   globe: 'Globe',
   eqearth: 'Equal Earth',
@@ -107,7 +109,12 @@ export function createGlobalScene(canvas, onError) {
     options,
     longitude = -25,
     latitude = 18,
-    dragging;
+    dragging,
+    weights,
+    transition,
+    animationFrame;
+  const duration = 1200;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const deck = new Deck({
     canvas,
     views: new OrthographicView({ flipY: false, near: -10000, far: 10000 }),
@@ -116,10 +123,36 @@ export function createGlobalScene(canvas, onError) {
     getCursor: () => (dragging ? 'grabbing' : 'grab'),
     onError
   });
+  function sampleTransition(now) {
+    if (!transition) return;
+    const fraction = (now - transition.start) / duration;
+    weights = projectionWeights(transition.from, transition.target, fraction);
+    if (fraction >= 1) transition = null;
+  }
+  function animate(now) {
+    animationFrame = null;
+    sampleTransition(now);
+    draw(current, options);
+    if (transition) animationFrame = requestAnimationFrame(animate);
+  }
   function render(model, opts) {
+    const now = performance.now();
+    sampleTransition(now);
     const viewChanged = options?.view !== opts.view;
+    if (!weights || reducedMotion.matches) {
+      weights = { [opts.view]: 1 };
+      transition = null;
+    } else if (viewChanged) {
+      transition = { from: { ...weights }, target: opts.view, start: now };
+    }
     current = model;
     options = opts;
+    if (viewChanged)
+      deck.setProps({ initialViewState: { target: [0, 0, 0], zoom: 0, minZoom: -1, maxZoom: 4 } });
+    draw(model, opts);
+    if (transition && !animationFrame) animationFrame = requestAnimationFrame(animate);
+  }
+  function draw(model, opts) {
     const { view, age, showIce, ghost, labels, iceNames } = opts;
     const g = grid(view),
       size = 361 * 181;
@@ -130,10 +163,16 @@ export function createGlobalScene(canvas, onError) {
       colors = new Float32Array(size * 3);
     const width = canvas.clientWidth || 900,
       height = canvas.clientHeight || 570;
-    const scale =
-      view === 'globe'
-        ? Math.min(width, height) * 0.42
-        : Math.min((width * 0.46) / g.maxX, (height * 0.43) / g.maxY);
+    const globeScale = Math.min(width, height) * 0.42;
+    const endpoints = Object.entries(weights).map(([id, weight]) => {
+      const mesh = grid(id);
+      const scale =
+        id === 'globe'
+          ? globeScale
+          : Math.min((width * 0.46) / mesh.maxX, (height * 0.43) / mesh.maxY);
+      return { id, weight, mesh, scale };
+    });
+    const globeWeight = weights.globe || 0;
     const tilt = latitude * RAD;
     function point(lon, lat) {
       const a = (lon - longitude) * RAD,
@@ -143,23 +182,50 @@ export function createGlobalScene(canvas, onError) {
         z = Math.cos(b) * Math.cos(a);
       return [x, y * Math.cos(tilt) - z * Math.sin(tilt), y * Math.sin(tilt) + z * Math.cos(tilt)];
     }
+    // Every endpoint shares vertex identities, including the longitude seam.
+    // Ice, graticules and text follow the same weighted geographical positions.
+    function blendedPoint(lon, lat, lift = 0) {
+      const result = [0, 0, 0];
+      for (const endpoint of endpoints) {
+        let p;
+        if (endpoint.id === 'globe') p = point(lon, lat).map((v) => v * (endpoint.scale + lift));
+        else {
+          p = engines[endpoint.id].projectSync([
+            lon,
+            endpoint.id === 'merc' ? Math.max(-85, Math.min(85, lat)) : lat
+          ]);
+          p = [p[0] * endpoint.scale, p[1] * endpoint.scale, lift];
+        }
+        for (let axis = 0; axis < 3; axis++) result[axis] += p[axis] * endpoint.weight;
+      }
+      return result;
+    }
     for (let y = 0; y <= 180; y++)
       for (let x = 0; x <= 360; x++) {
         const i = y * 361 + x,
           j = y * 360 + (x % 360),
           c = color(bed[j], ice[j], showIce, ghost);
-        if (view === 'globe') {
-          const p = point(x - 180, y - 90);
-          positions.set(
-            p.map((v) => v * scale),
-            i * 3
-          );
-          normals.set(p, i * 3);
-        } else {
-          positions.set([g.positions[i * 2] * scale, g.positions[i * 2 + 1] * scale, 0], i * 3);
-          normals.set([0, 0, 1], i * 3);
+        const sphere = point(x - 180, y - 90);
+        for (const endpoint of endpoints) {
+          const p =
+            endpoint.id === 'globe'
+              ? sphere.map((v) => v * endpoint.scale)
+              : [
+                  endpoint.mesh.positions[i * 2] * endpoint.scale,
+                  endpoint.mesh.positions[i * 2 + 1] * endpoint.scale,
+                  0
+                ];
+          for (let axis = 0; axis < 3; axis++) positions[i * 3 + axis] += p[axis] * endpoint.weight;
         }
-        const shade = view === 'globe' ? 0.7 + 0.3 * Math.max(0, normals[i * 3 + 2]) : 1;
+        const normal = sphere.map(
+          (v, axis) => v * globeWeight + (axis === 2 ? 1 - globeWeight : 0)
+        );
+        const length = Math.hypot(...normal) || 1;
+        normals.set(
+          normal.map((v) => v / length),
+          i * 3
+        );
+        const shade = 1 - globeWeight * 0.3 * (1 - Math.max(0, sphere[2]));
         colors.set(
           c.map((v) => (v / 255) * shade),
           i * 3
@@ -178,24 +244,14 @@ export function createGlobalScene(canvas, onError) {
     if (labels) {
       for (let lon = -180; lon <= 180; lon += 30) {
         const path = [];
-        for (let lat = -85; lat <= 85; lat += 1)
-          path.push(
-            view === 'globe' ? point(lon, lat).map((v) => v * (scale + 0.6)) : project(lon, lat)
-          );
+        for (let lat = -85; lat <= 85; lat += 1) path.push(blendedPoint(lon, lat, 0.6));
         lines.push({ path });
       }
       for (let lat = -60; lat <= 60; lat += 30) {
         const path = [];
-        for (let lon = -180; lon <= 180; lon += 1)
-          path.push(
-            view === 'globe' ? point(lon, lat).map((v) => v * (scale + 0.6)) : project(lon, lat)
-          );
+        for (let lon = -180; lon <= 180; lon += 1) path.push(blendedPoint(lon, lat, 0.6));
         lines.push({ path });
       }
-    }
-    function project(lon, lat) {
-      const p = engines[view].projectSync([lon, lat]);
-      return [p[0] * scale, p[1] * scale, 0.6];
     }
     const names =
       age >= 11.7
@@ -206,16 +262,16 @@ export function createGlobalScene(canvas, onError) {
           ]
         : [{ name: 'HOLOCENE', lon: 0, lat: 25 }];
     const namePositions = names
-      .map((d) => ({
-        ...d,
-        position:
-          view === 'globe' ? point(d.lon, d.lat).map((v) => v * (scale + 1)) : project(d.lon, d.lat)
-      }))
-      .filter((d) => view !== 'globe' || d.position[2] > scale * 0.12);
+      .map((d) => {
+        const visible = Math.max(0, Math.min(1, (point(d.lon, d.lat)[2] - 0.05) / 0.15));
+        return {
+          ...d,
+          position: blendedPoint(d.lon, d.lat, 1),
+          opacity: 1 - globeWeight + globeWeight * visible
+        };
+      })
+      .filter((d) => d.opacity > 0.01);
     deck.setProps({
-      ...(viewChanged
-        ? { initialViewState: { target: [0, 0, 0], zoom: 0, minZoom: -1, maxZoom: 4 } }
-        : {}),
       controller: { dragPan: view !== 'globe', scrollZoom: true },
       layers: [
         new SimpleMeshLayer({
@@ -233,9 +289,10 @@ export function createGlobalScene(canvas, onError) {
             coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
             data: namePositions,
             getPosition: (d) => d.position,
-            getText: (d) => d.name,
+            getText: (d) => (age >= 11.7 ? `${d.name}\n${glacialPhase(age)}` : d.name),
+            getPixelOffset: (d) => (d.name === 'WÜRM' ? [0, 12] : [0, 0]),
             getSize: 14,
-            getColor: [241, 248, 252],
+            getColor: (d) => [241, 248, 252, 255 * d.opacity],
             fontFamily: 'system-ui',
             fontWeight: 600,
             characterSet: 'auto',
@@ -259,7 +316,7 @@ export function createGlobalScene(canvas, onError) {
     });
   }
   function down(e) {
-    if (options?.view === 'globe') {
+    if (options?.view === 'globe' && !transition) {
       dragging = [e.clientX, e.clientY, longitude, latitude];
       canvas.setPointerCapture(e.pointerId);
     }
@@ -285,6 +342,8 @@ export function createGlobalScene(canvas, onError) {
   return {
     render,
     finalize() {
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+      transition = null;
       resize.disconnect();
       canvas.removeEventListener('pointerdown', down);
       canvas.removeEventListener('pointermove', move);

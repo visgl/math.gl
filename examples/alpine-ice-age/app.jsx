@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { loadSimulation, sampleAt } from './data.js';
 import { createScene } from './scene.js';
 import './style.css';
+import { glacialPhase } from './glacial-phase.js';
 import GlobalIceAge from './global-app.jsx';
 const CHAPTERS = [
   { age: 119, name: 'Cycle begins' },
@@ -97,6 +98,9 @@ function AlpineView({ onMode }) {
           <span>GLACIER LAB / math.gl</span>
           <h1>Alpine Ice Age</h1>
           <p>{age < 0.05 ? 'Present day' : `${age.toFixed(1)} thousand years ago`}</p>
+          <div className="alpine-phase" aria-live="polite">
+            {glacialPhase(age)}
+          </div>
         </div>
         {!model && (
           <div className="alpine-loading" role="status">
