@@ -253,6 +253,49 @@ test("footprint rasterization preserves holes and excludes the Southern Hemisphe
 });
 
 import { maskFrame, krappPhase, loadKrappSimulation } from "./krapp-data.js";
+import { ParquetSource } from "math.gl-parquet-loader";
+test("successful Krapp loads assemble ordered batches and interpolate area", async (t) => {
+  const rows = 720 * 360;
+  const groups = Array.from({ length: 800 }, (_, rowGroup) => ({ rowGroup, ageKa: 1, rows }));
+  groups[0].ageKa = 799;
+  groups[1].ageKa = 5;
+  groups[2].ageKa = 0;
+  t.mock.method(globalThis, "fetch", async (url) => {
+    assert.equal(url, DATASETS.krappManifest);
+    return new Response(JSON.stringify({ id: "krapp2021", rowGroupIndex: groups, files: [{ path: "grids.parquet", bytes: 100 }] }));
+  });
+  const reads = [];
+  let closed = false;
+  t.mock.method(ParquetSource.prototype, "read", async function* (options) {
+    assert.deepEqual(options.columns, ["mask"]);
+    assert.equal(options.batchSize, rows);
+    const group = options.rowGroups[0];
+    reads.push(group);
+    for (const length of [rows / 2, rows / 2]) {
+      yield { data: { numRows: length, getChild(name) {
+        assert.equal(name, "mask");
+        return { get() { return group === 1 ? 2 : group === 0 ? 1 : 0; } };
+      } } };
+    }
+  });
+  t.mock.method(ParquetSource.prototype, "close", async () => { closed = true; });
+  const progress = [];
+  const model = await loadKrappSimulation(new AbortController().signal, message => progress.push(message), { worker: false });
+  assert(closed);
+  assert.deepEqual(reads, [0, 1, 2]);
+  assert.deepEqual(model.manifest.ages, [799, 5, 0]);
+  assert.deepEqual(model.manifest.volumeKm3, [null, null, null]);
+  assert.equal(model.ice[0], 0);
+  assert.equal(model.bed[0], 100);
+  assert.equal(model.ice[model.count], 1);
+  assert.equal(model.ice[2 * model.count], 0);
+  assert.equal(model.bed[2 * model.count], -1000);
+  assert.equal(interpolateField(model.ice, model.count, model.manifest.ages, 2.5)[0], 0.5);
+  const { index, fraction } = sampleAt(model.manifest.ages, 2.5);
+  const area = model.manifest.areaKm2[index] * (1 - fraction) + model.manifest.areaKm2[index + 1] * fraction;
+  assert(Math.abs(area - 2 * Math.PI * 6371.0088 ** 2) < 0.01);
+  assert.equal(progress.at(-1), "3/3 ice-mask snapshots");
+});
 test("Krapp coverage aggregates native cells and integrates spherical area without invented volume", () => {
   const native = new Int16Array(720 * 360).fill(2);
   const frame = maskFrame(native);

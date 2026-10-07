@@ -155,7 +155,7 @@ These climate series are independent of PaleoMIST, not calculated from its ice m
 ### Upstream hosting
 
 The example fetches all ice-grid previews, preview manifests and climate JSON from
-[deck.gl-data/earth/glaciations/v1](https://github.com/visgl/deck.gl-data/tree/2a69f8a6e01e22c7c6649244a1577c20c74a02ae/earth/glaciations/v1).
+[deck.gl-data/earth/glaciations/v1](https://github.com/visgl/deck.gl-data/tree/2de3d08585770105e1b84a6c0308c934fcce4878/earth/glaciations/v1).
 `sources.js` pins the merged repository commit; LFS gzip data uses GitHub media URLs,
 and ordinary JSON uses raw URLs. No scientific data is bundled into this example.
 Preparation scripts remain available for reproducing display assets locally.
