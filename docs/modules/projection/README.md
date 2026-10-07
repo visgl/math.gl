@@ -64,7 +64,7 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 | API | Use it when |
 | --- | --- |
 | [`Projection`](api-reference/projection.md) | You want a ready-to-use converter with all built-in algorithms and WKT/PROJJSON readers |
-| [`ProjectionEngine`](api-reference/projection-engine.md) | You want an explicit list of plugins, readers and grids for a smaller bundle |
+| [`CustomProjectionEngine`](api-reference/projection-engine.md) | You want an explicit list of plugins, readers and grids for a smaller bundle |
 | `LazyProjection` (`/projections/lazy`) | You want built-in algorithms to load automatically when requested |
 | `ProjectionPipeline` (`/pipeline`) | You need explicit operation order or coordinate epochs |
 | `OperationCatalog` (`/operations`) | You need to select among application-reviewed transformations |

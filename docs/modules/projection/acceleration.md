@@ -60,9 +60,9 @@ normally and keep its lifetime under application control.
 
 ```typescript
 // projection-worker.ts
-import {ProjectionEngine} from '@math.gl/projection/core';
+import {ProjectionTransform} from '@math.gl/projection/core';
 import {universalTransverseMercator} from '@math.gl/projection/projections/utm';
-const projection = new ProjectionEngine({
+const projection = new ProjectionTransform({
   to: 'EPSG:32631', projections: [universalTransverseMercator]
 });
 self.postMessage({ready: true});
