@@ -1,5 +1,9 @@
 # Matrix4
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v1.0-blue.svg?style=flat-square" alt="From v1.0" />
+</p>
+
 A 4x4 matrix. Any arguments to `Matrix4` methods can be plain JavaScript arrays or other `math.gl` objects.
 
 ## Usage

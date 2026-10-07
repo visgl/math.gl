@@ -2,6 +2,10 @@
 
 # getSunLight
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Estimates direct sunlight and diffuse skylight color and intensity from solar altitude,
 with configurable atmospheric haze and cloud conditions.
 

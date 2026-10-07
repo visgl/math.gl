@@ -3,6 +3,10 @@
 
 # subdivideGlobeMesh
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Refines an already triangulated geographic mesh onto a sphere or oblate spheroid.
 This composes the existing shared-edge-conforming subdivision engine with the
 shared spheroid conversion kernel; it does not introduce a second tessellator.

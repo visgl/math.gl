@@ -4,6 +4,10 @@ slug: /modules/projection/bulk-layouts
 
 # ProjectionBuffer
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Use `ProjectionBuffer` when coordinates live in separate input/output arrays,
 interleaved records with padding, or separate X/Y/Z/M columns. Capture the layout
 once and reuse the transform and storage across batches or chunks.

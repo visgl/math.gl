@@ -4,6 +4,10 @@ slug: /modules/projection/operation-pipelines
 
 # ProjectionPipeline
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 `ProjectionPipeline` composes a known coordinate operation from typed steps. Use it
 when you need to choose the order of projection, datum and height operations yourself.
 For ordinary CRS-to-CRS conversion, use [Projection or ProjectionTransform](../developer-guide/projection-engine.md).

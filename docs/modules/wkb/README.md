@@ -1,5 +1,9 @@
 # @math.gl/wkb
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 `@math.gl/wkb` provides dependency-free, synchronous codecs for individual WKB, EWKB, and WKT
 geometry values. It is the neutral format layer used by `@math.gl/geoarrow`, but has no dependency
 on GeoArrow or Apache Arrow.

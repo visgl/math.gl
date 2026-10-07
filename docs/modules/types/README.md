@@ -1,5 +1,9 @@
 # Overview
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.6-blue.svg?style=flat-square" alt="From v3.6" />
+</p>
+
 Minimal set of math types, intended to be used with very low cost (bundle size impact)
 across other frameworks.
 

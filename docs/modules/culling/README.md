@@ -1,5 +1,9 @@
 # Overview
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.0-blue.svg?style=flat-square" alt="From v3.0" />
+</p>
+
 import CullingExample from '@site/src/components/culling-playground';
 
 <CullingExample inline />

@@ -2,6 +2,10 @@
 
 # getStarfieldRotation
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Returns the full rotation for orienting a celestial star-field cubemap at a location and
 UTC time. A single vector cannot specify the cubemap's roll; a rotation matrix can.
 

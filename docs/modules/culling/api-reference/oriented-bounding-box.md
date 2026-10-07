@@ -1,5 +1,9 @@
 # OrientedBoundingBox
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.0-blue.svg?style=flat-square" alt="From v3.0" />
+</p>
+
 An `OrientedBoundingBox` is a closed and convex cuboid. It can provide a tighter bounding volume than a bounding sphere or an axis aligned bounding box in many cases.
 
 The class support two representations of an oriented bounding box:

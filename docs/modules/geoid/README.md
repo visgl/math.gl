@@ -1,5 +1,9 @@
 # Overview
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.4-blue.svg?style=flat-square" alt="From v3.4" />
+</p>
+
 The `@math.gl/geoid` module evaluates geoid heights from Earth gravity model grids.
 
 import GeoidGlobe from '@site/src/components/geoid-globe';

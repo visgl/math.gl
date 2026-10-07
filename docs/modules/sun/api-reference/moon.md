@@ -1,6 +1,15 @@
+---
+title: Moon
+sidebar_label: Moon
+---
+
 {/* SPDX-License-Identifier: MIT */}
 
-# Moon position and light
+# Moon
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
 
 ```typescript
 import {getMoonPosition, getMoonDirection, getMoonIllumination, getMoonLight} from '@math.gl/sun';

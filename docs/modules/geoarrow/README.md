@@ -1,5 +1,9 @@
 # @math.gl/geoarrow
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 `@math.gl/geoarrow` is the Arrow-runtime-independent home for columnar geospatial math in math.gl.
 It defines a small immutable descriptor ABI over borrowed typed arrays and implements synchronous
 geometry kernels directly over that ABI.
