@@ -125,7 +125,11 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
             throw new Error('Cannot resolve historical source: ' + args.path);
           });
           builder.onLoad({filter: /\.(ts|js|json)$/, namespace: 'historical'}, args => ({
-            contents: git(historicalPath(relative(root, args.path))),
+            // Adapt the renamed public transform without changing the historical implementation.
+            contents: git(historicalPath(relative(root, args.path))).replace(
+              /export \{ProjectionEngine, checkProjectionCompatibility\}/,
+              'export {ProjectionEngine, ProjectionEngine as ProjectionTransform, checkProjectionCompatibility}'
+            ),
             resolveDir: dirname(args.path),
             loader: args.path.endsWith('.json') ? 'json' : args.path.endsWith('.js') ? 'js' : 'ts'
           }));
