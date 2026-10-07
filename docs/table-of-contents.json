@@ -183,7 +183,8 @@
         "items": [
           "modules/geoid/README",
           "modules/geoid/api-reference/geoid",
-          "modules/geoid/api-reference/parse-pgm"
+          "modules/geoid/api-reference/parse-pgm",
+          "modules/geoid/api-reference/create-geoid-from-grid"
         ]
       },
       {

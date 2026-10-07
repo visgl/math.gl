@@ -91,13 +91,13 @@ export type GeoidProps = {
   _rmserror: number;
   _description: string;
   _datetime: string;
-  data: Uint8Array;
+  data: Uint8Array | Uint16Array;
 };
 
 /**
  * class Geoid - "Gravity Height Model"
  * Calculates difference between mean see level height and WGS84 ellipsoid height
- * Input data have to be loaded from "Earth Gravity Model" *.pgm file with "PGMLoader"
+ * Accepts PGM bytes through parsePGM or decoded samples through createGeoidFromGrid.
  * A particular model file can be loaded on https://geographiclib.sourceforge.io/html/geoid.html
  *
  * The implementation is ported from GeographicLib-1.50.1
@@ -116,8 +116,8 @@ export class Geoid {
   /**
    * @constructs
    * Create a Geoid instance.
-   * @param options - object which includes parameters parsed from *.pgm header
-   * @param options.data - binary buffer of *.pgm file
+   * @param options - grid parameters supplied by parsePGM or createGeoidFromGrid
+   * @param options.data - PGM bytes or decoded unsigned 16-bit samples
    */
   constructor(options: GeoidProps) {
     this.options = options;
@@ -251,7 +251,11 @@ export class Geoid {
       iy = iy < 0 ? -iy : 2 * (this.options._height - 1) - iy;
       ix += ((ix < this.options._width / 2 ? 1 : -1) * this.options._width) / 2;
     }
-    const bufferPosition = this.options._datastart + PIXEL_SIZE * (iy * this.options._swidth + ix);
+    const sampleIndex = iy * this.options._swidth + ix;
+    if (this.options.data instanceof Uint16Array) {
+      return this.options.data[this.options._datastart + sampleIndex];
+    }
+    const bufferPosition = this.options._datastart + PIXEL_SIZE * sampleIndex;
     // initial values to suppress warnings in case get fails
     const a = this.options.data[bufferPosition];
     const b = this.options.data[bufferPosition + 1];
