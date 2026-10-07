@@ -70,6 +70,18 @@ export class SurfaceLayer extends SolidPolygonLayer {
                 mix(tectonicIceHash(i+vec3(0,1,0)),tectonicIceHash(i+vec3(1,1,0)),f.x),f.y),
             mix(mix(tectonicIceHash(i+vec3(0,0,1)),tectonicIceHash(i+vec3(1,0,1)),f.x),
                 mix(tectonicIceHash(i+vec3(0,1,1)),tectonicIceHash(i+vec3(1,1,1)),f.x),f.y),f.z);
+        }
+        // Filter detail near the pixel scale to keep ice stable during zooms and morphs.
+        float tectonicIceDetail(vec3 p,float frequency) {
+          float footprint=length(fwidth(p))*frequency;
+          return mix(tectonicIceNoise(p*frequency),.5,smoothstep(.35,1.2,footprint));
+        }
+        vec3 tectonicIceNormal(vec3 normal,float height) {
+          vec3 dx=dFdx(surfacePosition),dy=dFdy(surfacePosition);
+          vec3 across=cross(dy,normal),along=cross(normal,dx);
+          float determinant=dot(dx,across);
+          vec3 gradient=sign(determinant)*(dFdx(height)*across+dFdy(height)*along);
+          return normalize(abs(determinant)*normal-gradient+normal*1e-12);
         }`,
         'fs:DECKGL_FILTER_COLOR': `
         vec3 reference=normalize(referencePosition);
@@ -97,25 +109,34 @@ export class SurfaceLayer extends SolidPolygonLayer {
         // Latitude follows the rendered world, not a plate's present-day reference position.
         // The ice is an illustrative material overlay, not a climate-model reconstruction.
         if(tectonicSurface.iceCoverage>0.) {
-          // World-space noise avoids the latitude stripes and projection seams of a UV texture.
-          float drift=tectonicIceNoise(reference*7.);
-          float grain=tectonicIceNoise(reference*85.);
-          float field=tectonicIceNoise(reference*28.+vec3(drift*2.));
+          // Land detail stays attached to each plate; ocean detail stays in geographic space.
+          float drift=tectonicIceDetail(reference,7.);
+          float grain=tectonicIceDetail(reference,120.);
+          float field=tectonicIceDetail(reference,90.);
           float edge=1.08-1.16*tectonicSurface.iceCoverage;
           float latitude=abs(iceLatitude)+(drift-.5)*.07;
           float ice=smoothstep(edge-.045,edge+.045,latitude)*smoothstep(0.,.08,tectonicSurface.iceCoverage);
-          // Sparse, branching blue fractures break up wind-packed snow on sea ice.
-          float fracture=(1.-smoothstep(.003,.019,abs(field-.5)))*smoothstep(.35,.6,drift);
-          vec3 snow=mix(vec3(.72,.81,.86),vec3(.96,.98,1.),.45+.45*drift);
-          snow*=.995+.01*grain;
-          vec3 iceColor=mix(snow,vec3(.37,.60,.72),fracture*.22*tectonicSurface.isWater);
-          float sheen=pow(max(dot(reflect(-light,normal),vec3(0.,0.,1.)),0.),36.)*.05;
-          iceColor=iceColor*diffuse+vec3(sheen);
-          // Preserve desaturated continent silhouettes beneath the ice sheet.
-          float glaze=mix(.66,.82,tectonicSurface.isWater);
-          float luminance=dot(color.rgb,vec3(.2126,.7152,.0722));
-          vec3 beneathIce=mix(color.rgb,vec3(luminance),ice*.96);
-          color.rgb=mix(beneathIce,iceColor,ice*glaze);
+          // Original illustrative relief, not elevation data or reconstructed ice thickness.
+          // Smooth sea ice contrasts with ridges and shaded valleys on land.
+          float land=1.-tectonicSurface.isWater;
+          float ridge=1.-abs(2.*field-1.);
+          float hills=tectonicIceDetail(reference,14.);
+          float terrainDetail=dot(texture(terrainTexture,uv).rgb,vec3(.2126,.7152,.0722));
+          float relief=land*(.0007*ridge*ridge+.0006*hills+.00045*terrainDetail*tectonicSurface.useTexture)
+            +mix(.00004,.00015,land)*grain;
+          vec3 iceNormal=tectonicIceNormal(normal,relief);
+          vec3 iceLight=normalize(vec3(-.5,.55,1.));
+          float illumination=.30+.70*max(dot(iceNormal,iceLight),0.);
+          vec3 seaIce=mix(vec3(.69,.78,.83),vec3(.84,.89,.92),.35+.5*drift);
+          vec3 landIce=mix(vec3(.81,.87,.91),vec3(.96,.98,1.),.45+.35*hills);
+          vec3 iceColor=mix(seaIce,landIce,land)*illumination;
+          iceColor*=1.-land*.13*(1.-ridge)*(1.-hills);
+          float sheen=pow(max(dot(reflect(-iceLight,iceNormal),vec3(0.,0.,1.)),0.),18.)*.035;
+          iceColor+=vec3(sheen);
+          float rim=pow(1.-max(normal.z,0.),5.)*tectonicSurface.globeWeight;
+          iceColor=mix(iceColor,vec3(.73,.82,.89),rim*.24);
+          // Full ice replaces the base material; relief/albedo preserve continent silhouettes.
+          color.rgb=mix(color.rgb,iceColor,ice);
         }
 
       `

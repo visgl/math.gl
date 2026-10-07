@@ -140,12 +140,17 @@ Background: [BGS on Laurussia and Pangaea](https://earthwise.bgs.ac.uk/index.php
 
 The timeline includes Sturtian (approximately 717–660 Ma) and Marinoan
 (approximately 650–635 Ma) chapters. Their illustrative ice material advances
-from the poles, glazes the ocean and reconstructed land while keeping continents and plate colors
-visible beneath it, and retreats at the end
+from the poles, covers the ocean and reconstructed land, and retreats at the end
 of each interval. It follows geological time when playing or seeking, works on
 the globe and projected maps, and is absent during the nonglacial interval.
 
-The **Glaciations** checkbox turns the ice glaze and event captions on or off.
+Full coverage uses opaque ice: smooth blue-white sea ice and brighter land ice
+with shaded ridges and valleys. Continent silhouettes remain visible through
+surface texture and color rather than underlying vegetation or plate colors.
+The relief is procedural visual context, not reconstructed elevation or ice thickness.
+Detail fades near the pixel scale to limit shimmer during zooms and projection changes.
+
+The **Glaciations** checkbox turns the ice material and event captions on or off.
 Timeline markers remain available for seeking to the events. During playback,
 ice-edge transitions automatically slow to at most 0.75 million years per second,
 then resume the selected speed. This changes presentation timing, not event dates.
