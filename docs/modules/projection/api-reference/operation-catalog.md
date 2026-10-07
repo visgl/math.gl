@@ -1,4 +1,8 @@
-# Select a coordinate operation
+---
+slug: /modules/projection/operation-selection
+---
+
+# OperationCatalog
 
 Two coordinate reference systems can have several transformations between them.
 A regional grid may be more accurate than a global approximation, but only within
@@ -56,8 +60,8 @@ const coordinates = new Float64Array([10, 20, 30, 8]);
 pipeline.projectFlatSync(coordinates, 4); // XYZ converted to feet; M stays 8
 ```
 
-Select once for a batch, then use the existing [pipeline](./operation-pipelines.md)
-or [projection](./projection-engine.md) APIs. Selection is a setup operation and
+Select once for a batch, then use the existing [pipeline](./projection-pipeline.md)
+or [projection](../developer-guide/projection-engine.md) APIs. Selection is a setup operation and
 creates request metadata; it does not add work or objects to coordinate loops.
 
 `OperationCatalog<T>` accepts any payload type `T`: an already prepared pipeline,
@@ -199,7 +203,7 @@ already returned decision is not updated automatically.
 This API is a bounded selector over an application-provided list. It is not an EPSG
 operation database, a parser for PROJ operation descriptions, a general GIS planner
 or automatic dynamic-datum interpretation. It does not change the operation chosen
-by `Projection`, `ProjectionEngine` or `ProjectionPipeline` unless the application
+by `Projection`, `ProjectionTransform` or `ProjectionPipeline` unless the application
 explicitly uses its returned payload.
 
 Qualification includes a separate pointwise longitude-containment oracle for 2,401

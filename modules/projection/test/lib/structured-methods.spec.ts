@@ -8,7 +8,7 @@ import {unshiftedStructuredDatums} from '../fixtures/unshifted-structured-datums
 import proj4 from 'proj4';
 import type {PROJJSONCRSByType} from '@math.gl/crs';
 import {
-  ProjectionEngine,
+  ProjectionTransform,
   normalizeCRS,
   projJSONCRSParser,
   wktCRSParser,
@@ -106,7 +106,7 @@ for (const variant of ['A', 'B'] as const) {
     test(
       'Hotine ' + variant + ' normalizes angular/linear units and rectified angle ' + gamma,
       () => {
-        const projection = new ProjectionEngine({
+        const projection = new ProjectionTransform({
           datumCatalogs,
           to: hotine(variant, gamma),
           parsers,
@@ -143,7 +143,7 @@ test('Method-specific names do not leak to other projections or hide duplicate/c
   };
   expect(
     () =>
-      new ProjectionEngine({
+      new ProjectionTransform({
         datumCatalogs,
         to: invalidMethod,
         parsers,
@@ -163,7 +163,7 @@ test('Method-specific names do not leak to other projections or hide duplicate/c
     };
     expect(
       () =>
-        new ProjectionEngine({
+        new ProjectionTransform({
           datumCatalogs,
           to: duplicate,
           parsers,
@@ -174,7 +174,7 @@ test('Method-specific names do not leak to other projections or hide duplicate/c
 });
 test('Krovak accepts only its fixed angular constants, in PROJ and structured definitions', () => {
   for (const alpha of [30.28813972222222, 30.28813975277778]) {
-    const projection = new ProjectionEngine({
+    const projection = new ProjectionTransform({
       datumCatalogs,
       to: '+proj=krovak +ellps=bessel +alpha=' + alpha + ' +lat_ts=78.5',
       projections
@@ -188,7 +188,7 @@ test('Krovak accepts only its fixed angular constants, in PROJ and structured de
   for (const parameter of ['+alpha=30', '+lat_ts=78', '+alpha=NaN']) {
     expect(
       () =>
-        new ProjectionEngine({
+        new ProjectionTransform({
           datumCatalogs,
           to: '+proj=krovak ' + parameter,
           projections
@@ -199,7 +199,7 @@ test('Krovak accepts only its fixed angular constants, in PROJ and structured de
   const definition = corpus.fixtures[143].code as string;
   expect(
     () =>
-      new ProjectionEngine({
+      new ProjectionTransform({
         datumCatalogs,
         to: definition.replace('30.2881397527781', '30'),
         parsers,
@@ -208,7 +208,7 @@ test('Krovak accepts only its fixed angular constants, in PROJ and structured de
   ).toThrow('fixed cone-axis');
   expect(
     () =>
-      new ProjectionEngine({
+      new ProjectionTransform({
         datumCatalogs,
         to: definition.replace('78.5000000000003', '78'),
         parsers,
@@ -224,7 +224,7 @@ test('North Pole stereographic alias selects the oblique alternative away from t
       ',PROJECTION["Stereographic_North_Pole"],PARAMETER["standard_parallel_1",' +
       latitude +
       '],PARAMETER["central_meridian",0],PARAMETER["scale_factor",0.994],UNIT["metre",1]]';
-    const projection = new ProjectionEngine({
+    const projection = new ProjectionTransform({
       datumCatalogs,
       to: definition,
       parsers,
@@ -241,7 +241,7 @@ test('North Pole stereographic alias selects the oblique alternative away from t
 });
 test('Legacy pseudo-Mercator semi_minor only confirms the projection sphere', () => {
   const definition = corpus.fixtures[203].code as string;
-  const projection = new ProjectionEngine({
+  const projection = new ProjectionTransform({
     datumCatalogs,
     to: definition,
     parsers,
@@ -250,7 +250,7 @@ test('Legacy pseudo-Mercator semi_minor only confirms the projection sphere', ()
   close(projection.project([10, 40]), proj4('EPSG:3857').forward([10, 40]));
   expect(
     () =>
-      new ProjectionEngine({
+      new ProjectionTransform({
         datumCatalogs,
         to: definition.replace('"semi_minor", 6378137.0', '"semi_minor", 6356752.0'),
         parsers,
@@ -259,7 +259,7 @@ test('Legacy pseudo-Mercator semi_minor only confirms the projection sphere', ()
   ).toThrow('semi_minor must equal');
   expect(
     () =>
-      new ProjectionEngine({
+      new ProjectionTransform({
         datumCatalogs,
         to: definition.replace(
           'PARAMETER["semi_minor", 6378137.0]',
@@ -276,7 +276,7 @@ test('Right-angle Hotine azimuth stays finite through ellipsoid roundoff at the 
       '+proj=omerc +ellps=bessel +lat_0=' +
       latitude +
       ' +lonc=7.43958333333333 +alpha=90 +gamma=90';
-    const projection = new ProjectionEngine({
+    const projection = new ProjectionTransform({
       datumCatalogs,
       from: '+proj=longlat +datum=none',
       to,
@@ -294,9 +294,9 @@ test('Hotine right-angle origin is stable across machine-precision changes in ga
   const asin = Math.asin;
   for (const delta of [-Number.EPSILON, 0, Number.EPSILON]) {
     const mock = vi.spyOn(Math, 'asin').mockImplementationOnce(value => asin(value) + delta);
-    let projection: ProjectionEngine;
+    let projection: ProjectionTransform;
     try {
-      projection = new ProjectionEngine({
+      projection = new ProjectionTransform({
         datumCatalogs,
         from: '+proj=longlat +datum=none',
         to: '+proj=omerc +ellps=bessel +lat_0=46.95240555555556 +lonc=7.43958333333333 +alpha=90 +gamma=90',
@@ -326,7 +326,7 @@ test('Right-angle Hotine origins stay accurate at low latitudes in both hemisphe
         'PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1]]'
     ];
     for (const to of definitions) {
-      const projection = new ProjectionEngine({
+      const projection = new ProjectionTransform({
         datumCatalogs,
         to,
         parsers,

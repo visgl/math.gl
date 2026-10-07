@@ -4,7 +4,7 @@
 // SPDX-FileComment: Original matched sphere/ellipsoid workload with analytic normal anchors and reusable scalar outputs.
 import {config} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
-import {ProjectionEngine} from '@math.gl/projection/core';
+import {ProjectionTransform} from '@math.gl/projection/core';
 import {geocentric} from '@math.gl/projection/projections/geocent';
 export {measureWorkload} from './benchmark-workload';
 export const shapes = [
@@ -46,7 +46,7 @@ export function runners(shape: Shape, inverse: boolean) {
   config._cartographicRadians = false;
   const ellipsoid = Ellipsoid.fromSpheroid({semiMajorAxis: shape.a, semiMinorAxis: shape.b});
   const axes = `+a=${shape.a} +b=${shape.b}`;
-  const engine = new ProjectionEngine({
+  const engine = new ProjectionTransform({
     from: '+proj=longlat ' + axes,
     to: '+proj=geocent ' + axes,
     projections: [geocentric]
@@ -81,7 +81,7 @@ export function factories(shape: Shape) {
   return [
     () => Ellipsoid.fromSpheroid({semiMajorAxis: shape.a, semiMinorAxis: shape.b}),
     () =>
-      new ProjectionEngine({
+      new ProjectionTransform({
         from: `+proj=longlat +a=${shape.a} +b=${shape.b}`,
         to: `+proj=geocent +a=${shape.a} +b=${shape.b}`,
         projections: [geocentric]

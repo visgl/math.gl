@@ -5,7 +5,7 @@
 import {expect, test} from 'vitest';
 import {Proj4Projection} from '../helpers/proj4-reference';
 import {
-  ProjectionEngine,
+  ProjectionTransform,
   mercator,
   transverseMercator,
   extendedTransverseMercator,
@@ -49,7 +49,7 @@ for (const fixture of commonProjectionCases) {
       for (const key of ['lon_0', 'lat_0', 'x_0', 'y_0']) {
         if (!to.includes('+' + key + '=') && !to.includes('+proj=utm')) to += ' +' + key + '=0';
       }
-      const native = new ProjectionEngine({to, projections});
+      const native = new ProjectionTransform({to, projections});
       const reference = new Proj4Projection({to});
       const points =
         fixture.points ||
@@ -83,7 +83,7 @@ test('all 120 WGS84 UTM aliases and both UPS aliases', () => {
   for (const south of [false, true]) {
     for (let zone = 1; zone <= 60; zone++) {
       const to = 'EPSG:' + ((south ? 32700 : 32600) + zone);
-      const native = new ProjectionEngine({to, projections: [universalTransverseMercator]});
+      const native = new ProjectionTransform({to, projections: [universalTransverseMercator]});
       const reference = new Proj4Projection({to});
       for (const dx of [-3, 0, 3]) {
         const coordinate = [6 * zone - 183 + dx, south ? -45 : 45, 17];
@@ -92,7 +92,7 @@ test('all 120 WGS84 UTM aliases and both UPS aliases', () => {
       }
     }
     const to = south ? 'EPSG:5042' : 'EPSG:5041';
-    const native = new ProjectionEngine({to, projections: [stereographic]});
+    const native = new ProjectionTransform({to, projections: [stereographic]});
     const reference = new Proj4Projection({to});
     const pole = [0, south ? -90 : 90];
     close(native.project(pole), [2000000, 2000000], 1e-8);
@@ -105,7 +105,7 @@ test('projected-to-projected composition preserves height and measure', () => {
   const from = 'EPSG:32631';
   const to = '+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=3';
   const coordinate = new Proj4Projection({to: from}).project([4, 48, 50, 7]);
-  const native = new ProjectionEngine({from, to, projections});
+  const native = new ProjectionTransform({from, to, projections});
   close(native.project(coordinate), new Proj4Projection({from, to}).project(coordinate), 1e-6);
   close(native.unproject(native.project(coordinate)), coordinate, 1e-5);
 });
@@ -126,34 +126,34 @@ test('invalid common projection parameters are rejected at construction', () => 
     '+proj=sterea +lat_0=90',
     '+proj=stere +k=0'
   ]) {
-    expect(() => new ProjectionEngine({to, projections})).toThrow();
+    expect(() => new ProjectionTransform({to, projections})).toThrow();
   }
-  expect(() => new ProjectionEngine({to: 'EPSG:32631'})).toThrow('not registered');
-  expect(() => new ProjectionEngine({to: 'EPSG:5041'})).toThrow('not registered');
+  expect(() => new ProjectionTransform({to: 'EPSG:32631'})).toThrow('not registered');
+  expect(() => new ProjectionTransform({to: 'EPSG:5041'})).toThrow('not registered');
 });
 
 test('singularities and inverse domain failures produce explicit errors', () => {
   for (const to of ['+proj=tmerc +approx +R=6371000', '+proj=tmerc', '+proj=etmerc']) {
-    expect(() => new ProjectionEngine({to, projections}).project([90, 0])).toThrow();
+    expect(() => new ProjectionTransform({to, projections}).project([90, 0])).toThrow();
   }
   for (const name of ['laea', 'stere', 'sterea', 'aeqd']) {
     for (const geometry of ['', ' +R=6371000']) {
-      const native = new ProjectionEngine({
+      const native = new ProjectionTransform({
         to: '+proj=' + name + ' +lat_0=0' + geometry,
         projections
       });
       expect(() => native.project([180, 0])).toThrow();
     }
   }
-  const laea = new ProjectionEngine({to: '+proj=laea +R=6371000', projections});
+  const laea = new ProjectionTransform({to: '+proj=laea +R=6371000', projections});
   expect(() => laea.unproject([2e7, 2e7])).toThrow();
-  const aeqd = new ProjectionEngine({to: '+proj=aeqd +R=6371000', projections});
+  const aeqd = new ProjectionTransform({to: '+proj=aeqd +R=6371000', projections});
   expect(() => aeqd.unproject([3e7, 0])).toThrow();
 });
 
 test('equatorial ellipsoidal stereographic applies false northing', () => {
   const base = '+proj=stere +lat_0=0 +lon_0=15 +x_0=100';
-  const native = new ProjectionEngine({to: base + ' +y_0=200', projections});
+  const native = new ProjectionTransform({to: base + ' +y_0=200', projections});
   const zero = new Proj4Projection({to: base + ' +y_0=0'});
   close(native.project([15, 0]), [100, 200], 1e-8);
   for (const point of [
@@ -174,8 +174,8 @@ test('native common projections initialize omitted origin and offsets', () => {
     '+proj=eqdc +lat_1=20 +lat_2=60',
     '+proj=sterea'
   ]) {
-    const native = new ProjectionEngine({to, projections});
-    const complete = new ProjectionEngine({
+    const native = new ProjectionTransform({to, projections});
+    const complete = new ProjectionTransform({
       to: to + ' +lat_0=0 +lon_0=0 +x_0=0 +y_0=0',
       projections
     });
@@ -186,12 +186,12 @@ test('native common projections initialize omitted origin and offsets', () => {
 for (const fixture of upstreamFixtures) {
   test('tagged upstream fixture: ' + fixture.id, () => {
     if ('gapId' in fixture) {
-      expect(() => new ProjectionEngine({to: fixture.to, projections})).toThrow(
+      expect(() => new ProjectionTransform({to: fixture.to, projections})).toThrow(
         /Unsupported (datum|ellipsoid)/
       );
       return;
     }
-    const native = new ProjectionEngine({to: fixture.to, projections});
+    const native = new ProjectionTransform({to: fixture.to, projections});
     close(native.project(fixture.ll), fixture.xy, fixture.xyToleranceMeters);
     const actual = native.unproject(fixture.xy);
     const longitudeError = ((actual[0] - fixture.ll[0] + 540) % 360) - 180;
@@ -207,7 +207,7 @@ test('published PROJ UTM examples provide independent reference values', () => {
     {to: '+proj=utm +zone=32', ll: [12, 56], xy: [687071.44, 6210141.33]},
     {to: '+proj=utm +zone=59 +south', ll: [174, -44], xy: [740526.32, 5123750.87]}
   ]) {
-    const native = new ProjectionEngine({to: fixture.to, projections});
+    const native = new ProjectionTransform({to: fixture.to, projections});
     close(native.project(fixture.ll), fixture.xy, 0.01);
     close(native.unproject(fixture.xy), fixture.ll, 1e-7);
   }
@@ -215,7 +215,7 @@ test('published PROJ UTM examples provide independent reference values', () => {
 
 test('spherical approximate transverse Mercator preserves latitude across its origin', () => {
   const to = '+proj=tmerc +approx +R=6371000 +lat_0=10 +lon_0=9 +k_0=0.9 +x_0=100 +y_0=200';
-  const native = new ProjectionEngine({to, projections});
+  const native = new ProjectionTransform({to, projections});
   const reference = new Proj4Projection({to});
   for (const point of [
     [8, -5],
@@ -230,20 +230,20 @@ test('spherical approximate transverse Mercator preserves latitude across its or
 
 test('polar and antimeridian boundaries and nonconvergence are explicit', () => {
   const to = '+proj=tmerc +lon_0=179';
-  const native = new ProjectionEngine({to, projections});
+  const native = new ProjectionTransform({to, projections});
   close(native.project([-179, 80]), new Proj4Projection({to}).project([-179, 80]), 1e-6);
   close(native.unproject(native.project([-179, 80])), [-179, 80], 1e-8);
   expect(() => native.unproject([1e20, 0])).toThrow();
-  const aeqd = new ProjectionEngine({to: '+proj=aeqd', projections});
+  const aeqd = new ProjectionTransform({to: '+proj=aeqd', projections});
   expect(() => aeqd.project([179.9, 0])).toThrow();
-  const lcc = new ProjectionEngine({to: '+proj=lcc +lat_1=30 +lat_2=60', projections});
+  const lcc = new ProjectionTransform({to: '+proj=lcc +lat_1=30 +lat_2=60', projections});
   expect(() => lcc.project([0, -90])).toThrow('opposite pole');
   close(lcc.unproject(lcc.project([5, 89])), [5, 89], 1e-7);
 });
 
 test('LCC opposite pole follows the cone sign for mixed standard parallels', () => {
   for (const parallels of ['+lat_1=0 +lat_2=45', '+lat_1=-10 +lat_2=50']) {
-    const projection = new ProjectionEngine({to: '+proj=lcc ' + parallels, projections});
+    const projection = new ProjectionTransform({to: '+proj=lcc ' + parallels, projections});
     expect(() => projection.project([0, -90])).toThrow('opposite pole');
     expect(projection.project([0, 90]).every(Number.isFinite)).toBe(true);
   }
@@ -254,12 +254,12 @@ for (const name of ['lcc', 'eqdc']) {
     test(`${name} preserves an equatorial second parallel (${geometry})`, () => {
       for (const parallel of [-30, 30]) {
         const base = `+proj=${name} ${geometry} +lon_0=10 +lat_0=0 +x_0=500 +y_0=-250`;
-        const native = new ProjectionEngine({
+        const native = new ProjectionTransform({
           to: `${base} +lat_1=${parallel} +lat_2=0`,
           projections
         });
         const swappedDefinition = `${base} +lat_1=0 +lat_2=${parallel}`;
-        const swapped = new ProjectionEngine({to: swappedDefinition, projections});
+        const swapped = new ProjectionTransform({to: swappedDefinition, projections});
         // Upstream also loses a zero second parallel. Its swapped definition avoids that bug.
         const reference = new Proj4Projection({to: swappedDefinition});
         for (const point of [
@@ -272,8 +272,8 @@ for (const name of ['lcc', 'eqdc']) {
           close(native.project(point), swapped.project(point), 1e-5);
           close(native.unproject(expected), point, 1e-7);
         }
-        const omitted = new ProjectionEngine({to: `${base} +lat_1=${parallel}`, projections});
-        const tangent = new ProjectionEngine({
+        const omitted = new ProjectionTransform({to: `${base} +lat_1=${parallel}`, projections});
+        const tangent = new ProjectionTransform({
           to: `${base} +lat_1=${parallel} +lat_2=${parallel}`,
           projections
         });

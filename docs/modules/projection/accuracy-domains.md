@@ -55,7 +55,7 @@ The polar ellipsoidal azimuthal-equidistant path now integrates the meridional r
 
 Van der Grinten uses rationalized expressions to avoid subtracting nearly equal terms. At the retained near-equator regression, an original 80-digit Decimal evaluation matches math.gl within 10 nanometres, while the pinned PROJ oracle differs by 20.864 micrometres. Its 30 micrometre comparison ceiling records that oracle limitation. The independent Decimal check is a separate strict regression.
 
-To enforce an application-qualified rectangle in both directions, use the optional [ProjectionAnalysis](./projection-analysis.md) interface. Its domain is explicit; it does not automatically certify an algorithm or select a datum operation.
+To enforce an application-qualified rectangle in both directions, use the optional [ProjectionAnalysis](api-reference/projection-analysis.md) interface. Its domain is explicit; it does not automatically certify an algorithm or select a datum operation.
 
 Regenerate with the pinned oracle environment, then run:
 

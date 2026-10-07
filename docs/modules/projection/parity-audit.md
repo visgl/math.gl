@@ -23,7 +23,7 @@ the old upstream forward coordinate by about two metres; its original fixture is
 retained and the native result is checked against PROJ. This is a deliberate accuracy
 correction, not an unclassified mismatch or a silently relaxed tolerance.
 
-The [projection support contract](./support.md) documents the default projection API,
+The [projection support contract](developer-guide/support.md) documents the default projection API,
 retained engine aliases and the original wrapper at `classic` (removed in the subsequent
 package rename), and records the remaining
 out-of-profile operations. CI covers three browser engines and emits performance
@@ -109,7 +109,7 @@ round trips. At that stage the remaining exceptions comprised **five axis-orient
 gaps** and **nine deliberate strict-input differences**; the axis follow-up above closes the five gaps. Grid-edge policy, regional
 validity limits and independent native PROJ accuracy qualification remain open.
 
-See the [projection engine guide](./projection-engine.md) for registration, dynamic
+See the [projection engine guide](developer-guide/projection-engine.md) for registration, dynamic
 loading, optional readers and measured bundle costs.
 
 ## Correctness follow-up (PR #149)

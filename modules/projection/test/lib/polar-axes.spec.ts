@@ -5,7 +5,7 @@
 import {expect, test} from 'vitest';
 import {createSpatialReference} from '@math.gl/crs';
 import type {PROJJSONCRSByType} from '@math.gl/crs';
-import {ProjectionEngine, normalizeCRS} from '@math.gl/projection/experimental/core';
+import {ProjectionTransform, normalizeCRS} from '@math.gl/projection/experimental/core';
 import {stereographic} from '@math.gl/projection/experimental/projections/stere';
 import {wktCRSParser} from '@math.gl/projection/experimental/parsers/wkt';
 import {projJSONCRSParser} from '@math.gl/projection/experimental/parsers/projjson';
@@ -60,9 +60,9 @@ test('Previously rejected polar WKT fixtures honor default and enforced axes in 
     const fixture = corpus.fixtures[index];
     const to = fixture.code as string;
     expect(normalizeCRS(to, {parsers}).axis).toBe(index === 91 ? 'neu' : 'enu');
-    const canonical = new ProjectionEngine({to, parsers, projections});
-    const declared = new ProjectionEngine({to, parsers, projections, enforceAxis: true});
-    const source = new ProjectionEngine({from: to, parsers, projections, enforceAxis: true});
+    const canonical = new ProjectionTransform({to, parsers, projections});
+    const declared = new ProjectionTransform({to, parsers, projections, enforceAxis: true});
+    const source = new ProjectionTransform({from: to, parsers, projections, enforceAxis: true});
     const point = [...fixture.ll, 123, 7];
     const xy = canonical.project(point);
     const expected = index === 91 ? [xy[1], xy[0], 123, 7] : xy;
@@ -88,7 +88,7 @@ test('Polar meridians map signs, order and angular units relative to lon_0', () 
     for (const longitude of [0, -45]) {
       const definition = polar(north, longitude);
       const point = [longitude + 10, north ? 80 : -80, 123, 7];
-      const xy = new ProjectionEngine({to: definition, parsers, projections}).project(point);
+      const xy = new ProjectionTransform({to: definition, parsers, projections}).project(point);
       const first = definition.coordinate_system.axis[0];
       const second = definition.coordinate_system.axis[1];
       // Swapped and reversed axes; explicit radians and grads exercise both unit representations.
@@ -106,7 +106,7 @@ test('Polar meridians map signs, order and angular units relative to lon_0', () 
       };
       definition.coordinate_system.axis = [second, first];
       expect(normalizeCRS(definition, {parsers}).axis).toBe('swu');
-      const declared = new ProjectionEngine({
+      const declared = new ProjectionTransform({
         to: definition,
         parsers,
         projections,
@@ -115,7 +115,7 @@ test('Polar meridians map signs, order and angular units relative to lon_0', () 
       close(declared.project(point), [-xy[1], -xy[0], 123, 7]);
       close(declared.unproject(declared.project(point)), point);
       // Axis metadata is ignored only for storage order, not syntax validation.
-      close(new ProjectionEngine({to: definition, parsers, projections}).project(point), xy);
+      close(new ProjectionTransform({to: definition, parsers, projections}).project(point), xy);
     }
 });
 
@@ -125,7 +125,7 @@ test('Stored coordinate order overrides declared polar order', () => {
     crs: {state: 'explicit', definition, representation: 'wkt', provenance: 'metadata'},
     coordinateOrder: ['easting', 'northing']
   });
-  const projection = new ProjectionEngine({
+  const projection = new ProjectionTransform({
     to: reference,
     parsers,
     projections,
@@ -177,13 +177,13 @@ test('Polar axis meridians share the CRS prime meridian and legacy west spelling
     ...base,
     datum: {...base.datum, prime_meridian: {name: 'Paris', longitude: 2.337229166667}}
   };
-  const projection = new ProjectionEngine({
+  const projection = new ProjectionTransform({
     to: definition,
     parsers,
     projections,
     enforceAxis: true
   });
-  const canonical = new ProjectionEngine({
+  const canonical = new ProjectionTransform({
     to: '+proj=stere +datum=WGS84 +lat_0=-90 +lat_ts=-71 +lon_0=-45 +pm=paris +x_0=123 +y_0=456',
     projections
   });

@@ -27,7 +27,7 @@ for (const fixture of structured.cases) {
   for (const format of ['wkt2', 'wkt1', 'esri', 'projjson'] as const) {
     test('independent structured conversion ' + fixture.id + ' / ' + format, () => {
       const definition = fixture[format];
-      const projection = new native.ProjectionEngine({
+      const projection = new native.ProjectionTransform({
         datumCatalogs,
         from: '+proj=longlat +datum=none',
         to: definition as native.TypeScriptCRSInput,
@@ -50,7 +50,7 @@ for (const fixture of structured.cases) {
 for (const [index, fixture] of datumInputs.cases.entries()) {
   test('independent 3D datum chain ' + fixture.id, () => {
     expect(datums.cases[index].id).toBe(fixture.id);
-    const projection = new native.ProjectionEngine({
+    const projection = new native.ProjectionTransform({
       datumCatalogs,
       from: fixture.fromCRS,
       to: fixture.toCRS
@@ -79,7 +79,7 @@ test('ESRI Krovak accepts only the complete supported axis adjustment', () => {
   ]) {
     expect(
       () =>
-        new native.ProjectionEngine({
+        new native.ProjectionTransform({
           datumCatalogs,
           to: invalid,
           projections,
@@ -90,7 +90,7 @@ test('ESRI Krovak accepts only the complete supported axis adjustment', () => {
 });
 
 test('Cassini exact poles and nonconvergent inverse fail observably', () => {
-  const projection = new native.ProjectionEngine({
+  const projection = new native.ProjectionTransform({
     datumCatalogs,
     to: '+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84',
     projections

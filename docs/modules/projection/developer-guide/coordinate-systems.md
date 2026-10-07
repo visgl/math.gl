@@ -1,3 +1,7 @@
+---
+slug: /modules/projection/coordinate-systems
+---
+
 # Coordinate systems, ellipsoids, datums and epochs
 
 A coordinate such as `[12, 55, 100]` is incomplete without its reference system.
@@ -7,7 +11,7 @@ what location those numbers describe.
 
 This guide introduces the concepts used by `@math.gl/projection`. It is useful
 before choosing a [projection algorithm](./projections.md) or composing an
-[operation pipeline](./operation-pipelines.md).
+[operation pipeline](../api-reference/projection-pipeline.md).
 
 ## Geographic, projected and geocentric coordinates
 
@@ -53,7 +57,7 @@ for mathematical parameter definitions.
 
 The package accepts named ellipsoids through `+ellps`, explicit axes through `+a`
 and `+b`, flattening through `+f` or `+rf`, and a sphere through `+R`. See
-[ellipsoid parameters](./api-reference/projection-engine.md#current-coverage) for
+[ellipsoid parameters](../api-reference/projection-transform.md#current-coverage) for
 precedence and validation.
 
 ```typescript
@@ -77,24 +81,24 @@ projection and produces different northings.
 
 ### Interoperating with geospatial ellipsoids
 
-[`Ellipsoid`](../geospatial/api-reference/ellipsoid.md) supports surface geometry,
+[`Ellipsoid`](../../geospatial/api-reference/ellipsoid.md) supports surface geometry,
 local frames and three independent radii. Projection CRS definitions use the
 sphere/oblate-spheroid subset. Both modules share `SpheroidParameters`, a type-only
 contract for the two axes in metres. They also share the low-level
-[spheroid conversions](../core/api-reference/spheroid.md) for forward conversion
+[spheroid conversions](../../core/api-reference/spheroid.md) for forward conversion
 and the qualified sphere/oblate surface/exterior inverse. Geospatial retains its
 three-radius and interior geometry paths.
 
 ```ts
 import {Ellipsoid} from '@math.gl/geospatial';
-import {normalizeCRS, ProjectionEngine} from '@math.gl/projection/core';
+import {normalizeCRS, ProjectionTransform} from '@math.gl/projection/core';
 import {geocentric} from '@math.gl/projection/projections/geocent';
 
 const normalized = normalizeCRS('+proj=longlat +ellps=GRS80');
 const shape = Ellipsoid.fromSpheroid(normalized.ellipsoid);
 const {semiMajorAxis: a, semiMinorAxis: b} = shape.toSpheroid();
 const geometry = `+a=${a} +b=${b}`;
-const conversion = new ProjectionEngine({
+const conversion = new ProjectionTransform({
   from: `+proj=longlat ${geometry}`,
   to: `+proj=geocent ${geometry}`,
   projections: [geocentric]
@@ -146,7 +150,7 @@ request a datum shift. `+datum=none` explicitly disables datum conversion.
 
 The configurable engine requires grids to be supplied by the application; it does
 not select operations or fetch grid files from an authority database. Use
-[explicit pipelines](./operation-pipelines.md) when operation order and conventions
+[explicit pipelines](../api-reference/projection-pipeline.md) when operation order and conventions
 need to be stated. In particular, a Helmert rotation's sign depends on whether the
 operation uses the position-vector or coordinate-frame convention. See the
 [PROJ Helmert reference](https://proj.org/en/stable/operations/transformations/helmert.html).
@@ -206,14 +210,14 @@ const xyz = new Float64Array([6378137, 0, 0, 6378137, 1, 0]);
 movingFrame.projectFlat(xyz, 3, new Float64Array([2000, 2020]));
 ```
 
-See [kinematic Helmert operations](./operation-pipelines.md) for inverse semantics
+See [kinematic Helmert operations](../api-reference/projection-pipeline.md) for inverse semantics
 and [deformation models](./deformation-models.md) for propagation with geographic ENU velocity grids
 applied to geocentric positions. PROJ's
 [deformation reference](https://proj.org/en/stable/operations/transformations/deformation.html)
 provides background on velocity-based epoch changes.
 
 `@math.gl/crs` can retain `coordinateEpoch` metadata. The ordinary `Projection`
-and `ProjectionEngine` do not silently apply it; epoch-bearing spatial references
+and `ProjectionTransform` do not silently apply it; epoch-bearing spatial references
 require an explicit time-dependent operation. Nor does a dynamic CRS definition
 select a velocity model or an operation automatically.
 
@@ -223,7 +227,7 @@ A CRS can declare latitude before longitude, west-positive longitude or differen
 horizontal and vertical units. Default coordinate arrays use conventional x/y/z
 order. `enforceAxis: true` honors the declared CRS axes. Metadata about stored
 coordinate order is a separate concern; see the
-[engine API](./api-reference/projection-engine.md#integration-with-mathglcrs).
+[engine API](../api-reference/projection-transform.md#integration-with-mathglcrs).
 
 Use Float64 storage for large map coordinates with small local differences.
 Float32 storage can lose sub-meter detail even if the equations calculate in
@@ -240,7 +244,7 @@ projection singularities, grid edges and datum boundaries.
 5. For dynamic frames, distinguish frame transformation at an epoch from propagation between epochs.
 6. Check compatibility, then validate representative coordinates against independent references.
 
-See [independent validation](./independent-validation.md) for the package's qualified
-accuracy profile. The optional [operation catalogue](./operation-selection.md) filters
+See [independent validation](../independent-validation.md) for the package's qualified
+accuracy profile. The optional [operation catalogue](../api-reference/operation-catalog.md) filters
 application-reviewed candidates; general EPSG operation discovery and complete
 PROJ/EPSG database behavior are outside the supported subset.

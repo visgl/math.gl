@@ -5,7 +5,7 @@
 import type {Bench} from '@probe.gl/bench';
 import proj4 from 'proj4';
 import {
-  ProjectionEngine,
+  ProjectionTransform,
   mercator,
   universalTransverseMercator,
   lambertConformalConic
@@ -24,7 +24,7 @@ export function projectionBench(suite: Bench): Bench {
       39
     ]
   ] as const) {
-    const native = new ProjectionEngine({to, projections: [plugin]});
+    const native = new ProjectionTransform({to, projections: [plugin]});
     const reference = proj4('WGS84', to);
     for (const ArrayType of [Float32Array, Float64Array]) {
       const source = new ArrayType(points * 2);

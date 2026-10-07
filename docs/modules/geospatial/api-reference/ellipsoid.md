@@ -56,7 +56,7 @@ const parameters = shape.toSpheroid(); // {semiMajorAxis, semiMinorAxis}, in met
 
 Create/cache the adapter result during setup. Coordinate conversions still use
 the existing geospatial implementation. The projection module does not import
-geospatial at runtime. See [coordinate-system concepts](../../projection/coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
+geospatial at runtime. See [coordinate-system concepts](../../projection/developer-guide/coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
 for the units and boundary conventions.
 
 ## Static Fields

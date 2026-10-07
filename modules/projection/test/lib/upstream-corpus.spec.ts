@@ -86,11 +86,11 @@ for (const fixture of corpus.fixtures) {
       if (rejection) {
         // Exact errors keep an unrelated regression from satisfying a known gap.
         // A newly accepted definition fails here until reviewed and numerically tested.
-        expect(() => new native.ProjectionEngine(nativeOptions)).toThrowError(
+        expect(() => new native.ProjectionTransform(nativeOptions)).toThrowError(
           new native.TypeScriptCRSError('missing-transform-stage', rejection.error)
         );
       } else {
-        const projection = new native.ProjectionEngine(nativeOptions);
+        const projection = new native.ProjectionTransform(nativeOptions);
         const correction = corrections.find(row => row.index === fixture.index);
         if (correction) {
           expect(correction.sourceLine).toBe(fixture.sourceLine);
@@ -162,7 +162,7 @@ test('Explicit WKT Helmert overrides named grids and authority shifts', () => {
     });
     expect(normalized.datum.towgs84).toEqual([1, 2, 3]);
     expect(normalized.datum.grids).toBeUndefined();
-    const projection = new native.ProjectionEngine(options(definition));
+    const projection = new native.ProjectionTransform(options(definition));
     close(
       projection.project([-80, 40]),
       proj4('+proj=tmerc +a=6378206.4 +rf=294.9786982138982 +towgs84=1,2,3').forward([-80, 40]),
@@ -186,7 +186,7 @@ function polarWKT(latitude: number, method = 'Polar_Stereographic') {
 }
 test('WKT1 polar origin is true-scale latitude; variant A retains pole scale', () => {
   for (const sign of [-1, 1]) {
-    const polar = new native.ProjectionEngine(options(polarWKT(sign * 71)));
+    const polar = new native.ProjectionTransform(options(polarWKT(sign * 71)));
     close(polar.project([0, sign * 90]), [0, 0], 1e-8);
     const reference = proj4(
       '+proj=stere +datum=WGS84 +lat_0=' + sign * 90 + ' +lat_ts=' + sign * 71 + ' +k_0=0.994'
@@ -202,7 +202,7 @@ test('WKT1 polar origin is true-scale latitude; variant A retains pole scale', (
       polarWKT(sign * 90, 'Polar Stereographic (variant A)'),
       variantAWKT2
     ]) {
-      const variantA = new native.ProjectionEngine(options(definition));
+      const variantA = new native.ProjectionTransform(options(definition));
       close(
         variantA.project([30, sign * 80]),
         proj4('+proj=stere +datum=WGS84 +lat_0=' + sign * 90 + ' +k_0=0.994').forward([
@@ -217,7 +217,7 @@ test('WKT1 polar origin is true-scale latitude; variant A retains pole scale', (
     ',UNIT["metre",1]]',
     ',PARAMETER["standard_parallel_1",70],UNIT["metre",1]]'
   );
-  expect(() => new native.ProjectionEngine(options(ambiguous))).toThrow('Duplicate polar');
+  expect(() => new native.ProjectionTransform(options(ambiguous))).toThrow('Duplicate polar');
 });
 
 test('Structured pole roundoff tolerance does not accept invalid latitude definitions', () => {
@@ -227,15 +227,15 @@ test('Structured pole roundoff tolerance does not accept invalid latitude defini
         '0.017453292519943295',
         String(factor)
       );
-      const projection = new native.ProjectionEngine(options(definition));
+      const projection = new native.ProjectionTransform(options(definition));
       close(projection.project([0, sign * 90]), [0, 0], 1e-8);
     }
     expect(
       () =>
-        new native.ProjectionEngine(options(polarWKT(sign * 90.000001, 'Azimuthal_Equidistant')))
+        new native.ProjectionTransform(options(polarWKT(sign * 90.000001, 'Azimuthal_Equidistant')))
     ).toThrow(/latitude/i);
     expect(
-      () => new native.ProjectionEngine(options('+proj=aeqd +lat_0=' + sign * 90.00000000000003))
+      () => new native.ProjectionTransform(options('+proj=aeqd +lat_0=' + sign * 90.00000000000003))
     ).toThrow(/latitude/i);
   }
 });

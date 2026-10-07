@@ -1,4 +1,8 @@
-# Reusable coordinate buffers
+---
+slug: /modules/projection/bulk-layouts
+---
+
+# ProjectionBuffer
 
 Use `ProjectionBuffer` when coordinates live in separate input/output arrays,
 interleaved records with padding, or separate X/Y/Z/M columns. Capture the layout
@@ -9,11 +13,11 @@ For contiguous coordinates that can be overwritten, the existing
 the shortest path and can use whole-buffer projection kernels.
 
 ```typescript
-import {ProjectionEngine} from '@math.gl/projection/core';
+import {ProjectionTransform} from '@math.gl/projection/core';
 import {mercator} from '@math.gl/projection/projections/merc';
 import {ProjectionBuffer} from '@math.gl/projection/bulk';
 
-const projection = new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});
+const projection = new ProjectionTransform({to: 'EPSG:3857', projections: [mercator]});
 const transform = new ProjectionBuffer({
   projection,
   dimension: 4,
@@ -28,7 +32,7 @@ const output = new Float32Array(10);
 transform.projectFlatTo(input, output, 2);
 ```
 
-`Projection`, `ProjectionEngine`, `ProjectionPipeline` and preloaded
+`Projection`, `ProjectionTransform`, `ProjectionPipeline` and preloaded
 `LazyProjection` instances provide the synchronous output methods this adapter
 uses. A lazy projection must have completed `preload()` before a nonempty batch;
 these methods neither start imports nor return promises. CRS units, axes, datum

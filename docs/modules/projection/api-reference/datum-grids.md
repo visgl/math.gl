@@ -30,7 +30,7 @@ object returned by a separately chosen TIFF reader. The adapter imports no TIFF
 library. That reader and its workers have their own bundle costs and can also be
 loaded on demand. See [datum grids](./projection-engine.md#horizontal-datum-grids)
 for band conventions, ownership, coverage, and inverse-edge behavior. Explicit vertical
-height conversion is described below; time-dependent operations use the explicit [pipeline API](../operation-pipelines.md).
+height conversion is described below; time-dependent operations use the explicit [pipeline API](projection-pipeline.md).
 
 ## Convert geoid heights
 
@@ -104,8 +104,8 @@ to a geocentric or identity CRS or combined with lossy horizontal extraction.
 This API supports explicit vertical-grid transformations.
 Compound/vertical WKT or PROJJSON execution, dynamic datum interpretation and
 automatic EPSG operation lookup remain outside the supported subset. Optional
-[operation selection](../operation-selection.md) filters application-reviewed candidates. Explicit typed pipelines and
-coordinate epochs are available through the optional [pipeline API](../operation-pipelines.md).
+[operation selection](operation-catalog.md) filters application-reviewed candidates. Explicit typed pipelines and
+coordinate epochs are available through the optional [pipeline API](projection-pipeline.md).
 
 ### Vertical GeoTIFF geoid models
 

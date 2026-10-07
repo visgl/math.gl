@@ -1,8 +1,12 @@
-# Explicit operation pipelines
+---
+slug: /modules/projection/operation-pipelines
+---
+
+# ProjectionPipeline
 
 `ProjectionPipeline` composes a known coordinate operation from typed steps. Use it
 when you need to choose the order of projection, datum and height operations yourself.
-For ordinary CRS-to-CRS conversion, use [Projection or ProjectionEngine](./projection-engine.md).
+For ordinary CRS-to-CRS conversion, use [Projection or ProjectionTransform](../developer-guide/projection-engine.md).
 A pipeline does not find an EPSG operation or select grids automatically.
 
 ```typescript
@@ -238,7 +242,7 @@ by [PROJ pipelines](https://proj.org/en/stable/operations/pipeline.html) and
 
 ## Lazy projections and synchronous methods
 
-Use the same descriptors and shared implementation cache as `ProjectionEngine`.
+Use the same descriptors and shared implementation cache as `ProjectionTransform`.
 Construction starts no imports; only projection names used by steps are preloaded.
 
 ```typescript
@@ -314,7 +318,7 @@ scalar input; the reusable-output methods can explicitly use that same object in
 WKT/PROJJSON readers, grid decoders or proj4js runtime. Add plugins/readers explicitly.
 The class is also available from the root barrel; ESM tree shaking keeps it out of
 ordinary core, wrapper and projection bundles. CommonJS subpaths select APIs but do
-not provide browser code splitting. See [bundle measurements](./projection-engine.md#tree-shaking-and-bundle-size).
+not provide browser code splitting. See [bundle measurements](../developer-guide/projection-engine.md#tree-shaking-and-bundle-size).
 
 ## Qualified profile and remaining work
 
@@ -333,7 +337,7 @@ This is typed composition, not a parser for arbitrary `+proj=pipeline` strings. 
 operators and parameters throw instead of being skipped. Stack support covers X/Y/Z
 with stricter balance validation; arbitrary operators, time-varying deformation components, automatic
 EPSG operation lookup and dynamic CRS inference remain outside this profile.
-Use the optional [operation catalogue](./operation-selection.md) to choose among
+Use the optional [operation catalogue](./operation-catalog.md) to choose among
 application-reviewed pipelines before execution.
 
 

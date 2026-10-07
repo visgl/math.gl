@@ -8,7 +8,7 @@ math.gl/crs WKT/PROJJSON readers. The package has no runtime dependency on proj4
 The v5 alpha package was renamed from `@math.gl/proj4`; use `Projection` instead
 of the former `Proj4Projection` alias. The `/classic` wrapper is removed.
 
-For selective bundles, use `ProjectionEngine` from `@math.gl/projection/core` with
+For selective bundles, use `ProjectionTransform` from `@math.gl/projection/core` with
 explicit projection plugins. `LazyProjection` from `@math.gl/projection/projections/lazy`
 loads algorithms on demand. The engine supports geocentric/Helmert transforms and
 prepared horizontal datum grids. `projectFlat` and `unprojectFlat` transform interleaved

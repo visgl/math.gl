@@ -128,7 +128,7 @@ and failure contracts.
 ## Pinned assets and reviewed operation metadata
 
 The local reference JSON can additionally include an `operation` candidate using
-the [operation catalogue](./operation-selection.md) contract, plus `assets`:
+the [operation catalogue](api-reference/operation-catalog.md) contract, plus `assets`:
 
 ```json
 {"assets": [{

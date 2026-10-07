@@ -69,8 +69,8 @@ coordinates. Warm throughput does not describe loading or first-use latency.
 | Individual coordinates | `project` / `unproject` | Returns a new coordinate array |
 | Repeated scalar calls | [`projectTo` / `unprojectTo`](./api-reference/projection-engine.md#reusable-scalar-outputs) | Reuses a caller-provided output |
 | Interleaved Float32/Float64 coordinates | `projectFlat` / `unprojectFlat` | Updates the supplied view in place |
-| Separate output, padded records or columns | [`ProjectionBuffer`](./bulk-layouts.md) | Reuses prepared layout and scratch |
-| Explicit datum or epoch operations | [`ProjectionPipeline`](./operation-pipelines.md) | Reuses the prepared operation chain |
+| Separate output, padded records or columns | [`ProjectionBuffer`](api-reference/projection-buffer.md) | Reuses prepared layout and scratch |
+| Explicit datum or epoch operations | [`ProjectionPipeline`](api-reference/projection-pipeline.md) | Reuses the prepared operation chain |
 
 ```typescript
 import {Projection} from '@math.gl/projection';
@@ -89,7 +89,7 @@ may allocate; use mutable hooks when implementing a plugin. A batch commits comp
 records before an error; see the [flat-array contract](./api-reference/projection-engine.md#flat-typed-arrays-in-place).
 
 Lazy instances need `preload()` before synchronous methods. Import selection and
-loading affect startup and downloads; see [imports, plugins and bundle size](./projection-engine.md).
+loading affect startup and downloads; see [imports, plugins and bundle size](developer-guide/projection-engine.md).
 
 ## Keep the interface responsive
 
@@ -195,4 +195,4 @@ layouts for repeated calls; include output copies and worker transfers when thos
 are part of the application workload.
 
 Bundle measurements and packaging checks are documented with
-[imports, plugins and loading](./projection-engine.md#tree-shaking-and-bundle-size).
+[imports, plugins and loading](developer-guide/projection-engine.md#tree-shaking-and-bundle-size).

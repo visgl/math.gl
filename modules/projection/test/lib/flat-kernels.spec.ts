@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
 import {
-  ProjectionEngine,
+  ProjectionTransform,
   mercator,
   universalTransverseMercator,
   transverseMercator,
@@ -15,7 +15,7 @@ import {
 import type {
   ProjectionPlugin,
   ProjectionFlatContext,
-  ProjectionEngineOptions
+  ProjectionTransformOptions
 } from '@math.gl/projection/core';
 import {commonProjectionCases} from '../fixtures/common-projections';
 
@@ -61,7 +61,7 @@ const cases = [
 for (const fixture of cases)
   test('whole-buffer/scalar exact parity: ' + fixture.id, () => {
     let runs = 0;
-    const projection = new ProjectionEngine({
+    const projection = new ProjectionTransform({
       to: fixture.definition,
       projections: plugins.map(plugin =>
         observed(plugin, kind => {
@@ -96,7 +96,7 @@ for (const fixture of cases)
   });
 
 test('batch selection retains the general pipeline for other transform stages', () => {
-  const cases: ProjectionEngineOptions[] = [
+  const cases: ProjectionTransformOptions[] = [
     {from: '+proj=longlat +axis=neu', enforceAxis: true},
     {from: '+proj=longlat +pm=paris'},
     {to: '+proj=merc +pm=paris'},
@@ -109,7 +109,7 @@ test('batch selection retains the general pipeline for other transform stages', 
   ];
   for (const options of cases) {
     let prepared = 0;
-    const projection = new ProjectionEngine({
+    const projection = new ProjectionTransform({
       to: 'EPSG:3857',
       ...options,
       projections: [
@@ -141,7 +141,7 @@ test('optional custom batch factories may decline without changing scalar fallba
       }
     })
   };
-  const projection = new ProjectionEngine({
+  const projection = new ProjectionTransform({
     to: '+proj=custom +units=km',
     projections: [plugin]
   });
@@ -155,7 +155,7 @@ test('optional custom batch factories may decline without changing scalar fallba
 test('batch failures preserve the failing record, later records and view boundaries', () => {
   for (const ArrayType of [Float32Array, Float64Array])
     for (const direction of ['project', 'unproject'] as const) {
-      const projection = new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});
+      const projection = new ProjectionTransform({to: 'EPSG:3857', projections: [mercator]});
       for (const invalid of [
         [NaN, 2, 3],
         [1, Infinity, 3],
@@ -178,7 +178,7 @@ test('batch failures preserve the failing record, later records and view boundar
         expect(backing[0]).toBe(999);
       }
     }
-  const huge = new ProjectionEngine({
+  const huge = new ProjectionTransform({
     to: '+proj=merc +a=1e40 +b=1e40 +datum=none',
     projections: [mercator]
   });
@@ -202,7 +202,7 @@ test('decorating a built-in mutable hook does not inherit an incompatible batch 
       };
     }
   };
-  const projection = new ProjectionEngine({to: 'EPSG:3857', projections: [plugin]});
+  const projection = new ProjectionTransform({to: 'EPSG:3857', projections: [plugin]});
   const result = projection.projectFlat(new Float64Array([0, 0]));
   expect([...result]).toEqual([100, 0]);
   expect([...result]).toEqual(projection.project([0, 0]));

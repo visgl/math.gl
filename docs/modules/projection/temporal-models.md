@@ -99,7 +99,7 @@ a centred numerical displacement Jacobian, at most 16 updates and 12 halving tri
 per update. The stopping criterion is a fixed-XYZ forward residual of 1e-8 metres.
 This numerical threshold is not a claim about observational model accuracy.
 Stencil/trial positions need coverage; singular or nonconvergent inverses fail.
-Failure restores the input XYZ. The existing [static velocity model](./deformation-models.md)
+Failure restores the input XYZ. The existing [static velocity model](developer-guide/deformation-models.md)
 keeps its current fixed-point inverse and multiplication order.
 
 ## Independent qualification

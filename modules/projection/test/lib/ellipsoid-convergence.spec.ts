@@ -5,7 +5,7 @@
 import {expect, test} from 'vitest';
 import {config} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
-import {normalizeCRS, ProjectionEngine} from '@math.gl/projection/core';
+import {normalizeCRS, ProjectionTransform} from '@math.gl/projection/core';
 import {geocentric} from '@math.gl/projection/projections/geocent';
 import {ProjectionPipeline} from '@math.gl/projection/pipeline';
 import references from '../fixtures/operation-pipeline-reference.json';
@@ -36,7 +36,7 @@ for (const geometry of geometries) {
       const {semiMajorAxis: a, semiMinorAxis: b} = ellipsoid.toSpheroid();
       const axes = `+a=${a} +b=${b}`;
       expect(normalizeCRS('+proj=longlat ' + axes).ellipsoid).toEqual(normalized.ellipsoid);
-      const engine = new ProjectionEngine({
+      const engine = new ProjectionTransform({
         from: '+proj=longlat ' + axes,
         to: '+proj=geocent ' + axes,
         projections: [geocentric]
@@ -68,7 +68,7 @@ test('both modules qualify independently against pinned PROJ cart results', () =
       ['cart-sphere', '+R=6371000']
     ]) {
       const ellipsoid = Ellipsoid.fromSpheroid(normalizeCRS('+proj=longlat ' + geometry).ellipsoid);
-      const engine = new ProjectionEngine({
+      const engine = new ProjectionTransform({
         from: '+proj=longlat ' + geometry,
         to: '+proj=geocent ' + geometry,
         projections: [geocentric]
@@ -124,7 +124,7 @@ test('authored cardinal anchors and explicitly scoped radians agree with the car
       close(pipeline.unproject(xyz), llh);
     }
     const geometry = `+a=${spheroid.semiMajorAxis} +b=${spheroid.semiMinorAxis}`;
-    const engine = new ProjectionEngine({
+    const engine = new ProjectionTransform({
       from: '+proj=longlat ' + geometry,
       to: '+proj=geocent ' + geometry,
       projections: [geocentric]
@@ -145,7 +145,7 @@ test('caller-owned scalar outputs, aliasing, Float32/64 batches and M preserve t
     const ellipsoid = Ellipsoid.WGS84;
     const {semiMajorAxis: a, semiMinorAxis: b} = ellipsoid.toSpheroid();
     const axes = `+a=${a} +b=${b}`;
-    const engine = new ProjectionEngine({
+    const engine = new ProjectionTransform({
       from: '+proj=longlat ' + axes,
       to: '+proj=geocent ' + axes,
       projections: [geocentric]
@@ -185,7 +185,7 @@ test('undefined center and canonical pole longitude remain distinct boundary con
   const previous = config._cartographicRadians;
   config._cartographicRadians = false;
   try {
-    const engine = new ProjectionEngine({to: 'EPSG:4978', projections: [geocentric]});
+    const engine = new ProjectionTransform({to: 'EPSG:4978', projections: [geocentric]});
     const output = [7, 8, 9];
     expect(Ellipsoid.WGS84.cartesianToCartographic([0, 0, 0], output)).toBeUndefined();
     expect(output).toEqual([7, 8, 9]);

@@ -1,3 +1,7 @@
+---
+slug: /modules/projection/deformation-models
+---
+
 # Propagate coordinates between epochs
 
 A velocity model describes how a position changes over time within a reference
@@ -95,7 +99,7 @@ ENU velocities in metres/year. The regular grid's setup coordinates remain degre
 its sampler performs that conversion. Deformation rotates these velocities using
 the normal at the inverse geodetic position, then integrates over the decimal-year
 interval in fixed XYZ metres. It shares the reusable
-[local-frame functions](../core/api-reference/local-frame.md) with geospatial.
+[local-frame functions](../../core/api-reference/local-frame.md) with geospatial.
 
 Sharing does not change geospatial's Cartesian-gradient normal choice at height,
 or the existing geocentric near-axis longitude convention. Custom samplers may
@@ -151,7 +155,7 @@ browser engines and checks fixture hashes and packed ESM/CommonJS/types.
 These authored fixtures validate the implemented contract, not a real model's
 accuracy or unrestricted PROJ parity. No third-party model files or new dependencies
 are distributed. Spatially nonlinear application samplers have an additional independent stress
-profile and offline model/reference harness; see [model qualification](./deformation-qualification.md).
+profile and offline model/reference harness; see [model qualification](../deformation-qualification.md).
 Event offsets, time-varying components, trajectory integration, automatic model
 selection, dynamic CRS inference and model extrapolation are outside this profile.
 

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original shared scalar/bulk scratch lifetime and recursive stack isolation tests.
 import {expect, test} from 'vitest';
-import {ProjectionEngine, ProjectionPipeline} from '@math.gl/projection';
+import {ProjectionTransform, ProjectionPipeline} from '@math.gl/projection';
 import type {ProjectionPoint, ProjectionPlugin} from '@math.gl/projection/core';
 
 for (const kind of ['engine', 'pipeline']) {
@@ -54,7 +54,7 @@ for (const kind of ['engine', 'pipeline']) {
     };
     const operation =
       kind === 'engine'
-        ? new ProjectionEngine({to: '+proj=scratch_lifetime', projections: [plugin]})
+        ? new ProjectionTransform({to: '+proj=scratch_lifetime', projections: [plugin]})
         : new ProjectionPipeline({
             input: {space: 'geographic', units: ['rad', 'rad', 'm']},
             steps: [

@@ -98,7 +98,7 @@ Browser JS heap/allocation values are **unavailable**, not zero. Each throughput
 
 ## Bundle costs
 
-**math.gl 5.0.0-alpha.12**, from the source-matched snapshot above. For current import choices and split-bundle measurements, see [imports, plugins and loading](./projection-engine.md#tree-shaking-and-bundle-size).
+**math.gl 5.0.0-alpha.12**, from the source-matched snapshot above. For current import choices and split-bundle measurements, see [imports, plugins and loading](developer-guide/projection-engine.md#tree-shaking-and-bundle-size).
 
 browser ESM, es2020, minified, gzip level 9; Node v24.14.0. Selective modules exclude model data and external TIFF decoders.
 
