@@ -4,6 +4,10 @@ slug: /modules/projection/operation-selection
 
 # OperationCatalog
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Two coordinate reference systems can have several transformations between them.
 A regional grid may be more accurate than a global approximation, but only within
 its reviewed coverage and epoch range. `OperationCatalog` helps an application

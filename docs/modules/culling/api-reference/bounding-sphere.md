@@ -1,5 +1,9 @@
 # BoundingSphere
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.0-blue.svg?style=flat-square" alt="From v3.0" />
+</p>
+
 A [bounding sphere](https://en.wikipedia.org/wiki/Bounding_sphere) with a center and a radius.
 
 ## Usage

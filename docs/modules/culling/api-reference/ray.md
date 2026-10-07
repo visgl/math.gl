@@ -1,5 +1,9 @@
 # Ray
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From v4.2" />
+</p>
+
 A ray that extends infinitely from an origin in one direction.
 
 ## Usage

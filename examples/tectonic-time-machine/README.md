@@ -84,6 +84,10 @@ Content-Range header is hidden by CORS, so each response's status and byte count
 checked against the requested range and manifest size. If a host returns a full-file
 HTTP 200 response, the small compressed file is buffered once and batches still decode incrementally.
 
+Every manifest and byte-range request has a 45-second deadline covering response headers
+and body consumption. A stalled request aborts only itself, leaving the model lifetime
+usable for retries. Pose waits report progress until their samples arrive.
+
 Background failures preserve validated samples and retry after 30 seconds, including
 while playback is stopped. Needed-pose failures show the existing retry control. Source
 changes and unmounts cancel waiters and retries; batches from cancelled sources never

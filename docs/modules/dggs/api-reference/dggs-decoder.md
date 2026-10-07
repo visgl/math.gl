@@ -1,5 +1,9 @@
 # DGGSDecoder
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 `DGGSDecoder` defines the common API implemented by the decoder objects exported from `@math.gl/dggs`.
 
 This is a compact decoding contract for visualization and data inspection. It does not attempt to standardize the complete API surface of DGGS implementations.

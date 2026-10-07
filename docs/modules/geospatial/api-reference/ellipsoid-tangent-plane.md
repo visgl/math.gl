@@ -1,5 +1,9 @@
 # EllipsoidTangentPlane
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From v4.2" />
+</p>
+
 A two-dimensional east-north plane tangent to the WGS84 ellipsoid. It converts WGS84 Cartesian
 positions into local coordinates near a point on the ellipsoid.
 

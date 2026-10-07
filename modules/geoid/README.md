@@ -6,6 +6,12 @@ This module contains support for non-ellipsoidal surface using earth gravity mod
 
 For documentation please visit the [website](https://math.gl).
 
+Use `createGeoidFromGrid({width, height, values, offset, scale, cubic})` to create
+a geoid from a complete decoded `Uint16Array` grid, including Parquet's
+`raw_value` column. The array must retain GeographicLib row/column order.
+Decode files in the application; this API requires no Arrow or Parquet dependency.
+See the [grid factory documentation](../../docs/modules/geoid/api-reference/create-geoid-from-grid.md).
+
 ## Optional EGM96 grids
 
 Import `@math.gl/geoid/geoid-egm96-low.pgm` (1° preview, 130 KB) or

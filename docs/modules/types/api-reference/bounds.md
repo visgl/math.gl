@@ -1,5 +1,9 @@
 # Bounds
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v4.1-blue.svg?style=flat-square" alt="From v4.1" />
+</p>
+
 A common need for geospatial and 3D applications is to be able to express bounds
 or extents for a 2D or 3D geometry.
 

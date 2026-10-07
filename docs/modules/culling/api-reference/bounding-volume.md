@@ -1,5 +1,9 @@
 # BoundingVolume (Interface)
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.5-blue.svg?style=flat-square" alt="From v3.5" />
+</p>
+
 An interface defining common operations for bounding volumes (i.e. `BoundingSphere`, `AxisAlignedBoundingBox`, `OrientedBoundingBox`).
 
 ## Global Functions

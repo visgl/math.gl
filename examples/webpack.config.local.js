@@ -8,7 +8,6 @@
 // This enables using the examples to debug the main library source
 // without publishing or npm linking, with conveniences such hot reloading etc.
 
-const webpack = require('webpack');
 const resolve = require('path').resolve;
 const ALIASES = require('ocular-dev-tools/config/ocular.config')({
   root: resolve(__dirname, '..')
@@ -51,7 +50,7 @@ const LOCAL_DEVELOPMENT_CONFIG = {
     ]
   },
 
-  plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
+  plugins: []
 };
 
 function addLocalDevSettings(config) {

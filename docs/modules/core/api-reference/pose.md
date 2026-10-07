@@ -1,5 +1,9 @@
 # Pose
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v2.0-blue.svg?style=flat-square" alt="From v2.0" />
+</p>
+
 A 6-degree-freedom pose (3D position and 3D rotation).
 See [Tait–Bryan angles](https://en.wikipedia.org/wiki/Euler_angles): z-y'-x"
 

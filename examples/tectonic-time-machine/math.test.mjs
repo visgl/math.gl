@@ -528,3 +528,109 @@ test('snapshot byte ranges reject truncated or incorrectly addressed responses',
     },/Unexpected snapshot byte range/);
   }
 });
+
+import {snapshotRequest} from './snapshot-request.js';
+test('snapshot deadlines cover stalled headers and bodies without aborting the model lifetime',async()=>{
+  for (const phase of ['headers','body']) {
+    const model=new AbortController();let requestSignal;
+    await assert.rejects(snapshotRequest('https://example.test/stalled',{
+      signal:model.signal,timeoutMs:20,fetchFile:async(_url,{signal})=>{
+        requestSignal=signal;
+        if (phase==='headers') return new Promise(()=>{});
+        return {json:()=>new Promise(()=>{})};
+      }
+    },response=>response.json()),{name:'TimeoutError'});
+    assert.equal(requestSignal.aborted,true);assert.equal(model.signal.aborted,false);
+    assert.equal(await snapshotRequest('https://example.test/retry',{
+      signal:model.signal,timeoutMs:20,fetchFile:async()=>new Response('"ok"')
+    },response=>response.json()),'ok');
+  }
+});
+test('snapshot requests clear deadlines and propagate source cancellation through body consumption',async()=>{
+  const model=new AbortController();let completedSignal;
+  assert.equal(await snapshotRequest('https://example.test/complete',{
+    signal:model.signal,timeoutMs:20,fetchFile:async(_url,{signal})=>{
+      completedSignal=signal;return new Response('done');
+    }
+  },response=>response.text()),'done');
+  await new Promise(resolve=>setTimeout(resolve,30));
+  assert.equal(completedSignal.aborted,false);
+  let requestSignal;
+  const bodyReady=deferred();
+  const pending=snapshotRequest('https://example.test/cancel',{
+    signal:model.signal,timeoutMs:1000,fetchFile:async(_url,{signal})=>{
+      requestSignal=signal;return {text:()=>{bodyReady.resolve();return new Promise(()=>{});}};
+    }
+  },response=>response.text());
+  await bodyReady.promise;model.abort(new DOMException('Source changed','AbortError'));
+  await assert.rejects(pending,/Source changed/);
+  assert.equal(requestSignal.aborted,true);assert.equal(completedSignal.aborted,false);
+});
+test('manifest header and JSON body stalls report failure before any geometry loads',async()=>{
+  for (const phase of ['headers','body']) {
+    const model=new AbortController();
+    await assert.rejects(loadModel({sourceId:'CAO2024',time:0,signal:model.signal,requestTimeout:20,
+      fetchManifest:async()=>phase==='headers'?new Promise(()=>{}):{ok:true,json:()=>new Promise(()=>{})},
+      readBatches:async function*(){assert.fail('Geometry requested before the manifest');}
+    }),{name:'TimeoutError'});
+    assert.equal(model.signal.aborted,false);
+  }
+});
+test('a stalled range body is evicted and the same source retries successfully',async()=>{
+  const data=await readFile(new URL('./test-data/streaming.parquet',import.meta.url));
+  const staleBody=deferred();let attempts=0,failedRequestSignal;
+  const read=createParquetReader(async(_url,{signal,headers})=>{
+    if (++attempts===1) {
+      failedRequestSignal=signal;
+      return {status:206,headers:new Headers(),arrayBuffer:()=>staleBody.promise};
+    }
+    const [,start,end]=/^bytes=(\d+)-(\d+)$/.exec(headers.Range).map(Number);
+    return new Response(data.subarray(start,end+1),{status:206});
+  },{worker:false,requestTimeout:20});
+  const signal=new AbortController().signal;
+  const options={signal,byteLength:data.byteLength,columns:['age','plateId'],rowGroups:[1]};
+  await assert.rejects(async()=>{for await(const item of read('https://example.test/retry.parquet',options))
+    assert.fail('Stalled body was published');},{name:'TimeoutError'});
+  assert.equal(failedRequestSignal.aborted,true);assert.equal(signal.aborted,false);
+  const result=[];
+  for await(const item of read('https://example.test/retry.parquet',options)) result.push(item);
+  assert.deepEqual(Array.from(result[0].data.getChild('age')),[0,10,20]);
+  staleBody.resolve(new Uint8Array(4).buffer);
+  const before=attempts;
+  for await(const item of read('https://example.test/retry.parquet',options))
+    assert.deepEqual(Array.from(item.data.getChild('age')),[0,10,20]);
+  assert.equal(attempts,before,'late timed-out data must not replace cached valid ranges');
+});
+test('pose waits report progress immediately and detach after resolution or cancellation',async()=>{
+  const zero=deferred(),ten=deferred(),twenty=deferred();
+  const lifetime=new AbortController(),cancel=new AbortController();
+  const cache=createRotationCache([1],{maxAge:20},async function*(){
+    await zero.promise;yield batch([rotationRow(0,1)]);
+    await ten.promise;yield batch([rotationRow(10,1)]);
+    await twenty.promise;yield batch([rotationRow(20,1)]);
+  });
+  const statuses=[],cancelledStatuses=[];
+  const pose=cache.waitForTime(-5,{signal:lifetime.signal,onStatus:value=>statuses.push(value)});
+  const other=cache.waitForTime(-20,{signal:cancel.signal,lifetimeSignal:lifetime.signal,
+    onStatus:value=>cancelledStatuses.push(value)});
+  assert.match(statuses[0],/Waiting for pose.*0\/3/);
+  cancel.abort();await assert.rejects(other,/abort/i);const cancelledCount=cancelledStatuses.length;
+  zero.resolve();await new Promise(resolve=>setImmediate(resolve));
+  assert.match(statuses.at(-1),/1\/3/);
+  ten.resolve();await pose;assert.match(statuses.at(-1),/2\/3/);const resolvedCount=statuses.length;
+  twenty.resolve();await cache.ensureHistory(-20,{signal:lifetime.signal});
+  assert.equal(statuses.length,resolvedCount);assert.equal(cancelledStatuses.length,cancelledCount);
+  assert.equal(lifetime.signal.aborted,false);assert.equal(cache.loadedSamples,3);
+});
+test('a new pose waiter retries a failed stream and does not inherit its stale failure',async()=>{
+  const signal=new AbortController().signal;let calls=0;
+  const cache=createRotationCache([1],{maxAge:10},async function*(){
+    if (++calls===1) throw new Error('Previous stream failed');
+    yield batch([rotationRow(0,1),rotationRow(10,1)]);
+  });
+  await assert.rejects(cache.ensureHistory(0,{signal}),/Previous stream failed/);
+  const statuses=[];
+  await cache.waitForTime(-5,{signal,onStatus:value=>statuses.push(value)});
+  assert.equal(calls,2);assert(cache.hasTime(-5));
+  assert.match(statuses[0],/0\/2/);assert.match(statuses.at(-1),/2\/2/);
+});

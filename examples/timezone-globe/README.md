@@ -24,3 +24,6 @@ The website reuses `mountTimezoneGlobe` from `app.js` in a browser-only React
 wrapper. `main.js` supplies Vite asset URLs for this standalone version. The
 mount function accepts an isolated container and returns cleanup that finalizes
 Deck, removes event listeners, and aborts outstanding geometry fetches.
+
+Basemap imagery uses NASA Blue Marble via the public GIBS EPSG:4326 WMS service,
+configured in `examples/common/blue-marble.js`. No access token is required.

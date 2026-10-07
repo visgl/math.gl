@@ -32,11 +32,12 @@ export type {
   NumericArray16
 } from './array-types';
 
-export {isTypedArray, isNumberArray, isNumericArray} from './is-array';
+export {isTypedArray, isUint16Array, isNumberArray, isNumericArray} from './is-array';
 export {
   NativeFloat16ArrayConstructor,
   getFloat16ArrayConstructor,
-  isFloat16ArrayConstructor
+  isFloat16ArrayConstructor,
+  isFloat16Array
 } from './float16';
 
 export type {Bounds, Bounds2D, Bounds3D} from './bounds-types';

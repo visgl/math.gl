@@ -1,5 +1,9 @@
 # Array Types
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.6-blue.svg?style=flat-square" alt="From v3.6" />
+</p>
+
 math.gl provides a number of numeric array types.
 
 TypeScript types to simplify working with a mix of typed arrays and standard JavaScript arrays containing numbers.
@@ -59,6 +63,20 @@ This includes `Float16Array` as part of the `TypedArray` union.
 Types matching number arrays of specific lengths or typed arrays.
 
 ## Utilities
+
+### `isUint16Array(value: unknown): value is Uint16Array`
+
+Checks the intrinsic element type of an unsigned 16-bit typed array. Works across
+JavaScript realms, including iframe and Node VM arrays, and supports subviews.
+Rejects signed integers, floats, DataViews, and objects with forged constructors
+or `Symbol.toStringTag` properties.
+
+### `isFloat16Array(value: unknown): value is Float16Array`
+
+Checks for a native Float16Array using the same realm-independent element-type
+check. Does not require a Float16Array constructor in the caller's realm and does
+not install a polyfill. A Uint16Array containing encoded IEEE 754 binary16 bits
+returns false: those bits need decoding before they represent numeric floats.
 
 ### `isTypedArray(value: unknown): value as TypedArray`
 

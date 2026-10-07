@@ -1,5 +1,9 @@
 # Vector3
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v1.0-blue.svg?style=flat-square" alt="From v1.0" />
+</p>
+
 ```js
 class Vector3 extends MathArray extends Array
 ```

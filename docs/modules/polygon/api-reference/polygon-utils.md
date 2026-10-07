@@ -1,5 +1,9 @@
 # polygon-utils
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.6-blue.svg?style=flat-square" alt="From v3.6" />
+</p>
+
 A set of polygon-related utility functions. Utility functions are available for flat arrays and for arrays of points. Note: the \*Points set of functions is used for arrays of points, and is separated for performance and backwards compatibility reasons.
 
 ## Usage

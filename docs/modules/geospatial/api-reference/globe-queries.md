@@ -3,6 +3,10 @@
 
 # Globe intersection and occlusion
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 These public APIs supply reusable CPU geometry for globe picking, label/annotation
 occlusion, limb meshes and imagery coverage. They do not depend on Kepler, deck.gl
 viewports or GPU state. Existing `SphereShape` remains useful for general transformed

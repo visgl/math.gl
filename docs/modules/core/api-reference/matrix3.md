@@ -1,5 +1,9 @@
 # Matrix3
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v1.1-blue.svg?style=flat-square" alt="From v1.1" />
+</p>
+
 A 3x3 matrix. Any arguments can be plain JavaScript arrays or other `math.gl` objects.
 
 ## Usage

@@ -1,6 +1,15 @@
+---
+title: Planets
+sidebar_label: Planets
+---
+
 {/* SPDX-License-Identifier: MIT */}
 
-# getPlanetSkyInfo
+# Planets
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
 
 Returns sky positions and disk geometry for Mercury, Venus, Mars, Jupiter, Saturn,
 Uranus and Neptune, plus Jupiter's Galilean moons: Io, Europa, Ganymede and Callisto.

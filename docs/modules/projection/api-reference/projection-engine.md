@@ -1,5 +1,9 @@
 # ProjectionEngine
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 `ProjectionEngine` is a reusable factory interface. Each engine holds projection plugins,
 CRS readers, aliases and grids; each `createProjection()` call creates an independent
 transform for a specific CRS pair.

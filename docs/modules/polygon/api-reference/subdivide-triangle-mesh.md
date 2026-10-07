@@ -1,5 +1,9 @@
 # subdivideTriangleMesh
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Adaptively refines an indexed triangle mesh through a supplied coordinate transform. Use it to approximate filled polygons or deform textured bitmap meshes when transformed triangles need more vertices to follow a curved surface.
 
 The utility checks both edge and triangle-interior samples. A failing triangle splits all three edges; adjacent triangles split the same shared edges. The resulting mesh remains conforming when the input is conforming. Vertices are shared by index, never welded by coordinate value.

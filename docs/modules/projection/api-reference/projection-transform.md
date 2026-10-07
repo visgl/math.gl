@@ -1,5 +1,9 @@
 # ProjectionTransform
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 The configurable math.gl projection engine underlying the default `Projection`; see the [support and migration contract](../developer-guide/support.md).
 Import it from `@math.gl/projection` or the isolated `@math.gl/projection/core` entry point.
 The package has no proj4js runtime dependency. Install `proj4` separately when

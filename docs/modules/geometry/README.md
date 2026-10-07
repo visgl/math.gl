@@ -1,5 +1,9 @@
 # @math.gl/geometry
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From v4.2" />
+</p>
+
 import GeometryViewer from '@site/src/components/geometry-viewer';
 
 <GeometryViewer geometryType="SphereGeometry" inline />
