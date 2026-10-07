@@ -3,7 +3,7 @@
 Animate the last Alpine glacial cycle from **119 ka to the present** using the
 published PISM output of Seguinot and colleagues. Switch between oblique relief and
 a map, scrub the ice-area chart, change playback speed or vertical exaggeration,
-and reveal terrain colors beneath the ice. Playback stops at the present.
+and reveal terrain colors beneath the ice. Playback repeats by default; disable Repeat animation to stop at the present.
 
 ## Run
 
@@ -101,5 +101,17 @@ python examples/alpine-ice-age/scripts/prepare-global.py /path/to/reconstruction
 The converter verifies the extracted source SHA-256 before processing, and records
 it and the compressed-asset checksum in the global manifest. The global binary
 contains time-major little-endian Int16 base elevations, then Uint16 grounded-ice
-thickness. The compressed display asset is about 4.2 MB. Both modes stop at present;
+thickness. The compressed display asset is about 4.2 MB. Both modes repeat by default, or stop at present with Repeat animation disabled;
 changing modes resets playback to the selected dataset's beginning.
+
+## Ice-age names
+
+The optional map labels identify regional names for the last glacial period:
+Wisconsinan (North America), Weichselian (northern Europe), and Würm (the Alps).
+They are broad regional context, not separate synchronous global ice ages or
+measured ice-margin boundaries. Labels change to Holocene at approximately
+11.7 ka; the Alpine view identifies the last interglacial before approximately
+115 ka. Those approximate divisions do not imply that every glacier disappeared
+at the same date. See the [USGS Wisconsinan chronology](https://www.usgs.gov/publications/chronology-late-wisconsinan-glaciation-middle-north-america-0),
+[BGS regional terminology](https://webapps.bgs.ac.uk/memoirs/docs/B07313.html),
+the Alpine study above, and the [ICS Holocene definition](https://stratigraphy.org/gssps/holocene).

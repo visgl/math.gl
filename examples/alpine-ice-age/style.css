@@ -62,28 +62,30 @@
   pointer-events: none;
 }
 .alpine-controls {
-  padding: 25px 22px;
+  padding: 14px 16px;
   background: #162730;
   border-left: 1px solid #344850;
   overflow: auto;
 }
 .alpine-controls h2 {
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1.2;
-  margin: 8px 0 12px;
+  margin: 4px 0 6px;
 }
 .alpine-controls p {
   color: #b0c5ce;
   font-size: 12px;
+  line-height: 1.4;
+  margin: 6px 0;
 }
 .alpine-stats {
   display: flex;
-  gap: 15px;
-  margin: 22px 0;
+  gap: 12px;
+  margin: 12px 0;
 }
 .alpine-stats strong {
   display: block;
-  font-size: 23px;
+  font-size: 20px;
   letter-spacing: -1px;
 }
 .alpine-stats span {
@@ -93,7 +95,7 @@
 .alpine-controls label {
   display: block;
   font-size: 12px;
-  margin: 16px 0;
+  margin: 8px 0;
   color: #c6d8df;
 }
 .alpine-controls label b {
@@ -101,8 +103,8 @@
 }
 .alpine-controls select {
   width: 100%;
-  margin-top: 6px;
-  padding: 8px;
+  margin-top: 3px;
+  padding: 6px;
   background: #1d3542;
   color: #eaf3f6;
   border: 1px solid #4a6370;
@@ -110,21 +112,21 @@
 }
 .alpine-controls input[type='range'] {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 5px;
   accent-color: #b3dce7;
 }
 .alpine-controls .alpine-check {
   display: flex;
   gap: 8px;
   align-items: center;
-  margin: 10px 0;
+  margin: 5px 0;
 }
 .alpine-check input {
   accent-color: #b3dce7;
 }
 .alpine-legend {
   font-size: 10px;
-  margin: 20px 0;
+  margin: 10px 0;
   color: #b9cdd6;
 }
 .alpine-legend i {
@@ -136,7 +138,7 @@
 }
 .alpine-controls details {
   border-top: 1px solid #37505c;
-  padding-top: 14px;
+  padding-top: 8px;
   font-size: 11px;
 }
 .alpine-controls summary {
@@ -239,7 +241,7 @@
     grid-template-columns: minmax(0, 1fr) 220px;
   }
   .alpine-controls {
-    padding: 18px 15px;
+    padding: 12px;
   }
   .alpine-title {
     top: 18px;

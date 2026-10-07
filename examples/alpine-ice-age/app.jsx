@@ -21,11 +21,13 @@ function AlpineView({ onMode }) {
     [error, setError] = useState('');
   const [age, setAge] = useState(119),
     [playing, setPlaying] = useState(true),
-    [speed, setSpeed] = useState(2);
+    [speed, setSpeed] = useState(2),
+    [repeat, setRepeat] = useState(true);
   const [exaggeration, setExaggeration] = useState(6),
     [showIce, setShowIce] = useState(true),
     [ghost, setGhost] = useState(true),
     [labels, setLabels] = useState(true),
+    [iceNames, setIceNames] = useState(true),
     [map, setMap] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
@@ -46,8 +48,9 @@ function AlpineView({ onMode }) {
     };
   }, []);
   useEffect(() => {
-    if (model) scene.current?.render(model, { age, exaggeration, showIce, ghost, labels });
-  }, [model, age, exaggeration, showIce, ghost, labels]);
+    if (model)
+      scene.current?.render(model, { age, exaggeration, showIce, ghost, labels, iceNames });
+  }, [model, age, exaggeration, showIce, ghost, labels, iceNames]);
   useEffect(() => {
     scene.current?.view(map);
   }, [map]);
@@ -58,13 +61,13 @@ function AlpineView({ onMode }) {
       const now = performance.now(),
         step = Math.min(0.15, (now - previous) / 1000) * speed;
       previous = now;
-      setAge((value) => Math.max(0, value - step));
+      setAge((value) => (repeat && value === 0 ? 119 : Math.max(0, value - step)));
     }, 75);
     return () => clearInterval(timer);
-  }, [playing, model, speed]);
+  }, [playing, model, speed, repeat]);
   useEffect(() => {
-    if (age === 0) setPlaying(false);
-  }, [age]);
+    if (age === 0 && !repeat) setPlaying(false);
+  }, [age, repeat]);
   const m = model?.manifest;
   const { index, fraction } = m ? sampleAt(m.ages, age) : { index: 0, fraction: 0 };
   const statistic = (field) =>
@@ -179,6 +182,18 @@ function AlpineView({ onMode }) {
         <label className="alpine-check">
           <input type="checkbox" checked={labels} onChange={(e) => setLabels(e.target.checked)} />
           Place labels
+        </label>
+        <label className="alpine-check">
+          <input type="checkbox" checked={repeat} onChange={(e) => setRepeat(e.target.checked)} />
+          Repeat animation
+        </label>
+        <label className="alpine-check">
+          <input
+            type="checkbox"
+            checked={iceNames}
+            onChange={(e) => setIceNames(e.target.checked)}
+          />
+          Ice age names
         </label>
         <div className="alpine-legend">
           <i />

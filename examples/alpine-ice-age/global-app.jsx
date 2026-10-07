@@ -20,10 +20,12 @@ export default function GlobalIceAge({ onMode }) {
     [error, setError] = useState('');
   const [age, setAge] = useState(80),
     [playing, setPlaying] = useState(true),
-    [speed, setSpeed] = useState(2);
+    [speed, setSpeed] = useState(2),
+    [repeat, setRepeat] = useState(true);
   const [showIce, setShowIce] = useState(true),
     [ghost, setGhost] = useState(true),
     [labels, setLabels] = useState(true),
+    [iceNames, setIceNames] = useState(true),
     [view, setView] = useState('globe');
   useEffect(() => {
     const controller = new AbortController();
@@ -44,8 +46,8 @@ export default function GlobalIceAge({ onMode }) {
     };
   }, []);
   useEffect(() => {
-    if (model) scene.current?.render(model, { age, view, showIce, ghost, labels });
-  }, [model, age, view, showIce, ghost, labels]);
+    if (model) scene.current?.render(model, { age, view, showIce, ghost, labels, iceNames });
+  }, [model, age, view, showIce, ghost, labels, iceNames]);
   useEffect(() => {
     if (!playing || !model) return;
     let previous = performance.now();
@@ -53,13 +55,13 @@ export default function GlobalIceAge({ onMode }) {
       const now = performance.now(),
         step = Math.min(0.15, (now - previous) / 1000) * speed;
       previous = now;
-      setAge((value) => Math.max(0, value - step));
+      setAge((value) => (repeat && value === 0 ? 80 : Math.max(0, value - step)));
     }, 75);
     return () => clearInterval(timer);
-  }, [playing, model, speed]);
+  }, [playing, model, speed, repeat]);
   useEffect(() => {
-    if (age === 0) setPlaying(false);
-  }, [age]);
+    if (age === 0 && !repeat) setPlaying(false);
+  }, [age, repeat]);
   const m = model?.manifest;
   const { index, fraction } = m ? sampleAt(m.ages, age) : { index: 0, fraction: 0 };
   const statistic = (field) =>
@@ -162,6 +164,18 @@ export default function GlobalIceAge({ onMode }) {
         <label className="alpine-check">
           <input type="checkbox" checked={labels} onChange={(e) => setLabels(e.target.checked)} />
           Latitude / longitude grid
+        </label>
+        <label className="alpine-check">
+          <input type="checkbox" checked={repeat} onChange={(e) => setRepeat(e.target.checked)} />
+          Repeat animation
+        </label>
+        <label className="alpine-check">
+          <input
+            type="checkbox"
+            checked={iceNames}
+            onChange={(e) => setIceNames(e.target.checked)}
+          />
+          Ice age names
         </label>
         <div className="alpine-legend">
           <i />

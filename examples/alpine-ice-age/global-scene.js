@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import { Deck, OrthographicView, COORDINATE_SYSTEM } from '@deck.gl/core';
 import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
-import { PathLayer } from '@deck.gl/layers';
+import { PathLayer, TextLayer } from '@deck.gl/layers';
 import { Geometry } from '@luma.gl/engine';
 import {
   ProjectionTransform,
@@ -120,7 +120,7 @@ export function createGlobalScene(canvas, onError) {
     const viewChanged = options?.view !== opts.view;
     current = model;
     options = opts;
-    const { view, age, showIce, ghost, labels } = opts;
+    const { view, age, showIce, ghost, labels, iceNames } = opts;
     const g = grid(view),
       size = 361 * 181;
     const ice = interpolateField(model.ice, model.count, model.manifest.ages, age),
@@ -197,6 +197,21 @@ export function createGlobalScene(canvas, onError) {
       const p = engines[view].projectSync([lon, lat]);
       return [p[0] * scale, p[1] * scale, 0.6];
     }
+    const names =
+      age >= 11.7
+        ? [
+            { name: 'WISCONSINAN', lon: -100, lat: 48 },
+            { name: 'WEICHSELIAN', lon: 25, lat: 63 },
+            { name: 'WÜRM', lon: 10, lat: 46 }
+          ]
+        : [{ name: 'HOLOCENE', lon: 0, lat: 25 }];
+    const namePositions = names
+      .map((d) => ({
+        ...d,
+        position:
+          view === 'globe' ? point(d.lon, d.lat).map((v) => v * (scale + 1)) : project(d.lon, d.lat)
+      }))
+      .filter((d) => view !== 'globe' || d.position[2] > scale * 0.12);
     deck.setProps({
       ...(viewChanged
         ? { initialViewState: { target: [0, 0, 0], zoom: 0, minZoom: -1, maxZoom: 4 } }
@@ -212,6 +227,24 @@ export function createGlobalScene(canvas, onError) {
           getColor: [255, 255, 255],
           material: { unlit: true }
         }),
+        iceNames &&
+          new TextLayer({
+            id: 'global-ice-age-names',
+            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            data: namePositions,
+            getPosition: (d) => d.position,
+            getText: (d) => d.name,
+            getSize: 14,
+            getColor: [241, 248, 252],
+            fontFamily: 'system-ui',
+            fontWeight: 600,
+            characterSet: 'auto',
+            fontSettings: { sdf: true },
+            outlineWidth: 0.15,
+            outlineColor: [13, 32, 43, 220],
+            parameters: { depthCompare: 'always', depthWriteEnabled: false },
+            billboard: true
+          }),
         new PathLayer({
           id: 'global-graticule',
           coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
