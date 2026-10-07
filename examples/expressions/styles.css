@@ -338,7 +338,6 @@
 .expression-playground .map-stage img {
   object-fit: fill;
   opacity: 0.72;
-  filter: grayscale(1) contrast(0.72);
 }
 
 .expression-playground .map-stage canvas {

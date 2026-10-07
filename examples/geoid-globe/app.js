@@ -5,6 +5,8 @@ import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import {parsePGM} from '@math.gl/geoid';
 
+import {BLUE_MARBLE_TILES, BLUE_MARBLE_CREDIT_URL} from '../common/blue-marble.js';
+
 let nextInstance = 0;
 /** Mounts an EGM96 height field and returns its cleanup function. */
 export function mountGeoidGlobe(root, {lowUrl, hiUrl}) {
@@ -18,7 +20,7 @@ export function mountGeoidGlobe(root, {lowUrl, hiUrl}) {
     <p data-role="status" role="status">Loading EGM96…</p><div class="legend"></div>
     <div class="legend-labels"><span>−110 m</span><span>0 m</span><span>+110 m</span></div>
     <p>Geoid height N above the WGS84 ellipsoid. Ellipsoidal height h = orthometric height H + N.</p>
-    <p class="credits">NGA EGM96 data, via <a href="https://geographiclib.sourceforge.io/C++/doc/geoid.html">GeographicLib</a>. Colors show geoid undulation, not terrain elevation.</p></aside>`;
+    <p class="credits"><a href="${BLUE_MARBLE_CREDIT_URL}">NASA Blue Marble</a>. NGA EGM96 data, via <a href="https://geographiclib.sourceforge.io/C++/doc/geoid.html">GeographicLib</a>. Colors show geoid undulation, not terrain elevation.</p></aside>`;
   const resolution = root.querySelector('[data-role="resolution"]');
   const interpolation = root.querySelector('[data-role="interpolation"]');
   const status = root.querySelector('[data-role="status"]');
@@ -88,8 +90,17 @@ export function mountGeoidGlobe(root, {lowUrl, hiUrl}) {
       context.putImageData(image, 0, 0);
       deck.setProps({
         layers: [
+          ...BLUE_MARBLE_TILES.map(
+            (tile, index) =>
+              new BitmapLayer({
+                id: `blue-marble-${index}`,
+                ...tile,
+                pickable: false
+              })
+          ),
           new BitmapLayer({
             id: 'geoid-field',
+            opacity: 0.65,
             image: canvas,
             bounds: [-180, -90, 180, 90],
             pickable: true
