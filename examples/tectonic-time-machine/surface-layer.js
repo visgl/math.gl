@@ -59,7 +59,18 @@ export class SurfaceLayer extends SolidPolygonLayer {
         out vec3 surfaceNormal; out vec3 referencePosition; out vec3 surfacePosition; out float iceLatitude;`,
         'vs:DECKGL_FILTER_GL_POSITION': `iceLatitude=iceLatitudes;surfaceNormal=surfaceNormals;
         referencePosition=referencePositions;surfacePosition=geometry.worldPosition;`,
-        'fs:#decl': `in vec3 surfaceNormal;in vec3 referencePosition;in vec3 surfacePosition;in float iceLatitude;`,
+        'fs:#decl': `in vec3 surfaceNormal;in vec3 referencePosition;in vec3 surfacePosition;in float iceLatitude;
+        float tectonicIceHash(vec3 p) {
+          return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);
+        }
+        float tectonicIceNoise(vec3 p) {
+          vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+          return mix(
+            mix(mix(tectonicIceHash(i),tectonicIceHash(i+vec3(1,0,0)),f.x),
+                mix(tectonicIceHash(i+vec3(0,1,0)),tectonicIceHash(i+vec3(1,1,0)),f.x),f.y),
+            mix(mix(tectonicIceHash(i+vec3(0,0,1)),tectonicIceHash(i+vec3(1,0,1)),f.x),
+                mix(tectonicIceHash(i+vec3(0,1,1)),tectonicIceHash(i+vec3(1,1,1)),f.x),f.y),f.z);
+        }`,
         'fs:DECKGL_FILTER_COLOR': `
         vec3 reference=normalize(referencePosition);
         vec2 uv=vec2(atan(reference.y,reference.x)/6.28318530718+.5,
@@ -85,14 +96,27 @@ export class SurfaceLayer extends SolidPolygonLayer {
         }
         // Latitude follows the rendered world, not a plate's present-day reference position.
         // The ice is an illustrative material overlay, not a climate-model reconstruction.
-        float latitude=abs(iceLatitude);
-        float edge=1.08-1.16*tectonicSurface.iceCoverage;
-        float ice=smoothstep(edge-.06,edge+.06,latitude)*smoothstep(0.,.08,tectonicSurface.iceCoverage);
-        float frost=.5+.5*sin(reference.x*67.+sin(reference.y*53.)+reference.z*41.);
-        vec3 iceColor=mix(vec3(.64,.82,.91),vec3(.94,.98,1.),frost*.25+.65)*diffuse;
-        // Keep coastlines and plate colors readable beneath a translucent ice glaze.
-        float glaze=mix(.62,.78,tectonicSurface.isWater);
-        color.rgb=mix(color.rgb,iceColor,ice*glaze);
+        if(tectonicSurface.iceCoverage>0.) {
+          // World-space noise avoids the latitude stripes and projection seams of a UV texture.
+          float drift=tectonicIceNoise(reference*7.);
+          float grain=tectonicIceNoise(reference*85.);
+          float field=tectonicIceNoise(reference*28.+vec3(drift*2.));
+          float edge=1.08-1.16*tectonicSurface.iceCoverage;
+          float latitude=abs(iceLatitude)+(drift-.5)*.07;
+          float ice=smoothstep(edge-.045,edge+.045,latitude)*smoothstep(0.,.08,tectonicSurface.iceCoverage);
+          // Sparse, branching blue fractures break up wind-packed snow on sea ice.
+          float fracture=(1.-smoothstep(.003,.019,abs(field-.5)))*smoothstep(.35,.6,drift);
+          vec3 snow=mix(vec3(.72,.81,.86),vec3(.96,.98,1.),.45+.45*drift);
+          snow*=.995+.01*grain;
+          vec3 iceColor=mix(snow,vec3(.37,.60,.72),fracture*.22*tectonicSurface.isWater);
+          float sheen=pow(max(dot(reflect(-light,normal),vec3(0.,0.,1.)),0.),36.)*.05;
+          iceColor=iceColor*diffuse+vec3(sheen);
+          // Preserve desaturated continent silhouettes beneath the ice sheet.
+          float glaze=mix(.66,.82,tectonicSurface.isWater);
+          float luminance=dot(color.rgb,vec3(.2126,.7152,.0722));
+          vec3 beneathIce=mix(color.rgb,vec3(luminance),ice*.96);
+          color.rgb=mix(beneathIce,iceColor,ice*glaze);
+        }
 
       `
       }

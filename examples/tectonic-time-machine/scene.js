@@ -24,7 +24,7 @@ import {
   REGIONS,
   timeLabel
 } from './math.js';
-import {snowballCoverage} from './timeline.js';
+import {snowballCoverage, glaciationPlaybackSpeed} from './timeline.js';
 import {SurfaceLayer} from './surface-layer.js';
 import {loadTerrain} from './terrain.js';
 import {makeMesh, blendWeights, transformMesh, binaryMesh, worldToGeographic} from './geometry.js';
@@ -390,7 +390,7 @@ export function mountScene(
       render(lastTime, true);
     },
     setPlayback({time, playing, ready, speed, maxAge}) {
-      widget.setProps({time, playing, step: speed / 20, timeRange: [-maxAge, 300]});
+      widget.setProps({time, playing, step: glaciationPlaybackSpeed(time, speed, glaciations) / 20, timeRange: [-maxAge, 300]});
       timelineContainer.inert = !ready;
       timelineContainer.setAttribute('aria-busy', String(!ready));
     },

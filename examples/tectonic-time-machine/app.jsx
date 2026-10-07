@@ -8,7 +8,7 @@ import parquetWorkerUrl from 'math.gl-parquet-loader/worker';
 import {maintainHistory} from './history-stream.js';
 import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime} from './sources.js';
 import {REGIONS, timeLabel} from './math.js';
-import {TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones} from './timeline.js';
+import {TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
 export default function TectonicTimeMachine() {
@@ -144,7 +144,7 @@ export default function TectonicTimeMachine() {
   }, [time, ready, playing]);
   useEffect(() => {
     scene.current?.setPlayback({time, playing, ready, speed, maxAge: source.maxAge});
-  }, [time, playing, ready, speed, sourceId]);
+  }, [time, playing, ready, speed, sourceId, glaciations]);
   const seek = value => {
     clock.current = clampTime(Number(value), source.maxAge);
     setPlaying(false);
@@ -296,6 +296,9 @@ export default function TectonicTimeMachine() {
           <input type="checkbox" checked={glaciations} onChange={e => setGlaciations(e.target.checked)} />{' '}
           Glaciations
         </label>
+        {glaciations && playing && glaciationPlaybackSpeed(time, speed) < speed && (
+          <p className="tectonic-data-note">Slower playback · ice edge transition</p>
+        )}
         <label>
           Land appearance
           <select

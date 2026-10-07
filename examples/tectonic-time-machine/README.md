@@ -146,7 +146,9 @@ of each interval. It follows geological time when playing or seeking, works on
 the globe and projected maps, and is absent during the nonglacial interval.
 
 The **Glaciations** checkbox turns the ice glaze and event captions on or off.
-Timeline markers remain available for seeking to the events.
+Timeline markers remain available for seeking to the events. During playback,
+ice-edge transitions automatically slow to at most 0.75 million years per second,
+then resume the selected speed. This changes presentation timing, not event dates.
 
 These chapters are educational cues, not an ice-extent dataset or climate
 simulation. Global versus partly open ocean conditions remain debated. Dates

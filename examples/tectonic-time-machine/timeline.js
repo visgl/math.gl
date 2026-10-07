@@ -85,3 +85,12 @@ export function chapterOpacity(chapter, time, scenario) {
   if (time <= held) return 1;
   return 1 - smoothstep((time - held) / (end - held));
 }
+
+/** Keep each ice-edge transition readable without changing its geological dates. */
+export function glaciationPlaybackSpeed(time, requestedSpeed, enabled = true) {
+  if (!enabled) return requestedSpeed;
+  const nearEdge = SNOWBALL_CHAPTERS.some(({fade: [start, formed, held, end]}) =>
+    (time >= start - 2 && time <= formed + 1) || (time >= held - 1 && time <= end + 2)
+  );
+  return nearEdge ? Math.min(requestedSpeed, 0.75) : requestedSpeed;
+}

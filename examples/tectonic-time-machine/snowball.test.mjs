@@ -31,3 +31,13 @@ test('ice latitude follows geographic positions independently of camera tilt', (
   assert.deepEqual(Array.from(binaryMesh(mesh).attributes.getIceLatitude.value), ice);
   for (let i = 0; i < ice.length; i++) assert(Math.abs(ice[i] - Math.sin(mesh.coordinates[i * 2 + 1] * Math.PI / 180)) < 1e-6);
 });
+
+import {glaciationPlaybackSpeed} from './timeline.js';
+test('playback slows before both ice edges and resumes within events and the warmer interval', () => {
+  for (const time of [-719, -716, -664, -659, -652, -649, -638, -634])
+    assert.equal(glaciationPlaybackSpeed(time, 40), 0.75);
+  for (const time of [-930, -700, -655, -640, -600, 0])
+    assert.equal(glaciationPlaybackSpeed(time, 20), 20);
+  assert.equal(glaciationPlaybackSpeed(-716, 20, false), 20);
+  assert.equal(glaciationPlaybackSpeed(-716, 0.5), 0.5);
+});
