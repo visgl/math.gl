@@ -27,9 +27,9 @@ Many commonly used `Vector2` methods are inherited from `Vector` and `MathArray`
 - `Vector2.toArray(array = [], offset = 0)`
 - `Vector2.equals(array)`
 - `Vector2.exactEquals(array)`
-- `Vector2.validate(array = this)`
-- `Vector2.check(array = this)`
-- `Vector2.normalize()`
+- `Vector2.validate()`
+- `Vector2.check()`
+- `vector2.normalize()`
 
 Also note that `Vector2` is a subclass of the built in JavaScript `Array` and can thus be used wherever an Array is expected. It can e.g. supplied as a parameter to any function expecting an `Array`.
 
@@ -116,30 +116,30 @@ Calculates clockwise angle in radians starting from positive y axis
 
 Note: returns `Math.atan2(this.x, this.y)`
 
-### transform(matrix4 : Number[16]) : Vector4
+### transform(matrix4 : Number[16]) : this
 
 Equivalent to `transformAsPoint`.
 
-### transformAsPoint(matrix4 : Number[16]) : Vector4
+### transformAsPoint(matrix4 : Number[16]) : this
 
 Transforms this vector by the provided 4x4 matrix as a point (i.e includes translations).
 
 Note: Implicitly extends the vector to `[x, y, 0, 1]` before applying the 4x4 transformation.
 
-### transformAsVector(matrix4 : Number[16]) : Vector4
+### transformAsVector(matrix4 : Number[16]) : this
 
 Transforms this vector by the provided 4x4 matrix as a vector (i.e does not include translations).
 
 Note: Implicitly extends the vector to `[x, y, 0, 0]` before applying the 4x4 transformation.
 
-### transformByMatrix3(matrix3 : Number[9]) : Vector4
+### transformByMatrix3(matrix3 : Number[9]) : this
 
 Transforms this vector by the provided 3x3 matrix.
 
-### transformByMatrix2x3(matrix2 : Number[6]) : Vector4
+### transformByMatrix2x3(matrix2 : Number[6]) : this
 
 Transforms this vector by the provided 2x3 matrix (A pure 2D transform that can incorporate translations).
 
-### transformByMatrix2(matrix2 : Number[4]) : Vector4
+### transformByMatrix2(matrix2 : Number[4]) : this
 
 Transforms this vector by the provided 2x2 matrix.

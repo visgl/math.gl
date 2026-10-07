@@ -2,24 +2,11 @@
   {
     "id": "foundations",
     "label": "Foundations",
-    "description": "Vectors, matrices and shared numeric types.",
+    "description": "Vectors, matrices, shared numeric types and expression evaluation.",
     "modules": [
       "core",
-      "types"
-    ]
-  },
-  {
-    "id": "earth",
-    "label": "Earth",
-    "description": "Coordinate reference systems, Earth models, maps and time.",
-    "modules": [
-      "crs",
-      "projection",
-      "web-mercator",
-      "geospatial",
-      "geoid",
-      "timezone",
-      "sun"
+      "types",
+      "expressions"
     ]
   },
   {
@@ -46,11 +33,17 @@
     ]
   },
   {
-    "id": "languages",
-    "label": "Languages",
-    "description": "Expression parsing, evaluation and accessor compilation.",
+    "id": "earth",
+    "label": "Earth",
+    "description": "Coordinate reference systems, Earth models, maps and time.",
     "modules": [
-      "expressions"
+      "crs",
+      "projection",
+      "web-mercator",
+      "geospatial",
+      "geoid",
+      "timezone",
+      "sun"
     ]
   }
 ]

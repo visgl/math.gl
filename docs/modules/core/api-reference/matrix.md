@@ -4,30 +4,20 @@
   <img src="https://img.shields.io/badge/From-v3.0-blue.svg?style=flat-square" alt="From v3.0" />
 </p>
 
-`Matrix` is a base class for [`Matrix3`](/docs/modules/core/api-reference/vector3) and [`Matrix4`](/docs/modules/core/api-reference/vector4), providing common methods to those classes.
+`Matrix` is the shared base for [Matrix3](./matrix3.md) and [Matrix4](./matrix4.md). It extends [MathArray](./math-array.md) and stores elements in column-major order.
 
-## Methods
 
-### toString()
+## Elements and columns
 
-Returns a string representation of the matrix
+| Method | Behavior |
+| --- | --- |
+| `getElement(row, column)` | Read an element by zero-based row and column |
+| `setElement(row, column, value)` | Write an element and return the receiver |
+| `getColumn(column, result?)` | Copy a column into a supplied result or new array |
+| `setColumn(column, values)` | Copy values into a column and return the receiver |
 
-### setElement(): this
+Array storage uses `column * rank + row` as the element index. Row/column accessors take row first regardless of storage order.
 
-Sets the element at "conceptual position" `M[i][j]`, row major indices by default
+## Formatting
 
-`matrix3.set(i, j, value, columnMajor = false)`
-
-### getElement(): number
-
-Gets the element at "conceptual position" `M[i][j]`, row major indices by default
-
-`matrix3.get(i, j, columnMajor = false)`
-
-### getColumn(columnIndex: number [ , result: number[3]]): number[3]
-
-Extracts a column from the matrix
-
-### setColumn(columnIndex: number, columnVector: number[3]): Matrix
-
-Copies a column into the matrix
+`toString()` displays values by row when `config.printRowMajor` is true, or in storage order otherwise. Display order does not change matrix storage or multiplication semantics.

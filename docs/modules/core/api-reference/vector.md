@@ -4,32 +4,23 @@
   <img src="https://img.shields.io/badge/From-v1.1-blue.svg?style=flat-square" alt="From v1.1" />
 </p>
 
-`Vector` is a base class for [`Vector2`](/docs/modules/core/api-reference/vector2), [`Vector3`](/docs/modules/core/api-reference/vector3) and [`Vector4`](/docs/modules/core/api-reference/vector4), providing common methods to those classes.
+`Vector` is the base class for [Vector2](./vector2.md), [Vector3](./vector3.md), and [Vector4](./vector4.md). It extends [MathArray](./math-array.md) and JavaScript `Array`; use a concrete vector class.
 
-## Inheritance
 
-`class Vector extends [MathArray](./docs/api-reference/math-array) extends [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)`
+## Magnitude and distance
 
-## Methods
+| Method | Result |
+| --- | --- |
+| `len()` or `magnitude()` | Vector magnitude |
+| `lengthSquared()` or `magnitudeSquared()` | Squared magnitude |
+| `distance(other)` | Euclidean distance to another vector |
+| `distanceSquared(other)` | Squared distance |
+| `dot(other)` | Dot product |
 
-### Vector.clone()
+`vector.length` is the number of components. It is not callable.
 
-### Vector.copy(array)
+## Mutating operations
 
-### Vector.set(...args)
+`normalize()` scales a nonzero vector to unit magnitude and leaves a zero vector unchanged. `multiply(...vectors)` and `divide(...vectors)` operate component by component.
 
-### Vector.fromArray(array, offset = 0)
-
-### Vector.toString()
-
-### Vector.toArray(array = [], offset = 0)
-
-### Vector.equals(array)
-
-### Vector.exactEquals(array)
-
-### Vector.validate(array = this)
-
-### Vector.check(array = this)
-
-### Vector.normalize()
+Copying, addition, subtraction, scaling, interpolation, comparisons, and validation are documented on [MathArray](./math-array.md). Mutating methods return the receiver.

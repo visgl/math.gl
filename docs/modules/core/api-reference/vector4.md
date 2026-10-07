@@ -4,18 +4,10 @@
   <img src="https://img.shields.io/badge/From-v1.0-blue.svg?style=flat-square" alt="From v1.0" />
 </p>
 
-`Vector4` is designed to hold three dimensional coordinates in projective space. Using the projective representation allows JavaScript applications to perform the same calculations that the GPU does.
+Stores four numeric components `[x, y, z, w]`. For homogeneous coordinates, W = 1 represents a point and W = 0 represents a direction under an affine transform.
 
-A main feature of vectors is that they can be transformed by matrices and quaternions. And `Vector4`s are particular general when transformed with 4x4 matrices (`Matrix4` or just arrays of 16 numbers), as those can include translations, projections and other transformations that cannot be expressed by e.g. 3x3 matrices or quaternions alone.
 
-Note that the fourth element `w` is not a coordinate but a scaling factor. The fourth component (`w`) is usually set to either
-
-- `0` to represent a vector
-- `1` to represent a point
-
-`Vector4` methods will keep the vector scaled so that `w` (if non-zero) is `1`.
-
-The math behind `Vector4` comes from projective geometry, which significantly generalizes calculations and removes a number of special cases compared to affine geometry. It is not necessary to understand the details to use `Vector4`, but see the developer guide for some additional xbackground.
+Use `Matrix4.transform(vector4, result)` for a full homogeneous transform. `Vector4.transform(matrix4)` has legacy point-transform behavior: it transforms XYZ with implicit W = 1 and leaves the stored W unchanged. See [homogeneous coordinates](../developer-guide/homogeneous-coordinates.md) for points, directions, and perspective division.
 
 ## Usage
 
@@ -47,8 +39,8 @@ Many of the most commonly used `Vector2` methods are inherited from [`MathArray`
 - `Vector4.toArray(array = [], offset = 0)`
 - `Vector4.equals(array)`
 - `Vector4.exactEquals(array)`
-- `Vector4.validate(array = this)`
-- `Vector4.check(array = this)`
+- `Vector4.validate()`
+- `Vector4.check()`
 - `Vector4.normalize()`
 
 Note that `Vector2` is a subclass of the built in JavaScript `Array` and can thus e.g. be supplied as a parameter to any function expecting an `Array`.
@@ -75,23 +67,23 @@ Returns the squared distance to the specifed Vector. Fast to calculate than dist
 
 Calculates the dot product with the supplied `vector`.
 
-### add(vector: number[4]): Vector4
+### add(vector: number[4]): this
 
 `add(...vectors)`
 
-### subtract(vector: number[4]): Vector4
+### subtract(vector: number[4]): this
 
 `subtract(...vectors)`
 
-### multiply(vector: number[4]): Vector4
+### multiply(vector: number[4]): this
 
 `multiply(...vectors)`
 
-### divide(vector: number[4]): Vector4
+### divide(vector: number[4]): this
 
 `divide(...vectors)`
 
-### scale(vector: number[4]): Vector4
+### scale(vector: number[4]): this
 
 `scale(scale)`
 
@@ -111,24 +103,18 @@ Normalizes the vector. Same direction but `len()` will now return `1`.
 
 Linearly interpolates between the vectors current value and the supplied `vector`.
 
-### transform(matrix4: number[16]): Vector4
+### transform(matrix4: number[16]): this
 
-Equivalent to `transformByMatrix4`.
+Transforms XYZ as a three-component point, including translation and perspective division, and leaves the stored W component unchanged. Use `matrix4.transform(vector4, result)` when all four homogeneous components must participate.
 
-### transformByMatrix4(matrix4: number[16]): Vector4
-
-Transforms a vector by the provided 4x4 matrix.
-
-Note: Scales the resulting vector to ensure that `w`, if non-zero, is set to `1`.
-
-### transformByMatrix3(matrix3: number[9]): Vector4
+### transformByMatrix3(matrix3: number[9]): this
 
 Transforms the vector's `x`, `y` and `z` values by the provided 3x3 matrix.
 
-### transformByMatrix2(matrix2: number[4]): Vector4
+### transformByMatrix2(matrix2: number[4]): this
 
 Transform the vector's `x` and `y` values by the provided 2x2 matrix.
 
-### transformByQuaternion(quaternion: number[4]): Vector4
+### transformByQuaternion(quaternion: number[4]): this
 
 Transform the vector by the provided `quaternion`.

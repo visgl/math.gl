@@ -4,7 +4,8 @@
   <img src="https://img.shields.io/badge/From-v1.0-blue.svg?style=flat-square" alt="From v1.0" />
 </p>
 
-GLSL math function equivalents. Work on both single values and vectors.
+Configuration, numeric comparisons, angle conversions, and array helpers for core math.
+
 
 ## Usage
 
@@ -28,13 +29,15 @@ config.precision = 4;
 
 `configure(options)`
 
+Merge options into the shared global configuration and return it. Call `configure({})` to read the current configuration.
+
 ### checkNumber
 
 `checkNumber(value)`
 
 ### formatValue
 
-`formatValue(value, precision = config.precision || 4)`
+`formatValue(value, {precision = config.precision} = {})`
 
 ### isArray
 
@@ -46,7 +49,9 @@ Note: does not return true for ArrayBuffers and DataViews
 
 ### clone
 
-`clone(array)If the array has a clone function, calls it, otherwise returns a copy`
+`clone(array)`
+
+Call the input's `clone()` method when present, otherwise copy it with `slice()`.
 
 ### toRadians
 
@@ -113,3 +118,7 @@ GLSL equivalent: Works on single values and vectors
 ## Remarks
 
 - When setting global configs, you may need to consider the order of code loadint when using `imports` and `requires`
+
+### equals and exactEquals
+
+`equals(a, b, epsilon?)` compares scalars or arrays with a relative/absolute tolerance. `exactEquals(a, b)` compares values directly. See [floating point](../developer-guide/floating-point.md).

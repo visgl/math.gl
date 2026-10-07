@@ -1,25 +1,37 @@
 # Debugging
 
-> This article is a work in progress.
+Enable core validation during development to catch invalid numeric values close to the operation that produced them.
 
-## About Validation and Debug Support
+## Validate core objects
 
-TBA:
+```js
+import {configure, Vector3} from '@math.gl/core';
 
-- Turning on an off
-- performance implications
+configure({debug: true});
+const position = new Vector3(1, 2, 3);
+position.scale(NaN); // Throws when the resulting vector is checked
+```
 
-## About "Printing"
+Debug checks are disabled by default. Mutating core methods call `check()`, which validates the element count and finite numeric values when debug mode is enabled. Call `vector.validate()` to inspect validity without throwing. Some setters and class-specific validation also check inputs independently of debug mode. These checks do not establish that an input has the right units or coordinate system.
 
-Generating a string representation of a math.gl object with desired precision and formatting.
+Configuration is shared globally, including between copies of core. Set `configure({debug: false})` for performance measurements and production code where these checks are unnecessary.
 
-Every math.gl object has a `formatString({...opts})` method that allows you to stringify an object with special options set. Each object also defines the built-in JavaScript function `toString()` to call `formatString()` with the global printing options in the math.gl `config` object.
+## Format values
 
-- `toString` and `formatString` methods print with controllable precision
+Use `toString()` for the configured format, or `formatString()` for a single call:
 
-| Print Parameter  | Default | Description                                                                                                                                                    |
-| ---------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `printPrecision` | `4`     | Number of significant digits                                                                                                                                   |
-| `printTypes`     | `false` | Prints the name of the math.gl type (e.g. `Vector3[...]` instead of `[...]`                                                                                    |
-| `printDegrees`   | `false` | Prints degrees instead of radians (e.g. for `Euler` and `SphericalCoordinates`)                                                                                |
-| `printRowMajor`  | `true`  | Prints matrices as row major which makes them look more familiar instead of as column major (which is how they are stored internally for WebGL compatibility). |
+```js
+configure({precision: 6, printTypes: true});
+const vector = new Vector3(1 / 3, 2, 3);
+console.log(vector.toString()); // Vector3[0.333333, 2, 3]
+console.log(vector.formatString({precision: 3, printTypes: false}));
+```
+
+| Option | Default | Effect |
+| --- | --- | --- |
+| `precision` | `4` | Significant digits in formatted numbers |
+| `printTypes` | `false` | Include the class name |
+| `printDegrees` | `false` | Format Euler angles in degrees |
+| `printRowMajor` | `true` | Display matrices by row, without changing their column-major storage |
+
+Formatting changes the displayed string, not the stored values. See [core utilities](../modules/core/api-reference/utilities.md) for configuration and comparison helpers.

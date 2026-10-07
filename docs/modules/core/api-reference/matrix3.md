@@ -9,14 +9,13 @@ A 3x3 matrix. Any arguments can be plain JavaScript arrays or other `math.gl` ob
 ## Usage
 
 ```js
-import {Matrix3} from `math.gl`;
+import {Matrix3} from '@math.gl/core';
 ```
 
 Copy a matrix to a `Matrix3` so that it can be manipulated (and mutated) with `Matrix3` methods:
 
 ```js
-const IDENTITY = [1, 0, ..., 1];
-const m = new Matrix3(IDENTITY).translate([1, 0]);
+const m = new Matrix3().translate([1, 0]);
 ```
 
 Invert a matrix
@@ -31,11 +30,12 @@ Transform a two-, three-, or four-element vector
 const transform = new Matrix3();
 const vector2 = transform.transform([1, 2]);
 const vector3 = transform.transform([1, 2, 1]);
+const vector4 = transform.transform([1, 2, 3, 1]); // Transforms XYZ; preserves W
 ```
 
 ## Inheritance
 
-`class Matrix3 extends [Matrix](./docs/api-reference/matrix) extends [MathArray](./docs/api-reference/math-array) extends [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)`
+`Matrix3` extends [Matrix](./matrix.md), [MathArray](./math-array.md), and JavaScript `Array`.
 
 ## Methods
 
@@ -49,15 +49,14 @@ Many of the most commonly used methods are inherited from [`MathArray`](./math-a
 - `matrix3.toArray(array = [], offset = 0)`
 - `matrix3.equals(array)`
 - `matrix3.exactEquals(array)`
-- `matrix3.validate(array = this)`
-- `matrix3.check(array = this)`
-- `matrix3.normalize()`
+- `matrix3.validate()`
+- `matrix3.check()`
 
 Note that `Matrix3` is a subclass of the built in JavaScript `Array` and can thus e.g. be supplied as a parameter to any function expecting an `Array`.
 
 ### constructor()
 
-Creates an empty `Matrix3`
+Creates an identity matrix; pass an array to copy its elements.
 
 `new Matrix3()`
 
@@ -164,13 +163,9 @@ Equivalent to right multiplying the new transform into the matrix but more perfo
 
 During vector transformation the given translation values are added to each component of the vector being transformed.
 
-### transformVector()
+### transform(vector, result?)
 
-`transformVector(vector, result)`
-
-- `vector` (`Array`|`Vector2`|`Vector3`)
-- `result` - unless supplied, will be a `Vector2` or `Vector3`, matching the length of input vector.
-  Returns `result`, or a newly minted `Vector2` or `Vector3`.
+Transform a two-, three-, or four-component input. For four components, transform XYZ and preserve W. Write to the supplied result, or allocate a plain array matching the input length. The input is unchanged unless it is also the result.
 
 ## Remarks
 
