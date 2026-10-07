@@ -4,11 +4,10 @@
   <img src="https://img.shields.io/badge/From-v1.0-blue.svg?style=flat-square" alt="From v1.0" />
 </p>
 
-```js
-class Quaternion extends MathArray extends Array
-```
+`Quaternion` extends JavaScript `Array` through its core base classes.
 
-A class to handle Quaternions. More information on quternions can be found [here](http://en.wikipedia.org/wiki/Quaternion). The quaternion will be represented by an instance with `x`, `y`, `z`, `w` components that make a quaternion like: `xi + yj + zk + w`.
+
+Stores quaternion components as `[x, y, z, w]`. Use unit quaternions for rotations, composition, and interpolation. Methods mutate the receiver unless stated otherwise; angles are radians.
 
 ## Usage
 
@@ -34,8 +33,8 @@ Many of the most commonly used methods are inherited from [`MathArray`](./math-a
 - `quaternion.toArray(array = [], offset = 0)`
 - `quaternion.equals(array)`
 - `quaternion.exactEquals(array)`
-- `quaternion.validate(array = this)`
-- `quaternion.check(array = this)`
+- `quaternion.validate()`
+- `quaternion.check()`
 - `quaternion.normalize()`
 
 Note that `Quaternion` is a subclass of the built in JavaScript `Array` and can thus technically be supplied as a parameter to any function expecting an `Array`.
@@ -54,47 +53,25 @@ Creates a quaternion from the given 3x3 rotation matrix. NOTE: The resultant qua
 
 Sets this quaternion from Euler angles and returns it. `EulerLike` is a structural type containing numeric `x`, `y`, and `z` fields plus an `order` string.
 
-### fromValues(x: number, y: number, z: number, w): number: this
+### fromAxisRotation(axis, radians): this
 
-Creates a new quat initialized with the given values
-
-`fromValues(x, y, z, w)`
+Set a rotation from a normalized axis and an angle in radians. `setAxisAngle(axis, radians)` is an alias.
 
 ### identity(): this
 
-Set a quat to the identity quaternion
+Set the identity rotation `[0, 0, 0, 1]`.
 
-`identity()`
+### len(): number
 
-### length(): number
+Return the quaternion magnitude. `length` is the array component count.
 
-Calculates the length of a quaternion
+### lengthSquared(): number
 
-`length()`
+Return the squared magnitude.
 
-### squaredLength(): number
+### dot(other): number
 
-Calculates the squared length of a quaternion
-
-`squaredLength(a)`
-
-@returnNumber}
-
-### dot(): number
-
-Calculates the dot product of two quat's
-
-`quaternion.dot(a, b)`
-
-### getAxisAngle
-
-Gets the rotation axis and angle for a given quaternion.
-
-`quaternion.getAxisAngle()`
-
-If a quaternion is created with setAxisAngle, this method will return the same values as providied in the original parameter list OR functionally equivalent values.
-
-Example: The quaternion formed by axis [0, 0, 1] and angle -90 is the same as the quaternion formed by [0, 0, 1] and 270. This method favors the latter.
+Return the dot product with another quaternion.
 
 ### rotationTo
 
@@ -106,7 +83,7 @@ Sets a quaternion to represent the shortest rotation from one vector to another.
 
 Adds two quaternions
 
-`quaternion.add(a, b)`
+`quaternion.add(other)`
 
 ### calculateW
 
@@ -128,15 +105,17 @@ Calculates the inverse of a quat
 
 ### lerp
 
-Performs a linear interpolation between two quat's
+Linearly interpolate components. Use `slerp()` for rotation interpolation.
 
 `quaternion.lerp(a, b, t)`
 
-### multiply
+### multiplyRight(other): this
 
-Multiplies two quat's
+Set the receiver to `this * other`. `multiply(other)` is an alias.
 
-`multiply(a, b)`
+### multiplyLeft(other): this
+
+Set the receiver to `other * this`. `premultiply(other)` is an alias.
 
 ### normalize
 

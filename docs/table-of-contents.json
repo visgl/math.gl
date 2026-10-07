@@ -3,7 +3,11 @@
     "type": "category",
     "label": "Overview",
     "items": [
-      "README",
+      {
+        "type": "doc",
+        "id": "README",
+        "label": "Introduction"
+      },
       "whats-new",
       "upgrade-guide"
     ]
@@ -12,46 +16,10 @@
     "type": "category",
     "label": "Developer Guide",
     "items": [
-      {
-        "type": "category",
-        "label": "Basics",
-        "items": [
-          "developer-guide/get-started",
-          "developer-guide/debugging",
-          "developer-guide/performance",
-          "developer-guide/bundling",
-          "developer-guide/external-frameworks"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "Geospatial Math",
-        "items": [
-          "developer-guide/geospatial/coordinate-reference-systems",
-          "developer-guide/geospatial/geospatial-models",
-          "developer-guide/geospatial/web-mercator-coordinates",
-          "developer-guide/geospatial/web-mercator-offset-accuracy"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "Discrete Global Grid Systems Math",
-        "items": [
-          "developer-guide/geospatial/dggs"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "3D Math",
-        "items": [
-          "developer-guide/math/transformations",
-          "developer-guide/math/view-and-projection",
-          "developer-guide/math/homogeneous-coordinates",
-          "developer-guide/math/coordinate-systems",
-          "developer-guide/math/rotations",
-          "developer-guide/math/floating-point"
-        ]
-      }
+      "developer-guide/get-started",
+      "developer-guide/debugging",
+      "developer-guide/performance",
+      "developer-guide/bundling"
     ]
   },
   {
@@ -72,6 +40,18 @@
         "label": "@math.gl/core",
         "items": [
           "modules/core/README",
+          {
+            "type": "category",
+            "label": "Developer Guide",
+            "items": [
+              "modules/core/developer-guide/transformations",
+              "modules/core/developer-guide/view-and-projection",
+              "modules/core/developer-guide/homogeneous-coordinates",
+              "modules/core/developer-guide/coordinate-systems",
+              "modules/core/developer-guide/rotations",
+              "modules/core/developer-guide/floating-point"
+            ]
+          },
           "modules/core/api-reference/euler",
           "modules/core/api-reference/math-array",
           "modules/core/api-reference/matrix",
@@ -182,6 +162,13 @@
         "label": "@math.gl/geoid",
         "items": [
           "modules/geoid/README",
+          {
+            "type": "category",
+            "label": "Developer Guide",
+            "items": [
+              "modules/geoid/developer-guide/geospatial-models"
+            ]
+          },
           "modules/geoid/api-reference/geoid",
           "modules/geoid/api-reference/parse-pgm",
           "modules/geoid/api-reference/create-geoid-from-grid"
@@ -222,6 +209,13 @@
         "label": "@math.gl/crs",
         "items": [
           "modules/crs/README",
+          {
+            "type": "category",
+            "label": "Developer Guide",
+            "items": [
+              "modules/crs/developer-guide/coordinate-reference-systems"
+            ]
+          },
           "modules/crs/api-reference/spatial-reference"
         ]
       },
@@ -296,6 +290,14 @@
         "label": "@math.gl/web-mercator",
         "items": [
           "modules/web-mercator/README",
+          {
+            "type": "category",
+            "label": "Developer Guide",
+            "items": [
+              "modules/web-mercator/developer-guide/web-mercator-coordinates",
+              "modules/web-mercator/developer-guide/web-mercator-offset-accuracy"
+            ]
+          },
           "modules/web-mercator/api-reference/web-mercator-utils",
           "modules/web-mercator/api-reference/web-mercator-viewport"
         ]
@@ -305,6 +307,13 @@
         "label": "@math.gl/dggs",
         "items": [
           "modules/dggs/README",
+          {
+            "type": "category",
+            "label": "Developer Guide",
+            "items": [
+              "modules/dggs/developer-guide/dggs"
+            ]
+          },
           "modules/dggs/api-reference/dggs-decoder",
           "modules/dggs/api-reference/a5-decoder",
           "modules/dggs/api-reference/geohash-decoder",

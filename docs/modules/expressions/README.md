@@ -7,7 +7,7 @@
 
 The experimental `@math.gl/expressions` module provides a compact expression parser and evaluator for JavaScript-style expressions.
 
-It extracts the expression machinery that has shipped inside `@deck.gl/json` and promotes it to a standalone, documented math.gl module with a stable public API.
+It extracts the expression machinery that has shipped inside `@deck.gl/json` and provides it as a standalone module. Its API remains experimental.
 
 ## Installation
 
@@ -121,4 +121,4 @@ Try the APIs in the [expression playground](https://math.gl/examples/expressions
 
 This module is adapted from the expression parser that ships in [`@deck.gl/json`](https://www.npmjs.com/package/@deck.gl/json).
 
-Its evaluator is based on Stephen Oney's [`jsep`](https://github.com/EricSmekens/jsep) parser and on [@donmccurdy](https://github.com/donmccurdy)'s deprecated [`expression-eval`](https://www.npmjs.com/package/expression-eval) module. math.gl keeps that lineage explicit here because the public module is intentionally preserving and documenting the behavior that previously lived inside deck.gl internals.
+Its evaluator uses the `jsep` parser and derives from `expression-eval` by @donmccurdy. Source headers and distributed license notices retain the upstream attribution.

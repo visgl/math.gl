@@ -1,17 +1,9 @@
 # Roadmap
 
-Some of the high-level goals for future and past versions
+The current major-release work is summarized in [What’s New](./whats-new.md#v50). Module guides describe their supported scope and remaining work; see the [projection support guide](./modules/projection/developer-guide/support.md) for that engine's current coverage.
 
-## v.Next
+## Completed milestones
 
-- Geometry primitives (spheres, cubes etc)
-- ...
-
-## v4.0
-
-- Support ES modules
-- Fork gl-matrix (because they are moving to 32 bit precision which is too low for geospatial use cases, and also gl-matrix is not merging the ES module exports we need for wide compatibility).
-
-# v3.6
-
-- Full typescript support
+- v3.6: TypeScript conversion and bundled declarations.
+- v4.0: ES module and CommonJS packaging, with standalone core numeric kernels.
+- v5.0: Expanded geometry, global-grid, CRS, projection, and timezone modules, plus more explicit core APIs. See the [upgrade guide](./upgrade-guide.md) for compatibility changes.

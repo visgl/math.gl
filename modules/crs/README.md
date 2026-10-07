@@ -65,5 +65,5 @@ See the [projection API](https://math.gl/docs/modules/projection/api-reference/t
 for the supported transformation subset and storage-order behavior.
 
 See the [PROJJSON specification](https://proj.org/en/stable/specifications/projjson.html).
-See the math.gl [Coordinate Reference Systems guide](https://math.gl/docs/developer-guide/geospatial/coordinate-reference-systems)
+See the math.gl [Coordinate Reference Systems guide](https://math.gl/docs/modules/crs/developer-guide/coordinate-reference-systems)
 for representations, epochs, axis order, vertical CRS, and transformation guidance.

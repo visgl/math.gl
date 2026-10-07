@@ -4,7 +4,8 @@
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-`@math.gl/timezone` is an intentional complement to JavaScript's `Intl`: it supplies geographic timezone lookup and numeric local-calendar computations for maps, charts, daily aggregation, and scheduling. `Intl` remains the interface for localized presentation and supplies the runtime's timezone rules. math.gl turns those rules into application-facing coordinates, fields, offsets, day boundaries, and transition records.
+`@math.gl/timezone` supplies geographic timezone lookup and numeric local-calendar computations. Use it for map labels, daily aggregation, and scheduling. It uses the runtime's timezone rules; use `Intl.DateTimeFormat` for localized presentation.
+
 
 ## Timezone globe
 

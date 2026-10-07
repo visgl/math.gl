@@ -2,20 +2,20 @@
 
 ## Upgrading to v5.0
 
-Version 5 removes APIs that were deprecated in earlier releases and tightens the dependency boundaries between core classes. The class entry point remains tree-shakeable; low-level gl-matrix-compatible functions now use focused subpath imports.
+Version 5 removes deprecated APIs and moves low-level functions to focused subpath imports.
 
 ### TypeScript and runtime support
 
-- Upgrade TypeScript consumers to TypeScript 6.0 or later before installing math.gl v5. The v5 declarations reference TypeScript's `es2025.float16` library to type `Float16Array` accurately.
-- `Float16Array` remains optional at runtime. math.gl detects native or polyfilled support and exposes a `Uint16Array` fallback; it does not install a polyfill.
-- The emitted JavaScript continues to target ES2020. Version 5 does not otherwise raise the runtime policy of evergreen browsers and active or maintenance Node.js LTS releases.
+- Use TypeScript 6.0 or later for the `Float16Array` declarations.
+- `Float16Array` is optional at runtime, with a `Uint16Array` fallback. No polyfill is installed.
+- JavaScript still targets ES2020; supported browsers and Node.js versions are unchanged.
 
 ### Rotation and coordinate conversions
 
-- Replace `euler.getQuaternion()` and `euler.toQuaternion()` with the destination-owned `new Quaternion().fromEuler(euler)`. To reuse an allocation, call `quaternion.fromEuler(euler)` on an existing quaternion.
-- Replace `quaternion.transformVector4(vector, result)` with `result.copy(vector).transformByQuaternion(quaternion)` when `result` is a `Vector4`. For a new result, use `new Vector4(vector).transformByQuaternion(quaternion)`. To retain a tuple or typed-array result, use `transformQuat(result, vector, quaternion)` from `@math.gl/core/vec4`.
+- Replace `euler.getQuaternion()` and `euler.toQuaternion()` with `quaternion.fromEuler(euler)` or `new Quaternion().fromEuler(euler)`.
+- Replace `quaternion.transformVector4(vector, result)` with `result.copy(vector).transformByQuaternion(quaternion)` for `Vector4` results, or `transformQuat(result, vector, quaternion)` from `@math.gl/core/vec4` for arrays.
 - Replace `quaternion.slerp({start, target, ratio})` with `quaternion.slerp(start, target, ratio)`.
-- `SphericalCoordinates.fromVector3()` and `toVector3()` now use the structural `Vector3Like` type. `toVector3()` returns a plain array by default; pass a `Vector3`, tuple, or typed array as its result argument when a particular representation should be reused.
+- `SphericalCoordinates` conversions use `Vector3Like`. `toVector3()` returns an array by default; pass a result argument to reuse a vector or typed array.
 
 Euler rotation orders are now represented directly by the `EulerRotationOrder` string type:
 
@@ -56,22 +56,23 @@ import * as vec3 from '@math.gl/core/vec3';
 import {mat4, vec3} from '@math.gl/core';
 ```
 
-The available subpaths are `@math.gl/core/mat3`, `/mat4`, `/quat`, `/vec2`, `/vec3`, and `/vec4`. Keeping these namespaces out of the root entry point substantially reduces the cost of retaining every root export.
+Available subpaths: `@math.gl/core/mat3`, `/mat4`, `/quat`, `/vec2`, `/vec3`, and `/vec4`.
 
 ### CRS and proj4 definitions
 
-- Use `CRSDefinition`, PROJJSON types, syntax codecs, and spatial-reference descriptors from the new proj4-independent `@math.gl/crs` package. Authority codes, WKT, and PROJ definitions remain strings, while PROJJSON is the typed semantic object model.
-- `@math.gl/proj4` is renamed to `@math.gl/projection`. Update package dependencies and imports, and replace `Proj4Projection` with `Projection`. The deprecated alias, `/classic` wrapper and proj4js-specific compatibility helpers are removed during the alpha cycle. Install `proj4` directly if its upstream API is required.
-- The package uses the math.gl projection engine and has no proj4js runtime dependency. Use `ProjectionTransform` for a configured CRS pair with explicit plugins/readers, or `CustomProjectionEngine` / `createProjectionEngine()` for a reusable factory and `checkProjectionCompatibility()` for capability checks. See the [migration contract](modules/projection/developer-guide/support.md).
+- Import CRS types, syntax codecs, and spatial-reference descriptors from `@math.gl/crs`. Authority codes, WKT, and PROJ definitions remain strings.
+- Rename `@math.gl/proj4` imports and dependencies to `@math.gl/projection`, and `Proj4Projection` to `Projection`. The alias, `/classic`, and proj4js helpers are removed; install `proj4` directly for its API.
+- Use `ProjectionTransform` for a configured CRS pair and `CustomProjectionEngine` for reusable configuration and `checkProjectionCompatibility()` for capability checks. See the [migration contract](modules/projection/developer-guide/support.md).
+
 - Axis-order enforcement remains opt-in through `enforceAxis: true`. Register NTv2 grids with `Projection.registerDatumGrid()` before using definitions that reference them.
 
 ### DGGS packages
 
-- The individual DGGS packages `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, and `@math.gl/dggs-quadkey` have been removed. Install only `@math.gl/dggs` and use its `/s2`, `/geohash`, and `/quadkey` subpath exports.
-- New `/a5`, `/h3`, and `/plus-code` subpath exports provide the same small cell-geometry contract for additional systems.
-- The new module exports a decoder object for each DGGS. Each object conforms to the common `DGGSDecoder` API.
+- Replace `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, and `@math.gl/dggs-quadkey` with `@math.gl/dggs` subpaths `/s2`, `/geohash`, and `/quadkey`.
+- Additional decoders are available at `/a5`, `/h3`, and `/plus-code`.
+- Each decoder implements the shared `DGGSDecoder` API.
 - `DGGSDecoder` cell geometry methods accept `string | bigint`; A5, H3, and S2 support both representations.
-- To upgrade, import the decoder object and replace individual function calls. For example, replace `getS2LngLat(...)` with `S2Decoder.cellToLngLat(...)`.
+- Replace standalone calls such as `getS2LngLat(...)` with `S2Decoder.cellToLngLat(...)`.
 
 ## Upgrading to v4.1
 
@@ -85,7 +86,7 @@ The available subpaths are `@math.gl/core/mat3`, `/mat4`, `/quat`, `/vec2`, `/ve
 
 ## Upgrading to v3.6
 
-In version 3.6 the entire math.gl code base was converted to typescript (`.ts`).
+In version 3.6 the entire math.gl code base was converted to TypeScript (`.ts`).
 While the API itself has not changed, in some cases, the introduction of types
 made it harder to keep supporting some type signatures and overloads.
 
@@ -99,43 +100,12 @@ in the math.gl github repo.
 
 ## Upgrading to v3.0
 
-### Matrix API changes
-
-Matrix setter functions no longer support ommitted parameters. (Motivation: Increased API rigor, improved debugging and library compactness).
-
-### Matrix transforms now return Arrays by default
-
-The `Matrix4` and `Matrix3` classes no longer by default create new `Vector2`, `Vector3` and `Vector4` instances. Instead they create standard JavaScript arrays.
-
-Previously a new `Vector4` would be allocated if no `result` parameter was provided.
+- Matrix setters require all parameters.
+- `Matrix3` and `Matrix4` transforms return plain arrays by default. Pass a result vector to retain the previous behavior:
 
 ```js
-import {Matrix4, Vector4} from '@math.gl/core';
-const vector = new Matrix4().transform([0, 0, 0, 1]);
-assert(vector instanceof Vector4);
-```
-
-Now a plain JavaScript `Array` is allocated
-
-```js
-import {Matrix4} from '@math.gl/core';
-const vector = new Matrix4().transform([0, 0, 0, 1]);
-assert(vector instanceof Array);
-```
-
-The old behavior can be restored by providing the result parameter
-
-```js
-import {Matrix4, Vector4} from '@math.gl/core';
 const vector = new Matrix4().transform([0, 0, 0, 1], new Vector4());
-assert(vector instanceof Vector4);
 ```
-
-Motivation: This change reduces dependencies between math.gl core classes which improves tree-shaking and bundle sizes.
-
-### Matrix setter functions no longer support ommitted parameters
-
-Motivation: This change increases rigor, facilitates debugging, and improves library compactness, and the use case for default parameters was questionable.
 
 The following functions have been deprecated:
 

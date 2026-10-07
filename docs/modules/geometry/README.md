@@ -18,6 +18,24 @@ All generated meshes use `triangle-list` topology and expose `POSITION`, `NORMAL
 `TEXCOORD_0` typed-array attributes. Index buffers automatically use 32-bit values when a mesh has
 more than 65,535 vertices.
 
+## Installation
+
+```bash
+npm install @math.gl/geometry
+```
+
+## Usage
+
+```js
+import {SphereGeometry} from '@math.gl/geometry';
+
+const geometry = new SphereGeometry({radius: 1});
+const positions = geometry.attributes.POSITION.value;
+const indices = geometry.indices?.value;
+```
+
+Pass these CPU buffers to the renderer of your choice. The module does not create GPU resources.
+
 ## API
 
 - `Geometry` stores CPU attributes, optional indices, topology and draw count.

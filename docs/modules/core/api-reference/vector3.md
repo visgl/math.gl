@@ -4,9 +4,8 @@
   <img src="https://img.shields.io/badge/From-v1.0-blue.svg?style=flat-square" alt="From v1.0" />
 </p>
 
-```js
-class Vector3 extends MathArray extends Array
-```
+`Vector3` extends JavaScript `Array` through its core base classes.
+
 
 ## Usage
 
@@ -65,8 +64,8 @@ Many of the most commonly used `Vector3` methods are inherited from [`MathArray`
 - `Vector3.toArray(array = [], offset = 0)`
 - `Vector3.equals(array)`
 - `Vector3.exactEquals(array)`
-- `Vector3.validate(array = this)`
-- `Vector3.check(array = this)`
+- `Vector3.validate()`
+- `Vector3.check()`
 - `Vector3.normalize()`
 
 Note that `Vector3` is a subclass of the built in JavaScript `Array` and can thus e.g. be supplied as a parameter to any function expecting an `Array`.
@@ -75,7 +74,9 @@ Note that `Vector3` is a subclass of the built in JavaScript `Array` and can thu
 
 ### set(x, y, z)
 
-### length()
+### len()
+
+Returns the magnitude. `length` is the array component count.
 
 ### distance(vector)
 
@@ -146,20 +147,20 @@ Rotate a 3D vector around the z-axis
 - `radians` (Number) - angle to rotate.
 - `origin`=`[0, 0, 0]` (Vector3) - the origin of the rotation (optional)
 
-### transform(matrix4 : Number[16]) : Vector4
+### transform(matrix4 : Number[16]) : this
 
 Transforms the vector by the provided 4x4 matrix.
 
 Note: Scales the resulting vector to ensure that `w`, if non-zero, is set to `1`.
 
-### transformByMatrix3(matrix3 : Number[9]) : Vector4
+### transformByMatrix3(matrix3 : Number[9]) : this
 
 Transforms the vector by the provided 3x3 matrix.
 
-### transformByMatrix2(matrix2 : Number[4]) : Vector4
+### transformByMatrix2(matrix2 : Number[4]) : this
 
 Transform the vector's `x` and `y` values by the provided 2x2 matrix.
 
-### transformByQuaternion(quaternion : Number[4]) : Vector4
+### transformByQuaternion(quaternion : Number[4]) : this
 
 Transform the vector by the provided `quaternion`.

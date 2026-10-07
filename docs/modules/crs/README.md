@@ -7,7 +7,7 @@
 `@math.gl/crs` provides lightweight, proj4-independent TypeScript definitions and syntax codecs
 for coordinate reference systems. It has no runtime dependencies and is browser-safe.
 
-The [Coordinate Reference Systems developer guide](/docs/developer-guide/geospatial/coordinate-reference-systems)
+The [Coordinate Reference Systems developer guide](/docs/modules/crs/developer-guide/coordinate-reference-systems)
 explains CRS families, representations, coordinate epochs, axis order, vertical coordinates,
 transformation boundaries, and cross-library integration in depth.
 
