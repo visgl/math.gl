@@ -4,9 +4,15 @@
   <img src="https://img.shields.io/badge/From-v3.0-blue.svg?style=flat-square" alt="From-v3.0" />
 </p>
 
-The `@math.gl/geospatial` module provides support for ellipsoidal math, focusing on geospatial use cases.
+`@math.gl/geospatial` provides ellipsoid geometry, geographic/Cartesian conversions, local tangent frames, and globe queries. Use it for WGS84 positions and 3D Tiles bounds without a renderer dependency.
 
-It provides classes and utilities to facilitate working with ellipsoidal geospatial coordinate systems and projections used with computer maps, primarily [WGS84](https://en.wikipedia.org/wiki/World_Geodetic_System) (World Geodetic System) coordinates.
+Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](../geoid/README.md) and [projection](../projection/README.md).
+
+## Installation
+
+```bash
+npm install @math.gl/geospatial
+```
 
 ![WGS84: The 1984 World Geodetic System Ellipsoid](./images/WGS84_mean_Earth_radius.svg)
 
@@ -38,10 +44,6 @@ Expand the infobox to explore query regions and levels.
 | ------------------- | --------------------------------------------------------------- |
 | `makeOBBFromRegion` | Creates a conservative oriented bounding box for a longitude–latitude–height region, including antimeridian and polar regions. |
 
-## Usage Examples
-
-A major use of this library is to convert between "cartesian" (`x`, `y`, `z`) and "cartographic" (`longitude` and `latitude` in degrees, `height` in meters above the ellipsoid) representations of WGS84 coordinates. The `Ellipsoid` class implements these calculations.
-
 ## Usage
 
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
@@ -70,9 +72,9 @@ const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin)
 
 ## Framework Independence
 
-Like all non-core math.gl modules, this module can be used independently of core math.gl classes.
+Input coordinates can be numeric arrays; callers do not need to construct core vectors.
 
-- Any input or result vectors can be supplied as JavaScript `Array` instances of length 3, or objects with `x`, `y`, `z` elements.
+- Coordinate inputs and outputs use three-component numeric arrays. Check each method's result parameter before supplying reusable storage.
 
 ## History
 
@@ -80,7 +82,7 @@ This library was initially created as part of a bigger collaboration between the
 
 ## Attribution
 
-This code is a fork of selected classes in the [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) code base, under the Apache 2 License.
+Selected classes and three-radius ellipsoid kernels derive from Cesium under Apache-2.0. Shared spheroid conversion kernels also retain proj4js MIT provenance. Source headers and distributed notices identify the applicable credits and terms.
 
 ## Globe queries
 

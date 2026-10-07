@@ -1,27 +1,17 @@
 # Overview
 
-<p class="badges">
-  <img src="https://img.shields.io/badge/From-v3.1-blue.svg?style=flat-square" alt="From-v3.1" />
-</p>
+`@math.gl/web-mercator` provides a map camera and coordinate utilities for spherical Web Mercator. Use `WebMercatorViewport` to convert longitude/latitude positions to screen pixels and back with zoom, pitch, and bearing.
 
-> The `@math.gl/web-mercator` module is the new home for the now archived[`viewport-mercator-project`](https://github.com/uber-common/viewport-mercator-project/blob/master/docs/whats-new.md) repository, as of Oct 1, 2019.
-
-The `@math.gl/web-mercator` module offers projection and camera utilities supporting the spherical Web Mercator Projection. At its core, this is a utility for converting to and from map coordinates (i.e. latitude, longitude) to screen coordinates and back.
-
-## Who is this for?
-
-Specifically built for use with [deck.gl](https://github.com/uber/deck.gl) and [react-map-gl](https://github.com/uber/react-map-gl), but potentially useful for any web mapping application that wants to support perspective enabled Web Mercator Projections with floating point zoom levels.
+Geographic inputs use `[longitude, latitude]` in degrees, with optional altitude in metres. For CRS conversions beyond Web Mercator, use [projection](../projection/README.md).
 
 ## Example Usage
 
-The `WebMercatorViewport` class offers the equivalent of a 3D matrix "camera" class of the type you would find in any 3D/WebGL/OpenGL library.
-
-```
-npm install @math.gl/web-mercator --save
+```bash
+npm install @math.gl/web-mercator
 ```
 
 ```js
-import WebMercatorViewport from '@math.gl/web-mercator';
+import {WebMercatorViewport} from '@math.gl/web-mercator';
 
 // A viewport looking at San Francisco city area
 const viewport = new WebMercatorViewport({
@@ -39,3 +29,9 @@ viewport.project([-122.45, 37.78]);
 viewport.unproject([400, 300]);
 // returns map coordinates [-122.45, 37.78]
 ```
+
+## Coordinate utilities
+
+The [utility reference](./api-reference/web-mercator-utils.md) covers world coordinates, distance scales, zoom conversions, and EPSG:3857 coordinates in metres. World coordinates and EPSG:3857 metres use different scales; select the matching forward and inverse helpers.
+
+The module continues the API from the archived `viewport-mercator-project` package.

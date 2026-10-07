@@ -125,6 +125,7 @@ config.staticDirectories = [
   '../modules/geoid/data'
 ];
 config.plugins.push(require('./projection-redirects.cjs'));
+config.plugins.push(require('./docs-redirects.cjs'));
 
 if (isNext) {
   config.themeConfig.announcementBar = {

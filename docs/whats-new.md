@@ -1,80 +1,18 @@
 # What's New
 
-## Unreleased
+| Geoid heights | Timezones | Expression evaluation |
+| --- | --- | --- |
+| [![EGM96 geoid globe](./images/geoid-globe.jpg)](./modules/geoid/README.md) | [![Timezone globe](./images/timezone-globe.jpg)](./modules/timezone/README.md) | [![Expression playground](./images/expressions.jpg)](./modules/expressions/README.md) |
+| Primitive geometry | Polygon cutting | Vector and matrix transforms |
+| [![Geometry viewer](./images/geometry-viewer.jpg)](./modules/geometry/README.md) | [![Polygon playground](./images/polygon-playground.jpg)](./modules/polygon/README.md) | [![Core transforms](./images/core-transforms.jpg)](./modules/core/README.md) |
 
-- `@math.gl/polygon` adds `subdivideTriangleMesh` for adaptive transformation of polygon and bitmap triangle meshes, with edge/interior error probes, conforming shared-edge refinement, and UV/attribute interpolation weights. See [subdivideTriangleMesh](./modules/polygon/api-reference/subdivide-triangle-mesh.md).
+## v5.0
 
-- `@math.gl/polygon` adds `subdividePolyline` for adaptive edge subdivision through application-supplied coordinate transforms, including source/target buffers, attribute interpolation metadata, and explicit resource limits. See [subdividePolyline](./modules/polygon/api-reference/subdivide-polyline.md).
-
-- `@math.gl/dggs` adds `unwrapDGGSBoundary` and optional unwrapping on decoder boundary, flat-boundary, and bounds methods. Antimeridian-crossing cells can use continuous longitudes while existing calls retain their output. See [DGGSDecoder](./modules/dggs/api-reference/dggs-decoder.md).
-
-<table style={{border: 0, align: "center"}}>
-  <tbody>
-    <tr>
-      <td>
-        <center>
-          <img style={{height: 200}} src="https://raw.github.com/uber-web/math.gl/master/docs/images/dggs/s2.png" />
-          <p><b>v4.0</b> <i><a target="_blank" href="https://math.gl/docs/modules/s2">S2 (DGGS)</a></i></p>
-        </center>
-      </td>
-      <td>
-        <center>
-          <img style={{height: 200}} src="https://raw.github.com/uber-web/math.gl/master/docs/images/dggs/geohash.png" />
-          <p><b>v4.0</b> <i><a target="_blank" href="https://math.gl/docs/modules/geohash">GeoHash (DGGS)</a></i></p>
-        </center>
-      </td>
-      <td>
-        <center>
-          <img style={{height: 200}} src="https://raw.github.com/uber-web/math.gl/master/docs/images/dggs/quadkey.png" />
-          <p><b>v4.0</b> <i><a target="_blank" href="https://math.gl/docs/modules/quadkey">Quadkey (DGGS)</a></i></p>
-        </center>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <center>
-          <img style={{height: 200}} src="https://raw.github.com/uber-web/math.gl/master/docs/modules/geoid/images/Earth_Gravitational_Model_1996.png" />
-          <p><b>v3.4</b> <i><a target="_blank" href="https://math.gl/modules/geoid/docs">Geoid (Earth Gravity Model)</a></i></p>
-        </center>
-      </td>
-      <td>
-        <center>
-          <img sstyle={{height: 200}} src="https://raw.github.com/uber-web/math.gl/master/docs/images/ts-logo-256.png" />
-          <p><b>v3.2</b> <i>TypeScript</i></p>
-        </center>
-      </td>
-      <td>
-        <center>
-          <img style={{height: 200, maxWidth: 200}} src="https://raw.github.com/uber-web/math.gl/master/docs/modules/geospatial/images/WGS84_mean_Earth_radius.svg" />
-          <p><b>v3.0</b> <i><a target="_blank" href="https://math.gl/modules/geospatial/docs">WGS84 & Ellipsoid</a></i></p>
-        </center>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-## v5.0 (In development)
-
-Status: prerelease development.
-
-Highlights:
-
-- TypeScript 6.0 or later is required for TypeScript consumers; emitted JavaScript continues to target ES2020.
-- New `@math.gl/geometry` CPU primitive mesh and tessellation module.
-- glTF 2.1 box, capsule, cylinder, plane and sphere analytic shapes in `@math.gl/culling`.
-- New expression evaluator module
-- DGGS support is consolidated into a single module with interchangeable decoder objects.
-- New standards-based CRS definitions module and modernized proj4 support.
-- New runtime-independent GeoArrow descriptor and columnar geometry module.
-- New dependency-free WKB, EWKB, and WKT geometry codec module.
-- New typed-array geometry utilities module.
-- Functionality additions to improve 3D Tiles support in loaders.gl.
-- Stronger type guarantees for math classes via the new sized array types.
-- Raised aggregate statement coverage to 96.07% (+5.34 points over the pre-moonshot baseline) across expressions, culling, GeoArrow, DGGS, CRS, geoid, geometry, WKB, and typed-array utilities, with coverage tracked directly in pull request checks.
-- Culling results, polygon winding directions, and Euler rotation orders now use descriptive string literal types.
+Status: prerelease development. TypeScript consumers require TypeScript 6.0 or later; JavaScript still targets ES2020.
 
 **`@math.gl/dggs`** (NEW MODULE)
 
+- Adds [boundary unwrapping](./modules/dggs/api-reference/dggs-decoder.md) for continuous longitudes across the antimeridian.
 - Consolidates all lightweight DGGS functionality into a single module and removes the individual DGGS packages.
 - Exports DGGS decoder objects with an interchangeable API for encoded data.
 - Aligns the core decoder shape with deck.gl-community's `GlobalGridLayer` contract.
@@ -82,8 +20,13 @@ Highlights:
 - Detects conventional cell-column names for all bundled decoders to power data-driven visualization layers.
 - Adds validated S2 token/index conversion, exact polar and antimeridian bounds, and face-aware spatial descendant addressing.
 
+**`@math.gl/types`**
+
+- Sized array types provide stronger guarantees for math class inputs and outputs.
+
 **`@math.gl/core`**
 
+- Euler rotation orders now use descriptive string literal types.
 - Added destination-owned `Matrix4.fromMatrix3()`, `Matrix3.fromMatrix4()`, and `Quaternion.fromEuler()` conversion helpers.
 - `Euler.fromQuaternion()` now supports all six rotation orders and preserves the destination's current order by default.
 - Removed the redundant `Euler.getQuaternion()` and `Euler.toQuaternion()` allocation helpers; use `Quaternion.fromEuler()` instead.
@@ -152,7 +95,9 @@ Highlights:
 
 **`@math.gl/geospatial`**
 
-- `makeOBBFromRegion()` - New function that creates a cartesian oriented bounding box from a geospatial region.
+- Adds `EllipsoidOccluder` ray intervals, altitude-aware occlusion, and limb ellipses, plus conservative globe horizon bounds across poles and the antimeridian.
+- Improves 3D Tiles support in loaders.gl with ellipsoid and bounding-volume helpers.
+- `makeOBBFromRegion()` - New function that creates a Cartesian oriented bounding box from a geospatial region.
 - `EllipsoidTangentPlane` - New helper class for doing math on the ellipsoid surface.
 
 **`@math.gl/geometry`** (NEW MODULE)
@@ -162,7 +107,8 @@ Highlights:
 
 **`@math.gl/culling`**
 
-- Adds analytic glTF shape queries for clipping/culling, rays, transforms and enclosing bounds.
+- Adds analytic glTF 2.1 box, capsule, cylinder, plane, and sphere queries for clipping/culling, rays, transforms, and enclosing bounds.
+- Culling results now use descriptive string literal types.
 
 **`@math.gl/geometry-utils`** (NEW MODULE)
 
@@ -170,13 +116,32 @@ Highlights:
 - Adds typed geometry traversal, vertex-normal generation, component-type conversion, packed RGB565
   colors, octahedral attribute compression, and typed-array utilities.
 
+**`@math.gl/polygon`**
+
+- Adds `subdivideGlobeMesh` for conforming globe subdivision with preserved attribute provenance.
+- Polygon winding directions now use descriptive string literal types.
+- Adds adaptive [triangle-mesh subdivision](./modules/polygon/api-reference/subdivide-triangle-mesh.md) with shared-edge refinement and attribute interpolation.
+- Adds adaptive [polyline subdivision](./modules/polygon/api-reference/subdivide-polyline.md) through application-supplied coordinate transforms.
+
+**`@math.gl/timezone`** (NEW MODULE)
+
+- Adds geographic timezone lookup, local-calendar fields, and numeric UTC offsets using runtime timezone rules.
+- Provides an optional Temporal entry point for day boundaries, local-time conversion, and offset transitions.
+- Ships optional approximate timezone geometry for map and globe visualization.
+
+**`@math.gl/sun`**
+
+- Adds Moon position and lighting, solar color and intensity, sky illumination, and approximate cloud lighting.
+- Provides optional planet ephemerides and shared sky snapshots through `astronomy-engine`.
+- Adds a bright-star catalogue, motion helpers, and globe rendering coordinates.
+
 ## v4.1
 
 Release Date: Sep 7, 2024.
 
 This minor release brings:
 
-- type improvements to support more rigorous typing of array lenghts.
+- type improvements to support more rigorous typing of array lengths.
 - [SPDX](https://spdx.org/licenses/)-compliant license headers.
 
 **`@math.gl/core`**
@@ -188,7 +153,7 @@ This minor release brings:
 - `Bounds`, `Bounds2D` and `Bounds3D` - New types for expressing [bounds](./modules/types/api-reference/bounds) (extents).
 - `NumberArray2` - `NumberArray16` - New types to specify numeric arrays of a specific length.
 - `NumericArray2` - `NumericArray16` - New types to specify numeric arrays of a specific length.
-- `isTypedArray()`, `isNumericArray()` - These utilities now perform typescript type narrowing.
+- `isTypedArray()`, `isNumericArray()` - These utilities now perform TypeScript type narrowing.
 
 ## v4.0
 
@@ -198,7 +163,7 @@ This release brings:
 
 - ESM (ECMAScript module) compliant.
 - Node.js v16, v18, v20.
-- Typescript v5
+- TypeScript v5
 - `gl-matrix` dependency removed.
 - New modules for working with DGGS (Discrete Global Grid System) math.
 
@@ -227,13 +192,13 @@ This release brings:
 
 Release Date: June 10, 2022
 
-Codebase has been fully converted to typescript. In general this means that users can expect
+Codebase has been fully converted to TypeScript. In general this means that users can expect
 the types exported from math.gl to be considerably improved, however in some function signatures
 are no longer supported. For details, consult the [upgrade guide](./upgrade-guide).
 
 **`@math.gl/types` (NEW)**
 
-- New module that exports a few typescript types that e.g. generalize handling of numeric arrays.
+- New module that exports a few TypeScript types that e.g. generalize handling of numeric arrays.
 
 **`@math.gl/polygon` (NEW)**
 
@@ -287,9 +252,9 @@ Release Date: Oct 9, 2020
 
 Release Date: July 18, 2020
 
-**Typescript**
+**TypeScript**
 
-- Typescript type definitions (`.d.ts` files) are now exported for all math.gl modules.
+- TypeScript type definitions (`.d.ts` files) are now exported for all math.gl modules.
 
 **`@math.gl/polygon`** - New module
 
@@ -404,13 +369,3 @@ math.gl classes now pass large parts of the THREE.js test suite, which should ma
 Release date: Jan 9, 2018
 
 Initial release.
-
-## Shared globe geometry
-
-- `@math.gl/geospatial`: `EllipsoidOccluder` adds true ray-hit intervals, altitude-aware
-  segment occlusion and exact limb ellipses. `getGlobeHorizonBounds` and
-  `splitGlobeBounds` supply conservative spherical imagery coverage across poles
-  and the antimeridian.
-- `@math.gl/polygon`: `subdivideGlobeMesh` composes bounded conforming subdivision
-  with shared spheroid conversion and preserved attribute provenance.
-- A standalone globe example combines these primitives without Kepler dependencies.
