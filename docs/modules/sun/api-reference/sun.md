@@ -13,14 +13,61 @@ sidebar_label: Sun
 
 Solar position, direction, direct/diffuse sunlight and altitude-aware cloud illumination.
 
-## getSun
+## getSunPosition
 
-> TBA
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.1-blue.svg?style=flat-square" alt="From v3.1" />
+</p>
+
+Returns the approximate geometric solar position at an observer's location.
+
+| Parameter | Meaning |
+| --- | --- |
+| `timestamp` | Unix milliseconds or a JavaScript `Date`. |
+| `latitude` | Geographic latitude in degrees, north positive. |
+| `longitude` | Geographic longitude in degrees, east positive. |
+
+The result is `{altitude, azimuth}`, both in radians. Altitude is zero at the
+geometric horizon, positive above it and negative below it. Azimuth is measured
+from south towards west: south is 0, west PI/2, north ±PI and east −PI/2.
+Atmospheric refraction, terrain and observer elevation are omitted. This lightweight
+orbital approximation is intended for visualization; use [getSkySnapshot](./sky.md)
+for the optional consistent topocentric astronomy tier. Supply finite inputs and a
+valid date; this legacy function does not validate ranges.
+
+`getSun` was the original API name. Current releases export `getSunPosition`;
+import that name when updating older examples.
+
+```ts
+import {getSunPosition, getSunLight} from '@math.gl/sun';
+const position = getSunPosition(new Date('2026-10-07T18:00:00Z'), 37.7749, -122.4194);
+const light = getSunLight(position.altitude);
+// position.altitude and position.azimuth are radians; light.color is linear RGB.
+```
 
 
 ## getSunDirection
 
-> TBA
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v3.1-blue.svg?style=flat-square" alt="From v3.1" />
+</p>
+
+Accepts the same date and geographic coordinates as `getSunPosition`. Returns
+a unit three-vector in local east/north/up axes pointing in the **incoming light
+direction**, from the Sun towards the observer. An overhead Sun returns
+`[0, 0, -1]`. The function still returns a direction when the Sun is below the
+horizon; calculate its intensity separately.
+
+For positioning a solar disk, negate the incoming vector with
+`reverseSkyDirection`, or call `getSkyDirection(altitude, azimuth)`. For globe
+lighting, rotate the incoming vector with `skyDirectionToGlobe`. See the
+[coordinate helpers](./sky.md#observer-and-direction-helpers).
+
+```ts
+import {getSunDirection, reverseSkyDirection} from '@math.gl/sun';
+const incomingDirection = getSunDirection(Date.now(), 37.7749, -122.4194);
+const diskDirection = reverseSkyDirection(incomingDirection);
+```
 
 
 {/* SPDX-License-Identifier: MIT */}
