@@ -8,7 +8,7 @@ sidebar_label: Sun
 # Sun
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/From-v3.2-blue.svg?style=flat-square" alt="From v3.2" />
+  <img src="https://img.shields.io/badge/From-v3.1-blue.svg?style=flat-square" alt="From v3.1" />
 </p>
 
 Solar position, direction, direct/diffuse sunlight and altitude-aware cloud illumination.
@@ -299,7 +299,7 @@ coefficient table, texture or paper text is redistributed.
 - [Preetham, Shirley & Smits (1999), A Practical Analytic Model for Daylight](https://doi.org/10.1145/311535.311545): spectral Rayleigh and aerosol attenuation approximations.
 - [Wyman, Sloan & Shirley (2013), Simple Analytic Approximations to the CIE XYZ Color Matching Functions](https://jcgt.org/published/0002/02/01/): equation 4/table 1 fits, independently evaluated.
 - [PBRT, Phase Functions](https://www.pbr-book.org/3ed-2018/Volume_Scattering/Phase_Functions): Henyey–Greenstein angular scattering and direction conventions.
-- The shared ambient sky and existing diffuse tint retain the references and licenses documented in [sky lighting](./sky.md) and [sunlight](./get-sun-light.md).
+- The shared ambient sky and existing diffuse tint retain the references and licenses documented in [sky lighting](./sky.md) and [sunlight](./sun.md#getsunlight).
 
 After building the package, generate a standalone dawn/dusk palette demo with
 `node modules/sun/scripts/create-cloud-demo.mjs /absolute/path/clouds.html`.

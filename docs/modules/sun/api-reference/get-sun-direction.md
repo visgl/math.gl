@@ -1,7 +1,9 @@
+{/* SPDX-License-Identifier: MIT */}
+
 # getSunDirection
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/From-v3.2-blue.svg?style=flat-square" alt="From v3.2" />
+  <img src="https://img.shields.io/badge/From-v3.1-blue.svg?style=flat-square" alt="From v3.1" />
 </p>
 
-> TBA
+See the [getSunDirection API reference](./sun.md#getsundirection).

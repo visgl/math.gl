@@ -8,7 +8,7 @@ sidebar_label: Overview
 # Overview
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/From-v3.2-blue.svg?style=flat-square" alt="From v3.2" />
+  <img src="https://img.shields.io/badge/From-v3.1-blue.svg?style=flat-square" alt="From v3.1" />
 </p>
 
 `@math.gl/sun` provides solar and lunar lighting, planetary sky information, bright-star data and shared sky/rendering coordinates.
