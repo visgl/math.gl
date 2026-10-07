@@ -24,6 +24,7 @@ import {
   REGIONS,
   timeLabel
 } from './math.js';
+import {snowballCoverage} from './timeline.js';
 import {SurfaceLayer} from './surface-layer.js';
 import {loadTerrain} from './terrain.js';
 import {makeMesh, blendWeights, transformMesh, binaryMesh, worldToGeographic} from './geometry.js';
@@ -266,6 +267,7 @@ export function mountScene(
         new SurfaceLayer({
           ...common,
           id: 'tectonic-ocean',
+          iceCoverage: snowballCoverage(time),
           data: binaryMesh(ocean),
           surfaceType: 'ocean',
           globeWeight: weights.globe || 0
@@ -273,6 +275,7 @@ export function mountScene(
         new SurfaceLayer({
           ...common,
           id: 'tectonic-land',
+          iceCoverage: snowballCoverage(time),
           data: binaryMesh(land),
           image: terrainImage,
           regionColors,

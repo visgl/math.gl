@@ -49,10 +49,25 @@ export const LANDMASS_CHAPTERS = [
     fade: [190, 240, 260, 300]
   }
 ];
+// Approximate Cryogenian intervals, not reconstructed ice boundaries.
+// Hoffman et al. (2017), https://doi.org/10.1126/sciadv.1600983
+export const SNOWBALL_CHAPTERS = [
+  {time: -700, name: 'Snowball Earth · Sturtian',
+    detail: 'Approx. 717–660 Ma · illustrative global ice cover',
+    fade: [-717, -714, -663, -660]},
+  {time: -640, name: 'Snowball Earth · Marinoan',
+    detail: 'Approx. 650–635 Ma · illustrative global ice cover',
+    fade: [-650, -648, -637, -635]}
+];
+export const TIMELINE_CHAPTERS = [...LANDMASS_CHAPTERS, ...SNOWBALL_CHAPTERS];
+/** Ice advances from the poles as each event fades in and retreats as it fades out. */
+export function snowballCoverage(time) {
+  return Math.max(...SNOWBALL_CHAPTERS.map(chapter => chapterOpacity(chapter, time)));
+}
 const present = {time: 0, name: 'Present'};
 export function timelineMilestones(scenario, maxAge = 500) {
   return [
-    ...LANDMASS_CHAPTERS.filter(c => c.time < 0 && -c.time <= maxAge),
+    ...TIMELINE_CHAPTERS.filter(c => c.time < 0 && -c.time <= maxAge).sort((a, b) => a.time - b.time),
     present,
     LANDMASS_CHAPTERS.find(c => c.scenario === scenario) ||
       LANDMASS_CHAPTERS.find(c => c.scenario === 'atlantic')

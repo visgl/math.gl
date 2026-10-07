@@ -134,3 +134,17 @@ Proposed Pannotia is not labeled because its existence and configuration are deb
 
 Background: [BGS on Laurussia and Pangaea](https://earthwise.bgs.ac.uk/index.php/Geotectonic_setting_of_Wales),
 [Veevers (2004) on Gondwana](https://doi.org/10.1016/j.earscirev.2004.05.002).
+
+
+## Snowball Earth
+
+The timeline includes Sturtian (approximately 717–660 Ma) and Marinoan
+(approximately 650–635 Ma) chapters. Their illustrative ice material advances
+from the poles, covers the ocean and reconstructed land, and retreats at the end
+of each interval. It follows geological time when playing or seeking, works on
+the globe and projected maps, and is absent during the nonglacial interval.
+
+These chapters are educational cues, not an ice-extent dataset or climate
+simulation. Global versus partly open ocean conditions remain debated. Dates
+follow [Hoffman et al. (2017)](https://doi.org/10.1126/sciadv.1600983); see also
+[NASA's discussion](https://www.giss.nasa.gov/research/features/201508_slushball/).

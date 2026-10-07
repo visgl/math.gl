@@ -48,6 +48,7 @@ export function makeMesh(parts) {
   return {
     coordinates: new Float64Array(coordinates),
     reference: new Float32Array(reference),
+    iceLatitudes: new Float32Array(coordinates.filter((_, i) => i % 2).map(lat => Math.sin(lat * Math.PI / 180))),
     normals: new Float32Array((coordinates.length / 2) * 3),
     positions: new Float64Array((coordinates.length / 2) * 3),
     projected: new Float64Array(coordinates.length),
@@ -124,6 +125,7 @@ export function binaryMesh(mesh) {
       getPolygon: {value: mesh.positions, size: 3},
       getSurfaceNormal: {value: mesh.normals, size: 3},
       getReferencePosition: {value: mesh.reference, size: 3},
+      getIceLatitude: {value: mesh.iceLatitudes, size: 1},
       indices: {value: mesh.indices, size: 1},
       getFillColor: {value: mesh.colors, size: 4}
     }

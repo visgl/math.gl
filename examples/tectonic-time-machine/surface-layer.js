@@ -9,12 +9,13 @@ const block = `layout(std140) uniform tectonicSurfaceUniforms {
   float globeWeight;
   float useTexture;
   float regionColors;
+  float iceCoverage;
 } tectonicSurface;`;
 const surface = {
   name: 'tectonicSurface',
   vs: block,
   fs: block + '\nuniform sampler2D terrainTexture;',
-  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32'}
+  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32'}
 };
 const LIGHTS = [
   {type: 'ambient', color: [170, 196, 222], intensity: 0.65},
@@ -24,15 +25,18 @@ export class SurfaceLayer extends SolidPolygonLayer {
   static layerName = 'TectonicSurfaceLayer';
   static defaultProps = {
     image: {type: 'image', value: null, async: true},
+    getIceLatitude: {type: 'accessor', value: 0},
     getSurfaceNormal: {type: 'accessor', value: [0, 0, 1]},
     getReferencePosition: {type: 'accessor', value: [1, 0, 0]},
     surfaceType: 'land',
     globeWeight: 1,
-    regionColors: false
+    regionColors: false,
+    iceCoverage: 0
   };
   initializeState(context) {
     super.initializeState(context);
     this.getAttributeManager().add({
+      iceLatitudes: {size: 1, stepMode: 'dynamic', accessor: 'getIceLatitude'},
       surfaceNormals: {size: 3, stepMode: 'dynamic', accessor: 'getSurfaceNormal'},
       referencePositions: {size: 3, stepMode: 'dynamic', accessor: 'getReferencePosition'}
     });
@@ -51,11 +55,11 @@ export class SurfaceLayer extends SolidPolygonLayer {
       ...shaders,
       modules: [...shaders.modules, waterMaterial, surface],
       inject: {
-        'vs:#decl': `in vec3 surfaceNormals; in vec3 referencePositions;
-        out vec3 surfaceNormal; out vec3 referencePosition; out vec3 surfacePosition;`,
-        'vs:DECKGL_FILTER_GL_POSITION': `surfaceNormal=surfaceNormals;
+        'vs:#decl': `in vec3 surfaceNormals; in vec3 referencePositions; in float iceLatitudes;
+        out vec3 surfaceNormal; out vec3 referencePosition; out vec3 surfacePosition; out float iceLatitude;`,
+        'vs:DECKGL_FILTER_GL_POSITION': `iceLatitude=iceLatitudes;surfaceNormal=surfaceNormals;
         referencePosition=referencePositions;surfacePosition=geometry.worldPosition;`,
-        'fs:#decl': `in vec3 surfaceNormal;in vec3 referencePosition;in vec3 surfacePosition;`,
+        'fs:#decl': `in vec3 surfaceNormal;in vec3 referencePosition;in vec3 surfacePosition;in float iceLatitude;`,
         'fs:DECKGL_FILTER_COLOR': `
         vec3 reference=normalize(referencePosition);
         vec2 uv=vec2(atan(reference.y,reference.x)/6.28318530718+.5,
@@ -79,16 +83,26 @@ export class SurfaceLayer extends SolidPolygonLayer {
           float rim=pow(1.-max(normal.z,0.),4.)*tectonicSurface.globeWeight;
           color.rgb=mix(color.rgb,vec3(.24,.5,.66),rim*.22);
         }
+        // Latitude follows the rendered world, not a plate's present-day reference position.
+        // The ice is an illustrative material overlay, not a climate-model reconstruction.
+        float latitude=abs(iceLatitude);
+        float edge=1.08-1.16*tectonicSurface.iceCoverage;
+        float ice=smoothstep(edge-.06,edge+.06,latitude)*smoothstep(0.,.08,tectonicSurface.iceCoverage);
+        float frost=.5+.5*sin(reference.x*67.+sin(reference.y*53.)+reference.z*41.);
+        vec3 iceColor=mix(vec3(.64,.82,.91),vec3(.94,.98,1.),frost*.25+.65)*diffuse;
+        color.rgb=mix(color.rgb,iceColor,ice);
+
       `
       }
     };
   }
   draw(params) {
-    const {image, surfaceType, globeWeight, regionColors} = this.props;
+    const {image, surfaceType, globeWeight, regionColors, iceCoverage} = this.props;
     this.setShaderModuleProps({
       tectonicSurface: {
         isWater: surfaceType === 'ocean' ? 1 : 0,
         globeWeight,
+        iceCoverage,
         useTexture: image ? 1 : 0,
         regionColors: regionColors ? 1 : 0,
         terrainTexture: image || this.state.fallbackTexture

@@ -8,7 +8,7 @@ import parquetWorkerUrl from 'math.gl-parquet-loader/worker';
 import {maintainHistory} from './history-stream.js';
 import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime} from './sources.js';
 import {REGIONS, timeLabel} from './math.js';
-import {LANDMASS_CHAPTERS, chapterOpacity, timelineMilestones} from './timeline.js';
+import {TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
 export default function TectonicTimeMachine() {
@@ -187,7 +187,7 @@ export default function TectonicTimeMachine() {
           </button>
         </div>
         <div className="tectonic-chapters" aria-hidden="true">
-          {LANDMASS_CHAPTERS.map(chapter => (
+          {TIMELINE_CHAPTERS.map(chapter => (
             <div
               key={chapter.name}
               className={`tectonic-chapter${chapter.name.includes('&') ? ' tectonic-chapter-pair' : ''}`}
