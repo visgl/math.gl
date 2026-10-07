@@ -8,7 +8,7 @@ import parquetWorkerUrl from 'math.gl-parquet-loader/worker';
 import {maintainHistory} from './history-stream.js';
 import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime} from './sources.js';
 import {REGIONS, timeLabel} from './math.js';
-import {LANDMASS_CHAPTERS, chapterOpacity, timelineMilestones} from './timeline.js';
+import {TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
 export default function TectonicTimeMachine() {
@@ -33,6 +33,7 @@ export default function TectonicTimeMachine() {
     [longitude, setLongitude] = useState(0),
     [scenario, setScenario] = useState('atlantic'),
     [grid, setGrid] = useState(false),
+    [glaciations, setGlaciations] = useState(true),
     [regionColors, setRegionColors] = useState(false),
     [speed, setSpeed] = useState(20),
     [counts, setCounts] = useState(null),
@@ -132,8 +133,8 @@ export default function TectonicTimeMachine() {
     return () => clearTimeout(timer);
   }, [cycleViews, playing, ready, view]);
   useEffect(() => {
-    scene.current?.setOptions({view, longitude, scenario, grid, regionColors});
-  }, [view, longitude, scenario, grid, regionColors]);
+    scene.current?.setOptions({view, longitude, scenario, grid, regionColors, glaciations});
+  }, [view, longitude, scenario, grid, regionColors, glaciations]);
   useEffect(() => {
     if (!playing) {
       clock.current = time;
@@ -143,7 +144,7 @@ export default function TectonicTimeMachine() {
   }, [time, ready, playing]);
   useEffect(() => {
     scene.current?.setPlayback({time, playing, ready, speed, maxAge: source.maxAge});
-  }, [time, playing, ready, speed, sourceId]);
+  }, [time, playing, ready, speed, sourceId, glaciations]);
   const seek = value => {
     clock.current = clampTime(Number(value), source.maxAge);
     setPlaying(false);
@@ -187,13 +188,13 @@ export default function TectonicTimeMachine() {
           </button>
         </div>
         <div className="tectonic-chapters" aria-hidden="true">
-          {LANDMASS_CHAPTERS.map(chapter => (
+          {TIMELINE_CHAPTERS.map(chapter => (
             <div
               key={chapter.name}
               className={`tectonic-chapter${chapter.name.includes('&') ? ' tectonic-chapter-pair' : ''}`}
               style={{
                 opacity:
-                  ready && !error && -chapter.time <= source.maxAge
+                  ready && !error && -chapter.time <= source.maxAge && (glaciations || !chapter.name.startsWith('Snowball Earth'))
                     ? chapterOpacity(chapter, time, scenario)
                     : 0
               }}
@@ -291,6 +292,13 @@ export default function TectonicTimeMachine() {
           <input type="checkbox" checked={grid} onChange={e => setGrid(e.target.checked)} />{' '}
           Graticule
         </label>
+        <label className="tectonic-check">
+          <input type="checkbox" checked={glaciations} onChange={e => setGlaciations(e.target.checked)} />{' '}
+          Glaciations
+        </label>
+        {glaciations && playing && glaciationPlaybackSpeed(time, speed) < speed && (
+          <p className="tectonic-data-note">Slower playback · ice edge transition</p>
+        )}
         <label>
           Land appearance
           <select
