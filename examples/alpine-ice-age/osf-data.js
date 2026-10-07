@@ -56,8 +56,10 @@ export function rasterizeFootprints(geometries, points, canvas) {
       stride = geometry.positions.size;
     const rings = geometry.primitivePolygonIndices.value;
     context.beginPath();
-    for (let r = 0; r < rings.length - 1; r++) {
-      for (let i = rings[r]; i < rings[r + 1]; i++) {
+    for (let r = 0; r < rings.length; r++) {
+      const end = rings[r + 1] ?? values.length / stride;
+      if (rings[r] === end) continue; // Optional terminal vertex-count sentinel.
+      for (let i = rings[r]; i < end; i++) {
         const x = ((values[i * stride] + extent) / (2 * extent)) * size;
         const y = ((extent - values[i * stride + 1]) / (2 * extent)) * size;
         if (!Number.isFinite(x + y)) throw new Error("Invalid OSF coordinates");

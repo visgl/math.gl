@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { loadSimulation, sampleAt } from './data.js';
 import { createScene } from './scene.js';
 import './style.css';
@@ -18,7 +18,7 @@ const CHAPTERS = [
   { age: 0, name: 'Present' }
 ];
 const number = (value) => Math.round(value).toLocaleString('en');
-function AlpineView({ onMode }) {
+function AlpineView({ onMode, earlierAvailable }) {
   const canvas = useRef(null),
     scene = useRef(null);
   const [model, setModel] = useState(null),
@@ -129,6 +129,7 @@ function AlpineView({ onMode }) {
           <select aria-label="Explore" value="alpine" onChange={(e) => onMode(e.target.value)}>
             <option value="global">Global ice sheets</option>
             <option value="alpine">Alpine glaciers</option>
+            <option value="quaternary" disabled={!earlierAvailable}>Earlier ice ages</option>
           </select>
         </label>
 
@@ -282,7 +283,17 @@ function AlpineView({ onMode }) {
 
 export default function IceAge() {
   const [mode, setMode] = useState('global');
+  const [earlierAvailable, setEarlierAvailable] = useState(false);
+  const userSelected = useRef(false);
+  const chooseMode = useCallback(value => {
+    userSelected.current = true;
+    setMode(value);
+  }, []);
+  const olderReady = useCallback(() => {
+    setEarlierAvailable(true);
+    if (!userSelected.current) setMode('quaternary');
+  }, []);
   return mode !== 'alpine'
-    ? <GlobalIceAge onMode={setMode} earlier={mode === 'quaternary'} />
-    : <AlpineView onMode={setMode} />;
+    ? <GlobalIceAge onMode={chooseMode} onOlderReady={olderReady} earlier={mode === 'quaternary'} />
+    : <AlpineView onMode={chooseMode} earlierAvailable={earlierAvailable} />;
 }

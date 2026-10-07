@@ -2,8 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import { DATASETS } from './sources.js';
+export function clampAge(ages, age) {
+  return Math.max(ages.at(-1), Math.min(ages[0], age));
+}
 export function sampleAt(ages, age) {
-  const value = Math.max(ages.at(-1), Math.min(ages[0], age));
+  const value = clampAge(ages, age);
   let index = 0;
   while (index < ages.length - 2 && ages[index + 1] > value) index++;
   return { index, fraction: (ages[index] - value) / (ages[index] - ages[index + 1]) };
