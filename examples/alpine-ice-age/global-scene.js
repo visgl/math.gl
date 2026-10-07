@@ -3,10 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import { Deck, OrthographicView, COORDINATE_SYSTEM } from '@deck.gl/core';
 import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
-import { PathLayer, TextLayer } from '@deck.gl/layers';
+import { PathLayer } from '@deck.gl/layers';
 import { Geometry } from '@luma.gl/engine';
 import {
   ProjectionTransform,
+  albersEqualArea,
   equalEarth,
   mollweide,
   robinson,
@@ -17,7 +18,7 @@ import {
 } from '@math.gl/projection';
 import { interpolateField } from './data.js';
 import { projectionWeights } from './projection-transition.js';
-import { glacialPhase } from './glacial-phase.js';
+import { REGIONAL_VIEWS, regionalCoordinate } from './regional-views.js';
 export const GLOBAL_VIEWS = {
   globe: 'Globe',
   eqearth: 'Equal Earth',
@@ -26,7 +27,8 @@ export const GLOBAL_VIEWS = {
   sinu: 'Sinusoidal',
   mill: 'Miller cylindrical',
   eqc: 'Equirectangular',
-  merc: 'Mercator'
+  merc: 'Mercator',
+  ...Object.fromEntries(Object.entries(REGIONAL_VIEWS).map(([id, region]) => [id, region.title]))
 };
 const R = 6371008.8,
   RAD = Math.PI / 180;
@@ -37,14 +39,16 @@ const plugins = {
   sinu: sinusoidal,
   mill: millerCylindrical,
   eqc: equidistantCylindrical,
-  merc: mercator
+  merc: mercator,
+  albersNorthAmerica: albersEqualArea,
+  albersEurope: albersEqualArea
 };
 const engines = Object.fromEntries(
   Object.entries(plugins).map(([id, plugin]) => [
     id,
     new ProjectionTransform({
       from: `+proj=longlat +R=${R}`,
-      to: `+proj=${id} +R=${R} +units=m`,
+      to: `${REGIONAL_VIEWS[id]?.definition || `+proj=${id}`} +R=${R} +units=m`,
       projections: [plugin]
     })
   ])
@@ -56,16 +60,28 @@ function grid(view) {
   for (let y = 0; y <= 180; y++)
     for (let x = 0; x <= 360; x++) {
       const i = (y * 361 + x) * 2;
-      positions[i] = x - 180;
-      positions[i + 1] = view === 'merc' ? Math.max(-85, Math.min(85, y - 90)) : y - 90;
+      positions.set(regionalCoordinate(view, x - 180, y - 90), i);
     }
   if (view !== 'globe') engines[view].projectFlatSync(positions, 2);
-  let maxX = 0,
-    maxY = 0;
+  let minX = Infinity,
+    minY = Infinity,
+    maxX = -Infinity,
+    maxY = -Infinity;
   if (view !== 'globe')
     for (let i = 0; i < positions.length; i += 2) {
-      maxX = Math.max(maxX, Math.abs(positions[i]));
-      maxY = Math.max(maxY, Math.abs(positions[i + 1]));
+      minX = Math.min(minX, positions[i]);
+      maxX = Math.max(maxX, positions[i]);
+      minY = Math.min(minY, positions[i + 1]);
+      maxY = Math.max(maxY, positions[i + 1]);
+    }
+  const centerX = view === 'globe' ? 0 : (minX + maxX) / 2,
+    centerY = view === 'globe' ? 0 : (minY + maxY) / 2;
+  maxX = view === 'globe' ? 0 : (maxX - minX) / 2;
+  maxY = view === 'globe' ? 0 : (maxY - minY) / 2;
+  if (view !== 'globe')
+    for (let i = 0; i < positions.length; i += 2) {
+      positions[i] -= centerX;
+      positions[i + 1] -= centerY;
     }
   const indices = new Uint32Array(360 * 180 * 6);
   let k = 0;
@@ -75,7 +91,7 @@ function grid(view) {
       indices.set([i, i + 1, i + 361, i + 1, i + 362, i + 361], k);
       k += 6;
     }
-  const result = { positions, indices, maxX, maxY };
+  const result = { positions, indices, maxX, maxY, centerX, centerY };
   grids.set(view, result);
   return result;
 }
@@ -108,7 +124,7 @@ export function createGlobalScene(canvas, onError) {
   let current,
     options,
     longitude = -25,
-    latitude = 18,
+    latitude = 35,
     dragging,
     weights,
     transition,
@@ -153,7 +169,7 @@ export function createGlobalScene(canvas, onError) {
     if (transition && !animationFrame) animationFrame = requestAnimationFrame(animate);
   }
   function draw(model, opts) {
-    const { view, age, showIce, ghost, labels, iceNames } = opts;
+    const { view, age, showIce, ghost, labels } = opts;
     const g = grid(view),
       size = 361 * 181;
     const ice = interpolateField(model.ice, model.count, model.manifest.ages, age),
@@ -190,11 +206,12 @@ export function createGlobalScene(canvas, onError) {
         let p;
         if (endpoint.id === 'globe') p = point(lon, lat).map((v) => v * (endpoint.scale + lift));
         else {
-          p = engines[endpoint.id].projectSync([
-            lon,
-            endpoint.id === 'merc' ? Math.max(-85, Math.min(85, lat)) : lat
-          ]);
-          p = [p[0] * endpoint.scale, p[1] * endpoint.scale, lift];
+          p = engines[endpoint.id].projectSync(regionalCoordinate(endpoint.id, lon, lat));
+          p = [
+            (p[0] - endpoint.mesh.centerX) * endpoint.scale,
+            (p[1] - endpoint.mesh.centerY) * endpoint.scale,
+            lift
+          ];
         }
         for (let axis = 0; axis < 3; axis++) result[axis] += p[axis] * endpoint.weight;
       }
@@ -245,32 +262,38 @@ export function createGlobalScene(canvas, onError) {
       for (let lon = -180; lon <= 180; lon += 30) {
         const path = [];
         for (let lat = -85; lat <= 85; lat += 1) path.push(blendedPoint(lon, lat, 0.6));
-        lines.push({ path });
+        lines.push({
+          path,
+          opacity: endpoints.reduce(
+            (sum, e) =>
+              sum +
+              e.weight *
+                (!REGIONAL_VIEWS[e.id] ||
+                (lon >= REGIONAL_VIEWS[e.id].bounds[0] && lon <= REGIONAL_VIEWS[e.id].bounds[2])
+                  ? 1
+                  : 0),
+            0
+          )
+        });
       }
       for (let lat = -60; lat <= 60; lat += 30) {
         const path = [];
         for (let lon = -180; lon <= 180; lon += 1) path.push(blendedPoint(lon, lat, 0.6));
-        lines.push({ path });
+        lines.push({
+          path,
+          opacity: endpoints.reduce(
+            (sum, e) =>
+              sum +
+              e.weight *
+                (!REGIONAL_VIEWS[e.id] ||
+                (lat >= REGIONAL_VIEWS[e.id].bounds[1] && lat <= REGIONAL_VIEWS[e.id].bounds[3])
+                  ? 1
+                  : 0),
+            0
+          )
+        });
       }
     }
-    const names =
-      age >= 11.7
-        ? [
-            { name: 'WISCONSINAN', lon: -100, lat: 48 },
-            { name: 'WEICHSELIAN', lon: 25, lat: 63 },
-            { name: 'WÜRM', lon: 10, lat: 46 }
-          ]
-        : [{ name: 'HOLOCENE', lon: 0, lat: 25 }];
-    const namePositions = names
-      .map((d) => {
-        const visible = Math.max(0, Math.min(1, (point(d.lon, d.lat)[2] - 0.05) / 0.15));
-        return {
-          ...d,
-          position: blendedPoint(d.lon, d.lat, 1),
-          opacity: 1 - globeWeight + globeWeight * visible
-        };
-      })
-      .filter((d) => d.opacity > 0.01);
     deck.setProps({
       controller: { dragPan: view !== 'globe', scrollZoom: true },
       layers: [
@@ -283,31 +306,12 @@ export function createGlobalScene(canvas, onError) {
           getColor: [255, 255, 255],
           material: { unlit: true }
         }),
-        iceNames &&
-          new TextLayer({
-            id: 'global-ice-age-names',
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-            data: namePositions,
-            getPosition: (d) => d.position,
-            getText: (d) => (age >= 11.7 ? `${d.name}\n${glacialPhase(age)}` : d.name),
-            getPixelOffset: (d) => (d.name === 'WÜRM' ? [0, 12] : [0, 0]),
-            getSize: 14,
-            getColor: (d) => [241, 248, 252, 255 * d.opacity],
-            fontFamily: 'system-ui',
-            fontWeight: 600,
-            characterSet: 'auto',
-            fontSettings: { sdf: true },
-            outlineWidth: 0.15,
-            outlineColor: [13, 32, 43, 220],
-            parameters: { depthCompare: 'always', depthWriteEnabled: false },
-            billboard: true
-          }),
         new PathLayer({
           id: 'global-graticule',
           coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
           data: lines,
           getPath: (d) => d.path,
-          getColor: [181, 211, 224, 60],
+          getColor: (d) => [181, 211, 224, 60 * d.opacity],
           getWidth: 1,
           widthUnits: 'pixels',
           parameters: { depthWriteEnabled: false }

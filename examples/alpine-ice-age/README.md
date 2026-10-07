@@ -122,9 +122,29 @@ Reduced-motion preferences switch immediately. Global readouts use millions of
 km² for area and millions of km³ for volume, each with one decimal; Alpine
 readouts retain km² and km³ to preserve detail at that smaller scale.
 
-The heading and geographic name overlays include changing descriptive phases:
-early cycle, ice-sheet fluctuations, last glacial maximum (approximately
+A large centered overlay shows changing descriptive phases:
+last glacial period, last glacial maximum (approximately
 26.5–19 ka), retreat, and Holocene. These broad chapters make progression visible
 within the same regional glaciation names; they are not separately reconstructed
 ice ages or exact dates of local advances and retreats.
 The approximate maximum chapter follows [Clark et al. (2009), The Last Glacial Maximum](https://pubs.usgs.gov/publication/70036965).
+
+Global map projections cycle automatically every eight seconds, with smooth transitions.
+Disable **Cycle projections** to keep the selected view. The **Ice age names** toggle
+controls the centered phase title and regional-name subtitle.
+
+### Climate context
+
+The global view includes independent model-derived temperature and land-ice albedo
+forcing from Köhler, de Boer, von der Heydt, Stap and van de Wal (2015),
+[dataset DOI](https://doi.pangaea.de/10.1594/PANGAEA.855449),
+[study](https://doi.org/10.5194/cp-11-1801-2015).
+The derived `assets/climate.json` is **CC-BY-3.0**, separately from the MIT code;
+[license](https://creativecommons.org/licenses/by/3.0/). Its metadata records the
+original archive checksum and attribution. Values are subsetted to 0–120 ka,
+with all three temperature variants and their source uncertainties retained.
+The UI shows variant 1 rebased to its 0 ka sample, not a modern instrumental
+average or a claimed 1850–1900 baseline. Land-ice radiative forcing retains its
+source reference and is not total planetary albedo. Both series interpolate
+linearly; albedo has no 0 ka sample and is unavailable below 2 ka.
+These climate series are independent of PaleoMIST, not calculated from its ice mesh.

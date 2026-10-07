@@ -4,14 +4,14 @@ import Example from "@site/src/components/alpine-ice-age";
 
 <Example height="calc(100vh - 140px)" />
 
-Explore global grounded ice sheets on a **globe or seven map projections**, or
+Explore global grounded ice sheets on a **globe or nine map projections**, or
 switch to the detailed **Alpine glaciers** terrain view. Both modes animate
 published reconstruction snapshots and support scrubbing, playback speed and
 terrain colors beneath the ice. Playback repeats by default; disable **Repeat animation**
-to stop at the present. **Ice age names** adds geographic labels for Wisconsinan,
+to stop at the present. **Ice age names** adds a centered phase title and regional subtitle for Wisconsinan,
 Weichselian and Würm, changing to Holocene at approximately 11.7 ka. These are
 regional names and broad chronological context, not synchronous glacier boundaries.
-Changing phase subtitles show the early cycle, fluctuations, maximum and retreat
+The large centered phase title shows the last glacial period, maximum and retreat
 within those same glaciations.
 
 The global view covers **80,000 years** with [PaleoMIST 1.0](https://doi.pangaea.de/10.1594/PANGAEA.905800),
@@ -20,7 +20,7 @@ It retains 33 snapshots at 2,500-year intervals from the corrected April 2021
 1° grid, using the minimal North American MIS 3 scenario. Grounded ice thickness
 and changing base topography drive the ice colors and shorelines. Sea ice and
 small mountain glaciers are not included. Choose Globe, Equal Earth, Mollweide,
-Robinson, Sinusoidal, Miller cylindrical, Equirectangular or Mercator; math.gl
+Robinson, Sinusoidal, Miller cylindrical, Equirectangular, Mercator, Albers North America or Albers Europe; math.gl
 performs the map transformations. Projection switches animate the ice surface,
 grid and labels together, including interrupted transitions. Reduced-motion
 preferences switch immediately. Global statistics use Mkm² and Mkm³, with one
@@ -46,3 +46,9 @@ The Alpine and global simulations have distinct sources and time ranges.
 
 The [preparation scripts and provenance](https://github.com/visgl/math.gl/tree/master/examples/alpine-ice-age)
 verify source checksums and generate the bundled, compressed display assets.
+
+Global map projections cycle automatically every eight seconds, with smooth transitions.
+Disable **Cycle projections** to keep the selected view. The **Ice age names** toggle
+controls the centered phase title and regional-name subtitle.
+
+Climate readouts use the independent [Köhler et al. (2015) dataset](https://doi.pangaea.de/10.1594/PANGAEA.855449), licensed **CC-BY-3.0**. Temperature is model variant 1 rebased to its 0 ka value. Ice-albedo forcing is land-ice radiative forcing in W/m², not total planetary reflectivity. Values interpolate 2,000-year samples; albedo is unavailable below 2 ka. Regional Albers views focus the map while statistics retain global totals.

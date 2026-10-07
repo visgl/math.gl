@@ -110,7 +110,7 @@
   border: 1px solid #4a6370;
   border-radius: 4px;
 }
-.alpine-controls input[type='range'] {
+.alpine-controls input[type="range"] {
   width: 100%;
   margin-top: 5px;
   accent-color: #b3dce7;
@@ -285,8 +285,35 @@
 }
 
 .alpine-phase {
-  margin-top: 6px;
-  color: #b8d7e2;
-  font-size: 12px;
-  letter-spacing: .3px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 92%;
+  text-align: center;
+  pointer-events: none;
+  color: #f3f7fa;
+  text-shadow:
+    0 2px 18px #091c2d,
+    0 1px 4px #091c2d;
+}
+.alpine-phase strong {
+  display: block;
+  font-size: clamp(26px, 4.5vw, 56px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+.alpine-phase span {
+  display: block;
+  margin-top: 10px;
+  font-size: clamp(11px, 1.4vw, 16px);
+  letter-spacing: 1px;
+}
+.alpine-stats strong small {
+  font-size: 11px;
+  font-weight: 400;
+}
+.alpine-climate {
+  margin-top: 4px;
 }

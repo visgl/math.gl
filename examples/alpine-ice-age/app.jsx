@@ -49,9 +49,8 @@ function AlpineView({ onMode }) {
     };
   }, []);
   useEffect(() => {
-    if (model)
-      scene.current?.render(model, { age, exaggeration, showIce, ghost, labels, iceNames });
-  }, [model, age, exaggeration, showIce, ghost, labels, iceNames]);
+    if (model) scene.current?.render(model, { age, exaggeration, showIce, ghost, labels });
+  }, [model, age, exaggeration, showIce, ghost, labels]);
   useEffect(() => {
     scene.current?.view(map);
   }, [map]);
@@ -98,10 +97,13 @@ function AlpineView({ onMode }) {
           <span>GLACIER LAB / math.gl</span>
           <h1>Alpine Ice Age</h1>
           <p>{age < 0.05 ? 'Present day' : `${age.toFixed(1)} thousand years ago`}</p>
-          <div className="alpine-phase" aria-live="polite">
-            {glacialPhase(age)}
-          </div>
         </div>
+        {iceNames && (
+          <div className="alpine-phase" aria-live="polite">
+            <strong>{glacialPhase(age)}</strong>
+            {age >= 11.7 && age <= 115 && <span>{'Würm glaciation'}</span>}
+          </div>
+        )}
         {!model && (
           <div className="alpine-loading" role="status">
             {error || 'Loading the Alpine glacier simulation…'}

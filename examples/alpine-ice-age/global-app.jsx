@@ -1,24 +1,25 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import React, { useEffect, useRef, useState } from 'react';
-import { loadGlobalSimulation, sampleAt } from './data.js';
-import { createGlobalScene, GLOBAL_VIEWS } from './global-scene.js';
-import './style.css';
-import { glacialPhase } from './glacial-phase.js';
+import React, { useEffect, useRef, useState } from "react";
+import { loadGlobalSimulation, sampleAt } from "./data.js";
+import { createGlobalScene, GLOBAL_VIEWS } from "./global-scene.js";
+import "./style.css";
+import { climateAt } from "./climate.js";
+import { glacialPhase } from "./glacial-phase.js";
 const CHAPTERS = [
-  { age: 80, name: 'Reconstruction begins' },
-  { age: 60, name: 'Earlier ice sheets' },
-  { age: 20, name: 'Last glacial maximum' },
-  { age: 14, name: 'Retreat' },
-  { age: 0, name: 'Present' }
+  { age: 80, name: "Reconstruction begins" },
+  { age: 60, name: "Earlier ice sheets" },
+  { age: 20, name: "Last glacial maximum" },
+  { age: 14, name: "Retreat" },
+  { age: 0, name: "Present" },
 ];
 const number = (value) => (value / 1e6).toFixed(1);
 export default function GlobalIceAge({ onMode }) {
   const canvas = useRef(null),
     scene = useRef(null);
   const [model, setModel] = useState(null),
-    [error, setError] = useState('');
+    [error, setError] = useState("");
   const [age, setAge] = useState(80),
     [playing, setPlaying] = useState(true),
     [speed, setSpeed] = useState(2),
@@ -27,7 +28,8 @@ export default function GlobalIceAge({ onMode }) {
     [ghost, setGhost] = useState(true),
     [labels, setLabels] = useState(true),
     [iceNames, setIceNames] = useState(true),
-    [view, setView] = useState('globe');
+    [view, setView] = useState("globe"),
+    [cycleViews, setCycleViews] = useState(true);
   useEffect(() => {
     const controller = new AbortController();
     loadGlobalSimulation(controller.signal)
@@ -40,15 +42,27 @@ export default function GlobalIceAge({ onMode }) {
     return () => controller.abort();
   }, []);
   useEffect(() => {
-    scene.current = createGlobalScene(canvas.current, (e) => setError(e.message));
+    scene.current = createGlobalScene(canvas.current, (e) =>
+      setError(e.message),
+    );
     return () => {
       scene.current?.finalize();
       scene.current = null;
     };
   }, []);
   useEffect(() => {
-    if (model) scene.current?.render(model, { age, view, showIce, ghost, labels, iceNames });
-  }, [model, age, view, showIce, ghost, labels, iceNames]);
+    if (model)
+      scene.current?.render(model, { age, view, showIce, ghost, labels });
+  }, [model, age, view, showIce, ghost, labels]);
+  useEffect(() => {
+    if (!cycleViews || !model) return;
+    const views = Object.keys(GLOBAL_VIEWS);
+    const timer = setTimeout(
+      () => setView(views[(views.indexOf(view) + 1) % views.length]),
+      8000,
+    );
+    return () => clearTimeout(timer);
+  }, [cycleViews, model, view]);
   useEffect(() => {
     if (!playing || !model) return;
     let previous = performance.now();
@@ -56,27 +70,32 @@ export default function GlobalIceAge({ onMode }) {
       const now = performance.now(),
         step = Math.min(0.15, (now - previous) / 1000) * speed;
       previous = now;
-      setAge((value) => (repeat && value === 0 ? 80 : Math.max(0, value - step)));
+      setAge((value) =>
+        repeat && value === 0 ? 80 : Math.max(0, value - step),
+      );
     }, 75);
     return () => clearInterval(timer);
   }, [playing, model, speed, repeat]);
   useEffect(() => {
     if (age === 0 && !repeat) setPlaying(false);
   }, [age, repeat]);
+  const climate = climateAt(age);
   const m = model?.manifest;
-  const { index, fraction } = m ? sampleAt(m.ages, age) : { index: 0, fraction: 0 };
+  const { index, fraction } = m
+    ? sampleAt(m.ages, age)
+    : { index: 0, fraction: 0 };
   const statistic = (field) =>
     m ? m[field][index] * (1 - fraction) + m[field][index + 1] * fraction : 0;
-  const area = statistic('areaKm2'),
-    volume = statistic('volumeKm3');
+  const area = statistic("areaKm2"),
+    volume = statistic("volumeKm3");
   const chart = m
     ? m.areaKm2
         .map(
           (value, i) =>
-            `${(i / (m.ages.length - 1)) * 1000},${60 - (value / Math.max(...m.areaKm2)) * 55}`
+            `${(i / (m.ages.length - 1)) * 1000},${60 - (value / Math.max(...m.areaKm2)) * 55}`,
         )
-        .join(' ')
-    : '';
+        .join(" ")
+    : "";
   const seek = (value) => {
     setPlaying(false);
     setAge(value);
@@ -91,14 +110,29 @@ export default function GlobalIceAge({ onMode }) {
         <div className="alpine-title">
           <span>GLACIER LAB / math.gl</span>
           <h1>Global Ice Age</h1>
-          <p>{age < 0.05 ? 'Present day' : `${age.toFixed(1)} thousand years ago`}</p>
-          <div className="alpine-phase" aria-live="polite">
-            {glacialPhase(age)}
-          </div>
+          <p>
+            {age < 0.05
+              ? "Present day"
+              : `${age.toFixed(1)} thousand years ago`}
+          </p>
         </div>
+        {iceNames && (
+          <div className="alpine-phase" aria-live="polite">
+            <strong>{glacialPhase(age)}</strong>
+            {age >= 11.7 && age <= 115 && (
+              <span>
+                {view === "albersNorthAmerica"
+                  ? "Wisconsinan"
+                  : view === "albersEurope"
+                    ? "Weichselian · Würm"
+                    : "Würm · Weichselian · Wisconsinan"}
+              </span>
+            )}
+          </div>
+        )}
         {!model && (
           <div className="alpine-loading" role="status">
-            {error || 'Loading the global ice-sheet reconstruction…'}
+            {error || "Loading the global ice-sheet reconstruction…"}
           </div>
         )}
         {model && error && (
@@ -107,14 +141,20 @@ export default function GlobalIceAge({ onMode }) {
           </div>
         )}
         <div className="alpine-map-note">
-          {view === 'globe' ? 'Drag to rotate' : 'Drag to pan'} · scroll to zoom{' '}
-          <span>PaleoMIST · 1° grid</span>
+          {view === "globe" ? "Drag to rotate" : "Drag to pan"} · scroll to zoom{" "}
+          <span>
+            {cycleViews ? "Cycling projections · " : ""}PaleoMIST · 1° grid
+          </span>
         </div>
       </div>
       <aside className="alpine-controls">
         <label>
           Explore
-          <select aria-label="Explore" value="global" onChange={(e) => onMode(e.target.value)}>
+          <select
+            aria-label="Explore"
+            value="global"
+            onChange={(e) => onMode(e.target.value)}
+          >
             <option value="global">Global ice sheets</option>
             <option value="alpine">Alpine glaciers</option>
           </select>
@@ -122,28 +162,56 @@ export default function GlobalIceAge({ onMode }) {
 
         <span className="alpine-eyebrow">THE LAST 80,000 YEARS</span>
         <h2>Ice across the planet</h2>
-        <p>
-          Explore the changing continental ice sheets and shorelines on a globe or a projected map.
-        </p>
         <div className="alpine-stats">
           <div>
-            <strong>{model ? number(area) : '—'}</strong>
-            <span>Model ice area · Mkm²</span>
+            <strong>
+              {model ? number(area) : "—"} <small>Mkm²</small>
+            </strong>
+            <span>Global ice area</span>
           </div>
           <div>
-            <strong>{model ? number(volume) : '—'}</strong>
-            <span>Model ice volume · Mkm³</span>
+            <strong>
+              {model ? number(volume) : "—"} <small>Mkm³</small>
+            </strong>
+            <span>Global ice volume</span>
+          </div>
+        </div>
+        <div className="alpine-stats alpine-climate">
+          <div>
+            <strong>
+              {climate.temperature.toFixed(1)} <small>°C</small>
+            </strong>
+            <span>Global temperature Δ · model</span>
+          </div>
+          <div>
+            <strong>
+              {climate.albedo === null ? "—" : climate.albedo.toFixed(1)}{" "}
+              <small>W/m²</small>
+            </strong>
+            <span>Ice-albedo forcing · model</span>
           </div>
         </div>
         <label>
           View
-          <select aria-label="View" value={view} onChange={(e) => setView(e.target.value)}>
+          <select
+            aria-label="View"
+            value={view}
+            onChange={(e) => setView(e.target.value)}
+          >
             {Object.entries(GLOBAL_VIEWS).map(([id, title]) => (
               <option key={id} value={id}>
                 {title}
               </option>
             ))}
           </select>
+        </label>
+        <label className="alpine-check">
+          <input
+            type="checkbox"
+            checked={cycleViews}
+            onChange={(e) => setCycleViews(e.target.checked)}
+          />
+          Cycle projections
         </label>
         <label>
           Playback speed
@@ -158,19 +226,35 @@ export default function GlobalIceAge({ onMode }) {
           </select>
         </label>
         <label className="alpine-check">
-          <input type="checkbox" checked={showIce} onChange={(e) => setShowIce(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={showIce}
+            onChange={(e) => setShowIce(e.target.checked)}
+          />
           Grounded ice sheets
         </label>
         <label className="alpine-check">
-          <input type="checkbox" checked={ghost} onChange={(e) => setGhost(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={ghost}
+            onChange={(e) => setGhost(e.target.checked)}
+          />
           Reveal terrain beneath ice
         </label>
         <label className="alpine-check">
-          <input type="checkbox" checked={labels} onChange={(e) => setLabels(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={labels}
+            onChange={(e) => setLabels(e.target.checked)}
+          />
           Latitude / longitude grid
         </label>
         <label className="alpine-check">
-          <input type="checkbox" checked={repeat} onChange={(e) => setRepeat(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={repeat}
+            onChange={(e) => setRepeat(e.target.checked)}
+          />
           Repeat animation
         </label>
         <label className="alpine-check">
@@ -181,6 +265,7 @@ export default function GlobalIceAge({ onMode }) {
           />
           Ice age names
         </label>
+
         <div className="alpine-legend">
           <i />
           Thin ice → thick ice
@@ -188,24 +273,48 @@ export default function GlobalIceAge({ onMode }) {
         <details>
           <summary>Source and scientific limits</summary>
           <p>
-            Gowan et al. (2021), PaleoMIST 1.0. Corrected April 2021 grids, minimal North American
-            MIS 3 scenario. 1° grid; 2,500-year snapshots.
+            Gowan et al. (2021), PaleoMIST 1.0. Corrected April 2021 grids,
+            minimal North American MIS 3 scenario. 1° grid; 2,500-year
+            snapshots.
           </p>
           <p>
-            Grounded ice thickness and changing base topography come from the reconstruction. Sea
-            ice and small mountain glaciers are not shown. Margins and statistics interpolate
-            between snapshots; terrain-reveal colors are illustrative. Area counts ice thicker than
-            10 m.
+            Grounded ice thickness and changing base topography come from the
+            reconstruction. Sea ice and small mountain glaciers are not shown.
+            Margins and statistics interpolate between snapshots; terrain-reveal
+            colors are illustrative. Area counts ice thicker than 10 m.
           </p>
           <p>
-            The Alpine view uses a separate, finer simulation. Günz, Mindel and Riss precede both
-            datasets.
+            The Alpine view uses a separate, finer simulation. Günz, Mindel and
+            Riss precede both datasets.
           </p>
-          <a href="https://doi.org/10.1038/s41467-021-21469-w" target="_blank" rel="noreferrer">
+          <p>
+            Climate: Köhler et al. (2015), CC-BY-3.0. Temperature uses variant 1
+            relative to its 0 ka value; albedo is land-ice radiative forcing,
+            not total planetary reflectivity. Independent model, linearly
+            interpolated 2,000-year samples. Albedo is unavailable below 2 ka;
+            no extrapolation.
+          </p>
+          <a
+            href="https://doi.pangaea.de/10.1594/PANGAEA.855449"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Climate dataset · CC-BY-3.0 ↗
+          </a>
+          <br />
+          <a
+            href="https://doi.org/10.1038/s41467-021-21469-w"
+            target="_blank"
+            rel="noreferrer"
+          >
             Read the study ↗
           </a>
           <br />
-          <a href="https://doi.pangaea.de/10.1594/PANGAEA.905800" target="_blank" rel="noreferrer">
+          <a
+            href="https://doi.pangaea.de/10.1594/PANGAEA.905800"
+            target="_blank"
+            rel="noreferrer"
+          >
             Dataset · CC-BY-4.0 ↗
           </a>
         </details>
@@ -218,9 +327,9 @@ export default function GlobalIceAge({ onMode }) {
               if (age === 0) setAge(80);
               setPlaying(!playing);
             }}
-            aria-label={playing ? 'Pause playback' : 'Play playback'}
+            aria-label={playing ? "Pause playback" : "Play playback"}
           >
-            {playing ? 'Ⅱ Pause' : '▶ Play'}
+            {playing ? "Ⅱ Pause" : "▶ Play"}
           </button>
           <span>80,000 years ago</span>
           <span>Ice area over time</span>
@@ -232,7 +341,12 @@ export default function GlobalIceAge({ onMode }) {
             preserveAspectRatio="none"
             aria-label="Model ice area over the last glacial cycle"
           >
-            <polyline points={chart} fill="none" stroke="#85bccc" strokeWidth="2" />
+            <polyline
+              points={chart}
+              fill="none"
+              stroke="#85bccc"
+              strokeWidth="2"
+            />
             <line
               x1={((80 - age) / 80) * 1000}
               x2={((80 - age) / 80) * 1000}
@@ -247,7 +361,7 @@ export default function GlobalIceAge({ onMode }) {
             min="0"
             max="80"
             step=".05"
-            style={{ direction: 'rtl' }}
+            style={{ direction: "rtl" }}
             value={age}
             disabled={!model}
             onChange={(e) => seek(Number(e.target.value))}
@@ -255,9 +369,13 @@ export default function GlobalIceAge({ onMode }) {
         </div>
         <div className="alpine-chapters">
           {CHAPTERS.map((chapter) => (
-            <button key={chapter.age} disabled={!model} onClick={() => seek(chapter.age)}>
+            <button
+              key={chapter.age}
+              disabled={!model}
+              onClick={() => seek(chapter.age)}
+            >
               <strong>{chapter.name}</strong>
-              <span>{chapter.age ? `${chapter.age} ka` : '0 ka'}</span>
+              <span>{chapter.age ? `${chapter.age} ka` : "0 ka"}</span>
             </button>
           ))}
         </div>

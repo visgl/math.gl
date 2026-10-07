@@ -7,7 +7,6 @@ import { TextLayer } from '@deck.gl/layers';
 import { Geometry } from '@luma.gl/engine';
 import { Vector3 } from '@math.gl/core';
 import { interpolateField } from './data.js';
-import { glacialPhase } from './glacial-phase.js';
 const a = new Vector3(),
   b = new Vector3(),
   n = new Vector3();
@@ -109,34 +108,6 @@ export function createScene(canvas, onError) {
             getColor: [255, 255, 255],
             material: { ambient: 0.45, diffuse: 0.8, shininess: 25, specularColor: [40, 55, 65] }
           }),
-          options.iceNames &&
-            new TextLayer({
-              id: 'alpine-ice-age-name',
-              coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-              data: [
-                {
-                  position: [0, 0, 35],
-                  name:
-                    options.age > 115
-                      ? 'LAST INTERGLACIAL'
-                      : options.age >= 11.7
-                        ? `WÜRM\n${glacialPhase(options.age)}`
-                        : 'HOLOCENE'
-                }
-              ],
-              getPosition: (d) => d.position,
-              getText: (d) => d.name,
-              getSize: 24,
-              getColor: [241, 248, 252],
-              fontFamily: 'system-ui',
-              fontWeight: 600,
-              characterSet: 'auto',
-              fontSettings: { sdf: true },
-              outlineWidth: 0.15,
-              outlineColor: [13, 32, 43, 220],
-              billboard: true,
-              parameters: { depthCompare: 'always', depthWriteEnabled: false }
-            }),
           options.labels &&
             new TextLayer({
               id: 'alpine-places',
