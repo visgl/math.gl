@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original adapter; datum lookup and method/parameter normalization rules are adapted from proj4js 2.22.0 and its MIT-licensed wkt-parser dependency. See ../../../PROJ4-LICENSE.md.
-import datums from './datum-table';
+import {getDatumDefinitions} from './datum-catalog';
 import {DEGREES_TO_RADIANS} from '../parameters';
 import {unsupportedStage} from './types';
 import type {CRSNormalizationOptions, ParsedCRS} from './types';
@@ -267,11 +267,13 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
     parameters['b'] = String(finite(ellipsoid['semi_minor_axis']) * unit(ellipsoid['unit'], 1));
   else if (ellipsoid['radius'] !== undefined) parameters['b'] = parameters['a'];
   else throw new Error('Ellipsoid requires inverse flattening or semi-minor axis');
+  const datums = getDatumDefinitions(options);
   const datumName = key(datum['name']);
   const namedDatum = Object.keys(datums).find(
     name => key(name) === datumName || key(name) === datumName.replace(/^d/, '')
   );
-  if (namedDatum) parameters['datum'] = namedDatum;
+  // Preserve unavailable names so normalization rejects missing catalogue registrations.
+  if (datumName) parameters['datum'] = namedDatum || String(datum['name']);
   if (
     [
       'wgs84',
@@ -345,7 +347,11 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
       ['xscale', 'yscale', 'xyplanerotation'].includes(key(parameter['name']))
     );
     if (esriKrovak.length) {
-      const expected: Record<string, number> = {xscale: -1, yscale: 1, xyplanerotation: 90};
+      const expected: Record<string, number> = {
+        xscale: -1,
+        yscale: 1,
+        xyplanerotation: 90
+      };
       if (
         projection !== 'krovak' ||
         esriKrovak.length !== 3 ||
@@ -489,7 +495,9 @@ function readAxisDirection(
   if (along) {
     if (meridian !== undefined) throw new Error('Duplicate axis meridian');
     direction = along[1];
-    meridian = {longitude: Number(along[2]) * (along[3]?.toLowerCase() === 'west' ? -1 : 1)};
+    meridian = {
+      longitude: Number(along[2]) * (along[3]?.toLowerCase() === 'west' ? -1 : 1)
+    };
   }
   if (meridian !== undefined) {
     const latitude = Number(parameters['lat_0']);

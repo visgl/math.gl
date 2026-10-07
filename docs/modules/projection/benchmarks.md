@@ -92,7 +92,8 @@ correctness and bundle sizes; it does not gate noisy speed ratios. Pull requests
 adaptive timing repetitions are disabled. These PR browser measurements are marked
 `timingLimited` and serve as correctness checks, not performance evidence. Pushes to
 master retain seven samples and a 12 ms calibration target for full browser reports.
-The separate paired Node performance comparison remains unchanged on every PR.
+The separate paired Node performance comparison runs on every PR with 11 samples
+and a 4 ms calibration target; local runs retain the 12 ms default.
 
 ### Compare a runtime change with its base
 
@@ -106,7 +107,10 @@ workload for both versions, validates both against proj4js, and rotates baseline
 flat/scalar execution order. It covers XY and XYZM in both precisions and directions;
 constructor batches alternate separately. `--scenarios` accepts comma-separated scenario
 names to focus a run. On pull requests, CI measures nine representative scenarios against
-the actual base commit and uploads `proj4-performance-comparison`.
+the actual base commit and uploads `projection-performance-comparison`. CI keeps all
+20,000 coordinates and 11 rotated samples, but uses `--min-sample-ms 4` to limit
+adaptive repetitions. Inspect the retained spread and `timingLimited` flags when
+interpreting these shorter measurements.
 
 `--clock thread-cpu` (Node 24.14 or later) is an optional diagnostic using main-thread CPU
 time. It reduces scheduler interference but excludes time spent off the thread; **it is
@@ -194,7 +198,7 @@ baseline, not a production latency promise.
 
 The table below preserves the initial tranche 7 baseline. For current measurements,
 including optional WKT/PROJJSON readers and grid adapters, see the
-[projection engine guide](./projection-engine.md#tree-shaking-and-bundle-size).
+[projection engine guide](developer-guide/projection-engine.md#tree-shaking-and-bundle-size).
 
 `bundle-budgets.json` records measured baselines and explicit limits with approximately
 10% headroom, rounded up to 100 bytes. The check uses esbuild browser ESM targeting
@@ -226,10 +230,10 @@ Tranche 10 adds the shared batch adapter to eligible projection bundles. Static 
 retain their existing limits. The UTM, WKT and rotated lazy initial graphs now measure
 48,390/18,137, 48,258/17,503 and 48,316/18,073 minified/gzip bytes respectively. Their
 initial limits are reviewed and rounded up to 100 bytes; catalogue and deferred limits
-remain unchanged. See the [current size tables](./projection-engine.md#tree-shaking-and-bundle-size).
+remain unchanged. See the [current size tables](developer-guide/projection-engine.md#tree-shaking-and-bundle-size).
 
 Performance and packaging do not establish geodetic parity. The math.gl projection engine is now the default;
-the [support profile](./support.md) defines the scope of the projection API
+the [support profile](developer-guide/support.md) defines the scope of the projection API
 and the migration to the default Projection wrapper. Historical wrapper timings
 refer to the upstream proj4js implementation. The historical wrapper was removed
 when the package was renamed; current comparisons import `proj4` directly.
@@ -913,7 +917,7 @@ The S4–S5 follow-up reuses projection points, batch working points and pipelin
 ordinate stacks at each observed recursive call depth. A normalized squared-norm
 classification also avoids an extra `hypot` in spheroid inverse dispatch. Existing
 independent numerical and recursive ownership checks qualify these changes.
-The optional [`ProjectionBuffer`](./bulk-layouts.md) adds separate arrays, padded
+The optional [`ProjectionBuffer`](api-reference/projection-buffer.md) adds separate arrays, padded
 records, columns, chunk ranges and pipeline epochs without per-record source
 objects, arrays or subviews.
 
@@ -962,4 +966,4 @@ node modules/projection/scripts/check-spheroid-boundary.mjs \
 Thread-CPU commands require Node 24.14 or later. Shared browser CI now also checks
 2,616 independent layout/epoch comparisons across 54 configurations. Browser
 performance, further mixed-pipeline fusion and runtime boxing reduction remain
-separate follow-ups in the [SOTA roadmap](./roadmap.md#sota-roadmap).
+separate follow-ups in the [SOTA roadmap](developer-guide/roadmap.md#sota-roadmap).

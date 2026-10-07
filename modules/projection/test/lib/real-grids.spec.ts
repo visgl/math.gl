@@ -5,7 +5,11 @@
 // Dataset attribution and redistribution terms: ../fixtures/real-grids/README.md.
 import {beforeAll, expect, test} from 'vitest';
 import {fromArrayBuffer} from 'geotiff';
-import {loadGeoTIFFGrid, parseNTv2Grid, ProjectionEngine} from '@math.gl/projection/experimental';
+import {
+  loadGeoTIFFGrid,
+  parseNTv2Grid,
+  ProjectionTransform
+} from '@math.gl/projection/experimental';
 import type {DatumGrid} from '@math.gl/projection/experimental';
 import inputs from '../fixtures/real-grid-cases.json';
 import reference from '../fixtures/real-grid-reference.json';
@@ -49,8 +53,8 @@ function close(actual: ArrayLike<number>, expected: number[], tolerance = 1e-9):
     expect(Math.abs(actual[index] - value), 'ordinate ' + index).toBeLessThanOrEqual(tolerance)
   );
 }
-function projection(grid: DatumGrid, names = 'real'): ProjectionEngine {
-  return new ProjectionEngine({
+function projection(grid: DatumGrid, names = 'real'): ProjectionTransform {
+  return new ProjectionTransform({
     from: '+proj=longlat +ellps=WGS84 +nadgrids=' + names,
     datumGrids: {real: grid}
   });

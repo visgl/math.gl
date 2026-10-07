@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original convenience API over projection descriptors. Deferred kernels retain their proj4js/PROJ port notices and licenses.
-import {ProjectionEngine} from './typescript-projection';
-import type {ProjectionEngineOptions} from './typescript-projection';
+import {ProjectionTransform} from './typescript-projection';
+import type {ProjectionTransformOptions} from './typescript-projection';
+import type {ProjectionEngine, ProjectionEngineOptions, CreateProjectionOptions} from '../types';
+import {snapshotEngineOptions} from './projection-engine';
 import {createProjectionDescriptor, preloadProjection} from './projection-descriptor';
 import type {ProjectionDescriptor} from './projection-descriptor';
 import type {ProjectionPlugin} from './types';
@@ -46,7 +48,7 @@ import {lazyUniversalTransverseMercator} from './lazy-projections/utm';
 import {lazyVanDerGrinten} from './lazy-projections/vandg';
 
 export type LazyProjectionOptions = Omit<
-  ProjectionEngineOptions<ProjectionDescriptor>,
+  ProjectionTransformOptions<ProjectionDescriptor>,
   'projections'
 >;
 const catalogue: readonly ProjectionDescriptor[] = [
@@ -89,15 +91,34 @@ const catalogue: readonly ProjectionDescriptor[] = [
 const key = (name: string) => name.toLowerCase().replace(/[\s_-]/g, '');
 
 /** All built-in projection descriptors, with algorithms imported only on use. */
-export class LazyProjection extends ProjectionEngine<ProjectionDescriptor> {
+export class LazyProjection extends ProjectionTransform<ProjectionDescriptor> {
   constructor(options: LazyProjectionOptions = {}) {
     super({...options, projections: configuredProjections(options)});
   }
   /** Resolve this catalogue into an ordinary synchronous engine instance. */
-  static override async create(options: LazyProjectionOptions = {}): Promise<ProjectionEngine> {
-    return ProjectionEngine.create({...options, projections: configuredProjections(options)});
+  static override async create(options: LazyProjectionOptions = {}): Promise<ProjectionTransform> {
+    return ProjectionTransform.create({...options, projections: configuredProjections(options)});
   }
 }
+
+/** Reusable built-in catalogue whose algorithms load only for requested CRS pairs. */
+export class LazyCRSProjectionEngine implements ProjectionEngine<ProjectionDescriptor> {
+  private readonly options: Omit<ProjectionEngineOptions<ProjectionDescriptor>, 'projections'>;
+
+  constructor(options: Omit<ProjectionEngineOptions<ProjectionDescriptor>, 'projections'> = {}) {
+    this.options = snapshotEngineOptions(options);
+  }
+
+  createProjection(options: CreateProjectionOptions = {}): LazyProjection {
+    return new LazyProjection({...this.options, ...options});
+  }
+
+  createProjectionAsync(options: CreateProjectionOptions = {}): Promise<ProjectionTransform> {
+    return LazyProjection.create({...this.options, ...options});
+  }
+}
+
+export const lazyProjectionEngine = new LazyCRSProjectionEngine();
 
 function configuredProjections(options: LazyProjectionOptions): ProjectionDescriptor[] {
   const children = new Map<string, ProjectionDescriptor>();

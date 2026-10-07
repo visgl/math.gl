@@ -6,6 +6,8 @@
 // Fixture inputs and tolerance semantics adapted from proj4js 2.22.0 tests (MIT).
 // Copyright (c) 2014, proj4js authors. See ../../PROJ4-LICENSE.md.
 import {expect, test} from 'vitest';
+import {datumCatalog} from '@math.gl/projection/datums';
+import {unshiftedStructuredDatums} from '../fixtures/unshifted-structured-datums';
 import proj4 from 'proj4';
 import upstreamManifest from 'proj4/package.json';
 import * as native from '@math.gl/projection/experimental';
@@ -20,6 +22,7 @@ const plugins = Object.values(native).filter(
   (value): value is ProjectionPlugin =>
     value && typeof value === 'object' && 'create' in value && typeof value.create === 'function'
 );
+const datumCatalogs = [datumCatalog, unshiftedStructuredDatums];
 const parsers = [native.wktCRSParser, native.projJSONCRSParser];
 const rejections = new Map(exceptions.map(entry => [entry.index, entry]));
 // Resolve aliases locally so this suite does not modify the upstream global registry.
@@ -31,6 +34,7 @@ function options(to: TypeScriptCRSInput) {
     throw new Error('Unresolved ob_tran dependency: ' + wrapped);
   return {
     to,
+    datumCatalogs,
     aliases,
     projections: [...plugins, native.obliqueTransformation(plugin || 'longlat')],
     parsers
@@ -82,11 +86,11 @@ for (const fixture of corpus.fixtures) {
       if (rejection) {
         // Exact errors keep an unrelated regression from satisfying a known gap.
         // A newly accepted definition fails here until reviewed and numerically tested.
-        expect(() => new native.ProjectionEngine(nativeOptions)).toThrowError(
+        expect(() => new native.ProjectionTransform(nativeOptions)).toThrowError(
           new native.TypeScriptCRSError('missing-transform-stage', rejection.error)
         );
       } else {
-        const projection = new native.ProjectionEngine(nativeOptions);
+        const projection = new native.ProjectionTransform(nativeOptions);
         const correction = corrections.find(row => row.index === fixture.index);
         if (correction) {
           expect(correction.sourceLine).toBe(fixture.sourceLine);
@@ -118,7 +122,9 @@ test('Geographic base authority IDs take precedence without borrowing other CRS 
   };
   const named = [106.869, -52.2978, 103.724, -0.33657, 0.456955, -1.84218, 1];
   const authority = [-106.8686, 52.2978, -103.7239, 0.3366, -0.457, 1.8422, -1.2747];
-  expect(native.normalizeCRS(definition, {parsers}).datum.towgs84).toEqual(authority);
+  expect(native.normalizeCRS(definition, {parsers, datumCatalogs}).datum.towgs84).toEqual(
+    authority
+  );
   for (const id of [
     undefined,
     {authority: 'EPSG', code: 999999},
@@ -133,7 +139,9 @@ test('Geographic base authority IDs take precedence without borrowing other CRS 
         datum: {...datum, id: {authority: 'EPSG', code: 4313}}
       }
     };
-    expect(native.normalizeCRS(withoutBaseID, {parsers}).datum.towgs84).toEqual(named);
+    expect(native.normalizeCRS(withoutBaseID, {parsers, datumCatalogs}).datum.towgs84).toEqual(
+      named
+    );
   }
 });
 
@@ -148,10 +156,13 @@ test('Explicit WKT Helmert overrides named grids and authority shifts', () => {
         : 'PROJCRS["explicit",' +
           geographic +
           ',CONVERSION["TM",METHOD["Transverse Mercator"]],CS[Cartesian,2],AXIS["E",east],AXIS["N",north],LENGTHUNIT["metre",1]]';
-    const normalized = native.normalizeCRS(definition, {parsers});
+    const normalized = native.normalizeCRS(definition, {
+      parsers,
+      datumCatalogs
+    });
     expect(normalized.datum.towgs84).toEqual([1, 2, 3]);
     expect(normalized.datum.grids).toBeUndefined();
-    const projection = new native.ProjectionEngine(options(definition));
+    const projection = new native.ProjectionTransform(options(definition));
     close(
       projection.project([-80, 40]),
       proj4('+proj=tmerc +a=6378206.4 +rf=294.9786982138982 +towgs84=1,2,3').forward([-80, 40]),
@@ -175,7 +186,7 @@ function polarWKT(latitude: number, method = 'Polar_Stereographic') {
 }
 test('WKT1 polar origin is true-scale latitude; variant A retains pole scale', () => {
   for (const sign of [-1, 1]) {
-    const polar = new native.ProjectionEngine(options(polarWKT(sign * 71)));
+    const polar = new native.ProjectionTransform(options(polarWKT(sign * 71)));
     close(polar.project([0, sign * 90]), [0, 0], 1e-8);
     const reference = proj4(
       '+proj=stere +datum=WGS84 +lat_0=' + sign * 90 + ' +lat_ts=' + sign * 71 + ' +k_0=0.994'
@@ -191,7 +202,7 @@ test('WKT1 polar origin is true-scale latitude; variant A retains pole scale', (
       polarWKT(sign * 90, 'Polar Stereographic (variant A)'),
       variantAWKT2
     ]) {
-      const variantA = new native.ProjectionEngine(options(definition));
+      const variantA = new native.ProjectionTransform(options(definition));
       close(
         variantA.project([30, sign * 80]),
         proj4('+proj=stere +datum=WGS84 +lat_0=' + sign * 90 + ' +k_0=0.994').forward([
@@ -206,7 +217,7 @@ test('WKT1 polar origin is true-scale latitude; variant A retains pole scale', (
     ',UNIT["metre",1]]',
     ',PARAMETER["standard_parallel_1",70],UNIT["metre",1]]'
   );
-  expect(() => new native.ProjectionEngine(options(ambiguous))).toThrow('Duplicate polar');
+  expect(() => new native.ProjectionTransform(options(ambiguous))).toThrow('Duplicate polar');
 });
 
 test('Structured pole roundoff tolerance does not accept invalid latitude definitions', () => {
@@ -216,15 +227,15 @@ test('Structured pole roundoff tolerance does not accept invalid latitude defini
         '0.017453292519943295',
         String(factor)
       );
-      const projection = new native.ProjectionEngine(options(definition));
+      const projection = new native.ProjectionTransform(options(definition));
       close(projection.project([0, sign * 90]), [0, 0], 1e-8);
     }
     expect(
       () =>
-        new native.ProjectionEngine(options(polarWKT(sign * 90.000001, 'Azimuthal_Equidistant')))
+        new native.ProjectionTransform(options(polarWKT(sign * 90.000001, 'Azimuthal_Equidistant')))
     ).toThrow(/latitude/i);
     expect(
-      () => new native.ProjectionEngine(options('+proj=aeqd +lat_0=' + sign * 90.00000000000003))
+      () => new native.ProjectionTransform(options('+proj=aeqd +lat_0=' + sign * 90.00000000000003))
     ).toThrow(/latitude/i);
   }
 });

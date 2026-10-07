@@ -55,7 +55,7 @@ if (spatialReference.crs.state === 'explicit') {
 
 // The native backend consumes the same readonly CRS and spatial-reference contracts.
 import {
-  ProjectionEngine,
+  ProjectionTransform,
   normalizeCRS,
   checkProjectionCompatibility,
   projJSONCRSParser,
@@ -63,8 +63,8 @@ import {
   type NormalizedCRS
 } from '@math.gl/projection/experimental';
 const nativeInput: TypeScriptCRSInput = spatialReference;
-new ProjectionEngine({from: nativeInput, to: readonlyDefinition, parsers: [projJSONCRSParser]});
-new ProjectionEngine({from: spatialReference.crs});
+new ProjectionTransform({from: nativeInput, to: readonlyDefinition, parsers: [projJSONCRSParser]});
+new ProjectionTransform({from: spatialReference.crs});
 const normalized: NormalizedCRS = normalizeCRS(geographic, {parsers: [projJSONCRSParser]});
 checkProjectionCompatibility(nativeInput, {parsers: [projJSONCRSParser]});
 // @ts-expect-error The engine's normalized parameters are immutable.
@@ -80,18 +80,18 @@ import {
 } from '@math.gl/projection/experimental';
 const preparedGrid: DatumGrid = parseNTv2Grid(new ArrayBuffer(0), {includeErrorFields: false});
 const gridCollection: DatumGridCollection = Object.freeze({local: preparedGrid});
-new ProjectionEngine({from: '+proj=longlat +nadgrids=local', datumGrids: gridCollection});
+new ProjectionTransform({from: '+proj=longlat +nadgrids=local', datumGrids: gridCollection});
 checkProjectionCompatibility('+proj=longlat +nadgrids=local', {datumGrids: gridCollection});
 declare const tiff: DatumGridGeoTIFF;
 const preparedTIFF: Promise<DatumGrid> = loadGeoTIFFGrid(tiff);
 void preparedTIFF;
 // @ts-expect-error Grid preparation must finish before synchronous projection construction.
-new ProjectionEngine({datumGrids: {local: preparedTIFF}});
+new ProjectionTransform({datumGrids: {local: preparedTIFF}});
 // @ts-expect-error Prepared grid metadata is immutable.
 preparedGrid.subgridCount = 2;
 
 // Batch methods preserve the concrete typed-array type.
-const batchProjection = new ProjectionEngine();
+const batchProjection = new ProjectionTransform();
 const float32Output: Float32Array = batchProjection.projectFlat(new Float32Array([0, 0]));
 const float64Output: Float64Array = batchProjection.unprojectFlat(new Float64Array([0, 0]));
 void float32Output;
@@ -100,3 +100,23 @@ void float64Output;
 batchProjection.projectFlat(new Int32Array([0, 0]));
 // @ts-expect-error The scalar array API is deliberately separate.
 batchProjection.projectFlat([0, 0]);
+
+import type {ProjectionEngine} from '@math.gl/projection/types';
+import {CustomProjectionEngine, CRSProjectionEngine} from '@math.gl/projection';
+const projectionEngines: ProjectionEngine[] = [
+  new CustomProjectionEngine(),
+  new CRSProjectionEngine(),
+  new LazyCRSProjectionEngine()
+];
+async function useEngine(engine: ProjectionEngine): Promise<number[]> {
+  const projection = await engine.createProjection({to: 'EPSG:3857'});
+  return await projection.project([12, 55]);
+}
+void projectionEngines;
+void useEngine;
+// @ts-expect-error ProjectionEngine is an interface, not a runtime constructor.
+new ProjectionEngine();
+// @ts-expect-error Engines configure algorithms, not a specific CRS pair.
+new CustomProjectionEngine({to: 'EPSG:3857'});
+
+import {LazyCRSProjectionEngine} from '@math.gl/projection/projections/lazy';

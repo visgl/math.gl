@@ -12,13 +12,13 @@ const packageRoot = fileURLToPath(new URL('../', import.meta.url));
 const require = createRequire(import.meta.url);
 const esm = await import('@math.gl/projection');
 const cjs = require('@math.gl/projection');
-for (const {ProjectionEngine, mercator} of [esm, cjs]) {
-  const projection = new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});
+for (const {ProjectionTransform, mercator} of [esm, cjs]) {
+  const projection = new ProjectionTransform({to: 'EPSG:3857', projections: [mercator]});
   assert.deepEqual(projection.project([0, 0]), [0, 0]);
 }
 
-for (const {ProjectionEngine, universalTransverseMercator} of [esm, cjs]) {
-  const projection = new ProjectionEngine({
+for (const {ProjectionTransform, universalTransverseMercator} of [esm, cjs]) {
+  const projection = new ProjectionTransform({
     to: 'EPSG:32631',
     projections: [universalTransverseMercator]
   });
@@ -52,14 +52,14 @@ const cases = [
 ];
 for (const fixture of cases) {
   const contents = fixture.plugin
-    ? 'import {ProjectionEngine, ' +
+    ? 'import {ProjectionTransform, ' +
       fixture.plugin +
-      "} from '@math.gl/projection'; export const projection = new ProjectionEngine({to: " +
+      "} from '@math.gl/projection'; export const projection = new ProjectionTransform({to: " +
       JSON.stringify(fixture.to) +
       ', projections: [' +
       (fixture.expression || fixture.plugin) +
       ']});'
-    : "export {ProjectionEngine} from '@math.gl/projection';";
+    : "export {ProjectionTransform} from '@math.gl/projection';";
   const result = await build({
     stdin: {contents, resolveDir: packageRoot},
     bundle: true,
@@ -94,8 +94,8 @@ for (const fixture of cases) {
 // CRS readers are optional even though their symbols share the public barrel.
 for (const parser of [null, 'wktCRSParser', 'projJSONCRSParser']) {
   const contents = parser
-    ? `import {ProjectionEngine, ${parser}} from '@math.gl/projection'; export const create = to => new ProjectionEngine({to, parsers: [${parser}]});`
-    : "export {ProjectionEngine} from '@math.gl/projection';";
+    ? `import {ProjectionTransform, ${parser}} from '@math.gl/projection'; export const create = to => new ProjectionTransform({to, parsers: [${parser}]});`
+    : "export {ProjectionTransform} from '@math.gl/projection';";
   const result = await build({
     stdin: {contents, resolveDir: packageRoot},
     bundle: true,
@@ -121,15 +121,15 @@ for (const parser of [null, 'wktCRSParser', 'projJSONCRSParser']) {
   );
   assert(!emitted.some(path => /node_modules\/proj4\//.test(path)));
 }
-for (const {ProjectionEngine, geocentric, wktCRSParser} of [esm, cjs]) {
+for (const {ProjectionTransform, geocentric, wktCRSParser} of [esm, cjs]) {
   assert.deepEqual(
-    new ProjectionEngine({to: 'EPSG:4978', projections: [geocentric]}).project([0, 0]),
+    new ProjectionTransform({to: 'EPSG:4978', projections: [geocentric]}).project([0, 0]),
     [6378137, 0, 0]
   );
   const source =
     'GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]]';
   assert.deepEqual(
-    new ProjectionEngine({from: source, parsers: [wktCRSParser]}).project([0, 0]),
+    new ProjectionTransform({from: source, parsers: [wktCRSParser]}).project([0, 0]),
     [0, 0]
   );
 }
@@ -146,7 +146,7 @@ for (const reader of [
 ]) {
   const contents = reader
     ? 'export {' + reader + "} from '@math.gl/projection';"
-    : "export {ProjectionEngine} from '@math.gl/projection';";
+    : "export {ProjectionTransform} from '@math.gl/projection';";
   const result = await build({
     stdin: {contents, resolveDir: packageRoot},
     bundle: true,
@@ -191,7 +191,7 @@ for (const reader of [
   assert(!emitted.some(path => /node_modules\/(proj4|geotiff)\//.test(path)));
   assert(!emitted.some(path => path.includes('/geoid/')));
 }
-for (const {ProjectionEngine, loadGeoTIFFGrid} of [esm, cjs]) {
+for (const {ProjectionTransform, loadGeoTIFFGrid} of [esm, cjs]) {
   const grid = await loadGeoTIFFGrid({
     getImageCount: async () => 1,
     getImage: async () => ({
@@ -202,7 +202,7 @@ for (const {ProjectionEngine, loadGeoTIFFGrid} of [esm, cjs]) {
       readRasters: async () => [new Float32Array(4).fill(1), new Float32Array(4).fill(-2)]
     })
   });
-  const projection = new ProjectionEngine({
+  const projection = new ProjectionTransform({
     from: '+proj=longlat +nadgrids=local',
     datumGrids: {local: grid}
   });
@@ -232,7 +232,7 @@ assert(
 for (const entry of [
   "export {OperationCatalog} from '@math.gl/projection/operations';",
   "export {ProjectionPipeline} from '@math.gl/projection/pipeline';",
-  "export {ProjectionEngine} from '@math.gl/projection/core';"
+  "export {ProjectionTransform} from '@math.gl/projection/core';"
 ]) {
   const result = await build({
     stdin: {contents: entry, resolveDir: packageRoot},

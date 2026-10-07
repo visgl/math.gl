@@ -6,13 +6,13 @@ import * as native from '@math.gl/projection/experimental';
 import type {
   ProjectionPlugin,
   ProjectionPoint,
-  ProjectionEngineOptions
+  ProjectionTransformOptions
 } from '@math.gl/projection/experimental';
 import {commonProjectionCases} from '../fixtures/common-projections';
 import {catalogueProjectionCases} from '../fixtures/catalogue-projections';
 import {makeNTv2, makeGeoTIFF} from '../fixtures/datum-grids';
 
-const {ProjectionEngine, mercator, geocentric, parseNTv2Grid, loadGeoTIFFGrid} = native;
+const {ProjectionTransform, mercator, geocentric, parseNTv2Grid, loadGeoTIFFGrid} = native;
 const projections = Object.values(native).filter(
   (value): value is ProjectionPlugin => typeof value === 'object' && 'create' in value
 );
@@ -38,7 +38,7 @@ const mutableOnly = projections.map(
     }) satisfies ProjectionPlugin
 );
 
-function compare(projection: native.ProjectionEngine, points: number[][]): void {
+function compare(projection: native.ProjectionTransform, points: number[][]): void {
   for (const ArrayType of [Float32Array, Float64Array]) {
     const dimension = points[0].length;
     const input = new ArrayType(points.flat());
@@ -64,7 +64,7 @@ function compare(projection: native.ProjectionEngine, points: number[][]): void 
 for (const fixture of [...commonProjectionCases, ...catalogueProjectionCases]) {
   test('batch/scalar parity with mutable hooks: ' + fixture.id, () => {
     const [lon, lat] = fixture.center;
-    const projection = new ProjectionEngine({to: fixture.definition, projections: mutableOnly});
+    const projection = new ProjectionTransform({to: fixture.definition, projections: mutableOnly});
     compare(projection, [
       [lon, lat],
       [lon + 0.1, lat - 0.1]
@@ -84,7 +84,7 @@ test('batch Mercator/eqc/oblique composition, stride and view boundaries', () =>
     '+proj=eqc +lat_ts=30',
     '+proj=ob_tran +o_lat_p=45 +o_lon_p=0'
   ]) {
-    const projection = new ProjectionEngine({to, projections: [...mutableOnly, oblique]});
+    const projection = new ProjectionTransform({to, projections: [...mutableOnly, oblique]});
     compare(projection, [
       [12, 48, 100, NaN, 9],
       [-10, -35, -10, Infinity, 1]
@@ -103,7 +103,7 @@ test('batch Mercator/eqc/oblique composition, stride and view boundaries', () =>
 });
 
 test('batch axes, prime meridians, units, datum chains and geocentric coordinates', () => {
-  const cases: ProjectionEngineOptions[] = [
+  const cases: ProjectionTransformOptions[] = [
     {to: 'EPSG:3857'},
     {to: 'EPSG:4978'},
     {
@@ -118,7 +118,7 @@ test('batch axes, prime meridians, units, datum chains and geocentric coordinate
     {from: '+proj=longlat +axis=uen', to: '+proj=longlat +axis=dsw', enforceAxis: true}
   ];
   for (const options of cases) {
-    compare(new ProjectionEngine({...options, projections: [mercator, geocentric]}), [
+    compare(new ProjectionTransform({...options, projections: [mercator, geocentric]}), [
       [12, 48, 10, 77],
       [15, 40, -5, 88]
     ]);
@@ -127,7 +127,7 @@ test('batch axes, prime meridians, units, datum chains and geocentric coordinate
 
 test('prepared grids use mutable interpolation, including fallback and inverse', async () => {
   for (const grid of [parseNTv2Grid(makeNTv2()), await loadGeoTIFFGrid(makeGeoTIFF())]) {
-    const projection = new ProjectionEngine({
+    const projection = new ProjectionTransform({
       from: '+proj=longlat +nadgrids=local,@null',
       to: 'EPSG:3857',
       projections: [mercator],
@@ -149,7 +149,7 @@ test('prepared grids use mutable interpolation, including fallback and inverse',
     expect(grid.shiftInPlace!(outside, false)).toBe(false);
     expect(outside).toEqual({x: -1, y: 1, z: 10});
   }
-  const legacy = new ProjectionEngine({
+  const legacy = new ProjectionTransform({
     from: '+proj=longlat +nadgrids=legacy',
     datumGrids: {
       legacy: {subgridCount: 1, shift: (x, y, inverse) => [x + (inverse ? -0.001 : 0.001), y]}
@@ -162,7 +162,7 @@ test('prepared grids use mutable interpolation, including fallback and inverse',
 });
 
 test('batch rejects malformed layouts before writing and accepts empty buffers', () => {
-  const projection = new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});
+  const projection = new ProjectionTransform({to: 'EPSG:3857', projections: [mercator]});
   for (const dimension of [0, 1, -2, 2.5, NaN, Infinity, 3]) {
     const buffer = new Float64Array([1, 2, 3, 4]);
     expect(() => projection.projectFlat(buffer, dimension)).toThrow('Dimension');
@@ -174,7 +174,7 @@ test('batch rejects malformed layouts before writing and accepts empty buffers',
   }
   const empty = new Float32Array();
   expect(projection.projectFlat(empty)).toBe(empty);
-  const geocentricProjection = new ProjectionEngine({
+  const geocentricProjection = new ProjectionTransform({
     to: 'EPSG:4978',
     projections: [geocentric]
   });
@@ -185,7 +185,7 @@ test('batch rejects malformed layouts before writing and accepts empty buffers',
 });
 
 test('batch commits whole records and stops at invalid coordinates', () => {
-  const projection = new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});
+  const projection = new ProjectionTransform({to: 'EPSG:3857', projections: [mercator]});
   for (const invalid of [NaN, Infinity, 90, 91]) {
     const buffer = new Float64Array([1, 2, 3, 0, invalid, 4, 5, 6, 7]);
     expect(() => projection.projectFlat(buffer, 3)).toThrow();
@@ -197,7 +197,7 @@ test('batch commits whole records and stops at invalid coordinates', () => {
     parameters: [],
     create: () => ({forward: () => [1e100, 0], inverse: () => [0, 0]})
   };
-  const native = new ProjectionEngine({to: '+proj=overflow', projections: [overflow]});
+  const native = new ProjectionTransform({to: '+proj=overflow', projections: [overflow]});
   const buffer = new Float32Array([1, 2]);
   expect(() => native.projectFlat(buffer)).toThrow('Float32 range');
   expect(buffer).toEqual(new Float32Array([1, 2]));
@@ -206,7 +206,7 @@ test('batch commits whole records and stops at invalid coordinates', () => {
 test('custom plugins retain scalar fallback or reuse a caller-owned scratch point', () => {
   const points = new Set<ProjectionPoint>();
   let nested = false;
-  let projection: native.ProjectionEngine;
+  let projection: native.ProjectionTransform;
   const plugin: ProjectionPlugin = {
     name: 'custom',
     parameters: [],
@@ -228,7 +228,7 @@ test('custom plugins retain scalar fallback or reuse a caller-owned scratch poin
       }
     })
   };
-  projection = new ProjectionEngine({to: '+proj=custom', projections: [plugin]});
+  projection = new ProjectionTransform({to: '+proj=custom', projections: [plugin]});
   const buffer = new Float64Array([0, 0, 10, 0, 0, 20]);
   projection.projectFlat(buffer, 3);
   expect(points.size).toBe(2); // One outer scratch point plus one reentrant call's scratch point.
@@ -236,7 +236,7 @@ test('custom plugins retain scalar fallback or reuse a caller-owned scratch poin
   projection.unprojectFlat(buffer, 3);
   expect(Array.from(buffer)).toEqual([0, 0, 10, 0, 0, 20]);
   compare(
-    new ProjectionEngine({
+    new ProjectionTransform({
       to: '+proj=custom',
       projections: [
         {
@@ -259,7 +259,7 @@ test('scalar scratch is reused, recursive hooks are isolated and failures releas
   const points = new Set<ProjectionPoint>();
   let nested = false,
     fail = false;
-  let projection: native.ProjectionEngine;
+  let projection: native.ProjectionTransform;
   const input = Object.freeze([10, 20, 100, 9]);
   const expected = [(10 * Math.PI) / 180 + 1, (20 * Math.PI) / 180 - 1, 100, 9];
   const plugin: ProjectionPlugin = {
@@ -288,7 +288,7 @@ test('scalar scratch is reused, recursive hooks are isolated and failures releas
       }
     })
   };
-  projection = new ProjectionEngine({to: '+proj=scratch', projections: [plugin]});
+  projection = new ProjectionTransform({to: '+proj=scratch', projections: [plugin]});
   const first = projection.project(input);
   expect(first).toEqual(expected);
   expect(projection.project(input)).toEqual(expected);

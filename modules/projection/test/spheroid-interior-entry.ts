@@ -5,7 +5,7 @@
 import {config} from '@math.gl/core';
 import {cartesianToSpheroid} from '@math.gl/core/spheroid';
 import {Ellipsoid} from '@math.gl/geospatial';
-import {ProjectionEngine} from '@math.gl/projection/core';
+import {ProjectionTransform} from '@math.gl/projection/core';
 import {geocentric} from '@math.gl/projection/projections/geocent';
 import fixtures from './fixtures/interior-reference.json';
 
@@ -55,7 +55,7 @@ export function evaluateInterior(row: InteriorCase, path: InteriorPath) {
         throw new Error('Leaf mutated separate input');
     } else {
       const axes = `+a=${a} +b=${b}`;
-      const engine = new ProjectionEngine({
+      const engine = new ProjectionTransform({
         from: '+proj=longlat ' + axes,
         to: '+proj=geocent ' + axes,
         projections: [geocentric]

@@ -38,5 +38,5 @@ export {lazyTiltedPerspective} from './tpers';
 export {lazyVanDerGrinten} from './vandg';
 export {lazyObliqueTransformation} from './ob_tran';
 
-export {LazyProjection} from '../lazy-projection';
+export {LazyProjection, LazyCRSProjectionEngine, lazyProjectionEngine} from '../lazy-projection';
 export type {LazyProjectionOptions} from '../lazy-projection';

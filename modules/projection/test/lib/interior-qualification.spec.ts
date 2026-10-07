@@ -6,7 +6,7 @@ import {expect, test} from 'vitest';
 import {config, Vector3} from '@math.gl/core';
 import {cartesianToSpheroid, spheroidToCartesian} from '@math.gl/core/spheroid';
 import {Ellipsoid} from '@math.gl/geospatial';
-import {ProjectionEngine} from '@math.gl/projection/core';
+import {ProjectionTransform} from '@math.gl/projection/core';
 import {geocentric} from '@math.gl/projection/projections/geocent';
 import {cases, evaluateInterior, type InteriorPath} from '../spheroid-interior-entry';
 
@@ -54,7 +54,7 @@ test('the independent oracle fixture retains qualified and unsupported probes', 
 // These boundaries use analytic constructions rather than the fixture solver.
 function engine(a: number, b: number) {
   const axes = `+a=${a} +b=${b}`;
-  return new ProjectionEngine({
+  return new ProjectionTransform({
     from: '+proj=longlat ' + axes,
     to: '+proj=geocent ' + axes,
     projections: [geocentric]

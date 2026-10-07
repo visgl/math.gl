@@ -6,7 +6,7 @@ import type {ProjectionCoordinate, ProjectionOutput} from './experimental/scalar
 import type {ProjectionArray} from './experimental/typescript-projection';
 import type {PipelineEpochs} from './experimental/projection-pipeline';
 
-/** ProjectionEngine, Projection or ProjectionPipeline with synchronous reusable outputs.
+/** ProjectionTransform, Projection or ProjectionPipeline with synchronous reusable outputs.
  * Lazy projections must have been preloaded. Epochs are interpreted by the supplied transform.
  */
 export type BulkProjection = {

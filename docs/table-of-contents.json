@@ -2,7 +2,11 @@
   {
     "type": "category",
     "label": "Overview",
-    "items": ["README", "whats-new", "upgrade-guide"]
+    "items": [
+      "README",
+      "whats-new",
+      "upgrade-guide"
+    ]
   },
   {
     "type": "category",
@@ -32,7 +36,9 @@
       {
         "type": "category",
         "label": "Discrete Global Grid Systems Math",
-        "items": ["developer-guide/geospatial/dggs"]
+        "items": [
+          "developer-guide/geospatial/dggs"
+        ]
       },
       {
         "type": "category",
@@ -137,7 +143,10 @@
       {
         "type": "category",
         "label": "@math.gl/wkb",
-        "items": ["modules/wkb/README", "modules/wkb/api-reference/wkb"]
+        "items": [
+          "modules/wkb/README",
+          "modules/wkb/api-reference/wkb"
+        ]
       },
       {
         "type": "category",
@@ -190,31 +199,53 @@
       {
         "type": "category",
         "label": "@math.gl/crs",
-        "items": ["modules/crs/README", "modules/crs/api-reference/spatial-reference"]
+        "items": [
+          "modules/crs/README",
+          "modules/crs/api-reference/spatial-reference"
+        ]
       },
       {
         "type": "category",
         "label": "@math.gl/projection",
         "items": [
           "modules/projection/README",
-          "modules/projection/coordinate-systems",
-          "modules/projection/ellipsoid-qualification",
-          "modules/projection/projections",
-          "modules/projection/projection-engine",
-          "modules/projection/bulk-layouts",
-          "modules/projection/operation-pipelines",
-          "modules/projection/operation-selection",
-          "modules/projection/deformation-models",
-          "modules/projection/deformation-qualification",
-          "modules/projection/api-reference/projection",
-          "modules/projection/api-reference/projection-engine",
-          "modules/projection/benchmarks",
-          "modules/projection/parity-audit",
-          "modules/projection/independent-validation",
-          "modules/projection/accuracy-domains",
-          "modules/projection/projection-analysis",
-          "modules/projection/support",
-          "modules/projection/roadmap"
+          {
+            "type": "category",
+            "label": "Developer Guide",
+            "items": [
+              "modules/projection/developer-guide/coordinate-systems",
+              "modules/projection/developer-guide/projections",
+              "modules/projection/developer-guide/projection-engine",
+              "modules/projection/developer-guide/deformation-models",
+              "modules/projection/developer-guide/support",
+              "modules/projection/developer-guide/roadmap"
+            ]
+          },
+          {
+            "type": "category",
+            "label": "API Reference",
+            "items": [
+              "modules/projection/api-reference/projection",
+              "modules/projection/api-reference/projection-engine",
+              "modules/projection/api-reference/projection-transform",
+              "modules/projection/api-reference/projection-pipeline",
+              "modules/projection/api-reference/operation-catalog",
+              "modules/projection/api-reference/projection-analysis",
+              "modules/projection/api-reference/projection-buffer"
+            ]
+          },
+          {
+            "type": "category",
+            "label": "Validation and Measurements",
+            "items": [
+              "modules/projection/ellipsoid-qualification",
+              "modules/projection/deformation-qualification",
+              "modules/projection/benchmarks",
+              "modules/projection/parity-audit",
+              "modules/projection/independent-validation",
+              "modules/projection/accuracy-domains"
+            ]
+          }
         ]
       },
       {
@@ -237,7 +268,10 @@
       {
         "type": "category",
         "label": "@math.gl/timezone",
-        "items": ["modules/timezone/README", "modules/timezone/api-reference/timezone"]
+        "items": [
+          "modules/timezone/README",
+          "modules/timezone/api-reference/timezone"
+        ]
       },
       {
         "type": "category",

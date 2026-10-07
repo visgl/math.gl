@@ -6,7 +6,7 @@ import proj4 from 'proj4';
 // @ts-expect-error Upstream exposes no declaration for its internal grid kernel.
 import {applyGridShift} from 'proj4/lib/datum_transform';
 import {
-  ProjectionEngine,
+  ProjectionTransform,
   parseNTv2Grid,
   loadGeoTIFFGrid,
   checkProjectionCompatibility,
@@ -25,8 +25,8 @@ function close(actual: readonly number[], expected: readonly number[], tolerance
     )
   );
 }
-function projection(grid: DatumGrid, list = 'test'): ProjectionEngine {
-  return new ProjectionEngine({
+function projection(grid: DatumGrid, list = 'test'): ProjectionTransform {
+  return new ProjectionTransform({
     from: '+proj=longlat +ellps=WGS84 +nadgrids=' + list,
     datumGrids: {test: grid}
   });
@@ -100,12 +100,12 @@ test('prepared grids own data and construction snapshots registrations', () => {
   const bytes = makeNTv2([{shift: () => [2, 1]}]),
     grid = parseNTv2Grid(bytes),
     datumGrids = {test: grid};
-  const native = new ProjectionEngine({from: '+proj=longlat +nadgrids=test', datumGrids});
+  const native = new ProjectionTransform({from: '+proj=longlat +nadgrids=test', datumGrids});
   new Uint8Array(bytes).fill(0);
   datumGrids.test = parseNTv2Grid(makeNTv2([{shift: () => [4, 3]}]));
   close(native.project([-1, 1]), [-1 - 2 / 3600, 1 + 1 / 3600]);
   expect(Object.isFrozen(grid)).toBe(true);
-  expect(() => new ProjectionEngine({from: '+proj=longlat +nadgrids=test'})).toThrow(
+  expect(() => new ProjectionTransform({from: '+proj=longlat +nadgrids=test'})).toThrow(
     'not registered'
   );
 });
@@ -135,13 +135,13 @@ test('grid-to-grid, Helmert chains, datum none, projected and geocentric targets
   const from = '+proj=longlat +ellps=clrk66 +nadgrids=test +towgs84=100,200,300';
   const point = [-1, 1, 123, 7],
     wgs = [-1 - 2 / 3600, 1 + 1 / 3600, 123, 7];
-  const source = new ProjectionEngine({from, datumGrids});
+  const source = new ProjectionTransform({from, datumGrids});
   close(source.project(point), wgs);
   close(source.unproject(wgs), point);
-  const target = new ProjectionEngine({to: from, datumGrids});
+  const target = new ProjectionTransform({to: from, datumGrids});
   close(target.project(wgs), point);
   close(
-    new ProjectionEngine({
+    new ProjectionTransform({
       from,
       to: '+proj=longlat +ellps=GRS80 +nadgrids=other',
       datumGrids
@@ -154,20 +154,20 @@ test('grid-to-grid, Helmert chains, datum none, projected and geocentric targets
     '+proj=longlat +ellps=GRS80 +towgs84=1,2,3,0.1,0.2,0.3,1'
   ]) {
     const options = {to, projections: [mercator, geocentric]};
-    const native = new ProjectionEngine({...options, from, datumGrids});
-    close(native.project(point), new ProjectionEngine(options).project(wgs), 1e-7);
+    const native = new ProjectionTransform({...options, from, datumGrids});
+    close(native.project(point), new ProjectionTransform(options).project(wgs), 1e-7);
     // The seven-parameter inverse retains the existing first-order rotation approximation.
     const roundTrip = native.unproject(native.project(point));
     close(roundTrip.slice(0, 2), point.slice(0, 2), 1e-8);
     close(roundTrip.slice(2), point.slice(2), 3e-5);
   }
-  const none = new ProjectionEngine({from: from + ' +datum=none'});
+  const none = new ProjectionTransform({from: from + ' +datum=none'});
   close(none.project(point), point);
   close(
-    new ProjectionEngine({from, to: '+proj=longlat +datum=none', datumGrids}).project(point),
+    new ProjectionTransform({from, to: '+proj=longlat +datum=none', datumGrids}).project(point),
     point
   );
-  close(new ProjectionEngine({from, to: from, datumGrids}).project([-20, 30]), [-20, 30]);
+  close(new ProjectionTransform({from, to: from, datumGrids}).project([-20, 30]), [-20, 30]);
 });
 test('inverse iteration converges both ordinates and rejects nonconvergence', () => {
   const native = projection(parseNTv2Grid(makeNTv2([{shift: x => [x * 360, 0]}])));
@@ -273,7 +273,7 @@ test('inverse solves variable shifts at every source boundary without an edge ap
 });
 test('grid interpolation works with enforced axes and prime meridians', () => {
   const grid = parseNTv2Grid(makeNTv2([{shift: () => [2, 1]}]));
-  const native = new ProjectionEngine({
+  const native = new ProjectionTransform({
     from: '+proj=longlat +ellps=WGS84 +nadgrids=test +pm=1 +axis=neu',
     to: '+proj=longlat +datum=WGS84 +pm=2 +axis=wsu',
     datumGrids: {test: grid},
@@ -323,7 +323,7 @@ test('registered grid lists fall through uncovered and nodata entries in declare
   const local = parseNTv2Grid(makeNTv2([{shift: () => [2, 1]}]));
   const alternate = parseNTv2Grid(makeNTv2([{shift: () => [4, 3]}]));
   const datumGrids = {remote, empty, local, alternate};
-  const native = new ProjectionEngine({
+  const native = new ProjectionTransform({
     from: '+proj=longlat +nadgrids=remote,empty,local,alternate',
     datumGrids
   });
@@ -331,7 +331,7 @@ test('registered grid lists fall through uncovered and nodata entries in declare
   close(native.unproject(native.project([-1, 1])), [-1, 1]);
 });
 test('null fallback terminates registration lookup as well as execution', () => {
-  const native = new ProjectionEngine({
+  const native = new ProjectionTransform({
     from: '+proj=longlat +nadgrids=@null,unreachable',
     datumGrids: {
       get unreachable(): DatumGrid {

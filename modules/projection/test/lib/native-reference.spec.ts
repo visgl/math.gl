@@ -36,7 +36,7 @@ test('native PROJ references cover every named projection, excluding the interna
 
 for (const [index, fixture] of inputs.cases.entries()) {
   test('independent PROJ forward/inverse and packed coordinates: ' + fixture.id, () => {
-    const projection = new native.ProjectionEngine({
+    const projection = new native.ProjectionTransform({
       from: '+proj=longlat +datum=none',
       to: fixture.definition,
       projections

@@ -25,20 +25,21 @@ const scenarios = {
     point: [3, 0]
   },
   utm: {
-    imports: "import {lazyUniversalTransverseMercator} from '@math.gl/projection/projections/lazy/utm';",
-    load: "return new ProjectionEngine({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});",
+    imports:
+      "import {lazyUniversalTransverseMercator} from '@math.gl/projection/projections/lazy/utm';",
+    load: "return new ProjectionTransform({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});",
     deferred: '/experimental/kernels/etmerc.js',
     expected: [500000, 0],
     point: [3, 0]
   },
   wkt: {
-    load: `const {wktCRSParser} = await import('@math.gl/projection/parsers/wkt'); return new ProjectionEngine({to: 'GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]]', parsers: [wktCRSParser]});`,
+    load: `const {wktCRSParser} = await import('@math.gl/projection/parsers/wkt'); return new ProjectionTransform({to: 'GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]]', parsers: [wktCRSParser]});`,
     deferred: '/experimental/crs/wkt.js',
     expected: [3, 0],
     point: [3, 0]
   },
   rotated: {
-    load: "const [{obliqueTransformation}, {mollweide}] = await Promise.all([import('@math.gl/projection/projections/ob_tran'), import('@math.gl/projection/projections/moll')]); return new ProjectionEngine({to: '+proj=ob_tran +o_lat_p=45 +o_lon_p=0', projections: [obliqueTransformation(mollweide)]});",
+    load: "const [{obliqueTransformation}, {mollweide}] = await Promise.all([import('@math.gl/projection/projections/ob_tran'), import('@math.gl/projection/projections/moll')]); return new ProjectionTransform({to: '+proj=ob_tran +o_lat_p=45 +o_lon_p=0', projections: [obliqueTransformation(mollweide)]});",
     deferred: '/experimental/kernels/moll.js',
     point: [3, 30]
   }
@@ -47,10 +48,10 @@ try {
   for (const [name, scenario] of Object.entries(scenarios)) {
     const result = await build({
       stdin: {
-        contents: `import {ProjectionEngine} from '@math.gl/projection/core';
+        contents: `import {ProjectionTransform} from '@math.gl/projection/core';
 import {mercator} from '@math.gl/projection/projections/merc';
 ${scenario.imports || ''}
-export const eager = new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});
+export const eager = new ProjectionTransform({to: 'EPSG:3857', projections: [mercator]});
 export async function load() {${scenario.load}}`,
         resolveDir: packageRoot,
         sourcefile: 'application.js'
@@ -68,6 +69,10 @@ export async function load() {${scenario.load}}`,
       minify: true,
       metafile: true
     });
+    assert(
+      !Object.keys(result.metafile.inputs).some(path => path.endsWith('/crs/datum-table.js')),
+      'Lazy engine and optional parsers must not import the regional datum catalogue'
+    );
     const outputs = new Map(
       Object.entries(result.metafile.outputs).map(([path, output]) => [
         resolve(packageRoot, path),

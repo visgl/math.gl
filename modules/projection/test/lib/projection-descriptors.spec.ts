@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test, vi} from 'vitest';
-import {ProjectionEngine, createProjectionDescriptor, mercator} from '@math.gl/projection';
+import {ProjectionTransform, createProjectionDescriptor, mercator} from '@math.gl/projection';
 import {lazyUniversalTransverseMercator} from '../../src/experimental/lazy-projections/utm';
 import {lazyMollweide} from '../../src/experimental/lazy-projections/moll';
 import {lazyObliqueTransformation} from '../../src/experimental/lazy-projections/ob_tran';
@@ -16,10 +16,10 @@ test('descriptors load only the algorithms requested by either CRS', async () =>
       throw new Error('not requested');
     })
   );
-  const geographic = await ProjectionEngine.create({projections: [descriptor, unused]});
+  const geographic = await ProjectionTransform.create({projections: [descriptor, unused]});
   expect(geographic.project([12, 45])).toEqual([12, 45]);
   expect(load).not.toHaveBeenCalled();
-  const p = await ProjectionEngine.create({
+  const p = await ProjectionTransform.create({
     from: 'EPSG:3857',
     to: 'EPSG:32631',
     projections: [descriptor, lazyUniversalTransverseMercator, unused]
@@ -36,8 +36,8 @@ test('preload and concurrent construction share a successful request', async () 
   const loader = createProjectionDescriptor({name: 'merc'}, load);
   const [plugin, p, q] = await Promise.all([
     loader.preload(),
-    ProjectionEngine.create({to: 'EPSG:3857', projections: [loader]}),
-    ProjectionEngine.create({from: 'EPSG:3857', projections: [loader]})
+    ProjectionTransform.create({to: 'EPSG:3857', projections: [loader]}),
+    ProjectionTransform.create({from: 'EPSG:3857', projections: [loader]})
   ]);
   expect(plugin).toBe(mercator);
   expect(load).toHaveBeenCalledTimes(1);
@@ -53,42 +53,42 @@ test('rejected imports retry and metadata mismatches reject explicitly', async (
     return mercator;
   });
   const options = {to: 'EPSG:3857', projections: [loader]};
-  await expect(ProjectionEngine.create(options)).rejects.toThrow('temporary load failure');
-  expect((await ProjectionEngine.create(options)).project([0, 0])).toEqual([0, 0]);
+  await expect(ProjectionTransform.create(options)).rejects.toThrow('temporary load failure');
+  expect((await ProjectionTransform.create(options)).project([0, 0])).toEqual([0, 0]);
   const wrong = {name: 'utm', preload: async () => mercator};
-  await expect(ProjectionEngine.create({to: 'EPSG:32631', projections: [wrong]})).rejects.toThrow(
-    'does not match'
-  );
+  await expect(
+    ProjectionTransform.create({to: 'EPSG:32631', projections: [wrong]})
+  ).rejects.toThrow('does not match');
   const wrongCached = createProjectionDescriptor({name: 'utm'}, async () => mercator);
   await expect(wrongCached.preload()).rejects.toThrow('does not match');
   await expect(
-    ProjectionEngine.create({to: 'EPSG:3857', projections: [mercator, loader]})
+    ProjectionTransform.create({to: 'EPSG:3857', projections: [mercator, loader]})
   ).rejects.toThrow('Duplicate');
-  await expect(ProjectionEngine.create({to: 'EPSG:32631', projections: [loader]})).rejects.toThrow(
-    'not registered'
-  );
+  await expect(
+    ProjectionTransform.create({to: 'EPSG:32631', projections: [loader]})
+  ).rejects.toThrow('not registered');
 });
 
 test('descriptors coexist with eager plugins and alias definitions', async () => {
-  const p = await ProjectionEngine.create({
+  const p = await ProjectionTransform.create({
     to: 'APP:UTM',
     aliases: {'APP:UTM': 'EPSG:32631'},
     projections: [mercator, lazyUniversalTransverseMercator]
   });
   expect(p.project([3, 0])[0]).toBeCloseTo(500000, 7);
-  const eager = await ProjectionEngine.create({to: 'EPSG:3857', projections: [mercator]});
+  const eager = await ProjectionTransform.create({to: 'EPSG:3857', projections: [mercator]});
   expect(eager.project([0, 0])).toEqual([0, 0]);
 });
 
 test('oblique descriptors also defer their child plugin', async () => {
-  const p = await ProjectionEngine.create({
+  const p = await ProjectionTransform.create({
     to: '+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=0',
     projections: [lazyObliqueTransformation(lazyMollweide)]
   });
   const output = p.unproject(p.project([3, 30]));
   expect(output[0]).toBeCloseTo(3, 7);
   expect(output[1]).toBeCloseTo(30, 7);
-  const rotated = await ProjectionEngine.create({
+  const rotated = await ProjectionTransform.create({
     to: '+proj=ob_tran +o_proj=longlat +o_lat_p=45 +o_lon_p=0',
     projections: [lazyObliqueTransformation('longlat')]
   });
@@ -101,7 +101,7 @@ test('constructor accepts descriptors and coordinate methods trigger the first i
   const unused = createProjectionDescriptor({name: 'unused'}, async () => {
     throw new Error('unused');
   });
-  const p = new ProjectionEngine({to: 'EPSG:3857', projections: [descriptor, unused]});
+  const p = new ProjectionTransform({to: 'EPSG:3857', projections: [descriptor, unused]});
   expect(load).not.toHaveBeenCalled();
   const source = [3, 45];
   const projected: Promise<number[]> = p.project(source);
@@ -120,7 +120,7 @@ test('constructor accepts descriptors and coordinate methods trigger the first i
 });
 
 test('eager methods remain synchronous and lazy failures leave buffers untouched', async () => {
-  const eager = new ProjectionEngine({to: 'EPSG:3857', projections: [mercator]});
+  const eager = new ProjectionTransform({to: 'EPSG:3857', projections: [mercator]});
   const result: number[] = eager.project([0, 0]);
   expect(result).toEqual([0, 0]);
   await eager.preload();
@@ -129,7 +129,7 @@ test('eager methods remain synchronous and lazy failures leave buffers untouched
     if (++calls === 1) throw new Error('offline');
     return mercator;
   });
-  const p = new ProjectionEngine({to: 'EPSG:3857', projections: [retry]});
+  const p = new ProjectionTransform({to: 'EPSG:3857', projections: [retry]});
   const buffer = new Float64Array([3, 45]);
   await expect(p.projectFlat(buffer)).rejects.toThrow('offline');
   expect(Array.from(buffer)).toEqual([3, 45]);
@@ -140,7 +140,7 @@ test('eager methods remain synchronous and lazy failures leave buffers untouched
 test('sync calls use the shared descriptor cache without starting imports', async () => {
   const load = vi.fn(async () => mercator);
   const descriptor = createProjectionDescriptor({name: 'merc'}, load);
-  const p = new ProjectionEngine({to: 'EPSG:3857', projections: [descriptor]});
+  const p = new ProjectionTransform({to: 'EPSG:3857', projections: [descriptor]});
   const buffer = new Float64Array([3, 45]);
   expect(() => p.projectSync([3, 45])).toThrow('preload');
   expect(() => p.projectFlatSync(buffer)).toThrow('preload');
@@ -153,7 +153,7 @@ test('sync calls use the shared descriptor cache without starting imports', asyn
   expect(p.projectFlatSync(buffer)).toBe(buffer);
   expect(p.unprojectFlatSync(buffer)).toBe(buffer);
   expect(buffer[0]).toBeCloseTo(3, 10);
-  const q = new ProjectionEngine({to: 'EPSG:3857', projections: [descriptor]});
+  const q = new ProjectionTransform({to: 'EPSG:3857', projections: [descriptor]});
   expect(q.projectSync([3, 45])).toEqual(output);
   expect(load).toHaveBeenCalledTimes(1);
 });
@@ -168,8 +168,8 @@ test('pending loads are unavailable to sync callers and descriptor identities st
   );
   const descriptor = createProjectionDescriptor({name: 'merc'}, load);
   const other = createProjectionDescriptor({name: 'merc'}, async () => mercator);
-  const p = new ProjectionEngine({to: 'EPSG:3857', projections: [descriptor]});
-  const q = new ProjectionEngine({to: 'EPSG:3857', projections: [other]});
+  const p = new ProjectionTransform({to: 'EPSG:3857', projections: [descriptor]});
+  const q = new ProjectionTransform({to: 'EPSG:3857', projections: [other]});
   const pending = p.preload();
   await Promise.resolve();
   expect(() => p.projectSync([3, 45])).toThrow('preload');

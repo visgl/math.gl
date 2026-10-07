@@ -5,12 +5,12 @@
 import {expect, test} from 'vitest';
 import {config, Vector3} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
-import {ProjectionEngine} from '@math.gl/projection/core';
+import {ProjectionTransform} from '@math.gl/projection/core';
 import {geocentric} from '@math.gl/projection/projections/geocent';
 
 function sphere(radius: number) {
   const crs = `+R=${radius} +proj=`;
-  return new ProjectionEngine({
+  return new ProjectionTransform({
     from: crs + 'longlat',
     to: crs + 'geocent',
     projections: [geocentric]

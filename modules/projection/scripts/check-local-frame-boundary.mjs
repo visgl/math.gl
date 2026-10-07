@@ -25,7 +25,7 @@ const fixtures = {
   numericLeaf: "export * from '@math.gl/core/local-frame';",
   deformation: "export {createDeformationModel} from '@math.gl/projection/deformation';",
   coreRoot: "export * from '@math.gl/core';",
-  projectionCore: "export {ProjectionEngine} from '@math.gl/projection/core';",
+  projectionCore: "export {ProjectionTransform} from '@math.gl/projection/core';",
   projectionPipeline: "export {ProjectionPipeline} from '@math.gl/projection/pipeline';",
   geospatialEllipsoid: "export {Ellipsoid} from '@math.gl/geospatial';"
 };

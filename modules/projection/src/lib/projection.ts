@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original compatibility wrapper around the math.gl projection engine. Projection kernels retain their proj4js/PROJ port notices and licenses in ../experimental/.
-import {ProjectionEngine} from '../experimental/typescript-projection';
+import {ProjectionTransform} from '../experimental/typescript-projection';
+import {CustomProjectionEngine} from '../experimental/projection-engine';
+import type {ProjectionEngine, ProjectionEngineOptions} from '../types';
+import {datumCatalog} from '../datums';
+import {getDatumDefinitions} from '../experimental/crs/datum-catalog';
+import type {CRSParser} from '../experimental/crs/types';
 import {
   mercator,
   equidistantCylindrical,
@@ -58,6 +63,29 @@ export type ProjectionOptions = {
   enforceAxis?: boolean;
   verticalGrids?: VerticalGridCollection;
 };
+
+// The compatibility wrapper historically accepts an unrecognized structured datum
+// label as ellipsoid-only metadata. Engine parsers retain the stricter registration rule.
+function compatibilityParser(parser: CRSParser): CRSParser {
+  return {
+    ...parser,
+    parse(definition, options) {
+      const parsed = parser.parse(definition, options);
+      const datum = parsed.parameters['datum'];
+      const key = (name: string) => name.toLowerCase().replace(/[\s_-]/g, '');
+      if (
+        datum &&
+        !Object.keys(getDatumDefinitions(options)).some(name => key(name) === key(datum))
+      ) {
+        const parameters = {...parsed.parameters};
+        delete parameters['datum'];
+        return {...parsed, parameters};
+      }
+      return parsed;
+    }
+  };
+}
+const compatibilityParsers = [wktCRSParser, projJSONCRSParser].map(compatibilityParser);
 
 const aliases: Record<string, ReadonlyCRSDefinition> = Object.create(null);
 const grids: Record<string, DatumGrid> = Object.create(null);
@@ -131,8 +159,22 @@ function defaultProjections(): readonly ProjectionPlugin[] {
   return preset;
 }
 
-/** Classic wrapper API, executed by the math.gl projection engine with all built-in plugins and readers. */
-export class Projection extends ProjectionEngine {
+/** Default engine with all built-in plugins, compatibility readers and named datums. */
+export class CRSProjectionEngine extends CustomProjectionEngine implements ProjectionEngine {
+  constructor(options: ProjectionEngineOptions = {}) {
+    super({
+      projections: defaultProjections(),
+      parsers: compatibilityParsers,
+      datumCatalogs: [datumCatalog],
+      ...options
+    });
+  }
+}
+
+export const projectionEngine = new CRSProjectionEngine();
+
+/** Classic wrapper for a single CRS pair. */
+export class Projection extends ProjectionTransform {
   /** Register aliases for subsequently constructed projections. */
   static defineProjectionAliases(definitions: {[name: string]: ReadonlyCRSDefinition}): void {
     for (const name of Object.keys(definitions)) {
@@ -159,9 +201,10 @@ export class Projection extends ProjectionEngine {
       enforceAxis,
       verticalGrids,
       projections: defaultProjections(),
-      parsers: [wktCRSParser, projJSONCRSParser],
+      parsers: compatibilityParsers,
       aliases,
-      datumGrids: grids
+      datumGrids: grids,
+      datumCatalogs: [datumCatalog]
     });
   }
 }
