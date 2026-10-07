@@ -30,6 +30,11 @@
   },
   {
     "type": "doc",
+    "label": "Alpine Ice Age",
+    "id": "alpine-ice-age"
+  },
+  {
+    "type": "doc",
     "label": "Polygon playground",
     "id": "polygon-playground"
   },

@@ -1,0 +1,34 @@
+# Alpine Ice Age
+
+import Example from "@site/src/components/alpine-ice-age";
+
+<Example height="calc(100vh - 140px)" />
+
+Explore the **Würm glacial cycle** from 119,000 years ago to the present. Drag to
+rotate the terrain, scrub the timeline, or switch to the map view. The ice surface
+follows published glacier-thickness snapshots; the terrain-reveal option keeps
+underlying land colors visible. Vertical exaggeration is adjustable.
+
+Data: [Seguinot and colleagues (2018)](https://doi.org/10.5194/tc-12-3265-2018),
+*Modelling last glacial cycle ice dynamics in the Alps*, and the
+[version 3 simulation archive](https://doi.org/10.5281/zenodo.7802275), licensed
+[CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). The selected PISM run uses
+EPICA climate forcing and palaeo-precipitation reduction. The original 2 km grid is
+sampled at 4 km for browser display; all 120 snapshots at 1,000-year intervals are
+retained. Ice thickness between snapshots is linearly interpolated. Model bedrock
+at the present is held fixed, so isostatic changes are not animated. Terrain-reveal
+colors are illustrative, and relief is exaggerated.
+
+The chart and numerical readouts use original model-grid totals. Ice area counts
+cells above 10 m thickness; volume sums thickness times nominal grid-cell area.
+Intermediate statistics are interpolated estimates. The 24 ka maximum chapter is
+an approximate marker; individual glacier lobes reached their maxima at different
+times. Modern place labels provide geographic orientation.
+
+**Günz, Mindel and Riss are outside this dataset.** They need separate
+reconstructions rather than reusing the Würm ice margins.
+
+The compressed, attributed browser dataset is bundled with this example. The
+[preparation script](https://github.com/visgl/math.gl/tree/master/examples/alpine-ice-age/scripts)
+checks the published checksum and records provenance. Surface normals use math.gl
+vectors; deck.gl renders the Cartesian terrain and orbit controls.

@@ -84,6 +84,9 @@ jobs:
       - name: Test tectonic time machine streaming
         run: yarn workspace math.gl-tectonic-time-machine test
 
+      - name: Test Alpine Ice Age dataset and interpolation
+        run: yarn workspace math.gl-alpine-ice-age test
+
       - name: Check curves package exports, public types and tree shaking
         run: yarn check:curves-package
 
