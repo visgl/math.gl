@@ -22,11 +22,11 @@ For plane masks (as used in`CullingVolume.computeVisibilityWithPlaneMask`), this
 
 ## Methods
 
-### constructor([planes : Plane[]])
+### constructor(planes: Plane[] = [])
 
 - `planes`=`[]` An array of clipping planes.
 
-Each plane is represented by a Cartesian4 object, where the x, y, and z components define the unit vector normal to the plane, and the w component is the distance of the plane from the origin.
+Each entry is a `Plane` with a normalized inward-facing normal and signed distance. The plane equation is `dot(normal, position) + distance = 0`; the nonnegative side is inside.
 
 ### fromBoundingSphere(boundingSphere : BoundingSphere)
 

@@ -1,23 +1,29 @@
 # Get Started
 
-## Installation
+Install the modules your application needs. Start with core for vectors, matrices, and rotations:
 
-If using a bundler like webpack to build your app with npm modules, use `npm` or `yarn` to install `@math.gl/core` and any other math.gl modules you need.
-
-```
+```bash
 npm install @math.gl/core
 ```
 
+```js
+import {Vector3} from '@math.gl/core';
+
+const position = new Vector3(1, 2, 3);
+position.add([4, 0, 0]); // Mutates position to [5, 2, 3]
+const copy = position.clone();
+```
+
+Core classes extend JavaScript `Array`. Most arithmetic methods modify the receiver and return it for chaining; use `clone()` when the original must be preserved. See the [core overview](../modules/core/README.md) for classes and conventions.
+
+## Choose a module
+
+Each module has its own package and installation instructions. Use [projection](../modules/projection/README.md) for CRS conversion, [web-mercator](../modules/web-mercator/README.md) for map cameras, and [geospatial](../modules/geospatial/README.md) for ellipsoid and globe math. The [module list](../README.md#modules) covers the full toolbox.
+
 ## TypeScript
 
-Type definitions are provided with each module. There is no need to install any separate types.
+Types ship with each package; no separate types package is needed. math.gl v5 declarations require TypeScript 6.0 or later for `Float16Array` types. Runtime `Float16Array` support remains optional. See [array types](../modules/types/api-reference/array-types.md) for detection and fallback helpers.
 
-math.gl v5 declarations require TypeScript 6.0 or later. The public typed-array definitions refer
-to TypeScript's `es2025.float16` library so that `Float16Array` can be represented accurately. This
-is a type-level requirement only: math.gl does not require or install a runtime `Float16Array`
-implementation. See the [array types guide](../modules/types/api-reference/array-types.md) for
-runtime detection and fallback helpers.
+## Module formats
 
-## ESM modules
-
-Since v4.0, math.gl is published as ES modules, but with a CommonJS named export. This setup should work automatically for most applications and bundlers.
+Packages provide ES module and CommonJS entry points. Use named imports from the package root, or documented subpaths for optional functionality. See [bundling](./bundling.md) for selective imports and bundle measurements.

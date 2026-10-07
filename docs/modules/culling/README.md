@@ -4,47 +4,51 @@
   <img src="https://img.shields.io/badge/From-v3.0-blue.svg?style=flat-square" alt="From v3.0" />
 </p>
 
+`@math.gl/culling` tests bounding volumes against planes and provides analytic shape queries. Use it to reject objects outside a view frustum, intersect rays with shapes, and compute enclosing bounds.
+
+
 import CullingExample from '@site/src/components/culling-playground';
 
 <CullingExample inline />
 
-The `@math.gl/culling` module provides primitives for implementing frustum culling:
+## Installation
 
-- Bounding boxes and intersection logic
-- Fully "transformable" primitives (i.e. oriented bounding boxes as opposed to just axis-aligned bounding boxes).
+```bash
+npm install @math.gl/culling
+```
 
-The culling module does not attempt to be a general "physics-based" collision detection library (e.g. it does not handle time-interpolated intersections like a physics library would).
 
-See the [ray and closest-point query lab](./api-reference/queries.md) for triangle picking and shared numeric query kernels.
+## Choose a primitive
 
-## Classes
+| API | Use it for |
+| --- | --- |
+| [CullingVolume](./api-reference/culling-volume.md) | Visibility against a set of inward-facing planes |
+| [AxisAlignedBoundingBox](./api-reference/axis-aligned-bounding-box.md) | Bounds aligned with the coordinate axes |
+| [OrientedBoundingBox](./api-reference/oriented-bounding-box.md) | Bounds with arbitrary orientation |
+| [BoundingSphere](./api-reference/bounding-sphere.md) | A center and radius enclosing geometry |
+| [Plane](./api-reference/plane.md) | A normalized normal and signed distance |
+| [Ray](./api-reference/ray.md) | An origin and direction for intersection queries |
+| [Analytic shapes](./api-reference/shapes.md) | Box, capsule, cylinder, plane, and sphere queries without tessellation |
 
-| Class                 | Description |
-| --------------------- | ----------- |
-| `CullingVolume`       |             |
-| `BoundingSphere`      |             |
-| `OrientedBoundingBox` |             |
-| `Plane`               |             |
-| `Ray`                 |             |
+## Test visibility
 
-## Example Usage
+Supply planes in the same coordinate space as the bounding volume. Plane normals face inward:
 
-- Create bounding volumes for your objects/geometries, and create `BoundingSphere` or `OrientedBoundingBox` instances.
-- Extract your camera view frustum parameters and create a `PerspectiveFrustum` instance.
-- You can now test your bounding volumes to see if the intersect the view frustum.
+```js
+import {BoundingSphere, CullingVolume, Plane} from '@math.gl/culling';
 
-## Framework Independence
+const volume = new CullingVolume([
+  new Plane([1, 0, 0], 1),  // x >= -1
+  new Plane([-1, 0, 0], 1)  // x <= 1
+]);
+const visibility = volume.computeVisibility(new BoundingSphere([0, 0, 0], 0.5));
+// 'inside'
+```
 
-Like all non-core math.gl modules, this library can be used without the math.gl core classes.
+A camera frustum can be represented by six planes. `computeVisibility()` returns `'outside'`, `'intersecting'`, or `'inside'`; render or refine intersecting objects as appropriate for the application. Plane masks allow children to skip tests already resolved by a parent's bounds.
 
-- Any input vectors can be supplied as length 3 JavaScript `Array` instances.
-- Any result vectors can be treated as length 3 JavaScript `Array` instances (they may be math.gl `Vector3`).
-- The core math.gl classes inherit from JavaScript `Array` and can be used directly as input.
-
-## History
-
-This library was initially developed as a fork of the Cesium math library as part of a collaboration between Cesium and Uber to provide framework-independent, portable support for the 3D tiles specification.
+Vector inputs can be numeric arrays, including core vectors; no renderer objects are required. This module handles geometric queries, not time-dependent collision simulation.
 
 ## Attribution
 
-This code in was initially forked from [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) under the Apache 2 License.
+Bounding-volume and frustum code was ported from Cesium under Apache-2.0. See the source headers and distributed license notices for provenance.

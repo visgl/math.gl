@@ -1,102 +1,44 @@
 # Performance
 
-The code vector and matrix operations in math.gl are based on gl-matrix which is designed as a high performance JavaScript 3D math library.
+Reuse math objects and output buffers in repeated calculations. Core methods use standalone numeric kernels; allocation, validation, and application data layout can affect the cost of a loop.
 
-Since math.gl uses gl-matrix functions under the hood, math.gl's performance is usually very close to gl-matrix, but the additional conveniences in math.gl do come with a certain overhead. Understanding this overhead can help you write more performant code and work around performance issues.
+## Reuse objects
 
-In cases where JavaScript math calculations are performance critical, you can always use gl-matrix operations directly. See (./docs/get-started/using-with-gl-matrix.md). Essentially, since all math.gl classes inherit from `Array`s they work directly as arguments to gl-matrix functions, no copying necessary.
-
-## Disabling Debug Checks
-
-If debug mode has been turned on, math.gl checks that objects after every operation. Enabling the checks has a modest impact on performance.
+Allocate scratch objects outside the loop and update their components:
 
 ```js
-import {configure, Vector2} from '@math.gl/core';
-configure({debug: false});
-let vector = new Vector2(NaN, NaN); // Initializes an "invalid" vector
+import {Vector3} from '@math.gl/core';
 
-configure({debug: true});
-let vector = new Vector2(NaN, NaN); // Now throws an error. The check
-```
-
-Verifying that error checks are not turned on.
-
-```js
-import {configure} from '@math.gl/core';
-console.log('Debug status', configure().debug);
-```
-
-## Minimizing Object Creation
-
-The biggest performance issue in math.gl (and essentially all other JavaScript math libraries) is object creation cost. Creating new `Vector3` and `Matrix4` instances every time a calculation is made incurs significant overhead.
-
-There are two standard techniques to avoid object creation costs.
-
-### Resuing Objects
-
-Therefore, reusing objects where possible is an important technique to optimize performance. A typical technique is to allocate a global object in the file.
-
-Replace
-
-```js
-for (...) {
-	const v = new Vector3(x, y, z);
+const scratch = new Vector3();
+for (const position of positions) {
+  scratch.copy(position).normalize();
+  // Consume scratch here; its values change on the next iteration.
 }
 ```
 
-with
+Store a clone or copy the components when a result must outlive the current iteration. A shared scratch object is unsuitable when callers need independent results.
+
+## Supply output buffers
+
+Matrix transforms allocate an array when no result is supplied. Pass a reusable result to avoid that allocation:
 
 ```js
-const tempVector = new Vector3();
-for (...) {
-	v.set(x, y, z);
+import {Matrix4, Vector3} from '@math.gl/core';
+
+const matrix = new Matrix4().translate([10, 0, 0]);
+const result = new Vector3();
+for (const position of positions) {
+  matrix.transformAsPoint(position, result);
+  // Consume result before the next transform.
 }
 ```
 
-Note that while creating objects can be slow, copying data into a temo object (e.g. `vector4.copy([1, 1, 1, 1])` or `vector4.copy([1, 1, 1, 1])`) is very fast.
+For large CRS coordinate buffers, use the [projection buffer APIs](../modules/projection/api-reference/projection-buffer.md) instead of constructing an object for each coordinate.
 
-### Supplying `result` Objects
+## Measure your workload
 
-A number of methods, such as `Matrix4.transform()`, allocate new arrays as return values. These methods typically accept an optional `result` argument which can be populated and returned. By providing a `result` value, you prevent the allocation of a new array and instead reuse one you have already allocated.
+Disable optional core validation with `configure({debug: false})` before measuring production performance. Compare the same inputs, output ownership, and numeric precision, and include any copying your application requires.
 
-```js
-for (...) {
-  const v = matrix4.transform([x, y, z]);
-  // v now contains a reference to a newly allocated `Vector3` which was updated with the result of the `tranformVector` operation.
-}
-```
+The [browser benchmarks](/examples/benchmarks) compare representative operations. [Projection benchmarks](../modules/projection/benchmarks.md) include scalar and buffer workloads. Results depend on the JavaScript engine and hardware; measure changes in the application that will use them.
 
-vs.
-
-```js
-const tempVector = new Vector3();
-for (...) {
-  const v = matrix4.transform([x, y, z], tempVector);
-  // v now contains a reference to `tempVector` which was updated with the result of the `tranformVector` operation.
-}
-```
-
-## Browser, OS version etc
-
-The JavaScript engine powering Chrome and Node is still improving. The performance difference between some older Node versions was dramatic.
-
-## Benchmarking
-
-The math.gl repository comes with a benchmark suite that you can run to see what operations are fast and which take more time in your environment.
-
-You can run the benchmarks both in Node.js and in the browser
-
-```bash
-yarn bench
-yarn bench browser
-```
-
-## JavaScript Engine Optimizations
-
-> This section should be considered advanced, and is not required reading for the normal math.gl user. However if you are writing your own math code it can be useful to have an understanding.
-
-To get good performance it is important to structure code so that it can be compiled and optimized by the JavaScript engine in use. math.gl focuses on optimizing for the V8 engine, since it is used both by Chrome and Node.js, however the optimizations are general and should also be relevant to other optimizing JavaScript engines.
-
-In particular, math.gl makes efforts to ensure that the engine knows that fields in math classes contain numbers, which allows for important optimizations that can result in a \~5x performance difference for simple operations.
-
-A good introduction to the topic can be found in [JavaScript Performance Pitfalls in V8](https://ponyfoo.com/articles/javascript-performance-pitfalls-v8).
+See [bundling](./bundling.md) when download size and startup cost matter more than arithmetic throughput.

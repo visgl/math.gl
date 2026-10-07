@@ -8,7 +8,7 @@
 referenced. It preserves discovery state and representation without performing a transformation.
 
 For concepts, examples, and integration guidance, see the
-[Coordinate Reference Systems developer guide](/docs/developer-guide/geospatial/coordinate-reference-systems).
+[Coordinate Reference Systems developer guide](/docs/modules/crs/developer-guide/coordinate-reference-systems).
 
 ## `SpatialReference`
 

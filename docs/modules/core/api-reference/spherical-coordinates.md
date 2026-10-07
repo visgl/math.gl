@@ -4,160 +4,56 @@
   <img src="https://img.shields.io/badge/From-v1.0-blue.svg?style=flat-square" alt="From v1.0" />
 </p>
 
-> This documentation is incomplete and may be incorrect
+Stores `radius`, `phi`, and `theta`, with angle and geographic convenience accessors. Angles in the primary fields are radians. This class retains legacy conversion conventions; see the conversion limitation below before using it for coordinate exchange.
 
-```js
-class SphericalCoordinates
-```
 
-See also [Wikipedia](https://en.wikipedia.org/wiki/Spherical_coordinate_system), [Wolfram MathWorld](http://mathworld.wolfram.com/SphericalCoordinates.html).
-
-- The poles (phi) are at the positive and negative y axis.
-- The equator starts at positive z.
-
-Conversion from spherical to Cartesian (rectilinear) coordinates:
-
-```
-<math xmlns="http://www.w3.org/1998/Math/MathML">
-<mfenced open="{" close="">
-<mtable columnalign="left">
-  <mtr><mrow><mi>x</mi><mo>=</mo><mn>ρ</mn><mi>cos</mi><mn>θφ</mn></mrow></mtr>
-  <mtr><mrow><mi>y</mi><mo>=</mo><mn>ρ</mn><mi>cos</mi><mn>θφ</mn></mrow></mtr>
-  <mtr><mrow><mi>z</mi><mo>=</mo><mn>ρ</mn><mi>cos</mi><mn>θφ</mn></mrow></mtr>
-</mtable>
-</mfenced>
-</math>
-```
-
-Conversion from Cartesian (rectilinear) to spherical coordinates:
-
-```
-<math xmlns="http://www.w3.org/1998/Math/MathML">
-<mfenced open="{" close="">
-<mtable columnalign="left">
-  <mtr><mrow><mi>r</mi><mo>=</mo><msqrt>
-    <msup><mi>x</mi><mn>2</mn></msup><mo>+</mo>
-    <msup><mi>y</mi><mn>2</mn></msup><mo>+</mo>
-    <msup><mi>z</mi><mn>2</mn></msup>
-  </msqrt></mrow></mtr>
-  <mtr><mrow><mi>θ</mi><mo>=</mo><mo>arccos</mo><mfrac><mi>z</mi><mi>r</mi></mfrac></mrow></mtr>
-  <mtr><mrow><mi>φ</mi><mo>=</mo><mo>arctan</mo><mfrac><mi>y</mi><mi>x</mi></mfrac></mrow></mtr>
-</mtable>
-</mfenced>
-</math>
-```
-
-Ranges
-
-```
-<math xmlns="http://www.w3.org/1998/Math/MathML">
-<mfenced open="{" close="">
-<mtable columnalign="left">
-  <mtr><mrow><mi>r</mi><mo>≥<mn>0</mn></mtr>
-  <mtr><mrow><mi>θ</mi><mo>≥<mn>0</mn></mtr>
-  <mtr><mrow><mi>φ</mi><mo>≥<mn>0</mn></mtr>
-</mtable>
-</mfenced>
-</math>
-```
-
-## Usage
+## Construction
 
 ```js
 import {SphericalCoordinates} from '@math.gl/core';
+
+const spherical = new SphericalCoordinates({radius: 2, phi: Math.PI / 2, theta: 0});
 ```
 
-Creating a SphericalCoordinates object
+The constructor accepts `phi`, `theta`, `radius`, `bearing`, `pitch`, `altitude`, and `radiusScale`. Defaults are `phi = 0`, `theta = 0`, and `radius = 1`. `bearing` and `pitch` are degree-based aliases. It does not accept `longitude` or `latitude` constructor options.
 
-```js
-const spherical = new SphericalCoordinates({phi: 0, theta: 0});
-const spherical = new SphericalCoordinates({pitch: 0, bearing: 0});
-const spherical = new SphericalCoordinates({longitude: 0, latitude: 0});
+## Primary methods
+
+| Method | Behavior |
+| --- | --- |
+| `set(radius, phi, theta)` | Set the three fields and validate |
+| `clone()` | Create a copy of the three primary fields |
+| `copy(other)` | Copy radius and angles into the receiver |
+| `equals(other)` | Compare radius and angles with the configured epsilon |
+| `makeSafe()` | Clamp phi away from 0 and π |
+| `check()` | Require finite angles and a positive radius; throws independently of debug mode |
+
+`clone()` and `copy()` do not copy `radiusScale`. Set it explicitly when preserving a custom geographic scale.
+
+## Vector conversions
+
+`fromVector3(vector)` reads a structural `Vector3Like` value:
+
+```text
+radius = hypot(x, y, z)
+theta = atan2(x, y)
+phi = acos(clamp(z / radius, -1, 1))
 ```
 
-Converting to a direction `Vector3`
+The zero vector fails the positive-radius check. `toVector3(result?)` writes to a supplied array, typed array, or core vector, and otherwise allocates a plain array:
 
-```js
-const direction = new SphericalCoordinates().toVector3();
+```text
+x = radius * sin(theta) * sin(phi)
+y = -radius * sin(theta) * cos(phi)
+z = radius * cos(theta)
 ```
 
-Manipulating spherical coordinates;
+These legacy formulas are not a general inverse pair. For example, `[0, 1, 0]` converts back to `[0, 0, 1]`. Do not rely on round trips or assume a standard spherical-axis convention. Use explicit conversion equations matching your application's convention when that is required.
 
-```js
-spherical.bearing += 3; // Add three degrees to bearing
-spherical.theta -= Math.PI / 4; // Subtract PI/4 radians from theta.
-```
+## Degree-based accessors
 
-## Members
+`bearing` reads `180 - degrees(phi)` and `pitch` reads `degrees(theta)`; both are writable. Read-only `longitude`/`lng` return `degrees(phi)`, while `latitude`/`lat` return `degrees(theta)`.
 
-// Standard spherical coordinates
+`fromLngLatZ([longitude, latitude, height])` sets `phi` from latitude, `theta` from longitude, and `radius = 1 + height / radiusScale`. The read-only `z` accessor returns `(radius - 1) * radiusScale`; the default scale is 6,371,000. These geographic aliases also use legacy conventions and are not inverse longitude/latitude accessors.
 
-### phi
-
-### theta
-
-### radius
-
-### altitude
-
-// lnglatZ coordinates
-
-### lng
-
-### lat
-
-### z
-
-## Methods
-
-### constructor
-
-```js
-SphericalCoordinates({phi = 0, theta = 0, radius = 1.0})
-SphericalCoordinates({bearing = 0, pitch = 0, altitude = 1.0})
-SphericalCoordinates({longitude = 0, latitude = 0, z = 1.0})
-```
-
-- phi=0 - rotation around X (latitude)
-- theta=0 - rotation around Y (longitude)
-- radius=1 - Distance from center
-
-### set
-
-`set(radius, phi, theta)`
-
-### clone
-
-`clone()`
-
-### copy
-
-`copy(other)`
-
-### fromLngLatZ
-
-`fromLngLatZ([lng, lat, z])`
-
-### fromVector3
-
-`fromVector3(v: Readonly<Vector3Like>)`
-
-### makeSafe
-
-`makeSafe()`
-
-// restrict phi to be betwee EPS and PI-EPS
-
-### toVector3
-
-`toVector3(result: Vector3Like = [0, 0, 0])`
-
-Returns the supplied result object, or a plain three-element array when omitted. `Vector3Like` accepts tuples, typed arrays, and `Vector3` instances.
-
-// TODO - add parameter for orientation of sphere? up vector etc?
-
-### check
-
-## Remarks
-
-- Inspired by THREE.js `THREE.Spherical` class
+Use [geospatial](../../geospatial/README.md) for ellipsoidal coordinates and [projection](../../projection/README.md) for CRS conversion.
