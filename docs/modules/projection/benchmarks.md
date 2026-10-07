@@ -67,7 +67,7 @@ coordinates. Warm throughput does not describe loading or first-use latency.
 | Input or workload | API | Storage behavior |
 | --- | --- | --- |
 | Individual coordinates | `project` / `unproject` | Returns a new coordinate array |
-| Repeated scalar calls | [`projectTo` / `unprojectTo`](api-reference/projection-engine.md#reusable-scalar-outputs) | Reuses a caller-provided output |
+| Repeated scalar calls | [`projectTo` / `unprojectTo`](api-reference/projection-transform.md#reusable-scalar-outputs) | Reuses a caller-provided output |
 | Interleaved Float32/Float64 coordinates | `projectFlat` / `unprojectFlat` | Updates the supplied view in place |
 | Separate output, padded records or columns | [`ProjectionBuffer`](api-reference/projection-buffer.md) | Reuses prepared layout and scratch |
 | Explicit datum or epoch operations | [`ProjectionPipeline`](api-reference/projection-pipeline.md) | Reuses the prepared operation chain |
@@ -86,7 +86,7 @@ height and trailing measures, so XYZM results have different memory costs from X
 
 Built-in flat paths avoid temporary coordinate arrays for each point. Custom plugins
 may allocate; use mutable hooks when implementing a plugin. A batch commits completed
-records before an error; see the [flat-array contract](api-reference/projection-engine.md#flat-typed-arrays-in-place).
+records before an error; see the [flat-array contract](api-reference/projection-transform.md#flat-typed-arrays-in-place).
 
 Lazy instances need `preload()` before synchronous methods. Import selection and
 loading affect startup and downloads; see [imports, plugins and bundle size](developer-guide/projection-engine.md).

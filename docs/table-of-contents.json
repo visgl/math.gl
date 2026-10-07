@@ -260,6 +260,9 @@
               "modules/projection/ellipsoid-qualification",
               "modules/projection/deformation-qualification",
               "modules/projection/benchmarks",
+              "modules/projection/scorecard",
+              "modules/projection/scorecard-methodology",
+              "modules/projection/acceleration",
               "modules/projection/parity-audit",
               "modules/projection/independent-validation",
               "modules/projection/accuracy-domains"
