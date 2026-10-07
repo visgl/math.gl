@@ -247,7 +247,9 @@ test("Krapp coverage aggregates native cells and integrates spherical area witho
   assert.equal(krappPhase(450), "Mindel");
   assert.equal(krappPhase(160), "Riss");
   assert.equal(krappPhase(20), "Würm");
-  assert.equal(krappPhase(0), "Holocene");
+  assert.equal(krappPhase(0), "");
+  assert.equal(krappPhase(799), "");
+  assert.equal(krappPhase(300), "");
 });
 test("Krapp failure preserves the existing reconstruction", async (t) => {
   t.mock.method(globalThis, "fetch", async () => {

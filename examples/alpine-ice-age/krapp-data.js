@@ -14,7 +14,7 @@ export function krappPhase(age) {
   if (age >= 424 && age <= 478) return "Mindel";
   if (age >= 130 && age <= 191) return "Riss";
   if (age >= 11.7 && age <= 115) return "Würm";
-  return age < 11.7 ? "Holocene" : "Earlier glaciations";
+  return "";
 }
 // Aggregate four native 0.5° cells to one 1° display cell. Pole vertices
 // repeat the adjacent strip; area is integrated on the native spherical grid.

@@ -156,14 +156,14 @@ export default function GlobalIceAge({ onMode, earlier = false }) {
         />
         <div className="alpine-title">
           <span>GLACIER LAB / math.gl</span>
-          <h1>{model?.maskModel ? "Earlier Ice Ages" : "Global Ice Age"}</h1>
+          <h1>{model?.maskModel ? "Ice Age Explorer" : "Global Ice Age"}</h1>
           <p>
             {age < 0.05
               ? "Present day"
               : `${age.toFixed(1)} thousand years ago`}
           </p>
         </div>
-        {iceNames && (
+        {iceNames && phase && (
           <div
             className={`alpine-phase ${titleVisible ? "" : "alpine-phase-hidden"}`}
             aria-hidden={!titleVisible}
