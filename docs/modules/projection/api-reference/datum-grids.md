@@ -11,16 +11,17 @@ decode them before creating an instance; coordinate transforms then stay synchro
 The application chooses the grid source, caching, and error handling.
 
 ```typescript title="grid-projection.ts"
-import {ProjectionTransform, parseNTv2Grid} from '@math.gl/projection';
+import { ProjectionTransform, parseNTv2Grid } from "@math.gl/projection";
 
 export async function createGridProjection(url: string) {
   const response = await fetch(url);
-  if (!response.ok) throw new Error('Could not load datum grid: ' + response.status);
+  if (!response.ok)
+    throw new Error("Could not load datum grid: " + response.status);
   const grid = parseNTv2Grid(await response.arrayBuffer());
   return new ProjectionTransform({
-    from: '+proj=longlat +ellps=clrk66 +nadgrids=regional.gsb',
-    to: 'EPSG:4326',
-    datumGrids: {'regional.gsb': grid}
+    from: "+proj=longlat +ellps=clrk66 +nadgrids=regional.gsb",
+    to: "EPSG:4326",
+    datumGrids: { "regional.gsb": grid },
   });
 }
 ```
@@ -47,16 +48,16 @@ Greenwich longitude and geographic latitude. These are explicit stages following
 [PROJ's vertical-grid convention](https://proj.org/en/stable/operations/transformations/vgridshift.html).
 
 ```typescript
-import {ProjectionTransform} from '@math.gl/projection/core';
-import {parseGTXGrid} from '@math.gl/projection/grids/gtx';
+import { ProjectionTransform } from "@math.gl/projection/core";
+import { parseGTXGrid } from "@math.gl/projection/grids/gtx";
 
-const response = await fetch('/grids/local.gtx');
-if (!response.ok) throw new Error('Could not load vertical grid');
+const response = await fetch("/grids/local.gtx");
+if (!response.ok) throw new Error("Could not load vertical grid");
 const local = parseGTXGrid(await response.arrayBuffer());
 const projection = new ProjectionTransform({
-  from: '+proj=longlat +datum=WGS84 +geoidgrids=local',
-  to: 'EPSG:4979',
-  verticalGrids: {local}
+  from: "+proj=longlat +datum=WGS84 +geoidgrids=local",
+  to: "EPSG:4979",
+  verticalGrids: { local },
 });
 const positions = new Float64Array([12, 41, 100, 7]);
 projection.projectFlat(positions, 4); // height changes; measure 7 is preserved
@@ -67,7 +68,7 @@ match your data. The key `local` is an application registration name, not an EPS
 CRS or an automatically selected model. An ellipsoid alone does not enable a horizontal
 datum shift: declare the datum or explicit `+towgs84` parameters when a shift is needed.
 
-`Projection`, `ProjectionTransform` and `LazyProjection` accept the same per-instance
+`ProjectionTransform` and transforms created by full or lazy engines accept the same
 `verticalGrids` map. Load grid data before constructing the projection. Lazy projection
 algorithms can still preload separately. No file, network request, TIFF decoder or geoid
 model is imported implicitly. The optional readers can themselves be dynamically imported.
@@ -75,10 +76,10 @@ model is imported implicitly. The optional readers can themselves be dynamically
 For an already loaded `@math.gl/geoid` model, use the structural adapter:
 
 ```typescript
-import {createGeoidGrid} from '@math.gl/projection/grids/vertical';
+import { createGeoidGrid } from "@math.gl/projection/grids/vertical";
 
 // geoid is a previously prepared @math.gl/geoid Geoid instance.
-const verticalGrids = {local: createGeoidGrid(geoid)};
+const verticalGrids = { local: createGeoidGrid(geoid) };
 ```
 
 The adapter calls `getHeight(latitudeDegrees, longitudeDegrees)` and retains the model's
@@ -127,19 +128,19 @@ GDAL metadata, GeoKeys, nodata and geometry tags have the same validation as the
 geotiff.js input. No runtime dependency on loaders.gl is added.
 
 ```typescript
-import {ProjectionTransform} from '@math.gl/projection/core';
-import {loadVerticalGeoTIFFGrid} from '@math.gl/projection/grids/vertical-geotiff';
-import {fromArrayBuffer} from 'geotiff'; // separately installed, application-owned decoder
+import { ProjectionTransform } from "@math.gl/projection/core";
+import { loadVerticalGeoTIFFGrid } from "@math.gl/projection/grids/vertical-geotiff";
+import { fromArrayBuffer } from "geotiff"; // separately installed, application-owned decoder
 
-const response = await fetch('/grids/local-geoid.tif');
-if (!response.ok) throw new Error('Could not load geoid grid');
+const response = await fetch("/grids/local-geoid.tif");
+if (!response.ok) throw new Error("Could not load geoid grid");
 const geoid = await loadVerticalGeoTIFFGrid(
-  await fromArrayBuffer(await response.arrayBuffer())
+  await fromArrayBuffer(await response.arrayBuffer()),
 );
 const projection = new ProjectionTransform({
-  from: '+proj=longlat +datum=WGS84 +geoidgrids=geoid',
-  to: 'EPSG:4979',
-  verticalGrids: {geoid}
+  from: "+proj=longlat +datum=WGS84 +geoidgrids=geoid",
+  to: "EPSG:4979",
+  verticalGrids: { geoid },
 });
 projection.project([12, 41, 100]); // synchronous after grid preparation
 ```
@@ -171,4 +172,3 @@ PROJ 9.5.1: point/area registration, Deflate, big-endian scaled int16, nonzero t
 nested grids, nodata and antimeridian sampling. See [validation](../independent-validation.md#vertical-geotiff-format-qualification)
 for scope. The adapter and decoder can both be dynamically imported; normal core and
 projection bundles do not retain this reader.
-

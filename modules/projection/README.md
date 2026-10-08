@@ -3,15 +3,28 @@
 [math.gl](https://math.gl/docs) is a suite of math modules for 3D and geospatial applications.
 
 This module transforms coordinates between geospatial coordinate reference systems.
-`Projection` uses the math.gl projection engine with the full projection catalogue and shared
+`projectionEngine` uses the math.gl projection engine with the full projection catalogue and shared
 math.gl/crs WKT/PROJJSON readers. The package has no runtime dependency on proj4js.
-The v5 alpha package was renamed from `@math.gl/proj4`; use `Projection` instead
-of the former `Proj4Projection` alias. The `/classic` wrapper is removed.
+The v5 alpha package was renamed from `@math.gl/proj4`. Create transforms through
+`projectionEngine.createProjection({from, to})` instead of the former `Proj4Projection`
+constructor. The `/classic` wrapper is removed.
+
+The runtime-free `@math.gl/projection/types` entry exports the `ProjectionEngine` factory
+and `Projection` transform contracts. Concrete engines are `FullProjectionEngine`,
+`ConfigurableProjectionEngine`, `LazyProjectionEngine` and the minimal
+`WebMercatorProjectionEngine` (`@math.gl/projection/web-mercator`).
+
+```typescript
+import {projectionEngine} from '@math.gl/projection';
+
+const projection = projectionEngine.createProjection({to: 'EPSG:3857'});
+const meters = projection.project([12, 55]);
+```
 
 For selective bundles, use `ProjectionTransform` from `@math.gl/projection/core` with
-explicit projection plugins. `LazyProjection` from `@math.gl/projection/projections/lazy`
-loads algorithms on demand. The engine supports geocentric/Helmert transforms and
-prepared horizontal datum grids. `projectFlat` and `unprojectFlat` transform interleaved
+explicit projection plugins. `lazyProjectionEngine` from `@math.gl/projection/projections/lazy`
+creates transforms that load algorithms on demand. The engine supports
+geocentric/Helmert transforms and prepared horizontal datum grids. `projectFlat` and `unprojectFlat` transform interleaved
 Float32/Float64 buffers without temporary coordinate arrays in the built-in pipeline.
 Unsupported CRS variants fail explicitly; the documented support profile defines
 compatibility boundaries.

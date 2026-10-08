@@ -1,9 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Original compatibility wrapper around the math.gl projection engine. Projection kernels retain their proj4js/PROJ port notices and licenses in ../experimental/.
-import {ProjectionTransform} from '../experimental/typescript-projection';
-import {CustomProjectionEngine} from '../experimental/projection-engine';
+// SPDX-FileComment: Original full-catalogue factory for the math.gl projection engine. Projection kernels retain their proj4js/PROJ port notices and licenses in ../experimental/.
+import {ConfigurableProjectionEngine} from '../experimental/projection-engine';
 import type {ProjectionEngine, ProjectionEngineOptions} from '../types';
 import {datumCatalog} from '../datums';
 import {getDatumDefinitions} from '../experimental/crs/datum-catalog';
@@ -45,24 +44,11 @@ import {
   tiltedPerspective,
   vanDerGrinten,
   obliqueTransformation,
-  parseNTv2Grid,
   wktCRSParser,
   projJSONCRSParser
 } from '../experimental/index';
 import {CORE_PARAMETERS} from '../experimental/crs/normalize';
 import type {ProjectionPlugin} from '../experimental/types';
-import type {DatumGrid, VerticalGridCollection} from '../experimental/grids/types';
-import type {ReadonlyCRSDefinition} from '@math.gl/crs';
-
-export type DatumGridOptions = {includeErrorFields?: boolean};
-
-/** Compatibility options with explicit, per-instance vertical grids. */
-export type ProjectionOptions = {
-  from?: ReadonlyCRSDefinition;
-  to?: ReadonlyCRSDefinition;
-  enforceAxis?: boolean;
-  verticalGrids?: VerticalGridCollection;
-};
 
 // The compatibility wrapper historically accepts an unrecognized structured datum
 // label as ellipsoid-only metadata. Engine parsers retain the stricter registration rule.
@@ -87,8 +73,6 @@ function compatibilityParser(parser: CRSParser): CRSParser {
 }
 const compatibilityParsers = [wktCRSParser, projJSONCRSParser].map(compatibilityParser);
 
-const aliases: Record<string, ReadonlyCRSDefinition> = Object.create(null);
-const grids: Record<string, DatumGrid> = Object.create(null);
 let preset: readonly ProjectionPlugin[] | undefined;
 function defaultProjections(): readonly ProjectionPlugin[] {
   if (preset) return preset;
@@ -131,7 +115,7 @@ function defaultProjections(): readonly ProjectionPlugin[] {
   ];
   const key = (name: string): string => name.toLowerCase().replace(/[\s_-]/g, '');
   const geographic = obliqueTransformation('longlat');
-  // The convenience wrapper supplies the catalogue; the configurable engine still
+  // The full engine supplies the catalogue; the configurable engine still
   // requires an explicit child plugin for obliqueTransformation.
   const oblique: ProjectionPlugin = {
     name: geographic.name,
@@ -160,51 +144,15 @@ function defaultProjections(): readonly ProjectionPlugin[] {
 }
 
 /** Default engine with all built-in plugins, compatibility readers and named datums. */
-export class CRSProjectionEngine extends CustomProjectionEngine implements ProjectionEngine {
+export class FullProjectionEngine extends ConfigurableProjectionEngine implements ProjectionEngine {
   constructor(options: ProjectionEngineOptions = {}) {
     super({
-      projections: defaultProjections(),
-      parsers: compatibilityParsers,
-      datumCatalogs: [datumCatalog],
-      ...options
+      ...options,
+      projections: options.projections ?? defaultProjections(),
+      parsers: options.parsers ?? compatibilityParsers,
+      datumCatalogs: options.datumCatalogs ?? [datumCatalog]
     });
   }
 }
 
-export const projectionEngine = new CRSProjectionEngine();
-
-/** Classic wrapper for a single CRS pair. */
-export class Projection extends ProjectionTransform {
-  /** Register aliases for subsequently constructed projections. */
-  static defineProjectionAliases(definitions: {[name: string]: ReadonlyCRSDefinition}): void {
-    for (const name of Object.keys(definitions)) {
-      const definition = definitions[name];
-      aliases[name] =
-        typeof definition === 'string' ? definition : JSON.parse(JSON.stringify(definition));
-    }
-  }
-
-  /** Register an owned NTv2 grid snapshot for subsequent projections. */
-  static registerDatumGrid(name: string, grid: ArrayBuffer, options?: DatumGridOptions): void {
-    grids[name] = parseNTv2Grid(grid, options);
-  }
-
-  constructor({
-    from = 'WGS84',
-    to = 'WGS84',
-    enforceAxis = false,
-    verticalGrids
-  }: ProjectionOptions) {
-    super({
-      from,
-      to,
-      enforceAxis,
-      verticalGrids,
-      projections: defaultProjections(),
-      parsers: compatibilityParsers,
-      aliases,
-      datumGrids: grids,
-      datumCatalogs: [datumCatalog]
-    });
-  }
-}
+export const projectionEngine = new FullProjectionEngine();

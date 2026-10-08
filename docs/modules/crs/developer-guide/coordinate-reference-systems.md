@@ -295,17 +295,17 @@ only two corners. Applications may need edge sampling, geometry-derived bounds, 
 logic, or projection-specific methods. Z and M components must be preserved or transformed under an
 explicit contract.
 
-`@math.gl/projection` wraps proj4js for supported coordinate transformations:
+`@math.gl/projection` provides the math.gl projection engine for supported coordinate transformations:
 
 ```ts
-import {Projection} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/projection';
 
-const projection = new Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+const projection = projectionEngine.createProjection({from: 'EPSG:4326', to: 'EPSG:3857'});
 const webMercatorPosition = projection.project([12.49, 41.89]);
 ```
 
 Support is intentionally narrower than `CRSDefinition`. For example, a valid compound or vertical
-PROJJSON object may not be executable by proj4js. Parsing or typing a definition is never a promise
+PROJJSON object may require additional operation stages or registered models. Parsing or typing a definition is never a promise
 that `@math.gl/projection` can transform it.
 
 ## Vertical coordinates

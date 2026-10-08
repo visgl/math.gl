@@ -154,6 +154,10 @@
     "mercatorWithDatumCatalog": {
       "minified": 61200,
       "gzip": 21700
+    },
+    "webMercatorEngine": {
+      "minified": 4500,
+      "gzip": 1700
     }
   },
   "lazyBaseline": {

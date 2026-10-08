@@ -62,7 +62,7 @@ for (const [name, entry] of Object.entries(entries)) {
 // Cold measurements exclude the shared workload and synthetic grid fixture.
 for (const [name, contents] of Object.entries({
   typescript:
-    "import {Projection} from '@math.gl/projection'; export const create = () => new Projection({to: 'EPSG:3857'});",
+    "import {projectionEngine} from '@math.gl/projection'; export const create = () => projectionEngine.createProjection({to: 'EPSG:3857'});",
   proj4:
     "import proj4 from 'proj4'; export const create = () => {const converter = proj4('WGS84', 'EPSG:3857'); return {project: point => converter.forward(point)};};"
 })) {

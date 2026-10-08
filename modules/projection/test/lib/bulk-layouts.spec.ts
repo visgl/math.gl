@@ -3,10 +3,15 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original buffer ownership, independent reference and reusable scratch tests.
 import {expect, test} from 'vitest';
-import {Projection, ProjectionTransform, ProjectionPipeline, mercator} from '@math.gl/projection';
+import {
+  projectionEngine,
+  ProjectionTransform,
+  ProjectionPipeline,
+  mercator
+} from '@math.gl/projection';
 import {ProjectionBuffer} from '../../src/bulk';
 import type {BulkProjection} from '../../src/bulk';
-import {LazyProjection} from '@math.gl/projection/projections/lazy';
+import {lazyProjectionEngine} from '@math.gl/projection/projections/lazy';
 import {ProjectionScratch} from '../../src/experimental/projection-scratch';
 import {qualifyBulkLayouts} from '../bulk-workload';
 import {
@@ -129,7 +134,10 @@ test('overlapping storage validation precedes all writes', () => {
 });
 
 test('failure commits the prefix and leaves failed XYZM record and tail intact', () => {
-  const transform = new ProjectionBuffer({projection: identity(), dimension: 4});
+  const transform = new ProjectionBuffer({
+    projection: identity(),
+    dimension: 4
+  });
   const input = new Float64Array([1, 2, 3, 7, 4, NaN, 6, 8, 7, 8, 9, 10]);
   const output = new Float64Array(12).fill(99);
   expect(() => transform.projectFlatTo(input, output)).toThrow('finite');
@@ -149,7 +157,10 @@ for (const ordinate of [0, 1, 2, 3])
   test('Float32 overflow is atomic at ordinate ' + ordinate, () => {
     const input = new Float64Array([1, 2, 3, 4]);
     input[ordinate] = 1e40;
-    const transform = new ProjectionBuffer({projection: identity(), dimension: 4});
+    const transform = new ProjectionBuffer({
+      projection: identity(),
+      dimension: 4
+    });
     const flat = new Float32Array(4).fill(91);
     expect(() => transform.projectFlatTo(input, flat)).toThrow('Float32');
     expect([...flat]).toEqual([91, 91, 91, 91]);
@@ -182,7 +193,10 @@ test('layout/range errors and no-op chunks', () => {
     expect(() => transform.projectFlatTo(input, output, count, start)).toThrow('range');
   expect(() => transform.projectFlatTo(input, new Float64Array(2))).toThrow('short');
   expect(() =>
-    new ProjectionBuffer({projection: identity(), inputStride: 1}).projectFlatTo(input, output)
+    new ProjectionBuffer({
+      projection: identity(),
+      inputStride: 1
+    }).projectFlatTo(input, output)
   ).toThrow('stride');
   expect(() => transform.projectColumnsTo([input], [output])).toThrow('dimension');
   expect(transform.projectFlatTo(input, output, 0, 2)).toBe(output);
@@ -190,12 +204,12 @@ test('layout/range errors and no-op chunks', () => {
 });
 
 test('preloaded lazy and compatibility projections keep synchronous behavior', async () => {
-  const wrapper = new Projection({to: 'EPSG:3857'}),
+  const wrapper = projectionEngine.createProjection({to: 'EPSG:3857'}),
     input = new Float64Array([12, 40]);
   expect(
     new ProjectionBuffer({projection: wrapper}).projectFlatTo(input, new Float64Array(2))
   ).toEqual(new Float64Array(wrapper.project(input)));
-  const lazy = new LazyProjection({to: 'EPSG:32631'}),
+  const lazy = lazyProjectionEngine.createProjection({to: 'EPSG:32631'}),
     transform = new ProjectionBuffer({projection: lazy});
   const output = new Float64Array([91, 92]);
   expect(() => transform.projectFlatTo(input, output)).toThrow('preload');

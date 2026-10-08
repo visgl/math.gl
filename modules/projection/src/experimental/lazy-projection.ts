@@ -47,10 +47,7 @@ import {lazyTiltedPerspective} from './lazy-projections/tpers';
 import {lazyUniversalTransverseMercator} from './lazy-projections/utm';
 import {lazyVanDerGrinten} from './lazy-projections/vandg';
 
-export type LazyProjectionOptions = Omit<
-  ProjectionTransformOptions<ProjectionDescriptor>,
-  'projections'
->;
+type LazyTransformOptions = Omit<ProjectionTransformOptions<ProjectionDescriptor>, 'projections'>;
 const catalogue: readonly ProjectionDescriptor[] = [
   lazyAlbersEqualArea,
   lazyAzimuthalEquidistant,
@@ -90,37 +87,36 @@ const catalogue: readonly ProjectionDescriptor[] = [
 ];
 const key = (name: string) => name.toLowerCase().replace(/[\s_-]/g, '');
 
-/** All built-in projection descriptors, with algorithms imported only on use. */
-export class LazyProjection extends ProjectionTransform<ProjectionDescriptor> {
-  constructor(options: LazyProjectionOptions = {}) {
-    super({...options, projections: configuredProjections(options)});
-  }
-  /** Resolve this catalogue into an ordinary synchronous engine instance. */
-  static override async create(options: LazyProjectionOptions = {}): Promise<ProjectionTransform> {
-    return ProjectionTransform.create({...options, projections: configuredProjections(options)});
-  }
-}
-
 /** Reusable built-in catalogue whose algorithms load only for requested CRS pairs. */
-export class LazyCRSProjectionEngine implements ProjectionEngine<ProjectionDescriptor> {
+export class LazyProjectionEngine implements ProjectionEngine {
   private readonly options: Omit<ProjectionEngineOptions<ProjectionDescriptor>, 'projections'>;
 
   constructor(options: Omit<ProjectionEngineOptions<ProjectionDescriptor>, 'projections'> = {}) {
     this.options = snapshotEngineOptions(options);
   }
 
-  createProjection(options: CreateProjectionOptions = {}): LazyProjection {
-    return new LazyProjection({...this.options, ...options});
+  createProjection(
+    options: CreateProjectionOptions = {}
+  ): ProjectionTransform<ProjectionDescriptor> {
+    const config = {...this.options, ...options};
+    return new ProjectionTransform({
+      ...config,
+      projections: configuredProjections(config)
+    });
   }
 
   createProjectionAsync(options: CreateProjectionOptions = {}): Promise<ProjectionTransform> {
-    return LazyProjection.create({...this.options, ...options});
+    const config = {...this.options, ...options};
+    return ProjectionTransform.create({
+      ...config,
+      projections: configuredProjections(config)
+    });
   }
 }
 
-export const lazyProjectionEngine = new LazyCRSProjectionEngine();
+export const lazyProjectionEngine = new LazyProjectionEngine();
 
-function configuredProjections(options: LazyProjectionOptions): ProjectionDescriptor[] {
+function configuredProjections(options: LazyTransformOptions): ProjectionDescriptor[] {
   const children = new Map<string, ProjectionDescriptor>();
   for (const definition of [options.from ?? 'WGS84', options.to ?? 'WGS84']) {
     const crs = normalizeCRS(definition, options);

@@ -15,11 +15,11 @@ before choosing a [projection algorithm](projections.md) or composing an
 
 ## Geographic, projected and geocentric coordinates
 
-| Space | Typical coordinates | What they describe |
-| --- | --- | --- |
-| Geographic | Longitude, latitude, ellipsoidal height | Angles on a reference ellipsoid and height along its surface normal |
-| Projected | Easting, northing, optional height | Planar coordinates obtained from a geographic location using projection equations |
-| Geocentric | X, Y, Z | Cartesian coordinates relative to the reference frame's Earth-centered origin |
+| Space      | Typical coordinates                     | What they describe                                                                |
+| ---------- | --------------------------------------- | --------------------------------------------------------------------------------- |
+| Geographic | Longitude, latitude, ellipsoidal height | Angles on a reference ellipsoid and height along its surface normal               |
+| Projected  | Easting, northing, optional height      | Planar coordinates obtained from a geographic location using projection equations |
+| Geocentric | X, Y, Z                                 | Cartesian coordinates relative to the reference frame's Earth-centered origin     |
 
 A cartographic projection maps a curved surface onto a plane. A datum transformation
 changes the reference frame in which a location is expressed. A complete conversion
@@ -28,12 +28,12 @@ forward projection. PROJ describes this decomposition in its
 [geodetic transformation guide](https://proj.org/en/stable/usage/transformation.html).
 
 ```typescript
-import {Projection} from '@math.gl/projection';
+import { projectionEngine } from "@math.gl/projection";
 
-const utm = new Projection({to: 'EPSG:32631'});
+const utm = projectionEngine.createProjection({ to: "EPSG:32631" });
 utm.project([3, 50, 100]); // geographic degrees and meters → UTM meters
 
-const earthCentered = new Projection({to: 'EPSG:4978'});
+const earthCentered = projectionEngine.createProjection({ to: "EPSG:4978" });
 earthCentered.project([3, 50, 100]); // X/Y/Z meters
 ```
 
@@ -49,10 +49,10 @@ radius and its semi-minor axis **b** is the polar radius. Flattening is
 See [PROJ's ellipsoid reference](https://proj.org/en/stable/usage/ellipsoids.html)
 for mathematical parameter definitions.
 
-| Shape | Semi-major axis (meters) | Inverse flattening |
-| --- | ---: | ---: |
-| WGS84 | 6,378,137 | 298.257223563 |
-| GRS80 | 6,378,137 | 298.257222101 |
+| Shape  |    Semi-major axis (meters) | Inverse flattening |
+| ------ | --------------------------: | -----------------: |
+| WGS84  |                   6,378,137 |      298.257223563 |
+| GRS80  |                   6,378,137 |      298.257222101 |
 | Sphere | Application-selected radius | Flattening is zero |
 
 The package accepts named ellipsoids through `+ellps`, explicit axes through `+a`
@@ -61,11 +61,11 @@ and `+b`, flattening through `+f` or `+rf`, and a sphere through `+R`. See
 precedence and validation.
 
 ```typescript
-const ellipsoidalMercator = new Projection({
-  to: '+proj=merc +ellps=WGS84 +datum=WGS84 +units=m'
+const ellipsoidalMercator = projectionEngine.createProjection({
+  to: "+proj=merc +ellps=WGS84 +datum=WGS84 +units=m",
 });
-const sphericalMap = new Projection({
-  to: '+proj=moll +R=6371000 +datum=none +units=m'
+const sphericalMap = projectionEngine.createProjection({
+  to: "+proj=moll +R=6371000 +datum=none +units=m",
 });
 ```
 
@@ -90,18 +90,18 @@ and the qualified sphere/oblate surface/exterior inverse. Geospatial retains its
 three-radius and interior geometry paths.
 
 ```ts
-import {Ellipsoid} from '@math.gl/geospatial';
-import {normalizeCRS, ProjectionTransform} from '@math.gl/projection/core';
-import {geocentric} from '@math.gl/projection/projections/geocent';
+import { Ellipsoid } from "@math.gl/geospatial";
+import { normalizeCRS, ProjectionTransform } from "@math.gl/projection/core";
+import { geocentric } from "@math.gl/projection/projections/geocent";
 
-const normalized = normalizeCRS('+proj=longlat +ellps=GRS80');
+const normalized = normalizeCRS("+proj=longlat +ellps=GRS80");
 const shape = Ellipsoid.fromSpheroid(normalized.ellipsoid);
-const {semiMajorAxis: a, semiMinorAxis: b} = shape.toSpheroid();
+const { semiMajorAxis: a, semiMinorAxis: b } = shape.toSpheroid();
 const geometry = `+a=${a} +b=${b}`;
 const conversion = new ProjectionTransform({
   from: `+proj=longlat ${geometry}`,
   to: `+proj=geocent ${geometry}`,
-  projections: [geocentric]
+  projections: [geocentric],
 });
 // Same shape, longitude/latitude degrees and ellipsoidal height metres.
 const xyz = conversion.project([12, 55, 100]);
@@ -139,14 +139,14 @@ In this package, `+datum` chooses a supported named datum definition. An explici
 to prepared horizontal correction grids. Merely specifying `+ellps` does not
 request a datum shift. `+datum=none` explicitly disables datum conversion.
 
-| Operation | What it does | Application responsibility |
-| --- | --- | --- |
-| Three-parameter translation | Changes geocentric X/Y/Z by fixed offsets | Supply parameters valid for the source and target frames |
-| Seven-parameter Helmert | Adds rotations and scale to translation | Declare units and the correct rotation convention |
-| Horizontal correction grid | Interpolates regional longitude/latitude corrections | Load the grid, match its datum and check coverage |
-| Vertical geoid grid | Relates ellipsoidal and gravity-related heights | Match the height datum, geographic datum and model conventions |
-| Kinematic Helmert | Evaluates frame-transformation parameters at an epoch | Supply reference epoch, rates and observation epoch |
-| Deformation model | Propagates coordinates between epochs using velocities | Supply the model, source epoch, target epoch and valid coverage |
+| Operation                   | What it does                                           | Application responsibility                                      |
+| --------------------------- | ------------------------------------------------------ | --------------------------------------------------------------- |
+| Three-parameter translation | Changes geocentric X/Y/Z by fixed offsets              | Supply parameters valid for the source and target frames        |
+| Seven-parameter Helmert     | Adds rotations and scale to translation                | Declare units and the correct rotation convention               |
+| Horizontal correction grid  | Interpolates regional longitude/latitude corrections   | Load the grid, match its datum and check coverage               |
+| Vertical geoid grid         | Relates ellipsoidal and gravity-related heights        | Match the height datum, geographic datum and model conventions  |
+| Kinematic Helmert           | Evaluates frame-transformation parameters at an epoch  | Supply reference epoch, rates and observation epoch             |
+| Deformation model           | Propagates coordinates between epochs using velocities | Supply the model, source epoch, target epoch and valid coverage |
 
 The configurable engine requires grids to be supplied by the application; it does
 not select operations or fetch grid files from an authority database. Use
@@ -192,18 +192,20 @@ Supply a scalar epoch or one Float32/Float64 epoch per flat record. The fourth
 coordinate component remains M, a measure; it is never interpreted as time.
 
 ```typescript
-import {ProjectionPipeline} from '@math.gl/projection/pipeline';
+import { ProjectionPipeline } from "@math.gl/projection/pipeline";
 
 // Illustrative coefficients, not an authoritative datum transformation.
 const movingFrame = new ProjectionPipeline({
-  input: {space: 'geocentric', units: ['m', 'm', 'm']},
-  steps: [{
-    type: 'helmert',
-    translation: [1, 0, 0],
-    referenceEpoch: 2000,
-    rates: {translation: [0.01, 0, 0]},
-    convention: 'position_vector'
-  }]
+  input: { space: "geocentric", units: ["m", "m", "m"] },
+  steps: [
+    {
+      type: "helmert",
+      translation: [1, 0, 0],
+      referenceEpoch: 2000,
+      rates: { translation: [0.01, 0, 0] },
+      convention: "position_vector",
+    },
+  ],
 });
 movingFrame.project([6378137, 0, 0, 42], 2020); // M=42 is preserved
 const xyz = new Float64Array([6378137, 0, 0, 6378137, 1, 0]);
@@ -216,7 +218,7 @@ applied to geocentric positions. PROJ's
 [deformation reference](https://proj.org/en/stable/operations/transformations/deformation.html)
 provides background on velocity-based epoch changes.
 
-`@math.gl/crs` can retain `coordinateEpoch` metadata. The ordinary `Projection`
+`@math.gl/crs` can retain `coordinateEpoch` metadata. An ordinary CRS-pair projection
 and `ProjectionTransform` do not silently apply it; epoch-bearing spatial references
 require an explicit time-dependent operation. Nor does a dynamic CRS definition
 select a velocity model or an operation automatically.

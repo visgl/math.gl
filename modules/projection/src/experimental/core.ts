@@ -3,7 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 // Engine and contracts only: no projection catalogue or optional readers.
-export {ProjectionTransform, checkProjectionCompatibility} from './typescript-projection';
+export {
+  ProjectionTransform,
+  checkProjectionCompatibility
+} from './typescript-projection';
 export type {
   ProjectionTransformOptions,
   ProjectionTransformCreateOptions,
@@ -49,10 +52,14 @@ export type {ProjectionCoordinate, ProjectionOutput} from './scalar-output';
 
 export type {SpheroidParameters} from '@math.gl/core';
 
-export {CustomProjectionEngine, createProjectionEngine} from './projection-engine';
+export {
+  ConfigurableProjectionEngine,
+  createProjectionEngine
+} from './projection-engine';
 export type {
   ProjectionEngine,
   ProjectionEngineOptions,
   CreateProjectionOptions,
-  ProjectionInstance
+  Projection,
+  PreparedProjection
 } from '../types';

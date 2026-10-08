@@ -56,19 +56,19 @@ test('lazy factory construction loads nothing and shares only required descripto
   expect(unused).toBe(0);
 });
 
-import {CRSProjectionEngine, CustomProjectionEngine} from '@math.gl/projection';
+import {FullProjectionEngine, ConfigurableProjectionEngine} from '@math.gl/projection';
 test('all concrete engines implement the shared contract and lazy engines offer deferred and ready projections', async () => {
   const engines: ProjectionEngine[] = [
-    new CustomProjectionEngine({projections: [mercator]}),
-    new CRSProjectionEngine(),
-    new LazyCRSProjectionEngine()
+    new ConfigurableProjectionEngine({projections: [mercator]}),
+    new FullProjectionEngine(),
+    new LazyProjectionEngine()
   ];
   const expected = projectionEngine.createProjection({to: 'EPSG:3857'}).projectSync([12, 55]);
   for (const engine of engines) {
     const projection = await engine.createProjectionAsync({to: 'EPSG:3857'});
     expect(projection.project([12, 55])).toEqual(expected);
   }
-  const lazy = new LazyCRSProjectionEngine();
+  const lazy = new LazyProjectionEngine();
   const deferred = lazy.createProjection({to: 'EPSG:3857'});
   expect(deferred).not.toBeInstanceOf(Promise);
   await deferred.preload();
@@ -81,4 +81,15 @@ test('all concrete engines implement the shared contract and lazy engines offer 
   expect(oblique.project([12, 55]).every(Number.isFinite)).toBe(true);
 });
 
-import {LazyCRSProjectionEngine} from '@math.gl/projection/projections/lazy';
+import {LazyProjectionEngine} from '@math.gl/projection/projections/lazy';
+
+test('full engine retains defaults for omitted registration options', () => {
+  const engine = new FullProjectionEngine({
+    projections: undefined,
+    parsers: undefined,
+    datumCatalogs: undefined
+  });
+  expect(engine.createProjection({to: 'EPSG:3857'}).project([12, 55])).toEqual(
+    projectionEngine.createProjection({to: 'EPSG:3857'}).project([12, 55])
+  );
+});

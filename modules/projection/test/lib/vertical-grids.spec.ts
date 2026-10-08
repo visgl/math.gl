@@ -6,13 +6,13 @@ import {expect, test} from 'vitest';
 import {parsePGM} from '@math.gl/geoid';
 import {wgs84Egm2008CompoundCRS} from '@math.gl/crs/test/projjson-fixtures';
 import {
-  Projection,
+  FullProjectionEngine,
   ProjectionTransform,
   mercator,
   geocentric,
   projJSONCRSParser
 } from '@math.gl/projection';
-import {LazyProjection} from '@math.gl/projection/projections/lazy';
+import {LazyProjectionEngine} from '@math.gl/projection/projections/lazy';
 import {parseGTXGrid} from '@math.gl/projection/grids/gtx';
 import {createGeoidGrid, createVerticalGrid} from '@math.gl/projection/grids/vertical';
 import inputs from '../fixtures/vertical-grid-cases.json';
@@ -83,7 +83,12 @@ test('GTX owns its nodes and samples inclusive outer edges without extrapolation
 
 test('bilinear grid snapshot, nodata, antimeridian and longitude equivalence', () => {
   const offsets = [10, 20, 30, NaN];
-  const prepared = createVerticalGrid({origin: [179, 0], step: [2, 1], size: [2, 2], offsets});
+  const prepared = createVerticalGrid({
+    origin: [179, 0],
+    step: [2, 1],
+    size: [2, 2],
+    offsets
+  });
   offsets[0] = 999;
   expect(prepared.getOffset(179 * radians, 0)).toBeCloseTo(10);
   expect(prepared.getOffset(-179 * radians, 0)).toBeCloseTo(20);
@@ -99,12 +104,22 @@ test('bilinear grid snapshot, nodata, antimeridian and longitude equivalence', (
   expect(seam.getOffset(-Math.PI, 0)).toBe(10);
   expect(seam.getOffset(Math.PI, 0)).toBe(20);
   expect(seam.getOffset(Number.MAX_VALUE, 0)).toBeUndefined();
-  expect(() => createVerticalGrid({origin: [0, 0], step: [-1, 1], size: [2, 2], offsets})).toThrow(
-    'geometry'
-  );
-  expect(() => createVerticalGrid({origin: [0, 0], step: [1, 1], size: [2.5, 2], offsets})).toThrow(
-    'geometry'
-  );
+  expect(() =>
+    createVerticalGrid({
+      origin: [0, 0],
+      step: [-1, 1],
+      size: [2, 2],
+      offsets
+    })
+  ).toThrow('geometry');
+  expect(() =>
+    createVerticalGrid({
+      origin: [0, 0],
+      step: [1, 1],
+      size: [2.5, 2],
+      offsets
+    })
+  ).toThrow('geometry');
   for (const value of [-88.8888, 1001, -2147479936, NaN, Infinity]) {
     const buffer = bytes();
     new DataView(buffer).setFloat32(40, value);
@@ -120,15 +135,23 @@ test('ordered coverage, optional names, explicit null fallback, captured registr
   close(projection.project([0, 0, 100, 7]), [0, 0, 100, 7]);
   close(projection.project([10, 40, 100, 7]), [10, 40, 112.5, 7]);
   expect(
-    () => new ProjectionTransform({...options, from: definition.replace('local', 'absent,local')})
+    () =>
+      new ProjectionTransform({
+        ...options,
+        from: definition.replace('local', 'absent,local')
+      })
   ).toThrow('not registered');
   expect(() =>
-    new ProjectionTransform({...options, from: definition.replace('local', '@absent')}).project([
-      10, 40, 100
-    ])
+    new ProjectionTransform({
+      ...options,
+      from: definition.replace('local', '@absent')
+    }).project([10, 40, 100])
   ).toThrow('covers');
   const registry = {local: grid};
-  const captured = new ProjectionTransform({...options, verticalGrids: registry});
+  const captured = new ProjectionTransform({
+    ...options,
+    verticalGrids: registry
+  });
   registry.local = {getOffset: () => 999};
   close(captured.project([10, 40, 100]), [10, 40, 112.5]);
   const bad = new ProjectionTransform({
@@ -180,15 +203,25 @@ test('height stage rejects geocentric attachment and missing grid registrations'
 });
 
 test('geoid structural adapter, convenience wrapper and lazy preload use the same stage', async () => {
-  const model = {getHeight: (latitude: number, longitude: number) => latitude + 2 * longitude};
+  const model = {
+    getHeight: (latitude: number, longitude: number) => latitude + 2 * longitude
+  };
   const adapted = createGeoidGrid(model);
   expect(adapted.getOffset(10 * radians, 40 * radians)).toBeCloseTo(60);
   expect(createGeoidGrid({getHeight: () => NaN}).getOffset(0, 0)).toBeUndefined();
-  close(new Projection(options).project([10, 40, 100, 7]), [10, 40, 112.5, 7]);
-  const lazy = new LazyProjection({...options, to: 'EPSG:3857'});
+  close(
+    new FullProjectionEngine(options).createProjection(options).project([10, 40, 100, 7]),
+    [10, 40, 112.5, 7]
+  );
+  const lazy = new LazyProjectionEngine(options).createProjection({
+    ...options,
+    to: 'EPSG:3857'
+  });
   expect(() => lazy.projectSync([10, 40, 100, 7])).toThrow('preload');
   await lazy.preload();
-  const expected = new Projection({...options, to: 'EPSG:3857'}).project([10, 40, 100, 7]);
+  const expected = new FullProjectionEngine(options)
+    .createProjection({...options, to: 'EPSG:3857'})
+    .project([10, 40, 100, 7]);
   close(lazy.projectSync([10, 40, 100, 7]), expected);
   close(await lazy.project([10, 40, 100, 7]), expected);
 });
@@ -201,7 +234,10 @@ test('prepared math.gl/geoid model retains its degree order and height units', (
   for (let i = 0; i < 12; i++) view.setUint16(header.length + i * 2, 20 + i);
   const geoid = parsePGM(data, {cubic: false});
   const adapted = createGeoidGrid(geoid);
-  const projection = new ProjectionTransform({...options, verticalGrids: {local: adapted}});
+  const projection = new ProjectionTransform({
+    ...options,
+    verticalGrids: {local: adapted}
+  });
   for (const [lon, lat] of [
     [10, 40],
     [-120, -45],

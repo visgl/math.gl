@@ -215,7 +215,7 @@ for (const {ProjectionTransform, loadGeoTIFFGrid} of [esm, cjs]) {
 
 // Selecting the default convenience wrapper must also exclude the classic runtime.
 const defaultBundle = await build({
-  stdin: {contents: "export {Projection} from '@math.gl/projection';", resolveDir: packageRoot},
+  stdin: {contents: "export {FullProjectionEngine} from '@math.gl/projection';", resolveDir: packageRoot},
   bundle: true,
   tsconfigRaw: {},
   format: 'esm',

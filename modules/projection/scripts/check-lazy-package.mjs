@@ -18,8 +18,8 @@ const budgets = JSON.parse(
 const measurements = {};
 const scenarios = {
   catalogue: {
-    imports: "import {LazyProjection} from '@math.gl/projection/projections/lazy';",
-    load: "return new LazyProjection({to: 'EPSG:32631'});",
+    imports: "import {lazyProjectionEngine} from '@math.gl/projection/projections/lazy';",
+    load: "return lazyProjectionEngine.createProjection({to: 'EPSG:32631'});",
     deferred: '/experimental/kernels/etmerc.js',
     expected: [500000, 0],
     point: [3, 0]

@@ -17,7 +17,7 @@ const entries = {
   'native-selected': `const [{ProjectionTransform},{mercator}]=await Promise.all([import('@math.gl/projection/core'),import('@math.gl/projection/projections/merc')]);const create=()=>new ProjectionTransform({to:'EPSG:3857',projections:[mercator]});`,
   'native-barrel': `const {ProjectionTransform,mercator}=await import('@math.gl/projection');const create=()=>new ProjectionTransform({to:'EPSG:3857',projections:[mercator]});`,
   proj4: `const {default:proj4}=await import('proj4');const create=()=>{const p=proj4('WGS84','EPSG:3857');return {project:p.forward};};`,
-  projection: `const {Projection}=await import('@math.gl/projection');const create=()=>new Projection({to:'EPSG:3857'});`
+  projection: `const {projectionEngine}=await import('@math.gl/projection');const create=()=>projectionEngine.createProjection({to:'EPSG:3857'});`
 };
 const results = [];
 for (let sample = 0; sample < samples; sample++)
