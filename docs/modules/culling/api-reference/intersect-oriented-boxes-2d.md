@@ -50,7 +50,9 @@ Edges and vertices are included. The default allowance is zero. Supply a nonnega
 This is a **per-axis SAT allowance**, not a Euclidean-distance test: a diagonal gap can pass
 even when its Euclidean length exceeds `epsilon`. There is no fixed pixel/meter epsilon.
 
-The query subtracts centers before projection and scales displacement/extents to avoid overflow
+The query subtracts centers before projection and scales each axis's projected displacement
+and radii independently, so a huge perpendicular extent cannot erase a tiny separating gap.
+This also avoids overflow
 in radius sums and opposite-sign center subtraction. Width directions are scaled before local
 normalization so huge and subnormal finite inputs remain usable. It still uses floating-point
 arithmetic; recenter coordinates and choose a suitable allowance near contact boundaries.

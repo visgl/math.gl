@@ -124,8 +124,36 @@ test('handles subnormal sizes and overflow-prone finite centers and extents', ()
   const huge = Number.MAX_VALUE;
   expect(intersectOrientedBoxes2D(box(-huge, 0, huge, huge), box(huge, 0, huge, huge))).toBe(true);
   expect(intersectOrientedBoxes2D(box(-huge, huge), box(huge, -huge))).toBe(false);
+  expect(
+    intersectOrientedBoxes2D(
+      {...box(-huge, huge), direction: [1, 1]},
+      {...box(huge, -huge), direction: [1, 1]}
+    )
+  ).toBe(false);
   expect(intersectOrientedBoxes2D({...box(), direction: [tiny, tiny]}, box())).toBe(true);
   expect(intersectOrientedBoxes2D({...box(), direction: [huge, huge]}, box())).toBe(true);
+});
+
+test('per-axis scaling preserves tiny gaps alongside huge perpendicular extents', () => {
+  const narrow: OrientedBox2D = {center: [0, 0], halfSize: [1e-200, 1e200], direction: [0, 1]};
+  const point = box(0, 2e-200, 0, 0);
+  expect(intersectOrientedBoxes2D(narrow, point)).toBe(false);
+  expect(intersectOrientedBoxes2D(point, narrow)).toBe(false);
+  const flat: OrientedBox2D = {center: [0, 0], halfSize: [1e308, 1e-100], direction: [1, 0]};
+  expect(intersectOrientedBoxes2D(flat, {...flat, center: [0, 1e-99]})).toBe(false);
+  const huge = Number.MAX_VALUE,
+    tiny = 1e-308;
+  const first = box(0, 0, huge, tiny);
+  const second = box(0, 3 * tiny, huge, tiny);
+  expect(intersectOrientedBoxes2D(first, second)).toBe(false);
+  expect(intersectOrientedBoxes2D(second, first)).toBe(false);
+  const vertical = {...first, direction: [0, 1]};
+  expect(intersectOrientedBoxes2D(vertical, {...vertical, center: [3 * tiny, 0]})).toBe(false);
+  // X subtraction overflows, but Y remains a representable separating direction.
+  expect(
+    intersectOrientedBoxes2D({...first, center: [-huge, 0]}, {...second, center: [huge, 3 * tiny]})
+  ).toBe(false);
+  expect(intersectOrientedBoxes2D(first, second, 2 * tiny)).toBe(true);
 });
 
 test('matches an independent corner SAT over deterministic label-sized fixtures', () => {

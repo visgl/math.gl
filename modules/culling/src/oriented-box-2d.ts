@@ -51,57 +51,96 @@ export function intersectOrientedBoxes2D(
   const secondX = secondWidthX / secondLength;
   const secondY = secondWidthY / secondLength;
 
-  let displacementX = second.center[0] - first.center[0];
-  let displacementY = second.center[1] - first.center[1];
-  let scale = Math.max(
-    first.halfSize[0],
-    first.halfSize[1],
-    second.halfSize[0],
-    second.halfSize[1],
-    epsilon
-  );
-  if (Number.isFinite(displacementX) && Number.isFinite(displacementY)) {
-    scale = Math.max(scale, Math.abs(displacementX), Math.abs(displacementY)) || 1;
-    displacementX /= scale;
-    displacementY /= scale;
-  } else {
-    // Opposite-sign finite centers can overflow subtraction. Normalize before subtracting.
-    scale = Math.max(
-      scale,
-      Math.abs(first.center[0]),
-      Math.abs(first.center[1]),
-      Math.abs(second.center[0]),
-      Math.abs(second.center[1])
-    );
-    displacementX = second.center[0] / scale - first.center[0] / scale;
-    displacementY = second.center[1] / scale - first.center[1] / scale;
-  }
-  const firstWidth = first.halfSize[0] / scale;
-  const firstHeight = first.halfSize[1] / scale;
-  const secondWidth = second.halfSize[0] / scale;
-  const secondHeight = second.halfSize[1] / scale;
-  const allowance = epsilon / scale;
-  const cosine = Math.abs(firstX * secondX + firstY * secondY);
-  const sine = Math.abs(firstX * secondY - firstY * secondX);
-
-  if (
-    Math.abs(displacementX * firstX + displacementY * firstY) >
-    firstWidth + secondWidth * cosine + secondHeight * sine + allowance
-  )
-    return false;
-  if (
-    Math.abs(-displacementX * firstY + displacementY * firstX) >
-    firstHeight + secondWidth * sine + secondHeight * cosine + allowance
-  )
-    return false;
-  if (
-    Math.abs(displacementX * secondX + displacementY * secondY) >
-    secondWidth + firstWidth * cosine + firstHeight * sine + allowance
-  )
-    return false;
+  // Clamp unit-axis dot products against rounding slightly above one.
+  const cosine = Math.min(1, Math.abs(firstX * secondX + firstY * secondY));
+  const sine = Math.min(1, Math.abs(firstX * secondY - firstY * secondX));
   return (
-    Math.abs(-displacementX * secondY + displacementY * secondX) <=
-    secondHeight + firstWidth * sine + firstHeight * cosine + allowance
+    overlapsOnAxis(
+      first,
+      second,
+      firstX,
+      firstY,
+      first.halfSize[0],
+      second.halfSize[0] * cosine,
+      second.halfSize[1] * sine,
+      epsilon
+    ) &&
+    overlapsOnAxis(
+      first,
+      second,
+      -firstY,
+      firstX,
+      first.halfSize[1],
+      second.halfSize[0] * sine,
+      second.halfSize[1] * cosine,
+      epsilon
+    ) &&
+    overlapsOnAxis(
+      first,
+      second,
+      secondX,
+      secondY,
+      second.halfSize[0],
+      first.halfSize[0] * cosine,
+      first.halfSize[1] * sine,
+      epsilon
+    ) &&
+    overlapsOnAxis(
+      first,
+      second,
+      -secondY,
+      secondX,
+      second.halfSize[1],
+      first.halfSize[0] * sine,
+      first.halfSize[1] * cosine,
+      epsilon
+    )
+  );
+}
+
+/** Scale each projection independently so an irrelevant huge extent cannot erase a small gap. */
+function overlapsOnAxis(
+  first: OrientedBox2D,
+  second: OrientedBox2D,
+  axisX: number,
+  axisY: number,
+  ownRadius: number,
+  otherWidthRadius: number,
+  otherHeightRadius: number,
+  epsilon: number
+): boolean {
+  const displacementX = second.center[0] - first.center[0];
+  const displacementY = second.center[1] - first.center[1];
+  // Keep a representable center difference before multiplying. If subtraction overflows,
+  // project the finite centers first; a zero axis component then stays exactly zero.
+  const projectionX = Number.isFinite(displacementX)
+    ? displacementX * axisX
+    : second.center[0] * axisX - first.center[0] * axisX;
+  const projectionY = Number.isFinite(displacementY)
+    ? displacementY * axisY
+    : second.center[1] * axisY - first.center[1] * axisY;
+  const scale =
+    Math.max(
+      ownRadius,
+      otherWidthRadius,
+      otherHeightRadius,
+      epsilon,
+      Number.isFinite(projectionX)
+        ? Math.abs(projectionX)
+        : Math.max(Math.abs(first.center[0] * axisX), Math.abs(second.center[0] * axisX)),
+      Number.isFinite(projectionY)
+        ? Math.abs(projectionY)
+        : Math.max(Math.abs(first.center[1] * axisY), Math.abs(second.center[1] * axisY))
+    ) || 1;
+  const normalizedX = Number.isFinite(projectionX)
+    ? projectionX / scale
+    : (second.center[0] * axisX) / scale - (first.center[0] * axisX) / scale;
+  const normalizedY = Number.isFinite(projectionY)
+    ? projectionY / scale
+    : (second.center[1] * axisY) / scale - (first.center[1] * axisY) / scale;
+  return (
+    Math.abs(normalizedX + normalizedY) <=
+    ownRadius / scale + otherWidthRadius / scale + otherHeightRadius / scale + epsilon / scale
   );
 }
 
