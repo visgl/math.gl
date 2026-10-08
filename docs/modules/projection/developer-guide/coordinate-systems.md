@@ -218,7 +218,7 @@ applied to geocentric positions. PROJ's
 [deformation reference](https://proj.org/en/stable/operations/transformations/deformation.html)
 provides background on velocity-based epoch changes.
 
-`@math.gl/crs` can retain `coordinateEpoch` metadata. The ordinary `Projection`
+`@math.gl/crs` can retain `coordinateEpoch` metadata. An ordinary CRS-pair projection
 and `ProjectionTransform` do not silently apply it; epoch-bearing spatial references
 require an explicit time-dependent operation. Nor does a dynamic CRS definition
 select a velocity model or an operation automatically.

@@ -114,7 +114,7 @@ check its datum, units, axes and area of use.
 ## Migration from @math.gl/proj4
 
 The v5 alpha package is renamed to `@math.gl/projection`. Update the dependency
-name and import prefix, and use `Projection` instead of the removed
+name and import prefix, and use `projectionEngine.createProjection({from, to})` instead of the removed
 `Proj4Projection` alias. The `/classic` wrapper and its proj4js-specific CRS helpers
 are removed. Applications needing proj4js behavior can install and import `proj4`
 directly. The math.gl package has no runtime dependency on proj4js.

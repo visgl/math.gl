@@ -1,8 +1,9 @@
 # Projection engine roadmap
 
 Status: tranches **0–11, including qualification tranches 7A–7D, are implemented** for the
-[documented projection support profile](../docs/modules/projection/developer-guide/support.md). The package root uses the math.gl projection engine; `Projection` supplies the compatible
-wrapper API and `ProjectionEngine` allows explicit plugins. The package is renamed
+[documented projection support profile](../docs/modules/projection/developer-guide/support.md). The package root uses the math.gl projection engine; `projectionEngine` supplies the full catalogue factory;
+`ProjectionEngine` and `Projection` are runtime-free contracts.
+`ConfigurableProjectionEngine` allows explicit plugins. The package is renamed
 from `@math.gl/proj4`; its deprecated wrapper alias and `/classic` subpath are removed.
 Prior engine subpaths remain aliases. No package is published by this work.
 

@@ -23,9 +23,9 @@ The transform can wrap a CRS converter. The utility does not interpret CRS ident
 For example, a polar CRS converter supplied by `@math.gl/projection` can be used without adding a dependency to the polygon utility:
 
 ```ts
-import {Projection} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/projection';
 
-const projection = new Projection({
+const projection = projectionEngine.createProjection({
   from: 'WGS84',
   to: '+proj=stere +lat_0=90 +lat_ts=70 +lon_0=0 +datum=WGS84 +units=m'
 });
