@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/From-v3.0-blue.svg?style=flat-square" alt="From-v3.0" />
 </p>
 
-`@math.gl/geospatial` provides ellipsoid geometry, geographic/Cartesian conversions, local tangent frames, and globe queries. Use it for WGS84 positions and 3D Tiles bounds without a renderer dependency.
+`@math.gl/geospatial` provides ellipsoid geometry, geographic/Cartesian conversions, local tangent frames, globe queries, and tile-grid geometry. Use it for WGS84 positions and 3D Tiles bounds without a renderer dependency.
 
 Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](../geoid/README.md) and [projection](../projection/README.md).
 
@@ -92,5 +92,10 @@ conservative imagery coverage without a viewport or rendering dependency.
 
 ## Tile matrices
 
-[Tile matrix types and utilities](./tile-matrix.md) describe rectangular tile grids in any coordinate
-system, including tile bounds, coordinate lookup and index limits.
+[Tile matrix types and utilities](./api-reference/tile-matrix.md) describe supplied rectangular
+grids in any coordinate system. Import from `@math.gl/geospatial/tile-matrix` for a lightweight
+entry point with no runtime dependencies. Helpers provide bounds, coordinate lookup, compact
+extent-to-tile ranges, coverage checks and resolution-based level selection.
+
+Use the geographic tile helpers above for the built-in equal-angle longitude/latitude quadtree
+and antimeridian-aware queries. Explicit matrix queries use half-open edges and never wrap.

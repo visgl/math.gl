@@ -68,3 +68,12 @@ const box = makeOBBFromRegion([
 
 The height interval is application supplied. Index construction and storage belong
 in a spatial index; tile refinement and cache policy belong in the tile system.
+
+
+## Explicit tile matrix grids
+
+For projected grids or service-defined origins, resolutions and tile dimensions, use
+[Tile matrix utilities](./tile-matrix.md) from `@math.gl/geospatial/tile-matrix`. They provide
+compact extent ranges and resolution-based matrix selection without assuming this geographic
+quadtree layout. Their far outer edges are excluded and queries do not wrap; the geographic
+helpers above retain their world-edge and antimeridian semantics.

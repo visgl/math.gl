@@ -182,7 +182,7 @@
           "modules/geospatial/api-reference/ellipsoid",
           "modules/geospatial/api-reference/globe-queries",
           "modules/geospatial/api-reference/geographic-tiles",
-          "modules/geospatial/tile-matrix",
+          "modules/geospatial/api-reference/tile-matrix",
           "modules/geospatial/api-reference/ellipsoid-tangent-plane",
           "modules/geospatial/api-reference/lng-lat-rectangle",
           "modules/geospatial/api-reference/make-obb-from-region",
