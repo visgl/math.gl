@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v5.0.0-alpha.14
+
+- feat(projection): Clarify projection factory APIs and add a minimal Web Mercator engine (#242).
+- feat(culling): Add dependency-free 2D oriented-box intersection queries (#241).
+- feat(geometry-utils): Add packed vertex attribute interpolation from subdivision provenance (#240).
+- feat(polygon): Add source-edge mesh refinement (#239).
+- feat(examples): Add global and Alpine glaciation explorers, landed Krapp masks, and Snowball Earth chapters with ice visualization (#231, #233, #237).
+- feat(examples): Use NASA Blue Marble basemaps in geographic examples (#236).
+- docs: Reorganize documentation and refine module guides (#238).
+
 ## v5.0.0-alpha.13
 
 - feat(geoarrow): Expose `materializeGeoArrowRows` for runtime adapters and preserve empty points encoded with non-finite or null ordinates.
