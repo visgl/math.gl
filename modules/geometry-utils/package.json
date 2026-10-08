@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.13",
+  "version": "5.0.0-alpha.14",
   "keywords": [
     "webgl",
     "webgpu",
@@ -38,7 +38,7 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-alpha.13",
-    "@math.gl/types": "5.0.0-alpha.13"
+    "@math.gl/core": "5.0.0-alpha.14",
+    "@math.gl/types": "5.0.0-alpha.14"
   }
 }
