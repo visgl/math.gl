@@ -5273,11 +5273,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/core@npm:5.0.0-alpha.14, @math.gl/core@workspace:*, @math.gl/core@workspace:modules/core":
+"@math.gl/core@npm:5.0.0-alpha.15, @math.gl/core@workspace:*, @math.gl/core@workspace:modules/core":
   version: 0.0.0-use.local
   resolution: "@math.gl/core@workspace:modules/core"
   dependencies:
-    "@math.gl/types": "npm:5.0.0-alpha.14"
+    "@math.gl/types": "npm:5.0.0-alpha.15"
   languageName: unknown
   linkType: soft
 
@@ -5288,18 +5288,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/crs@npm:5.0.0-alpha.14, @math.gl/crs@workspace:modules/crs":
+"@math.gl/crs@npm:5.0.0-alpha.15, @math.gl/crs@workspace:modules/crs":
   version: 0.0.0-use.local
   resolution: "@math.gl/crs@workspace:modules/crs"
   languageName: unknown
   linkType: soft
 
-"@math.gl/culling@npm:5.0.0-alpha.14, @math.gl/culling@workspace:*, @math.gl/culling@workspace:modules/culling":
+"@math.gl/culling@npm:5.0.0-alpha.15, @math.gl/culling@workspace:*, @math.gl/culling@workspace:modules/culling":
   version: 0.0.0-use.local
   resolution: "@math.gl/culling@workspace:modules/culling"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.14"
-    "@math.gl/types": "npm:5.0.0-alpha.14"
+    "@math.gl/core": "npm:5.0.0-alpha.15"
+    "@math.gl/types": "npm:5.0.0-alpha.15"
   languageName: unknown
   linkType: soft
 
@@ -5317,15 +5317,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/curves@workspace:modules/curves"
   dependencies:
-    "@math.gl/types": "npm:5.0.0-alpha.14"
+    "@math.gl/types": "npm:5.0.0-alpha.15"
   languageName: unknown
   linkType: soft
 
-"@math.gl/dggs@npm:5.0.0-alpha.14, @math.gl/dggs@workspace:modules/dggs":
+"@math.gl/dggs@npm:5.0.0-alpha.15, @math.gl/dggs@workspace:modules/dggs":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs@workspace:modules/dggs"
   dependencies:
-    "@math.gl/types": "npm:5.0.0-alpha.14"
+    "@math.gl/types": "npm:5.0.0-alpha.15"
     a5-js: "npm:^0.10.0"
     h3-js: "npm:^4.5.0"
     open-location-code: "npm:^1.0.3"
@@ -5337,9 +5337,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/expressions@workspace:modules/expressions"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.14"
-    "@math.gl/dggs": "npm:5.0.0-alpha.14"
-    "@math.gl/geospatial": "npm:5.0.0-alpha.14"
+    "@math.gl/core": "npm:5.0.0-alpha.15"
+    "@math.gl/dggs": "npm:5.0.0-alpha.15"
+    "@math.gl/geospatial": "npm:5.0.0-alpha.15"
     jsep: "npm:^1.4.0"
   languageName: unknown
   linkType: soft
@@ -5360,10 +5360,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geoarrow@workspace:modules/geoarrow"
   dependencies:
-    "@math.gl/crs": "npm:5.0.0-alpha.14"
-    "@math.gl/polygon": "npm:5.0.0-alpha.14"
-    "@math.gl/types": "npm:5.0.0-alpha.14"
-    "@math.gl/wkb": "npm:5.0.0-alpha.14"
+    "@math.gl/crs": "npm:5.0.0-alpha.15"
+    "@math.gl/polygon": "npm:5.0.0-alpha.15"
+    "@math.gl/types": "npm:5.0.0-alpha.15"
+    "@math.gl/wkb": "npm:5.0.0-alpha.15"
   languageName: unknown
   linkType: soft
 
@@ -5371,8 +5371,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geoid@workspace:modules/geoid"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.14"
-    "@math.gl/types": "npm:5.0.0-alpha.14"
+    "@math.gl/core": "npm:5.0.0-alpha.15"
+    "@math.gl/types": "npm:5.0.0-alpha.15"
   languageName: unknown
   linkType: soft
 
@@ -5390,8 +5390,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry-utils@workspace:modules/geometry-utils"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.14"
-    "@math.gl/types": "npm:5.0.0-alpha.14"
+    "@math.gl/core": "npm:5.0.0-alpha.15"
+    "@math.gl/types": "npm:5.0.0-alpha.15"
   languageName: unknown
   linkType: soft
 
@@ -5399,17 +5399,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry@workspace:modules/geometry"
   dependencies:
-    "@math.gl/types": "npm:5.0.0-alpha.14"
+    "@math.gl/types": "npm:5.0.0-alpha.15"
   languageName: unknown
   linkType: soft
 
-"@math.gl/geospatial@npm:5.0.0-alpha.14, @math.gl/geospatial@workspace:*, @math.gl/geospatial@workspace:modules/geospatial":
+"@math.gl/geospatial@npm:5.0.0-alpha.15, @math.gl/geospatial@workspace:*, @math.gl/geospatial@workspace:modules/geospatial":
   version: 0.0.0-use.local
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.14"
-    "@math.gl/culling": "npm:5.0.0-alpha.14"
-    "@math.gl/types": "npm:5.0.0-alpha.14"
+    "@math.gl/core": "npm:5.0.0-alpha.15"
+    "@math.gl/culling": "npm:5.0.0-alpha.15"
+    "@math.gl/types": "npm:5.0.0-alpha.15"
   languageName: unknown
   linkType: soft
 
@@ -5432,11 +5432,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/polygon@npm:5.0.0-alpha.14, @math.gl/polygon@workspace:*, @math.gl/polygon@workspace:modules/polygon":
+"@math.gl/polygon@npm:5.0.0-alpha.15, @math.gl/polygon@workspace:*, @math.gl/polygon@workspace:modules/polygon":
   version: 0.0.0-use.local
   resolution: "@math.gl/polygon@workspace:modules/polygon"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.14"
+    "@math.gl/core": "npm:5.0.0-alpha.15"
   languageName: unknown
   linkType: soft
 
@@ -5464,7 +5464,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/proj@workspace:modules/proj"
   dependencies:
-    "@math.gl/web-mercator": "npm:5.0.0-alpha.14"
+    "@math.gl/web-mercator": "npm:5.0.0-alpha.15"
   languageName: unknown
   linkType: soft
 
@@ -5472,9 +5472,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/projection@workspace:modules/projection"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.14"
-    "@math.gl/crs": "npm:5.0.0-alpha.14"
-    "@math.gl/geospatial": "npm:5.0.0-alpha.14"
+    "@math.gl/core": "npm:5.0.0-alpha.15"
+    "@math.gl/crs": "npm:5.0.0-alpha.15"
+    "@math.gl/geospatial": "npm:5.0.0-alpha.15"
     proj4: "npm:2.22.0"
   languageName: unknown
   linkType: soft
@@ -5483,7 +5483,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/spatial-index@workspace:modules/spatial-index"
   dependencies:
-    "@math.gl/culling": "npm:5.0.0-alpha.14"
+    "@math.gl/culling": "npm:5.0.0-alpha.15"
   languageName: unknown
   linkType: soft
 
@@ -5530,17 +5530,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/types@npm:5.0.0-alpha.14, @math.gl/types@workspace:modules/types":
+"@math.gl/types@npm:5.0.0-alpha.15, @math.gl/types@workspace:modules/types":
   version: 0.0.0-use.local
   resolution: "@math.gl/types@workspace:modules/types"
   languageName: unknown
   linkType: soft
 
-"@math.gl/web-mercator@npm:5.0.0-alpha.14, @math.gl/web-mercator@workspace:modules/web-mercator":
+"@math.gl/web-mercator@npm:5.0.0-alpha.15, @math.gl/web-mercator@workspace:modules/web-mercator":
   version: 0.0.0-use.local
   resolution: "@math.gl/web-mercator@workspace:modules/web-mercator"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.14"
+    "@math.gl/core": "npm:5.0.0-alpha.15"
     mock-browser: "npm:^0.92.14"
   languageName: unknown
   linkType: soft
@@ -5561,7 +5561,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/wkb@npm:5.0.0-alpha.14, @math.gl/wkb@workspace:modules/wkb":
+"@math.gl/wkb@npm:5.0.0-alpha.15, @math.gl/wkb@workspace:modules/wkb":
   version: 0.0.0-use.local
   resolution: "@math.gl/wkb@workspace:modules/wkb"
   languageName: unknown
@@ -16015,7 +16015,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math.gl@workspace:modules/main"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.14"
+    "@math.gl/core": "npm:5.0.0-alpha.15"
   languageName: unknown
   linkType: soft
 

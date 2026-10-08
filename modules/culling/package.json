@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.14",
+  "version": "5.0.0-alpha.15",
   "keywords": [
     "webgl",
     "javascript",
@@ -52,8 +52,8 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-alpha.14",
-    "@math.gl/types": "5.0.0-alpha.14"
+    "@math.gl/core": "5.0.0-alpha.15",
+    "@math.gl/types": "5.0.0-alpha.15"
   },
   "gitHead": "e1a95300cb225a90da6e90333d4adf290f7ba501"
 }
