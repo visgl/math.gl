@@ -89,3 +89,22 @@ test('minimal Web Mercator matches longitude wrapping and near-pole coordinates'
   }
   expect(() => engine.createProjection().project([0, 91])).toThrow('domain');
 });
+
+test('inverse longitude wrapping preserves near-date-line signs without degree modulo rounding', () => {
+  const minimal = engine.createProjection({to: 'EPSG:3857'});
+  const full = projectionEngine.createProjection({to: 'EPSG:3857'});
+  for (const x of [
+    6378137 * Math.PI - 1e-8,
+    -6378137 * Math.PI + 1e-8,
+    6378137 * Math.PI,
+    -6378137 * Math.PI
+  ]) {
+    const input = [x, 0];
+    expect(minimal.unproject(input)).toEqual(full.unproject(input));
+    const actual = new Float64Array(input);
+    const expected = new Float64Array(input);
+    minimal.unprojectFlatSync(actual);
+    full.unprojectFlatSync(expected);
+    expect(actual).toEqual(expected);
+  }
+});

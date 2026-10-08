@@ -148,7 +148,7 @@ same factory and transform contracts as the full engine. Unsupported CRS definit
 fail explicitly. See the [engine reference](../api-reference/projection-engine.md).
 
 Measured for math.gl **5.0.0-alpha.13** on October 8, 2026 with Node 24.5.0,
-esbuild browser ESM, ES2020 and gzip level 9: **4,091 bytes minified / 1,410 bytes gzip**
+esbuild browser ESM, ES2020 and gzip level 9: **4,066 bytes minified / 1,389 bytes gzip**
 (4.0 / 1.4 KiB). The runtime-free `/types` entry retains no executable projection code.
 These are isolated entry-point measurements, not full application download sizes.
 

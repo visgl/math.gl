@@ -94,8 +94,7 @@ class WebMercatorTransform implements PreparedProjection {
       throw new Error('Coordinate outside geographic domain');
     if (from !== to && !(from !== 'EPSG:3857' && to !== 'EPSG:3857')) {
       if (from === 'EPSG:3857') {
-        x = x / RADIUS / RADIANS;
-        x = ((((x + 180) % 360) + 360) % 360) - 180;
+        x = wrap(x / RADIUS) / RADIANS;
         y = Math.atan(Math.sinh(y / RADIUS)) / RADIANS;
       } else {
         if (Math.abs(y) >= 90) throw new Error('Coordinate outside Web Mercator projection domain');
