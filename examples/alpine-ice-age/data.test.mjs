@@ -295,6 +295,13 @@ test("successful Krapp loads assemble ordered batches and interpolate area", asy
   const area = model.manifest.areaKm2[index] * (1 - fraction) + model.manifest.areaKm2[index + 1] * fraction;
   assert(Math.abs(area - 2 * Math.PI * 6371.0088 ** 2) < 0.01);
   assert.equal(progress.at(-1), "3/3 ice-mask snapshots");
+  t.mock.method(ParquetSource.prototype, "close", async () => {
+    throw new Error("Worker cleanup failed");
+  });
+  t.mock.method(console, "warn", () => {});
+  const retained = await loadKrappSimulation(new AbortController().signal, undefined, { worker: false });
+  assert.deepEqual(retained.manifest.ages, model.manifest.ages);
+  assert.equal(retained.ice[retained.count], 1);
 });
 test("Krapp coverage aggregates native cells and integrates spherical area without invented volume", () => {
   const native = new Int16Array(720 * 360).fill(2);

@@ -146,6 +146,10 @@ export async function loadKrappSimulation(
     onProgress("Earlier masks unavailable; using PaleoMIST");
     return null;
   } finally {
-    await source?.close();
+    try {
+      await source?.close();
+    } catch (error) {
+      console.warn("Krapp source cleanup failed", error);
+    }
   }
 }
