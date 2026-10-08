@@ -36,6 +36,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./oriented-box-2d": {
+      "types": "./dist/oriented-box-2d.d.ts",
+      "import": "./dist/oriented-box-2d.js",
+      "require": "./dist/oriented-box-2d.cjs"
+    },
     "./queries": {
       "types": "./dist/queries.d.ts",
       "import": "./dist/queries.js",
