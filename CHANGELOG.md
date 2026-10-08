@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v5.0.0-alpha.15
+
+- feat(geospatial): Add lightweight tile matrix utilities, package boundary validation, and API documentation (#244).
+
 ## v5.0.0-alpha.14
 
 - feat(projection): Clarify projection factory APIs and add a minimal Web Mercator engine (#242).
