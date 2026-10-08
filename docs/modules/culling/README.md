@@ -29,6 +29,7 @@ npm install @math.gl/culling
 | [Plane](./api-reference/plane.md) | A normalized normal and signed distance |
 | [Ray](./api-reference/ray.md) | An origin and direction for intersection queries |
 | [Analytic shapes](./api-reference/shapes.md) | Box, capsule, cylinder, plane, and sphere queries without tessellation |
+| [intersectOrientedBoxes2D](./api-reference/intersect-oriented-boxes-2d.md) | Allocation-free rotated rectangle queries for screen-space labels and other 2D geometry |
 
 ## Test visibility
 
