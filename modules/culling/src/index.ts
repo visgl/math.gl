@@ -36,3 +36,6 @@ export {computeEigenDecomposition} from './lib/algorithms/compute-eigen-decompos
 
 export {intersectRayBounds, intersectRayTriangle, getClosestPointOnTriangle} from './queries';
 export type {QueryPoint, TriangleRayHit} from './queries';
+
+export {intersectOrientedBoxes2D} from './oriented-box-2d';
+export type {OrientedBox2D} from './oriented-box-2d';
