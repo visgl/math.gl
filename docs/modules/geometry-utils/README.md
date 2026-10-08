@@ -40,12 +40,16 @@ const decodedNormal = octDecode(128, 128, new Vector3());
 The inline workshop combines these operations on two sphere meshes. Expand the infobox
 to stretch or reflect a mesh, compare vertex counts, and inspect wireframe topology.
 
+[Interpolate interleaved attributes](./api-reference/interpolate-packed-attributes.md) from
+polygon subdivision provenance without unpacking every vertex into JavaScript objects.
+Declare linear and flat policies explicitly, including mixed policies within one attribute.
+
 ## API
 
 - Geometry inspection and traversal: `isGeometry`, `makeAttributeIterator`,
   `makePrimitiveIterator`, `computeVertexNormals`
 - Typed arrays and component types: `GL`, `GL_TYPE`, `GLType`, `concatTypedArrays`
-- Packed attributes: `encodeRGB565`, `decodeRGB565`, octahedral vector encoding, texture-coordinate
+- Packed attributes: `interpolatePackedAttributes`, `encodeRGB565`, `decodeRGB565`, octahedral vector encoding, texture-coordinate
   compression, and ZigZag delta decoding
 - Coordinate helpers: `emod`
 
