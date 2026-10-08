@@ -8,6 +8,24 @@ Adaptively refines an indexed triangle mesh through a supplied coordinate transf
 
 The utility checks both edge and triangle-interior samples. A failing triangle splits all three edges; adjacent triangles split the same shared edges. The resulting mesh remains conforming when the input is conforming. Vertices are shared by index, never welded by coordinate value.
 
+For applications with a known source-space resolution requirement, opt into `refinement: 'source-edge'`. This splits only indexed edges longer than a finite `maxEdgeLength` and transforms each output vertex once, skipping all error probes. Both modes preserve conformity, winding, seam identities, and attribute provenance.
+
+## Source-edge refinement
+
+```ts
+const mesh = subdivideTriangleMesh({
+  positions: [0, 0, 1, 0, 1, 1, 0, 1],
+  indices: [0, 1, 2, 0, 2, 3]
+}, {
+  refinement: 'source-edge',
+  maxEdgeLength: 0.25,
+  transform: ([x, y]) => [x, y, Math.sin(2 * x)],
+  targetSize: 3
+});
+```
+
+Use this mode when the application has its own resolution policy, such as a source tile's angular-span limit. It provides **no target-space accuracy guarantee** and does not detect invalid domains between output vertices. Choose the edge length for the projection and geometry being rendered; use the default sampled-error mode when target-space error should drive refinement. `tolerance` is not accepted in source-edge mode, to avoid implying that it is checked.
+
 ## Polygon with holes
 
 Triangulate the polygon in its source coordinate space, then refine that mesh. This preserves the original triangles' source coverage and hole boundaries. For already triangulated loader output, pass its positions and indices directly.
@@ -70,10 +88,11 @@ All input vertices, including unused vertices, are copied and transformed. Input
 | Option | Default | Description |
 | --- | --- | --- |
 | `transform` | Required | Deterministic `(position: readonly number[]) => ArrayLike<number> \| null`. Each invocation receives a fresh array. Must return exactly `targetSize` finite components. |
-| `tolerance` | Required | Positive finite sampled error tolerance, in target-coordinate units. All target components participate. |
+| `refinement` | `'transform-error'` | Sample transform error, or use `'source-edge'` to split only long source edges without error probes. |
+| `tolerance` | Required in transform-error mode | Positive finite sampled error tolerance, in target-coordinate units. All target components participate. Must be omitted in source-edge mode. |
 | `size` | `2` | Source dimension, `2` or `3`. |
 | `targetSize` | `size` | Target dimension, `2` or `3`. |
-| `maxEdgeLength` | `Infinity` | Positive maximum Euclidean source-edge length. All source components participate; choose compatible axis units. |
+| `maxEdgeLength` | `Infinity` in transform-error mode | Positive maximum Euclidean source-edge length. Required and finite in source-edge mode. All source components participate; choose compatible axis units. |
 | `maxDepth` | `10` | Maximum global refinement passes, integer from `0` through `30`. |
 | `maxVertices` | `65536` | Maximum output vertex count, including unused input vertices. |
 | `maxTriangles` | `131072` | Maximum output triangle count. |
@@ -93,10 +112,16 @@ The result contains:
 
 ## Accuracy and failure behavior
 
-Edge probes use fractions `1/4`, `1/2`, and `3/4`. Interior probes use the centroid and barycentric permutations of `[1/2, 1/4, 1/4]`. Error is the Euclidean distance between the transformed source probe and barycentric interpolation of the transformed vertices at the same weights. This also detects nonlinear parameterization of otherwise flat geometry. An edge-length limit can force refinement where the error probes might miss oscillation.
+In the default transform-error mode, edge probes use fractions `1/4`, `1/2`, and `3/4`. Interior probes use the centroid and barycentric permutations of `[1/2, 1/4, 1/4]`. Error is the Euclidean distance between the transformed source probe and barycentric interpolation of the transformed vertices at the same weights. This also detects nonlinear parameterization of otherwise flat geometry. An edge-length limit can force refinement where the error probes might miss oscillation.
 
 The criterion is sampled. It does not guarantee a continuous bound for arbitrary transforms, detect every projection seam, or repair inverted triangles. Polygon boundaries and interiors are refined; the caller retains ownership of clipping policy, triangulation, GPU resources, and interpolation of attributes.
 
 Invalid options, buffers, indices, nonfinite coordinates, rejected transform samples, and exhausted limits produce `RangeError`. Callback exceptions propagate unchanged. No partial result is returned. Source-coordinate attribute seams remain distinct because refinement shares vertices only along identical indexed edges.
+
+Source-edge mode validates transformed output vertices, but intentionally never evaluates edge or interior probes. An invalid interior can therefore be undetected. Count and depth limits, finite-coordinate validation, and callback exception propagation apply in both modes. Refinement can change triangle ordering and counts between modes; consumers should use provenance rather than assume identical output topology.
+
+## Performance comparison
+
+After building the repository, run `node test/bench/subdivision.mjs` for a deterministic small/coarse-quad comparison. It reports median elapsed time, output counts and transform calls for both policies. The source-edge policy deliberately does less work and provides a weaker accuracy contract; this is not an equal-accuracy comparison or a production rendering benchmark. Output provenance and typed-array formats are unchanged.
 
 See [subdividePolyline](./subdivide-polyline.md) for strokes and boundary-only processing. Boundary subdivision alone is insufficient when a filled polygon or image also needs its triangle interiors to deform.
