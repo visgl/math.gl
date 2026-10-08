@@ -127,7 +127,7 @@ try {
       );
     if (name === 'projectionAnalysis')
       assert(
-        candidate.minified <= 4900 && candidate.gzip <= 1800,
+        candidate.minified <= 6600 && candidate.gzip <= 2100,
         'Reviewed optional analysis size budget'
       );
     rows.push({

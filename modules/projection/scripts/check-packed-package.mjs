@@ -99,7 +99,12 @@ try {
       './datums': ['datumCatalog'],
       './bulk': ['ProjectionBuffer'],
       './operations': ['OperationCatalog'],
-      './analysis': ['ProjectionAnalysis', 'createProjectionJacobian', 'createProjectionFactors'],
+      './analysis': [
+        'ProjectionAnalysis',
+        'createProjectionJacobian',
+        'createProjectionHessian',
+        'createProjectionFactors'
+      ],
       './deformation': ['createDeformationModel'],
       './grids/velocity': ['createVelocityGrid'],
       './grids/velocity-geotiff': ['loadVelocityGeoTIFFGrid']
@@ -207,12 +212,15 @@ try {
     const bufferColumnOutput = bufferColumns.map(()=>new Float32Array(2));
     assert.equal(buffers.projectColumnsTo(bufferColumns,bufferColumnOutput),bufferColumnOutput);
     for(let i=0;i<4;i++) for(let j=0;j<2;j++) assert.equal(bufferColumnOutput[i][j],bufferOutput[j*4+i]);
-    const {ProjectionAnalysis, createProjectionFactors, createProjectionJacobian} = await load('@math.gl/projection/analysis');
+    const {ProjectionAnalysis, createProjectionFactors, createProjectionHessian, createProjectionJacobian} = await load('@math.gl/projection/analysis');
     const inspected = new ProjectionAnalysis({projection: api.mercator, context: {semiMajorAxis:10,eccentricitySquared:0,parameters:{}}, domain:{west:-1,east:1,south:-1,north:1}});
     const factors = createProjectionFactors(), jacobian = createProjectionJacobian();
     assert(inspected.factors(0,0,factors)); assert(inspected.jacobian(0,0,jacobian));
     assert(Math.abs(factors.meridionalScale - 1) < 1e-10);
     assert(Math.abs(jacobian.dxDLongitude - 10) < 1e-10);
+    const hessian = createProjectionHessian();
+    assert(inspected.hessian(0,0.5,hessian));
+    assert(Math.abs(hessian.d2yDLatitude2 - 10 * Math.sin(0.5) / Math.cos(0.5) ** 2) < 1e-6);
     const {OperationCatalog} = await load('@math.gl/projection/operations');
     const createOperation = () => new core.ProjectionTransform({});
     const selection = new OperationCatalog([{
@@ -499,12 +507,15 @@ try {
     const separateResult:Float32Array = bufferProjection.projectFlatTo(new Float64Array(6),new Float32Array(7),1,0,new Float64Array([2020]));
     const columnOutputs = [new Float32Array(1),new Float64Array(1),new Float64Array(1),new Float64Array(1)] as const;
     const columnResult:typeof columnOutputs = bufferProjection.unprojectColumnsTo(columnOutputs,columnOutputs,1,0,2020);
-    import {ProjectionAnalysis, createProjectionFactors, createProjectionJacobian, type ProjectionAnalysisOptions, type ProjectionDomain, type ProjectionFactors, type ProjectionJacobian} from '@math.gl/projection/analysis';
+    import {ProjectionAnalysis, createProjectionFactors, createProjectionHessian, createProjectionJacobian, type ProjectionAnalysisOptions, type ProjectionDomain, type ProjectionFactors, type ProjectionHessian, type ProjectionJacobian} from '@math.gl/projection/analysis';
     const analysisDomain: ProjectionDomain = {west:-1,east:1,south:-1,north:1};
     const analysisOptions: ProjectionAnalysisOptions = {projection:mercator,context:{semiMajorAxis:10,eccentricitySquared:0,parameters:{}},domain:analysisDomain};
     const inspected = new ProjectionAnalysis(analysisOptions);
     const factors: ProjectionFactors = createProjectionFactors(), jacobian: ProjectionJacobian = createProjectionJacobian();
     inspected.factors(0,0,factors); inspected.jacobian(0,0,jacobian);
+    const hessian: ProjectionHessian = createProjectionHessian(); inspected.hessian(0,0,hessian);
+    // @ts-expect-error Reusable Hessian storage is required.
+    inspected.hessian(0,0);
     // @ts-expect-error Reusable factors storage is required.
     inspected.factors(0,0);
     // @ts-expect-error Analysis requires an explicit application domain.

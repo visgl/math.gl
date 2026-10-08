@@ -347,7 +347,7 @@ shorter paths below. The former `classic` subpath is removed.
 | Subpath                 | Exports                                                                                                |
 | ----------------------- | ------------------------------------------------------------------------------------------------------ |
 | `operations`            | Optional `OperationCatalog` and selection metadata/diagnostics; no database or execution code          |
-| `analysis`              | `ProjectionAnalysis`, reusable factors/Jacobians and explicit mathematical domain enforcement          |
+| `analysis`              | `ProjectionAnalysis`, reusable factors/Jacobians/Hessians and explicit mathematical domain enforcement |
 | `bulk`                  | `ProjectionBuffer` for separate, strided, column and chunked buffers; no projection algorithms/readers |
 | `pipeline`              | `ProjectionPipeline` and typed explicit operation contracts; no catalogue/readers                      |
 | `types`                 | Runtime-free `ProjectionEngine`, `Projection`, `PreparedProjection` and shared contracts               |

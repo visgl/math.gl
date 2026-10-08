@@ -92,6 +92,7 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 - Adds a [projection catalogue](modules/projection/developer-guide/projections.md) and a [guide to ellipsoids, datums, heights and epochs](modules/projection/developer-guide/coordinate-systems.md).
 - Adds optional CRS axis-order enforcement and NTv2 datum-grid registration.
 - Defines aliases for WGS84 UTM and UPS EPSG coordinate systems automatically.
+- Adds [`ProjectionAnalysis.hessian()`](modules/projection/api-reference/projection-analysis.md#jacobians-hessians-and-factors) for second derivatives of a projection: how scale, convergence and distortion change across a region, for second-order local analysis and Newton-style inverse iteration.
 
 **`@math.gl/geospatial`**
 
