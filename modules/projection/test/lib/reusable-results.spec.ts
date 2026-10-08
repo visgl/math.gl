@@ -4,7 +4,7 @@
 // SPDX-FileComment: Original reusable-output ownership, precision, lazy and recursion tests.
 import {beforeAll, expect, test} from 'vitest';
 import {
-  Projection,
+  projectionEngine,
   ProjectionTransform,
   ProjectionPipeline,
   mercator,
@@ -12,7 +12,7 @@ import {
   createProjectionDescriptor
 } from '@math.gl/projection';
 import type {ProjectionOutput, ProjectionPlugin, ProjectionPoint} from '@math.gl/projection/core';
-import {LazyProjection} from '@math.gl/projection/projections/lazy';
+import {lazyProjectionEngine} from '@math.gl/projection/projections/lazy';
 import {pipelineOptions} from '../pipeline-workload';
 import {kinematicOptions} from '../kinematic-workload';
 import inputs from '../fixtures/operation-pipeline-cases.json';
@@ -40,7 +40,7 @@ for (const outputKind of ['array', 'Float32', 'Float64']) {
           : outputKind === 'Float32'
             ? new Float32Array(8).fill(77)
             : new Float64Array(8).fill(77);
-      const projection = new Projection({to: 'EPSG:3857'});
+      const projection = projectionEngine.createProjection({to: 'EPSG:3857'});
       const {projectTo, unprojectToSync} = projection;
       for (const point of [
         [11, 41],
@@ -121,7 +121,7 @@ test('geocentric output appends generated Z only with sufficient caller capacity
 });
 
 test('layout, domain and Float32 overflow failures leave caller outputs untouched', () => {
-  const projection = new Projection({to: 'EPSG:3857'});
+  const projection = projectionEngine.createProjection({to: 'EPSG:3857'});
   for (const output of [new Int32Array(4), new Float64Array(1), [], undefined, null, {}])
     expect(() => projection.projectTo([1, 2, 3, 4], output as ProjectionOutput)).toThrow();
   const result = new Float32Array([77, 77, 77, 77]);
@@ -134,7 +134,10 @@ test('layout, domain and Float32 overflow failures leave caller outputs untouche
     expect(() => projection.projectTo(point, result)).toThrow();
     expect(Array.from(result)).toEqual([77, 77, 77, 77]);
   }
-  const huge = new ProjectionTransform({to: '+proj=merc +a=1e40 +b=1e40', projections: [mercator]});
+  const huge = new ProjectionTransform({
+    to: '+proj=merc +a=1e40 +b=1e40',
+    projections: [mercator]
+  });
   expect(() => huge.projectTo([45, 45, 10, 9], result)).toThrow('Float32');
   expect(Array.from(result)).toEqual([77, 77, 77, 77]);
   expect(projection.projectTo([0, 0, 10, 9], result)).toBe(result);
@@ -166,7 +169,10 @@ test('reusable scratch isolates nested calls and recovers after callbacks and in
       }
     })
   };
-  projection = new ProjectionTransform({to: '+proj=scratch_output', projections: [plugin]});
+  projection = new ProjectionTransform({
+    to: '+proj=scratch_output',
+    projections: [plugin]
+  });
   nested = true;
   projection.projectTo([10, 20, 100, 9], output);
   expect(Array.from(output)).toEqual([(10 * Math.PI) / 180 + 1, (20 * Math.PI) / 180 - 1, 100, 9]);
@@ -197,17 +203,24 @@ test('descriptor-backed result APIs snapshot input, defer writes and retain expl
     await gate;
     return mercator;
   });
-  const engine = new ProjectionTransform({to: 'EPSG:3857', projections: [descriptor]});
+  const engine = new ProjectionTransform({
+    to: 'EPSG:3857',
+    projections: [descriptor]
+  });
   const pipeline = new ProjectionPipeline({
     input: {space: 'geographic', units: ['deg', 'deg', 'm']},
     projections: [descriptor],
     steps: [
       {type: 'unitconvert', xy: {from: 'deg', to: 'rad'}},
-      {type: 'projection', name: 'merc', parameters: {a: '6378137', b: '6378137'}}
+      {
+        type: 'projection',
+        name: 'merc',
+        parameters: {a: '6378137', b: '6378137'}
+      }
     ]
   });
   const input = new Float64Array([11, 41, 100, 8]);
-  const expected = new Projection({to: 'EPSG:3857'}).project(Array.from(input));
+  const expected = projectionEngine.createProjection({to: 'EPSG:3857'}).project(Array.from(input));
   for (const api of [engine, pipeline])
     expect(() => api.projectToSync(input, new Float64Array(4))).toThrow('preload');
   const a = new Float64Array(4).fill(77),
@@ -226,7 +239,7 @@ test('descriptor-backed result APIs snapshot input, defer writes and retain expl
   expect(pipeline.unprojectToSync(b, b)).toBe(b);
   expect(a[0]).toBeCloseTo(11, 10);
   expect(b[1]).toBeCloseTo(41, 10);
-  const lazy = new LazyProjection({to: 'EPSG:3857'}),
+  const lazy = lazyProjectionEngine.createProjection({to: 'EPSG:3857'}),
     result = new Float64Array(4);
   expect(await lazy.projectTo([0, 0, 10, 8], result)).toBe(result);
   expect(lazy.unprojectToSync(result, result)).toBe(result);

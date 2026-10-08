@@ -127,8 +127,8 @@ test('a transform that mutates its argument cannot change source positions', () 
 });
 
 test('polar CRS adapter approximates a curved latitude edge in meter units', async () => {
-  const {Projection} = await import('@math.gl/projection');
-  const projection = new Projection({
+  const {projectionEngine} = await import('@math.gl/projection');
+  const projection = projectionEngine.createProjection({
     from: 'WGS84',
     to: '+proj=stere +lat_0=90 +lat_ts=70 +lon_0=0 +datum=WGS84 +units=m'
   });

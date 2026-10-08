@@ -17,16 +17,19 @@ For contiguous coordinates that can be overwritten, the existing
 the shortest path and can use whole-buffer projection kernels.
 
 ```typescript
-import {ProjectionTransform} from '@math.gl/projection/core';
-import {mercator} from '@math.gl/projection/projections/merc';
-import {ProjectionBuffer} from '@math.gl/projection/bulk';
+import { ProjectionTransform } from "@math.gl/projection/core";
+import { mercator } from "@math.gl/projection/projections/merc";
+import { ProjectionBuffer } from "@math.gl/projection/bulk";
 
-const projection = new ProjectionTransform({to: 'EPSG:3857', projections: [mercator]});
+const projection = new ProjectionTransform({
+  to: "EPSG:3857",
+  projections: [mercator],
+});
 const transform = new ProjectionBuffer({
   projection,
   dimension: 4,
   inputStride: 6,
-  outputStride: 5
+  outputStride: 5,
 });
 
 // Each input record is [longitude, latitude, height, M, padding, padding].
@@ -36,8 +39,7 @@ const output = new Float32Array(10);
 transform.projectFlatTo(input, output, 2);
 ```
 
-`Projection`, `ProjectionTransform`, `ProjectionPipeline` and preloaded
-`LazyProjection` instances provide the synchronous output methods this adapter
+`ProjectionTransform`, `ProjectionPipeline` and prepared factory transforms provide the synchronous output methods this adapter
 uses. A lazy projection must have completed `preload()` before a nonempty batch;
 these methods neither start imports nor return promises. CRS units, axes, datum
 and height operations are those of the supplied projection.
@@ -50,12 +52,12 @@ and is absent from root/core/pipeline bundles unless explicitly imported. The
 measured adapter alone is approximately 5.3 KiB minified / 1.7 KiB gzip; the
 projection algorithms and optional readers you select have their own costs.
 
-| Constructor option | Meaning |
-| --- | --- |
-| `projection` | Transform providing `projectToSync` and `unprojectToSync`; each writes the complete coordinate into the supplied result |
-| `dimension` | Integer at least 2; default 2. XY, XYZ and XYZM use 2, 3 and 4 |
-| `inputOffset`, `outputOffset` | Element offsets in each supplied typed-array view; default 0 |
-| `inputStride`, `outputStride` | Element distance between records; defaults to `dimension` for interleaved arrays and 1 for columns |
+| Constructor option            | Meaning                                                                                                                 |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `projection`                  | Transform providing `projectToSync` and `unprojectToSync`; each writes the complete coordinate into the supplied result |
+| `dimension`                   | Integer at least 2; default 2. XY, XYZ and XYZM use 2, 3 and 4                                                          |
+| `inputOffset`, `outputOffset` | Element offsets in each supplied typed-array view; default 0                                                            |
+| `inputStride`, `outputStride` | Element distance between records; defaults to `dimension` for interleaved arrays and 1 for columns                      |
 
 All four methods return their supplied output storage:
 
@@ -82,15 +84,17 @@ are in elements, not bytes, and are relative to the supplied view.
 ## Separate columns
 
 ```typescript
-const columns = new ProjectionBuffer({projection, dimension: 4});
+const columns = new ProjectionBuffer({ projection, dimension: 4 });
 const longitude = new Float64Array([12, 13]);
 const latitude = new Float64Array([40, 41]);
 const height = new Float64Array([100, 200]);
 const measure = new Float64Array([7, 8]);
 const inputColumns = [longitude, latitude, height, measure];
 const outputColumns = [
-  new Float32Array(2), new Float32Array(2),
-  new Float64Array(2), new Float64Array(2)
+  new Float32Array(2),
+  new Float32Array(2),
+  new Float64Array(2),
+  new Float64Array(2),
 ];
 columns.projectColumnsTo(inputColumns, outputColumns);
 ```
@@ -104,12 +108,17 @@ committing the record; output conversion may round or underflow representable va
 ## Chunking and coordinate epochs
 
 ```typescript
-const contiguous = new ProjectionBuffer({projection, dimension: 4});
+const contiguous = new ProjectionBuffer({ projection, dimension: 4 });
 const positions = new Float64Array(4000);
 const projected = new Float64Array(4000);
 const records = positions.length / 4;
 for (let start = 0; start < records; start += 256) {
-  contiguous.projectFlatTo(positions, projected, Math.min(256, records - start), start);
+  contiguous.projectFlatTo(
+    positions,
+    projected,
+    Math.min(256, records - start),
+    start,
+  );
 }
 ```
 

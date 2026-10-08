@@ -8,6 +8,7 @@ import {gzipSync} from 'node:zlib';
 import {build} from 'esbuild';
 
 const fixtures = {
+  webMercatorEngine: "export {WebMercatorProjectionEngine} from '@math.gl/projection/web-mercator';",
   temporalModel: "export * from '@math.gl/projection/temporal';",
   projectionBulk: "export * from '@math.gl/projection/bulk';",
   projectionAnalysis: "export * from '@math.gl/projection/analysis';",
@@ -38,7 +39,7 @@ const fixtures = {
     "export {createDeformationModel} from '@math.gl/projection/deformation'; export {loadVelocityGeoTIFFGrid} from '@math.gl/projection/grids/velocity-geotiff';",
   operationCatalog: "export {OperationCatalog} from '@math.gl/projection/operations';",
   operationPipeline: "export {ProjectionPipeline} from '@math.gl/projection/pipeline';",
-  typescriptWrapper: "export {Projection} from '@math.gl/projection';",
+  typescriptWrapper: "export {FullProjectionEngine} from '@math.gl/projection';",
   allNativeExports: "export * from '@math.gl/projection';"
 };
 const budgets = process.argv.includes('--measure')
@@ -76,6 +77,10 @@ for (const [name, contents] of Object.entries(fixtures)) {
     expectsCatalog,
     name + ' regional datum catalogue retention'
   );
+  if (name === 'webMercatorEngine') {
+    assert(retained.every(path => /\/(web-mercator|scalar-output)\.js$/.test(path)),
+      'Minimal backend must contain only Mercator arithmetic and scalar storage validation');
+  }
   if (name === 'core')
     assert(!Object.keys(result.metafile.inputs).some(path => path.endsWith('/crs/datum-table.js')));
   const bytes = result.outputFiles[0].contents;

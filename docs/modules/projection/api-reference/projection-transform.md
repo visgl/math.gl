@@ -4,18 +4,18 @@
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-The configurable math.gl projection engine underlying the default `Projection`; see the [support and migration contract](../developer-guide/support.md).
+The configurable math.gl projection engine used by the full, configurable and lazy engines; see the [support and migration contract](../developer-guide/support.md).
 Import it from `@math.gl/projection` or the isolated `@math.gl/projection/core` entry point.
 The package has no proj4js runtime dependency. Install `proj4` separately when
 its upstream behavior is required.
 
 ```typescript
-import {ProjectionTransform, mercator} from '@math.gl/projection';
+import { ProjectionTransform, mercator } from "@math.gl/projection";
 
 const projection = new ProjectionTransform({
-  from: 'EPSG:4326',
-  to: 'EPSG:3857',
-  projections: [mercator]
+  from: "EPSG:4326",
+  to: "EPSG:3857",
+  projections: [mercator],
 });
 
 projection.project([-74, 40.7]);
@@ -68,13 +68,19 @@ also applies to normalization, compatibility checks, lazy loading and structured
 Unknown datum names throw a `missing-transform-stage` error with registration guidance.
 
 ```typescript
-import type {DatumDefinition, DatumCatalogPlugin} from '@math.gl/projection/core';
+import type {
+  DatumDefinition,
+  DatumCatalogPlugin,
+} from "@math.gl/projection/core";
 
-const local: DatumDefinition = {ellipse: 'airy', towgs84: '1,2,3'};
-const catalog: DatumCatalogPlugin = {name: 'application-datums', datums: {local}};
+const local: DatumDefinition = { ellipse: "airy", towgs84: "1,2,3" };
+const catalog: DatumCatalogPlugin = {
+  name: "application-datums",
+  datums: { local },
+};
 const projection = new ProjectionTransform({
-  from: '+proj=longlat +datum=local',
-  datumCatalogs: [catalog]
+  from: "+proj=longlat +datum=local",
+  datumCatalogs: [catalog],
 });
 ```
 
@@ -115,20 +121,24 @@ provenance and alternatives. Stored coordinate order is honored; declared units 
 coordinate frame must agree with the executable definition. Inputs are not mutated.
 
 ```typescript
-import {createSpatialReference} from '@math.gl/crs';
-import {ProjectionTransform, mercator} from '@math.gl/projection';
+import { createSpatialReference } from "@math.gl/crs";
+import { ProjectionTransform, mercator } from "@math.gl/projection";
 
 const source = createSpatialReference({
   crs: {
-    state: 'explicit', definition: 'EPSG:4326', representation: 'identifier',
-    provenance: 'metadata'
+    state: "explicit",
+    definition: "EPSG:4326",
+    representation: "identifier",
+    provenance: "metadata",
   },
-  coordinateFrame: 'geographic',
-  coordinateOrder: ['latitude', 'longitude', 'height'],
-  units: ['degree', 'degree', 'metre']
+  coordinateFrame: "geographic",
+  coordinateOrder: ["latitude", "longitude", "height"],
+  units: ["degree", "degree", "metre"],
 });
 const projection = new ProjectionTransform({
-  from: source, to: 'EPSG:3857', projections: [mercator]
+  from: source,
+  to: "EPSG:3857",
+  projections: [mercator],
 });
 projection.project([40.7, -74, 100]);
 ```
@@ -176,8 +186,7 @@ mode to compare the computed values. Geocentric units also apply consistently to
 ## Reusable scalar outputs
 
 `projectTo(coordinate, output)` and `unprojectTo(coordinate, output)` write a single
-coordinate into caller-owned storage and return that exact output object. `Projection`,
-`ProjectionTransform` and `LazyProjection` expose these bound methods. Use them when a scalar
+coordinate into caller-owned storage and return that exact output object. Transforms created by the full, configurable and lazy engines expose these bound methods. Use them when a scalar
 loop should reuse its result instead of creating an array on each call:
 
 ```typescript
@@ -260,23 +269,23 @@ See the [projection catalogue](../developer-guide/projections.md) for algorithm 
 tradeoffs and examples, and [coordinate systems](../developer-guide/coordinate-systems.md) for
 ellipsoid, datum and epoch concepts.
 
-| Projection | Plugin | Parameters |
-| --- | --- | --- |
-| Geographic (`longlat`, `latlong`, `latlon`, `lonlat`) | Built into the core | CRS angular units |
-| Raw geographic radians (`identity`) | Built into the core | Optional unit factor |
-| Geocentric (`geocent`) | `geocentric` | Three Cartesian components |
-| Mercator (`merc`), spherical or ellipsoidal | `mercator` | `lon_0`, `lat_ts`, `k`, `k_0`, `x_0`, `y_0` |
-| Equidistant cylindrical (`eqc`), spherical equations | `equidistantCylindrical` | `lon_0`, `lat_0`, `lat_ts`, `x_0`, `y_0` |
-| Transverse Mercator (`tmerc`) | `transverseMercator` | Origin, scale, `approx` |
-| Extended Transverse Mercator (`etmerc`) | `extendedTransverseMercator` | Origin, scale, `approx` |
-| UTM (`utm`) | `universalTransverseMercator` | `zone`, `south`, `approx` |
-| Lambert conformal conic (`lcc`) | `lambertConformalConic` | Origin, scale, `lat_1`, `lat_2` |
-| Albers equal area (`aea`) | `albersEqualArea` | Origin, `lat_1`, `lat_2` |
-| Equidistant conic (`eqdc`) | `equidistantConic` | Origin, `lat_1`, `lat_2` |
-| Lambert azimuthal equal area (`laea`) | `lambertAzimuthalEqualArea` | Origin |
-| Stereographic (`stere`) | `stereographic` | Origin, scale, `lat_ts` |
-| Oblique stereographic (`sterea`) | `obliqueStereographic` | Origin, scale |
-| Azimuthal equidistant (`aeqd`) | `azimuthalEquidistant` | Origin |
+| Projection                                            | Plugin                        | Parameters                                  |
+| ----------------------------------------------------- | ----------------------------- | ------------------------------------------- |
+| Geographic (`longlat`, `latlong`, `latlon`, `lonlat`) | Built into the core           | CRS angular units                           |
+| Raw geographic radians (`identity`)                   | Built into the core           | Optional unit factor                        |
+| Geocentric (`geocent`)                                | `geocentric`                  | Three Cartesian components                  |
+| Mercator (`merc`), spherical or ellipsoidal           | `mercator`                    | `lon_0`, `lat_ts`, `k`, `k_0`, `x_0`, `y_0` |
+| Equidistant cylindrical (`eqc`), spherical equations  | `equidistantCylindrical`      | `lon_0`, `lat_0`, `lat_ts`, `x_0`, `y_0`    |
+| Transverse Mercator (`tmerc`)                         | `transverseMercator`          | Origin, scale, `approx`                     |
+| Extended Transverse Mercator (`etmerc`)               | `extendedTransverseMercator`  | Origin, scale, `approx`                     |
+| UTM (`utm`)                                           | `universalTransverseMercator` | `zone`, `south`, `approx`                   |
+| Lambert conformal conic (`lcc`)                       | `lambertConformalConic`       | Origin, scale, `lat_1`, `lat_2`             |
+| Albers equal area (`aea`)                             | `albersEqualArea`             | Origin, `lat_1`, `lat_2`                    |
+| Equidistant conic (`eqdc`)                            | `equidistantConic`            | Origin, `lat_1`, `lat_2`                    |
+| Lambert azimuthal equal area (`laea`)                 | `lambertAzimuthalEqualArea`   | Origin                                      |
+| Stereographic (`stere`)                               | `stereographic`               | Origin, scale, `lat_ts`                     |
+| Oblique stereographic (`sterea`)                      | `obliqueStereographic`        | Origin, scale                               |
+| Azimuthal equidistant (`aeqd`)                        | `azimuthalEquidistant`        | Origin                                      |
 
 For these common projections, **origin** means `lon_0`, `lat_0`, `x_0`, and `y_0`;
 **scale** means `k` or `k_0`. All support spherical and ellipsoidal forms, except
@@ -291,11 +300,14 @@ use `stere` for polar projections. UTM requires an integer `zone` from 1 through
 offsets according to its zone/hemisphere. Use `tmerc` for custom TM parameters.
 
 ```typescript
-import {ProjectionTransform, universalTransverseMercator} from '@math.gl/projection';
+import {
+  ProjectionTransform,
+  universalTransverseMercator,
+} from "@math.gl/projection";
 
 const utm = new ProjectionTransform({
-  to: 'EPSG:32756',
-  projections: [universalTransverseMercator]
+  to: "EPSG:32756",
+  projections: [universalTransverseMercator],
 });
 utm.project([151.2, -33.9]);
 ```
@@ -333,31 +345,30 @@ Unknown or duplicate parameters throw. `no_defs`, `title`, and `type=crs` are me
 Use a separately installed `proj4` runtime where its broader behavior is needed;
 there is no implicit fallback.
 
-
 ### Remaining projection catalogue
 
 Each export is an opt-in plugin. All accept `lon_0`, `x_0`, and `y_0`,
 with additional parameters listed below. Geometry and unit parameters use the shared
 CRS pipeline.
 
-| Export | PROJ name | Additional parameters |
-| --- | --- | --- |
-| `bonne` | bonne | required nonzero lat_1 |
-| `cassiniSoldner` | cass | lat_0 |
-| `cylindricalEqualArea` | cea | lat_ts |
-| `eckertVI`, `equalEarth` | eck6, eqearth | — |
-| `equirectangular` | equi | lat_0 (true-scale parallel; use eqc for the usual latitude-origin convention) |
-| `millerCylindrical`, `mollweide`, `robinson` | mill, moll, robin | — |
-| `sinusoidal`, `vanDerGrinten` | sinu, vandg | — |
-| `gaussSchreiberTransverseMercator` | gstmerc | lat_0, k/k_0 |
-| `krovak` | krovak | lat_0, k/k_0, czech flag; fixed alpha and lat_ts values only |
-| `newZealandMapGrid` | nzmg | required lat_0/lon_0, iterations (integer 0–10; default 1) |
-| `obliqueMercator` | omerc | lat_0, k/k_0; alpha/gamma + lonc, or lon_1/lat_1/lon_2/lat_2; no_off/no_uoff/no_rot flags |
-| `polyconic`, `swissObliqueMercator` | poly, somerc | lat_0; somerc also k/k_0 |
-| `gnomonic`, `orthographic` | gnom, ortho | lat_0 |
-| `geostationary` | geos | required positive h, sweep=x/y |
-| `tiltedPerspective` | tpers | lat_0, positive h (default 100000 m), tilt, azi (degrees) |
-| `quadrilateralizedSphericalCube` | qsc | lat_0 |
+| Export                                       | PROJ name         | Additional parameters                                                                     |
+| -------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------- |
+| `bonne`                                      | bonne             | required nonzero lat_1                                                                    |
+| `cassiniSoldner`                             | cass              | lat_0                                                                                     |
+| `cylindricalEqualArea`                       | cea               | lat_ts                                                                                    |
+| `eckertVI`, `equalEarth`                     | eck6, eqearth     | —                                                                                         |
+| `equirectangular`                            | equi              | lat_0 (true-scale parallel; use eqc for the usual latitude-origin convention)             |
+| `millerCylindrical`, `mollweide`, `robinson` | mill, moll, robin | —                                                                                         |
+| `sinusoidal`, `vanDerGrinten`                | sinu, vandg       | —                                                                                         |
+| `gaussSchreiberTransverseMercator`           | gstmerc           | lat_0, k/k_0                                                                              |
+| `krovak`                                     | krovak            | lat_0, k/k_0, czech flag; fixed alpha and lat_ts values only                              |
+| `newZealandMapGrid`                          | nzmg              | required lat_0/lon_0, iterations (integer 0–10; default 1)                                |
+| `obliqueMercator`                            | omerc             | lat_0, k/k_0; alpha/gamma + lonc, or lon_1/lat_1/lon_2/lat_2; no_off/no_uoff/no_rot flags |
+| `polyconic`, `swissObliqueMercator`          | poly, somerc      | lat_0; somerc also k/k_0                                                                  |
+| `gnomonic`, `orthographic`                   | gnom, ortho       | lat_0                                                                                     |
+| `geostationary`                              | geos              | required positive h, sweep=x/y                                                            |
+| `tiltedPerspective`                          | tpers             | lat_0, positive h (default 100000 m), tilt, azi (degrees)                                 |
+| `quadrilateralizedSphericalCube`             | qsc               | lat_0                                                                                     |
 
 Structured readers map Hotine variants A/B and legacy aliases, Krovak/North Orientated,
 QSC, Cassini, and spherical equidistant cylindrical methods to these plugins. Hotine
@@ -372,11 +383,15 @@ instead of being silently ignored by the fixed kernel.
 `obliqueTransformation` is a factory with an explicit dependency:
 
 ```typescript
-import {ProjectionTransform, obliqueTransformation, mollweide} from '@math.gl/projection';
+import {
+  ProjectionTransform,
+  obliqueTransformation,
+  mollweide,
+} from "@math.gl/projection";
 
 const rotated = new ProjectionTransform({
-  to: '+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=-90',
-  projections: [obliqueTransformation(mollweide)]
+  to: "+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=-90",
+  projections: [obliqueTransformation(mollweide)],
 });
 ```
 
@@ -392,22 +407,20 @@ Krovak retains upstream defaults (49.5° latitude, 24.8333333333° longitude,
 plugins reject invisible points. Exhaustive structured method variants and domain
 coverage remain tracked gaps; see the parity inventory.
 
-
 ## Horizontal datum grids
 
 Grid decoding/loading is separate from synchronous coordinate transformation.
 Register prepared grids per instance through `datumGrids`; the math.gl projection engine has no
-global registry. This replaces the global registration pattern of the existing
-`Projection.registerDatumGrid` wrapper.
+global registry. Register shared grids on an engine to use them across its transforms.
 
 ```typescript
-import {ProjectionTransform, parseNTv2Grid} from '@math.gl/projection';
+import { ProjectionTransform, parseNTv2Grid } from "@math.gl/projection";
 
 const grid = parseNTv2Grid(ntv2ArrayBuffer);
 const projection = new ProjectionTransform({
-  from: '+proj=longlat +ellps=clrk66 +nadgrids=local.gsb',
-  to: 'EPSG:4326',
-  datumGrids: {'local.gsb': grid}
+  from: "+proj=longlat +ellps=clrk66 +nadgrids=local.gsb",
+  to: "EPSG:4326",
+  datumGrids: { "local.gsb": grid },
 });
 ```
 
@@ -422,12 +435,12 @@ object. Callers load the file or URL with their chosen GeoTIFF library and await
 result before construction:
 
 ```typescript
-import {loadGeoTIFFGrid, ProjectionTransform} from '@math.gl/projection';
+import { loadGeoTIFFGrid, ProjectionTransform } from "@math.gl/projection";
 
 const grid = await loadGeoTIFFGrid(decodedTIFF);
 const projection = new ProjectionTransform({
-  from: '+proj=longlat +ellps=GRS80 +nadgrids=local.tif',
-  datumGrids: {'local.tif': grid}
+  from: "+proj=longlat +ellps=GRS80 +nadgrids=local.tif",
+  datumGrids: { "local.tif": grid },
 });
 ```
 
@@ -479,17 +492,17 @@ The engine handles CRS units, axes, prime meridians, datum transformations, and 
 Geocentric plugins additionally implement `forward3D`/`inverse3D` over three-element tuples.
 
 ```typescript
-import type {ProjectionPlugin} from '@math.gl/projection';
+import type { ProjectionPlugin } from "@math.gl/projection";
 
 const simpleCylindrical: ProjectionPlugin = {
-  name: 'simple_cylindrical',
+  name: "simple_cylindrical",
   parameters: [],
-  create({semiMajorAxis: radius}) {
+  create({ semiMajorAxis: radius }) {
     return {
       forward: (longitude, latitude) => [radius * longitude, radius * latitude],
-      inverse: (x, y) => [x / radius, y / radius]
+      inverse: (x, y) => [x / radius, y / radius],
     };
-  }
+  },
 };
 ```
 
@@ -533,37 +546,23 @@ synchronous return types. Imports and constructors do not preload algorithms.
 `await instance.preload()` prepares required implementations ahead of time.
 `projectSync`, `unprojectSync`, `projectFlatSync` and `unprojectFlatSync` never import
 algorithms: preload first, or these methods throw. Preloading a descriptor directly
-also enables sync methods on any instance that uses it. The default `Projection`
-wrapper contains eager plugins and preserves its synchronous API.
+also enables sync methods on any instance that uses it. The default `projectionEngine`
+contains eager plugins and preserves its synchronous API.
 
 See [descriptor loading and cache behavior](../developer-guide/projection-engine.md#load-less-used-projections-on-demand)
 for examples, shared caching, retry behavior and custom descriptors.
 
-## Expansion path
-
-The [parity roadmap](https://github.com/visgl/math.gl/blob/master/dev-docs/projection-roadmap.md) defines tranches and acceptance gates against
-the pinned proj4js 2.22.0 reference.
-
-Add projection plugins with forward/inverse parity tests against proj4js, then extend
-CRS normalization, ellipsoid/datum handling, and grid support independently.
-The default wrapper uses this engine. The former `classic` subpath and its
-proj4js-specific compatibility utility are removed.
+## Attribution
 
 Mercator equations follow the [PROJ Mercator documentation](https://proj.org/en/stable/operations/projections/merc.html).
+Kernel headers identify direct ports of proj4js 2.22.0; original adapters and equation
+implementations are identified separately. Distributed notices include the upstream
+MIT license and Equal Earth's retained Apache-2.0 license.
 
-Numerical kernel headers identify direct TypeScript ports of proj4js 2.22.0; original
-adapters and inspired equation implementations are identified separately. Distributed
-notices include the upstream MIT license and Equal Earth's retained Apache-2.0 license.
-
-## LazyProjection
-
-Import `LazyProjection` and `LazyProjectionOptions` from
-`@math.gl/projection/projections/lazy`. Its constructor takes the same options except
-`projections`: the full built-in descriptor catalogue is supplied automatically.
-Readers, aliases and grids remain explicit options. Coordinate methods return
-promises; `preload()` and the sync variants follow the descriptor contract above.
-`LazyProjection.create(options)` optionally resolves the catalogue into a prepared
-synchronous `ProjectionTransform` instance. See the [loading guide](../developer-guide/projection-engine.md#load-less-used-projections-on-demand).
+For the built-in descriptor catalogue, use `LazyProjectionEngine` from
+`@math.gl/projection/projections/lazy`. Create a transform with `createProjection()`
+or prepare a synchronous transform with `createProjectionAsync()`. Readers, aliases
+and grids remain explicit engine options. See the [engine reference](projection-engine.md).
 
 ## Vertical height grids
 
@@ -579,7 +578,6 @@ and reference their names with `+geoidgrids`; scalar and flat transforms then re
 entry points also export these helpers; `/core` exports only the contract and engine.
 See [height conversion](../developer-guide/projection-engine.md#convert-geoid-heights) for loading,
 units, axes, fallback, coverage, datum ordering and the limits of this explicit subset.
-
 
 ### loadVerticalGeoTIFFGrid
 

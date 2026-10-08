@@ -11,7 +11,11 @@ import {fileURLToPath} from 'node:url';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const temporary = mkdtempSync(join(tmpdir(), 'math-gl-proj4-packed-'));
 function run(command, args, cwd = temporary) {
-  return execFileSync(command, args, {cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']});
+  return execFileSync(command, args, {
+    cwd,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
 }
 try {
   for (const name of ['types', 'core', 'culling', 'crs', 'geospatial', 'projection']) {
@@ -84,11 +88,13 @@ try {
   const entrySmoke = `
     const stable = await load('@math.gl/projection');
     assert.equal(stable.ProjectionTransform, api.ProjectionTransform);
+    for (const oldName of ['Projection', 'CustomProjectionEngine', 'CRSProjectionEngine', 'LazyCRSProjectionEngine']) assert(!(oldName in stable), oldName + ' must not remain as an alpha alias');
     assert(!('TypeScriptProjection' in api));
     assert(!('checkTypeScriptCRSCompatibility' in api));
     assert.equal(stable.mercator, api.mercator);
     const subpaths = ${JSON.stringify(subpaths)};
     const optionalEntries = {
+      './web-mercator': ['WebMercatorProjectionEngine'],
       './temporal': ['createTemporalDeformationModel'],
       './datums': ['datumCatalog'],
       './bulk': ['ProjectionBuffer'],
@@ -111,7 +117,7 @@ try {
       }
       for (const [name, value] of Object.entries(entry)) {
         if (subpath.startsWith('./projections/lazy')) {
-          if (typeof value === 'function') assert(['lazyObliqueTransformation', 'LazyProjection', 'LazyCRSProjectionEngine'].includes(name));
+          if (typeof value === 'function') assert(['lazyObliqueTransformation', 'LazyProjectionEngine'].includes(name));
           else if (name === 'lazyProjectionEngine') assert.equal(typeof value.createProjectionAsync, 'function');
           else { assert.equal(typeof value.preload, 'function'); assert.equal((await value.preload()).name, value.name); }
           continue;
@@ -121,8 +127,10 @@ try {
         if (value && typeof value === 'object' && 'create' in value) assert.equal(value.name, api[name].name);
       }
     }
-    const {LazyProjection} = await load('@math.gl/projection/projections/lazy');
-    const automatic = new LazyProjection({to: 'EPSG:32631'});
+    const lazyEntry = await load('@math.gl/projection/projections/lazy');
+    assert(!('LazyProjection' in lazyEntry));
+    const {LazyProjectionEngine, lazyProjectionEngine} = lazyEntry;
+    const automatic = lazyProjectionEngine.createProjection({to: 'EPSG:32631'});
     assert(Math.abs((await automatic.project([3, 0]))[0] - 500000) < 1e-7);
     assert(Math.abs(automatic.projectSync([3, 0])[0] - 500000) < 1e-7);
     const core = await load('@math.gl/projection/core');
@@ -133,9 +141,9 @@ try {
     const datumEngine = new core.ProjectionTransform({from:regional,datumCatalogs:[datumCatalog]});
     const shifted = datumEngine.project([-2,52,100]);
     assert(Math.abs(shifted[0] - (-2)) > 0.0001);
-    assert.deepEqual(new stable.Projection({from:regional}).project([-2,52,100]),shifted);
+    assert.deepEqual(stable.projectionEngine.createProjection({from:regional}).project([-2,52,100]),shifted);
     assert.equal(core.checkProjectionCompatibility(regional,{datumCatalogs:[datumCatalog]}).status,'supported');
-    const regionalLazy = await LazyProjection.create({from:regional,to:'EPSG:3857',datumCatalogs:[datumCatalog]});
+    const regionalLazy = await new LazyProjectionEngine({datumCatalogs:[datumCatalog]}).createProjectionAsync({from:regional,to:'EPSG:3857'});
     assert(Number.isFinite(regionalLazy.project([-2,52])[0]));
     const {spheroidToCartesian, cartesianToSpheroid} = await load('@math.gl/core/spheroid');
     const numericOutput = {x:0,y:0,z:3};
@@ -223,7 +231,7 @@ try {
       {type: 'unitconvert', xy: {from: 'deg', to: 'rad'}}, {type: 'projection', name: 'merc', parameters: {a: '6378137', b: '6378137'}}
     ], projections: [api.mercator]});
     const ownedOutput = new Float64Array(4);
-    const convenience = new stable.Projection({to: 'EPSG:3857'});
+    const convenience = stable.projectionEngine.createProjection({to: 'EPSG:3857'});
     assert.equal(convenience.projectTo([11, 41, 123, 8], ownedOutput), ownedOutput);
     assert.deepEqual(Array.from(ownedOutput), convenience.project([11, 41, 123, 8]));
     assert.equal(convenience.unprojectToSync(ownedOutput, ownedOutput), ownedOutput);
@@ -395,15 +403,15 @@ try {
   `;
   const smoke = `
     assert(!('Proj4Projection' in api));
-    for (const Wrapper of [api.Projection]) {
-      Wrapper.defineProjectionAliases({'PACKED:UTM': '+proj=utm +zone=31 +datum=WGS84'});
-      const p = new Wrapper({to: 'PACKED:UTM'});
+    {
+      const engine = new api.FullProjectionEngine({aliases: {'PACKED:UTM': '+proj=utm +zone=31 +datum=WGS84'}});
+      const p = engine.createProjection({to: 'PACKED:UTM'});
       const project = p.project;
       const unproject = p.unproject;
       assert(Math.abs(project([3, 0])[0] - 500000) < 1e-8);
       assert(Math.abs(unproject([500000, 0])[0] - 3) < 1e-8);
     }
-    assert(new api.Projection({}) instanceof api.ProjectionTransform);
+    assert(api.projectionEngine.createProjection({}) instanceof api.ProjectionTransform);
     const projection = new api.ProjectionTransform({to: 'EPSG:3857', projections: [api.mercator]});
     const input = new Float64Array([12, 48, 123, 7]);
     const scalar = projection.project(Array.from(input));
@@ -473,9 +481,10 @@ try {
     Ellipsoid.fromSpheroid({a: '6378137', b: '6356752'});
     // @ts-expect-error The axes are numeric metres.
     Ellipsoid.fromSpheroid({semiMajorAxis: '6378137', semiMinorAxis: 6356752});
-    import {LazyProjection, type LazyProjectionOptions} from '@math.gl/projection/projections/lazy';
-    const lazyOptions: LazyProjectionOptions = {to: 'EPSG:32631'};
-    const automatic = new LazyProjection(lazyOptions);
+    import {LazyProjectionEngine, lazyProjectionEngine} from '@math.gl/projection/projections/lazy';
+    import type {CreateProjectionOptions} from '@math.gl/projection/types';
+    const lazyOptions: CreateProjectionOptions = {to: 'EPSG:32631'};
+    const automatic = lazyProjectionEngine.createProjection(lazyOptions);
     const automaticResult: Promise<number[]> = automatic.project([3, 0]);
     const automaticFlat: Promise<Float32Array> = automatic.projectFlat(new Float32Array([3, 0]));
     import {createTemporalDeformationModel, type TemporalFunction, type DeformationField, type TemporalDeformationOptions} from '@math.gl/projection/temporal';
@@ -553,7 +562,7 @@ try {
     new OperationCatalog([{...selectedDefinition,accuracyMeters:'1'}]);
     // @ts-expect-error reviewed metadata cannot be mutated
     selectedDefinition.epochRange = null;
-    import {Projection, type ProjectionOptions, type DatumGridOptions} from '@math.gl/projection';
+    import {FullProjectionEngine, projectionEngine, parseNTv2Grid, type NTv2GridOptions} from '@math.gl/projection';
     import {createDeformationModel, type DeformationModel, type DeformationModelOptions} from '@math.gl/projection/deformation';
     import {createVelocityGrid, type VelocityGrid, type VelocityGridOptions} from '@math.gl/projection/grids/velocity';
     import {loadVelocityGeoTIFFGrid, type VelocityGridGeoTIFFData, type VelocityGridGeoTIFF} from '@math.gl/projection/grids/velocity-geotiff';
@@ -584,14 +593,14 @@ try {
     import type {VerticalGridCollection} from '@math.gl/projection/core';
     const verticalOptions: VerticalGridOptions = {origin: [0, 0], step: [1, 1], size: [2, 2], offsets: [1, 2, 3, 4]};
     const verticalGrids: VerticalGridCollection = {local: createVerticalGrid(verticalOptions), geoid: createGeoidGrid({getHeight: () => 1})};
-    const heightOptions: ProjectionOptions = {from: '+proj=longlat +geoidgrids=local', verticalGrids};
-    new Projection(heightOptions).project([0, 0, 1]);
-    new LazyProjection({...heightOptions, verticalGrids});
+    const heightOptions: ProjectionTransformOptions = {from: '+proj=longlat +geoidgrids=local', verticalGrids};
+    new FullProjectionEngine(heightOptions).createProjection(heightOptions).project([0, 0, 1]);
+    new LazyProjectionEngine({verticalGrids}).createProjection(heightOptions);
     const readGTX: (buffer: ArrayBuffer) => typeof verticalGrids.local = parseGTXGrid;
-    const options: ProjectionOptions = {};
-    const gridOptions: DatumGridOptions = {includeErrorFields: false};
-    new Projection(options);
-    Projection.registerDatumGrid('local', new ArrayBuffer(0), gridOptions);
+    const options: CreateProjectionOptions = {};
+    const gridOptions: NTv2GridOptions = {includeErrorFields: false};
+    projectionEngine.createProjection(options);
+    new FullProjectionEngine({datumGrids: {local: parseNTv2Grid(new ArrayBuffer(0), gridOptions)}});
     import {lazyUniversalTransverseMercator} from '@math.gl/projection/projections/lazy/utm';
     const lazy = new ProjectionTransform({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});
     const asyncResult: Promise<number[]> = lazy.project([3, 0]);

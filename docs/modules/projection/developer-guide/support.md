@@ -4,8 +4,8 @@ slug: /modules/projection/support
 
 # Projection API support and migration
 
-`@math.gl/projection` uses the math.gl projection engine by default. `Projection` supplies
-all projection plugins and WKT/PROJJSON readers behind the existing wrapper API.
+`@math.gl/projection` uses the math.gl projection engine by default. `projectionEngine` supplies
+all projection plugins and WKT/PROJJSON readers through its factory API.
 `ProjectionTransform` exposes per-instance configuration for smaller bundles.
 The former `/classic` wrapper and proj4js-specific CRS helpers are removed.
 Applications needing the upstream runtime can install `proj4` directly.
@@ -16,24 +16,24 @@ paths in new code. This API is available in releases containing these exports.
 
 ## Named datum catalogue migration
 
-The default `ProjectionTransform`, `LazyProjection`, and `normalizeCRS` retain only
+The default `ProjectionTransform`, `LazyProjectionEngine`, and `normalizeCRS` retain only
 WGS84 and NAD83 as named datums. Register regional definitions explicitly:
 
 ```typescript
-import {ProjectionTransform} from '@math.gl/projection/core';
-import {datumCatalog} from '@math.gl/projection/datums';
+import { ProjectionTransform } from "@math.gl/projection/core";
+import { datumCatalog } from "@math.gl/projection/datums";
 
 const projection = new ProjectionTransform({
-  from: '+proj=longlat +datum=nad27',
-  to: 'WGS84',
-  datumCatalogs: [datumCatalog]
+  from: "+proj=longlat +datum=nad27",
+  to: "WGS84",
+  datumCatalogs: [datumCatalog],
 });
 ```
 
 Supply required datum-grid data separately; the catalogue contains definitions,
 not grids. The option also applies to WKT/PROJJSON readers and capability checks.
 Explicit ellipsoid and operation parameters remain available without named datum
-registration. The `Projection` convenience wrapper includes the catalogue
+registration. The default `projectionEngine` includes the catalogue
 internally and preserves its existing behavior. See the
 [datum registration guide](projection-engine.md#register-regional-datums).
 
@@ -46,7 +46,7 @@ The documented corrections and strict-input exceptions below still apply. The en
 the former name is no longer exported. Update imports and constructors, and use
 `ProjectionTransformOptions`, `ProjectionTransformCreateOptions`, `ProjectionCompatibility`
 and `checkProjectionCompatibility` in place of the former TypeScript-prefixed names.
-`Projection` provides the ready-to-use API, and `LazyProjection` loads built-in
+`projectionEngine` provides the ready-to-use API, and `LazyProjectionEngine` loads built-in
 algorithms on demand.
 
 ## Supported profile
@@ -80,12 +80,11 @@ Eager construction is synchronous and resolves plugins, parsers, aliases and pre
 With projection descriptors, construction reads definitions but algorithms load on the
 first asynchronous coordinate call. `projectSync`/`unprojectSync` and their flat variants
 require preloading; they never start an import. See the [loading guide](projection-engine.md#load-less-used-projections-on-demand).
-The eager engine and default wrapper perform no network requests. Descriptor imports
+The eager engine perform no network requests. Descriptor imports
 can fetch application chunks through the bundler runtime. The configurable `ProjectionTransform` keeps plugin registration per instance and
-shares only the descriptor implementation cache. The convenience `Projection` preserves the classic static registration
-API: aliases and NTv2 grids affect subsequently constructed wrappers of that backend.
-Existing instances retain their compiled configuration. These registries are independent of the configurable engine
-and of any separately installed proj4js runtime.
+shares only the descriptor implementation cache. Engines snapshot aliases and prepared grid maps at construction. Each factory call
+creates an independent transform. Existing instances retain their configuration;
+other engines and any separately installed proj4js runtime remain independent.
 Unsupported definitions and missing stages fail explicitly. There is no automatic
 fallback to another engine. Reuse an instance for repeated transformations.
 
@@ -115,60 +114,18 @@ No sub-metre/global-domain guarantee follows from API stability.
 
 ## Migration
 
-The default wrapper retains the same constructor options (`from`, `to`, `enforceAxis`),
-bound `project`/`unproject` methods, `defineProjectionAliases` static method, and
-`registerDatumGrid` static method, including `includeErrorFields`. It also exposes
-`projectFlat`/`unprojectFlat` for typed arrays. No plugin setup is required:
+`Projection` and `ProjectionEngine` are type contracts exported from `/types`.
+Replace the former `new Projection({from, to})` with
+`projectionEngine.createProjection({from, to})`. Replace `new LazyProjection(options)`
+with `lazyProjectionEngine.createProjection(options)` and `LazyProjection.create(options)`
+with `lazyProjectionEngine.createProjectionAsync(options)`.
 
-```typescript
-import {Projection} from '@math.gl/projection';
-const projection = new Projection({to: 'EPSG:3857'});
-const projected = projection.project([12, 55]);
-```
-
-The package was renamed from `@math.gl/proj4` during the v5 alpha release cycle.
-Update the dependency and every import prefix to `@math.gl/projection`, then use
-`Projection`, `ProjectionOptions` and `DatumGridOptions` in place of the removed
-`Proj4Projection`, `Proj4ProjectionOptions` and `Proj4DatumGridOptions` names.
-
-The `/classic` subpath and `checkProj4CRSCompatibility`, `toProj4CRSDefinition` and
-`Proj4CRSCompatibilityError` helpers are removed. Install and import `proj4`
-directly if the application needs upstream behavior. Use
-`checkProjectionCompatibility` with explicit plugins/readers to check the math.gl
-engine; this is a different capability check, not a replacement for upstream
-runtime validation.
-
-For selective bundles, register algorithms required by **both** ends:
-
-```typescript
-import {ProjectionTransform} from '@math.gl/projection/core';
-import {mercator} from '@math.gl/projection/projections/merc';
-import {universalTransverseMercator} from '@math.gl/projection/projections/utm';
-
-const projection = new ProjectionTransform({
-  from: 'EPSG:3857',
-  to: 'EPSG:32631',
-  projections: [mercator, universalTransverseMercator]
-});
-const coordinates = new Float64Array([333958.4723798207, 5621521.486192066]);
-projection.projectFlat(coordinates, 2);
-```
-
-For WKT/PROJJSON, register the matching optional reader. For grids, load and prepare
-all required data before constructing the instance. The [engine guide](projection-engine.md)
-shows dynamic imports, grid loading and minimal bundles.
-
-Use `checkProjectionCompatibility` on each definition with the same plugin/parser
-options as construction. A supported result establishes construction support; it does
-not prove grid coverage, coordinate-domain validity or application-specific accuracy.
-Compare representative production coordinates in both directions before switching.
-Pay particular attention to computed heights, strict errors, Cassini/Robinson/CEA/EQDC
-corrections and inverse grid boundaries. Use a separately installed proj4js runtime where its behavior is required.
-
-Explicit `+geoidgrids` height conversion supports prepared grids, GTX snapshots, the validated vertical GeoTIFF subset and a
-structural `@math.gl/geoid` adapter. See [vertical heights](projection-engine.md#convert-geoid-heights)
-for the supported domain and grid loading contract. This does not add compound/vertical
-CRS execution or implicit model selection.
+The configurable, full and lazy engine classes are named `ConfigurableProjectionEngine`,
+`FullProjectionEngine` and `LazyProjectionEngine`. Registrations belong to engines:
+use `new FullProjectionEngine({aliases, datumGrids, verticalGrids})` instead of static
+registration methods. Prepare NTv2 grids with `parseNTv2Grid(bytes, {includeErrorFields})`.
+Direct construction of `ProjectionTransform` remains available for explicit configuration.
+No deprecated class aliases are exported during the alpha cycle.
 
 ## Default backend and future work
 

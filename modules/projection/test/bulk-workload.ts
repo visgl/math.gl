@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original cross-runtime buffer qualification using existing independent references.
-import {Projection, ProjectionPipeline} from '@math.gl/projection';
+import {projectionEngine, ProjectionPipeline} from '@math.gl/projection';
 import {ProjectionBuffer} from '../src/bulk';
 import cases from './fixtures/accuracy-cases.json';
 import reference from './fixtures/accuracy-reference.json';
@@ -10,7 +10,10 @@ import kinematicCases from './fixtures/kinematic-pipeline-cases.json';
 import kinematicReference from './fixtures/kinematic-pipeline-reference.json';
 import {kinematicOptions} from './kinematic-workload';
 
-export function qualifyBulkLayouts(): {configurations: number; records: number} {
+export function qualifyBulkLayouts(): {
+  configurations: number;
+  records: number;
+} {
   let records = 0;
   const close = (actual: number, expected: number, tolerance: number) => {
     if (!Number.isFinite(actual) || Math.abs(actual - expected) > tolerance)
@@ -19,7 +22,10 @@ export function qualifyBulkLayouts(): {configurations: number; records: number} 
   for (let index = 0; index < cases.cases.length; index++) {
     const fixture = cases.cases[index],
       rows = reference.cases[index].results;
-    const projection = new Projection({from: '+proj=longlat +datum=none', to: fixture.definition});
+    const projection = projectionEngine.createProjection({
+      from: '+proj=longlat +datum=none',
+      to: fixture.definition
+    });
     const transform = new ProjectionBuffer({
       projection,
       dimension: 4,
@@ -105,5 +111,8 @@ export function qualifyBulkLayouts(): {configurations: number; records: number} 
       records += rows.length;
     }
   }
-  return {configurations: cases.cases.length + kinematicCases.cases.length, records};
+  return {
+    configurations: cases.cases.length + kinematicCases.cases.length,
+    records
+  };
 }

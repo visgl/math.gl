@@ -14,13 +14,13 @@ your own browser and hardware. Choose a buffer layout and direction, then run th
 inline benchmark. Nothing runs until you press **Run benchmarks**.
 
 <BrowserOnly fallback={<p>Live benchmarks are available in a browser with JavaScript enabled.</p>}>
-  {() => {
-    const Proj4Benchmarks = require('@site/src/components/projection-benchmarks').default;
-    return <Proj4Benchmarks />;
-  }}
+{() => {
+const Proj4Benchmarks = require('@site/src/components/projection-benchmarks').default;
+return <Proj4Benchmarks />;
+}}
 </BrowserOnly>
 
-The math.gl columns use the default `Projection`, through its in-place and
+The math.gl columns use the default `projectionEngine`, through its in-place and
 scalar APIs, labeled **math.gl flat** and **math.gl scalar**. The **proj4js 2.22.0**
 column uses the pinned `proj4` dependency directly. All three process the same coordinates into
 the same typed-array layout. Scalar paths reuse an input array and copy returned
@@ -64,18 +64,18 @@ Reuse one compiled converter for each CRS pair. Construction resolves definition
 validates parameters and prepares algorithms; it is a separate cost from transforming
 coordinates. Warm throughput does not describe loading or first-use latency.
 
-| Input or workload | API | Storage behavior |
-| --- | --- | --- |
-| Individual coordinates | `project` / `unproject` | Returns a new coordinate array |
-| Repeated scalar calls | [`projectTo` / `unprojectTo`](api-reference/projection-transform.md#reusable-scalar-outputs) | Reuses a caller-provided output |
-| Interleaved Float32/Float64 coordinates | `projectFlat` / `unprojectFlat` | Updates the supplied view in place |
-| Separate output, padded records or columns | [`ProjectionBuffer`](api-reference/projection-buffer.md) | Reuses prepared layout and scratch |
-| Explicit datum or epoch operations | [`ProjectionPipeline`](api-reference/projection-pipeline.md) | Reuses the prepared operation chain |
+| Input or workload                          | API                                                                                          | Storage behavior                    |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Individual coordinates                     | `project` / `unproject`                                                                      | Returns a new coordinate array      |
+| Repeated scalar calls                      | [`projectTo` / `unprojectTo`](api-reference/projection-transform.md#reusable-scalar-outputs) | Reuses a caller-provided output     |
+| Interleaved Float32/Float64 coordinates    | `projectFlat` / `unprojectFlat`                                                              | Updates the supplied view in place  |
+| Separate output, padded records or columns | [`ProjectionBuffer`](api-reference/projection-buffer.md)                                     | Reuses prepared layout and scratch  |
+| Explicit datum or epoch operations         | [`ProjectionPipeline`](api-reference/projection-pipeline.md)                                 | Reuses the prepared operation chain |
 
 ```typescript
-import {Projection} from '@math.gl/projection';
+import { projectionEngine } from "@math.gl/projection";
 
-const projection = new Projection({to: 'EPSG:3857'});
+const projection = projectionEngine.createProjection({ to: "EPSG:3857" });
 const positions = new Float64Array([12, 55, 13, 56]);
 projection.projectFlat(positions, 2);
 ```

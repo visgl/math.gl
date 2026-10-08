@@ -975,6 +975,11 @@
       "types": "./dist/types.d.ts",
       "import": "./dist/types.js",
       "require": "./dist/types.cjs"
+    },
+    "./web-mercator": {
+      "types": "./dist/web-mercator.d.ts",
+      "import": "./dist/web-mercator.js",
+      "require": "./dist/web-mercator.cjs"
     }
   },
   "files": [

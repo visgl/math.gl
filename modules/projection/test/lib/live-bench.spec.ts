@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test, vi} from 'vitest';
-import {Projection} from '@math.gl/projection';
+import {ProjectionTransform} from '@math.gl/projection';
 import {runLiveBenchmark} from '../live-bench';
 import type {BenchmarkOptions, BenchmarkRow} from '../live-bench-types';
 
@@ -52,12 +52,17 @@ for (const precision of ['Float32', 'Float64'] as const)
       });
 
 test('incorrect coordinates cannot produce a benchmark result', () => {
-  const project = vi.spyOn(Projection.prototype, 'project').mockReturnValue([NaN, NaN]);
+  const project = vi.spyOn(ProjectionTransform.prototype, 'project').mockReturnValue([NaN, NaN]);
   const onRow = vi.fn();
   try {
     expect(() =>
       runLiveBenchmark(
-        {points: 10, precision: 'Float64', direction: 'project', dimension: 2},
+        {
+          points: 10,
+          precision: 'Float64',
+          direction: 'project',
+          dimension: 2
+        },
         onRow
       )
     ).toThrow('failed coordinate validation');

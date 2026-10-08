@@ -10,8 +10,8 @@ import type {ProjectionDescriptor} from './projection-descriptor';
 type Registration = ProjectionPlugin | ProjectionDescriptor;
 
 /** A reusable factory for independent coordinate transforms. */
-export class CustomProjectionEngine<P extends Registration = ProjectionPlugin>
-  implements ProjectionEngine<P>
+export class ConfigurableProjectionEngine<P extends Registration = ProjectionPlugin>
+  implements ProjectionEngine
 {
   protected readonly options: ProjectionEngineOptions<P>;
 
@@ -33,8 +33,8 @@ export class CustomProjectionEngine<P extends Registration = ProjectionPlugin>
 /** Create an engine with an explicit, tree-shakeable set of plugins and readers. */
 export function createProjectionEngine<P extends Registration = ProjectionPlugin>(
   options: ProjectionEngineOptions<P> = {}
-): CustomProjectionEngine<P> {
-  return new CustomProjectionEngine(options);
+): ConfigurableProjectionEngine<P> {
+  return new ConfigurableProjectionEngine(options);
 }
 
 /** Copy registration containers while retaining owned plugin and grid data. */

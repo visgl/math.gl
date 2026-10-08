@@ -1,107 +1,59 @@
 # Projection
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/From-v3.3-blue.svg?style=flat-square" alt="From-v3.3" />
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-`Projection` is the ready-to-use math.gl projection engine with all built-in
-algorithms and WKT/PROJJSON readers. Its constructor, bound coordinate methods and
-static registrations follow the former math.gl wrapper API. For smaller bundles
-and instance-local configuration, use [`ProjectionTransform`](projection-engine.md).
+`Projection` is the backend-independent type for a coordinate transformation between
+one source and target CRS. Create instances through a [ProjectionEngine](projection-engine.md).
+It is a type, not a constructor.
 
-Static aliases and NTv2 grids affect subsequently constructed `Projection` instances.
-Existing instances retain their prepared configuration. See the
-[migration guide](../developer-guide/support.md) for strict-input and numerical differences from proj4js.
+```typescript
+import type { Projection, ProjectionEngine } from "@math.gl/projection/types";
+import { projectionEngine } from "@math.gl/projection";
 
-## Usage
-
-Reproject WGS84 coordinates to another CRS
-
-```js
-import {Projection} from '@math.gl/projection';
-
-const nad83Proj =
-  '+title=NAD83 (long/lat) +proj=longlat +a=6378137.0 +b=6356752.31414036 +ellps=GRS80 +datum=NAD83 +units=degrees';
-const projection = new Projection({from: 'WGS84', to: nad83Proj});
-
-const wgs84Position = [21, 78, 5000];
-const reprojectedPosition = projection.project(wgs84Position);
+const engine: ProjectionEngine = projectionEngine;
+const projection: Projection = engine.createProjection({ to: "EPSG:3857" });
+const meters = await projection.project([12, 55]);
+const longitudeLatitude = await projection.unproject(meters);
 ```
 
-Define Projection Aliases
+The `/types` entry point exports only types and adds no runtime code when used with
+`import type`. Applications can accept this contract without depending on a particular engine.
 
-```js
-import {Projection} from '@math.gl/projection';
+## Coordinate methods
 
-Projection.defineProjectionAliases({
-  'EPSG:4326': '+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees',
-  'EPSG:4269':
-    '+title=NAD83 (long/lat) +proj=longlat +a=6378137.0 +b=6356752.31414036 +ellps=GRS80 +datum=NAD83 +units=degrees'
-});
-const projection = new Projection({from: 'EPSG:4326', to: 'EPSG:4269'});
+| Method                                      | Behavior                                                 |
+| ------------------------------------------- | -------------------------------------------------------- |
+| `project(coordinate)`                       | Convert from source to target; return a new number array |
+| `unproject(coordinate)`                     | Convert from target to source; return a new number array |
+| `projectTo(coordinate, output)`             | Convert into caller-owned storage and return that output |
+| `unprojectTo(coordinate, output)`           | Inverse conversion into caller-owned storage             |
+| `projectFlat(coordinates, dimension = 2)`   | Convert a Float32Array or Float64Array in place          |
+| `unprojectFlat(coordinates, dimension = 2)` | Inverse conversion of the same flat buffer               |
+
+Each method also has a `Sync` variant, for example `projectSync` and `projectFlatSync`.
+Those variants never initiate loading. Call `await projection.preload()` first when using
+lazy algorithms; an unprepared synchronous call throws.
+
+Ordinary methods may return promises for deferred transforms. Awaiting them works with
+both eager and lazy engines. `await engine.createProjectionAsync(options)` returns a
+`PreparedProjection`, whose ordinary methods are synchronous as well.
+
+```typescript
+const ready = await engine.createProjectionAsync({ to: "EPSG:3857" });
+const positions = new Float64Array([12, 55, 100, 7, 13, 56, 200, 8]);
+ready.projectFlat(positions, 4);
+const output = new Float64Array(4);
+ready.projectTo([12, 55, 100, 7], output);
 ```
 
-Respect the axis order declared by a coordinate system
+Coordinates use canonical longitude/latitude or easting/northing order unless the
+selected engine supports and is configured to enforce declared axes. Z carries height
+or geocentric Z where applicable; extra ordinates such as M are preserved. The flat
+buffer length must be divisible by its dimension. A failing record is not committed,
+although earlier records may already be transformed.
 
-```js
-const projection = new Projection({
-  from: '+proj=longlat +datum=WGS84 +axis=neu',
-  to: 'EPSG:3857',
-  enforceAxis: true
-});
-
-const position = projection.project([37.8, -122.4]);
-```
-
-Register an NTv2 datum grid before using it in a projection definition
-
-```js
-const grid = await fetch('/grids/local-datum.gsb').then(response => response.arrayBuffer());
-Projection.registerDatumGrid('local-datum.gsb', grid);
-
-const projection = new Projection({
-  from: '+proj=longlat +ellps=WGS84 +nadgrids=local-datum.gsb +no_defs',
-  to: 'WGS84'
-});
-```
-
-## Static Fields
-
-### `Projection.defineProjectionAliases(projections: {[alias: string]: ReadonlyCRSDefinition})`
-
-Defines projection aliases from authority codes, PROJ strings, WKT strings, or PROJJSON objects.
-
-### `Projection.registerDatumGrid(name: string, grid: ArrayBuffer, options?: DatumGridOptions)`
-
-Registers an NTv2 datum grid that projection definitions can reference with `+nadgrids=<name>`. Set `options.includeErrorFields` to `false` when the grid does not contain latitude and longitude error columns.
-
-## Methods
-
-### `constructor(options: ProjectionOptions)`
-
-Create a new `Projection` instance that can convert between the specified coordinate systems.
-
-- `from` and `to` are `ReadonlyCRSDefinition` values. They can be named coordinate systems, PROJ strings, WKT strings, or the `GeographicCRS`, `GeodeticCRS`, `ProjectedCRS`, and `BoundCRS` PROJJSON object kinds. See the [engine reference](projection-engine.md) for supported methods and parameters. Both default to `WGS84`.
-- `enforceAxis` defaults to `false`. Set it to `true` to respect the axis order declared by the source and destination coordinate systems.
-
-### `project(coord: number[]): number[]`
-
-Transform a coordinate from the source to the target coordinate system.
-
-### `unproject(coord: number[]): number[]`
-
-Transform a coordinate from the target to the source coordinate system.
-
-### `projectTo(coordinate, output)` / `unprojectTo(coordinate, output)`
-
-Write a coordinate into a preallocated number array, `Float32Array` or `Float64Array`
-and return the same output object. Exact input/output identity supports in-place use.
-The inherited `projectToSync` and `unprojectToSync` methods have the same storage contract.
-See [reusable scalar outputs](projection-transform.md#reusable-scalar-outputs) for capacity,
-overlap, rounding, error and lazy-loading behavior.
-
-### `projectFlat(coordinates, dimension = 2)` / `unprojectFlat(coordinates, dimension = 2)`
-
-Transform interleaved `Float32Array` or `Float64Array` records in place and return
-the same view. Record widths, precision and failure behavior follow the
-[engine flat-array contract](projection-transform.md#flat-typed-arrays-in-place).
+`lossy`, when supplied by an implementation, indicates deliberate horizontal extraction.
+See [ProjectionTransform](projection-transform.md) for configurable implementation options,
+validation, height conventions and CRS support limits.

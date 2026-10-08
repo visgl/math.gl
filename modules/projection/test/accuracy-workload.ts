@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original independent accuracy measurements for the proj4js-inspired API.
-import {Projection} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/projection';
 import inputs from './fixtures/accuracy-cases.json';
 import reference from './fixtures/accuracy-reference.json';
 
 /** Observed component-wise error, never a bound on unsampled coordinates. */
 export function measureAccuracy() {
   return inputs.cases.map((fixture, index) => {
-    const projection = new Projection({
+    const projection = projectionEngine.createProjection({
       from: '+proj=longlat +datum=none',
       to: fixture.definition
     });
@@ -60,7 +60,12 @@ export function measureAccuracy() {
         }
       }
     });
-    return {id: fixture.id, bounds: fixture.bounds, points: rows.length, errors};
+    return {
+      id: fixture.id,
+      bounds: fixture.bounds,
+      points: rows.length,
+      errors
+    };
   });
 }
 

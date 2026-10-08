@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Projection} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/projection';
 import {
   createSpatialReference,
   inferCRSRepresentation,
@@ -28,7 +28,7 @@ const geographic: PROJJSONCRSByType<'GeographicCRS'> = {
 const definition: ReadonlyCRSDefinition = geographic;
 const readonlyDefinition: ReadonlyCRSDefinition = geographic;
 
-new Projection({from: definition, to: serialized});
+projectionEngine.createProjection({from: definition, to: serialized});
 
 if (typeof readonlyDefinition === 'object') {
   // @ts-expect-error Spatial-reference PROJJSON definitions are deeply readonly.
@@ -49,7 +49,10 @@ const spatialReference: SpatialReference = createSpatialReference({
 
 if (spatialReference.crs.state === 'explicit') {
   const spatialDefinition: ReadonlyCRSDefinition = spatialReference.crs.definition;
-  new Projection({from: spatialDefinition, to: serialized});
+  projectionEngine.createProjection({
+    from: spatialDefinition,
+    to: serialized
+  });
   void spatialDefinition;
 }
 
@@ -63,9 +66,15 @@ import {
   type NormalizedCRS
 } from '@math.gl/projection/experimental';
 const nativeInput: TypeScriptCRSInput = spatialReference;
-new ProjectionTransform({from: nativeInput, to: readonlyDefinition, parsers: [projJSONCRSParser]});
+new ProjectionTransform({
+  from: nativeInput,
+  to: readonlyDefinition,
+  parsers: [projJSONCRSParser]
+});
 new ProjectionTransform({from: spatialReference.crs});
-const normalized: NormalizedCRS = normalizeCRS(geographic, {parsers: [projJSONCRSParser]});
+const normalized: NormalizedCRS = normalizeCRS(geographic, {
+  parsers: [projJSONCRSParser]
+});
 checkProjectionCompatibility(nativeInput, {parsers: [projJSONCRSParser]});
 // @ts-expect-error The engine's normalized parameters are immutable.
 normalized.parameters['proj'] = 'merc';
@@ -78,10 +87,19 @@ import {
   type DatumGridCollection,
   type DatumGridGeoTIFF
 } from '@math.gl/projection/experimental';
-const preparedGrid: DatumGrid = parseNTv2Grid(new ArrayBuffer(0), {includeErrorFields: false});
-const gridCollection: DatumGridCollection = Object.freeze({local: preparedGrid});
-new ProjectionTransform({from: '+proj=longlat +nadgrids=local', datumGrids: gridCollection});
-checkProjectionCompatibility('+proj=longlat +nadgrids=local', {datumGrids: gridCollection});
+const preparedGrid: DatumGrid = parseNTv2Grid(new ArrayBuffer(0), {
+  includeErrorFields: false
+});
+const gridCollection: DatumGridCollection = Object.freeze({
+  local: preparedGrid
+});
+new ProjectionTransform({
+  from: '+proj=longlat +nadgrids=local',
+  datumGrids: gridCollection
+});
+checkProjectionCompatibility('+proj=longlat +nadgrids=local', {
+  datumGrids: gridCollection
+});
 declare const tiff: DatumGridGeoTIFF;
 const preparedTIFF: Promise<DatumGrid> = loadGeoTIFFGrid(tiff);
 void preparedTIFF;
@@ -101,12 +119,12 @@ batchProjection.projectFlat(new Int32Array([0, 0]));
 // @ts-expect-error The scalar array API is deliberately separate.
 batchProjection.projectFlat([0, 0]);
 
-import type {ProjectionEngine} from '@math.gl/projection/types';
-import {CustomProjectionEngine, CRSProjectionEngine} from '@math.gl/projection';
+import type {ProjectionEngine, Projection, PreparedProjection} from '@math.gl/projection/types';
+import {ConfigurableProjectionEngine, FullProjectionEngine} from '@math.gl/projection';
 const projectionEngines: ProjectionEngine[] = [
-  new CustomProjectionEngine(),
-  new CRSProjectionEngine(),
-  new LazyCRSProjectionEngine()
+  new ConfigurableProjectionEngine(),
+  new FullProjectionEngine(),
+  new LazyProjectionEngine()
 ];
 async function useEngine(engine: ProjectionEngine): Promise<number[]> {
   const projection = await engine.createProjection({to: 'EPSG:3857'});
@@ -117,6 +135,24 @@ void useEngine;
 // @ts-expect-error ProjectionEngine is an interface, not a runtime constructor.
 new ProjectionEngine();
 // @ts-expect-error Engines configure algorithms, not a specific CRS pair.
-new CustomProjectionEngine({to: 'EPSG:3857'});
+new ConfigurableProjectionEngine({to: 'EPSG:3857'});
 
-import {LazyCRSProjectionEngine} from '@math.gl/projection/projections/lazy';
+import {LazyProjectionEngine} from '@math.gl/projection/projections/lazy';
+
+import {WebMercatorProjectionEngine} from '@math.gl/projection/web-mercator';
+const minimalEngine: ProjectionEngine = new WebMercatorProjectionEngine();
+const minimalProjection: Projection = minimalEngine.createProjection({
+  to: 'EPSG:3857'
+});
+async function preparedEngine(engine: ProjectionEngine) {
+  const projection: PreparedProjection = await engine.createProjectionAsync({
+    to: 'EPSG:3857'
+  });
+  const buffer: Float32Array = projection.projectFlat(new Float32Array(4));
+  const coordinate: number[] = projection.project([12, 55]);
+  return {buffer, coordinate};
+}
+void minimalProjection;
+void preparedEngine;
+// @ts-expect-error Projection is a type contract, not a constructor.
+new Projection();

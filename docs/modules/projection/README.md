@@ -30,9 +30,12 @@ Choose a data source to visit Nuna (Columbia), Rodinia and Pangaea.
 ## Quick start
 
 ```typescript
-import {Projection} from '@math.gl/projection';
+import { projectionEngine } from "@math.gl/projection";
 
-const projection = new Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+const projection = projectionEngine.createProjection({
+  from: "EPSG:4326",
+  to: "EPSG:3857",
+});
 const meters = projection.project([12, 55]);
 const longitudeLatitude = projection.unproject(meters);
 
@@ -47,33 +50,35 @@ for the concepts behind a transformation. The [projection catalogue](developer-g
 explains the built-in algorithms, their distortion tradeoffs and their sphere or
 ellipsoid support. It includes examples for regional, global and polar maps.
 
-| Guide | What you will learn |
-| --- | --- |
-| [Imports, plugins and loading](developer-guide/projection-engine.md) | Choose entry points, register algorithms, load on demand and compare bundle sizes |
-| [Coordinate systems](developer-guide/coordinate-systems.md) | Distinguish projection, ellipsoid, datum, height and coordinate epoch |
-| [Projection catalogue](developer-guide/projections.md) | Choose an algorithm and understand its useful domain |
-| [Reusable coordinate buffers](api-reference/projection-buffer.md) | Transform separate, strided and column buffers with reusable scratch and explicit ownership |
-| [Operation pipelines](api-reference/projection-pipeline.md) | Order units, axes, projections, datum shifts and time-dependent operations explicitly |
-| [Operation selection](api-reference/operation-catalog.md) | Select application-reviewed operations by area, epoch, accuracy and prepared grids |
-| [Temporal models](temporal-models.md) | Combine velocities, acceleration, events and relaxation with explicit epochs |
-| [Optional acceleration](acceleration.md) | Evaluate persistent workers, ownership and complete application costs |
-| [Deformation models](developer-guide/deformation-models.md) | Propagate coordinates between epochs with prepared velocity grids |
-| [Support and migration](developer-guide/support.md) | Understand accepted definitions and differences from proj4js |
-| [Performance and live benchmarks](benchmarks.md) | Compare math.gl flat and scalar transforms with proj4js in your browser |
-| [Projection scorecard](scorecard.md) | Inspect source-matched accuracy, throughput, startup, allocation, memory and bundle evidence |
-| [Independent validation](independent-validation.md) | Inspect numerical references and qualification limits |
+| Guide                                                                | What you will learn                                                                          |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [Imports, plugins and loading](developer-guide/projection-engine.md) | Choose entry points, register algorithms, load on demand and compare bundle sizes            |
+| [Coordinate systems](developer-guide/coordinate-systems.md)          | Distinguish projection, ellipsoid, datum, height and coordinate epoch                        |
+| [Projection catalogue](developer-guide/projections.md)               | Choose an algorithm and understand its useful domain                                         |
+| [Reusable coordinate buffers](api-reference/projection-buffer.md)    | Transform separate, strided and column buffers with reusable scratch and explicit ownership  |
+| [Operation pipelines](api-reference/projection-pipeline.md)          | Order units, axes, projections, datum shifts and time-dependent operations explicitly        |
+| [Operation selection](api-reference/operation-catalog.md)            | Select application-reviewed operations by area, epoch, accuracy and prepared grids           |
+| [Temporal models](temporal-models.md)                                | Combine velocities, acceleration, events and relaxation with explicit epochs                 |
+| [Optional acceleration](acceleration.md)                             | Evaluate persistent workers, ownership and complete application costs                        |
+| [Deformation models](developer-guide/deformation-models.md)          | Propagate coordinates between epochs with prepared velocity grids                            |
+| [Support and migration](developer-guide/support.md)                  | Understand accepted definitions and differences from proj4js                                 |
+| [Performance and live benchmarks](benchmarks.md)                     | Compare math.gl flat and scalar transforms with proj4js in your browser                      |
+| [Projection scorecard](scorecard.md)                                 | Inspect source-matched accuracy, throughput, startup, allocation, memory and bundle evidence |
+| [Independent validation](independent-validation.md)                  | Inspect numerical references and qualification limits                                        |
 
 ## Choose an API
 
-| API | Use it when |
-| --- | --- |
-| [`Projection`](api-reference/projection.md) | You want a ready-to-use converter with all built-in algorithms and WKT/PROJJSON readers |
-| [`CustomProjectionEngine`](api-reference/projection-engine.md) | You want an explicit list of plugins, readers and grids for a smaller bundle |
-| `LazyProjection` (`/projections/lazy`) | You want built-in algorithms to load automatically when requested |
-| `ProjectionPipeline` (`/pipeline`) | You need explicit operation order or coordinate epochs |
-| `OperationCatalog` (`/operations`) | You need to select among application-reviewed transformations |
+| API                                                                  | Use it when                                                                  |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [`FullProjectionEngine`](api-reference/projection-engine.md)         | You want all built-in algorithms and WKT/PROJJSON readers                    |
+| [`ConfigurableProjectionEngine`](api-reference/projection-engine.md) | You want an explicit list of plugins, readers and grids for a smaller bundle |
+| `LazyProjectionEngine` (`/projections/lazy`)                         | You want built-in algorithms to load automatically when requested            |
+| `WebMercatorProjectionEngine` (`/web-mercator`)                      | You need only WGS84 and EPSG:3857 with a minimal bundle                      |
+| `ProjectionPipeline` (`/pipeline`)                                   | You need explicit operation order or coordinate epochs                       |
+| `OperationCatalog` (`/operations`)                                   | You need to select among application-reviewed transformations                |
 
-The package root exports the convenience class and configurable engine. `/core`
+The package root exports the full and configurable engines and the default `projectionEngine`.
+`Projection` and `ProjectionEngine` are type contracts, available from `/types`. `/core`
 contains the engine without the catalogue. `/projections/<id>` contains an
 individual algorithm; `/projections/lazy/<id>` contains its deferred descriptor.
 Readers, grids, pipelines, operation selection and deformation models have optional subpaths. See the
@@ -90,16 +95,16 @@ as construction, then verify your coordinate domain and grid coverage.
 These definitions are built in. Selective engines still require the corresponding
 projection algorithm; an alias does not load it.
 
-| Coordinate system | Aliases | Algorithm |
-| --- | --- | --- |
-| WGS84 longitude/latitude | `EPSG:4326`, `WGS84` | Core geographic coordinates |
-| NAD83 longitude/latitude | `EPSG:4269` | Core geographic coordinates |
-| WGS84 longitude/latitude/ellipsoidal height | `EPSG:4979` | Core geographic coordinates |
-| WGS84 geocentric | `EPSG:4978` | `geocentric` |
-| Web Mercator | `EPSG:3857`, `EPSG:3785`, `GOOGLE`, `EPSG:900913`, `EPSG:102113` | `mercator` |
-| WGS84 UTM north | `EPSG:32601` through `EPSG:32660` | `universalTransverseMercator` |
-| WGS84 UTM south | `EPSG:32701` through `EPSG:32760` | `universalTransverseMercator` |
-| WGS84 UPS north/south | `EPSG:5041`, `EPSG:5042` | `stereographic` |
+| Coordinate system                           | Aliases                                                          | Algorithm                     |
+| ------------------------------------------- | ---------------------------------------------------------------- | ----------------------------- |
+| WGS84 longitude/latitude                    | `EPSG:4326`, `WGS84`                                             | Core geographic coordinates   |
+| NAD83 longitude/latitude                    | `EPSG:4269`                                                      | Core geographic coordinates   |
+| WGS84 longitude/latitude/ellipsoidal height | `EPSG:4979`                                                      | Core geographic coordinates   |
+| WGS84 geocentric                            | `EPSG:4978`                                                      | `geocentric`                  |
+| Web Mercator                                | `EPSG:3857`, `EPSG:3785`, `GOOGLE`, `EPSG:900913`, `EPSG:102113` | `mercator`                    |
+| WGS84 UTM north                             | `EPSG:32601` through `EPSG:32660`                                | `universalTransverseMercator` |
+| WGS84 UTM south                             | `EPSG:32701` through `EPSG:32760`                                | `universalTransverseMercator` |
+| WGS84 UPS north/south                       | `EPSG:5041`, `EPSG:5042`                                         | `stereographic`               |
 
 There is no automatic EPSG database lookup or network access. Supply other named
 definitions through aliases or pass an explicit PROJ string, WKT or supported

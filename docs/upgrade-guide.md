@@ -61,10 +61,10 @@ Available subpaths: `@math.gl/core/mat3`, `/mat4`, `/quat`, `/vec2`, `/vec3`, an
 ### CRS and proj4 definitions
 
 - Import CRS types, syntax codecs, and spatial-reference descriptors from `@math.gl/crs`. Authority codes, WKT, and PROJ definitions remain strings.
-- Rename `@math.gl/proj4` imports and dependencies to `@math.gl/projection`, and `Proj4Projection` to `Projection`. The alias, `/classic`, and proj4js helpers are removed; install `proj4` directly for its API.
-- Use `ProjectionTransform` for a configured CRS pair and `CustomProjectionEngine` for reusable configuration and `checkProjectionCompatibility()` for capability checks. See the [migration contract](modules/projection/developer-guide/support.md).
+- Rename `@math.gl/proj4` imports and dependencies to `@math.gl/projection`, and create transforms with `projectionEngine.createProjection({from, to})` instead of `new Proj4Projection(...)`. The alias, `/classic`, and proj4js helpers are removed; install `proj4` directly for its API.
+- Use `ProjectionTransform` for a configured CRS pair and `ConfigurableProjectionEngine` for reusable configuration and `checkProjectionCompatibility()` for capability checks. See the [migration contract](modules/projection/developer-guide/support.md).
 
-- Axis-order enforcement remains opt-in through `enforceAxis: true`. Register NTv2 grids with `Projection.registerDatumGrid()` before using definitions that reference them.
+- Axis-order enforcement remains opt-in through `enforceAxis: true`. Prepare NTv2 grids with `parseNTv2Grid()` and register them on an engine through `datumGrids` before using definitions that reference them.
 
 ### DGGS packages
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Paired, alternating before/after measurements without changing the working tree.
+import {parseNTv2Grid} from '@math.gl/projection/grids/ntv2';
 import {bundleRuntime} from './benchmark-runtime.mjs';
 import {execFileSync} from 'node:child_process';
 import {mkdtempSync, rmSync, writeFileSync} from 'node:fs';
@@ -76,11 +77,15 @@ try {
       outfile,
       baseline ? baselineCommit : undefined
     );
-    const {Projection} = await import(pathToFileURL(outfile).href);
-    Projection.registerDatumGrid('benchmark-grid', benchmarkGrid());
+    const {Projection, FullProjectionEngine} = await import(pathToFileURL(outfile).href);
+    let engine;
+    if (FullProjectionEngine) engine = new FullProjectionEngine({datumGrids: {'benchmark-grid': parseNTv2Grid(benchmarkGrid())}});
+    else Projection.registerDatumGrid('benchmark-grid', benchmarkGrid());
     engines.push({
-      prepare: scenario => () =>
-        new Projection({from: scenario.from || 'WGS84', to: scenario.to, enforceAxis: true})
+      prepare: scenario => () => {
+        const options = {from: scenario.from || 'WGS84', to: scenario.to, enforceAxis: true};
+        return engine ? engine.createProjection(options) : new Projection(options);
+      }
     });
   }
   for (const scenario of scenarios) {
