@@ -27,7 +27,9 @@ isTileIndexInRange(matrix, 4, 0); // false
 - `getTileBounds(matrix, column, row)` returns `[minX, minY, maxX, maxY]`; out-of-range indices throw.
 - `getTileIndex(matrix, coordinate)` returns `[column, row]`, or `null` outside the matrix or for
   nonfinite input. Intervals are half-open in the direction of increasing column/row. The origin
-  edge is included; the opposite outer edge is excluded. Indices never wrap or clamp.
+  edge is included; the opposite outer edge is excluded. Indices never wrap or clamp. Lookup
+  compares computed grid edges, so fractional resolutions have the same edge ownership as bounds.
+  It takes logarithmic time in matrix dimensions and constant space.
 - `isTileIndexInRange(matrix, column, row, limits?)` checks integer indices and optional inclusive
   `TileMatrixLimits`. Malformed limits throw. Limits describe a rectangular coverage subset;
   they do not guarantee a tile exists on a server.

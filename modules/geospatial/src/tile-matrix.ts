@@ -147,16 +147,48 @@ export function getTileIndex(
 ): [number, number] | null {
   validateTileMatrix(matrix);
   if (!coordinate.every(Number.isFinite)) return null;
-  const column = Math.floor(
-    (coordinate[0] - matrix.origin[0]) / (matrix.resolution * matrix.tileSize[0])
+  const column = getTileAxisIndex(
+    matrix.origin[0],
+    1,
+    matrix.resolution * matrix.tileSize[0],
+    matrix.matrixSize[0],
+    coordinate[0]
   );
-  const row = Math.floor(
-    (matrix.cornerOfOrigin === 'topLeft'
-      ? matrix.origin[1] - coordinate[1]
-      : coordinate[1] - matrix.origin[1]) /
-      (matrix.resolution * matrix.tileSize[1])
+  const row = getTileAxisIndex(
+    matrix.origin[1],
+    matrix.cornerOfOrigin === 'topLeft' ? -1 : 1,
+    matrix.resolution * matrix.tileSize[1],
+    matrix.matrixSize[1],
+    coordinate[1]
   );
-  return isTileIndexInRange(matrix, column, row)
-    ? [column === 0 ? 0 : column, row === 0 ? 0 : row]
-    : null;
+  return column === null || row === null ? null : [column, row];
+}
+
+/** Finds half-open edge ownership using the same arithmetic as bounds, without division drift. */
+function getTileAxisIndex(
+  origin: number,
+  direction: number,
+  tileSpan: number,
+  matrixSize: number,
+  coordinate: number
+): number | null {
+  const end = origin + direction * (matrixSize * tileSpan);
+  if (
+    direction === 1
+      ? coordinate < origin || coordinate >= end
+      : coordinate > origin || coordinate <= end
+  ) {
+    return null;
+  }
+  // Find the first edge strictly beyond the coordinate. Binary search also handles large grids
+  // without enumerating edges or assuming a division result is accurate near an integer.
+  let lower = 0;
+  let upper = matrixSize;
+  while (lower < upper) {
+    const middle = lower + Math.floor((upper - lower) / 2);
+    const edge = origin + direction * (middle * tileSpan);
+    if (direction === 1 ? coordinate >= edge : coordinate <= edge) lower = middle + 1;
+    else upper = middle;
+  }
+  return lower - 1;
 }

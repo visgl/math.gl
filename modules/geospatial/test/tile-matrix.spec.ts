@@ -78,3 +78,49 @@ test.each([
   const grid = {...matrix, ...replacement} as TileMatrix;
   expect(() => validateTileMatrix(grid)).toThrow(RangeError);
 });
+
+test.each(['topLeft', 'bottomLeft'] as const)(
+  'fractional edges belong to the following tile with %s origin',
+  cornerOfOrigin => {
+    const grid = {
+      ...matrix,
+      resolution: 0.1,
+      tileSize: [256, 256] as const,
+      matrixSize: [3, 3] as const,
+      cornerOfOrigin
+    };
+    const direction = cornerOfOrigin === 'topLeft' ? -1 : 1;
+    for (let index = 0; index < 3; index++) {
+      const bounds = getTileBounds(grid, index, index);
+      const edgeY = cornerOfOrigin === 'topLeft' ? bounds[3] : bounds[1];
+      expect(getTileIndex(grid, [bounds[0], edgeY])).toEqual([index, index]);
+      expect(getTileIndex(grid, [bounds[0] - 1e-10, edgeY])).toEqual(
+        index === 0 ? null : [index - 1, index]
+      );
+      expect(getTileIndex(grid, [bounds[0], edgeY - direction * 1e-10])).toEqual(
+        index === 0 ? null : [index, index - 1]
+      );
+    }
+    const outer = getTileBounds(grid, 2, 2);
+    expect(getTileIndex(grid, [outer[2], grid.origin[1]])).toBeNull();
+    expect(
+      getTileIndex(grid, [grid.origin[0], cornerOfOrigin === 'topLeft' ? outer[1] : outer[3]])
+    ).toBeNull();
+    const single = {...grid, matrixSize: [1, 1] as const};
+    expect(getTileIndex(single, [getTileBounds(single, 0, 0)[2], single.origin[1]])).toBeNull();
+  }
+);
+
+test('coordinate lookup supports large matrix dimensions without enumerating tiles', () => {
+  const grid = {
+    ...matrix,
+    origin: [0, 0] as const,
+    resolution: 1,
+    tileSize: [1, 1] as const,
+    matrixSize: [Number.MAX_SAFE_INTEGER, 1] as const
+  };
+  expect(getTileIndex(grid, [Number.MAX_SAFE_INTEGER - 1, 0])).toEqual([
+    Number.MAX_SAFE_INTEGER - 1,
+    0
+  ]);
+});
