@@ -89,3 +89,8 @@ Selected classes and three-radius ellipsoid kernels derive from Cesium under Apa
 [EllipsoidOccluder and globe horizon bounds](./api-reference/globe-queries.md) provide
 true ray intersections, elevated-point occlusion, exact limb ellipses and wrapped
 conservative imagery coverage without a viewport or rendering dependency.
+
+## Tile matrices
+
+[Tile matrix types and utilities](./tile-matrix.md) describe rectangular tile grids in any coordinate
+system, including tile bounds, coordinate lookup and index limits.
