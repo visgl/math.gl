@@ -26,6 +26,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./interpolate-packed-attributes": {
+      "types": "./dist/interpolate-packed-attributes.d.ts",
+      "import": "./dist/interpolate-packed-attributes.js",
+      "require": "./dist/interpolate-packed-attributes.cjs"
     }
   },
   "files": [

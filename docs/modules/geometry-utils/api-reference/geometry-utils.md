@@ -29,6 +29,10 @@ triangle geometry. Triangle strips and triangle fans are supported.
 
 ## Packed attributes
 
+[`interpolatePackedAttributes`](./interpolate-packed-attributes.md) reconstructs interleaved
+vertex records from original-vertex provenance. It preserves storage encodings, handles offset
+views, and requires explicit linear or flat policies for every declared field.
+
 `encodeRGB565` and `decodeRGB565` convert 8-bit RGB colors to and from RGB565.
 
 The `oct*` functions encode and decode normalized vectors using octahedral encoding.
