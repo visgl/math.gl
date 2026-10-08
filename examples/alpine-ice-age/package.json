@@ -18,6 +18,7 @@
     "@luma.gl/engine": "~9.4.0",
     "@math.gl/core": "workspace:*",
     "@math.gl/projection": "workspace:*",
+    "math.gl-parquet-loader": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

@@ -71,3 +71,18 @@ export const OSF_SOURCES = [
       "The present-day PaleoMIST bedrock grid is used as background only; it is not a reconstruction of earlier Quaternary terrain.",
   },
 ];
+
+export const KRAPP_SOURCES = [
+  {
+    id: "krapp2021",
+    title: "Global ice/ocean/land masks",
+    credit: "Krapp et al. (2021)",
+    dataset: "https://osf.io/8n43x/",
+    paper: "https://doi.org/10.1038/s41597-021-01009-3",
+    license: "CC BY 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+    hosted: `${hosted}/krapp2021`,
+    changes:
+      "Native 0.5° masks aggregated to 1° display coverage; 5,000-year snapshots with linear visual interpolation. Area integrated on the native grid. No thickness or volume. Regional ice-age labels are approximate correlations.",
+  },
+];

@@ -252,6 +252,114 @@ test("footprint rasterization preserves holes and excludes the Southern Hemisphe
   );
 });
 
+import { maskFrame, krappPhase, loadKrappSimulation } from "./krapp-data.js";
+import { ParquetSource } from "math.gl-parquet-loader";
+test("successful Krapp loads assemble ordered batches and interpolate area", async (t) => {
+  const rows = 720 * 360;
+  const groups = Array.from({ length: 800 }, (_, rowGroup) => ({ rowGroup, ageKa: 1, rows }));
+  groups[0].ageKa = 799;
+  groups[1].ageKa = 5;
+  groups[2].ageKa = 0;
+  t.mock.method(globalThis, "fetch", async (url) => {
+    assert.equal(url, DATASETS.krappManifest);
+    return new Response(JSON.stringify({ id: "krapp2021", rowGroupIndex: groups, files: [{ path: "grids.parquet", bytes: 100 }] }));
+  });
+  const reads = [];
+  let closed = false;
+  t.mock.method(ParquetSource.prototype, "read", async function* (options) {
+    assert.deepEqual(options.columns, ["mask"]);
+    assert.equal(options.batchSize, rows);
+    const group = options.rowGroups[0];
+    reads.push(group);
+    for (const length of [rows / 2, rows / 2]) {
+      yield { data: { numRows: length, getChild(name) {
+        assert.equal(name, "mask");
+        return { get() { return group === 1 ? 2 : group === 0 ? 1 : 0; } };
+      } } };
+    }
+  });
+  t.mock.method(ParquetSource.prototype, "close", async () => { closed = true; });
+  const progress = [];
+  const model = await loadKrappSimulation(new AbortController().signal, message => progress.push(message), { worker: false });
+  assert(closed);
+  assert.deepEqual(reads, [0, 1, 2]);
+  assert.deepEqual(model.manifest.ages, [799, 5, 0]);
+  assert.deepEqual(model.manifest.volumeKm3, [null, null, null]);
+  assert.equal(model.ice[0], 0);
+  assert.equal(model.bed[0], 100);
+  assert.equal(model.ice[model.count], 1);
+  assert.equal(model.ice[2 * model.count], 0);
+  assert.equal(model.bed[2 * model.count], -1000);
+  assert.equal(interpolateField(model.ice, model.count, model.manifest.ages, 2.5)[0], 0.5);
+  const { index, fraction } = sampleAt(model.manifest.ages, 2.5);
+  const area = model.manifest.areaKm2[index] * (1 - fraction) + model.manifest.areaKm2[index + 1] * fraction;
+  assert(Math.abs(area - 2 * Math.PI * 6371.0088 ** 2) < 0.01);
+  assert.equal(progress.at(-1), "3/3 ice-mask snapshots");
+  t.mock.method(ParquetSource.prototype, "close", async () => {
+    throw new Error("Worker cleanup failed");
+  });
+  t.mock.method(console, "warn", () => {});
+  const retained = await loadKrappSimulation(new AbortController().signal, undefined, { worker: false });
+  assert.deepEqual(retained.manifest.ages, model.manifest.ages);
+  assert.equal(retained.ice[retained.count], 1);
+});
+test("Krapp coverage aggregates native cells and integrates spherical area without invented volume", () => {
+  const native = new Int16Array(720 * 360).fill(2);
+  const frame = maskFrame(native);
+  assert(frame.ice.every((value) => value === 1));
+  assert(Math.abs(frame.area - 4 * Math.PI * 6371.0088 ** 2) < 0.01);
+  native.fill(0);
+  native[0] = 2;
+  const partial = maskFrame(native);
+  assert.equal(partial.ice[0], 0.25);
+  assert.equal(partial.ice[1], 0);
+  assert(partial.area > 0);
+  assert.equal(krappPhase(650), "Günz");
+  assert.equal(krappPhase(450), "Mindel");
+  assert.equal(krappPhase(160), "Riss");
+  assert.equal(krappPhase(20), "Würm");
+  assert.equal(krappPhase(0), "");
+  assert.equal(krappPhase(799), "");
+  assert.equal(krappPhase(300), "");
+});
+test("Krapp failure preserves the existing reconstruction", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => {
+    throw new TypeError("Network unavailable");
+  });
+  assert.equal(await loadKrappSimulation(new AbortController().signal), null);
+});
+test(
+  "a stalled Krapp manifest times out and falls back",
+  { timeout: 1000 },
+  async (t) => {
+    const timeout = new AbortController();
+    t.mock.method(AbortSignal, "timeout", (milliseconds) => {
+      assert.equal(milliseconds, 30000);
+      queueMicrotask(() =>
+        timeout.abort(new DOMException("Timeout", "TimeoutError")),
+      );
+      return timeout.signal;
+    });
+    t.mock.method(globalThis, "fetch", async (_url, { signal }) => {
+      signal.throwIfAborted();
+      return new Promise((resolve, reject) =>
+        signal.addEventListener("abort", () => reject(signal.reason), {
+          once: true,
+        }),
+      );
+    });
+    t.mock.method(console, "warn", () => {});
+    let status;
+    assert.equal(
+      await loadKrappSimulation(new AbortController().signal, (message) => {
+        status = message;
+      }),
+      null,
+    );
+    assert.match(status, /using PaleoMIST/);
+  },
+);
+
 test("returning from an older reconstruction clamps age before climate readouts", () => {
   const age = clampAge(globalManifest.ages, 650);
   assert.equal(age, 80);

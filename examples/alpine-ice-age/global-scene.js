@@ -229,7 +229,7 @@ export function createGlobalScene(canvas, onError) {
       for (let x = 0; x <= 360; x++) {
         const i = y * 361 + x,
           j = y * 360 + (x % 360),
-          c = color(bed[j], model.footprints ? ice[j] * 1500 : ice[j], showIce, ghost);
+          c = color(bed[j], (model.footprints || model.maskModel) ? ice[j] * 1500 : ice[j], showIce, ghost);
         const sphere = point(x - 180, y - 90);
         for (const endpoint of endpoints) {
           const p =

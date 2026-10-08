@@ -1,9 +1,11 @@
 # Glaciation Explorer
 
-Animate the last Alpine glacial cycle from **119 ka to the present** using the
-published PISM output of Seguinot and colleagues. Switch between oblique relief and
-a map, scrub the ice-area chart, change playback speed or vertical exaggeration,
-and reveal terrain colors beneath the ice. Playback repeats by default; disable Repeat animation to stop at the present.
+Explore global ice masks from **799 ka to the present**, the last **80 ka** of
+global ice-sheet thickness, or the Alpine glacial cycle from **119 ka to the
+present**. Switch map projections, scrub the ice-area chart and adjust playback.
+The **Ice Age Explorer** uses licensed Krapp masks for the older interval;
+the younger thickness reconstructions remain separate modes. Playback repeats
+by default; disable Repeat animation to stop at the present.
 
 ## Run
 
@@ -36,7 +38,8 @@ are visualization, not additional model output. The terrain-reveal option blends
 terrain colors into the ice surface; it does not simulate optical transmission.
 Relief exaggeration applies to both bedrock and ice. The timeline's LGM chapter
 at 24 ka is an approximate reference, not a claim that all lobes peaked together.
-Günz, Mindel and Riss are outside this dataset and are not represented.
+Günz, Mindel and Riss are outside this Alpine dataset; use the earlier global
+ice-mask mode to explore those approximate correlations.
 
 Area and volume use the original 2 km source grid, not the display mesh. Ice area
 counts cells with thickness above 10 m; volume sums thickness times 4 km². Values
@@ -63,7 +66,7 @@ for the Cartesian orbit view, mesh shading, place labels and picking-free displa
 
 ## Global ice sheets and map projections
 
-The default **Global ice sheets** mode animates the last **80 ka**, alongside the
+The **Global ice sheets** mode animates the last **80 ka**, alongside the
 Alpine glaciers mode above. Choose Globe, Equal Earth, Mollweide, Robinson,
 Sinusoidal, Miller cylindrical, Equirectangular or Mercator. Drag the globe to
 rotate it; drag maps to pan. The projection transformations use math.gl's
@@ -152,7 +155,7 @@ These climate series are independent of PaleoMIST, not calculated from its ice m
 ### Upstream hosting
 
 The example fetches all ice-grid previews, preview manifests and climate JSON from
-[deck.gl-data/earth/glaciations/v1](https://github.com/visgl/deck.gl-data/tree/2a69f8a6e01e22c7c6649244a1577c20c74a02ae/earth/glaciations/v1).
+[deck.gl-data/earth/glaciations/v1](https://github.com/visgl/deck.gl-data/tree/2de3d08585770105e1b84a6c0308c934fcce4878/earth/glaciations/v1).
 `sources.js` pins the merged repository commit; LFS gzip data uses GitHub media URLs,
 and ordinary JSON uses raw URLs. No scientific data is bundled into this example.
 Preparation scripts remain available for reproducing display assets locally.
@@ -167,32 +170,28 @@ license, pinned hosted copy and display modifications. Scientific limits are
 listed separately. The tectonic example uses the same component and updates the
 credits when the selected reconstruction changes.
 
-### Optional older OSF reconstructions
+### Earlier global ice ages
 
-After PaleoMIST loads, the explorer independently tries the public OSF file API
-for Batchelor et al. (2019), [project 7jen3](https://osf.io/7jen3/),
-[study](https://doi.org/10.1038/s41467-019-11601-2). HTTP, browser CORS, a 30-second
-timeout, missing files, unsupported projections or parse failures retain the
-current reconstruction. No OSF data is bundled or redistributed. If all three
-stages load, **Earlier ice ages · OSF** becomes available and is selected; the
-original Global ice sheets and Alpine glaciers modes remain available.
+After PaleoMIST loads, the explorer loads licensed Krapp et al. (2021)
+[global masks](https://osf.io/8n43x/) from the immutable deck.gl-data Parquet asset.
+The bundled loaders.gl decoder reads only the mask column for 161 snapshots
+(799 ka plus 795–0 ka in 5 ka steps), with loading progress shown.
+Failures preserve PaleoMIST. Successful loading selects **Earlier ice ages · Krapp**;
+the global thickness reconstruction and Alpine simulation remain available.
 
-The source best-estimate polygons for MIS 16 (622–677 ka), MIS 12 (429–477 ka)
-and MIS 6 (132–190 ka) describe Northern Hemisphere ice sheets. Günz, Mindel and
-Riss are approximate Alpine correlations, not universally agreed global names.
-The slider uses stage midpoints and switches to the nearest published snapshot;
-there is no invented intermediate ice extent. The original polar WGS84 Lambert
-azimuthal equal-area polygons are rasterized at approximately 9 km and sampled
-to the 1° display grid. Area is approximate sampled footprint area. Thickness,
-volume and climate readouts are unavailable. Present-day PaleoMIST bedrock is
-used as a background; Southern Hemisphere ice is outside this source's coverage.
-The OSF metadata declares no dataset license, and its two READMEs contain no
-redistribution grant; the paper's CC BY 4.0 license is not assigned to these
-external files. The attribution widget links to the source and records this.
+Native 0.5° cells are aggregated to 1° coverage. Area is integrated
+on the native spherical grid; intermediate coverage and area interpolate
+linearly for animation. No ice thickness or volume is supplied; illustrative
+relief is not elevation data. Climate values are unavailable in this mode.
+Günz, Mindel and Riss labels use approximate Alpine correlations to MIS 16, 12
+and 6; these are regional terminology, not globally synchronous measured dates.
+The data are CC BY 4.0; attribution links the original project, article, license
+and hosted copy. ICE-6G supplies 0–122 ka masks; older masks use Ganopolski & Calov.
 
 The large last-glacial-period title is **Würm**; the maximum and retreat phase
 descriptions appear underneath.
 
+The center title is empty between named ice-age windows.
 Chapter titles appear for four seconds after the model loads or a phase changes,
 then fade out over 800 ms. Re-enabling Ice age names introduces the current chapter
 again. Reduced-motion preferences remove the fade.
