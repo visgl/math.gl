@@ -11,19 +11,15 @@ export type TriangleMesh = {
 };
 
 /** Controls adaptive subdivision through an application-supplied coordinate transform. */
-export type SubdivideTriangleMeshOptions = {
+type SubdivisionOptions = {
   /** Deterministic source-to-target conversion. Each invocation receives a fresh source array.
    * Null and nonfinite output reject the mesh; callback exceptions propagate unchanged.
    */
   transform: (position: readonly number[]) => ArrayLike<number> | null;
-  /** Positive, finite sampled error tolerance across all target components, in target units. */
-  tolerance: number;
   /** Source dimension: 2 or 3. Default 2. */
   size?: 2 | 3;
   /** Target dimension: 2 or 3. Defaults to size. */
   targetSize?: 2 | 3;
-  /** Positive maximum Euclidean source-edge length. Default Infinity. */
-  maxEdgeLength?: number;
   /** Maximum global refinement passes, from 0 through 30. Default 10. */
   maxDepth?: number;
   /** Maximum output vertex count, including unused input vertices. Default 65536. */
@@ -31,6 +27,27 @@ export type SubdivideTriangleMeshOptions = {
   /** Maximum output triangle count. Default 131072. */
   maxTriangles?: number;
 };
+
+/** Select sampled transform error (default), or exclusively limit source-edge length. */
+export type SubdivideTriangleMeshOptions = SubdivisionOptions &
+  (
+    | {
+        /** Sample target-space error, including triangle interiors. This is the default. */
+        refinement?: 'transform-error';
+        /** Positive, finite sampled error tolerance across target components, in target units. */
+        tolerance: number;
+        /** Positive maximum Euclidean source-edge length. Default Infinity. */
+        maxEdgeLength?: number;
+      }
+    | {
+        /** Split only long indexed edges, without evaluating transform-error probes. */
+        refinement: 'source-edge';
+        /** No target-space tolerance is evaluated in source-edge mode. */
+        tolerance?: never;
+        /** Positive, finite maximum Euclidean edge length across all source components. */
+        maxEdgeLength: number;
+      }
+  );
 
 /** Refined geometry with provenance for interpolating UVs and other source vertex attributes. */
 export type SubdividedTriangleMesh = {
@@ -65,6 +82,8 @@ const FACE_WEIGHTS = [
  * The tolerance is sampled, not a universal error bound. Source interpolation is linear.
  * Clip invalid domains and split projection seams before calling. Attribute seams must use
  * duplicated input vertices; equal coordinates are never welded.
+ * Opt-in source-edge refinement skips error probes and transforms each output vertex once.
+ * It provides no target-space error bound or interior-domain validation.
  * @throws RangeError For invalid input/options, rejected transform samples, or exhausted limits.
  */
 export function subdivideTriangleMesh(
@@ -74,6 +93,7 @@ export function subdivideTriangleMesh(
   const {
     transform,
     tolerance,
+    refinement = 'transform-error',
     size = 2,
     targetSize = size,
     maxEdgeLength = Infinity,
@@ -100,7 +120,15 @@ export function subdivideTriangleMesh(
   for (let depth = 0; ; depth++) {
     const splitEdges = new Set<string>();
     for (const face of faces) {
-      if (needsRefinement(face)) {
+      if (refinement === 'source-edge') {
+        for (let edge = 0; edge < 3; edge++) {
+          const a = face.vertices[edge];
+          const b = face.vertices[(edge + 1) % 3];
+          if (sourceEdgeLength(vertices[a], vertices[b]) > maxEdgeLength) {
+            splitEdges.add(edgeKey(a, b));
+          }
+        }
+      } else if (needsRefinement(face)) {
         const [a, b, c] = face.vertices;
         splitEdges.add(edgeKey(a, b));
         splitEdges.add(edgeKey(b, c));
@@ -120,8 +148,11 @@ export function subdivideTriangleMesh(
   function validateOptions(): void {
     if (
       typeof transform !== 'function' ||
-      !Number.isFinite(tolerance) ||
-      tolerance <= 0 ||
+      (refinement !== 'transform-error' && refinement !== 'source-edge') ||
+      (refinement === 'transform-error' &&
+        (tolerance === undefined || !Number.isFinite(tolerance) || tolerance <= 0)) ||
+      (refinement === 'source-edge' &&
+        (tolerance !== undefined || !Number.isFinite(maxEdgeLength))) ||
       (size !== 2 && size !== 3) ||
       (targetSize !== 2 && targetSize !== 3) ||
       !(maxEdgeLength > 0) ||
@@ -173,14 +204,15 @@ export function subdivideTriangleMesh(
     for (let i = 0; i < 3; i++) {
       const a = points[i];
       const b = points[(i + 1) % 3];
-      const length = Math.hypot(...a.source.map((value, j) => value - b.source[j]));
+      const length = sourceEdgeLength(a, b);
       if (length > maxEdgeLength) exceedsTolerance = true;
       for (const fraction of EDGE_FRACTIONS) {
-        if (error([a, b], [1 - fraction, fraction]) > tolerance) exceedsTolerance = true;
+        if (error([a, b], [1 - fraction, fraction]) > (tolerance ?? Infinity))
+          exceedsTolerance = true;
       }
     }
     for (const weights of FACE_WEIGHTS) {
-      if (error(points, weights) > tolerance) exceedsTolerance = true;
+      if (error(points, weights) > (tolerance ?? Infinity)) exceedsTolerance = true;
     }
     return exceedsTolerance;
   }
@@ -270,6 +302,11 @@ export function subdivideTriangleMesh(
       sourceTriangleIndices: new Uint32Array(faces.map(f => f.sourceTriangle))
     };
   }
+}
+
+/** Measures an indexed edge in source-coordinate units. */
+function sourceEdgeLength(a: Vertex, b: Vertex): number {
+  return Math.hypot(...a.source.map((value, component) => value - b.source[component]));
 }
 
 function edgeKey(a: number, b: number): string {

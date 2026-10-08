@@ -44,6 +44,13 @@ positive finite sampled Cartesian error in axis units. Optional `maxEdgeLength` 
 in **source coordinate units**, mixing degrees and height when size is 3; avoid that
 option for mixed-unit meshes unless a meaningful source-space bound is chosen.
 
+The adapter also accepts `refinement: 'source-edge'` with a required finite
+`maxEdgeLength` and no `tolerance`. In that opt-in mode it transforms only output
+vertices, skipping Cartesian error probes. For XY longitude/latitude input the
+edge limit is measured in Euclidean degrees, **not geodesic distance**; this mode
+provides no Cartesian accuracy guarantee. The default sampled-error policy is
+unchanged. See [source-edge refinement](./subdivide-triangle-mesh.md#source-edge-refinement).
+
 Depth, vertex and triangle limits retain the existing engine's global contracts.
 Exhausting a limit throws `RangeError` rather than return a partial or unqualified
 mesh. Invalid geometry, axes, latitude or unsplit longitude span also throw.

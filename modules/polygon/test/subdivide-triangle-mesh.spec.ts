@@ -2,12 +2,210 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
-import {earcut, subdivideTriangleMesh} from '@math.gl/polygon';
+import {test, expect, vi} from 'vitest';
+import {earcut, subdivideTriangleMesh, subdivideGlobeMesh} from '@math.gl/polygon';
 import type {SubdividedTriangleMesh} from '@math.gl/polygon';
 
 const quad = {positions: [0, 0, 1, 0, 1, 1, 0, 1], indices: [0, 1, 2, 0, 2, 3]};
 const identity = (p: readonly number[]) => p;
+
+test('source-edge refinement splits only long shared edges and projects each vertex once', () => {
+  const transform = vi.fn((position: readonly number[]) => [position[0], position[1], 7]);
+  const positions = Object.freeze(quad.positions.slice());
+  const indices = new Uint16Array(quad.indices);
+  const result = subdivideTriangleMesh(
+    {positions, indices},
+    {
+      refinement: 'source-edge',
+      maxEdgeLength: 1,
+      transform,
+      targetSize: 3
+    }
+  );
+  // Only the shared diagonal is long; both triangles reuse its one midpoint.
+  expect(result.sourcePositions.length / 2).toBe(5);
+  expect(result.indices.length / 3).toBe(4);
+  expect(transform).toHaveBeenCalledTimes(5);
+  expect(Array.from(result.sourceTriangleIndices)).toEqual([0, 0, 1, 1]);
+  expect(Array.from(result.sourceVertexIndices.slice(12))).toEqual([2, 0, 0]);
+  expect(Array.from(result.sourceVertexWeights.slice(12))).toEqual([0.5, 0.5, 0]);
+  expect(Array.from(result.positions.filter((_, index) => index % 3 === 2))).toEqual([
+    7, 7, 7, 7, 7
+  ]);
+  expect(positions).toEqual(quad.positions);
+  expect(Array.from(indices)).toEqual(quad.indices);
+  checkQuadConformity(result);
+});
+
+test.each([0.9, 0.4, 0.2])(
+  'source-edge refinement is conforming with edge limit %s',
+  maxEdgeLength => {
+    const result = subdivideTriangleMesh(quad, {
+      refinement: 'source-edge',
+      maxEdgeLength,
+      transform: identity
+    });
+    checkQuadConformity(result);
+    for (let index = 0; index < result.indices.length; index += 3) {
+      const original = quad.indices.slice(
+        result.sourceTriangleIndices[index / 3] * 3,
+        result.sourceTriangleIndices[index / 3] * 3 + 3
+      );
+      for (let corner = 0; corner < 3; corner++) {
+        const vertex = result.indices[index + corner];
+        const next = result.indices[index + ((corner + 1) % 3)];
+        expect(
+          Math.hypot(
+            result.sourcePositions[vertex * 2] - result.sourcePositions[next * 2],
+            result.sourcePositions[vertex * 2 + 1] - result.sourcePositions[next * 2 + 1]
+          )
+        ).toBeLessThanOrEqual(maxEdgeLength);
+        for (let component = 0; component < 2; component++) {
+          let reconstructed = 0;
+          for (let slot = 0; slot < 3; slot++) {
+            const weight = result.sourceVertexWeights[vertex * 3 + slot];
+            const source = result.sourceVertexIndices[vertex * 3 + slot];
+            if (weight) expect(original).toContain(source);
+            reconstructed += quad.positions[source * 2 + component] * weight;
+          }
+          expect(reconstructed).toBeCloseTo(result.sourcePositions[vertex * 2 + component]);
+        }
+      }
+    }
+  }
+);
+
+test('source-edge mode deliberately does not validate unsampled interiors', () => {
+  const transform = vi.fn((position: readonly number[]) =>
+    position[0] === 1 / 3 ? null : position
+  );
+  const mesh = {positions: [0, 0, 1, 0, 0, 1], indices: [0, 1, 2]};
+  expect(() => subdivideTriangleMesh(mesh, {transform, tolerance: 0.01})).toThrow(RangeError);
+  transform.mockClear();
+  const result = subdivideTriangleMesh(mesh, {
+    transform,
+    refinement: 'source-edge',
+    maxEdgeLength: 2
+  });
+  expect(Array.from(result.indices)).toEqual(mesh.indices);
+  expect(transform).toHaveBeenCalledTimes(3);
+});
+
+test.each([
+  {maxEdgeLength: Infinity},
+  {maxEdgeLength: 0},
+  {maxEdgeLength: NaN},
+  {maxEdgeLength: -1},
+  {maxEdgeLength: undefined},
+  {tolerance: 1},
+  {refinement: 'unknown'}
+])('source-edge mode rejects invalid policy options: %j', overrides => {
+  expect(() =>
+    Reflect.apply(subdivideTriangleMesh, undefined, [
+      quad,
+      {
+        transform: identity,
+        refinement: 'source-edge',
+        maxEdgeLength: 1,
+        ...overrides
+      }
+    ])
+  ).toThrow(RangeError);
+});
+
+test.each([{maxDepth: 0}, {maxVertices: 4}, {maxTriangles: 2}])(
+  'source-edge mode enforces resource limits: %j',
+  limits => {
+    expect(() =>
+      subdivideTriangleMesh(quad, {
+        refinement: 'source-edge',
+        maxEdgeLength: 0.5,
+        transform: identity,
+        ...limits
+      })
+    ).toThrow(RangeError);
+  }
+);
+
+test('source-edge mode retains seam identities and unused vertices', () => {
+  const positions = [0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 2, 2];
+  const transform = vi.fn(identity);
+  const result = subdivideTriangleMesh(
+    {positions, indices: [0, 1, 2, 3, 4, 5]},
+    {
+      refinement: 'source-edge',
+      maxEdgeLength: 1,
+      transform
+    }
+  );
+  expect(result.sourcePositions.length / 2).toBe(9);
+  expect(transform).toHaveBeenCalledTimes(9);
+  expect(Array.from(result.sourceVertexIndices.slice(21, 24))).toEqual([2, 0, 0]);
+  expect(Array.from(result.sourceVertexIndices.slice(24, 27))).toEqual([3, 4, 0]);
+  expect(Array.from(result.sourcePositions.slice(12, 14))).toEqual([2, 2]);
+});
+
+test('source-edge mode rejects invalid output vertices and propagates callback exceptions', () => {
+  for (const output of [null, [0], [NaN, 0]]) {
+    expect(() =>
+      subdivideTriangleMesh(quad, {
+        refinement: 'source-edge',
+        maxEdgeLength: 1,
+        transform: () => output
+      })
+    ).toThrow(RangeError);
+  }
+  const failure = new Error('transform failure');
+  expect(() =>
+    subdivideTriangleMesh(quad, {
+      refinement: 'source-edge',
+      maxEdgeLength: 1,
+      transform: () => {
+        throw failure;
+      }
+    })
+  ).toThrow(failure);
+  expect(() =>
+    subdivideTriangleMesh(quad, {
+      refinement: 'source-edge',
+      maxEdgeLength: 1,
+      transform: position => (position[0] === 0.5 ? null : position)
+    })
+  ).toThrow(RangeError);
+});
+
+test('source-edge length includes altitude and globe adapter preserves the policy', () => {
+  const result = subdivideTriangleMesh(
+    {positions: [0, 0, 0, 0, 0, 8, 1, 0, 0], indices: [0, 1, 2]},
+    {
+      refinement: 'source-edge',
+      maxEdgeLength: 4,
+      size: 3,
+      transform: identity
+    }
+  );
+  expect(result.indices.length).toBeGreaterThan(3);
+  const globe = subdivideGlobeMesh(quad, {
+    refinement: 'source-edge',
+    maxEdgeLength: 1,
+    semiMajorAxis: 1
+  });
+  checkQuadConformity(globe);
+  expect(globe.positions.length).toBe(15);
+  for (let index = 0; index < globe.positions.length; index += 3) {
+    expect(Math.hypot(...globe.positions.slice(index, index + 3))).toBeCloseTo(1);
+  }
+  expect(
+    subdivideTriangleMesh(
+      {positions: [], indices: []},
+      {
+        refinement: 'source-edge',
+        maxEdgeLength: 1,
+        transform: identity
+      }
+    ).indices.length
+  ).toBe(0);
+});
 
 function sourceArea(result: SubdividedTriangleMesh): number {
   let area = 0;
@@ -171,6 +369,41 @@ test('polygon triangulation with a hole retains source area and hole exclusion',
     const x = ids.reduce((sum, id) => sum + result.sourcePositions[id * 2] / 3, 0);
     const y = ids.reduce((sum, id) => sum + result.sourcePositions[id * 2 + 1] / 3, 0);
     expect(x > 1 && x < 3 && y > 1 && y < 3).toBe(false);
+  }
+});
+
+test('source-edge refinement preserves polygon holes and clockwise winding', () => {
+  const positions = [0, 0, 4, 0, 4, 4, 0, 4, 1, 1, 1, 3, 3, 3, 3, 1];
+  const indices = earcut(positions, [4]);
+  const mesh = {positions, indices};
+  const result = subdivideTriangleMesh(mesh, {
+    transform: identity,
+    refinement: 'source-edge',
+    maxEdgeLength: 0.75
+  });
+  expect(sourceArea(result)).toBeCloseTo(12);
+  checkMeshBoundary(mesh, result);
+  for (let index = 0; index < result.indices.length; index += 3) {
+    const vertices = result.indices.slice(index, index + 3);
+    const x = vertices.reduce((sum, vertex) => sum + result.sourcePositions[vertex * 2] / 3, 0);
+    const y = vertices.reduce((sum, vertex) => sum + result.sourcePositions[vertex * 2 + 1] / 3, 0);
+    expect(x > 1 && x < 3 && y > 1 && y < 3).toBe(false);
+  }
+  const reversed = subdivideTriangleMesh(
+    {positions, indices: indices.slice().reverse()},
+    {
+      transform: identity,
+      refinement: 'source-edge',
+      maxEdgeLength: 0.75
+    }
+  );
+  for (let index = 0; index < reversed.indices.length; index += 3) {
+    const [a, b, c] = reversed.indices.slice(index, index + 3);
+    const source = reversed.sourcePositions;
+    expect(
+      (source[b * 2] - source[a * 2]) * (source[c * 2 + 1] - source[a * 2 + 1]) -
+        (source[c * 2] - source[a * 2]) * (source[b * 2 + 1] - source[a * 2 + 1])
+    ).toBeLessThan(0);
   }
 });
 
