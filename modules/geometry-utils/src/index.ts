@@ -44,3 +44,12 @@ export {
   getDegenerateTriangles
 } from './mesh-processing';
 export type {WeldGeometryOptions, WeldGeometryResult} from './mesh-processing';
+
+export {interpolatePackedAttributes} from './interpolate-packed-attributes';
+export type {
+  PackedAttributeType,
+  PackedAttributeInterpolation,
+  PackedAttribute,
+  AttributeInterpolationProvenance,
+  PackedAttributeInterpolationOptions
+} from './interpolate-packed-attributes';
