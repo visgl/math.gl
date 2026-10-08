@@ -11,10 +11,13 @@ import {
   type SubdividedTriangleMesh
 } from './subdivide-triangle-mesh';
 
-export type SubdivideGlobeMeshOptions = Omit<
-  SubdivideTriangleMeshOptions,
-  'transform' | 'targetSize'
-> & {
+/** Preserve the refinement discriminant when removing the globe adapter's fixed transform. */
+type GlobeSubdivisionOptions<Options> = Options extends unknown
+  ? Omit<Options, 'transform' | 'targetSize'>
+  : never;
+
+/** Globe axes and either sampled-error or source-edge refinement options. */
+export type SubdivideGlobeMeshOptions = GlobeSubdivisionOptions<SubdivideTriangleMeshOptions> & {
   /** Equatorial radius; default 6371000. */
   semiMajorAxis?: number;
   /** Polar radius; default semiMajorAxis. Positive and at most semiMajorAxis. */
