@@ -96,6 +96,9 @@ jobs:
       - name: Check parametric geometry package
         run: yarn check:parametric-package
 
+      - name: Check tile-matrix subpath exports, public types and dependency boundary
+        run: yarn check:tile-matrix-package
+
       - name: Check GeoArrow package boundary
         run: yarn check:geoarrow-boundary
 

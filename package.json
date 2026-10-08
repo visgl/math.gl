@@ -40,7 +40,8 @@
     "test-coverage": "ocular-test headless --coverage",
     "test-pre-commit": "yarn lint && ocular-test node",
     "check:timezone-geometry": "python3 modules/timezone/scripts/check-geometry.py",
-    "check:parametric-package": "node modules/geometry/scripts/check-parametric-package.mjs"
+    "check:parametric-package": "node modules/geometry/scripts/check-parametric-package.mjs",
+    "check:tile-matrix-package": "node modules/geospatial/scripts/check-tile-matrix-package.mjs"
   },
   "devDependencies": {
     "@probe.gl/bench": "^4.1.1",
