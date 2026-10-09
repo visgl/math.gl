@@ -10,56 +10,56 @@ import {test, expect} from 'vitest';
 import {toNested} from './utils';
 
 import {configure, equals} from '@math.gl/core';
-import {_Polygon as Polygon, WINDING} from '@math.gl/polygon';
+import {Polygon} from '@math.gl/polygon';
 
 const TEST_CASES = [
   {
     title: 'non-closed poly (flat TypedArray array)',
     polygon: new Float32Array([5, 0, 6, 4, 4, 5, 1, 5, 1, 0]),
     area: 22,
-    sign: WINDING.COUNTER_CLOCKWISE,
+    sign: 'counter-clockwise',
     segments: 5
   },
   {
     title: 'exactly closed poly (flat TypedArray array)',
     polygon: new Float32Array([5, 0, 6, 4, 4, 5, 1, 5, 1, 0, 5, 0]),
     area: 22,
-    sign: WINDING.COUNTER_CLOCKWISE,
+    sign: 'counter-clockwise',
     segments: 5
   },
   {
     title: 'EPSILON closed poly (flat TypedArray array)',
     polygon: new Float32Array([5, 0, 6, 4, 4, 5, 1, 5, 1, 0, 5, 0.0000001]),
     area: 22,
-    sign: WINDING.COUNTER_CLOCKWISE,
+    sign: 'counter-clockwise',
     segments: 5
   },
   {
     title: 'non-closed poly (flat array)',
     polygon: [5, 0, 6, 4, 4, 5, 1, 5, 1, 0],
     area: 22,
-    sign: WINDING.COUNTER_CLOCKWISE,
+    sign: 'counter-clockwise',
     segments: 5
   },
   {
     title: 'exactly closed poly (flat array)',
     polygon: [5, 0, 6, 4, 4, 5, 1, 5, 1, 0, 5, 0],
     area: 22,
-    sign: WINDING.COUNTER_CLOCKWISE,
+    sign: 'counter-clockwise',
     segments: 5
   },
   {
     title: 'EPSILON closed poly (flat array)',
     polygon: [5, 0, 6, 4, 4, 5, 1, 5, 1, 0, 5, 0.0000001],
     area: 22,
-    sign: WINDING.COUNTER_CLOCKWISE,
+    sign: 'counter-clockwise',
     segments: 5
   },
   {
     title: 'Flat 2d array with custom start and end offsets',
     polygon: [0, 0, 1, 1, 2, 1, 2, 2, 1, 2, 9, 5],
     area: 1,
-    sign: WINDING.COUNTER_CLOCKWISE,
+    sign: 'counter-clockwise',
     segments: 4,
     options: {
       start: 2,
@@ -71,7 +71,7 @@ const TEST_CASES = [
     title: 'Flat 3d array with custom start and end offsets',
     polygon: [0, 0, 0, 1, 1, 0, 1, 2, 0, 2, 2, 0, 2, 1, 0, 9, 5, 2],
     area: 1,
-    sign: WINDING.CLOCKWISE,
+    sign: 'clockwise',
     segments: 4,
     options: {
       start: 3,
@@ -89,7 +89,7 @@ const TEST_CASES = [
       [1, 0]
     ],
     area: 22,
-    sign: WINDING.COUNTER_CLOCKWISE,
+    sign: 'counter-clockwise',
     segments: 5
   },
   {
@@ -103,7 +103,7 @@ const TEST_CASES = [
       [5, 0]
     ],
     area: 22,
-    sign: WINDING.COUNTER_CLOCKWISE,
+    sign: 'counter-clockwise',
     segments: 5
   },
   {
@@ -117,7 +117,7 @@ const TEST_CASES = [
       [5, 0.0000001]
     ],
     area: 22,
-    sign: WINDING.COUNTER_CLOCKWISE,
+    sign: 'counter-clockwise',
     segments: 5
   }
 ];
@@ -140,7 +140,7 @@ test('Polygon#methods', () => {
 
   for (const tc of TEST_CASES) {
     const polygon = new Polygon(tc.polygon, tc.options);
-    const windingSign = tc.sign === WINDING.CLOCKWISE ? 1 : -1;
+    const windingSign = tc.sign === 'clockwise' ? 1 : -1;
     expect(polygon, `${tc.title}: Created polygon`).toBeTruthy();
     expect(
       equals(polygon.getSignedArea(), tc.area * windingSign),
@@ -154,12 +154,6 @@ test('Polygon#methods', () => {
   }
 
   configure({EPSILON: 1e-12});
-});
-
-test('WINDING compatibility constants are string-valued', () => {
-  expect(WINDING.CLOCKWISE).toBe('clockwise');
-  expect(WINDING.COUNTER_CLOCKWISE).toBe('counter-clockwise');
-  expect(WINDING.NONE).toBe('none');
 });
 
 test('Polygon#forEachSegment', () => {
@@ -184,17 +178,17 @@ test('Polygon#modifyWindingDirection', () => {
   const polygon = new Polygon(testPolygon);
 
   expect(polygon.getWindingDirection(), 'getWindingDirection() returned expected result').toBe(
-    WINDING.COUNTER_CLOCKWISE
+    'counter-clockwise'
   );
 
-  polygon.modifyWindingDirection(WINDING.CLOCKWISE);
+  polygon.modifyWindingDirection('clockwise');
   expect(
     testPolygon.every((value, index) => value === testPolygonReversed[index]),
     'modifyWindingDirection() reversed polygon as expected'
   ).toBeTruthy();
 
   expect(polygon.getWindingDirection(), 'getWindingDirection() returned expected result').toBe(
-    WINDING.CLOCKWISE
+    'clockwise'
   );
 });
 

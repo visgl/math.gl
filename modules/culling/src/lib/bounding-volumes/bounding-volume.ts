@@ -4,7 +4,6 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
-// import {INTERSECTION} from '../../constants';
 import {Plane} from '../plane';
 import type {CullingResult} from '../../constants';
 

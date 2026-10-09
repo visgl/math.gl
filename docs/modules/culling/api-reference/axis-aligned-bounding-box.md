@@ -85,7 +85,7 @@ Returns
 
 - `true` if left and right are equal, `false` otherwise.
 
-### `intersectPlane(plane : Plane) : INTERSECTION`
+### `intersectPlane(plane : Plane) : CullingResult`
 
 Determines which side of a plane the axis-aligned bounding box is located.
 

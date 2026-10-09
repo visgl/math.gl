@@ -121,7 +121,7 @@ Computes a bounding sphere by enlarging the provided sphere to contain the provi
 
 - `point` A point to enclose in a bounding sphere.
 
-### `intersectPlane(plane : Plane) : INTERSECTION`
+### `intersectPlane(plane : Plane) : CullingResult`
 
 Determines which side of a plane a sphere is located.
 

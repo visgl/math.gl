@@ -6,7 +6,6 @@ import {expect, it} from 'vitest';
 import {
   AxisAlignedBoundingBox,
   makeAxisAlignedBoundingBoxFromPoints,
-  INTERSECTION,
   Plane
 } from '@math.gl/culling';
 import {Vector3, Matrix4} from '@math.gl/core';
@@ -138,7 +137,7 @@ it('AxisAlignedBoundingBox#intersectPlane works with box on the positive side of
   const normal = new Vector3(VECTOR3_UNIT_X).negate();
   const position = VECTOR3_UNIT_X;
   const plane = new Plane(normal, -new Vector3(normal).dot(position));
-  expect(box.intersectPlane(plane)).toEqual(INTERSECTION.INSIDE);
+  expect(box.intersectPlane(plane)).toEqual('inside');
 });
 
 it('AxisAlignedBoundingBox#intersectPlane works with box on the negative side of a plane', () => {
@@ -146,7 +145,7 @@ it('AxisAlignedBoundingBox#intersectPlane works with box on the negative side of
   const normal = VECTOR3_UNIT_X;
   const position = VECTOR3_UNIT_X;
   const plane = new Plane(normal, -new Vector3(normal).dot(position));
-  expect(box.intersectPlane(plane)).toEqual(INTERSECTION.OUTSIDE);
+  expect(box.intersectPlane(plane)).toEqual('outside');
 });
 
 it('AxisAlignedBoundingBox#intersectPlane works with box intersecting a plane', () => {
@@ -158,7 +157,7 @@ it('AxisAlignedBoundingBox#intersectPlane works with box intersecting a plane', 
   const normal = VECTOR3_UNIT_X;
   const position = VECTOR3_UNIT_X;
   const plane = new Plane(normal, -new Vector3(normal).dot(position));
-  expect(box.intersectPlane(plane)).toEqual(INTERSECTION.INTERSECTING);
+  expect(box.intersectPlane(plane)).toEqual('intersecting');
 });
 
 it('AxisAlignedBoundingBox#intersectPlane throws without a plane', () => {

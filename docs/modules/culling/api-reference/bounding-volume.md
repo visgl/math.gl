@@ -10,7 +10,7 @@ An interface defining common operations for bounding volumes (i.e. `BoundingSphe
 
 ## Members
 
-### intersectPlane(plane : Plane) : INTERSECTION
+### intersectPlane(plane : Plane) : CullingResult
 
 Determines which side of a plane a sphere is located.
 

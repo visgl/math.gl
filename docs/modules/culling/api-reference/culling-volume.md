@@ -44,8 +44,6 @@ Returns
 
 - `'outside'`, `'intersecting'`, or `'inside'`.
 
-`INTERSECTION.OUTSIDE`, `INTERSECTION.INTERSECTING`, and `INTERSECTION.INSIDE` remain as deprecated string-valued compatibility constants.
-
 ### computeVisibilityWithPlaneMask(boundingVolume : Object, parentPlaneMask : Number) : Number
 
 Determines whether a bounding volume intersects the culling volume.
