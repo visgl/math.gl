@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- feat(geoarrow): Add borrowed batch iteration, row views, and chunk-preserving column assembly without allocating typed arrays.
 - Remove deprecated `_Polygon`, `WINDING`, `INTERSECTION`, and `WebMercatorViewport.getLocationAtPoint()` APIs; retain the Web Mercator default export.
 
 ## v5.0.0-alpha.15

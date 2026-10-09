@@ -30,6 +30,9 @@ export {
   getGeoArrowGeometryType
 } from './types';
 
+export type {GeoArrowBatchView, GeoArrowRowView} from './views';
+export {iterateGeoArrowBatches, getGeoArrowRowView, concatenateGeoArrowColumns} from './views';
+
 export type {
   GeoArrowColumnInspection,
   GeoArrowValidationIssue,
