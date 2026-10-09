@@ -54,6 +54,55 @@ Creates a zero-copy physical view by advancing logical offsets and bitmap bit of
 Count logical rows or native coordinate tuples directly over descriptors. Serialized columns report
 zero native vertices until decoded with the `/wkb` bridge.
 
+## Borrowed geometry batches and rows
+
+These native-geometry APIs create only JavaScript descriptors and reference lists: no new typed
+arrays, subarray views, coordinate copies, rebased offsets, or expanded feature IDs. Existing
+`sliceGeoArrowColumn` and `sliceGeoArrowArray` also retain the original typed-array objects.
+Use valid descriptors; call `validateGeoArrowColumn` separately for untrusted physical input.
+
+Storage is borrowed, not immutable: callers must not mutate, recycle, or transfer/detach buffers
+while any view is in use. Retained streaming batches must keep their original buffers alive.
+Small slices may retain large buffers. Cloning, decoding WKB/WKT, filtering/compaction, interleaving,
+reprojection, and renderer preparation are separate operations outside this allocation guarantee.
+
+### `iterateGeoArrowBatches(column)`
+
+Lazily yields `GeoArrowBatchView` objects containing `column` (a single-chunk envelope), `chunkIndex`,
+and `rowOffset` relative to the input column. Empty chunks are retained; no chunks means no views.
+This iterates physical chunks, not a loader streaming protocol. One loader batch may contain several
+chunks. Row offsets are not feature IDs, byte cursors, or batch sequence numbers.
+
+### `getGeoArrowRowView(column, rowIndex)`
+
+Returns a `GeoArrowRowView` with a one-row `column`, the input `rowIndex`, `chunkIndex`, and
+`chunkRowIndex` before union dispatch. The index must be an in-range nonnegative integer.
+Top-level dense-union dispatch is resolved by type ID, preserving the child's encoding, dimension,
+and coordinate layout. Collection contents remain list/union descriptors, not flattened families.
+Null rows remain null in the returned column; empty and one-part Multi geometries retain identity.
+The returned column can be passed directly to existing bounds and traversal kernels.
+
+```typescript
+import {getGeoArrowRowView, getGeoArrowBounds} from '@math.gl/geoarrow';
+
+const view = getGeoArrowRowView(column, 10);
+const bounds = getGeoArrowBounds(view.column);
+```
+
+### `concatenateGeoArrowColumns(columns)`
+
+Assembles a nonempty iterable of native columns into one envelope and chunk-reference list, without
+concatenating buffers. Encoding, dimension, and coordinate layout must match. Missing `edges` means
+`planar`. CRS and opaque metadata must share references (or be absent); this conservative check
+does not infer semantic equivalence or merge metadata. Explicit null CRS and absent CRS are distinct.
+Equivalent separately constructed metadata
+must be reconciled explicitly by the caller. Union chunks may have different child ordering or
+populated families because each chunk retains its own dispatch descriptors.
+
+Empty columns and chunks are permitted. An empty iterable throws because it supplies no semantic
+envelope. Conflicting semantics throw rather than silently converting coordinates or losing metadata.
+All three helpers reject WKB/WKT and box columns; decode serialized geometry explicitly first.
+
 ## Geometry materialization
 
 ### `materializeGeoArrowRows(column)`

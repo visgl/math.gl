@@ -433,7 +433,8 @@ function materializeUnionRow(
   );
 }
 
-function getEncodingFromChildName(name: string): GeoArrowEncoding {
+/** Resolves legacy union child names when an explicit encoding is absent. */
+export function getEncodingFromChildName(name: string): GeoArrowEncoding {
   const normalized = name.replace(/[^a-z]/gi, '').toLowerCase();
   switch (normalized) {
     case 'point':
