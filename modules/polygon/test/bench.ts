@@ -8,7 +8,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 // @ts-nocheck
-import {earcut, Polygon, modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
+import {earcut, Polygon, modifyPolygonWindingDirection} from '@math.gl/polygon';
 import {toNested} from './utils';
 
 const polygonSmall = [0, 0, 1, 1, 0, 2, -1, 1, -1.25, 0.5, 0, 0];
@@ -21,9 +21,9 @@ const polygonMedium = [
 const polygonMediumNested = toNested(polygonMedium);
 
 // A helper function to swap winding direction on each iteration.
-let winding = WINDING.CLOCKWISE;
+let winding = 'clockwise';
 function nextWinding() {
-  winding = winding === WINDING.CLOCKWISE ? WINDING.COUNTER_CLOCKWISE : WINDING.CLOCKWISE;
+  winding = winding === 'clockwise' ? 'counter-clockwise' : 'clockwise';
   return winding;
 }
 

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-export {INTERSECTION} from './constants';
 export type {CullingResult} from './constants';
 
 export {AxisAlignedBoundingBox} from './lib/bounding-volumes/axis-aligned-bounding-box';

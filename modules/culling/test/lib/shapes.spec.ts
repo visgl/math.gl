@@ -9,7 +9,6 @@ import {
   CapsuleShape,
   CullingVolume,
   CylinderShape,
-  INTERSECTION,
   Plane,
   PlaneShape,
   Ray,
@@ -86,11 +85,11 @@ test('capsule ray intersection returns the retained sphere exit hit from inside'
 test('shape transforms, plane classification and enclosing bounds', () => {
   const sphere = new SphereShape({matrix: new Matrix4().translate([2, 0, 0])});
   expect(sphere.containsPoint([2, 0, 0])).toBe(true);
-  expect(sphere.intersectPlane(new Plane([1, 0, 0], -3))).toBe(INTERSECTION.OUTSIDE);
-  expect(sphere.intersectPlane(new Plane([1, 0, 0], -2))).toBe(INTERSECTION.INTERSECTING);
-  expect(sphere.intersectPlane(new Plane([1, 0, 0], -1))).toBe(INTERSECTION.INSIDE);
+  expect(sphere.intersectPlane(new Plane([1, 0, 0], -3))).toBe('outside');
+  expect(sphere.intersectPlane(new Plane([1, 0, 0], -2))).toBe('intersecting');
+  expect(sphere.intersectPlane(new Plane([1, 0, 0], -1))).toBe('inside');
   expect(new CullingVolume([new Plane([1, 0, 0], 1)]).computeVisibility(new BoxShape())).toBe(
-    INTERSECTION.INSIDE
+    'inside'
   );
   const bounds = sphere.getAxisAlignedBoundingBox();
   expect(bounds && Array.from(bounds.minimum)).toEqual([1.5, -0.5, -0.5]);
@@ -172,9 +171,9 @@ test('plane classification handles bounded rays and alignment cases', () => {
   expect(plane.intersectRay(new Ray(new Vector3(0, 1, 2), new Vector3(0, -1, 0)))).toBeUndefined();
   expect(() => plane.supportLocal([1, 0, 0])).toThrow(/unbounded/);
 
-  expect(plane.intersectPlane(new Plane([0, -1, 0], 1))).toBe(INTERSECTION.INSIDE);
-  expect(plane.intersectPlane(new Plane([0, 1, 0], -1))).toBe(INTERSECTION.OUTSIDE);
-  expect(plane.intersectPlane(new Plane([1, 0, 0], 0))).toBe(INTERSECTION.INTERSECTING);
+  expect(plane.intersectPlane(new Plane([0, -1, 0], 1))).toBe('inside');
+  expect(plane.intersectPlane(new Plane([0, 1, 0], -1))).toBe('outside');
+  expect(plane.intersectPlane(new Plane([1, 0, 0], 0))).toBe('intersecting');
   const flipped = new PlaneShape({matrix: new Matrix4().scale([1, -1, 1])});
-  expect(flipped.intersectPlane(new Plane([0, -1, 0], -1))).toBe(INTERSECTION.OUTSIDE);
+  expect(flipped.intersectPlane(new Plane([0, -1, 0], -1))).toBe('outside');
 });

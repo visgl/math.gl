@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+- Remove deprecated `_Polygon`, `WINDING`, `INTERSECTION`, and `WebMercatorViewport.getLocationAtPoint()` APIs; retain the Web Mercator default export.
+
 ## v5.0.0-alpha.15
 
 - feat(geospatial): Add lightweight tile matrix utilities, package boundary validation, and API documentation (#244).

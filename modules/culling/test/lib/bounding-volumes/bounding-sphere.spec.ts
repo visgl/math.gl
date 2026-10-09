@@ -10,7 +10,7 @@
 import {test, expect} from 'vitest';
 
 import {Vector3, Matrix4, equals} from '@math.gl/core';
-import {BoundingSphere, Plane, INTERSECTION} from '@math.gl/culling';
+import {BoundingSphere, Plane} from '@math.gl/culling';
 
 // const positionsRadius = 1.0;
 // const positionsCenter = new Vector3(10000001.0, 0.0, 0.0);
@@ -145,7 +145,7 @@ test('BoundingSphere#intersectPlane with sphere on the positive side of a plane'
   const normal = new Vector3(VECTOR3_UNIT_X).negate();
   const position = VECTOR3_UNIT_X;
   const plane = new Plane(normal, -normal.dot(position));
-  expect(sphere.intersectPlane(plane)).toBe(INTERSECTION.INSIDE);
+  expect(sphere.intersectPlane(plane)).toBe('inside');
 });
 
 test('BoundingSphere#intersectPlane with sphere on the negative side of a plane', () => {
@@ -153,7 +153,7 @@ test('BoundingSphere#intersectPlane with sphere on the negative side of a plane'
   const normal = VECTOR3_UNIT_X;
   const position = VECTOR3_UNIT_X;
   const plane = new Plane(normal, -normal.dot(position));
-  expect(sphere.intersectPlane(plane)).toBe(INTERSECTION.OUTSIDE);
+  expect(sphere.intersectPlane(plane)).toBe('outside');
 });
 
 test('BoundingSphere#intersectPlane with sphere intersecting a plane', () => {
@@ -161,7 +161,7 @@ test('BoundingSphere#intersectPlane with sphere intersecting a plane', () => {
   const normal = VECTOR3_UNIT_X;
   const position = VECTOR3_UNIT_X;
   const plane = new Plane(normal, -normal.dot(position));
-  expect(sphere.intersectPlane(plane)).toBe(INTERSECTION.INTERSECTING);
+  expect(sphere.intersectPlane(plane)).toBe('intersecting');
 });
 
 test('BoundingSphere#expands to contain another sphere', () => {

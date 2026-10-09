@@ -403,11 +403,4 @@ export class WebMercatorViewport {
   getBoundingRegion(options: {z?: number} = {}): number[][] {
     return getBounds(this, options.z || 0);
   }
-
-  // DEPRECATED
-
-  /** @deprecated Legacy method name */
-  getLocationAtPoint({lngLat, pos}: {lngLat: number[]; pos: number[]}): number[] {
-    return this.getMapCenterByLngLatPosition({lngLat, pos});
-  }
 }

@@ -13,15 +13,6 @@ export type WindingDirection = 'clockwise' | 'counter-clockwise' | 'none';
 /** A non-degenerate polygon winding direction. */
 export type PolygonWinding = Exclude<WindingDirection, 'none'>;
 
-/**
- * @deprecated Use the string values of {@link WindingDirection} directly.
- */
-export enum WINDING {
-  CLOCKWISE = 'clockwise',
-  COUNTER_CLOCKWISE = 'counter-clockwise',
-  NONE = 'none'
-}
-
 /** Polygon representation where each point is represented as a separate array of positions. */
 type PointsArray = NumericArray[];
 

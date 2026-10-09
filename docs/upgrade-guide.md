@@ -4,6 +4,15 @@
 
 Version 5 removes deprecated APIs and moves low-level functions to focused subpath imports.
 
+### Polygon, culling, and viewport APIs
+
+| Removed API | Replacement |
+| --- | --- |
+| `_Polygon` | `Polygon` |
+| `WINDING.CLOCKWISE`, `.COUNTER_CLOCKWISE`, `.NONE` | `'clockwise'`, `'counter-clockwise'`, `'none'` (`WindingDirection`) |
+| `INTERSECTION.OUTSIDE`, `.INTERSECTING`, `.INSIDE` | `'outside'`, `'intersecting'`, `'inside'` (`CullingResult`) |
+| `viewport.getLocationAtPoint(options)` | `viewport.getMapCenterByLngLatPosition(options)` |
+
 ### TypeScript and runtime support
 
 - Use TypeScript 6.0 or later for the `Float16Array` declarations.

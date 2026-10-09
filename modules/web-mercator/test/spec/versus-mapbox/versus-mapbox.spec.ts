@@ -85,12 +85,12 @@ test('Viewport vs Mapbox project 3D', () => {
   }
 });
 
-test('Viewport/Mapbox getLocationAtPoint', () => {
+test('Viewport/Mapbox getMapCenterByLngLatPosition', () => {
   for (const viewportName in VIEWPORT_PROPS) {
     const viewportProps = VIEWPORT_PROPS[viewportName];
     for (const {title, lngLat} of TEST_CASES) {
       const viewport = new WebMercatorViewport(viewportProps);
-      const llp = viewport.getLocationAtPoint({lngLat, pos: [100, 100]});
+      const llp = viewport.getMapCenterByLngLatPosition({lngLat, pos: [100, 100]});
 
       const transform = new MapboxTransform(viewportProps);
       const llm = transform.mapboxGetLngLatAtPoint({
@@ -100,7 +100,7 @@ test('Viewport/Mapbox getLocationAtPoint', () => {
 
       expect(
         toLowPrecision(llp),
-        `getLocationAtPoint(${title}, ${viewportName})) - viewport/mapbox match`
+        `getMapCenterByLngLatPosition(${title}, ${viewportName})) - viewport/mapbox match`
       ).toEqual(toLowPrecision(llm));
     }
   }

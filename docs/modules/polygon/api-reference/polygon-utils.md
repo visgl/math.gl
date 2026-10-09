@@ -18,8 +18,6 @@ import {getPolygonWindingDirection} from '@math.gl/polygon';
 
 `'clockwise' | 'counter-clockwise' | 'none'`
 
-`WINDING.CLOCKWISE`, `WINDING.COUNTER_CLOCKWISE`, and `WINDING.NONE` remain as deprecated string-valued compatibility constants.
-
 ### PolygonParams
 
 `PolygonParams`

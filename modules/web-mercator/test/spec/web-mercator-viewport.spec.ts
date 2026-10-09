@@ -110,7 +110,7 @@ test('WebMercatorViewport.project#2D', () => {
   }
 });
 
-test('WebMercatorViewport.getLocationAtPoint', () => {
+test('WebMercatorViewport.getMapCenterByLngLatPosition', () => {
   config.EPSILON = 1e-6;
   const TEST_POS = [200, 200];
 
@@ -119,7 +119,7 @@ test('WebMercatorViewport.getLocationAtPoint', () => {
     for (const tc in VIEWPORT_PROPS) {
       const lngLat = [VIEWPORT_PROPS[tc].longitude, VIEWPORT_PROPS[tc].latitude];
 
-      const [newLng, newLat] = viewport.getLocationAtPoint({lngLat, pos: TEST_POS});
+      const [newLng, newLat] = viewport.getMapCenterByLngLatPosition({lngLat, pos: TEST_POS});
 
       const newViewport = new WebMercatorViewport(
         Object.assign({}, VIEWPORT_PROPS[vc], {
