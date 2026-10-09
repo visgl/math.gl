@@ -5,6 +5,7 @@
 import {existsSync, readdirSync, readFileSync, statSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {extractMarkdownLinks} from './markdown-links.mjs';
 
 const websiteDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const buildDirectory = path.join(websiteDirectory, 'build');
@@ -55,15 +56,6 @@ function findFiles(directory, extension) {
     }
   }
   return filePaths;
-}
-
-function extractMarkdownLinks(markdown) {
-  const links = [];
-  const markdownLinkPattern = /!?\[[^\]]*\]\(([^)\s]+)(?:\s+["'][^"']*["'])?\)/g;
-  for (const match of markdown.matchAll(markdownLinkPattern)) {
-    links.push(match[1].replace(/^<|>$/g, ''));
-  }
-  return links;
 }
 
 function resolveGeneratedMarkdownLink(sourcePath, link) {

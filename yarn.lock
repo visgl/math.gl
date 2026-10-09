@@ -19910,6 +19910,8 @@ __metadata:
     proj4: "npm:2.22.0"
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
+    remark-parse: "npm:^11.0.0"
+    unified: "npm:^11.0.5"
     webpack: "npm:^5.109.2"
   languageName: unknown
   linkType: soft
@@ -22678,7 +22680,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unified@npm:^11, unified@npm:^11.0.0, unified@npm:^11.0.3, unified@npm:^11.0.4":
+"unified@npm:^11, unified@npm:^11.0.0, unified@npm:^11.0.3, unified@npm:^11.0.4, unified@npm:^11.0.5":
   version: 11.0.5
   resolution: "unified@npm:11.0.5"
   dependencies:
