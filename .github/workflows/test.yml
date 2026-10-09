@@ -66,6 +66,9 @@ jobs:
       - name: Check generated CRS declarations
         run: yarn check:projjson-types
 
+      - name: Validate agent skill and offline evaluation corpus
+        run: node --test test/llm/*.test.mjs
+
       - name: Test website dependency resolution
         run: node --test website/resolve-math-gl-dependency.test.cjs
 

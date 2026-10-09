@@ -117,6 +117,30 @@ config.plugins.push(() => ({
 }));
 
 config.baseUrl = websiteBaseUrl;
+const basePathSegments = websiteBaseUrl.split('/').filter(Boolean);
+const routePrefix = basePathSegments.length ? `/${basePathSegments.join('/')}` : '';
+config.plugins.push([
+  '@signalwire/docusaurus-plugin-llms-txt',
+  {
+    siteTitle: 'math.gl',
+    siteDescription: 'Modular JavaScript mathematics for 3D and geospatial applications.',
+    depth: Math.min(5, 3 + basePathSegments.length),
+    enableDescriptions: true,
+    includeOrder: ['/docs/developer-guide/**', '/docs/modules/**'].map(route => routePrefix + route),
+    onRouteError: 'throw',
+    content: {
+      enableMarkdownFiles: true,
+      enableLlmsFullTxt: false,
+      relativePaths: false,
+      includeBlog: false,
+      includePages: false,
+      includeDocs: true,
+      includeVersionedDocs: false,
+      includeGeneratedIndex: true,
+      excludeRoutes: ['/examples/**'].map(route => routePrefix + route)
+    }
+  }
+]);
 config.favicon = 'images/visgl-favicon.png';
 // Serve the optional geometry independently of the JavaScript bundle.
 config.staticDirectories = [...config.staticDirectories, '../modules/timezone/data'];
