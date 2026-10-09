@@ -1,0 +1,332 @@
+# Matrix4
+
+![From v1.0](https://img.shields.io/badge/From-v1.0-blue.svg?style=flat-square)
+
+A 4x4 matrix. Any arguments to `Matrix4` methods can be plain JavaScript arrays or other `math.gl` objects.
+
+## Usage[​](#usage "Direct link to Usage")
+
+```
+import {Matrix4} from '@math.gl/core';
+```
+
+Copy a matrix to a `Matrix4` so that it can be manipulated (and mutated) with `Matrix4` methods:
+
+```
+const m = new Matrix4().translate([1, 0, 0]);
+```
+
+Create a perspective projection matrix
+
+```
+const projectionMatrix = new Matrix4().perspective({fovy: Math.PI / 3, aspect: 1, near: 0.1, far: 1000});
+```
+
+Create an orthographic projection matrix
+
+```
+const projectionMatrix = new Matrix4().ortho({left: -1, right: 1, bottom: -1, top: 1, near: 0.1, far: 1000});
+```
+
+Invert a matrix
+
+```
+const inverse = matrix.invert();
+```
+
+Transform a vector as a point (including translations)
+
+```
+const transform = new Matrix4();
+
+const vector2 = transform.transformAsPoint([0, 0]);
+
+const vector3 = transform.transformAsPoint([0, 1, 2]);
+
+const vector4 = transform.transform([0, 1, 2, 1]);
+```
+
+Transform a vector as a direction (NOT including translations)
+
+```
+const transform = new Matrix4();
+
+const vector2 = transform.transformAsVector([0, 0]);
+
+const vector3 = transform.transformAsVector([0, 1, 2]);
+
+const vector4 = transform.transform([0, 1, 2, 0]);
+```
+
+## Inheritance[​](#inheritance "Direct link to Inheritance")
+
+`class Matrix4 extends` [`Matrix`](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/matrix.md) `extends` [`MathArray`](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/math-array.md) `extends` [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)
+
+Many basic methods are inherited:
+
+* `matrix4.clone()`
+* `matrix4.copy(array)`
+* `matrix4.set(...args)`
+* `matrix4.fromArray(array, offset = 0)`
+* `matrix4.toString()`
+* `matrix4.toArray(array = [], offset = 0)`
+* `matrix4.equals(array)`
+* `matrix4.exactEquals(array)`
+* `matrix4.validate()`
+* `matrix4.check()`
+
+Since `Matrix4` is a subclass of the built in JavaScript `Array` it can be used directly as a parameter to any function expecting an `Array`.
+
+## Methods[​](#methods "Direct link to Methods")
+
+### `constructor()`[​](#constructor "Direct link to constructor")
+
+Creates an identity matrix; pass an array to copy its elements.
+
+`new Matrix4()`
+
+### `identity(): this`[​](#identity-this "Direct link to identity-this")
+
+Sets the matrix to the multiplicative identity matrix.
+
+`matrix4.identity()`
+
+### `set(...number): this`[​](#setnumber-this "Direct link to setnumber-this")
+
+Sets the elements of the matrix.
+
+`matrix4.set(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33)`
+
+### `fromQuaternion(quaternion: Quaternion): this`[​](#fromquaternionquaternion-quaternion-this "Direct link to fromquaternionquaternion-quaternion-this")
+
+Sets the matrix to a transformation corresponding to the rotations represented by the given quaternion.
+
+`matrix4.fromQuaternion(quaternion)`
+
+* `quaternion` (`Quaternion`) - the quaternion to create matrix from
+
+### `fromMatrix3(matrix3: Matrix3 | number[9]): this`[​](#frommatrix3matrix3-matrix3--number9-this "Direct link to frommatrix3matrix3-matrix3--number9-this")
+
+Sets the upper-left 3x3 elements from `matrix3`, with zero translation.
+
+### `frustum(options: {left: number, right: number, bottom: number, top: number, near: number, far: number}): this`[​](#frustumoptions-left-number-right-number-bottom-number-top-number-near-number-far-number-this "Direct link to frustumoptions-left-number-right-number-bottom-number-top-number-near-number-far-number-this")
+
+Generates a frustum matrix with the given bounds. The frustum far plane can be infinite.
+
+`matrix4.frustum({left, right, bottom, top, near, far})`
+
+* `left` (`number`) - Left bound of the frustum
+* `right` (`number`) - Right bound of the frustum
+* `bottom` (`number`) - Bottom bound of the frustum
+* `top` (`number`) - Top bound of the frustum
+* `near` (`number`) - Near bound of the frustum
+* `far` (`number`|`Infinity`) - Far bound of the frustum
+
+### `lookAt(options?: {eye: number, center: number, up: number}): this`[​](#lookatoptions-eye-number-center-number-up-number-this "Direct link to lookatoptions-eye-number-center-number-up-number-this")
+
+Generates a look-at matrix with the given eye position, focal point, and up axis
+
+`matrix4.lookAt({eye, center, up})`
+
+* `eye` (`Vector3`|`number[3]`) - Position of the viewer
+* `center`=`[0, 0, 0]` (`Vector3`|`number[3]`) vec3 Point the viewer is looking at
+* `up`=`[0, 1, 0]` (`Vector3`|`number[3]`) vec3 vec3 pointing up
+
+### `ortho(options: {left: number, right: number, bottom: number, top: number, near?: number, far: number}): this`[​](#orthooptions-left-number-right-number-bottom-number-top-number-near-number-far-number-this "Direct link to orthooptions-left-number-right-number-bottom-number-top-number-near-number-far-number-this")
+
+Generates a orthogonal projection matrix with the given bounds
+
+`matrix4.ortho({left, right, bottom, top, near = 0.1, far = 500})`
+
+* `left` (`number`) - Left bound of the frustum
+* `right` (`number`) - Right bound of the frustum
+* `bottom` (`number`) - Bottom bound of the frustum
+* `top` (`number`) - Top bound of the frustum
+* `near` (`number`) - Near bound of the frustum
+* `far` (`number`) - Far bound of the frustum
+
+### `orthographic()`[​](#orthographic "Direct link to orthographic")
+
+Generates an orthogonal projection matrix with the same parameters as a perspective matrix (plus `focalDistance`).
+
+* `Matrix4.orthographic({fovy, aspect, focalDistance, near, far})`
+
+* `fovy` (`number`) - Vertical field of view in radians
+
+* `aspect` (`number`) - Aspect ratio. typically viewport width/height
+
+* `focalDistance` (`number`) - selects which plane in the perspective view frustum should be used to calculate the size of the orthographic view box.
+
+* `near`=`0.1` (`number`) - Near bound of the frustum
+
+* `far`=`500` (`number`) - Far bound of the frustum
+
+> In applications it is not unusual to want to offer both perspective and orthographic views and this method is supplied to make this as simple as possible.
+
+### `perspective()`[​](#perspective "Direct link to perspective")
+
+Generates a perspective projection matrix with the given bounds. The frustum far plane can be infinite.
+
+`matrix4.perspective({ fovy = 45 * Math.PI - / 180, aspect = 1, near = 0.1, far = 500 })`
+
+* `fovy`=`45` (`number`) - Vertical field of view in radians (default is 45 degrees specified in radians)
+* `aspect`=`1` (`number`) - Aspect ratio. typically viewport width/height
+* `near`=`0.1` (`number`) - Near bound of the frustum
+* `far`=`500` (`number`|`Infinity`) - Far bound of the frustum
+
+### `determinant(): number`[​](#determinant-number "Direct link to determinant-number")
+
+Returns the determinant of the matrix (does not modify the matrix).
+
+`const determinant = matrix4.determinant()`
+
+Returns (`number`) - the determinant
+
+* If the determinant is zero, the matrix is not invertible.
+* Determinant calculation is somewhat expensive.
+
+### `transpose(): this`[​](#transpose-this "Direct link to transpose-this")
+
+Sets this matrix to its transpose matrix.
+
+`matrix4.transpose()`
+
+* The transpose matrix mirrors the original matrix elements in the diagonal.
+
+### `invert(): this`[​](#invert-this "Direct link to invert-this")
+
+Sets this matrix to its inverse matrix.
+
+`matrix4.invert()`
+
+* The inverse matrix mirrors the original matrix elements in the diagonal.
+
+### `multiplyLeft(matrix: number[16]): this`[​](#multiplyleftmatrix-number16-this "Direct link to multiplyleftmatrix-number16-this")
+
+Multiplies in another matrix from the left
+
+`matrix4.multiplyLeft(matrix4)`
+
+* When using `Matrix4` to transform vectors, the vectors are multiplied in from the right. This means that the multiplying in a matrix from the left will cause it to be applied last during transformation (unless additional matrices are multiplied in from the left of course).
+
+### `multiplyRight(matrix: number[16]): this`[​](#multiplyrightmatrix-number16-this "Direct link to multiplyrightmatrix-number16-this")
+
+`matrix4.multiplyRight(matrix4)`
+
+* When using `Matrix4` to transform vectors, the vectors are multiplied in from the right. This means that the multiplying in a matrix from the left will cause it to be applied last during transformation (unless additional matrices are multiplied in from the left of course).
+
+### `rotateX(radians: number): this`[​](#rotatexradians-number-this "Direct link to rotatexradians-number-this")
+
+Adds a rotation by the given angle around the X axis. Equivalent to right multiplying the new transform into the matrix but more performant.
+
+`matrix4.rotateX(radians)`
+
+### `rotateY(radians: number): this`[​](#rotateyradians-number-this "Direct link to rotateyradians-number-this")
+
+Adds a rotation by the given angle around the Y axis.
+
+`rotateY(radians)`
+
+* Equivalent to right multiplying the new transform into the matrix but more performant.
+
+### `rotateZ(radians: number): this`[​](#rotatezradians-number-this "Direct link to rotatezradians-number-this")
+
+Adds a rotation by the given angle around the Z axis.
+
+`matrix4.rotateZ(radians)`
+
+* Equivalent to right multiplying the new transform into the matrix but more performant.
+
+### `rotateXYZ(angles: [rx: number, ry: number, rz: `number]): this[​](#rotatexyzangles-rx-number-ry-number-rz-number-this "Direct link to rotatexyzangles-rx-number-ry-number-rz-number-this")
+
+Adds successive rotations by the given angles around the X, Y and Z axis.
+
+`rotateXYZ([rx, ry, rz])`
+
+* Equivalent to right multiplying the new transform into the matrix but more performant.
+
+### `rotateAxis(radians: number, axis: number[3]): this`[​](#rotateaxisradians-number-axis-number3-this "Direct link to rotateaxisradians-number-axis-number3-this")
+
+Adds successive rotations by the given angles around the X, Y and Z axis.
+
+`rotateAxis(radians, axis)`
+
+Equivalent to right multiplying the new transform into the matrix but more performant.
+
+### `scale(factor: number | number[3]): this`[​](#scalefactor-number--number3-this "Direct link to scalefactor-number--number3-this")
+
+Adds a scaling transform, each axis can be scaled independently.
+
+`matrix4.scale(factor)`
+
+* `factor` (number) - scale factor to be applied to each axis.
+
+`matrix4.scale([x, y, z])`
+
+* `x` (number) - scale factor to be multiplied into x component
+* `y` (number) - scale factor to be multiplied into y component
+* `z` (number) - scale factor to be multiplied into z component
+
+Equivalent to right multiplying the new transform into the matrix but more performant.
+
+* During vector transformation all coordinates will be multiplied with the given factors.
+* Scale with `-1` will flip the coordinate system in that axis.
+* Scale with `0` will drop that component.
+
+### `translate(scale: number[3]): this`[​](#translatescale-number3-this "Direct link to translatescale-number3-this")
+
+Adds a translation to the matrix.
+
+`matrix4.translate([x, y, z])`
+
+* `x` (number) - translation to be added to the x component
+* `y` (number) - translation to be added to the y component
+* `z` (number) - translation to be added to the z component
+
+Equivalent to right multiplying the new transform into the matrix but more performant.
+
+During vector transformation the given translation values are added to each component of the vector being transformed.
+
+## Decomposition[​](#decomposition "Direct link to Decomposition")
+
+### `getRotation(result?: number[16]) : number[16]`[​](#getrotationresult-number16--number16 "Direct link to getrotationresult-number16--number16")
+
+Returns a 4x4 rotation matrix.
+
+### `getRotationMatrix3(result?: number[9]) : number[9]`[​](#getrotationmatrix3result-number9--number9 "Direct link to getrotationmatrix3result-number9--number9")
+
+Returns a 3x3 rotation matrix.
+
+### `getTranslation(result?: number[3]) : number[3]`[​](#gettranslationresult-number3--number3 "Direct link to gettranslationresult-number3--number3")
+
+Returns the 3-element translation vector component of the affine transform described by the matrix.
+
+For performance, an existing vector can be provided, if not a new vector will be returned.
+
+### `getScale(result?: number[3]) : number[3]`[​](#getscaleresult-number3--number3 "Direct link to getscaleresult-number3--number3")
+
+Returns the 3-element scale vector component of the affine transform described by the matrix.
+
+For performance, an existing vector can be provided, if not a new vector will be returned.
+
+## Point Transformations[​](#point-transformations "Direct link to Point Transformations")
+
+### `transformAsPoint(vector : number[2] | number[3])`[​](#transformaspointvector--number2--number3 "Direct link to transformaspointvector--number2--number3")
+
+Transforms a two- or three-element vector as a "point" by multiplying it (from the right) with this matrix. `Point` here means that the returned vector will include any translations in this matrix.
+
+`const vector = matrix4.transformAsPoint(vector, result)`
+
+* `vector` (`Array`|`Vector2`|`Vector3`)
+* `result` - unless supplied, a plain array matching the input length is allocated.
+
+### `transformAsVector(vector : number[2] | number[3])`[​](#transformasvectorvector--number2--number3 "Direct link to transformasvectorvector--number2--number3")
+
+Transforms a two- or three-element vector interpreted as a direction (i.e. all vectors are based in the origin so the transformation not pick up any translations from the matrix).
+
+`const vector = matrix4.transformAsVector(vector, result)`
+
+## Remarks[​](#remarks "Direct link to Remarks")
+
+* All transforms are effectively "right multiplied" onto the matrix (meaning that during transform they will be applied in opposite order).
+* `Matrix4` is stored internally in column major format (per WebGL conventions). This only matters when you read out the matrix to use it with other software.

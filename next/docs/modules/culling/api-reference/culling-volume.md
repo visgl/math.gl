@@ -1,0 +1,58 @@
+# CullingVolume
+
+![From v3.0](https://img.shields.io/badge/From-v3.0-blue.svg?style=flat-square)
+
+A culling volume defined by planes.
+
+## Static Members[​](#static-members "Direct link to Static Members")
+
+### CullingVolume.MASK\_OUTSIDE[​](#cullingvolumemask_outside "Direct link to CullingVolume.MASK_OUTSIDE")
+
+For plane masks (as used in `CullingVolume#computeVisibilityWithPlaneMask`), this special value represents the case where the object bounding volume is entirely outside the culling volume.
+
+### CullingVolume.MASK\_INSIDE[​](#cullingvolumemask_inside "Direct link to CullingVolume.MASK_INSIDE")
+
+For plane masks (as used in `CullingVolume.computeVisibilityWithPlaneMask`), this value represents the case where the object bounding volume is entirely inside the culling volume.
+
+### CullingVolume.MASK\_INDETERMINATE[​](#cullingvolumemask_indeterminate "Direct link to CullingVolume.MASK_INDETERMINATE")
+
+For plane masks (as used in`CullingVolume.computeVisibilityWithPlaneMask`), this value represents the case where the object bounding volume (may) intersect all planes of the culling volume.
+
+## Methods[​](#methods "Direct link to Methods")
+
+### constructor(planes: Plane\[] = \[])[​](#constructorplanes-plane-- "Direct link to constructor(planes: Plane\[] = \[])")
+
+* `planes`=`[]` An array of clipping planes.
+
+Each entry is a `Plane` with a normalized inward-facing normal and signed distance. The plane equation is `dot(normal, position) + distance = 0`; the nonnegative side is inside.
+
+### fromBoundingSphere(boundingSphere : BoundingSphere)[​](#fromboundingsphereboundingsphere--boundingsphere "Direct link to fromBoundingSphere(boundingSphere : BoundingSphere)")
+
+Constructs a culling volume from a bounding sphere. Creates six planes that create a box containing the sphere. The planes are aligned to the x, y, and z axes in world coordinates.
+
+* `boundingSphere` The bounding sphere used to create the culling volume.
+
+### computeVisibility(boundingVolume : Object) : CullingResult[​](#computevisibilityboundingvolume--object--cullingresult "Direct link to computeVisibility(boundingVolume : Object) : CullingResult")
+
+Determines whether a bounding volume intersects the culling volume.
+
+* `boundingVolume` The bounding volume whose intersection with the culling volume is to be tested.
+
+Returns
+
+* `'outside'`, `'intersecting'`, or `'inside'`.
+
+### computeVisibilityWithPlaneMask(boundingVolume : Object, parentPlaneMask : Number) : Number[​](#computevisibilitywithplanemaskboundingvolume--object-parentplanemask--number--number "Direct link to computeVisibilityWithPlaneMask(boundingVolume : Object, parentPlaneMask : Number) : Number")
+
+Determines whether a bounding volume intersects the culling volume.
+
+* `boundingVolume` The bounding volume whose intersection with the culling volume is to be tested.
+* `parentPlaneMask` A bit mask from the boundingVolume's parent's check against the same culling volume, such that if `planeMask & (1 << planeIndex) === 0`, for `k < 31`, then the parent (and therefore this) volume is completely inside `plane[planeIndex]` and that plane check can be skipped.
+
+Returns
+
+* A plane mask as described above (which can be applied to this boundingVolume's children).
+
+## Attribution[​](#attribution "Direct link to Attribution")
+
+This class was ported from [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) under the Apache 2 License.

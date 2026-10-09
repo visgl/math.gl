@@ -1,0 +1,86 @@
+# makeOBBFromRegion
+
+![From v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)
+
+Builds a conservative [`OrientedBoundingBox`](https://visgl.github.io/math.gl/next/docs/modules/culling/api-reference/oriented-bounding-box.md) for a longitude–latitude–height region on an ellipsoid. This is useful for 3D Tiles regions, globe rendering, spatial indexing, and frustum culling.
+
+The returned box is expressed in ellipsoid-fixed Cartesian coordinates. Its orientation is an implementation detail and may change between releases.
+
+## Usage[​](#usage "Direct link to Usage")
+
+```
+import {toRadians} from '@math.gl/core';
+
+import {makeOBBFromRegion} from '@math.gl/geospatial';
+
+
+
+const region = [
+
+  toRadians(-30), // west
+
+  toRadians(35),  // south
+
+  toRadians(20),  // east
+
+  toRadians(55),  // north
+
+  0,              // minimumHeight
+
+  1000            // maximumHeight
+
+];
+
+
+
+const box = makeOBBFromRegion(region);
+```
+
+## Function[​](#function "Direct link to Function")
+
+### `makeOBBFromRegion(region, ellipsoid?, options?) : OrientedBoundingBox`[​](#makeobbfromregionregion-ellipsoid-options--orientedboundingbox "Direct link to makeobbfromregionregion-ellipsoid-options--orientedboundingbox")
+
+`region` is `[west, south, east, north, minimumHeight, maximumHeight]`. Longitudes and latitudes are in radians by default, matching the OGC 3D Tiles region definition. Heights use the ellipsoid's linear unit, normally meters. Use `options.units: 'degrees'` for degree input.
+
+Latitudes must be in `[-π/2, π/2]` (or `[-90, 90]` in degree mode), `south` must not exceed `north`, and minimum height must not exceed maximum height.
+
+### Longitude wrapping[​](#longitude-wrapping "Direct link to Longitude wrapping")
+
+Longitude values outside the conventional range are accepted. The boundaries retain the directed eastward semantics used by 3D Tiles and `LngLatRectangle`: if `east < west`, the interval crosses the antimeridian and continues eastward through ±180°.
+
+```
+const datelineRegion = [170, -10, -170, 10, 0, 250];
+
+const box = makeOBBFromRegion(datelineRegion, undefined, {units: 'degrees'});
+```
+
+This describes a 20° region centered on ±180°. A region from `10°` to `-10°` is the directed 340° interval, not the shorter 20° interval. Equal endpoints describe zero width, while endpoints separated by one full turn (for example `0°` to `360°`) describe a full-globe longitude span.
+
+### Ellipsoid[​](#ellipsoid "Direct link to Ellipsoid")
+
+The optional ellipsoid defaults to `Ellipsoid.WGS84`:
+
+```
+import {Ellipsoid, makeOBBFromRegion} from '@math.gl/geospatial';
+
+
+
+const moon = new Ellipsoid(1737400, 1737400, 1737400);
+
+const box = makeOBBFromRegion(region, moon);
+```
+
+### Options[​](#options "Direct link to Options")
+
+| Property    | Type                     | Default     | Description                                                               |
+| ----------- | ------------------------ | ----------- | ------------------------------------------------------------------------- |
+| `units`     | `'radians' \| 'degrees'` | `'radians'` | Units for longitude and latitude. Heights are never converted.            |
+| `transform` | `Matrix4`                | —           | Affine transform from ellipsoid-fixed coordinates into world coordinates. |
+
+The transform is applied exactly once and may include translation, rotation, non-uniform scale, or shear. Translation affects the center; the linear part affects the half-axes. For 3D Tiles, do not automatically pass `tile.transform`: the 3D Tiles specification exempts region bounding volumes from that transform. Inputs and caller-owned values are never mutated.
+
+## Errors and edge cases[​](#errors-and-edge-cases "Direct link to Errors and edge cases")
+
+The function throws for malformed regions, non-finite values, reversed heights, or invalid latitudes. A tiny tolerance is allowed at the latitude boundaries and values are clamped to the exact pole before conversion.
+
+Zero-width longitude, zero-height latitude, zero-height altitude, and point-like regions are valid. Regions touching either pole are valid and produce finite results even though longitude lines converge there. The box encloses the curved region conservatively; it is not an exact minimum-volume box.
