@@ -68,7 +68,11 @@ export function getGeoArrowRowView(column: GeoArrowColumn, rowIndex: number): Ge
       ...column,
       chunks: [sliceGeoArrowArray(chunk, chunkRowIndex, chunkRowIndex + 1)]
     };
-    if (column.encoding === 'geoarrow.geometry') {
+    // A parent-masked union row has no child value to resolve; dispatch may be unused.
+    if (
+      column.encoding === 'geoarrow.geometry' &&
+      isGeoArrowValueValid(chunk.validity, chunkRowIndex)
+    ) {
       if (chunk.kind !== 'dense-union') {
         throw new Error('Mixed GeoArrow geometry requires dense-union storage');
       }
@@ -89,17 +93,12 @@ export function getGeoArrowRowView(column: GeoArrowColumn, rowIndex: number): Ge
       if (encoding === 'geoarrow.geometry') {
         throw new Error('GeoArrow geometry union children must be concrete geometries');
       }
-      let data = sliceGeoArrowArray(child.data, valueOffset, valueOffset + 1);
-      // A null parent masks a valid child without constructing an intersected bitmap.
-      if (!isGeoArrowValueValid(chunk.validity, chunkRowIndex)) {
-        data = {...data, validity: rowColumn.chunks[0].validity};
-      }
+      const data = sliceGeoArrowArray(child.data, valueOffset, valueOffset + 1);
       rowColumn = {
         ...column,
         encoding,
         dimension: child.dimension ?? column.dimension,
-        coordinateLayout:
-          child.coordinateLayout === undefined ? column.coordinateLayout : child.coordinateLayout,
+        coordinateLayout: child.coordinateLayout ?? column.coordinateLayout,
         chunks: [data]
       };
       assertNativeGeometryColumn(rowColumn);

@@ -7,6 +7,7 @@ import {
   concatenateGeoArrowColumns,
   getGeoArrowBounds,
   getGeoArrowRowView,
+  interleaveGeoArrowCoordinates,
   iterateGeoArrowBatches,
   makeGeoArrowColumnFromGeometryRows,
   materializeGeoArrowRows,
@@ -210,6 +211,48 @@ test('union views preserve collections, nulls and empties without regrouping chi
       expect(collectTypedArrays(source).has(array)).toBe(true);
   }
 });
+
+test.each([1, 99])('parent-null union rows preserve unused dispatch for type ID %s', typeId => {
+  const empty = makeGeoArrowColumnFromGeometryRows([], {encoding: 'geoarrow.point'});
+  const union: GeoArrowDenseUnion = {
+    kind: 'dense-union',
+    length: 2,
+    validity: {values: new Uint8Array([0])},
+    typeIds: new Int8Array([typeId, typeId]),
+    valueOffsets: new Int32Array([0, 0]),
+    children: [{name: 'Point', typeId: 1, data: empty.chunks[0]}]
+  };
+  const source: GeoArrowColumn = {...empty, encoding: 'geoarrow.geometry', chunks: [union]};
+  expect(validateGeoArrowColumn(source).valid).toBe(true);
+  const view = getGeoArrowRowView(sliceGeoArrowColumn(source, 1), 0);
+  expect(view.column.encoding).toBe('geoarrow.geometry');
+  expect(validateGeoArrowColumn(view.column).valid).toBe(true);
+  expect(materializeGeoArrowRows(view.column)).toEqual([null]);
+  expect(getGeoArrowBounds(view.column)).toBeNull();
+  for (const array of collectTypedArrays(view))
+    expect(collectTypedArrays(source).has(array)).toBe(true);
+});
+
+test.each(['interleaved', 'separated'] as const)(
+  'union rows inherit %s layout from null child metadata',
+  coordinateLayout => {
+    const point = makeGeoArrowColumnFromGeometryRows([geometries[0]], {coordinateLayout});
+    const union: GeoArrowDenseUnion = {
+      kind: 'dense-union',
+      length: 1,
+      typeIds: new Int8Array([1]),
+      valueOffsets: new Int32Array([0]),
+      children: [{name: 'Point', typeId: 1, coordinateLayout: null, data: point.chunks[0]}]
+    };
+    const source: GeoArrowColumn = {...point, encoding: 'geoarrow.geometry', chunks: [union]};
+    expect(validateGeoArrowColumn(source).valid).toBe(true);
+    const view = getGeoArrowRowView(source, 0);
+    expect(view.column.coordinateLayout).toBe(coordinateLayout);
+    expect(validateGeoArrowColumn(view.column).valid).toBe(true);
+    expect(interleaveGeoArrowCoordinates(view.column).coordinateLayout).toBe('interleaved');
+    expect(materializeGeoArrowRows(view.column)).toEqual([geometries[0]]);
+  }
+);
 
 test('batch iterator does not access later chunks until requested', () => {
   const source = makeGeoArrowColumnFromGeometryRows([geometries[0]]);

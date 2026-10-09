@@ -80,6 +80,8 @@ Returns a `GeoArrowRowView` with a one-row `column`, the input `rowIndex`, `chun
 Top-level dense-union dispatch is resolved by type ID, preserving the child's encoding, dimension,
 and coordinate layout. Collection contents remain list/union descriptors, not flattened families.
 Null rows remain null in the returned column; empty and one-part Multi geometries retain identity.
+Parent-masked union rows retain their union descriptor because their dispatch entries may be unused.
+Null or omitted child layout metadata inherits the parent layout, matching descriptor validation.
 The returned column can be passed directly to existing bounds and traversal kernels.
 
 ```typescript
