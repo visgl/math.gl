@@ -5,7 +5,7 @@
   "description": "Website for vis.gl project",
   "scripts": {
     "start": "docusaurus start",
-    "build": "docusaurus build",
+    "build": "docusaurus build && node scripts/normalize-llm-output.mjs && node scripts/check-llm-output.mjs",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-heading-ids": "ocular-doc-headers ../docs",
@@ -26,11 +26,14 @@
     "@math.gl/projection": "workspace:*",
     "@math.gl/timezone": "workspace:*",
     "@mdx-js/react": "^3.1.1",
+    "@signalwire/docusaurus-plugin-llms-txt": "^1.2.2",
     "@vis.gl/docusaurus-website": "2.0.0-alpha.6",
     "math.gl-parquet-loader": "workspace:*",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",

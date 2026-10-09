@@ -1,0 +1,74 @@
+[
+  {
+    "id": "mutation",
+    "prompt": "Derive two offsets from the same Vector3 while preserving it.",
+    "expected": [
+      "Check installed declarations",
+      "Clone before mutating",
+      "Verify the original remains unchanged"
+    ],
+    "sources": ["modules/core/src/classes/vector3.ts"]
+  },
+  {
+    "id": "rotation",
+    "prompt": "Rotate [1,0,0] about Z by 90 degrees.",
+    "expected": [
+      "Check angle units",
+      "Convert degrees if needed",
+      "Compare against [0,1,0] with a tolerance"
+    ],
+    "sources": ["docs/modules/core/developer-guide/rotations.md"]
+  },
+  {
+    "id": "matrix-order",
+    "prompt": "Compose translation and rotation for a local-space point.",
+    "expected": [
+      "Specify multiplication order",
+      "Use column-major conventions",
+      "Test a known transformed point"
+    ],
+    "sources": ["modules/core/src/classes/matrix4.ts"]
+  },
+  {
+    "id": "mercator",
+    "prompt": "Compute meter offsets near the poles using Web Mercator.",
+    "expected": [
+      "Check projection domain",
+      "Explain latitude-dependent approximation",
+      "Choose a suitable coordinate frame"
+    ],
+    "sources": [
+      "docs/modules/web-mercator/developer-guide/web-mercator-offset-accuracy.md"
+    ]
+  },
+  {
+    "id": "crs",
+    "prompt": "Convert coordinates to a different CRS accurately.",
+    "expected": [
+      "Specify CRS and axis order",
+      "Check required grids and support",
+      "Use independent reference values"
+    ],
+    "sources": ["docs/modules/projection/developer-guide/support.md"]
+  },
+  {
+    "id": "precision",
+    "prompt": "Store Earth-centered positions in Float32Array.",
+    "expected": [
+      "Assess loss of precision at the coordinate scale",
+      "Consider a local origin",
+      "Validate actual output precision"
+    ],
+    "sources": ["docs/modules/core/developer-guide/floating-point.md"]
+  },
+  {
+    "id": "height",
+    "prompt": "Convert a GPS height to height above mean sea level.",
+    "expected": [
+      "Distinguish ellipsoidal and orthometric height",
+      "Check geoid model and units",
+      "Verify sign against a known point"
+    ],
+    "sources": ["docs/modules/geoid/README.md"]
+  }
+]
