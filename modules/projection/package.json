@@ -980,6 +980,11 @@
       "types": "./dist/web-mercator.d.ts",
       "import": "./dist/web-mercator.js",
       "require": "./dist/web-mercator.cjs"
+    },
+    "./analysis/transform": {
+      "types": "./dist/transform-analysis.d.ts",
+      "import": "./dist/transform-analysis.js",
+      "require": "./dist/transform-analysis.cjs"
     }
   },
   "files": [

@@ -68,3 +68,46 @@ Boundary stencils, poles, rank-deficient maps, plugin exceptions and unresolved 
 One mutable point and one derivative record are owned by each analysis instance. Successful calls create no coordinate arrays, point objects or callbacks. Recursive calls from a plugin fail while that scratch is in use. Values are captured before writing public output setters, so setters may safely invoke another analysis call. Application-owned throwing setters retain normal JavaScript behavior; they are not transactional storage.
 
 The optional entry stays outside the root and `/core` bundles. Its independent checks include **450 PROJ 9.5.1 factor/derivative comparisons** across eighteen configurations, analytic spherical Mercator checks and domain, singularity, output ownership and reentry tests. This qualifies the sampled configurations; it does not claim analytical derivatives or full-domain projection accuracy. See [PROJ's factor definitions](https://proj.org/en/stable/development/reference/datatypes.html#projection-derivatives).
+
+## Complete CRS transform analysis
+
+The optional `@math.gl/projection/analysis/transform` entry exports
+`createProjectionTransformAnalysis`. It prepares a geographic-anchor-to-source transform and
+the requested source-to-target transform, then reuses the same numerical differentiation and
+factor calculations. Unlike single-kernel analysis, the sampled coordinates execute datum,
+prime-meridian, axis, unit, grid and vertical stages supported by the selected engine options.
+
+```typescript
+import {createProjectionTransformAnalysis} from '@math.gl/projection/analysis/transform';
+import {createProjectionFactors} from '@math.gl/projection/analysis';
+import {universalTransverseMercator} from '@math.gl/projection/projections/utm';
+import {mercator} from '@math.gl/projection/projections/merc';
+
+const analysis = await createProjectionTransformAnalysis({
+  from: 'EPSG:32610',
+  to: 'EPSG:3857',
+  geographicFrom: 'EPSG:4326',
+  projections: [universalTransverseMercator, mercator],
+  domain: {west: -2.2, east: -2.1, south: 0.6, north: 0.7}
+});
+const factors = createProjectionFactors();
+analysis.factors(-2.15, 0.65, factors);
+```
+
+Options otherwise follow `ProjectionTransform.create`, with axis enforcement enabled.
+`geographicFrom` is required for a projected or geocentric source; for a geographic source
+it defaults to `from`. Inputs and bounds use canonical longitude/latitude radians relative
+to that reference's prime meridian. `height` is held fixed, defaults to zero, and is in meters
+in that reference's vertical CRS. Explicit grids and parsers must be supplied when required.
+Lossy horizontal-only pipelines reject rather than silently discard height.
+
+The returned interface has `domain`, `contains`, `jacobian` and `factors`. Jacobians measure
+physical east/north meters per anchor radian, after normalizing target stored axes and units.
+Factors default to the anchor ellipsoid; `groundEllipsoid` selects a different physical
+ground metric. The adapter uses that metric for numerical derivative agreement as well. Source planar units are not treated as ground meters. This interface exposes no
+2D coordinate inverse: datum and vertical stages can couple horizontal coordinates to height.
+
+All loading finishes before the factory resolves; derivative methods are synchronous and
+reuse coordinate storage. Seams, knots and invalid grid regions must still be excluded from
+the application domain. Sampling agreement does not certify differentiability or accuracy.
+The separate entry keeps the original `/analysis`, `/core` and root imports unchanged.
