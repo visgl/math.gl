@@ -75,7 +75,7 @@ export class ProjectionAnalysis {
   private readonly implementation: ProjectionImplementation;
   private readonly a: number;
   private readonly groundSemiMajorAxis: number;
-  private readonly groundEccentricitySquared: number;
+  private readonly groundEs: number;
   private readonly step: number;
   private readonly tolerance: number;
   private readonly point: ProjectionPoint = {x: 0, y: 0, z: 0};
@@ -126,7 +126,7 @@ export class ProjectionAnalysis {
     }
     this.a = a;
     this.groundSemiMajorAxis = ground.semiMajorAxis;
-    this.groundEccentricitySquared = ground.eccentricitySquared;
+    this.groundEs = ground.eccentricitySquared;
     this.step = step;
     this.tolerance = tolerance;
   }
@@ -212,7 +212,7 @@ export class ProjectionAnalysis {
       this.busy = false;
     }
     const a = this.groundSemiMajorAxis;
-    const es = this.groundEccentricitySquared;
+    const es = this.groundEs;
     const d = 1 - es * Math.sin(latitude) ** 2;
     const parallelRadius = (a * Math.cos(latitude)) / Math.sqrt(d);
     const meridionalRadius = (a * (1 - es)) / (d * Math.sqrt(d));
