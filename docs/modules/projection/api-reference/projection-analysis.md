@@ -79,6 +79,7 @@ prime-meridian, axis, unit, grid and vertical stages supported by the selected e
 
 ```typescript
 import {createProjectionTransformAnalysis} from '@math.gl/projection/analysis/transform';
+import {createProjectionFactors} from '@math.gl/projection/analysis';
 import {universalTransverseMercator} from '@math.gl/projection/projections/utm';
 import {mercator} from '@math.gl/projection/projections/merc';
 
