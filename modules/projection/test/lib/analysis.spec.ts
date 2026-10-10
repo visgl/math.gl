@@ -155,3 +155,49 @@ test('plugin reentry is rejected and output setters can reenter without corrupti
   for (const key of Object.keys(expected) as (keyof ProjectionFactors)[])
     if (key !== 'dxDLongitude') expect(target[key]).toBe(expected[key]);
 });
+
+test('separate ground ellipsoid changes factors but preserves coordinates and Jacobians', () => {
+  const crs = normalizeCRS('EPSG:3857');
+  const context = {...crs.ellipsoid, parameters: crs.parameters};
+  const sphere = new ProjectionAnalysis({projection: mercator, context, domain});
+  const ground = normalizeCRS('EPSG:4326').ellipsoid;
+  const ellipsoid = new ProjectionAnalysis({
+    projection: mercator,
+    context,
+    domain,
+    groundEllipsoid: ground
+  });
+  const a = {x: 0, y: 0},
+    b = {x: 0, y: 0};
+  sphere.projectTo(0.2, 0.5, a);
+  ellipsoid.projectTo(0.2, 0.5, b);
+  expect(b).toEqual(a);
+  const j1 = createProjectionJacobian(),
+    j2 = createProjectionJacobian();
+  expect(sphere.jacobian(0.2, 0.5, j1)).toBe(true);
+  expect(ellipsoid.jacobian(0.2, 0.5, j2)).toBe(true);
+  expect(j2).toEqual(j1);
+  const f = createProjectionFactors();
+  expect(ellipsoid.factors(0.2, 0.5, f)).toBe(true);
+  const d = 1 - ground.eccentricitySquared * Math.sin(0.5) ** 2;
+  const parallel = Math.sqrt(d) / Math.cos(0.5);
+  const meridional = d ** 1.5 / ((1 - ground.eccentricitySquared) * Math.cos(0.5));
+  expect(f.parallelScale).toBeCloseTo(parallel, 9);
+  expect(f.meridionalScale).toBeCloseTo(meridional, 9);
+  expect(f.arealScale).toBeCloseTo(parallel * meridional, 9);
+  expect(f.angularDistortion).toBeCloseTo(
+    2 * Math.asin(Math.abs(meridional - parallel) / (meridional + parallel)),
+    9
+  );
+  for (const invalid of [
+    {semiMajorAxis: 0, eccentricitySquared: 0},
+    {semiMajorAxis: NaN, eccentricitySquared: 0},
+    {semiMajorAxis: 1, eccentricitySquared: -1},
+    {semiMajorAxis: 1, eccentricitySquared: 1}
+  ]) {
+    expect(
+      () =>
+        new ProjectionAnalysis({projection: mercator, context, domain, groundEllipsoid: invalid})
+    ).toThrow('geometry');
+  }
+});
