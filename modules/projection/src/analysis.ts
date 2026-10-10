@@ -36,6 +36,11 @@ export type ProjectionFactors = ProjectionJacobian & {
 export type ProjectionAnalysisOptions = {
   projection: ProjectionPlugin;
   context: ProjectionContext;
+  /** Ellipsoid used to measure ground distances, independently of the projection kernel.
+   * Axes are in the kernel's physical output units. Defaults to context geometry.
+   * Changes factors only; projected coordinates and raw Jacobians are unchanged.
+   */
+  groundEllipsoid?: Pick<ProjectionContext, 'semiMajorAxis' | 'eccentricitySquared'>;
   /** Application-qualified region, not a promise of a globally valid algorithm. */
   domain: ProjectionDomain;
   /** Central difference step in radians. Default 1e-4; stencil uses +/-2 steps. */
@@ -69,7 +74,8 @@ export class ProjectionAnalysis {
   readonly domain: ProjectionDomain;
   private readonly implementation: ProjectionImplementation;
   private readonly a: number;
-  private readonly es: number;
+  private readonly groundSemiMajorAxis: number;
+  private readonly groundEccentricitySquared: number;
   private readonly step: number;
   private readonly tolerance: number;
   private readonly point: ProjectionPoint = {x: 0, y: 0, z: 0};
@@ -114,8 +120,19 @@ export class ProjectionAnalysis {
     if (!this.implementation.forwardInPlace || !this.implementation.inverseInPlace) {
       throw new Error('Projection analysis requires mutable horizontal projection hooks');
     }
+    const ground = options.groundEllipsoid ?? options.context;
+    if (
+      !Number.isFinite(ground.semiMajorAxis) ||
+      ground.semiMajorAxis <= 0 ||
+      !Number.isFinite(ground.eccentricitySquared) ||
+      ground.eccentricitySquared < 0 ||
+      ground.eccentricitySquared >= 1
+    ) {
+      throw new Error('Invalid projection analysis ground ellipsoid');
+    }
     this.a = a;
-    this.es = es;
+    this.groundSemiMajorAxis = ground.semiMajorAxis;
+    this.groundEccentricitySquared = ground.eccentricitySquared;
     this.step = step;
     this.tolerance = tolerance;
   }
@@ -200,9 +217,11 @@ export class ProjectionAnalysis {
     } finally {
       this.busy = false;
     }
-    const d = 1 - this.es * Math.sin(latitude) ** 2;
-    const parallelRadius = (this.a * Math.cos(latitude)) / Math.sqrt(d);
-    const meridionalRadius = (this.a * (1 - this.es)) / (d * Math.sqrt(d));
+    const a = this.groundSemiMajorAxis;
+    const es = this.groundEccentricitySquared;
+    const d = 1 - es * Math.sin(latitude) ** 2;
+    const parallelRadius = (a * Math.cos(latitude)) / Math.sqrt(d);
+    const meridionalRadius = (a * (1 - es)) / (d * Math.sqrt(d));
     const ex = xx / parallelRadius,
       ey = yx / parallelRadius;
     const nx = xy / meridionalRadius,
