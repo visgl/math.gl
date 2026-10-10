@@ -84,17 +84,21 @@ export class ProjectionAnalysis {
   private dx = 0;
   private dy = 0;
   constructor(options: ProjectionAnalysisOptions) {
-    const {semiMajorAxis: a, eccentricitySquared: es} = options.context;
+    const {semiMajorAxis: a} = options.context;
+    const ground = options.groundEllipsoid ?? options.context;
     const {west, east, south, north} = options.domain;
     const step = options.step ?? 1e-4,
       tolerance = options.derivativeTolerance ?? 1e-6;
     if (
       !(
-        Number.isFinite(a) &&
-        a > 0 &&
-        Number.isFinite(es) &&
-        es >= 0 &&
-        es < 1 &&
+        [options.context, ground].every(
+          ({semiMajorAxis, eccentricitySquared}) =>
+            Number.isFinite(semiMajorAxis) &&
+            semiMajorAxis > 0 &&
+            Number.isFinite(eccentricitySquared) &&
+            eccentricitySquared >= 0 &&
+            eccentricitySquared < 1
+        ) &&
         Number.isFinite(west) &&
         Number.isFinite(east) &&
         west < east &&
@@ -119,16 +123,6 @@ export class ProjectionAnalysis {
     this.implementation = options.projection.create(options.context);
     if (!this.implementation.forwardInPlace || !this.implementation.inverseInPlace) {
       throw new Error('Projection analysis requires mutable horizontal projection hooks');
-    }
-    const ground = options.groundEllipsoid ?? options.context;
-    if (
-      !Number.isFinite(ground.semiMajorAxis) ||
-      ground.semiMajorAxis <= 0 ||
-      !Number.isFinite(ground.eccentricitySquared) ||
-      ground.eccentricitySquared < 0 ||
-      ground.eccentricitySquared >= 1
-    ) {
-      throw new Error('Invalid projection analysis ground ellipsoid');
     }
     this.a = a;
     this.groundSemiMajorAxis = ground.semiMajorAxis;
