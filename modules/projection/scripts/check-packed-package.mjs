@@ -100,6 +100,7 @@ try {
       './bulk': ['ProjectionBuffer'],
       './operations': ['OperationCatalog'],
       './analysis': ['ProjectionAnalysis', 'createProjectionJacobian', 'createProjectionFactors'],
+      './analysis/transform': ['createProjectionTransformAnalysis'],
       './deformation': ['createDeformationModel'],
       './grids/velocity': ['createVelocityGrid'],
       './grids/velocity-geotiff': ['loadVelocityGeoTIFFGrid']
