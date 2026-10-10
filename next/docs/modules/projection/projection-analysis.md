@@ -66,6 +66,32 @@ This is a single-projection mathematical interface; normal CRS transformations c
 
 The radius of curvature uses the supplied eccentricity and semi-major axis. For example, spherical Mercator's two length scales are `1 / cos(latitude)` at unit scale; an equal-area projection's area factor approaches one.
 
+## Ground metric ellipsoid[​](#ground-metric-ellipsoid "Direct link to Ground metric ellipsoid")
+
+`groundEllipsoid` optionally supplies `semiMajorAxis` and `eccentricitySquared` for the local ground-distance metric. It defaults to `context` geometry. It affects all factors derived from ground distances, including area, principal scales and angular distortion; forward/inverse coordinates and raw Jacobians continue to use the projection context. The ground semi-major axis must use the same physical units as the kernel output.
+
+For example, spherical Web Mercator coordinates can be measured against WGS84 ground distances without changing the spherical kernel:
+
+```
+const webMercator = normalizeCRS('EPSG:3857');
+
+const wgs84 = normalizeCRS('EPSG:4326');
+
+const analysis = new ProjectionAnalysis({
+
+  projection: mercator,
+
+  context: {...webMercator.ellipsoid, parameters: webMercator.parameters},
+
+  groundEllipsoid: wgs84.ellipsoid,
+
+  domain: {west: -Math.PI, east: Math.PI, south: -1.4, north: 1.4}
+
+});
+```
+
+This selects a metric, not a datum transformation. It does not add CRS unit conversions, axis normalization, grid shifts or vertical operations. Derivative agreement remains scaled by the projection context's semi-major axis, independently of the ground metric.
+
 ## Numerical and failure contracts[​](#numerical-and-failure-contracts "Direct link to Numerical and failure contracts")
 
 Derivatives use fourth-order central differences at `step` and `step/2`, followed by Richardson extrapolation. The default step is `1e-4` radians; the complete stencil must fit inside the declared rectangle. The two estimates must agree within `derivativeTolerance * max(a, absolute half-step derivatives)`; the default tolerance is `1e-6`. This is an agreement test, not a universal derivative error estimate. There are sixteen forward samples per derivative evaluation.
