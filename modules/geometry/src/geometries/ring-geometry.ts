@@ -40,8 +40,10 @@ export class RingGeometry extends Geometry {
     for (let segment = 0; segment < segments; segment++) {
       const firstAngle = startAngle + (segment * sweepAngle) / segments;
       const secondAngle =
-        sweepAngle === FULL_CIRCLE && segment === segments - 1
-          ? startAngle
+        segment === segments - 1
+          ? sweepAngle === FULL_CIRCLE
+            ? startAngle
+            : startAngle + sweepAngle
           : startAngle + ((segment + 1) * sweepAngle) / segments;
       const makeCapVertex = (radius: number, height: number, angle: number, normal: Vector) =>
         vertex(radius, height, angle, normal, [

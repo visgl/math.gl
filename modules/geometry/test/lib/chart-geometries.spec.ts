@@ -115,7 +115,8 @@ test('closed solids have exactly two incident faces on every welded edge', () =>
   for (const geometry of [
     new PrismGeometry(),
     new RingGeometry({segments: 8}),
-    new RingGeometry({segments: 8, sweepAngle: 1.7, startAngle: 0.4})
+    new RingGeometry({segments: 8, sweepAngle: 1.7, startAngle: 0.4}),
+    new RingGeometry({segments: 11, startAngle: 0, sweepAngle: Math.PI / 2})
   ]) {
     const positions = geometry.attributes.POSITION.value;
     const indices = geometry.indices!.value;
