@@ -40,6 +40,7 @@ Pass these CPU buffers to the renderer of your choice. The module does not creat
 * `unpackIndexedGeometry()` expands an indexed mesh into non-indexed attributes.
 * `BoxGeometry`, `CapsuleGeometry`, `CylinderGeometry`, `PlaneGeometry`, `SphereGeometry` implement the glTF shape conventions.
 * `CubeGeometry`, `ConeGeometry`, `TruncatedConeGeometry`, `IcoSphereGeometry` provide additional common tessellators.
+* `PrismGeometry` provides closed flat-sided polygons, including hexagonal prisms; `RingGeometry` provides solid annuli and capped ring segments.
 
 An infinite glTF plane cannot be tessellated, so `PlaneGeometry` requires finite `sizeX` and `sizeZ` values. Use `PlaneShape` from `@math.gl/culling` when infinite or partially infinite analytic planes are required.
 
@@ -54,6 +55,8 @@ An infinite glTF plane cannot be tessellated, so `PlaneGeometry` requires finite
 * [PlaneGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/plane-geometry.md)
 * [SphereGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/sphere-geometry.md)
 * [IcoSphereGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/ico-sphere-geometry.md)
+* [PrismGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/prism-geometry.md)
+* [RingGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/ring-geometry.md)
 * [Geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/geometry.md)
 
 ## Parametric surfaces[​](#parametric-surfaces "Direct link to Parametric surfaces")
