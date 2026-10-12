@@ -26,7 +26,21 @@ Defaults: `majorRadius: 1`, `minorRadius: 0.3`, `majorSegments: 48`,
 `minorSegments: 24`, `arc: 2π`. Both radii must be positive and the minor radius
 must be smaller than the major radius. At least three segments per axis are
 required. The torus revolves around Y, with outward analytic normals. Arc is in
-(0, 2π]; partial sweeps have open ends.
+(0, 2π]; partial sweeps have open ends by default. `startAngle` (default `0`) rotates
+the segment around Y, using the same angular direction as the existing surface.
+Set `cap: true` to close partial segments with planar end disks and separate flat
+normals. Full tori have no end faces, regardless of `cap`.
+
+```typescript
+const segment = new TorusGeometry({
+  majorRadius: 1, minorRadius: 0.25,
+  startAngle: Math.PI / 4, arc: Math.PI * 1.5, cap: true
+});
+```
+
+Use the gallery's sweep, start-angle and **Close segment ends** controls to compare
+open and closed segments. The function editor describes the curved surface; caps
+are separate geometry.
 
 ## LatheGeometry
 

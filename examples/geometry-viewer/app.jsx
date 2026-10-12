@@ -22,7 +22,16 @@ export const presets = {
   },
   PlaneGeometry: {sizeX: 2, sizeZ: 2, nx: 6, nz: 6},
   SphereGeometry: {radius: 0.75, nlat: 16, nlong: 24},
-  IcoSphereGeometry: {radius: 0.75, iterations: 2}
+  IcoSphereGeometry: {radius: 0.75, iterations: 2},
+  PrismGeometry: {radius: 0.6, height: 1.5, sides: 6, startAngle: Math.PI / 6},
+  RingGeometry: {
+    innerRadius: 0.45,
+    outerRadius: 0.9,
+    height: 0.35,
+    segments: 48,
+    startAngle: Math.PI / 4,
+    sweepAngle: Math.PI * 1.5
+  }
 };
 
 /** Supply a Geometry instance directly, or a constructor name and constructor props. */
