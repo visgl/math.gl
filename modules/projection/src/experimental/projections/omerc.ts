@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
+import {withRectangleRenderingProfile} from '../rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
 import {createState, forward, inverse} from '../kernels/omerc';
@@ -61,6 +62,15 @@ export const obliqueMercator: ProjectionPlugin = {
       no_uoff: flagParameter(context.parameters, 'no_uoff'),
       no_rot: flagParameter(context.parameters, 'no_rot')
     });
-    return bindCatalogueKernel('omerc', context, state, forward, inverse);
+    // Use a regional extent around the effective oblique central meridian.
+    return withRectangleRenderingProfile(
+      bindCatalogueKernel('omerc', context, state, forward, inverse),
+      [
+        state.lam0 - Math.PI / 18,
+        Math.max(-Math.PI / 2 + 1e-8, base.lat0 - Math.PI / 18),
+        state.lam0 + Math.PI / 18,
+        Math.min(Math.PI / 2 - 1e-8, base.lat0 + Math.PI / 18)
+      ]
+    );
   }
 };

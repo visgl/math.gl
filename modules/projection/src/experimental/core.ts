@@ -19,6 +19,7 @@ export type {
   ProjectionFlatOperation,
   ProjectionContext,
   ProjectionImplementation,
+  ProjectionProfile,
   ProjectionParameters,
   ProjectionPlugin
 } from './types';
@@ -56,6 +57,16 @@ export {
   ConfigurableProjectionEngine,
   createProjectionEngine
 } from './projection-engine';
+export type {
+  CRSEngine,
+  CRSDescriptor,
+  CRSConversion,
+  CRSConverter,
+  CRSBounds,
+  CRSDistanceScale,
+  CRSDistanceScaleCallback,
+  GetCRSOptions
+} from './types';
 export type {
   ProjectionEngine,
   ProjectionEngineOptions,

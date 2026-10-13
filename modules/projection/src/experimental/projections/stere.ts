@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {createAngularRenderingProfile} from '../rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {
   bindKernel,
@@ -24,6 +25,13 @@ export const stereographic: ProjectionPlugin = {
   create(context) {
     const base = kernelParameters(context);
 
-    return guardAzimuthalDomain(base, bindKernel('stere', createState(base), forward, inverse));
+    const projection = guardAzimuthalDomain(
+      base,
+      bindKernel('stere', createState(base), forward, inverse)
+    );
+    return {
+      ...projection,
+      profile: createAngularRenderingProfile(base, projection.forward, (150 * Math.PI) / 180)
+    };
   }
 };

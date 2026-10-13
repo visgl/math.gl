@@ -19,6 +19,14 @@ export const geocentric: ProjectionPlugin = {
       semiMinorAxis: semiMinorAxis ?? semiMajorAxis * Math.sqrt(1 - eccentricitySquared)
     };
     return {
+      profile: {
+        bounds: [
+          [-semiMajorAxis, -semiMajorAxis, -ellipsoid.semiMinorAxis],
+          [semiMajorAxis, semiMajorAxis, ellipsoid.semiMinorAxis]
+        ],
+        longitudeCenter: 0,
+        maxLatitude: Math.PI / 2
+      },
       forward() {
         throw new Error('Geocentric projection requires the 3D pipeline');
       },

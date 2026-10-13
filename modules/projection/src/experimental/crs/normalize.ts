@@ -10,7 +10,7 @@ import type {ProjectionParameters} from '../types';
 import {getDatumDefinitions} from './datum-catalog';
 import ellipsoids from './ellipsoid-table';
 import primeMeridians from './primemeridian-table';
-import unitTable from './units-table';
+import {linearUnits} from '@math.gl/crs';
 import {TypeScriptCRSError, unsupportedStage} from './types';
 import type {CRSNormalizationOptions, Ellipsoid, NormalizedCRS, ParsedCRS} from './types';
 
@@ -238,6 +238,7 @@ export function normalizeCRS(
             ? undefined
             : gridReferences && Object.freeze(gridReferences)
       }),
+      areaOfUse: parsed.areaOfUse,
       angularUnit,
       toMeter,
       verticalUnit,
@@ -254,14 +255,14 @@ export function normalizeCRS(
 }
 function unitFactor(parameters: ProjectionParameters, unitKey: string, factorKey: string): number {
   const unit = parameters[unitKey];
-  const table: Record<string, {to_meter: number}> = unitTable;
+  const table = linearUnits;
   if (unitKey === 'vunits' && unit === 'degrees') throw new Error('Height requires linear units');
   if (unit && !['m', 'degrees'].includes(unit) && !own(table, unit))
     throw new Error('Unsupported units: ' + unit);
   const factor = numberParameter(
     parameters,
     factorKey,
-    unit && table[unit] ? table[unit].to_meter : 1
+    unit && table[unit] ? table[unit].metersPerUnit : 1
   );
   if (!(factor > 0)) throw new Error('+' + factorKey + ' must be positive');
   return factor;

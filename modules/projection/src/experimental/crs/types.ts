@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {SpheroidParameters} from '@math.gl/core';
-import type {ReadonlyCRSDefinition} from '@math.gl/crs';
+import type {CRSMetadata, ReadonlyCRSDefinition} from '@math.gl/crs';
 import type {ProjectionParameters} from '../types';
 import type {DatumGridReference} from '../grids/types';
 
@@ -31,6 +31,7 @@ export type CRSNormalizationOptions = {
 /** Parser adapters provide execution metadata; syntax parsing stays in @math.gl/crs. */
 export type ParsedCRS = {
   parameters: ProjectionParameters;
+  areaOfUse?: CRSMetadata['areaOfUse'];
   angularUnit?: number;
   verticalUnit?: number;
   lossy?: boolean;
@@ -63,6 +64,7 @@ export type NormalizedCRS = {
   readonly axis: string;
   readonly storedAxis?: string;
   readonly longitudeWrap?: number;
+  readonly areaOfUse?: CRSMetadata['areaOfUse'];
   readonly lossy: boolean;
 };
 export type CRSCompatibilityReason =

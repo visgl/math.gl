@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {createFlatProjection} from '../flat-projection';
+import {withRectangleRenderingProfile} from '../rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {bindKernel, kernelParameters, ORIGIN_PARAMETERS, validateConic} from '../kernel';
 import {createState, forward, inverse} from '../kernels/eqdc';
@@ -14,6 +15,10 @@ export const equidistantConic: ProjectionPlugin = {
   create(context) {
     const base = kernelParameters(context);
     validateConic(base, context.parameters);
-    return bindKernel('eqdc', createState(base), forward, inverse, createFlatProjection);
+    // The rendering target covers one world; +over still permits conversion beyond it.
+    return withRectangleRenderingProfile(
+      bindKernel('eqdc', createState(base), forward, inverse, createFlatProjection),
+      [base.long0 - Math.PI, -Math.PI / 2, base.long0 + Math.PI, Math.PI / 2]
+    );
   }
 };

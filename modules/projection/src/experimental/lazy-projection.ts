@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original convenience API over projection descriptors. Deferred kernels retain their proj4js/PROJ port notices and licenses.
+import {resolveCRSDescriptor} from './crs-descriptor';
+import type {TypeScriptCRSInput} from './crs/spatial-reference';
 import {ProjectionTransform} from './typescript-projection';
 import type {ProjectionTransformOptions} from './typescript-projection';
-import type {ProjectionEngine, ProjectionEngineOptions, CreateProjectionOptions} from '../types';
-import {snapshotEngineOptions} from './projection-engine';
+import type {CRSEngine, CRSDescriptor, GetCRSOptions} from './types';
+import type {ProjectionEngineOptions, CreateProjectionOptions} from '../types';
+import {hasCRSOverrides, snapshotEngineOptions} from './projection-engine';
 import {createProjectionDescriptor, preloadProjection} from './projection-descriptor';
 import type {ProjectionDescriptor} from './projection-descriptor';
 import type {ProjectionPlugin} from './types';
@@ -88,11 +91,24 @@ const catalogue: readonly ProjectionDescriptor[] = [
 const key = (name: string) => name.toLowerCase().replace(/[\s_-]/g, '');
 
 /** Reusable built-in catalogue whose algorithms load only for requested CRS pairs. */
-export class LazyProjectionEngine implements ProjectionEngine {
+export class LazyProjectionEngine implements CRSEngine {
   private readonly options: Omit<ProjectionEngineOptions<ProjectionDescriptor>, 'projections'>;
+  private readonly useDefinitionSignature: boolean;
 
   constructor(options: Omit<ProjectionEngineOptions<ProjectionDescriptor>, 'projections'> = {}) {
     this.options = snapshotEngineOptions(options);
+    this.useDefinitionSignature = !hasCRSOverrides(options);
+  }
+
+  /** Resolve a CRS and load only its required algorithms before exposing sync conversions. */
+  getCRS(definition: TypeScriptCRSInput, options: GetCRSOptions = {}): Promise<CRSDescriptor> {
+    return resolveCRSDescriptor(
+      this,
+      definition,
+      this.options,
+      options,
+      this.useDefinitionSignature
+    );
   }
 
   createProjection(

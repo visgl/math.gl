@@ -21,15 +21,26 @@ export const equidistantCylindrical: ProjectionPlugin = {
     const parallelScale = Math.cos(latitudeParameter(parameters, 'lat_ts'));
     const x0 = numberParameter(parameters, 'x_0', 0);
     const y0 = numberParameter(parameters, 'y_0', 0);
-    return createProjection(
-      point => {
-        point.x = x0 + a * parallelScale * wrap(point.x - longitudeOrigin);
-        point.y = y0 + a * (point.y - latitudeOrigin);
+    const width = a * Math.abs(parallelScale) * Math.PI;
+    return {
+      profile: {
+        bounds: [
+          [x0 - width, y0 + a * (-Math.PI / 2 - latitudeOrigin), 0],
+          [x0 + width, y0 + a * (Math.PI / 2 - latitudeOrigin), 0]
+        ],
+        longitudeCenter: longitudeOrigin,
+        maxLatitude: Math.PI / 2
       },
-      point => {
-        point.x = wrap(longitudeOrigin + (point.x - x0) / (a * parallelScale));
-        point.y = latitudeOrigin + (point.y - y0) / a;
-      }
-    );
+      ...createProjection(
+        point => {
+          point.x = x0 + a * parallelScale * wrap(point.x - longitudeOrigin);
+          point.y = y0 + a * (point.y - latitudeOrigin);
+        },
+        point => {
+          point.x = wrap(longitudeOrigin + (point.x - x0) / (a * parallelScale));
+          point.y = latitudeOrigin + (point.y - y0) / a;
+        }
+      )
+    };
   }
 };

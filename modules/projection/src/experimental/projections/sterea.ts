@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {withAngularRenderingProfile} from '../rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {
   bindKernel,
@@ -25,6 +26,11 @@ export const obliqueStereographic: ProjectionPlugin = {
     const base = kernelParameters(context);
     if (Math.abs(base.lat0) === Math.PI / 2)
       throw new Error('sterea requires a non-polar origin; use stere at the poles');
-    return guardAzimuthalDomain(base, bindKernel('sterea', createState(base), forward, inverse));
+    // Keep the rendering boundary finite without restricting raw conversion.
+    return withAngularRenderingProfile(
+      guardAzimuthalDomain(base, bindKernel('sterea', createState(base), forward, inverse)),
+      base,
+      (Math.PI * 150) / 180
+    );
   }
 };

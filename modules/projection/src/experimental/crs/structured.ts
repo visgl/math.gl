@@ -493,8 +493,30 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
     unsupportedStage('Structured CRS vertical-first axes require an explicit PROJ axis definition');
   if (axis) parameters['axis'] = axis;
   if (type === 'ProjectedCRS' || geocentric) parameters['to_meter'] = String(factor);
+  const bbox = crs['bbox'];
+  let areaOfUse: ParsedCRS['areaOfUse'];
+  if (bbox !== undefined) {
+    const extent = object(bbox);
+    const west = finite(extent['west_longitude']),
+      south = finite(extent['south_latitude']);
+    const east = finite(extent['east_longitude']),
+      north = finite(extent['north_latitude']);
+    if (
+      west < -180 ||
+      west > 180 ||
+      east < -180 ||
+      east > 180 ||
+      south < -90 ||
+      north > 90 ||
+      south >= north ||
+      west === east
+    )
+      throw new Error('Invalid CRS geographic bounding box');
+    areaOfUse = [west, south, east, north];
+  }
   return {
     parameters,
+    areaOfUse,
     angularUnit: type === 'ProjectedCRS' || geocentric ? angularUnit : factor,
     verticalUnit: geocentric ? 1 : unit(axes[2]?.['unit'], 1)
   };

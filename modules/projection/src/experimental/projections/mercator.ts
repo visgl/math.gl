@@ -33,47 +33,61 @@ export const mercator: ProjectionPlugin = {
     }
     if (scale <= 0) throw new Error('Mercator scale must be positive');
     const radius = a * scale;
-    return createProjection(
-      point => {
-        const longitude = point.x,
-          latitude = point.y;
-        if (Math.abs(latitude) >= Math.PI / 2) {
-          throw new Error('Mercator is undefined at the poles');
-        }
-        const isometricLatitude = Math.asinh(Math.tan(latitude));
-        point.x = x0 + radius * wrap(longitude - longitudeOrigin);
-        // Spherical Mercator has no ellipsoidal correction. Normalize signed zero.
-        point.y =
-          y0 +
-          radius *
-            (e === 0
-              ? isometricLatitude + 0
-              : isometricLatitude - e * Math.atanh(e * Math.sin(latitude)));
+    // One finite world is the rendering target, even with unrestricted +over conversion.
+    const maxLatitude = Math.atan(Math.sinh(Math.PI));
+    const width = radius * Math.PI;
+    const height = radius * (Math.PI - e * Math.atanh(e * Math.sin(maxLatitude)));
+    return {
+      profile: {
+        bounds: [
+          [x0 - width, y0 - height, 0],
+          [x0 + width, y0 + height, 0]
+        ],
+        longitudeCenter: longitudeOrigin,
+        maxLatitude
       },
-      point => {
-        const x = point.x,
-          y = point.y;
-        const isometricLatitude = (y - y0) / radius;
-        let latitude = Math.atan(Math.sinh(isometricLatitude));
-        // The spherical inverse is already exact; no iteration is needed.
-        if (e === 0) {
-          point.x = wrap(longitudeOrigin + (x - x0) / radius);
-          point.y = latitude + 0;
-          return;
-        }
-        for (let iteration = 0; iteration < 30; iteration++) {
-          const next = Math.atan(
-            Math.sinh(isometricLatitude + e * Math.atanh(e * Math.sin(latitude)))
-          );
-          if (Math.abs(next - latitude) < 1e-13) {
+      ...createProjection(
+        point => {
+          const longitude = point.x,
+            latitude = point.y;
+          if (Math.abs(latitude) >= Math.PI / 2) {
+            throw new Error('Mercator is undefined at the poles');
+          }
+          const isometricLatitude = Math.asinh(Math.tan(latitude));
+          point.x = x0 + radius * wrap(longitude - longitudeOrigin);
+          // Spherical Mercator has no ellipsoidal correction. Normalize signed zero.
+          point.y =
+            y0 +
+            radius *
+              (e === 0
+                ? isometricLatitude + 0
+                : isometricLatitude - e * Math.atanh(e * Math.sin(latitude)));
+        },
+        point => {
+          const x = point.x,
+            y = point.y;
+          const isometricLatitude = (y - y0) / radius;
+          let latitude = Math.atan(Math.sinh(isometricLatitude));
+          // The spherical inverse is already exact; no iteration is needed.
+          if (e === 0) {
             point.x = wrap(longitudeOrigin + (x - x0) / radius);
-            point.y = next;
+            point.y = latitude + 0;
             return;
           }
-          latitude = next;
+          for (let iteration = 0; iteration < 30; iteration++) {
+            const next = Math.atan(
+              Math.sinh(isometricLatitude + e * Math.atanh(e * Math.sin(latitude)))
+            );
+            if (Math.abs(next - latitude) < 1e-13) {
+              point.x = wrap(longitudeOrigin + (x - x0) / radius);
+              point.y = next;
+              return;
+            }
+            latitude = next;
+          }
+          throw new Error('Mercator inverse did not converge');
         }
-        throw new Error('Mercator inverse did not converge');
-      }
-    );
+      )
+    };
   }
 };

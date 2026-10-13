@@ -75,6 +75,150 @@ Mercator, are opt-in. Registration is local to an instance; there is no global
 projection registry and no automatic fallback to proj4js. To change the available
 algorithms, create a new instance with the new plugin set.
 
+## Retrieve a CRS descriptor
+
+General engines expose asynchronous `getCRS(definition, options?)`. Retrieval resolves
+metadata and loads only the registered algorithms needed for the requested converter pairs.
+WGS84 is always included; `converters` requests additional source CRS strings. All returned conversion functions are synchronous:
+
+```typescript
+import {lazyProjectionEngine} from '@math.gl/projection/projections/lazy';
+
+const crs = await lazyProjectionEngine.getCRS('+proj=eqearth +ellps=WGS84');
+const position = crs.converter.WGS84.from([12, 55, 100]);
+const geographic = crs.converter.WGS84.to(position);
+const output = new Float64Array(3);
+crs.converter.WGS84.from([12, 55, 100], output);
+const normalized = crs.converter.WGS84.normalize([372, 55, 100]);
+const bounds = crs.bounds;
+const scale = crs.getDistanceScale(position);
+```
+
+`CRSDescriptor` is exported from the root, `/core`, and runtime-free `/types` entries.
+Its metadata includes coordinate frame, resolved projection parameters,
+ellipsoid axes in metres, effective array axis order, `xUnit`, `yUnit`, and `zUnit`,
+and explicit extraction lossiness. Each unit is a `{name, metersPerUnit?}`
+object. Linear units include their constant metre conversion, for example
+`{name: 'feet', metersPerUnit: 0.3048}`. Angular units omit `metersPerUnit`, for example
+`{name: 'degrees'}`. Units follow axis reordering; geocentric XYZ share linear units.
+A custom linear unit retains its factor with the name `custom`. Ground-distance
+scales remain separate and may depend on position.
+The metadata-only `CRSMetadata` type belongs to `@math.gl/crs`.
+
+`enforceAxis` and `mode` have the same meanings as for projection construction.
+The WGS84 endpoint always uses longitude/latitude in degrees and ellipsoidal height in
+metres. Conversion retains the engine's existing datum policy; a spherical target is
+not implicitly treated as a rendering-sphere reinterpretation. Fourth and later
+components pass through. Both methods accept an optional output array or typed array and return that same
+storage. Omitting output allocates a new number array.
+
+Aliases, readers, grids, and algorithm availability come from the engine. Retrieval
+rejects unresolved definitions, missing algorithms, and failed imports. Caller-owned
+structured definitions are captured before asynchronous loading. No descriptor cache
+or arbitrary CRS equivalence test is implied. The specialized `WebMercatorProjectionEngine`
+continues to implement the pair-transform interface only.
+
+### Generic converters
+
+`CRSConverter` contains `from`, `to`, and `normalize` functions. The dictionary key
+identifies the source CRS; the descriptor identifies the target CRS. `from` converts
+source → target, `to` converts target → source, and `normalize` returns source
+coordinates adjusted for the target projection's working convention. All three accept
+optional output storage. Conversion does not invoke normalization automatically.
+
+```typescript
+const target = await lazyProjectionEngine.getCRS('+proj=eqearth', {
+  converters: ['EPSG:3857']
+});
+const converter = target.converter['EPSG:3857'];
+const projected = converter.from(mercatorPosition);
+const restored = converter.to(projected);
+```
+
+Additional converters use direct CRS-pair transformations. Their normalization first
+converts the source to WGS84, applies the target's geographic working convention, and
+converts back to the source CRS. This requires a valid inverse at the source position.
+Converters and their dictionary have readonly types; request further sources through
+`getCRS` options. Source keys are the exact supplied strings; no arbitrary equivalence
+lookup is performed. Additional converters do not change target bounds or distance scales.
+
+`signature` preserves the exact input string under default engine conventions.
+Different aliases, whitespace, or parameter order produce different identities.
+Structured input, axis enforcement, horizontal extraction, or custom engine
+registrations use a resolved metadata signature constructed by `@math.gl/crs`.
+Effective conventions include engine defaults and per-request overrides.
+Additional requested converters do not affect identity. Consumers can use the
+opaque signature to invalidate packed coordinates without interpreting CRS
+definitions themselves. It does not perform arbitrary CRS equivalence testing.
+
+### Normalization and bounds
+
+`converter.WGS84.normalize(position, output?)` explicitly maps WGS84 longitude into the interval
+centered on the destination's central meridian and clamps latitude. It preserves
+altitude and later components. Conversion methods do not invoke normalization.
+The interval follows the CRS central meridian, prime meridian, and longitude-wrap parameters.
+
+All built-in projection types provide finite rendering bounds chosen as an appropriate
+rendering target. They describe a rendering policy: a useful extent for displaying the
+projection and constructing rendering resources such as scale textures. They do not
+describe the algorithm's mathematical validity domain, a complete set of convertible
+coordinates, or a guarantee of projection accuracy.
+
+Do not use rectangle membership to validate coordinates. A coordinate outside the
+bounds remains convertible wherever the equations are defined; being inside the
+rectangle does not guarantee a valid conversion. The rectangle encloses the selected
+rendering reference surface and can include areas outside its curved boundary.
+Normalization explicitly maps coordinates into the rendering target, preserving altitude
+and later components. Conversion functions do not apply this normalization automatically.
+
+`bounds` is `[[minX, minY], [maxX, maxY]]` in target coordinates and their effective
+axis order/units. It encloses the rendering reference surface, not an altitude range.
+Each algorithm owns its rendering extent and normalization. Shared boundary sampling projects
+curved edges and refines their extrema; descriptor assembly applies target units and
+axis order. False offsets, ellipsoid parameters, and projection scales affect the envelope.
+
+PROJJSON `bbox` and WKT2 `USAGE[BBOX[...]]` supply geographic area-of-use coverage.
+When present, this coverage narrows the default geographic/projected rendering target,
+within the algorithm's rendering extent. `areaOfUse` records it as `[west, south, east, north]`
+in Greenwich degrees; east less than west denotes an antimeridian crossing. Coverage
+does not restrict conversion functions. Geocentric bounds always enclose the reference
+ellipsoid. The package does not fetch a full EPSG registry.
+
+Without declared coverage, built-in algorithms use these rendering policies:
+
+| Projection family | Default rendering target |
+| --- | --- |
+| Geographic | One longitude interval and ±90° latitude |
+| Mercator, including Web Mercator | One world, latitude ±85.051129° |
+| Global cylindrical/pseudocylindrical, Bonne, Albers, equidistant conic | One world including the poles |
+| Lambert conformal conic | One world, stopping at 60° in the hemisphere opposite the cone |
+| Transverse Mercator | Central meridian ±30°, both polar limits |
+| UTM | The six-degree zone, 0–84°N or 80°S–0° |
+| Cassini, polyconic | Central meridian ±30°; polyconic avoids its latitude branch boundary |
+| Gauss-Schreiber transverse Mercator | Central meridian ±30°, latitude ±60° |
+| Swiss/Hotine oblique Mercator | Longitude/latitude ±10° around the effective origin |
+| New Zealand Map Grid | Longitude/latitude ±8° around the origin |
+| Krovak | Longitude ±15°, latitude ±5° around the origin |
+| Stereographic, oblique stereographic | Angular distance 150° from the origin |
+| Azimuthal equidistant, Lambert azimuthal equal area | Angular distance 179° from the origin |
+| Orthographic | Visible hemisphere |
+| Gnomonic | Angular distance 80° from the origin |
+| Geostationary, tilted perspective | Visible domain, avoiding any tilted image-plane singularity |
+| Quadrilateralized spherical cube | One complete square cube face |
+| Oblique transformation | The wrapped algorithm's domain in rotated coordinates |
+| Geocentric | Reference ellipsoid's XYZ envelope |
+| Local identity | Unit reference square |
+
+Angular clamps follow the great-circle bearing from the origin. At polar centers,
+normalization preserves the input meridian; an exact non-polar antipode uses the
+northward boundary. Longitude wrapping follows central/prime meridian and
+longitude-wrap parameters. `+over` permits unrestricted longitude conversion but
+retains a finite rendering target.
+
+Custom algorithms can supply a `ProjectionProfile`. Without one, descriptor retrieval
+projects a world rectangle; a custom algorithm with singularities must supply its own
+finite domain. Ordinary coordinate conversion does not evaluate rendering bounds.
+
 ## What is pluggable?
 
 | Component                        | Option or API      | Application responsibility                                                              |

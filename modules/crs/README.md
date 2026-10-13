@@ -54,7 +54,7 @@ const spatialReference = createSpatialReference({
 The official PROJJSON v0.7 JSON Schema is vendored unchanged under its MIT license and exported as
 `@math.gl/crs/projjson.schema.json`. It is the source of truth for the checked-in generated
 TypeScript declarations. This package has no runtime dependencies. Its runtime APIs parse, encode,
-and validate serialization syntax only: they do not perform registry lookup, semantic equivalence,
+and validate serialization syntax and identify already-resolved metadata. They do not perform registry lookup, semantic equivalence,
 coordinate transformation, or general conversion between WKT, PROJ, and PROJJSON.
 
 The `ProjectionTransform` in `@math.gl/projection/core` directly accepts
@@ -67,3 +67,14 @@ for the supported transformation subset and storage-order behavior.
 See the [PROJJSON specification](https://proj.org/en/stable/specifications/projjson.html).
 See the math.gl [Coordinate Reference Systems guide](https://math.gl/docs/modules/crs/developer-guide/coordinate-reference-systems)
 for representations, epochs, axis order, vertical CRS, and transformation guidance.
+
+`linearUnits` provides names and metre conversion factors keyed by PROJ unit
+identifier. For example, `linearUnits.ft` is `{name: 'feet', metersPerUnit: 0.3048}`.
+
+`getCRSSignature(metadata)` returns a deterministic signature for resolved
+`CRSMetadata`. It tracks projection parameters, ellipsoid, effective axis order,
+units, and horizontal extraction. Parameter order and object identity do not
+matter. This is an identity of resolved execution conventions, not a semantic
+equivalence test for arbitrary CRS definitions. Projection descriptors use this
+result as `signature` when structured input or overrides require resolved metadata;
+default string definitions retain the original string.

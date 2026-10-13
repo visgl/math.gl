@@ -1,11 +1,13 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {createCoverageRenderingProfile, createRectangleRenderingProfile} from './rendering-profile';
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
 import type {ProjectionDescriptor} from './projection-descriptor';
 import {getLoadedProjection, preloadProjection} from './projection-descriptor';
 import type {
   ProjectionImplementation,
+  ProjectionProfile,
   ProjectionPlugin,
   ProjectionPoint,
   ProjectionFlatOperation
@@ -19,6 +21,7 @@ import {TypeScriptCRSError, unsupportedStage} from './crs/types';
 import type {CRSCompatibilityReason, CRSNormalizationOptions, NormalizedCRS} from './crs/types';
 import {createDatumTransform} from './datum';
 import {wrapLongitude} from './parameters';
+import {createGeographicProfile} from './projections/geographic';
 import {compileVerticalGrid} from './vertical-datum';
 import type {DatumGridCollection, VerticalGridCollection} from './grids/types';
 
@@ -70,6 +73,8 @@ export class ProjectionTransform<P extends ProjectionRegistration = ProjectionPl
     pending?: Promise<ProjectionTransform>;
     implementation?: ProjectionTransform;
   };
+  /** Initialized target projection profile on eager/prepared transforms. @internal */
+  readonly targetProfile?: ProjectionProfile;
   readonly lossy: boolean;
   constructor(options: ProjectionTransformOptions<P> = {}) {
     const registrations = options.projections || [];
@@ -86,6 +91,54 @@ export class ProjectionTransform<P extends ProjectionRegistration = ProjectionPl
       const eagerPlugins = plugins as ReadonlyMap<string, ProjectionPlugin>;
       const from = compileCRS(eager.from ?? 'WGS84', eagerPlugins, eager);
       const to = compileCRS(eager.to ?? 'WGS84', eagerPlugins, eager);
+      let profile =
+        to.implementation?.profile ??
+        (to.kind === 'geographic'
+          ? createGeographicProfile(to.parameters)
+          : to.kind === 'identity'
+            ? ({
+                bounds: [
+                  [-1, -1, 0],
+                  [1, 1, 0]
+                ],
+                longitudeCenter: 0,
+                maxLatitude: Math.PI / 2
+              } as ProjectionProfile)
+            : undefined);
+      // A custom algorithm without a profile can render a world rectangle if finite.
+      // Bounds remain unevaluated during ordinary coordinate conversion.
+      if (!profile && to.implementation) {
+        const center = (Number(to.parameters['lon_0'] || 0) * Math.PI) / 180;
+        profile = createRectangleRenderingProfile(to.implementation.forward, [
+          center - Math.PI,
+          -Math.PI / 2,
+          center + Math.PI,
+          Math.PI / 2
+        ]);
+      }
+      if (profile && to.areaOfUse && (to.kind === 'projected' || to.kind === 'geographic')) {
+        const [west, south, east, north] = to.areaOfUse;
+        const radians = Math.PI / 180;
+        profile = createCoverageRenderingProfile(
+          to.implementation ?? {
+            forward: (x, y) => [
+              to.longitudeWrap === undefined
+                ? x
+                : to.longitudeWrap + wrapLongitude(x - to.longitudeWrap),
+              y
+            ],
+            inverse: (x, y) => [x, y]
+          },
+          profile,
+          [
+            west * radians - to.primeMeridian,
+            south * radians,
+            (east < west ? east + 360 : east) * radians - to.primeMeridian,
+            north * radians
+          ]
+        );
+      }
+      this.targetProfile = profile;
       this.lossy = from.lossy || to.lossy;
       if (this.lossy && (from.kind === 'geocentric' || to.kind === 'geocentric'))
         unsupportedStage(

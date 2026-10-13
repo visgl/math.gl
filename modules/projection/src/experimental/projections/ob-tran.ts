@@ -3,8 +3,9 @@
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Rotation equations directly ported from proj4js 2.22.0 lib/projections/ob_tran.js. See ../../../PROJ4-LICENSE.md. Modified to use an explicitly supplied plugin instead of proj4js's global registry.
-import type {ProjectionPlugin, ProjectionParameters} from '../types';
+import type {ProjectionPlugin, ProjectionParameters, ProjectionPoint} from '../types';
 import {createProjection, projectionOperation} from '../mutable-projection';
+import {createGeographicProfile} from './geographic';
 import {numberParameter, wrapLongitude} from '../parameters';
 import {TypeScriptCRSError} from '../crs/types';
 
@@ -118,44 +119,75 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
       const forward = projectionOperation(inner, false),
         inverse = projectionOperation(inner, true);
       const asin = (value: number): number => Math.asin(Math.max(-1, Math.min(1, value)));
-      return createProjection(
+      const rotate = (point: ProjectionPoint) => {
+        const longitude = point.x,
+          latitude = point.y;
+        const lam = over ? longitude - longitudeOrigin : wrapLongitude(longitude - longitudeOrigin);
+        const coslam = Math.cos(lam),
+          sinphi = Math.sin(latitude),
+          cosphi = Math.cos(latitude);
+        const lon = wrapLongitude(
+          Math.atan2(
+            cosphi * Math.sin(lam),
+            oblique ? sphip * cosphi * coslam + cphip * sinphi : sinphi
+          ) + lamp
+        );
+        const lat = asin(oblique ? sphip * sinphi - cphip * cosphi * coslam : -cosphi * coslam);
+        point.x = lon;
+        point.y = lat;
+      };
+      const unrotate = (point: ProjectionPoint) => {
+        const innerLongitude = point.x,
+          latitude = point.y;
+        const lam = innerLongitude - lamp,
+          coslam = Math.cos(lam),
+          sinphi = Math.sin(latitude),
+          cosphi = Math.cos(latitude);
+        const lon = Math.atan2(
+          cosphi * Math.sin(lam),
+          oblique ? sphip * cosphi * coslam - cphip * sinphi : -sinphi
+        );
+        const lat = asin(oblique ? sphip * sinphi + cphip * cosphi * coslam : cosphi * coslam);
+        point.x = wrapLongitude(lon + longitudeOrigin);
+        point.y = lat;
+      };
+      const implementation = createProjection(
         point => {
-          const longitude = point.x,
-            latitude = point.y;
-          const lam = over
-            ? longitude - longitudeOrigin
-            : wrapLongitude(longitude - longitudeOrigin);
-          const coslam = Math.cos(lam),
-            sinphi = Math.sin(latitude),
-            cosphi = Math.cos(latitude);
-          const lon = wrapLongitude(
-            Math.atan2(
-              cosphi * Math.sin(lam),
-              oblique ? sphip * cosphi * coslam + cphip * sinphi : sinphi
-            ) + lamp
-          );
-          const lat = asin(oblique ? sphip * sinphi - cphip * cosphi * coslam : -cosphi * coslam);
-          point.x = lon;
-          point.y = lat;
+          rotate(point);
           forward(point);
         },
         point => {
           inverse(point);
-          const innerLongitude = point.x,
-            latitude = point.y;
-          const lam = innerLongitude - lamp,
-            coslam = Math.cos(lam),
-            sinphi = Math.sin(latitude),
-            cosphi = Math.cos(latitude);
-          const lon = Math.atan2(
-            cosphi * Math.sin(lam),
-            oblique ? sphip * cosphi * coslam - cphip * sinphi : -sinphi
-          );
-          const lat = asin(oblique ? sphip * sinphi + cphip * cosphi * coslam : cosphi * coslam);
-          point.x = wrapLongitude(lon + longitudeOrigin);
-          point.y = lat;
+          unrotate(point);
         }
       );
+      const profile = geographic ? createGeographicProfile(innerParameters) : inner.profile;
+      if (!profile) return implementation;
+      return {
+        ...implementation,
+        profile: {
+          get bounds() {
+            const bounds = profile.bounds;
+            // The longlat child stores degrees; other children store native linear units.
+            const degrees = (
+              corner: readonly [number, number, number]
+            ): [number, number, number] => [
+              (corner[0] * 180) / Math.PI,
+              (corner[1] * 180) / Math.PI,
+              corner[2]
+            ];
+            return geographic ? ([degrees(bounds[0]), degrees(bounds[1])] as const) : bounds;
+          },
+          longitudeCenter: longitudeOrigin,
+          maxLatitude: Math.PI / 2,
+          normalize(point) {
+            rotate(point);
+            point.y = Math.max(-profile.maxLatitude, Math.min(profile.maxLatitude, point.y));
+            profile.normalize?.(point);
+            unrotate(point);
+          }
+        }
+      };
     }
   };
 }
