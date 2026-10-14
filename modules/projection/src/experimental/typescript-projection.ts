@@ -21,7 +21,7 @@ import {TypeScriptCRSError, unsupportedStage} from './crs/types';
 import type {CRSCompatibilityReason, CRSNormalizationOptions, NormalizedCRS} from './crs/types';
 import {createDatumTransform} from './datum';
 import {wrapLongitude} from './parameters';
-import {createGeographicProfile} from './projections/geographic';
+import {createGeographicProfile} from './geographic-rendering-profile';
 import {compileVerticalGrid} from './vertical-datum';
 import type {DatumGridCollection, VerticalGridCollection} from './grids/types';
 

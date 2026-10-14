@@ -5,7 +5,7 @@
 // SPDX-FileComment: Rotation equations directly ported from proj4js 2.22.0 lib/projections/ob_tran.js. See ../../../PROJ4-LICENSE.md. Modified to use an explicitly supplied plugin instead of proj4js's global registry.
 import type {ProjectionPlugin, ProjectionParameters, ProjectionPoint} from '../types';
 import {createProjection, projectionOperation} from '../mutable-projection';
-import {createGeographicProfile} from './geographic';
+import {createGeographicProfile} from '../geographic-rendering-profile';
 import {numberParameter, wrapLongitude} from '../parameters';
 import {TypeScriptCRSError} from '../crs/types';
 

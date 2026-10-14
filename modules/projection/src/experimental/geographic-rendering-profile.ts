@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {ProjectionParameters, ProjectionRenderingProfile} from '../types';
-import {DEGREES_TO_RADIANS, numberParameter} from '../parameters';
+import type {ProjectionParameters, ProjectionRenderingProfile} from './types';
+import {DEGREES_TO_RADIANS, numberParameter} from './parameters';
 
 /** Geographic conversion is built into the engine; its native coordinates are radians. */
 export function createGeographicProfile(
