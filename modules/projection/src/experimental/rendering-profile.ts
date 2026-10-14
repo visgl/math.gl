@@ -8,6 +8,48 @@ import {wrapLongitude} from './parameters';
 
 type Curve = (fraction: number) => [number, number];
 type Project = ProjectionImplementation['forward'];
+
+/** Retain curve segments inside the other domain, refining their intersection endpoints. */
+function intersectCurve(curve: Curve, contains: (x: number, y: number) => boolean): Curve[] {
+  const count = 256;
+  const curves: Curve[] = [];
+  let start = 0;
+  let previousInside = contains(...curve(0));
+  for (let index = 1; index <= count; index++) {
+    const end = index / count;
+    const inside = contains(...curve(end));
+    if (inside !== previousInside) {
+      let left = (index - 1) / count;
+      let right = end;
+      for (let iteration = 0; iteration < 48; iteration++) {
+        const middle = (left + right) / 2;
+        if (contains(...curve(middle)) === previousInside) left = middle;
+        else right = middle;
+      }
+      const intersection = inside ? right : left;
+      if (inside) start = intersection;
+      else {
+        const segmentStart = start;
+        curves.push(t => curve(segmentStart + t * (intersection - segmentStart)));
+      }
+    }
+    if (index === count && inside) {
+      const segmentStart = start;
+      curves.push(t => curve(segmentStart + t * (1 - segmentStart)));
+    }
+    previousInside = inside;
+  }
+  return curves;
+}
+
+function rectangleCurves([west, south, east, north]: GeographicRenderingBounds): Curve[] {
+  return [
+    t => [west + t * (east - west), south],
+    t => [east, south + t * (north - south)],
+    t => [east - t * (east - west), north],
+    t => [west, north - t * (north - south)]
+  ];
+}
 /** Native geographic rectangle in radians, with an unwrapped east endpoint. */
 export type GeographicRenderingBounds = readonly [
   west: number,
@@ -93,12 +135,7 @@ export function createRectangleRenderingProfile(
   return {
     // Bounds are needed by descriptors, not by ordinary coordinate conversion.
     get bounds() {
-      return projectBoundaryBounds(project, [
-        t => [west + t * spanX, south],
-        t => [east, south + t * spanY],
-        t => [east - t * spanX, north],
-        t => [west, north - t * spanY]
-      ]);
+      return projectBoundaryBounds(project, rectangleCurves(bounds));
     },
     longitudeCenter: center,
     maxLatitude: Math.PI / 2,
@@ -141,6 +178,17 @@ export function createAngularRenderingProfile(
     },
     longitudeCenter: base.long0,
     maxLatitude: Math.PI / 2,
+    boundary: t => boundary(t * 2 * Math.PI),
+    contains(longitude, latitude) {
+      const delta = longitude - base.long0;
+      const dot =
+        sinLatitude * Math.sin(latitude) + cosLatitude * Math.cos(latitude) * Math.cos(delta);
+      const bearing = Math.atan2(
+        Math.cos(latitude) * Math.sin(delta),
+        cosLatitude * Math.sin(latitude) - sinLatitude * Math.cos(latitude) * Math.cos(delta)
+      );
+      return dot >= Math.cos(distance(bearing)) - 1e-14;
+    },
     requiresClipping([west, south, east, north]) {
       // A rectangle can surround the antipode while every edge remains convertible.
       // Resolve its meridian into the coverage interval, including dateline crossings.
@@ -188,20 +236,33 @@ export function createCoverageRenderingProfile(
     if (clipToDomain) clip(point);
     return implementation.forward(point.x, point.y);
   }, bounds);
+  const [west, south, east, north] = bounds;
+  const longitudeCenter = (west + east) / 2;
+  const unwrap = (longitude: number) =>
+    longitudeCenter + wrapLongitude(longitude - longitudeCenter);
+  const inCoverage = (x: number, y: number) =>
+    x >= west - 1e-12 && x <= east + 1e-12 && y >= south - 1e-12 && y <= north + 1e-12;
+  let intersection: Curve[] = [];
+  const clippedBounds = () => {
+    if (!profile.boundary || !profile.contains) return covered.bounds;
+    // The intersection boundary consists of coverage edges inside the cap and
+    // cap arcs inside coverage. Neither domain's full envelope belongs here.
+    intersection = rectangleCurves(bounds).flatMap(curve =>
+      intersectCurve(curve, profile.contains!)
+    );
+    intersection.push(
+      ...intersectCurve(t => {
+        const [x, y] = profile.boundary!(t);
+        return [unwrap(x), y];
+      }, inCoverage)
+    );
+    if (!intersection.length)
+      throw new Error('CRS coverage does not intersect the rendering domain');
+    return projectBoundaryBounds(implementation.forward, intersection);
+  };
   const resolveBounds = () => {
-    const encloseClippedBounds = (result: ProjectionRenderingProfile['bounds']) => {
-      if (!clipToDomain) return result;
-      // Clipping may introduce an interior cap boundary absent from the rectangle's
-      // edges. Its full finite envelope conservatively encloses normalized coverage.
-      const domain = profile.bounds;
-      return result.map((corner, index) =>
-        corner.map((value, axis) =>
-          index === 0 ? Math.min(value, domain[index][axis]) : Math.max(value, domain[index][axis])
-        )
-      ) as [[number, number, number], [number, number, number]];
-    };
     try {
-      const result = encloseClippedBounds(covered.bounds);
+      const result = clipToDomain ? clippedBounds() : covered.bounds;
       coverageChecked = true;
       return result;
     } catch (error) {
@@ -209,7 +270,7 @@ export function createCoverageRenderingProfile(
       // Explicit coverage replaces defaults when convertible. At a horizon use
       // the projection-owned finite clipping policy, e.g. Gnomonic's 80-degree cap.
       clipToDomain = true;
-      const result = encloseClippedBounds(covered.bounds);
+      const result = clippedBounds();
       coverageChecked = true;
       return result;
     }
@@ -223,7 +284,49 @@ export function createCoverageRenderingProfile(
     normalize(point) {
       if (!coverageChecked) resolveBounds();
       covered.normalize!(point);
-      if (clipToDomain) clip(point);
+      if (clipToDomain) {
+        clip(point);
+        point.x = unwrap(point.x);
+        if (intersection.length && !inCoverage(point.x, point.y)) {
+          // Radial cap clamping can leave the coverage rectangle. Choose the
+          // closest point on the intersection boundary to satisfy both domains.
+          const target = [
+            Math.cos(point.y) * Math.cos(point.x),
+            Math.cos(point.y) * Math.sin(point.x),
+            Math.sin(point.y)
+          ];
+          const score = (coordinate: [number, number]) => {
+            const [x, y] = coordinate;
+            return (
+              target[0] * Math.cos(y) * Math.cos(x) +
+              target[1] * Math.cos(y) * Math.sin(x) +
+              target[2] * Math.sin(y)
+            );
+          };
+          let bestScore = -Infinity;
+          let bestCurve = intersection[0];
+          let bestT = 0;
+          for (const curve of intersection) {
+            for (let index = 0; index <= 64; index++) {
+              const value = score(curve(index / 64));
+              if (value > bestScore) {
+                bestScore = value;
+                bestCurve = curve;
+                bestT = index / 64;
+              }
+            }
+          }
+          let left = Math.max(0, bestT - 1 / 64);
+          let right = Math.min(1, bestT + 1 / 64);
+          for (let iteration = 0; iteration < 48; iteration++) {
+            const a = left + (right - left) / 3;
+            const b = right - (right - left) / 3;
+            if (score(bestCurve(a)) > score(bestCurve(b))) right = b;
+            else left = a;
+          }
+          [point.x, point.y] = bestCurve((left + right) / 2);
+        }
+      }
     }
   };
 }

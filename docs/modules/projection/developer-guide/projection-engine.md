@@ -218,8 +218,9 @@ coverage is inherited when the outer CRS has none. Coverage that reaches unproje
 coordinates is clipped using the projection's finite rendering policy, including
 Gnomonic's horizon-safe angular cap and Mercator's latitude cap. Coverage may surround
 an interior singularity, such as a stereographic antipode; normalization also clips
-that region. For clipped coverage, the bounds conservatively include the projection's
-finite rendering envelope to enclose the curved clipping boundary. `areaOfUse` records the declared coverage as
+that region. Clipped rendering bounds enclose the intersection of declared coverage
+and the finite rendering domain, including curved boundary arcs within the coverage.
+`areaOfUse` records the declared coverage as
 `[west, south, east, north]` in Greenwich degrees; east less than west denotes an
 antimeridian crossing. Coverage does not restrict conversion functions. Geocentric bounds always enclose the reference
 ellipsoid. The package does not fetch a full EPSG registry.

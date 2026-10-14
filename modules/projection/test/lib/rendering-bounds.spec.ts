@@ -336,3 +336,59 @@ test('stereographic coverage enclosing an interior antipode clips to a finite re
     }
   }
 });
+
+test('Mercator latitude clipping preserves regional longitude and latitude bounds', async () => {
+  const crs = await projectionEngine.getCRS({
+    ...projectedJSON,
+    conversion: {name: 'Mercator', method: {name: 'Mercator (variant A)'}, parameters: []},
+    bbox: {west_longitude: 2, south_latitude: 80, east_longitude: 4, north_latitude: 90}
+  });
+  const cap = (Math.atan(Math.sinh(Math.PI)) * 180) / Math.PI;
+  const minimum = crs.converter.WGS84.from([2, 80]);
+  const maximum = crs.converter.WGS84.from([4, cap]);
+  for (let axis = 0; axis < 2; axis++) {
+    expect(crs.renderingBounds[0][axis]).toBeCloseTo(minimum[axis], 3);
+    expect(crs.renderingBounds[1][axis]).toBeCloseTo(maximum[axis], 3);
+  }
+  const normalized = crs.converter.WGS84.normalize([10, 90, 123]);
+  expect(normalized[0]).toBeCloseTo(4, 10);
+  expect(normalized[1]).toBeCloseTo(cap, 10);
+  expect(normalized[2]).toBe(123);
+});
+
+test('Orthographic coverage intersects the curved horizon without expanding to a full hemisphere', async () => {
+  const crs = await projectionEngine.getCRS({
+    ...projectedJSON,
+    conversion: {
+      name: 'Orthographic',
+      method: {name: 'Orthographic'},
+      parameters: [
+        {name: 'Longitude of natural origin', value: 0, unit: 'degree'},
+        {name: 'Latitude of natural origin', value: 0, unit: 'degree'}
+      ]
+    },
+    bbox: {west_longitude: 60, south_latitude: -10, east_longitude: 120, north_latitude: 10}
+  });
+  const minimum = crs.converter.WGS84.from([60, -10]);
+  const maximum = crs.converter.WGS84.from([90, 0]);
+  const upperCorner = crs.converter.WGS84.from([90, 10]);
+  expect(crs.renderingBounds[0][0]).toBeCloseTo(minimum[0], 3);
+  expect(crs.renderingBounds[1][0]).toBeCloseTo(maximum[0], 3);
+  expect(crs.renderingBounds[0][1]).toBeCloseTo(-upperCorner[1], 3);
+  expect(crs.renderingBounds[1][1]).toBeCloseTo(upperCorner[1], 3);
+  for (let longitude = 60; longitude <= 120; longitude += 5) {
+    for (let latitude = -90; latitude <= 90; latitude += 5) {
+      const normalized = crs.converter.WGS84.normalize([longitude, latitude, 123]);
+      expect(normalized[0]).toBeGreaterThanOrEqual(60 - 1e-8);
+      expect(normalized[0]).toBeLessThanOrEqual(90 + 1e-8);
+      expect(normalized[1]).toBeGreaterThanOrEqual(-10 - 1e-8);
+      expect(normalized[1]).toBeLessThanOrEqual(10 + 1e-8);
+      expect(normalized[2]).toBe(123);
+      const projected = crs.converter.WGS84.from(normalized);
+      for (let axis = 0; axis < 2; axis++) {
+        expect(projected[axis]).toBeGreaterThanOrEqual(crs.renderingBounds[0][axis] - 0.01);
+        expect(projected[axis]).toBeLessThanOrEqual(crs.renderingBounds[1][axis] + 0.01);
+      }
+    }
+  }
+});

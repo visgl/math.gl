@@ -44,6 +44,10 @@ export type ProjectionRenderingProfile = {
    * Bounds use native geographic radians, with an unwrapped east endpoint.
    */
   requiresClipping?(bounds: readonly [number, number, number, number]): boolean;
+  /** Geographic boundary of a curved rendering domain, parameterized over [0, 1]. */
+  boundary?(fraction: number): [number, number];
+  /** Membership in the finite rendering domain, using native geographic radians. */
+  contains?(longitude: number, latitude: number): boolean;
   /** Optional rendering-domain clamp on native geographic radians; preserve altitude.
    * Conversion kernels remain unrestricted by this rendering envelope.
    */
