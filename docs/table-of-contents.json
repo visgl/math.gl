@@ -230,6 +230,7 @@
             "type": "category",
             "label": "Developer Guide",
             "items": [
+              "modules/projection/developer-guide/api-guide",
               "modules/projection/developer-guide/coordinate-systems",
               "modules/projection/developer-guide/projections",
               "modules/projection/developer-guide/projection-engine",

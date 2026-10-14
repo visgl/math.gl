@@ -4,6 +4,9 @@ slug: /modules/projection/projection-engine
 
 # Projection engine
 
+For the responsibilities of each API and when to use it, start with the
+[CRS and projection API guide](api-guide.md).
+
 Use the math.gl projection engine to convert coordinates between geographic,
 projected and geocentric coordinate reference systems. It supports scalar coordinates,
 in-place typed arrays, custom projections and loading algorithms on demand.
