@@ -196,3 +196,31 @@ are part of the application workload.
 
 Bundle measurements and packaging checks are documented with
 [imports, plugins and loading](developer-guide/projection-engine.md#tree-shaking-and-bundle-size).
+
+## CRS descriptor bundle baseline
+
+CRS descriptors add metadata assembly, converters, rendering profiles and numerical
+rendering scales to engines that expose `getCRS()`. The full root also exports the
+rendering-aware projection implementations. These capabilities increase aggregate
+bundle sizes; importing a plain transform still excludes descriptor assembly.
+
+The Node 24.14.0 / browser ES2020 minified ESM measurements below use
+`check-bundle-budget.mjs --measure` and `check-lazy-package.mjs --measure` (gzip level 9).
+They are recorded as `crsDescriptorBaseline` in the bundle-budget fixture, with bounded
+headroom only for affected entries. Historical baselines remain available there.
+
+| Entry | Minified bytes | Gzip bytes |
+| --- | ---: | ---: |
+| Projection analysis | 4,486 | 1,640 |
+| Full engine | 165,390 | 56,060 |
+| All root exports | 199,878 | 67,978 |
+| Lazy catalogue, initial graph | 53,492 | 20,391 |
+| Lazy rotated projection, initial graph | 38,966 | 14,789 |
+
+The shared numerical derivative and its caller remain allocation-guarded. The analysis
+source-graph budget remains 4,900 minified / 1,800 gzip bytes; the published-package
+analysis gzip limit is 1,700 bytes. These are distinct builds. Optional projection kernels,
+grid readers, WKT syntax and regional datum data must still stay out of the corresponding
+initial graphs. The metadata-only `@math.gl/crs/metadata` import prevents shared WKT
+syntax from being hoisted by split-bundle construction. No dependency exclusions or
+coverage thresholds are relaxed by this baseline update.

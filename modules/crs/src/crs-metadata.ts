@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+// Metadata-only entry: importing units/signatures must not pull syntax readers into split bundles.
+export {linearUnits} from './units-table';
+
 /** Coordinate unit metadata. */
 export type CRSUnit = Readonly<{
   /** Unit name, such as degrees, radians, meters, kilometers, or feet. */

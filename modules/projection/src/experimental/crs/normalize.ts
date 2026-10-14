@@ -10,7 +10,7 @@ import type {ProjectionParameters} from '../types';
 import {getDatumDefinitions} from './datum-catalog';
 import ellipsoids from './ellipsoid-table';
 import primeMeridians from './primemeridian-table';
-import {linearUnits} from '@math.gl/crs';
+import {linearUnits} from '@math.gl/crs/metadata';
 import {TypeScriptCRSError, unsupportedStage} from './types';
 import type {CRSNormalizationOptions, Ellipsoid, NormalizedCRS, ParsedCRS} from './types';
 

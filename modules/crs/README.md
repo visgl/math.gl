@@ -78,3 +78,7 @@ matter. This is an identity of resolved execution conventions, not a semantic
 equivalence test for arbitrary CRS definitions. Projection descriptors use this
 result as `signature` when structured input or overrides require resolved metadata;
 default string definitions retain the original string.
+
+Import `getCRSSignature`, `linearUnits`, `CRSMetadata` and `CRSUnit` from
+`@math.gl/crs/metadata` when only resolved metadata is needed. This entry keeps
+WKT/PROJ syntax readers out of the initial graph of code-split applications.

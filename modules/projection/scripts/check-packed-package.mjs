@@ -395,6 +395,9 @@ try {
     class CustomError extends core.TypeScriptCRSError {}
     assert(new CustomError('invalid-definition', 'custom') instanceof api.TypeScriptCRSError);
     assert(!(new core.TypeScriptCRSError('invalid-definition', 'base') instanceof CustomError));
+    const metadata = await load('@math.gl/crs/metadata');
+    assert.equal(typeof metadata.getCRSSignature, 'function');
+    assert.equal(metadata.linearUnits.ft.metersPerUnit, 0.3048);
     const {parseWKTCRS} = await load('@math.gl/crs/wkt');
     const {parsePROJString} = await load('@math.gl/crs/proj-string');
     const {inferCRSRepresentation} = await load('@math.gl/crs/spatial-reference');
@@ -651,6 +654,10 @@ try {
     // @ts-expect-error Observation epoch is supplied separately, not in a step.
     const dynamicStep: PipelineStep = {type: 'helmert', translation: [0, 0, 0], epoch: 2020};
     import {mercator} from '@math.gl/projection/projections/merc';
+    import {getCRSSignature, linearUnits, type CRSMetadata, type CRSUnit} from '@math.gl/crs/metadata';
+    const metadataUnit: CRSUnit = linearUnits.ft;
+    const signature: (metadata: CRSMetadata) => string = getCRSSignature;
+    void [metadataUnit, signature];
     import {parseWKTCRS} from '@math.gl/crs/wkt';
     import {parsePROJString} from '@math.gl/crs/proj-string';
     import {inferCRSRepresentation} from '@math.gl/crs/spatial-reference';

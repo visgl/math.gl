@@ -84,8 +84,8 @@
       "gzip": 16900
     },
     "allNativeExports": {
-      "minified": 186900,
-      "gzip": 63800
+      "minified": 204000,
+      "gzip": 69500
     },
     "mercatorWithWKT": {
       "minified": 65200,
@@ -104,8 +104,8 @@
       "gzip": 15300
     },
     "typescriptWrapper": {
-      "minified": 159300,
-      "gzip": 54500
+      "minified": 170000,
+      "gzip": 57500
     },
     "mercatorWithGTX": {
       "minified": 40500,
@@ -133,7 +133,7 @@
     },
     "projectionAnalysis": {
       "minified": 4500,
-      "gzip": 1600
+      "gzip": 1700
     },
     "projectionBulk": {
       "minified": 6100,
@@ -222,12 +222,12 @@
   },
   "lazyInitialLimits": {
     "catalogue": {
-      "minified": 47300,
-      "gzip": 18000
+      "minified": 55000,
+      "gzip": 21000
     },
     "rotated": {
       "minified": 39300,
-      "gzip": 14600
+      "gzip": 15000
     },
     "utm": {
       "minified": 39400,
@@ -369,5 +369,65 @@
   "leanDatumCIAllRoot": {
     "node": "24.14.0",
     "gzip": 63213
+  },
+  "crsDescriptorBaseline": {
+    "node": "24.14.0",
+    "reason": "CRS descriptors, rendering profiles and shared numerical derivatives add runtime code to engine/root imports. Metadata subpath keeps WKT syntax deferred. Only affected size limits change; dependency exclusions and coverage gates remain unchanged.",
+    "eager": {
+      "projectionAnalysis": {
+        "minified": 4486,
+        "gzip": 1640
+      },
+      "typescriptWrapper": {
+        "minified": 165390,
+        "gzip": 56060
+      },
+      "allNativeExports": {
+        "minified": 199878,
+        "gzip": 67978
+      }
+    },
+    "lazy": {
+      "catalogue": {
+        "initial": {
+          "minified": 53492,
+          "gzip": 20391
+        },
+        "deferred": {
+          "minified": 84002,
+          "gzip": 39682
+        }
+      },
+      "utm": {
+        "initial": {
+          "minified": 38893,
+          "gzip": 14534
+        },
+        "deferred": {
+          "minified": 8242,
+          "gzip": 3619
+        }
+      },
+      "wkt": {
+        "initial": {
+          "minified": 38660,
+          "gzip": 14418
+        },
+        "deferred": {
+          "minified": 24704,
+          "gzip": 8680
+        }
+      },
+      "rotated": {
+        "initial": {
+          "minified": 38966,
+          "gzip": 14789
+        },
+        "deferred": {
+          "minified": 5842,
+          "gzip": 2725
+        }
+      }
+    }
   }
 }

@@ -7,7 +7,7 @@ import {normalizeCRS} from './crs/normalize';
 import {createRenderingScale} from './crs-rendering-scale';
 import {validateScalarOutput, writeScalarOutput} from './scalar-output';
 import type {ProjectionTransform} from './typescript-projection';
-import {getCRSSignature, linearUnits} from '@math.gl/crs';
+import {getCRSSignature, linearUnits} from '@math.gl/crs/metadata';
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
 import type {CRSNormalizationOptions, NormalizedCRS} from './crs/types';
 import type {
