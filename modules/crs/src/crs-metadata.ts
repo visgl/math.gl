@@ -11,6 +11,8 @@ export type CRSUnit = Readonly<{
   name: string;
   /** Metres per coordinate unit for linear units; omitted for angular units. */
   metersPerUnit?: number;
+  /** Degrees per coordinate unit for angular units; omitted for linear units. */
+  degreesPerUnit?: number;
 }>;
 
 /** Resolved executable CRS metadata, without projection algorithms or rendering conventions. */
@@ -52,9 +54,9 @@ export function getCRSSignature(crs: CRSMetadata): string {
       .map(key => [key, crs.parameters[key]]),
     [crs.ellipsoid.semiMajorAxis, crs.ellipsoid.semiMinorAxis],
     crs.axis,
-    [crs.xUnit.name, crs.xUnit.metersPerUnit],
-    [crs.yUnit.name, crs.yUnit.metersPerUnit],
-    [crs.zUnit.name, crs.zUnit.metersPerUnit],
+    [crs.xUnit.name, crs.xUnit.metersPerUnit, crs.xUnit.degreesPerUnit],
+    [crs.yUnit.name, crs.yUnit.metersPerUnit, crs.yUnit.degreesPerUnit],
+    [crs.zUnit.name, crs.zUnit.metersPerUnit, crs.zUnit.degreesPerUnit],
     crs.lossy,
     crs.areaOfUse
   ]);

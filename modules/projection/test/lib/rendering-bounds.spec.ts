@@ -150,3 +150,116 @@ test.each([
     }
   }
 });
+
+test.each(['bound', 'compound'] as const)(
+  'outer %s CRS coverage takes precedence over inherited coverage',
+  async kind => {
+    const inherited = {
+      ...geographicJSON,
+      bbox: {west_longitude: -10, south_latitude: -20, east_longitude: 10, north_latitude: 20}
+    };
+    const base =
+      kind === 'bound'
+        ? {
+            type: 'BoundCRS' as const,
+            source_crs: inherited,
+            target_crs: geographicJSON,
+            transformation: {
+              name: 'Identity translation',
+              method: {name: 'Geocentric translations'},
+              parameters: ['X-axis translation', 'Y-axis translation', 'Z-axis translation'].map(
+                name => ({name, value: 0, unit: 'metre' as const})
+              )
+            }
+          }
+        : {
+            type: 'CompoundCRS' as const,
+            name: 'WGS84 and height',
+            components: [
+              inherited,
+              {type: 'VerticalCRS' as const, name: 'Height', datum: {name: 'Local vertical'}}
+            ]
+          };
+    const options = kind === 'compound' ? {mode: 'horizontal' as const} : {};
+    const inheritedDescriptor = await projectionEngine.getCRS(base, options);
+    expect(inheritedDescriptor.areaOfUse).toEqual([-10, -20, 10, 20]);
+    const bbox = {west_longitude: 2, south_latitude: 40, east_longitude: 4, north_latitude: 50};
+    const descriptor = await projectionEngine.getCRS({...base, bbox}, options);
+    expect(descriptor.areaOfUse).toEqual([2, 40, 4, 50]);
+    expect(descriptor.converter.WGS84.normalize([10, 20])).toEqual([4, 40]);
+    const expectedBounds = [
+      [2, 40, 0],
+      [4, 50, 0]
+    ];
+    for (let corner = 0; corner < 2; corner++) {
+      for (let axis = 0; axis < 3; axis++) {
+        expect(descriptor.renderingBounds[corner][axis]).toBeCloseTo(
+          expectedBounds[corner][axis],
+          9
+        );
+      }
+    }
+    expect(descriptor.signature).not.toBe(inheritedDescriptor.signature);
+    await expect(
+      projectionEngine.getCRS({...base, bbox: {...bbox, south_latitude: 60}}, options)
+    ).rejects.toThrow('Invalid CRS geographic bounding box');
+  }
+);
+
+test('explicit coverage expands the default UTM rendering domain', async () => {
+  const bbox = {west_longitude: 0, south_latitude: -10, east_longitude: 10, north_latitude: 85};
+  const descriptor = await projectionEngine.getCRS({...projectedJSON, bbox});
+  expect(descriptor.converter.WGS84.normalize([9, -5])).toEqual([9, -5]);
+  expect(descriptor.converter.WGS84.normalize([20, -20])).toEqual([10, -10]);
+  for (const coordinate of [
+    [0, -10],
+    [10, 0],
+    [3, 85]
+  ]) {
+    const point = descriptor.converter.WGS84.from(coordinate);
+    for (let axis = 0; axis < 2; axis++) {
+      expect(point[axis]).toBeGreaterThanOrEqual(descriptor.renderingBounds[0][axis] - 1e-6);
+      expect(point[axis]).toBeLessThanOrEqual(descriptor.renderingBounds[1][axis] + 1e-6);
+    }
+  }
+});
+
+test('convertible Gnomonic coverage can extend past its default finite rendering cap', async () => {
+  const descriptor = await projectionEngine.getCRS({
+    ...projectedJSON,
+    conversion: {
+      name: 'Gnomonic',
+      method: {name: 'Gnomonic'},
+      parameters: [
+        {name: 'Latitude of natural origin', value: 0, unit: 'degree'},
+        {name: 'Longitude of natural origin', value: 0, unit: 'degree'}
+      ]
+    },
+    bbox: {west_longitude: 81, south_latitude: -1, east_longitude: 85, north_latitude: 1}
+  });
+  expect(descriptor.converter.WGS84.normalize([84, 0])).toEqual([84, 0]);
+  expect(descriptor.renderingBounds.flat().every(Number.isFinite)).toBe(true);
+});
+
+test('coverage clipping is resolved before normalization even when bounds were not requested', async () => {
+  const projection = await projectionEngine.createProjectionAsync({
+    from: 'WGS84',
+    to: {
+      ...projectedJSON,
+      conversion: {
+        name: 'Gnomonic',
+        method: {name: 'Gnomonic'},
+        parameters: [
+          {name: 'Latitude of natural origin', value: 0, unit: 'degree'},
+          {name: 'Longitude of natural origin', value: 0, unit: 'degree'}
+        ]
+      },
+      bbox: {west_longitude: -180, south_latitude: -80, east_longitude: 180, north_latitude: 80}
+    }
+  });
+  const point = {x: Math.PI, y: 0, z: 0};
+  projection.targetProfile!.normalize!(point);
+  const distance = Math.acos(Math.cos(point.x) * Math.cos(point.y));
+  expect(distance).toBeCloseTo((Math.PI * 80) / 180, 10);
+  expect(projection.targetProfile!.bounds.flat().every(Number.isFinite)).toBe(true);
+});

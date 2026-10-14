@@ -399,11 +399,11 @@ or numerically unresolved; invalid nonpositive computed scales raise an error.
 | Concept | Coordinates | Meaning |
 | --- | --- | --- |
 | `CRSMetadata.areaOfUse` | Greenwich longitude/latitude degrees | Geographic coverage declared by the CRS definition. |
-| `CRSDescriptor.renderingBounds` | Effective target coordinates | A finite rectangle enclosing the selected rendering reference surface. It is neither an altitude range nor a conversion-validity test. |
+| `CRSDescriptor.renderingBounds` | Effective target coordinates | A finite XYZ envelope enclosing the selected rendering reference surface; consumers select axes from the effective axis order. It is neither an altitude range nor a conversion-validity test. |
 | `ProjectionRenderingProfile` | Native projection units and geographic radians | Projection-owned rendering envelope and normalization, adapted by the descriptor into effective units and axis order. |
 | `ProjectionAnalysis.domain` | Geographic radians | An explicit application-qualified rectangle in which numerical analysis is attempted. The derivative stencil must fit inside it. |
 
-Declared area of use may narrow the default rendering envelope. Neither envelope nor
+Declared area of use replaces the default rendering extent, with projection-owned clipping at unprojectable horizons. Neither envelope nor
 area of use automatically becomes an analysis domain. A point inside rendering bounds
 can still fail conversion, and a point outside them can remain mathematically convertible.
 

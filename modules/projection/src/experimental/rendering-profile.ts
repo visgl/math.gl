@@ -163,30 +163,48 @@ export function createAngularRenderingProfile(
   };
 }
 
-/** Apply declared geographic coverage inside the algorithm's rendering domain. */
+/** Declared CRS coverage replaces the algorithm's default rendering domain. */
 export function createCoverageRenderingProfile(
   implementation: ProjectionImplementation,
   profile: ProjectionRenderingProfile,
   bounds: GeographicRenderingBounds
 ): ProjectionRenderingProfile {
-  const normalizeDomain = (point: ProjectionPoint) => {
+  let clipToDomain = false,
+    coverageChecked = false;
+  const clip = (point: ProjectionPoint) => {
     point.y = Math.max(-profile.maxLatitude, Math.min(profile.maxLatitude, point.y));
     profile.normalize?.(point);
   };
   const covered = createRectangleRenderingProfile((x, y) => {
     const point = {x, y, z: 0};
-    normalizeDomain(point);
+    if (clipToDomain) clip(point);
     return implementation.forward(point.x, point.y);
   }, bounds);
+  const resolveBounds = () => {
+    try {
+      const result = covered.bounds;
+      coverageChecked = true;
+      return result;
+    } catch (error) {
+      if (clipToDomain || !profile.normalize) throw error;
+      // Explicit coverage replaces defaults when convertible. At a horizon use
+      // the projection-owned finite clipping policy, e.g. Gnomonic's 80-degree cap.
+      clipToDomain = true;
+      const result = covered.bounds;
+      coverageChecked = true;
+      return result;
+    }
+  };
   return {
     get bounds() {
-      return covered.bounds;
+      return resolveBounds();
     },
     longitudeCenter: covered.longitudeCenter,
     maxLatitude: covered.maxLatitude,
     normalize(point) {
+      if (!coverageChecked) resolveBounds();
       covered.normalize!(point);
-      normalizeDomain(point);
+      if (clipToDomain) clip(point);
     }
   };
 }

@@ -176,6 +176,7 @@ const DIRECTIONS: Record<string, string> = {
 
 export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOptions): ParsedCRS {
   const type = String(crs['type']);
+  const areaOfUse = readAreaOfUse(crs['bbox']);
   if (type === 'CompoundCRS') {
     if (options.mode !== 'horizontal')
       unsupportedStage('CompoundCRS requires explicit horizontal extraction');
@@ -186,7 +187,8 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
       );
     if (components.length !== 1)
       throw new Error('CompoundCRS requires exactly one horizontal component');
-    return {...readStructuredCRS(components[0], options), lossy: true};
+    const component = readStructuredCRS(components[0], options);
+    return {...component, areaOfUse: areaOfUse ?? component.areaOfUse, lossy: true};
   }
   if (type === 'BoundCRS') {
     const source = readStructuredCRS(object(crs['source_crs']), options);
@@ -243,7 +245,7 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
       towgs84: values.join(',')
     };
     delete parameters['datum'];
-    return {...source, parameters};
+    return {...source, parameters, areaOfUse: areaOfUse ?? source.areaOfUse};
   }
   if (!['ProjectedCRS', 'GeographicCRS', 'GeodeticCRS'].includes(type))
     unsupportedStage('Unsupported CRS type: ' + type);
@@ -493,7 +495,16 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
     unsupportedStage('Structured CRS vertical-first axes require an explicit PROJ axis definition');
   if (axis) parameters['axis'] = axis;
   if (type === 'ProjectedCRS' || geocentric) parameters['to_meter'] = String(factor);
-  const bbox = crs['bbox'];
+  return {
+    parameters,
+    areaOfUse,
+    angularUnit: type === 'ProjectedCRS' || geocentric ? angularUnit : factor,
+    verticalUnit: geocentric ? 1 : unit(axes[2]?.['unit'], 1)
+  };
+}
+
+/** Declared coverage belongs to the outer CRS, ahead of inherited component coverage. */
+function readAreaOfUse(bbox: unknown): ParsedCRS['areaOfUse'] {
   let areaOfUse: ParsedCRS['areaOfUse'];
   if (bbox !== undefined) {
     const extent = object(bbox);
@@ -514,12 +525,7 @@ export function readStructuredCRS(crs: RecordValue, options: CRSNormalizationOpt
       throw new Error('Invalid CRS geographic bounding box');
     areaOfUse = [west, south, east, north];
   }
-  return {
-    parameters,
-    areaOfUse,
-    angularUnit: type === 'ProjectedCRS' || geocentric ? angularUnit : factor,
-    verticalUnit: geocentric ? 1 : unit(axes[2]?.['unit'], 1)
-  };
+  return areaOfUse;
 }
 
 /** Interpret polar axis meridians in the projection's central-meridian frame.

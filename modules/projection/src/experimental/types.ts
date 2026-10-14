@@ -95,12 +95,12 @@ export type GetCRSOptions = Pick<CreateProjectionOptions, 'enforceAxis' | 'mode'
   converters?: readonly string[];
 };
 
-/** Finite target-coordinate XY rectangle describing an appropriate rendering target.
+/** Finite target-coordinate XYZ envelope describing an appropriate rendering target.
  * This is not the projection algorithm's validity domain or a coordinate validity test.
  */
 export type CRSBounds = readonly [
-  minimum: readonly [number, number],
-  maximum: readonly [number, number]
+  minimum: readonly [number, number, number],
+  maximum: readonly [number, number, number]
 ];
 
 /** Rendering factors in effective target-axis order. Horizontal factors measure
@@ -145,9 +145,9 @@ export interface CRSDescriptor extends CRSMetadata {
    * not guarantee packed-coordinate interchangeability across engines.
    */
   readonly signature: string;
-  /** Finite rectangle chosen as an appropriate rendering target, in effective units and axis order.
+  /** Finite XYZ envelope chosen as an appropriate rendering target, in effective units and axis order.
    * Bounds describe a rendering policy for the reference surface, not the algorithm's
-   * mathematical validity domain or altitude limits. Coordinates outside the rectangle
+   * mathematical validity domain or altitude limits. Coordinates outside the envelope
    * may still be converted; being inside it does not guarantee a valid conversion.
    */
   readonly renderingBounds: CRSBounds;

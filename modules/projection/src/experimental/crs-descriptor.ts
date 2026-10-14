@@ -244,14 +244,16 @@ function adaptBounds(
     return /[wsd]/.test(direction) ? [-maximum, -minimum] : [minimum, maximum];
   });
   return [
-    [limits[0][0], limits[1][0]] as readonly [number, number],
-    [limits[0][1], limits[1][1]] as readonly [number, number]
+    [limits[0][0], limits[1][0], limits[2][0]] as readonly [number, number, number],
+    [limits[0][1], limits[1][1], limits[2][1]] as readonly [number, number, number]
   ];
 }
 
-/** Canonical unit labels are metadata; numeric factors remain in the compiled transform. */
+/** Canonical labels and conversion factors describe the effective coordinate units. */
 function getUnit(factor: number, angular: boolean): CRSUnit {
   const units = angular ? ANGULAR_UNITS : LINEAR_UNITS;
   const name = Object.keys(units).find(candidate => units[candidate] === factor) || 'custom';
-  return angular ? {name} : {name, metersPerUnit: factor};
+  return angular
+    ? {name, degreesPerUnit: factor / ANGULAR_UNITS['degrees']}
+    : {name, metersPerUnit: factor};
 }

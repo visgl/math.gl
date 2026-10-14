@@ -100,11 +100,12 @@ const scale = crs.getRenderingScale(position);
 `CRSDescriptor` is exported from the root, `/core`, and runtime-free `/types` entries.
 Its metadata includes coordinate frame, resolved projection parameters,
 ellipsoid axes in metres, effective array axis order, `xUnit`, `yUnit`, and `zUnit`,
-and explicit extraction lossiness. Each unit is a `{name, metersPerUnit?}`
+and explicit extraction lossiness. Each unit is a `{name, metersPerUnit?, degreesPerUnit?}`
 object. Linear units include their constant metre conversion, for example
-`{name: 'feet', metersPerUnit: 0.3048}`. Angular units omit `metersPerUnit`, for example
-`{name: 'degrees'}`. Units follow axis reordering; geocentric XYZ share linear units.
-A custom linear unit retains its factor with the name `custom`. Ground-distance
+`{name: 'feet', metersPerUnit: 0.3048}`. Angular units include their constant degree
+conversion, for example `{name: 'degrees', degreesPerUnit: 1}` or
+`{name: 'radians', degreesPerUnit: 180 / Math.PI}`. Units follow axis reordering; geocentric XYZ share linear units.
+A custom unit retains its linear or angular factor with the name `custom`. Ground-distance
 scales remain separate and may depend on position.
 The metadata-only `CRSMetadata` type belongs to `@math.gl/crs`.
 
@@ -201,17 +202,23 @@ rendering reference surface and can include areas outside its curved boundary.
 Normalization explicitly maps coordinates into the rendering target, preserving altitude
 and later components. Conversion functions do not apply this normalization automatically.
 
-`renderingBounds` is `[[minX, minY], [maxX, maxY]]` in target coordinates and their effective
-axis order/units. It encloses the rendering reference surface, not an altitude range.
+To frame a map in selected target axes, use `renderingBounds`: `[[minX, minY, minZ],
+[maxX, maxY, maxZ]]` in the effective axis order and units. Use `axis` to select the
+horizontal components when height is stored first. The envelope encloses the rendering
+reference surface; planar reference surfaces have zero span along their height axis.
 Each algorithm owns its rendering extent and normalization. Shared boundary sampling projects
 curved edges and refines their extrema; descriptor assembly applies target units and
 axis order. False offsets, ellipsoid parameters, and projection scales affect the envelope.
 
 PROJJSON `bbox` and WKT2 `USAGE[BBOX[...]]` supply geographic area-of-use coverage.
-When present, this coverage narrows the default geographic/projected rendering target,
-within the algorithm's rendering extent. `areaOfUse` records it as `[west, south, east, north]`
-in Greenwich degrees; east less than west denotes an antimeridian crossing. Coverage
-does not restrict conversion functions. Geocentric bounds always enclose the reference
+Declared coverage replaces the default geographic/projected rendering extent, allowing
+applications to frame a region beyond defaults such as a UTM zone. The outer CRS's coverage
+takes precedence over a BoundCRS source or an extracted CompoundCRS component; component
+coverage is inherited when the outer CRS has none. Coverage that reaches unprojectable
+coordinates is clipped using the projection's finite rendering policy, including
+Gnomonic's horizon-safe angular cap. `areaOfUse` records the declared coverage as
+`[west, south, east, north]` in Greenwich degrees; east less than west denotes an
+antimeridian crossing. Coverage does not restrict conversion functions. Geocentric bounds always enclose the reference
 ellipsoid. The package does not fetch a full EPSG registry.
 
 Without declared coverage, built-in algorithms use these rendering policies:

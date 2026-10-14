@@ -58,3 +58,14 @@ test('CRS signatures track projection parameters, ellipsoid, units and effective
     expect(getCRSSignature(changed)).not.toBe(getCRSSignature(metadata));
   }
 });
+
+test('CRS signatures distinguish angular conversion factors with identical unit names', () => {
+  const angular = {
+    ...metadata,
+    coordinateFrame: 'geographic' as const,
+    xUnit: {name: 'custom', degreesPerUnit: 1 / 60}
+  };
+  expect(getCRSSignature(angular)).not.toBe(
+    getCRSSignature({...angular, xUnit: {name: 'custom', degreesPerUnit: 1 / 3600}})
+  );
+});

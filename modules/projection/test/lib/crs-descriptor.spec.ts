@@ -8,6 +8,7 @@ import {LazyProjectionEngine, lazyProjectionEngine} from '@math.gl/projection/pr
 import {mercator} from '@math.gl/projection/projections/merc';
 import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/projection/analysis';
 import {createSpatialReference, getCRSSignature} from '@math.gl/crs';
+import {geographicJSON} from '../fixtures/crs-datums';
 
 // Independent WGS84 curvature radii (metres per radian).
 function wgs84Radii(latitude: number) {
@@ -55,8 +56,8 @@ test('CRS metadata describes resolved units, axes and earth model', async () => 
   const geographic = await projectionEngine.getCRS('WGS84');
   expect(geographic.coordinateFrame).toBe('geographic');
   expect([geographic.xUnit, geographic.yUnit, geographic.zUnit]).toEqual([
-    {name: 'degrees'},
-    {name: 'degrees'},
+    {name: 'degrees', degreesPerUnit: 1},
+    {name: 'degrees', degreesPerUnit: 1},
     {name: 'meters', metersPerUnit: 1}
   ]);
   expect(geographic.xUnit).not.toHaveProperty('metersPerUnit');
@@ -148,8 +149,8 @@ test('component unit labels follow altitude axis order and geocentric coordinate
   });
   expect([reordered.xUnit, reordered.yUnit, reordered.zUnit]).toEqual([
     {name: 'feet', metersPerUnit: 0.3048},
-    {name: 'degrees'},
-    {name: 'degrees'}
+    {name: 'degrees', degreesPerUnit: 1},
+    {name: 'degrees', degreesPerUnit: 1}
   ]);
   const ecef = await projectionEngine.getCRS('+proj=geocent +ellps=WGS84 +units=km +vunits=ft');
   expect([ecef.xUnit, ecef.yUnit, ecef.zUnit]).toEqual([
@@ -213,8 +214,8 @@ test('normalization follows CRS longitude parameters and preserves storage on fa
   const geographic = await projectionEngine.getCRS('+proj=longlat +lon_wrap=180');
   expect(geographic.converter.WGS84.normalize([-10, 0])).toEqual([350, 0]);
   expect(geographic.renderingBounds).toEqual([
-    [0, -90],
-    [360, 90]
+    [0, -90, 0],
+    [360, 90, 0]
   ]);
   const output = [1, 2, 3];
   expect(() => crs.converter.WGS84.normalize([NaN, 0, 0], output)).toThrow();
@@ -224,8 +225,8 @@ test('normalization follows CRS longitude parameters and preserves storage on fa
 test('global bounds account for earth models, linear units, false offsets and axis signs', async () => {
   const sphere = await projectionEngine.getCRS('+proj=geocent +R=6371008.8 +units=km');
   expect(sphere.renderingBounds).toEqual([
-    [-6371.0088, -6371.0088],
-    [6371.0088, 6371.0088]
+    [-6371.0088, -6371.0088, -6371.0088],
+    [6371.0088, 6371.0088, 6371.0088]
   ]);
   const eqc = await projectionEngine.getCRS(
     '+proj=eqc +R=1000 +lat_ts=60 +x_0=10 +y_0=20 +units=km +axis=wsu',
@@ -619,4 +620,43 @@ test('datum-shifted scales use WGS84 curvature rather than the target ellipsoid'
       (2 * step);
     expect(scale[axis] / expected).toBeCloseTo(1, 6);
   }
+});
+
+test('custom angular units retain factors and distinguish descriptor identity', async () => {
+  const definition = (conversionFactor: number) => ({
+    ...geographicJSON,
+    coordinate_system: {
+      ...geographicJSON.coordinate_system,
+      axis: geographicJSON.coordinate_system.axis.map(axis => ({
+        ...axis,
+        unit: {
+          type: 'AngularUnit' as const,
+          name: 'custom angle',
+          conversion_factor: conversionFactor
+        }
+      }))
+    }
+  });
+  const minutes = await projectionEngine.getCRS(definition(Math.PI / 10800));
+  const seconds = await projectionEngine.getCRS(definition(Math.PI / 648000));
+  expect(minutes.xUnit.degreesPerUnit).toBeCloseTo(1 / 60, 14);
+  expect(seconds.xUnit.degreesPerUnit).toBeCloseTo(1 / 3600, 14);
+  expect(minutes.signature).not.toBe(seconds.signature);
+  expect(minutes.converter.WGS84.from([1, 1])[0]).toBeCloseTo(60, 10);
+  expect(seconds.converter.WGS84.from([1, 1])[0]).toBeCloseTo(3600, 10);
+});
+
+test('XYZ bounds retain both horizontal extents with vertical-first axes', async () => {
+  const baseline = await projectionEngine.getCRS('+proj=merc +R=6371008.8 +units=ft');
+  const reordered = await projectionEngine.getCRS(
+    '+proj=merc +R=6371008.8 +units=ft +vunits=us-ft +axis=une',
+    {enforceAxis: true}
+  );
+  expect(reordered.renderingBounds).toEqual([
+    [0, baseline.renderingBounds[0][1], baseline.renderingBounds[0][0]],
+    [0, baseline.renderingBounds[1][1], baseline.renderingBounds[1][0]]
+  ]);
+  const ecef = await projectionEngine.getCRS('EPSG:4978');
+  expect(ecef.renderingBounds[0][2]).toBeCloseTo(-ecef.ellipsoid.semiMinorAxis, 6);
+  expect(ecef.renderingBounds[1][2]).toBeCloseTo(ecef.ellipsoid.semiMinorAxis, 6);
 });
