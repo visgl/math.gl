@@ -4,7 +4,7 @@
 
 import type {CRSMetadata, CRSUnit} from '@math.gl/crs';
 import {normalizeCRS} from './crs/normalize';
-import {createDistanceScale} from './crs-distance-scale';
+import {createRenderingScale} from './crs-rendering-scale';
 import {validateScalarOutput, writeScalarOutput} from './scalar-output';
 import type {ProjectionTransform} from './typescript-projection';
 import {getCRSSignature, linearUnits} from '@math.gl/crs';
@@ -16,7 +16,7 @@ import type {
   CRSConverter,
   CRSDescriptor,
   GetCRSOptions,
-  ProjectionProfile
+  ProjectionRenderingProfile
 } from './types';
 import type {
   CreateProjectionOptions,
@@ -79,7 +79,7 @@ export async function resolveCRSDescriptor(
     profile.normalize,
     crs.primeMeridian
   );
-  const distanceScale = createDistanceScale(crs, projection, axis, center);
+  const renderingScale = createRenderingScale(crs, projection, axis, center);
   const sources = [...new Set(['WGS84', ...(conventions.converters || [])])];
   if (sources.some(source => typeof source !== 'string' || !source.trim()))
     throw new Error('Converter source CRS must be a nonempty string');
@@ -121,10 +121,10 @@ export async function resolveCRSDescriptor(
       useDefinitionSignature && typeof input === 'string' && !conventions.enforceAxis && !crs.lossy
         ? input
         : getCRSSignature(metadata),
-    bounds,
-    distanceScale,
-    getDistanceScale: coordinate =>
-      typeof distanceScale === 'function' ? distanceScale(coordinate) : distanceScale,
+    renderingBounds: bounds,
+    renderingScale,
+    getRenderingScale: coordinate =>
+      typeof renderingScale === 'function' ? renderingScale(coordinate) : renderingScale,
     converter
   };
 }
@@ -179,7 +179,7 @@ function createConversion(
 function createNormalization(
   center: number,
   maxLatitude: number,
-  normalizeDomain?: ProjectionProfile['normalize'],
+  normalizeDomain?: ProjectionRenderingProfile['normalize'],
   primeMeridian = 0
 ): CRSConversion {
   function normalize(coordinate: ProjectionCoordinate): number[];
@@ -225,7 +225,11 @@ function createNormalization(
 }
 
 /** Convert projection-owned native envelopes into the CRS's stored units and axis order. */
-function adaptBounds(profile: ProjectionProfile, crs: NormalizedCRS, axis: string): CRSBounds {
+function adaptBounds(
+  profile: ProjectionRenderingProfile,
+  crs: NormalizedCRS,
+  axis: string
+): CRSBounds {
   const horizontalUnit = crs.kind === 'geographic' ? crs.angularUnit : crs.toMeter;
   const units = [
     horizontalUnit,

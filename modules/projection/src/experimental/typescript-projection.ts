@@ -7,7 +7,7 @@ import type {ProjectionDescriptor} from './projection-descriptor';
 import {getLoadedProjection, preloadProjection} from './projection-descriptor';
 import type {
   ProjectionImplementation,
-  ProjectionProfile,
+  ProjectionRenderingProfile,
   ProjectionPlugin,
   ProjectionPoint,
   ProjectionFlatOperation
@@ -74,7 +74,7 @@ export class ProjectionTransform<P extends ProjectionRegistration = ProjectionPl
     implementation?: ProjectionTransform;
   };
   /** Initialized target projection profile on eager/prepared transforms. @internal */
-  readonly targetProfile?: ProjectionProfile;
+  readonly targetProfile?: ProjectionRenderingProfile;
   readonly lossy: boolean;
   constructor(options: ProjectionTransformOptions<P> = {}) {
     const registrations = options.projections || [];
@@ -103,7 +103,7 @@ export class ProjectionTransform<P extends ProjectionRegistration = ProjectionPl
                 ],
                 longitudeCenter: 0,
                 maxLatitude: Math.PI / 2
-              } as ProjectionProfile)
+              } as ProjectionRenderingProfile)
             : undefined);
       // A custom algorithm without a profile can render a world rectangle if finite.
       // Bounds remain unevaluated during ordinary coordinate conversion.

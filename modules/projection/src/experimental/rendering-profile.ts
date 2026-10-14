@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {KernelParameters} from './kernel';
-import type {ProjectionImplementation, ProjectionPoint, ProjectionProfile} from './types';
+import type {ProjectionImplementation, ProjectionPoint, ProjectionRenderingProfile} from './types';
 import {wrapLongitude} from './parameters';
 
 type Curve = (fraction: number) => [number, number];
@@ -20,7 +20,7 @@ export type GeographicRenderingBounds = readonly [
 function projectBoundaryBounds(
   project: Project,
   curves: readonly Curve[]
-): ProjectionProfile['bounds'] {
+): ProjectionRenderingProfile['bounds'] {
   const count = 64;
   const minimum = [Infinity, Infinity, 0];
   const maximum = [-Infinity, -Infinity, 0];
@@ -83,7 +83,7 @@ function projectBoundaryBounds(
 export function createRectangleRenderingProfile(
   project: Project,
   bounds: GeographicRenderingBounds
-): ProjectionProfile {
+): ProjectionRenderingProfile {
   const [west, south, east, north] = bounds;
   const center = (west + east) / 2;
   const spanX = east - west,
@@ -114,7 +114,7 @@ export function createAngularRenderingProfile(
   base: Pick<KernelParameters, 'long0' | 'lat0'>,
   project: Project,
   maximumDistance: number | ((bearing: number) => number)
-): ProjectionProfile {
+): ProjectionRenderingProfile {
   const sinLatitude = Math.sin(base.lat0),
     cosLatitude = Math.cos(base.lat0);
   const sinLongitude = Math.sin(base.long0),
@@ -166,9 +166,9 @@ export function createAngularRenderingProfile(
 /** Apply declared geographic coverage inside the algorithm's rendering domain. */
 export function createCoverageRenderingProfile(
   implementation: ProjectionImplementation,
-  profile: ProjectionProfile,
+  profile: ProjectionRenderingProfile,
   bounds: GeographicRenderingBounds
-): ProjectionProfile {
+): ProjectionRenderingProfile {
   const normalizeDomain = (point: ProjectionPoint) => {
     point.y = Math.max(-profile.maxLatitude, Math.min(profile.maxLatitude, point.y));
     profile.normalize?.(point);

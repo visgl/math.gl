@@ -90,8 +90,8 @@ const geographic = crs.converter.WGS84.to(position);
 const output = new Float64Array(3);
 crs.converter.WGS84.from([12, 55, 100], output);
 const normalized = crs.converter.WGS84.normalize([372, 55, 100]);
-const bounds = crs.bounds;
-const scale = crs.getDistanceScale(position);
+const bounds = crs.renderingBounds;
+const scale = crs.getRenderingScale(position);
 ```
 
 `CRSDescriptor` is exported from the root, `/core`, and runtime-free `/types` entries.
@@ -148,8 +148,35 @@ Structured input, axis enforcement, horizontal extraction, or custom engine
 registrations use a resolved metadata signature constructed by `@math.gl/crs`.
 Effective conventions include engine defaults and per-request overrides.
 Additional requested converters do not affect identity. Consumers can use the
-opaque signature to invalidate packed coordinates without interpreting CRS
-definitions themselves. It does not perform arbitrary CRS equivalence testing.
+opaque signature within fixed engine conventions. It does not fingerprint custom
+algorithm implementations or grid contents and cannot guarantee packed-coordinate
+interchangeability across engines or perform arbitrary CRS equivalence testing.
+
+### Rendering scales and projection analysis
+
+`renderingScale` is a constant triple or a position callback; `getRenderingScale(position)`
+provides one entry point for both. Horizontal factors measure WGS84 reference-surface
+metres per stored target-axis unit through the complete inverse transform, including
+CRS units, axis order and datum stages. The metric uses the WGS84 ellipsoid consistently
+with the converter's output, even when the target projection uses a sphere.
+
+For projected CRSs, the vertical factor is an isotropic rendering sizing convention:
+the square root of the inverse horizontal area scale, expressed in the vertical unit.
+It is not an altitude conversion. Use the component unit metadata and prepared
+converters for physical heights. At 60° latitude, EPSG:3857 has approximately
+`[0.501260, 0.500417, 0.500838]`; converting a height of 100 metres still preserves 100.
+Geocentric and identity CRSs expose constant physical unit factors.
+
+`ProjectionAnalysis` instead differentiates a single projection in radians and physical
+projected units, excluding datum and CRS axis/unit stages. Both APIs share fourth-order
+finite differences, step/half-step agreement checks, and reusable sampling scratch.
+Descriptor sampling retains the full inverse Jacobian: reciprocals of parallel and
+meridional scales cannot represent rotated or sheared grids. Failed sampling or
+unresolved derivatives return `null`; nonpositive computed scales raise a contract error.
+
+The descriptor complements `SpatialReference` input metadata and prepared transforms.
+Its rendering envelope is separate from declared `areaOfUse` and the explicit,
+application-qualified `ProjectionAnalysis.domain`.
 
 ### Normalization and bounds
 
@@ -171,7 +198,7 @@ rendering reference surface and can include areas outside its curved boundary.
 Normalization explicitly maps coordinates into the rendering target, preserving altitude
 and later components. Conversion functions do not apply this normalization automatically.
 
-`bounds` is `[[minX, minY], [maxX, maxY]]` in target coordinates and their effective
+`renderingBounds` is `[[minX, minY], [maxX, maxY]]` in target coordinates and their effective
 axis order/units. It encloses the rendering reference surface, not an altitude range.
 Each algorithm owns its rendering extent and normalization. Shared boundary sampling projects
 curved edges and refines their extrema; descriptor assembly applies target units and
@@ -215,7 +242,7 @@ northward boundary. Longitude wrapping follows central/prime meridian and
 longitude-wrap parameters. `+over` permits unrestricted longitude conversion but
 retains a finite rendering target.
 
-Custom algorithms can supply a `ProjectionProfile`. Without one, descriptor retrieval
+Custom algorithms can supply a `ProjectionRenderingProfile`. Without one, descriptor retrieval
 projects a world rectangle; a custom algorithm with singularities must supply its own
 finite domain. Ordinary coordinate conversion does not evaluate rendering bounds.
 

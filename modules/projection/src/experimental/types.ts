@@ -29,7 +29,7 @@ export type ProjectionFlatContext = {
 };
 
 /** Projection-owned reference-surface envelope and geographic normalization, in radians/metres. */
-export type ProjectionProfile = {
+export type ProjectionRenderingProfile = {
   /** Finite native XYZ envelope chosen as an appropriate rendering target.
    * This is a rendering policy, not the algorithm's mathematical validity domain.
    * Coordinates outside it may still be converted; membership does not validate a coordinate.
@@ -49,7 +49,7 @@ export type ProjectionProfile = {
 /** A projection operates on radians and meters; the engine handles CRS units. */
 export type ProjectionImplementation = {
   /** Projection-specific bounds and normalization derived at initialization. */
-  readonly profile?: ProjectionProfile;
+  readonly profile?: ProjectionRenderingProfile;
   /** Optional whole-buffer specialization. Return undefined to keep the general pipeline.
    * Called only for geographic/projected pairs without datum, axis, prime-meridian,
    * vertical-unit, longitude-wrap or lossy stages. The engine validates storage and stride.
@@ -103,18 +103,20 @@ export type CRSBounds = readonly [
   maximum: readonly [number, number]
 ];
 
-/** Ground metres per coordinate unit along the target axes.
- * For projected CRSs, the vertical factor encodes the inverse square root of the
- * horizontal Jacobian determinant in the declared vertical unit. It provides an
- * isotropic sizing scale, independently of position altitude's linear unit conversion.
- * Spherical Web Mercator in metres at latitude 60 degrees yields [0.5, 0.5, 0.5].
+/** Rendering factors in effective target-axis order. Horizontal factors measure
+ * WGS84 reference-surface metres per stored coordinate unit through the full inverse
+ * transform. For projected CRSs the vertical factor uses the square root of the
+ * inverse horizontal area scale, expressed in the declared vertical unit.
+ * This sizing convention is independent of altitude conversion; use the component
+ * unit metadata and converters for physical heights. Geocentric/identity factors
+ * are constant physical unit conversions.
  */
-export type CRSDistanceScale = readonly [x: number, y: number, z: number];
+export type CRSRenderingScale = readonly [x: number, y: number, z: number];
 
 /** Evaluate at a position in the descriptor's CRS; null means scale calculation failed. */
-export type CRSDistanceScaleCallback = (
+export type CRSRenderingScaleCallback = (
   coordinate: ProjectionCoordinate
-) => CRSDistanceScale | null;
+) => CRSRenderingScale | null;
 
 /** Synchronous conversion; omit output to allocate an array, or supply storage to reuse it. */
 export interface CRSConversion {
@@ -139,6 +141,8 @@ export interface CRSConverter {
 export interface CRSDescriptor extends CRSMetadata {
   /** Original string under default conventions; otherwise a resolved @math.gl/crs signature.
    * Opaque to consumers; no arbitrary CRS equivalence comparison is implied.
+   * Does not fingerprint algorithm implementations or grid contents; equality does
+   * not guarantee packed-coordinate interchangeability across engines.
    */
   readonly signature: string;
   /** Finite rectangle chosen as an appropriate rendering target, in effective units and axis order.
@@ -146,13 +150,16 @@ export interface CRSDescriptor extends CRSMetadata {
    * mathematical validity domain or altitude limits. Coordinates outside the rectangle
    * may still be converted; being inside it does not guarantee a valid conversion.
    */
-  readonly bounds: CRSBounds;
+  readonly renderingBounds: CRSBounds;
   /** Constant scale or target-position callback; no viewport fallback is applied. */
-  readonly distanceScale: CRSDistanceScale | CRSDistanceScaleCallback;
-  /** Return ground metres per target coordinate unit at the anchor; null means unavailable. */
-  getDistanceScale(coordinate: ProjectionCoordinate): CRSDistanceScale | null;
+  readonly renderingScale: CRSRenderingScale | CRSRenderingScaleCallback;
+  /** Return rendering sizing factors at the anchor; null means sampling is unavailable
+   * or derivatives fail numerical agreement. Invalid finite geometry raises an error. */
+  getRenderingScale(coordinate: ProjectionCoordinate): CRSRenderingScale | null;
   /** Prepared converters; WGS84 is always available, plus explicitly requested source strings. */
-  readonly converter: Readonly<Record<string, CRSConverter>> & {readonly WGS84: CRSConverter};
+  readonly converter: Readonly<Record<string, CRSConverter>> & {
+    readonly WGS84: CRSConverter;
+  };
 }
 
 /** General CRS-capable engine; specialized pair-only engines need not implement retrieval. */

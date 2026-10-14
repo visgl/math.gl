@@ -6,7 +6,18 @@ import {FullProjectionEngine, projectionEngine} from '@math.gl/projection';
 import {createProjectionEngine, createProjectionDescriptor} from '@math.gl/projection/core';
 import {LazyProjectionEngine, lazyProjectionEngine} from '@math.gl/projection/projections/lazy';
 import {mercator} from '@math.gl/projection/projections/merc';
+import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/projection/analysis';
 import {createSpatialReference, getCRSSignature} from '@math.gl/crs';
+
+// Independent WGS84 curvature radii (metres per radian).
+function wgs84Radii(latitude: number) {
+  const a = 6378137,
+    f = 1 / 298.257223563,
+    es = f * (2 - f);
+  const phi = (latitude * Math.PI) / 180;
+  const d = 1 - es * Math.sin(phi) ** 2;
+  return [(a * Math.cos(phi)) / Math.sqrt(d), (a * (1 - es)) / d ** 1.5];
+}
 
 const definitions = [
   'WGS84',
@@ -182,15 +193,15 @@ test('Web Mercator normalization is explicit and provides a finite map rectangle
   expect(() => crs.converter.WGS84.from([0, 90])).toThrow();
   const extent = Math.PI * 6378137;
   for (let axis = 0; axis < 2; axis++) {
-    expect(crs.bounds[0][axis]).toBeCloseTo(-extent, 6);
-    expect(crs.bounds[1][axis]).toBeCloseTo(extent, 6);
+    expect(crs.renderingBounds[0][axis]).toBeCloseTo(-extent, 6);
+    expect(crs.renderingBounds[1][axis]).toBeCloseTo(extent, 6);
   }
   const projected = crs.converter.WGS84.from(crs.converter.WGS84.normalize([0, 90]));
-  expect(projected[1]).toBeCloseTo(crs.bounds[1][1], 6);
+  expect(projected[1]).toBeCloseTo(crs.renderingBounds[1][1], 6);
   const generic = await projectionEngine.getCRS('+proj=merc +ellps=WGS84');
   expect(generic.converter.WGS84.normalize([0, 89])[1]).toBeCloseTo(85.0511287798066);
-  expect(generic.converter.WGS84.from([0, 89])[1]).toBeGreaterThan(generic.bounds[1][1]);
-  expect(Number.isFinite(generic.bounds[1][1])).toBe(true);
+  expect(generic.converter.WGS84.from([0, 89])[1]).toBeGreaterThan(generic.renderingBounds[1][1]);
+  expect(Number.isFinite(generic.renderingBounds[1][1])).toBe(true);
 });
 
 test('normalization follows CRS longitude parameters and preserves storage on failure', async () => {
@@ -201,7 +212,7 @@ test('normalization follows CRS longitude parameters and preserves storage on fa
   ]);
   const geographic = await projectionEngine.getCRS('+proj=longlat +lon_wrap=180');
   expect(geographic.converter.WGS84.normalize([-10, 0])).toEqual([350, 0]);
-  expect(geographic.bounds).toEqual([
+  expect(geographic.renderingBounds).toEqual([
     [0, -90],
     [360, 90]
   ]);
@@ -212,7 +223,7 @@ test('normalization follows CRS longitude parameters and preserves storage on fa
 
 test('global bounds account for earth models, linear units, false offsets and axis signs', async () => {
   const sphere = await projectionEngine.getCRS('+proj=geocent +R=6371008.8 +units=km');
-  expect(sphere.bounds).toEqual([
+  expect(sphere.renderingBounds).toEqual([
     [-6371.0088, -6371.0088],
     [6371.0088, 6371.0088]
   ]);
@@ -220,8 +231,8 @@ test('global bounds account for earth models, linear units, false offsets and ax
     '+proj=eqc +R=1000 +lat_ts=60 +x_0=10 +y_0=20 +units=km +axis=wsu',
     {enforceAxis: true}
   );
-  expect(eqc.bounds[0][0]).toBeCloseTo(-(10 + 500 * Math.PI) / 1000, 10);
-  expect(eqc.bounds[1][1]).toBeCloseTo(-(20 - 500 * Math.PI) / 1000, 10);
+  expect(eqc.renderingBounds[0][0]).toBeCloseTo(-(10 + 500 * Math.PI) / 1000, 10);
+  expect(eqc.renderingBounds[1][1]).toBeCloseTo(-(20 - 500 * Math.PI) / 1000, 10);
   const equalEarth = await projectionEngine.getCRS('+proj=eqearth +ellps=WGS84');
   // Independently evaluate a geographic grid through the projection. The envelope
   // must include boundary and interior points, including both seam spellings.
@@ -229,44 +240,47 @@ test('global bounds account for earth models, linear units, false offsets and ax
     for (let longitude = -180; longitude <= 180; longitude += 30) {
       const point = equalEarth.converter.WGS84.from([longitude, latitude]);
       for (let axis = 0; axis < 2; axis++) {
-        expect(point[axis]).toBeGreaterThanOrEqual(equalEarth.bounds[0][axis] - 1e-6);
-        expect(point[axis]).toBeLessThanOrEqual(equalEarth.bounds[1][axis] + 1e-6);
+        expect(point[axis]).toBeGreaterThanOrEqual(equalEarth.renderingBounds[0][axis] - 1e-6);
+        expect(point[axis]).toBeLessThanOrEqual(equalEarth.renderingBounds[1][axis] + 1e-6);
       }
     }
   }
   const polar = await projectionEngine.getCRS('+proj=stere +lat_0=90');
-  expect(polar.bounds.flat().every(Number.isFinite)).toBe(true);
+  expect(polar.renderingBounds.flat().every(Number.isFinite)).toBe(true);
 });
 
-test('distance scales are ground metres per native coordinate unit', async () => {
+test('rendering scales use WGS84 ground units and separate vertical sizing', async () => {
   const mercator = await projectionEngine.getCRS('EPSG:3857');
-  if (typeof mercator.distanceScale !== 'function') throw new Error('Missing scale callback');
-  const scale = mercator.distanceScale(mercator.converter.WGS84.from([0, 60, 0]));
-  expect(mercator.getDistanceScale(mercator.converter.WGS84.from([0, 60, 0]))).toEqual(scale);
-  expect(mercator.getDistanceScale([NaN, 0])).toBeNull();
-  expect(scale[0]).toBeCloseTo(0.5, 7);
-  expect(scale[1]).toBeCloseTo(0.5, 7);
-  expect(scale[2]).toBeCloseTo(0.5, 7);
-  expect(mercator.distanceScale([NaN, 0])).toBeNull();
-  expect(mercator.distanceScale(mercator.converter.WGS84.from([180, 0]))).toBeNull();
+  if (typeof mercator.renderingScale !== 'function') throw new Error('Missing scale callback');
+  const scale = mercator.renderingScale(mercator.converter.WGS84.from([0, 60, 0]));
+  expect(mercator.getRenderingScale(mercator.converter.WGS84.from([0, 60, 0]))).toEqual(scale);
+  expect(mercator.getRenderingScale([NaN, 0])).toBeNull();
+  const [parallel, meridional] = wgs84Radii(60);
+  expect(scale[0]).toBeCloseTo(parallel / 6378137, 7);
+  expect(scale[1]).toBeCloseTo((meridional * 0.5) / 6378137, 7);
+  expect(scale[2]).toBeCloseTo(Math.sqrt(scale[0] * scale[1]), 7);
+  expect(mercator.converter.WGS84.from([0, 60, 100])[2]).toBe(100);
+  expect(mercator.zUnit.metersPerUnit).toBe(1);
+  expect(mercator.renderingScale([NaN, 0])).toBeNull();
+  expect(mercator.renderingScale(mercator.converter.WGS84.from([180, 0]))).toBeNull();
   const sphere = await projectionEngine.getCRS('+proj=geocent +R=6371008.8 +units=km');
-  expect(sphere.distanceScale).toEqual([1000, 1000, 1000]);
-  expect(sphere.getDistanceScale([0, 0, 0])).toEqual([1000, 1000, 1000]);
+  expect(sphere.renderingScale).toEqual([1000, 1000, 1000]);
+  expect(sphere.getRenderingScale([0, 0, 0])).toEqual([1000, 1000, 1000]);
   const ellipsoid = await projectionEngine.getCRS('EPSG:4978');
-  expect(ellipsoid.distanceScale).toEqual([1, 1, 1]);
+  expect(ellipsoid.renderingScale).toEqual([1, 1, 1]);
   const equalEarth = await projectionEngine.getCRS('+proj=eqearth +ellps=WGS84');
-  if (typeof equalEarth.distanceScale !== 'function') throw new Error('Missing scale callback');
-  const areaScale = equalEarth.distanceScale(equalEarth.converter.WGS84.from([0, 45, 0]));
+  if (typeof equalEarth.renderingScale !== 'function') throw new Error('Missing scale callback');
+  const areaScale = equalEarth.renderingScale(equalEarth.converter.WGS84.from([0, 45, 0]));
   expect(areaScale[0] * areaScale[1]).toBeCloseTo(1, 6);
 });
 
 test('scale derivatives follow the CRS central meridian and remain continuous on globe', async () => {
   const shifted = await projectionEngine.getCRS('+proj=merc +R=6378137 +lon_0=180');
-  if (typeof shifted.distanceScale !== 'function') throw new Error('Missing scale callback');
-  expect(shifted.distanceScale(shifted.converter.WGS84.from([180, 0]))).not.toBeNull();
-  expect(shifted.distanceScale(shifted.converter.WGS84.from([0, 0]))).toBeNull();
+  if (typeof shifted.renderingScale !== 'function') throw new Error('Missing scale callback');
+  expect(shifted.renderingScale(shifted.converter.WGS84.from([180, 0]))).not.toBeNull();
+  expect(shifted.renderingScale(shifted.converter.WGS84.from([0, 0]))).toBeNull();
   const globe = await projectionEngine.getCRS('+proj=geocent +R=6371008.8');
-  expect(globe.distanceScale).toEqual([1, 1, 1]);
+  expect(globe.renderingScale).toEqual([1, 1, 1]);
 });
 
 test('additional converters use direct source/target pairs and leave target behavior unchanged', async () => {
@@ -274,7 +288,7 @@ test('additional converters use direct source/target pairs and leave target beha
   const target = '+proj=eqearth +R=6378137';
   const baseline = await projectionEngine.getCRS(target);
   const descriptor = await projectionEngine.getCRS(target, {converters: ['EPSG:3857', source]});
-  expect(descriptor.bounds).toEqual(baseline.bounds);
+  expect(descriptor.renderingBounds).toEqual(baseline.renderingBounds);
   expect(Object.keys(descriptor.converter)).toEqual(['WGS84', 'EPSG:3857', source]);
   const sourcePosition = projectionEngine
     .createProjection({from: 'WGS84', to: source})
@@ -290,8 +304,8 @@ test('additional converters use direct source/target pairs and leave target beha
   expect(descriptor).not.toHaveProperty('fromWGS84');
   expect(descriptor).not.toHaveProperty('toWGS84');
   expect(descriptor).not.toHaveProperty('normalizeWGS84');
-  const before = baseline.distanceScale;
-  const after = descriptor.distanceScale;
+  const before = baseline.renderingScale;
+  const after = descriptor.renderingScale;
   if (typeof before !== 'function' || typeof after !== 'function')
     throw new Error('Missing scale callback');
   const point = baseline.converter.WGS84.from([0, 45, 0]);
@@ -346,25 +360,28 @@ test('axis scales include horizontal/altitude units and effective axis order', a
     '+proj=merc +R=6371008.8 +units=ft +vunits=us-ft +axis=une',
     {enforceAxis: true}
   );
-  if (typeof crs.distanceScale !== 'function') throw new Error('Missing scale callback');
-  const scale = crs.distanceScale(crs.converter.WGS84.from([0, 60, 0]));
-  expect(scale[0]).toBeCloseTo((1200 / 3937) * 0.5, 7);
-  expect(scale[1]).toBeCloseTo(0.3048 * 0.5, 7);
-  expect(scale[2]).toBeCloseTo(0.3048 * 0.5, 7);
+  if (typeof crs.renderingScale !== 'function') throw new Error('Missing scale callback');
+  const scale = crs.renderingScale(crs.converter.WGS84.from([0, 60, 0]));
+  const [parallel, meridional] = wgs84Radii(60);
+  const east = parallel / 6371008.8,
+    north = (meridional * 0.5) / 6371008.8;
+  expect(scale[0]).toBeCloseTo((1200 / 3937) * Math.sqrt(east * north), 7);
+  expect(scale[1]).toBeCloseTo(0.3048 * north, 7);
+  expect(scale[2]).toBeCloseTo(0.3048 * east, 7);
 });
 
 test('descriptor bounds and normalization follow projection-owned profiles through aliases', async () => {
   const canonical = await projectionEngine.getCRS('+proj=eqearth +lon_0=30 +x_0=100');
   const alias = await projectionEngine.getCRS('+proj=Equal_Earth +lon_0=30 +x_0=100');
-  expect(alias.bounds).toEqual(canonical.bounds);
+  expect(alias.renderingBounds).toEqual(canonical.renderingBounds);
   expect(alias.converter.WGS84.normalize([-170, 95])).toEqual([190, 90]);
   const utm = await projectionEngine.getCRS('EPSG:32632');
   expect(utm.converter.WGS84.normalize([-179, 0])).toEqual([12, 0]);
   const geocentric = await projectionEngine.getCRS('+proj=geocent +ellps=WGS84 +axis=une', {
     enforceAxis: true
   });
-  expect(geocentric.bounds[1][0]).toBeCloseTo(6356752.314245179, 6);
-  expect(geocentric.bounds[1][1]).toBe(6378137);
+  expect(geocentric.renderingBounds[1][0]).toBeCloseTo(6356752.314245179, 6);
+  expect(geocentric.renderingBounds[1][1]).toBe(6378137);
 });
 
 test('Jacobian scalar retains shear and respects independent vertical units', async () => {
@@ -384,10 +401,11 @@ test('Jacobian scalar retains shear and respects independent vertical units', as
     ]
   });
   const crs = await engine.getCRS('+proj=shear +R=6378137 +units=ft +vunits=us-ft');
-  const scale = crs.getDistanceScale([0, 0, 0])!;
+  const scale = crs.getRenderingScale([0, 0, 0])!;
   expect(scale[0]).toBeCloseTo(0.3048, 7);
-  expect(scale[1]).toBeCloseTo(0.3048 * Math.sqrt(5), 7);
-  expect(scale[2]).toBeCloseTo(1200 / 3937, 7);
+  const north = wgs84Radii(0)[1] / 6378137;
+  expect(scale[1]).toBeCloseTo(0.3048 * Math.hypot(2, north), 7);
+  expect(scale[2]).toBeCloseTo((1200 / 3937) * Math.sqrt(north), 7);
   expect(scale[2]).not.toBeCloseTo(Math.sqrt(scale[0] * scale[1]), 3);
 });
 
@@ -402,7 +420,7 @@ test('invalid computed distance scales raise an actionable contract error', asyn
     ]
   });
   const crs = await engine.getCRS('+proj=degenerate +R=6378137 +units=m');
-  expect(() => crs.getDistanceScale([0, 0, 0])).toThrow('Invalid CRS distance scale');
+  expect(() => crs.getRenderingScale([0, 0, 0])).toThrow('Invalid CRS rendering scale');
 });
 
 test.each([projectionEngine, lazyProjectionEngine])(
@@ -416,8 +434,8 @@ test.each([projectionEngine, lazyProjectionEngine])(
     const extent = (4 * radius * Math.tan((75 * Math.PI) / 180)) / 0.3048;
     for (let axis = 0; axis < 2; axis++) {
       const offset = [123, -456][axis] / 0.3048;
-      expect(crs.bounds[0][axis]).toBeCloseTo(offset - extent, 3);
-      expect(crs.bounds[1][axis]).toBeCloseTo(offset + extent, 3);
+      expect(crs.renderingBounds[0][axis]).toBeCloseTo(offset - extent, 3);
+      expect(crs.renderingBounds[1][axis]).toBeCloseTo(offset + extent, 3);
     }
     for (const longitude of [-180, -90, 0, 90, 180]) {
       const input = new Float64Array([longitude, -90, 321, 8]);
@@ -431,7 +449,7 @@ test.each([projectionEngine, lazyProjectionEngine])(
       expect(converter.from(input).every(Number.isFinite)).toBe(true);
     }
     const outside = converter.from([0, -75, 321]);
-    expect(outside[1]).toBeLessThan(crs.bounds[0][1]);
+    expect(outside[1]).toBeLessThan(crs.renderingBounds[0][1]);
     const restored = converter.to(outside);
     expect(restored[1]).toBeCloseTo(-75, 10);
     expect(restored[2]).toBe(321);
@@ -464,8 +482,8 @@ test.each([-90, 0, 37, 90])(
           expect(normalized[2]).toBe(7);
           const projected = converter.from(normalized);
           for (let axis = 0; axis < 2; axis++) {
-            expect(projected[axis]).toBeGreaterThanOrEqual(crs.bounds[0][axis] - 1e-6);
-            expect(projected[axis]).toBeLessThanOrEqual(crs.bounds[1][axis] + 1e-6);
+            expect(projected[axis]).toBeGreaterThanOrEqual(crs.renderingBounds[0][axis] - 1e-6);
+            expect(projected[axis]).toBeLessThanOrEqual(crs.renderingBounds[1][axis] + 1e-6);
           }
         }
       }
@@ -527,7 +545,78 @@ test('custom engine registrations and structured inputs retain resolved signatur
   const registered = await createProjectionEngine({projections: [mercator]}).getCRS('+proj=merc');
   expect(registered.signature).toBe(getCRSSignature(registered));
   const structured = await projectionEngine.getCRS(
-    createSpatialReference({crs: {state: 'explicit', definition: 'EPSG:3857'}})
+    createSpatialReference({
+      crs: {
+        state: 'explicit',
+        definition: 'EPSG:3857',
+        representation: 'identifier',
+        provenance: 'metadata'
+      }
+    })
   );
   expect(structured.signature).toBe(getCRSSignature(structured));
+});
+
+test('ellipsoidal Mercator rendering scales agree with projection analysis without datum stages', async () => {
+  const a = 6378137,
+    f = 1 / 298.257223563;
+  const analysis = new ProjectionAnalysis({
+    projection: mercator,
+    context: {semiMajorAxis: a, eccentricitySquared: f * (2 - f), parameters: {}},
+    domain: {west: -3, east: 3, south: -1.4, north: 1.4}
+  });
+  const descriptor = await projectionEngine.getCRS('+proj=merc +ellps=WGS84');
+  for (const latitude of [0, 30, 60]) {
+    const factors = createProjectionFactors();
+    expect(analysis.factors(0, (latitude * Math.PI) / 180, factors)).toBe(true);
+    const scale = descriptor.getRenderingScale(descriptor.converter.WGS84.from([0, latitude]))!;
+    expect(scale[0]).toBeCloseTo(1 / factors.parallelScale, 7);
+    expect(scale[1]).toBeCloseTo(1 / factors.meridionalScale, 7);
+    expect(scale[2]).toBeCloseTo(1 / Math.sqrt(factors.arealScale), 7);
+  }
+});
+
+test('rendering scales reject unresolved derivatives and recover for later samples', async () => {
+  const engine = createProjectionEngine({
+    projections: [
+      {
+        name: 'cusp',
+        parameters: [],
+        create: ({semiMajorAxis: a}) => ({
+          forward: (x, y) => [a * x, a * y],
+          inverse: (x, y) => [(x + Math.sign(x) * 0.1) / a, y / a]
+        })
+      }
+    ]
+  });
+  const descriptor = await engine.getCRS('+proj=cusp +ellps=WGS84');
+  expect(descriptor.getRenderingScale([0, 0])).toBeNull();
+  expect(descriptor.getRenderingScale([100, 0])).not.toBeNull();
+});
+
+test('datum-shifted scales use WGS84 curvature rather than the target ellipsoid', async () => {
+  const descriptor = await projectionEngine.getCRS(
+    '+proj=longlat +ellps=clrk66 +towgs84=100,-200,300'
+  );
+  const anchor = [10, 50, 0];
+  const geographic = descriptor.converter.WGS84.to(anchor);
+  const radii = wgs84Radii(geographic[1]);
+  const step = 0.0001;
+  const scale = descriptor.getRenderingScale(anchor)!;
+  for (let axis = 0; axis < 2; axis++) {
+    const low = anchor.slice(),
+      high = anchor.slice();
+    low[axis] -= step;
+    high[axis] += step;
+    const before = descriptor.converter.WGS84.to(low),
+      after = descriptor.converter.WGS84.to(high);
+    const expected =
+      Math.hypot(
+        (((after[0] - before[0]) * Math.PI) / 180) * radii[0],
+        (((after[1] - before[1]) * Math.PI) / 180) * radii[1],
+        after[2] - before[2]
+      ) /
+      (2 * step);
+    expect(scale[axis] / expected).toBeCloseTo(1, 6);
+  }
 });

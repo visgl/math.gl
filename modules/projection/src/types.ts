@@ -73,7 +73,7 @@ export type {
   CRSConversion,
   CRSConverter,
   CRSBounds,
-  CRSDistanceScale,
-  CRSDistanceScaleCallback,
+  CRSRenderingScale,
+  CRSRenderingScaleCallback,
   GetCRSOptions
 } from './experimental/types';

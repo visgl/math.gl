@@ -19,7 +19,7 @@ export type {
   ProjectionFlatOperation,
   ProjectionContext,
   ProjectionImplementation,
-  ProjectionProfile,
+  ProjectionRenderingProfile,
   ProjectionParameters,
   ProjectionPlugin
 } from './types';
@@ -63,8 +63,8 @@ export type {
   CRSConversion,
   CRSConverter,
   CRSBounds,
-  CRSDistanceScale,
-  CRSDistanceScaleCallback,
+  CRSRenderingScale,
+  CRSRenderingScaleCallback,
   GetCRSOptions
 } from './types';
 export type {
