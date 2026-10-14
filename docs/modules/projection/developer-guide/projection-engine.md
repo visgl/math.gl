@@ -253,8 +253,8 @@ Without declared coverage, built-in algorithms use these rendering policies:
 
 Angular clamps follow the great-circle bearing from the origin. At polar centers,
 normalization preserves the input meridian; an exact non-polar antipode uses the
-northward boundary. Longitude wrapping follows central/prime meridian and
-longitude-wrap parameters. `+over` permits unrestricted longitude conversion but
+northward boundary when declared coverage permits. Longitude wrapping follows
+central/prime meridian and longitude-wrap parameters. `+over` permits unrestricted longitude conversion but
 retains a finite rendering target.
 
 To expose a custom algorithm through `getCRS`, implement `getRenderingProfile(coverage?)`

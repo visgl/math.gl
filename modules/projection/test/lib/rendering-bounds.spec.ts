@@ -9,6 +9,8 @@ import inputs from '../fixtures/native-proj-cases.json';
 import {sphericalExtremum} from '../../src/experimental/spherical-rendering-domain';
 import {createProjectionEngine} from '@math.gl/projection/core';
 import {mercator} from '@math.gl/projection/projections/merc';
+import {equalAreaAzimuthalBounds} from '../../src/experimental/azimuthal-rendering-bounds';
+import {kernelParameters} from '../../src/experimental/kernel';
 
 for (const fixture of inputs.cases) {
   test('finite rendering bounds and normalized containment: ' + fixture.id, async () => {
@@ -493,3 +495,91 @@ test.each([
     expect(point.z).toBe(123);
   }
 );
+
+test.each([
+  ['sphere', {name: 'Sphere', semi_major_axis: 6371000, semi_minor_axis: 6371000}],
+  ['WGS84', geographicJSON.datum!.ellipsoid],
+  ['flattened', {name: 'Flattened', semi_major_axis: 6371000, inverse_flattening: 4}]
+])(
+  'LAEA coverage outside its cap falls back with usable normalization: %s',
+  async (_name, ellipsoid) => {
+    const definition = {
+      ...projectedJSON,
+      base_crs: {...geographicJSON, datum: {...geographicJSON.datum!, ellipsoid}},
+      conversion: {name: 'LAEA', method: {name: 'Lambert Azimuthal Equal Area'}, parameters: []},
+      bbox: {west_longitude: 179.5, south_latitude: -0.1, east_longitude: 180, north_latitude: 0.1}
+    };
+    const crs = await projectionEngine.getCRS(definition);
+    const fallback = await projectionEngine.getCRS({...definition, bbox: undefined});
+    expect(crs.areaOfUse).toEqual([179.5, -0.1, 180, 0.1]);
+    expect(crs.renderingBounds).toEqual(fallback.renderingBounds);
+    const normalized = crs.converter.WGS84.normalize([180, 0, 123]);
+    expect(normalized[1]).toBeCloseTo(1, 10);
+    expect(normalized[2]).toBe(123);
+    const projected = crs.converter.WGS84.from(normalized);
+    for (let axis = 0; axis < 2; axis++) {
+      expect(projected[axis]).toBeGreaterThanOrEqual(crs.renderingBounds[0][axis] - 0.001);
+      expect(projected[axis]).toBeLessThanOrEqual(crs.renderingBounds[1][axis] + 0.001);
+    }
+  }
+);
+
+test('spherical LAEA bounds use the cap in their analytical extrema', () => {
+  const radius = 6371000;
+  const base = kernelParameters({semiMajorAxis: radius, eccentricitySquared: 0, parameters: {}});
+  const coverage = [-Math.PI, -Math.PI / 2, Math.PI, Math.PI / 2] as const;
+  const cap = {latitude: 0, distance: Math.PI / 3};
+  const bounds = equalAreaAzimuthalBounds(base, 1, 1, coverage, cap, 0, latitude => latitude);
+  const unclipped = equalAreaAzimuthalBounds(
+    base,
+    1,
+    1,
+    coverage,
+    undefined,
+    0,
+    latitude => latitude
+  );
+  for (let axis = 0; axis < 2; axis++) {
+    expect(bounds[0][axis]).toBeCloseTo(-radius, 4);
+    expect(bounds[1][axis]).toBeCloseTo(radius, 4);
+    expect(bounds[1][axis]).toBeLessThan(unclipped[1][axis]);
+  }
+});
+
+for (const [projection, distance] of [
+  ['stere', 150],
+  ['laea', 179],
+  ['aeqd', 179],
+  ['ortho', 90],
+  ['gnom', 80]
+] as const) {
+  test.each([-20, 0, 37])(
+    `${projection} exact antipodes normalize northward at latitude %s`,
+    async latitude => {
+      const longitude = 30;
+      const crs = await projectionEngine.getCRS(
+        `+proj=${projection} +R=6371000 +lon_0=${longitude} +lat_0=${latitude}`
+      );
+      const angle = ((latitude + distance) * Math.PI) / 180;
+      const expectedLongitude = longitude + (Math.cos(angle) < 0 ? 180 : 0);
+      const expectedLatitude =
+        (Math.atan2(Math.sin(angle), Math.abs(Math.cos(angle))) * 180) / Math.PI;
+      const normalized = crs.converter.WGS84.normalize([longitude - 180, -latitude, 456]);
+      expect(Math.sin(((normalized[0] - expectedLongitude) * Math.PI) / 180)).toBeCloseTo(0, 12);
+      expect(Math.cos(((normalized[0] - expectedLongitude) * Math.PI) / 180)).toBeCloseTo(1, 12);
+      expect(normalized[1]).toBeCloseTo(expectedLatitude, 10);
+      expect(normalized[2]).toBe(456);
+    }
+  );
+}
+
+test('antipode preference retains declared coverage when the northward point is excluded', async () => {
+  const crs = await projectionEngine.getCRS({
+    ...projectedJSON,
+    conversion: {name: 'Stereographic', method: {name: 'Stereographic'}, parameters: []},
+    bbox: {west_longitude: -180, south_latitude: -80, east_longitude: 180, north_latitude: 0}
+  });
+  const normalized = crs.converter.WGS84.normalize([180, 0, 456]);
+  expect(normalized[1]).toBeCloseTo(-30, 10);
+  expect(normalized[2]).toBe(456);
+});

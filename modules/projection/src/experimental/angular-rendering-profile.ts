@@ -8,6 +8,7 @@ import type {GeographicRenderingBounds} from './rendering-profile';
 import {createRectangleRenderingProfile} from './rectangular-rendering-profile';
 import {geographicVector, sphericalExtremum} from './spherical-rendering-domain';
 import type {AngularDomain} from './spherical-rendering-domain';
+import {wrapLongitude} from './parameters';
 
 export type ResolveAngularBounds = (
   coverage: GeographicRenderingBounds,
@@ -59,6 +60,24 @@ export function createAngularRenderingProfile(
             Math.cos(domain.distance) - 1e-14
           )
             return;
+          if (Math.hypot(target[0] + axis[0], target[1], target[2] + axis[2]) < 1e-12) {
+            // All cap bearings are equally close to an exact antipode. Prefer
+            // northward to keep normalization stable, provided coverage allows it.
+            const angle = base.lat0 + domain.distance;
+            const center = (local[0] + local[2]) / 2;
+            const longitude = center + wrapLongitude((Math.cos(angle) < 0 ? Math.PI : 0) - center);
+            const latitude = Math.atan2(Math.sin(angle), Math.abs(Math.cos(angle)));
+            if (
+              longitude >= local[0] &&
+              longitude <= local[2] &&
+              latitude >= local[1] &&
+              latitude <= local[3]
+            ) {
+              point.x = longitude + base.long0;
+              point.y = latitude;
+              return;
+            }
+          }
           const result = sphericalExtremum(target, local, domain);
           [point.x, point.y] = [result.point[0] + base.long0, result.point[1]];
         }

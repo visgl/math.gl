@@ -55,21 +55,31 @@ export function equalAreaAzimuthalBounds(
   latitude: number,
   transformLatitude: (latitude: number) => number
 ) {
+  // Check the geodetic intersection before changing latitude: an empty target
+  // must trigger default-profile fallback, rather than leave normalization unusable.
+  const latitudes = domain && sphericalRange([0, 0, 1], coverage, domain);
   const region: GeographicRenderingBounds = [
     coverage[0],
-    transformLatitude(coverage[1]),
+    transformLatitude(latitudes ? Math.asin(Math.max(-1, latitudes[0])) : coverage[1]),
     coverage[2],
-    transformLatitude(coverage[3])
+    transformLatitude(latitudes ? Math.asin(Math.min(1, latitudes[1])) : coverage[3])
   ];
+  // Authalic latitude has meridional metric >= (1-e²)² and longitude metric
+  // >= 1. This lower bound on distance from the antipode encloses the transformed
+  // geodetic cap; the spherical case retains its exact angular boundary.
+  const cap = domain && {
+    latitude,
+    distance: Math.PI - (1 - base.es) ** 2 * (Math.PI - domain.distance)
+  };
   const center = [Math.cos(latitude), 0, Math.sin(latitude)] as const;
   const north = [-Math.sin(latitude), 0, Math.cos(latitude)] as const;
-  const d = sphericalRange(center, region);
+  const d = sphericalRange(center, region, cap);
   const factor: [number, number] = [
     Math.sqrt(2 / (1 + Math.min(1, d[1]))),
     d[0] > -1 + 1e-14 ? Math.sqrt(2 / (1 + d[0])) : Infinity
   ];
   const axisBounds = (vector: Vector, unit: number) => {
-    const range = sphericalRange(vector, region);
+    const range = sphericalRange(vector, region, cap);
     const minimum = range[0] === 0 ? 0 : range[0] * (range[0] < 0 ? factor[1] : factor[0]);
     const maximum = range[1] === 0 ? 0 : range[1] * (range[1] > 0 ? factor[1] : factor[0]);
     return scale([Math.max(-2, minimum), Math.min(2, maximum)], base.a * unit);
