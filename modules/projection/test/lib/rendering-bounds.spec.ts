@@ -263,3 +263,76 @@ test('coverage clipping is resolved before normalization even when bounds were n
   expect(distance).toBeCloseTo((Math.PI * 80) / 180, 10);
   expect(projection.targetProfile!.bounds.flat().every(Number.isFinite)).toBe(true);
 });
+
+test('Mercator polar coverage uses its finite latitude policy without restricting conversion', async () => {
+  const definition = {
+    ...projectedJSON,
+    conversion: {
+      name: 'Mercator',
+      method: {name: 'Mercator (variant A)'},
+      parameters: []
+    }
+  };
+  const crs = await projectionEngine.getCRS({
+    ...definition,
+    bbox: {
+      west_longitude: -180,
+      south_latitude: -90,
+      east_longitude: 180,
+      north_latitude: 90
+    }
+  });
+  const cap = (Math.atan(Math.sinh(Math.PI)) * 180) / Math.PI;
+  for (const latitude of [-90, 90]) {
+    const normalized = crs.converter.WGS84.normalize([0, latitude, 123]);
+    expect(normalized[1]).toBeCloseTo(Math.sign(latitude) * cap, 10);
+    expect(normalized[2]).toBe(123);
+    const point = crs.converter.WGS84.from(normalized);
+    expect(point[1]).toBeGreaterThanOrEqual(crs.renderingBounds[0][1]);
+    expect(point[1]).toBeLessThanOrEqual(crs.renderingBounds[1][1]);
+    expect(() => crs.converter.WGS84.from([0, latitude])).toThrow('undefined at the poles');
+  }
+  const extended = await projectionEngine.getCRS({
+    ...definition,
+    bbox: {
+      west_longitude: -10,
+      south_latitude: -89,
+      east_longitude: 10,
+      north_latitude: 89
+    }
+  });
+  expect(extended.converter.WGS84.normalize([0, 88])[1]).toBeCloseTo(88, 10);
+  expect(extended.renderingBounds[1][1]).toBeGreaterThan(crs.renderingBounds[1][1]);
+});
+
+test('stereographic coverage enclosing an interior antipode clips to a finite rendering target', async () => {
+  const crs = await projectionEngine.getCRS({
+    ...projectedJSON,
+    conversion: {
+      name: 'Stereographic',
+      method: {name: 'Stereographic'},
+      parameters: [
+        {name: 'Longitude of natural origin', value: 180, unit: 'degree'},
+        {name: 'Latitude of natural origin', value: 20, unit: 'degree'}
+      ]
+    },
+    bbox: {
+      west_longitude: -170,
+      south_latitude: -80,
+      east_longitude: 170,
+      north_latitude: 80
+    }
+  });
+  expect(crs.converter.WGS84.normalize([0, -20])).not.toEqual([0, -20]);
+  expect(() => crs.converter.WGS84.from([0, -20])).toThrow('undefined at the antipode');
+  for (let longitude = -180; longitude <= 180; longitude += 5) {
+    for (let latitude = -90; latitude <= 90; latitude += 5) {
+      const normalized = crs.converter.WGS84.normalize([longitude, latitude]);
+      const point = crs.converter.WGS84.from(normalized);
+      for (let axis = 0; axis < 2; axis++) {
+        expect(point[axis]).toBeGreaterThanOrEqual(crs.renderingBounds[0][axis] - 0.01);
+        expect(point[axis]).toBeLessThanOrEqual(crs.renderingBounds[1][axis] + 0.01);
+      }
+    }
+  }
+});

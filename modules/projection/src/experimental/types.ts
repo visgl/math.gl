@@ -40,6 +40,10 @@ export type ProjectionRenderingProfile = {
   readonly longitudeCenter: number;
   /** Maximum absolute latitude for normalization, in radians. */
   readonly maxLatitude: number;
+  /** Detect interior singularities missed by sampling a declared coverage boundary.
+   * Bounds use native geographic radians, with an unwrapped east endpoint.
+   */
+  requiresClipping?(bounds: readonly [number, number, number, number]): boolean;
   /** Optional rendering-domain clamp on native geographic radians; preserve altitude.
    * Conversion kernels remain unrestricted by this rendering envelope.
    */

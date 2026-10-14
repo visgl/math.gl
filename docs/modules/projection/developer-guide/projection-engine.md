@@ -216,7 +216,10 @@ applications to frame a region beyond defaults such as a UTM zone. The outer CRS
 takes precedence over a BoundCRS source or an extracted CompoundCRS component; component
 coverage is inherited when the outer CRS has none. Coverage that reaches unprojectable
 coordinates is clipped using the projection's finite rendering policy, including
-Gnomonic's horizon-safe angular cap. `areaOfUse` records the declared coverage as
+Gnomonic's horizon-safe angular cap and Mercator's latitude cap. Coverage may surround
+an interior singularity, such as a stereographic antipode; normalization also clips
+that region. For clipped coverage, the bounds conservatively include the projection's
+finite rendering envelope to enclose the curved clipping boundary. `areaOfUse` records the declared coverage as
 `[west, south, east, north]` in Greenwich degrees; east less than west denotes an
 antimeridian crossing. Coverage does not restrict conversion functions. Geocentric bounds always enclose the reference
 ellipsoid. The package does not fetch a full EPSG registry.

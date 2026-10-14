@@ -141,6 +141,14 @@ export function createAngularRenderingProfile(
     },
     longitudeCenter: base.long0,
     maxLatitude: Math.PI / 2,
+    requiresClipping([west, south, east, north]) {
+      // A rectangle can surround the antipode while every edge remains convertible.
+      // Resolve its meridian into the coverage interval, including dateline crossings.
+      const antipodeLongitude =
+        west + ((((base.long0 + Math.PI - west) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI));
+      const longitudeCovered = Math.abs(cosLatitude) < 1e-12 || antipodeLongitude <= east + 1e-12;
+      return longitudeCovered && -base.lat0 >= south && -base.lat0 <= north;
+    },
     normalize(point) {
       const delta = point.x - base.long0;
       const sin = Math.sin(point.y),
@@ -169,7 +177,7 @@ export function createCoverageRenderingProfile(
   profile: ProjectionRenderingProfile,
   bounds: GeographicRenderingBounds
 ): ProjectionRenderingProfile {
-  let clipToDomain = false,
+  let clipToDomain = profile.requiresClipping?.(bounds) ?? false,
     coverageChecked = false;
   const clip = (point: ProjectionPoint) => {
     point.y = Math.max(-profile.maxLatitude, Math.min(profile.maxLatitude, point.y));
@@ -181,16 +189,27 @@ export function createCoverageRenderingProfile(
     return implementation.forward(point.x, point.y);
   }, bounds);
   const resolveBounds = () => {
+    const encloseClippedBounds = (result: ProjectionRenderingProfile['bounds']) => {
+      if (!clipToDomain) return result;
+      // Clipping may introduce an interior cap boundary absent from the rectangle's
+      // edges. Its full finite envelope conservatively encloses normalized coverage.
+      const domain = profile.bounds;
+      return result.map((corner, index) =>
+        corner.map((value, axis) =>
+          index === 0 ? Math.min(value, domain[index][axis]) : Math.max(value, domain[index][axis])
+        )
+      ) as [[number, number, number], [number, number, number]];
+    };
     try {
-      const result = covered.bounds;
+      const result = encloseClippedBounds(covered.bounds);
       coverageChecked = true;
       return result;
     } catch (error) {
-      if (clipToDomain || !profile.normalize) throw error;
+      if (clipToDomain || (!profile.normalize && profile.maxLatitude >= Math.PI / 2)) throw error;
       // Explicit coverage replaces defaults when convertible. At a horizon use
       // the projection-owned finite clipping policy, e.g. Gnomonic's 80-degree cap.
       clipToDomain = true;
-      const result = covered.bounds;
+      const result = encloseClippedBounds(covered.bounds);
       coverageChecked = true;
       return result;
     }
