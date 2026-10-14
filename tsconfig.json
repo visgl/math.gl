@@ -72,6 +72,7 @@
       "@math.gl/polygon/test/*": ["./modules/polygon/test/*"],
       "@math.gl/proj/*": ["./modules/proj/src/*"],
       "@math.gl/proj/test/*": ["./modules/proj/test/*"],
+      "@math.gl/projection/analysis/transform": ["./modules/projection/src/transform-analysis.ts"],
       "@math.gl/projection/experimental/projections/*": ["./modules/projection/src/experimental/entries/projections/*"],
       "@math.gl/projection/experimental/parsers/*": ["./modules/projection/src/experimental/crs/*"],
       "@math.gl/projection/*": ["./modules/projection/src/*"],

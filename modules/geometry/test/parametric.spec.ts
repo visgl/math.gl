@@ -123,3 +123,85 @@ test('estimated normals and positions match exactly across periodic UV seams', (
       );
     }
 });
+
+test('rotated torus caps have outward flat normals and preserve grid inheritance', () => {
+  const properties = {majorSegments: 8, minorSegments: 8, startAngle: 0.4, arc: Math.PI / 2};
+  const open = new TorusGeometry(properties);
+  const capped = new TorusGeometry({...properties, cap: true, id: 'capped'});
+  expect(capped).toBeInstanceOf(ParametricGeometry);
+  expect(capped.id).toBe('capped');
+  expect(capped.indices!.value.length - open.indices!.value.length).toBe(48);
+  expect(capped.getVertexCount()).toBe(capped.indices!.value.length);
+  expect(capped.getAttributes().indices).toBe(capped.indices);
+  const positions = capped.attributes.POSITION.value;
+  const normals = capped.attributes.NORMAL.value;
+  expect(positions[0]).toBeCloseTo(1.3 * Math.cos(0.4), 6);
+  expect(positions[2]).toBeCloseTo(-1.3 * Math.sin(0.4), 6);
+  const originalVertexCount = open.attributes.POSITION.value.length / 3;
+  for (let end = 0; end < 2; end++) {
+    const angle = properties.startAngle + end * properties.arc;
+    const direction = end === 0 ? -1 : 1;
+    for (let vertex = 0; vertex < 10; vertex++) {
+      const offset = (originalVertexCount + end * 10 + vertex) * 3;
+      expect(normals[offset]).toBeCloseTo(-Math.sin(angle) * direction, 6);
+      expect(normals[offset + 1]).toBe(0);
+      expect(normals[offset + 2]).toBeCloseTo(-Math.cos(angle) * direction, 6);
+    }
+  }
+  for (let index = 0; index < capped.indices!.value.length; index += 3) {
+    const offsets = Array.from(capped.indices!.value.slice(index, index + 3), vertex => vertex * 3);
+    const firstEdge = [0, 1, 2].map(
+      axis => positions[offsets[1] + axis] - positions[offsets[0] + axis]
+    );
+    const secondEdge = [0, 1, 2].map(
+      axis => positions[offsets[2] + axis] - positions[offsets[0] + axis]
+    );
+    const cross = [
+      firstEdge[1] * secondEdge[2] - firstEdge[2] * secondEdge[1],
+      firstEdge[2] * secondEdge[0] - firstEdge[0] * secondEdge[2],
+      firstEdge[0] * secondEdge[1] - firstEdge[1] * secondEdge[0]
+    ];
+    expect(Math.hypot(...cross)).toBeGreaterThan(1e-8);
+    expect(
+      cross.reduce((sum, component, axis) => sum + component * normals[offsets[0] + axis], 0)
+    ).toBeGreaterThan(0);
+  }
+  const full = new TorusGeometry({cap: true});
+  expect(full.indices!.value.length).toBe(new TorusGeometry().indices!.value.length);
+  expect(() => new TorusGeometry({startAngle: Infinity})).toThrow();
+});
+
+test('capped torus edges close and constructor metadata retains custom attributes', () => {
+  const custom = {size: 1, value: new Float32Array([7]), constant: true};
+  const geometry = new TorusGeometry({
+    arc: 1.7,
+    startAngle: -2,
+    cap: true,
+    majorSegments: 8,
+    minorSegments: 8,
+    attributes: {custom}
+  });
+  expect(geometry.attributes.custom.value).toBe(custom.value);
+  const positions = geometry.attributes.POSITION.value;
+  const indices = geometry.indices!.value;
+  const vertices: string[] = [];
+  for (let index = 0; index < positions.length; index += 3) {
+    vertices.push(Array.from(positions.slice(index, index + 3)).join(','));
+  }
+  const edges = new Map<string, number>();
+  for (let index = 0; index < indices.length; index += 3) {
+    for (let corner = 0; corner < 3; corner++) {
+      const edge = [
+        vertices[indices[index + corner]],
+        vertices[indices[index + ((corner + 1) % 3)]]
+      ]
+        .sort()
+        .join('|');
+      edges.set(edge, (edges.get(edge) ?? 0) + 1);
+    }
+  }
+  expect(Array.from(edges.values()).every(count => count === 2)).toBe(true);
+  const large = new TorusGeometry({arc: 1, cap: true, majorSegments: 256, minorSegments: 256});
+  expect(large.indices!.value).toBeInstanceOf(Uint32Array);
+  expect(large.getVertexCount()).toBe(256 * 256 * 6 + 256 * 6);
+});

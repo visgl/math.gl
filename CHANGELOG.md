@@ -1,9 +1,14 @@
 # CHANGELOG
 
-## Unreleased
+## v5.0.0-alpha.16
 
 - feat(geoarrow): Add borrowed batch iteration, row views, and chunk-preserving column assembly without allocating typed arrays.
 - Remove deprecated `_Polygon`, `WINDING`, `INTERSECTION`, and `WebMercatorViewport.getLocationAtPoint()` APIs; retain the Web Mercator default export.
+
+- feat(geometry): Add prism and ring geometries and capped torus segments (#250).
+- feat(projection): Analyze complete CRS transform pipelines (#249).
+- feat(projection): Separate the analysis ground metric ellipsoid (#248).
+- docs: Add LLM-friendly developer support (#246).
 
 ## v5.0.0-alpha.15
 

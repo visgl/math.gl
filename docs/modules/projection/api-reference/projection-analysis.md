@@ -62,6 +62,32 @@ This is a single-projection mathematical interface; normal CRS transformations c
 
 The radius of curvature uses the supplied eccentricity and semi-major axis. For example, spherical Mercator's two length scales are `1 / cos(latitude)` at unit scale; an equal-area projection's area factor approaches one.
 
+## Ground metric ellipsoid
+
+`groundEllipsoid` optionally supplies `semiMajorAxis` and `eccentricitySquared` for the
+local ground-distance metric. It defaults to `context` geometry. It affects all factors
+derived from ground distances, including area, principal scales and angular distortion;
+forward/inverse coordinates and raw Jacobians continue to use the projection context.
+The ground semi-major axis must use the same physical units as the kernel output.
+
+For example, spherical Web Mercator coordinates can be measured against WGS84 ground
+distances without changing the spherical kernel:
+
+```typescript
+const webMercator = normalizeCRS('EPSG:3857');
+const wgs84 = normalizeCRS('EPSG:4326');
+const analysis = new ProjectionAnalysis({
+  projection: mercator,
+  context: {...webMercator.ellipsoid, parameters: webMercator.parameters},
+  groundEllipsoid: wgs84.ellipsoid,
+  domain: {west: -Math.PI, east: Math.PI, south: -1.4, north: 1.4}
+});
+```
+
+This selects a metric, not a datum transformation. It does not add CRS unit conversions,
+axis normalization, grid shifts or vertical operations. Derivative agreement remains
+scaled by the projection context's semi-major axis, independently of the ground metric.
+
 ## Numerical and failure contracts
 
 Derivatives use fourth-order central differences at `step` and `step/2`, followed by Richardson extrapolation. The default step is `1e-4` radians; the complete stencil must fit inside the declared rectangle. The two estimates must agree within `derivativeTolerance * max(a, absolute half-step derivatives)`; the default tolerance is `1e-6`. This is an agreement test, not a universal derivative error estimate. There are sixteen forward samples per derivative evaluation.
@@ -71,3 +97,46 @@ Boundary stencils, poles, rank-deficient maps, plugin exceptions and unresolved 
 One mutable point and one derivative record are owned by each analysis instance. Successful calls create no coordinate arrays, point objects or callbacks. Recursive calls from a plugin fail while that scratch is in use. Values are captured before writing public output setters, so setters may safely invoke another analysis call. Application-owned throwing setters retain normal JavaScript behavior; they are not transactional storage.
 
 The optional entry stays outside the root and `/core` bundles. Its independent checks include **450 PROJ 9.5.1 factor/derivative comparisons** across eighteen configurations, analytic spherical Mercator checks and domain, singularity, output ownership and reentry tests. This qualifies the sampled configurations; it does not claim analytical derivatives or full-domain projection accuracy. See [PROJ's factor definitions](https://proj.org/en/stable/development/reference/datatypes.html#projection-derivatives).
+
+## Complete CRS transform analysis
+
+The optional `@math.gl/projection/analysis/transform` entry exports
+`createProjectionTransformAnalysis`. It prepares a geographic-anchor-to-source transform and
+the requested source-to-target transform, then reuses the same numerical differentiation and
+factor calculations. Unlike single-kernel analysis, the sampled coordinates execute datum,
+prime-meridian, axis, unit, grid and vertical stages supported by the selected engine options.
+
+```typescript
+import {createProjectionTransformAnalysis} from '@math.gl/projection/analysis/transform';
+import {createProjectionFactors} from '@math.gl/projection/analysis';
+import {universalTransverseMercator} from '@math.gl/projection/projections/utm';
+import {mercator} from '@math.gl/projection/projections/merc';
+
+const analysis = await createProjectionTransformAnalysis({
+  from: 'EPSG:32610',
+  to: 'EPSG:3857',
+  geographicFrom: 'EPSG:4326',
+  projections: [universalTransverseMercator, mercator],
+  domain: {west: -2.2, east: -2.1, south: 0.6, north: 0.7}
+});
+const factors = createProjectionFactors();
+analysis.factors(-2.15, 0.65, factors);
+```
+
+Options otherwise follow `ProjectionTransform.create`, with axis enforcement enabled.
+`geographicFrom` is required for a projected or geocentric source; for a geographic source
+it defaults to `from`. Inputs and bounds use canonical longitude/latitude radians relative
+to that reference's prime meridian. `height` is held fixed, defaults to zero, and is in meters
+in that reference's vertical CRS. Explicit grids and parsers must be supplied when required.
+Lossy horizontal-only pipelines reject rather than silently discard height.
+
+The returned interface has `domain`, `contains`, `jacobian` and `factors`. Jacobians measure
+physical east/north meters per anchor radian, after normalizing target stored axes and units.
+Factors default to the anchor ellipsoid; `groundEllipsoid` selects a different physical
+ground metric. The adapter uses that metric for numerical derivative agreement as well. Source planar units are not treated as ground meters. This interface exposes no
+2D coordinate inverse: datum and vertical stages can couple horizontal coordinates to height.
+
+All loading finishes before the factory resolves; derivative methods are synchronous and
+reuse coordinate storage. Seams, knots and invalid grid regions must still be excluded from
+the application domain. Sampling agreement does not certify differentiability or accuracy.
+The separate entry keeps the original `/analysis`, `/core` and root imports unchanged.

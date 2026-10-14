@@ -44,6 +44,8 @@ Pass these CPU buffers to the renderer of your choice. The module does not creat
   the glTF shape conventions.
 - `CubeGeometry`, `ConeGeometry`, `TruncatedConeGeometry`, `IcoSphereGeometry` provide additional
   common tessellators.
+- `PrismGeometry` provides closed flat-sided polygons, including hexagonal prisms;
+  `RingGeometry` provides solid annuli and capped ring segments.
 
 An infinite glTF plane cannot be tessellated, so `PlaneGeometry` requires finite `sizeX` and `sizeZ`
 values. Use `PlaneShape` from `@math.gl/culling` when infinite or partially infinite analytic
@@ -60,6 +62,8 @@ planes are required.
 - [PlaneGeometry](./api-reference/plane-geometry.md)
 - [SphereGeometry](./api-reference/sphere-geometry.md)
 - [IcoSphereGeometry](./api-reference/ico-sphere-geometry.md)
+- [PrismGeometry](./api-reference/prism-geometry.md)
+- [RingGeometry](./api-reference/ring-geometry.md)
 - [Geometry](./api-reference/geometry.md)
 
 ## Parametric surfaces

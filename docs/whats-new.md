@@ -8,6 +8,11 @@
 
 ## v5.0
 
+- `@math.gl/geometry` adds flat-sided `PrismGeometry` and solid `RingGeometry`, including
+  hexagonal prisms and capped annular segments. The optional parametric entry adds
+  rotated, capped segments to `TorusGeometry` while preserving its full-torus defaults.
+
+
 Status: prerelease development. TypeScript consumers require TypeScript 6.0 or later; JavaScript still targets ES2020.
 
 **`@math.gl/dggs`** (NEW MODULE)

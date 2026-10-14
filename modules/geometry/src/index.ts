@@ -26,3 +26,9 @@ export {TruncatedConeGeometry} from './geometries/truncated-cone-geometry';
 export type {TruncatedConeGeometryProps} from './geometries/truncated-cone-geometry';
 export {IcoSphereGeometry} from './geometries/ico-sphere-geometry';
 export type {IcoSphereGeometryProps} from './geometries/ico-sphere-geometry';
+
+export {PrismGeometry} from './geometries/prism-geometry';
+export type {PrismGeometryProps} from './geometries/prism-geometry';
+
+export {RingGeometry} from './geometries/ring-geometry';
+export type {RingGeometryProps} from './geometries/ring-geometry';

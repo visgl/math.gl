@@ -42,6 +42,9 @@ export default function Example() {
   const [shape, setShape] = useState('torus'),
     [segments, setSegments] = useState(48),
     [amount, setAmount] = useState(0.4),
+    [torusArc, setTorusArc] = useState(Math.PI * 2),
+    [torusStartAngle, setTorusStartAngle] = useState(0),
+    [torusCaps, setTorusCaps] = useState(true),
     [wireframe, setWireframe] = useState(false),
     [starter, setStarter] = useState('Wave'),
     [source, setSource] = useState(functions.Wave),
@@ -92,7 +95,10 @@ export default function Example() {
       return new TorusGeometry({
         majorSegments: segments,
         minorSegments: Math.max(8, Math.floor(segments / 2)),
-        minorRadius: amount
+        minorRadius: amount,
+        arc: torusArc,
+        startAngle: torusStartAngle,
+        cap: torusCaps
       });
     if (shape === 'lathe')
       return new LatheGeometry({
@@ -116,7 +122,11 @@ export default function Example() {
         return [x, amount * Math.sin(x * 3) * Math.cos(z * 3), -z];
       }
     });
-  }, [shape, segments, amount]);
+  }, [shape, segments, amount, torusArc, torusStartAngle, torusCaps]);
+  const surfaceFunction =
+    shape === 'torus'
+      ? presetFunctions.torus.replace('u * Math.PI * 2', `${torusStartAngle} + u * ${torusArc}`)
+      : presetFunctions[shape];
   const displayed = shape === 'function' && customGeometry ? customGeometry : geometry;
   return (
     <div className="processing-example">
@@ -145,26 +155,66 @@ export default function Example() {
             <option value="function">Function</option>
           </select>
         </label>
+        {shape === 'torus' && (
+          <>
+            <label>
+              Sweep · {Math.round((torusArc * 180) / Math.PI)}°
+              <input
+                aria-label="Torus sweep"
+                type="range"
+                min="30"
+                max="360"
+                step="15"
+                value={Math.round((torusArc * 180) / Math.PI)}
+                onChange={event => setTorusArc((Number(event.target.value) * Math.PI) / 180)}
+              />
+            </label>
+            <label>
+              Start · {Math.round((torusStartAngle * 180) / Math.PI)}°
+              <input
+                aria-label="Torus start angle"
+                type="range"
+                min="0"
+                max="360"
+                step="15"
+                value={Math.round((torusStartAngle * 180) / Math.PI)}
+                onChange={event => setTorusStartAngle((Number(event.target.value) * Math.PI) / 180)}
+              />
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={torusCaps}
+                disabled={torusArc === Math.PI * 2}
+                onChange={event => setTorusCaps(event.target.checked)}
+              />
+              Close segment ends
+            </label>
+          </>
+        )}
         {shape !== 'function' && (
           <div className="function-editor">
             <p>Surface function · (u, v, a) → [x, y, z]</p>
             <pre>
-              <code>{presetFunctions[shape]}</code>
+              <code>{surfaceFunction}</code>
             </pre>
             <button
               type="button"
               onClick={() => {
                 setCustomGeometry(displayed);
                 setStarter('');
-                setSource(presetFunctions[shape]);
-                setAppliedSource(presetFunctions[shape]);
+                setSource(surfaceFunction);
+                setAppliedSource(surfaceFunction);
                 setRevision(value => value + 1);
                 setShape('function');
               }}
             >
               Edit this function
             </button>
-            <p>The primitive also defines its normals, seams, and sampling resolution.</p>
+            <p>
+              The primitive also defines its normals, seams, and sampling resolution. Torus end caps
+              are separate faces from this curved surface.
+            </p>
           </div>
         )}
         {shape === 'function' && (
