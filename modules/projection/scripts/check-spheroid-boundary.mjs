@@ -82,7 +82,18 @@ try {
         const leaf = inputs.filter(path => path.endsWith('modules/core/src/spheroid.ts'));
         if (['projectionAnalysis', 'projectionBulk'].includes(name)) {
           assert.equal(leaf.length, 0);
-          assert.equal(inputs.filter(path => /modules\/.*\/src\//.test(path)).length, 1);
+          const expected =
+            name === 'projectionAnalysis'
+              ? ['modules/projection/src/analysis.ts', 'modules/projection/src/numerical-derivative.ts']
+              : ['modules/projection/src/bulk.ts'];
+          assert.deepEqual(
+            inputs
+              .filter(path => /modules\/.*\/src\//.test(path))
+              .map(path => path.slice(path.indexOf('modules/')))
+              .sort(),
+            expected,
+            'Optional analysis/bulk must retain only their reviewed runtime sources'
+          );
         } else if (name === 'coreRoot')
           assert.equal(leaf.length, 0, 'Core root must not retain the optional spheroid leaf');
         else assert.equal(leaf.length, 1, 'Exactly one shared numeric source per selected graph');

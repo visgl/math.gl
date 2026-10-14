@@ -80,7 +80,8 @@ export class ProjectionAnalysis {
   private readonly step: number;
   private readonly tolerance: number;
   private readonly point: ProjectionPoint = {x: 0, y: 0, z: 0};
-  private readonly derivative: ProjectionJacobian = createProjectionJacobian();
+  // Internal row-major Jacobian scratch; public outputs retain named fields.
+  private readonly derivative = [0, 0, 0, 0];
   private busy = false;
   private longitude = 0;
   private latitude = 0;
@@ -195,18 +196,9 @@ export class ProjectionAnalysis {
     return true;
   }
   jacobian(longitude: number, latitude: number, result: ProjectionJacobian): boolean {
-    if (this.busy) return false;
-    this.busy = true;
-    let xx: number, xy: number, yx: number, yy: number;
-    try {
-      if (!this.calculate(longitude, latitude)) return false;
-      xx = this.derivative.dxDLongitude;
-      xy = this.derivative.dxDLatitude;
-      yx = this.derivative.dyDLongitude;
-      yy = this.derivative.dyDLatitude;
-    } finally {
-      this.busy = false;
-    }
+    if (!this.calculate(longitude, latitude)) return false;
+    // Snapshot before writing caller-owned outputs, whose setters can reenter.
+    const [xx, xy, yx, yy] = this.derivative;
     result.dxDLongitude = xx;
     result.dxDLatitude = xy;
     result.dyDLongitude = yx;
@@ -214,18 +206,9 @@ export class ProjectionAnalysis {
     return true;
   }
   factors(longitude: number, latitude: number, result: ProjectionFactors): boolean {
-    if (this.busy) return false;
-    this.busy = true;
-    let xx: number, xy: number, yx: number, yy: number;
-    try {
-      if (!this.calculate(longitude, latitude)) return false;
-      xx = this.derivative.dxDLongitude;
-      xy = this.derivative.dxDLatitude;
-      yx = this.derivative.dyDLongitude;
-      yy = this.derivative.dyDLatitude;
-    } finally {
-      this.busy = false;
-    }
+    if (!this.calculate(longitude, latitude)) return false;
+    // Snapshot before writing caller-owned outputs, whose setters can reenter.
+    const [xx, xy, yx, yy] = this.derivative;
     const a = this.groundSemiMajorAxis;
     const es = this.groundEs;
     const d = 1 - es * Math.sin(latitude) ** 2;
@@ -282,20 +265,20 @@ export class ProjectionAnalysis {
     return Number.isFinite(this.point.x) && Number.isFinite(this.point.y);
   }
   private calculate(longitude: number, latitude: number): boolean {
-    this.longitude = longitude;
-    this.latitude = latitude;
-    for (let axis = 0; axis < 2; axis++) {
-      this.axis = axis;
-      if (!this.numerical.evaluate(this.step, this.a, this.tolerance)) return false;
-      const [dx, dy] = this.numerical.result;
-      if (axis === 0) {
-        this.derivative.dxDLongitude = dx;
-        this.derivative.dyDLongitude = dy;
-      } else {
-        this.derivative.dxDLatitude = dx;
-        this.derivative.dyDLatitude = dy;
+    if (this.busy) return false;
+    this.busy = true;
+    try {
+      this.longitude = longitude;
+      this.latitude = latitude;
+      for (let axis = 0; axis < 2; axis++) {
+        this.axis = axis;
+        if (!this.numerical.evaluate(this.step, this.a, this.tolerance)) return false;
+        this.derivative[axis] = this.numerical.result[0];
+        this.derivative[axis + 2] = this.numerical.result[1];
       }
+      return true;
+    } finally {
+      this.busy = false;
     }
-    return true;
   }
 }
