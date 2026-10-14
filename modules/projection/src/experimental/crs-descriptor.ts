@@ -86,14 +86,15 @@ export async function resolveCRSDescriptor(
   const entries = await Promise.all(
     sources.map(async source => {
       if (source === 'WGS84') return [source, createConverter(projection, normalizeWGS84)] as const;
-      // Forward/inverse conversion uses the engine's direct CRS-pair pipeline.
-      // Only source normalization goes through the shared geographic convention.
+      // Direct CRS-pair conversions retain each source's datum and axis conventions.
       const [pair, geographic] = await Promise.all([
         engine.createProjectionAsync({...conventions, from: source, to: input}),
         engine.createProjectionAsync({...conventions, from: 'WGS84', to: source})
       ]);
-      const normalize = createSourceNormalization(geographic, normalizeWGS84);
-      return [source, createConverter(pair, normalize)] as const;
+      return [
+        source,
+        createConverter(pair, createSourceNormalization(geographic, normalizeWGS84))
+      ] as const;
     })
   );
   const converter = Object.assign(Object.create(null), Object.fromEntries(entries));
