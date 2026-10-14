@@ -2,9 +2,15 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
-import {withAngularRenderingProfile} from '../rendering-profile';
+import {withAngularRenderingProfile} from '../angular-rendering-profile';
+import {perspectiveBounds} from '../azimuthal-rendering-bounds';
 import type {ProjectionPlugin} from '../types';
-import {catalogueParameters, bindCatalogueKernel, horizonGuard} from '../catalogue-kernel';
+import {
+  catalogueParameters,
+  catalogueBoundsParameters,
+  bindCatalogueKernel,
+  horizonGuard
+} from '../catalogue-kernel';
 import {createState, forward, inverse} from '../kernels/tpers';
 import {numberParameter} from '../parameters';
 
@@ -37,7 +43,17 @@ export const tiltedPerspective: ProjectionPlugin = {
         horizonGuard(base, 1 / (1 + h / base.a))
       ),
       base,
-      distance
+      distance,
+      (region, domain) =>
+        perspectiveBounds(
+          catalogueBoundsParameters(base, context),
+          radius,
+          tilt,
+          azi,
+          region,
+          domain
+        ),
+      horizon
     );
   }
 };

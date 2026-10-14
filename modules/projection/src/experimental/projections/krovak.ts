@@ -2,9 +2,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
-import {withRectangleRenderingProfile} from '../rendering-profile';
+import {krovakBounds} from '../regional-rendering-bounds';
+import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
-import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
+import {
+  catalogueParameters,
+  catalogueBoundsParameters,
+  bindCatalogueKernel
+} from '../catalogue-kernel';
 import {createState, forward, inverse} from '../kernels/krovak';
 import {numberParameter} from '../parameters';
 import {flagParameter, angleParameter} from '../kernel';
@@ -38,14 +43,16 @@ export const krovak: ProjectionPlugin = {
     );
     const state = createState(base, {czech: flagParameter(context.parameters, 'czech')});
     // Render the regional conic around its configured origin.
+    const projection = bindCatalogueKernel('krovak', context, state, forward, inverse);
     return withRectangleRenderingProfile(
-      bindCatalogueKernel('krovak', context, state, forward, inverse),
+      projection,
       [
         base.long0 - Math.PI / 12,
         Math.max(-Math.PI / 2 + 1e-8, base.lat0 - Math.PI / 36),
         base.long0 + Math.PI / 12,
         Math.min(Math.PI / 2 - 1e-8, base.lat0 + Math.PI / 36)
-      ]
+      ],
+      coverage => krovakBounds(catalogueBoundsParameters(state, context), coverage)
     );
   }
 };

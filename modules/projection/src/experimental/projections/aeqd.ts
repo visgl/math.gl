@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {withAngularRenderingProfile} from '../rendering-profile';
+import {withAngularRenderingProfile} from '../angular-rendering-profile';
+import {equidistantAzimuthalBounds} from '../azimuthal-rendering-bounds';
 import type {ProjectionPlugin} from '../types';
 import {bindKernel, guardAzimuthalDomain, kernelParameters, ORIGIN_PARAMETERS} from '../kernel';
 import {createState, forward, inverse} from '../kernels/aeqd';
@@ -14,11 +15,13 @@ export const azimuthalEquidistant: ProjectionPlugin = {
   create(context) {
     const base = kernelParameters(context);
 
+    const state = createState(base);
     // Keep the rendering boundary finite without restricting raw conversion.
     return withAngularRenderingProfile(
-      guardAzimuthalDomain(base, bindKernel('aeqd', createState(base), forward, inverse)),
+      guardAzimuthalDomain(base, bindKernel('aeqd', state, forward, inverse)),
       base,
-      (Math.PI * 179) / 180
+      (Math.PI * 179) / 180,
+      (region, domain) => equidistantAzimuthalBounds(base, region, domain)
     );
   }
 };

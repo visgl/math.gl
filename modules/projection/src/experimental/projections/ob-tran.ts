@@ -3,11 +3,19 @@
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Rotation equations directly ported from proj4js 2.22.0 lib/projections/ob_tran.js. See ../../../PROJ4-LICENSE.md. Modified to use an explicitly supplied plugin instead of proj4js's global registry.
-import type {ProjectionPlugin, ProjectionParameters, ProjectionPoint} from '../types';
+import type {
+  ProjectionPlugin,
+  ProjectionParameters,
+  ProjectionPoint,
+  ProjectionRenderingProfile
+} from '../types';
 import {createProjection, projectionOperation} from '../mutable-projection';
 import {createGeographicProfile} from '../geographic-rendering-profile';
 import {numberParameter, wrapLongitude} from '../parameters';
 import {TypeScriptCRSError} from '../crs/types';
+import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
+import type {GeographicRenderingBounds} from '../rendering-profile';
+import {sphericalRange, sphericalRatioRange} from '../spherical-rendering-domain';
 
 const rotationParameters = [
   'o_proj',
@@ -161,13 +169,18 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
           unrotate(point);
         }
       );
-      const profile = geographic ? createGeographicProfile(innerParameters) : inner.profile;
-      if (!profile) return implementation;
-      return {
-        ...implementation,
-        profile: {
+      const getChildProfile = geographic
+        ? createGeographicProfile(innerParameters)
+        : inner.getRenderingProfile?.bind(inner);
+      if (!getChildProfile) return implementation;
+      const wrapProfile = (
+        child: ProjectionRenderingProfile,
+        coverage?: GeographicRenderingBounds
+      ): ProjectionRenderingProfile => {
+        const source = coverage && createRectangleRenderingProfile(() => child.bounds, coverage);
+        return {
           get bounds() {
-            const bounds = profile.bounds;
+            const bounds = child.bounds;
             // The longlat child stores degrees; other children store native linear units.
             const degrees = (
               corner: readonly [number, number, number]
@@ -178,14 +191,37 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
             ];
             return geographic ? ([degrees(bounds[0]), degrees(bounds[1])] as const) : bounds;
           },
-          longitudeCenter: longitudeOrigin,
-          maxLatitude: Math.PI / 2,
           normalize(point) {
+            source?.normalize!(point);
             rotate(point);
-            point.y = Math.max(-profile.maxLatitude, Math.min(profile.maxLatitude, point.y));
-            profile.normalize?.(point);
+            child.normalize?.(point);
             unrotate(point);
           }
+        };
+      };
+      return {
+        ...implementation,
+        getRenderingProfile(coverage) {
+          if (!coverage) return wrapProfile(getChildProfile());
+          const local = [
+            coverage[0] - longitudeOrigin,
+            coverage[1],
+            coverage[2] - longitudeOrigin,
+            coverage[3]
+          ] as const;
+          const z = sphericalRange(oblique ? [-cphip, 0, sphip] : [-1, 0, 0], local);
+          const xAxis = oblique ? ([sphip, 0, cphip] as const) : ([0, 0, 1] as const);
+          const x = sphericalRange(xAxis, local);
+          // A rotation is linear on the sphere. Latitude extrema follow z;
+          // longitude is a linear-fractional form unless the rotated seam is crossed.
+          const longitude =
+            x[0] > 0
+              ? sphericalRatioRange([0, 1, 0], xAxis, 0, local).map(Math.atan)
+              : [-Math.PI, Math.PI];
+          return wrapProfile(
+            getChildProfile([longitude[0] + lamp, asin(z[0]), longitude[1] + lamp, asin(z[1])]),
+            coverage
+          );
         }
       };
     }

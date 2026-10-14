@@ -4,7 +4,8 @@
 
 import {createFlatProjection} from '../flat-projection';
 import type {ProjectionPlugin} from '../types';
-import {withRectangleRenderingProfile} from '../rendering-profile';
+import {conicBounds} from '../rendering-bounds';
+import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import {bindKernel, kernelParameters, ORIGIN_PARAMETERS, validateConic} from '../kernel';
 import {createState, forward, inverse} from '../kernels/aea';
 
@@ -15,11 +16,23 @@ export const albersEqualArea: ProjectionPlugin = {
   create(context) {
     const base = kernelParameters(context);
     validateConic(base, context.parameters);
+    const state = createState(base);
+    const projection = {
+      ...bindKernel('aea', state, forward, inverse, createFlatProjection)
+    };
     return withRectangleRenderingProfile(
-      {
-        ...bindKernel('aea', createState(base), forward, inverse, createFlatProjection)
-      },
-      [base.long0 - Math.PI, -Math.PI / 2, base.long0 + Math.PI, Math.PI / 2]
+      projection,
+      [base.long0 - Math.PI, -Math.PI / 2, base.long0 + Math.PI, Math.PI / 2],
+      coverage =>
+        conicBounds(
+          projection.forward,
+          coverage,
+          base.long0,
+          state.ns0,
+          state.x0,
+          state.y0 + state.rh,
+          base.over
+        )
     );
   }
 };

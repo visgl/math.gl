@@ -6,6 +6,8 @@ import {numberParameter} from '../parameters';
 import type {ProjectionPlugin} from '../types';
 import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
 import {createState, forward, inverse} from '../kernels/eqearth';
+import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
+import {cylindricalBounds} from '../rendering-bounds';
 
 export const equalEarth: ProjectionPlugin = {
   name: 'eqearth',
@@ -15,6 +17,7 @@ export const equalEarth: ProjectionPlugin = {
     const base = catalogueParameters(context);
 
     const state = createState(base);
+    const projection = bindCatalogueKernel('eqearth', context, state, forward, inverse);
     // The kernel's authalic radius and polynomial determine the global extrema:
     // maximum width at the equatorial seam and maximum height at the poles.
     const e = Math.sqrt(context.eccentricitySquared);
@@ -28,14 +31,24 @@ export const equalEarth: ProjectionPlugin = {
     const y0 = numberParameter(context.parameters, 'y_0', 0);
     const height = radius * theta * (1.340264 - 0.081106 * t2 + t6 * (0.000893 + 0.003796 * t2));
     return {
-      ...bindCatalogueKernel('eqearth', context, state, forward, inverse),
-      profile: {
-        bounds: [
+      ...projection,
+      getRenderingProfile(coverage) {
+        if (coverage)
+          return createRectangleRenderingProfile(
+            region => cylindricalBounds(projection.forward, region, base.long0, base.over),
+            coverage
+          );
+        const defaultBounds = [
           [x0 - width, y0 - height, 0],
           [x0 + width, y0 + height, 0]
-        ],
-        longitudeCenter: base.long0,
-        maxLatitude: Math.PI / 2
+        ] as const;
+        return {
+          bounds: defaultBounds,
+          normalize: createRectangleRenderingProfile(
+            () => defaultBounds,
+            [base.long0 - Math.PI, -(Math.PI / 2), base.long0 + Math.PI, Math.PI / 2]
+          ).normalize
+        };
       }
     };
   }

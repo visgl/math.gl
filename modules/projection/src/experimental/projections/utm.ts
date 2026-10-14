@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {ProjectionPlugin} from '../types';
-import {withRectangleRenderingProfile} from '../rendering-profile';
+import {transverseBounds} from '../rendering-bounds';
+import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import {numberParameter} from '../parameters';
 import {flagParameter} from '../kernel';
 import {createTransverseMercator} from './transverse-mercator';
@@ -32,11 +33,15 @@ export const universalTransverseMercator: ProjectionPlugin = {
     });
     const center = ((6 * zone - 183) * Math.PI) / 180;
     // Standard six-degree UTM zone coverage, independent of conversion validity.
-    return withRectangleRenderingProfile(implementation, [
-      center - Math.PI / 60,
-      south ? (-80 * Math.PI) / 180 : 0,
-      center + Math.PI / 60,
-      south ? 0 : (84 * Math.PI) / 180
-    ]);
+    return withRectangleRenderingProfile(
+      implementation,
+      [
+        center - Math.PI / 60,
+        south ? (-80 * Math.PI) / 180 : 0,
+        center + Math.PI / 60,
+        south ? 0 : (84 * Math.PI) / 180
+      ],
+      coverage => transverseBounds(implementation.forward, coverage, center)
+    );
   }
 };

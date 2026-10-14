@@ -36,18 +36,6 @@ export type ProjectionRenderingProfile = {
    * Horizontal projections use zero reference height; geocentric profiles enclose XYZ.
    */
   readonly bounds: readonly [readonly [number, number, number], readonly [number, number, number]];
-  /** Native geographic longitude at the center of the normalization interval, in radians. */
-  readonly longitudeCenter: number;
-  /** Maximum absolute latitude for normalization, in radians. */
-  readonly maxLatitude: number;
-  /** Detect interior singularities missed by sampling a declared coverage boundary.
-   * Bounds use native geographic radians, with an unwrapped east endpoint.
-   */
-  requiresClipping?(bounds: readonly [number, number, number, number]): boolean;
-  /** Geographic boundary of a curved rendering domain, parameterized over [0, 1]. */
-  boundary?(fraction: number): [number, number];
-  /** Membership in the finite rendering domain, using native geographic radians. */
-  contains?(longitude: number, latitude: number): boolean;
   /** Optional rendering-domain clamp on native geographic radians; preserve altitude.
    * Conversion kernels remain unrestricted by this rendering envelope.
    */
@@ -56,8 +44,15 @@ export type ProjectionRenderingProfile = {
 
 /** A projection operates on radians and meters; the engine handles CRS units. */
 export type ProjectionImplementation = {
-  /** Projection-specific bounds and normalization derived at initialization. */
-  readonly profile?: ProjectionRenderingProfile;
+  /** Resolve projection-owned bounds and normalization, optionally for declared coverage.
+   * Coverage uses native geographic radians and an unwrapped east endpoint.
+   * Omit coverage for the default rendering target. Descriptor retrieval retries
+   * without coverage if the coverage-specific profile cannot be resolved.
+   * Required for CRS descriptor retrieval; ordinary conversion can omit it.
+   */
+  getRenderingProfile?(
+    coverage?: readonly [west: number, south: number, east: number, north: number]
+  ): ProjectionRenderingProfile;
   /** Optional whole-buffer specialization. Return undefined to keep the general pipeline.
    * Called only for geographic/projected pairs without datum, axis, prime-meridian,
    * vertical-unit, longitude-wrap or lossy stages. The engine validates storage and stride.

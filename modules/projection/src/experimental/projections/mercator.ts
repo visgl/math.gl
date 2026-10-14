@@ -6,6 +6,8 @@
 import {createFlatProjection as createProjection} from '../flat-projection';
 import {DEGREES_TO_RADIANS, latitudeParameter, numberParameter, wrapLongitude} from '../parameters';
 import type {ProjectionPlugin} from '../types';
+import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
+import {longitudeRange, envelope, scale as scaleRange, add} from '../rendering-bounds';
 
 /** Spherical and ellipsoidal Mercator, using the PROJ Mercator equations. */
 export const mercator: ProjectionPlugin = {
@@ -38,13 +40,49 @@ export const mercator: ProjectionPlugin = {
     const width = radius * Math.PI;
     const height = radius * (Math.PI - e * Math.atanh(e * Math.sin(maxLatitude)));
     return {
-      profile: {
-        bounds: [
+      getRenderingProfile(coverage) {
+        if (coverage) {
+          // Only the mathematical poles trigger clipping; finite declared
+          // latitudes beyond the default cap remain available as render targets.
+          const clipped = coverage[1] <= -Math.PI / 2 || coverage[3] >= Math.PI / 2;
+          const bounds = [
+            coverage[0],
+            clipped ? Math.max(-maxLatitude, Math.min(maxLatitude, coverage[1])) : coverage[1],
+            coverage[2],
+            clipped ? Math.max(-maxLatitude, Math.min(maxLatitude, coverage[3])) : coverage[3]
+          ] as const;
+          const northing = (latitude: number) =>
+            y0 + radius * (Math.asinh(Math.tan(latitude)) - e * Math.atanh(e * Math.sin(latitude)));
+          return createRectangleRenderingProfile(
+            region =>
+              envelope(
+                add(
+                  [x0, x0],
+                  scaleRange(
+                    longitudeRange(
+                      region,
+                      longitudeOrigin,
+                      Object.prototype.hasOwnProperty.call(parameters, 'over')
+                    ),
+                    radius
+                  )
+                ),
+                [northing(region[1]), northing(region[3])]
+              ),
+            bounds
+          );
+        }
+        const defaultBounds = [
           [x0 - width, y0 - height, 0],
           [x0 + width, y0 + height, 0]
-        ],
-        longitudeCenter: longitudeOrigin,
-        maxLatitude
+        ] as const;
+        return {
+          bounds: defaultBounds,
+          normalize: createRectangleRenderingProfile(
+            () => defaultBounds,
+            [longitudeOrigin - Math.PI, -maxLatitude, longitudeOrigin + Math.PI, maxLatitude]
+          ).normalize
+        };
       },
       ...createProjection(
         point => {

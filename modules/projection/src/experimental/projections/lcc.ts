@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {ProjectionPlugin} from '../types';
-import {withRectangleRenderingProfile} from '../rendering-profile';
+import {conicBounds} from '../rendering-bounds';
+import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import {createFlatProjection as createProjection} from '../flat-projection';
 import {
   bindKernel,
@@ -31,22 +32,33 @@ export const lambertConformalConic: ProjectionPlugin = {
     const state = createState(base);
     const implementation = bindKernel('lcc', state, forward, inverse);
     // The opposite pole diverges for LCC; its rendering target stops at 60 degrees.
+    const projection = {
+      ...createProjection(point => {
+        const latitude = point.y;
+        if (Math.abs(latitude) === Math.PI / 2 && latitude * state.ns < 0) {
+          throw new Error('Lambert conformal conic is undefined at the opposite pole');
+        }
+        implementation.forwardInPlace!(point);
+      }, implementation.inverseInPlace!)
+    };
     return withRectangleRenderingProfile(
-      {
-        ...createProjection(point => {
-          const latitude = point.y;
-          if (Math.abs(latitude) === Math.PI / 2 && latitude * state.ns < 0) {
-            throw new Error('Lambert conformal conic is undefined at the opposite pole');
-          }
-          implementation.forwardInPlace!(point);
-        }, implementation.inverseInPlace!)
-      },
+      projection,
       [
         base.long0 - Math.PI,
         state.ns > 0 ? -Math.PI / 3 : -Math.PI / 2,
         base.long0 + Math.PI,
         state.ns > 0 ? Math.PI / 2 : Math.PI / 3
-      ]
+      ],
+      coverage =>
+        conicBounds(
+          projection.forward,
+          coverage,
+          base.long0,
+          state.ns,
+          state.x0,
+          state.y0 + state.k0 * state.rh,
+          base.over
+        )
     );
   }
 };

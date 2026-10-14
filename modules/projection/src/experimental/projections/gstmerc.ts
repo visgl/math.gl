@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
-import {withRectangleRenderingProfile} from '../rendering-profile';
+import {transverseBounds} from '../rendering-bounds';
+import invlatiso from '../common/invlatiso';
+import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
 import {createState, forward, inverse} from '../kernels/gstmerc';
@@ -16,9 +18,18 @@ export const gaussSchreiberTransverseMercator: ProjectionPlugin = {
 
     const state = createState(base);
     // Avoid the transverse Mercator singularity in the rendering domain.
+    const projection = bindCatalogueKernel('gstmerc', context, state, forward, inverse);
     return withRectangleRenderingProfile(
-      bindCatalogueKernel('gstmerc', context, state, forward, inverse),
-      [base.long0 - Math.PI / 6, -Math.PI / 3, base.long0 + Math.PI / 6, Math.PI / 3]
+      projection,
+      [base.long0 - Math.PI / 6, -Math.PI / 3, base.long0 + Math.PI / 6, Math.PI / 3],
+      coverage =>
+        transverseBounds(
+          projection.forward,
+          coverage,
+          base.long0,
+          base.over,
+          invlatiso(state.e, -state.cp / state.rs)
+        )
     );
   }
 };

@@ -6,6 +6,8 @@
 import {createProjection} from '../mutable-projection';
 import {DEGREES_TO_RADIANS, latitudeParameter, numberParameter, wrapLongitude} from '../parameters';
 import type {ProjectionPlugin} from '../types';
+import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
+import {longitudeRange, envelope, scale, add} from '../rendering-bounds';
 
 /** Spherical equidistant cylindrical (the eqc formulation used by proj4js). */
 export const equidistantCylindrical: ProjectionPlugin = {
@@ -23,13 +25,37 @@ export const equidistantCylindrical: ProjectionPlugin = {
     const y0 = numberParameter(parameters, 'y_0', 0);
     const width = a * Math.abs(parallelScale) * Math.PI;
     return {
-      profile: {
-        bounds: [
+      getRenderingProfile(coverage) {
+        if (coverage)
+          return createRectangleRenderingProfile(
+            region =>
+              envelope(
+                add(
+                  [x0, x0],
+                  scale(
+                    longitudeRange(
+                      region,
+                      longitudeOrigin,
+                      Object.prototype.hasOwnProperty.call(parameters, 'over')
+                    ),
+                    a * parallelScale
+                  )
+                ),
+                [y0 + a * (region[1] - latitudeOrigin), y0 + a * (region[3] - latitudeOrigin)]
+              ),
+            coverage
+          );
+        const defaultBounds = [
           [x0 - width, y0 + a * (-Math.PI / 2 - latitudeOrigin), 0],
           [x0 + width, y0 + a * (Math.PI / 2 - latitudeOrigin), 0]
-        ],
-        longitudeCenter: longitudeOrigin,
-        maxLatitude: Math.PI / 2
+        ] as const;
+        return {
+          bounds: defaultBounds,
+          normalize: createRectangleRenderingProfile(
+            () => defaultBounds,
+            [longitudeOrigin - Math.PI, -(Math.PI / 2), longitudeOrigin + Math.PI, Math.PI / 2]
+          ).normalize
+        };
       },
       ...createProjection(
         point => {

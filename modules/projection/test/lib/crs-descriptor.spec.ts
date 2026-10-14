@@ -212,7 +212,9 @@ test('normalization follows CRS longitude parameters and preserves storage on fa
     (Math.atan(Math.sinh(Math.PI)) * 180) / Math.PI
   ]);
   const geographic = await projectionEngine.getCRS('+proj=longlat +lon_wrap=180');
-  expect(geographic.converter.WGS84.normalize([-10, 0])).toEqual([350, 0]);
+  const normalized = geographic.converter.WGS84.normalize([-10, 0]);
+  expect(normalized[0]).toBeCloseTo(350, 12);
+  expect(normalized[1]).toBe(0);
   expect(geographic.renderingBounds).toEqual([
     [0, -90, 0],
     [360, 90, 0]
@@ -392,6 +394,12 @@ test('Jacobian scalar retains shear and respects independent vertical units', as
         name: 'shear',
         parameters: [],
         create: ({semiMajorAxis: radius}) => ({
+          getRenderingProfile: () => ({
+            bounds: [
+              [-2 * Math.PI * radius, (-Math.PI * radius) / 2, 0],
+              [2 * Math.PI * radius, (Math.PI * radius) / 2, 0]
+            ]
+          }),
           forward: (longitude, latitude) => [
             radius * (longitude + 2 * latitude),
             radius * latitude
@@ -416,7 +424,16 @@ test('invalid computed distance scales raise an actionable contract error', asyn
       {
         name: 'degenerate',
         parameters: [],
-        create: () => ({forward: () => [0, 0], inverse: () => [0, 0]})
+        create: () => ({
+          getRenderingProfile: () => ({
+            bounds: [
+              [0, 0, 0],
+              [0, 0, 0]
+            ]
+          }),
+          forward: () => [0, 0],
+          inverse: () => [0, 0]
+        })
       }
     ]
   });
@@ -584,6 +601,12 @@ test('rendering scales reject unresolved derivatives and recover for later sampl
         name: 'cusp',
         parameters: [],
         create: ({semiMajorAxis: a}) => ({
+          getRenderingProfile: () => ({
+            bounds: [
+              [-a * Math.PI, (-a * Math.PI) / 2, 0],
+              [a * Math.PI, (a * Math.PI) / 2, 0]
+            ]
+          }),
           forward: (x, y) => [a * x, a * y],
           inverse: (x, y) => [(x + Math.sign(x) * 0.1) / a, y / a]
         })
@@ -659,4 +682,21 @@ test('XYZ bounds retain both horizontal extents with vertical-first axes', async
   const ecef = await projectionEngine.getCRS('EPSG:4978');
   expect(ecef.renderingBounds[0][2]).toBeCloseTo(-ecef.ellipsoid.semiMinorAxis, 6);
   expect(ecef.renderingBounds[1][2]).toBeCloseTo(ecef.ellipsoid.semiMinorAxis, 6);
+});
+
+test('custom descriptor retrieval requires projection-owned bounds', async () => {
+  const engine = createProjectionEngine({
+    projections: [
+      {
+        name: 'unbounded',
+        parameters: [],
+        create: () => ({forward: (x, y) => [x, y], inverse: (x, y) => [x, y]})
+      }
+    ]
+  });
+  await expect(engine.getCRS('+proj=unbounded')).rejects.toThrow(
+    'Projection must define a rendering profile'
+  );
+  const conversion = await engine.createProjectionAsync({to: '+proj=unbounded'});
+  expect(conversion.project([0, 0])).toEqual([0, 0]);
 });

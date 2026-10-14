@@ -4,7 +4,8 @@
 
 import {createFlatProjection} from '../flat-projection';
 import type {ProjectionContext, ProjectionImplementation, ProjectionPlugin} from '../types';
-import {withRectangleRenderingProfile} from '../rendering-profile';
+import {transverseBounds} from '../rendering-bounds';
+import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import {
   bindKernel,
   flagParameter,
@@ -27,12 +28,11 @@ export function createTransverseMercator(context: ProjectionContext): Projection
   const base = kernelParameters(context);
   // A finite regional strip avoids the transverse singularities at +/-90 degrees.
   const render = (implementation: ProjectionImplementation) =>
-    withRectangleRenderingProfile(implementation, [
-      base.long0 - Math.PI / 6,
-      -Math.PI / 2,
-      base.long0 + Math.PI / 6,
-      Math.PI / 2
-    ]);
+    withRectangleRenderingProfile(
+      implementation,
+      [base.long0 - Math.PI / 6, -Math.PI / 2, base.long0 + Math.PI / 6, Math.PI / 2],
+      coverage => transverseBounds(implementation.forward, coverage, base.long0, base.over)
+    );
   if (flagParameter(context.parameters, 'approx')) {
     return render({
       ...bindKernel(

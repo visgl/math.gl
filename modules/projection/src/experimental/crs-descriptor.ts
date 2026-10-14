@@ -70,15 +70,14 @@ export async function resolveCRSDescriptor(
   const units = [...axis].map(direction =>
     crs.kind !== 'geocentric' && /[ud]/.test(direction) ? heightUnit : horizontalUnit
   );
-  const profile = projection.targetProfile!;
-  const center = ((profile.longitudeCenter + crs.primeMeridian) * 180) / Math.PI;
+  const profile = projection.targetProfile;
+  if (!profile) throw new Error('Projection must define a rendering profile for CRS retrieval');
+  // Derivative seam checks follow the algorithm's central meridian, independently of rendering coverage.
+  const center =
+    Number(crs.parameters[crs.kind === 'geographic' ? 'lon_wrap' : 'lon_0'] ?? 0) +
+    (crs.primeMeridian * 180) / Math.PI;
   const bounds = adaptBounds(profile, crs, axis);
-  const normalizeWGS84 = createNormalization(
-    center,
-    (profile.maxLatitude * 180) / Math.PI,
-    profile.normalize,
-    crs.primeMeridian
-  );
+  const normalizeWGS84 = createNormalization(profile.normalize, crs.primeMeridian);
   const renderingScale = createRenderingScale(crs, projection, axis, center);
   const sources = [...new Set(['WGS84', ...(conventions.converters || [])])];
   if (sources.some(source => typeof source !== 'string' || !source.trim()))
@@ -177,8 +176,6 @@ function createConversion(
 }
 
 function createNormalization(
-  center: number,
-  maxLatitude: number,
   normalizeDomain?: ProjectionRenderingProfile['normalize'],
   primeMeridian = 0
 ): CRSConversion {
@@ -200,23 +197,13 @@ function createNormalization(
       !Number.isFinite(altitude)
     )
       throw new Error('Normalization requires finite longitude, latitude and altitude');
-    const offset = longitude - center;
-    if (!Number.isFinite(offset)) throw new Error('Longitude exceeds normalization range');
-    const wrapped = Math.abs(offset) <= 180 ? offset : ((((offset + 180) % 360) + 360) % 360) - 180;
-    const point = {
-      x: center + wrapped,
-      y: Math.max(-maxLatitude, Math.min(maxLatitude, latitude)),
-      z: altitude
-    };
+    const point = {x: longitude, y: latitude, z: altitude};
     if (normalizeDomain) {
-      // Projection profiles use their native meridian and radians, while this
-      // converter accepts WGS84 degrees relative to Greenwich.
-      point.x = (point.x * Math.PI) / 180 - primeMeridian;
-      point.y = (point.y * Math.PI) / 180;
+      // Adapt units and meridian only; the algorithm owns wrapping and clipping.
+      point.x = (longitude * Math.PI) / 180 - primeMeridian;
+      point.y = (latitude * Math.PI) / 180;
       normalizeDomain(point);
-      const offset = ((point.x + primeMeridian) * 180) / Math.PI - center;
-      point.x =
-        center + (Math.abs(offset) <= 180 ? offset : ((((offset + 180) % 360) + 360) % 360) - 180);
+      point.x = ((point.x + primeMeridian) * 180) / Math.PI;
       point.y = (point.y * 180) / Math.PI;
     }
     return writeScalarOutput(coordinate, result, point, coordinate.length);

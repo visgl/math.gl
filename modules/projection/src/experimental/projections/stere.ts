@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {createAngularRenderingProfile} from '../rendering-profile';
+import {createAngularRenderingProfile} from '../angular-rendering-profile';
+import {
+  sphericalAzimuthalBounds,
+  ellipsoidalStereographicBounds
+} from '../azimuthal-rendering-bounds';
 import type {ProjectionPlugin} from '../types';
 import {
   bindKernel,
@@ -25,13 +29,37 @@ export const stereographic: ProjectionPlugin = {
   create(context) {
     const base = kernelParameters(context);
 
-    const projection = guardAzimuthalDomain(
-      base,
-      bindKernel('stere', createState(base), forward, inverse)
-    );
+    const state = createState(base);
+    const projection = guardAzimuthalDomain(base, bindKernel('stere', state, forward, inverse));
     return {
       ...projection,
-      profile: createAngularRenderingProfile(base, projection.forward, (150 * Math.PI) / 180)
+      getRenderingProfile: createAngularRenderingProfile(
+        base,
+        (150 * Math.PI) / 180,
+        (region, domain) =>
+          state.sphere
+            ? sphericalAzimuthalBounds(state, region, domain, 'stere')
+            : ellipsoidalStereographicBounds(
+                state,
+                latitude =>
+                  2 *
+                    Math.atan(
+                      Math.tan(Math.PI / 4 + latitude / 2) *
+                        Math.pow(
+                          (1 - state.e * Math.sin(latitude)) / (1 + state.e * Math.sin(latitude)),
+                          state.e / 2
+                        )
+                    ) -
+                  Math.PI / 2,
+                state.X0,
+                2 *
+                  state.a *
+                  state.k0 *
+                  (Math.abs(state.coslat0) < 1e-10 ? 1 / state.cons : state.ms1 / state.cosX0),
+                region,
+                domain
+              )
+      )
     };
   }
 };

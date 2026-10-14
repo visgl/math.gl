@@ -13,6 +13,17 @@ export function catalogueParameters(context: ProjectionContext): KernelParameter
   // False offsets are applied once by the adapter, including kernels that omit them upstream.
   return {...base, x0: 0, y0: 0, lat_ts: Number.isNaN(base.lat_ts) ? 0 : base.lat_ts};
 }
+/** Bounds include false offsets that the numerical-kernel adapter applies externally. */
+export function catalogueBoundsParameters<State extends KernelParameters>(
+  state: State,
+  context: ProjectionContext
+): State {
+  return {
+    ...state,
+    x0: numberParameter(context.parameters, 'x_0', 0),
+    y0: numberParameter(context.parameters, 'y_0', 0)
+  };
+}
 export function bindCatalogueKernel<State>(
   name: string,
   context: ProjectionContext,

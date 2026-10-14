@@ -2,9 +2,15 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
-import {withAngularRenderingProfile} from '../rendering-profile';
+import {withAngularRenderingProfile} from '../angular-rendering-profile';
+import {sphericalAzimuthalBounds} from '../azimuthal-rendering-bounds';
 import type {ProjectionPlugin} from '../types';
-import {catalogueParameters, bindCatalogueKernel, horizonGuard} from '../catalogue-kernel';
+import {
+  catalogueParameters,
+  catalogueBoundsParameters,
+  bindCatalogueKernel,
+  horizonGuard
+} from '../catalogue-kernel';
 import {createState, forward, inverse} from '../kernels/ortho';
 
 export const orthographic: ProjectionPlugin = {
@@ -19,6 +25,9 @@ export const orthographic: ProjectionPlugin = {
     return withAngularRenderingProfile(
       bindCatalogueKernel('ortho', context, state, forward, inverse, horizonGuard(base, 0, true)),
       base,
+      Math.PI / 2,
+      (region, domain) =>
+        sphericalAzimuthalBounds(catalogueBoundsParameters(base, context), region, domain, 'ortho'),
       Math.PI / 2
     );
   }

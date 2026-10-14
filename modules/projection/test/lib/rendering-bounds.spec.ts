@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {projectionEngine} from '@math.gl/projection';
+import {projectionEngine, projJSONCRSParser} from '@math.gl/projection';
 import {lazyProjectionEngine} from '@math.gl/projection/projections/lazy';
 import {geographicJSON, projectedJSON, projectedWKT2} from '../fixtures/crs-datums';
 import inputs from '../fixtures/native-proj-cases.json';
+import {sphericalExtremum} from '../../src/experimental/spherical-rendering-domain';
+import {createProjectionEngine} from '@math.gl/projection/core';
+import {mercator} from '@math.gl/projection/projections/merc';
 
 for (const fixture of inputs.cases) {
   test('finite rendering bounds and normalized containment: ' + fixture.id, async () => {
@@ -392,3 +395,101 @@ test('Orthographic coverage intersects the curved horizon without expanding to a
     }
   }
 });
+
+test('analytical cap intersections retain a narrow meridian strip', () => {
+  const west = 0.4,
+    east = west + 1e-8;
+  const region = [west, -0.8, east, 0.8] as const;
+  const cap = {latitude: 0, distance: 0.5};
+  const longitude = (west + east) / 2;
+  const latitude = Math.acos(Math.cos(cap.distance) / Math.cos(longitude));
+  const result = sphericalExtremum(
+    [0, Math.cos(latitude) * Math.sin(longitude), Math.sin(latitude)],
+    region,
+    cap
+  );
+  expect(result.value).toBeCloseTo(Math.sin(cap.distance) ** 2, 12);
+  expect(result.point[0]).toBeCloseTo(longitude, 12);
+  expect(result.point[1]).toBeCloseTo(latitude, 12);
+});
+
+test('linear-fractional horizon extrema include cap tangencies between coverage corners', async () => {
+  const radius = 6371000;
+  const crs = await projectionEngine.getCRS('+proj=gnom +R=6371000 +lat_0=37 +lon_0=123');
+  const extent = radius * Math.tan((80 * Math.PI) / 180);
+  for (let axis = 0; axis < 2; axis++) {
+    expect(crs.renderingBounds[0][axis]).toBeCloseTo(-extent, 3);
+    expect(crs.renderingBounds[1][axis]).toBeCloseTo(extent, 3);
+  }
+});
+
+test('Mercator coverage bounds do not evaluate a coordinate-conversion sampling grid', async () => {
+  let calls = 0;
+  const engine = createProjectionEngine({
+    parsers: [projJSONCRSParser],
+    projections: [
+      {
+        ...mercator,
+        create(context) {
+          const projection = mercator.create(context);
+          return {
+            ...projection,
+            forward(x, y) {
+              calls++;
+              return projection.forward(x, y);
+            }
+          };
+        }
+      }
+    ]
+  });
+  const crs = await engine.getCRS({
+    ...projectedJSON,
+    conversion: {name: 'Mercator', method: {name: 'Mercator (variant A)'}, parameters: []},
+    bbox: {west_longitude: 2, south_latitude: 80, east_longitude: 4, north_latitude: 90}
+  });
+  expect(crs.renderingBounds[1][0]).toBeGreaterThan(crs.renderingBounds[0][0]);
+  expect(calls).toBe(0);
+});
+
+for (const fixture of inputs.cases) {
+  // UTM supplies its standardized false offsets rather than accepting overrides.
+  if (/\+proj=(geocent|longlat|ob_tran|utm)/.test(fixture.definition)) continue;
+  test('analytical rendering bounds preserve false offsets: ' + fixture.id, async () => {
+    const definition = fixture.definition.replace(/\+x_0=\S+|\+y_0=\S+/g, '');
+    const original = await projectionEngine.getCRS(definition);
+    const shifted = await projectionEngine.getCRS(definition + ' +x_0=1234 +y_0=-5678');
+    for (let corner = 0; corner < 2; corner++) {
+      expect(shifted.renderingBounds[corner][0] - original.renderingBounds[corner][0]).toBeCloseTo(
+        1234,
+        2
+      );
+      expect(shifted.renderingBounds[corner][1] - original.renderingBounds[corner][1]).toBeCloseTo(
+        -5678,
+        2
+      );
+    }
+  });
+}
+
+test.each([
+  ['+proj=lcc +lat_1=30 +lat_2=60 +lat_0=40', 0, -Math.PI / 2, 0, -Math.PI / 3],
+  ['+proj=tmerc +datum=WGS84', Math.PI / 2, 0, Math.PI / 6, 0]
+])(
+  'analytical singularity extrema clip declared world coverage for %s',
+  async (definition, x, y, expectedX, expectedY) => {
+    const projection = await projectionEngine.createProjectionAsync({to: definition as string});
+    const profile = projection.getTargetRenderingProfile([
+      -Math.PI,
+      -Math.PI / 2,
+      Math.PI,
+      Math.PI / 2
+    ])!;
+    expect(profile.bounds.flat().every(Number.isFinite)).toBe(true);
+    const point = {x: x as number, y: y as number, z: 123};
+    profile.normalize!(point);
+    expect(point.x).toBeCloseTo(expectedX as number, 10);
+    expect(point.y).toBeCloseTo(expectedY as number, 10);
+    expect(point.z).toBe(123);
+  }
+);

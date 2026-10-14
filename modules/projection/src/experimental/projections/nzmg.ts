@@ -2,9 +2,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
-import {withRectangleRenderingProfile} from '../rendering-profile';
+import {nzmgBounds} from '../regional-rendering-bounds';
+import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
-import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
+import {
+  catalogueParameters,
+  catalogueBoundsParameters,
+  bindCatalogueKernel
+} from '../catalogue-kernel';
 import {createState, forward, inverse} from '../kernels/nzmg';
 import {numberParameter} from '../parameters';
 
@@ -24,14 +29,16 @@ export const newZealandMapGrid: ProjectionPlugin = {
       throw new Error('NZMG requires lat_0 and lon_0');
     const state = createState(base, {iterations});
     // The New Zealand polynomial is regional: render eight degrees around its origin.
+    const projection = bindCatalogueKernel('nzmg', context, state, forward, inverse);
     return withRectangleRenderingProfile(
-      bindCatalogueKernel('nzmg', context, state, forward, inverse),
+      projection,
       [
         base.long0 - Math.PI / 22.5,
         Math.max(-Math.PI / 2, base.lat0 - Math.PI / 22.5),
         base.long0 + Math.PI / 22.5,
         Math.min(Math.PI / 2, base.lat0 + Math.PI / 22.5)
-      ]
+      ],
+      coverage => nzmgBounds(catalogueBoundsParameters(state, context), coverage)
     );
   }
 };

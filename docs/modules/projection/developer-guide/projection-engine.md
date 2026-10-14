@@ -206,9 +206,10 @@ To frame a map in selected target axes, use `renderingBounds`: `[[minX, minY, mi
 [maxX, maxY, maxZ]]` in the effective axis order and units. Use `axis` to select the
 horizontal components when height is stored first. The envelope encloses the rendering
 reference surface; planar reference surfaces have zero span along their height axis.
-Each algorithm owns its rendering extent and normalization. Shared boundary sampling projects
-curved edges and refines their extrema; descriptor assembly applies target units and
-axis order. False offsets, ellipsoid parameters, and projection scales affect the envelope.
+Each algorithm owns its rendering extent, normalization and bounds calculation. Bounds
+use analytical extrema, horizon intersections, and equation-derived enclosing ranges;
+descriptor assembly applies target units and axis order. False offsets, ellipsoid
+parameters, and projection scales affect the envelope.
 
 PROJJSON `bbox` and WKT2 `USAGE[BBOX[...]]` supply geographic area-of-use coverage.
 Declared coverage replaces the default geographic/projected rendering extent, allowing
@@ -256,9 +257,12 @@ northward boundary. Longitude wrapping follows central/prime meridian and
 longitude-wrap parameters. `+over` permits unrestricted longitude conversion but
 retains a finite rendering target.
 
-Custom algorithms can supply a `ProjectionRenderingProfile`. Without one, descriptor retrieval
-projects a world rectangle; a custom algorithm with singularities must supply its own
-finite domain. Ordinary coordinate conversion does not evaluate rendering bounds.
+To expose a custom algorithm through `getCRS`, implement `getRenderingProfile(coverage?)`
+to supply finite reference-surface bounds and an optional normalization function.
+Coverage is a geographic rectangle in native radians. With no coverage, return the
+algorithm’s default rendering target. If coverage-specific resolution fails, descriptor
+retrieval uses that default while preserving the declared coverage in metadata.
+Ordinary coordinate conversion does not evaluate rendering bounds.
 
 ## What is pluggable?
 
@@ -867,6 +871,23 @@ export const simpleCylindrical: ProjectionPlugin = {
     if (eccentricitySquared !== 0)
       throw new Error("This plugin requires a sphere");
     return {
+      getRenderingProfile(coverage) {
+        const [west, south, east, north] = coverage ?? [-Math.PI, -Math.PI / 2, Math.PI, Math.PI / 2];
+        return {
+          bounds: [
+            [radius * west, radius * south, 0],
+            [radius * east, radius * north, 0],
+          ],
+          normalize(point) {
+            const center = (west + east) / 2;
+            const offset = point.x - center;
+            const wrapped = Math.abs(offset) <= Math.PI ? offset :
+              ((offset + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+            point.x = Math.max(west, Math.min(east, center + wrapped));
+            point.y = Math.max(south, Math.min(north, point.y));
+          },
+        };
+      },
       forward: (longitude, latitude) => [radius * longitude, radius * latitude],
       inverse: (x, y) => [x / radius, y / radius],
       forwardInPlace(point) {

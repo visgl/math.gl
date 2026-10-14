@@ -2,9 +2,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
-import {withRectangleRenderingProfile} from '../rendering-profile';
+import {cassiniBounds} from '../regional-rendering-bounds';
+import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
-import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
+import {
+  catalogueParameters,
+  catalogueBoundsParameters,
+  bindCatalogueKernel
+} from '../catalogue-kernel';
 import {createState, forward, inverse} from '../kernels/cass';
 
 export const cassiniSoldner: ProjectionPlugin = {
@@ -16,9 +21,12 @@ export const cassiniSoldner: ProjectionPlugin = {
 
     const state = createState(base);
     // Use a regional meridian strip; the series is not a global map.
+    const projection = bindCatalogueKernel('cass', context, state, forward, inverse);
     return withRectangleRenderingProfile(
-      bindCatalogueKernel('cass', context, state, forward, inverse),
-      [base.long0 - Math.PI / 6, -Math.PI / 2 + 1e-8, base.long0 + Math.PI / 6, Math.PI / 2 - 1e-8]
+      projection,
+      [base.long0 - Math.PI / 6, -Math.PI / 2 + 1e-8, base.long0 + Math.PI / 6, Math.PI / 2 - 1e-8],
+      coverage =>
+        cassiniBounds(catalogueBoundsParameters(base, context), projection.forward, coverage)
     );
   }
 };
