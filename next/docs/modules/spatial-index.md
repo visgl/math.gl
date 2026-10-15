@@ -36,16 +36,33 @@ points.nearest([1, 2, 4]); // {index: 1, distance: 1}
 * `search(minimum, maximum)`: closed-box overlap candidates, sorted by row index.
 * `nearest(point, {maxDistance = Infinity, filter?, distanceToItem?})`: nearest result `{index,distance}`, or null. Without refinement, distance is to the filled box (or point). `filter(index)` excludes rows. `distanceToItem(index)` can refine a candidate against actual geometry; return null to exclude it. Distances must be nonnegative and no less than the box distance. Geometry must be completely enclosed by the indexed box for pruning to be valid.
 * `searchRay(origin, direction, maxDistance = Infinity)`: box candidates sorted by entry distance, then row index. Directions are normalized; a nonunit input does not change distances. An origin inside a box has entry distance zero. Ray direction must be finite and nonzero.
+* `intersectRay(origin, direction, {maxDistance = Infinity, filter?, intersectItem?})`: nearest accepted box/geometry hit, returning `{index,distance}` or null. Unlike `searchRay`, this near-first branch-and-bound traversal does not materialize all candidates. `filter(index)` excludes rows before refinement. `intersectItem(index, currentMaxDistance)` returns an exact Euclidean hit distance or null; without it, box entry distance is used. Geometry must be enclosed by its indexed box, and refinement distances must be nonnegative and at least the box entry distance (allowing eight relative floating-point rounding steps between independently evaluated kernels). Refined distances are never clamped or rounded; broad-phase pruning uses the same allowance so inclusive limits and ties are retained. Rejected hits do not clip later candidates. Limits are inclusive; ties select the lowest original row. Callback order is unspecified, not an all-intersections stream. Exceptions propagate.
 
 ## TriangleBVH[​](#trianglebvh "Direct link to TriangleBVH")
 
 `new TriangleBVH({positions, indices?, leafSize = 8})`: packed xyz vertices and optional triangle-list vertex indices. Without indices, each three consecutive vertices form a triangle. Returns original triangle numbers, not vertex numbers. Positions and indices are copied.
 
 * `search(minimum, maximum)`: triangle **bounds** candidates, not exact triangle/box overlap.
-* `intersectRay(origin, direction, {maxDistance = Infinity, backfaceCulling = false})`: closest triangle hit `{index,distance,point,barycentric}`, or null. Distances are Euclidean; barycentric components correspond to vertices a,b,c. Degenerate/coplanar triangles have no hit.
+* `intersectRay(origin, direction, {maxDistance = Infinity, backfaceCulling = false, filter?, acceptHit?})`: closest triangle hit `{index,distance,point,barycentric}`, or null. Distances are Euclidean; barycentric components correspond to vertices a,b,c. Degenerate/coplanar triangles have no hit. `filter(index)` excludes an original triangle before exact intersection. `acceptHit(hit)` can reject an exact point using barycentric weights, source validity, clipping or other application constraints. Rejection does not shorten the ray; a valid surface behind a foreground hole can still be selected. Predicates must treat the candidate as immutable; they run only for hits that could improve the accepted result, in unspecified traversal order, not as an all-intersections API. Exceptions propagate. With no predicates, existing behavior is unchanged.
 * `nearest(point, {maxDistance = Infinity, filter?})`: closest point on a filled triangle, returning `{index,distance,point}` or null. Degenerate triangles reduce to segments/points.
 
 The ray and triangle geometry kernels are reused from `@math.gl/culling/queries`. `@math.gl/spatial-index/boxes` provides BoxIndex and PointIndex without the triangle code.
+
+For terrain picking, keep physical heights and validity masks in the caller (for example loaders.gl height grids). The BVH indexes displayed geometry; it does not infer datums, reconstruct elevation, or apply exaggeration:
+
+```
+const hit = mesh.intersectRay(origin, direction, {
+
+  maxDistance: 1000,
+
+  filter: triangleIndex => loadedTriangles.has(triangleIndex),
+
+  acceptHit: candidate => isValidSurfacePoint(candidate.index, candidate.barycentric)
+
+});
+```
+
+This acceptance boundary supports Tangram's terrain-query conformance work without importing terrain or renderer concepts into math.gl. Cooperative construction, explicit index-memory admission and an exact zero-budget fallback remain prerequisites to replacing Tangram's production query index; this change does not claim that switch.
 
 ## loaders.gl adapter boundary[​](#loadersgl-adapter-boundary "Direct link to loaders.gl adapter boundary")
 
@@ -53,7 +70,7 @@ GeoArrow adapters can generate one bounds record per non-null row, maintain a ma
 
 ## POC limits[​](#poc-limits "Direct link to POC limits")
 
-Construction uses repeated median sorting (O(n log² n)), and queries can degrade to O(n). Ray candidates are materialized and sorted before triangle refinement. Incremental updates, packed-buffer serialization/restoration, k-nearest queries, SAH construction, and performance budgets are deferred. Rebuild after changing data. Geometry kernels are not watertight-certified; near-degenerate and extreme-scale numerical qualification is incomplete. This is not a tile scheduler, an ellipsoidal index, or a geodesic nearest-neighbor implementation.
+Construction uses repeated median sorting (O(n log² n)), and queries can degrade to O(n). `searchRay` materializes and sorts all broad-phase candidates; nearest `intersectRay` queries instead prune against accepted hits during traversal. Incremental updates, packed-buffer serialization/restoration, k-nearest queries, SAH construction, and performance budgets are deferred. Rebuild after changing data. Geometry kernels are not watertight-certified; near-degenerate and extreme-scale numerical qualification is incomplete. This is not a tile scheduler, an ellipsoidal index, or a geodesic nearest-neighbor implementation.
 
 ## Qualification workloads[​](#qualification-workloads "Direct link to Qualification workloads")
 
