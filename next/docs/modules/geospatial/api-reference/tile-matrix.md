@@ -47,7 +47,8 @@ selectTileMatrix(matrixSet, 3)?.id; // '2m'
 | Field            | Meaning                                                                                                                        |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `id`             | Opaque string identifier, independent of numeric zoom or array index.                                                          |
-| `resolution`     | Positive finite coordinate units per pixel, the same on both axes.                                                             |
+| `resolution`     | Positive finite X coordinate units per pixel. Also used for Y unless overridden.                                               |
+| `resolutionY`    | Optional positive finite Y coordinate units per pixel, for anisotropic pixels.                                                 |
 | `origin`         | Origin in canonical X/Y order in the matrix coordinate system.                                                                 |
 | `cornerOfOrigin` | Required `topLeft` or `bottomLeft`. Columns increase along X; rows decrease along Y for top-left and increase for bottom-left. |
 | `tileSize`       | Positive integer width and height in pixels; rectangular tiles are supported.                                                  |
@@ -56,6 +57,18 @@ selectTileMatrix(matrixSet, 3)?.id; // '2m'
 A `TileMatrixSet` associates a `crs` identifier with `matrices` having unique IDs. Array order does not imply zoom, matrices need not form a quadtree, and levels can have different origins and sizes. Utilities use the supplied coordinate units without interpreting the CRS identifier.
 
 Adapters resolve CRS axis order and units before constructing a matrix. Incomplete service metadata is distinct from complete geometry. Parsing WMTS/OGC documents, discovery, tile fetching, rendering, reprojection and variable-width rows belong outside these utilities.
+
+## Different pixel sizes on each axis[​](#different-pixel-sizes-on-each-axis "Direct link to Different pixel sizes on each axis")
+
+Some raster grids, including GeoPackage tile tables, advertise separate horizontal and vertical pixel sizes. Preserve them with `resolution` and `resolutionY`; changing tile dimensions would misrepresent the stored pixels. Existing matrices that omit `resolutionY` retain square pixels.
+
+```
+const anisotropic = {...matrix, resolution: 2, resolutionY: 3};
+
+getTileBounds(anisotropic, 1, 0); // [200512, 4599232, 201024, 4600000]
+```
+
+Both values are positive magnitudes. `cornerOfOrigin` determines row direction. This supports axis-aligned rectangular pixels, not rotation, skew, or row-dependent widths. Bounds, inverse indexing, range queries, and floating-point extent validation all use each axis's own resolution.
 
 ## validateTileMatrix(matrix)[​](#validatetilematrixmatrix "Direct link to validateTileMatrix(matrix)")
 
@@ -88,6 +101,8 @@ Checks integer indices and optional inclusive `TileMatrixLimits`. Malformed limi
 ## selectTileMatrix(matrixSet, targetResolution)[​](#selecttilematrixmatrixset-targetresolution "Direct link to selectTileMatrix(matrixSet, targetResolution)")
 
 Selects the **coarsest matrix whose resolution is at or below the target**. If all matrices are coarser than the target, returns the finest available matrix. Returns `null` for an empty set. Equal-resolution ties retain the first matrix in the supplied array. The returned matrix is the original object, and the set is not sorted or mutated.
+
+For anisotropic pixels, selection compares the larger of `resolution` and `resolutionY` against the scalar target. Both axes must meet the target; the fallback minimizes that larger resolution. Equal maximum resolutions retain the first matrix.
 
 The target must be positive and finite, in the same coordinate units per pixel as the matrices. For a CRS using metres, this is metres per pixel; for a degree-based grid, it is degrees per pixel. Convert viewport or ground-resolution inputs to those units before calling. No projection, latitude-dependent scale correction or coverage-based selection is performed.
 
