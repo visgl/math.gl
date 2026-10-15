@@ -93,6 +93,32 @@ test('misses, degeneracy, backface culling, limits and callback errors keep expl
   );
 });
 
+test.each([1, 1e-8, 1e8])(
+  'fractional triangle kernels retain valid exact hits at scale %s',
+  scale => {
+    const positions = [0, 0, 0, 0.1 * scale, 0, 0, 0, 0.1 * scale, 0];
+    const origin = [0.01 * scale, 0.01 * scale, 0.3 * scale],
+      direction = [0, 0, -1];
+    const expected = intersectRayTriangle(
+      origin,
+      direction,
+      positions.slice(0, 3),
+      positions.slice(3, 6),
+      positions.slice(6, 9)
+    );
+    if (!expected) throw new Error('Expected a fractional triangle hit');
+    const index = new TriangleBVH({positions});
+    expect(index.intersectRay(origin, direction)?.distance).toBe(expected.t);
+    expect(
+      index.intersectRay(origin, direction, {maxDistance: expected.t, acceptHit: () => true})
+        ?.distance
+    ).toBe(expected.t);
+    expect(
+      index.intersectRay(origin, direction, {maxDistance: expected.t * (1 - 1e-10)})
+    ).toBeNull();
+  }
+);
+
 test('oblique rays preserve triangle-kernel results across nonunit directions', () => {
   const positions = [0, 0, 0, 2, 0, 0, 0, 2, 0];
   const index = new TriangleBVH({positions});

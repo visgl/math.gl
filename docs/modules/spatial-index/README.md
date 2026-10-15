@@ -50,7 +50,10 @@ caller-owned IDs, feature properties, or tile references.
   `intersectItem(index, currentMaxDistance)` returns an exact Euclidean hit distance
   or null; without it, box entry distance is used. Geometry must be enclosed by its
   indexed box, and refinement distances must be nonnegative and at least the box
-  entry distance. Rejected hits do not clip later candidates. Limits are inclusive;
+  entry distance (allowing eight relative floating-point rounding steps between
+  independently evaluated kernels). Refined distances are never clamped or rounded;
+  broad-phase pruning uses the same allowance so inclusive limits and ties are retained.
+  Rejected hits do not clip later candidates. Limits are inclusive;
   ties select the lowest original row. Callback order is unspecified, not an
   all-intersections stream. Exceptions propagate.
 

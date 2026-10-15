@@ -32,7 +32,8 @@ export type RayIndexOptions = {
   filter?: (index: number) => boolean;
   /**
    * Exact Euclidean hit distance, or null to reject the row.
-   * Must be at least its indexed-box entry distance; geometry must stay inside that box.
+   * Must be at least its indexed-box entry distance, apart from floating-point roundoff;
+   * geometry must stay inside that box. Refined distances are never rounded or clamped.
    * The second argument is the current accepted distance limit, initially maxDistance.
    * Traversal order is unspecified; this is not an all-intersections callback.
    */
@@ -211,14 +212,18 @@ export class BoxIndex {
         unit,
         bounds.subarray(offset, offset + this.dimension),
         bounds.subarray(offset + this.dimension, offset + this.dimension * 2),
-        best
+        best + getRayDistanceTolerance(best, best)
       );
     };
     const rootDistance = this.size ? getEntry(this.nodeBounds, 0) : null;
     const stack = rootDistance === null ? [] : [{index: 0, distance: rootDistance}];
     while (stack.length) {
       const candidate = stack.pop();
-      if (!candidate || candidate.distance > best) continue;
+      if (
+        !candidate ||
+        candidate.distance > best + getRayDistanceTolerance(candidate.distance, best)
+      )
+        continue;
       const node = candidate.index;
       if (this.counts[node]) {
         for (
@@ -232,7 +237,11 @@ export class BoxIndex {
           const exact = options.intersectItem ? options.intersectItem(index, best) : lower;
           if (exact === null) continue;
           validateQueryDistance(exact);
-          if (exact < lower) throw new RangeError('Refinement distance cannot be below box entry');
+          if (
+            exact < lower &&
+            (!Number.isFinite(lower) || lower - exact > getRayDistanceTolerance(lower, exact))
+          )
+            throw new RangeError('Refinement distance cannot be below box entry');
           if (
             Number.isFinite(exact) &&
             exact <= best &&
@@ -307,6 +316,13 @@ export class BoxIndex {
       if (minimum[i] > maximum[i]) throw new RangeError('Bounds must be ordered');
     }
   }
+}
+
+/** Relative, unit-independent allowance for independently rounded slab and geometry kernels. */
+function getRayDistanceTolerance(first: number, second: number): number {
+  return (
+    8 * Math.max(Number.MIN_VALUE, Number.EPSILON * Math.max(Math.abs(first), Math.abs(second)))
+  );
 }
 
 /** Points are zero-volume boxes: nearest gives exact Euclidean point distance. */

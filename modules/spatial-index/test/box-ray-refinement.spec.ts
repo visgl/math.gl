@@ -101,6 +101,32 @@ test('refinements validate lower bounds and distances, preserve exceptions and s
   expect(new BoxIndex({bounds: [], dimension: 2}).intersectRay([0, 0], [1, 0])).toBeNull();
 });
 
+test.each([1, 1e-8, 1e8])(
+  'roundoff preserves refined distances, inclusive limits and stable ties at scale %s',
+  scale => {
+    const exact = 0.29999999999999993 * scale;
+    const index = new BoxIndex({
+      bounds: [0.3 * scale, -1, 0.4 * scale, 1, 0.2 * scale, -1, 0.4 * scale, 1],
+      dimension: 2,
+      leafSize: 1
+    });
+    expect(index.intersectRay([0, 0], [1, 0], {intersectItem: () => exact})).toEqual({
+      index: 0,
+      distance: exact
+    });
+    expect(
+      index.intersectRay([0, 0], [1, 0], {maxDistance: exact, intersectItem: () => exact})
+    ).toEqual({index: 0, distance: exact});
+    expect(
+      index.intersectRay([0, 0], [1, 0], {
+        maxDistance: exact * (1 - 1e-10),
+        intersectItem: () => exact
+      })
+    ).toBeNull();
+    expect(() => index.intersectRay([0, 0], [1, 0], {intersectItem: () => 0.19 * scale})).toThrow();
+  }
+);
+
 test.each([1, 8])(
   'exact filtered ray refinements match exhaustive row scans (leaf %i)',
   leafSize => {
