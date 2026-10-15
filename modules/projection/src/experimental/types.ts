@@ -35,7 +35,7 @@ export type ProjectionFlatContext = {
  */
 export type GeographicBounds = readonly [west: number, south: number, east: number, north: number];
 
-/** Projection-owned reference-surface envelope and geographic normalization, in radians/metres. */
+/** Projection-owned native reference-surface envelope and Greenwich degree normalization. */
 export type ProjectionRenderingProfile = {
   /** Finite native XYZ envelope chosen as an appropriate rendering target.
    * This is a rendering policy, not the algorithm's mathematical validity domain.
@@ -43,7 +43,7 @@ export type ProjectionRenderingProfile = {
    * Horizontal projections use zero reference height; geocentric profiles enclose XYZ.
    */
   readonly bounds: readonly [readonly [number, number, number], readonly [number, number, number]];
-  /** Optional rendering-domain clamp on native geographic radians; preserve altitude.
+  /** Optional rendering-domain clamp on Greenwich longitude/latitude in degrees; preserve altitude.
    * Conversion kernels remain unrestricted by this rendering envelope.
    */
   normalize?(point: ProjectionPoint): void;

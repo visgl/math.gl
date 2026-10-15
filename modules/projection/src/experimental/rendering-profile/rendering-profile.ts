@@ -35,6 +35,23 @@ function resolveBounds(profile: ProjectionRenderingProfile): ProjectionRendering
   return {bounds, normalize: profile.normalize?.bind(profile)};
 }
 
+/** Adapt a curved-domain operation to Greenwich degrees, retaining unchanged inputs exactly. */
+export function createAngularNormalization(
+  normalize: NonNullable<ProjectionRenderingProfile['normalize']>,
+  primeMeridian = 0
+): NonNullable<ProjectionRenderingProfile['normalize']> {
+  return point => {
+    const x = (point.x * Math.PI) / 180 - primeMeridian;
+    const y = (point.y * Math.PI) / 180;
+    const native = {x, y, z: point.z};
+    normalize(native);
+    // Interior points need no conversion back: even an identity radians round
+    // trip can change a covered degree coordinate at a projection seam.
+    if (native.x !== x) point.x = ((native.x + primeMeridian) * 180) / Math.PI;
+    if (native.y !== y) point.y = (native.y * 180) / Math.PI;
+  };
+}
+
 /** Combine projection-owned profiles for disconnected geographic coverage.
  * A null result explicitly marks an empty piece. Unexpected callback/bounds
  * errors propagate; only an entirely empty collection returns null.
@@ -62,8 +79,10 @@ export function combineRenderingProfiles(
         // Compare the actual normalized positions, rather than rectangular
         // envelopes that may include points outside a curved rendering target.
         const distance =
-          Math.sin((candidate.y - point.y) / 2) ** 2 +
-          Math.cos(point.y) * Math.cos(candidate.y) * Math.sin((candidate.x - point.x) / 2) ** 2;
+          Math.sin(((candidate.y - point.y) * Math.PI) / 360) ** 2 +
+          Math.cos((point.y * Math.PI) / 180) *
+            Math.cos((candidate.y * Math.PI) / 180) *
+            Math.sin(((candidate.x - point.x) * Math.PI) / 360) ** 2;
         if (distance < best) {
           best = distance;
           bestX = candidate.x;

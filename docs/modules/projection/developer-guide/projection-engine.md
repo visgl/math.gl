@@ -888,7 +888,7 @@ export const simpleCylindrical: ProjectionPlugin = {
             [radius * (right * radians - primeMeridian), radius * north * radians, 0],
           ],
           normalize(point) {
-            let longitude = wrap((point.x + primeMeridian) / radians);
+            let longitude = wrap(point.x);
             const inside = west <= east
               ? longitude >= west && longitude <= east
               : longitude >= west || longitude <= east;
@@ -896,8 +896,8 @@ export const simpleCylindrical: ProjectionPlugin = {
               longitude = Math.abs(wrap(longitude - west)) <= Math.abs(wrap(longitude - east))
                 ? west : east;
             }
-            point.x = longitude * radians - primeMeridian;
-            point.y = Math.max(south, Math.min(north, point.y / radians)) * radians;
+            point.x = longitude;
+            point.y = Math.max(south, Math.min(north, point.y));
           },
         };
       },

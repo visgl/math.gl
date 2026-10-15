@@ -400,7 +400,7 @@ or numerically unresolved; invalid nonpositive computed scales raise an error.
 | --- | --- | --- |
 | `CRSMetadata.areaOfUse` | Greenwich longitude/latitude degrees | Geographic coverage declared by the CRS definition. |
 | `CRSDescriptor.renderingBounds` | Effective target coordinates | A finite XYZ envelope enclosing the selected rendering reference surface; consumers select axes from the effective axis order. It is neither an altitude range nor a conversion-validity test. |
-| `ProjectionRenderingProfile` | Native projection units and geographic radians | Projection-owned rendering envelope and normalization, adapted by the descriptor into effective units and axis order. |
+| `ProjectionRenderingProfile` | Native projection units and Greenwich geographic degrees | Projection-owned rendering envelope and normalization, adapted by the descriptor into effective units and axis order. |
 | `ProjectionAnalysis.domain` | Geographic radians | An explicit application-qualified rectangle in which numerical analysis is attempted. The derivative stencil must fit inside it. |
 
 For projection implementations, `getRenderingProfile(coverage)` defines a rendering

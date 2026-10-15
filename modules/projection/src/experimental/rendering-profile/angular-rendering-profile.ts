@@ -14,6 +14,7 @@ import {createRectangleRenderingProfile} from './rectangular-rendering-profile';
 import {geographicVector, sphericalExtremum} from './spherical-rendering-domain';
 import type {AngularDomain} from './spherical-rendering-domain';
 import {wrapLongitude} from '../parameters';
+import {createAngularNormalization} from './rendering-profile';
 
 export type ResolveAngularBounds = (
   parameters: AngularRanges,
@@ -46,49 +47,50 @@ export function createAngularRenderingProfile(
       base.long0,
       base.primeMeridian
     );
+    const polar = Math.abs(Math.cos(base.lat0)) < 1e-12;
+    const polarLatitude = ((Math.PI / 2 - maximumDistance) * 180) / Math.PI;
+    const normalizeCap =
+      domain &&
+      !polar &&
+      createAngularNormalization(point => {
+        const target = geographicVector(point.x - base.long0, point.y);
+        if (
+          target[0] * Math.cos(base.lat0) + target[2] * Math.sin(base.lat0) >=
+          Math.cos(domain.distance) - 1e-14
+        )
+          return;
+        if (Math.hypot(target[0] + axis[0], target[1], target[2] + axis[2]) < 1e-12) {
+          // All cap bearings are equally close to an exact antipode. Prefer
+          // northward to keep normalization stable, provided coverage allows it.
+          const angle = base.lat0 + domain.distance;
+          const center = (local[0][0] + local[1][0]) / 2;
+          const longitude = center + wrapLongitude((Math.cos(angle) < 0 ? Math.PI : 0) - center);
+          const latitude = Math.atan2(Math.sin(angle), Math.abs(Math.cos(angle)));
+          if (
+            longitude >= local[0][0] &&
+            longitude <= local[1][0] &&
+            latitude >= local[0][1] &&
+            latitude <= local[1][1]
+          ) {
+            point.x = longitude + base.long0;
+            point.y = latitude;
+            return;
+          }
+        }
+        const result = sphericalExtremum(target, local, domain);
+        [point.x, point.y] = [result.point[0] + base.long0, result.point[1]];
+      }, base.primeMeridian);
     return {
       get bounds() {
         return resolveBounds(local, domain);
       },
       normalize(point) {
         rectangle.normalize!(point);
-        if (domain) {
-          if (Math.abs(Math.cos(base.lat0)) < 1e-12) {
-            // At the antipodal pole every meridian is equally close; retain the
-            // input meridian so graticules do not collapse onto one longitude.
-            point.y =
-              base.lat0 > 0
-                ? Math.max(Math.PI / 2 - maximumDistance, point.y)
-                : Math.min(-Math.PI / 2 + maximumDistance, point.y);
-            return;
-          }
-          const target = geographicVector(point.x - base.long0, point.y);
-          if (
-            target[0] * Math.cos(base.lat0) + target[2] * Math.sin(base.lat0) >=
-            Math.cos(domain.distance) - 1e-14
-          )
-            return;
-          if (Math.hypot(target[0] + axis[0], target[1], target[2] + axis[2]) < 1e-12) {
-            // All cap bearings are equally close to an exact antipode. Prefer
-            // northward to keep normalization stable, provided coverage allows it.
-            const angle = base.lat0 + domain.distance;
-            const center = (local[0][0] + local[1][0]) / 2;
-            const longitude = center + wrapLongitude((Math.cos(angle) < 0 ? Math.PI : 0) - center);
-            const latitude = Math.atan2(Math.sin(angle), Math.abs(Math.cos(angle)));
-            if (
-              longitude >= local[0][0] &&
-              longitude <= local[1][0] &&
-              latitude >= local[0][1] &&
-              latitude <= local[1][1]
-            ) {
-              point.x = longitude + base.long0;
-              point.y = latitude;
-              return;
-            }
-          }
-          const result = sphericalExtremum(target, local, domain);
-          [point.x, point.y] = [result.point[0] + base.long0, result.point[1]];
-        }
+        if (domain && polar) {
+          // A polar cap is a latitude clamp in degrees; retain its input meridian.
+          point.y =
+            base.lat0 > 0 ? Math.max(polarLatitude, point.y) : Math.min(-polarLatitude, point.y);
+        } else normalizeCap?.(point);
       }
     };
   };

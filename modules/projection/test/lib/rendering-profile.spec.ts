@@ -126,8 +126,8 @@ test.each([true, false])(
   async supplied => {
     const normalize = vi.fn((point: {x: number; y: number; z: number}) => {
       // The plugin sees the original geographic position, before any rendering policy.
-      expect(point.x).toBeCloseTo(3 * Math.PI, 12);
-      expect(point.y).toBeCloseTo((100 * Math.PI) / 180, 12);
+      expect(point.x).toBe(540);
+      expect(point.y).toBe(100);
     });
     const getRenderingProfile = vi.fn(() => ({
       ...defaultProfile,
@@ -269,7 +269,7 @@ test('combined normalization resolves close candidates without longitude-branch 
     return {
       ...defaultProfile,
       normalize(point) {
-        point.x = current === 0 ? 2 * Math.PI + 1e-8 : 1e-9;
+        point.x = current === 0 ? 360 + 1e-8 : 1e-9;
       }
     };
   })!;

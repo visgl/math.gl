@@ -699,3 +699,25 @@ test('custom descriptor retrieval requires projection-owned bounds', async () =>
   const conversion = await engine.createProjectionAsync({to: '+proj=unbounded'});
   expect(conversion.project([0, 0])).toEqual([0, 0]);
 });
+
+test.each(['EPSG:3857', '+proj=eqc +R=6378137 +units=ft', '+proj=utm +zone=31 +datum=WGS84'])(
+  'unchanged normalization preserves exact source coordinates: %s',
+  async source => {
+    const descriptor = await projectionEngine.getCRS('+proj=eqearth +ellps=WGS84', {
+      converters: [source]
+    });
+    const converter = descriptor.converter[source];
+    const input = [623456.8912345, 4567890.1234567, 123, 456];
+    const original = [...input];
+    const allocated = converter.normalize(input);
+    expect(allocated).not.toBe(input);
+    expect(allocated).toEqual(original);
+    expect(input).toEqual(original);
+    const output = new Float64Array(input.length);
+    expect(converter.normalize(input, output)).toBe(output);
+    expect(Array.from(output)).toEqual(original);
+    expect(converter.normalize(input, input)).toBe(input);
+    expect(input).toEqual(original);
+    expect(converter.normalize(input.slice(0, 2))).toEqual(original.slice(0, 2));
+  }
+);

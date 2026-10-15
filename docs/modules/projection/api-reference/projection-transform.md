@@ -487,7 +487,8 @@ To expose bounds and normalization through `getCRS`, provide an algorithm-owned
 Coverage uses Greenwich longitude/latitude in degrees, with longitude endpoints in
 `[-180, 180]`. `west > east` crosses the dateline; `[-180, south, 180, north]`
 covers all longitudes. The engine passes declared coverage unchanged. Without it,
-return the default rendering target.
+return the default rendering target. The profile's `normalize` callback receives
+Greenwich longitude/latitude in degrees and preserves altitude.
 Descriptor retrieval falls back to this default when coverage-specific resolution fails. See [normalization and bounds](../developer-guide/projection-engine.md#normalization-and-bounds).
 
 A plugin declares its PROJ name and additional accepted parameters, optionally lists

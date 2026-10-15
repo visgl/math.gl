@@ -12,6 +12,7 @@ import type {
 import {createProjection, projectionOperation} from '../mutable-projection';
 import {createGeographicProfile} from '../rendering-profile/geographic-rendering-profile';
 import {numberParameter, wrapLongitude} from '../parameters';
+import {createAngularNormalization} from '../rendering-profile/rendering-profile';
 import {TypeScriptCRSError} from '../crs/types';
 import {createRectangleRenderingProfile} from '../rendering-profile/rectangular-rendering-profile';
 import type {GeographicBounds} from '../types';
@@ -195,6 +196,25 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
             context.primeMeridian ?? 0,
             over
           );
+        const normalizeRotated = createAngularNormalization(point => {
+          const longitude = point.x,
+            latitude = point.y;
+          rotate(point);
+          const x = (point.x * 180) / Math.PI,
+            y = (point.y * 180) / Math.PI;
+          const rotated = {x, y, z: point.z};
+          child.normalize?.(rotated);
+          if (rotated.x === x && rotated.y === y) {
+            // An unchanged child coordinate needs no inverse rotation or degree round trip.
+            point.x = longitude;
+            point.y = latitude;
+            return;
+          }
+          point.x = (rotated.x * Math.PI) / 180;
+          point.y = (rotated.y * Math.PI) / 180;
+          unrotate(point);
+          if (over) point.x += Math.round((longitude - point.x) / (2 * Math.PI)) * 2 * Math.PI;
+        }, context.primeMeridian ?? 0);
         return {
           get bounds() {
             const bounds = child.bounds;
@@ -210,13 +230,7 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
           },
           normalize(point) {
             source?.normalize!(point);
-            const longitude = point.x;
-            rotate(point);
-            child.normalize?.(point);
-            unrotate(point);
-            // Rotation recovers a principal longitude. Restore the source branch
-            // for +over without changing the geographic point or child coordinates.
-            if (over) point.x += Math.round((longitude - point.x) / (2 * Math.PI)) * 2 * Math.PI;
+            normalizeRotated(point);
           }
         };
       };

@@ -75,7 +75,7 @@ export async function resolveCRSDescriptor(
   // Derivative seam checks follow the algorithm's central meridian, independently of rendering coverage.
   const center = ((projection.targetLongitudeOrigin + crs.primeMeridian) * 180) / Math.PI;
   const bounds = adaptBounds(profile, crs, axis);
-  const normalizeWGS84 = createNormalization(profile.normalize, crs.primeMeridian);
+  const normalizeWGS84 = createNormalization(profile.normalize);
   const renderingScale = createRenderingScale(crs, projection, axis, center);
   const sources = [...new Set(['WGS84', ...(conventions.converters || [])])];
   if (sources.some(source => typeof source !== 'string' || !source.trim()))
@@ -151,8 +151,22 @@ function createSourceNormalization(
     coordinate: ProjectionCoordinate,
     output?: ProjectionOutput
   ): ProjectionOutput {
+    if (output !== undefined) validateScalarOutput(coordinate, output, coordinate.length);
     const wgs84 = geographic.unproject(Array.from(coordinate));
+    const [longitude, latitude, altitude] = wgs84;
     normalizeWGS84(wgs84, wgs84);
+    if (wgs84[0] === longitude && wgs84[1] === latitude && wgs84[2] === altitude) {
+      // Source -> WGS84 is needed to evaluate the target's rendering policy.
+      // An unchanged point needs no reverse projection, which could perturb it.
+      return output === undefined
+        ? Array.from(coordinate)
+        : writeScalarOutput(
+            coordinate,
+            output,
+            {x: coordinate[0], y: coordinate[1], z: coordinate[2] ?? 0},
+            coordinate.length
+          );
+    }
     return output === undefined ? geographic.project(wgs84) : geographic.projectTo(wgs84, output);
   }
   return normalize;
@@ -174,8 +188,7 @@ function createConversion(
 }
 
 function createNormalization(
-  normalizeDomain?: ProjectionRenderingProfile['normalize'],
-  primeMeridian = 0
+  normalizeDomain?: ProjectionRenderingProfile['normalize']
 ): CRSConversion {
   function normalize(coordinate: ProjectionCoordinate): number[];
   function normalize<T extends ProjectionOutput>(coordinate: ProjectionCoordinate, output: T): T;
@@ -196,14 +209,7 @@ function createNormalization(
     )
       throw new Error('Normalization requires finite longitude, latitude and altitude');
     const point = {x: longitude, y: latitude, z: altitude};
-    if (normalizeDomain) {
-      // Adapt units and meridian only; the algorithm owns wrapping and clipping.
-      point.x = (longitude * Math.PI) / 180 - primeMeridian;
-      point.y = (latitude * Math.PI) / 180;
-      normalizeDomain(point);
-      point.x = ((point.x + primeMeridian) * 180) / Math.PI;
-      point.y = (point.y * 180) / Math.PI;
-    }
+    normalizeDomain?.(point);
     return writeScalarOutput(coordinate, result, point, coordinate.length);
   }
   return normalize;

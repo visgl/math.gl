@@ -269,9 +269,11 @@ test('coverage clipping is resolved before normalization even when bounds were n
       bbox: {west_longitude: -180, south_latitude: -80, east_longitude: 180, north_latitude: 80}
     }
   });
-  const point = {x: Math.PI, y: 0, z: 0};
+  const point = {x: 180, y: 0, z: 0};
   projection.targetProfile!.normalize!(point);
-  const distance = Math.acos(Math.cos(point.x) * Math.cos(point.y));
+  const distance = Math.acos(
+    Math.cos((point.x * Math.PI) / 180) * Math.cos((point.y * Math.PI) / 180)
+  );
   expect(distance).toBeCloseTo((Math.PI * 80) / 180, 10);
   expect(projection.targetProfile!.bounds.flat().every(Number.isFinite)).toBe(true);
 });
@@ -482,8 +484,8 @@ for (const fixture of inputs.cases) {
 }
 
 test.each([
-  ['+proj=lcc +lat_1=30 +lat_2=60 +lat_0=40', 0, -Math.PI / 2, 0, -Math.PI / 3],
-  ['+proj=tmerc +datum=WGS84', Math.PI / 2, 0, Math.PI / 6, 0]
+  ['+proj=lcc +lat_1=30 +lat_2=60 +lat_0=40', 0, -90, 0, -60],
+  ['+proj=tmerc +datum=WGS84', 90, 0, 30, 0]
 ])(
   'analytical singularity extrema clip declared world coverage for %s',
   async (definition, x, y, expectedX, expectedY) => {
@@ -594,10 +596,10 @@ test.each([0, 170, -170])(
     });
     const profile = projection.getTargetRenderingProfile([-180, -90, 180, 90])!;
     for (const offset of [-60, -30, 0, 30, 60]) {
-      const point = {x: ((longitude + offset) * Math.PI) / 180, y: 0, z: 123};
+      const point = {x: longitude + offset, y: 0, z: 123};
       profile.normalize!(point);
-      expect(Math.sin(point.x - ((longitude + offset) * Math.PI) / 180)).toBeCloseTo(0, 12);
-      expect(Math.cos(point.x - ((longitude + offset) * Math.PI) / 180)).toBeCloseTo(1, 12);
+      expect(Math.sin(((point.x - longitude - offset) * Math.PI) / 180)).toBeCloseTo(0, 12);
+      expect(Math.cos(((point.x - longitude - offset) * Math.PI) / 180)).toBeCloseTo(1, 12);
       expect(point.z).toBe(123);
       const projected = projection.project([longitude + offset, 0, 123]);
       for (let axis = 0; axis < 2; axis++) {
@@ -620,9 +622,9 @@ test.each([
     const profile = projection.getTargetRenderingProfile([west, south, east, north])!;
     const points = west > east ? [175, 185] : [140, 230];
     for (const longitude of points) {
-      const point = {x: (longitude * Math.PI) / 180, y: 0, z: 0};
+      const point = {x: longitude, y: 0, z: 0};
       profile.normalize!(point);
-      expect(Math.cos(point.x - (longitude * Math.PI) / 180)).toBeCloseTo(1, 12);
+      expect(Math.cos(((point.x - longitude) * Math.PI) / 180)).toBeCloseTo(1, 12);
       const projected = projection.project([longitude, 0]);
       expect(projected[0]).toBeGreaterThanOrEqual(profile.bounds[0][0] - 0.001);
       expect(projected[0]).toBeLessThanOrEqual(profile.bounds[1][0] + 0.001);
@@ -636,13 +638,9 @@ test('rotated geographic bounds contain both sides of the output seam', async ()
   });
   const profile = projection.getTargetRenderingProfile([-10, -10, 10, 10])!;
   for (const longitude of [-5, 0, 5]) {
-    const point = {x: (longitude * Math.PI) / 180, y: 0, z: 123};
+    const point = {x: longitude, y: 0, z: 123};
     profile.normalize!(point);
-    const projected = projection.project([
-      (point.x * 180) / Math.PI,
-      (point.y * 180) / Math.PI,
-      point.z
-    ]);
+    const projected = projection.project([point.x, point.y, point.z]);
     expect(projected[0]).toBeGreaterThanOrEqual(profile.bounds[0][0] - 1e-10);
     expect(projected[0]).toBeLessThanOrEqual(profile.bounds[1][0] + 1e-10);
     expect(projected[2]).toBe(123);
@@ -687,12 +685,9 @@ for (const definition of [
       const projection = await projectionEngine.createProjectionAsync({to: definition});
       const profile = projection.getTargetRenderingProfile([west, south, east, north])!;
       for (const longitude of [-180, 180]) {
-        const point = {x: (longitude * Math.PI) / 180, y: 0, z: 0};
+        const point = {x: longitude, y: 0, z: 0};
         profile.normalize!(point);
-        const projected = projection.project([
-          (point.x * 180) / Math.PI,
-          (point.y * 180) / Math.PI
-        ]);
+        const projected = projection.project([point.x, point.y]);
         // Geographic profiles use native radians; the public converter stores degrees.
         const x = definition === 'WGS84' ? (projected[0] * Math.PI) / 180 : projected[0];
         expect(x).toBeGreaterThanOrEqual(profile.bounds[0][0] - 0.001);
@@ -711,9 +706,9 @@ for (const definition of [
     const projection = await projectionEngine.createProjectionAsync({to: definition});
     const profile = projection.getTargetRenderingProfile([-170, -10, 170, 10])!;
     for (const longitude of [-170, -100, 0, 100, 170, 190]) {
-      const point = {x: (longitude * Math.PI) / 180, y: 0, z: 0};
+      const point = {x: longitude, y: 0, z: 0};
       profile.normalize!(point);
-      const normalizedLongitude = (point.x * 180) / Math.PI;
+      const normalizedLongitude = point.x;
       expect(normalizedLongitude).toBeGreaterThanOrEqual(-170 - 1e-10);
       expect(normalizedLongitude).toBeLessThanOrEqual(170 + 1e-10);
       const projected = projection.project([normalizedLongitude, 0]);
@@ -746,10 +741,10 @@ test.each([
     const defaults = projection.getTargetRenderingProfile()!;
     expect(profile.bounds).not.toEqual(defaults.bounds);
     expect(profile.bounds[0][1]).toBeGreaterThan(0);
-    const point = {x: (anchor * Math.PI) / 180, y: 0, z: 123};
+    const point = {x: anchor, y: 0, z: 123};
     profile.normalize!(point);
-    expect((point.y * 180) / Math.PI).toBeGreaterThanOrEqual(70 - 1e-10);
-    expect((point.y * 180) / Math.PI).toBeLessThanOrEqual(75 + 1e-10);
+    expect(point.y).toBeGreaterThanOrEqual(70 - 1e-10);
+    expect(point.y).toBeLessThanOrEqual(75 + 1e-10);
     expect(point.z).toBe(123);
     const projected = projection.project([anchor, 72]);
     for (let axis = 0; axis < 2; axis++) {
@@ -780,10 +775,10 @@ for (const definition of [
       });
       const profile = projection.getTargetRenderingProfile([-170, -10, 170, 10])!;
       for (const longitude of [-550, -190, 190, 550]) {
-        const point = {x: (longitude * Math.PI) / 180, y: 0, z: 12};
+        const point = {x: longitude, y: 0, z: 12};
         profile.normalize!(point);
         const expected = over ? Math.sign(longitude) * 170 : longitude > 0 ? -170 : 170;
-        expect((point.x * 180) / Math.PI).toBeCloseTo(expected, 10);
+        expect(point.x).toBeCloseTo(expected, 10);
         expect(point.z).toBe(12);
       }
     }
@@ -801,10 +796,10 @@ test('oblique +over normalization retains the source coverage branch across the 
     [185, 185],
     [195, 190]
   ]) {
-    const point = {x: (longitude * Math.PI) / 180, y: 0, z: 12};
+    const point = {x: longitude, y: 0, z: 12};
     profile.normalize!(point);
-    expect((point.x * 180) / Math.PI).toBeCloseTo(expected, 10);
-    const projected = projection.project([(point.x * 180) / Math.PI, (point.y * 180) / Math.PI]);
+    expect(point.x).toBeCloseTo(expected, 10);
+    const projected = projection.project([point.x, point.y]);
     for (let axis = 0; axis < 2; axis++) {
       // Rotated geographic profiles expose degree coordinates in native bounds.
       expect(projected[axis]).toBeGreaterThanOrEqual(profile.bounds[0][axis] - 1e-8);
@@ -847,3 +842,55 @@ for (const definition of ['+proj=merc +R=6371000', '+proj=eqc +R=6371000']) {
     }
   );
 }
+
+test.each([0, 19, -19, 71, -71])(
+  'Mercator normalization preserves exact covered seam coordinates at origin %s',
+  async origin => {
+    const west = origin - 180;
+    const coverageWest = west < -180 ? west + 360 : west;
+    const coverageEast = coverageWest + 10 > 180 ? coverageWest - 350 : coverageWest + 10;
+    const crs = await projectionEngine.getCRS({
+      ...projectedJSON,
+      name: 'Mercator seam',
+      conversion: {
+        name: 'Mercator',
+        method: {name: 'Mercator'},
+        parameters: [{name: 'Longitude of natural origin', value: origin, unit: 'degree'}]
+      },
+      bbox: {
+        west_longitude: coverageWest,
+        south_latitude: -10,
+        east_longitude: coverageEast,
+        north_latitude: 10
+      }
+    });
+    for (const longitude of [west, west + 5, west + 10]) {
+      const input = [longitude, 0, 123];
+      const normalized = crs.converter.WGS84.normalize(input);
+      expect(normalized).toEqual(input);
+      const converted = crs.converter.WGS84.from(normalized);
+      for (let axis = 0; axis < 2; axis++) {
+        expect(converted[axis]).toBeGreaterThanOrEqual(crs.renderingBounds[0][axis] - 1e-7);
+        expect(converted[axis]).toBeLessThanOrEqual(crs.renderingBounds[1][axis] + 1e-7);
+      }
+    }
+  }
+);
+
+test.each([
+  'WGS84',
+  '+proj=merc +lon_0=19 +pm=paris +ellps=WGS84',
+  '+proj=geocent +ellps=WGS84',
+  '+proj=stere +lat_0=90 +ellps=WGS84',
+  '+proj=ortho +lon_0=19 +lat_0=40 +ellps=WGS84',
+  '+proj=geos +lon_0=19 +h=35785831 +ellps=WGS84',
+  '+proj=qsc +lon_0=19 +lat_0=0 +ellps=WGS84',
+  '+proj=ob_tran +o_proj=longlat +o_lat_p=45 +o_lon_p=0 +ellps=WGS84'
+])('normalization preserves covered degree coordinates exactly: %s', async definition => {
+  const crs = await projectionEngine.getCRS(definition);
+  const coordinate = [19.25, 4.123456789, 123, 456];
+  expect(crs.converter.WGS84.normalize(coordinate)).toEqual(coordinate);
+  const output = new Float64Array(coordinate.length);
+  expect(crs.converter.WGS84.normalize(coordinate, output)).toBe(output);
+  expect(Array.from(output)).toEqual(coordinate);
+});

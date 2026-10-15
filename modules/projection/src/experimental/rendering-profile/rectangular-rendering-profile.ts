@@ -11,51 +11,46 @@ import type {AngularRanges} from './geographic-bounds';
 import {
   clampGeographicPoint,
   getAngularRanges,
+  getLongitudeSpan,
   getGeographicBounds,
   intersectGeographicBounds,
   normalizeLongitude
 } from './geographic-bounds';
-import {wrapLongitude} from '../parameters';
 import {combineRenderingProfiles} from './rendering-profile';
 
 export type ResolveRenderingBounds = (
   parameters: AngularRanges
 ) => ProjectionRenderingProfile['bounds'];
 
-/** Normalize native kernel coordinates against Greenwich geographic coverage. */
+/** Clamp Greenwich longitude/latitude in degrees to one rendering rectangle. */
 export function normalizeCoverage(
   point: {x: number; y: number},
   coverage: GeographicBounds,
-  origin = 0,
-  primeMeridian = 0,
+  center = 0,
   over = false
 ): void {
-  const ranges = getAngularRanges(coverage, primeMeridian, origin);
-  // Region combination is owned by combineRenderingProfiles. This helper
-  // clamps one rectangle, preserving its continuous branch when +over is set.
+  const span = getLongitudeSpan(coverage);
+  const west =
+    span === 360
+      ? center - 180
+      : coverage[0] + Math.round((center - coverage[0] - span / 2) / 360) * 360;
+  const east = west + span;
+  // Keep geographic values in degrees: a covered seam endpoint must not be
+  // perturbed by a radians round trip onto the opposite projection branch.
   if (over) {
-    point.x = Math.max(ranges[0][0], Math.min(ranges[1][0], point.x));
-    point.y = Math.max(ranges[0][1], Math.min(ranges[1][1], point.y));
+    point.x = Math.max(west, Math.min(east, point.x));
+    point.y = Math.max(coverage[1], Math.min(coverage[3], point.y));
     return;
   }
-  const input: [number, number] = [
-    ((point.x + primeMeridian) * 180) / Math.PI,
-    (point.y * 180) / Math.PI
-  ];
-  const best = clampGeographicPoint(coverage, input);
-  const inputLongitude = (input[0] * Math.PI) / 180 - primeMeridian;
-  let longitude = (best[0] * Math.PI) / 180 - primeMeridian;
-  if (
-    best[0] === normalizeLongitude(input[0]) &&
-    inputLongitude >= ranges[0][0] &&
-    inputLongitude <= ranges[1][0]
-  )
-    longitude = inputLongitude;
-  else if (longitude < ranges[0][0] || longitude > ranges[1][0])
-    longitude +=
-      Math.round(((ranges[0][0] + ranges[1][0]) / 2 - longitude) / (2 * Math.PI)) * 2 * Math.PI;
-  point.x = origin + wrapLongitude(longitude - origin);
-  point.y = (best[1] * Math.PI) / 180;
+  const best = clampGeographicPoint(coverage, [point.x, point.y]);
+  let longitude = best[0];
+  if (best[0] === normalizeLongitude(point.x) && point.x >= west && point.x <= east)
+    longitude = point.x;
+  else if (longitude < west || longitude > east)
+    longitude += Math.round(((west + east) / 2 - longitude) / 360) * 360;
+  const offset = longitude - center;
+  point.x = Math.abs(offset) <= 180 ? longitude : center + normalizeLongitude(offset);
+  point.y = best[1];
 }
 
 /** Geographic coverage with a projection-owned analytical envelope. */
@@ -66,12 +61,13 @@ export function createRectangleRenderingProfile(
   primeMeridian = 0,
   over = false
 ): ProjectionRenderingProfile {
+  const center = ((origin + primeMeridian) * 180) / Math.PI;
   return {
     get bounds() {
       return resolveBounds(getAngularRanges(coverage, primeMeridian, origin));
     },
     normalize(point) {
-      normalizeCoverage(point, coverage, origin, primeMeridian, over);
+      normalizeCoverage(point, coverage, center, over);
     }
   };
 }
@@ -100,6 +96,7 @@ export function withRectangleRenderingProfile(
 ): ProjectionImplementation {
   const origin = (parameters[0][0] + parameters[1][0]) / 2;
   const defaults = getGeographicBounds(parameters, primeMeridian);
+  const center = ((origin + primeMeridian) * 180) / Math.PI;
   return {
     ...implementation,
     longitudeOrigin: origin,
@@ -108,7 +105,7 @@ export function withRectangleRenderingProfile(
         return {
           bounds: resolveBounds(parameters),
           normalize(point) {
-            normalizeCoverage(point, defaults, origin, primeMeridian, over);
+            normalizeCoverage(point, defaults, center, over);
           }
         };
       try {

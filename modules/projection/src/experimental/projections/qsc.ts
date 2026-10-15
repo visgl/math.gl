@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
 import type {ProjectionPlugin} from '../types';
+import {createAngularNormalization} from '../rendering-profile/rendering-profile';
 import {createGeographicProfile} from '../rendering-profile/geographic-rendering-profile';
 import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
 import {numberParameter} from '../parameters';
@@ -60,16 +61,21 @@ export const quadrilateralizedSphericalCube: ProjectionPlugin = {
           [x0 - base.a, y0 - base.a, 0],
           [x0 + base.a, y0 + base.a, 0]
         ] as const;
+        const normalizeGeographic = createGeographicProfile(context.parameters, primeMeridian)()
+          .normalize!;
+        const normalizeFace = createAngularNormalization(point => {
+          const [x, y] = implementation.forward(point.x, point.y);
+          if (Math.abs(x - x0) <= base.a && Math.abs(y - y0) <= base.a) return;
+          [point.x, point.y] = implementation.inverse(
+            x0 + Math.max(-base.a, Math.min(base.a, x - x0)),
+            y0 + Math.max(-base.a, Math.min(base.a, y - y0))
+          );
+        }, primeMeridian);
         return {
           bounds: defaultBounds,
           normalize(point) {
-            createGeographicProfile(context.parameters, primeMeridian)().normalize!(point);
-            const [x, y] = implementation.forward(point.x, point.y);
-            if (Math.abs(x - x0) <= base.a && Math.abs(y - y0) <= base.a) return;
-            [point.x, point.y] = implementation.inverse(
-              x0 + Math.max(-base.a, Math.min(base.a, x - x0)),
-              y0 + Math.max(-base.a, Math.min(base.a, y - y0))
-            );
+            normalizeGeographic(point);
+            normalizeFace(point);
           }
         };
       }

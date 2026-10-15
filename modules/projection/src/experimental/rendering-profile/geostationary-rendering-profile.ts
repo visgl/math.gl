@@ -10,7 +10,7 @@ import {
   intersectGeographicBounds
 } from './geographic-bounds';
 import type {AngularRanges} from './geographic-bounds';
-import {combineRenderingProfiles} from './rendering-profile';
+import {combineRenderingProfiles, createAngularNormalization} from './rendering-profile';
 import {normalizeCoverage} from './rectangular-rendering-profile';
 import type {ProjectionImplementation, ProjectionRenderingProfile} from '../types';
 import {wrapLongitude} from '../parameters';
@@ -53,6 +53,19 @@ export function createGeostationaryProfile(
       north = Math.min(coverage[1][1], maxLatitude);
     if (east < west || north < south) return null;
     const region = createAngularRanges(west, south, east, north);
+    const geographicCoverage = getGeographicBounds(
+      createAngularRanges(west + base.long0, south, east + base.long0, north),
+      base.primeMeridian
+    );
+    const center = ((base.long0 + base.primeMeridian) * 180) / Math.PI;
+    const normalizeLimb = createAngularNormalization(point => {
+      const longitude = Math.max(west, Math.min(east, wrapLongitude(point.x - base.long0)));
+      const limit = latitudeLimit(longitude);
+      const latitude = Math.max(Math.max(south, -limit), Math.min(Math.min(north, limit), point.y));
+      // Avoid reconstructing a native longitude when it is already within the limb.
+      if (longitude !== point.x - base.long0) point.x = longitude + base.long0;
+      point.y = latitude;
+    }, base.primeMeridian);
     return {
       get bounds() {
         if (!declared)
@@ -90,19 +103,8 @@ export function createGeostationaryProfile(
         );
       },
       normalize(point) {
-        normalizeCoverage(
-          point,
-          getGeographicBounds(
-            createAngularRanges(west + base.long0, south, east + base.long0, north),
-            base.primeMeridian
-          ),
-          base.long0,
-          base.primeMeridian
-        );
-        point.x = Math.max(west, Math.min(east, wrapLongitude(point.x - base.long0)));
-        const limit = latitudeLimit(point.x);
-        point.y = Math.max(Math.max(south, -limit), Math.min(Math.min(north, limit), point.y));
-        point.x += base.long0;
+        normalizeCoverage(point, geographicCoverage, center);
+        normalizeLimb(point);
       }
     };
   };
