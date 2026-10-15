@@ -86,8 +86,7 @@ export function cassiniBounds(
   const d = maxAbs(longitudeRange(region, base.long0, base.over));
   // Beyond the front hemisphere, atan2 northing crosses a branch cut that
   // the meridian correction below does not bound. Use the regional fallback.
-  if (base.sphere && d > Math.PI / 2)
-    throw new Error('Cassini rendering bounds require the front hemisphere');
+  if (base.sphere && d > Math.PI / 2) throw new Error('Unsupported Cassini rendering coverage');
   const n = base.a / Math.sqrt(1 - base.es),
     c = base.es / (1 - base.es);
   const width = base.sphere
@@ -199,10 +198,9 @@ export function krovakBounds(state: KrovakState, region: AngularRanges) {
     latitude(region[1][1])
   );
   const s = sphericalRange([Math.sin(state.ad), 0, Math.cos(state.ad)], sphere);
-  const minAbsS = s[0] <= 0 && s[1] >= 0 ? 0 : Math.min(Math.abs(s[0]), Math.abs(s[1]));
   const cosS: Range = [
     Math.sqrt(Math.max(Number.EPSILON, 1 - maxAbs(s) ** 2)),
-    Math.sqrt(Math.max(Number.EPSILON, 1 - minAbsS ** 2))
+    1 // cos(s) never exceeds one; a conservative upper endpoint avoids underbounding.
   ];
   const numerator = sphericalRange([0, 1, 0], sphere);
   // Both denominator endpoints matter when the numerator has one sign.

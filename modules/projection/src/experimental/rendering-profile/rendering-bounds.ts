@@ -96,7 +96,7 @@ export function transverseBounds(
   // backside branches or the approximate series far from its central meridian.
   // Let the profile clip unsupported coverage to its default rendering target.
   if (maxAbs(longitude) > Math.PI / 6 + 1e-12)
-    throw new Error('Transverse rendering bounds require a regional meridian strip');
+    throw new Error('Unsupported transverse rendering coverage');
   const longitudes = [
     longitude[0],
     longitude[1],
