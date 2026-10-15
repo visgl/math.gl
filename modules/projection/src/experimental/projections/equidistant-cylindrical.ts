@@ -6,6 +6,7 @@
 import {createProjection} from '../mutable-projection';
 import {DEGREES_TO_RADIANS, latitudeParameter, numberParameter, wrapLongitude} from '../parameters';
 import type {ProjectionPlugin} from '../types';
+import {createAngularRanges, getGeographicBounds} from '../geographic-bounds';
 import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import {longitudeRange, envelope, scale, add} from '../rendering-bounds';
 
@@ -14,10 +15,9 @@ export const equidistantCylindrical: ProjectionPlugin = {
   name: 'eqc',
   aliases: ['Equirectangular', 'Equidistant_Cylindrical', 'Equidistant_Cylindrical_Spherical'],
   parameters: ['lon_0', 'lat_0', 'lat_ts', 'x_0', 'y_0'],
-  create({semiMajorAxis: a, parameters}) {
-    const wrap = Object.prototype.hasOwnProperty.call(parameters, 'over')
-      ? (value: number) => value
-      : wrapLongitude;
+  create({semiMajorAxis: a, parameters, primeMeridian = 0}) {
+    const over = Object.prototype.hasOwnProperty.call(parameters, 'over');
+    const wrap = over ? (value: number) => value : wrapLongitude;
     const longitudeOrigin = numberParameter(parameters, 'lon_0', 0) * DEGREES_TO_RADIANS;
     const latitudeOrigin = latitudeParameter(parameters, 'lat_0');
     const parallelScale = Math.cos(latitudeParameter(parameters, 'lat_ts'));
@@ -25,6 +25,7 @@ export const equidistantCylindrical: ProjectionPlugin = {
     const y0 = numberParameter(parameters, 'y_0', 0);
     const width = a * Math.abs(parallelScale) * Math.PI;
     return {
+      longitudeOrigin,
       getRenderingProfile(coverage) {
         if (coverage)
           return createRectangleRenderingProfile(
@@ -32,18 +33,17 @@ export const equidistantCylindrical: ProjectionPlugin = {
               envelope(
                 add(
                   [x0, x0],
-                  scale(
-                    longitudeRange(
-                      region,
-                      longitudeOrigin,
-                      Object.prototype.hasOwnProperty.call(parameters, 'over')
-                    ),
-                    a * parallelScale
-                  )
+                  scale(longitudeRange(region, longitudeOrigin, over), a * parallelScale)
                 ),
-                [y0 + a * (region[1] - latitudeOrigin), y0 + a * (region[3] - latitudeOrigin)]
+                [
+                  y0 + a * (region.latitude[0] - latitudeOrigin),
+                  y0 + a * (region.latitude[1] - latitudeOrigin)
+                ]
               ),
-            coverage
+            coverage,
+            longitudeOrigin,
+            primeMeridian,
+            over
           );
         const defaultBounds = [
           [x0 - width, y0 + a * (-Math.PI / 2 - latitudeOrigin), 0],
@@ -53,7 +53,18 @@ export const equidistantCylindrical: ProjectionPlugin = {
           bounds: defaultBounds,
           normalize: createRectangleRenderingProfile(
             () => defaultBounds,
-            [longitudeOrigin - Math.PI, -(Math.PI / 2), longitudeOrigin + Math.PI, Math.PI / 2]
+            getGeographicBounds(
+              createAngularRanges(
+                longitudeOrigin - Math.PI,
+                -(Math.PI / 2),
+                longitudeOrigin + Math.PI,
+                Math.PI / 2
+              ),
+              primeMeridian
+            ),
+            longitudeOrigin,
+            primeMeridian,
+            over
           ).normalize
         };
       },

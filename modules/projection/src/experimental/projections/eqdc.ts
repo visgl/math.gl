@@ -4,6 +4,7 @@
 
 import {createFlatProjection} from '../flat-projection';
 import {conicBounds} from '../rendering-bounds';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {bindKernel, kernelParameters, ORIGIN_PARAMETERS, validateConic} from '../kernel';
@@ -21,17 +22,19 @@ export const equidistantConic: ProjectionPlugin = {
     const projection = bindKernel('eqdc', state, forward, inverse, createFlatProjection);
     return withRectangleRenderingProfile(
       projection,
-      [base.long0 - Math.PI, -Math.PI / 2, base.long0 + Math.PI, Math.PI / 2],
-      coverage =>
+      createAngularRanges(base.long0 - Math.PI, -Math.PI / 2, base.long0 + Math.PI, Math.PI / 2),
+      ranges =>
         conicBounds(
           projection.forward,
-          coverage,
+          ranges,
           base.long0,
           state.ns,
           state.x0,
           state.y0 + state.rh,
           base.over
-        )
+        ),
+      base.primeMeridian,
+      base.over
     );
   }
 };

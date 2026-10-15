@@ -4,6 +4,7 @@
 
 import type {ProjectionPlugin} from '../types';
 import {conicBounds} from '../rendering-bounds';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import {createFlatProjection as createProjection} from '../flat-projection';
 import {
@@ -43,22 +44,24 @@ export const lambertConformalConic: ProjectionPlugin = {
     };
     return withRectangleRenderingProfile(
       projection,
-      [
+      createAngularRanges(
         base.long0 - Math.PI,
         state.ns > 0 ? -Math.PI / 3 : -Math.PI / 2,
         base.long0 + Math.PI,
         state.ns > 0 ? Math.PI / 2 : Math.PI / 3
-      ],
-      coverage =>
+      ),
+      ranges =>
         conicBounds(
           projection.forward,
-          coverage,
+          ranges,
           base.long0,
           state.ns,
           state.x0,
           state.y0 + state.k0 * state.rh,
           base.over
-        )
+        ),
+      base.primeMeridian,
+      base.over
     );
   }
 };

@@ -28,6 +28,13 @@ export type ProjectionFlatContext = {
   readonly outputScale: number;
 };
 
+/** Greenwich longitude/latitude coverage in degrees. Longitude endpoints are in
+ * [-180, 180]; west > east crosses the dateline. [-180, south, 180, north]
+ * covers all longitudes; equal longitude endpoints describe a meridian.
+ * Latitude satisfies -90 <= south <= north <= 90.
+ */
+export type GeographicBounds = readonly [west: number, south: number, east: number, north: number];
+
 /** Projection-owned reference-surface envelope and geographic normalization, in radians/metres. */
 export type ProjectionRenderingProfile = {
   /** Finite native XYZ envelope chosen as an appropriate rendering target.
@@ -44,15 +51,15 @@ export type ProjectionRenderingProfile = {
 
 /** A projection operates on radians and meters; the engine handles CRS units. */
 export type ProjectionImplementation = {
+  /** Effective central longitude in native radians, including algorithm-derived origins. */
+  readonly longitudeOrigin?: number;
   /** Resolve projection-owned bounds and normalization, optionally for declared coverage.
-   * Coverage uses native geographic radians and an unwrapped east endpoint.
+   * Coverage is the declared Greenwich geographic area, in degrees; wrapped endpoints are preserved.
    * Omit coverage for the default rendering target. Descriptor retrieval retries
    * without coverage if the coverage-specific profile cannot be resolved.
    * Required for CRS descriptor retrieval; ordinary conversion can omit it.
    */
-  getRenderingProfile?(
-    coverage?: readonly [west: number, south: number, east: number, north: number]
-  ): ProjectionRenderingProfile;
+  getRenderingProfile?(coverage?: GeographicBounds): ProjectionRenderingProfile;
   /** Optional whole-buffer specialization. Return undefined to keep the general pipeline.
    * Called only for geographic/projected pairs without datum, axis, prime-meridian,
    * vertical-unit, longitude-wrap or lossy stages. The engine validates storage and stride.
@@ -74,6 +81,8 @@ export type ProjectionImplementation = {
 
 /** Initialized geometry shared by projection plugins. No datum shift is implied. */
 export type ProjectionContext = {
+  /** Greenwich longitude of the CRS prime meridian, in radians. */
+  readonly primeMeridian?: number;
   /** Preserve the normalized polar axis; recovering it from eccentricity can lose precision. */
   readonly semiMinorAxis?: number;
   readonly semiMajorAxis: number;

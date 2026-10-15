@@ -20,6 +20,7 @@ export type {
   ProjectionContext,
   ProjectionImplementation,
   ProjectionRenderingProfile,
+  GeographicBounds,
   ProjectionParameters,
   ProjectionPlugin
 } from './types';

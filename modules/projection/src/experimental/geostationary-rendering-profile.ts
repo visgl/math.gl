@@ -3,7 +3,15 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {KernelParameters} from './kernel';
-import type {GeographicRenderingBounds} from './rendering-profile';
+import {
+  createAngularRanges,
+  getAngularRanges,
+  getGeographicBounds,
+  intersectGeographicBounds,
+  unionRenderingBounds
+} from './geographic-bounds';
+import type {AngularRanges} from './geographic-bounds';
+import {normalizeCoverage} from './rectangular-rendering-profile';
 import type {ProjectionImplementation, ProjectionRenderingProfile} from './types';
 import {wrapLongitude} from './parameters';
 import {sphericalRange} from './spherical-rendering-domain';
@@ -32,20 +40,17 @@ export function createGeostationaryProfile(
   };
   const fullX = height * Math.asin(1 / radius);
   const fullY = height * Math.atan(Math.sqrt((1 - base.es) / (radius * radius - 1)));
-  const create = (
-    coverage: GeographicRenderingBounds,
-    declared: boolean
-  ): ProjectionRenderingProfile => {
-    const closestLatitude = Math.max(coverage[1], Math.min(coverage[3], 0));
+  const create = (coverage: AngularRanges, declared: boolean): ProjectionRenderingProfile => {
+    const closestLatitude = Math.max(coverage.latitude[0], Math.min(coverage.latitude[1], 0));
     const maximumLongitude = longitudeLimit(closestLatitude);
-    const west = Math.max(coverage[0] - base.long0, -maximumLongitude);
-    const east = Math.min(coverage[2] - base.long0, maximumLongitude);
+    const west = Math.max(coverage.longitude[0] - base.long0, -maximumLongitude);
+    const east = Math.min(coverage.longitude[1] - base.long0, maximumLongitude);
     const maxLatitude = latitudeLimit(Math.max(west, Math.min(east, 0)));
-    const south = Math.max(coverage[1], -maxLatitude),
-      north = Math.min(coverage[3], maxLatitude);
+    const south = Math.max(coverage.latitude[0], -maxLatitude),
+      north = Math.min(coverage.latitude[1], maxLatitude);
     if (east < west || north < south)
       throw new Error('CRS coverage does not intersect the satellite limb');
-    const region: GeographicRenderingBounds = [west, south, east, north];
+    const region = createAngularRanges(west, south, east, north);
     return {
       get bounds() {
         if (!declared)
@@ -83,6 +88,17 @@ export function createGeostationaryProfile(
         );
       },
       normalize(point) {
+        normalizeCoverage(
+          point,
+          [
+            getGeographicBounds(
+              createAngularRanges(west + base.long0, south, east + base.long0, north),
+              base.primeMeridian
+            )
+          ],
+          base.long0,
+          base.primeMeridian
+        );
         point.x = Math.max(west, Math.min(east, wrapLongitude(point.x - base.long0)));
         const limit = latitudeLimit(point.x);
         point.y = Math.max(Math.max(south, -limit), Math.min(Math.min(north, limit), point.y));
@@ -90,9 +106,36 @@ export function createGeostationaryProfile(
       }
     };
   };
-  return coverage =>
-    create(
-      coverage ?? [base.long0 - Math.PI, -Math.PI / 2, base.long0 + Math.PI, Math.PI / 2],
-      Boolean(coverage)
+  const extent = getGeographicBounds(
+    createAngularRanges(
+      base.long0 - longitudeLimit(0),
+      -latitudeLimit(0),
+      base.long0 + longitudeLimit(0),
+      latitudeLimit(0)
+    ),
+    base.primeMeridian
+  );
+  return coverage => {
+    const regions = coverage ? intersectGeographicBounds(coverage, extent) : [extent];
+    const profiles = regions.map(region =>
+      create(getAngularRanges(region, base.primeMeridian, base.long0), Boolean(coverage))
     );
+    // Resolve each piece before returning a normalizer; empty coverage must fall back.
+    const bounds = unionRenderingBounds(profiles.map(profile => profile.bounds));
+    return {
+      bounds,
+      normalize(point) {
+        normalizeCoverage(point, regions, base.long0, base.primeMeridian);
+        const longitude = wrapLongitude(point.x - base.long0);
+        const index = regions.findIndex(region => {
+          const ranges = getAngularRanges(region, base.primeMeridian, base.long0);
+          return (
+            longitude >= ranges.longitude[0] - base.long0 - 1e-12 &&
+            longitude <= ranges.longitude[1] - base.long0 + 1e-12
+          );
+        });
+        profiles[Math.max(0, index)].normalize!(point);
+      }
+    };
+  };
 }

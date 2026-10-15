@@ -207,10 +207,9 @@ test('Web Mercator normalization is explicit and provides a finite map rectangle
 
 test('normalization follows CRS longitude parameters and preserves storage on failure', async () => {
   const crs = await projectionEngine.getCRS('+proj=merc +lon_0=100');
-  expect(crs.converter.WGS84.normalize([-170, 95])).toEqual([
-    190,
-    (Math.atan(Math.sinh(Math.PI)) * 180) / Math.PI
-  ]);
+  const mercatorNormalized = crs.converter.WGS84.normalize([-170, 95]);
+  expect(mercatorNormalized[0]).toBe(190);
+  expect(mercatorNormalized[1]).toBeCloseTo((Math.atan(Math.sinh(Math.PI)) * 180) / Math.PI, 12);
   const geographic = await projectionEngine.getCRS('+proj=longlat +lon_wrap=180');
   const normalized = geographic.converter.WGS84.normalize([-10, 0]);
   expect(normalized[0]).toBeCloseTo(350, 12);

@@ -73,9 +73,7 @@ export async function resolveCRSDescriptor(
   const profile = projection.targetProfile;
   if (!profile) throw new Error('Projection must define a rendering profile for CRS retrieval');
   // Derivative seam checks follow the algorithm's central meridian, independently of rendering coverage.
-  const center =
-    Number(crs.parameters[crs.kind === 'geographic' ? 'lon_wrap' : 'lon_0'] ?? 0) +
-    (crs.primeMeridian * 180) / Math.PI;
+  const center = ((projection.targetLongitudeOrigin + crs.primeMeridian) * 180) / Math.PI;
   const bounds = adaptBounds(profile, crs, axis);
   const normalizeWGS84 = createNormalization(profile.normalize, crs.primeMeridian);
   const renderingScale = createRenderingScale(crs, projection, axis, center);

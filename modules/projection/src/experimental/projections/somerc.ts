@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
 import {swissBounds} from '../regional-rendering-bounds';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {
@@ -24,13 +25,15 @@ export const swissObliqueMercator: ProjectionPlugin = {
     const projection = bindCatalogueKernel('somerc', context, state, forward, inverse);
     return withRectangleRenderingProfile(
       projection,
-      [
+      createAngularRanges(
         base.long0 - Math.PI / 18,
         Math.max(-Math.PI / 2 + 1e-8, base.lat0 - Math.PI / 18),
         base.long0 + Math.PI / 18,
         Math.min(Math.PI / 2 - 1e-8, base.lat0 + Math.PI / 18)
-      ],
-      coverage => swissBounds(catalogueBoundsParameters(state, context), coverage)
+      ),
+      ranges => swissBounds(catalogueBoundsParameters(state, context), ranges),
+      base.primeMeridian,
+      base.over
     );
   }
 };

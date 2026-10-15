@@ -5,6 +5,7 @@
 import {createFlatProjection} from '../flat-projection';
 import type {ProjectionContext, ProjectionImplementation, ProjectionPlugin} from '../types';
 import {transverseBounds} from '../rendering-bounds';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import {
   bindKernel,
@@ -30,8 +31,15 @@ export function createTransverseMercator(context: ProjectionContext): Projection
   const render = (implementation: ProjectionImplementation) =>
     withRectangleRenderingProfile(
       implementation,
-      [base.long0 - Math.PI / 6, -Math.PI / 2, base.long0 + Math.PI / 6, Math.PI / 2],
-      coverage => transverseBounds(implementation.forward, coverage, base.long0, base.over)
+      createAngularRanges(
+        base.long0 - Math.PI / 6,
+        -Math.PI / 2,
+        base.long0 + Math.PI / 6,
+        Math.PI / 2
+      ),
+      ranges => transverseBounds(implementation.forward, ranges, base.long0, base.over),
+      base.primeMeridian,
+      base.over
     );
   if (flagParameter(context.parameters, 'approx')) {
     return render({

@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
 import {cassiniBounds} from '../regional-rendering-bounds';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {
@@ -24,9 +25,15 @@ export const cassiniSoldner: ProjectionPlugin = {
     const projection = bindCatalogueKernel('cass', context, state, forward, inverse);
     return withRectangleRenderingProfile(
       projection,
-      [base.long0 - Math.PI / 6, -Math.PI / 2 + 1e-8, base.long0 + Math.PI / 6, Math.PI / 2 - 1e-8],
-      coverage =>
-        cassiniBounds(catalogueBoundsParameters(base, context), projection.forward, coverage)
+      createAngularRanges(
+        base.long0 - Math.PI / 6,
+        -Math.PI / 2 + 1e-8,
+        base.long0 + Math.PI / 6,
+        Math.PI / 2 - 1e-8
+      ),
+      ranges => cassiniBounds(catalogueBoundsParameters(base, context), projection.forward, ranges),
+      base.primeMeridian,
+      base.over
     );
   }
 };

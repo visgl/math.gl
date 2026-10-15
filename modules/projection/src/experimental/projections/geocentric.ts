@@ -13,7 +13,7 @@ export const geocentric: ProjectionPlugin = {
   name: 'geocent',
   aliases: ['Geocentric', 'geocentric', 'Geocent'],
   parameters: [],
-  create({semiMajorAxis, semiMinorAxis, eccentricitySquared}) {
+  create({semiMajorAxis, semiMinorAxis, eccentricitySquared, primeMeridian = 0}) {
     const ellipsoid = {
       semiMajorAxis,
       eccentricitySquared,
@@ -25,7 +25,7 @@ export const geocentric: ProjectionPlugin = {
           [-semiMajorAxis, -semiMajorAxis, -ellipsoid.semiMinorAxis],
           [semiMajorAxis, semiMajorAxis, ellipsoid.semiMinorAxis]
         ],
-        normalize: createGeographicProfile({})().normalize
+        normalize: createGeographicProfile({}, primeMeridian)().normalize
       }),
       forward() {
         throw new Error('Geocentric projection requires the 3D pipeline');

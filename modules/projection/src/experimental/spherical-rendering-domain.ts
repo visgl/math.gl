@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {GeographicRenderingBounds} from './rendering-profile';
+import type {AngularRanges} from './geographic-bounds';
 import {wrapLongitude} from './parameters';
 
 export type Vector = readonly [number, number, number];
@@ -47,11 +47,12 @@ export function trigonometricRoots(
  */
 export function sphericalExtremum(
   vector: Vector,
-  coverage: GeographicRenderingBounds,
+  parameters: AngularRanges,
   domain?: AngularDomain,
   maximize = true
 ): {value: number; point: [number, number]} {
-  const [west, south, east, north] = coverage;
+  const [west, east] = parameters.longitude;
+  const [south, north] = parameters.latitude;
   const center = (west + east) / 2;
   const axis: Vector = domain
     ? [Math.cos(domain.latitude), 0, Math.sin(domain.latitude)]
@@ -133,12 +134,12 @@ export function sphericalExtremum(
 
 export function sphericalRange(
   vector: Vector,
-  coverage: GeographicRenderingBounds,
+  parameters: AngularRanges,
   domain?: AngularDomain
 ): [number, number] {
   return [
-    sphericalExtremum(vector, coverage, domain, false).value,
-    sphericalExtremum(vector, coverage, domain).value
+    sphericalExtremum(vector, parameters, domain, false).value,
+    sphericalExtremum(vector, parameters, domain).value
   ];
 }
 
@@ -150,11 +151,11 @@ export function sphericalRatioRange(
   numerator: Vector,
   denominator: Vector,
   constant: number,
-  coverage: GeographicRenderingBounds,
+  parameters: AngularRanges,
   domain?: AngularDomain
 ): [number, number] {
-  const n = sphericalRange(numerator, coverage, domain);
-  const d = sphericalRange(denominator, coverage, domain).map(value => value + constant);
+  const n = sphericalRange(numerator, parameters, domain);
+  const d = sphericalRange(denominator, parameters, domain).map(value => value + constant);
   if (d[0] <= 0) throw new Error('Projection rendering denominator is not positive');
   const quotients = n.flatMap(value => d.map(divisor => value / divisor));
   return [false, true].map(maximize => {
@@ -166,7 +167,7 @@ export function sphericalRatioRange(
         (value, index) => value - middle * denominator[index]
       ) as unknown as Vector;
       const residual =
-        sphericalExtremum(vector, coverage, domain, maximize).value - middle * constant;
+        sphericalExtremum(vector, parameters, domain, maximize).value - middle * constant;
       if (residual > 0) low = middle;
       else high = middle;
     }

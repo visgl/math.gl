@@ -4,6 +4,7 @@
 
 import type {ProjectionPlugin} from '../types';
 import {transverseBounds} from '../rendering-bounds';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import {numberParameter} from '../parameters';
 import {flagParameter} from '../kernel';
@@ -35,13 +36,15 @@ export const universalTransverseMercator: ProjectionPlugin = {
     // Standard six-degree UTM zone coverage, independent of conversion validity.
     return withRectangleRenderingProfile(
       implementation,
-      [
+      createAngularRanges(
         center - Math.PI / 60,
         south ? (-80 * Math.PI) / 180 : 0,
         center + Math.PI / 60,
         south ? 0 : (84 * Math.PI) / 180
-      ],
-      coverage => transverseBounds(implementation.forward, coverage, center)
+      ),
+      ranges => transverseBounds(implementation.forward, ranges, center),
+      context.primeMeridian ?? 0,
+      Object.prototype.hasOwnProperty.call(context.parameters, 'over')
     );
   }
 };

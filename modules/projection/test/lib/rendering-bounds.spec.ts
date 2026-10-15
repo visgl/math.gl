@@ -11,6 +11,7 @@ import {createProjectionEngine} from '@math.gl/projection/core';
 import {mercator} from '@math.gl/projection/projections/merc';
 import {equalAreaAzimuthalBounds} from '../../src/experimental/azimuthal-rendering-bounds';
 import {kernelParameters} from '../../src/experimental/kernel';
+import {createAngularRanges} from '../../src/experimental/geographic-bounds';
 
 for (const fixture of inputs.cases) {
   test('finite rendering bounds and normalized containment: ' + fixture.id, async () => {
@@ -96,13 +97,15 @@ test('declared coverage handles the antimeridian and prime meridian', async () =
     bbox: {west_longitude: 170, south_latitude: -20, east_longitude: -170, north_latitude: 20}
   };
   const crs = await projectionEngine.getCRS(definition);
-  expect(crs.converter.WGS84.normalize([-175, 30])).toEqual([185, 20]);
-  expect(crs.renderingBounds[0][0]).toBeCloseTo(170, 6);
-  expect(crs.renderingBounds[1][0]).toBeCloseTo(190, 6);
+  const normalized = crs.converter.WGS84.normalize([-175, 30]);
+  expect(normalized[0]).toBeCloseTo(-175, 12);
+  expect(normalized[1]).toBe(20);
+  expect(crs.renderingBounds[0][0]).toBeCloseTo(-180, 6);
+  expect(crs.renderingBounds[1][0]).toBeCloseTo(180, 6);
   // Geographic storage follows its wrapping convention; the rendering rectangle
   // must use the same convention to contain converted normalized coordinates.
   expect(crs.converter.WGS84.from(crs.converter.WGS84.normalize([-175, 30]))[0]).toBeCloseTo(
-    185,
+    -175,
     6
   );
   const shifted = await projectionEngine.getCRS({
@@ -401,7 +404,7 @@ test('Orthographic coverage intersects the curved horizon without expanding to a
 test('analytical cap intersections retain a narrow meridian strip', () => {
   const west = 0.4,
     east = west + 1e-8;
-  const region = [west, -0.8, east, 0.8] as const;
+  const region = createAngularRanges(west, -0.8, east, 0.8);
   const cap = {latitude: 0, distance: 0.5};
   const longitude = (west + east) / 2;
   const latitude = Math.acos(Math.cos(cap.distance) / Math.cos(longitude));
@@ -481,12 +484,7 @@ test.each([
   'analytical singularity extrema clip declared world coverage for %s',
   async (definition, x, y, expectedX, expectedY) => {
     const projection = await projectionEngine.createProjectionAsync({to: definition as string});
-    const profile = projection.getTargetRenderingProfile([
-      -Math.PI,
-      -Math.PI / 2,
-      Math.PI,
-      Math.PI / 2
-    ])!;
+    const profile = projection.getTargetRenderingProfile([-180, -90, 180, 90])!;
     expect(profile.bounds.flat().every(Number.isFinite)).toBe(true);
     const point = {x: x as number, y: y as number, z: 123};
     profile.normalize!(point);
@@ -527,7 +525,7 @@ test.each([
 test('spherical LAEA bounds use the cap in their analytical extrema', () => {
   const radius = 6371000;
   const base = kernelParameters({semiMajorAxis: radius, eccentricitySquared: 0, parameters: {}});
-  const coverage = [-Math.PI, -Math.PI / 2, Math.PI, Math.PI / 2] as const;
+  const coverage = createAngularRanges(-Math.PI, -Math.PI / 2, Math.PI, Math.PI / 2);
   const cap = {latitude: 0, distance: Math.PI / 3};
   const bounds = equalAreaAzimuthalBounds(base, 1, 1, coverage, cap, 0, latitude => latitude);
   const unclipped = equalAreaAzimuthalBounds(
@@ -583,3 +581,140 @@ test('antipode preference retains declared coverage when the northward point is 
   expect(normalized[1]).toBeCloseTo(-30, 10);
   expect(normalized[2]).toBe(456);
 });
+
+test.each([0, 170, -170])(
+  'satellite world coverage includes both sides of longitude %s',
+  async longitude => {
+    const projection = await projectionEngine.createProjectionAsync({
+      to: `+proj=geos +h=35785831 +lon_0=${longitude} +ellps=WGS84`
+    });
+    const profile = projection.getTargetRenderingProfile([-180, -90, 180, 90])!;
+    for (const offset of [-60, -30, 0, 30, 60]) {
+      const point = {x: ((longitude + offset) * Math.PI) / 180, y: 0, z: 123};
+      profile.normalize!(point);
+      expect(Math.sin(point.x - ((longitude + offset) * Math.PI) / 180)).toBeCloseTo(0, 12);
+      expect(Math.cos(point.x - ((longitude + offset) * Math.PI) / 180)).toBeCloseTo(1, 12);
+      expect(point.z).toBe(123);
+      const projected = projection.project([longitude + offset, 0, 123]);
+      for (let axis = 0; axis < 2; axis++) {
+        expect(projected[axis]).toBeGreaterThanOrEqual(profile.bounds[0][axis] - 0.001);
+        expect(projected[axis]).toBeLessThanOrEqual(profile.bounds[1][axis] + 0.001);
+      }
+    }
+  }
+);
+
+test.each([
+  [160, -10, -160, 10],
+  [-160, -10, 160, 10]
+] as const)(
+  'satellite respects periodic and disconnected coverage %s,%s,%s,%s',
+  async (west, south, east, north) => {
+    const projection = await projectionEngine.createProjectionAsync({
+      to: '+proj=geos +h=35785831 +lon_0=170 +ellps=WGS84'
+    });
+    const profile = projection.getTargetRenderingProfile([west, south, east, north])!;
+    const points = west > east ? [175, 185] : [140, 230];
+    for (const longitude of points) {
+      const point = {x: (longitude * Math.PI) / 180, y: 0, z: 0};
+      profile.normalize!(point);
+      expect(Math.cos(point.x - (longitude * Math.PI) / 180)).toBeCloseTo(1, 12);
+      const projected = projection.project([longitude, 0]);
+      expect(projected[0]).toBeGreaterThanOrEqual(profile.bounds[0][0] - 0.001);
+      expect(projected[0]).toBeLessThanOrEqual(profile.bounds[1][0] + 0.001);
+    }
+  }
+);
+
+test('rotated geographic bounds contain both sides of the output seam', async () => {
+  const projection = await projectionEngine.createProjectionAsync({
+    to: '+proj=ob_tran +o_proj=longlat +o_lat_p=90 +o_lon_p=180'
+  });
+  const profile = projection.getTargetRenderingProfile([-10, -10, 10, 10])!;
+  for (const longitude of [-5, 0, 5]) {
+    const point = {x: (longitude * Math.PI) / 180, y: 0, z: 123};
+    profile.normalize!(point);
+    const projected = projection.project([
+      (point.x * 180) / Math.PI,
+      (point.y * 180) / Math.PI,
+      point.z
+    ]);
+    expect(projected[0]).toBeGreaterThanOrEqual(profile.bounds[0][0] - 1e-10);
+    expect(projected[0]).toBeLessThanOrEqual(profile.bounds[1][0] + 1e-10);
+    expect(projected[2]).toBe(123);
+  }
+});
+
+test('spherical Polyconic coverage preserves large false northing across the latitude branch', async () => {
+  const projection = await projectionEngine.createProjectionAsync({
+    to: '+proj=poly +R=6371000 +lat_0=30 +y_0=100000000'
+  });
+  const profile = projection.getTargetRenderingProfile([-180, -80, 180, 80])!;
+  const origin = projection.project([0, 30]);
+  expect(origin[1]).toBe(100000000);
+  expect(origin[1]).toBeGreaterThanOrEqual(profile.bounds[0][1]);
+  expect(origin[1]).toBeLessThanOrEqual(profile.bounds[1][1]);
+});
+
+test('UTM uses its derived meridian for rendering scale at the dateline', async () => {
+  for (const code of ['EPSG:32601', 'EPSG:32660']) {
+    const crs = await projectionEngine.getCRS(code);
+    const point = crs.converter.WGS84.from([180, 40]);
+    const scale = crs.getRenderingScale(point);
+    expect(scale).not.toBeNull();
+    expect(scale!.every(value => Number.isFinite(value) && value > 0)).toBe(true);
+  }
+});
+
+for (const definition of [
+  'WGS84',
+  '+proj=merc +R=6371000',
+  '+proj=eqc +R=6371000',
+  '+proj=eqearth +R=6371000'
+]) {
+  test.each([
+    [170, -10, 180, 10],
+    [-180, -10, -170, 10],
+    [180, -10, 180, 10],
+    [-180, -10, -180, 10]
+  ] as const)(
+    `covered dateline aliases stay within ${definition} bounds %s,%s,%s,%s`,
+    async (west, south, east, north) => {
+      const projection = await projectionEngine.createProjectionAsync({to: definition});
+      const profile = projection.getTargetRenderingProfile([west, south, east, north])!;
+      for (const longitude of [-180, 180]) {
+        const point = {x: (longitude * Math.PI) / 180, y: 0, z: 0};
+        profile.normalize!(point);
+        const projected = projection.project([
+          (point.x * 180) / Math.PI,
+          (point.y * 180) / Math.PI
+        ]);
+        // Geographic profiles use native radians; the public converter stores degrees.
+        const x = definition === 'WGS84' ? (projected[0] * Math.PI) / 180 : projected[0];
+        expect(x).toBeGreaterThanOrEqual(profile.bounds[0][0] - 0.001);
+        expect(x).toBeLessThanOrEqual(profile.bounds[1][0] + 0.001);
+      }
+    }
+  );
+}
+
+for (const definition of [
+  '+proj=merc +R=6371000 +lon_0=100 +over',
+  '+proj=eqc +R=6371000 +lon_0=100 +over',
+  '+proj=eqearth +R=6371000 +lon_0=100 +over'
+]) {
+  test(`unwrapped conversion shares its declared coverage interval: ${definition}`, async () => {
+    const projection = await projectionEngine.createProjectionAsync({to: definition});
+    const profile = projection.getTargetRenderingProfile([-170, -10, 170, 10])!;
+    for (const longitude of [-170, -100, 0, 100, 170, 190]) {
+      const point = {x: (longitude * Math.PI) / 180, y: 0, z: 0};
+      profile.normalize!(point);
+      const normalizedLongitude = (point.x * 180) / Math.PI;
+      expect(normalizedLongitude).toBeGreaterThanOrEqual(-170 - 1e-10);
+      expect(normalizedLongitude).toBeLessThanOrEqual(170 + 1e-10);
+      const projected = projection.project([normalizedLongitude, 0]);
+      expect(projected[0]).toBeGreaterThanOrEqual(profile.bounds[0][0] - 0.001);
+      expect(projected[0]).toBeLessThanOrEqual(profile.bounds[1][0] + 0.001);
+    }
+  });
+}

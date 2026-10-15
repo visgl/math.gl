@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
 import {bonneBounds} from '../regional-rendering-bounds';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {
@@ -28,9 +29,10 @@ export const bonne: ProjectionPlugin = {
     const projection = bindCatalogueKernel('bonne', context, state, forward, inverse);
     return withRectangleRenderingProfile(
       projection,
-      [base.long0 - Math.PI, -Math.PI / 2, base.long0 + Math.PI, Math.PI / 2],
-      coverage =>
-        bonneBounds(catalogueBoundsParameters(state, context), projection.forward, coverage)
+      createAngularRanges(base.long0 - Math.PI, -Math.PI / 2, base.long0 + Math.PI, Math.PI / 2),
+      ranges => bonneBounds(catalogueBoundsParameters(state, context), projection.forward, ranges),
+      base.primeMeridian,
+      base.over
     );
   }
 };

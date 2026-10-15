@@ -10,6 +10,7 @@ export type Point = {x: number; y: number};
 
 /** Fully initialized inputs to numerical kernels. Angles are radians, lengths meters. */
 export type KernelParameters = {
+  primeMeridian: number;
   a: number;
   b: number;
   e: number;
@@ -53,11 +54,13 @@ export function flagParameter(parameters: ProjectionParameters, name: string): b
 export function kernelParameters({
   semiMajorAxis: a,
   eccentricitySquared: es,
-  parameters
+  parameters,
+  primeMeridian = 0
 }: ProjectionContext): KernelParameters {
   const k0 = numberParameter(parameters, 'k_0', numberParameter(parameters, 'k', 1));
   if (k0 <= 0) throw new Error('Projection scale must be positive');
   return {
+    primeMeridian,
     a,
     b: a * Math.sqrt(1 - es),
     es,

@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {KernelParameters} from './kernel';
-import type {GeographicRenderingBounds} from './rendering-profile';
+import {createAngularRanges} from './geographic-bounds';
+import type {AngularRanges} from './geographic-bounds';
 import type {Vector, AngularDomain} from './spherical-rendering-domain';
 import {sphericalRange, sphericalRatioRange} from './spherical-rendering-domain';
 import {envelope, scale, add} from './rendering-bounds';
@@ -11,7 +12,7 @@ import {envelope, scale, add} from './rendering-bounds';
 /** Exact extrema for spherical orthographic and linear-fractional azimuthal maps. */
 export function sphericalAzimuthalBounds(
   base: KernelParameters,
-  coverage: GeographicRenderingBounds,
+  parameters: AngularRanges,
   domain: AngularDomain | undefined,
   kind: 'ortho' | 'gnom' | 'stere'
 ) {
@@ -21,8 +22,8 @@ export function sphericalAzimuthalBounds(
   const constant = kind === 'stere' ? 1 : 0;
   const range = (vector: Vector) =>
     kind === 'ortho'
-      ? sphericalRange(vector, coverage, domain)
-      : sphericalRatioRange(vector, center, constant, coverage, domain);
+      ? sphericalRange(vector, parameters, domain)
+      : sphericalRatioRange(vector, center, constant, parameters, domain);
   const factor = base.a * (kind === 'stere' ? 2 * base.k0 : 1);
   return envelope(
     add([base.x0, base.x0], scale(range(east), factor)),
@@ -33,12 +34,12 @@ export function sphericalAzimuthalBounds(
 /** The ellipsoid's maximum curvature radius bounds the shortest geodesic length. */
 export function equidistantAzimuthalBounds(
   base: KernelParameters,
-  coverage: GeographicRenderingBounds,
+  parameters: AngularRanges,
   domain?: AngularDomain
 ) {
   const minimum = sphericalRange(
     [Math.cos(base.lat0), 0, Math.sin(base.lat0)],
-    coverage,
+    parameters,
     domain
   )[0];
   const radius = (base.a / Math.sqrt(1 - base.es)) * Math.acos(Math.max(-1, Math.min(1, minimum)));
@@ -50,20 +51,20 @@ export function equalAreaAzimuthalBounds(
   base: KernelParameters,
   xFactor: number,
   yFactor: number,
-  coverage: GeographicRenderingBounds,
+  parameters: AngularRanges,
   domain: AngularDomain | undefined,
   latitude: number,
   transformLatitude: (latitude: number) => number
 ) {
   // Check the geodetic intersection before changing latitude: an empty target
   // must trigger default-profile fallback, rather than leave normalization unusable.
-  const latitudes = domain && sphericalRange([0, 0, 1], coverage, domain);
-  const region: GeographicRenderingBounds = [
-    coverage[0],
-    transformLatitude(latitudes ? Math.asin(Math.max(-1, latitudes[0])) : coverage[1]),
-    coverage[2],
-    transformLatitude(latitudes ? Math.asin(Math.min(1, latitudes[1])) : coverage[3])
-  ];
+  const latitudes = domain && sphericalRange([0, 0, 1], parameters, domain);
+  const region: AngularRanges = createAngularRanges(
+    parameters.longitude[0],
+    transformLatitude(latitudes ? Math.asin(Math.max(-1, latitudes[0])) : parameters.latitude[0]),
+    parameters.longitude[1],
+    transformLatitude(latitudes ? Math.asin(Math.min(1, latitudes[1])) : parameters.latitude[1])
+  );
   // Authalic latitude has meridional metric >= (1-e²)² and longitude metric
   // >= 1. This lower bound on distance from the antipode encloses the transformed
   // geodetic cap; the spherical case retains its exact angular boundary.
@@ -98,17 +99,17 @@ export function ellipsoidalStereographicBounds(
   conformalLatitude: (latitude: number) => number,
   centerLatitude: number,
   radius: number,
-  coverage: GeographicRenderingBounds,
+  parameters: AngularRanges,
   domain?: AngularDomain,
   longitudeScale = 1,
   latitudeError = base.e * Math.atanh(base.e)
 ) {
-  const region: GeographicRenderingBounds = [
-    coverage[0] * longitudeScale,
-    conformalLatitude(coverage[1]),
-    coverage[2] * longitudeScale,
-    conformalLatitude(coverage[3])
-  ];
+  const region: AngularRanges = createAngularRanges(
+    parameters.longitude[0] * longitudeScale,
+    conformalLatitude(parameters.latitude[0]),
+    parameters.longitude[1] * longitudeScale,
+    conformalLatitude(parameters.latitude[1])
+  );
   const padding = 2 * latitudeError + Math.PI * Math.abs(longitudeScale - 1);
   // The conformal-sphere metric has minimum scale 1-e². Applying that
   // bound to distance from the antipode also handles strongly flattened axes.
@@ -122,9 +123,11 @@ export function ellipsoidalStereographicBounds(
       : undefined;
   const center = [Math.cos(centerLatitude), 0, Math.sin(centerLatitude)] as const;
   const north = [-Math.sin(centerLatitude), 0, Math.cos(centerLatitude)] as const;
-  const longitudeWidth = region[2] - region[0];
+  const longitudeWidth = region.longitude[1] - region.longitude[0];
   const wrapped =
-    longitudeWidth >= 2 * Math.PI ? ([-Math.PI, region[1], Math.PI, region[3]] as const) : region;
+    longitudeWidth >= 2 * Math.PI
+      ? createAngularRanges(-Math.PI, region.latitude[0], Math.PI, region.latitude[1])
+      : region;
   const x = sphericalRatioRange([0, 1, 0], center, 1, wrapped, cap);
   const y = sphericalRatioRange(north, center, 1, wrapped, cap);
   return envelope(
@@ -139,7 +142,7 @@ export function perspectiveBounds(
   p: number,
   tilt: number,
   azimuth: number,
-  coverage: GeographicRenderingBounds,
+  parameters: AngularRanges,
   domain?: AngularDomain
 ) {
   const center = [Math.cos(base.lat0), 0, Math.sin(base.lat0)];
@@ -160,14 +163,14 @@ export function perspectiveBounds(
     right as [number, number, number],
     denominator,
     cw * p,
-    coverage,
+    parameters,
     domain
   );
   const y = sphericalRatioRange(
     up as [number, number, number],
     denominator,
     cw * p,
-    coverage,
+    parameters,
     domain
   );
   // The existing numerical kernel returns image coordinates without false offsets.

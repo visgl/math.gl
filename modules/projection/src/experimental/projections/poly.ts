@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
 import {polyconicBounds} from '../regional-rendering-bounds';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {
@@ -24,14 +25,16 @@ export const polyconic: ProjectionPlugin = {
     const projection = bindCatalogueKernel('poly', context, state, forward, inverse);
     return withRectangleRenderingProfile(
       projection,
-      [
+      createAngularRanges(
         base.long0 - Math.PI / 6,
         Math.max(-Math.PI / 2 + 1e-8, base.lat0 - Math.PI / 2 + 1e-8),
         base.long0 + Math.PI / 6,
         Math.min(Math.PI / 2 - 1e-8, base.lat0 + Math.PI / 2 - 1e-8)
-      ],
-      coverage =>
-        polyconicBounds(catalogueBoundsParameters(base, context), projection.forward, coverage)
+      ),
+      ranges =>
+        polyconicBounds(catalogueBoundsParameters(base, context), projection.forward, ranges),
+      base.primeMeridian,
+      base.over
     );
   }
 };

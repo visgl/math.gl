@@ -5,18 +5,25 @@
 import type {ProjectionParameters, ProjectionImplementation} from './types';
 import {DEGREES_TO_RADIANS, numberParameter} from './parameters';
 import {createRectangleRenderingProfile} from './rectangular-rendering-profile';
+import {longitudeRange} from './rendering-bounds';
 
-/** Geographic coordinates use their declared longitude interval as a rendering target. */
+/** Geographic rendering follows the same longitude branch as its output convention. */
 export function createGeographicProfile(
-  parameters: ProjectionParameters
+  parameters: ProjectionParameters,
+  primeMeridian = 0
 ): NonNullable<ProjectionImplementation['getRenderingProfile']> {
   const center = numberParameter(parameters, 'lon_wrap', 0) * DEGREES_TO_RADIANS;
   return coverage =>
     createRectangleRenderingProfile(
-      ([west, south, east, north]) => [
-        [west, south, 0],
-        [east, north, 0]
-      ],
-      coverage ?? [center - Math.PI, -Math.PI / 2, center + Math.PI, Math.PI / 2]
+      ranges => {
+        const longitude = longitudeRange(ranges, center);
+        return [
+          [center + longitude[0], ranges.latitude[0], 0],
+          [center + longitude[1], ranges.latitude[1], 0]
+        ];
+      },
+      coverage ?? [-180, -90, 180, 90],
+      center,
+      primeMeridian
     );
 }

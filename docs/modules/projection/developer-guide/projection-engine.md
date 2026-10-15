@@ -259,7 +259,10 @@ retains a finite rendering target.
 
 To expose a custom algorithm through `getCRS`, implement `getRenderingProfile(coverage?)`
 to supply finite reference-surface bounds and an optional normalization function.
-Coverage is a geographic rectangle in native radians. With no coverage, return the
+Coverage is the declared Greenwich longitude/latitude rectangle in degrees, passed
+unchanged. Longitude endpoints lie in `[-180, 180]`; `west > east` crosses the
+dateline, and `[-180, south, 180, north]` covers all longitudes. Latitude satisfies
+`-90 <= south <= north <= 90`. With no coverage, return the
 algorithm’s default rendering target. If coverage-specific resolution fails, descriptor
 retrieval uses that default while preserving the declared coverage in metadata.
 Ordinary coordinate conversion does not evaluate rendering bounds.
@@ -867,24 +870,34 @@ import type { ProjectionPlugin } from "@math.gl/projection";
 export const simpleCylindrical: ProjectionPlugin = {
   name: "simple_cylindrical",
   parameters: [],
-  create({ semiMajorAxis: radius, eccentricitySquared }) {
+  create({ semiMajorAxis: radius, eccentricitySquared, primeMeridian = 0 }) {
     if (eccentricitySquared !== 0)
       throw new Error("This plugin requires a sphere");
     return {
       getRenderingProfile(coverage) {
-        const [west, south, east, north] = coverage ?? [-Math.PI, -Math.PI / 2, Math.PI, Math.PI / 2];
+        const radians = Math.PI / 180;
+        const [west, south, east, north] = coverage ?? [-180, -90, 180, 90];
+        const wrap = (longitude: number) =>
+          ((longitude + 180) % 360 + 360) % 360 - 180;
+        // A single projected rectangle encloses both sides of wrapped coverage.
+        const left = west > east || west === 180 ? -180 : west;
+        const right = west > east || east === -180 ? 180 : east;
         return {
           bounds: [
-            [radius * west, radius * south, 0],
-            [radius * east, radius * north, 0],
+            [radius * (left * radians - primeMeridian), radius * south * radians, 0],
+            [radius * (right * radians - primeMeridian), radius * north * radians, 0],
           ],
           normalize(point) {
-            const center = (west + east) / 2;
-            const offset = point.x - center;
-            const wrapped = Math.abs(offset) <= Math.PI ? offset :
-              ((offset + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
-            point.x = Math.max(west, Math.min(east, center + wrapped));
-            point.y = Math.max(south, Math.min(north, point.y));
+            let longitude = wrap((point.x + primeMeridian) / radians);
+            const inside = west <= east
+              ? longitude >= west && longitude <= east
+              : longitude >= west || longitude <= east;
+            if (!inside) {
+              longitude = Math.abs(wrap(longitude - west)) <= Math.abs(wrap(longitude - east))
+                ? west : east;
+            }
+            point.x = longitude * radians - primeMeridian;
+            point.y = Math.max(south, Math.min(north, point.y / radians)) * radians;
           },
         };
       },

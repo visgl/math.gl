@@ -6,6 +6,7 @@
 import {createFlatProjection as createProjection} from '../flat-projection';
 import {DEGREES_TO_RADIANS, latitudeParameter, numberParameter, wrapLongitude} from '../parameters';
 import type {ProjectionPlugin} from '../types';
+import {createAngularRanges, getGeographicBounds} from '../geographic-bounds';
 import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import {longitudeRange, envelope, scale as scaleRange, add} from '../rendering-bounds';
 
@@ -20,11 +21,10 @@ export const mercator: ProjectionPlugin = {
     'Mercator_Variant_A'
   ],
   parameters: ['lon_0', 'lat_ts', 'k', 'k_0', 'x_0', 'y_0'],
-  create({semiMajorAxis: a, eccentricitySquared: es, parameters}) {
+  create({semiMajorAxis: a, eccentricitySquared: es, parameters, primeMeridian = 0}) {
     const e = Math.sqrt(es);
-    const wrap = Object.prototype.hasOwnProperty.call(parameters, 'over')
-      ? (value: number) => value
-      : wrapLongitude;
+    const over = Object.prototype.hasOwnProperty.call(parameters, 'over');
+    const wrap = over ? (value: number) => value : wrapLongitude;
     const longitudeOrigin = numberParameter(parameters, 'lon_0', 0) * DEGREES_TO_RADIANS;
     const x0 = numberParameter(parameters, 'x_0', 0);
     const y0 = numberParameter(parameters, 'y_0', 0);
@@ -40,36 +40,40 @@ export const mercator: ProjectionPlugin = {
     const width = radius * Math.PI;
     const height = radius * (Math.PI - e * Math.atanh(e * Math.sin(maxLatitude)));
     return {
+      longitudeOrigin,
       getRenderingProfile(coverage) {
         if (coverage) {
           // Only the mathematical poles trigger clipping; finite declared
           // latitudes beyond the default cap remain available as render targets.
-          const clipped = coverage[1] <= -Math.PI / 2 || coverage[3] >= Math.PI / 2;
+          const clipped = coverage[1] <= -90 || coverage[3] >= 90;
           const bounds = [
             coverage[0],
-            clipped ? Math.max(-maxLatitude, Math.min(maxLatitude, coverage[1])) : coverage[1],
+            clipped
+              ? Math.max(
+                  (-maxLatitude * 180) / Math.PI,
+                  Math.min((maxLatitude * 180) / Math.PI, coverage[1])
+                )
+              : coverage[1],
             coverage[2],
-            clipped ? Math.max(-maxLatitude, Math.min(maxLatitude, coverage[3])) : coverage[3]
+            clipped
+              ? Math.max(
+                  (-maxLatitude * 180) / Math.PI,
+                  Math.min((maxLatitude * 180) / Math.PI, coverage[3])
+                )
+              : coverage[3]
           ] as const;
           const northing = (latitude: number) =>
             y0 + radius * (Math.asinh(Math.tan(latitude)) - e * Math.atanh(e * Math.sin(latitude)));
           return createRectangleRenderingProfile(
             region =>
               envelope(
-                add(
-                  [x0, x0],
-                  scaleRange(
-                    longitudeRange(
-                      region,
-                      longitudeOrigin,
-                      Object.prototype.hasOwnProperty.call(parameters, 'over')
-                    ),
-                    radius
-                  )
-                ),
-                [northing(region[1]), northing(region[3])]
+                add([x0, x0], scaleRange(longitudeRange(region, longitudeOrigin, over), radius)),
+                [northing(region.latitude[0]), northing(region.latitude[1])]
               ),
-            bounds
+            bounds,
+            longitudeOrigin,
+            primeMeridian,
+            over
           );
         }
         const defaultBounds = [
@@ -80,7 +84,18 @@ export const mercator: ProjectionPlugin = {
           bounds: defaultBounds,
           normalize: createRectangleRenderingProfile(
             () => defaultBounds,
-            [longitudeOrigin - Math.PI, -maxLatitude, longitudeOrigin + Math.PI, maxLatitude]
+            getGeographicBounds(
+              createAngularRanges(
+                longitudeOrigin - Math.PI,
+                -maxLatitude,
+                longitudeOrigin + Math.PI,
+                maxLatitude
+              ),
+              primeMeridian
+            ),
+            longitudeOrigin,
+            primeMeridian,
+            over
           ).normalize
         };
       },

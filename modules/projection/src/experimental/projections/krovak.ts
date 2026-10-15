@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
 import {krovakBounds} from '../regional-rendering-bounds';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {
@@ -46,13 +47,15 @@ export const krovak: ProjectionPlugin = {
     const projection = bindCatalogueKernel('krovak', context, state, forward, inverse);
     return withRectangleRenderingProfile(
       projection,
-      [
+      createAngularRanges(
         base.long0 - Math.PI / 12,
         Math.max(-Math.PI / 2 + 1e-8, base.lat0 - Math.PI / 36),
         base.long0 + Math.PI / 12,
         Math.min(Math.PI / 2 - 1e-8, base.lat0 + Math.PI / 36)
-      ],
-      coverage => krovakBounds(catalogueBoundsParameters(state, context), coverage)
+      ),
+      ranges => krovakBounds(catalogueBoundsParameters(state, context), ranges),
+      base.primeMeridian,
+      base.over
     );
   }
 };

@@ -35,6 +35,7 @@ export const geostationary: ProjectionPlugin = {
     );
     return {
       ...projection,
+      longitudeOrigin: base.long0,
       getRenderingProfile: createGeostationaryProfile(
         catalogueBoundsParameters(base, context),
         h,

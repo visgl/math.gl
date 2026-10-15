@@ -5,6 +5,7 @@
 import {createFlatProjection} from '../flat-projection';
 import type {ProjectionPlugin} from '../types';
 import {conicBounds} from '../rendering-bounds';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import {bindKernel, kernelParameters, ORIGIN_PARAMETERS, validateConic} from '../kernel';
 import {createState, forward, inverse} from '../kernels/aea';
@@ -22,17 +23,19 @@ export const albersEqualArea: ProjectionPlugin = {
     };
     return withRectangleRenderingProfile(
       projection,
-      [base.long0 - Math.PI, -Math.PI / 2, base.long0 + Math.PI, Math.PI / 2],
-      coverage =>
+      createAngularRanges(base.long0 - Math.PI, -Math.PI / 2, base.long0 + Math.PI, Math.PI / 2),
+      ranges =>
         conicBounds(
           projection.forward,
-          coverage,
+          ranges,
           base.long0,
           state.ns0,
           state.x0,
           state.y0 + state.rh,
           base.over
-        )
+        ),
+      base.primeMeridian,
+      base.over
     );
   }
 };

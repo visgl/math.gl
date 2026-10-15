@@ -484,7 +484,10 @@ acceptance gate in tranche 7.
 
 To expose bounds and normalization through `getCRS`, provide an algorithm-owned
 `getRenderingProfile(coverage?)` callback that returns a `ProjectionRenderingProfile`.
-Coverage uses native geographic radians; without it, return the default rendering target.
+Coverage uses Greenwich longitude/latitude in degrees, with longitude endpoints in
+`[-180, 180]`. `west > east` crosses the dateline; `[-180, south, 180, north]`
+covers all longitudes. The engine passes declared coverage unchanged. Without it,
+return the default rendering target.
 Descriptor retrieval falls back to this default when coverage-specific resolution fails. See [normalization and bounds](../developer-guide/projection-engine.md#normalization-and-bounds).
 
 A plugin declares its PROJ name and additional accepted parameters, optionally lists

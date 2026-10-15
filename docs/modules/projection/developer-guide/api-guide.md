@@ -403,6 +403,13 @@ or numerically unresolved; invalid nonpositive computed scales raise an error.
 | `ProjectionRenderingProfile` | Native projection units and geographic radians | Projection-owned rendering envelope and normalization, adapted by the descriptor into effective units and axis order. |
 | `ProjectionAnalysis.domain` | Geographic radians | An explicit application-qualified rectangle in which numerical analysis is attempted. The derivative stencil must fit inside it. |
 
+For projection implementations, `getRenderingProfile(coverage)` defines a rendering
+target for the declared area of use. Coverage uses the same Greenwich degree convention
+as `CRSMetadata.areaOfUse`: longitude endpoints lie in `[-180, 180]`, `west > east`
+crosses the dateline, and `[-180, south, 180, north]` covers all longitudes. The engine
+passes this coverage unchanged; each implementation interprets it using its own
+conversion branch and prime meridian.
+
 Declared area of use replaces the default rendering extent, with projection-owned clipping at unprojectable horizons. Neither envelope nor
 area of use automatically becomes an analysis domain. A point inside rendering bounds
 can still fail conversion, and a point outside them can remain mathematically convertible.

@@ -4,6 +4,7 @@
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
 import {transverseBounds} from '../rendering-bounds';
 import invlatiso from '../common/invlatiso';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
@@ -21,15 +22,22 @@ export const gaussSchreiberTransverseMercator: ProjectionPlugin = {
     const projection = bindCatalogueKernel('gstmerc', context, state, forward, inverse);
     return withRectangleRenderingProfile(
       projection,
-      [base.long0 - Math.PI / 6, -Math.PI / 3, base.long0 + Math.PI / 6, Math.PI / 3],
-      coverage =>
+      createAngularRanges(
+        base.long0 - Math.PI / 6,
+        -Math.PI / 3,
+        base.long0 + Math.PI / 6,
+        Math.PI / 3
+      ),
+      ranges =>
         transverseBounds(
           projection.forward,
-          coverage,
+          ranges,
           base.long0,
           base.over,
           invlatiso(state.e, -state.cp / state.rs)
-        )
+        ),
+      base.primeMeridian,
+      base.over
     );
   }
 };

@@ -7,6 +7,7 @@ import {createGeographicProfile} from '../geographic-rendering-profile';
 import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
 import {numberParameter} from '../parameters';
 import {createState, forward, inverse} from '../kernels/qsc';
+import {createAngularRanges} from '../geographic-bounds';
 import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import {sphericalRange} from '../spherical-rendering-domain';
 import {envelope} from '../rendering-bounds';
@@ -17,6 +18,7 @@ export const quadrilateralizedSphericalCube: ProjectionPlugin = {
   parameters: ['lon_0', 'x_0', 'y_0', 'lat_0'],
   create(context) {
     const base = catalogueParameters(context);
+    const primeMeridian = context.primeMeridian ?? 0;
 
     const state = createState(base);
     const implementation = bindCatalogueKernel('qsc', context, state, forward, inverse);
@@ -25,29 +27,35 @@ export const quadrilateralizedSphericalCube: ProjectionPlugin = {
     // A QSC rendering target is one cube face, including its square corners.
     return {
       ...implementation,
+      longitudeOrigin: base.long0,
       getRenderingProfile(coverage) {
         if (coverage)
-          return createRectangleRenderingProfile(region => {
-            const latitude = (phi: number) =>
-              base.es ? Math.atan((1 - base.es) * Math.tan(phi)) : phi;
-            const local = [
-              region[0] - base.long0,
-              latitude(region[1]),
-              region[2] - base.long0,
-              latitude(region[3])
-            ] as const;
-            const axis =
-              state.face === 5
-                ? ([0, 0, 1] as const)
-                : state.face === 6
-                  ? ([0, 0, -1] as const)
-                  : ([1, 0, 0] as const);
-            const cosine = sphericalRange(axis, local)[0];
-            // QSC's reduced sector has |mu|, |theta| <= pi/4. Bound its
-            // denominator away from zero over the whole sector analytically.
-            const radius = base.a * Math.sqrt((1 - cosine) / (0.5 * (1 - Math.SQRT1_2)));
-            return envelope([x0 - radius, x0 + radius], [y0 - radius, y0 + radius]);
-          }, coverage);
+          return createRectangleRenderingProfile(
+            region => {
+              const latitude = (phi: number) =>
+                base.es ? Math.atan((1 - base.es) * Math.tan(phi)) : phi;
+              const local = createAngularRanges(
+                region.longitude[0] - base.long0,
+                latitude(region.latitude[0]),
+                region.longitude[1] - base.long0,
+                latitude(region.latitude[1])
+              );
+              const axis =
+                state.face === 5
+                  ? ([0, 0, 1] as const)
+                  : state.face === 6
+                    ? ([0, 0, -1] as const)
+                    : ([1, 0, 0] as const);
+              const cosine = sphericalRange(axis, local)[0];
+              // QSC's reduced sector has |mu|, |theta| <= pi/4. Bound its
+              // denominator away from zero over the whole sector analytically.
+              const radius = base.a * Math.sqrt((1 - cosine) / (0.5 * (1 - Math.SQRT1_2)));
+              return envelope([x0 - radius, x0 + radius], [y0 - radius, y0 + radius]);
+            },
+            coverage,
+            base.long0,
+            primeMeridian
+          );
         const defaultBounds = [
           [x0 - base.a, y0 - base.a, 0],
           [x0 + base.a, y0 + base.a, 0]
@@ -55,7 +63,7 @@ export const quadrilateralizedSphericalCube: ProjectionPlugin = {
         return {
           bounds: defaultBounds,
           normalize(point) {
-            createGeographicProfile(context.parameters)().normalize!(point);
+            createGeographicProfile(context.parameters, primeMeridian)().normalize!(point);
             const [x, y] = implementation.forward(point.x, point.y);
             if (Math.abs(x - x0) <= base.a && Math.abs(y - y0) <= base.a) return;
             [point.x, point.y] = implementation.inverse(

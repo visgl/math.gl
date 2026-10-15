@@ -6,6 +6,7 @@ import {numberParameter} from '../parameters';
 import type {ProjectionPlugin} from '../types';
 import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
 import {createState, forward, inverse} from '../kernels/eqearth';
+import {createAngularRanges, getGeographicBounds} from '../geographic-bounds';
 import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import {cylindricalBounds} from '../rendering-bounds';
 
@@ -15,6 +16,7 @@ export const equalEarth: ProjectionPlugin = {
   parameters: ['lon_0', 'x_0', 'y_0'],
   create(context) {
     const base = catalogueParameters(context);
+    const primeMeridian = context.primeMeridian ?? 0;
 
     const state = createState(base);
     const projection = bindCatalogueKernel('eqearth', context, state, forward, inverse);
@@ -32,11 +34,15 @@ export const equalEarth: ProjectionPlugin = {
     const height = radius * theta * (1.340264 - 0.081106 * t2 + t6 * (0.000893 + 0.003796 * t2));
     return {
       ...projection,
+      longitudeOrigin: base.long0,
       getRenderingProfile(coverage) {
         if (coverage)
           return createRectangleRenderingProfile(
             region => cylindricalBounds(projection.forward, region, base.long0, base.over),
-            coverage
+            coverage,
+            base.long0,
+            primeMeridian,
+            base.over
           );
         const defaultBounds = [
           [x0 - width, y0 - height, 0],
@@ -46,7 +52,18 @@ export const equalEarth: ProjectionPlugin = {
           bounds: defaultBounds,
           normalize: createRectangleRenderingProfile(
             () => defaultBounds,
-            [base.long0 - Math.PI, -(Math.PI / 2), base.long0 + Math.PI, Math.PI / 2]
+            getGeographicBounds(
+              createAngularRanges(
+                base.long0 - Math.PI,
+                -(Math.PI / 2),
+                base.long0 + Math.PI,
+                Math.PI / 2
+              ),
+              primeMeridian
+            ),
+            base.long0,
+            primeMeridian,
+            base.over
           ).normalize
         };
       }

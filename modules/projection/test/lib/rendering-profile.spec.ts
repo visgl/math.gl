@@ -101,12 +101,7 @@ test('rendering fallback preserves declared metadata and effective axis conventi
   };
   const descriptor = await engine.getCRS(definition);
   expect(calls).toHaveLength(2);
-  expect(calls[0]).toEqual([
-    (120 * Math.PI) / 180,
-    (-30 * Math.PI) / 180,
-    (150 * Math.PI) / 180,
-    (40 * Math.PI) / 180
-  ]);
+  expect(calls[0]).toEqual([120, -30, 150, 40]);
   expect(calls[1]).toBeUndefined();
   expect(descriptor.areaOfUse).toEqual([120, -30, 150, 40]);
   expect(descriptor.axis).toBe('enu');
@@ -160,3 +155,32 @@ test.each([true, false])(
     if (!supplied) expect(result).toEqual([540, 100, 12, 99]);
   }
 );
+
+test('profile callback receives wrapped Greenwich coverage unchanged with a prime meridian', async () => {
+  const calls: unknown[] = [];
+  const engine = createProjectionEngine({
+    parsers: [projJSONCRSParser],
+    projections: [
+      {
+        ...transverseMercator,
+        create(context) {
+          const implementation = transverseMercator.create(context);
+          return {
+            ...implementation,
+            getRenderingProfile(coverage) {
+              calls.push(coverage);
+              return implementation.getRenderingProfile!(coverage);
+            }
+          };
+        }
+      }
+    ]
+  });
+  const coverage = [170, -20, -170, 20];
+  await engine.getCRS({
+    ...projectedJSON,
+    base_crs: {...projectedJSON.base_crs, prime_meridian: {name: 'Test meridian', longitude: 10}},
+    bbox: {west_longitude: 170, south_latitude: -20, east_longitude: -170, north_latitude: 20}
+  });
+  expect(calls[0]).toEqual(coverage);
+});

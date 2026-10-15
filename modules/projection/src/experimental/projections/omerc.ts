@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
 import {hotineBounds} from '../regional-rendering-bounds';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {
@@ -71,13 +72,15 @@ export const obliqueMercator: ProjectionPlugin = {
     const projection = bindCatalogueKernel('omerc', context, state, forward, inverse);
     return withRectangleRenderingProfile(
       projection,
-      [
+      createAngularRanges(
         state.lam0 - Math.PI / 18,
         Math.max(-Math.PI / 2 + 1e-8, base.lat0 - Math.PI / 18),
         state.lam0 + Math.PI / 18,
         Math.min(Math.PI / 2 - 1e-8, base.lat0 + Math.PI / 18)
-      ],
-      coverage => hotineBounds(catalogueBoundsParameters(state, context), coverage)
+      ),
+      ranges => hotineBounds(catalogueBoundsParameters(state, context), ranges),
+      base.primeMeridian,
+      base.over
     );
   }
 };

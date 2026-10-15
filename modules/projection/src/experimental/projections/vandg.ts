@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
 import {vanDerGrintenBounds} from '../rendering-bounds';
+import {createAngularRanges} from '../geographic-bounds';
 import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
@@ -20,8 +21,10 @@ export const vanDerGrinten: ProjectionPlugin = {
     const projection = bindCatalogueKernel('vandg', context, state, forward, inverse);
     return withRectangleRenderingProfile(
       projection,
-      [base.long0 - Math.PI, -Math.PI / 2, base.long0 + Math.PI, Math.PI / 2],
-      coverage => vanDerGrintenBounds(projection.forward, coverage, base.long0, base.over)
+      createAngularRanges(base.long0 - Math.PI, -Math.PI / 2, base.long0 + Math.PI, Math.PI / 2),
+      ranges => vanDerGrintenBounds(projection.forward, ranges, base.long0, base.over),
+      base.primeMeridian,
+      base.over
     );
   }
 };

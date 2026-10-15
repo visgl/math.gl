@@ -14,7 +14,8 @@ import {createGeographicProfile} from '../geographic-rendering-profile';
 import {numberParameter, wrapLongitude} from '../parameters';
 import {TypeScriptCRSError} from '../crs/types';
 import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
-import type {GeographicRenderingBounds} from '../rendering-profile';
+import type {GeographicBounds} from '../types';
+import {createAngularRanges, getAngularRanges, getGeographicBounds} from '../geographic-bounds';
 import {sphericalRange, sphericalRatioRange} from '../spherical-rendering-domain';
 
 const rotationParameters = [
@@ -123,7 +124,11 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
               point.y *= Math.PI / 180;
             }
           )
-        : wrapped.create({...context, parameters: Object.freeze(innerParameters)});
+        : wrapped.create({
+            ...context,
+            parameters: Object.freeze(innerParameters),
+            primeMeridian: 0
+          });
       const forward = projectionOperation(inner, false),
         inverse = projectionOperation(inner, true);
       const asin = (value: number): number => Math.asin(Math.max(-1, Math.min(1, value)));
@@ -175,9 +180,16 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
       if (!getChildProfile) return implementation;
       const wrapProfile = (
         child: ProjectionRenderingProfile,
-        coverage?: GeographicRenderingBounds
+        coverage?: GeographicBounds
       ): ProjectionRenderingProfile => {
-        const source = coverage && createRectangleRenderingProfile(() => child.bounds, coverage);
+        const source =
+          coverage &&
+          createRectangleRenderingProfile(
+            () => child.bounds,
+            coverage,
+            longitudeOrigin,
+            context.primeMeridian ?? 0
+          );
         return {
           get bounds() {
             const bounds = child.bounds;
@@ -201,14 +213,20 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
       };
       return {
         ...implementation,
+        longitudeOrigin,
         getRenderingProfile(coverage) {
           if (!coverage) return wrapProfile(getChildProfile());
-          const local = [
-            coverage[0] - longitudeOrigin,
-            coverage[1],
-            coverage[2] - longitudeOrigin,
-            coverage[3]
-          ] as const;
+          const parameters = getAngularRanges(
+            coverage,
+            context.primeMeridian ?? 0,
+            longitudeOrigin
+          );
+          const local = createAngularRanges(
+            parameters.longitude[0] - longitudeOrigin,
+            parameters.latitude[0],
+            parameters.longitude[1] - longitudeOrigin,
+            parameters.latitude[1]
+          );
           const z = sphericalRange(oblique ? [-cphip, 0, sphip] : [-1, 0, 0], local);
           const xAxis = oblique ? ([sphip, 0, cphip] as const) : ([0, 0, 1] as const);
           const x = sphericalRange(xAxis, local);
@@ -219,7 +237,16 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
               ? sphericalRatioRange([0, 1, 0], xAxis, 0, local).map(Math.atan)
               : [-Math.PI, Math.PI];
           return wrapProfile(
-            getChildProfile([longitude[0] + lamp, asin(z[0]), longitude[1] + lamp, asin(z[1])]),
+            getChildProfile(
+              getGeographicBounds(
+                createAngularRanges(
+                  longitude[0] + lamp,
+                  asin(z[0]),
+                  longitude[1] + lamp,
+                  asin(z[1])
+                )
+              )
+            ),
             coverage
           );
         }

@@ -2,20 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {ProjectionImplementation, ProjectionRenderingProfile} from './types';
-
-/** Native geographic rectangle in radians, with an unwrapped east endpoint. */
-export type GeographicRenderingBounds = readonly [
-  west: number,
-  south: number,
-  east: number,
-  north: number
-];
+import type {GeographicBounds, ProjectionImplementation, ProjectionRenderingProfile} from './types';
 
 /** Algorithms own extent policy; descriptor assembly only selects a resolved profile. */
 export function resolveRenderingProfile(
   getRenderingProfile: NonNullable<ProjectionImplementation['getRenderingProfile']>,
-  coverage?: GeographicRenderingBounds
+  coverage?: GeographicBounds
 ): ProjectionRenderingProfile {
   if (coverage) {
     try {
