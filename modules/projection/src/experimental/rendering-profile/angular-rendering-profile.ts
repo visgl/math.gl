@@ -8,7 +8,7 @@ import type {
   ProjectionImplementation,
   ProjectionRenderingProfile
 } from '../types';
-import {createAngularRanges, getAngularRanges} from './geographic-bounds';
+import {createAngularRanges, getAngularRanges, normalizeLongitude} from './geographic-bounds';
 import type {AngularRanges} from './geographic-bounds';
 import {createRectangleRenderingProfile} from './rectangular-rendering-profile';
 import {geographicVector, sphericalExtremum} from './spherical-rendering-domain';
@@ -91,6 +91,11 @@ export function createAngularRenderingProfile(
           point.y =
             base.lat0 > 0 ? Math.max(polarLatitude, point.y) : Math.min(-polarLatitude, point.y);
         } else normalizeCap?.(point);
+        // Cap extrema use a continuous coverage interval, which may lie on a
+        // different longitude branch than the rectangle's normalized output.
+        const center = ((base.long0 + base.primeMeridian) * 180) / Math.PI;
+        const offset = point.x - center;
+        if (Math.abs(offset) > 180) point.x = center + normalizeLongitude(offset);
       }
     };
   };
