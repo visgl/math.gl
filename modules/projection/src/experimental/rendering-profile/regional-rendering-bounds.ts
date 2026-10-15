@@ -84,6 +84,9 @@ export function cassiniBounds(
   region: AngularRanges
 ) {
   const d = maxAbs(longitudeRange(region, base.long0, base.over));
+  // Beyond the front hemisphere, atan2 northing crosses a branch cut that
+  // the meridian correction below does not bound. Use the regional fallback.
+  if (base.sphere && d > Math.PI / 2) throw new Error('Unsupported Cassini rendering coverage');
   const n = base.a / Math.sqrt(1 - base.es),
     c = base.es / (1 - base.es);
   const width = base.sphere
@@ -195,10 +198,15 @@ export function krovakBounds(state: KrovakState, region: AngularRanges) {
     latitude(region[1][1])
   );
   const s = sphericalRange([Math.sin(state.ad), 0, Math.cos(state.ad)], sphere);
-  const cosS = Math.sqrt(Math.max(Number.EPSILON, 1 - maxAbs(s) ** 2));
+  const cosS: Range = [
+    Math.sqrt(Math.max(Number.EPSILON, 1 - maxAbs(s) ** 2)),
+    1 // cos(s) never exceeds one; a conservative upper endpoint avoids underbounding.
+  ];
   const numerator = sphericalRange([0, 1, 0], sphere);
+  // Both denominator endpoints matter when the numerator has one sign.
+  const quotient = ratioRange(numerator, cosS);
   const d = scale(
-    [Math.asin(Math.max(-1, numerator[0] / cosS)), Math.asin(Math.min(1, numerator[1] / cosS))],
+    quotient.map(value => Math.asin(Math.max(-1, Math.min(1, value)))) as [number, number],
     state.n
   );
   const radius = (sin: number) =>
@@ -220,7 +228,9 @@ export function krovakBounds(state: KrovakState, region: AngularRanges) {
  */
 export function nzmgBounds(state: NZMGState, region: AngularRanges) {
   const phi = scale([region[0][1] - state.lat0, region[1][1] - state.lat0], 1e-5 / SEC_TO_RAD);
-  const lambda: Range = [region[0][0] - state.long0, region[1][0] - state.long0];
+  // Normalization selects the origin-relative branch unless +over is active.
+  // Enclose both sides when coverage crosses that cut: the polynomial is not periodic.
+  const lambda = longitudeRange(region, state.long0, state.over);
   let psi: Range = [0, 0];
   for (let index = 10; index >= 1; index--)
     psi = add([state.A[index], state.A[index]], multiply(psi, phi));

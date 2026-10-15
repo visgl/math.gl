@@ -221,6 +221,10 @@ Gnomonic's horizon-safe angular cap and Mercator's latitude cap. Coverage may su
 an interior singularity, such as a stereographic antipode; normalization also clips
 that region. Clipped rendering bounds enclose the intersection of declared coverage
 and the finite rendering domain, including curved boundary arcs within the coverage.
+The transverse bounds formulas support the central meridian ±30° strip; spherical
+Cassini bounds support the front hemisphere. Coverage beyond those limits uses the
+intersection with the algorithm's default rendering target, or the default target
+when that intersection is empty. This rendering fallback does not restrict raw conversion.
 `areaOfUse` records the declared coverage as
 `[west, south, east, north]` in Greenwich degrees; east less than west denotes an
 antimeridian crossing. Coverage does not restrict conversion functions. Geocentric bounds always enclose the reference
