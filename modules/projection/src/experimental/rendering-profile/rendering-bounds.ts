@@ -92,14 +92,16 @@ export function transverseBounds(
   equator = 0
 ): ProjectionRenderingProfile['bounds'] {
   const longitude = longitudeRange(parameters, origin, over);
+  // This endpoint argument applies to the regional strip, not the kernels'
+  // backside branches or the approximate series far from its central meridian.
+  // Let the profile clip unsupported coverage to its default rendering target.
+  if (maxAbs(longitude) > Math.PI / 6 + 1e-12)
+    throw new Error('Unsupported transverse rendering coverage');
   const longitudes = [
     longitude[0],
     longitude[1],
     Math.max(longitude[0], Math.min(longitude[1], 0))
   ];
-  for (const meridian of [-Math.PI / 2, Math.PI / 2]) {
-    if (meridian >= longitude[0] && meridian <= longitude[1]) longitudes.push(meridian);
-  }
   const latitudes = [
     parameters[0][1],
     parameters[1][1],
