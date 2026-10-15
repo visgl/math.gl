@@ -68,6 +68,8 @@ Start with [coordinate systems, ellipsoids, datums and epochs](https://visgl.git
 
 ## Choose an API[​](#choose-an-api "Direct link to Choose an API")
 
+The [CRS and projection API guide](https://visgl.github.io/math.gl/next/docs/modules/projection/developer-guide/api-guide.md) explains how source metadata, CRS descriptors, transforms, algorithm plugins and projection analysis fit together, and when to use each.
+
 | API                                                                                                                                            | Use it when                                                                  |
 | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | [`FullProjectionEngine`](https://visgl.github.io/math.gl/next/docs/modules/projection/api-reference/projection-engine.md)         | You want all built-in algorithms and WKT/PROJJSON readers                    |

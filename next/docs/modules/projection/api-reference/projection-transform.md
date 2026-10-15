@@ -365,6 +365,8 @@ Synthetic analytic and upstream differential fixtures cover the implemented subs
 
 ## Custom plugins[​](#custom-plugins "Direct link to Custom plugins")
 
+To expose bounds and normalization through `getCRS`, provide an algorithm-owned `getRenderingProfile(coverage?)` callback that returns a `ProjectionRenderingProfile`. Coverage uses Greenwich longitude/latitude in degrees, with longitude endpoints in `[-180, 180]`. `west > east` crosses the dateline; `[-180, south, 180, north]` covers all longitudes. The engine passes declared coverage unchanged. Without it, return the default rendering target. The profile's `normalize` callback receives Greenwich longitude/latitude in degrees and preserves altitude. Descriptor retrieval falls back to this default when coverage-specific resolution fails. See [normalization and bounds](https://visgl.github.io/math.gl/next/docs/modules/projection/projection-engine.md#normalization-and-bounds).
+
 A plugin declares its PROJ name and additional accepted parameters, optionally lists value-free parameters in `flags`, then creates a forward/inverse implementation. The engine supplies an immutable parameter map, semi-major axis, and eccentricity squared. The plugin validates its own parameter values and domain. Forward input and inverse output are longitude/latitude in radians; forward output and inverse input are projected meters, including any false offsets. The engine handles CRS units, axes, prime meridians, datum transformations, and heights. Geocentric plugins additionally implement `forward3D`/`inverse3D` over three-element tuples.
 
 ```

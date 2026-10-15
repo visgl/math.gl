@@ -36,6 +36,8 @@ if (analysis.factors(0.2, 0.6, factors)) {
 
 All input angles, domain bounds and output angles use **radians**. Projection coordinates use the plugin's physical axis units, normally metres. The Jacobian uses physical output units per input radian. It does not include CRS angular/linear unit conversions, axis ordering, prime meridians, datum shifts, grids or deformation. For compound coordinate operations, these map factors alone do not describe the complete operation derivative.
 
+For the distinction between mathematical projection factors and CRS rendering scales, see the [CRS and projection API guide](https://visgl.github.io/math.gl/next/docs/modules/projection/developer-guide/api-guide.md#choose-rendering-scales-or-projection-analysis-by-their-meaning).
+
 ## Domain and reusable coordinate outputs[​](#domain-and-reusable-coordinate-outputs "Direct link to Domain and reusable coordinate outputs")
 
 `domain` is required: a closed rectangle with increasing west/east and south/north bounds. It is captured at construction. Rectangles do not cross the antimeridian; split such applications into separate regions. The [accuracy scorecard](https://visgl.github.io/math.gl/next/docs/modules/projection/accuracy-domains.md) supplies tested configurations and regions, not automatic global validity declarations.
