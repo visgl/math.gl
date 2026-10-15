@@ -24,6 +24,22 @@ export type NearestIndexOptions = {
   distanceToItem?: (index: number) => number | null;
 };
 
+/** Constraints for the nearest accepted ray hit against indexed boxes or caller-owned geometry. */
+export type RayIndexOptions = {
+  /** Inclusive Euclidean distance limit; defaults to Infinity. */
+  maxDistance?: number;
+  /** Exclude an original row before exact refinement. */
+  filter?: (index: number) => boolean;
+  /**
+   * Exact Euclidean hit distance, or null to reject the row.
+   * Must be at least its indexed-box entry distance, apart from floating-point roundoff;
+   * geometry must stay inside that box. Refined distances are never rounded or clamped.
+   * The second argument is the current accepted distance limit, initially maxDistance.
+   * Traversal order is unspecified; this is not an all-intersections callback.
+   */
+  intersectItem?: (index: number, maxDistance: number) => number | null;
+};
+
 /** Static median-split BVH. Results refer to original input rows, not tree order. */
 export class BoxIndex {
   readonly dimension: 2 | 3;
@@ -175,6 +191,89 @@ export class BoxIndex {
     return result;
   }
 
+  /**
+   * Nearest accepted box/geometry hit without materializing and sorting all ray candidates.
+   * Rejected refinements do not clip the ray. Equal distances select the lowest original row.
+   */
+  intersectRay(
+    origin: QueryPoint,
+    direction: QueryPoint,
+    options: RayIndexOptions = {}
+  ): NearestIndexResult | null {
+    validateQueryPoint(origin, this.dimension);
+    const unit = normalizeQueryDirection(direction, this.dimension);
+    let best = options.maxDistance ?? Infinity;
+    validateQueryDistance(best);
+    let result: NearestIndexResult | null = null;
+    const getEntry = (bounds: Float64Array, index: number): number | null => {
+      const offset = index * this.dimension * 2;
+      return intersectRayBounds(
+        origin,
+        unit,
+        bounds.subarray(offset, offset + this.dimension),
+        bounds.subarray(offset + this.dimension, offset + this.dimension * 2),
+        best + getRayDistanceTolerance(best, best)
+      );
+    };
+    const rootDistance = this.size ? getEntry(this.nodeBounds, 0) : null;
+    const stack = rootDistance === null ? [] : [{index: 0, distance: rootDistance}];
+    while (stack.length) {
+      const candidate = stack.pop();
+      if (
+        !candidate ||
+        candidate.distance > best + getRayDistanceTolerance(candidate.distance, best)
+      )
+        continue;
+      const node = candidate.index;
+      if (this.counts[node]) {
+        for (
+          let offset = this.starts[node];
+          offset < this.starts[node] + this.counts[node];
+          offset++
+        ) {
+          const index = this.order[offset];
+          const lower = getEntry(this.bounds, index);
+          if (lower === null || (options.filter && !options.filter(index))) continue;
+          const exact = options.intersectItem ? options.intersectItem(index, best) : lower;
+          if (exact === null) continue;
+          validateQueryDistance(exact);
+          if (
+            exact < lower &&
+            (!Number.isFinite(lower) || lower - exact > getRayDistanceTolerance(lower, exact))
+          )
+            throw new RangeError('Refinement distance cannot be below box entry');
+          if (
+            Number.isFinite(exact) &&
+            exact <= best &&
+            (!result || exact < best || index < result.index)
+          ) {
+            best = exact;
+            result = {index, distance: exact};
+          }
+        }
+      } else {
+        const first = this.children[node * 2],
+          second = this.children[node * 2 + 1];
+        const firstDistance = getEntry(this.nodeBounds, first),
+          secondDistance = getEntry(this.nodeBounds, second);
+        if (firstDistance !== null && secondDistance !== null) {
+          if (firstDistance <= secondDistance)
+            stack.push(
+              {index: second, distance: secondDistance},
+              {index: first, distance: firstDistance}
+            );
+          else
+            stack.push(
+              {index: first, distance: firstDistance},
+              {index: second, distance: secondDistance}
+            );
+        } else if (firstDistance !== null) stack.push({index: first, distance: firstDistance});
+        else if (secondDistance !== null) stack.push({index: second, distance: secondDistance});
+      }
+    }
+    return result;
+  }
+
   /** Broad-phase ray candidates, sorted by entry distance then original row index. */
   searchRay(
     origin: QueryPoint,
@@ -217,6 +316,13 @@ export class BoxIndex {
       if (minimum[i] > maximum[i]) throw new RangeError('Bounds must be ordered');
     }
   }
+}
+
+/** Relative, unit-independent allowance for independently rounded slab and geometry kernels. */
+function getRayDistanceTolerance(first: number, second: number): number {
+  return (
+    8 * Math.max(Number.MIN_VALUE, Number.EPSILON * Math.max(Math.abs(first), Math.abs(second)))
+  );
 }
 
 /** Points are zero-volume boxes: nearest gives exact Euclidean point distance. */

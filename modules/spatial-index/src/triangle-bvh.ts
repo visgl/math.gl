@@ -25,6 +25,28 @@ export type TriangleQueryResult = {
 };
 export type TriangleRayResult = TriangleQueryResult & {barycentric: [number, number, number]};
 
+/** Optional application constraints for the nearest accepted triangle intersection. */
+export type TriangleRayOptions = {
+  /** Inclusive Euclidean distance limit in input-coordinate units; defaults to Infinity. */
+  maxDistance?: number;
+  /** Ignore triangles facing away from the ray; defaults to false. */
+  backfaceCulling?: boolean;
+  /** Exclude an original triangle index before running its exact intersection kernel. */
+  filter?: (index: number) => boolean;
+  /**
+   * Accept or reject an exact hit using its point and original-order barycentric weights.
+   * Rejected hits do not shorten the search: a valid surface behind a hole can still win.
+   * Called only for candidates that could improve the current accepted result, not all hits.
+   * Treat the detached candidate as immutable; traversal order is unspecified.
+   */
+  acceptHit?: (
+    hit: Readonly<Omit<TriangleRayResult, 'point' | 'barycentric'>> & {
+      readonly point: readonly [number, number, number];
+      readonly barycentric: readonly [number, number, number];
+    }
+  ) => boolean;
+};
+
 /** Static triangle-list BVH. index is the original triangle number, not a vertex index. */
 export class TriangleBVH {
   readonly size: number;
@@ -69,39 +91,48 @@ export class TriangleBVH {
     return this.boxes.search(minimum, maximum);
   }
 
+  /** Nearest accepted exact hit; application rejection never clips away later candidates. */
   intersectRay(
     origin: QueryPoint,
     direction: QueryPoint,
-    options: {maxDistance?: number; backfaceCulling?: boolean} = {}
+    options: TriangleRayOptions = {}
   ): TriangleRayResult | null {
     validateQueryPoint(origin, 3);
     const unit = normalizeQueryDirection(direction, 3);
     let result: TriangleRayResult | null = null;
-    for (const candidate of this.boxes.searchRay(origin, unit, options.maxDistance)) {
-      if (result && candidate.distance > result.distance) break;
-      const [a, b, c] = this.triangle(candidate.index);
-      const hit = intersectRayTriangle(origin, unit, a, b, c, {
-        backfaceCulling: options.backfaceCulling,
-        maxT: result?.distance ?? options.maxDistance
-      });
-      if (
-        hit &&
-        (!result ||
-          hit.t < result.distance ||
-          (hit.t === result.distance && candidate.index < result.index))
-      ) {
-        result = {
-          index: candidate.index,
-          distance: hit.t,
-          point: [
-            origin[0] + hit.t * unit[0],
-            origin[1] + hit.t * unit[1],
-            origin[2] + hit.t * unit[2]
-          ],
-          barycentric: hit.barycentric
-        };
+    this.boxes.intersectRay(origin, direction, {
+      maxDistance: options.maxDistance,
+      filter: options.filter,
+      intersectItem: (index, maximum) => {
+        const [a, b, c] = this.triangle(index);
+        const hit = intersectRayTriangle(origin, unit, a, b, c, {
+          backfaceCulling: options.backfaceCulling,
+          maxT: maximum
+        });
+        if (
+          hit &&
+          (!result ||
+            hit.t < result.distance ||
+            (hit.t === result.distance && index < result.index))
+        ) {
+          const candidateHit: TriangleRayResult = {
+            index,
+            distance: hit.t,
+            point: [
+              origin[0] + hit.t * unit[0],
+              origin[1] + hit.t * unit[1],
+              origin[2] + hit.t * unit[2]
+            ],
+            barycentric: hit.barycentric
+          };
+          if (!options.acceptHit || options.acceptHit(candidateHit)) {
+            result = candidateHit;
+            return hit.t;
+          }
+        }
+        return null;
       }
-    }
+    });
     return result;
   }
 
