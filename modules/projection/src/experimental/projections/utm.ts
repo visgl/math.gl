@@ -3,6 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {ProjectionPlugin} from '../types';
+import {transverseBounds} from '../rendering-profile/rendering-bounds';
+import {createAngularRanges} from '../rendering-profile/geographic-bounds';
+import {withRectangleRenderingProfile} from '../rendering-profile/rectangular-rendering-profile';
 import {numberParameter} from '../parameters';
 import {flagParameter} from '../kernel';
 import {createTransverseMercator} from './transverse-mercator';
@@ -18,7 +21,7 @@ export const universalTransverseMercator: ProjectionPlugin = {
       throw new Error('UTM requires an integer +zone from 1 to 60');
     }
     const south = flagParameter(context.parameters, 'south');
-    return createTransverseMercator({
+    const implementation = createTransverseMercator({
       ...context,
       parameters: {
         ...context.parameters,
@@ -29,5 +32,19 @@ export const universalTransverseMercator: ProjectionPlugin = {
         k_0: '0.9996'
       }
     });
+    const center = ((6 * zone - 183) * Math.PI) / 180;
+    // Standard six-degree UTM zone coverage, independent of conversion validity.
+    return withRectangleRenderingProfile(
+      implementation,
+      createAngularRanges(
+        center - Math.PI / 60,
+        south ? (-80 * Math.PI) / 180 : 0,
+        center + Math.PI / 60,
+        south ? 0 : (84 * Math.PI) / 180
+      ),
+      ranges => transverseBounds(implementation.forward, ranges, center),
+      context.primeMeridian ?? 0,
+      Object.prototype.hasOwnProperty.call(context.parameters, 'over')
+    );
   }
 };

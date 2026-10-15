@@ -4,6 +4,9 @@
 
 import {createFlatProjection} from '../flat-projection';
 import type {ProjectionContext, ProjectionImplementation, ProjectionPlugin} from '../types';
+import {transverseBounds} from '../rendering-profile/rendering-bounds';
+import {createAngularRanges} from '../rendering-profile/geographic-bounds';
+import {withRectangleRenderingProfile} from '../rendering-profile/rectangular-rendering-profile';
 import {
   bindKernel,
   flagParameter,
@@ -24,23 +27,41 @@ import {
 
 export function createTransverseMercator(context: ProjectionContext): ProjectionImplementation {
   const base = kernelParameters(context);
-  if (flagParameter(context.parameters, 'approx')) {
-    return bindKernel(
-      'tmerc +approx',
-      createFast(base),
-      fastForward,
-      fastInverse,
-      createFlatProjection
+  // A finite regional strip avoids the transverse singularities at +/-90 degrees.
+  const render = (implementation: ProjectionImplementation) =>
+    withRectangleRenderingProfile(
+      implementation,
+      createAngularRanges(
+        base.long0 - Math.PI / 6,
+        -Math.PI / 2,
+        base.long0 + Math.PI / 6,
+        Math.PI / 2
+      ),
+      ranges => transverseBounds(implementation.forward, ranges, base.long0, base.over),
+      base.primeMeridian,
+      base.over
     );
+  if (flagParameter(context.parameters, 'approx')) {
+    return render({
+      ...bindKernel(
+        'tmerc +approx',
+        createFast(base),
+        fastForward,
+        fastInverse,
+        createFlatProjection
+      )
+    });
   }
   if (base.sphere) throw new Error('Spherical transverse Mercator requires +approx');
-  return bindKernel(
-    'etmerc',
-    createExtended(base),
-    extendedForward,
-    extendedInverse,
-    createFlatProjection
-  );
+  return render({
+    ...bindKernel(
+      'etmerc',
+      createExtended(base),
+      extendedForward,
+      extendedInverse,
+      createFlatProjection
+    )
+  });
 }
 
 /** Matches proj4js: tmerc uses the extended algorithm unless +approx is supplied. */

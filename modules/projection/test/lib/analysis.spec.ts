@@ -117,44 +117,47 @@ test('poles, wrap seams, invalid geometry and unsupported hook interfaces fail o
       })
   ).toThrow(/mutable/);
 });
-test('plugin reentry is rejected and output setters can reenter without corrupting snapshots', () => {
-  let projection: ProjectionAnalysis;
-  const nested = createProjectionFactors();
-  const plugin = {
-    ...mercator,
-    create: (context: catalogue.ProjectionContext) => {
-      const implementation = mercator.create(context);
-      return {
-        ...implementation,
-        forwardInPlace: (point: catalogue.ProjectionPoint) => {
-          expect(projection.factors(0, 0, nested)).toBe(false);
-          implementation.forwardInPlace!(point);
-        }
-      };
-    }
-  };
-  projection = new ProjectionAnalysis({
-    projection: plugin,
-    context: {semiMajorAxis: 10, eccentricitySquared: 0, parameters: {}},
-    domain
-  });
-  const result = createProjectionFactors();
-  expect(projection.factors(0, 0.5, result)).toBe(true);
-  let writes = 0;
-  const expected = {...result};
-  const target = createProjectionFactors();
-  Object.defineProperty(target, 'dxDLongitude', {
-    set(value: number) {
-      writes++;
-      expect(projection.factors(0, -0.5, nested)).toBe(true);
-      expect(value).toBe(expected.dxDLongitude);
-    }
-  });
-  expect(projection.factors(0, 0.5, target)).toBe(true);
-  expect(writes).toBe(1);
-  for (const key of Object.keys(expected) as (keyof ProjectionFactors)[])
-    if (key !== 'dxDLongitude') expect(target[key]).toBe(expected[key]);
-});
+test.each(['factors', 'jacobian'] as const)(
+  '%s rejects plugin reentry and snapshots outputs before setters reenter',
+  method => {
+    let projection: ProjectionAnalysis;
+    const nested = createProjectionFactors();
+    const plugin = {
+      ...mercator,
+      create: (context: catalogue.ProjectionContext) => {
+        const implementation = mercator.create(context);
+        return {
+          ...implementation,
+          forwardInPlace: (point: catalogue.ProjectionPoint) => {
+            expect(projection[method](0, 0, nested)).toBe(false);
+            implementation.forwardInPlace!(point);
+          }
+        };
+      }
+    };
+    projection = new ProjectionAnalysis({
+      projection: plugin,
+      context: {semiMajorAxis: 10, eccentricitySquared: 0, parameters: {}},
+      domain
+    });
+    const result = createProjectionFactors();
+    expect(projection[method](0, 0.5, result)).toBe(true);
+    let writes = 0;
+    const expected = {...result};
+    const target = createProjectionFactors();
+    Object.defineProperty(target, 'dxDLongitude', {
+      set(value: number) {
+        writes++;
+        expect(projection[method](0, -0.5, nested)).toBe(true);
+        expect(value).toBe(expected.dxDLongitude);
+      }
+    });
+    expect(projection[method](0, 0.5, target)).toBe(true);
+    expect(writes).toBe(1);
+    for (const key of Object.keys(expected) as (keyof ProjectionFactors)[])
+      if (key !== 'dxDLongitude') expect(target[key]).toBe(expected[key]);
+  }
+);
 
 test('separate ground ellipsoid changes factors but preserves coordinates and Jacobians', () => {
   const crs = normalizeCRS('EPSG:3857');

@@ -91,6 +91,7 @@ aliases['@math.gl/spatial-index$'] = resolve(__dirname, '../modules/spatial-inde
 aliases['@math.gl/culling/queries$'] = resolve(__dirname, '../modules/culling/src/queries.ts');
 aliases['@math.gl/curves$'] = resolve(__dirname, '../modules/curves/src/index.ts');
 aliases['@math.gl/crs$'] = aliases['@math.gl/crs'];
+aliases['@math.gl/crs/metadata$'] = resolve(__dirname, '../modules/crs/src/crs-metadata.ts');
 aliases['@math.gl/crs/wkt$'] = resolve(__dirname, '../modules/crs/src/wkt-crs.ts');
 aliases['@math.gl/crs/proj-string$'] = resolve(__dirname, '../modules/crs/src/proj-string.ts');
 aliases['@math.gl/crs/spatial-reference$'] = resolve(

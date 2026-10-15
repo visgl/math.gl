@@ -149,6 +149,15 @@ function readWKT(node: WKTCRSNode): RecordValue {
     id: id ? {authority: value(id), code: value(id, 1)} : undefined,
     coordinate_system: {subtype: projected || geocentric ? 'Cartesian' : 'ellipsoidal', axis: axes}
   };
+  const usage = child(node, 'USAGE');
+  const bbox = child(usage || node, 'BBOX');
+  if (bbox)
+    result['bbox'] = {
+      south_latitude: value(bbox, 0),
+      west_longitude: value(bbox, 1),
+      north_latitude: value(bbox, 2),
+      east_longitude: value(bbox, 3)
+    };
   if (projected) {
     const base = child(node, 'GEOGCS', 'BASEGEOGCRS', 'BASEGEODCRS', 'GEODCRS', 'GEOGCRS');
     if (!base) throw new Error('Projected WKT requires a base geographic CRS');

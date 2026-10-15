@@ -2,8 +2,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
+import {createGeostationaryProfile} from '../rendering-profile/geostationary-rendering-profile';
 import type {ProjectionPlugin} from '../types';
-import {catalogueParameters, bindCatalogueKernel, horizonGuard} from '../catalogue-kernel';
+import {
+  catalogueParameters,
+  catalogueBoundsParameters,
+  bindCatalogueKernel,
+  horizonGuard
+} from '../catalogue-kernel';
 import {createState, forward, inverse} from '../kernels/geos';
 import {numberParameter} from '../parameters';
 
@@ -19,7 +25,7 @@ export const geostationary: ProjectionPlugin = {
     const sweep = context.parameters['sweep'] || 'y';
     if (!['x', 'y'].includes(sweep)) throw new Error('Geostationary sweep must be x or y');
     const state = createState(base, {h, sweep});
-    return bindCatalogueKernel(
+    const projection = bindCatalogueKernel(
       'geos',
       context,
       state,
@@ -27,5 +33,14 @@ export const geostationary: ProjectionPlugin = {
       inverse,
       base.sphere ? horizonGuard({...base, lat0: 0}, 1 / (1 + h / base.a), true) : undefined
     );
+    return {
+      ...projection,
+      longitudeOrigin: base.long0,
+      getRenderingProfile: createGeostationaryProfile(
+        catalogueBoundsParameters(base, context),
+        h,
+        sweep === 'x'
+      )
+    };
   }
 };

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original domain enforcement, numerical differentiation and cartographic factors.
+import {NumericalDerivative} from './numerical-derivative';
 import type {
   ProjectionContext,
   ProjectionImplementation,
@@ -79,10 +80,25 @@ export class ProjectionAnalysis {
   private readonly step: number;
   private readonly tolerance: number;
   private readonly point: ProjectionPoint = {x: 0, y: 0, z: 0};
-  private readonly derivative: ProjectionJacobian = createProjectionJacobian();
+  // Internal row-major Jacobian scratch; public outputs retain named fields.
+  private readonly derivative = [0, 0, 0, 0];
   private busy = false;
-  private dx = 0;
-  private dy = 0;
+  private longitude = 0;
+  private latitude = 0;
+  private axis = 0;
+  private readonly numerical = new NumericalDerivative((offset, output) => {
+    if (
+      !this.sample(
+        this.longitude + (this.axis === 0 ? offset : 0),
+        this.latitude + (this.axis === 1 ? offset : 0)
+      )
+    )
+      return false;
+    output[0] = this.point.x;
+    output[1] = this.point.y;
+    output[2] = 0;
+    return true;
+  });
   constructor(options: ProjectionAnalysisOptions) {
     const {semiMajorAxis: a} = options.context;
     const ground = options.groundEllipsoid ?? options.context;
@@ -180,18 +196,9 @@ export class ProjectionAnalysis {
     return true;
   }
   jacobian(longitude: number, latitude: number, result: ProjectionJacobian): boolean {
-    if (this.busy) return false;
-    this.busy = true;
-    let xx: number, xy: number, yx: number, yy: number;
-    try {
-      if (!this.calculate(longitude, latitude)) return false;
-      xx = this.derivative.dxDLongitude;
-      xy = this.derivative.dxDLatitude;
-      yx = this.derivative.dyDLongitude;
-      yy = this.derivative.dyDLatitude;
-    } finally {
-      this.busy = false;
-    }
+    if (!this.calculate(longitude, latitude)) return false;
+    // Snapshot before writing caller-owned outputs, whose setters can reenter.
+    const [xx, xy, yx, yy] = this.derivative;
     result.dxDLongitude = xx;
     result.dxDLatitude = xy;
     result.dyDLongitude = yx;
@@ -199,18 +206,9 @@ export class ProjectionAnalysis {
     return true;
   }
   factors(longitude: number, latitude: number, result: ProjectionFactors): boolean {
-    if (this.busy) return false;
-    this.busy = true;
-    let xx: number, xy: number, yx: number, yy: number;
-    try {
-      if (!this.calculate(longitude, latitude)) return false;
-      xx = this.derivative.dxDLongitude;
-      xy = this.derivative.dxDLatitude;
-      yx = this.derivative.dyDLongitude;
-      yy = this.derivative.dyDLatitude;
-    } finally {
-      this.busy = false;
-    }
+    if (!this.calculate(longitude, latitude)) return false;
+    // Snapshot before writing caller-owned outputs, whose setters can reenter.
+    const [xx, xy, yx, yy] = this.derivative;
     const a = this.groundSemiMajorAxis;
     const es = this.groundEs;
     const d = 1 - es * Math.sin(latitude) ** 2;
@@ -266,42 +264,21 @@ export class ProjectionAnalysis {
     }
     return Number.isFinite(this.point.x) && Number.isFinite(this.point.y);
   }
-  private difference(longitude: number, latitude: number, step: number, axis: number): boolean {
-    const lx = axis === 0 ? step : 0,
-      ly = axis === 1 ? step : 0;
-    if (!this.sample(longitude - 2 * lx, latitude - 2 * ly)) return false;
-    const x1 = this.point.x,
-      y1 = this.point.y;
-    if (!this.sample(longitude - lx, latitude - ly)) return false;
-    const x2 = this.point.x,
-      y2 = this.point.y;
-    if (!this.sample(longitude + lx, latitude + ly)) return false;
-    const x3 = this.point.x,
-      y3 = this.point.y;
-    if (!this.sample(longitude + 2 * lx, latitude + 2 * ly)) return false;
-    this.dx = (x1 - this.point.x + 8 * (x3 - x2)) / (12 * step);
-    this.dy = (y1 - this.point.y + 8 * (y3 - y2)) / (12 * step);
-    return Number.isFinite(this.dx) && Number.isFinite(this.dy);
-  }
   private calculate(longitude: number, latitude: number): boolean {
-    for (let axis = 0; axis < 2; axis++) {
-      if (!this.difference(longitude, latitude, this.step, axis)) return false;
-      const x = this.dx,
-        y = this.dy;
-      if (!this.difference(longitude, latitude, this.step / 2, axis)) return false;
-      const bound = this.tolerance * Math.max(this.a, Math.abs(this.dx), Math.abs(this.dy));
-      if (Math.abs(x - this.dx) > bound || Math.abs(y - this.dy) > bound) return false;
-      const dx = this.dx + (this.dx - x) / 15,
-        dy = this.dy + (this.dy - y) / 15;
-      if (!Number.isFinite(dx) || !Number.isFinite(dy)) return false;
-      if (axis === 0) {
-        this.derivative.dxDLongitude = dx;
-        this.derivative.dyDLongitude = dy;
-      } else {
-        this.derivative.dxDLatitude = dx;
-        this.derivative.dyDLatitude = dy;
+    if (this.busy) return false;
+    this.busy = true;
+    try {
+      this.longitude = longitude;
+      this.latitude = latitude;
+      for (let axis = 0; axis < 2; axis++) {
+        this.axis = axis;
+        if (!this.numerical.evaluate(this.step, this.a, this.tolerance)) return false;
+        this.derivative[axis] = this.numerical.result[0];
+        this.derivative[axis + 2] = this.numerical.result[1];
       }
+      return true;
+    } finally {
+      this.busy = false;
     }
-    return true;
   }
 }

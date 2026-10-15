@@ -3,10 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {projectionEngine} from '@math.gl/projection';
+import type {CRSBounds} from '@math.gl/projection/types';
 import {
   createSpatialReference,
   inferCRSRepresentation,
   type CRSDefinition,
+  type CRSUnit,
   type PROJJSONCRSByType,
   type ReadonlyCRSDefinition,
   type SpatialReference
@@ -156,3 +158,14 @@ void minimalProjection;
 void preparedEngine;
 // @ts-expect-error Projection is a type contract, not a constructor.
 new Projection();
+
+const angularUnit: CRSUnit = {name: 'degrees', degreesPerUnit: 1};
+const renderingBounds: CRSBounds = [
+  [0, 0, 0],
+  [1, 1, 0]
+];
+// @ts-expect-error Rendering envelopes require all three target coordinate axes.
+const incompleteCorner: CRSBounds[0] = [0, 0];
+void angularUnit;
+void renderingBounds;
+void incompleteCorner;

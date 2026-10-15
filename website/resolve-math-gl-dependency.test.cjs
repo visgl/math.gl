@@ -55,3 +55,14 @@ test('missing packages are reported instead of silently falling back to workspac
   const root = fixture(t);
   assert.throws(() => resolveDependency('@math.gl/missing', root, join(root, 'modules')), {code: 'MODULE_NOT_FOUND'});
 });
+
+test('website resolves the CRS metadata entry directly from source', () => {
+  const config = require('./docusaurus.config.js');
+  const plugin = config.plugins.find(
+    entry => Array.isArray(entry) && entry[0] === '@vis.gl/docusaurus-website/plugin-webpack-config'
+  );
+  assert.equal(
+    plugin[1].resolve.alias['@math.gl/crs/metadata$'],
+    join(__dirname, '../modules/crs/src/crs-metadata.ts')
+  );
+});

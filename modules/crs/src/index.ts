@@ -59,3 +59,7 @@ export {
   parsePROJString,
   PROJStringSyntaxError
 } from './proj-string';
+
+export type {CRSMetadata, CRSUnit} from './crs-metadata';
+export {getCRSSignature} from './crs-metadata';
+export {linearUnits} from './units-table';

@@ -64,10 +64,10 @@ const scopes = new Map([
       'jacobian',
       'factors',
       'sample',
-      'difference',
       'calculate'
     ])
   ],
+  ['modules/projection/src/numerical-derivative.ts', new Set(['evaluate', 'difference'])],
   [
     'modules/projection/src/experimental/common/meridian-distance.ts',
     new Set(['radius', 'pair', 'meridianDistance', 'inverseMeridianDistance'])
@@ -124,11 +124,10 @@ for (const [path, names] of scopes) {
   }
   visit(source);
 }
-assert.equal(
-  found.size,
-  [...scopes.values()].reduce((total, names) => total + names.size, 0),
-  'Guarded functions must remain present'
+const missing = [...scopes].flatMap(([path, names]) =>
+  [...names].map(name => path + ':' + name).filter(name => !found.has(name))
 );
+assert.deepEqual(missing, [], 'Guarded functions must remain present: ' + missing.join(', '));
 assert.deepEqual(
   violations,
   [],

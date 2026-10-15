@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original full-catalogue factory for the math.gl projection engine. Projection kernels retain their proj4js/PROJ port notices and licenses in ../experimental/.
-import {ConfigurableProjectionEngine} from '../experimental/projection-engine';
+import {ConfigurableProjectionEngine, hasCRSOverrides} from '../experimental/projection-engine';
 import type {ProjectionEngine, ProjectionEngineOptions} from '../types';
 import {datumCatalog} from '../datums';
 import {getDatumDefinitions} from '../experimental/crs/datum-catalog';
@@ -152,6 +152,9 @@ export class FullProjectionEngine extends ConfigurableProjectionEngine implement
       parsers: options.parsers ?? compatibilityParsers,
       datumCatalogs: options.datumCatalogs ?? [datumCatalog]
     });
+    // Built-in registrations define the default meaning; only caller overrides
+    // require a signature reconstructed from resolved metadata.
+    this.useDefinitionSignature = !hasCRSOverrides(options);
   }
 }
 

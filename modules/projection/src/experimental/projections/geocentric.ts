@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {ProjectionPlugin} from '../types';
+import {createGeographicProfile} from '../rendering-profile/geographic-rendering-profile';
 import {
   geodeticToGeocentric,
   geocentricToGeodetic,
@@ -12,13 +13,20 @@ export const geocentric: ProjectionPlugin = {
   name: 'geocent',
   aliases: ['Geocentric', 'geocentric', 'Geocent'],
   parameters: [],
-  create({semiMajorAxis, semiMinorAxis, eccentricitySquared}) {
+  create({semiMajorAxis, semiMinorAxis, eccentricitySquared, primeMeridian = 0}) {
     const ellipsoid = {
       semiMajorAxis,
       eccentricitySquared,
       semiMinorAxis: semiMinorAxis ?? semiMajorAxis * Math.sqrt(1 - eccentricitySquared)
     };
     return {
+      getRenderingProfile: () => ({
+        bounds: [
+          [-semiMajorAxis, -semiMajorAxis, -ellipsoid.semiMinorAxis],
+          [semiMajorAxis, semiMajorAxis, ellipsoid.semiMinorAxis]
+        ],
+        normalize: createGeographicProfile({}, primeMeridian)().normalize
+      }),
       forward() {
         throw new Error('Geocentric projection requires the 3D pipeline');
       },

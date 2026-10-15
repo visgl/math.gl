@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import qsfnz from '../common/qsfnz';
+import {withAngularRenderingProfile} from '../rendering-profile/angular-rendering-profile';
+import {equalAreaAzimuthalBounds} from '../rendering-profile/azimuthal-rendering-bounds';
 import type {ProjectionPlugin} from '../types';
 import {bindKernel, guardAzimuthalDomain, kernelParameters, ORIGIN_PARAMETERS} from '../kernel';
 import {createState, forward, inverse} from '../kernels/laea';
@@ -13,6 +16,24 @@ export const lambertAzimuthalEqualArea: ProjectionPlugin = {
   create(context) {
     const base = kernelParameters(context);
 
-    return guardAzimuthalDomain(base, bindKernel('laea', createState(base), forward, inverse));
+    const state = createState(base);
+    // Keep the rendering boundary finite without restricting raw conversion.
+    return withAngularRenderingProfile(
+      guardAzimuthalDomain(base, bindKernel('laea', state, forward, inverse)),
+      base,
+      (Math.PI * 179) / 180,
+      (region, domain) =>
+        equalAreaAzimuthalBounds(
+          base,
+          base.sphere ? 1 : state.xmf || Math.sqrt(state.qp / 2),
+          base.sphere ? 1 : state.ymf || Math.sqrt(state.qp / 2),
+          region,
+          domain,
+          base.sphere ? base.lat0 : Math.asin(qsfnz(base.e, Math.sin(base.lat0)) / state.qp),
+          base.sphere
+            ? latitude => latitude
+            : latitude => Math.asin(qsfnz(base.e, Math.sin(latitude)) / state.qp)
+        )
+    );
   }
 };

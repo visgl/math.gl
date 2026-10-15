@@ -66,3 +66,14 @@ export type {ProjectionCoordinate, ProjectionOutput, ProjectionArray};
 export type {ProjectionTransformOptions};
 export type {ProjectionPlugin, ProjectionPoint} from './experimental/types';
 export type {ProjectionDescriptor} from './experimental/projection-descriptor';
+
+export type {
+  CRSEngine,
+  CRSDescriptor,
+  CRSConversion,
+  CRSConverter,
+  CRSBounds,
+  CRSRenderingScale,
+  CRSRenderingScaleCallback,
+  GetCRSOptions
+} from './experimental/types';

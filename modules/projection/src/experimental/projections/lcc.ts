@@ -3,6 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {ProjectionPlugin} from '../types';
+import {conicBounds} from '../rendering-profile/rendering-bounds';
+import {createAngularRanges} from '../rendering-profile/geographic-bounds';
+import {withRectangleRenderingProfile} from '../rendering-profile/rectangular-rendering-profile';
 import {createFlatProjection as createProjection} from '../flat-projection';
 import {
   bindKernel,
@@ -29,12 +32,36 @@ export const lambertConformalConic: ProjectionPlugin = {
     validateConic(base, context.parameters);
     const state = createState(base);
     const implementation = bindKernel('lcc', state, forward, inverse);
-    return createProjection(point => {
-      const latitude = point.y;
-      if (Math.abs(latitude) === Math.PI / 2 && latitude * state.ns < 0) {
-        throw new Error('Lambert conformal conic is undefined at the opposite pole');
-      }
-      implementation.forwardInPlace!(point);
-    }, implementation.inverseInPlace!);
+    // The opposite pole diverges for LCC; its rendering target stops at 60 degrees.
+    const projection = {
+      ...createProjection(point => {
+        const latitude = point.y;
+        if (Math.abs(latitude) === Math.PI / 2 && latitude * state.ns < 0) {
+          throw new Error('Lambert conformal conic is undefined at the opposite pole');
+        }
+        implementation.forwardInPlace!(point);
+      }, implementation.inverseInPlace!)
+    };
+    return withRectangleRenderingProfile(
+      projection,
+      createAngularRanges(
+        base.long0 - Math.PI,
+        state.ns > 0 ? -Math.PI / 3 : -Math.PI / 2,
+        base.long0 + Math.PI,
+        state.ns > 0 ? Math.PI / 2 : Math.PI / 3
+      ),
+      ranges =>
+        conicBounds(
+          projection.forward,
+          ranges,
+          base.long0,
+          state.ns,
+          state.x0,
+          state.y0 + state.k0 * state.rh,
+          base.over
+        ),
+      base.primeMeridian,
+      base.over
+    );
   }
 };

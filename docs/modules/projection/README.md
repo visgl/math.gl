@@ -68,6 +68,10 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 
 ## Choose an API
 
+The [CRS and projection API guide](developer-guide/api-guide.md) explains how source
+metadata, CRS descriptors, transforms, algorithm plugins and projection analysis fit
+together, and when to use each.
+
 | API                                                                  | Use it when                                                                  |
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | [`FullProjectionEngine`](api-reference/projection-engine.md)         | You want all built-in algorithms and WKT/PROJJSON readers                    |

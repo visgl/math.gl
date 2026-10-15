@@ -2,6 +2,15 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {CRSMetadata} from '@math.gl/crs';
+import type {TypeScriptCRSInput} from './crs/spatial-reference';
+import type {
+  CreateProjectionOptions,
+  ProjectionEngine,
+  ProjectionCoordinate,
+  ProjectionOutput
+} from '../types';
+
 /** Raw PROJ parameters. Angles are decimal degrees and lengths are meters. */
 export type ProjectionParameters = Readonly<Record<string, string | undefined>>;
 
@@ -19,8 +28,38 @@ export type ProjectionFlatContext = {
   readonly outputScale: number;
 };
 
+/** Greenwich longitude/latitude coverage in degrees. Longitude endpoints are in
+ * [-180, 180]; west > east crosses the dateline. [-180, south, 180, north]
+ * covers all longitudes; equal longitude endpoints describe a meridian.
+ * Latitude satisfies -90 <= south <= north <= 90.
+ */
+export type GeographicBounds = readonly [west: number, south: number, east: number, north: number];
+
+/** Projection-owned native reference-surface envelope and Greenwich degree normalization. */
+export type ProjectionRenderingProfile = {
+  /** Finite native XYZ envelope chosen as an appropriate rendering target.
+   * This is a rendering policy, not the algorithm's mathematical validity domain.
+   * Coordinates outside it may still be converted; membership does not validate a coordinate.
+   * Horizontal projections use zero reference height; geocentric profiles enclose XYZ.
+   */
+  readonly bounds: readonly [readonly [number, number, number], readonly [number, number, number]];
+  /** Optional rendering-domain clamp on Greenwich longitude/latitude in degrees; preserve altitude.
+   * Conversion kernels remain unrestricted by this rendering envelope.
+   */
+  normalize?(point: ProjectionPoint): void;
+};
+
 /** A projection operates on radians and meters; the engine handles CRS units. */
 export type ProjectionImplementation = {
+  /** Effective central longitude in native radians, including algorithm-derived origins. */
+  readonly longitudeOrigin?: number;
+  /** Resolve projection-owned bounds and normalization, optionally for declared coverage.
+   * Coverage is the declared Greenwich geographic area, in degrees; wrapped endpoints are preserved.
+   * Omit coverage for the default rendering target. Descriptor retrieval retries
+   * without coverage if the coverage-specific profile cannot be resolved.
+   * Required for CRS descriptor retrieval; ordinary conversion can omit it.
+   */
+  getRenderingProfile?(coverage?: GeographicBounds): ProjectionRenderingProfile;
   /** Optional whole-buffer specialization. Return undefined to keep the general pipeline.
    * Called only for geographic/projected pairs without datum, axis, prime-meridian,
    * vertical-unit, longitude-wrap or lossy stages. The engine validates storage and stride.
@@ -42,6 +81,8 @@ export type ProjectionImplementation = {
 
 /** Initialized geometry shared by projection plugins. No datum shift is implied. */
 export type ProjectionContext = {
+  /** Greenwich longitude of the CRS prime meridian, in radians. */
+  readonly primeMeridian?: number;
   /** Preserve the normalized polar axis; recovering it from eccentricity can lose precision. */
   readonly semiMinorAxis?: number;
   readonly semiMajorAxis: number;
@@ -59,3 +100,82 @@ export type ProjectionPlugin = {
   readonly flags?: readonly string[];
   create(context: ProjectionContext): ProjectionImplementation;
 };
+
+/** Coordinate conventions used when resolving a single CRS. */
+export type GetCRSOptions = Pick<CreateProjectionOptions, 'enforceAxis' | 'mode'> & {
+  /** Additional source CRS strings to prepare; WGS84 is always included. */
+  converters?: readonly string[];
+};
+
+/** Finite target-coordinate XYZ envelope describing an appropriate rendering target.
+ * This is not the projection algorithm's validity domain or a coordinate validity test.
+ */
+export type CRSBounds = readonly [
+  minimum: readonly [number, number, number],
+  maximum: readonly [number, number, number]
+];
+
+/** Rendering factors in effective target-axis order. Horizontal factors measure
+ * WGS84 reference-surface metres per stored coordinate unit through the full inverse
+ * transform. For projected CRSs the vertical factor uses the square root of the
+ * inverse horizontal area scale, expressed in the declared vertical unit.
+ * This sizing convention is independent of altitude conversion; use the component
+ * unit metadata and converters for physical heights. Geocentric/identity factors
+ * are constant physical unit conversions.
+ */
+export type CRSRenderingScale = readonly [x: number, y: number, z: number];
+
+/** Evaluate at a position in the descriptor's CRS; null means scale calculation failed. */
+export type CRSRenderingScaleCallback = (
+  coordinate: ProjectionCoordinate
+) => CRSRenderingScale | null;
+
+/** Synchronous conversion; omit output to allocate an array, or supply storage to reuse it. */
+export interface CRSConversion {
+  (coordinate: ProjectionCoordinate): number[];
+  <T extends ProjectionOutput>(coordinate: ProjectionCoordinate, output: T): T;
+}
+
+/** Prepared bidirectional conversion between a source CRS and a descriptor's target CRS. */
+export interface CRSConverter {
+  /** Convert source coordinates to target coordinates, optionally reusing output storage. */
+  readonly from: CRSConversion;
+  /** Convert target coordinates to source coordinates, optionally reusing output storage. */
+  readonly to: CRSConversion;
+  /** Normalize source coordinates for the target projection, optionally reusing output storage. */
+  readonly normalize: CRSConversion;
+}
+
+/** Prepared CRS metadata, target-space behavior, and converters keyed by source CRS string.
+ * WGS84 uses longitude/latitude in degrees and ellipsoidal height in metres. Converters
+ * retain the engine's datum policy; fourth and later components pass through.
+ */
+export interface CRSDescriptor extends CRSMetadata {
+  /** Original string under default conventions; otherwise a resolved @math.gl/crs signature.
+   * Opaque to consumers; no arbitrary CRS equivalence comparison is implied.
+   * Does not fingerprint algorithm implementations or grid contents; equality does
+   * not guarantee packed-coordinate interchangeability across engines.
+   */
+  readonly signature: string;
+  /** Finite XYZ envelope chosen as an appropriate rendering target, in effective units and axis order.
+   * Bounds describe a rendering policy for the reference surface, not the algorithm's
+   * mathematical validity domain or altitude limits. Coordinates outside the envelope
+   * may still be converted; being inside it does not guarantee a valid conversion.
+   */
+  readonly renderingBounds: CRSBounds;
+  /** Constant scale or target-position callback; no viewport fallback is applied. */
+  readonly renderingScale: CRSRenderingScale | CRSRenderingScaleCallback;
+  /** Return rendering sizing factors at the anchor; null means sampling is unavailable
+   * or derivatives fail numerical agreement. Invalid finite geometry raises an error. */
+  getRenderingScale(coordinate: ProjectionCoordinate): CRSRenderingScale | null;
+  /** Prepared converters; WGS84 is always available, plus explicitly requested source strings. */
+  readonly converter: Readonly<Record<string, CRSConverter>> & {
+    readonly WGS84: CRSConverter;
+  };
+}
+
+/** General CRS-capable engine; specialized pair-only engines need not implement retrieval. */
+export interface CRSEngine extends ProjectionEngine {
+  /** Resolve metadata and preload only required algorithms. Returned conversions are synchronous. */
+  getCRS(definition: TypeScriptCRSInput, options?: GetCRSOptions): Promise<CRSDescriptor>;
+}

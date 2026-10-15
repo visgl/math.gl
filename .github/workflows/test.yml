@@ -117,6 +117,7 @@ jobs:
         run: |
           node modules/projection/scripts/check-attribution.mjs
           node modules/projection/scripts/audit-allocations.mjs --check
+          node --test modules/projection/scripts/check-spheroid-allocations.test.mjs
           node modules/projection/scripts/check-spheroid-allocations.mjs
           node modules/projection/scripts/check-spheroid-boundary.mjs
           node modules/projection/scripts/check-local-frame-allocations.mjs

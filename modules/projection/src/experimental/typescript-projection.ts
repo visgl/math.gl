@@ -1,11 +1,15 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {resolveRenderingProfile} from './rendering-profile/rendering-profile';
+import type {GeographicBounds} from './types';
+import {getIdentityRenderingProfile} from './rendering-profile/identity-rendering-profile';
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
 import type {ProjectionDescriptor} from './projection-descriptor';
 import {getLoadedProjection, preloadProjection} from './projection-descriptor';
 import type {
   ProjectionImplementation,
+  ProjectionRenderingProfile,
   ProjectionPlugin,
   ProjectionPoint,
   ProjectionFlatOperation
@@ -19,6 +23,7 @@ import {TypeScriptCRSError, unsupportedStage} from './crs/types';
 import type {CRSCompatibilityReason, CRSNormalizationOptions, NormalizedCRS} from './crs/types';
 import {createDatumTransform} from './datum';
 import {wrapLongitude} from './parameters';
+import {createGeographicProfile} from './rendering-profile/geographic-rendering-profile';
 import {compileVerticalGrid} from './vertical-datum';
 import type {DatumGridCollection, VerticalGridCollection} from './grids/types';
 
@@ -70,6 +75,20 @@ export class ProjectionTransform<P extends ProjectionRegistration = ProjectionPl
     pending?: Promise<ProjectionTransform>;
     implementation?: ProjectionTransform;
   };
+  /** Initialized target projection profile on eager/prepared transforms. @internal */
+  private readonly targetRenderingProfile?: ProjectionImplementation['getRenderingProfile'];
+  private readonly targetCoverage?: GeographicBounds;
+  get targetProfile(): ProjectionRenderingProfile | undefined {
+    return this.getTargetRenderingProfile(this.targetCoverage);
+  }
+  /** Resolve target rendering policy independently from coordinate conversion. @internal */
+  getTargetRenderingProfile(coverage?: GeographicBounds): ProjectionRenderingProfile | undefined {
+    return (
+      this.targetRenderingProfile && resolveRenderingProfile(this.targetRenderingProfile, coverage)
+    );
+  }
+  /** Effective target central meridian in native radians. @internal */
+  readonly targetLongitudeOrigin: number = 0;
   readonly lossy: boolean;
   constructor(options: ProjectionTransformOptions<P> = {}) {
     const registrations = options.projections || [];
@@ -86,6 +105,17 @@ export class ProjectionTransform<P extends ProjectionRegistration = ProjectionPl
       const eagerPlugins = plugins as ReadonlyMap<string, ProjectionPlugin>;
       const from = compileCRS(eager.from ?? 'WGS84', eagerPlugins, eager);
       const to = compileCRS(eager.to ?? 'WGS84', eagerPlugins, eager);
+      this.targetRenderingProfile =
+        to.implementation?.getRenderingProfile?.bind(to.implementation) ??
+        (to.kind === 'geographic'
+          ? createGeographicProfile(to.parameters, to.primeMeridian)
+          : to.kind === 'identity'
+            ? getIdentityRenderingProfile
+            : undefined);
+      this.targetCoverage = to.areaOfUse;
+      this.targetLongitudeOrigin =
+        to.implementation?.longitudeOrigin ??
+        (to.kind === 'geographic' ? (to.longitudeWrap ?? 0) : 0);
       this.lossy = from.lossy || to.lossy;
       if (this.lossy && (from.kind === 'geocentric' || to.kind === 'geocentric'))
         unsupportedStage(
@@ -336,7 +366,11 @@ function compileCRS(
     pluginKey(crs.projection) === 'fasttransversemercator'
       ? Object.freeze({...crs.parameters, approx: undefined})
       : crs.parameters;
-  const implementation = plugin?.create({...crs.ellipsoid, parameters});
+  const implementation = plugin?.create({
+    ...crs.ellipsoid,
+    parameters,
+    primeMeridian: crs.primeMeridian
+  });
   if (crs.kind === 'geocentric' && (!implementation?.forward3D || !implementation?.inverse3D))
     throw new Error('Geocentric plugin must implement 3D operations');
   const references = crs.datum.grids;

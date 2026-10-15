@@ -43,6 +43,11 @@
       "types": "./dist/spatial-reference.d.ts",
       "import": "./dist/spatial-reference.js",
       "require": "./dist/spatial-reference.cjs"
+    },
+    "./metadata": {
+      "types": "./dist/crs-metadata.d.ts",
+      "import": "./dist/crs-metadata.js",
+      "require": "./dist/crs-metadata.cjs"
     }
   },
   "files": [
