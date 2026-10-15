@@ -2,17 +2,21 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {GeographicBounds, ProjectionImplementation, ProjectionRenderingProfile} from './types';
+import type {
+  GeographicBounds,
+  ProjectionImplementation,
+  ProjectionRenderingProfile
+} from '../types';
 import type {AngularRanges} from './geographic-bounds';
 import {
   clampGeographicPoint,
   getAngularRanges,
   getGeographicBounds,
   intersectGeographicBounds,
-  normalizeLongitude,
-  unionRenderingBounds
+  normalizeLongitude
 } from './geographic-bounds';
-import {wrapLongitude} from './parameters';
+import {wrapLongitude} from '../parameters';
+import {combineRenderingProfiles} from './rendering-profile';
 
 export type ResolveRenderingBounds = (
   parameters: AngularRanges
@@ -21,45 +25,36 @@ export type ResolveRenderingBounds = (
 /** Normalize native kernel coordinates against Greenwich geographic coverage. */
 export function normalizeCoverage(
   point: {x: number; y: number},
-  regions: readonly GeographicBounds[],
+  coverage: GeographicBounds,
   origin = 0,
   primeMeridian = 0,
   over = false
 ): void {
+  const ranges = getAngularRanges(coverage, primeMeridian, origin);
+  // Region combination is owned by combineRenderingProfiles. This helper
+  // clamps one rectangle, preserving its continuous branch when +over is set.
+  if (over) {
+    point.x = Math.max(ranges[0][0], Math.min(ranges[1][0], point.x));
+    point.y = Math.max(ranges[0][1], Math.min(ranges[1][1], point.y));
+    return;
+  }
   const input: [number, number] = [
     ((point.x + primeMeridian) * 180) / Math.PI,
     (point.y * 180) / Math.PI
   ];
-  let selected: GeographicBounds | undefined;
-  let best: [number, number] | undefined,
-    distance = Infinity;
-  for (const region of regions) {
-    const candidate = clampGeographicPoint(region, input);
-    const d = Math.hypot(normalizeLongitude(candidate[0] - input[0]), candidate[1] - input[1]);
-    if (d < distance) {
-      best = candidate;
-      selected = region;
-      distance = d;
-    }
-  }
-  if (!best) throw new Error('CRS coverage does not intersect the rendering target');
-  const ranges = getAngularRanges(selected!, primeMeridian, origin);
+  const best = clampGeographicPoint(coverage, input);
   const inputLongitude = (input[0] * Math.PI) / 180 - primeMeridian;
   let longitude = (best[0] * Math.PI) / 180 - primeMeridian;
   if (
     best[0] === normalizeLongitude(input[0]) &&
-    inputLongitude >= ranges.longitude[0] &&
-    inputLongitude <= ranges.longitude[1]
+    inputLongitude >= ranges[0][0] &&
+    inputLongitude <= ranges[1][0]
   )
     longitude = inputLongitude;
-  else if (longitude < ranges.longitude[0] || longitude > ranges.longitude[1])
+  else if (longitude < ranges[0][0] || longitude > ranges[1][0])
     longitude +=
-      Math.round(((ranges.longitude[0] + ranges.longitude[1]) / 2 - longitude) / (2 * Math.PI)) *
-      2 *
-      Math.PI;
-  // +over keeps the chosen continuous interval; ordinary kernels wrap relative
-  // to their effective origin. Both choices use the same ranges as the bounds.
-  point.x = over ? longitude : origin + wrapLongitude(longitude - origin);
+      Math.round(((ranges[0][0] + ranges[1][0]) / 2 - longitude) / (2 * Math.PI)) * 2 * Math.PI;
+  point.x = origin + wrapLongitude(longitude - origin);
   point.y = (best[1] * Math.PI) / 180;
 }
 
@@ -71,7 +66,14 @@ export function createRectangleRenderingProfile(
   primeMeridian = 0,
   over = false
 ): ProjectionRenderingProfile {
-  return createRegionsRenderingProfile(resolveBounds, [coverage], origin, primeMeridian, over);
+  return {
+    get bounds() {
+      return resolveBounds(getAngularRanges(coverage, primeMeridian, origin));
+    },
+    normalize(point) {
+      normalizeCoverage(point, coverage, origin, primeMeridian, over);
+    }
+  };
 }
 
 function createRegionsRenderingProfile(
@@ -81,16 +83,11 @@ function createRegionsRenderingProfile(
   primeMeridian: number,
   over: boolean
 ): ProjectionRenderingProfile {
-  return {
-    get bounds() {
-      return unionRenderingBounds(
-        regions.map(region => resolveBounds(getAngularRanges(region, primeMeridian, origin)))
-      );
-    },
-    normalize(point) {
-      normalizeCoverage(point, regions, origin, primeMeridian, over);
-    }
-  };
+  const profile = combineRenderingProfiles(regions, region =>
+    createRectangleRenderingProfile(resolveBounds, region, origin, primeMeridian, over)
+  );
+  if (!profile) throw new Error('CRS coverage does not intersect the rendering target');
+  return profile;
 }
 
 /** Algorithms opt into rectangular coverage and clipping to their own default target. */
@@ -101,7 +98,7 @@ export function withRectangleRenderingProfile(
   primeMeridian = 0,
   over = false
 ): ProjectionImplementation {
-  const origin = (parameters.longitude[0] + parameters.longitude[1]) / 2;
+  const origin = (parameters[0][0] + parameters[1][0]) / 2;
   const defaults = getGeographicBounds(parameters, primeMeridian);
   return {
     ...implementation,
@@ -111,7 +108,7 @@ export function withRectangleRenderingProfile(
         return {
           bounds: resolveBounds(parameters),
           normalize(point) {
-            normalizeCoverage(point, [defaults], origin, primeMeridian, over);
+            normalizeCoverage(point, defaults, origin, primeMeridian, over);
           }
         };
       try {

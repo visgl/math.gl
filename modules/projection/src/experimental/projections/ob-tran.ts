@@ -10,13 +10,17 @@ import type {
   ProjectionRenderingProfile
 } from '../types';
 import {createProjection, projectionOperation} from '../mutable-projection';
-import {createGeographicProfile} from '../geographic-rendering-profile';
+import {createGeographicProfile} from '../rendering-profile/geographic-rendering-profile';
 import {numberParameter, wrapLongitude} from '../parameters';
 import {TypeScriptCRSError} from '../crs/types';
-import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
+import {createRectangleRenderingProfile} from '../rendering-profile/rectangular-rendering-profile';
 import type {GeographicBounds} from '../types';
-import {createAngularRanges, getAngularRanges, getGeographicBounds} from '../geographic-bounds';
-import {sphericalRange, sphericalRatioRange} from '../spherical-rendering-domain';
+import {
+  createAngularRanges,
+  getAngularRanges,
+  getGeographicBounds
+} from '../rendering-profile/geographic-bounds';
+import {sphericalRange, sphericalRatioRange} from '../rendering-profile/spherical-rendering-domain';
 
 const rotationParameters = [
   'o_proj',
@@ -135,7 +139,7 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
       const rotate = (point: ProjectionPoint) => {
         const longitude = point.x,
           latitude = point.y;
-        const lam = over ? longitude - longitudeOrigin : wrapLongitude(longitude - longitudeOrigin);
+        const lam = wrapLongitude(longitude - longitudeOrigin, over);
         const coslam = Math.cos(lam),
           sinphi = Math.sin(latitude),
           cosphi = Math.cos(latitude);
@@ -188,7 +192,8 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
             () => child.bounds,
             coverage,
             longitudeOrigin,
-            context.primeMeridian ?? 0
+            context.primeMeridian ?? 0,
+            over
           );
         return {
           get bounds() {
@@ -205,9 +210,13 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
           },
           normalize(point) {
             source?.normalize!(point);
+            const longitude = point.x;
             rotate(point);
             child.normalize?.(point);
             unrotate(point);
+            // Rotation recovers a principal longitude. Restore the source branch
+            // for +over without changing the geographic point or child coordinates.
+            if (over) point.x += Math.round((longitude - point.x) / (2 * Math.PI)) * 2 * Math.PI;
           }
         };
       };
@@ -222,10 +231,10 @@ export function obliqueTransformation(wrapped: ProjectionPlugin | 'longlat'): Pr
             longitudeOrigin
           );
           const local = createAngularRanges(
-            parameters.longitude[0] - longitudeOrigin,
-            parameters.latitude[0],
-            parameters.longitude[1] - longitudeOrigin,
-            parameters.latitude[1]
+            parameters[0][0] - longitudeOrigin,
+            parameters[0][1],
+            parameters[1][0] - longitudeOrigin,
+            parameters[1][1]
           );
           const z = sphericalRange(oblique ? [-cphip, 0, sphip] : [-1, 0, 0], local);
           const xAxis = oblique ? ([sphip, 0, cphip] as const) : ([0, 0, 1] as const);

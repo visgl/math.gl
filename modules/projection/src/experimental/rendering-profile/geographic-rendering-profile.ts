@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {ProjectionParameters, ProjectionImplementation} from './types';
-import {DEGREES_TO_RADIANS, numberParameter} from './parameters';
+import type {ProjectionParameters, ProjectionImplementation} from '../types';
+import {DEGREES_TO_RADIANS, numberParameter} from '../parameters';
 import {createRectangleRenderingProfile} from './rectangular-rendering-profile';
 import {longitudeRange} from './rendering-bounds';
 
@@ -18,8 +18,8 @@ export function createGeographicProfile(
       ranges => {
         const longitude = longitudeRange(ranges, center);
         return [
-          [center + longitude[0], ranges.latitude[0], 0],
-          [center + longitude[1], ranges.latitude[1], 0]
+          [center + longitude[0], ranges[0][1], 0],
+          [center + longitude[1], ranges[1][1], 0]
         ];
       },
       coverage ?? [-180, -90, 180, 90],

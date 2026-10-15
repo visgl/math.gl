@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {ProjectionPlugin} from '../types';
-import {createGeographicProfile} from '../geographic-rendering-profile';
+import {createGeographicProfile} from '../rendering-profile/geographic-rendering-profile';
 import {
   geodeticToGeocentric,
   geocentricToGeodetic,

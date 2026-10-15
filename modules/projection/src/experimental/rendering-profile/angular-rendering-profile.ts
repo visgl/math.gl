@@ -2,14 +2,18 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {KernelParameters} from './kernel';
-import type {GeographicBounds, ProjectionImplementation, ProjectionRenderingProfile} from './types';
+import type {KernelParameters} from '../kernel';
+import type {
+  GeographicBounds,
+  ProjectionImplementation,
+  ProjectionRenderingProfile
+} from '../types';
 import {createAngularRanges, getAngularRanges} from './geographic-bounds';
 import type {AngularRanges} from './geographic-bounds';
 import {createRectangleRenderingProfile} from './rectangular-rendering-profile';
 import {geographicVector, sphericalExtremum} from './spherical-rendering-domain';
 import type {AngularDomain} from './spherical-rendering-domain';
-import {wrapLongitude} from './parameters';
+import {wrapLongitude} from '../parameters';
 
 export type ResolveAngularBounds = (
   parameters: AngularRanges,
@@ -27,10 +31,10 @@ export function createAngularRenderingProfile(
   const create = (coverage: GeographicBounds, declared: boolean): ProjectionRenderingProfile => {
     const parameters = getAngularRanges(coverage, base.primeMeridian, base.long0);
     const local = createAngularRanges(
-      parameters.longitude[0] - base.long0,
-      parameters.latitude[0],
-      parameters.longitude[1] - base.long0,
-      parameters.latitude[1]
+      parameters[0][0] - base.long0,
+      parameters[0][1],
+      parameters[1][0] - base.long0,
+      parameters[1][1]
     );
     const axis = [Math.cos(base.lat0), 0, Math.sin(base.lat0)] as const;
     const minimum = declared ? sphericalExtremum(axis, local, undefined, false).value : -1;
@@ -68,14 +72,14 @@ export function createAngularRenderingProfile(
             // All cap bearings are equally close to an exact antipode. Prefer
             // northward to keep normalization stable, provided coverage allows it.
             const angle = base.lat0 + domain.distance;
-            const center = (local.longitude[0] + local.longitude[1]) / 2;
+            const center = (local[0][0] + local[1][0]) / 2;
             const longitude = center + wrapLongitude((Math.cos(angle) < 0 ? Math.PI : 0) - center);
             const latitude = Math.atan2(Math.sin(angle), Math.abs(Math.cos(angle)));
             if (
-              longitude >= local.longitude[0] &&
-              longitude <= local.longitude[1] &&
-              latitude >= local.latitude[0] &&
-              latitude <= local.latitude[1]
+              longitude >= local[0][0] &&
+              longitude <= local[1][0] &&
+              latitude >= local[0][1] &&
+              latitude <= local[1][1]
             ) {
               point.x = longitude + base.long0;
               point.y = latitude;

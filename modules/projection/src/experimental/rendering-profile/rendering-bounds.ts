@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {ProjectionImplementation, ProjectionRenderingProfile} from './types';
+import type {ProjectionImplementation, ProjectionRenderingProfile} from '../types';
 import type {AngularRanges} from './geographic-bounds';
-import {wrapLongitude} from './parameters';
+import {wrapLongitude} from '../parameters';
 
 export type Range = readonly [number, number];
 export const ordered = (a: number, b: number): [number, number] => [Math.min(a, b), Math.max(a, b)];
@@ -45,17 +45,18 @@ export function longitudeRange(
   origin: number,
   over = false
 ): [number, number] {
-  const low = parameters.longitude[0] - origin,
-    high = parameters.longitude[1] - origin;
+  const low = parameters[0][0] - origin,
+    high = parameters[1][0] - origin;
   if (over) return [low, high];
-  if (high - low >= 2 * Math.PI - 1e-12) return [-Math.PI, Math.PI];
-  const west = wrapLongitude(low),
-    east = wrapLongitude(high);
-  // A covered seam endpoint has equivalent representatives on both sides;
-  // account for kernel rounding at the cut as well as strict seam crossings.
-  if (Math.abs(west) >= Math.PI - 1e-12 || Math.abs(east) >= Math.PI - 1e-12)
-    return [-Math.PI, Math.PI];
-  return west <= east ? [west, east] : [-Math.PI, Math.PI];
+  // AngularRanges already stores a continuous eastward interval in radians.
+  const span = high - low;
+  if (span >= 2 * Math.PI - 1e-12) return [-Math.PI, Math.PI];
+  let west = wrapLongitude(low);
+  // An eastward interval starting at the cut belongs to its negative side.
+  // Ending at the cut stays on the positive side; touching alone is not crossing.
+  if (span > 0 && Math.abs(west - Math.PI) < 1e-12) west = -Math.PI;
+  const east = west + span;
+  return east > Math.PI + 1e-12 ? [-Math.PI, Math.PI] : [west, Math.min(east, Math.PI)];
 }
 
 /** Cylindrical x is linear in longitude; width is monotone on each side of the equator.
@@ -69,9 +70,9 @@ export function cylindricalBounds(
 ): ProjectionRenderingProfile['bounds'] {
   const longitude = longitudeRange(parameters, origin, over);
   const latitudes = [
-    parameters.latitude[0],
-    parameters.latitude[1],
-    Math.max(parameters.latitude[0], Math.min(parameters.latitude[1], 0))
+    parameters[0][1],
+    parameters[1][1],
+    Math.max(parameters[0][1], Math.min(parameters[1][1], 0))
   ];
   const points = longitude.flatMap(x => latitudes.map(y => project(origin + x, y)));
   return envelope(
@@ -100,9 +101,9 @@ export function transverseBounds(
     if (meridian >= longitude[0] && meridian <= longitude[1]) longitudes.push(meridian);
   }
   const latitudes = [
-    parameters.latitude[0],
-    parameters.latitude[1],
-    Math.max(parameters.latitude[0], Math.min(parameters.latitude[1], equator))
+    parameters[0][1],
+    parameters[1][1],
+    Math.max(parameters[0][1], Math.min(parameters[1][1], equator))
   ];
   const points = longitudes.flatMap(x => latitudes.map(y => project(origin + x, y)));
   return envelope(
@@ -127,9 +128,9 @@ export function vanDerGrintenBounds(
     Math.max(longitude[0], Math.min(longitude[1], 0))
   ];
   const latitudes = [
-    parameters.latitude[0],
-    parameters.latitude[1],
-    Math.max(parameters.latitude[0], Math.min(parameters.latitude[1], 0))
+    parameters[0][1],
+    parameters[1][1],
+    Math.max(parameters[0][1], Math.min(parameters[1][1], 0))
   ];
   const points = longitudes.flatMap(x => latitudes.map(y => project(origin + x, y)));
   return envelope(
@@ -150,8 +151,8 @@ export function conicBounds(
 ): ProjectionRenderingProfile['bounds'] {
   const angles = scale(longitudeRange(parameters, origin, over), cone);
   const radii = ordered(
-    centerY - project(origin, parameters.latitude[0])[1],
-    centerY - project(origin, parameters.latitude[1])[1]
+    centerY - project(origin, parameters[0][1])[1],
+    centerY - project(origin, parameters[1][1])[1]
   );
   return envelope(
     add([x0, x0], multiply(radii, sine(angles))),

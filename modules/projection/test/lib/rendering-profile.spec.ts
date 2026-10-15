@@ -5,7 +5,10 @@ import {expect, test, vi} from 'vitest';
 import {createProjectionEngine} from '@math.gl/projection/core';
 import {projJSONCRSParser} from '@math.gl/projection';
 import {transverseMercator} from '@math.gl/projection/projections/tmerc';
-import {resolveRenderingProfile} from '../../src/experimental/rendering-profile';
+import {
+  resolveRenderingProfile,
+  combineRenderingProfiles
+} from '../../src/experimental/rendering-profile/rendering-profile';
 import type {
   ProjectionImplementation,
   ProjectionRenderingProfile
@@ -183,4 +186,113 @@ test('profile callback receives wrapped Greenwich coverage unchanged with a prim
     bbox: {west_longitude: 170, south_latitude: -20, east_longitude: -170, north_latitude: 20}
   });
   expect(calls[0]).toEqual(coverage);
+});
+
+test('combined coverage skips explicit empty pieces and retains the matching normalizer', () => {
+  const regions = [
+    [-20, -10, -10, 10],
+    [10, -10, 20, 10]
+  ] as const;
+  const normalize = vi.fn((point: {x: number; y: number; z: number}) => {
+    point.x = 0.2;
+  });
+  const resolve = vi.fn((region: (typeof regions)[number]) =>
+    region === regions[0] ? null : {...defaultProfile, normalize}
+  );
+  const profile = combineRenderingProfiles(regions, resolve)!;
+  expect(resolve.mock.calls).toEqual([[regions[0]], [regions[1]]]);
+  expect(profile.bounds).toEqual(defaultProfile.bounds);
+  const point = {x: 0, y: 0, z: 123};
+  profile.normalize!(point);
+  expect(point).toEqual({x: 0.2, y: 0, z: 123});
+  expect(normalize).toHaveBeenCalledTimes(1);
+});
+
+test('combined coverage returns null only when every piece is explicitly empty', () => {
+  expect(combineRenderingProfiles([coverage, coverage], () => null)).toBeNull();
+  const resolve = vi.fn(() => defaultProfile);
+  expect(combineRenderingProfiles([], resolve)).toBeNull();
+  expect(resolve).not.toHaveBeenCalled();
+});
+
+test('combined coverage propagates unexpected callback and lazy-bound errors', () => {
+  const error = new Error('Broken projection');
+  expect(() =>
+    combineRenderingProfiles([coverage], () => {
+      throw error;
+    })
+  ).toThrow(error);
+  expect(() =>
+    combineRenderingProfiles([coverage], () => ({
+      get bounds() {
+        throw error;
+      }
+    }))
+  ).toThrow(error);
+});
+
+test('combined coverage unions XYZ and selects the closest actual normalized position', () => {
+  const bounds = [
+    [
+      [-10, -20, -30],
+      [10, 20, 30]
+    ],
+    [
+      [-40, -5, 0],
+      [5, 50, 60]
+    ]
+  ] as const;
+  let index = 0;
+  const profile = combineRenderingProfiles([coverage, coverage], () => {
+    const current = index++;
+    return {
+      bounds: bounds[current],
+      normalize(point) {
+        point.x = current === 0 ? 0.4 : -0.2;
+        point.y = 0;
+      }
+    };
+  })!;
+  expect(profile.bounds).toEqual([
+    [-40, -20, -30],
+    [10, 50, 60]
+  ]);
+  const point = {x: 0, y: 0, z: 123};
+  profile.normalize!(point);
+  expect(point).toEqual({x: -0.2, y: 0, z: 123});
+});
+
+test('combined normalization resolves close candidates without longitude-branch bias', () => {
+  let index = 0;
+  const profile = combineRenderingProfiles([coverage, coverage], () => {
+    const current = index++;
+    return {
+      ...defaultProfile,
+      normalize(point) {
+        point.x = current === 0 ? 2 * Math.PI + 1e-8 : 1e-9;
+      }
+    };
+  })!;
+  const point = {x: 0, y: 0, z: 123};
+  profile.normalize!(point);
+  expect(point.x).toBe(1e-9);
+  expect(point.z).toBe(123);
+});
+
+test('combined normalization propagates errors without partially changing the input', () => {
+  let index = 0;
+  const error = new Error('Broken normalizer');
+  const profile = combineRenderingProfiles([coverage, coverage], () => {
+    const current = index++;
+    return {
+      ...defaultProfile,
+      normalize(point) {
+        if (current === 1) throw error;
+        point.x = 0.2;
+      }
+    };
+  })!;
+  const point = {x: 0, y: 0, z: 123};
+  expect(() => profile.normalize!(point)).toThrow(error);
+  expect(point).toEqual({x: 0, y: 0, z: 123});
 });

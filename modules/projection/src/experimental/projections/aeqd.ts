@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {withAngularRenderingProfile} from '../angular-rendering-profile';
-import {equidistantAzimuthalBounds} from '../azimuthal-rendering-bounds';
+import {withAngularRenderingProfile} from '../rendering-profile/angular-rendering-profile';
+import {equidistantAzimuthalBounds} from '../rendering-profile/azimuthal-rendering-bounds';
 import type {ProjectionPlugin} from '../types';
 import {bindKernel, guardAzimuthalDomain, kernelParameters, ORIGIN_PARAMETERS} from '../kernel';
 import {createState, forward, inverse} from '../kernels/aeqd';

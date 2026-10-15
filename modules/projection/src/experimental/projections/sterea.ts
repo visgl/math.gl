@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {withAngularRenderingProfile} from '../angular-rendering-profile';
-import {ellipsoidalStereographicBounds} from '../azimuthal-rendering-bounds';
+import {withAngularRenderingProfile} from '../rendering-profile/angular-rendering-profile';
+import {ellipsoidalStereographicBounds} from '../rendering-profile/azimuthal-rendering-bounds';
 import type {ProjectionPlugin} from '../types';
 import {
   bindKernel,

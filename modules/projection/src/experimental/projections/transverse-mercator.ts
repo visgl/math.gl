@@ -4,9 +4,9 @@
 
 import {createFlatProjection} from '../flat-projection';
 import type {ProjectionContext, ProjectionImplementation, ProjectionPlugin} from '../types';
-import {transverseBounds} from '../rendering-bounds';
-import {createAngularRanges} from '../geographic-bounds';
-import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
+import {transverseBounds} from '../rendering-profile/rendering-bounds';
+import {createAngularRanges} from '../rendering-profile/geographic-bounds';
+import {withRectangleRenderingProfile} from '../rendering-profile/rectangular-rendering-profile';
 import {
   bindKernel,
   flagParameter,

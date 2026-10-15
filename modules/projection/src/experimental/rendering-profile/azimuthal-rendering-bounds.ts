@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {KernelParameters} from './kernel';
+import type {KernelParameters} from '../kernel';
 import {createAngularRanges} from './geographic-bounds';
 import type {AngularRanges} from './geographic-bounds';
 import type {Vector, AngularDomain} from './spherical-rendering-domain';
@@ -60,10 +60,10 @@ export function equalAreaAzimuthalBounds(
   // must trigger default-profile fallback, rather than leave normalization unusable.
   const latitudes = domain && sphericalRange([0, 0, 1], parameters, domain);
   const region: AngularRanges = createAngularRanges(
-    parameters.longitude[0],
-    transformLatitude(latitudes ? Math.asin(Math.max(-1, latitudes[0])) : parameters.latitude[0]),
-    parameters.longitude[1],
-    transformLatitude(latitudes ? Math.asin(Math.min(1, latitudes[1])) : parameters.latitude[1])
+    parameters[0][0],
+    transformLatitude(latitudes ? Math.asin(Math.max(-1, latitudes[0])) : parameters[0][1]),
+    parameters[1][0],
+    transformLatitude(latitudes ? Math.asin(Math.min(1, latitudes[1])) : parameters[1][1])
   );
   // Authalic latitude has meridional metric >= (1-e²)² and longitude metric
   // >= 1. This lower bound on distance from the antipode encloses the transformed
@@ -105,10 +105,10 @@ export function ellipsoidalStereographicBounds(
   latitudeError = base.e * Math.atanh(base.e)
 ) {
   const region: AngularRanges = createAngularRanges(
-    parameters.longitude[0] * longitudeScale,
-    conformalLatitude(parameters.latitude[0]),
-    parameters.longitude[1] * longitudeScale,
-    conformalLatitude(parameters.latitude[1])
+    parameters[0][0] * longitudeScale,
+    conformalLatitude(parameters[0][1]),
+    parameters[1][0] * longitudeScale,
+    conformalLatitude(parameters[1][1])
   );
   const padding = 2 * latitudeError + Math.PI * Math.abs(longitudeScale - 1);
   // The conformal-sphere metric has minimum scale 1-e². Applying that
@@ -123,10 +123,10 @@ export function ellipsoidalStereographicBounds(
       : undefined;
   const center = [Math.cos(centerLatitude), 0, Math.sin(centerLatitude)] as const;
   const north = [-Math.sin(centerLatitude), 0, Math.cos(centerLatitude)] as const;
-  const longitudeWidth = region.longitude[1] - region.longitude[0];
+  const longitudeWidth = region[1][0] - region[0][0];
   const wrapped =
     longitudeWidth >= 2 * Math.PI
-      ? createAngularRanges(-Math.PI, region.latitude[0], Math.PI, region.latitude[1])
+      ? createAngularRanges(-Math.PI, region[0][1], Math.PI, region[1][1])
       : region;
   const x = sphericalRatioRange([0, 1, 0], center, 1, wrapped, cap);
   const y = sphericalRatioRange(north, center, 1, wrapped, cap);

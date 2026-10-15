@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
-import {withAngularRenderingProfile} from '../angular-rendering-profile';
-import {sphericalAzimuthalBounds} from '../azimuthal-rendering-bounds';
+import {withAngularRenderingProfile} from '../rendering-profile/angular-rendering-profile';
+import {sphericalAzimuthalBounds} from '../rendering-profile/azimuthal-rendering-bounds';
 import type {ProjectionPlugin} from '../types';
 import {
   catalogueParameters,

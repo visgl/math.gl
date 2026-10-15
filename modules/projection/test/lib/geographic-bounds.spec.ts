@@ -11,9 +11,10 @@ import {
   containsGeographicPoint,
   intersectGeographicBounds,
   clampGeographicPoint,
+  getLongitudeSpan,
   getAngularRanges,
   getGeographicBounds
-} from '../../src/experimental/geographic-bounds';
+} from '../../src/experimental/rendering-profile/geographic-bounds';
 
 const world: GeographicBounds = [-180, -90, 180, 90];
 
@@ -36,6 +37,24 @@ test('constructs canonical coverage without losing the full-world interval', () 
   expect(createGeographicBounds(0, -90, 360, 90)).toEqual(world);
   expect(createGeographicBounds(180, -20, 180, 20)).toEqual([-180, -20, -180, 20]);
   expect(() => createGeographicBounds(-180, -100, 180, 90)).toThrow('Invalid geographic coverage');
+});
+
+test.each([
+  [170, -170, 20],
+  [-170, 170, 340],
+  [-180, 180, 360],
+  [180, -180, 0],
+  [180, 180, 0],
+  [-180, -180, 0],
+  [170, 180, 10],
+  [-180, -170, 10],
+  [-10, 10, 20],
+  [10, -10, 340]
+])('longitude span from %s to %s is %s degrees', (west, east, span) => {
+  const bounds: GeographicBounds = [west, -10, east, 10];
+  expect(getLongitudeSpan(bounds)).toBe(span);
+  const ranges = getAngularRanges(bounds);
+  expect(((ranges[1][0] - ranges[0][0]) * 180) / Math.PI).toBeCloseTo(span, 10);
 });
 
 test('splits wrapped coverage while retaining ordered endpoint rectangles', () => {
@@ -108,13 +127,13 @@ test('clamping uses circular distance and preserves covered positions', () => {
 test('kernel range conversion preserves periodic coverage and applies the prime meridian explicitly', () => {
   const radians = Math.PI / 180;
   const ranges = getAngularRanges([170, -10, -170, 10], 2 * radians, 177 * radians);
-  expect(ranges.longitude[0]).toBeCloseTo(168 * radians, 12);
-  expect(ranges.longitude[1]).toBeCloseTo(188 * radians, 12);
+  expect(ranges[0][0]).toBeCloseTo(168 * radians, 12);
+  expect(ranges[1][0]).toBeCloseTo(188 * radians, 12);
   expect(getGeographicBounds(ranges, 2 * radians)).toEqual([170, -10, -170, 10]);
   expect(
     getGeographicBounds(createAngularRanges(0, -Math.PI / 2, 2 * Math.PI, Math.PI / 2))
   ).toEqual(world);
   const full = getAngularRanges(world, 0, 170 * radians);
-  expect(full.longitude[0]).toBeCloseTo(-10 * radians, 12);
-  expect(full.longitude[1]).toBeCloseTo(350 * radians, 12);
+  expect(full[0][0]).toBeCloseTo(-10 * radians, 12);
+  expect(full[1][0]).toBeCloseTo(350 * radians, 12);
 });

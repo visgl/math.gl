@@ -6,9 +6,9 @@ import {numberParameter} from '../parameters';
 import type {ProjectionPlugin} from '../types';
 import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
 import {createState, forward, inverse} from '../kernels/eqearth';
-import {createAngularRanges, getGeographicBounds} from '../geographic-bounds';
-import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
-import {cylindricalBounds} from '../rendering-bounds';
+import {createAngularRanges, getGeographicBounds} from '../rendering-profile/geographic-bounds';
+import {createRectangleRenderingProfile} from '../rendering-profile/rectangular-rendering-profile';
+import {cylindricalBounds} from '../rendering-profile/rendering-bounds';
 
 export const equalEarth: ProjectionPlugin = {
   name: 'eqearth',

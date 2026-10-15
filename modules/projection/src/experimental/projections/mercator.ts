@@ -6,9 +6,14 @@
 import {createFlatProjection as createProjection} from '../flat-projection';
 import {DEGREES_TO_RADIANS, latitudeParameter, numberParameter, wrapLongitude} from '../parameters';
 import type {ProjectionPlugin} from '../types';
-import {createAngularRanges, getGeographicBounds} from '../geographic-bounds';
-import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
-import {longitudeRange, envelope, scale as scaleRange, add} from '../rendering-bounds';
+import {createAngularRanges, getGeographicBounds} from '../rendering-profile/geographic-bounds';
+import {createRectangleRenderingProfile} from '../rendering-profile/rectangular-rendering-profile';
+import {
+  longitudeRange,
+  envelope,
+  scale as scaleRange,
+  add
+} from '../rendering-profile/rendering-bounds';
 
 /** Spherical and ellipsoidal Mercator, using the PROJ Mercator equations. */
 export const mercator: ProjectionPlugin = {
@@ -24,7 +29,6 @@ export const mercator: ProjectionPlugin = {
   create({semiMajorAxis: a, eccentricitySquared: es, parameters, primeMeridian = 0}) {
     const e = Math.sqrt(es);
     const over = Object.prototype.hasOwnProperty.call(parameters, 'over');
-    const wrap = over ? (value: number) => value : wrapLongitude;
     const longitudeOrigin = numberParameter(parameters, 'lon_0', 0) * DEGREES_TO_RADIANS;
     const x0 = numberParameter(parameters, 'x_0', 0);
     const y0 = numberParameter(parameters, 'y_0', 0);
@@ -68,7 +72,7 @@ export const mercator: ProjectionPlugin = {
             region =>
               envelope(
                 add([x0, x0], scaleRange(longitudeRange(region, longitudeOrigin, over), radius)),
-                [northing(region.latitude[0]), northing(region.latitude[1])]
+                [northing(region[0][1]), northing(region[1][1])]
               ),
             bounds,
             longitudeOrigin,
@@ -107,7 +111,7 @@ export const mercator: ProjectionPlugin = {
             throw new Error('Mercator is undefined at the poles');
           }
           const isometricLatitude = Math.asinh(Math.tan(latitude));
-          point.x = x0 + radius * wrap(longitude - longitudeOrigin);
+          point.x = x0 + radius * wrapLongitude(longitude - longitudeOrigin, over);
           // Spherical Mercator has no ellipsoidal correction. Normalize signed zero.
           point.y =
             y0 +
@@ -123,7 +127,7 @@ export const mercator: ProjectionPlugin = {
           let latitude = Math.atan(Math.sinh(isometricLatitude));
           // The spherical inverse is already exact; no iteration is needed.
           if (e === 0) {
-            point.x = wrap(longitudeOrigin + (x - x0) / radius);
+            point.x = wrapLongitude(longitudeOrigin + (x - x0) / radius, over);
             point.y = latitude + 0;
             return;
           }
@@ -132,7 +136,7 @@ export const mercator: ProjectionPlugin = {
               Math.sinh(isometricLatitude + e * Math.atanh(e * Math.sin(latitude)))
             );
             if (Math.abs(next - latitude) < 1e-13) {
-              point.x = wrap(longitudeOrigin + (x - x0) / radius);
+              point.x = wrapLongitude(longitudeOrigin + (x - x0) / radius, over);
               point.y = next;
               return;
             }

@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {KernelParameters} from './kernel';
-import type {ProjectionImplementation} from './types';
+import type {KernelParameters} from '../kernel';
+import type {ProjectionImplementation} from '../types';
 import {createAngularRanges} from './geographic-bounds';
 import type {AngularRanges} from './geographic-bounds';
-import type {State as BonneState} from './kernels/bonne';
-import type {State as SwissState} from './kernels/somerc';
-import type {State as HotineState} from './kernels/omerc';
-import type {State as KrovakState} from './kernels/krovak';
-import type {State as NZMGState} from './kernels/nzmg';
+import type {State as BonneState} from '../kernels/bonne';
+import type {State as SwissState} from '../kernels/somerc';
+import type {State as HotineState} from '../kernels/omerc';
+import type {State as KrovakState} from '../kernels/krovak';
+import type {State as NZMGState} from '../kernels/nzmg';
 import {sphericalRange} from './spherical-rendering-domain';
 import {
   add,
@@ -24,8 +24,8 @@ import {
   longitudeRange
 } from './rendering-bounds';
 import type {Range} from './rendering-bounds';
-import tsfnz from './common/tsfnz';
-import {SEC_TO_RAD} from './common/constants';
+import tsfnz from '../common/tsfnz';
+import {SEC_TO_RAD} from '../common/constants';
 
 /** |sin(t)| <= |t| and |1-cos(t)| <= min(2, |t|) bound Bonne's polar terms,
  * including the removable rho=0 limit, without searching its curved meridians.
@@ -38,8 +38,8 @@ export function bonneBounds(
   const d = maxAbs(longitudeRange(region, state.long0, state.over));
   const n = state.a / Math.sqrt(1 - state.es);
   const meridian = ordered(
-    project(state.long0, region.latitude[0])[1],
-    project(state.long0, region.latitude[1])[1]
+    project(state.long0, region[0][1])[1],
+    project(state.long0, region[1][1])[1]
   );
   const radius = Math.max(
     Math.abs(state.a * (state.es ? state.am1 : state.cphi1) + state.y0 - meridian[0]),
@@ -63,12 +63,12 @@ export function polyconicBounds(
   const n = base.a / Math.sqrt(1 - base.es);
   const correction = (n * d * d) / 4; // |sin(phi) cos(phi)| <= 1/2
   let meridian = ordered(
-    project(base.long0, region.latitude[0])[1],
-    project(base.long0, region.latitude[1])[1]
+    project(base.long0, region[0][1])[1],
+    project(base.long0, region[1][1])[1]
   );
   if (
     base.sphere &&
-    (region.latitude[0] - base.lat0 < -Math.PI / 2 || region.latitude[1] - base.lat0 > Math.PI / 2)
+    (region[0][1] - base.lat0 < -Math.PI / 2 || region[1][1] - base.lat0 > Math.PI / 2)
   )
     meridian = [base.y0 - (base.a * Math.PI) / 2, base.y0 + (base.a * Math.PI) / 2];
   return envelope(
@@ -91,8 +91,8 @@ export function cassiniBounds(
     : n * (d + d ** 3 / 6 + ((9 + 8 * c) * d ** 5) / 120);
   const correction = base.sphere ? base.a * d : n * ((d * d) / 4 + ((6 + 6 * c) * d ** 4) / 24);
   const meridian = ordered(
-    project(base.long0, region.latitude[0])[1],
-    project(base.long0, region.latitude[1])[1]
+    project(base.long0, region[0][1])[1],
+    project(base.long0, region[1][1])[1]
   );
   return envelope(
     [base.x0 - width, base.x0 + width],
@@ -114,10 +114,10 @@ export function swissBounds(state: SwissState, region: AngularRanges) {
     return Math.asin(Math.tanh(s));
   };
   const rotated: AngularRanges = createAngularRanges(
-    (region.longitude[0] - state.long0) * state.alpha,
-    latitude(region.latitude[0]),
-    (region.longitude[1] - state.long0) * state.alpha,
-    latitude(region.latitude[1])
+    (region[0][0] - state.long0) * state.alpha,
+    latitude(region[0][1]),
+    (region[1][0] - state.long0) * state.alpha,
+    latitude(region[1][1])
   );
   const north = sphericalRange([-Math.sin(state.b0), 0, Math.cos(state.b0)], rotated);
   if (maxAbs(north) >= 1 - 1e-14)
@@ -140,11 +140,8 @@ export function swissBounds(state: SwissState, region: AngularRanges) {
 export function hotineBounds(state: HotineState, region: AngularRanges) {
   const logW = (phi: number) =>
     Math.log(state.E) - state.B * Math.log(tsfnz(state.e, phi, Math.sin(phi)));
-  const w = ordered(logW(region.latitude[0]), logW(region.latitude[1]));
-  const longitude = scale(
-    [region.longitude[0] - state.lam0, region.longitude[1] - state.lam0],
-    state.B
-  );
+  const w = ordered(logW(region[0][1]), logW(region[1][1]));
+  const longitude = scale([region[0][0] - state.lam0, region[1][0] - state.lam0], state.B);
   const sphere: AngularRanges = createAngularRanges(
     longitude[0],
     Math.asin(Math.tanh(w[0])),
@@ -193,9 +190,9 @@ export function krovakBounds(state: KrovakState, region: AngularRanges) {
   const longitude = scale(longitudeRange(region, state.long0, state.over), -state.alfa);
   const sphere: AngularRanges = createAngularRanges(
     longitude[0],
-    latitude(region.latitude[0]),
+    latitude(region[0][1]),
     longitude[1],
-    latitude(region.latitude[1])
+    latitude(region[1][1])
   );
   const s = sphericalRange([Math.sin(state.ad), 0, Math.cos(state.ad)], sphere);
   const cosS = Math.sqrt(Math.max(Number.EPSILON, 1 - maxAbs(s) ** 2));
@@ -222,11 +219,8 @@ export function krovakBounds(state: KrovakState, region: AngularRanges) {
  * The coefficient envelope is rigorous over the entire declared rectangle.
  */
 export function nzmgBounds(state: NZMGState, region: AngularRanges) {
-  const phi = scale(
-    [region.latitude[0] - state.lat0, region.latitude[1] - state.lat0],
-    1e-5 / SEC_TO_RAD
-  );
-  const lambda: Range = [region.longitude[0] - state.long0, region.longitude[1] - state.long0];
+  const phi = scale([region[0][1] - state.lat0, region[1][1] - state.lat0], 1e-5 / SEC_TO_RAD);
+  const lambda: Range = [region[0][0] - state.long0, region[1][0] - state.long0];
   let psi: Range = [0, 0];
   for (let index = 10; index >= 1; index--)
     psi = add([state.A[index], state.A[index]], multiply(psi, phi));

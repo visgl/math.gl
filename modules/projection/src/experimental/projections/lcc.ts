@@ -3,9 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {ProjectionPlugin} from '../types';
-import {conicBounds} from '../rendering-bounds';
-import {createAngularRanges} from '../geographic-bounds';
-import {withRectangleRenderingProfile} from '../rectangular-rendering-profile';
+import {conicBounds} from '../rendering-profile/rendering-bounds';
+import {createAngularRanges} from '../rendering-profile/geographic-bounds';
+import {withRectangleRenderingProfile} from '../rendering-profile/rectangular-rendering-profile';
 import {createFlatProjection as createProjection} from '../flat-projection';
 import {
   bindKernel,

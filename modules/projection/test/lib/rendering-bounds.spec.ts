@@ -6,12 +6,16 @@ import {projectionEngine, projJSONCRSParser} from '@math.gl/projection';
 import {lazyProjectionEngine} from '@math.gl/projection/projections/lazy';
 import {geographicJSON, projectedJSON, projectedWKT2} from '../fixtures/crs-datums';
 import inputs from '../fixtures/native-proj-cases.json';
-import {sphericalExtremum} from '../../src/experimental/spherical-rendering-domain';
+import {sphericalExtremum} from '../../src/experimental/rendering-profile/spherical-rendering-domain';
 import {createProjectionEngine} from '@math.gl/projection/core';
 import {mercator} from '@math.gl/projection/projections/merc';
-import {equalAreaAzimuthalBounds} from '../../src/experimental/azimuthal-rendering-bounds';
+import {equalAreaAzimuthalBounds} from '../../src/experimental/rendering-profile/azimuthal-rendering-bounds';
 import {kernelParameters} from '../../src/experimental/kernel';
-import {createAngularRanges} from '../../src/experimental/geographic-bounds';
+import {
+  createAngularRanges,
+  getAngularRanges
+} from '../../src/experimental/rendering-profile/geographic-bounds';
+import {longitudeRange} from '../../src/experimental/rendering-profile/rendering-bounds';
 
 for (const fixture of inputs.cases) {
   test('finite rendering bounds and normalized containment: ' + fixture.id, async () => {
@@ -717,4 +721,129 @@ for (const definition of [
       expect(projected[0]).toBeLessThanOrEqual(profile.bounds[1][0] + 0.001);
     }
   });
+}
+
+test.each([180, -180])('stereographic sizing uses its effective origin at %s', async longitude => {
+  const crs = await projectionEngine.getCRS(
+    `+proj=stere +lon_0=${longitude} +lat_0=0 +ellps=WGS84`
+  );
+  const position = crs.converter.WGS84.from([180, 40]);
+  const scale = crs.getRenderingScale(position);
+  expect(scale).not.toBeNull();
+  expect(scale!.every(value => Number.isFinite(value) && value > 0)).toBe(true);
+});
+
+test.each([
+  [170, [-110, 70, 160, 75], 150],
+  [-170, [-160, 70, 110, 75], -150]
+] as const)(
+  'satellite retains visible pieces when another piece is empty at origin %s',
+  async (longitude, coverage, anchor) => {
+    const projection = await projectionEngine.createProjectionAsync({
+      to: `+proj=geos +h=35785831 +lon_0=${longitude} +ellps=WGS84`
+    });
+    const profile = projection.getTargetRenderingProfile(coverage)!;
+    const defaults = projection.getTargetRenderingProfile()!;
+    expect(profile.bounds).not.toEqual(defaults.bounds);
+    expect(profile.bounds[0][1]).toBeGreaterThan(0);
+    const point = {x: (anchor * Math.PI) / 180, y: 0, z: 123};
+    profile.normalize!(point);
+    expect((point.y * 180) / Math.PI).toBeGreaterThanOrEqual(70 - 1e-10);
+    expect((point.y * 180) / Math.PI).toBeLessThanOrEqual(75 + 1e-10);
+    expect(point.z).toBe(123);
+    const projected = projection.project([anchor, 72]);
+    for (let axis = 0; axis < 2; axis++) {
+      expect(projected[axis]).toBeGreaterThanOrEqual(profile.bounds[0][axis] - 0.001);
+      expect(projected[axis]).toBeLessThanOrEqual(profile.bounds[1][axis] + 0.001);
+    }
+  }
+);
+
+test('satellite uses the default target when all regional pieces are invisible', async () => {
+  const projection = await projectionEngine.createProjectionAsync({
+    to: '+proj=geos +h=35785831 +lon_0=170 +ellps=WGS84'
+  });
+  const profile = projection.getTargetRenderingProfile([-110, 70, -109, 75])!;
+  expect(profile.bounds).toEqual(projection.getTargetRenderingProfile()!.bounds);
+});
+
+for (const definition of [
+  '+proj=merc +R=6371000',
+  '+proj=eqc +R=6371000',
+  '+proj=eqearth +R=6371000',
+  '+proj=ob_tran +o_proj=longlat +o_lat_p=90 +o_lon_p=0 +R=6371000'
+]) {
+  test(`+over coverage clamps on the continuous longitude branch: ${definition}`, async () => {
+    for (const over of [false, true]) {
+      const projection = await projectionEngine.createProjectionAsync({
+        to: definition + (over ? ' +over' : '')
+      });
+      const profile = projection.getTargetRenderingProfile([-170, -10, 170, 10])!;
+      for (const longitude of [-550, -190, 190, 550]) {
+        const point = {x: (longitude * Math.PI) / 180, y: 0, z: 12};
+        profile.normalize!(point);
+        const expected = over ? Math.sign(longitude) * 170 : longitude > 0 ? -170 : 170;
+        expect((point.x * 180) / Math.PI).toBeCloseTo(expected, 10);
+        expect(point.z).toBe(12);
+      }
+    }
+  });
+}
+
+test('oblique +over normalization retains the source coverage branch across the dateline', async () => {
+  const projection = await projectionEngine.createProjectionAsync({
+    to: '+proj=ob_tran +o_proj=longlat +o_lat_p=90 +o_lon_p=0 +lon_0=180 +over +R=6371000'
+  });
+  const profile = projection.getTargetRenderingProfile([170, -10, -170, 10])!;
+  for (const [longitude, expected] of [
+    [-175, 170],
+    [175, 175],
+    [185, 185],
+    [195, 190]
+  ]) {
+    const point = {x: (longitude * Math.PI) / 180, y: 0, z: 12};
+    profile.normalize!(point);
+    expect((point.x * 180) / Math.PI).toBeCloseTo(expected, 10);
+    const projected = projection.project([(point.x * 180) / Math.PI, (point.y * 180) / Math.PI]);
+    for (let axis = 0; axis < 2; axis++) {
+      // Rotated geographic profiles expose degree coordinates in native bounds.
+      expect(projected[axis]).toBeGreaterThanOrEqual(profile.bounds[0][axis] - 1e-8);
+      expect(projected[axis]).toBeLessThanOrEqual(profile.bounds[1][axis] + 1e-8);
+    }
+  }
+});
+
+// A seam-touching interval has one continuous projected branch; a crossing
+// needs both sides of the cut in its single rectangular envelope.
+test.each([
+  [170, 180, 0, 170, 180],
+  [-180, -170, 0, -180, -170],
+  [180, 180, 0, 180, 180],
+  [170, -170, 0, -180, 180],
+  [-180, 180, 0, -180, 180],
+  [-90, -80, 100, 170, 180],
+  [-80, -70, 100, -180, -170],
+  [-90, -70, 100, -180, 180]
+])('longitude envelope for %s to %s around %s is %s to %s', (west, east, origin, low, high) => {
+  const radians = Math.PI / 180;
+  const ranges = getAngularRanges([west, -10, east, 10], 0, origin * radians);
+  const result = longitudeRange(ranges, origin * radians);
+  expect(result[0] / radians).toBeCloseTo(low, 10);
+  expect(result[1] / radians).toBeCloseTo(high, 10);
+});
+
+for (const definition of ['+proj=merc +R=6371000', '+proj=eqc +R=6371000']) {
+  test.each([
+    [170, 180],
+    [-180, -170],
+    [180, 180]
+  ])(
+    `seam-touching coverage has a tight projected envelope: ${definition} %s,%s`,
+    async (west, east) => {
+      const projection = await projectionEngine.createProjectionAsync({to: definition});
+      const profile = projection.getTargetRenderingProfile([west, -10, east, 10])!;
+      const expectedWidth = ((east - west) * Math.PI * 6371000) / 180;
+      expect(profile.bounds[1][0] - profile.bounds[0][0]).toBeCloseTo(expectedWidth, 3);
+    }
+  );
 }

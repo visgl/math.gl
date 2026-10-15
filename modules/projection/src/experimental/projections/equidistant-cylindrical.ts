@@ -6,9 +6,9 @@
 import {createProjection} from '../mutable-projection';
 import {DEGREES_TO_RADIANS, latitudeParameter, numberParameter, wrapLongitude} from '../parameters';
 import type {ProjectionPlugin} from '../types';
-import {createAngularRanges, getGeographicBounds} from '../geographic-bounds';
-import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
-import {longitudeRange, envelope, scale, add} from '../rendering-bounds';
+import {createAngularRanges, getGeographicBounds} from '../rendering-profile/geographic-bounds';
+import {createRectangleRenderingProfile} from '../rendering-profile/rectangular-rendering-profile';
+import {longitudeRange, envelope, scale, add} from '../rendering-profile/rendering-bounds';
 
 /** Spherical equidistant cylindrical (the eqc formulation used by proj4js). */
 export const equidistantCylindrical: ProjectionPlugin = {
@@ -17,7 +17,6 @@ export const equidistantCylindrical: ProjectionPlugin = {
   parameters: ['lon_0', 'lat_0', 'lat_ts', 'x_0', 'y_0'],
   create({semiMajorAxis: a, parameters, primeMeridian = 0}) {
     const over = Object.prototype.hasOwnProperty.call(parameters, 'over');
-    const wrap = over ? (value: number) => value : wrapLongitude;
     const longitudeOrigin = numberParameter(parameters, 'lon_0', 0) * DEGREES_TO_RADIANS;
     const latitudeOrigin = latitudeParameter(parameters, 'lat_0');
     const parallelScale = Math.cos(latitudeParameter(parameters, 'lat_ts'));
@@ -35,10 +34,7 @@ export const equidistantCylindrical: ProjectionPlugin = {
                   [x0, x0],
                   scale(longitudeRange(region, longitudeOrigin, over), a * parallelScale)
                 ),
-                [
-                  y0 + a * (region.latitude[0] - latitudeOrigin),
-                  y0 + a * (region.latitude[1] - latitudeOrigin)
-                ]
+                [y0 + a * (region[0][1] - latitudeOrigin), y0 + a * (region[1][1] - latitudeOrigin)]
               ),
             coverage,
             longitudeOrigin,
@@ -70,11 +66,11 @@ export const equidistantCylindrical: ProjectionPlugin = {
       },
       ...createProjection(
         point => {
-          point.x = x0 + a * parallelScale * wrap(point.x - longitudeOrigin);
+          point.x = x0 + a * parallelScale * wrapLongitude(point.x - longitudeOrigin, over);
           point.y = y0 + a * (point.y - latitudeOrigin);
         },
         point => {
-          point.x = wrap(longitudeOrigin + (point.x - x0) / (a * parallelScale));
+          point.x = wrapLongitude(longitudeOrigin + (point.x - x0) / (a * parallelScale), over);
           point.y = latitudeOrigin + (point.y - y0) / a;
         }
       )

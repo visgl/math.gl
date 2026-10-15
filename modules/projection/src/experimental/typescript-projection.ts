@@ -1,9 +1,9 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {resolveRenderingProfile} from './rendering-profile';
+import {resolveRenderingProfile} from './rendering-profile/rendering-profile';
 import type {GeographicBounds} from './types';
-import {getIdentityRenderingProfile} from './identity-rendering-profile';
+import {getIdentityRenderingProfile} from './rendering-profile/identity-rendering-profile';
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
 import type {ProjectionDescriptor} from './projection-descriptor';
 import {getLoadedProjection, preloadProjection} from './projection-descriptor';
@@ -23,7 +23,7 @@ import {TypeScriptCRSError, unsupportedStage} from './crs/types';
 import type {CRSCompatibilityReason, CRSNormalizationOptions, NormalizedCRS} from './crs/types';
 import {createDatumTransform} from './datum';
 import {wrapLongitude} from './parameters';
-import {createGeographicProfile} from './geographic-rendering-profile';
+import {createGeographicProfile} from './rendering-profile/geographic-rendering-profile';
 import {compileVerticalGrid} from './vertical-datum';
 import type {DatumGridCollection, VerticalGridCollection} from './grids/types';
 

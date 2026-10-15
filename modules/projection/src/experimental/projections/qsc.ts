@@ -3,14 +3,14 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
 import type {ProjectionPlugin} from '../types';
-import {createGeographicProfile} from '../geographic-rendering-profile';
+import {createGeographicProfile} from '../rendering-profile/geographic-rendering-profile';
 import {catalogueParameters, bindCatalogueKernel} from '../catalogue-kernel';
 import {numberParameter} from '../parameters';
 import {createState, forward, inverse} from '../kernels/qsc';
-import {createAngularRanges} from '../geographic-bounds';
-import {createRectangleRenderingProfile} from '../rectangular-rendering-profile';
-import {sphericalRange} from '../spherical-rendering-domain';
-import {envelope} from '../rendering-bounds';
+import {createAngularRanges} from '../rendering-profile/geographic-bounds';
+import {createRectangleRenderingProfile} from '../rendering-profile/rectangular-rendering-profile';
+import {sphericalRange} from '../rendering-profile/spherical-rendering-domain';
+import {envelope} from '../rendering-profile/rendering-bounds';
 
 export const quadrilateralizedSphericalCube: ProjectionPlugin = {
   name: 'qsc',
@@ -35,10 +35,10 @@ export const quadrilateralizedSphericalCube: ProjectionPlugin = {
               const latitude = (phi: number) =>
                 base.es ? Math.atan((1 - base.es) * Math.tan(phi)) : phi;
               const local = createAngularRanges(
-                region.longitude[0] - base.long0,
-                latitude(region.latitude[0]),
-                region.longitude[1] - base.long0,
-                latitude(region.latitude[1])
+                region[0][0] - base.long0,
+                latitude(region[0][1]),
+                region[1][0] - base.long0,
+                latitude(region[1][1])
               );
               const axis =
                 state.face === 5

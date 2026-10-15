@@ -28,8 +28,9 @@ export function latitudeParameter(parameters: ProjectionParameters, name: string
   return degrees * DEGREES_TO_RADIANS;
 }
 
-export function wrapLongitude(longitude: number): number {
-  if (Math.abs(longitude) <= Math.PI) return longitude;
+/** Wrap radians to the principal interval; +over preserves the original longitude branch. */
+export function wrapLongitude(longitude: number, over = false): number {
+  if (over || Math.abs(longitude) <= Math.PI) return longitude;
   const circle = 2 * Math.PI;
   return ((((longitude + Math.PI) % circle) + circle) % circle) - Math.PI;
 }

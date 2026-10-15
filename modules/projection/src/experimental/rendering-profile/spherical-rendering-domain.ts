@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {AngularRanges} from './geographic-bounds';
-import {wrapLongitude} from './parameters';
+import {wrapLongitude} from '../parameters';
 
 export type Vector = readonly [number, number, number];
 export type AngularDomain = {latitude: number; distance: number};
@@ -51,8 +51,7 @@ export function sphericalExtremum(
   domain?: AngularDomain,
   maximize = true
 ): {value: number; point: [number, number]} {
-  const [west, east] = parameters.longitude;
-  const [south, north] = parameters.latitude;
+  const [[west, south], [east, north]] = parameters;
   const center = (west + east) / 2;
   const axis: Vector = domain
     ? [Math.cos(domain.latitude), 0, Math.sin(domain.latitude)]

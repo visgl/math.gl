@@ -2,18 +2,18 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {KernelParameters} from './kernel';
+import type {KernelParameters} from '../kernel';
 import {
   createAngularRanges,
   getAngularRanges,
   getGeographicBounds,
-  intersectGeographicBounds,
-  unionRenderingBounds
+  intersectGeographicBounds
 } from './geographic-bounds';
 import type {AngularRanges} from './geographic-bounds';
+import {combineRenderingProfiles} from './rendering-profile';
 import {normalizeCoverage} from './rectangular-rendering-profile';
-import type {ProjectionImplementation, ProjectionRenderingProfile} from './types';
-import {wrapLongitude} from './parameters';
+import type {ProjectionImplementation, ProjectionRenderingProfile} from '../types';
+import {wrapLongitude} from '../parameters';
 import {sphericalRange} from './spherical-rendering-domain';
 import {multiply, envelope, add} from './rendering-bounds';
 
@@ -40,16 +40,18 @@ export function createGeostationaryProfile(
   };
   const fullX = height * Math.asin(1 / radius);
   const fullY = height * Math.atan(Math.sqrt((1 - base.es) / (radius * radius - 1)));
-  const create = (coverage: AngularRanges, declared: boolean): ProjectionRenderingProfile => {
-    const closestLatitude = Math.max(coverage.latitude[0], Math.min(coverage.latitude[1], 0));
+  const create = (
+    coverage: AngularRanges,
+    declared: boolean
+  ): ProjectionRenderingProfile | null => {
+    const closestLatitude = Math.max(coverage[0][1], Math.min(coverage[1][1], 0));
     const maximumLongitude = longitudeLimit(closestLatitude);
-    const west = Math.max(coverage.longitude[0] - base.long0, -maximumLongitude);
-    const east = Math.min(coverage.longitude[1] - base.long0, maximumLongitude);
+    const west = Math.max(coverage[0][0] - base.long0, -maximumLongitude);
+    const east = Math.min(coverage[1][0] - base.long0, maximumLongitude);
     const maxLatitude = latitudeLimit(Math.max(west, Math.min(east, 0)));
-    const south = Math.max(coverage.latitude[0], -maxLatitude),
-      north = Math.min(coverage.latitude[1], maxLatitude);
-    if (east < west || north < south)
-      throw new Error('CRS coverage does not intersect the satellite limb');
+    const south = Math.max(coverage[0][1], -maxLatitude),
+      north = Math.min(coverage[1][1], maxLatitude);
+    if (east < west || north < south) return null;
     const region = createAngularRanges(west, south, east, north);
     return {
       get bounds() {
@@ -90,12 +92,10 @@ export function createGeostationaryProfile(
       normalize(point) {
         normalizeCoverage(
           point,
-          [
-            getGeographicBounds(
-              createAngularRanges(west + base.long0, south, east + base.long0, north),
-              base.primeMeridian
-            )
-          ],
+          getGeographicBounds(
+            createAngularRanges(west + base.long0, south, east + base.long0, north),
+            base.primeMeridian
+          ),
           base.long0,
           base.primeMeridian
         );
@@ -117,25 +117,10 @@ export function createGeostationaryProfile(
   );
   return coverage => {
     const regions = coverage ? intersectGeographicBounds(coverage, extent) : [extent];
-    const profiles = regions.map(region =>
+    const profile = combineRenderingProfiles(regions, region =>
       create(getAngularRanges(region, base.primeMeridian, base.long0), Boolean(coverage))
     );
-    // Resolve each piece before returning a normalizer; empty coverage must fall back.
-    const bounds = unionRenderingBounds(profiles.map(profile => profile.bounds));
-    return {
-      bounds,
-      normalize(point) {
-        normalizeCoverage(point, regions, base.long0, base.primeMeridian);
-        const longitude = wrapLongitude(point.x - base.long0);
-        const index = regions.findIndex(region => {
-          const ranges = getAngularRanges(region, base.primeMeridian, base.long0);
-          return (
-            longitude >= ranges.longitude[0] - base.long0 - 1e-12 &&
-            longitude <= ranges.longitude[1] - base.long0 + 1e-12
-          );
-        });
-        profiles[Math.max(0, index)].normalize!(point);
-      }
-    };
+    if (!profile) throw new Error('CRS coverage does not intersect the satellite limb');
+    return profile;
   };
 }

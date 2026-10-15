@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {GeographicBounds, ProjectionRenderingProfile} from './types';
+import type {GeographicBounds, ProjectionRenderingProfile} from '../types';
 
 const RADIANS = Math.PI / 180;
 
 /** Kernel parameter ranges, in radians. These are not geographic coverage bounds. */
-export type AngularRanges = {
-  readonly longitude: readonly [number, number];
-  readonly latitude: readonly [number, number];
-};
+export type AngularRanges = readonly [
+  min: readonly [lon: number, lat: number],
+  max: readonly [lon: number, lat: number]
+];
 
 /** Construct explicitly typed numerical parameter ranges, in radians. */
 export function createAngularRanges(
@@ -19,7 +19,10 @@ export function createAngularRanges(
   east: number,
   north: number
 ): AngularRanges {
-  return {longitude: [west, east], latitude: [south, north]};
+  return [
+    [west, south],
+    [east, north]
+  ];
 }
 
 /** Normalize a longitude in degrees; the dateline's canonical point is -180. */
@@ -53,6 +56,13 @@ export function createGeographicBounds(
     wrappedEast === -180 && east > west ? 180 : wrappedEast,
     north
   ];
+}
+
+/** Eastward longitude span in degrees, preserving full-world and single-meridian coverage. */
+export function getLongitudeSpan(bounds: GeographicBounds): number {
+  const span = bounds[2] - bounds[0];
+  // Modulo would collapse the explicitly represented full world to a meridian.
+  return span < 0 ? span + 360 : span;
 }
 
 /** Split periodic coverage into rectangles whose longitude endpoints are ordered. */
@@ -138,7 +148,7 @@ export function getAngularRanges(
   primeMeridian = 0,
   origin = 0
 ): AngularRanges {
-  const width = bounds[2] >= bounds[0] ? bounds[2] - bounds[0] : bounds[2] - bounds[0] + 360;
+  const width = getLongitudeSpan(bounds);
   const west = bounds[0] * RADIANS - primeMeridian;
   const middle = west + (width * RADIANS) / 2;
   const shift = Math.round((origin - middle) / (2 * Math.PI)) * 2 * Math.PI;
@@ -153,10 +163,10 @@ export function getAngularRanges(
 /** Convert numerical kernel ranges into Greenwich degree coverage at an explicit boundary. */
 export function getGeographicBounds(ranges: AngularRanges, primeMeridian = 0): GeographicBounds {
   return createGeographicBounds(
-    (ranges.longitude[0] + primeMeridian) / RADIANS,
-    ranges.latitude[0] / RADIANS,
-    (ranges.longitude[1] + primeMeridian) / RADIANS,
-    ranges.latitude[1] / RADIANS
+    (ranges[0][0] + primeMeridian) / RADIANS,
+    ranges[0][1] / RADIANS,
+    (ranges[1][0] + primeMeridian) / RADIANS,
+    ranges[1][1] / RADIANS
   );
 }
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
-import {createGeostationaryProfile} from '../geostationary-rendering-profile';
+import {createGeostationaryProfile} from '../rendering-profile/geostationary-rendering-profile';
 import type {ProjectionPlugin} from '../types';
 import {
   catalogueParameters,
