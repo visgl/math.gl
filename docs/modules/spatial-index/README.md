@@ -51,14 +51,38 @@ triangle-list vertex indices. Without indices, each three consecutive vertices f
 Returns original triangle numbers, not vertex numbers. Positions and indices are copied.
 
 - `search(minimum, maximum)`: triangle **bounds** candidates, not exact triangle/box overlap.
-- `intersectRay(origin, direction, {maxDistance = Infinity, backfaceCulling = false})`:
+- `intersectRay(origin, direction, {maxDistance = Infinity, backfaceCulling = false, filter?, acceptHit?})`:
   closest triangle hit `{index,distance,point,barycentric}`, or null. Distances are Euclidean;
   barycentric components correspond to vertices a,b,c. Degenerate/coplanar triangles have no hit.
+  `filter(index)` excludes an original triangle before exact intersection.
+  `acceptHit(hit)` can reject an exact point using barycentric weights, source validity,
+  clipping or other application constraints. Rejection does not shorten the ray;
+  a valid surface behind a foreground hole can still be selected. Predicates must
+  treat the candidate as immutable; they run only for hits that could improve the
+  accepted result, in unspecified traversal order, not as an all-intersections API.
+  Exceptions propagate. With no predicates, existing behavior is unchanged.
 - `nearest(point, {maxDistance = Infinity, filter?})`: closest point on a filled triangle,
   returning `{index,distance,point}` or null. Degenerate triangles reduce to segments/points.
 
 The ray and triangle geometry kernels are reused from `@math.gl/culling/queries`.
 `@math.gl/spatial-index/boxes` provides BoxIndex and PointIndex without the triangle code.
+
+For terrain picking, keep physical heights and validity masks in the caller (for
+example loaders.gl height grids). The BVH indexes displayed geometry; it does not
+infer datums, reconstruct elevation, or apply exaggeration:
+
+```ts
+const hit = mesh.intersectRay(origin, direction, {
+  maxDistance: 1000,
+  filter: triangleIndex => loadedTriangles.has(triangleIndex),
+  acceptHit: candidate => isValidSurfacePoint(candidate.index, candidate.barycentric)
+});
+```
+
+This acceptance boundary supports Tangram's terrain-query conformance work without
+importing terrain or renderer concepts into math.gl. Cooperative construction,
+explicit index-memory admission and an exact zero-budget fallback remain prerequisites
+to replacing Tangram's production query index; this change does not claim that switch.
 
 ## loaders.gl adapter boundary
 
