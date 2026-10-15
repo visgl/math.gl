@@ -25,6 +25,7 @@ assert.deepEqual(tiles.getTileIndex(matrix, [120, 190]), [1, 1]);
 assert.deepEqual(tiles.getTileRange(matrix, [120, 190, 140, 200]),
   {minTileColumn: 1, maxTileColumn: 1, minTileRow: 0, maxTileRow: 0});
 assert.equal(tiles.selectTileMatrix({crs: 'local', matrices: [matrix]}, 1), matrix);
+assert.deepEqual(tiles.getTileBounds({...matrix, resolutionY: 3}, 1, 1), [120, 170, 140, 185]);
 `;
   await writeFile(
     join(temporaryDirectory, 'consumer.mjs'),
@@ -48,7 +49,7 @@ import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix}
   from '@math.gl/geospatial/tile-matrix';
 import type {TileMatrix, TileMatrixSet, TileMatrixBounds, TileMatrixLimits}
   from '@math.gl/geospatial/tile-matrix';
-const matrix: TileMatrix = {id: '0', resolution: 1, origin: [0, 0],
+const matrix: TileMatrix = {id: '0', resolution: 1, resolutionY: 2, origin: [0, 0],
   cornerOfOrigin: 'topLeft', tileSize: [256, 256], matrixSize: [2, 2]};
 const matrixSet: TileMatrixSet = {crs: 'local', matrices: [matrix]};
 const bounds: TileMatrixBounds = getTileBounds(matrix, 0, 0);
