@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v5.0.0-alpha.17
+
+- feat(geospatial): support per-axis tile matrix resolution (#253)
+- feat(spatial-index): refine accepted ray hits during traversal (#254)
+- fix(projection): contain rendering bounds and stabilize normalization (#252)
+- feat(projection): Add CRSDescriptor (#251)
+
 ## v5.0.0-alpha.16
 
 - feat(geoarrow): Add borrowed batch iteration, row views, and chunk-preserving column assembly without allocating typed arrays.

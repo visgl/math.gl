@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.16",
+  "version": "5.0.0-alpha.17",
   "keywords": [
     "math",
     "curve",
@@ -33,7 +33,7 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/types": "5.0.0-alpha.16"
+    "@math.gl/types": "5.0.0-alpha.17"
   },
   "sideEffects": false
 }
