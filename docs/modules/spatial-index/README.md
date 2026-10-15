@@ -43,6 +43,16 @@ caller-owned IDs, feature properties, or tile references.
 - `searchRay(origin, direction, maxDistance = Infinity)`: box candidates sorted by entry
   distance, then row index. Directions are normalized; a nonunit input does not change distances.
   An origin inside a box has entry distance zero. Ray direction must be finite and nonzero.
+- `intersectRay(origin, direction, {maxDistance = Infinity, filter?, intersectItem?})`:
+  nearest accepted box/geometry hit, returning `{index,distance}` or null. Unlike
+  `searchRay`, this near-first branch-and-bound traversal does not materialize all
+  candidates. `filter(index)` excludes rows before refinement.
+  `intersectItem(index, currentMaxDistance)` returns an exact Euclidean hit distance
+  or null; without it, box entry distance is used. Geometry must be enclosed by its
+  indexed box, and refinement distances must be nonnegative and at least the box
+  entry distance. Rejected hits do not clip later candidates. Limits are inclusive;
+  ties select the lowest original row. Callback order is unspecified, not an
+  all-intersections stream. Exceptions propagate.
 
 ## TriangleBVH
 
@@ -95,7 +105,8 @@ in their existing tile hierarchy. This PR changes no loaders.gl code.
 ## POC limits
 
 Construction uses repeated median sorting (O(n log² n)), and queries can degrade to O(n).
-Ray candidates are materialized and sorted before triangle refinement. Incremental updates,
+`searchRay` materializes and sorts all broad-phase candidates; nearest `intersectRay`
+queries instead prune against accepted hits during traversal. Incremental updates,
 packed-buffer serialization/restoration, k-nearest queries, SAH construction, and performance
 budgets are deferred. Rebuild after changing data. Geometry kernels are not watertight-certified;
 near-degenerate and extreme-scale numerical qualification is incomplete. This is not a tile

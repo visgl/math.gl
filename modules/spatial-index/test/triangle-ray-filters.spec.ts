@@ -4,7 +4,7 @@
 
 import {expect, test, vi} from 'vitest';
 import {TriangleBVH, type TriangleRayOptions, type TriangleRayResult} from '../src';
-import {intersectRayTriangle} from '../../culling/src/queries';
+import {intersectRayTriangle, normalizeQueryDirection} from '../../culling/src/queries';
 
 /** Indexed stacked triangles, including coincident surfaces and one degenerate face. */
 function createFixture(leafSize: number) {
@@ -24,7 +24,7 @@ test.each([1, 2, 8])(
       point: [0.5, 0.5, 1],
       barycentric: [0.5, 0.25, 0.25]
     });
-    expect(acceptHit.mock.calls.map(([hit]) => hit.index)).toEqual([0, 2, 1]);
+    expect(acceptHit.mock.calls.map(([hit]) => hit.index).sort()).toEqual([0, 1, 2]);
     expect(index.intersectRay([0.5, 0.5, 5], [0, 0, -7], {acceptHit, maxDistance: 3})).toBeNull();
     expect(index.intersectRay([0.5, 0.5, 5], [0, 0, -7], {acceptHit, maxDistance: 4})?.index).toBe(
       1
@@ -91,6 +91,30 @@ test('misses, degeneracy, backface culling, limits and callback errors keep expl
   expect(index.intersectRay([0.5, 0.5, 3], [0, 0, -1], {maxDistance: 0, acceptHit})?.distance).toBe(
     0
   );
+});
+
+test('oblique rays preserve triangle-kernel results across nonunit directions', () => {
+  const positions = [0, 0, 0, 2, 0, 0, 0, 2, 0];
+  const index = new TriangleBVH({positions});
+  for (const horizontal of [0, 0.3, 1, 1.5])
+    for (const vertical of [0.1, 0.3, 1]) {
+      if (horizontal + vertical > 2) continue;
+      for (const altitude of [0.1, 3, 12345]) {
+        const origin = [horizontal + 0.1, vertical + 0.7, altitude],
+          direction = [-0.1, -0.7, -altitude];
+        const unit = normalizeQueryDirection(direction, 3);
+        const expected = intersectRayTriangle(
+          origin,
+          unit,
+          positions.slice(0, 3),
+          positions.slice(3, 6),
+          positions.slice(6, 9)
+        );
+        const hit = index.intersectRay(origin, direction);
+        expect(hit?.distance ?? null).toBe(expected?.t ?? null);
+        expect(hit?.barycentric ?? null).toEqual(expected?.barycentric ?? null);
+      }
+    }
 });
 
 test.each([1, 8])(

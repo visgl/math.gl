@@ -21,6 +21,7 @@ try {
   await writeFile(join(temporary, 'package.json'), ' {"type":"module"}');
   const assertions = `const index=new api.PointIndex({positions:[0,0,1,1],dimension:2});
 assert.deepEqual(index.nearest([1,2]),{index:1,distance:1});
+assert.deepEqual(index.intersectRay([1,2],[0,-2]),{index:1,distance:1});
 const mesh=new api.TriangleBVH({positions:[0,0,0,1,0,0,0,1,0]});
 assert.equal(mesh.intersectRay([0.2,0.2,1],[0,0,-2]).distance,1);
 assert.equal(mesh.intersectRay([0.2,0.2,1],[0,0,-2],{acceptHit:()=>false}),null);
@@ -39,7 +40,7 @@ ${assertions}`
     execFileSync(process.execPath, [join(temporary, file)], {stdio: 'inherit'});
   await writeFile(
     join(temporary, 'consumer.ts'),
-    `import {PointIndex,TriangleBVH,type TriangleRayOptions} from '@math.gl/spatial-index';
+    `import {PointIndex,TriangleBVH,type TriangleRayOptions,type RayIndexOptions} from '@math.gl/spatial-index';
 const points=new PointIndex({positions:new Float64Array([0,0]),dimension:2});
 const index:number|undefined=points.nearest([0,0])?.index;
 const triangle=new TriangleBVH({positions:[]});
@@ -51,6 +52,8 @@ const options:TriangleRayOptions={filter:index=>index!==2,acceptHit:hit=>{
   return hit.distance>=0&&weights[0]>=0;
 }};
 triangle.intersectRay([0,0,1],[0,0,-1],options);
+const rayOptions:RayIndexOptions={intersectItem:(index,maximum)=>index===0?Math.min(1,maximum):null};
+points.intersectRay([0,0],[1,0],rayOptions);
 void [index,point];
 // @ts-expect-error invalid dimension
 new PointIndex({positions:[],dimension:4});`
