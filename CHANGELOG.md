@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v5.0.0-alpha.18
+
+- Republish current master with the CRSDescriptor, projection rendering bounds fixes, per-axis tile matrix resolution, and refined ray-hit traversal from PRs #251–#254. No source changes since alpha.17.
+
 ## v5.0.0-alpha.17
 
 - feat(geospatial): support per-axis tile matrix resolution (#253)
