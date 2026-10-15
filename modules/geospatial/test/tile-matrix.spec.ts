@@ -279,3 +279,59 @@ test('selection rejects duplicate identifiers and malformed unselected matrices'
     )
   ).toThrow(RangeError);
 });
+
+test.each(['topLeft', 'bottomLeft'] as const)(
+  'anisotropic pixels preserve bounds, inverse edges and ranges for %s',
+  cornerOfOrigin => {
+    const grid: TileMatrix = {...matrix, resolutionY: 3, cornerOfOrigin};
+    const direction = cornerOfOrigin === 'topLeft' ? -1 : 1;
+    const bounds = getTileBounds(grid, 1, 1);
+    expect(bounds).toEqual(
+      cornerOfOrigin === 'topLeft' ? [120, 170, 140, 185] : [120, 215, 140, 230]
+    );
+    expect(getTileIndex(grid, [120, 200 + direction * 15])).toEqual([1, 1]);
+    expect(getTileIndex(grid, [120, 200 + direction * 30])).toBeNull();
+    expect(getTileRange(grid, bounds)).toEqual({
+      minTileColumn: 1,
+      maxTileColumn: 1,
+      minTileRow: 1,
+      maxTileRow: 1
+    });
+    expect(getTileRange(grid, [120, 200 + direction * 15, 120, 200 + direction * 15])).toEqual({
+      minTileColumn: 1,
+      maxTileColumn: 1,
+      minTileRow: 1,
+      maxTileRow: 1
+    });
+    expect(
+      isTileIndexInRange(grid, 1, 1, {
+        minTileColumn: 1,
+        maxTileColumn: 1,
+        minTileRow: 1,
+        maxTileRow: 1
+      })
+    ).toBe(true);
+    expect(getTileBounds({...grid, resolutionY: undefined}, 1, 1)).toEqual(
+      getTileBounds({...matrix, cornerOfOrigin}, 1, 1)
+    );
+  }
+);
+
+test.each([0, -1, NaN, Infinity, Number.MAX_VALUE, Number.MIN_VALUE])(
+  'rejects invalid or unrepresentable vertical resolution %s',
+  resolutionY => expect(() => validateTileMatrix({...matrix, resolutionY})).toThrow(RangeError)
+);
+
+test('selects anisotropic matrices using the coarser pixel axis without mutating inputs', () => {
+  const coarse: TileMatrix = {...matrix, id: 'coarse', resolution: 1, resolutionY: 8};
+  const fine: TileMatrix = {...matrix, id: 'fine', resolution: 2, resolutionY: 3};
+  const wide: TileMatrix = {...matrix, id: 'wide', resolution: 4, resolutionY: 1};
+  const tied: TileMatrix = {...matrix, id: 'tied', resolution: 1, resolutionY: 4};
+  const matrices = Object.freeze([coarse, fine, wide, tied]);
+  const set = {crs: 'local', matrices};
+  expect(selectTileMatrix(set, 4)).toBe(wide);
+  expect(selectTileMatrix(set, 3)).toBe(fine);
+  expect(selectTileMatrix(set, 0.5)).toBe(fine);
+  expect(selectTileMatrix(set, 8)).toBe(coarse);
+  expect(matrices).toEqual([coarse, fine, wide, tied]);
+});

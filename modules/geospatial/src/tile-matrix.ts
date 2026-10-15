@@ -9,8 +9,10 @@ export type TileMatrixBounds = readonly [number, number, number, number];
 export type TileMatrix = {
   /** Opaque identifier; it is not a numeric zoom or array index. */
   readonly id: string;
-  /** Coordinate units per pixel, positive and finite. */
+  /** X coordinate units per pixel, positive and finite; also used for Y unless overridden. */
   readonly resolution: number;
+  /** Y coordinate units per pixel, positive and finite; defaults to resolution. */
+  readonly resolutionY?: number;
   /** Origin in X/Y order in the matrix coordinate system. */
   readonly origin: readonly [number, number];
   /** Origin corner; columns increase in X, rows decrease/increase in Y for top/bottom left. */
@@ -51,6 +53,8 @@ export function validateTileMatrix(matrix: TileMatrix): void {
     matrix.matrixSize.length !== 2 ||
     !Number.isFinite(matrix.resolution) ||
     matrix.resolution <= 0 ||
+    (matrix.resolutionY !== undefined &&
+      (!Number.isFinite(matrix.resolutionY) || matrix.resolutionY <= 0)) ||
     !matrix.origin.every(Number.isFinite) ||
     ![...matrix.tileSize, ...matrix.matrixSize].every(
       value => Number.isSafeInteger(value) && value > 0
@@ -60,7 +64,8 @@ export function validateTileMatrix(matrix: TileMatrix): void {
     throw new RangeError('Invalid tile matrix geometry');
   }
   for (let axis = 0; axis < 2; axis++) {
-    const tileSpan = matrix.resolution * matrix.tileSize[axis];
+    const resolution = axis === 1 ? (matrix.resolutionY ?? matrix.resolution) : matrix.resolution;
+    const tileSpan = resolution * matrix.tileSize[axis];
     const span = tileSpan * matrix.matrixSize[axis];
     const direction = axis === 1 && matrix.cornerOfOrigin === 'topLeft' ? -1 : 1;
     const end = matrix.origin[axis] + direction * span;
@@ -104,7 +109,7 @@ export function isTileIndexInRange(
 export function getTileBounds(matrix: TileMatrix, column: number, row: number): TileMatrixBounds {
   if (!isTileIndexInRange(matrix, column, row)) throw new RangeError('Tile index outside matrix');
   const width = matrix.resolution * matrix.tileSize[0];
-  const height = matrix.resolution * matrix.tileSize[1];
+  const height = (matrix.resolutionY ?? matrix.resolution) * matrix.tileSize[1];
   const minimumX = matrix.origin[0] + column * width;
   const minimumY =
     matrix.cornerOfOrigin === 'topLeft'
@@ -141,7 +146,7 @@ export function getTileIndex(
   const row = getTileAxisIndex(
     matrix.origin[1],
     matrix.cornerOfOrigin === 'topLeft' ? -1 : 1,
-    matrix.resolution * matrix.tileSize[1],
+    (matrix.resolutionY ?? matrix.resolution) * matrix.tileSize[1],
     matrix.matrixSize[1],
     coordinate[1]
   );
@@ -243,7 +248,7 @@ export function getTileRange(
   const rows = getTileAxisRange(
     matrix.origin[1],
     topLeft ? -1 : 1,
-    matrix.resolution * matrix.tileSize[1],
+    (matrix.resolutionY ?? matrix.resolution) * matrix.tileSize[1],
     matrix.matrixSize[1],
     topLeft ? bounds[3] : bounds[1],
     topLeft ? bounds[1] : bounds[3]
@@ -287,6 +292,7 @@ function getTileAxisRange(
  * Selects the coarsest matrix with resolution at or below the positive finite target, or the
  * finest available matrix when all levels are coarser. Target units must match the matrix set's
  * coordinate units per pixel. Returns null for an empty set; ties retain the first matrix.
+ * Uses the larger axis resolution for anisotropic pixels, so both axes meet the target.
  * Validates every matrix and unique identifiers. Does not sort or mutate the set.
  */
 export function selectTileMatrix(
@@ -298,17 +304,21 @@ export function selectTileMatrix(
   }
   let selected: TileMatrix | null = null;
   let finest: TileMatrix | null = null;
+  let selectedResolution = -Infinity;
+  let finestResolution = Infinity;
   const identifiers = new Set<string>();
   for (const matrix of matrixSet.matrices) {
     validateTileMatrix(matrix);
     if (identifiers.has(matrix.id)) throw new RangeError('Tile matrix identifiers must be unique');
     identifiers.add(matrix.id);
-    if (!finest || matrix.resolution < finest.resolution) finest = matrix;
-    if (
-      matrix.resolution <= targetResolution &&
-      (!selected || matrix.resolution > selected.resolution)
-    ) {
+    const resolution = Math.max(matrix.resolution, matrix.resolutionY ?? matrix.resolution);
+    if (!finest || resolution < finestResolution) {
+      finest = matrix;
+      finestResolution = resolution;
+    }
+    if (resolution <= targetResolution && (!selected || resolution > selectedResolution)) {
       selected = matrix;
+      selectedResolution = resolution;
     }
   }
   return selected ?? finest;
