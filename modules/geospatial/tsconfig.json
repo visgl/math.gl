@@ -10,6 +10,12 @@
   "references": [
     {"path": "../types"},
     {"path": "../core"},
-    {"path": "../culling"}
+    {"path": "../culling"},
+    {"path": "../crs"},
+    {"path": "../projection"},
+    {"path": "../proj"},
+    {"path": "../web-mercator"},
+    {"path": "../wkb"},
+    {"path": "../geoarrow"}
   ]
 }

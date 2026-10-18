@@ -32,6 +32,31 @@
       "types": "./dist/parametric.d.ts",
       "import": "./dist/parametric.js",
       "require": "./dist/parametric.cjs"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.js",
+      "require": "./dist/utils.cjs"
+    },
+    "./curves": {
+      "types": "./dist/curves.d.ts",
+      "import": "./dist/curves.js",
+      "require": "./dist/curves.cjs"
+    },
+    "./polygon": {
+      "types": "./dist/polygon.d.ts",
+      "import": "./dist/polygon.js",
+      "require": "./dist/polygon.cjs"
+    },
+    "./culling": {
+      "types": "./dist/culling.d.ts",
+      "import": "./dist/culling.js",
+      "require": "./dist/culling.cjs"
+    },
+    "./spatial-index": {
+      "types": "./dist/spatial-index.d.ts",
+      "import": "./dist/spatial-index.js",
+      "require": "./dist/spatial-index.cjs"
     }
   },
   "files": [
@@ -39,6 +64,11 @@
     "src"
   ],
   "dependencies": {
+    "@math.gl/culling": "5.0.0-alpha.18",
+    "@math.gl/curves": "5.0.0-alpha.18",
+    "@math.gl/geometry-utils": "5.0.0-alpha.18",
+    "@math.gl/polygon": "5.0.0-alpha.18",
+    "@math.gl/spatial-index": "5.0.0-alpha.18",
     "@math.gl/types": "5.0.0-alpha.18"
   }
 }

@@ -5,7 +5,9 @@
   <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
 </p>
 
-The experimental `@math.gl/expressions` module provides a compact expression parser and evaluator for JavaScript-style expressions.
+The experimental expression parser is available from `@math.gl/core/expressions`. The historical
+`@math.gl/expressions` package remains as a compatibility entry point and also re-exports the
+geospatial function library. DGGS function libraries remain at `@math.gl/expressions/dggs`.
 
 It extracts the expression machinery that has shipped inside `@deck.gl/json` and provides it as a standalone module. Its API remains experimental.
 

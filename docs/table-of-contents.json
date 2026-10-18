@@ -162,6 +162,11 @@
       },
       {
         "type": "category",
+        "label": "@math.gl/earth",
+        "items": ["modules/earth/README"]
+      },
+      {
+        "type": "category",
         "label": "@math.gl/geoid",
         "items": [
           "modules/geoid/README",

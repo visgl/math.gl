@@ -1,0 +1,56 @@
+{
+  "name": "@math.gl/earth",
+  "description": "Earth and astronomy utilities for math.gl",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "5.0.0-alpha.18",
+  "keywords": [
+    "earth",
+    "geoid",
+    "sun",
+    "timezone",
+    "geospatial"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./geoid": {
+      "types": "./dist/geoid.d.ts",
+      "import": "./dist/geoid.js",
+      "require": "./dist/geoid.cjs"
+    },
+    "./sun": {
+      "types": "./dist/sun.d.ts",
+      "import": "./dist/sun.js",
+      "require": "./dist/sun.cjs"
+    },
+    "./timezone": {
+      "types": "./dist/timezone.d.ts",
+      "import": "./dist/timezone.js",
+      "require": "./dist/timezone.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@math.gl/geoid": "5.0.0-alpha.18",
+    "@math.gl/sun": "5.0.0-alpha.18",
+    "@math.gl/timezone": "5.0.0-alpha.18"
+  }
+}

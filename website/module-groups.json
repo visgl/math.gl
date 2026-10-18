@@ -17,17 +17,20 @@
       "curves",
       "geometry",
       "geometry-utils",
-      "culling"
+      "culling",
+      "polygon",
+      "spatial-index"
     ]
   },
   {
     "id": "spatial",
-    "label": "Spatial",
-    "description": "Geometry operations, geographic indexing and columnar data.",
+    "label": "Geospatial",
+    "description": "Coordinate systems, projections, and geospatial data formats.",
     "modules": [
-      "spatial-index",
-      "polygon",
-      "dggs",
+      "geospatial",
+      "crs",
+      "projection",
+      "web-mercator",
       "geoarrow",
       "wkb"
     ]
@@ -37,13 +40,16 @@
     "label": "Earth",
     "description": "Coordinate reference systems, Earth models, maps and time.",
     "modules": [
-      "crs",
-      "projection",
-      "web-mercator",
-      "geospatial",
+      "earth",
       "geoid",
       "timezone",
       "sun"
     ]
+  },
+  {
+    "id": "dggs",
+    "label": "DGGS",
+    "description": "A separate module for discrete global grid systems.",
+    "modules": ["dggs"]
   }
 ]

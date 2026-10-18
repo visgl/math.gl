@@ -5278,6 +5278,7 @@ __metadata:
   resolution: "@math.gl/core@workspace:modules/core"
   dependencies:
     "@math.gl/types": "npm:5.0.0-alpha.18"
+    jsep: "npm:^1.4.0"
   languageName: unknown
   linkType: soft
 
@@ -5313,7 +5314,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/curves@workspace:*, @math.gl/curves@workspace:modules/curves":
+"@math.gl/curves@npm:5.0.0-alpha.18, @math.gl/curves@workspace:*, @math.gl/curves@workspace:modules/curves":
   version: 0.0.0-use.local
   resolution: "@math.gl/curves@workspace:modules/curves"
   dependencies:
@@ -5333,6 +5334,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@math.gl/earth@workspace:modules/earth":
+  version: 0.0.0-use.local
+  resolution: "@math.gl/earth@workspace:modules/earth"
+  dependencies:
+    "@math.gl/geoid": "npm:5.0.0-alpha.18"
+    "@math.gl/sun": "npm:5.0.0-alpha.18"
+    "@math.gl/timezone": "npm:5.0.0-alpha.18"
+  languageName: unknown
+  linkType: soft
+
 "@math.gl/expressions@workspace:*, @math.gl/expressions@workspace:modules/expressions":
   version: 0.0.0-use.local
   resolution: "@math.gl/expressions@workspace:modules/expressions"
@@ -5340,7 +5351,6 @@ __metadata:
     "@math.gl/core": "npm:5.0.0-alpha.18"
     "@math.gl/dggs": "npm:5.0.0-alpha.18"
     "@math.gl/geospatial": "npm:5.0.0-alpha.18"
-    jsep: "npm:^1.4.0"
   languageName: unknown
   linkType: soft
 
@@ -5356,7 +5366,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/geoarrow@workspace:modules/geoarrow":
+"@math.gl/geoarrow@npm:5.0.0-alpha.18, @math.gl/geoarrow@workspace:modules/geoarrow":
   version: 0.0.0-use.local
   resolution: "@math.gl/geoarrow@workspace:modules/geoarrow"
   dependencies:
@@ -5367,7 +5377,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/geoid@workspace:*, @math.gl/geoid@workspace:modules/geoid":
+"@math.gl/geoid@npm:5.0.0-alpha.18, @math.gl/geoid@workspace:*, @math.gl/geoid@workspace:modules/geoid":
   version: 0.0.0-use.local
   resolution: "@math.gl/geoid@workspace:modules/geoid"
   dependencies:
@@ -5386,7 +5396,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/geometry-utils@workspace:*, @math.gl/geometry-utils@workspace:modules/geometry-utils":
+"@math.gl/geometry-utils@npm:5.0.0-alpha.18, @math.gl/geometry-utils@workspace:*, @math.gl/geometry-utils@workspace:modules/geometry-utils":
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry-utils@workspace:modules/geometry-utils"
   dependencies:
@@ -5399,6 +5409,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry@workspace:modules/geometry"
   dependencies:
+    "@math.gl/culling": "npm:5.0.0-alpha.18"
+    "@math.gl/curves": "npm:5.0.0-alpha.18"
+    "@math.gl/geometry-utils": "npm:5.0.0-alpha.18"
+    "@math.gl/polygon": "npm:5.0.0-alpha.18"
+    "@math.gl/spatial-index": "npm:5.0.0-alpha.18"
     "@math.gl/types": "npm:5.0.0-alpha.18"
   languageName: unknown
   linkType: soft
@@ -5408,8 +5423,14 @@ __metadata:
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
     "@math.gl/core": "npm:5.0.0-alpha.18"
+    "@math.gl/crs": "npm:5.0.0-alpha.18"
     "@math.gl/culling": "npm:5.0.0-alpha.18"
+    "@math.gl/geoarrow": "npm:5.0.0-alpha.18"
+    "@math.gl/proj": "npm:5.0.0-alpha.18"
+    "@math.gl/projection": "npm:5.0.0-alpha.18"
     "@math.gl/types": "npm:5.0.0-alpha.18"
+    "@math.gl/web-mercator": "npm:5.0.0-alpha.18"
+    "@math.gl/wkb": "npm:5.0.0-alpha.18"
   languageName: unknown
   linkType: soft
 
@@ -5460,7 +5481,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/proj@workspace:modules/proj":
+"@math.gl/proj@npm:5.0.0-alpha.18, @math.gl/proj@workspace:modules/proj":
   version: 0.0.0-use.local
   resolution: "@math.gl/proj@workspace:modules/proj"
   dependencies:
@@ -5468,7 +5489,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/projection@workspace:*, @math.gl/projection@workspace:modules/projection":
+"@math.gl/projection@npm:5.0.0-alpha.18, @math.gl/projection@workspace:*, @math.gl/projection@workspace:modules/projection":
   version: 0.0.0-use.local
   resolution: "@math.gl/projection@workspace:modules/projection"
   dependencies:
@@ -5479,7 +5500,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/spatial-index@workspace:*, @math.gl/spatial-index@workspace:modules/spatial-index":
+"@math.gl/spatial-index@npm:5.0.0-alpha.18, @math.gl/spatial-index@workspace:*, @math.gl/spatial-index@workspace:modules/spatial-index":
   version: 0.0.0-use.local
   resolution: "@math.gl/spatial-index@workspace:modules/spatial-index"
   dependencies:
@@ -5487,14 +5508,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/sun@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "@math.gl/sun@npm:4.1.0"
-  checksum: 10c0/baf813f3134124a1701c5f64cc8725fdb1d8d4c9e47c7fbd0d2e960d823f776d35312f82c62a09dcb140ea31d42b3945aa781066495291df190566ae17b5857b
-  languageName: node
-  linkType: hard
-
-"@math.gl/sun@workspace:modules/sun":
+"@math.gl/sun@npm:5.0.0-alpha.18, @math.gl/sun@workspace:modules/sun":
   version: 0.0.0-use.local
   resolution: "@math.gl/sun@workspace:modules/sun"
   dependencies:
@@ -5507,7 +5521,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/timezone@workspace:*, @math.gl/timezone@workspace:modules/timezone":
+"@math.gl/sun@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "@math.gl/sun@npm:4.1.0"
+  checksum: 10c0/baf813f3134124a1701c5f64cc8725fdb1d8d4c9e47c7fbd0d2e960d823f776d35312f82c62a09dcb140ea31d42b3945aa781066495291df190566ae17b5857b
+  languageName: node
+  linkType: hard
+
+"@math.gl/timezone@npm:5.0.0-alpha.18, @math.gl/timezone@workspace:*, @math.gl/timezone@workspace:modules/timezone":
   version: 0.0.0-use.local
   resolution: "@math.gl/timezone@workspace:modules/timezone"
   dependencies:
@@ -16226,14 +16247,6 @@ __metadata:
     "@luma.gl/shadertools": "npm:~9.4.0"
     "@math.gl/timezone": "workspace:*"
     vite: "npm:^8.2.2"
-  languageName: unknown
-  linkType: soft
-
-"math.gl@workspace:modules/main":
-  version: 0.0.0-use.local
-  resolution: "math.gl@workspace:modules/main"
-  dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.18"
   languageName: unknown
   linkType: soft
 

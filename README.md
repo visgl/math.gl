@@ -1,12 +1,12 @@
 <p align="right">
-  <a href="https://www.npmjs.com/package/math.gl">
-    <img src="https://img.shields.io/npm/v/math.gl.svg?style=flat-square&label=npm%20package" alt="npm package version" />
+  <a href="https://www.npmjs.com/package/@math.gl/core">
+    <img src="https://img.shields.io/npm/v/@math.gl/core.svg?style=flat-square&label=npm%20package" alt="math.gl core npm package version" />
   </a>
   <a href="https://github.com/visgl/math.gl/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square" alt="MIT license" />
   </a>
-  <a href="https://www.npmjs.com/package/math.gl">
-    <img src="https://img.shields.io/npm/dm/math.gl.svg?style=flat-square&label=downloads" alt="npm downloads" />
+  <a href="https://www.npmjs.com/package/@math.gl/core">
+    <img src="https://img.shields.io/npm/dm/@math.gl/core.svg?style=flat-square&label=downloads" alt="math.gl core npm downloads" />
   </a>
   <a href="https://coveralls.io/github/visgl/math.gl?branch=master">
     <img src="https://img.shields.io/coveralls/visgl/math.gl.svg?style=flat-square&label=coverage" alt="coverage" />

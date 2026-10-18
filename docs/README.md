@@ -18,16 +18,28 @@ math.gl computes on the CPU and has no GPU dependencies. Its arrays and coordina
 
 ## Features
 
-- **Core classes** - Basic vectors and matrices: **`@math.gl/types`**, **`@math.gl/core`**
-- **Expression parsing** - Parse and evaluate compact JavaScript-style expressions: **`@math.gl/expressions`**
-- **Geospatial projections** - CRS definitions and support for a variety of geospatial projections **`@math.gl/crs`**, **`@math.gl/geospatial`**, **`@math.gl/geoid`**, **`@math.gl/projection`**, **`@math.gl/web-mercator`**
-- **Geospatial utilities** - Cutting polygons and calculating sun position and direction **`@math.gl/polygon`**, **`@math.gl/sun`**
+- **Core math** - Vectors, matrices, shared types, and expressions through **`@math.gl/core`**
+- **Geometry** - Primitives, curves, polygon processing, culling, and spatial indexes through **`@math.gl/geometry`**
+- **Geospatial** - CRS, projections, WKB, and GeoArrow through **`@math.gl/geospatial`**
+- **Earth utilities** - Geoid, sun, and timezone APIs through **`@math.gl/earth`**
 - **Discrete global grids** - Lightweight geometry decoders and cell-column detection for common grid encodings. **`@math.gl/dggs`**
 - **3D math** - 3D primitives, geometry processing and culling: **`@math.gl/geometry`**, **`@math.gl/geometry-utils`**, **`@math.gl/culling`**
 
 ## Modules
 
 math.gl is a toolbox that offers a suite of composable modules.
+
+The grouped package entry points are:
+
+| Package | Subpaths |
+| --- | --- |
+| `@math.gl/core` | `/types`, `/expressions` |
+| `@math.gl/geometry` | `/utils`, `/curves`, `/polygon`, `/culling`, `/spatial-index` |
+| `@math.gl/geospatial` | `/crs`, `/projection`, `/proj`, `/web-mercator`, `/wkb`, `/geoarrow`, `/expressions` |
+| `@math.gl/earth` | `/geoid`, `/sun`, `/timezone` |
+
+`@math.gl/dggs` remains a separate package. Existing leaf package imports such as `@math.gl/polygon`,
+`@math.gl/crs`, and `@math.gl/sun` remain available.
 
 ### Foundations
 
@@ -75,10 +87,13 @@ Coordinate reference systems, Earth models, maps and time.
 | [`@math.gl/geoid`](./modules/geoid/README.md) | Earth gravity models and geoid height conversion. |
 | [`@math.gl/timezone`](./modules/timezone/README.md) | Geographic timezone lookup and local calendar calculations. |
 | [`@math.gl/sun`](./modules/sun/README.md) | Sun position, daylight and atmospheric lighting. |
+| [`@math.gl/earth`](./modules/earth/README.md) | Grouped entry points for geoid, sun, and timezone utilities. |
 
 ## Legacy packages
 
-`math.gl` re-exports core for older applications. `viewport-mercator-project` re-exports Web Mercator utilities. Use the scoped packages for new code.
+The unscoped `math.gl` compatibility package has been removed from the workspace; use
+`@math.gl/core` for core math. `@math.gl/web-mercator` remains available for compatibility, and
+`viewport-mercator-project` re-exports Web Mercator utilities.
 
 ## Supported Browsers and Node Versions
 

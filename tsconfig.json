@@ -61,6 +61,7 @@
       "@math.gl/geometry/test/*": ["./modules/geometry/test/*"],
       "@math.gl/expressions/*": ["./modules/expressions/src/*"],
       "@math.gl/expressions/test/*": ["./modules/expressions/test/*"],
+      "@math.gl/earth/*": ["./modules/earth/src/*"],
       "@math.gl/geoid/*": ["./modules/geoid/src/*"],
       "@math.gl/geoid/test/*": ["./modules/geoid/test/*"],
       "@math.gl/geospatial/*": ["./modules/geospatial/src/*"],

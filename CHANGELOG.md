@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+- feat(packaging): Add grouped subpaths for core, geometry, geospatial, and Earth APIs; remove the unscoped `math.gl` workspace package and keep its former core APIs in `@math.gl/core`.
+
 ## v5.0.0-alpha.18
 
 - Republish current master with the CRSDescriptor, projection rendering bounds fixes, per-axis tile matrix resolution, and refined ray-hit traversal from PRs #251–#254. No source changes since alpha.17.

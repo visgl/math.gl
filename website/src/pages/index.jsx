@@ -27,7 +27,7 @@ const modules = [
   {
     name: 'Core',
     packageName: '@math.gl/core',
-    description: 'Vectors, matrices, quaternions, and the building blocks of 3D math.',
+    description: 'Vectors, matrices, shared types, and expression evaluation.',
     image: 'examples/core-transforms.jpg',
     imageAlt: 'Interactive 3D transform example',
     theme: 'violet'
@@ -43,7 +43,7 @@ const modules = [
   {
     name: 'Geospatial',
     packageName: '@math.gl/geospatial',
-    description: 'Ellipsoids, coordinate frames, and geospatial transformations.',
+    description: 'Ellipsoids, CRS, projections, WKB, and GeoArrow entry points.',
     image: 'icon-basemap.webp',
     imageAlt: 'Map illustration',
     theme: 'blue'
@@ -59,7 +59,7 @@ const modules = [
   {
     name: 'Geometry',
     packageName: '@math.gl/geometry',
-    description: 'Renderer-independent meshes and primitive geometry generators.',
+    description: 'Meshes, curves, polygon processing, culling, and spatial indexes.',
     image: 'examples/geometry-viewer.jpg',
     imageAlt: '3D geometry viewer example',
     theme: 'orange'
@@ -71,6 +71,14 @@ const modules = [
     image: 'examples/culling-playground.jpg',
     imageAlt: 'Frustum culling playground example',
     theme: 'teal'
+  },
+  {
+    name: 'Earth',
+    packageName: '@math.gl/earth',
+    description: 'Grouped paths for geoid, sun, and timezone utilities.',
+    image: 'icon-basemap.webp',
+    imageAlt: 'Earth illustration',
+    theme: 'indigo'
   },
   {
     name: 'Timezone',

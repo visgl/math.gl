@@ -37,6 +37,41 @@
       "types": "./dist/tile-matrix.d.ts",
       "import": "./dist/tile-matrix.js",
       "require": "./dist/tile-matrix.cjs"
+    },
+    "./crs": {
+      "types": "./dist/crs.d.ts",
+      "import": "./dist/crs.js",
+      "require": "./dist/crs.cjs"
+    },
+    "./projection": {
+      "types": "./dist/projection.d.ts",
+      "import": "./dist/projection.js",
+      "require": "./dist/projection.cjs"
+    },
+    "./proj": {
+      "types": "./dist/proj.d.ts",
+      "import": "./dist/proj.js",
+      "require": "./dist/proj.cjs"
+    },
+    "./web-mercator": {
+      "types": "./dist/web-mercator.d.ts",
+      "import": "./dist/web-mercator.js",
+      "require": "./dist/web-mercator.cjs"
+    },
+    "./wkb": {
+      "types": "./dist/wkb.d.ts",
+      "import": "./dist/wkb.js",
+      "require": "./dist/wkb.cjs"
+    },
+    "./geoarrow": {
+      "types": "./dist/geoarrow.d.ts",
+      "import": "./dist/geoarrow.js",
+      "require": "./dist/geoarrow.cjs"
+    },
+    "./expressions": {
+      "types": "./dist/expressions.d.ts",
+      "import": "./dist/expressions.js",
+      "require": "./dist/expressions.cjs"
     }
   },
   "files": [
@@ -45,8 +80,14 @@
   ],
   "dependencies": {
     "@math.gl/core": "5.0.0-alpha.18",
+    "@math.gl/crs": "5.0.0-alpha.18",
     "@math.gl/culling": "5.0.0-alpha.18",
-    "@math.gl/types": "5.0.0-alpha.18"
+    "@math.gl/geoarrow": "5.0.0-alpha.18",
+    "@math.gl/proj": "5.0.0-alpha.18",
+    "@math.gl/projection": "5.0.0-alpha.18",
+    "@math.gl/types": "5.0.0-alpha.18",
+    "@math.gl/web-mercator": "5.0.0-alpha.18",
+    "@math.gl/wkb": "5.0.0-alpha.18"
   },
   "gitHead": "e1a95300cb225a90da6e90333d4adf290f7ba501"
 }

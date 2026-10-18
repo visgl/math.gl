@@ -2,6 +2,18 @@
 
 ## Upgrading to v5.0
 
+### Grouped package subpaths
+
+Use the grouped subpaths for new imports: `@math.gl/core/types`, `@math.gl/core/expressions`,
+`@math.gl/geometry/utils`, `@math.gl/geometry/curves`, `@math.gl/geometry/polygon`,
+`@math.gl/geometry/culling`, `@math.gl/geometry/spatial-index`, `@math.gl/geospatial/crs`,
+`@math.gl/geospatial/projection`, `@math.gl/geospatial/proj`,
+`@math.gl/geospatial/web-mercator`, `@math.gl/geospatial/wkb`, `@math.gl/geospatial/geoarrow`,
+`@math.gl/geospatial/expressions`, and the `@math.gl/earth` geoid, sun, and timezone subpaths.
+Existing leaf packages remain supported. DGGS stays
+available as the separate `@math.gl/dggs` package. The unscoped `math.gl` package has been removed;
+replace imports from it with `@math.gl/core`.
+
 Version 5 removes deprecated APIs and moves low-level functions to focused subpath imports.
 
 ### Polygon, culling, and viewport APIs

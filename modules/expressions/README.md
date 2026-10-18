@@ -5,8 +5,10 @@
 
 [math.gl](https://math.gl/docs) expression parsing and evaluation helpers.
 
-This experimental module, available from math.gl v4.2, contains a small expression parser and accessor compiler.
+This compatibility package re-exports the expression parser and basic math library from
+`@math.gl/core/expressions`, the WGS84 library from `@math.gl/geospatial/expressions`, and the DGGS
+libraries from `@math.gl/dggs/expressions`.
 
-It includes an instance-scoped function registry and built-in basic math and WGS84 function tables. Optional GeoHash, Quadkey, and S2 tables are exported from `@math.gl/expressions/dggs`.
+The historical `@math.gl/expressions` and `@math.gl/expressions/dggs` entry points remain available.
 
 For documentation please visit the [website](https://math.gl).
