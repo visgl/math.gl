@@ -183,6 +183,9 @@ delete aliases['@math.gl/geometry'];
 // Resolve grouped geospatial imports from source before package dist files exist.
 aliases['@math.gl/geospatial$'] = resolve(__dirname, '../modules/geospatial/src/index.ts');
 delete aliases['@math.gl/geospatial'];
-for (const [name, file] of Object.entries({ellipsoid: 'entries/ellipsoid', globe: 'globe', tiles: 'tiles'})) {
-  aliases['@math.gl/geospatial/' + name + '$'] = resolve(__dirname, '../modules/geospatial/src/' + file + '.ts');
+const geospatialExports = require('../modules/geospatial/package.json').exports;
+for (const [subpath, entry] of Object.entries(geospatialExports)) {
+  if (subpath === '.') continue;
+  const sourceFile = entry.import.replace('./dist/', '../modules/geospatial/src/').replace(/\.js$/, '.ts');
+  aliases['@math.gl/geospatial' + subpath.slice(1) + '$'] = resolve(__dirname, sourceFile);
 }
