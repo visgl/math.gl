@@ -15,7 +15,7 @@ import {
   parse,
   parseExpressionString
 } from '@math.gl/expressions';
-import {get} from '../src/get';
+import {get} from '../../core/src/expressions/get';
 
 test('@math.gl/expressions#eval', () => {
   expect(evaluate(parse('x * 2 + 1'), {x: 3}), 'evaluates arithmetic expressions').toBe(7);
