@@ -8,7 +8,7 @@
 
 Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](../geoid/README.md) and [projection](../projection/README.md).
 
-The geospatial group includes `@math.gl/geospatial/crs`, `/projection`, `/web-mercator`,
+The geospatial group includes `@math.gl/geospatial/ellipsoid`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`,
 `/wkb`, `/geoarrow`, and `/expressions`. `@math.gl/web-mercator` remains available for existing
 imports. DGGS remains a separate package.
 
@@ -103,3 +103,9 @@ extent-to-tile ranges, coverage checks and resolution-based level selection.
 
 Use the geographic tile helpers above for the built-in equal-angle longitude/latitude quadtree
 and antimeridian-aware queries. Explicit matrix queries use half-open edges and never wrap.
+
+Use `@math.gl/geospatial/ellipsoid` for ellipsoid coordinate math and local tangent frames,
+`@math.gl/geospatial/globe` for geographic regions, bounding boxes, horizon bounds, and occlusion,
+and `@math.gl/geospatial/tiles` for geographic tile queries and tile-matrix utilities.
+The package root continues to export these APIs for compatibility. The existing `/tile-matrix`
+subpath remains available for applications that only need tile-matrix utilities.

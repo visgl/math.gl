@@ -67,6 +67,21 @@
       "types": "./dist/expressions.d.ts",
       "import": "./dist/expressions.js",
       "require": "./dist/expressions.cjs"
+    },
+    "./ellipsoid": {
+      "types": "./dist/entries/ellipsoid.d.ts",
+      "import": "./dist/entries/ellipsoid.js",
+      "require": "./dist/entries/ellipsoid.cjs"
+    },
+    "./globe": {
+      "types": "./dist/globe.d.ts",
+      "import": "./dist/globe.js",
+      "require": "./dist/globe.cjs"
+    },
+    "./tiles": {
+      "types": "./dist/tiles.d.ts",
+      "import": "./dist/tiles.js",
+      "require": "./dist/tiles.cjs"
     }
   },
   "files": [
