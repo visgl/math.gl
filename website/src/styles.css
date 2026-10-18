@@ -264,3 +264,10 @@ html[data-theme='dark'] .theme-doc-sidebar-container {
   font-size: 0.85rem;
   font-weight: 600;
 }
+
+@media (max-width: 996px) {
+  /* A filtered navbar contains fixed descendants and clips the mobile drawer. */
+  html[data-theme='dark'] .navbar {
+    backdrop-filter: none;
+  }
+}
