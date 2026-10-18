@@ -2,7 +2,7 @@
 
 `@math.gl/geospatial/tile-matrix` provides geometry, extent queries and level selection for
 regular rectangular tile grids in any coordinate system. The subpath has no runtime dependencies;
-its types and functions are also exported from `@math.gl/geospatial`.
+its types and functions are also exported from `@math.gl/geospatial/tiles`, alongside geographic tile queries.
 
 ```typescript
 import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix}

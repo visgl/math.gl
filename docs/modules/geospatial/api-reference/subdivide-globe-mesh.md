@@ -12,7 +12,7 @@ This composes the existing shared-edge-conforming subdivision engine with the
 shared spheroid conversion kernel; it does not introduce a second tessellator.
 
 ```js
-import {subdivideGlobeMesh} from '@math.gl/polygon';
+import {subdivideGlobeMesh} from '@math.gl/geospatial/globe';
 
 const mesh = subdivideGlobeMesh({
   // Dateline coordinates are unwrapped; the intended span is 20°, not 340°.
@@ -30,7 +30,7 @@ const mesh = subdivideGlobeMesh({
 
 ## Inputs and options
 
-`positions` and `indices` follow [subdivideTriangleMesh](./subdivide-triangle-mesh.md).
+`positions` and `indices` follow [subdivideTriangleMesh](../../polygon/api-reference/subdivide-triangle-mesh.md).
 `size` is 2 (longitude/latitude, default) or 3 (longitude/latitude/height). Angles are
 degrees; heights use the same units as axes. Latitude must be in `[-90, 90]`.
 Longitudes may be unwrapped beyond `[-180, 180]`, but each triangle must span no more
@@ -49,7 +49,7 @@ The adapter also accepts `refinement: 'source-edge'` with a required finite
 vertices, skipping Cartesian error probes. For XY longitude/latitude input the
 edge limit is measured in Euclidean degrees, **not geodesic distance**; this mode
 provides no Cartesian accuracy guarantee. The default sampled-error policy is
-unchanged. See [source-edge refinement](./subdivide-triangle-mesh.md#source-edge-refinement).
+unchanged. See [source-edge refinement](../../polygon/api-reference/subdivide-triangle-mesh.md#source-edge-refinement).
 
 Depth, vertex and triangle limits retain the existing engine's global contracts.
 Exhausting a limit throws `RangeError` rather than return a partial or unqualified

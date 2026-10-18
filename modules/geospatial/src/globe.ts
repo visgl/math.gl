@@ -9,3 +9,6 @@ export {EllipsoidOccluder} from './ellipsoid-occluder';
 export type {EllipsoidHorizon} from './ellipsoid-occluder';
 export {getGlobeHorizonBounds, splitGlobeBounds} from './globe-horizon-bounds';
 export type {GlobeBounds} from './globe-horizon-bounds';
+
+export {subdivideGlobeMesh} from './subdivide-globe-mesh';
+export type {SubdivideGlobeMeshOptions} from './subdivide-globe-mesh';

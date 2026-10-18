@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {subdivideGlobeMesh} from '@math.gl/polygon';
+import {subdivideGlobeMesh} from '@math.gl/geospatial/globe';
 
 const mesh = {
   positions: [170, -20, 190, -20, 190, 20, 170, 20],
@@ -88,5 +88,28 @@ test('globe mesh preserves triangulated holes and independent attribute seams', 
         if (seams.sourceVertexWeights[index * 3 + slot] > 0)
           expect(allowed).toContain(seams.sourceVertexIndices[index * 3 + slot]);
       }
+  }
+});
+
+test('globe adapter preserves source-edge refinement on shared edges', () => {
+  const globe = subdivideGlobeMesh(
+    {positions: [0, 0, 1, 0, 1, 1, 0, 1], indices: [0, 1, 2, 0, 2, 3]},
+    {refinement: 'source-edge', maxEdgeLength: 1, semiMajorAxis: 1}
+  );
+  expect(globe.positions.length).toBe(15);
+  expect(globe.indices.length).toBe(12);
+  const incidence = new Map<string, number>();
+  for (let i = 0; i < globe.indices.length; i += 3) {
+    for (let j = 0; j < 3; j++) {
+      const a = globe.indices[i + j];
+      const b = globe.indices[i + ((j + 1) % 3)];
+      const key = a < b ? a + ':' + b : b + ':' + a;
+      incidence.set(key, (incidence.get(key) || 0) + 1);
+    }
+  }
+  expect([...incidence.values()].filter(count => count === 1)).toHaveLength(4);
+  expect([...incidence.values()].filter(count => count === 2)).toHaveLength(4);
+  for (let i = 0; i < globe.positions.length; i += 3) {
+    expect(Math.hypot(...globe.positions.slice(i, i + 3))).toBeCloseTo(1);
   }
 });

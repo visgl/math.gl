@@ -36,7 +36,7 @@ const indices = earcut(positions, [], 2); // Two triangles
 
 `subdivideTriangleMesh` refines indexed triangle meshes with shared-edge conformity and interpolation weights for UVs and other vertex attributes. It supports filled polygons after triangulation and textured bitmap meshes. See the [mesh API reference](./api-reference/subdivide-triangle-mesh.md).
 
-[subdivideGlobeMesh](./api-reference/subdivide-globe-mesh.md) prepares a globe mesh while preserving attribute provenance. See [polygon utilities](./api-reference/polygon-utils.md) for winding and area conventions, and [earcut](./api-reference/earcut.md) for triangulation input and hole offsets.
+See [polygon utilities](./api-reference/polygon-utils.md) for winding and area conventions, and [earcut](./api-reference/earcut.md) for triangulation input and hole offsets.
 
 ## Attribution
 

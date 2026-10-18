@@ -93,6 +93,7 @@
     "@math.gl/crs": "5.0.0-alpha.18",
     "@math.gl/culling": "5.0.0-alpha.18",
     "@math.gl/geoarrow": "5.0.0-alpha.18",
+    "@math.gl/polygon": "5.0.0-alpha.18",
     "@math.gl/projection": "5.0.0-alpha.18",
     "@math.gl/types": "5.0.0-alpha.18",
     "@math.gl/web-mercator": "5.0.0-alpha.18",

@@ -7,7 +7,7 @@ const {themes} = require('prism-react-renderer');
 const {NormalModuleReplacementPlugin} = require('webpack');
 const resolveMathGlDependency = require('./resolve-math-gl-dependency.cjs');
 const moduleGroups = require('./module-groups.json');
-const docsTableOfContents = require('../docs/table-of-contents.json');
+const docsTableOfContents = structuredClone(require('../docs/table-of-contents.json'));
 const apiReference = docsTableOfContents.find(section => section.label === 'API Reference');
 const moduleReferences = new Map(apiReference.items.map(item => [item.label.split(' ')[0], item]));
 apiReference.items = moduleGroups.map(group => ({
@@ -179,3 +179,10 @@ module.exports = config;
 aliases['@math.gl/geometry/parametric$'] = resolve(__dirname, '../modules/geometry/src/parametric.ts');
 aliases['@math.gl/geometry$'] = resolve(__dirname, '../modules/geometry/src/index.ts');
 delete aliases['@math.gl/geometry'];
+
+// Resolve grouped geospatial imports from source before package dist files exist.
+aliases['@math.gl/geospatial$'] = resolve(__dirname, '../modules/geospatial/src/index.ts');
+delete aliases['@math.gl/geospatial'];
+for (const [name, file] of Object.entries({ellipsoid: 'entries/ellipsoid', globe: 'globe', tiles: 'tiles'})) {
+  aliases['@math.gl/geospatial/' + name + '$'] = resolve(__dirname, '../modules/geospatial/src/' + file + '.ts');
+}

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {earcut, subdivideTriangleMesh, subdivideGlobeMesh} from '@math.gl/polygon';
+import {earcut, subdivideTriangleMesh} from '@math.gl/polygon';
 import type {SubdividedTriangleMesh} from '@math.gl/polygon';
 
 const quad = {positions: [0, 0, 1, 0, 1, 1, 0, 1], indices: [0, 1, 2, 0, 2, 3]};
@@ -174,7 +174,7 @@ test('source-edge mode rejects invalid output vertices and propagates callback e
   ).toThrow(RangeError);
 });
 
-test('source-edge length includes altitude and globe adapter preserves the policy', () => {
+test('source-edge length includes altitude', () => {
   const result = subdivideTriangleMesh(
     {positions: [0, 0, 0, 0, 0, 8, 1, 0, 0], indices: [0, 1, 2]},
     {
@@ -185,16 +185,6 @@ test('source-edge length includes altitude and globe adapter preserves the polic
     }
   );
   expect(result.indices.length).toBeGreaterThan(3);
-  const globe = subdivideGlobeMesh(quad, {
-    refinement: 'source-edge',
-    maxEdgeLength: 1,
-    semiMajorAxis: 1
-  });
-  checkQuadConformity(globe);
-  expect(globe.positions.length).toBe(15);
-  for (let index = 0; index < globe.positions.length; index += 3) {
-    expect(Math.hypot(...globe.positions.slice(index, index + 3))).toBeCloseTo(1);
-  }
   expect(
     subdivideTriangleMesh(
       {positions: [], indices: []},

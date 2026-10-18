@@ -123,7 +123,7 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 
 **`@math.gl/polygon`**
 
-- Adds `subdivideGlobeMesh` for conforming globe subdivision with preserved attribute provenance.
+- Adds [`subdivideGlobeMesh`](./modules/geospatial/api-reference/subdivide-globe-mesh.md) in `@math.gl/geospatial/globe` for conforming globe subdivision with preserved attribute provenance.
 - Polygon winding directions now use descriptive string literal types.
 - Adds adaptive [triangle-mesh subdivision](./modules/polygon/api-reference/subdivide-triangle-mesh.md) with shared-edge refinement and attribute interpolation.
 - Adds adaptive [polyline subdivision](./modules/polygon/api-reference/subdivide-polyline.md) through application-supplied coordinate transforms.

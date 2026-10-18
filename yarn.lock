@@ -5426,6 +5426,7 @@ __metadata:
     "@math.gl/crs": "npm:5.0.0-alpha.18"
     "@math.gl/culling": "npm:5.0.0-alpha.18"
     "@math.gl/geoarrow": "npm:5.0.0-alpha.18"
+    "@math.gl/polygon": "npm:5.0.0-alpha.18"
     "@math.gl/projection": "npm:5.0.0-alpha.18"
     "@math.gl/types": "npm:5.0.0-alpha.18"
     "@math.gl/web-mercator": "npm:5.0.0-alpha.18"

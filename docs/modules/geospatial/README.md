@@ -23,6 +23,14 @@ npm install @math.gl/geospatial
 <center>WGS84: The 1984 World Geodetic System Ellipsoid. <br/>
 Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/media/File:WGS84_mean_Earth_radius.svg">wikipedia</a>, Creative Commons 4.0.</center>
 
+## Import paths
+
+| Import | APIs |
+| --- | --- |
+| `@math.gl/geospatial/ellipsoid` | [Ellipsoid](./api-reference/ellipsoid.md), [tangent planes](./api-reference/ellipsoid-tangent-plane.md), and [WGS84 helpers](./api-reference/helpers.md) |
+| `@math.gl/geospatial/globe` | [Geographic rectangles](./api-reference/lng-lat-rectangle.md), [region bounding boxes](./api-reference/make-obb-from-region.md), [visibility queries](./api-reference/globe-queries.md), and [mesh subdivision](./api-reference/subdivide-globe-mesh.md) |
+| `@math.gl/geospatial/tiles` | [Geographic tile queries](./api-reference/geographic-tiles.md) and [tile-matrix utilities](./api-reference/tile-matrix.md) |
+
 ## Classes
 
 | Class                   | Description                                                                 |
@@ -53,7 +61,7 @@ Expand the infobox to explore query regions and levels.
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
 const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPosition);
 ```
@@ -61,7 +69,7 @@ const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPo
 Determine the Cartographic representation of a Cartesian position on a WGS84 ellipsoid.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 const cartesianPosition = [17832.12, 83234.52, 952313.73];
 const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPosition);
 ```
@@ -69,7 +77,7 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
 ```
@@ -94,6 +102,10 @@ Selected classes and three-radius ellipsoid kernels derive from Cesium under Apa
 true ray intersections, elevated-point occlusion, exact limb ellipses and wrapped
 conservative imagery coverage without a viewport or rendering dependency.
 
+## Globe mesh subdivision
+
+[subdivideGlobeMesh](./api-reference/subdivide-globe-mesh.md) refines triangulated longitude/latitude meshes onto a sphere or oblate ellipsoid, preserving shared edges and attribute provenance. Import it and `SubdivideGlobeMeshOptions` from `@math.gl/geospatial/globe`.
+
 ## Tile matrices
 
 [Tile matrix types and utilities](./api-reference/tile-matrix.md) describe supplied rectangular
@@ -103,9 +115,3 @@ extent-to-tile ranges, coverage checks and resolution-based level selection.
 
 Use the geographic tile helpers above for the built-in equal-angle longitude/latitude quadtree
 and antimeridian-aware queries. Explicit matrix queries use half-open edges and never wrap.
-
-Use `@math.gl/geospatial/ellipsoid` for ellipsoid coordinate math and local tangent frames,
-`@math.gl/geospatial/globe` for geographic regions, bounding boxes, horizon bounds, and occlusion,
-and `@math.gl/geospatial/tiles` for geographic tile queries and tile-matrix utilities.
-The package root continues to export these APIs for compatibility. The existing `/tile-matrix`
-subpath remains available for applications that only need tile-matrix utilities.
