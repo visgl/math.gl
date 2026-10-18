@@ -35,7 +35,7 @@ The grouped package entry points are:
 | --- | --- |
 | `@math.gl/core` | `/types`, `/expressions` |
 | `@math.gl/geometry` | `/utils`, `/curves`, `/polygon`, `/culling`, `/spatial-index` |
-| `@math.gl/geospatial` | `/crs`, `/projection`, `/proj`, `/web-mercator`, `/wkb`, `/geoarrow`, `/expressions` |
+| `@math.gl/geospatial` | `/crs`, `/projection`, `/web-mercator`, `/wkb`, `/geoarrow`, `/expressions` |
 | `@math.gl/earth` | `/geoid`, `/sun`, `/timezone` |
 
 `@math.gl/dggs` remains a separate package. Existing leaf package imports such as `@math.gl/polygon`,

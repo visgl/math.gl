@@ -34,7 +34,6 @@
       "@math.gl/geospatial/expressions": ["./modules/geospatial/src/expressions.ts"],
       "@math.gl/geospatial/crs": ["./modules/geospatial/src/crs.ts"],
       "@math.gl/geospatial/projection": ["./modules/geospatial/src/projection.ts"],
-      "@math.gl/geospatial/proj": ["./modules/geospatial/src/proj.ts"],
       "@math.gl/geospatial/web-mercator": ["./modules/geospatial/src/web-mercator.ts"],
       "@math.gl/geospatial/wkb": ["./modules/geospatial/src/wkb.ts"],
       "@math.gl/geospatial/geoarrow": ["./modules/geospatial/src/geoarrow.ts"],

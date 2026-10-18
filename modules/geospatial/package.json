@@ -48,11 +48,6 @@
       "import": "./dist/projection.js",
       "require": "./dist/projection.cjs"
     },
-    "./proj": {
-      "types": "./dist/proj.d.ts",
-      "import": "./dist/proj.js",
-      "require": "./dist/proj.cjs"
-    },
     "./web-mercator": {
       "types": "./dist/web-mercator.d.ts",
       "import": "./dist/web-mercator.js",
@@ -83,7 +78,6 @@
     "@math.gl/crs": "5.0.0-alpha.18",
     "@math.gl/culling": "5.0.0-alpha.18",
     "@math.gl/geoarrow": "5.0.0-alpha.18",
-    "@math.gl/proj": "5.0.0-alpha.18",
     "@math.gl/projection": "5.0.0-alpha.18",
     "@math.gl/types": "5.0.0-alpha.18",
     "@math.gl/web-mercator": "5.0.0-alpha.18",

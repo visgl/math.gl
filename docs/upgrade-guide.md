@@ -7,7 +7,7 @@
 Use the grouped subpaths for new imports: `@math.gl/core/types`, `@math.gl/core/expressions`,
 `@math.gl/geometry/utils`, `@math.gl/geometry/curves`, `@math.gl/geometry/polygon`,
 `@math.gl/geometry/culling`, `@math.gl/geometry/spatial-index`, `@math.gl/geospatial/crs`,
-`@math.gl/geospatial/projection`, `@math.gl/geospatial/proj`,
+`@math.gl/geospatial/projection`,
 `@math.gl/geospatial/web-mercator`, `@math.gl/geospatial/wkb`, `@math.gl/geospatial/geoarrow`,
 `@math.gl/geospatial/expressions`, and the `@math.gl/earth` geoid, sun, and timezone subpaths.
 Existing leaf packages remain supported. DGGS stays

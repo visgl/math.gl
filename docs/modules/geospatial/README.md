@@ -8,7 +8,7 @@
 
 Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](../geoid/README.md) and [projection](../projection/README.md).
 
-The geospatial group includes `@math.gl/geospatial/crs`, `/projection`, `/proj`, `/web-mercator`,
+The geospatial group includes `@math.gl/geospatial/crs`, `/projection`, `/web-mercator`,
 `/wkb`, `/geoarrow`, and `/expressions`. `@math.gl/web-mercator` remains available for existing
 imports. DGGS remains a separate package.
 

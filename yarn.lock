@@ -5426,7 +5426,6 @@ __metadata:
     "@math.gl/crs": "npm:5.0.0-alpha.18"
     "@math.gl/culling": "npm:5.0.0-alpha.18"
     "@math.gl/geoarrow": "npm:5.0.0-alpha.18"
-    "@math.gl/proj": "npm:5.0.0-alpha.18"
     "@math.gl/projection": "npm:5.0.0-alpha.18"
     "@math.gl/types": "npm:5.0.0-alpha.18"
     "@math.gl/web-mercator": "npm:5.0.0-alpha.18"
@@ -5481,7 +5480,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/proj@npm:5.0.0-alpha.18, @math.gl/proj@workspace:modules/proj":
+"@math.gl/proj@workspace:modules/proj":
   version: 0.0.0-use.local
   resolution: "@math.gl/proj@workspace:modules/proj"
   dependencies:
