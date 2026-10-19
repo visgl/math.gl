@@ -188,3 +188,16 @@ models, lunar crater observations and paleobiological occurrence/rate data
 via deck.gl-data STAC, with explicit source, model, uncertainty and coordinate
 frame metadata. An extended timeline will require a separate planetary
 visualization mode, rather than stretching rigid plate rotations into the Hadean.
+
+### Geological event rail
+
+A separate 4,567–0 Ma overview places sourced event markers on a geological
+age axis. This is **not** the plate reconstruction timeline. Markers within
+the selected source's age range can seek the existing timeline; older
+markers remain visible but are disabled, with an explanation in their
+accessible label and tooltip. Category and text filters apply to both the
+event browser and the rail. Marker positions are linear in millions of
+years, so closely spaced recent events may overlap; the event list remains
+the accessible way to inspect their full details.
+
+The existing TimelineWidget and geological playback bounds are unchanged.
