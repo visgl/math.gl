@@ -201,3 +201,21 @@ years, so closely spaced recent events may overlap; the event list remains
 the accessible way to inspect their full details.
 
 The existing TimelineWidget and geological playback bounds are unchanged.
+
+### Early Earth conceptual mode and data readiness
+
+For event ages older than the selected plate model, the event rail and
+browser now offer an **Explore early Earth scenario** action. This pauses
+tectonic playback and covers the map with a separate, deliberately stylized
+planetary scene. Stage labels distinguish accretion, Moon-forming impact
+scenarios, cooling crust and later pre-tectonic Earth. The visual is an
+educational illustration, **not** a physics simulation, reconstructed
+surface, impact geometry or inferred global magma coverage. Returning
+restores the tectonic scene and its existing playback age.
+
+`planetary-history.js` also defines a provenance-gated contract for
+future impact-flux and biodiversity time series. Each series must identify
+source, license, model, units and method, and provide strictly ordered,
+finite, nonnegative observations. No numerical series has been published
+or embedded in this PR, so the UI explicitly reports their unavailability
+rather than drawing invented extinction rates or impact frequencies.
