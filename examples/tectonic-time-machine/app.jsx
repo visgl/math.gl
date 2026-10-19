@@ -410,6 +410,32 @@ export default function TectonicTimeMachine() {
       </aside>
       <footer className="tectonic-timeline">
         <div ref={timeline} className="tectonic-widget" aria-label="Geological playback timeline" />
+        <div className="tectonic-deep-time" aria-label="Earth history event timeline">
+          <div className="tectonic-deep-time-header">
+            <strong>4.567 billion years of Earth history</strong>
+            <span>Event chronology · not a continuous plate reconstruction</span>
+          </div>
+          <div className="tectonic-deep-time-track">
+            {filterEarthEvents(EARTH_EVENTS, eventCategory, eventQuery).map(event => {
+              const available = eventIsReconstructable(event, source.maxAge);
+              return (
+                <button
+                  key={event.id}
+                  type="button"
+                  className={`tectonic-deep-time-marker ${available ? 'available' : 'unavailable'}`}
+                  style={{left: `${(1 - event.ageMa / 4567) * 100}%`}}
+                  title={`${event.name} · ${event.ageMa} Ma · ${available ? 'Seek to geological age' : 'Outside current plate reconstruction'}`}
+                  aria-label={`${event.name}, ${event.ageMa} Ma. ${available ? 'Seek to event' : 'Outside plate reconstruction range'}`}
+                  disabled={!available || !ready || Boolean(error)}
+                  onClick={() => seek(-event.ageMa)}
+                />
+              );
+            })}
+          </div>
+          <div className="tectonic-deep-time-axis">
+            <span>4,567 Ma</span><span>3,000</span><span>1,500</span><span>0 Ma</span>
+          </div>
+        </div>
         <div className="tectonic-milestones">
           {timelineMilestones(scenario, source.maxAge).map(({time: value, name: label}) => (
             <button key={value} disabled={!ready || Boolean(error)} onClick={() => seek(value)}>
