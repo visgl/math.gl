@@ -8,6 +8,7 @@ import parquetWorkerUrl from 'math.gl-parquet-loader/worker';
 import {maintainHistory} from './history-stream.js';
 import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime} from './sources.js';
 import {REGIONS, timeLabel} from './math.js';
+import {EARTH_EVENTS, EVENT_CATEGORIES, filterEarthEvents, eventIsReconstructable} from './earth-events.js';
 import {TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
@@ -39,7 +40,9 @@ export default function TectonicTimeMachine() {
     [regionColors, setRegionColors] = useState(false),
     [speed, setSpeed] = useState(20),
     [counts, setCounts] = useState(null),
-    [appearanceStatus, setAppearanceStatus] = useState('Loading terrain imagery…');
+    [appearanceStatus, setAppearanceStatus] = useState('Loading terrain imagery…'),
+    [eventCategory, setEventCategory] = useState('all'),
+    [eventQuery, setEventQuery] = useState('');
   useEffect(() => {
     const renderer = mountScene(
       canvas.current,
@@ -323,6 +326,56 @@ export default function TectonicTimeMachine() {
           </div>
         )}
         <p className="tectonic-appearance-status">{appearanceStatus}</p>
+        <details className="tectonic-info" open>
+          <summary>Earth history · impacts, climate and extinctions</summary>
+          <p className="tectonic-note">
+            Events extend to 4,567 Ma. Older events are documented chronology,
+            not rendered plate reconstructions. Theia and the late bombardment
+            are hypotheses with model-dependent details.
+          </p>
+          <label>
+            Event category
+            <select
+              aria-label="Event category"
+              value={eventCategory}
+              onChange={e => setEventCategory(e.target.value)}
+            >
+              {EVENT_CATEGORIES.map(category => (
+                <option key={category} value={category}>
+                  {category === 'all' ? 'All events' : category}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Search events
+            <input
+              type="search"
+              aria-label="Search Earth history events"
+              value={eventQuery}
+              placeholder="Theia, extinction, impact…"
+              onChange={e => setEventQuery(e.target.value)}
+            />
+          </label>
+          <ul className="tectonic-events">
+            {filterEarthEvents(EARTH_EVENTS, eventCategory, eventQuery).map(event => (
+              <li key={event.id}>
+                <strong>{event.name}</strong>
+                <small> · {event.ageMa.toLocaleString()} Ma · {event.confidence}</small>
+                <p className="tectonic-note">{event.description}</p>
+                <a href={event.url} target="_blank" rel="noreferrer">{event.source}</a>
+                {eventIsReconstructable(event, source.maxAge) ? (
+                  <button
+                    disabled={!ready || Boolean(error)}
+                    onClick={() => seek(-event.ageMa)}
+                  >View at this age</button>
+                ) : (
+                  <small> · Earlier than this plate reconstruction</small>
+                )}
+              </li>
+            ))}
+          </ul>
+        </details>
         <AttributionWidget sources={tectonicSources(source)} />
         <details className="tectonic-info">
           <summary>About this reconstruction</summary>
