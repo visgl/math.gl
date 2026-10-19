@@ -165,3 +165,26 @@ These chapters are educational cues, not an ice-extent dataset or climate
 simulation. Global versus partly open ocean conditions remain debated. Dates
 follow [Hoffman et al. (2017)](https://doi.org/10.1126/sciadv.1600983); see also
 [NASA's discussion](https://www.giss.nasa.gov/research/features/201508_slushball/).
+
+## Earth history events (4,567 Ma to present)
+
+The **Earth history** panel contains a curated, source-linked chronology of
+planetary formation, the Moon-forming giant impact hypothesis (Theia),
+the debated Late Heavy Bombardment, early zircons, oxygenation, Cryogenian
+glaciations and the Big Five mass extinction intervals. Entries support text
+search, category filtering and source links.
+
+**Scientific boundaries:** this is an event catalogue, not a 4.567-billion-year
+tectonic reconstruction. Existing plate models still stop at 1,000 or 1,800 Ma.
+A `View at this age` control is shown only when the selected model covers that
+age; older events are browsable but cannot be mapped with nonexistent plates.
+The Theia impact and discrete Late Heavy Bombardment spike are not observed
+reconstructions; ages and event descriptions have model uncertainty.
+No simulated collision animation, stochastic bombardment positions, or
+extinction-rate measurements are implied.
+
+Future iterations should ingest independently licensed numerical impact-flux
+models, lunar crater observations and paleobiological occurrence/rate data
+via deck.gl-data STAC, with explicit source, model, uncertainty and coordinate
+frame metadata. An extended timeline will require a separate planetary
+visualization mode, rather than stretching rigid plate rotations into the Hadean.
