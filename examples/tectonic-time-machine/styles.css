@@ -88,3 +88,14 @@ SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 .tectonic-events li a {color:#91c9dc;font-size:10px;}
 .tectonic-events li button {display:block;margin-top:7px;font-size:10px;}
 .tectonic-controls input[type=search] {display:block;width:100%;margin-top:5px;padding:7px;background:#102737;border:1px solid #345064;border-radius:4px;color:#eef6fa;font:12px system-ui;}
+
+/* Chronological overview is separate from the reconstruction's bounded playback widget. */
+.tectonic-deep-time {margin:0 0 14px;color:#afcad8;}
+.tectonic-deep-time-header {display:flex;justify-content:space-between;gap:12px;align-items:baseline;font-size:11px;}
+.tectonic-deep-time-header span {font-size:10px;color:#8eabba;}
+.tectonic-deep-time-track {position:relative;height:22px;margin:9px 7px 0;border-top:2px solid #416075;}
+.tectonic-deep-time-marker {position:absolute;top:-7px;transform:translateX(-50%);border:1px solid #90b6c9!important;width:11px;height:11px;border-radius:50%!important;padding:0!important;background:#b4d3de!important;min-width:0;}
+.tectonic-deep-time-marker.unavailable {background:#657989!important;border-color:#657989!important;opacity:.65;cursor:help;}
+.tectonic-deep-time-marker:focus-visible {outline:2px solid white;outline-offset:3px;}
+.tectonic-deep-time-axis {display:flex;justify-content:space-between;color:#88a9b9;font:10px ui-monospace,monospace;}
+@media(max-width:650px) {.tectonic-deep-time-header {display:block;}.tectonic-deep-time-header span {display:block;}}
