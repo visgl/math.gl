@@ -9,6 +9,7 @@ import {maintainHistory} from './history-stream.js';
 import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime} from './sources.js';
 import {REGIONS, timeLabel} from './math.js';
 import {EARTH_EVENTS, EVENT_CATEGORIES, filterEarthEvents, eventIsReconstructable} from './earth-events.js';
+import {planetaryStage} from './planetary-history.js';
 import {TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
@@ -42,7 +43,8 @@ export default function TectonicTimeMachine() {
     [counts, setCounts] = useState(null),
     [appearanceStatus, setAppearanceStatus] = useState('Loading terrain imagery…'),
     [eventCategory, setEventCategory] = useState('all'),
-    [eventQuery, setEventQuery] = useState('');
+    [eventQuery, setEventQuery] = useState(''),
+    [planetaryAge, setPlanetaryAge] = useState(null);
   useEffect(() => {
     const renderer = mountScene(
       canvas.current,
@@ -151,6 +153,7 @@ export default function TectonicTimeMachine() {
     scene.current?.setPlayback({time, playing, ready, speed, maxAge: source.maxAge});
   }, [time, playing, ready, speed, sourceId, glaciations]);
   const seek = value => {
+    setPlanetaryAge(null);
     clock.current = clampTime(Number(value), source.maxAge);
     setPlaying(false);
     setTime(clock.current);
@@ -192,6 +195,17 @@ export default function TectonicTimeMachine() {
             <span aria-hidden="true">{playing ? '■' : '▶'}</span> {playing ? 'Stop' : 'Play'}
           </button>
         </div>
+        {planetaryAge !== null && (
+          <div className="tectonic-planetary-mode" role="region" aria-label="Illustrative early Earth mode">
+            <div className="tectonic-planetary-body" aria-hidden="true" />
+            <div className="tectonic-planetary-caption">
+              <strong>{planetaryAge.toLocaleString()} Ma · {planetaryStage(planetaryAge)?.label}</strong>
+              <p>{planetaryStage(planetaryAge)?.description}</p>
+              <p>Conceptual planetary appearance, not reconstructed terrain or impact simulation.</p>
+              <button onClick={() => setPlanetaryAge(null)}>Return to tectonic reconstruction</button>
+            </div>
+          </div>
+        )}
         <div className="tectonic-chapters" aria-hidden="true">
           {TIMELINE_CHAPTERS.map(chapter => (
             <div
@@ -370,7 +384,9 @@ export default function TectonicTimeMachine() {
                     onClick={() => seek(-event.ageMa)}
                   >View at this age</button>
                 ) : (
-                  <small> · Earlier than this plate reconstruction</small>
+                  <button onClick={() => {setPlaying(false); setPlanetaryAge(event.ageMa);}}>
+                    Explore early Earth scenario
+                  </button>
                 )}
               </li>
             ))}
@@ -424,10 +440,10 @@ export default function TectonicTimeMachine() {
                   type="button"
                   className={`tectonic-deep-time-marker ${available ? 'available' : 'unavailable'}`}
                   style={{left: `${(1 - event.ageMa / 4567) * 100}%`}}
-                  title={`${event.name} · ${event.ageMa} Ma · ${available ? 'Seek to geological age' : 'Outside current plate reconstruction'}`}
-                  aria-label={`${event.name}, ${event.ageMa} Ma. ${available ? 'Seek to event' : 'Outside plate reconstruction range'}`}
-                  disabled={!available || !ready || Boolean(error)}
-                  onClick={() => seek(-event.ageMa)}
+                  title={`${event.name} · ${event.ageMa} Ma · ${available ? 'Seek to geological age' : 'Explore illustrative early Earth mode'}`}
+                  aria-label={`${event.name}, ${event.ageMa} Ma. ${available ? 'Seek to event' : 'Explore illustrative early Earth mode'}`}
+                  disabled={available && (!ready || Boolean(error))}
+                  onClick={() => available ? seek(-event.ageMa) : (setPlaying(false), setPlanetaryAge(event.ageMa))}
                 />
               );
             })}
