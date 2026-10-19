@@ -99,3 +99,11 @@ SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 .tectonic-deep-time-marker:focus-visible {outline:2px solid white;outline-offset:3px;}
 .tectonic-deep-time-axis {display:flex;justify-content:space-between;color:#88a9b9;font:10px ui-monospace,monospace;}
 @media(max-width:650px) {.tectonic-deep-time-header {display:block;}.tectonic-deep-time-header span {display:block;}}
+
+/* Deliberately conceptual early-Earth mode: hides the tectonic map, never reuses modern terrain. */
+.tectonic-planetary-mode {position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;background:radial-gradient(ellipse at center,#48251e,#10151e 65%,#07131e);padding:40px;text-align:center;}
+.tectonic-planetary-body {width:min(36vh,45%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 32% 28%,#f4b766,#ad4932 40%,#3d1e22 72%,#130f19);box-shadow:0 0 45px #d2673d55,inset -18px -16px 30px #100d18;}
+.tectonic-planetary-caption {max-width:450px;color:#eaf3f7;}
+.tectonic-planetary-caption strong {font-size:18px;}
+.tectonic-planetary-caption p {color:#b7c7d1;font-size:12px;}
+.tectonic-planetary-caption button {margin-top:6px;}
