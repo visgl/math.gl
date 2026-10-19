@@ -392,6 +392,20 @@ export default function TectonicTimeMachine() {
             ))}
           </ul>
         </details>
+        <details className="tectonic-info">
+          <summary>Bombardment and biodiversity data</summary>
+          <p className="tectonic-note">
+            Numerical impact-flux and fossil-diversity series are not yet bundled.
+            The chart will only appear when a licensed, provenance-checked
+            source provides measured or modelled values. No synthetic rates
+            or extinction percentages are substituted for missing data.
+          </p>
+          <p className="tectonic-note">
+            Planned sources: published impact chronology models and the
+            Paleobiology Database. Impact models must retain their scenario
+            and uncertainty; biodiversity curves must retain sampling methods.
+          </p>
+        </details>
         <AttributionWidget sources={tectonicSources(source)} />
         <details className="tectonic-info">
           <summary>About this reconstruction</summary>
