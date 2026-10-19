@@ -165,3 +165,22 @@ These chapters are educational cues, not an ice-extent dataset or climate
 simulation. Global versus partly open ocean conditions remain debated. Dates
 follow [Hoffman et al. (2017)](https://doi.org/10.1126/sciadv.1600983); see also
 [NASA's discussion](https://www.giss.nasa.gov/research/features/201508_slushball/).
+
+## Ancient geographic feature index
+
+The expandable **Ancient geographic features** panel offers a small curated, searchable
+index of mountain belts, oceans, seas and paleocontinents. Entries are filtered by
+the current geological age; a checkbox shows all entries regardless of time.
+The index lives in `paleo-features.js` and has focused tests.
+
+**Scientific scope:** these are approximate educational intervals, not precise
+formation/extinction dates. Features may change shape and identity over time.
+No geometry, paleolocation, height, or historical shoreline is implied or rendered.
+The index is independent of the selected plate reconstruction source and does not
+claim that the listed feature geometries are included in its model.
+
+Future work could incorporate a provenance-backed gazetteer with citations per
+feature, age-specific geometries and model-compatible plate assignments, with
+uncertainty metadata and explicit distinctions between present-day evidence and
+reconstructed historical footprints. This requires separate data licensing and
+geological validation before drawing features on the globe.
