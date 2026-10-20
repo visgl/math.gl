@@ -60,7 +60,7 @@ function fingerprint() {
       else hash.update(child + '\0').update(readFileSync(join(root, child)));
     }
   }
-  for (const name of ['core', 'types', 'culling', 'crs', 'geospatial', 'projection'])
+  for (const name of ['core', 'geometry', 'geospatial'])
     visit('modules/' + name + '/src');
   return hash.digest('hex');
 }
