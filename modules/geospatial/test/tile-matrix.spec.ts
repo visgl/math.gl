@@ -452,3 +452,28 @@ test('fractional coalesced edges round-trip without division drift', () => {
     ]);
   }
 });
+
+test.each(['topLeft', 'bottomLeft'] as const)(
+  'coalesced rows share base-grid outer edges for %s',
+  cornerOfOrigin => {
+    const grid: TileMatrix = {
+      ...matrix,
+      origin: [0, 0],
+      resolution: 0.1,
+      tileSize: [1, 1],
+      matrixSize: [9, 2],
+      cornerOfOrigin,
+      variableMatrixWidths: [{coalesce: 3, minTileRow: 0, maxTileRow: 0}]
+    };
+    const edge = 9 * 0.1;
+    expect(getTileBounds(grid, 6, 0)[2]).toBe(edge);
+    expect(getTileBounds(grid, 8, 1)[2]).toBe(edge);
+    expect(getTileIndex(grid, [edge, 0])).toBeNull();
+    expect(getTileRanges(grid, [edge, -1, edge, 1])).toEqual([]);
+    const tile = getTileBounds(grid, 3, 0);
+    expect(getTileIndex(grid, [tile[0], 0])).toEqual([3, 0]);
+    expect(getTileRanges(grid, tile)).toEqual([
+      {minTileColumn: 3, maxTileColumn: 3, minTileRow: 0, maxTileRow: 0, columnStep: 3}
+    ]);
+  }
+);

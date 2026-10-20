@@ -63,6 +63,11 @@ export type TileMatrixRowRange = TileMatrixLimits & {
 
 /** Rejects malformed or numerically unrepresentable matrix geometry. */
 export function validateTileMatrix(matrix: TileMatrix): void {
+  validateTileMatrixGeometry(matrix);
+}
+
+/** Validates geometry and returns a sorted copy of the declared coalescence bands. */
+function validateTileMatrixGeometry(matrix: TileMatrix): VariableMatrixWidth[] {
   if (
     typeof matrix.id !== 'string' ||
     !matrix.id ||
@@ -115,6 +120,7 @@ export function validateTileMatrix(matrix: TileMatrix): void {
       throw new RangeError('Tile matrix extent must be finite');
     }
   }
+  return bands;
 }
 
 /** Tests integer indices against the matrix and optional inclusive coverage limits. Does not wrap. */
@@ -148,7 +154,7 @@ export function getTileBounds(matrix: TileMatrix, column: number, row: number): 
   const height = (matrix.resolutionY ?? matrix.resolution) * matrix.tileSize[1];
   const coalesce = getRowCoalesce(matrix, row);
   const canonicalColumn = Math.floor(column / coalesce) * coalesce;
-  const minimumX = matrix.origin[0] + (canonicalColumn / coalesce) * (width * coalesce);
+  const minimumX = matrix.origin[0] + canonicalColumn * width;
   const minimumY =
     matrix.cornerOfOrigin === 'topLeft'
       ? matrix.origin[1] - (row + 1) * height
@@ -156,7 +162,7 @@ export function getTileBounds(matrix: TileMatrix, column: number, row: number): 
   return [
     minimumX,
     minimumY,
-    matrix.origin[0] + (canonicalColumn / coalesce + 1) * (width * coalesce),
+    matrix.origin[0] + (canonicalColumn + coalesce) * width,
     matrix.cornerOfOrigin === 'topLeft'
       ? matrix.origin[1] - row * height
       : matrix.origin[1] + (row + 1) * height
@@ -186,11 +192,12 @@ export function getTileIndex(
   const column = getTileAxisIndex(
     matrix.origin[0],
     1,
-    matrix.resolution * matrix.tileSize[0] * coalesce,
-    matrix.matrixSize[0] / coalesce,
-    coordinate[0]
+    matrix.resolution * matrix.tileSize[0],
+    matrix.matrixSize[0],
+    coordinate[0],
+    coalesce
   );
-  return column === null ? null : [column * coalesce, row];
+  return column === null ? null : [column, row];
 }
 
 /** Finds half-open edge ownership using the same arithmetic as bounds, without division drift. */
@@ -199,7 +206,8 @@ function getTileAxisIndex(
   direction: number,
   tileSpan: number,
   matrixSize: number,
-  coordinate: number
+  coordinate: number,
+  columnStep = 1
 ): number | null {
   const end = origin + direction * (matrixSize * tileSpan);
   if (
@@ -209,7 +217,11 @@ function getTileAxisIndex(
   ) {
     return null;
   }
-  return findTileAxisBoundary(origin, direction, tileSpan, matrixSize, coordinate, false) - 1;
+  return (
+    (findTileAxisBoundary(origin, direction, tileSpan, matrixSize, coordinate, false, columnStep) -
+      1) *
+    columnStep
+  );
 }
 
 /** Finds the first edge beyond a coordinate, optionally including an equal edge. */
@@ -219,14 +231,15 @@ function findTileAxisBoundary(
   tileSpan: number,
   matrixSize: number,
   coordinate: number,
-  includeEqualEdge: boolean
+  includeEqualEdge: boolean,
+  columnStep = 1
 ): number {
   // Binary search avoids enumerating edges or assuming division is accurate near an integer.
   let lower = 0;
-  let upper = matrixSize;
+  let upper = matrixSize / columnStep;
   while (lower < upper) {
     const middle = lower + Math.floor((upper - lower) / 2);
-    const edge = origin + direction * (middle * tileSpan);
+    const edge = origin + direction * (middle * columnStep * tileSpan);
     const precedesCoordinate =
       direction === 1
         ? includeEqualEdge
@@ -266,16 +279,7 @@ function getRegularTileRange(
   bounds: TileMatrixBounds,
   limits?: TileMatrixLimits
 ): TileMatrixLimits | null {
-  validateTileMatrix(matrix);
-  if (limits) validateTileMatrixLimits(matrix, limits);
-  if (
-    bounds.length !== 4 ||
-    !bounds.every(Number.isFinite) ||
-    bounds[0] > bounds[2] ||
-    bounds[1] > bounds[3]
-  ) {
-    throw new RangeError('Tile query bounds must be finite and ordered');
-  }
+  validateTileQueryBounds(bounds);
   const columns = getTileAxisRange(
     matrix.origin[0],
     1,
@@ -305,6 +309,18 @@ function getRegularTileRange(
     : range;
 }
 
+/** Rejects nonfinite or unordered query bounds independently of matrix validation. */
+function validateTileQueryBounds(bounds: TileMatrixBounds): void {
+  if (
+    bounds.length !== 4 ||
+    !bounds.every(Number.isFinite) ||
+    bounds[0] > bounds[2] ||
+    bounds[1] > bounds[3]
+  ) {
+    throw new RangeError('Tile query bounds must be finite and ordered');
+  }
+}
+
 /**
  * Returns a rectangular range for a regular matrix. Variable-width matrices require getTileRanges
  * so callers cannot accidentally enumerate aliases as separate tiles.
@@ -318,6 +334,7 @@ export function getTileRange(
   if (matrix.variableMatrixWidths?.length) {
     throw new RangeError('Use getTileRanges for variable-width matrices');
   }
+  if (limits) validateTileMatrixLimits(matrix, limits);
   return getRegularTileRange(matrix, bounds, limits);
 }
 
@@ -340,13 +357,9 @@ export function getTileRanges(
   bounds: TileMatrixBounds,
   limits?: TileMatrixLimits
 ): TileMatrixRowRange[] {
-  validateTileMatrix(matrix);
+  const declaredBands = validateTileMatrixGeometry(matrix);
   if (limits) validateTileMatrixLimits(matrix, limits);
-  // Validate query geometry even when every band is outside the coverage limits.
-  getRegularTileRange(matrix, bounds, limits);
-  const declaredBands = [...(matrix.variableMatrixWidths ?? [])].sort(
-    (first, second) => first.minTileRow - second.minTileRow
-  );
+  validateTileQueryBounds(bounds);
   const bands: VariableMatrixWidth[] = [];
   let nextRow = 0;
   for (const band of declaredBands) {
@@ -381,24 +394,26 @@ export function getTileRanges(
     const columns = getTileAxisRange(
       matrix.origin[0],
       1,
-      matrix.resolution * matrix.tileSize[0] * band.coalesce,
-      matrix.matrixSize[0] / band.coalesce,
+      matrix.resolution * matrix.tileSize[0],
+      matrix.matrixSize[0],
       bounds[0],
-      bounds[2]
+      bounds[2],
+      band.coalesce
     );
     if (!columns) continue;
     const minimumColumn = Math.max(
       columns[0],
-      Math.floor((limits?.minTileColumn ?? 0) / band.coalesce)
+      Math.floor((limits?.minTileColumn ?? 0) / band.coalesce) * band.coalesce
     );
     const maximumColumn = Math.min(
       columns[1],
-      Math.floor((limits?.maxTileColumn ?? matrix.matrixSize[0] - 1) / band.coalesce)
+      Math.floor((limits?.maxTileColumn ?? matrix.matrixSize[0] - 1) / band.coalesce) *
+        band.coalesce
     );
     if (minimumColumn <= maximumColumn)
       ranges.push({
-        minTileColumn: minimumColumn * band.coalesce,
-        maxTileColumn: maximumColumn * band.coalesce,
+        minTileColumn: minimumColumn,
+        maxTileColumn: maximumColumn,
         minTileRow: minimumRow,
         maxTileRow: maximumRow,
         columnStep: band.coalesce
@@ -414,10 +429,11 @@ function getTileAxisRange(
   tileSpan: number,
   matrixSize: number,
   start: number,
-  end: number
+  end: number,
+  columnStep = 1
 ): [number, number] | null {
   if (start === end) {
-    const index = getTileAxisIndex(origin, direction, tileSpan, matrixSize, start);
+    const index = getTileAxisIndex(origin, direction, tileSpan, matrixSize, start, columnStep);
     return index === null ? null : [index, index];
   }
   const matrixEnd = origin + direction * (matrixSize * tileSpan);
@@ -425,8 +441,20 @@ function getTileAxisRange(
   const clippedEnd = direction === 1 ? Math.min(end, matrixEnd) : Math.max(end, matrixEnd);
   if (direction === 1 ? clippedStart >= clippedEnd : clippedStart <= clippedEnd) return null;
   return [
-    findTileAxisBoundary(origin, direction, tileSpan, matrixSize, clippedStart, false) - 1,
-    findTileAxisBoundary(origin, direction, tileSpan, matrixSize, clippedEnd, true) - 1
+    (findTileAxisBoundary(
+      origin,
+      direction,
+      tileSpan,
+      matrixSize,
+      clippedStart,
+      false,
+      columnStep
+    ) -
+      1) *
+      columnStep,
+    (findTileAxisBoundary(origin, direction, tileSpan, matrixSize, clippedEnd, true, columnStep) -
+      1) *
+      columnStep
   ];
 }
 
