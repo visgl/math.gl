@@ -4,7 +4,9 @@
 
 `@math.gl/geospatial` provides ellipsoid geometry, geographic/Cartesian conversions, local tangent frames, globe queries, and tile-grid geometry. Use it for WGS84 positions and 3D Tiles bounds without a renderer dependency.
 
-Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](https://visgl.github.io/math.gl/next/docs/modules/geoid.md) and [projection](https://visgl.github.io/math.gl/next/docs/modules/projection.md).
+Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md) and [projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md).
+
+The geospatial group includes `@math.gl/geospatial/ellipsoid`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`, `/wkb`, `/geoarrow`, and `/expressions`. `@math.gl/web-mercator` remains available for existing imports. DGGS remains a separate package.
 
 ## Installation[​](#installation "Direct link to Installation")
 
@@ -19,6 +21,14 @@ WGS84: The 1984 World Geodetic System Ellipsoid.
 <br />
 
 Attribution: From [wikipedia](https://en.wikipedia.org/wiki/World_Geodetic_System#/media/File:WGS84_mean_Earth_radius.svg), Creative Commons 4.0.
+
+## Import paths[​](#import-paths "Direct link to Import paths")
+
+| Import                          | APIs                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@math.gl/geospatial/ellipsoid` | [Ellipsoid](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid.md), [tangent planes](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-tangent-plane.md), and [WGS84 helpers](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/helpers.md)                                                                                                                                                                         |
+| `@math.gl/geospatial/globe`     | [Geographic rectangles](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/lng-lat-rectangle.md), [region bounding boxes](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/make-obb-from-region.md), [visibility queries](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/globe-queries.md), and [mesh subdivision](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/subdivide-globe-mesh.md) |
+| `@math.gl/geospatial/tiles`     | [Geographic tile queries](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geographic-tiles.md) and [tile-matrix utilities](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/tile-matrix.md)                                                                                                                                                                                                                                                                               |
 
 ## Classes[​](#classes "Direct link to Classes")
 
@@ -50,7 +60,7 @@ Loading <!-- -->Geographic tile explorer<!-- -->…
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
 const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
 
@@ -60,7 +70,7 @@ const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPo
 Determine the Cartographic representation of a Cartesian position on a WGS84 ellipsoid.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
 const cartesianPosition = [17832.12, 83234.52, 952313.73];
 
@@ -70,7 +80,7 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 
@@ -94,6 +104,10 @@ Selected classes and three-radius ellipsoid kernels derive from Cesium under Apa
 ## Globe queries[​](#globe-queries "Direct link to Globe queries")
 
 [EllipsoidOccluder and globe horizon bounds](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/globe-queries.md) provide true ray intersections, elevated-point occlusion, exact limb ellipses and wrapped conservative imagery coverage without a viewport or rendering dependency.
+
+## Globe mesh subdivision[​](#globe-mesh-subdivision "Direct link to Globe mesh subdivision")
+
+[subdivideGlobeMesh](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/subdivide-globe-mesh.md) refines triangulated longitude/latitude meshes onto a sphere or oblate ellipsoid, preserving shared edges and attribute provenance. Import it and `SubdivideGlobeMeshOptions` from `@math.gl/geospatial/globe`.
 
 ## Tile matrices[​](#tile-matrices "Direct link to Tile matrices")
 

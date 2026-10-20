@@ -7,7 +7,7 @@ A two-dimensional east-north plane tangent to the WGS84 ellipsoid. It converts W
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial';
+import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial/ellipsoid';
 
 
 

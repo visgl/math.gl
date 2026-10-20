@@ -71,38 +71,14 @@ math.gl provides a documentation index, individually retrievable Markdown pages,
 - [3D Rotations](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/rotations.md): Use Euler angles to specify an orientation, Quaternion to compose or interpolate rotations, and Matrix4 to combine rotation with translation and scale. All rotation angles in math.gl are in radians.
 - [Transformations](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/transformations.md): Use Matrix4 to combine translation, rotation, and scale. Use a quaternion when only rotation is needed. Core vector methods mutate their receiver; matrix transform methods write to a supplied result or allocate a new array.
 - [View and Projection Matrices](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/view-and-projection.md): A view matrix expresses world coordinates relative to a camera. A projection matrix maps those camera coordinates to homogeneous clip coordinates. Compose them as projection * view to transform a world-space point.
-
-#### crs
-
-@math.gl/crs provides lightweight, proj4-independent TypeScript definitions and syntax codecs
-
-- [CRS Definitions](https://visgl.github.io/math.gl/next/docs/modules/crs.md): @math.gl/crs provides lightweight, proj4-independent TypeScript definitions and syntax codecs
-- [Spatial Reference](https://visgl.github.io/math.gl/next/docs/modules/crs/api-reference/spatial-reference.md): @math.gl/crs provides a format-neutral descriptor for reporting how a dataset's coordinates are
-- [Coordinate Reference Systems](https://visgl.github.io/math.gl/next/docs/modules/crs/developer-guide/coordinate-reference-systems.md): A coordinate tuple such as [12.49, 41.89] is not a location by itself. Software also needs to
-
-#### culling
-
-@math.gl/culling tests bounding volumes against planes and provides analytic shape queries. Use it to reject objects outside a view frustum, intersect rays with shapes, and compute enclosing bounds.
-
-- [Overview](https://visgl.github.io/math.gl/next/docs/modules/culling.md): @math.gl/culling tests bounding volumes against planes and provides analytic shape queries. Use it to reject objects outside a view frustum, intersect rays with shapes, and compute enclosing bounds.
-- [AxisAlignedBoundingBox](https://visgl.github.io/math.gl/next/docs/modules/culling/api-reference/axis-aligned-bounding-box.md): An AxisAlignedBoundingBox is a closed and convex cuboid that is aligned with the orthogonal axes.
-- [BoundingSphere](https://visgl.github.io/math.gl/next/docs/modules/culling/api-reference/bounding-sphere.md): A bounding sphere with a center and a radius.
-- [BoundingVolume (Interface)](https://visgl.github.io/math.gl/next/docs/modules/culling/api-reference/bounding-volume.md): An interface defining common operations for bounding volumes (i.e. BoundingSphere, AxisAlignedBoundingBox, OrientedBoundingBox).
-- [CullingVolume](https://visgl.github.io/math.gl/next/docs/modules/culling/api-reference/culling-volume.md): A culling volume defined by planes.
-- [intersectOrientedBoxes2D](https://visgl.github.io/math.gl/next/docs/modules/culling/api-reference/intersect-oriented-boxes-2d.md): Test two oriented rectangles in a shared two-dimensional Euclidean coordinate space. This
-- [OrientedBoundingBox](https://visgl.github.io/math.gl/next/docs/modules/culling/api-reference/oriented-bounding-box.md): An OrientedBoundingBox is a closed and convex cuboid. It can provide a tighter bounding volume than a bounding sphere or an axis aligned bounding box in many cases.
-- [Plane](https://visgl.github.io/math.gl/next/docs/modules/culling/api-reference/plane.md): A plane in Hessian Normal Form defined by ax + by + cz + d = 0 where [a, b, c] is the plane's normal, d is the signed distance to the plane (from the origin along the normal), and [x, y, z] is any point on the plane.
-- [Ray and closest-point queries](https://visgl.github.io/math.gl/next/docs/modules/culling/api-reference/queries.md): Import intersectRayBounds, intersectRayTriangle, and getClosestPointOnTriangle from
-- [Ray](https://visgl.github.io/math.gl/next/docs/modules/culling/api-reference/ray.md): A ray that extends infinitely from an origin in one direction.
-- [glTF Shapes](https://visgl.github.io/math.gl/next/docs/modules/culling/api-reference/shapes.md): @math.gl/culling provides BoxShape, CapsuleShape, CylinderShape, PlaneShape and
-
-#### curves
-
-The curves module provides renderer-independent parametric curves for 2D and 3D Cartesian
-
-- [@math.gl/curves](https://visgl.github.io/math.gl/next/docs/modules/curves.md): The curves module provides renderer-independent parametric curves for 2D and 3D Cartesian
-- [CurveArcLength](https://visgl.github.io/math.gl/next/docs/modules/curves/api-reference/curve-arc-length.md): Constructor
-- [Curve classes](https://visgl.github.io/math.gl/next/docs/modules/curves/api-reference/curves.md): Constructors
+- [Overview](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md): The experimental expression parser and evaluator are available from @math.gl/core/expressions.
+- [DGGS Function Libraries](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/dggs-function-libraries.md): Import optional Discrete Global Grid System function tables from @math.gl/dggs/expressions.
+- [Expression Evaluator](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/expression-eval.md): The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
+- [Function Registry](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/function-registry.md): ExpressionFunctionRegistry maintains an isolated table of JavaScript functions that expression evaluators can call with evaluated arguments.
+- [Accessor Compiler](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/parse-expression-string.md): parseExpressionString(expression (row: Record) => unknown
+- [Overview](https://visgl.github.io/math.gl/next/docs/modules/core/types.md): @math.gl/core/types provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
+- [Array Types](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/array-types.md): math.gl provides a number of numeric array types.
+- [Bounds](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds.md): A common need for geospatial and 3D applications is to be able to express bounds
 
 #### dggs
 
@@ -118,34 +94,29 @@ This module is still experimental. It may have issues and functionality may chan
 - [S2Decoder](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/s2-decoder.md): This module is still experimental. It may have issues and functionality may change in minor releases.
 - [Discrete Global Grids](https://visgl.github.io/math.gl/next/docs/modules/dggs/developer-guide/dggs.md): Global grid encodings identify cells rather than individual coordinates. Use @math.gl/dggs to turn cell identifiers into longitude/latitude centers and boundaries for visualization.
 
-#### expressions
+#### earth
 
-The experimental @math.gl/expressions module provides a compact expression parser and evaluator for JavaScript-style expressions.
+The earth group collects Earth model, solar, and timezone utilities. Import the specific utility you
 
-- [Overview](https://visgl.github.io/math.gl/next/docs/modules/expressions.md): The experimental @math.gl/expressions module provides a compact expression parser and evaluator for JavaScript-style expressions.
-- [DGGS Function Libraries](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/dggs-function-libraries.md): Import optional Discrete Global Grid System function tables from @math.gl/expressions/dggs.
-- [Expression Evaluator](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/expression-eval.md): The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
-- [Function Registry](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/function-registry.md): ExpressionFunctionRegistry maintains an isolated table of JavaScript functions that expression evaluators can call with evaluated arguments.
-- [Accessor Compiler](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/parse-expression-string.md): parseExpressionString(expression (row: Record) => unknown
-
-#### geoarrow
-
-@math.gl/geoarrow is the Arrow-runtime-independent home for columnar geospatial math in math.gl.
-
-- [@math.gl/geoarrow](https://visgl.github.io/math.gl/next/docs/modules/geoarrow.md): @math.gl/geoarrow is the Arrow-runtime-independent home for columnar geospatial math in math.gl.
-- [GeoArrow API reference](https://visgl.github.io/math.gl/next/docs/modules/geoarrow/api-reference/geoarrow.md): All root functions are synchronous. Unless a function explicitly returns a new column or fills a
-- [Migrating GeoArrow work into math.gl](https://visgl.github.io/math.gl/next/docs/modules/geoarrow/migration-guide.md): @math.gl/geoarrow consolidates the reusable math from the loaders.gl GeoArrow tentpole work and
-- [GeoArrow physical layouts](https://visgl.github.io/math.gl/next/docs/modules/geoarrow/physical-layouts.md): The descriptor model separates physical storage from the library that owns it. Descriptors are
-
-#### geoid
-
-The @math.gl/geoid module evaluates geoid heights from Earth gravity model grids.
-
-- [Overview](https://visgl.github.io/math.gl/next/docs/modules/geoid.md): The @math.gl/geoid module evaluates geoid heights from Earth gravity model grids.
-- [createGeoidFromGrid](https://visgl.github.io/math.gl/next/docs/modules/geoid/api-reference/create-geoid-from-grid.md): Creates a Geoid from a complete global grid of decoded unsigned 16-bit samples.
-- [Geoid](https://visgl.github.io/math.gl/next/docs/modules/geoid/api-reference/geoid.md): class Geoid - "Gravity Height Model"
-- [parsePGM](https://visgl.github.io/math.gl/next/docs/modules/geoid/api-reference/parse-pgm.md): Parse header of "Earth Gravity Model" \*.pgm file.
-- [Earth Models and Geoid Heights](https://visgl.github.io/math.gl/next/docs/modules/geoid/developer-guide/geospatial-models.md): Use a sphere or ellipsoid for coordinate geometry, and a geoid model when converting between ellipsoidal and orthometric heights.
+- [@math.gl/earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md): The earth group collects Earth model, solar, and timezone utilities. Import the specific utility you
+- [Overview](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md): The @math.gl/earth/geoid module evaluates geoid heights from Earth gravity model grids.
+- [createGeoidFromGrid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/create-geoid-from-grid.md): Creates a Geoid from a complete global grid of decoded unsigned 16-bit samples.
+- [Geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/geoid.md): class Geoid - "Gravity Height Model"
+- [parsePGM](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/parse-pgm.md): Parse header of "Earth Gravity Model" \*.pgm file.
+- [Earth Models and Geoid Heights](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/developer-guide/geospatial-models.md): Use a sphere or ellipsoid for coordinate geometry, and a geoid model when converting between ellipsoidal and orthometric heights.
+- [Overview](https://visgl.github.io/math.gl/next/docs/modules/earth/sun.md): {/ SPDX-License-Identifier: MIT /}
+- [Cloud lighting](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/cloud-lighting.md): {/ SPDX-License-Identifier: MIT /}
+- [Planets](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/get-planet-sky-info.md): {/ SPDX-License-Identifier: MIT /}
+- [getStarfieldRotation](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/get-starfield-rotation.md): {/ SPDX-License-Identifier: MIT /}
+- [getSun](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/get-sun.md): {/ SPDX-License-Identifier: MIT /}
+- [getSunDirection](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/get-sun-direction.md): {/ SPDX-License-Identifier: MIT /}
+- [getSunLight](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/get-sun-light.md): {/ SPDX-License-Identifier: MIT /}
+- [Moon](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/moon.md): {/ SPDX-License-Identifier: MIT /}
+- [Sky](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sky.md): {/ SPDX-License-Identifier: MIT /}
+- [Stars](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/stars.md): {/ SPDX-License-Identifier: MIT /}
+- [Sun](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sun.md): {/ SPDX-License-Identifier: MIT /}
+- [Overview](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md): @math.gl/earth/timezone supplies geographic timezone lookup and numeric local-calendar computations. Use it for map labels, daily aggregation, and scheduling. It uses the runtime's timezone rules; use Intl.DateTimeFormat for localized presentation.
+- [Timezone utilities](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone/api-reference/timezone.md): getTimezoneOffset(timezone, date?)
 
 #### geometry
 
@@ -165,15 +136,37 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [RingGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/ring-geometry.md): A solid annulus centered at the origin, with height along Y. Partial sweeps form
 - [SphereGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/sphere-geometry.md): A latitude/longitude sphere centered at the origin. Positive radius defaults to 0.5. nlat and nlong default to 10 and control latitude and longitude segments.
 - [TruncatedConeGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/truncated-cone-geometry.md): A general tapered primitive with independent radii, caps and axis. topRadius and bottomRadius default to zero: supply at least one positive radius. height defaults to 1, both cap flags to false, nradial to 10, nvertical to 1, and verticalAxis to y.
-
-#### geometry-utils
-
-Utilities for processing renderer-independent geometry stored in typed arrays. The module is
-
-- [@math.gl/geometry-utils](https://visgl.github.io/math.gl/next/docs/modules/geometry-utils.md): Utilities for processing renderer-independent geometry stored in typed arrays. The module is
-- [Geometry utilities](https://visgl.github.io/math.gl/next/docs/modules/geometry-utils/api-reference/geometry-utils.md): Geometry types
-- [interpolatePackedAttributes](https://visgl.github.io/math.gl/next/docs/modules/geometry-utils/api-reference/interpolate-packed-attributes.md): Reconstruct attributes in interleaved vertex buffers from original-vertex provenance, such as
-- [Triangle mesh processing](https://visgl.github.io/math.gl/next/docs/modules/geometry-utils/api-reference/mesh-processing.md): These operations accept the module's minimal Geometry shape GL.TRIANGLES,
+- [Overview](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling.md): @math.gl/geometry/culling tests bounding volumes against planes and provides analytic shape queries. Use it to reject objects outside a view frustum, intersect rays with shapes, and compute enclosing bounds.
+- [AxisAlignedBoundingBox](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/axis-aligned-bounding-box.md): An AxisAlignedBoundingBox is a closed and convex cuboid that is aligned with the orthogonal axes.
+- [BoundingSphere](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/bounding-sphere.md): A bounding sphere with a center and a radius.
+- [BoundingVolume (Interface)](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/bounding-volume.md): An interface defining common operations for bounding volumes (i.e. BoundingSphere, AxisAlignedBoundingBox, OrientedBoundingBox).
+- [CullingVolume](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/culling-volume.md): A culling volume defined by planes.
+- [intersectOrientedBoxes2D](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/intersect-oriented-boxes-2d.md): Test two oriented rectangles in a shared two-dimensional Euclidean coordinate space. This
+- [OrientedBoundingBox](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/oriented-bounding-box.md): An OrientedBoundingBox is a closed and convex cuboid. It can provide a tighter bounding volume than a bounding sphere or an axis aligned bounding box in many cases.
+- [Plane](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/plane.md): A plane in Hessian Normal Form defined by ax + by + cz + d = 0 where [a, b, c] is the plane's normal, d is the signed distance to the plane (from the origin along the normal), and [x, y, z] is any point on the plane.
+- [Ray and closest-point queries](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/queries.md): Import intersectRayBounds, intersectRayTriangle, and getClosestPointOnTriangle from
+- [Ray](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/ray.md): A ray that extends infinitely from an origin in one direction.
+- [glTF Shapes](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/shapes.md): @math.gl/geometry/culling provides BoxShape, CapsuleShape, CylinderShape, PlaneShape and
+- [@math.gl/geometry/curves](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves.md): The curves module provides renderer-independent parametric curves for 2D and 3D Cartesian
+- [CurveArcLength](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/curve-arc-length.md): Constructor
+- [Curve classes](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/curves.md): Constructors
+- [Overview](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md): @math.gl/geometry/polygon clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.
+- [clipPolygon](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/clip-polygon.md): Clips a polygon with a bounding box.
+- [clipPolyline](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/clip-polyline.md): Clips a polyline with a bounding box.
+- [cutPolygonByGrid](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/cut-polygon-by-grid.md): Subdivides a polygon by intersecting with a uniform grid.
+- [cutPolygonByMercatorBounds](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/cut-polygon-by-mercator-bounds.md): Splits a geospatial polygon at the 180th meridian and the top (latitude=90) and bottom (latitude=-90) edges of the Web Mercator map.
+- [cutPolylineByGrid](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/cut-polyline-by-grid.md): Subdivides a polyline by intersecting with a uniform grid.
+- [cutPolylineByMercatorBounds](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/cut-polyline-by-mercator-bounds.md): Splits a geospatial polyline at the 180th meridian.
+- [earcut](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/earcut.md): Computes a triangulation of a polygon using the earcut library.
+- [Polygon](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/polygon.md): Allows an array of points (whether closed or non-closed) to be treated as a Polygon.
+- [polygon-utils](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/polygon-utils.md): A set of polygon-related utility functions. Utility functions are available for flat arrays and for arrays of points. Note: the \*Points set of functions is used for arrays of points, and is separated for performance and backwards compatibility reasons.
+- [subdividePolyline](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/subdivide-polyline.md): Subdivides straight source-coordinate edges until sampled error after a supplied transform is within a tolerance. Use it to approximate curved projected paths and polygon boundaries before rendering or triangulation.
+- [subdivideTriangleMesh](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/subdivide-triangle-mesh.md): Adaptively refines an indexed triangle mesh through a supplied coordinate transform. Use it to approximate filled polygons or deform textured bitmap meshes when transformed triangles need more vertices to follow a curved surface.
+- [@math.gl/geometry/spatial-index (POC)](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md): This proof of concept indexes static Cartesian boxes, points, and triangles. It uses a
+- [@math.gl/geometry/utils](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils.md): Utilities for processing renderer-independent geometry stored in typed arrays. The module is
+- [Geometry utilities](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/geometry-utils.md): Geometry types
+- [interpolatePackedAttributes](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/interpolate-packed-attributes.md): Reconstruct attributes in interleaved vertex buffers from original-vertex provenance, such as
+- [Triangle mesh processing](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/mesh-processing.md): These operations accept the module's minimal Geometry shape GL.TRIANGLES,
 
 #### geospatial
 
@@ -187,92 +180,42 @@ Utilities for processing renderer-independent geometry stored in typed arrays. T
 - [Helpers](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/helpers.md): Helper functions for geospatial.
 - [LngLatRectangle](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/lng-lat-rectangle.md): A longitude-latitude rectangle on an ellipsoid. Angular values are stored in radians.
 - [makeOBBFromRegion](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/make-obb-from-region.md): Builds a conservative OrientedBoundingBox for a longitude–latitude–height region on an ellipsoid. This is useful for 3D Tiles regions, globe rendering, spatial indexing, and frustum culling.
+- [subdivideGlobeMesh](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/subdivide-globe-mesh.md): {/ SPDX-License-Identifier: MIT /}
 - [Tile matrices](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/tile-matrix.md): @math.gl/geospatial/tile-matrix provides geometry, extent queries and level selection for
-
-#### polygon
-
-@math.gl/polygon clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.
-
-- [Overview](https://visgl.github.io/math.gl/next/docs/modules/polygon.md): @math.gl/polygon clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.
-- [clipPolygon](https://visgl.github.io/math.gl/next/docs/modules/polygon/api-reference/clip-polygon.md): Clips a polygon with a bounding box.
-- [clipPolyline](https://visgl.github.io/math.gl/next/docs/modules/polygon/api-reference/clip-polyline.md): Clips a polyline with a bounding box.
-- [cutPolygonByGrid](https://visgl.github.io/math.gl/next/docs/modules/polygon/api-reference/cut-polygon-by-grid.md): Subdivides a polygon by intersecting with a uniform grid.
-- [cutPolygonByMercatorBounds](https://visgl.github.io/math.gl/next/docs/modules/polygon/api-reference/cut-polygon-by-mercator-bounds.md): Splits a geospatial polygon at the 180th meridian and the top (latitude=90) and bottom (latitude=-90) edges of the Web Mercator map.
-- [cutPolylineByGrid](https://visgl.github.io/math.gl/next/docs/modules/polygon/api-reference/cut-polyline-by-grid.md): Subdivides a polyline by intersecting with a uniform grid.
-- [cutPolylineByMercatorBounds](https://visgl.github.io/math.gl/next/docs/modules/polygon/api-reference/cut-polyline-by-mercator-bounds.md): Splits a geospatial polyline at the 180th meridian.
-- [earcut](https://visgl.github.io/math.gl/next/docs/modules/polygon/api-reference/earcut.md): Computes a triangulation of a polygon using the earcut library.
-- [Polygon](https://visgl.github.io/math.gl/next/docs/modules/polygon/api-reference/polygon.md): Allows an array of points (whether closed or non-closed) to be treated as a Polygon.
-- [polygon-utils](https://visgl.github.io/math.gl/next/docs/modules/polygon/api-reference/polygon-utils.md): A set of polygon-related utility functions. Utility functions are available for flat arrays and for arrays of points. Note: the \*Points set of functions is used for arrays of points, and is separated for performance and backwards compatibility reasons.
-- [subdivideGlobeMesh](https://visgl.github.io/math.gl/next/docs/modules/polygon/api-reference/subdivide-globe-mesh.md): {/ SPDX-License-Identifier: MIT /}
-- [subdividePolyline](https://visgl.github.io/math.gl/next/docs/modules/polygon/api-reference/subdivide-polyline.md): Subdivides straight source-coordinate edges until sampled error after a supplied transform is within a tolerance. Use it to approximate curved projected paths and polygon boundaries before rendering or triangulation.
-- [subdivideTriangleMesh](https://visgl.github.io/math.gl/next/docs/modules/polygon/api-reference/subdivide-triangle-mesh.md): Adaptively refines an indexed triangle mesh through a supplied coordinate transform. Use it to approximate filled polygons or deform textured bitmap meshes when transformed triangles need more vertices to follow a curved surface.
-
-#### projection
-
-@math.gl/projection converts coordinates between geographic, projected and
-
-- [Overview](https://visgl.github.io/math.gl/next/docs/modules/projection.md): @math.gl/projection converts coordinates between geographic, projected and
-- [Optional acceleration](https://visgl.github.io/math.gl/next/docs/modules/projection/acceleration.md): Large independent buffers can benefit from persistent application workers.
-- [Projection accuracy domains](https://visgl.github.io/math.gl/next/docs/modules/projection/accuracy-domains.md): Every named algorithm has independent forward and inverse references. This scorecard expands seeded scalar and Float64 XYZM qualification to 42 configurations, 11,160 points and 36 horizontal algorithms. Geocentric conversion is covered separately by the three-dimensional PROJ corpus and the nearest-normal qualification.
-- [Datum and height grids](https://visgl.github.io/math.gl/next/docs/modules/projection/api-reference/datum-grids.md): Load datum-grid data separately
-- [Projection](https://visgl.github.io/math.gl/next/docs/modules/projection/api-reference/projection.md): Projection is the backend-independent type for a coordinate transformation between
-- [ProjectionEngine](https://visgl.github.io/math.gl/next/docs/modules/projection/api-reference/projection-engine.md): ProjectionEngine is a reusable factory interface. Each engine holds projection plugins,
-- [ProjectionTransform](https://visgl.github.io/math.gl/next/docs/modules/projection/api-reference/projection-transform.md): The configurable math.gl projection engine used by the full, configurable and lazy engines; see the support and migration contract.
-- [Performance](https://visgl.github.io/math.gl/next/docs/modules/projection/benchmarks.md): The math.gl projection engine offers projectFlat and unprojectFlat for interleaved
-- [ProjectionBuffer](https://visgl.github.io/math.gl/next/docs/modules/projection/bulk-layouts.md): Use ProjectionBuffer when coordinates live in separate input/output arrays,
-- [Coordinate systems, ellipsoids, datums and epochs](https://visgl.github.io/math.gl/next/docs/modules/projection/coordinate-systems.md): A coordinate such as [12, 55, 100] is incomplete without its reference system.
-- [Propagate coordinates between epochs](https://visgl.github.io/math.gl/next/docs/modules/projection/deformation-models.md): A velocity model describes how a position changes over time within a reference
-- [Qualify a deformation model](https://visgl.github.io/math.gl/next/docs/modules/projection/deformation-qualification.md): A deformation model's numerical behavior, physical accuracy and data authority
-- [Choosing a CRS and projection API](https://visgl.github.io/math.gl/next/docs/modules/projection/developer-guide/api-guide.md): The CRS and projection APIs describe coordinates, select and prepare operations,
-- [Ellipsoid accuracy and interior boundaries](https://visgl.github.io/math.gl/next/docs/modules/projection/ellipsoid-qualification.md): Longitude, latitude and ellipsoidal height describe a position along a surface
-- [Independent projection validation](https://visgl.github.io/math.gl/next/docs/modules/projection/independent-validation.md): The math.gl projection engine now has reference coordinates from PROJ 9.5.1, generated with
-- [ProjectionPipeline](https://visgl.github.io/math.gl/next/docs/modules/projection/operation-pipelines.md): ProjectionPipeline composes a known coordinate operation from typed steps. Use it
-- [OperationCatalog](https://visgl.github.io/math.gl/next/docs/modules/projection/operation-selection.md): Two coordinate reference systems can have several transformations between them.
-- [Projection parity audit — September 29, 2026](https://visgl.github.io/math.gl/next/docs/modules/projection/parity-audit.md): The native engine has broad algorithm coverage, but has not reached proj4js parity.
-- [ProjectionAnalysis](https://visgl.github.io/math.gl/next/docs/modules/projection/projection-analysis.md): The optional @math.gl/projection/analysis entry evaluates a single map projection inside an explicit application domain. It provides scales, convergence, distortion and coordinate derivatives without importing projection algorithms. Supply the same projection plugin and geometry used by your map.
-- [Projection engine](https://visgl.github.io/math.gl/next/docs/modules/projection/projection-engine.md): For the responsibilities of each API and when to use it, start with the
-- [Projection catalogue](https://visgl.github.io/math.gl/next/docs/modules/projection/projections.md): A projection chooses how a curved Earth becomes a flat map. The choice affects
-- [Projection scorecard](https://visgl.github.io/math.gl/next/docs/modules/projection/scorecard.md): Complete Node / Chromium / Firefox / WebKit evidence.
-- [Reproduce the projection scorecard](https://visgl.github.io/math.gl/next/docs/modules/projection/scorecard-methodology.md): The published scorecard consolidates source-matched measurements
-- [Projection API support and migration](https://visgl.github.io/math.gl/next/docs/modules/projection/support.md): @math.gl/projection uses the math.gl projection engine by default. projectionEngine supplies
-- [Temporal deformation models](https://visgl.github.io/math.gl/next/docs/modules/projection/temporal-models.md): A coordinate can move between observation epochs because of a steady velocity,
-
-#### spatial-index
-
-This proof of concept indexes static Cartesian boxes, points, and triangles. It uses a
-
-- [@math.gl/spatial-index (POC)](https://visgl.github.io/math.gl/next/docs/modules/spatial-index.md): This proof of concept indexes static Cartesian boxes, points, and triangles. It uses a
-
-#### sun
-
-{/ SPDX-License-Identifier: MIT /}
-
-- [Overview](https://visgl.github.io/math.gl/next/docs/modules/sun.md): {/ SPDX-License-Identifier: MIT /}
-- [Cloud lighting](https://visgl.github.io/math.gl/next/docs/modules/sun/api-reference/cloud-lighting.md): {/ SPDX-License-Identifier: MIT /}
-- [Planets](https://visgl.github.io/math.gl/next/docs/modules/sun/api-reference/get-planet-sky-info.md): {/ SPDX-License-Identifier: MIT /}
-- [getStarfieldRotation](https://visgl.github.io/math.gl/next/docs/modules/sun/api-reference/get-starfield-rotation.md): {/ SPDX-License-Identifier: MIT /}
-- [getSun](https://visgl.github.io/math.gl/next/docs/modules/sun/api-reference/get-sun.md): {/ SPDX-License-Identifier: MIT /}
-- [getSunDirection](https://visgl.github.io/math.gl/next/docs/modules/sun/api-reference/get-sun-direction.md): {/ SPDX-License-Identifier: MIT /}
-- [getSunLight](https://visgl.github.io/math.gl/next/docs/modules/sun/api-reference/get-sun-light.md): {/ SPDX-License-Identifier: MIT /}
-- [Moon](https://visgl.github.io/math.gl/next/docs/modules/sun/api-reference/moon.md): {/ SPDX-License-Identifier: MIT /}
-- [Sky](https://visgl.github.io/math.gl/next/docs/modules/sun/api-reference/sky.md): {/ SPDX-License-Identifier: MIT /}
-- [Stars](https://visgl.github.io/math.gl/next/docs/modules/sun/api-reference/stars.md): {/ SPDX-License-Identifier: MIT /}
-- [Sun](https://visgl.github.io/math.gl/next/docs/modules/sun/api-reference/sun.md): {/ SPDX-License-Identifier: MIT /}
-
-#### timezone
-
-@math.gl/timezone supplies geographic timezone lookup and numeric local-calendar computations. Use it for map labels, daily aggregation, and scheduling. It uses the runtime's timezone rules; use Intl.DateTimeFormat for localized presentation.
-
-- [Overview](https://visgl.github.io/math.gl/next/docs/modules/timezone.md): @math.gl/timezone supplies geographic timezone lookup and numeric local-calendar computations. Use it for map labels, daily aggregation, and scheduling. It uses the runtime's timezone rules; use Intl.DateTimeFormat for localized presentation.
-- [Timezone utilities](https://visgl.github.io/math.gl/next/docs/modules/timezone/api-reference/timezone.md): getTimezoneOffset(timezone, date?)
-
-#### types
-
-@math.gl/types provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
-
-- [Overview](https://visgl.github.io/math.gl/next/docs/modules/types.md): @math.gl/types provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
-- [Array Types](https://visgl.github.io/math.gl/next/docs/modules/types/api-reference/array-types.md): math.gl provides a number of numeric array types.
-- [Bounds](https://visgl.github.io/math.gl/next/docs/modules/types/api-reference/bounds.md): A common need for geospatial and 3D applications is to be able to express bounds
+- [CRS Definitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs.md): @math.gl/geospatial/crs provides lightweight, proj4-independent TypeScript definitions and syntax codecs
+- [Spatial Reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/spatial-reference.md): @math.gl/geospatial/crs provides a format-neutral descriptor for reporting how a dataset's coordinates are
+- [Coordinate Reference Systems](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/developer-guide/coordinate-reference-systems.md): A coordinate tuple such as [12.49, 41.89] is not a location by itself. Software also needs to
+- [@math.gl/geospatial/geoarrow](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow.md): @math.gl/geospatial/geoarrow is the Arrow-runtime-independent home for columnar geospatial math in math.gl.
+- [GeoArrow API reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow/api-reference/geoarrow.md): All root functions are synchronous. Unless a function explicitly returns a new column or fills a
+- [Migrating GeoArrow work into math.gl](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow/migration-guide.md): @math.gl/geospatial/geoarrow consolidates the reusable math from the loaders.gl GeoArrow tentpole work and
+- [GeoArrow physical layouts](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow/physical-layouts.md): The descriptor model separates physical storage from the library that owns it. Descriptors are
+- [Overview](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md): @math.gl/geospatial/projection converts coordinates between geographic, projected and
+- [Optional acceleration](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/acceleration.md): Large independent buffers can benefit from persistent application workers.
+- [Projection accuracy domains](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/accuracy-domains.md): Every named algorithm has independent forward and inverse references. This scorecard expands seeded scalar and Float64 XYZM qualification to 42 configurations, 11,160 points and 36 horizontal algorithms. Geocentric conversion is covered separately by the three-dimensional PROJ corpus and the nearest-normal qualification.
+- [Datum and height grids](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/datum-grids.md): Load datum-grid data separately
+- [Projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection.md): Projection is the backend-independent type for a coordinate transformation between
+- [ProjectionEngine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md): ProjectionEngine is a reusable factory interface. Each engine holds projection plugins,
+- [ProjectionTransform](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-transform.md): The configurable math.gl projection engine used by the full, configurable and lazy engines; see the support and migration contract.
+- [Performance](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/benchmarks.md): The math.gl projection engine offers projectFlat and unprojectFlat for interleaved
+- [ProjectionBuffer](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/bulk-layouts.md): Use ProjectionBuffer when coordinates live in separate input/output arrays,
+- [Coordinate systems, ellipsoids, datums and epochs](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/coordinate-systems.md): A coordinate such as [12, 55, 100] is incomplete without its reference system.
+- [Propagate coordinates between epochs](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/deformation-models.md): A velocity model describes how a position changes over time within a reference
+- [Qualify a deformation model](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/deformation-qualification.md): A deformation model's numerical behavior, physical accuracy and data authority
+- [Choosing a CRS and projection API](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/api-guide.md): The CRS and projection APIs describe coordinates, select and prepare operations,
+- [Ellipsoid accuracy and interior boundaries](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/ellipsoid-qualification.md): Longitude, latitude and ellipsoidal height describe a position along a surface
+- [Independent projection validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md): The math.gl projection engine now has reference coordinates from PROJ 9.5.1, generated with
+- [ProjectionPipeline](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/operation-pipelines.md): ProjectionPipeline composes a known coordinate operation from typed steps. Use it
+- [OperationCatalog](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/operation-selection.md): Two coordinate reference systems can have several transformations between them.
+- [Projection parity audit — September 29, 2026](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/parity-audit.md): The native engine has broad algorithm coverage, but has not reached proj4js parity.
+- [ProjectionAnalysis](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-analysis.md): The optional @math.gl/geospatial/projection/analysis entry evaluates a single map projection inside an explicit application domain. It provides scales, convergence, distortion and coordinate derivatives without importing projection algorithms. Supply the same projection plugin and geometry used by your map.
+- [Projection engine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md): For the responsibilities of each API and when to use it, start with the
+- [Projection catalogue](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projections.md): A projection chooses how a curved Earth becomes a flat map. The choice affects
+- [Projection scorecard](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/scorecard.md): Complete Node / Chromium / Firefox / WebKit evidence.
+- [Reproduce the projection scorecard](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/scorecard-methodology.md): The published scorecard consolidates source-matched measurements
+- [Projection API support and migration](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md): @math.gl/geospatial/projection uses the math.gl projection engine by default. projectionEngine supplies
+- [Temporal deformation models](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/temporal-models.md): A coordinate can move between observation epochs because of a steady velocity,
+- [@math.gl/geospatial/wkb](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb.md): @math.gl/geospatial/wkb provides dependency-free, synchronous codecs for individual WKB, EWKB, and WKT
+- [WKB and WKT API reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb/api-reference/wkb.md): All APIs are synchronous. Inputs are borrowed and never detached or mutated.
 
 #### web-mercator
 
@@ -283,13 +226,6 @@ This proof of concept indexes static Cartesian boxes, points, and triangles. It 
 - [WebMercatorViewport](https://visgl.github.io/math.gl/next/docs/modules/web-mercator/api-reference/web-mercator-viewport.md): The WebMercatorViewport class takes map camera states (latitude, longitude, zoom, pitch, bearing etc.),
 - [Web Mercator Coordinates](https://visgl.github.io/math.gl/next/docs/modules/web-mercator/developer-guide/web-mercator-coordinates.md): Use matching forward and inverse helpers for each coordinate space. Geographic positions, world coordinates, EPSG:3857 metres, and viewport pixels are different representations.
 - [Accuracy of Offset Projection](https://visgl.github.io/math.gl/next/docs/modules/web-mercator/developer-guide/web-mercator-offset-accuracy.md): getDistanceScales offers a cheap way to project lng/lat or meter offset to pixels. It is useful when using the GPU to project a cluster of coordinates near an origin point, without suffering the precision loss of WebGL.
-
-#### wkb
-
-@math.gl/wkb provides dependency-free, synchronous codecs for individual WKB, EWKB, and WKT
-
-- [@math.gl/wkb](https://visgl.github.io/math.gl/next/docs/modules/wkb.md): @math.gl/wkb provides dependency-free, synchronous codecs for individual WKB, EWKB, and WKT
-- [WKB and WKT API reference](https://visgl.github.io/math.gl/next/docs/modules/wkb/api-reference/wkb.md): All APIs are synchronous. Inputs are borrowed and never detached or mutated.
 
 ### roadmap
 

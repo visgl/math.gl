@@ -24,6 +24,6 @@ const result = spherical.toVector3(new Vector3()); // Reuses a vector
 
 `SphericalCoordinates` retains legacy angle conventions, and its forward and inverse conversions are not a general inverse pair. Check the [current formulas and limits](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/spherical-coordinates.md#vector-conversions) before using it for coordinate exchange. Use explicit spherical conversion equations when a standard convention or round trip is required.
 
-Spherical coordinates describe geometry around a center; they are not ellipsoidal longitude, latitude, and height. Use [geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md) for ellipsoid conversions and [projection](https://visgl.github.io/math.gl/next/docs/modules/projection.md) for CRS transformations.
+Spherical coordinates describe geometry around a center; they are not ellipsoidal longitude, latitude, and height. Use [geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md) for ellipsoid conversions and [projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) for CRS transformations.
 
 See [SphericalCoordinates](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/spherical-coordinates.md), [homogeneous coordinates](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/homogeneous-coordinates.md), and [rotations](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/rotations.md) for details.

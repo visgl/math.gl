@@ -1,6 +1,6 @@
 # Roadmap
 
-The current major-release work is summarized in [What’s New](https://visgl.github.io/math.gl/next/docs/whats-new.md#v50). Module guides describe their supported scope and remaining work; see the [projection support guide](https://visgl.github.io/math.gl/next/docs/modules/projection/support.md) for that engine's current coverage.
+The current major-release work is summarized in [What’s New](https://visgl.github.io/math.gl/next/docs/whats-new.md#v50). Module guides describe their supported scope and remaining work; see the [projection support guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md) for that engine's current coverage.
 
 ## Completed milestones[​](#completed-milestones "Direct link to Completed milestones")
 

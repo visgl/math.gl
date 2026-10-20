@@ -4,7 +4,7 @@
 
 The optional `@math.gl/core/spheroid` entry provides low-level conversions between longitude/latitude/ellipsoidal height and Cartesian XYZ for spheres and oblate spheroids. It is also used by geospatial and the projection engine. It imports no vector classes, global configuration, CRS definitions or model data.
 
-For CRS units, axes, datums, grids and epochs, use [`ProjectionEngine`](https://visgl.github.io/math.gl/next/docs/modules/projection/api-reference/projection-engine.md). For three-radius geometry, surface normals and local frames, use [`Ellipsoid`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid.md).
+For CRS units, axes, datums, grids and epochs, use [`ProjectionEngine`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md). For three-radius geometry, surface normals and local frames, use [`Ellipsoid`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid.md).
 
 ```
 import {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core/spheroid';
@@ -52,7 +52,7 @@ Unique sphere/oblate interiors use the bounded nearest-footpoint solve. The shif
 
 Geospatial shares this cartographic inverse for sphere/oblate shapes, preserving its signed-zero pole longitude and `undefined` failure convention. Projection retains its near-axis longitude convention and throws on failure. Prolate/triaxial cartographic conversion and the separate geospatial `scaleToGeodeticSurface` method retain their own kernel, including its radial approximation.
 
-The independent [interior qualification](https://visgl.github.io/math.gl/next/docs/modules/projection/ellipsoid-qualification.md) covers 434 accuracy checks, including thin spheroids and both sides of the cusp. The 128-update interior bound is a convergence limit, not a global accuracy guarantee. Squared-axis/ratio underflow and other unrepresentable intermediates can reject.
+The independent [interior qualification](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/ellipsoid-qualification.md) covers 434 accuracy checks, including thin spheroids and both sides of the cusp. The 128-update interior bound is a convergence limit, not a global accuracy guarantee. Squared-axis/ratio underflow and other unrepresentable intermediates can reject.
 
 ## Attribution[​](#attribution "Direct link to Attribution")
 

@@ -15,7 +15,7 @@ Use `Ellipsoid.WGS84` for the standard Earth shape, construct three radii direct
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
 const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
 
@@ -25,7 +25,7 @@ const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPo
 Determine the Cartographic representation of a Cartesian position on a WGS84 ellipsoid.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
 const cartesianPosition = [17832.12, 83234.52, 952313.73];
 
@@ -35,7 +35,7 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 
@@ -44,12 +44,12 @@ const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin)
 
 ## Projection interoperability[​](#projection-interoperability "Direct link to Projection interoperability")
 
-`@math.gl/projection` uses spheres and oblate spheroids: its X/Y equatorial radii are equal. `Ellipsoid` also supports three independent radii. The adapters exchange only the common geometry; they do not transfer a datum, axis order, units or epoch.
+`@math.gl/geospatial/projection` uses spheres and oblate spheroids: its X/Y equatorial radii are equal. `Ellipsoid` also supports three independent radii. The adapters exchange only the common geometry; they do not transfer a datum, axis order, units or epoch.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
-import {normalizeCRS} from '@math.gl/projection/core';
+import {normalizeCRS} from '@math.gl/geospatial/projection/core';
 
 
 
@@ -60,7 +60,7 @@ const shape = Ellipsoid.fromSpheroid(crs.ellipsoid);
 const parameters = shape.toSpheroid(); // {semiMajorAxis, semiMinorAxis}, in metres
 ```
 
-Create/cache the adapter result during setup. Coordinate conversions still use the existing geospatial implementation. The projection module does not import geospatial at runtime. See [coordinate-system concepts](https://visgl.github.io/math.gl/next/docs/modules/projection/coordinate-systems.md#interoperating-with-geospatial-ellipsoids) for the units and boundary conventions.
+Create/cache the adapter result during setup. Coordinate conversions still use the existing geospatial implementation. The projection module does not import geospatial at runtime. See [coordinate-system concepts](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/coordinate-systems.md#interoperating-with-geospatial-ellipsoids) for the units and boundary conventions.
 
 ## Static Fields[​](#static-fields "Direct link to Static Fields")
 
@@ -163,7 +163,7 @@ Returns
 
 ### cartesianToCartographic(cartesian : Number\[3], result : Number\[3]) : Vector3 | Number\[3] | `undefined`[​](#cartesiantocartographiccartesian--number3-result--number3--vector3--number3--undefined "Direct link to cartesiantocartographiccartesian--number3-result--number3--vector3--number3--undefined")
 
-Converts the provided Cartesian position to cartographic representation. Latitude retains precision near the poles. Returns `undefined` at the center, for non-finite or unrepresentable inputs, or when its bounded inverse cannot converge; an existing result is left unchanged. Sphere/oblate cartographic conversion uses the shared [spheroid helpers](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/spheroid.md), including the safeguarded nearest-normal interior inverse. Equatorial interiors with two equally near normals reject. Prolate/triaxial conversion retains the 64-update surface algorithm and its approximate near-center radial fallback. The separate `scaleToGeodeticSurface` method retains that three-radius behavior for all shapes. See [ellipsoid accuracy and interior boundaries](https://visgl.github.io/math.gl/next/docs/modules/projection/ellipsoid-qualification.md) for independent references, branch selection and sampled accuracy limits.
+Converts the provided Cartesian position to cartographic representation. Latitude retains precision near the poles. Returns `undefined` at the center, for non-finite or unrepresentable inputs, or when its bounded inverse cannot converge; an existing result is left unchanged. Sphere/oblate cartographic conversion uses the shared [spheroid helpers](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/spheroid.md), including the safeguarded nearest-normal interior inverse. Equatorial interiors with two equally near normals reject. Prolate/triaxial conversion retains the 64-update surface algorithm and its approximate near-center radial fallback. The separate `scaleToGeodeticSurface` method retains that three-radius behavior for all shapes. See [ellipsoid accuracy and interior boundaries](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/ellipsoid-qualification.md) for independent references, branch selection and sampled accuracy limits.
 
 * `cartesian` The Cartesian position to convert to cartographic representation.
 * `result` Optional object onto which to store the result.

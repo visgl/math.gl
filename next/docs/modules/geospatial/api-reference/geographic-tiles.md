@@ -5,7 +5,7 @@
 ```
 import {getGeographicTile, getGeographicTileBounds, getGeographicTileRanges}
 
-  from '@math.gl/geospatial';
+  from '@math.gl/geospatial/tiles';
 
 
 

@@ -59,4 +59,4 @@ These legacy formulas are not a general inverse pair. For example, `[0, 1, 0]` c
 
 `fromLngLatZ([longitude, latitude, height])` sets `phi` from latitude, `theta` from longitude, and `radius = 1 + height / radiusScale`. The read-only `z` accessor returns `(radius - 1) * radiusScale`; the default scale is 6,371,000. These geographic aliases also use legacy conventions and are not inverse longitude/latitude accessors.
 
-Use [geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md) for ellipsoidal coordinates and [projection](https://visgl.github.io/math.gl/next/docs/modules/projection.md) for CRS conversion.
+Use [geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md) for ellipsoidal coordinates and [projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) for CRS conversion.

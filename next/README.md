@@ -36,11 +36,11 @@ Use Python 3.10+ and Node.js, installing build tools outside the package:
 
 ```sh
 python3 -m venv /tmp/timezone-tools
-/tmp/timezone-tools/bin/pip install -r modules/timezone/scripts/geometry-requirements.txt
+/tmp/timezone-tools/bin/pip install -r modules/earth/timezone/scripts/geometry-requirements.txt
 npm install --prefix /tmp/timezone-node mapshaper@0.6.113
-/tmp/timezone-tools/bin/python modules/timezone/scripts/generate-geometry.py \
+/tmp/timezone-tools/bin/python modules/earth/timezone/scripts/generate-geometry.py \
   --mapshaper /tmp/timezone-node/node_modules/.bin/mapshaper
-/tmp/timezone-tools/bin/python modules/timezone/scripts/check-geometry.py
+/tmp/timezone-tools/bin/python modules/earth/timezone/scripts/check-geometry.py
 ```
 
 The generator checks the pinned upstream ZIP checksum before extracting data.

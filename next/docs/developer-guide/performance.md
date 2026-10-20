@@ -46,12 +46,12 @@ for (const position of positions) {
 }
 ```
 
-For large CRS coordinate buffers, use the [projection buffer APIs](https://visgl.github.io/math.gl/next/docs/modules/projection/bulk-layouts.md) instead of constructing an object for each coordinate.
+For large CRS coordinate buffers, use the [projection buffer APIs](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/bulk-layouts.md) instead of constructing an object for each coordinate.
 
 ## Measure your workload[​](#measure-your-workload "Direct link to Measure your workload")
 
 Disable optional core validation with `configure({debug: false})` before measuring production performance. Compare the same inputs, output ownership, and numeric precision, and include any copying your application requires.
 
-The [browser benchmarks](https://visgl.github.io/math.gl/next/examples/benchmarks) compare representative operations. [Projection benchmarks](https://visgl.github.io/math.gl/next/docs/modules/projection/benchmarks.md) include scalar and buffer workloads. Results depend on the JavaScript engine and hardware; measure changes in the application that will use them.
+The [browser benchmarks](https://visgl.github.io/math.gl/next/examples/benchmarks) compare representative operations. [Projection benchmarks](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/benchmarks.md) include scalar and buffer workloads. Results depend on the JavaScript engine and hardware; measure changes in the application that will use them.
 
 See [bundling](https://visgl.github.io/math.gl/next/docs/developer-guide/bundling.md) when download size and startup cost matter more than arithmetic throughput.

@@ -2,7 +2,7 @@
 
 `@math.gl/web-mercator` provides a map camera and coordinate utilities for spherical Web Mercator. Use `WebMercatorViewport` to convert longitude/latitude positions to screen pixels and back with zoom, pitch, and bearing.
 
-Geographic inputs use `[longitude, latitude]` in degrees, with optional altitude in metres. For CRS conversions beyond Web Mercator, use [projection](https://visgl.github.io/math.gl/next/docs/modules/projection.md).
+Geographic inputs use `[longitude, latitude]` in degrees, with optional altitude in metres. For CRS conversions beyond Web Mercator, use [projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md).
 
 ## Example Usage[​](#example-usage "Direct link to Example Usage")
 

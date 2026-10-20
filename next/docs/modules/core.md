@@ -4,6 +4,8 @@
 
 `@math.gl/core` provides array-based vectors, matrices, quaternions, and coordinate helpers. Use it to compose transforms, rotate geometry, and work with reusable numeric objects.
 
+Shared types and expression parsing are available at `@math.gl/core/types` and `@math.gl/core/expressions`. The basic math expression library is included there; geospatial and DGGS expression functions live at `@math.gl/geospatial/expressions` and `@math.gl/dggs/expressions`.
+
 <!-- -->
 
 ## Core transforms[​](#core-transforms "Direct link to Core transforms")
