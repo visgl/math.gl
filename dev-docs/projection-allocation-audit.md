@@ -1,6 +1,6 @@
 # Projection allocation audit
 
-The October 2026 audit reads every TypeScript runtime source in `modules/projection/src`
+The October 2026 audit reads every TypeScript runtime source in `modules/geospatial/projection/src`
 (223 files), then reviews coordinate dispatch, all named algorithms and their numerical
 helpers, grid readers/samplers, datum/height/epoch operations and lazy loading. Allocation
 reduction is valuable even when throughput differences are within measurement noise:
@@ -60,7 +60,7 @@ implementations need separate heap profiling.
 ## Repeat the audit
 
 ```sh
-node modules/projection/scripts/audit-allocations.mjs --check --output /tmp/projection-allocations.json
+node modules/geospatial/projection/scripts/audit-allocations.mjs --check --output /tmp/projection-allocations.json
 ```
 
 The TypeScript AST inventory records every object/array/regexp literal, `new`, closure

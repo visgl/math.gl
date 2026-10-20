@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileCopyrightText: Copyright (c) 2017 Uber Technologies, Inc.
 
-import {NumericArray, NumericArray9} from '@math.gl/types';
+import {NumericArray, NumericArray9} from '../types';
 import {Matrix} from './base/matrix';
 import {checkVector} from '../lib/validators';
 

@@ -10,4 +10,4 @@ import {lookupTimezoneAsync} from '@math.gl/earth/timezone';
 ```
 
 The group root exports `geoid`, `sun`, and `timezone` namespaces. The existing
-`@math.gl/geoid`, `@math.gl/sun`, and `@math.gl/timezone` package imports remain available.
+`@math.gl/earth/geoid`, `@math.gl/earth/sun`, and `@math.gl/earth/timezone` package imports remain available.

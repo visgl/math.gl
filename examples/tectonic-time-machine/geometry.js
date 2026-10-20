@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original mesh adapter: triangulate geographic cells before morphing their vertices.
-import {earcut, cutPolygonByGrid} from '@math.gl/polygon';
+import {earcut, cutPolygonByGrid} from '@math.gl/geometry/polygon';
 const IDENTITY = [1, 0, 0, 0];
 export function makeMesh(parts) {
   const coordinates = [],

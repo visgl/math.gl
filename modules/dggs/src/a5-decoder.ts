@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {cellToBoundary, cellToLonLat, hexToU64, u64ToHex} from 'a5-js';
-import {type Bounds2D} from '@math.gl/types';
+import {type Bounds2D} from '@math.gl/core/types';
 import {
   withDGGSBoundaryOptions,
   type DGGSCell,

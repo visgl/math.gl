@@ -9,7 +9,7 @@ import {
   type TriangleMesh,
   type SubdivideTriangleMeshOptions,
   type SubdividedTriangleMesh
-} from '@math.gl/polygon';
+} from '@math.gl/geometry/polygon';
 
 /** Preserve the refinement discriminant when removing the globe adapter's fixed transform. */
 type GlobeSubdivisionOptions<Options> = Options extends unknown

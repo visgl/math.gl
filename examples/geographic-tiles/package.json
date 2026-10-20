@@ -13,7 +13,7 @@
     "@luma.gl/engine": "~9.4.2",
     "@luma.gl/shadertools": "~9.4.2",
     "@math.gl/core": "workspace:*",
-    "@math.gl/culling": "workspace:*",
+    "@math.gl/geometry": "workspace:*",
     "@math.gl/geospatial": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"

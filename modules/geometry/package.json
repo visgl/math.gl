@@ -34,29 +34,49 @@
       "require": "./dist/parametric.cjs"
     },
     "./utils": {
-      "types": "./dist/utils.d.ts",
-      "import": "./dist/utils.js",
-      "require": "./dist/utils.cjs"
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js",
+      "require": "./dist/utils/index.cjs"
     },
     "./curves": {
-      "types": "./dist/curves.d.ts",
-      "import": "./dist/curves.js",
-      "require": "./dist/curves.cjs"
+      "types": "./dist/curves/index.d.ts",
+      "import": "./dist/curves/index.js",
+      "require": "./dist/curves/index.cjs"
     },
     "./polygon": {
-      "types": "./dist/polygon.d.ts",
-      "import": "./dist/polygon.js",
-      "require": "./dist/polygon.cjs"
+      "types": "./dist/polygon/index.d.ts",
+      "import": "./dist/polygon/index.js",
+      "require": "./dist/polygon/index.cjs"
     },
     "./culling": {
-      "types": "./dist/culling.d.ts",
-      "import": "./dist/culling.js",
-      "require": "./dist/culling.cjs"
+      "types": "./dist/culling/index.d.ts",
+      "import": "./dist/culling/index.js",
+      "require": "./dist/culling/index.cjs"
     },
     "./spatial-index": {
-      "types": "./dist/spatial-index.d.ts",
-      "import": "./dist/spatial-index.js",
-      "require": "./dist/spatial-index.cjs"
+      "types": "./dist/spatial-index/index.d.ts",
+      "import": "./dist/spatial-index/index.js",
+      "require": "./dist/spatial-index/index.cjs"
+    },
+    "./utils/interpolate-packed-attributes": {
+      "types": "./dist/utils/interpolate-packed-attributes.d.ts",
+      "import": "./dist/utils/interpolate-packed-attributes.js",
+      "require": "./dist/utils/interpolate-packed-attributes.cjs"
+    },
+    "./culling/oriented-box-2d": {
+      "types": "./dist/culling/oriented-box-2d.d.ts",
+      "import": "./dist/culling/oriented-box-2d.js",
+      "require": "./dist/culling/oriented-box-2d.cjs"
+    },
+    "./culling/queries": {
+      "types": "./dist/culling/queries.d.ts",
+      "import": "./dist/culling/queries.js",
+      "require": "./dist/culling/queries.cjs"
+    },
+    "./spatial-index/boxes": {
+      "types": "./dist/spatial-index/box-index.d.ts",
+      "import": "./dist/spatial-index/box-index.js",
+      "require": "./dist/spatial-index/box-index.cjs"
     }
   },
   "files": [
@@ -64,11 +84,7 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/culling": "5.0.0-alpha.18",
-    "@math.gl/curves": "5.0.0-alpha.18",
-    "@math.gl/geometry-utils": "5.0.0-alpha.18",
-    "@math.gl/polygon": "5.0.0-alpha.18",
-    "@math.gl/spatial-index": "5.0.0-alpha.18",
-    "@math.gl/types": "5.0.0-alpha.18"
-  }
+    "@math.gl/core": "5.0.0-alpha.18"
+  },
+  "sideEffects": false
 }

@@ -52,7 +52,7 @@ Pass these CPU buffers to the renderer of your choice. The module does not creat
   `RingGeometry` provides solid annuli and capped ring segments.
 
 An infinite glTF plane cannot be tessellated, so `PlaneGeometry` requires finite `sizeX` and `sizeZ`
-values. Use `PlaneShape` from `@math.gl/culling` when infinite or partially infinite analytic
+values. Use `PlaneShape` from `@math.gl/geometry/culling` when infinite or partially infinite analytic
 planes are required.
 
 ## Primitive reference

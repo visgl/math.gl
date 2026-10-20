@@ -13,10 +13,10 @@ const temporary = await mkdtemp(join(tmpdir(), 'math-gl-parametric-'));
 try {
   const scope = join(temporary, 'node_modules/@math.gl');
   await mkdir(scope, {recursive: true});
-  for (const name of ['geometry', 'types']) {
+  for (const name of ['geometry', 'core']) {
     await mkdir(join(scope, name));
     const source =
-      name === 'types' ? join(root, 'node_modules/@math.gl/types') : join(root, 'modules/geometry');
+      join(root, 'modules', name);
     await cp(join(source, 'dist'), join(scope, name, 'dist'), {recursive: true});
     await copyFile(join(source, 'package.json'), join(scope, name, 'package.json'));
   }

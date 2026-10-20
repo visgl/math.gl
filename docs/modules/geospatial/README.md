@@ -6,7 +6,7 @@
 
 `@math.gl/geospatial` provides ellipsoid geometry, geographic/Cartesian conversions, local tangent frames, globe queries, and tile-grid geometry. Use it for WGS84 positions and 3D Tiles bounds without a renderer dependency.
 
-Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](../geoid/README.md) and [projection](../projection/README.md).
+Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](../earth/geoid/README.md) and [projection](./projection/README.md).
 
 The geospatial group includes `@math.gl/geospatial/ellipsoid`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`,
 `/wkb`, `/geoarrow`, and `/expressions`. `@math.gl/web-mercator` remains available for existing

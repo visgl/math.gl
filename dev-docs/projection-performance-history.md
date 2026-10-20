@@ -1,6 +1,6 @@
 # Projection performance development history
 
-Historical implementation measurements and development notes. For application guidance and live benchmarks, see [Performance](../docs/modules/projection/benchmarks.md).
+Historical implementation measurements and development notes. For application guidance and live benchmarks, see [Performance](../docs/modules/geospatial/projection/benchmarks.md).
 
 Tranche 9 removes duplicate plugin-registry construction and resolves CRS kinds, unit
 factors and Helmert coefficients once per compiled transform. It retains operation order,
@@ -45,7 +45,7 @@ The ranges below span Float64 XY/XYZM and forward/inverse medians, not confidenc
 UTM is dominated by its projection equations and shows little change; there is no
 uniform gain across every projection or direction. Scalar and construction results
 remain mixed. Raw samples, variation, clock and source/workload fingerprints are retained
-in [the diagnostic report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/batch-kernels-cpu.json).
+in [the diagnostic report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/batch-kernels-cpu.json).
 Use the CI comparison artifact for elapsed measurements on each PR revision. Browser
 qualification validates 792 warm workloads per engine, including the independent PROJ
 reference corpus. Reuse compiled instances to amortize batch-factory setup.
@@ -83,7 +83,7 @@ baseline, not a production latency promise.
 
 The table below preserves the initial tranche 7 baseline. For current measurements,
 including optional WKT/PROJJSON readers and grid adapters, see the
-[projection engine guide](../docs/modules/projection/developer-guide/projection-engine.md#tree-shaking-and-bundle-size).
+[projection engine guide](../docs/modules/geospatial/projection/developer-guide/projection-engine.md#tree-shaking-and-bundle-size).
 
 `bundle-budgets.json` records measured baselines and explicit limits with approximately
 10% headroom, rounded up to 100 bytes. The check uses esbuild browser ESM targeting
@@ -115,10 +115,10 @@ Tranche 10 adds the shared batch adapter to eligible projection bundles. Static 
 retain their existing limits. The UTM, WKT and rotated lazy initial graphs now measure
 48,390/18,137, 48,258/17,503 and 48,316/18,073 minified/gzip bytes respectively. Their
 initial limits are reviewed and rounded up to 100 bytes; catalogue and deferred limits
-remain unchanged. See the [current size tables](../docs/modules/projection/developer-guide/projection-engine.md#tree-shaking-and-bundle-size).
+remain unchanged. See the [current size tables](../docs/modules/geospatial/projection/developer-guide/projection-engine.md#tree-shaking-and-bundle-size).
 
 Performance and packaging do not establish geodetic parity. The math.gl projection engine is now the default;
-the [support profile](../docs/modules/projection/developer-guide/support.md) defines the scope of the projection API
+the [support profile](../docs/modules/geospatial/projection/developer-guide/support.md) defines the scope of the projection API
 and the migration to the default Projection wrapper. Historical wrapper timings
 refer to the upstream proj4js implementation. The historical wrapper was removed
 when the package was renamed; current comparisons import `proj4` directly.
@@ -126,7 +126,7 @@ when the package was renamed; current comparisons import `proj4` directly.
 
 ## Historical release qualification measurements
 
-The checked-in raw reports under `modules/projection/test/fixtures/qualification/` include
+The checked-in raw reports under `modules/geospatial/projection/test/fixtures/qualification/` include
 source SHA-256 fingerprints, all samples, exact engine versions and methodology.
 These recorded timings predate the Robinson pole correction and its 32 additional
 reference points; subsequent CI artifacts qualify the updated source and corpus.
@@ -194,9 +194,9 @@ counts. Scalar APIs allocate output arrays; mutable batch hooks avoid those arra
 Reproduce the additional qualification after building:
 
 ```sh
-node modules/projection/scripts/benchmark-startup.mjs --samples 7 --output /tmp/startup.json
+node modules/geospatial/projection/scripts/benchmark-startup.mjs --samples 7 --output /tmp/startup.json
 yarn playwright install --with-deps chromium firefox webkit
-node modules/projection/scripts/benchmark-browser.mjs --points 20000 --samples 7 --output /tmp/browsers.json
+node modules/geospatial/projection/scripts/benchmark-browser.mjs --points 20000 --samples 7 --output /tmp/browsers.json
 ```
 
 Each browser first measures separate math.gl and direct-proj4 bundles, then checks
@@ -211,7 +211,7 @@ canonical projection paths and retained compatibility aliases.
 ### Compare operation pipeline performance
 
 ```sh
-node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --allocations --output /tmp/proj4-pipeline-comparison.json
+node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --allocations --output /tmp/proj4-pipeline-comparison.json
 ```
 
 This runner compares the historical and current `ProjectionPipeline` using the same
@@ -265,7 +265,7 @@ projection APIs; this paired pipeline report is a separate developer tool.
 ### Compare grid preparation and retained memory
 
 ```sh
-node --expose-gc modules/projection/scripts/benchmark-grid-compare.mjs --baseline-ref origin/master --sizes 65,257,1025 --samples 11 --memory --output /tmp/projection-grid-comparison.json
+node --expose-gc modules/geospatial/projection/scripts/benchmark-grid-compare.mjs --baseline-ref origin/master --sizes 65,257,1025 --samples 11 --memory --output /tmp/projection-grid-comparison.json
 ```
 
 This compares the historical and current horizontal grid readers with identical authored
@@ -300,9 +300,9 @@ samples against commit `6b2b154`. For 1025 × 1025 nodes:
 These results describe synthetic grid preparation on one machine. Smaller-grid CPU
 results were mixed, including slower medians at 65 × 65, and ordinary coordinate
 throughput did not improve consistently. The
-[raw grid report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/grid-preparation-node.json)
+[raw grid report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/grid-preparation-node.json)
 retains all sizes, samples and provenance. The
-[paired coordinate report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/allocation-projections-node.json)
+[paired coordinate report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/allocation-projections-node.json)
 covers the five changed algorithms and NTv2, both precisions, XY/XYZM and both directions.
 
 ### Allocation checks
@@ -322,7 +322,7 @@ optional typed ordinate stack per call, rather than per record. Custom plugins/g
 provide mutable hooks to avoid the legacy array-returning fallback.
 
 ```sh
-node modules/projection/scripts/audit-allocations.mjs --check --output /tmp/projection-allocations.json
+node modules/geospatial/projection/scripts/audit-allocations.mjs --check --output /tmp/projection-allocations.json
 ```
 
 The source-wide AST inventory covers all projection runtime files. CI checks the numerical
@@ -335,7 +335,7 @@ per point for the scalar stack-and-datum chain and 188.7 → 100.5 for the mixed
 Helmert chain. These are sampled estimates, including collected objects, rather than
 exact counts or a throughput promise. Public result arrays still allocate, and flat
 paths still show some engine allocations despite having no explicit per-record objects.
-See the [paired pipeline report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/allocation-pipeline-node.json)
+See the [paired pipeline report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/allocation-pipeline-node.json)
 for all allocation samples and timing rows.
 
 
@@ -349,8 +349,8 @@ subarrays are created, and every output ordinate is checked before measuring. Pi
 observation epochs remain separate from M. The live table retains its three existing columns.
 
 ```sh
-node modules/projection/scripts/benchmark-compare.mjs --baseline-ref origin/master --reusable-results --points 10000 --samples 7 --output /tmp/projection-scalar-results.json
-node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --reusable-results --allocations --points 10000 --samples 7 --output /tmp/projection-pipeline-results.json
+node modules/geospatial/projection/scripts/benchmark-compare.mjs --baseline-ref origin/master --reusable-results --points 10000 --samples 7 --output /tmp/projection-scalar-results.json
+node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --reusable-results --allocations --points 10000 --samples 7 --output /tmp/projection-pipeline-results.json
 ```
 
 `arrayOutputSpeedup` and `typedOutputSpeedup` divide the current allocating scalar median
@@ -378,8 +378,8 @@ Selected pipeline allocation estimates were:
 | Height stack and datum | 156.7 B/point | 78.2 B/point | 78.0 B/point |
 | Mixed epoch Helmert | 96.2 B/point | 17.0 B/point | 15.3 B/point |
 
-The [ordinary raw report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/reusable-scalar-projections-node.json)
-and [pipeline raw report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/reusable-scalar-pipelines-node.json)
+The [ordinary raw report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/reusable-scalar-projections-node.json)
+and [pipeline raw report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/reusable-scalar-pipelines-node.json)
 retain timings, sample variation, runtime/source/workload provenance and allocation estimates.
 Grid/datum and mixed-epoch runtime allocations remain profiling targets. Use flat APIs for
 large buffers; deferred scalar requests still snapshot inputs and allocate promises, so use
@@ -411,7 +411,7 @@ modes. Across eight layout/direction rows, inverse angular-unit conversion has a
 dispatch. Mixed grid/datum and mixed-epoch flat ratios were approximately 1.00×.
 Scalar timings were mixed, including slower axis rows; this is a targeted batch improvement,
 not a general throughput claim. See the
-[raw batch report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/numeric-batches-node.json)
+[raw batch report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/numeric-batches-node.json)
 for all 48 rows, samples and separate allocation estimates. The full bounded CI runner
 qualified the then-current 22 scenarios / 176 rows, including both baseline/current output modes where
 available, without a speed threshold.
@@ -420,7 +420,7 @@ Large buffers amortize point/stack setup. To expose allocation traffic in repeat
 calls, increase untimed allocation repetitions while keeping timing samples independent:
 
 ```sh
-node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --points 10 --samples 7 --min-sample-ms 4 --allocations --allocation-iterations 10000 --scenarios 'Height stack and datum,Horizontal grid to UTM' --output /tmp/projection-bulk-leases.json
+node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --points 10 --samples 7 --min-sample-ms 4 --allocations --allocation-iterations 10000 --scenarios 'Height stack and datum,Horizontal grid to UTM' --output /tmp/projection-bulk-leases.json
 ```
 
 For ten-point calls, the sampled stack/datum estimate decreased from 109.3 to 77.1 B/point;
@@ -428,7 +428,7 @@ the horizontal-grid chain decreased from 147.5 to 142.9 B/point. These estimates
 collected JavaScript objects, are not exact allocation counts, and do not measure GC pauses.
 All short-call timing rows hit the aggregate-iteration cap and are flagged `timingLimited`;
 use this run for allocation evidence rather than a throughput claim. The
-[raw bulk-lease report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/bulk-leases-node.json)
+[raw bulk-lease report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/bulk-leases-node.json)
 retains runtime/source/workload provenance and 100,000 coordinates per allocation profile.
 
 The optional pipeline import measures 58,759 minified / 21,108 gzip bytes: +1,746 / +499
@@ -477,7 +477,7 @@ Local CPU contention and GC produced spread warnings: 54 of 80 rows flag at leas
 one implementation, and 20 hit the aggregate-iteration limit. Among the 56 static
 Helmert rows, 27 flag spread in a flat implementation and 13 are timing-limited.
 These flags, raw samples and p10–p90 remain in the
-[raw report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/helmert-batches-node.json).
+[raw report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/helmert-batches-node.json).
 Treat ratios as targeted CPU-time observations, not elapsed throughput guarantees
 or a state-of-the-art claim. Repeat on the application's browser and hardware.
 
@@ -529,7 +529,7 @@ aggregate limits for five. Forty of the 48 targeted rows flag spread in a flat
 implementation; four mixed-epoch Float32 rows are at or below baseline, including
 one at 0.66×. These ratios are CPU-time observations with substantial variation,
 not guaranteed elapsed throughput or a state-of-the-art claim. Keep the
-[raw samples and warnings](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/kinematic-helmert-batches-node.json)
+[raw samples and warnings](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/kinematic-helmert-batches-node.json)
 when interpreting the result, and repeat on the application's browser and hardware.
 
 A longer-sample confirmation repeats the exact batch, exact mixed and inverse exact
@@ -538,12 +538,12 @@ allocation sampling. The eight constant-epoch rows have a 2.86× median; all 16 
 rows improve, with a 1.26× median and a 1.16–1.53× range. Static/grid control medians
 are 1.01×/1.01×. Eighteen of 40 rows still flag spread in at least one runner, and
 six hit the aggregate limit. The
-[confirmation report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/kinematic-helmert-batches-confirmation-node.json)
+[confirmation report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/kinematic-helmert-batches-confirmation-node.json)
 retains those warnings; it supports the targeted optimization without proving
 universal gains.
 
 ```sh
-node modules/projection/scripts/benchmark-pipeline-compare.mjs \
+node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs \
   --baseline-ref a1b36de3 --points 20000 --samples 9 --min-sample-ms 8 \
   --clock thread-cpu \
   --scenarios 'Batch epoch Helmert,Mixed epoch Helmert,Mixed epoch inverse exact Helmert,Static Helmert,Horizontal grid to UTM' \
@@ -577,7 +577,7 @@ optional `--allocation-sites` diagnostics establish the next qualification gate;
 throughput alone is insufficient.
 
 ```sh
-node modules/projection/scripts/benchmark-pipeline-compare.mjs \
+node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs \
   --baseline-ref 4f0d3ae2 --points 10000 --samples 7 --min-sample-ms 4 \
   --clock thread-cpu --allocations --allocation-sites \
   --scenarios 'Static Helmert with units and axes,Exact Helmert with units and axes,Batch epoch Helmert with units and axes,Mixed epoch Helmert with units and axes,Static Helmert' \
@@ -592,7 +592,7 @@ calls following coverage failures or inverse errors. This removes an explicit sm
 object even when JIT timing or heap samples are inconclusive.
 
 ```sh
-node modules/projection/scripts/benchmark-grid-compare.mjs \
+node modules/geospatial/projection/scripts/benchmark-grid-compare.mjs \
   --baseline-ref 4f0d3ae2 --sizes 65 --samples 9 --clock thread-cpu \
   --coordinates --allocations --points 20000 \
   --output /tmp/grid-coordinate-comparison.json
@@ -607,7 +607,7 @@ The existing preparation/retained-memory measurements stay separate. CI records
 bounded coordinate/allocation runs alongside the preparation reports.
 
 
-The [grid coordinate report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/grid-coordinate-scratch-node.json)
+The [grid coordinate report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/grid-coordinate-scratch-node.json)
 uses 65 × 65 nodes, 20,000 coordinates and nine samples. All timing rows flag wide
 spread, so they do not establish a speedup. Separate owned-tuple allocation samples
 show:
@@ -639,7 +639,7 @@ by that merge. Final bundle checks include the landed grid scratch adapter.
 
 The ellipsoid convergence follow-up improves near-pole latitude and bounds surface
 inversion, while preserving separate projection/geospatial contracts. The paired
-[spheroid report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/spheroid-boundaries-node.json)
+[spheroid report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/spheroid-boundaries-node.json)
 compares master `7bc0ba63` with candidate `c52156b4` on Apple M2 / Node 24.14.0: 5,000
 points, seven samples, a 4 ms thread-CPU aggregate, Float64 XYZM, both directions
 and regional/near-pole inputs for WGS84, a sphere and a 2:1 flattened spheroid.
@@ -678,10 +678,10 @@ and failure errors are allowed. Caller-provided outputs, aliased buffers, preser
 M, unsupported-input recovery and recursive setters have Node/Chromium coverage.
 
 ```sh
-node modules/projection/scripts/benchmark-spheroid-compare.mjs \
+node modules/geospatial/projection/scripts/benchmark-spheroid-compare.mjs \
   --baseline-ref 7bc0ba63 --points 5000 --samples 7 --min-sample-ms 4 \
   --clock thread-cpu --allocations --output /tmp/spheroid-comparison.json
-node modules/projection/scripts/check-spheroid-allocations.mjs
+node modules/geospatial/projection/scripts/check-spheroid-allocations.mjs
 ```
 
 The analytic spherical inverse adds 148 minified bytes to retained projection
@@ -695,7 +695,7 @@ conversion code is added.
 
 ### Shared spheroid conversions
 
-The shared-conversion [paired report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/shared-spheroid-node.json)
+The shared-conversion [paired report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/shared-spheroid-node.json)
 uses Apple M2 / Node 24.14.0, 5,000 Float64 XYZM points, seven samples and 4 ms
 thread-CPU aggregates. Baseline `66b70d5e` contains the landed #187 spheroid code;
 the candidate source fingerprint identifies this extraction. Both runtimes use
@@ -723,7 +723,7 @@ are not a zero-allocation or zero-GC proof. The extraction deliberately avoids
 passing large numeric argument lists or vector-class outputs across the shared
 inverse boundary, which increased sampled allocations in local diagnostics.
 
-The [selective source-graph report](https://github.com/visgl/math.gl/blob/master/modules/projection/test/fixtures/qualification/shared-spheroid-bundles.json)
+The [selective source-graph report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/shared-spheroid-bundles.json)
 compares identical historical/current source-level entries, browser ESM/es2020,
 esbuild minification and gzip level 9. Core's root graph is unchanged; the numeric
 leaf has no runtime imports, and projection graphs retain no geospatial/culling
@@ -736,12 +736,12 @@ only measured exceeded allowances are updated. Full upstream MIT attribution
 ships in the core package; no new third-party source or model data is added.
 
 ```sh
-node modules/projection/scripts/benchmark-spheroid-compare.mjs \
+node modules/geospatial/projection/scripts/benchmark-spheroid-compare.mjs \
   --baseline-ref 66b70d5e --points 5000 --samples 7 --min-sample-ms 4 \
   --clock thread-cpu --allocations --output /tmp/shared-spheroid-comparison.json
-node modules/projection/scripts/check-spheroid-boundary.mjs \
+node modules/geospatial/projection/scripts/check-spheroid-boundary.mjs \
   --baseline-ref 66b70d5e --output /tmp/shared-spheroid-bundles.json
-node modules/projection/scripts/check-spheroid-allocations.mjs
+node modules/geospatial/projection/scripts/check-spheroid-allocations.mjs
 ```
 
 ## Shared local frames
@@ -753,10 +753,10 @@ up for geometry and inverse-geodetic up for deformation remain distinct at heigh
 The paired diagnostic validates every output independently before timing.
 
 ```sh
-node modules/projection/scripts/benchmark-local-frame-compare.mjs \
+node modules/geospatial/projection/scripts/benchmark-local-frame-compare.mjs \
   --baseline-ref f59efba9 --points 5000 --samples 7 --min-sample-ms 4 \
   --clock thread-cpu --allocations --output /tmp/local-frame-comparison.json
-node modules/projection/scripts/check-local-frame-boundary.mjs \
+node modules/geospatial/projection/scripts/check-local-frame-boundary.mjs \
   --baseline-ref f59efba9 --output /tmp/local-frame-bundles.json
 ```
 
@@ -802,11 +802,11 @@ The S4–S5 follow-up reuses projection points, batch working points and pipelin
 ordinate stacks at each observed recursive call depth. A normalized squared-norm
 classification also avoids an extra `hypot` in spheroid inverse dispatch. Existing
 independent numerical and recursive ownership checks qualify these changes.
-The optional [`ProjectionBuffer`](../docs/modules/projection/api-reference/projection-buffer.md) adds separate arrays, padded
+The optional [`ProjectionBuffer`](../docs/modules/geospatial/projection/api-reference/projection-buffer.md) adds separate arrays, padded
 records, columns, chunk ranges and pipeline epochs without per-record source
 objects, arrays or subviews.
 
-Retained diagnostics in `modules/projection/test/fixtures/qualification/` include:
+Retained diagnostics in `modules/geospatial/projection/test/fixtures/qualification/` include:
 
 - `reusable-mixed-pipelines.json`: paired historical/current runtime measurements
   for six mixed/grid-heavy scenarios, both directions, XYZ/XYZM and Float32/64;
@@ -837,14 +837,14 @@ application and measure the complete path. The packed optional adapter measures
 build. The optional adapter itself adds no bytes to either graph.
 
 ```sh
-node modules/projection/scripts/benchmark-pipeline-compare.mjs \
+node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs \
   --baseline-ref b6f38ef5 --points 1000 --samples 7 --min-sample-ms 4 \
   --clock thread-cpu --allocations --allocation-sites --reusable-results \
   --scenarios 'Mercator to UTM,Datum to Mercator,Horizontal grid to UTM,Height stack and datum,Static Helmert with units and axes,Mixed epochs with height stack and UTM' \
   --output /tmp/mixed-scratch.json
-node modules/projection/scripts/benchmark-bulk-layouts.mjs \
+node modules/geospatial/projection/scripts/benchmark-bulk-layouts.mjs \
   --points 1000 --samples 7 --allocations --output /tmp/bulk-layouts.json
-node modules/projection/scripts/check-spheroid-boundary.mjs \
+node modules/geospatial/projection/scripts/check-spheroid-boundary.mjs \
   --baseline-ref b6f38ef5 --output /tmp/bulk-bundles.json
 ```
 
@@ -859,16 +859,16 @@ The optional S8 runner measures both directions/precisions, copies, partitioning
 transfer and scheduling, with cold worker preparation reported separately.
 Measured large UTM buffers benefit from two persistent workers on the tested Apple
 M2; small batches and Mercator depend more on browser and timer resolution. See
-[the measurements, ownership recipe and backend boundaries](../docs/modules/projection/acceleration.md).
+[the measurements, ownership recipe and backend boundaries](../docs/modules/geospatial/projection/acceleration.md).
 CI records all three browser results without a speed gate. Wasm SIMD and WebGPU
 capability probes do not benchmark projection implementations.
 
 ## Consolidated scorecard
 
-The [projection scorecard](../docs/modules/projection/scorecard.md) combines these measurements with
+The [projection scorecard](../docs/modules/geospatial/projection/scorecard.md) combines these measurements with
 independent accuracy, allocation sampling, isolated memory checkpoints, startup
 and bundle costs. Environments stay separate and missing browser heap evidence
-is explicit. See [the publication gates and commands](../docs/modules/projection/scorecard-methodology.md).
+is explicit. See [the publication gates and commands](../docs/modules/geospatial/projection/scorecard-methodology.md).
 
 ### CI runner usage
 

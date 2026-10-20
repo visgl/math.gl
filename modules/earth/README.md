@@ -12,4 +12,4 @@ The root entry exports each module as a namespace:
 import {geoid, sun, timezone} from '@math.gl/earth';
 ```
 
-Existing `@math.gl/geoid`, `@math.gl/sun`, and `@math.gl/timezone` imports remain available.
+Existing `@math.gl/earth/geoid`, `@math.gl/earth/sun`, and `@math.gl/earth/timezone` imports remain available.

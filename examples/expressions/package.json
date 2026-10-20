@@ -10,7 +10,9 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@math.gl/expressions": "workspace:*",
+    "@math.gl/core": "workspace:*",
+    "@math.gl/dggs": "workspace:*",
+    "@math.gl/geospatial": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

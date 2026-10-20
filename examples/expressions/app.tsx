@@ -5,17 +5,17 @@ import {useCallback, useEffect, useMemo, useRef, useState, type ReactElement} fr
 import {
   BASIC_MATH_FUNCTION_LIBRARY,
   ExpressionFunctionRegistry,
-  GEOSPATIAL_FUNCTION_LIBRARY,
   compileAsync,
   type ExpressionFunctionLibrary
-} from '@math.gl/expressions';
+} from '@math.gl/core/expressions';
+import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial/expressions';
 /* The repository ESLint resolver does not understand package export subpaths. */
 /* eslint-disable import/no-unresolved */
 import {
   GEOHASH_FUNCTION_LIBRARY,
   QUADKEY_FUNCTION_LIBRARY,
   S2_FUNCTION_LIBRARY
-} from '@math.gl/expressions/dggs';
+} from '@math.gl/dggs/expressions';
 /* eslint-enable import/no-unresolved */
 import {EXPRESSION_SAMPLES, type ExpressionSample, type LibraryId} from './samples';
 import {BLUE_MARBLE_WORLD_URL, BLUE_MARBLE_CREDIT_URL} from '../common/blue-marble.js';
@@ -117,7 +117,7 @@ export default function ExpressionPlayground(): ReactElement {
     <main className="expression-playground">
       <header className="playground-header">
         <div>
-          <p className="eyebrow">@math.gl/expressions</p>
+          <p className="eyebrow">@math.gl/core/expressions</p>
           <h1>Expression playground</h1>
           <div className="release-status" aria-label="Release status">
             <span>Experimental</span>

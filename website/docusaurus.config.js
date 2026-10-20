@@ -87,18 +87,18 @@ webpackPlugin[1].resolve.modules.unshift('node_modules');
 // Preserve the published Parquet worker as a bundled asset, shared with Vite's ?url import.
 webpackPlugin[1].module = {rules: [{resourceQuery: /\?url$/, type: 'asset/resource'}]};
 const aliases = webpackPlugin[1].resolve.alias;
-aliases['@math.gl/spatial-index$'] = resolve(__dirname, '../modules/spatial-index/src/index.ts');
-aliases['@math.gl/culling/queries$'] = resolve(__dirname, '../modules/culling/src/queries.ts');
-aliases['@math.gl/curves$'] = resolve(__dirname, '../modules/curves/src/index.ts');
-aliases['@math.gl/crs$'] = aliases['@math.gl/crs'];
-aliases['@math.gl/crs/metadata$'] = resolve(__dirname, '../modules/crs/src/crs-metadata.ts');
-aliases['@math.gl/crs/wkt$'] = resolve(__dirname, '../modules/crs/src/wkt-crs.ts');
-aliases['@math.gl/crs/proj-string$'] = resolve(__dirname, '../modules/crs/src/proj-string.ts');
-aliases['@math.gl/crs/spatial-reference$'] = resolve(
+aliases['@math.gl/geometry/spatial-index$'] = resolve(__dirname, '../modules/geometry/src/spatial-index/index.ts');
+aliases['@math.gl/geometry/culling/queries$'] = resolve(__dirname, '../modules/geometry/src/culling/queries.ts');
+aliases['@math.gl/geometry/curves$'] = resolve(__dirname, '../modules/geometry/src/curves/index.ts');
+aliases['@math.gl/geospatial/crs$'] = aliases['@math.gl/geospatial/crs'];
+aliases['@math.gl/geospatial/crs/metadata$'] = resolve(__dirname, '../modules/geospatial/src/crs/crs-metadata.ts');
+aliases['@math.gl/geospatial/crs/wkt$'] = resolve(__dirname, '../modules/geospatial/src/crs/wkt-crs.ts');
+aliases['@math.gl/geospatial/crs/proj-string$'] = resolve(__dirname, '../modules/geospatial/src/crs/proj-string.ts');
+aliases['@math.gl/geospatial/crs/spatial-reference$'] = resolve(
   __dirname,
-  '../modules/crs/src/spatial-reference.ts'
+  '../modules/geospatial/src/crs/spatial-reference.ts'
 );
-delete aliases['@math.gl/crs'];
+delete aliases['@math.gl/geospatial/crs'];
 
 // Dependencies such as deck.gl 9.4 require math.gl 4.x. Keep their imports on
 // their installed dependency versions rather than the website's 5.x source aliases.
@@ -144,7 +144,7 @@ config.plugins.push([
 ]);
 config.favicon = 'images/visgl-favicon.png';
 // Serve the optional geometry independently of the JavaScript bundle.
-config.staticDirectories = [...config.staticDirectories, '../modules/timezone/data'];
+config.staticDirectories = [...config.staticDirectories, '../modules/earth/timezone/data'];
 config.plugins.push(require('./projection-redirects.cjs'));
 config.plugins.push(require('./docs-redirects.cjs'));
 
@@ -180,12 +180,14 @@ aliases['@math.gl/geometry/parametric$'] = resolve(__dirname, '../modules/geomet
 aliases['@math.gl/geometry$'] = resolve(__dirname, '../modules/geometry/src/index.ts');
 delete aliases['@math.gl/geometry'];
 
-// Resolve grouped geospatial imports from source before package dist files exist.
-aliases['@math.gl/geospatial$'] = resolve(__dirname, '../modules/geospatial/src/index.ts');
-delete aliases['@math.gl/geospatial'];
-const geospatialExports = require('../modules/geospatial/package.json').exports;
-for (const [subpath, entry] of Object.entries(geospatialExports)) {
-  if (subpath === '.') continue;
-  const sourceFile = entry.import.replace('./dist/', '../modules/geospatial/src/').replace(/\.js$/, '.ts');
-  aliases['@math.gl/geospatial' + subpath.slice(1) + '$'] = resolve(__dirname, sourceFile);
+// Exact aliases cover every consolidated public entrypoint, including nested subpaths.
+for (const name of ['core', 'geometry', 'geospatial', 'earth', 'dggs', 'web-mercator']) {
+  const pkg = require('../modules/' + name + '/package.json');
+  delete aliases[pkg.name];
+  for (const [subpath, entry] of Object.entries(pkg.exports)) {
+    const target = typeof entry === 'string' ? entry : entry.import;
+    const source = target.replace('./dist/', 'src/').replace(/\.js$/, '.ts');
+    aliases[pkg.name + (subpath === '.' ? '' : subpath.slice(1)) + '$'] =
+      resolve(__dirname, '../modules/' + name, source);
+  }
 }

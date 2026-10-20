@@ -58,7 +58,7 @@ present day, assembling by +250 Ma and held until +300 Ma. They are not publishe
 Amasia/Aurica/Pangaea Proxima reconstructions or physical forecasts. Geological Ma
 is the animation time axis, not a CRS coordinate epoch or a trajectory integrator.
 
-`@math.gl/polygon` cuts geographic rings at the dateline, respecting holes and polar
+`@math.gl/geometry/polygon` cuts geographic rings at the dateline, respecting holes and polar
 closure, before `CRSProjection.projectFlatSync` transforms numeric XY buffers.
 Mercator is displayed with its ±85.05112878° latitude cap. Globe and map rendering
 use deck.gl; no basemap, service credentials or map API key is required.

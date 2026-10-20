@@ -33,12 +33,12 @@ for (const position of positions) {
 }
 ```
 
-For large CRS coordinate buffers, use the [projection buffer APIs](../modules/projection/api-reference/projection-buffer.md) instead of constructing an object for each coordinate.
+For large CRS coordinate buffers, use the [projection buffer APIs](../modules/geospatial/projection/api-reference/projection-buffer.md) instead of constructing an object for each coordinate.
 
 ## Measure your workload
 
 Disable optional core validation with `configure({debug: false})` before measuring production performance. Compare the same inputs, output ownership, and numeric precision, and include any copying your application requires.
 
-The [browser benchmarks](/examples/benchmarks) compare representative operations. [Projection benchmarks](../modules/projection/benchmarks.md) include scalar and buffer workloads. Results depend on the JavaScript engine and hardware; measure changes in the application that will use them.
+The [browser benchmarks](/examples/benchmarks) compare representative operations. [Projection benchmarks](../modules/geospatial/projection/benchmarks.md) include scalar and buffer workloads. Results depend on the JavaScript engine and hardware; measure changes in the application that will use them.
 
 See [bundling](./bundling.md) when download size and startup cost matter more than arithmetic throughput.

@@ -73,7 +73,7 @@
     "src"
   ],
   "dependencies": {
-    "@math.gl/types": "5.0.0-alpha.18",
+    "@math.gl/core": "5.0.0-alpha.18",
     "a5-js": "^0.10.0",
     "h3-js": "^4.5.0",
     "open-location-code": "^1.0.3"

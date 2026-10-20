@@ -1,6 +1,6 @@
 # Timezone globe
 
-A deck.gl 9.4 `GlobeView` example using the optional `@math.gl/timezone` geometry exports.
+A deck.gl 9.4 `GlobeView` example using the optional `@math.gl/earth/timezone` geometry exports.
 It includes oceans, low/high geometry selection, a UTC date slider, offset colors,
 and hover details showing the IANA identifier, date-specific label, offset, and local clock.
 Labels reflect daylight saving where the runtime supplies them. Political offset changes

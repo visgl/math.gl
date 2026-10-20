@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From v4.2" />
 </p>
 
-Builds a conservative [`OrientedBoundingBox`](../../culling/api-reference/oriented-bounding-box) for a longitude–latitude–height region on an ellipsoid. This is useful for 3D Tiles regions, globe rendering, spatial indexing, and frustum culling.
+Builds a conservative [`OrientedBoundingBox`](../../geometry/culling/api-reference/oriented-bounding-box) for a longitude–latitude–height region on an ellipsoid. This is useful for 3D Tiles regions, globe rendering, spatial indexing, and frustum culling.
 
 The returned box is expressed in ellipsoid-fixed Cartesian coordinates. Its orientation is an implementation detail and may change between releases.
 

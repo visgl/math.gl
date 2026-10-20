@@ -1,6 +1,6 @@
 # Roadmap
 
-The current major-release work is summarized in [What’s New](./whats-new.md#v50). Module guides describe their supported scope and remaining work; see the [projection support guide](./modules/projection/developer-guide/support.md) for that engine's current coverage.
+The current major-release work is summarized in [What’s New](./whats-new.md#v50). Module guides describe their supported scope and remaining work; see the [projection support guide](./modules/geospatial/projection/developer-guide/support.md) for that engine's current coverage.
 
 ## Completed milestones
 
