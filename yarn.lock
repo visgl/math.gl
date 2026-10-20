@@ -4124,15 +4124,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@js-temporal/polyfill@npm:^0.5.1":
-  version: 0.5.1
-  resolution: "@js-temporal/polyfill@npm:0.5.1"
-  dependencies:
-    jsbi: "npm:^4.3.0"
-  checksum: 10c0/d9a843e22167e6c98946dc03f8a480d062ece5d01ca850930c8f00af1bd99cfe513a98c3420b24a9920c47e7a61a82e5c8866da47ecdc0e7ee2cd3bf6e440b46
-  languageName: node
-  linkType: hard
-
 "@jsdevtools/ono@npm:^7.1.3":
   version: 7.1.3
   resolution: "@jsdevtools/ono@npm:7.1.3"
@@ -5276,8 +5267,6 @@ __metadata:
 "@math.gl/core@npm:5.0.0-alpha.18, @math.gl/core@workspace:*, @math.gl/core@workspace:modules/core":
   version: 0.0.0-use.local
   resolution: "@math.gl/core@workspace:modules/core"
-  dependencies:
-    jsep: "npm:^1.4.0"
   languageName: unknown
   linkType: soft
 
@@ -5314,9 +5303,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/earth@workspace:modules/earth"
   dependencies:
-    "@js-temporal/polyfill": "npm:^0.5.1"
     "@math.gl/core": "npm:5.0.0-alpha.18"
-    "@photostructure/tz-lookup": "npm:^11.7.0"
     astronomy-engine: "npm:2.1.19"
   languageName: unknown
   linkType: soft
@@ -6303,13 +6290,6 @@ __metadata:
   version: 3.9.3
   resolution: "@petamoriken/float16@npm:3.9.3"
   checksum: 10c0/de0a1a0224862cba16e6b614e6a5dd557c545c3f0372db21f61d7bcce7595fa63a28d10512c908acfbe177d209a39cea406f190159936f5891b3c095d460fdc2
-  languageName: node
-  linkType: hard
-
-"@photostructure/tz-lookup@npm:^11.7.0":
-  version: 11.7.0
-  resolution: "@photostructure/tz-lookup@npm:11.7.0"
-  checksum: 10c0/955760d41844c06243129d9b42cebacc0d3f26b5eafb60eafb25ba6ef903803f65b65d6d9c9b9670dac0aa64239668b555715ebfaa52db4f12a2f1cb92d973c9
   languageName: node
   linkType: hard
 
@@ -14951,13 +14931,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsbi@npm:^4.3.0":
-  version: 4.3.2
-  resolution: "jsbi@npm:4.3.2"
-  checksum: 10c0/f8deb4fc1b1828ee9f90b19b778748f23877d63d437a083b4bead36c7b76c8d173b5dbe2a20cc5dc0217be5bde81791b696b104d5a40d7ede5fda34831d9fab6
-  languageName: node
-  linkType: hard
-
 "jsbn@npm:1.1.0":
   version: 1.1.0
   resolution: "jsbn@npm:1.1.0"
@@ -14996,13 +14969,6 @@ __metadata:
     whatwg-url: "npm:^4.3.0"
     xml-name-validator: "npm:^2.0.1"
   checksum: 10c0/bcfce735902ad93fcd3a02feb5bd2b2e8f3ce17a7859978dd85f0874fb5cf0a06719db7b5d01a19ec5afbe469ed5da3d013e773aead56ddead9ce9cba7568913
-  languageName: node
-  linkType: hard
-
-"jsep@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "jsep@npm:1.4.0"
-  checksum: 10c0/fe60adf47e050e22eadced42514a51a15a3cf0e2d147896584486acd8ee670fc16641101b9aeb81f4aaba382043d29744b7aac41171e8106515b14f27e0c7116
   languageName: node
   linkType: hard
 

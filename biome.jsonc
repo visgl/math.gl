@@ -24,6 +24,7 @@
       "examples/**/*.ts",
       "examples/**/*.tsx",
       "!**/*.min.js",
+      "!modules/**/vendor/**",
       "!**/dist/**",
       "!**/wip/**",
       "!**/.cache/**",
