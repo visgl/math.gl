@@ -20,7 +20,7 @@ replace imports from it with `@math.gl/core`.
 Version 5 removes deprecated APIs and moves low-level functions to focused subpath imports.
 
 Import `subdivideGlobeMesh` and `SubdivideGlobeMeshOptions` from `@math.gl/geospatial/globe`;
-they are no longer exported by `@math.gl/geometry/polygon` or `@math.gl/geometry/polygon`.
+they are no longer exported by `@math.gl/polygon` or `@math.gl/geometry/polygon`.
 
 ### Removed standalone packages
 
