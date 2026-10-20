@@ -29,7 +29,7 @@ export type TileMatrix = {
   readonly cornerOfOrigin: 'topLeft' | 'bottomLeft';
   /** Positive integer tile width and height in pixels. */
   readonly tileSize: readonly [number, number];
-  /** Positive integer matrix width and height in tiles. */
+  /** Positive integer base-grid width and height in tiles, before coalescence. */
   readonly matrixSize: readonly [number, number];
   /** Optional disjoint row bands; omitted rows have coalescence one. Order is immaterial. */
   readonly variableMatrixWidths?: readonly VariableMatrixWidth[];
@@ -141,7 +141,7 @@ export function isTileIndexInRange(
   );
 }
 
-/** Returns tile bounds in matrix coordinates. Throws for indices outside the matrix. */
+/** Returns the entire tile footprint, including column aliases. Throws for out-of-range indices. */
 export function getTileBounds(matrix: TileMatrix, column: number, row: number): TileMatrixBounds {
   if (!isTileIndexInRange(matrix, column, row)) throw new RangeError('Tile index outside matrix');
   const width = matrix.resolution * matrix.tileSize[0];
@@ -166,7 +166,7 @@ export function getTileBounds(matrix: TileMatrix, column: number, row: number): 
 /**
  * Finds the containing tile without clamping or wrapping. Tile intervals are half-open in column
  * and row direction: the origin edge belongs to the matrix, the opposite outer edge does not.
- * Returns null for nonfinite coordinates or coordinates outside the matrix.
+ * Returns a canonical column for coalesced rows, or null for nonfinite/outside coordinates.
  */
 export function getTileIndex(
   matrix: TileMatrix,

@@ -1,7 +1,7 @@
 # Tile matrices
 
 `@math.gl/geospatial/tile-matrix` provides geometry, extent queries and level selection for
-regular rectangular tile grids in any coordinate system. The subpath has no runtime dependencies;
+rectangular tile grids, including coalesced row bands, in any coordinate system. The subpath has no runtime dependencies;
 its types and functions are also exported from `@math.gl/geospatial/tiles`, alongside geographic tile queries.
 
 ```typescript
@@ -37,7 +37,8 @@ selectTileMatrix(matrixSet, 3)?.id; // '2m'
 | `origin` | Origin in canonical X/Y order in the matrix coordinate system. |
 | `cornerOfOrigin` | Required `topLeft` or `bottomLeft`. Columns increase along X; rows decrease along Y for top-left and increase for bottom-left. |
 | `tileSize` | Positive integer width and height in pixels; rectangular tiles are supported. |
-| `matrixSize` | Positive integer width and height in tiles. |
+| `matrixSize` | Positive integer width and height in base-grid tiles, before coalescence. |
+| `variableMatrixWidths` | Optional disjoint inclusive row bands and coalescence factors; see below. |
 
 A `TileMatrixSet` associates a `crs` identifier with `matrices` having unique IDs. Array order does
 not imply zoom, matrices need not form a quadtree, and levels can have different origins and sizes.
@@ -45,7 +46,7 @@ Utilities use the supplied coordinate units without interpreting the CRS identif
 
 Adapters resolve CRS axis order and units before constructing a matrix. Incomplete service metadata
 is distinct from complete geometry. Parsing WMTS/OGC documents, discovery, tile fetching, rendering,
-reprojection and variable-width rows belong outside these utilities.
+and reprojection belong outside these utilities. Row-dependent geometry is described below.
 
 ## Different pixel sizes on each axis
 
@@ -59,7 +60,7 @@ getTileBounds(anisotropic, 1, 0); // [200512, 4599232, 201024, 4600000]
 ```
 
 Both values are positive magnitudes. `cornerOfOrigin` determines row direction. This supports
-axis-aligned rectangular pixels, not rotation, skew, or row-dependent widths. Bounds, inverse
+axis-aligned rectangular pixels, without rotation or skew. Optional coalescence bands multiply the horizontal footprint independently. Bounds, inverse
 indexing, range queries, and floating-point extent validation all use each axis's own resolution.
 
 ## validateTileMatrix(matrix)
@@ -80,11 +81,11 @@ the opposite outer edge is excluded. A shared edge belongs to the following colu
 Indices never wrap or clamp.
 
 Lookup compares the same computed edges as `getTileBounds()`, preserving edge ownership with
-fractional resolutions. It takes logarithmic time in matrix dimensions and constant space.
+fractional resolutions. After validation, lookup takes logarithmic time in matrix dimensions plus a scan of declared row bands. Validation sorts a copy of the bands, using space proportional to their count.
 
 ## getTileRange(matrix, bounds, limits?)
 
-Returns one compact, inclusive `TileMatrixLimits` rectangle, or `null` for no intersection.
+For regular matrices, returns one compact, inclusive `TileMatrixLimits` rectangle, or `null` for no intersection. Matrices declaring coalescence require `getTileRanges` instead.
 The result has `minTileColumn`, `maxTileColumn`, `minTileRow` and `maxTileRow` fields. Queries are
 clipped to the matrix and, when supplied, the coverage limits. Tiles are not enumerated.
 
