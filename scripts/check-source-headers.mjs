@@ -53,7 +53,7 @@ const cesiumDerived = new Set([
 const extensions = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.py', '.css', '.html']);
 const files = execFileSync('git', ['ls-files', '-z'], {cwd: root, encoding: 'utf8'})
   .split('\0')
-  .filter((file) => extensions.has(extname(file)));
+  .filter((file) => extensions.has(extname(file)) || file.includes('/vendor/'));
 assert(files.length > 0, 'Source header check must inspect tracked source files');
 for (const file of files) {
   const header = readFileSync(resolve(root, file), 'utf8')

@@ -70,7 +70,7 @@ try {
   await bundle(jsepDir + '/runtime.ts', "export {default} from './jsep/dist/jsep.js';", jsepHeader);
   const jsepTypes = (await readFile(join(directory, 'jsep/typings/tsd.d.ts'), 'utf8'))
     .replace(/^declare module 'jsep' \{\s*/, '')
-    .replace(/\s*export = jsep;\s*\}\s*$/, '\nexport {jsep as Jsep};\n')
+    .replace(/\s*export = jsep;\s*\}\s*$/, '\nexport type {jsep as Jsep};\n')
     .replace(/^namespace jsep/m, 'declare namespace jsep')
     .replace(/^\tfunction jsep/m, 'declare function jsep');
   await save(jsepDir + '/types.ts', jsepHeader + '\n' + jsepTypes);

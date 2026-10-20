@@ -176,4 +176,4 @@ declare namespace jsep {
 	}
 
 declare function jsep(val: string | jsep.Expression): jsep.Expression;
-export {jsep as Jsep};
+export type {jsep as Jsep};
