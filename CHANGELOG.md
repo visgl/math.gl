@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Unreleased
+
+- Consolidate implementations into core, geometry, geospatial, earth, and dggs packages. Remove the standalone leaf packages and migrate their APIs, assets, and nested exports to grouped subpaths; retain the web-mercator package.
+
+- feat(packaging): Add grouped subpaths for core, geometry, geospatial, and Earth APIs; remove the unscoped `math.gl` workspace package and keep its former core APIs in `@math.gl/core`.
+
 ## v5.0.0-alpha.18
 
 - Republish current master with the CRSDescriptor, projection rendering bounds fixes, per-axis tile matrix resolution, and refined ray-hit traversal from PRs #251–#254. No source changes since alpha.17.
@@ -40,7 +46,7 @@
 - feat(geoarrow): Expose `materializeGeoArrowRows` for runtime adapters and preserve empty points encoded with non-finite or null ordinates.
 - fix(geoarrow): Rebuild empty point rows and preserve empty MultiPoint members through WKB/WKT serialization.
 
-- perf(projection): Make the configurable and lazy engines lean by default; register regional named datums through `datumCatalogs` and `@math.gl/projection/datums`. WGS84/NAD83 remain built in; the `Projection` wrapper retains the full catalogue for compatibility.
+- perf(projection): Make the configurable and lazy engines lean by default; register regional named datums through `datumCatalogs` and `@math.gl/geospatial/projection/datums`. WGS84/NAD83 remain built in; the `Projection` wrapper retains the full catalogue for compatibility.
 
 - feat(curves, geometry): Add parametric curves, arc-length sampling, torus, lathe and sampled surfaces (#208, #227).
 - feat(geometry-utils, spatial-index): Add mesh processing and experimental static spatial indexes (#211, #223).
@@ -539,8 +545,8 @@
 
 ## v3.0.0-beta.2 - Jul 24, 2019
 
-- @math.gl/culling: Frustum classes to enable CullingVolume tests (#91)
-- @math.gl/culling: AxisAlignedBoundingBox (#86)
+- @math.gl/geometry/culling: Frustum classes to enable CullingVolume tests (#91)
+- @math.gl/geometry/culling: AxisAlignedBoundingBox (#86)
 
 ## v3.0.0-beta.1 - Jul 1, 2019
 
@@ -560,7 +566,7 @@
 
 ## v3.0.0-alpha.1 - Jun 11, 2019
 
-- @math.gl/culling (#71)
+- @math.gl/geometry/culling (#71)
 - core: Matrix/Vector API alignment and performance tuning (#74)
 - core: `transform` API overhaul (#72)
 - Update docs and license (#70)

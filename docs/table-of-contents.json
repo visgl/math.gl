@@ -29,11 +29,11 @@
     "items": [
       {
         "type": "category",
-        "label": "@math.gl/types",
+        "label": "@math.gl/core/types",
         "items": [
-          "modules/types/README",
-          "modules/types/api-reference/array-types",
-          "modules/types/api-reference/bounds"
+          "modules/core/types/README",
+          "modules/core/types/api-reference/array-types",
+          "modules/core/types/api-reference/bounds"
         ]
       },
       {
@@ -72,29 +72,29 @@
       },
       {
         "type": "category",
-        "label": "@math.gl/expressions (experimental)",
+        "label": "@math.gl/core/expressions (experimental)",
         "items": [
-          "modules/expressions/README",
-          "modules/expressions/api-reference/expression-eval",
-          "modules/expressions/api-reference/function-registry",
-          "modules/expressions/api-reference/dggs-function-libraries",
-          "modules/expressions/api-reference/parse-expression-string"
+          "modules/core/expressions/README",
+          "modules/core/expressions/api-reference/expression-eval",
+          "modules/core/expressions/api-reference/function-registry",
+          "modules/core/expressions/api-reference/dggs-function-libraries",
+          "modules/core/expressions/api-reference/parse-expression-string"
         ]
       },
       {
         "type": "category",
-        "label": "@math.gl/curves",
+        "label": "@math.gl/geometry/curves",
         "items": [
-          "modules/curves/README",
-          "modules/curves/api-reference/curves",
-          "modules/curves/api-reference/curve-arc-length"
+          "modules/geometry/curves/README",
+          "modules/geometry/curves/api-reference/curves",
+          "modules/geometry/curves/api-reference/curve-arc-length"
         ]
       },
       {
         "type": "category",
-        "label": "@math.gl/spatial-index (POC)",
+        "label": "@math.gl/geometry/spatial-index (POC)",
         "items": [
-          "modules/spatial-index/README"
+          "modules/geometry/spatial-index/README"
         ]
       },
       {
@@ -119,62 +119,67 @@
       },
       {
         "type": "category",
-        "label": "@math.gl/culling",
+        "label": "@math.gl/geometry/culling",
         "items": [
-          "modules/culling/README",
-          "modules/culling/api-reference/queries",
-          "modules/culling/api-reference/axis-aligned-bounding-box",
-          "modules/culling/api-reference/bounding-sphere",
-          "modules/culling/api-reference/bounding-volume",
-          "modules/culling/api-reference/culling-volume",
-          "modules/culling/api-reference/oriented-bounding-box",
-          "modules/culling/api-reference/plane",
-          "modules/culling/api-reference/ray",
-          "modules/culling/api-reference/shapes"
+          "modules/geometry/culling/README",
+          "modules/geometry/culling/api-reference/queries",
+          "modules/geometry/culling/api-reference/axis-aligned-bounding-box",
+          "modules/geometry/culling/api-reference/bounding-sphere",
+          "modules/geometry/culling/api-reference/bounding-volume",
+          "modules/geometry/culling/api-reference/culling-volume",
+          "modules/geometry/culling/api-reference/oriented-bounding-box",
+          "modules/geometry/culling/api-reference/plane",
+          "modules/geometry/culling/api-reference/ray",
+          "modules/geometry/culling/api-reference/shapes"
         ]
       },
       {
         "type": "category",
-        "label": "@math.gl/geometry-utils",
+        "label": "@math.gl/geometry/utils",
         "items": [
-          "modules/geometry-utils/README",
-          "modules/geometry-utils/api-reference/geometry-utils",
-          "modules/geometry-utils/api-reference/mesh-processing"
+          "modules/geometry/utils/README",
+          "modules/geometry/utils/api-reference/geometry-utils",
+          "modules/geometry/utils/api-reference/mesh-processing"
         ]
       },
       {
         "type": "category",
-        "label": "@math.gl/wkb",
+        "label": "@math.gl/geospatial/wkb",
         "items": [
-          "modules/wkb/README",
-          "modules/wkb/api-reference/wkb"
+          "modules/geospatial/wkb/README",
+          "modules/geospatial/wkb/api-reference/wkb"
         ]
       },
       {
         "type": "category",
-        "label": "@math.gl/geoarrow",
+        "label": "@math.gl/geospatial/geoarrow",
         "items": [
-          "modules/geoarrow/README",
-          "modules/geoarrow/physical-layouts",
-          "modules/geoarrow/api-reference/geoarrow",
-          "modules/geoarrow/migration-guide"
+          "modules/geospatial/geoarrow/README",
+          "modules/geospatial/geoarrow/physical-layouts",
+          "modules/geospatial/geoarrow/api-reference/geoarrow",
+          "modules/geospatial/geoarrow/migration-guide"
         ]
       },
       {
         "type": "category",
-        "label": "@math.gl/geoid",
+        "label": "@math.gl/earth",
+        "items": ["modules/earth/README"]
+      },
+      {
+        "type": "category",
+        "label": "@math.gl/earth/geoid",
         "items": [
-          "modules/geoid/README",
+          "modules/earth/geoid/README",
           {
             "type": "category",
             "label": "Developer Guide",
             "items": [
-              "modules/geoid/developer-guide/geospatial-models"
+              "modules/earth/geoid/developer-guide/geospatial-models"
             ]
           },
-          "modules/geoid/api-reference/geoid",
-          "modules/geoid/api-reference/parse-pgm",
-          "modules/geoid/api-reference/create-geoid-from-grid"
+          "modules/earth/geoid/api-reference/geoid",
+          "modules/earth/geoid/api-reference/parse-pgm",
+          "modules/earth/geoid/api-reference/create-geoid-from-grid"
         ]
       },
       {
@@ -184,6 +189,7 @@
           "modules/geospatial/README",
           "modules/geospatial/api-reference/ellipsoid",
           "modules/geospatial/api-reference/globe-queries",
+          "modules/geospatial/api-reference/subdivide-globe-mesh",
           "modules/geospatial/api-reference/geographic-tiles",
           "modules/geospatial/api-reference/tile-matrix",
           "modules/geospatial/api-reference/ellipsoid-tangent-plane",
@@ -194,100 +200,99 @@
       },
       {
         "type": "category",
-        "label": "@math.gl/polygon",
+        "label": "@math.gl/geometry/polygon",
         "items": [
-          "modules/polygon/api-reference/clip-polygon",
-          "modules/polygon/api-reference/clip-polyline",
-          "modules/polygon/api-reference/subdivide-polyline",
-          "modules/polygon/api-reference/subdivide-triangle-mesh",
-          "modules/polygon/api-reference/subdivide-globe-mesh",
-          "modules/polygon/api-reference/cut-polygon-by-grid",
-          "modules/polygon/api-reference/cut-polyline-by-grid",
-          "modules/polygon/api-reference/cut-polygon-by-mercator-bounds",
-          "modules/polygon/api-reference/cut-polyline-by-mercator-bounds",
-          "modules/polygon/api-reference/polygon"
+          "modules/geometry/polygon/api-reference/clip-polygon",
+          "modules/geometry/polygon/api-reference/clip-polyline",
+          "modules/geometry/polygon/api-reference/subdivide-polyline",
+          "modules/geometry/polygon/api-reference/subdivide-triangle-mesh",
+          "modules/geometry/polygon/api-reference/cut-polygon-by-grid",
+          "modules/geometry/polygon/api-reference/cut-polyline-by-grid",
+          "modules/geometry/polygon/api-reference/cut-polygon-by-mercator-bounds",
+          "modules/geometry/polygon/api-reference/cut-polyline-by-mercator-bounds",
+          "modules/geometry/polygon/api-reference/polygon"
         ]
       },
       {
         "type": "category",
-        "label": "@math.gl/crs",
+        "label": "@math.gl/geospatial/crs",
         "items": [
-          "modules/crs/README",
+          "modules/geospatial/crs/README",
           {
             "type": "category",
             "label": "Developer Guide",
             "items": [
-              "modules/crs/developer-guide/coordinate-reference-systems"
+              "modules/geospatial/crs/developer-guide/coordinate-reference-systems"
             ]
           },
-          "modules/crs/api-reference/spatial-reference"
+          "modules/geospatial/crs/api-reference/spatial-reference"
         ]
       },
       {
         "type": "category",
-        "label": "@math.gl/projection",
+        "label": "@math.gl/geospatial/projection",
         "items": [
-          "modules/projection/README",
+          "modules/geospatial/projection/README",
           {
             "type": "category",
             "label": "Developer Guide",
             "items": [
-              "modules/projection/developer-guide/api-guide",
-              "modules/projection/developer-guide/coordinate-systems",
-              "modules/projection/developer-guide/projections",
-              "modules/projection/developer-guide/projection-engine",
-              "modules/projection/developer-guide/deformation-models",
-              "modules/projection/developer-guide/support"
+              "modules/geospatial/projection/developer-guide/api-guide",
+              "modules/geospatial/projection/developer-guide/coordinate-systems",
+              "modules/geospatial/projection/developer-guide/projections",
+              "modules/geospatial/projection/developer-guide/projection-engine",
+              "modules/geospatial/projection/developer-guide/deformation-models",
+              "modules/geospatial/projection/developer-guide/support"
             ]
           },
           {
             "type": "category",
             "label": "API Reference",
             "items": [
-              "modules/projection/api-reference/projection",
-              "modules/projection/api-reference/projection-engine",
-              "modules/projection/api-reference/projection-transform",
-              "modules/projection/api-reference/projection-pipeline",
-              "modules/projection/api-reference/operation-catalog",
-              "modules/projection/api-reference/projection-analysis",
-              "modules/projection/api-reference/projection-buffer"
+              "modules/geospatial/projection/api-reference/projection",
+              "modules/geospatial/projection/api-reference/projection-engine",
+              "modules/geospatial/projection/api-reference/projection-transform",
+              "modules/geospatial/projection/api-reference/projection-pipeline",
+              "modules/geospatial/projection/api-reference/operation-catalog",
+              "modules/geospatial/projection/api-reference/projection-analysis",
+              "modules/geospatial/projection/api-reference/projection-buffer"
             ]
           },
           {
             "type": "category",
             "label": "Validation and Measurements",
             "items": [
-              "modules/projection/ellipsoid-qualification",
-              "modules/projection/deformation-qualification",
-              "modules/projection/benchmarks",
-              "modules/projection/scorecard",
-              "modules/projection/scorecard-methodology",
-              "modules/projection/acceleration",
-              "modules/projection/parity-audit",
-              "modules/projection/independent-validation",
-              "modules/projection/accuracy-domains"
+              "modules/geospatial/projection/ellipsoid-qualification",
+              "modules/geospatial/projection/deformation-qualification",
+              "modules/geospatial/projection/benchmarks",
+              "modules/geospatial/projection/scorecard",
+              "modules/geospatial/projection/scorecard-methodology",
+              "modules/geospatial/projection/acceleration",
+              "modules/geospatial/projection/parity-audit",
+              "modules/geospatial/projection/independent-validation",
+              "modules/geospatial/projection/accuracy-domains"
             ]
           }
         ]
       },
       {
         "type": "category",
-        "label": "@math.gl/sun",
+        "label": "@math.gl/earth/sun",
         "items": [
-          "modules/sun/README",
-          "modules/sun/api-reference/sun",
-          "modules/sun/api-reference/moon",
-          "modules/sun/api-reference/get-planet-sky-info",
-          "modules/sun/api-reference/stars",
-          "modules/sun/api-reference/sky"
+          "modules/earth/sun/README",
+          "modules/earth/sun/api-reference/sun",
+          "modules/earth/sun/api-reference/moon",
+          "modules/earth/sun/api-reference/get-planet-sky-info",
+          "modules/earth/sun/api-reference/stars",
+          "modules/earth/sun/api-reference/sky"
         ]
       },
       {
         "type": "category",
-        "label": "@math.gl/timezone",
+        "label": "@math.gl/earth/timezone",
         "items": [
-          "modules/timezone/README",
-          "modules/timezone/api-reference/timezone"
+          "modules/earth/timezone/README",
+          "modules/earth/timezone/api-reference/timezone"
         ]
       },
       {

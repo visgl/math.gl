@@ -16,9 +16,9 @@ export type {
   NumberArray9,
   NumberArray12,
   NumberArray16
-} from '@math.gl/types';
+} from './types';
 
-export type {isTypedArray, isNumberArray, isNumericArray} from '@math.gl/types';
+export type {isTypedArray, isNumberArray, isNumericArray} from './types';
 
 // classes
 export {MathArray as _MathArray} from './classes/base/math-array';
@@ -69,4 +69,4 @@ export {
   withEpsilon
 } from './lib/common';
 
-export type {SpheroidParameters} from '@math.gl/types';
+export type {SpheroidParameters} from './types';

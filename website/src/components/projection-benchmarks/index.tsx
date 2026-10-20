@@ -8,8 +8,8 @@ import {
   SAMPLE_COUNT,
   MIN_SAMPLE_MS,
   SCENARIOS
-} from '../../../../modules/projection/test/live-bench-types';
-import type {BenchmarkOptions, BenchmarkRow} from '../../../../modules/projection/test/live-bench-types';
+} from '../../../../modules/geospatial/projection/test/live-bench-types';
+import type {BenchmarkOptions, BenchmarkRow} from '../../../../modules/geospatial/projection/test/live-bench-types';
 import styles from './styles.module.css';
 
 type Status = 'idle' | 'running' | 'complete' | 'stopped' | 'error';

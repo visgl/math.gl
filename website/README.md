@@ -52,7 +52,7 @@ inline documentation frame enables interaction in fullscreen so globe controls d
 not capture page scrolling. Unmounting finalizes Deck and cancels data requests.
 
 The renderer and scoped styles are shared with `examples/timezone-globe`.
-`modules/timezone/data` is a static directory; `useBaseUrl` supplies geometry URLs
+`modules/earth/timezone/data` is a static directory; `useBaseUrl` supplies geometry URLs
 for both `/math.gl/` and `/math.gl/next/`. Low geometry loads initially, and high
 geometry is fetched when selected. The static directory also provides the data
 license and provenance manifest.

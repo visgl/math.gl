@@ -24,4 +24,4 @@ The default `config.EPSILON` is `1e-12`. Pass an explicit epsilon to `equals(a, 
 
 Core classes store JavaScript numbers. Writing results to `Float32Array` or `Float16Array` rounds them to that format's precision. Use `Float64Array` when large coordinates and small differences must be retained, or use a local origin before converting positions to a lower-precision rendering buffer.
 
-Changing `EPSILON` affects comparisons, not arithmetic accuracy. Formatting precision affects displayed strings, not stored coordinates. See [debugging](../../../developer-guide/debugging.md) and [array types](../../types/api-reference/array-types.md).
+Changing `EPSILON` affects comparisons, not arithmetic accuracy. Formatting precision affects displayed strings, not stored coordinates. See [debugging](../../../developer-guide/debugging.md) and [array types](../types/api-reference/array-types.md).

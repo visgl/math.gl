@@ -38,3 +38,7 @@ tsconfig.tsbuildinfo
 .idea
 *.zip
 *.rar
+
+# Python generator caches
+__pycache__/
+*.pyc

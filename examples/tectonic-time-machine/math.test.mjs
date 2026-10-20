@@ -193,7 +193,7 @@ test('hover labels recover globe and map coordinates and reject points outside t
 });
 
 test('Equal Earth hover outside its outline returns no coordinate instead of a runtime error', async () => {
-  const {ProjectionTransform, equalEarth} = await import('@math.gl/projection');
+  const {ProjectionTransform, equalEarth} = await import('@math.gl/geospatial/projection');
   const radius = 6371008.8;
   const engine = new ProjectionTransform({
     from: `+proj=longlat +R=${radius}`,

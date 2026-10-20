@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original factored ENU/NED basis, rotations and matrix commits. No CesiumJS or PROJ source is copied.
-import type {NumericArray} from '@math.gl/types';
+import type {NumericArray} from './types';
 
 export type LocalFramePoint = {x: number; y: number; z: number};
 export type LocalFrameAxis = 'east' | 'north' | 'up' | 'west' | 'south' | 'down';

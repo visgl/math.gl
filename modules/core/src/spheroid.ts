@@ -5,7 +5,7 @@
 // SPDX-FileComment: Forward geocentric equations and Hannover inverse moved/adapted from math.gl projection's proj4js 2.22.0 datumUtils.js port. See ../PROJ4-LICENSE.md. Safeguarded nearest-footpoint inverse and numeric output commit are original math.gl code.
 
 /** Numeric leaf: angles in radians, distances in axis units; no CRS, global config or scratch. */
-import type {SpheroidParameters} from '@math.gl/types';
+import type {SpheroidParameters} from './types';
 export type SpheroidGeometry = SpheroidParameters & {readonly eccentricitySquared: number};
 export type SpheroidPoint = {x: number; y: number; z: number};
 

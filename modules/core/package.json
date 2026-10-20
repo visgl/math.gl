@@ -75,6 +75,16 @@
       "types": "./dist/spheroid.d.ts",
       "import": "./dist/spheroid.js",
       "require": "./dist/spheroid.cjs"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "require": "./dist/types.cjs"
+    },
+    "./expressions": {
+      "types": "./dist/expressions/index.d.ts",
+      "import": "./dist/expressions/index.js",
+      "require": "./dist/expressions/index.cjs"
     }
   },
   "files": [
@@ -86,7 +96,6 @@
     "./src/lib/common.js"
   ],
   "dependencies": {
-    "@math.gl/types": "5.0.0-alpha.18"
-  },
-  "gitHead": "e1a95300cb225a90da6e90333d4adf290f7ba501"
+    "jsep": "^1.4.0"
+  }
 }

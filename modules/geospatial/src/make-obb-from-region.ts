@@ -8,7 +8,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 import {Matrix3, Matrix4, Vector2, Vector3, degrees, radians, _MathUtils} from '@math.gl/core';
-import {OrientedBoundingBox, Plane} from '@math.gl/culling';
+import {OrientedBoundingBox, Plane} from '@math.gl/geometry/culling';
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved
 import {LngLatRectangle} from './lng-lat-rectangle';

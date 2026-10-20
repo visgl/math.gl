@@ -1,8 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {EllipsoidOccluder, getGlobeHorizonBounds, splitGlobeBounds} from '@math.gl/geospatial';
-import {subdivideGlobeMesh} from '@math.gl/polygon';
+import {EllipsoidOccluder, getGlobeHorizonBounds, splitGlobeBounds, subdivideGlobeMesh} from '@math.gl/geospatial/globe';
 
 import {BLUE_MARBLE_WORLD_URL} from '../common/blue-marble.js';
 

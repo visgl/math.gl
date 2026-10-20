@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useEffect, useMemo, useRef} from 'react';
-import {BoxIndex, PointIndex} from '@math.gl/spatial-index';
+import {BoxIndex, PointIndex} from '@math.gl/geometry/spatial-index';
 import '../shared/query-example.css';
 const records = Array.from({length: 1200}, (_, i) => {
   const x = (((i * 7919) % 997) / 997) * 180 - 90,

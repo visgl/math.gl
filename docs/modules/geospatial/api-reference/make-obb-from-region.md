@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From v4.2" />
 </p>
 
-Builds a conservative [`OrientedBoundingBox`](../../culling/api-reference/oriented-bounding-box) for a longitude–latitude–height region on an ellipsoid. This is useful for 3D Tiles regions, globe rendering, spatial indexing, and frustum culling.
+Builds a conservative [`OrientedBoundingBox`](../../geometry/culling/api-reference/oriented-bounding-box) for a longitude–latitude–height region on an ellipsoid. This is useful for 3D Tiles regions, globe rendering, spatial indexing, and frustum culling.
 
 The returned box is expressed in ellipsoid-fixed Cartesian coordinates. Its orientation is an implementation detail and may change between releases.
 
@@ -12,7 +12,7 @@ The returned box is expressed in ellipsoid-fixed Cartesian coordinates. Its orie
 
 ```js
 import {toRadians} from '@math.gl/core';
-import {makeOBBFromRegion} from '@math.gl/geospatial';
+import {makeOBBFromRegion} from '@math.gl/geospatial/globe';
 
 const region = [
   toRadians(-30), // west
@@ -50,7 +50,8 @@ This describes a 20° region centered on ±180°. A region from `10°` to `-10°
 The optional ellipsoid defaults to `Ellipsoid.WGS84`:
 
 ```js
-import {Ellipsoid, makeOBBFromRegion} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {makeOBBFromRegion} from '@math.gl/geospatial/globe';
 
 const moon = new Ellipsoid(1737400, 1737400, 1737400);
 const box = makeOBBFromRegion(region, moon);

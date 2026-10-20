@@ -4,7 +4,7 @@
 // SPDX-FileComment: Original tests of geometry adapters; no upstream implementation or model data copied.
 import {expect, test} from 'vitest';
 import {Ellipsoid} from '@math.gl/geospatial';
-import type {SpheroidParameters} from '@math.gl/types';
+import type {SpheroidParameters} from '@math.gl/core/types';
 
 test('Ellipsoid spheroid adapters snapshot axes without datum or derived parameters', () => {
   const parameters = {semiMajorAxis: 6378137, semiMinorAxis: 6356752} satisfies SpheroidParameters;

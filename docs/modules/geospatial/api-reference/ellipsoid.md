@@ -18,7 +18,7 @@ or use `Ellipsoid.fromSpheroid` to import two-axis geometry from a projection CR
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
 const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPosition);
 ```
@@ -26,7 +26,7 @@ const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPo
 Determine the Cartographic representation of a Cartesian position on a WGS84 ellipsoid.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 const cartesianPosition = [17832.12, 83234.52, 952313.73];
 const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPosition);
 ```
@@ -34,20 +34,20 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
 ```
 
 ## Projection interoperability
 
-`@math.gl/projection` uses spheres and oblate spheroids: its X/Y equatorial radii
+`@math.gl/geospatial/projection` uses spheres and oblate spheroids: its X/Y equatorial radii
 are equal. `Ellipsoid` also supports three independent radii. The adapters exchange
 only the common geometry; they do not transfer a datum, axis order, units or epoch.
 
 ```ts
-import {Ellipsoid} from '@math.gl/geospatial';
-import {normalizeCRS} from '@math.gl/projection/core';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {normalizeCRS} from '@math.gl/geospatial/projection/core';
 
 const crs = normalizeCRS('+proj=longlat +ellps=GRS80');
 const shape = Ellipsoid.fromSpheroid(crs.ellipsoid);
@@ -56,7 +56,7 @@ const parameters = shape.toSpheroid(); // {semiMajorAxis, semiMinorAxis}, in met
 
 Create/cache the adapter result during setup. Coordinate conversions still use
 the existing geospatial implementation. The projection module does not import
-geospatial at runtime. See [coordinate-system concepts](../../projection/developer-guide/coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
+geospatial at runtime. See [coordinate-system concepts](../projection/developer-guide/coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
 for the units and boundary conventions.
 
 ## Static Fields
@@ -171,7 +171,7 @@ Returns
 Converts the provided Cartesian position to cartographic representation. Latitude
 retains precision near the poles. Returns `undefined` at the center, for non-finite
 or unrepresentable inputs, or when its bounded inverse cannot converge; an existing
-result is left unchanged. Sphere/oblate cartographic conversion uses the shared [spheroid helpers](../../core/api-reference/spheroid.md), including the safeguarded nearest-normal interior inverse. Equatorial interiors with two equally near normals reject. Prolate/triaxial conversion retains the 64-update surface algorithm and its approximate near-center radial fallback. The separate `scaleToGeodeticSurface` method retains that three-radius behavior for all shapes. See [ellipsoid accuracy and interior boundaries](../../projection/ellipsoid-qualification.md) for independent references, branch selection and sampled accuracy limits.
+result is left unchanged. Sphere/oblate cartographic conversion uses the shared [spheroid helpers](../../core/api-reference/spheroid.md), including the safeguarded nearest-normal interior inverse. Equatorial interiors with two equally near normals reject. Prolate/triaxial conversion retains the 64-update surface algorithm and its approximate near-center radial fallback. The separate `scaleToGeodeticSurface` method retains that three-radius behavior for all shapes. See [ellipsoid accuracy and interior boundaries](../projection/ellipsoid-qualification.md) for independent references, branch selection and sampled accuracy limits.
 
 - `cartesian` The Cartesian position to convert to cartographic representation.
 - `result` Optional object onto which to store the result.

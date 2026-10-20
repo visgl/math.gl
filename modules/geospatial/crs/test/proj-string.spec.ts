@@ -1,0 +1,112 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+
+import {describe, expect, test} from 'vitest';
+
+import {encodePROJString, parsePROJString, PROJStringSyntaxError} from '@math.gl/geospatial/crs';
+
+describe('PROJ string codec', () => {
+  test('parses definitions, flags, duplicates, and optional plus signs', () => {
+    const ast = parsePROJString('proj=utm +zone=32 +ellps=GRS80 +zone=33 +no_defs');
+    expect(ast.parameters.map(parameter => parameter.name)).toEqual([
+      'proj',
+      'zone',
+      'ellps',
+      'zone',
+      'no_defs'
+    ]);
+    expect(ast.parameters[4].value).toBeUndefined();
+    expect(encodePROJString(ast)).toBe('+proj=utm +zone=32 +ellps=GRS80 +zone=33 +no_defs');
+  });
+
+  test('preserves pipelines and parameter order', () => {
+    const text =
+      '+proj=pipeline +ellps=GRS80 +step +proj=cart +step +inv +proj=helmert +x=10 +step +proj=cart';
+    const ast = parsePROJString(text);
+    expect(ast.parameters.filter(parameter => parameter.name === 'step')).toHaveLength(3);
+    expect(encodePROJString(ast)).toBe(text);
+  });
+
+  test('preserves quoted raw values while exposing decoded values', () => {
+    const text = '+proj=pipeline +title="A local pipeline" +empty="" +step +proj=noop';
+    const ast = parsePROJString(text);
+    expect(ast.parameters[1]).toMatchObject({
+      name: 'title',
+      value: 'A local pipeline',
+      rawValue: '"A local pipeline"'
+    });
+    expect(encodePROJString(ast)).toBe(text);
+  });
+
+  test('supports multiline canonical output', () => {
+    const ast = parsePROJString('+proj=merc +ellps=WGS84');
+    expect(encodePROJString(ast, {format: 'multiline'})).toBe('+proj=merc\n+ellps=WGS84');
+  });
+
+  test('rejects empty and unterminated input with locations', () => {
+    expect(() => parsePROJString('  ')).toThrow(PROJStringSyntaxError);
+    let error: PROJStringSyntaxError | undefined;
+    try {
+      parsePROJString('+proj=pipeline\n+title="unterminated');
+    } catch (caughtError) {
+      error = caughtError as PROJStringSyntaxError;
+    }
+    expect(error).toBeInstanceOf(PROJStringSyntaxError);
+    expect(error?.line).toBe(2);
+    expect(error?.column).toBe(1);
+  });
+
+  test('rejects unsafe caller-constructed raw values', () => {
+    expect(() =>
+      encodePROJString({
+        type: 'proj-string',
+        parameters: [{type: 'parameter', name: 'title', value: 'safe', rawValue: 'two tokens'}]
+      })
+    ).toThrow('Invalid PROJ raw parameter value');
+    expect(() =>
+      encodePROJString({
+        type: 'proj-string',
+        parameters: [{type: 'parameter', name: 'title', rawValue: '"'}]
+      })
+    ).toThrow('Invalid PROJ raw parameter value');
+    expect(() =>
+      encodePROJString({
+        type: 'proj-string',
+        parameters: [{type: 'parameter', name: 'title', rawValue: '"' + '\\' + '"'}]
+      })
+    ).toThrow('Invalid PROJ raw parameter value');
+  });
+
+  test('handles empty values, escapes, flags, and encoder validation', () => {
+    const ast = parsePROJString('+proj= +title="A \\"quoted\\" value" +flag');
+    expect(ast.parameters[0].value).toBe('');
+    expect(ast.parameters[1].value).toBe('A "quoted" value');
+    expect(encodePROJString(ast)).toContain('+flag');
+    expect(
+      encodePROJString({
+        type: 'proj-string',
+        parameters: [
+          {type: 'parameter', name: 'title', value: 'two words'},
+          {type: 'parameter', name: 'quote', value: 'a"b'},
+          {type: 'parameter', name: 'slash', value: 'a\\b'}
+        ]
+      })
+    ).toBe('+title="two words" +quote="a\\"b" +slash=a\\b');
+    expect(() => parsePROJString('+bad="unterminated')).toThrow(PROJStringSyntaxError);
+    expect(() => parsePROJString('+bad=a"b')).toThrow(PROJStringSyntaxError);
+    expect(() => encodePROJString(null as never)).toThrow(TypeError);
+    expect(() => encodePROJString({type: 'proj-string', parameters: []})).toThrow(TypeError);
+    expect(() =>
+      encodePROJString({type: 'proj-string', parameters: [{type: 'parameter', name: 'bad name'}]})
+    ).toThrow(/Invalid PROJ parameter name/);
+  });
+});
+
+test('PROJ DMS punctuation is preserved without confusing quoted values', () => {
+  const text = '+proj=merc +lon_0=12d30\'15"E +title="A quoted title"';
+  const ast = parsePROJString(text);
+  expect(ast.parameters[1].value).toBe('12d30\'15"E');
+  expect(encodePROJString(ast)).toBe(text);
+  expect(() => parsePROJString("+proj=merc +lon_0=12d30'oops")).toThrow(PROJStringSyntaxError);
+});

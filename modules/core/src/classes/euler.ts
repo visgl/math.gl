@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2017 Uber Technologies, Inc.
 
 import {MathArray} from './base/math-array';
-import {NumericArray} from '@math.gl/types';
+import {NumericArray} from '../types';
 import type {EulerRotationOrder} from './euler-types';
 
 import {clamp} from '../lib/common';
