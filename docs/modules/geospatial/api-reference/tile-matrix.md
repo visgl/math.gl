@@ -133,3 +133,46 @@ the world’s outer edges, unlike the explicit, nonwrapping, half-open matrix co
 [Globe horizon bounds](./globe-queries.md) produce geographic extents for visibility queries.
 [DGGS utilities](../../dggs/README.md) decode addresses for global grid systems such as S2, H3 and
 quadkeys. These are complementary to rectangular matrix geometry, rather than interchangeable APIs.
+
+
+## Variable-width / coalesced rows
+
+`TileMatrix.variableMatrixWidths` optionally declares disjoint inclusive native row bands:
+
+```typescript
+const polarMatrix = {
+  ...matrix,
+  matrixSize: [8, 4] as const,
+  variableMatrixWidths: [{coalesce: 2, minTileRow: 0, maxTileRow: 0}]
+};
+```
+
+Following [OGC TMS 2.0 section 6.1.5](https://docs.ogc.org/is/17-083r4/17-083r4.html#toc15),
+base column numbering is preserved. In the example, row zero has canonical columns
+0, 2, 4, 6; columns 0 and 1 are aliases for the same tile. `getTileBounds` accepts
+aliases and returns the entire coalesced footprint. `getTileIndex` returns the canonical
+column. Coalescence changes horizontal footprint and effective horizontal pixel resolution;
+encoded `tileSize`, vertical resolution, and the matrix's overall extent stay unchanged.
+Unlisted rows retain coalescence one. Top-left and bottom-left row directions both work.
+
+Bands may be supplied in any order, but must not overlap. Factors must be safe integers
+greater than one and divide matrix width exactly. Row endpoints must be safe integers
+within matrix height. Invalid declarations throw `RangeError`; inputs are never sorted in place.
+`selectTileMatrix` continues to compare nominal uncoalesced resolution, independently of row.
+
+### getTileRanges(matrix, bounds, limits?)
+
+Returns `TileMatrixRowRange[]`: exact inclusive bands with `columnStep`. Enumerate columns
+from `minTileColumn` to `maxTileColumn` using that step, and rows using step one. This avoids
+requesting the same coalesced tile once for every alias. Query edges retain the half-open
+rules of `getTileRange`, including point queries, clipping and both origin corners.
+
+Coverage limits retain base-grid indices. A coalesced tile is included if any alias is
+within those limits; its canonical column can therefore be below `limits.minTileColumn`.
+`isTileIndexInRange` continues to test the supplied base index literally against those limits.
+Work scales with declared bands and logarithmic axis searches, without enumerating rows or tiles.
+
+`getTileRange` remains unchanged for regular matrices and throws for matrices declaring
+coalescence: use `getTileRanges` to represent row-dependent columns exactly.
+The new API also accepts regular matrices, returning zero or one band with `columnStep: 1`.
+Service parsing, URL construction, cache keys and rendering remain application/loader concerns.

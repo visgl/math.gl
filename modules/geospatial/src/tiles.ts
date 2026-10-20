@@ -15,6 +15,14 @@ export {
   getTileBounds,
   getTileIndex,
   getTileRange,
+  getTileRanges,
   selectTileMatrix
 } from './tile-matrix';
-export type {TileMatrix, TileMatrixSet, TileMatrixLimits, TileMatrixBounds} from './tile-matrix';
+export type {
+  TileMatrix,
+  TileMatrixSet,
+  TileMatrixLimits,
+  TileMatrixBounds,
+  VariableMatrixWidth,
+  TileMatrixRowRange
+} from './tile-matrix';

@@ -374,3 +374,7 @@ math.gl classes now pass large parts of the THREE.js test suite, which should ma
 Release date: Jan 9, 2018
 
 Initial release.
+
+### Coalesced TileMatrix rows
+
+The geospatial `tile-matrix` subpath supports validated variable-width row bands, canonical OGC column aliases, row-aware bounds/point lookup, and compact `getTileRanges` queries. Regular-grid behavior is unchanged.

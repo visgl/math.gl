@@ -7,6 +7,7 @@ import {
   getTileBounds,
   getTileIndex,
   getTileRange,
+  getTileRanges,
   selectTileMatrix,
   isTileIndexInRange,
   validateTileMatrix
@@ -334,4 +335,120 @@ test('selects anisotropic matrices using the coarser pixel axis without mutating
   expect(selectTileMatrix(set, 0.5)).toBe(fine);
   expect(selectTileMatrix(set, 8)).toBe(coarse);
   expect(matrices).toEqual([coarse, fine, wide, tied]);
+});
+
+test.each(['topLeft', 'bottomLeft'] as const)(
+  'coalesced columns retain OGC aliases and exact row bands with %s origin',
+  cornerOfOrigin => {
+    const grid: TileMatrix = {
+      ...matrix,
+      origin: [0, 0],
+      resolution: 0.1,
+      resolutionY: 0.2,
+      tileSize: [10, 5],
+      matrixSize: [8, 4],
+      cornerOfOrigin,
+      variableMatrixWidths: Object.freeze([
+        {coalesce: 4, minTileRow: 3, maxTileRow: 3},
+        {coalesce: 2, minTileRow: 0, maxTileRow: 0}
+      ])
+    };
+    const direction = cornerOfOrigin === 'topLeft' ? -1 : 1;
+    for (let row = 0; row < 4; row++) {
+      const step = row === 0 ? 2 : row === 3 ? 4 : 1;
+      for (let column = 0; column < 8; column++) {
+        const canonical = Math.floor(column / step) * step;
+        const bounds = getTileBounds(grid, column, row);
+        expect(bounds[0]).toBe(canonical);
+        expect(bounds[2]).toBe(canonical + step);
+        expect(getTileIndex(grid, [bounds[0], direction * row])).toEqual([canonical, row]);
+        expect(getTileRanges(grid, bounds)).toEqual([
+          {
+            minTileColumn: canonical,
+            maxTileColumn: canonical,
+            minTileRow: row,
+            maxTileRow: row,
+            columnStep: step
+          }
+        ]);
+      }
+    }
+    expect(getTileIndex(grid, [8, 0])).toBeNull();
+    expect(getTileIndex(grid, [0, direction * 4])).toBeNull();
+    expect(getTileRanges(grid, [0, -10, 8, 10])).toEqual([
+      {minTileColumn: 0, maxTileColumn: 6, minTileRow: 0, maxTileRow: 0, columnStep: 2},
+      {minTileColumn: 0, maxTileColumn: 7, minTileRow: 1, maxTileRow: 2, columnStep: 1},
+      {minTileColumn: 0, maxTileColumn: 4, minTileRow: 3, maxTileRow: 3, columnStep: 4}
+    ]);
+    const limits = {minTileColumn: 3, maxTileColumn: 3, minTileRow: 0, maxTileRow: 0};
+    expect(getTileRanges(grid, [0, -10, 8, 10], limits)).toEqual([
+      {...limits, minTileColumn: 2, maxTileColumn: 2, columnStep: 2}
+    ]);
+    expect(isTileIndexInRange(grid, 3, 0, limits)).toBe(true);
+    expect(getTileRanges(grid, [9, -10, 10, 10])).toEqual([]);
+    expect(() => getTileRange(grid, [0, -10, 8, 10])).toThrow('getTileRanges');
+    expect(grid.variableMatrixWidths![0].minTileRow).toBe(3);
+  }
+);
+
+test.each(
+  [
+    [{coalesce: 1, minTileRow: 0, maxTileRow: 0}],
+    [{coalesce: 3, minTileRow: 0, maxTileRow: 0}],
+    [{coalesce: 2.5, minTileRow: 0, maxTileRow: 0}],
+    [{coalesce: Infinity, minTileRow: 0, maxTileRow: 0}],
+    [{coalesce: 2, minTileRow: -1, maxTileRow: 0}],
+    [{coalesce: 2, minTileRow: 1, maxTileRow: 0}],
+    [{coalesce: 2, minTileRow: 0, maxTileRow: 2}],
+    [{coalesce: 2, minTileRow: 0.5, maxTileRow: 1}],
+    [
+      {coalesce: 2, minTileRow: 0, maxTileRow: 1},
+      {coalesce: 4, minTileRow: 1, maxTileRow: 1}
+    ]
+  ].map(variableMatrixWidths => ({variableMatrixWidths}))
+)('rejects malformed or overlapping coalescence bands %j', ({variableMatrixWidths}) => {
+  expect(() => validateTileMatrix({...matrix, matrixSize: [8, 2], variableMatrixWidths})).toThrow(
+    RangeError
+  );
+});
+
+test('row ranges stay compact for large dimensions and regular grids remain compatible', () => {
+  const grid: TileMatrix = {
+    ...matrix,
+    origin: [0, 0],
+    resolution: 1,
+    tileSize: [1, 1],
+    matrixSize: [2 ** 32, 2 ** 32],
+    variableMatrixWidths: [{coalesce: 4, minTileRow: 0, maxTileRow: 2 ** 32 - 1}]
+  };
+  expect(getTileRanges(grid, [0, -(2 ** 32), 2 ** 32, 0])).toEqual([
+    {
+      minTileColumn: 0,
+      maxTileColumn: 2 ** 32 - 4,
+      minTileRow: 0,
+      maxTileRow: 2 ** 32 - 1,
+      columnStep: 4
+    }
+  ]);
+  expect(getTileRanges(matrix, getTileBounds(matrix, 1, 0))).toEqual([
+    {...getTileRange(matrix, getTileBounds(matrix, 1, 0)), columnStep: 1}
+  ]);
+  expect(() => getTileRanges(grid, [NaN, 0, 1, 1])).toThrow(RangeError);
+});
+
+test('fractional coalesced edges round-trip without division drift', () => {
+  const grid: TileMatrix = {
+    ...matrix,
+    resolution: 0.1,
+    tileSize: [3, 1],
+    matrixSize: [6, 2],
+    variableMatrixWidths: [{coalesce: 3, minTileRow: 0, maxTileRow: 1}]
+  };
+  for (const column of [0, 3]) {
+    const bounds = getTileBounds(grid, column, 0);
+    expect(getTileIndex(grid, [bounds[0], bounds[3]])).toEqual([column, 0]);
+    expect(getTileRanges(grid, bounds)).toEqual([
+      {minTileColumn: column, maxTileColumn: column, minTileRow: 0, maxTileRow: 0, columnStep: 3}
+    ]);
+  }
 });
