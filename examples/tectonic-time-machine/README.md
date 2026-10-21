@@ -166,6 +166,60 @@ simulation. Global versus partly open ocean conditions remain debated. Dates
 follow [Hoffman et al. (2017)](https://doi.org/10.1126/sciadv.1600983); see also
 [NASA's discussion](https://www.giss.nasa.gov/research/features/201508_slushball/).
 
+## Earth history events (4,567 Ma to present)
+
+The **Earth history** panel contains a curated, source-linked chronology of
+planetary formation, the Moon-forming giant impact hypothesis (Theia),
+the debated Late Heavy Bombardment, early zircons, oxygenation, Cryogenian
+glaciations and the Big Five mass extinction intervals. Entries support text
+search, category filtering and source links.
+
+**Scientific boundaries:** this is an event catalogue, not a 4.567-billion-year
+tectonic reconstruction. Existing plate models still stop at 1,000 or 1,800 Ma.
+A `View at this age` control is shown only when the selected model covers that
+age; older events are browsable but cannot be mapped with nonexistent plates.
+The Theia impact and discrete Late Heavy Bombardment spike are not observed
+reconstructions; ages and event descriptions have model uncertainty.
+No simulated collision animation, stochastic bombardment positions, or
+extinction-rate measurements are implied.
+
+Future iterations should ingest independently licensed numerical impact-flux
+models, lunar crater observations and paleobiological occurrence/rate data
+via deck.gl-data STAC, with explicit source, model, uncertainty and coordinate
+frame metadata. An extended timeline will require a separate planetary
+visualization mode, rather than stretching rigid plate rotations into the Hadean.
+
+### Geological event rail
+
+A separate 4,567–0 Ma overview places sourced event markers on a geological
+age axis. This is **not** the plate reconstruction timeline. Markers within
+the selected source's age range can seek the existing timeline; older
+markers remain visible but are disabled, with an explanation in their
+accessible label and tooltip. Category and text filters apply to both the
+event browser and the rail. Marker positions are linear in millions of
+years, so closely spaced recent events may overlap; the event list remains
+the accessible way to inspect their full details.
+
+The existing TimelineWidget and geological playback bounds are unchanged.
+
+### Early Earth conceptual mode and data readiness
+
+For event ages older than the selected plate model, the event rail and
+browser now offer an **Explore early Earth scenario** action. This pauses
+tectonic playback and covers the map with a separate, deliberately stylized
+planetary scene. Stage labels distinguish accretion, Moon-forming impact
+scenarios, cooling crust and later pre-tectonic Earth. The visual is an
+educational illustration, **not** a physics simulation, reconstructed
+surface, impact geometry or inferred global magma coverage. Returning
+restores the tectonic scene and its existing playback age.
+
+`planetary-history.js` also defines a provenance-gated contract for
+future impact-flux and biodiversity time series. Each series must identify
+source, license, model, units and method, and provide strictly ordered,
+finite, nonnegative observations. No numerical series has been published
+or embedded in this PR, so the UI explicitly reports their unavailability
+rather than drawing invented extinction rates or impact frequencies.
+
 ## Ancient geographic feature index
 
 The expandable **Ancient geographic features** panel offers a small curated, searchable
@@ -200,3 +254,7 @@ interpolate ancient outlines or mix reference frames. No external geological
 geometry is bundled, and the current map renderer is unchanged. A future data
 integration should add provenance-backed epoch snapshots, geometry topology
 checks and projection-aware rendering before exposing any map overlay.
+
+Land-plant emergence is marked at approximately 470 Ma, with an illustrative
+80 Myr transition from bare earth tones to modern texture colors. This is not
+an ancient vegetation reconstruction; region colors remain a categorical view.
