@@ -10,4 +10,4 @@ Geographic coordinates may cross the antimeridian and approach projection limits
 
 JavaScript number calculations use double precision, but Float32Array output loses precision. Large Earth-centered positions may need local origins or higher-precision storage. Check finite outputs, degeneracies and zero-length normalization using the actual API's contract.
 
-For CRS conversion, specify source/target CRS, axis order, height convention, epoch when applicable, and required grids. A round trip alone does not establish absolute accuracy; compare against independent fixtures. See `docs/modules/projection/developer-guide/support.md` and the module's qualification pages for supported domains.
+For CRS conversion, specify source/target CRS, axis order, height convention, epoch when applicable, and required grids. A round trip alone does not establish absolute accuracy; compare against independent fixtures. See `docs/modules/geospatial/projection/developer-guide/support.md` and the module's qualification pages for supported domains.

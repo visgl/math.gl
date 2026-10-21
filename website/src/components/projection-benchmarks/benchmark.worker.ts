@@ -1,8 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {runLiveBenchmark} from '../../../../modules/projection/test/live-bench';
-import type {BenchmarkOptions} from '../../../../modules/projection/test/live-bench-types';
+import {runLiveBenchmark} from '../../../../modules/geospatial/projection/test/live-bench';
+import type {BenchmarkOptions} from '../../../../modules/geospatial/projection/test/live-bench-types';
 
 self.onmessage = ({data}: MessageEvent<BenchmarkOptions>) => {
   try {

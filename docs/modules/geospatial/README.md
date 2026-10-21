@@ -6,7 +6,11 @@
 
 `@math.gl/geospatial` provides ellipsoid geometry, geographic/Cartesian conversions, local tangent frames, globe queries, and tile-grid geometry. Use it for WGS84 positions and 3D Tiles bounds without a renderer dependency.
 
-Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](../geoid/README.md) and [projection](../projection/README.md).
+Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](../earth/geoid/README.md) and [projection](./projection/README.md).
+
+The geospatial group includes `@math.gl/geospatial/ellipsoid`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`,
+`/wkb`, `/geoarrow`, and `/expressions`. `@math.gl/web-mercator` remains available for existing
+imports. DGGS remains a separate package.
 
 ## Installation
 
@@ -18,6 +22,14 @@ npm install @math.gl/geospatial
 
 <center>WGS84: The 1984 World Geodetic System Ellipsoid. <br/>
 Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/media/File:WGS84_mean_Earth_radius.svg">wikipedia</a>, Creative Commons 4.0.</center>
+
+## Import paths
+
+| Import | APIs |
+| --- | --- |
+| `@math.gl/geospatial/ellipsoid` | [Ellipsoid](./api-reference/ellipsoid.md), [tangent planes](./api-reference/ellipsoid-tangent-plane.md), and [WGS84 helpers](./api-reference/helpers.md) |
+| `@math.gl/geospatial/globe` | [Geographic rectangles](./api-reference/lng-lat-rectangle.md), [region bounding boxes](./api-reference/make-obb-from-region.md), [visibility queries](./api-reference/globe-queries.md), and [mesh subdivision](./api-reference/subdivide-globe-mesh.md) |
+| `@math.gl/geospatial/tiles` | [Geographic tile queries](./api-reference/geographic-tiles.md) and [tile-matrix utilities](./api-reference/tile-matrix.md) |
 
 ## Classes
 
@@ -49,7 +61,7 @@ Expand the infobox to explore query regions and levels.
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
 const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPosition);
 ```
@@ -57,7 +69,7 @@ const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPo
 Determine the Cartographic representation of a Cartesian position on a WGS84 ellipsoid.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 const cartesianPosition = [17832.12, 83234.52, 952313.73];
 const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPosition);
 ```
@@ -65,7 +77,7 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
 ```
@@ -89,6 +101,10 @@ Selected classes and three-radius ellipsoid kernels derive from Cesium under Apa
 [EllipsoidOccluder and globe horizon bounds](./api-reference/globe-queries.md) provide
 true ray intersections, elevated-point occlusion, exact limb ellipses and wrapped
 conservative imagery coverage without a viewport or rendering dependency.
+
+## Globe mesh subdivision
+
+[subdivideGlobeMesh](./api-reference/subdivide-globe-mesh.md) refines triangulated longitude/latitude meshes onto a sphere or oblate ellipsoid, preserving shared edges and attribute provenance. Import it and `SubdivideGlobeMeshOptions` from `@math.gl/geospatial/globe`.
 
 ## Tile matrices
 

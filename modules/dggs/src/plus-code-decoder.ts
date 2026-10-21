@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import OpenLocationCodePackage, {type OpenLocationCodeArea} from 'open-location-code';
-import {type Bounds2D} from '@math.gl/types';
+import {type Bounds2D} from '@math.gl/core/types';
 import {
   withDGGSBoundaryOptions,
   type DGGSCell,

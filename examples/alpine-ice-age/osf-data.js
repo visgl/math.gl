@@ -4,7 +4,7 @@
 import {
   ProjectionTransform,
   lambertAzimuthalEqualArea,
-} from "@math.gl/projection";
+} from "@math.gl/geospatial/projection";
 
 export const OSF_PROJECT = "https://osf.io/7jen3/";
 export const OSF_CHAPTERS = [

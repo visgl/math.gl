@@ -11,10 +11,7 @@
 // @ts-nocheck
 /* eslint-disable */
 /* global QUnit */
-import {Euler} from 'math.gl/Euler';
-import {Matrix4} from 'math.gl/Matrix4';
-import {Quaternion} from 'math.gl/Quaternion';
-import {Vector3} from 'math.gl/Vector3';
+import {Euler, Matrix4, Quaternion, Vector3} from '@math.gl/core';
 import {x, y, z} from './Constants.tests';
 
 const eulerZero = new Euler(0, 0, 0, 'XYZ');

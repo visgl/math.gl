@@ -1,40 +1,28 @@
 {
   "ts-node": {
-    // It is faster to skip typechecking. Remove if you want ts-node to do typechecking.
     "transpileOnly": true,
     "compilerOptions": {
-      // ts-node 10 does not understand TypeScript's Node20 module mode.
       "module": "Node16",
       "moduleResolution": "node16"
     }
   },
-
   "compilerOptions": {
     "target": "es2020",
     "module": "es2020",
     "allowJs": true,
     "checkJs": false,
-    // Supports package.json "exports" while preserving extensionless source imports.
     "moduleResolution": "bundler",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "rootDir": ".",
     "useDefineForClassFields": false,
-
-    // BEGIN TYPE CHECK SETTINGS
     "skipLibCheck": true,
-
     "strict": false,
-
-    "noImplicitAny": false, // covered by strict
-    "noImplicitThis": true, // covered by strict
-    "strictBindCallApply": true, // covered by strict
-    "strictFunctionTypes": true, // covered by strict
-    "useUnknownInCatchVariables": true, // covered by strict
-    // "strictNullChecks": true, // covered by strict
-    // "strictPropertyInitialization": true, // covered by strict, requires strict null checks
-
-    // "exactOptionalPropertyTypes": true, - requires strictNullChecks
+    "noImplicitAny": false,
+    "noImplicitThis": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "useUnknownInCatchVariables": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
@@ -42,74 +30,35 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": false,
-    // END TYPE CHECK SETTINGS
-
     "paths": {
-      "@math.gl/core/*": ["./modules/core/src/*"],
-      "@math.gl/core/test/*": ["./modules/core/test/*"],
-      "@math.gl/crs/metadata": ["./modules/crs/src/crs-metadata.ts"],
-      "@math.gl/crs/wkt": ["./modules/crs/src/wkt-crs.ts"],
-      "@math.gl/crs/*": ["./modules/crs/src/*"],
-      "@math.gl/crs/test/*": ["./modules/crs/test/*"],
-      "@math.gl/curves/*": ["./modules/curves/src/*"],
-      "@math.gl/culling/queries": ["./modules/culling/src/queries.ts"],
-      "@math.gl/culling/*": ["./modules/culling/src/*"],
-      "@math.gl/culling/test/*": ["./modules/culling/test/*"],
-      "@math.gl/dggs/*": ["./modules/dggs/src/*"],
-      "@math.gl/dggs/test/*": ["./modules/dggs/test/*"],
-      "@math.gl/geometry/*": ["./modules/geometry/src/*"],
-      "@math.gl/geometry/test/*": ["./modules/geometry/test/*"],
-      "@math.gl/expressions/*": ["./modules/expressions/src/*"],
-      "@math.gl/expressions/test/*": ["./modules/expressions/test/*"],
-      "@math.gl/geoid/*": ["./modules/geoid/src/*"],
-      "@math.gl/geoid/test/*": ["./modules/geoid/test/*"],
-      "@math.gl/geospatial/*": ["./modules/geospatial/src/*"],
-      "@math.gl/geospatial/test/*": ["./modules/geospatial/test/*"],
-      "@math.gl/geoarrow/*": ["./modules/geoarrow/src/*"],
-      "@math.gl/geoarrow/test/*": ["./modules/geoarrow/test/*"],
-      "@math.gl/geometry-utils/*": ["./modules/geometry-utils/src/*"],
-      "@math.gl/geometry-utils/test/*": ["./modules/geometry-utils/test/*"],
-      "@math.gl/polygon/*": ["./modules/polygon/src/*"],
-      "@math.gl/polygon/test/*": ["./modules/polygon/test/*"],
-      "@math.gl/proj/*": ["./modules/proj/src/*"],
-      "@math.gl/proj/test/*": ["./modules/proj/test/*"],
-      "@math.gl/projection/analysis/transform": ["./modules/projection/src/transform-analysis.ts"],
-      "@math.gl/projection/experimental/projections/*": ["./modules/projection/src/experimental/entries/projections/*"],
-      "@math.gl/projection/experimental/parsers/*": ["./modules/projection/src/experimental/crs/*"],
-      "@math.gl/projection/*": ["./modules/projection/src/*"],
-      "@math.gl/projection/test/*": ["./modules/projection/test/*"],
-      "@math.gl/spatial-index/*": ["./modules/spatial-index/src/*"],
-      "@math.gl/sun/*": ["./modules/sun/src/*"],
-      "@math.gl/sun/test/*": ["./modules/sun/test/*"],
-      "@math.gl/timezone/lookup": ["./modules/timezone/src/lookup.ts"],
-      "@math.gl/timezone/*": ["./modules/timezone/src/*"],
-      "@math.gl/types/*": ["./modules/types/src/*"],
-      "@math.gl/types/test/*": ["./modules/types/test/*"],
-      "@math.gl/wkb/*": ["./modules/wkb/src/*"],
-      "@math.gl/wkb/test/*": ["./modules/wkb/test/*"],
-      "@math.gl/web-mercator/*": ["./modules/web-mercator/src/*"],
-      "@math.gl/web-mercator/test/*": ["./modules/web-mercator/test/*"],
-      "test/*": ["./test/*"]
+      "test/*": [
+        "./test/*"
+      ]
     },
     "plugins": [
       {
         "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
-        "extensions": [".js"],
+        "extensions": [
+          ".js"
+        ],
         "after": true
       },
       {
         "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
-        "extensions": [".js"],
+        "extensions": [
+          ".js"
+        ],
         "afterDeclarations": true
       }
     ]
   },
-  "include": ["modules/*/src", "modules/*/test", "examples/expressions"],
+  "include": [
+    "modules/*/src",
+    "modules/*/test",
+    "modules/*/*/test",
+    "examples/expressions"
+  ],
   "exclude": [
-    "modules/core/test",
-    "modules/polygon/test",
-    "modules/web-mercator/test",
-    "test/apps/**/*",
     "node_modules",
     "**/dist/**/*",
     "**/*bench*"

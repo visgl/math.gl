@@ -13,7 +13,7 @@ viewports or GPU state. Existing `SphereShape` remains useful for general transf
 shape picking; `EllipsoidOccluder` specializes in planetary segment and limb queries.
 
 ```js
-import {EllipsoidOccluder, getGlobeHorizonBounds, splitGlobeBounds} from '@math.gl/geospatial';
+import {EllipsoidOccluder, getGlobeHorizonBounds, splitGlobeBounds} from '@math.gl/geospatial/globe';
 
 const globe = new EllipsoidOccluder([6371000, 6371000, 6371000]);
 const camera = [2 * 6371000, 0, 0];
@@ -100,7 +100,7 @@ before calling the geographic bounds helper. The helper does not accept WGS84 EC
 as a spherical approximation implicitly.
 
 The [standalone example](https://github.com/visgl/math.gl/tree/master/examples/globe-primitives)
-composes these queries with `subdivideGlobeMesh`, demonstrating elevated labels,
+composes these queries with [subdivideGlobeMesh](./subdivide-globe-mesh.md), demonstrating elevated labels,
 true ray misses and polar/antimeridian coverage without Kepler dependencies.
 
 ## Provenance and limits

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /* eslint-disable camelcase */
-import {NumericArray} from '@math.gl/types';
+import {NumericArray} from '../types';
 // vec2 additions
 
 export function vec2_transformMat4AsVector<T extends NumericArray>(

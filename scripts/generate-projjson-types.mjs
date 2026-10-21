@@ -7,8 +7,8 @@ import {resolve} from 'node:path';
 import process from 'node:process';
 import {compile} from 'json-schema-to-typescript';
 
-const schemaPath = resolve('modules/crs/schemas/projjson.schema.json');
-const outputPath = resolve('modules/crs/src/projjson-types.ts');
+const schemaPath = resolve('modules/geospatial/crs/schemas/projjson.schema.json');
+const outputPath = resolve('modules/geospatial/src/crs/projjson-types.ts');
 const check = process.argv.includes('--check');
 
 const source = await readFile(schemaPath, 'utf8');

@@ -2,9 +2,9 @@
 
 | Geoid heights | Timezones | Expression evaluation |
 | --- | --- | --- |
-| [![EGM96 geoid globe](./images/geoid-globe.jpg)](./modules/geoid/README.md) | [![Timezone globe](./images/timezone-globe.jpg)](./modules/timezone/README.md) | [![Expression playground](./images/expressions.jpg)](./modules/expressions/README.md) |
+| [![EGM96 geoid globe](./images/geoid-globe.jpg)](./modules/earth/geoid/README.md) | [![Timezone globe](./images/timezone-globe.jpg)](./modules/earth/timezone/README.md) | [![Expression playground](./images/expressions.jpg)](./modules/core/expressions/README.md) |
 | Primitive geometry | Polygon cutting | Vector and matrix transforms |
-| [![Geometry viewer](./images/geometry-viewer.jpg)](./modules/geometry/README.md) | [![Polygon playground](./images/polygon-playground.jpg)](./modules/polygon/README.md) | [![Core transforms](./images/core-transforms.jpg)](./modules/core/README.md) |
+| [![Geometry viewer](./images/geometry-viewer.jpg)](./modules/geometry/README.md) | [![Polygon playground](./images/polygon-playground.jpg)](./modules/geometry/polygon/README.md) | [![Core transforms](./images/core-transforms.jpg)](./modules/core/README.md) |
 
 ## v5.0
 
@@ -25,7 +25,7 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 - Detects conventional cell-column names for all bundled decoders to power data-driven visualization layers.
 - Adds validated S2 token/index conversion, exact polar and antimeridian bounds, and face-aware spatial descendant addressing.
 
-**`@math.gl/types`**
+**`@math.gl/core/types`**
 
 - Sized array types provide stronger guarantees for math class inputs and outputs.
 
@@ -40,7 +40,7 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 - `SphericalCoordinates` now uses the structural `Vector3Like` type and direct calculations, avoiding runtime dependencies on `Vector3` and `vec3`.
 - Core named-import gzip fixtures are 6–62% smaller than v4.1; the full public-entry fixture is 37% smaller. See the bundling guide for methodology and measurements.
 
-**`@math.gl/expressions`** (NEW EXPERIMENTAL MODULE)
+**`@math.gl/core/expressions`** (NEW EXPERIMENTAL MODULE)
 
 - Promotes the expression parser previously embedded in `@deck.gl/json` to a documented experimental module.
 - Parses, evaluates, and compiles synchronous or asynchronous JavaScript-style expressions.
@@ -49,7 +49,7 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 - Compiles restricted JSON-style accessor expressions with function calls disabled.
 - Includes an interactive expression playground with editable context and sample DGGS expressions.
 
-**`@math.gl/crs`** (NEW MODULE)
+**`@math.gl/geospatial/crs`** (NEW MODULE)
 
 - Adds lightweight, proj4-independent TypeScript definitions for coordinate reference systems with no runtime dependencies.
 - Uses strict PROJJSON v0.7 as its semantic CRS object model and exports types generated from the official schema.
@@ -63,7 +63,7 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 - Adds a comprehensive CRS developer guide covering standards, serialization versus semantics,
   axis order, dynamic and vertical CRS, transformation boundaries, and integration guidance.
 
-**`@math.gl/wkb`** (NEW MODULE)
+**`@math.gl/geospatial/wkb`** (NEW MODULE)
 
 - Adds dependency-free synchronous WKB, EWKB, and WKT codecs over plain geometry values.
 - Supports both endian orders, ISO and EWKB dimension headers, EWKB SRIDs, all geometry families,
@@ -71,10 +71,10 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 - Enforces strict input coverage plus configurable WKB nesting and element-count limits.
 - Supports header-only and count-only visitor traversal that skips coordinate decoding when scalar
   ordinate callbacks are not requested.
-- Provides the neutral format layer used by `@math.gl/geoarrow` without depending on GeoArrow or
+- Provides the neutral format layer used by `@math.gl/geospatial/geoarrow` without depending on GeoArrow or
   Apache Arrow.
 
-**`@math.gl/geoarrow`** (NEW MODULE)
+**`@math.gl/geospatial/geoarrow`** (NEW MODULE)
 
 - Defines borrowed physical descriptors for native, mixed, box, WKB, and WKT geometry columns
   without requiring an Arrow runtime.
@@ -90,16 +90,17 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 - Moves reusable GeoArrow math out of loaders.gl and luma.gl prototypes while leaving runtime
   adapters, worker scheduling, and GPU resources with their owning libraries.
 
-**`@math.gl/projection`**
+**`@math.gl/geospatial/projection`**
 
-- Renames `@math.gl/proj4` to `@math.gl/projection`, with a pluggable math.gl projection engine, lazy algorithms, in-place buffers and explicit coordinate operations.
+- Renames `@math.gl/proj4` to `@math.gl/geospatial/projection`, with a pluggable math.gl projection engine, lazy algorithms, in-place buffers and explicit coordinate operations.
 - Removes the deprecated `Proj4Projection` alias and `/classic` wrapper. The package has no proj4js runtime dependency; comparisons and compatibility tests use a pinned development dependency.
-- Adds a [projection catalogue](modules/projection/developer-guide/projections.md) and a [guide to ellipsoids, datums, heights and epochs](modules/projection/developer-guide/coordinate-systems.md).
+- Adds a [projection catalogue](./modules/geospatial/projection/developer-guide/projections.md) and a [guide to ellipsoids, datums, heights and epochs](./modules/geospatial/projection/developer-guide/coordinate-systems.md).
 - Adds optional CRS axis-order enforcement and NTv2 datum-grid registration.
 - Defines aliases for WGS84 UTM and UPS EPSG coordinate systems automatically.
 
 **`@math.gl/geospatial`**
 
+- The `tile-matrix` subpath adds validated variable-width/coalesced row bands, canonical OGC column aliases, row-aware bounds and point lookup, and compact `getTileRanges` queries. Regular-grid behavior is unchanged.
 - Adds `EllipsoidOccluder` ray intervals, altitude-aware occlusion, and limb ellipses, plus conservative globe horizon bounds across poles and the antimeridian.
 - Improves 3D Tiles support in loaders.gl with ellipsoid and bounding-volume helpers.
 - `makeOBBFromRegion()` - New function that creates a Cartesian oriented bounding box from a geospatial region.
@@ -110,31 +111,31 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 - Adds renderer-independent `Geometry` typed-array storage and indexed-geometry unpacking.
 - Adds tessellators for glTF 2.1 draft shapes and common luma.gl primitives.
 
-**`@math.gl/culling`**
+**`@math.gl/geometry/culling`**
 
 - Adds analytic glTF 2.1 box, capsule, cylinder, plane, and sphere queries for clipping/culling, rays, transforms, and enclosing bounds.
 - Culling results now use descriptive string literal types.
 
-**`@math.gl/geometry-utils`** (NEW MODULE)
+**`@math.gl/geometry/utils`** (NEW MODULE)
 
 - Promotes the renderer-independent geometry helpers previously maintained in `@loaders.gl/math`.
 - Adds typed geometry traversal, vertex-normal generation, component-type conversion, packed RGB565
   colors, octahedral attribute compression, and typed-array utilities.
 
-**`@math.gl/polygon`**
+**`@math.gl/geometry/polygon`**
 
-- Adds `subdivideGlobeMesh` for conforming globe subdivision with preserved attribute provenance.
+- Adds [`subdivideGlobeMesh`](./modules/geospatial/api-reference/subdivide-globe-mesh.md) in `@math.gl/geospatial/globe` for conforming globe subdivision with preserved attribute provenance.
 - Polygon winding directions now use descriptive string literal types.
-- Adds adaptive [triangle-mesh subdivision](./modules/polygon/api-reference/subdivide-triangle-mesh.md) with shared-edge refinement and attribute interpolation.
-- Adds adaptive [polyline subdivision](./modules/polygon/api-reference/subdivide-polyline.md) through application-supplied coordinate transforms.
+- Adds adaptive [triangle-mesh subdivision](./modules/geometry/polygon/api-reference/subdivide-triangle-mesh.md) with shared-edge refinement and attribute interpolation.
+- Adds adaptive [polyline subdivision](./modules/geometry/polygon/api-reference/subdivide-polyline.md) through application-supplied coordinate transforms.
 
-**`@math.gl/timezone`** (NEW MODULE)
+**`@math.gl/earth/timezone`** (NEW MODULE)
 
 - Adds geographic timezone lookup, local-calendar fields, and numeric UTC offsets using runtime timezone rules.
 - Provides an optional Temporal entry point for day boundaries, local-time conversion, and offset transitions.
 - Ships optional approximate timezone geometry for map and globe visualization.
 
-**`@math.gl/sun`**
+**`@math.gl/earth/sun`**
 
 - Adds Moon position and lighting, solar color and intensity, sky illumination, and approximate cloud lighting.
 - Provides optional planet ephemerides and shared sky snapshots through `astronomy-engine`.
@@ -153,9 +154,9 @@ This minor release brings:
 
 - `Vector2Like` - `Matrix4Like` - New types to specify numeric inputs of a specific length.
 
-**`@math.gl/types`**
+**`@math.gl/core/types`**
 
-- `Bounds`, `Bounds2D` and `Bounds3D` - New types for expressing [bounds](./modules/types/api-reference/bounds) (extents).
+- `Bounds`, `Bounds2D` and `Bounds3D` - New types for expressing [bounds](./modules/core/types/api-reference/bounds) (extents).
 - `NumberArray2` - `NumberArray16` - New types to specify numeric arrays of a specific length.
 - `NumericArray2` - `NumericArray16` - New types to specify numeric arrays of a specific length.
 - `isTypedArray()`, `isNumericArray()` - These utilities now perform TypeScript type narrowing.
@@ -189,7 +190,7 @@ This release brings:
 - `config` is now truly global (stored on `globalThis`).
 - `gl-matrix` dependency removed.
 
-**`@math.gl/types`**
+**`@math.gl/core/types`**
 
 - New `isTypedArray()` and `isNumericArray()` utilities that check values and return properly restricted types to help write clean TypeScript code (e.g. avoids the `DataView` case when using `ArrayBuffer.isView()`).
 
@@ -201,11 +202,11 @@ Codebase has been fully converted to TypeScript. In general this means that user
 the types exported from math.gl to be considerably improved, however in some function signatures
 are no longer supported. For details, consult the [upgrade guide](./upgrade-guide).
 
-**`@math.gl/types` (NEW)**
+**`@math.gl/core/types` (NEW)**
 
 - New module that exports a few TypeScript types that e.g. generalize handling of numeric arrays.
 
-**`@math.gl/polygon` (NEW)**
+**`@math.gl/geometry/polygon` (NEW)**
 
 - Includes earcut 2.2 (various bug fixes for edge cases)
 - The `earcut` utility supports a new argument `plane` to calculate tesselation on alternative projection planes.
@@ -219,7 +220,7 @@ Release Date: July 14, 2021
 - `getBounds()` now supports an optional `fovy` parameter on the `WebMercatorViewport` object
 - `getProjectionMatrix()` and `getProjectionParameters()` now accept a `fovy` parameter
 
-**`@math.gl/polygon`**
+**`@math.gl/geometry/polygon`**
 
 - Improve performance of `getPolygonSignedArea()` by 3x
 - Addition of `earcut()` method for triangulating polygons
@@ -233,13 +234,13 @@ Release Date: July 14, 2021
 
 Release Date: Jan 7, 2021
 
-**`@math.gl/geoid`** - New module
+**`@math.gl/earth/geoid`** - New module
 
 - Support for [geoid](https://en.wikipedia.org/wiki/Geoid)-based [earth gravity models](https://en.wikipedia.org/wiki/Earth_Gravitational_Model).
 - New `Geoid` class calculates the height offset (aka "undulation") from the pure ellipsoid for a given lng/lat (using spherical harmonics).
 - `Geoid` instances can be initialized with PGM-encoded earth gravity model coefficient files from standard sources.
 
-**`@math.gl/polygon`**
+**`@math.gl/geometry/polygon`**
 
 - Support for flat arrays (e.g. polygons stored in typed arrays)
 - Support for calling polygon utilities directly on arrays, without a `Polygon` instance.
@@ -261,7 +262,7 @@ Release Date: July 18, 2020
 
 - TypeScript type definitions (`.d.ts` files) are now exported for all math.gl modules.
 
-**`@math.gl/polygon`** - New module
+**`@math.gl/geometry/polygon`** - New module
 
 - A new module offering geospatial polygon clipping functions.
 
@@ -286,7 +287,7 @@ A new module (developed in collaboration with the Cesium engineering team) provi
 
 - New class `Ellipsoid` and constant `Ellipsoid.WGS84` for working with WSG84 coordinates
 
-### `@math.gl/culling`
+### `@math.gl/geometry/culling`
 
 A new module (developed in collaboration with the Cesium engineering team) providing WebGL-framework-independent classesthat support geometric intersection calculations (primarily intended to support frustum culling operations):
 

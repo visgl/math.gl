@@ -10,3 +10,7 @@ The optional `@math.gl/core/spheroid` numeric entry supports the shared sphere/o
 conversion paths used by geospatial and projection. It does not import vector/matrix
 classes or global configuration. Its existing proj4js-derived arithmetic retains
 MIT attribution and the full terms in [PROJ4-LICENSE.md](./PROJ4-LICENSE.md).
+
+Expression parsing and evaluation are available at `@math.gl/core/expressions`. The core entry
+includes the basic math function library. Earth-specific and DGGS function libraries are exposed
+separately by `@math.gl/geospatial/expressions` and `@math.gl/dggs/expressions`.

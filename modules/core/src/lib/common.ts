@@ -4,7 +4,7 @@
 
 /* eslint-disable no-shadow */ // radians and degrees are common variable names
 
-import type {NumericArray} from '@math.gl/types';
+import type {NumericArray} from '../types';
 
 import type {MathArray} from '../classes/base/math-array';
 import {EPSILON14, TWO_PI, PI} from './math-utils';

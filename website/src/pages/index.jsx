@@ -10,7 +10,7 @@ import moduleGroups from '../../module-groups.json';
 const modules = [
   {
     name: 'Spatial index',
-    packageName: '@math.gl/spatial-index',
+    packageName: '@math.gl/geometry/spatial-index',
     description: 'Static box, point and triangle indexes for range, ray and nearest queries (POC).',
     image: 'examples/spatial-index.png',
     imageAlt: 'Interactive spatial query explorer',
@@ -18,7 +18,7 @@ const modules = [
   },
   {
     name: 'Curves',
-    packageName: '@math.gl/curves',
+    packageName: '@math.gl/geometry/curves',
     description: 'Parametric curves, interpolation, and arc-length sampling in 2D and 3D.',
     image: 'examples/curves.jpg',
     imageAlt: 'Interactive parametric curve example',
@@ -27,14 +27,14 @@ const modules = [
   {
     name: 'Core',
     packageName: '@math.gl/core',
-    description: 'Vectors, matrices, quaternions, and the building blocks of 3D math.',
+    description: 'Vectors, matrices, shared types, and expression evaluation.',
     image: 'examples/core-transforms.jpg',
     imageAlt: 'Interactive 3D transform example',
     theme: 'violet'
   },
   {
     name: 'Projection',
-    packageName: '@math.gl/projection',
+    packageName: '@math.gl/geospatial/projection',
     description: 'Project coordinates, transform reference systems, and work across epochs.',
     image: 'examples/tectonic-time-machine.svg',
     imageAlt: 'Tectonic time machine map example',
@@ -43,14 +43,14 @@ const modules = [
   {
     name: 'Geospatial',
     packageName: '@math.gl/geospatial',
-    description: 'Ellipsoids, coordinate frames, and geospatial transformations.',
+    description: 'Ellipsoids, CRS, projections, WKB, and GeoArrow entry points.',
     image: 'icon-basemap.webp',
     imageAlt: 'Map illustration',
     theme: 'blue'
   },
   {
     name: 'Polygon',
-    packageName: '@math.gl/polygon',
+    packageName: '@math.gl/geometry/polygon',
     description: 'Clip, subdivide, triangulate, and transform polygon and line geometry.',
     image: 'examples/polygon-playground.jpg',
     imageAlt: 'Polygon playground example',
@@ -59,22 +59,30 @@ const modules = [
   {
     name: 'Geometry',
     packageName: '@math.gl/geometry',
-    description: 'Renderer-independent meshes and primitive geometry generators.',
+    description: 'Meshes, curves, polygon processing, culling, and spatial indexes.',
     image: 'examples/geometry-viewer.jpg',
     imageAlt: '3D geometry viewer example',
     theme: 'orange'
   },
   {
     name: 'Culling',
-    packageName: '@math.gl/culling',
+    packageName: '@math.gl/geometry/culling',
     description: 'Bounding volumes, intersection tests, and visibility culling.',
     image: 'examples/culling-playground.jpg',
     imageAlt: 'Frustum culling playground example',
     theme: 'teal'
   },
   {
+    name: 'Earth',
+    packageName: '@math.gl/earth',
+    description: 'Grouped paths for geoid, sun, and timezone utilities.',
+    image: 'icon-basemap.webp',
+    imageAlt: 'Earth illustration',
+    theme: 'indigo'
+  },
+  {
     name: 'Timezone',
-    packageName: '@math.gl/timezone',
+    packageName: '@math.gl/earth/timezone',
     description: 'Geographic timezone lookup and local calendar calculations.',
     image: 'examples/timezone-globe.jpg',
     imageAlt: 'Interactive timezone globe example',
@@ -82,7 +90,7 @@ const modules = [
   },
   {
     name: 'Geoid',
-    packageName: '@math.gl/geoid',
+    packageName: '@math.gl/earth/geoid',
     description: 'Sample Earth gravity models and convert ellipsoidal and geoid heights.',
     image: 'examples/geoid-globe.jpg',
     imageAlt: 'Interactive geoid globe example',
@@ -90,7 +98,7 @@ const modules = [
   },
   {
     name: 'Sun',
-    packageName: '@math.gl/sun',
+    packageName: '@math.gl/earth/sun',
     description: 'Calculate sun position, daylight, and atmospheric lighting.',
     image: 'math-hero.webp',
     imageAlt: 'Math.gl geospatial visualization',
@@ -106,7 +114,7 @@ const modules = [
   },
   {
     name: 'Expressions',
-    packageName: '@math.gl/expressions',
+    packageName: '@math.gl/core/expressions',
     description: 'Parse and evaluate compact expressions with optional geospatial functions.',
     image: 'examples/expressions.jpg',
     imageAlt: 'Expression playground example',
@@ -115,7 +123,7 @@ const modules = [
   },
   {
     name: 'GeoArrow',
-    packageName: '@math.gl/geoarrow',
+    packageName: '@math.gl/geospatial/geoarrow',
     description: 'Columnar geospatial layouts and kernels over typed-array buffers.',
     image: 'icon-layers.svg',
     imageAlt: 'Layered geometry illustration',
@@ -123,7 +131,7 @@ const modules = [
   },
   {
     name: 'Geometry Utils',
-    packageName: '@math.gl/geometry-utils',
+    packageName: '@math.gl/geometry/utils',
     description: 'Inspect, normalize, and process geometry stored in typed arrays.',
     image: 'examples/geometry-viewer.jpg',
     imageAlt: 'Renderer-independent mesh example',
@@ -131,7 +139,7 @@ const modules = [
   },
   {
     name: 'CRS',
-    packageName: '@math.gl/crs',
+    packageName: '@math.gl/geospatial/crs',
     description: 'Lightweight coordinate reference system definitions and syntax codecs.',
     image: 'icon-basemap.webp',
     imageAlt: 'Map illustration',
@@ -147,7 +155,7 @@ const modules = [
   },
   {
     name: 'Types',
-    packageName: '@math.gl/types',
+    packageName: '@math.gl/core/types',
     description: 'Small, reusable TypeScript contracts for math and geospatial data.',
     image: 'icon-typescript.svg',
     imageAlt: 'TypeScript logo',
@@ -155,7 +163,7 @@ const modules = [
   },
   {
     name: 'WKB',
-    packageName: '@math.gl/wkb',
+    packageName: '@math.gl/geospatial/wkb',
     description: 'Dependency-free WKB, EWKB, and WKT geometry codecs.',
     image: 'icon-layers.svg',
     imageAlt: 'Layered geometry illustration',

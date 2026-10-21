@@ -5,8 +5,8 @@
     "description": "Vectors, matrices, shared numeric types and expression evaluation.",
     "modules": [
       "core",
-      "types",
-      "expressions"
+      "core/types",
+      "core/expressions"
     ]
   },
   {
@@ -14,22 +14,25 @@
     "label": "3D",
     "description": "Curves, meshes, geometry processing and visibility.",
     "modules": [
-      "curves",
+      "geometry/curves",
       "geometry",
-      "geometry-utils",
-      "culling"
+      "geometry/utils",
+      "geometry/culling",
+      "geometry/polygon",
+      "geometry/spatial-index"
     ]
   },
   {
     "id": "spatial",
-    "label": "Spatial",
-    "description": "Geometry operations, geographic indexing and columnar data.",
+    "label": "Geospatial",
+    "description": "Coordinate systems, projections, and geospatial data formats.",
     "modules": [
-      "spatial-index",
-      "polygon",
-      "dggs",
-      "geoarrow",
-      "wkb"
+      "geospatial",
+      "geospatial/crs",
+      "geospatial/projection",
+      "web-mercator",
+      "geospatial/geoarrow",
+      "geospatial/wkb"
     ]
   },
   {
@@ -37,13 +40,18 @@
     "label": "Earth",
     "description": "Coordinate reference systems, Earth models, maps and time.",
     "modules": [
-      "crs",
-      "projection",
-      "web-mercator",
-      "geospatial",
-      "geoid",
-      "timezone",
-      "sun"
+      "earth",
+      "earth/geoid",
+      "earth/timezone",
+      "earth/sun"
+    ]
+  },
+  {
+    "id": "dggs",
+    "label": "DGGS",
+    "description": "A separate module for discrete global grid systems.",
+    "modules": [
+      "dggs"
     ]
   }
 ]

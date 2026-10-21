@@ -1,7 +1,7 @@
 # Projection engine roadmap
 
 Status: tranches **0–11, including qualification tranches 7A–7D, are implemented** for the
-[documented projection support profile](../docs/modules/projection/developer-guide/support.md). The package root uses the math.gl projection engine; `projectionEngine` supplies the full catalogue factory;
+[documented projection support profile](../docs/modules/geospatial/projection/developer-guide/support.md). The package root uses the math.gl projection engine; `projectionEngine` supplies the full catalogue factory;
 `ProjectionEngine` and `Projection` are runtime-free contracts.
 `ConfigurableProjectionEngine` allows explicit plugins. The package is renamed
 from `@math.gl/proj4`; its deprecated wrapper alias and `/classic` subpath are removed.
@@ -14,7 +14,7 @@ unrestricted upstream behavior, not a claim of full-domain geodetic accuracy.
 
 ## Target and upstream baseline
 
-Build an independent math.gl projection engine inside `@math.gl/projection`, initially alongside
+Build an independent math.gl projection engine inside `@math.gl/geospatial/projection`, initially alongside
 the existing proj4js wrapper. Keep projection algorithms explicitly pluggable and
 ESM imports tree-shakeable throughout implementation.
 
@@ -50,11 +50,11 @@ the math.gl projection engine must never silently fall back to proj4js.
 
 ### Tranche 0: implemented foundation
 
-- `@math.gl/projection/experimental` exports `ProjectionEngine`, plugin types,
+- `@math.gl/geospatial/projection/experimental` exports `ProjectionEngine`, plugin types,
   `mercator`, and `equidistantCylindrical` without importing proj4js.
 - Plugins and aliases are supplied per instance. Geographic coordinates work without
   plugins; no global projection registry is populated as an import side effect.
-- Reuses `@math.gl/crs`'s PROJ syntax parser. The execution subset is documented
+- Reuses `@math.gl/geospatial/crs`'s PROJ syntax parser. The execution subset is documented
   separately from syntax support.
 - WGS84 geographic coordinates, EPSG:3857, ellipsoidal/spherical Mercator, and spherical
   eqc equations support both directions and projected-to-projected conversion.
@@ -66,14 +66,14 @@ the math.gl projection engine must never silently fall back to proj4js.
   bundles, and removal of unused projection plugins.
 
 This tranche is a usable subset, not a claim of complete parity for any CRS syntax.
-See [ProjectionEngine](../docs/modules/projection/api-reference/projection-engine.md) for the exact contract.
+See [ProjectionEngine](../docs/modules/geospatial/projection/api-reference/projection-engine.md) for the exact contract.
 Tranche 3 adds upstream's `identity` alias with explicit radian semantics.
 
 ### Tranche 1: make parity measurable
 
 Implemented artifacts:
 
-- `modules/projection/test/fixtures/parity-inventory.json`: all 38 upstream projection/helper
+- `modules/geospatial/projection/test/fixtures/parity-inventory.json`: all 38 upstream projection/helper
   modules and 31 CRS/API/transform features, with aliases, default-bundle membership,
   source hashes, fixture IDs, tests, gaps, and intentional differences.
 - `upstream-2.22.0.ts`: 24 tagged upstream coordinate fixtures with source lines and
@@ -138,7 +138,7 @@ upstream copyright/license notices whenever code or test data is adapted.
 ### Tranche 3: separate CRS normalization from execution
 
 Implemented: immutable native CRS normalization, opt-in WKT/PROJJSON adapters using
-`@math.gl/crs`, shared readonly definitions and SpatialReference inputs, explicit
+`@math.gl/geospatial/crs`, shared readonly definitions and SpatialReference inputs, explicit
 storage-order handling, backend-specific capability checks, and compound/vertical
 extraction policy. The shared PROJ parser now preserves DMS notation. Readers are
 excluded from minimal bundles. Structured method/axis variants beyond the documented
@@ -147,7 +147,7 @@ subset remain explicit gaps rather than a claim of full standards coverage.
 
 Normalize PROJ strings, WKT1/WKT2 (including ESRI spellings), and upstream-supported
 PROJJSON into a typed internal CRS model. Keep parsing and metadata types in
-`@math.gl/crs`; executable interpretation belongs in `@math.gl/projection`.
+`@math.gl/geospatial/crs`; executable interpretation belongs in `@math.gl/geospatial/projection`.
 
 Cover projection-name aliases, parameter defaults and precedence, angular formats,
 unit tables, prime meridians, longitude wrapping, axes, and built-in CRS aliases.
@@ -247,8 +247,8 @@ selection remain outside this horizontal subset.
 | 7C — Performance | Node throughput/allocation and fresh-process measurements; isolated browser load/construction timing and Float32/Float64 forward/inverse workloads. Chromium, Firefox and WebKit qualification runs in CI, including the independent projection corpus. Timing results are artifacts; correctness and package-size budgets are gates. |
 | 7D — Stabilization | Supported native entry points alias the same implementation as experimental imports. Packed ESM/CommonJS/type checks cover both families. The documented contract reviews numerical/strict-input exceptions and described migration through the original `classic` wrapper, since removed during the package rename. |
 
-See [independent validation](../docs/modules/projection/independent-validation.md), [performance measurements](./projection-performance-history.md)
-and the [support/migration contract](../docs/modules/projection/developer-guide/support.md). The machine-readable release
+See [independent validation](../docs/modules/geospatial/projection/independent-validation.md), [performance measurements](./projection-performance-history.md)
+and the [support/migration contract](../docs/modules/geospatial/projection/developer-guide/support.md). The machine-readable release
 profile checks fixture counts and the reviewed exception list. Publication is a
 separate release action. The default uses the math.gl projection engine; proj4js is now a development dependency. The `/classic` wrapper and its helpers were removed during the alpha package rename.
 
@@ -274,7 +274,7 @@ A paired source comparison runner validates and measures baseline/current runtim
 same seeded workload without changing checkouts. CI records elapsed results against the
 PR base; a separately labeled thread-CPU diagnostic is available locally. Constructor
 improvement is clear in the local diagnostic, while transform gains vary by case; see
-[methodology and observations](../docs/modules/projection/benchmarks.md#compare-a-runtime-change-with-its-base).
+[methodology and observations](../docs/modules/geospatial/projection/benchmarks.md#compare-a-runtime-change-with-its-base).
 
 ## Tranche 10: projection-specific batch kernels — implemented
 
@@ -300,7 +300,7 @@ Equidistant conic now uses a higher-order meridional series; cylindrical equal-a
 preserves near-pole latitudes instead of snapping them to the pole. Node and all three
 browser engines enforce the budgets alongside the existing 37-algorithm corpus.
 
-The [accuracy domains and error report](../docs/modules/projection/independent-validation.md#seeded-accuracy-domains)
+The [accuracy domains and error report](../docs/modules/geospatial/projection/independent-validation.md#seeded-accuracy-domains)
 document conditioning limits and remaining series approximations. Broader parameter
 coverage and singularity analysis remain ongoing numerical work, not unrestricted
 PROJ parity.
@@ -309,7 +309,7 @@ PROJ parity.
 
 Per-instance `verticalGrids` and `+geoidgrids` convert height before/after horizontal
 datum transformations. Optional GTX and regular-grid readers snapshot their data;
-a structural adapter accepts a prepared `@math.gl/geoid` model. Scalar and in-place
+a structural adapter accepts a prepared `@math.gl/earth/geoid` model. Scalar and in-place
 Float32/Float64 XYZM paths preserve M and enforce coverage, height and nodata checks.
 Ten authored configurations (28 XYZM points) are checked against pinned PROJ 9.5.1
 pipelines, including source/destination grids, Helmert ordering, feet, axes and prime
@@ -317,7 +317,7 @@ meridians. Browser qualification exercises the same independent references.
 
 This does not complete tranche 12: compound/vertical CRS execution,
 general pipeline composition, epochs and automatic operation selection remain open.
-See the [height conversion guide](../docs/modules/projection/developer-guide/projection-engine.md#convert-geoid-heights).
+See the [height conversion guide](../docs/modules/geospatial/projection/developer-guide/projection-engine.md#convert-geoid-heights).
 
 ## Tranche 12B1: vertical GeoTIFF — implemented
 
@@ -345,7 +345,7 @@ reverses order/direction for inverse execution, supports XY/XYZ/XYZM typed buffe
 and shares lazy projection implementations without eager imports. Scalar and Float64
 results are independently qualified against PROJ 9.5.1; Float32 execution rounds only
 final records. Packed ESM/CJS/types, optional bundle boundaries and browser qualification
-run in CI. See [the operation pipeline contract](../docs/modules/projection/api-reference/projection-pipeline.md).
+run in CI. See [the operation pipeline contract](../docs/modules/geospatial/projection/api-reference/projection-pipeline.md).
 
 This completes the typed composition profile, not arbitrary PROJ pipeline parsing.
 The follow-up below adds exact rotations, explicit `ob_tran` output units, ordinate
@@ -364,7 +364,7 @@ are validated for units, spaces and stack state; each batch owns reusable stack 
 Thirty-seven authored pipelines / 102 XYZM points now have independent PROJ 9.5.1
 forward/inverse expectations, including real BETA2007 interpolation and an authored
 GTX field. Scalar, Float64 and Float32 ownership/rounding checks run with Node and
-browser qualification. See [the pipeline guide](../docs/modules/projection/api-reference/projection-pipeline.md).
+browser qualification. See [the pipeline guide](../docs/modules/geospatial/projection/api-reference/projection-pipeline.md).
 
 This completes the declared typed-operator extension. M remains an uninterpreted
 measure. The following tranche adds explicit observation epochs; general PROJ
@@ -386,7 +386,7 @@ The core and ordinary wrapper bundles remain unchanged.
 This is explicit reference-frame transformation at an observation epoch. It neither
 propagates coordinates between epochs nor infers time from M or CRS metadata.
 Prepared linear velocity models are available in the bounded 12C2 profile below.
-Time-varying components and automatic operation selection remain future work. See [coordinate epochs](../docs/modules/projection/api-reference/projection-pipeline.md#coordinate-epochs-and-moving-reference-frames).
+Time-varying components and automatic operation selection remain future work. See [coordinate epochs](../docs/modules/geospatial/projection/api-reference/projection-pipeline.md#coordinate-epochs-and-moving-reference-frames).
 
 ## Tranche 12C2: linear velocity models — implemented bounded profile
 
@@ -402,7 +402,7 @@ ordinary wrappers and a pipeline-only static graph.
 
 This completes the linear, time-invariant profile. Real-model accuracy qualification
 and nonlinear/time-varying components are still separate work. See
-[deformation models](../docs/modules/projection/developer-guide/deformation-models.md).
+[deformation models](../docs/modules/geospatial/projection/developer-guide/deformation-models.md).
 
 ## Tranche 13A: pipeline batch performance — implemented first pass
 
@@ -478,7 +478,7 @@ existing bundle limits are unchanged.
 
 This completes the bounded application-catalogue milestone, not unrestricted EPSG
 operation discovery, dynamic CRS inference or a geodetic accuracy certification.
-See the [operation selection guide](../docs/modules/projection/api-reference/operation-catalog.md).
+See the [operation selection guide](../docs/modules/geospatial/projection/api-reference/operation-catalog.md).
 
 ## Tranche 13A — Static Helmert coordinate buffers: implemented follow-up
 
@@ -578,7 +578,7 @@ The five outstanding corpus axis cases now pass: legacy named UNKNOWN axes,
 polar direction spellings, and cardinal WKT2/PROJJSON meridians relative to the
 central meridian. Scalar and typed-array tests exercise default/enforced order,
 signs, units, both hemispheres, and explicit stored order. All nine remaining corpus
-rejections are deliberate strict-input policies; see the [audit](../docs/modules/projection/parity-audit.md#strict-input-policy).
+rejections are deliberate strict-input policies; see the [audit](../docs/modules/geospatial/projection/parity-audit.md#strict-input-policy).
 Oblique axis rotations, non-polar meridian operations and broader structured variants
 remain outside the supported subset.
 
@@ -587,7 +587,7 @@ barrel. Corresponding CRS syntax subpaths prevent optional WKT syntax from being
 hoisted through a shared dependency. CI inspects the initial static dependency graph
 with an eagerly loaded core/Mercator, executes the deferred UTM, WKT and composite
 chunks, enforces byte budgets, and checks every subpath in packed ESM/CommonJS and
-TypeScript consumers. See the [engine guide](../docs/modules/projection/developer-guide/projection-engine.md#load-less-used-projections-on-demand).
+TypeScript consumers. See the [engine guide](../docs/modules/geospatial/projection/developer-guide/projection-engine.md#load-less-used-projections-on-demand).
 
 The independent-reference follow-up below adds maintained datasets and an explicit
 edge disposition. The completed qualification profile is described above; additional operations and
@@ -604,7 +604,7 @@ unsampled domains remain future extensions rather than an unrestricted parity cl
 - AEQD relative-origin correction, explicit legacy-definition translations, measured
   Cassini/Robinson limits and a disposition for the Canadian inverse edge failures.
 
-See [independent validation](../docs/modules/projection/independent-validation.md). This completes the initial
+See [independent validation](../docs/modules/geospatial/projection/independent-validation.md). This completes the initial
 maintained independent-reference and real-GeoTIFF baseline. Tranches 7A–7D above extend this initial baseline and make the supported-profile
 promotion decision explicit.
 
@@ -624,7 +624,7 @@ behavior, numeric inverse output commits, and an analytic spherical projection
 inverse. Authored anchors qualify center/near-axis boundaries, flattened/prolate/
 triaxial geometry, aliasing and recursive outputs; matched benchmarks compare
 reusable scalar and flat paths with separate allocation samples. CI records those
-diagnostics without speed gates. See [coordinate-system boundaries](../docs/modules/projection/developer-guide/coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
+diagnostics without speed gates. See [coordinate-system boundaries](../docs/modules/geospatial/projection/developer-guide/coordinate-systems.md#interoperating-with-geospatial-ellipsoids)
 and [the measurements](./projection-performance-history.md#spheroid-numerical-boundaries).
 
 The next qualification and sharing tranche is implemented: independent surface/
@@ -648,7 +648,7 @@ flattening, prolate/triaxial axes and either side of the equatorial cusp. Analyt
 checks extend finite-axis/underflow boundaries and flat failure ownership. CI
 checks fixture reproducibility, sampled accuracy and failure contracts; every
 diagnostic error/rejection is retained separately. See
-[ellipsoid accuracy and interior boundaries](../docs/modules/projection/ellipsoid-qualification.md).
+[ellipsoid accuracy and interior boundaries](../docs/modules/geospatial/projection/ellipsoid-qualification.md).
 
 Further interior algorithm work needs an explicit normal-branch selection
 contract and a safeguarded, independently qualified solver.
@@ -664,19 +664,19 @@ the full upstream MIT notice. No new third-party source or model data is added.
 ## Validation commands
 
 ```sh
-yarn exec vitest run --project node modules/projection/test
-yarn exec tsc --noEmit --project modules/projection/tsconfig.json
+yarn exec vitest run --project node modules/geospatial/projection/test
+yarn exec tsc --noEmit --project modules/geospatial/projection/tsconfig.json
 yarn exec ocular-build projection
-node modules/projection/scripts/check-experimental-package.mjs
-node modules/projection/scripts/check-parity-inventory.mjs
-node modules/projection/scripts/check-packed-package.mjs
-python3 modules/projection/scripts/generate-interior-reference.py --check
-node modules/projection/scripts/qualify-interiors.mjs
-node modules/projection/scripts/check-spheroid-allocations.mjs
-node modules/projection/scripts/check-local-frame-allocations.mjs
-node modules/projection/scripts/check-local-frame-boundary.mjs
-node modules/projection/scripts/check-bundle-budget.mjs
-node modules/projection/scripts/benchmark.mjs --allocations --output /tmp/proj4-benchmark.json
+node modules/geospatial/projection/scripts/check-experimental-package.mjs
+node modules/geospatial/projection/scripts/check-parity-inventory.mjs
+node modules/geospatial/projection/scripts/check-packed-package.mjs
+python3 modules/geospatial/projection/scripts/generate-interior-reference.py --check
+node modules/geospatial/projection/scripts/qualify-interiors.mjs
+node modules/geospatial/projection/scripts/check-spheroid-allocations.mjs
+node modules/geospatial/projection/scripts/check-local-frame-allocations.mjs
+node modules/geospatial/projection/scripts/check-local-frame-boundary.mjs
+node modules/geospatial/projection/scripts/check-bundle-budget.mjs
+node modules/geospatial/projection/scripts/benchmark.mjs --allocations --output /tmp/proj4-benchmark.json
 ```
 
 ## Deformation qualification follow-up: authored stress and application harness
@@ -694,8 +694,8 @@ static velocity from temporal rate/event laws. Authoritative model certification
 remains application-owned. S6 adds pinned local
 asset and operation metadata qualification; S7 implements the four explicit
 temporal laws with independent references. See
-[deformation qualification](../docs/modules/projection/deformation-qualification.md), [temporal models](../docs/modules/projection/temporal-models.md)
-and [optional acceleration](../docs/modules/projection/acceleration.md).
+[deformation qualification](../docs/modules/geospatial/projection/deformation-qualification.md), [temporal models](../docs/modules/geospatial/projection/temporal-models.md)
+and [optional acceleration](../docs/modules/geospatial/projection/acceleration.md).
 S6–S8 add original code/reference generation only, with no new runtime dependencies
-or third-party datasets. S9 consolidates these results in the [published scorecard](../docs/modules/projection/scorecard.md);
-[measurement limits and commands](../docs/modules/projection/scorecard-methodology.md) preserve the bounded scope.
+or third-party datasets. S9 consolidates these results in the [published scorecard](../docs/modules/geospatial/projection/scorecard.md);
+[measurement limits and commands](../docs/modules/geospatial/projection/scorecard-methodology.md) preserve the bounded scope.

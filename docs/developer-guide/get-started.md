@@ -18,11 +18,11 @@ Core classes extend JavaScript `Array`. Most arithmetic methods modify the recei
 
 ## Choose a module
 
-Each module has its own package and installation instructions. Use [projection](../modules/projection/README.md) for CRS conversion, [web-mercator](../modules/web-mercator/README.md) for map cameras, and [geospatial](../modules/geospatial/README.md) for ellipsoid and globe math. The [module list](../README.md#modules) covers the full toolbox.
+Each module has its own package and installation instructions. Use [projection](../modules/geospatial/projection/README.md) for CRS conversion, [web-mercator](../modules/web-mercator/README.md) for map cameras, and [geospatial](../modules/geospatial/README.md) for ellipsoid and globe math. The [module list](../README.md#modules) covers the full toolbox.
 
 ## TypeScript
 
-Types ship with each package; no separate types package is needed. math.gl v5 declarations require TypeScript 6.0 or later for `Float16Array` types. Runtime `Float16Array` support remains optional. See [array types](../modules/types/api-reference/array-types.md) for detection and fallback helpers.
+Types ship with each package; no separate types package is needed. math.gl v5 declarations require TypeScript 6.0 or later for `Float16Array` types. Runtime `Float16Array` support remains optional. See [array types](../modules/core/types/api-reference/array-types.md) for detection and fallback helpers.
 
 ## Module formats
 
