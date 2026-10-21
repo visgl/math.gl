@@ -87,8 +87,10 @@ jobs:
       - name: Check consolidated packages, exports, and assets
         run: yarn check:packages
 
-      - name: Test tectonic time machine streaming
-        run: yarn workspace math.gl-tectonic-time-machine test
+      - name: Test and build tectonic time machine
+        run: |
+          yarn workspace math.gl-tectonic-time-machine test
+          yarn workspace math.gl-tectonic-time-machine build
 
       - name: Test Alpine Ice Age dataset and interpolation
         run: yarn workspace math.gl-alpine-ice-age test
