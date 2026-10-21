@@ -216,6 +216,7 @@
               "modules/projection/developer-guide/coordinate-systems",
               "modules/projection/developer-guide/projections",
               "modules/projection/developer-guide/projection-engine",
+              "modules/projection/developer-guide/external-projection-engines",
               "modules/projection/developer-guide/deformation-models",
               "modules/projection/developer-guide/support",
               "modules/projection/developer-guide/roadmap"
