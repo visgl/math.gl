@@ -43,7 +43,9 @@ export default function TectonicTimeMachine() {
     [regionColors, setRegionColors] = useState(false),
     [speed, setSpeed] = useState(20),
     [counts, setCounts] = useState(null),
-    [appearanceStatus, setAppearanceStatus] = useState('Loading terrain imagery…'),
+    [appearanceStatus, setAppearanceStatus] = useState('Loading terrain…'),
+    [paleoActive, setPaleoActive] = useState(false),
+    [historicalTerrain, setHistoricalTerrain] = useState(true),
     [eventCategory, setEventCategory] = useState('all'),
     [eventQuery, setEventQuery] = useState(''),
     [planetaryAge, setPlanetaryAge] = useState(null),
@@ -57,7 +59,8 @@ export default function TectonicTimeMachine() {
       e => setError(e.message),
       value => playback.current.advance(value),
       value => playback.current.play(value),
-      setAppearanceStatus
+      (status, active) => {setAppearanceStatus(status); setPaleoActive(active);},
+      parquetWorkerUrl
     );
     scene.current = renderer;
     const observer = new ResizeObserver(() => renderer.resize());
@@ -144,8 +147,8 @@ export default function TectonicTimeMachine() {
     return () => clearTimeout(timer);
   }, [cycleViews, playing, ready, view]);
   useEffect(() => {
-    scene.current?.setOptions({view, longitude, scenario, grid, regionColors, glaciations});
-  }, [view, longitude, scenario, grid, regionColors, glaciations]);
+    scene.current?.setOptions({view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain});
+  }, [view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain]);
   useEffect(() => {
     if (!playing) {
       clock.current = time;
@@ -199,7 +202,7 @@ export default function TectonicTimeMachine() {
           <p>
             {time > 0
               ? 'Illustrative future · not a prediction'
-              : `${source.id} · rigid-block reconstruction`}
+              : paleoActive ? 'PALEOMAP · reconstructed paleotopography' : `${source.id} · rigid-block reconstruction`}
           </p>
           <button
             className="tectonic-primary-play"
@@ -337,10 +340,11 @@ export default function TectonicTimeMachine() {
           Land appearance
           <select
             aria-label="Land appearance"
-            value={regionColors ? 'regions' : 'terrain'}
-            onChange={e => setRegionColors(e.target.value === 'regions')}
+            value={regionColors ? 'regions' : historicalTerrain ? 'paleodem' : 'terrain'}
+            onChange={e => {setRegionColors(e.target.value === 'regions'); setHistoricalTerrain(e.target.value === 'paleodem');}}
           >
-            <option value="terrain">Natural terrain</option>
+            <option value="paleodem">Historical terrain · PaleoDEM (0–540 Ma)</option>
+            <option value="terrain">Modern NASA imagery on plates</option>
             <option value="regions">Region colors</option>
           </select>
         </label>
@@ -483,12 +487,13 @@ export default function TectonicTimeMachine() {
           </p>
           <p className="tectonic-note">
             Older reconstructions carry greater uncertainty, especially in longitude. Terrain is
-            modern NASA imagery carried with each rigid block. Ancient mountains, vegetation and ice
+            PaleoDEM elevation grids for 0–540 Ma, in their own reconstructed PALEOMAP frame;
+            outside that range, modern NASA imagery carried with rigid blocks. Vegetation and ice
             are not reconstructed. Ocean ripples and lighting are visual effects.
           </p>
           <p className="tectonic-status" role="status">
             {status}
-            {counts && ready
+            {counts && ready && !paleoActive
               ? ` · ${counts.active} visible templates${counts.unresolved ? ` · ${counts.unresolved} unresolved templates omitted` : ''}`
               : ''}
           </p>

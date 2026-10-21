@@ -634,3 +634,18 @@ test('a new pose waiter retries a failed stream and does not inherit its stale f
   assert.equal(calls,2);assert(cache.hasTime(-5));
   assert.match(statuses[0],/0\/2/);assert.match(statuses.at(-1),/2\/2/);
 });
+
+test('global PaleoDEM material rotates with the meridian once and stays above the ocean', () => {
+  const parts = [{positions: [-5,-5,5,-5,5,5,-5,5,-5,-5], color: [1,2,3]}];
+  const land = makeMesh(parts), sea = makeMesh(parts);
+  for (const longitude of [0, 120, -180, 30]) {
+    transformMesh(land, {globe: 1}, {}, {}, 0, false, longitude, true);
+    transformMesh(sea, {globe: 1}, {}, {}, 0, true, longitude);
+    for (let i = 0, j = 0; i < land.coordinates.length; i += 2, j += 3) {
+      const expected = unitVector(land.coordinates[i] + longitude, land.coordinates[i + 1]);
+      for (let k = 0; k < 3; k++) near(land.reference[j+k], expected[k], 1e-6);
+      near(Math.hypot(...land.positions.subarray(j,j+3)), 1);
+      near(Math.hypot(...sea.positions.subarray(j,j+3)), .994);
+    }
+  }
+});
