@@ -22,7 +22,7 @@ Capabilities have separate dependency boundaries:
 
 * `@math.gl/earth/timezone`: offsets, local calendar fields, timezone labels, runtime identifier support, and lazy geographic lookup. These utilities use native `Intl`.
 * `@math.gl/earth/timezone/lookup`: synchronous approximate geographic lookup with the compact boundary table.
-* `@math.gl/earth/timezone/temporal`: local-day boundaries, local-time conversion, and offset transitions. This entry point uses `@js-temporal/polyfill` for Temporal algorithms across supported browsers and Node versions. It does not modify globals. Its compatibility dependency is isolated from root and lookup consumers; it still uses runtime timezone rules.
+* `@math.gl/earth/timezone/temporal`: local-day boundaries, local-time conversion, and offset transitions. This entry point uses a vendored copy of `@js-temporal/polyfill` 0.5.1 (including JSBI) for Temporal algorithms across supported browsers and Node versions. It does not modify globals. Its vendored compatibility implementation is isolated from root and lookup consumers; it still uses runtime timezone rules.
 
 The package does not ship an `Intl` polyfill or a separate date-specific timezone-rule database.
 
@@ -62,7 +62,7 @@ import {lookupTimezone} from '@math.gl/earth/timezone/lookup';
 const timezone = lookupTimezone([-74.006, 40.7128]); // America/New_York
 ```
 
-Coordinates are `[longitude, latitude]` in degrees. Geographic lookup uses the compact [@photostructure/tz-lookup](https://github.com/photostructure/tz-lookup) dependency. Its compressed boundaries are approximate and can produce incorrect results, including near borders. It returns one identifier and does not resolve ambiguous political timezone usage. Upstream package updates refresh geographic data; date-specific offsets depend separately on the runtime's timezone database.
+Coordinates are `[longitude, latitude]` in degrees. Geographic lookup uses the compact [@photostructure/tz-lookup](https://github.com/photostructure/tz-lookup) implementation, vendored at version 11.7.0. Its compressed boundaries are approximate and can produce incorrect results, including near borders. It returns one identifier and does not resolve ambiguous political timezone usage. Updating the vendored upstream snapshot refreshes geographic data; date-specific offsets depend separately on the runtime's timezone database.
 
 ## Local calendar computations[​](#local-calendar-computations "Direct link to Local calendar computations")
 
