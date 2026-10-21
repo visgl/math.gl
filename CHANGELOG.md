@@ -1,10 +1,16 @@
 # CHANGELOG
 
-## Unreleased
+## v5.0.0-alpha.19
 
 - Consolidate implementations into core, geometry, geospatial, earth, and dggs packages. Remove the standalone leaf packages and migrate their APIs, assets, and nested exports to grouped subpaths; retain the web-mercator package.
 
 - feat(packaging): Add grouped subpaths for core, geometry, geospatial, and Earth APIs; remove the unscoped `math.gl` workspace package and keep its former core APIs in `@math.gl/core`.
+
+- feat(geospatial): Support variable-width TileMatrix rows (#259).
+- feat(tectonics): Add a searchable ancient geographic feature catalogue, provenance-aware paleogeographic geometry contracts, and a deep-time planetary history and mass extinction explorer (#256, #257, #258).
+- build: Vendor expression parser and timezone dependencies; migrate benchmarks to probe.gl 5 subpaths (#261, #263).
+- docs: Clarify unsupported discontinuous map layouts and restore the external projection wrapper guide (#262, #267).
+- build(deps): Update launch-editor (#264).
 
 ## v5.0.0-alpha.18
 
