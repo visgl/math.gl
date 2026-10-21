@@ -20,10 +20,10 @@ export default function TectonicTimeMachine() {
   const canvas = useRef(null),
     stage = useRef(null),
     scene = useRef(null),
-    clock = useRef(-930),
+    clock = useRef(-500),
     timeline = useRef(null),
     playback = useRef(null);
-  const [time, setTime] = useState(-930),
+  const [time, setTime] = useState(-500),
     [playing, setPlaying] = useState(false),
     [ready, setReady] = useState(false),
     [status, setStatus] = useState('Ready to load published history'),

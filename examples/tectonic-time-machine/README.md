@@ -261,6 +261,7 @@ an ancient vegetation reconstruction; region colors remain a categorical view.
 
 ## Historical PaleoDEM terrain
 
+Playback starts at 500 Ma so historical terrain is visible immediately.
 The default **Historical terrain · PaleoDEM** appearance uses Scotese and Wright's
 CC-BY-4.0 PALEOMAP PaleoDEMs v2 from 540 Ma through the present. The 3.1 MB
 [immutable Parquet snapshot](https://media.githubusercontent.com/media/visgl/deck.gl-data/eaa2649826c795492ee89a2632d863788545f2a2/earth/paleogeography/v1/paleodem/paleodem.parquet)
