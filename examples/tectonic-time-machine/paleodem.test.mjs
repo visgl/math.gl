@@ -67,3 +67,30 @@ test('truncated grids are not exposed and a failure leaves the fallback availabl
   assert.equal(terrain.get(-540), null);
   controller.abort();
 });
+
+test('between-age terrain uses distinct loaded grids in the correct blend direction', async () => {
+  const controller = new AbortController(), gates = [];
+  const terrain = await loadPaleoTerrain({signal: controller.signal,
+    fetchFile: async () => Response.json(manifest),
+    async *readBatches(_url, options) {
+      await new Promise(resolve => gates.push(resolve));
+      options.signal.throwIfAborted();
+      const group = manifest.rowGroups[options.rowGroups[0]];
+      yield {data: {getChild: () => ({length: group.rows, get: () => group.ageMa * 10})}};
+    }
+  });
+  assert.equal(terrain.get(-302), null);
+  gates.shift()();await tick(); // 300 Ma is available, but 305 Ma is still pending.
+  assert.equal(terrain.get(-302), null);
+  gates.shift()();await tick();
+  const pose = terrain.get(-302), {a, b} = pose;
+  assert.notEqual(a, b);
+  assert.equal(a.age, 300);assert.equal(b.age, 305);
+  assert.equal(a.elevation[0], 3000);assert.equal(a.elevation.at(-1), 3000);
+  assert.equal(b.elevation[0], 3050);assert.equal(b.elevation.at(-1), 3050);
+  assert.equal(pose.blend, .4);
+  assert.equal(a.elevation[0] * (1 - pose.blend) + b.elevation[0] * pose.blend, 3020);
+  const next = terrain.get(-303);
+  assert.equal(next.a, a);assert.equal(next.b, b);assert.equal(next.blend, .6);
+  controller.abort();gates.shift()?.();await tick();
+});
