@@ -191,6 +191,27 @@ it does not choose polygon seam splits or tessellation. Use
 [`@math.gl/geometry/polygon`](../../../geometry/polygon/api-reference/polygon.md) for the relevant geometric
 operations. Cube-face selection and tiling likewise belong to the application.
 
+### Not yet supported: discontinuous map layouts
+
+math.gl does not currently provide complete discontinuous map layouts, such as
+Goode's interrupted homolosine, interrupted sinusoidal and Mollweide maps, or the
+Butterfly, Collignon and Waterman polyhedral layouts. These combine
+projection equations with rules for splitting the globe into lobes or faces and
+arranging the resulting pieces on the map.
+
+The missing support is primarily in map rendering: choosing lobes or faces,
+clipping and splitting lines and polygons at their boundaries, and placing the
+pieces into a coherent layout. Transforming each vertex independently is
+insufficient for rendering geometry across those boundaries. The built-in `sinu`
+and `moll` algorithms supply point transforms, but do not construct interrupted
+layouts; `qsc` likewise does not assemble an unfolded polyhedral map.
+
+See the [supported profile](./support.md) for math.gl's current coordinate
+transformation coverage. D3 supports these layouts through
+[`d3-geo`](https://d3js.org/d3-geo) with the clipping-aware projections in
+[`d3-geo-polygon`](https://github.com/d3/d3-geo-polygon#updated-projections).
+Support for these layouts is not currently available in deck.gl.
+
 ## Satellite views and rotated maps
 
 | Operation                      | ID        | Export                  | Parameters and limits                                                                                |
