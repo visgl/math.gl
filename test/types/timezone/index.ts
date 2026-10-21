@@ -1,8 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {getTimezoneOffset, lookupTimezoneAsync} from '@math.gl/timezone';
-import {lookupTimezone} from '@math.gl/timezone/lookup';
+import {getTimezoneOffset, lookupTimezoneAsync} from '@math.gl/earth/timezone';
+import {lookupTimezone} from '@math.gl/earth/timezone/lookup';
 
 const coordinates = [-74.006, 40.7128] as const;
 const zone: string = lookupTimezone(coordinates);
@@ -17,18 +17,18 @@ lookupTimezone([1]);
 // @ts-expect-error offsets require an instant, not a date string
 getTimezoneOffset(zone, '2024-01-01');
 
-import {getLocalDateTime, getTimezoneLabel, isTimezoneSupported} from '@math.gl/timezone';
-import type {LocalDateTime} from '@math.gl/timezone';
+import {getLocalDateTime, getTimezoneLabel, isTimezoneSupported} from '@math.gl/earth/timezone';
+import type {LocalDateTime} from '@math.gl/earth/timezone';
 import {
   getStartOfDay,
   getTimezoneTransitions,
   localDateTimeToInstant
-} from '@math.gl/timezone/temporal';
+} from '@math.gl/earth/timezone/temporal';
 import type {
   LocalDateTimeInput,
   LocalDateTimeOptions,
   TimezoneTransition
-} from '@math.gl/timezone/temporal';
+} from '@math.gl/earth/timezone/temporal';
 
 const local: LocalDateTime = getLocalDateTime(zone, 0);
 const supported: boolean = isTimezoneSupported(zone);

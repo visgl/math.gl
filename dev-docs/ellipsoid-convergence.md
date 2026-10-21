@@ -1,7 +1,7 @@
 # Ellipsoid convergence
 
 The first step shares geometry and establishes conversion baselines between
-`@math.gl/geospatial` and `@math.gl/projection`. Qualified sphere/oblate conversion kernels now share a small optional numeric leaf;
+`@math.gl/geospatial` and `@math.gl/geospatial/projection`. Qualified sphere/oblate conversion kernels now share a small optional numeric leaf;
 three-radius geospatial surface inversion remains separate. Sphere/oblate cartographic interiors now share the safeguarded nearest-normal solver; see S1 below.
 
 ## Shared scope and boundaries
@@ -18,7 +18,7 @@ three-radius geospatial surface inversion remains separate. Sphere/oblate cartog
 
 ## Geometry adapters: implemented preparation
 
-- `SpheroidParameters` is a shared type-only contract in `@math.gl/types`, re-exported
+- `SpheroidParameters` is a shared type-only contract in `@math.gl/core/types`, re-exported
   by core, geospatial and projection. It contains finite positive equatorial/polar
   axes in metres, with `semiMinorAxis <= semiMajorAxis`.
 - `Ellipsoid.fromSpheroid()` consumes a geometry snapshot, including the structural
@@ -135,7 +135,7 @@ aliased failure, flat views/M and recovery. No production solver is replaced and
 no per-coordinate allocation is added. CI verifies reference reproducibility and
 qualified rows without promoting diagnostic matches to support.
 
-See [the public qualification page](../docs/modules/projection/ellipsoid-qualification.md)
+See [the public qualification page](../docs/modules/geospatial/projection/ellipsoid-qualification.md)
 for allowances, recorded outcomes and reproduction commands. Further inverse
 sharing requires a branch-selection contract and a safeguarded interior solver,
 with independent qualification before replacing retained fallbacks. Local-frame

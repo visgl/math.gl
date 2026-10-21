@@ -5,7 +5,17 @@
 /** Bounds in the matrix coordinate system: minimum X/Y followed by maximum X/Y. */
 export type TileMatrixBounds = readonly [number, number, number, number];
 
-/** A regular rectangular tile grid at one resolution, independent of service protocols. */
+/** Coalescence of contiguous base-grid columns over an inclusive band of rows. */
+export type VariableMatrixWidth = {
+  /** Number of base columns per tile; an integer greater than one dividing matrix width. */
+  readonly coalesce: number;
+  /** First row in this band, in the matrix's native row direction. */
+  readonly minTileRow: number;
+  /** Last row in this band, inclusive. */
+  readonly maxTileRow: number;
+};
+
+/** A rectangular tile grid at one resolution, independent of service protocols. */
 export type TileMatrix = {
   /** Opaque identifier; it is not a numeric zoom or array index. */
   readonly id: string;
@@ -19,8 +29,10 @@ export type TileMatrix = {
   readonly cornerOfOrigin: 'topLeft' | 'bottomLeft';
   /** Positive integer tile width and height in pixels. */
   readonly tileSize: readonly [number, number];
-  /** Positive integer matrix width and height in tiles. */
+  /** Positive integer base-grid width and height in tiles, before coalescence. */
   readonly matrixSize: readonly [number, number];
+  /** Optional disjoint row bands; omitted rows have coalescence one. Order is immaterial. */
+  readonly variableMatrixWidths?: readonly VariableMatrixWidth[];
 };
 
 /** Matrices sharing a coordinate system; no ordering or quadtree relationship is assumed. */
@@ -43,8 +55,19 @@ export type TileMatrixLimits = {
   readonly maxTileRow: number;
 };
 
+/** An exact row-band range of canonical columns, enumerated using columnStep. */
+export type TileMatrixRowRange = TileMatrixLimits & {
+  /** Increment between canonical columns; rows increment by one. */
+  readonly columnStep: number;
+};
+
 /** Rejects malformed or numerically unrepresentable matrix geometry. */
 export function validateTileMatrix(matrix: TileMatrix): void {
+  validateTileMatrixGeometry(matrix);
+}
+
+/** Validates geometry and returns a sorted copy of the declared coalescence bands. */
+function validateTileMatrixGeometry(matrix: TileMatrix): VariableMatrixWidth[] {
   if (
     typeof matrix.id !== 'string' ||
     !matrix.id ||
@@ -63,6 +86,24 @@ export function validateTileMatrix(matrix: TileMatrix): void {
   ) {
     throw new RangeError('Invalid tile matrix geometry');
   }
+  const bands = [...(matrix.variableMatrixWidths ?? [])].sort(
+    (first, second) => first.minTileRow - second.minTileRow
+  );
+  let previousRow = -1;
+  for (const band of bands) {
+    if (
+      !Number.isSafeInteger(band.coalesce) ||
+      band.coalesce <= 1 ||
+      matrix.matrixSize[0] % band.coalesce !== 0 ||
+      !Number.isSafeInteger(band.minTileRow) ||
+      !Number.isSafeInteger(band.maxTileRow) ||
+      band.minTileRow <= previousRow ||
+      band.maxTileRow < band.minTileRow ||
+      band.maxTileRow >= matrix.matrixSize[1]
+    )
+      throw new RangeError('Invalid variable matrix width');
+    previousRow = band.maxTileRow;
+  }
   for (let axis = 0; axis < 2; axis++) {
     const resolution = axis === 1 ? (matrix.resolutionY ?? matrix.resolution) : matrix.resolution;
     const tileSpan = resolution * matrix.tileSize[axis];
@@ -79,6 +120,7 @@ export function validateTileMatrix(matrix: TileMatrix): void {
       throw new RangeError('Tile matrix extent must be finite');
     }
   }
+  return bands;
 }
 
 /** Tests integer indices against the matrix and optional inclusive coverage limits. Does not wrap. */
@@ -105,12 +147,14 @@ export function isTileIndexInRange(
   );
 }
 
-/** Returns tile bounds in matrix coordinates. Throws for indices outside the matrix. */
+/** Returns the entire tile footprint, including column aliases. Throws for out-of-range indices. */
 export function getTileBounds(matrix: TileMatrix, column: number, row: number): TileMatrixBounds {
   if (!isTileIndexInRange(matrix, column, row)) throw new RangeError('Tile index outside matrix');
   const width = matrix.resolution * matrix.tileSize[0];
   const height = (matrix.resolutionY ?? matrix.resolution) * matrix.tileSize[1];
-  const minimumX = matrix.origin[0] + column * width;
+  const coalesce = getRowCoalesce(matrix, row);
+  const canonicalColumn = Math.floor(column / coalesce) * coalesce;
+  const minimumX = matrix.origin[0] + canonicalColumn * width;
   const minimumY =
     matrix.cornerOfOrigin === 'topLeft'
       ? matrix.origin[1] - (row + 1) * height
@@ -118,7 +162,7 @@ export function getTileBounds(matrix: TileMatrix, column: number, row: number): 
   return [
     minimumX,
     minimumY,
-    matrix.origin[0] + (column + 1) * width,
+    matrix.origin[0] + (canonicalColumn + coalesce) * width,
     matrix.cornerOfOrigin === 'topLeft'
       ? matrix.origin[1] - row * height
       : matrix.origin[1] + (row + 1) * height
@@ -128,7 +172,7 @@ export function getTileBounds(matrix: TileMatrix, column: number, row: number): 
 /**
  * Finds the containing tile without clamping or wrapping. Tile intervals are half-open in column
  * and row direction: the origin edge belongs to the matrix, the opposite outer edge does not.
- * Returns null for nonfinite coordinates or coordinates outside the matrix.
+ * Returns a canonical column for coalesced rows, or null for nonfinite/outside coordinates.
  */
 export function getTileIndex(
   matrix: TileMatrix,
@@ -136,13 +180,6 @@ export function getTileIndex(
 ): [number, number] | null {
   validateTileMatrix(matrix);
   if (!coordinate.every(Number.isFinite)) return null;
-  const column = getTileAxisIndex(
-    matrix.origin[0],
-    1,
-    matrix.resolution * matrix.tileSize[0],
-    matrix.matrixSize[0],
-    coordinate[0]
-  );
   const row = getTileAxisIndex(
     matrix.origin[1],
     matrix.cornerOfOrigin === 'topLeft' ? -1 : 1,
@@ -150,7 +187,17 @@ export function getTileIndex(
     matrix.matrixSize[1],
     coordinate[1]
   );
-  return column === null || row === null ? null : [column, row];
+  if (row === null) return null;
+  const coalesce = getRowCoalesce(matrix, row);
+  const column = getTileAxisIndex(
+    matrix.origin[0],
+    1,
+    matrix.resolution * matrix.tileSize[0],
+    matrix.matrixSize[0],
+    coordinate[0],
+    coalesce
+  );
+  return column === null ? null : [column, row];
 }
 
 /** Finds half-open edge ownership using the same arithmetic as bounds, without division drift. */
@@ -159,7 +206,8 @@ function getTileAxisIndex(
   direction: number,
   tileSpan: number,
   matrixSize: number,
-  coordinate: number
+  coordinate: number,
+  columnStep = 1
 ): number | null {
   const end = origin + direction * (matrixSize * tileSpan);
   if (
@@ -169,7 +217,11 @@ function getTileAxisIndex(
   ) {
     return null;
   }
-  return findTileAxisBoundary(origin, direction, tileSpan, matrixSize, coordinate, false) - 1;
+  return (
+    (findTileAxisBoundary(origin, direction, tileSpan, matrixSize, coordinate, false, columnStep) -
+      1) *
+    columnStep
+  );
 }
 
 /** Finds the first edge beyond a coordinate, optionally including an equal edge. */
@@ -179,14 +231,15 @@ function findTileAxisBoundary(
   tileSpan: number,
   matrixSize: number,
   coordinate: number,
-  includeEqualEdge: boolean
+  includeEqualEdge: boolean,
+  columnStep = 1
 ): number {
   // Binary search avoids enumerating edges or assuming division is accurate near an integer.
   let lower = 0;
-  let upper = matrixSize;
+  let upper = matrixSize / columnStep;
   while (lower < upper) {
     const middle = lower + Math.floor((upper - lower) / 2);
-    const edge = origin + direction * (middle * tileSpan);
+    const edge = origin + direction * (middle * columnStep * tileSpan);
     const precedesCoordinate =
       direction === 1
         ? includeEqualEdge
@@ -221,21 +274,12 @@ function validateTileMatrixLimits(matrix: TileMatrix, limits: TileMatrixLimits):
  * that only touch an edge. Zero-width/height queries use point edge ownership on that axis.
  * Bounds must be finite and ordered; no wrapping or coordinate transformation is performed.
  */
-export function getTileRange(
+function getRegularTileRange(
   matrix: TileMatrix,
   bounds: TileMatrixBounds,
   limits?: TileMatrixLimits
 ): TileMatrixLimits | null {
-  validateTileMatrix(matrix);
-  if (limits) validateTileMatrixLimits(matrix, limits);
-  if (
-    bounds.length !== 4 ||
-    !bounds.every(Number.isFinite) ||
-    bounds[0] > bounds[2] ||
-    bounds[1] > bounds[3]
-  ) {
-    throw new RangeError('Tile query bounds must be finite and ordered');
-  }
+  validateTileQueryBounds(bounds);
   const columns = getTileAxisRange(
     matrix.origin[0],
     1,
@@ -265,6 +309,119 @@ export function getTileRange(
     : range;
 }
 
+/** Rejects nonfinite or unordered query bounds independently of matrix validation. */
+function validateTileQueryBounds(bounds: TileMatrixBounds): void {
+  if (
+    bounds.length !== 4 ||
+    !bounds.every(Number.isFinite) ||
+    bounds[0] > bounds[2] ||
+    bounds[1] > bounds[3]
+  ) {
+    throw new RangeError('Tile query bounds must be finite and ordered');
+  }
+}
+
+/**
+ * Returns a rectangular range for a regular matrix. Variable-width matrices require getTileRanges
+ * so callers cannot accidentally enumerate aliases as separate tiles.
+ */
+export function getTileRange(
+  matrix: TileMatrix,
+  bounds: TileMatrixBounds,
+  limits?: TileMatrixLimits
+): TileMatrixLimits | null {
+  validateTileMatrix(matrix);
+  if (matrix.variableMatrixWidths?.length) {
+    throw new RangeError('Use getTileRanges for variable-width matrices');
+  }
+  if (limits) validateTileMatrixLimits(matrix, limits);
+  return getRegularTileRange(matrix, bounds, limits);
+}
+
+/** Returns the coalescence factor for an already validated row. */
+function getRowCoalesce(matrix: TileMatrix, row: number): number {
+  return (
+    matrix.variableMatrixWidths?.find(band => row >= band.minTileRow && row <= band.maxTileRow)
+      ?.coalesce ?? 1
+  );
+}
+
+/**
+ * Returns exact canonical-column ranges, ordered by native row, split at coalescence changes.
+ * Columns advance by columnStep, rows by one. Limits use base-grid indices: a tile is included
+ * when any of its aliases falls within those limits. Canonical columns may precede minTileColumn.
+ * Work and output scale with row bands rather than the number of tiles or rows.
+ */
+export function getTileRanges(
+  matrix: TileMatrix,
+  bounds: TileMatrixBounds,
+  limits?: TileMatrixLimits
+): TileMatrixRowRange[] {
+  const declaredBands = validateTileMatrixGeometry(matrix);
+  if (limits) validateTileMatrixLimits(matrix, limits);
+  validateTileQueryBounds(bounds);
+  const bands: VariableMatrixWidth[] = [];
+  let nextRow = 0;
+  for (const band of declaredBands) {
+    if (nextRow < band.minTileRow) {
+      bands.push({coalesce: 1, minTileRow: nextRow, maxTileRow: band.minTileRow - 1});
+    }
+    bands.push(band);
+    nextRow = band.maxTileRow + 1;
+  }
+  if (nextRow < matrix.matrixSize[1]) {
+    bands.push({coalesce: 1, minTileRow: nextRow, maxTileRow: matrix.matrixSize[1] - 1});
+  }
+  const topLeft = matrix.cornerOfOrigin === 'topLeft';
+  const rows = getTileAxisRange(
+    matrix.origin[1],
+    topLeft ? -1 : 1,
+    (matrix.resolutionY ?? matrix.resolution) * matrix.tileSize[1],
+    matrix.matrixSize[1],
+    topLeft ? bounds[3] : bounds[1],
+    topLeft ? bounds[1] : bounds[3]
+  );
+  if (!rows) return [];
+  const ranges: TileMatrixRowRange[] = [];
+  for (const band of bands) {
+    const minimumRow = Math.max(band.minTileRow, rows[0], limits?.minTileRow ?? 0);
+    const maximumRow = Math.min(
+      band.maxTileRow,
+      rows[1],
+      limits?.maxTileRow ?? matrix.matrixSize[1] - 1
+    );
+    if (minimumRow > maximumRow) continue;
+    const columns = getTileAxisRange(
+      matrix.origin[0],
+      1,
+      matrix.resolution * matrix.tileSize[0],
+      matrix.matrixSize[0],
+      bounds[0],
+      bounds[2],
+      band.coalesce
+    );
+    if (!columns) continue;
+    const minimumColumn = Math.max(
+      columns[0],
+      Math.floor((limits?.minTileColumn ?? 0) / band.coalesce) * band.coalesce
+    );
+    const maximumColumn = Math.min(
+      columns[1],
+      Math.floor((limits?.maxTileColumn ?? matrix.matrixSize[0] - 1) / band.coalesce) *
+        band.coalesce
+    );
+    if (minimumColumn <= maximumColumn)
+      ranges.push({
+        minTileColumn: minimumColumn,
+        maxTileColumn: maximumColumn,
+        minTileRow: minimumRow,
+        maxTileRow: maximumRow,
+        columnStep: band.coalesce
+      });
+  }
+  return ranges;
+}
+
 /** Finds an inclusive range along one directed axis, clipping before comparing computed edges. */
 function getTileAxisRange(
   origin: number,
@@ -272,10 +429,11 @@ function getTileAxisRange(
   tileSpan: number,
   matrixSize: number,
   start: number,
-  end: number
+  end: number,
+  columnStep = 1
 ): [number, number] | null {
   if (start === end) {
-    const index = getTileAxisIndex(origin, direction, tileSpan, matrixSize, start);
+    const index = getTileAxisIndex(origin, direction, tileSpan, matrixSize, start, columnStep);
     return index === null ? null : [index, index];
   }
   const matrixEnd = origin + direction * (matrixSize * tileSpan);
@@ -283,8 +441,20 @@ function getTileAxisRange(
   const clippedEnd = direction === 1 ? Math.min(end, matrixEnd) : Math.max(end, matrixEnd);
   if (direction === 1 ? clippedStart >= clippedEnd : clippedStart <= clippedEnd) return null;
   return [
-    findTileAxisBoundary(origin, direction, tileSpan, matrixSize, clippedStart, false) - 1,
-    findTileAxisBoundary(origin, direction, tileSpan, matrixSize, clippedEnd, true) - 1
+    (findTileAxisBoundary(
+      origin,
+      direction,
+      tileSpan,
+      matrixSize,
+      clippedStart,
+      false,
+      columnStep
+    ) -
+      1) *
+      columnStep,
+    (findTileAxisBoundary(origin, direction, tileSpan, matrixSize, clippedEnd, true, columnStep) -
+      1) *
+      columnStep
   ];
 }
 
@@ -292,6 +462,7 @@ function getTileAxisRange(
  * Selects the coarsest matrix with resolution at or below the positive finite target, or the
  * finest available matrix when all levels are coarser. Target units must match the matrix set's
  * coordinate units per pixel. Returns null for an empty set; ties retain the first matrix.
+ * Uses nominal uncoalesced resolution; selection is independent of row.
  * Uses the larger axis resolution for anisotropic pixels, so both axes meet the target.
  * Validates every matrix and unique identifiers. Does not sort or mutate the set.
  */

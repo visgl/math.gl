@@ -7,7 +7,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "test": "node --test math.test.mjs snowball.test.mjs"
+    "test": "node --test math.test.mjs snowball.test.mjs paleo-features.test.mjs paleo-geometry.test.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "~9.4.0",
@@ -17,8 +17,8 @@
     "@luma.gl/core": "~9.4.0",
     "@luma.gl/engine": "~9.4.0",
     "@luma.gl/shadertools": "~9.4.0",
-    "@math.gl/polygon": "workspace:*",
-    "@math.gl/projection": "workspace:*",
+    "@math.gl/geometry": "workspace:*",
+    "@math.gl/geospatial": "workspace:*",
     "math.gl-parquet-loader": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"

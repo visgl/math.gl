@@ -14,8 +14,8 @@ const movedGuides = {
   "developer-guide/math/rotations": "modules/core/developer-guide/rotations",
   "developer-guide/math/floating-point": "modules/core/developer-guide/floating-point",
   "developer-guide/geospatial/dggs": "modules/dggs/developer-guide/dggs",
-  "developer-guide/geospatial/coordinate-reference-systems": "modules/crs/developer-guide/coordinate-reference-systems",
-  "developer-guide/geospatial/geospatial-models": "modules/geoid/developer-guide/geospatial-models",
+  "developer-guide/geospatial/coordinate-reference-systems": "modules/geospatial/crs/developer-guide/coordinate-reference-systems",
+  "developer-guide/geospatial/geospatial-models": "modules/earth/geoid/developer-guide/geospatial-models",
   "developer-guide/geospatial/web-mercator-coordinates": "modules/web-mercator/developer-guide/web-mercator-coordinates",
   "developer-guide/geospatial/web-mercator-offset-accuracy": "modules/web-mercator/developer-guide/web-mercator-offset-accuracy"
 };

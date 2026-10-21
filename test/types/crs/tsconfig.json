@@ -15,7 +15,7 @@
   },
   "include": [
     "index.ts",
-    "../../../modules/crs/test/crs-types.ts",
-    "../../../modules/crs/test/projjson-fixtures.ts"
+    "../../../modules/geospatial/crs/test/crs-types.ts",
+    "../../../modules/geospatial/crs/test/projjson-fixtures.ts"
   ]
 }

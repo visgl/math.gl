@@ -28,11 +28,11 @@ test('workspace imports retain source aliases without any built dist files', t =
   const root = fixture(t), modules = join(root, 'modules');
   const context = join(root, 'node_modules', '@loaders.gl', 'gis', 'dist');
   mkdirSync(context, {recursive: true});
-  for (const name of ['wkb', 'crs', 'types']) {
+  for (const name of ['core', 'geometry', 'geospatial', 'earth']) {
     workspace(root, name);
     assert.equal(resolveDependency(`@math.gl/${name}`, context, modules), `@math.gl/${name}`);
   }
-  assert.equal(resolveDependency('@math.gl/crs/wkt', context, modules), '@math.gl/crs/wkt');
+  assert.equal(resolveDependency('@math.gl/geospatial/crs/wkt', context, modules), '@math.gl/geospatial/crs/wkt');
 });
 test('installed dependencies keep math.gl 4.x even when a 5.x workspace exists', t => {
   const root = fixture(t), modules = join(root, 'modules');
@@ -62,7 +62,19 @@ test('website resolves the CRS metadata entry directly from source', () => {
     entry => Array.isArray(entry) && entry[0] === '@vis.gl/docusaurus-website/plugin-webpack-config'
   );
   assert.equal(
-    plugin[1].resolve.alias['@math.gl/crs/metadata$'],
-    join(__dirname, '../modules/crs/src/crs-metadata.ts')
+    plugin[1].resolve.alias['@math.gl/geospatial/crs/metadata$'],
+    join(__dirname, '../modules/geospatial/src/crs/crs-metadata.ts')
   );
+});
+
+test('website resolves grouped geospatial APIs without package builds', () => {
+  const config = require('./docusaurus.config.js');
+  const plugin = config.plugins.find(
+    entry => Array.isArray(entry) && entry[0] === '@vis.gl/docusaurus-website/plugin-webpack-config'
+  );
+  const aliases = plugin[1].resolve.alias;
+  assert.equal(aliases['@math.gl/geospatial/expressions$'], join(__dirname, '../modules/geospatial/src/expressions.ts'));
+  assert.equal(aliases['@math.gl/geospatial/globe$'], join(__dirname, '../modules/geospatial/src/globe.ts'));
+  assert.equal(aliases['@math.gl/geospatial/ellipsoid$'], join(__dirname, '../modules/geospatial/src/entries/ellipsoid.ts'));
+  assert.equal(aliases['@math.gl/geospatial'], undefined);
 });

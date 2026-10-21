@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Bench} from '@probe.gl/bench';
+import {Bench} from 'probe.gl/bench';
 import addBenchmarks from './modules.bench';
 
 const addReferenceBenchmarks = false;

@@ -9,7 +9,7 @@ module.exports = function projectionRedirects(context) {
   return {
     name: 'projection-module-redirects',
     async postBuild({outDir, routesPaths}) {
-      const prefix = context.baseUrl + 'docs/modules/projection';
+      const prefix = context.baseUrl + 'docs/modules/geospatial/projection';
       for (const moduleName of ['projection', 'proj4']) {
         const oldRoute = context.baseUrl + 'docs/modules/' + moduleName + '/roadmap';
         const route = prefix + '/support';

@@ -10,8 +10,7 @@
   },
   "dependencies": {
     "@math.gl/core": "workspace:*",
-    "@probe.gl/bench": "^4.1.1",
-    "@probe.gl/react-bench": "^4.1.1",
+    "probe.gl": "^5.0.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0"
   },

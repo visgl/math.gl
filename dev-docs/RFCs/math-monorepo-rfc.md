@@ -62,6 +62,6 @@ Ideally:
 | -------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------- | ----- |
 | `modules/core`       | `math.gl`             | "Classes for gl-matrix". Compact and powerful                                                               |
 | `modules/geospatial` | `@math.gl/geospatial` | "Advanced" geospatial math.                                                                                 |
-| `modules/culling`    | `@math.gl/culling`    | Frustum "Culling" and bounding boxes.                                                                       |
+| `modules/culling`    | `@math.gl/geometry/culling`    | Frustum "Culling" and bounding boxes.                                                                       |
 | `modules/geometry`   | `@math.gl/geometry`   | Support for WebGL typed array geometries                                                                    |
 | `modules/geometries` | `@math.gl/geometries` | Library of geometric primitives compatible with the geometry system. Seeded by luma.gl geometric primitives |

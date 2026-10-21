@@ -17,14 +17,14 @@
   "scripts": {
     "bootstrap": "yarn && ocular-bootstrap && yarn build",
     "build": "ocular-clean && time ocular-build",
-    "check:spatial-index-package": "node modules/spatial-index/scripts/check-package.mjs",
+    "check:spatial-index-package": "node modules/geometry/spatial-index/scripts/check-package.mjs",
     "check:source-headers": "node scripts/check-source-headers.mjs",
-    "check:curves-package": "node modules/curves/scripts/check-package.mjs",
+    "check:curves-package": "node modules/geometry/curves/scripts/check-package.mjs",
     "check:crs-types": "npx tsc --project test/types/crs/tsconfig.json",
-    "check:geoarrow-boundary": "node modules/geoarrow/scripts/check-package-boundary.mjs",
+    "check:geoarrow-boundary": "node modules/geospatial/geoarrow/scripts/check-package-boundary.mjs",
     "check:timezone-types": "npx tsc --project test/types/timezone/tsconfig.json",
-    "check:timezone-boundary": "node modules/timezone/scripts/check-package-boundary.mjs",
-    "check:wkb-boundary": "node modules/wkb/scripts/check-package-boundary.mjs",
+    "check:timezone-boundary": "node modules/earth/timezone/scripts/check-package-boundary.mjs",
+    "check:wkb-boundary": "node modules/geospatial/wkb/scripts/check-package-boundary.mjs",
     "check:projjson-types": "node scripts/generate-projjson-types.mjs --check",
     "generate:projjson-types": "node scripts/generate-projjson-types.mjs",
     "cover": "yarn test-coverage",
@@ -39,12 +39,12 @@
     "test-node": "ocular-test node",
     "test-coverage": "ocular-test headless --coverage",
     "test-pre-commit": "yarn lint && ocular-test node",
-    "check:timezone-geometry": "python3 modules/timezone/scripts/check-geometry.py",
+    "check:timezone-geometry": "python3 modules/earth/timezone/scripts/check-geometry.py",
     "check:parametric-package": "node modules/geometry/scripts/check-parametric-package.mjs",
-    "check:tile-matrix-package": "node modules/geospatial/scripts/check-tile-matrix-package.mjs"
+    "check:tile-matrix-package": "node modules/geospatial/scripts/check-tile-matrix-package.mjs",
+    "check:packages": "node scripts/check-packages.mjs"
   },
   "devDependencies": {
-    "@probe.gl/bench": "^4.1.1",
     "@turf/destination": "^7.4.0",
     "@types/node": "^22.20.1",
     "@vis.gl/dev-tools": "^2.0.0-alpha.6",
@@ -55,6 +55,7 @@
     "json-schema-to-typescript": "^16.0.0",
     "playwright": "^1.62.1",
     "pre-commit": "^2.0.0",
+    "probe.gl": "^5.0.0",
     "vitest": "4.1.11"
   },
   "pre-commit": [

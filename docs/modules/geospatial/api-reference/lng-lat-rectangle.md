@@ -10,7 +10,7 @@ A longitude-latitude rectangle on an ellipsoid. Angular values are stored in rad
 
 ```js
 import {toRadians} from '@math.gl/core';
-import {LngLatRectangle} from '@math.gl/geospatial';
+import {LngLatRectangle} from '@math.gl/geospatial/globe';
 
 const rectangle = new LngLatRectangle(
   toRadians(170),

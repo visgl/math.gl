@@ -1,5 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {validatePaleoGeometry, featuresForEpoch} from './paleo-geometry.js';

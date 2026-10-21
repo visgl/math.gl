@@ -49,7 +49,7 @@
       "Check required grids and support",
       "Use independent reference values"
     ],
-    "sources": ["docs/modules/projection/developer-guide/support.md"]
+    "sources": ["docs/modules/geospatial/projection/developer-guide/support.md"]
   },
   {
     "id": "precision",
@@ -69,6 +69,6 @@
       "Check geoid model and units",
       "Verify sign against a known point"
     ],
-    "sources": ["docs/modules/geoid/README.md"]
+    "sources": ["docs/modules/earth/geoid/README.md"]
   }
 ]

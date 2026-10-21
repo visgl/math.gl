@@ -9,7 +9,7 @@
 
 /* eslint-disable */
 import {Vector3, Matrix4, assert, equals, _MathUtils, NumericArray} from '@math.gl/core';
-import type {SpheroidParameters} from '@math.gl/types';
+import type {SpheroidParameters} from '@math.gl/core/types';
 import {
   spheroidToCartesian,
   cartesianToSpheroid,

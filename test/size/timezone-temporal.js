@@ -5,4 +5,4 @@ export {
   getStartOfDay,
   localDateTimeToInstant,
   getTimezoneTransitions
-} from '@math.gl/timezone/temporal';
+} from '@math.gl/earth/timezone/temporal';

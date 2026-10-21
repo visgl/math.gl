@@ -15,7 +15,7 @@ import {
   mercator,
   sinusoidal,
   millerCylindrical
-} from '@math.gl/projection';
+} from '@math.gl/geospatial/projection';
 import { interpolateField } from './data.js';
 import {nearestOSFChapter} from './osf-data.js';
 import { projectionWeights } from './projection-transition.js';

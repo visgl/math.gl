@@ -4,7 +4,7 @@
 import React, {useEffect, useMemo, useRef} from 'react';
 import {Matrix4, toRadians} from '@math.gl/core';
 import {OrbitControls} from '@luma.gl/engine';
-import {CatmullRomCurve, CubicBezierCurve, HermiteCurve, CurveArcLength} from '@math.gl/curves';
+import {CatmullRomCurve, CubicBezierCurve, HermiteCurve, CurveArcLength} from '@math.gl/geometry/curves';
 import './styles.css';
 
 const CAMERA = {distance: 19, yaw: 0.65, pitch: 0.45};
@@ -277,7 +277,7 @@ export default function CurvesExample() {
           <span className="curves-panel-toggle">Controls</span>
         </summary>
         <div className="curves-panel-content">
-          <span className="curves-eyebrow">@math.gl/curves</span>
+          <span className="curves-eyebrow">@math.gl/geometry/curves</span>
           <p>
             One path. Two clocks. Watch the pink traveler accelerate while cyan covers equal
             distances.

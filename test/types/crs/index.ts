@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {projectionEngine} from '@math.gl/projection';
-import type {CRSBounds} from '@math.gl/projection/types';
+import {projectionEngine} from '@math.gl/geospatial/projection';
+import type {CRSBounds} from '@math.gl/geospatial/projection/types';
 import {
   createSpatialReference,
   inferCRSRepresentation,
@@ -12,7 +12,7 @@ import {
   type PROJJSONCRSByType,
   type ReadonlyCRSDefinition,
   type SpatialReference
-} from '@math.gl/crs';
+} from '@math.gl/geospatial/crs';
 
 const serialized: CRSDefinition = 'EPSG:4326';
 const geographic: PROJJSONCRSByType<'GeographicCRS'> = {
@@ -66,7 +66,7 @@ import {
   projJSONCRSParser,
   type TypeScriptCRSInput,
   type NormalizedCRS
-} from '@math.gl/projection/experimental';
+} from '@math.gl/geospatial/projection/experimental';
 const nativeInput: TypeScriptCRSInput = spatialReference;
 new ProjectionTransform({
   from: nativeInput,
@@ -88,7 +88,7 @@ import {
   type DatumGrid,
   type DatumGridCollection,
   type DatumGridGeoTIFF
-} from '@math.gl/projection/experimental';
+} from '@math.gl/geospatial/projection/experimental';
 const preparedGrid: DatumGrid = parseNTv2Grid(new ArrayBuffer(0), {
   includeErrorFields: false
 });
@@ -121,8 +121,12 @@ batchProjection.projectFlat(new Int32Array([0, 0]));
 // @ts-expect-error The scalar array API is deliberately separate.
 batchProjection.projectFlat([0, 0]);
 
-import type {ProjectionEngine, Projection, PreparedProjection} from '@math.gl/projection/types';
-import {ConfigurableProjectionEngine, FullProjectionEngine} from '@math.gl/projection';
+import type {
+  ProjectionEngine,
+  Projection,
+  PreparedProjection
+} from '@math.gl/geospatial/projection/types';
+import {ConfigurableProjectionEngine, FullProjectionEngine} from '@math.gl/geospatial/projection';
 const projectionEngines: ProjectionEngine[] = [
   new ConfigurableProjectionEngine(),
   new FullProjectionEngine(),
@@ -139,9 +143,9 @@ new ProjectionEngine();
 // @ts-expect-error Engines configure algorithms, not a specific CRS pair.
 new ConfigurableProjectionEngine({to: 'EPSG:3857'});
 
-import {LazyProjectionEngine} from '@math.gl/projection/projections/lazy';
+import {LazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
 
-import {WebMercatorProjectionEngine} from '@math.gl/projection/web-mercator';
+import {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection/web-mercator';
 const minimalEngine: ProjectionEngine = new WebMercatorProjectionEngine();
 const minimalProjection: Projection = minimalEngine.createProjection({
   to: 'EPSG:3857'

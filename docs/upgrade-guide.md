@@ -2,7 +2,50 @@
 
 ## Upgrading to v5.0
 
+### Grouped package subpaths
+
+Use the grouped subpaths for new imports: `@math.gl/core/types`, `@math.gl/core/expressions`,
+`@math.gl/geometry/utils`, `@math.gl/geometry/curves`, `@math.gl/geometry/polygon`,
+`@math.gl/geometry/culling`, `@math.gl/geometry/spatial-index`, `@math.gl/geospatial/ellipsoid`,
+`@math.gl/geospatial/globe`, `@math.gl/geospatial/tiles`, `@math.gl/geospatial/crs`,
+`@math.gl/geospatial/projection`,
+`@math.gl/geospatial/web-mercator`, `@math.gl/geospatial/wkb`, `@math.gl/geospatial/geoarrow`,
+`@math.gl/geospatial/expressions`, and the `@math.gl/earth` geoid, sun, and timezone subpaths.
+The original standalone packages have been removed. Update both import specifiers and package
+dependencies. Install the grouped package root, such as `@math.gl/geometry`, even when importing
+from `@math.gl/geometry/polygon`. DGGS stays
+available as the separate `@math.gl/dggs` package. The unscoped `math.gl` package has been removed;
+replace imports from it with `@math.gl/core`.
+
 Version 5 removes deprecated APIs and moves low-level functions to focused subpath imports.
+
+Import `subdivideGlobeMesh` and `SubdivideGlobeMeshOptions` from `@math.gl/geospatial/globe`;
+they are no longer exported by `@math.gl/polygon` or `@math.gl/geometry/polygon`.
+
+### Removed standalone packages
+
+| Removed package | Install | Import from |
+| --- | --- | --- |
+| `@math.gl/types` | `@math.gl/core` | `@math.gl/core/types` |
+| `@math.gl/expressions` | `@math.gl/core` | `@math.gl/core/expressions` |
+| `@math.gl/geometry-utils` | `@math.gl/geometry` | `@math.gl/geometry/utils` |
+| `@math.gl/curves` | `@math.gl/geometry` | `@math.gl/geometry/curves` |
+| `@math.gl/polygon` | `@math.gl/geometry` | `@math.gl/geometry/polygon` |
+| `@math.gl/culling` | `@math.gl/geometry` | `@math.gl/geometry/culling` |
+| `@math.gl/spatial-index` | `@math.gl/geometry` | `@math.gl/geometry/spatial-index` |
+| `@math.gl/crs` | `@math.gl/geospatial` | `@math.gl/geospatial/crs` |
+| `@math.gl/projection` | `@math.gl/geospatial` | `@math.gl/geospatial/projection` |
+| `@math.gl/wkb` | `@math.gl/geospatial` | `@math.gl/geospatial/wkb` |
+| `@math.gl/geoarrow` | `@math.gl/geospatial` | `@math.gl/geospatial/geoarrow` |
+| `@math.gl/geoid` | `@math.gl/earth` | `@math.gl/earth/geoid` |
+| `@math.gl/sun` | `@math.gl/earth` | `@math.gl/earth/sun` |
+| `@math.gl/timezone` | `@math.gl/earth` | `@math.gl/earth/timezone` |
+| `@math.gl/proj` | `@math.gl/web-mercator` | `@math.gl/web-mercator` |
+
+Nested entrypoints keep their suffix, for example `@math.gl/crs/wkt` becomes
+`@math.gl/geospatial/crs/wkt`, and `@math.gl/timezone/lookup` becomes
+`@math.gl/earth/timezone/lookup`. DGGS expression helpers move from
+`@math.gl/expressions/dggs` to `@math.gl/dggs/expressions`.
 
 ### Polygon, culling, and viewport APIs
 
@@ -69,9 +112,9 @@ Available subpaths: `@math.gl/core/mat3`, `/mat4`, `/quat`, `/vec2`, `/vec3`, an
 
 ### CRS and proj4 definitions
 
-- Import CRS types, syntax codecs, and spatial-reference descriptors from `@math.gl/crs`. Authority codes, WKT, and PROJ definitions remain strings.
-- Rename `@math.gl/proj4` imports and dependencies to `@math.gl/projection`, and create transforms with `projectionEngine.createProjection({from, to})` instead of `new Proj4Projection(...)`. The alias, `/classic`, and proj4js helpers are removed; install `proj4` directly for its API.
-- Use `ProjectionTransform` for a configured CRS pair and `ConfigurableProjectionEngine` for reusable configuration and `checkProjectionCompatibility()` for capability checks. See the [migration contract](modules/projection/developer-guide/support.md).
+- Import CRS types, syntax codecs, and spatial-reference descriptors from `@math.gl/geospatial/crs`. Authority codes, WKT, and PROJ definitions remain strings.
+- Rename `@math.gl/proj4` imports and dependencies to `@math.gl/geospatial/projection`, and create transforms with `projectionEngine.createProjection({from, to})` instead of `new Proj4Projection(...)`. The alias, `/classic`, and proj4js helpers are removed; install `proj4` directly for its API.
+- Use `ProjectionTransform` for a configured CRS pair and `ConfigurableProjectionEngine` for reusable configuration and `checkProjectionCompatibility()` for capability checks. See the [migration contract](./modules/geospatial/projection/developer-guide/support.md).
 
 - Axis-order enforcement remains opt-in through `enforceAxis: true`. Prepare NTv2 grids with `parseNTv2Grid()` and register them on an engine through `datumGrids` before using definitions that reference them.
 
