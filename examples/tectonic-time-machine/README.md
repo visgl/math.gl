@@ -184,3 +184,19 @@ feature, age-specific geometries and model-compatible plate assignments, with
 uncertainty metadata and explicit distinctions between present-day evidence and
 reconstructed historical footprints. This requires separate data licensing and
 geological validation before drawing features on the globe.
+
+### Sourced geometry contract (follow-up)
+
+`paleo-geometry.js` validates prospective epoch-specific GeoJSON feature records.
+A record requires a feature identifier and name, category, older/younger age bounds,
+a specific reconstruction epoch (`epochMa`), source citation, data license and
+reconstruction model ID. A nonnegative plate ID is optional. Coordinates are
+longitude/latitude in the specified **reconstructed** epoch, not present-day
+coordinates to be moved blindly by plate rotations.
+
+`featuresForEpoch(records, epochMa, modelId)` selects only validated records with
+an **exact** epoch and matching reconstruction model. It deliberately does not
+interpolate ancient outlines or mix reference frames. No external geological
+geometry is bundled, and the current map renderer is unchanged. A future data
+integration should add provenance-backed epoch snapshots, geometry topology
+checks and projection-aware rendering before exposing any map overlay.
