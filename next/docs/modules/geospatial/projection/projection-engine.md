@@ -182,6 +182,8 @@ Angular clamps follow the great-circle bearing from the origin. At polar centers
 
 To expose a custom algorithm through `getCRS`, implement `getRenderingProfile(coverage?)` to supply finite reference-surface bounds and an optional normalization function. Coverage is the declared Greenwich longitude/latitude rectangle in degrees, passed unchanged. Longitude endpoints lie in `[-180, 180]`; `west > east` crosses the dateline, and `[-180, south, 180, north]` covers all longitudes. Latitude satisfies `-90 <= south <= north <= 90`. With no coverage, return the algorithm’s default rendering target. If coverage-specific resolution fails, descriptor retrieval uses that default while preserving the declared coverage in metadata. Ordinary coordinate conversion does not evaluate rendering bounds.
 
+To wrap proj4js or D3 as a backend, see [external projection engines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/external-projection-engines.md) for complete adapter examples.
+
 ## What is pluggable?[​](#what-is-pluggable "Direct link to What is pluggable?")
 
 | Component                        | Option or API      | Application responsibility                                                              |

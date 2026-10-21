@@ -20,6 +20,8 @@ Play continental motion from **1.8 billion years ago** to **300 Ma into the futu
 
 [Open the full example](https://visgl.github.io/math.gl/next/examples/tectonic-time-machine) for data credits and limits.
 
+See [external projection engines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/external-projection-engines.md) for proj4js and D3 adapter examples.
+
 ## Quick start[​](#quick-start "Direct link to Quick start")
 
 ```
