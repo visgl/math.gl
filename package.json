@@ -45,7 +45,6 @@
     "check:packages": "node scripts/check-packages.mjs"
   },
   "devDependencies": {
-    "@probe.gl/bench": "^4.1.1",
     "@turf/destination": "^7.4.0",
     "@types/node": "^22.20.1",
     "@vis.gl/dev-tools": "^2.0.0-alpha.6",
@@ -56,6 +55,7 @@
     "json-schema-to-typescript": "^16.0.0",
     "playwright": "^1.62.1",
     "pre-commit": "^2.0.0",
+    "probe.gl": "^5.0.0",
     "vitest": "4.1.11"
   },
   "pre-commit": [

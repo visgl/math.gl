@@ -4,7 +4,7 @@
 // math.gl, MIT license
 
 // @ts-expect-error tsconfig configuration issue?
-import type {Bench} from '@probe.gl/bench';
+import type {Bench} from 'probe.gl/bench';
 
 import {coreBench} from '../../modules/core/test/bench';
 import {geospatialBench} from '../../modules/geospatial/test/bench';

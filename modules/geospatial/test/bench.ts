@@ -8,7 +8,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 // @ts-expect-error tsconfig issue?
-import {Bench} from '@probe.gl/bench';
+import {Bench} from 'probe.gl/bench';
 
 import {Vector3} from '@math.gl/core';
 import {
