@@ -39,7 +39,8 @@ export function pointProjection(
       throw new Error('Expected two finite coordinates');
     }
     const result = operation([input[0], input[1]]);
-    if (!result || !Number.isFinite(result[0]) || !Number.isFinite(result[1])) {
+    if (!result || result.length !== 2 ||
+        !Number.isFinite(result[0]) || !Number.isFinite(result[1])) {
       throw new Error('Point is outside the supported projection domain');
     }
     return [result[0], result[1]];
