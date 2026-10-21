@@ -8,6 +8,7 @@ import parquetWorkerUrl from 'math.gl-parquet-loader/worker';
 import {maintainHistory} from './history-stream.js';
 import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime} from './sources.js';
 import {REGIONS, timeLabel} from './math.js';
+import {PALEO_FEATURES, featuresAtAge, searchPaleoFeatures} from './paleo-features.js';
 import {TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
@@ -39,7 +40,9 @@ export default function TectonicTimeMachine() {
     [regionColors, setRegionColors] = useState(false),
     [speed, setSpeed] = useState(20),
     [counts, setCounts] = useState(null),
-    [appearanceStatus, setAppearanceStatus] = useState('Loading terrain imagery…');
+    [appearanceStatus, setAppearanceStatus] = useState('Loading terrain imagery…'),
+    [featureQuery, setFeatureQuery] = useState(''),
+    [showAllFeatures, setShowAllFeatures] = useState(false);
   useEffect(() => {
     const renderer = mountScene(
       canvas.current,
@@ -323,6 +326,47 @@ export default function TectonicTimeMachine() {
           </div>
         )}
         <p className="tectonic-appearance-status">{appearanceStatus}</p>
+        <details className="tectonic-info">
+          <summary>Ancient geographic features</summary>
+          <p className="tectonic-note">
+            Curated names and approximate age ranges only. These are not reconstructed
+            locations, outlines, or elevations, and are not plotted on the map.
+          </p>
+          <label>
+            Find a feature
+            <input
+              type="search"
+              aria-label="Find ancient geographic feature"
+              placeholder="Ocean, mountain belt, continent…"
+              value={featureQuery}
+              onChange={e => setFeatureQuery(e.target.value)}
+            />
+          </label>
+          <label className="tectonic-check">
+            <input
+              type="checkbox"
+              checked={showAllFeatures}
+              onChange={e => setShowAllFeatures(e.target.checked)}
+            />{' '}
+            Show features outside selected time
+          </label>
+          <ul className="tectonic-feature-list">
+            {searchPaleoFeatures(
+              showAllFeatures ? PALEO_FEATURES : featuresAtAge(time),
+              featureQuery
+            ).map(feature => (
+              <li key={feature.id}>
+                <strong>{feature.name}</strong> · {feature.type}
+                <small> · approximately {feature.olderMa}–{feature.youngerMa} Ma</small>
+                <p className="tectonic-note">{feature.note}</p>
+              </li>
+            ))}
+          </ul>
+          {!searchPaleoFeatures(
+            showAllFeatures ? PALEO_FEATURES : featuresAtAge(time),
+            featureQuery
+          ).length && <p className="tectonic-note">No matching features at this time.</p>}
+        </details>
         <AttributionWidget sources={tectonicSources(source)} />
         <details className="tectonic-info">
           <summary>About this reconstruction</summary>
