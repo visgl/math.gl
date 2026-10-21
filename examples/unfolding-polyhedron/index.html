@@ -1,0 +1,75 @@
+<!doctype html>
+<!-- math.gl
+SPDX-License-Identifier: MIT
+SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Unfolding polyhedra · math.gl</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <a href="https://math.gl">math.gl / geometry</a><span>01 — Rigid panels</span>
+      </header>
+      <section>
+        <div class="intro">
+          <p class="eyebrow">FROM SOLID TO SURFACE</p>
+          <h1>Unfolding polyhedra</h1>
+          <p>From Platonic solids to a sphere with 1,280 faces.</p>
+        </div>
+        <div class="selectors">
+          <label for="solid">Solid</label>
+          <select id="solid">
+            <option value="tetrahedron">Tetrahedron</option>
+            <option value="cube">Cube</option>
+            <option value="octahedron">Octahedron</option>
+            <option value="dodecahedron">Dodecahedron</option>
+            <option value="icosahedron" selected>Icosahedron</option>
+          </select>
+          <label for="subdivision">Subdivision</label>
+          <select id="subdivision">
+            <option value="0">0 · base solid</option>
+            <option value="1">1 · 80 faces</option>
+            <option value="2" selected>2 · 320 faces</option>
+            <option value="3">3 · 1,280 faces</option>
+          </select>
+          <label for="cuts">Cuts</label>
+          <select id="cuts">
+            <option value="legacy">Original · geometric</option>
+            <option value="ocean" selected>Ocean-preferred</option>
+            <option value="dymaxion">Dymaxion · AirOcean (24 panels)</option>
+          </select>
+          <label><input id="earth" type="checkbox" checked /> Earth texture</label>
+          <label><input id="edges" type="checkbox" /> Show edges</label>
+          <button id="recut" type="button">New cut layout</button>
+        </div>
+        <p id="summary" class="hint" aria-live="polite"></p>
+        <canvas aria-label="Interactive polyhedron unfolding along automatically selected hinges"
+          >Your browser needs WebGL 2 support.</canvas
+        >
+        <p class="hint"><span id="imagery-status" aria-live="polite"></span> · <a href="https://www.nasa.gov/nasa-brand-center/images-and-media/">Imagery usage</a></p>
+        <p class="hint">Drag to orbit · gold edges are hinges · dark edges are cuts</p>
+      </section>
+      <footer>
+        <div class="controls">
+          <button id="play" type="button">Play</button>
+          <label for="unfold">Unfold <output id="amount">0%</output></label>
+          <input id="unfold" type="range" min="0" max="100" step="0.1" value="0" />
+          <button id="flat" type="button">Flat view</button>
+          <button id="reset" type="button">Reset view</button>
+        </div>
+        <p id="cut-summary" aria-live="polite"></p>
+        <p id="notice" aria-live="polite"></p>
+        <p>
+          Automatic cuts retain a maximum-weight tree; the AirOcean preset uses fixed joins. Panels stay rigid
+          throughout the motion.
+        </p>
+      </footer>
+    </main>
+    <script type="module" src="./app.ts"></script>
+  </body>
+</html>

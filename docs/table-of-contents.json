@@ -103,6 +103,7 @@
         "items": [
           "modules/geometry/README",
           "modules/geometry/api-reference/geometry",
+          "modules/geometry/api-reference/hinge-tree",
           "modules/geometry/api-reference/box-geometry",
           "modules/geometry/api-reference/cube-geometry",
           "modules/geometry/api-reference/capsule-geometry",
