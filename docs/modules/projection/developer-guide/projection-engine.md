@@ -75,6 +75,9 @@ Mercator, are opt-in. Registration is local to an instance; there is no global
 projection registry and no automatic fallback to proj4js. To change the available
 algorithms, create a new instance with the new plugin set.
 
+To use proj4js or D3 as the backend, see [external projection engines](./external-projection-engines.md)
+for complete adapter examples.
+
 ## What is pluggable?
 
 | Component | Option or API | Application responsibility |

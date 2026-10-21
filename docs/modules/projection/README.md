@@ -30,6 +30,7 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 
 | Guide | What you will learn |
 | --- | --- |
+| [External projection engines](developer-guide/external-projection-engines.md) | Wrap proj4js and D3 behind the ProjectionEngine interface |
 | [Projection engine](developer-guide/projection-engine.md) | Select plugins, load algorithms on demand, transform typed arrays and control bundle size |
 | [Coordinate systems](developer-guide/coordinate-systems.md) | Distinguish projection, ellipsoid, datum, height and coordinate epoch |
 | [Projection catalogue](developer-guide/projections.md) | Choose an algorithm and understand its useful domain |
