@@ -79,7 +79,8 @@ export async function loadPaleoTerrain({signal, workerUrl, fetchFile = fetch, re
       }
       signal.throwIfAborted();
       if (offset !== elevation.length) throw new Error('Incomplete PaleoDEM grid');
-      const result = {age, width: group.width, height: group.height, elevation};
+      const result = {age, width: group.width, height: group.height,
+        size: new Float32Array([group.width, group.height]), elevation};
       frames.set(age, result);
       onUpdate();
       return result;

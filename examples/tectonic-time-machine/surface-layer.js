@@ -22,6 +22,7 @@ const surface = {
   fs: block + '\nuniform sampler2D terrainTexture; uniform sampler2D paleoElevationA; uniform sampler2D paleoElevationB;',
   uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32', vegetation: 'f32', paleoBlend: 'f32', paleoTerrain: 'f32', paleoSizeA: 'vec2<f32>', paleoSizeB: 'vec2<f32>'}
 };
+const UNIT_SIZE = new Float32Array([1, 1]);
 const LIGHTS = [
   {type: 'ambient', color: [170, 196, 222], intensity: 0.65},
   {type: 'directional', direction: [-0.5, -0.55, -1], color: [255, 244, 224], intensity: 1.25}
@@ -53,6 +54,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
     });
     this.setState({
       elevationTextures: new Map(),
+      elevationFrames: [null, null],
       elevationFallback: context.device.createTexture({width: 1, height: 1,
         data: new Float32Array(1), format: 'r32float',
         sampler: {minFilter: 'nearest', magFilter: 'nearest'}}),
@@ -188,7 +190,9 @@ export class SurfaceLayer extends SolidPolygonLayer {
   draw(params) {
     const {image, surfaceType, globeWeight, regionColors, iceCoverage, vegetation, paleoFrameA, paleoFrameB, paleoBlend} = this.props;
     const textures = this.state.elevationTextures;
-    for (const frame of [paleoFrameA, paleoFrameB]) {
+    const frames = this.state.elevationFrames;
+    frames[0] = paleoFrameA; frames[1] = paleoFrameB;
+    for (const frame of frames) {
       if (frame && !textures.has(frame)) textures.set(frame, this.context.device.createTexture({
         width: frame.width, height: frame.height, data: frame.elevation, format: 'r32float',
         sampler: {minFilter: 'nearest', magFilter: 'nearest'}
@@ -205,11 +209,11 @@ export class SurfaceLayer extends SolidPolygonLayer {
         vegetation,
         paleoTerrain: paleoFrameA && paleoFrameB ? 1 : 0,
         paleoBlend,
-        paleoSizeA: paleoFrameA ? [paleoFrameA.width, paleoFrameA.height] : [1, 1],
-        paleoSizeB: paleoFrameB ? [paleoFrameB.width, paleoFrameB.height] : [1, 1],
+        paleoSizeA: paleoFrameA?.size || UNIT_SIZE,
+        paleoSizeB: paleoFrameB?.size || UNIT_SIZE,
         paleoElevationA: textures.get(paleoFrameA) || this.state.elevationFallback,
         paleoElevationB: textures.get(paleoFrameB) || this.state.elevationFallback,
-        useTexture: image ? 1 : 0,
+        useTexture: image && !paleoFrameA ? 1 : 0,
         regionColors: regionColors ? 1 : 0,
         terrainTexture: image || this.state.fallbackTexture
       },

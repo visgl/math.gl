@@ -259,9 +259,9 @@ export default function TectonicTimeMachine() {
           </span>
         </div>
         <label>
-          Data source
+          Plate model
           <select
-            aria-label="Data source"
+            aria-label="Plate model"
             value={sourceId}
             onChange={e => {leavePlanetary(); setSourceId(e.target.value);}}
           >
@@ -348,6 +348,7 @@ export default function TectonicTimeMachine() {
             <option value="regions">Region colors</option>
           </select>
         </label>
+        <p className="tectonic-note">PaleoDEM uses its own PALEOMAP reconstruction. The plate model applies to region colors and earlier/future terrain.</p>
         {regionColors && (
           <div className="tectonic-legend">
             {Object.entries(REGIONS).map(([name, r]) => (

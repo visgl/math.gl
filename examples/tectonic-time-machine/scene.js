@@ -249,7 +249,8 @@ export function mountScene(
     const pose = paleoTerrain?.get(time);
     const usePaleo = historicalTerrain && !regionColors && Boolean(pose);
     let status;
-    if (usePaleo) status = `PALEOMAP PaleoDEM · ${pose.a.age === pose.b.age ? pose.a.age : `${pose.a.age}–${pose.b.age}`} Ma · source elevation with illustrative colors and 8× hill shading`;
+    if (regionColors) status = `${model?.source.id || 'Plate model'} · categorical region colors`;
+    else if (usePaleo) status = `PALEOMAP PaleoDEM · ${pose.a.age === pose.b.age ? pose.a.age : `${pose.a.age}–${pose.b.age}`} Ma · source elevation with illustrative colors and 8× hill shading`;
     else if (historicalTerrain && !regionColors && terrainBracket(time))
       status = `${paleoError || paleoTerrain?.failed ? 'PaleoDEM unavailable' : 'Loading PaleoDEM'} · showing illustrative plate terrain`;
     else status = `${terrainImage ? 'Modern NASA imagery' : modernTerrainError ? 'Shaded land' : 'Loading NASA imagery'} on ${model?.source.id || 'moving'} plates · illustrative${historicalTerrain && !regionColors ? ' (PaleoDEM covers 0–540 Ma)' : ''}`;
@@ -300,7 +301,7 @@ export function mountScene(
           vegetation: vegetationCoverage(time),
           iceCoverage: glaciations ? snowballCoverage(time) : 0,
           data: binaryMesh(usePaleo ? paleoMesh : land),
-          image: usePaleo ? null : terrainImage,
+          image: terrainImage,
           paleoFrameA: usePaleo ? pose.a : null,
           paleoFrameB: usePaleo ? pose.b : null,
           paleoBlend: usePaleo ? pose.blend : 0,
