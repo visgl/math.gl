@@ -19,3 +19,7 @@ Related CPU geometry modules are available from subpaths: `@math.gl/geometry/uti
 `@math.gl/geometry/spatial-index`. These APIs are implemented in this package. Polygon processing includes general tessellation
 and mesh refinement, with Mercator clipping helpers. Globe mesh subdivision is available from
 `@math.gl/geospatial/globe`.
+
+The experimental `HingeTree` evaluates rigid panels connected by hinges. See the
+[HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and
+[unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/unfolding-polyhedron).

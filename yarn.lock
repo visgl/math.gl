@@ -15941,6 +15941,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"math.gl-unfolding-polyhedron@workspace:examples/unfolding-polyhedron":
+  version: 0.0.0-use.local
+  resolution: "math.gl-unfolding-polyhedron@workspace:examples/unfolding-polyhedron"
+  dependencies:
+    "@math.gl/core": "workspace:*"
+    "@math.gl/geometry": "workspace:*"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
 "md5@npm:^2.3.0":
   version: 2.3.0
   resolution: "md5@npm:2.3.0"
