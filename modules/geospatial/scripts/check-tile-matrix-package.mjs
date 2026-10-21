@@ -26,6 +26,10 @@ assert.deepEqual(tiles.getTileRange(matrix, [120, 190, 140, 200]),
   {minTileColumn: 1, maxTileColumn: 1, minTileRow: 0, maxTileRow: 0});
 assert.equal(tiles.selectTileMatrix({crs: 'local', matrices: [matrix]}, 1), matrix);
 assert.deepEqual(tiles.getTileBounds({...matrix, resolutionY: 3}, 1, 1), [120, 170, 140, 185]);
+const variable = {...matrix, matrixSize: [4, 2],
+  variableMatrixWidths: [{coalesce: 2, minTileRow: 0, maxTileRow: 0}]};
+assert.deepEqual(tiles.getTileIndex(variable, [130, 200]), [0, 0]);
+assert.equal(tiles.getTileRanges(variable, [100, 190, 180, 200])[0].columnStep, 2);
 `;
   await writeFile(
     join(temporaryDirectory, 'consumer.mjs'),
@@ -45,9 +49,9 @@ ${assertions}`
   await writeFile(
     join(temporaryDirectory, 'consumer.ts'),
     `
-import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix}
+import {getTileBounds, getTileIndex, getTileRange, getTileRanges, selectTileMatrix}
   from '@math.gl/geospatial/tile-matrix';
-import type {TileMatrix, TileMatrixSet, TileMatrixBounds, TileMatrixLimits}
+import type {TileMatrix, TileMatrixSet, TileMatrixBounds, TileMatrixLimits, VariableMatrixWidth, TileMatrixRowRange}
   from '@math.gl/geospatial/tile-matrix';
 const matrix: TileMatrix = {id: '0', resolution: 1, resolutionY: 2, origin: [0, 0],
   cornerOfOrigin: 'topLeft', tileSize: [256, 256], matrixSize: [2, 2]};
@@ -55,7 +59,9 @@ const matrixSet: TileMatrixSet = {crs: 'local', matrices: [matrix]};
 const bounds: TileMatrixBounds = getTileBounds(matrix, 0, 0);
 const range: TileMatrixLimits | null = getTileRange(matrix, bounds);
 const selected: TileMatrix | null = selectTileMatrix(matrixSet, 1);
-void [range, selected, getTileIndex(matrix, [0, 0])];
+const band: VariableMatrixWidth = {coalesce: 2, minTileRow: 0, maxTileRow: 0};
+const rowRanges: TileMatrixRowRange[] = getTileRanges({...matrix, variableMatrixWidths: [band]}, bounds);
+void [range, rowRanges, selected, getTileIndex(matrix, [0, 0])];
 // @ts-expect-error resolution targets are numeric
 selectTileMatrix(matrixSet, '1');
 // @ts-expect-error matrix geometry is readonly

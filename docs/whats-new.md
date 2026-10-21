@@ -100,6 +100,7 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 
 **`@math.gl/geospatial`**
 
+- The `tile-matrix` subpath adds validated variable-width/coalesced row bands, canonical OGC column aliases, row-aware bounds and point lookup, and compact `getTileRanges` queries. Regular-grid behavior is unchanged.
 - Adds `EllipsoidOccluder` ray intervals, altitude-aware occlusion, and limb ellipses, plus conservative globe horizon bounds across poles and the antimeridian.
 - Improves 3D Tiles support in loaders.gl with ellipsoid and bounding-volume helpers.
 - `makeOBBFromRegion()` - New function that creates a Cartesian oriented bounding box from a geospatial region.
