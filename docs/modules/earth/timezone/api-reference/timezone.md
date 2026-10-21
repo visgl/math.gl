@@ -70,4 +70,4 @@ Transitions include daylight saving and political offset changes. Historical off
 
 ## Dependency boundaries
 
-Root helpers use native `Intl` and do not import the Temporal compatibility dependency. The `/temporal` entry point uses `@js-temporal/polyfill` without changing globals, exposing plain numeric results rather than polyfill objects. It imports neither the geographic table nor an `Intl` polyfill. The root and lookup entry points accept the identifiers supported by the runtime's `Intl`; `/temporal` uses Temporal's identifier rules.
+Root helpers use native `Intl` and do not import the vendored Temporal implementation. The `/temporal` entry point uses a vendored copy of `@js-temporal/polyfill` 0.5.1 (including JSBI) without changing globals, exposing plain numeric results rather than polyfill objects. It imports neither the geographic table nor an `Intl` polyfill. The root and lookup entry points accept the identifiers supported by the runtime's `Intl`; `/temporal` uses Temporal's identifier rules.

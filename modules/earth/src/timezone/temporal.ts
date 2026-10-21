@@ -2,13 +2,17 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Temporal} from '@js-temporal/polyfill';
+import temporalRuntime from './vendor/temporal/runtime';
+import type {Temporal as TemporalTypes} from './vendor/temporal/types';
+
 import {assertTimezone, getInstant} from './instant';
 import type {LocalDateTimeInput, LocalDateTimeOptions, TimezoneTransition} from './types';
 
 export type {LocalDateTimeInput, LocalDateTimeOptions, TimezoneTransition} from './types';
 
-function getZonedDateTime(timezone: string, date: Date | number): Temporal.ZonedDateTime {
+const Temporal: typeof TemporalTypes = temporalRuntime;
+
+function getZonedDateTime(timezone: string, date: Date | number): TemporalTypes.ZonedDateTime {
   assertTimezone(timezone);
   return Temporal.Instant.fromEpochMilliseconds(getInstant(date).getTime()).toZonedDateTimeISO(
     timezone

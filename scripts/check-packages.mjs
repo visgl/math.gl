@@ -25,6 +25,12 @@ for (const name of expected) {
       assert.notEqual(dependency, manifest.name, 'Subpaths must not create self-dependencies');
     }
   }
+  if (['core', 'earth'].includes(name)) {
+    for (const field of ['dependencies', 'peerDependencies', 'optionalDependencies']) {
+      assert(Object.keys(manifest[field] || {}).every(dependency => dependency.startsWith('@math.gl/')),
+        manifest.name + ': vendored implementations must not introduce external runtime dependencies');
+    }
+  }
   for (const [subpath, entry] of Object.entries(manifest.exports)) {
     const targets = typeof entry === 'string' ? [entry] : Object.values(entry);
     for (const target of targets) {

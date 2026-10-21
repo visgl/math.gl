@@ -13,8 +13,8 @@ const require = createRequire(import.meta.url);
 const toolsRequire = createRequire(require.resolve('@vis.gl/dev-tools'));
 const {build} = toolsRequire('esbuild');
 const directory = await mkdtemp(join(tmpdir(), 'math-gl-timezone-'));
-const table = input => input.includes('@photostructure/tz-lookup');
-const temporal = input => input.includes('@js-temporal/polyfill') || input.includes('node_modules/jsbi');
+const table = input => input.includes('/vendor/tz-lookup/');
+const temporal = input => input.includes('/vendor/temporal/');
 const options = {
   bundle: true,
   tsconfigRaw: {},
@@ -85,7 +85,7 @@ try {
   execFileSync(process.execPath, ['-e', `
     const assert = require('node:assert/strict');
     const root = require('@math.gl/earth/timezone');
-    assert.ok(!Object.keys(require.cache).some(path => path.includes('@photostructure/tz-lookup') || path.includes('@js-temporal/polyfill')));
+    assert.ok(!Object.keys(require.cache).some(path => path.includes('/vendor/tz-lookup/') || path.includes('/vendor/temporal/')));
     assert.equal(root.getLocalDateTime('UTC', 0).year, 1970);
     const originalIntl = globalThis.Intl;
     const originalTemporal = globalThis.Temporal;

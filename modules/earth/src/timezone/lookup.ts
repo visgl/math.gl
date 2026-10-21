@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import tzLookup from '@photostructure/tz-lookup';
+import tzLookup from './vendor/tz-lookup/runtime';
 
 /** Returns an approximate IANA timezone for [longitude, latitude] in degrees. */
 export function lookupTimezone(coordinates: readonly [number, number]): string {

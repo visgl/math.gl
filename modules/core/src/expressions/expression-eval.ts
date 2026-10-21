@@ -12,8 +12,11 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return, @typescript-eslint/restrict-plus-operands */
 
-import jsep from 'jsep';
+import jsepRuntime from './vendor/jsep/runtime';
+import type {Jsep as JsepTypes} from './vendor/jsep/types';
 import {mergeFunctionLibraries, type ExpressionEvaluationOptions} from './function-libraries';
+
+const jsep: typeof JsepTypes = jsepRuntime;
 
 /**
  * Named values and functions available while evaluating an expression.
@@ -24,15 +27,15 @@ export type ExpressionContext = Record<string, unknown>;
  * A JSEP abstract syntax tree node supported by the evaluator.
  */
 export type Expression =
-  | jsep.ArrayExpression
-  | jsep.BinaryExpression
-  | jsep.CallExpression
-  | jsep.ConditionalExpression
-  | jsep.Identifier
-  | jsep.Literal
-  | jsep.MemberExpression
-  | jsep.ThisExpression
-  | jsep.UnaryExpression;
+  | JsepTypes.ArrayExpression
+  | JsepTypes.BinaryExpression
+  | JsepTypes.CallExpression
+  | JsepTypes.ConditionalExpression
+  | JsepTypes.Identifier
+  | JsepTypes.Literal
+  | JsepTypes.MemberExpression
+  | JsepTypes.ThisExpression
+  | JsepTypes.UnaryExpression;
 
 /**
  * Evaluator implementation for a custom unary operator.
@@ -120,13 +123,13 @@ const unops: Record<string, (...args: any[]) => any> = {
   '!': (a: unknown) => !a
 };
 
-function evaluateArray(list: jsep.Expression[], context: ExpressionContext): unknown[] {
+function evaluateArray(list: JsepTypes.Expression[], context: ExpressionContext): unknown[] {
   return list.map(value => evaluate(value, context));
 }
 
 /** Evaluates each expression in an array concurrently. */
 async function evaluateArrayAsync(
-  list: jsep.Expression[],
+  list: JsepTypes.Expression[],
   context: ExpressionContext
 ): Promise<unknown[]> {
   return await Promise.all(list.map(value => evalAsync(value, context)));
@@ -134,13 +137,13 @@ async function evaluateArrayAsync(
 
 /** Resolves a member expression and preserves its receiver for method calls. */
 function evaluateMember(
-  node: jsep.MemberExpression,
+  node: JsepTypes.MemberExpression,
   context: ExpressionContext
 ): [Record<string, unknown>, unknown] {
   const object = evaluate(node.object, context) as Record<string, unknown>;
   const key = node.computed
     ? (evaluate(node.property, context) as string)
-    : (node.property as jsep.Identifier).name;
+    : (node.property as JsepTypes.Identifier).name;
 
   if (/^__proto__|prototype|constructor$/.test(key)) {
     throw new Error(`Access to member "${key}" disallowed.`);
@@ -151,13 +154,13 @@ function evaluateMember(
 
 /** Asynchronously resolves a member expression and its receiver. */
 async function evaluateMemberAsync(
-  node: jsep.MemberExpression,
+  node: JsepTypes.MemberExpression,
   context: ExpressionContext
 ): Promise<[Record<string, unknown>, unknown]> {
   const object = (await evalAsync(node.object, context)) as Record<string, unknown>;
   const key = node.computed
     ? ((await evalAsync(node.property, context)) as string)
-    : (node.property as jsep.Identifier).name;
+    : (node.property as JsepTypes.Identifier).name;
 
   if (/^__proto__|prototype|constructor$/.test(key)) {
     throw new Error(`Access to member "${key}" disallowed.`);
@@ -169,7 +172,7 @@ async function evaluateMemberAsync(
 /** Evaluates one expression node synchronously. */
 // eslint-disable-next-line complexity
 function evaluateExpression(
-  node: jsep.Expression,
+  node: JsepTypes.Expression,
   context: ExpressionContext,
   options?: ExpressionEvaluationOptions
 ): unknown {
@@ -201,7 +204,10 @@ function evaluateExpression(
       let fn: Callable | undefined;
 
       if (expression.callee.type === 'MemberExpression') {
-        const member = evaluateMember(expression.callee as jsep.MemberExpression, mergedContext);
+        const member = evaluateMember(
+          expression.callee as JsepTypes.MemberExpression,
+          mergedContext
+        );
         caller = member[0];
         fn = member[1] as Callable | undefined;
       } else {
@@ -241,7 +247,7 @@ function evaluateExpression(
 }
 
 /** Evaluates a nested expression using an already-merged context. */
-function evaluate(node: jsep.Expression, context: ExpressionContext): unknown {
+function evaluate(node: JsepTypes.Expression, context: ExpressionContext): unknown {
   return evaluateExpression(node, context);
 }
 
@@ -259,7 +265,7 @@ function evaluate(node: jsep.Expression, context: ExpressionContext): unknown {
  */
 // eslint-disable-next-line complexity
 export async function evalAsync(
-  node: jsep.Expression,
+  node: JsepTypes.Expression,
   context: ExpressionContext,
   options?: ExpressionEvaluationOptions
 ): Promise<unknown> {
@@ -294,7 +300,7 @@ export async function evalAsync(
 
       if (expression.callee.type === 'MemberExpression') {
         const member = await evaluateMemberAsync(
-          expression.callee as jsep.MemberExpression,
+          expression.callee as JsepTypes.MemberExpression,
           mergedContext
         );
         caller = member[0];
@@ -343,7 +349,7 @@ export async function evalAsync(
  * @returns A function that evaluates the expression against a context.
  */
 export function compile(
-  expression: string | jsep.Expression,
+  expression: string | JsepTypes.Expression,
   options?: ExpressionEvaluationOptions
 ): (context: ExpressionContext) => unknown {
   const ast = parse(expression);
@@ -358,7 +364,7 @@ export function compile(
  * @returns A function that asynchronously evaluates the expression.
  */
 export function compileAsync(
-  expression: string | jsep.Expression,
+  expression: string | JsepTypes.Expression,
   options?: ExpressionEvaluationOptions
 ): (context: ExpressionContext) => Promise<unknown> {
   const ast = parse(expression);
@@ -414,7 +420,7 @@ export function addBinaryOp(
  * @returns A parsed AST, or the supplied AST unchanged.
  * @throws If the expression string is not valid JSEP syntax.
  */
-export function parse(expression: string | jsep.Expression): jsep.Expression {
+export function parse(expression: string | JsepTypes.Expression): JsepTypes.Expression {
   return typeof expression === 'string' ? jsep(expression) : expression;
 }
 

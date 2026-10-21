@@ -94,8 +94,5 @@
   ],
   "sideEffects": [
     "./src/lib/common.js"
-  ],
-  "dependencies": {
-    "jsep": "^1.4.0"
-  }
+  ]
 }
