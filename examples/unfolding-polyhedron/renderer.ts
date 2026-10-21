@@ -75,7 +75,8 @@ export function createRenderer(canvas: HTMLCanvasElement, status: HTMLElement) {
     gl.vertexAttribPointer(i, 3, gl.FLOAT, false, 36, i * 12);
   }
   const textured = gl.getUniformLocation(program, 'textured');
-  gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texImage2D(
     gl.TEXTURE_2D,
     0,
@@ -108,6 +109,14 @@ export function createRenderer(canvas: HTMLCanvasElement, status: HTMLElement) {
   };
   image.src = BLUE_MARBLE_WORLD_URL;
   return {
+    dispose() {
+      image.onload = null;
+      image.onerror = null;
+      image.src = '';
+      gl.deleteBuffer(buffer);
+      gl.deleteTexture(texture);
+      gl.deleteProgram(program);
+    },
     get ready() {
       return ready;
     },

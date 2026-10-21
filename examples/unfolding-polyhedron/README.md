@@ -85,3 +85,8 @@ Vite aliases local math.gl sources. Build with
 
 No code, shaders, presets, or mesh assets from Nico Belmonte's demo are used.
 Coastline-aligned meshes and vector clipping remain future work.
+
+The docs and standalone page share `mountUnfolding` and the same markup and styles.
+The docs lazy-load the browser-only renderer; unmounting cancels animation, removes
+listeners and frees WebGL resources. Find **Unfolding Earth** in the Geometry docs
+and Examples sidebars.

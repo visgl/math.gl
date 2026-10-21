@@ -3,58 +3,58 @@
  * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
  */
 
-:root {
+.unfolding-polyhedron {
   font-family: system-ui, sans-serif;
   color: #e5edf0;
   background: #0e2029;
   color-scheme: dark;
 }
-* {
+.unfolding-polyhedron * {
   box-sizing: border-box;
 }
-body {
+.unfolding-polyhedron {
   margin: 0;
 }
-main {
+.unfolding-polyhedron main {
   max-width: 1200px;
   margin: auto;
   padding: 30px 40px;
 }
-header {
+.unfolding-polyhedron header {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
   color: #a0b6c0;
 }
-a {
+.unfolding-polyhedron a {
   color: #c8dce3;
   text-decoration: none;
 }
-section {
+.unfolding-polyhedron section {
   position: relative;
   margin-top: 45px;
 }
-.intro {
+.unfolding-polyhedron .intro {
   pointer-events: none;
   position: absolute;
   z-index: 1;
 }
-.eyebrow {
+.unfolding-polyhedron .eyebrow {
   font-size: 11px;
   letter-spacing: 0.18em;
   color: #edbd6d;
 }
-h1 {
+.unfolding-polyhedron h2 {
   font-weight: 500;
   font-size: clamp(28px, 4vw, 46px);
   letter-spacing: -0.04em;
   margin: 12px 0;
 }
-.intro > p:last-child {
+.unfolding-polyhedron .intro > p:last-child {
   color: #a0b6c0;
   font-size: 15px;
 }
-canvas {
+.unfolding-polyhedron canvas {
   display: block;
   width: 100%;
   height: min(62vh, 620px);
@@ -62,40 +62,40 @@ canvas {
   touch-action: none;
   cursor: grab;
 }
-canvas:active {
+.unfolding-polyhedron canvas:active {
   cursor: grabbing;
 }
-.hint {
+.unfolding-polyhedron .hint {
   text-align: center;
   color: #a0b6c0;
   font-size: 12px;
   margin-top: 0;
 }
-footer {
+.unfolding-polyhedron footer {
   border-top: 1px solid #344953;
   padding-top: 24px;
   margin-top: 30px;
 }
-.controls {
+.unfolding-polyhedron .controls {
   display: flex;
   align-items: center;
   gap: 24px;
 }
-label {
+.unfolding-polyhedron label {
   white-space: nowrap;
   min-width: 108px;
   font-size: 14px;
 }
-output {
+.unfolding-polyhedron output {
   color: #edbd6d;
   padding-left: 8px;
   font-variant-numeric: tabular-nums;
 }
-input {
+.unfolding-polyhedron input {
   flex: 1;
   accent-color: #edbd6d;
 }
-button {
+.unfolding-polyhedron button {
   background: #213942;
   border: 1px solid #49606a;
   color: #e5edf0;
@@ -105,65 +105,65 @@ button {
   font: inherit;
   font-size: 13px;
 }
-button:hover {
+.unfolding-polyhedron button:hover {
   background: #304b57;
 }
-button:focus-visible,
-input:focus-visible {
+.unfolding-polyhedron button:focus-visible,
+.unfolding-polyhedron input:focus-visible {
   outline: 2px solid #edbd6d;
   outline-offset: 4px;
 }
-footer > p {
+.unfolding-polyhedron footer > p {
   font-size: 13px;
   color: #a0b6c0;
   line-height: 1.6;
 }
 @media (max-width: 600px) {
-  main {
+  .unfolding-polyhedron main {
     padding: 20px;
   }
-  header span {
+  .unfolding-polyhedron header span {
     display: none;
   }
-  .controls {
+  .unfolding-polyhedron .controls {
     gap: 12px;
     flex-wrap: wrap;
   }
-  input[type="range"] {
+  .unfolding-polyhedron input[type="range"] {
     min-width: 120px;
   }
-  canvas {
+  .unfolding-polyhedron canvas {
     height: 55vh;
   }
-  .intro {
+  .unfolding-polyhedron .intro {
     position: static;
   }
-  section {
+  .unfolding-polyhedron section {
     margin-top: 30px;
   }
 }
 
-.intro {
+.unfolding-polyhedron .intro {
   position: static;
 }
-section {
+.unfolding-polyhedron section {
   margin-top: 28px;
 }
-canvas {
+.unfolding-polyhedron canvas {
   height: min(52vh, 540px);
 }
-.selectors {
+.unfolding-polyhedron .selectors {
   display: flex;
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
   margin-top: 24px;
 }
-.selectors label {
+.unfolding-polyhedron .selectors label {
   min-width: auto;
   color: #a0b6c0;
 }
-select {
+.unfolding-polyhedron select {
   font: inherit;
   font-size: 14px;
   padding: 9px 12px;
@@ -172,29 +172,37 @@ select {
   background: #213942;
   color: #e5edf0;
 }
-select:disabled {
+.unfolding-polyhedron select:disabled {
   opacity: 0.45;
 }
-select:focus-visible {
+.unfolding-polyhedron select:focus-visible {
   outline: 2px solid #edbd6d;
   outline-offset: 4px;
 }
-#summary {
+.unfolding-polyhedron #summary {
   text-align: left;
   margin-top: 18px;
   font-variant-numeric: tabular-nums;
 }
-#notice {
+.unfolding-polyhedron #notice {
   color: #edbd6d;
 }
 
 @media (min-width: 601px) {
-  main {padding: 20px 32px;}
-  section {margin-top: 16px;}
-  h1 {font-size: 36px; margin: 8px 0;}
-  .eyebrow {margin: 8px 0;}
-  .selectors {margin-top: 16px;}
-  canvas {height: 36vh; min-height: 220px;}
-  footer {margin-top: 16px; padding-top: 16px;}
-  footer > p {margin: 10px 0;}
+  .unfolding-polyhedron main {padding: 20px 32px;}
+  .unfolding-polyhedron section {margin-top: 16px;}
+  .unfolding-polyhedron h2 {font-size: 36px; margin: 8px 0;}
+  .unfolding-polyhedron .eyebrow {margin: 8px 0;}
+  .unfolding-polyhedron .selectors {margin-top: 16px;}
+  .unfolding-polyhedron canvas {height: 36vh; min-height: 220px;}
+  .unfolding-polyhedron footer {margin-top: 16px; padding-top: 16px;}
+  .unfolding-polyhedron footer > p {margin: 10px 0;}
 }
+
+.unfolding-polyhedron {height: 100%; overflow: auto; background: #0e2029; color: #e5edf0;}
+.unfolding-polyhedron canvas {height: 280px; min-height: 220px;}
+.unfolding-polyhedron .controls {flex-wrap: wrap;}
+
+.unfolding-polyhedron[data-embedded] header,
+.unfolding-polyhedron[data-embedded] .intro {display: none;}
+.unfolding-polyhedron[data-embedded] section {margin-top: 0;}

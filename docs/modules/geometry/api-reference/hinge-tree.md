@@ -76,3 +76,5 @@ See the [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/mast
 for all five Platonic solids, subdivided icosahedra, automatic maximum-spanning-tree
 cut selection, and a simple Canvas renderer. The mesh/layout builder is experimental
 example code, separate from this API.
+
+Try the [interactive Unfolding Earth example](../unfolding-earth.md) inline in the docs.

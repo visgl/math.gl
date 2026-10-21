@@ -102,6 +102,7 @@
         "label": "@math.gl/geometry",
         "items": [
           "modules/geometry/README",
+          "modules/geometry/unfolding-earth",
           "modules/geometry/api-reference/geometry",
           "modules/geometry/api-reference/hinge-tree",
           "modules/geometry/api-reference/box-geometry",
