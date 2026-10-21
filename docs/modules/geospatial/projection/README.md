@@ -27,6 +27,9 @@ Choose a data source to visit Nuna (Columbia), Rodinia and Pangaea.
 [Open the full example](/examples/tectonic-time-machine) for data credits and limits.
 </Admonition>
 
+See [external projection engines](./developer-guide/external-projection-engines.md)
+for proj4js and D3 adapter examples.
+
 ## Quick start
 
 ```typescript

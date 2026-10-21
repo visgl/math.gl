@@ -241,6 +241,7 @@
               "modules/geospatial/projection/developer-guide/coordinate-systems",
               "modules/geospatial/projection/developer-guide/projections",
               "modules/geospatial/projection/developer-guide/projection-engine",
+              "modules/geospatial/projection/developer-guide/external-projection-engines",
               "modules/geospatial/projection/developer-guide/deformation-models",
               "modules/geospatial/projection/developer-guide/support"
             ]
