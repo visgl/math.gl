@@ -4,6 +4,13 @@
 // Curated educational event chronology. Ages are approximate and do not
 // constitute observed impact coordinates, tectonic reconstructions or simulations.
 // Each event includes a source for the scientific interpretation.
+export const LAND_PLANTS_AGE_MA = 470;
+// Illustrative greening, not a reconstructed vegetation map. Full color arrives
+// gradually by the Devonian; older terrain keeps its luminance and relief.
+export function vegetationCoverage(time) {
+  const fraction = Math.max(0, Math.min(1, (time + LAND_PLANTS_AGE_MA) / 80));
+  return fraction * fraction * (3 - 2 * fraction);
+}
 export const EARTH_EVENTS = [
   {id: 'solar-system', name: 'Formation of the Solar System', ageMa: 4567,
     category: 'planetary', uncertaintyMa: 2, confidence: 'high',
@@ -33,6 +40,10 @@ export const EARTH_EVENTS = [
     category: 'climate', olderMa: 650, youngerMa: 635, confidence: 'high',
     description: 'Cryogenian glaciation; the event is represented as an interval.',
     source: 'Hoffman et al. (2017)', url: 'https://doi.org/10.1126/sciadv.1600983'},
+  {id: 'land-plants', name: 'Emergence of land plants', ageMa: LAND_PLANTS_AGE_MA,
+    category: 'life', uncertaintyMa: 30, confidence: 'high',
+    description: 'Early land plants appear around the Ordovician. The timing is approximate; greening in this example is illustrative, not reconstructed vegetation coverage.',
+    source: 'University of Bristol (2020)', url: 'https://www.bristol.ac.uk/news/2020/january/land-plants.html'},
   {id: 'end-ordovician', name: 'End-Ordovician extinction', ageMa: 444,
     category: 'extinction', uncertaintyMa: 2, confidence: 'high',
     description: 'Major marine extinction associated with rapid climatic and sea-level changes.',
@@ -54,7 +65,7 @@ export const EARTH_EVENTS = [
     description: 'Impact at the Cretaceous–Paleogene boundary; this is a geographically evidenced impact, unlike Hadean simulated events.',
     source: 'Schulte et al. (2010)', url: 'https://doi.org/10.1126/science.1177265'}
 ];
-export const EVENT_CATEGORIES = ['all', 'planetary', 'impact', 'geology', 'environment', 'climate', 'extinction'];
+export const EVENT_CATEGORIES = ['all', 'planetary', 'impact', 'geology', 'environment', 'climate', 'life', 'extinction'];
 export function filterEarthEvents(events, category = 'all', query = '') {
   const needle = query.trim().toLowerCase();
   return events.filter(event =>

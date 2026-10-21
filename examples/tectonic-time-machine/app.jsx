@@ -30,6 +30,7 @@ export default function TectonicTimeMachine() {
     [historyStatus, setHistoryStatus] = useState(''),
     [error, setError] = useState(''),
     [attempt, setAttempt] = useState(0);
+  const planetaryAgeRef = useRef(null);
   const [sourceId, setSourceId] = useState(DEFAULT_SOURCE),
     [model, setModel] = useState(null);
   const source = sourceFor(sourceId);
@@ -84,7 +85,7 @@ export default function TectonicTimeMachine() {
         scene.current?.setModel(loaded);
         setCounts(scene.current?.render(clock.current, true));
         setReady(true);
-        setPlaying(true);
+        setPlaying(planetaryAgeRef.current === null);
         setStatus(
           `${loaded.pids.length} plate IDs · ${source.citation} · rotations sampled every 10 Ma`
         );
@@ -116,7 +117,7 @@ export default function TectonicTimeMachine() {
         setStatus(
           `${model.pids.length} plate IDs · ${source.citation} · rotations sampled every 10 Ma`
         );
-        setPlaying(resume);
+        setPlaying(resume && planetaryAgeRef.current === null);
       })
       .catch(e => {
         if (!abort.signal.aborted) setError(e.message);
@@ -153,22 +154,33 @@ export default function TectonicTimeMachine() {
     }
   }, [time, ready, playing]);
   useEffect(() => {
-    scene.current?.setPlayback({time, playing, ready, speed, maxAge: source.maxAge});
-  }, [time, playing, ready, speed, sourceId, glaciations]);
-  const seek = value => {
+    scene.current?.setPlayback({time, playing: playing && planetaryAge === null, ready: ready && planetaryAge === null, speed, maxAge: source.maxAge});
+  }, [time, playing, ready, speed, sourceId, glaciations, planetaryAge]);
+  const leavePlanetary = () => {
+    planetaryAgeRef.current = null;
     setPlanetaryAge(null);
+  };
+  const enterPlanetary = age => {
+    planetaryAgeRef.current = age;
+    setPlanetaryAge(age);
+    setPlaying(false);
+  };
+  const seek = value => {
+    leavePlanetary();
     clock.current = clampTime(Number(value), source.maxAge);
     setPlaying(false);
     setTime(clock.current);
   };
   playback.current = {
     advance(value) {
+      if (planetaryAgeRef.current !== null) return;
       clock.current = clampTime(Number(value), source.maxAge);
       setTime(clock.current);
       const result = scene.current?.render(clock.current);
       if (result) setCounts(result);
     },
     play(value) {
+      if (planetaryAgeRef.current !== null) return;
       if (value && clock.current >= 300) clock.current = -source.maxAge;
       setTime(clock.current);
       setPlaying(value);
@@ -191,7 +203,7 @@ export default function TectonicTimeMachine() {
           </p>
           <button
             className="tectonic-primary-play"
-            disabled={!ready || Boolean(error)}
+            disabled={!ready || Boolean(error) || planetaryAge !== null}
             aria-label={playing ? 'Stop playback' : 'Play playback'}
             onClick={() => playback.current.play(!playing)}
           >
@@ -205,7 +217,7 @@ export default function TectonicTimeMachine() {
               <strong>{planetaryAge.toLocaleString()} Ma · {planetaryStage(planetaryAge)?.label}</strong>
               <p>{planetaryStage(planetaryAge)?.description}</p>
               <p>Conceptual planetary appearance, not reconstructed terrain or impact simulation.</p>
-              <button onClick={() => setPlanetaryAge(null)}>Return to tectonic reconstruction</button>
+              <button onClick={leavePlanetary}>Return to tectonic reconstruction</button>
             </div>
           </div>
         )}
@@ -248,7 +260,7 @@ export default function TectonicTimeMachine() {
           <select
             aria-label="Data source"
             value={sourceId}
-            onChange={e => setSourceId(e.target.value)}
+            onChange={e => {leavePlanetary(); setSourceId(e.target.value);}}
           >
             {Object.values(DATA_SOURCES).map(item => (
               <option key={item.id} value={item.id}>
@@ -387,7 +399,7 @@ export default function TectonicTimeMachine() {
                     onClick={() => seek(-event.ageMa)}
                   >View at this age</button>
                 ) : (
-                  <button onClick={() => {setPlaying(false); setPlanetaryAge(event.ageMa);}}>
+                  <button onClick={() => enterPlanetary(event.ageMa)}>
                     Explore early Earth scenario
                   </button>
                 )}
@@ -483,7 +495,7 @@ export default function TectonicTimeMachine() {
         </details>
       </aside>
       <footer className="tectonic-timeline">
-        <div ref={timeline} className="tectonic-widget" aria-label="Geological playback timeline" />
+        <div ref={timeline} inert={planetaryAge !== null} aria-disabled={planetaryAge !== null} className="tectonic-widget" aria-label="Geological playback timeline" />
         <div className="tectonic-deep-time" aria-label="Earth history event timeline">
           <div className="tectonic-deep-time-header">
             <strong>4.567 billion years of Earth history</strong>
@@ -501,7 +513,7 @@ export default function TectonicTimeMachine() {
                   title={`${event.name} · ${event.ageMa} Ma · ${available ? 'Seek to geological age' : 'Explore illustrative early Earth mode'}`}
                   aria-label={`${event.name}, ${event.ageMa} Ma. ${available ? 'Seek to event' : 'Explore illustrative early Earth mode'}`}
                   disabled={available && (!ready || Boolean(error))}
-                  onClick={() => available ? seek(-event.ageMa) : (setPlaying(false), setPlanetaryAge(event.ageMa))}
+                  onClick={() => available ? seek(-event.ageMa) : enterPlanetary(event.ageMa)}
                 />
               );
             })}

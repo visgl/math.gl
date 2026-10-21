@@ -10,12 +10,13 @@ const block = `layout(std140) uniform tectonicSurfaceUniforms {
   float useTexture;
   float regionColors;
   float iceCoverage;
+  float vegetation;
 } tectonicSurface;`;
 const surface = {
   name: 'tectonicSurface',
   vs: block,
   fs: block + '\nuniform sampler2D terrainTexture;',
-  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32'}
+  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32', vegetation: 'f32'}
 };
 const LIGHTS = [
   {type: 'ambient', color: [170, 196, 222], intensity: 0.65},
@@ -32,6 +33,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
     surfaceType: 'land',
     globeWeight: 1,
     regionColors: false,
+    vegetation: 1,
     iceCoverage: 0
   };
   initializeState(context) {
@@ -104,6 +106,9 @@ export class SurfaceLayer extends SolidPolygonLayer {
           float waterPixel=smoothstep(.025,.09,terrain.b-max(terrain.r,terrain.g));
           terrain=mix(terrain,vec3(.36,.39,.24),waterPixel);
           vec3 naturalColor=mix(vec3(.36,.42,.28),terrain,tectonicSurface.useTexture);
+          float luminance=dot(naturalColor,vec3(.2126,.7152,.0722));
+          vec3 bareEarth=luminance*vec3(1.14,.98,.81);
+          naturalColor=mix(bareEarth,naturalColor,tectonicSurface.vegetation);
           color.rgb=mix(naturalColor,color.rgb,tectonicSurface.regionColors)*diffuse;
           float rim=pow(1.-max(normal.z,0.),4.)*tectonicSurface.globeWeight;
           color.rgb=mix(color.rgb,vec3(.24,.5,.66),rim*.22);
@@ -147,12 +152,13 @@ export class SurfaceLayer extends SolidPolygonLayer {
     };
   }
   draw(params) {
-    const {image, surfaceType, globeWeight, regionColors, iceCoverage} = this.props;
+    const {image, surfaceType, globeWeight, regionColors, iceCoverage, vegetation} = this.props;
     this.setShaderModuleProps({
       tectonicSurface: {
         isWater: surfaceType === 'ocean' ? 1 : 0,
         globeWeight,
         iceCoverage,
+        vegetation,
         useTexture: image ? 1 : 0,
         regionColors: regionColors ? 1 : 0,
         terrainTexture: image || this.state.fallbackTexture

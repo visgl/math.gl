@@ -254,3 +254,7 @@ interpolate ancient outlines or mix reference frames. No external geological
 geometry is bundled, and the current map renderer is unchanged. A future data
 integration should add provenance-backed epoch snapshots, geometry topology
 checks and projection-aware rendering before exposing any map overlay.
+
+Land-plant emergence is marked at approximately 470 Ma, with an illustrative
+80 Myr transition from bare earth tones to modern texture colors. This is not
+an ancient vegetation reconstruction; region colors remain a categorical view.

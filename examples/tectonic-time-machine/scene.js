@@ -25,6 +25,7 @@ import {
   timeLabel
 } from './math.js';
 import {snowballCoverage, glaciationPlaybackSpeed} from './timeline.js';
+import {vegetationCoverage} from './earth-events.js';
 import {SurfaceLayer} from './surface-layer.js';
 import {loadTerrain} from './terrain.js';
 import {makeMesh, blendWeights, transformMesh, binaryMesh, worldToGeographic} from './geometry.js';
@@ -276,6 +277,7 @@ export function mountScene(
         new SurfaceLayer({
           ...common,
           id: 'tectonic-land',
+          vegetation: vegetationCoverage(time),
           iceCoverage: glaciations ? snowballCoverage(time) : 0,
           data: binaryMesh(land),
           image: terrainImage,

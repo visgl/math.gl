@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {EARTH_EVENTS, EVENT_CATEGORIES, filterEarthEvents, eventIsReconstructable} from './earth-events.js';
+import {EARTH_EVENTS, EVENT_CATEGORIES, filterEarthEvents, eventIsReconstructable, vegetationCoverage, LAND_PLANTS_AGE_MA} from './earth-events.js';
 
 test('chronology is sourced, unique and spans planetary formation through K-Pg', () => {
   assert.equal(new Set(EARTH_EVENTS.map(e => e.id)).size, EARTH_EVENTS.length);
@@ -28,4 +28,12 @@ test('events outside selected tectonic source cannot seek its rotation model', (
   const chicxulub = EARTH_EVENTS.find(e => e.id === 'chicxulub');
   assert.equal(eventIsReconstructable(theia, 1800), false);
   assert.equal(eventIsReconstructable(chicxulub, 1000), true);
+});
+
+test('land vegetation starts at the sourced event and fades in after emergence', () => {
+  assert.equal(EARTH_EVENTS.find(event => event.id === 'land-plants').ageMa, LAND_PLANTS_AGE_MA);
+  for (const time of [-1800, -700, -500, -470]) assert.equal(vegetationCoverage(time), 0);
+  assert.equal(vegetationCoverage(-430), .5);
+  for (const time of [-390, 0, 300]) assert.equal(vegetationCoverage(time), 1);
+  assert.ok(vegetationCoverage(-469) < .001);
 });
