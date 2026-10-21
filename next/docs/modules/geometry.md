@@ -64,3 +64,5 @@ An infinite glTF plane cannot be tessellated, so `PlaneGeometry` requires finite
 ## Parametric surfaces[​](#parametric-surfaces "Direct link to Parametric surfaces")
 
 The optional [`@math.gl/geometry/parametric`](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/parametric.md) subpath provides torus, lathe and sampled surface generators, with an interactive gallery.
+
+The experimental `HingeTree` evaluates rigid panels connected by hinges. See the [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/unfolding-polyhedron).
