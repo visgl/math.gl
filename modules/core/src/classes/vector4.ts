@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileCopyrightText: Copyright (c) 2017 Uber Technologies, Inc.
 
-import {NumericArray, NumericArray4} from '@math.gl/types';
+import {NumericArray, NumericArray4} from '../types';
 /* eslint-disable camelcase */
 import {
   transformMat4 as vec4_transformMat4,

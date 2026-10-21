@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {NumericArray} from '@math.gl/types';
+import {NumericArray} from '../types';
 import {config} from './common';
 
 export function validateVector(v: NumericArray, length: number): boolean {

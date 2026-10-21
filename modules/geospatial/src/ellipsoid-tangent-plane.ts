@@ -8,7 +8,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 import {Vector2, Vector3, Matrix4} from '@math.gl/core';
-import {Plane} from '@math.gl/culling';
+import {Plane} from '@math.gl/geometry/culling';
 import {Ellipsoid} from './ellipsoid';
 
 const scratchOrigin = new Vector3();

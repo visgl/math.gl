@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
-import {NumericArray} from '@math.gl/types';
+import {NumericArray} from '@math.gl/core/types';
 import {Vector3, assert, equals as equalsEpsilon} from '@math.gl/core';
 import {
   createLocalFrameBasis,

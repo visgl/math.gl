@@ -53,15 +53,15 @@ jobs:
 
       - name: Check independent interior references and qualification
         run: |
-          python3 modules/projection/scripts/generate-interior-reference.py --check
-          node modules/projection/scripts/qualify-interiors.mjs --output /tmp/interior-qualification.json
+          python3 modules/geospatial/projection/scripts/generate-interior-reference.py --check
+          node modules/geospatial/projection/scripts/qualify-interiors.mjs --output /tmp/interior-qualification.json
 
       - name: Check independent deformation stress references and qualification
         run: |
-          python3 modules/projection/scripts/generate-deformation-stress-reference.py --check
-          python3 modules/projection/scripts/generate-temporal-reference.py --check
-          node modules/projection/scripts/qualify-deformation-stress.mjs --output /tmp/deformation-stress-qualification.json
-          node modules/projection/scripts/check-application-deformation-qualification.mjs
+          python3 modules/geospatial/projection/scripts/generate-deformation-stress-reference.py --check
+          python3 modules/geospatial/projection/scripts/generate-temporal-reference.py --check
+          node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs --output /tmp/deformation-stress-qualification.json
+          node modules/geospatial/projection/scripts/check-application-deformation-qualification.mjs
 
       - name: Check generated CRS declarations
         run: yarn check:projjson-types
@@ -83,6 +83,9 @@ jobs:
 
       - name: Build code
         run: yarn build
+
+      - name: Check consolidated packages, exports, and assets
+        run: yarn check:packages
 
       - name: Test tectonic time machine streaming
         run: yarn workspace math.gl-tectonic-time-machine test
@@ -115,26 +118,26 @@ jobs:
 
       - name: Check projection parity inventory and package boundaries
         run: |
-          node modules/projection/scripts/check-attribution.mjs
-          node modules/projection/scripts/audit-allocations.mjs --check
-          node --test modules/projection/scripts/check-spheroid-allocations.test.mjs
-          node modules/projection/scripts/check-spheroid-allocations.mjs
-          node modules/projection/scripts/check-spheroid-boundary.mjs
-          node modules/projection/scripts/check-local-frame-allocations.mjs
-          node modules/projection/scripts/check-local-frame-boundary.mjs
-          node modules/projection/scripts/check-parity-inventory.mjs
-          node modules/projection/scripts/check-native-reference.mjs
-          node modules/projection/scripts/check-vertical-reference.mjs
-          node modules/projection/scripts/check-vertical-geotiff-reference.mjs
-          node modules/projection/scripts/check-pipeline-reference.mjs
-          node modules/projection/scripts/check-kinematic-reference.mjs
-          node modules/projection/scripts/check-deformation-reference.mjs
-          node modules/projection/scripts/measure-accuracy.mjs --output /tmp/projection-accuracy.json
-          node modules/projection/scripts/check-experimental-package.mjs
-          node modules/projection/scripts/check-packed-package.mjs
-          node modules/projection/scripts/check-bundle-budget.mjs
-          node modules/projection/scripts/check-lazy-package.mjs
-          node modules/projection/scripts/benchmark.mjs --points 100 --samples 3 --min-sample-ms 0
+          node modules/geospatial/projection/scripts/check-attribution.mjs
+          node modules/geospatial/projection/scripts/audit-allocations.mjs --check
+          node --test modules/geospatial/projection/scripts/check-spheroid-allocations.test.mjs
+          node modules/geospatial/projection/scripts/check-spheroid-allocations.mjs
+          node modules/geospatial/projection/scripts/check-spheroid-boundary.mjs
+          node modules/geospatial/projection/scripts/check-local-frame-allocations.mjs
+          node modules/geospatial/projection/scripts/check-local-frame-boundary.mjs
+          node modules/geospatial/projection/scripts/check-parity-inventory.mjs
+          node modules/geospatial/projection/scripts/check-native-reference.mjs
+          node modules/geospatial/projection/scripts/check-vertical-reference.mjs
+          node modules/geospatial/projection/scripts/check-vertical-geotiff-reference.mjs
+          node modules/geospatial/projection/scripts/check-pipeline-reference.mjs
+          node modules/geospatial/projection/scripts/check-kinematic-reference.mjs
+          node modules/geospatial/projection/scripts/check-deformation-reference.mjs
+          node modules/geospatial/projection/scripts/measure-accuracy.mjs --output /tmp/projection-accuracy.json
+          node modules/geospatial/projection/scripts/check-experimental-package.mjs
+          node modules/geospatial/projection/scripts/check-packed-package.mjs
+          node modules/geospatial/projection/scripts/check-bundle-budget.mjs
+          node modules/geospatial/projection/scripts/check-lazy-package.mjs
+          node modules/geospatial/projection/scripts/benchmark.mjs --points 100 --samples 3 --min-sample-ms 0
 
       - name: Upload projection accuracy measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -165,8 +168,8 @@ jobs:
           SCORECARD_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
           SCORECARD_WINDOW: ${{ github.event_name == 'pull_request' && '4' || '12' }}
         run: |
-          node --test modules/projection/scripts/scorecard.test.mjs
-          node modules/projection/scripts/collect-scorecard-node.mjs --directory /tmp/projection-scorecard-node --points "$SCORECARD_POINTS" --samples "$SCORECARD_SAMPLES" --min-sample-ms "$SCORECARD_WINDOW"
+          node --test modules/geospatial/projection/scripts/scorecard.test.mjs
+          node modules/geospatial/projection/scripts/collect-scorecard-node.mjs --directory /tmp/projection-scorecard-node --points "$SCORECARD_POINTS" --samples "$SCORECARD_SAMPLES" --min-sample-ms "$SCORECARD_WINDOW"
 
       - name: Upload Node scorecard evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -284,8 +287,8 @@ jobs:
       - name: Qualify independent interior and deformation references
         timeout-minutes: 2
         run: |
-          node modules/projection/scripts/qualify-interiors.mjs --browser ${{ matrix.browser }} --output /tmp/interior-qualification-${{ matrix.browser }}.json
-          node modules/projection/scripts/qualify-deformation-stress.mjs --browser ${{ matrix.browser }} --output /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
+          node modules/geospatial/projection/scripts/qualify-interiors.mjs --browser ${{ matrix.browser }} --output /tmp/interior-qualification-${{ matrix.browser }}.json
+          node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs --browser ${{ matrix.browser }} --output /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
 
       # Retain the complete matrix and three samples in PRs. A bounded 4 ms
       # window supports scorecard diagnostics; master retains the 12 ms profile.
@@ -294,11 +297,11 @@ jobs:
         env:
           BROWSER_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
           BROWSER_MIN_SAMPLE_MS: ${{ github.event_name == 'pull_request' && '4' || '12' }}
-        run: node modules/projection/scripts/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/projection-browser-qualification.json
+        run: node modules/geospatial/projection/scripts/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/projection-browser-qualification.json
 
       - name: Evaluate optional worker correctness and costs
         timeout-minutes: 2
-        run: node modules/projection/scripts/benchmark-workers.mjs --browser ${{ matrix.browser }} --points 1000,100000 --samples 3 --output /tmp/projection-worker-evaluation-${{ matrix.browser }}.json
+        run: node modules/geospatial/projection/scripts/benchmark-workers.mjs --browser ${{ matrix.browser }} --points 1000,100000 --samples 3 --output /tmp/projection-worker-evaluation-${{ matrix.browser }}.json
 
       - name: Upload browser qualification measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -351,7 +354,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           git fetch --no-tags --depth=1 origin "$BASE_SHA"
-          node modules/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --min-sample-ms 4 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
+          node modules/geospatial/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --min-sample-ms 4 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
 
       # Keep every scenario/layout/direction and seven samples; bound aggregate windows
       # as reusable-output modes add implementations. Longer local runs keep the 12 ms default.
@@ -359,25 +362,25 @@ jobs:
         timeout-minutes: 5
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: node modules/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --min-sample-ms 4 --allocations --reusable-results --output /tmp/projection-pipeline-comparison.json
+        run: node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --min-sample-ms 4 --allocations --reusable-results --output /tmp/projection-pipeline-comparison.json
 
       - name: Check paired grid preparation benchmark
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: node modules/projection/scripts/benchmark-grid-compare.mjs --baseline-ref "$BASE_SHA" --sizes 17,65 --samples 3 --coordinates --allocations --points 1000 --output /tmp/projection-grid-comparison.json
+        run: node modules/geospatial/projection/scripts/benchmark-grid-compare.mjs --baseline-ref "$BASE_SHA" --sizes 17,65 --samples 3 --coordinates --allocations --points 1000 --output /tmp/projection-grid-comparison.json
 
       - name: Compare spheroid conversion correctness and costs
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: node modules/projection/scripts/benchmark-spheroid-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-spheroid-comparison.json
+        run: node modules/geospatial/projection/scripts/benchmark-spheroid-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-spheroid-comparison.json
 
       - name: Compare shared local-frame correctness and costs
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: node modules/projection/scripts/benchmark-local-frame-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-local-frame-comparison.json
+        run: node modules/geospatial/projection/scripts/benchmark-local-frame-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-local-frame-comparison.json
 
       - name: Upload paired performance measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -423,7 +426,7 @@ jobs:
       - name: Consolidate matched evidence
         if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         run: |
-          node modules/projection/scripts/scorecard.mjs --node /tmp/projection-scorecard-node \
+          node modules/geospatial/projection/scripts/scorecard.mjs --node /tmp/projection-scorecard-node \
             --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-chromium/projection-browser-qualification.json \
             --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-firefox/projection-browser-qualification.json \
             --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-webkit/projection-browser-qualification.json \

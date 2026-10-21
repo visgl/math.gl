@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
-import {parsePGM} from '@math.gl/geoid';
+import {parsePGM} from '@math.gl/earth/geoid';
 
 import {BLUE_MARBLE_TILES, BLUE_MARBLE_CREDIT_URL} from '../common/blue-marble.js';
 

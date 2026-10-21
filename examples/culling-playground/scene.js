@@ -8,7 +8,7 @@ import {
   OrientedBoundingBox,
   CullingVolume,
   Plane
-} from '@math.gl/culling';
+} from '@math.gl/geometry/culling';
 import {Geometry, BoxGeometry, SphereGeometry} from '@math.gl/geometry';
 
 export const initial = {

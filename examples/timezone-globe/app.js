@@ -4,7 +4,7 @@
 
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
 import {GeoJsonLayer, BitmapLayer} from '@deck.gl/layers';
-import {getTimezoneOffset, getTimezoneLabel, isTimezoneSupported} from '@math.gl/timezone';
+import {getTimezoneOffset, getTimezoneLabel, isTimezoneSupported} from '@math.gl/earth/timezone';
 
 import {BLUE_MARBLE_TILES, BLUE_MARBLE_CREDIT_URL} from '../common/blue-marble.js';
 

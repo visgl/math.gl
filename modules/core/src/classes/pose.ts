@@ -6,7 +6,7 @@
 import {Matrix4} from './matrix4';
 import {Vector3} from './vector3';
 import {Euler} from './euler';
-import {NumericArray} from '@math.gl/types';
+import {NumericArray} from '../types';
 
 type PoseOptions = {
   position?: Readonly<NumericArray>;

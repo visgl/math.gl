@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useMemo} from 'react';
-import {intersectRayTriangle, getClosestPointOnTriangle} from '@math.gl/culling/queries';
+import {intersectRayTriangle, getClosestPointOnTriangle} from '@math.gl/geometry/culling/queries';
 import SceneCanvas from '../shared/scene-canvas';
 import '../shared/query-example.css';
 const triangles = [

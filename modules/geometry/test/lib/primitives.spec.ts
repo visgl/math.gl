@@ -3,7 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {BoxShape, CapsuleShape, CylinderShape, PlaneShape, SphereShape} from '@math.gl/culling';
+import {
+  BoxShape,
+  CapsuleShape,
+  CylinderShape,
+  PlaneShape,
+  SphereShape
+} from '@math.gl/geometry/culling';
 import {
   BoxGeometry,
   CapsuleGeometry,

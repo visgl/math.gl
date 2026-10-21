@@ -6,7 +6,7 @@
 
 import {test, expect} from 'vitest';
 import {Matrix4, Vector3, toRadians} from '@math.gl/core';
-import {OrientedBoundingBox} from '@math.gl/culling';
+import {OrientedBoundingBox} from '@math.gl/geometry/culling';
 import {Ellipsoid, makeOBBFromRegion} from '@math.gl/geospatial';
 
 const TEST_REGIONS = [

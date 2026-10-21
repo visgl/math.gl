@@ -6,7 +6,7 @@
 
 ## Summary
 
-This RFC proposes adding a new submodule `@math.gl/culling`, adding support for frustum culling math with a selection of bounding boxes.
+This RFC proposes adding a new submodule `@math.gl/geometry/culling`, adding support for frustum culling math with a selection of bounding boxes.
 
 ## Overview
 

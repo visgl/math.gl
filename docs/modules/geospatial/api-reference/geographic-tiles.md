@@ -6,7 +6,7 @@
 
 ```typescript
 import {getGeographicTile, getGeographicTileBounds, getGeographicTileRanges}
-  from '@math.gl/geospatial';
+  from '@math.gl/geospatial/tiles';
 
 getGeographicTile(175, 20, 3); // {x: 7, y: 3, level: 3}
 getGeographicTileBounds({x: 7, y: 3, level: 3}); // [135, 0, 180, 22.5]

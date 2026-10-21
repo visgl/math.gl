@@ -6,7 +6,7 @@ import {getS2Cell} from '../s2-geometry/s2-geometry';
 import {getS2Region} from './s2-to-region';
 import {getS2IndexFromToken} from '../s2-geometry/s2-token';
 
-// import {OrientedBoundingBox, makeOrientedBoundingBoxFromPoints} from '@math.gl/culling';
+// import {OrientedBoundingBox, makeOrientedBoundingBoxFromPoints} from '@math.gl/geometry/culling';
 // import {Ellipsoid} from '@math.gl/geospatial';
 
 export type S2HeightInfo = {

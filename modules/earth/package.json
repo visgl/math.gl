@@ -1,0 +1,93 @@
+{
+  "name": "@math.gl/earth",
+  "description": "Earth and astronomy utilities for math.gl",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "5.0.0-alpha.18",
+  "keywords": [
+    "earth",
+    "geoid",
+    "sun",
+    "timezone",
+    "geospatial"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./geoid": {
+      "types": "./dist/geoid/index.d.ts",
+      "import": "./dist/geoid/index.js",
+      "require": "./dist/geoid/index.cjs"
+    },
+    "./sun": {
+      "types": "./dist/sun/index.d.ts",
+      "import": "./dist/sun/index.js",
+      "require": "./dist/sun/index.cjs"
+    },
+    "./timezone": {
+      "types": "./dist/timezone/index.d.ts",
+      "import": "./dist/timezone/index.js",
+      "require": "./dist/timezone/index.cjs"
+    },
+    "./geoid/geoid-egm96-low.pgm": "./geoid/data/geoid-egm96-low.pgm",
+    "./geoid/geoid-egm96-hi.pgm": "./geoid/data/geoid-egm96-hi.pgm",
+    "./sun/planets": {
+      "types": "./dist/sun/planets.d.ts",
+      "import": "./dist/sun/planets.js",
+      "require": "./dist/sun/planets.cjs"
+    },
+    "./sun/astronomy": {
+      "types": "./dist/sun/astronomy.d.ts",
+      "import": "./dist/sun/astronomy.js",
+      "require": "./dist/sun/astronomy.cjs"
+    },
+    "./sun/stars": {
+      "types": "./dist/sun/stars.d.ts",
+      "import": "./dist/sun/stars.js",
+      "require": "./dist/sun/stars.cjs"
+    },
+    "./timezone/lookup": {
+      "types": "./dist/timezone/lookup.d.ts",
+      "import": "./dist/timezone/lookup.js",
+      "require": "./dist/timezone/lookup.cjs"
+    },
+    "./timezone/temporal": {
+      "types": "./dist/timezone/temporal.d.ts",
+      "import": "./dist/timezone/temporal.js",
+      "require": "./dist/timezone/temporal.cjs"
+    },
+    "./timezone/timezone-geometry-low.json": "./timezone/data/timezone-geometry-low.json",
+    "./timezone/timezone-geometry-low.parquet": "./timezone/data/timezone-geometry-low.parquet",
+    "./timezone/timezone-geometry-hi.json": "./timezone/data/timezone-geometry-hi.json",
+    "./timezone/timezone-geometry-hi.parquet": "./timezone/data/timezone-geometry-hi.parquet"
+  },
+  "files": [
+    "dist",
+    "src",
+    "geoid/data",
+    "sun/LICENSE-HOSEK-WILKIE",
+    "sun/LICENSE-SUNCALC",
+    "sun/LICENSE-BRIGHT-STARS",
+    "timezone/data"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@math.gl/core": "5.0.0-alpha.18"
+  },
+  "devDependencies": {
+    "astronomy-engine": "2.1.19"
+  }
+}
