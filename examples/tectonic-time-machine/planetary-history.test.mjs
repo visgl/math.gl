@@ -22,3 +22,18 @@ test('model and fossil data require units, provenance and monotonic ages', () =>
   assert.ok(validateGeologicalSeries({...valid, samples: [...valid.samples].reverse()}).length);
   assert.ok(validateGeologicalSeries({...valid, samples: [{ageMa: 100, value: -1}]}).length);
 });
+
+
+test('malformed samples and non-text provenance are rejected without throwing', () => {
+  const valid = {kind: 'impact-flux', source: 'Reference', license: 'CC-BY-4.0', model: 'Published model', unit: 'impacts/Ma', method: 'Model output', samples: [{ageMa: 4000, value: 1}]};
+  assert.deepEqual(validateGeologicalSeries(valid), []);
+  for (const sample of [null, undefined, [], 1, 'sample']) {
+    assert.ok(validateGeologicalSeries({...valid, samples: [sample]}).includes('Invalid sample'));
+  }
+  for (const key of ['source', 'license', 'model', 'unit', 'method']) {
+    for (const value of [' ', 123, {}, []]) {
+      assert.ok(validateGeologicalSeries({...valid, [key]: value}).length > 0);
+    }
+  }
+  assert.deepEqual(selectGeologicalSeries([{...valid, samples: [null]}, valid], 'impact-flux'), [valid]);
+});

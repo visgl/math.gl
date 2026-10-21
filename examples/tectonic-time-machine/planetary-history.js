@@ -21,18 +21,23 @@ export function validateGeologicalSeries(series) {
   if (!series || typeof series !== 'object' || !['impact-flux', 'biodiversity'].includes(series.kind))
     return ['Unsupported series kind'];
   const errors = [];
-  if (!series.source || !series.license || !series.model) errors.push('Missing provenance');
+  const text = value => typeof value === 'string' && value.trim().length > 0;
+  if (![series.source, series.license, series.model].every(text)) errors.push('Missing provenance');
   if (!Array.isArray(series.samples) || !series.samples.length) errors.push('No samples');
   else {
     let previous = Infinity;
     for (const sample of series.samples) {
+      if (!sample || typeof sample !== 'object' || Array.isArray(sample)) {
+        errors.push('Invalid sample');
+        continue;
+      }
       if (!Number.isFinite(sample.ageMa) || sample.ageMa < 0 ||
           !Number.isFinite(sample.value) || sample.value < 0) errors.push('Invalid sample');
       if (sample.ageMa >= previous) errors.push('Samples must have strictly decreasing ages');
       previous = sample.ageMa;
     }
   }
-  if (!series.unit || !series.method) errors.push('Missing unit or measurement method');
+  if (![series.unit, series.method].every(text)) errors.push('Missing unit or measurement method');
   return errors;
 }
 export function selectGeologicalSeries(series, kind) {

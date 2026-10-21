@@ -219,3 +219,38 @@ source, license, model, units and method, and provide strictly ordered,
 finite, nonnegative observations. No numerical series has been published
 or embedded in this PR, so the UI explicitly reports their unavailability
 rather than drawing invented extinction rates or impact frequencies.
+
+## Ancient geographic feature index
+
+The expandable **Ancient geographic features** panel offers a small curated, searchable
+index of mountain belts, oceans, seas and paleocontinents. Entries are filtered by
+the current geological age; a checkbox shows all entries regardless of time.
+The index lives in `paleo-features.js` and has focused tests.
+
+**Scientific scope:** these are approximate educational intervals, not precise
+formation/extinction dates. Features may change shape and identity over time.
+No geometry, paleolocation, height, or historical shoreline is implied or rendered.
+The index is independent of the selected plate reconstruction source and does not
+claim that the listed feature geometries are included in its model.
+
+Future work could incorporate a provenance-backed gazetteer with citations per
+feature, age-specific geometries and model-compatible plate assignments, with
+uncertainty metadata and explicit distinctions between present-day evidence and
+reconstructed historical footprints. This requires separate data licensing and
+geological validation before drawing features on the globe.
+
+### Sourced geometry contract (follow-up)
+
+`paleo-geometry.js` validates prospective epoch-specific GeoJSON feature records.
+A record requires a feature identifier and name, category, older/younger age bounds,
+a specific reconstruction epoch (`epochMa`), source citation, data license and
+reconstruction model ID. A nonnegative plate ID is optional. Coordinates are
+longitude/latitude in the specified **reconstructed** epoch, not present-day
+coordinates to be moved blindly by plate rotations.
+
+`featuresForEpoch(records, epochMa, modelId)` selects only validated records with
+an **exact** epoch and matching reconstruction model. It deliberately does not
+interpolate ancient outlines or mix reference frames. No external geological
+geometry is bundled, and the current map renderer is unchanged. A future data
+integration should add provenance-backed epoch snapshots, geometry topology
+checks and projection-aware rendering before exposing any map overlay.
