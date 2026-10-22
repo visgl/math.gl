@@ -1,6 +1,6 @@
 # Discontinuous map layouts
 
-- Status: Draft investigation; no implementation proposed for immediate release
+- Status: Experimental static API implemented; broader topology and rendering integration remain proposed
 - Date: 2026-10-21
 
 ## Implementation progress
@@ -15,8 +15,8 @@ No reference application code, shaders, or mesh assets were copied. The example
 now generates all five Platonic solids and subdivided icosahedra (up to 1,280
 faces), builds shared-edge adjacency, and selects joins with a deterministic
 maximum spanning tree. It derives signed hinge angles from face normals and
-reports positive-area overlaps in the final flat net. These layout experiments
-remain example-local; only hinge kinematics is a public library API. The example
+reports positive-area overlaps in the final flat net. Dynamic cut selection and animation remain example-local. The static region-based
+API described below now provides a separate public experimental entry point. The example
 now maps NASA Blue Marble imagery onto the subdivided icosahedron with an
 independently written WebGL 2 renderer. Original sphere coordinates travel with
 each rigid panel; per-fragment spherical sampling handles longitude wrapping and
@@ -32,11 +32,17 @@ clipping, and motion collision handling remain future work.
 
 ## Recommendation
 
-Add an experimental, renderer-independent map-layout abstraction alongside CRS
-coordinate transforms. Start with a textured polyhedral mesh that unfolds, using
-Nicolas Belmonte's myriahedral demo as the target experience. Add spherical vector
-clipping as a separate milestone. A new scalar projection alone cannot provide
-correct lines, polygons, or meshes across cuts.
+Provide an experimental, renderer-independent `DiscontinuousMap` in the optional
+`@math.gl/geospatial/discontinuous` entry point. Its pipeline is:
+
+**geographic geometry → spherical region clipping → local projection → placement → region-tagged parts**.
+
+Regions, local mappings, placements, and seam topology are the shared abstraction.
+A polyhedral layout may derive placements from a hinge tree, but interrupted
+projections do not need hinges. Static geographic projection must work independently
+of unfolding, textures, WebGL, CRS registries, and renderer-specific tessellation.
+The next high-level milestone is reliable vector geometry across cuts, rather than
+additional unfolding controls.
 
 ## Evidence and limits
 
@@ -222,12 +228,13 @@ contract distinct from exact rigid-pose evaluation.
 
 ## Existing building blocks and gaps
 
-| Area | Available | Missing |
+| Area | Available | Remaining work |
 | --- | --- | --- |
-| `@math.gl/projection` | Scalar forward/inverse kernels, CRS pipeline, sinusoidal, Mollweide, gnomonic, QSC | Face/lobe identity, cuts, layout placement, multiple inverse candidates |
-| `@math.gl/polygon` | Planar rectangle clipping, Mercator bounds cuts, triangulation, adaptive subdivision | Arbitrary spherical face clipping and polygon reconstruction across cuts |
-| `@math.gl/geometry` | `IcoSphereGeometry`, typed geometry | Indexed topological mesh, face adjacency, fold tree |
-| `@math.gl/core` | Matrices, vectors, quaternions | Layout-specific hinge traversal |
+| `@math.gl/geospatial/projection` | Scalar forward/inverse kernels and CRS pipelines | Optional adapters with explicit inverse policy |
+| `@math.gl/geospatial/discontinuous` | Convex spherical regions, point/inverse lookup, seam-aware lines and polygons, AirOcean and interrupted sinusoidal | Global/complement polygons, curved seams, spatial acceleration, packed attribute provenance |
+| `@math.gl/geometry/polygon` | Planar clipping, triangulation, adaptive subdivision | Integration with region-tagged projected geometry |
+| `@math.gl/geometry` | `HingeTree`, generated geometry | Reusable mesh topology and constrained cut selection |
+| Examples | Geographic cut weights, unfolding, original-surface texture sampling, coordinate hover picking | Renderer integration for projected vector data |
 
 `ProjectionImplementation` returns one XY pair and requires an inverse. Flat
 operations preserve buffer cardinality. Geometry splitting produces additional
@@ -238,28 +245,107 @@ ideas, but retain canonical vertex/edge IDs during subdivision rather than
 recovering adjacency by welding Float32 render positions. Existing subdivision
 utilities explicitly require seams to be split first.
 
-## Proposed contracts
+## Static architecture and first API
 
-Keep the initial layout API in an optional experimental projection entry point;
-put reusable topology helpers in geometry and spherical clipping in polygon.
-Avoid adding renderer dependencies or layout objects to CRS strings.
+`DiscontinuousMap` snapshots an ordered list of `MapRegion` definitions. A region has:
 
-A layout needs stable region IDs, spherical boundaries, a local mapping per
-region, placement transforms, and edge relations identifying cuts versus joins.
-Interrupted lobes and polyhedral faces can share this contract; only polyhedral
-layouts need hinges and a fold tree.
+- A stable string ID and a convex spherical boundary of minor great-circle arcs.
+- A strictly interior spherical reference point that selects the half-spaces.
+- A local forward mapping and an inverse returning a coordinate or `null`.
+- An optional invertible six-coefficient affine XY placement.
 
-Point projection should return position plus region ID. Permit an explicit
-region for boundary points; define deterministic default ownership. Inverse
-lookup must reject gaps, validate containment, and report ambiguous candidates
-for overlapping layouts. An ordinary scalar adapter can be added only for a
-fixed layout with a documented unique-inverse policy.
+Callbacks must describe a continuous, one-to-one local map over the region and
+must remain stable after construction. Region domains need not cover the sphere;
+gaps and overlaps are valid. Shared edges must have matching subdivision on both
+sides. Geographic coordinates are longitude/latitude in degrees on a sphere;
+height, datum transformation, and ellipsoidal surface metrics are outside this API.
 
-Geometry output should carry typed positions/indices, region and source-feature
-IDs, part offsets, and interpolation provenance. Duplicate cut vertices for each
-side. Preserve holes, winding, and feature ownership when rebuilding polygons.
-Declare whether input edges mean great-circle arcs, rhumb lines, or linear
-longitude/latitude interpolation; these are different clipping problems.
+The separate entry point avoids changing scalar projection cardinality or adding
+layout state to CRS strings. The first implementation keeps its spherical clipping
+helpers private, rather than prematurely exporting a second geometry framework.
+There are no imports from examples or Nico's application.
+
+### Point ownership and inverse lookup
+
+`findRegions(lonLat)` returns all containing region IDs, including boundary matches.
+`projectPoint(lonLat, regionId?)` returns `{regionId, position}` or `null`; the first
+containing region owns an unspecified boundary point. Supplying a region chooses
+one side of a cut. Longitude wraps; antipodal edges are rejected as ambiguous.
+
+`unprojectPoint(xy, regionId?)` returns all validated candidates. It reverses the
+placement, applies the local inverse, checks spherical containment, and checks
+forward residual. Map gaps return `[]`; overlaps or continuous joins can return
+multiple candidates. Picking code must select the visible region when occlusion
+matters; a static inverse cannot resolve a renderer's depth order.
+
+`seams` pairs complete spherical boundary edges and identifies unpaired boundaries.
+The initial `join`/`cut` classification compares placed endpoints and midpoint.
+This is sampled continuity metadata, not a proof for arbitrary user callbacks.
+Clipping always splits at every region boundary, so correctness does not depend
+on that classification. Cuts have independently placed copies of boundary vertices.
+
+### Lines and polygons
+
+`projectLine` returns a list of `{regionId, coordinates, sourceCoordinates}` parts.
+Input edges are minor great-circle arcs, not rhumb lines or straight longitude/
+latitude interpolation. Clip an arc against oriented spherical half-spaces using
+3D chord intersections, then normalize onto the sphere. Preserve separate exits
+and reentries. Boundary-coincident arcs appear on both incident regions, while
+isolated tangencies do not emit a zero-length line.
+
+`projectPolygon` accepts one exterior followed by holes and returns region-tagged
+polygons, each with matching source rings. Winding is independent on input; output
+exteriors are counterclockwise and holes clockwise. Open or closed input rings
+are accepted; output rings close explicitly. Holes intersecting cuts become part
+of exterior boundaries, and one source polygon can yield several disconnected
+polygons within the same region. One call retains feature ownership; callers attach
+their feature ID to its results. Packed arrays and per-attribute interpolation
+provenance are deferred; source coordinates are retained for every generated vertex.
+
+The first implementation requires each input polygon to fit in one **open
+hemisphere**. Its gnomonic chart turns great-circle edges and region half-spaces
+into straight lines. Convex half-space clipping constructs a region mask in that
+chart; the MIT-licensed `polygon-clipping` kernel reconstructs intersections,
+holes, and disconnected components. The inverse chart restores spherical source
+coordinates before the region mapping and placement are applied. This avoids
+coordinate jitter at coincident seams. An optional `chartCenter` selects the chart;
+otherwise the outer-vertex mean direction is used. If that chart cannot contain
+all vertices with a positive margin, reject the polygon explicitly. This does not
+yet support whole-globe polygons, spherical complements, or polygons that require
+multiple hemisphere charts. Callers must split those into supported polygons.
+
+After clipping, great-circle arcs are sampled with a maximum angular step (default
+2 degrees) and an adaptive midpoint chord-error target (default `1e-4` output
+units). This is an approximation criterion, not a certified error bound for
+arbitrary callbacks. Exceeding recursion/output limits throws. Use larger distance
+tolerances when choosing meter-scale output. No resampled segment crosses a region
+boundary; downstream triangulation must consume each polygon independently.
+
+### Validation against three families
+
+| Case | Region domains and local map | Placement and seam requirements | Executable validation |
+| --- | --- | --- | --- |
+| AirOcean | 24 spherical triangles with radial/gnomonic mapping into their original facets | Independent rigid XY placements from the licensed fixed join tree; 23 joins, 13 cuts | Global point coverage and inverse round trips, exact topology, line-length and polygon-area conservation, holes and seam-side output |
+| Interrupted sinusoidal | Six convex hemisphere lobes; `x = center + (longitude-center) cos(latitude)`, `y = latitude` | Lobe offsets and equatorial joins; the poles have multiple placed copies | Analytic coordinate oracle, global point coverage/inverse, interrupted lines, polygons and holes across the date line |
+| Antimeridian-cut cylindrical | Two regional spherical domains on opposite sides of 180 degrees, with equirectangular local mapping | Separate +180/-180 output sides despite one geographic seam | Equivalent +/-180 point ownership, line and polygon splitting without a long bridge |
+
+The cylindrical test intentionally excludes the poles: a full rectangular cylindrical
+map represents each pole as an edge, so its singular point behavior needs a separate
+contract. This third case tests the ordinary wrap seam without claiming to solve
+that singularity. The six-lobe sinusoidal preset is an independent arrangement,
+not a claim to reproduce a named historical interruption pattern.
+
+AirOcean reproduces the **cut arrangement**, using gnomonic/radial face mappings.
+It is not the Gray-Fuller projection and is not equal-area. Its topology and rotation
+are adapted from the ISC-licensed d3-geo-polygon AirOcean preset, pinned upstream at
+`93f12a456e169d9b1b40fcaa42cbeeeee1251d36`. The license is shipped beside the source.
+The spherical clipping, placements, and sinusoidal implementation are independent
+of Nico's application. `polygon-clipping` is a separately licensed MIT dependency.
+
+Regression tests additionally cover polygon holes contained within a region,
+holes opened by a cut, disconnected components, reversed winding, coincident
+seams without jitter, inverse ambiguity, finite/invertible placement validation,
+antipodal edge rejection, and unsupported hemisphere rejection.
 
 ## Myriahedral construction proposal
 
@@ -283,31 +369,25 @@ must state its sphere conversion and resulting distortion.
 
 ## Delivery sequence and acceptance
 
-1. **Source investigation completed:** main and worker source maps inspected;
-   procedural and precomputed paths identified. Application licensing remains
-   unverified, so proceed with independent code and independently sourced data.
-2. **Mesh prototype:** fixed octahedron net, then subdivided icosahedron; textured
-   globe-to-flat animation with visible cuts and folds. Verify face edge lengths,
-   coincident hinge endpoints at intermediate times, coplanarity at the end,
-   deterministic topology, and overlap diagnostics.
-3. **Layout coordinates:** face-aware forward/inverse, gap rejection, boundary
-   ownership, spatial indexing. Test interior round trips and seam duplicates.
-4. **Vector geometry:** spherical line and polygon clipping, then per-region
-   tessellation. Test seam crossings, exact-edge paths, poles, antimeridian,
-   holes, multiple components, and attribute interpolation. Assert that no
-   output triangle or path segment bridges a cut.
-5. **Broader layouts:** interrupted sinusoidal/Mollweide, followed by additional
-   polyhedral presets and geography-weighted cuts. Shared abstractions should
-   be justified by these implementations before stabilizing the public API.
+1. **Completed: reference investigation and independent hinge primitive.** Keep
+   the existing source evidence and licensing boundary above.
+2. **Completed: unfolding prototype.** All Platonic solids, subdivided icosahedra,
+   Earth texture, geography-aware cuts, AirOcean arrangement, and overlap diagnostics.
+3. **Implemented experimentally: static discontinuous maps.** Region-aware points,
+   explicit inverse candidates, clipped line parts, and hemisphere-bounded polygon
+   reconstruction. Validate the shared contract against the three cases above.
+4. **Next: vector rendering integration.** Render projected coastlines, graticules,
+   filled polygons and holes in both presets; triangulate per region, preserve
+   feature/attribute provenance, and connect picking to visible region IDs.
+5. **Broaden spherical topology.** Support hemisphere-spanning/global polygons,
+   complementary interiors and curved seams; define exact cylindrical pole policy.
+6. **Scale and stabilize.** Spatial indexing, cached compiled layouts, packed batch
+   buffers, expansion/performance benchmarks and additional interrupted projections.
+   Only then consider stable CRS adapters and downstream deck.gl integration.
 
-Benchmark construction, geometry expansion, inverse lookup, and animation
-separately. Cache topology; the proposed exact unfolding path should update
-transforms without reclipping geographic geometry. Nico's sampled-frame playback
-is a separate optional approximation, with a memory/accuracy tradeoff. For
-thousands of faces, use iterative tree
-traversal and indexed spatial searches rather than recursion or all-face scans.
-
-The first demonstration can therefore be substantially smaller than full
-discontinuous vector-map support. It proves the experience Nico demonstrates;
-it does not yet imply that existing deck.gl geographic layers can render any
-layout without integration work.
+Static output already separates topology from local coordinates and placement.
+Animation can later update placements without changing feature identity, but moving
+geometry must retain original spherical coordinates and region membership. A
+spanning tree still does not guarantee a non-overlapping net or collision-free
+motion. Neither static support nor the textured example implies existing deck.gl
+geographic layers can consume arbitrary layouts without integration work.

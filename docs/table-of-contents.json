@@ -235,6 +235,7 @@
         "label": "@math.gl/geospatial/projection",
         "items": [
           "modules/geospatial/projection/README",
+          "modules/geospatial/discontinuous/README",
           {
             "type": "category",
             "label": "Developer Guide",

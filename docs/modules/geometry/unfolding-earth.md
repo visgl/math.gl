@@ -24,3 +24,8 @@ requires internet access; the bundled land mask and geometry work offline.
 [Source and instructions](https://github.com/visgl/math.gl/tree/master/examples/unfolding-polyhedron)
 · [Imagery terms](https://github.com/visgl/math.gl/blob/master/examples/unfolding-polyhedron/IMAGERY.md)
 · [Geography and AirOcean licenses](https://github.com/visgl/math.gl/blob/master/examples/unfolding-polyhedron/data/README.md)
+
+Hover over a panel to see its original longitude and latitude, including after
+unfolding. Picking follows the visible surface on either side of a cut and hides
+the tooltip over gaps. The coordinates use the same spherical mapping as the
+Earth texture; overlapping panels are resolved by depth.

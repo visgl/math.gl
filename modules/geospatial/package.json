@@ -1074,6 +1074,11 @@
       "types": "./dist/geoarrow/tessellation-entry.d.ts",
       "import": "./dist/geoarrow/tessellation-entry.js",
       "require": "./dist/geoarrow/tessellation-entry.cjs"
+    },
+    "./discontinuous": {
+      "types": "./dist/discontinuous.d.ts",
+      "import": "./dist/discontinuous.js",
+      "require": "./dist/discontinuous.cjs"
     }
   },
   "files": [
@@ -1091,7 +1096,8 @@
   "dependencies": {
     "@math.gl/core": "5.0.0-alpha.19",
     "@math.gl/geometry": "5.0.0-alpha.19",
-    "@math.gl/web-mercator": "5.0.0-alpha.19"
+    "@math.gl/web-mercator": "5.0.0-alpha.19",
+    "polygon-clipping": "0.15.7"
   },
   "devDependencies": {
     "proj4": "2.22.0"
