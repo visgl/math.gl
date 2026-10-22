@@ -391,3 +391,44 @@ geometry must retain original spherical coordinates and region membership. A
 spanning tree still does not guarantee a non-overlapping net or collision-free
 motion. Neither static support nor the textured example implies existing deck.gl
 geographic layers can consume arbitrary layouts without integration work.
+
+
+## Additional preset validation: regional composites and interrupted formulas
+
+The static API now also supports `createAlbersUsaMap`, with three independently
+projected and placed regions (`lower48`, `alaska`, `hawaii`). This validates a
+non-global layout with geographic gaps, an antimeridian-crossing source region,
+and unequal inset scales. The existing point selection, inverse candidates, and
+line/polygon clipping contract needs no extension. The masks are convex spherical
+quadrilaterals, not political borders or D3's projected rectangular clip extents.
+Alaska has 0.35 linear scale. Compact Alaska and Hawaii insets sit at the lower
+left; their masks are inverse-corner spherical approximations to inset windows,
+so distant islands can be cropped. Other U.S. territories are not included.
+Placed inset backgrounds overlap the main map: render ordering and region-aware
+picking resolve that ambiguity.
+
+Interrupted Mollweide and homolosine reuse the sinusoidal six-lobe topology with
+new local forward/inverse formulas. Homolosine solves its scale-matching latitude
+and vertical shift, avoiding a small discontinuity from rounded constants. These
+presets validate separation of topology from local mathematics, but do not claim
+the historical IGH arrangement. Exact projected rectangular masks, curved seams,
+and historical cut tables remain separate follow-up work. All new implementation
+is independent of Nico's published code.
+
+
+### Implemented: inset composition metadata and viewport fitting
+
+`MapRegion.layout` declares label, kind, parentId, relativeScale, drawOrder, and an
+optional visual frame in placed map units. Construction snapshots metadata and
+validates frames, scales, draw order, and parent hierarchy. Frames do not clip
+geography. `getMapLayout` samples curved coverage boundaries and returns ordered
+regions and approximate bounds, including frames. `fitMapLayout` uniformly fits
+that result into a padded viewport with explicit Y direction, reversible screen
+coordinates, and sequential rendering layers. Independent inset reflow and pixel
+spacing constraints remain follow-up work.
+
+The Explorer consumes these helpers instead of computing its own map bounds and
+hardcoding U.S. region ordering. It draws metadata-derived inset frames and labels.
+The Hawaii crop now includes all main islands, and a pinned public-domain Natural
+Earth modern reference overlay addresses the one-degree terrain grid's inability
+to resolve them. No reconstruction values or global statistics are changed.

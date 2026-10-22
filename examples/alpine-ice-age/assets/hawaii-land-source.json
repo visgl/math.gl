@@ -1,0 +1,7 @@
+{
+  "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_10m_admin_1_states_provinces.geojson",
+  "upstreamSha256": "22d0e3ad85eb3e27f17cabf8ba2d50e554fbc27a87796ff891d958185da62fb5",
+  "license": "Public domain",
+  "licenseUrl": "https://www.naturalearthdata.com/about/terms-of-use/",
+  "changes": "Selected Hawaii feature; kept polygons entirely in -161..-154 longitude, 18..23 latitude. Coordinates unchanged. Modern geographic reference only, not paleocoastline or reconstructed ice."
+}

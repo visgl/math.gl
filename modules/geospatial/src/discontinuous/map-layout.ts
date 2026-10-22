@@ -23,8 +23,22 @@ import {
 export type GeographicPosition = readonly [number, number];
 /** [a,b,c,d,tx,ty]: x'=a*x+c*y+tx, y'=b*x+d*y+ty. */
 export type MapPlacement = readonly [number, number, number, number, number, number];
+/** Bounds in placed map units: [minX, minY, maxX, maxY]. */
+export type MapBounds = readonly [number, number, number, number];
+/** Presentation metadata; frames do not change geographic clipping. */
+export type MapRegionLayout = {
+  label?: string;
+  kind?: 'main' | 'inset' | 'panel';
+  parentId?: string;
+  /** Semantic linear scale relative to the parent, independent of output units. */
+  relativeScale?: number;
+  /** Back-to-front order; equal values retain region definition order. */
+  drawOrder?: number;
+  frame?: MapBounds;
+};
 export type MapRegion = {
   id: string;
+  layout?: MapRegionLayout;
   /** Ordered convex spherical boundary, with optional repeated closing point. */
   boundary: readonly GeographicPosition[];
   /** Strictly interior point, used to orient the boundary half-spaces. */
@@ -105,8 +119,31 @@ export class DiscontinuousMap {
       const determinant = a * d - b * c;
       if (!Number.isFinite(determinant) || Math.abs(determinant) < 1e-14)
         throw new Error('Placement must be a finite invertible affine transform');
+      const metadata = definition.layout;
+      if (
+        metadata?.relativeScale !== undefined &&
+        (!Number.isFinite(metadata.relativeScale) || metadata.relativeScale <= 0)
+      )
+        throw new Error('Relative scale must be finite and positive');
+      if (metadata?.drawOrder !== undefined && !Number.isFinite(metadata.drawOrder))
+        throw new Error('Draw order must be finite');
+      if (
+        metadata?.frame &&
+        (metadata.frame.length !== 4 ||
+          !metadata.frame.every(Number.isFinite) ||
+          metadata.frame[0] >= metadata.frame[2] ||
+          metadata.frame[1] >= metadata.frame[3])
+      )
+        throw new Error('Frame must have finite, increasing bounds');
+      const layout = metadata
+        ? Object.freeze({
+            ...metadata,
+            ...(metadata.frame ? {frame: Object.freeze([...metadata.frame]) as MapBounds} : {})
+          })
+        : undefined;
       const snapshot = Object.freeze({
         ...definition,
+        ...(layout ? {layout} : {}),
         interior: Object.freeze([...definition.interior]) as GeographicPosition,
         boundary: Object.freeze(vertices.map(v => Object.freeze(coordinates(v)))),
         placement: Object.freeze(placement)
@@ -122,6 +159,17 @@ export class DiscontinuousMap {
       };
     });
     this.regions = Object.freeze(this.compiled.map(r => r.definition));
+    const byId = new Map(this.regions.map(r => [r.id, r]));
+    for (const r of this.regions) {
+      const visited = new Set([r.id]);
+      let parent = r.layout?.parentId;
+      while (parent !== undefined) {
+        if (!byId.has(parent) || visited.has(parent))
+          throw new Error('Invalid region parent hierarchy');
+        visited.add(parent);
+        parent = byId.get(parent)!.layout?.parentId;
+      }
+    }
     this.seams = Object.freeze(this.buildSeams());
   }
   /** Boundary-inclusive; order determines default point ownership. */
@@ -237,17 +285,49 @@ export class DiscontinuousMap {
     for (const ring of planar)
       for (const p of ring) bound = Math.max(bound, Math.abs(p[0]), Math.abs(p[1]));
     bound += 1;
+    // Convex single rings need no boolean reconstruction. Direct half-space
+    // clipping avoids nearly coincident mask/input edges at exact grid seams.
+    const orientation = ringOrientation(planar[0]);
+    const convex =
+      planar.length === 1 &&
+      planar[0].every((p, i, ring) => {
+        const turn = ringOrientation([p, ring[(i + 1) % ring.length], ring[(i + 2) % ring.length]]);
+        return turn === 0 || turn === orientation;
+      });
+    const origin = planar[0][0];
+    let extent = 0;
+    for (const p of planar[0])
+      extent = Math.max(extent, Math.abs(p[0] - origin[0]), Math.abs(p[1] - origin[1]));
+    const relativeArea = (ring: Position[]) =>
+      Math.abs(
+        ring.reduce((sum, p, i) => {
+          const q = ring[(i + 1) % ring.length];
+          return (
+            sum +
+            ((p[0] - origin[0]) / extent) * ((q[1] - origin[1]) / extent) -
+            ((p[1] - origin[1]) / extent) * ((q[0] - origin[0]) / extent)
+          );
+        }, 0)
+      );
+    const inputArea = convex ? relativeArea(planar[0]) : 0;
     const results: MapPolygon[] = [];
     for (const r of this.compiled) {
-      let clip: Position[] = [
-        [-bound, -bound],
-        [bound, -bound],
-        [bound, bound],
-        [-bound, bound]
-      ];
+      let clip: Position[] = convex
+        ? planar[0].slice()
+        : [
+            [-bound, -bound],
+            [bound, -bound],
+            [bound, bound],
+            [-bound, bound]
+          ];
       for (const n of r.normals) clip = clipPlane(clip, dot(n, x), dot(n, y), dot(n, center));
-      if (clip.length < 3) continue;
-      const polygons = polygonClipping.intersection(planar, [clip]);
+      if (clip.length < 3 || ringOrientation(clip) === 0) continue;
+      // Roundoff at a tangent seam must not emit a numerical sliver. Compare
+      // to the source ring's own scale so genuinely small polygons survive.
+      if (convex && relativeArea(clip) <= inputArea * 64 * Number.EPSILON) continue;
+      const polygons = convex
+        ? [[[...clip, clip[0]]]]
+        : polygonClipping.intersection(planar, [clip]);
       for (const polygon of polygons) {
         const output: MapPolygon = {
           regionId: r.definition.id,

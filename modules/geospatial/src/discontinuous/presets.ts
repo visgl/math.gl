@@ -87,7 +87,55 @@ export function createAirOceanMap(options: {radius?: number} = {}): Discontinuou
  * times radius, not an ellipsoidal CRS. Equatorial joins remain continuous.
  */
 export function createInterruptedSinusoidalMap(options: {radius?: number} = {}): DiscontinuousMap {
-  const radius = validRadius(options.radius);
+  return interruptedMap('sinusoidal', options.radius);
+}
+
+/** Six-lobe Mollweide map using the same independent cuts as the sinusoidal preset. */
+export function createInterruptedMollweideMap(options: {radius?: number} = {}): DiscontinuousMap {
+  return interruptedMap('mollweide', options.radius);
+}
+
+/** Goode homolosine formula with independent six-lobe cuts (not PROJ's IGH layout). */
+export function createInterruptedHomolosineMap(options: {radius?: number} = {}): DiscontinuousMap {
+  return interruptedMap('homolosine', options.radius);
+}
+
+function interruptedMap(
+  kind: 'sinusoidal' | 'mollweide' | 'homolosine',
+  value?: number
+): DiscontinuousMap {
+  const radius = validRadius(value);
+  const mollweide = (latitude: number): Position => {
+    // Bisection stays bounded at the poles where Newton's derivative vanishes.
+    let low = -Math.PI / 2,
+      high = Math.PI / 2;
+    const target = Math.PI * Math.sin(latitude);
+    for (let i = 0; i < 55; i++) {
+      const theta = (low + high) / 2;
+      if (2 * theta + Math.sin(2 * theta) < target) low = theta;
+      else high = theta;
+    }
+    const theta =
+      Math.abs(latitude) >= Math.PI / 2 ? (Math.sign(latitude) * Math.PI) / 2 : (low + high) / 2;
+    return [((2 * Math.SQRT2) / Math.PI) * Math.cos(theta), Math.SQRT2 * Math.sin(theta)];
+  };
+  // Solve the nonzero intersection of the two horizontal scale factors.
+  let low = 0.5,
+    high = 1;
+  for (let i = 0; i < 50; i++) {
+    const latitude = (low + high) / 2;
+    if (mollweide(latitude)[0] < Math.cos(latitude)) low = latitude;
+    else high = latitude;
+  }
+  const transition = (low + high) / 2;
+  const correction = mollweide(transition)[1] - transition;
+  const profile = (latitude: number): Position => {
+    if (kind === 'sinusoidal' || (kind === 'homolosine' && Math.abs(latitude) <= transition))
+      return [Math.cos(latitude), latitude];
+    const [width, height] = mollweide(latitude);
+    return [width, height - (kind === 'homolosine' ? Math.sign(latitude) * correction : 0)];
+  };
+  const equatorialScale = kind === 'mollweide' ? (2 * Math.SQRT2) / Math.PI : 1;
   const breaks = [
     [-180, -60, 60, 180],
     [-180, -100, 20, 180]
@@ -110,17 +158,29 @@ export function createInterruptedSinusoidalMap(options: {radius?: number} = {}):
         interior: [center, 45 * sign],
         project: ([lon, lat]) => {
           const delta = ((((lon - center + 180) % 360) + 360) % 360) - 180;
-          return [radius * (center * RAD + delta * RAD * Math.cos(lat * RAD)), radius * lat * RAD];
+          const [width, height] = profile(lat * RAD);
+          return [radius * (equatorialScale * center * RAD + delta * RAD * width), radius * height];
         },
         unproject: ([x, y]) => {
-          const lat = y / radius;
-          if (Math.abs(lat) > Math.PI / 2 + 1e-10) return null;
-          const cosine = Math.cos(lat);
-          if (Math.abs(cosine) < 1e-12)
-            return Math.abs(x / radius - center * RAD) < 1e-10 ? [center, sign * 90] : null;
-          const delta = (x / radius - center * RAD) / cosine / RAD;
+          const height = y / radius;
+          const maxHeight = profile(Math.PI / 2)[1];
+          if (Math.abs(height) > maxHeight + 1e-10) return null;
+          let latitude = height;
+          if (kind === 'mollweide' || (kind === 'homolosine' && Math.abs(height) > transition)) {
+            const adjusted = height + (kind === 'homolosine' ? Math.sign(height) * correction : 0);
+            const theta = Math.asin(Math.max(-1, Math.min(1, adjusted / Math.SQRT2)));
+            latitude = Math.asin(
+              Math.max(-1, Math.min(1, (2 * theta + Math.sin(2 * theta)) / Math.PI))
+            );
+          }
+          latitude = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, latitude));
+          const width = profile(latitude)[0];
+          const relativeX = x / radius - equatorialScale * center * RAD;
+          if (Math.abs(width) < 1e-12)
+            return Math.abs(relativeX) < 1e-10 ? [center, sign * 90] : null;
+          const delta = relativeX / width / RAD;
           if (Math.abs(delta) > 180 + 1e-8) return null;
-          return [center + delta, Math.max(-90, Math.min(90, lat / RAD))];
+          return [center + delta, latitude / RAD];
         }
       });
     }
