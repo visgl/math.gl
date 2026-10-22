@@ -3,10 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {
-  createGraticule,
-  createMyriahedralLayout
-} from '../../../../examples/myriahedral-maps/layout';
+import {createGraticule} from '../../../geospatial/src/discontinuous/myriahedral/graticule';
+import {createMyriahedralLayout} from '../../../../examples/myriahedral-maps/layout';
 import {
   dot,
   faceNormal,
@@ -40,7 +38,7 @@ for (const columns of [24, 48, 72, 96]) {
 
 test('structured geographic layout preserves hinges, rigid faces, and continent order', () => {
   const layout = createMyriahedralLayout(1, 1, 'ocean');
-  expect(layout.cutLandKm).toBeLessThan(layout.baselineLandKm);
+  expect(layout.cutLandKm).toBeLessThan(createMyriahedralLayout(1, 1, 'legacy').cutLandKm);
   expect(layout.edges.filter(e => e.hinge)).toHaveLength(layout.mesh.faces.length - 1);
   for (const edge of layout.edges) {
     const a = layout.mesh.vertices[edge.a],
@@ -103,3 +101,13 @@ test('structured geographic layout preserves hinges, rigid faces, and continent 
   expect(centroid(100, 40)[0]).toBeGreaterThan(centroid(20, 0)[0]);
   expect(centroid(135, -25)[0]).toBeGreaterThan(centroid(20, 0)[0]);
 }, 60000);
+
+test('example offers alternate cuts only for presets with meridian-dependent cuts', () => {
+  for (const preset of ['polyconic', 'hemispheres', 'sealine', 'coastline'])
+    expect(createMyriahedralLayout(0, 1, preset).canRecut).toBe(true);
+  for (const preset of ['cylindric', 'azimuthal'])
+    expect(createMyriahedralLayout(0, 1, preset).canRecut).toBe(false);
+  for (const solid of ['tetrahedron', 'cube', 'octahedron', 'dodecahedron', 'icosahedron']) {
+    expect(createMyriahedralLayout(0, 1, `solid:${solid}`).canRecut).toBe(false);
+  }
+});
