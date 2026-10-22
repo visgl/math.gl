@@ -101,6 +101,9 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
           break;
         }
       }
+      lat = refineInverseLatitude(state, lat === undefined ? phi : lat, x, y);
+      if (lat === undefined) return null;
+      phi = lat;
       lon = adjust_lon(
         state.long0 + Math.asin((x * Math.tan(phi)) / state.a) / Math.sin(lat),
         state.over
@@ -134,6 +137,9 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
         }
       }
 
+      lat = refineInverseLatitude(state, lat === undefined ? phi : lat, x, y);
+      if (lat === undefined) return null;
+      phi = lat;
       // lat=phi4z(state.e,state.e0,state.e1,state.e2,state.e3,al,bl,0,0);
       cl = Math.sqrt(1 - state.es * Math.pow(Math.sin(lat), 2)) * Math.tan(lat);
       lon = adjust_lon(state.long0 + Math.asin((x * cl) / state.a) / Math.sin(lat), state.over);
@@ -155,4 +161,44 @@ export function createState(base: KernelParameters, options: Partial<State> = {}
   };
   initialize(state);
   return state;
+}
+
+/** Refine a stalled iterate using the original northing at fixed easting.
+ * Acceptance is measured in planar axis units, not an angular step threshold.
+ */
+function refineInverseLatitude(
+  state: State,
+  latitude: number,
+  x: number,
+  y: number
+): number | undefined {
+  for (let i = 0; i < 8; i++) {
+    if (!Number.isFinite(latitude) || Math.abs(latitude) >= Math.PI / 2) return undefined;
+    const sin = Math.sin(latitude),
+      cos = Math.cos(latitude);
+    const denominator = 1 - state.es * sin * sin;
+    const normal = state.sphere ? state.a : gN(state.a, state.e, sin);
+    const radius = normal / Math.tan(latitude);
+    const arc = Math.asin(x / radius);
+    const easting = radius * Math.sin(arc);
+    const northing = state.sphere
+      ? state.a * (latitude - state.lat0 + (1 - Math.cos(arc)) / Math.tan(latitude))
+      : meridianDistance(state.a, state.es, state.lat0, latitude) + radius * (1 - Math.cos(arc));
+    const error = northing - y;
+    if (
+      Math.hypot(easting - x, error) <=
+      64 * Number.EPSILON * Math.max(state.a, Math.abs(x), Math.abs(y))
+    )
+      return latitude;
+    const meridianDerivative = state.sphere
+      ? state.a
+      : (state.a * (1 - state.es)) / Math.pow(denominator, 1.5);
+    const radiusDerivative =
+      normal * ((state.sphere ? 0 : (state.es * cos * cos) / denominator) - 1 / (sin * sin));
+    const derivative = meridianDerivative + radiusDerivative * (1 - 1 / Math.cos(arc));
+    const step = error / derivative;
+    if (!Number.isFinite(step) || Math.abs(step) > 1e-6) return undefined;
+    latitude -= step;
+  }
+  return undefined;
 }

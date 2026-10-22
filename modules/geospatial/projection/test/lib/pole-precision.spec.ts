@@ -129,3 +129,32 @@ test('Mollweide polar seams accept rounded ellipse boundaries and reject exterio
   );
   expect(Math.abs(recovered[1] - point[1])).toBeLessThan(1e-7);
 });
+
+test('polyconic inverses accept roundoff-stalled updates only with a tight planar residual', () => {
+  for (const shape of ['+R=6371000', '+ellps=WGS84']) {
+    const transform = projectionEngine.createProjection({
+      from: '+proj=longlat +datum=none',
+      to: `+proj=poly ${shape}`
+    });
+    for (const latitude of [-89.9, -89, -88, -80, -45, 45, 80, 88, 89, 89.9]) {
+      for (const longitude of [-10, -5, -1, 0, 1, 5, 10]) {
+        const projected = transform.project([longitude, latitude]);
+        expect(
+          () => transform.unproject(projected),
+          `${shape}: ${longitude}, ${latitude}`
+        ).not.toThrow();
+        const inverse = transform.unproject(projected);
+        expect(Math.abs(inverse[0] - longitude)).toBeLessThan(2e-9);
+        expect(Math.abs(inverse[1] - latitude)).toBeLessThan(2e-11);
+        const recovered = transform.project(inverse);
+        expect(Math.hypot(recovered[0] - projected[0], recovered[1] - projected[1])).toBeLessThan(
+          2e-7
+        );
+      }
+    }
+  }
+  const transform = projectionEngine.createProjection({to: '+proj=poly +R=6371000'});
+  const inverse = transform.unproject([9690.78815532985, 9896771.515790729]);
+  expect(Math.abs(inverse[0] - 5)).toBeLessThan(2e-9);
+  expect(Math.abs(inverse[1] - 89)).toBeLessThan(2e-11);
+});
