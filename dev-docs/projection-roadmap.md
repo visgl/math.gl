@@ -7,8 +7,8 @@ Status: tranches **0–11, including qualification tranches 7A–7D, are impleme
 from `@math.gl/proj4`; its deprecated wrapper alias and `/classic` subpath are removed.
 Prior engine subpaths remain aliases. No package is published by this work.
 
-The upstream corpus has 232 original numeric matches, one independently corrected
-Robinson case and nine deliberate input rejections. All 37 named algorithms have
+The upstream corpus has 230 original numeric matches, three independently corrected
+cases (one Robinson and two ellipsoidal gnomonic) and nine deliberate input rejections. All 37 named algorithms have
 independent references; partial inventory statuses describe the difference from
 unrestricted upstream behavior, not a claim of full-domain geodetic accuracy.
 

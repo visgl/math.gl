@@ -9,13 +9,13 @@ available separately.
 
 The math.gl projection engine now has reference coordinates from **PROJ 9.5.1**, generated with
 **pyproj 3.7.2** independently of proj4js. The corpus covers all **37 named algorithms**
-with **134 configurations and 2,386 points**, plus **87 points in real horizontal
+with **135 configurations and 2,387 points**, plus **87 points in real horizontal
 GeoTIFF and NTv2 datasets**. The internal Gauss helper is exercised through its parent projections.
 A separate seeded corpus adds **42 explicit domains / 11,160 points** covering every named horizontal algorithm. The [accuracy domain scorecard](./accuracy-domains.md) records parameters, tested regions, observed maxima and regression ceilings. These are sampled accuracy checks, not a claim of full-domain or full-CRS parity.
 
 The proj4js compatibility baseline remains **2.22.0**, checked against npm's latest
-tag on October 4, 2026. Its separate upstream corpus has 232 original numeric matches, one independently
-corrected Robinson result, and nine deliberate input rejections. An independent oracle matters because a
+tag on October 4, 2026. Its separate upstream corpus has 230 original numeric matches, three independently
+corrected results (one Robinson and two ellipsoidal gnomonic), and nine deliberate input rejections. An independent oracle matters because a
 TypeScript port can reproduce a bug in the JavaScript implementation exactly.
 
 ## What the checks establish
