@@ -30,6 +30,7 @@ export function createMyriahedralLayout(level: number, seed: number, mode: strin
   return {
     ...map.layout,
     map,
+    canRecut: !solid,
     cutLandKm: map.layout.cutLandRadians! * 6371,
     description: `${solid ?? preset} preset · sampled geography; land connectivity and overlap-free nets are not guaranteed.`
   };

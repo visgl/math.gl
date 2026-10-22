@@ -101,3 +101,10 @@ test('structured geographic layout preserves hinges, rigid faces, and continent 
   expect(centroid(100, 40)[0]).toBeGreaterThan(centroid(20, 0)[0]);
   expect(centroid(135, -25)[0]).toBeGreaterThan(centroid(20, 0)[0]);
 }, 60000);
+
+test('example offers alternate cuts only for graticule presets', () => {
+  expect(createMyriahedralLayout(0, 1, 'cylindric').canRecut).toBe(true);
+  for (const solid of ['tetrahedron', 'cube', 'octahedron', 'dodecahedron', 'icosahedron']) {
+    expect(createMyriahedralLayout(0, 1, `solid:${solid}`).canRecut).toBe(false);
+  }
+});
