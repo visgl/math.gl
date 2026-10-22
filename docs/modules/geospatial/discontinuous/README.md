@@ -61,7 +61,9 @@ Boundaries are convex spherical polygons with minor great-circle edges. The
 interior point must be strictly inside. Repeating the closing vertex is optional.
 Shared edges must use matching vertices on both regions, including subdivisions.
 The affine placement `[a, b, c, d, tx, ty]` applies
-`x' = a*x + c*y + tx`, `y' = b*x + d*y + ty`. It must be finite and invertible.
+`x' = a*x + c*y + tx`, `y' = b*x + d*y + ty`. It must be finite and numerically invertible. Singularity is checked after
+normalizing the linear coefficients by their largest magnitude (determinant
+threshold `1e-14`), so uniform changes of output units do not affect acceptance.
 Definitions are snapshotted; callbacks must remain stable and valid on boundaries.
 
 The source coordinate convention is `[longitude, latitude]` in degrees on a sphere.

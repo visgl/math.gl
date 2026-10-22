@@ -57,6 +57,9 @@ type Region = {
   vertices: Vector[];
   normals: Vector[];
   placement: MapPlacement;
+  placementScale: number;
+  normalizedPlacement: number[];
+  determinant: number;
 };
 const EPS = 1e-10;
 
@@ -92,11 +95,15 @@ export class DiscontinuousMap {
       const placement = [
         ...(definition.placement || [1, 0, 0, 1, 0, 0])
       ] as unknown as MapPlacement;
-      if (
-        placement.length !== 6 ||
-        !placement.every(Number.isFinite) ||
-        Math.abs(placement[0] * placement[3] - placement[1] * placement[2]) < 1e-14
-      )
+      if (placement.length !== 6 || !placement.every(Number.isFinite))
+        throw new Error('Placement must be a finite invertible affine transform');
+      // A normalized determinant avoids both underflow and overflow and makes
+      // the numerical singularity threshold independent of output units.
+      const placementScale = Math.max(...placement.slice(0, 4).map(Math.abs));
+      const normalizedPlacement = placement.slice(0, 4).map(v => v / placementScale);
+      const [a, b, c, d] = normalizedPlacement;
+      const determinant = a * d - b * c;
+      if (!Number.isFinite(determinant) || Math.abs(determinant) < 1e-14)
         throw new Error('Placement must be a finite invertible affine transform');
       const snapshot = Object.freeze({
         ...definition,
@@ -104,7 +111,15 @@ export class DiscontinuousMap {
         boundary: Object.freeze(vertices.map(v => Object.freeze(coordinates(v)))),
         placement: Object.freeze(placement)
       });
-      return {definition: snapshot, vertices, normals, placement};
+      return {
+        definition: snapshot,
+        vertices,
+        normals,
+        placement,
+        placementScale,
+        normalizedPlacement,
+        determinant
+      };
     });
     this.regions = Object.freeze(this.compiled.map(r => r.definition));
     this.seams = Object.freeze(this.buildSeams());
@@ -126,18 +141,30 @@ export class DiscontinuousMap {
       throw new Error('Expected finite XY coordinates');
     const results: MapPoint[] = [];
     for (const r of this.select(regionId)) {
-      const [a, b, c, d, tx, ty] = r.placement,
-        det = a * d - b * c;
-      const x = position[0] - tx,
-        y = position[1] - ty;
-      const source = r.definition.unproject([(d * x - c * y) / det, (-b * x + a * y) / det]);
+      const [a, b, c, d] = r.normalizedPlacement;
+      // Subtract first for cancellation accuracy; scale first only if the
+      // difference overflows, so inverse placement works at large scales too.
+      const deltaX = position[0] - r.placement[4];
+      const deltaY = position[1] - r.placement[5];
+      const x = Number.isFinite(deltaX)
+        ? deltaX / r.placementScale
+        : position[0] / r.placementScale - r.placement[4] / r.placementScale;
+      const y = Number.isFinite(deltaY)
+        ? deltaY / r.placementScale
+        : position[1] / r.placementScale - r.placement[5] / r.placementScale;
+      const local: Position = [(d * x - c * y) / r.determinant, (-b * x + a * y) / r.determinant];
+      if (!local.every(Number.isFinite)) continue;
+      const source = r.definition.unproject(local);
       if (!source) continue;
       const p = geographic(source);
       if (!this.contains(r, p)) continue;
       const check = this.project(r, p);
+      const outputScale = Math.max(r.placementScale, Math.abs(position[0]), Math.abs(position[1]));
       if (
-        Math.hypot(check[0] - position[0], check[1] - position[1]) <=
-        1e-8 * (1 + Math.hypot(...position))
+        Math.hypot(
+          check[0] / outputScale - position[0] / outputScale,
+          check[1] / outputScale - position[1] / outputScale
+        ) <= 1e-8
       )
         results.push({regionId: r.definition.id, position: coordinates(p)});
     }
@@ -318,7 +345,18 @@ export class DiscontinuousMap {
         kind = samples.every(p => {
           const u = this.project(r, p),
             v = this.project(other, p);
-          return Math.hypot(u[0] - v[0], u[1] - v[1]) < 1e-8 * (1 + Math.hypot(...u));
+          const outputScale = Math.max(
+            r.placementScale,
+            other.placementScale,
+            Math.abs(u[0]),
+            Math.abs(u[1])
+          );
+          return (
+            Math.hypot(
+              u[0] / outputScale - v[0] / outputScale,
+              u[1] / outputScale - v[1] / outputScale
+            ) < 1e-8
+          );
         })
           ? 'join'
           : 'cut';

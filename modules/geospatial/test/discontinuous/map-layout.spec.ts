@@ -453,3 +453,38 @@ test('interrupted map supports a polygon containing the north pole', () => {
     expect(part.sourceCoordinates[0].some(p => Math.abs(p[1] - 90) < 1e-8)).toBe(true);
   }
 });
+
+test('AirOcean placements and seam classification are independent of output scale', () => {
+  const reference = createAirOceanMap();
+  const source: XY = [12, 34];
+  const expected = reference.projectPoint(source)!;
+  for (const radius of [1e-200, 1e-8, 1e200]) {
+    const map = createAirOceanMap({radius});
+    const projected = map.projectPoint(source)!;
+    expect(projected.position[0] / radius).toBeCloseTo(expected.position[0], 10);
+    expect(projected.position[1] / radius).toBeCloseTo(expected.position[1], 10);
+    const inverse = map.unprojectPoint(projected.position, projected.regionId);
+    expect(inverse).toHaveLength(1);
+    expect(distance(inverse[0].position, source)).toBeLessThan(1e-10);
+    expect(map.seams.map(seam => seam.kind)).toEqual(reference.seams.map(seam => seam.kind));
+  }
+});
+
+test('scaled affine placements reject singular matrices and safely invert finite large coefficients', () => {
+  for (const scale of [1e-200, 1e200]) {
+    expect(
+      () =>
+        new DiscontinuousMap([
+          {...region('a', -2, 2), placement: [scale, scale, scale, scale, 0, 0]}
+        ])
+    ).toThrow(/invertible/);
+    const map = new DiscontinuousMap([
+      {...region('a', -2, 2), placement: [scale, scale / 2, -scale / 2, scale, scale, -scale]}
+    ]);
+    const source = sphere([0.25, 0.5]);
+    const projected = map.projectPoint(source)!;
+    const inverse = map.unprojectPoint(projected.position);
+    expect(inverse).toHaveLength(1);
+    expect(distance(inverse[0].position, source)).toBeLessThan(1e-10);
+  }
+});
