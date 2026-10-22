@@ -288,20 +288,31 @@ export class DiscontinuousMap {
     // Convex single rings need no boolean reconstruction. Direct half-space
     // clipping avoids nearly coincident mask/input edges at exact grid seams.
     const orientation = ringOrientation(planar[0]);
+    let totalTurn = 0;
     const convex =
       planar.length === 1 &&
       planar[0].every((p, i, ring) => {
-        const turn = ringOrientation([p, ring[(i + 1) % ring.length], ring[(i + 2) % ring.length]]);
-        return turn === 0 || turn === orientation;
+        const q = ring[(i + 1) % ring.length];
+        const r = ring[(i + 2) % ring.length];
+        const turn = ringOrientation([p, q, r]);
+        if (turn !== 0 && turn !== orientation) return false;
+        const ax = q[0] - p[0],
+          ay = q[1] - p[1];
+        const bx = r[0] - q[0],
+          by = r[1] - q[1];
+        const aLength = Math.hypot(ax, ay),
+          bLength = Math.hypot(bx, by);
+        if (aLength === 0 || bLength === 0) return false;
+        const cross = (ax / aLength) * (by / bLength) - (ay / aLength) * (bx / bLength);
+        const dot = (ax / aLength) * (bx / bLength) + (ay / aLength) * (by / bLength);
+        // Backtracking edges are not a convex boundary.
+        if (turn === 0 && dot < 0) return false;
+        totalTurn += Math.atan2(cross, dot);
+        return true;
       }) &&
-      // Equal local turns alone also accept self-crossing stars. A convex
-      // ring must lie entirely on the interior side of each of its edges.
-      planar[0].every((p, i, ring) =>
-        ring.every(q => {
-          const side = ringOrientation([p, ring[(i + 1) % ring.length], q]);
-          return side === 0 || side === orientation;
-        })
-      );
+      // Local turns alone also accept self-crossing stars. A convex boundary
+      // makes exactly one revolution; this additional check stays linear.
+      Math.abs(totalTurn - orientation * 2 * Math.PI) < 1e-7;
     const origin = planar[0][0];
     let extent = 0;
     for (const p of planar[0])
