@@ -490,8 +490,8 @@
     {
       "id": "domain-mill-ellipsoid",
       "definition": "+proj=mill +lon_0=10 +ellps=WGS84",
-      "oracle": "+proj=mill +lon_0=10 +R=6378137",
-      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics.",
+      "oracle": "+proj=mill +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Spherical method in native PROJ; the unchanged definition uses the semi-major axis as its radius.",
       "forwardTolerance": 1e-05,
       "inverseTolerance": 1e-08,
       "roundtripTolerance": 1e-08,
@@ -522,8 +522,8 @@
     {
       "id": "domain-vandg-ellipsoid",
       "definition": "+proj=vandg +lon_0=10 +ellps=WGS84",
-      "oracle": "+proj=vandg +lon_0=10 +R=6378137",
-      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics. PROJ differs by 20.864 micrometres at the authored dense regression; original 80-digit Decimal evaluation agrees with math.gl within 1e-8 m. This comparison allowance includes oracle cancellation, not a relaxed math.gl accuracy target.",
+      "oracle": "+proj=vandg +lon_0=10 +ellps=WGS84",
+      "oracleNotes": "Spherical method in native PROJ; the unchanged definition uses the semi-major axis as its radius.",
       "forwardTolerance": 3e-05,
       "inverseTolerance": 1e-08,
       "roundtripTolerance": 1e-08,
@@ -586,8 +586,8 @@
     {
       "id": "domain-ortho-ellipsoid",
       "definition": "+proj=ortho +lon_0=10 +lat_0=40 +ellps=WGS84",
-      "oracle": "+proj=ortho +lon_0=10 +lat_0=40 +R=6378137",
-      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics.",
+      "oracle": "+proj=ortho +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "Identical ellipsoidal or spherical definition; modern PROJ orthographic equations.",
       "forwardTolerance": 1e-05,
       "inverseTolerance": 1e-08,
       "roundtripTolerance": 1e-08,

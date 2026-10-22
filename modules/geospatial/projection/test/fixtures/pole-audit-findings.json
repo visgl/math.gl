@@ -1,0 +1,5866 @@
+{
+  "oracle": "pyproj 3.7.2 / PROJ 9.5.1",
+  "referenceSourceSHA256": "1759895123cd54f967f0ab0bf09aee076d6b909cea7eae207f6ee527ed92f808",
+  "referenceGeneratorSHA256": "acc76b317fceecb9090bd2b6da7b4c32606594e826762b6b319822bedc638180",
+  "methodology": "Unchanged definitions except documented non-ellipsoid aliases/defaults. Forward error in metres (1 mm + 1e-12 relative screening); inverse in degrees (1e-6 screening), with longitude weighted by cos(latitude) at collapsed poles. Pole-line maps retain longitude. All oracle rejections and disagreements are retained. Screening is an audit, not a global accuracy guarantee.",
+  "cases": [
+    {
+      "id": "tmerc-ellipsoid",
+      "algorithm": "tmerc",
+      "definition": "+proj=tmerc +lon_0=9 +lat_0=10 +k_0=0.9996 +x_0=500000 +y_0=1234 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 5.416892274481064e-15
+      },
+      "mismatches": []
+    },
+    {
+      "id": "etmerc-ellipsoid",
+      "algorithm": "etmerc",
+      "definition": "+proj=etmerc +lon_0=-69 +lat_0=-10 +k=0.99 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 7.105427357601002e-15
+      },
+      "mismatches": []
+    },
+    {
+      "id": "tmerc-approx-ellipsoid",
+      "algorithm": "tmerc",
+      "definition": "+proj=tmerc +approx +lon_0=9 +k_0=0.9996 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 9.164214134216309e-7,
+        "inverse": 3.104389634245308e-9
+      },
+      "mismatches": []
+    },
+    {
+      "id": "tmerc-approx-sphere",
+      "algorithm": "tmerc",
+      "definition": "+proj=tmerc +approx +R=6371000 +lon_0=9 +x_0=123 +y_0=456",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 7.105427357601002e-15
+      },
+      "mismatches": []
+    },
+    {
+      "id": "etmerc-approx-sphere",
+      "algorithm": "etmerc",
+      "definition": "+proj=etmerc +approx +R=6371000 +lon_0=9",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "utm-north",
+      "algorithm": "utm",
+      "definition": "+proj=utm +zone=31 +datum=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 9.313225746154785e-10,
+        "inverse": 7.105427357601002e-15
+      },
+      "mismatches": []
+    },
+    {
+      "id": "utm-south",
+      "algorithm": "utm",
+      "definition": "+proj=utm +zone=56 +south +datum=WGS84",
+      "probes": 21,
+      "comparisons": 42,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 9.313225746154785e-10,
+        "inverse": 7.105427357601002e-15
+      },
+      "mismatches": []
+    },
+    {
+      "id": "utm-sphere",
+      "algorithm": "utm",
+      "definition": "+proj=utm +zone=31 +approx +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "lcc-north",
+      "algorithm": "lcc",
+      "definition": "+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=1000 +y_0=2000 +k_0=0.99 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 8598.986572265625,
+        "inverse": 2.2026824808563106e-13
+      },
+      "mismatches": [
+        {
+          "input": [
+            -126.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 8119.314208984375,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -96.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 8598.986572265625,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -66.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 8149.98876953125,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "lcc-south",
+      "algorithm": "lcc",
+      "definition": "+proj=lcc +lat_1=-18 +lat_2=-36 +lat_0=-25 +lon_0=135 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 115.86868286132812,
+        "inverse": 7.780442956573097e-13
+      },
+      "mismatches": [
+        {
+          "input": [
+            104.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 112.47386169433594,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            134.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 115.86868286132812,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            164.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 112.69186401367188,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "lcc-tangent",
+      "algorithm": "lcc",
+      "definition": "+proj=lcc +lat_1=45 +lat_0=45 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 38474.193359375,
+        "inverse": 1.0658141036401503e-13
+      },
+      "mismatches": [
+        {
+          "input": [
+            -30.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 35781.29296875,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 38474.193359375,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 35953.10546875,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "lcc-sphere",
+      "algorithm": "lcc",
+      "definition": "+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +R=6371000",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 5400.416259765625,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": [
+        {
+          "input": [
+            -30.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 5099.185791015625,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 5400.416259765625,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 5118.448974609375,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "lcc-polar-origin",
+      "algorithm": "lcc",
+      "definition": "+proj=lcc +lat_1=-60 +lat_2=-80 +lat_0=-90 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 1585098.0625,
+        "inverse": 7.531752999057062e-13
+      },
+      "mismatches": [
+        {
+          "input": [
+            -30.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 1388828.4375,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 1585098.0625,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 1401240.125,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "aea-north",
+      "algorithm": "aea",
+      "definition": "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=100 +y_0=-100 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.0244548320770264e-8,
+        "inverse": 0.00999999987769229
+      },
+      "mismatches": [
+        {
+          "input": [
+            -126.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999185353659,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -126.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.00999999987769229,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -96.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999599429543,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -96.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.00999999987769229,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -66.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999599429543,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -66.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.00999999987769229,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "aea-south",
+      "algorithm": "aea",
+      "definition": "+proj=aea +lat_1=-18 +lat_2=-36 +lat_0=-25 +lon_0=135 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 8.381903171539307e-9,
+        "inverse": 0.00999999987804756
+      },
+      "mismatches": [
+        {
+          "input": [
+            104.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999869975795,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            104.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.00999999948214736,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            134.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999869350518,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            134.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999753773636,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            164.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999869975795,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            164.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.00999999987804756,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "aea-sphere",
+      "algorithm": "aea",
+      "definition": "+proj=aea +lat_1=30 +lat_2=60 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.259629011154175e-9,
+        "inverse": 8.537736420066722e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "aea-tangent",
+      "algorithm": "aea",
+      "definition": "+proj=aea +lat_1=40 +lat_2=40 +lat_0=40 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.210719347000122e-8,
+        "inverse": 0.0099999998284801
+      },
+      "mismatches": [
+        {
+          "input": [
+            -30.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.0099999998284801,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -30.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999759784828,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.0099999998284801,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999759784828,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.0099999998284801,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999759784828,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "eqdc-north",
+      "algorithm": "eqdc",
+      "definition": "+proj=eqdc +lat_1=20 +lat_2=60 +lat_0=40 +x_0=1500 +y_0=-200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.0000025890767574310303,
+        "inverse": 1.460875864722766e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "eqdc-south",
+      "algorithm": "eqdc",
+      "definition": "+proj=eqdc +lat_1=-20 +lat_2=-60 +lat_0=-40 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.0000025890767574310303,
+        "inverse": 1.460875864722766e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "eqdc-sphere",
+      "algorithm": "eqdc",
+      "definition": "+proj=eqdc +lat_1=20 +lat_2=60 +lat_0=40 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 2.842170943040401e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "eqdc-tangent",
+      "algorithm": "eqdc",
+      "definition": "+proj=eqdc +lat_1=40 +lat_0=40 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.000001257285475730896,
+        "inverse": 1.1226575225009583e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "laea-0-ellipsoid",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.09647456354885264,
+        "inverse": 6.222138466682736e-7
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.09647456354885264,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.09647456354885264,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.09482566826045513,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.09482566826045513,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.09360149203433821,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.09360149203433821,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea-0-sphere",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0,
+        "inverse": 5.512827562497485e-15
+      },
+      "mismatches": []
+    },
+    {
+      "id": "laea-45-ellipsoid",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.17768218387512036,
+        "inverse": 2.701489165701787e-7
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.17768218387512036,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.17768218387512036,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.051486674696207047,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.051486674696207047,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.17239069973152255,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.17239069973152255,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea-45-sphere",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 3.536446229190915e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "laea--45-ellipsoid",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.12390727177262306,
+        "inverse": 2.701489307810334e-7
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.10676618479192257,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.10676618479192257,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.12390727177262306,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.12390727177262306,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.10784750618040562,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.10784750618040562,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea--45-sphere",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 3.536446229190915e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "laea-90-ellipsoid",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 3.4691765904426575e-8,
+        "inverse": 0.0000024040496668931155
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000024040496668931155,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000002081968091260933,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000002081968091260933,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea-90-sphere",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 0,
+        "inverse": 0.000001707547298224199
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001707547298224199,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea--90-ellipsoid",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 0.000008086891284619924,
+        "inverse": 0.000002081968091260933
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001699919835118635,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001202024819235703,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000002081968091260933,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea--90-sphere",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 0,
+        "inverse": 0.000001707547298224199
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001707547298224199,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere-0-ellipsoid",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=0 +lon_0=15 +x_0=100 +y_0=0 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 3.5981884138891473e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "stere-0-sphere",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 3.645084234449314e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "stere-45-ellipsoid",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.4901161193847656e-8,
+        "inverse": 0.000001199344353608467
+      },
+      "mismatches": [
+        {
+          "input": [
+            44.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001199344353608467,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere-45-sphere",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 7.450580596923828e-9,
+        "inverse": 0.0000012074182649257637
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000012074182649257637,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000012074182649257637,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere--45-ellipsoid",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.1175870895385742e-8,
+        "inverse": 0.000001199344353608467
+      },
+      "mismatches": [
+        {
+          "input": [
+            14.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001199344353608467,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere--45-sphere",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 7.450580596923828e-9,
+        "inverse": 0.0000012074182649257637
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000012074182649257637,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000012074182649257637,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere-90-ellipsoid",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 51,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 13333144.75,
+        "inverse": 0
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 11488664,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            14.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 13333144.75,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 11605020.25,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere-90-sphere",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 542963356605230.75,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 467850878700480.75,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -15.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "error": 436.565673828125,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 542963356605230.75,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "error": 506.63299560546875,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 472589247944297.75,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "error": 440.98590087890625,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere--90-ellipsoid",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 51,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 13333144.75,
+        "inverse": 0
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 11488664,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -15.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            14.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 13333144.75,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            44.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 11605020.25,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "stere--90-sphere",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 542963356605230.75,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            89.99
+          ],
+          "direction": "forward",
+          "error": 436.565673828125,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -15.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 467850878700480.75,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            89.99
+          ],
+          "direction": "forward",
+          "error": 506.63299560546875,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 542963356605230.75,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            89.99
+          ],
+          "direction": "forward",
+          "error": 440.98590087890625,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 472589247944297.75,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "aeqd-0-ellipsoid",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 9.313225746154785e-7,
+        "inverse": 3.895195277436869e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "aeqd-0-sphere",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 6.250056969747675e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "aeqd-45-ellipsoid",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.0000018421560525894165,
+        "inverse": 1.6854073692229576e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "aeqd-45-sphere",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 0.0000013369966256818573
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.0000011080783928468536,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.0000013369966256818573,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.0000011146898377654912,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "aeqd--45-ellipsoid",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.0000018421560525894165,
+        "inverse": 1.6854073692229576e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "aeqd--45-sphere",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 0.0000013369966256818573
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.0000011080783928468536,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.0000013369966256818573,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.0000011146898377654912,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "aeqd-90-ellipsoid",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 51,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 7.450580596923828e-9,
+        "inverse": 2.842170943040401e-14
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "aeqd-90-sphere",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 1.4622636967942526e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "aeqd--90-ellipsoid",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 51,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 7.450580596923828e-9,
+        "inverse": 2.842170943040401e-14
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            14.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            44.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "aeqd--90-sphere",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "probes": 27,
+      "comparisons": 48,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 1.4622636967942526e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "stere-true-scale-north",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=90 +lat_ts=70 +k_0=0.8 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 51,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 12931259.75,
+        "inverse": 0
+      },
+      "mismatches": [
+        {
+          "input": [
+            -30.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -30.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 11142374.5,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 12931259.75,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 11255224,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere-true-scale-south",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=-90 +lat_ts=-71 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 51,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 12970070,
+        "inverse": 0
+      },
+      "mismatches": [
+        {
+          "input": [
+            -30.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 11175816,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -30.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -0.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 12970070,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            29.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 11289004.25,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "sterea-ellipsoid",
+      "algorithm": "sterea",
+      "definition": "+proj=sterea +lat_0=52 +lon_0=5 +k_0=0.9999 +x_0=155000 +y_0=463000 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 7.450580596923828e-9,
+        "inverse": 0.0000012146107053467858
+      },
+      "mismatches": [
+        {
+          "input": [
+            -25.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000012055055833570805,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            34.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000012055055833570805,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            34.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000012146107053467858,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "sterea-sphere",
+      "algorithm": "sterea",
+      "definition": "+proj=sterea +lat_0=-30 +lon_0=150 +R=6371000 +k=0.9",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 8.537736420066722e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "cea-ellipsoid",
+      "algorithm": "cea",
+      "definition": "+proj=cea +lon_0=10 +lat_ts=30 +ellps=WGS84",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 0.000001202024819235703
+      },
+      "mismatches": [
+        {
+          "input": [
+            -0.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.000001202024819235703,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001202024819235703,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.000001202024819235703,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001202024819235703,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.000001202024819235703,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001202024819235703,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "cea-sphere",
+      "algorithm": "cea",
+      "definition": "+proj=cea +lon_0=10 +lat_ts=30 +R=6371000",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "eck6-ellipsoid",
+      "algorithm": "eck6",
+      "definition": "+proj=eck6 +lon_0=10 +ellps=WGS84",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 3.645084234449314e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "eck6-sphere",
+      "algorithm": "eck6",
+      "definition": "+proj=eck6 +lon_0=10 +R=6371000",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "eqearth-ellipsoid",
+      "algorithm": "eqearth",
+      "definition": "+proj=eqearth +lon_0=10 +ellps=WGS84",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 4.6566128730773926e-9,
+        "inverse": 0.000006638399128178207
+      },
+      "mismatches": [
+        {
+          "input": [
+            -0.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.000006638399128178207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006638399128178207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006638399128178207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.000006638399128178207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.000006638399128178207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006638399128178207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006638399128178207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.000006638399128178207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.000006638399128178207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006638399128178207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006638399128178207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.000006638399128178207,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "eqearth-sphere",
+      "algorithm": "eqearth",
+      "definition": "+proj=eqearth +lon_0=10 +R=6371000",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0,
+        "inverse": 0.000006668185335456656
+      },
+      "mismatches": [
+        {
+          "input": [
+            -0.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "equi-ellipsoid",
+      "algorithm": "equi",
+      "definition": "+proj=equi +lon_0=10 +ellps=WGS84",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "equi-sphere",
+      "algorithm": "equi",
+      "definition": "+proj=equi +lon_0=10 +R=6371000",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0,
+        "inverse": 0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "mill-ellipsoid",
+      "algorithm": "mill",
+      "definition": "+proj=mill +lon_0=10 +ellps=WGS84",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "mill-sphere",
+      "algorithm": "mill",
+      "definition": "+proj=mill +lon_0=10 +R=6371000",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 5.587935447692871e-9,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "moll-ellipsoid",
+      "algorithm": "moll",
+      "definition": "+proj=moll +lon_0=10 +ellps=WGS84",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 30.981421904450514,
+        "inverse": 1.191438059322536e-10
+      },
+      "mismatches": [
+        {
+          "input": [
+            -0.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 6.5718167676107155,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 6.5718167676107155,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 12.2048025684199,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 12.2048025684199,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 30.981421904450514,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 30.981421904450514,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "moll-sphere",
+      "algorithm": "moll",
+      "definition": "+proj=moll +lon_0=10 +R=6371000",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 30.946754350565726,
+        "inverse": 1.191438059322536e-10
+      },
+      "mismatches": [
+        {
+          "input": [
+            -0.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 6.564463044059397,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 6.564463044059397,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 12.191145653253166,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 12.191145653253166,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 30.946754350565726,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 30.946754350565726,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "robin-ellipsoid",
+      "algorithm": "robin",
+      "definition": "+proj=robin +lon_0=10 +ellps=WGS84",
+      "probes": 173,
+      "comparisons": 346,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 0.00002912144407218875
+      },
+      "mismatches": [
+        {
+          "input": [
+            -110,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 0.000016397767467424273,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -110,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -110,
+            30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -110,
+            60
+          ],
+          "direction": "inverse",
+          "error": 0.000016397767467424273,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -50,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 0.000008198883733712137,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -50,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -50,
+            30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -50,
+            60
+          ],
+          "direction": "inverse",
+          "error": 0.000008198883733712137,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 0.000007611725273193315,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            60
+          ],
+          "direction": "inverse",
+          "error": 0.000007611725273193315,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            70,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 0.000008198883733712137,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            70,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            70,
+            30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            70,
+            60
+          ],
+          "direction": "inverse",
+          "error": 0.000008198883733712137,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            130,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 0.000016397767467424273,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            130,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            130,
+            30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            130,
+            60
+          ],
+          "direction": "inverse",
+          "error": 0.000016397767467424273,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -65
+          ],
+          "direction": "inverse",
+          "error": 0.00002912144407218875,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 0.000024460003146486997,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -50
+          ],
+          "direction": "inverse",
+          "error": 0.000007521435918533825,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -20
+          ],
+          "direction": "inverse",
+          "error": 0.00001757655802947511,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -15
+          ],
+          "direction": "inverse",
+          "error": 0.000006340265697346581,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -10
+          ],
+          "direction": "inverse",
+          "error": 0.0000019295105939676205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -5
+          ],
+          "direction": "inverse",
+          "error": 0.0000011394564580768929,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            5
+          ],
+          "direction": "inverse",
+          "error": 0.0000011394564580768929,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            10
+          ],
+          "direction": "inverse",
+          "error": 0.0000019295105939676205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            15
+          ],
+          "direction": "inverse",
+          "error": 0.000006340265697346581,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            20
+          ],
+          "direction": "inverse",
+          "error": 0.00001757655802947511,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            50
+          ],
+          "direction": "inverse",
+          "error": 0.000007521435918533825,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            60
+          ],
+          "direction": "inverse",
+          "error": 0.000024460003146486997,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            65
+          ],
+          "direction": "inverse",
+          "error": 0.00002912144407218875,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -65
+          ],
+          "direction": "inverse",
+          "error": 0.000014128745078778593,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 0.000007611725273193315,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -50
+          ],
+          "direction": "inverse",
+          "error": 0.0000011205177372630715,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -20
+          ],
+          "direction": "inverse",
+          "error": 0.00001757655802947511,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -15
+          ],
+          "direction": "inverse",
+          "error": 0.000006340265697346581,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -10
+          ],
+          "direction": "inverse",
+          "error": 0.0000019295105939676205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            10
+          ],
+          "direction": "inverse",
+          "error": 0.0000019295105939676205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            15
+          ],
+          "direction": "inverse",
+          "error": 0.000006340265697346581,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            20
+          ],
+          "direction": "inverse",
+          "error": 0.00001757655802947511,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            50
+          ],
+          "direction": "inverse",
+          "error": 0.0000011205177372630715,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            60
+          ],
+          "direction": "inverse",
+          "error": 0.000007611725273193315,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            65
+          ],
+          "direction": "inverse",
+          "error": 0.000014128745078778593,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -65
+          ],
+          "direction": "inverse",
+          "error": 0.00002749454779404914,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 0.000023093522599992866,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -50
+          ],
+          "direction": "inverse",
+          "error": 0.0000071012440230333596,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -20
+          ],
+          "direction": "inverse",
+          "error": 0.00001757655802947511,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -15
+          ],
+          "direction": "inverse",
+          "error": 0.000006340265697346581,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -10
+          ],
+          "direction": "inverse",
+          "error": 0.0000019295105939676205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -5
+          ],
+          "direction": "inverse",
+          "error": 0.0000010757996733445907,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            5
+          ],
+          "direction": "inverse",
+          "error": 0.0000010757996733445907,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            10
+          ],
+          "direction": "inverse",
+          "error": 0.0000019295105939676205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            15
+          ],
+          "direction": "inverse",
+          "error": 0.000006340265697346581,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            20
+          ],
+          "direction": "inverse",
+          "error": 0.00001757655802947511,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            50
+          ],
+          "direction": "inverse",
+          "error": 0.0000071012440230333596,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            60
+          ],
+          "direction": "inverse",
+          "error": 0.000023093522599992866,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            65
+          ],
+          "direction": "inverse",
+          "error": 0.00002749454779404914,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "robin-sphere",
+      "algorithm": "robin",
+      "definition": "+proj=robin +lon_0=10 +R=6371000",
+      "probes": 173,
+      "comparisons": 346,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 0.00002912144407218875
+      },
+      "mismatches": [
+        {
+          "input": [
+            -169,
+            -65
+          ],
+          "direction": "inverse",
+          "error": 0.00002912144407218875,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -20
+          ],
+          "direction": "inverse",
+          "error": 0.00001757655802947511,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -10
+          ],
+          "direction": "inverse",
+          "error": 0.0000019295105939676205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -5
+          ],
+          "direction": "inverse",
+          "error": 0.0000011394564580768929,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            5
+          ],
+          "direction": "inverse",
+          "error": 0.0000011394564580768929,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            10
+          ],
+          "direction": "inverse",
+          "error": 0.0000019295105939676205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            20
+          ],
+          "direction": "inverse",
+          "error": 0.00001757655802947511,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            65
+          ],
+          "direction": "inverse",
+          "error": 0.00002912144407218875,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -65
+          ],
+          "direction": "inverse",
+          "error": 0.000014128745064567738,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -20
+          ],
+          "direction": "inverse",
+          "error": 0.00001757655802947511,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -10
+          ],
+          "direction": "inverse",
+          "error": 0.0000019295105939676205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            10
+          ],
+          "direction": "inverse",
+          "error": 0.0000019295105939676205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            20
+          ],
+          "direction": "inverse",
+          "error": 0.00001757655802947511,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            65
+          ],
+          "direction": "inverse",
+          "error": 0.000014128745064567738,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -65
+          ],
+          "direction": "inverse",
+          "error": 0.00002749454779404914,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -20
+          ],
+          "direction": "inverse",
+          "error": 0.00001757655802947511,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -10
+          ],
+          "direction": "inverse",
+          "error": 0.0000019295105939676205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -5
+          ],
+          "direction": "inverse",
+          "error": 0.0000010757996733445907,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            5
+          ],
+          "direction": "inverse",
+          "error": 0.0000010757996733445907,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            10
+          ],
+          "direction": "inverse",
+          "error": 0.0000019295105939676205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            20
+          ],
+          "direction": "inverse",
+          "error": 0.00001757655802947511,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            65
+          ],
+          "direction": "inverse",
+          "error": 0.00002749454779404914,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "sinu-ellipsoid",
+      "algorithm": "sinu",
+      "definition": "+proj=sinu +lon_0=10 +ellps=WGS84",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.000003300607204437256,
+        "inverse": 5.366018740460278e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "sinu-sphere",
+      "algorithm": "sinu",
+      "definition": "+proj=sinu +lon_0=10 +R=6371000",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "vandg-ellipsoid",
+      "algorithm": "vandg",
+      "definition": "+proj=vandg +lon_0=10 +ellps=WGS84",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.0005059391260147095,
+        "inverse": 8.940696574200047e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "vandg-sphere",
+      "algorithm": "vandg",
+      "definition": "+proj=vandg +lon_0=10 +R=6371000",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.0005053691565990448,
+        "inverse": 8.940696574200047e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "cass-ellipsoid",
+      "algorithm": "cass",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.000001257285475730896,
+        "inverse": 3.7474023883987684e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "cass-sphere",
+      "algorithm": "cass",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 7.073310825944645e-10,
+        "inverse": 0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "poly-ellipsoid",
+      "algorithm": "poly",
+      "definition": "+proj=poly +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 42,
+      "rejectedByPROJ": 12,
+      "errors": {
+        "forward": 0.0003571007400751114,
+        "inverse": 3.147434313177655e-9
+      },
+      "mismatches": [
+        {
+          "input": [
+            -20.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "poly-sphere",
+      "algorithm": "poly",
+      "definition": "+proj=poly +lon_0=10 +lat_0=40 +R=6371000",
+      "probes": 27,
+      "comparisons": 42,
+      "rejectedByPROJ": 12,
+      "errors": {
+        "forward": 7.275957614183426e-12,
+        "inverse": 1.3893952655053e-10
+      },
+      "mismatches": [
+        {
+          "input": [
+            -20.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "gstmerc-ellipsoid",
+      "algorithm": "gstmerc",
+      "definition": "+proj=gstmerc +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 1.9184653865522705e-13
+      },
+      "mismatches": []
+    },
+    {
+      "id": "gstmerc-sphere",
+      "algorithm": "gstmerc",
+      "definition": "+proj=gstmerc +lon_0=10 +lat_0=40 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 2.842170943040401e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "gnom-ellipsoid",
+      "algorithm": "gnom",
+      "definition": "+proj=gnom +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 36,
+      "rejectedByPROJ": 9,
+      "errors": {
+        "forward": 10534.107486056164,
+        "inverse": 0.03906685163082102
+      },
+      "mismatches": [
+        {
+          "input": [
+            9.5,
+            39.5
+          ],
+          "direction": "forward",
+          "error": 144.99971626549814,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            9.5,
+            39.5
+          ],
+          "direction": "inverse",
+          "error": 0.0012994980952214519,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            9.5,
+            40
+          ],
+          "direction": "forward",
+          "error": 59.09289863073354,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            9.5,
+            40
+          ],
+          "direction": "inverse",
+          "error": 0.0005308167733705685,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            9.5,
+            40.5
+          ],
+          "direction": "forward",
+          "error": 139.86374831299327,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            9.5,
+            40.5
+          ],
+          "direction": "inverse",
+          "error": 0.0012593244826888395,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            39.5
+          ],
+          "direction": "forward",
+          "error": 144.8379365073488,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            39.5
+          ],
+          "direction": "inverse",
+          "error": 0.0013010024963904243,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            40.5
+          ],
+          "direction": "forward",
+          "error": 140.03345566394273,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            40.5
+          ],
+          "direction": "inverse",
+          "error": 0.001257846380575245,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10.5,
+            39.5
+          ],
+          "direction": "forward",
+          "error": 144.9997162654763,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10.5,
+            39.5
+          ],
+          "direction": "inverse",
+          "error": 0.0012994980952214519,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10.5,
+            40
+          ],
+          "direction": "forward",
+          "error": 59.09289863073354,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10.5,
+            40
+          ],
+          "direction": "inverse",
+          "error": 0.0005308167734576577,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10.5,
+            40.5
+          ],
+          "direction": "forward",
+          "error": 139.86374831326975,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10.5,
+            40.5
+          ],
+          "direction": "inverse",
+          "error": 0.001259324482681734,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -20.5,
+            89.99
+          ],
+          "direction": "forward",
+          "error": 10526.299900002778,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -20.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.024436161267742323,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -20.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 10534.106705102138,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -20.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.03906498849698892,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -20.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 10534.107486056164,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -20.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.03906685163082102,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            9.5,
+            89.99
+          ],
+          "direction": "forward",
+          "error": 10525.046558774076,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            9.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.03129854361229421,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            9.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 10534.106579723768,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            9.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.039064849926205625,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            9.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 10534.107486056164,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            9.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.03906685163082102,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            39.5,
+            89.99
+          ],
+          "direction": "forward",
+          "error": 10526.22083264403,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            39.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.0246546153371668,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            39.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 10534.106697192416,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            39.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.039064979764603436,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            39.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 10534.107486056164,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            39.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.03906685163082102,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "gnom-sphere",
+      "algorithm": "gnom",
+      "definition": "+proj=gnom +lon_0=10 +lat_0=40 +R=6371000",
+      "probes": 27,
+      "comparisons": 36,
+      "rejectedByPROJ": 9,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 8.537736420066722e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "ortho-ellipsoid",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 34,
+      "rejectedByPROJ": 11,
+      "errors": {
+        "forward": 9.313225746154785e-10,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": [
+        {
+          "input": [
+            -20.5,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "ortho-sphere",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +lon_0=10 +lat_0=40 +R=6371000",
+      "probes": 27,
+      "comparisons": 36,
+      "rejectedByPROJ": 9,
+      "errors": {
+        "forward": 9.313225746154785e-10,
+        "inverse": 2.0741826745052094e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "bonne-ellipsoid",
+      "algorithm": "bonne",
+      "definition": "+proj=bonne +lat_1=45 +lon_0=10 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.0000016633421182632446,
+        "inverse": 1.4878764886816498e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "bonne-sphere",
+      "algorithm": "bonne",
+      "definition": "+proj=bonne +lat_1=45 +lon_0=10 +R=6371000",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 5.684341886080802e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "krovak",
+      "algorithm": "krovak",
+      "definition": "+proj=krovak +ellps=bessel",
+      "probes": 27,
+      "comparisons": 47,
+      "rejectedByPROJ": 1,
+      "errors": {
+        "forward": 2.2351741790771484e-8,
+        "inverse": 3.609557097661309e-11
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "krovak-czech",
+      "algorithm": "krovak",
+      "definition": "+proj=krovak +ellps=bessel +czech",
+      "probes": 27,
+      "comparisons": 47,
+      "rejectedByPROJ": 1,
+      "errors": {
+        "forward": 2.2351741790771484e-8,
+        "inverse": 3.609557097661309e-11
+      },
+      "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "nzmg-1",
+      "algorithm": "nzmg",
+      "definition": "+proj=nzmg +ellps=intl +lon_0=173 +lat_0=-41 +iterations=1 +x_0=2510000 +y_0=6023150",
+      "probes": 21,
+      "comparisons": 30,
+      "rejectedByPROJ": 12,
+      "errors": {
+        "forward": 47244640256,
+        "inverse": 0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "nzmg-2",
+      "algorithm": "nzmg",
+      "definition": "+proj=nzmg +ellps=intl +lon_0=173 +lat_0=-41 +iterations=2 +x_0=2510000 +y_0=6023150",
+      "probes": 21,
+      "comparisons": 30,
+      "rejectedByPROJ": 12,
+      "errors": {
+        "forward": 47244640256,
+        "inverse": 0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "omerc-alpha",
+      "algorithm": "omerc",
+      "definition": "+proj=omerc +lat_0=4 +lonc=115 +alpha=53.31582047222222 +gamma=53.13010236111111 +k=0.99984 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 7.628386811120436e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "omerc-no-offset",
+      "algorithm": "omerc",
+      "definition": "+proj=omerc +lat_0=4 +lonc=115 +alpha=53 +no_off +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 7.628386811120436e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "omerc-no-rotation",
+      "algorithm": "omerc",
+      "definition": "+proj=omerc +lat_0=4 +lonc=115 +alpha=53 +no_rot +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 7.628386811120436e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "omerc-two-point",
+      "algorithm": "omerc",
+      "definition": "+proj=omerc +lat_0=4 +lon_1=110 +lat_1=5 +lon_2=120 +lat_2=10 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.4901161193847656e-8,
+        "inverse": 7.629807896591956e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "somerc",
+      "algorithm": "somerc",
+      "definition": "+proj=somerc +ellps=bessel +lat_0=46.95240555555556 +lon_0=7.43958333333333 +k_0=1",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1553.329009278205,
+        "inverse": 1.2566219252020561e-7
+      },
+      "mismatches": [
+        {
+          "input": [
+            -23.06,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.1542714742611508,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -23.06,
+            -89.99
+          ],
+          "direction": "forward",
+          "error": 1553.329009278205,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            6.94,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.0026505281318145576,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            6.94,
+            -89.99
+          ],
+          "direction": "forward",
+          "error": 26.688249931769697,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            36.94,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.1496816371440996,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            36.94,
+            -89.99
+          ],
+          "direction": "forward",
+          "error": 1507.1170012490493,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "geos-x-false",
+      "algorithm": "geos",
+      "definition": "+proj=geos +lon_0=0 +h=35785831 +sweep=x +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 18,
+      "rejectedByPROJ": 18,
+      "errors": {
+        "forward": 1.1641532182693481e-9,
+        "inverse": 2.1316282072803006e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "geos-x-true",
+      "algorithm": "geos",
+      "definition": "+proj=geos +lon_0=0 +h=35785831 +sweep=x +R=6371000",
+      "probes": 27,
+      "comparisons": 36,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 2.3283064365386963e-10,
+        "inverse": 5.684341886080802e-14
+      },
+      "mismatches": [
+        {
+          "input": [
+            -10.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "geos-y-false",
+      "algorithm": "geos",
+      "definition": "+proj=geos +lon_0=0 +h=35785831 +sweep=y +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 18,
+      "rejectedByPROJ": 18,
+      "errors": {
+        "forward": 9.313225746154785e-10,
+        "inverse": 2.842170943040401e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "geos-y-true",
+      "algorithm": "geos",
+      "definition": "+proj=geos +lon_0=0 +h=35785831 +sweep=y +R=6371000",
+      "probes": 27,
+      "comparisons": 36,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 4.656612873077393e-10,
+        "inverse": 4.263256414560601e-14
+      },
+      "mismatches": [
+        {
+          "input": [
+            -10.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "tpers-0",
+      "algorithm": "tpers",
+      "definition": "+proj=tpers +lon_0=10 +lat_0=40 +h=1000000 +azi=45 +tilt=0 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 18,
+      "rejectedByPROJ": 18,
+      "errors": {
+        "forward": 5.820766091346741e-11,
+        "inverse": 7.105427357601002e-15
+      },
+      "mismatches": []
+    },
+    {
+      "id": "tpers-20",
+      "algorithm": "tpers",
+      "definition": "+proj=tpers +lon_0=10 +lat_0=40 +h=1000000 +azi=45 +tilt=20 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 18,
+      "rejectedByPROJ": 18,
+      "errors": {
+        "forward": 4.3655745685100555e-11,
+        "inverse": 7.105427357601002e-15
+      },
+      "mismatches": []
+    },
+    {
+      "id": "qsc-0",
+      "algorithm": "qsc",
+      "definition": "+proj=qsc +lon_0=0 +lat_0=0 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.0000036740622900016673,
+        "inverse": 1.2695955398100978e-12
+      },
+      "mismatches": []
+    },
+    {
+      "id": "qsc-1",
+      "algorithm": "qsc",
+      "definition": "+proj=qsc +lon_0=90 +lat_0=0 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.0000036740622900016673,
+        "inverse": 1.2695955398100978e-12
+      },
+      "mismatches": []
+    },
+    {
+      "id": "qsc-2",
+      "algorithm": "qsc",
+      "definition": "+proj=qsc +lon_0=-90 +lat_0=0 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.0000036740622900016673,
+        "inverse": 1.2695955398100978e-12
+      },
+      "mismatches": []
+    },
+    {
+      "id": "qsc-3",
+      "algorithm": "qsc",
+      "definition": "+proj=qsc +lon_0=180 +lat_0=0 +ellps=WGS84",
+      "probes": 21,
+      "comparisons": 42,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.0000036737398261266208,
+        "inverse": 1.1823431123048067e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "qsc-4",
+      "algorithm": "qsc",
+      "definition": "+proj=qsc +lon_0=0 +lat_0=90 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.000005386769771575928,
+        "inverse": 0.00000281269072388568
+      },
+      "mismatches": [
+        {
+          "input": [
+            -30.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.00000281269072388568,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -30.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.00000281269072388568,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.0000022437509841211067,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000022437509841211067,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "qsc-5",
+      "algorithm": "qsc",
+      "definition": "+proj=qsc +lon_0=0 +lat_0=-90 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 6.258487701416016e-7,
+        "inverse": 0.00000281269072388568
+      },
+      "mismatches": [
+        {
+          "input": [
+            -30.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.00000281269072388568,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -30.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.00000281269072388568,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000022437509841211067,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.0000022437509841211067,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "merc-ellipsoid",
+      "algorithm": "merc",
+      "definition": "+proj=merc +ellps=WGS84",
+      "probes": 52,
+      "comparisons": 98,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0,
+        "inverse": 0
+      },
+      "mismatches": [
+        {
+          "input": [
+            -20.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            9.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            39.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            39.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "merc-sphere",
+      "algorithm": "merc",
+      "definition": "+proj=merc +R=6371000",
+      "probes": 52,
+      "comparisons": 98,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 4.656612873077393e-10,
+        "inverse": 0
+      },
+      "mismatches": [
+        {
+          "input": [
+            -20.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            9.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            39.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            39.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "eqc",
+      "algorithm": "eqc",
+      "definition": "+proj=eqc +lat_ts=30 +lat_0=10 +lon_0=10 +ellps=WGS84",
+      "probes": 52,
+      "comparisons": 104,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "aeqd-origin-regression-north",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lon_0=10 +lat_0=40 +x_0=1234 +y_0=5678 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.000005480833351612091,
+        "inverse": 5.1469699642816076e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "aeqd-origin-regression-south",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lon_0=-10 +lat_0=-40 +x_0=1234 +y_0=5678 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.000005480833351612091,
+        "inverse": 5.1469699642816076e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "cass-regional-1",
+      "algorithm": "cass",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.000001257285475730896,
+        "inverse": 5.756817245128332e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "cass-regional-3",
+      "algorithm": "cass",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.000001257285475730896,
+        "inverse": 2.3817392502678558e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "cass-regional-5",
+      "algorithm": "cass",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.000001257285475730896,
+        "inverse": 4.0990973149695184e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "cass-regional-10",
+      "algorithm": "cass",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "probes": 27,
+      "comparisons": 54,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.000001259148120880127,
+        "inverse": 2.6031761536263063e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "cass-dense-domain",
+      "algorithm": "cass",
+      "definition": "+proj=cass +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "probes": 81,
+      "comparisons": 162,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.000001259148120880127,
+        "inverse": 2.6031761536263063e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "tmerc-dense-domain",
+      "algorithm": "tmerc",
+      "definition": "+proj=tmerc +lon_0=9 +lat_0=10 +k_0=0.9996 +x_0=500000 +y_0=1234 +ellps=WGS84",
+      "probes": 81,
+      "comparisons": 162,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "lcc-dense-domain",
+      "algorithm": "lcc",
+      "definition": "+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=1000 +y_0=2000 +k_0=0.99 +ellps=WGS84",
+      "probes": 81,
+      "comparisons": 156,
+      "rejectedByPROJ": 3,
+      "errors": {
+        "forward": 8547.104248046875,
+        "inverse": 1.3358203432289883e-11
+      },
+      "mismatches": [
+        {
+          "input": [
+            -136,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 7779.4443359375,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -106,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 8547.104248046875,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -76,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 8391.697265625,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere-dense-domain",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 81,
+      "comparisons": 162,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.4901161193847656e-8,
+        "inverse": 8.480645306008228e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "laea-dense-domain",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 81,
+      "comparisons": 162,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.22503108113355097,
+        "inverse": 2.701489307810334e-7
+      },
+      "mismatches": [
+        {
+          "input": [
+            -25,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.22503108113355097,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -25,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.22503108113355097,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.060791832872368445,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.060791832872368445,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            35,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.11973653680203711,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            35,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.11973653680203711,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "aeqd-dense-domain",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "probes": 81,
+      "comparisons": 162,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 0.000004211906343698502,
+        "inverse": 5.0611959068191936e-11
+      },
+      "mismatches": []
+    },
+    {
+      "id": "merc-edge-domain",
+      "algorithm": "merc",
+      "definition": "+proj=merc +R=6371000",
+      "probes": 35,
+      "comparisons": 66,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 0
+      },
+      "mismatches": [
+        {
+          "input": [
+            -179.999,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -179.999,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -149.999,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -149.999,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "moll-edge-domain",
+      "algorithm": "moll",
+      "definition": "+proj=moll +lon_0=10 +R=6371000",
+      "probes": 35,
+      "comparisons": 70,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 106.28240780506108,
+        "inverse": 1.6984813555609435e-10
+      },
+      "mismatches": [
+        {
+          "input": [
+            -179.999,
+            -90
+          ],
+          "direction": "forward",
+          "error": 106.28240780506108,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -179.999,
+            90
+          ],
+          "direction": "forward",
+          "error": 106.28240780506108,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            -90
+          ],
+          "direction": "forward",
+          "error": 100.02928786537707,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            90
+          ],
+          "direction": "forward",
+          "error": 100.02928786537707,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "eqearth-edge-domain",
+      "algorithm": "eqearth",
+      "definition": "+proj=eqearth +lon_0=10 +R=6371000",
+      "probes": 35,
+      "comparisons": 70,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 0.000006668185335456656
+      },
+      "mismatches": [
+        {
+          "input": [
+            -179.999,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -179.999,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -179.999,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -179.999,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            90
+          ],
+          "direction": "inverse",
+          "error": 0.000006668185335456656,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "sinu-edge-domain",
+      "algorithm": "sinu",
+      "definition": "+proj=sinu +lon_0=10 +R=6371000",
+      "probes": 35,
+      "comparisons": 70,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 0
+      },
+      "mismatches": []
+    },
+    {
+      "id": "robin-world-wrapping",
+      "algorithm": "robin",
+      "definition": "+proj=robin +lon_0=10 +ellps=WGS84",
+      "probes": 37,
+      "comparisons": 74,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 3.725290298461914e-9,
+        "inverse": 8.393822362697199e-16
+      },
+      "mismatches": []
+    },
+    {
+      "id": "robin-axis-regression",
+      "algorithm": "robin",
+      "definition": "+proj=robin +lon_0=0 +ellps=WGS84",
+      "probes": 19,
+      "comparisons": 38,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 0.000014495657072899348
+      },
+      "mismatches": [
+        {
+          "input": [
+            20,
+            30
+          ],
+          "direction": "inverse",
+          "error": 0.000014495657072899348,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "robin-upstream-165",
+      "algorithm": "robin",
+      "definition": "+proj=robin +lon_0=0 +ellps=WGS84",
+      "probes": 19,
+      "comparisons": 38,
+      "rejectedByPROJ": 0,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 7.105427357601002e-15
+      },
+      "mismatches": []
+    },
+    {
+      "id": "ortho-horizon",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +R=6371000 +lon_0=0 +lat_0=0",
+      "probes": 33,
+      "comparisons": 58,
+      "rejectedByPROJ": 4,
+      "errors": {
+        "forward": 2.2737367544323206e-13,
+        "inverse": 1.4622634125771583e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "geos-horizon",
+      "algorithm": "geos",
+      "definition": "+proj=geos +h=35785831 +ellps=WGS84 +sweep=x",
+      "probes": 25,
+      "comparisons": 14,
+      "rejectedByPROJ": 18,
+      "errors": {
+        "forward": 0,
+        "inverse": 3.751665644813329e-12
+      },
+      "mismatches": []
+    },
+    {
+      "id": "tpers-horizon",
+      "algorithm": "tpers",
+      "definition": "+proj=tpers +h=1000000 +R=6371000 +lat_0=0 +lon_0=0",
+      "probes": 23,
+      "comparisons": 10,
+      "rejectedByPROJ": 18,
+      "errors": {
+        "forward": 0,
+        "inverse": 1.1368683772161603e-13
+      },
+      "mismatches": []
+    },
+    {
+      "id": "ortho-issue-269",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +ellps=WGS84 +lat_0=-42 +lon_0=147",
+      "probes": 19,
+      "comparisons": 15,
+      "rejectedByPROJ": 14,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 3.943512183468556e-13
+      },
+      "mismatches": [
+        {
+          "input": [
+            60,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            60,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            90,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            90,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            120,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "ortho-scale",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +ellps=WGS84 +lat_0=42 +k_0=0.9 +x_0=123 +y_0=-456",
+      "probes": 21,
+      "comparisons": 21,
+      "rejectedByPROJ": 12,
+      "errors": {
+        "forward": 9.313225746154785e-10,
+        "inverse": 1.7282465828106254e-14
+      },
+      "mismatches": [
+        {
+          "input": [
+            30,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            60,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            60,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "ortho-audit--90-ellps=WGS84",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +ellps=WGS84 +lat_0=-90 +lon_0=10 +x_0=123 +y_0=-456",
+      "probes": 89,
+      "comparisons": 96,
+      "rejectedByPROJ": 41,
+      "errors": {
+        "forward": 9.313225746154785e-10,
+        "inverse": 8.566458157301895e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "ortho-audit--90-R=6371000",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +R=6371000 +lat_0=-90 +lon_0=10 +x_0=123 +y_0=-456",
+      "probes": 89,
+      "comparisons": 96,
+      "rejectedByPROJ": 41,
+      "errors": {
+        "forward": 4.656612873077393e-10,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": []
+    },
+    {
+      "id": "ortho-audit--42-ellps=WGS84",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +ellps=WGS84 +lat_0=-42 +lon_0=10 +x_0=123 +y_0=-456",
+      "probes": 89,
+      "comparisons": 88,
+      "rejectedByPROJ": 52,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 3.75759636503077e-14
+      },
+      "mismatches": [
+        {
+          "input": [
+            -79,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -79,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -50,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -50,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            40,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            70,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            70,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            99,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            99,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -109,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -109,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -49,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -49,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "ortho-audit--42-R=6371000",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +R=6371000 +lat_0=-42 +lon_0=10 +x_0=123 +y_0=-456",
+      "probes": 89,
+      "comparisons": 102,
+      "rejectedByPROJ": 38,
+      "errors": {
+        "forward": 4.656612873077393e-10,
+        "inverse": 9.999999974752427e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "ortho-audit-0-ellps=WGS84",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +ellps=WGS84 +lat_0=0 +lon_0=10 +x_0=123 +y_0=-456",
+      "probes": 89,
+      "comparisons": 170,
+      "rejectedByPROJ": 4,
+      "errors": {
+        "forward": 9.313225746154785e-10,
+        "inverse": 0.000001214104486280121
+      },
+      "mismatches": [
+        {
+          "input": [
+            -79,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.00000116692770291138,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -79,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.00000116692770291138,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -50,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001214104486280121,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -50,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001214104486280121,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -20,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001155886920400917,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -20,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001155886920400917,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000012033700329538988,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000012033700329538988,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            40,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001155886920400917,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            40,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001155886920400917,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            70,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001214104486280121,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            70,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.000001214104486280121,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            99,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.00000116692770291138,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            99,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.00000116692770291138,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -49,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.00000120780191537051,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -49,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.00000120780191537051,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "ortho-audit-0-R=6371000",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +R=6371000 +lat_0=0 +lon_0=10 +x_0=123 +y_0=-456",
+      "probes": 89,
+      "comparisons": 170,
+      "rejectedByPROJ": 4,
+      "errors": {
+        "forward": 4.656612873077393e-10,
+        "inverse": 1.46074043527733e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "ortho-audit-42-ellps=WGS84",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +ellps=WGS84 +lat_0=42 +lon_0=10 +x_0=123 +y_0=-456",
+      "probes": 89,
+      "comparisons": 88,
+      "rejectedByPROJ": 52,
+      "errors": {
+        "forward": 1.862645149230957e-9,
+        "inverse": 3.75759636503077e-14
+      },
+      "mismatches": [
+        {
+          "input": [
+            -79,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -79,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -50,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -50,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            40,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            70,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            70,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            99,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            99,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -109,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -109,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -49,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -49,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "ortho-audit-42-R=6371000",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +R=6371000 +lat_0=42 +lon_0=10 +x_0=123 +y_0=-456",
+      "probes": 89,
+      "comparisons": 102,
+      "rejectedByPROJ": 38,
+      "errors": {
+        "forward": 4.656612873077393e-10,
+        "inverse": 9.999999974752427e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "ortho-audit-90-ellps=WGS84",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +ellps=WGS84 +lat_0=90 +lon_0=10 +x_0=123 +y_0=-456",
+      "probes": 89,
+      "comparisons": 96,
+      "rejectedByPROJ": 41,
+      "errors": {
+        "forward": 9.313225746154785e-10,
+        "inverse": 8.566458157301895e-7
+      },
+      "mismatches": []
+    },
+    {
+      "id": "ortho-audit-90-R=6371000",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +R=6371000 +lat_0=90 +lon_0=10 +x_0=123 +y_0=-456",
+      "probes": 89,
+      "comparisons": 96,
+      "rejectedByPROJ": 41,
+      "errors": {
+        "forward": 4.656612873077393e-10,
+        "inverse": 1.4210854715202004e-14
+      },
+      "mismatches": []
+    }
+  ]
+}

@@ -119,4 +119,25 @@ assert.equal(
 );
 console.log('Native support profile counts and reviewed exceptions verified.');
 
+const poleAudit = await json('pole-audit-reference.json');
+const poleFindings = await json('pole-audit-findings.json');
+assert.equal(poleAudit.pyproj, '3.7.2');
+assert.equal(poleAudit.proj, '9.5.1');
+assert.equal(poleAudit.sourceSHA256, sha(await readFile(join(root, 'native-proj-cases.json'))));
+assert.equal(poleAudit.generatorSHA256, sha(await readFile(new URL('./generate-pole-audit.py', import.meta.url))));
+assert.equal(poleFindings.referenceSourceSHA256, poleAudit.sourceSHA256);
+assert.equal(poleFindings.referenceGeneratorSHA256, poleAudit.generatorSHA256);
+assert.deepEqual(poleFindings.cases.map(c => c.id), poleAudit.cases.map(c => c.id));
+for (const row of poleAudit.cases) {
+  // Every probe must retain an oracle result or an explicit rejection.
+  assert(row.oracle.includes('+ellps=') === row.definition.includes('+ellps='));
+  if (/\+proj=(ortho|gnom|mill|vandg)\b/.test(row.definition))
+    assert.equal(row.oracle, row.definition, 'Do not replace an ellipsoid with a sphere');
+  for (const point of row.results) {
+    assert(point.forward || point.forwardRejected);
+    if (point.forward) assert(point.inverse || point.inverseRejected);
+  }
+}
+console.log('Unchanged-definition pole audit references and retained findings verified.');
+
 await import('./check-accuracy-reference.mjs');

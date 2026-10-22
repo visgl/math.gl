@@ -3705,7 +3705,7 @@
     {
       "id": "mill-ellipsoid",
       "definition": "+proj=mill +lon_0=10 +ellps=WGS84",
-      "oracle": "+proj=mill +lon_0=10 +R=6378137",
+      "oracle": "+proj=mill +lon_0=10 +ellps=WGS84",
       "points": [
         [
           29.5,
@@ -3846,7 +3846,7 @@
       ],
       "forwardTolerance": 1e-05,
       "inverseTolerance": 1e-08,
-      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics."
+      "oracleNotes": "Spherical method in native PROJ; the unchanged definition uses the semi-major axis as its radius."
     },
     {
       "id": "mill-sphere",
@@ -5847,7 +5847,7 @@
     {
       "id": "vandg-ellipsoid",
       "definition": "+proj=vandg +lon_0=10 +ellps=WGS84",
-      "oracle": "+proj=vandg +lon_0=10 +R=6378137",
+      "oracle": "+proj=vandg +lon_0=10 +ellps=WGS84",
       "points": [
         [
           29.5,
@@ -5988,7 +5988,7 @@
       ],
       "forwardTolerance": 1e-05,
       "inverseTolerance": 1e-08,
-      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics."
+      "oracleNotes": "Spherical method in native PROJ; the unchanged definition uses the semi-major axis as its radius."
     },
     {
       "id": "vandg-sphere",
@@ -6509,7 +6509,7 @@
     {
       "id": "ortho-ellipsoid",
       "definition": "+proj=ortho +lon_0=10 +lat_0=40 +ellps=WGS84",
-      "oracle": "+proj=ortho +lon_0=10 +lat_0=40 +R=6378137",
+      "oracle": "+proj=ortho +lon_0=10 +lat_0=40 +ellps=WGS84",
       "points": [
         [
           9.5,
@@ -6550,7 +6550,7 @@
       ],
       "forwardTolerance": 1e-05,
       "inverseTolerance": 1e-08,
-      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics."
+      "oracleNotes": "Identical ellipsoidal or spherical definition; modern PROJ orthographic equations."
     },
     {
       "id": "ortho-sphere",
@@ -6596,7 +6596,7 @@
       ],
       "forwardTolerance": 1e-05,
       "inverseTolerance": 1e-08,
-      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+      "oracleNotes": "Identical ellipsoidal or spherical definition; modern PROJ orthographic equations."
     },
     {
       "id": "bonne-ellipsoid",
@@ -10781,7 +10781,7 @@
       "id": "ortho-horizon",
       "definition": "+proj=ortho +R=6371000 +lon_0=0 +lat_0=0",
       "oracle": "+proj=ortho +R=6371000 +lon_0=0 +lat_0=0",
-      "oracleNotes": "Identical explicit parameters; visible points close to the projection horizon.",
+      "oracleNotes": "Identical ellipsoidal or spherical definition; modern PROJ orthographic equations.",
       "forwardTolerance": 1e-05,
       "inverseTolerance": 1e-07,
       "points": [

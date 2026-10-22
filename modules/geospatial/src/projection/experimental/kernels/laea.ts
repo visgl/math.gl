@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Adapted from proj4js 2.22.0 with bounded inverse disk/pole roundoff. See ../../../PROJ4-LICENSE.md for upstream attribution. Independent corrections acknowledge PROJ 9.5.1 src/projections/laea.cpp; see ../../../../projection/PROJ-LICENSE.txt.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -240,7 +240,9 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
         p.y = state.lat0;
         return p;
       }
-      sCe = 2 * Math.asin((0.5 * rho) / state.rq);
+      const sinHalfCe = (0.5 * rho) / state.rq;
+      if (sinHalfCe > 1 + 8 * Number.EPSILON) return null;
+      sCe = 2 * Math.asin(Math.min(1, sinHalfCe));
       cCe = Math.cos(sCe);
       x *= sCe = Math.sin(sCe);
       if (state.mode === OBLIQ) {
@@ -268,7 +270,8 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
       }
     }
     lam = Math.atan2(x, y);
-    phi = authlat(Math.asin(ab), state.apa);
+    if (Math.abs(ab) > 1 + 8 * Number.EPSILON) return null;
+    phi = authlat(Math.asin(Math.max(-1, Math.min(1, ab))), state.apa);
   }
 
   p.x = adjust_lon(state.long0 + lam, state.over);

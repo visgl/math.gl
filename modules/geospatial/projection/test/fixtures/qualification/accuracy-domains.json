@@ -1,7 +1,7 @@
 {
   "oracle": "pyproj 3.7.2 / PROJ 9.5.1",
   "upstreamComparison": "proj4js 2.22.0",
-  "scope": "Observed maxima at exact stored sampled inputs; configured test ceilings are regression gates, not mathematical global bounds.",
+  "scope": "Observed maxima at exact stored sampled inputs; configured test ceilings are regression gates, not mathematical global bounds. domain-gnom-ellipsoid uses a legacy spherical oracle and does not qualify ellipsoidal gnomonic accuracy.",
   "cases": [
     {
       "id": "merc-ellipsoid",
@@ -427,17 +427,17 @@
           ]
         },
         "inverse": {
-          "maximum": 1.2789769243681803e-13,
-          "input": [
-            -88.24192315340042,
-            58.3559704455547
-          ]
-        },
-        "roundtrip": {
           "maximum": 1.1368683772161603e-13,
           "input": [
             -105.54649495054036,
             64.7137751430273
+          ]
+        },
+        "roundtrip": {
+          "maximum": 7.815970093361102e-14,
+          "input": [
+            -65.00014295803373,
+            34.312723353505135
           ]
         },
         "flatForward": {
@@ -448,17 +448,17 @@
           ]
         },
         "flatInverse": {
-          "maximum": 1.2789769243681803e-13,
-          "input": [
-            -88.24192315340042,
-            58.3559704455547
-          ]
-        },
-        "flatRoundtrip": {
           "maximum": 1.1368683772161603e-13,
           "input": [
             -105.54649495054036,
             64.7137751430273
+          ]
+        },
+        "flatRoundtrip": {
+          "maximum": 7.815970093361102e-14,
+          "input": [
+            -65.00014295803373,
+            34.312723353505135
           ]
         }
       },
@@ -1333,7 +1333,7 @@
         }
       },
       "definition": "+proj=mill +lon_0=10 +ellps=WGS84",
-      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics.",
+      "oracleNotes": "Spherical method in native PROJ; the unchanged definition uses the semi-major axis as its radius.",
       "forwardTolerance": 0.00001,
       "inverseTolerance": 1e-8
     },
@@ -1449,7 +1449,7 @@
         }
       },
       "definition": "+proj=vandg +lon_0=10 +ellps=WGS84",
-      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics. PROJ differs by 20.864 micrometres at the authored dense regression; original 80-digit Decimal evaluation agrees with math.gl within 1e-8 m. This comparison allowance includes oracle cancellation, not a relaxed math.gl accuracy target.",
+      "oracleNotes": "Spherical method in native PROJ; the unchanged definition uses the semi-major axis as its radius.",
       "forwardTolerance": 0.00003,
       "inverseTolerance": 1e-8
     },
@@ -1638,50 +1638,50 @@
       "points": 265,
       "errors": {
         "forward": {
-          "maximum": 8.512870408594608e-10,
+          "maximum": 1.076841726899147e-9,
           "input": [
-            9.939981313655153,
-            39.63217981625348
+            10.312310089124367,
+            40.49710373053061
           ]
         },
         "inverse": {
           "maximum": 1.4210854715202004e-14,
           "input": [
-            9.500000004321018,
-            40.47488926840015
+            10.15239150961861,
+            39.713615889893845
           ]
         },
         "roundtrip": {
           "maximum": 1.4210854715202004e-14,
           "input": [
-            9.500000004321018,
-            40.47488926840015
+            10.364678194746375,
+            39.500000621214525
           ]
         },
         "flatForward": {
-          "maximum": 8.512870408594608e-10,
+          "maximum": 1.076841726899147e-9,
           "input": [
-            9.939981313655153,
-            39.63217981625348
+            10.312310089124367,
+            40.49710373053061
           ]
         },
         "flatInverse": {
           "maximum": 1.4210854715202004e-14,
           "input": [
-            9.500000004321018,
-            40.47488926840015
+            10.15239150961861,
+            39.713615889893845
           ]
         },
         "flatRoundtrip": {
           "maximum": 1.4210854715202004e-14,
           "input": [
-            9.500000004321018,
-            40.47488926840015
+            10.364678194746375,
+            39.500000621214525
           ]
         }
       },
       "definition": "+proj=ortho +lon_0=10 +lat_0=40 +ellps=WGS84",
-      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics.",
+      "oracleNotes": "Identical ellipsoidal or spherical definition; modern PROJ orthographic equations.",
       "forwardTolerance": 0.00001,
       "inverseTolerance": 1e-8
     },

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+- fix(projection): Implement ellipsoidal orthographic, correct Eckert VI and Equal Earth pole inverses, and repair conic, polyconic and LAEA pole boundaries. Audit unchanged definitions against native PROJ and distinguish numerical accuracy from proj4js compatibility.
+
 ## v5.0.0-alpha.19
 
 - Consolidate implementations into core, geometry, geospatial, earth, and dggs packages. Remove the standalone leaf packages and migrate their APIs, assets, and nested exports to grouped subpaths; retain the web-mercator package.

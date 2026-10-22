@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Adapted from proj4js 2.22.0 with corrected spherical meridian distance across pole-relative latitudes. See ../../../PROJ4-LICENSE.md for upstream attribution. Independent corrections acknowledge PROJ 9.5.1 src/projections/poly.cpp; see ../../../../projection/PROJ-LICENSE.txt.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -17,7 +17,6 @@ import e1fn from '../common/e1fn';
 import e2fn from '../common/e2fn';
 import e3fn from '../common/e3fn';
 import adjust_lon from '../common/adjust_lon';
-import adjust_lat from '../common/adjust_lat';
 import mlfn from '../common/mlfn';
 import {EPSLN} from '../common/constants';
 
@@ -52,7 +51,8 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
       y = -1 * state.a * state.lat0;
     } else {
       x = (state.a * Math.sin(el)) / Math.tan(lat);
-      y = state.a * (adjust_lat(lat - state.lat0) + (1 - Math.cos(el)) / Math.tan(lat));
+      // This is a meridian distance, not a latitude to wrap at either pole.
+      y = state.a * (lat - state.lat0 + (1 - Math.cos(el)) / Math.tan(lat));
     }
   } else {
     if (Math.abs(lat) <= EPSLN) {

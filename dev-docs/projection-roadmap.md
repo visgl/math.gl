@@ -14,6 +14,13 @@ unrestricted upstream behavior, not a claim of full-domain geodetic accuracy.
 
 ## Target and upstream baseline
 
+**Numerical target:** modern native PROJ accuracy in explicitly qualified domains.
+Proj4js is a compatibility baseline, not the accuracy ceiling. The
+[modern PROJ audit](../docs/modules/geospatial/projection/modern-proj-audit.md) tracks inherited spherical algorithms,
+exact/near poles, oracle limitations and remaining gaps. Current reproducible
+native references pin pyproj 3.7.2 / PROJ 9.5.1; that is a recorded test oracle,
+not a claim to implement every operation in the newest PROJ release.
+
 Build an independent math.gl projection engine inside `@math.gl/geospatial/projection`, initially alongside
 the existing proj4js wrapper. Keep projection algorithms explicitly pluggable and
 ESM imports tree-shakeable throughout implementation.

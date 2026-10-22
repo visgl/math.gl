@@ -1,9 +1,9 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Original plugin adapter for the numerical kernel directly ported from proj4js 2.22.0.
+// SPDX-FileComment: Original plugin adapter for the ellipsoidal orthographic kernel.
 import {withAngularRenderingProfile} from '../rendering-profile/angular-rendering-profile';
-import {sphericalAzimuthalBounds} from '../rendering-profile/azimuthal-rendering-bounds';
+import {orthographicBounds} from '../rendering-profile/azimuthal-rendering-bounds';
 import type {ProjectionPlugin} from '../types';
 import {
   catalogueParameters,
@@ -16,7 +16,7 @@ import {createState, forward, inverse} from '../kernels/ortho';
 export const orthographic: ProjectionPlugin = {
   name: 'ortho',
   aliases: [],
-  parameters: ['lon_0', 'x_0', 'y_0', 'lat_0'],
+  parameters: ['lon_0', 'x_0', 'y_0', 'lat_0', 'k', 'k_0'],
   create(context) {
     const base = catalogueParameters(context);
 
@@ -27,7 +27,7 @@ export const orthographic: ProjectionPlugin = {
       base,
       Math.PI / 2,
       (region, domain) =>
-        sphericalAzimuthalBounds(catalogueBoundsParameters(base, context), region, domain, 'ortho'),
+        orthographicBounds(catalogueBoundsParameters(base, context), region, domain),
       Math.PI / 2
     );
   }

@@ -1,106 +1,52 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
-
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original orthographic equations using an ellipsoid surface and parallel ray intersection. Independently qualified against native PROJ. Independent corrections acknowledge PROJ 9.5.1 src/projections/ortho.cpp and OSGeo/PROJ #2361, #2844 and #2855; see ../../../../projection/PROJ-LICENSE.txt.
 import type {KernelParameters, Point} from '../kernel';
-export type State = KernelParameters & {
-  sin_p14: number;
-  cos_p14: number;
-};
 import adjust_lon from '../common/adjust_lon';
-import asinz from '../common/asinz';
-import {EPSLN, HALF_PI} from '../common/constants';
 
-function initialize(state: State): void {
-  // double temp;      /* temporary variable    */
+export type State = KernelParameters & {sin0: number; cos0: number; originY: number};
 
-  /* Place parameters in static storage for common use
-      ------------------------------------------------- */
-  state.sin_p14 = Math.sin(state.lat0 || 0);
-  state.cos_p14 = Math.cos(state.lat0 || 0);
+export function createState(base: KernelParameters): State {
+  const sin0 = Math.sin(base.lat0);
+  const cos0 = Math.cos(base.lat0);
+  const nu0 = 1 / Math.sqrt(1 - base.es * sin0 * sin0);
+  return {...base, sin0, cos0, originY: -base.es * nu0 * sin0 * cos0};
 }
 
-/* Orthographic forward equations--mapping lat,long to x,y
-    --------------------------------------------------- */
-export function forward(state: State, p: Point): Point | null | undefined | number {
-  var sinphi, cosphi; /* sin and cos value        */
-  var dlon; /* delta longitude value      */
-  var coslon; /* cos of longitude        */
-  var ksp; /* scale factor          */
-  var g, x, y;
-  var lon = p.x;
-  var lat = p.y;
-  /* Forward equations
-      ----------------- */
-  dlon = adjust_lon(lon - (state.long0 || 0), state.over);
-
-  sinphi = Math.sin(lat);
-  cosphi = Math.cos(lat);
-
-  coslon = Math.cos(dlon);
-  g = state.sin_p14 * sinphi + state.cos_p14 * cosphi * coslon;
-  ksp = 1;
-  if (g > 0 || Math.abs(g) <= EPSLN) {
-    x = (state.x0 || 0) + state.a * ksp * cosphi * Math.sin(dlon);
-    y =
-      (state.y0 || 0) + state.a * ksp * (state.cos_p14 * sinphi - state.sin_p14 * cosphi * coslon);
-  }
-  p.x = x;
-  p.y = y;
+export function forward(s: State, p: Point): Point {
+  const longitude = adjust_lon(p.x - s.long0, s.over);
+  const sin = Math.sin(p.y);
+  const cos = Math.cos(p.y);
+  const nu = 1 / Math.sqrt(1 - s.es * sin * sin);
+  p.x = s.x0 + s.a * s.k0 * nu * cos * Math.sin(longitude);
+  p.y =
+    s.y0 +
+    s.a *
+      s.k0 *
+      (nu * ((1 - s.es) * sin * s.cos0 - cos * Math.cos(longitude) * s.sin0) - s.originY);
   return p;
 }
 
-export function inverse(state: State, p: Point): Point | null | undefined | number {
-  var rh; /* height above ellipsoid      */
-  var z; /* angle          */
-  var sinz, cosz; /* sin of z and cos of z      */
-  var con;
-  var lon, lat;
-  var long0, lat0;
-  /* Inverse equations
-      ----------------- */
-  p.x -= state.x0 || 0;
-  p.y -= state.y0 || 0;
-  rh = Math.sqrt(p.x * p.x + p.y * p.y);
-  if (rh > state.a * (1 + 1e-14)) throw new Error('Coordinate is outside the orthographic disk');
-  z = asinz(rh / state.a);
-
-  sinz = Math.sin(z);
-  cosz = Math.cos(z);
-
-  long0 = state.long0 || 0;
-  lat0 = state.lat0 || 0;
-  lon = long0;
-  if (Math.abs(rh) <= EPSLN) {
-    lat = lat0;
-    p.x = lon;
-    p.y = lat;
-    return p;
+export function inverse(s: State, p: Point): Point {
+  // In the meridian frame, E=(0,1,0), N=(-sin0,0,cos0),
+  // V=(cos0,0,sin0). Intersect x E + y N + t V with the ellipsoid.
+  const x = (p.x - s.x0) / (s.a * s.k0);
+  const y = (p.y - s.y0) / (s.a * s.k0) + s.originY;
+  const q = 1 - s.es;
+  const a = s.cos0 * s.cos0 + (s.sin0 * s.sin0) / q;
+  const b = (y * s.sin0 * s.cos0 * s.es) / q;
+  const c = x * x + y * y * (s.sin0 * s.sin0 + (s.cos0 * s.cos0) / q) - 1;
+  const discriminant = b * b - a * c;
+  // The positive root selects the visible intersection. A few ulps of
+  // discriminant roundoff are possible exactly on the projected limb.
+  if (discriminant < -32 * Number.EPSILON * a) {
+    throw new Error('Coordinate is outside the orthographic ellipse');
   }
-  lat = asinz(cosz * state.sin_p14 + (p.y * sinz * state.cos_p14) / rh);
-  con = Math.abs(lat0) - HALF_PI;
-  if (Math.abs(con) <= EPSLN) {
-    if (lat0 >= 0) {
-      lon = adjust_lon(long0 + Math.atan2(p.x, -p.y), state.over);
-    } else {
-      lon = adjust_lon(long0 - Math.atan2(-p.x, p.y), state.over);
-    }
-    p.x = lon;
-    p.y = lat;
-    return p;
-  }
-  lon = adjust_lon(
-    long0 + Math.atan2(p.x * sinz, rh * state.cos_p14 * cosz - p.y * state.sin_p14 * sinz),
-    state.over
-  );
-  p.x = lon;
-  p.y = lat;
+  const t = (-b + Math.sqrt(Math.max(0, discriminant))) / a;
+  const radial = t * s.cos0 - y * s.sin0;
+  const z = t * s.sin0 + y * s.cos0;
+  p.x = adjust_lon(s.long0 + Math.atan2(x, radial), s.over);
+  p.y = Math.atan2(z, q * Math.hypot(radial, x));
   return p;
-}
-
-export function createState(base: KernelParameters, options: Partial<State> = {}): State {
-  const state: State = {...base, sin_p14: 0, cos_p14: 0, ...options};
-  initialize(state);
-  return state;
 }

@@ -129,6 +129,14 @@ No deprecated class aliases are exported during the alpha cycle.
 
 ## Default backend and future work
 
+Native PROJ is the numerical accuracy reference. Proj4js is retained for API/input
+compatibility comparisons and benchmarks; agreement with it does not qualify an
+ellipsoidal algorithm or its pole boundaries. Orthographic now uses ellipsoidal
+equations for ellipsoidal definitions. **Gnomonic still uses inherited spherical
+equations**, including when an ellipsoid is supplied, and is not qualified as an
+ellipsoidal PROJ replacement. See the [modern PROJ audit](../modern-proj-audit.md)
+for retained boundary findings and the numerical domains that remain unqualified.
+
 The package has no runtime dependency on proj4js. The pinned development dependency
 remains for compatibility tests and benchmarks. This rename and wrapper removal
 are breaking alpha API changes; no release is published by this work.

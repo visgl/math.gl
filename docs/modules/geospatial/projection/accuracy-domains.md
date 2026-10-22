@@ -1,5 +1,7 @@
 # Projection accuracy domains
 
+**Native PROJ is the numerical reference; proj4js is the compatibility reference.** The `domain-gnom-ellipsoid` row is a legacy exception: its oracle substitutes a sphere and does not establish ellipsoidal gnomonic accuracy. See the [modern PROJ audit](modern-proj-audit.md) for unchanged-definition comparisons and remaining gaps.
+
 Every named algorithm has independent forward and inverse references. This scorecard expands seeded scalar and Float64 XYZM qualification to **42 configurations, 11,160 points and 36 horizontal algorithms**. Geocentric conversion is covered separately by the three-dimensional PROJ corpus and the [nearest-normal qualification](./ellipsoid-qualification.md).
 
 Each rectangle below belongs to the exact parameter configuration in the [machine-readable report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/accuracy-domains.json). It is a tested region, not an inferred global validity domain. Regional formulae, approximate transverse Mercator, map seams, antipodes, projection knots and perspective visibility boundaries need their own qualified regions. The report retains the worst observed coordinate as well as every test ceiling. No rejected samples are silently removed.
@@ -15,7 +17,7 @@ Forward maxima and ceilings are metres; inverse values are degrees. The identity
 | utm-south | 150…156 / -80…0 | 267 | 1.86e-9 / 1.00e-5 | 2.84e-14 / 1.00e-8 |
 | lcc-north | -125…-65 / 15…65 | 265 | 4.07e-9 / 1.00e-5 | 1.76e-11 / 1.00e-8 |
 | lcc-south | 105…165 / -65…-10 | 265 | 5.59e-9 / 1.00e-5 | 1.76e-11 / 1.00e-8 |
-| aea-north | -125…-65 / 15…65 | 265 | 1.02e-8 / 1.00e-5 | 1.28e-13 / 1.00e-8 |
+| aea-north | -125…-65 / 15…65 | 265 | 1.02e-8 / 1.00e-5 | 1.14e-13 / 1.00e-8 |
 | eqdc-north | -60…60 / 0…85 | 267 | 4.51e-6 / 1.00e-5 | 1.20e-10 / 1.00e-8 |
 | eqdc-south | -60…60 / -85…0 | 267 | 4.54e-6 / 1.00e-5 | 1.20e-10 / 1.00e-8 |
 | cea-ellipsoid | -169.99…179.99 / -89.99…89.99 | 273 | 7.45e-9 / 1.00e-5 | 1.42e-8 / 2.00e-8 |
@@ -36,7 +38,7 @@ Forward maxima and ceilings are metres; inverse values are degrees. The identity
 | domain-poly-ellipsoid | 9.5…10.5 / 39.5…40.5 | 265 | 9.47e-6 / 1.00e-5 | 8.53e-11 / 1.00e-8 |
 | domain-gstmerc-ellipsoid | 9.5…10.5 / 39.5…40.5 | 265 | 5.14e-9 / 1.00e-5 | 2.20e-13 / 1.00e-8 |
 | domain-gnom-ellipsoid | 9.5…10.5 / 39.5…40.5 | 265 | 1.36e-9 / 1.00e-5 | 1.42e-14 / 1.00e-8 |
-| domain-ortho-ellipsoid | 9.5…10.5 / 39.5…40.5 | 265 | 8.51e-10 / 1.00e-5 | 1.42e-14 / 1.00e-8 |
+| domain-ortho-ellipsoid | 9.5…10.5 / 39.5…40.5 | 265 | 1.08e-9 / 1.00e-5 | 1.42e-14 / 1.00e-8 |
 | domain-bonne-ellipsoid | 9.5…10.5 / 39.5…40.5 | 265 | 4.32e-7 / 1.00e-5 | 3.90e-12 / 1.00e-8 |
 | domain-krovak | 14.5…15.5 / 49.5…50.5 | 265 | 1.58e-8 / 1.00e-5 | 2.56e-12 / 1.00e-8 |
 | domain-nzmg-1 | 172.5…173.5 / -41.5…-40.5 | 265 | 9.31e-10 / 1.00e-5 | 7.11e-15 / 1.00e-8 |

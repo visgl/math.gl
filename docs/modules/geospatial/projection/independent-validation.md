@@ -1,5 +1,12 @@
 # Independent projection validation
 
+**Native PROJ is the numerical accuracy reference; proj4js is a compatibility
+reference.** A separate [modern PROJ audit](modern-proj-audit.md) adds 5,560 probes
+across 143 configurations using unchanged ellipsoidal definitions, exact poles,
+near poles and explicit oracle rejections. Its retained findings are limitations,
+not successful qualifications. The original historical compatibility audit remains
+available separately.
+
 The math.gl projection engine now has reference coordinates from **PROJ 9.5.1**, generated with
 **pyproj 3.7.2** independently of proj4js. The corpus covers all **37 named algorithms**
 with **134 configurations and 2,386 points**, plus **87 points in real horizontal
@@ -183,9 +190,14 @@ No datum transformation is selected implicitly in the projection-only corpus.
   defaults for an omitted second parallel.
 - Polar stereographic `lat_ts` overrides `k_0` in math.gl/proj4js. PROJ rejects their
   conflicting combination, so the oracle omits the overridden scale.
-- The legacy Miller, Van der Grinten, gnomonic and orthographic implementations
-  use a sphere of radius equal to the semi-major axis. The oracle explicitly selects
-  that sphere. Passing their unchanged ellipsoidal strings to PROJ can yield different results.
+- Miller and Van der Grinten are spherical methods in native PROJ too. Their
+  references now use the unchanged ellipsoidal definition; the prior explicit
+  sphere substitutions were unnecessary. Orthographic now implements ellipsoidal
+  equations and is likewise checked with unchanged ellipsoidal definitions.
+- Gnomonic still uses the inherited sphere of semi-major-axis radius. Its legacy
+  qualification oracle explicitly selects that sphere. This is **not** modern
+  ellipsoidal gnomonic accuracy; the separate unchanged-definition audit retains
+  the discrepancy rather than counting it as a pass.
 - Legacy `equi` is compared with equivalent `eqc`. NZMG uses standard false offsets
   explicitly in math.gl and omits the proj4js-only `iterations` option in PROJ.
 
