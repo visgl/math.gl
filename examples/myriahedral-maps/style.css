@@ -1,0 +1,9 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+@import '../unfolding-polyhedron/style.css';
+
+.unfolding-polyhedron .myriahedral-map canvas {
+  height: clamp(320px, 52vh, 560px);
+}

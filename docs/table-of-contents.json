@@ -236,6 +236,7 @@
         "items": [
           "modules/geospatial/projection/README",
           "modules/geospatial/discontinuous/README",
+          "modules/geospatial/myriahedral-maps",
           {
             "type": "category",
             "label": "Developer Guide",
