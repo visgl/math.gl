@@ -195,3 +195,25 @@ The center title is empty between named ice-age windows.
 Chapter titles appear for four seconds after the model loads or a phase changes,
 then fade out over 800 ms. Re-enabling Ice age names introduces the current chapter
 again. Reduced-motion preferences remove the fade.
+
+
+## Discontinuous maps
+
+The global and earlier-ice-age projection selector includes Albers USA with
+Alaska/Hawaii insets, interrupted sinusoidal, Mollweide, Goode homolosine, and
+gnomonic AirOcean. Geographic grid cells are clipped by region before independent
+triangulation; graticules are split at the same cuts. Cached topology retains
+source coordinates for bilinear sampling of the periodic ice and bed grids.
+These views switch immediately rather than morphing incompatible triangle meshes.
+Statistics remain global even in the U.S. view. The U.S. masks include surrounding
+land and ocean and do not select political boundaries.
+
+See the [discontinuous projections guide](../../docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md)
+for API examples and limitations.
+
+
+Inset bounds, viewport fitting, draw order, outlines, and labels come from
+`@math.gl/geospatial/discontinuous` layout metadata. Alaska and Hawaii have visible
+frames. Hawaiian island shapes use a bundled, pinned Natural Earth 1:10m modern
+reference (public domain); the 1° reconstruction grid does not resolve their terrain.
+This overlay does not change ice values, global totals, or reconstruct past shorelines.

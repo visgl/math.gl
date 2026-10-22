@@ -178,6 +178,30 @@ describe('DiscontinuousMap geometry contract', () => {
     expect(pieces.filter(p => p.regionId === 'east')).toHaveLength(2);
     expect(area(pieces)).toBeCloseTo(28, 8);
   });
+  test('self-crossing stars still use nonzero-winding polygon reconstruction', () => {
+    const radius = 2;
+    const vertices: XY[] = Array.from({length: 5}, (_, i) => [
+      radius * Math.cos((i * 2 * Math.PI) / 5),
+      radius * Math.sin((i * 2 * Math.PI) / 5)
+    ]);
+    const star = [0, 2, 4, 1, 3].map(i => sphere(vertices[i]));
+    const pieces = new DiscontinuousMap([region('whole', -4, 4)]).projectPolygon([star]);
+    const inner = (radius * Math.cos((2 * Math.PI) / 5)) / Math.cos(Math.PI / 5);
+    expect(area(pieces)).toBeCloseTo(5 * radius * inner * Math.sin(Math.PI / 5), 8);
+  });
+  test('clips detailed convex outlines in either winding', () => {
+    const count = 10000;
+    const ring: XY[] = Array.from({length: count}, (_, i) => [
+      Math.cos((i * 2 * Math.PI) / count),
+      Math.sin((i * 2 * Math.PI) / count)
+    ]);
+    const map = new DiscontinuousMap([region('whole', -4, 4)]);
+    for (const outline of [ring, [...ring].reverse()]) {
+      const pieces = map.projectPolygon([outline.map(sphere)]);
+      expect(pieces).toHaveLength(1);
+      expect(area(pieces)).toBeCloseTo(Math.PI, 5);
+    }
+  });
   test('handles a seam-coincident ring without jitter or zero-area pieces', () => {
     const map = splitMap(),
       input = rectangle(0, 2, -1, 1).map(sphere);

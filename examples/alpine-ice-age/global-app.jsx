@@ -6,7 +6,7 @@ import { loadGlobalSimulation, sampleAt, clampAge } from "./data.js";
 import { createGlobalScene, GLOBAL_VIEWS } from "./global-scene.js";
 import "./style.css";
 import AttributionWidget from "../shared/attribution-widget.jsx";
-import { GLOBAL_SOURCES } from "./attribution.js";
+import { GLOBAL_SOURCES, INSET_REFERENCE_SOURCES } from "./attribution.js";
 import { climateAt, loadClimate } from "./climate.js";
 import {
   loadKrappSimulation,
@@ -364,8 +364,17 @@ export default function GlobalIceAge({
           <i />
           {model?.maskModel ? "Ice-mask coverage" : "Thin ice → thick ice"}
         </div>
+        {view === "albersUsa" && (
+          <p className="alpine-reference-note">
+            Hawaiian island shapes are a modern reference. The 1° reconstruction
+            grid does not resolve their terrain or local glaciation.
+          </p>
+        )}
         <AttributionWidget
-          sources={model?.maskModel ? KRAPP_SOURCES : GLOBAL_SOURCES}
+          sources={[
+            ...(model?.maskModel ? KRAPP_SOURCES : GLOBAL_SOURCES),
+            ...(view === "albersUsa" ? INSET_REFERENCE_SOURCES : []),
+          ]}
         />
         <details>
           <summary>Scientific limits</summary>

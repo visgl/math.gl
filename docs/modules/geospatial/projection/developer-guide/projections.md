@@ -193,10 +193,23 @@ operations. Cube-face selection and tiling likewise belong to the application.
 
 ### Discontinuous map layouts (experimental)
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+</p>
+
 The separate [`@math.gl/geospatial/discontinuous` API](../../discontinuous/README.md)
 provides static region-aware point projection, inverse candidates, and seam-aware
-line and polygon projection. Initial presets are a 24-panel AirOcean arrangement
-with gnomonic face mapping and a six-lobe interrupted sinusoidal map.
+line and polygon projection. Presets include a 24-panel AirOcean arrangement
+with gnomonic face mapping; six-lobe interrupted sinusoidal, Mollweide, and Goode
+homolosine formulas; and an Albers USA composite with Alaska and Hawaii insets.
+The interrupted cuts and U.S. geographic masks are independent arrangements, not
+exact historical IGH or D3 clip-extent compatibility.
+
+Still unsupported as built-in presets: Butterfly, Collignon, Waterman polyhedral
+layouts, historical interrupted cut arrangements, and arbitrary curved clip
+boundaries. These require additional layouts or clipping support; a scalar
+projection kernel alone does not provide seam-aware geometry.
 
 Polygon support currently requires each input polygon to fit in an open hemisphere.
 AirOcean here is the cut arrangement, not the Gray-Fuller projection. These layouts
