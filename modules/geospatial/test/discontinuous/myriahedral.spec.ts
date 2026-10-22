@@ -158,6 +158,7 @@ test('seam-aware lines and polygon holes retain geographic coordinates across da
 
 test('radius scales both map and animation; supplied mesh and geography remain independent', () => {
   const base = createMyriahedralMap({columns: 12});
+  expect(base.layout.cutLandRadians).toBeUndefined();
   const scaled = createMyriahedralMap({columns: 12, radius: 7});
   const p = base.projectPoint([33, 21])!,
     q = scaled.projectPoint([33, 21])!;

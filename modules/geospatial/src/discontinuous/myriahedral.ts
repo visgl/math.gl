@@ -72,7 +72,7 @@ export const MYRIAHEDRAL_PRESETS: readonly MyriahedralPreset[] = Object.freeze([
 /** Build an independent spherical panel net and its rigid unfolding animation.
  * Each call owns its mesh. Geographical costs are sampled once per edge.
  */
-export function createMyriahedralLayout(options: MyriahedralOptions = {}) {
+export function createMyriahedralLayout(options: MyriahedralOptions = {}): MyriahedralLayout {
   const preset = options.preset ?? 'cylindric';
   if (!MYRIAHEDRAL_PRESETS.includes(preset)) throw new RangeError('Unknown myriahedral preset');
   const radius = options.radius ?? 1;
@@ -185,7 +185,12 @@ export function createMyriahedralLayout(options: MyriahedralOptions = {}) {
     : undefined;
   return {...layout, evaluate, preset, radius, cutLandRadians};
 }
-export type MyriahedralLayout = ReturnType<typeof createMyriahedralLayout>;
+export type MyriahedralLayout = ReturnType<typeof createLayout> & {
+  preset: MyriahedralPreset;
+  radius: number;
+  /** Undefined without an isLand callback. */
+  cutLandRadians?: number;
+};
 
 /** A static seam-aware projection with the same panel IDs and layout as its animation.
  * Radial/gnomonic mapping is locally approximate, not equal-area or conformal.
