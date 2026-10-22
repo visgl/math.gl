@@ -1084,7 +1084,9 @@
     "projection/PROJ4-LICENSE.md",
     "projection/APACHE-2.0-LICENSE.txt",
     "projection/THIRD-PARTY-NOTICES.md",
-    "projection/PROJ-LICENSE.txt"
+    "projection/PROJ-LICENSE.txt",
+    "GEOGRAPHICLIB-LICENSE.txt",
+    "LICENSE"
   ],
   "dependencies": {
     "@math.gl/core": "5.0.0-alpha.19",

@@ -1,6 +1,6 @@
 # Projection accuracy domains
 
-**Native PROJ is the numerical reference; proj4js is the compatibility reference.** The `domain-gnom-ellipsoid` row is a legacy exception: its oracle substitutes a sphere and does not establish ellipsoidal gnomonic accuracy. See the [modern PROJ audit](modern-proj-audit.md) for unchanged-definition comparisons and remaining gaps.
+**Native PROJ is the numerical reference; proj4js is the compatibility reference.** Ellipsoidal gnomonic uses the unchanged native PROJ definition. See the [modern PROJ audit](modern-proj-audit.md) for unchanged-definition comparisons and remaining gaps.
 
 Every named algorithm has independent forward and inverse references. This scorecard expands seeded scalar and Float64 XYZM qualification to **42 configurations, 11,160 points and 36 horizontal algorithms**. Geocentric conversion is covered separately by the three-dimensional PROJ corpus and the [nearest-normal qualification](./ellipsoid-qualification.md).
 
@@ -15,8 +15,8 @@ Forward maxima and ceilings are metres; inverse values are degrees. The identity
 | tmerc-ellipsoid | -15…33 / -80…84 | 267 | 1.86e-9 / 1.00e-5 | 6.04e-14 / 1.00e-8 |
 | utm-north | 0…6 / 0…84 | 267 | 2.79e-9 / 1.00e-5 | 5.88e-14 / 1.00e-8 |
 | utm-south | 150…156 / -80…0 | 267 | 1.86e-9 / 1.00e-5 | 2.84e-14 / 1.00e-8 |
-| lcc-north | -125…-65 / 15…65 | 265 | 4.07e-9 / 1.00e-5 | 1.76e-11 / 1.00e-8 |
-| lcc-south | 105…165 / -65…-10 | 265 | 5.59e-9 / 1.00e-5 | 1.76e-11 / 1.00e-8 |
+| lcc-north | -125…-65 / 15…65 | 265 | 2.33e-9 / 1.00e-5 | 1.76e-11 / 1.00e-8 |
+| lcc-south | 105…165 / -65…-10 | 265 | 3.26e-9 / 1.00e-5 | 1.76e-11 / 1.00e-8 |
 | aea-north | -125…-65 / 15…65 | 265 | 1.02e-8 / 1.00e-5 | 1.14e-13 / 1.00e-8 |
 | eqdc-north | -60…60 / 0…85 | 267 | 4.51e-6 / 1.00e-5 | 1.20e-10 / 1.00e-8 |
 | eqdc-south | -60…60 / -85…0 | 267 | 4.54e-6 / 1.00e-5 | 1.20e-10 / 1.00e-8 |
@@ -37,13 +37,13 @@ Forward maxima and ceilings are metres; inverse values are degrees. The identity
 | domain-vandg-ellipsoid | -110…130 / -60…60 | 265 | 2.09e-5 / 3.00e-5 | 1.58e-12 / 1.00e-8 |
 | domain-poly-ellipsoid | 9.5…10.5 / 39.5…40.5 | 265 | 9.47e-6 / 1.00e-5 | 8.53e-11 / 1.00e-8 |
 | domain-gstmerc-ellipsoid | 9.5…10.5 / 39.5…40.5 | 265 | 5.14e-9 / 1.00e-5 | 2.20e-13 / 1.00e-8 |
-| domain-gnom-ellipsoid | 9.5…10.5 / 39.5…40.5 | 265 | 1.36e-9 / 1.00e-5 | 1.42e-14 / 1.00e-8 |
+| domain-gnom-ellipsoid | 9.5…10.5 / 39.5…40.5 | 265 | 2.59e-9 / 1.00e-5 | 2.13e-14 / 1.00e-8 |
 | domain-ortho-ellipsoid | 9.5…10.5 / 39.5…40.5 | 265 | 1.08e-9 / 1.00e-5 | 1.42e-14 / 1.00e-8 |
 | domain-bonne-ellipsoid | 9.5…10.5 / 39.5…40.5 | 265 | 4.32e-7 / 1.00e-5 | 3.90e-12 / 1.00e-8 |
-| domain-krovak | 14.5…15.5 / 49.5…50.5 | 265 | 1.58e-8 / 1.00e-5 | 2.56e-12 / 1.00e-8 |
+| domain-krovak | 14.5…15.5 / 49.5…50.5 | 265 | 1.33e-8 / 1.00e-5 | 2.59e-12 / 1.00e-8 |
 | domain-nzmg-1 | 172.5…173.5 / -41.5…-40.5 | 265 | 9.31e-10 / 1.00e-5 | 7.11e-15 / 1.00e-8 |
-| domain-omerc-alpha | 114.5…115.5 / 4.5…5.5 | 265 | 4.25e-9 / 1.00e-5 | 4.76e-13 / 1.00e-8 |
-| domain-somerc | 6.94…7.94 / 46.45…47.45 | 265 | 5.58e-9 / 1.00e-5 | 1.41e-9 / 1.00e-8 |
+| domain-omerc-alpha | 114.5…115.5 / 4.5…5.5 | 265 | 1.73e-9 / 1.00e-5 | 4.82e-13 / 1.00e-8 |
+| domain-somerc | 6.94…7.94 / 46.45…47.45 | 265 | 4.31e-9 / 1.00e-5 | 5.68e-14 / 1.00e-8 |
 | domain-geos-x-false | 19.5…20.5 / 19.5…20.5 | 265 | 1.40e-9 / 1.00e-5 | 6.75e-14 / 1.00e-8 |
 | domain-tpers-0 | 9.5…10.5 / 39.5…40.5 | 265 | 6.40e-10 / 1.00e-5 | 1.42e-14 / 1.00e-8 |
 | domain-qsc-0 | -0.5…0.5 / -0.5…0.5 | 265 | 3.26e-8 / 1.00e-5 | 2.84e-12 / 1.00e-8 |

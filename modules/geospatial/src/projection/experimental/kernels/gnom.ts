@@ -1,10 +1,17 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Spherical path adapted from proj4js 2.22.0; ellipsoidal path delegates to the attributed PROJ/GeographicLib adapter. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
+import {
+  prepareEllipsoidalGnomonic,
+  forwardEllipsoidalGnomonic,
+  inverseEllipsoidalGnomonic
+} from '../ellipsoidal-gnomonic';
+import type {EllipsoidalGnomonic} from '../ellipsoidal-gnomonic';
 export type State = KernelParameters & {
+  ellipsoid?: EllipsoidalGnomonic;
   sin_p14: number;
   cos_p14: number;
   infinity_dist: number;
@@ -16,6 +23,7 @@ import asinz from '../common/asinz';
 import {EPSLN} from '../common/constants';
 
 function initialize(state: State): void {
+  if (!state.sphere) state.ellipsoid = prepareEllipsoidalGnomonic(state);
   /* Place parameters in static storage for common use
       ------------------------------------------------- */
   state.sin_p14 = Math.sin(state.lat0);
@@ -28,6 +36,7 @@ function initialize(state: State): void {
 /* Gnomonic forward equations--mapping lat,long to x,y
     --------------------------------------------------- */
 export function forward(state: State, p: Point): Point | null | undefined | number {
+  if (state.ellipsoid) return forwardEllipsoidalGnomonic(state, state.ellipsoid, p);
   var sinphi, cosphi; /* sin and cos value        */
   var dlon; /* delta longitude value      */
   var coslon; /* cos of longitude        */
@@ -66,6 +75,7 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
 }
 
 export function inverse(state: State, p: Point): Point | null | undefined | number {
+  if (state.ellipsoid) return inverseEllipsoidalGnomonic(state, state.ellipsoid, p);
   var rh; /* Rho */
   var sinc, cosc;
   var c;

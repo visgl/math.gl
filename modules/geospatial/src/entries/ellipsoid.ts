@@ -6,3 +6,5 @@ export {Ellipsoid} from '../ellipsoid';
 export {EllipsoidTangentPlane} from '../ellipsoid-tangent-plane';
 export {isWGS84} from '../type-utils';
 export type {SpheroidParameters} from '@math.gl/core/types';
+export {EllipsoidGeodesic} from '../ellipsoid-geodesic';
+export type {GeodesicResult, GeodesicLine} from '../ellipsoid-geodesic';

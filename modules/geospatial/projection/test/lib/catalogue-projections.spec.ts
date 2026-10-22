@@ -82,7 +82,9 @@ for (const fixture of catalogueProjectionCases) {
           ]);
           // Cassini signs/refinement and Robinson coefficients intentionally improve
           // on proj4js. Keep their offset/unit checks tied to native PROJ references.
-          const corrected = ['cass', 'robin', 'ortho'].some(name => fixture.id.startsWith(name));
+          const corrected = ['cass', 'robin', 'ortho', 'gnom', 'somerc'].some(name =>
+            fixture.id.startsWith(name)
+          );
           const oracle = corrected
             ? independent.cases
                 .find(row => row.id === fixture.id)!

@@ -1,0 +1,293 @@
+{
+  "oracle": "pyproj 3.7.2 / PROJ 9.5.1 (offline)",
+  "cases": [
+    {
+      "axes": {
+        "semiMajorAxis": 6378137,
+        "semiMinorAxis": 6356752.314245179
+      },
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        0,
+        0
+      ],
+      "azimuth": 180.0,
+      "distance": 0.0
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6378137,
+        "semiMinorAxis": 6356752.314245179
+      },
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        0,
+        180
+      ],
+      "azimuth": 0.0,
+      "distance": 20003931.458625447
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6378137,
+        "semiMinorAxis": 6356752.314245179
+      },
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        1e-05,
+        179.99999
+      ],
+      "azimuth": 0.000950163688681274,
+      "distance": 20003930.35287346
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6378137,
+        "semiMinorAxis": 6356752.314245179
+      },
+      "start": [
+        90,
+        0
+      ],
+      "end": [
+        -89.9,
+        100
+      ],
+      "azimuth": 80.0,
+      "distance": 19992762.060784187
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6378137,
+        "semiMinorAxis": 6356752.314245179
+      },
+      "start": [
+        -90,
+        20
+      ],
+      "end": [
+        89.9,
+        -100
+      ],
+      "azimuth": -120.0,
+      "distance": 19992762.060784187
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6378137,
+        "semiMinorAxis": 6356752.314245179
+      },
+      "start": [
+        40,
+        -75
+      ],
+      "end": [
+        35,
+        140
+      ],
+      "azimuth": -28.310157579162595,
+      "distance": 10960491.374927383
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6378137,
+        "semiMinorAxis": 6356752.314245179
+      },
+      "start": [
+        89.999999,
+        179
+      ],
+      "end": [
+        -30,
+        -179
+      ],
+      "azimuth": 178.00000001990367,
+      "distance": 13322079.015627166
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6378137,
+        "semiMinorAxis": 6356752.314245179
+      },
+      "start": [
+        -60,
+        -170
+      ],
+      "end": [
+        70,
+        175
+      ],
+      "azimuth": -6.695754403734045,
+      "distance": 14471972.255428793
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6378137,
+        "semiMinorAxis": 6356752.314245179
+      },
+      "start": [
+        40,
+        10
+      ],
+      "end": [
+        41,
+        11
+      ],
+      "azimuth": 37.03329990175317,
+      "distance": 139698.75539274904
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6371000,
+        "semiMinorAxis": 6371000
+      },
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        0,
+        0
+      ],
+      "azimuth": 180.0,
+      "distance": 0.0
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6371000,
+        "semiMinorAxis": 6371000
+      },
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        0,
+        180
+      ],
+      "azimuth": 0.0,
+      "distance": 20015086.79602057
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6371000,
+        "semiMinorAxis": 6371000
+      },
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        1e-05,
+        179.99999
+      ],
+      "azimuth": 45.00000000908402,
+      "distance": 20015085.22348684
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6371000,
+        "semiMinorAxis": 6371000
+      },
+      "start": [
+        90,
+        0
+      ],
+      "end": [
+        -89.9,
+        100
+      ],
+      "azimuth": 80.0,
+      "distance": 20003967.30335612
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6371000,
+        "semiMinorAxis": 6371000
+      },
+      "start": [
+        -90,
+        20
+      ],
+      "end": [
+        89.9,
+        -100
+      ],
+      "azimuth": -120.0,
+      "distance": 20003967.30335612
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6371000,
+        "semiMinorAxis": 6371000
+      },
+      "start": [
+        40,
+        -75
+      ],
+      "end": [
+        35,
+        140
+      ],
+      "azimuth": -28.352089670051466,
+      "distance": 10936768.25428866
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6371000,
+        "semiMinorAxis": 6371000
+      },
+      "start": [
+        89.999999,
+        179
+      ],
+      "end": [
+        -30,
+        -179
+      ],
+      "azimuth": 178.00000002014923,
+      "distance": 13343391.086219858
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6371000,
+        "semiMinorAxis": 6371000
+      },
+      "start": [
+        -60,
+        -170
+      ],
+      "end": [
+        70,
+        175
+      ],
+      "azimuth": -6.678872129188531,
+      "distance": 14503958.51771756
+    },
+    {
+      "axes": {
+        "semiMajorAxis": 6371000,
+        "semiMinorAxis": 6371000
+      },
+      "start": [
+        40,
+        10
+      ],
+      "end": [
+        41,
+        11
+      ],
+      "azimuth": 36.92588510308515,
+      "distance": 139688.63454686652
+    }
+  ]
+}

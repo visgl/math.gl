@@ -229,3 +229,23 @@ export function perspectiveBounds(
     add([base.y0, base.y0], scale(y, base.a * (p - 1)))
   );
 }
+
+/** Gaussian curvature K <= 1/b² gives M >= cos(s/b), while m <= s.
+ * The geodetic spherical path bounds distance by a*angle/sqrt(1-es).
+ * This disk conservatively encloses m/M on the finite rendering cap.
+ */
+export function ellipsoidalGnomonicBounds(
+  base: KernelParameters,
+  region: AngularRanges,
+  domain?: AngularDomain
+) {
+  const dot = sphericalRange([Math.cos(base.lat0), 0, Math.sin(base.lat0)], region, domain)[0];
+  const angle = Math.acos(Math.max(-1, Math.min(1, dot)));
+  const q = 1 - base.es;
+  const distance = (base.a * angle) / Math.sqrt(q);
+  const scale = Math.cos(angle / q);
+  if (!(scale > 0))
+    throw new Error('Gnomonic rendering coverage approaches its ellipsoidal horizon');
+  const radius = distance / scale;
+  return envelope([base.x0 - radius, base.x0 + radius], [base.y0 - radius, base.y0 + radius]);
+}

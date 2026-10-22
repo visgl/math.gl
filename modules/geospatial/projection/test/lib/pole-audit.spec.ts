@@ -17,7 +17,11 @@ test('native PROJ audit retains every probe and permits no new or worsening find
     reference.cases.reduce((n, c) => n + c.results.length, 0)
   );
   for (const [index, row] of actual.entries()) {
-    const baseline = findings.cases[index];
+    const baseline = findings.cases[index] as {
+      definition: string;
+      probes: number;
+      mismatches: {direction: string; kind: string; input: number[]; error?: number}[];
+    };
     expect(row.definition).toBe(baseline.definition);
     expect(row.probes).toBe(baseline.probes);
     // These are retained audit findings, not successful accuracy qualifications.

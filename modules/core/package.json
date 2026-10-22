@@ -90,7 +90,8 @@
   "files": [
     "dist",
     "src",
-    "PROJ4-LICENSE.md"
+    "PROJ4-LICENSE.md",
+    "LICENSE"
   ],
   "sideEffects": [
     "./src/lib/common.js"

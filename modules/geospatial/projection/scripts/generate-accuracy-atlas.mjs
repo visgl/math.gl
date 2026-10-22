@@ -34,7 +34,7 @@ try {
     oracle: 'pyproj 3.7.2 / PROJ 9.5.1',
     upstreamComparison: 'proj4js 2.22.0',
     scope:
-      'Observed maxima at exact stored sampled inputs; configured test ceilings are regression gates, not mathematical global bounds. domain-gnom-ellipsoid uses a legacy spherical oracle and does not qualify ellipsoidal gnomonic accuracy.',
+      'Observed maxima at exact stored sampled inputs; configured test ceilings are regression gates, not mathematical global bounds.',
     cases: rows
   };
   writeFileSync(
@@ -54,8 +54,7 @@ try {
     document.replace('# Projection accuracy domains\n\n',
       '# Projection accuracy domains\n\n' +
       '**Native PROJ is the numerical reference; proj4js is the compatibility reference.** ' +
-      'The `domain-gnom-ellipsoid` row is a legacy exception: its oracle substitutes a sphere ' +
-      'and does not establish ellipsoidal gnomonic accuracy. See the ' +
+      'Ellipsoidal gnomonic uses the unchanged native PROJ definition. See the ' +
       '[modern PROJ audit](modern-proj-audit.md) for unchanged-definition comparisons and remaining gaps.\n\n')
   );
   console.log(

@@ -570,8 +570,8 @@
     {
       "id": "domain-gnom-ellipsoid",
       "definition": "+proj=gnom +lon_0=10 +lat_0=40 +ellps=WGS84",
-      "oracle": "+proj=gnom +lon_0=10 +lat_0=40 +R=6378137",
-      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics.",
+      "oracle": "+proj=gnom +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "oracleNotes": "Unchanged definition evaluated by native PROJ 9.5.1, including ellipsoidal geodesic gnomonic.",
       "forwardTolerance": 1e-05,
       "inverseTolerance": 1e-08,
       "roundtripTolerance": 1e-08,

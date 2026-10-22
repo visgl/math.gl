@@ -78,7 +78,7 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
   var con = Math.abs(Math.abs(lat) - HALF_PI);
   var ts, rh1;
   if (con > EPSLN) {
-    ts = tsfnz(state.e, lat, Math.sin(lat));
+    ts = state.sphere ? 1 / Math.tan(Math.PI / 4 + lat / 2) : tsfnz(state.e, lat, Math.sin(lat));
     rh1 = state.a * state.f0 * Math.pow(ts, state.ns);
   } else {
     con = lat * state.ns;

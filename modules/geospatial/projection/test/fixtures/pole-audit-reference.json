@@ -1,7 +1,7 @@
 {
   "pyproj": "3.7.2",
   "proj": "9.5.1",
-  "sourceSHA256": "1759895123cd54f967f0ab0bf09aee076d6b909cea7eae207f6ee527ed92f808",
+  "sourceSHA256": "7c1d6f938d8f43921a2974f1de90ccf92d1fe0c776c6b7c1e8025d3dec9c200e",
   "generatorSHA256": "acc76b317fceecb9090bd2b6da7b4c32606594e826762b6b319822bedc638180",
   "cases": [
     {
@@ -5549,6 +5549,32 @@
         {"input": [0, 89.99], "forwardRejected": true},
         {"input": [0, 89.999999], "forwardRejected": true},
         {"input": [0, 90], "forwardRejected": true}
+      ]
+    },
+    {
+      "id": "gnom-upstream-22",
+      "definition": "+proj=gnom +lat_0=90 +lon_0=0 +x_0=6300000 +y_0=6300000 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+      "oracle": "+proj=gnom +lat_0=90 +lon_0=0 +x_0=6300000 +y_0=6300000 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+      "results": [
+        {"input": [-75, 46], "forward": [345430.503091204, 4704477.912028291], "inverse": [-75.0, 45.99999999999999]},
+        {"input": [-105, -90], "forwardRejected": true},
+        {"input": [-105, -89.999999], "forwardRejected": true},
+        {"input": [-105, -89.99], "forwardRejected": true},
+        {"input": [-105, 89.99], "forward": [6298921.118994184, 6300289.085294237], "inverse": [-104.9999999999823, 89.99]},
+        {"input": [-105, 89.999999], "forward": [6299999.892111901, 6300000.028908529], "inverse": [-105.00000018374527, 89.999999]},
+        {"input": [-105, 90], "forward": [6300000.0, 6300000.0], "inverse": [0.0, 90.0]},
+        {"input": [-75, -90], "forwardRejected": true},
+        {"input": [-75, -89.999999], "forwardRejected": true},
+        {"input": [-75, -89.99], "forwardRejected": true},
+        {"input": [-75, 89.99], "forward": [6298921.118994184, 6299710.914705763], "inverse": [-75.00000000001772, 89.99]},
+        {"input": [-75, 89.999999], "forward": [6299999.892111901, 6299999.971091471], "inverse": [-74.99999981625473, 89.999999]},
+        {"input": [-75, 90], "forward": [6300000.0, 6300000.0], "inverse": [0.0, 90.0]},
+        {"input": [-45, -90], "forwardRejected": true},
+        {"input": [-45, -89.999999], "forwardRejected": true},
+        {"input": [-45, -89.99], "forwardRejected": true},
+        {"input": [-45, 89.99], "forward": [6299210.204288421, 6299210.204288421], "inverse": [-44.99999999999999, 89.99]},
+        {"input": [-45, 89.999999], "forward": [6299999.92102043, 6299999.92102043], "inverse": [-45.0, 89.999999]},
+        {"input": [-45, 90], "forward": [6300000.0, 6300000.0], "inverse": [0.0, 90.0]}
       ]
     },
     {

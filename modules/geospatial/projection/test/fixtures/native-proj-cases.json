@@ -6417,7 +6417,7 @@
     {
       "id": "gnom-ellipsoid",
       "definition": "+proj=gnom +lon_0=10 +lat_0=40 +ellps=WGS84",
-      "oracle": "+proj=gnom +lon_0=10 +lat_0=40 +R=6378137",
+      "oracle": "+proj=gnom +lon_0=10 +lat_0=40 +ellps=WGS84",
       "points": [
         [
           9.5,
@@ -6458,7 +6458,7 @@
       ],
       "forwardTolerance": 1e-05,
       "inverseTolerance": 1e-08,
-      "oracleNotes": "math.gl/proj4js use the semi-major axis as a spherical radius for this algorithm. Explicitly select that sphere in PROJ; the unmodified ellipsoidal definition has different semantics."
+      "oracleNotes": "Unchanged definition evaluated by native PROJ 9.5.1, including ellipsoidal geodesic gnomonic."
     },
     {
       "id": "gnom-sphere",
@@ -6504,7 +6504,7 @@
       ],
       "forwardTolerance": 1e-05,
       "inverseTolerance": 1e-08,
-      "oracleNotes": "Identical explicit projection parameters; no datum operation."
+      "oracleNotes": "Unchanged definition evaluated by native PROJ 9.5.1, including ellipsoidal geodesic gnomonic."
     },
     {
       "id": "ortho-ellipsoid",
@@ -10914,6 +10914,20 @@
           0
         ]
       ]
+    },
+    {
+      "id": "gnom-upstream-22",
+      "definition": "+proj=gnom +lat_0=90 +lon_0=0 +x_0=6300000 +y_0=6300000 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+      "oracle": "+proj=gnom +lat_0=90 +lon_0=0 +x_0=6300000 +y_0=6300000 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+      "points": [
+        [
+          -75,
+          46
+        ]
+      ],
+      "forwardTolerance": 1e-05,
+      "inverseTolerance": 1e-08,
+      "oracleNotes": "Unchanged definition evaluated by native PROJ 9.5.1, including ellipsoidal geodesic gnomonic."
     }
   ]
 }

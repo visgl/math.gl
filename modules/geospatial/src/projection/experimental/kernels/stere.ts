@@ -1,7 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileCopyrightText: Copyright (c) PROJ contributors
+// SPDX-FileComment: Adapted from proj4js 2.22.0, with polar half-angle equations from PROJ 9.5.1 src/projections/stere.cpp. See ../../../../projection/PROJ-LICENSE.txt. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -88,6 +89,15 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
     // trace('stere:this is the origin point');
     p.x = NaN;
     p.y = NaN;
+    return p;
+  }
+  if (state.sphere && Math.abs(state.coslat0) <= EPSLN) {
+    // PROJ's polar half-angle form avoids subtracting nearly equal values in
+    // 1 +/- sin(latitude) close to the opposite pole.
+    const sign = state.lat0 > 0 ? 1 : -1;
+    const radius = 2 * state.a * state.k0 * Math.tan(Math.PI / 4 - (sign * lat) / 2);
+    p.x = state.x0 + radius * Math.sin(dlon);
+    p.y = state.y0 - sign * radius * Math.cos(dlon);
     return p;
   }
   if (state.sphere) {

@@ -31,13 +31,13 @@ separate from this broader audit.
 | Method | Result of comparing unchanged definitions |
 | --- | --- |
 | Orthographic | Now uses ellipsoidal equations for ellipsoidal definitions. No sphere is substituted in the qualification oracle. |
-| Gnomonic | **Remaining implementation gap.** Ellipsoidal input still selects inherited spherical equations. A local WGS84 sample differs by about 145 m; the wider sampled discrepancy reaches 10.5 km. Native PROJ uses ellipsoidal geodesic reduced length and scale. Ellipsoidal gnomonic must not be treated as qualified. An explicit `+R` selects the supported spherical method. |
+| Gnomonic | Ellipsoidal definitions now use geodesic reduced length and scale, matching modern native PROJ. The shared ellipsoid geodesic solver retains GeographicLib MIT attribution. Explicit `+R` retains the spherical method. |
 | Miller / Van der Grinten | These are spherical methods in native PROJ too. Unchanged WGS84 definitions agree within the audit screen. Their old explicit-sphere oracle substitutions have been removed. |
 | Eckert VI / Mollweide / equirectangular | Spherical evaluation is intrinsic to these methods, rather than a missing ellipsoidal implementation. Exact-pole numerical behavior still needs separate checks. |
 
 ## Pole audit and retained findings
 
-The audit includes **143 configurations, 5,560 probes and 34 projected
+The audit includes **144 configurations, 5,579 probes and 34 projected
 algorithms**. It retains regional controls, both exact poles, ±89.99° and
 ±89.999999° on multiple meridians, plus wider orthographic samples at five origins
 on a sphere and WGS84. Identity, geocentric conversion and the composed oblique
@@ -55,15 +55,12 @@ with spheres in this audit.
 Screening uses 1 mm plus 1e-12 relative forward error and 1e-6 degree inverse
 error. Longitude is weighted by cos(latitude) at collapsed poles, where longitude
 is indeterminate; maps with a pole line retain unweighted longitude. These are
-triage thresholds, not application accuracy guarantees. **61 configurations retain
+triage thresholds, not application accuracy guarantees. **49 configurations retain
 findings; they are not counted as successful modern PROJ qualifications.**
 
 | Retained finding | Interpretation and next work |
 | --- | --- |
-| Ellipsoidal gnomonic | Replace the legacy spherical method with a qualified ellipsoidal geodesic implementation. This is a real accuracy gap even in local samples. |
-| LCC / polar stereographic near the opposite pole | Very large finite projected coordinates are ill-conditioned. Review stable formulas and supported-domain limits; passing local samples does not qualify these regions. |
-| Swiss oblique Mercator near the south pole | Forward discrepancies reach 1.55 km far outside its regional profile. Audit the branch formulas before expanding the domain. |
-| Krovak south pole | math.gl rejects coordinates for which PROJ returns a finite result. Keep this boundary unqualified pending an algorithm/domain review. |
+| Polar stereographic at the opposite pole | The exact antipode remains an explicit domain rejection. Stable half-angle formulas remove avoidable cancellation near it; huge finite coordinates remain ill-conditioned. |
 | Polyconic inverse near poles | PROJ rejects some of its own forward coordinates while math.gl returns finite inverses. These cases need independent mathematical/domain checks. |
 | LAEA / stereographic / AEQD / QSC pole conditioning | Small inverse latitude differences and, for orthographic, some PROJ inverse failures remain at or extremely near collapsed poles. Keep exact-pole mathematics and forward checks distinct from oracle agreement. |
 | Albers / Equal Earth / Mollweide oracle boundaries | The pinned PROJ inverse can snap Albers ±89.99° to a pole and can return Equal Earth pole latitudes several microdegrees short of ±90°. Its Mollweide exact-pole forward can retain a nonzero easting. Mathematical pole regressions are retained instead of adopting those artifacts. |
@@ -112,3 +109,7 @@ are verified with the existing native-reference gate. Python and PROJ are needed
 only for regeneration; CI consumes the offline references. See
 [independent validation](independent-validation.md) for the established qualified
 domains, budgets and real-grid tests.
+
+## Follow-up corrections
+
+Ellipsoidal gnomonic now uses the shared `EllipsoidGeodesic` solver. Its ordinary-domain accuracy corpus uses the unchanged WGS84 definition, with no spherical oracle substitution. LCC uses stable half-angle expressions; polar spherical stereographic avoids a cancelling denominator; Krovak uses exact π/4 at the south-pole boundary; Swiss oblique Mercator follows native PROJ branch and inverse convergence formulas. The unchanged-definition pole audit retains unresolved oracle/domain differences rather than treating them as qualifications.
