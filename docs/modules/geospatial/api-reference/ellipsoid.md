@@ -18,7 +18,8 @@ vectors. Construct a new `Ellipsoid` to change shape; mutating these vectors thr
 instead of leaving prepared conversion caches inconsistent.
 
 Surface projection selects a qualified nearest point rather than a radial
-approximation. Ambiguous interiors and unsupported singular boundaries return
+approximation. Unique near-cusp and boundary solutions have an exact-dyadic fallback. Ambiguous
+interiors and inputs outside the qualified numerical range return
 `undefined` without changing the supplied output. See the
 [nearest-point qualification and boundary policy](../projection/ellipsoid-qualification.md).
 

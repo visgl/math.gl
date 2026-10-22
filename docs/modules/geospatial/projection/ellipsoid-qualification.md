@@ -44,28 +44,68 @@ when comparing results, rather than from a production inverse.
 
 ## Nearest-normal and ambiguity policy
 
-For an oblate spheroid, nonzero polar coordinates admit a unique nearest normal. Interior inversion solves a monotone multiplier equation on its positive-definite interval with at most **128 safeguarded Newton/bisection updates**. It uses the shifted variable `(lambda + b²) / a²` so the short-axis singularity is not formed by subtracting nearly equal numbers. Compensated horizontal-radius and squared-axis arithmetic protect the near-cusp, very thin cases.
+For an oblate spheroid, nonzero polar coordinates admit a unique nearest normal. Interior inversion solves a monotone multiplier equation on its positive-definite interval with at most **1024 safeguarded Newton/bisection updates**. It uses the shifted variable `(lambda + b²) / a²` so the short-axis singularity is not formed by subtracting nearly equal numbers. Compensated horizontal-radius and squared-axis arithmetic protect the near-cusp, very thin cases.
 
 On the equatorial plane, points inside `p < a * (1 - (b/a)²)` have two equally near normals in opposite hemispheres. The inverse rejects instead of choosing a hemisphere or the more distant equatorial stationary normal. The cusp itself and points beyond it use the equatorial solution. The center rejects. Exact poles use an analytic branch; projection retains its documented near-axis longitude convention, while geospatial preserves signed-zero pole longitude.
 
 A rejected numeric leaf returns `false`, geospatial returns `undefined`, and projection throws. Existing outputs and the failed flat record remain untouched; completed preceding records remain committed. Sphere conversion is analytic. Exterior conversion keeps the bounded Hannover path and safeguarded exterior fallback.
 
-`Ellipsoid.scaleToGeodeticSurface` and prolate/triaxial cartographic conversion now use an original compensated three-axis constrained-distance solver, bounded by 512 safeguarded Newton/bisection updates. The shifted multiplier avoids subtracting nearly equal values at the shortest-axis singularity. A positive shifted root certifies the unique minimum in exact arithmetic; independent binary64-input controls qualify the sampled numerical accuracy. The near-center radial approximation is removed. A compensated residual and
-relative convergence test preserve the shortest-axis component when the ordinary
-surface norm rounds to one. A further 72 controls use a 220-digit, 900-update
-Decimal oracle on exact cusp/adjacent binary64 inputs, both signs and axis
-permutations. Their per-component relative ceiling is `2e-12`, including
-coordinates near `1e-100`; a whole-shape absolute tolerance cannot hide these errors. Success additionally
-requires estimated residual roundoff and multiplier sensitivity to bound
-footpoint displacement, with a safety margin inside the qualified coordinate budget. Multidirectional cusps that cannot meet this condition
-reject atomically, even when their nearest point is unique; these remain an
-explicit qualification gap rather than silently returning a rounded surface norm.
+`Ellipsoid.scaleToGeodeticSurface` and prolate/triaxial cartographic conversion
+first use the compensated three-axis solver, bounded by 512 updates. If its
+residual cannot resolve the multiplier accurately, an original exact-dyadic
+fallback evaluates the multiplier equation's sign with built-in JavaScript
+`BigInt`. This adds no dependency or upstream source.
 
-If the shortest-axis coordinates vanish and the limiting surface norm is at most one, the general solver rejects atomically. This includes ambiguous medial-set points and the singular boundary, including some unique cusp points. It does not promise complete inversion at every unique boundary point. Sphere/oblate cartographic inversion retains its separately qualified analytic cusp behavior. Unrepresentable normalized ratios, nonfinite intermediates and exhausted iteration also reject. There is no global certificate for all finite shapes.
+The fallback converts the original binary64 inputs to exact integer dyadics.
+It clears positive denominators before evaluating the monotone equation and
+bisects an exact bracket, bounded by 4096 updates. A nonzero shortest-axis
+coordinate gives a positive lower scale for the root; otherwise an exact
+rational boundary/derivative bound selects additional fraction bits. The final
+bracket has relative width at most `2^-60`, followed by binary64 output rounding.
+This certifies the mathematical branch; sampled numerical controls qualify the
+returned precision, not universal correct rounding for every finite input.
+
+On the zero shortest-axis plane, an exact negative boundary residual identifies
+multiple nearest points and rejects atomically. Exact equality identifies the
+unique cusp point, with zero shortest-axis surface coordinates, and succeeds.
+A positive residual admits the unique positive-multiplier-interval root.
+Previously rejected multidirectional cusps are now solved rather than bypassing
+the accuracy guard. Centers remain ambiguous and reject.
+
+**408 cusp controls** use an independent standard-library Decimal oracle:
+220 digits/900 updates ordinarily, and 440 digits/1600 updates for the four
+extreme controls. They cover oblate/prolate/triaxial shapes, Earth scaling,
+neighboring binary64 inputs, signs, axis orders and
+nonzero ordinates down to `1e-320`. Nonzero footpoint components retain the
+`2e-12` relative ceiling; aliasing and cartographic normal/height are also checked.
+Separate analytic anchors qualify exact unique boundary cusps and ambiguous neighbors.
+The Node/Chromium/Firefox/WebKit harness now checks the 408 surface controls in
+addition to all 466 existing inverse paths. Together with the original 198
+surface controls, the unit suite qualifies 606 surface inputs.
+
+The shared oblate solve now allows 1024 bounded updates and divides `z` by `a*t`
+instead of forming an underflowing `z/a` first. Geospatial can use the exact
+three-axis fallback when that numeric solve fails. Prolate/triaxial inverse
+height projects displacement onto the unit normal instead of taking its sign
+from a dot product that can underflow; normal length uses `hypot`.
+
+The ordinary numeric path retains its allocation guard. The rare exact fallback
+allocates bounded strings, arrays and BigInt temporaries and is deliberately
+slower. It does not run for every ordinary point. No general performance
+advantage is claimed, and consumers of pathological shapes should account for
+this additional work. Ordinary CI reads stored controls and verifies their
+standard-library generator; it installs no native PROJ or GeographicLib oracle.
 
 Positive finite axes alone do not guarantee representable squared ratios or geometry intermediates. Underflowing non-cardinal ratios reject; exact-pole analytic cases remain separately covered. Geospatial retains its finite derived-geometry magnitude limits. Nearly singular binary64 inputs outside the qualified samples can still fail bounded convergence.
 
 
 ## Reproduce
 
-Run the original Decimal generator with `--check`, then `node modules/geospatial/projection/scripts/qualify-interiors.mjs`. Add `--browser chromium`, `--browser firefox` or `--browser webkit` to run the same rows in each browser. See the stored [qualification report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/interior-normal-node.json).
+Check both independent reference generators, then run qualification:
+
+```sh
+python3 modules/geospatial/projection/scripts/generate-interior-reference.py --check
+python3 modules/geospatial/projection/scripts/generate-nearest-cusp-reference.py --check
+node modules/geospatial/projection/scripts/qualify-interiors.mjs
+```
+ Add `--browser chromium`, `--browser firefox` or `--browser webkit` to run the same rows in each browser. See the stored [qualification report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/interior-normal-node.json).

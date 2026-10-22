@@ -83,8 +83,8 @@ and qualification priorities without replacing those plans.
 | Tranche | Delivered increment | Remaining gate |
 | --- | --- | --- |
 | G0 | Existing native PROJ 9.9 geodesic corpus and independent 110-digit Cartesian oracle; operation/domain matrix below. | Full C++ GeographicLib comparison and broader conditioning/magnitude coverage before a complete SOTA claim. |
-| G1 | Original bounded three-axis nearest-point solver; 32 formerly diagnostic deep inverse cases promoted without changing budgets; 198 direct independent surface checks. | Singular multiplier boundary currently rejects, including some unique cusp points. Broader axis ratios and near-medial conditioning need independent qualification. |
-| G2 | Geometry vectors and derived caches frozen together; mutation, alias, invalid-input and ambiguity regressions. | Continue auditing all public result ownership, units and pole contracts; no claim of exhaustive completion. |
+| G1 | Original three-axis solver plus exact-dyadic recovery of unique boundary/near-cusp roots; 606 surface controls including 408 cusp inputs. Formerly diagnostic deep inverse cases retain their original budgets. | Broader extreme domains and bounded-solver limits still need qualification; no universal finite-input accuracy claim. |
+| G2 | Geometry vectors and derived caches frozen together; underflow-safe inverse normal/height; mutation, alias, invalid-input and ambiguity regressions. | Continue auditing all public result ownership, units and pole contracts; no claim of exhaustive completion. |
 
 ### Current qualification matrix
 
@@ -92,8 +92,8 @@ and qualification priorities without replacing those plans.
 | --- | --- | --- |
 | Series geodesics, seven shapes near Earth-like flattening | 819 native PROJ 9.9 controls; distance/reduced length, scales, condition-aware endpoint/bearing displacement | Shared algorithm family; not an independent mathematical proof or arbitrary-flattening guarantee |
 | Sphere/oblate Cartesian inverse, including thin shapes and unique interiors | Exact binary64-input, 110-digit Decimal footpoint oracle; unit-normal angle and height | 134 inputs per leaf/projection/geospatial path; 1e-9 degree and max(1e-12, max radius * 2e-12) height ceilings |
-| Prolate/triaxial Cartesian inverse | Same independent oracle and unchanged budgets | 64 sampled inputs, including deep interiors; general singular boundary rejects |
-| Three-axis nearest surface | Same independent footpoint oracle; coordinate and surface residual checks | 198 sampled inputs, max radius * 2e-12 coordinate ceiling; no claim for all finite shapes |
+| Prolate/triaxial Cartesian inverse | Same independent oracle and unchanged budgets | 64 sampled inputs, including deep interiors; additional unique cusp/boundary recovery qualified |
+| Three-axis nearest surface | Same independent footpoint oracle; coordinate and surface residual checks | 606 sampled inputs including 408 cusp controls; original absolute ceilings plus 2e-12 relative cusp-component checks; no universal finite-shape claim |
 | Ambiguous interiors | Analytic multiple-minimum constructions | Reject atomically instead of selecting arbitrary hemisphere/axis |
 | Geometry/cache ownership | Mutation and alias regressions | Frozen geometry snapshots; construct a new shape instead of mutating vectors |
 

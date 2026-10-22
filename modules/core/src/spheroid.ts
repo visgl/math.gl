@@ -96,7 +96,9 @@ function interiorInverse(
     vertical = z / a,
     delta = 1 - ratio2;
   if (!(ratio2 > 0) || ratio > 1) return false;
-  if (z === 0) {
+  // Away from the cusp, retain the inexpensive equatorial classification.
+  // Only the rounding neighborhood needs the compensated radius below.
+  if (z === 0 && Math.abs(horizontal - delta) > 32 * Number.EPSILON) {
     if (horizontal < delta) return false;
     return commit(result, Math.atan2(y, x), 0, p - a);
   }
@@ -129,18 +131,25 @@ function interiorInverse(
     base = p - a + shift;
   const correction =
     radiusError + sumError(p - a, shift, base) + productError(a, ratio2, shift) + a * ratioError;
+  if (z === 0) {
+    // A rounded hypot can equal the cusp for points just inside it. Include
+    // the radius/axis corrections before selecting a unique equatorial normal.
+    if (base + correction < 0) return false;
+    return commit(result, Math.atan2(y, x), 0, p - a);
+  }
   const weighted = Math.abs(vertical) * ratio;
-  if (!(weighted > 0)) return false;
   let lower = 0,
     upper = ratio2;
   // A lower bound near the short-axis singularity prevents thousands of bisections
   // for deep, nearly equatorial interiors. No subtraction of lambda and -b².
   let t = Math.max(weighted, horizontal - delta);
   if (!(t > lower && t < upper)) t = upper / 2;
-  for (let i = 0; i < 128; i++) {
+  for (let i = 0; i < 1024; i++) {
     const equatorial = delta + t;
     const u = horizontal / equatorial,
-      v = weighted / t;
+      // Divide after forming a*t: z/a can underflow although z/(a*t)
+      // and the unique near-cusp latitude are representable.
+      v = (z / (a * t)) * ratio;
     const at = a * t,
       difference = base - at;
     const offset =
@@ -148,11 +157,12 @@ function interiorInverse(
       (a * equatorial);
     const term = offset * (u + 1);
     const residual = term + v * v;
+    if (!Number.isFinite(residual)) return false;
     if (
       Math.abs(residual) <= 4 * Number.EPSILON * (Math.abs(term) + v * v) ||
       upper - lower <= 4 * Number.EPSILON * t
     ) {
-      const latitude = Math.atan2(vertical / t, horizontal / equatorial);
+      const latitude = Math.atan2(z / (a * t), horizontal / equatorial);
       const sin = Math.sin(latitude),
         cos = Math.cos(latitude);
       return commit(
@@ -169,7 +179,7 @@ function interiorInverse(
     const candidate =
       Number.isFinite(next) && next > lower && next < upper ? next : lower + (upper - lower) / 2;
     if (candidate === t) {
-      const latitude = Math.atan2(vertical / t, horizontal / equatorial);
+      const latitude = Math.atan2(z / (a * t), horizontal / equatorial);
       return commit(
         result,
         Math.atan2(y, x),

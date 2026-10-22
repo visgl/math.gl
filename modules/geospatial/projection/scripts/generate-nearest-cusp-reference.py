@@ -24,7 +24,7 @@ def generate():
         for power in [15, 60, 120, 150]:
             for y in [math.nextafter(1.5, 0), 1.5, math.nextafter(1.5, 2)]:
                 axes = [1., 2., 3.]
-                point = [10. ** -power, y, 0.]
+                point = [float('1e-' + str(power)), y, 0.]
                 base = oracle.nearest(axes, point, iterations=900)
                 # Exact sign/permutation symmetries preserve stored binary64 inputs
                 # and the positive-definite certificate; solve each base only once.
@@ -36,7 +36,58 @@ def generate():
                         for key in ['footpoint', 'normal']:
                             reference[key] = [base[key][i] * sign for i in permutation]
                         rows.append({'radii': radii, 'xyz': xyz, 'reference': reference})
-    return {'provenance': {'license': 'MIT', 'precision': 220, 'iterations': 900,
+        # Multidirectional exact cusps and adjacent stored binary64 inputs.
+        # For (1,4,16), normalized non-short-axis components are 3/5 and 4/5.
+        for axes, horizontal in [([1., 4., 4.], [2.25, 3.]),
+                                 ([1., 4., 16.], [2.25, 12.75])]:
+            for scale in [1., 6378137.]:
+                radii0 = [r * scale for r in axes]
+                for power in [15, 60, 120, 150]:
+                    for y in [math.nextafter(horizontal[0], 0), horizontal[0],
+                              math.nextafter(horizontal[0], math.inf)]:
+                        point = [float('1e-' + str(power)) * scale, y * scale,
+                                 horizontal[1] * scale]
+                        base = oracle.nearest(radii0, point, iterations=900)
+                        for permutation in [(0, 1, 2), (2, 0, 1), (1, 2, 0)]:
+                            radii = [radii0[i] for i in permutation]
+                            for sign in [-1, 1]:
+                                xyz = [point[i] * sign for i in permutation]
+                                reference = dict(base)
+                                for key in ['footpoint', 'normal']:
+                                    reference[key] = [base[key][i] * sign for i in permutation]
+                                rows.append({'radii': radii, 'xyz': xyz, 'reference': reference})
+        # Oblate cusp inputs also exercise the shared cartographic inverse.
+        for power in [15, 60, 120, 150]:
+            radii = [2., 2., 1.]
+            for xy in [[1.5, 0.], [.9, 1.2]]:
+                xyz = xy + [float('1e-' + str(power))]
+                rows.append({'radii': radii, 'xyz': xyz,
+                             'reference': oracle.nearest(radii, xyz, iterations=900)})
+        # Unique solutions on the zero shortest-axis plane, outside the cusp.
+        for axes, point0 in [([1., 4., 4.], [0., math.nextafter(2.25, math.inf), 3.]),
+                               ([1., 4., 16.], [0., math.nextafter(2.25, math.inf), 12.75]),
+                               ([13., 13., 6.5], [math.nextafter(3.75, math.inf), 9., 0.])]:
+            for scale in [1., 6378137.]:
+                radii0 = [r * scale for r in axes]
+                point = [v * scale for v in point0]
+                base = oracle.nearest(radii0, point, iterations=900)
+                for permutation in [(0, 1, 2), (2, 0, 1), (1, 2, 0)]:
+                    for sign in [-1, 1]:
+                        reference = dict(base)
+                        for key in ['footpoint', 'normal']:
+                            reference[key] = [base[key][i] * sign for i in permutation]
+                        rows.append({'radii': [radii0[i] for i in permutation],
+                                     'xyz': [point[i] * sign for i in permutation],
+                                     'reference': reference})
+        with localcontext() as extreme:
+            extreme.prec = 440
+            for scale in [1., 6378137.]:
+                for power in [300, 320]:
+                    radii = [2 * scale, 2 * scale, scale]
+                    xyz = [1.5 * scale, 0., float('1e-' + str(power))]
+                    rows.append({'radii': radii, 'xyz': xyz,
+                                 'reference': oracle.nearest(radii, xyz, iterations=1600)})
+    return {'provenance': {'license': 'MIT', 'precision': 220, 'iterations': 900, 'extremePrecision': 440, 'extremeIterations': 1600,
             'method': 'Original Decimal bisection from exact stored binary64 inputs; positive-definite multiplier certificate.'}, 'cases': rows}
 
 

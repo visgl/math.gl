@@ -57,9 +57,11 @@ not a blanket nanometre claim for all ellipsoid operations.
 
 Prolate/triaxial Cartesian conversion and `scaleToGeodeticSurface` now use an
 original safeguarded nearest-point solve, replacing the radial approximation.
-All 64 prolate/triaxial inverse controls and 198 independent surface-footpoint
-controls enforce accuracy. Ambiguous interiors and the general solver's singular
-multiplier boundary reject without touching outputs. Qualification remains sampled;
+All 64 prolate/triaxial inverse controls and 606 independent surface-footpoint
+controls enforce accuracy, including 408 cusp controls. An original exact-dyadic
+fallback recovers ill-conditioned and unique boundary solutions; ambiguous
+interiors reject without touching outputs. The rare fallback uses built-in
+BigInt storage, adds no dependencies, and has an explicit iteration bound. Qualification remains sampled;
 extreme shapes and all unique boundary points are not universally certified.
 Public geometry vectors are frozen with their derived caches; construct a new
 ellipsoid to change shape. This tightens previously mutable nested vectors.
@@ -80,7 +82,7 @@ contract used by projection and Cartesian conversion.
 | Robust geodesic polygon area/perimeter and edge area | Not exposed or qualified; requires compensated accumulation, pole/dateline crossing and singularity tests |
 | Exact geodesics for arbitrary flattening | Not implemented; sixth-order series is not an exact elliptic-integral solver |
 | General triaxial geodesics | Not implemented |
-| Certified nearest surface point on every triaxial/prolate interior | Sampled positive-definite nearest solutions qualified; ambiguous/singular boundaries reject; no universal certificate |
+| Certified nearest surface point on every triaxial/prolate interior | Sampled nearest solutions and unique cusp boundaries qualified; ambiguous minima reject; no universal finite-input certificate |
 | Rhumb lines and geodesic intersections | Not implemented |
 | Magnetic/gravity/geoid models | Outside the ellipsoid geometry API; not implied by geodesic parity |
 | Performance advantage over GeographicLib | No claim; shared implementation plus facade has not established an advantage |

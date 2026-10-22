@@ -8,6 +8,7 @@ import {Ellipsoid} from '@math.gl/geospatial';
 import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
 import {geocentric} from '@math.gl/geospatial/projection/projections/geocent';
 import fixtures from './fixtures/interior-reference.json';
+import cuspFixtures from './fixtures/nearest-cusp-reference.json';
 
 export const cases = fixtures.cases;
 export const provenance = fixtures.provenance;
@@ -106,10 +107,39 @@ export function evaluateInterior(row: InteriorCase, path: InteriorPath) {
   };
 }
 export function qualifyInteriors() {
-  return cases.flatMap(row => {
+  const interiors = cases.flatMap(row => {
     const paths: InteriorPath[] = ['geospatial'];
     if (row.radii[0] === row.radii[1] && row.radii[2] <= row.radii[0])
       paths.push('projection', 'leaf');
     return paths.map(path => evaluateInterior(row, path));
   });
+  const cusps = cuspFixtures.cases.map((row, index) => {
+    const ellipsoid = new Ellipsoid(...(row.radii as [number, number, number]));
+    const source = [...row.xyz];
+    const output = [7, 8, 9];
+    const success = Boolean(ellipsoid.scaleToGeodeticSurface(source, output));
+    const alias = [...row.xyz, 42];
+    const aliased = Boolean(ellipsoid.scaleToGeodeticSurface(alias, alias));
+    const error = success
+      ? Math.max(
+          ...output.map((v, i) => {
+            const expected = row.reference.footpoint[i];
+            return expected === 0 ? Math.abs(v) : Math.abs((v - expected) / expected);
+          })
+        )
+      : null;
+    return {
+      id: 'nearest-cusp/' + index,
+      path: 'geospatial-surface',
+      qualified: true,
+      status: !success ? 'rejected' : error! <= 2e-12 ? 'matches-reference' : 'outside-tolerance',
+      footpointRelativeError: error,
+      finite: !success || output.every(Number.isFinite),
+      inputUnchanged: source.every((v, i) => v === row.xyz[i]),
+      failureAtomic: success || output.every((v, i) => v === [7, 8, 9][i]),
+      // Treat aliasing as part of the same required ownership gate.
+      aliasCorrect: aliased && alias[3] === 42 && output.every((v, i) => Object.is(v, alias[i]))
+    };
+  });
+  return [...interiors, ...cusps];
 }

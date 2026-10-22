@@ -3,10 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original safeguarded constrained-distance solver and compensated residual; no upstream code.
 
+import {exactNearestSurface} from './exact-nearest-surface';
+
 /** Unique nearest point on a positive three-axis ellipsoid. No output on failure.
  * With t = lambda + min(radii)^2 > 0 the constrained Hessian is positive
- * definite, certifying a global minimum in exact arithmetic. Singular boundary
- * roots reject rather than choosing an arbitrary normal. Numerical qualification
+ * definite, certifying a global minimum in exact arithmetic. Unique boundary
+ * roots and ill-conditioned residuals use exact dyadic classification/solving. Numerical qualification
  * is sampled; unrepresentable products and exhausted convergence reject.
  */
 export function nearestSurface(
@@ -43,7 +45,7 @@ export function nearestSurface(
     dy === 0 ? (uy === 0 ? 0 : Infinity) : uy / (dy + ey),
     dz === 0 ? (uz === 0 ? 0 : Infinity) : uz / (dz + ez)
   );
-  if (limit <= 1) return false;
+  if (limit <= 1 + 64 * Number.EPSILON) return exactNearestSurface(x, y, z, a, b, c, result);
   if ((x !== 0 ? 1 : 0) + (y !== 0 ? 1 : 0) + (z !== 0 ? 1 : 0) === 1) {
     result.x = x === 0 ? x : Math.sign(x) * a;
     result.y = y === 0 ? y : Math.sign(y) * b;
@@ -52,7 +54,7 @@ export function nearestSurface(
   }
   let lower = Math.hypot(dx === 0 ? ux : 0, dy === 0 ? uy : 0, dz === 0 ? uz : 0);
   let upper = Math.hypot(ux, uy, uz);
-  if (!(upper > 0) || !Number.isFinite(upper)) return false;
+  if (!(upper > 0) || !Number.isFinite(upper)) return exactNearestSurface(x, y, z, a, b, c, result);
   let t = lower > 0 ? lower : upper;
   for (let iteration = 0; iteration < 512; iteration++) {
     const hx = dx + t,
@@ -81,7 +83,7 @@ export function nearestSurface(
     const derivative = -2 * ((vx * vx) / hx + (vy * vy) / hy + (vz * vz) / hz);
     const roundoff = 4 * Number.EPSILON * (Math.abs(term) + rest);
     const residual = term + rest;
-    if (!Number.isFinite(residual)) return false;
+    if (!Number.isFinite(residual)) return exactNearestSurface(x, y, z, a, b, c, result);
     if (
       Math.abs(residual) <= 4 * Number.EPSILON * (Math.abs(term) + rest) ||
       upper - lower <= 4 * Number.EPSILON * t
@@ -90,15 +92,17 @@ export function nearestSurface(
       // multiplier. Bound displacement using its sensitivity, and reject when
       // the local error estimate is too large to certify the qualified budget.
       const uncertainty = roundoff / Math.abs(derivative);
-      if (!Number.isFinite(derivative) || !(Math.abs(derivative) > 0) || uncertainty >= t / 4)
-        return false;
+      if (!Number.isFinite(derivative) || !(Math.abs(derivative) > 0) || uncertainty > 2e-13 * t)
+        return exactNearestSurface(x, y, z, a, b, c, result);
       const qx = Math.sign(x) * a * (vx * (1 - lx / hx));
       const qy = Math.sign(y) * b * (vy * (1 - ly / hy));
       const qz = Math.sign(z) * c * (vz * (1 - lz / hz));
       const displacement =
         2 * uncertainty * Math.max(Math.abs(qx / hx), Math.abs(qy / hy), Math.abs(qz / hz));
-      if (!Number.isFinite(displacement) || displacement > 2e-13 * Math.max(a, b, c)) return false;
-      if (!Number.isFinite(qx) || !Number.isFinite(qy) || !Number.isFinite(qz)) return false;
+      if (!Number.isFinite(displacement) || displacement > 2e-13 * Math.max(a, b, c))
+        return exactNearestSurface(x, y, z, a, b, c, result);
+      if (!Number.isFinite(qx) || !Number.isFinite(qy) || !Number.isFinite(qz))
+        return exactNearestSurface(x, y, z, a, b, c, result);
       result.x = qx;
       result.y = qy;
       result.z = qz;
@@ -108,10 +112,10 @@ export function nearestSurface(
     else upper = t;
     const candidate = t - residual / derivative;
     const next = candidate > lower && candidate < upper ? candidate : lower + (upper - lower) / 2;
-    if (next === t) return false;
+    if (next === t) return exactNearestSurface(x, y, z, a, b, c, result);
     t = next;
   }
-  return false;
+  return exactNearestSurface(x, y, z, a, b, c, result);
 }
 
 function offset(
