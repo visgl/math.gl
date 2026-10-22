@@ -58,9 +58,13 @@ Types matching number arrays of specific lengths or typed arrays.
 
 ### `isUint16Array(value: unknown): value is Uint16Array`[​](#isuint16arrayvalue-unknown-value-is-uint16array "Direct link to isuint16arrayvalue-unknown-value-is-uint16array")
 
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
+
 Checks the intrinsic element type of an unsigned 16-bit typed array. Works across JavaScript realms, including iframe and Node VM arrays, and supports subviews. Rejects signed integers, floats, DataViews, and objects with forged constructors or `Symbol.toStringTag` properties.
 
 ### `isFloat16Array(value: unknown): value is Float16Array`[​](#isfloat16arrayvalue-unknown-value-is-float16array "Direct link to isfloat16arrayvalue-unknown-value-is-float16array")
+
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
 Checks for a native Float16Array using the same realm-independent element-type check. Does not require a Float16Array constructor in the caller's realm and does not install a polyfill. A Uint16Array containing encoded IEEE 754 binary16 bits returns false: those bits need decoding before they represent numeric floats.
 

@@ -48,6 +48,8 @@ Creates a quaternion from the given 3x3 rotation matrix. NOTE: The resultant qua
 
 ### fromEuler(euler: EulerLike): this[​](#fromeulereuler-eulerlike-this "Direct link to fromEuler(euler: EulerLike): this")
 
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
+
 Sets this quaternion from Euler angles and returns it. `EulerLike` is a structural type containing numeric `x`, `y`, and `z` fields plus an `order` string.
 
 ### fromAxisRotation(axis, radians): this[​](#fromaxisrotationaxis-radians-this "Direct link to fromAxisRotation(axis, radians): this")

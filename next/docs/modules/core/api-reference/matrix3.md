@@ -83,6 +83,8 @@ Sets the matrix to a transformation corresponding to the rotations represented b
 
 ### fromMatrix4(matrix4: Matrix4 | number\[16]): this[​](#frommatrix4matrix4-matrix4--number16-this "Direct link to fromMatrix4(matrix4: Matrix4 | number\[16]): this")
 
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
+
 Copies the upper-left 3x3 elements of `matrix4`, including any scale, and returns this matrix. This differs from `Matrix4.getRotationMatrix3()`, which removes scale.
 
 ### determinant(): number[​](#determinant-number "Direct link to determinant(): number")

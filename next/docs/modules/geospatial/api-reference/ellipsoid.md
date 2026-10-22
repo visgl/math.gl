@@ -72,6 +72,8 @@ An Ellipsoid instance initialized to the WGS84 standard.
 
 ### Ellipsoid.fromSpheroid(parameters: SpheroidParameters): Ellipsoid[​](#ellipsoidfromspheroidparameters-spheroidparameters-ellipsoid "Direct link to Ellipsoid.fromSpheroid(parameters: SpheroidParameters): Ellipsoid")
 
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
+
 Constructs radii `[semiMajorAxis, semiMajorAxis, semiMinorAxis]` from an owned snapshot of the supplied axes. Accepts the geometry returned by `normalizeCRS(...).ellipsoid`. Additional fields such as `eccentricitySquared` are not imported; the axes determine the shape.
 
 Throws if either axis is non-finite or non-positive, or the polar axis is larger than the equatorial axis. These checks apply to this adapter; the existing three-radius constructor retains its broader geometry support.
@@ -129,6 +131,8 @@ Returns
 * The cloned `Ellipsoid`.
 
 ### toSpheroid(): SpheroidParameters[​](#tospheroid-spheroidparameters "Direct link to toSpheroid(): SpheroidParameters")
+
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
 Returns a new frozen `{semiMajorAxis, semiMinorAxis}` snapshot in metres. The snapshot remains independent of subsequent changes to the radii vector. Throws for unequal X/Y radii, a prolate spheroid, non-finite axes or zero radii. It never approximates a triaxial ellipsoid by discarding one radius.
 

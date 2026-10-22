@@ -107,6 +107,8 @@ Sets the matrix to a transformation corresponding to the rotations represented b
 
 ### `fromMatrix3(matrix3: Matrix3 | number[9]): this`[​](#frommatrix3matrix3-matrix3--number9-this "Direct link to frommatrix3matrix3-matrix3--number9-this")
 
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
+
 Sets the upper-left 3x3 elements from `matrix3`, with zero translation.
 
 ### `frustum(options: {left: number, right: number, bottom: number, top: number, near: number, far: number}): this`[​](#frustumoptions-left-number-right-number-bottom-number-top-number-near-number-far-number-this "Direct link to frustumoptions-left-number-right-number-bottom-number-top-number-near-number-far-number-this")

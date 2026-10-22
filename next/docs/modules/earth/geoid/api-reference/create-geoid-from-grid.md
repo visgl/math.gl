@@ -1,5 +1,7 @@
 # createGeoidFromGrid
 
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
+
 Creates a `Geoid` from a complete global grid of decoded unsigned 16-bit samples. It uses the same bilinear or cubic interpolation as `parsePGM`, without requiring Arrow or a Parquet decoder in `@math.gl/earth/geoid`.
 
 ```
