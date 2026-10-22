@@ -39,11 +39,29 @@ export function basis(center: Vector): [Vector, Vector] {
   const x = unit(cross(Math.abs(center[2]) < 0.9 ? [0, 0, 1] : [0, 1, 0], center));
   return [x, cross(center, x)];
 }
-export function area(ring: Position[]): number {
-  return (
-    ring.reduce((sum, p, i) => {
-      const q = ring[(i + 1) % ring.length];
-      return sum + p[0] * q[1] - p[1] * q[0];
-    }, 0) / 2
-  );
+/** Orientation of a planar ring, normalized by its own extent. Translating
+ * before summation preserves tiny holes far from the chart origin; scaling
+ * avoids an absolute minimum area and overflow/underflow in cross products.
+ */
+export function ringOrientation(ring: Position[]): number {
+  const origin = ring[0];
+  let extent = 0;
+  for (const p of ring)
+    extent = Math.max(extent, Math.abs(p[0] - origin[0]), Math.abs(p[1] - origin[1]));
+  if (!extent) return 0;
+  if (!Number.isFinite(extent)) {
+    let coordinateScale = 0;
+    for (const p of ring)
+      coordinateScale = Math.max(coordinateScale, Math.abs(p[0]), Math.abs(p[1]));
+    return ringOrientation(ring.map(p => [p[0] / coordinateScale, p[1] / coordinateScale]));
+  }
+  let sum = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const p = ring[i],
+      q = ring[(i + 1) % ring.length];
+    sum +=
+      ((p[0] - origin[0]) / extent) * ((q[1] - origin[1]) / extent) -
+      ((p[1] - origin[1]) / extent) * ((q[0] - origin[0]) / extent);
+  }
+  return Math.sign(sum);
 }

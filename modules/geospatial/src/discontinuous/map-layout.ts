@@ -6,7 +6,7 @@ import polygonClipping from 'polygon-clipping';
 import {
   add,
   angle,
-  area,
+  ringOrientation,
   basis,
   coordinates,
   cross,
@@ -232,7 +232,7 @@ export class DiscontinuousMap {
     const planar = vectors.map(r =>
       r.map(p => [dot(x, p) / dot(center, p), dot(y, p) / dot(center, p)] as Position)
     );
-    if (planar.some(r => Math.abs(area(r)) < 1e-14)) throw new Error('Degenerate polygon ring');
+    if (planar.some(r => ringOrientation(r) === 0)) throw new Error('Degenerate polygon ring');
     let bound = 1;
     for (const ring of planar)
       for (const p of ring) bound = Math.max(bound, Math.abs(p[0]), Math.abs(p[1]));
@@ -264,7 +264,7 @@ export class DiscontinuousMap {
           if (points.length < 3) return;
           points.push(points[0]);
           const xy = points.map(p => this.project(r, p));
-          if (area(xy) > 0 !== (index === 0)) {
+          if (ringOrientation(xy) > 0 !== (index === 0)) {
             xy.reverse();
             points.reverse();
           }
@@ -333,8 +333,14 @@ export class DiscontinuousMap {
         group.push({r, i});
         groups.set(k, group);
       });
-    return [...groups.values()].map(group => {
-      if (group.length > 2) throw new Error('More than two regions share a boundary edge');
+    // Repeated/inset domains may share an edge with more than one other
+    // region. Describe each relation independently instead of imposing a
+    // manifold-mesh restriction on arbitrary overlapping map domains.
+    const relations = [...groups.values()].flatMap(group => {
+      if (group.length === 1) return [group];
+      return group.flatMap((edge, index) => group.slice(index + 1).map(other => [edge, other]));
+    });
+    return relations.map(group => {
       let kind: MapSeam['kind'] = 'boundary';
       if (group.length === 2) {
         const {r, i} = group[0],

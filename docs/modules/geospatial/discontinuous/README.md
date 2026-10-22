@@ -85,7 +85,8 @@ select a side. Static inverse candidates do not establish visibility in an
 animated or overlapping rendering; the renderer must resolve depth.
 
 `regions` exposes immutable definitions. `seams` pairs complete spherical boundary
-edges, with region IDs, zero-based edge indices, and `kind`: `join`, `cut`, or
+edges, with one relation per pair when overlapping/inset regions share the same
+edge, region IDs, zero-based edge indices, and `kind`: `join`, `cut`, or
 `boundary`. Join classification samples placed endpoints and midpoint; it is
 informational, not a mathematical continuity proof for custom callbacks.
 All geometry is split at every region boundary regardless of this classification.
@@ -120,7 +121,8 @@ degenerate rings, nonfinite coordinates, and antipodal edges.
 The planar reconstruction uses the MIT-licensed `polygon-clipping` library.
 Simple exteriors with contained holes are the intended input; the boolean kernel
 uses nonzero winding for self-intersections and clips holes extending outside the
-exterior. Rings with zero signed chart area are rejected. Geometry is not jittered
+exterior. Rings with zero signed chart area are rejected using their own translated,
+normalized extent; there is no fixed minimum area. Geometry is not jittered
 to move it away from cuts. Calculations use floating-point tolerances, including
 `1e-10` for spherical half-space containment and `1e-6` for the chart's horizon margin.
 

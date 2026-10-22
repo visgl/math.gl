@@ -488,3 +488,51 @@ test('scaled affine placements reject singular matrices and safely invert finite
     expect(distance(inverse[0].position, source)).toBeLessThan(1e-10);
   }
 });
+
+test('small geographic exteriors and holes retain their topology without a fixed area floor', () => {
+  const tiny: XY[] = [
+    [0, 0],
+    [1e-6, 0],
+    [1e-6, 1e-6],
+    [0, 1e-6]
+  ];
+  for (const map of [createAirOceanMap(), createInterruptedSinusoidalMap()]) {
+    const pieces = map.projectPolygon([tiny]);
+    expect(pieces).toHaveLength(1);
+    expect(pieces[0].sourceCoordinates[0]).toHaveLength(5);
+    const translated = pieces[0].sourceCoordinates[0].map(p => [p[0] * 1e6, p[1] * 1e6] as XY);
+    expect(Math.abs(signedArea(translated))).toBeCloseTo(1, 5);
+    const hole = tiny.map(([x, y]) => [10.1 + x, 10.1 + y] as XY);
+    const withHole = map.projectPolygon([rectangle(10, 11, 10, 11), hole]);
+    expect(withHole.some(p => p.coordinates.length === 2)).toBe(true);
+  }
+  expect(() =>
+    splitMap().projectPolygon([
+      [
+        [0, 0],
+        [1e-6, 0],
+        [2e-6, 0]
+      ]
+    ])
+  ).toThrow(/Degenerate/);
+});
+
+test('overlapping copies of a region retain independent seam relations and geometry', () => {
+  const map = new DiscontinuousMap([
+    region('a', -1, 1),
+    region('b', -1, 1),
+    region('inset', -1, 1, 10)
+  ]);
+  expect(map.findRegions([0, 0])).toEqual(['a', 'b', 'inset']);
+  expect(map.unprojectPoint([0, 0]).map(p => p.regionId)).toEqual(['a', 'b']);
+  expect(map.unprojectPoint([10, 0]).map(p => p.regionId)).toEqual(['inset']);
+  expect(map.seams.filter(s => s.kind === 'join')).toHaveLength(4);
+  expect(map.seams.filter(s => s.kind === 'cut')).toHaveLength(8);
+  expect(
+    map.projectLine([
+      [-10, 0],
+      [10, 0]
+    ])
+  ).toHaveLength(3);
+  expect(map.projectPolygon([rectangle(-0.5, 0.5, -0.5, 0.5).map(sphere)])).toHaveLength(3);
+});
