@@ -8,6 +8,8 @@
 
 `@math.gl/geospatial/projection` converts coordinates between geographic, projected and geocentric coordinate reference systems. Use it for map coordinates, in-place coordinate buffers, explicit datum transformations and coordinate propagation between epochs.
 
+Numerical accuracy is evaluated against **native PROJ**. The pinned proj4js reference serves compatibility tests and benchmarks. The independent references qualify specific configurations and coordinate domains; they do not establish complete modern PROJ equivalence. See [independent validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md) and the [modern PROJ audit](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/modern-proj-audit.md) for coverage and remaining gaps.
+
 ## Tectonic time machine[​](#tectonic-time-machine "Direct link to Tectonic time machine")
 
 Loading <!-- -->Tectonic time machine<!-- -->…

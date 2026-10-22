@@ -102,14 +102,14 @@ This example illustrates a projection choice. It does not identify a national gr
 
 ## Azimuthal and polar projections[​](#azimuthal-and-polar-projections "Direct link to Azimuthal and polar projections")
 
-| Algorithm                    | ID       | Export                      | Geometry and useful domain                                                        |
-| ---------------------------- | -------- | --------------------------- | --------------------------------------------------------------------------------- |
-| Lambert azimuthal equal area | `laea`   | `lambertAzimuthalEqualArea` | Sphere or ellipsoid; area-preserving maps centered on a region                    |
-| Stereographic                | `stere`  | `stereographic`             | Sphere or ellipsoid; conformal, including polar aspects                           |
-| Oblique stereographic        | `sterea` | `obliqueStereographic`      | Regional conformal alternative; requires a non-polar origin                       |
-| Azimuthal equidistant        | `aeqd`   | `azimuthalEquidistant`      | Sphere or ellipsoid; centered-distance use, with ellipsoidal qualifications below |
-| Gnomonic                     | `gnom`   | `gnomonic`                  | Spherical equations; great-circle paths are straight lines, horizon excluded      |
-| Orthographic                 | `ortho`  | `orthographic`              | Spherical equations; globe-like hemisphere view, invisible points rejected        |
+| Algorithm                    | ID       | Export                      | Geometry and useful domain                                                                 |
+| ---------------------------- | -------- | --------------------------- | ------------------------------------------------------------------------------------------ |
+| Lambert azimuthal equal area | `laea`   | `lambertAzimuthalEqualArea` | Sphere or ellipsoid; area-preserving maps centered on a region                             |
+| Stereographic                | `stere`  | `stereographic`             | Sphere or ellipsoid; conformal, including polar aspects                                    |
+| Oblique stereographic        | `sterea` | `obliqueStereographic`      | Regional conformal alternative; requires a non-polar origin                                |
+| Azimuthal equidistant        | `aeqd`   | `azimuthalEquidistant`      | Sphere or ellipsoid; centered-distance use, with ellipsoidal qualifications below          |
+| Gnomonic                     | `gnom`   | `gnomonic`                  | Spherical equations; great-circle paths are straight lines, horizon excluded               |
+| Orthographic                 | `ortho`  | `orthographic`              | Spherical and ellipsoidal equations; globe-like hemisphere view, invisible points rejected |
 
 Choose the center deliberately. Distortion increases away from it, and an antipodal point or projection horizon may be undefined. Polar stereographic is useful for high-latitude mapping; UPS aliases `EPSG:5041` and `EPSG:5042` provide the WGS84 north/south definitions.
 

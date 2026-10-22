@@ -42,6 +42,8 @@ const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
 ```
 
+See the [accuracy and GeographicLib coverage audit](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-accuracy.md) for qualified domains, measured geodesic accuracy, and remaining capability gaps.
+
 ## Projection interoperability[​](#projection-interoperability "Direct link to Projection interoperability")
 
 `@math.gl/geospatial/projection` uses spheres and oblate spheroids: its X/Y equatorial radii are equal. `Ellipsoid` also supports three independent radii. The adapters exchange only the common geometry; they do not transfer a datum, axis order, units or epoch.
