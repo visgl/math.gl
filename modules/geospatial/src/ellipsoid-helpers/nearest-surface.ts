@@ -78,15 +78,26 @@ export function nearestSurface(
       term = offset(uz, fz, dz, ez, t, hz) * (vz + 1);
       rest = (vx * (1 - lx / hx)) ** 2 + (vy * (1 - ly / hy)) ** 2;
     }
+    const derivative = -2 * ((vx * vx) / hx + (vy * vy) / hy + (vz * vz) / hz);
+    const roundoff = 4 * Number.EPSILON * (Math.abs(term) + rest);
     const residual = term + rest;
     if (!Number.isFinite(residual)) return false;
     if (
       Math.abs(residual) <= 4 * Number.EPSILON * (Math.abs(term) + rest) ||
       upper - lower <= 4 * Number.EPSILON * t
     ) {
+      // With several large components, a rounded residual may lose a tiny
+      // multiplier. Bound displacement using its sensitivity, and reject when
+      // the local error estimate is too large to certify the qualified budget.
+      const uncertainty = roundoff / Math.abs(derivative);
+      if (!Number.isFinite(derivative) || !(Math.abs(derivative) > 0) || uncertainty >= t / 4)
+        return false;
       const qx = Math.sign(x) * a * (vx * (1 - lx / hx));
       const qy = Math.sign(y) * b * (vy * (1 - ly / hy));
       const qz = Math.sign(z) * c * (vz * (1 - lz / hz));
+      const displacement =
+        2 * uncertainty * Math.max(Math.abs(qx / hx), Math.abs(qy / hy), Math.abs(qz / hz));
+      if (!Number.isFinite(displacement) || displacement > 2e-13 * Math.max(a, b, c)) return false;
       if (!Number.isFinite(qx) || !Number.isFinite(qy) || !Number.isFinite(qz)) return false;
       result.x = qx;
       result.y = qy;
@@ -95,7 +106,6 @@ export function nearestSurface(
     }
     if (residual > 0) lower = t;
     else upper = t;
-    const derivative = -2 * ((vx * vx) / hx + (vy * vy) / hy + (vz * vz) / hz);
     const candidate = t - residual / derivative;
     const next = candidate > lower && candidate < upper ? candidate : lower + (upper - lower) / 2;
     if (next === t) return false;

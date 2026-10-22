@@ -55,7 +55,11 @@ relative convergence test preserve the shortest-axis component when the ordinary
 surface norm rounds to one. A further 72 controls use a 220-digit, 900-update
 Decimal oracle on exact cusp/adjacent binary64 inputs, both signs and axis
 permutations. Their per-component relative ceiling is `2e-12`, including
-coordinates near `1e-100`; a whole-shape absolute tolerance cannot hide these errors.
+coordinates near `1e-100`; a whole-shape absolute tolerance cannot hide these errors. Success additionally
+requires estimated residual roundoff and multiplier sensitivity to bound
+footpoint displacement, with a safety margin inside the qualified coordinate budget. Multidirectional cusps that cannot meet this condition
+reject atomically, even when their nearest point is unique; these remain an
+explicit qualification gap rather than silently returning a rounded surface norm.
 
 If the shortest-axis coordinates vanish and the limiting surface norm is at most one, the general solver rejects atomically. This includes ambiguous medial-set points and the singular boundary, including some unique cusp points. It does not promise complete inversion at every unique boundary point. Sphere/oblate cartographic inversion retains its separately qualified analytic cusp behavior. Unrepresentable normalized ratios, nonfinite intermediates and exhausted iteration also reject. There is no global certificate for all finite shapes.
 

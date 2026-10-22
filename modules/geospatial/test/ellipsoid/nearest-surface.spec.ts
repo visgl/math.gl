@@ -83,3 +83,18 @@ for (const [index, row] of cuspFixtures.cases.entries()) {
     }
   });
 }
+
+test('uncertifiable multidirectional cusps reject atomically rather than returning a rounded norm', () => {
+  // At x=0 this rotational ellipsoid has an exact cusp: the other normalized
+  // coordinates are 3/5 and 4/5. Nonzero x makes the nearest point unique, but
+  // ordinary binary64 residuals cannot resolve the tiny multiplier reliably.
+  for (const x of [1e-15, 1e-60, 1e-120, 1e-150]) {
+    const ellipsoid = new Ellipsoid(1, 4, 4);
+    const point = [x, 2.25, 3];
+    const result = [7, 8, 9];
+    expect(ellipsoid.scaleToGeodeticSurface(point, result)).toBeUndefined();
+    expect(result).toEqual([7, 8, 9]);
+    expect(ellipsoid.cartesianToCartographic(point, result)).toBeUndefined();
+    expect(result).toEqual([7, 8, 9]);
+  }
+});

@@ -12,7 +12,7 @@
     "platform": "darwin",
     "architecture": "arm64"
   },
-  "sourceSHA256": "59c3d105654bc1f8fcba548f03125280eb2a1a17c8f9b14276a6f46c1a7ead11",
+  "sourceSHA256": "f7b151293de09ba08d916762a6653397ea9f979d4dd550d8764ffec73c6755a3",
   "angleToleranceRadians": 1.7453292519943295e-11,
   "heightTolerance": "max(1e-12, max(radii) * 2e-12) in axis units",
   "note": "Diagnostic matches do not promote unsupported domains. Passing bounded-behavior checks is not an accuracy claim.",
