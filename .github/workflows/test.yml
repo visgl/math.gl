@@ -164,9 +164,11 @@ jobs:
       # The Azure Ubuntu mirror has taken 6+ minutes to fetch browser fonts.
       # Use Ubuntu's main archive and bound stalled network requests. OS libraries
       # are still installed on every fresh runner; a browser cache cannot replace them.
+      # Hosted runners also use mirror+file entries backed by apt-mirrors.txt.
       - name: Configure Ubuntu archive for browser dependencies
         run: |
-          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          sudo find /etc/apt -maxdepth 2 -type f \( -name '*.list' -o -name '*.sources' -o -name '*mirrors*.txt' \) \
+            -exec sed -i 's|http[s]*://azure\.archive\.ubuntu\.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' {} +
           printf 'Acquire::Retries "2";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/80-ci-network
 
       - name: Install Chromium for coverage
@@ -295,9 +297,11 @@ jobs:
       # The Azure Ubuntu mirror has taken 6+ minutes to fetch browser fonts.
       # Use Ubuntu's main archive and bound stalled network requests. OS libraries
       # are still installed on every fresh runner; a browser cache cannot replace them.
+      # Hosted runners also use mirror+file entries backed by apt-mirrors.txt.
       - name: Configure Ubuntu archive for browser dependencies
         run: |
-          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          sudo find /etc/apt -maxdepth 2 -type f \( -name '*.list' -o -name '*.sources' -o -name '*mirrors*.txt' \) \
+            -exec sed -i 's|http[s]*://azure\.archive\.ubuntu\.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' {} +
           printf 'Acquire::Retries "2";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/80-ci-network
 
       - name: Install selected Playwright browser
