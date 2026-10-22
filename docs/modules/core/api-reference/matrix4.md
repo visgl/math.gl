@@ -103,6 +103,10 @@ Sets the matrix to a transformation corresponding to the rotations represented b
 
 ### `fromMatrix3(matrix3: Matrix3 | number[9]): this`
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Sets the upper-left 3x3 elements from `matrix3`, with zero translation.
 
 ### `frustum(options: {left: number, right: number, bottom: number, top: number, near: number, far: number}): this`

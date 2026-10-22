@@ -1,5 +1,12 @@
 # Discontinuous maps (experimental)
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+</p>
+
+The discontinuous map API, presets, and layout helpers are experimental and may change.
+
 Project geographic points, lines, and polygons into a map with cuts. Import this
 API separately from scalar CRS transforms:
 

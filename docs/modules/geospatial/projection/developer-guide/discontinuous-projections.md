@@ -1,5 +1,12 @@
 # Discontinuous projections
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+</p>
+
+The discontinuous map API, presets, and layout helpers are experimental and may change.
+
 A discontinuous map places neighboring parts of the Earth in separate parts of a
 plane. A line that crosses a cut must end on one side and resume on the other;
 a polygon must become separate, closed pieces. Projecting only the original

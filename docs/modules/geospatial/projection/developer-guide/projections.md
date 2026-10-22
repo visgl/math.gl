@@ -193,6 +193,11 @@ operations. Cube-face selection and tiling likewise belong to the application.
 
 ### Discontinuous map layouts (experimental)
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+</p>
+
 The separate [`@math.gl/geospatial/discontinuous` API](../../discontinuous/README.md)
 provides static region-aware point projection, inverse candidates, and seam-aware
 line and polygon projection. Presets include a 24-panel AirOcean arrangement

@@ -69,6 +69,10 @@ An Ellipsoid instance initialized to the WGS84 standard.
 
 ### Ellipsoid.fromSpheroid(parameters: SpheroidParameters): Ellipsoid
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Constructs radii `[semiMajorAxis, semiMajorAxis, semiMinorAxis]` from an owned
 snapshot of the supplied axes. Accepts the geometry returned by
 `normalizeCRS(...).ellipsoid`. Additional fields such as `eccentricitySquared`
@@ -131,6 +135,10 @@ Returns
 - The cloned `Ellipsoid`.
 
 ### toSpheroid(): SpheroidParameters
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
 
 Returns a new frozen `{semiMajorAxis, semiMinorAxis}` snapshot in metres.
 The snapshot remains independent of subsequent changes to the radii vector.
