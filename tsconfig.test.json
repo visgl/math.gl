@@ -86,6 +86,9 @@
       "@math.gl/geospatial/crs": [
         "./modules/geospatial/src/crs/index.ts"
       ],
+      "@math.gl/geospatial/discontinuous": [
+        "./modules/geospatial/src/discontinuous.ts"
+      ],
       "@math.gl/geospatial/projection": [
         "./modules/geospatial/src/projection/index.ts"
       ],

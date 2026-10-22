@@ -5355,6 +5355,7 @@ __metadata:
     "@math.gl/core": "npm:5.0.0-alpha.19"
     "@math.gl/geometry": "npm:5.0.0-alpha.19"
     "@math.gl/web-mercator": "npm:5.0.0-alpha.19"
+    polygon-clipping: "npm:0.15.7"
     proj4: "npm:2.22.0"
   languageName: unknown
   linkType: soft
@@ -18564,6 +18565,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"polygon-clipping@npm:0.15.7":
+  version: 0.15.7
+  resolution: "polygon-clipping@npm:0.15.7"
+  dependencies:
+    robust-predicates: "npm:^3.0.2"
+    splaytree: "npm:^3.1.0"
+  checksum: 10c0/9515283509f1793f22fd87e68662838a6ebbd33cca4fc4bccd9f1b4f366383a4590e9a1cd48287e6897ad018803aeb97ed9ebe38bada5cffa7b4551539a9ab10
+  languageName: node
+  linkType: hard
+
 "postcss-attribute-case-insensitive@npm:^7.0.1":
   version: 7.0.1
   resolution: "postcss-attribute-case-insensitive@npm:7.0.1"
@@ -21344,6 +21355,13 @@ __metadata:
   version: 1.0.2
   resolution: "splaytree-ts@npm:1.0.2"
   checksum: 10c0/4c34573891a749055ffe22381ea841ae03dbf7b55a3ea4a1d7df5013bfbe128e79f6c468579358ec573734cdbdf5f77a97ae7185f155248eb8be58151428c85e
+  languageName: node
+  linkType: hard
+
+"splaytree@npm:^3.1.0":
+  version: 3.2.3
+  resolution: "splaytree@npm:3.2.3"
+  checksum: 10c0/b37e0dc4555b018142e0142e5cf576fd2eec7ababb5149947b731f7137728fe799da2fad60b110709aec44f3a7986451d9a9e451c9559601b8ce1d1195dace1a
   languageName: node
   linkType: hard
 

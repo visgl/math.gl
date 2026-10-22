@@ -7,7 +7,7 @@ This module contains geospatial math, primarly ellipsoid math for dealing with t
 For documentation please visit the [website](https://math.gl).
 
 The grouped subpaths include `@math.gl/geospatial/ellipsoid`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`,
-`/wkb`, `/geoarrow`, and `/expressions`. DGGS remains a separate module at `@math.gl/dggs`.
+`/wkb`, `/geoarrow`, `/expressions`, and the experimental `/discontinuous`. DGGS remains a separate module at `@math.gl/dggs`.
 `@math.gl/web-mercator` remains available for existing applications.
 
 Use `@math.gl/geospatial/ellipsoid` for ellipsoid coordinate math and local tangent frames,
