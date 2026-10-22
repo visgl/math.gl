@@ -35,22 +35,22 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
   var dlon = adjust_lon(lon - state.long0, state.over);
   el = dlon * Math.sin(lat);
   if (state.sphere) {
-    if (Math.abs(lat) <= EPSLN) {
+    if (lat === 0) {
       x = state.a * dlon;
       y = -1 * state.a * state.lat0;
     } else {
       x = (state.a * Math.sin(el)) / Math.tan(lat);
       // This is a meridian distance, not a latitude to wrap at either pole.
-      y = state.a * (lat - state.lat0 + (1 - Math.cos(el)) / Math.tan(lat));
+      y = state.a * (lat - state.lat0 + (2 * Math.sin(el / 2) ** 2) / Math.tan(lat));
     }
   } else {
-    if (Math.abs(lat) <= EPSLN) {
+    if (lat === 0) {
       x = state.a * dlon;
       y = -1 * state.ml0;
     } else {
       var nl = gN(state.a, state.e, Math.sin(lat)) / Math.tan(lat);
       x = nl * Math.sin(el);
-      y = meridianDistance(state.a, state.es, state.lat0, lat) + nl * (1 - Math.cos(el));
+      y = meridianDistance(state.a, state.es, state.lat0, lat) + nl * (2 * Math.sin(el / 2) ** 2);
     }
   }
   p.x = x + state.x0;
@@ -181,13 +181,26 @@ function refineInverseLatitude(
     const radius = normal / Math.tan(latitude);
     const arc = Math.asin(x / radius);
     const easting = radius * Math.sin(arc);
-    const northing = state.sphere
-      ? state.a * (latitude - state.lat0 + (1 - Math.cos(arc)) / Math.tan(latitude))
-      : meridianDistance(state.a, state.es, state.lat0, latitude) + radius * (1 - Math.cos(arc));
+    const oneMinusCos = 2 * Math.sin(arc / 2) ** 2;
+    const meridian = state.sphere
+      ? state.a * (latitude - state.lat0)
+      : meridianDistance(state.a, state.es, state.lat0, latitude);
+    const correction = radius * oneMinusCos;
+    const northing = meridian + correction;
     const error = northing - y;
+    // Scale each ordinate by the terms forming it. A full-axis tolerance on
+    // tiny equatorial northings would accept a large relative latitude error.
     if (
-      Math.hypot(easting - x, error) <=
-      64 * Number.EPSILON * Math.max(state.a, Math.abs(x), Math.abs(y))
+      Math.abs(easting - x) <= 64 * Number.EPSILON * Math.max(state.a, Math.abs(x)) &&
+      Math.abs(error) <=
+        64 *
+          Number.EPSILON *
+          Math.max(
+            Math.abs(y),
+            Math.abs(meridian),
+            Math.abs(correction),
+            state.a * Math.max(Math.abs(latitude), Math.abs(state.lat0))
+          )
     )
       return latitude;
     const meridianDerivative = state.sphere
@@ -195,7 +208,7 @@ function refineInverseLatitude(
       : (state.a * (1 - state.es)) / Math.pow(denominator, 1.5);
     const radiusDerivative =
       normal * ((state.sphere ? 0 : (state.es * cos * cos) / denominator) - 1 / (sin * sin));
-    const derivative = meridianDerivative + radiusDerivative * (1 - 1 / Math.cos(arc));
+    const derivative = meridianDerivative + radiusDerivative * (-oneMinusCos / Math.cos(arc));
     const step = error / derivative;
     if (!Number.isFinite(step) || Math.abs(step) > 1e-6) return undefined;
     latitude -= step;

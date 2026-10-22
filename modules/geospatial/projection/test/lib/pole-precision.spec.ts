@@ -136,8 +136,11 @@ test('polyconic inverses accept roundoff-stalled updates only with a tight plana
       from: '+proj=longlat +datum=none',
       to: `+proj=poly ${shape}`
     });
-    for (const latitude of [-89.9, -89, -88, -80, -45, 45, 80, 88, 89, 89.9]) {
-      for (const longitude of [-10, -5, -1, 0, 1, 5, 10]) {
+    for (const latitude of [
+      -89.9, -89, -88, -80, -45, -0.001, -0.00001, -0.000001, -0.0000001, -1e-10, -1e-12, 1e-12,
+      1e-10, 0.0000001, 0.000001, 0.00001, 0.001, 45, 80, 88, 89, 89.9
+    ]) {
+      for (const longitude of [-49, -10, -5, -1, 0, 1, 5, 10, 49]) {
         const projected = transform.project([longitude, latitude]);
         expect(
           () => transform.unproject(projected),
@@ -145,7 +148,9 @@ test('polyconic inverses accept roundoff-stalled updates only with a tight plana
         ).not.toThrow();
         const inverse = transform.unproject(projected);
         expect(Math.abs(inverse[0] - longitude)).toBeLessThan(2e-9);
-        expect(Math.abs(inverse[1] - latitude)).toBeLessThan(2e-11);
+        expect(Math.abs(inverse[1] - latitude)).toBeLessThan(
+          Math.min(2e-11, Math.abs(latitude) * 1e-6)
+        );
         const recovered = transform.project(inverse);
         expect(Math.hypot(recovered[0] - projected[0], recovered[1] - projected[1])).toBeLessThan(
           2e-7
@@ -157,4 +162,33 @@ test('polyconic inverses accept roundoff-stalled updates only with a tight plana
   const inverse = transform.unproject([9690.78815532985, 9896771.515790729]);
   expect(Math.abs(inverse[0] - 5)).toBeLessThan(2e-9);
   expect(Math.abs(inverse[1] - 89)).toBeLessThan(2e-11);
+});
+
+test('polyconic inverts the stored near-equator cancellation regression', () => {
+  const transform = projectionEngine.createProjection({to: '+proj=poly +R=6371000'});
+  const projected = [5448551.405583377, 0.15172155439576684];
+  const inverse = transform.unproject(projected);
+  expect(Math.abs(inverse[0] - 49)).toBeLessThan(2e-11);
+  // This stored northing was formed with the old cancelling forward formula;
+  // its accurate inverse need not be the original ideal latitude of 1e-6°.
+  expect(Math.abs(inverse[1] - 9.991004620028349e-7)).toBeLessThan(1e-15);
+  const recovered = transform.project(inverse);
+  expect(Math.hypot(recovered[0] - projected[0], recovered[1] - projected[1])).toBeLessThan(1e-7);
+});
+
+test('polyconic near-equator forward equations match independent 80-digit controls', () => {
+  // Original spherical equations evaluated with mpmath 1.3.0 at 80 digits,
+  // using the exact binary64 longitude/latitude inputs. Native PROJ's rounded
+  // 1-cos(e) is not an accuracy oracle for these cancellation-sensitive rows.
+  const transform = projectionEngine.createProjection({to: '+proj=poly +R=6371000'});
+  const controls = [
+    {input: [49, 0.000001], expected: [5448551.405583377, 0.15185815657778803]},
+    {input: [-49, -0.000001], expected: [-5448551.405583377, -0.15185815657778803]},
+    {input: [10, 0.0000001], expected: [1111949.2664455874, 0.011288852222695062]}
+  ];
+  for (const row of controls) {
+    const actual = transform.project(row.input);
+    expect(Math.abs(actual[0] - row.expected[0])).toBeLessThan(1e-8);
+    expect(Math.abs(actual[1] - row.expected[1])).toBeLessThan(1e-12);
+  }
 });
