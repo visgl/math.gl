@@ -4,7 +4,7 @@
 
 import {createLayout, type MeshEdge} from '../unfolding-polyhedron/layout';
 import {landArc} from '../unfolding-polyhedron/geography';
-import {dot, type Polyhedron, type Vec3} from '../unfolding-polyhedron/polyhedra';
+import {dot, edgeKey, type Polyhedron, type Vec3} from '../unfolding-polyhedron/polyhedra';
 
 /** Independent, closed graticule mesh. Equal-latitude trapezoids are planar.
  * Pole cells are triangles; shared longitude seams use the same vertex IDs.
@@ -48,11 +48,12 @@ export function createMyriahedralLayout(level: number, seed: number, mode: strin
   const columns = [24, 48, 72, 96][level];
   if (!columns) throw new RangeError('Unknown graticule resolution');
   const mesh = createGraticule(columns);
-  const exposure = new Map<MeshEdge, number>();
+  const exposure = new Map<string, number>();
   const land = (edge: MeshEdge) => {
-    if (!exposure.has(edge))
-      exposure.set(edge, landArc(mesh.vertices[edge.a], mesh.vertices[edge.b]));
-    return exposure.get(edge)!;
+    const key = edgeKey(edge.a, edge.b);
+    if (!exposure.has(key))
+      exposure.set(key, landArc(mesh.vertices[edge.a], mesh.vertices[edge.b]));
+    return exposure.get(key)!;
   };
   const weight = (edge: MeshEdge, geographic: boolean) => {
     const a = mesh.vertices[edge.a],

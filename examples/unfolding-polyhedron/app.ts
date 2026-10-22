@@ -190,6 +190,8 @@ export function mountUnfolding(
   );
   let previous = '';
   let framingKey = '';
+  let framingLayout: typeof layout | undefined;
+  let framingPoses: ReturnType<typeof layout.evaluate>[] = [];
   let framingBounds = [0, 0, 0, 0];
   function render(time: number) {
     const dt = Math.min((time - lastTime) / 1000, 0.05);
@@ -249,12 +251,17 @@ export function mountUnfolding(
       if (options.northUp) {
         // Keep the camera stationary while the hinges move. Fit sampled poses
         // once per layout/orbit, rather than recentering every animation frame.
-        const key = [subdivision.value, cuts.value, seed, yaw, pitch].join(':');
+        if (framingLayout !== layout) {
+          framingLayout = layout;
+          framingPoses = [0, 0.25, 0.5, 0.75, 1].map(amount => layout.evaluate(amount));
+          framingKey = '';
+        }
+        const key = [yaw, pitch].join(':');
         if (key !== framingKey) {
           framingKey = key;
           const bounds = [Infinity, -Infinity, Infinity, -Infinity];
-          for (const amount of [0, 0.25, 0.5, 0.75, 1])
-            for (const face of layout.evaluate(amount))
+          for (const pose of framingPoses)
+            for (const face of pose)
               for (const point of face) {
                 const p = view.transformAsPoint(point);
                 bounds[0] = Math.min(bounds[0], p[0]);
