@@ -158,13 +158,11 @@ worldAreas.project([12, 55]);
 
 [Equal Earth](https://proj.org/en/stable/operations/projections/eqearth.html) is a useful starting point for area-preserving world maps. A projection converts points; it does not choose polygon seam splits or tessellation. Use [`@math.gl/geometry/polygon`](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/polygon.md) for the relevant geometric operations. Cube-face selection and tiling likewise belong to the application.
 
-### Not yet supported: discontinuous map layouts[​](#not-yet-supported-discontinuous-map-layouts "Direct link to Not yet supported: discontinuous map layouts")
+### Discontinuous map layouts (experimental)[​](#discontinuous-map-layouts-experimental "Direct link to Discontinuous map layouts (experimental)")
 
-math.gl does not currently provide complete discontinuous map layouts, such as Goode's interrupted homolosine, interrupted sinusoidal and Mollweide maps, or the Butterfly, Collignon and Waterman polyhedral layouts. These combine projection equations with rules for splitting the globe into lobes or faces and arranging the resulting pieces on the map.
+The separate [`@math.gl/geospatial/discontinuous` API](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous.md) provides static region-aware point projection, inverse candidates, and seam-aware line and polygon projection. Initial presets are a 24-panel AirOcean arrangement with gnomonic face mapping and a six-lobe interrupted sinusoidal map.
 
-The missing support is primarily in map rendering: choosing lobes or faces, clipping and splitting lines and polygons at their boundaries, and placing the pieces into a coherent layout. Transforming each vertex independently is insufficient for rendering geometry across those boundaries. The built-in `sinu` and `moll` algorithms supply point transforms, but do not construct interrupted layouts; `qsc` likewise does not assemble an unfolded polyhedral map.
-
-See the [supported profile](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md) for math.gl's current coordinate transformation coverage. D3 supports these layouts through [`d3-geo`](https://d3js.org/d3-geo) with the clipping-aware projections in [`d3-geo-polygon`](https://github.com/d3/d3-geo-polygon#updated-projections). Support for these layouts is not currently available in deck.gl.
+Polygon support currently requires each input polygon to fit in an open hemisphere. AirOcean here is the cut arrangement, not the Gray-Fuller projection. These layouts are not scalar CRS operations and are not automatically supported by existing deck.gl geographic layers. The scalar `sinu` and `qsc` kernels remain separate from interrupted or unfolded map assembly.
 
 ## Satellite views and rotated maps[​](#satellite-views-and-rotated-maps "Direct link to Satellite views and rotated maps")
 
