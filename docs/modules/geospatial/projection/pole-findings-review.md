@@ -2,7 +2,7 @@
 
 Every configuration with a finding at revision `64b7fe33` is listed below. The review found real accuracy gaps in **seven kernels**: LAEA, stereographic, oblique stereographic, spherical AEQD, QSC, Mollweide and polyconic. **22 of the 49 configurations receive a numerical fix.** Some have both a fixed math.gl error and a separate retained oracle/domain difference.
 
-The unchanged native PROJ audit still has **44 configurations with discrepancies** over 144 configurations / 5,579 probes. This is a discrepancy count, not an unfixed-bug count. Every retained configuration has a reviewed disposition; none is promoted into an accuracy pass. The baseline gate still rejects new coordinates, changed rejection policies and worsened measured errors. Updated ceilings record the reviewed formula corrections; the independent precision gates prevent a blanket relaxation.
+The unchanged native PROJ audit still has **44 configurations with discrepancies** over 144 configurations / 5,579 probes. This is a discrepancy count, not an unfixed-bug count. Every retained configuration has a reviewed disposition; none is promoted into an accuracy pass. The baseline gate still rejects new coordinates, changed rejection policies and worsened measured errors. Cross-engine near-pole allowances are consumed one-to-one, so one baseline finding cannot permit failures to spread across meridians. Albers and equidistant conic retain unweighted longitude wherever their exact pole maps to an arc; only collapsed pole geometry permits cosine weighting. Updated ceilings record the reviewed formula corrections; the independent precision gates prevent a blanket relaxation.
 
 ## Independent numerical evidence
 

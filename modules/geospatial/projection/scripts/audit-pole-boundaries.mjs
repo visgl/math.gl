@@ -18,7 +18,7 @@ try {
   const report = {oracle: 'pyproj 3.7.2 / PROJ 9.5.1',
     referenceSourceSHA256: reference.sourceSHA256,
     referenceGeneratorSHA256: reference.generatorSHA256,
-    methodology: 'Unchanged definitions except documented non-ellipsoid aliases/defaults. Forward error in metres (1 mm + 1e-12 relative screening); inverse in degrees (1e-6 screening), with longitude weighted by cos(latitude) at collapsed poles. Pole-line maps retain longitude. All oracle rejections and disagreements are retained. Screening is an audit, not a global accuracy guarantee.',
+    methodology: 'Unchanged definitions except documented non-ellipsoid aliases/defaults. Forward error in metres (1 mm + 1e-12 relative screening); inverse in degrees (1e-6 screening), with longitude weighted by cos(latitude) at collapsed poles. Pole-line maps and noncollapsed conic pole arcs retain unweighted longitude. All oracle rejections and disagreements are retained. Screening is an audit, not a global accuracy guarantee.',
     cases};
   const output = process.argv[2];
   if (output) writeFileSync(output, JSON.stringify(report, null, 2) + '\n');

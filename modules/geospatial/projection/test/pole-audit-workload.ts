@@ -16,6 +16,49 @@ const projections = Object.values(native).filter((value): value is ProjectionPlu
   Boolean(value && typeof value === 'object' && 'create' in value)
 );
 
+type AuditFinding = {
+  direction: string;
+  kind: string;
+  input: number[];
+  error?: number;
+};
+
+export function consumePoleFinding(remaining: AuditFinding[], finding: AuditFinding) {
+  const previous =
+    remaining.find(
+      m =>
+        m.direction === finding.direction &&
+        m.kind === finding.kind &&
+        m.input[0] === finding.input[0] &&
+        m.input[1] === finding.input[1]
+    ) ||
+    (finding.kind === 'numeric difference' && Math.abs(finding.input[1]) > 89.9999
+      ? remaining
+          .filter(
+            m =>
+              m.kind === finding.kind &&
+              m.direction === finding.direction &&
+              Math.abs(m.input[1] - finding.input[1]) < 1e-5
+          )
+          .sort((a, b) => (b.error || 0) - (a.error || 0))[0]
+      : undefined);
+  if (previous) remaining.splice(remaining.indexOf(previous), 1);
+  return previous;
+}
+
+// Cone poles can be arcs or collapsed points, depending on the definition and
+// hemisphere. Measure exact pole geometry instead of guessing from its name.
+export function conePoleRetainsLongitude(
+  project: (point: number[]) => number[],
+  latitude: number
+): boolean {
+  const pole = latitude < 0 ? -90 : 90;
+  const first = project([0, pole]);
+  const second = project([90, pole]);
+  const scale = Math.max(1, ...first.map(Math.abs), ...second.map(Math.abs));
+  return Math.max(...first.map((v, i) => Math.abs(v - second[i]))) > 64 * Number.EPSILON * scale;
+}
+
 export function runPoleAudit() {
   return reference.cases.map(fixture => {
     const transform = new native.ProjectionTransform({
@@ -26,7 +69,12 @@ export function runPoleAudit() {
     const algorithm = /\+proj=(\w+)/.exec(fixture.definition)![1];
     const poleLine = ['eck6', 'eqearth', 'eqc', 'equi', 'cea', 'mill', 'robin'].includes(algorithm);
     const errors = {forward: 0, inverse: 0};
-    const mismatches: {input: number[]; direction: string; error?: number; kind: string}[] = [];
+    const mismatches: {
+      input: number[];
+      direction: string;
+      error?: number;
+      kind: string;
+    }[] = [];
     let comparisons = 0;
     let rejectedByPROJ = 0;
     for (const row of fixture.results as OracleRow[]) {
@@ -38,13 +86,22 @@ export function runPoleAudit() {
         try {
           actual = direction === 'forward' ? transform.project(input) : transform.unproject(input);
         } catch {
-          if (expected) mismatches.push({input: row.input, direction, kind: 'math.gl rejects'});
+          if (expected)
+            mismatches.push({
+              input: row.input,
+              direction,
+              kind: 'math.gl rejects'
+            });
           else rejectedByPROJ++;
           continue;
         }
         if (!expected) {
           rejectedByPROJ++;
-          mismatches.push({input: row.input, direction, kind: 'PROJ rejects'});
+          mismatches.push({
+            input: row.input,
+            direction,
+            kind: 'PROJ rejects'
+          });
           continue;
         }
         comparisons++;
@@ -56,13 +113,23 @@ export function runPoleAudit() {
             ? Math.max(...expected.map((v, i) => Math.abs(v - actual[i])))
             : Math.max(
                 Math.abs(actual[1] - expected[1]),
-                longitude * (poleLine ? 1 : Math.abs(Math.cos((expected[1] * Math.PI) / 180)))
+                longitude *
+                  (poleLine ||
+                  (['aea', 'eqdc'].includes(algorithm) &&
+                    conePoleRetainsLongitude(point => transform.project(point), expected[1]))
+                    ? 1
+                    : Math.abs(Math.cos((expected[1] * Math.PI) / 180)))
               );
         errors[direction] = Math.max(errors[direction], error);
         const tolerance =
           direction === 'forward' ? 0.001 + 1e-12 * Math.max(...expected.map(Math.abs)) : 1e-6;
         if (error > tolerance)
-          mismatches.push({input: row.input, direction, error, kind: 'numeric difference'});
+          mismatches.push({
+            input: row.input,
+            direction,
+            error,
+            kind: 'numeric difference'
+          });
       }
     }
     return {
