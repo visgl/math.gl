@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import qsfnz from '../common/qsfnz';
+import {authalicLatitude} from '../authalic-latitude';
 import {withAngularRenderingProfile} from '../rendering-profile/angular-rendering-profile';
 import {equalAreaAzimuthalBounds} from '../rendering-profile/azimuthal-rendering-bounds';
 import type {ProjectionPlugin} from '../types';
@@ -29,10 +29,10 @@ export const lambertAzimuthalEqualArea: ProjectionPlugin = {
           base.sphere ? 1 : state.ymf || Math.sqrt(state.qp / 2),
           region,
           domain,
-          base.sphere ? base.lat0 : Math.asin(qsfnz(base.e, Math.sin(base.lat0)) / state.qp),
+          base.sphere ? base.lat0 : authalicLatitude(base.e, state.qp, base.lat0),
           base.sphere
             ? latitude => latitude
-            : latitude => Math.asin(qsfnz(base.e, Math.sin(latitude)) / state.qp)
+            : latitude => authalicLatitude(base.e, state.qp, latitude)
         )
     );
   }

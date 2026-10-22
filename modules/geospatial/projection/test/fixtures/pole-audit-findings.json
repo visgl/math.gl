@@ -450,8 +450,8 @@
       "comparisons": 54,
       "rejectedByPROJ": 0,
       "errors": {
-        "forward": 0.09647456354885264,
-        "inverse": 6.222138466682736e-7
+        "forward": 0.09647456326727877,
+        "inverse": 3.520649016763855e-7
       },
       "mismatches": [
         {
@@ -460,7 +460,7 @@
             -90
           ],
           "direction": "forward",
-          "error": 0.09647456354885264,
+          "error": 0.09647456326727877,
           "kind": "numeric difference"
         },
         {
@@ -469,7 +469,16 @@
             -89.999999
           ],
           "direction": "forward",
-          "error": 0.09647456354885264,
+          "error": 0.016214521954310612,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -15.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.08026004159454203,
           "kind": "numeric difference"
         },
         {
@@ -487,7 +496,16 @@
             -89.999999
           ],
           "direction": "forward",
-          "error": 0.09482566826045513,
+          "error": 0.01593739166855812,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.07888828031718731,
           "kind": "numeric difference"
         },
         {
@@ -496,7 +514,7 @@
             -90
           ],
           "direction": "forward",
-          "error": 0.09360149203433821,
+          "error": 0.09360149176114874,
           "kind": "numeric difference"
         },
         {
@@ -505,7 +523,16 @@
             -89.999999
           ],
           "direction": "forward",
-          "error": 0.09360149203433821,
+          "error": 0.01573164357112944,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.07786984846320877,
           "kind": "numeric difference"
         }
       ]
@@ -519,7 +546,7 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 0,
-        "inverse": 5.512827562497485e-15
+        "inverse": 1.4622636967942526e-7
       },
       "mismatches": []
     },
@@ -531,8 +558,8 @@
       "comparisons": 54,
       "rejectedByPROJ": 0,
       "errors": {
-        "forward": 0.17768218387512036,
-        "inverse": 2.701489165701787e-7
+        "forward": 0.17768218335652364,
+        "inverse": 2.70148902359324e-7
       },
       "mismatches": [
         {
@@ -541,7 +568,7 @@
             -90
           ],
           "direction": "forward",
-          "error": 0.17768218387512036,
+          "error": 0.17768218335652364,
           "kind": "numeric difference"
         },
         {
@@ -550,7 +577,16 @@
             -89.999999
           ],
           "direction": "forward",
-          "error": 0.17768218387512036,
+          "error": 0.0298631217882388,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -15.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.08882194105535746,
           "kind": "numeric difference"
         },
         {
@@ -559,7 +595,7 @@
             -90
           ],
           "direction": "forward",
-          "error": 0.051486674696207047,
+          "error": 0.0514866728335619,
           "kind": "numeric difference"
         },
         {
@@ -568,7 +604,16 @@
             -89.999999
           ],
           "direction": "forward",
-          "error": 0.051486674696207047,
+          "error": 0.008653391152620316,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.10308211762458086,
           "kind": "numeric difference"
         },
         {
@@ -577,7 +622,7 @@
             -90
           ],
           "direction": "forward",
-          "error": 0.17239069973152255,
+          "error": 0.1723906992283588,
           "kind": "numeric difference"
         },
         {
@@ -586,7 +631,16 @@
             -89.999999
           ],
           "direction": "forward",
-          "error": 0.17239069973152255,
+          "error": 0.028973779745484762,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.08972152415663004,
           "kind": "numeric difference"
         }
       ]
@@ -600,7 +654,7 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 1.862645149230957e-9,
-        "inverse": 3.536446229190915e-7
+        "inverse": 4.787793415061969e-7
       },
       "mismatches": []
     },
@@ -612,8 +666,8 @@
       "comparisons": 54,
       "rejectedByPROJ": 0,
       "errors": {
-        "forward": 0.12390727177262306,
-        "inverse": 2.701489307810334e-7
+        "forward": 0.14781906208688156,
+        "inverse": 4.8722696988079406e-9
       },
       "mismatches": [
         {
@@ -631,7 +685,16 @@
             -89.999999
           ],
           "direction": "forward",
-          "error": 0.10676618479192257,
+          "error": 0.017944241873919964,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -15.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.14781906208688156,
           "kind": "numeric difference"
         },
         {
@@ -649,7 +712,16 @@
             -89.999999
           ],
           "direction": "forward",
-          "error": 0.12390727177262306,
+          "error": 0.020825151354074478,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.04283328168094158,
           "kind": "numeric difference"
         },
         {
@@ -667,7 +739,16 @@
             -89.999999
           ],
           "direction": "forward",
-          "error": 0.10784750618040562,
+          "error": 0.018125979229807854,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.14341691998603778,
           "kind": "numeric difference"
         }
       ]
@@ -681,7 +762,7 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 1.862645149230957e-9,
-        "inverse": 3.536446229190915e-7
+        "inverse": 4.787793415061969e-7
       },
       "mismatches": []
     },
@@ -693,7 +774,7 @@
       "comparisons": 48,
       "rejectedByPROJ": 3,
       "errors": {
-        "forward": 3.4691765904426575e-8,
+        "forward": 0.11168972600717098,
         "inverse": 0.0000024040496668931155
       },
       "mismatches": [
@@ -708,6 +789,15 @@
         },
         {
           "input": [
+            -15.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.0962387893277139,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
             14.5,
             -89.999999
           ],
@@ -717,11 +807,29 @@
         },
         {
           "input": [
+            14.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.11168972600717098,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
             44.5,
             -89.999999
           ],
           "direction": "inverse",
           "error": 0.000002081968091260933,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.09721349080015784,
           "kind": "numeric difference"
         }
       ]
@@ -757,10 +865,19 @@
       "comparisons": 48,
       "rejectedByPROJ": 3,
       "errors": {
-        "forward": 0.000008086891284619924,
+        "forward": 0.11168972600717098,
         "inverse": 0.000002081968091260933
       },
       "mismatches": [
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.0962387893277139,
+          "kind": "numeric difference"
+        },
         {
           "input": [
             -15.5,
@@ -773,10 +890,28 @@
         {
           "input": [
             14.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.11168972600717098,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
             89.999999
           ],
           "direction": "inverse",
           "error": 0.000001202024819235703,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.09721349080015784,
           "kind": "numeric difference"
         },
         {
@@ -822,7 +957,7 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 1.862645149230957e-9,
-        "inverse": 3.5981884138891473e-11
+        "inverse": 1.5193546687441994e-7
       },
       "mismatches": []
     },
@@ -835,7 +970,7 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 1.862645149230957e-9,
-        "inverse": 3.645084234449314e-11
+        "inverse": 1.4622636967942526e-7
       },
       "mismatches": []
     },
@@ -848,19 +983,9 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 1.4901161193847656e-8,
-        "inverse": 0.000001199344353608467
+        "inverse": 4.688908745720255e-7
       },
-      "mismatches": [
-        {
-          "input": [
-            44.5,
-            89.999999
-          ],
-          "direction": "inverse",
-          "error": 0.000001199344353608467,
-          "kind": "numeric difference"
-        }
-      ]
+      "mismatches": []
     },
     {
       "id": "stere-45-sphere",
@@ -871,28 +996,9 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 7.450580596923828e-9,
-        "inverse": 0.0000012074182649257637
+        "inverse": 9.99999983264388e-7
       },
-      "mismatches": [
-        {
-          "input": [
-            -15.5,
-            89.999999
-          ],
-          "direction": "inverse",
-          "error": 0.0000012074182649257637,
-          "kind": "numeric difference"
-        },
-        {
-          "input": [
-            44.5,
-            -89.999999
-          ],
-          "direction": "inverse",
-          "error": 0.0000012074182649257637,
-          "kind": "numeric difference"
-        }
-      ]
+      "mismatches": []
     },
     {
       "id": "stere--45-ellipsoid",
@@ -903,19 +1009,9 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 1.1175870895385742e-8,
-        "inverse": 0.000001199344353608467
+        "inverse": 1.9934437034407892e-7
       },
-      "mismatches": [
-        {
-          "input": [
-            14.5,
-            89.999999
-          ],
-          "direction": "inverse",
-          "error": 0.000001199344353608467,
-          "kind": "numeric difference"
-        }
-      ]
+      "mismatches": []
     },
     {
       "id": "stere--45-sphere",
@@ -926,28 +1022,9 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 7.450580596923828e-9,
-        "inverse": 0.0000012074182649257637
+        "inverse": 9.99999983264388e-7
       },
-      "mismatches": [
-        {
-          "input": [
-            -15.5,
-            -89.999999
-          ],
-          "direction": "inverse",
-          "error": 0.0000012074182649257637,
-          "kind": "numeric difference"
-        },
-        {
-          "input": [
-            44.5,
-            89.999999
-          ],
-          "direction": "inverse",
-          "error": 0.0000012074182649257637,
-          "kind": "numeric difference"
-        }
-      ]
+      "mismatches": []
     },
     {
       "id": "stere-90-ellipsoid",
@@ -996,7 +1073,7 @@
       "rejectedByPROJ": 3,
       "errors": {
         "forward": 0.5,
-        "inverse": 1.4210854715202004e-14
+        "inverse": 1.4622635546857055e-7
       },
       "mismatches": []
     },
@@ -1047,7 +1124,7 @@
       "rejectedByPROJ": 3,
       "errors": {
         "forward": 0.5,
-        "inverse": 1.4210854715202004e-14
+        "inverse": 1.4622635546857055e-7
       },
       "mismatches": []
     },
@@ -1073,7 +1150,7 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 1.862645149230957e-9,
-        "inverse": 6.250056969747675e-7
+        "inverse": 1.4622636967942526e-7
       },
       "mismatches": []
     },
@@ -1232,7 +1309,7 @@
       "rejectedByPROJ": 3,
       "errors": {
         "forward": 3.725290298461914e-9,
-        "inverse": 1.4622636967942526e-7
+        "inverse": 2.842170943040401e-14
       },
       "mismatches": []
     },
@@ -1283,7 +1360,7 @@
       "rejectedByPROJ": 3,
       "errors": {
         "forward": 3.725290298461914e-9,
-        "inverse": 1.4622636967942526e-7
+        "inverse": 2.842170943040401e-14
       },
       "mismatches": []
     },
@@ -1372,37 +1449,9 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 7.450580596923828e-9,
-        "inverse": 0.0000012146107053467858
+        "inverse": 2.1461072208239784e-7
       },
-      "mismatches": [
-        {
-          "input": [
-            -25.5,
-            -89.999999
-          ],
-          "direction": "inverse",
-          "error": 0.0000012055055833570805,
-          "kind": "numeric difference"
-        },
-        {
-          "input": [
-            34.5,
-            -89.999999
-          ],
-          "direction": "inverse",
-          "error": 0.0000012055055833570805,
-          "kind": "numeric difference"
-        },
-        {
-          "input": [
-            34.5,
-            89.999999
-          ],
-          "direction": "inverse",
-          "error": 0.0000012146107053467858,
-          "kind": "numeric difference"
-        }
-      ]
+      "mismatches": []
     },
     {
       "id": "sterea-sphere",
@@ -1413,7 +1462,7 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 3.725290298461914e-9,
-        "inverse": 8.537736420066722e-7
+        "inverse": 9.999999974752427e-7
       },
       "mismatches": []
     },
@@ -1829,7 +1878,7 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 30.981421904450514,
-        "inverse": 1.191438059322536e-10
+        "inverse": 8.23811689087961e-7
       },
       "mismatches": [
         {
@@ -1839,6 +1888,24 @@
           ],
           "direction": "forward",
           "error": 6.5718167676107155,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 1.2707822389104155,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 1.2707822389104155,
           "kind": "numeric difference"
         },
         {
@@ -1857,6 +1924,24 @@
           ],
           "direction": "forward",
           "error": 12.2048025684199,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 2.3600241579764862,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 2.3600241579764862,
           "kind": "numeric difference"
         },
         {
@@ -1875,6 +1960,24 @@
           ],
           "direction": "forward",
           "error": 30.981421904450514,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 5.990830554863386,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 5.990830554863386,
           "kind": "numeric difference"
         },
         {
@@ -1897,7 +2000,7 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 30.946754350565726,
-        "inverse": 1.191438059322536e-10
+        "inverse": 8.23804654714877e-7
       },
       "mismatches": [
         {
@@ -1907,6 +2010,24 @@
           ],
           "direction": "forward",
           "error": 6.564463044059397,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 1.269360260542891,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 1.269360260542891,
           "kind": "numeric difference"
         },
         {
@@ -1925,6 +2046,24 @@
           ],
           "direction": "forward",
           "error": 12.191145653253166,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 2.3573833410082266,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 2.3573833410082266,
           "kind": "numeric difference"
         },
         {
@@ -1943,6 +2082,24 @@
           ],
           "direction": "forward",
           "error": 30.946754350565726,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 5.984126942559342,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 5.984126942559342,
           "kind": "numeric difference"
         },
         {
@@ -2859,11 +3016,11 @@
       "algorithm": "poly",
       "definition": "+proj=poly +lon_0=10 +lat_0=40 +ellps=WGS84",
       "probes": 27,
-      "comparisons": 42,
+      "comparisons": 38,
       "rejectedByPROJ": 12,
       "errors": {
-        "forward": 0.0003571007400751114,
-        "inverse": 3.147434313177655e-9
+        "forward": 5.587935447692871e-9,
+        "inverse": 1.5153034382819897e-10
       },
       "mismatches": [
         {
@@ -2877,7 +3034,31 @@
         {
           "input": [
             -20.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -20.5,
             89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            90
           ],
           "direction": "inverse",
           "kind": "PROJ rejects"
@@ -2901,7 +3082,31 @@
         {
           "input": [
             9.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            9.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            9.5,
             89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            90
           ],
           "direction": "inverse",
           "kind": "PROJ rejects"
@@ -2917,7 +3122,31 @@
         {
           "input": [
             39.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            39.5,
             89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            90
           ],
           "direction": "inverse",
           "kind": "PROJ rejects"
@@ -2929,11 +3158,11 @@
       "algorithm": "poly",
       "definition": "+proj=poly +lon_0=10 +lat_0=40 +R=6371000",
       "probes": 27,
-      "comparisons": 42,
+      "comparisons": 41,
       "rejectedByPROJ": 12,
       "errors": {
         "forward": 7.275957614183426e-12,
-        "inverse": 1.3893952655053e-10
+        "inverse": 2.3202062493510311e-10
       },
       "mismatches": [
         {
@@ -2983,6 +3212,14 @@
           ],
           "direction": "inverse",
           "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "kind": "math.gl rejects"
         },
         {
           "input": [
@@ -3648,8 +3885,8 @@
       "comparisons": 54,
       "rejectedByPROJ": 0,
       "errors": {
-        "forward": 0.0000036740622900016673,
-        "inverse": 1.2695955398100978e-12
+        "forward": 3.800960257649422e-8,
+        "inverse": 1.993353606621895e-7
       },
       "mismatches": []
     },
@@ -3661,8 +3898,8 @@
       "comparisons": 54,
       "rejectedByPROJ": 0,
       "errors": {
-        "forward": 0.0000036740622900016673,
-        "inverse": 1.2695955398100978e-12
+        "forward": 3.800960257649422e-8,
+        "inverse": 1.993353606621895e-7
       },
       "mismatches": []
     },
@@ -3674,8 +3911,8 @@
       "comparisons": 54,
       "rejectedByPROJ": 0,
       "errors": {
-        "forward": 0.0000036740622900016673,
-        "inverse": 1.2695955398100978e-12
+        "forward": 3.800960257649422e-8,
+        "inverse": 1.993353606621895e-7
       },
       "mismatches": []
     },
@@ -3687,8 +3924,8 @@
       "comparisons": 42,
       "rejectedByPROJ": 0,
       "errors": {
-        "forward": 0.0000036737398261266208,
-        "inverse": 1.1823431123048067e-11
+        "forward": 2.0459992811083794e-8,
+        "inverse": 1.993353606621895e-7
       },
       "mismatches": []
     },
@@ -3700,44 +3937,53 @@
       "comparisons": 54,
       "rejectedByPROJ": 0,
       "errors": {
-        "forward": 0.000005386769771575928,
-        "inverse": 0.00000281269072388568
+        "forward": 0.02224774642783145,
+        "inverse": 0.0000016961163282758207
       },
       "mismatches": [
         {
           "input": [
             -30.5,
-            -90
+            89.999999
           ],
-          "direction": "inverse",
-          "error": 0.00000281269072388568,
+          "direction": "forward",
+          "error": 0.020432832590901215,
           "kind": "numeric difference"
         },
         {
           "input": [
-            -30.5,
+            -0.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 0.0000016961163282758207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
             -89.999999
           ],
           "direction": "inverse",
-          "error": 0.00000281269072388568,
+          "error": 0.0000016961163282758207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.02224774642783145,
           "kind": "numeric difference"
         },
         {
           "input": [
             29.5,
-            -90
+            89.999999
           ],
-          "direction": "inverse",
-          "error": 0.0000022437509841211067,
-          "kind": "numeric difference"
-        },
-        {
-          "input": [
-            29.5,
-            -89.999999
-          ],
-          "direction": "inverse",
-          "error": 0.0000022437509841211067,
+          "direction": "forward",
+          "error": 0.020544651911950956,
           "kind": "numeric difference"
         }
       ]
@@ -3750,26 +3996,53 @@
       "comparisons": 54,
       "rejectedByPROJ": 0,
       "errors": {
-        "forward": 6.258487701416016e-7,
-        "inverse": 0.00000281269072388568
+        "forward": 0.02224774642783145,
+        "inverse": 0.0000016961163282758207
       },
       "mismatches": [
         {
           "input": [
             -30.5,
-            89.999999
+            -89.999999
           ],
-          "direction": "inverse",
-          "error": 0.00000281269072388568,
+          "direction": "forward",
+          "error": 0.02043283259090123,
           "kind": "numeric difference"
         },
         {
           "input": [
-            -30.5,
+            -0.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.02224774642783145,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 0.0000016961163282758207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
             90
           ],
           "direction": "inverse",
-          "error": 0.00000281269072388568,
+          "error": 0.0000016961163282758207,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.02054465191195093,
           "kind": "numeric difference"
         },
         {
@@ -3778,7 +4051,7 @@
             89.999999
           ],
           "direction": "inverse",
-          "error": 0.0000022437509841211067,
+          "error": 0.00000114848165821968,
           "kind": "numeric difference"
         },
         {
@@ -3787,7 +4060,7 @@
             90
           ],
           "direction": "inverse",
-          "error": 0.0000022437509841211067,
+          "error": 0.00000114848165821968,
           "kind": "numeric difference"
         }
       ]
@@ -4055,7 +4328,7 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 1.4901161193847656e-8,
-        "inverse": 8.480645306008228e-7
+        "inverse": 9.99999983264388e-7
       },
       "mismatches": []
     },
@@ -4067,8 +4340,8 @@
       "comparisons": 162,
       "rejectedByPROJ": 0,
       "errors": {
-        "forward": 0.22503108113355097,
-        "inverse": 2.701489307810334e-7
+        "forward": 0.2250310804767537,
+        "inverse": 9.367276732064056e-9
       },
       "mismatches": [
         {
@@ -4077,7 +4350,7 @@
             -90
           ],
           "direction": "forward",
-          "error": 0.22503108113355097,
+          "error": 0.2250310804767537,
           "kind": "numeric difference"
         },
         {
@@ -4086,7 +4359,16 @@
             -89.999999
           ],
           "direction": "forward",
-          "error": 0.22503108113355097,
+          "error": 0.03782107158421866,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -25,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.07896849047392607,
           "kind": "numeric difference"
         },
         {
@@ -4095,7 +4377,7 @@
             -90
           ],
           "direction": "forward",
-          "error": 0.060791832872368445,
+          "error": 0.06079183269493171,
           "kind": "numeric difference"
         },
         {
@@ -4104,7 +4386,16 @@
             -89.999999
           ],
           "direction": "forward",
-          "error": 0.060791832872368445,
+          "error": 0.010217309718328238,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            5,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.10151993483304977,
           "kind": "numeric difference"
         },
         {
@@ -4113,7 +4404,7 @@
             -90
           ],
           "direction": "forward",
-          "error": 0.11973653680203711,
+          "error": 0.11973653645256377,
           "kind": "numeric difference"
         },
         {
@@ -4122,7 +4413,16 @@
             -89.999999
           ],
           "direction": "forward",
-          "error": 0.11973653680203711,
+          "error": 0.0201241716932401,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            35,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 0.0968691948801279,
           "kind": "numeric difference"
         }
       ]
@@ -4195,7 +4495,7 @@
       "rejectedByPROJ": 0,
       "errors": {
         "forward": 106.28240780506108,
-        "inverse": 1.6984813555609435e-10
+        "inverse": 8.23804654714877e-7
       },
       "mismatches": [
         {
@@ -4205,6 +4505,24 @@
           ],
           "direction": "forward",
           "error": 106.28240780506108,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -179.999,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 20.55166796690969,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -179.999,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 20.55166796690969,
           "kind": "numeric difference"
         },
         {
@@ -4223,6 +4541,24 @@
           ],
           "direction": "forward",
           "error": 100.02928786537707,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 19.342511650152574,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            89.999999
+          ],
+          "direction": "forward",
+          "error": 19.342511650152574,
           "kind": "numeric difference"
         },
         {

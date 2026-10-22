@@ -1,0 +1,3601 @@
+{
+  "sourceCommit": "64b7fe33",
+  "reviewedConfigurations": 49,
+  "scope": "Every retained finding in the pre-review audit; an accuracy fix may retain a separately explained native/domain discrepancy.",
+  "cases": [
+    {
+      "id": "aea-north",
+      "algorithm": "aea",
+      "definition": "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=100 +y_0=-100 +ellps=WGS84",
+      "category": "native-pole-cutoff",
+      "reason": "PROJ inverse snaps \u00b189.99\u00b0 to \u00b190\u00b0; math.gl retains the roundoff-sized cutoff and recovers the original latitude.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -126.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999185353659,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -126.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.00999999987769229,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -96.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999599429543,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -96.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.00999999987769229,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -66.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999599429543,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -66.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.00999999987769229,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "aea-south",
+      "algorithm": "aea",
+      "definition": "+proj=aea +lat_1=-18 +lat_2=-36 +lat_0=-25 +lon_0=135 +ellps=WGS84",
+      "category": "native-pole-cutoff",
+      "reason": "PROJ inverse snaps \u00b189.99\u00b0 to \u00b190\u00b0; math.gl retains the roundoff-sized cutoff and recovers the original latitude.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            104.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999869975795,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            104.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.00999999948214736,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            134.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999869350518,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            134.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999753773636,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            164.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999869975795,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            164.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.00999999987804756,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "aea-tangent",
+      "algorithm": "aea",
+      "definition": "+proj=aea +lat_1=40 +lat_2=40 +lat_0=40 +ellps=WGS84",
+      "category": "native-pole-cutoff",
+      "reason": "PROJ inverse snaps \u00b189.99\u00b0 to \u00b190\u00b0; math.gl retains the roundoff-sized cutoff and recovers the original latitude.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -30.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.0099999998284801,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -30.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999759784828,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.0099999998284801,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999759784828,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.99
+          ],
+          "direction": "inverse",
+          "error": 0.0099999998284801,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            89.99
+          ],
+          "direction": "inverse",
+          "error": 0.009999999759784828,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea-0-ellipsoid",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=0 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "category": "native-pole-roundoff",
+      "reason": "Native authalic subtraction and inverse disk-edge arithmetic lose pole information. Original pole-complement and Cartesian inverse fixes are independently checked at 80 digits; opposite-pole disk inversion remains ill-conditioned.",
+      "accuracyFix": "stable-authalic-latitude-and-inverse-rotation",
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.09647456354885264,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.09647456354885264,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.09482566826045513,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.09482566826045513,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.09360149203433821,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.09360149203433821,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea-45-ellipsoid",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "category": "native-pole-roundoff",
+      "reason": "Native authalic subtraction and inverse disk-edge arithmetic lose pole information. Original pole-complement and Cartesian inverse fixes are independently checked at 80 digits; opposite-pole disk inversion remains ill-conditioned.",
+      "accuracyFix": "stable-authalic-latitude-and-inverse-rotation",
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.17768218387512036,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.17768218387512036,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.051486674696207047,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.051486674696207047,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.17239069973152255,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.17239069973152255,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea--45-ellipsoid",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "category": "native-pole-roundoff",
+      "reason": "Native authalic subtraction and inverse disk-edge arithmetic lose pole information. Original pole-complement and Cartesian inverse fixes are independently checked at 80 digits; opposite-pole disk inversion remains ill-conditioned.",
+      "accuracyFix": "stable-authalic-latitude-and-inverse-rotation",
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.10676618479192257,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.10676618479192257,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.12390727177262306,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.12390727177262306,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.10784750618040562,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.10784750618040562,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea-90-ellipsoid",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "category": "native-pole-roundoff",
+      "reason": "Native authalic subtraction and inverse disk-edge arithmetic lose pole information. Original pole-complement and Cartesian inverse fixes are independently checked at 80 digits; opposite-pole disk inversion remains ill-conditioned.",
+      "accuracyFix": "stable-authalic-latitude-and-inverse-rotation",
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 2.4040496668931155e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 2.081968091260933e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 2.081968091260933e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea-90-sphere",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "category": "native-pole-roundoff",
+      "reason": "Native authalic subtraction and inverse disk-edge arithmetic lose pole information. Original pole-complement and Cartesian inverse fixes are independently checked at 80 digits; opposite-pole disk inversion remains ill-conditioned.",
+      "accuracyFix": "stable-authalic-latitude-and-inverse-rotation",
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.707547298224199e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea--90-ellipsoid",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "category": "native-pole-roundoff",
+      "reason": "Native authalic subtraction and inverse disk-edge arithmetic lose pole information. Original pole-complement and Cartesian inverse fixes are independently checked at 80 digits; opposite-pole disk inversion remains ill-conditioned.",
+      "accuracyFix": "stable-authalic-latitude-and-inverse-rotation",
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.699919835118635e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.202024819235703e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 2.081968091260933e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "laea--90-sphere",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "category": "native-pole-roundoff",
+      "reason": "Native authalic subtraction and inverse disk-edge arithmetic lose pole information. Original pole-complement and Cartesian inverse fixes are independently checked at 80 digits; opposite-pole disk inversion remains ill-conditioned.",
+      "accuracyFix": "stable-authalic-latitude-and-inverse-rotation",
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.707547298224199e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere-45-ellipsoid",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "category": "accuracy-fixed",
+      "reason": "Cartesian spherical/conformal inverse rotation removes the avoidable asin pole cancellation.",
+      "accuracyFix": "inverse-spherical-latitude",
+      "originalFindings": [
+        {
+          "input": [
+            44.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.199344353608467e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere-45-sphere",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "category": "accuracy-fixed",
+      "reason": "Cartesian spherical/conformal inverse rotation removes the avoidable asin pole cancellation.",
+      "accuracyFix": "inverse-spherical-latitude",
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.2074182649257637e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.2074182649257637e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere--45-ellipsoid",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "category": "accuracy-fixed",
+      "reason": "Cartesian spherical/conformal inverse rotation removes the avoidable asin pole cancellation.",
+      "accuracyFix": "inverse-spherical-latitude",
+      "originalFindings": [
+        {
+          "input": [
+            14.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.199344353608467e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere--45-sphere",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "category": "accuracy-fixed",
+      "reason": "Cartesian spherical/conformal inverse rotation removes the avoidable asin pole cancellation.",
+      "accuracyFix": "inverse-spherical-latitude",
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.2074182649257637e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.2074182649257637e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "stere-90-ellipsoid",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "category": "singular-antipode",
+      "reason": "The exact opposite pole has infinite stereographic radius. Native finite ~1e23 metre outputs are a floating-point artifact; math.gl deliberately rejects the singularity.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "stere--90-ellipsoid",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "category": "singular-antipode",
+      "reason": "The exact opposite pole has infinite stereographic radius. Native finite ~1e23 metre outputs are a floating-point artifact; math.gl deliberately rejects the singularity.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            14.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            44.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "aeqd-45-sphere",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "category": "native-pole-roundoff",
+      "reason": "The exact geographic pole has no unique longitude. Native inverse returns a displaced latitude and arbitrary longitude; independent 80-digit inversion checks the exact stored planar coordinates.",
+      "accuracyFix": "inverse-spherical-latitude",
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 1.1080783928468536e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 1.3369966256818573e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 1.1146898377654912e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "aeqd--45-sphere",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=-45 +lon_0=15 +x_0=100 +y_0=200 +R=6371000",
+      "category": "native-pole-roundoff",
+      "reason": "The exact geographic pole has no unique longitude. Native inverse returns a displaced latitude and arbitrary longitude; independent 80-digit inversion checks the exact stored planar coordinates.",
+      "accuracyFix": "inverse-spherical-latitude",
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 1.1080783928468536e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            14.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 1.3369966256818573e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            44.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 1.1146898377654912e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "aeqd-90-ellipsoid",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "category": "nonunique-antipode",
+      "reason": "At the antipode the azimuth is nonunique. Native chooses a longitude-dependent ring convention; math.gl deliberately rejects it.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            14.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            44.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "aeqd--90-ellipsoid",
+      "algorithm": "aeqd",
+      "definition": "+proj=aeqd +lat_0=-90 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "category": "nonunique-antipode",
+      "reason": "At the antipode the azimuth is nonunique. Native chooses a longitude-dependent ring convention; math.gl deliberately rejects it.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -15.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            14.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            44.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "stere-true-scale-north",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=90 +lat_ts=70 +k_0=0.8 +ellps=WGS84",
+      "category": "singular-antipode",
+      "reason": "The exact opposite pole has infinite stereographic radius. Native finite ~1e23 metre outputs are a floating-point artifact; math.gl deliberately rejects the singularity.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -30.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -0.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "stere-true-scale-south",
+      "algorithm": "stere",
+      "definition": "+proj=stere +lat_0=-90 +lat_ts=-71 +ellps=WGS84",
+      "category": "singular-antipode",
+      "reason": "The exact opposite pole has infinite stereographic radius. Native finite ~1e23 metre outputs are a floating-point artifact; math.gl deliberately rejects the singularity.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -30.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -0.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            29.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "sterea-ellipsoid",
+      "algorithm": "sterea",
+      "definition": "+proj=sterea +lat_0=52 +lon_0=5 +k_0=0.9999 +x_0=155000 +y_0=463000 +ellps=WGS84",
+      "category": "accuracy-fixed",
+      "reason": "Cartesian inverse rotation retains the small horizontal component instead of applying asin to a rounded pole sine.",
+      "accuracyFix": "inverse-spherical-latitude",
+      "originalFindings": [
+        {
+          "input": [
+            -25.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.2055055833570805e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            34.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.2055055833570805e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            34.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.2146107053467858e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "cea-ellipsoid",
+      "algorithm": "cea",
+      "definition": "+proj=cea +lon_0=10 +lat_ts=30 +ellps=WGS84",
+      "category": "native-pole-roundoff",
+      "reason": "Native authalic inverse is a truncated series and can return 89.99999879797518\u00b0 at the pole. Rounded binary64 northings cannot reliably distinguish the closest pole probes; math.gl retains exact-pole handling.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -0.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 1.202024819235703e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.202024819235703e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 1.202024819235703e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.202024819235703e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 1.202024819235703e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.202024819235703e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "eqearth-ellipsoid",
+      "algorithm": "eqearth",
+      "definition": "+proj=eqearth +lon_0=10 +ellps=WGS84",
+      "category": "native-pole-roundoff",
+      "reason": "PROJ inverse Newton/asin arithmetic returns a pole latitude about 6.7 microdegrees short. math.gl preserves exact map-pole handling with a bounded ulp clamp; nearby northings can be indistinguishable in binary64.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -0.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 6.638399128178207e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.638399128178207e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.638399128178207e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 6.638399128178207e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 6.638399128178207e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.638399128178207e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.638399128178207e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 6.638399128178207e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 6.638399128178207e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.638399128178207e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.638399128178207e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 6.638399128178207e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "eqearth-sphere",
+      "algorithm": "eqearth",
+      "definition": "+proj=eqearth +lon_0=10 +R=6371000",
+      "category": "native-pole-roundoff",
+      "reason": "PROJ inverse Newton/asin arithmetic returns a pole latitude about 6.7 microdegrees short. math.gl preserves exact map-pole handling with a bounded ulp clamp; nearby northings can be indistinguishable in binary64.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -0.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "moll-ellipsoid",
+      "algorithm": "moll",
+      "definition": "+proj=moll +lon_0=10 +ellps=WGS84",
+      "category": "native-pole-iteration",
+      "reason": "Native iteration leaves nonzero easting at exact poles and also loses nearby latitude offsets when sin(latitude) rounds to one. An original pole-complement solve preserves those offsets and exact constants; a bounded inverse rejects points outside the map.",
+      "accuracyFix": "stable-mollweide-pole-complement",
+      "originalFindings": [
+        {
+          "input": [
+            -0.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 6.5718167676107155,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 6.5718167676107155,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 12.2048025684199,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 12.2048025684199,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 30.981421904450514,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 30.981421904450514,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "moll-sphere",
+      "algorithm": "moll",
+      "definition": "+proj=moll +lon_0=10 +R=6371000",
+      "category": "native-pole-iteration",
+      "reason": "Native iteration leaves nonzero easting at exact poles and also loses nearby latitude offsets when sin(latitude) rounds to one. An original pole-complement solve preserves those offsets and exact constants; a bounded inverse rejects points outside the map.",
+      "accuracyFix": "stable-mollweide-pole-complement",
+      "originalFindings": [
+        {
+          "input": [
+            -0.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 6.564463044059397,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -0.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 6.564463044059397,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 12.191145653253166,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 12.191145653253166,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 30.946754350565726,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            59.5,
+            90
+          ],
+          "direction": "forward",
+          "error": 30.946754350565726,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "robin-ellipsoid",
+      "algorithm": "robin",
+      "definition": "+proj=robin +lon_0=10 +ellps=WGS84",
+      "category": "native-inverse-knot",
+      "reason": "All findings are at exact 5\u00b0 table knots. math.gl retains exact-knot inverse corrections to the same PROJ forward coefficient table; PROJ inverse can select/refine the adjacent cubic interval incorrectly.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -110,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 1.6397767467424273e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -110,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -110,
+            30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -110,
+            60
+          ],
+          "direction": "inverse",
+          "error": 1.6397767467424273e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -50,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 8.198883733712137e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -50,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -50,
+            30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -50,
+            60
+          ],
+          "direction": "inverse",
+          "error": 8.198883733712137e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 7.611725273193315e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            60
+          ],
+          "direction": "inverse",
+          "error": 7.611725273193315e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            70,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 8.198883733712137e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            70,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            70,
+            30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            70,
+            60
+          ],
+          "direction": "inverse",
+          "error": 8.198883733712137e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            130,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 1.6397767467424273e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            130,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            130,
+            30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            130,
+            60
+          ],
+          "direction": "inverse",
+          "error": 1.6397767467424273e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -65
+          ],
+          "direction": "inverse",
+          "error": 2.912144407218875e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 2.4460003146486997e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -50
+          ],
+          "direction": "inverse",
+          "error": 7.521435918533825e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -20
+          ],
+          "direction": "inverse",
+          "error": 1.757655802947511e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -15
+          ],
+          "direction": "inverse",
+          "error": 6.340265697346581e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -10
+          ],
+          "direction": "inverse",
+          "error": 1.9295105939676205e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -5
+          ],
+          "direction": "inverse",
+          "error": 1.1394564580768929e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            5
+          ],
+          "direction": "inverse",
+          "error": 1.1394564580768929e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            10
+          ],
+          "direction": "inverse",
+          "error": 1.9295105939676205e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            15
+          ],
+          "direction": "inverse",
+          "error": 6.340265697346581e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            20
+          ],
+          "direction": "inverse",
+          "error": 1.757655802947511e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            50
+          ],
+          "direction": "inverse",
+          "error": 7.521435918533825e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            60
+          ],
+          "direction": "inverse",
+          "error": 2.4460003146486997e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            65
+          ],
+          "direction": "inverse",
+          "error": 2.912144407218875e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -65
+          ],
+          "direction": "inverse",
+          "error": 1.4128745078778593e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 7.611725273193315e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -50
+          ],
+          "direction": "inverse",
+          "error": 1.1205177372630715e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -20
+          ],
+          "direction": "inverse",
+          "error": 1.757655802947511e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -15
+          ],
+          "direction": "inverse",
+          "error": 6.340265697346581e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -10
+          ],
+          "direction": "inverse",
+          "error": 1.9295105939676205e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            10
+          ],
+          "direction": "inverse",
+          "error": 1.9295105939676205e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            15
+          ],
+          "direction": "inverse",
+          "error": 6.340265697346581e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            20
+          ],
+          "direction": "inverse",
+          "error": 1.757655802947511e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            50
+          ],
+          "direction": "inverse",
+          "error": 1.1205177372630715e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            60
+          ],
+          "direction": "inverse",
+          "error": 7.611725273193315e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            65
+          ],
+          "direction": "inverse",
+          "error": 1.4128745078778593e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -65
+          ],
+          "direction": "inverse",
+          "error": 2.749454779404914e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -60
+          ],
+          "direction": "inverse",
+          "error": 2.3093522599992866e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -50
+          ],
+          "direction": "inverse",
+          "error": 7.1012440230333596e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -20
+          ],
+          "direction": "inverse",
+          "error": 1.757655802947511e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -15
+          ],
+          "direction": "inverse",
+          "error": 6.340265697346581e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -10
+          ],
+          "direction": "inverse",
+          "error": 1.9295105939676205e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -5
+          ],
+          "direction": "inverse",
+          "error": 1.0757996733445907e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            5
+          ],
+          "direction": "inverse",
+          "error": 1.0757996733445907e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            10
+          ],
+          "direction": "inverse",
+          "error": 1.9295105939676205e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            15
+          ],
+          "direction": "inverse",
+          "error": 6.340265697346581e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            20
+          ],
+          "direction": "inverse",
+          "error": 1.757655802947511e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            50
+          ],
+          "direction": "inverse",
+          "error": 7.1012440230333596e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            60
+          ],
+          "direction": "inverse",
+          "error": 2.3093522599992866e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            65
+          ],
+          "direction": "inverse",
+          "error": 2.749454779404914e-05,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "robin-sphere",
+      "algorithm": "robin",
+      "definition": "+proj=robin +lon_0=10 +R=6371000",
+      "category": "native-inverse-knot",
+      "reason": "All findings are at exact 5\u00b0 table knots. math.gl retains exact-knot inverse corrections to the same PROJ forward coefficient table; PROJ inverse can select/refine the adjacent cubic interval incorrectly.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -169,
+            -65
+          ],
+          "direction": "inverse",
+          "error": 2.912144407218875e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -20
+          ],
+          "direction": "inverse",
+          "error": 1.757655802947511e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -10
+          ],
+          "direction": "inverse",
+          "error": 1.9295105939676205e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            -5
+          ],
+          "direction": "inverse",
+          "error": 1.1394564580768929e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            5
+          ],
+          "direction": "inverse",
+          "error": 1.1394564580768929e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            10
+          ],
+          "direction": "inverse",
+          "error": 1.9295105939676205e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            20
+          ],
+          "direction": "inverse",
+          "error": 1.757655802947511e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -169,
+            65
+          ],
+          "direction": "inverse",
+          "error": 2.912144407218875e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -65
+          ],
+          "direction": "inverse",
+          "error": 1.4128745064567738e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -20
+          ],
+          "direction": "inverse",
+          "error": 1.757655802947511e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            -10
+          ],
+          "direction": "inverse",
+          "error": 1.9295105939676205e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            10
+          ],
+          "direction": "inverse",
+          "error": 1.9295105939676205e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            20
+          ],
+          "direction": "inverse",
+          "error": 1.757655802947511e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            0,
+            65
+          ],
+          "direction": "inverse",
+          "error": 1.4128745064567738e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -65
+          ],
+          "direction": "inverse",
+          "error": 2.749454779404914e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -20
+          ],
+          "direction": "inverse",
+          "error": 1.757655802947511e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -10
+          ],
+          "direction": "inverse",
+          "error": 1.9295105939676205e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            -5
+          ],
+          "direction": "inverse",
+          "error": 1.0757996733445907e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            5
+          ],
+          "direction": "inverse",
+          "error": 1.0757996733445907e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            10
+          ],
+          "direction": "inverse",
+          "error": 1.9295105939676205e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            20
+          ],
+          "direction": "inverse",
+          "error": 1.757655802947511e-05,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            179,
+            65
+          ],
+          "direction": "inverse",
+          "error": 2.749454779404914e-05,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "poly-ellipsoid",
+      "algorithm": "poly",
+      "definition": "+proj=poly +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "category": "native-inverse-failure",
+      "reason": "PROJ rejects its own near-pole forward values. math.gl also had centimetre-scale inverse residuals: an original polar tangent-plane limit fixes them, and shared quadrature removes the truncated meridian series. Geographic controls and submillimetre forward residuals verify the accepted inverses.",
+      "accuracyFix": "polar-inverse-limit-and-meridian-quadrature",
+      "originalFindings": [
+        {
+          "input": [
+            -20.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "poly-sphere",
+      "algorithm": "poly",
+      "definition": "+proj=poly +lon_0=10 +lat_0=40 +R=6371000",
+      "category": "native-inverse-failure",
+      "reason": "PROJ rejects its own near-pole forward values. math.gl also had centimetre-scale inverse residuals: an original polar tangent-plane limit fixes them, and shared quadrature removes the truncated meridian series. Geographic controls and submillimetre forward residuals verify the accepted inverses.",
+      "accuracyFix": "polar-inverse-limit-and-meridian-quadrature",
+      "originalFindings": [
+        {
+          "input": [
+            -20.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            9.5,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "ortho-ellipsoid",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +lon_0=10 +lat_0=40 +ellps=WGS84",
+      "category": "native-inverse-failure",
+      "reason": "PROJ inverse fails at some finite visible polar forward values. math.gl uses an ellipsoid-ray intersection; the equatorial limb also needs a bounded ulp discriminant tolerance.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -20.5,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            39.5,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "geos-x-true",
+      "algorithm": "geos",
+      "definition": "+proj=geos +lon_0=0 +h=35785831 +sweep=x +R=6371000",
+      "category": "hidden-hemisphere",
+      "reason": "These near-pole points fail the independent satellite visibility inequality. Native spherical forward returns the hidden intersection, whose inverse moves to the visible hemisphere; math.gl intentionally rejects it.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -10.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "geos-y-true",
+      "algorithm": "geos",
+      "definition": "+proj=geos +lon_0=0 +h=35785831 +sweep=y +R=6371000",
+      "category": "hidden-hemisphere",
+      "reason": "These near-pole points fail the independent satellite visibility inequality. Native spherical forward returns the hidden intersection, whose inverse moves to the visible hemisphere; math.gl intentionally rejects it.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -10.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -10.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            19.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            -89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            89.99
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            89.999999
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            49.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "qsc-4",
+      "algorithm": "qsc",
+      "definition": "+proj=qsc +lon_0=0 +lat_0=90 +ellps=WGS84",
+      "category": "native-face-roundoff",
+      "reason": "Original inverse findings are at the opposite pole outside the selected cube face, where the raw extension is ill-conditioned. Corrected own-face forward values also differ because native 1-cos(phi) cancels near the centre. Original half-angle/atan2 corrections are independently qualified; no new raw rejection is introduced.",
+      "accuracyFix": "stable-face-centre-half-angle-and-geodetic-latitude",
+      "originalFindings": [
+        {
+          "input": [
+            -30.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 2.81269072388568e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -30.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 2.81269072388568e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 2.2437509841211067e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 2.2437509841211067e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "qsc-5",
+      "algorithm": "qsc",
+      "definition": "+proj=qsc +lon_0=0 +lat_0=-90 +ellps=WGS84",
+      "category": "native-face-roundoff",
+      "reason": "Original inverse findings are at the opposite pole outside the selected cube face, where the raw extension is ill-conditioned. Corrected own-face forward values also differ because native 1-cos(phi) cancels near the centre. Original half-angle/atan2 corrections are independently qualified; no new raw rejection is introduced.",
+      "accuracyFix": "stable-face-centre-half-angle-and-geodetic-latitude",
+      "originalFindings": [
+        {
+          "input": [
+            -30.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 2.81269072388568e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -30.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 2.81269072388568e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 2.2437509841211067e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            29.5,
+            90
+          ],
+          "direction": "inverse",
+          "error": 2.2437509841211067e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "merc-ellipsoid",
+      "algorithm": "merc",
+      "definition": "+proj=merc +ellps=WGS84",
+      "category": "singular-pole",
+      "reason": "Mercator tends to infinity at \u00b190\u00b0. Native finite ~242 million metre outputs arise from evaluating the floating approximation to \u03c0/2. math.gl deliberately rejects exact poles.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -20.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            9.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            39.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            39.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "merc-sphere",
+      "algorithm": "merc",
+      "definition": "+proj=merc +R=6371000",
+      "category": "singular-pole",
+      "reason": "Mercator tends to infinity at \u00b190\u00b0. Native finite ~242 million metre outputs arise from evaluating the floating approximation to \u03c0/2. math.gl deliberately rejects exact poles.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -20.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -20.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            9.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            9.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            39.5,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            39.5,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "laea-dense-domain",
+      "algorithm": "laea",
+      "definition": "+proj=laea +lat_0=45 +lon_0=15 +x_0=100 +y_0=200 +ellps=WGS84",
+      "category": "native-pole-roundoff",
+      "reason": "Native authalic subtraction and inverse disk-edge arithmetic lose pole information. Original pole-complement and Cartesian inverse fixes are independently checked at 80 digits; opposite-pole disk inversion remains ill-conditioned.",
+      "accuracyFix": "stable-authalic-latitude-and-inverse-rotation",
+      "originalFindings": [
+        {
+          "input": [
+            -25,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.22503108113355097,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -25,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.22503108113355097,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            5,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.060791832872368445,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            5,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.060791832872368445,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            35,
+            -90
+          ],
+          "direction": "forward",
+          "error": 0.11973653680203711,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            35,
+            -89.999999
+          ],
+          "direction": "forward",
+          "error": 0.11973653680203711,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "merc-edge-domain",
+      "algorithm": "merc",
+      "definition": "+proj=merc +R=6371000",
+      "category": "singular-pole",
+      "reason": "Mercator tends to infinity at \u00b190\u00b0. Native finite ~242 million metre outputs arise from evaluating the floating approximation to \u03c0/2. math.gl deliberately rejects exact poles.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -179.999,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -179.999,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -149.999,
+            -90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        },
+        {
+          "input": [
+            -149.999,
+            90
+          ],
+          "direction": "forward",
+          "kind": "math.gl rejects"
+        }
+      ]
+    },
+    {
+      "id": "moll-edge-domain",
+      "algorithm": "moll",
+      "definition": "+proj=moll +lon_0=10 +R=6371000",
+      "category": "native-pole-iteration",
+      "reason": "Native iteration leaves nonzero easting at exact poles and also loses nearby latitude offsets when sin(latitude) rounds to one. An original pole-complement solve preserves those offsets and exact constants; a bounded inverse rejects points outside the map.",
+      "accuracyFix": "stable-mollweide-pole-complement",
+      "originalFindings": [
+        {
+          "input": [
+            -179.999,
+            -90
+          ],
+          "direction": "forward",
+          "error": 106.28240780506108,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -179.999,
+            90
+          ],
+          "direction": "forward",
+          "error": 106.28240780506108,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            -90
+          ],
+          "direction": "forward",
+          "error": 100.02928786537707,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            90
+          ],
+          "direction": "forward",
+          "error": 100.02928786537707,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "eqearth-edge-domain",
+      "algorithm": "eqearth",
+      "definition": "+proj=eqearth +lon_0=10 +R=6371000",
+      "category": "native-pole-roundoff",
+      "reason": "PROJ inverse Newton/asin arithmetic returns a pole latitude about 6.7 microdegrees short. math.gl preserves exact map-pole handling with a bounded ulp clamp; nearby northings can be indistinguishable in binary64.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -179.999,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -179.999,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -179.999,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -179.999,
+            90
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            -90
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -149.999,
+            90
+          ],
+          "direction": "inverse",
+          "error": 6.668185335456656e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "robin-axis-regression",
+      "algorithm": "robin",
+      "definition": "+proj=robin +lon_0=0 +ellps=WGS84",
+      "category": "native-inverse-knot",
+      "reason": "All findings are at exact 5\u00b0 table knots. math.gl retains exact-knot inverse corrections to the same PROJ forward coefficient table; PROJ inverse can select/refine the adjacent cubic interval incorrectly.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            20,
+            30
+          ],
+          "direction": "inverse",
+          "error": 1.4495657072899348e-05,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "ortho-issue-269",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +ellps=WGS84 +lat_0=-42 +lon_0=147",
+      "category": "native-inverse-failure",
+      "reason": "PROJ inverse fails at some finite visible polar forward values. math.gl uses an ellipsoid-ray intersection; the equatorial limb also needs a bounded ulp discriminant tolerance.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            60,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            60,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            90,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            90,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            120,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "ortho-scale",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +ellps=WGS84 +lat_0=42 +k_0=0.9 +x_0=123 +y_0=-456",
+      "category": "native-inverse-failure",
+      "reason": "PROJ inverse fails at some finite visible polar forward values. math.gl uses an ellipsoid-ray intersection; the equatorial limb also needs a bounded ulp discriminant tolerance.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            30,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            60,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            60,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "ortho-audit--42-ellps=WGS84",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +ellps=WGS84 +lat_0=-42 +lon_0=10 +x_0=123 +y_0=-456",
+      "category": "native-inverse-failure",
+      "reason": "PROJ inverse fails at some finite visible polar forward values. math.gl uses an ellipsoid-ray intersection; the equatorial limb also needs a bounded ulp discriminant tolerance.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -79,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -79,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -50,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -50,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            40,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            70,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            70,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            99,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            99,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -109,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -109,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -49,
+            -90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -49,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    },
+    {
+      "id": "ortho-audit-0-ellps=WGS84",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +ellps=WGS84 +lat_0=0 +lon_0=10 +x_0=123 +y_0=-456",
+      "category": "rounded-limb",
+      "reason": "The projected binary64 northing is at the equatorial ellipse limb; 1 microdegree pole offsets enter northing only quadratically and can round away. The explicit bounded-ulp ellipse tolerance is retained; there is no uniform inverse angular accuracy at this limb.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -79,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.16692770291138e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -79,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.16692770291138e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -50,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.214104486280121e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -50,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.214104486280121e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -20,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.155886920400917e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -20,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.155886920400917e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.2033700329538988e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            10,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.2033700329538988e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            40,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.155886920400917e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            40,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.155886920400917e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            70,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.214104486280121e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            70,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.214104486280121e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            99,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.16692770291138e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            99,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.16692770291138e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -49,
+            -89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.20780191537051e-06,
+          "kind": "numeric difference"
+        },
+        {
+          "input": [
+            -49,
+            89.999999
+          ],
+          "direction": "inverse",
+          "error": 1.20780191537051e-06,
+          "kind": "numeric difference"
+        }
+      ]
+    },
+    {
+      "id": "ortho-audit-42-ellps=WGS84",
+      "algorithm": "ortho",
+      "definition": "+proj=ortho +ellps=WGS84 +lat_0=42 +lon_0=10 +x_0=123 +y_0=-456",
+      "category": "native-inverse-failure",
+      "reason": "PROJ inverse fails at some finite visible polar forward values. math.gl uses an ellipsoid-ray intersection; the equatorial limb also needs a bounded ulp discriminant tolerance.",
+      "accuracyFix": null,
+      "originalFindings": [
+        {
+          "input": [
+            -79,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -79,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -50,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -50,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -20,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            40,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            70,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            70,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            99,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            99,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -109,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -109,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -49,
+            89.999999
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        },
+        {
+          "input": [
+            -49,
+            90
+          ],
+          "direction": "inverse",
+          "kind": "PROJ rejects"
+        }
+      ]
+    }
+  ]
+}

@@ -315,3 +315,7 @@ the pinned oracle environment; verify offline with
 The adapter does not claim general raster or arbitrary PROJ grid support: other grid
 operation types, projected/rotated rasters, overviews, non-metre units, non-bilinear
 interpolation and ambiguous overlapping image layouts remain unsupported.
+
+## Independent review of pole conditioning
+
+The [49-configuration finding review](pole-findings-review.md) distinguishes real accuracy fixes from native PROJ pole artifacts, inverse failures and deliberate domain differences. An additional 303 controls use independently authored 80-digit equations (mpmath 1.3.0 in temporary offline tooling); all inverse controls start from exact stored binary64 x/y. These supplement the native PROJ corpus rather than redefine it. Native Mollweide outputs remain available, but pole-conditioned forward controls are qualified against the tighter high-precision oracle. Source/review/generator hashes and per-configuration evidence tests protect the reviewed classifications.

@@ -1,40 +1,29 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Adapted from proj4js 2.22.0 with corrected spherical meridian distance across pole-relative latitudes. See ../../../PROJ4-LICENSE.md for upstream attribution. Independent corrections acknowledge PROJ 9.5.1 src/projections/poly.cpp; see ../../../../projection/PROJ-LICENSE.txt.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original math.gl polar inverse tangent-plane limit and shared meridional quadrature remove cancellation, truncation and inverse residuals.  Adapted from proj4js 2.22.0 with corrected spherical meridian distance across pole-relative latitudes. See ../../../PROJ4-LICENSE.md for upstream attribution. Independent corrections acknowledge PROJ 9.5.1 src/projections/poly.cpp; see ../../../../projection/PROJ-LICENSE.txt.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
-  temp: number;
-  e0: number;
-  e1: number;
-  e2: number;
-  e3: number;
   ml0: number;
+  meridianPole: number;
+  poleRadius: number;
 };
-import e0fn from '../common/e0fn';
-import e1fn from '../common/e1fn';
-import e2fn from '../common/e2fn';
-import e3fn from '../common/e3fn';
 import adjust_lon from '../common/adjust_lon';
-import mlfn from '../common/mlfn';
 import {EPSLN} from '../common/constants';
 
 import gN from '../common/gN';
+import {meridianDistance} from '../common/meridian-distance';
 
 var MAX_ITER = 20;
 
 function initialize(state: State): void {
   /* Place parameters in static storage for common use
       ------------------------------------------------- */
-  state.temp = state.b / state.a;
-  state.es = 1 - Math.pow(state.temp, 2); // devait etre dans tmerc.js mais n y est pas donc je commente sinon retour de valeurs nulles
-  state.e = Math.sqrt(state.es);
-  state.e0 = e0fn(state.es);
-  state.e1 = e1fn(state.es);
-  state.e2 = e2fn(state.es);
-  state.e3 = e3fn(state.es);
-  state.ml0 = state.a * mlfn(state.e0, state.e1, state.e2, state.e3, state.lat0); // si que des zeros le calcul ne se fait pas
+  state.meridianPole = meridianDistance(state.a, state.es, 0, Math.PI / 2);
+  state.poleRadius = state.a / Math.sqrt(1 - state.es);
+  state.ml0 = meridianDistance(state.a, state.es, 0, state.lat0);
 }
 
 /* Polyconic forward equations--mapping lat,long to x,y
@@ -61,10 +50,7 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
     } else {
       var nl = gN(state.a, state.e, Math.sin(lat)) / Math.tan(lat);
       x = nl * Math.sin(el);
-      y =
-        state.a * mlfn(state.e0, state.e1, state.e2, state.e3, lat) -
-        state.ml0 +
-        nl * (1 - Math.cos(el));
+      y = meridianDistance(state.a, state.es, state.lat0, lat) + nl * (1 - Math.cos(el));
     }
   }
   p.x = x + state.x0;
@@ -81,6 +67,20 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
   x = p.x - state.x0;
   y = p.y - state.y0;
 
+  const meridian = y + (state.sphere ? state.a * state.lat0 : state.ml0);
+  const sign = meridian < 0 ? -1 : 1;
+  const pole = state.sphere ? (state.a * Math.PI) / 2 : state.meridianPole;
+  const poleOffset = pole - sign * meridian;
+  const radius = Math.hypot(x, poleOffset);
+  // The polar limit is a tangent plane: x=N*u*sin(lambda),
+  // y_pole-y=sign*N*u*cos(lambda). Neglected terms are O(a*u^3),
+  // below a nanometre for this branch, before binary64 rounding.
+  if (radius / state.a < 1e-6) {
+    p.x = adjust_lon(state.long0 + Math.atan2(x, poleOffset), state.over);
+    p.y = sign * (Math.PI / 2 - radius / state.poleRadius);
+    return p;
+  }
+
   if (state.sphere) {
     if (Math.abs(y + state.a * state.lat0) <= EPSLN) {
       lon = adjust_lon(x / state.a + state.long0, state.over);
@@ -96,7 +96,7 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
           (-1 * (al * (phi * tanphi + 1) - phi - 0.5 * (phi * phi + bl) * tanphi)) /
           ((phi - al) / tanphi - 1);
         phi += dphi;
-        if (Math.abs(dphi) <= EPSLN) {
+        if (Math.abs(dphi) <= 1e-14) {
           lat = phi;
           break;
         }
@@ -119,12 +119,8 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
       for (i = MAX_ITER; i; --i) {
         con = state.e * Math.sin(phi);
         cl = Math.sqrt(1 - con * con) * Math.tan(phi);
-        mln = state.a * mlfn(state.e0, state.e1, state.e2, state.e3, phi);
-        mlnp =
-          state.e0 -
-          2 * state.e1 * Math.cos(2 * phi) +
-          4 * state.e2 * Math.cos(4 * phi) -
-          6 * state.e3 * Math.cos(6 * phi);
+        mln = meridianDistance(state.a, state.es, 0, phi);
+        mlnp = (1 - state.es) / Math.pow(1 - con * con, 1.5);
         ma = mln / state.a;
         dphi =
           (al * (cl * ma + 1) - ma - 0.5 * cl * (ma * ma + bl)) /
@@ -132,7 +128,7 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
             (al - ma) * (cl * mlnp - 2 / Math.sin(2 * phi)) -
             mlnp);
         phi -= dphi;
-        if (Math.abs(dphi) <= EPSLN) {
+        if (Math.abs(dphi) <= 1e-14) {
           lat = phi;
           break;
         }
@@ -150,7 +146,13 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
 }
 
 export function createState(base: KernelParameters, options: Partial<State> = {}): State {
-  const state: State = {...base, temp: 0, e0: 0, e1: 0, e2: 0, e3: 0, ml0: 0, ...options};
+  const state: State = {
+    ...base,
+    ml0: 0,
+    meridianPole: 0,
+    poleRadius: 0,
+    ...options
+  };
   initialize(state);
   return state;
 }

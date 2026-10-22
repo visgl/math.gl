@@ -194,3 +194,14 @@ The ellipsoidal gnomonic Newton formulation and Swiss oblique Mercator branch an
 inverse equations follow PROJ 9.5.1. Stable conformal latitude expressions follow
 PROJ's tsfn formulation. Source SPDX comments identify these adaptations; the PROJ
 license is retained in `PROJ-LICENSE.txt` and the module `../LICENSE`.
+
+## Original pole-conditioning corrections
+
+The follow-up review adds original math.gl authalic pole-complement/inversion and
+Cartesian spherical-inverse helpers. LAEA, stereographic, oblique stereographic,
+spherical AEQD, QSC, Mollweide and polyconic retain their existing attributed ports;
+new half-angle identities, stable complements, polar inverse limits and quadrature
+reuse are original math.gl corrections, not copied upstream implementations.
+Source SPDX comments preserve existing proj4js/PROJ credits and identify the changes.
+Independent multiprecision equations and authored reference fixtures retain MIT
+math.gl provenance; mpmath/pyproj are used only by temporary offline generation tools.

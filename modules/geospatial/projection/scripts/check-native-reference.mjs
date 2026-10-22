@@ -141,3 +141,18 @@ for (const row of poleAudit.cases) {
 console.log('Unchanged-definition pole audit references and retained findings verified.');
 
 await import('./check-accuracy-reference.mjs');
+
+const polePrecision = await json('pole-precision-reference.json');
+assert.equal(polePrecision.precision, 80);
+assert.equal(polePrecision.mpmath, '1.3.0');
+assert.equal(polePrecision.generatorSHA256, sha(await readFile(new URL('./generate-pole-precision.py', import.meta.url))));
+assert.equal(polePrecision.reviewSHA256, sha(await readFile(join(root, 'pole-audit-review.json'))));
+assert.equal(polePrecision.nativeSourceSHA256, sha(await readFile(join(root, 'native-proj-cases.json'))));
+const poleReview = await json('pole-audit-review.json');
+assert.equal(poleReview.cases.length, 49);
+assert.equal(new Set(poleReview.cases.map(c => c.id)).size, 49);
+assert(poleReview.cases.every(c => c.reason && c.category && c.originalFindings.length));
+const polePrecisionQualification = await json('pole-precision-qualification.json');
+assert.equal(polePrecisionQualification.referenceGeneratorSHA256, polePrecision.generatorSHA256);
+assert.equal(polePrecisionQualification.cases.length, polePrecision.cases.length);
+console.log('All 49 original pole findings reviewed; high-precision oracle provenance verified.');

@@ -55,7 +55,7 @@ with spheres in this audit.
 Screening uses 1 mm plus 1e-12 relative forward error and 1e-6 degree inverse
 error. Longitude is weighted by cos(latitude) at collapsed poles, where longitude
 is indeterminate; maps with a pole line retain unweighted longitude. These are
-triage thresholds, not application accuracy guarantees. **49 configurations retain
+triage thresholds, not application accuracy guarantees. **44 configurations retain
 findings; they are not counted as successful modern PROJ qualifications.**
 
 | Retained finding | Interpretation and next work |
@@ -113,3 +113,7 @@ domains, budgets and real-grid tests.
 ## Follow-up corrections
 
 Ellipsoidal gnomonic now uses the shared `EllipsoidGeodesic` solver. Its ordinary-domain accuracy corpus uses the unchanged WGS84 definition, with no spherical oracle substitution. LCC uses stable half-angle expressions; polar spherical stereographic avoids a cancelling denominator; Krovak uses exact π/4 at the south-pole boundary; Swiss oblique Mercator follows native PROJ branch and inverse convergence formulas. The unchanged-definition pole audit retains unresolved oracle/domain differences rather than treating them as qualifications.
+
+## Completed review of the remaining findings
+
+The [complete review of all 49 original configurations](pole-findings-review.md) records every decision and its independent evidence. This follow-up fixes genuine cancellation, inverse-residual and meridian-series gaps in seven kernels. Twenty-two reviewed configurations receive numerical fixes; five stop disagreeing with PROJ altogether. The other retained differences are classified oracle quirks, rounded boundaries or intentional domain/visibility policy. No unreviewed accuracy gap remains within the audited probes; this is not a claim about unsampled coordinates. The precision corpus uses 80-digit equations as a second oracle wherever native PROJ itself loses pole information.

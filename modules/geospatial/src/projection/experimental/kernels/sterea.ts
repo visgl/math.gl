@@ -1,9 +1,11 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original math.gl inverse Cartesian rotation correction. Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
+import {inverseSphericalLatitude} from '../inverse-spherical-latitude';
 export type State = GaussState & {
   sinc0: number;
   cosc0: number;
@@ -54,7 +56,7 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
     var c = 2 * Math.atan2(rho, state.R2);
     sinc = Math.sin(c);
     cosc = Math.cos(c);
-    lat = Math.asin(cosc * state.sinc0 + (p.y * sinc * state.cosc0) / rho);
+    lat = inverseSphericalLatitude(state.sinc0, state.cosc0, sinc, cosc, p.x, p.y, rho);
     lon = Math.atan2(p.x * sinc, rho * state.cosc0 * cosc - p.y * state.sinc0 * sinc);
   } else {
     lat = state.phic0;
