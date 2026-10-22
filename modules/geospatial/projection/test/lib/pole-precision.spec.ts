@@ -78,3 +78,54 @@ test('Mollweide rejects projected points beyond its ellipse and retains nearby p
   expect(pole[0]).toBe(0);
   expect(pole[1]).toBe(Math.SQRT2 * 6371000);
 });
+
+test('Mollweide polar seams accept rounded ellipse boundaries and reject exterior points', () => {
+  for (const shape of ['+R=6371000', '+ellps=WGS84']) {
+    const a = shape.startsWith('+R=') ? 6371000 : 6378137;
+    for (const origin of [0, 25]) {
+      const transform = projectionEngine.createProjection({
+        from: '+proj=longlat +datum=none',
+        to: `+proj=moll ${shape} +lon_0=${origin} +x_0=500 +y_0=-300`
+      });
+      for (const side of [-1, 1]) {
+        for (const latitude of [
+          -89.9999999999, -89.999999, -89.99, 0, 89.99, 89.999999, 89.9999999999
+        ]) {
+          const projected = transform.project([origin + side * 180, latitude]);
+          const inverse = transform.unproject(projected);
+          // The two map seams identify the same geographic meridian; wrapping
+          // can select the opposite planar edge after a shifted central meridian.
+          const recovered = transform.project(inverse);
+          expect(Math.abs(inverse[1] - latitude)).toBeLessThanOrEqual(2e-12);
+          // Recovering a binary64 latitude introduces its own easting rounding:
+          // near a pole x is proportional to (pi/2-|lat|)^(2/3).
+          const complement = ((90 - Math.abs(latitude)) * Math.PI) / 180;
+          const eastingQuantization =
+            (4 * Number.EPSILON * Math.abs(projected[0] - 500)) / complement;
+          for (let i = 0; i < 2; i++)
+            expect(
+              i === 0
+                ? Math.abs(Math.abs(recovered[0] - 500) - Math.abs(projected[0] - 500))
+                : Math.abs(recovered[i] - projected[i]),
+              `${shape} ${latitude}: ordinate ${i}`
+            ).toBeLessThanOrEqual(16 * Number.EPSILON * a + (i === 0 ? eastingQuantization : 0));
+          expect(Math.abs(((inverse[0] - origin + 540) % 360) - 180)).toBeCloseTo(180, 8);
+          // A definite displacement outside the ellipse is still rejected,
+          // including when the northing itself rounds to its polar limit.
+          expect(() =>
+            transform.unproject([projected[0] + Math.sign(projected[0] - 500) * 2, projected[1]])
+          ).toThrow();
+        }
+      }
+    }
+  }
+  const transform = projectionEngine.createProjection({to: '+proj=moll +R=6371000'});
+  const point = [128.05539759931776, 9009954.605651489];
+  const inverse = transform.unproject(point);
+  expect(Math.abs(inverse[0])).toBeCloseTo(180, 8);
+  const recovered = transform.project(inverse);
+  expect(Math.abs(Math.abs(recovered[0]) - Math.abs(point[0]))).toBeLessThan(
+    (4 * Number.EPSILON * point[0]) / (Math.PI / 180000000)
+  );
+  expect(Math.abs(recovered[1] - point[1])).toBeLessThan(1e-7);
+});

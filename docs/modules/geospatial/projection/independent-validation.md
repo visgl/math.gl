@@ -194,10 +194,15 @@ No datum transformation is selected implicitly in the projection-only corpus.
   references now use the unchanged ellipsoidal definition; the prior explicit
   sphere substitutions were unnecessary. Orthographic now implements ellipsoidal
   equations and is likewise checked with unchanged ellipsoidal definitions.
-- Gnomonic still uses the inherited sphere of semi-major-axis radius. Its legacy
-  qualification oracle explicitly selects that sphere. This is **not** modern
-  ellipsoidal gnomonic accuracy; the separate unchanged-definition audit retains
-  the discrepancy rather than counting it as a pass.
+- Ellipsoidal gnomonic uses the shared GeographicLib-based `EllipsoidGeodesic`
+  solver and Karney's reduced-length/geodesic-scale equations. Native PROJ
+  controls retain the ellipsoid; no spherical oracle substitution is made.
+  Spherical definitions still use spherical equations. The forward operation
+  rejects nonpositive geodesic scale at/beyond the horizon, and the inverse uses
+  at most 20 Newton updates before rejecting nonconvergence. The sampled controls
+  qualify the tested interior domain, not a uniform error bound at the singular
+  horizon. See the [ellipsoid accuracy audit](../api-reference/ellipsoid-accuracy.md)
+  for the shared solver's separate PROJ 9.9.0 qualification and flattening limits.
 - Legacy `equi` is compared with equivalent `eqc`. NZMG uses standard false offsets
   explicitly in math.gl and omits the proj4js-only `iterations` option in PROJ.
 

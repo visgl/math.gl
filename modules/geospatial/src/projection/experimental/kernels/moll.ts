@@ -55,11 +55,21 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
   const x = p.x - state.x0;
   const y = (p.y - state.y0) / (Math.SQRT2 * state.a);
   if (Math.abs(y) > 1 + 8 * Number.EPSILON) return null;
-  const v = 2 * Math.acos(Math.min(1, Math.abs(y)));
-  const sinHalf = Math.sin(v / 2);
+  const normalizedX = x / (2 * Math.SQRT2 * state.a);
+  // Test the ellipse in projected space: a rounded polar northing cannot
+  // support a fixed longitude tolerance after division by its tiny cosine.
+  const ellipse = normalizedX * normalizedX + y * y;
+  if (!state.over && ellipse > 1 + 8 * Number.EPSILON) return null;
+  let v = 2 * Math.acos(Math.min(1, Math.abs(y)));
+  let sinHalf = Math.sin(v / 2);
+  if (!state.over && Math.abs(ellipse - 1) <= 8 * Number.EPSILON) {
+    // Within the roundoff envelope, recover the seam from easting. This also
+    // handles a near-pole northing that rounds to the exact polar ordinate.
+    sinHalf = Math.min(1, Math.abs(normalizedX));
+    v = 2 * Math.asin(sinHalf);
+  }
   if (sinHalf === 0 && Math.abs(x) > 8 * Number.EPSILON * state.a) return null;
-  const longitude = sinHalf === 0 ? 0 : (Math.PI * x) / (2 * Math.SQRT2 * state.a * sinHalf);
-  if (!state.over && Math.abs(longitude) > Math.PI + 1e-10) return null;
+  const longitude = sinHalf === 0 ? 0 : (Math.PI * normalizedX) / sinHalf;
   var lon = adjust_lon(state.long0 + longitude, state.over);
   var lat =
     Math.sign(y) * (Math.PI / 2 - 2 * Math.asin(Math.sqrt(sineComplement(v) / (2 * Math.PI))));
