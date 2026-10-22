@@ -31,7 +31,8 @@ the panels. Back faces are darkened to distinguish them during unfolding.
 
 ## How it works
 
-The example calls `createMyriahedralMap` from `@math.gl/geospatial/discontinuous`.
+The animation calls `createMyriahedralLayout` from `@math.gl/geospatial/discontinuous`.
+Static map users can build the same net with `createMyriahedralMap`.
 See the [API reference](./discontinuous/myriahedral.md) and
 [background and credits](./projection/developer-guide/myriahedral-projections.md).
 

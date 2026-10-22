@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
-  createMyriahedralMap,
+  createMyriahedralLayout as createLayout,
   type MyriahedralPreset,
   type MyriahedralSolid
 } from '@math.gl/geospatial/discontinuous';
@@ -19,7 +19,7 @@ export function createMyriahedralLayout(level: number, seed: number, mode: strin
       : mode === 'legacy'
         ? 'cylindric'
         : (mode as MyriahedralPreset);
-  const map = createMyriahedralMap({
+  const layout = createLayout({
     preset,
     columns: [24, 48, 72, 96][level],
     solid,
@@ -28,10 +28,9 @@ export function createMyriahedralLayout(level: number, seed: number, mode: strin
     isLand: ([longitude, latitude]) => isLand(longitude, latitude)
   });
   return {
-    ...map.layout,
-    map,
+    ...layout,
     canRecut: !solid,
-    cutLandKm: map.layout.cutLandRadians! * 6371,
+    cutLandKm: layout.cutLandRadians! * 6371,
     description: `${solid ?? preset} preset · sampled geography; land connectivity and overlap-free nets are not guaranteed.`
   };
 }

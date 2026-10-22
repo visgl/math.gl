@@ -166,7 +166,7 @@ export function createMyriahedralLayout(options: MyriahedralOptions = {}): Myria
       if (
         (preset === 'cylindric' || preset === 'sealine' || preset === 'coastline') &&
         !parallel &&
-        Math.min(a[2], b[2]) === 0
+        Math.abs(Math.min(a[2], b[2])) < 1e-10
       )
         result = 1e6;
     }

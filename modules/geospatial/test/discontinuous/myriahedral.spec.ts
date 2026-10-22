@@ -275,3 +275,24 @@ test('land callbacks are sampled once per edge and custom weights receive geogra
   expect(calls).toBe(expected);
   expect(weights).toBe(layout.edges.length);
 });
+
+for (const preset of ['cylindric', 'sealine', 'coastline'] as const) {
+  test(`${preset}: rounded equator retains its open backbone at 52 columns`, () => {
+    const layout = createMyriahedralLayout({preset, columns: 52, isLand});
+    const backbone = layout.edges.filter(edge => {
+      const a = layout.mesh.vertices[edge.a],
+        b = layout.mesh.vertices[edge.b];
+      const longitude = Math.atan2(a[1] + b[1], a[0] + b[0]);
+      return (
+        Math.abs(a[2] - b[2]) > 1e-10 &&
+        Math.abs(Math.min(a[2], b[2])) < 1e-10 &&
+        Math.abs(Math.abs(longitude) - Math.PI) > 1e-8
+      );
+    });
+    expect(backbone).toHaveLength(51);
+    for (const edge of backbone) {
+      expect(edge.weight).toBe(1e6);
+      expect(edge.hinge).toBe(true);
+    }
+  });
+}
