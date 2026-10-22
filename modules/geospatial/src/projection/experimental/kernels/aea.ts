@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Adapted from proj4js 2.22.0 with a roundoff-bounded authalic inverse at poles. See ../../../PROJ4-LICENSE.md for upstream attribution. Independent corrections acknowledge PROJ 9.5.1 src/projections/aea.cpp; see ../../../../projection/PROJ-LICENSE.txt.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -27,7 +27,7 @@ export type State = KernelParameters & {
 import msfnz from '../common/msfnz';
 import qsfnz from '../common/qsfnz';
 import adjust_lon from '../common/adjust_lon';
-import asinz from '../common/asinz';
+import iqsfnz from '../common/iqsfnz';
 import {EPSLN} from '../common/constants';
 
 function initialize(state: State): void {
@@ -104,43 +104,22 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
   }
   con = (rh1 * state.ns0) / state.a;
   if (state.sphere) {
-    lat = Math.asin((state.c - con * con) / (2 * state.ns0));
+    const sinLatitude = (state.c - con * con) / (2 * state.ns0);
+    if (Math.abs(sinLatitude) > 1 + 8 * Number.EPSILON) return null;
+    lat = Math.asin(Math.max(-1, Math.min(1, sinLatitude)));
   } else {
     qs = (state.c - con * con) / state.ns0;
-    lat = phi1z(state.e3, qs);
+    const poleQ = qsfnz(state.e3, 1);
+    lat =
+      Math.abs(Math.abs(qs) - poleQ) <= 16 * Number.EPSILON * poleQ
+        ? (Math.sign(qs) * Math.PI) / 2
+        : iqsfnz(state.e3, qs);
   }
 
   lon = adjust_lon(theta / state.ns0 + state.long0, state.over);
   p.x = lon;
   p.y = lat;
   return p;
-}
-
-/* Function to compute phi1, the latitude for the inverse of the
-   Albers Conical Equal-Area projection.
-------------------------------------------- */
-function phi1z(eccent: number, qs: number): number | null {
-  var sinphi, cosphi, con, com, dphi;
-  var phi = asinz(0.5 * qs);
-  if (eccent < EPSLN) {
-    return phi;
-  }
-
-  var eccnts = eccent * eccent;
-  for (var i = 1; i <= 25; i++) {
-    sinphi = Math.sin(phi);
-    cosphi = Math.cos(phi);
-    con = eccent * sinphi;
-    com = 1 - con * con;
-    dphi =
-      ((0.5 * com * com) / cosphi) *
-      (qs / (1 - eccnts) - sinphi / com + (0.5 / eccent) * Math.log((1 - con) / (1 + con)));
-    phi = phi + dphi;
-    if (Math.abs(dphi) <= 1e-7) {
-      return phi;
-    }
-  }
-  return null;
 }
 
 export function createState(base: KernelParameters): State {

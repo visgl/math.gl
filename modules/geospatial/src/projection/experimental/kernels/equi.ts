@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Adapted from proj4js 2.22.0 with bounded inverse pole roundoff. See ../../../PROJ4-LICENSE.md for upstream attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -39,6 +39,8 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
   p.x -= state.x0;
   p.y -= state.y0;
   var lat = p.y / state.a;
+  if (Math.abs(lat) > Math.PI / 2 && Math.abs(lat) <= Math.PI / 2 + 8 * Number.EPSILON)
+    lat = (Math.sign(lat) * Math.PI) / 2;
 
   var lon = adjust_lon(state.long0 + p.x / (state.a * Math.cos(state.lat0)), state.over);
   p.x = lon;

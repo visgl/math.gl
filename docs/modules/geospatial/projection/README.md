@@ -13,6 +13,12 @@ geocentric coordinate reference systems. Use it for map coordinates, in-place
 coordinate buffers, explicit datum transformations and coordinate propagation
 between epochs.
 
+Numerical accuracy is evaluated against **native PROJ**. The pinned proj4js
+reference serves compatibility tests and benchmarks. The independent references
+qualify specific configurations and coordinate domains; they do not establish
+complete modern PROJ equivalence. See [independent validation](independent-validation.md)
+and the [modern PROJ audit](modern-proj-audit.md) for coverage and remaining gaps.
+
 ## Tectonic time machine
 
 <TectonicTimeMachine inline height={600} />

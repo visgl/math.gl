@@ -1,14 +1,14 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original math.gl pole-complement and Cartesian inverse stability corrections. Adapted from proj4js 2.22.0 with bounded inverse disk/pole roundoff. See ../../../PROJ4-LICENSE.md for upstream attribution. Independent corrections acknowledge PROJ 9.5.1 src/projections/laea.cpp; see ../../../../projection/PROJ-LICENSE.txt.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
   mode: number;
   qp: number;
   mmf: number;
-  apa: number[];
   dd: number;
   rq: number;
   xmf: number;
@@ -22,8 +22,8 @@ import {HALF_PI, EPSLN, FORTPI} from '../common/constants';
 
 import qsfnz from '../common/qsfnz';
 import adjust_lon from '../common/adjust_lon';
-import authset from '../common/authset';
-import authlat from '../common/authlat';
+import {authalicPoleDifference, inverseAuthalicLatitude} from '../authalic-latitude';
+import {inverseSphericalLatitude} from '../inverse-spherical-latitude';
 
 /*
   reference
@@ -50,7 +50,6 @@ function initialize(state: State): void {
 
     state.qp = qsfnz(state.e, 1);
     state.mmf = 0.5 / (1 - state.es);
-    state.apa = authset(state.es);
     switch (state.mode) {
       case N_POLE:
         state.dd = 1;
@@ -132,7 +131,8 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
     q = qsfnz(state.e, sinphi);
     if (state.mode === OBLIQ || state.mode === EQUIT) {
       sinb = q / state.qp;
-      cosb = Math.sqrt(1 - sinb * sinb);
+      const poleFraction = authalicPoleDifference(state.e, phi) / state.qp;
+      cosb = Math.sqrt(poleFraction * (2 - poleFraction));
     }
     switch (state.mode) {
       case OBLIQ:
@@ -143,11 +143,17 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
         break;
       case N_POLE:
         b = HALF_PI + phi;
-        q = state.qp - q;
+        q =
+          phi >= 0
+            ? authalicPoleDifference(state.e, phi)
+            : 2 * state.qp - authalicPoleDifference(state.e, phi);
         break;
       case S_POLE:
         b = phi - HALF_PI;
-        q = state.qp + q;
+        q =
+          phi <= 0
+            ? authalicPoleDifference(state.e, phi)
+            : 2 * state.qp - authalicPoleDifference(state.e, phi);
         break;
     }
     if (Math.abs(b) < EPSLN) {
@@ -198,17 +204,17 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
 
     rh = Math.sqrt(x * x + y * y);
     phi = rh * 0.5;
-    if (phi > 1) {
+    if (phi > 1 + 8 * Number.EPSILON) {
       return null;
     }
-    phi = 2 * Math.asin(phi);
+    phi = 2 * Math.asin(Math.min(1, phi));
     if (state.mode === OBLIQ || state.mode === EQUIT) {
       sinz = Math.sin(phi);
       cosz = Math.cos(phi);
     }
     switch (state.mode) {
       case EQUIT:
-        phi = Math.abs(rh) <= EPSLN ? 0 : Math.asin((y * sinz) / rh);
+        phi = Math.abs(rh) <= EPSLN ? 0 : inverseSphericalLatitude(0, 1, sinz, cosz, x, y, rh);
         x *= sinz;
         y = cosz * rh;
         break;
@@ -216,7 +222,7 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
         phi =
           Math.abs(rh) <= EPSLN
             ? state.lat0
-            : Math.asin(cosz * state.sinph0 + (y * sinz * state.cosph0) / rh);
+            : inverseSphericalLatitude(state.sinph0, state.cosph0, sinz, cosz, x, y, rh);
         x *= sinz * state.cosph0;
         y = (cosz - Math.sin(phi) * state.sinph0) * rh;
         break;
@@ -240,9 +246,22 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
         p.y = state.lat0;
         return p;
       }
-      sCe = 2 * Math.asin((0.5 * rho) / state.rq);
+      const sinHalfCe = (0.5 * rho) / state.rq;
+      if (sinHalfCe > 1 + 8 * Number.EPSILON) return null;
+      sCe = 2 * Math.asin(Math.min(1, sinHalfCe));
       cCe = Math.cos(sCe);
-      x *= sCe = Math.sin(sCe);
+      sCe = Math.sin(sCe);
+      const beta = inverseSphericalLatitude(
+        state.mode === OBLIQ ? state.sinb1 : 0,
+        state.mode === OBLIQ ? state.cosb1 : 1,
+        sCe,
+        cCe,
+        x,
+        y,
+        rho
+      );
+      phi = inverseAuthalicLatitude(state.e, state.qp, beta);
+      x *= sCe;
       if (state.mode === OBLIQ) {
         ab = cCe * state.sinb1 + (y * sCe * state.cosb1) / rho;
         q = state.qp * ab;
@@ -268,7 +287,12 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
       }
     }
     lam = Math.atan2(x, y);
-    phi = authlat(Math.asin(ab), state.apa);
+    if (Math.abs(ab) > 1 + 8 * Number.EPSILON) return null;
+    if (state.mode === N_POLE || state.mode === S_POLE) {
+      const fraction = Math.max(0, Math.min(2, q / state.qp));
+      const beta = Math.atan2(ab, Math.sqrt(fraction * (2 - fraction)));
+      phi = inverseAuthalicLatitude(state.e, state.qp, beta);
+    }
   }
 
   p.x = adjust_lon(state.long0 + lam, state.over);
@@ -282,7 +306,6 @@ export function createState(base: KernelParameters): State {
     mode: 0,
     qp: 0,
     mmf: 0,
-    apa: [],
     dd: 0,
     rq: 0,
     xmf: 0,

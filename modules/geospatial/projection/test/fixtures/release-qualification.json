@@ -4,13 +4,13 @@
   "defaultBackend": "typescript",
   "upstreamCorpus": {
     "total": 242,
-    "numericMatches": 232,
+    "numericMatches": 230,
     "strictRejections": 9,
-    "numericCorrections": 1
+    "numericCorrections": 3
   },
   "independent": {
-    "projectionConfigurations": 134,
-    "projectionPoints": 2386,
+    "projectionConfigurations": 135,
+    "projectionPoints": 2387,
     "structuredCRSs": 15,
     "structuredFormats": [
       "wkt1",

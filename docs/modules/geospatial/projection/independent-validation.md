@@ -1,14 +1,21 @@
 # Independent projection validation
 
+**Native PROJ is the numerical accuracy reference; proj4js is a compatibility
+reference.** A separate [modern PROJ audit](modern-proj-audit.md) adds 5,560 probes
+across 143 configurations using unchanged ellipsoidal definitions, exact poles,
+near poles and explicit oracle rejections. Its retained findings are limitations,
+not successful qualifications. The original historical compatibility audit remains
+available separately.
+
 The math.gl projection engine now has reference coordinates from **PROJ 9.5.1**, generated with
 **pyproj 3.7.2** independently of proj4js. The corpus covers all **37 named algorithms**
-with **134 configurations and 2,386 points**, plus **87 points in real horizontal
+with **135 configurations and 2,387 points**, plus **87 points in real horizontal
 GeoTIFF and NTv2 datasets**. The internal Gauss helper is exercised through its parent projections.
 A separate seeded corpus adds **42 explicit domains / 11,160 points** covering every named horizontal algorithm. The [accuracy domain scorecard](./accuracy-domains.md) records parameters, tested regions, observed maxima and regression ceilings. These are sampled accuracy checks, not a claim of full-domain or full-CRS parity.
 
 The proj4js compatibility baseline remains **2.22.0**, checked against npm's latest
-tag on October 4, 2026. Its separate upstream corpus has 232 original numeric matches, one independently
-corrected Robinson result, and nine deliberate input rejections. An independent oracle matters because a
+tag on October 4, 2026. Its separate upstream corpus has 230 original numeric matches, three independently
+corrected results (one Robinson and two ellipsoidal gnomonic), and nine deliberate input rejections. An independent oracle matters because a
 TypeScript port can reproduce a bug in the JavaScript implementation exactly.
 
 ## What the checks establish
@@ -183,9 +190,19 @@ No datum transformation is selected implicitly in the projection-only corpus.
   defaults for an omitted second parallel.
 - Polar stereographic `lat_ts` overrides `k_0` in math.gl/proj4js. PROJ rejects their
   conflicting combination, so the oracle omits the overridden scale.
-- The legacy Miller, Van der Grinten, gnomonic and orthographic implementations
-  use a sphere of radius equal to the semi-major axis. The oracle explicitly selects
-  that sphere. Passing their unchanged ellipsoidal strings to PROJ can yield different results.
+- Miller and Van der Grinten are spherical methods in native PROJ too. Their
+  references now use the unchanged ellipsoidal definition; the prior explicit
+  sphere substitutions were unnecessary. Orthographic now implements ellipsoidal
+  equations and is likewise checked with unchanged ellipsoidal definitions.
+- Ellipsoidal gnomonic uses the shared GeographicLib-based `EllipsoidGeodesic`
+  solver and Karney's reduced-length/geodesic-scale equations. Native PROJ
+  controls retain the ellipsoid; no spherical oracle substitution is made.
+  Spherical definitions still use spherical equations. The forward operation
+  rejects nonpositive geodesic scale at/beyond the horizon, and the inverse uses
+  at most 20 Newton updates before rejecting nonconvergence. The sampled controls
+  qualify the tested interior domain, not a uniform error bound at the singular
+  horizon. See the [ellipsoid accuracy audit](../api-reference/ellipsoid-accuracy.md)
+  for the shared solver's separate PROJ 9.9.0 qualification and flattening limits.
 - Legacy `equi` is compared with equivalent `eqc`. NZMG uses standard false offsets
   explicitly in math.gl and omits the proj4js-only `iterations` option in PROJ.
 
@@ -303,3 +320,7 @@ the pinned oracle environment; verify offline with
 The adapter does not claim general raster or arbitrary PROJ grid support: other grid
 operation types, projected/rotated rasters, overviews, non-metre units, non-bilinear
 interpolation and ambiguous overlapping image layouts remain unsupported.
+
+## Independent review of pole conditioning
+
+The [49-configuration finding review](pole-findings-review.md) distinguishes real accuracy fixes from native PROJ pole artifacts, inverse failures and deliberate domain differences. An additional 303 controls use independently authored 80-digit equations (mpmath 1.3.0 in temporary offline tooling); all inverse controls start from exact stored binary64 x/y. These supplement the native PROJ corpus rather than redefine it. Native Mollweide outputs remain available, but pole-conditioned forward controls are qualified against the tighter high-precision oracle. Source/review/generator hashes and per-configuration evidence tests protect the reviewed classifications.

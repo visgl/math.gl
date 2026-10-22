@@ -81,7 +81,8 @@
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "LICENSE"
   ],
   "dependencies": {
     "@math.gl/core": "5.0.0-alpha.19"

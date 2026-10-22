@@ -1,9 +1,12 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileCopyrightText: Copyright (c) PROJ contributors
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original math.gl inverse Cartesian rotation correction. Adapted from proj4js 2.22.0, with polar half-angle equations from PROJ 9.5.1 src/projections/stere.cpp. See ../../../../projection/PROJ-LICENSE.txt. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
+import {inverseSphericalLatitude} from '../inverse-spherical-latitude';
 export type State = KernelParameters & {
   coslat0: number;
   sinlat0: number;
@@ -90,6 +93,15 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
     p.y = NaN;
     return p;
   }
+  if (state.sphere && Math.abs(state.coslat0) <= EPSLN) {
+    // PROJ's polar half-angle form avoids subtracting nearly equal values in
+    // 1 +/- sin(latitude) close to the opposite pole.
+    const sign = state.lat0 > 0 ? 1 : -1;
+    const radius = 2 * state.a * state.k0 * Math.tan(Math.PI / 4 - (sign * lat) / 2);
+    p.x = state.x0 + radius * Math.sin(dlon);
+    p.y = state.y0 - sign * radius * Math.cos(dlon);
+    return p;
+  }
   if (state.sphere) {
     // trace('stere:sphere case');
     A = (2 * state.k0) / (1 + state.sinlat0 * sinlat + state.coslat0 * coslat * Math.cos(dlon));
@@ -143,7 +155,15 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
       p.y = lat;
       return p;
     }
-    lat = Math.asin(Math.cos(c) * state.sinlat0 + (p.y * Math.sin(c) * state.coslat0) / rh);
+    lat = inverseSphericalLatitude(
+      state.sinlat0,
+      state.coslat0,
+      Math.sin(c),
+      Math.cos(c),
+      p.x,
+      p.y,
+      rh
+    );
     if (Math.abs(state.coslat0) < EPSLN) {
       if (state.lat0 > 0) {
         lon = adjust_lon(state.long0 + Math.atan2(p.x, -1 * p.y), state.over);
@@ -184,7 +204,15 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
       if (rh <= EPSLN) {
         Chi = state.X0;
       } else {
-        Chi = Math.asin(Math.cos(ce) * state.sinX0 + (p.y * Math.sin(ce) * state.cosX0) / rh);
+        Chi = inverseSphericalLatitude(
+          state.sinX0,
+          state.cosX0,
+          Math.sin(ce),
+          Math.cos(ce),
+          p.x,
+          p.y,
+          rh
+        );
         lon = adjust_lon(
           state.long0 +
             Math.atan2(

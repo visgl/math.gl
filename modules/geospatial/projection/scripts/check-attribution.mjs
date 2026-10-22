@@ -67,7 +67,7 @@ function visit(directory) {
     assert.equal(license, apache ? 'Apache-2.0' : 'MIT', name + ' must declare its source license');
     if (
       (/^experimental\/(kernels|common)\//.test(name) &&
-        name !== 'experimental/common/meridian-distance.ts') ||
+        !['experimental/common/meridian-distance.ts', 'experimental/kernels/ortho.ts'].includes(name)) ||
       derived.has(name)
     ) {
       assert(

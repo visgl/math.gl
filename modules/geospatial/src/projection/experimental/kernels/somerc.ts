@@ -1,7 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileCopyrightText: Copyright (c) PROJ contributors
+// SPDX-FileComment: Initialization adapted from proj4js 2.22.0; forward branch and inverse Newton equations adapted from PROJ 9.5.1 src/projections/somerc.cpp. See ../../../../projection/PROJ-LICENSE.txt. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -42,67 +43,56 @@ function initialize(state: State): void {
   state.K = k1 - state.alpha * k2 + ((state.alpha * e) / 2) * k3;
 }
 
-export function forward(state: State, p: Point): Point | null | undefined | number {
-  var Sa1 = Math.log(Math.tan(Math.PI / 4 - p.y / 2));
-  var Sa2 = (state.e / 2) * Math.log((1 + state.e * Math.sin(p.y)) / (1 - state.e * Math.sin(p.y)));
-  var S = -state.alpha * (Sa1 + Sa2) + state.K;
-
-  // spheric latitude
-  var b = 2 * (Math.atan(Math.exp(S)) - Math.PI / 4);
-
-  // spheric longitude
-  var I = state.alpha * (p.x - state.lambda0);
-
-  // psoeudo equatorial rotation
-  var rotI = Math.atan(
-    Math.sin(I) / (Math.sin(state.b0) * Math.tan(b) + Math.cos(state.b0) * Math.cos(I))
+export function forward(state: State, p: Point): Point | null {
+  const sp = state.e * Math.sin(p.y);
+  const latitude =
+    2 *
+      Math.atan(
+        Math.exp(
+          state.alpha *
+            (Math.log(Math.tan(Math.PI / 4 + p.y / 2)) -
+              (state.e / 2) * Math.log((1 + sp) / (1 - sp))) +
+            state.K
+        )
+      ) -
+    Math.PI / 2;
+  const longitude = state.alpha * (p.x - state.lambda0);
+  const cos = Math.cos(latitude);
+  const rotatedLatitude = Math.asin(
+    Math.cos(state.b0) * Math.sin(latitude) - Math.sin(state.b0) * cos * Math.cos(longitude)
   );
-
-  var rotB = Math.asin(
-    Math.cos(state.b0) * Math.sin(b) - Math.sin(state.b0) * Math.cos(b) * Math.cos(I)
-  );
-
-  p.y = (state.R / 2) * Math.log((1 + Math.sin(rotB)) / (1 - Math.sin(rotB))) + state.y0;
-  p.x = state.R * rotI + state.x0;
+  const rotatedLongitude = Math.asin((cos * Math.sin(longitude)) / Math.cos(rotatedLatitude));
+  p.x = state.x0 + state.R * rotatedLongitude;
+  p.y = state.y0 + state.R * Math.log(Math.tan(Math.PI / 4 + rotatedLatitude / 2));
   return p;
 }
 
-export function inverse(state: State, p: Point): Point | null | undefined | number {
-  var Y = p.x - state.x0;
-  var X = p.y - state.y0;
-
-  var rotI = Y / state.R;
-  var rotB = 2 * (Math.atan(Math.exp(X / state.R)) - Math.PI / 4);
-
-  var b = Math.asin(
-    Math.cos(state.b0) * Math.sin(rotB) + Math.sin(state.b0) * Math.cos(rotB) * Math.cos(rotI)
+export function inverse(state: State, p: Point): Point | null {
+  const longitude = (p.x - state.x0) / state.R;
+  const latitude = 2 * (Math.atan(Math.exp((p.y - state.y0) / state.R)) - Math.PI / 4);
+  let phi = Math.asin(
+    Math.cos(state.b0) * Math.sin(latitude) +
+      Math.sin(state.b0) * Math.cos(latitude) * Math.cos(longitude)
   );
-  var I = Math.atan(
-    Math.sin(rotI) / (Math.cos(state.b0) * Math.cos(rotI) - Math.sin(state.b0) * Math.tan(rotB))
-  );
-
-  var lambda = state.lambda0 + I / state.alpha;
-
-  var S = 0;
-  var phy = b;
-  var prevPhy = -1000;
-  var iteration = 0;
-  while (Math.abs(phy - prevPhy) > 0.0000001) {
-    if (++iteration > 20) {
-      // ...reportError("omercFwdInfinity");
-      return undefined;
+  const lambda = Math.asin((Math.cos(latitude) * Math.sin(longitude)) / Math.cos(phi));
+  const con = (state.K - Math.log(Math.tan(Math.PI / 4 + phi / 2))) / state.alpha;
+  for (let iteration = 0; iteration < 6; iteration++) {
+    const esp = state.e * Math.sin(phi);
+    const step =
+      ((con +
+        Math.log(Math.tan(Math.PI / 4 + phi / 2)) -
+        (state.e / 2) * Math.log((1 + esp) / (1 - esp))) *
+        (1 - esp * esp) *
+        Math.cos(phi)) /
+      (1 - state.es);
+    phi -= step;
+    if (Math.abs(step) < 1e-10) {
+      p.x = state.lambda0 + lambda / state.alpha;
+      p.y = phi;
+      return p;
     }
-    // S = Math.log(Math.tan(Math.PI / 4 + phy / 2));
-    S =
-      (1 / state.alpha) * (Math.log(Math.tan(Math.PI / 4 + b / 2)) - state.K) +
-      state.e * Math.log(Math.tan(Math.PI / 4 + Math.asin(state.e * Math.sin(phy)) / 2));
-    prevPhy = phy;
-    phy = 2 * Math.atan(Math.exp(S)) - Math.PI / 2;
   }
-
-  p.x = lambda;
-  p.y = phy;
-  return p;
+  return null;
 }
 
 export function createState(base: KernelParameters, options: Partial<State> = {}): State {

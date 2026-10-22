@@ -1,0 +1,119 @@
+# Modern PROJ accuracy audit
+
+Native PROJ is the numerical accuracy reference. Proj4js 2.22.0 remains useful for
+compatibility comparisons and benchmarks, but reproducing its equations does not
+establish modern ellipsoidal accuracy. This audit follows [issue #269](https://github.com/visgl/math.gl/issues/269).
+
+The reproducible oracle is **pyproj 3.7.2 / PROJ 9.5.1**, with networking disabled.
+PROJ 9.5.1 already includes ellipsoidal orthographic and gnomonic methods. This
+records a specific native reference; it does not claim coverage of the latest
+PROJ release or every native operation.
+
+## Corrections
+
+| Method | Correction |
+| --- | --- |
+| Orthographic | Ellipsoidal forward coordinates and a parallel-ray/ellipsoid inverse replace the inherited spherical equations. The issue's WGS84 point now agrees with native PROJ within 10 nanometres, and inverses recover its longitude/latitude within 1e-10 degrees. Spherical definitions remain spherical. Scale, false offsets and visibility/domain errors are covered. |
+| Eckert VI | Preserve both exact poles instead of wrapping −90° to +90°. Reject northings beyond the pole lines. |
+| Equal Earth | Bound inverse-sine roundoff at the pole lines, preserve their longitude and reject northings outside the map. |
+| Albers equal-area | Use the maintained authalic-q inverse with a roundoff-sized exact-pole check. The inherited inverse lost near-pole accuracy and could reject exact poles. |
+| Lambert conformal conic | Remove the artificial latitude displacement at exact poles. The valid cone pole maps to its apex; the opposite pole rejects. |
+| Spherical polyconic | Do not wrap the meridian distance relative to the latitude of origin. With a 40° origin, the old south-pole result could be displaced by about 20,000 km. |
+| LAEA / equirectangular | Accept only roundoff-sized inverse disk/latitude overshoots; preserve rejection of coordinates outside the domain. |
+
+Regression tests cover independent PROJ coordinates, exact and nearby poles,
+both hemispheres, pole-line longitude, false offsets, scalar/reusable outputs and
+Float64 XYZM paths. The established regional and seeded qualification suites remain
+separate from this broader audit.
+
+## Spherical approximations
+
+| Method | Result of comparing unchanged definitions |
+| --- | --- |
+| Orthographic | Now uses ellipsoidal equations for ellipsoidal definitions. No sphere is substituted in the qualification oracle. |
+| Gnomonic | Ellipsoidal definitions now use geodesic reduced length and scale, matching modern native PROJ. The shared ellipsoid geodesic solver retains GeographicLib MIT attribution. Explicit `+R` retains the spherical method. |
+| Miller / Van der Grinten | These are spherical methods in native PROJ too. Unchanged WGS84 definitions agree within the audit screen. Their old explicit-sphere oracle substitutions have been removed. |
+| Eckert VI / Mollweide / equirectangular | Spherical evaluation is intrinsic to these methods, rather than a missing ellipsoidal implementation. Exact-pole numerical behavior still needs separate checks. |
+
+## Pole audit and retained findings
+
+The audit includes **144 configurations, 5,579 probes and 34 projected
+algorithms**. It retains regional controls, both exact poles, ±89.99° and
+±89.999999° on multiple meridians, plus wider orthographic samples at five origins
+on a sphere and WGS84. Identity, geocentric conversion and the composed oblique
+wrapper remain covered by their existing suites.
+
+Every oracle result or rejection is stored in
+[`pole-audit-reference.json`](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/pole-audit-reference.json).
+The [findings](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/pole-audit-findings.json)
+retain numerical differences and both kinds of rejection disagreement, including
+coordinates where PROJ fails but math.gl succeeds. Definitions are unchanged;
+documented aliases and unsupported syntax/default combinations use the same
+explicit translations as the existing corpus. Ellipsoids are never replaced
+with spheres in this audit.
+
+Screening uses 1 mm plus 1e-12 relative forward error and 1e-6 degree inverse
+error. Longitude is weighted by cos(latitude) at collapsed poles, where longitude
+is indeterminate; maps with a pole line retain unweighted longitude. These are
+triage thresholds, not application accuracy guarantees. **44 configurations retain
+findings; they are not counted as successful modern PROJ qualifications.**
+
+| Retained finding | Interpretation and next work |
+| --- | --- |
+| Polar stereographic at the opposite pole | The exact antipode remains an explicit domain rejection. Stable half-angle formulas remove avoidable cancellation near it; huge finite coordinates remain ill-conditioned. |
+| Polyconic inverse near poles | PROJ rejects some of its own forward coordinates while math.gl returns finite inverses. These cases need independent mathematical/domain checks. |
+| LAEA / stereographic / AEQD / QSC pole conditioning | Small inverse latitude differences and, for orthographic, some PROJ inverse failures remain at or extremely near collapsed poles. Keep exact-pole mathematics and forward checks distinct from oracle agreement. |
+| Albers / Equal Earth / Mollweide oracle boundaries | The pinned PROJ inverse can snap Albers ±89.99° to a pole and can return Equal Earth pole latitudes several microdegrees short of ±90°. Its Mollweide exact-pole forward can retain a nonzero easting. Mathematical pole regressions are retained instead of adopting those artifacts. |
+| Robinson knots | Previously reviewed PROJ inverse coefficient/knot differences remain visible; math.gl's exact-knot corrections are retained. |
+| Mercator poles, azimuthal antipodes, geostationary visibility | Explicit mathematical/visibility rejection can differ from PROJ's finite outputs. These are domain-policy findings, not evidence of ordinary-coordinate accuracy. |
+
+The audit regression gate permits a finding to disappear but rejects new
+discrepancies, rejection changes or worsened measured findings. At roundoff-sensitive
+collapsed poles it permits the same bounded numerical finding to move between
+meridians across JavaScript engines. It does not promote retained findings into
+accuracy passes. Adding or widening an exception requires review.
+
+## Findings from upstream documentation and history
+
+The [OSGeo/PROJ repository](https://github.com/OSGeo/PROJ) provides more than
+reference outputs: its method documentation and bug history help distinguish a
+missing algorithm from a numerical defect or intentional domain policy.
+
+| Upstream evidence | Implication for math.gl |
+| --- | --- |
+| [Orthographic documentation](https://proj.org/en/stable/operations/projections/ortho.html), [PR #2361](https://github.com/OSGeo/PROJ/pull/2361) | Ellipsoidal support arrived in PROJ 7.2. Scale and azimuth rotation arrived in 9.5. This change implements scale; `+alpha` rotation remains an explicit unsupported parameter, so complete orthographic parameter parity is not claimed. |
+| [ESRI mapping in PR #2361](https://github.com/OSGeo/PROJ/pull/2361) | PROJ distinguishes ESRI `Orthographic` (spherical) from ellipsoidal orthographic, and treats ESRI `Local` separately. Our method-name normalization currently maps `orthographic` directly to `ortho`; preserving that metadata distinction needs a dedicated structured-CRS audit. This is a follow-up risk identified from the source, not an assertion that every ESRI definition is wrong. |
+| [Orthographic inverse #2844](https://github.com/OSGeo/PROJ/issues/2844), [PR #2855](https://github.com/OSGeo/PROJ/pull/2855) | Valid forward points can defeat the iterative inverse, including near poles. Three historical coordinates are tested against independent native forward values and the new non-iterative inverse. Oracle failure must not automatically be treated as a math.gl failure. |
+| [Gnomonic #4433](https://github.com/OSGeo/PROJ/issues/4433), [method documentation](https://proj.org/en/stable/operations/projections/gnom.html) | The reported 13 m version-to-version change was identified by PROJ maintainers as the ellipsoidal implementation introduced in 9.2. Reproducing pre-9.2 results is not the desired modern accuracy target. A geodesic implementation is required, not a radius adjustment. |
+| [Mollweide PR #3082](https://github.com/OSGeo/PROJ/pull/3082) | Too few iterations collapsed distinct latitudes beyond about 89.15 degrees. Regression probes at 89.1, 89.2, 89.3 and 89.4 degrees check native coordinates and distinct northings in both hemispheres. |
+| [Equal Earth #1097](https://github.com/OSGeo/PROJ/issues/1097) | Authalic latitude conversion is needed to preserve equal-area behavior on an ellipsoid. The existing ellipsoidal path already performs that conversion; the pole fix preserves it. |
+| [Mercator tolerance #2413](https://github.com/OSGeo/PROJ/issues/2413) | PROJ changed from rejecting exact poles to returning large finite numbers. Finite output alone does not establish mathematical validity; math.gl retains explicit pole rejection. |
+
+SPDX provenance comments and the third-party notices acknowledge the upstream
+fixes and regression investigations. This review is focused on the audited
+methods; it is not an exhaustive review of all PROJ issues or PRs.
+
+## Reproduce
+
+Use an isolated environment with `pyproj==3.7.2`, then run:
+
+```sh
+python modules/geospatial/projection/scripts/generate-pole-audit.py
+node modules/geospatial/projection/scripts/audit-pole-boundaries.mjs /tmp/pole-audit-findings.json
+node modules/geospatial/projection/scripts/check-native-reference.mjs
+node node_modules/vitest/vitest.mjs run --project node modules/geospatial/projection/test
+```
+
+Review the fresh findings before replacing the checked-in report. Fixture hashes
+are verified with the existing native-reference gate. Python and PROJ are needed
+only for regeneration; CI consumes the offline references. See
+[independent validation](independent-validation.md) for the established qualified
+domains, budgets and real-grid tests.
+
+## Follow-up corrections
+
+Ellipsoidal gnomonic now uses the shared `EllipsoidGeodesic` solver. Its ordinary-domain accuracy corpus uses the unchanged WGS84 definition, with no spherical oracle substitution. LCC uses stable half-angle expressions; polar spherical stereographic avoids a cancelling denominator; Krovak uses exact π/4 at the south-pole boundary; Swiss oblique Mercator follows native PROJ branch and inverse convergence formulas. The unchanged-definition pole audit retains unresolved oracle/domain differences rather than treating them as qualifications.
+
+## Completed review of the remaining findings
+
+The [complete review of all 49 original configurations](pole-findings-review.md) records every decision and its independent evidence. This follow-up fixes genuine cancellation, inverse-residual and meridian-series gaps in seven kernels. Twenty-two reviewed configurations receive numerical fixes; five stop disagreeing with PROJ altogether. The other retained differences are classified oracle quirks, rounded boundaries or intentional domain/visibility policy. No unreviewed accuracy gap remains within the audited probes; this is not a claim about unsampled coordinates. The precision corpus uses 80-digit equations as a second oracle wherever native PROJ itself loses pole information.

@@ -39,6 +39,9 @@ const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
 ```
 
+See the [accuracy and GeographicLib coverage audit](./ellipsoid-accuracy.md) for
+qualified domains, measured geodesic accuracy, and remaining capability gaps.
+
 ## Projection interoperability
 
 `@math.gl/geospatial/projection` uses spheres and oblate spheroids: its X/Y equatorial radii

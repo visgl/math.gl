@@ -11,14 +11,14 @@ selected fixtures and synthetic grids. The original results below are preserved 
 
 ## Combined qualification and native API follow-up
 
-The supported native profile now has 134 projection configurations / 2,386 independent
+The supported native profile now has 135 projection configurations / 2,387 independent
 points, 15 EPSG systems in four structured formats, 12 independent 3D datum chains,
 and 87 real-grid points across NTv2 and GeoTIFF. Cassini series/inverse and Robinson
 precision corrections improve the measured accuracy. New fixtures also fix datum=none
 suppression across the whole chain and ESRI polar stereographic/Krovak interpretation.
 
-The upstream count is now **232 original numeric matches + 1 reviewed numeric
-correction + 9 deliberate construction rejections**. Robinson case 165 differs from
+The upstream count is now **230 original numeric matches + 3 reviewed numeric
+corrections + 9 deliberate construction rejections**. Robinson case 165 differs from
 the old upstream forward coordinate by about two metres; its original fixture is
 retained and the native result is checked against PROJ. This is a deliberate accuracy
 correction, not an unclassified mismatch or a silently relaxed tolerance.

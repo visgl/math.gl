@@ -81,7 +81,8 @@
     "sun/LICENSE-HOSEK-WILKIE",
     "sun/LICENSE-SUNCALC",
     "sun/LICENSE-BRIGHT-STARS",
-    "timezone/data"
+    "timezone/data",
+    "LICENSE"
   ],
   "sideEffects": false,
   "dependencies": {

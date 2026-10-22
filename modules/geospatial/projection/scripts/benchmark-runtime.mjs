@@ -63,7 +63,7 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
     ...(baselineCommit ? {namespace: 'historical'} : {})
   });
   function historicalSource(base) {
-    for (const file of [base, base.replace(/\.js$/, '.ts'), base + '.ts', base + '.json', base + '/index.ts']) {
+    for (const file of [base, base.replace(/\.js$/, '.ts'), base + '.ts', base + '.js', base + '.json', base + '/index.ts']) {
       try {git(historicalPath(relative(root, file))); return sourceResult(file);}
       catch { /* Try the next supported source extension. */ }
     }

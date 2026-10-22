@@ -158,7 +158,15 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('yarn.lock') }}
+          key: ${{ runner.os }}-ubuntu22-playwright-chromium-${{ hashFiles('node_modules/playwright-core/browsers.json') }}
+
+      # The Azure Ubuntu mirror has taken 6+ minutes to fetch browser fonts.
+      # Use Ubuntu's main archive and bound stalled network requests. OS libraries
+      # are still installed on every fresh runner; a browser cache cannot replace them.
+      - name: Configure Ubuntu archive for browser dependencies
+        run: |
+          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          printf 'Acquire::Retries "2";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/80-ci-network
 
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
@@ -281,7 +289,15 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ matrix.browser }}-${{ hashFiles('yarn.lock') }}
+          key: ${{ runner.os }}-ubuntu22-playwright-${{ matrix.browser }}-${{ hashFiles('node_modules/playwright-core/browsers.json') }}
+
+      # The Azure Ubuntu mirror has taken 6+ minutes to fetch browser fonts.
+      # Use Ubuntu's main archive and bound stalled network requests. OS libraries
+      # are still installed on every fresh runner; a browser cache cannot replace them.
+      - name: Configure Ubuntu archive for browser dependencies
+        run: |
+          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+          printf 'Acquire::Retries "2";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/80-ci-network
 
       - name: Install selected Playwright browser
         run: yarn playwright install --with-deps ${{ matrix.browser }}

@@ -119,4 +119,48 @@ assert.equal(
 );
 console.log('Native support profile counts and reviewed exceptions verified.');
 
+const poleAudit = await json('pole-audit-reference.json');
+const poleFindings = await json('pole-audit-findings.json');
+assert.equal(poleAudit.pyproj, '3.7.2');
+assert.equal(poleAudit.proj, '9.5.1');
+assert.equal(poleAudit.sourceSHA256, sha(await readFile(join(root, 'native-proj-cases.json'))));
+assert.equal(poleAudit.generatorSHA256, sha(await readFile(new URL('./generate-pole-audit.py', import.meta.url))));
+assert.equal(poleFindings.referenceSourceSHA256, poleAudit.sourceSHA256);
+assert.equal(poleFindings.referenceGeneratorSHA256, poleAudit.generatorSHA256);
+assert.deepEqual(poleFindings.cases.map(c => c.id), poleAudit.cases.map(c => c.id));
+for (const row of poleAudit.cases) {
+  // Every probe must retain an oracle result or an explicit rejection.
+  assert(row.oracle.includes('+ellps=') === row.definition.includes('+ellps='));
+  if (/\+proj=(ortho|gnom|mill|vandg)\b/.test(row.definition))
+    assert.equal(row.oracle, row.definition, 'Do not replace an ellipsoid with a sphere');
+  for (const point of row.results) {
+    assert(point.forward || point.forwardRejected);
+    if (point.forward) assert(point.inverse || point.inverseRejected);
+  }
+}
+console.log('Unchanged-definition pole audit references and retained findings verified.');
+
 await import('./check-accuracy-reference.mjs');
+
+const polePrecision = await json('pole-precision-reference.json');
+assert.equal(polePrecision.precision, 80);
+assert.equal(polePrecision.mpmath, '1.3.0');
+assert.equal(polePrecision.generatorSHA256, sha(await readFile(new URL('./generate-pole-precision.py', import.meta.url))));
+assert.equal(polePrecision.reviewSHA256, sha(await readFile(join(root, 'pole-audit-review.json'))));
+assert.equal(polePrecision.nativeSourceSHA256, sha(await readFile(join(root, 'native-proj-cases.json'))));
+const poleReview = await json('pole-audit-review.json');
+assert.equal(poleReview.cases.length, 49);
+assert.equal(new Set(poleReview.cases.map(c => c.id)).size, 49);
+assert(poleReview.cases.every(c => c.reason && c.category && c.originalFindings.length));
+const polePrecisionQualification = await json('pole-precision-qualification.json');
+assert.equal(polePrecisionQualification.referenceGeneratorSHA256, polePrecision.generatorSHA256);
+assert.equal(polePrecisionQualification.cases.length, polePrecision.cases.length);
+console.log('All 49 original pole findings reviewed; high-precision oracle provenance verified.');
+
+const geodesicQualification = JSON.parse(await readFile(new URL('../../test/ellipsoid/geodesic-qualification.json', import.meta.url), 'utf8'));
+assert.equal(geodesicQualification.oracle, 'native PROJ 9.9.0 geodesic.c');
+assert.equal(geodesicQualification.generatorSHA256, sha(await readFile(new URL('./generate-geodesic-qualification.py', import.meta.url))));
+assert.equal(geodesicQualification.cases.length, 819);
+assert.equal(Object.keys(geodesicQualification.sourceSHA256).length, 2);
+assert.equal(new Set(geodesicQualification.cases.map(row => row.axes.join(','))).size, 7);
+console.log('PROJ 9.9.0 geodesic qualification provenance verified: 819 controls, seven geometries.');

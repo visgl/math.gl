@@ -31,8 +31,6 @@ for (const [index, fixture] of inputs.cases.entries()) {
   const algorithm = /\+proj=(\w+)/.exec(fixture.definition)[1];
   let equivalent = fixture.definition;
   if (algorithm === 'equi') equivalent = equivalent.replace('+proj=equi ', '+proj=eqc ');
-  if (['mill', 'vandg', 'gnom', 'ortho'].includes(algorithm))
-    equivalent = equivalent.replace('+ellps=WGS84', '+R=6378137');
   if (algorithm === 'nzmg') equivalent = equivalent.replace(' +iterations=1', '');
   assert.equal(
     fixture.oracle,

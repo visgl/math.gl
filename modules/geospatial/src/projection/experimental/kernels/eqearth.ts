@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2018 Bernie Jenny, Monash University, Melbourne, Australia (Equal Earth, ported through proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0 lib/projections/eqearth.js. Modified to use explicit TypeScript state. Original Apache-2.0 notice retained below. See ../../../APACHE-2.0-LICENSE.txt and ../../../THIRD-PARTY-NOTICES.md.
+// SPDX-FileComment: Adapted from proj4js 2.22.0 lib/projections/eqearth.js with explicit TypeScript state and bounded inverse pole roundoff. Original Apache-2.0 notice retained below. See ../../../APACHE-2.0-LICENSE.txt and ../../../THIRD-PARTY-NOTICES.md. Independent corrections acknowledge PROJ 9.5.1 src/projections/eqearth.cpp and OSGeo/PROJ #1097; see ../../../../projection/PROJ-LICENSE.txt.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -94,6 +94,11 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
     p.y /= state.rqda;
   }
 
+  const poleParam = Math.PI / 3;
+  const poleSq = poleParam * poleParam;
+  const poleY = poleParam * (A1 + A2 * poleSq + poleSq ** 3 * (A3 + A4 * poleSq));
+  if (Math.abs(p.y) > poleY + 8 * Number.EPSILON * poleY) return null;
+
   var EPS = 1e-9,
     NITER = 12,
     paramLat = p.y,
@@ -119,7 +124,12 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
   p.x =
     (M * p.x * (A1 + 3 * A2 * paramLatSq + paramLatPow6 * (7 * A3 + 9 * A4 * paramLatSq))) /
     Math.cos(paramLat);
-  p.y = Math.asin(Math.sin(paramLat) / M);
+  // Clamp only roundoff at the pole; points beyond the map remain invalid.
+  const sinBeta = Math.sin(paramLat) / M;
+  const poleRoundoff = 8 * Number.EPSILON;
+  if (Math.abs(sinBeta) > 1 + poleRoundoff) return null;
+  p.y =
+    Math.abs(sinBeta) >= 1 - poleRoundoff ? (Math.sign(sinBeta) * Math.PI) / 2 : Math.asin(sinBeta);
 
   if (state.es !== 0) {
     p.y = authlat(p.y, state.apa);

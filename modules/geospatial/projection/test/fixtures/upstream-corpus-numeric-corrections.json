@@ -4,5 +4,17 @@
     "sourceLine": 2041,
     "referenceId": "robin-upstream-165",
     "reason": "Native Robinson uses the PROJ 9.5.1 float coefficient table, correcting a roughly two-metre difference from proj4js. Exact inverse knots use their tabulated latitude."
+  },
+  {
+    "index": 22,
+    "sourceLine": 314,
+    "referenceId": "gnom-upstream-22",
+    "reason": "Modern native PROJ ellipsoidal gnomonic replaces legacy spherical proj4js coordinates."
+  },
+  {
+    "index": 23,
+    "sourceLine": 317,
+    "referenceId": "gnom-upstream-22",
+    "reason": "Modern native PROJ ellipsoidal gnomonic replaces legacy spherical proj4js coordinates."
   }
 ]

@@ -6,8 +6,8 @@ import type {KernelParameters} from '../kernel';
 import {createAngularRanges} from './geographic-bounds';
 import type {AngularRanges} from './geographic-bounds';
 import type {Vector, AngularDomain} from './spherical-rendering-domain';
-import {sphericalRange, sphericalRatioRange} from './spherical-rendering-domain';
-import {envelope, scale, add} from './rendering-bounds';
+import {sphericalExtremum, sphericalRange, sphericalRatioRange} from './spherical-rendering-domain';
+import {envelope, scale, add, multiply, ordered} from './rendering-bounds';
 
 /** Exact extrema for spherical orthographic and linear-fractional azimuthal maps. */
 export function sphericalAzimuthalBounds(
@@ -28,6 +28,56 @@ export function sphericalAzimuthalBounds(
   return envelope(
     add([base.x0, base.x0], scale(range(east), factor)),
     add([base.y0, base.y0], scale(range(north), factor))
+  );
+}
+
+/** Enclose ellipsoidal orthographic ECEF components over the visible region. */
+export function orthographicBounds(
+  base: KernelParameters,
+  parameters: AngularRanges,
+  domain?: AngularDomain
+) {
+  const sin0 = Math.sin(base.lat0);
+  const cos0 = Math.cos(base.lat0);
+  const latitudeSin = sphericalRange([0, 0, 1], parameters, domain);
+  if (Math.abs(sin0) < 1e-15 && (!domain || Math.abs(domain.distance - Math.PI / 2) < 1e-15)) {
+    // On an equatorial hemisphere, visibility restricts longitude only. The
+    // parallel radius decreases with |latitude|, so x has the same extremizers
+    // as its spherical counterpart; ellipsoidal northing is monotone in sin(phi).
+    const x = (maximize: boolean) => {
+      const extremum = sphericalExtremum([0, 1, 0], parameters, domain, maximize);
+      return extremum.value / Math.sqrt(1 - base.es * Math.sin(extremum.point[1]) ** 2);
+    };
+    const y = (sin: number) => ((1 - base.es) * sin) / Math.sqrt(1 - base.es * sin * sin);
+    return envelope(
+      add([base.x0, base.x0], scale([x(false), x(true)], base.a * base.k0)),
+      add([base.y0, base.y0], scale([y(latitudeSin[0]), y(latitudeSin[1])], base.a * base.k0))
+    );
+  }
+
+  const squareMin =
+    latitudeSin[0] <= 0 && latitudeSin[1] >= 0
+      ? 0
+      : Math.min(latitudeSin[0] ** 2, latitudeSin[1] ** 2);
+  const squareMax = Math.max(latitudeSin[0] ** 2, latitudeSin[1] ** 2);
+  const nu = ordered(
+    1 / Math.sqrt(1 - base.es * squareMin),
+    1 / Math.sqrt(1 - base.es * squareMax)
+  );
+  const factor = base.a * base.k0;
+  const yShift = (base.es * sin0 * cos0) / Math.sqrt(1 - base.es * sin0 * sin0);
+  return envelope(
+    add(
+      [base.x0, base.x0],
+      scale(multiply(sphericalRange([0, 1, 0], parameters, domain), nu), factor)
+    ),
+    add(
+      [base.y0 + factor * yShift, base.y0 + factor * yShift],
+      scale(
+        multiply(sphericalRange([-sin0, 0, (1 - base.es) * cos0], parameters, domain), nu),
+        factor
+      )
+    )
   );
 }
 
@@ -178,4 +228,24 @@ export function perspectiveBounds(
     add([base.x0, base.x0], scale(x, base.a * (p - 1) * cw)),
     add([base.y0, base.y0], scale(y, base.a * (p - 1)))
   );
+}
+
+/** Gaussian curvature K <= 1/b² gives M >= cos(s/b), while m <= s.
+ * The geodetic spherical path bounds distance by a*angle/sqrt(1-es).
+ * This disk conservatively encloses m/M on the finite rendering cap.
+ */
+export function ellipsoidalGnomonicBounds(
+  base: KernelParameters,
+  region: AngularRanges,
+  domain?: AngularDomain
+) {
+  const dot = sphericalRange([Math.cos(base.lat0), 0, Math.sin(base.lat0)], region, domain)[0];
+  const angle = Math.acos(Math.max(-1, Math.min(1, dot)));
+  const q = 1 - base.es;
+  const distance = (base.a * angle) / Math.sqrt(q);
+  const scale = Math.cos(angle / q);
+  if (!(scale > 0))
+    throw new Error('Gnomonic rendering coverage approaches its ellipsoidal horizon');
+  const radius = distance / scale;
+  return envelope([base.x0 - radius, base.x0 + radius], [base.y0 - radius, base.y0 + radius]);
 }

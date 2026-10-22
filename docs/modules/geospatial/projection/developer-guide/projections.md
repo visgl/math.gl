@@ -136,7 +136,7 @@ algorithm defaults do not define a complete CRS.
 | Oblique stereographic        | `sterea` | `obliqueStereographic`      | Regional conformal alternative; requires a non-polar origin                       |
 | Azimuthal equidistant        | `aeqd`   | `azimuthalEquidistant`      | Sphere or ellipsoid; centered-distance use, with ellipsoidal qualifications below |
 | Gnomonic                     | `gnom`   | `gnomonic`                  | Spherical equations; great-circle paths are straight lines, horizon excluded      |
-| Orthographic                 | `ortho`  | `orthographic`              | Spherical equations; globe-like hemisphere view, invisible points rejected        |
+| Orthographic                 | `ortho`  | `orthographic`              | Spherical and ellipsoidal equations; globe-like hemisphere view, invisible points rejected        |
 
 Choose the center deliberately. Distortion increases away from it, and an antipodal
 point or projection horizon may be undefined. Polar stereographic is useful for

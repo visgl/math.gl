@@ -275,6 +275,7 @@
               "modules/geospatial/projection/acceleration",
               "modules/geospatial/projection/parity-audit",
               "modules/geospatial/projection/independent-validation",
+              "modules/geospatial/projection/modern-proj-audit",
               "modules/geospatial/projection/accuracy-domains"
             ]
           }
