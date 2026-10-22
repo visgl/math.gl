@@ -1,0 +1,378 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+
+import polygonClipping from 'polygon-clipping';
+import {
+  add,
+  angle,
+  area,
+  basis,
+  coordinates,
+  cross,
+  dot,
+  geographic,
+  RAD,
+  scale,
+  unit,
+  validateArc,
+  type Position,
+  type Vector
+} from './math';
+
+export type GeographicPosition = readonly [number, number];
+/** [a,b,c,d,tx,ty]: x'=a*x+c*y+tx, y'=b*x+d*y+ty. */
+export type MapPlacement = readonly [number, number, number, number, number, number];
+export type MapRegion = {
+  id: string;
+  /** Ordered convex spherical boundary, with optional repeated closing point. */
+  boundary: readonly GeographicPosition[];
+  /** Strictly interior point, used to orient the boundary half-spaces. */
+  interior: GeographicPosition;
+  project: (position: GeographicPosition) => Position;
+  unproject: (position: GeographicPosition) => Position | null;
+  placement?: MapPlacement;
+};
+export type MapSeam = {
+  regions: readonly string[];
+  edges: readonly number[];
+  /** Join continuity is sampled at endpoints and midpoint; clipping does not rely on it. */
+  kind: 'join' | 'cut' | 'boundary';
+};
+export type MapPoint = {regionId: string; position: Position};
+export type MapLine = {regionId: string; coordinates: Position[]; sourceCoordinates: Position[]};
+export type MapPolygon = {
+  regionId: string;
+  coordinates: Position[][];
+  sourceCoordinates: Position[][];
+};
+export type MapSamplingOptions = {
+  /** Maximum angular sampling interval in degrees. Default 2, range (0, 90]. */
+  maxAngularStep?: number;
+  /** Midpoint chord-error target in placed output units. Default 1e-4. */
+  tolerance?: number;
+};
+type Region = {
+  definition: MapRegion;
+  vertices: Vector[];
+  normals: Vector[];
+  placement: MapPlacement;
+};
+const EPS = 1e-10;
+
+/** Experimental static map layout. Source edges are minor great-circle arcs.
+ * Geometry is split at every region boundary, including continuous joins.
+ */
+export class DiscontinuousMap {
+  readonly regions: readonly MapRegion[];
+  readonly seams: readonly MapSeam[];
+  private readonly compiled: Region[];
+  constructor(definitions: readonly MapRegion[]) {
+    if (!definitions.length) throw new Error('At least one map region is required');
+    const ids = new Set<string>();
+    this.compiled = definitions.map(definition => {
+      if (!definition.id || ids.has(definition.id))
+        throw new Error('Map region IDs must be unique and nonempty');
+      ids.add(definition.id);
+      let vertices = definition.boundary.map(geographic);
+      if (vertices.length > 1 && angle(vertices[0], vertices[vertices.length - 1]) < EPS)
+        vertices = vertices.slice(0, -1);
+      if (vertices.length < 3)
+        throw new Error('A region requires at least three boundary vertices');
+      const interior = geographic(definition.interior);
+      const normals = vertices.map((v, i) => {
+        const next = vertices[(i + 1) % vertices.length];
+        validateArc(v, next);
+        let normal = unit(cross(v, next));
+        if (dot(normal, interior) < 0) normal = scale(normal, -1);
+        if (dot(normal, interior) < EPS || vertices.some(p => dot(normal, p) < -EPS))
+          throw new Error('Region must be convex with a strictly interior reference point');
+        return normal;
+      });
+      const placement = [
+        ...(definition.placement || [1, 0, 0, 1, 0, 0])
+      ] as unknown as MapPlacement;
+      if (
+        placement.length !== 6 ||
+        !placement.every(Number.isFinite) ||
+        Math.abs(placement[0] * placement[3] - placement[1] * placement[2]) < 1e-14
+      )
+        throw new Error('Placement must be a finite invertible affine transform');
+      const snapshot = Object.freeze({
+        ...definition,
+        interior: Object.freeze([...definition.interior]) as GeographicPosition,
+        boundary: Object.freeze(vertices.map(v => Object.freeze(coordinates(v)))),
+        placement: Object.freeze(placement)
+      });
+      return {definition: snapshot, vertices, normals, placement};
+    });
+    this.regions = Object.freeze(this.compiled.map(r => r.definition));
+    this.seams = Object.freeze(this.buildSeams());
+  }
+  /** Boundary-inclusive; order determines default point ownership. */
+  findRegions(position: GeographicPosition): string[] {
+    const p = geographic(position);
+    return this.compiled.filter(r => this.contains(r, p)).map(r => r.definition.id);
+  }
+  projectPoint(position: GeographicPosition, regionId?: string): MapPoint | null {
+    const p = geographic(position);
+    const candidates = this.select(regionId);
+    const region = candidates.find(r => this.contains(r, p));
+    return region ? {regionId: region.definition.id, position: this.project(region, p)} : null;
+  }
+  /** Explicit candidates: gaps return []; overlaps and seams can return several. */
+  unprojectPoint(position: GeographicPosition, regionId?: string): MapPoint[] {
+    if (position.length !== 2 || !position.every(Number.isFinite))
+      throw new Error('Expected finite XY coordinates');
+    const results: MapPoint[] = [];
+    for (const r of this.select(regionId)) {
+      const [a, b, c, d, tx, ty] = r.placement,
+        det = a * d - b * c;
+      const x = position[0] - tx,
+        y = position[1] - ty;
+      const source = r.definition.unproject([(d * x - c * y) / det, (-b * x + a * y) / det]);
+      if (!source) continue;
+      const p = geographic(source);
+      if (!this.contains(r, p)) continue;
+      const check = this.project(r, p);
+      if (
+        Math.hypot(check[0] - position[0], check[1] - position[1]) <=
+        1e-8 * (1 + Math.hypot(...position))
+      )
+        results.push({regionId: r.definition.id, position: coordinates(p)});
+    }
+    return results;
+  }
+  projectLine(line: readonly GeographicPosition[], options: MapSamplingOptions = {}): MapLine[] {
+    const settings = sampling(options);
+    const points = line.map(geographic);
+    for (let i = 1; i < points.length; i++) validateArc(points[i - 1], points[i]);
+    const results: MapLine[] = [];
+    for (const r of this.compiled) {
+      let current: MapLine | null = null;
+      for (let i = 1; i < points.length; i++) {
+        const clipped = clipArc(points[i - 1], points[i], r.normals);
+        if (!clipped) {
+          current = null;
+          continue;
+        }
+        const sampled = this.sample(r, clipped[0], clipped[1], settings);
+        if (sampled.length < 2) continue;
+        if (
+          !current ||
+          angle(
+            geographic(current.sourceCoordinates[current.sourceCoordinates.length - 1]),
+            clipped[0]
+          ) > EPS
+        ) {
+          current = {regionId: r.definition.id, coordinates: [], sourceCoordinates: []};
+          results.push(current);
+        } else sampled.shift();
+        for (const p of sampled) {
+          current.coordinates.push(this.project(r, p));
+          current.sourceCoordinates.push(coordinates(p));
+        }
+        // Even an excursion returning to the same seam point starts a new part.
+        if (!this.contains(r, points[i])) current = null;
+      }
+    }
+    return results;
+  }
+  /** Exterior first, then holes; winding-independent. Each input polygon must
+   * fit in one open hemisphere. Returned polygons have CCW exteriors/CW holes.
+   */
+  projectPolygon(
+    rings: readonly (readonly GeographicPosition[])[],
+    options: MapSamplingOptions & {chartCenter?: GeographicPosition} = {}
+  ): MapPolygon[] {
+    const settings = sampling(options);
+    if (!rings.length) return [];
+    const vectors = rings.map(ring => {
+      let p = ring.map(geographic);
+      if (p.length > 1 && angle(p[0], p[p.length - 1]) < EPS) p = p.slice(0, -1);
+      if (p.length < 3) throw new Error('Polygon rings require at least three vertices');
+      p.forEach((v, i) => validateArc(v, p[(i + 1) % p.length]));
+      return p;
+    });
+    const center = options.chartCenter
+      ? geographic(options.chartCenter)
+      : unit(vectors[0].reduce(add, [0, 0, 0]));
+    if (vectors.some(r => r.some(p => dot(center, p) <= 1e-6)))
+      throw new Error(
+        'Polygon does not fit its open-hemisphere chart; supply chartCenter or split into smaller polygons'
+      );
+    const [x, y] = basis(center);
+    const planar = vectors.map(r =>
+      r.map(p => [dot(x, p) / dot(center, p), dot(y, p) / dot(center, p)] as Position)
+    );
+    if (planar.some(r => Math.abs(area(r)) < 1e-14)) throw new Error('Degenerate polygon ring');
+    let bound = 1;
+    for (const ring of planar)
+      for (const p of ring) bound = Math.max(bound, Math.abs(p[0]), Math.abs(p[1]));
+    bound += 1;
+    const results: MapPolygon[] = [];
+    for (const r of this.compiled) {
+      let clip: Position[] = [
+        [-bound, -bound],
+        [bound, -bound],
+        [bound, bound],
+        [-bound, bound]
+      ];
+      for (const n of r.normals) clip = clipPlane(clip, dot(n, x), dot(n, y), dot(n, center));
+      if (clip.length < 3) continue;
+      const polygons = polygonClipping.intersection(planar, [clip]);
+      for (const polygon of polygons) {
+        const output: MapPolygon = {
+          regionId: r.definition.id,
+          coordinates: [],
+          sourceCoordinates: []
+        };
+        polygon.forEach((ring, index) => {
+          const sphere = ring.map(p => unit(add(center, add(scale(x, p[0]), scale(y, p[1])))));
+          const points: Vector[] = [];
+          for (let i = 1; i < sphere.length; i++) {
+            const sampled = this.sample(r, sphere[i - 1], sphere[i], settings);
+            for (let j = 0; j < sampled.length - 1; j++) points.push(sampled[j]);
+          }
+          if (points.length < 3) return;
+          points.push(points[0]);
+          const xy = points.map(p => this.project(r, p));
+          if (area(xy) > 0 !== (index === 0)) {
+            xy.reverse();
+            points.reverse();
+          }
+          output.coordinates.push(xy);
+          output.sourceCoordinates.push(points.map(coordinates));
+        });
+        if (output.coordinates.length) results.push(output);
+      }
+    }
+    return results;
+  }
+  private select(id?: string): Region[] {
+    if (id === undefined) return this.compiled;
+    const r = this.compiled.find(p => p.definition.id === id);
+    if (!r) throw new Error(`Unknown map region: ${id}`);
+    return [r];
+  }
+  private contains(r: Region, p: Vector) {
+    return r.normals.every(n => dot(n, p) >= -EPS);
+  }
+  private project(r: Region, p: Vector): Position {
+    const local = r.definition.project(coordinates(p));
+    const [a, b, c, d, tx, ty] = r.placement;
+    const xy: Position = [a * local[0] + c * local[1] + tx, b * local[0] + d * local[1] + ty];
+    if (!xy.every(Number.isFinite))
+      throw new Error(`Nonfinite projection in region ${r.definition.id}`);
+    return xy;
+  }
+  private sample(
+    r: Region,
+    a: Vector,
+    b: Vector,
+    settings: {step: number; tolerance: number}
+  ): Vector[] {
+    if (angle(a, b) < 1e-13) return [a];
+    const out: Vector[] = [a];
+    const visit = (u: Vector, v: Vector, depth: number) => {
+      const middle = unit(add(u, v)),
+        p = this.project(r, u),
+        q = this.project(r, v),
+        m = this.project(r, middle);
+      const dx = q[0] - p[0],
+        dy = q[1] - p[1],
+        length = dx * dx + dy * dy;
+      const t = length
+        ? Math.max(0, Math.min(1, ((m[0] - p[0]) * dx + (m[1] - p[1]) * dy) / length))
+        : 0;
+      const error = Math.hypot(m[0] - p[0] - t * dx, m[1] - p[1] - t * dy);
+      if (angle(u, v) > settings.step || error > settings.tolerance) {
+        if (depth >= 20 || out.length > 1000000)
+          throw new Error('Projection sampling limit exceeded; relax tolerance');
+        visit(u, middle, depth + 1);
+        visit(middle, v, depth + 1);
+      } else out.push(v);
+    };
+    visit(a, b, 0);
+    return out;
+  }
+  private buildSeams(): MapSeam[] {
+    const groups = new Map<string, {r: Region; i: number}[]>();
+    const key = (p: Vector) => p.map(v => Math.round(v * 1e9)).join(',');
+    for (const r of this.compiled)
+      r.vertices.forEach((p, i) => {
+        const k = [key(p), key(r.vertices[(i + 1) % r.vertices.length])].sort().join('/');
+        const group = groups.get(k) || [];
+        group.push({r, i});
+        groups.set(k, group);
+      });
+    return [...groups.values()].map(group => {
+      if (group.length > 2) throw new Error('More than two regions share a boundary edge');
+      let kind: MapSeam['kind'] = 'boundary';
+      if (group.length === 2) {
+        const {r, i} = group[0],
+          other = group[1].r,
+          a = r.vertices[i],
+          b = r.vertices[(i + 1) % r.vertices.length];
+        const samples = [a, unit(add(a, b)), b];
+        kind = samples.every(p => {
+          const u = this.project(r, p),
+            v = this.project(other, p);
+          return Math.hypot(u[0] - v[0], u[1] - v[1]) < 1e-8 * (1 + Math.hypot(...u));
+        })
+          ? 'join'
+          : 'cut';
+      }
+      return Object.freeze({
+        regions: Object.freeze(group.map(g => g.r.definition.id)),
+        edges: Object.freeze(group.map(g => g.i)),
+        kind
+      });
+    });
+  }
+}
+function sampling(options: MapSamplingOptions) {
+  const step = options.maxAngularStep ?? 2,
+    tolerance = options.tolerance ?? 1e-4;
+  if (
+    !Number.isFinite(step) ||
+    step <= 0 ||
+    step > 90 ||
+    !Number.isFinite(tolerance) ||
+    tolerance <= 0
+  )
+    throw new Error('Invalid map sampling options');
+  return {step: step * RAD, tolerance};
+}
+function clipArc(a: Vector, b: Vector, normals: Vector[]): [Vector, Vector] | null {
+  let start = 0,
+    end = 1;
+  for (const n of normals) {
+    const snap = (x: number) => (Math.abs(x) < EPS ? 0 : x);
+    const u = snap(dot(n, a)),
+      v = snap(dot(n, b));
+    if (u < -EPS && v < -EPS) return null;
+    if (u < 0 && v >= 0) start = Math.max(start, -u / (v - u));
+    if (v < 0 && u >= 0) end = Math.min(end, u / (u - v));
+  }
+  if (end - start < 1e-12) return null;
+  return [
+    unit(add(scale(a, 1 - start), scale(b, start))),
+    unit(add(scale(a, 1 - end), scale(b, end)))
+  ];
+}
+function clipPlane(ring: Position[], a: number, b: number, c: number): Position[] {
+  const output: Position[] = [];
+  for (let i = 0; i < ring.length; i++) {
+    const p = ring[i],
+      q = ring[(i + 1) % ring.length],
+      u = a * p[0] + b * p[1] + c,
+      v = a * q[0] + b * q[1] + c;
+    if (u >= 0) output.push(p);
+    if (u < 0 !== v < 0) {
+      const t = u / (u - v);
+      output.push([p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1])]);
+    }
+  }
+  return output;
+}

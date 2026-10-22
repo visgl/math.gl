@@ -206,3 +206,18 @@
 .unfolding-polyhedron[data-embedded] header,
 .unfolding-polyhedron[data-embedded] .intro {display: none;}
 .unfolding-polyhedron[data-embedded] section {margin-top: 0;}
+
+.unfolding-polyhedron .coordinate-tooltip {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  background: rgba(5, 15, 22, 0.94);
+  color: #f2f6f8;
+  border: 1px solid #718895;
+  border-radius: 5px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  box-shadow: 0 3px 12px #0005;
+}

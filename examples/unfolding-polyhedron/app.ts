@@ -7,6 +7,7 @@ import {createSolid, edgeKey, type Solid} from './polyhedra';
 import {createCutLayout, type CutMode} from './cut-layout';
 import {createRenderer} from './renderer';
 import {markup} from './view';
+import {pickSurface} from './picking';
 
 /** Mount one independent instance; cleanup releases listeners, animation and GPU resources. */
 export function mountUnfolding(root: HTMLElement) {
@@ -21,6 +22,29 @@ export function mountUnfolding(root: HTMLElement) {
     element.addEventListener(type, listener as EventListener, {signal: abort.signal});
   }
   const canvas = root.querySelector('canvas')!;
+  const tooltip = document.createElement('div');
+  tooltip.className = 'coordinate-tooltip';
+  tooltip.setAttribute('role', 'tooltip');
+  tooltip.hidden = true;
+  canvas.parentElement!.append(tooltip);
+  let pointer: {x: number; y: number} | null = null;
+  let positions: number[][][] = [];
+  let hoverDirty = false;
+  function updateTooltip() {
+    tooltip.hidden = true;
+    if (!pointer || drag) return;
+    const bounds = canvas.getBoundingClientRect();
+    const x = (pointer.x - bounds.left) / bounds.width;
+    const y = (pointer.y - bounds.top) / bounds.height;
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;
+    const hit = pickSurface(layout.mesh, positions, x * 2 - 1, 1 - y * 2);
+    if (!hit) return;
+    tooltip.textContent = `Lon ${hit.longitude.toFixed(3)}° · Lat ${hit.latitude.toFixed(3)}° · Panel ${hit.face + 1}`;
+    tooltip.hidden = false;
+    const parent = canvas.parentElement!.getBoundingClientRect();
+    tooltip.style.left = `${Math.max(0, Math.min(pointer.x - parent.left + 14, parent.width - tooltip.offsetWidth))}px`;
+    tooltip.style.top = `${pointer.y - parent.top - tooltip.offsetHeight - 12}px`;
+  }
   const renderer = createRenderer(canvas, root.querySelector('#imagery-status')!);
   const earth = root.querySelector<HTMLInputElement>('#earth')!;
   const edges = root.querySelector<HTMLInputElement>('#edges')!;
@@ -111,9 +135,12 @@ export function mountUnfolding(root: HTMLElement) {
   });
   listen(canvas, 'pointerdown', e => {
     drag = {x: e.clientX, y: e.clientY};
+    tooltip.hidden = true;
     canvas.setPointerCapture(e.pointerId);
   });
   listen(canvas, 'pointermove', e => {
+    pointer = e.pointerType === 'touch' ? null : {x: e.clientX, y: e.clientY};
+    hoverDirty = true;
     if (!drag) return;
     yaw += (e.clientX - drag.x) * 0.008;
     pitch = Math.max(-1.5, Math.min(1.5, pitch + (e.clientY - drag.y) * 0.008));
@@ -121,10 +148,29 @@ export function mountUnfolding(root: HTMLElement) {
   });
   listen(canvas, 'pointerup', () => {
     drag = null;
+    hoverDirty = true;
   });
   listen(canvas, 'pointercancel', () => {
     drag = null;
+    pointer = null;
+    tooltip.hidden = true;
   });
+  listen(canvas, 'pointerleave', () => {
+    pointer = null;
+    tooltip.hidden = true;
+  });
+  listen(canvas, 'lostpointercapture', () => {
+    drag = null;
+    hoverDirty = true;
+  });
+  window.addEventListener(
+    'scroll',
+    () => {
+      pointer = null;
+      tooltip.hidden = true;
+    },
+    {capture: true, signal: abort.signal}
+  );
   let previous = '';
   function render(time: number) {
     const dt = Math.min((time - lastTime) / 1000, 0.05);
@@ -180,13 +226,14 @@ export function mountUnfolding(root: HTMLElement) {
         (height - 40) / Math.max(maxY - minY, 2.5)
       );
       const depth = Math.max(1, ...faces.flatMap(face => face.points.map(p => Math.abs(p[2]))));
-      const positions = faces.map(face =>
+      positions = faces.map(face =>
         face.points.map(p => [
           (2 * (p[0] - (minX + maxX) / 2) * scale) / width,
           (2 * (p[1] - (minY + maxY) / 2) * scale) / height,
           -p[2] / (depth + 1)
         ])
       );
+      hoverDirty = true;
       renderer.draw(
         layout.mesh,
         positions,
@@ -194,6 +241,10 @@ export function mountUnfolding(root: HTMLElement) {
         earth.checked && !earth.disabled,
         edges.checked
       );
+    }
+    if (hoverDirty) {
+      updateTooltip();
+      hoverDirty = false;
     }
     frame = requestAnimationFrame(render);
   }
