@@ -348,21 +348,26 @@ export class DiscontinuousMap {
           a = r.vertices[i],
           b = r.vertices[(i + 1) % r.vertices.length];
         const samples = [a, unit(add(a, b)), b];
-        kind = samples.every(p => {
-          const u = this.project(r, p),
-            v = this.project(other, p);
-          const outputScale = Math.max(
-            r.placementScale,
-            other.placementScale,
-            Math.abs(u[0]),
-            Math.abs(u[1])
-          );
-          return (
-            Math.hypot(
-              u[0] / outputScale - v[0] / outputScale,
-              u[1] / outputScale - v[1] / outputScale
-            ) < 1e-8
-          );
+        const first = samples.map(p => this.project(r, p));
+        const second = samples.map(p => this.project(other, p));
+        // Measure the actual placed edge, independent of how scale is split
+        // between local projection and placement. Normalize before distances
+        // to avoid overflow; allow only floating-point roundoff at large offsets.
+        const coordinateScale = Math.max(...first.concat(second).flat().map(Math.abs));
+        const normalizedFirst = first.map(p =>
+          p.map(v => (coordinateScale ? v / coordinateScale : 0))
+        );
+        const normalizedSecond = second.map(p =>
+          p.map(v => (coordinateScale ? v / coordinateScale : 0))
+        );
+        const edgeLength = (points: number[][]) =>
+          Math.hypot(points[2][0] - points[0][0], points[2][1] - points[0][1]);
+        const tolerance =
+          1e-8 * Math.max(edgeLength(normalizedFirst), edgeLength(normalizedSecond)) +
+          8 * Number.EPSILON;
+        kind = normalizedFirst.every((u, index) => {
+          const v = normalizedSecond[index];
+          return Math.hypot(u[0] - v[0], u[1] - v[1]) <= tolerance;
         })
           ? 'join'
           : 'cut';

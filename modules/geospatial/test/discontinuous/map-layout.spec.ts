@@ -536,3 +536,31 @@ test('overlapping copies of a region retain independent seam relations and geome
   ).toHaveLength(3);
   expect(map.projectPolygon([rectangle(-0.5, 0.5, -0.5, 0.5).map(sphere)])).toHaveLength(3);
 });
+
+test('seam labels depend on placed geometry rather than projection/placement scale factorization', () => {
+  const make = (
+    id: string,
+    west: number,
+    east: number,
+    offset: number,
+    factor: number
+  ): MapRegion => ({
+    ...region(id, west, east),
+    project: p => chart(p).map(v => v / factor) as XY,
+    unproject: p => sphere([p[0] * factor, p[1] * factor]),
+    placement: [factor, 0, 0, factor, offset, 0]
+  });
+  for (const factor of [1e-9, 1, 1e9])
+    for (const offset of [0, 1e9]) {
+      const continuous = new DiscontinuousMap([
+        make('west', -4, 0, offset, factor),
+        make('east', 0, 4, offset, factor)
+      ]);
+      expect(continuous.seams.filter(s => s.kind === 'join')).toHaveLength(1);
+      const interrupted = new DiscontinuousMap([
+        make('west', -4, 0, offset, factor),
+        make('east', 0, 4, offset + 1, factor)
+      ]);
+      expect(interrupted.seams.filter(s => s.kind === 'cut')).toHaveLength(1);
+    }
+});
