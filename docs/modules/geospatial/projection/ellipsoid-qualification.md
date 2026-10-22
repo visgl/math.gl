@@ -50,7 +50,12 @@ On the equatorial plane, points inside `p < a * (1 - (b/a)²)` have two equally 
 
 A rejected numeric leaf returns `false`, geospatial returns `undefined`, and projection throws. Existing outputs and the failed flat record remain untouched; completed preceding records remain committed. Sphere conversion is analytic. Exterior conversion keeps the bounded Hannover path and safeguarded exterior fallback.
 
-`Ellipsoid.scaleToGeodeticSurface` and prolate/triaxial cartographic conversion now use an original normalized three-axis constrained-distance solver, bounded by 256 safeguarded Newton/bisection updates. The shifted multiplier avoids subtracting nearly equal values at the shortest-axis singularity. A positive shifted root certifies the unique minimum in exact arithmetic; independent binary64-input controls qualify the sampled numerical accuracy. The near-center radial approximation is removed.
+`Ellipsoid.scaleToGeodeticSurface` and prolate/triaxial cartographic conversion now use an original compensated three-axis constrained-distance solver, bounded by 512 safeguarded Newton/bisection updates. The shifted multiplier avoids subtracting nearly equal values at the shortest-axis singularity. A positive shifted root certifies the unique minimum in exact arithmetic; independent binary64-input controls qualify the sampled numerical accuracy. The near-center radial approximation is removed. A compensated residual and
+relative convergence test preserve the shortest-axis component when the ordinary
+surface norm rounds to one. A further 72 controls use a 220-digit, 900-update
+Decimal oracle on exact cusp/adjacent binary64 inputs, both signs and axis
+permutations. Their per-component relative ceiling is `2e-12`, including
+coordinates near `1e-100`; a whole-shape absolute tolerance cannot hide these errors.
 
 If the shortest-axis coordinates vanish and the limiting surface norm is at most one, the general solver rejects atomically. This includes ambiguous medial-set points and the singular boundary, including some unique cusp points. It does not promise complete inversion at every unique boundary point. Sphere/oblate cartographic inversion retains its separately qualified analytic cusp behavior. Unrepresentable normalized ratios, nonfinite intermediates and exhausted iteration also reject. There is no global certificate for all finite shapes.
 

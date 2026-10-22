@@ -54,6 +54,7 @@ jobs:
       - name: Check independent interior references and qualification
         run: |
           python3 modules/geospatial/projection/scripts/generate-interior-reference.py --check
+          python3 modules/geospatial/projection/scripts/generate-nearest-cusp-reference.py --check
           node modules/geospatial/projection/scripts/qualify-interiors.mjs --output /tmp/interior-qualification.json
 
       - name: Check independent deformation stress references and qualification

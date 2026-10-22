@@ -5,6 +5,7 @@
 import {expect, test} from 'vitest';
 import {Ellipsoid} from '@math.gl/geospatial';
 import fixtures from '../../projection/test/fixtures/interior-reference.json';
+import cuspFixtures from '../../projection/test/fixtures/nearest-cusp-reference.json';
 
 for (const row of fixtures.cases) {
   test(`nearest surface: independent Decimal ${row.id}`, () => {
@@ -69,3 +70,16 @@ test('nearest surface respects axis permutations and exact exterior cardinal poi
     }
   }
 });
+
+for (const [index, row] of cuspFixtures.cases.entries()) {
+  test(`nearest surface: conditioned independent cusp ${index}`, () => {
+    const ellipsoid = new Ellipsoid(...(row.radii as [number, number, number]));
+    const result = ellipsoid.scaleToGeodeticSurface(row.xyz);
+    expect(result).toBeDefined();
+    for (let i = 0; i < 3; i++) {
+      const expected = row.reference.footpoint[i];
+      if (expected === 0) expect(Math.abs(result[i])).toBe(0);
+      else expect(Math.abs((result[i] - expected) / expected)).toBeLessThanOrEqual(2e-12);
+    }
+  });
+}
