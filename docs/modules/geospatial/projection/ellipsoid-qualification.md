@@ -10,7 +10,7 @@ math.gl selects the nearest surface-normal representation for sphere/oblate cart
 
 ## What is qualified
 
-The corpus contains **198 exact stored binary64 inputs and 466 path checks**. **434 checks enforce accuracy**: 134 sphere/oblate inputs through each of the numeric leaf, projection engine and geospatial, plus 32 moderate prolate/triaxial geospatial inputs. The remaining 32 deep prolate/triaxial probes retain diagnostic error and rejection reports. Diagnostic matches do not promote support.
+The corpus contains **198 exact stored binary64 inputs and 466 path checks**. **All 466 checks enforce accuracy**: 134 sphere/oblate inputs through each of the numeric leaf, projection engine and geospatial, plus 64 moderate/deep prolate/triaxial geospatial inputs. The previously diagnostic 32 deep inputs now pass the same existing angular and height budgets. A further 198 surface-projection checks compare directly with the independent footpoints, including aliased outputs.
 
 The sphere/oblate inputs cover Earth-like, 2:1, 10:1 and 1,000,000:1 axes at two scales; shallow/deep offsets in both hemispheres; near-pole/equator normals; and both sides of the equatorial cusp. The allowance is `1e-9` degrees of unit-normal angular difference and `max(1e-12, max(radii) * 2e-12)` height in axis units, about 13 micrometres at Earth scale. These are sampled regression limits, not universal bounds.
 
@@ -50,7 +50,9 @@ On the equatorial plane, points inside `p < a * (1 - (b/a)²)` have two equally 
 
 A rejected numeric leaf returns `false`, geospatial returns `undefined`, and projection throws. Existing outputs and the failed flat record remain untouched; completed preceding records remain committed. Sphere conversion is analytic. Exterior conversion keeps the bounded Hannover path and safeguarded exterior fallback.
 
-`Ellipsoid.scaleToGeodeticSurface` remains a separate three-radius algorithm. Its near-center radial approximation and 64-update limit are preserved. Its output is not a nearest-normal accuracy certificate. Prolate/triaxial cartographic conversions retain this algorithm and their existing diagnostic limitations.
+`Ellipsoid.scaleToGeodeticSurface` and prolate/triaxial cartographic conversion now use an original normalized three-axis constrained-distance solver, bounded by 256 safeguarded Newton/bisection updates. The shifted multiplier avoids subtracting nearly equal values at the shortest-axis singularity. A positive shifted root certifies the unique minimum in exact arithmetic; independent binary64-input controls qualify the sampled numerical accuracy. The near-center radial approximation is removed.
+
+If the shortest-axis coordinates vanish and the limiting surface norm is at most one, the general solver rejects atomically. This includes ambiguous medial-set points and the singular boundary, including some unique cusp points. It does not promise complete inversion at every unique boundary point. Sphere/oblate cartographic inversion retains its separately qualified analytic cusp behavior. Unrepresentable normalized ratios, nonfinite intermediates and exhausted iteration also reject. There is no global certificate for all finite shapes.
 
 Positive finite axes alone do not guarantee representable squared ratios or geometry intermediates. Underflowing non-cardinal ratios reject; exact-pole analytic cases remain separately covered. Geospatial retains its finite derived-geometry magnitude limits. Nearly singular binary64 inputs outside the qualified samples can still fail bounded convergence.
 

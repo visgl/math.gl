@@ -32,6 +32,10 @@ Sphere/oblate local frames now share an original optional numeric basis, preserv
 Cartesian-gradient versus geodetic normals, pole conventions and reused outputs.
 Three-radius/interior geometry retains separate contracts.
 
+The [GeographicLib SOTA tranche list](./geographiclib-roadmap.md) prioritizes
+remaining correctness/domain gaps (P0), core geometry capabilities (P1), and
+extended domains and optional models (P2).
+
 ## Sun and sky
 
 The [six-tranche sun and sky roadmap](./sun-roadmap.md) tracks shared

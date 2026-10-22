@@ -86,7 +86,7 @@ def generate():
                         radii = [float(r) for r in axes]
                         reference = nearest(radii, xyz)
                         ordinary = label in ['earth-ratio', 'flattened', 'flat', 'very-flat']
-                        geo_qualified = ordinary or (D(depth) <= D('.5') and label != 'very-flat')
+                        geo_qualified = True
                         cases.append({
                             'id': '/'.join([label, scale, depth, direction]),
                             'shape': label,

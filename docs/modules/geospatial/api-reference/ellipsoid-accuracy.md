@@ -49,17 +49,20 @@ and [PROJ's geodesic documentation](https://proj.org/en/stable/geodesic.html).
 
 Sphere/oblate Cartesian conversion uses the shared numeric spheroid kernel.
 Its independent 110-digit Decimal nearest-normal oracle includes thin shapes
-and deep interiors. The existing qualification enforces **434 accuracy checks**;
+and deep interiors. The existing qualification enforces **466 accuracy checks**;
 see [the full domain, ceilings and ambiguity policy](../projection/ellipsoid-qualification.md).
 This is mathematical reference evidence independent of GeographicLib/PROJ code.
 The current sampled ceilings are about 13 µm for Earth-scale interior heights,
 not a blanket nanometre claim for all ellipsoid operations.
 
-Prolate/triaxial Cartesian conversion and `scaleToGeodeticSurface` retain the
-Cesium-derived algorithm, including a near-center radial approximation. Those
-paths do not have a general nearest-point accuracy certificate. Ambiguous
-interior representations are not a unique geographic inverse. These limitations
-prevent describing the entire ellipsoid module as universally state of the art.
+Prolate/triaxial Cartesian conversion and `scaleToGeodeticSurface` now use an
+original safeguarded nearest-point solve, replacing the radial approximation.
+All 64 prolate/triaxial inverse controls and 198 independent surface-footpoint
+controls enforce accuracy. Ambiguous interiors and the general solver's singular
+multiplier boundary reject without touching outputs. Qualification remains sampled;
+extreme shapes and all unique boundary points are not universally certified.
+Public geometry vectors are frozen with their derived caches; construct a new
+ellipsoid to change shape. This tightens previously mutable nested vectors.
 Geodesic prolate support does not change the sphere/oblate-only `toSpheroid`
 contract used by projection and Cartesian conversion.
 
@@ -77,7 +80,7 @@ contract used by projection and Cartesian conversion.
 | Robust geodesic polygon area/perimeter and edge area | Not exposed or qualified; requires compensated accumulation, pole/dateline crossing and singularity tests |
 | Exact geodesics for arbitrary flattening | Not implemented; sixth-order series is not an exact elliptic-integral solver |
 | General triaxial geodesics | Not implemented |
-| Certified nearest surface point on every triaxial/prolate interior | Not implemented; existing approximation is documented |
+| Certified nearest surface point on every triaxial/prolate interior | Sampled positive-definite nearest solutions qualified; ambiguous/singular boundaries reject; no universal certificate |
 | Rhumb lines and geodesic intersections | Not implemented |
 | Magnetic/gravity/geoid models | Outside the ellipsoid geometry API; not implied by geodesic parity |
 | Performance advantage over GeographicLib | No claim; shared implementation plus facade has not established an advantage |

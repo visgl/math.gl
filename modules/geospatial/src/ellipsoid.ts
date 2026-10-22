@@ -109,6 +109,13 @@ export class Ellipsoid {
         semiMinorAxis: z,
         eccentricitySquared: 1 - this.radiiSquared.z / this.radiiSquared.x
       });
+    // Geometry and all derived caches are one immutable snapshot. Mutating a
+    // public vector previously changed some algorithms while leaving others stale.
+    Object.freeze(this.radii);
+    Object.freeze(this.radiiSquared);
+    Object.freeze(this.radiiToTheFourth);
+    Object.freeze(this.oneOverRadii);
+    Object.freeze(this.oneOverRadiiSquared);
     Object.freeze(this);
   }
 
@@ -200,6 +207,13 @@ export class Ellipsoid {
         result
       );
     }
+    // Retain the legacy representable squared-axis domain for normal arithmetic.
+    if (
+      !(this.minimumRadius > 0) ||
+      !Number.isFinite(this.maximumRadius * this.maximumRadius) ||
+      !Number.isFinite(1 / (this.minimumRadius * this.minimumRadius))
+    )
+      return undefined;
     scratchCartesian.set(x, y, z);
     const point = this.scaleToGeodeticSurface(scratchCartesian, scratchPosition);
 

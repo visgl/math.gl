@@ -28,7 +28,7 @@ for (const row of cases) {
   }
 }
 
-test('the independent oracle fixture retains qualified and unsupported probes', () => {
+test('the independent oracle fixture retains qualified shapes and cusp probes', () => {
   expect(cases.length).toBe(198);
   expect(cases.some(row => row.qualified.geospatial)).toBe(true);
   expect(cases.some(row => row.qualified.projection)).toBe(true);
