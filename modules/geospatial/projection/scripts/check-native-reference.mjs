@@ -156,3 +156,11 @@ const polePrecisionQualification = await json('pole-precision-qualification.json
 assert.equal(polePrecisionQualification.referenceGeneratorSHA256, polePrecision.generatorSHA256);
 assert.equal(polePrecisionQualification.cases.length, polePrecision.cases.length);
 console.log('All 49 original pole findings reviewed; high-precision oracle provenance verified.');
+
+const geodesicQualification = JSON.parse(await readFile(new URL('../../test/ellipsoid/geodesic-qualification.json', import.meta.url), 'utf8'));
+assert.equal(geodesicQualification.oracle, 'native PROJ 9.9.0 geodesic.c');
+assert.equal(geodesicQualification.generatorSHA256, sha(await readFile(new URL('./generate-geodesic-qualification.py', import.meta.url))));
+assert.equal(geodesicQualification.cases.length, 819);
+assert.equal(Object.keys(geodesicQualification.sourceSHA256).length, 2);
+assert.equal(new Set(geodesicQualification.cases.map(row => row.axes.join(','))).size, 7);
+console.log('PROJ 9.9.0 geodesic qualification provenance verified: 819 controls, seven geometries.');

@@ -33,7 +33,7 @@ test('geodesic reduced length and scale agree with the analytic sphere', () => {
     expect(Math.abs(point.M12 - Math.cos(distance / 2))).toBeLessThan(1e-14);
     expect(Math.abs(point.M21 - point.M12)).toBeLessThan(1e-14);
   }
-  expect(() => new EllipsoidGeodesic({semiMajorAxis: 1, semiMinorAxis: 2})).toThrow();
+  expect(() => new EllipsoidGeodesic({semiMajorAxis: 1, semiMinorAxis: 0})).toThrow();
   expect(() => solver.inverse(91, 0, 0, 0)).toThrow();
   expect(() => line.position(Infinity)).toThrow();
 });
