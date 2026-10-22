@@ -10,8 +10,16 @@ import {markup} from './view';
 import {pickSurface} from './picking';
 
 /** Mount one independent instance; cleanup releases listeners, animation and GPU resources. */
-export function mountUnfolding(root: HTMLElement) {
-  root.innerHTML = markup;
+export function mountUnfolding(
+  root: HTMLElement,
+  view = markup,
+  options: {
+    buildLayout?: (level: number, seed: number, mode: string) => ReturnType<typeof createCutLayout>;
+    landTexture?: HTMLCanvasElement;
+    northUp?: boolean;
+  } = {}
+) {
+  root.innerHTML = view;
   const abort = new AbortController();
   let frame = 0;
   function listen<K extends keyof HTMLElementEventMap>(
@@ -45,7 +53,11 @@ export function mountUnfolding(root: HTMLElement) {
     tooltip.style.left = `${Math.max(0, Math.min(pointer.x - parent.left + 14, parent.width - tooltip.offsetWidth))}px`;
     tooltip.style.top = `${pointer.y - parent.top - tooltip.offsetHeight - 12}px`;
   }
-  const renderer = createRenderer(canvas, root.querySelector('#imagery-status')!);
+  const renderer = createRenderer(
+    canvas,
+    root.querySelector('#imagery-status')!,
+    options.landTexture
+  );
   const earth = root.querySelector<HTMLInputElement>('#earth')!;
   const edges = root.querySelector<HTMLInputElement>('#edges')!;
   const slider = root.querySelector<HTMLInputElement>('#unfold')!;
@@ -57,11 +69,20 @@ export function mountUnfolding(root: HTMLElement) {
   const subdivision = root.querySelector<HTMLSelectElement>('#subdivision')!;
   const summary = root.querySelector<HTMLElement>('#summary')!;
   const notice = root.querySelector<HTMLElement>('#notice')!;
+  const surface = root.querySelector<HTMLSelectElement>('#surface');
+  const build = () =>
+    options.buildLayout
+      ? options.buildLayout(Number(subdivision.value), seed, cuts.value)
+      : createCutLayout(
+          createSolid(solid.value as Solid, Number(subdivision.value)),
+          seed,
+          cuts.value as CutMode
+        );
   let seed = 1,
-    layout = createCutLayout(createSolid('icosahedron', 2), seed, 'ocean');
+    layout = build();
   let hinges = new Set<string>();
-  let yaw = -0.3,
-    pitch = 0.65,
+  let yaw = options.northUp ? 0 : -0.3,
+    pitch = options.northUp ? 0 : 0.65,
     unfolding = 0,
     playing = false,
     direction = 1,
@@ -73,7 +94,7 @@ export function mountUnfolding(root: HTMLElement) {
     subdivision.disabled = preset || solid.value !== 'icosahedron';
     cuts.disabled = solid.value !== 'icosahedron';
     root.querySelector<HTMLButtonElement>('#recut')!.disabled = preset;
-    cutSummary.textContent = `Estimated land crossed by cuts: ${Math.round(layout.cutLandKm).toLocaleString()} km · original strategy on this mesh: ${Math.round(layout.baselineLandKm).toLocaleString()} km. ${preset ? 'AirOcean 24-panel topology; spherical texture mapping, not the Fuller projection.' : 'Ocean preference minimizes sampled land cuts; it cannot guarantee unbroken continents.'}`;
+    cutSummary.textContent = `Estimated land crossed by cuts: ${Math.round(layout.cutLandKm).toLocaleString()} km · comparison strategy on this mesh: ${Math.round(layout.baselineLandKm).toLocaleString()} km. ${preset ? 'AirOcean 24-panel topology; spherical texture mapping, not the Fuller projection.' : options.buildLayout ? 'Structured graticule joins favor land; continents can still be cut.' : 'Ocean preference minimizes sampled land cuts; it cannot guarantee unbroken continents.'}`;
     hinges = new Set(layout.edges.filter(e => e.hinge).map(e => edgeKey(e.a, e.b)));
     summary.textContent = `${layout.mesh.faces.length.toLocaleString()} panels · ${hinges.size.toLocaleString()} hinges · ${(layout.edges.length - hinges.size).toLocaleString()} cut edges · layout ${seed}`;
     notice.textContent = layout.overlaps
@@ -81,11 +102,7 @@ export function mountUnfolding(root: HTMLElement) {
       : 'Flat net: no face overlaps detected. Motion collisions are not checked.';
   }
   function rebuild() {
-    layout = createCutLayout(
-      createSolid(solid.value as Solid, Number(subdivision.value)),
-      seed,
-      cuts.value as CutMode
-    );
+    layout = build();
     describe();
   }
   listen(solid, 'change', () => {
@@ -130,8 +147,8 @@ export function mountUnfolding(root: HTMLElement) {
     setUnfold(1);
   });
   listen(root.querySelector('#reset')!, 'click', () => {
-    yaw = -0.3;
-    pitch = 0.65;
+    yaw = options.northUp ? 0 : -0.3;
+    pitch = options.northUp ? 0 : 0.65;
   });
   listen(canvas, 'pointerdown', e => {
     drag = {x: e.clientX, y: e.clientY};
@@ -172,6 +189,10 @@ export function mountUnfolding(root: HTMLElement) {
     {capture: true, signal: abort.signal}
   );
   let previous = '';
+  let framingKey = '';
+  let framingLayout: typeof layout | undefined;
+  let framingPoses: ReturnType<typeof layout.evaluate>[] = [];
+  let framingBounds = [0, 0, 0, 0];
   function render(time: number) {
     const dt = Math.min((time - lastTime) / 1000, 0.05);
     lastTime = time;
@@ -194,10 +215,16 @@ export function mountUnfolding(root: HTMLElement) {
       dpr,
       earth.checked,
       edges.checked,
-      renderer.ready
+      renderer.ready,
+      surface?.value
     ].join(':');
     if (key !== previous) {
       previous = key;
+      const surfaceStatus = root.querySelector<HTMLElement>('#surface-status');
+      if (surfaceStatus) {
+        surfaceStatus.hidden = surface?.value !== 'land';
+        root.querySelector<HTMLElement>('#imagery-status')!.hidden = surface?.value === 'land';
+      }
       if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
         canvas.width = Math.round(width * dpr);
         canvas.height = Math.round(height * dpr);
@@ -221,6 +248,31 @@ export function mountUnfolding(root: HTMLElement) {
           minY = Math.min(minY, p[1]);
           maxY = Math.max(maxY, p[1]);
         }
+      if (options.northUp) {
+        // Keep the camera stationary while the hinges move. Fit sampled poses
+        // once per layout/orbit, rather than recentering every animation frame.
+        if (framingLayout !== layout) {
+          framingLayout = layout;
+          framingPoses = [0, 0.25, 0.5, 0.75, 1].map(amount => layout.evaluate(amount));
+          framingKey = '';
+        }
+        const key = [yaw, pitch].join(':');
+        if (key !== framingKey) {
+          framingKey = key;
+          const bounds = [Infinity, -Infinity, Infinity, -Infinity];
+          for (const pose of framingPoses)
+            for (const face of pose)
+              for (const point of face) {
+                const p = view.transformAsPoint(point);
+                bounds[0] = Math.min(bounds[0], p[0]);
+                bounds[1] = Math.max(bounds[1], p[0]);
+                bounds[2] = Math.min(bounds[2], p[1]);
+                bounds[3] = Math.max(bounds[3], p[1]);
+              }
+          framingBounds = bounds;
+        }
+        [minX, maxX, minY, maxY] = framingBounds;
+      }
       const scale = Math.min(
         (width - 50) / Math.max(maxX - minX, 2.5),
         (height - 40) / Math.max(maxY - minY, 2.5)
@@ -239,7 +291,8 @@ export function mountUnfolding(root: HTMLElement) {
         positions,
         hinges,
         earth.checked && !earth.disabled,
-        edges.checked
+        edges.checked,
+        surface?.value === 'land'
       );
     }
     if (hoverDirty) {

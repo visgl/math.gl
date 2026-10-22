@@ -60,6 +60,11 @@
   },
   {
     "type": "doc",
+    "label": "Myriahedral maps",
+    "id": "myriahedral-maps"
+  },
+  {
+    "type": "doc",
     "label": "Frustum culling",
     "id": "culling-playground"
   }
