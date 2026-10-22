@@ -7,7 +7,7 @@ import * as native from '@math.gl/geospatial/projection/experimental';
 import type {ProjectionPlugin} from '@math.gl/geospatial/projection/experimental';
 import inputs from '../fixtures/native-proj-cases.json';
 import reference from '../fixtures/native-proj-reference.json';
-import polePrecision from '../fixtures/pole-precision-reference.json';
+import {nativeForwardExpectation} from '../native-forward-reference';
 import inventory from '../fixtures/parity-inventory.json';
 
 const projections = Object.values(native).filter((value): value is ProjectionPlugin =>
@@ -49,21 +49,8 @@ for (const [index, fixture] of inputs.cases.entries()) {
         ? fixture.knotInverseTolerance!
         : fixture.inverseTolerance;
     const results = reference.cases[index].results;
-    // PROJ's pole-conditioned Mollweide iteration can exceed this corpus's
-    // 20-micrometre ceiling. Preserve its outputs, but qualify the corrected
-    // forward equation against the independently evaluated 80-digit values.
-    const expectedForward = (row: (typeof results)[number]) => {
-      if (!fixture.definition.startsWith('+proj=moll ')) return row.forward;
-      const precise = polePrecision.cases.find(
-        p =>
-          p.definition === fixture.definition &&
-          p.input[0] === row.input[0] &&
-          p.input[1] === row.input[1] &&
-          !('inverseOnly' in p)
-      );
-      expect(precise, fixture.id + ': independent Mollweide forward').toBeDefined();
-      return precise!.forward;
-    };
+    const expectedForward = (row: (typeof results)[number]) =>
+      nativeForwardExpectation(fixture.definition, row);
     expect(results.map(row => row.input)).toEqual(fixture.points);
     const forward = new Float64Array(results.length * 4);
     const inverse = new Float64Array(results.length * 4);

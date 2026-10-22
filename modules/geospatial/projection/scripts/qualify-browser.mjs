@@ -4,6 +4,7 @@
 // Independent PROJ fixtures, exercised in the same engines as browser benchmarks.
 import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection/analysis';
 import factorsReference from '../test/fixtures/factors-reference.json';
+import {nativeForwardExpectation} from '../test/native-forward-reference';
 export {qualifyAccuracy} from '../test/accuracy-workload';
 import * as native from '@math.gl/geospatial/projection';
 const projections = Object.values(native).filter(
@@ -31,7 +32,8 @@ export function qualify(inputs, reference) {
         Math.abs(row.input[1]) < 90 &&
         Math.abs(row.input[1] / 5 - Math.round(row.input[1] / 5)) < 1e-12;
       const inverseTolerance = knot ? fixture.knotInverseTolerance : fixture.inverseTolerance;
-      close(projection.project(row.input), row.forward, fixture.forwardTolerance);
+      const expectedForward = nativeForwardExpectation(fixture.definition, row);
+      close(projection.project(row.input), expectedForward, fixture.forwardTolerance);
       close(projection.unproject(row.forward), row.inverse, inverseTolerance);
       if (knot) close(projection.unproject(row.forward), row.input, 1e-8);
       const forward = new Float64Array([row.input[0], row.input[1], row.input[2] ?? 123, 7]);
@@ -40,7 +42,7 @@ export function qualify(inputs, reference) {
       projection.unprojectFlat(inverse, 4);
       close(
         forward,
-        [row.forward[0], row.forward[1], row.forward[2] ?? 123, 7],
+        [expectedForward[0], expectedForward[1], row.forward[2] ?? 123, 7],
         fixture.forwardTolerance
       );
       close(inverse, [row.inverse[0], row.inverse[1], row.inverse[2] ?? 123, 7], inverseTolerance);
