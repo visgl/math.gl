@@ -14,7 +14,15 @@ export function mountUnfolding(
   root: HTMLElement,
   view = markup,
   options: {
-    buildLayout?: (level: number, seed: number, mode: string) => ReturnType<typeof createCutLayout>;
+    buildLayout?: (
+      level: number,
+      seed: number,
+      mode: string
+    ) => Omit<ReturnType<typeof createCutLayout>, 'cutLandKm' | 'baselineLandKm'> & {
+      cutLandKm?: number;
+      baselineLandKm?: number;
+      description?: string;
+    };
     landTexture?: HTMLCanvasElement;
     northUp?: boolean;
   } = {}
@@ -94,7 +102,9 @@ export function mountUnfolding(
     subdivision.disabled = preset || solid.value !== 'icosahedron';
     cuts.disabled = solid.value !== 'icosahedron';
     root.querySelector<HTMLButtonElement>('#recut')!.disabled = preset;
-    cutSummary.textContent = `Estimated land crossed by cuts: ${Math.round(layout.cutLandKm).toLocaleString()} km · comparison strategy on this mesh: ${Math.round(layout.baselineLandKm).toLocaleString()} km. ${preset ? 'AirOcean 24-panel topology; spherical texture mapping, not the Fuller projection.' : options.buildLayout ? 'Structured graticule joins favor land; continents can still be cut.' : 'Ocean preference minimizes sampled land cuts; it cannot guarantee unbroken continents.'}`;
+    cutSummary.textContent = options.buildLayout
+      ? `${layout.cutLandKm === undefined ? '' : `Estimated land crossed by cuts: ${Math.round(layout.cutLandKm).toLocaleString()} km. `}${'description' in layout ? layout.description : ''}`
+      : `Estimated land crossed by cuts: ${Math.round(layout.cutLandKm!).toLocaleString()} km · comparison strategy on this mesh: ${Math.round(layout.baselineLandKm!).toLocaleString()} km. ${preset ? 'AirOcean 24-panel topology; spherical texture mapping, not the Fuller projection.' : 'Ocean preference minimizes sampled land cuts; it cannot guarantee unbroken continents.'}`;
     hinges = new Set(layout.edges.filter(e => e.hinge).map(e => edgeKey(e.a, e.b)));
     summary.textContent = `${layout.mesh.faces.length.toLocaleString()} panels · ${hinges.size.toLocaleString()} hinges · ${(layout.edges.length - hinges.size).toLocaleString()} cut edges · layout ${seed}`;
     notice.textContent = layout.overlaps

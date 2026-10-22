@@ -34,6 +34,10 @@ For concepts, rendering patterns, and the Ice Age Explorer integration, see the
 
 ## Presets
 
+`createMyriahedralMap(options)` builds independently generated graticule or
+polyhedral nets with optional unfolding. See the [myriahedral API](./myriahedral.md)
+for presets, custom mesh/weight callbacks, and inverse-ambiguity handling.
+
 `createAirOceanMap({radius = 1})` provides 24 panels and the AirOcean cut arrangement.
 Its local maps are radial/gnomonic projections onto planar facets. It does **not**
 implement Gray-Fuller projection and is not equal-area. Topology and orientation

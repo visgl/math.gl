@@ -3,10 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {
-  createGraticule,
-  createMyriahedralLayout
-} from '../../../../examples/myriahedral-maps/layout';
+import {createGraticule} from '../../../geospatial/src/discontinuous/myriahedral/graticule';
+import {createMyriahedralLayout} from '../../../../examples/myriahedral-maps/layout';
 import {
   dot,
   faceNormal,
@@ -40,7 +38,7 @@ for (const columns of [24, 48, 72, 96]) {
 
 test('structured geographic layout preserves hinges, rigid faces, and continent order', () => {
   const layout = createMyriahedralLayout(1, 1, 'ocean');
-  expect(layout.cutLandKm).toBeLessThan(layout.baselineLandKm);
+  expect(layout.cutLandKm).toBeLessThan(createMyriahedralLayout(1, 1, 'legacy').cutLandKm);
   expect(layout.edges.filter(e => e.hinge)).toHaveLength(layout.mesh.faces.length - 1);
   for (const edge of layout.edges) {
     const a = layout.mesh.vertices[edge.a],
