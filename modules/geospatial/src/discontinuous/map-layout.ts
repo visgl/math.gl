@@ -293,7 +293,15 @@ export class DiscontinuousMap {
       planar[0].every((p, i, ring) => {
         const turn = ringOrientation([p, ring[(i + 1) % ring.length], ring[(i + 2) % ring.length]]);
         return turn === 0 || turn === orientation;
-      });
+      }) &&
+      // Equal local turns alone also accept self-crossing stars. A convex
+      // ring must lie entirely on the interior side of each of its edges.
+      planar[0].every((p, i, ring) =>
+        ring.every(q => {
+          const side = ringOrientation([p, ring[(i + 1) % ring.length], q]);
+          return side === 0 || side === orientation;
+        })
+      );
     const origin = planar[0][0];
     let extent = 0;
     for (const p of planar[0])
