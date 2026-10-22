@@ -25,8 +25,9 @@ the original longitude and latitude on either side of a cut.
 
 Choose **Projection preset** to compare polyconic, cylindric, azimuthal, two-hemisphere,
 sealine, and coastline layouts, or any of the five Platonic solids.
-**Alternate layout** changes the secondary join preference for graticules; it is
-disabled for solids, whose preset weights do not depend on that control. **Show edges** reveals
+**Alternate layout** changes the secondary join preference for polyconic,
+hemispheres, sealine, and coastline presets. It is disabled for solids and the
+fixed-cut cylindric/azimuthal presets. **Show edges** reveals
 the panels. Back faces are darkened to distinguish them during unfolding.
 
 ## How it works

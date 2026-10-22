@@ -29,7 +29,7 @@ export function createMyriahedralLayout(level: number, seed: number, mode: strin
   });
   return {
     ...layout,
-    canRecut: !solid,
+    canRecut: !solid && preset !== 'cylindric' && preset !== 'azimuthal',
     cutLandKm: layout.cutLandRadians! * 6371,
     description: `${solid ?? preset} preset · sampled geography; land connectivity and overlap-free nets are not guaranteed.`
   };
