@@ -1,5 +1,9 @@
 # intersectOrientedBoxes2D
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Test two oriented rectangles in a shared two-dimensional Euclidean coordinate space. This
 scalar separating-axis query is useful for rotated screen-space labels and other planar
 collision checks. It does not require 3D bounding volumes, matrices or renderer objects.

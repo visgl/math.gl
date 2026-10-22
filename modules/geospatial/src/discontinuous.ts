@@ -14,4 +14,14 @@ export type {
   MapPolygon,
   MapSamplingOptions
 } from './discontinuous/map-layout';
-export {createAirOceanMap, createInterruptedSinusoidalMap} from './discontinuous/presets';
+export {
+  createAirOceanMap,
+  createInterruptedSinusoidalMap,
+  createInterruptedMollweideMap,
+  createInterruptedHomolosineMap
+} from './discontinuous/presets';
+
+export {createAlbersUsaMap} from './discontinuous/albers-usa';
+export {getMapLayout, fitMapLayout} from './discontinuous/layout';
+export type {MapBounds, MapRegionLayout} from './discontinuous/map-layout';
+export type {MapLayout, MapLayoutRegion, MapViewportOptions} from './discontinuous/layout';

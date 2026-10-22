@@ -1,5 +1,12 @@
 # Discontinuous maps (experimental)
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+</p>
+
+The discontinuous map API, presets, and layout helpers are experimental and may change.
+
 Project geographic points, lines, and polygons into a map with cuts. Import this
 API separately from scalar CRS transforms:
 
@@ -22,6 +29,9 @@ Render every line part and every polygon independently. Connecting parts or
 triangulating across region boundaries reintroduces the bridges this API removes.
 Results retain `regionId` and matching `sourceCoordinates` for every output vertex.
 
+For concepts, rendering patterns, and the Ice Age Explorer integration, see the
+[discontinuous projections guide](../projection/developer-guide/discontinuous-projections.md).
+
 ## Presets
 
 `createAirOceanMap({radius = 1})` provides 24 panels and the AirOcean cut arrangement.
@@ -37,8 +47,106 @@ arrangement, not a named historical preset. Within each lobe, the local formula 
 `x = radius * (center + (longitude - center) * cos(latitude))`,
 `y = radius * latitude`, with angles in radians and longitude relative to the lobe.
 
+`createInterruptedMollweideMap({radius = 1})` and
+`createInterruptedHomolosineMap({radius = 1})` use the same six-lobe cut arrangement.
+Mollweide uses its equal-area elliptical formula; homolosine combines sinusoidal
+at low latitudes with Mollweide above approximately 40°44′, solving for matching
+horizontal scale and shifting the polar portions to meet continuously.
+These are independent layouts, **not the historical/PROJ IGH cut arrangement**.
+See [PROJ's homolosine description](https://proj.org/en/stable/operations/projections/igh.html)
+for the distinction between the local formula and its interruption layout.
+
+### U.S. composite with insets
+
+```typescript
+import {createAlbersUsaMap} from '@math.gl/geospatial/discontinuous';
+const usa = createAlbersUsaMap();
+const anchorage = usa.projectPoint([-149.9, 61.2]); // regionId: 'alaska'
+const honolulu = usa.projectPoint([-157.8, 21.3]); // regionId: 'hawaii'
+const candidates = usa.unprojectPoint(honolulu!.position);
+```
+
+`createAlbersUsaMap({radius = 1})` combines three spherical Albers equal-area
+projections. Alaska is scaled to 0.35 of the linear scale (0.1225 of the area scale);
+Hawaii retains the lower-48 scale. Insets use the familiar lower-left composition, with Alaska to the left of Hawaii and Y up.
+The composite as a whole therefore does not preserve relative area between states.
+Points outside all three geographic masks return `null`; inverse queries in gaps
+return no candidates. Lines and polygons use the same region clipping as other maps.
+
+| Region ID | Center | Standard parallels | Offset | Linear scale |
+| --- | --- | --- | --- | --- |
+| `lower48` | -96, 38 | 29.5, 45.5 | 0, 0 | 1 |
+| `alaska` | -154, 60 | 55, 65 | -0.307, -0.201 | 0.35 |
+| `hawaii` | -157, 21 | 8, 18 | -0.15, -0.2 | 1 |
+
+The lower-48 mask connects corners (-127, 20), (-65, 20), (-65, 51),
+and (-127, 51) with great-circle edges. Inset masks are constructed by inversely
+projecting the corners of these unit-radius XY boxes, then joining them with
+great-circle edges: Alaska `[-0.425, -0.234, -0.22, -0.12]`, Hawaii
+`[-0.215, -0.245, -0.1, -0.155]` (left, bottom, right, top).
+Their sides are therefore not exact projected straight lines.
+
+The compact arrangement follows the convention illustrated by
+[D3's Albers USA composite](https://d3js.org/d3-geo/conic#geoAlbersUsa), but is an
+independent preset, **not D3 clip-extent compatibility**. Cropping focuses on the
+main islands and mainland Alaska; distant islands can fall outside the inset
+masks. Territories such as Puerto Rico are not included. These masks include
+neighboring land and ocean: filter input features if only U.S. states should
+appear. Insets overlap the main map's ocean background in placed XY; draw them
+above it and use the visible region ID for picking. Use custom regions for full
+island coverage, different inset placements, or additional territories.
+
 Radius must be finite and positive. Output is in units of that radius; the default
 is unit-sphere coordinates. There is no ellipsoid or datum conversion.
+
+## Layout metadata and viewport fitting
+
+Regions may supply `layout: {label, kind, parentId, relativeScale, drawOrder, frame}`.
+`kind` is `main`, `inset`, or `panel`. `relativeScale` is an explicitly declared
+linear scale relative to the parent; it is not inferred from arbitrary local
+projection formulas. `drawOrder` increases from back to front, with definition
+order breaking ties. `frame` is `[minX, minY, maxX, maxY]` in placed map units:
+it describes a visual frame, **not an additional clipping mask**. Metadata and
+frame arrays are snapshotted and frozen. Parent IDs must exist and form an acyclic
+hierarchy. Scale must be positive and finite, and frame bounds must increase.
+
+```typescript
+import {createAlbersUsaMap, getMapLayout, fitMapLayout}
+  from '@math.gl/geospatial/discontinuous';
+
+const map = createAlbersUsaMap();
+const layout = getMapLayout(map, {maxAngularStep: 1, tolerance: 1e-5});
+const fit = fitMapLayout(layout, {
+  width: 900, height: 600,
+  padding: {left: 24, right: 24, top: 40, bottom: 24}
+});
+const honolulu = map.projectPoint([-157.8, 21.3])!;
+const pixel = fit.project(honolulu.position);
+const candidates = map.unprojectPoint(fit.unproject(pixel), honolulu.regionId);
+```
+
+`getMapLayout` returns `{bounds, regions}`. Regions are sorted back-to-front and
+include IDs, labels (defaulting to IDs), kinds (default `panel`), parent IDs,
+optional relative scales, draw order (default `0`), canonical affine placements,
+projected `bounds`, optional frames, and sampled coverage `outlines`. Overall
+bounds include both coverage and visual frames. Bounds sample curved projected
+edges using the same criteria as `projectLine`; they are approximate, not analytic
+or guaranteed conservative bounds. Choose tolerance in your map's output units.
+Cache this result while the map is unchanged.
+
+`fitMapLayout` returns a uniform `scale`, forward `project` and inverse `unproject`
+functions, fitted `bounds`, and fitted `regions`. Region bounds, frames, and outlines
+are now in viewport pixels; `placement` remains the canonical map-space transform.
+Each region also has a sequential `layer` index for rendering. Higher layers
+should cover lower layers. Use the same order for picking overlapping insets.
+
+The default viewport origin is top left, with Y down; `flipY: false` selects bottom
+left with Y up. Padding is in pixels and may be a uniform number or a per-side
+object (omitted sides default to zero). The helper centers the map in the remaining
+rectangle and preserves all inset scale ratios and gaps. It does not independently
+reflow insets, enlarge small islands, or convert pixel gaps into new geographic
+coverage. Viewport dimensions must be finite and positive, padding finite and
+nonnegative, and usable width and height positive.
 
 ## Custom regions
 
@@ -118,7 +226,9 @@ that contains every vertex or split the polygon. Whole-globe polygons and
 spherical complements are not supported. The API throws for an unsuitable chart,
 degenerate rings, nonfinite coordinates, and antipodal edges.
 
-The planar reconstruction uses the MIT-licensed `polygon-clipping` library.
+Convex single rings use direct half-space clipping. Tangent numerical slivers
+smaller than 64 machine epsilons relative to the source chart area are omitted.
+Concave rings and holes use the MIT-licensed `polygon-clipping` library for planar reconstruction.
 Simple exteriors with contained holes are the intended input; the boolean kernel
 uses nonzero winding for self-intersections and clips holes extending outside the
 exterior. Rings with zero signed chart area are rejected using their own translated,

@@ -7,7 +7,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "test": "node --test data.test.mjs"
+    "test": "node --test data.test.mjs discontinuous-views.test.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "~9.4.0",

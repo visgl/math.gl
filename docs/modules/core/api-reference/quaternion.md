@@ -51,6 +51,10 @@ Creates a quaternion from the given 3x3 rotation matrix. NOTE: The resultant qua
 
 ### fromEuler(euler: EulerLike): this
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Sets this quaternion from Euler angles and returns it. `EulerLike` is a structural type containing numeric `x`, `y`, and `z` fields plus an `order` string.
 
 ### fromAxisRotation(axis, radians): this
