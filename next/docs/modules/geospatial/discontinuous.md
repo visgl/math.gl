@@ -38,6 +38,8 @@ For concepts, rendering patterns, and the Ice Age Explorer integration, see the 
 
 ## Presets[​](#presets "Direct link to Presets")
 
+`createMyriahedralMap(options)` builds independently generated graticule or polyhedral nets with optional unfolding. See the [myriahedral API](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/myriahedral.md) for presets, custom mesh/weight callbacks, and inverse-ambiguity handling.
+
 `createAirOceanMap({radius = 1})` provides 24 panels and the AirOcean cut arrangement. Its local maps are radial/gnomonic projections onto planar facets. It does **not** implement Gray-Fuller projection and is not equal-area. Topology and orientation come from the ISC-licensed d3-geo-polygon preset; placement and clipping are independently implemented. It is static and does not require a `HingeTree`.
 
 `createInterruptedSinusoidalMap({radius = 1})` provides six lobes, with northern longitude breaks at -180, -60, 60, 180 degrees and southern breaks at -180, -100, 20, 180 degrees. The equatorial edges join continuously. This is an independent arrangement, not a named historical preset. Within each lobe, the local formula is `x = radius * (center + (longitude - center) * cos(latitude))`, `y = radius * latitude`, with angles in radians and longitude relative to the lobe.
