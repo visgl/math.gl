@@ -119,3 +119,11 @@ quirk classifies one rounded spherical continuum as isolated although native
 All reports the continuum. The fixture preserves that discrepancy explicitly;
 that case is gated against All and an independent analytic shift/period minimum.
 Physical residual and conditioned parameter budgets remain unchanged.
+
+Global default bounds and ranking arithmetic stay normalized by the semi-major
+axis, so accepted large axes do not overflow the radius or L1 ranking sums.
+Unrepresentable output parameters still withhold completeness; explicit infinite
+search radii remain invalid. Coincident closest/next ranking gates use the tight
+`5e-14 a` distance budget, without the isolated-crossing sine condition factor.
+Fault injection moves candidates along the same coincident paths and verifies
+that an incorrect ranking fails even when its physical residual remains valid.

@@ -68,9 +68,18 @@ export class GeodesicIntersections {
 
   /** Find all discovered roots in the L1 ball |s-originS|+|t-originT| <= maxDistance. */
   all(a: GeodesicPath, b: GeodesicPath, options: IntersectionSearchOptions): IntersectionSearch {
+    return this.search(a, b, options, false);
+  }
+
+  private search(
+    a: GeodesicPath,
+    b: GeodesicPath,
+    options: IntersectionSearchOptions,
+    normalized: boolean
+  ): IntersectionSearch {
     const A = this.solver.line(a.latitude, a.longitude, a.azimuth),
       B = this.solver.line(b.latitude, b.longitude, b.azimuth);
-    const d = options.maxDistance / this.a,
+    const d = normalized ? options.maxDistance : options.maxDistance / this.a,
       origin = options.origin ?? [0, 0];
     const x = origin[0] / this.a,
       y = origin[1] / this.a;
@@ -78,7 +87,9 @@ export class GeodesicIntersections {
       !(
         Number.isFinite(d) &&
         d > 0 &&
-        options.maxDistance <= 4 * this.bounds.halfCircumference * this.a &&
+        (normalized
+          ? d <= 4 * this.bounds.halfCircumference
+          : options.maxDistance <= 4 * this.bounds.halfCircumference * this.a) &&
         Number.isFinite(x) &&
         Number.isFinite(y) &&
         Math.max(Math.abs(origin[0]), Math.abs(origin[1])) <=
@@ -168,14 +179,7 @@ export class GeodesicIntersections {
         });
     }
     this.sort(roots, origin);
-    coincidences.sort(
-      (p, q) =>
-        Math.abs(p.s - origin[0]) +
-          Math.abs(p.t - origin[1]) -
-          (Math.abs(q.s - origin[0]) + Math.abs(q.t - origin[1])) ||
-        p.s - q.s ||
-        p.t - q.t
-    );
+    this.sort(coincidences, origin);
     return {
       intersections: roots,
       coincidences,
@@ -196,9 +200,9 @@ export class GeodesicIntersections {
   ): ClosestIntersection {
     const settings = {
       ...options,
-      maxDistance: options.maxDistance ?? 4 * this.bounds.halfCircumference * this.a
+      maxDistance: options.maxDistance ?? 4 * this.bounds.halfCircumference
     };
-    const search = this.all(a, b, settings);
+    const search = this.search(a, b, settings, options.maxDistance === undefined);
     const candidates = [...search.intersections];
     for (const c of search.coincidences) {
       const point = this.coincidencePoint(a, b, c);
@@ -220,11 +224,18 @@ export class GeodesicIntersections {
     longitude: number,
     azimuthA: number,
     azimuthB: number,
-    maxDistance = 4 * this.bounds.halfCircumference * this.a
+    maxDistance?: number
   ): ClosestIntersection {
     const a = {latitude, longitude, azimuth: azimuthA},
       b = {latitude, longitude, azimuth: azimuthB};
-    const search = this.all(a, b, {maxDistance});
+    const bound =
+      maxDistance === undefined ? 4 * this.bounds.halfCircumference : maxDistance / this.a;
+    const search = this.search(
+      a,
+      b,
+      {maxDistance: maxDistance ?? bound},
+      maxDistance === undefined
+    );
     search.intersections = search.intersections.filter(
       p => Math.abs(p.s / this.a) + Math.abs(p.t / this.a) > this.bounds.margin
     );
@@ -260,7 +271,7 @@ export class GeodesicIntersections {
       }
     }
     const bounded = candidates.filter(
-      p => Math.abs(p.s / this.a) + Math.abs(p.t / this.a) <= maxDistance / this.a + this.tolerance
+      p => Math.abs(p.s / this.a) + Math.abs(p.t / this.a) <= bound + this.tolerance
     );
     this.sort(bounded, [0, 0]);
     return {...search, intersection: bounded[0]};
@@ -528,14 +539,19 @@ export class GeodesicIntersections {
       failedSeeds: failed
     };
   }
-  private sort(points: IntersectionPoint[], origin: readonly [number, number]): void {
+  private sort<T extends {s: number; t: number}>(
+    points: T[],
+    origin: readonly [number, number]
+  ): void {
+    const x = origin[0] / this.a,
+      y = origin[1] / this.a;
     points.sort(
       (p, q) =>
-        Math.abs(p.s - origin[0]) +
-          Math.abs(p.t - origin[1]) -
-          (Math.abs(q.s - origin[0]) + Math.abs(q.t - origin[1])) ||
-        p.s - q.s ||
-        p.t - q.t
+        Math.abs(p.s / this.a - x) +
+          Math.abs(p.t / this.a - y) -
+          (Math.abs(q.s / this.a - x) + Math.abs(q.t / this.a - y)) ||
+        p.s / this.a - q.s / this.a ||
+        p.t / this.a - q.t / this.a
     );
   }
 }

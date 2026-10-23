@@ -163,7 +163,9 @@ export function qualifyG6() {
                 )[0]
             : r.closest;
           const p = closest.intersection,
-            conditioning = Math.max(1e-12, Math.sin((p.crossingAngle * Math.PI) / 180));
+            conditioning = p.coincidence
+              ? 1
+              : Math.max(1e-12, Math.sin((p.crossingAngle * Math.PI) / 180));
           check(
             Math.abs(p.s - origin[0]) + Math.abs(p.t - origin[1]),
             Math.abs(expectedClosest[0] - origin[0]) + Math.abs(expectedClosest[1] - origin[1]),
@@ -180,7 +182,9 @@ export function qualifyG6() {
             return;
           }
           const p = result.intersection,
-            conditioning = Math.max(1e-12, Math.sin((p.crossingAngle * Math.PI) / 180));
+            conditioning = p.coincidence
+              ? 1
+              : Math.max(1e-12, Math.sin((p.crossingAngle * Math.PI) / 180));
           check(
             Math.abs(p.s) + Math.abs(p.t),
             Math.abs(r.expected[0]) + Math.abs(r.expected[1]),
