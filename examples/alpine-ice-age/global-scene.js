@@ -211,6 +211,9 @@ export function createGlobalScene(canvas, onError) {
       };
     }
   }
+  function gridStep(view) {
+    return view === "myriahedral:h3-0" ? 2 : 1;
+  }
   function sampleTransition(now) {
     if (!transition) return;
     const fraction = Math.min(
@@ -235,7 +238,7 @@ export function createGlobalScene(canvas, onError) {
     // Build a requested panel mesh before starting the clock, so construction
     // latency cannot consume the first unfolding frames.
     if (options?.view !== opts.view && isMyriahedral(opts.view))
-      discontinuousGrid(opts.view);
+      discontinuousGrid(opts.view, gridStep(opts.view));
     const now = performance.now();
     sampleTransition(now);
     const viewChanged = options?.view !== opts.view;
@@ -427,7 +430,7 @@ export function createGlobalScene(canvas, onError) {
     setLayers(view, mesh, lines);
   }
   function drawDiscontinuous(model, opts, ice, bed) {
-    const g = discontinuousGrid(opts.view);
+    const g = discontinuousGrid(opts.view, gridStep(opts.view));
     const width = canvas.clientWidth || 900,
       height = canvas.clientHeight || 570;
     const fitted = fitMapLayout(g.layout, {
@@ -494,12 +497,13 @@ export function createGlobalScene(canvas, onError) {
         colors: { size: 3, value: colors },
       },
     });
-    const lines = opts.labels
-      ? g.lines.map((line) => ({
-          opacity: 1,
-          path: line.coordinates.map((p) => toScene(p, line.regionId, 0.2)),
-        }))
-      : [];
+    const lines = g.lines
+      .filter((line) => opts.labels || line.kind === "cell")
+      .map((line) => ({
+        kind: line.kind,
+        opacity: 1,
+        path: line.coordinates.map((p) => toScene(p, line.regionId, 0.2)),
+      }));
     const insets = fitted.regions.filter((region) => region.kind === "inset");
     const frameData = insets.map((region) => {
       const [left, top, right, bottom] = region.frame || region.bounds;
@@ -582,7 +586,10 @@ export function createGlobalScene(canvas, onError) {
           coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
           data: lines,
           getPath: (d) => d.path,
-          getColor: (d) => [181, 211, 224, 60 * d.opacity],
+          getColor: (d) =>
+            d.kind === "cell"
+              ? [235, 222, 170, 180]
+              : [181, 211, 224, 60 * d.opacity],
           getWidth: 1,
           widthUnits: "pixels",
           parameters: { depthWriteEnabled: false },

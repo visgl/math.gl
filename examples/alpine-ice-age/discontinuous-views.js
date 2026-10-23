@@ -13,11 +13,20 @@ import {
 
 import { isLand } from "../common/land-mask.js";
 import { myriahedralGrid } from "./myriahedral-grid.js";
+import {
+  createH3MyriahedralMesh,
+  h3CellWeight,
+  h3CellOutlines,
+} from "./h3-mesh.js";
 
 import hawaiiLand from "./assets/hawaii-land.json" with { type: "json" };
 
+// Construct once: the H3 panel topology is independent of the ice-age snapshot.
+let h3;
+const h3Panels = () => (h3 ??= createH3MyriahedralMesh());
 // Modest panel counts keep map construction and the 1° field mesh interactive.
 export const MYRIAHEDRAL_VIEWS = Object.fromEntries([
+  ["myriahedral:h3-0", { preset: "polyhedral", h3: true }],
   ...[
     "polyconic",
     "cylindric",
@@ -43,7 +52,9 @@ export const DISCONTINUOUS_VIEWS = {
   ...Object.fromEntries(
     Object.entries(MYRIAHEDRAL_VIEWS).map(([id, options]) => [
       id,
-      `Myriahedral · ${options.solid ?? options.preset}`,
+      options.h3
+        ? "Myriahedral · H3 base cells"
+        : `Myriahedral · ${options.solid ?? options.preset}`,
     ]),
   ),
 };
@@ -53,7 +64,14 @@ const factories = {
       id,
       () =>
         createMyriahedralMap({
-          ...options,
+          preset: options.preset,
+          ...(options.h3
+            ? {
+                mesh: h3Panels().mesh,
+                edgeWeight: (edge, weight) =>
+                  h3CellWeight(edge, weight, h3Panels().centerVertices),
+              }
+            : options),
           isLand: ([lon, lat]) => isLand(lon, lat),
         }),
     ]),
@@ -237,6 +255,8 @@ export function discontinuousGrid(view, step = 1) {
     lines.push(
       ...map.projectLine(Array.from({ length: 361 }, (_, i) => [i - 180, lat])),
     );
+  if (view === "myriahedral:h3-0")
+    lines.push(...h3CellOutlines(map, h3Panels().cells));
   const result = {
     map,
     positions: new Float32Array(positions),

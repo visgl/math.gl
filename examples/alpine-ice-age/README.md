@@ -246,3 +246,17 @@ namesake graticule strategies are not exact analytic equal-area projections.
 
 See the [myriahedral background and credits](../../docs/modules/geospatial/projection/developer-guide/myriahedral-projections.md)
 for Nico Belmonte's inspiration, Jarke van Wijk's research, and implementation limitations.
+
+
+### H3 base-cell unfolding (experimental)
+
+**Myriahedral · H3 base cells** unfolds the 122 resolution-0 H3 cells: 110
+hexagons and 12 pentagons. Their exact spherical boundary vertices are shared
+between neighboring cells. Because these spherical polygons are not generally
+flat, the example triangulates each cell around an interior point into rigid
+panels. A strong internal hinge preference keeps each H3 cell connected; the
+remaining intercell cuts are selected by the library's maximum spanning tree
+with a modern-land preference. Cell outlines remain visible during unfolding.
+The panel surface is sampled from the 1° ice and terrain grid at roughly 2°
+spacing to keep animation responsive. It is an H3-shaped hinged map, not an
+area-preserving H3 projection or a reconstruction of historic coastlines.
