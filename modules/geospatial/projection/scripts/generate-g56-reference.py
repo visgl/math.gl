@@ -63,7 +63,7 @@ def independent_direct():
         area=sa/ca*(c1/c2).ln()
         rows.append(dict(path=[lat,0.,az,distance],expected=list(map(float,[p2*180/h.PI,lon*180/h.PI,area]))))
     for ratio in [.5,.9966471893352525,1.01,2.]:
-        for a in [1.,6378137.]:
+        for a in [1e-100,1.,6378137.,1e100]:
             for sign in [-1,1]:
                 b=a*ratio;r=D.from_float(b)/D.from_float(a);e2=1-r*r
                 theta1=h.PI/3

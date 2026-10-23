@@ -109,8 +109,8 @@ meridian distance and endpoint isometric latitude through longitude and area
 integration. If subtraction of the full meridian arc and northing is ill
 conditioned, an original internal 48-decimal fixed-point binomial integral
 computes that difference from the exact binary inputs. This bounded slow path
-adds no dependency. Another 28 independent controls cover starts at 0°, 30°,
-60° and 80°, both hemispheres and signed distances, unit/Earth axes and b/a
+adds no dependency. Another 44 independent controls cover starts at 0°, 30°,
+60° and 80°, both hemispheres and signed distances, unit/Earth and 1e±100 axes and b/a
 from 0.5 through 2. Spherical controls use analytic logarithms; ellipsoidal
 controls use 80-digit quadrature with the polar singularity removed analytically.
 The area budget remains `5e-14 a²`.

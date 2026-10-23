@@ -42,6 +42,12 @@ export function remainingPoleDistance(
   distance: number,
   sign: number
 ): number {
+  // A shared power-of-two rescaling is exact and keeps fixed-point inputs
+  // representable even when the physical axes are extremely small or large.
+  const unit = 2 ** Math.floor(Math.log2(a));
+  a /= unit;
+  b /= unit;
+  distance /= unit;
   const ratio = div(exact(b), exact(a));
   const theta = mul(90n * Q - BigInt(sign) * exact(latitude), PI) / 180n;
   const [s, c] = sc(theta),
