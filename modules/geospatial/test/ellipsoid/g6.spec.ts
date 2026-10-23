@@ -169,7 +169,13 @@ test('Global defaults retain normalized bounds for very large axes', () => {
     expect(result.failedSeeds).toBeGreaterThan(0);
     const next = g.next(0, 0, 90, 0);
     expect(next.complete).toBe(false);
-    for (const r of [result, next]) {
+    const coincident = g.closest(p, p),
+      coincidentNext = g.next(0, 0, 90, 90);
+    expect(coincident.intersection!.s).toBe(0);
+    expect(coincident.intersection!.t).toBe(0);
+    expect(coincident.complete).toBe(false);
+    expect(coincidentNext.complete).toBe(false);
+    for (const r of [result, next, coincident, coincidentNext]) {
       expect(r.intersections.every(p => Number.isFinite(p.s) && Number.isFinite(p.t))).toBe(true);
       expect(r.coincidences.every(p => Number.isFinite(p.s) && Number.isFinite(p.t))).toBe(true);
     }
