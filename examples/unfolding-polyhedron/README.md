@@ -16,6 +16,15 @@ changes the deterministic seed used to score edges. Gold edges remain connected
 as hinges; dark edges are cut. **Flat view** unfolds the net and looks straight at it.
 Subdivision is available only for the icosahedron.
 
+## Source structure
+
+`app.ts` connects the UI to the layout and scene. `view.ts` contains markup;
+`scene.ts` evaluates poses and frames the camera; `renderer.ts` owns WebGL drawing
+and textures. The scene takes plain view state rather than reading controls.
+`cut-layout.ts` builds the hinge layout and `picking.ts` handles geographic hits.
+The myriahedral example reuses the controller, scene, renderer, and picking with
+its own layout builder.
+
 ## Cut strategies
 
 The **Cuts** selector preserves the unfolding amount, camera, subdivision and seed

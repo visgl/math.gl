@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {MapEngine} from "@math.gl/geospatial/discontinuous";
+import {MYRIAHEDRAL_VIEWS} from "./map-options.js";
+export {MYRIAHEDRAL_VIEWS, DISCONTINUOUS_VIEWS} from "./map-options.js";
+
 
 import { isLand } from "../common/land-mask.js";
 import { myriahedralGrid } from "./myriahedral-grid.js";
@@ -31,52 +34,6 @@ function dggsPanels(system) {
     );
   return dggsMeshes.get(system);
 }
-// Modest panel counts keep map construction and the 1° field mesh interactive.
-export const MYRIAHEDRAL_VIEWS = Object.fromEntries([
-  ["myriahedral:h3-0", { preset: "polyhedral", dggs: "h3" }],
-  ["myriahedral:a5-0", { preset: "polyhedral", dggs: "a5" }],
-  ["myriahedral:a5-1", { preset: "polyhedral", dggs: "a5-1" }],
-  ["myriahedral:s2-0", { preset: "polyhedral", dggs: "s2" }],
-  ["myriahedral:s2-1", { preset: "polyhedral", dggs: "s2-1" }],
-  ...[
-    "polyconic",
-    "cylindric",
-    "azimuthal",
-    "hemispheres",
-    "sealine",
-    "coastline",
-  ].map((preset) => [`myriahedral:${preset}`, { preset, columns: 24 }]),
-  ...["tetrahedron", "cube", "octahedron", "dodecahedron", "icosahedron"].map(
-    (solid) => [
-      `myriahedral:${solid}`,
-      { preset: "polyhedral", solid, subdivisions: 1 },
-    ],
-  ),
-]);
-
-export const DISCONTINUOUS_VIEWS = {
-  albersUsa: "Albers USA · Alaska & Hawaii insets",
-  interruptedSinusoidal: "Interrupted sinusoidal",
-  interruptedMollweide: "Interrupted Mollweide",
-  interruptedHomolosine: "Interrupted Goode homolosine",
-  airOcean: "AirOcean · gnomonic",
-  ...Object.fromEntries(
-    Object.entries(MYRIAHEDRAL_VIEWS).map(([id, options]) => [
-      id,
-      options.dggs === "s2-1"
-        ? "Myriahedral · S2 resolution 1"
-        : options.dggs === "s2"
-          ? "Myriahedral · S2 base cells"
-          : options.dggs === "h3"
-            ? "Myriahedral · H3 base cells"
-            : options.dggs
-              ? options.dggs === "a5-1"
-                ? "Myriahedral · A5 resolution 1"
-                : "Myriahedral · A5 base cells"
-              : `Myriahedral · ${options.solid ?? options.preset}`,
-    ]),
-  ),
-};
 const definitions = {
   albersUsa: {type: "albers-usa"},
   airOcean: {type: "air-ocean"},

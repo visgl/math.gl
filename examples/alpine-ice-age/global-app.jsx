@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, { useEffect, useRef, useState } from "react";
 import { loadGlobalSimulation, sampleAt, clampAge } from "./data.js";
-import { createGlobalScene, GLOBAL_VIEWS } from "./global-scene.js";
+import { createGlobalScene } from "./global-scene.js";
+import { GLOBAL_VIEWS } from "./map-options.js";
 import "./style.css";
 import AttributionWidget from "../shared/attribution-widget.jsx";
 import { GLOBAL_SOURCES, INSET_REFERENCE_SOURCES } from "./attribution.js";
