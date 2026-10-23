@@ -108,6 +108,9 @@ jobs:
       - name: Check tile-matrix subpath exports, public types and dependency boundary
         run: yarn check:tile-matrix-package
 
+      - name: Check geodesic paths, public types and selective packages
+        run: yarn check:geodesic-path-package
+
       - name: Check GeoArrow package boundary
         run: yarn check:geoarrow-boundary
 
