@@ -17,9 +17,11 @@ test('Ellipsoid spheroid adapters snapshot axes without datum or derived paramet
   expect(ellipsoid.toSpheroid()).not.toBe(snapshot);
   parameters.semiMajorAxis = 1;
   expect(ellipsoid.radii.x).toBe(6378137);
-  ellipsoid.radii.x = 1;
+  expect(() => {
+    ellipsoid.radii.x = 1;
+  }).toThrow(TypeError);
   expect(snapshot.semiMajorAxis).toBe(6378137);
-  expect(() => ellipsoid.toSpheroid()).toThrow('equal X/Y');
+  expect(ellipsoid.toSpheroid()).toEqual(snapshot);
 });
 
 test('Ellipsoid spheroid adapters accept spheres and reject lossy or invalid geometry', () => {
@@ -52,10 +54,29 @@ test('Ellipsoid spheroid adapters accept spheres and reject lossy or invalid geo
       'Spheroid'
     );
   }
-  const nonFinite = new Ellipsoid(1, 1, 1);
-  nonFinite.radii[0] = Infinity;
-  nonFinite.radii[1] = Infinity;
-  expect(() => nonFinite.toSpheroid()).toThrow('finite positive axes');
+
   // The existing three-radius constructor still supports triaxial/prolate geometry.
   expect(Array.from(new Ellipsoid(1, 2, 3).radii)).toEqual([1, 2, 3]);
+});
+
+test('Ellipsoid geometry caches cannot diverge through public vector mutation', () => {
+  const ellipsoid = new Ellipsoid(3, 3, 2);
+  const before = ellipsoid.cartographicToCartesian([30, 45, 1]);
+  for (const vector of [
+    ellipsoid.radii,
+    ellipsoid.radiiSquared,
+    ellipsoid.radiiToTheFourth,
+    ellipsoid.oneOverRadii,
+    ellipsoid.oneOverRadiiSquared
+  ]) {
+    expect(Object.isFrozen(vector)).toBe(true);
+    expect(() => {
+      vector[0] = 99;
+    }).toThrow(TypeError);
+    expect(() => {
+      vector.z = 99;
+    }).toThrow(TypeError);
+  }
+  expect(ellipsoid.cartographicToCartesian([30, 45, 1])).toEqual(before);
+  expect(ellipsoid.toSpheroid()).toEqual({semiMajorAxis: 3, semiMinorAxis: 2});
 });

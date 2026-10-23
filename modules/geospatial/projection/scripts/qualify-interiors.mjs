@@ -27,7 +27,7 @@ async function browserRows(outfile, name) {
       response.end('<!doctype html><title>Independent interior qualification</title>');
     }
   });
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   try {
     const browser = await browsers[name].launch({headless: true, timeout: 30000});
     const watchdog = setTimeout(() => {
@@ -47,7 +47,7 @@ async function browserRows(outfile, name) {
     }
   } finally {
     server.closeAllConnections();
-    await new Promise((resolve) => server.close(resolve));
+    await new Promise(resolve => server.close(resolve));
   }
 }
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
@@ -71,7 +71,7 @@ try {
   const summary = {};
   for (const row of rows) {
     assert(
-      row.finite && row.inputUnchanged && row.failureAtomic,
+      row.finite && row.inputUnchanged && row.failureAtomic && row.aliasCorrect !== false,
       row.id + ': ownership/finiteness'
     );
     if (row.qualified) assert.equal(row.status, 'matches-reference', row.path + ': ' + row.id);
@@ -94,6 +94,7 @@ try {
     },
     sourceSHA256: hash.digest('hex'),
     angleToleranceRadians: runtime.angleTolerance,
+    cuspFootpointRelativeTolerance: 2e-12,
     heightTolerance: 'max(1e-12, max(radii) * 2e-12) in axis units',
     note: 'Diagnostic matches do not promote unsupported domains. Passing bounded-behavior checks is not an accuracy claim.',
     summary,
@@ -101,7 +102,7 @@ try {
   };
   if (values.output) {
     const header = JSON.stringify({...report, rows: undefined}, null, 2);
-    const body = rows.map((row) => '    ' + JSON.stringify(row)).join(',\n');
+    const body = rows.map(row => '    ' + JSON.stringify(row)).join(',\n');
     writeFileSync(values.output, header.slice(0, -2) + ',\n  "rows": [\n' + body + '\n  ]\n}\n');
   }
   console.log(JSON.stringify(summary, null, 2));

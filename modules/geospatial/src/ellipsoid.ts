@@ -15,7 +15,6 @@ import {
   cartesianToSpheroid,
   type SpheroidGeometry
 } from '@math.gl/core/spheroid';
-import * as vec3 from '@math.gl/core/vec3';
 
 import {WGS84_RADIUS_X, WGS84_RADIUS_Y, WGS84_RADIUS_Z} from './constants';
 import {fromCartographicToRadians, toCartographicFromRadiansComponents} from './type-utils';
@@ -29,7 +28,6 @@ const scratchVector = new Vector3();
 const scratchNormal = new Vector3();
 const scratchK = new Vector3();
 const scratchPosition = new Vector3();
-const scratchHeight = new Vector3();
 const scratchCartesian = new Vector3();
 
 /**
@@ -109,6 +107,13 @@ export class Ellipsoid {
         semiMinorAxis: z,
         eccentricitySquared: 1 - this.radiiSquared.z / this.radiiSquared.x
       });
+    // Geometry and all derived caches are one immutable snapshot. Mutating a
+    // public vector previously changed some algorithms while leaving others stale.
+    Object.freeze(this.radii);
+    Object.freeze(this.radiiSquared);
+    Object.freeze(this.radiiToTheFourth);
+    Object.freeze(this.oneOverRadii);
+    Object.freeze(this.oneOverRadiiSquared);
     Object.freeze(this);
   }
 
@@ -190,16 +195,33 @@ export class Ellipsoid {
       spheroidScratch.x = x;
       spheroidScratch.y = y;
       spheroidScratch.z = z;
-      if (!cartesianToSpheroid(spheroidScratch, this.spheroidGeometry)) return undefined;
-      // Preserve signed-zero atan2 at exact poles rather than projection's canonical zero.
-      const longitude = x === 0 && y === 0 ? Math.atan2(y, x) : spheroidScratch.x;
-      return toCartographicFromRadiansComponents(
-        longitude,
-        spheroidScratch.y,
-        spheroidScratch.z,
-        result
-      );
+      const shape = this.spheroidGeometry;
+      const nearBoundary =
+        z === 0 &&
+        shape.semiMinorAxis < shape.semiMajorAxis &&
+        Math.abs(Math.hypot(x, y) - shape.semiMajorAxis * shape.eccentricitySquared) <=
+          64 * Number.EPSILON * shape.semiMajorAxis;
+      // On the cusp plane classify exact axes/coordinates, not a rounded hypot.
+      if (!nearBoundary && cartesianToSpheroid(spheroidScratch, shape)) {
+        // Preserve signed-zero atan2 at exact poles rather than projection's canonical zero.
+        const longitude = x === 0 && y === 0 ? Math.atan2(y, x) : spheroidScratch.x;
+        return toCartographicFromRadiansComponents(
+          longitude,
+          spheroidScratch.y,
+          spheroidScratch.z,
+          result
+        );
+      }
+      // Exact three-axis fallback can recover a unique root when the shared
+      // bounded numeric solve cannot represent its intermediate scaling.
     }
+    // Retain the legacy representable squared-axis domain for normal arithmetic.
+    if (
+      !(this.minimumRadius > 0) ||
+      !Number.isFinite(this.maximumRadius * this.maximumRadius) ||
+      !Number.isFinite(1 / (this.minimumRadius * this.minimumRadius))
+    )
+      return undefined;
     scratchCartesian.set(x, y, z);
     const point = this.scaleToGeodeticSurface(scratchCartesian, scratchPosition);
 
@@ -207,15 +229,19 @@ export class Ellipsoid {
       return undefined;
     }
 
-    const normal = this.geodeticSurfaceNormal(point, scratchNormal);
-
-    const h = scratchHeight;
-    h.copy(scratchCartesian).subtract(point);
-
-    const longitude = Math.atan2(normal.y, normal.x);
-    // atan2 retains latitude precision when the normal is almost vertical.
-    const latitude = Math.atan2(normal.z, Math.hypot(normal.x, normal.y));
-    const height = Math.sign(vec3.dot(h, scratchCartesian)) * vec3.length(h);
+    const gx = point[0] * this.oneOverRadiiSquared.x;
+    const gy = point[1] * this.oneOverRadiiSquared.y;
+    const gz = point[2] * this.oneOverRadiiSquared.z;
+    const length = Math.hypot(gx, gy, gz);
+    if (!(length > 0) || !Number.isFinite(length)) return undefined;
+    const nx = gx / length,
+      ny = gy / length,
+      nz = gz / length;
+    const longitude = Math.atan2(ny, nx);
+    const latitude = Math.atan2(nz, Math.hypot(nx, ny));
+    // Project onto the unit normal. The former sign(h dot input) can underflow
+    // for a deep interior even when its signed height is representable.
+    const height = (x - point[0]) * nx + (y - point[1]) * ny + (z - point[2]) * nz;
 
     return toCartographicFromRadiansComponents(longitude, latitude, height, result);
   }

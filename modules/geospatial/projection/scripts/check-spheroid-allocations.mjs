@@ -8,12 +8,24 @@ import {fileURLToPath} from 'node:url';
 import ts from 'typescript';
 const root = new URL('../../../../', import.meta.url);
 const scopes = new Map([
+  // The ordinary nearest-point path is allocation-free; its explicitly
+  // documented exact-dyadic fallback uses bounded BigInt/string storage.
+  [
+    'modules/geospatial/src/ellipsoid-helpers/nearest-surface.ts',
+    new Set(['nearestSurface', 'offset', 'sumError', 'productError'])
+  ],
   [
     'modules/geospatial/src/projection/experimental/spatial-deformation.ts',
     new Set(['validateEpochs', 'displacement', 'apply'])
   ],
-  ['modules/geospatial/src/projection/experimental/deformation-inverse.ts', new Set(['inverseDisplacement'])],
-  ['modules/geospatial/src/projection/temporal.ts', new Set(['temporalDifference', 'sampleComponents'])],
+  [
+    'modules/geospatial/src/projection/experimental/deformation-inverse.ts',
+    new Set(['inverseDisplacement'])
+  ],
+  [
+    'modules/geospatial/src/projection/temporal.ts',
+    new Set(['temporalDifference', 'sampleComponents'])
+  ],
   [
     'modules/geospatial/src/projection/bulk.ts',
     new Set([
@@ -52,22 +64,18 @@ const scopes = new Map([
       'interiorInverse',
       'sumError',
       'productError',
-      'commit'
+      'commit',
+      'commitNormal'
     ])
   ],
   [
     'modules/geospatial/src/projection/analysis.ts',
-    new Set([
-      'contains',
-      'projectTo',
-      'unprojectTo',
-      'jacobian',
-      'factors',
-      'sample',
-      'calculate'
-    ])
+    new Set(['contains', 'projectTo', 'unprojectTo', 'jacobian', 'factors', 'sample', 'calculate'])
   ],
-  ['modules/geospatial/src/projection/numerical-derivative.ts', new Set(['evaluate', 'difference'])],
+  [
+    'modules/geospatial/src/projection/numerical-derivative.ts',
+    new Set(['evaluate', 'difference'])
+  ],
   [
     'modules/geospatial/src/projection/experimental/common/meridian-distance.ts',
     new Set(['radius', 'pair', 'meridianDistance', 'inverseMeridianDistance'])

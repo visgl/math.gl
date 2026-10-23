@@ -133,16 +133,16 @@ test('bounded surface inverse leaves outputs untouched for unrepresentable input
     }
   }));
 
-test('surface radial fallback remains separate from safeguarded cartographic inversion', () =>
+test('deep surface projection selects the independent nearest point rather than a radial approximation', () =>
   degrees(() => {
     const ellipsoid = Ellipsoid.fromSpheroid({semiMajorAxis: 10, semiMinorAxis: 5});
     const source = [0.1, 0.2, 0.3];
-    const factor = 1 / Math.hypot(source[0] / 10, source[1] / 10, source[2] / 5);
-    const expected = source.map(value => value * factor);
+    // Original 110-digit Decimal oracle on exact stored binary64 inputs.
+    const expected = [0.13071785864590693, 0.26143571729181386, 4.997863648779225];
     const result = source.slice();
     expect(ellipsoid.scaleToGeodeticSurface(result, result)).toBe(result);
     close(result, expected, 1e-14);
-    // The retained radial approximation is not the normal footpoint for deep interior points.
+    // Cartesian inversion and surface projection now select the same nearest normal.
     const llh = ellipsoid.cartesianToCartographic(source);
     const roundtrip = ellipsoid.cartographicToCartesian(llh);
     close(roundtrip, source, 1e-12);
@@ -184,15 +184,14 @@ test('numeric cartographic and surface commits survive recursive output setters'
     close([surface.x, surface.y, surface.z], expectedSurface, 0);
   }));
 
-test('deep-interior singular Newton updates leave outputs untouched', () => {
+test('safeguarded surface projection recovers an independently referenced legacy Newton failure', () => {
   const ellipsoid = new Ellipsoid(1, 1, 0.5);
-  // Authored interior coordinate outside the radial-fallback region; Newton
-  // reaches a singular update rather than a supported normal footpoint.
+  // The legacy unbracketed Newton solve hit a singular update on this input.
   const point = [0.7343026178423315, 0, 0.037234249800657836];
   const result = [7, 8, 9];
-  expect(ellipsoid.scaleToGeodeticSurface(point, result)).toBeUndefined();
-  expect(result).toEqual([7, 8, 9]);
-  // The independent nearest-normal solve succeeds where legacy surface Newton fails.
+  expect(ellipsoid.scaleToGeodeticSurface(point, result)).toBe(result);
+  // Original 110-digit Decimal oracle, not a production round trip.
+  close(result, [0.9205658365745027, 0, 0.1952937150370474], 1e-14);
   expect(ellipsoid.cartesianToCartographic(point, result)).toBe(result);
   close(ellipsoid.cartographicToCartesian(result), point, 1e-12);
   expect(ellipsoid.scaleToGeodeticSurface([2, 0, 0], result)).toBe(result);

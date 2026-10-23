@@ -167,6 +167,39 @@ work retain separate scopes.
 
 ## S1: safeguarded nearest-normal interiors — implemented
 
-The shared sphere/oblate cartographic inverse now covers unique deep interiors. Original shifted-multiplier Newton/bisection with compensated radius/axis arithmetic is bounded by 128 updates. Equatorial interiors below the evolute cusp reject their equally near hemisphere pair. Failure ownership and adapter longitude conventions remain intact. This supersedes the earlier shared surface/exterior restriction and ordinary Hannover interior branch described above.
+The shared sphere/oblate cartographic inverse now covers unique deep interiors. Original shifted-multiplier Newton/bisection with compensated radius/axis arithmetic is bounded by 1024 updates. Equatorial interiors below the evolute cusp reject their equally near hemisphere pair. Failure ownership and adapter longitude conventions remain intact. This supersedes the earlier shared surface/exterior restriction and ordinary Hannover interior branch described above.
 
 The original 110-digit Decimal oracle now enforces 434 accuracy checks out of 466 paths, including `b/a=1e-6` and both sides of the cusp. The remaining 32 deep prolate/triaxial paths retain diagnostic status. Prolate/triaxial cartographic inversion and the separate `scaleToGeodeticSurface` method retain their legacy kernel. No new third-party implementation or model is copied.
+
+
+## P0 follow-up: three-axis nearest points and immutable geometry
+
+The original three-axis shifted-multiplier solver replaces the remaining radial
+approximation in surface projection and prolate/triaxial cartographic conversion.
+All 466 inverse paths now enforce the original independent-oracle error budgets;
+198 additional surface checks enforce footpoint accuracy and aliasing. This
+supersedes the earlier diagnostic status of 32 deep prolate/triaxial inputs.
+The original general solver rejected its singular multiplier boundary, including
+some unique cusp points. The follow-up below recovers those unique roots;
+ambiguous minima still reject. See the public qualification page for limits.
+
+All five public geometry/cache vectors are frozen. This prevents nested mutation
+from changing normals or adapters while the prepared spheroid keeps old axes.
+Create a new Ellipsoid when changing shape. No dependencies or upstream solver
+code are added; existing Cesium and GeographicLib attribution remains intact.
+
+
+## P0 follow-up: unique cusps and exact dyadic recovery
+
+An original bounded BigInt fallback now resolves formerly rejected unique
+multidirectional cusps and classifies exact boundary roots independently of
+rounded norms. The existing numeric fast path and allocation guard remain;
+rare fallback calls allocate integer/string temporaries. The shared oblate
+solver also avoids normalized-coordinate underflow and permits 1024 updates.
+Signed height uses normal projection, including tiny deep interiors.
+
+The independent corpus now has 427 cusp controls (including subnormal inputs),
+run by the Node and three-browser harness alongside all 466 inverse controls.
+Existing tolerances and SPDX/license notices remain unchanged. There are no
+new dependencies; full GeographicLib C++ coverage and universal extreme-domain
+qualification remain separate G0 work.
