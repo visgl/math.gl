@@ -299,9 +299,9 @@ export function dggsCellWeight(edge, presetWeight, panels) {
 export function dggsCellOutlines(map, cells) {
   const edgePanels = new Map();
   const panelByFace = new Map(
-    map.layout.mesh.faces.map((face, index) => [faceKey(face), index]),
+    map.motion.mesh.faces.map((face, index) => [faceKey(face), index]),
   );
-  map.layout.mesh.faces.forEach((face, i) => {
+  map.motion.mesh.faces.forEach((face, i) => {
     for (let j = 0; j < face.length; j++) {
       const a = face[j],
         b = face[(j + 1) % face.length];
@@ -327,7 +327,7 @@ export function dggsCellOutlines(map, cells) {
       if (panel === undefined)
         throw new Error("DGGS edge lost its source panel");
       const sourceCoordinates = [a, b].map((index) =>
-        geographic(map.layout.mesh.vertices[index]),
+        geographic(map.motion.mesh.vertices[index]),
       );
       const regionId = `panel-${panel}`;
       lines.push({

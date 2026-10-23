@@ -7,6 +7,11 @@
 
 The discontinuous map API, presets, and layout helpers are experimental and may change.
 
+For a shared rendering pipeline across ordinary, interrupted, inset, and hinged
+maps, start with [MapEngine](./map-engine.md) and its
+[rendering guide](../projection/developer-guide/map-engine.md). The factories
+below remain useful when only the lower-level static map is needed.
+
 Project geographic points, lines, and polygons into a map with cuts. Import this
 API separately from scalar CRS transforms:
 
@@ -33,6 +38,17 @@ For concepts, rendering patterns, and the Ice Age Explorer integration, see the
 [discontinuous projections guide](../projection/developer-guide/discontinuous-projections.md).
 
 ## Presets
+
+<span class="badge">From v5.0 · Experimental</span>
+
+`createGoodeMap({radius = 1})` provides Goode's land-oriented homolosine layout:
+northern lobes centered at −100° and 30°, and southern lobes centered at −160°,
+−60°, 20°, and 140°. Northern interruptions are at −40°; southern interruptions
+are at −100°, −20°, and 80°, in addition to the antimeridian. The wide Eurasian
+lobe uses two convex charts with a continuous join at 30°.
+Use `{type: 'goode'}` with `MapEngine` for the same layout. The lobe parameters
+follow [D3's published homolosine definition](https://github.com/d3/d3-geo-projection/blob/main/src/interrupted/homolosine.js);
+the projection and clipping implementation are independent.
 
 `createMyriahedralMap(options)` builds independently generated graticule or
 polyhedral nets with optional unfolding. See the [myriahedral API](./myriahedral.md)

@@ -15,6 +15,7 @@ export type {
   MapSamplingOptions
 } from './discontinuous/map-layout';
 export {
+  createGoodeMap,
   createAirOceanMap,
   createInterruptedSinusoidalMap,
   createInterruptedMollweideMap,
@@ -32,6 +33,17 @@ export {
   MyriahedralMap,
   MYRIAHEDRAL_PRESETS
 } from './discontinuous/myriahedral';
+export {MapEngine} from './discontinuous/map-engine';
+export type {
+  MapDescription,
+  MapDefinition,
+  MapChartDescription,
+  MapEngineOptions,
+  MapCapabilities,
+  MapState,
+  MapPosition3D,
+  MapTransitionPlan
+} from './discontinuous/map-engine';
 export type {
   MyriahedralOptions,
   MyriahedralPreset,

@@ -1,15 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {
-  getMapLayout,
-  createAlbersUsaMap,
-  createAirOceanMap,
-  createMyriahedralMap,
-  createInterruptedSinusoidalMap,
-  createInterruptedMollweideMap,
-  createInterruptedHomolosineMap,
-} from "@math.gl/geospatial/discontinuous";
+import {MapEngine} from "@math.gl/geospatial/discontinuous";
 
 import { isLand } from "../common/land-mask.js";
 import { myriahedralGrid } from "./myriahedral-grid.js";
@@ -85,30 +77,27 @@ export const DISCONTINUOUS_VIEWS = {
     ]),
   ),
 };
-const factories = {
-  ...Object.fromEntries(
-    Object.entries(MYRIAHEDRAL_VIEWS).map(([id, options]) => [
-      id,
-      () =>
-        createMyriahedralMap({
-          preset: options.preset,
-          ...(options.dggs
-            ? {
-                mesh: dggsPanels(options.dggs).mesh,
-                edgeWeight: (edge, weight) =>
-                  dggsCellWeight(edge, weight, dggsPanels(options.dggs)),
-              }
-            : options),
-          isLand: ([lon, lat]) => isLand(lon, lat),
-        }),
-    ]),
-  ),
-  albersUsa: createAlbersUsaMap,
-  airOcean: createAirOceanMap,
-  interruptedSinusoidal: createInterruptedSinusoidalMap,
-  interruptedMollweide: createInterruptedMollweideMap,
-  interruptedHomolosine: createInterruptedHomolosineMap,
+const definitions = {
+  albersUsa: {type: "albers-usa"},
+  airOcean: {type: "air-ocean"},
+  interruptedSinusoidal: {type: "interrupted-sinusoidal"},
+  interruptedMollweide: {type: "interrupted-mollweide"},
+  interruptedHomolosine: {type: "goode"},
 };
+function createMap(view) {
+  const options = MYRIAHEDRAL_VIEWS[view];
+  const panels = options?.dggs ? dggsPanels(options.dggs) : null;
+  const definition = options
+    ? {type: "myriahedral", preset: options.preset,
+       ...(panels ? {mesh: panels.mesh} : options)}
+    : definitions[view];
+  if (!definition) throw new Error(`Unknown map: ${view}`);
+  return new MapEngine({version: 1, id: view, definition}, {
+    isLand: ([lon, lat]) => isLand(lon, lat),
+    edgeWeight: panels ? (edge, weight) => dggsCellWeight(edge, weight, panels) : undefined,
+    sampling: {tolerance: 1e-5},
+  });
+}
 const cache = new Map();
 
 /** Bilinear samples in the example's 360 x 181 periodic, one-degree source grid. */
@@ -145,10 +134,9 @@ export function discontinuousGrid(view, step = 1) {
     cache.set(key, cached);
     return cached;
   }
-  if (!factories[view]) throw new Error(`Unknown discontinuous view: ${view}`);
   if (!(step > 0 && 180 % step === 0))
     throw new Error("Grid step must divide 180");
-  const map = factories[view]();
+  const map = createMap(view);
   const ownership = new Map(),
     vertexIds = new Map();
   const regionsAt = (p) => {
@@ -289,7 +277,7 @@ export function discontinuousGrid(view, step = 1) {
       }
     }
   }
-  const layout = getMapLayout(map, { tolerance: 1e-5 });
+  const layout = map.getLayout();
   const lines = [];
   for (let lon = -180; lon <= 180; lon += 30)
     lines.push(

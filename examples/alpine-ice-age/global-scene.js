@@ -20,7 +20,6 @@ import {
   myriahedralPose,
   prepareMyriahedralAnimation,
 } from "./myriahedral-animation.js";
-import { fitMapLayout } from "@math.gl/geospatial/discontinuous";
 import { interpolateField } from "./data.js";
 import { nearestOSFChapter } from "./osf-data.js";
 import {
@@ -437,7 +436,7 @@ export function createGlobalScene(canvas, onError) {
     const g = discontinuousGrid(opts.view, gridStep(opts.view));
     const width = canvas.clientWidth || 900,
       height = canvas.clientHeight || 570;
-    const fitted = fitMapLayout(g.layout, {
+    const fitted = g.map.fit({
       width,
       height,
       padding: {
@@ -451,7 +450,7 @@ export function createGlobalScene(canvas, onError) {
       fitted.regions.map((region) => [region.id, region]),
     );
     let pose;
-    if (g.map.layout && unfoldAmount < 1) {
+    if (g.map.motion && unfoldAmount < 1) {
       if (!animations.has(g.map))
         animations.set(g.map, prepareMyriahedralAnimation(g.map));
       pose = myriahedralPose(

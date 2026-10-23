@@ -2,7 +2,7 @@
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
-  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
 </p>
 
 A discontinuous map places neighboring parts of the Earth in separate parts of a
@@ -22,6 +22,11 @@ wheel and zoom buttons magnify every region together; drag to pan. The
 [full example](/examples/albers-usa) includes more explanation.
 
 The discontinuous map API, presets, and layout helpers are experimental and may change.
+
+For new renderers, use [MapEngine](./map-engine.md) to construct these layouts,
+fit the insets, pick coordinates, and evaluate optional hinge motion through one
+interface. A serializable `MapDescription` selects the map; the
+[reference](../../discontinuous/map-engine.md) documents its fields and methods.
 
 math.gl provides the experimental `@math.gl/geospatial/discontinuous` entrypoint
 for this geometry processing. It combines geographic regions, local projections,
