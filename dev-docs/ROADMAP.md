@@ -36,6 +36,14 @@ The [GeographicLib SOTA tranche list](./geographiclib-roadmap.md) prioritizes
 remaining correctness/domain gaps (P0), core geometry capabilities (P1), and
 extended domains and optional models (P2).
 
+## Geospatial frames and paths
+
+The [tranched geospatial roadmap](./geospatial-roadmap.md) records the existing
+master baseline, C1–C3 merged in [PR #277](https://github.com/visgl/math.gl/pull/277),
+and the remaining path subdivision, seams, rhumb, precision and celestial-frame work.
+PR implementation, merge/release status and numerical qualification are tracked
+separately. The next integration tranche reuses the existing geodesic solver.
+
 ## Sun and sky
 
 The [six-tranche sun and sky roadmap](./sun-roadmap.md) tracks shared
