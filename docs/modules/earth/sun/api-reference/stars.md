@@ -142,3 +142,11 @@ node modules/earth/sun/scripts/generate-stars.mjs /absolute/path/bsc5-orig.json 
 The generator verifies input SHA-256 `28cb835cbd2d72ced9ef9d20d9b5d92f05f649dfd39a509b1cf82dbd3c5f2fb9`, selects and sorts the 7,000 sources deterministically, and converts source arcseconds/year to milliarcseconds/year. No network request is part of building or using the module. Angles are rounded to 10 decimal places in radians, finer than the source coordinate precision.
 
 For a standalone comparison demo after building the package, run `node modules/earth/sun/scripts/create-stars-demo.mjs /absolute/path/stars.html`. It shows the full equatorial sky beside a deck.gl GlobeView and includes a ±1 million-year slider. The catalog is bundled; the globe panel loads MIT-licensed deck.gl 9.1.9 from a CDN. Increase GlobeView’s `farZMultiplier` if the chosen star shell lies beyond the camera’s far clipping plane. `node modules/earth/sun/scripts/benchmark-stars.mjs` measures 7,000-source propagation and GlobeView data conversion.
+
+### Explicit observer time offsets
+
+`getStarfieldRotation` accepts `ut1MinusUtc` and `ttMinusUtc` seconds in its options.
+Both default to zero for compatibility. These offsets adjust the existing mean-frame
+approximation; they do not add nutation, polar motion or a full Earth-orientation model.
+The [celestial helpers](../../celestial/README.md) expose the same equations with explicit
+UT1/TT coordinates, separately from stellar simulation time.

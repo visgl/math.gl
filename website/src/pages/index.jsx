@@ -75,7 +75,7 @@ const modules = [
   {
     name: 'Earth',
     packageName: '@math.gl/earth',
-    description: 'Grouped paths for geoid, sun, and timezone utilities.',
+    description: 'Grouped paths for celestial, geoid, sun, and timezone utilities.',
     image: 'icon-basemap.webp',
     imageAlt: 'Earth illustration',
     theme: 'indigo'
@@ -103,6 +103,14 @@ const modules = [
     image: 'math-hero.webp',
     imageAlt: 'Math.gl geospatial visualization',
     theme: 'orange'
+  },
+  {
+    name: 'Celestial',
+    packageName: '@math.gl/earth/celestial',
+    description: 'Explicit astronomical time coordinates and frame/state transforms.',
+    image: 'math-hero.webp',
+    imageAlt: 'Math.gl geospatial visualization',
+    theme: 'indigo'
   },
   {
     name: 'DGGS',

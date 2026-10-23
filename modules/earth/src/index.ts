@@ -5,3 +5,4 @@
 export * as geoid from './geoid/index';
 export * as sun from './sun/index';
 export * as timezone from './timezone/index';
+export * as celestial from './celestial/index';

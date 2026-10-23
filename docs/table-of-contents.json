@@ -165,7 +165,17 @@
       {
         "type": "category",
         "label": "@math.gl/earth",
-        "items": ["modules/earth/README"]
+        "items": [
+          "modules/earth/README"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@math.gl/earth/celestial",
+        "items": [
+          "modules/earth/celestial/README",
+          "modules/earth/celestial/arrow-time-mapping"
+        ]
       },
       {
         "type": "category",
