@@ -198,7 +198,7 @@ rare fallback calls allocate integer/string temporaries. The shared oblate
 solver also avoids normalized-coordinate underflow and permits 1024 updates.
 Signed height uses normal projection, including tiny deep interiors.
 
-The independent corpus now has 421 cusp controls (including subnormal inputs),
+The independent corpus now has 427 cusp controls (including subnormal inputs),
 run by the Node and three-browser harness alongside all 466 inverse controls.
 Existing tolerances and SPDX/license notices remain unchanged. There are no
 new dependencies; full GeographicLib C++ coverage and universal extreme-domain

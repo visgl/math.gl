@@ -126,14 +126,19 @@ function interiorInverse(
         (2 * p)
       : 0;
   const shift = a * ratio2,
-    base = p - a + shift;
+    distance = p - a,
+    base = distance + shift;
   const correction =
-    radiusError + sumError(p - a, shift, base) + productError(a, ratio2, shift) + a * ratioError;
+    radiusError +
+    sumError(p, -a, distance) +
+    sumError(distance, shift, base) +
+    productError(a, ratio2, shift) +
+    a * ratioError;
   if (z === 0) {
     // A rounded hypot can equal the cusp for points just inside it. Include
     // the radius/axis corrections before selecting a unique equatorial normal.
     if (base + correction < 0) return false;
-    return commit(result, longitude, 0, p - a);
+    return commit(result, longitude, 0, distance);
   }
   const weighted = Math.abs(vertical) * ratio;
   let lower = 0,
@@ -173,16 +178,14 @@ function interiorInverse(
     const candidate = next > lower && next < upper ? next : lower + (upper - lower) / 2;
     if (
       Math.abs(residual) <= 4 * EPSILON * (Math.abs(term) + v * v) ||
-      upper - lower <= 4 * EPSILON * t ||
-      candidate === t
+      upper - lower <= 4 * EPSILON * t
     ) {
       latitude = Math.atan2(verticalAt, u);
       break;
     }
     t = candidate;
   }
-  if (latitude === undefined) return false;
-  return commitNormal(result, longitude, latitude, p, z, a, ratio);
+  return latitude !== undefined && commitNormal(result, longitude, latitude, p, z, a, ratio);
 }
 
 /** Error-free transforms on the finite squared-axis domain used by geometry adapters. */

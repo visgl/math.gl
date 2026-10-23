@@ -105,6 +105,13 @@ def generate():
             xyz = [.15, 0., tiny]
             rows.append({'radii': radii, 'xyz': xyz,
                          'reference': oracle.nearest(radii, xyz, iterations=1600)})
+            # Cancellation in p-a must retain the low bits of the cusp gap.
+            for x in [1.8999999999999995, 1.8999999999999992, 1.9]:
+                for sign in [-1., 1.]:
+                    radii = [10., 10., 9.]
+                    xyz = [x, 0., sign * 1e-320]
+                    rows.append({'radii': radii, 'xyz': xyz,
+                                 'reference': oracle.nearest(radii, xyz, iterations=1600)})
     return {'provenance': {'license': 'MIT', 'precision': 220, 'iterations': 900, 'extremePrecision': 440, 'extremeIterations': 1600,
             'method': 'Original Decimal bisection from exact stored binary64 inputs; positive-definite multiplier certificate.'}, 'cases': rows}
 
