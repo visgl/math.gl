@@ -235,7 +235,8 @@ GeographicLib geodesics and polygon transit/area reduction
 
 The MIT License (MIT).
 
-Copyright (c) 2010-2023, Charles Karney
+Copyright (c) 2011-2022, Charles Karney
+Copyright (c) 2010-2023, Charles Karney (polygon transit and area reduction)
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
