@@ -157,31 +157,31 @@ test('Qualification rejects incorrect overlap interval endpoints', () => {
   }
 });
 
-test('Global defaults retain normalized bounds for very large axes', () => {
-  for (const ratio of [0.99, 1, 1.01]) {
-    const a = 1e308;
-    const g = new GeodesicIntersections({semiMajorAxis: a, semiMinorAxis: a * ratio});
-    const p = {latitude: 0, longitude: 0, azimuth: 90};
-    const result = g.closest(p, {...p, azimuth: 0});
-    expect(result.intersection!.s).toBe(0);
-    expect(result.intersection!.t).toBe(0);
-    expect(result.complete).toBe(false);
-    expect(result.failedSeeds).toBeGreaterThan(0);
-    const next = g.next(0, 0, 90, 0);
-    expect(next.complete).toBe(false);
-    const coincident = g.closest(p, p),
-      coincidentNext = g.next(0, 0, 90, 90);
-    expect(coincident.intersection!.s).toBe(0);
-    expect(coincident.intersection!.t).toBe(0);
-    expect(coincident.complete).toBe(false);
-    expect(coincidentNext.complete).toBe(false);
-    for (const r of [result, next, coincident, coincidentNext]) {
-      expect(r.intersections.every(p => Number.isFinite(p.s) && Number.isFinite(p.t))).toBe(true);
-      expect(r.coincidences.every(p => Number.isFinite(p.s) && Number.isFinite(p.t))).toBe(true);
+test('Global defaults retain normalized bounds and report unrepresentable parameters', () => {
+  for (const a of [1e308, 1e-320])
+    for (const ratio of [0.99, 1, 1.01]) {
+      const g = new GeodesicIntersections({semiMajorAxis: a, semiMinorAxis: a * ratio});
+      const p = {latitude: 0, longitude: 0, azimuth: 90};
+      const result = g.closest(p, {...p, azimuth: 0});
+      expect(result.intersection!.s).toBe(0);
+      expect(result.intersection!.t).toBe(0);
+      expect(result.complete).toBe(false);
+      expect(result.failedSeeds).toBeGreaterThan(0);
+      const next = g.next(0, 0, 90, 0);
+      expect(next.complete).toBe(false);
+      const coincident = g.closest(p, p),
+        coincidentNext = g.next(0, 0, 90, 90);
+      expect(coincident.intersection!.s).toBe(0);
+      expect(coincident.intersection!.t).toBe(0);
+      expect(coincident.complete).toBe(false);
+      expect(coincidentNext.complete).toBe(false);
+      for (const r of [result, next, coincident, coincidentNext]) {
+        expect(r.intersections.every(p => Number.isFinite(p.s) && Number.isFinite(p.t))).toBe(true);
+        expect(r.coincidences.every(p => Number.isFinite(p.s) && Number.isFinite(p.t))).toBe(true);
+      }
+      expect(() => g.closest(p, p, {maxDistance: Infinity})).toThrow(RangeError);
+      expect(() => g.next(0, 0, 90, 0, Infinity)).toThrow(RangeError);
     }
-    expect(() => g.closest(p, p, {maxDistance: Infinity})).toThrow(RangeError);
-    expect(() => g.next(0, 0, 90, 0, Infinity)).toThrow(RangeError);
-  }
 });
 
 test('Qualification rejects physically valid but incorrectly ranked coincident answers', () => {

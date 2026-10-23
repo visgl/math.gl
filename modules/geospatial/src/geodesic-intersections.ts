@@ -431,7 +431,14 @@ export class GeodesicIntersections {
   }
 
   private point(A: GeodesicLine, B: GeodesicLine, p: Root): IntersectionPoint | undefined {
-    if (!(Number.isFinite(p.x * this.a) && Number.isFinite(p.y * this.a))) return undefined;
+    const s = p.x * this.a,
+      t = p.y * this.a;
+    if (
+      !(Number.isFinite(s) && Number.isFinite(t)) ||
+      Math.abs(s / this.a - p.x) > this.tolerance ||
+      Math.abs(t / this.a - p.y) > this.tolerance
+    )
+      return undefined;
     const a = A.position(p.x),
       b = B.position(p.y),
       v = this.solver.inverse(a.lat2, a.lon2, b.lat2, b.lon2);
