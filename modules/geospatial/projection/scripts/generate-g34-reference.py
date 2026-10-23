@@ -98,6 +98,9 @@ def independent():
         area=2*atan((s/(1+c))**2)
         hyp=atan((1-c**4).sqrt()/(c*c)) if c!=0 else PI/2
         sphere.append(dict(delta=delta,area=float(area),perimeter=float(2*t+hyp)))
+    x,y=D(20)*PI/180,D(10)*PI/180
+    sx,cx=sc(x);sy,cy=sc(y);c=cx*cy
+    sphere.append(dict(delta=10.,longitudeDelta=20.,area=float(2*atan((sx/(1+cx))*(sy/(1+cy)))),perimeter=float(x+y+atan((1-c*c).sqrt()/c))))
     return dict(metrics=rows,sphere=sphere)
 
 def native_inputs():
@@ -127,6 +130,14 @@ def native_inputs():
                 if o[2] is None:o[2]=a*([math.pi*8+.2,-.3,1.2][(i-1)%3] if index==9 else [math.pi*8,math.pi/2,math.pi][(i-1)%3])
             for line,reverse,unsigned in [(False,False,False),(False,True,False),(False,False,True),(True,False,False)]:
                 polygons.append(dict(a=a,b=b,ops=ops,polyline=line,reverse=reverse,unsigned=unsigned))
+    # Both directions across negative 360/720 cuts, translated by whole circuits.
+    for a,b in shapes:
+        for shift in range(-1440,1441,360):
+            for direction in [-1,1]:
+                lon=(-350 if direction<0 else -370)+shift
+                ops=[[0,0,lon],[1,direction*90,20*math.pi/180*a],[0,10,lon]]
+                for line,reverse,unsigned in [(False,False,False),(False,True,False),(False,False,True),(True,False,False)]:
+                    polygons.append(dict(a=a,b=b,ops=ops,polyline=line,reverse=reverse,unsigned=unsigned,longitudeShift=shift,direction=direction))
     return metrics,edges,polygons,directs
 
 def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -150,7 +161,7 @@ def generate(oracle):
             r['independentArea']=float(D.from_float(r['b'])**2*t*t/2)
     for index,r in enumerate(polygons):
         path=(index//4)%12
-        if path in [8,11]:
+        if index<144 and path in [8,11]:
             t=D.from_float(1e-7 if path==8 else .00001)*PI/180
             value=D.from_float(r['b'])**2*t*t/2*(1 if path==8 else 1000)
             r['independentArea']=float(-value if r['reverse'] else value)

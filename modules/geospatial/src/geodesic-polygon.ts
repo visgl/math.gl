@@ -182,5 +182,5 @@ function transit(a: number, b: number): number {
 function transitDirect(a: number, b: number): number {
   a %= 720;
   b %= 720;
-  return (b >= 0 && b < 360 ? 0 : 1) - (a >= 0 && a < 360 ? 0 : 1);
+  return ((b >= 0 && b < 360) || b < -360 ? 0 : 1) - ((a >= 0 && a < 360) || a < -360 ? 0 : 1);
 }

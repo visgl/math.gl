@@ -133,13 +133,15 @@ for (const row of reference.independent.sphere) {
   test(`G4 independent spherical excess at ${row.delta} degrees`, () => {
     for (const a of [1e-30, 1, 6378137, 1e30]) {
       const p = new GeodesicPolygon(axes(a, a));
-      p.addPoint(0, 0).addPoint(0, row.delta).addPoint(row.delta, 0);
+      p.addPoint(0, 0)
+        .addPoint(0, 'longitudeDelta' in row ? row.longitudeDelta : row.delta)
+        .addPoint(row.delta, 0);
       const r = p.compute();
       near(r.area!, row.area * a * a, Math.max(1e-29 * a * a, row.area * a * a * 2e-8));
       near(r.perimeter, row.perimeter * a, 5e-14 * a);
       const reversed = new GeodesicPolygon(axes(a, a))
         .addPoint(row.delta, 0)
-        .addPoint(0, row.delta)
+        .addPoint(0, 'longitudeDelta' in row ? row.longitudeDelta : row.delta)
         .addPoint(0, 0);
       near(
         reversed.compute().area!,
@@ -254,4 +256,14 @@ test('G4 exact zero/complement boundary and finite arithmetic failures', () => {
     expect(() => small.addEdge(45, 1e308)).toThrow();
     expect(small.compute()).toEqual(before);
   }
+});
+
+test('G4 direct crossing parity is invariant under negative longitude winding', () => {
+  const polygon = (shift: number) =>
+    new GeodesicPolygon(axes(1, 1))
+      .addPoint(0, -350 + shift)
+      .addEdge(-90, (20 * Math.PI) / 180)
+      .addPoint(10, -350 + shift)
+      .compute();
+  near(polygon(0).area!, polygon(360).area!, 5e-14);
 });

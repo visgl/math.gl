@@ -37,7 +37,7 @@ algebraic area, open polylines, previews and reset. Original stable C4 differenc
 fix tiny ellipsoidal-area cancellation also seen in native GeographicLib 2.7.
 
 The [G3–G4 matrix](../docs/modules/geospatial/projection/geographiclib-g34-qualification.md)
-records 593 sampled native/independent cases, explicit budgets, native Exact
+records 810 sampled native/independent cases, explicit budgets, native Exact
 limitations, exact input conventions and remaining boundaries. This delivers the
 bounded G3/G4 scalar APIs, not arbitrary-flattening or all near-zero polygon
 certification. G5/G6 are next; G7 performance APIs and G8 wider-domain solvers

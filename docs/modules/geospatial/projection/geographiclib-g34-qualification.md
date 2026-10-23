@@ -7,9 +7,9 @@ feature parity. G5/G6 and wider-domain Exact solvers remain separate work.
 
 ## Controls and budgets
 
-The stored original workload has **593 cases**: 336 native metric/latitude
+The stored original workload has **810 cases**: 336 native metric/latitude
 cases, 35 independent integral cases, 24 inverse edges, 48 direct/arc cases,
-144 polygon/polyline cases, and six independent spherical triangles (each at
+360 polygon/polyline cases, and seven independent spherical triangles (each at
 four length scales). Each case can gate several outputs. Node and Chromium,
 Firefox and WebKit run the same source-bundled evaluator. Contract tests also
 check all line entry paths, preview isolation, errors, reset, zero and ownership.
@@ -54,6 +54,13 @@ are recorded. The fixture records actual native significand precision (53 bits
 for the recorded Apple arm64 precision-3 build), driver/generator hashes and the
 complete native-data hash. A precision-3 build is not claimed to provide more
 than 53 significant bits on this platform.
+
+Direct-edge transit parity uses the C++ centered-remainder convention. JavaScript
+`% 720` has negative residues below -360; those belong to the even crossing
+class. Both directions across negative circuit boundaries are tested with
+longitude translations from -1440° through +1440°, against native series/Exact
+and an independent right spherical triangle. This fixes a half-surface area
+error which was invisible to normalized-longitude-only controls.
 
 Polygon reduction uses the exact same cached authalic normalization as its
 edge engine. Recomputing a nominally equivalent total area independently caused

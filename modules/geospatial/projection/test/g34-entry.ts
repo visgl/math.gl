@@ -157,7 +157,9 @@ export function qualifyG34() {
   for (const [i, r] of reference.independent.sphere.entries()) {
     for (const a of [1e-30, 1, 6378137, 1e30]) {
       const p = new GeodesicPolygon({semiMajorAxis: a, semiMinorAxis: a});
-      p.addPoint(0, 0).addPoint(0, r.delta).addPoint(r.delta, 0);
+      p.addPoint(0, 0)
+        .addPoint(0, 'longitudeDelta' in r ? r.longitudeDelta : r.delta)
+        .addPoint(r.delta, 0);
       const v = p.compute();
       check(v.area!, r.area * a * a, Math.max(1e-29 * a * a, r.area * a * a * 2e-8));
       check(v.perimeter, r.perimeter * a, 5e-14 * a);
