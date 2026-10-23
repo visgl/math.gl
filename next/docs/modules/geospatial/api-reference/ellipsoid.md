@@ -330,3 +330,9 @@ Notes:
 ## Attribution[​](#attribution "Direct link to Attribution")
 
 This class was ported from [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) under the Apache 2 License.
+
+## Metrics and geodesic areas[​](#metrics-and-geodesic-areas "Direct link to Metrics and geodesic areas")
+
+Use the separate [EllipsoidMetrics](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-metrics.md) class for revolution ellipsoid metrics and auxiliary latitudes. [GeodesicPolygon](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-polygon.md) and optional `EllipsoidGeodesic` edge areas support compensated polygon geometry. These APIs use explicit degree units and retain the existing Cartesian API.
+
+[EllipsoidRhumb and RhumbPolygon](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-rhumb.md) provide constant-bearing paths and areas. [GeodesicIntersections](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-intersections.md) provides bounded searches with explicit completeness and segment statuses.
