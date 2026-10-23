@@ -14,11 +14,11 @@ import './style.css';
 
 const map = createAlbersUsaMap({includeTerritories: true});
 const layout = getMapLayout(map);
-export function mountAlbers(app) {
+export function mountAlbers(app, {compact = false} = {}) {
 app.classList.add('albers-usa');
+app.classList.toggle('albers-usa-compact', compact);
 app.innerHTML = `<main class="shell">
-  <header><div class="eyebrow">math.gl / projection lab</div><h1>Albers USA</h1>
-  <p>Eight independently projected regions. Explore the seams and insets.</p></header>
+  ${compact ? '' : '<header><div class="eyebrow">math.gl / projection lab</div><h1>Albers USA</h1><p>Eight independently projected regions. Explore the seams and insets.</p></header>'}
   <section class="workspace" aria-label="Interactive Albers USA map">
     <div class="map-wrap"><svg role="img" aria-label="U.S. states and territories in an Albers projection with seven insets"></svg></div>
     <aside><h2>View</h2><button class="view-toggle" type="button">View globe</button>

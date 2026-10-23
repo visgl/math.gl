@@ -5,13 +5,22 @@
   <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
 </p>
 
-The discontinuous map API, presets, and layout helpers are experimental and may change.
-
 A discontinuous map places neighboring parts of the Earth in separate parts of a
 plane. A line that crosses a cut must end on one side and resume on the other;
 a polygon must become separate, closed pieces. Projecting only the original
 vertices does not produce a correct map: the renderer may draw a line or triangle
 across the empty space between pieces.
+
+import AlbersUsaExample from '@site/src/components/albers-usa';
+
+<AlbersUsaExample compact />
+
+The interactive Albers USA map shows this with Alaska, Hawaii, and five U.S.
+territory insets. Move over a region to inspect its coordinates, or use
+**View globe** to see its features unfold into the composite map. The
+[full example](/examples/albers-usa) includes more explanation.
+
+The discontinuous map API, presets, and layout helpers are experimental and may change.
 
 math.gl provides the experimental `@math.gl/geospatial/discontinuous` entrypoint
 for this geometry processing. It combines geographic regions, local projections,

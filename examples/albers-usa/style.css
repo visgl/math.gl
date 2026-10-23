@@ -29,6 +29,21 @@
 .albers-usa .details p, .albers-usa .credit {color: #58707e; font-size: 13px; line-height: 1.55;}
 .albers-usa .credit {margin-top: 24px;}
 .albers-usa a {color: #147b89;}
+.albers-usa-compact {margin: 24px 0;}
+.albers-usa-compact .shell {padding: 0;}
+.albers-usa-compact .workspace {grid-template-columns: 1fr; border-radius: 10px; box-shadow: none;}
+.albers-usa-compact .map-wrap, .albers-usa-compact .map-wrap svg {height: 420px; min-height: 420px;}
+.albers-usa-compact aside {display: grid; grid-template-columns: auto minmax(130px, 1fr) minmax(180px, 1.4fr); align-items: center; gap: 8px 16px; padding: 10px 16px; border-left: 0; border-top: 1px solid #dce7ea;}
+.albers-usa-compact aside h2, .albers-usa-compact .details, .albers-usa-compact .credit {display: none;}
+.albers-usa-compact .view-toggle {width: auto; white-space: nowrap;}
+.albers-usa-compact .unfold-control {margin: 0;}
+.albers-usa-compact .readout {min-height: 0; margin: 0; padding: 9px;}
+.albers-usa-compact aside > label:not(.unfold-control) {margin: 0; font-size: 12px; white-space: nowrap;}
+@media (max-width: 700px) {
+  .albers-usa-compact .map-wrap, .albers-usa-compact .map-wrap svg {height: 340px; min-height: 340px;}
+  .albers-usa-compact aside {grid-template-columns: 1fr 1fr;}
+  .albers-usa-compact .readout {grid-column: 1 / -1;}
+}
 @media (max-width: 900px) {
   .albers-usa .workspace {grid-template-columns: 1fr;}
   .albers-usa .map-wrap, .albers-usa .map-wrap svg {height: 480px; min-height: 480px;}

@@ -5,8 +5,8 @@ import React, {useEffect, useRef} from 'react';
 import {mountAlbers} from 'website-examples/albers-usa/main';
 import 'website-examples/albers-usa/style.css';
 
-export default function AlbersUsaExample() {
+export default function AlbersUsaExample({compact = false}) {
   const root = useRef(null);
-  useEffect(() => mountAlbers(root.current), []);
+  useEffect(() => mountAlbers(root.current, {compact}), [compact]);
   return <div ref={root} />;
 }
