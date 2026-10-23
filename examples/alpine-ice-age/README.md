@@ -13,6 +13,22 @@ From the repository root, run `yarn workspace math.gl-alpine-ice-age start`.
 Use `yarn workspace math.gl-alpine-ice-age build` for a standalone build and
 `yarn workspace math.gl-alpine-ice-age test` for dataset/interpolation checks.
 
+## Read the map code
+
+This is a full data application. For a short introduction to `MapEngine`, start
+with `../albers-usa/map.js` or `../myriahedral-maps/layout.ts`.
+
+- `global-app.jsx` owns the React controls, data loading, and playback state.
+- `map-options.js` lists the available maps without importing a renderer.
+- `projection-grid.js` constructs and caches ordinary projection grids.
+- `discontinuous-views.js` constructs `MapEngine` instances and clips field geometry.
+- `global-scene.js` owns deck.gl layers and camera rendering.
+- `myriahedral-animation.js` adapts engine frames to the scene's camera.
+
+The UI passes state to the scene. Geometry modules can be exercised without
+mounting React or allocating GPU resources. Data loading and scientific field
+sampling remain separate from map layout and drawing.
+
 ## Data and attribution
 
 Julien Seguinot, Susan Ivy-Ochs, Guillaume Jouvet, Matthias Huss, Martin Funk and
