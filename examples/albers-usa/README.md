@@ -6,6 +6,14 @@ It renders public-domain Natural Earth 1:10m U.S. state polygons through
 `pickMapLayout` for region-aware coordinate inspection. Run with
 `yarn workspace math.gl-albers-usa start`.
 
+The **View globe** button and **Unfold** slider animate the same projected
+feature vertices between geographic globe positions and their fitted inset
+positions. A bundled public-domain Natural Earth 1:110m land layer provides
+global context on the globe. Reduced-motion preferences make the toggle instant.
+Inset label font sizes adapt to the fitted frame width.
+The default map omits graticules and inset frames; both remain optional
+inspection overlays. Labels stay visible without frames.
+
 The Albers USA preset uses broad spherical masks and a 0.35 linear scale for
 Alaska. It is an illustrative composite, not a political clip or a reproduction
 of D3's exact `geoAlbersUsa` arrangement. The source file

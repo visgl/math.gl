@@ -8,6 +8,8 @@
 .albers-usa .workspace {display: grid; grid-template-columns: minmax(0, 1fr) 260px; background: white; border: 1px solid #cbdbe2; border-radius: 18px; box-shadow: 0 18px 55px #38586b18; overflow: hidden;}
 .albers-usa .map-wrap {min-height: 570px; position: relative; background: #e9f2f3;}
 .albers-usa .map-wrap svg {display: block; width: 100%; height: 570px;}
+.albers-usa .globe-disc {fill: #c9e2e9; stroke: #4f8497; stroke-width: 2;}
+.albers-usa .world-land {fill: #8ba69c; stroke: #e8f2f3; stroke-width: .5;}
 .albers-usa .state {fill: #a8c5b0; stroke: #f9fbf9; stroke-width: .8; vector-effect: non-scaling-stroke;}
 .albers-usa .state:hover {fill: #efb565;}
 .albers-usa .state.no-borders {stroke: none;}
@@ -15,6 +17,10 @@
 .albers-usa .frame {fill: none; stroke: #2b5367; stroke-width: 1.5; rx: 4; pointer-events: none;}
 .albers-usa .inset-label {font-size: 11px; fill: #153b4b; font-weight: 700; pointer-events: none;}
 .albers-usa .readout {background: #153b4b; color: white; padding: 12px; border-radius: 8px; font-size: 13px; min-height: 58px; margin-bottom: 28px;}
+.albers-usa .view-toggle {width: 100%; border: 0; border-radius: 8px; padding: 10px 12px; background: #156b7b; color: white; font: inherit; font-weight: 700; cursor: pointer;}
+.albers-usa .view-toggle:hover {background: #104e5b;}
+.albers-usa .unfold-control {display: grid; grid-template-columns: auto 1fr; gap: 10px; margin: 16px 0 30px; font-size: 13px;}
+.albers-usa .unfold-control input {width: 100%;}
 .albers-usa aside {padding: 25px; border-left: 1px solid #dce7ea;}
 .albers-usa h2 {font-size: 13px; text-transform: uppercase; letter-spacing: .09em; color: #52748a; margin: 0 0 17px;}
 .albers-usa label {display: flex; align-items: center; gap: 10px; margin: 13px 0; cursor: pointer;}

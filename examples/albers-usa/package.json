@@ -9,7 +9,8 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@math.gl/geospatial": "workspace:*"
+    "@math.gl/geospatial": "workspace:*",
+    "d3-geo": "^2.0.2"
   },
   "devDependencies": {
     "vite": "^8.2.2"

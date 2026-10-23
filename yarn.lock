@@ -15656,6 +15656,7 @@ __metadata:
   resolution: "math.gl-albers-usa@workspace:examples/albers-usa"
   dependencies:
     "@math.gl/geospatial": "workspace:*"
+    d3-geo: "npm:^2.0.2"
     vite: "npm:^8.2.2"
   languageName: unknown
   linkType: soft
