@@ -76,8 +76,7 @@ Mercator clips the display at ±85°; Antarctica remains available in other view
 Global data: Evan J. Gowan (2019), [Global ice sheet reconstruction for the past
 80000 years](https://doi.pangaea.de/10.1594/PANGAEA.905800), supplementary data to
 Gowan and colleagues (2021), [A new global ice sheet reconstruction for the past
-80,000 years](https://doi.org/10.1038/s41467-021-21469-w), Nature Communications 12,
-1199. The derived `global.bin.gz` and `global-manifest.json` assets retain **CC-BY-4.0**.
+80,000 years](https://doi.org/10.1038/s41467-021-21469-w), Nature Communications 12, 1199. The derived `global.bin.gz` and `global-manifest.json` assets retain **CC-BY-4.0**.
 We use PaleoMIST 1.0's corrected April 2021 1° geographical grid and the minimal
 North American MIS 3 scenario. This is a reconstruction of **grounded ice sheets**;
 sea ice and small mountain glaciers are not included. It is a separate dataset,
@@ -196,7 +195,6 @@ Chapter titles appear for four seconds after the model loads or a phase changes,
 then fade out over 800 ms. Re-enabling Ice age names introduces the current chapter
 again. Reduced-motion preferences remove the fade.
 
-
 ## Discontinuous maps
 
 The global and earlier-ice-age projection selector includes Albers USA with
@@ -212,13 +210,11 @@ land and ocean and do not select political boundaries.
 See the [discontinuous projections guide](../../docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md)
 for API examples and limitations.
 
-
 Inset bounds, viewport fitting, draw order, outlines, and labels come from
 `@math.gl/geospatial/discontinuous` layout metadata. Alaska and Hawaii have visible
 frames. Hawaiian island shapes use a bundled, pinned Natural Earth 1:10m modern
 reference (public domain); the 1° reconstruction grid does not resolve their terrain.
 This overlay does not change ice values, global totals, or reconstruct past shorelines.
-
 
 ### Myriahedral presets (experimental)
 
@@ -247,16 +243,50 @@ namesake graticule strategies are not exact analytic equal-area projections.
 See the [myriahedral background and credits](../../docs/modules/geospatial/projection/developer-guide/myriahedral-projections.md)
 for Nico Belmonte's inspiration, Jarke van Wijk's research, and implementation limitations.
 
-
 ### H3 base-cell unfolding (experimental)
 
 **Myriahedral · H3 base cells** unfolds the 122 resolution-0 H3 cells: 110
 hexagons and 12 pentagons. Their exact spherical boundary vertices are shared
 between neighboring cells. Because these spherical polygons are not generally
-flat, the example triangulates each cell around an interior point into rigid
+flat, the example triangulates each cell from its boundary vertices into rigid
 panels. A strong internal hinge preference keeps each H3 cell connected; the
 remaining intercell cuts are selected by the library's maximum spanning tree
 with a modern-land preference. Cell outlines remain visible during unfolding.
 The panel surface is sampled from the 1° ice and terrain grid at roughly 2°
 spacing to keep animation responsive. It is an H3-shaped hinged map, not an
 area-preserving H3 projection or a reconstruction of historic coastlines.
+
+### A5 base-cell unfolding (experimental)
+
+**Myriahedral · A5 base cells** unfolds A5's 12 resolution-0 pentagons.
+A5 returns curved spherical edges, so each original edge is sampled at its
+ends and at matching positions 20/64 and 44/64 along the edge. This makes
+three short planar hinge segments per edge while keeping the shared boundary
+identical in both cells. Only the **middle segment** can join neighboring
+pentagons; the outer segments are cuts. Internal hinges keep each cell's
+triangular panels connected with a closed outline, and geography-aware weights select which middle
+segments join the cells. The result follows the A5 boundary shape at those
+samples; it is a faceted approximation rather than a single rigid pentagon
+or an equal-area projection. Terrain uses the same 1° source, sampled at
+roughly 2° spacing for responsive animation.
+
+**Myriahedral · A5 resolution 1** unfolds the 60 first-level A5 cells. Each
+cell has three curved edges represented by three matching segments; only the
+central segment of each edge can act as an intercell hinge. The 420 triangular
+panels share exact sampled vertices and remain connected within their source
+cells. This finer net uses the same geography-aware cut preference and Earth
+textures as the base-cell view.
+
+### S2 base-cell unfolding (experimental)
+
+**Myriahedral · S2 base cells** unfolds Google's six level-zero S2 cells as
+the faces of a cube. Each face is one rigid panel. Geography-aware weights
+choose five shared edges to keep as hinges, while the other seven edges are
+cuts. The cell outlines remain visible as the cube unfolds.
+
+**Myriahedral · S2 resolution 1** uses the four children of each cube face:
+24 spherical quadrilateral cells. Their corners do not generally lie in one
+plane, so the example triangulates each cell across a diagonal into two rigid
+facets. Internal hinges keep each source cell together; the geography-aware
+spanning tree chooses 23 intercell hinges. This finer net shows the actual S2
+cell layout rather than six undivided cube faces.

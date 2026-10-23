@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cellToBoundary, getRes0Cells } from "h3-js";
-import { createH3MyriahedralMesh } from "./h3-mesh.js";
+import { createH3MyriahedralMesh } from "./dggs-mesh.js";
 import { discontinuousGrid } from "./discontinuous-views.js";
 
 const rad = Math.PI / 180;
@@ -20,8 +20,8 @@ test("H3 base cells form one closed, outward-wound spherical triangle mesh", () 
   const { mesh, cells } = createH3MyriahedralMesh();
   assert.equal(cells.length, 122);
   assert.equal(getRes0Cells().length, 122);
-  assert.equal(mesh.vertices.length, 362);
-  assert.equal(mesh.faces.length, 720);
+  assert.equal(mesh.vertices.length, 240);
+  assert.equal(mesh.faces.length, 476);
   assert.deepEqual(
     Object.groupBy(cells, (cell) => cell.ring.length)[5].length,
     12,
@@ -44,7 +44,7 @@ test("H3 base cells form one closed, outward-wound spherical triangle mesh", () 
       edges.set(key, (edges.get(key) || 0) + 1);
     });
   }
-  assert.equal(edges.size, 1080);
+  assert.equal(edges.size, 714);
   assert([...edges.values()].every((n) => n === 2));
   assert.equal(mesh.vertices.length - edges.size + mesh.faces.length, 2);
   for (const cell of cells) {
@@ -57,18 +57,30 @@ test("H3 base cells form one closed, outward-wound spherical triangle mesh", () 
 test("H3 unfolding keeps every cell connected and projects its outlines", () => {
   const grid = discontinuousGrid("myriahedral:h3-0", 5),
     { mesh, cells } = createH3MyriahedralMesh();
-  assert.equal(grid.map.regions.length, 720);
-  const centers = new Set(cells.map((cell) => cell.centerIndex));
+  assert.equal(grid.map.regions.length, 476);
+  const panels = createH3MyriahedralMesh();
   const inside = grid.map.layout.edges.filter(
-    (edge) => edge.hinge && [edge.a, edge.b].some((v) => centers.has(v)),
+    (edge) => edge.hinge && panels.innerEdges.has(edgeKey(edge.a, edge.b)),
   );
   const between = grid.map.layout.edges.filter(
-    (edge) => edge.hinge && ![edge.a, edge.b].some((v) => centers.has(v)),
+    (edge) => edge.hinge && !panels.innerEdges.has(edgeKey(edge.a, edge.b)),
   );
-  assert.equal(inside.length, 720 - 122);
+  assert.equal(inside.length, 476 - 122);
   assert.equal(between.length, 122 - 1);
   const outlines = grid.lines.filter((line) => line.kind === "cell");
   assert.equal(outlines.length, 720);
+  let offset = 0;
+  for (const cell of cells) {
+    const size = cell.ring.length;
+    for (let i = 0; i < size; i++)
+      assert(
+        distance(
+          outlines[offset + i].coordinates[1],
+          outlines[offset + ((i + 1) % size)].coordinates[0],
+        ) < 1e-8,
+      );
+    offset += size;
+  }
   for (const line of outlines) {
     assert.equal(line.coordinates.length, 2);
     for (let i = 0; i < 2; i++) {

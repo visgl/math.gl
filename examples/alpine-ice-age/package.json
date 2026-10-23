@@ -7,7 +7,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "test": "node --test data.test.mjs discontinuous-views.test.mjs myriahedral-animation.test.mjs h3-mesh.test.mjs"
+    "test": "node --test data.test.mjs discontinuous-views.test.mjs myriahedral-animation.test.mjs h3-mesh.test.mjs a5-mesh.test.mjs s2-mesh.test.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "~9.4.0",
@@ -17,7 +17,9 @@
     "@loaders.gl/shapefile": "^4.4.3",
     "@luma.gl/engine": "~9.4.0",
     "@math.gl/core": "workspace:*",
+    "@math.gl/dggs": "workspace:*",
     "@math.gl/geospatial": "workspace:*",
+    "a5-js": "^0.10.0",
     "h3-js": "^4.5.0",
     "math.gl-parquet-loader": "workspace:*",
     "react": "^19.2.8",

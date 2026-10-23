@@ -122,8 +122,11 @@ test("myriahedral meshes cover the sphere once and retain the source field", () 
           1 + dot(a, b) + dot(b, c) + dot(c, a),
         );
     }
+    // A5's sampled curved edges are faceted; constrained, nondegenerate
+    // triangulation can shift spherical area by roughly one part in 10 million.
+    const areaTolerance = view.startsWith("myriahedral:a5-") ? 1e-5 : 1e-8;
     assert(
-      Math.abs(area - 4 * Math.PI) < 1e-8,
+      Math.abs(area - 4 * Math.PI) < areaTolerance,
       `${view} covers the sphere once`,
     );
     for (let i = 0; i < g.sources.length; i++) {

@@ -15,18 +15,37 @@ import { isLand } from "../common/land-mask.js";
 import { myriahedralGrid } from "./myriahedral-grid.js";
 import {
   createH3MyriahedralMesh,
-  h3CellWeight,
-  h3CellOutlines,
-} from "./h3-mesh.js";
+  createA5MyriahedralMesh,
+  createS2MyriahedralMesh,
+  dggsCellWeight,
+  dggsCellOutlines,
+} from "./dggs-mesh.js";
 
 import hawaiiLand from "./assets/hawaii-land.json" with { type: "json" };
 
-// Construct once: the H3 panel topology is independent of the ice-age snapshot.
-let h3;
-const h3Panels = () => (h3 ??= createH3MyriahedralMesh());
+// DGGS panel topology is independent of the ice-age snapshot.
+const dggsMeshes = new Map();
+function dggsPanels(system) {
+  if (!dggsMeshes.has(system))
+    dggsMeshes.set(
+      system,
+      system === "h3"
+        ? createH3MyriahedralMesh()
+        : system === "s2"
+          ? createS2MyriahedralMesh()
+          : system === "s2-1"
+            ? createS2MyriahedralMesh(1)
+            : createA5MyriahedralMesh(system === "a5-1" ? 1 : 0),
+    );
+  return dggsMeshes.get(system);
+}
 // Modest panel counts keep map construction and the 1° field mesh interactive.
 export const MYRIAHEDRAL_VIEWS = Object.fromEntries([
-  ["myriahedral:h3-0", { preset: "polyhedral", h3: true }],
+  ["myriahedral:h3-0", { preset: "polyhedral", dggs: "h3" }],
+  ["myriahedral:a5-0", { preset: "polyhedral", dggs: "a5" }],
+  ["myriahedral:a5-1", { preset: "polyhedral", dggs: "a5-1" }],
+  ["myriahedral:s2-0", { preset: "polyhedral", dggs: "s2" }],
+  ["myriahedral:s2-1", { preset: "polyhedral", dggs: "s2-1" }],
   ...[
     "polyconic",
     "cylindric",
@@ -52,9 +71,17 @@ export const DISCONTINUOUS_VIEWS = {
   ...Object.fromEntries(
     Object.entries(MYRIAHEDRAL_VIEWS).map(([id, options]) => [
       id,
-      options.h3
-        ? "Myriahedral · H3 base cells"
-        : `Myriahedral · ${options.solid ?? options.preset}`,
+      options.dggs === "s2-1"
+        ? "Myriahedral · S2 resolution 1"
+        : options.dggs === "s2"
+          ? "Myriahedral · S2 base cells"
+          : options.dggs === "h3"
+            ? "Myriahedral · H3 base cells"
+            : options.dggs
+              ? options.dggs === "a5-1"
+                ? "Myriahedral · A5 resolution 1"
+                : "Myriahedral · A5 base cells"
+              : `Myriahedral · ${options.solid ?? options.preset}`,
     ]),
   ),
 };
@@ -65,11 +92,11 @@ const factories = {
       () =>
         createMyriahedralMap({
           preset: options.preset,
-          ...(options.h3
+          ...(options.dggs
             ? {
-                mesh: h3Panels().mesh,
+                mesh: dggsPanels(options.dggs).mesh,
                 edgeWeight: (edge, weight) =>
-                  h3CellWeight(edge, weight, h3Panels().centerVertices),
+                  dggsCellWeight(edge, weight, dggsPanels(options.dggs)),
               }
             : options),
           isLand: ([lon, lat]) => isLand(lon, lat),
@@ -255,8 +282,10 @@ export function discontinuousGrid(view, step = 1) {
     lines.push(
       ...map.projectLine(Array.from({ length: 361 }, (_, i) => [i - 180, lat])),
     );
-  if (view === "myriahedral:h3-0")
-    lines.push(...h3CellOutlines(map, h3Panels().cells));
+  if (MYRIAHEDRAL_VIEWS[view]?.dggs)
+    lines.push(
+      ...dggsCellOutlines(map, dggsPanels(MYRIAHEDRAL_VIEWS[view].dggs).cells),
+    );
   const result = {
     map,
     positions: new Float32Array(positions),

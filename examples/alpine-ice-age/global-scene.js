@@ -212,7 +212,11 @@ export function createGlobalScene(canvas, onError) {
     }
   }
   function gridStep(view) {
-    return view === "myriahedral:h3-0" ? 2 : 1;
+    return view === "myriahedral:h3-0" ||
+      view.startsWith("myriahedral:a5-") ||
+      view === "myriahedral:s2-1"
+      ? 2
+      : 1;
   }
   function sampleTransition(now) {
     if (!transition) return;
