@@ -1,3 +1,7 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
 .albers-usa {font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #17314a; background: #edf3f5;}
 .albers-usa * {box-sizing: border-box;}
 .albers-usa .shell {max-width: 1480px; margin: auto; padding: clamp(20px, 3vw, 48px);}
@@ -17,10 +21,11 @@
 .albers-usa .territory .state.no-borders {stroke: none;}
 .albers-usa .territory .state:hover {fill: #efb565;}
 .albers-usa .map-wrap svg {cursor: grab;}
+.albers-usa .map-wrap svg.is-zoomed {touch-action: none;}
 .albers-usa .map-wrap svg:active {cursor: grabbing;}
 .albers-usa .graticule {fill: none; stroke: #5e96a5; stroke-width: .6; opacity: .55; pointer-events: none;}
 .albers-usa .frame {fill: none; stroke: #2b5367; stroke-width: 1.5; rx: 4; pointer-events: none;}
-.albers-usa .inset-label {font-size: 11px; fill: #153b4b; font-weight: 700; pointer-events: none;}
+.albers-usa .inset-label {fill: #153b4b; font-weight: 700; pointer-events: none;}
 .albers-usa .readout {background: #153b4b; color: white; padding: 12px; border-radius: 8px; font-size: 13px; min-height: 58px; margin-bottom: 28px;}
 .albers-usa .view-toggle {width: 100%; border: 0; border-radius: 8px; padding: 10px 12px; background: #156b7b; color: white; font: inherit; font-weight: 700; cursor: pointer;}
 .albers-usa .view-toggle:hover {background: #104e5b;}

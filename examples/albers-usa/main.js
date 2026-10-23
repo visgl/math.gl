@@ -56,11 +56,27 @@ const features = states.flatMap(state => ringsOf(state.geometry).flatMap(rings =
     throw new Error(`Cannot project ${state.name}: ${error.message}`);
   }
 }));
-const meridians = Array.from({length: 13}, (_, i) => -180 + i * 10)
-  .flatMap(lon => map.projectLine(Array.from({length: 145}, (_, j) => [lon, 10 + j * 0.5])));
-const parallels = Array.from({length: 7}, (_, i) => 20 + i * 10)
-  .flatMap(lat => map.projectLine(Array.from({length: 361}, (_, j) => [-180 + j, lat])));
-const graticule = [...meridians, ...parallels];
+const gridSteps = {lower48: 10, alaska: 5, hawaii: 5, puertoRico: 0.5,
+  virginIslands: 0.25, guam: 0.25, northernMariana: 1, americanSamoa: 0.5};
+const graticule = map.regions.flatMap(region => {
+  const step = gridSteps[region.id];
+  const [centerLon, centerLat] = region.interior;
+  const lonSpan = region.id === 'lower48' || region.id === 'alaska' ? 45 : region.id === 'hawaii' ? 20 : 8;
+  const latSpan = region.id === 'lower48' || region.id === 'alaska' ? 30 : region.id === 'hawaii' ? 12 : 8;
+  const south = Math.max(-89.5, centerLat - latSpan);
+  const north = Math.min(89.5, centerLat + latSpan);
+  const meridians = Array.from({length: Math.floor(2 * lonSpan / step) + 1}, (_, i) =>
+    Math.ceil((centerLon - lonSpan) / step) * step + i * step)
+    .filter(lon => lon <= centerLon + lonSpan)
+    .flatMap(lon => map.projectLine(Array.from({length: Math.ceil(north - south) + 1}, (_, i) =>
+      [lon, Math.min(north, south + i)])).filter(line => line.regionId === region.id));
+  const parallels = Array.from({length: Math.floor((north - south) / step) + 1}, (_, i) =>
+    Math.ceil(south / step) * step + i * step)
+    .filter(lat => lat <= north)
+    .flatMap(lat => map.projectLine(Array.from({length: 2 * lonSpan + 1}, (_, i) =>
+      [centerLon - lonSpan + i, lat])).filter(line => line.regionId === region.id));
+  return [...meridians, ...parallels];
+});
 const shortLabels = {
   puertoRico: 'PR', virginIslands: 'VI', guam: 'GU',
   northernMariana: 'MP', americanSamoa: 'AS'
@@ -71,7 +87,6 @@ let amount = 1;
 let frameId = 0;
 let zoom = 1;
 let viewCenter;
-let previousSize;
 let dragPoint;
 const radians = Math.PI / 180;
 const centerLongitude = -96 * radians;
@@ -88,14 +103,13 @@ function globePoint([longitude, latitude], width, height) {
 function draw() {
   const width = Math.max(320, svg.clientWidth);
   const height = Math.max(300, svg.clientHeight);
-  if (viewCenter && previousSize && (width !== previousSize[0] || height !== previousSize[1]))
-    viewCenter = [viewCenter[0] * width / previousSize[0], viewCenter[1] * height / previousSize[1]];
-  previousSize = [width, height];
+  const centerOnMap = viewCenter && fitted ? fitted.unproject(viewCenter) : null;
   fitted = fitMapLayout(layout, {
     width, height,
     padding: {left: width * 0.035, right: width * 0.035, top: 24, bottom: 36}
   });
-  if (!viewCenter) viewCenter = [width / 2, height / 2];
+  viewCenter = centerOnMap ? fitted.project(centerOnMap) : [width / 2, height / 2];
+  svg.classList.toggle('is-zoomed', zoom > 1);
   const visibleWidth = width / zoom;
   const visibleHeight = height / zoom;
   svg.setAttribute('viewBox', `${viewCenter[0] - visibleWidth / 2} ${viewCenter[1] - visibleHeight / 2} ${visibleWidth} ${visibleHeight}`);
@@ -144,7 +158,8 @@ function draw() {
         d: mixedPath(part.coordinates, part.sourceCoordinates, true),
         class: `state ${options[0].checked ? '' : 'no-borders'}`,
         'data-state': part.state,
-        opacity: meanFront >= 0 ? 1 : amount.toFixed(3)
+        opacity: meanFront >= 0 ? 1 : amount.toFixed(3),
+        'pointer-events': meanFront < 0 && amount < 0.001 ? 'none' : 'auto'
       });
       group.append(shape);
     }
@@ -184,10 +199,9 @@ function setZoom(next, anchor) {
   draw();
 }
 function eventPoint(event) {
-  const rect = svg.getBoundingClientRect();
-  const box = svg.viewBox.baseVal;
-  return [box.x + (event.clientX - rect.left) * box.width / rect.width,
-    box.y + (event.clientY - rect.top) * box.height / rect.height];
+  const point = new DOMPoint(event.clientX, event.clientY)
+    .matrixTransform(svg.getScreenCTM().inverse());
+  return [point.x, point.y];
 }
 zoomControls.addEventListener('click', event => {
   const action = event.target.closest('button')?.dataset.zoom;
@@ -234,9 +248,10 @@ unfold.addEventListener('input', () => {
 });
 svg.addEventListener('pointermove', event => {
   if (dragPoint) {
-    const rect = svg.getBoundingClientRect();
-    viewCenter = [viewCenter[0] - (event.clientX - dragPoint[0]) * fitted.width / (zoom * rect.width),
-      viewCenter[1] - (event.clientY - dragPoint[1]) * fitted.height / (zoom * rect.height)];
+    const current = eventPoint(event);
+    const previous = eventPoint({clientX: dragPoint[0], clientY: dragPoint[1]});
+    viewCenter = [viewCenter[0] - (current[0] - previous[0]),
+      viewCenter[1] - (current[1] - previous[1])];
     dragPoint = [event.clientX, event.clientY];
     draw();
   }
@@ -256,7 +271,7 @@ svg.addEventListener('pointermove', event => {
       const lat = Math.asin(north * Math.cos(centerLatitude) + front * Math.sin(centerLatitude));
       const lon = centerLongitude + Math.atan2(east,
         front * Math.cos(centerLatitude) - north * Math.sin(centerLatitude));
-      hit = {regionId: 'globe', position: [lon / radians, lat / radians]};
+      hit = {regionId: 'globe', position: [((lon / radians + 540) % 360) - 180, lat / radians]};
     }
   } else hit = pickMapLayout(map, fitted, pixel)[0];
   const state = event.target.closest?.('[data-state]')?.getAttribute('data-state');
