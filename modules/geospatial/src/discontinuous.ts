@@ -25,3 +25,18 @@ export {createAlbersUsaMap} from './discontinuous/albers-usa';
 export {getMapLayout, fitMapLayout} from './discontinuous/layout';
 export type {MapBounds, MapRegionLayout} from './discontinuous/map-layout';
 export type {MapLayout, MapLayoutRegion, MapViewportOptions} from './discontinuous/layout';
+
+export {
+  createMyriahedralMap,
+  createMyriahedralLayout,
+  MyriahedralMap,
+  MYRIAHEDRAL_PRESETS
+} from './discontinuous/myriahedral';
+export type {
+  MyriahedralOptions,
+  MyriahedralPreset,
+  MyriahedralMesh,
+  MyriahedralSolid,
+  MyriahedralEdge,
+  MyriahedralLayout
+} from './discontinuous/myriahedral';

@@ -13,17 +13,30 @@ export const markup = `
     </div>
     <select id="solid" aria-label="Solid" hidden><option value="icosahedron">Icosahedron</option></select>
     <div class="selectors">
-      <label for="subdivision">Facets</label>
+      <label for="subdivision">Resolution</label>
       <select id="subdivision">
-        <option value="0">288 · 15° grid</option>
-        <option value="1">1,152 · 7.5° grid</option>
-        <option value="2" selected>2,592 · 5° grid</option>
-        <option value="3">4,608 · 3.75° grid</option>
+        <option value="0">Coarse · 15° grid / solid</option>
+        <option value="1">Medium · 7.5° grid / subdivision 1</option>
+        <option value="2" selected>Fine · 5° grid / subdivision 2</option>
+        <option value="3">Finest · 3.75° grid / subdivision 3</option>
       </select>
-      <label for="cuts">Cut strategy</label>
+      <label for="cuts">Projection preset</label>
       <select id="cuts">
-        <option value="ocean" selected>Continents · ocean cuts</option>
-        <option value="legacy">Meridian strips</option>
+        <optgroup label="Graticule">
+          <option value="sealine" selected>Sealine · preserve land joins</option>
+          <option value="coastline">Coastline · preserve ocean joins</option>
+          <option value="cylindric">Cylindric · meridian strips</option>
+          <option value="polyconic">Polyconic · latitude strips</option>
+          <option value="azimuthal">Azimuthal · north polar</option>
+          <option value="hemispheres">Hemispheres · two polar nets</option>
+        </optgroup>
+        <optgroup label="Polyhedral / recursive subdivision">
+          <option value="solid:tetrahedron">Tetrahedron</option>
+          <option value="solid:cube">Cube</option>
+          <option value="solid:octahedron">Octahedron</option>
+          <option value="solid:dodecahedron">Dodecahedron</option>
+          <option value="solid:icosahedron">Icosahedron</option>
+        </optgroup>
       </select>
       <button id="recut" type="button">Alternate layout</button>
       <input id="earth" type="checkbox" checked hidden />
@@ -34,7 +47,7 @@ export const markup = `
     <p id="summary" class="hint" aria-live="polite"></p>
     <canvas aria-label="Interactive Earth with thousands of hinged facets">WebGL 2 is required.</canvas>
     <p class="hint"><span id="surface-status">Land / ocean: Natural Earth (public domain)</span><span id="imagery-status" aria-live="polite"></span> · <a href="https://www.nasa.gov/nasa-brand-center/images-and-media/">Imagery usage</a></p>
-    <p class="hint">Drag to orbit · hover for coordinates · show edges to inspect the graticule</p>
+    <p class="hint">Drag to orbit · hover for coordinates · show edges to inspect the panels</p>
   </section>
   <footer>
     <div class="controls">
@@ -46,7 +59,7 @@ export const markup = `
     </div>
     <p id="cut-summary" aria-live="polite"></p>
     <p id="notice" aria-live="polite"></p>
-    <p>Independent implementation using a spherical graticule, a maximum-weight hinge tree,
+    <p>Independent implementation using the reusable myriahedral projection API, a maximum-weight hinge tree,
     and public-domain Natural Earth geography. Land joins are preferred, not guaranteed. Flat nets may overlap.</p>
   </footer>
 </main>`;

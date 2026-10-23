@@ -16,19 +16,28 @@ Blue Marble remains available under **Surface**.
 
 ## Explore the cuts
 
-Choose **Facets** for a 15°, 7.5°, 5°, or 3.75° graticule (288–4,608 panels).
+Choose **Resolution** for a 15°, 7.5°, 5°, or 3.75° graticule (288–4,608 panels),
+or zero through three refinement levels for a Platonic solid.
 **Unfold** moves from a closed globe to a planar net; **Play** animates it.
 The camera stays fixed through the motion. **Flat view** faces the unfolded net;
 drag to orbit, or **Reset view** to restore the north-up view. Hover to inspect
 the original longitude and latitude on either side of a cut.
 
-Compare **Continents · ocean cuts** with **Meridian strips** on the same mesh.
-**Alternate layout** changes the secondary join preference. **Show edges** reveals
-the graticule. Back faces are darkened to distinguish them during unfolding.
+Choose **Projection preset** to compare polyconic, cylindric, azimuthal, two-hemisphere,
+sealine, and coastline layouts, or any of the five Platonic solids.
+**Alternate layout** changes the secondary join preference for polyconic,
+hemispheres, sealine, and coastline presets. It is disabled for solids and the
+fixed-cut cylindric/azimuthal presets. **Show edges** reveals
+the panels. Back faces are darkened to distinguish them during unfolding.
 
 ## How it works
 
-The mesh is generated from longitude and latitude, with shared vertices at the
+The animation calls `createMyriahedralLayout` from `@math.gl/geospatial/discontinuous`.
+Static map users can build the same net with `createMyriahedralMap`.
+See the [API reference](./discontinuous/myriahedral.md) and
+[background and credits](./projection/developer-guide/myriahedral-projections.md).
+
+For the default sealine preset, the mesh is generated from longitude and latitude, with shared vertices at the
 antimeridian and poles. Its cells are planar trapezoids, with triangular caps.
 An open equatorial chain of hinges establishes a west-to-east backbone; the
 remaining joins favor land and then north–south strips. The date-line seam stays
@@ -49,7 +58,8 @@ or orbit, preventing the map from recentering and changing scale at every frame.
 ## Limits and sources
 
 The visual reference is the graticule **Sealine** view in
-[Nico Belmonte's demonstration](https://philogb.github.io/page/myriahedral/).
+[Nico Belmonte's demonstration](https://philogb.github.io/page/myriahedral/),
+explained in his [2018 vis.gl article](https://medium.com/vis-gl/unfolding-the-earth-myriahedral-projections-in-webgl-6b2bcfd00a30).
 Our graticule, tree, root, framing, land texture, and animation are independently
 generated. No mesh tables, imagery, presets, source code, or animation frames were
 copied from that demonstration. The layout follows the same broad arrangement,
@@ -62,9 +72,11 @@ check collisions during motion. The coarse land mask and sampled edge weights
 can miss small islands or narrow coastlines. Finer grids cost more CPU
 and GPU time, especially when selecting a new tree.
 
-This animated rigid-panel example is separate from the static
-[discontinuous projection API](./discontinuous/README.md). It does not yet expose
-its unfolding as a static `DiscontinuousMap` preset.
+The same library layout supplies both animated panels and a static
+[discontinuous map](./discontinuous/myriahedral.md), including seam-aware point,
+line, and polygon projection. Its inverse returns every candidate in overlapping
+regions. The main graticule families and Platonic solids are available;
+coastline-distance-field meshes and Archimedean presets are not generated.
 
 The default Natural Earth land/ocean view works offline. Optional NASA Blue Marble
 is loaded online from GIBS with attribution; geometry and land masks remain usable

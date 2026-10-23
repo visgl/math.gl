@@ -1,7 +1,7 @@
 # Myriahedral maps
 
 An independent experimental globe-to-net example with 288–4,608 graticule panels,
-resolution and unfolding controls, meridian/continent cut comparison,
+resolution and unfolding controls, six graticule presets and all five Platonic solids,
 Natural Earth land/ocean colors, optional NASA textures, dark back faces, coordinate picking, and overlap diagnostics.
 
 Run from the repository root:
@@ -11,10 +11,12 @@ node node_modules/vite/bin/vite.js examples/myriahedral-maps --config examples/m
 node node_modules/vite/bin/vite.js build examples/myriahedral-maps --config examples/myriahedral-maps/vite.config.ts
 ```
 
-Shared geometry, cutting, picking and WebGL code live in `../unfolding-polyhedron`.
+Mesh generation, cutting, static projection, and animation use
+`@math.gl/geospatial/discontinuous`. Only picking and WebGL rendering are shared
+with `../unfolding-polyhedron`.
 No code or imagery from Nico Belmonte's demonstration is used. This is a rigid
 polyhedral unfolding, not an implementation of a specific published cartographic
-projection or an overlap optimizer. Switching strategies keeps the same seed and mesh.
+projection or an overlap optimizer. Graticule presets share a mesh at a given resolution; solid presets use their own meshes.
 
 NASA Blue Marble is loaded online; a colored surface remains available if imagery
 fails. See [imagery terms](../unfolding-polyhedron/IMAGERY.md) and the bundled
