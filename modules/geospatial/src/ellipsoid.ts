@@ -8,7 +8,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 /* eslint-disable */
-import {Vector3, Matrix4, assert, equals, _MathUtils, NumericArray} from '@math.gl/core';
+import {Vector3, Matrix4, assert, equals, _MathUtils, NumericArray, config} from '@math.gl/core';
 import type {SpheroidParameters} from '@math.gl/core/types';
 import {
   spheroidToCartesian,
@@ -17,7 +17,11 @@ import {
 } from '@math.gl/core/spheroid';
 
 import {WGS84_RADIUS_X, WGS84_RADIUS_Y, WGS84_RADIUS_Z} from './constants';
-import {fromCartographicToRadians, toCartographicFromRadiansComponents} from './type-utils';
+import {
+  fromCartographic,
+  fromCartographicToRadians,
+  toCartographicFromRadiansComponents
+} from './type-utils';
 
 import type {AxisDirection} from './ellipsoid-helpers/ellipsoid-transform';
 import {localFrameToFixedFrame} from './ellipsoid-helpers/ellipsoid-transform';
@@ -64,9 +68,9 @@ export class Ellipsoid {
   constructor();
 
   constructor(x = 0.0, y = 0.0, z = 0.0) {
-    assert(x >= 0.0);
-    assert(y >= 0.0);
-    assert(z >= 0.0);
+    assert(Number.isFinite(x) && x >= 0.0);
+    assert(Number.isFinite(y) && y >= 0.0);
+    assert(Number.isFinite(z) && z >= 0.0);
 
     this.radii = new Vector3(x, y, z);
 
@@ -133,7 +137,7 @@ export class Ellipsoid {
     return this === right || Boolean(right && this.radii.equals(right.radii));
   }
 
-  /** Creates a string representing this Ellipsoid in the format '(radii.x, radii.y, radii.z)'. */
+  /** Creates a string representing this Ellipsoid in the format '[radii.x, radii.y, radii.z]'. */
   toString(): string {
     return this.radii.toString();
   }
@@ -146,29 +150,40 @@ export class Ellipsoid {
   cartographicToCartesian(cartographic: number[], result?: number[]): number[];
 
   cartographicToCartesian(cartographic: Readonly<NumericArray>, result = [0, 0, 0]) {
-    if (this.spheroidGeometry) {
-      const llh = fromCartographicToRadians(cartographic, scratchCartesian);
-      spheroidScratch.x = llh[0];
-      spheroidScratch.y = llh[1];
-      spheroidScratch.z = llh[2];
+    const llh = fromCartographicToRadians(cartographic, scratchCartesian);
+    const longitude = llh[0],
+      latitude = llh[1],
+      height = llh[2];
+    if (
+      !Number.isFinite(longitude) ||
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(height) ||
+      !(this.minimumRadius > 0) ||
+      !Number.isFinite(this.maximumRadius * this.maximumRadius)
+    )
+      return undefined;
+    // Degree inputs near a pole retain their complement before conversion. A
+    // rounded radian latitude loses angle bits amplified by thin-shape curvature.
+    if (
+      this.spheroidGeometry &&
+      (config._cartographicRadians || Math.abs(latitude) <= Math.PI / 4)
+    ) {
+      spheroidScratch.x = longitude;
+      spheroidScratch.y = latitude;
+      spheroidScratch.z = height;
       if (!spheroidToCartesian(spheroidScratch, this.spheroidGeometry)) return undefined;
       return writeResult(result, spheroidScratch.x, spheroidScratch.y, spheroidScratch.z);
     }
-    const normal = scratchNormal;
-    const k = scratchK;
-
-    const [, , height] = cartographic;
+    const normal = scratchNormal,
+      k = scratchK;
     this.geodeticSurfaceNormalCartographic(cartographic, normal);
     k.copy(this.radiiSquared).scale(normal);
-
     const gamma = Math.sqrt(normal.dot(k));
     k.scale(1 / gamma);
-
     normal.scale(height);
-
     k.add(normal);
-
-    return k.to(result);
+    if (!Number.isFinite(k.x) || !Number.isFinite(k.y) || !Number.isFinite(k.z)) return undefined;
+    return writeResult(result, k.x, k.y, k.z);
   }
 
   /** Converts the provided Cartesian position to [longitude, latitude, height],
@@ -290,7 +305,9 @@ export class Ellipsoid {
   geocentricSurfaceNormal(cartesian: number[], result?: number[]): number[];
   geocentricSurfaceNormal<NumArray>(cartesian: number[], result: NumArray): NumArray;
   geocentricSurfaceNormal(cartesian: Readonly<NumericArray>, result = [0, 0, 0]) {
-    return scratchVector.from(cartesian).normalize().to(result);
+    fromCartographic(cartesian, scratchVector);
+    const point = scratchVector;
+    return normalResult(point.x, point.y, point.z, result);
   }
 
   /** Computes the normal of the plane tangent to the surface of the ellipsoid at the provided
@@ -302,25 +319,42 @@ export class Ellipsoid {
   ): NumArray;
   geodeticSurfaceNormalCartographic(cartographic: number[]): number[];
   geodeticSurfaceNormalCartographic(cartographic: Readonly<NumericArray>, result = [0, 0, 0]) {
-    const cartographicVectorRadians = fromCartographicToRadians(cartographic);
-
-    const longitude = cartographicVectorRadians[0];
-    const latitude = cartographicVectorRadians[1];
-
-    const cosLatitude = Math.cos(latitude);
-
-    scratchVector
-      .set(cosLatitude * Math.cos(longitude), cosLatitude * Math.sin(longitude), Math.sin(latitude))
-      .normalize();
-
-    return scratchVector.to(result);
+    const point = fromCartographic(cartographic, scratchCartesian);
+    const longitude = config._cartographicRadians ? point[0] : (point[0] * Math.PI) / 180;
+    const latitude = config._cartographicRadians ? point[1] : (point[1] * Math.PI) / 180;
+    const polarDegrees = !config._cartographicRadians && Math.abs(point[1]) > 45;
+    const complement = ((90 - Math.abs(point[1])) * Math.PI) / 180;
+    const cosLatitude = polarDegrees
+      ? Math.sin(complement)
+      : Math.abs(latitude) === Math.PI / 2
+        ? 0
+        : Math.cos(latitude);
+    const sinLatitude = polarDegrees
+      ? Math.sign(point[1]) * Math.cos(complement)
+      : Math.sin(latitude);
+    return normalResult(
+      cosLatitude * Math.cos(longitude),
+      cosLatitude * Math.sin(longitude),
+      sinLatitude,
+      result
+    );
   }
 
   /** Computes the normal of the plane tangent to the surface of the ellipsoid at the provided position. */
   geodeticSurfaceNormal<NumArrayT>(cartesian: number[], result: NumArrayT): NumArrayT;
   geodeticSurfaceNormal(cartesian: number[]): number[];
   geodeticSurfaceNormal(cartesian: Readonly<NumericArray>, result = [0, 0, 0]) {
-    return scratchVector.from(cartesian).scale(this.oneOverRadiiSquared).normalize().to(result);
+    if (!(this.minimumRadius > 0)) return undefined;
+    fromCartographic(cartesian, scratchVector);
+    const point = scratchVector;
+    const scale = Math.max(Math.abs(point.x), Math.abs(point.y), Math.abs(point.z));
+    if (!(scale > 0) || !Number.isFinite(scale)) return undefined;
+    return normalResult(
+      (point.x / scale) * (this.minimumRadius / this.radii.x) ** 2,
+      (point.y / scale) * (this.minimumRadius / this.radii.y) ** 2,
+      (point.z / scale) * (this.minimumRadius / this.radii.z) ** 2,
+      result
+    );
   }
 
   /** Scales the provided Cartesian position along the geodetic surface normal
@@ -333,34 +367,47 @@ export class Ellipsoid {
   /** Scales the provided Cartesian position along the geocentric surface normal
    * so that it is on the surface of this ellipsoid. */
   scaleToGeocentricSurface(cartesian: number[], result: number[] = [0, 0, 0]): number[] {
-    scratchPosition.from(cartesian);
-
-    const positionX = scratchPosition.x;
-    const positionY = scratchPosition.y;
-    const positionZ = scratchPosition.z;
-    const oneOverRadiiSquared = this.oneOverRadiiSquared;
-
-    const beta =
-      1.0 /
-      Math.sqrt(
-        positionX * positionX * oneOverRadiiSquared.x +
-          positionY * positionY * oneOverRadiiSquared.y +
-          positionZ * positionZ * oneOverRadiiSquared.z
-      );
-
-    return scratchPosition.multiplyByScalar(beta).to(result);
+    fromCartographic(cartesian, scratchPosition);
+    const point = scratchPosition;
+    const scale = Math.max(Math.abs(point.x), Math.abs(point.y), Math.abs(point.z));
+    if (!(this.minimumRadius > 0) || !(scale > 0) || !Number.isFinite(scale)) return undefined;
+    const squared =
+      point.x * point.x * this.oneOverRadiiSquared.x +
+      point.y * point.y * this.oneOverRadiiSquared.y +
+      point.z * point.z * this.oneOverRadiiSquared.z;
+    // Preserve the ordinary path's established rounding; scale only when its
+    // squared intermediates are unsafe. Commit scalar snapshots in both paths.
+    if (
+      squared >= 2 ** -1022 &&
+      Number.isFinite(squared) &&
+      scale * scale >= 2 ** -1022 &&
+      Number.isFinite(scale * scale)
+    ) {
+      const beta = 1 / Math.sqrt(squared);
+      return writeResult(result, point.x * beta, point.y * beta, point.z * beta);
+    }
+    const x = point.x / scale,
+      y = point.y / scale,
+      z = point.z / scale;
+    const norm = Math.hypot(x / this.radii.x, y / this.radii.y, z / this.radii.z);
+    if (!(norm > 0) || !Number.isFinite(norm)) return undefined;
+    return writeResult(result, x / norm, y / norm, z / norm);
   }
 
   /** Transforms a Cartesian X, Y, Z position to the ellipsoid-scaled space by multiplying
    * its components by the result of `Ellipsoid#oneOverRadii` */
   transformPositionToScaledSpace(position: number[], result: number[] = [0, 0, 0]): number[] {
-    return scratchPosition.from(position).scale(this.oneOverRadii).to(result);
+    fromCartographic(position, scratchPosition);
+    const point = scratchPosition.scale(this.oneOverRadii);
+    return writeResult(result, point.x, point.y, point.z);
   }
 
   /** Transforms a Cartesian X, Y, Z position from the ellipsoid-scaled space by multiplying
    * its components by the result of `Ellipsoid#radii`. */
   transformPositionFromScaledSpace(position: number[], result: number[] = [0, 0, 0]): number[] {
-    return scratchPosition.from(position).scale(this.radii).to(result);
+    fromCartographic(position, scratchPosition);
+    const point = scratchPosition.scale(this.radii);
+    return writeResult(result, point.x, point.y, point.z);
   }
 
   /** Computes a point which is the intersection of the surface normal with the z-axis. */
@@ -373,14 +420,21 @@ export class Ellipsoid {
     assert(equals(this.radii.x, this.radii.y, _MathUtils.EPSILON15));
     assert(this.radii.z > 0);
 
-    scratchPosition.from(position);
+    fromCartographic(position, scratchPosition);
+    if (
+      !Number.isFinite(scratchPosition.x) ||
+      !Number.isFinite(scratchPosition.y) ||
+      !Number.isFinite(scratchPosition.z) ||
+      !Number.isFinite(buffer)
+    )
+      return undefined;
     const z = scratchPosition.z * (1 - this.squaredXOverSquaredZ);
 
     if (Math.abs(z) >= this.radii.z - buffer) {
       return undefined;
     }
 
-    return scratchPosition.set(0.0, 0.0, z).to(result);
+    return writeResult(result, 0, 0, z);
   }
 }
 
@@ -388,4 +442,15 @@ export class Ellipsoid {
 function validateSpheroid(a: number, b: number): void {
   if (!Number.isFinite(a) || !Number.isFinite(b) || a <= 0 || b <= 0 || b > a)
     throw new Error('Spheroid requires finite positive axes with semiMinorAxis <= semiMajorAxis');
+}
+
+/** Original scaled normalization and scalar commit; safe for tiny/huge rays and reentrant setters. */
+function normalResult(x: number, y: number, z: number, result: number[]): number[] {
+  const scale = Math.max(Math.abs(x), Math.abs(y), Math.abs(z));
+  if (!(scale > 0) || !Number.isFinite(scale)) return undefined;
+  const nx = x / scale,
+    ny = y / scale,
+    nz = z / scale;
+  const length = Math.hypot(nx, ny, nz);
+  return writeResult(result, nx / length, ny / length, nz / length);
 }

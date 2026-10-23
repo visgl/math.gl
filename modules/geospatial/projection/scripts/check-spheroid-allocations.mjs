@@ -49,7 +49,18 @@ const scopes = new Map([
   ],
   [
     'modules/geospatial/src/ellipsoid.ts',
-    new Set(['cartesianToCartographic', 'cartographicToCartesian'])
+    new Set([
+      'cartesianToCartographic',
+      'cartographicToCartesian',
+      'geocentricSurfaceNormal',
+      'geodeticSurfaceNormal',
+      'geodeticSurfaceNormalCartographic',
+      'scaleToGeocentricSurface',
+      'normalResult',
+      'transformPositionToScaledSpace',
+      'transformPositionFromScaledSpace',
+      'getSurfaceNormalIntersectionWithZAxis'
+    ])
   ],
   [
     'modules/geospatial/src/ellipsoid-helpers/scale-to-geodetic-surface.ts',
@@ -60,7 +71,6 @@ const scopes = new Map([
     new Set([
       'spheroidToCartesian',
       'cartesianToSpheroid',
-      'exteriorInverse',
       'interiorInverse',
       'sumError',
       'productError',
