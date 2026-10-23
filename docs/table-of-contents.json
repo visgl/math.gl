@@ -195,6 +195,7 @@
           "modules/geospatial/api-reference/geographic-tiles",
           "modules/geospatial/api-reference/tile-matrix",
           "modules/geospatial/api-reference/ellipsoid-tangent-plane",
+          "modules/geospatial/api-reference/local-reference-frame",
           "modules/geospatial/api-reference/lng-lat-rectangle",
           "modules/geospatial/api-reference/make-obb-from-region",
           "modules/geospatial/api-reference/helpers"

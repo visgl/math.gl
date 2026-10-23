@@ -37,6 +37,7 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 | ----------------------- | --------------------------------------------------------------------------- |
 | `Ellipsoid`             | Implements ellipsoid math and cartographic/Cartesian conversions.           |
 | `Ellipsoid.WGS84`       | An `Ellipsoid` instance initialized with Earth radii per WGS84.             |
+| `LocalReferenceFrame` | Reusable local frames, geographic poses, and velocity-aligned orientations. |
 | `EllipsoidTangentPlane` | Projects WGS84 Cartesian positions into a local east-north plane.           |
 | `LngLatRectangle`       | Represents a longitude-latitude rectangle, including antimeridian crossing. |
 
@@ -115,3 +116,9 @@ extent-to-tile ranges, coverage checks and resolution-based level selection.
 
 Use the geographic tile helpers above for the built-in equal-angle longitude/latitude quadtree
 and antimeridian-aware queries. Explicit matrix queries use half-open edges and never wrap.
+
+## Local frames and poses
+
+[LocalReferenceFrame](./api-reference/local-reference-frame.md) separates point and vector transformations,
+composes geographic heading/pitch/roll poses, and builds velocity-aligned orientations. Import it
+from `@math.gl/geospatial/ellipsoid`. Local distances use the ellipsoid axis units; pose angles use radians.

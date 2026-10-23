@@ -13,3 +13,6 @@ export type {
   GeodesicParameters,
   GeodesicOptions
 } from '../ellipsoid-geodesic';
+export {LocalReferenceFrame} from '../local-reference-frame';
+export type {LocalReferenceFrameOptions, HeadingPitchRoll} from '../local-reference-frame';
+export type {TangentPlaneProjectionMode, TangentPlaneProjection} from '../ellipsoid-tangent-plane';
