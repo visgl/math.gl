@@ -28,10 +28,12 @@ export {RhumbPolygon} from '../rhumb-polygon';
 export type {RhumbPolygonOptions, RhumbPolygonResult, RhumbPointOptions} from '../rhumb-polygon';
 export {GeodesicIntersections} from '../geodesic-intersections';
 export type {
-  GeodesicPath,
+  GeodesicPath as GeodesicIntersectionPath,
   IntersectionPoint,
   IntersectionSearchOptions,
   IntersectionSearch,
   ClosestIntersection,
   SegmentIntersection
 } from '../geodesic-intersections';
+export {GeodesicPath} from '../geodesic-path';
+export type {GeodesicPathOptions} from '../geodesic-path';

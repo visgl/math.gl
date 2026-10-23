@@ -100,9 +100,15 @@ export function createInterruptedHomolosineMap(options: {radius?: number} = {}):
   return interruptedMap('homolosine', options.radius);
 }
 
+/** Goode's land-oriented homolosine interruption (two northern, four southern lobes). */
+export function createGoodeMap(options: {radius?: number} = {}): DiscontinuousMap {
+  return interruptedMap('homolosine', options.radius, true);
+}
+
 function interruptedMap(
   kind: 'sinusoidal' | 'mollweide' | 'homolosine',
-  value?: number
+  value?: number,
+  goode = false
 ): DiscontinuousMap {
   const radius = validRadius(value);
   const mollweide = (latitude: number): Position => {
@@ -136,26 +142,42 @@ function interruptedMap(
     return [width, height - (kind === 'homolosine' ? Math.sign(latitude) * correction : 0)];
   };
   const equatorialScale = kind === 'mollweide' ? (2 * Math.SQRT2) / Math.PI : 1;
-  const breaks = [
-    [-180, -60, 60, 180],
-    [-180, -100, 20, 180]
-  ];
-  const equator = [...new Set(breaks.flat())].sort((a, b) => a - b);
+  // Split the wide Eurasian lobe into two convex computational charts sharing
+  // one projection. The extra meridian is a continuous join, not a map cut.
+  const lobes = goode
+    ? [
+        [
+          [-180, -100, -40],
+          [-40, 30, 30],
+          [30, 30, 180]
+        ],
+        [
+          [-180, -160, -100],
+          [-100, -60, -20],
+          [-20, 20, 80],
+          [80, 140, 180]
+        ]
+      ]
+    : [
+        [-180, -60, 60, 180],
+        [-180, -100, 20, 180]
+      ].map(limits => limits.slice(1).map((east, i) => [limits[i], (limits[i] + east) / 2, east]));
+  const equator = [...new Set(lobes.flat().flatMap(([west, , east]) => [west, east]))].sort(
+    (a, b) => a - b
+  );
   const regions: MapRegion[] = [];
-  breaks.forEach((limits, hemisphere) => {
+  lobes.forEach((limits, hemisphere) => {
     const sign = hemisphere === 0 ? 1 : -1;
-    for (let i = 1; i < limits.length; i++) {
-      const west = limits[i - 1],
-        east = limits[i],
-        center = (west + east) / 2;
+    for (let i = 0; i < limits.length; i++) {
+      const [west, center, east] = limits[i];
       const boundary: Position[] = [
         [west, 90 * sign],
         ...equator.filter(lon => lon >= west && lon <= east).map(lon => [lon, 0] as Position)
       ];
       regions.push({
-        id: `${sign > 0 ? 'north' : 'south'}-${i - 1}`,
+        id: `${sign > 0 ? 'north' : 'south'}-${i}`,
         boundary,
-        interior: [center, 45 * sign],
+        interior: [(west + east) / 2, 45 * sign],
         project: ([lon, lat]) => {
           const delta = ((((lon - center + 180) % 360) + 360) % 360) - 180;
           const [width, height] = profile(lat * RAD);

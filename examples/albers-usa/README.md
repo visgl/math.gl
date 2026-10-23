@@ -2,8 +2,9 @@
 
 A focused example of the experimental `@math.gl/geospatial/discontinuous` API.
 It renders public-domain Natural Earth 1:10m U.S. state polygons through
-`createAlbersUsaMap`, fits the complete layout with `fitMapLayout`, and uses
-`pickMapLayout` for region-aware coordinate inspection. Run with
+`new MapEngine({version: 1, id: 'usa', definition: {type: 'albers-usa', includeTerritories: true}})`,
+fits the complete layout with `map.fit`, and uses `map.pick` for region-aware
+coordinate inspection. Run with
 `yarn workspace math.gl-albers-usa start`.
 
 The **View globe** button and **Unfold** slider animate the same projected

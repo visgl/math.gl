@@ -196,6 +196,8 @@
           "modules/geospatial/api-reference/geodesic-intersections",
           "modules/geospatial/api-reference/globe-queries",
           "modules/geospatial/api-reference/subdivide-globe-mesh",
+          "modules/geospatial/api-reference/geodesic-path",
+          "modules/geospatial/api-reference/subdivide-geodesic-polyline",
           "modules/geospatial/api-reference/geographic-tiles",
           "modules/geospatial/api-reference/tile-matrix",
           "modules/geospatial/api-reference/ellipsoid-tangent-plane",
@@ -242,6 +244,8 @@
           "modules/geospatial/projection/README",
           "modules/geospatial/projection/developer-guide/discontinuous-projections",
           "modules/geospatial/myriahedral-maps",
+          "modules/geospatial/projection/developer-guide/map-engine",
+          "modules/geospatial/discontinuous/map-engine",
           "modules/geospatial/discontinuous/README",
           "modules/geospatial/discontinuous/myriahedral",
           {

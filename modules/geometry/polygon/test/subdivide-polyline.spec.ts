@@ -146,3 +146,84 @@ test('polar CRS adapter approximates a curved latitude edge in meter units', asy
     }
   }
 });
+
+test('custom source edges reuse original distance fractions and mutable callback buffers are copied', () => {
+  const fractions: number[] = [];
+  const buffer = new Float64Array(2);
+  let factories = 0;
+  const result = subdividePolyline([0, 0, 1, 1, 2, 4], {
+    transform: p => p,
+    tolerance: 0.001,
+    maxSegmentLength: 0.5,
+    createEdgeSampler: (start, end, index) => {
+      factories++;
+      const a = start[0],
+        b = end[0];
+      (start as number[]).fill(100);
+      (end as number[]).fill(100);
+      return {
+        length: 2,
+        sample: t => {
+          fractions.push(t);
+          const x = a * (1 - t) + b * t;
+          buffer[0] = x;
+          buffer[1] = x * x;
+          return buffer;
+        }
+      };
+    }
+  });
+  expect(factories).toBe(2);
+  expect(fractions).toContain(0.125);
+  for (let i = 0; i < result.segmentIndices.length; i++) {
+    const x = result.segmentIndices[i] + result.segmentFractions[i];
+    expect(result.sourcePositions[i * 2]).toBeCloseTo(x, 14);
+    expect(result.sourcePositions[i * 2 + 1]).toBeCloseTo(x * x, 14);
+  }
+  expect(Array.from(result.sourcePositions.slice(-2))).toEqual([2, 4]);
+});
+
+test('custom sampler endpoint, length, dimension and finiteness contracts are validated', () => {
+  const input = [0, 0, 1, 1];
+  const base = {transform: identity, tolerance: 1};
+  for (const length of [-1, NaN, Infinity]) {
+    expect(() =>
+      subdividePolyline(input, {...base, createEdgeSampler: () => ({length, sample: t => [t, t]})})
+    ).toThrow(RangeError);
+  }
+  for (const sample of [() => [0], () => [NaN, 0], () => [100, 100]]) {
+    expect(() =>
+      subdividePolyline(input, {...base, createEdgeSampler: () => ({length: 1, sample})})
+    ).toThrow(RangeError);
+  }
+  expect(() =>
+    subdividePolyline(input, {
+      ...base,
+      createEdgeSampler: () => ({
+        length: 1,
+        sample: t => (t === 0 || t === 1 ? [t, t] : [Infinity, 0])
+      })
+    })
+  ).toThrow(RangeError);
+  const rejection = new Error('edge construction');
+  expect(() =>
+    subdividePolyline(input, {
+      ...base,
+      createEdgeSampler: () => {
+        throw rejection;
+      }
+    })
+  ).toThrow(rejection);
+  const sampleRejection = new Error('edge sample');
+  expect(() =>
+    subdividePolyline(input, {
+      ...base,
+      createEdgeSampler: () => ({
+        length: 1,
+        sample: () => {
+          throw sampleRejection;
+        }
+      })
+    })
+  ).toThrow(sampleRejection);
+});

@@ -10,6 +10,13 @@ lines, reduced length, scales, longitude unrolling and ellipsoidal gnomonic have
 native PROJ controls. Sphere/oblate Cartesian conversion has independent
 high-precision controls. Preserve these qualifications.
 
+The complementary [geospatial frames and paths roadmap](./geospatial-roadmap.md)
+tracks local frames, poses, tangent-plane operations and path integration.
+C1–C3 are merged in [PR #277](https://github.com/visgl/math.gl/pull/277),
+not yet recorded here as released; their sampled API/geometry evidence does not complete G0–G2.
+Rhumb algorithms remain owned by G5 here, and their subdivision integration is
+tracked separately by C4/C6.
+
 ## P0 — Existing correctness and defensible claims
 
 | Tranche | Deliverable | Acceptance criteria |
