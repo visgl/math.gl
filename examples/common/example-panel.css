@@ -3,7 +3,7 @@
  * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
  */
 /* The example grid owns sizing; the community shell fills its column. */
-aside.example-panel {
+aside.example-panel.deck-widget-container {
   min-width: 0;
   padding: 0;
   pointer-events: auto;
