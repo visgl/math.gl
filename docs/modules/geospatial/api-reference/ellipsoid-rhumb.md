@@ -44,6 +44,9 @@ area, orientation, preview, `clear`, `addEdge`, and polyline contracts as
 and `testPoint(lat, lon, {longitudeTurns, reverse, unsigned})` additionally support
 explicit winding. A whole eastward parallel at latitude 30 degrees on the unit
 sphere has perimeter `2π cos(30°)` and signed enclosed north-cap area `π`.
+At exact half/full-surface reduction boundaries, floating-point rounding can
+select either equivalent area representative; compare modulo `surfaceArea`
+when the geometry lies exactly on that discontinuity.
 Pole rejection also applies to the first vertex and previews. Failed insertion
 leaves the polygon unchanged.
 

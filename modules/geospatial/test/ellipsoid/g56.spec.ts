@@ -135,3 +135,30 @@ test('Independent rotated spherical crossings satisfy both great-circle planes',
     }
   }
 });
+
+test('Rhumb polygon winding and insertion failures preserve compensated state', () => {
+  for (const turns of [-4, -3, -2, -1, 1, 2, 3, 4]) {
+    const p = new RhumbPolygon(axes).addPoint(30, -1080);
+    const preview = p.testPoint(30, -1080, {longitudeTurns: turns});
+    p.addPoint(30, -1080, {longitudeTurns: turns});
+    expect(p.compute()).toEqual(preview);
+    let area = (turns * Math.PI) % (4 * Math.PI);
+    if (area > 2 * Math.PI) area -= 4 * Math.PI;
+    if (area <= -2 * Math.PI) area += 4 * Math.PI;
+    // At an exact half/full ellipsoid boundary, rounding can select either
+    // equivalent representative. Compare modulo the full surface area.
+    const difference = p.compute().area! - area;
+    const error = difference - Math.round(difference / (4 * Math.PI)) * 4 * Math.PI;
+    expect(Math.abs(error)).toBeLessThan(5e-14);
+    const state = p.compute();
+    expect(() => p.addPoint(45, 0, {longitudeTurns: 0.5})).toThrow(RangeError);
+    expect(() => p.testPoint(90, 0)).toThrow(RhumbDomainError);
+    expect(() => p.addEdge(0, 10)).toThrow(RhumbDomainError);
+    expect(p.compute()).toEqual(state);
+  }
+  const p = new RhumbPolygon(axes, {polyline: true}).addPoint(0, 0).addEdge(90, 0.1);
+  expect(p.compute().area).toBeUndefined();
+  expect(p.compute().perimeter).toBeCloseTo(0.1, 15);
+  expect(p.clear().compute()).toEqual({number: 0, perimeter: 0});
+  expect(() => new RhumbPolygon(axes).testPoint(0, 0, {longitudeTurns: NaN})).toThrow(RangeError);
+});
