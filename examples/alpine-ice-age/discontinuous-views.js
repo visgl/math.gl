@@ -200,7 +200,7 @@ export function discontinuousGrid(view, step = 1) {
             { regionId: "lower48", step: 1, bounds: [-130, 18, -62, 60] },
             { regionId: "alaska", step: 0.5, bounds: [-180, 35, -128, 82] },
             // The Aleutian part of the spherical mask wraps past -180°.
-            { regionId: "alaska", step: 0.5, bounds: [168, 35, 180, 82] },
+            { regionId: "alaska", step: 0.5, bounds: [150, 35, 180, 82] },
             { regionId: "hawaii", step: 0.25, bounds: [-180, 15, -150, 32] },
           ]
         : [{ regionId: null, step, bounds: [-180, -90, 180, 90] }];

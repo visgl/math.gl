@@ -111,6 +111,8 @@ test("Albers USA insets use independent display mesh spacing", () => {
   assert(hasHalfDegreeVertex);
   assert(grid.sources.some(([lon], i) => grid.regionIds[i] === "alaska" && lon > 170),
     "Aleutian cells across the antimeridian must remain in the display mesh");
+  assert(grid.sources.some(([lon], i) => grid.regionIds[i] === "alaska" && lon > 155 && lon < 168),
+    "western Alaska mask cells must remain in the display mesh");
   assert(grid.sources.some(([, lat], i) => grid.regionIds[i] === "lower48" && lat > 54),
     "northern great-circle-edge cells must remain in the display mesh");
 });
