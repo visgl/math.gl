@@ -210,7 +210,8 @@ function sincos(degrees: number): [number, number] {
 function angle(s: number, c: number): number {
   return s > c ? 90 - Math.atan2(c, s) / DEG : Math.atan2(s, c) / DEG;
 }
-function integrate(f: (t: number) => number, lo: number, hi: number): number {
+/** @internal Shared bounded quadrature for original revolution integrals. */
+export function integrate(f: (t: number) => number, lo: number, hi: number): number {
   let sum = 0;
   for (let j = 0; j < 8; ++j) {
     const h = (hi - lo) / 16,

@@ -21,3 +21,17 @@ export {EllipsoidMetrics} from '../ellipsoid-metrics';
 export type {AuxiliaryLatitude} from '../ellipsoid-metrics';
 export {GeodesicPolygon} from '../geodesic-polygon';
 export type {GeodesicPolygonResult, GeodesicPolygonOptions} from '../geodesic-polygon';
+
+export {EllipsoidRhumb, RhumbDomainError} from '../ellipsoid-rhumb';
+export type {RhumbOptions, RhumbResult, RhumbLine} from '../ellipsoid-rhumb';
+export {RhumbPolygon} from '../rhumb-polygon';
+export type {RhumbPolygonOptions, RhumbPolygonResult, RhumbPointOptions} from '../rhumb-polygon';
+export {GeodesicIntersections} from '../geodesic-intersections';
+export type {
+  GeodesicPath,
+  IntersectionPoint,
+  IntersectionSearchOptions,
+  IntersectionSearch,
+  ClosestIntersection,
+  SegmentIntersection
+} from '../geodesic-intersections';

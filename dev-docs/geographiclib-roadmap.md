@@ -40,7 +40,11 @@ The [G3–G4 matrix](../docs/modules/geospatial/projection/geographiclib-g34-qua
 records 810 sampled native/independent cases, explicit budgets, native Exact
 limitations, exact input conventions and remaining boundaries. This delivers the
 bounded G3/G4 scalar APIs, not arbitrary-flattening or all near-zero polygon
-certification. G5/G6 are next; G7 performance APIs and G8 wider-domain solvers
+certification. G5 now has rhumb inverse/direct/lines/polygons with independent integral and
+native controls. G6 has bounded sphere/ellipsoid intersections with explicit
+completeness: **global ellipsoidal completeness remains open**. See the
+[G5–G6 qualification](../docs/modules/geospatial/projection/geographiclib-g56-qualification.md).
+G7 performance APIs and G8 wider-domain solvers
 remain separate. G0–G2 completion is tracked independently in PR #278.
 
 ## P2 — Wider domains and specialized capabilities
