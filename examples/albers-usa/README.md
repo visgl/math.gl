@@ -11,6 +11,7 @@ feature vertices between geographic globe positions and their fitted inset
 positions. A bundled public-domain Natural Earth 1:110m land layer provides
 global context on the globe. Reduced-motion preferences make the toggle instant.
 Inset label font sizes adapt to the fitted frame width.
+Mouse-wheel and button zoom apply to the entire composite; drag to pan.
 The default map omits graticules and inset frames; both remain optional
 inspection overlays. Labels stay visible without frames.
 

@@ -13,6 +13,11 @@
 .albers-usa .state {fill: #a8c5b0; stroke: #f9fbf9; stroke-width: .8; vector-effect: non-scaling-stroke;}
 .albers-usa .state:hover {fill: #efb565;}
 .albers-usa .state.no-borders {stroke: none;}
+.albers-usa .territory .state {fill: #88b89c; stroke: #618d76; stroke-width: 1.3;}
+.albers-usa .territory .state.no-borders {stroke: none;}
+.albers-usa .territory .state:hover {fill: #efb565;}
+.albers-usa .map-wrap svg {cursor: grab;}
+.albers-usa .map-wrap svg:active {cursor: grabbing;}
 .albers-usa .graticule {fill: none; stroke: #5e96a5; stroke-width: .6; opacity: .55; pointer-events: none;}
 .albers-usa .frame {fill: none; stroke: #2b5367; stroke-width: 1.5; rx: 4; pointer-events: none;}
 .albers-usa .inset-label {font-size: 11px; fill: #153b4b; font-weight: 700; pointer-events: none;}
@@ -21,6 +26,9 @@
 .albers-usa .view-toggle:hover {background: #104e5b;}
 .albers-usa .unfold-control {display: grid; grid-template-columns: auto 1fr; gap: 10px; margin: 16px 0 30px; font-size: 13px;}
 .albers-usa .unfold-control input {width: 100%;}
+.albers-usa .zoom-controls {display: flex; gap: 6px; margin-bottom: 20px;}
+.albers-usa .zoom-controls button {border: 1px solid #b8d1d9; border-radius: 6px; background: white; color: #17314a; padding: 5px 10px; cursor: pointer;}
+.albers-usa .zoom-controls button:hover {background: #e9f2f3;}
 .albers-usa aside {padding: 25px; border-left: 1px solid #dce7ea;}
 .albers-usa h2 {font-size: 13px; text-transform: uppercase; letter-spacing: .09em; color: #52748a; margin: 0 0 17px;}
 .albers-usa label {display: flex; align-items: center; gap: 10px; margin: 13px 0; cursor: pointer;}
@@ -33,8 +41,9 @@
 .albers-usa-compact .shell {padding: 0;}
 .albers-usa-compact .workspace {grid-template-columns: 1fr; border-radius: 10px; box-shadow: none;}
 .albers-usa-compact .map-wrap, .albers-usa-compact .map-wrap svg {height: 420px; min-height: 420px;}
-.albers-usa-compact aside {display: grid; grid-template-columns: auto minmax(130px, 1fr) minmax(180px, 1.4fr); align-items: center; gap: 8px 16px; padding: 10px 16px; border-left: 0; border-top: 1px solid #dce7ea;}
+.albers-usa-compact aside {display: grid; grid-template-columns: auto minmax(130px, 1fr) auto minmax(180px, 1.4fr); align-items: center; gap: 8px 16px; padding: 10px 16px; border-left: 0; border-top: 1px solid #dce7ea;}
 .albers-usa-compact aside h2, .albers-usa-compact .details, .albers-usa-compact .credit {display: none;}
+.albers-usa-compact .zoom-controls {margin: 0;}
 .albers-usa-compact .view-toggle {width: auto; white-space: nowrap;}
 .albers-usa-compact .unfold-control {margin: 0;}
 .albers-usa-compact .readout {min-height: 0; margin: 0; padding: 9px;}

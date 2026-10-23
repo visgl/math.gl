@@ -1,4 +1,4 @@
-# Discontinuous maps (experimental)
+# Discontinuous map API
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -76,9 +76,12 @@ Hawaii retains the lower-48 scale. Insets use the familiar lower-left compositio
 The composite as a whole therefore does not preserve relative area between states.
 Points outside all three geographic masks return `null`; inverse queries in gaps
 return no candidates. Lines and polygons use the same region clipping as other maps.
-Set `includeTerritories: true` to add framed insets for Puerto Rico, the U.S.
+Set `includeTerritories: true` to add insets for Puerto Rico, the U.S.
 Virgin Islands, Guam, the Northern Mariana Islands, and American Samoa. These
-five regions use independent spherical Albers projections and placements.
+five regions use independent spherical Albers projections and enlarged local
+scales so their island outlines remain visible. Frames are available as layout
+metadata but need not be drawn. The composite does not preserve area between
+the lower 48 and these islands.
 The [dedicated example](/examples/albers-usa) enables them and renders pinned,
 public-domain Natural Earth polygons. Minor outlying islands are not included.
 
@@ -99,7 +102,7 @@ The compact arrangement follows the convention illustrated by
 [D3's Albers USA composite](https://d3js.org/d3-geo/conic#geoAlbersUsa), but is an
 independent preset, **not D3 clip-extent compatibility**. Cropping focuses on the
 main islands and mainland Alaska; distant islands can fall outside the inset
-masks. Territories such as Puerto Rico are not included. These masks include
+masks. Territories are opt-in. These masks include
 neighboring land and ocean: filter input features if only U.S. states should
 appear. Insets overlap the main map's ocean background in placed XY; draw them
 above it and use the visible region ID for picking. Use custom regions for full

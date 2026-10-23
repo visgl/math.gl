@@ -1,4 +1,4 @@
-# Discontinuous projections
+# Discontinuous maps
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -17,7 +17,8 @@ import AlbersUsaExample from '@site/src/components/albers-usa';
 
 The interactive Albers USA map shows this with Alaska, Hawaii, and five U.S.
 territory insets. Move over a region to inspect its coordinates, or use
-**View globe** to see its features unfold into the composite map. The
+**View globe** to see its features unfold into the composite map. The mouse
+wheel and zoom buttons magnify every region together; drag to pan. The
 [full example](/examples/albers-usa) includes more explanation.
 
 The discontinuous map API, presets, and layout helpers are experimental and may change.

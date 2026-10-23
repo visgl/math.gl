@@ -23,6 +23,7 @@ app.innerHTML = `<main class="shell">
     <div class="map-wrap"><svg role="img" aria-label="U.S. states and territories in an Albers projection with seven insets"></svg></div>
     <aside><h2>View</h2><button class="view-toggle" type="button">View globe</button>
       <label class="unfold-control">Unfold <input id="unfold" type="range" min="0" max="100" value="100" aria-label="Unfold globe into Albers USA map" /></label>
+      <div class="zoom-controls" aria-label="Map zoom controls"><button type="button" data-zoom="in" aria-label="Zoom in">+</button><button type="button" data-zoom="out" aria-label="Zoom out">−</button><button type="button" data-zoom="reset">Reset zoom</button></div>
       <h2>Coordinate inspector</h2><div class="readout" role="status" aria-live="polite">Move over the map to inspect coordinates</div><h2>Layers</h2>
       <label><input id="states" type="checkbox" checked /> State boundaries</label>
       <label><input id="grid" type="checkbox" /> Show graticule</label>
@@ -38,6 +39,7 @@ const svg = app.querySelector('svg');
 const readout = app.querySelector('.readout');
 const viewToggle = app.querySelector('.view-toggle');
 const unfold = app.querySelector('#unfold');
+const zoomControls = app.querySelector('.zoom-controls');
 const options = ['states', 'grid', 'frames'].map(id => app.querySelector(`#${id}`));
 const namespace = 'http://www.w3.org/2000/svg';
 const element = (name, attributes = {}) => {
@@ -67,6 +69,10 @@ let fitted;
 let globeLandCache;
 let amount = 1;
 let frameId = 0;
+let zoom = 1;
+let viewCenter;
+let previousSize;
+let dragPoint;
 const radians = Math.PI / 180;
 const centerLongitude = -96 * radians;
 const centerLatitude = 38 * radians;
@@ -82,11 +88,17 @@ function globePoint([longitude, latitude], width, height) {
 function draw() {
   const width = Math.max(320, svg.clientWidth);
   const height = Math.max(300, svg.clientHeight);
+  if (viewCenter && previousSize && (width !== previousSize[0] || height !== previousSize[1]))
+    viewCenter = [viewCenter[0] * width / previousSize[0], viewCenter[1] * height / previousSize[1]];
+  previousSize = [width, height];
   fitted = fitMapLayout(layout, {
     width, height,
     padding: {left: width * 0.035, right: width * 0.035, top: 24, bottom: 36}
   });
-  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  if (!viewCenter) viewCenter = [width / 2, height / 2];
+  const visibleWidth = width / zoom;
+  const visibleHeight = height / zoom;
+  svg.setAttribute('viewBox', `${viewCenter[0] - visibleWidth / 2} ${viewCenter[1] - visibleHeight / 2} ${visibleWidth} ${visibleHeight}`);
   svg.replaceChildren();
   const definitions = element('defs');
   svg.append(definitions);
@@ -105,7 +117,8 @@ function draw() {
     svg.append(world);
   }
   for (const region of fitted.regions) {
-    const group = element('g', {'data-region': region.id});
+    const group = element('g', {'data-region': region.id,
+      class: !['lower48', 'alaska', 'hawaii'].includes(region.id) ? 'territory' : ''});
     const mixed = (flat, source) => {
       const [x, y] = fitted.project(flat);
       if (amount === 1) return [x, y];
@@ -158,6 +171,40 @@ function draw() {
     svg.append(group);
   }
 }
+function setZoom(next, anchor) {
+  const old = zoom;
+  zoom = Math.max(1, Math.min(8, next));
+  if (zoom === 1) {viewCenter = [fitted.width / 2, fitted.height / 2]; draw(); return;}
+  if (anchor && zoom !== old) {
+    viewCenter = [
+      anchor[0] + (viewCenter[0] - anchor[0]) * old / zoom,
+      anchor[1] + (viewCenter[1] - anchor[1]) * old / zoom
+    ];
+  }
+  draw();
+}
+function eventPoint(event) {
+  const rect = svg.getBoundingClientRect();
+  const box = svg.viewBox.baseVal;
+  return [box.x + (event.clientX - rect.left) * box.width / rect.width,
+    box.y + (event.clientY - rect.top) * box.height / rect.height];
+}
+zoomControls.addEventListener('click', event => {
+  const action = event.target.closest('button')?.dataset.zoom;
+  if (action === 'reset') {zoom = 1; viewCenter = null; draw();}
+  else if (action) setZoom(zoom * (action === 'in' ? 1.5 : 1 / 1.5));
+});
+svg.addEventListener('wheel', event => {
+  event.preventDefault();
+  setZoom(zoom * (event.deltaY < 0 ? 1.2 : 1 / 1.2), eventPoint(event));
+}, {passive: false});
+svg.addEventListener('pointerdown', event => {
+  if (zoom === 1) return;
+  dragPoint = [event.clientX, event.clientY];
+  svg.setPointerCapture(event.pointerId);
+});
+svg.addEventListener('pointerup', () => {dragPoint = null;});
+svg.addEventListener('pointercancel', () => {dragPoint = null;});
 function setAmount(value) {
   amount = Math.max(0, Math.min(1, value));
   unfold.value = String(Math.round(amount * 100));
@@ -186,9 +233,14 @@ unfold.addEventListener('input', () => {
   setAmount(Number(unfold.value) / 100);
 });
 svg.addEventListener('pointermove', event => {
-  const bounds = svg.getBoundingClientRect();
-  const pixel = [(event.clientX - bounds.left) * fitted.width / bounds.width,
-    (event.clientY - bounds.top) * fitted.height / bounds.height];
+  if (dragPoint) {
+    const rect = svg.getBoundingClientRect();
+    viewCenter = [viewCenter[0] - (event.clientX - dragPoint[0]) * fitted.width / (zoom * rect.width),
+      viewCenter[1] - (event.clientY - dragPoint[1]) * fitted.height / (zoom * rect.height)];
+    dragPoint = [event.clientX, event.clientY];
+    draw();
+  }
+  const pixel = eventPoint(event);
   if (amount > 0.001 && amount < 0.999) {
     readout.textContent = 'Unfolding between globe and map';
     return;
