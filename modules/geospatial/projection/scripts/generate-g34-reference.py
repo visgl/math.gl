@@ -178,7 +178,7 @@ if __name__=='__main__':
     if args.oracle:
         assert args.archive and digest(Path(args.archive))==ARCHIVE_SHA, 'Pass the pinned --archive to verify source provenance'
         data=generate(args.oracle)
-        if args.check:assert json.loads(DEST.read_text())==data
+        if args.check:assert json.loads(DEST.read_text())==json.loads(json.dumps(data))
         else:
             chunks=['  '+json.dumps(k)+': '+json.dumps(data[k],separators=(',',':'),allow_nan=False) for k in ['provenance','independent']]
             for k in ['metrics','edges','polygons','directs']:
