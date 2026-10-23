@@ -143,7 +143,7 @@ export function qualifyG56() {
         const b = geod.line(paths[1].latitude, paths[1].longitude, paths[1].azimuth).position(p.t);
         check(geod.inverse(a.lat2, a.lon2, b.lat2, b.lon2).s12, 0, 5e-14 * r.a);
       }
-      if (r.a !== r.b) check(Number(result.complete), 0, 0.1);
+      check(Number(result.complete), 1, 0.1);
     })
   );
   for (const [i, ratio] of [1, 0.9966471893352525].entries()) {

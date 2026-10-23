@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) Charles Karney (2011-2023)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Spherical correction adapted from GeographicLib 2.7 Intersect.cpp (MIT, Karney 2024 geodesic-intersection paper). Geodesic.hpp shortest-path ambiguity catalog; original bounded search/reporting, analytic sphere enumeration and segment contracts. See ../GEOGRAPHICLIB-LICENSE.txt.
+// SPDX-FileComment: Global capture tiling, characteristic bounds, conjugates and spherical correction adapted from GeographicLib 2.7 Intersect.cpp (MIT, Karney 2024). Geodesic.hpp ambiguity catalog; original adaptive coverage, typed reporting and analytic sphere enumeration. See ../GEOGRAPHICLIB-LICENSE.txt.
 import {EllipsoidGeodesic, type GeodesicParameters, type GeodesicLine} from './ellipsoid-geodesic';
+import {IntersectionBounds} from './ellipsoid-helpers/intersection-bounds';
 import {geodesic} from './vendor/geographiclib-geodesic/runtime';
 export type GeodesicPath = {latitude: number; longitude: number; azimuth: number};
 export type IntersectionPoint = {
@@ -14,13 +15,17 @@ export type IntersectionPoint = {
   residual: number;
   crossingAngle: number;
   iterations: number;
+  /** Continuum representative; next() uses the native conjugate-point convention. */
+  coincidence?: 1 | -1;
 };
 export type IntersectionSearchOptions = {maxDistance: number; origin?: readonly [number, number]};
 export type IntersectionSearch = {
   intersections: IntersectionPoint[];
   coincidences: {s: number; t: number; direction: 1 | -1}[];
+  /** Every tile/candidate is covered and all output residuals pass. */
   complete: boolean;
   attemptedSeeds: number;
+  /** Failed refinement/candidate attempts, including recovered tiles. */
   failedSeeds: number;
 };
 export type ClosestIntersection = IntersectionSearch & {intersection?: IntersectionPoint};
@@ -34,19 +39,20 @@ const math = geodesic.Math as unknown as {
   AngDiff(a: number, b: number): {d: number; e: number};
   sincosde(a: number, b: number): {s: number; c: number};
 };
+type CoincidenceDirection = 1 | -1;
 type Root = {x: number; y: number; c: 0 | 1 | -1; iterations: number};
 type Vec = [number, number, number];
 
-/** Bounded geodesic intersection search. Degrees and caller axis units.
- * Sphere searches enumerate analytically and are complete away from coincidence.
- * Ellipsoid searches explicitly report complete=false: converged roots are
- * residual-gated, but a sampled tiling is not a proof of global completeness.
+/** Global geodesic intersection search in the declared numerical profile.
+ * All finite L1 search tiles use GeographicLib capture bounds and a boundary
+ * margin. Completeness is withheld on unresolved convergence or residual failure.
  */
 export class GeodesicIntersections {
   private readonly a: number;
   private readonly r: number;
   private readonly radius: number;
   private readonly solver: EllipsoidGeodesic;
+  private readonly bounds: IntersectionBounds;
   private readonly tolerance = 5e-14;
   constructor({semiMajorAxis: a, semiMinorAxis: b}: GeodesicParameters) {
     const r = b / a;
@@ -56,6 +62,7 @@ export class GeodesicIntersections {
     this.r = r;
     this.solver = new EllipsoidGeodesic({semiMajorAxis: 1, semiMinorAxis: r});
     this.radius = Math.sqrt(this.solver.surfaceArea / (4 * Math.PI));
+    this.bounds = new IntersectionBounds(this.solver, r, this.radius);
     Object.freeze(this);
   }
 
@@ -71,89 +78,201 @@ export class GeodesicIntersections {
       !(
         Number.isFinite(d) &&
         d > 0 &&
-        d <= 4 * Math.PI * this.radius &&
+        options.maxDistance <= 4 * this.bounds.halfCircumference * this.a &&
         Number.isFinite(x) &&
         Number.isFinite(y) &&
-        Math.max(Math.abs(x), Math.abs(y)) <= 4 * Math.PI * this.radius
+        Math.max(Math.abs(origin[0]), Math.abs(origin[1])) <=
+          4 * this.bounds.halfCircumference * this.a
       )
     )
       throw new RangeError(
         'Intersection search requires finite bounds within four half-circumferences'
       );
     if (this.r === 1) return this.sphere(a, b, A, B, d, x, y);
-    const roots: IntersectionPoint[] = [],
-      coincidences: IntersectionSearch['coincidences'] = [];
-    const m = Math.ceil(d / ((Math.PI * Math.min(1, this.r)) / 2));
-    const n = m - 1,
-      spacing = d / m,
-      seeds: [number, number][] = [[x, y]];
+    // GeographicLib AllInt0 capture-radius tiling, without its optional seed
+    // pruning: every tile is refined. Extend by delta before tiling so roots
+    // at the requested boundary still lie inside a capture region.
+    const extended = d + this.bounds.margin;
+    const m = Math.ceil(extended / this.bounds.spacing),
+      n = m - 1;
+    const spacing = extended / m;
+    const seeds: [number, number, number, number][] = [[x, y, spacing, 0]];
     for (let i = -n; i <= n; i += 2)
       for (let j = -n; j <= n; j += 2)
-        if (i || j) seeds.push([x + (spacing * (i + j)) / 2, y + (spacing * (i - j)) / 2]);
-    let failed = 0;
+        if (i || j)
+          seeds.push([x + (spacing * (i + j)) / 2, y + (spacing * (i - j)) / 2, spacing, 0]);
+    let failed = 0,
+      unresolved = 0;
+    const isolated: Root[] = [],
+      lines: Root[] = [];
+    const equal = (p: Root, q: Root) =>
+      Math.abs(p.x - q.x) + Math.abs(p.y - q.y) <= this.bounds.margin;
+    const canonical = (p: Root, c: CoincidenceDirection) => {
+      const shift = (x + c * y - (p.x + c * p.y)) / 2;
+      return {...p, x: p.x + shift, y: p.y + c * shift, c};
+    };
+    const retry = (seed: [number, number, number, number]) => {
+      ++failed;
+      if (seed[3] === 3) {
+        ++unresolved;
+        return;
+      }
+      // Four half-radius L1 diamonds exactly cover their parent. A failed
+      // coarse refinement is not evidence of an empty tile: cover it again.
+      const half = seed[2] / 2,
+        depth = seed[3] + 1;
+      for (const [dx, dy] of [
+        [half, 0],
+        [-half, 0],
+        [0, half],
+        [0, -half]
+      ])
+        seeds.push([seed[0] + dx, seed[1] + dy, half, depth]);
+    };
     for (const seed of seeds) {
       const root = this.refine(A, B, seed[0], seed[1]);
       if (!root) {
-        ++failed;
+        retry(seed);
         continue;
       }
       if (root.c) {
-        const shift = (x + root.c * y - (root.x + root.c * root.y)) / 2;
-        const sx = root.x + shift,
-          sy = root.y + root.c * shift;
-        if (
-          Math.abs(sx - x) + Math.abs(sy - y) <= d + this.tolerance &&
-          !coincidences.some(p => Math.abs(p.s / this.a - sx) + Math.abs(p.t / this.a - sy) < 1e-10)
-        )
-          coincidences.push({s: sx * this.a, t: sy * this.a, direction: root.c});
-        continue;
+        const q = canonical(root, root.c);
+        if (!this.point(A, B, q)) {
+          retry(seed);
+          continue;
+        }
+        if (!lines.some(p => p.c === q.c && equal(p, q))) lines.push(q);
+      } else if (!isolated.some(p => equal(p, root))) isolated.push(root);
+    }
+    const roots: IntersectionPoint[] = [],
+      coincidences: IntersectionSearch['coincidences'] = [];
+    for (const p of isolated) {
+      if (lines.some(q => equal(canonical(p, q.c as CoincidenceDirection), q))) continue;
+      if (Math.abs(p.x - x) + Math.abs(p.y - y) > d + this.tolerance) continue;
+      const point = this.point(A, B, p);
+      if (point) roots.push(point);
+      else {
+        ++failed;
+        ++unresolved;
       }
-      if (Math.abs(root.x - x) + Math.abs(root.y - y) > d + this.tolerance) continue;
-      const point = this.point(A, B, root);
-      if (
-        point &&
-        !roots.some(p => Math.abs(p.s / this.a - root.x) + Math.abs(p.t / this.a - root.y) < 1e-10)
-      )
-        roots.push(point);
+    }
+    for (const p of lines) {
+      if (Math.abs(p.x - x) + Math.abs(p.y - y) <= d + this.tolerance)
+        coincidences.push({
+          s: p.x * this.a,
+          t: p.y * this.a,
+          direction: p.c as CoincidenceDirection
+        });
     }
     this.sort(roots, origin);
+    coincidences.sort(
+      (p, q) =>
+        Math.abs(p.s - origin[0]) +
+          Math.abs(p.t - origin[1]) -
+          (Math.abs(q.s - origin[0]) + Math.abs(q.t - origin[1])) ||
+        p.s - q.s ||
+        p.t - q.t
+    );
     return {
       intersections: roots,
       coincidences,
-      complete: false,
+      complete: unresolved === 0,
       attemptedSeeds: seeds.length,
       failedSeeds: failed
     };
   }
 
+  /** Without an explicit radius, search the full native global profile.
+   * A returned root from any complete centered L1 search is globally closest:
+   * every point outside that ball is farther from its center.
+   */
   closest(
     a: GeodesicPath,
     b: GeodesicPath,
-    options: IntersectionSearchOptions
+    options: Partial<IntersectionSearchOptions> = {}
   ): ClosestIntersection {
-    const search = this.all(a, b, options);
-    return {...search, intersection: search.intersections[0]};
+    const settings = {
+      ...options,
+      maxDistance: options.maxDistance ?? 4 * this.bounds.halfCircumference * this.a
+    };
+    const search = this.all(a, b, settings);
+    const candidates = [...search.intersections];
+    for (const c of search.coincidences) {
+      const point = this.coincidencePoint(a, b, c);
+      if (point) candidates.push(point);
+      else {
+        search.complete = false;
+        ++search.failedSeeds;
+      }
+    }
+    this.sort(candidates, settings.origin ?? [0, 0]);
+    return {...search, intersection: candidates[0]};
   }
 
-  /** Next isolated crossing after the shared start, ranked by |s|+|t|.
-   * Signed directions are retained; equal-distance ties are deterministic.
+  /** Global next crossing, excluding the shared parameter origin. For a
+   * coincident continuum use GeographicLib's nearest-conjugate convention.
    */
   next(
     latitude: number,
     longitude: number,
     azimuthA: number,
     azimuthB: number,
-    maxDistance: number
+    maxDistance = 4 * this.bounds.halfCircumference * this.a
   ): ClosestIntersection {
-    const search = this.all(
-      {latitude, longitude, azimuth: azimuthA},
-      {latitude, longitude, azimuth: azimuthB},
-      {maxDistance}
-    );
+    const a = {latitude, longitude, azimuth: azimuthA},
+      b = {latitude, longitude, azimuth: azimuthB};
+    const search = this.all(a, b, {maxDistance});
     search.intersections = search.intersections.filter(
-      p => Math.abs(p.s / this.a) + Math.abs(p.t / this.a) > 1e-10
+      p => Math.abs(p.s / this.a) + Math.abs(p.t / this.a) > this.bounds.margin
     );
-    return {...search, intersection: search.intersections[0]};
+    const candidates = [...search.intersections];
+    const A = this.solver.line(latitude, longitude, azimuthA);
+    for (const c of search.coincidences) {
+      if (Math.abs(c.s / this.a) + Math.abs(c.t / this.a) > this.bounds.margin) {
+        const point = this.coincidencePoint(a, b, c);
+        if (point) candidates.push(point);
+        else {
+          search.complete = false;
+          ++search.failedSeeds;
+        }
+      } else {
+        for (const sign of [-1, 1]) {
+          try {
+            const s = this.bounds.conjugate(A, sign * this.bounds.halfCircumference);
+            const point = this.coincidencePoint(a, b, {
+              s: s * this.a,
+              t: c.direction * s * this.a,
+              direction: c.direction
+            });
+            if (point) candidates.push(point);
+            else {
+              search.complete = false;
+              ++search.failedSeeds;
+            }
+          } catch {
+            search.complete = false;
+            ++search.failedSeeds;
+          }
+        }
+      }
+    }
+    const bounded = candidates.filter(
+      p => Math.abs(p.s / this.a) + Math.abs(p.t / this.a) <= maxDistance / this.a + this.tolerance
+    );
+    this.sort(bounded, [0, 0]);
+    return {...search, intersection: bounded[0]};
+  }
+
+  private coincidencePoint(
+    a: GeodesicPath,
+    b: GeodesicPath,
+    c: {s: number; t: number; direction: 1 | -1}
+  ): IntersectionPoint | undefined {
+    return this.point(
+      this.solver.line(a.latitude, a.longitude, a.azimuth),
+      this.solver.line(b.latitude, b.longitude, b.azimuth),
+      {x: c.s / this.a, y: c.t / this.a, c: c.direction, iterations: 0}
+    );
   }
 
   segments(
@@ -212,14 +331,16 @@ export class GeodesicIntersections {
             status: 'overlap',
             intervalA: [lo * this.a, hi * this.a],
             intervalB: [(c.direction * lo + offset) * this.a, (c.direction * hi + offset) * this.a],
-            complete: false
+            complete: search.complete
           };
         const s = (lo + hi) / 2,
           t = c.direction * s + offset;
         const A = this.solver.line(a0[0], a0[1], ia.azi1),
           B = this.solver.line(b0[0], b0[1], ib.azi1);
         const point = this.point(A, B, {x: s, y: t, c: 0, iterations: 0});
-        if (point) return {status: 'intersection', point, complete: false};
+        if (point) return {status: 'intersection', point, complete: search.complete};
+        search.complete = false;
+        ++search.failedSeeds;
       }
     }
     const point = search.intersections.find(
@@ -299,7 +420,15 @@ export class GeodesicIntersections {
     const a = A.position(p.x),
       b = B.position(p.y),
       v = this.solver.inverse(a.lat2, a.lon2, b.lat2, b.lon2);
-    if (!(Number.isFinite(v.s12) && v.s12 <= this.tolerance)) return undefined;
+    if (
+      !(
+        Number.isFinite(v.s12) &&
+        v.s12 <= this.tolerance &&
+        Number.isFinite(p.x * this.a) &&
+        Number.isFinite(p.y * this.a)
+      )
+    )
+      return undefined;
     // Azimuths at a pole can use different longitude reference frames.
     const ta = frame({latitude: a.lat2, longitude: a.lon2, azimuth: a.azi2})[1];
     const tb = frame({latitude: b.lat2, longitude: b.lon2, azimuth: b.azi2})[1];
@@ -311,7 +440,8 @@ export class GeodesicIntersections {
       longitude: a.lon2,
       residual: v.s12 * this.a,
       crossingAngle: angle,
-      iterations: p.iterations
+      iterations: p.iterations,
+      ...(p.c ? {coincidence: p.c} : {})
     };
   }
 
@@ -343,7 +473,24 @@ export class GeodesicIntersections {
         if (Math.abs(sx - x) + Math.abs(sy - y) <= d + this.tolerance)
           coincidences.push({s: sx * this.a, t: sy * this.a, direction: sign});
       }
-      return {intersections: [], coincidences, complete: false, attemptedSeeds: 0, failedSeeds: 0};
+      let failed = 0;
+      const checked = coincidences.filter(c => {
+        const p = this.point(A, B, {
+          x: c.s / this.a,
+          y: c.t / this.a,
+          c: c.direction,
+          iterations: 0
+        });
+        if (!p) ++failed;
+        return Boolean(p);
+      });
+      return {
+        intersections: [],
+        coincidences: checked,
+        complete: failed === 0,
+        attemptedSeeds: 0,
+        failedSeeds: failed
+      };
     }
     const result: IntersectionPoint[] = [];
     let failed = 0;
