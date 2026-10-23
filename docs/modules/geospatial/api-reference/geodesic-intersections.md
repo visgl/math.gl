@@ -47,3 +47,8 @@ Callers must handle these statuses rather than treating every empty search as a
 proof of nonintersection.
 
 See [G5–G6 qualification](../projection/geographiclib-g56-qualification.md).
+
+Endpoint segments also reject the native GeographicLib catalog of nonunique
+shortest paths (latitude-reflected routes and opposite-longitude prolate routes),
+which cannot be detected by an auxiliary-arc cutoff alone. Compensated rhumb
+longitude differences retain representable tiny legs across the dateline.

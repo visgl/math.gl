@@ -1,8 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
-// SPDX-FileCopyrightText: Copyright (c) Charles Karney (2023)
+// SPDX-FileCopyrightText: Copyright (c) Charles Karney (2011-2023)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Spherical correction adapted from GeographicLib 2.7 Intersect.cpp (MIT, Karney 2024 geodesic-intersection paper). Original bounded search/reporting, analytic sphere enumeration and segment contracts. See ../GEOGRAPHICLIB-LICENSE.txt.
+// SPDX-FileComment: Spherical correction adapted from GeographicLib 2.7 Intersect.cpp (MIT, Karney 2024 geodesic-intersection paper). Geodesic.hpp shortest-path ambiguity catalog; original bounded search/reporting, analytic sphere enumeration and segment contracts. See ../GEOGRAPHICLIB-LICENSE.txt.
 import {EllipsoidGeodesic, type GeodesicParameters, type GeodesicLine} from './ellipsoid-geodesic';
 import {geodesic} from './vendor/geographiclib-geodesic/runtime';
 export type GeodesicPath = {latitude: number; longitude: number; azimuth: number};
@@ -164,7 +164,8 @@ export class GeodesicIntersections {
   ): SegmentIntersection {
     const ia = this.solver.inverse(...a0, ...a1),
       ib = this.solver.inverse(...b0, ...b1);
-    if (ia.a12 > 180 - 1e-10 || ib.a12 > 180 - 1e-10) return {status: 'ambiguous', complete: false};
+    if (this.ambiguous(a0, a1, ia) || this.ambiguous(b0, b1, ib))
+      return {status: 'ambiguous', complete: false};
     const sa = ia.s12,
       sb = ib.s12;
     if (sa === 0 || sb === 0) {
@@ -231,6 +232,25 @@ export class GeodesicIntersections {
     return point
       ? {status: 'intersection', point, complete: search.complete}
       : {status: search.complete ? 'disjoint' : 'not-found', complete: search.complete};
+  }
+
+  private ambiguous(
+    start: readonly [number, number],
+    end: readonly [number, number],
+    path: {a12: number; azi1: number; azi2: number}
+  ): boolean {
+    if (path.a12 > 180 - 1e-10) return true;
+    if (Math.abs(start[0]) === 90 || Math.abs(end[0]) === 90) return false;
+    // GeographicLib's nonunique shortest-path catalog is distinct from arc
+    // length: on prolate ellipsoids the cut locus can have a12 well below 180.
+    if (start[0] === -end[0] && math.AngDiff(path.azi1, path.azi2).d !== 0) return true;
+    const longitude = math.AngDiff(start[1], end[1]);
+    return (
+      Math.abs(longitude.d) === 180 &&
+      longitude.e === 0 &&
+      path.azi1 !== 0 &&
+      Math.abs(path.azi1) !== 180
+    );
   }
 
   private refine(A: GeodesicLine, B: GeodesicLine, x: number, y: number): Root | undefined {

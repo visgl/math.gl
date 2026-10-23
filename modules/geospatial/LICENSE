@@ -231,7 +231,8 @@ END OF TERMS AND CONDITIONS
 
 ---
 
-GeographicLib geodesics and polygon transit/area reduction
+GeographicLib geodesics, compensated longitude differences, shortest-path
+ambiguity catalog, polygon transit/area reduction and intersection correction
 
 The MIT License (MIT).
 

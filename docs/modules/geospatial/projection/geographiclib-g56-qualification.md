@@ -83,3 +83,8 @@ No runtime or development dependencies were added. Rhumb geometry is original
 math.gl source. The small spherical intersection correction is adapted from
 GeographicLib `Intersect.cpp`, with MIT SPDX/Charles Karney acknowledgements and
 full module license notices; existing vendored geodesic code is reused.
+
+Endpoint segments also reject the native GeographicLib catalog of nonunique
+shortest paths (latitude-reflected routes and opposite-longitude prolate routes),
+which cannot be detected by an auxiliary-arc cutoff alone. Compensated rhumb
+longitude differences retain representable tiny legs across the dateline.

@@ -197,3 +197,56 @@ test('Pole-relative meridian steps moving away from a pole stay representable', 
     }
   }
 });
+
+test('Compensated rhumb dateline differences retain nanometre legs and signed ties', () => {
+  const a = 6378137,
+    r = new EllipsoidRhumb({semiMajorAxis: a, semiMinorAxis: a});
+  const gap = 2 ** -45,
+    expected = (a * gap * Math.PI) / 180;
+  for (const [x, y, bearing] of [
+    [180 - gap, -180, 90],
+    [-180, 180 - gap, -90],
+    [-180 + gap, 180, -90],
+    [180, -180 + gap, 90]
+  ]) {
+    const p = r.inverse(0, x, 0, y, {area: true});
+    expect(p.azi12).toBe(bearing);
+    expect(p.s12).toBeCloseTo(expected, 22);
+    expect(p.S12).toBe(0);
+  }
+  for (const [x, y, bearing] of [
+    [0, 180, 90],
+    [0, -180, -90],
+    [360, 180, -90]
+  ])
+    expect(r.inverse(0, x, 0, y).azi12).toBe(bearing);
+  const before = 2 ** -46;
+  expect(r.inverse(0, before, 0, 180).azi12).toBe(90);
+  expect(r.inverse(0, -before, 0, 180).azi12).toBe(-90);
+});
+test('Segment ambiguity follows shortest-path multiplicity on both shapes', () => {
+  for (const ratio of [0.99, 1, 1.01]) {
+    const g = new GeodesicIntersections({semiMajorAxis: 1, semiMinorAxis: ratio});
+    for (const [start, end] of [
+      [
+        [10, 0],
+        [-10, 180]
+      ],
+      [
+        [0, 0],
+        [0, 180]
+      ],
+      [
+        [-10, 0],
+        [10, -180]
+      ]
+    ] as const) {
+      expect(g.segments(start, end, [0, 89], [0, 91]).status).toBe('ambiguous');
+      expect(g.segments([0, 89], [0, 91], start, end).status).toBe('ambiguous');
+    }
+    // Reflected latitude alone does not imply multiple shortest routes.
+    expect(g.segments([10, 0], [-10, 90], [0, 44], [0, 46]).status).toBe('intersection');
+    // Opposite longitude alone does not imply multiple shortest routes either.
+    expect(g.segments([80, 0], [80, 180], [85, 90], [89, 90]).status).not.toBe('ambiguous');
+  }
+});

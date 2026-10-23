@@ -1,7 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) Charles Karney (2011-2022)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Original meridian/isometric divided-integral rhumb solver. Independently compared with GeographicLib 2.7 Rhumb (Charles Karney, MIT); no upstream rhumb implementation copied. See ../GEOGRAPHICLIB-LICENSE.txt.
+// SPDX-FileComment: Original meridian/isometric divided-integral rhumb solver. Compensated longitude helper adapted from GeographicLib JS 2.2 Math.AngDiff (MIT); rhumbs independently compared with GeographicLib C++ 2.7. See ../GEOGRAPHICLIB-LICENSE.txt.
 import {EllipsoidMetrics, integrate} from './ellipsoid-metrics';
 import type {GeodesicParameters} from './ellipsoid-geodesic';
 
@@ -307,8 +308,15 @@ function normalize(angle: number): number {
   return a;
 }
 function angleDifference(a: number, b: number): number {
-  // Reduce before subtraction so common winding cannot swallow small differences.
-  const difference = normalize(b) - normalize(a),
-    result = normalize(difference);
-  return Math.abs(result) === 180 ? (b - a < 0 ? -180 : 180) : result;
+  // Retain the error when the first subtraction rounds a tiny dateline gap
+  // to a complete turn. Keep this small helper independent of the runtime.
+  let [d, e] = twoSum(-normalize(a), normalize(b));
+  [d, e] = twoSum(normalize(d), e);
+  if (Math.abs(d) === 180) return (e === 0 ? b < a : e > 0) ? -180 : 180;
+  return d === 0 ? (b < a ? -0 : 0) : d;
+}
+function twoSum(a: number, b: number): [number, number] {
+  const s = a + b,
+    v = s - a;
+  return [s, a - (s - v) + (b - v)];
 }

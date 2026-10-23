@@ -37,7 +37,7 @@ def independent():
             s,c=h.sc(phi);return r*r*(s/(c*c+r*r*s*s)+I(s))/2
         def P(phi):
             s,c=h.sc(phi);return r*r/(c*(c*c+r*r*s*s))
-        for p,q,dl in [(0.,12.5,20.),(-45.,60.,70.),(78.,78.1,.01),(1e-9,2e-9,3e-9),(45.,45.,.00001),(89.999999,89.999999,170.),(-12.,-12.,360.)]:
+        for p,q,dl in [(0.,12.5,20.),(-45.,60.,70.),(78.,78.1,.01),(1e-9,2e-9,3e-9),(45.,45.,.00001),(89.999999,89.999999,170.),(-12.,-12.,360.),(0.,0.,2**-45),(45.,45.,2**-45)]:
             x=D.from_float(p)*h.PI/180;y=D.from_float(q)*h.PI/180;lam=D.from_float(dl)*h.PI/180
             if p==q:
                 distance=abs(lam*M(x)/P(x));area=lam*F(x);azi=90.
@@ -54,7 +54,7 @@ def workloads():
     inverse=[];direct=[];polygons=[];intersections=[]
     for ratio in [.5,.99,.9966471893352525,1.,1.00000000000001,1.01,2.]:
         for a in [1.,6378137.]:
-            for point in [[0,0,0,170],[45,170,45,-170],[-80,0,80,179],[89.999999,1,89.999999,-170],[89.99,0,89.999999,120],[1e-9,0,2e-9,3e-9],[-10,180,-10,-180]]+[[rng.uniform(-85,85),rng.uniform(-180,180),rng.uniform(-85,85),rng.uniform(-180,180)] for _ in range(12)]:
+            for point in [[0,0,0,170],[0,180-2**-45,0,-180],[0,-180,0,180-2**-45],[45,180-2**-45,45,-180],[45,-180,45,180-2**-45],[45,170,45,-170],[-80,0,80,179],[89.999999,1,89.999999,-170],[89.99,0,89.999999,120],[1e-9,0,2e-9,3e-9],[-10,180,-10,-180]]+[[rng.uniform(-85,85),rng.uniform(-180,180),rng.uniform(-85,85),rng.uniform(-180,180)] for _ in range(12)]:
                 inverse.append(dict(a=a,b=a*ratio,point=point))
             for path in [[0,0,90,.1],[45,170,90,.2],[-20,30,0,.1],[78,45,-135,-.01],[0,0,37,1e-16]]+[[rng.uniform(-70,70),rng.uniform(-180,180),rng.uniform(-180,180),rng.uniform(-.1,.1)] for _ in range(7)]:
                 direct.append(dict(a=a,b=a*ratio,path=path[:3]+[path[3]*a]))

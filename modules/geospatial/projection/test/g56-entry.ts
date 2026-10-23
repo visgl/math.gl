@@ -158,5 +158,23 @@ export function qualifyG56() {
         }
       });
   }
+  run(0, 'independent tiny dateline leg', check => {
+    const a = 6378137,
+      r = new EllipsoidRhumb(axes(a, a)),
+      gap = 2 ** -45;
+    const p = r.inverse(0, 180 - gap, 0, -180, {area: true});
+    check(p.s12, (a * gap * Math.PI) / 180, 1e-22);
+    check(p.azi12, 90, 2e-11);
+    check(p.S12!, 0, 1e-28 * a * a);
+  });
+  run(0, 'native-catalog prolate segment ambiguity', check => {
+    const g = new GeodesicIntersections(axes(1, 1.01));
+    check(Number(g.segments([10, 0], [-10, 180], [0, 89], [0, 91]).status === 'ambiguous'), 1, 0.1);
+    check(
+      Number(g.segments([10, 0], [-10, 90], [0, 44], [0, 46]).status === 'intersection'),
+      1,
+      0.1
+    );
+  });
   return rows;
 }
