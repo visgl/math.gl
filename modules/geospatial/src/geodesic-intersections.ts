@@ -280,14 +280,17 @@ export class GeodesicIntersections {
       b = B.position(p.y),
       v = this.solver.inverse(a.lat2, a.lon2, b.lat2, b.lon2);
     if (!(Number.isFinite(v.s12) && v.s12 <= this.tolerance)) return undefined;
-    const angle = Math.abs(math.AngDiff(a.azi2, b.azi2).d);
+    // Azimuths at a pole can use different longitude reference frames.
+    const ta = frame({latitude: a.lat2, longitude: a.lon2, azimuth: a.azi2})[1];
+    const tb = frame({latitude: b.lat2, longitude: b.lon2, azimuth: b.azi2})[1];
+    const angle = Math.atan2(Math.hypot(...cross(ta, tb)), Math.abs(dot(ta, tb))) / DEG;
     return {
       s: p.x * this.a,
       t: p.y * this.a,
       latitude: a.lat2,
       longitude: a.lon2,
       residual: v.s12 * this.a,
-      crossingAngle: Math.min(angle, 180 - angle),
+      crossingAngle: angle,
       iterations: p.iterations
     };
   }

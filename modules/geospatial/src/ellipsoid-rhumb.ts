@@ -109,7 +109,6 @@ export class EllipsoidRhumb {
     validateRhumbPoint(latitude, longitude);
     if (!Number.isFinite(azimuth)) throw new RangeError('Rhumb azimuth must be finite');
     const [sa, ca] = sincosDegrees(azimuth);
-    const m1 = this.metrics.meridianDistance(latitude);
     const area = Boolean(options.area),
       unroll = Boolean(options.unrollLongitude);
     const azi = normalize(azimuth);
@@ -117,13 +116,17 @@ export class EllipsoidRhumb {
       position: (distance: number): RhumbResult => {
         if (!Number.isFinite(distance)) throw new RangeError('Rhumb distance must be finite');
         const delta = distance / this.a;
-        const target = m1 + delta * ca;
-        if (ca !== 0 && delta !== 0 && Math.abs(target) > this.metrics.quarterMeridian)
-          throw new RhumbDomainError('pole-crossing');
-        if (ca !== 0 && delta !== 0 && Math.abs(target) === this.metrics.quarterMeridian)
-          throw new RhumbDomainError('pole');
-        // Exact east/west paths keep the input latitude, including tiny parallels.
-        const lat2 = ca === 0 || delta === 0 ? latitude : this.inverseMeridian(target);
+        if (!Number.isFinite(delta)) throw new RangeError('Unrepresentable rhumb distance');
+        const north = delta * ca;
+        if (north !== 0) {
+          // Integrate the pole gap directly: subtracting two absolute meridian
+          // ordinates discards valid steps close to a pole, even away from it.
+          const gap =
+            north > 0 ? this.meridianDelta(latitude, 90) : this.meridianDelta(-90, latitude);
+          if (Math.abs(north) > gap) throw new RhumbDomainError('pole-crossing');
+          if (Math.abs(north) === gap) throw new RhumbDomainError('pole');
+        }
+        const lat2 = north === 0 ? latitude : this.inverseMeridian(latitude, north);
         if (Math.abs(lat2) === 90) throw new RhumbDomainError('pole');
         const [meanM, meanP] = this.means(latitude, lat2);
         const dlon = (delta * sa * meanP) / meanM / DEG;
@@ -146,15 +149,7 @@ export class EllipsoidRhumb {
   private means(lat1: number, lat2: number): [number, number] {
     const d = (lat2 - lat1) * DEG;
     const mid = (lat1 + lat2) / 2;
-    const meanM =
-      integrate(
-        t => {
-          const [s, c] = latitudeSinCos(mid + (t * (lat2 - lat1)) / 2);
-          return this.r ** 2 / Math.hypot(c, this.r * s) ** 3;
-        },
-        -1,
-        1
-      ) / 2;
+    const meanM = this.meridianMean(lat1, lat2);
     const cmin = Math.min(latitudeSinCos(lat1)[1], latitudeSinCos(lat2)[1]);
     // Divided integral, not subtraction of nearly equal meridian/isometric values.
     const meanP =
@@ -175,19 +170,47 @@ export class EllipsoidRhumb {
     return this.metrics.latitudeToAuxiliary(latitude, 'isometric') * DEG;
   }
 
-  private inverseMeridian(target: number): number {
+  private meridianMean(lat1: number, lat2: number): number {
+    const mid = (lat1 + lat2) / 2;
+    return (
+      integrate(
+        t => {
+          const [s, c] = latitudeSinCos(mid + (t * (lat2 - lat1)) / 2);
+          return this.r ** 2 / Math.hypot(c, this.r * s) ** 3;
+        },
+        -1,
+        1
+      ) / 2
+    );
+  }
+
+  private meridianDelta(lat1: number, lat2: number): number {
+    return (lat2 - lat1) * DEG * this.meridianMean(lat1, lat2);
+  }
+
+  private inverseMeridian(start: number, displacement: number): number {
     let lo = -90,
-      hi = 90,
-      phi = (target / this.metrics.quarterMeridian) * 90;
-    for (let i = 0; i < 32; i++) {
-      const residual = this.metrics.meridianDistance(phi) - target;
+      hi = 90;
+    let phi = start + displacement / this.metrics.meridionalCurvatureRadius(start) / DEG;
+    if (!(phi > lo && phi < hi)) phi = (start + Math.sign(displacement) * 90) / 2;
+    for (let i = 0; i < 64; i++) {
+      const residual = this.meridianDelta(start, phi) - displacement;
       if (residual === 0) return phi;
       if (residual < 0) lo = phi;
       else hi = phi;
       const next = phi - residual / this.metrics.meridionalCurvatureRadius(phi) / DEG;
       if (next === phi) return phi;
       phi = next > lo && next < hi ? next : (lo + hi) / 2;
-      if (phi === lo || phi === hi) return phi;
+      if (phi === lo || phi === hi) {
+        // Select a representable non-pole endpoint with the smaller residual.
+        const candidates = [lo, hi].filter(v => Math.abs(v) < 90);
+        return candidates.reduce((best, v) =>
+          Math.abs(this.meridianDelta(start, v) - displacement) <
+          Math.abs(this.meridianDelta(start, best) - displacement)
+            ? v
+            : best
+        );
+      }
     }
     throw new Error('Rhumb meridian inversion did not converge');
   }

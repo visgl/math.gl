@@ -32,6 +32,12 @@ from a local iteration alone.
 
 ## Findings and deliberate differences
 
+- Polar geodesic crossing tangents must be compared in a common Cartesian
+  frame; subtracting longitude-dependent azimuths can mislabel a right-angle
+  crossing as parallel.
+- Pole-relative meridian gaps and start-relative inversion preserve valid tiny
+  steps moving away from a pole; absolute meridian ordinates can round to the
+  pole even when the endpoint is representable.
 - Tiny meridian displacements need a relative Newton inversion; fixed absolute
   latitude bisection loses meaningful tiny endpoints. The rhumb solver preserves
   the displacement and independently tests it.

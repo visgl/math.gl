@@ -162,3 +162,38 @@ test('Rhumb polygon winding and insertion failures preserve compensated state', 
   expect(p.clear().compute()).toEqual({number: 0, perimeter: 0});
   expect(() => new RhumbPolygon(axes).testPoint(0, 0, {longitudeTurns: NaN})).toThrow(RangeError);
 });
+
+test('Polar intersections compare tangents in a common frame', () => {
+  for (const ratio of [1, 0.9966471893352525]) {
+    const g = new GeodesicIntersections({semiMajorAxis: 1, semiMinorAxis: ratio});
+    for (const longitude of [30, 90, 150]) {
+      const result = g.all(
+        {latitude: 0, longitude: 0, azimuth: 0},
+        {latitude: 0, longitude, azimuth: 0},
+        {maxDistance: 4}
+      );
+      expect(result.intersections).toHaveLength(2);
+      for (const p of result.intersections) {
+        expect(Math.abs(p.latitude)).toBeCloseTo(90, 11);
+        expect(p.crossingAngle).toBeCloseTo(Math.min(longitude, 180 - longitude), 11);
+      }
+    }
+  }
+});
+test('Pole-relative meridian steps moving away from a pole stay representable', () => {
+  for (const ratio of [0.5, 0.9966471893352525, 1, 2]) {
+    const r = new EllipsoidRhumb({semiMajorAxis: 1, semiMinorAxis: ratio});
+    for (const sign of [-1, 1]) {
+      const latitude = sign * (90 - 2 ** -46),
+        distance = -sign * 2e-16;
+      const p = r.direct(latitude, 0, 0, distance);
+      expect(Math.abs(p.lat2)).toBeLessThan(90);
+      expect(sign * (p.lat2 - latitude)).toBeLessThanOrEqual(0);
+      // Independent local pole limit M/a=1/r; error includes degree quantization.
+      expect(Math.abs(((p.lat2 - latitude) * Math.PI) / 180 - distance * ratio)).toBeLessThan(
+        4e-16
+      );
+      expect(r.line(latitude, 0, 0).position(distance)).toEqual(p);
+    }
+  }
+});
