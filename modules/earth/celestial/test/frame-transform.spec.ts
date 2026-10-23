@@ -108,3 +108,41 @@ test('Snapshots isolate input and getter mutation, and reject nonrigid/invalid r
   ).toThrow(RangeError);
   expect(() => frame.transformPosition([NaN, 0, 0])).toThrow(RangeError);
 });
+
+test('A rotating snapshot composes with its inverse despite derivative cancellation roundoff', () => {
+  const [sx, sy, sz] = [0.4, 0.7, 0.9].map(Math.sin);
+  const [cx, cy, cz] = [0.4, 0.7, 0.9].map(Math.cos);
+  // Independent Rz Ry Rx matrix, and dR/dt = cross([1,2,3]) R.
+  const matrix = [
+    cz * cy,
+    sz * cy,
+    -sy,
+    cz * sy * sx - sz * cx,
+    sz * sy * sx + cz * cx,
+    cy * sx,
+    cz * sy * cx + sz * sx,
+    sz * sy * cx - cz * sx,
+    cy * cx
+  ];
+  const rate: number[] = [];
+  for (let column = 0; column < 3; column++) {
+    const [x, y, z] = matrix.slice(column * 3, column * 3 + 3);
+    rate.push(2 * z - 3 * y, 3 * x - z, y - 2 * x);
+  }
+  const multiaxis = new CelestialFrameTransform(matrix, {
+    from: 'A',
+    to: 'B',
+    epoch,
+    rotationRate: rate
+  });
+  const state = {position: [7e6, -2e6, 1e6], velocity: [1e3, 7e3, -2e3]};
+  for (const frame of [rotation(0.7, 0.1), multiaxis]) {
+    for (const combined of [frame.then(frame.inverse()), frame.inverse().then(frame)]) {
+      close(combined.rotation, identity);
+      close(combined.rotationRate!, zero);
+      const output = combined.transformState(state);
+      close(output.position, state.position, 7);
+      close(output.velocity, state.velocity, 7);
+    }
+  }
+});

@@ -43,7 +43,8 @@
       "earth",
       "earth/geoid",
       "earth/timezone",
-      "earth/sun"
+      "earth/sun",
+      "earth/celestial"
     ]
   },
   {

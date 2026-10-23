@@ -50,7 +50,9 @@ export class CelestialFrameTransform {
           !Number.isFinite(dot) ||
           Math.abs(dot - (i === j ? 1 : 0)) > 1e-10 ||
           !Number.isFinite(derivative) ||
-          (rate && Math.abs(derivative) > 1e-12 * Math.max(1e-30, ...rate.map(Math.abs)))
+          // Inverse composition can cancel rates down to machine roundoff.
+          // Keep an absolute floor as well as a relative check (rates are per second).
+          (rate && Math.abs(derivative) > 64 * Number.EPSILON * Math.max(1, ...rate.map(Math.abs)))
         ) {
           throw new RangeError('Expected orthonormal rotation and a compatible derivative');
         }
