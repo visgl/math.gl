@@ -11,3 +11,15 @@ export function projectionWeights(from, target, fraction) {
   }
   return result;
 }
+
+export const isMyriahedral = view => view?.startsWith('myriahedral:');
+
+/** Route incompatible panel nets through their common spherical endpoint. */
+export function myriahedralRoute(fromView, toView, amount = 1) {
+  const stages = [];
+  if (isMyriahedral(fromView)) stages.push({kind: 'hinge', view: fromView, from: amount, to: 0});
+  else if (fromView !== 'globe') stages.push({kind: 'map', view: 'globe'});
+  if (isMyriahedral(toView)) stages.push({kind: 'hinge', view: toView, from: 0, to: 1});
+  else if (toView !== 'globe') stages.push({kind: 'map', view: toView});
+  return stages;
+}
