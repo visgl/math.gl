@@ -27,8 +27,9 @@ def workloads():
     for direction in [1,-1]:
      b=path[:];b[2]+=180 if direction<0 else 0
      rows.append(dict(**axes,mode='A',paths=[path,b],maxDistance=10*a,origin=[0.,0.]))
-   for direction in [1,-1]:
-    rows.append(dict(**axes,mode='A',along=[20.,30.,37.,2.1*a,direction],maxDistance=10*a,origin=[.3*a,-.2*a]))
+   for shift in [2.1,3.2,5.7]:
+    for direction in [1,-1]:
+     rows.append(dict(**axes,mode='A',along=[20.,30.,37.,shift*a,direction],maxDistance=10*a,origin=[.3*a,-.2*a],**({'nativeClosestQuirk':'Native Closest classifies a shifted spherical continuum as isolated; All and the analytic great-circle identity agree.'} if r==1 and a==6378137 and shift==3.2 and direction==-1 else {})))
    for azimuths in [[90.,90.],[0.,180.],[37.,37.],[37.,37.0001],[0.,90.]]:
     rows.append(dict(**axes,mode='N',shared=[0.,0.,*azimuths]))
    for points in [[[0,-20],[0,20],[-20,0],[20,0]],[[0,-20],[0,20],[20,30],[30,30]],[[0,-20],[0,20],[0,0],[0,40]],[[0,-20],[0,20],[0,40],[0,0]]]:

@@ -19,6 +19,7 @@ type AllRow = Axes & {
   origin: number[];
   expected: number[][];
   closest: number[];
+  nativeClosestQuirk?: string;
 };
 type NextRow = Axes & {mode: 'N'; shared: number[]; expected: number[]};
 type SegmentRow = Axes & {mode: 'S'; points: number[][]; expected: number[]};
@@ -96,8 +97,9 @@ export function qualifyG6() {
           );
           check(report.intersections.length, isolated.length, 0.1);
           check(report.coincidences.length, lines.length, 0.1);
+          const unmatched = [...isolated];
           for (const p of report.intersections) {
-            const expected = isolated.reduce<number[] | undefined>(
+            const expected = unmatched.reduce<number[] | undefined>(
               (best, q) =>
                 !best ||
                 Math.abs(p.s - q[0]) + Math.abs(p.t - q[1]) <
@@ -110,19 +112,23 @@ export function qualifyG6() {
               check(Infinity, 0, 1);
               continue;
             }
+            unmatched.splice(unmatched.indexOf(expected), 1);
             const conditioning = Math.max(1e-12, Math.sin((p.crossingAngle * Math.PI) / 180));
             check(p.s, expected[0], (5e-14 * r.a) / conditioning);
             check(p.t, expected[1], (5e-14 * r.a) / conditioning);
             residual(geod, a, b, p, r.a, check);
           }
+          check(unmatched.length, 0, 0.1);
+          const unmatchedLines = [...lines];
           for (const c of report.coincidences) {
-            const line = lines.find(
+            const line = unmatchedLines.find(
               q => q[2] === c.direction && Math.abs(c.t - c.direction * c.s - offset(q)) <= margin
             );
             if (!line) {
               check(Infinity, 0, 1);
               continue;
             }
+            unmatchedLines.splice(unmatchedLines.indexOf(line), 1);
             check(c.t - c.direction * c.s, offset(line), 5e-14 * r.a);
             const p = geod.line(a.latitude, a.longitude, a.azimuth).position(c.s),
               q = geod.line(b.latitude, b.longitude, b.azimuth).position(c.t);
@@ -133,20 +139,37 @@ export function qualifyG6() {
               5e-14 * r.a
             );
           }
+          check(unmatchedLines.length, 0, 0.1);
           const closest = g.closest(a, b, {origin});
           check(Number(closest.complete), 1, 0.1);
           if (!closest.intersection) {
             check(Infinity, 0, 1);
             return;
           }
+          // Native Closest can misclassify this rounded spherical continuum.
+          // Its complete All list and independent shift/period identity agree.
+          const expectedClosest = r.nativeClosestQuirk
+            ? lines
+                .map(q => {
+                  const shift = (origin[0] + q[2] * origin[1] - q[0] - q[2] * q[1]) / 2;
+                  return [q[0] + shift, q[1] + q[2] * shift, q[2]];
+                })
+                .sort(
+                  (u, v) =>
+                    Math.abs(u[0] - origin[0]) +
+                    Math.abs(u[1] - origin[1]) -
+                    Math.abs(v[0] - origin[0]) -
+                    Math.abs(v[1] - origin[1])
+                )[0]
+            : r.closest;
           const p = closest.intersection,
             conditioning = Math.max(1e-12, Math.sin((p.crossingAngle * Math.PI) / 180));
           check(
             Math.abs(p.s - origin[0]) + Math.abs(p.t - origin[1]),
-            Math.abs(r.closest[0] - origin[0]) + Math.abs(r.closest[1] - origin[1]),
+            Math.abs(expectedClosest[0] - origin[0]) + Math.abs(expectedClosest[1] - origin[1]),
             (5e-14 * r.a) / conditioning
           );
-          check(p.coincidence ?? 0, r.closest[2], 0.1);
+          check(p.coincidence ?? 0, expectedClosest[2], 0.1);
           residual(geod, a, b, p, r.a, check);
         } else if (r.mode === 'N') {
           const [lat, lon, az, bz] = r.shared;
@@ -180,6 +203,37 @@ export function qualifyG6() {
             coincidence = r.expected[2];
           if (mode === 0) {
             check(Number(result.status === (coincidence ? 'overlap' : 'intersection')), 1, 0.1);
+            if (result.status === 'overlap') {
+              // These controls are equatorial: axis-scaled longitude gives
+              // independent interval endpoints, including reversed B ordering.
+              check(
+                Number([...a, ...b, ...c, ...d].filter((_, i) => i % 2 === 0).every(v => v === 0)),
+                1,
+                0.1
+              );
+              const lo = Math.max(Math.min(a[1], b[1]), Math.min(c[1], d[1]));
+              const hi = Math.min(Math.max(a[1], b[1]), Math.max(c[1], d[1]));
+              const ia = geod.inverse(...a, ...b),
+                ib = geod.inverse(...c, ...d);
+              const A = geod.line(...a, ia.azi1),
+                B = geod.line(...c, ib.azi1);
+              for (const [i, longitude] of [lo, hi].entries()) {
+                check(
+                  result.intervalA[i],
+                  (((longitude - a[1]) * Math.PI) / 180) * r.a,
+                  5e-14 * r.a
+                );
+                check(
+                  result.intervalB[i],
+                  (((longitude - c[1]) * Math.sign(d[1] - c[1]) * Math.PI) / 180) * r.a,
+                  5e-14 * r.a
+                );
+                const x = A.position(result.intervalA[i]),
+                  y = B.position(result.intervalB[i]);
+                check(geod.inverse(x.lat2, x.lon2, y.lat2, y.lon2).s12, 0, 5e-14 * r.a);
+                check(geod.inverse(x.lat2, x.lon2, 0, longitude).s12, 0, 5e-14 * r.a);
+              }
+            }
             if (result.status === 'intersection') {
               const p = result.point,
                 ia = geod.inverse(...a, ...b),
@@ -210,17 +264,27 @@ export function qualifyG6() {
         });
         check(Number(result.complete), 1, 0.1);
         check(result.intersections.length, r.expected!.length, 0.1);
+        const unmatched = [...r.expected!];
         for (const p of result.intersections) {
-          const q = r.expected!.reduce((best, q) =>
-            Math.abs(p.s - q[0]) + Math.abs(p.t - q[1]) <
-            Math.abs(p.s - best[0]) + Math.abs(p.t - best[1])
-              ? q
-              : best
+          const q = unmatched.reduce<number[] | undefined>(
+            (best, q) =>
+              !best ||
+              Math.abs(p.s - q[0]) + Math.abs(p.t - q[1]) <
+                Math.abs(p.s - best[0]) + Math.abs(p.t - best[1])
+                ? q
+                : best,
+            undefined
           );
+          if (!q) {
+            check(Infinity, 0, 1);
+            continue;
+          }
+          unmatched.splice(unmatched.indexOf(q), 1);
           check(p.s, q[0], 5e-14 * r.a);
           check(p.t, q[1], 5e-14 * r.a);
           check(p.residual, 0, 5e-14 * r.a);
         }
+        check(unmatched.length, 0, 0.1);
       } else {
         const result = r.mode === 'pole-next' ? g.next(90, 0, 0, 180) : g.next(0, 0, 90, 90);
         check(Number(result.complete), 1, 0.1);

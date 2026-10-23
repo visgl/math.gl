@@ -88,7 +88,10 @@ export class GeodesicIntersections {
       throw new RangeError(
         'Intersection search requires finite bounds within four half-circumferences'
       );
-    if (this.r === 1) return this.sphere(a, b, A, B, d, x, y);
+    if (this.r === 1) {
+      const analytic = this.sphere(a, b, A, B, d, x, y);
+      if (analytic) return analytic;
+    }
     // GeographicLib AllInt0 capture-radius tiling, without its optional seed
     // pruning: every tile is refined. Extend by delta before tiling so roots
     // at the requested boundary still lie inside a capture region.
@@ -453,11 +456,15 @@ export class GeodesicIntersections {
     d: number,
     x: number,
     y: number
-  ): IntersectionSearch {
+  ): IntersectionSearch | undefined {
     const [pa, ta, na] = frame(a),
       [pb, tb, nb] = frame(b),
       crossing = cross(na, nb),
       length = Math.hypot(...crossing);
+    // Almost dependent plane normals amplify their floating-point error.
+    // Resolve these through capture-bound geodesic refinement and the native
+    // coincidence convention instead of normalizing an unreliable cross product.
+    if (length > 0 && length < Math.sqrt(Number.EPSILON)) return undefined;
     if (length <= EPS) {
       const sign = dot(na, nb) >= 0 ? 1 : -1;
       const offset = Math.atan2(dot(pa, tb), dot(pa, pb));

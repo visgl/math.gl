@@ -1,9 +1,10 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {expect, test} from 'vitest';
+import {expect, test, vi} from 'vitest';
 import reference from './g6-reference.json';
 import {qualifyG6} from '../../projection/test/g6-entry';
+import {EllipsoidGeodesic} from '../../src/ellipsoid-geodesic';
 import {GeodesicIntersections} from '../../src/geodesic-intersections';
 for (const row of qualifyG6())
   test(`G6 ${row.family} ${row.id}`, () => expect(row, row.error).toMatchObject({passed: true}));
@@ -62,7 +63,13 @@ test('Complete search includes closed boundaries and distinguishes an empty smal
   }
 });
 test('Global ranking handles competing roots from near-antipodal starts', () => {
-  const r = reference.native[55],
+  const r = reference.native.find(
+      r =>
+        r.a === 1 &&
+        r.b === 0.9966471893352525 &&
+        'construction' in r &&
+        r.construction?.[3] === 37.0001
+    )!,
     p = r.pathsGenerated!.map(([latitude, longitude, azimuth]) => ({latitude, longitude, azimuth}));
   const g = new GeodesicIntersections({semiMajorAxis: r.a, semiMinorAxis: r.b});
   const closest = g.closest(p[0], p[1]);
@@ -74,4 +81,78 @@ test('Global ranking handles competing roots from near-antipodal starts', () => 
   expect(result.complete).toBe(true);
   expect(result.intersections).toHaveLength(12);
   expect(result.attemptedSeeds).toBeLessThanOrEqual(2125);
+});
+
+test('Shifted spherical continua retain the analytic global minimum', () => {
+  for (const a of [1, 6378137]) {
+    const axes = {semiMajorAxis: a, semiMinorAxis: a};
+    const geod = new EllipsoidGeodesic(axes);
+    const start = {latitude: 20, longitude: 30, azimuth: 37};
+    const shift = 3.2 * a;
+    const q = geod.line(20, 30, 37).position(shift);
+    const origin: [number, number] = [0.3 * a, -0.2 * a];
+    for (const direction of [-1, 1] as const) {
+      const g = new GeodesicIntersections(axes);
+      const result = g.closest(
+        start,
+        {latitude: q.lat2, longitude: q.lon2, azimuth: q.azi2 + (direction === -1 ? 180 : 0)},
+        {origin}
+      );
+      const p = result.intersection!;
+      expect(result.complete).toBe(true);
+      expect(p.coincidence).toBe(direction);
+      // s - direction*t = shift mod 2*pi*a, independently of native Closest.
+      const expected = Math.min(
+        ...[-2, -1, 0, 1, 2].map(k =>
+          Math.abs(shift + k * 2 * Math.PI * a - origin[0] + direction * origin[1])
+        )
+      );
+      expect(
+        Math.abs(Math.abs(p.s - origin[0]) + Math.abs(p.t - origin[1]) - expected)
+      ).toBeLessThan(5e-14 * a);
+    }
+  }
+});
+
+test('Qualification rejects duplicate crossings and continuum branches', () => {
+  const original = GeodesicIntersections.prototype.all;
+  for (const field of ['intersections', 'coincidences'] as const) {
+    const spy = vi.spyOn(GeodesicIntersections.prototype, 'all').mockImplementation(function (
+      ...args
+    ) {
+      const report = original.apply(this, args);
+      if (report[field].length > 1) report[field][1] = {...report[field][0]} as never;
+      return report;
+    });
+    try {
+      const rows = qualifyG6();
+      expect(rows.some(r => r.family === 'native global all/closest' && !r.passed)).toBe(true);
+      if (field === 'intersections')
+        expect(
+          rows.some(r => r.family === 'independent meridian lattice/conjugates' && !r.passed)
+        ).toBe(true);
+    } finally {
+      spy.mockRestore();
+    }
+  }
+});
+
+test('Qualification rejects incorrect overlap interval endpoints', () => {
+  const original = GeodesicIntersections.prototype.segments;
+  for (const field of ['intervalA', 'intervalB'] as const) {
+    const spy = vi.spyOn(GeodesicIntersections.prototype, 'segments').mockImplementation(function (
+      ...args
+    ) {
+      const report = original.apply(this, args);
+      if (report.status === 'overlap') report[field][0] += 0.01;
+      return report;
+    });
+    try {
+      expect(qualifyG6().some(r => r.family === 'native complete segments' && !r.passed)).toBe(
+        true
+      );
+    } finally {
+      spy.mockRestore();
+    }
+  }
 });

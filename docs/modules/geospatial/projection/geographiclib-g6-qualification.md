@@ -72,7 +72,7 @@ The existing gates are unchanged:
 | Segment membership and continuum offsets | `5e-14 a` |
 | Root/continuum counts and complete flags | Exact |
 
-The fixture has **300 original native controls** for full root sets, global
+The fixture has **348 original native controls** for full root sets, global
 closest/next rankings, coincident/antiparallel paths, shifted origins, multiple
 circuits and segment modes. Shapes include oblate/prolate endpoints, WGS84,
 sphere and near-sphere limits. Near-antipodal starts and nearly parallel paths
@@ -111,3 +111,11 @@ using the source/generated include directories and a 53-bit `Math::real` build.
 Then run the generator with `--archive /path/to/r2.7.tar.gz --oracle /path/to/oracle`.
 The adapted capture/conjugate algorithms retain Charles Karney MIT SPDX credits
 and the full module license notices.
+
+Shifted coincident paths now include 2.1, 3.2 and 5.7 axis-unit shifts in both
+directions. Near-dependent spherical plane normals use the geodesic refinement
+path rather than amplifying cross-product rounding. A 53-bit native Closest
+quirk classifies one rounded spherical continuum as isolated although native
+All reports the continuum. The fixture preserves that discrepancy explicitly;
+that case is gated against All and an independent analytic shift/period minimum.
+Physical residual and conditioned parameter budgets remain unchanged.
