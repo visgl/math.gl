@@ -72,7 +72,7 @@ contract used by projection and Cartesian conversion.
 
 The [full P0 operation/domain matrix](../projection/ellipsoid-p0-qualification.md)
 closes G0–G2 for the declared sampled support profile. It adds 930 independent
-180-digit geometry controls (including 210 stored anchor inputs) and 2,442 controls from full C++ GeographicLib 2.7,
+180-digit geometry controls (including 210 stored anchor inputs) and 2,550 controls from full C++ GeographicLib 2.7,
 including elliptic-integral Exact comparisons. It also audits every existing
 Ellipsoid method's units, ownership and boundary policy. Native C++ thin-shape
 failures/discrepancies and beyond-four-circuit series limitations remain visible;

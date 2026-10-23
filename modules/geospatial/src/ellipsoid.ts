@@ -8,7 +8,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 /* eslint-disable */
-import {Vector3, Matrix4, assert, equals, _MathUtils, NumericArray, config} from '@math.gl/core';
+import {Vector3, Matrix4, assert, _MathUtils, NumericArray, config} from '@math.gl/core';
 import type {SpheroidParameters} from '@math.gl/core/types';
 import {
   spheroidToCartesian,
@@ -30,7 +30,6 @@ import {scaleToGeodeticSurface, writeResult} from './ellipsoid-helpers/scale-to-
 const spheroidScratch = {x: 0, y: 0, z: 0};
 const scratchVector = new Vector3();
 const scratchNormal = new Vector3();
-const scratchK = new Vector3();
 const scratchPosition = new Vector3();
 const scratchCartesian = new Vector3();
 
@@ -94,8 +93,8 @@ export class Ellipsoid {
 
     this.maximumRadius = Math.max(x, y, z);
 
-    if (this.radiiSquared.z !== 0) {
-      this.squaredXOverSquaredZ = this.radiiSquared.x / this.radiiSquared.z;
+    if (z !== 0) {
+      this.squaredXOverSquaredZ = (x / z) ** 2;
     }
 
     // Setup only: retain the three-radius path for unsupported/lossy shapes.
@@ -109,7 +108,7 @@ export class Ellipsoid {
       this.spheroidGeometry = Object.freeze({
         semiMajorAxis: x,
         semiMinorAxis: z,
-        eccentricitySquared: 1 - this.radiiSquared.z / this.radiiSquared.x
+        eccentricitySquared: 1 - (z / x) ** 2
       });
     // Geometry and all derived caches are one immutable snapshot. Mutating a
     // public vector previously changed some algorithms while leaving others stale.
@@ -174,16 +173,21 @@ export class Ellipsoid {
       if (!spheroidToCartesian(spheroidScratch, this.spheroidGeometry)) return undefined;
       return writeResult(result, spheroidScratch.x, spheroidScratch.y, spheroidScratch.z);
     }
-    const normal = scratchNormal,
-      k = scratchK;
+    const normal = scratchNormal;
     this.geodeticSurfaceNormalCartographic(cartographic, normal);
-    k.copy(this.radiiSquared).scale(normal);
-    const gamma = Math.sqrt(normal.dot(k));
-    k.scale(1 / gamma);
-    normal.scale(height);
-    k.add(normal);
-    if (!Number.isFinite(k.x) || !Number.isFinite(k.y) || !Number.isFinite(k.z)) return undefined;
-    return writeResult(result, k.x, k.y, k.z);
+    const nx = normal.x,
+      ny = normal.y,
+      nz = normal.z;
+    const rx = this.radii.x,
+      ry = this.radii.y,
+      rz = this.radii.z;
+    // Form support from scaled axes, not rounded (possibly subnormal) squares.
+    const gamma = Math.hypot(rx * nx, ry * ny, rz * nz);
+    const x = rx * ((rx * nx) / gamma) + height * nx;
+    const y = ry * ((ry * ny) / gamma) + height * ny;
+    const z = rz * ((rz * nz) / gamma) + height * nz;
+    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) return undefined;
+    return writeResult(result, x, y, z);
   }
 
   /** Converts the provided Cartesian position to [longitude, latitude, height],
@@ -417,8 +421,7 @@ export class Ellipsoid {
     result: number[] = [0, 0, 0]
   ): number[] {
     // Ellipsoid must be an ellipsoid of revolution (radii.x == radii.y)
-    assert(equals(this.radii.x, this.radii.y, _MathUtils.EPSILON15));
-    assert(this.radii.z > 0);
+    assert(this.radii.x === this.radii.y && this.minimumRadius > 0);
 
     fromCartographic(position, scratchPosition);
     if (
@@ -429,6 +432,7 @@ export class Ellipsoid {
     )
       return undefined;
     const z = scratchPosition.z * (1 - this.squaredXOverSquaredZ);
+    if (!Number.isFinite(z)) return undefined;
 
     if (Math.abs(z) >= this.radii.z - buffer) {
       return undefined;

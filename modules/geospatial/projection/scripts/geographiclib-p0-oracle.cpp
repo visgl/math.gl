@@ -36,7 +36,11 @@ int main(int argc,char**) {
     R f=double((a-b)/a);
     if(backend=='S') geodesic<Geodesic>(mode,a,f,p);
     else if(backend=='E') geodesic<GeodesicExact>(mode,a,f,p);
-    else if(mode=='T') {
+    else if(mode=='Q') {
+      Triaxial::Cartesian3 g(a,b,c);Triaxial::Cartesian3::vec3 q;
+      g.anytocart(Triaxial::Cartesian3::GEODETIC,p[1],p[0],p[2],q);
+      std::cout<<double(q[0])<<' '<<double(q[1])<<' '<<double(q[2])<<'\n';
+    } else if(mode=='T') {
       Triaxial::Cartesian3 g(a,b,c);Triaxial::Cartesian3::vec3 q;
       R h;g.carttocart2({p[0],p[1],p[2]},q,h);
       R nx=q[0]/a/a,ny=q[1]/b/b,nz=q[2]/c/c,n=std::hypot(nx,ny,nz);

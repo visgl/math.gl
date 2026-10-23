@@ -16,7 +16,7 @@ The [P0 completion matrix](../docs/modules/geospatial/projection/ellipsoid-p0-qu
 closes G0–G2 for existing APIs and explicit sampled domains. It pins full C++
 GeographicLib 2.7 (series and Exact), independently gates Cartesian mathematics,
 and records the complete public ownership/unit/boundary audit. The new matrix
-has 930 Decimal geometry rows (720 wider-domain cases and 210 exact-input anchor cases) and 2,442 native C++ rows; 3,370 rows are gates and
+has 930 Decimal geometry rows (720 wider-domain cases and 210 exact-input anchor cases) and 2,550 native C++ rows; 3,478 rows are gates and
 two very-long-line Exact comparisons remain explicitly diagnostic. Existing
 PROJ, interior and cusp gates and accuracy/bundle budgets remain unchanged.
 

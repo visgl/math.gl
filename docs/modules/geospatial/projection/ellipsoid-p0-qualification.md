@@ -27,13 +27,13 @@ unchanged, including their cusp-component gates.
 | --- | --- | --- |
 | Series direct/inverse, distance/arc lines, reduced length, scales, normalized/unrolled longitude | Existing 819 PROJ inputs plus C++ series/Exact controls; Earth-like flattening near ±1/50, unit radii `1e-60`, `1`, `1e60`; up to four circuits | `5e-14*a` distance/reduced length/transverse-bearing displacement; `5e-14` scales/physical-longitude angle; `2e-11` degrees latitude/arc |
 | Three-radius nearest point and inverse | 720 wider-domain Decimal controls over six sphere/oblate/prolate/triaxial ratios and cyclic axis orders, plus 210 exact-input legacy anchors; scales `1e-60`, `1`, `6378137`, `1e60`; axis ratios through `1e6`; surface, exterior and unique interiors through `1-2^-45` depth | Footpoint/surface residual `2e-12`; inverse normal `1e-9` degrees; height `2e-12*maxRadius`, also enforced in tiny units rather than relying on the existing `1e-12` absolute floor |
-| Forward Cartesian | Sphere/oblate, including polar/equatorial ratio `1e-6`, exact and near poles, depths/heights from `-0.1*a` to `4*a`, scaled units | `5e-14*a` position discrepancy; exact degree inputs and exact radian inputs have separate independent expectations |
+| Forward Cartesian | Sphere/oblate and 108 triaxial C++/Decimal controls, including polar/equatorial ratio `1e-6`, exact and near poles, depths/heights from `-0.1*a` to `4*a`, scaled units | `5e-14*a` position discrepancy; exact degree inputs and exact radian inputs have separate independent expectations |
 | Reverse Cartesian | Sphere/oblate, thin and scaled geometries; unique interior/exterior/cardinal cases | Existing normal-angle/height ceilings, against independent Decimal expectations |
 | ENU rotations | GeographicLib LocalCartesian at surface/interior/offset origins, poles, both hemispheres and scaled units | `5e-14*a` displacement; Ellipsoid frame ownership/directions additionally have analytic checks |
 | Gnomonic | Sphere and Earth-like oblate shapes, several origins, forward points within the sampled horizon, inverse offsets through about `11*a` | Existing `1e-5` Earth-unit forward ceiling scaled with radius; `1e-8` degrees inverse |
 
-The matrix contains **3,372 rows**: 930 Decimal geometry rows (720 wider-domain cases and 210 exact-input anchor cases) and 2,442 native
-C++ rows. Of these, **3,370 are gates** (including 21 intentional prolate-CRS
+The matrix contains **3,480 rows**: 930 Decimal geometry rows (720 wider-domain cases and 210 exact-input anchor cases) and 2,550 native
+C++ rows. Of these, **3,478 are gates** (including 21 intentional prolate-CRS
 rejection controls); two Exact many-circuit comparisons are explicitly diagnostic.
 The 210 legacy normal-support anchors now use independently computed inverse
 expectations for their actual stored XYZ values: ideal generating normals are
@@ -57,6 +57,11 @@ remains visible; these controls do not turn it into a universal nanometre claim.
   normals now retain the polar complement, while radian inputs are compared
   against their own exact stored values. Exact ±90°/±π/2 endpoints are canonical
   poles. This is input precision, not a reason to loosen Cartesian budgets.
+- **Fixed: subnormal axis squares.** Polar support and scalar ratio caches use
+  axes before squaring, retaining polar and ordinary-latitude coordinates when
+  cached squared radii are subnormal. Analytic regressions include axes down to
+  `1e-300`; this preserves previously working inputs without claiming a complete
+  tiny-magnitude inverse domain.
 - **Fixed: extreme rays and ownership.** Scaled normalization/projection avoids
   squared-norm underflow/overflow. Numeric commits snapshot all ordinates before
   invoking result setters. Finite-axis validation, invalid-input atomicity and
@@ -95,7 +100,7 @@ remains visible; these controls do not turn it into a universal nanometre claim.
 | Geocentric/geodetic/angular normals | Unit directions; finite nonzero rays normalize across the tested `1e-300`–`1e300` magnitude range. Zero/nonfinite rays return `undefined` atomically. Angular normals use the configured angle unit; legacy finite trigonometric continuation outside geographic latitude bounds is not a qualified geographic domain. These are algebraic radial/gradient directions, not an implicit nearest-point solve. |
 | Nearest versus radial surface | Nearest is globally constrained in the qualified unique domain; ambiguity rejects. Radial projection deliberately follows the input ray and is distinct from geodetic projection. Ordinary radial rounding is retained; unsafe squared intermediates use a scaled path. |
 | Scaled-space transforms | Component-wise cached-axis multiplication; no CRS or angle unit. Owned/supplied/aliased/reentrant outputs are checked. These algebraic methods retain Vector3's existing debug/nonfinite arithmetic policy rather than claiming a validated geodetic solve. |
-| Normal/Z-axis intersection | Revolution geometry requirement, axis-unit buffer and documented outside-buffer rejection. Invalid finite-coordinate/buffer conditions reject before writes; output setters cannot corrupt remaining ordinates. |
+| Normal/Z-axis intersection | Exact equal X/Y radii and positive axes (consistent with the shape, without an absolute epsilon that admits tiny triaxial shapes); axis-unit buffer and documented outside-buffer rejection. Invalid finite-coordinate/buffer conditions reject before writes; output setters cannot corrupt remaining ordinates. |
 | ENU/custom-axis matrices | Column-major, right-handed axes, XYZ translation in axis units; output/matrix aliases and nested setters retain captured values. Nonfinite origins/short buffers reject before writes. Surface-gradient frames differ intentionally from GeographicLib's geodetic-origin LocalCartesian frame at nonzero heights. |
 | Frame poles/center | Preserve the legacy orientation neighborhood, bounded by `1e-14*min(1,maxRadius)` so an entire tiny ellipsoid is not classified as a pole. An exact Cartesian pole has no supplied longitude and uses the retained east convention. Center matrices retain the legacy degenerate convention and are outside qualified physical frames. Core angular ENU retains a supplied meridian at poles. |
 | Geodesic facade/adapters | Degrees and axis-unit distances; inputs/options/axes are snapshotted, finite validation precedes evaluation. Longitude unrolling remains opt-in. Invalid shapes/coordinates throw; sphere/oblate adapter restrictions do not remove prolate geodesic support. |

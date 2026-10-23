@@ -77,6 +77,18 @@ export function cppRow(index: number) {
     [a, b] = row.radii,
     p = row.input,
     e = row.expected;
+  if (row.mode === 'Q') {
+    const actual = ellipsoid(row.radii).cartographicToCartesian(p);
+    const radius = Math.max(...row.radii);
+    return {
+      id: 'cpp/' + index,
+      family: 'C++ triaxial forward',
+      budgetUsage: actual ? error(actual, row.mathematicalXYZ!) / (5e-14 * radius) : Infinity,
+      ownership: true,
+      comparatorFailure: e === null,
+      comparatorErrorOverRadius: e ? error(e, row.mathematicalXYZ!) / radius : null
+    };
+  }
   if (row.mode === 'T') {
     const source = reference.surfaces[(row as {surfaceIndex: number}).surfaceIndex];
     const actual = ellipsoid(source.radii).scaleToGeodeticSurface(source.xyz);

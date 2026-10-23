@@ -63,7 +63,7 @@ def surface_cases():
     return rows
 
 
-def forward_decimal(radii, point, radians=False):
+def forward_decimal(radii, point, radians=False, triaxial=False):
     # Machin's identity and Taylor series are independent of native/libm trig.
     with localcontext() as ctx:
         ctx.prec = 180
@@ -92,7 +92,7 @@ def forward_decimal(radii, point, radians=False):
             sp,cp = D(1 if point[1]>0 else -1),D(0)
         n = [cp*cl,cp*sl,sp]
         a,b = [D.from_float(v) for v in radii[:2]]
-        axes = [a,a,b]
+        axes = [D.from_float(v) for v in radii] if triaxial else [a,a,b]
         support = sum((r*v)**2 for r,v in zip(axes,n)).sqrt()
         h = D.from_float(point[2])
         return [float(r*r*v/support+h*v) for r,v in zip(axes,n)]
@@ -136,6 +136,14 @@ def cpp_cases(surfaces):
                 rows.append(dict(mode='G',backend='C',radii=[a,b,b],input=[10.,lat,10.+lon,lat*.7]))
             for x,y in [(0.,0.),(.1*a,-.2*a),(a,2*a),(10*a,-5*a)]:
                 rows.append(dict(mode='H',backend='C',radii=[a,b,b],input=[10.,lat,x,y]))
+    for shape in [[3.,2.,1.],[1.,1e-3,1e-6]]:
+        for scale in [1e-60,1.,1e60]:
+            radii=[v*scale for v in shape]
+            for lon,lat in [(0.,0.),(-40.,35.),(70.,-55.),(179.999999,89.999999),(-120.,90.),(90.,-90.)]:
+                for height in [-.1*max(radii),0.,4*max(radii)]:
+                    point=[lon,lat,height]
+                    rows.append(dict(mode='Q',backend='C',radii=radii,input=point,
+                                     mathematicalXYZ=forward_decimal(radii,point,triaxial=True)))
     # Ordered distinct radii are the C++ Cartesian3 parameter contract. Axis
     # permutations and equal-axis limits are additionally gated by Decimal.
     for i, row in enumerate(surfaces):

@@ -204,3 +204,48 @@ test('P0 normal intersection invalid numbers and frame failures preserve outputs
     config.debug = previous;
   }
 });
+
+test('P0 normal intersection requires revolution geometry in every unit', () => {
+  expect(() => new Ellipsoid(0, 0, 1).getSurfaceNormalIntersectionWithZAxis([0, 0, 0])).toThrow();
+  for (const scale of [1e-60, 1, 1e60]) {
+    const shape = new Ellipsoid(3 * scale, 2 * scale, scale);
+    const out = [7, 8, 9, 42];
+    expect(() => shape.getSurfaceNormalIntersectionWithZAxis([0, 0, 0], 0, out)).toThrow();
+    expect(out).toEqual([7, 8, 9, 42]);
+  }
+});
+
+test('P0 polar forward coordinates retain axes with subnormal squared radii', () => {
+  const previousDebug = config.debug;
+  const previousRadians = config._cartographicRadians;
+  config.debug = false;
+  config._cartographicRadians = false;
+  try {
+    for (const radius of [1e-160, 1e-200, 1e-300]) {
+      const polar = radius / 10;
+      const shape = new Ellipsoid(radius, radius, polar);
+      const oblate = new Ellipsoid(radius, radius, radius * 0.9);
+      const ratio = oblate.radii.z / radius;
+      const norm = Math.sqrt(1 + ratio * ratio);
+      const midpoint = oblate.cartographicToCartesian([0, 45, 0]);
+      expect(Math.abs(midpoint[0] / radius - 1 / norm)).toBeLessThanOrEqual(2e-14);
+      expect(Math.abs(midpoint[2] / radius - (ratio * ratio) / norm)).toBeLessThanOrEqual(2e-14);
+      const intersection = oblate.getSurfaceNormalIntersectionWithZAxis([0, 0, radius * 0.001]);
+      expect(intersection).toBeDefined();
+      expect(
+        Math.abs(intersection[2] / radius - 0.001 * (1 - (1 / ratio) ** 2))
+      ).toBeLessThanOrEqual(2e-14);
+
+      for (const sign of [-1, 1]) {
+        const out = shape.cartographicToCartesian([0, sign * 90, 0]);
+        expect(out).toBeDefined();
+        expect(out[0]).toBe(0);
+        expect(out[1]).toBe(0);
+        expect(Math.abs(out[2] / polar - sign)).toBeLessThanOrEqual(2e-14);
+      }
+    }
+  } finally {
+    config.debug = previousDebug;
+    config._cartographicRadians = previousRadians;
+  }
+});
