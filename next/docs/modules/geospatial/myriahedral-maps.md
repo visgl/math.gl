@@ -1,6 +1,6 @@
 # Myriahedral maps
 
-![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
 <!-- -->
 
@@ -18,7 +18,7 @@ Choose **Projection preset** to compare polyconic, cylindric, azimuthal, two-hem
 
 ## How it works[​](#how-it-works "Direct link to How it works")
 
-The animation calls `createMyriahedralLayout` from `@math.gl/geospatial/discontinuous`. Static map users can build the same net with `createMyriahedralMap`. See the [API reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/myriahedral.md) and [background and credits](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/myriahedral-projections.md).
+The example constructs a `MapEngine` with a myriahedral `MapDescription` and uses its `motion` layout for the shared polyhedron renderer. Static maps and animated geographic features can use the same engine. See the [MapEngine guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/map-engine.md), [API reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md), [preset reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/myriahedral.md), and [background and credits](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/myriahedral-projections.md).
 
 For the default sealine preset, the mesh is generated from longitude and latitude, with shared vertices at the antimeridian and poles. Its cells are planar trapezoids, with triangular caps. An open equatorial chain of hinges establishes a west-to-east backbone; the remaining joins favor land and then north–south strips. The date-line seam stays open. A maximum spanning tree gives one connected net without hinge cycles.
 

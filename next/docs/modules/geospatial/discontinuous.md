@@ -4,6 +4,8 @@
 
 The discontinuous map API, presets, and layout helpers are experimental and may change.
 
+For a shared rendering pipeline across ordinary, interrupted, inset, and hinged maps, start with [MapEngine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md) and its [rendering guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/map-engine.md). The factories below remain useful when only the lower-level static map is needed.
+
 Project geographic points, lines, and polygons into a map with cuts. Import this API separately from scalar CRS transforms:
 
 ```
@@ -37,6 +39,10 @@ Render every line part and every polygon independently. Connecting parts or tria
 For concepts, rendering patterns, and the Ice Age Explorer integration, see the [discontinuous projections guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md).
 
 ## Presets[​](#presets "Direct link to Presets")
+
+From v5.0 · Experimental
+
+`createGoodeMap({radius = 1})` provides Goode's land-oriented homolosine layout: northern lobes centered at −100° and 30°, and southern lobes centered at −160°, −60°, 20°, and 140°. Northern interruptions are at −40°; southern interruptions are at −100°, −20°, and 80°, in addition to the antimeridian. The wide Eurasian lobe uses two convex charts with a continuous join at 30°. Use `{type: 'goode'}` with `MapEngine` for the same layout. The lobe parameters follow [D3's published homolosine definition](https://github.com/d3/d3-geo-projection/blob/main/src/interrupted/homolosine.js); the projection and clipping implementation are independent.
 
 `createMyriahedralMap(options)` builds independently generated graticule or polyhedral nets with optional unfolding. See the [myriahedral API](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/myriahedral.md) for presets, custom mesh/weight callbacks, and inverse-ambiguity handling.
 

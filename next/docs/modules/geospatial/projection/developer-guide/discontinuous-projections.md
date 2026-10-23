@@ -1,6 +1,6 @@
 # Discontinuous maps
 
-![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
 A discontinuous map places neighboring parts of the Earth in separate parts of a plane. A line that crosses a cut must end on one side and resume on the other; a polygon must become separate, closed pieces. Projecting only the original vertices does not produce a correct map: the renderer may draw a line or triangle across the empty space between pieces.
 
@@ -9,6 +9,8 @@ A discontinuous map places neighboring parts of the Earth in separate parts of a
 The interactive Albers USA map shows this with Alaska, Hawaii, and five U.S. territory insets. Move over a region to inspect its coordinates, or use **View globe** to see its features unfold into the composite map. The mouse wheel and zoom buttons magnify every region together; drag to pan. The [full example](https://visgl.github.io/math.gl/next/examples/albers-usa) includes more explanation.
 
 The discontinuous map API, presets, and layout helpers are experimental and may change.
+
+For new renderers, use [MapEngine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/map-engine.md) to construct these layouts, fit the insets, pick coordinates, and evaluate optional hinge motion through one interface. A serializable `MapDescription` selects the map; the [reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md) documents its fields and methods.
 
 math.gl provides the experimental `@math.gl/geospatial/discontinuous` entrypoint for this geometry processing. It combines geographic regions, local projections, and planar placements. It supports forward point projection, inverse candidates, seam-aware lines, and hemisphere-bounded polygons.
 
