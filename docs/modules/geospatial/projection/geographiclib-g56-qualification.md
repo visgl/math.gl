@@ -88,3 +88,18 @@ Endpoint segments also reject the native GeographicLib catalog of nonunique
 shortest paths (latitude-reflected routes and opposite-longitude prolate routes),
 which cannot be detected by an auxiliary-arc cutoff alone. Compensated rhumb
 longitude differences retain representable tiny legs across the dateline.
+
+## Tiny polar direct paths
+
+Near a pole, a nearly east/west course can have a meaningful isometric/longitude
+change even when its endpoint latitude rounds to the starting latitude. The
+solver retains colatitude internally in this region before rounding public
+latitude. Forty-two original native direct controls also expose cancellation
+in the 53-bit native comparator: native area discrepancies reach roughly
+`1.5e-9 a²`. Those native results remain in the fixture and reports as diagnostics.
+Their gates use independent 80-digit, 12-node polar meridian/isometric/area
+integrals; four additional spherical direct controls use analytic logarithmic
+formulas. The existing `5e-14 a²` area and angular budgets remain unchanged.
+The distinct high-precision rule operates on colatitudes below `2e-8` radians,
+where its truncation error is below the working Decimal precision. CI recomputes
+these controls without native software.

@@ -18,7 +18,9 @@ Latitudes, longitudes and azimuths are explicit degrees, independent of global
 configuration. Distances use axis units; `S12` and polygon areas use squared axis
 units. Axes must be finite, positive, with `0.5 <= b/a <= 2` and representable
 surface area. The original integral solver uses meridian and isometric latitude
-divided integrals, including an exact east/west parallel branch.
+divided integrals, including an exact east/west parallel branch. Near poles, internal colatitude
+retains longitude and area accuracy before the public endpoint latitude is
+rounded.
 
 | Method | Contract |
 | --- | --- |

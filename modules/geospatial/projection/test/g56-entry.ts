@@ -9,13 +9,20 @@ import {EllipsoidGeodesic} from '../../src/ellipsoid-geodesic';
 import reference from '../../test/ellipsoid/g56-reference.json';
 export const provenance = reference.provenance;
 export function qualifyG56() {
-  const rows: {id: string; family: string; budgetUsage: number; passed: boolean; error?: string}[] =
-    [];
+  const rows: {
+    id: string;
+    family: string;
+    budgetUsage: number;
+    passed: boolean;
+    error?: string;
+    nativeAreaDiscrepancy?: number;
+  }[] = [];
   const axes = (a: number, b: number) => ({semiMajorAxis: a, semiMinorAxis: b});
   function run(
     id: number,
     family: string,
-    body: (check: (v: number, e: number, t: number) => void) => void
+    body: (check: (v: number, e: number, t: number) => void) => void,
+    nativeAreaDiscrepancy?: number
   ) {
     let usage = 0;
     try {
@@ -25,7 +32,13 @@ export function qualifyG56() {
           Number.isFinite(v) && Number.isFinite(e) ? Math.abs(v - e) / t : Infinity
         );
       });
-      rows.push({id: String(id), family, budgetUsage: usage, passed: usage <= 1});
+      rows.push({
+        id: String(id),
+        family,
+        budgetUsage: usage,
+        passed: usage <= 1,
+        ...(nativeAreaDiscrepancy === undefined ? {} : {nativeAreaDiscrepancy})
+      });
     } catch (error) {
       rows.push({
         id: String(id),
@@ -46,20 +59,27 @@ export function qualifyG56() {
       check(p.S12!, r.expected[2], 5e-14 * r.a * r.a);
     })
   );
-  reference.direct.forEach((r, i) =>
-    run(i, 'native rhumb direct/line', check => {
-      const g = new EllipsoidRhumb(axes(r.a, r.b));
-      const [lat, lon, azi, d] = r.path;
-      for (const p of [
-        g.direct(lat, lon, azi, d, {area: true, unrollLongitude: true}),
-        g.line(lat, lon, azi, {area: true, unrollLongitude: true}).position(d)
-      ]) {
-        check(p.lat2, r.expected[0], 2e-11);
-        check((p.lon2 - r.expected[1]) * Math.cos((p.lat2 * Math.PI) / 180), 0, 2e-11);
-        check(p.S12!, r.expected[2], 5e-14 * r.a * r.a);
-      }
-    })
-  );
+  reference.direct.forEach((r, i) => {
+    const independent = 'independentExpected' in r ? r.independentExpected : undefined;
+    run(
+      i,
+      independent ? 'independent polar direct/native discrepancy' : 'native rhumb direct/line',
+      check => {
+        const g = new EllipsoidRhumb(axes(r.a, r.b));
+        const [lat, lon, azi, d] = r.path;
+        const expected = independent ?? r.expected;
+        for (const p of [
+          g.direct(lat, lon, azi, d, {area: true, unrollLongitude: true}),
+          g.line(lat, lon, azi, {area: true, unrollLongitude: true}).position(d)
+        ]) {
+          check(p.lat2, expected[0], 2e-11);
+          check((p.lon2 - expected[1]) * Math.cos((p.lat2 * Math.PI) / 180), 0, 2e-11);
+          check(p.S12!, expected[2], 5e-14 * r.a * r.a);
+        }
+      },
+      independent ? Math.abs(independent[2] - r.expected[2]) / r.a ** 2 : undefined
+    );
+  });
   reference.polygons.forEach((r, i) =>
     run(i, 'native rhumb polygons', check => {
       const p = new RhumbPolygon(axes(r.a, r.b));
@@ -176,5 +196,23 @@ export function qualifyG56() {
       0.1
     );
   });
+  reference.independentDirect.forEach((r, i) =>
+    run(i, 'independent 80-digit polar direct rhumbs', check => {
+      const [lat, lon, azi, d] = r.path,
+        g = new EllipsoidRhumb(axes(1, 1));
+      for (const p of [
+        g.direct(lat, lon, azi, d, {area: true, unrollLongitude: true}),
+        g.line(lat, lon, azi, {area: true, unrollLongitude: true}).position(d)
+      ]) {
+        check(p.lat2, r.expected[0], 2e-11);
+        check(p.lon2, r.expected[1], 2e-11);
+        check(
+          p.S12!,
+          r.expected[2],
+          Math.min(5e-14, Math.max(1e-28, Math.abs(r.expected[2]) * 2e-8))
+        );
+      }
+    })
+  );
   return rows;
 }

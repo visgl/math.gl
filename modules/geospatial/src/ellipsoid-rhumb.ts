@@ -127,9 +127,11 @@ export class EllipsoidRhumb {
           if (Math.abs(north) > gap) throw new RhumbDomainError('pole-crossing');
           if (Math.abs(north) === gap) throw new RhumbDomainError('pole');
         }
-        const lat2 = north === 0 ? latitude : this.inverseMeridian(latitude, north);
+        const polar = north === 0 ? undefined : this.polarEndpoint(latitude, north);
+        const lat2 =
+          north === 0 ? latitude : (polar?.latitude ?? this.inverseMeridian(latitude, north));
         if (Math.abs(lat2) === 90) throw new RhumbDomainError('pole');
-        const [meanM, meanP] = this.means(latitude, lat2);
+        const [meanM, meanP] = polar?.means ?? this.means(latitude, lat2);
         const dlon = (delta * sa * meanP) / meanM / DEG;
         const lon2 = unroll ? longitude + dlon : normalize(normalize(longitude) + dlon);
         if (!Number.isFinite(lon2)) throw new RangeError('Unrepresentable rhumb longitude');
@@ -169,6 +171,62 @@ export class EllipsoidRhumb {
 
   private psi(latitude: number): number {
     return this.metrics.latitudeToAuxiliary(latitude, 'isometric') * DEG;
+  }
+
+  private polarEndpoint(
+    latitude: number,
+    north: number
+  ): {latitude: number; means: [number, number]} | undefined {
+    if (Math.abs(latitude) <= 80) return undefined;
+    const sign = Math.sign(latitude),
+      theta1 = (90 - Math.abs(latitude)) * DEG,
+      limit = 10 * DEG;
+    const density = (theta: number) =>
+      this.r ** 2 / Math.hypot(Math.sin(theta), this.r * Math.cos(theta)) ** 3;
+    const gap = (theta: number) => integrate(density, 0, theta);
+    const target = gap(theta1) - sign * north;
+    if (!(target > 0 && target < gap(limit))) return undefined;
+    let lo = 0,
+      hi = limit,
+      theta = target * this.r;
+    if (!(theta > lo && theta < hi)) theta = theta1;
+    for (let i = 0; i < 64; i++) {
+      const residual = gap(theta) - target;
+      if (residual === 0) break;
+      if (residual < 0) lo = theta;
+      else hi = theta;
+      const next = theta - residual / density(theta);
+      if (next === theta) break;
+      theta = next > lo && next < hi ? next : (lo + hi) / 2;
+      if (theta === lo || theta === hi) break;
+      if (i === 63) throw new Error('Rhumb polar meridian inversion did not converge');
+    }
+    const span = theta - theta1,
+      mid = (theta + theta1) / 2;
+    const meanM = integrate(t => density(mid + (t * span) / 2), -1, 1) / 2;
+    const meanP =
+      Math.abs(span) < 0.25 * Math.min(Math.sin(theta), Math.sin(theta1))
+        ? integrate(
+            t => {
+              const x = mid + (t * span) / 2,
+                c = Math.sin(x),
+                s = Math.cos(x);
+              return this.r ** 2 / (c * (c * c + (this.r * s) ** 2));
+            },
+            -1,
+            1
+          ) / 2
+        : -(this.polarPsi(theta) - this.polarPsi(theta1)) / span;
+    return {latitude: sign * (90 - theta / DEG), means: [meanM, meanP]};
+  }
+
+  private polarPsi(theta: number): number {
+    const s = Math.cos(theta),
+      c = Math.sin(theta),
+      e2 = (1 - this.r) * (1 + this.r),
+      e = Math.sqrt(Math.abs(e2));
+    const I = e === 0 ? s : (e2 > 0 ? Math.atanh(e * s) : Math.atan(e * s)) / e;
+    return Math.asinh(s / c) - e2 * I;
   }
 
   private meridianMean(lat1: number, lat2: number): number {
