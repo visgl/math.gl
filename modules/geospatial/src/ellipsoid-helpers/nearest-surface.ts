@@ -37,6 +37,14 @@ export function nearestSurface(
   const ux = a * Math.abs(x),
     uy = b * Math.abs(y),
     uz = c * Math.abs(z);
+  // Error-free products cannot retain their low bits below the normal range.
+  if (
+    minimumSquared < 2 ** -1022 ||
+    (x !== 0 && ux < 2 ** -1022) ||
+    (y !== 0 && uy < 2 ** -1022) ||
+    (z !== 0 && uz < 2 ** -1022)
+  )
+    return exactNearestSurface(x, y, z, a, b, c, result);
   const fx = productError(a, Math.abs(x), ux);
   const fy = productError(b, Math.abs(y), uy);
   const fz = productError(c, Math.abs(z), uz);

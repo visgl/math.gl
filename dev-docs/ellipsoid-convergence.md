@@ -179,8 +179,9 @@ approximation in surface projection and prolate/triaxial cartographic conversion
 All 466 inverse paths now enforce the original independent-oracle error budgets;
 198 additional surface checks enforce footpoint accuracy and aliasing. This
 supersedes the earlier diagnostic status of 32 deep prolate/triaxial inputs.
-The general solver rejects its singular multiplier boundary, including ambiguous
-minima and some unique cusp points. See the public qualification page for limits.
+The original general solver rejected its singular multiplier boundary, including
+some unique cusp points. The follow-up below recovers those unique roots;
+ambiguous minima still reject. See the public qualification page for limits.
 
 All five public geometry/cache vectors are frozen. This prevents nested mutation
 from changing normals or adapters while the prepared spheroid keeps old axes.
@@ -197,7 +198,7 @@ rare fallback calls allocate integer/string temporaries. The shared oblate
 solver also avoids normalized-coordinate underflow and permits 1024 updates.
 Signed height uses normal projection, including tiny deep interiors.
 
-The independent corpus now has 408 cusp controls (including subnormal inputs),
+The independent corpus now has 421 cusp controls (including subnormal inputs),
 run by the Node and three-browser harness alongside all 466 inverse controls.
 Existing tolerances and SPDX/license notices remain unchanged. There are no
 new dependencies; full GeographicLib C++ coverage and universal extreme-domain

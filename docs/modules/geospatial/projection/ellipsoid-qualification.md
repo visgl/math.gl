@@ -72,19 +72,23 @@ A positive residual admits the unique positive-multiplier-interval root.
 Previously rejected multidirectional cusps are now solved rather than bypassing
 the accuracy guard. Centers remain ambiguous and reject.
 
-**408 cusp controls** use an independent standard-library Decimal oracle:
-220 digits/900 updates ordinarily, and 440 digits/1600 updates for the four
-extreme controls. They cover oblate/prolate/triaxial shapes, Earth scaling,
+**421 cusp controls** use an independent standard-library Decimal oracle:
+220 digits/900 updates ordinarily, and 440 digits/1600 updates for the 17
+subnormal/extreme controls. They cover oblate/prolate/triaxial shapes, Earth scaling,
 neighboring binary64 inputs, signs, axis orders and
 nonzero ordinates down to `1e-320`. Nonzero footpoint components retain the
 `2e-12` relative ceiling; aliasing and cartographic normal/height are also checked.
 Separate analytic anchors qualify exact unique boundary cusps and ambiguous neighbors.
-The Node/Chromium/Firefox/WebKit harness now checks the 408 surface controls in
+The Node/Chromium/Firefox/WebKit harness now checks the 421 surface controls in
 addition to all 466 existing inverse paths. Together with the original 198
-surface controls, the unit suite qualifies 606 surface inputs.
+surface controls, the unit suite qualifies 619 surface inputs.
 
-The shared oblate solve now allows 1024 bounded updates and divides `z` by `a*t`
-instead of forming an underflowing `z/a` first. Geospatial can use the exact
+The shared oblate solve now allows 1024 bounded updates and evaluates `(z/t)/a`
+to avoid underflowing `z/a` or losing precision in `a*t`. Below the cusp,
+a limiting vertical footpoint is used only when the upper bound on the shifted
+root is at most one machine epsilon times the cusp gap. Subnormal axis squares
+or axis-coordinate products use the exact three-axis fallback, since their
+compensated low bits cannot be represented. Geospatial can use the exact
 three-axis fallback when that numeric solve fails. Prolate/triaxial inverse
 height projects displacement onto the unit normal instead of taking its sign
 from a dot product that can underflow; normal length uses `hypot`.

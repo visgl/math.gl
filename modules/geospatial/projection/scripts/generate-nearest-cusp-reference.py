@@ -87,6 +87,24 @@ def generate():
                     xyz = [1.5 * scale, 0., float('1e-' + str(power))]
                     rows.append({'radii': radii, 'xyz': xyz,
                                  'reference': oracle.nearest(radii, xyz, iterations=1600)})
+            # Subnormal products are rounded before a floating residual sees them.
+            tiny = math.nextafter(1e-320, math.inf)
+            for scale in [.125, .1]:
+                radii0 = [scale, 2 * scale, 3 * scale]
+                point = [tiny, 1.5 * scale, 0.]
+                base = oracle.nearest(radii0, point, iterations=1600)
+                for permutation in [(0, 1, 2), (2, 0, 1), (1, 2, 0)]:
+                    for sign in [-1, 1]:
+                        reference = dict(base)
+                        for key in ['footpoint', 'normal']:
+                            reference[key] = [base[key][i] * sign for i in permutation]
+                        rows.append({'radii': [radii0[i] for i in permutation],
+                                     'xyz': [point[i] * sign for i in permutation],
+                                     'reference': reference})
+            radii = [.2, .2, .1]
+            xyz = [.15, 0., tiny]
+            rows.append({'radii': radii, 'xyz': xyz,
+                         'reference': oracle.nearest(radii, xyz, iterations=1600)})
     return {'provenance': {'license': 'MIT', 'precision': 220, 'iterations': 900, 'extremePrecision': 440, 'extremeIterations': 1600,
             'method': 'Original Decimal bisection from exact stored binary64 inputs; positive-definite multiplier certificate.'}, 'cases': rows}
 

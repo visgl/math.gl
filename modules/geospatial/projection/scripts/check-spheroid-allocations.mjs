@@ -64,7 +64,8 @@ const scopes = new Map([
       'interiorInverse',
       'sumError',
       'productError',
-      'commit'
+      'commit',
+      'commitNormal'
     ])
   ],
   [

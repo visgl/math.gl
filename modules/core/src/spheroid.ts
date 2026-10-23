@@ -9,6 +9,8 @@ import type {SpheroidParameters} from './types';
 export type SpheroidGeometry = SpheroidParameters & {readonly eccentricitySquared: number};
 export type SpheroidPoint = {x: number; y: number; z: number};
 
+const EPSILON = Number.EPSILON;
+
 /** Caller supplies validated positive finite axes and eccentricity. No latitude wrapping. */
 export function spheroidToCartesian(
   point: SpheroidPoint,
@@ -53,9 +55,9 @@ export function cartesianToSpheroid(
   if (p === 0) return commit(result, 0, (Math.sign(z) * Math.PI) / 2, Math.abs(z) - b);
   const horizontal = p / a,
     vertical = z / b;
-  if (horizontal * horizontal + vertical * vertical < 1 - 16 * Number.EPSILON)
+  if (horizontal * horizontal + vertical * vertical < 1 - 16 * EPSILON)
     return interiorInverse(x, y, z, p, a, b, result);
-  if (es >= 0.9) return exteriorInverse(x, y, z, p, a, b, result);
+  if (es >= 0.9) return exteriorInverse(Math.atan2(y, x), z, p, a, b, result);
   const ct = z / rr,
     st = p / rr;
   let rx = 1 / Math.sqrt(1 - es * (2 - es) * st * st);
@@ -75,7 +77,7 @@ export function cartesianToSpheroid(
     cos = nextCos;
     sin = nextSin;
   }
-  return exteriorInverse(x, y, z, p, a, b, result);
+  return exteriorInverse(Math.atan2(y, x), z, p, a, b, result);
 }
 
 /** Original nearest-normal solve in t = (lambda + b²)/a², avoiding interior cancellation.
@@ -96,12 +98,8 @@ function interiorInverse(
     vertical = z / a,
     delta = 1 - ratio2;
   if (!(ratio2 > 0) || ratio > 1) return false;
-  // Away from the cusp, retain the inexpensive equatorial classification.
-  // Only the rounding neighborhood needs the compensated radius below.
-  if (z === 0 && Math.abs(horizontal - delta) > 32 * Number.EPSILON) {
-    if (horizontal < delta) return false;
-    return commit(result, Math.atan2(y, x), 0, p - a);
-  }
+  // Reject clearly ambiguous equatorial points before the compensated cusp test.
+  if (z === 0 && horizontal < delta - 32 * EPSILON) return false;
   const aa = a * a,
     bb = b * b;
   const ratioError =
@@ -144,12 +142,23 @@ function interiorInverse(
   // for deep, nearly equatorial interiors. No subtraction of lambda and -b².
   let t = Math.max(weighted, horizontal - delta);
   if (!(t > lower && t < upper)) t = upper / 2;
-  for (let i = 0; i < 1024; i++) {
+  // Below the cusp, a vanishing polar input can make t subnormal. The
+  // limiting vertical footpoint remains well conditioned. Use it only when
+  // its bound t <= abs(z)*ratio/(a*v) is negligible relative to the cusp gap.
+  const gap = -(base + correction) / a;
+  const horizontalLimit = horizontal / delta;
+  const limiting = Math.sqrt((gap / delta) * (horizontalLimit + 1));
+  let latitude: number | undefined =
+    gap > 0 && (Math.abs(z) / limiting / a) * ratio <= EPSILON * gap
+      ? Math.atan2((Math.sign(z) * limiting) / ratio, horizontalLimit)
+      : undefined;
+  for (let i = 0; i < 1024 && latitude === undefined; i++) {
     const equatorial = delta + t;
     const u = horizontal / equatorial,
-      // Divide after forming a*t: z/a can underflow although z/(a*t)
-      // and the unique near-cusp latitude are representable.
-      v = (z / (a * t)) * ratio;
+      // Divide by t first: both z/a and a*t can lose precision in the
+      // subnormal range although the near-cusp latitude is representable.
+      verticalAt = z / t / a,
+      v = verticalAt * ratio;
     const at = a * t,
       difference = base - at;
     const offset =
@@ -158,40 +167,23 @@ function interiorInverse(
     const term = offset * (u + 1);
     const residual = term + v * v;
     if (!Number.isFinite(residual)) return false;
-    if (
-      Math.abs(residual) <= 4 * Number.EPSILON * (Math.abs(term) + v * v) ||
-      upper - lower <= 4 * Number.EPSILON * t
-    ) {
-      const latitude = Math.atan2(z / (a * t), horizontal / equatorial);
-      const sin = Math.sin(latitude),
-        cos = Math.cos(latitude);
-      return commit(
-        result,
-        Math.atan2(y, x),
-        latitude,
-        p * cos + z * sin - a * Math.hypot(cos, ratio * sin)
-      );
-    }
     if (residual > 0) lower = t;
     else upper = t;
     const derivative = -2 * ((u * u) / equatorial + (v * v) / t);
     const next = t - residual / derivative;
-    const candidate =
-      Number.isFinite(next) && next > lower && next < upper ? next : lower + (upper - lower) / 2;
-    if (candidate === t) {
-      const latitude = Math.atan2(z / (a * t), horizontal / equatorial);
-      return commit(
-        result,
-        Math.atan2(y, x),
-        latitude,
-        p * Math.cos(latitude) +
-          z * Math.sin(latitude) -
-          a * Math.hypot(Math.cos(latitude), ratio * Math.sin(latitude))
-      );
+    const candidate = next > lower && next < upper ? next : lower + (upper - lower) / 2;
+    if (
+      Math.abs(residual) <= 4 * EPSILON * (Math.abs(term) + v * v) ||
+      upper - lower <= 4 * EPSILON * t ||
+      candidate === t
+    ) {
+      latitude = Math.atan2(verticalAt, u);
+      break;
     }
     t = candidate;
   }
-  return false;
+  if (latitude === undefined) return false;
+  return commitNormal(result, Math.atan2(y, x), latitude, p, z, a, ratio);
 }
 
 /** Error-free transforms on the finite squared-axis domain used by geometry adapters. */
@@ -212,8 +204,7 @@ function productError(x: number, y: number, product: number): number {
 
 /** Original dimensionless Lagrange-multiplier solve, restricted to surface/exterior. */
 function exteriorInverse(
-  x: number,
-  y: number,
+  longitude: number,
   z: number,
   p: number,
   a: number,
@@ -225,11 +216,11 @@ function exteriorInverse(
     horizontal = p / a,
     vertical = z / a;
   const norm = Math.hypot(horizontal, z / b);
-  if (!Number.isFinite(norm) || norm < 1 - 8 * Number.EPSILON || !(ratio2 > 0)) return false;
+  if (!Number.isFinite(norm) || norm < 1 - 8 * EPSILON || !(ratio2 > 0)) return false;
   let lower = 0,
     upper = Math.hypot(horizontal, vertical * ratio);
   if (!Number.isFinite(upper)) return false;
-  let multiplier = norm <= 1 + 8 * Number.EPSILON ? 0 : upper / 2;
+  let multiplier = norm <= 1 + 8 * EPSILON ? 0 : upper / 2;
   for (let i = 0; i < 96; i++) {
     const equatorial = 1 + multiplier,
       polar = ratio2 + multiplier;
@@ -237,20 +228,32 @@ function exteriorInverse(
       v = (vertical * ratio) / polar;
     const length = Math.hypot(u, v);
     const residual = length - 1;
-    if (Math.abs(residual) <= 4 * Number.EPSILON) {
+    if (Math.abs(residual) <= 4 * EPSILON) {
       const latitude = Math.atan2(vertical / polar, horizontal / equatorial);
-      const sin = Math.sin(latitude),
-        cos = Math.cos(latitude);
-      const height = p * cos + z * sin - a * Math.hypot(cos, ratio * sin);
-      return commit(result, Math.atan2(y, x), latitude, height);
+      return commitNormal(result, longitude, latitude, p, z, a, ratio);
     }
     if (residual > 0) lower = multiplier;
     else upper = multiplier;
     const derivative = -((u * u) / equatorial + (v * v) / polar) / length;
     const next = multiplier - residual / derivative;
-    multiplier = Number.isFinite(next) && next > lower && next < upper ? next : (lower + upper) / 2;
+    multiplier = next > lower && next < upper ? next : (lower + upper) / 2;
   }
   return false;
+}
+
+/** Shared signed distance along the solved surface normal. */
+function commitNormal(
+  result: SpheroidPoint,
+  longitude: number,
+  latitude: number,
+  p: number,
+  z: number,
+  a: number,
+  ratio: number
+): boolean {
+  const sin = Math.sin(latitude),
+    cos = Math.cos(latitude);
+  return commit(result, longitude, latitude, p * cos + z * sin - a * Math.hypot(cos, ratio * sin));
 }
 
 /** Values are captured before invoking application setters; recursive writes are safe. */

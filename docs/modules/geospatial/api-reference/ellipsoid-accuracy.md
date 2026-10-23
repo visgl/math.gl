@@ -57,8 +57,8 @@ not a blanket nanometre claim for all ellipsoid operations.
 
 Prolate/triaxial Cartesian conversion and `scaleToGeodeticSurface` now use an
 original safeguarded nearest-point solve, replacing the radial approximation.
-All 64 prolate/triaxial inverse controls and 606 independent surface-footpoint
-controls enforce accuracy, including 408 cusp controls. An original exact-dyadic
+All 64 prolate/triaxial inverse controls and 619 independent surface-footpoint
+controls enforce accuracy, including 421 cusp controls. An original exact-dyadic
 fallback recovers ill-conditioned and unique boundary solutions; ambiguous
 interiors reject without touching outputs. The rare fallback uses built-in
 BigInt storage, adds no dependencies, and has an explicit iteration bound. Qualification remains sampled;
