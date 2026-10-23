@@ -367,3 +367,7 @@ Use the separate [EllipsoidMetrics](./ellipsoid-metrics.md) class for revolution
 ellipsoid metrics and auxiliary latitudes. [GeodesicPolygon](./geodesic-polygon.md)
 and optional `EllipsoidGeodesic` edge areas support compensated polygon geometry.
 These APIs use explicit degree units and retain the existing Cartesian API.
+
+[EllipsoidRhumb and RhumbPolygon](./ellipsoid-rhumb.md) provide constant-bearing
+paths and areas. [GeodesicIntersections](./geodesic-intersections.md) provides
+bounded searches with explicit completeness and segment statuses.

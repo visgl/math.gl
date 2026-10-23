@@ -1,0 +1,137 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {expect, test} from 'vitest';
+import {qualifyG56} from '../../projection/test/g56-entry';
+import {EllipsoidRhumb, RhumbDomainError} from '../../src/ellipsoid-rhumb';
+import {RhumbPolygon} from '../../src/rhumb-polygon';
+import {GeodesicIntersections} from '../../src/geodesic-intersections';
+const axes = {semiMajorAxis: 1, semiMinorAxis: 1};
+for (const row of qualifyG56())
+  test(`G5/G6 ${row.family} ${row.id}`, () => expect(row, row.error).toMatchObject({passed: true}));
+test('Rhumb tiny meridian displacement is retained; exact cardinal parallels', () => {
+  const r = new EllipsoidRhumb(axes);
+  expect(r.direct(0, 0, 0, 1e-20).lat2).toBeCloseTo((1e-20 * 180) / Math.PI, 32);
+  expect(r.direct(45, 0, 90, 0.1).lat2).toBe(45);
+  expect(r.direct(45, 0, -90, -0.1).lat2).toBe(45);
+  expect(r.inverse(0, 0, 1e-20, 0).s12).toBeCloseTo((1e-20 * Math.PI) / 180, 34);
+});
+test('Rhumb poles are explicit domain errors; line options are snapshotted', () => {
+  const r = new EllipsoidRhumb(axes);
+  expect(() => r.inverse(90, 0, 0, 0)).toThrow(RhumbDomainError);
+  expect(() => r.direct(0, 0, 0, 2)).toThrow(RhumbDomainError);
+  expect(() => r.direct(0, 0, 0, Math.PI / 2)).toThrow(RhumbDomainError);
+  const options = {area: true, unrollLongitude: true};
+  const line = r.line(0, 179, 90, options);
+  options.area = false;
+  options.unrollLongitude = false;
+  expect(line.position(0.1).lon2).toBeGreaterThan(180);
+  expect(line.position(0.1).S12).toBe(0);
+  expect(r.inverse(0, 0, 1, 1).S12).toBeUndefined();
+  for (const value of [NaN, Infinity]) expect(() => r.direct(0, 0, 0, value)).toThrow(RangeError);
+  expect(() => r.inverse(0, 0, 1, 1, {longitudeTurns: 0.1})).toThrow(RangeError);
+});
+test('Rhumb polygon whole-turn area, previews and atomic first pole rejection', () => {
+  const p = new RhumbPolygon(axes);
+  expect(() => p.addPoint(90, 0)).toThrow(RhumbDomainError);
+  expect(p.compute().number).toBe(0);
+  p.addPoint(30, 0);
+  const before = p.compute();
+  const preview = p.testPoint(30, 0, {longitudeTurns: 1});
+  expect(p.compute()).toEqual(before);
+  p.addPoint(30, 0, {longitudeTurns: 1});
+  expect(p.compute()).toEqual(preview);
+  expect(p.compute().area).toBeCloseTo(Math.PI, 13);
+  expect(p.compute().perimeter).toBeCloseTo(2 * Math.PI * Math.cos(Math.PI / 6), 13);
+});
+test('Analytic sphere all/closest/next intersections retain parameter circuits', () => {
+  const g = new GeodesicIntersections(axes);
+  const a = {latitude: 0, longitude: -30, azimuth: 90},
+    b = {latitude: -20, longitude: 0, azimuth: 0};
+  const result = g.closest(a, b, {maxDistance: 1});
+  expect(result.complete).toBe(true);
+  expect(result.intersection!.s).toBeCloseTo(Math.PI / 6, 14);
+  expect(result.intersection!.t).toBeCloseTo(Math.PI / 9, 14);
+  expect(g.all(a, b, {maxDistance: 4 * Math.PI}).intersections.length).toBeGreaterThan(8);
+  const next = g.next(0, 0, 90, 0, 7);
+  expect(next.intersection).toBeDefined();
+  expect(Math.abs(next.intersection!.s) + Math.abs(next.intersection!.t)).toBeCloseTo(
+    2 * Math.PI,
+    13
+  );
+});
+test('Segments distinguish crossing, overlap, near-line points and ambiguity', () => {
+  for (const ratio of [1, 0.9966471893352525]) {
+    const g = new GeodesicIntersections({semiMajorAxis: 1, semiMinorAxis: ratio});
+    expect(g.segments([0, -20], [0, 20], [-20, 0], [20, 0]).status).toBe('intersection');
+    expect(g.segments([0, -20], [0, 20], [0, 0], [0, 40]).status).toBe('overlap');
+    expect(g.segments([0, -20], [0, 20], [0, 40], [0, 0]).status).toBe('overlap');
+    expect(g.segments([1e-7, 0], [1e-7, 0], [0, -20], [0, 20]).status).toBe('disjoint');
+    expect(g.segments([0, 0], [0, 0], [0, -20], [0, 20]).status).toBe('intersection');
+    expect(g.segments([0, 0], [0, 180], [-20, 0], [20, 0]).status).toBe('ambiguous');
+  }
+});
+test('Intersection bounds, coincidence and input validation are explicit', () => {
+  const g = new GeodesicIntersections(axes),
+    a = {latitude: 0, longitude: 0, azimuth: 90};
+  const coincident = g.all(a, {...a, longitude: 90}, {maxDistance: 1});
+  expect(coincident.coincidences).toEqual([]);
+  expect(coincident.complete).toBe(false);
+  const found = g.all(a, {...a, longitude: 90}, {maxDistance: 2});
+  expect(found.coincidences).toHaveLength(1);
+  const c = found.coincidences[0];
+  expect(Math.abs(c.s) + Math.abs(c.t)).toBeLessThanOrEqual(2);
+  expect(() => g.all(a, a, {maxDistance: Infinity})).toThrow(RangeError);
+  expect(() => g.all({...a, latitude: 91}, a, {maxDistance: 1})).toThrow();
+  expect(() => new GeodesicIntersections({semiMajorAxis: 1, semiMinorAxis: 0.5})).toThrow(
+    RangeError
+  );
+});
+
+test('Representable near-pole parallels and zero-distance paths retain latitude', () => {
+  for (const ratio of [0.5, 0.9966471893352525, 1, 2]) {
+    const r = new EllipsoidRhumb({semiMajorAxis: 1, semiMinorAxis: ratio});
+    for (const lat of [90 - 2 ** -46, -90 + 2 ** -46]) {
+      expect(r.direct(lat, 0, 90, 1e-17).lat2).toBe(lat);
+      expect(r.direct(lat, 0, 37, 0).lat2).toBe(lat);
+      expect(Number.isFinite(r.inverse(lat, 0, lat, 90, {area: true}).S12)).toBe(true);
+    }
+  }
+});
+test('Independent rotated spherical crossings satisfy both great-circle planes', () => {
+  const g = new GeodesicIntersections(axes);
+  const rad = Math.PI / 180;
+  const vector = (lat: number, lon: number) => [
+    Math.cos(lat * rad) * Math.cos(lon * rad),
+    Math.cos(lat * rad) * Math.sin(lon * rad),
+    Math.sin(lat * rad)
+  ];
+  const dot = (a: number[], b: number[]) => a.reduce((s, v, i) => s + v * b[i], 0);
+  const normal = (lat: number, lon: number, azi: number) => {
+    const p = vector(lat, lon),
+      north = [
+        -Math.sin(lat * rad) * Math.cos(lon * rad),
+        -Math.sin(lat * rad) * Math.sin(lon * rad),
+        Math.cos(lat * rad)
+      ],
+      east = [-Math.sin(lon * rad), Math.cos(lon * rad), 0];
+    const t = north.map((v, i) => v * Math.cos(azi * rad) + east[i] * Math.sin(azi * rad));
+    return [p[1] * t[2] - p[2] * t[1], p[2] * t[0] - p[0] * t[2], p[0] * t[1] - p[1] * t[0]];
+  };
+  for (const a of [
+    [23, 45, 37],
+    [-60, 179, 123],
+    [89, 15, -80]
+  ]) {
+    const b = [-35, -100, 70],
+      paths = [a, b].map(([latitude, longitude, azimuth]) => ({latitude, longitude, azimuth}));
+    const result = g.all(paths[0], paths[1], {maxDistance: 7});
+    expect(result.complete).toBe(true);
+    expect(result.intersections.length).toBeGreaterThan(1);
+    for (const p of result.intersections) {
+      const v = vector(p.latitude, p.longitude);
+      for (const path of [a, b])
+        expect(Math.abs(dot(v, normal(path[0], path[1], path[2])))).toBeLessThan(5e-14);
+    }
+  }
+});
