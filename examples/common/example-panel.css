@@ -1,0 +1,19 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+/* The example grid owns sizing; the community shell fills its column. */
+aside.example-panel {
+  min-width: 0;
+  padding: 0;
+  pointer-events: auto;
+}
+.example-panel > .deck-widget-box {
+  width: 100%;
+  max-width: 100% !important;
+}
+.example-panel > .deck-widget-box > section {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
