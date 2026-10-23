@@ -1,17 +1,27 @@
-# Discontinuous projections
+# Discontinuous maps
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
   <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
 </p>
 
-The discontinuous map API, presets, and layout helpers are experimental and may change.
-
 A discontinuous map places neighboring parts of the Earth in separate parts of a
 plane. A line that crosses a cut must end on one side and resume on the other;
 a polygon must become separate, closed pieces. Projecting only the original
 vertices does not produce a correct map: the renderer may draw a line or triangle
 across the empty space between pieces.
+
+import AlbersUsaExample from '@site/src/components/albers-usa';
+
+<AlbersUsaExample compact />
+
+The interactive Albers USA map shows this with Alaska, Hawaii, and five U.S.
+territory insets. Move over a region to inspect its coordinates, or use
+**View globe** to see its features unfold into the composite map. The mouse
+wheel and zoom buttons magnify every region together; drag to pan. The
+[full example](/examples/albers-usa) includes more explanation.
+
+The discontinuous map API, presets, and layout helpers are experimental and may change.
 
 math.gl provides the experimental `@math.gl/geospatial/discontinuous` entrypoint
 for this geometry processing. It combines geographic regions, local projections,
@@ -85,10 +95,12 @@ it performs no ellipsoid or datum conversion. Supplying an Earth radius scales
 the output but does not turn a layout into an EPSG coordinate reference system.
 
 The U.S. preset uses compact lower-left insets: Alaska on the left, Hawaii beside
-it. Their geographic masks focus on mainland Alaska and the main Hawaiian
-islands; distant islands may be cropped. The masks also include neighboring land and ocean. Filter
-features before projection when only U.S. states should be drawn. Puerto Rico
-and other territories are not included. The independent masks and placements
+it. With `includeTerritories: true`, it also adds Puerto Rico, the U.S. Virgin
+Islands, Guam, the Northern Mariana Islands, and American Samoa. The Alaska and
+Hawaii masks focus on mainland Alaska and the main Hawaiian islands; distant
+islands may be cropped. The masks also include neighboring land and ocean. Filter
+features before projection when only U.S. geography should be drawn. Minor
+outlying islands are not included. The independent masks and placements
 are not a reproduction of D3 `geoAlbersUsa`'s projected rectangular clips.
 
 See the [API reference](../../discontinuous/README.md) for exact preset parameters.
@@ -213,9 +225,10 @@ projection selector and projection cycle. Its discontinuous rendering path:
 3. Samples bed elevation and ice values at the resulting geographic vertices.
 4. Splits graticules with `projectLine` so they do not bridge cuts or inset gaps.
 
-Switches involving discontinuous layouts happen immediately because their mesh
-topologies differ. The continuous world projections retain their animated
-transitions. U.S. inset selection changes the displayed coverage; statistics
+Static discontinuous layouts switch immediately because their mesh topologies
+differ. Myriahedral views use a separate hinge animation through the globe.
+The continuous world projections retain their animated transitions. U.S. inset
+selection changes the displayed coverage; statistics
 remain global. Geographic masks are not political borders, and the display
 interpolation adds no new reconstruction data.
 
@@ -249,6 +262,9 @@ Use `getMapLayout(map)` to obtain sampled bounds and coverage outlines, then
 `fitMapLayout(layout, {width, height, padding})` to place the complete map into a
 viewport. The result includes forward/inverse pixel transforms and sorted region
 layers, plus frame and outline coordinates suitable for drawing inset borders.
+`pickMapLayout(map, fitted, pixel)` returns inverse candidates in front-to-back
+order for a viewport pixel. The [Albers USA example](/examples/albers-usa) shows
+these helpers with clipped state polygons and coordinate inspection.
 Bounds follow projected curves instead of measuring only region corners. They
 remain sampling approximations, so choose a tolerance appropriate to your scale.
 

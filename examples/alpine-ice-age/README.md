@@ -212,8 +212,12 @@ for API examples and limitations.
 
 Inset bounds, viewport fitting, draw order, outlines, and labels come from
 `@math.gl/geospatial/discontinuous` layout metadata. Alaska and Hawaii have visible
-frames. Hawaiian island shapes use a bundled, pinned Natural Earth 1:10m modern
-reference (public domain); the 1° reconstruction grid does not resolve their terrain.
+frames. Each region uses its own display mesh spacing: 1° for the contiguous
+U.S., 0.5° for Alaska, and 0.25° for Hawaii. All meshes still sample the same
+1° PaleoMIST reconstruction, so finer display triangles do not invent finer
+ice or terrain measurements. Hawaiian island shapes use a bundled, pinned
+Natural Earth 1:10m modern reference (public domain) because the reconstruction
+grid does not resolve their terrain. This view does not use raster tile sets.
 This overlay does not change ice values, global totals, or reconstruct past shorelines.
 
 ### Myriahedral presets (experimental)

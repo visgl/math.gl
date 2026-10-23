@@ -22,7 +22,7 @@ export {
 } from './discontinuous/presets';
 
 export {createAlbersUsaMap} from './discontinuous/albers-usa';
-export {getMapLayout, fitMapLayout} from './discontinuous/layout';
+export {getMapLayout, fitMapLayout, pickMapLayout} from './discontinuous/layout';
 export type {MapBounds, MapRegionLayout} from './discontinuous/map-layout';
 export type {MapLayout, MapLayoutRegion, MapViewportOptions} from './discontinuous/layout';
 
