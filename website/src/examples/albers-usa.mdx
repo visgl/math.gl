@@ -1,0 +1,20 @@
+# Albers USA inset map
+
+<p class="badges"><img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" /> <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" /></p>
+
+import Example from '@site/src/components/albers-usa';
+
+<Example />
+
+This focused example shows the experimental [`createAlbersUsaMap`,
+`getMapLayout`, `fitMapLayout`, and `pickMapLayout`
+APIs](/docs/modules/geospatial/discontinuous/). States are clipped at region
+boundaries, and the cursor readout resolves geographic coordinates through the
+frontmost inset. The example enables the five inhabited U.S. territory insets
+with `{includeTerritories: true}` alongside Alaska and Hawaii. Alaska is
+displayed at 35% linear scale. The preset's broad geographic masks are not
+political borders or exact D3 inset clips. Minor outlying islands are outside
+this example's coverage.
+
+State boundaries come from [Natural Earth 1:10m](https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/), public domain.
+See the [standalone source](https://github.com/visgl/math.gl/tree/master/examples/albers-usa) and the [discontinuous projection guide](/docs/modules/geospatial/projection/developer-guide/discontinuous-projections).

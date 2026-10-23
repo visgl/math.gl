@@ -87,6 +87,30 @@ test("layout metadata drives inset order and finer reference polygons retain all
   );
 });
 
+test("Albers USA insets use independent display mesh spacing", () => {
+  const grid = discontinuousGrid("albersUsa", 1);
+  const spacing = { lower48: 1, alaska: 0.5, hawaii: 0.25 };
+  for (let i = 0; i < grid.sources.length; i++) {
+    const step = spacing[grid.regionIds[i]];
+    assert(step, `unexpected region ${grid.regionIds[i]}`);
+    assert(grid.samples[i].indices.every((index) => index < 360 * 181));
+  }
+  const hasQuarterDegreeVertex = grid.sources.some(
+    ([lon, lat], i) =>
+      grid.regionIds[i] === "hawaii" &&
+      (Math.abs(lon * 2 - Math.round(lon * 2)) > 1e-8 ||
+        Math.abs(lat * 2 - Math.round(lat * 2)) > 1e-8),
+  );
+  const hasHalfDegreeVertex = grid.sources.some(
+    ([lon, lat], i) =>
+      grid.regionIds[i] === "alaska" &&
+      (Math.abs(lon - Math.round(lon)) > 1e-8 ||
+        Math.abs(lat - Math.round(lat)) > 1e-8),
+  );
+  assert(hasQuarterDegreeVertex);
+  assert(hasHalfDegreeVertex);
+});
+
 // The spherical area catches missing/duplicated fan triangles, including at poles
 // and the antimeridian, independently of the flattened layout's possible overlaps.
 test("myriahedral meshes cover the sphere once and retain the source field", () => {

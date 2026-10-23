@@ -7,6 +7,7 @@ import {
   createAlbersUsaMap,
   createInterruptedMollweideMap,
   fitMapLayout,
+  pickMapLayout,
   getMapLayout,
   type MapRegion
 } from '../../src/discontinuous';
@@ -129,4 +130,36 @@ test('U.S. inset metadata identifies parent, scale and frames and includes all m
   ] as const)
     expect(map.projectPoint(point)?.regionId).toBe('hawaii');
   expect(layout.regions[2].frame).toBeDefined();
+});
+
+test('viewport picking returns the visible inset before overlapping lower layers', () => {
+  const map = createAlbersUsaMap();
+  const fitted = fitMapLayout(getMapLayout(map), {width: 800, height: 500});
+  const hawaii = [-157.8, 21.3] as const;
+  const xy = fitted.project(map.projectPoint(hawaii, 'hawaii')!.position);
+  const candidates = pickMapLayout(map, fitted, xy);
+  expect(candidates[0].regionId).toBe('hawaii');
+  expect(candidates[0].position[0]).toBeCloseTo(hawaii[0], 5);
+  expect(candidates[0].position[1]).toBeCloseTo(hawaii[1], 5);
+  expect(pickMapLayout(map, fitted, [-100, -100])).toEqual([]);
+});
+
+test('optional U.S. territory insets project and fit all inhabited territories', () => {
+  const map = createAlbersUsaMap({includeTerritories: true});
+  const cases = [
+    ['puertoRico', [-66.1, 18.2]],
+    ['virginIslands', [-64.8, 18.34]],
+    ['guam', [144.8, 13.45]],
+    ['northernMariana', [145.75, 15.2]],
+    ['americanSamoa', [-170.7, -14.3]]
+  ] as const;
+  const fitted = fitMapLayout(getMapLayout(map), {width: 900, height: 600});
+  expect(fitted.regions.filter(region => region.kind === 'inset')).toHaveLength(7);
+  for (const [id, coordinate] of cases) {
+    const point = map.projectPoint(coordinate, id);
+    expect(point?.regionId).toBe(id);
+    const candidates = pickMapLayout(map, fitted, fitted.project(point!.position));
+    expect(candidates.length, id).toBeGreaterThan(0);
+    expect(candidates[0].regionId).toBe(id);
+  }
 });

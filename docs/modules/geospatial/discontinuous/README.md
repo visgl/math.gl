@@ -70,12 +70,17 @@ const honolulu = usa.projectPoint([-157.8, 21.3]); // regionId: 'hawaii'
 const candidates = usa.unprojectPoint(honolulu!.position);
 ```
 
-`createAlbersUsaMap({radius = 1})` combines three spherical Albers equal-area
+`createAlbersUsaMap({radius = 1, includeTerritories = false})` combines three spherical Albers equal-area
 projections. Alaska is scaled to 0.35 of the linear scale (0.1225 of the area scale);
 Hawaii retains the lower-48 scale. Insets use the familiar lower-left composition, with Alaska to the left of Hawaii and Y up.
 The composite as a whole therefore does not preserve relative area between states.
 Points outside all three geographic masks return `null`; inverse queries in gaps
 return no candidates. Lines and polygons use the same region clipping as other maps.
+Set `includeTerritories: true` to add framed insets for Puerto Rico, the U.S.
+Virgin Islands, Guam, the Northern Mariana Islands, and American Samoa. These
+five regions use independent spherical Albers projections and placements.
+The [dedicated example](/examples/albers-usa) enables them and renders pinned,
+public-domain Natural Earth polygons. Minor outlying islands are not included.
 
 | Region ID | Center | Standard parallels | Offset | Linear scale |
 | --- | --- | --- | --- | --- |
@@ -115,7 +120,7 @@ frame arrays are snapshotted and frozen. Parent IDs must exist and form an acycl
 hierarchy. Scale must be positive and finite, and frame bounds must increase.
 
 ```typescript
-import {createAlbersUsaMap, getMapLayout, fitMapLayout}
+import {createAlbersUsaMap, getMapLayout, fitMapLayout, pickMapLayout}
   from '@math.gl/geospatial/discontinuous';
 
 const map = createAlbersUsaMap();
@@ -126,7 +131,7 @@ const fit = fitMapLayout(layout, {
 });
 const honolulu = map.projectPoint([-157.8, 21.3])!;
 const pixel = fit.project(honolulu.position);
-const candidates = map.unprojectPoint(fit.unproject(pixel), honolulu.regionId);
+const candidates = pickMapLayout(map, fit, pixel);
 ```
 
 `getMapLayout` returns `{bounds, regions}`. Regions are sorted back-to-front and
@@ -143,6 +148,11 @@ functions, fitted `bounds`, and fitted `regions`. Region bounds, frames, and out
 are now in viewport pixels; `placement` remains the canonical map-space transform.
 Each region also has a sequential `layer` index for rendering. Higher layers
 should cover lower layers. Use the same order for picking overlapping insets.
+`pickMapLayout(map, fit, pixel)` converts a viewport pixel to map space and
+returns inverse candidates in top-to-bottom layer order, each with a `layer`.
+It resolves layout overlap, but a renderer should still reject candidates hidden
+by its own feature geometry. See the [interactive Albers USA example](/examples/albers-usa)
+for a complete SVG rendering and pointer readout.
 
 The default viewport origin is top left, with Y down; `flipY: false` selects bottom
 left with Y up. Padding is in pixels and may be a uniform number or a per-side
