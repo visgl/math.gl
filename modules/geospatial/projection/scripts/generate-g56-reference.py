@@ -53,6 +53,7 @@ def independent_direct():
     rows=[]
     paths=[[lat,89.999999,d] for lat,d in [(89.999999,1e-9),(-89.999999,1e-9),(90-2**-46,1e-17),(-90+2**-46,1e-17)]]
     paths += [[sign*lat,45. if sign*direction>0 else 135.,direction*d] for lat,d in [(0.,2.2214414443965),(60.,.7404804797988333),(80.,.2468268265996111)] for sign in [-1,1] for direction in [-1,1]]
+    paths += [[sign*30., 135. if sign>0 else 45., -1.4809609793861218] for sign in [-1,1]]
     for lat,az,distance in paths:
         phi=D.from_float(lat)*h.PI/180;azi=D.from_float(az)*h.PI/180;d=D.from_float(distance)
         sa,ca=h.sc(azi);p2=phi+d*ca

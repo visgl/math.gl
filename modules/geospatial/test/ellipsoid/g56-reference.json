@@ -4,7 +4,7 @@
     "precisionBits": 53,
     "archiveSHA256": "5aaca14cd75f13aa2690273d76e88e8ddf4aeb267d6be2c3e0ba948deb9ceea5",
     "sourceSHA256": {
-      "generate-g56-reference.py": "6dd412c9c0928c0956eed40cbda5d0c919af0fb70d7e2113cf34f37ba318341c",
+      "generate-g56-reference.py": "6935597f15aa2afb689d6d9ac6c952a60057c36b260fd2cae2709e6e1a35224b",
       "generate-g34-reference.py": "b0c1461621e10f1e6a92760079134260b65df5c0e51c231d06193ad7096ebe32",
       "geographiclib-g56-oracle.cpp": "a7ae12bea7cfd27896088880992a471c5bcbcd4d57eed8f964b0da0171ebbc22"
     }
@@ -13972,6 +13972,32 @@
         89.99999986638097,
         1038.9673635723036,
         18.125776194122743
+      ]
+    },
+    {
+      "path": [
+        -30.0,
+        0.0,
+        45.0,
+        -1.4809609793861218
+      ],
+      "expected": [
+        -89.99999999999999,
+        -2081.9478735469634,
+        36.04916317583728
+      ]
+    },
+    {
+      "path": [
+        30.0,
+        0.0,
+        135.0,
+        -1.4809609793861218
+      ],
+      "expected": [
+        89.99999999999999,
+        -2081.9478735469634,
+        -36.04916317583728
       ]
     },
     {

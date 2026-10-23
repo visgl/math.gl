@@ -109,8 +109,13 @@ meridian distance and endpoint isometric latitude through longitude and area
 integration. If subtraction of the full meridian arc and northing is ill
 conditioned, an original internal 48-decimal fixed-point binomial integral
 computes that difference from the exact binary inputs. This bounded slow path
-adds no dependency. Another 44 independent controls cover starts at 0°, 30°,
+adds no dependency. Another 46 independent controls cover starts at 0°, 30°,
 60° and 80°, both hemispheres and signed distances, unit/Earth and 1e±100 axes and b/a
 from 0.5 through 2. Spherical controls use analytic logarithms; ellipsoidal
 controls use 80-digit quadrature with the polar singularity removed analytically.
 The area budget remains `5e-14 a²`.
+
+Cancellation-sensitive domain classification uses the high-precision remaining
+distance before rejecting a pole or pole crossing. This preserves representable
+endpoints when rounded northing equals the rounded full pole distance; endpoints
+whose public latitude rounds to an exact pole still raise the explicit domain error.

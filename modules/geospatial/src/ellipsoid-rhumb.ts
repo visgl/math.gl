@@ -122,16 +122,26 @@ export class EllipsoidRhumb {
         const delta = distance / this.a;
         if (!Number.isFinite(delta)) throw new RangeError('Unrepresentable rhumb distance');
         const north = delta * ca;
+        let poleDistance: number | undefined;
         if (north !== 0) {
           // Integrate the pole gap directly: subtracting two absolute meridian
           // ordinates discards valid steps close to a pole, even away from it.
           const gap =
             north > 0 ? this.meridianDelta(latitude, 90) : this.meridianDelta(-90, latitude);
-          if (Math.abs(north) > gap) throw new RhumbDomainError('pole-crossing');
-          if (Math.abs(north) === gap) throw new RhumbDomainError('pole');
+          poleDistance = gap - Math.abs(north);
+          if (Math.abs(poleDistance) < 1e-4 * gap)
+            poleDistance = remainingPoleDistance(
+              this.a,
+              this.b,
+              latitude,
+              azimuth,
+              distance,
+              Math.sign(north)
+            );
+          if (poleDistance < 0) throw new RhumbDomainError('pole-crossing');
+          if (poleDistance === 0) throw new RhumbDomainError('pole');
         }
-        const polar =
-          north === 0 ? undefined : this.polarEndpoint(latitude, north, azimuth, distance);
+        const polar = north === 0 ? undefined : this.polarEndpoint(latitude, north, poleDistance!);
         const lat2 =
           north === 0 ? latitude : (polar?.latitude ?? this.inverseMeridian(latitude, north));
         if (Math.abs(lat2) === 90) throw new RhumbDomainError('pole');
@@ -180,8 +190,7 @@ export class EllipsoidRhumb {
   private polarEndpoint(
     latitude: number,
     north: number,
-    azimuth: number,
-    distance: number
+    poleDistance: number
   ): {latitude: number; means: [number, number]; psi: number} | undefined {
     const sign =
         Math.abs(latitude) > 80 && Math.abs(north) < Math.abs(this.meridianDelta(0, latitude))
@@ -192,10 +201,10 @@ export class EllipsoidRhumb {
     const density = (theta: number) =>
       this.r ** 2 / Math.hypot(Math.sin(theta), this.r * Math.cos(theta)) ** 3;
     const gap = (theta: number) => integrate(density, 0, theta);
-    let target =
-      this.meridianDelta(sign > 0 ? latitude : -90, sign > 0 ? 90 : latitude) - sign * north;
-    if (target < 1e-4 * gap(theta1))
-      target = remainingPoleDistance(this.a, this.b, latitude, azimuth, distance, sign);
+    const target =
+      sign === Math.sign(north)
+        ? poleDistance
+        : this.meridianDelta(sign > 0 ? latitude : -90, sign > 0 ? 90 : latitude) - sign * north;
     if (!(target > 0 && target < gap(limit))) return undefined;
     let lo = 0,
       hi = limit,
