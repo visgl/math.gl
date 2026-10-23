@@ -5,12 +5,62 @@ import {
   getMapLayout,
   createAlbersUsaMap,
   createAirOceanMap,
+  createMyriahedralMap,
   createInterruptedSinusoidalMap,
   createInterruptedMollweideMap,
   createInterruptedHomolosineMap,
 } from "@math.gl/geospatial/discontinuous";
 
+import { isLand } from "../common/land-mask.js";
+import { myriahedralGrid } from "./myriahedral-grid.js";
+import {
+  createH3MyriahedralMesh,
+  createA5MyriahedralMesh,
+  createS2MyriahedralMesh,
+  dggsCellWeight,
+  dggsCellOutlines,
+} from "./dggs-mesh.js";
+
 import hawaiiLand from "./assets/hawaii-land.json" with { type: "json" };
+
+// DGGS panel topology is independent of the ice-age snapshot.
+const dggsMeshes = new Map();
+function dggsPanels(system) {
+  if (!dggsMeshes.has(system))
+    dggsMeshes.set(
+      system,
+      system === "h3"
+        ? createH3MyriahedralMesh()
+        : system === "s2"
+          ? createS2MyriahedralMesh()
+          : system === "s2-1"
+            ? createS2MyriahedralMesh(1)
+            : createA5MyriahedralMesh(system === "a5-1" ? 1 : 0),
+    );
+  return dggsMeshes.get(system);
+}
+// Modest panel counts keep map construction and the 1° field mesh interactive.
+export const MYRIAHEDRAL_VIEWS = Object.fromEntries([
+  ["myriahedral:h3-0", { preset: "polyhedral", dggs: "h3" }],
+  ["myriahedral:a5-0", { preset: "polyhedral", dggs: "a5" }],
+  ["myriahedral:a5-1", { preset: "polyhedral", dggs: "a5-1" }],
+  ["myriahedral:s2-0", { preset: "polyhedral", dggs: "s2" }],
+  ["myriahedral:s2-1", { preset: "polyhedral", dggs: "s2-1" }],
+  ...[
+    "polyconic",
+    "cylindric",
+    "azimuthal",
+    "hemispheres",
+    "sealine",
+    "coastline",
+  ].map((preset) => [`myriahedral:${preset}`, { preset, columns: 24 }]),
+  ...["tetrahedron", "cube", "octahedron", "dodecahedron", "icosahedron"].map(
+    (solid) => [
+      `myriahedral:${solid}`,
+      { preset: "polyhedral", solid, subdivisions: 1 },
+    ],
+  ),
+]);
 
 export const DISCONTINUOUS_VIEWS = {
   albersUsa: "Albers USA · Alaska & Hawaii insets",
@@ -18,8 +68,41 @@ export const DISCONTINUOUS_VIEWS = {
   interruptedMollweide: "Interrupted Mollweide",
   interruptedHomolosine: "Interrupted Goode homolosine",
   airOcean: "AirOcean · gnomonic",
+  ...Object.fromEntries(
+    Object.entries(MYRIAHEDRAL_VIEWS).map(([id, options]) => [
+      id,
+      options.dggs === "s2-1"
+        ? "Myriahedral · S2 resolution 1"
+        : options.dggs === "s2"
+          ? "Myriahedral · S2 base cells"
+          : options.dggs === "h3"
+            ? "Myriahedral · H3 base cells"
+            : options.dggs
+              ? options.dggs === "a5-1"
+                ? "Myriahedral · A5 resolution 1"
+                : "Myriahedral · A5 base cells"
+              : `Myriahedral · ${options.solid ?? options.preset}`,
+    ]),
+  ),
 };
 const factories = {
+  ...Object.fromEntries(
+    Object.entries(MYRIAHEDRAL_VIEWS).map(([id, options]) => [
+      id,
+      () =>
+        createMyriahedralMap({
+          preset: options.preset,
+          ...(options.dggs
+            ? {
+                mesh: dggsPanels(options.dggs).mesh,
+                edgeWeight: (edge, weight) =>
+                  dggsCellWeight(edge, weight, dggsPanels(options.dggs)),
+              }
+            : options),
+          isLand: ([lon, lat]) => isLand(lon, lat),
+        }),
+    ]),
+  ),
   albersUsa: createAlbersUsaMap,
   airOcean: createAirOceanMap,
   interruptedSinusoidal: createInterruptedSinusoidalMap,
@@ -56,7 +139,12 @@ export function sampleField(field, sample) {
 /** Clip source grid cells before triangulation; each emitted triangle belongs to one region. */
 export function discontinuousGrid(view, step = 1) {
   const key = `${view}:${step}`;
-  if (cache.has(key)) return cache.get(key);
+  if (cache.has(key)) {
+    const cached = cache.get(key);
+    cache.delete(key);
+    cache.set(key, cached);
+    return cached;
+  }
   if (!factories[view]) throw new Error(`Unknown discontinuous view: ${view}`);
   if (!(step > 0 && 180 % step === 0))
     throw new Error("Grid step must divide 180");
@@ -94,83 +182,93 @@ export function discontinuousGrid(view, step = 1) {
       return dot(n, interior) < 0 ? n.map((v) => -v) : n;
     });
   });
-  for (let lat = -90; lat < 90; lat += step) {
-    for (let lon = -180; lon < 180; lon += step) {
-      const ring = [
-        [lon, lat],
-        [lon + step, lat],
-        [lon + step, lat + step],
-        [lon, lat + step],
-      ];
-      if (lat === -90) ring.splice(1, 1);
-      if (lat + step === 90) ring.splice(2, 1);
-      const vectors = ring.map(sphere);
-      if (
-        !masks.some((normals) =>
-          normals.every((n) => vectors.some((v) => dot(n, v) >= -1e-12)),
-        )
-      )
-        continue;
-      const common = regionsAt(ring[0]).find((id) =>
-        ring.every((p) => regionsAt(p).includes(id)),
-      );
-      if (common) {
-        const corners = ring.map((p) => {
-          const key = `${common}:${p.join(",")}`;
-          if (!vertexIds.has(key)) {
-            vertexIds.set(key, positions.length / 2);
-            positions.push(...map.projectPoint(p, common).position);
-            sources.push(p);
-            samples.push(sourceSample(p));
-            regionIds.push(common);
-          }
-          return vertexIds.get(key);
-        });
-        for (let i = 1; i < corners.length - 1; i++)
-          indices.push(corners[0], corners[i], corners[i + 1]);
-        continue;
-      }
-      const parts = map.projectPolygon([ring], { tolerance: 1e-5 });
-      for (const part of parts) {
-        let outline = part.coordinates[0],
-          source = part.sourceCoordinates[0];
-        if (
-          outline.length > 1 &&
-          outline[0][0] === outline.at(-1)[0] &&
-          outline[0][1] === outline.at(-1)[1]
-        ) {
-          outline = outline.slice(0, -1);
-          source = source.slice(0, -1);
-        }
-        if (outline.length < 3) continue;
-        // These are small convex spherical grid fragments, not arbitrary feature polygons.
-        // A spherical interior point keeps the fan inside its local panel.
-        const sum = source
-          .map(sphere)
-          .reduce((a, p) => a.map((v, i) => v + p[i]), [0, 0, 0]);
-        const center = [
-          (Math.atan2(sum[1], sum[0]) * 180) / Math.PI,
-          (Math.atan2(sum[2], Math.hypot(sum[0], sum[1])) * 180) / Math.PI,
+  if (MYRIAHEDRAL_VIEWS[view]) {
+    myriahedralGrid(
+      map,
+      step,
+      { positions, sources, samples, indices, regionIds },
+      sourceSample,
+    );
+  }
+  if (!MYRIAHEDRAL_VIEWS[view]) {
+    for (let lat = -90; lat < 90; lat += step) {
+      for (let lon = -180; lon < 180; lon += step) {
+        const ring = [
+          [lon, lat],
+          [lon + step, lat],
+          [lon + step, lat + step],
+          [lon, lat + step],
         ];
-        const projected = map.projectPoint(center, part.regionId);
-        if (!projected)
-          throw new Error("Clipped cell has no region-local center");
-        const start = positions.length / 2;
-        for (const [p, geographic] of [
-          [projected.position, center],
-          ...outline.map((p, i) => [p, source[i]]),
-        ]) {
-          positions.push(...p);
-          sources.push(geographic);
-          samples.push(sourceSample(geographic));
-          regionIds.push(part.regionId);
+        if (lat === -90) ring.splice(1, 1);
+        if (lat + step === 90) ring.splice(2, 1);
+        const vectors = ring.map(sphere);
+        if (
+          !masks.some((normals) =>
+            normals.every((n) => vectors.some((v) => dot(n, v) >= -1e-12)),
+          )
+        )
+          continue;
+        const common = regionsAt(ring[0]).find((id) =>
+          ring.every((p) => regionsAt(p).includes(id)),
+        );
+        if (common) {
+          const corners = ring.map((p) => {
+            const key = `${common}:${p.join(",")}`;
+            if (!vertexIds.has(key)) {
+              vertexIds.set(key, positions.length / 2);
+              positions.push(...map.projectPoint(p, common).position);
+              sources.push(p);
+              samples.push(sourceSample(p));
+              regionIds.push(common);
+            }
+            return vertexIds.get(key);
+          });
+          for (let i = 1; i < corners.length - 1; i++)
+            indices.push(corners[0], corners[i], corners[i + 1]);
+          continue;
         }
-        for (let i = 0; i < outline.length; i++)
-          indices.push(
-            start,
-            start + i + 1,
-            start + ((i + 1) % outline.length) + 1,
-          );
+        const parts = map.projectPolygon([ring], { tolerance: 1e-5 });
+        for (const part of parts) {
+          let outline = part.coordinates[0],
+            source = part.sourceCoordinates[0];
+          if (
+            outline.length > 1 &&
+            outline[0][0] === outline.at(-1)[0] &&
+            outline[0][1] === outline.at(-1)[1]
+          ) {
+            outline = outline.slice(0, -1);
+            source = source.slice(0, -1);
+          }
+          if (outline.length < 3) continue;
+          // These are small convex spherical grid fragments, not arbitrary feature polygons.
+          // A spherical interior point keeps the fan inside its local panel.
+          const sum = source
+            .map(sphere)
+            .reduce((a, p) => a.map((v, i) => v + p[i]), [0, 0, 0]);
+          const center = [
+            (Math.atan2(sum[1], sum[0]) * 180) / Math.PI,
+            (Math.atan2(sum[2], Math.hypot(sum[0], sum[1])) * 180) / Math.PI,
+          ];
+          const projected = map.projectPoint(center, part.regionId);
+          if (!projected)
+            throw new Error("Clipped cell has no region-local center");
+          const start = positions.length / 2;
+          for (const [p, geographic] of [
+            [projected.position, center],
+            ...outline.map((p, i) => [p, source[i]]),
+          ]) {
+            positions.push(...p);
+            sources.push(geographic);
+            samples.push(sourceSample(geographic));
+            regionIds.push(part.regionId);
+          }
+          for (let i = 0; i < outline.length; i++)
+            indices.push(
+              start,
+              start + i + 1,
+              start + ((i + 1) % outline.length) + 1,
+            );
+        }
       }
     }
   }
@@ -183,6 +281,10 @@ export function discontinuousGrid(view, step = 1) {
   for (let lat = -60; lat <= 60; lat += 30)
     lines.push(
       ...map.projectLine(Array.from({ length: 361 }, (_, i) => [i - 180, lat])),
+    );
+  if (MYRIAHEDRAL_VIEWS[view]?.dggs)
+    lines.push(
+      ...dggsCellOutlines(map, dggsPanels(MYRIAHEDRAL_VIEWS[view].dggs).cells),
     );
   const result = {
     map,
@@ -199,6 +301,8 @@ export function discontinuousGrid(view, step = 1) {
         )
       : [],
   };
+  // Cycling through many panel meshes must not retain every high-resolution grid.
+  if (cache.size >= 3) cache.delete(cache.keys().next().value);
   cache.set(key, result);
   return result;
 }

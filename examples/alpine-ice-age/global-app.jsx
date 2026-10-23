@@ -291,13 +291,31 @@ export default function GlobalIceAge({
             value={view}
             onChange={(e) => setView(e.target.value)}
           >
-            {Object.entries(GLOBAL_VIEWS).map(([id, title]) => (
-              <option key={id} value={id}>
-                {title}
-              </option>
-            ))}
+            {Object.entries(GLOBAL_VIEWS)
+              .filter(([id]) => !id.startsWith("myriahedral:"))
+              .map(([id, title]) => (
+                <option key={id} value={id}>
+                  {title}
+                </option>
+              ))}
+            <optgroup label="Myriahedral · experimental">
+              {Object.entries(GLOBAL_VIEWS)
+                .filter(([id]) => id.startsWith("myriahedral:"))
+                .map(([id, title]) => (
+                  <option key={id} value={id}>
+                    {title}
+                  </option>
+                ))}
+            </optgroup>
           </select>
         </label>
+        {view.startsWith("myriahedral:") && (
+          <p className="alpine-source-note">
+            Experimental panel map; overlaps are possible. Geography-aware cuts
+            use a fixed modern Natural Earth land mask, not reconstructed
+            shorelines.
+          </p>
+        )}
         <label className="alpine-check">
           <input
             type="checkbox"
