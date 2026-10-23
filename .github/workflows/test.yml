@@ -53,6 +53,10 @@ jobs:
 
       - name: Check independent interior references and qualification
         run: |
+          python3 modules/geospatial/projection/scripts/generate-g56-reference.py --check
+          node modules/geospatial/projection/scripts/qualify-g56.mjs --output /tmp/g56-qualification.json
+          python3 modules/geospatial/projection/scripts/generate-g34-reference.py --check
+          node modules/geospatial/projection/scripts/qualify-g34.mjs --output /tmp/g34-qualification.json
           python3 modules/geospatial/projection/scripts/generate-interior-reference.py --check
           python3 modules/geospatial/projection/scripts/generate-nearest-cusp-reference.py --check
           node modules/geospatial/projection/scripts/qualify-interiors.mjs --output /tmp/interior-qualification.json
@@ -141,6 +145,8 @@ jobs:
           node modules/geospatial/projection/scripts/measure-accuracy.mjs --output /tmp/projection-accuracy.json
           node modules/geospatial/projection/scripts/check-experimental-package.mjs
           node modules/geospatial/projection/scripts/check-packed-package.mjs
+          node modules/geospatial/projection/scripts/check-g56-package.mjs
+          node modules/geospatial/projection/scripts/check-g34-package.mjs
           node modules/geospatial/projection/scripts/check-bundle-budget.mjs
           node modules/geospatial/projection/scripts/check-lazy-package.mjs
           node modules/geospatial/projection/scripts/benchmark.mjs --points 100 --samples 3 --min-sample-ms 0
@@ -313,6 +319,8 @@ jobs:
       - name: Qualify independent interior and deformation references
         timeout-minutes: 2
         run: |
+          node modules/geospatial/projection/scripts/qualify-g56.mjs --browser ${{ matrix.browser }} --output /tmp/g56-qualification-${{ matrix.browser }}.json
+          node modules/geospatial/projection/scripts/qualify-g34.mjs --browser ${{ matrix.browser }} --output /tmp/g34-qualification-${{ matrix.browser }}.json
           node modules/geospatial/projection/scripts/qualify-interiors.mjs --browser ${{ matrix.browser }} --output /tmp/interior-qualification-${{ matrix.browser }}.json
           node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs --browser ${{ matrix.browser }} --output /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
 
@@ -334,6 +342,8 @@ jobs:
         with:
           name: projection-browser-qualification-${{ matrix.browser }}
           path: |
+            /tmp/g56-qualification-${{ matrix.browser }}.json
+            /tmp/g34-qualification-${{ matrix.browser }}.json
             /tmp/projection-browser-qualification.json
             /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
             /tmp/interior-qualification-${{ matrix.browser }}.json

@@ -16,5 +16,24 @@ export type {
 export {LocalReferenceFrame} from '../local-reference-frame';
 export type {LocalReferenceFrameOptions, HeadingPitchRoll} from '../local-reference-frame';
 export type {TangentPlaneProjectionMode, TangentPlaneProjection} from '../ellipsoid-tangent-plane';
+
+export {EllipsoidMetrics} from '../ellipsoid-metrics';
+export type {AuxiliaryLatitude} from '../ellipsoid-metrics';
+export {GeodesicPolygon} from '../geodesic-polygon';
+export type {GeodesicPolygonResult, GeodesicPolygonOptions} from '../geodesic-polygon';
+
+export {EllipsoidRhumb, RhumbDomainError} from '../ellipsoid-rhumb';
+export type {RhumbOptions, RhumbResult, RhumbLine} from '../ellipsoid-rhumb';
+export {RhumbPolygon} from '../rhumb-polygon';
+export type {RhumbPolygonOptions, RhumbPolygonResult, RhumbPointOptions} from '../rhumb-polygon';
+export {GeodesicIntersections} from '../geodesic-intersections';
+export type {
+  GeodesicPath as GeodesicIntersectionPath,
+  IntersectionPoint,
+  IntersectionSearchOptions,
+  IntersectionSearch,
+  ClosestIntersection,
+  SegmentIntersection
+} from '../geodesic-intersections';
 export {GeodesicPath} from '../geodesic-path';
 export type {GeodesicPathOptions} from '../geodesic-path';

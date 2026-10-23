@@ -190,6 +190,10 @@
         "items": [
           "modules/geospatial/README",
           "modules/geospatial/api-reference/ellipsoid",
+          "modules/geospatial/api-reference/ellipsoid-metrics",
+          "modules/geospatial/api-reference/geodesic-polygon",
+          "modules/geospatial/api-reference/ellipsoid-rhumb",
+          "modules/geospatial/api-reference/geodesic-intersections",
           "modules/geospatial/api-reference/globe-queries",
           "modules/geospatial/api-reference/subdivide-globe-mesh",
           "modules/geospatial/api-reference/geodesic-path",
