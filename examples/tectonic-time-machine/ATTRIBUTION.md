@@ -56,3 +56,22 @@ If imagery cannot be loaded, the visualization reports it and uses neutral shade
 
 Ocean motion imports `waterMaterial` from the installed `@luma.gl/shadertools` public API,
 the same reusable material used by luma.gl's globe. No upstream shader source is copied.
+
+## Historical terrain — PALEOMAP PaleoDEMs v2
+
+Scotese, Christopher R. and Wright, Nicky M. (2018). *PALEOMAP Paleodigital
+Elevation Models (PaleoDEMs) for the Phanerozoic*, v2.
+[DOI 10.5281/zenodo.5460860](https://doi.org/10.5281/zenodo.5460860).
+[CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/).
+
+The [hosted dataset](https://github.com/visgl/deck.gl-data/tree/eaa2649826c795492ee89a2632d863788545f2a2/earth/paleogeography/v1/paleodem)
+retains the original archive license, source checksum, complete provenance and
+lossless numeric Parquet conversion. The example decodes only elevation,
+converts values to float32 for display, interpolates spatially and between 5 Ma
+ages, and adds illustrative hypsometric colors and 8× hill shading. Vegetation
+and ice remain illustrative. Already reconstructed PALEOMAP coordinates are
+not rotated with Cao/Müller plate models. No endorsement is implied.
+
+The test manifest is reproduced from the same licensed snapshot; synthetic
+height values are used in unit tests. Source-data licensing is separate from
+the MIT license covering the example's original implementation.

@@ -72,14 +72,14 @@ export function blendWeights(from, target, progress) {
 }
 // Every endpoint reads the same current geological coordinates. Interrupted transitions
 // begin from the current mixture, so neither time nor the displayed shape jumps backwards.
-export function transformMesh(mesh, weights, engines, scales, latitude = 15, ocean = false, longitude = 0) {
+export function transformMesh(mesh, weights, engines, scales, latitude = 15, ocean = false, longitude = 0, geographic = false) {
   const {coordinates, projected, positions} = mesh;
   const tilt = (latitude * Math.PI) / 180,
     sinTilt = Math.sin(tilt),
     cosTilt = Math.cos(tilt);
   // Ocean geometry covers the whole view, so only its material coordinates need the
   // camera longitude. Land coordinates already contain this shift during rebuilding.
-  if (ocean && mesh.materialLongitude !== longitude) {
+  if ((ocean || geographic) && mesh.materialLongitude !== longitude) {
     const angle = longitude * Math.PI / 180;
     for (let i = 0, j = 0; i < coordinates.length; i += 2, j += 3) {
       const lon = coordinates[i] * Math.PI / 180 + angle;

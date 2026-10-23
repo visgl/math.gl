@@ -111,7 +111,7 @@ A visible Play / Stop button works directly in the inline documentation example.
 The compact expandable info box includes sources and scientific limits.
 
 Ocean ripples and specular lighting use the public luma.gl `waterMaterial` API. Modern
-NASA terrain stays attached to each moving rigid block through projection transitions.
+In the modern-imagery appearance mode, NASA terrain stays attached to each moving rigid block through projection transitions.
 It is visual context, not a reconstruction of ancient mountains, vegetation or ice;
 no elevation is inferred from the image. If imagery fails to load, neutral shaded land
 is shown. Region colors remain available as an alternative.
@@ -258,3 +258,35 @@ checks and projection-aware rendering before exposing any map overlay.
 Land-plant emergence is marked at approximately 470 Ma, with an illustrative
 80 Myr transition from bare earth tones to modern texture colors. This is not
 an ancient vegetation reconstruction; region colors remain a categorical view.
+
+## Historical PaleoDEM terrain
+
+Playback starts at 500 Ma so historical terrain is visible immediately.
+The default **Historical terrain · PaleoDEM** appearance uses Scotese and Wright's
+CC-BY-4.0 PALEOMAP PaleoDEMs v2 from 540 Ma through the present. The 3.1 MB
+[immutable Parquet snapshot](https://media.githubusercontent.com/media/visgl/deck.gl-data/eaa2649826c795492ee89a2632d863788545f2a2/earth/paleogeography/v1/paleodem/paleodem.parquet)
+is registered in the [deck.gl-data STAC catalog](https://github.com/visgl/deck.gl-data/pull/51).
+See the in-example Sources section and [ATTRIBUTION.md](ATTRIBUTION.md).
+
+The loaders.gl TypeScript Parquet decoder streams only `elevation_m` in a worker.
+Grid dimensions and age indexes come from the pinned manifest. Decode starts at
+the requested age, prioritizes seeks, then fills younger history in playback order;
+older snapshots complete in the background. Completed float32 elevation grids
+occupy about 28 MB; only the two displayed grids have GPU textures. Pending,
+failed, or out-of-range terrain uses explicitly labeled illustrative plate imagery.
+The display never labels a stale grid as the requested age.
+
+Land/sea masks and terrain colors are derived from elevation, with bilinear spatial
+sampling, linear interpolation between the bracketing 5 Ma grids, and exaggerated
+8× hill shading. This is a shaded surface, not an extruded elevation mesh. Source
+edge omissions remain uncovered; no missing polar/dateline nodes are extrapolated.
+Colors, vegetation greening and glaciations are illustrative, not reconstructed
+biomes or climate. Plant emergence still controls greening around 470 Ma.
+
+PaleoDEM grids are **already reconstructed in the PALEOMAP frame**. Their global
+surface replaces the plate-template land layer in this appearance mode; it is not
+rotated, clipped to, or presented as compatible with Cao/Müller coastlines. The
+selected plate model still supplies region colors and the earlier/future fallback.
+Choose **Modern NASA imagery on plates** or **Region colors** to see those plate
+models throughout their time ranges. Globe rotation, meridian shifts and projection
+morphing transform the global surface once, without applying plate rotations.

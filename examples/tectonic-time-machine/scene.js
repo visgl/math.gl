@@ -27,6 +27,7 @@ import {
 import {snowballCoverage, glaciationPlaybackSpeed} from './timeline.js';
 import {vegetationCoverage} from './earth-events.js';
 import {SurfaceLayer} from './surface-layer.js';
+import {loadPaleoTerrain, terrainBracket} from './paleodem.js';
 import {loadTerrain} from './terrain.js';
 import {makeMesh, blendWeights, transformMesh, binaryMesh, worldToGeographic} from './geometry.js';
 const RADIUS = 6371008.8,
@@ -80,7 +81,8 @@ export function mountScene(
   onError,
   onTimeChange,
   onPlayingChange,
-  onAppearanceStatus
+  onAppearanceStatus,
+  workerUrl
 ) {
   let mode = 'globe',
     longitude = 0,
@@ -91,7 +93,12 @@ export function mountScene(
     grid = false,
     glaciations = true,
     regionColors = false,
-    terrainImage = null;
+    terrainImage = null,
+    modernTerrainError = false,
+    paleoTerrain = null,
+    paleoError = false,
+    historicalTerrain = true,
+    appearanceStatus = null;
   let targets = futureRotations(scenario),
     lastTime = -300,
     lastRender = 0;
@@ -105,7 +112,8 @@ export function mountScene(
     counts = {active: 0, unresolved: 0};
   const rotations = new Map(),
     future = new Map(),
-    ocean = makeMesh(earth);
+    ocean = makeMesh(earth),
+    paleoMesh = makeMesh(earth);
   const scales = {},
     widget = new TimelineWidget({
       id: 'tectonic-playback',
@@ -238,9 +246,22 @@ export function mountScene(
     if (!force && now - lastRender < 50) return;
     lastRender = now;
     currentWeights(now);
-    if (time !== geometryTime || longitude !== geometryLongitude || !land) counts = rebuild(time);
+    const pose = paleoTerrain?.get(time);
+    const usePaleo = historicalTerrain && !regionColors && Boolean(pose);
+    let status;
+    if (regionColors) status = `${model?.source.id || 'Plate model'} · categorical region colors`;
+    else if (usePaleo) status = `PALEOMAP PaleoDEM · ${pose.a.age === pose.b.age ? pose.a.age : `${pose.a.age}–${pose.b.age}`} Ma · source elevation with illustrative colors and 8× hill shading`;
+    else if (historicalTerrain && !regionColors && terrainBracket(time))
+      status = `${paleoError || paleoTerrain?.failed ? 'PaleoDEM unavailable' : 'Loading PaleoDEM'} · showing illustrative plate terrain`;
+    else status = `${terrainImage ? 'Modern NASA imagery' : modernTerrainError ? 'Shaded land' : 'Loading NASA imagery'} on ${model?.source.id || 'moving'} plates · illustrative${historicalTerrain && !regionColors ? ' (PaleoDEM covers 0–540 Ma)' : ''}`;
+    if (status !== appearanceStatus) {
+      appearanceStatus = status;
+      onAppearanceStatus?.(status, usePaleo);
+    }
+    if (!usePaleo && (time !== geometryTime || longitude !== geometryLongitude || !land)) counts = rebuild(time);
     transformMesh(ocean, weights, engines, scales, latitude, true, longitude);
-    transformMesh(land, weights, engines, scales, latitude);
+    if (usePaleo) transformMesh(paleoMesh, weights, engines, scales, latitude, false, longitude, true);
+    else transformMesh(land, weights, engines, scales, latitude);
     paths = [];
     if (grid)
       for (const line of graticule) {
@@ -279,8 +300,11 @@ export function mountScene(
           id: 'tectonic-land',
           vegetation: vegetationCoverage(time),
           iceCoverage: glaciations ? snowballCoverage(time) : 0,
-          data: binaryMesh(land),
+          data: binaryMesh(usePaleo ? paleoMesh : land),
           image: terrainImage,
+          paleoFrameA: usePaleo ? pose.a : null,
+          paleoFrameB: usePaleo ? pose.b : null,
+          paleoBlend: usePaleo ? pose.blend : 0,
           regionColors,
           globeWeight: weights.globe || 0
         }),
@@ -376,14 +400,29 @@ export function mountScene(
         return;
       }
       terrainImage = image;
-      onAppearanceStatus?.('Modern NASA terrain · carried with the plates');
+      appearanceStatus = null;
       render(lastTime, true);
     })
     .catch(error => {
+      modernTerrainError = true;
       console.warn('Terrain load failed', error);
       if (!appearanceAbort.signal.aborted)
-        onAppearanceStatus?.('Terrain imagery unavailable · showing shaded land');
+        {appearanceStatus = null; render(lastTime, true);}
     });
+  loadPaleoTerrain({signal: appearanceAbort.signal, workerUrl,
+    onUpdate(error) {
+      if (error) paleoError = true;
+      if (!appearanceAbort.signal.aborted) render(lastTime, true);
+    }
+  }).then(value => {
+    if (!appearanceAbort.signal.aborted) {paleoTerrain = value; render(lastTime, true);}
+  }).catch(error => {
+    if (!appearanceAbort.signal.aborted) {
+      paleoError = true;
+      console.warn('PaleoDEM load failed', error);
+      render(lastTime, true);
+    }
+  });
   return {
     setModel(value) {
       model = value;
@@ -420,6 +459,7 @@ export function mountScene(
       grid = options.grid;
       glaciations = options.glaciations ?? true;
       regionColors = options.regionColors;
+      historicalTerrain = options.historicalTerrain ?? true;
       return render(lastTime, true);
     },
     render,
