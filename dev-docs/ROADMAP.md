@@ -48,3 +48,10 @@ star visibility and formal tier budgets remain follow-ups.
 The [projection roadmap](./projection-roadmap.md) tracks numerical, bulk-operation and
 performance work. Historical measurements remain in the
 [performance development history](./projection-performance-history.md).
+
+## Celestial
+
+The [celestial roadmap](./celestial-roadmap.md) separates time coordinates and frame/state
+algebra from qualified Earth orientation, satellite integration and precision astrometry.
+Its Arrow mapping distinguishes civil dates, clock times, instants, fixed durations and
+calendar intervals.

@@ -32,6 +32,11 @@
       "import": "./dist/geoid/index.js",
       "require": "./dist/geoid/index.cjs"
     },
+    "./celestial": {
+      "types": "./dist/celestial/index.d.ts",
+      "import": "./dist/celestial/index.js",
+      "require": "./dist/celestial/index.cjs"
+    },
     "./sun": {
       "types": "./dist/sun/index.d.ts",
       "import": "./dist/sun/index.js",

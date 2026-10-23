@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- feat(earth): Add optional celestial time and frame/state primitives, share approximate starfield rotations, and document Arrow temporal interoperability.
+
 - feat(geospatial): Add reusable local reference frames, geographic heading/pitch/roll poses and velocity-aligned orientations. Extend tangent planes with radial projection, radial/normal surface inversion and packed projection with validity masks; correct three-radius tangent basis orthogonality.
 
 - fix(projection): Implement ellipsoidal orthographic, correct Eckert VI and Equal Earth pole inverses, and repair conic, polyconic and LAEA pole boundaries. Audit unchanged definitions against native PROJ and distinguish numerical accuracy from proj4js compatibility.

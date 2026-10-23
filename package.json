@@ -42,7 +42,8 @@
     "check:timezone-geometry": "python3 modules/earth/timezone/scripts/check-geometry.py",
     "check:parametric-package": "node modules/geometry/scripts/check-parametric-package.mjs",
     "check:tile-matrix-package": "node modules/geospatial/scripts/check-tile-matrix-package.mjs",
-    "check:packages": "node scripts/check-packages.mjs"
+    "check:packages": "node scripts/check-packages.mjs",
+    "check:celestial-package": "node modules/earth/scripts/check-celestial-package.mjs"
   },
   "devDependencies": {
     "@turf/destination": "^7.4.0",
