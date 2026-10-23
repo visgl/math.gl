@@ -51,15 +51,39 @@ def independent():
 
 def independent_direct():
     rows=[]
-    for lat,distance in [(89.999999,1e-9),(-89.999999,1e-9),(90-2**-46,1e-17),(-90+2**-46,1e-17)]:
-        phi=D.from_float(lat)*h.PI/180;azi=D.from_float(89.999999)*h.PI/180;d=D.from_float(distance)
+    paths=[[lat,89.999999,d] for lat,d in [(89.999999,1e-9),(-89.999999,1e-9),(90-2**-46,1e-17),(-90+2**-46,1e-17)]]
+    paths += [[sign*lat,45. if sign*direction>0 else 135.,direction*d] for lat,d in [(0.,2.2214414443965),(60.,.7404804797988333),(80.,.2468268265996111)] for sign in [-1,1] for direction in [-1,1]]
+    for lat,az,distance in paths:
+        phi=D.from_float(lat)*h.PI/180;azi=D.from_float(az)*h.PI/180;d=D.from_float(distance)
         sa,ca=h.sc(azi);p2=phi+d*ca
         def psi(p):
             s,c=h.sc(p);return ((1+s)/c).ln()
         dp=psi(p2)-psi(phi);lon=sa/ca*dp
         c1=h.sc(phi)[1];c2=h.sc(p2)[1]
         area=sa/ca*(c1/c2).ln()
-        rows.append(dict(path=[lat,0.,89.999999,distance],expected=list(map(float,[p2*180/h.PI,lon*180/h.PI,area]))))
+        rows.append(dict(path=[lat,0.,az,distance],expected=list(map(float,[p2*180/h.PI,lon*180/h.PI,area]))))
+    for ratio in [.5,.9966471893352525,1.01,2.]:
+        for a in [1.,6378137.]:
+            for sign in [-1,1]:
+                b=a*ratio;r=D.from_float(b)/D.from_float(a);e2=1-r*r
+                theta1=h.PI/3
+                def density(t):
+                    c,s=h.sc(t);return r*r/(c*c+r*r*s*s)**D('1.5')
+                az=45. if sign>0 else 135.;sa,ca=h.sc(D.from_float(az)*h.PI/180)
+                distance=float(D.from_float(a)*(h.integral(density,theta1)-D('1e-8'))/abs(ca))
+                target=h.integral(density,theta1)-D.from_float(distance)/D.from_float(a)*abs(ca)
+                theta2=target*r
+                for _ in range(8):theta2-=(h.integral(density,theta2)-target)/density(theta2)
+                def values(t):
+                    c,s=h.sc(t);den=c*c+r*r*s*s;e=abs(e2).sqrt()
+                    I=s if e==0 else ((((1+e*s)/(1-e*s)).ln()/2 if e2>0 else h.atan(e*s))/e)
+                    return ((1+s)/c).ln()-e2*I,r*r*(s/den+I)/2,r*r/(c*den)
+                p1=values(theta1)[0];p2=values(theta2)[0]
+                e=abs(e2).sqrt();I=(((1+e)/(1-e)).ln()/2 if e2>0 else h.atan(e))/e
+                pole=r*r*(1/(r*r)+I)/2
+                correction=h.integral(lambda t:(values(t)[1]-pole)*values(t)[2],theta1)-h.integral(lambda t:(values(t)[1]-pole)*values(t)[2],theta2)
+                area=D.from_float(a)**2*sa/ca*(pole*(p2-p1)+correction)
+                rows.append(dict(a=a,b=b,path=[sign*30.,0.,az,distance],expected=list(map(float,[sign*(90-theta2*180/h.PI),sign*sa/ca*(p2-p1)*180/h.PI,area]))))
     return rows
 
 POLAR_RULE=h.rule(12)

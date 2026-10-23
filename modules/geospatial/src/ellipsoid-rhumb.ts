@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) Charles Karney (2011-2022)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original meridian/isometric divided-integral rhumb solver. Compensated longitude helper adapted from GeographicLib JS 2.2 Math.AngDiff (MIT); rhumbs independently compared with GeographicLib C++ 2.7. See ../GEOGRAPHICLIB-LICENSE.txt.
+import {remainingPoleDistance} from './ellipsoid-helpers/rhumb-pole-distance';
 import {EllipsoidMetrics, integrate} from './ellipsoid-metrics';
 import type {GeodesicParameters} from './ellipsoid-geodesic';
 
@@ -46,11 +47,13 @@ export class EllipsoidRhumb {
   readonly surfaceArea: number;
   private readonly a: number;
   private readonly r: number;
+  private readonly b: number;
   private readonly metrics: EllipsoidMetrics;
   constructor({semiMajorAxis: a, semiMinorAxis: b}: GeodesicParameters) {
     if (!(Number.isFinite(a) && Number.isFinite(b) && a > 0 && b > 0))
       throw new RangeError('Rhumbs require finite positive axes');
     this.a = a;
+    this.b = b;
     this.r = b / a;
     this.metrics = new EllipsoidMetrics({semiMajorAxis: 1, semiMinorAxis: this.r});
     this.surfaceArea = a * this.metrics.surfaceArea * a;
@@ -127,7 +130,8 @@ export class EllipsoidRhumb {
           if (Math.abs(north) > gap) throw new RhumbDomainError('pole-crossing');
           if (Math.abs(north) === gap) throw new RhumbDomainError('pole');
         }
-        const polar = north === 0 ? undefined : this.polarEndpoint(latitude, north);
+        const polar =
+          north === 0 ? undefined : this.polarEndpoint(latitude, north, azimuth, distance);
         const lat2 =
           north === 0 ? latitude : (polar?.latitude ?? this.inverseMeridian(latitude, north));
         if (Math.abs(lat2) === 90) throw new RhumbDomainError('pole');
@@ -143,7 +147,7 @@ export class EllipsoidRhumb {
           azi12: azi,
           s12: distance
         };
-        if (area) result.S12 = this.area(latitude, lat2, dlon * DEG);
+        if (area) result.S12 = this.area(latitude, lat2, dlon * DEG, polar?.psi);
         return result;
       }
     };
@@ -175,16 +179,23 @@ export class EllipsoidRhumb {
 
   private polarEndpoint(
     latitude: number,
-    north: number
-  ): {latitude: number; means: [number, number]} | undefined {
-    if (Math.abs(latitude) <= 80) return undefined;
-    const sign = Math.sign(latitude),
-      theta1 = (90 - Math.abs(latitude)) * DEG,
+    north: number,
+    azimuth: number,
+    distance: number
+  ): {latitude: number; means: [number, number]; psi: number} | undefined {
+    const sign =
+        Math.abs(latitude) > 80 && Math.abs(north) < Math.abs(this.meridianDelta(0, latitude))
+          ? Math.sign(latitude)
+          : Math.sign(north),
+      theta1 = (90 - sign * latitude) * DEG,
       limit = 10 * DEG;
     const density = (theta: number) =>
       this.r ** 2 / Math.hypot(Math.sin(theta), this.r * Math.cos(theta)) ** 3;
     const gap = (theta: number) => integrate(density, 0, theta);
-    const target = gap(theta1) - sign * north;
+    let target =
+      this.meridianDelta(sign > 0 ? latitude : -90, sign > 0 ? 90 : latitude) - sign * north;
+    if (target < 1e-4 * gap(theta1))
+      target = remainingPoleDistance(this.a, this.b, latitude, azimuth, distance, sign);
     if (!(target > 0 && target < gap(limit))) return undefined;
     let lo = 0,
       hi = limit,
@@ -217,7 +228,11 @@ export class EllipsoidRhumb {
             1
           ) / 2
         : -(this.polarPsi(theta) - this.polarPsi(theta1)) / span;
-    return {latitude: sign * (90 - theta / DEG), means: [meanM, meanP]};
+    return {
+      latitude: sign * (90 - theta / DEG),
+      means: [meanM, meanP],
+      psi: sign * this.polarPsi(theta)
+    };
   }
 
   private polarPsi(theta: number): number {
@@ -303,7 +318,7 @@ export class EllipsoidRhumb {
     return (this.r ** 2 * (s / (c * c + (this.r * s) ** 2) + I)) / 2;
   }
 
-  private area(lat1: number, lat2: number, dlon: number): number {
+  private area(lat1: number, lat2: number, dlon: number, endpointPsi?: number): number {
     if (dlon === 0 || lat1 === -lat2) return 0;
     if (lat1 === lat2) {
       const value = this.a * dlon * (this.a * this.potential(lat1));
@@ -311,7 +326,7 @@ export class EllipsoidRhumb {
       return value;
     }
     const p1 = this.psi(lat1),
-      p2 = this.psi(lat2),
+      p2 = endpointPsi ?? this.psi(lat2),
       mid = (p1 + p2) / 2,
       half = (p2 - p1) / 2;
     // Isometric integration resolves the logarithmic pole approach uniformly.

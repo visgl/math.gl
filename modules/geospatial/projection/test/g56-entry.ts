@@ -198,8 +198,9 @@ export function qualifyG56() {
   });
   reference.independentDirect.forEach((r, i) =>
     run(i, 'independent 80-digit polar direct rhumbs', check => {
+      const scale = 'a' in r ? r.a : 1;
       const [lat, lon, azi, d] = r.path,
-        g = new EllipsoidRhumb(axes(1, 1));
+        g = new EllipsoidRhumb(axes('a' in r ? r.a : 1, 'b' in r ? r.b : 1));
       for (const p of [
         g.direct(lat, lon, azi, d, {area: true, unrollLongitude: true}),
         g.line(lat, lon, azi, {area: true, unrollLongitude: true}).position(d)
@@ -209,7 +210,7 @@ export function qualifyG56() {
         check(
           p.S12!,
           r.expected[2],
-          Math.min(5e-14, Math.max(1e-28, Math.abs(r.expected[2]) * 2e-8))
+          Math.min(5e-14 * scale ** 2, Math.max(1e-28, Math.abs(r.expected[2]) * 2e-8))
         );
       }
     })

@@ -103,3 +103,14 @@ formulas. The existing `5e-14 a²` area and angular budgets remain unchanged.
 The distinct high-precision rule operates on colatitudes below `2e-8` radians,
 where its truncation error is below the working Decimal precision. CI recomputes
 these controls without native software.
+
+Direct paths approaching a pole from ordinary latitudes retain the remaining
+meridian distance and endpoint isometric latitude through longitude and area
+integration. If subtraction of the full meridian arc and northing is ill
+conditioned, an original internal 48-decimal fixed-point binomial integral
+computes that difference from the exact binary inputs. This bounded slow path
+adds no dependency. Another 28 independent controls cover starts at 0°, 30°,
+60° and 80°, both hemispheres and signed distances, unit/Earth axes and b/a
+from 0.5 through 2. Spherical controls use analytic logarithms; ellipsoidal
+controls use 80-digit quadrature with the polar singularity removed analytically.
+The area budget remains `5e-14 a²`.
