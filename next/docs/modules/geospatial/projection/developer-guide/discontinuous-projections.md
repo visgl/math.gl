@@ -1,10 +1,14 @@
-# Discontinuous projections
+# Discontinuous maps
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
-The discontinuous map API, presets, and layout helpers are experimental and may change.
-
 A discontinuous map places neighboring parts of the Earth in separate parts of a plane. A line that crosses a cut must end on one side and resume on the other; a polygon must become separate, closed pieces. Projecting only the original vertices does not produce a correct map: the renderer may draw a line or triangle across the empty space between pieces.
+
+<!-- -->
+
+The interactive Albers USA map shows this with Alaska, Hawaii, and five U.S. territory insets. Move over a region to inspect its coordinates, or use **View globe** to see its features unfold into the composite map. The mouse wheel and zoom buttons magnify every region together; drag to pan. The [full example](https://visgl.github.io/math.gl/next/examples/albers-usa) includes more explanation.
+
+The discontinuous map API, presets, and layout helpers are experimental and may change.
 
 math.gl provides the experimental `@math.gl/geospatial/discontinuous` entrypoint for this geometry processing. It combines geographic regions, local projections, and planar placements. It supports forward point projection, inverse candidates, seam-aware lines, and hemisphere-bounded polygons.
 
@@ -66,7 +70,7 @@ const world = createInterruptedHomolosineMap();
 
 All factories accept `{radius: number}`, defaulting to `1`. Coordinates are in units of that radius, with Y increasing upward. The API operates on a sphere; it performs no ellipsoid or datum conversion. Supplying an Earth radius scales the output but does not turn a layout into an EPSG coordinate reference system.
 
-The U.S. preset uses compact lower-left insets: Alaska on the left, Hawaii beside it. Their geographic masks focus on mainland Alaska and the main Hawaiian islands; distant islands may be cropped. The masks also include neighboring land and ocean. Filter features before projection when only U.S. states should be drawn. Puerto Rico and other territories are not included. The independent masks and placements are not a reproduction of D3 `geoAlbersUsa`'s projected rectangular clips.
+The U.S. preset uses compact lower-left insets: Alaska on the left, Hawaii beside it. With `includeTerritories: true`, it also adds Puerto Rico, the U.S. Virgin Islands, Guam, the Northern Mariana Islands, and American Samoa. The Alaska and Hawaii masks focus on mainland Alaska and the main Hawaiian islands; distant islands may be cropped. The masks also include neighboring land and ocean. Filter features before projection when only U.S. geography should be drawn. Minor outlying islands are not included. The independent masks and placements are not a reproduction of D3 `geoAlbersUsa`'s projected rectangular clips.
 
 See the [API reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous.md) for exact preset parameters.
 
@@ -181,7 +185,7 @@ The [Glaciation Explorer](https://visgl.github.io/math.gl/next/examples/alpine-i
 3. Samples bed elevation and ice values at the resulting geographic vertices.
 4. Splits graticules with `projectLine` so they do not bridge cuts or inset gaps.
 
-Switches involving discontinuous layouts happen immediately because their mesh topologies differ. The continuous world projections retain their animated transitions. U.S. inset selection changes the displayed coverage; statistics remain global. Geographic masks are not political borders, and the display interpolation adds no new reconstruction data.
+Static discontinuous layouts switch immediately because their mesh topologies differ. Myriahedral views use a separate hinge animation through the globe. The continuous world projections retain their animated transitions. U.S. inset selection changes the displayed coverage; statistics remain global. Geographic masks are not political borders, and the display interpolation adds no new reconstruction data.
 
 This integration uses Cartesian rendering of preprojected geometry. It does not add general discontinuous-projection support to existing deck.gl geographic layers. The [unfolding Earth example](https://visgl.github.io/math.gl/next/docs/modules/geometry/unfolding-earth.md) explores a separate animated hinge-and-texture pipeline.
 
@@ -199,7 +203,7 @@ A local projection kernel and a discontinuous layout solve different problems. U
 
 `MapRegion.layout` supplies optional labels, kinds, parent IDs, relative scales, back-to-front draw order, and visual frame bounds. Albers USA declares both insets as children of the main map. Presentation frames do not change geographic coverage.
 
-Use `getMapLayout(map)` to obtain sampled bounds and coverage outlines, then `fitMapLayout(layout, {width, height, padding})` to place the complete map into a viewport. The result includes forward/inverse pixel transforms and sorted region layers, plus frame and outline coordinates suitable for drawing inset borders. Bounds follow projected curves instead of measuring only region corners. They remain sampling approximations, so choose a tolerance appropriate to your scale.
+Use `getMapLayout(map)` to obtain sampled bounds and coverage outlines, then `fitMapLayout(layout, {width, height, padding})` to place the complete map into a viewport. The result includes forward/inverse pixel transforms and sorted region layers, plus frame and outline coordinates suitable for drawing inset borders. `pickMapLayout(map, fitted, pixel)` returns inverse candidates in front-to-back order for a viewport pixel. The [Albers USA example](https://visgl.github.io/math.gl/next/examples/albers-usa) shows these helpers with clipped state polygons and coordinate inspection. Bounds follow projected curves instead of measuring only region corners. They remain sampling approximations, so choose a tolerance appropriate to your scale.
 
 ```
 import {getMapLayout, fitMapLayout} from '@math.gl/geospatial/discontinuous';
