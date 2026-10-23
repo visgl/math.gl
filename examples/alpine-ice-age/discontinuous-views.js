@@ -191,83 +191,100 @@ export function discontinuousGrid(view, step = 1) {
     );
   }
   if (!MYRIAHEDRAL_VIEWS[view]) {
-    for (let lat = -90; lat < 90; lat += step) {
-      for (let lon = -180; lon < 180; lon += step) {
-        const ring = [
-          [lon, lat],
-          [lon + step, lat],
-          [lon + step, lat + step],
-          [lon, lat + step],
-        ];
-        if (lat === -90) ring.splice(1, 1);
-        if (lat + step === 90) ring.splice(2, 1);
-        const vectors = ring.map(sphere);
-        if (
-          !masks.some((normals) =>
-            normals.every((n) => vectors.some((v) => dot(n, v) >= -1e-12)),
-          )
-        )
-          continue;
-        const common = regionsAt(ring[0]).find((id) =>
-          ring.every((p) => regionsAt(p).includes(id)),
-        );
-        if (common) {
-          const corners = ring.map((p) => {
-            const key = `${common}:${p.join(",")}`;
-            if (!vertexIds.has(key)) {
-              vertexIds.set(key, positions.length / 2);
-              positions.push(...map.projectPoint(p, common).position);
-              sources.push(p);
-              samples.push(sourceSample(p));
-              regionIds.push(common);
-            }
-            return vertexIds.get(key);
-          });
-          for (let i = 1; i < corners.length - 1; i++)
-            indices.push(corners[0], corners[i], corners[i + 1]);
-          continue;
-        }
-        const parts = map.projectPolygon([ring], { tolerance: 1e-5 });
-        for (const part of parts) {
-          let outline = part.coordinates[0],
-            source = part.sourceCoordinates[0];
-          if (
-            outline.length > 1 &&
-            outline[0][0] === outline.at(-1)[0] &&
-            outline[0][1] === outline.at(-1)[1]
-          ) {
-            outline = outline.slice(0, -1);
-            source = source.slice(0, -1);
-          }
-          if (outline.length < 3) continue;
-          // These are small convex spherical grid fragments, not arbitrary feature polygons.
-          // A spherical interior point keeps the fan inside its local panel.
-          const sum = source
-            .map(sphere)
-            .reduce((a, p) => a.map((v, i) => v + p[i]), [0, 0, 0]);
-          const center = [
-            (Math.atan2(sum[1], sum[0]) * 180) / Math.PI,
-            (Math.atan2(sum[2], Math.hypot(sum[0], sum[1])) * 180) / Math.PI,
+    // Insets occupy very different fractions of the fitted viewport. Sample
+    // their display meshes independently while retaining the source grid's
+    // actual 1° resolution for bedrock and ice values.
+    const grids =
+      view === "albersUsa" && step === 1
+        ? [
+            { regionId: "lower48", step: 1, bounds: [-130, 18, -62, 60] },
+            { regionId: "alaska", step: 0.5, bounds: [-180, 35, -128, 82] },
+            // The Aleutian part of the spherical mask wraps past -180°.
+            { regionId: "alaska", step: 0.5, bounds: [150, 35, 180, 82] },
+            { regionId: "hawaii", step: 0.25, bounds: [-180, 15, -150, 32] },
+          ]
+        : [{ regionId: null, step, bounds: [-180, -90, 180, 90] }];
+    for (const grid of grids) {
+      const [west, south, east, north] = grid.bounds;
+      for (let lat = south; lat < north; lat += grid.step) {
+        for (let lon = west; lon < east; lon += grid.step) {
+          const ring = [
+            [lon, lat],
+            [lon + grid.step, lat],
+            [lon + grid.step, lat + grid.step],
+            [lon, lat + grid.step],
           ];
-          const projected = map.projectPoint(center, part.regionId);
-          if (!projected)
-            throw new Error("Clipped cell has no region-local center");
-          const start = positions.length / 2;
-          for (const [p, geographic] of [
-            [projected.position, center],
-            ...outline.map((p, i) => [p, source[i]]),
-          ]) {
-            positions.push(...p);
-            sources.push(geographic);
-            samples.push(sourceSample(geographic));
-            regionIds.push(part.regionId);
+          if (lat === -90) ring.splice(1, 1);
+          if (lat + grid.step === 90) ring.splice(2, 1);
+          const vectors = ring.map(sphere);
+          if (
+            !masks.some((normals) =>
+              normals.every((n) => vectors.some((v) => dot(n, v) >= -1e-12)),
+            )
+          )
+            continue;
+          const common = regionsAt(ring[0]).find((id) =>
+            ring.every((p) => regionsAt(p).includes(id)),
+          );
+          if (common && (!grid.regionId || common === grid.regionId)) {
+            const corners = ring.map((p) => {
+              const key = `${common}:${p.join(",")}`;
+              if (!vertexIds.has(key)) {
+                vertexIds.set(key, positions.length / 2);
+                positions.push(...map.projectPoint(p, common).position);
+                sources.push(p);
+                samples.push(sourceSample(p));
+                regionIds.push(common);
+              }
+              return vertexIds.get(key);
+            });
+            for (let i = 1; i < corners.length - 1; i++)
+              indices.push(corners[0], corners[i], corners[i + 1]);
+            continue;
           }
-          for (let i = 0; i < outline.length; i++)
-            indices.push(
-              start,
-              start + i + 1,
-              start + ((i + 1) % outline.length) + 1,
-            );
+          const parts = map.projectPolygon([ring], { tolerance: 1e-5 });
+          for (const part of parts) {
+            if (grid.regionId && part.regionId !== grid.regionId) continue;
+            let outline = part.coordinates[0],
+              source = part.sourceCoordinates[0];
+            if (
+              outline.length > 1 &&
+              outline[0][0] === outline.at(-1)[0] &&
+              outline[0][1] === outline.at(-1)[1]
+            ) {
+              outline = outline.slice(0, -1);
+              source = source.slice(0, -1);
+            }
+            if (outline.length < 3) continue;
+            // These are small convex spherical grid fragments, not arbitrary feature polygons.
+            // A spherical interior point keeps the fan inside its local panel.
+            const sum = source
+              .map(sphere)
+              .reduce((a, p) => a.map((v, i) => v + p[i]), [0, 0, 0]);
+            const center = [
+              (Math.atan2(sum[1], sum[0]) * 180) / Math.PI,
+              (Math.atan2(sum[2], Math.hypot(sum[0], sum[1])) * 180) / Math.PI,
+            ];
+            const projected = map.projectPoint(center, part.regionId);
+            if (!projected)
+              throw new Error("Clipped cell has no region-local center");
+            const start = positions.length / 2;
+            for (const [p, geographic] of [
+              [projected.position, center],
+              ...outline.map((p, i) => [p, source[i]]),
+            ]) {
+              positions.push(...p);
+              sources.push(geographic);
+              samples.push(sourceSample(geographic));
+              regionIds.push(part.regionId);
+            }
+            for (let i = 0; i < outline.length; i++)
+              indices.push(
+                start,
+                start + i + 1,
+                start + ((i + 1) % outline.length) + 1,
+              );
+          }
         }
       }
     }

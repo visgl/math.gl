@@ -162,3 +162,20 @@ export function fitMapLayout(layout: MapLayout, options: MapViewportOptions) {
     )
   });
 }
+
+/** Inverse candidates at a viewport pixel, ordered from the visible top layer.
+ * A renderer can still reject candidates hidden by its own geometry or styling.
+ */
+export function pickMapLayout(
+  map: DiscontinuousMap,
+  fitted: ReturnType<typeof fitMapLayout>,
+  pixel: GeographicPosition
+) {
+  const xy = fitted.unproject(pixel);
+  return fitted.regions
+    .slice()
+    .reverse()
+    .flatMap(region =>
+      map.unprojectPoint(xy, region.id).map(point => ({...point, layer: region.layer}))
+    );
+}
