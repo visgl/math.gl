@@ -7,6 +7,20 @@ fits the complete layout with `map.fit`, and uses `map.pick` for region-aware
 coordinate inspection. Run with
 `yarn workspace math.gl-albers-usa start`.
 
+## Read the source
+
+Start with `map.js`: it constructs the `MapEngine`, projects the state polygons,
+and samples the optional graticule. It has no browser UI dependencies.
+
+- `main.js` wires the map, scene, and controls together and returns cleanup.
+- `scene.js` fits and draws SVG geometry, maps screen coordinates, and picks locations.
+- `controls.js` handles buttons, sliders, pointer gestures, and animation timing.
+- `view.js` contains the page markup; `style.css` controls presentation.
+
+The scene consumes plain layer and unfolding state. It never reads form controls.
+To reuse the rendering with a different UI, call its methods directly. Each mount
+owns its observers, event listeners, animation frame, and SVG clip identifiers.
+
 The **View globe** button and **Unfold** slider animate the same projected
 feature vertices between geographic globe positions and their fitted inset
 positions. A bundled public-domain Natural Earth 1:110m land layer provides
