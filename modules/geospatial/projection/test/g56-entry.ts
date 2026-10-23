@@ -126,5 +126,37 @@ export function qualifyG56() {
       if (r.a !== r.b) check(Number(result.complete), 0, 0.1);
     })
   );
+  for (const [i, ratio] of [1, 0.9966471893352525].entries()) {
+    for (const longitude of [30, 90, 150])
+      run(i * 180 + longitude, 'independent polar crossing angles', check => {
+        const g = new GeodesicIntersections(axes(1, ratio));
+        const result = g.all(
+          {latitude: 0, longitude: 0, azimuth: 0},
+          {latitude: 0, longitude, azimuth: 0},
+          {maxDistance: 4}
+        );
+        check(result.intersections.length, 2, 0.1);
+        for (const p of result.intersections) {
+          check(Math.abs(p.latitude), 90, 2e-11);
+          check(p.crossingAngle, Math.min(longitude, 180 - longitude), 2e-11);
+          check(p.residual, 0, 5e-14);
+        }
+      });
+  }
+  for (const [i, ratio] of [0.5, 0.9966471893352525, 1, 2].entries()) {
+    for (const sign of [-1, 1])
+      run(2 * i + (sign + 1) / 2, 'independent pole-relative departure', check => {
+        const r = new EllipsoidRhumb(axes(1, ratio));
+        const latitude = sign * (90 - 2 ** -46),
+          distance = -sign * 2e-16;
+        for (const p of [
+          r.direct(latitude, 0, 0, distance),
+          r.line(latitude, 0, 0).position(distance)
+        ]) {
+          check(Number(Math.abs(p.lat2) < 90 && sign * (p.lat2 - latitude) <= 0), 1, 0.1);
+          check(((p.lat2 - latitude) * Math.PI) / 180, distance * ratio, 4e-16);
+        }
+      });
+  }
   return rows;
 }
