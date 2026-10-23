@@ -12,3 +12,5 @@ export type {GlobeBounds} from './globe-horizon-bounds';
 
 export {subdivideGlobeMesh} from './subdivide-globe-mesh';
 export type {SubdivideGlobeMeshOptions} from './subdivide-globe-mesh';
+export {subdivideGeodesicPolyline} from './subdivide-geodesic-polyline';
+export type {SubdivideGeodesicPolylineOptions} from './subdivide-geodesic-polyline';
