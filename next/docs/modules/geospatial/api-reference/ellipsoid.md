@@ -10,6 +10,10 @@ Cartographic positions are represented as `[longitude, latitude, height]`. Longi
 
 Use `Ellipsoid.WGS84` for the standard Earth shape, construct three radii directly, or use `Ellipsoid.fromSpheroid` to import two-axis geometry from a projection CRS.
 
+Geometry is immutable, including the public `radii`, squared-radius and reciprocal vectors. Construct a new `Ellipsoid` to change shape; mutating these vectors throws instead of leaving prepared conversion caches inconsistent.
+
+Surface projection selects a qualified nearest point rather than a radial approximation. Unique near-cusp and boundary solutions have an exact-dyadic fallback. Ambiguous interiors and inputs outside the qualified numerical range return `undefined` without changing the supplied output. See the [nearest-point qualification and boundary policy](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/ellipsoid-qualification.md).
+
 ## Usage[​](#usage "Direct link to Usage")
 
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
