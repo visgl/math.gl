@@ -16,3 +16,8 @@ export type {
 export {LocalReferenceFrame} from '../local-reference-frame';
 export type {LocalReferenceFrameOptions, HeadingPitchRoll} from '../local-reference-frame';
 export type {TangentPlaneProjectionMode, TangentPlaneProjection} from '../ellipsoid-tangent-plane';
+
+export {EllipsoidMetrics} from '../ellipsoid-metrics';
+export type {AuxiliaryLatitude} from '../ellipsoid-metrics';
+export {GeodesicPolygon} from '../geodesic-polygon';
+export type {GeodesicPolygonResult, GeodesicPolygonOptions} from '../geodesic-polygon';

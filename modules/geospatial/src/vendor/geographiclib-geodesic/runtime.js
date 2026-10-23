@@ -1,7 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) 2011-2022 Charles Karney
-// SPDX-FileComment: GeographicLib geodesic Math.js, Geodesic.js and GeodesicLine.js, pinned at 9c4036d6242aa997e08e43a20df789e2007fbe6f. Combined into an ESM module; version template fields set to 2.2.0. See ../../../GEOGRAPHICLIB-LICENSE.txt.
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Original math.gl follow-up evaluates short-edge cosine-series differences without cancellation; qualified by independent Decimal small-area controls. GeographicLib geodesic Math.js, Geodesic.js and GeodesicLine.js, pinned at 9c4036d6242aa997e08e43a20df789e2007fbe6f. Combined into an ESM module; version template fields set to 2.2.0. See ../../../GEOGRAPHICLIB-LICENSE.txt.
 
 /*
  * Math.js
@@ -604,7 +605,17 @@ geodesic.PolygonArea = {};
   g.LONG_UNROLL   = 1<<15;
   g.OUT_MASK      = OUT_ALL| g.LONG_UNROLL;
 
-  g.SinCosSeries = function(sinp, sinx, cosx, c) {
+  // Original math.gl stable difference: cos(k*(x+d))-cos(k*x)
+  // = -2*sin(k*(x+d/2))*sin(k*d/2), k odd. Retain tiny arc bits.
+  g.SinCosSeries = function(sinp, sinx, cosx, c, delta) {
+    if (delta !== undefined) {
+      var h = delta / 2, sh = Math.sin(h), ch = Math.cos(h);
+      // sin((2*i+1)*mid) = (-1)^i*cos((2*i+1)*(pi/2-mid)).
+      return -2 * g.SinCosSeries(false, cosx * ch - sinx * sh,
+        sinx * ch + cosx * sh,
+        c.map(function(v, i) {return (i % 2 ? -v : v) * Math.sin((2 * i + 1) * h);}));
+    }
+
     // Evaluate
     // y = sinp ? sum(c[i] * sin( 2*i    * x), i, 1, n) :
     //            sum(c[i] * cos((2*i+1) * x), i, 0, n-1)
@@ -1640,7 +1651,8 @@ geodesic.PolygonArea = {};
         this.C4f(eps, C4a);
         B41 = g.SinCosSeries(false, ssig1, csig1, C4a);
         B42 = g.SinCosSeries(false, ssig2, csig2, C4a);
-        vals.S12 = A4 * (B42 - B41);
+        vals.S12 = A4 * (sig12 < 0.01 ?
+          g.SinCosSeries(false, ssig1, csig1, C4a, sig12) : B42 - B41);
       } else
         // Avoid problems with indeterminate sig1, sig2 on equator
         vals.S12 = 0;
@@ -2240,7 +2252,8 @@ geodesic.PolygonArea = {};
         calp12 = m.sq(this._salp0) + m.sq(this._calp0) * this._csig1 * csig2;
       }
       vals.S12 = this._c2 * Math.atan2(salp12, calp12) +
-        this._A4 * (B42 - this._B41);
+        this._A4 * (Math.abs(sig12) < 0.01 ?
+          g.SinCosSeries(false, this._ssig1, this._csig1, this._C4a, sig12) : B42 - this._B41);
     }
 
     if (!arcmode)

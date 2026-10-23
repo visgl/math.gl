@@ -360,3 +360,10 @@ Notes:
 ## Attribution
 
 This class was ported from [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) under the Apache 2 License.
+
+## Metrics and geodesic areas
+
+Use the separate [EllipsoidMetrics](./ellipsoid-metrics.md) class for revolution
+ellipsoid metrics and auxiliary latitudes. [GeodesicPolygon](./geodesic-polygon.md)
+and optional `EllipsoidGeodesic` edge areas support compensated polygon geometry.
+These APIs use explicit degree units and retain the existing Cartesian API.

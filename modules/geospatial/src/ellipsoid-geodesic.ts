@@ -12,6 +12,8 @@ export type GeodesicParameters = {readonly semiMajorAxis: number; readonly semiM
 export type GeodesicOptions = {
   /** Preserve longitude winding rather than normalizing to [-180, 180]. */
   unrollLongitude?: boolean;
+  /** Include the signed geodesic edge area S12 in squared axis units. */
+  area?: boolean;
 };
 
 /** Angles and azimuths are degrees; distances and reduced lengths use the axes' units. */
@@ -27,6 +29,7 @@ export type GeodesicResult = {
   M12: number;
   M21: number;
   a12: number;
+  S12?: number;
 };
 
 interface EngineLine {
@@ -34,19 +37,18 @@ interface EngineLine {
   ArcPosition(arc: number, mask: number): GeodesicResult;
 }
 interface Engine {
+  _c2: number;
   Inverse(lat1: number, lon1: number, lat2: number, lon2: number, mask: number): GeodesicResult;
   Line(latitude: number, longitude: number, azimuth: number, caps: number): EngineLine;
 }
 interface Namespace {
   Geodesic: new (a: number, f: number) => Engine;
-  STANDARD: number;
-  REDUCEDLENGTH: number;
-  GEODESICSCALE: number;
+  AREA: number;
+  ALL: number;
   DISTANCE_IN: number;
   LONG_UNROLL: number;
 }
 const library = geodesic.Geodesic as unknown as Namespace;
-const mask = library.STANDARD | library.REDUCEDLENGTH | library.GEODESICSCALE;
 
 /** A geodesic with a fixed starting point and initial azimuth. */
 export interface GeodesicLine {
@@ -61,10 +63,12 @@ export class EllipsoidGeodesic {
   private readonly engine: Engine;
 
   constructor({semiMajorAxis: a, semiMinorAxis: b}: GeodesicParameters) {
-    if (!(Number.isFinite(a) && Number.isFinite(b) && a > 0 && b > 0)) {
-      throw new Error('Geodesics require finite positive equatorial and polar axes');
-    }
-    this.engine = new library.Geodesic(a, (a - b) / a);
+    this.engine = createGeodesicEngine({semiMajorAxis: a, semiMinorAxis: b});
+  }
+
+  /** Total area in squared axis units, with the same normalization as S12. */
+  get surfaceArea(): number {
+    return 4 * Math.PI * this.engine._c2;
   }
 
   inverse(
@@ -106,16 +110,16 @@ export class EllipsoidGeodesic {
     options: GeodesicOptions = {}
   ): GeodesicLine {
     validatePoint(latitude, longitude);
-    if (!Number.isFinite(azimuth)) throw new Error('Geodesic azimuth must be finite');
+    validateFinite(azimuth);
     const selectedMask = outputMask(options);
     const line = this.engine.Line(latitude, longitude, azimuth, selectedMask | library.DISTANCE_IN);
     return {
       position(distance: number): GeodesicResult {
-        if (!Number.isFinite(distance)) throw new Error('Geodesic distance must be finite');
+        validateFinite(distance);
         return line.Position(distance, selectedMask);
       },
       arcPosition(arc: number): GeodesicResult {
-        if (!Number.isFinite(arc)) throw new Error('Geodesic arc must be finite');
+        validateFinite(arc);
         return line.ArcPosition(arc, selectedMask);
       }
     };
@@ -124,10 +128,32 @@ export class EllipsoidGeodesic {
 
 function validatePoint(latitude: number, longitude: number): void {
   if (!(Number.isFinite(latitude) && Math.abs(latitude) <= 90 && Number.isFinite(longitude))) {
-    throw new Error('Geodesic coordinates require finite longitude and latitude in [-90, 90]');
+    throw new Error('Invalid geodesic coordinates');
   }
 }
 
 function outputMask(options: GeodesicOptions): number {
-  return mask | (options.unrollLongitude ? library.LONG_UNROLL : 0);
+  return (
+    (library.ALL & ~(options.area ? 0 : library.AREA)) |
+    (options.unrollLongitude ? library.LONG_UNROLL : 0)
+  );
+}
+
+function validateFinite(value: number): void {
+  if (!Number.isFinite(value))
+    throw new Error('Geodesic axes, azimuth, distance and arc must be finite');
+}
+
+/** @internal Shared engine and non-area mask for projections. Keeping the raw
+ * kernel separate lets projection bundles discard the public optional facade.
+ */
+export const nonAreaGeodesicMask = library.ALL & ~library.AREA;
+export function createGeodesicEngine({
+  semiMajorAxis: a,
+  semiMinorAxis: b
+}: GeodesicParameters): Engine {
+  validateFinite(a);
+  validateFinite(b);
+  // The engine validates positivity of both derived axes.
+  return new library.Geodesic(a, (a - b) / a);
 }

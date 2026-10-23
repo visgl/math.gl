@@ -28,6 +28,21 @@ high-precision controls. Preserve these qualifications.
 | G6: Geodesic intersections | Closest/next/all searches and segment intersection semantics within an explicit support profile. | Independent residual and segment-membership checks plus GeographicLib comparisons. Cover tangencies, nearly parallel/coincident paths, antipodes and multiple crossings. Specify search bounds, deduplication and ambiguity; bound iteration. |
 | G7: Bulk APIs and performance | Reusable/batch operations with output buffers where benchmarks demonstrate value. | Paired benchmarks against pinned GeographicLib implementations at equal accuracy. Measure setup, throughput, allocations and bundle cost separately. Preserve scalar accuracy and alias contracts. Claim improvements only for measured operations/environments. |
 
+## G3–G4 bounded delivery
+
+`EllipsoidMetrics` now supplies area, volume, meridian/curvature metrics and six
+auxiliary latitudes/inverses for 0.5 ≤ b/a ≤ 2. Optional geodesic `S12` and
+`GeodesicPolygon` supply compensated point/edge insertion, signed/unsigned
+algebraic area, open polylines, previews and reset. Original stable C4 differences
+fix tiny ellipsoidal-area cancellation also seen in native GeographicLib 2.7.
+
+The [G3–G4 matrix](../docs/modules/geospatial/projection/geographiclib-g34-qualification.md)
+records 593 sampled native/independent cases, explicit budgets, native Exact
+limitations, exact input conventions and remaining boundaries. This delivers the
+bounded G3/G4 scalar APIs, not arbitrary-flattening or all near-zero polygon
+certification. G5/G6 are next; G7 performance APIs and G8 wider-domain solvers
+remain separate. G0–G2 completion is tracked independently in PR #278.
+
 ## P2 — Wider domains and specialized capabilities
 
 | Tranche | Deliverable | Acceptance criteria |
