@@ -502,13 +502,13 @@ export function createGlobalScene(canvas, onError) {
       },
     });
     const lines = g.lines
-      .filter((line) => opts.labels || line.kind === "cell")
+      .filter((line) => opts.view !== "albersUsa" && (opts.labels || line.kind === "cell"))
       .map((line) => ({
         kind: line.kind,
         opacity: 1,
         path: line.coordinates.map((p) => toScene(p, line.regionId, 0.2)),
       }));
-    const insets = fitted.regions.filter((region) => region.kind === "inset");
+    const insets = fitted.regions.filter((region) => region.kind === "inset" && opts.view !== "albersUsa");
     const frameData = insets.map((region) => {
       const [left, top, right, bottom] = region.frame || region.bounds;
       const scene = ([x, y]) => [

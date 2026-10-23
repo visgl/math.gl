@@ -236,9 +236,10 @@
         "label": "@math.gl/geospatial/projection",
         "items": [
           "modules/geospatial/projection/README",
+          "modules/geospatial/projection/developer-guide/discontinuous-projections",
+          "modules/geospatial/myriahedral-maps",
           "modules/geospatial/discontinuous/README",
           "modules/geospatial/discontinuous/myriahedral",
-          "modules/geospatial/myriahedral-maps",
           {
             "type": "category",
             "label": "Developer Guide",
@@ -246,7 +247,6 @@
               "modules/geospatial/projection/developer-guide/api-guide",
               "modules/geospatial/projection/developer-guide/coordinate-systems",
               "modules/geospatial/projection/developer-guide/projections",
-              "modules/geospatial/projection/developer-guide/discontinuous-projections",
               "modules/geospatial/projection/developer-guide/myriahedral-projections",
               "modules/geospatial/projection/developer-guide/projection-engine",
               "modules/geospatial/projection/developer-guide/external-projection-engines",
