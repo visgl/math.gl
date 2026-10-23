@@ -59,10 +59,10 @@ test("H3 unfolding keeps every cell connected and projects its outlines", () => 
     { mesh, cells } = createH3MyriahedralMesh();
   assert.equal(grid.map.regions.length, 476);
   const panels = createH3MyriahedralMesh();
-  const inside = grid.map.layout.edges.filter(
+  const inside = grid.map.motion.edges.filter(
     (edge) => edge.hinge && panels.innerEdges.has(edgeKey(edge.a, edge.b)),
   );
-  const between = grid.map.layout.edges.filter(
+  const between = grid.map.motion.edges.filter(
     (edge) => edge.hinge && !panels.innerEdges.has(edgeKey(edge.a, edge.b)),
   );
   assert.equal(inside.length, 476 - 122);

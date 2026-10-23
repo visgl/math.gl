@@ -1,19 +1,15 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {
-  createAlbersUsaMap,
-  fitMapLayout,
-  getMapLayout,
-  pickMapLayout
-} from '@math.gl/geospatial/discontinuous';
+import {MapEngine} from '@math.gl/geospatial/discontinuous';
 import states from './assets/us-states.json' with {type: 'json'};
 import globalLand from '../unfolding-polyhedron/data/land.json' with {type: 'json'};
 import {geoOrthographic, geoPath} from 'd3-geo';
 import './style.css';
 
-const map = createAlbersUsaMap({includeTerritories: true});
-const layout = getMapLayout(map);
+const map = new MapEngine({version: 1, id: 'albers-usa', definition: {type: 'albers-usa', includeTerritories: true}});
+const layout = map.getLayout();
+const globeFrame = map.evaluate({type: 'globe'});
 export function mountAlbers(app, {compact = false} = {}) {
 app.classList.add('albers-usa');
 app.classList.toggle('albers-usa-compact', compact);
@@ -91,12 +87,12 @@ let dragPoint;
 const radians = Math.PI / 180;
 const centerLongitude = -96 * radians;
 const centerLatitude = 38 * radians;
-function globePoint([longitude, latitude], width, height) {
-  const lon = longitude * radians - centerLongitude;
-  const lat = latitude * radians;
-  const east = Math.cos(lat) * Math.sin(lon);
-  const north = Math.cos(centerLatitude) * Math.sin(lat) - Math.sin(centerLatitude) * Math.cos(lat) * Math.cos(lon);
-  const front = Math.sin(centerLatitude) * Math.sin(lat) + Math.cos(centerLatitude) * Math.cos(lat) * Math.cos(lon);
+function globePoint(source, width, height) {
+  const [x, y, z] = globeFrame.projectPoint(source).position;
+  const east = -Math.sin(centerLongitude) * x + Math.cos(centerLongitude) * y;
+  const meridian = Math.cos(centerLongitude) * x + Math.sin(centerLongitude) * y;
+  const north = Math.cos(centerLatitude) * z - Math.sin(centerLatitude) * meridian;
+  const front = Math.sin(centerLatitude) * z + Math.cos(centerLatitude) * meridian;
   const radius = Math.min(width, height) * 0.41;
   return [width / 2 + east * radius, height / 2 - north * radius, front];
 }
@@ -104,7 +100,7 @@ function draw() {
   const width = Math.max(320, svg.clientWidth);
   const height = Math.max(300, svg.clientHeight);
   const centerOnMap = viewCenter && fitted ? fitted.unproject(viewCenter) : null;
-  fitted = fitMapLayout(layout, {
+  fitted = map.fit({
     width, height,
     padding: {left: width * 0.035, right: width * 0.035, top: 24, bottom: 36}
   });
@@ -273,7 +269,7 @@ svg.addEventListener('pointermove', event => {
         front * Math.cos(centerLatitude) - north * Math.sin(centerLatitude));
       hit = {regionId: 'globe', position: [((lon / radians + 540) % 360) - 180, lat / radians]};
     }
-  } else hit = pickMapLayout(map, fitted, pixel)[0];
+  } else hit = map.pick(fitted, pixel)[0];
   const state = event.target.closest?.('[data-state]')?.getAttribute('data-state');
   const regionLabel = hit && (fitted.regions.find(region => region.id === hit.regionId)?.label || 'Globe');
   readout.textContent = hit

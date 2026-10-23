@@ -226,7 +226,7 @@ The **View → Myriahedral** group offers polyconic, cylindric, azimuthal,
 hemispheres, sealine, and coastline layouts, plus tetrahedron, cube, octahedron,
 dodecahedron, and icosahedron nets. Turn off **Cycle projections** to inspect one
 layout while scrubbing time. These views use the reusable
-`createMyriahedralMap` API: 24-column graticules or one subdivision of each solid.
+`MapEngine` API with myriahedral descriptions: 24-column graticules or one subdivision of each solid.
 Each panel is tessellated independently at approximately the source grid's 1°
 resolution, retaining geographic coordinates for ice and bed interpolation.
 No triangle spans a cut. Layout metadata fits the complete net to the viewport.

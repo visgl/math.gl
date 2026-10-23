@@ -240,6 +240,8 @@
           "modules/geospatial/projection/README",
           "modules/geospatial/projection/developer-guide/discontinuous-projections",
           "modules/geospatial/myriahedral-maps",
+          "modules/geospatial/projection/developer-guide/map-engine",
+          "modules/geospatial/discontinuous/map-engine",
           "modules/geospatial/discontinuous/README",
           "modules/geospatial/discontinuous/myriahedral",
           {

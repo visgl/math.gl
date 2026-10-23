@@ -36,7 +36,7 @@ test("S2 level-zero cells form an outward-wound closed cube", () => {
 test("S2 level-zero cells unfold through five hinges with visible outlines", () => {
   const grid = discontinuousGrid("myriahedral:s2-0", 5);
   assert.equal(grid.map.regions.length, 6);
-  assert.equal(grid.map.layout.edges.filter((edge) => edge.hinge).length, 5);
+  assert.equal(grid.map.motion.edges.filter((edge) => edge.hinge).length, 5);
   assert.equal(grid.lines.filter((line) => line.kind === "cell").length, 24);
 });
 
@@ -62,7 +62,7 @@ test("S2 level-one cells share a closed spherical boundary mesh", () => {
 test("S2 level-one cells unfold with their cell outlines", () => {
   const grid = discontinuousGrid("myriahedral:s2-1", 5);
   const panels = createS2MyriahedralMesh(1);
-  const hinges = grid.map.layout.edges.filter((edge) => edge.hinge);
+  const hinges = grid.map.motion.edges.filter((edge) => edge.hinge);
   assert.equal(grid.map.regions.length, 48);
   assert.equal(hinges.length, 47);
   assert.equal(

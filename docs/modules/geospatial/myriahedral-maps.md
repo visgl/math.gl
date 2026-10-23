@@ -2,7 +2,7 @@
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
-  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
 </p>
 
 import Example from '@site/src/components/myriahedral-maps';
@@ -32,9 +32,11 @@ the panels. Back faces are darkened to distinguish them during unfolding.
 
 ## How it works
 
-The animation calls `createMyriahedralLayout` from `@math.gl/geospatial/discontinuous`.
-Static map users can build the same net with `createMyriahedralMap`.
-See the [API reference](./discontinuous/myriahedral.md) and
+The example constructs a `MapEngine` with a myriahedral `MapDescription` and
+uses its `motion` layout for the shared polyhedron renderer. Static maps and
+animated geographic features can use the same engine. See the
+[MapEngine guide](./projection/developer-guide/map-engine.md),
+[API reference](./discontinuous/map-engine.md), [preset reference](./discontinuous/myriahedral.md), and
 [background and credits](./projection/developer-guide/myriahedral-projections.md).
 
 For the default sealine preset, the mesh is generated from longitude and latitude, with shared vertices at the
