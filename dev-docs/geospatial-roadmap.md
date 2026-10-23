@@ -13,6 +13,7 @@ Priorities describe sequencing, not release commitments.
 | C1: Reusable local reference frames | Merged in [PR #277](https://github.com/visgl/math.gl/pull/277) | `LocalReferenceFrame` snapshots geodetic basis and origin; ENU/NED/custom right-handed axes; separate point/vector transforms; independent matrix copies and caller-owned vector results. Analytic axis, elevated-origin, pole, dateline, alias and ownership tests. | Sphere/oblate geometry only. Pole longitude follows the existing Cartesian inverse convention. No datum transformation or universal finite-input precision claim. |
 | C2: Geographic poses and motion orientation | Merged in [PR #277](https://github.com/visgl/math.gl/pull/277) | Radian heading/pitch/roll matrices/quaternions, rigid-pose extraction, canonical gimbal lock and normalized velocity-aligned orientation. Tests cover mixed/custom frames, singular motion, subnormal speeds and overflow rejection. | Model-forward and angle signs are explicit; ENU heading zero aligns model +X east. Motion orientation is stateless; no continuity solver, inertial conversion or rotating-frame velocity term. |
 | C3: Tangent-plane operations | Merged in [PR #277](https://github.com/visgl/math.gl/pull/277) | Outward radial projection, radial/normal surface inversion, packed projection with validity masks, overlap validation and orthonormal three-radius bases. Independent sphere/axis equations plus off-axis triaxial and WGS84 regression cases. | Normal inversion selects the near-facing branch and can miss; radial horizon/back-facing rays fail explicitly. Height is discarded. Legacy basis getters remain mutable. This is not comprehensive extreme-shape qualification. |
+| C4: Surface-path sampling and subdivision | Geodesic/linear increment implemented in [PR #280](https://github.com/visgl/math.gl/pull/280); review and CI pending | Reusable `GeodesicPath` fraction/distance sampling; generic original-edge sampler factory; adaptive geodesic polylines with surface-distance limits, unrolled longitude, height interpolation and original-edge provenance. 180 pinned native PROJ controls, analytic spherical distance/dense-error checks and failure/ownership regressions. | Sampled target error is not a certified bound. No seam splitting, terrain following or route uniqueness at antipodes. Rhumb integration waits for C6/G5. Packaged ESM/CJS, strict types and selective boundaries are checked; no speed or allocation-free claim. |
 
 PR #277 validation: all 198 repository Node test files passed (6,399 tests passed,
 124 skipped); the 20-file geospatial subset passed (1,695 passed, one skipped);
@@ -27,7 +28,6 @@ remain follow-up work.
 
 | Tranche | Priority / status | Deliverable | Acceptance gate and dependencies |
 | --- | --- | --- | --- |
-| C4: Surface-path sampling and subdivision | P1 / planned next | Adapt existing geodesic lines into an explicit source-edge sampler; extend adaptive subdivision to consume declared linear, geodesic and eventually rhumb paths. Preserve edge indices/fractions and interpolated height/attributes. | Reuse existing geodesics rather than expose internal Vincenty helpers. Independent midpoint/distance controls, dateline/polar/near-antipodal cases, bounded vertex/depth limits and provenance checks. Keep sampled error distinct from a certified curve bound. Rhumb mode depends on C6/G5; geodesic mode need not wait for it. |
 | C5: Geographic seams and topology | P1 / planned | Generalize current Mercator cutters and existing discontinuous-layout geometry into geographic seam splitting with declared edge semantics, interpolated attributes and preserved topology. | Build on C4 and existing layout/cutting contracts. Qualify seam intersections, pole crossings, holes, winding, repeated crossings and degenerate edges. Split seams and clip invalid domains before adaptive projection; retain provenance and do not silently reinterpret edges. |
 | C6: Rhumb geometry | P2 / planned; owned by [G5](./geographiclib-roadmap.md) | Constant-bearing direct/inverse operations and reusable lines, followed by polygon area when its accumulator infrastructure is ready. | Share auxiliary-latitude work from G3 and area infrastructure from G4. GeographicLib controls and independent meridian/parallel/sphere limits; explicit winding, pole and infinite/undefined behavior. Feed the same qualified solver into C4. |
 | C7: Precision and renderer interop | P2 / design needed | Optional coordinate rebasing/high-low encoding utilities and a matching consumer contract for deck.gl/luma.gl. Clarify geographic degrees, projected metres, ECEF/local units and rendering common space. | Establish an actual renderer consumer before selecting a buffer layout. Measure reconstruction and relative subtraction under real float32 arithmetic, including large origins and small offsets. Benchmark setup, throughput, allocation and selective bundle cost; coordinate encoding alone must not imply jitter-free rendering. |
@@ -38,9 +38,11 @@ remain follow-up work.
 
 1. C1–C3 landed in PR #277; retain their documented support limits and track
    release status separately.
-2. Start C4 using the already delivered geodesic solver; then extend C5 using the
-   existing cutters/discontinuous layouts. Keep these as reviewable increments.
-3. Develop C6 through GeographicLib G3–G5, then connect rhumb sampling to C4.
+2. Review and land the C4 geodesic/linear increment in PR #280, then start C5
+   using the existing cutters/discontinuous layouts. Keep seam processing separate
+   from longitude unrolling and preserve the sampled-error qualification.
+3. Develop C6 through GeographicLib G3–G5, then connect qualified rhumb sampling
+   to C4's source-edge sampler interface.
 4. Advance C7 with a renderer consumer and C8 alongside each API's expansion.
 5. Start C9 only with an agreed astronomy/satellite use case and data/time design.
 
@@ -56,3 +58,18 @@ projection logic are not immediate new tranches: general projection and tile
 capabilities already exist, while scene-specific decisions belong to consumers.
 New public numerical capabilities require independent expected values, explicit
 units/domains/failures, retained attribution, tests and discoverable API docs.
+
+## C4 validation and remaining work
+
+The C4 increment reuses the existing geodesic solver and adaptive subdivision engine;
+no runtime dependency or replacement geodesic algorithm is added. The stored controls
+pin native PROJ 9.9.0 source hashes and their original generator. Analytic sphere checks
+are mathematically independent; native PROJ comparisons share the geodesic algorithm family.
+The package check verifies fixture provenance, ESM/CJS public entries, strict consumer
+signatures and selective dependency boundaries. Generic geometry does not acquire a
+geodesic dependency, and importing only `Ellipsoid` does not initialize the new default solver.
+
+Rhumb paths remain deferred to C6/G5. C5 owns seam/topology processing; unrolled longitude
+alone does not clip a discontinuous projection or guarantee a continuous longitude chart
+at a pole. Existing solver shape/domain restrictions remain in force. Full performance,
+allocation and broader numerical-domain qualification are not implied by this delivery.

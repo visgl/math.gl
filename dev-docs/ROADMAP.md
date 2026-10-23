@@ -40,9 +40,10 @@ extended domains and optional models (P2).
 
 The [tranched geospatial roadmap](./geospatial-roadmap.md) records the existing
 master baseline, C1–C3 merged in [PR #277](https://github.com/visgl/math.gl/pull/277),
-and the remaining path subdivision, seams, rhumb, precision and celestial-frame work.
+the C4 geodesic sampling/subdivision increment implemented in [PR #280](https://github.com/visgl/math.gl/pull/280),
+and the remaining seams, rhumb, precision and celestial-frame work.
 PR implementation, merge/release status and numerical qualification are tracked
-separately. The next integration tranche reuses the existing geodesic solver.
+separately. C4 reuses the existing geodesic solver and adaptive engine; C5 seam processing follows it.
 
 ## Sun and sky
 
