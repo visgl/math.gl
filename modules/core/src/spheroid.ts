@@ -48,16 +48,17 @@ export function cartesianToSpheroid(
     y = point.y,
     z = point.z;
   const {semiMajorAxis: a, semiMinorAxis: b, eccentricitySquared: es} = geometry;
+  const longitude = Math.atan2(y, x);
   const p = Math.hypot(x, y),
     rr = Math.hypot(x, y, z);
   if (!(rr > 0) || !Number.isFinite(rr)) return false;
-  if (es === 0) return commit(result, p === 0 ? 0 : Math.atan2(y, x), Math.atan2(z, p), rr - a);
+  if (es === 0) return commit(result, p === 0 ? 0 : longitude, Math.atan2(z, p), rr - a);
   if (p === 0) return commit(result, 0, (Math.sign(z) * Math.PI) / 2, Math.abs(z) - b);
   const horizontal = p / a,
     vertical = z / b;
   if (horizontal * horizontal + vertical * vertical < 1 - 16 * EPSILON)
     return interiorInverse(x, y, z, p, a, b, result);
-  if (es >= 0.9) return exteriorInverse(Math.atan2(y, x), z, p, a, b, result);
+  if (es >= 0.9) return exteriorInverse(longitude, z, p, a, b, result);
   const ct = z / rr,
     st = p / rr;
   let rx = 1 / Math.sqrt(1 - es * (2 - es) * st * st);
@@ -71,13 +72,13 @@ export function cartesianToSpheroid(
     const nextCos = st * (1 - rk) * rx,
       nextSin = ct * rx;
     if (Math.abs(nextSin * cos - nextCos * sin) <= 1e-12) {
-      if (!Number.isFinite(height) || !Number.isFinite(nextSin) || !Number.isFinite(nextCos)) break;
-      return commit(result, Math.atan2(y, x), Math.atan2(nextSin, Math.abs(nextCos)), height);
+      if (!Number.isFinite(height)) break;
+      return commit(result, longitude, Math.atan2(nextSin, Math.abs(nextCos)), height);
     }
     cos = nextCos;
     sin = nextSin;
   }
-  return exteriorInverse(Math.atan2(y, x), z, p, a, b, result);
+  return exteriorInverse(longitude, z, p, a, b, result);
 }
 
 /** Original nearest-normal solve in t = (lambda + b²)/a², avoiding interior cancellation.
@@ -92,14 +93,13 @@ function interiorInverse(
   b: number,
   result: SpheroidPoint
 ): boolean {
+  const longitude = Math.atan2(y, x);
   const ratio = b / a,
     ratio2 = ratio * ratio;
   const horizontal = p / a,
     vertical = z / a,
     delta = 1 - ratio2;
   if (!(ratio2 > 0) || ratio > 1) return false;
-  // Reject clearly ambiguous equatorial points before the compensated cusp test.
-  if (z === 0 && horizontal < delta - 32 * EPSILON) return false;
   const aa = a * a,
     bb = b * b;
   const ratioError =
@@ -133,7 +133,7 @@ function interiorInverse(
     // A rounded hypot can equal the cusp for points just inside it. Include
     // the radius/axis corrections before selecting a unique equatorial normal.
     if (base + correction < 0) return false;
-    return commit(result, Math.atan2(y, x), 0, p - a);
+    return commit(result, longitude, 0, p - a);
   }
   const weighted = Math.abs(vertical) * ratio;
   let lower = 0,
@@ -146,11 +146,10 @@ function interiorInverse(
   // limiting vertical footpoint remains well conditioned. Use it only when
   // its bound t <= abs(z)*ratio/(a*v) is negligible relative to the cusp gap.
   const gap = -(base + correction) / a;
-  const horizontalLimit = horizontal / delta;
-  const limiting = Math.sqrt((gap / delta) * (horizontalLimit + 1));
+  const limiting = Math.sqrt(gap * (horizontal + delta)) / delta;
   let latitude: number | undefined =
     gap > 0 && (Math.abs(z) / limiting / a) * ratio <= EPSILON * gap
-      ? Math.atan2((Math.sign(z) * limiting) / ratio, horizontalLimit)
+      ? Math.atan2((Math.sign(z) * limiting) / ratio, horizontal / delta)
       : undefined;
   for (let i = 0; i < 1024 && latitude === undefined; i++) {
     const equatorial = delta + t;
@@ -183,7 +182,7 @@ function interiorInverse(
     t = candidate;
   }
   if (latitude === undefined) return false;
-  return commitNormal(result, Math.atan2(y, x), latitude, p, z, a, ratio);
+  return commitNormal(result, longitude, latitude, p, z, a, ratio);
 }
 
 /** Error-free transforms on the finite squared-axis domain used by geometry adapters. */
