@@ -70,18 +70,6 @@ jobs:
       - name: Validate agent skill and offline evaluation corpus
         run: node --test test/llm/*.test.mjs
 
-      - name: Test website dependency resolution
-        run: node --test website/resolve-math-gl-dependency.test.cjs
-
-      # Match website deployment: build from source before any package dist files exist.
-      - name: Build website
-        run: yarn workspace project-website build
-
-      - name: Build next website
-        env:
-          WEBSITE_BASE_URL: /math.gl/next/
-        run: yarn workspace project-website build
-
       - name: Build code
         run: yarn build
 
@@ -191,9 +179,6 @@ jobs:
           path: /tmp/projection-scorecard-node
           if-no-files-found: error
 
-      - name: Run Node tests
-        run: yarn test-node
-
       - name: Run headless tests with coverage
         run: yarn test-coverage
 
@@ -247,6 +232,83 @@ jobs:
                 text: `**${totals.hit.toLocaleString()} / ${totals.found.toLocaleString()}** instrumented lines are covered.\n\n[View the detailed Coveralls report](https://coveralls.io).`
               }
             });
+
+  # Website builds must run before package dist files exist, just as in deployment.
+  website:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Node (with Corepack)
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack / Yarn 4
+        run: |
+          corepack enable
+          corepack prepare yarn@4.18.0 --activate
+          yarn -v
+
+      - name: Cache Yarn Berry artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.yarn/berry/cache
+            .yarn/install-state.gz
+          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json') }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Test website dependency resolution
+        run: node --test website/resolve-math-gl-dependency.test.cjs
+
+      # Match website deployment: build from source before any package dist files exist.
+      - name: Build website
+        run: yarn workspace project-website build
+
+      - name: Build next website
+        env:
+          WEBSITE_BASE_URL: /math.gl/next/
+        run: yarn workspace project-website build
+
+  node-tests:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Node (with Corepack)
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack / Yarn 4
+        run: |
+          corepack enable
+          corepack prepare yarn@4.18.0 --activate
+          yarn -v
+
+      - name: Cache Yarn Berry artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.yarn/berry/cache
+            .yarn/install-state.gz
+          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json') }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build code
+        run: yarn build
+
+      - name: Run Node tests
+        run: yarn test-node
 
   projection-browsers:
     name: Projection qualification (${{ matrix.browser }})
@@ -339,6 +401,11 @@ jobs:
 
   projection-performance:
     if: github.event_name == 'pull_request'
+    # Keep paired measurements serial within each runner to avoid CPU contention.
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [projection, pipeline]
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
@@ -370,36 +437,45 @@ jobs:
       - name: Build code
         run: yarn build
 
+      - name: Fetch PR base for paired measurements
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: git fetch --no-tags --depth=1 origin "$BASE_SHA"
+
       # Retain all coordinates, layouts and 11 samples; bound adaptive timing windows.
       - name: Compare projection performance against the PR base
+        if: matrix.suite == 'projection'
         timeout-minutes: 10
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          git fetch --no-tags --depth=1 origin "$BASE_SHA"
           node modules/geospatial/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --min-sample-ms 4 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
 
       # Keep every scenario/layout/direction and seven samples; bound aggregate windows
       # as reusable-output modes add implementations. Longer local runs keep the 12 ms default.
       - name: Compare pipeline performance against the PR base
+        if: matrix.suite == 'pipeline'
         timeout-minutes: 5
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --min-sample-ms 4 --allocations --reusable-results --output /tmp/projection-pipeline-comparison.json
 
       - name: Check paired grid preparation benchmark
+        if: matrix.suite == 'projection'
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node modules/geospatial/projection/scripts/benchmark-grid-compare.mjs --baseline-ref "$BASE_SHA" --sizes 17,65 --samples 3 --coordinates --allocations --points 1000 --output /tmp/projection-grid-comparison.json
 
       - name: Compare spheroid conversion correctness and costs
+        if: matrix.suite == 'projection'
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node modules/geospatial/projection/scripts/benchmark-spheroid-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-spheroid-comparison.json
 
       - name: Compare shared local-frame correctness and costs
+        if: matrix.suite == 'projection'
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -408,7 +484,7 @@ jobs:
       - name: Upload paired performance measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: projection-performance-comparison
+          name: projection-performance-comparison-${{ matrix.suite }}
           path: |
             /tmp/projection-performance-comparison.json
             /tmp/projection-pipeline-comparison.json
@@ -422,7 +498,7 @@ jobs:
   # diagnostic scorecard before enforcing the independent performance result.
   test:
     if: always()
-    needs: [checks, projection-browsers, projection-performance]
+    needs: [checks, website, node-tests, projection-browsers, projection-performance]
     runs-on: ubuntu-22.04
     timeout-minutes: 3
     steps:
@@ -467,11 +543,15 @@ jobs:
       - name: Require all checks to pass
         if: always()
         env:
+          WEBSITE_RESULT: ${{ needs.website.result }}
+          NODE_TESTS_RESULT: ${{ needs.node-tests.result }}
           CHECKS_RESULT: ${{ needs.checks.result }}
           BROWSERS_RESULT: ${{ needs.projection-browsers.result }}
           PERFORMANCE_RESULT: ${{ needs.projection-performance.result }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
+          test "$WEBSITE_RESULT" = success
+          test "$NODE_TESTS_RESULT" = success
           test "$CHECKS_RESULT" = success
           test "$BROWSERS_RESULT" = success
           if [ "$EVENT_NAME" = pull_request ]; then
