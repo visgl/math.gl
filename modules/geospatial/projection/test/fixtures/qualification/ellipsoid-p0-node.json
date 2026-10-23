@@ -9,8 +9,8 @@
     "driverSHA256": "0551c687efdfbdd0ac4185f02cae3d7beda1bf78252846339b76a7f5b294c346",
     "generatorSHA256": "88d5b120b31d907473491e898e054b54370b8a7414fd8a8e57e56a1de89fb6ca",
     "decimalOracleSHA256": "9a72ff7b2c909aeff44304833468363c7e87ea95b58d29fdb70c6aff84f907b0",
-    "anchorInputSHA256": "2481290af8ddf8f76d24456300ad11438f3ee07dac5c288bccb7d411b5f4b44a",
-    "anchorGeneratorSHA256": "071442adb65d2d02181b3e298e413ebd95ffb61db39928b63a2f6ea69c6a1113",
+    "anchorInputSHA256": "676028d4c466a91b4f457d0a7a8a92d8adb8b9c9ba138016f89ccf0f5563c1d0",
+    "anchorGeneratorSHA256": "ca65a893367e37153a0b8b7df04fc6a239ddff35c57c393e3755a477412b6724",
     "method": "Original inputs; C++ series and elliptic-integral Exact; independent exact-binary64-input Decimal 180 digits/600 bisections.",
     "license": "MIT",
     "scope": "Bounded P0 support profile; no universal finite-input claim."
@@ -20,7 +20,7 @@
     "platform": "darwin",
     "architecture": "arm64"
   },
-  "sourceSHA256": "48249578fd8d390d8b501733ee210639c6b0551911fa6ea1c13b3e6c14e87097",
+  "sourceSHA256": "8263c2b7dfa64cb08910f180e44a56785e202d20672e42bb6e70e4da13a420b9",
   "heightTolerance": "max(radii) * 2e-12 in axis units (the existing absolute floor is not needed in this new profile)",
   "qualifiedRows": 3370,
   "diagnosticRows": 2,
