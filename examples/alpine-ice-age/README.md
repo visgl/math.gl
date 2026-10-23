@@ -204,7 +204,8 @@ Alaska/Hawaii insets, interrupted sinusoidal, Mollweide, Goode homolosine, and
 gnomonic AirOcean. Geographic grid cells are clipped by region before independent
 triangulation; graticules are split at the same cuts. Cached topology retains
 source coordinates for bilinear sampling of the periodic ice and bed grids.
-These views switch immediately rather than morphing incompatible triangle meshes.
+These views switch immediately rather than morphing incompatible triangle meshes,
+except for the hinge transitions of myriahedral maps described below.
 Statistics remain global even in the U.S. view. The U.S. masks include surrounding
 land and ocean and do not select political boundaries.
 
@@ -217,3 +218,31 @@ Inset bounds, viewport fitting, draw order, outlines, and labels come from
 frames. Hawaiian island shapes use a bundled, pinned Natural Earth 1:10m modern
 reference (public domain); the 1° reconstruction grid does not resolve their terrain.
 This overlay does not change ice values, global totals, or reconstruct past shorelines.
+
+
+### Myriahedral presets (experimental)
+
+The **View → Myriahedral** group offers polyconic, cylindric, azimuthal,
+hemispheres, sealine, and coastline layouts, plus tetrahedron, cube, octahedron,
+dodecahedron, and icosahedron nets. Turn off **Cycle projections** to inspect one
+layout while scrubbing time. These views use the reusable
+`createMyriahedralMap` API: 24-column graticules or one subdivision of each solid.
+Each panel is tessellated independently at approximately the source grid's 1°
+resolution, retaining geographic coordinates for ice and bed interpolation.
+No triangle spans a cut. Layout metadata fits the complete net to the viewport.
+Only the three most recently used discontinuous meshes are cached.
+
+Cuts are fixed across time so geography remains comparable. Sealine and coastline
+weights use the same bundled public-domain Natural Earth 1:110m modern land mask
+as the unfolding example; this is not a reconstruction of past coastlines.
+Selecting a myriahedral view animates from the globe to its fully unfolded net.
+Switching presets folds the current net back to the globe before unfolding the
+next one; ordinary global projections transition through the globe as well.
+Terrain and graticules follow the same library hinge poses. A short initial
+deflation fits spherical samples onto planar panels. Reduced-motion preferences
+skip animations. The standalone example provides manual unfolding and subdivision
+controls. Panel overlaps remain possible, and the
+namesake graticule strategies are not exact analytic equal-area projections.
+
+See the [myriahedral background and credits](../../docs/modules/geospatial/projection/developer-guide/myriahedral-projections.md)
+for Nico Belmonte's inspiration, Jarke van Wijk's research, and implementation limitations.

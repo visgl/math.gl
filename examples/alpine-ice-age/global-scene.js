@@ -16,10 +16,18 @@ import {
   sinusoidal,
   millerCylindrical,
 } from "@math.gl/geospatial/projection";
+import {
+  myriahedralPose,
+  prepareMyriahedralAnimation,
+} from "./myriahedral-animation.js";
 import { fitMapLayout } from "@math.gl/geospatial/discontinuous";
 import { interpolateField } from "./data.js";
 import { nearestOSFChapter } from "./osf-data.js";
-import { projectionWeights } from "./projection-transition.js";
+import {
+  projectionWeights,
+  isMyriahedral,
+  myriahedralRoute,
+} from "./projection-transition.js";
 import {
   REGIONAL_VIEWS,
   regionalCoordinate,
@@ -154,7 +162,11 @@ export function createGlobalScene(canvas, onError) {
     dragging,
     weights,
     transition,
-    animationFrame;
+    animationFrame,
+    displayView,
+    unfoldAmount = 1,
+    route = [];
+  const animations = new WeakMap();
   const duration = 1200;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const deck = new Deck({
@@ -166,11 +178,52 @@ export function createGlobalScene(canvas, onError) {
     onViewStateChange: ({ viewState }) => deck.setProps({ viewState }),
     onError,
   });
+  function startStage(now) {
+    const stage = route.shift();
+    if (!stage) {
+      transition = null;
+      return;
+    }
+    if (stage.kind === "hinge") {
+      displayView = stage.view;
+      unfoldAmount = stage.from;
+      transition = { ...stage, start: now };
+      weights = { globe: 1 };
+    } else if (
+      REGIONAL_VIEWS[stage.view] ||
+      DISCONTINUOUS_VIEWS[stage.view] ||
+      Object.keys(weights).some(
+        (id) => REGIONAL_VIEWS[id] || DISCONTINUOUS_VIEWS[id],
+      )
+    ) {
+      // Other discontinuous maps do not share a hinge mesh.
+      displayView = stage.view;
+      weights = { [stage.view]: 1 };
+      transition = null;
+      startStage(now);
+    } else {
+      displayView = stage.view;
+      transition = {
+        kind: "map",
+        from: { ...weights },
+        target: stage.view,
+        start: now,
+      };
+    }
+  }
   function sampleTransition(now) {
     if (!transition) return;
-    const fraction = (now - transition.start) / duration;
-    weights = projectionWeights(transition.from, transition.target, fraction);
-    if (fraction >= 1) transition = null;
+    const fraction = Math.min(
+      1,
+      Math.max(0, (now - transition.start) / duration),
+    );
+    if (transition.kind === "hinge") {
+      const ease = fraction * fraction * (3 - 2 * fraction);
+      unfoldAmount = transition.from + (transition.to - transition.from) * ease;
+      if (fraction >= 1 && transition.to === 0) displayView = "globe";
+    } else
+      weights = projectionWeights(transition.from, transition.target, fraction);
+    if (fraction >= 1) startStage(now);
   }
   function animate(now) {
     animationFrame = null;
@@ -179,6 +232,10 @@ export function createGlobalScene(canvas, onError) {
     if (transition) animationFrame = requestAnimationFrame(animate);
   }
   function render(model, opts) {
+    // Build a requested panel mesh before starting the clock, so construction
+    // latency cannot consume the first unfolding frames.
+    if (options?.view !== opts.view && isMyriahedral(opts.view))
+      discontinuousGrid(opts.view);
     const now = performance.now();
     sampleTransition(now);
     const viewChanged = options?.view !== opts.view;
@@ -189,11 +246,31 @@ export function createGlobalScene(canvas, onError) {
         Object.keys(weights || {}).some(
           (id) => REGIONAL_VIEWS[id] || DISCONTINUOUS_VIEWS[id],
         ));
-    if (!weights || reducedMotion.matches || regionalSwitch) {
+    if (!weights || reducedMotion.matches) {
       weights = { [opts.view]: 1 };
+      displayView = opts.view;
+      unfoldAmount = 1;
       transition = null;
+      route = [];
+    } else if (
+      viewChanged &&
+      (isMyriahedral(displayView) || isMyriahedral(opts.view))
+    ) {
+      route = myriahedralRoute(displayView, opts.view, unfoldAmount);
+      startStage(now);
     } else if (viewChanged) {
-      transition = { from: { ...weights }, target: opts.view, start: now };
+      route = [];
+      displayView = opts.view;
+      if (regionalSwitch) {
+        weights = { [opts.view]: 1 };
+        transition = null;
+      } else
+        transition = {
+          kind: "map",
+          from: { ...weights },
+          target: opts.view,
+          start: now,
+        };
     }
     current = model;
     options = opts;
@@ -211,6 +288,7 @@ export function createGlobalScene(canvas, onError) {
       animationFrame = requestAnimationFrame(animate);
   }
   function draw(model, opts) {
+    opts = { ...opts, view: displayView ?? opts.view };
     const { view, age, showIce, ghost, labels } = opts;
     const size = 361 * 181;
     const ice = model.footprints
@@ -365,7 +443,19 @@ export function createGlobalScene(canvas, onError) {
     const regions = new Map(
       fitted.regions.map((region) => [region.id, region]),
     );
+    let pose;
+    if (g.map.layout && unfoldAmount < 1) {
+      if (!animations.has(g.map))
+        animations.set(g.map, prepareMyriahedralAnimation(g.map));
+      pose = myriahedralPose(
+        animations.get(g.map),
+        unfoldAmount,
+        { width, height, longitude, latitude },
+        fitted,
+      );
+    }
     const toScene = (p, regionId, lift = 0) => {
+      if (pose) return pose(p, regionId, lift);
       const [x, y] = fitted.project(p);
       return [
         x - width / 2,
@@ -502,7 +592,7 @@ export function createGlobalScene(canvas, onError) {
     });
   }
   function down(e) {
-    if (options?.view === "globe" && !transition) {
+    if (displayView === "globe" && !transition) {
       dragging = [e.clientX, e.clientY, longitude, latitude];
       canvas.setPointerCapture(e.pointerId);
     }
@@ -533,6 +623,7 @@ export function createGlobalScene(canvas, onError) {
     finalize() {
       if (animationFrame) cancelAnimationFrame(animationFrame);
       transition = null;
+      route = [];
       resize.disconnect();
       canvas.removeEventListener("pointerdown", down);
       canvas.removeEventListener("pointermove", move);

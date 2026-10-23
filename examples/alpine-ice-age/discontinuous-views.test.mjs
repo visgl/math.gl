@@ -84,3 +84,82 @@ test("layout metadata drives inset order and finer reference polygons retain all
     0,
   );
 });
+
+// The spherical area catches missing/duplicated fan triangles, including at poles
+// and the antimeridian, independently of the flattened layout's possible overlaps.
+test("myriahedral meshes cover the sphere once and retain the source field", () => {
+  const rad = Math.PI / 180;
+  const sphere = ([lon, lat]) => [
+    Math.cos(lon * rad) * Math.cos(lat * rad),
+    Math.sin(lon * rad) * Math.cos(lat * rad),
+    Math.sin(lat * rad),
+  ];
+  const dot = (a, b) => a.reduce((sum, x, i) => sum + x * b[i], 0);
+  const field = Float32Array.from({ length: 360 * 181 }, (_, i) =>
+    Math.floor(i / 360),
+  );
+  for (const view of Object.keys(DISCONTINUOUS_VIEWS).filter((id) =>
+    id.startsWith("myriahedral:"),
+  )) {
+    const g = discontinuousGrid(view, 5);
+    const vectors = g.sources.map(sphere);
+    let area = 0;
+    for (let i = 0; i < g.indices.length; i += 3) {
+      const [a, b, c] = [...g.indices.slice(i, i + 3)].map(
+        (index) => vectors[index],
+      );
+      const cross = [
+        b[1] * c[2] - b[2] * c[1],
+        b[2] * c[0] - b[0] * c[2],
+        b[0] * c[1] - b[1] * c[0],
+      ];
+      area +=
+        2 *
+        Math.atan2(
+          Math.abs(dot(a, cross)),
+          1 + dot(a, b) + dot(b, c) + dot(c, a),
+        );
+    }
+    assert(
+      Math.abs(area - 4 * Math.PI) < 1e-8,
+      `${view} covers the sphere once`,
+    );
+    for (let i = 0; i < g.sources.length; i++) {
+      const expected = g.map.projectPoint(
+        g.sources[i],
+        g.regionIds[i],
+      ).position;
+      assert(
+        Math.hypot(
+          expected[0] - g.positions[i * 2],
+          expected[1] - g.positions[i * 2 + 1],
+        ) < 1e-5,
+      );
+      assert(
+        Math.abs(sampleField(field, g.samples[i]) - (g.sources[i][1] + 90)) <
+          1e-8,
+      );
+    }
+  }
+});
+
+test("cycling bounds cached mesh retention", () => {
+  const first = discontinuousGrid("myriahedral:cylindric", 5);
+  discontinuousGrid("myriahedral:azimuthal", 5);
+  discontinuousGrid("myriahedral:hemispheres", 5);
+  assert.equal(discontinuousGrid("myriahedral:cylindric", 5), first);
+  discontinuousGrid("myriahedral:icosahedron", 5);
+  assert.equal(
+    discontinuousGrid("myriahedral:cylindric", 5),
+    first,
+    "recent mesh retained",
+  );
+  discontinuousGrid("myriahedral:coastline", 5);
+  discontinuousGrid("myriahedral:sealine", 5);
+  discontinuousGrid("myriahedral:polyconic", 5);
+  assert.notEqual(
+    discontinuousGrid("myriahedral:cylindric", 5),
+    first,
+    "old mesh evicted",
+  );
+});
