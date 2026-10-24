@@ -73,8 +73,9 @@ surface length is not terrain distance or the length of a varying-height 3D rout
 Split projection seams and clip to valid domains before calling. Longitude unrolling is not
 seam splitting. A transform that wraps longitudes can still introduce a discontinuity and
 exhaust the depth/vertex limit; a pole-crossing geographic path may require a different
-coordinate chart. An ECEF transform is useful for continuous globe paths. C5 owns general
-seam/topology processing. The scalar [rhumb solver](./ellipsoid-rhumb.md) is available; integrating it into this adaptive path sampler remains C4/C6 work.
+coordinate chart. An ECEF transform is useful for continuous globe paths. Use the [geographic seam splitters](./geographic-seams.md) for the declared periodic-meridian profile.
+[RhumbPath and subdivideRhumbPolyline](./rhumb-path.md) provide constant-bearing sampling
+without introducing another solver. Arbitrary interrupted-chart and projection-domain clipping remain separate.
 
 Qualification includes native PROJ path controls, independent spherical dense-error and
 surface-distance checks, multi-edge height/attribute provenance, dateline/polar/antipodal

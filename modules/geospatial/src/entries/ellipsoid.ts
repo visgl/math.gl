@@ -37,3 +37,5 @@ export type {
 } from '../geodesic-intersections';
 export {GeodesicPath} from '../geodesic-path';
 export type {GeodesicPathOptions} from '../geodesic-path';
+export {RhumbPath} from '../rhumb-path';
+export type {RhumbPathOptions} from '../rhumb-path';

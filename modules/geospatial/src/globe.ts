@@ -14,3 +14,18 @@ export {subdivideGlobeMesh} from './subdivide-globe-mesh';
 export type {SubdivideGlobeMeshOptions} from './subdivide-globe-mesh';
 export {subdivideGeodesicPolyline} from './subdivide-geodesic-polyline';
 export type {SubdivideGeodesicPolylineOptions} from './subdivide-geodesic-polyline';
+export {subdivideRhumbPolyline} from './subdivide-rhumb-polyline';
+export type {SubdivideRhumbPolylineOptions} from './subdivide-rhumb-polyline';
+export {
+  splitGeographicPolyline,
+  splitGeographicPolygon,
+  GeographicSeamError
+} from './geographic-seams';
+export type {
+  GeographicSeamOptions,
+  GeographicEdgeSource,
+  GeographicSeamRing,
+  GeographicSeamPolyline,
+  GeographicPolygonRing,
+  GeographicSeamPolygon
+} from './geographic-seams';

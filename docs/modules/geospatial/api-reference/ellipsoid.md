@@ -388,3 +388,7 @@ These APIs use explicit degree units and retain the existing Cartesian API.
 [EllipsoidRhumb and RhumbPolygon](./ellipsoid-rhumb.md) provide constant-bearing
 paths and areas. [GeodesicIntersections](./geodesic-intersections.md) provides
 bounded searches with explicit completeness and segment statuses.
+
+[RhumbPath](./rhumb-path.md) adds surface-distance sampling over the existing
+rhumb solver. [Geographic seam splitters](./geographic-seams.md) preserve declared
+edge semantics, attributes, holes and source provenance in a periodic longitude chart.
