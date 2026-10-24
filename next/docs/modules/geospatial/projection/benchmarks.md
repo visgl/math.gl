@@ -80,7 +80,12 @@ Schema-version-2 JSON reports retain individual aggregate samples, per-buffer me
 node modules/geospatial/projection/scripts/benchmark-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --output /tmp/proj4-comparison.json
 ```
 
-The comparison compiles baseline runtime sources from Git and current sources with the same bundler, package manifests and installed dependencies. It uses the current shared workload for both versions, validates both against proj4js, and rotates baseline/candidate flat/scalar execution order. It covers XY and XYZM in both precisions and directions; constructor batches alternate separately. `--scenarios` accepts comma-separated scenario names to focus a run. On pull requests, CI measures nine representative scenarios against the actual base commit and uploads `projection-performance-comparison`. CI keeps all 20,000 coordinates and 11 rotated samples, but uses `--min-sample-ms 4` to limit adaptive repetitions. Inspect the retained spread and `timingLimited` flags when interpreting these shorter measurements.
+The comparison compiles baseline runtime sources from Git and current sources with the same bundler, package manifests and installed dependencies. It uses the current shared workload for both versions, validates both against proj4js, and rotates baseline/candidate flat/scalar execution order. It covers XY and XYZM in both precisions and directions; constructor batches alternate separately. `--scenarios` accepts comma-separated scenario names to focus a run. On pull requests, CI measures nine representative scenarios against the actual base commit. CI uploads two artifacts from parallel jobs:
+
+* `projection-performance-comparison-projection` contains the projection, grid preparation, spheroid conversion, and local-frame comparison reports.
+* `projection-performance-comparison-pipeline` contains the pipeline comparison report.
+
+Each job measures baseline and candidate together on one runner. CI keeps all 20,000 coordinates and 11 rotated samples, but uses `--min-sample-ms 4` to limit adaptive repetitions. Inspect the retained spread and `timingLimited` flags when interpreting these shorter measurements.
 
 `--clock thread-cpu` (Node 24.14 or later) is an optional diagnostic using main-thread CPU time. It reduces scheduler interference but excludes time spent off the thread; **it is not elapsed throughput** and must not be compared directly with the live table. Default reports use elapsed wall time. Always inspect sample variation before interpreting ratios.
 
