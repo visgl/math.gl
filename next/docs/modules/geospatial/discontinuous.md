@@ -186,3 +186,11 @@ Both geometry methods accept:
 Sampling happens after clipping. The criterion is an approximation target, not a certified maximum error for arbitrary user projections. Recursion is limited to 20 levels and approximately one million samples per clipped edge; exceeding limits throws. Choose a suitable distance tolerance for large radii, for example `tolerance: 10` when output units are meters. The default targets unit-sphere maps.
 
 See the [unfolding Earth example](https://visgl.github.io/math.gl/next/docs/modules/geometry/unfolding-earth.md) for the related hinge and texture demonstration. Static vector projection and animated panel rendering currently use separate pipelines.
+
+## Quincuncial and star factories[​](#quincuncial-and-star-factories "Direct link to Quincuncial and star factories")
+
+From v5.0 · Experimental
+
+`createPeirceQuincuncialMap(options?: QuincuncialMapOptions)` and `createBerghausMap(options?: BerghausMapOptions)` return `DiscontinuousMap` instances. Both accept `radius` (positive, default 1) and `centralMeridian` (finite degrees, default 0). Berghaus additionally accepts `lobes` (integer 3–24, default 5). The exported option types have the same defaults as the corresponding [MapEngine definitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md#quincuncial-and-star-definitions).
+
+Use `MapEngine` when you also need serializable descriptions, fitting, picking, capabilities and transition planning. Consult the [support table](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md#supported-map-families) for the distinction between these presets and other quincuncial/star variants.

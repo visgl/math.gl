@@ -162,9 +162,9 @@ worldAreas.project([12, 55]);
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
-The separate [`@math.gl/geospatial/discontinuous` API](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous.md) provides static region-aware point projection, inverse candidates, and seam-aware line and polygon projection. Presets include a 24-panel AirOcean arrangement with gnomonic face mapping; six-lobe interrupted sinusoidal, Mollweide, and Goode homolosine formulas; and an Albers USA composite with Alaska and Hawaii insets. The interrupted cuts and U.S. geographic masks are independent arrangements, not exact historical IGH or D3 clip-extent compatibility.
+The separate [`@math.gl/geospatial/discontinuous` API](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous.md) provides static region-aware point projection, inverse candidates, and seam-aware line and polygon projection. Presets include AirOcean, land-oriented Goode, independent interrupted sinusoidal, Mollweide and homolosine layouts, Albers USA with optional territories, Peirce quincuncial, Berghaus star, and myriahedral layouts.
 
-Still unsupported as built-in presets: Butterfly, Collignon, Waterman polyhedral layouts, historical interrupted cut arrangements, and arbitrary curved clip boundaries. These require additional layouts or clipping support; a scalar projection kernel alone does not provide seam-aware geometry.
+See the [support table](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md#supported-map-families) for implemented families, exact preset names, and remaining gaps. Historical cut arrangements and clipping semantics are not interchangeable: `goode` uses land-oriented lobes, while `interrupted-homolosine` uses independent cuts.
 
 Polygon support currently requires each input polygon to fit in an open hemisphere. AirOcean here is the cut arrangement, not the Gray-Fuller projection. These layouts are not scalar CRS operations and are not automatically supported by existing deck.gl geographic layers. The scalar `sinu` and `qsc` kernels remain separate from interrupted or unfolded map assembly.
 
