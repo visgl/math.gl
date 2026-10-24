@@ -169,8 +169,35 @@ export function qualifyGeographicSeams(): SeamQualificationRow[] {
         );
       }
     }
+    const closed = subdivideRhumbPolyline([100.1, 0, -170.1, 0, -170.1, 10, 100.1, 10, 100.1, 0], {
+      rhumb: sphere,
+      transform: p => p,
+      tolerance: 1
+    });
+    check(
+      'exact fractional endpoint',
+      closed.sourcePositions[closed.sourcePositions.length - 2],
+      100.1,
+      0
+    );
   });
-  run('independent topology', 'full-width periodic aliases', check => {
+  run('independent topology', 'periodic polygon topology', check => {
+    for (const sign of [-1, 1])
+      for (const edgeModel of ['linear', 'rhumb'] as const) {
+        const result = splitGeographicPolygon(
+          [{positions: [sign * 100.1, 0, -sign * 170.1, 0, -sign * 170.1, 10, sign * 100.1, 10]}],
+          {edgeModel, linearLongitude: 'shortest', rhumb: sphere}
+        );
+        check('fractional components', result.length, 2, 0);
+        let area = 0;
+        for (const polygon of result) {
+          const p = points(polygon.rings[0].positions);
+          let sum = 0;
+          for (let j = 1; j < p.length; j++) sum += p[j - 1][0] * p[j][1] - p[j][0] * p[j - 1][1];
+          area += Math.abs(sum / 2);
+        }
+        check('fractional filled area', area, 898, 1e-9);
+      }
     for (const origin of [-180, 0, 23, 360, 0.1, 0.2, -0.1, -0.2, 10.1])
       for (const seamLongitude of [0, 180, 270, 0.1, 179.9, 360.2]) {
         const result = splitGeographicPolygon(

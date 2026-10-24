@@ -208,7 +208,7 @@ export function createEdges(
     (turns !== 0 && edgeModel !== 'rhumb')
   )
     throw new GeographicSeamError('input', 'Turns require rhumb edges and |turns| <= 128');
-  const offset = start[0] - originalStart[0];
+  let offset = 360 * Math.round((start[0] - originalStart[0]) / 360);
   const source: GeographicEdgeSource = {
     ringIndex,
     edgeIndex,
@@ -224,8 +224,8 @@ export function createEdges(
   if (edgeModel === 'linear') {
     last[0] =
       end[0] +
-      (linearLongitude === 'shortest' ? 360 * shortLongitudeTurns(originalStart[0], end[0]) : 0) +
-      offset;
+      (offset +
+        (linearLongitude === 'shortest' ? 360 * shortLongitudeTurns(originalStart[0], end[0]) : 0));
     horizontal = t => [first[0] * (1 - t) + last[0] * t, first[1] * (1 - t) + last[1] * t];
   } else if (edgeModel === 'rhumb') {
     context.tick(2); // Inverse and reusable-line setup.
@@ -233,7 +233,7 @@ export function createEdges(
       rhumb: context.options.rhumb,
       longitudeTurns: turns
     });
-    last[0] = end[0] + 360 * Math.round((path.end[0] - end[0]) / 360) + offset;
+    last[0] = end[0] + (360 * Math.round((path.end[0] - end[0]) / 360) + offset);
     horizontal = t => {
       const p = path.sample(t);
       p[0] += offset;
@@ -242,12 +242,24 @@ export function createEdges(
   } else {
     context.tick(3); // Path inverse/line setup and the bearing query below.
     const solver = context.options.geodesic || getDefaultGeodesic();
-    const path = new GeodesicPath(first.slice(0, 2), last.slice(0, 2), {geodesic: solver});
-    last[0] = end[0] + 360 * Math.round((path.end[0] - end[0]) / 360);
-    horizontal = t => path.sample(t);
+    const path = new GeodesicPath(originalStart.slice(0, 2), last.slice(0, 2), {geodesic: solver});
+    if (Math.abs(first[1]) === 90) {
+      context.tick(2);
+      const incomingChart = new GeodesicPath(first.slice(0, 2), last.slice(0, 2), {
+        geodesic: solver
+      });
+      offset = 360 * Math.round((incomingChart.end[0] - path.end[0]) / 360);
+      source.longitudeShift = offset;
+    }
+    last[0] = end[0] + (360 * Math.round((path.end[0] - end[0]) / 360) + offset);
+    horizontal = t => {
+      const p = path.sample(t);
+      p[0] += offset;
+      return p;
+    };
     if (Math.abs(first[1]) === 90) first[0] = last[0];
     if (Math.abs(last[1]) === 90) last[0] = first[0];
-    const inverse = solver.inverse(start[1], start[0], end[1], end[0]);
+    const inverse = solver.inverse(originalStart[1], originalStart[0], end[1], end[0]);
     const c1 = Math.cos((inverse.azi1 * Math.PI) / 180),
       c2 = Math.cos((inverse.azi2 * Math.PI) / 180);
     if (
@@ -268,7 +280,9 @@ export function createEdges(
         pole = {fraction, latitude};
     } else if (splitLatitude && c1 * c2 < 0 && path.length > 0) {
       context.tick();
-      const line = solver.line(start[1], start[0], inverse.azi1, {unrollLongitude: true});
+      const line = solver.line(originalStart[1], originalStart[0], inverse.azi1, {
+        unrollLongitude: true
+      });
       let lo = 0,
         hi = 1;
       for (let i = 0; i < 64; i++) {

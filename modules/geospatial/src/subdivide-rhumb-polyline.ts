@@ -71,9 +71,27 @@ export function subdivideRhumbPolyline(
     // Select each signed interval before translating it into the accumulated
     // world. Otherwise a preceding wrap can reverse an exact 180-degree tie.
     const first = positions.slice(i - size, i);
-    const offset = first[0] - original[i - size];
+    const worldTurns = Math.round((first[0] - original[i - size]) / 360);
+    const offset = 360 * worldTurns;
+    if (!Number.isSafeInteger(worldTurns) || original[i - size] + offset !== first[0])
+      throw new RangeError('Unrepresentable rhumb longitude chart');
+    const last = path.end;
+    const endTurns = Math.round((last[0] - original[i]) / 360);
+    const translated = last[0] + offset;
+    const endpoint = original[i] + (offset + 360 * endTurns);
+    last[0] =
+      Number.isSafeInteger(endTurns) &&
+      Number.isFinite(endpoint) &&
+      Math.abs(endpoint - translated) <= 4 * Number.EPSILON * Math.max(360, Math.abs(translated))
+        ? endpoint
+        : translated;
+    if (path.length === 0) {
+      last[0] = first[0];
+      last[1] = first[1];
+    }
     const sample = (fraction: number): number[] => {
       if (fraction === 0) return first.slice();
+      if (fraction === 1) return last.slice();
       const p = path.sample(fraction);
       p[0] += offset;
       return p;

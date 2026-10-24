@@ -105,6 +105,25 @@ test('Exact pole passages are separate meridian endpoints, including pole vertic
   expect(vertex.length).toBe(2);
   expect(points(vertex[1].positions)[0]).toEqual([90, 90]);
   expect(() => line([0, 80, 0, 90], {edgeModel: 'rhumb', rhumb})).toThrow(RangeError);
+  for (const part of line([90, 80, 0, 90, 90, 80], {edgeModel: 'geodesic', geodesic}))
+    for (const edge of part.edges.filter(e => e.edgeIndex === 1))
+      expect(edge.longitudeShift).toBe(0); // The original outgoing meridian is 90°, not 180°.
+});
+test('Fractional wrapped rectangles close without sequential turn roundoff', () => {
+  for (const sign of [-1, 1]) {
+    const input = [sign * 100.1, 0, -sign * 170.1, 0, -sign * 170.1, 10, sign * 100.1, 10];
+    for (const edgeModel of ['linear', 'geodesic', 'rhumb'] as const) {
+      const result = polygon([{positions: input}], {
+        edgeModel,
+        linearLongitude: 'shortest',
+        geodesic,
+        rhumb
+      });
+      closed(result);
+      expect(result.length).toBe(2);
+      if (edgeModel !== 'geodesic') expect(Math.abs(total(result) - 898)).toBeLessThan(1e-9);
+    }
+  }
 });
 test('Rectangles retain area and winding when split, including full-world extents', () => {
   for (const outer of [

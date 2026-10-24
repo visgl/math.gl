@@ -63,7 +63,14 @@ export class RhumbPath {
     this.length = inverse.s12;
     this.first = Object.freeze(Array.from(start));
     const last = Array.from(end);
-    last[0] = inverse.s12 === 0 ? start[0] : inverse.lon2;
+    const turns = Math.round((inverse.lon2 - end[0]) / 360);
+    const endpoint = end[0] + 360 * turns;
+    const retainsPhase =
+      Number.isSafeInteger(turns) &&
+      Number.isFinite(endpoint) &&
+      Math.abs(endpoint - inverse.lon2) <=
+        4 * Number.EPSILON * Math.max(360, Math.abs(inverse.lon2));
+    last[0] = inverse.s12 === 0 ? start[0] : retainsPhase ? endpoint : inverse.lon2;
     if (inverse.s12 === 0) last[1] = start[1];
     this.last = Object.freeze(last);
     this.line = solver.line(start[1], start[0], inverse.azi12, {unrollLongitude: true});

@@ -106,6 +106,22 @@ test('Rhumb subdivision retains original signed ties after accumulated wraps', (
       ]);
     }
   }
+  const result = subdivideRhumbPolyline([100.1, 0, -170.1, 0, -170.1, 10, 100.1, 10, 100.1, 0], {
+    rhumb: sphere,
+    transform: p => p,
+    tolerance: 1
+  });
+  expect(Array.from(result.sourcePositions.slice(-2))).toEqual([100.1, 0]);
+  expect(new RhumbPath([-170.1, 0], [100.1, 0], {rhumb: sphere}).end[0]).toBe(100.1 - 360);
+  const large = new RhumbPath([0, 0], [1e20, 0], {rhumb: sphere});
+  expect(large.end[0]).toBe(-80); // Analytic modulo-360 endpoint; cancellation must not create 0°.
+  expect(() =>
+    subdivideRhumbPolyline([0, 0, 1e20, 0, 0, 0], {
+      rhumb: sphere,
+      transform: p => p,
+      tolerance: 1
+    })
+  ).toThrow(RangeError);
 });
 
 test('Unrolled rhumb mode preserves full-width seam fragments without another solver', () => {

@@ -73,7 +73,9 @@ samples spanning sphere, oblate and prolate axes. Independent sphere tests use
 constant-bearing isometric-latitude equations, parallel circumference and
 meridian distance. Tests also cover winding, height, ownership, output failure,
 source provenance and work/depth limits. Existing G5 accuracy ceilings remain in
-force. The shared [seam qualification](./geographic-seams.md)
+force. Accumulated subdivision charts reject when a whole-turn translation
+cannot retain the original endpoint phase; arbitrary finite winding is not
+certified. The shared [seam qualification](./geographic-seams.md)
 matrix runs the stored native adapter controls in Node, Chromium, Firefox and
 WebKit. Native generation remains offline; ordinary CI verifies stored provenance.
 
