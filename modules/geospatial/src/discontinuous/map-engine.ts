@@ -26,11 +26,14 @@ import {
 import {createAlbersUsaMap} from './albers-usa';
 import {createMyriahedralMap, type MyriahedralOptions, type MyriahedralLayout} from './myriahedral';
 import {MercatorMap} from './mercator-map';
+import {createPeirceQuincuncialMap, createBerghausMap} from './quincuncial-star';
 import {geographic} from './math';
 
 /** Serializable chart: runtime projection callbacks are resolved by key. */
 export type MapChartDescription = Omit<MapRegion, 'project' | 'unproject'> & {projection: string};
 export type MapDefinition =
+  | {type: 'peirce-quincuncial'; centralMeridian?: number}
+  | {type: 'berghaus'; centralMeridian?: number; lobes?: number}
   | {type: 'mercator'; centralMeridian?: number; maxLatitude?: number}
   | {
       type:
@@ -119,6 +122,12 @@ export class MapEngine {
     this.sampling = {...options.sampling};
     const d = this.description.definition;
     switch (d.type) {
+      case 'peirce-quincuncial':
+        this.map = createPeirceQuincuncialMap({...d, radius});
+        break;
+      case 'berghaus':
+        this.map = createBerghausMap({...d, radius});
+        break;
       case 'mercator':
         this.map = new MercatorMap(radius, d.centralMeridian, d.maxLatitude);
         break;

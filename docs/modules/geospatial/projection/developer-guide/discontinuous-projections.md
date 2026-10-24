@@ -23,6 +23,48 @@ wheel and zoom buttons magnify every region together; drag to pan. The
 
 The discontinuous map API, presets, and layout helpers are experimental and may change.
 
+## Supported map families
+
+“Built in” means a `MapEngine` definition with region-aware points, inverse
+candidates, and seam-split lines and polygons. It does **not** mean automatic
+compatibility with deck.gl geographic layers. Custom charts require projection
+callbacks and convex spherical boundaries; they are not verified presets.
+
+| Family | Built-in `MapEngine` support | Remaining gaps |
+| --- | --- | --- |
+| Ordinary continuous maps | Spherical `mercator` with a finite latitude band | Other scalar projection kernels require custom chart bindings; not all scalar CRS operations are MapEngine presets |
+| Interrupted pseudocylindrical maps | `goode` (land-oriented); `interrupted-sinusoidal`, `interrupted-mollweide`, `interrupted-homolosine` (independent six-lobe cuts) | Ocean-centric Goode, arbitrary configurable lobes, interrupted Boggs, Sinu-Mollweide and quartic authalic; no claim of exact PROJ/D3 clip compatibility |
+| Regional composites / insets | `albers-usa`, including optional PR, VI, GU, MP and AS | Other national composites need custom charts; no responsive inset reflow or exact projected rectangular clipping |
+| Quincuncial square-world maps | `peirce-quincuncial`, in an equatorial aspect | Gringorten quincuncial and standalone Guyou; arbitrary aspect rotation beyond the central meridian |
+| Star maps | `berghaus`, with 3–24 lobes | Other star formulas and arbitrary aspect rotation |
+| Classical polyhedral maps | `air-ocean`: 24-panel radial/gnomonic arrangement | Exact Gray–Fuller mathematics; Butterfly, Collignon butterfly and Waterman presets |
+| Myriahedral maps | `myriahedral`: six named cut strategies, five Platonic solids, subdivisions, custom meshes and hinge motion | Guaranteed overlap-free nets, collision-free unfolding, and guaranteed continent connectivity |
+| DGGS-derived unfolding | Custom myriahedral meshes; H3, A5 and S2 adapters in examples | These adapters are not built-in MapEngine definitions or exact DGGS cartographic projection kernels |
+
+### Quincuncial and star examples
+
+import QuincuncialStarExample from '@site/src/components/quincuncial-star';
+
+<QuincuncialStarExample />
+
+Peirce places one hemisphere in the central diamond and splits the opposite
+hemisphere among four corners. Berghaus retains an azimuthal-equidistant front
+hemisphere and opens the back into star lobes. Both are static charts: transitions
+to different layouts use the globe strategy, not hinge motion. Both default to
+longitude/latitude `[0, 0]` at the center; this differs from D3's default Peirce
+rotation. `centralMeridian` rotates longitude only.
+
+The example separates `map.js` (geographic preparation), `scene.js` (Canvas
+rendering and picking), and `main.js` (controls). Blue indicates chart coverage;
+coastlines come from public-domain Natural Earth. The orange polygon shows
+seam splitting. See the [full example](/examples/quincuncial-star).
+
+Peirce's elliptic kernel is adapted from [D3's ISC-licensed implementation](https://github.com/d3/d3-geo-projection);
+the packaged `src/discontinuous/D3-LICENSE.txt` retains the license. Berghaus
+uses the published formula, with chart-specific boundary limits and bounded
+inverse solving. Neither implementation uses Nico Belmonte's code.
+
+
 For new renderers, use [MapEngine](./map-engine.md) to construct these layouts,
 fit the insets, pick coordinates, and evaluate optional hinge motion through one
 interface. A serializable `MapDescription` selects the map; the
@@ -246,7 +288,7 @@ explores a separate animated hinge-and-texture pipeline.
 
 - Polygons spanning a hemisphere or representing spherical complements.
 - Curved region boundaries and exact projected rectangular clip semantics.
-- Built-in historical IGH cuts and Butterfly, Collignon, or Waterman layouts.
+- The missing presets and layout variants listed in the support table above. Land-oriented Goode is supported.
 - Ellipsoidal projection/datum conversion within this API.
 - GeoJSON wrappers, automatic property interpolation, packed mesh output, and
   spatial indexing for large region sets.
@@ -260,7 +302,7 @@ membership, cuts, and geometry reconstruction are part of the operation.
 ## Placement and spacing metadata
 
 `MapRegion.layout` supplies optional labels, kinds, parent IDs, relative scales,
-back-to-front draw order, and visual frame bounds. Albers USA declares both insets
+back-to-front draw order, and visual frame bounds. Albers USA declares Alaska, Hawaii and optional territory insets
 as children of the main map. Presentation frames do not change geographic coverage.
 
 Use `getMapLayout(map)` to obtain sampled bounds and coverage outlines, then

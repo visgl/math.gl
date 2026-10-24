@@ -41,6 +41,8 @@ spherical degrees; the radius does not specify an ellipsoid or a CRS.
 | `albers-usa` | `includeTerritories: false`; true adds PR, VI, GU, MP, AS to Alaska/Hawaii |
 | `air-ocean` | 24-panel radial/gnomonic map; not Gray-Fuller |
 | `myriahedral` | [Myriahedral options](./myriahedral.md): `preset`, `columns`, `solid`, `subdivisions`, `mesh`, `centralMeridian`, `landSampleStep`; use top-level radius and runtime callbacks |
+| `peirce-quincuncial` | `centralMeridian: 0`; equatorial Peirce square-world layout, 8 computational charts |
+| `berghaus` | `centralMeridian: 0`, `lobes: 5`; integer lobes from 3–24, two charts per lobe |
 | `custom` | `charts: readonly MapChartDescription[]` |
 
 Mercator is spherical, not ellipsoidal Mercator. It clips lines and polygons to
@@ -48,6 +50,34 @@ the finite latitude band after antimeridian/chart splitting. Coordinates at
 the poles are outside coverage. Goode uses seven convex computational charts:
 the broad Eurasian lobe has an extra continuous join. This is not a claim of
 bitwise agreement with another cartographic implementation.
+
+### Quincuncial and star definitions
+
+<span class="badge">From v5.0 · Experimental</span>
+
+```typescript
+const peirce = new MapEngine({
+  version: 1, id: 'peirce', definition: {type: 'peirce-quincuncial'}
+});
+const star = new MapEngine({
+  version: 1, id: 'star', radius: 1,
+  definition: {type: 'berghaus', lobes: 5, centralMeridian: -30}
+});
+```
+
+Both cover the sphere, have cuts, and expose the standard point/line/polygon,
+fitting, picking and globe-frame methods. Neither has hinge motion. Units scale
+with `radius`; no ellipsoidal datum is implied. The center is latitude zero at
+`centralMeridian` (degrees, default zero); Peirce does not use D3's default polar
+rotation. Berghaus lobe tips are distinct images of the same antipodal point.
+Use region IDs to select a side at a cut. Boundary picking may return multiple
+candidates; blank space outside the map returns none.
+
+Peirce has four conformal branch points on the hemisphere boundary; finite
+limits are used there, but derivatives are singular. Adaptive line sampling
+approximates curved projected edges; adjust sampling tolerance for output size.
+Input polygons still require an open-hemisphere source chart. See the
+[interactive comparison and support table](../projection/developer-guide/discontinuous-projections.md#supported-map-families).
 
 ## MapChartDescription
 

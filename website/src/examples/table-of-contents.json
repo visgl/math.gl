@@ -40,6 +40,11 @@
   },
   {
     "type": "doc",
+    "label": "Quincuncial and star maps",
+    "id": "quincuncial-star"
+  },
+  {
+    "type": "doc",
     "label": "Polygon playground",
     "id": "polygon-playground"
   },
