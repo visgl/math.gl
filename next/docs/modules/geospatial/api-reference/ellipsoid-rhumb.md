@@ -6,6 +6,8 @@ On a Mercator map, a rhumb line appears straight. On a globe, it usually takes a
 
 The equator and meridians are both rhumb lines and geodesics. Other lines of latitude are rhumb lines, but are not shortest routes. An oblique rhumb line that approaches a pole spirals around it. Longitude and the rhumb bearing are undefined at the pole itself.
 
+For distance-parameterized sampling and adaptive subdivision, see [RhumbPath and subdivideRhumbPolyline](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/rhumb-path.md).
+
 ## API[​](#api "Direct link to API")
 
 Constant-bearing geometry is available from the optional ellipsoid entry:

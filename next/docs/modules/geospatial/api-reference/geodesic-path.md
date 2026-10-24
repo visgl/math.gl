@@ -48,3 +48,5 @@ Latitude/longitude representations can be discontinuous at poles even when the 3
 ## Qualification[​](#qualification "Direct link to Qualification")
 
 The path adapter has 180 stored fractional controls generated offline from pinned native PROJ 9.9.0 C sources, covering WGS84, a sphere and a mildly prolate shape, with dateline, polar, coincident and nearly/exactly antipodal paths. The fixture records upstream source hashes and its original generator. These comparisons share the underlying geodesic algorithm family; separate analytic sphere interpolation and distance checks provide independent mathematical controls. This evidence does not extend the solver's qualified shape domain.
+
+For constant-bearing routes, use [RhumbPath](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/rhumb-path.md). For periodic map discontinuities, [split geographic seams](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geographic-seams.md) before adaptive projection; unrolled longitude alone does not split a chart.

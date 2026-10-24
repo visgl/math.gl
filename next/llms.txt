@@ -184,12 +184,14 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [GeodesicIntersections](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-intersections.md): Coordinates and azimuths are degrees; distances use axis units. The qualified
 - [GeodesicPath](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-path.md): A reusable shortest geodesic between two geographic endpoints, sampled by surface-distance
 - [GeodesicPolygon](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-polygon.md): Streaming geodesic polygons and open polylines on revolution ellipsoids. This
+- [Geographic line and polygon seams](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geographic-seams.md): A longitude seam is a discontinuity in the map chart, not a gap in the globe.
 - [Geographic tile queries](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geographic-tiles.md): The helpers define an equal-angle geographic quadtree: one world tile at level zero,
 - [Globe intersection and occlusion](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/globe-queries.md): {/ SPDX-License-Identifier: MIT /}
 - [Helpers](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/helpers.md): Helper functions for geospatial.
 - [LngLatRectangle](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/lng-lat-rectangle.md): A longitude-latitude rectangle on an ellipsoid. Angular values are stored in radians.
 - [LocalReferenceFrame](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/local-reference-frame.md): A reusable rigid frame at a fixed Cartesian origin on a sphere or oblate spheroid. The class
 - [makeOBBFromRegion](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/make-obb-from-region.md): Builds a conservative OrientedBoundingBox for a longitude–latitude–height region on an ellipsoid. This is useful for 3D Tiles regions, globe rendering, spatial indexing, and frustum culling.
+- [RhumbPath and subdivideRhumbPolyline](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/rhumb-path.md): A rhumb path maintains a constant compass bearing. It generally travels farther
 - [subdivideGeodesicPolyline](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/subdivide-geodesic-polyline.md): Adaptively samples geographic geodesic edges through a supplied continuous transform. It
 - [subdivideGlobeMesh](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/subdivide-globe-mesh.md): {/ SPDX-License-Identifier: MIT /}
 - [Tile matrices](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/tile-matrix.md): @math.gl/geospatial/tile-matrix provides geometry, extent queries and level selection for
