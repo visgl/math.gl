@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Independently authored normal-support/cardinal anchors; no third-party reference implementation or model data.
 import {expect, test} from 'vitest';
+import p0Reference from '../fixtures/ellipsoid-p0-reference.json';
 import {config} from '@math.gl/core';
 import {
   spheroidToCartesian as forwardKernel,
@@ -108,21 +109,38 @@ for (const ratio of [1, 0.9966471893352525, 0.5, 0.1, 0.01, 0.001, 0.000001]) {
           [0, 0, -1]
         ]) {
           for (const height of [0, a * 0.01, a * 6]) {
-            const {xyz, llh} = anchor(a, b, ...(normal as [number, number, number]), height);
+            const {llh} = anchor(a, b, ...(normal as [number, number, number]), height);
+            const stored = p0Reference.surfaces.find(
+              row =>
+                row.anchor?.ratio === ratio &&
+                row.anchor.a === a &&
+                row.anchor.height === height &&
+                row.anchor.normal.every((v, i) => v === normal[i])
+            )!;
+            const xyz = stored.xyz;
+            // For thin shapes a rounded surface coordinate need not retain the
+            // ideal generating normal. Gate the actual stored binary64 point
+            // against independent Decimal, with the original ceilings unchanged.
+            const n = stored.reference.normal;
+            const nearest = [
+              (Math.atan2(n[1], n[0]) * 180) / Math.PI,
+              (Math.atan2(n[2], Math.hypot(n[0], n[1])) * 180) / Math.PI,
+              stored.reference.height
+            ];
             expect(
               cartesianToSpheroid(...(xyz as [number, number, number]), a, b, es, result)
             ).toBe(true);
             // At exact poles longitude has no geometric meaning.
             if (normal[0] !== 0 || normal[1] !== 0)
-              expect(Math.abs((result[0] * 180) / Math.PI - llh[0])).toBeLessThan(1e-9);
-            expect(Math.abs((result[1] * 180) / Math.PI - llh[1])).toBeLessThan(1e-9);
-            expect(Math.abs(result[2] - height)).toBeLessThan(1e-5);
-            const expected = llh.slice();
+              expect(Math.abs((result[0] * 180) / Math.PI - nearest[0])).toBeLessThan(1e-9);
+            expect(Math.abs((result[1] * 180) / Math.PI - nearest[1])).toBeLessThan(1e-9);
+            expect(Math.abs(result[2] - nearest[2])).toBeLessThan(1e-5);
+            const expected = nearest.slice();
             if (normal[0] === 0 && normal[1] === 0) expected[0] = 0;
             close(engine.unproject(xyz), expected, 1e-5);
             close(ellipsoid.cartesianToCartographic(xyz), expected, 1e-5);
             // Highly flattened cardinal near-poles may amplify trigonometric rounding;
-            // the unit-normal anchor above remains the inverse oracle.
+            // the exact-input Decimal normal above remains the inverse oracle.
             expect(
               spheroidToCartesian(
                 (llh[0] * Math.PI) / 180,

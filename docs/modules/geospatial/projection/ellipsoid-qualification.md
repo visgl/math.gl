@@ -115,3 +115,13 @@ python3 modules/geospatial/projection/scripts/generate-nearest-cusp-reference.py
 node modules/geospatial/projection/scripts/qualify-interiors.mjs
 ```
  Add `--browser chromium`, `--browser firefox` or `--browser webkit` to run the same rows in each browser. See the stored [qualification report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/interior-normal-node.json).
+
+
+## P0 completion follow-up
+
+See the [G0–G2 completion matrix](./ellipsoid-p0-qualification.md) for the full
+C++ GeographicLib 2.7/Exact comparison, 720 additional independent geometry
+controls, thin-exterior and degree-pole fixes, and complete existing API contract
+audit. The controls and ceilings on this page remain unchanged. Native model
+limitations and intentionally different ambiguity/pole/adapter policies are
+recorded separately from math.gl accuracy failures.

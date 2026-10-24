@@ -203,3 +203,16 @@ run by the Node and three-browser harness alongside all 466 inverse controls.
 Existing tolerances and SPDX/license notices remain unchanged. There are no
 new dependencies; full GeographicLib C++ coverage and universal extreme-domain
 qualification remain separate G0 work.
+
+
+## G0–G2 completion profile
+
+The [P0 completion matrix](../docs/modules/geospatial/projection/ellipsoid-p0-qualification.md)
+records the versioned full C++/Exact comparison, 930 independent Decimal
+controls (720 wider-domain plus 210 stored anchor inputs) and complete existing API contract audit. The shifted-root solve now
+also replaces the duplicate rounded exterior residual for thin spheroids;
+ordinary Hannover exteriors remain. Polar degree conversion and scaled normals,
+radial projection, small-unit frames and reentrant result commits close measured
+gaps. All previous interior/cusp, accuracy, bundle and licensing gates remain.
+G3–G5 scalar APIs are now on master; G6 completeness remains in open #287.
+No universal finite-input or arbitrary-flattening claim is made.

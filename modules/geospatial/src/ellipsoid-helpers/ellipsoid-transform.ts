@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT AND Apache-2.0
 // SPDX-FileCopyrightText: Copyright 2011-2018 CesiumJS Contributors
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
+// SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms. Scaled east normalization and the small-unit pole neighborhood are original math.gl fixes.
 
 import {NumericArray} from '@math.gl/core/types';
-import {Vector3, assert, equals as equalsEpsilon} from '@math.gl/core';
+import {Vector3, assert} from '@math.gl/core';
 import {
   createLocalFrameBasis,
   eastNorthUpBasisFromDirections,
@@ -109,7 +109,17 @@ export function localFrameToFixedFrame(
   const origin = scratchOrigin.copy(cartesianOrigin);
 
   // If x and y are zero, assume origin is at a pole, which is a special case.
-  const atPole = equalsEpsilon(origin.x, 0.0, EPSILON14) && equalsEpsilon(origin.y, 0.0, EPSILON14);
+  if (
+    !Number.isFinite(origin.x) ||
+    !Number.isFinite(origin.y) ||
+    !Number.isFinite(origin.z) ||
+    (!Array.isArray(result) && (result as NumericArray).length < 16)
+  )
+    throw new Error('Unsupported local frame');
+  // Retain the legacy orientation neighborhood for ordinary units, but never
+  // classify an entire tiny ellipsoid as a pole merely because of its unit.
+  const poleTolerance = EPSILON14 * Math.min(1, ellipsoid.maximumRadius);
+  const atPole = Math.abs(origin.x) <= poleTolerance && Math.abs(origin.y) <= poleTolerance;
 
   // Only the qualified sphere/oblate basis is shared. Three-radius and center
   // conventions keep the retained Cesium path, without changing its normal choice.
@@ -126,7 +136,8 @@ export function localFrameToFixedFrame(
       east.set(0, 1, 0);
       up.set(0, 0, Math.sign(origin.z));
     } else {
-      east.set(-origin.y, origin.x, 0).normalize();
+      const scale = Math.max(Math.abs(origin.x), Math.abs(origin.y));
+      east.set(-origin.y / scale, origin.x / scale, 0).normalize();
       ellipsoid.geodeticSurfaceNormal(origin, up);
     }
     if (
@@ -159,7 +170,8 @@ export function localFrameToFixedFrame(
     // Calculate all axis
     const {up, east, north} = scratchAxisVectors;
 
-    east.set(-origin.y, origin.x, 0.0).normalize();
+    const scale = Math.max(Math.abs(origin.x), Math.abs(origin.y));
+    east.set(-origin.y / scale, origin.x / scale, 0).normalize();
     ellipsoid.geodeticSurfaceNormal(origin, up);
     north.copy(up).cross(east);
 

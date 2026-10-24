@@ -62,6 +62,9 @@ jobs:
           python3 modules/geospatial/projection/scripts/generate-interior-reference.py --check
           python3 modules/geospatial/projection/scripts/generate-nearest-cusp-reference.py --check
           node modules/geospatial/projection/scripts/qualify-interiors.mjs --output /tmp/interior-qualification.json
+          node modules/geospatial/projection/scripts/generate-spheroid-anchor-inputs.mjs --check
+          python3 modules/geospatial/projection/scripts/generate-ellipsoid-p0-reference.py --verify-fixture
+          node modules/geospatial/projection/scripts/qualify-ellipsoid-p0.mjs --output /tmp/ellipsoid-p0-node.json
 
       - name: Check independent deformation stress references and qualification
         run: |
@@ -393,6 +396,7 @@ jobs:
           node modules/geospatial/projection/scripts/qualify-g56.mjs --browser ${{ matrix.browser }} --output /tmp/g56-qualification-${{ matrix.browser }}.json
           node modules/geospatial/projection/scripts/qualify-g34.mjs --browser ${{ matrix.browser }} --output /tmp/g34-qualification-${{ matrix.browser }}.json
           node modules/geospatial/projection/scripts/qualify-interiors.mjs --browser ${{ matrix.browser }} --output /tmp/interior-qualification-${{ matrix.browser }}.json
+          node modules/geospatial/projection/scripts/qualify-ellipsoid-p0.mjs --browser ${{ matrix.browser }} --output /tmp/ellipsoid-p0-${{ matrix.browser }}.json
           node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs --browser ${{ matrix.browser }} --output /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
 
       # Retain the complete matrix and three samples in PRs. A bounded 4 ms
@@ -418,6 +422,7 @@ jobs:
             /tmp/projection-browser-qualification.json
             /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
             /tmp/interior-qualification-${{ matrix.browser }}.json
+            /tmp/ellipsoid-p0-${{ matrix.browser }}.json
             /tmp/projection-worker-evaluation-${{ matrix.browser }}.json
           if-no-files-found: error
 

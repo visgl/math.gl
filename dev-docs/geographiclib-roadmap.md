@@ -17,6 +17,23 @@ not yet recorded here as released; their sampled API/geometry evidence does not 
 Rhumb algorithms remain owned by G5 here, and their subdivision integration is
 tracked separately by C4/C6.
 
+## P0 status — declared qualification profile in PR #278
+
+The [P0 completion matrix](../docs/modules/geospatial/projection/ellipsoid-p0-qualification.md)
+closes G0–G2 for existing APIs and explicit sampled domains in open
+[PR #278](https://github.com/visgl/math.gl/pull/278); it is not yet on master. It pins full C++
+GeographicLib 2.7 (series and Exact), independently gates Cartesian mathematics,
+and records the complete public ownership/unit/boundary audit. The new matrix
+has 930 Decimal geometry rows (720 wider-domain cases and 210 exact-input anchor cases) and 2,550 native C++ rows; 3,478 rows are gates and
+two very-long-line Exact comparisons remain explicitly diagnostic. Existing
+PROJ, interior and cusp gates and accuracy/bundle budgets remain unchanged.
+
+No P0 blocker remains within this profile. Arbitrary finite-domain certification
+is not implied: wider flattening/path-length Exact algorithms are G8, triaxial
+geodesic scope is G9, and new buffer signatures/performance claims are G7.
+G3–G5 scalar APIs are now on master. Remaining implementation and integration
+work includes open G6 completeness in #287, G7 and the frames/paths roadmap.
+
 ## P0 — Existing correctness and defensible claims
 
 | Tranche | Deliverable | Acceptance criteria |
@@ -108,18 +125,18 @@ and qualification priorities without replacing those plans.
 
 | Tranche | Delivered increment | Remaining gate |
 | --- | --- | --- |
-| G0 | Existing native PROJ 9.9 geodesic corpus and independent 110-digit Cartesian oracle; operation/domain matrix below. | Full C++ GeographicLib comparison and broader conditioning/magnitude coverage before a complete SOTA claim. |
-| G1 | Original three-axis solver plus exact-dyadic recovery of unique boundary/near-cusp roots; 625 surface controls including 427 cusp inputs. Formerly diagnostic deep inverse cases retain their original budgets. | Broader extreme domains and bounded-solver limits still need qualification; no universal finite-input accuracy claim. |
-| G2 | Geometry vectors and derived caches frozen together; underflow-safe inverse normal/height; mutation, alias, invalid-input and ambiguity regressions. | Continue auditing all public result ownership, units and pole contracts; no claim of exhaustive completion. |
+| G0 | Full pinned C++ 2.7 series/Exact, ECEF, LocalCartesian, Gnomonic and triaxial Cartesian comparisons; independent Decimal forward/nearest mathematics; published worst cases/native limitations. | Closed for the [declared profile](../docs/modules/geospatial/projection/ellipsoid-p0-qualification.md). No universal finite-input/SOTA claim. |
+| G1 | Existing 625 surface controls plus 930 independent Decimal controls; compensated thin exteriors and accurate polar degree conversion; ambiguity/cusp policies retained. | Closed for sampled bounded domains; arbitrary extreme/Exact domains remain G8/G9. |
+| G2 | Complete existing-Ellipsoid contract table and regressions: snapshots, inputs/outputs, aliases/M, unit modes, nested setters, normals/rays, pole/center and invalid-input policies. | Closed for existing signatures. New typed-buffer API design and performance comparisons remain G7. |
 
 ### Current qualification matrix
 
 | Operation/domain | Comparator and metric | Support boundary |
 | --- | --- | --- |
 | Series geodesics, seven shapes near Earth-like flattening | 819 native PROJ 9.9 controls; distance/reduced length, scales, condition-aware endpoint/bearing displacement | Shared algorithm family; not an independent mathematical proof or arbitrary-flattening guarantee |
-| Sphere/oblate Cartesian inverse, including thin shapes and unique interiors | Exact binary64-input, 110-digit Decimal footpoint oracle; unit-normal angle and height | 134 inputs per leaf/projection/geospatial path; 1e-9 degree and max(1e-12, max radius * 2e-12) height ceilings |
+| Sphere/oblate Cartesian inverse, including thin shapes and unique interiors | Exact binary64-input, 110/180-digit Decimal footpoint oracle; unit-normal angle and height | 134 inputs per leaf/projection/geospatial path; 1e-9 degree and max(1e-12, max radius * 2e-12) height ceilings |
 | Prolate/triaxial Cartesian inverse | Same independent oracle and unchanged budgets | 64 sampled inputs, including deep interiors; additional unique cusp/boundary recovery qualified |
-| Three-axis nearest surface | Same independent footpoint oracle; coordinate and surface residual checks | 625 sampled inputs including 427 cusp controls; original absolute ceilings plus 2e-12 relative cusp-component checks; no universal finite-shape claim |
+| Three-axis nearest surface | Same independent footpoint oracle; coordinate and surface residual checks | Existing 625 inputs including 427 cusp controls, plus 930 independent controls; original ceilings retained; no universal finite-shape claim |
 | Ambiguous interiors | Analytic multiple-minimum constructions | Reject atomically instead of selecting arbitrary hemisphere/axis |
 | Geometry/cache ownership | Mutation and alias regressions | Frozen geometry snapshots; construct a new shape instead of mutating vectors |
 

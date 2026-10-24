@@ -283,6 +283,7 @@
             "label": "Validation and Measurements",
             "items": [
               "modules/geospatial/projection/ellipsoid-qualification",
+              "modules/geospatial/projection/ellipsoid-p0-qualification",
               "modules/geospatial/projection/deformation-qualification",
               "modules/geospatial/projection/benchmarks",
               "modules/geospatial/projection/scorecard",

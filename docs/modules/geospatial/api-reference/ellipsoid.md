@@ -361,6 +361,23 @@ Notes:
 
 This class was ported from [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) under the Apache 2 License.
 
+
+## P0 numeric and output contracts
+
+The [P0 qualification profile](../projection/ellipsoid-p0-qualification.md)
+details the supported samples and all public ownership, unit and boundary
+contracts. Constructor axes must be finite and nonnegative; default/zero shapes
+remain constructible but do not define a valid conversion surface. Normals and
+radial surface projection now return `undefined` for zero/nonfinite rays without
+modifying a supplied result. Forward conversion and normal/Z-axis intersection
+also reject invalid numeric inputs before output writes.
+
+Degree latitudes retain their complement near a pole, avoiding lost radians
+amplified by very flat shapes. Supplied result setters can invoke nested
+conversions without corrupting later output ordinates. The legacy local-frame
+pole neighborhood is bounded by shape scale in small units. These tighten
+previous failure/precision behavior; no runtime dependencies are added.
+
 ## Metrics and geodesic areas
 
 Use the separate [EllipsoidMetrics](./ellipsoid-metrics.md) class for revolution

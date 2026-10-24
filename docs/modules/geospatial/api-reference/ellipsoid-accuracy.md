@@ -68,6 +68,22 @@ ellipsoid to change shape. This tightens previously mutable nested vectors.
 Geodesic prolate support does not change the sphere/oblate-only `toSpheroid`
 contract used by projection and Cartesian conversion.
 
+## Completed P0 qualification
+
+The [full P0 operation/domain matrix](../projection/ellipsoid-p0-qualification.md)
+closes G0–G2 for the declared sampled support profile. It adds 930 independent
+180-digit geometry controls (including 210 stored anchor inputs) and 2,550 controls from full C++ GeographicLib 2.7,
+including elliptic-integral Exact comparisons. It also audits every existing
+Ellipsoid method's units, ownership and boundary policy. Native C++ thin-shape
+failures/discrepancies and beyond-four-circuit series limitations remain visible;
+mathematical expectations, not parity with an inaccurate comparator, gate fixes.
+
+Measured fixes cover compensated exterior normals, polar degree conversion,
+extreme-ray normals/radial projection, tiny-unit frame classification and nested
+result setters. No existing accuracy/bundle threshold is weakened and no package
+dependency is added. The roadmap now proceeds to G3/G4. Wider Exact and arbitrary
+finite-domain certification remain separate; this is not full feature parity.
+
 ## Capability coverage and remaining work
 
 | Capability | math.gl status |
