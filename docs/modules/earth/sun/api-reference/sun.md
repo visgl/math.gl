@@ -35,8 +35,7 @@ orbital approximation is intended for visualization; use [getSkySnapshot](./sky.
 for the optional consistent topocentric astronomy tier. Supply finite inputs and a
 valid date; this legacy function does not validate ranges.
 
-`getSun` was the original API name. Current releases export `getSunPosition`;
-import that name when updating older examples.
+The historical `get-sun.md` documentation filename did not correspond to a `getSun` export. Import `getSunPosition` for the Sun-position API.
 
 ```ts
 import {getSunPosition, getSunLight} from '@math.gl/earth/sun';

@@ -214,4 +214,5 @@ also replaces the duplicate rounded exterior residual for thin spheroids;
 ordinary Hannover exteriors remain. Polar degree conversion and scaled normals,
 radial projection, small-unit frames and reentrant result commits close measured
 gaps. All previous interior/cusp, accuracy, bundle and licensing gates remain.
-G3/G4 are next; no universal finite-input or arbitrary-flattening claim is made.
+G3–G5 scalar APIs are now on master; G6 completeness remains in open #287.
+No universal finite-input or arbitrary-flattening claim is made.

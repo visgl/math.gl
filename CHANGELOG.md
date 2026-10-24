@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- feat(geospatial): Add reusable geodesic path sampling and adaptive geodesic polyline subdivision with surface-distance limits, unrolled longitude and original-edge provenance; extend generic subdivision with constant-speed source-edge samplers.
+
+- feat(geospatial): Add reusable local reference frames, geographic heading/pitch/roll poses and velocity-aligned orientations. Extend tangent planes with radial projection, radial/normal surface inversion and packed projection with validity masks; correct three-radius tangent basis orthogonality.
+
 - fix(projection): Implement ellipsoidal orthographic, correct Eckert VI and Equal Earth pole inverses, and repair conic, polyconic and LAEA pole boundaries. Audit unchanged definitions against native PROJ and distinguish numerical accuracy from proj4js compatibility.
 
 ## v5.0.0-alpha.19

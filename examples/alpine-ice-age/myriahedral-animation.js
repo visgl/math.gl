@@ -4,31 +4,14 @@
 import {Quaternion} from '@math.gl/core';
 
 const sub = (a, b) => a.map((v, i) => v - b[i]);
-const dot = (a, b) => a.reduce((s, v, i) => s + v * b[i], 0);
-const cross = (a, b) => [
-  a[1] * b[2] - a[2] * b[1],
-  a[2] * b[0] - a[0] * b[2],
-  a[0] * b[1] - a[1] * b[0]
-];
-const unit = a => a.map(v => v / Math.hypot(...a));
 const mix = (a, b, t) => a + (b - a) * t;
 
-/** One affine coordinate frame per panel, shared by terrain and graticules. */
+/** Camera alignment uses the engine's root frame; panel transforms stay in the engine. */
 export function prepareMyriahedralAnimation(map) {
-  const layout = map.layout;
-  const flat = layout.evaluate(1);
-  const frames = flat.map(p => {
-    const a = sub(p[1], p[0]),
-      b = sub(p[2], p[0]);
-    return {origin: p[0], a, b, determinant: a[0] * b[1] - a[1] * b[0]};
-  });
-  const root = layout.mesh.faces[0].map(i => layout.mesh.vertices[i]);
-  const x = unit(sub(root[1], root[0]));
-  const z = unit(cross(x, sub(root[2], root[0]))),
-    y = cross(z, x);
-  const origin = root[0].map((_, k) => root.reduce((s, p) => s + p[k], 0) / root.length);
-  const center = [x, y, z].map(axis => -dot(axis, origin));
-  return {layout, frames, basis: [x, y, z], center};
+  const {rootTransform: matrix, radius} = map.motion;
+  const basis = [0, 1, 2].map(row => [matrix[row], matrix[row + 4], matrix[row + 8]]);
+  const center = [matrix[12], matrix[13], matrix[14]].map(v => v * radius);
+  return {map, basis, center};
 }
 
 /** At zero the panels meet on the oriented globe; at one they match the static map.
@@ -36,9 +19,9 @@ export function prepareMyriahedralAnimation(map) {
  * the remaining motion is the library's rigid hinge evaluation.
  */
 export function myriahedralPose(animation, amount, {width, height, longitude, latitude}, fitted) {
-  const {layout, frames, basis, center} = animation;
+  const {map, basis, center} = animation;
   const t = Math.max(0, Math.min(1, amount));
-  const panels = layout.evaluate(Math.max(0, (t - 0.1) / 0.9));
+  const frame = map.evaluate({type: 'hinge', amount: Math.max(0, (t - 0.1) / 0.9)});
   const rad = Math.PI / 180,
     lon = longitude * rad,
     lat = latitude * rad;
@@ -67,19 +50,8 @@ export function myriahedralPose(animation, amount, {width, height, longitude, la
   const zero = fitted.project([0, 0]);
   const scale = mix(Math.min(width, height) * 0.42, fitted.scale, t);
   const offset = [mix(-center[0], 0, t), mix(-center[1], 0, t), mix(-center[2], 0, t)];
-  const transforms = panels.map((p, i) => {
-    const f = frames[i],
-      a = sub(p[1], p[0]),
-      b = sub(p[2], p[0]);
-    const u = a.map((v, k) => (v * f.b[1] - b[k] * f.a[1]) / f.determinant);
-    const v = a.map((value, k) => (b[k] * f.a[0] - value * f.b[0]) / f.determinant);
-    return {origin: p[0], u, v, flat: f.origin};
-  });
   return (position, regionId, lift = 0) => {
-    const f = transforms[Number(regionId.slice(6))];
-    let p = f.origin.map(
-      (v, k) => v + f.u[k] * (position[0] - f.flat[0]) + f.v[k] * (position[1] - f.flat[1])
-    );
+    let p = frame.projectPlacedPoint(position, regionId);
     if (t < 0.1) {
       const d = sub(p, center),
         length = Math.hypot(...d);

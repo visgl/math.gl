@@ -35,6 +35,16 @@
   },
   {
     "type": "doc",
+    "label": "Albers USA inset map",
+    "id": "albers-usa"
+  },
+  {
+    "type": "doc",
+    "label": "Quincuncial and star maps",
+    "id": "quincuncial-star"
+  },
+  {
+    "type": "doc",
     "label": "Polygon playground",
     "id": "polygon-playground"
   },

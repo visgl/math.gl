@@ -95,7 +95,10 @@ test('supports degree input, custom ellipsoids and affine transforms', () => {
   const transform = new Matrix4().translate([10, 20, 30]).scale([2, 3, 4]);
   const transformed = makeOBBFromRegion([0, 0, 0.1, 0.1, 0, 1], ellipsoid, {transform});
   const expectedCenter = transform.transformAsPoint(customBox.center);
-  expect(transformed.center).toEqual(expectedCenter);
+  // Equivalent affine evaluation orders may differ by a binary64 rounding bit.
+  expectedCenter.forEach((value, index) => {
+    expect(transformed.center[index]).toBeCloseTo(value, 12);
+  });
   expect(transformed.halfAxes.every(Number.isFinite)).toBeTruthy();
   expect(
     new Vector3(transformed.halfAxes.getColumn(0)).dot(

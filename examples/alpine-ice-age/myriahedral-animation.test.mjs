@@ -3,7 +3,6 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { fitMapLayout } from "@math.gl/geospatial/discontinuous";
 import { discontinuousGrid } from "./discontinuous-views.js";
 import {
   prepareMyriahedralAnimation,
@@ -17,7 +16,7 @@ test("hinge transitions match globe and flat endpoints and preserve panel edges"
   for (const view of ["myriahedral:cylindric", "myriahedral:icosahedron"]) {
     const g = discontinuousGrid(view, 10),
       animation = prepareMyriahedralAnimation(g.map);
-    const fitted = fitMapLayout(g.layout, { width: 900, height: 570 });
+    const fitted = g.map.fit({ width: 900, height: 570 });
     const folded = myriahedralPose(animation, 0, viewport, fitted);
     const flat = myriahedralPose(animation, 1, viewport, fitted);
     for (let i = 0; i < g.sources.length; i += 13) {
@@ -56,9 +55,9 @@ test("hinge transitions match globe and flat endpoints and preserve panel edges"
         const points = r.boundary
           .slice(0, 2)
           .map((p) => pose(g.map.projectPoint(p, r.id).position, r.id));
-        const vertices = g.map.layout.mesh.faces[i]
+        const vertices = g.map.motion.mesh.faces[i]
           .slice(0, 2)
-          .map((v) => g.map.layout.mesh.vertices[v]);
+          .map((v) => g.map.motion.mesh.vertices[v]);
         const length = Math.hypot(
           ...vertices[0].map((v, k) => v - vertices[1][k]),
         );

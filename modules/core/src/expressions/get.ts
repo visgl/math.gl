@@ -24,7 +24,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object';
 }
 
-const keyMap: Record<string, string[]> = {};
+const keyMap: Record<string, string[]> = Object.create(null);
 
 /** Returns a cached list of property names for a dot-separated path. */
 function getKeys(compositeKey: string): string[] {

@@ -15,6 +15,7 @@ export type {
   MapSamplingOptions
 } from './discontinuous/map-layout';
 export {
+  createGoodeMap,
   createAirOceanMap,
   createInterruptedSinusoidalMap,
   createInterruptedMollweideMap,
@@ -22,7 +23,9 @@ export {
 } from './discontinuous/presets';
 
 export {createAlbersUsaMap} from './discontinuous/albers-usa';
-export {getMapLayout, fitMapLayout} from './discontinuous/layout';
+export {createPeirceQuincuncialMap, createBerghausMap} from './discontinuous/quincuncial-star';
+export type {QuincuncialMapOptions, BerghausMapOptions} from './discontinuous/quincuncial-star';
+export {getMapLayout, fitMapLayout, pickMapLayout} from './discontinuous/layout';
 export type {MapBounds, MapRegionLayout} from './discontinuous/map-layout';
 export type {MapLayout, MapLayoutRegion, MapViewportOptions} from './discontinuous/layout';
 
@@ -32,6 +35,17 @@ export {
   MyriahedralMap,
   MYRIAHEDRAL_PRESETS
 } from './discontinuous/myriahedral';
+export {MapEngine} from './discontinuous/map-engine';
+export type {
+  MapDescription,
+  MapDefinition,
+  MapChartDescription,
+  MapEngineOptions,
+  MapCapabilities,
+  MapState,
+  MapPosition3D,
+  MapTransitionPlan
+} from './discontinuous/map-engine';
 export type {
   MyriahedralOptions,
   MyriahedralPreset,

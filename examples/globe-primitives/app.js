@@ -1,7 +1,12 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {EllipsoidOccluder, getGlobeHorizonBounds, splitGlobeBounds, subdivideGlobeMesh} from '@math.gl/geospatial/globe';
+import {
+  EllipsoidOccluder,
+  getGlobeHorizonBounds,
+  splitGlobeBounds,
+  subdivideGlobeMesh
+} from '@math.gl/geospatial/globe';
 
 import {BLUE_MARBLE_WORLD_URL} from '../common/blue-marble.js';
 
@@ -14,8 +19,13 @@ earthImage.onload = () => {
   texture.height = 512;
   const textureContext = texture.getContext('2d');
   textureContext.drawImage(earthImage, 0, 0, 1024, 512);
+  document.querySelector('#imagery-status').textContent = 'NASA Blue Marble basemap loaded.';
   earthPixels = textureContext.getImageData(0, 0, 1024, 512).data;
   render();
+};
+earthImage.onerror = () => {
+  document.querySelector('#imagery-status').textContent =
+    'NASA basemap unavailable. Showing the fallback globe; reload to retry.';
 };
 earthImage.src = BLUE_MARBLE_WORLD_URL;
 

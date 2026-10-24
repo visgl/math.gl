@@ -1,17 +1,98 @@
-# Discontinuous projections
+# Discontinuous maps
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
-  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
 </p>
-
-The discontinuous map API, presets, and layout helpers are experimental and may change.
 
 A discontinuous map places neighboring parts of the Earth in separate parts of a
 plane. A line that crosses a cut must end on one side and resume on the other;
 a polygon must become separate, closed pieces. Projecting only the original
 vertices does not produce a correct map: the renderer may draw a line or triangle
 across the empty space between pieces.
+
+import AlbersUsaExample from '@site/src/components/albers-usa';
+
+<AlbersUsaExample compact />
+
+The interactive Albers USA map shows this with Alaska, Hawaii, and five U.S.
+territory insets. Move over a region to inspect its coordinates, or use
+**View globe** to see its features unfold into the composite map. The mouse
+wheel and zoom buttons magnify every region together; drag to pan. The
+[full example](/examples/albers-usa) includes more explanation.
+
+The discontinuous map API, presets, and layout helpers are experimental and may change.
+
+## Segmented, connected, or detached?
+
+A map assembled from several charts is not necessarily detached or visibly
+interrupted at every chart boundary. **Segmentation** describes how the map is
+constructed; **continuity** describes what happens across each seam; and
+**connectivity** describes whether the placed pieces remain joined together.
+
+| Arrangement | Example | Meaning |
+| --- | --- | --- |
+| Joined charts forming one filled map | Peirce quincuncial | The hemisphere pieces meet at continuous joins to form a square. Cuts between the outer pieces lie on the square's perimeter; a line crossing one resumes at another edge. |
+| Connected map with open cuts | Berghaus star | The lobes join the central hemisphere, while cuts open between their outer edges. The map is connected despite those interruptions. |
+| Detached components | Albers USA | Alaska, Hawaii and territory insets are placed separately from the mainland. |
+
+`MapEngine` represents these properties separately: `seams[].kind` distinguishes
+`join`, `cut`, and `boundary`; `capabilities.hasCuts` reports cuts, while
+`capabilities.disjoint` reports multiple components in the continuous-join graph.
+A map can therefore have cuts without being disjoint. `capabilities.hinged` is
+another independent property: joined charts do not imply physical hinges or
+unfolding motion. Seam classification is sampled metadata, not a mathematical
+proof of continuity for arbitrary custom projection callbacks.
+
+The renderer still receives geometry split by chart, including at continuous
+joins. It should not draw every computational chart edge as a visible map cut.
+
+## Supported map families
+
+“Built in” means a `MapEngine` definition with region-aware points, inverse
+candidates, and seam-split lines and polygons. It does **not** mean automatic
+compatibility with deck.gl geographic layers. Custom charts require projection
+callbacks and convex spherical boundaries; they are not verified presets.
+
+| Family | Built-in `MapEngine` support | Remaining gaps |
+| --- | --- | --- |
+| Ordinary continuous maps | Spherical `mercator` with a finite latitude band | Other scalar projection kernels require custom chart bindings; not all scalar CRS operations are MapEngine presets |
+| Interrupted pseudocylindrical maps | `goode` (land-oriented); `interrupted-sinusoidal`, `interrupted-mollweide`, `interrupted-homolosine` (independent six-lobe cuts) | Ocean-centric Goode, arbitrary configurable lobes, interrupted Boggs, Sinu-Mollweide and quartic authalic; no claim of exact PROJ/D3 clip compatibility |
+| Regional composites / insets | `albers-usa`, including optional PR, VI, GU, MP and AS | Other national composites need custom charts; no responsive inset reflow or exact projected rectangular clipping |
+| Quincuncial square-world maps | `peirce-quincuncial`, in an equatorial aspect | Gringorten quincuncial and standalone Guyou; arbitrary aspect rotation beyond the central meridian |
+| Star maps | `berghaus`, with 3–24 lobes | Other star formulas and arbitrary aspect rotation |
+| Classical polyhedral maps | `air-ocean`: 24-panel radial/gnomonic arrangement | Exact Gray–Fuller mathematics; Butterfly, Collignon butterfly and Waterman presets |
+| Myriahedral maps | `myriahedral`: six named cut strategies, five Platonic solids, subdivisions, custom meshes and hinge motion | Guaranteed overlap-free nets, collision-free unfolding, and guaranteed continent connectivity |
+| DGGS-derived unfolding | Custom myriahedral meshes; H3, A5 and S2 adapters in examples | These adapters are not built-in MapEngine definitions or exact DGGS cartographic projection kernels |
+
+### Quincuncial and star examples
+
+import QuincuncialStarExample from '@site/src/components/quincuncial-star';
+
+<QuincuncialStarExample />
+
+Peirce places one hemisphere in the central diamond and splits the opposite
+hemisphere among four corners. Berghaus retains an azimuthal-equidistant front
+hemisphere and opens the back into star lobes. Both are static charts: transitions
+to different layouts use the globe strategy, not hinge motion. Both default to
+longitude/latitude `[0, 0]` at the center; this differs from D3's default Peirce
+rotation. `centralMeridian` rotates longitude only.
+
+The example separates `map.js` (geographic preparation), `scene.js` (Canvas
+rendering and picking), and `main.js` (controls). Blue indicates chart coverage;
+coastlines come from public-domain Natural Earth. The orange polygon shows
+seam splitting. See the [full example](/examples/quincuncial-star).
+
+Peirce's elliptic kernel is adapted from [D3's ISC-licensed implementation](https://github.com/d3/d3-geo-projection);
+the packaged `src/discontinuous/D3-LICENSE.txt` retains the license. Berghaus
+uses the published formula, with chart-specific boundary limits and bounded
+inverse solving. Neither implementation uses Nico Belmonte's code.
+
+
+For new renderers, use [MapEngine](./map-engine.md) to construct these layouts,
+fit the insets, pick coordinates, and evaluate optional hinge motion through one
+interface. A serializable `MapDescription` selects the map; the
+[reference](../../discontinuous/map-engine.md) documents its fields and methods.
 
 math.gl provides the experimental `@math.gl/geospatial/discontinuous` entrypoint
 for this geometry processing. It combines geographic regions, local projections,
@@ -85,10 +166,12 @@ it performs no ellipsoid or datum conversion. Supplying an Earth radius scales
 the output but does not turn a layout into an EPSG coordinate reference system.
 
 The U.S. preset uses compact lower-left insets: Alaska on the left, Hawaii beside
-it. Their geographic masks focus on mainland Alaska and the main Hawaiian
-islands; distant islands may be cropped. The masks also include neighboring land and ocean. Filter
-features before projection when only U.S. states should be drawn. Puerto Rico
-and other territories are not included. The independent masks and placements
+it. With `includeTerritories: true`, it also adds Puerto Rico, the U.S. Virgin
+Islands, Guam, the Northern Mariana Islands, and American Samoa. The Alaska and
+Hawaii masks focus on mainland Alaska and the main Hawaiian islands; distant
+islands may be cropped. The masks also include neighboring land and ocean. Filter
+features before projection when only U.S. geography should be drawn. Minor
+outlying islands are not included. The independent masks and placements
 are not a reproduction of D3 `geoAlbersUsa`'s projected rectangular clips.
 
 See the [API reference](../../discontinuous/README.md) for exact preset parameters.
@@ -213,9 +296,10 @@ projection selector and projection cycle. Its discontinuous rendering path:
 3. Samples bed elevation and ice values at the resulting geographic vertices.
 4. Splits graticules with `projectLine` so they do not bridge cuts or inset gaps.
 
-Switches involving discontinuous layouts happen immediately because their mesh
-topologies differ. The continuous world projections retain their animated
-transitions. U.S. inset selection changes the displayed coverage; statistics
+Static discontinuous layouts switch immediately because their mesh topologies
+differ. Myriahedral views use a separate hinge animation through the globe.
+The continuous world projections retain their animated transitions. U.S. inset
+selection changes the displayed coverage; statistics
 remain global. Geographic masks are not political borders, and the display
 interpolation adds no new reconstruction data.
 
@@ -228,7 +312,7 @@ explores a separate animated hinge-and-texture pipeline.
 
 - Polygons spanning a hemisphere or representing spherical complements.
 - Curved region boundaries and exact projected rectangular clip semantics.
-- Built-in historical IGH cuts and Butterfly, Collignon, or Waterman layouts.
+- The missing presets and layout variants listed in the support table above. Land-oriented Goode is supported.
 - Ellipsoidal projection/datum conversion within this API.
 - GeoJSON wrappers, automatic property interpolation, packed mesh output, and
   spatial indexing for large region sets.
@@ -242,13 +326,16 @@ membership, cuts, and geometry reconstruction are part of the operation.
 ## Placement and spacing metadata
 
 `MapRegion.layout` supplies optional labels, kinds, parent IDs, relative scales,
-back-to-front draw order, and visual frame bounds. Albers USA declares both insets
+back-to-front draw order, and visual frame bounds. Albers USA declares Alaska, Hawaii and optional territory insets
 as children of the main map. Presentation frames do not change geographic coverage.
 
 Use `getMapLayout(map)` to obtain sampled bounds and coverage outlines, then
 `fitMapLayout(layout, {width, height, padding})` to place the complete map into a
 viewport. The result includes forward/inverse pixel transforms and sorted region
 layers, plus frame and outline coordinates suitable for drawing inset borders.
+`pickMapLayout(map, fitted, pixel)` returns inverse candidates in front-to-back
+order for a viewport pixel. The [Albers USA example](/examples/albers-usa) shows
+these helpers with clipped state polygons and coordinate inspection.
 Bounds follow projected curves instead of measuring only region corners. They
 remain sampling approximations, so choose a tolerance appropriate to your scale.
 

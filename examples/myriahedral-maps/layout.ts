@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
-  createMyriahedralLayout as createLayout,
+  MapEngine,
   type MyriahedralPreset,
   type MyriahedralSolid
 } from '@math.gl/geospatial/discontinuous';
@@ -19,14 +19,24 @@ export function createMyriahedralLayout(level: number, seed: number, mode: strin
       : mode === 'legacy'
         ? 'cylindric'
         : (mode as MyriahedralPreset);
-  const layout = createLayout({
-    preset,
-    columns: [24, 48, 72, 96][level],
-    solid,
-    subdivisions: level,
-    centralMeridian: 20 + (seed - 1) * 10,
-    isLand: ([longitude, latitude]) => isLand(longitude, latitude)
-  });
+  const engine = new MapEngine(
+    {
+      version: 1,
+      id: mode,
+      definition: {
+        type: 'myriahedral',
+        preset,
+        columns: [24, 48, 72, 96][level],
+        solid,
+        subdivisions: level,
+        centralMeridian: 20 + (seed - 1) * 10
+      }
+    },
+    {
+      isLand: ([longitude, latitude]) => isLand(longitude, latitude)
+    }
+  );
+  const layout = engine.motion!;
   return {
     ...layout,
     canRecut: !solid && preset !== 'cylindric' && preset !== 'azimuthal',

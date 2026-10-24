@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {performance} from 'node:perf_hooks';
-import {createSkyContext} from '../dist/astronomy.js';
-import {createSkyObserver} from '../dist/index.js';
+import {createSkyContext} from '../../dist/sun/astronomy.js';
+import {createSkyObserver} from '../../dist/sun/index.js';
 
 const observer = createSkyObserver({latitude: 37.8, longitude: -122.4});
 const context = createSkyContext(observer, {cacheSize: 48});

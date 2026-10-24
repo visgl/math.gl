@@ -20,7 +20,7 @@ export function surfaceVertices(mesh: Polyhedron, positions: number[][][]): Floa
 
 export function createRenderer(
   canvas: HTMLCanvasElement,
-  status: HTMLElement,
+  onStatus: (message: string) => void,
   landSource?: HTMLCanvasElement
 ) {
   const gl = canvas.getContext('webgl2');
@@ -119,17 +119,17 @@ export function createRenderer(
   let ready = false;
   const image = new Image();
   image.crossOrigin = 'anonymous';
-  status.textContent = 'Loading NASA Blue Marble…';
+  onStatus('Loading NASA Blue Marble…');
   image.onload = () => {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     // No Y flip: row zero is north and the shader maps north to v=0.
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     gl.generateMipmap(gl.TEXTURE_2D);
     ready = true;
-    status.textContent = 'Earth imagery: NASA Blue Marble';
+    onStatus('Earth imagery: NASA Blue Marble');
   };
   image.onerror = () => {
-    status.textContent = 'Earth imagery unavailable. Showing panel colors; reload to retry.';
+    onStatus('Earth imagery unavailable. Showing panel colors; reload to retry.');
   };
   image.src = BLUE_MARBLE_WORLD_URL;
   return {
@@ -141,6 +141,7 @@ export function createRenderer(
       gl.deleteTexture(texture);
       gl.deleteTexture(landTexture);
       gl.deleteProgram(program);
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
     },
     get ready() {
       return ready;

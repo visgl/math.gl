@@ -230,6 +230,15 @@ export class WKBBuilder {
     if (valueOffsets.length !== geometryWriters.length + 1) {
       throw new Error('WKB valueOffsets length must equal geometry count plus one');
     }
+    for (let i = 0; i < valueOffsets.length; i++) {
+      if (
+        !Number.isInteger(valueOffsets[i]) ||
+        valueOffsets[i] < 0 ||
+        (i > 0 && valueOffsets[i] < valueOffsets[i - 1])
+      ) {
+        throw new Error('WKB valueOffsets must be nonnegative and nondecreasing');
+      }
+    }
     if (valueOffsets[valueOffsets.length - 1] > values.byteLength) {
       throw new Error('WKB values buffer is smaller than its final offset');
     }
@@ -237,10 +246,10 @@ export class WKBBuilder {
       const geometryWriter = geometryWriters[geometryIndex];
       if (!geometryWriter) continue;
       const builder = new WKBBuilder({
+        ...options,
         mode: 'write',
         target: values,
         byteOffset: valueOffsets[geometryIndex],
-        ...options,
         dimension: options.dimensionResolver?.(geometryIndex) ?? options.dimension
       });
       geometryWriter(builder);
@@ -307,7 +316,7 @@ function measureGeometry(
   geometryWriter: WKBGeometryWriter,
   options: WKBBuilderBaseOptions
 ): number {
-  const builder = new WKBBuilder({mode: 'measure', ...options});
+  const builder = new WKBBuilder({...options, mode: 'measure'});
   geometryWriter(builder);
   return builder.finishGeometry();
 }

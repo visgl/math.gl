@@ -16,11 +16,11 @@
     "scope": "Bounded P0 support profile; no universal finite-input claim."
   },
   "environment": {
-    "node": "v24.14.0",
+    "node": "v24.5.0",
     "platform": "darwin",
     "architecture": "arm64"
   },
-  "sourceSHA256": "70da00af221dda67dd943390061c5a5b123445f29bac5d700e21bf4e0d4ed4fa",
+  "sourceSHA256": "2eca37fdc540507f6294b364ff3cb696679d0ac78ae71fc39ee587121431739a",
   "heightTolerance": "max(radii) * 2e-12 in axis units (the existing absolute floor is not needed in this new profile)",
   "qualifiedRows": 3478,
   "diagnosticRows": 2,

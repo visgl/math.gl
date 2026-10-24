@@ -1,4 +1,4 @@
-# Discontinuous maps (experimental)
+# Discontinuous map API
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -6,6 +6,11 @@
 </p>
 
 The discontinuous map API, presets, and layout helpers are experimental and may change.
+
+For a shared rendering pipeline across ordinary, interrupted, inset, and hinged
+maps, start with [MapEngine](./map-engine.md) and its
+[rendering guide](../projection/developer-guide/map-engine.md). The factories
+below remain useful when only the lower-level static map is needed.
 
 Project geographic points, lines, and polygons into a map with cuts. Import this
 API separately from scalar CRS transforms:
@@ -33,6 +38,17 @@ For concepts, rendering patterns, and the Ice Age Explorer integration, see the
 [discontinuous projections guide](../projection/developer-guide/discontinuous-projections.md).
 
 ## Presets
+
+<span class="badge">From v5.0 · Experimental</span>
+
+`createGoodeMap({radius = 1})` provides Goode's land-oriented homolosine layout:
+northern lobes centered at −100° and 30°, and southern lobes centered at −160°,
+−60°, 20°, and 140°. Northern interruptions are at −40°; southern interruptions
+are at −100°, −20°, and 80°, in addition to the antimeridian. The wide Eurasian
+lobe uses two convex charts with a continuous join at 30°.
+Use `{type: 'goode'}` with `MapEngine` for the same layout. The lobe parameters
+follow [D3's published homolosine definition](https://github.com/d3/d3-geo-projection/blob/main/src/interrupted/homolosine.js);
+the projection and clipping implementation are independent.
 
 `createMyriahedralMap(options)` builds independently generated graticule or
 polyhedral nets with optional unfolding. See the [myriahedral API](./myriahedral.md)
@@ -70,12 +86,20 @@ const honolulu = usa.projectPoint([-157.8, 21.3]); // regionId: 'hawaii'
 const candidates = usa.unprojectPoint(honolulu!.position);
 ```
 
-`createAlbersUsaMap({radius = 1})` combines three spherical Albers equal-area
+`createAlbersUsaMap({radius = 1, includeTerritories = false})` combines three spherical Albers equal-area
 projections. Alaska is scaled to 0.35 of the linear scale (0.1225 of the area scale);
 Hawaii retains the lower-48 scale. Insets use the familiar lower-left composition, with Alaska to the left of Hawaii and Y up.
 The composite as a whole therefore does not preserve relative area between states.
 Points outside all three geographic masks return `null`; inverse queries in gaps
 return no candidates. Lines and polygons use the same region clipping as other maps.
+Set `includeTerritories: true` to add insets for Puerto Rico, the U.S.
+Virgin Islands, Guam, the Northern Mariana Islands, and American Samoa. These
+five regions use independent spherical Albers projections and enlarged local
+scales so their island outlines remain visible. Frames are available as layout
+metadata but need not be drawn. The composite does not preserve area between
+the lower 48 and these islands.
+The [dedicated example](/examples/albers-usa) enables them and renders pinned,
+public-domain Natural Earth polygons. Minor outlying islands are not included.
 
 | Region ID | Center | Standard parallels | Offset | Linear scale |
 | --- | --- | --- | --- | --- |
@@ -94,7 +118,7 @@ The compact arrangement follows the convention illustrated by
 [D3's Albers USA composite](https://d3js.org/d3-geo/conic#geoAlbersUsa), but is an
 independent preset, **not D3 clip-extent compatibility**. Cropping focuses on the
 main islands and mainland Alaska; distant islands can fall outside the inset
-masks. Territories such as Puerto Rico are not included. These masks include
+masks. Territories are opt-in. These masks include
 neighboring land and ocean: filter input features if only U.S. states should
 appear. Insets overlap the main map's ocean background in placed XY; draw them
 above it and use the visible region ID for picking. Use custom regions for full
@@ -115,7 +139,7 @@ frame arrays are snapshotted and frozen. Parent IDs must exist and form an acycl
 hierarchy. Scale must be positive and finite, and frame bounds must increase.
 
 ```typescript
-import {createAlbersUsaMap, getMapLayout, fitMapLayout}
+import {createAlbersUsaMap, getMapLayout, fitMapLayout, pickMapLayout}
   from '@math.gl/geospatial/discontinuous';
 
 const map = createAlbersUsaMap();
@@ -126,7 +150,7 @@ const fit = fitMapLayout(layout, {
 });
 const honolulu = map.projectPoint([-157.8, 21.3])!;
 const pixel = fit.project(honolulu.position);
-const candidates = map.unprojectPoint(fit.unproject(pixel), honolulu.regionId);
+const candidates = pickMapLayout(map, fit, pixel);
 ```
 
 `getMapLayout` returns `{bounds, regions}`. Regions are sorted back-to-front and
@@ -143,6 +167,11 @@ functions, fitted `bounds`, and fitted `regions`. Region bounds, frames, and out
 are now in viewport pixels; `placement` remains the canonical map-space transform.
 Each region also has a sequential `layer` index for rendering. Higher layers
 should cover lower layers. Use the same order for picking overlapping insets.
+`pickMapLayout(map, fit, pixel)` converts a viewport pixel to map space and
+returns inverse candidates in top-to-bottom layer order, each with a `layer`.
+It resolves layout overlap, but a renderer should still reject candidates hidden
+by its own feature geometry. See the [interactive Albers USA example](/examples/albers-usa)
+for a complete SVG rendering and pointer readout.
 
 The default viewport origin is top left, with Y down; `flipY: false` selects bottom
 left with Y up. Padding is in pixels and may be a uniform number or a per-side
@@ -262,3 +291,20 @@ limits throws. Choose a suitable distance tolerance for large radii, for example
 See the [unfolding Earth example](../../geometry/unfolding-earth.md) for the related
 hinge and texture demonstration. Static vector projection and animated panel
 rendering currently use separate pipelines.
+
+
+## Quincuncial and star factories
+
+<span class="badge">From v5.0 · Experimental</span>
+
+`createPeirceQuincuncialMap(options?: QuincuncialMapOptions)` and
+`createBerghausMap(options?: BerghausMapOptions)` return `DiscontinuousMap` instances.
+Both accept `radius` (positive, default 1) and `centralMeridian` (finite degrees,
+default 0). Berghaus additionally accepts `lobes` (integer 3–24, default 5).
+The exported option types have the same defaults as the corresponding
+[MapEngine definitions](./map-engine.md#quincuncial-and-star-definitions).
+
+Use `MapEngine` when you also need serializable descriptions, fitting, picking,
+capabilities and transition planning. Consult the
+[support table](../projection/developer-guide/discontinuous-projections.md#supported-map-families)
+for the distinction between these presets and other quincuncial/star variants.

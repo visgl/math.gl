@@ -53,10 +53,10 @@ test("A5 base cells share sampled boundaries in a closed spherical mesh", () => 
 test("A5 unfolding joins cells only at the central subdivided edge segments", () => {
   const panels = createA5MyriahedralMesh(),
     g = discontinuousGrid("myriahedral:a5-0", 5);
-  const inner = g.map.layout.edges.filter(
+  const inner = g.map.motion.edges.filter(
     (e) => e.hinge && panels.innerEdges.has(edgeKey(e.a, e.b)),
   );
-  const outer = g.map.layout.edges.filter(
+  const outer = g.map.motion.edges.filter(
     (e) => e.hinge && !panels.innerEdges.has(edgeKey(e.a, e.b)),
   );
   assert.equal(inner.length, 156 - 12);
@@ -112,10 +112,10 @@ test("A5 resolution 1 forms 60 closed triangular cells", () => {
 test("A5 resolution 1 unfolds through the intended middle segments", () => {
   const panels = createA5MyriahedralMesh(1);
   const grid = discontinuousGrid("myriahedral:a5-1", 5);
-  const internal = grid.map.layout.edges.filter(
+  const internal = grid.map.motion.edges.filter(
     (edge) => edge.hinge && panels.innerEdges.has(edgeKey(edge.a, edge.b)),
   );
-  const external = grid.map.layout.edges.filter(
+  const external = grid.map.motion.edges.filter(
     (edge) => edge.hinge && !panels.innerEdges.has(edgeKey(edge.a, edge.b)),
   );
   assert.equal(internal.length, 420 - 60);

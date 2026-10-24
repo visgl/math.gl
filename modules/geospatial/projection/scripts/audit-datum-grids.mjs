@@ -21,7 +21,7 @@ assert(
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
 const require = createRequire(root + '/package.json'),
   proj4 = require('proj4');
-const n = await import(root + '/modules/geospatial/projection/dist/experimental/index.js');
+const n = await import(root + '/modules/geospatial/dist/projection/experimental/index.js');
 const {fromArrayBuffer} = await import(pathToFileURL(values['geotiff-module']).href);
 const directory = values.grids,
   rows = [],

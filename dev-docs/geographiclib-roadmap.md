@@ -10,10 +10,18 @@ lines, reduced length, scales, longitude unrolling and ellipsoidal gnomonic have
 native PROJ controls. Sphere/oblate Cartesian conversion has independent
 high-precision controls. Preserve these qualifications.
 
-## P0 status — closed for the declared qualification profile
+The complementary [geospatial frames and paths roadmap](./geospatial-roadmap.md)
+tracks local frames, poses, tangent-plane operations and path integration.
+C1–C3 are merged in [PR #277](https://github.com/visgl/math.gl/pull/277),
+not yet recorded here as released; their sampled API/geometry evidence does not complete G0–G2.
+Rhumb algorithms remain owned by G5 here, and their subdivision integration is
+tracked separately by C4/C6.
+
+## P0 status — declared qualification profile in PR #278
 
 The [P0 completion matrix](../docs/modules/geospatial/projection/ellipsoid-p0-qualification.md)
-closes G0–G2 for existing APIs and explicit sampled domains. It pins full C++
+closes G0–G2 for existing APIs and explicit sampled domains in open
+[PR #278](https://github.com/visgl/math.gl/pull/278); it is not yet on master. It pins full C++
 GeographicLib 2.7 (series and Exact), independently gates Cartesian mathematics,
 and records the complete public ownership/unit/boundary audit. The new matrix
 has 930 Decimal geometry rows (720 wider-domain cases and 210 exact-input anchor cases) and 2,550 native C++ rows; 3,478 rows are gates and
@@ -23,7 +31,8 @@ PROJ, interior and cusp gates and accuracy/bundle budgets remain unchanged.
 No P0 blocker remains within this profile. Arbitrary finite-domain certification
 is not implied: wider flattening/path-length Exact algorithms are G8, triaxial
 geodesic scope is G9, and new buffer signatures/performance claims are G7.
-Next implementation tranches are **G3 then G4**, followed by G5/G6.
+G3–G5 scalar APIs are now on master. Remaining implementation and integration
+work includes open G6 completeness in #287, G7 and the frames/paths roadmap.
 
 ## P0 — Existing correctness and defensible claims
 
@@ -42,6 +51,25 @@ Next implementation tranches are **G3 then G4**, followed by G5/G6.
 | G5: Rhumb geometry | Constant-bearing inverse/direct, reusable lines and rhumb polygon area. | GeographicLib controls plus independent meridian/parallel/sphere limits. Cover winding, near-east/west courses and pole approach; distinguish undefined/infinite cases from convergence failures. |
 | G6: Geodesic intersections | Closest/next/all searches and segment intersection semantics within an explicit support profile. | Independent residual and segment-membership checks plus GeographicLib comparisons. Cover tangencies, nearly parallel/coincident paths, antipodes and multiple crossings. Specify search bounds, deduplication and ambiguity; bound iteration. |
 | G7: Bulk APIs and performance | Reusable/batch operations with output buffers where benchmarks demonstrate value. | Paired benchmarks against pinned GeographicLib implementations at equal accuracy. Measure setup, throughput, allocations and bundle cost separately. Preserve scalar accuracy and alias contracts. Claim improvements only for measured operations/environments. |
+
+## G3–G4 bounded delivery
+
+`EllipsoidMetrics` now supplies area, volume, meridian/curvature metrics and six
+auxiliary latitudes/inverses for 0.5 ≤ b/a ≤ 2. Optional geodesic `S12` and
+`GeodesicPolygon` supply compensated point/edge insertion, signed/unsigned
+algebraic area, open polylines, previews and reset. Original stable C4 differences
+fix tiny ellipsoidal-area cancellation also seen in native GeographicLib 2.7.
+
+The [G3–G4 matrix](../docs/modules/geospatial/projection/geographiclib-g34-qualification.md)
+records 810 sampled native/independent cases, explicit budgets, native Exact
+limitations, exact input conventions and remaining boundaries. This delivers the
+bounded G3/G4 scalar APIs, not arbitrary-flattening or all near-zero polygon
+certification. G5 now has rhumb inverse/direct/lines/polygons with independent integral and
+native controls. G6 has bounded sphere/ellipsoid intersections with explicit
+completeness: **global ellipsoidal completeness is implemented in open [PR #287](https://github.com/visgl/math.gl/pull/287), but is not yet on master**. See the
+[G5–G6 qualification](../docs/modules/geospatial/projection/geographiclib-g56-qualification.md).
+The [landed-review audit](./landed-review-audit.md) records follow-up correctness fixes and separates pending integration from remaining implementation. G7 performance APIs and G8 wider-domain solvers
+remain separate. G0–G2 completion is tracked independently in PR #278.
 
 ## P2 — Wider domains and specialized capabilities
 

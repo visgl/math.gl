@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Matrix4} from '@math.gl/core';
 import {createSolid, edgeKey, type Solid} from './polyhedra';
 import {createCutLayout, type CutMode} from './cut-layout';
-import {createRenderer} from './renderer';
+import {createUnfoldingScene} from './scene';
 import {markup} from './view';
 import {pickSurface} from './picking';
 
@@ -62,11 +61,13 @@ export function mountUnfolding(
     tooltip.style.left = `${Math.max(0, Math.min(pointer.x - parent.left + 14, parent.width - tooltip.offsetWidth))}px`;
     tooltip.style.top = `${pointer.y - parent.top - tooltip.offsetHeight - 12}px`;
   }
-  const renderer = createRenderer(
-    canvas,
-    root.querySelector('#imagery-status')!,
-    options.landTexture
-  );
+  const scene = createUnfoldingScene(canvas, {
+    landTexture: options.landTexture,
+    stableFraming: options.northUp,
+    onImageryStatus: message => {
+      root.querySelector('#imagery-status')!.textContent = message;
+    }
+  });
   const earth = root.querySelector<HTMLInputElement>('#earth')!;
   const edges = root.querySelector<HTMLInputElement>('#edges')!;
   const slider = root.querySelector<HTMLInputElement>('#unfold')!;
@@ -201,10 +202,6 @@ export function mountUnfolding(
     {capture: true, signal: abort.signal}
   );
   let previous = '';
-  let framingKey = '';
-  let framingLayout: typeof layout | undefined;
-  let framingPoses: ReturnType<typeof layout.evaluate>[] = [];
-  let framingBounds = [0, 0, 0, 0];
   function render(time: number) {
     const dt = Math.min((time - lastTime) / 1000, 0.05);
     lastTime = time;
@@ -227,7 +224,7 @@ export function mountUnfolding(
       dpr,
       earth.checked,
       edges.checked,
-      renderer.ready,
+      scene.ready,
       surface?.value
     ].join(':');
     if (key !== previous) {
@@ -237,75 +234,16 @@ export function mountUnfolding(
         surfaceStatus.hidden = surface?.value !== 'land';
         root.querySelector<HTMLElement>('#imagery-status')!.hidden = surface?.value === 'land';
       }
-      if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
-        canvas.width = Math.round(width * dpr);
-        canvas.height = Math.round(height * dpr);
-      }
-      const view = new Matrix4()
-        .rotateX(pitch)
-        .rotateY(yaw)
-        .rotateZ(cuts.value === 'dymaxion' ? Math.PI / 2 : 0);
-      const faces = layout.evaluate(unfolding).map((face, i) => {
-        const points = face.map(p => Array.from(view.transformAsPoint(p)));
-        return {i, points, depth: points.reduce((s, p) => s + p[2], 0) / points.length};
+      positions = scene.draw(layout, hinges, {
+        unfolding,
+        yaw,
+        pitch,
+        rotationZ: cuts.value === 'dymaxion' ? Math.PI / 2 : 0,
+        earth: earth.checked && !earth.disabled,
+        edges: edges.checked,
+        land: surface?.value === 'land'
       });
-      let minX = Infinity,
-        maxX = -Infinity,
-        minY = Infinity,
-        maxY = -Infinity;
-      for (const face of faces)
-        for (const p of face.points) {
-          minX = Math.min(minX, p[0]);
-          maxX = Math.max(maxX, p[0]);
-          minY = Math.min(minY, p[1]);
-          maxY = Math.max(maxY, p[1]);
-        }
-      if (options.northUp) {
-        // Keep the camera stationary while the hinges move. Fit sampled poses
-        // once per layout/orbit, rather than recentering every animation frame.
-        if (framingLayout !== layout) {
-          framingLayout = layout;
-          framingPoses = [0, 0.25, 0.5, 0.75, 1].map(amount => layout.evaluate(amount));
-          framingKey = '';
-        }
-        const key = [yaw, pitch].join(':');
-        if (key !== framingKey) {
-          framingKey = key;
-          const bounds = [Infinity, -Infinity, Infinity, -Infinity];
-          for (const pose of framingPoses)
-            for (const face of pose)
-              for (const point of face) {
-                const p = view.transformAsPoint(point);
-                bounds[0] = Math.min(bounds[0], p[0]);
-                bounds[1] = Math.max(bounds[1], p[0]);
-                bounds[2] = Math.min(bounds[2], p[1]);
-                bounds[3] = Math.max(bounds[3], p[1]);
-              }
-          framingBounds = bounds;
-        }
-        [minX, maxX, minY, maxY] = framingBounds;
-      }
-      const scale = Math.min(
-        (width - 50) / Math.max(maxX - minX, 2.5),
-        (height - 40) / Math.max(maxY - minY, 2.5)
-      );
-      const depth = Math.max(1, ...faces.flatMap(face => face.points.map(p => Math.abs(p[2]))));
-      positions = faces.map(face =>
-        face.points.map(p => [
-          (2 * (p[0] - (minX + maxX) / 2) * scale) / width,
-          (2 * (p[1] - (minY + maxY) / 2) * scale) / height,
-          -p[2] / (depth + 1)
-        ])
-      );
       hoverDirty = true;
-      renderer.draw(
-        layout.mesh,
-        positions,
-        hinges,
-        earth.checked && !earth.disabled,
-        edges.checked,
-        surface?.value === 'land'
-      );
     }
     if (hoverDirty) {
       updateTooltip();
@@ -318,7 +256,7 @@ export function mountUnfolding(
   return () => {
     abort.abort();
     cancelAnimationFrame(frame);
-    renderer.dispose();
+    scene.dispose();
     root.replaceChildren();
   };
 }

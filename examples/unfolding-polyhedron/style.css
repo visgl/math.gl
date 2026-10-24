@@ -200,7 +200,7 @@
 }
 
 .unfolding-polyhedron {height: 100%; overflow: auto; background: #0e2029; color: #e5edf0;}
-.unfolding-polyhedron canvas {height: 280px; min-height: 220px;}
+.unfolding-polyhedron[data-compact] canvas {height: 280px; min-height: 220px;}
 .unfolding-polyhedron .controls {flex-wrap: wrap;}
 
 .unfolding-polyhedron[data-embedded] header,
@@ -221,3 +221,5 @@
   white-space: nowrap;
   box-shadow: 0 3px 12px #0005;
 }
+
+[data-fullscreen] .unfolding-polyhedron[data-compact] canvas {height: min(52vh, 540px); min-height: 220px;}

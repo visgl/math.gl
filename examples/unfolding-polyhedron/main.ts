@@ -5,4 +5,6 @@
 import {mountUnfolding} from './app';
 import './style.css';
 const dispose = mountUnfolding(document.querySelector<HTMLElement>('#app')!);
-window.addEventListener('pagehide', dispose, {once: true});
+window.addEventListener('pagehide', event => {
+  if (!event.persisted) dispose();
+});

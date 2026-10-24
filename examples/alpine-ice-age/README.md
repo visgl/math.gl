@@ -13,6 +13,22 @@ From the repository root, run `yarn workspace math.gl-alpine-ice-age start`.
 Use `yarn workspace math.gl-alpine-ice-age build` for a standalone build and
 `yarn workspace math.gl-alpine-ice-age test` for dataset/interpolation checks.
 
+## Read the map code
+
+This is a full data application. For a short introduction to `MapEngine`, start
+with `../albers-usa/map.js` or `../myriahedral-maps/layout.ts`.
+
+- `global-app.jsx` owns the React controls, data loading, and playback state.
+- `map-options.js` lists the available maps without importing a renderer.
+- `projection-grid.js` constructs and caches ordinary projection grids.
+- `discontinuous-views.js` constructs `MapEngine` instances and clips field geometry.
+- `global-scene.js` owns deck.gl layers and camera rendering.
+- `myriahedral-animation.js` adapts engine frames to the scene's camera.
+
+The UI passes state to the scene. Geometry modules can be exercised without
+mounting React or allocating GPU resources. Data loading and scientific field
+sampling remain separate from map layout and drawing.
+
 ## Data and attribution
 
 Julien Seguinot, Susan Ivy-Ochs, Guillaume Jouvet, Matthias Huss, Martin Funk and
@@ -212,8 +228,12 @@ for API examples and limitations.
 
 Inset bounds, viewport fitting, draw order, outlines, and labels come from
 `@math.gl/geospatial/discontinuous` layout metadata. Alaska and Hawaii have visible
-frames. Hawaiian island shapes use a bundled, pinned Natural Earth 1:10m modern
-reference (public domain); the 1° reconstruction grid does not resolve their terrain.
+frames. Each region uses its own display mesh spacing: 1° for the contiguous
+U.S., 0.5° for Alaska, and 0.25° for Hawaii. All meshes still sample the same
+1° PaleoMIST reconstruction, so finer display triangles do not invent finer
+ice or terrain measurements. Hawaiian island shapes use a bundled, pinned
+Natural Earth 1:10m modern reference (public domain) because the reconstruction
+grid does not resolve their terrain. This view does not use raster tile sets.
 This overlay does not change ice values, global totals, or reconstruct past shorelines.
 
 ### Myriahedral presets (experimental)
@@ -222,7 +242,7 @@ The **View → Myriahedral** group offers polyconic, cylindric, azimuthal,
 hemispheres, sealine, and coastline layouts, plus tetrahedron, cube, octahedron,
 dodecahedron, and icosahedron nets. Turn off **Cycle projections** to inspect one
 layout while scrubbing time. These views use the reusable
-`createMyriahedralMap` API: 24-column graticules or one subdivision of each solid.
+`MapEngine` API with myriahedral descriptions: 24-column graticules or one subdivision of each solid.
 Each panel is tessellated independently at approximately the source grid's 1°
 resolution, retaining geographic coordinates for ice and bed interpolation.
 No triangle spans a cut. Layout metadata fits the complete net to the viewport.

@@ -27,7 +27,7 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 
 | Import | APIs |
 | --- | --- |
-| `@math.gl/geospatial/ellipsoid` | [Ellipsoid](./api-reference/ellipsoid.md), [tangent planes](./api-reference/ellipsoid-tangent-plane.md), [surface geodesics](./api-reference/ellipsoid-geodesic.md), and [WGS84 helpers](./api-reference/helpers.md) |
+| `@math.gl/geospatial/ellipsoid` | [Ellipsoid](./api-reference/ellipsoid.md), [tangent planes](./api-reference/ellipsoid-tangent-plane.md), [surface geodesics](./api-reference/ellipsoid-geodesic.md), [geodesic paths](./api-reference/geodesic-path.md), and [WGS84 helpers](./api-reference/helpers.md) |
 | `@math.gl/geospatial/globe` | [Geographic rectangles](./api-reference/lng-lat-rectangle.md), [region bounding boxes](./api-reference/make-obb-from-region.md), [visibility queries](./api-reference/globe-queries.md), and [mesh subdivision](./api-reference/subdivide-globe-mesh.md) |
 | `@math.gl/geospatial/tiles` | [Geographic tile queries](./api-reference/geographic-tiles.md) and [tile-matrix utilities](./api-reference/tile-matrix.md) |
 
@@ -37,6 +37,7 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 | ----------------------- | --------------------------------------------------------------------------- |
 | `Ellipsoid`             | Implements ellipsoid math and cartographic/Cartesian conversions.           |
 | `Ellipsoid.WGS84`       | An `Ellipsoid` instance initialized with Earth radii per WGS84.             |
+| `LocalReferenceFrame` | Reusable local frames, geographic poses, and velocity-aligned orientations. |
 | `EllipsoidTangentPlane` | Projects WGS84 Cartesian positions into a local east-north plane.           |
 | `LngLatRectangle`       | Represents a longitude-latitude rectangle, including antimeridian crossing. |
 
@@ -115,3 +116,17 @@ extent-to-tile ranges, coverage checks and resolution-based level selection.
 
 Use the geographic tile helpers above for the built-in equal-angle longitude/latitude quadtree
 and antimeridian-aware queries. Explicit matrix queries use half-open edges and never wrap.
+
+## Local frames and poses
+
+[LocalReferenceFrame](./api-reference/local-reference-frame.md) separates point and vector transformations,
+composes geographic heading/pitch/roll poses, and builds velocity-aligned orientations. Import it
+from `@math.gl/geospatial/ellipsoid`. Local distances use the ellipsoid axis units; pose angles use radians.
+
+## Geodesic path sampling
+
+[GeodesicPath](./api-reference/geodesic-path.md) reuses a shortest geodesic line for fraction/distance
+sampling. [subdivideGeodesicPolyline](./api-reference/subdivide-geodesic-polyline.md) adaptively maps
+those paths through a supplied transform with original-edge provenance and optional surface-distance
+limits. Source angles are degrees, output tolerance uses target units, and longitude unrolling does
+not split projection seams. Import the sampler from `/ellipsoid` and subdivision from `/globe`.
