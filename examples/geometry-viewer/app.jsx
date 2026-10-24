@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import ExamplePanel from '../common/example-panel';
 import React, {useMemo, useState} from 'react';
 import * as primitives from '@math.gl/geometry';
 import Mesh from './mesh';
@@ -49,8 +50,7 @@ export default function GeometryExample({geometry, geometryType, geometryProps})
   const props = {...presets[type], ...geometryProps};
   return (
     <div className="geometry-example">
-      <aside className="geometry-panel">
-        <h2>{geometry ? 'Geometry' : type}</h2>
+      <ExamplePanel title={geometry ? 'Geometry' : type} className="geometry-panel">
         {!geometry && !geometryType && (
           <label>
             Primitive
@@ -81,7 +81,7 @@ export default function GeometryExample({geometry, geometryType, geometryProps})
         </dl>
         {!geometry && <pre>{`new ${type}(${JSON.stringify(props, null, 2)})`}</pre>}
         <p>Drag to orbit. Scroll or pinch to zoom. Focus the canvas for arrow keys and +/−.</p>
-      </aside>
+      </ExamplePanel>
       <Mesh geometry={mesh} wireframe={wireframe} />
     </div>
   );
