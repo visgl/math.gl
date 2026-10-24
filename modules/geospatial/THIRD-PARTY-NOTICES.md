@@ -25,3 +25,36 @@ AirOcean is radial/gnomonic, not an exact Gray–Fuller implementation. Nico Bel
 myriahedral demonstration is credited as inspiration; its application code is not incorporated.
 
 HEALPix is independently implemented from M. R. Calabretta, [Mapping on the HEALPix grid (2004)](https://arxiv.org/abs/astro-ph/0412607). The HEALPix and Gingery numerical fixtures use d3-geo-projection 4.0.0; the package does not depend on D3 at runtime.
+
+## Gray–Fuller, Petroff, and Snyder maps
+
+- **Robert W. Gray / Buckminster Fuller**: `gray-fuller.ts` implements Gray's
+  1995 face equations, also published by **Philippe Rivière** in
+  [d3-geo-polygon's Gray–Fuller kernel](https://github.com/d3/d3-geo-polygon/blob/main/src/grayfuller.js)
+  with a public-domain dedication. math.gl adds its own monotone inverse and
+  integrates the existing ISC-licensed AirOcean topology. Reference fixtures use
+  d3-geo-polygon **2.0.1**, without adding a runtime dependency.
+- **Matthew A. Petroff**: `petroff.ts` adapts the forward/inverse equations in
+  `new_projection.py`, [Zenodo record 4661351](https://doi.org/10.5281/zenodo.4661351).
+  The archive's code is **CC0-1.0**, as stated in its
+  [retained README/license](./src/discontinuous/PETROFF-LICENSE.txt). The record's
+  CC-BY metadata also covers images that are not incorporated. Modifications:
+  scalar TypeScript, stable Cartesian evaluation, explicit singular limits,
+  chart-boundary ownership, and MapEngine integration. Reference fixtures evaluate
+  the original Python with NumPy; no Python/JAX runtime dependency.
+- **John P. Snyder**, *An Equal-Area Map Projection for Polyhedral Globes* (1992),
+  and [BRSR's vector formulation](https://brsr.github.io/2021/08/31/snyder-equal-area.html):
+  mathematical sources for the independently implemented spherical triangle
+  equations in `snyder.ts`. ISEA reference fixtures use **PROJ 9.8.1** through
+  pyproj 3.8.0, without adding a runtime dependency.
+- **Felix Palmer / PROJ contributors**: `snyder-mesh.ts` adapts only polyhedron
+  coordinate/face tables and parent trees from PROJ revision
+  `5fa31c29f0a806568ed7bc76c1a557604db4a804`, under the
+  [retained PROJ MIT-style terms](./src/discontinuous/PROJ-LICENSE.txt).
+  Source paths: `src/projections/polyhedral/polyhedra/{icosahedron,dodecahedron}.h`
+  and `src/projections/polyhedral/nets/{isea/isea,dsea/dsea}.h`.
+  The separately licensed A5/DGGAL projection implementation is not incorporated.
+
+`air-ocean` remains gnomonic; the distinct `gray-fuller` preset uses the exact
+Gray–Fuller formula. Neither is advertised as equal-area. Petroff, ISEA, and DSEA
+are spherical equal-area maps; they do not implement ellipsoidal CRS transforms.

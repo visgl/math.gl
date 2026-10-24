@@ -5,6 +5,7 @@
 // SPDX-FileComment: Interrupted formulas and land/hemisphere lobe tables follow d3-geo-projection 4.0.0 (D3-LICENSE.txt); ocean Goode lobes follow PROJ igh_o documentation. Original math.gl chart assembly and bounded inverse.
 
 import {DiscontinuousMap, type MapRegion, type MapPlacement} from './map-layout';
+import {grayFullerForward, grayFullerInverse} from './gray-fuller';
 import {airOceanMesh} from './air-ocean-mesh';
 import {
   add,
@@ -24,12 +25,28 @@ const subtract = (a: Vector, b: Vector) => add(a, scale(b, -1));
  * This is NOT the Gray-Fuller projection. Output units scale with radius.
  */
 export function createAirOceanMap(options: {radius?: number} = {}): DiscontinuousMap {
+  return airOceanMap(options, false);
+}
+
+/** Exact Gray–Fuller face transform on the 24-panel AirOcean net. */
+export function createGrayFullerMap(options: {radius?: number} = {}): DiscontinuousMap {
+  return airOceanMap(options, true);
+}
+
+function airOceanMap(options: {radius?: number}, fuller: boolean) {
   const radius = validRadius(options.radius);
   const {
     mesh: {vertices, faces},
     joins
   } = airOceanMesh();
-  const charts = faces.map(face => {
+  // Split panels retain the original icosahedron face frame.
+  const original = faces.slice(0, 20).map(face => [...face]);
+  original[14] = [11, 2, 10];
+  original[15] = [1, 2, 4];
+  original[19] = [1, 10, 2];
+  const parentFaces = [...Array.from({length: 20}, (_, i) => i), 15, 15, 14, 19];
+  const charts = faces.map((panel, i) => {
+    const face = fuller ? original[parentFaces[i]] : panel;
     const origin = vertices[face[0]],
       x = unit(subtract(vertices[face[1]], origin));
     const normal = unit(cross(x, subtract(vertices[face[2]], origin))),
@@ -39,7 +56,35 @@ export function createAirOceanMap(options: {radius?: number} = {}): Discontinuou
       dot(subtract(p, origin), x),
       dot(subtract(p, origin), y)
     ];
-    return {origin, x, y, normal, height, plane};
+    if (!fuller)
+      return {
+        origin,
+        x,
+        y,
+        normal,
+        height,
+        plane,
+        project: (p: Vector) => plane(scale(p, height / dot(normal, p))),
+        inverse: ([u, v]: Position) => unit(add(origin, add(scale(x, u), scale(y, v))))
+      };
+    const center = unit(face.map(v => vertices[v]).reduce(add, [0, 0, 0]));
+    const up = unit(subtract(vertices[face[0]], scale(center, dot(center, vertices[face[0]]))));
+    const right = cross(up, center);
+    const project = (p: Vector) =>
+      grayFullerForward(dot(right, p) / dot(center, p), dot(up, p) / dot(center, p));
+    return {
+      origin,
+      x,
+      y,
+      normal,
+      height,
+      plane: project,
+      project,
+      inverse: ([u, v]: Position) => {
+        const q = grayFullerInverse(u, v);
+        return q ? unit(add(center, add(scale(right, q[0]), scale(up, q[1])))) : null;
+      }
+    };
   });
   const placements: MapPlacement[] = [];
   placements[0] = [radius, 0, 0, radius, 0, 0];
@@ -74,12 +119,11 @@ export function createAirOceanMap(options: {radius?: number} = {}): Discontinuou
         boundary: face.map(v => coordinates(vertices[v])),
         interior: coordinates(unit(face.map(v => vertices[v]).reduce(add, [0, 0, 0]))),
         placement: placements[i],
-        project: position => {
-          const p = geographic(position);
-          return chart.plane(scale(p, chart.height / dot(chart.normal, p)));
-        },
-        unproject: ([x, y]) =>
-          coordinates(unit(add(chart.origin, add(scale(chart.x, x), scale(chart.y, y)))))
+        project: position => chart.project(geographic(position)),
+        unproject: position => {
+          const p = chart.inverse([...position]);
+          return p && coordinates(p);
+        }
       };
     })
   );

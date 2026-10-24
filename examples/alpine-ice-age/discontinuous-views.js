@@ -39,6 +39,10 @@ const definitions = {
   peirceQuincuncial: { type: "peirce-quincuncial" },
   berghaus: { type: "berghaus" },
   gingery: { type: "gingery" },
+  'gray-fuller': {type: 'gray-fuller'},
+  petroff: {type: 'petroff'},
+  isea: {type: 'isea'},
+  dsea: {type: 'dsea'},
   healpix: { type: "healpix" },
   "interrupted-custom": {
     type: "interrupted",

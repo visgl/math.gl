@@ -30,6 +30,9 @@ import {
   createInterruptedQuarticAuthalicMap,
   createInterruptedMollweideHemispheresMap
 } from './presets';
+import {createGrayFullerMap} from './presets';
+import {createPetroffMap} from './petroff';
+import {createIcosahedralSnyderMap, createDodecahedralSnyderMap} from './snyder';
 import {createHealpixMap} from './healpix';
 import {createAlbersUsaMap} from './albers-usa';
 import {createMyriahedralMap, type MyriahedralOptions, type MyriahedralLayout} from './myriahedral';
@@ -49,6 +52,8 @@ export type MapChartDescription = Omit<MapRegion, 'project' | 'unproject'> & {
   projection: string;
 };
 export type MapDefinition =
+  | {type: 'gray-fuller' | 'isea' | 'dsea'}
+  | {type: 'petroff'; centralMeridian?: number}
   | {type: 'healpix'; centralMeridian?: number}
   | {
       type: 'gingery';
@@ -161,6 +166,18 @@ export class MapEngine {
     this.sampling = {...options.sampling};
     const d = this.description.definition;
     switch (d.type) {
+      case 'gray-fuller':
+        this.map = createGrayFullerMap({radius});
+        break;
+      case 'petroff':
+        this.map = createPetroffMap({...d, radius});
+        break;
+      case 'isea':
+        this.map = createIcosahedralSnyderMap({radius});
+        break;
+      case 'dsea':
+        this.map = createDodecahedralSnyderMap({radius});
+        break;
       case 'healpix':
         this.map = createHealpixMap({...d, radius});
         break;
