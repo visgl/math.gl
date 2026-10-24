@@ -15932,6 +15932,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"math.gl-quincuncial-star@workspace:examples/quincuncial-star":
+  version: 0.0.0-use.local
+  resolution: "math.gl-quincuncial-star@workspace:examples/quincuncial-star"
+  dependencies:
+    "@math.gl/geospatial": "workspace:*"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
 "math.gl-spatial-index-example@workspace:examples/spatial-index":
   version: 0.0.0-use.local
   resolution: "math.gl-spatial-index-example@workspace:examples/spatial-index"

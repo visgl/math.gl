@@ -1,0 +1,18 @@
+# Quincuncial and star maps
+
+<p class="badges"><img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" /> <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" /></p>
+
+import Example from '@site/src/components/quincuncial-star';
+
+<Example />
+
+Compare Peirce quincuncial with Berghaus star. Change the central meridian to see
+coastlines and the orange polygon split at new cuts; hover to inspect coordinates.
+
+Both use the same `MapEngine` point, line, polygon, viewport fitting and picking
+pipeline. Neither is a hinged polyhedron. The Peirce elliptic kernel is adapted
+from [D3's ISC-licensed implementation](https://github.com/d3/d3-geo-projection).
+The equatorial aspect intentionally differs from D3's default Peirce rotation.
+
+[Source](https://github.com/visgl/math.gl/tree/master/examples/quincuncial-star) ·
+[API and limitations](/docs/modules/geospatial/discontinuous/map-engine)

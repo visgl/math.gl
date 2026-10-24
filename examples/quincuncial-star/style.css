@@ -1,0 +1,11 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.quincuncial-star {font: 14px system-ui; color: #193747; background: #fff; border-radius: 8px; padding: 16px;}
+.quincuncial-star .qs-controls {display:flex; flex-wrap:wrap; gap:12px; align-items:center;}
+.quincuncial-star label {display:flex; align-items:center; gap:6px;}
+.quincuncial-star [hidden] {display:none;}
+.quincuncial-star canvas {display:block; width:100%; height: min(65vh, 560px); min-height:320px;}
+.quincuncial-star p {min-height:1.5em; margin:8px 0;}
+.quincuncial-star small {color:#526b77;}
