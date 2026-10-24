@@ -74,7 +74,7 @@ Split projection seams and clip to valid domains before calling. Longitude unrol
 seam splitting. A transform that wraps longitudes can still introduce a discontinuity and
 exhaust the depth/vertex limit; a pole-crossing geographic path may require a different
 coordinate chart. An ECEF transform is useful for continuous globe paths. C5 owns general
-seam/topology processing. Rhumb sampling remains dependent on the future rhumb solver.
+seam/topology processing. The scalar [rhumb solver](./ellipsoid-rhumb.md) is available; integrating it into this adaptive path sampler remains C4/C6 work.
 
 Qualification includes native PROJ path controls, independent spherical dense-error and
 surface-distance checks, multi-edge height/attribute provenance, dateline/polar/antipodal

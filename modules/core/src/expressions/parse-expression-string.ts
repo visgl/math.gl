@@ -14,9 +14,9 @@ import {get} from './get';
  */
 export type AccessorFunction = (row: Record<string, unknown>) => unknown;
 
-const cachedExpressionMap: Record<string, AccessorFunction> = {
-  '-': object => object
-};
+const cachedExpressionMap = Object.assign(Object.create(null) as Record<string, AccessorFunction>, {
+  '-': (object: Record<string, unknown>) => object
+});
 
 /**
  * Compiles a JSON-style expression string into an accessor function.

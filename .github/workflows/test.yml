@@ -97,6 +97,9 @@ jobs:
           yarn workspace math.gl-tectonic-time-machine test
           yarn workspace math.gl-tectonic-time-machine build
 
+      - name: Test expression preview seam handling
+        run: node --test examples/expressions/*.test.mjs
+
       - name: Test Alpine Ice Age dataset and interpolation
         run: yarn workspace math.gl-alpine-ice-age test
 
@@ -182,6 +185,10 @@ jobs:
 
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
+
+      - name: Check regressions from landed example reviews
+        timeout-minutes: 2
+        run: node scripts/check-landed-review-examples.mjs
 
       - name: Check projection scorecard integrity and collect Node evidence
         timeout-minutes: 5

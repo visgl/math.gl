@@ -11,7 +11,7 @@ const root = fileURLToPath(new URL('../../../../', import.meta.url));
 const require = createRequire(root + '/package.json'),
   proj4 = require('proj4');
 const {build, transform} = require('esbuild');
-const native = await import(root + '/modules/geospatial/projection/dist/experimental/index.js');
+const native = await import(root + '/modules/geospatial/dist/projection/experimental/index.js');
 const extra = await build({
   stdin: {
     contents:

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Matrix4, Quaternion, Vector3} from '@math.gl/core';
+import {Matrix4, Quaternion, Vector3, config} from '@math.gl/core';
 import {Ellipsoid, LocalReferenceFrame} from '@math.gl/geospatial/ellipsoid';
 
 function close(actual: ArrayLike<number>, expected: ArrayLike<number>, digits = 10): void {
@@ -187,4 +187,23 @@ test('Subnormal velocity and large invalid rotations cannot produce nonfinite or
   expect(attitude.heading).toBeCloseTo(0.3, 12);
   expect(attitude.pitch).toBeCloseTo(-0.5, 12);
   expect(attitude.roll).toBeCloseTo(0.2, 12);
+});
+
+test('Velocity orientation is invariant under extreme finite scaling', () => {
+  for (const speed of [Number.MIN_VALUE, 1, 1.3e308]) {
+    const q = frame.velocityQuaternion([0, speed, speed])!;
+    close(new Vector3(1, 0, 0).transformByQuaternion(q), [0, Math.SQRT1_2, Math.SQRT1_2], 14);
+  }
+});
+
+test('Local reference frames respect radian cartographic configuration', () => {
+  const previous = config._cartographicRadians;
+  try {
+    config._cartographicRadians = true;
+    const f = new LocalReferenceFrame([0, 5 * Math.sqrt(3), 5], {ellipsoid: sphere});
+    close(f.localToFixedVector([1, 0, 0]), [-1, 0, 0], 14);
+    close(f.localToFixedVector([0, 0, 1]), [0, Math.sqrt(3) / 2, 0.5], 14);
+  } finally {
+    config._cartographicRadians = previous;
+  }
 });
