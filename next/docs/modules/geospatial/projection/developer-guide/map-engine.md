@@ -169,7 +169,7 @@ const oceanCuts = new MapEngine({
 });
 ```
 
-Here `landMaskContains` is an application-provided geographic lookup. No land dataset or network request is bundled in the engine. A custom description names projection bindings in its charts; provide their forward/inverse functions in the constructor's `projections` dictionary. Keep those callbacks stable for the engine's lifetime. See the [reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md) for the chart contract and all methods.
+Here `landMaskContains` is an application-provided geographic lookup. No land dataset or network request is bundled in the engine. A custom description names projection bindings in its charts; provide their forward/inverse functions in the constructor's `projections` dictionary. Keep those callbacks stable for the engine's lifetime. See the [reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/map-engine.md) for the chart contract and all methods.
 
 ## Migrate existing examples[​](#migrate-existing-examples "Direct link to Migrate existing examples")
 
@@ -183,3 +183,9 @@ Here `landMaskContains` is an application-provided geographic lookup. No land da
 | Inspect a myriahedral map's `.layout`           | `map.motion`                                                       |
 
 Albers USA, the myriahedral demo, and Ice Age Explorer use this API. Their renderers retain SVG/WebGL drawing, textures, camera motion, and field sampling. The lower-level factories remain supported for callers that only need a static map or the geometry layout itself.
+
+## Choosing a named projection[​](#choosing-a-named-projection "Direct link to Choosing a named projection")
+
+From v5.0 · Experimental
+
+Use `{type: 'projection', projection: 'robinson'}` or another name from `MAP_PROJECTIONS` for the [projection families and presets](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/projection-catalog.md). The same rendering code also handles regional visibility caps, interrupted Sinu-Mollweide's oblique cuts, and quincuncial layouts. Use `getLayout()` / `fit()` to measure visible coverage, and keep every returned region-local piece and its source coordinates. Do not assume every catalog map covers the entire globe or has a globally unique inverse.

@@ -8,6 +8,8 @@ Geographic arrays use `[longitude, latitude, height]`, with angles in degrees an
 
 The geospatial group includes `@math.gl/geospatial/ellipsoid`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`, `/wkb`, `/geoarrow`, and `/expressions`. `@math.gl/web-mercator` remains available for existing imports. DGGS remains a separate package.
 
+New to these concepts? Start with [Geospatial terminology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/terminology.md) for geodesics, rhumb lines, chords, ellipsoids, reference systems, and projection properties.
+
 ## Installation[​](#installation "Direct link to Installation")
 
 ```

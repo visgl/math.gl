@@ -4,7 +4,7 @@
 
 The discontinuous map API, presets, and layout helpers are experimental and may change.
 
-For a shared rendering pipeline across ordinary, interrupted, inset, and hinged maps, start with [MapEngine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md) and its [rendering guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/map-engine.md). The factories below remain useful when only the lower-level static map is needed.
+For a shared rendering pipeline across ordinary, interrupted, inset, and hinged maps, start with [MapEngine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/map-engine.md) and its [rendering guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/map-engine.md). The factories below remain useful when only the lower-level static map is needed.
 
 Project geographic points, lines, and polygons into a map with cuts. Import this API separately from scalar CRS transforms:
 
@@ -38,6 +38,56 @@ Render every line part and every polygon independently. Connecting parts or tria
 
 For concepts, rendering patterns, and the Ice Age Explorer integration, see the [discontinuous projections guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md).
 
+For the complete named preset list and regional configuration, see the [projection families and presets](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/projection-catalog.md).
+
+## World maps[​](#world-maps "Direct link to World maps")
+
+From v5.0 · Experimental
+
+`createWorldMap(options)` and `MapEngine`'s `{type: 'world', projection, parameters?, centralMeridian?}` definition expose ordinary world formulas through the same point, inverse, line, polygon, layout and globe-transition pipeline. The lower-level factory also accepts `radius` (default 1); `MapDescription.radius` sets the engine's scale. Longitude/latitude and angular parameters are in degrees. Output has north-positive y. `WORLD_PROJECTIONS` is a frozen array of supported `WorldProjection` names.
+
+```
+const engine = new MapEngine({
+
+  version: 1,
+
+  id: 'bonne-45',
+
+  definition: {type: 'world', projection: 'bonne', parameters: {parallel: 45}}
+
+});
+```
+
+`WorldMapOptions`, `WorldProjection`, and `WorldProjectionParameters` describe these inputs. Unsupported parameter keys, non-finite values and invalid ranges throw. Default parameters follow d3-geo-projection 4.0.0. Bertin 1953 and Sinu-Mollweide include their native oblique aspects; `centralMeridian` shifts their geographic longitude. D3's pixel scale, screen-y reflection, translation and display center are presentation choices; use `fitViewport` instead.
+
+The 64 names are:
+
+* `aitoff`, `august`, `baker`, `bertin1953`, `boggs`, `bonne`, `bottomley`, `bromley`.
+* `collignon`, `craster`, `cylindrical-equal-area`, `cylindrical-stereographic`.
+* `eckert1` through `eckert6`, `eisenlohr`, `fahey`, `foucaut`, `foucaut-sinusoidal`.
+* `gilbert`, `gringorten` (rectangular), `ginzburg4`, `ginzburg5`, `ginzburg6`, `ginzburg8`, `ginzburg9`, `hammer`, `hill`, `homolosine`, `hufnagel`, `hyperelliptical`, `kavrayskiy7`, `lagrange`, `larrivee`, `laskowski`, `loximuthal`, `miller`, `mollweide`.
+* `mt-flat-polar-parabolic`, `mt-flat-polar-quartic`, `mt-flat-polar-sinusoidal`, `natural-earth2`, `nell-hammer`, `nicolosi`, `patterson`, `polyconic`, `quartic-authalic`, `rectangular-polyconic`, `robinson`, `sinu-mollweide`, `sinusoidal`, `times`.
+* `van-der-grinten`, `van-der-grinten2`, `van-der-grinten3`, `van-der-grinten4`, `wagner`, `wagner4`, `wagner6`, `wagner7`, `winkel3`.
+
+| Formula                                | Parameters (defaults)                                                                                |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Bonne                                  | `parallel: 45`                                                                                       |
+| Bottomley                              | `fraction: 0.5`                                                                                      |
+| Cylindrical equal-area / stereographic | `parallel: 38.58` / `parallel: 0`; polar parallels are excluded                                      |
+| Foucaut sinusoidal                     | `alpha: 0.5`                                                                                         |
+| Hammer                                 | `coefficient: 2`, strictly greater than 1; use `quartic-authalic` for the infinite-coefficient limit |
+| Hill                                   | `ratio: 1`                                                                                           |
+| Hufnagel                               | `a: 1`, `b: 0`, `psiMax: 45`, `ratio: 2`                                                             |
+| Hyperelliptical                        | `alpha: 0`, `k: 2.5`, `gamma: 1.183136`                                                              |
+| Lagrange                               | `spacing: 0.5`, strictly less than 1                                                                 |
+| Loximuthal                             | `parallel: 40`                                                                                       |
+| Rectangular polyconic                  | `parallel: 0`, strictly between −90° and 90°                                                         |
+| Wagner                                 | `poleline: 65`, `parallels: 60`, `inflation: 20`, `ratio: 200`                                       |
+
+These formulas are spherical maps, not ellipsoidal CRS transforms. Their eight computational charts cover the globe and split geometry at the antimeridian. Continuous chart joins should not be rendered as outlines. Some formulas stretch a pole into an edge: incoming and outgoing meridians then have different limiting positions. Returned source coordinates retain that directional longitude; a renderer must use the returned geometry rather than collapsing all polar vertices together.
+
+The numeric kernels are adapted from [D3's ISC-licensed sources](https://github.com/d3/d3-geo-projection/tree/v4.0.0/src); see the [provenance inventory](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/discontinuous/world-kernels/README.md). The [projection families and presets](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/projection-catalog.md) groups presets by geometry and coverage: continuous world maps, regional domains, interrupted lobes, segmented layouts, and polyhedral nets. It describes each family's configuration and limits.
+
 ## Presets[​](#presets "Direct link to Presets")
 
 From v5.0 · Experimental
@@ -58,9 +108,9 @@ From v5.0 · Experimental
 
 * `createHealpixMap({radius = 1, centralMeridian = 0})`: spherical H=4, K=3 HEALPix. Options type: `HealpixMapOptions`.
 * `createGingeryMap({radius = 1, centralMeridian = 0, lobes = 6, coreAngle = 30})`: equatorial Gingery star. Options type: `GingeryMapOptions`; `coreAngle` is in degrees and strictly between 0 and 90; `lobes` is an integer from 3 to 24.
-* `createInterruptedMap({projection, lobes, radius = 1, centralMeridian = 0})`: configurable equatorial interruptions. `InterruptedMapOptions` uses an `InterruptedProjection` formula and `InterruptedLobe` tuples in `north` and `south` arrays.
+* `createInterruptedMap({projection, lobes, radius = 1, centralMeridian = 0})`: configurable interruptions. `InterruptedMapOptions` uses an `InterruptedProjection` formula, optional `latitudes: {north: 0, south: 0}` (north in \[0, 90), south in (−90, 0]), and `InterruptedLobe` tuples in `north` and `south` arrays.
 
-All return `DiscontinuousMap`. See the [MapEngine reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md#healpix-gingery-and-configurable-interruptions) for formulas, tuple validation, defaults, examples, limitations, and credits. These are also available in Ice Age Explorer, and HEALPix/Gingery appear in the inline segmented-map comparison.
+All return `DiscontinuousMap`. See the [MapEngine reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/map-engine.md#healpix-gingery-and-configurable-interruptions) for formulas, tuple validation, defaults, examples, limitations, and credits. These are also available in Ice Age Explorer, and HEALPix/Gingery appear in the inline segmented-map comparison.
 
 ### U.S. composite with insets[​](#us-composite-with-insets "Direct link to U.S. composite with insets")
 
@@ -201,7 +251,7 @@ See the [unfolding Earth example](https://visgl.github.io/math.gl/next/docs/modu
 
 From v5.0 · Experimental
 
-`createPeirceQuincuncialMap(options?: QuincuncialMapOptions)` and `createBerghausMap(options?: BerghausMapOptions)` return `DiscontinuousMap` instances. Both accept `radius` (positive, default 1) and `centralMeridian` (finite degrees, default 0). Berghaus additionally accepts `lobes` (integer 3–24, default 5). The exported option types have the same defaults as the corresponding [MapEngine definitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md#quincuncial-and-star-definitions).
+`createPeirceQuincuncialMap(options?: QuincuncialMapOptions)` and `createBerghausMap(options?: BerghausMapOptions)` return `DiscontinuousMap` instances. Both accept `radius` (positive, default 1) and `centralMeridian` (finite degrees, default 0). Berghaus additionally accepts `lobes` (integer 3–24, default 5). The exported option types have the same defaults as the corresponding [MapEngine definitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/map-engine.md#quincuncial-and-star-definitions).
 
 Use `MapEngine` when you also need serializable descriptions, fitting, picking, capabilities and transition planning. Consult the [support table](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md#supported-map-families) for the distinction between these presets and other quincuncial/star variants.
 
@@ -224,7 +274,7 @@ Each factory returns a `DiscontinuousMap` and accepts an optional positive `radi
 | `createInterruptedQuarticAuthalicMap`      | `{radius?: number}`                                          |
 | `createInterruptedMollweideHemispheresMap` | `{radius?: number}`                                          |
 
-`PolyhedralMapOptions` is exported from `@math.gl/geospatial/discontinuous`. See the [MapEngine definitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md#additional-segmented-and-interrupted-definitions) for each preset's aspect, cuts, coordinate conventions, and limitations.
+`PolyhedralMapOptions` is exported from `@math.gl/geospatial/discontinuous`. See the [MapEngine definitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/map-engine.md#additional-segmented-and-interrupted-definitions) for each preset's aspect, cuts, coordinate conventions, and limitations.
 
 ## Gray–Fuller, Petroff, and Snyder equal-area maps[​](#grayfuller-petroff-and-snyder-equal-area-maps "Direct link to Gray–Fuller, Petroff, and Snyder equal-area maps")
 
@@ -239,4 +289,4 @@ From v5.0 · Experimental
 
 All return `DiscontinuousMap`, with region-aware forward/inverse points and seam-split lines and polygons. `radius` defaults to 1 and must be finite and positive. Petroff's `centralMeridian` defaults to 0 and must be finite, in degrees. `SnyderMapOptions` is exported from the same entry point.
 
-See [MapEngine's reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md#grayfuller-petroff-and-snyder-maps) for definitions, aspects, units, numerical behavior, and implementation credits.
+See [MapEngine's reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/map-engine.md#grayfuller-petroff-and-snyder-maps) for definitions, aspects, units, numerical behavior, and implementation credits.
