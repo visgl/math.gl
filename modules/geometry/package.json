@@ -82,7 +82,8 @@
   "files": [
     "dist",
     "src",
-    "LICENSE"
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
     "@math.gl/core": "5.0.0-alpha.19"

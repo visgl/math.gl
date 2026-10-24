@@ -5,7 +5,7 @@
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
 // This file is derived from the Cesium math library under Apache 2 license
-// See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
+// See ../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
 // Note: This class is still an experimental export, mainly used by other test cases
 // - It has not been fully adapted to math.gl conventions

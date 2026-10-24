@@ -7,7 +7,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "test": "node --test data.test.mjs discontinuous-views.test.mjs myriahedral-animation.test.mjs h3-mesh.test.mjs a5-mesh.test.mjs s2-mesh.test.mjs"
+    "test": "node --test data.test.mjs discontinuous-views.test.mjs prepare-map-grid.test.mjs map-center.test.mjs myriahedral-animation.test.mjs h3-mesh.test.mjs a5-mesh.test.mjs s2-mesh.test.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "~9.4.0",

@@ -9,7 +9,8 @@
         "label": "Introduction"
       },
       "whats-new",
-      "upgrade-guide"
+      "upgrade-guide",
+      "references-and-credits"
     ]
   },
   {
@@ -165,7 +166,9 @@
       {
         "type": "category",
         "label": "@math.gl/earth",
-        "items": ["modules/earth/README"]
+        "items": [
+          "modules/earth/README"
+        ]
       },
       {
         "type": "category",

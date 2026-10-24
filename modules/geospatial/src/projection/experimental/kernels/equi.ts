@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Adapted from proj4js 2.22.0 with bounded inverse pole roundoff. See ../../../PROJ4-LICENSE.md for upstream attribution.
+// SPDX-FileComment: Adapted from proj4js 2.22.0 with bounded inverse pole roundoff. See ../../../../projection/PROJ4-LICENSE.md for upstream attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {

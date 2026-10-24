@@ -49,7 +49,9 @@ jobs:
         run: yarn install --immutable
 
       - name: Check source license and copyright headers
-        run: yarn check:source-headers
+        run: |
+          yarn check:source-headers
+          yarn check:attributions
 
       - name: Check independent interior references and qualification
         run: |

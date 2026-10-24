@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) PROJ contributors
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Original math.gl inverse Cartesian rotation correction. Adapted from proj4js 2.22.0, with polar half-angle equations from PROJ 9.5.1 src/projections/stere.cpp. See ../../../../projection/PROJ-LICENSE.txt. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Original math.gl inverse Cartesian rotation correction. Adapted from proj4js 2.22.0, with polar half-angle equations from PROJ 9.5.1 src/projections/stere.cpp. See ../../../../projection/PROJ-LICENSE.txt. See ../../../../projection/PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 import {inverseSphericalLatitude} from '../inverse-spherical-latitude';

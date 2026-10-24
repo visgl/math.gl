@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Bilinear interpolation and inverse grid equations directly adapted from proj4js 2.22.0 lib/datum_transform.js. See ../../../PROJ4-LICENSE.md. Modified for immutable explicit state, inclusive edges, nodata and bounded two-axis convergence.
+// SPDX-FileComment: Bilinear interpolation and inverse grid equations directly adapted from proj4js 2.22.0 lib/datum_transform.js. See ../../../../projection/PROJ4-LICENSE.md. Modified for immutable explicit state, inclusive edges, nodata and bounded two-axis convergence.
 import type {DatumGrid, Subgrid} from './types';
 import {wrapLongitude} from '../parameters';
 

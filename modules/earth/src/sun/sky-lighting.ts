@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Original photometric composition; derived solar data attribution in ../LICENSE-HOSEK-WILKIE.
+// SPDX-FileComment: Original photometric composition; derived solar data attribution in ../../sun/LICENSE-HOSEK-WILKIE.
 import {getSunLight} from './sunlight';
 import {getMoonLight} from './moonlight';
 import {getMoonAppearance} from './moon-appearance';

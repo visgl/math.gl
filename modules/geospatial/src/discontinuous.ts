@@ -54,3 +54,15 @@ export type {
   MyriahedralEdge,
   MyriahedralLayout
 } from './discontinuous/myriahedral';
+
+export {createGuyouMap} from './discontinuous/quincuncial-star';
+export {createGringortenQuincuncialMap} from './discontinuous/quincuncial-star';
+export {createButterflyMap} from './discontinuous/polyhedral';
+export {createCollignonButterflyMap} from './discontinuous/polyhedral';
+export {createWatermanMap} from './discontinuous/polyhedral';
+export {createGoodeOceanMap} from './discontinuous/presets';
+export {createInterruptedBoggsMap} from './discontinuous/presets';
+export {createInterruptedSinuMollweideMap} from './discontinuous/presets';
+export {createInterruptedQuarticAuthalicMap} from './discontinuous/presets';
+export {createInterruptedMollweideHemispheresMap} from './discontinuous/presets';
+export type {PolyhedralMapOptions} from './discontinuous/polyhedral';

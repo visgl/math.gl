@@ -8,7 +8,11 @@ import {
   prepareMyriahedralAnimation,
   myriahedralPose,
 } from "./myriahedral-animation.js";
-import { myriahedralRoute } from "./projection-transition.js";
+import {
+  projectionRoute,
+  segmentedPosition,
+  globePosition,
+} from "./projection-transition.js";
 
 test("hinge transitions match globe and flat endpoints and preserve panel edges", () => {
   const viewport = { width: 900, height: 570, longitude: -25, latitude: 35 };
@@ -74,17 +78,55 @@ test("hinge transitions match globe and flat endpoints and preserve panel edges"
 
 test("preset changes and interrupted unfolds route through the globe", () => {
   assert.deepEqual(
-    myriahedralRoute("myriahedral:sealine", "myriahedral:coastline", 0.37),
+    projectionRoute("myriahedral:sealine", "myriahedral:coastline", 0.37),
     [
       { kind: "hinge", view: "myriahedral:sealine", from: 0.37, to: 0 },
       { kind: "hinge", view: "myriahedral:coastline", from: 0, to: 1 },
     ],
   );
-  assert.deepEqual(myriahedralRoute("eqearth", "myriahedral:cylindric"), [
+  assert.deepEqual(projectionRoute("eqearth", "myriahedral:cylindric"), [
     { kind: "map", view: "globe" },
     { kind: "hinge", view: "myriahedral:cylindric", from: 0, to: 1 },
   ]);
-  assert.deepEqual(myriahedralRoute("myriahedral:cylindric", "globe"), [
+  assert.deepEqual(projectionRoute("myriahedral:cylindric", "globe"), [
     { kind: "hinge", view: "myriahedral:cylindric", from: 1, to: 0 },
   ]);
+});
+
+test("segmented layouts close to the globe before opening a different cut", () => {
+  assert.deepEqual(projectionRoute("waterman", "guyou", 0.4), [
+    { kind: "segmented", view: "waterman", from: 0.4, to: 0 },
+    { kind: "segmented", view: "guyou", from: 0, to: 1 },
+  ]);
+  assert.deepEqual(projectionRoute("globe", "interruptedMollweide"), [
+    { kind: "segmented", view: "interruptedMollweide", from: 0, to: 1 },
+  ]);
+  assert.deepEqual(projectionRoute("guyou", "myriahedral:sealine"), [
+    { kind: "segmented", view: "guyou", from: 1, to: 0 },
+    { kind: "hinge", view: "myriahedral:sealine", from: 0, to: 1 },
+  ]);
+});
+
+test("separate seam copies meet on the globe and interpolate continuously", () => {
+  const viewport = { width: 900, height: 570, longitude: -25, latitude: 35 };
+  const source = [-40, 30],
+    left = [-200, 50, 0],
+    right = [200, 50, 0];
+  const globe = globePosition(source, viewport);
+  assert.deepEqual(segmentedPosition(left, source, 0, viewport), globe);
+  assert.deepEqual(segmentedPosition(right, source, 0, viewport), globe);
+  assert.deepEqual(segmentedPosition(left, source, 1, viewport), left);
+  const halfway = segmentedPosition(left, source, 0.5, viewport);
+  assert(
+    halfway.every((v, i) => Math.abs(v - (globe[i] + left[i]) / 2) < 1e-10),
+  );
+});
+
+test("cache eviction retains the next stage while another selection finishes loading", async () => {
+  const { prunePreparedMaps } = await import("./projection-transition.js");
+  const cache = new Map(["A", "B", "X", "C"].map((id) => [id, {}]));
+  prunePreparedMaps(cache, "A", "C", { view: "A" }, [{ view: "B" }]);
+  assert.deepEqual([...cache.keys()], ["A", "B", "C"]);
+  prunePreparedMaps(cache, "C", "D", null, [], 1);
+  assert.deepEqual([...cache.keys()], ["C"]);
 });
