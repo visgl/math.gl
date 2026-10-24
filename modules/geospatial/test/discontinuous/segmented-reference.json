@@ -1,6 +1,196 @@
 {
-  "reference": "d3-geo-projection 4.0.0; scale 1, center/translate/angle zero; screen Y negated; equatorial aspect except -20° central meridian for paired hemispheres",
+  "reference": "d3-geo-projection 4.0.0; scale 1, center/translate/angle zero; screen Y negated; HEALPix output rescaled by pi/2 to PROJ units; equatorial aspect except -20° central meridian for paired hemispheres",
   "cases": [
+    {
+      "type": "healpix",
+      "samples": [
+        {
+          "source": [
+            12,
+            23
+          ],
+          "expected": [
+            0.2094395102393196,
+            0.460319266046532
+          ]
+        },
+        {
+          "source": [
+            45,
+            15
+          ],
+          "expected": [
+            0.7853981633974483,
+            0.3049140040137016
+          ]
+        },
+        {
+          "source": [
+            -35,
+            -25
+          ],
+          "expected": [
+            -0.6108652381980153,
+            -0.4978854098840511
+          ]
+        },
+        {
+          "source": [
+            100,
+            60
+          ],
+          "expected": [
+            1.9689214474636354,
+            1.0728738432865557
+          ]
+        },
+        {
+          "source": [
+            -140,
+            32
+          ],
+          "expected": [
+            -2.443460952792061,
+            0.6242964253165293
+          ]
+        },
+        {
+          "source": [
+            -120,
+            -50
+          ],
+          "expected": [
+            -2.1368655518252084,
+            -0.9128095116934872
+          ]
+        },
+        {
+          "source": [
+            170,
+            -35
+          ],
+          "expected": [
+            2.9670597283903604,
+            -0.6757288195172474
+          ]
+        },
+        {
+          "source": [
+            80,
+            -70
+          ],
+          "expected": [
+            1.0452293443011937,
+            -1.2367276656329382
+          ]
+        },
+        {
+          "source": [
+            -20,
+            70
+          ],
+          "expected": [
+            -0.5998044627519157,
+            1.2367276656329382
+          ]
+        }
+      ]
+    },
+    {
+      "type": "gingery",
+      "samples": [
+        {
+          "source": [
+            12,
+            23
+          ],
+          "expected": [
+            0.19800282645085565,
+            0.4042447687098993
+          ]
+        },
+        {
+          "source": [
+            45,
+            15
+          ],
+          "expected": [
+            0.7854897509275093,
+            0.2671819717108547
+          ]
+        },
+        {
+          "source": [
+            -35,
+            -25
+          ],
+          "expected": [
+            -0.5638488598663002,
+            -0.4823097147190718
+          ]
+        },
+        {
+          "source": [
+            100,
+            60
+          ],
+          "expected": [
+            0.8231665118549981,
+            1.4389231920298906
+          ]
+        },
+        {
+          "source": [
+            -140,
+            32
+          ],
+          "expected": [
+            -1.3225142985404328,
+            1.8730834576362034
+          ]
+        },
+        {
+          "source": [
+            -120,
+            -50
+          ],
+          "expected": [
+            -1.0349930826955835,
+            -1.594166313042802
+          ]
+        },
+        {
+          "source": [
+            170,
+            -35
+          ],
+          "expected": [
+            1.1154747588832283,
+            -2.2607551142810594
+          ]
+        },
+        {
+          "source": [
+            80,
+            -70
+          ],
+          "expected": [
+            0.5986660392236138,
+            -1.39566104677575
+          ]
+        },
+        {
+          "source": [
+            -20,
+            70
+          ],
+          "expected": [
+            -0.2775669171989397,
+            1.2420527828511692
+          ]
+        }
+      ]
+    },
     {
       "type": "guyou",
       "samples": [

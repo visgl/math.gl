@@ -17,6 +17,8 @@ import {
   type MapViewportOptions
 } from './layout';
 import {
+  createInterruptedMap,
+  type InterruptedMapOptions,
   createAirOceanMap,
   createGoodeMap,
   createInterruptedSinusoidalMap,
@@ -28,12 +30,14 @@ import {
   createInterruptedQuarticAuthalicMap,
   createInterruptedMollweideHemispheresMap
 } from './presets';
+import {createHealpixMap} from './healpix';
 import {createAlbersUsaMap} from './albers-usa';
 import {createMyriahedralMap, type MyriahedralOptions, type MyriahedralLayout} from './myriahedral';
 import {MercatorMap} from './mercator-map';
 import {
   createPeirceQuincuncialMap,
   createBerghausMap,
+  createGingeryMap,
   createGuyouMap,
   createGringortenQuincuncialMap
 } from './quincuncial-star';
@@ -41,8 +45,18 @@ import {createButterflyMap, createCollignonButterflyMap, createWatermanMap} from
 import {geographic} from './math';
 
 /** Serializable chart: runtime projection callbacks are resolved by key. */
-export type MapChartDescription = Omit<MapRegion, 'project' | 'unproject'> & {projection: string};
+export type MapChartDescription = Omit<MapRegion, 'project' | 'unproject'> & {
+  projection: string;
+};
 export type MapDefinition =
+  | {type: 'healpix'; centralMeridian?: number}
+  | {
+      type: 'gingery';
+      centralMeridian?: number;
+      lobes?: number;
+      coreAngle?: number;
+    }
+  | ({type: 'interrupted'} & Omit<InterruptedMapOptions, 'radius'>)
   | {
       type:
         | 'butterfly'
@@ -54,7 +68,10 @@ export type MapDefinition =
         | 'interrupted-quartic-authalic'
         | 'interrupted-mollweide-hemispheres';
     }
-  | {type: 'peirce-quincuncial' | 'guyou' | 'gringorten-quincuncial'; centralMeridian?: number}
+  | {
+      type: 'peirce-quincuncial' | 'guyou' | 'gringorten-quincuncial';
+      centralMeridian?: number;
+    }
   | {type: 'berghaus'; centralMeridian?: number; lobes?: number}
   | {type: 'mercator'; centralMeridian?: number; maxLatitude?: number}
   | {
@@ -144,6 +161,15 @@ export class MapEngine {
     this.sampling = {...options.sampling};
     const d = this.description.definition;
     switch (d.type) {
+      case 'healpix':
+        this.map = createHealpixMap({...d, radius});
+        break;
+      case 'gingery':
+        this.map = createGingeryMap({...d, radius});
+        break;
+      case 'interrupted':
+        this.map = createInterruptedMap({...d, radius});
+        break;
       case 'guyou':
         this.map = createGuyouMap({...d, radius});
         break;
@@ -200,7 +226,10 @@ export class MapEngine {
         this.map = createAirOceanMap({radius});
         break;
       case 'albers-usa':
-        this.map = createAlbersUsaMap({radius, includeTerritories: d.includeTerritories});
+        this.map = createAlbersUsaMap({
+          radius,
+          includeTerritories: d.includeTerritories
+        });
         break;
       case 'myriahedral': {
         const map = createMyriahedralMap({

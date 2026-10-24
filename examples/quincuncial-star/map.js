@@ -10,7 +10,9 @@ export function createMapData(type, lobes, centralMeridian) {
     {
       version: 1,
       id: type,
-      definition: type === 'berghaus' ? {type, lobes, centralMeridian} : {type, centralMeridian}
+      definition: ['berghaus', 'gingery'].includes(type)
+        ? {type, lobes, centralMeridian}
+        : {type, centralMeridian}
     },
     {sampling: {maxAngularStep: 3, tolerance: 0.001}}
   );

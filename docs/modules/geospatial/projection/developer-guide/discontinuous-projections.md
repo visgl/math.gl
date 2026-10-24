@@ -57,15 +57,16 @@ callbacks and convex spherical boundaries; they are not verified presets.
 | Family | Built-in `MapEngine` support | Remaining gaps |
 | --- | --- | --- |
 | Ordinary continuous maps | Spherical `mercator` with a finite latitude band | Other scalar projection kernels require custom chart bindings; not all scalar CRS operations are MapEngine presets |
-| Interrupted pseudocylindrical maps | `goode` (land-oriented); `interrupted-sinusoidal`, `interrupted-mollweide`, `interrupted-homolosine` (independent six-lobe cuts); additional presets: `goode-ocean`, `interrupted-boggs`, `interrupted-sinu-mollweide`, `interrupted-quartic-authalic`, `interrupted-mollweide-hemispheres` | Arbitrary configurable lobes and D3’s oblique Sinu-Mollweide cut layout remain unsupported; no claim of bitwise PROJ/D3 compatibility |
+| Interrupted pseudocylindrical maps | `goode` (land-oriented); `interrupted-sinusoidal`, `interrupted-mollweide`, `interrupted-homolosine` (independent six-lobe cuts); additional presets: `goode-ocean`, `interrupted-boggs`, `interrupted-sinu-mollweide`, `interrupted-quartic-authalic`, `interrupted-mollweide-hemispheres` | Configurable equatorial lobes are available through `interrupted`; oblique Sinu-Mollweide cuts and arbitrary interruption latitudes remain unsupported; no claim of bitwise PROJ/D3 compatibility |
 | Regional composites / insets | `albers-usa`, including optional PR, VI, GU, MP and AS | Other national composites need custom charts; no responsive inset reflow or exact projected rectangular clipping |
 | Quincuncial square-world maps | `peirce-quincuncial`, `gringorten-quincuncial`, and `guyou`, in equatorial aspects | Arbitrary aspect rotation beyond the central meridian |
-| Star maps | `berghaus`, with 3–24 lobes | Other star formulas and arbitrary aspect rotation |
+| Star maps | `berghaus` and `gingery`, with 3–24 lobes; Gingery has a configurable central cap | Other star formulas and arbitrary aspect rotation |
+| HEALPix | Spherical `healpix` (H=4, K=3), equal-area, with four polar lobes per hemisphere | rHEALPix polar rearrangement, other H/K values, and pixel indexing |
 | Classical polyhedral maps | `air-ocean` (24-panel radial/gnomonic), `butterfly`, `collignon-butterfly`, `waterman` (W5) | Exact Gray–Fuller mathematics; arbitrary polyhedral nets |
 | Myriahedral maps | `myriahedral`: six named cut strategies, five Platonic solids, subdivisions, custom meshes and hinge motion | Guaranteed overlap-free nets, collision-free unfolding, and guaranteed continent connectivity |
 | DGGS-derived unfolding | Custom myriahedral meshes; H3, A5 and S2 adapters in examples | These adapters are not built-in MapEngine definitions or exact DGGS cartographic projection kernels |
 
-### Quincuncial and star examples
+### Quincuncial, star, and HEALPix examples
 
 import QuincuncialStarExample from '@site/src/components/quincuncial-star';
 
@@ -296,8 +297,8 @@ projection selector and projection cycle. Its discontinuous rendering path:
 3. Samples bed elevation and ice values at the resulting geographic vertices.
 4. Splits graticules with `projectLine` so they do not bridge cuts or inset gaps.
 
-Static discontinuous layouts switch immediately because their mesh topologies
-differ. Myriahedral views use a separate hinge animation through the globe.
+Static segmented layouts transition through the globe, rebuilding destination
+geometry with its own cuts. Myriahedral views use hinge motion through the globe.
 The continuous world projections retain their animated transitions. U.S. inset
 selection changes the displayed coverage; statistics
 remain global. Geographic masks are not political borders, and the display

@@ -76,6 +76,25 @@ These are independent layouts, **not the historical/PROJ IGH cut arrangement**.
 See [PROJ's homolosine description](https://proj.org/en/stable/operations/projections/igh.html)
 for the distinction between the local formula and its interruption layout.
 
+### HEALPix, Gingery, and custom interruptions
+
+<span class="badge">From v5.0 · Experimental</span>
+
+- `createHealpixMap({radius = 1, centralMeridian = 0})`: spherical H=4, K=3 HEALPix.
+  Options type: `HealpixMapOptions`.
+- `createGingeryMap({radius = 1, centralMeridian = 0, lobes = 6, coreAngle = 30})`:
+  equatorial Gingery star. Options type: `GingeryMapOptions`; `coreAngle` is in
+  degrees and strictly between 0 and 90; `lobes` is an integer from 3 to 24.
+- `createInterruptedMap({projection, lobes, radius = 1, centralMeridian = 0})`:
+  configurable equatorial interruptions. `InterruptedMapOptions` uses an
+  `InterruptedProjection` formula and `InterruptedLobe` tuples in `north` and
+  `south` arrays.
+
+All return `DiscontinuousMap`. See the [MapEngine reference](./map-engine.md#healpix-gingery-and-configurable-interruptions)
+for formulas, tuple validation, defaults, examples, limitations, and credits.
+These are also available in Ice Age Explorer, and HEALPix/Gingery appear in the
+inline segmented-map comparison.
+
 ### U.S. composite with insets
 
 ```typescript

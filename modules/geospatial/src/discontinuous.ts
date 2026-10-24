@@ -3,6 +3,16 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /** Experimental static discontinuous spherical maps. */
+export {createHealpixMap} from './discontinuous/healpix';
+export type {HealpixMapOptions} from './discontinuous/healpix';
+export {createGingeryMap} from './discontinuous/quincuncial-star';
+export type {GingeryMapOptions} from './discontinuous/quincuncial-star';
+export {createInterruptedMap} from './discontinuous/presets';
+export type {
+  InterruptedProjection,
+  InterruptedLobe,
+  InterruptedMapOptions
+} from './discontinuous/presets';
 export {DiscontinuousMap} from './discontinuous/map-layout';
 export type {
   GeographicPosition,
@@ -23,11 +33,25 @@ export {
 } from './discontinuous/presets';
 
 export {createAlbersUsaMap} from './discontinuous/albers-usa';
-export {createPeirceQuincuncialMap, createBerghausMap} from './discontinuous/quincuncial-star';
-export type {QuincuncialMapOptions, BerghausMapOptions} from './discontinuous/quincuncial-star';
-export {getMapLayout, fitMapLayout, pickMapLayout} from './discontinuous/layout';
+export {
+  createPeirceQuincuncialMap,
+  createBerghausMap
+} from './discontinuous/quincuncial-star';
+export type {
+  QuincuncialMapOptions,
+  BerghausMapOptions
+} from './discontinuous/quincuncial-star';
+export {
+  getMapLayout,
+  fitMapLayout,
+  pickMapLayout
+} from './discontinuous/layout';
 export type {MapBounds, MapRegionLayout} from './discontinuous/map-layout';
-export type {MapLayout, MapLayoutRegion, MapViewportOptions} from './discontinuous/layout';
+export type {
+  MapLayout,
+  MapLayoutRegion,
+  MapViewportOptions
+} from './discontinuous/layout';
 
 export {
   createMyriahedralMap,
