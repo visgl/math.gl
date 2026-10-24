@@ -77,3 +77,12 @@ test('@math.gl/core/expressions#ExpressionFunctionRegistry async', async () => {
   const fn = compileAsync('load(value) + 1', {registry});
   expect(await fn({value: 4}), 'awaits registered functions').toBe(9);
 });
+
+test('Registry rejects JSEP literals and this before mutating a function table', () => {
+  for (const name of ['true', 'false', 'null', 'this']) {
+    const registry = new ExpressionFunctionRegistry();
+    expect(() => registry.registerFunction(name, () => 1)).toThrow();
+    expect(() => registry.registerFunctions({good: () => 1, [name]: () => 2})).toThrow();
+    expect(registry.hasFunction('good')).toBe(false);
+  }
+});

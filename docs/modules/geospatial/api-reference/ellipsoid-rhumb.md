@@ -1,5 +1,20 @@
 # EllipsoidRhumb and RhumbPolygon
 
+A **rhumb line** is a route that keeps the same compass bearing throughout—for
+example, heading northeast at 45° the whole way. It is also called a *loxodrome*.
+
+On a Mercator map, a rhumb line appears straight. On a globe, it usually takes a
+longer route than the shortest surface path, called a **geodesic**. Rhumb lines
+are useful when a constant heading matters; geodesics are useful when minimizing
+travel distance matters.
+
+The equator and meridians are both rhumb lines and geodesics. Other lines of
+latitude are rhumb lines, but are not shortest routes. An oblique rhumb
+line that approaches a pole spirals around it. Longitude and the rhumb bearing
+are undefined at the pole itself.
+
+## API
+
 Constant-bearing geometry is available from the optional ellipsoid entry:
 
 ```ts

@@ -86,11 +86,15 @@ export class EllipsoidTangentPlane {
     result = new Vector2()
   ): Vector2 | undefined {
     finiteInput(cartesian, 3);
-    const length = Math.hypot(cartesian[0], cartesian[1], cartesian[2]);
-    if (!(length > 0 && Number.isFinite(length))) return undefined;
-    const x = cartesian[0] / length;
-    const y = cartesian[1] / length;
-    const z = cartesian[2] / length;
+    const scale = Math.max(Math.abs(cartesian[0]), Math.abs(cartesian[1]), Math.abs(cartesian[2]));
+    if (scale === 0) return undefined;
+    const sx = cartesian[0] / scale,
+      sy = cartesian[1] / scale,
+      sz = cartesian[2] / scale;
+    const length = Math.hypot(sx, sy, sz);
+    const x = sx / length;
+    const y = sy / length;
+    const z = sz / length;
     const n = this.zAxis;
     const denominator = x * n[0] + y * n[1] + z * n[2];
     if (denominator <= 1e-14) return undefined;
@@ -136,10 +140,13 @@ export class EllipsoidTangentPlane {
     const a = ax * ax + ay * ay + az * az;
     const b = ax * px + ay * py + az * pz;
     const c = px * px + py * py + pz * pz - 1;
-    const discriminant = b * b - a * c;
-    if (!(a > 0 && discriminant >= 0 && Number.isFinite(discriminant))) return undefined;
+    const squaredB = b * b,
+      ac = a * c;
+    const error = 8 * Number.EPSILON * (Math.abs(squaredB) + Math.abs(ac));
+    const discriminant = squaredB - ac;
+    if (!(a > 0 && discriminant >= -error && Number.isFinite(discriminant))) return undefined;
     // Stable form of the nearer root (-b + sqrt(discriminant)) / a.
-    const root = Math.sqrt(discriminant);
+    const root = Math.sqrt(Math.max(0, discriminant));
     const t = b > 0 ? -c / (b + root) : (-b + root) / a;
     return writeSurfacePoint(p[0] + t * n[0], p[1] + t * n[1], p[2] + t * n[2], result);
   }

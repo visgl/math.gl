@@ -89,6 +89,14 @@
   "dependencies": {
     "@math.gl/core": "5.0.0-alpha.19"
   },
+  "peerDependencies": {
+    "astronomy-engine": "^2.1.19"
+  },
+  "peerDependenciesMeta": {
+    "astronomy-engine": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "astronomy-engine": "2.1.19"
   }

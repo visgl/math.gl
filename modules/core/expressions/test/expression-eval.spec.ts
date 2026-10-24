@@ -209,3 +209,12 @@ test('@math.gl/core/expressions#evalAsync covers nested arrays, members and bran
   expect(await evalAsync(parse('missingFunction(value)'), context)).toBeUndefined();
   await expect(evalAsync(parse('object.constructor'), context)).rejects.toThrow(/disallowed/);
 });
+
+test('Expression accessors cache prototype-named row fields as own entries', () => {
+  const row = JSON.parse('{"toString":3,"hasOwnProperty":4,"__proto__":5,"constructor":6}');
+  for (const key of Object.keys(row)) {
+    const accessor = parseExpressionString(key);
+    expect(accessor(row)).toBe(row[key]);
+    expect(parseExpressionString(key)).toBe(accessor);
+  }
+});

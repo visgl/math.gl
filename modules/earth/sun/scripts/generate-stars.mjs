@@ -37,7 +37,7 @@ ${rows.map(r => `  ${JSON.stringify(r)}`).join(',\n')}
 ];
 `;
 const target = new URL('../../src/sun/data/bright-stars.ts', import.meta.url);
-const biome = fileURLToPath(new URL('../../../node_modules/@biomejs/biome/bin/biome', import.meta.url));
+const biome = fileURLToPath(new URL('../../../../node_modules/@biomejs/biome/bin/biome', import.meta.url));
 const formatted = execFileSync(process.execPath, [biome, 'format', '--stdin-file-path=' + fileURLToPath(target)], {input: output, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024});
 if (process.argv.includes('--check')) {
   if (readFileSync(target, 'utf8') !== formatted) throw new Error('Generated star catalog differs');

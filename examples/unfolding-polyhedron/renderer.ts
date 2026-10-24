@@ -141,6 +141,7 @@ export function createRenderer(
       gl.deleteTexture(texture);
       gl.deleteTexture(landTexture);
       gl.deleteProgram(program);
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
     },
     get ready() {
       return ready;

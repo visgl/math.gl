@@ -66,7 +66,7 @@ const BigInt64ArrayCtor = (() => {
 })();
 
 const BigUint64ArrayCtor = (() => {
-  return BigUint64ArrayAvailable ? [BigUint64Array] : [BigInt64ArrayUnavailable];
+  return BigUint64ArrayAvailable ? BigUint64Array : BigInt64ArrayUnavailable;
 })();
 
 export {BigIntCtor as BigInt};

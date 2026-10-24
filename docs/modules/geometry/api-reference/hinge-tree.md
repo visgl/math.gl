@@ -79,7 +79,7 @@ composition throws and may leave partial output. Floating-point error accumulate
 
 See the [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/unfolding-polyhedron)
 for all five Platonic solids, subdivided icosahedra, automatic maximum-spanning-tree
-cut selection, and a simple Canvas renderer. The mesh/layout builder is experimental
+cut selection, and a WebGL 2 renderer. The mesh/layout builder is experimental
 example code, separate from this API.
 
 Try the [interactive Unfolding Earth example](../unfolding-earth.md) inline in the docs.

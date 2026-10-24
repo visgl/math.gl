@@ -157,7 +157,13 @@ workload for both versions, validates both against proj4js, and rotates baseline
 flat/scalar execution order. It covers XY and XYZM in both precisions and directions;
 constructor batches alternate separately. `--scenarios` accepts comma-separated scenario
 names to focus a run. On pull requests, CI measures nine representative scenarios against
-the actual base commit and uploads `projection-performance-comparison`. CI keeps all
+the actual base commit. CI uploads two artifacts from parallel jobs:
+
+- `projection-performance-comparison-projection` contains the projection, grid preparation,
+  spheroid conversion, and local-frame comparison reports.
+- `projection-performance-comparison-pipeline` contains the pipeline comparison report.
+
+Each job measures baseline and candidate together on one runner. CI keeps all
 20,000 coordinates and 11 rotated samples, but uses `--min-sample-ms 4` to limit
 adaptive repetitions. Inspect the retained spread and `timingLimited` flags when
 interpreting these shorter measurements.

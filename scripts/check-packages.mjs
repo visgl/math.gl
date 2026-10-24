@@ -27,9 +27,17 @@ for (const name of expected) {
   }
   if (['core', 'earth'].includes(name)) {
     for (const field of ['dependencies', 'peerDependencies', 'optionalDependencies']) {
-      assert(Object.keys(manifest[field] || {}).every(dependency => dependency.startsWith('@math.gl/')),
+      assert(Object.keys(manifest[field] || {}).every(dependency =>
+        dependency.startsWith('@math.gl/') ||
+        (name === 'earth' && field === 'peerDependencies' && dependency === 'astronomy-engine' &&
+          manifest.peerDependenciesMeta?.[dependency]?.optional === true)),
         manifest.name + ': vendored implementations must not introduce external runtime dependencies');
     }
+  }
+  if (name === 'earth') {
+    assert.equal(manifest.peerDependencies?.['astronomy-engine'], '^' + manifest.devDependencies['astronomy-engine'],
+      'The existing astronomy integration must advertise its optional peer');
+    assert.equal(manifest.peerDependenciesMeta?.['astronomy-engine']?.optional, true);
   }
   for (const [subpath, entry] of Object.entries(manifest.exports)) {
     const targets = typeof entry === 'string' ? [entry] : Object.values(entry);

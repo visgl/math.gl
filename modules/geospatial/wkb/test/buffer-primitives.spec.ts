@@ -349,3 +349,41 @@ function makeGeometryWriters(): WKBGeometryWriter[] {
     }
   ];
 }
+
+test('Geometry-array ownership cannot be overridden by structurally assignable write options', () => {
+  const target = new Uint8Array(100).fill(0xaa);
+  const options = {mode: 'write' as const, target, byteOffset: 10};
+  const writer: WKBGeometryWriter = builder => {
+    builder.beginPoint();
+    builder.writeCoordinate(1, 2);
+  };
+  const array = WKBBuilder.buildGeometryArray([writer], options);
+  expect(Array.from(array.valueOffsets)).toEqual([0, 21]);
+  expect(parseWKB(array.values).geometry).toEqual({type: 'Point', coordinates: [1, 2]});
+  expect(target.every(value => value === 0xaa)).toBe(true);
+});
+
+test('Every WKB array offset is validated before writing, including null rows', () => {
+  const writer: WKBGeometryWriter = builder => {
+    builder.beginPoint();
+    builder.writeCoordinate(1, 2);
+  };
+  for (const [writers, offsets] of [
+    [
+      [writer, null],
+      [0, 21, 0]
+    ],
+    [
+      [null, null],
+      [0, -1, 0]
+    ],
+    [
+      [null, null],
+      [-1, 0, 0]
+    ]
+  ] as const) {
+    const values = new Uint8Array(30).fill(0xaa);
+    expect(() => WKBBuilder.writeGeometryArray(writers, new Int32Array(offsets), values)).toThrow();
+    expect(values.every(value => value === 0xaa)).toBe(true);
+  }
+});
