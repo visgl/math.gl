@@ -1,6 +1,13 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {
+  canCenterMap,
+  wrapLongitude,
+  mapLongitudeOffset,
+  geographicSource,
+  sampleLongitudeRow,
+} from "./map-center.js";
 import { Deck, OrthographicView, COORDINATE_SYSTEM } from "@deck.gl/core";
 import { SimpleMeshLayer } from "@deck.gl/mesh-layers";
 import { PathLayer, PolygonLayer, TextLayer } from "@deck.gl/layers";
@@ -21,7 +28,11 @@ import {
   globePosition,
 } from "./projection-transition.js";
 import { REGIONAL_VIEWS } from "./regional-views.js";
-import { DISCONTINUOUS_VIEWS, sampleField } from "./discontinuous-views.js";
+import {
+  DISCONTINUOUS_VIEWS,
+  sourceSample,
+  sampleField,
+} from "./discontinuous-views.js";
 const RAD = Math.PI / 180;
 function color(bed, ice, showIce, ghost) {
   let c =
@@ -48,10 +59,15 @@ function color(bed, ice, showIce, ghost) {
   }
   return c;
 }
-export function createGlobalScene(canvas, onError, onLoading = () => {}) {
+export function createGlobalScene(
+  canvas,
+  onError,
+  onLoading = () => {},
+  onLongitude = () => {},
+) {
   let current,
     options,
-    longitude = -25,
+    longitude = 0,
     latitude = 35,
     dragging,
     weights,
@@ -140,6 +156,8 @@ export function createGlobalScene(canvas, onError, onLoading = () => {}) {
   }
   function render(model, opts) {
     if (disposed) return;
+    if (opts.longitude !== undefined && opts.longitude !== options?.longitude)
+      longitude = Number(opts.longitude);
     if (pending && pending.opts.view !== opts.view) {
       pending.controller.abort();
       pending = null;
@@ -262,6 +280,7 @@ export function createGlobalScene(canvas, onError, onLoading = () => {}) {
       colors = new Float32Array(size * 3);
     const width = canvas.clientWidth || 900,
       height = canvas.clientHeight || 570;
+    const offset = mapLongitudeOffset(view, longitude);
     const globeScale = Math.min(width, height) * 0.42;
     const endpoints = Object.entries(weights).map(([id, weight]) => {
       const mesh = projectionGrid(id);
@@ -292,7 +311,7 @@ export function createGlobalScene(canvas, onError, onLoading = () => {}) {
       for (const endpoint of endpoints) {
         let p;
         if (endpoint.id === "globe")
-          p = point(lon, lat).map((v) => v * (endpoint.scale + lift));
+          p = point(lon + offset, lat).map((v) => v * (endpoint.scale + lift));
         else {
           p = projectCoordinate(endpoint.id, [lon, lat]);
           p = [
@@ -309,14 +328,14 @@ export function createGlobalScene(canvas, onError, onLoading = () => {}) {
     for (let y = 0; y <= 180; y++)
       for (let x = 0; x <= 360; x++) {
         const i = y * 361 + x,
-          j = y * 360 + (x % 360),
           c = color(
-            bed[j],
-            model.footprints || model.maskModel ? ice[j] * 1500 : ice[j],
+            sampleLongitudeRow(bed, x, y, offset),
+            sampleLongitudeRow(ice, x, y, offset) *
+              (model.footprints || model.maskModel ? 1500 : 1),
             showIce,
             ghost,
           );
-        const sphere = point(x - 180, y - 90);
+        const sphere = point(x - 180 + offset, y - 90);
         for (const endpoint of endpoints) {
           const p =
             endpoint.id === "globe"
@@ -405,6 +424,7 @@ export function createGlobalScene(canvas, onError, onLoading = () => {}) {
       );
     }
     const viewport = { width, height, longitude, latitude };
+    const offset = mapLongitudeOffset(opts.view, longitude);
     const toScene = (p, regionId, lift = 0, source) => {
       if (pose) return pose(p, regionId, lift);
       const [x, y] = fitted.project(p);
@@ -419,7 +439,7 @@ export function createGlobalScene(canvas, onError, onLoading = () => {}) {
         if (geographic)
           return segmentedPosition(
             flat,
-            geographic,
+            geographicSource(geographic, offset),
             unfoldAmount,
             viewport,
             lift,
@@ -436,6 +456,10 @@ export function createGlobalScene(canvas, onError, onLoading = () => {}) {
           key,
           flat: new Float32Array(g.samples.length * 3),
           globe: new Float32Array(g.samples.length * 3),
+          samples:
+            offset === 0
+              ? g.samples
+              : g.sources.map((p) => sourceSample(geographicSource(p, offset))),
         };
         for (let i = 0; i < g.samples.length; i++) {
           const [x, y] = fitted.project([
@@ -450,7 +474,10 @@ export function createGlobalScene(canvas, onError, onLoading = () => {}) {
             ],
             i * 3,
           );
-          endpoint.globe.set(globePosition(g.sources[i], viewport), i * 3);
+          endpoint.globe.set(
+            globePosition(geographicSource(g.sources[i], offset), viewport),
+            i * 3,
+          );
         }
         endpoints.set(g, endpoint);
       }
@@ -460,11 +487,13 @@ export function createGlobalScene(canvas, onError, onLoading = () => {}) {
     const surfaceChanged =
       !surface ||
       surface.fields !== fields ||
+      surface.offset !== offset ||
       surface.showIce !== opts.showIce ||
       surface.ghost !== opts.ghost;
     if (surfaceChanged) {
       surface = {
         fields,
+        offset,
         showIce: opts.showIce,
         ghost: opts.ghost,
         colors: new Float32Array(positions.length),
@@ -492,11 +521,11 @@ export function createGlobalScene(canvas, onError, onLoading = () => {}) {
       normals[i * 3 + 2] = 1;
       if (surfaceChanged) {
         const thickness =
-          sampleField(ice, g.samples[i]) *
+          sampleField(ice, endpoint?.samples[i] || g.samples[i]) *
           (model.footprints || model.maskModel ? 1500 : 1);
         colors.set(
           color(
-            sampleField(bed, g.samples[i]),
+            sampleField(bed, endpoint?.samples[i] || g.samples[i]),
             thickness,
             opts.showIce,
             opts.ghost,
@@ -594,7 +623,7 @@ export function createGlobalScene(canvas, onError, onLoading = () => {}) {
   }
   function setLayers(view, mesh, lines, overlays = []) {
     deck.setProps({
-      controller: { dragPan: view !== "globe", scrollZoom: true },
+      controller: { dragPan: view !== "globe" && !dragging, scrollZoom: true },
       layers: [
         new SimpleMeshLayer({
           id: "global-ice",
@@ -623,23 +652,32 @@ export function createGlobalScene(canvas, onError, onLoading = () => {}) {
     });
   }
   function down(e) {
-    if (displayView === "globe" && !transition) {
+    if (
+      !transition &&
+      (displayView === "globe" || (e.shiftKey && canCenterMap(displayView)))
+    ) {
       dragging = [e.clientX, e.clientY, longitude, latitude];
+      deck.setProps({ controller: { dragPan: false, scrollZoom: true } });
       canvas.setPointerCapture(e.pointerId);
     }
   }
   function move(e) {
     if (dragging) {
-      longitude = dragging[2] - (e.clientX - dragging[0]) * 0.35;
-      latitude = Math.max(
-        -85,
-        Math.min(85, dragging[3] + (e.clientY - dragging[1]) * 0.35),
-      );
-      draw(current, options);
+      longitude = wrapLongitude(dragging[2] - (e.clientX - dragging[0]) * 0.35);
+      if (displayView === "globe")
+        latitude = Math.max(
+          -85,
+          Math.min(85, dragging[3] + (e.clientY - dragging[1]) * 0.35),
+        );
+      onLongitude(longitude);
+      if (!animationFrame) animationFrame = requestAnimationFrame(animate);
     }
   }
   function up() {
     dragging = null;
+    deck.setProps({
+      controller: { dragPan: displayView !== "globe", scrollZoom: true },
+    });
   }
   canvas.addEventListener("pointerdown", down);
   canvas.addEventListener("pointermove", move);

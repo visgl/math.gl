@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import { canCenterMap } from "./map-center.js";
 import React, { useEffect, useRef, useState } from "react";
 import { loadGlobalSimulation, sampleAt, clampAge } from "./data.js";
 import { createGlobalScene } from "./global-scene.js";
@@ -35,6 +36,7 @@ export default function GlobalIceAge({
     scene = useRef(null);
   const [baseModel, setModel] = useState(null),
     [error, setError] = useState("");
+  const [longitude, setLongitude] = useState(0);
   const [preparingMap, setPreparingMap] = useState(false);
   const [climateModel, setClimateModel] = useState(null);
   const [olderStatus, setOlderStatus] = useState("Loading earlier ice masks…");
@@ -93,6 +95,7 @@ export default function GlobalIceAge({
       canvas.current,
       (e) => setError(e.message),
       setPreparingMap,
+      setLongitude,
     );
     return () => {
       scene.current?.finalize();
@@ -101,8 +104,15 @@ export default function GlobalIceAge({
   }, []);
   useEffect(() => {
     if (model)
-      scene.current?.render(model, { age, view, showIce, ghost, labels });
-  }, [model, age, view, showIce, ghost, labels]);
+      scene.current?.render(model, {
+        age,
+        view,
+        showIce,
+        ghost,
+        labels,
+        longitude,
+      });
+  }, [model, age, view, showIce, ghost, labels, longitude]);
   useEffect(() => {
     if (!cycleViews || !model || preparingMap) return;
     const views = Object.keys(GLOBAL_VIEWS);
@@ -220,7 +230,12 @@ export default function GlobalIceAge({
           </div>
         )}
         <div className="alpine-map-note">
-          {view === "globe" ? "Drag to rotate" : "Drag to pan"} · scroll to zoom{" "}
+          {view === "globe"
+            ? "Drag to rotate"
+            : canCenterMap(view)
+              ? "Drag to pan · Shift-drag to center"
+              : "Drag to pan"}{" "}
+          · scroll to zoom{" "}
           <span>
             {cycleViews ? "Cycling projections · " : ""}
             {model?.maskModel
@@ -318,6 +333,21 @@ export default function GlobalIceAge({
             </optgroup>
           </select>
         </label>
+        {canCenterMap(view) && (
+          <label>
+            {view === "globe" ? "Globe longitude" : "Map central meridian"}
+            <input
+              type="range"
+              aria-label="Central meridian"
+              min="-180"
+              max="180"
+              step="1"
+              value={longitude}
+              onChange={(e) => setLongitude(Number(e.target.value))}
+            />
+            <output>{Math.round(longitude)}°</output>
+          </label>
+        )}
         {view.startsWith("myriahedral:") && (
           <p className="alpine-source-note">
             Experimental panel map; overlaps are possible. Geography-aware cuts

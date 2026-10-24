@@ -322,3 +322,5 @@ Mollweide and ocean Goode presets. All use `MapEngine` through
 Sinu-Mollweide currently uses equatorial six-lobe cuts, not D3's oblique five-lobe
 arrangement. See the [supported families and projection credits](../../docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md)
 for aspects, limitations, primary references, and D3/PROJ provenance.
+
+The longitude slider sets the globe longitude or the central meridian of global maps. Drag the globe to rotate; Shift-drag a global flat map to change its central meridian, or drag normally to pan. These controls stay synchronized. Regional/inset maps and geography-aware myriahedral layouts retain their fixed geographic orientation.
