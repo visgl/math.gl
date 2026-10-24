@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0, modified to reuse the input point and avoid per-coordinate result objects and Newton callbacks. See ../../../PROJ4-LICENSE.md for the upstream license and attribution. Table precision and interval selection follow PROJ 9.5.1 robin.cpp. See ../../../PROJ-LICENSE.txt for PROJ attribution.
+// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0, modified to reuse the input point and avoid per-coordinate result objects and Newton callbacks. See ../../../../projection/PROJ4-LICENSE.md for the upstream license and attribution. Table precision and interval selection follow PROJ 9.5.1 robin.cpp. See ../../../../projection/PROJ-LICENSE.txt for PROJ attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {};

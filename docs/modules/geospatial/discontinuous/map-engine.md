@@ -43,6 +43,16 @@ spherical degrees; the radius does not specify an ellipsoid or a CRS.
 | `myriahedral` | [Myriahedral options](./myriahedral.md): `preset`, `columns`, `solid`, `subdivisions`, `mesh`, `centralMeridian`, `landSampleStep`; use top-level radius and runtime callbacks |
 | `peirce-quincuncial` | `centralMeridian: 0`; equatorial Peirce square-world layout, 8 computational charts |
 | `berghaus` | `centralMeridian: 0`, `lobes: 5`; integer lobes from 3–24, two charts per lobe |
+| `guyou` | `centralMeridian: 0`; two joined conformal hemisphere squares, 8 computational charts |
+| `gringorten-quincuncial` | `centralMeridian: 0`; equal-area quincuncial in equatorial aspect, 8 charts |
+| `butterfly` | Octahedral gnomonic butterfly, 8 faces |
+| `collignon-butterfly` | Collignon octahedral butterfly, 8 faces |
+| `waterman` | Waterman W5 butterfly: 8 hexagons and 24 corner triangles |
+| `goode-ocean` | Ocean-oriented homolosine lobes, central meridian −160°, no duplicate extensions |
+| `interrupted-boggs` | Boggs eumorphic with land-oriented equatorial interruptions |
+| `interrupted-sinu-mollweide` | Sinu-Mollweide formula with land-oriented equatorial cuts; not D3's oblique five-lobe layout |
+| `interrupted-quartic-authalic` | Paired hemispheric lobes, central meridian −20° |
+| `interrupted-mollweide-hemispheres` | Paired Mollweide hemispheres, central meridian −20° |
 | `custom` | `charts: readonly MapChartDescription[]` |
 
 Mercator is spherical, not ellipsoidal Mercator. It clips lines and polygons to
@@ -78,6 +88,32 @@ limits are used there, but derivatives are singular. Adaptive line sampling
 approximates curved projected edges; adjust sampling tolerance for output size.
 Input polygons still require an open-hemisphere source chart. See the
 [interactive comparison and support table](../projection/developer-guide/discontinuous-projections.md#supported-map-families).
+
+### Additional segmented and interrupted definitions
+
+<span class="badge">From v5.0 · Experimental</span>
+
+All presets in the table use the same `projectPoint`, `projectLine`,
+`projectPolygon`, `fit`, picking, and globe-transition pipeline. Select them in
+Ice Age Explorer's global projection control. These static maps do not have
+hinge motion. Square maps expose `centralMeridian`; the other new presets use
+fixed cuts and aspects. `radius` belongs to `MapDescription` and scales the whole map.
+
+The paired hemispheric maps touch at a point on the equator but share no full
+continuous edge: `disjoint` is true under the engine's join-graph definition.
+Butterfly faces share edges along a tree; their other edges are cuts. Computational
+chart boundaries are not all visible seams.
+
+Sinu-Mollweide here uses the published formula in equatorial aspect with six
+land-oriented lobes. It does **not** reproduce D3's oblique five-lobe layout with
+cuts starting at 35° north and 10° south. Small-circle interruption boundaries,
+arbitrary lobe configuration, and general aspect rotation remain future work.
+Ocean Goode uses the six standard ocean-oriented lobes without duplicated
+extension regions. Polyhedral presets use a root-face origin and a fixed −30°
+planar orientation; use `fit()` instead of assuming D3 screen coordinates.
+
+See [references and implementation credits](../projection/developer-guide/discontinuous-projections.md#references-and-implementation-credits)
+for formulas, source provenance, and licensing.
 
 ## MapChartDescription
 

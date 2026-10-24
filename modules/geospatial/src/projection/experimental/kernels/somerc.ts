@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) PROJ contributors
-// SPDX-FileComment: Initialization adapted from proj4js 2.22.0; forward branch and inverse Newton equations adapted from PROJ 9.5.1 src/projections/somerc.cpp. See ../../../../projection/PROJ-LICENSE.txt. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Initialization adapted from proj4js 2.22.0; forward branch and inverse Newton equations adapted from PROJ 9.5.1 src/projections/somerc.cpp. See ../../../../projection/PROJ-LICENSE.txt. See ../../../../projection/PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {

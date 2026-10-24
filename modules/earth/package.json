@@ -82,7 +82,8 @@
     "sun/LICENSE-SUNCALC",
     "sun/LICENSE-BRIGHT-STARS",
     "timezone/data",
-    "LICENSE"
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
   ],
   "sideEffects": false,
   "dependencies": {

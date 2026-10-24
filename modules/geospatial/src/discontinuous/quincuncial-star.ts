@@ -1,10 +1,13 @@
 // math.gl
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND ISC
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright 2013-2021 Mike Bostock
+// SPDX-FileComment: Quincuncial arrangement and Berghaus formula adapted from d3-geo-projection 4.0.0; see D3-LICENSE.txt. Original math.gl chart and boundary handling.
 
 import {DiscontinuousMap, type MapRegion} from './map-layout';
 import {coordinates, geographic, RAD, type Position, type Vector} from './math';
 import {guyouRaw} from './quincuncial-kernel';
+import {gringortenRaw} from './gringorten-kernel';
 
 const PI = Math.PI;
 const HALF_PI = PI / 2;
@@ -62,7 +65,28 @@ function fan(
  * Equatorial aspect centered on centralMeridian, latitude zero; not D3's default rotation.
  */
 export function createPeirceQuincuncialMap(options: QuincuncialMapOptions = {}) {
-  const halfSide = guyouRaw(HALF_PI, 0)[0];
+  return squareMap(options, guyouRaw);
+}
+
+/** Equal-area Gringorten quincuncial, in equatorial aspect. */
+export function createGringortenQuincuncialMap(options: QuincuncialMapOptions = {}) {
+  return squareMap(options, gringortenRaw);
+}
+
+/** Conformal Guyou: two joined hemisphere squares centered at ±90° longitude. */
+export function createGuyouMap(options: QuincuncialMapOptions = {}) {
+  return squareMap(
+    {...options, centralMeridian: (options.centralMeridian ?? 0) + 90},
+    guyouRaw,
+    true
+  );
+}
+
+type SquareKernel = ((lambda: number, phi: number) => number[]) & {
+  invert: (x: number, y: number) => number[];
+};
+function squareMap(options: QuincuncialMapOptions, raw: SquareKernel, rectangular = false) {
+  const halfSide = raw(HALF_PI, 0)[0];
   const distance = 2 * halfSide * Math.SQRT1_2;
   return fan(4, PI / 4, options, (back, theta) => {
     const sx = Math.sign(Math.cos(theta) - Math.sin(theta));
@@ -72,6 +96,9 @@ export function createPeirceQuincuncialMap(options: QuincuncialMapOptions = {}) 
       project: ([lon, lat]) => {
         let lambda = lon * RAD;
         if (back) lambda = wrap(lambda - PI);
+        // Region clipping owns this hemisphere. Rotation roundoff must not
+        // select the other complex branch just beyond its ±90° boundary.
+        lambda = Math.max(-HALF_PI, Math.min(HALF_PI, lambda));
         // The four branch points lie at hemisphere corners. Their finite limit
         // is known exactly; the elliptic formula otherwise encounters 0 * Infinity.
         const phi = lat * RAD;
@@ -82,7 +109,8 @@ export function createPeirceQuincuncialMap(options: QuincuncialMapOptions = {}) 
               ? [0, Math.sign(phi) * halfSide]
               : Math.abs(Math.abs(lambda) - HALF_PI) < 1e-12 && Math.abs(phi) < 1e-12
                 ? [Math.sign(lambda) * halfSide, 0]
-                : guyouRaw(lambda, phi);
+                : raw(lambda, phi);
+        if (rectangular) return [p[0] + (back ? -halfSide : halfSide), p[1]];
         const x = (p[0] - p[1]) * Math.SQRT1_2;
         const y = (p[0] + p[1]) * Math.SQRT1_2;
         // Back longitude reverses the local horizontal axis. This chart owns
@@ -92,12 +120,12 @@ export function createPeirceQuincuncialMap(options: QuincuncialMapOptions = {}) 
       unproject: ([x0, y0]) => {
         let x = x0,
           y = y0;
-        if (back) {
+        if (back && !rectangular) {
           x = (x - sx * distance) / s;
           y = (y - sy * distance) / s;
         }
-        const u = (x + y) * Math.SQRT1_2,
-          v = (y - x) * Math.SQRT1_2;
+        const u = rectangular ? x - (back ? -halfSide : halfSide) : (x + y) * Math.SQRT1_2,
+          v = rectangular ? y : (y - x) * Math.SQRT1_2;
         if (Math.abs(u) > halfSide + 1e-9 || Math.abs(v) > halfSide + 1e-9) return null;
         if (Math.abs(Math.abs(u) - halfSide) < 1e-12 && Math.abs(Math.abs(v) - halfSide) < 1e-12)
           return [wrap(Math.sign(u) * HALF_PI + (back ? PI : 0)) / RAD, Math.sign(v) * 45];
@@ -111,7 +139,7 @@ export function createPeirceQuincuncialMap(options: QuincuncialMapOptions = {}) 
           let high = vertical ? PI / 4 : HALF_PI;
           for (let i = 0; i < 55; i++) {
             const phi = (low + high) / 2;
-            const q = guyouRaw(HALF_PI, phi);
+            const q = raw(HALF_PI, phi);
             if (vertical ? q[1] < Math.abs(v) : q[0] > Math.abs(u)) low = phi;
             else high = phi;
           }
@@ -123,7 +151,7 @@ export function createPeirceQuincuncialMap(options: QuincuncialMapOptions = {}) 
         // Forward Guyou is odd in each coordinate. Invert the first quadrant
         // and reflect explicitly: the elliptic inverse can select another
         // boundary branch when its complex cosine approaches zero.
-        const p = guyouRaw.invert(Math.abs(u), Math.abs(v));
+        const p = raw.invert(Math.abs(u), Math.abs(v));
         return [wrap(Math.sign(u) * p[0] + (back ? PI : 0)) / RAD, (Math.sign(v) * p[1]) / RAD];
       }
     };

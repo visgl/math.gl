@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Original math.gl pole-complement and Cartesian inverse stability corrections. Adapted from proj4js 2.22.0 with bounded inverse disk/pole roundoff. See ../../../PROJ4-LICENSE.md for upstream attribution. Independent corrections acknowledge PROJ 9.5.1 src/projections/laea.cpp; see ../../../../projection/PROJ-LICENSE.txt.
+// SPDX-FileComment: Original math.gl pole-complement and Cartesian inverse stability corrections. Adapted from proj4js 2.22.0 with bounded inverse disk/pole roundoff. See ../../../../projection/PROJ4-LICENSE.md for upstream attribution. Independent corrections acknowledge PROJ 9.5.1 src/projections/laea.cpp; see ../../../../projection/PROJ-LICENSE.txt.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
