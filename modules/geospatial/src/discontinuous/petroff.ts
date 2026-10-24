@@ -72,12 +72,12 @@ export function petroffForward(
       s0 * Math.cos(latitude) * Math.cos(delta) - c0 * Math.sin(latitude)
     )
   );
-  const r = acos(s0 * Math.sin(latitude) + c0 * Math.cos(latitude) * Math.cos(delta));
+  const point = geographic([Math.abs(delta) / RAD, latitude / RAD]);
+  const r = angle(geographic([0, phi0 / RAD]), point);
   if (r < 1e-14) return finish(0, h);
   const {index, c, G, Gp, F, ap, cp} = section(theta);
   const beta = index === 0 ? psi0 - theta : index === 1 ? theta - psi0 : PI - theta;
   // Great-circle distance is well conditioned even at a section vertex.
-  const point = geographic([Math.abs(delta) / RAD, latitude / RAD]);
   const vertex = geographic(index < 2 ? [45, 0] : [0, 90]);
   const x = angle(point, vertex);
   if (x < 1e-14) {
@@ -125,8 +125,13 @@ function inverse(x: number, y: number, quadrant: number, south: boolean): Positi
   const gamma = F - delta;
   const cosxy = 1 / Math.sqrt(1 + (Math.tan(b) / Math.cos(delta)) ** 2);
   const arc = acos(1 - (xp / (xp + yp)) ** 2 * (1 - cosxy));
-  const r = acos(Math.cos(arc) * Math.cos(c) + Math.sin(arc) * Math.sin(c) * Math.cos(gamma));
-  const bt = asin((Math.sin(arc) * Math.sin(gamma)) / Math.sin(r));
+  // atan2 retains the tiny tangent components near the section center;
+  // acos(cos(r)) rounds to zero there and makes the old sine ratio 0/0.
+  const transverse = Math.sin(arc) * Math.sin(gamma);
+  const axial = Math.cos(arc) * Math.sin(c) - Math.sin(arc) * Math.cos(c) * Math.cos(gamma);
+  const cosine = Math.cos(arc) * Math.cos(c) + Math.sin(arc) * Math.sin(c) * Math.cos(gamma);
+  const r = Math.atan2(Math.hypot(transverse, axial), cosine);
+  const bt = Math.atan2(transverse, axial);
   const az = index === 0 ? psi0 - bt : index === 1 ? psi0 + bt : PI - bt;
   const lat = asin(s0 * Math.cos(r) - c0 * Math.sin(r) * Math.cos(az));
   const lon =

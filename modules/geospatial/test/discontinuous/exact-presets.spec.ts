@@ -128,3 +128,20 @@ test('public factories validate options and invert face centers', () => {
     }
   }
 });
+
+test('Petroff inverse remains defined arbitrarily close to section centers', () => {
+  const map = make('petroff');
+  for (const lon of [-135, -45, 45, 135])
+    for (const sign of [-1, 1]) {
+      for (const delta of [1e-4, 1e-6, 1e-8, 1e-10])
+        for (const direction of [-1, 1]) {
+          const source: Position = [lon + direction * delta, sign * (67.5 - delta)];
+          const hit = map.projectPoint(source)!;
+          const inverse = map.unprojectPoint(hit.position, hit.regionId);
+          expect(inverse.length, String(source)).toBe(1);
+          const a = geographic(source),
+            b = geographic(inverse[0].position);
+          expect(Math.hypot(...a.map((v, i) => v - b[i]))).toBeLessThan(2e-7);
+        }
+    }
+});
