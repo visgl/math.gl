@@ -85,6 +85,9 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
   };
   function historicalSource(base) {
     for (const file of [base, base.replace(/\.js$/, '.ts'), base + '.ts', base + '.js', base + '.json', base + '/index.ts']) {
+      // `git show ref:directory` succeeds with a tree listing. Only source
+      // files can be loaded; continue to directory/index.ts for barrel imports.
+      if (!/\.(ts|js|json)$/.test(file)) continue;
       try {git(historicalPath(relative(root, file))); return sourceResult(file);}
       catch { /* Try the next supported source extension. */ }
     }

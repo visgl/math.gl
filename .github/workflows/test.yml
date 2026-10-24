@@ -110,6 +110,9 @@ jobs:
       - name: Check tile-matrix subpath exports, public types and dependency boundary
         run: yarn check:tile-matrix-package
 
+      - name: Fetch pinned C8 package baseline
+        run: git fetch --no-tags --depth=1 origin b9db6472e72b22ffb52b1c37c97745e68478728a
+
       - name: Qualify local frames, poses and G7 baseline accuracy
         timeout-minutes: 2
         run: |
