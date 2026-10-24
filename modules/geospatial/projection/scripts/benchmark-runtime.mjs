@@ -66,7 +66,10 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
     let sideEffects;
     if (parts[0] === 'modules' && parts.length > 2) {
       const manifest = parts.slice(0, 2).join('/') + '/package.json';
-      const metadata = JSON.parse(baselineCommit ? git(manifest) : readFileSync(join(root, manifest), 'utf8'));
+      let contents;
+      try {contents = baselineCommit ? git(manifest) : readFileSync(join(root, manifest), 'utf8');}
+      catch { /* Sources without package metadata retain conservative side effects. */ }
+      const metadata = contents ? JSON.parse(contents) : {};
       // Virtual historical modules do not inherit filesystem package metadata.
       // Preserve explicit contracts. Literal lists are used by core; unknown
       // glob patterns stay conservative instead of guessing their semantics.
@@ -85,9 +88,6 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
   };
   function historicalSource(base) {
     for (const file of [base, base.replace(/\.js$/, '.ts'), base + '.ts', base + '.js', base + '.json', base + '/index.ts']) {
-      // `git show ref:directory` succeeds with a tree listing. Only source
-      // files can be loaded; continue to directory/index.ts for barrel imports.
-      if (!/\.(ts|js|json)$/.test(file)) continue;
       try {git(historicalPath(relative(root, file))); return sourceResult(file);}
       catch { /* Try the next supported source extension. */ }
     }
