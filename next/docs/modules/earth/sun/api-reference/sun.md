@@ -18,7 +18,7 @@ Returns the approximate geometric solar position at an observer's location.
 
 The result is `{altitude, azimuth}`, both in radians. Altitude is zero at the geometric horizon, positive above it and negative below it. Azimuth is measured from south towards west: south is 0, west PI/2, north ±PI and east −PI/2. Atmospheric refraction, terrain and observer elevation are omitted. This lightweight orbital approximation is intended for visualization; use [getSkySnapshot](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sky.md) for the optional consistent topocentric astronomy tier. Supply finite inputs and a valid date; this legacy function does not validate ranges.
 
-`getSun` was the original API name. Current releases export `getSunPosition`; import that name when updating older examples.
+The historical `get-sun.md` documentation filename did not correspond to a `getSun` export. Import `getSunPosition` for the Sun-position API.
 
 ```
 import {getSunPosition, getSunLight} from '@math.gl/earth/sun';
