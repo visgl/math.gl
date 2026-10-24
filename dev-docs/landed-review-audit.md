@@ -10,10 +10,11 @@ all domains of a feature are qualified.
 
 PR #281 has four review threads, all resolved. Its polar rhumb area and
 representable near-pole endpoint fixes are on master. No additional unresolved
-finding on #281 requires another implementation here. The still-open
+finding on #281 requires another implementation here. At the original audit,
 [PR #278](https://github.com/visgl/math.gl/pull/278) (bounded P0 qualification) and
 [PR #287](https://github.com/visgl/math.gl/pull/287) (global G6 completeness) are
-separate integration work; this change does not copy their implementations.
+separate integration work. Both are now merged; the delivery ledger below records
+that update without changing the historical review findings.
 
 ## Fixes in this change
 
@@ -61,7 +62,7 @@ Removing the `NumberArray` compatibility alias remains an explicit major-version
 API decision; this audit does not silently break existing consumers. These
 threads are not mechanically marked resolved merely to reduce the open count.
 
-## Remaining implementation tranches
+## Delivery status and remaining implementation tranches
 
 The authoritative mathematical scope is the
 [GeographicLib roadmap](./geographiclib-roadmap.md), complemented by the
@@ -69,11 +70,11 @@ The authoritative mathematical scope is the
 
 | Priority | Remaining tranche | Next deliverable |
 | --- | --- | --- |
-| P0 | G0–G2 bounded qualification — open #278 | Refresh and land the existing P0 work; preserve independent controls and published conditioning/shape/magnitude limits. Broader domains remain qualification work, not a universal finite-input claim. |
-| P1 | G6 global intersections — open #287 | Land the already implemented capture-bound completeness increment and its independent/root-set/ranking tests. Master currently contains only the earlier bounded search. |
+| Delivered | G0–G2 bounded qualification — merged #278 | Preserve independent controls and declared conditioning/shape/magnitude limits; broader domains remain separate qualification work. |
+| Delivered | G6 global intersections — merged #287 | Capture-bound completeness is on master with independent root-set/ranking controls and an explicit finite support profile. |
 | P1 | G7 bulk/performance | Output-buffer/reusable/batch APIs only where equal-accuracy paired benchmarks demonstrate value; separate setup, allocations, throughput and bundle costs. |
-| P1 | C5 seams/topology | Qualified seam splitting for declared edge models, pole/dateline crossings, holes, winding and degeneracies; preserve attributes and original-edge provenance. |
-| P2 | C4/C6 rhumb path integration | Reuse the delivered G5 scalar rhumb solver in the path sampler/adaptive subdivision interfaces; test winding, pole failures, height/provenance and work limits. Do not reimplement G5. |
+| Meridian profile delivered | C5 seams/topology | Configurable meridian seams, declared edge models, holes/components, polar caps, attributes and provenance; arbitrary interrupted networks and invalid-polygon repair remain separate. |
+| Delivered | C4/C6 rhumb path integration | Reuses G5 in RhumbPath and adaptive subdivision, preserving winding, pole failures, height/provenance and work limits. |
 | P2 | C8 local-operation qualification | Extend scalar/frame/tangent evidence to a declared independent domain matrix, packaged APIs, multiple browser engines and measured performance. These boundary fixes are not exhaustive qualification. |
 | P2 | C7 renderer precision/interop | Consumer-driven rebasing/high-low buffers, tested under actual float32 arithmetic with allocation/bundle measurements. |
 | P2 | G8 wider-flattening revolution geodesics | Qualified elliptic-integral primitives and Exact direct/inverse/line solver with explicit algorithm selection. |

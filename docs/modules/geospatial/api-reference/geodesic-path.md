@@ -71,3 +71,7 @@ polar, coincident and nearly/exactly antipodal paths. The fixture records upstre
 hashes and its original generator. These comparisons share the underlying geodesic algorithm
 family; separate analytic sphere interpolation and distance checks provide independent
 mathematical controls. This evidence does not extend the solver's qualified shape domain.
+
+For constant-bearing routes, use [RhumbPath](./rhumb-path.md). For periodic map
+discontinuities, [split geographic seams](./geographic-seams.md) before adaptive
+projection; unrolled longitude alone does not split a chart.

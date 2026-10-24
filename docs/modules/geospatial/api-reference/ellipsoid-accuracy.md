@@ -99,7 +99,7 @@ finite-domain certification remain separate; this is not full feature parity.
 | Exact geodesics for arbitrary flattening | Not implemented; sixth-order series is not an exact elliptic-integral solver |
 | General triaxial geodesics | Not implemented |
 | Certified nearest surface point on every triaxial/prolate interior | Sampled nearest solutions and unique cusp boundaries qualified; ambiguous minima reject; no universal finite-input certificate |
-| Rhumb lines and geodesic intersections | Scalar rhumb inverse/direct/lines/polygons and bounded intersections are exposed; see [G5–G6 qualification](../projection/geographiclib-g56-qualification.md). Global ellipsoidal intersection completeness remains in open [PR #287](https://github.com/visgl/math.gl/pull/287) |
+| Rhumb lines and geodesic intersections | Scalar rhumb inverse/direct/lines/polygons and bounded intersections are exposed; see [G5–G6 qualification](../projection/geographiclib-g56-qualification.md). Capture-bound global completeness is on master through [PR #287](https://github.com/visgl/math.gl/pull/287), within the [declared G6 profile](../projection/geographiclib-g6-qualification.md) |
 | Magnetic/gravity/geoid models | Outside the ellipsoid geometry API; not implied by geodesic parity |
 | Performance advantage over GeographicLib | No claim; shared implementation plus facade has not established an advantage |
 
