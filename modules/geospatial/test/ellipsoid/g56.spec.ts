@@ -76,7 +76,7 @@ test('Intersection bounds, coincidence and input validation are explicit', () =>
     a = {latitude: 0, longitude: 0, azimuth: 90};
   const coincident = g.all(a, {...a, longitude: 90}, {maxDistance: 1});
   expect(coincident.coincidences).toEqual([]);
-  expect(coincident.complete).toBe(false);
+  expect(coincident.complete).toBe(true);
   const found = g.all(a, {...a, longitude: 90}, {maxDistance: 2});
   expect(found.coincidences).toHaveLength(1);
   const c = found.coincidences[0];

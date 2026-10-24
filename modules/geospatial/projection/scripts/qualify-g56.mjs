@@ -88,7 +88,7 @@ try {
       architecture: process.arch
     },
     sourceSHA256: hash.digest('hex'),
-    note: 'Bounded G5–G6 profile. Rhumb native and independent integral controls; bounded intersections include native counts and residual gates. Ellipsoid global completeness remains unqualified.',
+    note: 'Bounded G5–G6 profile. Rhumb native and independent integral controls; bounded intersections include native counts and residual gates. Capture-bound completeness is additionally gated by the global G6 matrix.',
     summary,
     rows
   };

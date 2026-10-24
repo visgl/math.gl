@@ -55,6 +55,8 @@ jobs:
 
       - name: Check independent interior references and qualification
         run: |
+          python3 modules/geospatial/projection/scripts/generate-g6-reference.py --check
+          node modules/geospatial/projection/scripts/qualify-g6.mjs --output /tmp/g6-qualification.json
           python3 modules/geospatial/projection/scripts/generate-g56-reference.py --check
           node modules/geospatial/projection/scripts/qualify-g56.mjs --output /tmp/g56-qualification.json
           python3 modules/geospatial/projection/scripts/generate-g34-reference.py --check
@@ -141,6 +143,7 @@ jobs:
           node modules/geospatial/projection/scripts/measure-accuracy.mjs --output /tmp/projection-accuracy.json
           node modules/geospatial/projection/scripts/check-experimental-package.mjs
           node modules/geospatial/projection/scripts/check-packed-package.mjs
+          node modules/geospatial/projection/scripts/check-g6-package.mjs
           node modules/geospatial/projection/scripts/check-g56-package.mjs
           node modules/geospatial/projection/scripts/check-g34-package.mjs
           node modules/geospatial/projection/scripts/check-bundle-budget.mjs
@@ -393,6 +396,7 @@ jobs:
       - name: Qualify independent interior and deformation references
         timeout-minutes: 2
         run: |
+          node modules/geospatial/projection/scripts/qualify-g6.mjs --browser ${{ matrix.browser }} --output /tmp/g6-qualification-${{ matrix.browser }}.json
           node modules/geospatial/projection/scripts/qualify-g56.mjs --browser ${{ matrix.browser }} --output /tmp/g56-qualification-${{ matrix.browser }}.json
           node modules/geospatial/projection/scripts/qualify-g34.mjs --browser ${{ matrix.browser }} --output /tmp/g34-qualification-${{ matrix.browser }}.json
           node modules/geospatial/projection/scripts/qualify-interiors.mjs --browser ${{ matrix.browser }} --output /tmp/interior-qualification-${{ matrix.browser }}.json
@@ -417,6 +421,7 @@ jobs:
         with:
           name: projection-browser-qualification-${{ matrix.browser }}
           path: |
+            /tmp/g6-qualification-${{ matrix.browser }}.json
             /tmp/g56-qualification-${{ matrix.browser }}.json
             /tmp/g34-qualification-${{ matrix.browser }}.json
             /tmp/projection-browser-qualification.json
