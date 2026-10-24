@@ -23,6 +23,30 @@ wheel and zoom buttons magnify every region together; drag to pan. The
 
 The discontinuous map API, presets, and layout helpers are experimental and may change.
 
+## Segmented, connected, or detached?
+
+A map assembled from several charts is not necessarily detached or visibly
+interrupted at every chart boundary. **Segmentation** describes how the map is
+constructed; **continuity** describes what happens across each seam; and
+**connectivity** describes whether the placed pieces remain joined together.
+
+| Arrangement | Example | Meaning |
+| --- | --- | --- |
+| Joined charts forming one filled map | Peirce quincuncial | The hemisphere pieces meet at continuous joins to form a square. Cuts between the outer pieces lie on the square's perimeter; a line crossing one resumes at another edge. |
+| Connected map with open cuts | Berghaus star | The lobes join the central hemisphere, while cuts open between their outer edges. The map is connected despite those interruptions. |
+| Detached components | Albers USA | Alaska, Hawaii and territory insets are placed separately from the mainland. |
+
+`MapEngine` represents these properties separately: `seams[].kind` distinguishes
+`join`, `cut`, and `boundary`; `capabilities.hasCuts` reports cuts, while
+`capabilities.disjoint` reports multiple components in the continuous-join graph.
+A map can therefore have cuts without being disjoint. `capabilities.hinged` is
+another independent property: joined charts do not imply physical hinges or
+unfolding motion. Seam classification is sampled metadata, not a mathematical
+proof of continuity for arbitrary custom projection callbacks.
+
+The renderer still receives geometry split by chart, including at continuous
+joins. It should not draw every computational chart edge as a visible map cut.
+
 ## Supported map families
 
 “Built in” means a `MapEngine` definition with region-aware points, inverse

@@ -135,6 +135,12 @@ use `disjoint` as a substitute for clipping. All geometry is split by chart,
 including at joins. `motion.evaluate()` and `evaluate({type: 'hinge', …})`
 already include the description radius.
 
+Segmentation and disconnection are different properties. Peirce's joined charts
+form a filled square with cuts on the perimeter; Berghaus's lobes remain joined
+to the center while cuts open between their outer edges. Both have cuts without
+being disjoint or hinged. Albers USA has detached components. See
+[segmented, connected, or detached maps](../projection/developer-guide/discontinuous-projections.md#segmented-connected-or-detached).
+
 ## Static geometry methods
 
 <span class="badge">From v5.0 · Experimental</span>
