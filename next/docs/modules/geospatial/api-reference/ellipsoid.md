@@ -331,6 +331,12 @@ Notes:
 
 This class was ported from [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) under the Apache 2 License.
 
+## P0 numeric and output contracts[​](#p0-numeric-and-output-contracts "Direct link to P0 numeric and output contracts")
+
+The [P0 qualification profile](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/ellipsoid-p0-qualification.md) details the supported samples and all public ownership, unit and boundary contracts. Constructor axes must be finite and nonnegative; default/zero shapes remain constructible but do not define a valid conversion surface. Normals and radial surface projection now return `undefined` for zero/nonfinite rays without modifying a supplied result. Forward conversion and normal/Z-axis intersection also reject invalid numeric inputs before output writes.
+
+Degree latitudes retain their complement near a pole, avoiding lost radians amplified by very flat shapes. Supplied result setters can invoke nested conversions without corrupting later output ordinates. The legacy local-frame pole neighborhood is bounded by shape scale in small units. These tighten previous failure/precision behavior; no runtime dependencies are added.
+
 ## Metrics and geodesic areas[​](#metrics-and-geodesic-areas "Direct link to Metrics and geodesic areas")
 
 Use the separate [EllipsoidMetrics](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-metrics.md) class for revolution ellipsoid metrics and auxiliary latitudes. [GeodesicPolygon](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-polygon.md) and optional `EllipsoidGeodesic` edge areas support compensated polygon geometry. These APIs use explicit degree units and retain the existing Cartesian API.
