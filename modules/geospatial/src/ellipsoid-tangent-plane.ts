@@ -11,6 +11,7 @@ import {Vector2, Vector3} from '@math.gl/core';
 import type {NumericArray} from '@math.gl/core/types';
 import {Plane} from '@math.gl/geometry/culling';
 import {Ellipsoid} from './ellipsoid';
+import {compensatedDot3, sphereNormalCoordinate} from './ellipsoid-helpers/tangent-plane-numerics';
 
 export type TangentPlaneProjectionMode = 'normal' | 'radial';
 export type TangentPlaneProjection = {
@@ -26,6 +27,7 @@ export class EllipsoidTangentPlane {
   private _yAxis: Vector3;
   private _plane: Plane;
   private readonly radii: readonly number[];
+  private readonly sphereRadius?: number;
 
   /**
    * Creates a new plane tangent to an ellipsoid at the provided origin.
@@ -37,6 +39,8 @@ export class EllipsoidTangentPlane {
   constructor(origin: Readonly<NumericArray>, ellipsoid: Ellipsoid = Ellipsoid.WGS84) {
     finiteInput(origin, 3);
     this.radii = Object.freeze(Array.from(ellipsoid.radii));
+    if (this.radii[0] === this.radii[1] && this.radii[1] === this.radii[2])
+      this.sphereRadius = this.radii[0];
     if (!this.radii.every(radius => radius > 0 && Number.isFinite(radius))) {
       throw new RangeError('Tangent plane requires positive finite ellipsoid radii');
     }
@@ -73,7 +77,7 @@ export class EllipsoidTangentPlane {
     const x = cartesian[0] - this._origin[0];
     const y = cartesian[1] - this._origin[1];
     const z = cartesian[2] - this._origin[2];
-    const projected = writePlanePoint(this, x, y, z, result);
+    const projected = writePlanePoint(this, x, y, z, result, this.sphereRadius);
     if (!projected) throw new RangeError('Tangent-plane projection overflow');
     return projected;
   }
@@ -104,7 +108,8 @@ export class EllipsoidTangentPlane {
       x * distance - this._origin[0],
       y * distance - this._origin[1],
       z * distance - this._origin[2],
-      result
+      result,
+      this.sphereRadius
     );
   }
 
@@ -119,18 +124,45 @@ export class EllipsoidTangentPlane {
   ): Vector3 | undefined {
     finiteInput(point, 2);
     checkMode(mode);
-    const p = new Vector3(
+    const [rx, ry, rz] = this.radii;
+    if (mode === 'radial') {
+      const scale = Math.max(
+        Math.abs(this._origin[0]),
+        Math.abs(this._origin[1]),
+        Math.abs(this._origin[2]),
+        Math.abs(point[0]),
+        Math.abs(point[1])
+      );
+      const u = point[0] / scale,
+        v = point[1] / scale;
+      const x = this._origin[0] / scale + this._xAxis[0] * u + this._yAxis[0] * v;
+      const y = this._origin[1] / scale + this._xAxis[1] * u + this._yAxis[1] * v;
+      const z = this._origin[2] / scale + this._xAxis[2] * u + this._yAxis[2] * v;
+      const minimum = Math.min(rx, ry, rz);
+      const ax = x * (minimum / rx),
+        ay = y * (minimum / ry),
+        az = z * (minimum / rz);
+      const length = Math.hypot(ax, ay, az);
+      if (!(length > 0 && Number.isFinite(length))) return undefined;
+      return writeSurfacePoint(rx * (ax / length), ry * (ay / length), rz * (az / length), result);
+    }
+    const n = this.zAxis;
+    if (this.sphereRadius !== undefined) {
+      const height = sphereNormalCoordinate(this.sphereRadius, point[0], point[1]);
+      if (height === undefined) return undefined;
+      return writeSurfacePoint(
+        this._xAxis[0] * point[0] + this._yAxis[0] * point[1] + n[0] * height,
+        this._xAxis[1] * point[0] + this._yAxis[1] * point[1] + n[1] * height,
+        this._xAxis[2] * point[0] + this._yAxis[2] * point[1] + n[2] * height,
+        result
+      );
+    }
+    const p = [
       this._origin[0] + this._xAxis[0] * point[0] + this._yAxis[0] * point[1],
       this._origin[1] + this._xAxis[1] * point[0] + this._yAxis[1] * point[1],
       this._origin[2] + this._xAxis[2] * point[0] + this._yAxis[2] * point[1]
-    );
-    const [rx, ry, rz] = this.radii;
-    if (mode === 'radial') {
-      const scale = Math.hypot(p[0] / rx, p[1] / ry, p[2] / rz);
-      if (!(scale > 0 && Number.isFinite(scale))) return undefined;
-      return writeSurfacePoint(p[0] / scale, p[1] / scale, p[2] / scale, result);
-    }
-    const n = this.zAxis;
+    ];
+    if (!p.every(Number.isFinite)) return undefined;
     const ax = n[0] / rx,
       ay = n[1] / ry,
       az = n[2] / rz;
@@ -229,10 +261,18 @@ function writePlanePoint(
   x: number,
   y: number,
   z: number,
-  result: Vector2
+  result: Vector2,
+  sphereRadius?: number
 ): Vector2 | undefined {
-  const east = x * plane.xAxis[0] + y * plane.xAxis[1] + z * plane.xAxis[2];
-  const north = x * plane.yAxis[0] + y * plane.yAxis[1] + z * plane.yAxis[2];
+  let east = x * plane.xAxis[0] + y * plane.xAxis[1] + z * plane.xAxis[2];
+  let north = x * plane.yAxis[0] + y * plane.yAxis[1] + z * plane.yAxis[2];
+  if (
+    sphereRadius !== undefined &&
+    Math.abs((east / sphereRadius) ** 2 + (north / sphereRadius) ** 2 - 1) <= 32 * Number.EPSILON
+  ) {
+    east = compensatedDot3(x, y, z, plane.xAxis[0], plane.xAxis[1], plane.xAxis[2]);
+    north = compensatedDot3(x, y, z, plane.yAxis[0], plane.yAxis[1], plane.yAxis[2]);
+  }
   if (!Number.isFinite(east) || !Number.isFinite(north)) return undefined;
   return result.set(east, north);
 }

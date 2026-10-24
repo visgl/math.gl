@@ -115,3 +115,6 @@ from preceding records are retained. The empty input produces empty arrays.
 const input = new Float64Array([...position, ...anotherPosition]);
 const {positions, valid} = tangentPlane.projectPointsFlat(input, 'radial');
 ```
+
+See the [C8 qualification and G7 baselines](./local-frame-qualification.md) for
+independent/native controls, numerical budgets, remaining domains and measured-cost methodology.

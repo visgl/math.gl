@@ -133,3 +133,6 @@ sampling. [subdivideGeodesicPolyline](./api-reference/subdivide-geodesic-polylin
 those paths through a supplied transform with original-edge provenance and optional surface-distance
 limits. Source angles are degrees, output tolerance uses target units, and longitude unrolling does
 not split projection seams. Import the sampler from `/ellipsoid` and subdivision from `/globe`.
+
+[Local-frame qualification and G7 benchmark baselines](./api-reference/local-frame-qualification.md)
+document the supported numerical profile and independent/native evidence.

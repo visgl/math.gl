@@ -110,6 +110,14 @@ jobs:
       - name: Check tile-matrix subpath exports, public types and dependency boundary
         run: yarn check:tile-matrix-package
 
+      - name: Qualify local frames, poses and G7 baseline accuracy
+        timeout-minutes: 2
+        run: |
+          python3 modules/geospatial/scripts/generate-c8-reference.py --check
+          python3 modules/geospatial/scripts/generate-g7-reference.py --check
+          yarn check:c8-package
+          node modules/geospatial/scripts/qualify-c8.mjs --output /tmp/c8-g7-node.json
+
       - name: Check geographic seam and rhumb APIs, public types and selective budgets
         run: |
           python3 modules/geospatial/scripts/generate-geographic-seam-reference.py --check
@@ -163,6 +171,7 @@ jobs:
           path: |
             /tmp/projection-accuracy.json
             /tmp/geographic-seams-node.json
+            /tmp/c8-g7-node.json
             /tmp/deformation-stress-qualification.json
           if-no-files-found: error
 
@@ -410,6 +419,10 @@ jobs:
           node modules/geospatial/projection/scripts/qualify-ellipsoid-p0.mjs --browser ${{ matrix.browser }} --output /tmp/ellipsoid-p0-${{ matrix.browser }}.json
           node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs --browser ${{ matrix.browser }} --output /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
 
+      - name: Qualify C8 frames, poses and G7 baseline controls
+        timeout-minutes: 2
+        run: node modules/geospatial/scripts/qualify-c8.mjs --browser ${{ matrix.browser }} --output /tmp/c8-g7-${{ matrix.browser }}.json
+
       - name: Qualify geographic seam and rhumb controls
         timeout-minutes: 2
         run: node modules/geospatial/scripts/qualify-geographic-seams.mjs --browser ${{ matrix.browser }} --output /tmp/geographic-seams-${{ matrix.browser }}.json
@@ -433,6 +446,7 @@ jobs:
           name: projection-browser-qualification-${{ matrix.browser }}
           path: |
             /tmp/geographic-seams-${{ matrix.browser }}.json
+            /tmp/c8-g7-${{ matrix.browser }}.json
             /tmp/g6-qualification-${{ matrix.browser }}.json
             /tmp/g56-qualification-${{ matrix.browser }}.json
             /tmp/g34-qualification-${{ matrix.browser }}.json
@@ -519,6 +533,13 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node modules/geospatial/projection/scripts/benchmark-spheroid-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-spheroid-comparison.json
 
+      - name: Collect equal-accuracy G7 and C8 benchmark baseline
+        if: matrix.suite == 'pipeline'
+        timeout-minutes: 2
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node modules/geospatial/scripts/benchmark-g7.mjs --baseline-ref "$BASE_SHA" --points 100 --samples 3 --min-sample-ms 0 --output /tmp/g7-comparison.json
+
       - name: Compare shared local-frame correctness and costs
         if: matrix.suite == 'projection'
         timeout-minutes: 2
@@ -536,6 +557,7 @@ jobs:
             /tmp/projection-grid-comparison.json
             /tmp/projection-spheroid-comparison.json
             /tmp/projection-local-frame-comparison.json
+            /tmp/g7-comparison.json
           if-no-files-found: error
 
   # Consolidate evidence and enforce the required check on one runner. This avoids

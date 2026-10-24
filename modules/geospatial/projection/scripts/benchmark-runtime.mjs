@@ -60,10 +60,29 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
     return legacy ? file.replace(/^modules\/projection\//, 'modules/proj4/')
       .replace('src/lib/projection.ts', 'src/lib/typescript-proj4-projection.ts') : file;
   }
-  const sourceResult = file => ({
-    path: baselineCommit ? join(root, historicalPath(relative(root, file))) : file,
-    ...(baselineCommit ? {namespace: 'historical'} : {})
-  });
+  const sourceResult = file => {
+    const path = baselineCommit ? historicalPath(relative(root, file)) : relative(root, file);
+    const parts = path.split(/[\\/]/);
+    let sideEffects;
+    if (parts[0] === 'modules' && parts.length > 2) {
+      const manifest = parts.slice(0, 2).join('/') + '/package.json';
+      const metadata = JSON.parse(baselineCommit ? git(manifest) : readFileSync(join(root, manifest), 'utf8'));
+      // Virtual historical modules do not inherit filesystem package metadata.
+      // Preserve explicit contracts. Literal lists are used by core; unknown
+      // glob patterns stay conservative instead of guessing their semantics.
+      if (metadata.sideEffects === false) sideEffects = false;
+      else if (Array.isArray(metadata.sideEffects) &&
+        metadata.sideEffects.every(pattern => !/[?*\[\]{}!]/.test(pattern))) {
+        const packagePath = './' + parts.slice(2).join('/');
+        sideEffects = metadata.sideEffects.includes(packagePath);
+      }
+    }
+    return {
+      path: baselineCommit ? join(root, path) : file,
+      ...(baselineCommit ? {namespace: 'historical'} : {}),
+      ...(sideEffects === false ? {sideEffects: false} : {})
+    };
+  };
   function historicalSource(base) {
     for (const file of [base, base.replace(/\.js$/, '.ts'), base + '.ts', base + '.js', base + '.json', base + '/index.ts']) {
       try {git(historicalPath(relative(root, file))); return sourceResult(file);}

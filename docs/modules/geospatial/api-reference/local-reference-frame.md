@@ -95,3 +95,6 @@ unrepresentable speed, or nearly vertical motion (sine of the angle to up below 
 coordinates throw `RangeError`. The operation is stateless: applications must decide whether to
 hold the previous attitude, switch reference directions, or interpolate across singularities.
 It is not an inertial-to-fixed state-vector conversion and adds no rotating-frame velocity term.
+
+See the [C8 qualification and G7 baselines](./local-frame-qualification.md) for
+independent/native controls, numerical budgets, remaining domains and measured-cost methodology.
