@@ -5,6 +5,10 @@ import {expect, test, vi} from 'vitest';
 import {MapEngine, type MapDefinition} from '../../src/discontinuous';
 import {geographic, coordinates, add, unit} from '../../src/discontinuous/math';
 const types = [
+  'gray-fuller',
+  'petroff',
+  'isea',
+  'dsea',
   'healpix',
   'gingery',
   'guyou',
