@@ -225,3 +225,18 @@ Each factory returns a `DiscontinuousMap` and accepts an optional positive `radi
 | `createInterruptedMollweideHemispheresMap` | `{radius?: number}`                                          |
 
 `PolyhedralMapOptions` is exported from `@math.gl/geospatial/discontinuous`. See the [MapEngine definitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md#additional-segmented-and-interrupted-definitions) for each preset's aspect, cuts, coordinate conventions, and limitations.
+
+## Gray–Fuller, Petroff, and Snyder equal-area maps[​](#grayfuller-petroff-and-snyder-equal-area-maps "Direct link to Gray–Fuller, Petroff, and Snyder equal-area maps")
+
+From v5.0 · Experimental
+
+| Factory                       | Options                                                                | Result                                                                              |
+| ----------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `createGrayFullerMap`         | `{radius?: number}`                                                    | Exact Gray–Fuller face equations on the 24-panel AirOcean arrangement               |
+| `createPetroffMap`            | `QuincuncialMapOptions`: `{radius?: number, centralMeridian?: number}` | Petroff's polar equal-area square; north pole at center, south pole at four corners |
+| `createIcosahedralSnyderMap`  | `SnyderMapOptions`: `{radius?: number}`                                | Spherical ISEA; 20 triangular faces, Snyder strip net                               |
+| `createDodecahedralSnyderMap` | `SnyderMapOptions`: `{radius?: number}`                                | Spherical DSEA; 12 pentagonal faces, Snyder two-row net                             |
+
+All return `DiscontinuousMap`, with region-aware forward/inverse points and seam-split lines and polygons. `radius` defaults to 1 and must be finite and positive. Petroff's `centralMeridian` defaults to 0 and must be finite, in degrees. `SnyderMapOptions` is exported from the same entry point.
+
+See [MapEngine's reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md#grayfuller-petroff-and-snyder-maps) for definitions, aspects, units, numerical behavior, and implementation credits.

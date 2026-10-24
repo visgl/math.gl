@@ -39,6 +39,10 @@ Descriptions are plain data. Construction takes a deeply frozen snapshot and rej
 | `interrupted-mollweide`             | Same independent cuts, Mollweide formula                                                                                                                                                                                                                             |
 | `interrupted-homolosine`            | Same independent cuts, homolosine formula; differs from `goode`                                                                                                                                                                                                      |
 | `albers-usa`                        | `includeTerritories: false`; true adds PR, VI, GU, MP, AS to Alaska/Hawaii                                                                                                                                                                                           |
+| `gray-fuller`                       | Exact Gray–Fuller on the AirOcean net; 24 panels                                                                                                                                                                                                                     |
+| `petroff`                           | `centralMeridian: 0`; polar equal-area square, 8 charts                                                                                                                                                                                                              |
+| `isea`                              | Spherical Snyder equal-area icosahedron; vertex at north pole, 20 faces                                                                                                                                                                                              |
+| `dsea`                              | Spherical Snyder equal-area dodecahedron; vertex at north pole, 12 faces                                                                                                                                                                                             |
 | `air-ocean`                         | 24-panel radial/gnomonic map; not Gray-Fuller                                                                                                                                                                                                                        |
 | `myriahedral`                       | [Myriahedral options](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/myriahedral.md): `preset`, `columns`, `solid`, `subdivisions`, `mesh`, `centralMeridian`, `landSampleStep`; use top-level radius and runtime callbacks |
 | `peirce-quincuncial`                | `centralMeridian: 0`; equatorial Peirce square-world layout, 8 computational charts                                                                                                                                                                                  |
@@ -56,6 +60,38 @@ Descriptions are plain data. Construction takes a deeply frozen snapshot and rej
 | `custom`                            | `charts: readonly MapChartDescription[]`                                                                                                                                                                                                                             |
 
 Mercator is spherical, not ellipsoidal Mercator. It clips lines and polygons to the finite latitude band after antimeridian/chart splitting. Coordinates at the poles are outside coverage. Goode uses seven convex computational charts: the broad Eurasian lobe has an extra continuous join. This is not a claim of bitwise agreement with another cartographic implementation.
+
+### Gray–Fuller, Petroff, and Snyder maps[​](#grayfuller-petroff-and-snyder-maps "Direct link to Gray–Fuller, Petroff, and Snyder maps")
+
+From v5.0 · Experimental
+
+```
+const map = new MapEngine({
+
+  version: 1,
+
+  id: 'snyder-earth',
+
+  definition: {type: 'isea'}, // also 'dsea', 'gray-fuller', or 'petroff'
+
+  radius: 1
+
+});
+
+const hit = map.projectPoint([-74, 41]);
+
+const inverse = hit && map.unprojectPoint(hit.position, hit.regionId);
+```
+
+`gray-fuller` uses Robert W. Gray's exact equations for Fuller's triangular faces, including the original face frame for split panels. It shares AirOcean's 24-panel topology and geographic orientation with `air-ocean`, whose face mapping remains gnomonic. Gray–Fuller is **not equal-area**. “Exact” identifies the mathematical projection, not exact arithmetic: inversion uses a bounded monotone angle solve. Output uses the raw Gray–Fuller scale times `radius`, with the first face's center at the origin; D3's display rotation and translation differ.
+
+`petroff` implements Matthew A. Petroff's 2021 square equal-area projection in its published polar aspect. The north pole maps to the center and the south pole to four corners. Output occupies `[-radius, radius]²`, so its area scale relative to a unit sphere is `radius² / π`. `centralMeridian` rotates longitude only. Forward and inverse use the author's closed-form equations, with stable Cartesian expressions and explicit limits at section vertices and poles.
+
+`isea` and `dsea` apply Snyder's equal-area construction to an icosahedron and dodecahedron respectively. Both use 120 right spherical subtriangles internally, but expose one chart per face; their continuous internal subdivisions do not multiply clipping work. Each net's planar area is `4π × radius²`. The net tables follow PROJ's Snyder strip (ISEA) and two-row pentagonal (DSEA) layouts. Both math.gl presets place vertex zero at the north pole. This differs from PROJ's **default geographic aspects**, and output starts at the root-face center with a local face orientation. They are spherical maps, not ellipsoidal CRS operations, DGGS cell indexers, or arbitrary-net builders. Inversion uses a bounded monotone spherical-area solve followed by an analytic radial inverse.
+
+All four definitions use the existing `MapEngine` layout, fitting, mesh, picking, and transition pipeline. They are static maps: transitions to other layouts go through the globe; they do not supply hinge animation. At cuts and repeated pole images, preserve `regionId` when selecting an inverse candidate. Ice Age Explorer includes all four in its projection selector and uses the same worker-based mesh preparation and globe transitions as its other discontinuous maps.
+
+Mathematical references: [Gray (1995)](https://github.com/d3/d3-geo-polygon/blob/main/src/grayfuller.js), [Petroff's paper and public-domain supplement](https://doi.org/10.5281/zenodo.4661351), [Snyder / PROJ's polyhedral documentation](https://proj.org/en/stable/operations/projections/polyhedral.html), and [BRSR's vector formulation](https://brsr.github.io/2021/08/31/snyder-equal-area.html). The [package notices](https://github.com/visgl/math.gl/blob/master/modules/geospatial/THIRD-PARTY-NOTICES.md) record source adaptations and licenses. No Nico Belmonte application code is used.
 
 ### HEALPix, Gingery, and configurable interruptions[​](#healpix-gingery-and-configurable-interruptions "Direct link to HEALPix, Gingery, and configurable interruptions")
 
