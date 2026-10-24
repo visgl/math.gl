@@ -25,10 +25,12 @@ const moved = {
 
 export async function bundleRuntime(root, entry, outfile, baselineCommit) {
   const cache = new Map();
+  // Reject Git tree objects: an extensionless import may name both a source
+  // file and a directory. A tree listing is not loadable module source.
   function git(path) {
     if (!cache.has(path)) {
       try {
-        cache.set(path, execFileSync('git', ['show', baselineCommit + ':' + path], {
+        cache.set(path, execFileSync('git', ['cat-file', 'blob', baselineCommit + ':' + path], {
           cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']
         }));
       } catch (error) {
