@@ -158,8 +158,9 @@ export function createGlobalScene(
   }
   function render(model, opts) {
     if (disposed) return;
-    if (opts.longitude !== undefined && opts.longitude !== options?.longitude)
-      longitude = Number(opts.longitude);
+    // Options may change repeatedly while a mesh is pending; honor the latest
+    // requested value even when it equals the last displayed longitude.
+    if (opts.longitude !== undefined) longitude = Number(opts.longitude);
     if (pending && pending.opts.view !== opts.view) {
       pending.controller.abort();
       pending = null;
