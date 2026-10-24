@@ -8,7 +8,7 @@
 The discontinuous map API, presets, and layout helpers are experimental and may change.
 
 For a shared rendering pipeline across ordinary, interrupted, inset, and hinged
-maps, start with [MapEngine](./map-engine.md) and its
+maps, start with [MapEngine](../projection/api-reference/map-engine.md) and its
 [rendering guide](../projection/developer-guide/map-engine.md). The factories
 below remain useful when only the lower-level static map is needed.
 
@@ -38,7 +38,7 @@ For concepts, rendering patterns, and the Ice Age Explorer integration, see the
 [discontinuous projections guide](../projection/developer-guide/discontinuous-projections.md).
 
 For the complete named preset list and regional configuration, see the
-[projection catalog](./projection-catalog.md).
+[projection families and presets](./projection-catalog.md).
 
 ## World maps
 
@@ -104,10 +104,9 @@ must use the returned geometry rather than collapsing all polar vertices togethe
 
 The numeric kernels are adapted from [D3's ISC-licensed sources](https://github.com/d3/d3-geo-projection/tree/v4.0.0/src);
 see the [provenance inventory](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/discontinuous/world-kernels/README.md).
-The [projection catalog](./projection-catalog.md) covers all named default
-constructors in d3-geo-projection 4.0.0, including regional formulas and native
-interruption layouts. Its coverage table distinguishes preset coverage from
-D3 API compatibility and arbitrary builder/accessor combinations.
+The [projection families and presets](./projection-catalog.md) groups presets by geometry and
+coverage: continuous world maps, regional domains, interrupted lobes, segmented
+layouts, and polyhedral nets. It describes each family's configuration and limits.
 
 ## Presets
 
@@ -163,7 +162,7 @@ for the distinction between the local formula and its interruption layout.
   (north in [0, 90), south in (−90, 0]), and `InterruptedLobe` tuples in `north` and
   `south` arrays.
 
-All return `DiscontinuousMap`. See the [MapEngine reference](./map-engine.md#healpix-gingery-and-configurable-interruptions)
+All return `DiscontinuousMap`. See the [MapEngine reference](../projection/api-reference/map-engine.md#healpix-gingery-and-configurable-interruptions)
 for formulas, tuple validation, defaults, examples, limitations, and credits.
 These are also available in Ice Age Explorer, and HEALPix/Gingery appear in the
 inline segmented-map comparison.
@@ -394,7 +393,7 @@ rendering currently use separate pipelines.
 Both accept `radius` (positive, default 1) and `centralMeridian` (finite degrees,
 default 0). Berghaus additionally accepts `lobes` (integer 3–24, default 5).
 The exported option types have the same defaults as the corresponding
-[MapEngine definitions](./map-engine.md#quincuncial-and-star-definitions).
+[MapEngine definitions](../projection/api-reference/map-engine.md#quincuncial-and-star-definitions).
 
 Use `MapEngine` when you also need serializable descriptions, fitting, picking,
 capabilities and transition planning. Consult the
@@ -423,7 +422,7 @@ these factories expose the lower-level map object.
 | `createInterruptedMollweideHemispheresMap` | `{radius?: number}` |
 
 `PolyhedralMapOptions` is exported from `@math.gl/geospatial/discontinuous`.
-See the [MapEngine definitions](./map-engine.md#additional-segmented-and-interrupted-definitions)
+See the [MapEngine definitions](../projection/api-reference/map-engine.md#additional-segmented-and-interrupted-definitions)
 for each preset's aspect, cuts, coordinate conventions, and limitations.
 
 ## Gray–Fuller, Petroff, and Snyder equal-area maps
@@ -442,5 +441,5 @@ seam-split lines and polygons. `radius` defaults to 1 and must be finite and
 positive. Petroff's `centralMeridian` defaults to 0 and must be finite, in degrees.
 `SnyderMapOptions` is exported from the same entry point.
 
-See [MapEngine's reference](./map-engine.md#grayfuller-petroff-and-snyder-maps)
+See [MapEngine's reference](../projection/api-reference/map-engine.md#grayfuller-petroff-and-snyder-maps)
 for definitions, aspects, units, numerical behavior, and implementation credits.

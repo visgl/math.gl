@@ -181,7 +181,7 @@ Here `landMaskContains` is an application-provided geographic lookup. No land
 dataset or network request is bundled in the engine. A custom description names
 projection bindings in its charts; provide their forward/inverse functions in
 the constructor's `projections` dictionary. Keep those callbacks stable for the
-engine's lifetime. See the [reference](../../discontinuous/map-engine.md) for
+engine's lifetime. See the [reference](../api-reference/map-engine.md) for
 the chart contract and all methods.
 
 ## Migrate existing examples
@@ -205,7 +205,7 @@ map or the geometry layout itself.
 <span class="badge">From v5.0 · Experimental</span>
 
 Use `{type: 'projection', projection: 'robinson'}` or another name from
-`MAP_PROJECTIONS` for the [projection catalog](../../discontinuous/projection-catalog.md).
+`MAP_PROJECTIONS` for the [projection families and presets](../../discontinuous/projection-catalog.md).
 The same rendering code also handles regional visibility caps, interrupted
 Sinu-Mollweide's oblique cuts, and quincuncial layouts. Use `getLayout()` / `fit()`
 to measure visible coverage, and keep every returned region-local piece and its

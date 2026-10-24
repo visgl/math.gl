@@ -19,6 +19,9 @@ qualify specific configurations and coordinate domains; they do not establish
 complete modern PROJ equivalence. See [independent validation](independent-validation.md)
 and the [modern PROJ audit](modern-proj-audit.md) for coverage and remaining gaps.
 
+For definitions of surface models, paths, reference systems, and distortion properties,
+see [Geospatial terminology](../developer-guide/terminology.md).
+
 ## Tectonic time machine
 
 <TectonicTimeMachine inline height={600} />

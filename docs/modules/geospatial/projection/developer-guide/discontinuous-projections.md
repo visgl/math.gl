@@ -23,6 +23,19 @@ wheel and zoom buttons magnify every region together; drag to pan. The
 
 The discontinuous map API, presets, and layout helpers are experimental and may change.
 
+## Projection formulas and map layouts
+
+Interruption is a choice about a map's domain and seams. It can be applied to
+several mathematical projection families: for example, interrupted sinusoidal
+and Mollweide maps use pseudocylindrical equal-area formulas, while Albers USA
+combines regional conic projections. Polyhedral maps choose a face projection
+and a net independently. Neither a cut nor a square or star-shaped outline
+implies that a projection preserves area or angles.
+
+See [map projection families](../../discontinuous/projection-catalog.md#mathematical-families)
+for the equations, geometric constructions, and distortion properties. This
+page focuses on the additional topology needed to render their cuts and joins.
+
 ## Segmented, connected, or detached?
 
 A map assembled from several charts is not necessarily detached or visibly
@@ -56,7 +69,7 @@ callbacks and convex spherical boundaries; they are not verified presets.
 
 | Family | Built-in `MapEngine` support | Remaining gaps |
 | --- | --- | --- |
-| Ordinary continuous maps | Spherical `mercator` and 64 `world` formulas, including Robinson, Mollweide, Eckert I–VI, Hammer, Wagner and Winkel Tripel | The [projection catalog](../../discontinuous/projection-catalog.md) adds regional caps and all named D3 defaults. Scalar ellipsoidal CRS operations are separate |
+| Ordinary continuous maps | Spherical `mercator` and 64 `world` formulas, including Robinson, Mollweide, Eckert I–VI, Hammer, Wagner and Winkel Tripel | The [projection families and presets](../../discontinuous/projection-catalog.md) describes the continuous and regional families. Scalar ellipsoidal CRS operations are separate |
 | Interrupted pseudocylindrical maps | `goode` (land-oriented); `interrupted-sinusoidal`, `interrupted-mollweide`, `interrupted-homolosine` (independent six-lobe cuts); additional presets: `goode-ocean`, `interrupted-boggs`, `interrupted-sinu-mollweide`, `interrupted-quartic-authalic`, `interrupted-mollweide-hemispheres` | Configurable equatorial lobes are available through `interrupted`; catalog presets include native oblique Sinu-Mollweide cuts; configurable north/south interruption latitudes are supported. Arbitrary per-lobe latitudes and bitwise PROJ/D3 compatibility are not promised |
 | Regional projection caps | Airy, Craig, Littrow, Satellite, modified stereographic, Chamberlin and two-point maps; Armadillo, Hammer retroazimuthal and Wiechel domains | See [catalog configuration and inverse limits](../../discontinuous/projection-catalog.md); no ellipsoidal regional CRS transforms |
 | Regional composites / insets | `albers-usa`, including optional PR, VI, GU, MP and AS | Other national composites need custom charts; no responsive inset reflow or exact projected rectangular clipping |
@@ -92,10 +105,10 @@ uses the published formula, with chart-specific boundary limits and bounded
 inverse solving. Neither implementation uses Nico Belmonte's code.
 
 
-For new renderers, use [MapEngine](./map-engine.md) to construct these layouts,
+For new renderers, use [MapEngine](../api-reference/map-engine.md) to construct these layouts,
 fit the insets, pick coordinates, and evaluate optional hinge motion through one
 interface. A serializable `MapDescription` selects the map; the
-[reference](../../discontinuous/map-engine.md) documents its fields and methods.
+[reference](../api-reference/map-engine.md) documents its fields and methods.
 
 math.gl provides the experimental `@math.gl/geospatial/discontinuous` entrypoint
 for this geometry processing. It combines geographic regions, local projections,

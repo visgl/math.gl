@@ -192,6 +192,7 @@
         "label": "@math.gl/geospatial",
         "items": [
           "modules/geospatial/README",
+          "modules/geospatial/developer-guide/terminology",
           "modules/geospatial/api-reference/ellipsoid",
           "modules/geospatial/api-reference/ellipsoid-metrics",
           "modules/geospatial/api-reference/geodesic-polygon",
@@ -249,8 +250,6 @@
           "modules/geospatial/projection/README",
           "modules/geospatial/projection/developer-guide/discontinuous-projections",
           "modules/geospatial/myriahedral-maps",
-          "modules/geospatial/projection/developer-guide/map-engine",
-          "modules/geospatial/discontinuous/map-engine",
           "modules/geospatial/discontinuous/projection-catalog",
           "modules/geospatial/discontinuous/README",
           "modules/geospatial/discontinuous/myriahedral",
@@ -259,6 +258,7 @@
             "label": "Developer Guide",
             "items": [
               "modules/geospatial/projection/developer-guide/api-guide",
+              "modules/geospatial/projection/developer-guide/map-engine",
               "modules/geospatial/projection/developer-guide/coordinate-systems",
               "modules/geospatial/projection/developer-guide/projections",
               "modules/geospatial/projection/developer-guide/myriahedral-projections",
@@ -273,6 +273,7 @@
             "label": "API Reference",
             "items": [
               "modules/geospatial/projection/api-reference/projection",
+              "modules/geospatial/projection/api-reference/map-engine",
               "modules/geospatial/projection/api-reference/projection-engine",
               "modules/geospatial/projection/api-reference/projection-transform",
               "modules/geospatial/projection/api-reference/projection-pipeline",

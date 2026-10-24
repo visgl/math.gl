@@ -12,6 +12,9 @@ The geospatial group includes `@math.gl/geospatial/ellipsoid`, `/globe`, `/tiles
 `/wkb`, `/geoarrow`, and `/expressions`. `@math.gl/web-mercator` remains available for existing
 imports. DGGS remains a separate package.
 
+New to these concepts? Start with [Geospatial terminology](./developer-guide/terminology.md)
+for geodesics, rhumb lines, chords, ellipsoids, reference systems, and projection properties.
+
 ## Installation
 
 ```bash
