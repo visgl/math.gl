@@ -42,7 +42,7 @@ try {
     table => '[\n' + table.map(row => '  ' + JSON.stringify(row)).join(',\n') + '\n]'
   );
   writeFileSync(
-    join(moduleRoot, 'src/data/sunlight.ts'),
+    join(moduleRoot, '../src/sun/data/sunlight.ts'),
     header +
       '// [direct R,G,B, diffuse R,G,B], turbidity 1–10, altitude 0–90° at 1° steps.\n' +
       'export const SUNLIGHT_DATA = [\n' +
@@ -72,10 +72,10 @@ try {
       JSON.stringify(fixtures, null, 2) +
       ';\n'
   );
-  execFileSync(join(moduleRoot, '../../node_modules/.bin/biome'), [
+  execFileSync(join(moduleRoot, '../../../node_modules/.bin/biome'), [
     'format',
     '--write',
-    join(moduleRoot, 'src/data/sunlight.ts'),
+    join(moduleRoot, '../src/sun/data/sunlight.ts'),
     join(moduleRoot, 'test/data/sunlight-reference.ts')
   ]);
 } finally {

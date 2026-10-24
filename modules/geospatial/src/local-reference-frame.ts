@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original geodetic frame and pose composition over math.gl local-frame kernels.
 
-import {Matrix4, Quaternion, Vector3} from '@math.gl/core';
+import {Matrix4, Quaternion, Vector3, config} from '@math.gl/core';
 import {
   createLocalFrameBasis,
   eastNorthUpBasis,
@@ -43,7 +43,9 @@ export class LocalReferenceFrame {
     const llh = ellipsoid.cartesianToCartographic(origin);
     if (!llh) throw new RangeError('Origin has no unique geodetic frame');
     const basis = createLocalFrameBasis();
-    eastNorthUpBasis((llh[0] * Math.PI) / 180, (llh[1] * Math.PI) / 180, basis);
+    const radians = config._cartographicRadians ? 1 : Math.PI / 180;
+    if (!eastNorthUpBasis(llh[0] * radians, llh[1] * radians, basis))
+      throw new RangeError('Cannot resolve local geodetic basis');
     const axes = options.axes || ['east', 'north', 'up'];
     const matrix: number[] = [];
     if (!localFrameToMatrix(basis, {x: origin[0], y: origin[1], z: origin[2]}, ...axes, matrix)) {
@@ -119,9 +121,10 @@ export class LocalReferenceFrame {
    */
   velocityQuaternion(velocity: Coordinate, result = new Quaternion()): Quaternion | undefined {
     finiteCoordinate(velocity);
-    const length = Math.hypot(velocity[0], velocity[1], velocity[2]);
-    if (!(length > 0 && Number.isFinite(length))) return undefined;
-    const x = new Vector3(velocity[0] / length, velocity[1] / length, velocity[2] / length);
+    const scale = Math.max(Math.abs(velocity[0]), Math.abs(velocity[1]), Math.abs(velocity[2]));
+    if (scale === 0) return undefined;
+    const x = new Vector3(velocity[0] / scale, velocity[1] / scale, velocity[2] / scale);
+    x.scale(1 / Math.hypot(x[0], x[1], x[2]));
     const y = new Vector3(this.up).cross(x);
     if (y.len() < 1e-12) return undefined;
     y.normalize();

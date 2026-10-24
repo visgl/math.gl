@@ -5,7 +5,15 @@
 import type {ExpressionFunction, ExpressionFunctionLibrary} from './function-libraries';
 
 const FUNCTION_NAME_PATTERN = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
-const DISALLOWED_FUNCTION_NAMES = new Set(['__proto__', 'prototype', 'constructor']);
+const DISALLOWED_FUNCTION_NAMES = new Set([
+  '__proto__',
+  'prototype',
+  'constructor',
+  'true',
+  'false',
+  'null',
+  'this'
+]);
 
 /**
  * Options for registering functions with an {@link ExpressionFunctionRegistry}.

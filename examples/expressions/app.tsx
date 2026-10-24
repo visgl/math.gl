@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {longitudeCopies} from './preview-paths';
 import {useCallback, useEffect, useMemo, useRef, useState, type ReactElement} from 'react';
 import {
   BASIC_MATH_FUNCTION_LIBRARY,
@@ -62,6 +63,7 @@ export default function ExpressionPlayground(): ReactElement {
   const [result, setResult] = useState<unknown>();
   const [error, setError] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+  const evaluationId = useRef(0);
 
   const registry = useMemo(() => {
     const nextRegistry = new ExpressionFunctionRegistry();
@@ -74,30 +76,33 @@ export default function ExpressionPlayground(): ReactElement {
   const functionNames = useMemo(() => Object.keys(registry.getFunctionTable()).sort(), [registry]);
 
   const runExpression = useCallback(async () => {
+    const id = ++evaluationId.current;
     setIsRunning(true);
     try {
       const context = JSON.parse(contextText) as Record<string, unknown>;
       const evaluate = compileAsync(expression, {registry});
-      setResult(await evaluate(context));
+      const value = await evaluate(context);
+      if (id !== evaluationId.current) return;
+      setResult(value);
       setError('');
     } catch (caughtError) {
+      if (id !== evaluationId.current) return;
       setResult(undefined);
       setError(caughtError instanceof Error ? caughtError.message : String(caughtError));
     } finally {
-      setIsRunning(false);
+      if (id === evaluationId.current) setIsRunning(false);
     }
   }, [contextText, expression, registry]);
 
   const startEvaluation = useCallback((): void => {
-    runExpression().catch((caughtError: unknown) => {
-      setResult(undefined);
-      setError(caughtError instanceof Error ? caughtError.message : String(caughtError));
-      setIsRunning(false);
-    });
+    void runExpression();
   }, [runExpression]);
 
   useEffect(() => {
     startEvaluation();
+    return () => {
+      evaluationId.current++;
+    };
   }, [startEvaluation]);
 
   function selectSample(sample: ExpressionSample): void {
@@ -277,36 +282,38 @@ function GeometryPreview({value}: {value: unknown}): ReactElement {
         return;
       }
 
-      context.beginPath();
-      coordinates.forEach(([longitude, latitude], index) => {
-        const x = ((longitude + 180) / 360) * bounds.width;
-        const y = ((90 - latitude) / 180) * bounds.height;
-        if (index === 0) {
-          context.moveTo(x, y);
-        } else {
-          context.lineTo(x, y);
-        }
-      });
-      context.lineJoin = 'round';
-      context.lineCap = 'round';
-      context.strokeStyle = '#ffffff';
-      context.lineWidth = 6;
-      context.stroke();
-      context.strokeStyle = '#d94736';
-      context.lineWidth = 3;
-      context.stroke();
-
-      if (coordinates.length === 1) {
-        const [longitude, latitude] = coordinates[0];
-        const x = ((longitude + 180) / 360) * bounds.width;
-        const y = ((90 - latitude) / 180) * bounds.height;
+      for (const path of longitudeCopies(coordinates)) {
         context.beginPath();
-        context.arc(x, y, 6, 0, Math.PI * 2);
-        context.fillStyle = '#d94736';
-        context.fill();
+        path.forEach(([longitude, latitude], index) => {
+          const x = ((longitude + 180) / 360) * bounds.width;
+          const y = ((90 - latitude) / 180) * bounds.height;
+          if (index === 0) {
+            context.moveTo(x, y);
+          } else {
+            context.lineTo(x, y);
+          }
+        });
+        context.lineJoin = 'round';
+        context.lineCap = 'round';
         context.strokeStyle = '#ffffff';
-        context.lineWidth = 2;
+        context.lineWidth = 6;
         context.stroke();
+        context.strokeStyle = '#d94736';
+        context.lineWidth = 3;
+        context.stroke();
+
+        if (path.length === 1) {
+          const [longitude, latitude] = path[0];
+          const x = ((longitude + 180) / 360) * bounds.width;
+          const y = ((90 - latitude) / 180) * bounds.height;
+          context.beginPath();
+          context.arc(x, y, 6, 0, Math.PI * 2);
+          context.fillStyle = '#d94736';
+          context.fill();
+          context.strokeStyle = '#ffffff';
+          context.lineWidth = 2;
+          context.stroke();
+        }
       }
     };
 

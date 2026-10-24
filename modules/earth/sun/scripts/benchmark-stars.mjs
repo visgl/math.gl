@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {getStarPositions, getStarLayerData} from '../dist/stars.js';
+import {getStarPositions, getStarLayerData} from '../../dist/sun/stars.js';
 const observer = {latitude: 37.8, longitude: -122.4, elevation: 0};
 for (const model of ['rectilinear', 'galactic']) {
   const start = performance.now();
