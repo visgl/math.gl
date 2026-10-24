@@ -26,6 +26,19 @@ export const DISCONTINUOUS_VIEWS = {
   interruptedMollweide: 'Interrupted Mollweide',
   interruptedHomolosine: 'Interrupted Goode homolosine',
   airOcean: 'AirOcean · gnomonic',
+  peirceQuincuncial: 'Peirce quincuncial',
+  berghaus: 'Berghaus star',
+  guyou: 'Guyou',
+  'gringorten-quincuncial': 'Gringorten quincuncial',
+  butterfly: 'Butterfly',
+  'collignon-butterfly': 'Collignon butterfly',
+  waterman: 'Waterman W5',
+  'goode-ocean': 'Goode · oceans',
+  'interrupted-boggs': 'Interrupted Boggs',
+  'interrupted-sinu-mollweide': 'Interrupted Sinu-Mollweide',
+  'interrupted-quartic-authalic': 'Interrupted quartic authalic',
+  'interrupted-mollweide-hemispheres': 'Mollweide hemispheres',
+
   ...Object.fromEntries(
     Object.entries(MYRIAHEDRAL_VIEWS).map(([id, options]) => [
       id,

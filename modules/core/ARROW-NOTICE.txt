@@ -1,0 +1,18 @@
+Apache Arrow
+Copyright 2016-2019 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+The notice above is the applicable ASF notice from Apache Arrow 4.0.0's
+NOTICE.txt for the adapted JavaScript BigInt compatibility code. Notices for
+unrelated Arrow components are not reproduced here because those components
+are not included in this adaptation.
+
+Upstream comparison:
+https://github.com/apache/arrow/blob/apache-arrow-4.0.0/js/src/util/compat.ts
+https://github.com/apache/arrow/blob/apache-arrow-4.0.0/NOTICE.txt
+
+math.gl modifications: extraction of the BigInt availability/fallback layer,
+separate availability constants, shared error messages, and narrower exports.
+The comparison version is documented; the original port commit is not known.

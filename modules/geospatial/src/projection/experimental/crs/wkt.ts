@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Original adapter; named-axis fallback inspired by proj4js 2.22.0 / wkt-parser (MIT). See ../../../PROJ4-LICENSE.md for upstream attribution.
+// SPDX-FileComment: Original adapter; named-axis fallback inspired by proj4js 2.22.0 / wkt-parser (MIT). See ../../../../projection/PROJ4-LICENSE.md for upstream attribution.
 import {inferCRSRepresentation} from '../../../crs/spatial-reference';
 import {parseWKTCRS} from '../../../crs/wkt-crs';
 import type {WKTCRSNode} from '../../../crs/index';

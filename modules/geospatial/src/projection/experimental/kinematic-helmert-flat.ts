@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileCopyrightText: Copyright (c) 2016, Thomas Knudsen / SDFE (PROJ)
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Original numeric-buffer traversal around kinematic-helmert.ts's existing attributed equations and prepared coefficients. Exact matrix application follows the PROJ adaptation; small-angle matrix application follows the proj4js adaptation. See ../../PROJ-LICENSE.txt and ../../PROJ4-LICENSE.md. No model data is included.
+// SPDX-FileComment: Original numeric-buffer traversal around kinematic-helmert.ts's existing attributed equations and prepared coefficients. Exact matrix application follows the PROJ adaptation; small-angle matrix application follows the proj4js adaptation. See ../../../projection/PROJ-LICENSE.txt and ../../../projection/PROJ4-LICENSE.md. No model data is included.
 import type {NumericFlatOperation} from './numeric-flat';
 
 /** Borrow the stage's owned coefficients, with exactly the scalar epoch preparation. */

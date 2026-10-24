@@ -5,3 +5,8 @@
 This module contains lightweight geometry decoders and cell-column detection for A5, GeoHash, H3, Google Plus Code, Quadkey, and S2 identifiers. Decoder-specific entry points are available as package subpaths such as `@math.gl/dggs/a5` and `@math.gl/dggs/h3`. The `@math.gl/dggs/s2` subpath also provides validated token conversion and spatial hierarchy navigation.
 
 For documentation please visit the [website](https://math.gl).
+
+## Sources and credits
+
+See [the packaged source and license index](./THIRD-PARTY-NOTICES.md) and
+[math.gl references and credits](https://math.gl/docs/references-and-credits).

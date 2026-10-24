@@ -36,6 +36,11 @@ Source headers use `SPDX-License-Identifier` for licenses,
 provenance where applicable. Existing upstream notices and license texts are
 retained. See the [source header convention](dev-docs/source-headers.md).
 
+See [References and credits](docs/references-and-credits.md) for the package-wide
+source and dataset inventory, scientific references, and distributed notices.
+
 ## License
 
-MIT license. All code that math.gl has forked is also licensed under MIT or an MIT compatible permissive licenses.
+math.gl-authored code is MIT licensed. Adapted and vendored code retains its
+upstream MIT, ISC, BSD or Apache-2.0 terms. Optional datasets have separate terms,
+including ODbL for timezone boundaries; the code license does not relicense data.

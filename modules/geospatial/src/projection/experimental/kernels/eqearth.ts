@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2018 Bernie Jenny, Monash University, Melbourne, Australia (Equal Earth, ported through proj4js)
-// SPDX-FileComment: Adapted from proj4js 2.22.0 lib/projections/eqearth.js with explicit TypeScript state and bounded inverse pole roundoff. Original Apache-2.0 notice retained below. See ../../../APACHE-2.0-LICENSE.txt and ../../../THIRD-PARTY-NOTICES.md. Independent corrections acknowledge PROJ 9.5.1 src/projections/eqearth.cpp and OSGeo/PROJ #1097; see ../../../../projection/PROJ-LICENSE.txt.
+// SPDX-FileComment: Adapted from proj4js 2.22.0 lib/projections/eqearth.js with explicit TypeScript state and bounded inverse pole roundoff. Original Apache-2.0 notice retained below. See ../../../../projection/APACHE-2.0-LICENSE.txt and ../../../../projection/THIRD-PARTY-NOTICES.md. Independent corrections acknowledge PROJ 9.5.1 src/projections/eqearth.cpp and OSGeo/PROJ #1097; see ../../../../projection/PROJ-LICENSE.txt.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {

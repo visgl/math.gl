@@ -23,3 +23,8 @@ and mesh refinement, with Mercator clipping helpers. Globe mesh subdivision is a
 The experimental `HingeTree` evaluates rigid panels connected by hinges. See the
 [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and
 [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/unfolding-polyhedron).
+
+## Sources and credits
+
+See [the packaged source and license index](./THIRD-PARTY-NOTICES.md) and
+[math.gl references and credits](https://math.gl/docs/references-and-credits).

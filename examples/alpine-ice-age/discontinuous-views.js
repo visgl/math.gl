@@ -1,13 +1,12 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {MapEngine} from "@math.gl/geospatial/discontinuous";
-import {MYRIAHEDRAL_VIEWS} from "./map-options.js";
-export {MYRIAHEDRAL_VIEWS, DISCONTINUOUS_VIEWS} from "./map-options.js";
-
+import { MapEngine } from "@math.gl/geospatial/discontinuous";
+import { MYRIAHEDRAL_VIEWS } from "./map-options.js";
+export { MYRIAHEDRAL_VIEWS, DISCONTINUOUS_VIEWS } from "./map-options.js";
 
 import { isLand } from "../common/land-mask.js";
-import { myriahedralGrid } from "./myriahedral-grid.js";
+import { myriahedralGridSteps } from "./myriahedral-grid.js";
 import {
   createH3MyriahedralMesh,
   createA5MyriahedralMesh,
@@ -35,25 +34,48 @@ function dggsPanels(system) {
   return dggsMeshes.get(system);
 }
 const definitions = {
-  albersUsa: {type: "albers-usa"},
-  airOcean: {type: "air-ocean"},
-  interruptedSinusoidal: {type: "interrupted-sinusoidal"},
-  interruptedMollweide: {type: "interrupted-mollweide"},
-  interruptedHomolosine: {type: "goode"},
+  albersUsa: { type: "albers-usa" },
+  airOcean: { type: "air-ocean" },
+  peirceQuincuncial: { type: "peirce-quincuncial" },
+  berghaus: { type: "berghaus" },
+  guyou: { type: "guyou" },
+  "gringorten-quincuncial": { type: "gringorten-quincuncial" },
+  butterfly: { type: "butterfly" },
+  "collignon-butterfly": { type: "collignon-butterfly" },
+  waterman: { type: "waterman" },
+  "goode-ocean": { type: "goode-ocean" },
+  "interrupted-boggs": { type: "interrupted-boggs" },
+  "interrupted-sinu-mollweide": { type: "interrupted-sinu-mollweide" },
+  "interrupted-quartic-authalic": { type: "interrupted-quartic-authalic" },
+  "interrupted-mollweide-hemispheres": {
+    type: "interrupted-mollweide-hemispheres",
+  },
+
+  interruptedSinusoidal: { type: "interrupted-sinusoidal" },
+  interruptedMollweide: { type: "interrupted-mollweide" },
+  interruptedHomolosine: { type: "goode" },
 };
-function createMap(view) {
+export function createMap(view) {
   const options = MYRIAHEDRAL_VIEWS[view];
   const panels = options?.dggs ? dggsPanels(options.dggs) : null;
   const definition = options
-    ? {type: "myriahedral", preset: options.preset,
-       ...(panels ? {mesh: panels.mesh} : options)}
+    ? {
+        type: "myriahedral",
+        preset: options.preset,
+        ...(panels ? { mesh: panels.mesh } : options),
+      }
     : definitions[view];
   if (!definition) throw new Error(`Unknown map: ${view}`);
-  return new MapEngine({version: 1, id: view, definition}, {
-    isLand: ([lon, lat]) => isLand(lon, lat),
-    edgeWeight: panels ? (edge, weight) => dggsCellWeight(edge, weight, panels) : undefined,
-    sampling: {tolerance: 1e-5},
-  });
+  return new MapEngine(
+    { version: 1, id: view, definition },
+    {
+      isLand: ([lon, lat]) => isLand(lon, lat),
+      edgeWeight: panels
+        ? (edge, weight) => dggsCellWeight(edge, weight, panels)
+        : undefined,
+      sampling: { tolerance: 1e-5 },
+    },
+  );
 }
 const cache = new Map();
 
@@ -83,7 +105,7 @@ export function sampleField(field, sample) {
 }
 
 /** Clip source grid cells before triangulation; each emitted triangle belongs to one region. */
-export function discontinuousGrid(view, step = 1) {
+function* buildGrid(view, step = 1) {
   const key = `${view}:${step}`;
   if (cache.has(key)) {
     const cached = cache.get(key);
@@ -128,7 +150,7 @@ export function discontinuousGrid(view, step = 1) {
     });
   });
   if (MYRIAHEDRAL_VIEWS[view]) {
-    myriahedralGrid(
+    yield* myriahedralGridSteps(
       map,
       step,
       { positions, sources, samples, indices, regionIds },
@@ -152,7 +174,9 @@ export function discontinuousGrid(view, step = 1) {
     for (const grid of grids) {
       const [west, south, east, north] = grid.bounds;
       for (let lat = south; lat < north; lat += grid.step) {
+        yield;
         for (let lon = west; lon < east; lon += grid.step) {
+          if (((lon - west) / grid.step) % 16 === 0) yield;
           const ring = [
             [lon, lat],
             [lon + grid.step, lat],
@@ -236,14 +260,20 @@ export function discontinuousGrid(view, step = 1) {
   }
   const layout = map.getLayout();
   const lines = [];
-  for (let lon = -180; lon <= 180; lon += 30)
+  for (let lon = -180; lon <= 180; lon += 30) {
+    yield;
     lines.push(
-      ...map.projectLine(Array.from({ length: 181 }, (_, i) => [lon, i - 90])),
+      ...map
+        .projectLine(Array.from({ length: 181 }, (_, i) => [lon, i - 90]))
+        .map((line) => ({ ...line, meridian: lon })),
     );
-  for (let lat = -60; lat <= 60; lat += 30)
+  }
+  for (let lat = -60; lat <= 60; lat += 30) {
+    yield;
     lines.push(
       ...map.projectLine(Array.from({ length: 361 }, (_, i) => [i - 180, lat])),
     );
+  }
   if (MYRIAHEDRAL_VIEWS[view]?.dggs)
     lines.push(
       ...dggsCellOutlines(map, dggsPanels(MYRIAHEDRAL_VIEWS[view].dggs).cells),
@@ -267,4 +297,42 @@ export function discontinuousGrid(view, step = 1) {
   if (cache.size >= 3) cache.delete(cache.keys().next().value);
   cache.set(key, result);
   return result;
+}
+
+/** Synchronous entry point for offline callers and geometry tests. */
+export function discontinuousGrid(view, step = 1) {
+  const builder = buildGrid(view, step);
+  let next;
+  do {
+    next = builder.next();
+  } while (!next.done);
+  return next.value;
+}
+
+/** Prepare without monopolizing the event loop; abandoned selections stop at a checkpoint. */
+export async function prepareDiscontinuousGrid(
+  view,
+  step = 1,
+  {
+    signal,
+    yieldTask = () => new Promise((resolve) => setTimeout(resolve, 0)),
+  } = {},
+) {
+  const builder = buildGrid(view, step);
+  try {
+    // Paint the selection/loading state before starting any geometry work.
+    await yieldTask();
+    let deadline = performance.now() + 8;
+    while (true) {
+      signal?.throwIfAborted();
+      const next = builder.next();
+      if (next.done) return next.value;
+      if (performance.now() >= deadline) {
+        await yieldTask();
+        deadline = performance.now() + 8;
+      }
+    }
+  } finally {
+    builder.return();
+  }
 }

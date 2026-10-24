@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Original math.gl inverse Cartesian rotation correction. Adapted from proj4js 2.22.0; polar meridian integration/inversion is original math.gl code. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Original math.gl inverse Cartesian rotation correction. Adapted from proj4js 2.22.0; polar meridian integration/inversion is original math.gl code. See ../../../../projection/PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 import {inverseSphericalLatitude} from '../inverse-spherical-latitude';

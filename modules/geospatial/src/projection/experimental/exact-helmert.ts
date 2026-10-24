@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) 2016, Thomas Knudsen / SDFE (PROJ)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Exact rotation matrix adapted from PROJ 9.5.1 src/transformations/helmert.cpp. See ../../PROJ-LICENSE.txt. Modified into prepared, typed, allocation-free point operations. Existing small-angle Helmert equations remain the proj4js adaptation in datum.ts.
+// SPDX-FileComment: Exact rotation matrix adapted from PROJ 9.5.1 src/transformations/helmert.cpp. See ../../../projection/PROJ-LICENSE.txt. Modified into prepared, typed, allocation-free point operations. Existing small-angle Helmert equations remain the proj4js adaptation in datum.ts.
 import type {ProjectionPoint} from './types';
 
 type Operation = (point: ProjectionPoint) => void;

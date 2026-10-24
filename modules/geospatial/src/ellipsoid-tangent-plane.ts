@@ -5,7 +5,7 @@
 // SPDX-FileComment: Derived from Cesium. Original math.gl follow-up adds explicit radial/normal inverses, packed projection and an orthonormal three-radius tangent basis. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
 // This file is derived from the Cesium library under Apache 2 license
-// See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
+// See ../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
 import {Vector2, Vector3} from '@math.gl/core';
 import type {NumericArray} from '@math.gl/core/types';

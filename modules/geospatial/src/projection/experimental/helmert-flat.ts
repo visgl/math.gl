@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) 2016, Thomas Knudsen / SDFE (PROJ)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Original whole-buffer dispatch. Small-angle equations follow the proj4js adaptation in datum.ts; see ../../PROJ4-LICENSE.md. Exact equations follow exact-helmert.ts, adapted from PROJ 9.5.1 helmert.cpp; see ../../PROJ-LICENSE.txt. Consume its prepared matrix without recomputing rotations.
+// SPDX-FileComment: Original whole-buffer dispatch. Small-angle equations follow the proj4js adaptation in datum.ts; see ../../../projection/PROJ4-LICENSE.md. Exact equations follow exact-helmert.ts, adapted from PROJ 9.5.1 helmert.cpp; see ../../../projection/PROJ-LICENSE.txt. Consume its prepared matrix without recomputing rotations.
 import type {NumericFlatOperation} from './numeric-flat';
 
 /** Setup-owned coefficients: small-angle rx/ry/rz or row-major exact matrix, then dx/dy/dz/scale. */
