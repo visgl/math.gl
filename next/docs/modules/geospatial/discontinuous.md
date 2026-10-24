@@ -194,3 +194,24 @@ From v5.0 · Experimental
 `createPeirceQuincuncialMap(options?: QuincuncialMapOptions)` and `createBerghausMap(options?: BerghausMapOptions)` return `DiscontinuousMap` instances. Both accept `radius` (positive, default 1) and `centralMeridian` (finite degrees, default 0). Berghaus additionally accepts `lobes` (integer 3–24, default 5). The exported option types have the same defaults as the corresponding [MapEngine definitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md#quincuncial-and-star-definitions).
 
 Use `MapEngine` when you also need serializable descriptions, fitting, picking, capabilities and transition planning. Consult the [support table](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md#supported-map-families) for the distinction between these presets and other quincuncial/star variants.
+
+## Additional segmented-map factories[​](#additional-segmented-map-factories "Direct link to Additional segmented-map factories")
+
+From v5.0 · Experimental
+
+Each factory returns a `DiscontinuousMap` and accepts an optional positive `radius` (default 1). `MapEngine` is the recommended rendering entry point; these factories expose the lower-level map object.
+
+| Factory                                    | Options type / extra options                                 |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| `createGuyouMap`                           | `QuincuncialMapOptions`: finite `centralMeridian`, default 0 |
+| `createGringortenQuincuncialMap`           | `QuincuncialMapOptions`: finite `centralMeridian`, default 0 |
+| `createButterflyMap`                       | `PolyhedralMapOptions`: `radius` only                        |
+| `createCollignonButterflyMap`              | `PolyhedralMapOptions`: `radius` only                        |
+| `createWatermanMap`                        | `PolyhedralMapOptions`: `radius` only                        |
+| `createGoodeOceanMap`                      | `{radius?: number}`                                          |
+| `createInterruptedBoggsMap`                | `{radius?: number}`                                          |
+| `createInterruptedSinuMollweideMap`        | `{radius?: number}`                                          |
+| `createInterruptedQuarticAuthalicMap`      | `{radius?: number}`                                          |
+| `createInterruptedMollweideHemispheresMap` | `{radius?: number}`                                          |
+
+`PolyhedralMapOptions` is exported from `@math.gl/geospatial/discontinuous`. See the [MapEngine definitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine.md#additional-segmented-and-interrupted-definitions) for each preset's aspect, cuts, coordinate conventions, and limitations.

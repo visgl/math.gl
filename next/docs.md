@@ -101,16 +101,18 @@ math.gl is fully supported on:
 | 2019  | v3.0    | A collaboration with the Cesium team around 3D Tiles led to ports of parts of the Cesium math library into the `math.gl/geospatial` and `@math.gl/geometry/culling` modules. |
 | 2020+ | v3.x    | Additional geospatial modules have gradually been added to support more advanced use cases for deck.gl.                                                                      |
 | 2022  | v3.6    | Code base fully rewritten in TypeScript.                                                                                                                                     |
-| 2023  | v4.0    | ES module support. gl-matrix was removed as a dependency and math.gl became fully stand-alone.                                                                               |
+| 2023  | v4.0    | ES module support. gl-matrix was removed as a runtime dependency; adapted numerical kernels remain in core.                                                                  |
 
 ## Attributions[​](#attributions "Direct link to Attributions")
 
 math.gl was inspired by and built upon some of the most proven open source JavaScript math libraries:
 
-* [`gl-matrix`](http://glmatrix.net/) - inspiration for the vector and matrix kernels; core no longer depends on the package
+* [`gl-matrix`](http://glmatrix.net/) - adapted vector and matrix kernels retained in core; no runtime dependency on the package
 * [`expression-eval`](https://www.npmjs.com/package/expression-eval) by [@donmccurdy](https://github.com/donmccurdy) - inspiration and source material for `@math.gl/core/expressions`
 * THREE.js math library - math.gl classes are API-compatible with a subset of the THREE.js classes and pass THREE.js test suites.
 * The CesiumJS math library (Apache2) - The geospatial and culling modules were ported from Cesium code base.
+
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the package-wide source inventory, scientific references, dataset credits, and redistribution notices.
 
 ## License[​](#license "Direct link to License")
 
