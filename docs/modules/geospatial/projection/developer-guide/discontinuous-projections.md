@@ -56,8 +56,9 @@ callbacks and convex spherical boundaries; they are not verified presets.
 
 | Family | Built-in `MapEngine` support | Remaining gaps |
 | --- | --- | --- |
-| Ordinary continuous maps | Spherical `mercator` with a finite latitude band | Other scalar projection kernels require custom chart bindings; not all scalar CRS operations are MapEngine presets |
-| Interrupted pseudocylindrical maps | `goode` (land-oriented); `interrupted-sinusoidal`, `interrupted-mollweide`, `interrupted-homolosine` (independent six-lobe cuts); additional presets: `goode-ocean`, `interrupted-boggs`, `interrupted-sinu-mollweide`, `interrupted-quartic-authalic`, `interrupted-mollweide-hemispheres` | Configurable equatorial lobes are available through `interrupted`; oblique Sinu-Mollweide cuts and arbitrary interruption latitudes remain unsupported; no claim of bitwise PROJ/D3 compatibility |
+| Ordinary continuous maps | Spherical `mercator` and 64 `world` formulas, including Robinson, Mollweide, Eckert I–VI, Hammer, Wagner and Winkel Tripel | The [projection catalog](../../discontinuous/projection-catalog.md) adds regional caps and all named D3 defaults. Scalar ellipsoidal CRS operations are separate |
+| Interrupted pseudocylindrical maps | `goode` (land-oriented); `interrupted-sinusoidal`, `interrupted-mollweide`, `interrupted-homolosine` (independent six-lobe cuts); additional presets: `goode-ocean`, `interrupted-boggs`, `interrupted-sinu-mollweide`, `interrupted-quartic-authalic`, `interrupted-mollweide-hemispheres` | Configurable equatorial lobes are available through `interrupted`; catalog presets include native oblique Sinu-Mollweide cuts; configurable north/south interruption latitudes are supported. Arbitrary per-lobe latitudes and bitwise PROJ/D3 compatibility are not promised |
+| Regional projection caps | Airy, Craig, Littrow, Satellite, modified stereographic, Chamberlin and two-point maps; Armadillo, Hammer retroazimuthal and Wiechel domains | See [catalog configuration and inverse limits](../../discontinuous/projection-catalog.md); no ellipsoidal regional CRS transforms |
 | Regional composites / insets | `albers-usa`, including optional PR, VI, GU, MP and AS | Other national composites need custom charts; no responsive inset reflow or exact projected rectangular clipping |
 | Quincuncial square-world maps | `peirce-quincuncial`, `gringorten-quincuncial`, and `guyou` in equatorial aspects; polar equal-area `petroff` | Arbitrary aspect rotation beyond the central meridian |
 | Star maps | `berghaus` and `gingery`, with 3–24 lobes; Gingery has a configurable central cap | Other star formulas and arbitrary aspect rotation |
@@ -313,7 +314,7 @@ explores a separate animated hinge-and-texture pipeline.
 ## What remains unsupported
 
 - Polygons spanning a hemisphere or representing spherical complements.
-- Curved region boundaries and exact projected rectangular clip semantics.
+- Arbitrary user-defined curved chart boundaries and exact projected rectangular clip semantics. Built-in regional caps and Armadillo coverage are supported.
 - The missing presets and layout variants listed in the support table above. Land-oriented Goode is supported.
 - Ellipsoidal projection/datum conversion within this API.
 - GeoJSON wrappers, automatic property interpolation, packed mesh output, and

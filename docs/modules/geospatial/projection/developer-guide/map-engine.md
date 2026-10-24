@@ -199,3 +199,15 @@ Albers USA, the myriahedral demo, and Ice Age Explorer use this API. Their
 renderers retain SVG/WebGL drawing, textures, camera motion, and field sampling.
 The lower-level factories remain supported for callers that only need a static
 map or the geometry layout itself.
+
+## Choosing a named projection
+
+<span class="badge">From v5.0 · Experimental</span>
+
+Use `{type: 'projection', projection: 'robinson'}` or another name from
+`MAP_PROJECTIONS` for the [projection catalog](../../discontinuous/projection-catalog.md).
+The same rendering code also handles regional visibility caps, interrupted
+Sinu-Mollweide's oblique cuts, and quincuncial layouts. Use `getLayout()` / `fit()`
+to measure visible coverage, and keep every returned region-local piece and its
+source coordinates. Do not assume every catalog map covers the entire globe or
+has a globally unique inverse.

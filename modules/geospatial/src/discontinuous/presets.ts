@@ -178,7 +178,8 @@ function interruptedMap(
   goode = false,
   layout: 'default' | 'ocean' | 'hemispheres' = 'default',
   centralMeridian = 0,
-  customLobes?: InterruptedMapOptions['lobes']
+  customLobes?: InterruptedMapOptions['lobes'],
+  latitudes: {north: number; south: number} = {north: 0, south: 0}
 ): DiscontinuousMap {
   const radius = validRadius(value);
   const mollweide = (latitude: number): Position => {
@@ -220,7 +221,6 @@ function interruptedMap(
       return latitude > -transition ? [width, height + correction] : [Math.cos(latitude), latitude];
     return [width, height - (kind === 'homolosine' ? Math.sign(latitude) * correction : 0)];
   };
-  const equatorialScale = profile(0)[0];
   const minHeight = profile(-Math.PI / 2)[1],
     maxHeight = profile(Math.PI / 2)[1];
   const asinClamped = (x: number) => Math.asin(Math.max(-1, Math.min(1, x)));
@@ -318,6 +318,10 @@ function interruptedMap(
   const regions: MapRegion[] = [];
   lobes.forEach((limits, hemisphere) => {
     const sign = hemisphere === 0 ? 1 : -1;
+    const interruption = (hemisphere === 0 ? latitudes.north : latitudes.south) * RAD;
+    const limitWidth = profile(interruption)[0];
+    const offsetWidth = (latitude: number, width: number) =>
+      sign * latitude >= sign * interruption ? limitWidth : width;
     for (let i = 0; i < limits.length; i++) {
       const [west, center, east] = limits[i];
       const boundary: Position[] = [
@@ -337,13 +341,16 @@ function interruptedMap(
             if (delta + center > east + 1e-8) delta -= 360;
           }
           const [width, height] = profile(lat * RAD);
-          return [radius * (equatorialScale * center * RAD + delta * RAD * width), radius * height];
+          return [
+            radius * (offsetWidth(lat * RAD, width) * center * RAD + delta * RAD * width),
+            radius * height
+          ];
         },
         unproject: ([x, y]) => {
           const height = y / radius;
           if (height > maxHeight + 1e-10 || height < minHeight - 1e-10) return null;
           const [latitude, width] = inverseProfile(height);
-          const relativeX = x / radius - equatorialScale * center * RAD;
+          const relativeX = x / radius - offsetWidth(latitude, width) * center * RAD;
           if (Math.abs(width) < 1e-12)
             return Math.abs(relativeX) < 1e-10 ? [center + centralMeridian, sign * 90] : null;
           const delta = relativeX / width / RAD;
@@ -369,6 +376,8 @@ export type InterruptedMapOptions = {
   radius?: number;
   centralMeridian?: number;
   projection: InterruptedProjection;
+  /** Latitude where each hemisphere starts opening its cuts. Defaults to 0°. */
+  latitudes?: {north: number; south: number};
   lobes: {
     north: readonly InterruptedLobe[];
     south: readonly InterruptedLobe[];
@@ -390,6 +399,16 @@ export function createInterruptedMap(options: InterruptedMapOptions): Discontinu
     ].includes(options.projection)
   )
     throw new Error('Unknown interrupted projection');
+  const latitudes = options.latitudes ?? {north: 0, south: 0};
+  if (
+    !Number.isFinite(latitudes.north) ||
+    !Number.isFinite(latitudes.south) ||
+    latitudes.north < 0 ||
+    latitudes.north >= 90 ||
+    latitudes.south > 0 ||
+    latitudes.south <= -90
+  )
+    throw new Error('Invalid interruption latitudes');
   const centralMeridian = options.centralMeridian ?? 0;
   if (!Number.isFinite(centralMeridian)) throw new Error('Expected finite centralMeridian');
   for (const hemisphere of [options.lobes?.north, options.lobes?.south]) {
@@ -421,7 +440,8 @@ export function createInterruptedMap(options: InterruptedMapOptions): Discontinu
     false,
     'default',
     ((((centralMeridian + 180) % 360) + 360) % 360) - 180,
-    options.lobes
+    options.lobes,
+    latitudes
   );
 }
 function validRadius(value = 1): number {

@@ -35,7 +35,10 @@ spherical degrees; the radius does not specify an ellipsoid or a CRS.
 | --- | --- |
 | `healpix` | Spherical H=4, K=3; `centralMeridian: 0`; 8 computational charts, not rHEALPix |
 | `gingery` | `centralMeridian: 0`, `lobes: 6` (integer 3–24), `coreAngle: 30` (strictly between 0° and 90°) |
-| `interrupted` | Required `projection` and `lobes: {north, south}`; optional `centralMeridian: 0`; see below |
+| `interrupted` | Required `projection` and `lobes: {north, south}`; optional `centralMeridian: 0`, `latitudes: {north: 0, south: 0}`; see below |
+| `projection` | Required `projection`: a `MapProjection` from `MAP_PROJECTIONS`; [named projection catalog](./projection-catalog.md), including native D3 aspects and regional coverage |
+| `regional` | Required `projection`; optional formula-specific fields documented in the [regional API](./projection-catalog.md#regional-api) |
+| `world` | `projection`: a `WorldProjection` name from `WORLD_PROJECTIONS`; `parameters`: optional formula-specific values; `centralMeridian: 0`. See [world maps](./README.md#world-maps). |
 | `mercator` | `centralMeridian: 0`, `maxLatitude: 85.0511287798066`; limit strictly between 0° and 90° |
 | `goode` | Goode land-oriented homolosine cuts: two northern and four southern lobes |
 | `interrupted-sinusoidal` | Independent six-lobe sinusoidal arrangement |
@@ -157,9 +160,10 @@ Each hemisphere must partition `[-180, 180]` in west-to-east order, without gaps
 or overlaps. Centers must lie within the lobe and be at most 180° from either
 edge. Supported `projection` values are `sinusoidal`, `mollweide`, `homolosine`,
 `boggs`, `sinu-mollweide`, and `quartic-authalic`. Interruptions begin at the
-equator. Wide lobes are subdivided into convex charts with continuous internal
-joins; chart count need not equal lobe count. These options do not implement
-oblique aspects or cuts beginning at arbitrary latitudes.
+optional `latitudes.north` and `latitudes.south` (both default 0°); north must be
+in [0, 90), south in (−90, 0]. Wide lobes are subdivided into convex charts with
+continuous internal joins. The catalog supplies D3's native oblique Sinu-Mollweide
+preset; arbitrary per-lobe latitudes and arbitrary oblique rotations are not options.
 
 All three definitions support the usual seam-aware geometry, fitting, picking,
 and transitions through the globe; none supplies hinge motion. At a cut, use a
@@ -388,3 +392,15 @@ overlap-free morph. Use geographic coordinates to rebuild destination geometry;
 fade differing coverage. Direct transitions between distinct but compatible
 engines, custom reference surfaces, and automatic topology correspondence are
 future extensions.
+
+### containsConvexPolygon(ring, regionId)
+
+<span class="badge">From v5.0 · Experimental</span>
+
+A conservative fast-path query for small convex source rings. `true` means the
+ring fits one region without crossing chart or coverage boundaries. `false`
+means use `projectPolygon()`; it does not imply the polygon is invisible.
+This includes checking whether a cap's excluded interior lies inside the ring,
+even when all original corners are visible. It does not waive the need for
+appropriate mesh subdivision or curved-edge sampling. Ice Age Explorer uses it
+to avoid unnecessary clipping of interior grid cells.

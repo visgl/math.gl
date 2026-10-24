@@ -12,7 +12,9 @@ latest available upstream releases.
 | proj4js 2.22.0 / PROJ | Adapted projection kernels, helpers and datum transformations; [detailed file-level provenance](./projection/THIRD-PARTY-NOTICES.md), [proj4js terms](./projection/PROJ4-LICENSE.md), [PROJ terms](./projection/PROJ-LICENSE.txt). |
 | Bernie Jenny and Equal Earth collaborators | Equal Earth kernel ported through proj4js; Apache-2.0, [full license](./projection/APACHE-2.0-LICENSE.txt). Source retains the original collaborator credits. |
 | Charles Karney / GeographicLib | Vendored geodesic solver and adapted rhumb, intersection and polygon algorithms; MIT, [notice](./GEOGRAPHICLIB-LICENSE.txt), [vendored version and modifications](./src/vendor/geographiclib-geodesic/README.md). |
-| Mike Bostock / d3-geo-projection | Adapted elliptic, Guyou, Gringorten, quincuncial, Berghaus, Gingery, interrupted and polyhedral work; ISC, [D3 notice](./src/discontinuous/D3-LICENSE.txt). Reference fixtures use version 4.0.0; no D3 runtime dependency. |
+| Mike Bostock / d3-geo-projection | Adapted [world projection kernels and modification inventory](./src/discontinuous/world-kernels/README.md), elliptic, Guyou, Gringorten, quincuncial, Berghaus, Gingery, interrupted and polyhedral work; ISC, [D3 notice](./src/discontinuous/D3-LICENSE.txt). Reference fixtures use version 4.0.0; no D3 runtime dependency. |
+| Mike Bostock / d3-geo 3.1.1 | Adapted spherical circle clipping; ISC, [retained license](./src/discontinuous/spherical-clip/D3-GEO-LICENSE.txt), [modifications and file inventory](./src/discontinuous/spherical-clip/README.md). No runtime D3 dependency. |
+| Ricky Reusser / scijs | Adaptive Simpson integration used by the hyperelliptical kernel, via d3-geo-projection; [MIT license](./src/discontinuous/world-kernels/INTEGRATE-LICENSE.txt). |
 | d3-geo-polygon contributors | AirOcean topology/rotation; ISC, [AirOcean notice](./src/discontinuous/AIR-OCEAN-LICENSE.txt). |
 
 The separately installed `polygon-clipping` dependency retains its own package

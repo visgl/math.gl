@@ -37,6 +37,78 @@ Results retain `regionId` and matching `sourceCoordinates` for every output vert
 For concepts, rendering patterns, and the Ice Age Explorer integration, see the
 [discontinuous projections guide](../projection/developer-guide/discontinuous-projections.md).
 
+For the complete named preset list and regional configuration, see the
+[projection catalog](./projection-catalog.md).
+
+## World maps
+
+<span class="badge">From v5.0 · Experimental</span>
+
+`createWorldMap(options)` and `MapEngine`'s `{type: 'world', projection, parameters?,
+centralMeridian?}` definition expose ordinary world formulas through the same
+point, inverse, line, polygon, layout and globe-transition pipeline. The lower-level
+factory also accepts `radius` (default 1); `MapDescription.radius` sets the engine's scale.
+Longitude/latitude and angular parameters are in degrees. Output has north-positive y.
+`WORLD_PROJECTIONS` is a frozen array of supported `WorldProjection` names.
+
+```typescript
+const engine = new MapEngine({
+  version: 1,
+  id: 'bonne-45',
+  definition: {type: 'world', projection: 'bonne', parameters: {parallel: 45}}
+});
+```
+
+`WorldMapOptions`, `WorldProjection`, and `WorldProjectionParameters` describe these
+inputs. Unsupported parameter keys, non-finite values and invalid ranges throw.
+Default parameters follow d3-geo-projection 4.0.0. Bertin 1953 and Sinu-Mollweide
+include their native oblique aspects; `centralMeridian` shifts their geographic
+longitude. D3's pixel scale, screen-y reflection, translation and display center
+are presentation choices; use `fitViewport` instead.
+
+The 64 names are:
+
+- `aitoff`, `august`, `baker`, `bertin1953`, `boggs`, `bonne`, `bottomley`, `bromley`.
+- `collignon`, `craster`, `cylindrical-equal-area`, `cylindrical-stereographic`.
+- `eckert1` through `eckert6`, `eisenlohr`, `fahey`, `foucaut`, `foucaut-sinusoidal`.
+- `gilbert`, `gringorten` (rectangular), `ginzburg4`, `ginzburg5`, `ginzburg6`, `ginzburg8`, `ginzburg9`, `hammer`, `hill`,
+  `homolosine`, `hufnagel`, `hyperelliptical`, `kavrayskiy7`, `lagrange`, `larrivee`,
+  `laskowski`, `loximuthal`, `miller`, `mollweide`.
+- `mt-flat-polar-parabolic`, `mt-flat-polar-quartic`, `mt-flat-polar-sinusoidal`,
+  `natural-earth2`, `nell-hammer`, `nicolosi`, `patterson`, `polyconic`,
+  `quartic-authalic`, `rectangular-polyconic`, `robinson`, `sinu-mollweide`, `sinusoidal`, `times`.
+- `van-der-grinten`, `van-der-grinten2`, `van-der-grinten3`, `van-der-grinten4`,
+  `wagner`, `wagner4`, `wagner6`, `wagner7`, `winkel3`.
+
+| Formula | Parameters (defaults) |
+| --- | --- |
+| Bonne | `parallel: 45` |
+| Bottomley | `fraction: 0.5` |
+| Cylindrical equal-area / stereographic | `parallel: 38.58` / `parallel: 0` |
+| Foucaut sinusoidal | `alpha: 0.5` |
+| Hammer | `coefficient: 2`; use `quartic-authalic` for the infinite-coefficient limit |
+| Hill | `ratio: 1` |
+| Hufnagel | `a: 1`, `b: 0`, `psiMax: 45`, `ratio: 2` |
+| Hyperelliptical | `alpha: 0`, `k: 2.5`, `gamma: 1.183136` |
+| Lagrange | `spacing: 0.5` |
+| Loximuthal | `parallel: 40` |
+| Rectangular polyconic | `parallel: 0` |
+| Wagner | `poleline: 65`, `parallels: 60`, `inflation: 20`, `ratio: 200` |
+
+These formulas are spherical maps, not ellipsoidal CRS transforms. Their eight
+computational charts cover the globe and split geometry at the antimeridian.
+Continuous chart joins should not be rendered as outlines. Some formulas stretch a
+pole into an edge: incoming and outgoing meridians then have different limiting
+positions. Returned source coordinates retain that directional longitude; a renderer
+must use the returned geometry rather than collapsing all polar vertices together.
+
+The numeric kernels are adapted from [D3's ISC-licensed sources](https://github.com/d3/d3-geo-projection/tree/v4.0.0/src);
+see the [provenance inventory](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/discontinuous/world-kernels/README.md).
+The [projection catalog](./projection-catalog.md) covers all named default
+constructors in d3-geo-projection 4.0.0, including regional formulas and native
+interruption layouts. Its coverage table distinguishes preset coverage from
+D3 API compatibility and arbitrary builder/accessor combinations.
+
 ## Presets
 
 <span class="badge">From v5.0 · Experimental</span>
@@ -86,8 +158,9 @@ for the distinction between the local formula and its interruption layout.
   equatorial Gingery star. Options type: `GingeryMapOptions`; `coreAngle` is in
   degrees and strictly between 0 and 90; `lobes` is an integer from 3 to 24.
 - `createInterruptedMap({projection, lobes, radius = 1, centralMeridian = 0})`:
-  configurable equatorial interruptions. `InterruptedMapOptions` uses an
-  `InterruptedProjection` formula and `InterruptedLobe` tuples in `north` and
+  configurable interruptions. `InterruptedMapOptions` uses an
+  `InterruptedProjection` formula, optional `latitudes: {north: 0, south: 0}`
+  (north in [0, 90), south in (−90, 0]), and `InterruptedLobe` tuples in `north` and
   `south` arrays.
 
 All return `DiscontinuousMap`. See the [MapEngine reference](./map-engine.md#healpix-gingery-and-configurable-interruptions)

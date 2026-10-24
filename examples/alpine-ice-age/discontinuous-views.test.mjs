@@ -36,7 +36,7 @@ for (const view of Object.keys(DISCONTINUOUS_VIEWS)) {
     // Region lookup scans every panel; sample across the full grid for dense H3 nets.
     const stride = Math.max(1, Math.floor(grid.sources.length / 2000));
     for (let i = 0; i < grid.sources.length; i += stride) {
-      assert(grid.map.findRegions(grid.sources[i]).includes(grid.regionIds[i]));
+      assert(grid.map.findRegions(grid.sources[i]).includes(grid.regionIds[i]), `${view}: ${grid.sources[i]} in ${grid.regionIds[i]}, owners ${grid.map.findRegions(grid.sources[i])}`);
     }
     for (const part of grid.lines) {
       assert(part.coordinates.length > 1);
@@ -230,4 +230,19 @@ test("cooperative grid preparation matches synchronous output and can be cancell
     }),
     { name: "AbortError" },
   );
+});
+
+test("source triangulation preserves a clipped polygon's hole", async () => {
+  const {triangulateSourcePolygon} = await import("./triangulate-source-polygon.js");
+  const rings = [
+    [[0, 0], [4, 0], [4, 4], [0, 4], [0, 0]],
+    [[1, 1], [1, 2], [2, 2], [2, 1], [1, 1]],
+  ];
+  const mesh = triangulateSourcePolygon({coordinates: rings, sourceCoordinates: rings});
+  let area = 0;
+  for (let i = 0; i < mesh.indices.length; i += 3) {
+    const [a, b, c] = mesh.indices.slice(i, i + 3).map(j => mesh.positions[j]);
+    area += Math.abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) / 2;
+  }
+  assert(Math.abs(area - 15) < 1e-10);
 });

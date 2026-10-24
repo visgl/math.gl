@@ -177,6 +177,26 @@ export class DiscontinuousMap {
     const p = geographic(position);
     return this.compiled.filter(r => this.contains(r, p)).map(r => r.definition.id);
   }
+  /** Conservative fast-path test for a convex source ring in one chart. */
+  containsConvexPolygon(ring: readonly GeographicPosition[], regionId: string): boolean {
+    const region = this.select(regionId)[0];
+    if (ring.length < 3) return false;
+    const points = ring.map(geographic),
+      sum = points.reduce(add, [0, 0, 0]);
+    if (Math.hypot(...sum) < 1e-12) return false;
+    const center = unit(sum);
+    if (points.some(p => dot(center, p) <= 1e-6 || !this.contains(region, p))) return false;
+    let edges = 0;
+    for (let i = 0; i < points.length; i++) {
+      const n = cross(points[i], points[(i + 1) % points.length]),
+        length = Math.hypot(...n);
+      if (length < 1e-12) continue;
+      edges++;
+      const normal = scale(n, (dot(n, center) < 0 ? -1 : 1) / length);
+      if (points.some(p => dot(normal, p) < -1e-10)) return false;
+    }
+    return edges >= 3;
+  }
   projectPoint(position: GeographicPosition, regionId?: string): MapPoint | null {
     const p = geographic(position);
     const candidates = this.select(regionId);
@@ -238,7 +258,11 @@ export class DiscontinuousMap {
           angle(
             geographic(current.sourceCoordinates[current.sourceCoordinates.length - 1]),
             clipped[0]
-          ) > EPS
+          ) > EPS ||
+          !this.sameProjectedPoint(
+            current.coordinates[current.coordinates.length - 1],
+            this.project(r, sampled[0])
+          )
         ) {
           current = {regionId: r.definition.id, coordinates: [], sourceCoordinates: []};
           results.push(current);
@@ -253,6 +277,15 @@ export class DiscontinuousMap {
     }
     return results;
   }
+  /** Sample the visible coverage outline of one chart. */
+  getRegionOutlines(id: string, options?: MapSamplingOptions): Position[][] {
+    const region = this.regions.find(r => r.id === id);
+    if (!region) throw new Error('Unknown region');
+    return this.projectLine([...region.boundary, region.boundary[0]], options)
+      .filter(part => part.regionId === id)
+      .map(part => part.coordinates);
+  }
+
   /** Exterior first, then holes; winding-independent. Each input polygon must
    * fit in one open hemisphere. Returned polygons have CCW exteriors/CW holes.
    */
@@ -328,7 +361,7 @@ export class DiscontinuousMap {
           );
         }, 0)
       );
-    const inputArea = convex ? relativeArea(planar[0]) : 0;
+    const inputArea = relativeArea(planar[0]);
     const results: MapPolygon[] = [];
     for (const r of this.compiled) {
       let clip: Position[] = convex
@@ -343,11 +376,12 @@ export class DiscontinuousMap {
       if (clip.length < 3 || ringOrientation(clip) === 0) continue;
       // Roundoff at a tangent seam must not emit a numerical sliver. Compare
       // to the source ring's own scale so genuinely small polygons survive.
-      if (convex && relativeArea(clip) <= inputArea * 64 * Number.EPSILON) continue;
+      if (convex && relativeArea(clip) <= inputArea * 1024 * Number.EPSILON) continue;
       const polygons = convex
         ? [[[...clip, clip[0]]]]
         : polygonClipping.intersection(planar, [clip]);
       for (const polygon of polygons) {
+        if (relativeArea(polygon[0]) <= inputArea * 1024 * Number.EPSILON) continue;
         const output: MapPolygon = {
           regionId: r.definition.id,
           coordinates: [],
@@ -358,9 +392,14 @@ export class DiscontinuousMap {
           const points: Vector[] = [];
           for (let i = 1; i < sphere.length; i++) {
             const sampled = this.sample(r, sphere[i - 1], sphere[i], settings);
-            for (let j = 0; j < sampled.length - 1; j++) points.push(sampled[j]);
+            for (const point of sampled) {
+              const previous = points[points.length - 1];
+              if (!previous || !point.every((value, k) => value === previous[k]))
+                points.push(point);
+            }
           }
           if (points.length < 3) return;
+          if (points[points.length - 1].every((value, k) => value === points[0][k])) points.pop();
           points.push(points[0]);
           const xy = points.map(p => this.project(r, p));
           if (ringOrientation(xy) > 0 !== (index === 0)) {
@@ -392,12 +431,25 @@ export class DiscontinuousMap {
       throw new Error(`Nonfinite projection in region ${r.definition.id}`);
     return xy;
   }
+  /** Internal extension point for coordinate singularities with directional limits. */
+  protected resolveSourceLimit(point: Vector, _towards: Vector): Vector {
+    return point;
+  }
+  private sameProjectedPoint(a: Position, b: Position) {
+    const magnitude = Math.max(1, ...a.map(Math.abs), ...b.map(Math.abs));
+    return (
+      Math.hypot(a[0] / magnitude - b[0] / magnitude, a[1] / magnitude - b[1] / magnitude) < 1e-12
+    );
+  }
   private sample(
     r: Region,
     a: Vector,
     b: Vector,
     settings: {step: number; tolerance: number}
   ): Vector[] {
+    const originalA = a;
+    a = this.resolveSourceLimit(a, b);
+    b = this.resolveSourceLimit(b, originalA);
     if (angle(a, b) < 1e-13) return [a];
     const out: Vector[] = [a];
     const visit = (u: Vector, v: Vector, depth: number) => {
@@ -413,7 +465,8 @@ export class DiscontinuousMap {
         : 0;
       const error = Math.hypot(m[0] - p[0] - t * dx, m[1] - p[1] - t * dy);
       if (angle(u, v) > settings.step || error > settings.tolerance) {
-        if (depth >= 20 || out.length > 1000000)
+        // Sharp but continuous polar cusps need more refinement than smooth maps.
+        if (depth >= 32 || out.length > 1000000)
           throw new Error('Projection sampling limit exceeded; relax tolerance');
         visit(u, middle, depth + 1);
         visit(middle, v, depth + 1);
@@ -446,7 +499,11 @@ export class DiscontinuousMap {
           other = group[1].r,
           a = r.vertices[i],
           b = r.vertices[(i + 1) % r.vertices.length];
-        const samples = [a, unit(add(a, b)), b];
+        const samples = [
+          this.resolveSourceLimit(a, b),
+          unit(add(a, b)),
+          this.resolveSourceLimit(b, a)
+        ];
         const first = samples.map(p => this.project(r, p));
         const second = samples.map(p => this.project(other, p));
         // Measure the actual placed edge, independent of how scale is split
