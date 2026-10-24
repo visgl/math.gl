@@ -121,3 +121,12 @@ test("separate seam copies meet on the globe and interpolate continuously", () =
     halfway.every((v, i) => Math.abs(v - (globe[i] + left[i]) / 2) < 1e-10),
   );
 });
+
+test("cache eviction retains the next stage while another selection finishes loading", async () => {
+  const { prunePreparedMaps } = await import("./projection-transition.js");
+  const cache = new Map(["A", "B", "X", "C"].map((id) => [id, {}]));
+  prunePreparedMaps(cache, "A", "C", { view: "A" }, [{ view: "B" }]);
+  assert.deepEqual([...cache.keys()], ["A", "B", "C"]);
+  prunePreparedMaps(cache, "C", "D", null, [], 1);
+  assert.deepEqual([...cache.keys()], ["C"]);
+});

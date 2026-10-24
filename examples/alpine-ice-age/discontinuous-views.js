@@ -263,7 +263,9 @@ function* buildGrid(view, step = 1) {
   for (let lon = -180; lon <= 180; lon += 30) {
     yield;
     lines.push(
-      ...map.projectLine(Array.from({ length: 181 }, (_, i) => [lon, i - 90])),
+      ...map
+        .projectLine(Array.from({ length: 181 }, (_, i) => [lon, i - 90]))
+        .map((line) => ({ ...line, meridian: lon })),
     );
   }
   for (let lat = -60; lat <= 60; lat += 30) {

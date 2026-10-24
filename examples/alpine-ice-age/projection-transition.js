@@ -65,3 +65,25 @@ export function segmentedPosition(flat, source, amount, viewport, lift = 0) {
     (value, axis) => globe[axis] + (value - globe[axis]) * amount,
   );
 }
+
+/** Keep every mesh that sampleTransition can display before a new route replaces it. */
+export function prunePreparedMaps(
+  cache,
+  displayed,
+  selected,
+  transition,
+  route,
+  limit = 3,
+) {
+  const retained = new Set([
+    displayed,
+    selected,
+    transition?.view,
+    transition?.target,
+    ...route.map((stage) => stage.view),
+  ]);
+  for (const key of cache.keys()) {
+    if (cache.size <= limit) break;
+    if (!retained.has(key)) cache.delete(key);
+  }
+}

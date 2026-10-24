@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {
   canCenterMap,
+  centeredGraticules,
   wrapLongitude,
   mapLongitudeOffset,
   geographicSource,
@@ -24,6 +25,7 @@ import { nearestOSFChapter } from "./osf-data.js";
 import {
   projectionWeights,
   projectionRoute,
+  prunePreparedMaps,
   segmentedPosition,
   globePosition,
 } from "./projection-transition.js";
@@ -178,10 +180,13 @@ export function createGlobalScene(
         .then((grid) => {
           if (disposed || pending !== request) return;
           prepared.set(opts.view, grid);
-          // Retain the currently displayed mesh until its closing stage ends.
-          for (const key of prepared.keys())
-            if (prepared.size > 3 && key !== displayView && key !== opts.view)
-              prepared.delete(key);
+          prunePreparedMaps(
+            prepared,
+            displayView,
+            opts.view,
+            transition,
+            route,
+          );
           pending = null;
           canvas.removeAttribute("aria-busy");
           onLoading(false);
@@ -306,14 +311,19 @@ export function createGlobalScene(
     }
     // Every endpoint shares vertex identities, including the longitude seam.
     // Ice, graticules and text follow the same weighted geographical positions.
-    function blendedPoint(lon, lat, lift = 0) {
+    function blendedPoint(
+      lon,
+      lat,
+      lift = 0,
+      chartLongitude = wrapLongitude(lon - offset),
+    ) {
       const result = [0, 0, 0];
       for (const endpoint of endpoints) {
         let p;
         if (endpoint.id === "globe")
-          p = point(lon + offset, lat).map((v) => v * (endpoint.scale + lift));
+          p = point(lon, lat).map((v) => v * (endpoint.scale + lift));
         else {
-          p = projectCoordinate(endpoint.id, [lon, lat]);
+          p = projectCoordinate(endpoint.id, [chartLongitude, lat]);
           p = [
             (p[0] - endpoint.mesh.centerX) * endpoint.scale,
             (p[1] - endpoint.mesh.centerY) * endpoint.scale,
@@ -389,7 +399,7 @@ export function createGlobalScene(
       ) {
         const path = [];
         for (let lon = west; lon <= east; lon += 1)
-          path.push(blendedPoint(lon, lat, 0.6));
+          path.push(blendedPoint(lon + offset, lat, 0.6, lon));
         lines.push({ path, opacity: 1 });
       }
     }
@@ -543,7 +553,7 @@ export function createGlobalScene(
         colors: { size: 3, value: colors },
       },
     });
-    const lines = g.lines
+    const lines = centeredGraticules(g.map, g.lines, offset)
       .filter(
         (line) =>
           opts.view !== "albersUsa" && (opts.labels || line.kind === "cell"),

@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {expect, test} from 'vitest';
+import {expect, test, vi} from 'vitest';
 import {MapEngine, type MapDefinition} from '../../src/discontinuous';
 import {geographic, coordinates, add, unit} from '../../src/discontinuous/math';
 const types = [
@@ -17,7 +17,12 @@ const types = [
   'interrupted-mollweide-hemispheres'
 ] as const;
 const make = (type: MapDefinition['type'], radius = 1) =>
-  new MapEngine({version: 1, id: type, definition: {type} as MapDefinition, radius});
+  new MapEngine({
+    version: 1,
+    id: type,
+    definition: {type} as MapDefinition,
+    radius
+  });
 for (const type of types) {
   test(`${type}: coverage, inverse, boundaries, layout, and transitions`, () => {
     const map = make(type);
@@ -106,7 +111,11 @@ test('matches D3 reference formulas and polyhedral shapes', () => {
 for (const type of ['guyou', 'gringorten-quincuncial'] as const) {
   test(`${type}: axes, nearby branches, and central-meridian rotation`, () => {
     const map = make(type);
-    const rotated = new MapEngine({version: 1, id: type, definition: {type, centralMeridian: 17}});
+    const rotated = new MapEngine({
+      version: 1,
+      id: type,
+      definition: {type, centralMeridian: 17}
+    });
     for (const lon of [0, 1e-6, -1e-6, 90, -90, 90 - 1e-6, 90 + 1e-6, 180]) {
       for (const lat of [-89, -60, -45, -1e-6, 0, 1e-6, 45, 60, 89]) {
         const hit = map.projectPoint([lon, lat])!;
@@ -130,7 +139,35 @@ for (const type of ['guyou', 'gringorten-quincuncial'] as const) {
       }
     }
     expect(
-      () => new MapEngine({version: 1, id: type, definition: {type, centralMeridian: NaN}})
+      () =>
+        new MapEngine({
+          version: 1,
+          id: type,
+          definition: {type, centralMeridian: NaN}
+        })
     ).toThrow();
   });
 }
+
+test('interrupted direct inverses avoid nested forward latitude solves', () => {
+  for (const type of [
+    'interrupted-mollweide',
+    'goode',
+    'interrupted-sinu-mollweide',
+    'interrupted-quartic-authalic'
+  ] as const) {
+    const map = make(type);
+    for (const latitude of [-65, -20, 20, 65]) {
+      const hit = map.projectPoint([-120, latitude])!;
+      const region = map.regions.find(r => r.id === hit.regionId)!;
+      const sin = vi.spyOn(Math, 'sin');
+      try {
+        const back = region.unproject(hit.position)!;
+        expect(back[1]).toBeCloseTo(latitude, 8);
+        expect(sin.mock.calls.length).toBeLessThan(10);
+      } finally {
+        sin.mockRestore();
+      }
+    }
+  }
+});

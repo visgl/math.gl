@@ -163,9 +163,9 @@ function interruptedMap(
   const profile = (latitude: number): Position => {
     if (kind === 'sinusoidal' || (kind === 'homolosine' && Math.abs(latitude) <= transition))
       return [Math.cos(latitude), latitude];
-    const [width, height] = mollweide(latitude);
     if (kind === 'quartic-authalic')
       return [Math.cos(latitude) / Math.cos(latitude / 2), 2 * Math.sin(latitude / 2)];
+    const [width, height] = mollweide(latitude);
     if (kind === 'boggs')
       return [
         2.00276 / (1 / Math.cos(latitude) + 1.11072 / ((width * Math.PI) / (2 * Math.SQRT2))),
@@ -176,6 +176,44 @@ function interruptedMap(
     return [width, height - (kind === 'homolosine' ? Math.sign(latitude) * correction : 0)];
   };
   const equatorialScale = profile(0)[0];
+  const minHeight = profile(-Math.PI / 2)[1],
+    maxHeight = profile(Math.PI / 2)[1];
+  const asinClamped = (x: number) => Math.asin(Math.max(-1, Math.min(1, x)));
+  const inverseProfile = (height: number): Position => {
+    if (
+      kind === 'sinusoidal' ||
+      (kind === 'homolosine' && Math.abs(height) <= transition) ||
+      (kind === 'sinu-mollweide' && height <= -transition)
+    )
+      return [height, Math.cos(height)];
+    if (kind === 'quartic-authalic') {
+      const latitude = 2 * asinClamped(height / 2);
+      return [latitude, Math.cos(latitude) / Math.cos(latitude / 2)];
+    }
+    if (kind !== 'boggs') {
+      const mollHeight =
+        kind === 'homolosine'
+          ? height + Math.sign(height) * correction
+          : kind === 'sinu-mollweide'
+            ? height - correction
+            : height;
+      const theta = asinClamped(mollHeight / Math.SQRT2);
+      return [
+        asinClamped((2 * theta + Math.sin(2 * theta)) / Math.PI),
+        ((2 * Math.SQRT2) / Math.PI) * Math.cos(theta)
+      ];
+    }
+    // Boggs combines latitude with Mollweide height and needs a bounded inverse solve.
+    let low = -Math.PI / 2,
+      high = Math.PI / 2;
+    for (let i = 0; i < 55; i++) {
+      const mid = (low + high) / 2;
+      if (profile(mid)[1] < height) low = mid;
+      else high = mid;
+    }
+    const latitude = (low + high) / 2;
+    return [latitude, profile(latitude)[0]];
+  };
   // Split the wide Eurasian lobe into two convex computational charts sharing
   // one projection. The extra meridian is a continuous join, not a map cut.
   const lobes =
@@ -242,17 +280,8 @@ function interruptedMap(
         },
         unproject: ([x, y]) => {
           const height = y / radius;
-          if (height > profile(Math.PI / 2)[1] + 1e-10 || height < profile(-Math.PI / 2)[1] - 1e-10)
-            return null;
-          let low = -Math.PI / 2,
-            high = Math.PI / 2;
-          for (let i = 0; i < 55; i++) {
-            const mid = (low + high) / 2;
-            if (profile(mid)[1] < height) low = mid;
-            else high = mid;
-          }
-          const latitude = (low + high) / 2;
-          const width = profile(latitude)[0];
+          if (height > maxHeight + 1e-10 || height < minHeight - 1e-10) return null;
+          const [latitude, width] = inverseProfile(height);
           const relativeX = x / radius - equatorialScale * center * RAD;
           if (Math.abs(width) < 1e-12)
             return Math.abs(relativeX) < 1e-10 ? [center + centralMeridian, sign * 90] : null;

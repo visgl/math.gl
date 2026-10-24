@@ -41,3 +41,25 @@ test("fixed geographic layouts keep their masks and drag longitudes wrap", () =>
   assert.equal(wrapLongitude(181), -179);
   assert.equal(wrapLongitude(-181), 179);
 });
+
+test("centered graticules retain actual geographic meridians and cache reprojection", async () => {
+  const { centeredGraticules } = await import("./map-center.js");
+  let calls = 0;
+  const map = {
+    projectLine: (sourceCoordinates) => {
+      calls++;
+      return [{ sourceCoordinates }];
+    },
+  };
+  const parallel = { kind: "parallel" };
+  const original = [parallel, { meridian: 0 }];
+  assert.strictEqual(centeredGraticules(map, original, 0), original);
+  const lines = centeredGraticules(map, original, 17);
+  assert.strictEqual(lines[0], parallel);
+  for (const [i, line] of lines.slice(1).entries()) {
+    const geographic = wrapLongitude(line.sourceCoordinates[0][0] + 17);
+    assert.equal(geographic, wrapLongitude(-180 + 30 * i));
+  }
+  assert.strictEqual(centeredGraticules(map, original, 17), lines);
+  assert.equal(calls, 13);
+});
