@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "metadata": {
-    "date": "2026-10-24T22:31:34.577Z",
+    "date": "2026-10-24T22:50:21.329Z",
     "baselineCommit": "b9db6472e72b22ffb52b1c37c97745e68478728a",
-    "candidateCommit": "41eed689fd428403f2f3fc44b57c4b996744d421",
+    "candidateCommit": "3801a347535d8089cb7b917ed933424bbeab6e63",
     "bundleSHA256": {
-      "baseline": "4bd727ae4cef288c20326030145cfb01aa105981a3e96db1036485dccbc5fb47",
-      "candidate": "94d2f77a8e7a083996792b9a2fa0a32b36b299e9ea35ac757242ebf54d36ec19"
+      "baseline": "35c78462acd982a40f000c3d2e2dbe9ed8a8a75e3bc2c4b148928d5338811e54",
+      "candidate": "b2633a6646cf3f18fc21e0ed584ff0fa2bce992bc1438f6f697f35d0d2839214"
     },
-    "workloadSHA256": "7bb0fce6d681f25acd4a62a72d42389dc3f01e1a0fde09e7d8184e56db4eea0a",
+    "workloadSHA256": "4a46d8905cfbcfad6081fc53993f7b6077c7b2dee458da7127b2e43ad9eb346f",
     "nativeReference": {
       "version": "2.7",
       "precisionBits": 53,
@@ -24,7 +24,49 @@
       "driverSHA256": "1689fd8dbd698234fd2a23c6544c4c98e109504e55363500a2ca83ece55137f8",
       "compiler": "Apple LLVM 21.0.0 (clang-2100.3.34.2)",
       "binarySHA256": "63374645a3522c90c7a32250f4f8a471e95c3ffd541ae743b9c884d7e0042192",
-      "compilerFlags": "-std=c++17 -O2; GEOGRAPHICLIB_PRECISION=2; no LTO"
+      "compilerFlags": "-std=c++17 -O2; GEOGRAPHICLIB_PRECISION=2; no LTO",
+      "qualification": [
+        {
+          "operation": "gi",
+          "rows": 9,
+          "maxBudgetUsage": 0
+        },
+        {
+          "operation": "gd",
+          "rows": 9,
+          "maxBudgetUsage": 0
+        },
+        {
+          "operation": "gl",
+          "rows": 9,
+          "maxBudgetUsage": 0
+        },
+        {
+          "operation": "ri",
+          "rows": 9,
+          "maxBudgetUsage": 0
+        },
+        {
+          "operation": "rd",
+          "rows": 9,
+          "maxBudgetUsage": 0
+        },
+        {
+          "operation": "rl",
+          "rows": 9,
+          "maxBudgetUsage": 0
+        },
+        {
+          "operation": "gs",
+          "rows": 9,
+          "maxBudgetUsage": 0
+        },
+        {
+          "operation": "rs",
+          "rows": 9,
+          "maxBudgetUsage": 0
+        }
+      ]
     },
     "node": "v24.5.0",
     "v8": "13.6.233.10-node.21",
@@ -70,65 +112,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 922.8567812499904,
-          "p10Nanoseconds": 910.4609375000052,
-          "p90Nanoseconds": 3942.9947499999685,
-          "spread": 3.2860286385851323,
-          "unstable": true,
+          "medianNanoseconds": 874.5455625000034,
+          "p10Nanoseconds": 872.4869687499961,
+          "p90Nanoseconds": 926.9557187499942,
+          "spread": 0.062282346781672424,
+          "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 17.941707999999835,
-              "iterations": 4,
+              "milliseconds": 17.695249999999987,
+              "iterations": 16,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 31.543957999999748,
-              "iterations": 8,
-              "checksum": 101123745.8125258
-            },
-            {
-              "milliseconds": 29.98849999999993,
+              "milliseconds": 28.00383299999976,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.456709000000046,
+              "milliseconds": 27.956290999999965,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.134750000000167,
+              "milliseconds": 27.919582999999875,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.88245900000038,
+              "milliseconds": 27.960625000000164,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.53229199999987,
+              "milliseconds": 29.66012499999988,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.531416999999692,
+              "milliseconds": 27.93295799999987,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 28.929999999999836,
+              "milliseconds": 27.916833000000224,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.229209000000083,
+              "milliseconds": 29.662582999999813,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.39408400000002,
+              "milliseconds": 29.559999999999945,
+              "iterations": 32,
+              "checksum": 101123745.8125258
+            },
+            {
+              "milliseconds": 27.985458000000108,
               "iterations": 32,
               "checksum": 101123745.8125258
             }
@@ -136,65 +178,65 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 917.7096250000005,
-          "p10Nanoseconds": 914.3150937500053,
-          "p90Nanoseconds": 2073.1511250000094,
-          "spread": 1.2627480410810812,
-          "unstable": true,
+          "medianNanoseconds": 874.0703124999953,
+          "p10Nanoseconds": 872.7643124999958,
+          "p90Nanoseconds": 886.6458437500029,
+          "spread": 0.015881481216658017,
+          "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 16.585209000000077,
-              "iterations": 8,
-              "checksum": 101123745.8125258
-            },
-            {
-              "milliseconds": 40.076292000000194,
-              "iterations": 8,
-              "checksum": 101123745.8125258
-            },
-            {
-              "milliseconds": 29.82574999999997,
+              "milliseconds": 28.051124999999956,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.65112500000032,
+              "milliseconds": 27.942999999999984,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.377542000000176,
+              "milliseconds": 27.970000000000255,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.25808300000017,
+              "milliseconds": 27.93783399999984,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.366708000000017,
+              "milliseconds": 27.97024999999985,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.25949999999966,
+              "milliseconds": 28.372667000000092,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.0959170000001,
+              "milliseconds": 27.970374999999876,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.30529200000001,
+              "milliseconds": 27.891999999999825,
               "iterations": 32,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 29.350582999999915,
+              "milliseconds": 29.47079199999962,
+              "iterations": 32,
+              "checksum": 101123745.8125258
+            },
+            {
+              "milliseconds": 28.203667000000223,
+              "iterations": 32,
+              "checksum": 101123745.8125258
+            },
+            {
+              "milliseconds": 27.928457999999864,
               "iterations": 32,
               "checksum": 101123745.8125258
             }
@@ -202,73 +244,73 @@
         },
         {
           "implementation": "GeographicLib C++ 2.7",
-          "medianNanoseconds": 356.5110625,
-          "p10Nanoseconds": 353.95246875000004,
-          "p90Nanoseconds": 490.4225312500001,
-          "spread": 0.38279334599890585,
-          "unstable": true,
+          "medianNanoseconds": 340.91340625,
+          "p10Nanoseconds": 340.141265625,
+          "p90Nanoseconds": 348.411453125,
+          "spread": 0.024258909589302654,
+          "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 31.387042,
+              "milliseconds": 21.884584,
               "iterations": 64,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 177.952875,
-              "iterations": 32,
-              "checksum": 101123745.8125258
-            },
-            {
-              "milliseconds": 22.941666,
+              "milliseconds": 21.80575,
               "iterations": 64,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 22.938875,
+              "milliseconds": 21.724833,
               "iterations": 64,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 22.927167,
+              "milliseconds": 21.818458,
               "iterations": 64,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 22.575042,
+              "milliseconds": 21.88875,
               "iterations": 64,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 22.67225,
+              "milliseconds": 22.298333,
               "iterations": 64,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 22.715541,
+              "milliseconds": 21.76925,
               "iterations": 64,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 22.652958,
+              "milliseconds": 21.769041,
               "iterations": 64,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 22.798791,
+              "milliseconds": 24.119042,
               "iterations": 64,
               "checksum": 101123745.8125258
             },
             {
-              "milliseconds": 22.816708,
+              "milliseconds": 21.798042,
+              "iterations": 64,
+              "checksum": 101123745.8125258
+            },
+            {
+              "milliseconds": 22.041791,
               "iterations": 64,
               "checksum": 101123745.8125258
             }
           ]
         }
       ],
-      "candidateOverBaseline": 0.9944225839213988,
-      "candidateOverNative": 2.5741406691973285
+      "candidateOverBaseline": 0.9994565749111465,
+      "candidateOverNative": 2.563907128542251
     },
     {
       "id": "geodesic direct (line setup included)",
@@ -291,65 +333,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 717.1445312499998,
-          "p10Nanoseconds": 707.5768125000081,
-          "p90Nanoseconds": 819.0260625000008,
-          "spread": 0.15540695793319925,
+          "medianNanoseconds": 673.5768125000021,
+          "p10Nanoseconds": 671.0963437500084,
+          "p90Nanoseconds": 707.552093749996,
+          "spread": 0.05412263207915484,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 22.68858399999999,
+              "milliseconds": 21.495625000000018,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 24.254291000000194,
+              "milliseconds": 21.554458000000068,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 26.208834000000024,
+              "milliseconds": 22.64166699999987,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 24.322250000000167,
-              "iterations": 16,
-              "checksum": 62552562.35199725
-            },
-            {
-              "milliseconds": 22.964125000000422,
+              "milliseconds": 21.58383300000014,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 22.878499999999804,
+              "milliseconds": 21.57483300000058,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 22.948624999999993,
+              "milliseconds": 21.95600000000013,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 22.64245800000026,
+              "milliseconds": 21.53508299999976,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 22.788957999999184,
+              "milliseconds": 21.527124999999614,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 22.623083000000406,
+              "milliseconds": 21.38562499999989,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 23.936999999999898,
+              "milliseconds": 21.475083000000268,
+              "iterations": 32,
+              "checksum": 62552562.35199725
+            },
+            {
+              "milliseconds": 26.62029199999961,
               "iterations": 32,
               "checksum": 62552562.35199725
             }
@@ -357,65 +399,65 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 711.5039062499875,
-          "p10Nanoseconds": 705.3945312499934,
-          "p90Nanoseconds": 871.7317812499914,
-          "spread": 0.23378262373383976,
-          "unstable": true,
+          "medianNanoseconds": 673.1471562499962,
+          "p10Nanoseconds": 671.190093749999,
+          "p90Nanoseconds": 675.8359374999827,
+          "spread": 0.00690167626327799,
+          "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 22.67133300000023,
+              "milliseconds": 21.60983400000032,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 22.944166000000223,
+              "milliseconds": 21.489000000000033,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 28.349334000000454,
+              "milliseconds": 21.620957999999973,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 27.895416999999725,
+              "milliseconds": 21.603083999999853,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 23.374917000000096,
+              "milliseconds": 25.66583300000002,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 22.436542000000372,
+              "milliseconds": 21.626749999999447,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 22.645290999999816,
+              "milliseconds": 21.54070899999988,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 22.673499999999876,
+              "milliseconds": 21.540374999999585,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 22.57262499999979,
+              "milliseconds": 21.47808299999997,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 22.7681249999996,
+              "milliseconds": 21.463000000000648,
               "iterations": 32,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 26.09358400000019,
+              "milliseconds": 21.504291999999623,
               "iterations": 32,
               "checksum": 62552562.35199725
             }
@@ -423,73 +465,73 @@
         },
         {
           "implementation": "GeographicLib C++ 2.7",
-          "medianNanoseconds": 270.38215625000004,
-          "p10Nanoseconds": 268.548828125,
-          "p90Nanoseconds": 295.5045625,
-          "spread": 0.09969494566082332,
+          "medianNanoseconds": 258.37565624999996,
+          "p10Nanoseconds": 257.609375,
+          "p90Nanoseconds": 260.24348437500004,
+          "spread": 0.010194882185229296,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 17.15125,
+              "milliseconds": 16.491208,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 18.0025,
+              "milliseconds": 16.482959,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.308083,
+              "milliseconds": 16.498125,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 18.912292,
+              "milliseconds": 16.599084,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.222208,
+              "milliseconds": 16.536042,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.454834,
+              "milliseconds": 16.655583,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.304458,
+              "milliseconds": 16.487,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.288834,
+              "milliseconds": 16.55,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.187125,
+              "milliseconds": 16.5795,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.266291,
+              "milliseconds": 16.496625,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.773625,
+              "milliseconds": 18.238208,
               "iterations": 64,
               "checksum": 62552562.35199725
             }
           ]
         }
       ],
-      "candidateOverBaseline": 0.9921346050144445,
-      "candidateOverNative": 2.6314750800053486
+      "candidateOverBaseline": 0.9993621273149068,
+      "candidateOverNative": 2.605304098767998
     },
     {
       "id": "geodesic reused line",
@@ -512,65 +554,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 306.51562500000296,
-          "p10Nanoseconds": 300.74087500000246,
-          "p90Nanoseconds": 322.73176562500794,
-          "spread": 0.07174476219607166,
+          "medianNanoseconds": 286.9713437499968,
+          "p10Nanoseconds": 286.113937500005,
+          "p90Nanoseconds": 297.64126562498916,
+          "spread": 0.04016891712723227,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 20.654833000000508,
+              "milliseconds": 19.059666999999536,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 20.085166000000754,
+              "milliseconds": 18.331875000000764,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 21.111958000000413,
+              "milliseconds": 18.31129200000032,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.61700000000019,
+              "milliseconds": 18.362875000000713,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.319750000000568,
+              "milliseconds": 18.366165999999794,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.6553329999997,
+              "milliseconds": 18.36254199999985,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.561250000000655,
+              "milliseconds": 18.402000000000044,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.247416000000158,
+              "milliseconds": 18.430749999999534,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.450166999999965,
+              "milliseconds": 18.310832999999548,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.239708999999493,
+              "milliseconds": 19.049040999999306,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.929041000000325,
+              "milliseconds": 18.38591699999961,
               "iterations": 64,
               "checksum": 62552562.35199725
             }
@@ -578,65 +620,65 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 303.00781249999886,
-          "p10Nanoseconds": 299.3828124999993,
-          "p90Nanoseconds": 317.0729218749955,
-          "spread": 0.05838169395383565,
+          "medianNanoseconds": 288.5078125000007,
+          "p10Nanoseconds": 285.94009374999985,
+          "p90Nanoseconds": 299.9498749999958,
+          "spread": 0.04855945192124034,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 19.336624999999913,
+              "milliseconds": 19.173791000000165,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 20.29266699999971,
+              "milliseconds": 18.464500000000044,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 22.22112500000003,
+              "milliseconds": 18.30016599999999,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.868124999999964,
+              "milliseconds": 18.26666600000044,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.255208999999923,
+              "milliseconds": 18.43262500000037,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.117333000000144,
+              "milliseconds": 18.327250000000276,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.267541999999594,
+              "milliseconds": 18.31341599999996,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.81212500000038,
+              "milliseconds": 23.53754200000003,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.160499999999956,
+              "milliseconds": 18.70874999999978,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.392499999999927,
+              "milliseconds": 19.196791999999732,
               "iterations": 64,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 19.647249999999985,
+              "milliseconds": 18.484541999999237,
               "iterations": 64,
               "checksum": 62552562.35199725
             }
@@ -644,73 +686,73 @@
         },
         {
           "implementation": "GeographicLib C++ 2.7",
-          "medianNanoseconds": 135.6240234375,
-          "p10Nanoseconds": 135.0751953125,
-          "p90Nanoseconds": 143.7281875,
-          "spread": 0.06380132345422987,
+          "medianNanoseconds": 129.859046875,
+          "p10Nanoseconds": 129.32779687500002,
+          "p90Nanoseconds": 131.6350859375,
+          "spread": 0.01776764205516593,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 20.454542,
+              "milliseconds": 16.596166,
               "iterations": 128,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 18.397208,
+              "milliseconds": 16.586583,
               "iterations": 128,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.877291,
+              "milliseconds": 18.426792,
               "iterations": 128,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.284375,
+              "milliseconds": 16.849291,
               "iterations": 128,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.359875,
+              "milliseconds": 16.689209,
               "iterations": 128,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.361334,
+              "milliseconds": 16.536083,
               "iterations": 128,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 18.088375,
+              "milliseconds": 16.57375,
               "iterations": 128,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.352916,
+              "milliseconds": 16.621958,
               "iterations": 128,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.289625,
+              "milliseconds": 16.553958,
               "iterations": 128,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.333125,
+              "milliseconds": 16.641916,
               "iterations": 128,
               "checksum": 62552562.35199725
             },
             {
-              "milliseconds": 17.332875,
+              "milliseconds": 16.653917,
               "iterations": 128,
               "checksum": 62552562.35199725
             }
           ]
         }
       ],
-      "candidateOverBaseline": 0.9885558444206423,
-      "candidateOverNative": 2.234175073265208
+      "candidateOverBaseline": 1.0053540842438347,
+      "candidateOverNative": 2.2216997540241703
     },
     {
       "id": "rhumb inverse",
@@ -733,65 +775,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 7538.375000000087,
-          "p10Nanoseconds": 7355.760250000003,
-          "p90Nanoseconds": 8067.197750000106,
-          "spread": 0.0943754456365058,
+          "medianNanoseconds": 7099.91674999992,
+          "p10Nanoseconds": 6963.3854999999585,
+          "p90Nanoseconds": 7725.822999999991,
+          "spread": 0.10738682252859384,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 16.697708000000603,
-              "iterations": 2,
-              "checksum": 60081168.59791664
-            },
-            {
-              "milliseconds": 31.072582999999213,
+              "milliseconds": 28.991291999999703,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 29.78112500000043,
+              "milliseconds": 28.189833000000363,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 29.423041000000012,
+              "milliseconds": 28.736582999999882,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 32.26879100000042,
+              "milliseconds": 30.903291999999965,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 30.26000000000022,
+              "milliseconds": 28.484583999999813,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 30.0600000000004,
+              "milliseconds": 27.808500000000095,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 30.15350000000035,
+              "milliseconds": 28.39966699999968,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 30.695334000000003,
+              "milliseconds": 27.96820800000023,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 29.275250000000597,
+              "milliseconds": 28.169542000000547,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 29.919667000000118,
+              "milliseconds": 27.853541999999834,
+              "iterations": 4,
+              "checksum": 60081168.59791664
+            },
+            {
+              "milliseconds": 31.38183299999946,
               "iterations": 4,
               "checksum": 60081168.59791664
             }
@@ -799,65 +841,65 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 7549.531249999973,
-          "p10Nanoseconds": 7314.208250000092,
-          "p90Nanoseconds": 8338.343749999922,
-          "spread": 0.1356555084131657,
+          "medianNanoseconds": 7231.406249999964,
+          "p10Nanoseconds": 6978.468750000047,
+          "p90Nanoseconds": 7373.646000000008,
+          "spread": 0.05464735852725227,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 16.507458000000042,
-              "iterations": 2,
-              "checksum": 60081168.59791664
-            },
-            {
-              "milliseconds": 30.37683300000026,
+              "milliseconds": 29.082416999999623,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 18.22770799999944,
-              "iterations": 2,
-              "checksum": 60081168.59791664
-            },
-            {
-              "milliseconds": 33.35337499999969,
+              "milliseconds": 29.14837499999976,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 29.25683300000037,
+              "milliseconds": 28.86658299999999,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 30.114167000000634,
+              "milliseconds": 29.49458400000003,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 30.025957999999264,
+              "milliseconds": 28.652084000000286,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 30.19812499999989,
+              "milliseconds": 28.43433300000015,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 30.145833000000493,
+              "milliseconds": 27.91387500000019,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 29.10095900000033,
+              "milliseconds": 27.77166699999998,
               "iterations": 4,
               "checksum": 60081168.59791664
             },
             {
-              "milliseconds": 30.691499999999905,
+              "milliseconds": 28.925624999999854,
+              "iterations": 4,
+              "checksum": 60081168.59791664
+            },
+            {
+              "milliseconds": 29.21929199999977,
+              "iterations": 4,
+              "checksum": 60081168.59791664
+            },
+            {
+              "milliseconds": 30.96520799999962,
               "iterations": 4,
               "checksum": 60081168.59791664
             }
@@ -865,73 +907,73 @@
         },
         {
           "implementation": "GeographicLib C++ 2.7",
-          "medianNanoseconds": 400.138671875,
-          "p10Nanoseconds": 397.31445312500006,
-          "p90Nanoseconds": 407.751953125,
-          "spread": 0.026084706961941845,
+          "medianNanoseconds": 382.217453125,
+          "p10Nanoseconds": 380.53125,
+          "p90Nanoseconds": 384.68359375,
+          "spread": 0.01086382559469884,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 25.637875,
+              "milliseconds": 24.61975,
               "iterations": 64,
               "checksum": 60081168.597916625
             },
             {
-              "milliseconds": 25.785,
+              "milliseconds": 24.432,
               "iterations": 64,
               "checksum": 60081168.597916625
             },
             {
-              "milliseconds": 26.726417,
+              "milliseconds": 24.407625,
               "iterations": 64,
               "checksum": 60081168.597916625
             },
             {
-              "milliseconds": 25.361416,
+              "milliseconds": 24.354,
               "iterations": 64,
               "checksum": 60081168.597916625
             },
             {
-              "milliseconds": 26.096125,
+              "milliseconds": 24.337,
               "iterations": 64,
               "checksum": 60081168.597916625
             },
             {
-              "milliseconds": 25.678333,
+              "milliseconds": 24.554,
               "iterations": 64,
               "checksum": 60081168.597916625
             },
             {
-              "milliseconds": 25.559,
+              "milliseconds": 24.581042,
               "iterations": 64,
               "checksum": 60081168.597916625
             },
             {
-              "milliseconds": 25.495917,
+              "milliseconds": 24.461917,
               "iterations": 64,
               "checksum": 60081168.597916625
             },
             {
-              "milliseconds": 25.523584,
+              "milliseconds": 24.385,
               "iterations": 64,
               "checksum": 60081168.597916625
             },
             {
-              "milliseconds": 25.608875,
+              "milliseconds": 24.481625,
               "iterations": 64,
               "checksum": 60081168.597916625
             },
             {
-              "milliseconds": 25.428125,
+              "milliseconds": 25.932292,
               "iterations": 64,
               "checksum": 60081168.597916625
             }
           ]
         }
       ],
-      "candidateOverBaseline": 1.0014799277032365,
-      "candidateOverNative": 18.867287219762613
+      "candidateOverBaseline": 1.0185198650392688,
+      "candidateOverNative": 18.91961288234269
     },
     {
       "id": "rhumb direct (line setup included)",
@@ -954,65 +996,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 30152.04099999937,
-          "p10Nanoseconds": 29094.583000000057,
-          "p90Nanoseconds": 32880.54199999897,
-          "spread": 0.1255622795153067,
+          "medianNanoseconds": 29184.375000000728,
+          "p10Nanoseconds": 28273.208000000523,
+          "p90Nanoseconds": 33014.29200000075,
+          "spread": 0.16245281935967826,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 33.01970799999981,
+              "milliseconds": 33.127291000000696,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 32.88054199999897,
+              "milliseconds": 33.01429200000075,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 32.85687499999949,
+              "milliseconds": 31.35766700000022,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 30.15204099999937,
+              "milliseconds": 29.30949999999939,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 30.503709000000526,
+              "milliseconds": 31.104957999999897,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.523999999999432,
+              "milliseconds": 28.520124999999098,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.62645800000064,
+              "milliseconds": 28.31212500000038,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 30.493791000000783,
+              "milliseconds": 28.273208000000523,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.23412500000086,
+              "milliseconds": 29.184375000000728,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.094583000000057,
+              "milliseconds": 27.888417000000118,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.76158299999952,
+              "milliseconds": 28.447957999998835,
               "iterations": 1,
               "checksum": 1272.512304684482
             }
@@ -1020,65 +1062,65 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 30071.332999999868,
-          "p10Nanoseconds": 29199.541999998473,
-          "p90Nanoseconds": 32895.291999999245,
-          "spread": 0.12289944047378237,
+          "medianNanoseconds": 28862.832999999227,
+          "p10Nanoseconds": 28218.541999998706,
+          "p90Nanoseconds": 32762.999999999916,
+          "spread": 0.1574501712981998,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 32.80395899999894,
+              "milliseconds": 32.76299999999992,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 32.91433400000096,
+              "milliseconds": 35.375999999999294,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 32.895291999999245,
+              "milliseconds": 31.754125000000386,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 30.071332999999868,
+              "milliseconds": 28.862832999999227,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 30.246957999999722,
+              "milliseconds": 29.33733300000131,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.29766699999891,
+              "milliseconds": 30.867333000000144,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.317332999999053,
+              "milliseconds": 28.218541999998706,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 30.425792,
+              "milliseconds": 28.538249999999607,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.199541999998473,
+              "milliseconds": 27.98175000000083,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.184041999998954,
+              "milliseconds": 28.461208000000624,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.8643749999992,
+              "milliseconds": 28.323083000001134,
               "iterations": 1,
               "checksum": 1272.512304684482
             }
@@ -1086,73 +1128,73 @@
         },
         {
           "implementation": "GeographicLib C++ 2.7",
-          "medianNanoseconds": 880.26953125,
-          "p10Nanoseconds": 877.40496875,
-          "p90Nanoseconds": 885.1666562500001,
-          "spread": 0.008817398790320884,
+          "medianNanoseconds": 854.28515625,
+          "p10Nanoseconds": 845.27471875,
+          "p90Nanoseconds": 889.1054687499999,
+          "spread": 0.051306931507976605,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 28.146459,
+              "milliseconds": 17.810459,
+              "iterations": 16,
+              "checksum": 1272.512304684482
+            },
+            {
+              "milliseconds": 28.429875,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.16125,
+              "milliseconds": 27.337125,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.076959,
+              "milliseconds": 27.120208,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.134417,
+              "milliseconds": 28.451375,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.408375,
+              "milliseconds": 27.109333,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.1755,
+              "milliseconds": 27.925166,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.063833,
+              "milliseconds": 27.048791,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.325333,
+              "milliseconds": 28.172334,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.168625,
+              "milliseconds": 27.019834,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.214208,
-              "iterations": 32,
-              "checksum": 1272.512304684482
-            },
-            {
-              "milliseconds": 28.275417,
+              "milliseconds": 27.118125,
               "iterations": 32,
               "checksum": 1272.512304684482
             }
           ]
         }
       ],
-      "candidateOverBaseline": 0.9973232989435273,
-      "candidateOverNative": 34.161506143803464
+      "candidateOverBaseline": 0.9889823921190194,
+      "candidateOverNative": 33.78594698601171
     },
     {
       "id": "rhumb reused line",
@@ -1175,65 +1217,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 28644.70799999981,
-          "p10Nanoseconds": 27740.083000000595,
-          "p90Nanoseconds": 30038.124999999127,
-          "spread": 0.08022570870677222,
+          "medianNanoseconds": 27864.33399999987,
+          "p10Nanoseconds": 27604.458000001614,
+          "p90Nanoseconds": 28161.79099999863,
+          "spread": 0.020001662340001218,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 28.64470799999981,
+              "milliseconds": 27.712333999999828,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.258334000000104,
+              "milliseconds": 28.117583000001105,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 27.740083000000595,
+              "milliseconds": 27.604458000001614,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 27.941917000000103,
+              "milliseconds": 28.53808299999946,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 30.28308300000026,
+              "milliseconds": 27.76537500000086,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.37420799999927,
+              "milliseconds": 27.60070799999994,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.44499999999971,
+              "milliseconds": 27.86433399999987,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.238499999999476,
+              "milliseconds": 28.16179099999863,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 30.038124999999127,
+              "milliseconds": 27.813250000001062,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.48358399999961,
+              "milliseconds": 28.109375,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 27.69079199999942,
+              "milliseconds": 27.980999999999767,
               "iterations": 1,
               "checksum": 1272.512304684482
             }
@@ -1241,65 +1283,65 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 28258.95799999853,
-          "p10Nanoseconds": 27951.91700000032,
-          "p90Nanoseconds": 29568.083000000115,
-          "spread": 0.057191280725916296,
+          "medianNanoseconds": 28006.499999999505,
+          "p10Nanoseconds": 27587.541999999303,
+          "p90Nanoseconds": 28186.875000001237,
+          "spread": 0.021399782193488783,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 27.969499999999243,
+              "milliseconds": 27.587541999999303,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.25895799999853,
+              "milliseconds": 28.075667000000976,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 27.678250000000844,
+              "milliseconds": 28.006499999999505,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 27.96912499999962,
+              "milliseconds": 27.827041000000463,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 30.163958000001003,
+              "milliseconds": 31.79333299999962,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.00787500000115,
+              "milliseconds": 27.454915999998775,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.54162499999984,
+              "milliseconds": 27.640541999999186,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.507792000000336,
+              "milliseconds": 28.151583000000755,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 29.568083000000115,
+              "milliseconds": 27.635167000000365,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 28.143458000000464,
+              "milliseconds": 28.186875000001237,
               "iterations": 1,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 27.95191700000032,
+              "milliseconds": 28.014208000000508,
               "iterations": 1,
               "checksum": 1272.512304684482
             }
@@ -1307,73 +1349,73 @@
         },
         {
           "implementation": "GeographicLib C++ 2.7",
-          "medianNanoseconds": 629.4986875,
-          "p10Nanoseconds": 598.80990625,
-          "p90Nanoseconds": 673.6523437500001,
-          "spread": 0.11889212636364724,
+          "medianNanoseconds": 600.2708124999999,
+          "p10Nanoseconds": 598.03515625,
+          "p90Nanoseconds": 600.78515625,
+          "spread": 0.004581265560034091,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 19.30575,
+              "milliseconds": 19.209959,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 19.301,
+              "milliseconds": 19.137125,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 19.205958,
+              "milliseconds": 19.16875,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 20.143958,
+              "milliseconds": 19.217333,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 20.424208,
+              "milliseconds": 19.208666,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 21.535834,
+              "milliseconds": 19.1495,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 21.319875,
+              "milliseconds": 19.125417,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 24.874792,
+              "milliseconds": 19.225125,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 21.556875,
+              "milliseconds": 19.283375,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 19.161917,
+              "milliseconds": 19.224959,
               "iterations": 32,
               "checksum": 1272.512304684482
             },
             {
-              "milliseconds": 19.157416,
+              "milliseconds": 19.160375,
               "iterations": 32,
               "checksum": 1272.512304684482
             }
           ]
         }
       ],
-      "candidateOverBaseline": 0.9865332891506075,
-      "candidateOverNative": 44.89121035696922
+      "candidateOverBaseline": 1.0051020778031026,
+      "candidateOverNative": 46.65644142076208
     },
     {
       "id": "geodesic solver setup",
@@ -1396,65 +1438,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 291.7656250000107,
-          "p10Nanoseconds": 290.5533750000018,
-          "p90Nanoseconds": 307.74739062499634,
-          "spread": 0.05893091629623585,
+          "medianNanoseconds": 291.64062500001364,
+          "p10Nanoseconds": 290.7578125000043,
+          "p90Nanoseconds": 293.60676562501453,
+          "spread": 0.009768711492131987,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 18.584458999999697,
+              "milliseconds": 18.665000000000873,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 18.635667000000467,
+              "milliseconds": 18.608500000000276,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 18.634374999999636,
+              "milliseconds": 18.668416999998954,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 18.673000000000684,
+              "milliseconds": 18.73754100000042,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 19.290791999999783,
+              "milliseconds": 18.660750000000917,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 18.703625000000102,
+              "milliseconds": 18.691125000001193,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 19.695832999999766,
+              "milliseconds": 18.664084000000003,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 18.595416000000114,
+              "milliseconds": 18.79083300000093,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 18.656417000000147,
+              "milliseconds": 19.945583999999144,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 19.816291000001,
+              "milliseconds": 18.62358299999869,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 19.66608399999859,
+              "milliseconds": 18.60020799999984,
               "iterations": 64,
               "checksum": 113.26467582507951
             }
@@ -1462,65 +1504,65 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 303.10351562499704,
-          "p10Nanoseconds": 291.14128125002026,
-          "p90Nanoseconds": 317.42578124999454,
-          "spread": 0.08671789882006427,
+          "medianNanoseconds": 292.0859374999907,
+          "p10Nanoseconds": 290.0240937499916,
+          "p90Nanoseconds": 296.42123437500345,
+          "spread": 0.021901570064502184,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 18.633042000001296,
+              "milliseconds": 18.515040999998746,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 19.56866699999955,
+              "milliseconds": 18.675374999998894,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 18.683125000001382,
+              "milliseconds": 18.617207999999664,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 18.69170800000029,
+              "milliseconds": 18.754957999999533,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 19.281957999999577,
+              "milliseconds": 18.574165999998513,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 19.707540999999765,
+              "milliseconds": 19.083834000000934,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 19.39862499999981,
+              "milliseconds": 18.561541999999463,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 18.609416999999667,
+              "milliseconds": 18.79570799999965,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 19.53137500000048,
+              "milliseconds": 18.693499999999403,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 20.665250000000015,
+              "milliseconds": 18.97095900000022,
               "iterations": 64,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 20.31524999999965,
+              "milliseconds": 18.750458000000435,
               "iterations": 64,
               "checksum": 113.26467582507951
             }
@@ -1528,73 +1570,73 @@
         },
         {
           "implementation": "GeographicLib C++ 2.7",
-          "medianNanoseconds": 79.02701953125,
-          "p10Nanoseconds": 76.71940234375,
-          "p90Nanoseconds": 82.3341484375,
-          "spread": 0.07104843542188428,
+          "medianNanoseconds": 77.62923046875,
+          "p10Nanoseconds": 76.6287421875,
+          "p90Nanoseconds": 78.228515625,
+          "spread": 0.020607874480270568,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 19.842459,
+              "milliseconds": 19.919375,
               "iterations": 256,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 20.230917,
+              "milliseconds": 19.573375,
               "iterations": 256,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 19.696,
+              "milliseconds": 19.974209,
               "iterations": 256,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 20.5915,
+              "milliseconds": 19.616958,
               "iterations": 256,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 21.077542,
+              "milliseconds": 19.949167,
               "iterations": 256,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 21.17375,
+              "milliseconds": 23.967708,
               "iterations": 256,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 19.640167,
+              "milliseconds": 19.860916,
               "iterations": 256,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 19.626917,
+              "milliseconds": 19.632333,
               "iterations": 256,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 19.664208,
+              "milliseconds": 19.873083,
               "iterations": 256,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 20.843833,
+              "milliseconds": 20.0265,
               "iterations": 256,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 20.585,
+              "milliseconds": 19.640375,
               "iterations": 256,
               "checksum": 113.26467582507946
             }
           ]
         }
       ],
-      "candidateOverBaseline": 1.038859583355599,
-      "candidateOverNative": 3.835441566983802
+      "candidateOverBaseline": 1.0015269220465326,
+      "candidateOverNative": 3.762576747653981
     },
     {
       "id": "rhumb solver setup",
@@ -1617,131 +1659,131 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 7314.895999999862,
-          "p10Nanoseconds": 7248.260500000015,
-          "p90Nanoseconds": 8001.968749999833,
-          "spread": 0.10303745261721184,
+          "medianNanoseconds": 7319.218749999891,
+          "p10Nanoseconds": 7249.5624999996835,
+          "p90Nanoseconds": 7363.323000000037,
+          "spread": 0.01554271075725881,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 32.00787499999933,
+              "milliseconds": 29.2097079999985,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 29.99437500000022,
+              "milliseconds": 29.276874999999563,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 29.142791000000216,
+              "milliseconds": 29.064416999999594,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 29.040500000000975,
+              "milliseconds": 29.169667000000118,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 28.99304200000006,
+              "milliseconds": 28.998249999998734,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 29.293958000000202,
+              "milliseconds": 29.334499999999025,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 28.859667000000627,
+              "milliseconds": 29.27875000000131,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 29.311999999999898,
+              "milliseconds": 29.354417000000467,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 29.25958399999945,
+              "milliseconds": 29.453292000000147,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 29.12854100000004,
+              "milliseconds": 28.956374999999753,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 16.661959000000934,
-              "iterations": 2,
+              "milliseconds": 31.05583299999853,
+              "iterations": 4,
               "checksum": 113.26467582507946
             }
           ]
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 7317.22925000031,
-          "p10Nanoseconds": 7248.500000000149,
-          "p90Nanoseconds": 7725.510499999928,
-          "spread": 0.06519004444199399,
+          "medianNanoseconds": 7343.218750000233,
+          "p10Nanoseconds": 7263.1562500000655,
+          "p90Nanoseconds": 7375.604249999924,
+          "spread": 0.015313175846743557,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 19.446665999999823,
+              "milliseconds": 29.502416999999696,
+              "iterations": 4,
+              "checksum": 113.26467582507946
+            },
+            {
+              "milliseconds": 29.37287500000093,
+              "iterations": 4,
+              "checksum": 113.26467582507946
+            },
+            {
+              "milliseconds": 29.129791999999725,
+              "iterations": 4,
+              "checksum": 113.26467582507946
+            },
+            {
+              "milliseconds": 29.448749999999563,
+              "iterations": 4,
+              "checksum": 113.26467582507946
+            },
+            {
+              "milliseconds": 29.171667000000525,
+              "iterations": 4,
+              "checksum": 113.26467582507946
+            },
+            {
+              "milliseconds": 16.371917000000394,
               "iterations": 2,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 29.360124999999243,
+              "milliseconds": 29.052625000000262,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 29.051832999999533,
+              "milliseconds": 28.887917000000016,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 30.90204199999971,
+              "milliseconds": 29.175875000000815,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 28.981541999999536,
+              "milliseconds": 29.487583000000086,
               "iterations": 4,
               "checksum": 113.26467582507946
             },
             {
-              "milliseconds": 29.159332999999606,
-              "iterations": 4,
-              "checksum": 113.26467582507946
-            },
-            {
-              "milliseconds": 29.268917000001238,
-              "iterations": 4,
-              "checksum": 113.26467582507946
-            },
-            {
-              "milliseconds": 28.994000000000597,
-              "iterations": 4,
-              "checksum": 113.26467582507946
-            },
-            {
-              "milliseconds": 29.27220800000032,
-              "iterations": 4,
-              "checksum": 113.26467582507946
-            },
-            {
-              "milliseconds": 29.002082999999402,
-              "iterations": 4,
-              "checksum": 113.26467582507946
-            },
-            {
-              "milliseconds": 29.414416999999958,
+              "milliseconds": 29.39887500000077,
               "iterations": 4,
               "checksum": 113.26467582507946
             }
@@ -1749,73 +1791,73 @@
         },
         {
           "implementation": "GeographicLib C++ 2.7",
-          "medianNanoseconds": 1821.0963749999999,
-          "p10Nanoseconds": 1800.4140625,
-          "p90Nanoseconds": 1875.7682499999999,
-          "spread": 0.04137847317388682,
+          "medianNanoseconds": 1811.4556875,
+          "p10Nanoseconds": 1802.596375,
+          "p90Nanoseconds": 1905.578125,
+          "spread": 0.05685027280028337,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 29.622833,
+              "milliseconds": 29.10925,
               "iterations": 16,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 28.803083,
+              "milliseconds": 28.915541,
               "iterations": 16,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 28.929625,
+              "milliseconds": 28.849,
               "iterations": 16,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 29.043792,
+              "milliseconds": 28.868459,
               "iterations": 16,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 28.806625,
+              "milliseconds": 28.983291,
               "iterations": 16,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 29.1685,
+              "milliseconds": 28.841542,
               "iterations": 16,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 29.023,
+              "milliseconds": 29.04275,
               "iterations": 16,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 29.137542,
+              "milliseconds": 28.761,
               "iterations": 16,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 29.5,
+              "milliseconds": 30.820875,
               "iterations": 16,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 30.012292,
+              "milliseconds": 29.452375,
               "iterations": 16,
               "checksum": 113.26467582507951
             },
             {
-              "milliseconds": 23.525333,
-              "iterations": 8,
+              "milliseconds": 30.48925,
+              "iterations": 16,
               "checksum": 113.26467582507951
             }
           ]
         }
       ],
-      "candidateOverBaseline": 1.0003189724092383,
-      "candidateOverNative": 4.018035152038733
+      "candidateOverBaseline": 1.0032790384903227,
+      "candidateOverNative": 4.053766703029125
     },
     {
       "id": "frame construction",
@@ -1838,65 +1880,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 344.27995312498183,
-          "p10Nanoseconds": 340.62174999999684,
-          "p90Nanoseconds": 356.21354687498297,
-          "spread": 0.04528813465164486,
+          "medianNanoseconds": 339.70573437500207,
+          "p10Nanoseconds": 338.9375000000143,
+          "p90Nanoseconds": 354.3867187499927,
+          "spread": 0.04547823950750267,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 23.561875000001237,
+              "milliseconds": 23.372166999999536,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 22.79766699999891,
+              "milliseconds": 22.680749999999534,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 22.462874999999258,
+              "milliseconds": 21.963999999999942,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 22.500084000001152,
+              "milliseconds": 21.713707999999315,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 21.760458000000654,
+              "milliseconds": 21.884540999999444,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 21.985915999999634,
+              "milliseconds": 21.682042000000365,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 22.022083000001658,
+              "milliseconds": 21.692000000000917,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 22.059166999999434,
+              "milliseconds": 21.70299999999952,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 21.799791999999798,
+              "milliseconds": 21.741167000000132,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 22.033916999998837,
+              "milliseconds": 21.708082999999533,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 21.8695000000007,
+              "milliseconds": 22.367291999998997,
               "iterations": 64,
               "checksum": 0
             }
@@ -1904,72 +1946,72 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 343.15690625001594,
-          "p10Nanoseconds": 339.38996874999816,
-          "p90Nanoseconds": 358.9498750000075,
-          "spread": 0.05699989099376744,
+          "medianNanoseconds": 338.71745312498547,
+          "p10Nanoseconds": 337.2285156250143,
+          "p90Nanoseconds": 391.07487499998683,
+          "spread": 0.15897131629382974,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 22.97279200000048,
+              "milliseconds": 25.028791999999157,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 22.070542000001296,
+              "milliseconds": 25.516916000000492,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 21.985624999999345,
+              "milliseconds": 21.752082999999402,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 21.96204200000102,
+              "milliseconds": 21.763042000000496,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 23.40558300000157,
+              "milliseconds": 21.582625000000917,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 22.335666999999376,
+              "milliseconds": 21.67791699999907,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 21.801541999999245,
+              "milliseconds": 21.59466599999905,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 21.764250000000175,
+              "milliseconds": 21.57849999999962,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 21.795583999999508,
+              "milliseconds": 21.656457999999475,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 21.720957999999882,
+              "milliseconds": 21.621499999999287,
               "iterations": 64,
               "checksum": 0
             },
             {
-              "milliseconds": 21.71129099999962,
+              "milliseconds": 22.52520800000093,
               "iterations": 64,
               "checksum": 0
             }
           ]
         }
       ],
-      "candidateOverBaseline": 0.9967379835370251
+      "candidateOverBaseline": 0.9970907725421978
     },
     {
       "id": "frame local point / reusable result",
@@ -1992,65 +2034,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 72.69157031250018,
-          "p10Nanoseconds": 72.39274218749614,
-          "p90Nanoseconds": 76.63020703125056,
-          "spread": 0.05829375848585489,
+          "medianNanoseconds": 72.48193359374966,
+          "p10Nanoseconds": 72.27457421875272,
+          "p90Nanoseconds": 76.3509101562505,
+          "spread": 0.05623933765819558,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 18.568457999999737,
+              "milliseconds": 19.46904100000029,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 19.98841700000048,
+              "milliseconds": 19.737499999999272,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.716958999999406,
+              "milliseconds": 19.54583300000013,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 19.546583000001192,
+              "milliseconds": 18.555374999999913,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.702416000000085,
+              "milliseconds": 18.502291000000696,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.53254199999901,
+              "milliseconds": 18.519916999999623,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.53716700000041,
+              "milliseconds": 18.571583999999348,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.609042000000045,
+              "milliseconds": 18.572540999999546,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.525541999999405,
+              "milliseconds": 18.527083999999377,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.534042000001136,
+              "milliseconds": 18.493917000001602,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 19.617333000000144,
+              "milliseconds": 18.551166999999623,
               "iterations": 256,
               "checksum": 8291578.1
             }
@@ -2058,72 +2100,72 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 73.53255078125187,
-          "p10Nanoseconds": 73.28727343750074,
-          "p90Nanoseconds": 79.0385742187496,
-          "spread": 0.07821435160542849,
+          "medianNanoseconds": 73.10660937500302,
+          "p10Nanoseconds": 72.84049609375387,
+          "p90Nanoseconds": 75.80468750000335,
+          "spread": 0.0405461480376495,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 18.789042000000336,
+              "milliseconds": 19.40600000000086,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 23.421416999999565,
+              "milliseconds": 18.794083999999202,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 19.7415830000009,
+              "milliseconds": 18.787874999999985,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 20.233874999999898,
+              "milliseconds": 18.656417000000147,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.855000000001382,
+              "milliseconds": 18.64716700000099,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.79029199999968,
+              "milliseconds": 18.643208999999842,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.76154200000019,
+              "milliseconds": 18.788291999999274,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.818250000000262,
+              "milliseconds": 18.715292000000773,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.7410830000008,
+              "milliseconds": 18.68408399999862,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 18.82433300000048,
+              "milliseconds": 18.67399999999907,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 19.275916999999026,
+              "milliseconds": 20.498874999999316,
               "iterations": 256,
               "checksum": 8291578.1
             }
           ]
         }
       ],
-      "candidateOverBaseline": 1.011569160841296
+      "candidateOverBaseline": 1.008618365298511
     },
     {
       "id": "frame local point / allocated result",
@@ -2146,138 +2188,138 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 78.91373828125126,
-          "p10Nanoseconds": 78.17057421874551,
-          "p90Nanoseconds": 82.982746093748,
-          "spread": 0.06098015351714485,
+          "medianNanoseconds": 79.02978515624426,
+          "p10Nanoseconds": 78.00211718749495,
+          "p90Nanoseconds": 86.26139453124892,
+          "spread": 0.10450841195411517,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 20.143291000000318,
+              "milliseconds": 20.04095899999993,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 20.20191700000032,
+              "milliseconds": 20.23162499999853,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 20.01166699999885,
+              "milliseconds": 20.2584169999991,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 20.072124999998778,
+              "milliseconds": 22.082916999999725,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 19.884500000000116,
+              "milliseconds": 19.968541999998706,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 20.375208000001294,
+              "milliseconds": 20.043625000000247,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 20.115916999999172,
+              "milliseconds": 21.232500000000073,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 21.636750000001484,
+              "milliseconds": 19.895540999999866,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 21.24358299999949,
+              "milliseconds": 20.00770900000134,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 21.17066700000214,
+              "milliseconds": 20.830332999999882,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 21.085166000000754,
-              "iterations": 256,
+              "milliseconds": 16.484333000000333,
+              "iterations": 128,
               "checksum": 8291578.1
             }
           ]
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 82.09879687500177,
-          "p10Nanoseconds": 78.67659374999647,
-          "p90Nanoseconds": 84.00895312500012,
-          "spread": 0.0649505178878852,
+          "medianNanoseconds": 78.65852734374812,
+          "p10Nanoseconds": 78.34098437499648,
+          "p90Nanoseconds": 88.60123828124955,
+          "spread": 0.13044045258328324,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 21.219583000000057,
+              "milliseconds": 20.0552919999991,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 21.50629200000003,
+              "milliseconds": 22.681916999999885,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 20.176415999998426,
+              "milliseconds": 20.077542000000903,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 21.017292000000452,
+              "milliseconds": 20.025374999999258,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 20.225916999999754,
+              "milliseconds": 22.828583000000435,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 20.209249999999884,
+              "milliseconds": 20.30987499999901,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 20.127667000000656,
+              "milliseconds": 20.15020899999945,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 20.141207999999097,
+              "milliseconds": 20.082875000000058,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 21.386999999998807,
+              "milliseconds": 20.059708999999202,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 21.451750000000175,
+              "milliseconds": 20.13658299999952,
               "iterations": 256,
               "checksum": 8291578.1
             },
             {
-              "milliseconds": 22.969084000000294,
+              "milliseconds": 20.790333999999348,
               "iterations": 256,
               "checksum": 8291578.1
             }
           ]
         }
       ],
-      "candidateOverBaseline": 1.040361268685547
+      "candidateOverBaseline": 0.995302305178204
     },
     {
       "id": "frame fixed point / reusable result",
@@ -2300,65 +2342,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 76.00000000000762,
-          "p10Nanoseconds": 74.54069140625563,
-          "p90Nanoseconds": 77.15641015624897,
-          "spread": 0.03441735197359306,
-          "unstable": false,
+          "medianNanoseconds": 72.4431992187391,
+          "p10Nanoseconds": 70.8443984375009,
+          "p90Nanoseconds": 255.53710937498408,
+          "spread": 2.5494830837027442,
+          "unstable": true,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 19.12958300000173,
+              "milliseconds": 19.692250000000058,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 19.082417000001442,
+              "milliseconds": 18.108249999999316,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 19.228417000002082,
+              "milliseconds": 18.145833000000493,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 19.04858299999978,
+              "milliseconds": 18.23949999999968,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 19.51825000000099,
+              "milliseconds": 18.62212499999987,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 19.45600000000195,
+              "milliseconds": 29.2933329999978,
+              "iterations": 8,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 16.35437499999898,
+              "iterations": 64,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 18.13616600000023,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 19.61566699999821,
+              "milliseconds": 18.54545899999721,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 19.752040999999736,
+              "milliseconds": 18.204750000000786,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 20.173166999997193,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 19.33904099999927,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 19.556250000001455,
+              "milliseconds": 18.626000000000204,
               "iterations": 256,
               "checksum": 797267.125
             }
@@ -2366,72 +2408,72 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 76.19075781249762,
-          "p10Nanoseconds": 74.83560937500044,
-          "p90Nanoseconds": 78.18554687500523,
-          "spread": 0.04396776716998717,
-          "unstable": false,
+          "medianNanoseconds": 73.73974609375011,
+          "p10Nanoseconds": 71.1399726562405,
+          "p90Nanoseconds": 361.8028984374959,
+          "spread": 3.941740257848418,
+          "unstable": true,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 19.35966699999699,
+              "milliseconds": 92.62154199999895,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 19.359375,
+              "milliseconds": 18.123374999999214,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 19.50483399999939,
+              "milliseconds": 19.34520799999882,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 19.316750000001775,
+              "milliseconds": 18.665624999999636,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 19.755750000000262,
+              "milliseconds": 26.29008299999805,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 18.986124999999447,
+              "milliseconds": 89.10662500000035,
+              "iterations": 32,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 16.592333000000508,
+              "iterations": 128,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 18.21183299999757,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 19.157916000000114,
+              "milliseconds": 18.617541999999958,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 21.582041999998182,
+              "milliseconds": 18.26037499999802,
               "iterations": 256,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 20.01550000000134,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 19.567957999999635,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 19.872542000000976,
+              "milliseconds": 18.87737500000003,
               "iterations": 256,
               "checksum": 797267.125
             }
           ]
         }
       ],
-      "candidateOverBaseline": 1.0025099712169736
+      "candidateOverBaseline": 1.017897427073812
     },
     {
       "id": "frame fixed vector / reusable result",
@@ -2454,65 +2496,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 62.91316601562613,
-          "p10Nanoseconds": 60.669027343756454,
-          "p90Nanoseconds": 67.27230078125501,
-          "spread": 0.104958530236079,
+          "medianNanoseconds": 58.10237499999715,
+          "p10Nanoseconds": 57.86629296874679,
+          "p90Nanoseconds": 58.43880078125352,
+          "spread": 0.009853432196304562,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 16.015290999999706,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 17.55787500000224,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 17.221709000001283,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 16.162124999998923,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 16.040415999999823,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 31.560249999998632,
+              "milliseconds": 29.859042000000045,
               "iterations": 512,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 32.38741700000173,
+              "milliseconds": 29.832875000000058,
               "iterations": 512,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 16.109333999997034,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 32.21154100000058,
+              "milliseconds": 29.677416999998968,
               "iterations": 512,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 31.062542000003305,
+              "milliseconds": 29.725083000001177,
               "iterations": 512,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 31.00249999999869,
+              "milliseconds": 29.882042000001093,
+              "iterations": 512,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 29.920666000001802,
+              "iterations": 512,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 29.716667000000598,
+              "iterations": 512,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 29.961624999999913,
+              "iterations": 512,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 29.748415999998542,
+              "iterations": 512,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 29.627541999998357,
+              "iterations": 512,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 29.60425000000032,
               "iterations": 512,
               "checksum": 797267.125
             }
@@ -2520,72 +2562,72 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 63.73990625000658,
-          "p10Nanoseconds": 61.06762695312539,
-          "p90Nanoseconds": 69.44417578125694,
-          "spread": 0.13141765215775938,
+          "medianNanoseconds": 58.01131249999969,
+          "p10Nanoseconds": 57.93880078125113,
+          "p90Nanoseconds": 58.19865039062222,
+          "spread": 0.004479292023794329,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 16.610083999999915,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 16.43591700000252,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 16.99433300000237,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 17.777709000001778,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 32.49029200000223,
+              "milliseconds": 29.671166000000085,
               "iterations": 512,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 31.97570800000176,
+              "milliseconds": 29.73899999999776,
               "iterations": 512,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 16.317416000001685,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 18.102249999999913,
-              "iterations": 256,
-              "checksum": 797267.125
-            },
-            {
-              "milliseconds": 31.266625000000204,
+              "milliseconds": 29.6875,
               "iterations": 512,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 31.73358399999779,
+              "milliseconds": 29.6382909999993,
               "iterations": 512,
               "checksum": 797267.125
             },
             {
-              "milliseconds": 31.004375000000437,
+              "milliseconds": 29.683750000000146,
+              "iterations": 512,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 29.857499999998254,
+              "iterations": 512,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 29.704459000000497,
+              "iterations": 512,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 29.70179199999984,
+              "iterations": 512,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 29.777000000001863,
+              "iterations": 512,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 29.797708999998576,
+              "iterations": 512,
+              "checksum": 797267.125
+            },
+            {
+              "milliseconds": 29.66466600000058,
               "iterations": 512,
               "checksum": 797267.125
             }
           ]
         }
       ],
-      "candidateOverBaseline": 1.0131409732928573
+      "candidateOverBaseline": 0.9984327232751249
     },
     {
       "id": "pose composition / reusable result",
@@ -2608,65 +2650,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 162.22460937501637,
-          "p10Nanoseconds": 159.48470312500262,
-          "p90Nanoseconds": 165.68782031251317,
-          "spread": 0.03823783093951382,
+          "medianNanoseconds": 153.54166406248737,
+          "p10Nanoseconds": 152.36556249999467,
+          "p90Nanoseconds": 156.31640624999932,
+          "spread": 0.02573141156264108,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 21.165874999998778,
+              "milliseconds": 19.909041999999317,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 21.172958999999537,
+              "milliseconds": 19.879124999999476,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 21.208041000001685,
+              "milliseconds": 19.653332999998383,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.756750000000466,
+              "milliseconds": 20.146082999999635,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.81054099999892,
+              "milliseconds": 19.901041999997688,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 21.25645799999984,
+              "milliseconds": 19.599999999998545,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.653834000000643,
+              "milliseconds": 20.008499999999913,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.414042000000336,
+              "milliseconds": 19.565542000000278,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.45416699999987,
+              "milliseconds": 19.502791999999317,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.35004100000151,
+              "milliseconds": 19.512084000001778,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.764750000002095,
+              "milliseconds": 19.495167000000947,
               "iterations": 128,
               "checksum": -0.7833269096274834
             }
@@ -2674,72 +2716,72 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 160.80403906249785,
-          "p10Nanoseconds": 158.9033203125041,
-          "p90Nanoseconds": 172.80729687499274,
-          "spread": 0.08646534405199083,
+          "medianNanoseconds": 156.85709375000556,
+          "p10Nanoseconds": 151.9661484374808,
+          "p90Nanoseconds": 157.4319609375152,
+          "spread": 0.03484581008969653,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 20.780375000002095,
+              "milliseconds": 19.964083000002574,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.614292000002024,
+              "milliseconds": 20.161125000002357,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.582916999999725,
+              "milliseconds": 20.151291000001947,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 21.235874999998487,
+              "milliseconds": 19.42816699999821,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 22.11933399999907,
+              "milliseconds": 19.8962500000016,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 23.47620900000038,
+              "milliseconds": 20.07770800000071,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.54595799999879,
+              "milliseconds": 19.664208000001963,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.481667000000016,
+              "milliseconds": 20.119957999999315,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.217499999998836,
+              "milliseconds": 20.09533299999748,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.382540999999037,
+              "milliseconds": 19.451666999997542,
               "iterations": 128,
               "checksum": -0.7833269096274834
             },
             {
-              "milliseconds": 20.339625000000524,
+              "milliseconds": 20.103041000002122,
               "iterations": 128,
               "checksum": -0.7833269096274834
             }
           ]
         }
       ],
-      "candidateOverBaseline": 0.9912431885766815
+      "candidateOverBaseline": 1.0215930295386724
     },
     {
       "id": "pose quaternion / reusable result",
@@ -2762,65 +2804,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 404.17448437500525,
-          "p10Nanoseconds": 399.8170468750004,
-          "p90Nanoseconds": 406.0299375000227,
-          "spread": 0.01537180318205776,
+          "medianNanoseconds": 386.4720000000261,
+          "p10Nanoseconds": 385.1315156249484,
+          "p90Nanoseconds": 389.28710937500455,
+          "spread": 0.010752638613032326,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 25.94641700000284,
+              "milliseconds": 24.72374999999738,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.678540999997495,
+              "milliseconds": 24.71745799999917,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.588291000000027,
+              "milliseconds": 24.590125000002445,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.728125000001455,
+              "milliseconds": 24.875542000001587,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.89441699999952,
+              "milliseconds": 24.734208000001672,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 26.05829100000119,
+              "milliseconds": 24.772750000000087,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.985916000001453,
+              "milliseconds": 24.803415999998833,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.5277079999978,
+              "milliseconds": 24.648416999996698,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.899208999999246,
+              "milliseconds": 24.9187090000014,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.70824999999968,
+              "milliseconds": 24.91437500000029,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.867167000000336,
+              "milliseconds": 24.694040999998833,
               "iterations": 64,
               "checksum": 0.1953470078652853
             }
@@ -2828,72 +2870,72 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 402.019531250005,
-          "p10Nanoseconds": 399.12954687497404,
-          "p90Nanoseconds": 403.4401093749693,
-          "spread": 0.010722271344858323,
+          "medianNanoseconds": 386.10482812498503,
+          "p10Nanoseconds": 383.58657812500496,
+          "p90Nanoseconds": 387.5260468749957,
+          "spread": 0.010203106677328372,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 25.788000000000466,
+              "milliseconds": 24.801666999999725,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.5311249999977,
+              "milliseconds": 24.73870800000077,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.627416999999696,
+              "milliseconds": 24.730875000001106,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.77704199999789,
+              "milliseconds": 24.54941599999802,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.820166999998037,
+              "milliseconds": 24.626416999999492,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.54429099999834,
+              "milliseconds": 24.549541000000318,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.784458000001905,
+              "milliseconds": 24.710708999999042,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.65808300000208,
+              "milliseconds": 24.68933299999844,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.548249999999825,
+              "milliseconds": 24.910334000000148,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.72925000000032,
+              "milliseconds": 24.761292000002868,
               "iterations": 64,
               "checksum": 0.1953470078652853
             },
             {
-              "milliseconds": 25.843541999998706,
+              "milliseconds": 24.6885829999992,
               "iterations": 64,
               "checksum": 0.1953470078652853
             }
           ]
         }
       ],
-      "candidateOverBaseline": 0.9946682603471801
+      "candidateOverBaseline": 0.9990499392581065
     },
     {
       "id": "pose extraction",
@@ -2916,65 +2958,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 913.7721249999231,
-          "p10Nanoseconds": 910.7929687500018,
-          "p90Nanoseconds": 917.1406250000018,
-          "spread": 0.006946651223356801,
+          "medianNanoseconds": 879.5403437500227,
+          "p10Nanoseconds": 878.8997499999596,
+          "p90Nanoseconds": 881.18750000001,
+          "spread": 0.0026010745457068856,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 29.145375000000058,
+              "milliseconds": 28.2154580000024,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.273042000000714,
+              "milliseconds": 28.145291000000725,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.348500000000058,
+              "milliseconds": 28.10895800000071,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.168417000000773,
+              "milliseconds": 28.139666999999463,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.328708000000915,
+              "milliseconds": 28.176375000002736,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.137125000001106,
+              "milliseconds": 28.140959000000294,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.259541999999783,
+              "milliseconds": 28.161958000000595,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.24070799999754,
+              "milliseconds": 28.140583000000333,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.23183400000198,
+              "milliseconds": 28.124791999998706,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.164749999999913,
+              "milliseconds": 28.156999999999243,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.388416000001598,
+              "milliseconds": 28.19800000000032,
               "iterations": 32,
               "checksum": 0.7
             }
@@ -2982,72 +3024,72 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 916.3606874999459,
-          "p10Nanoseconds": 913.5156249999454,
-          "p90Nanoseconds": 921.266937500036,
-          "spread": 0.00845880078207851,
+          "medianNanoseconds": 881.1562500000036,
+          "p10Nanoseconds": 879.115875000025,
+          "p90Nanoseconds": 882.6223749999826,
+          "spread": 0.003979430435813934,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 29.29424999999901,
+              "milliseconds": 28.10912499999904,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.375625000000582,
+              "milliseconds": 28.23016700000153,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.232499999998254,
+              "milliseconds": 28.197000000000116,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.44429100000343,
+              "milliseconds": 28.19587500000125,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.261332999998558,
+              "milliseconds": 28.243915999999444,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.419041000001016,
+              "milliseconds": 28.18091600000116,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.32354199999827,
+              "milliseconds": 28.1317080000008,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.48054200000115,
+              "milliseconds": 28.23554200000217,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.163457999999082,
+              "milliseconds": 28.1954590000023,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.27333400000134,
+              "milliseconds": 28.368415999997524,
               "iterations": 32,
               "checksum": 0.7
             },
             {
-              "milliseconds": 29.809667000001355,
+              "milliseconds": 28.218582999998034,
               "iterations": 32,
               "checksum": 0.7
             }
           ]
         }
       ],
-      "candidateOverBaseline": 1.002832831544323
+      "candidateOverBaseline": 1.0018372167478884
     },
     {
       "id": "velocity quaternion / reusable result",
@@ -3070,65 +3112,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 359.9492187499891,
-          "p10Nanoseconds": 347.34960937498727,
-          "p90Nanoseconds": 362.28125000002365,
-          "spread": 0.0414826310135917,
+          "medianNanoseconds": 352.5390625,
+          "p10Nanoseconds": 346.6705781249857,
+          "p90Nanoseconds": 379.0683593749691,
+          "spread": 0.09189841551241817,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 23.065374999998312,
+              "milliseconds": 22.335959000000003,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 23.0367499999993,
+              "milliseconds": 23.761249999999563,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 23.186000000001513,
+              "milliseconds": 24.873250000000553,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 23.056125000002794,
+              "milliseconds": 22.5625,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 22.941915999999765,
+              "milliseconds": 22.186916999999085,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 23.429416999999376,
+              "milliseconds": 22.920624999998836,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 23.174416999998357,
+              "milliseconds": 22.550083999998606,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 22.325457999999344,
+              "milliseconds": 22.696541999997862,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 22.358040999999503,
+              "milliseconds": 22.274124999999913,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 22.1642090000023,
+              "milliseconds": 22.139917000000423,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 22.230374999999185,
+              "milliseconds": 24.26037499999802,
               "iterations": 64,
               "checksum": 0.7963082720246442
             }
@@ -3136,72 +3178,72 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 362.7988281249941,
-          "p10Nanoseconds": 349.71874999996544,
-          "p90Nanoseconds": 370.87565625000707,
-          "spread": 0.05831580647430454,
+          "medianNanoseconds": 354.0833437500055,
+          "p10Nanoseconds": 344.37629687499793,
+          "p90Nanoseconds": 361.2428437500057,
+          "spread": 0.04763439786909635,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 23.21912499999962,
+              "milliseconds": 22.19879199999923,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 23.027500000000146,
+              "milliseconds": 23.38025000000198,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 23.055083000002924,
+              "milliseconds": 22.661334000000352,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 23.32141700000284,
+              "milliseconds": 22.913124999999127,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 23.736042000000452,
+              "milliseconds": 22.04650000000038,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 23.484208000001672,
+              "milliseconds": 22.864292000002024,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 29.561499999999796,
+              "milliseconds": 23.119542000000365,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 22.902540999999474,
+              "milliseconds": 23.105916999997135,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 22.381999999997788,
+              "milliseconds": 22.06487500000003,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 22.193708000002516,
+              "milliseconds": 22.040082999999868,
               "iterations": 64,
               "checksum": 0.7963082720246442
             },
             {
-              "milliseconds": 23.656290999999328,
+              "milliseconds": 22.039040999999997,
               "iterations": 64,
               "checksum": 0.7963082720246442
             }
           ]
         }
       ],
-      "candidateOverBaseline": 1.0079166983190044
+      "candidateOverBaseline": 1.0043804542936443
     },
     {
       "id": "tangent normal projection / reusable result",
@@ -3224,65 +3266,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 8.767435546875646,
-          "p10Nanoseconds": 8.652506835938212,
-          "p90Nanoseconds": 8.932393066407585,
-          "spread": 0.03192338614557742,
+          "medianNanoseconds": 8.710835449218024,
+          "p10Nanoseconds": 8.691365722656386,
+          "p90Nanoseconds": 8.736572265624076,
+          "spread": 0.005189690843229951,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 17.97425000000294,
+              "milliseconds": 17.839790999998513,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 17.955708000001323,
+              "milliseconds": 17.865249999998923,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 17.773000000001048,
+              "milliseconds": 17.89249999999811,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 17.92175000000134,
+              "milliseconds": 17.799917000000278,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.035916000000725,
+              "milliseconds": 17.839584000001196,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 17.71216600000116,
+              "milliseconds": 17.83599999999933,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 17.720334000001458,
+              "milliseconds": 17.789167000002635,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 17.94120899999689,
+              "milliseconds": 18.862249999998312,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.293541000002733,
+              "milliseconds": 17.890542000001005,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.77916600000026,
+              "milliseconds": 17.85541700000249,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.229583000000275,
+              "milliseconds": 17.80708400000003,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             }
@@ -3290,72 +3332,72 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 8.931070800780816,
-          "p10Nanoseconds": 8.799458984375619,
-          "p90Nanoseconds": 9.170511718750163,
-          "spread": 0.04154627621383362,
+          "medianNanoseconds": 8.83085107421877,
+          "p10Nanoseconds": 8.818521972656868,
+          "p90Nanoseconds": 8.947794433593614,
+          "spread": 0.01463873185611194,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 18.330999999998312,
+              "milliseconds": 18.060333000001265,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.781208000000333,
+              "milliseconds": 18.085583000000042,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.280457999997452,
+              "milliseconds": 18.17870799999946,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.100540999999794,
+              "milliseconds": 18.103707999998733,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.021292000001267,
+              "milliseconds": 18.07208300000275,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.010207999999693,
+              "milliseconds": 18.072457999998733,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.890416000002006,
+              "milliseconds": 18.325082999999722,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.498082999998587,
+              "milliseconds": 19.12366600000314,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.270583000001352,
+              "milliseconds": 18.08495799999946,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.380083000000013,
+              "milliseconds": 18.104957999999897,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             },
             {
-              "milliseconds": 18.29083299999911,
+              "milliseconds": 18.053500000001804,
               "iterations": 2048,
               "checksum": 1271350.4628490354
             }
           ]
         }
       ],
-      "candidateOverBaseline": 1.0186639813923106
+      "candidateOverBaseline": 1.013777739885044
     },
     {
       "id": "tangent radial lift / reusable result",
@@ -3378,138 +3420,138 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 64.58235546874391,
-          "p10Nanoseconds": 62.37483593749716,
-          "p90Nanoseconds": 69.54541015623761,
-          "spread": 0.11102992708605706,
-          "unstable": false,
+          "medianNanoseconds": 64.63476562500148,
+          "p10Nanoseconds": 61.604248046876364,
+          "p90Nanoseconds": 75.94010156249453,
+          "spread": 0.22179787266178155,
+          "unstable": true,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 31.935915999998542,
+              "milliseconds": 31.550209000000905,
               "iterations": 512,
               "checksum": 1689957.4892597222
             },
             {
-              "milliseconds": 31.72833299999911,
+              "milliseconds": 18.458583999999973,
+              "iterations": 256,
+              "checksum": 1689957.4892597222
+            },
+            {
+              "milliseconds": 19.4406659999986,
+              "iterations": 256,
+              "checksum": 1689957.4892597222
+            },
+            {
+              "milliseconds": 16.39641699999993,
+              "iterations": 256,
+              "checksum": 1689957.4892597222
+            },
+            {
+              "milliseconds": 17.140416999998706,
+              "iterations": 256,
+              "checksum": 1689957.4892597222
+            },
+            {
+              "milliseconds": 19.270832999998674,
+              "iterations": 128,
+              "checksum": 1689957.4892597222
+            },
+            {
+              "milliseconds": 18.807583000001614,
+              "iterations": 256,
+              "checksum": 1689957.4892597222
+            },
+            {
+              "milliseconds": 16.297624999999243,
+              "iterations": 256,
+              "checksum": 1689957.4892597222
+            },
+            {
+              "milliseconds": 16.54650000000038,
+              "iterations": 256,
+              "checksum": 1689957.4892597222
+            },
+            {
+              "milliseconds": 31.5413750000007,
               "iterations": 512,
               "checksum": 1689957.4892597222
             },
             {
-              "milliseconds": 16.482208000001265,
-              "iterations": 256,
-              "checksum": 1689957.4892597222
-            },
-            {
-              "milliseconds": 16.895250000001397,
-              "iterations": 256,
-              "checksum": 1689957.4892597222
-            },
-            {
-              "milliseconds": 17.803624999996828,
-              "iterations": 256,
-              "checksum": 1689957.4892597222
-            },
-            {
-              "milliseconds": 16.498083999998926,
-              "iterations": 256,
-              "checksum": 1689957.4892597222
-            },
-            {
-              "milliseconds": 16.605750000002445,
-              "iterations": 256,
-              "checksum": 1689957.4892597222
-            },
-            {
-              "milliseconds": 16.53308299999844,
-              "iterations": 256,
-              "checksum": 1689957.4892597222
-            },
-            {
-              "milliseconds": 16.334125000001222,
-              "iterations": 256,
-              "checksum": 1689957.4892597222
-            },
-            {
-              "milliseconds": 20.4287080000031,
-              "iterations": 256,
-              "checksum": 1689957.4892597222
-            },
-            {
-              "milliseconds": 16.658457999998063,
-              "iterations": 256,
+              "milliseconds": 31.51195799999914,
+              "iterations": 512,
               "checksum": 1689957.4892597222
             }
           ]
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 69.29655078124597,
-          "p10Nanoseconds": 66.26253125000403,
-          "p90Nanoseconds": 73.02962109375244,
-          "spread": 0.09765406455958575,
+          "medianNanoseconds": 69.89892578124568,
+          "p10Nanoseconds": 66.24218750000921,
+          "p90Nanoseconds": 72.89550781248977,
+          "spread": 0.09518487212954699,
           "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 17.071791000002122,
+              "milliseconds": 18.217083999999886,
               "iterations": 256,
               "checksum": 1689957.4892597224
             },
             {
-              "milliseconds": 16.963208000001032,
+              "milliseconds": 18.1148749999993,
               "iterations": 256,
               "checksum": 1689957.4892597224
             },
             {
-              "milliseconds": 18.21912499999962,
+              "milliseconds": 25.78179100000125,
               "iterations": 256,
               "checksum": 1689957.4892597224
             },
             {
-              "milliseconds": 18.695583000000624,
+              "milliseconds": 18.66124999999738,
               "iterations": 256,
               "checksum": 1689957.4892597224
             },
             {
-              "milliseconds": 18.184582999998383,
+              "milliseconds": 18.08941599999889,
               "iterations": 256,
               "checksum": 1689957.4892597224
             },
             {
-              "milliseconds": 17.739916999998968,
+              "milliseconds": 17.894124999998894,
               "iterations": 256,
               "checksum": 1689957.4892597224
             },
             {
-              "milliseconds": 17.832666999998764,
+              "milliseconds": 17.5278330000001,
               "iterations": 256,
               "checksum": 1689957.4892597224
             },
             {
-              "milliseconds": 17.69366599999921,
+              "milliseconds": 17.5904589999991,
               "iterations": 256,
               "checksum": 1689957.4892597224
             },
             {
-              "milliseconds": 22.27745800000048,
+              "milliseconds": 17.549125000001368,
               "iterations": 256,
               "checksum": 1689957.4892597224
             },
             {
-              "milliseconds": 17.574499999998807,
+              "milliseconds": 16.958000000002357,
               "iterations": 256,
               "checksum": 1689957.4892597224
             },
             {
-              "milliseconds": 16.936416000000463,
+              "milliseconds": 16.954333000001498,
               "iterations": 256,
               "checksum": 1689957.4892597224
             }
           ]
         }
       ],
-      "candidateOverBaseline": 1.0729950971637074
+      "candidateOverBaseline": 1.0814447164051906
     },
     {
       "id": "tangent normal lift / reusable result",
@@ -3532,65 +3574,65 @@
       "measurements": [
         {
           "implementation": "math.gl baseline",
-          "medianNanoseconds": 52.192626953129206,
-          "p10Nanoseconds": 51.57193945312599,
-          "p90Nanoseconds": 1032.3645937500032,
-          "spread": 18.791785574956076,
-          "unstable": true,
+          "medianNanoseconds": 51.577962890625884,
+          "p10Nanoseconds": 51.47013476562989,
+          "p90Nanoseconds": 52.36368945312364,
+          "spread": 0.01732435011806457,
+          "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 26.722625000002154,
+              "milliseconds": 26.352709000002505,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 27.025375000001077,
+              "milliseconds": 26.407917000000452,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 26.372041999999055,
+              "milliseconds": 26.550083999998606,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 26.538375000000087,
+              "milliseconds": 26.327166999999463,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 26.404833000000508,
+              "milliseconds": 26.35783299999821,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 26.673875000000407,
+              "milliseconds": 26.810208999999304,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 26.649749999996857,
+              "milliseconds": 26.371707999998762,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 30.547999999998865,
-              "iterations": 16,
-              "checksum": 1669309.212752719
-            },
-            {
-              "milliseconds": 33.0356670000001,
-              "iterations": 32,
-              "checksum": 1669309.212752719
-            },
-            {
-              "milliseconds": 28.147499999999127,
+              "milliseconds": 27.182583000001614,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 27.425082999998267,
+              "milliseconds": 26.63458299999911,
+              "iterations": 512,
+              "checksum": 1669309.212752719
+            },
+            {
+              "milliseconds": 26.499416999999085,
+              "iterations": 512,
+              "checksum": 1669309.212752719
+            },
+            {
+              "milliseconds": 26.39208399999916,
               "iterations": 512,
               "checksum": 1669309.212752719
             }
@@ -3598,165 +3640,165 @@
         },
         {
           "implementation": "math.gl candidate",
-          "medianNanoseconds": 51.68253515624599,
-          "p10Nanoseconds": 51.46655273437517,
-          "p90Nanoseconds": 156.60318749999647,
-          "spread": 2.034277816437865,
-          "unstable": true,
+          "medianNanoseconds": 51.28759765624835,
+          "p10Nanoseconds": 51.10465624999705,
+          "p90Nanoseconds": 51.39526367187841,
+          "spread": 0.005666231899359708,
+          "unstable": false,
           "timingLimited": false,
           "raw": [
             {
-              "milliseconds": 26.258207999999286,
+              "milliseconds": 26.16558399999849,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 26.384874999999738,
+              "milliseconds": 26.358915999997407,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 26.432624999997643,
+              "milliseconds": 26.211875000000873,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 26.350875000000087,
+              "milliseconds": 26.164709000000585,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 26.461457999997947,
+              "milliseconds": 26.259249999999156,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 26.396958999997878,
+              "milliseconds": 26.310708000000886,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 28.553665999999794,
+              "milliseconds": 26.217625000001135,
               "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 20.045207999999548,
-              "iterations": 128,
+              "milliseconds": 26.240624999998545,
+              "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 22.950041000000056,
-              "iterations": 32,
+              "milliseconds": 26.29041700000016,
+              "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 18.25566699999763,
-              "iterations": 128,
+              "milliseconds": 26.2946669999983,
+              "iterations": 512,
               "checksum": 1669309.212752719
             },
             {
-              "milliseconds": 26.550999999999476,
+              "milliseconds": 26.314375000001746,
               "iterations": 512,
               "checksum": 1669309.212752719
             }
           ]
         }
       ],
-      "candidateOverBaseline": 0.9902267460624027
+      "candidateOverBaseline": 0.9943703624938955
     }
   ],
   "allocations": [
     {
       "id": "geodesic inverse",
       "implementation": "baseline",
-      "sampleCount": 4094,
+      "sampleCount": 4186,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 3413.1568
+      "sampledEstimatedBytesPerOperation": 3490.6464
     },
     {
       "id": "geodesic direct (line setup included)",
       "implementation": "baseline",
-      "sampleCount": 3240,
+      "sampleCount": 3191,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 2687.5024
+      "sampledEstimatedBytesPerOperation": 2645.088
     },
     {
       "id": "geodesic reused line",
       "implementation": "baseline",
-      "sampleCount": 983,
+      "sampleCount": 962,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 810.9296
+      "sampledEstimatedBytesPerOperation": 793.7616
     },
     {
       "id": "rhumb inverse",
       "implementation": "baseline",
-      "sampleCount": 26630,
+      "sampleCount": 26732,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 21937.016
+      "sampledEstimatedBytesPerOperation": 22019.8704
     },
     {
       "id": "rhumb direct (line setup included)",
       "implementation": "baseline",
-      "sampleCount": 93466,
+      "sampleCount": 93296,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 76948.3648
+      "sampledEstimatedBytesPerOperation": 76805.5472
     },
     {
       "id": "rhumb reused line",
       "implementation": "baseline",
-      "sampleCount": 93165,
+      "sampleCount": 93017,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 76687.344
+      "sampledEstimatedBytesPerOperation": 76565.4976
     },
     {
       "id": "geodesic solver setup",
       "implementation": "baseline",
-      "sampleCount": 1054,
+      "sampleCount": 981,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 879.3456
+      "sampledEstimatedBytesPerOperation": 818.4496
     },
     {
       "id": "rhumb solver setup",
       "implementation": "baseline",
-      "sampleCount": 11960,
+      "sampleCount": 11950,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 9819.0352
+      "sampledEstimatedBytesPerOperation": 9810.8336
     },
     {
       "id": "frame construction",
       "implementation": "baseline",
-      "sampleCount": 1179,
+      "sampleCount": 1210,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 992.5088
+      "sampledEstimatedBytesPerOperation": 1017.8192
     },
     {
       "id": "frame local point / reusable result",
-      "implementation": "baseline",
-      "sampleCount": 46,
-      "points": 5000,
-      "sampledEstimatedBytesPerOperation": 37.7568
-    },
-    {
-      "id": "frame local point / allocated result",
-      "implementation": "baseline",
-      "sampleCount": 177,
-      "points": 5000,
-      "sampledEstimatedBytesPerOperation": 145.8
-    },
-    {
-      "id": "frame fixed point / reusable result",
       "implementation": "baseline",
       "sampleCount": 63,
       "points": 5000,
       "sampledEstimatedBytesPerOperation": 51.712
     },
     {
+      "id": "frame local point / allocated result",
+      "implementation": "baseline",
+      "sampleCount": 155,
+      "points": 5000,
+      "sampledEstimatedBytesPerOperation": 127.7344
+    },
+    {
+      "id": "frame fixed point / reusable result",
+      "implementation": "baseline",
+      "sampleCount": 72,
+      "points": 5000,
+      "sampledEstimatedBytesPerOperation": 59.0976
+    },
+    {
       "id": "frame fixed vector / reusable result",
       "implementation": "baseline",
-      "sampleCount": 52,
+      "sampleCount": 60,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 42.688
+      "sampledEstimatedBytesPerOperation": 49.2544
     },
     {
       "id": "pose composition / reusable result",
@@ -3768,184 +3810,184 @@
     {
       "id": "pose quaternion / reusable result",
       "implementation": "baseline",
-      "sampleCount": 711,
+      "sampleCount": 698,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 589.32
+      "sampledEstimatedBytesPerOperation": 578.3584
     },
     {
       "id": "pose extraction",
       "implementation": "baseline",
-      "sampleCount": 3034,
+      "sampleCount": 3052,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 2505.7056
+      "sampledEstimatedBytesPerOperation": 2520.344
     },
     {
       "id": "velocity quaternion / reusable result",
       "implementation": "baseline",
-      "sampleCount": 1836,
+      "sampleCount": 1887,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 1516.8784
+      "sampledEstimatedBytesPerOperation": 1558.52
     },
     {
       "id": "tangent normal projection / reusable result",
       "implementation": "baseline",
-      "sampleCount": 0,
+      "sampleCount": 1,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 0
+      "sampledEstimatedBytesPerOperation": 0.84
     },
     {
       "id": "tangent radial lift / reusable result",
       "implementation": "baseline",
-      "sampleCount": 382,
+      "sampleCount": 416,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 314.6896
+      "sampledEstimatedBytesPerOperation": 341.8896
     },
     {
       "id": "tangent normal lift / reusable result",
       "implementation": "baseline",
-      "sampleCount": 295,
+      "sampleCount": 275,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 243.2976
+      "sampledEstimatedBytesPerOperation": 226.8256
     },
     {
       "id": "geodesic inverse",
       "implementation": "candidate",
-      "sampleCount": 10893,
+      "sampleCount": 10514,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 8954.1136
+      "sampledEstimatedBytesPerOperation": 8642.7984
     },
     {
       "id": "geodesic direct (line setup included)",
       "implementation": "candidate",
-      "sampleCount": 6076,
+      "sampleCount": 5994,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 5012.536
+      "sampledEstimatedBytesPerOperation": 4946.1648
     },
     {
       "id": "geodesic reused line",
       "implementation": "candidate",
-      "sampleCount": 3718,
+      "sampleCount": 3740,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 3053.7088
+      "sampledEstimatedBytesPerOperation": 3071.76
     },
     {
       "id": "rhumb inverse",
       "implementation": "candidate",
-      "sampleCount": 26761,
+      "sampleCount": 26548,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 22044.7696
+      "sampledEstimatedBytesPerOperation": 21868.2112
     },
     {
       "id": "rhumb direct (line setup included)",
       "implementation": "candidate",
-      "sampleCount": 93166,
+      "sampleCount": 93340,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 76699.4208
+      "sampledEstimatedBytesPerOperation": 76841.8912
     },
     {
       "id": "rhumb reused line",
       "implementation": "candidate",
-      "sampleCount": 93135,
+      "sampleCount": 92741,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 76662.552
+      "sampledEstimatedBytesPerOperation": 76338.9104
     },
     {
       "id": "geodesic solver setup",
       "implementation": "candidate",
-      "sampleCount": 1021,
+      "sampleCount": 1033,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 852.7648
+      "sampledEstimatedBytesPerOperation": 862.344
     },
     {
       "id": "rhumb solver setup",
       "implementation": "candidate",
-      "sampleCount": 12021,
+      "sampleCount": 11893,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 9869.304
+      "sampledEstimatedBytesPerOperation": 9764.1536
     },
     {
       "id": "frame construction",
       "implementation": "candidate",
-      "sampleCount": 1153,
+      "sampleCount": 1157,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 971.1744
+      "sampledEstimatedBytesPerOperation": 973.672
     },
     {
       "id": "frame local point / reusable result",
       "implementation": "candidate",
-      "sampleCount": 49,
+      "sampleCount": 62,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 40.2208
+      "sampledEstimatedBytesPerOperation": 50.9168
     },
     {
       "id": "frame local point / allocated result",
       "implementation": "candidate",
-      "sampleCount": 151,
+      "sampleCount": 148,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 124.4784
+      "sampledEstimatedBytesPerOperation": 121.9632
     },
     {
       "id": "frame fixed point / reusable result",
       "implementation": "candidate",
-      "sampleCount": 77,
+      "sampleCount": 55,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 62.3824
+      "sampledEstimatedBytesPerOperation": 44.3248
     },
     {
       "id": "frame fixed vector / reusable result",
       "implementation": "candidate",
-      "sampleCount": 59,
+      "sampleCount": 63,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 48.4288
+      "sampledEstimatedBytesPerOperation": 51.712
     },
     {
       "id": "pose composition / reusable result",
       "implementation": "candidate",
-      "sampleCount": 31,
+      "sampleCount": 24,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 25.4464
+      "sampledEstimatedBytesPerOperation": 19.6992
     },
     {
       "id": "pose quaternion / reusable result",
       "implementation": "candidate",
-      "sampleCount": 720,
+      "sampleCount": 675,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 596.7856
+      "sampledEstimatedBytesPerOperation": 559.6096
     },
     {
       "id": "pose extraction",
       "implementation": "candidate",
-      "sampleCount": 2934,
+      "sampleCount": 3024,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 2422.8816
+      "sampledEstimatedBytesPerOperation": 2497.6416
     },
     {
       "id": "velocity quaternion / reusable result",
       "implementation": "candidate",
-      "sampleCount": 1834,
+      "sampleCount": 1927,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 1514.8176
+      "sampledEstimatedBytesPerOperation": 1591.7392
     },
     {
       "id": "tangent normal projection / reusable result",
       "implementation": "candidate",
-      "sampleCount": 1,
+      "sampleCount": 2,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 0.8256
+      "sampledEstimatedBytesPerOperation": 1.6544
     },
     {
       "id": "tangent radial lift / reusable result",
       "implementation": "candidate",
-      "sampleCount": 323,
+      "sampleCount": 341,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 265.6464
+      "sampledEstimatedBytesPerOperation": 280.4496
     },
     {
       "id": "tangent normal lift / reusable result",
       "implementation": "candidate",
-      "sampleCount": 279,
+      "sampleCount": 269,
       "points": 5000,
-      "sampledEstimatedBytesPerOperation": 229.6256
+      "sampledEstimatedBytesPerOperation": 221.4128
     }
   ]
 }

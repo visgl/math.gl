@@ -107,8 +107,7 @@ The [recorded Node/native baseline](https://github.com/visgl/math.gl/blob/master
 contains 20 operation groups, 11 rotated samples with a 16 ms minimum aggregate
 window, and sampled heap estimates. It pins the measured implementation commit,
 Node/V8, CPU, compiler, native driver and workload. This shared-host observation
-flags high spread in geodesic inverse, candidate direct and tangent normal lift
-measurements; use its raw samples and flags rather than inferring speedups from
+flags high spread in some frame/tangent measurements; use its raw samples and flags rather than inferring speedups from
 individual ratios. It is an initial diagnostic baseline, not a quiet-host release
 performance claim.
 
