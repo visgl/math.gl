@@ -115,6 +115,8 @@ test('world parameters and description validation', () => {
   }
   expect(() => make('aitoff', {parallel: 30})).toThrow(/Unsupported/);
   expect(() => make('lagrange', {spacing: 2})).toThrow(/Invalid/);
+  expect(() => make('lagrange', {spacing: 1})).toThrow(/antipodal clip/);
+  expect(() => make('hammer', {coefficient: 1})).toThrow(/antipodal clip/);
   expect(() => make('bonne', {parallel: NaN})).toThrow();
   expect(() => make('constructor' as WorldProjection)).toThrow(/Unknown/);
 });

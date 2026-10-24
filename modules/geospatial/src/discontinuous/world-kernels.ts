@@ -233,6 +233,8 @@ export function createWorldKernel(
       throw new Error(`Invalid ${name} ${key}; expected [${low}, ${high}]`);
     return degrees ? (value * Math.PI) / 180 : value;
   });
+  if ((name === 'hammer' && values[0] === 1) || (name === 'lagrange' && values[0] === 1))
+    throw new Error(`Invalid ${name} parameter: the endpoint requires an antipodal clip`);
   const kernel = entry.make(...values);
   for (const lat of [-1.5, -1, -0.5, 0, 0.5, 1, 1.5])
     if (!kernel(1, lat).every(Number.isFinite))

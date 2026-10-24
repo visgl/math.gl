@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {triangulateSourcePolygon} from './triangulate-source-polygon.js';
+import {triangulateSourcePolygon, isConvexSourcePolygon} from './triangulate-source-polygon.js';
 import {MapEngine, MAP_PROJECTIONS} from '@math.gl/geospatial/discontinuous';
 import {MYRIAHEDRAL_VIEWS} from './map-options.js';
 export {MYRIAHEDRAL_VIEWS, DISCONTINUOUS_VIEWS} from './map-options.js';
@@ -253,7 +253,7 @@ function* buildGrid(view, step = 1) {
               (Math.atan2(sum[2], Math.hypot(sum[0], sum[1])) * 180) / Math.PI
             ];
             const projected = map.projectPoint(center, part.regionId);
-            if (!projected || part.coordinates.length > 1) {
+            if (!projected || !isConvexSourcePolygon(part)) {
               const mesh = triangulateSourcePolygon(part),
                 start = positions.length / 2;
               for (let i = 0; i < mesh.sources.length; i++) {

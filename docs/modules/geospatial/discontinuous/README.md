@@ -86,11 +86,11 @@ The 64 names are:
 | Bottomley | `fraction: 0.5` |
 | Cylindrical equal-area / stereographic | `parallel: 38.58` / `parallel: 0` |
 | Foucaut sinusoidal | `alpha: 0.5` |
-| Hammer | `coefficient: 2`; use `quartic-authalic` for the infinite-coefficient limit |
+| Hammer | `coefficient: 2`, strictly greater than 1; use `quartic-authalic` for the infinite-coefficient limit |
 | Hill | `ratio: 1` |
 | Hufnagel | `a: 1`, `b: 0`, `psiMax: 45`, `ratio: 2` |
 | Hyperelliptical | `alpha: 0`, `k: 2.5`, `gamma: 1.183136` |
-| Lagrange | `spacing: 0.5` |
+| Lagrange | `spacing: 0.5`, strictly less than 1 |
 | Loximuthal | `parallel: 40` |
 | Rectangular polyconic | `parallel: 0` |
 | Wagner | `poleline: 65`, `parallels: 60`, `inflation: 20`, `ratio: 200` |

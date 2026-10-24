@@ -246,3 +246,23 @@ test("source triangulation preserves a clipped polygon's hole", async () => {
   }
   assert(Math.abs(area - 15) < 1e-10);
 });
+
+test("a visible center does not fill a concave source notch", async () => {
+  const {isConvexSourcePolygon, triangulateSourcePolygon} = await import("./triangulate-source-polygon.js");
+  // A narrow notch in the top edge: the vertex average is still in the polygon.
+  const ring = [[0,0],[6,0],[6,6],[4,6],[4,5],[3,5],[3,6],[0,6],[0,0]];
+  const part = {coordinates:[ring], sourceCoordinates:[ring]};
+  const averageY = ring.slice(0,-1).reduce((sum,p) => sum+p[1],0)/(ring.length-1);
+  assert(averageY > 0 && averageY < 5, "the vertex average is below the notch and remains visible");
+  assert.equal(isConvexSourcePolygon(part), false);
+  assert.equal(isConvexSourcePolygon({coordinates:[ring.slice(0,3).concat([ring[0]])], sourceCoordinates:[ring.slice(0,3).concat([ring[0]])]}), true);
+  const mesh = triangulateSourcePolygon(part);
+  let area = 0;
+  for (let i = 0; i < mesh.indices.length; i += 3) {
+    const [a,b,c] = mesh.indices.slice(i,i+3).map(j => mesh.positions[j]);
+    area += Math.abs((b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]))/2;
+    const center = [(a[0]+b[0]+c[0])/3,(a[1]+b[1]+c[1])/3];
+    assert(!(center[0]>3 && center[0]<4 && center[1]>5));
+  }
+  assert(Math.abs(area-35)<1e-10);
+});
