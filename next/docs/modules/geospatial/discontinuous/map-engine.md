@@ -30,6 +30,9 @@ Descriptions are plain data. Construction takes a deeply frozen snapshot and rej
 
 | `definition.type`                   | Additional fields and defaults                                                                                                                                                                                                                                       |
 | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `healpix`                           | Spherical H=4, K=3; `centralMeridian: 0`; 8 computational charts, not rHEALPix                                                                                                                                                                                       |
+| `gingery`                           | `centralMeridian: 0`, `lobes: 6` (integer 3–24), `coreAngle: 30` (strictly between 0° and 90°)                                                                                                                                                                       |
+| `interrupted`                       | Required `projection` and `lobes: {north, south}`; optional `centralMeridian: 0`; see below                                                                                                                                                                          |
 | `mercator`                          | `centralMeridian: 0`, `maxLatitude: 85.0511287798066`; limit strictly between 0° and 90°                                                                                                                                                                             |
 | `goode`                             | Goode land-oriented homolosine cuts: two northern and four southern lobes                                                                                                                                                                                            |
 | `interrupted-sinusoidal`            | Independent six-lobe sinusoidal arrangement                                                                                                                                                                                                                          |
@@ -53,6 +56,42 @@ Descriptions are plain data. Construction takes a deeply frozen snapshot and rej
 | `custom`                            | `charts: readonly MapChartDescription[]`                                                                                                                                                                                                                             |
 
 Mercator is spherical, not ellipsoidal Mercator. It clips lines and polygons to the finite latitude band after antimeridian/chart splitting. Coordinates at the poles are outside coverage. Goode uses seven convex computational charts: the broad Eurasian lobe has an extra continuous join. This is not a claim of bitwise agreement with another cartographic implementation.
+
+### HEALPix, Gingery, and configurable interruptions[​](#healpix-gingery-and-configurable-interruptions "Direct link to HEALPix, Gingery, and configurable interruptions")
+
+From v5.0 · Experimental
+
+`healpix` combines a cylindrical equal-area equatorial band with four Collignon polar lobes in each hemisphere. Its formula changes at ±asin(2/3), approximately ±41.81°. Output uses the spherical HEALPix equations in radians times `radius`, not D3's normalized display scale. It is a projection, not a HEALPix cell indexer. The polar rearrangement of rHEALPix is not implemented.
+
+`gingery` preserves an azimuthal-equidistant central cap and opens the rest of the sphere into star lobes. `coreAngle` is the cap's angular radius in degrees; `radius` still means the output scale. The implementation uses bounded numerical arc-length solves, so it is more expensive than HEALPix. Its default aspect is equatorial, unlike D3's default oblique view.
+
+```
+const map = new MapEngine({
+
+  version: 1, id: 'custom-interruptions',
+
+  definition: {
+
+    type: 'interrupted', projection: 'sinusoidal', centralMeridian: 20,
+
+    lobes: {
+
+      north: [[-180, -90, 0], [0, 90, 180]],
+
+      south: [[-180, -120, -60], [-60, 60, 180]]
+
+    }
+
+  }
+
+});
+```
+
+Each lobe is `[west, center, east]` in degrees relative to `centralMeridian`. Each hemisphere must partition `[-180, 180]` in west-to-east order, without gaps or overlaps. Centers must lie within the lobe and be at most 180° from either edge. Supported `projection` values are `sinusoidal`, `mollweide`, `homolosine`, `boggs`, `sinu-mollweide`, and `quartic-authalic`. Interruptions begin at the equator. Wide lobes are subdivided into convex charts with continuous internal joins; chart count need not equal lobe count. These options do not implement oblique aspects or cuts beginning at arbitrary latitudes.
+
+All three definitions support the usual seam-aware geometry, fitting, picking, and transitions through the globe; none supplies hinge motion. At a cut, use a region ID to choose a side. Seam endpoints identify where a join becomes a cut.
+
+References: [Calabretta's HEALPix equations](https://arxiv.org/abs/astro-ph/0412607), [PROJ's HEALPix documentation](https://proj.org/en/stable/operations/projections/healpix.html), and [D3's Gingery implementation](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/gingery.js). Gingery's arc-length construction is adapted under ISC; chart assembly and bounded inverse handling use math.gl's existing pipeline. See the package's third-party notices.
 
 ### Quincuncial and star definitions[​](#quincuncial-and-star-definitions "Direct link to Quincuncial and star definitions")
 
