@@ -199,12 +199,16 @@ export function createEdges(
     horizontal = t => [first[0] * (1 - t) + last[0] * t, first[1] * (1 - t) + last[1] * t];
   } else if (edgeModel === 'rhumb') {
     context.tick(2); // Inverse and reusable-line setup.
-    const path = new RhumbPath(first.slice(0, 2), last.slice(0, 2), {
+    const path = new RhumbPath(originalStart.slice(0, 2), last.slice(0, 2), {
       rhumb: context.options.rhumb,
       longitudeTurns: turns
     });
-    last[0] = path.end[0];
-    horizontal = t => path.sample(t);
+    last[0] = path.end[0] + offset;
+    horizontal = t => {
+      const p = path.sample(t);
+      p[0] += offset;
+      return p;
+    };
   } else {
     context.tick(3); // Path inverse/line setup and the bearing query below.
     const solver = context.options.geodesic || getDefaultGeodesic();

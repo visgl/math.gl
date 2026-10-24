@@ -6,6 +6,7 @@ import {EllipsoidRhumb} from '../src/ellipsoid-rhumb';
 import {EllipsoidGeodesic} from '../src/ellipsoid-geodesic';
 import {RhumbPath} from '../src/rhumb-path';
 import {splitGeographicPolyline, splitGeographicPolygon} from '../src/geographic-seams';
+import {subdivideRhumbPolyline} from '../src/subdivide-rhumb-polyline';
 import reference from './ellipsoid/geographic-seam-reference.json';
 export const provenance = reference.provenance;
 export type SeamQualificationRow = {
@@ -140,6 +141,49 @@ export function qualifyGeographicSeams(): SeamQualificationRow[] {
       Math.atan(Math.tan(Math.PI / 6) / Math.cos(Math.PI / 18)) / DEG,
       2e-10
     );
+  });
+  run('independent sphere', 'signed rhumb ties after wrapping', check => {
+    for (const sign of [-1, 1]) {
+      const input = [sign * 170, 0, -sign * 170, 0, sign * 10, 0];
+      const parts = splitGeographicPolyline(input, {edgeModel: 'rhumb', rhumb: sphere});
+      const last = parts[parts.length - 1];
+      check(
+        'unrolled endpoint',
+        last.positions[last.positions.length - 2] + 360 * last.world,
+        sign * 370,
+        2e-12
+      );
+      const result = subdivideRhumbPolyline(input, {
+        rhumb: sphere,
+        transform: p => p,
+        tolerance: 1,
+        maxSurfaceDistance: Math.PI / 18
+      });
+      for (let i = 0; i < result.segmentIndices.length; i++) {
+        const f = result.segmentFractions[i];
+        check(
+          'original-edge longitude',
+          result.sourcePositions[2 * i],
+          sign * (result.segmentIndices[i] === 0 ? 170 + 20 * f : 190 + 180 * f),
+          2e-12
+        );
+      }
+    }
+  });
+  run('independent topology', 'full-width periodic aliases', check => {
+    for (const origin of [-180, 0, 23, 360])
+      for (const seamLongitude of [0, 180, 270]) {
+        const result = splitGeographicPolygon(
+          [{positions: [origin, -10, origin + 360, -10, origin + 360, 10, origin, 10]}],
+          {edgeModel: 'linear', seamLongitude}
+        );
+        check('components', result.length, 1, 0);
+        check('rings', result[0].rings.length, 1, 0);
+        const p = points(result[0].rings[0].positions);
+        let sum = 0;
+        for (let j = 1; j < p.length; j++) sum += p[j - 1][0] * p[j][1] - p[j][0] * p[j - 1][1];
+        check('planar area', Math.abs(sum / 2), 7200, 1e-9);
+      }
   });
   run('independent topology', 'hole notches and area', check => {
     const result = splitGeographicPolygon(

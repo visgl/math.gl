@@ -89,6 +89,24 @@ test('Rhumb adaptive sampling keeps distance, height and original-edge provenanc
     subdivideRhumbPolyline(input, {size: 3, transform: p => p, tolerance: 1, maxVertices: 2})
   ).toThrow(RangeError);
 });
+test('Rhumb subdivision retains original signed ties after accumulated wraps', () => {
+  for (const sign of [-1, 1]) {
+    const result = subdivideRhumbPolyline([sign * 170, 0, -sign * 170, 0, sign * 10, 0], {
+      rhumb: sphere,
+      transform: p => p,
+      tolerance: 1,
+      maxSurfaceDistance: 10 * rad
+    });
+    for (let i = 0; i < result.segmentIndices.length; i++) {
+      const edge = result.segmentIndices[i],
+        f = result.segmentFractions[i];
+      close(result.sourcePositions.slice(2 * i, 2 * i + 2), [
+        sign * (edge === 0 ? 170 + 20 * f : 190 + 180 * f),
+        0
+      ]);
+    }
+  }
+});
 
 test('Unrolled rhumb mode preserves full-width seam fragments without another solver', () => {
   const path = new RhumbPath([-180, 30], [180, 30], {rhumb: sphere, longitudeMode: 'unrolled'});
@@ -132,4 +150,9 @@ test('Numerically zero rhumb paths hold horizontal coordinates while interpolati
   expect(path.end).toEqual([0, 0, 5]);
   expect(path.sample(0.5)).toEqual([0, 0, 3]);
   expect(path.sample(1)).toEqual([0, 0, 5]);
+  const result = subdivideRhumbPolyline([0, 0, 360, Number.MIN_VALUE, 1, 1], {
+    transform: p => p,
+    tolerance: 1
+  });
+  expect(Array.from(result.sourcePositions)).toEqual([0, 0, 0, 0, 1, 1]);
 });

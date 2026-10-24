@@ -4,7 +4,11 @@
 // SPDX-FileComment: Original rhumb adapter for the existing adaptive subdivision engine.
 
 import {subdividePolyline} from '@math.gl/geometry/polygon';
-import type {SubdividePolylineOptions, SubdividedPolyline} from '@math.gl/geometry/polygon';
+import type {
+  SubdividePolylineOptions,
+  SubdividedPolyline,
+  PolylineEdgeSampler
+} from '@math.gl/geometry/polygon';
 import {RhumbPath, type RhumbPathOptions} from './rhumb-path';
 import {validateGeographicPosition} from './geodesic-path';
 
@@ -56,15 +60,26 @@ export function subdivideRhumbPolyline(
   const positions = Array.from(input);
   for (let i = 0; i < positions.length; i += size)
     validateGeographicPosition(positions.slice(i, i + size));
-  const paths: RhumbPath[] = [];
+  const original = positions.slice();
+  const paths: PolylineEdgeSampler[] = [];
   for (let i = size; i < positions.length; i += size) {
-    const path = new RhumbPath(positions.slice(i - size, i), positions.slice(i, i + size), {
+    const path = new RhumbPath(original.slice(i - size, i), original.slice(i, i + size), {
       rhumb,
       longitudeMode,
       longitudeTurns: turns?.[paths.length]
     });
-    paths.push(path);
-    positions.splice(i, size, ...path.end);
+    // Select each signed interval before translating it into the accumulated
+    // world. Otherwise a preceding wrap can reverse an exact 180-degree tie.
+    const first = positions.slice(i - size, i);
+    const offset = first[0] - original[i - size];
+    const sample = (fraction: number): number[] => {
+      if (fraction === 0) return first.slice();
+      const p = path.sample(fraction);
+      p[0] += offset;
+      return p;
+    };
+    paths.push({length: path.length, sample});
+    positions.splice(i, size, ...sample(1));
   }
   return subdividePolyline(positions, {
     ...subdivision,

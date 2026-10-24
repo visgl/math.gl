@@ -2,7 +2,17 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original curve-aware chart-boundary graph reconstruction. No upstream clipping implementation copied.
-import {ANGULAR_TOLERANCE, Context, createEdges, cut, root, same, shift, straight} from './edge';
+import {
+  ANGULAR_TOLERANCE,
+  Context,
+  createEdges,
+  cut,
+  root,
+  same,
+  shift,
+  slice,
+  straight
+} from './edge';
 import type {Edge} from './edge';
 import {GeographicSeamError} from './types';
 import type {
@@ -246,19 +256,61 @@ export function splitGeographicPolygon(
       } else nodes.set(k, {p, edges: [id]});
     }
   };
+  const pieces: Edge[] = [];
+  const meridians = new Map<number, Set<number>>();
   for (const ring of rings)
     for (const original of ring.edges)
       for (const {edge} of cut(original, context)) {
-        if (edge.a[0] === context.left && edge.b[0] === context.left) {
-          const latitude = (edge.a[1] + edge.b[1]) / 2;
-          const left = filled(rings, [context.left, latitude], context, 'right');
-          const right = filled(rings, [context.right, latitude], context, 'left');
-          if (left && right) continue; // Full-width periodic aliases cancel in the interior.
-          if (!left && !right)
-            throw new GeographicSeamError('topology', 'Unresolvable seam-coincident boundary');
-          add(left ? edge : shift(edge, 360));
-        } else add(edge);
+        pieces.push(edge);
+        if (edge.a[0] === edge.b[0]) {
+          const events = meridians.get(edge.a[0]) || new Set<number>();
+          events.add(edge.a[1]);
+          events.add(edge.b[1]);
+          meridians.set(edge.a[0], events);
+        }
       }
+  for (const edge of pieces) {
+    if (edge.a[0] !== edge.b[0]) {
+      add(edge);
+      continue;
+    }
+    // Periodic full-width aliases can coincide at an interior meridian, not
+    // just at the chart seam. Split partial overlaps before testing both sides.
+    const fractions = [0, 1];
+    const latitudes = new Map<number, number>();
+    for (const y of meridians.get(edge.a[0])) {
+      context.tick();
+      if (y > Math.min(edge.a[1], edge.b[1]) && y < Math.max(edge.a[1], edge.b[1])) {
+        const fraction = root(edge, 1, y, context);
+        if (latitudes.has(fraction) && latitudes.get(fraction) !== y)
+          throw new GeographicSeamError('precision', 'Unresolvable meridian event separation');
+        fractions.push(fraction);
+        latitudes.set(fraction, y);
+      }
+    }
+    fractions.sort((a, b) => a - b);
+    for (let i = 1; i < fractions.length; i++) {
+      context.tick();
+      const piece = slice(edge, fractions[i - 1], fractions[i]);
+      if (latitudes.has(fractions[i - 1])) piece.a[1] = latitudes.get(fractions[i - 1]);
+      if (latitudes.has(fractions[i])) piece.b[1] = latitudes.get(fractions[i]);
+      if (fractions.length > 2) context.addVertices(2);
+      const x = piece.a[0],
+        latitude = (piece.a[1] + piece.b[1]) / 2;
+      const seam = x === context.left;
+      const left = filled(rings, [x, latitude], context, seam ? 'right' : 'left');
+      const right = filled(
+        rings,
+        [seam ? context.right : x, latitude],
+        context,
+        seam ? 'left' : 'right'
+      );
+      if (left && right) continue;
+      if (!left && !right)
+        throw new GeographicSeamError('topology', 'Unresolvable meridian-coincident boundary');
+      add(seam && !left ? shift(piece, 360) : piece);
+    }
+  }
   const pole = rings[0].pole;
   if (pole && !rings.slice(1).some(r => r.pole === pole)) {
     const latitude = pole === 'north' ? 90 : -90;

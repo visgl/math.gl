@@ -71,6 +71,20 @@ test('Repeated seam crossings keep source order and are bounded', () => {
     line([0, 0, 80, 40], {edgeModel: 'rhumb', rhumb, seamLongitude: 30, maxIterations: 1})
   ).toThrow(GeographicSeamError);
 });
+test('Original rhumb tie directions survive earlier longitude wraps', () => {
+  for (const [input, end] of [
+    [[170, 0, -170, 0, 10, 0], 370],
+    [[-170, 0, 170, 0, -10, 0], -370]
+  ] as const) {
+    const parts = line(input, {edgeModel: 'rhumb', rhumb});
+    const last = parts.at(-1);
+    expect(last.positions[last.positions.length - 2] + 360 * last.world).toBe(end);
+    expect(parts.length).toBe(2);
+    const edges = parts.flatMap(p => p.edges).filter(e => e.edgeIndex === 1);
+    expect(edges[0].startFraction).toBe(0);
+    expect(edges.at(-1).endFraction).toBe(1);
+  }
+});
 for (const row of qualifyGeographicSeams()) {
   test(`C5/C6 ${row.family}: ${row.id}`, () =>
     expect(row, row.error).toMatchObject({passed: true}));
@@ -108,6 +122,23 @@ test('Rectangles retain area and winding when split, including full-world extent
   const world = polygon([{positions: [-180, -10, 180, -10, 180, 10, -180, 10]}], linear);
   expect(world.length).toBe(1);
   expect(total(world)).toBe(7200);
+});
+test('Full-width aliases cancel at interior meridians and across partial overlaps', () => {
+  for (const origin of [-180, 0, 23, 360])
+    for (const seamLongitude of [0, 180, 270]) {
+      const result = polygon(
+        [{positions: [origin, -10, origin + 360, -10, origin + 360, 10, origin, 10]}],
+        {...linear, seamLongitude}
+      );
+      expect(result.length).toBe(1);
+      expect(total(result)).toBe(7200);
+      expect(result[0].rings.length).toBe(1);
+      expect(Array.from(result[0].rings[0].positions).every(Number.isFinite)).toBe(true);
+    }
+  const partial = polygon([{positions: [0, -10, 360, -5, 360, 15, 0, 10]}], linear);
+  closed(partial);
+  expect(partial.length).toBe(1);
+  expect(total(partial)).toBe(7200);
 });
 test('A seam-crossing hole becomes notches, not independently closed filled rings', () => {
   const result = polygon(

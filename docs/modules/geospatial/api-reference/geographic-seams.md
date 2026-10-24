@@ -87,7 +87,8 @@ join its boundary as notches.
 `edges[i]` describes the edge from vertex `i` to vertex `i+1`. A `null` entry marks
 a generated seam or pole connector, not an invented original edge. Seam-aligned
 source edges are assigned to the filled side; full-width periodic aliases cancel
-in the interior. Original-edge attributes are preserved; generated edges connect
+in the interior, including meridians away from the selected seam and partially
+overlapping source intervals. Original-edge attributes are preserved; generated edges connect
 retained endpoints and have no original-edge fraction.
 
 A once-winding polar ring must explicitly select `pole: 'north'` or `'south'`.
@@ -149,8 +150,8 @@ separation, it also rejects. No partial output or input mutation occurs on failu
 The implementation and native workloads are original MIT math.gl code. Existing
 PROJ/GeographicLib SPDX acknowledgements and packaged licenses are retained.
 Native source compilation is offline only; CI uses stored, provenance-checked
-controls. A shared 315-case matrix runs in Node, Chromium, Firefox and WebKit:
+controls. A shared 317-case matrix runs in Node, Chromium, Firefox and WebKit:
 100 native rhumb adapter cases, 100 native rhumb seam cases, 110 interior
-geodesic seam cases and five independent sphere/topology controls. Qualification
+geodesic seam cases and seven independent sphere/topology controls. Qualification
 reports retain per-case error budgets, source hashes and runtime versions.
 No runtime package dependency is added.
