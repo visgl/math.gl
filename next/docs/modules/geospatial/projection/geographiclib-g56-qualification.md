@@ -1,5 +1,7 @@
 # GeographicLib G5–G6 qualification
 
+This report records the initial G5–G6 delivery. The follow-up [global G6 qualification](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/geographiclib-g6-qualification.md) closes its ellipsoidal capture/completeness gate; initial limitations below are historical.
+
 This increment adds original rhumb inverse/direct/line geometry, compensated rhumb polygons, and a bounded geodesic intersection API. It starts G6; it does not close the global ellipsoidal completeness gate or claim all GeographicLib features. G0–G4 budgets and projection bundle ceilings are unchanged.
 
 ## Controls and budgets[​](#controls-and-budgets "Direct link to Controls and budgets")
