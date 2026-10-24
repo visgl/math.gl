@@ -67,6 +67,28 @@ for (const type of ['peirce-quincuncial', 'berghaus'] as const) {
       expect(map.projectPoint(point)!.position.every(Number.isFinite)).toBe(true);
     }
   });
+  test(`${type}: chart-edge interiors remain invertible on either side`, () => {
+    const map = make({type});
+    for (const region of map.regions) {
+      for (let edge = 0; edge < region.boundary.length; edge++) {
+        const a = geographic(region.boundary[edge]);
+        const b = geographic(region.boundary[(edge + 1) % region.boundary.length]);
+        for (const t of [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99]) {
+          const source = coordinates(unit(add(scale(a, 1 - t), scale(b, t))));
+          const hit = map.projectPoint(source, region.id)!;
+          const inverse = map.unprojectPoint(hit.position, region.id);
+          expect(inverse.length, `${region.id} edge ${edge} t=${t}: ${source}`).toBe(1);
+          const expected = geographic(source),
+            actual = geographic(inverse[0].position);
+          expect(Math.hypot(...actual.map((v, i) => v - expected[i]))).toBeLessThan(1e-7);
+        }
+      }
+    }
+    for (const lon of [-90, 90]) {
+      const hit = map.projectPoint([lon, -60])!;
+      expect(map.unprojectPoint(hit.position, hit.regionId)[0].position[1]).toBeCloseTo(-60, 7);
+    }
+  });
   test(`${type}: cuts split lines and polygons with holes into closed pieces`, () => {
     const map = make({type});
     const seam = map.seams.find(s => s.kind === 'cut')!;

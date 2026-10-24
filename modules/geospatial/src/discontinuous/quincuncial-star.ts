@@ -101,8 +101,30 @@ export function createPeirceQuincuncialMap(options: QuincuncialMapOptions = {}) 
         if (Math.abs(u) > halfSide + 1e-9 || Math.abs(v) > halfSide + 1e-9) return null;
         if (Math.abs(Math.abs(u) - halfSide) < 1e-12 && Math.abs(Math.abs(v) - halfSide) < 1e-12)
           return [wrap(Math.sign(u) * HALF_PI + (back ? PI : 0)) / RAD, Math.sign(v) * 45];
-        const p = guyouRaw.invert(u, v);
-        return [wrap(p[0] + (back ? PI : 0)) / RAD, p[1] / RAD];
+        // The square perimeter is the hemisphere boundary. The complex
+        // elliptic inverse is ill-conditioned there; solve its monotone
+        // one-dimensional forward limit instead of choosing a complex branch.
+        const vertical = Math.abs(Math.abs(u) - halfSide) < 1e-12;
+        const horizontal = Math.abs(Math.abs(v) - halfSide) < 1e-12;
+        if (vertical || horizontal) {
+          let low = vertical ? 0 : PI / 4;
+          let high = vertical ? PI / 4 : HALF_PI;
+          for (let i = 0; i < 55; i++) {
+            const phi = (low + high) / 2;
+            const q = guyouRaw(HALF_PI, phi);
+            if (vertical ? q[1] < Math.abs(v) : q[0] > Math.abs(u)) low = phi;
+            else high = phi;
+          }
+          return [
+            wrap(Math.sign(u) * HALF_PI + (back ? PI : 0)) / RAD,
+            (Math.sign(v) * (low + high)) / (2 * RAD)
+          ];
+        }
+        // Forward Guyou is odd in each coordinate. Invert the first quadrant
+        // and reflect explicitly: the elliptic inverse can select another
+        // boundary branch when its complex cosine approaches zero.
+        const p = guyouRaw.invert(Math.abs(u), Math.abs(v));
+        return [wrap(Math.sign(u) * p[0] + (back ? PI : 0)) / RAD, (Math.sign(v) * p[1]) / RAD];
       }
     };
   });
