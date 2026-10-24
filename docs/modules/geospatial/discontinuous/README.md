@@ -291,3 +291,20 @@ limits throws. Choose a suitable distance tolerance for large radii, for example
 See the [unfolding Earth example](../../geometry/unfolding-earth.md) for the related
 hinge and texture demonstration. Static vector projection and animated panel
 rendering currently use separate pipelines.
+
+
+## Quincuncial and star factories
+
+<span class="badge">From v5.0 · Experimental</span>
+
+`createPeirceQuincuncialMap(options?: QuincuncialMapOptions)` and
+`createBerghausMap(options?: BerghausMapOptions)` return `DiscontinuousMap` instances.
+Both accept `radius` (positive, default 1) and `centralMeridian` (finite degrees,
+default 0). Berghaus additionally accepts `lobes` (integer 3–24, default 5).
+The exported option types have the same defaults as the corresponding
+[MapEngine definitions](./map-engine.md#quincuncial-and-star-definitions).
+
+Use `MapEngine` when you also need serializable descriptions, fitting, picking,
+capabilities and transition planning. Consult the
+[support table](../projection/developer-guide/discontinuous-projections.md#supported-map-families)
+for the distinction between these presets and other quincuncial/star variants.

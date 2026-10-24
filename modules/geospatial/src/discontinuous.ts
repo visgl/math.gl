@@ -23,6 +23,8 @@ export {
 } from './discontinuous/presets';
 
 export {createAlbersUsaMap} from './discontinuous/albers-usa';
+export {createPeirceQuincuncialMap, createBerghausMap} from './discontinuous/quincuncial-star';
+export type {QuincuncialMapOptions, BerghausMapOptions} from './discontinuous/quincuncial-star';
 export {getMapLayout, fitMapLayout, pickMapLayout} from './discontinuous/layout';
 export type {MapBounds, MapRegionLayout} from './discontinuous/map-layout';
 export type {MapLayout, MapLayoutRegion, MapViewportOptions} from './discontinuous/layout';
