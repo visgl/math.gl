@@ -87,3 +87,8 @@ auxiliary latitudes, geodesic polygons and rhumbs are on master in #281. C1–C3
 frames/poses/tangent operations and C4 geodesic/linear path sampling are already
 merged; their follow-on qualification/integration work above must not be confused
 with missing scalar implementations.
+
+The audit was refreshed after #289 landed: both of its review threads were already
+resolved (228 merged PRs and 256 threads inspected in total). Review of this follow-up
+also added a zoom-zero Quadkey regression: closed boundaries preserve supplied
+longitude extents, while open paths use short dateline intervals.

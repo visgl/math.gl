@@ -17,3 +17,11 @@ test('Ordinary paths stay single and seam points appear on both edges', () => {
   assert.deepEqual(longitudeCopies([[180,2]]), [[[-180,2]],[[180,2]]]);
   assert.deepEqual(longitudeCopies([[NaN,0]]), []);
 });
+
+test('Closed world cell boundaries retain their supplied longitude extent', () => {
+  const boundary = [[176.4,85],[176.4,-85],[-180,-85],[-180,85],[176.4,85]];
+  const copies = longitudeCopies(boundary);
+  const visible = copies.find(path => path[0][0] === 176.4);
+  assert.deepEqual(visible, boundary);
+  assert.equal(Math.max(...visible.map(p => p[0])) - Math.min(...visible.map(p => p[0])), 356.4);
+});
