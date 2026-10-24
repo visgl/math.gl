@@ -20,7 +20,7 @@
     "platform": "darwin",
     "architecture": "arm64"
   },
-  "sourceSHA256": "2eca37fdc540507f6294b364ff3cb696679d0ac78ae71fc39ee587121431739a",
+  "sourceSHA256": "6569f0c6c455075d778cbe5a3f61f5df56cb247ddde49e293c6b26875af10347",
   "heightTolerance": "max(radii) * 2e-12 in axis units (the existing absolute floor is not needed in this new profile)",
   "qualifiedRows": 3478,
   "diagnosticRows": 2,

@@ -249,3 +249,41 @@ test('P0 polar forward coordinates retain axes with subnormal squared radii', ()
     config._cartographicRadians = previousRadians;
   }
 });
+
+test('P0 weighted normal preserves valid extreme axis directions', () => {
+  close(new Ellipsoid(1e70, 1e70, 1e-100).geodeticSurfaceNormal([1e140, 0, 0]), [1, 0, 0]);
+  const axes = [2 ** 250, 2 ** -500, 2 ** -200];
+  const point = [2 ** 500, 2 ** -1000, -(2 ** -400)];
+  const expected = [1 / Math.sqrt(3), 1 / Math.sqrt(3), -1 / Math.sqrt(3)];
+  // Each exact dyadic coordinate is its squared radius times a signed unit
+  // coefficient, so the normalized gradient is independent of axis magnitude.
+  for (let rotation = 0; rotation < 3; rotation++) {
+    const shape = new Ellipsoid(axes[0], axes[1], axes[2]);
+    for (const scale of [0.5, 1, 2]) {
+      const alias = point.map(x => x * scale);
+      expect(shape.geodeticSurfaceNormal(alias, alias)).toBe(alias);
+      close(alias, expected);
+    }
+    axes.push(axes[0]);
+    axes.shift();
+    point.push(point[0]);
+    point.shift();
+    expected.push(expected[0]);
+    expected.shift();
+  }
+});
+
+test('P0 weighted normal does not depend on overflowing derived caches', () => {
+  const previousDebug = config.debug;
+  config.debug = false;
+  try {
+    const shape = new Ellipsoid(Number.MIN_VALUE, 1, 2 ** 1023);
+    expect(shape.geodeticSurfaceNormal([Number.MIN_VALUE, 1, 2 ** 1023])).toEqual([
+      1,
+      Number.MIN_VALUE,
+      0
+    ]);
+  } finally {
+    config.debug = previousDebug;
+  }
+});

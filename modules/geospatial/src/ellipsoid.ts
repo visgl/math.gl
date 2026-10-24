@@ -353,10 +353,40 @@ export class Ellipsoid {
     const point = scratchVector;
     const scale = Math.max(Math.abs(point.x), Math.abs(point.y), Math.abs(point.z));
     if (!(scale > 0) || !Number.isFinite(scale)) return undefined;
+    const nx = (point.x / scale) * (this.minimumRadius / this.radii.x) ** 2;
+    const ny = (point.y / scale) * (this.minimumRadius / this.radii.y) ** 2;
+    const nz = (point.z / scale) * (this.minimumRadius / this.radii.z) ** 2;
+    if (
+      (point.x === 0 || Math.abs(nx) >= 2 ** -1022) &&
+      (point.y === 0 || Math.abs(ny) >= 2 ** -1022) &&
+      (point.z === 0 || Math.abs(nz) >= 2 ** -1022)
+    )
+      return normalResult(nx, ny, nz, result);
+
+    // Original exponent-scaled gradient fallback: evaluate x/a² only after
+    // extracting exact powers of two. Squared radius ratios and scaled input
+    // coordinates can underflow independently before their weights compensate.
+    const ex = point.x === 0 ? 0 : Math.min(1023, Math.floor(Math.log2(Math.abs(point.x))));
+    const ey = point.y === 0 ? 0 : Math.min(1023, Math.floor(Math.log2(Math.abs(point.y))));
+    const ez = point.z === 0 ? 0 : Math.min(1023, Math.floor(Math.log2(Math.abs(point.z))));
+    const ax = Math.min(1023, Math.floor(Math.log2(this.radii.x)));
+    const ay = Math.min(1023, Math.floor(Math.log2(this.radii.y)));
+    const az = Math.min(1023, Math.floor(Math.log2(this.radii.z)));
+    const common = Math.max(
+      point.x === 0 ? -Infinity : ex - 2 * ax,
+      point.y === 0 ? -Infinity : ey - 2 * ay,
+      point.z === 0 ? -Infinity : ez - 2 * az
+    );
     return normalResult(
-      (point.x / scale) * (this.minimumRadius / this.radii.x) ** 2,
-      (point.y / scale) * (this.minimumRadius / this.radii.y) ** 2,
-      (point.z / scale) * (this.minimumRadius / this.radii.z) ** 2,
+      point.x === 0
+        ? point.x
+        : (point.x / 2 ** ex / (this.radii.x / 2 ** ax) ** 2) * 2 ** (ex - 2 * ax - common),
+      point.y === 0
+        ? point.y
+        : (point.y / 2 ** ey / (this.radii.y / 2 ** ay) ** 2) * 2 ** (ey - 2 * ay - common),
+      point.z === 0
+        ? point.z
+        : (point.z / 2 ** ez / (this.radii.z / 2 ** az) ** 2) * 2 ** (ez - 2 * az - common),
       result
     );
   }
