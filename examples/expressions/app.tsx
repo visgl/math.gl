@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {longitudeCopies} from './preview-paths';
+import {longitudeCopies, type LongitudeEdges} from './preview-paths';
 import {useCallback, useEffect, useMemo, useRef, useState, type ReactElement} from 'react';
 import {
   BASIC_MATH_FUNCTION_LIBRARY,
@@ -60,6 +60,7 @@ export default function ExpressionPlayground(): ReactElement {
   const [expression, setExpression] = useState(INITIAL_SAMPLE.expression);
   const [contextText, setContextText] = useState(formatJson(INITIAL_SAMPLE.context));
   const [enabledLibraries, setEnabledLibraries] = useState<LibraryId[]>(INITIAL_SAMPLE.libraries);
+  const [longitudeEdges, setLongitudeEdges] = useState<LongitudeEdges>('supplied');
   const [result, setResult] = useState<unknown>();
   const [error, setError] = useState('');
   const [isRunning, setIsRunning] = useState(false);
@@ -107,6 +108,9 @@ export default function ExpressionPlayground(): ReactElement {
 
   function selectSample(sample: ExpressionSample): void {
     setSampleId(sample.id);
+    setLongitudeEdges(
+      sample.id === 'quadkey-boundary' || sample.id === 'geohash-boundary' ? 'supplied' : 'shortest'
+    );
     setExpression(sample.expression);
     setContextText(formatJson(sample.context));
     setEnabledLibraries(sample.libraries);
@@ -240,7 +244,11 @@ export default function ExpressionPlayground(): ReactElement {
             <pre className="result-output">{formatJson(result)}</pre>
           )}
 
-          <GeometryPreview value={result} />
+          <GeometryPreview
+            value={result}
+            edges={longitudeEdges}
+            onEdgesChange={setLongitudeEdges}
+          />
         </section>
       </div>
 
@@ -254,7 +262,15 @@ export default function ExpressionPlayground(): ReactElement {
   );
 }
 
-function GeometryPreview({value}: {value: unknown}): ReactElement {
+function GeometryPreview({
+  value,
+  edges,
+  onEdgesChange
+}: {
+  value: unknown;
+  edges: LongitudeEdges;
+  onEdgesChange: (edges: LongitudeEdges) => void;
+}): ReactElement {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const coordinates = useMemo(() => extractCoordinates(value), [value]);
 
@@ -282,7 +298,7 @@ function GeometryPreview({value}: {value: unknown}): ReactElement {
         return;
       }
 
-      for (const path of longitudeCopies(coordinates)) {
+      for (const path of longitudeCopies(coordinates, edges)) {
         context.beginPath();
         path.forEach(([longitude, latitude], index) => {
           const x = ((longitude + 180) / 360) * bounds.width;
@@ -321,12 +337,22 @@ function GeometryPreview({value}: {value: unknown}): ReactElement {
     const resizeObserver = new ResizeObserver(draw);
     resizeObserver.observe(canvas);
     return () => resizeObserver.disconnect();
-  }, [coordinates]);
+  }, [coordinates, edges]);
 
   return (
     <div className="geometry-preview">
       <div className="preview-heading">
         <h2>Geometry</h2>
+        <label>
+          Longitude edges{' '}
+          <select
+            value={edges}
+            onChange={event => onEdgesChange(event.target.value as LongitudeEdges)}
+          >
+            <option value="shortest">Shortest interval</option>
+            <option value="supplied">As supplied (cell extents)</option>
+          </select>
+        </label>
         <span>{coordinates.length ? `${coordinates.length} positions` : 'No coordinates'}</span>
       </div>
       <div className="map-stage">

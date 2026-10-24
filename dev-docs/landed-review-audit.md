@@ -90,5 +90,6 @@ with missing scalar implementations.
 
 The audit was refreshed after #289 landed: both of its review threads were already
 resolved (228 merged PRs and 256 threads inspected in total). Review of this follow-up
-also added a zoom-zero Quadkey regression: closed boundaries preserve supplied
-longitude extents, while open paths use short dateline intervals.
+also added a zoom-zero Quadkey regression: cell samples explicitly select supplied
+longitude extents, while other paths can use short dateline intervals. The preview
+exposes this edge choice, and repeats segments rather than whole winding paths.
