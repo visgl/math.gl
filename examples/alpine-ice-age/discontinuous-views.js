@@ -38,6 +38,23 @@ const definitions = {
   airOcean: { type: "air-ocean" },
   peirceQuincuncial: { type: "peirce-quincuncial" },
   berghaus: { type: "berghaus" },
+  gingery: { type: "gingery" },
+  healpix: { type: "healpix" },
+  "interrupted-custom": {
+    type: "interrupted",
+    projection: "sinusoidal",
+    centralMeridian: 20,
+    lobes: {
+      north: [
+        [-180, -90, 0],
+        [0, 90, 180],
+      ],
+      south: [
+        [-180, -90, 0],
+        [0, 90, 180],
+      ],
+    },
+  },
   guyou: { type: "guyou" },
   "gringorten-quincuncial": { type: "gringorten-quincuncial" },
   butterfly: { type: "butterfly" },

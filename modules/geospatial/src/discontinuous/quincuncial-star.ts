@@ -14,8 +14,12 @@ const HALF_PI = PI / 2;
 const clamp = (x: number) => Math.max(-1, Math.min(1, x));
 const wrap = (x: number) => ((((x + PI) % (2 * PI)) + 2 * PI) % (2 * PI)) - PI;
 
-export type QuincuncialMapOptions = {radius?: number; centralMeridian?: number};
+export type QuincuncialMapOptions = {
+  radius?: number;
+  centralMeridian?: number;
+};
 export type BerghausMapOptions = QuincuncialMapOptions & {lobes?: number};
+export type GingeryMapOptions = BerghausMapOptions & {coreAngle?: number};
 
 /** Charts around the front/back axes. Each triangle is within an open hemisphere;
  * its projection owns the one-sided limit at cuts and the antipodal vertex.
@@ -24,7 +28,8 @@ function fan(
   count: number,
   start: number,
   options: QuincuncialMapOptions,
-  projection: (back: boolean, theta: number) => Pick<MapRegion, 'project' | 'unproject'>
+  projection: (back: boolean, theta: number) => Pick<MapRegion, 'project' | 'unproject'>,
+  seamStart?: number
 ) {
   const radius = options.radius ?? 1;
   const longitude = options.centralMeridian ?? 0;
@@ -43,11 +48,23 @@ function fan(
       const theta = (a + b) / 2;
       const axis: Vector = [back ? -1 : 1, 0, 0];
       const kernel = projection(back, theta);
+      const boundary: Vector[] = [
+        axis,
+        [0, Math.cos(a), Math.sin(a)],
+        [0, Math.cos(b), Math.sin(b)]
+      ];
+      if (!back && seamStart !== undefined) {
+        const point = (angle: number): Vector => [
+          Math.cos(seamStart),
+          Math.sin(seamStart) * Math.cos(angle),
+          Math.sin(seamStart) * Math.sin(angle)
+        ];
+        boundary.splice(1, 0, point(a));
+        boundary.push(point(b));
+      }
       regions.push({
         id: `${back ? 'back' : 'front'}-${i}`,
-        boundary: [axis, [0, Math.cos(a), Math.sin(a)], [0, Math.cos(b), Math.sin(b)]].map(p =>
-          rotate(coordinates(p as Vector), 1)
-        ),
+        boundary: boundary.map(p => rotate(coordinates(p), 1)),
         interior: rotate(coordinates([axis[0], Math.cos(theta), Math.sin(theta)]), 1),
         placement: [radius, 0, 0, radius, 0, 0],
         project: p => kernel.project(rotate([...p], -1)),
@@ -203,4 +220,96 @@ export function createBerghausMap(options: BerghausMapOptions = {}) {
       ]);
     }
   }));
+}
+
+/** Gingery star, equatorial aspect. coreAngle is the uncut central cap in degrees.
+ * Arc-length construction adapted from d3-geo-projection 4.0.0 gingery.js (ISC).
+ * Chart-owned lobe selection and bracketed inverses are math.gl additions.
+ */
+export function createGingeryMap(options: GingeryMapOptions = {}) {
+  const lobes = options.lobes ?? 6;
+  const coreAngle = options.coreAngle ?? 30;
+  if (!Number.isInteger(lobes) || lobes < 3 || lobes > 24)
+    throw new Error('Gingery lobes must be an integer from 3 to 24');
+  if (!Number.isFinite(coreAngle) || coreAngle <= 0 || coreAngle >= 90)
+    throw new Error('Gingery coreAngle must be greater than 0 and less than 90 degrees');
+  const rho = coreAngle * RAD;
+  const half = PI / lobes;
+  // Match the published D3 quadrature; all solves are bounded. The integration
+  // interval and angle are local to one lobe, including at its one-sided edges.
+  const shape = (alpha: number) => {
+    const start = rho * Math.cos(alpha);
+    const k = (rho * Math.sin(alpha) - alpha * Math.sin(start)) / (HALF_PI - start);
+    const height = (x: number) => alpha * Math.sin(x) - (x < HALF_PI ? k * (x - HALF_PI) : 0);
+    const speed = (x: number) => Math.hypot(1, alpha * Math.cos(x) - (x < HALF_PI ? k : 0));
+    const integral = (end: number) => {
+      const step = (end - start) / 50;
+      let sum = speed(start) + speed(end);
+      for (let i = 1; i < 50; i++) sum += 2 * speed(start + i * step);
+      return (sum * step) / 2;
+    };
+    return {start, height, speed, integral};
+  };
+  return fan(
+    lobes,
+    -half,
+    options,
+    (_back, theta) => ({
+      project: position => {
+        const [vx, vy, vz] = geographic(position);
+        const r = Math.acos(clamp(vx));
+        const angle = Math.atan2(vz, vy);
+        if (r <= rho) return [r * Math.cos(angle), r * Math.sin(angle)];
+        if (r >= PI - 1e-12) return [PI * Math.cos(theta), PI * Math.sin(theta)];
+        const alpha = Math.max(-half, Math.min(half, wrap(angle - theta)));
+        const curve = shape(alpha);
+        const factor = (PI - rho) / curve.integral(PI);
+        let low = curve.start,
+          high = PI,
+          x = r;
+        for (let i = 0; i < 30; i++) {
+          const error = rho + curve.integral(x) * factor - r;
+          if (Math.abs(error) < 1e-12) break;
+          if (error < 0) low = x;
+          else high = x;
+          const next = x - error / (curve.speed(x) * factor);
+          x = next > low && next < high ? next : (low + high) / 2;
+        }
+        const y = curve.height(x);
+        return [
+          x * Math.cos(theta) - y * Math.sin(theta),
+          x * Math.sin(theta) + y * Math.cos(theta)
+        ];
+      },
+      unproject: ([px, py]) => {
+        let r = Math.hypot(px, py),
+          angle = Math.atan2(py, px);
+        if (r > rho + 1e-12) {
+          const x = px * Math.cos(theta) + py * Math.sin(theta);
+          const y = -px * Math.sin(theta) + py * Math.cos(theta);
+          if (x > PI + 1e-10 || x < rho * Math.cos(half) - 1e-10) return null;
+          if (x >= PI - 1e-12) return Math.abs(y) < 1e-10 ? [180, 0] : null;
+          if (Math.abs(y) > shape(half).height(x) + 1e-10) return null;
+          let low = -half,
+            high = half;
+          for (let i = 0; i < 45; i++) {
+            const alpha = (low + high) / 2;
+            if (shape(alpha).height(x) < y) low = alpha;
+            else high = alpha;
+          }
+          const alpha = (low + high) / 2;
+          const curve = shape(alpha);
+          r = rho + (curve.integral(x) * (PI - rho)) / curve.integral(PI);
+          if (r < rho - 1e-9 || r > PI + 1e-9) return null;
+          angle = theta + alpha;
+        }
+        return coordinates([
+          Math.cos(r),
+          Math.sin(r) * Math.cos(angle),
+          Math.sin(r) * Math.sin(angle)
+        ]);
+      }
+    }),
+    rho
+  );
 }

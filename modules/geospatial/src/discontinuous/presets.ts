@@ -129,11 +129,12 @@ export function createGoodeOceanMap(options: {radius?: number} = {}) {
 }
 
 function interruptedMap(
-  kind: 'sinusoidal' | 'mollweide' | 'homolosine' | 'boggs' | 'sinu-mollweide' | 'quartic-authalic',
+  kind: InterruptedProjection,
   value?: number,
   goode = false,
   layout: 'default' | 'ocean' | 'hemispheres' = 'default',
-  centralMeridian = 0
+  centralMeridian = 0,
+  customLobes?: InterruptedMapOptions['lobes']
 ): DiscontinuousMap {
   const radius = validRadius(value);
   const mollweide = (latitude: number): Position => {
@@ -216,8 +217,18 @@ function interruptedMap(
   };
   // Split the wide Eurasian lobe into two convex computational charts sharing
   // one projection. The extra meridian is a continuous join, not a map cut.
-  const lobes =
-    layout === 'ocean'
+  const lobes = customLobes
+    ? [customLobes.north, customLobes.south].map(hemisphere =>
+        hemisphere.flatMap(([west, center, east]) => {
+          const count = Math.ceil((east - west) / 90);
+          return Array.from({length: count}, (_, i) => [
+            west + ((east - west) * i) / count,
+            center,
+            west + ((east - west) * (i + 1)) / count
+          ]);
+        })
+      )
+    : layout === 'ocean'
       ? [
           [
             [-180, -140, -90],
@@ -274,7 +285,13 @@ function interruptedMap(
         boundary: boundary.map(([lon, lat]) => [lon + centralMeridian, lat]),
         interior: [(west + east) / 2 + centralMeridian, 45 * sign],
         project: ([lon, lat]) => {
-          const delta = ((((lon - centralMeridian - center + 180) % 360) + 360) % 360) - 180;
+          let delta = ((((lon - centralMeridian - center + 180) % 360) + 360) % 360) - 180;
+          if (customLobes) {
+            // A wide lobe can own either copy of the antimeridian. The chart,
+            // rather than longitude normalization, chooses the one-sided limit.
+            if (delta + center < west - 1e-8) delta += 360;
+            if (delta + center > east + 1e-8) delta -= 360;
+          }
           const [width, height] = profile(lat * RAD);
           return [radius * (equatorialScale * center * RAD + delta * RAD * width), radius * height];
         },
@@ -293,6 +310,75 @@ function interruptedMap(
     }
   });
   return new DiscontinuousMap(regions);
+}
+
+export type InterruptedProjection =
+  | 'sinusoidal'
+  | 'mollweide'
+  | 'homolosine'
+  | 'boggs'
+  | 'sinu-mollweide'
+  | 'quartic-authalic';
+/** Longitudes relative to centralMeridian, in degrees: [west, center, east]. */
+export type InterruptedLobe = readonly [number, number, number];
+export type InterruptedMapOptions = {
+  radius?: number;
+  centralMeridian?: number;
+  projection: InterruptedProjection;
+  lobes: {
+    north: readonly InterruptedLobe[];
+    south: readonly InterruptedLobe[];
+  };
+};
+
+/** Configurable equatorial interruptions. Each hemisphere must tile [-180, 180]
+ * in west-to-east order. Wide lobes are split into joined computational charts.
+ */
+export function createInterruptedMap(options: InterruptedMapOptions): DiscontinuousMap {
+  if (
+    ![
+      'sinusoidal',
+      'mollweide',
+      'homolosine',
+      'boggs',
+      'sinu-mollweide',
+      'quartic-authalic'
+    ].includes(options.projection)
+  )
+    throw new Error('Unknown interrupted projection');
+  const centralMeridian = options.centralMeridian ?? 0;
+  if (!Number.isFinite(centralMeridian)) throw new Error('Expected finite centralMeridian');
+  for (const hemisphere of [options.lobes?.north, options.lobes?.south]) {
+    if (!Array.isArray(hemisphere) || !hemisphere.length)
+      throw new Error('Expected nonempty north and south lobe arrays');
+    let edge = -180;
+    for (const lobe of hemisphere) {
+      if (!Array.isArray(lobe) || lobe.length !== 3 || !lobe.every(Number.isFinite))
+        throw new Error('Expected finite [west, center, east] lobes');
+      const [west, center, east] = lobe;
+      if (
+        west !== edge ||
+        east <= west ||
+        east > 180 ||
+        center < west ||
+        center > east ||
+        Math.max(center - west, east - center) > 180
+      )
+        throw new Error(
+          'Lobes must partition [-180, 180] with centers inside and at most 180 degrees from either edge'
+        );
+      edge = east;
+    }
+    if (edge !== 180) throw new Error('Lobes must cover [-180, 180]');
+  }
+  return interruptedMap(
+    options.projection,
+    options.radius,
+    false,
+    'default',
+    ((((centralMeridian + 180) % 360) + 360) % 360) - 180,
+    options.lobes
+  );
 }
 function validRadius(value = 1): number {
   if (!Number.isFinite(value) || value <= 0) throw new Error('Radius must be finite and positive');
