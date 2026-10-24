@@ -9,7 +9,8 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl-community/editable-layers": "^9.4.1",
+    "@deck.gl-community/editable-layers": "^9.4.8",
+    "@deck.gl-community/panels": "^9.4.8",
     "@deck.gl/core": "~9.4.0",
     "@deck.gl/extensions": "~9.4.0",
     "@deck.gl/geo-layers": "~9.4.0",

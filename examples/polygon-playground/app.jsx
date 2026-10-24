@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import ExamplePanel from '../common/example-panel';
 import React, {useEffect, useRef, useState} from 'react';
 import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SolidPolygonLayer, LineLayer} from '@deck.gl/layers';
@@ -64,7 +65,7 @@ function validRing(ring) {
 function validRings(rings) {
   if (!rings.every(validRing)) return false;
   for (let i = 1; i < rings.length; i++) {
-    if (!rings[i].every((p) => contains(rings[0], p))) return false;
+    if (!rings[i].every(p => contains(rings[0], p))) return false;
     for (let j = 0; j < i; j++) {
       if (
         rings[i].some((a, k) =>
@@ -85,20 +86,19 @@ function validRings(rings) {
   }
   return true;
 }
-const collection = (rings) => ({
+const collection = rings => ({
   type: 'FeatureCollection',
   features: [
     {
       type: 'Feature',
       properties: {},
-      geometry: {type: 'Polygon', coordinates: rings.map((ring) => [...ring, ring[0]])}
+      geometry: {type: 'Polygon', coordinates: rings.map(ring => [...ring, ring[0]])}
     }
   ]
 });
-const openRings = (data) =>
-  data.features[0]?.geometry.coordinates.map((ring) =>
-    ring.slice(0, -1).map((p) => p.slice(0, 2))
-  ) || [];
+const openRings = data =>
+  data.features[0]?.geometry.coordinates.map(ring => ring.slice(0, -1).map(p => p.slice(0, 2))) ||
+  [];
 
 export default function PolygonPlayground() {
   const [data, setData] = useState(() => collection([initial]));
@@ -120,13 +120,13 @@ export default function PolygonPlayground() {
   });
   const indices = earcut(vertices.flat(), holes, 2);
   const triangles = Array.from({length: indices.length / 3}, (_, i) =>
-    indices.slice(i * 3, i * 3 + 3).map((index) => vertices[index])
+    indices.slice(i * 3, i * 3 + 3).map(index => vertices[index])
   );
   const area = rings.reduce(
     (sum, r, i) => sum + (i ? -1 : 1) * Math.abs(getPolygonSignedArea(r.flat())),
     0
   );
-  const accept = (updated) => {
+  const accept = updated => {
     const next = openRings(updated);
     if (next.length && !validRings(next)) {
       setWarning('Keep edges apart and holes inside the outline.');
@@ -134,7 +134,7 @@ export default function PolygonPlayground() {
     }
     setData(updated);
     setWarning('');
-    setVertex((v) => Math.min(v, Math.max(0, next[0]?.length - 1 || 0)));
+    setVertex(v => Math.min(v, Math.max(0, next[0]?.length - 1 || 0)));
   };
   useEffect(() => {
     const instance = new Deck({
@@ -169,15 +169,15 @@ export default function PolygonPlayground() {
           id: 'math-triangles',
           coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
           data: triangles,
-          getPolygon: (p) => p,
+          getPolygon: p => p,
           getFillColor: (_, info) => [40 + ((info.index * 13) % 150), 140, 210, 170]
         }),
         new LineLayer({
           id: 'triangle-edges',
           coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-          data: edges ? triangles.flatMap((t) => t.map((p, i) => [p, t[(i + 1) % 3]])) : [],
-          getSourcePosition: (d) => d[0],
-          getTargetPosition: (d) => d[1],
+          data: edges ? triangles.flatMap(t => t.map((p, i) => [p, t[(i + 1) % 3]])) : [],
+          getSourcePosition: d => d[0],
+          getTargetPosition: d => d[1],
           getColor: [220, 240, 255],
           getWidth: 1.5
         }),
@@ -201,7 +201,7 @@ export default function PolygonPlayground() {
               return;
             }
             if (editType === 'addTentativePosition') {
-              setDrawingCount((count) => count + 1);
+              setDrawingCount(count => count + 1);
               return;
             }
             if (editType === 'updateTentativeFeature') return;
@@ -221,8 +221,7 @@ export default function PolygonPlayground() {
   };
   return (
     <div className="math-playground">
-      <aside>
-        <h2>Polygon playground</h2>
+      <ExamplePanel title="Polygon playground">
         <p>
           Drag handles to edit. Click an edge to insert a vertex; click a handle to remove it.
           Scroll to zoom.
@@ -250,12 +249,12 @@ export default function PolygonPlayground() {
             type="checkbox"
             checked={rings.length > 1}
             disabled={!ring.length || mode === 'draw'}
-            onChange={(e) => accept(collection(e.target.checked ? [ring, hole] : [ring]))}
+            onChange={e => accept(collection(e.target.checked ? [ring, hole] : [ring]))}
           />{' '}
           Include a hole
         </label>
         <label>
-          <input type="checkbox" checked={edges} onChange={(e) => setEdges(e.target.checked)} />{' '}
+          <input type="checkbox" checked={edges} onChange={e => setEdges(e.target.checked)} />{' '}
           Triangle edges
         </label>
         <button
@@ -280,7 +279,7 @@ export default function PolygonPlayground() {
               <select
                 aria-label="Outline vertex"
                 value={vertex}
-                onChange={(e) => setVertex(Number(e.target.value))}
+                onChange={e => setVertex(Number(e.target.value))}
               >
                 {ring.map((_, i) => (
                   <option key={i} value={i}>
@@ -297,7 +296,7 @@ export default function PolygonPlayground() {
                   type="number"
                   step="1"
                   value={Number((ring[vertex]?.[k] || 0).toFixed(2))}
-                  onChange={(e) => {
+                  onChange={e => {
                     if (e.target.value === '') return;
                     const next = ring.map((p, i) =>
                       i === vertex ? p.map((v, j) => (j === k ? Number(e.target.value) : v)) : p
@@ -314,7 +313,7 @@ export default function PolygonPlayground() {
           Editing: deck.gl-community. Triangulation, area, and winding: math.gl. Coordinates use an
           upward Y axis.
         </p>
-      </aside>
+      </ExamplePanel>
       <div className="polygon-editor-view" ref={root}>
         <canvas aria-label="Editable triangulated polygon" />
       </div>

@@ -12,8 +12,7 @@ export default defineConfig({
       },
       'core',
       'geometry',
-      'culling',
-      'types'
+      'culling'
     ].map(name => ({
       find: new RegExp(`^@math\\.gl/${name}$`),
       replacement: fileURLToPath(new URL(`../../modules/${name}/src/index.ts`, import.meta.url))

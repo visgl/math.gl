@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import ExamplePanel from '../common/example-panel';
 import React, {useMemo, useState} from 'react';
 import Mesh from '../geometry-viewer/mesh';
 import '../geometry-viewer/styles.css';
@@ -13,8 +14,7 @@ export default function CullingExample() {
   const update = (name, value) => setState(previous => ({...previous, [name]: value}));
   return (
     <div className="geometry-example culling-example">
-      <aside className="geometry-panel">
-        <h2>Frustum culling</h2>
+      <ExamplePanel title="Frustum culling" className="geometry-panel">
         <label>
           Bounding volume
           <select value={state.type} onChange={event => update('type', event.target.value)}>
@@ -84,7 +84,7 @@ export default function CullingExample() {
           The blue frame is the test frustum, looking down −Z. Orbit moves the observer camera; it
           does not change the culling planes. Colored volumes show computeVisibility results.
         </p>
-      </aside>
+      </ExamplePanel>
       <Mesh
         geometry={scene.geometry}
         wireframe={false}
