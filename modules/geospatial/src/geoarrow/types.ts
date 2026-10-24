@@ -187,6 +187,46 @@ export function getGeoArrowDimensionSize(dimension: GeoArrowDimension): 2 | 3 | 
   }
 }
 
+/** Combines semantic dimensions without confusing a measure ordinate with elevation. */
+export function mergeGeoArrowDimensions(
+  left: GeoArrowDimension,
+  right: GeoArrowDimension
+): GeoArrowDimension {
+  const hasZ = left === 'xyz' || left === 'xyzm' || right === 'xyz' || right === 'xyzm';
+  const hasM = left === 'xym' || left === 'xyzm' || right === 'xym' || right === 'xyzm';
+  return hasZ && hasM ? 'xyzm' : hasZ ? 'xyz' : hasM ? 'xym' : 'xy';
+}
+
+/**
+ * Infers the dimensions present in coordinate arrays of a tagged geometry value.
+ * Three ordinates are interpreted as XYZ; callers with XYM data should supply that semantic
+ * dimension explicitly instead of inferring it from tuple length.
+ */
+export function inferGeoArrowGeometryDimension(geometry: GeoArrowGeometryValue): GeoArrowDimension {
+  if (geometry.type === 'GeometryCollection') {
+    return geometry.geometries.reduce(
+      (dimension, child) =>
+        mergeGeoArrowDimensions(dimension, inferGeoArrowGeometryDimension(child)),
+      'xy' as GeoArrowDimension
+    );
+  }
+  return inferCoordinateDimensions(geometry.coordinates);
+}
+
+/** Infers the combined dimensions of nested coordinate tuples. */
+function inferCoordinateDimensions(coordinates: readonly unknown[]): GeoArrowDimension {
+  if (typeof coordinates[0] === 'number') {
+    return coordinates.length >= 4 ? 'xyzm' : coordinates.length === 3 ? 'xyz' : 'xy';
+  }
+  let dimension: GeoArrowDimension = 'xy';
+  for (const child of coordinates) {
+    if (Array.isArray(child)) {
+      dimension = mergeGeoArrowDimensions(dimension, inferCoordinateDimensions(child));
+    }
+  }
+  return dimension;
+}
+
 /** Returns the concrete geometry family associated with an encoding. */
 export function getGeoArrowGeometryType(
   encoding: GeoArrowEncoding
