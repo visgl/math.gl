@@ -201,6 +201,8 @@
           "modules/geospatial/api-reference/subdivide-globe-mesh",
           "modules/geospatial/api-reference/geodesic-path",
           "modules/geospatial/api-reference/subdivide-geodesic-polyline",
+          "modules/geospatial/api-reference/rhumb-path",
+          "modules/geospatial/api-reference/geographic-seams",
           "modules/geospatial/api-reference/geographic-tiles",
           "modules/geospatial/api-reference/tile-matrix",
           "modules/geospatial/api-reference/ellipsoid-tangent-plane",

@@ -17,11 +17,11 @@ not yet recorded here as released; their sampled API/geometry evidence does not 
 Rhumb algorithms remain owned by G5 here, and their subdivision integration is
 tracked separately by C4/C6.
 
-## P0 status — declared qualification profile in PR #278
+## Bounded P0 delivery — merged PR #278
 
 The [P0 completion matrix](../docs/modules/geospatial/projection/ellipsoid-p0-qualification.md)
-closes G0–G2 for existing APIs and explicit sampled domains in open
-[PR #278](https://github.com/visgl/math.gl/pull/278); it is not yet on master. It pins full C++
+closes G0–G2 for existing APIs and explicit sampled domains in merged
+[PR #278](https://github.com/visgl/math.gl/pull/278). It pins full C++
 GeographicLib 2.7 (series and Exact), independently gates Cartesian mathematics,
 and records the complete public ownership/unit/boundary audit. The new matrix
 has 930 Decimal geometry rows (720 wider-domain cases and 210 exact-input anchor cases) and 2,550 native C++ rows; 3,478 rows are gates and
@@ -32,7 +32,7 @@ No P0 blocker remains within this profile. Arbitrary finite-domain certification
 is not implied: wider flattening/path-length Exact algorithms are G8, triaxial
 geodesic scope is G9, and new buffer signatures/performance claims are G7.
 G3–G5 scalar APIs are now on master. Remaining implementation and integration
-work includes open G6 completeness in #287, G7 and the frames/paths roadmap.
+work includes G7 and the remaining frames/paths qualification and wider domains.
 
 ## P0 — Existing correctness and defensible claims
 
@@ -65,14 +65,13 @@ records 810 sampled native/independent cases, explicit budgets, native Exact
 limitations, exact input conventions and remaining boundaries. This delivers the
 bounded G3/G4 scalar APIs, not arbitrary-flattening or all near-zero polygon
 certification. G5 now has rhumb inverse/direct/lines/polygons with independent integral and
-native controls. This PR adds capture-bound global closest/next searches and complete finite-ball
+native controls. Merged [PR #287](https://github.com/visgl/math.gl/pull/287) adds capture-bound global closest/next searches and complete finite-ball
 ellipsoid intersections, including coincident continua and complete segment
-classification in the declared 0.99 ≤ b/a ≤ 1.01 profile. This global increment
-remains in open [PR #287](https://github.com/visgl/math.gl/pull/287), not yet on master.
+classification in the declared 0.99 ≤ b/a ≤ 1.01 profile. This global increment is on master; it does not certify arbitrary finite shapes or searches.
 See the [global G6 qualification](../docs/modules/geospatial/projection/geographiclib-g6-qualification.md) and the
 [G5–G6 qualification](../docs/modules/geospatial/projection/geographiclib-g56-qualification.md).
 The [landed-review audit](./landed-review-audit.md) records follow-up correctness fixes and separates pending integration from remaining implementation. G7 performance APIs and G8 wider-domain solvers
-remain separate. G0–G2 completion is tracked independently in PR #278.
+remain separate. G0–G2 bounded completion is on master in PR #278. C6 rhumb adapters and the C5 meridian line/polygon profile are described in the [seam guide](../docs/modules/geospatial/api-reference/geographic-seams.md).
 
 ## P2 — Wider domains and specialized capabilities
 
@@ -85,9 +84,9 @@ remain separate. G0–G2 completion is tracked independently in PR #278.
 
 ## Sequence and common gates
 
-Start with G0–G2, then G3/G4, followed by G5/G6. G5 uses auxiliary
-latitudes and polygon accumulation infrastructure; G6 builds on existing reusable
-geodesic lines. G7 follows each scalar API's qualification. G8 needs qualified
+G0–G6 bounded increments are delivered. C6 now connects rhumbs to path sampling,
+and C5 adds a meridian line/polygon profile. Next, extend qualification and advance
+G7 where equal-accuracy benchmarks justify reusable/batch APIs. G8 needs qualified
 special-function primitives; G9 follows G1/G2 and a dedicated numerical design.
 P2 tranches are independently selectable, and G11 requires a product scope decision.
 

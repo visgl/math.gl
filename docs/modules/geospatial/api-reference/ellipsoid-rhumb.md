@@ -13,6 +13,9 @@ latitude are rhumb lines, but are not shortest routes. An oblique rhumb
 line that approaches a pole spirals around it. Longitude and the rhumb bearing
 are undefined at the pole itself.
 
+For distance-parameterized sampling and adaptive subdivision, see
+[RhumbPath and subdivideRhumbPolyline](./rhumb-path.md).
+
 ## API
 
 Constant-bearing geometry is available from the optional ellipsoid entry:
