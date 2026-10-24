@@ -108,8 +108,19 @@ try {
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   assert.equal(await page.locator('.result-output').textContent(),'4');
   assert.equal(await page.locator('.error-output').count(),0);
+  await page.getByRole('combobox', {name:'Longitude edges'}).selectOption('shortest');
+  await expression.fill('[[-60,0],[60,0],[0,60],[0,-60]]');
+  await page.waitForFunction(()=>document.querySelector('.result-output')?.textContent.includes('-60'));
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  const crossing = await page.locator('canvas').evaluate(canvas => {
+    const ratio = window.devicePixelRatio || 1;
+    return Array.from(canvas.getContext('2d').getImageData(
+      Math.floor(canvas.width/2 + 2*ratio), Math.floor(canvas.height/2), 1, 1
+    ).data);
+  });
+  assert(crossing[0] > crossing[1] * 1.5, `Crossing remains red: ${crossing}`);
   assert.deepEqual(errors,[]);
-  console.log('Merged-review browser regressions pass: BFCache, WebGL disposal, responsive sizing, failed imagery and stale async evaluation.');
+  console.log('Merged-review browser regressions pass: BFCache, WebGL disposal, responsive sizing, failed imagery, stale async evaluation and crossing stroke order.');
 } catch (error) {
   console.error({errors, page:page?.url(), status:await page?.locator('body').innerText().catch(()=>'' )});
   throw error;

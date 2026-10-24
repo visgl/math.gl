@@ -298,8 +298,9 @@ function GeometryPreview({
         return;
       }
 
-      for (const path of longitudeCopies(coordinates, edges)) {
-        context.beginPath();
+      const paths = longitudeCopies(coordinates, edges);
+      context.beginPath();
+      for (const path of paths) {
         path.forEach(([longitude, latitude], index) => {
           const x = ((longitude + 180) / 360) * bounds.width;
           const y = ((90 - latitude) / 180) * bounds.height;
@@ -309,15 +310,17 @@ function GeometryPreview({
             context.lineTo(x, y);
           }
         });
-        context.lineJoin = 'round';
-        context.lineCap = 'round';
-        context.strokeStyle = '#ffffff';
-        context.lineWidth = 6;
-        context.stroke();
-        context.strokeStyle = '#d94736';
-        context.lineWidth = 3;
-        context.stroke();
+      }
+      context.lineJoin = 'round';
+      context.lineCap = 'round';
+      context.strokeStyle = '#ffffff';
+      context.lineWidth = 6;
+      context.stroke();
+      context.strokeStyle = '#d94736';
+      context.lineWidth = 3;
+      context.stroke();
 
+      for (const path of paths) {
         if (path.length === 1) {
           const [longitude, latitude] = path[0];
           const x = ((longitude + 180) / 360) * bounds.width;
