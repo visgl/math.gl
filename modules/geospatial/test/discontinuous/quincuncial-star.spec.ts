@@ -9,6 +9,39 @@ import {add, scale, unit, cross, coordinates, geographic} from '../../src/discon
 const make = (definition: MapDefinition, radius = 1) =>
   new MapEngine({version: 1, id: 'test', definition, radius});
 
+test('Peirce central meridian and nearby axes have stable round trips', () => {
+  const map = make({type: 'peirce-quincuncial'});
+  for (const lon of [
+    0,
+    1e-9,
+    -1e-9,
+    1e-6,
+    -1e-6,
+    90,
+    -90,
+    90 - 1e-6,
+    90 + 1e-6,
+    -90 - 1e-6,
+    -90 + 1e-6,
+    180 - 1e-9,
+    -180 + 1e-9
+  ]) {
+    for (let lat = -88; lat <= 88; lat += 2) {
+      const hit = map.projectPoint([lon, lat])!;
+      const inverse = map.unprojectPoint(hit.position, hit.regionId);
+      expect(inverse.length, `${lon},${lat}`).toBe(1);
+      expect(inverse[0].position[1]).toBeCloseTo(lat, 7);
+      const expected = geographic([lon, lat]),
+        actual = geographic(inverse[0].position);
+      expect(Math.hypot(...actual.map((v, i) => v - expected[i]))).toBeLessThan(1e-7);
+      if (lon === 0) {
+        // The center meridian is a straight diagonal after the 45° square rotation.
+        expect(hit.position[0] + hit.position[1]).toBeCloseTo(0, 12);
+      }
+    }
+  }
+});
+
 test('matches D3 4.0.0 reference coordinates in the documented equatorial aspect', () => {
   for (const entry of reference.cases) {
     const map = make({type: entry.type, lobes: entry.lobes} as MapDefinition);

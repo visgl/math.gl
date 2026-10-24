@@ -89,18 +89,24 @@ export function ellipticJ(u: number, m: number) {
 // Calculate F(phi+iPsi|m).
 // See Abramowitz and Stegun, 17.4.11.
 export function ellipticFi(phi: number, psi: number, m: number) {
+  if (!psi) return [ellipticF(phi, m), 0];
   var r = abs(phi),
     i = abs(psi),
     sinhPsi = sinh(i);
   if (r) {
     var cscPhi = 1 / sin(r),
       cotPhi2 = 1 / (tan(r) * tan(r)),
-      b = -(cotPhi2 + m * (sinhPsi * sinhPsi * cscPhi * cscPhi) - 1 + m),
-      c = (m - 1) * cotPhi2,
-      cotLambda2 = (-b + sqrt(b * b - 4 * c)) / 2;
+      k = m * sinhPsi * sinhPsi * cscPhi * cscPhi,
+      a = cotPhi2 + 1 - m - k,
+      discriminant = sqrt(a * a + 4 * k * cotPhi2),
+      // Solve directly for (cotLambda2 - cotPhi2) / cotPhi2.
+      // Subtracting cotLambda2 / cotPhi2 - 1 loses the imaginary
+      // component for nearly real arguments (the central meridian).
+      ratio = a >= 0 ? (2 * k) / (discriminant + a) : (discriminant - a) / (2 * cotPhi2),
+      cotLambda2 = cotPhi2 * (1 + ratio);
     return [
       ellipticF(atan(1 / sqrt(cotLambda2)), m) * sign(phi),
-      ellipticF(atan(sqrt(Math.max(0, (cotLambda2 / cotPhi2 - 1) / m))), 1 - m) * sign(psi)
+      ellipticF(atan(sqrt(ratio / m)), 1 - m) * sign(psi)
     ];
   }
   return [0, ellipticF(atan(sinhPsi), 1 - m) * sign(psi)];
