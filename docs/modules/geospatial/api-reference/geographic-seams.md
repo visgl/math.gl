@@ -123,8 +123,12 @@ Roots are bracketed on curve pieces monotone in latitude and longitude. The
 selected numerical curve must converge to a fraction interval of at most four
 machine epsilons, with latitude span and physical longitude span (longitude times
 cosine latitude) each no greater than `1e-10` degrees. Exact sampled roots and
-original endpoints are retained directly. This is not a universal physical-error
-certificate for every source solver/domain.
+original endpoints are retained directly, apart from chart representation of
+declared full-width longitude aliases. For a binary64 extent of exactly 360°,
+the two aliases use one chart representation within bounded translation
+roundoff (and the same angular budget). This normalizes a declared meridian;
+unrelated nearby vertices are not snapped together. This is not a universal
+physical-error certificate for every source solver/domain.
 
 Near-meridional geodesics have ill-conditioned longitude intersections: nanometre
 transverse differences between solvers can move a root farther along the seam.

@@ -124,8 +124,8 @@ test('Rectangles retain area and winding when split, including full-world extent
   expect(total(world)).toBe(7200);
 });
 test('Full-width aliases cancel at interior meridians and across partial overlaps', () => {
-  for (const origin of [-180, 0, 23, 360])
-    for (const seamLongitude of [0, 180, 270]) {
+  for (const origin of [-180, 0, 23, 360, 0.1, 0.2, -0.1, -0.2, 10.1])
+    for (const seamLongitude of [0, 180, 270, 0.1, 179.9, 360.2]) {
       const result = polygon(
         [{positions: [origin, -10, origin + 360, -10, origin + 360, 10, origin, 10]}],
         {...linear, seamLongitude}
@@ -134,11 +134,23 @@ test('Full-width aliases cancel at interior meridians and across partial overlap
       expect(total(result)).toBe(7200);
       expect(result[0].rings.length).toBe(1);
       expect(Array.from(result[0].rings[0].positions).every(Number.isFinite)).toBe(true);
+      const partial = polygon(
+        [{positions: [origin, -10, origin + 360, -5, origin + 360, 15, origin, 10]}],
+        {...linear, seamLongitude}
+      );
+      expect(partial.length).toBe(1);
+      expect(Math.abs(total(partial) - 7200)).toBeLessThan(1e-9);
     }
   const partial = polygon([{positions: [0, -10, 360, -5, 360, 15, 0, 10]}], linear);
   closed(partial);
   expect(partial.length).toBe(1);
   expect(total(partial)).toBe(7200);
+  const fractional = polygon([{positions: [0.1, 0, 0.2, 0, 0.2, 1, 0.1, 1]}], {
+    ...linear,
+    linearLongitude: 'shortest'
+  });
+  closed(fractional);
+  expect(Math.abs(total(fractional) - 0.1)).toBeLessThan(1e-14);
 });
 test('A contained hole can coincide with a canceled full-width chart alias', () => {
   const result = polygon(
@@ -424,6 +436,11 @@ test('Tiny short longitude intervals are not erased by wrap-offset arithmetic', 
   expect(
     Array.from(line([0, 0, 1e-20, 1], {...linear, linearLongitude: 'shortest'})[0].positions)
   ).toEqual([0, 0, 1e-20, 1]);
+  expect(
+    Array.from(line([-1e-20, 0, 360, 1], {...linear, linearLongitude: 'shortest'})[0].positions)
+  ).toEqual([-1e-20, 0, 0, 1]);
+  const west = line([-1e-20, 0, 180, 1], {...linear, linearLongitude: 'shortest'});
+  expect(west.at(-1).positions.at(-2)).toBe(-180);
   expect(() => line([-1e-20, 0, 1e-20, 1], {...linear, seamLongitude: 0})).toThrow(
     GeographicSeamError
   );

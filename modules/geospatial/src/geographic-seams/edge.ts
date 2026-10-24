@@ -30,6 +30,7 @@ export class Context {
   readonly iterations: number;
   private work = 0;
   private vertices = 0;
+  private readonly longitudeAliases = new Map<number, number>();
   readonly maxVertices: number;
   private readonly maxWork: number;
   constructor(readonly options: GeographicSeamOptions) {
@@ -65,6 +66,26 @@ export class Context {
     this.work += n;
     if (this.work > this.maxWork) throw new GeographicSeamError('limit', 'Exceeded maxWork');
   }
+  canonicalLongitude(longitude: number): number {
+    while (this.longitudeAliases.has(longitude)) {
+      this.tick();
+      longitude = this.longitudeAliases.get(longitude);
+    }
+    return longitude;
+  }
+  aliasLongitude(from: number, to: number): void {
+    const a = this.canonicalLongitude(from),
+      b = this.canonicalLongitude(to);
+    if (a !== b) this.longitudeAliases.set(a, b);
+  }
+  projectLongitude(longitude: number, shift: number): number {
+    const world = Math.round((longitude - this.right) / 360);
+    const translated =
+      longitude === this.right + 360 * world
+        ? this.right + 360 * (world + shift / 360)
+        : longitude + shift;
+    return this.canonicalLongitude(translated);
+  }
   addVertices(n: number): void {
     this.vertices += n;
     if (this.vertices > this.maxVertices)
@@ -94,6 +115,16 @@ export function same(a: readonly number[], b: readonly number[]): boolean {
 function shortDifference(delta: number): number {
   const value = delta % 360;
   return value > 180 ? value - 360 : value < -180 ? value + 360 : value;
+}
+function shortLongitudeTurns(a: number, b: number): number {
+  const delta = b - a,
+    virtual = delta - b;
+  const low = b - (delta - virtual) + (-a - virtual);
+  const remainder = delta % 360;
+  let turns = -Math.trunc(delta / 360);
+  if (remainder > 180 || (remainder === 180 && low > 0)) turns--;
+  if (remainder < -180 || (remainder === -180 && low < 0)) turns++;
+  return turns;
 }
 /** Exact binary64 opposite-meridian predicate; an angular epsilon would turn
  * unique near-pole routes into pole passages. Retain subtraction's low part.
@@ -192,10 +223,9 @@ export function createEdges(
   let pole: {fraction: number; latitude: number} | undefined;
   if (edgeModel === 'linear') {
     last[0] =
-      first[0] +
-      (linearLongitude === 'shortest'
-        ? shortDifference(end[0] - originalStart[0])
-        : end[0] - originalStart[0]);
+      end[0] +
+      (linearLongitude === 'shortest' ? 360 * shortLongitudeTurns(originalStart[0], end[0]) : 0) +
+      offset;
     horizontal = t => [first[0] * (1 - t) + last[0] * t, first[1] * (1 - t) + last[1] * t];
   } else if (edgeModel === 'rhumb') {
     context.tick(2); // Inverse and reusable-line setup.
@@ -203,7 +233,7 @@ export function createEdges(
       rhumb: context.options.rhumb,
       longitudeTurns: turns
     });
-    last[0] = path.end[0] + offset;
+    last[0] = end[0] + 360 * Math.round((path.end[0] - end[0]) / 360) + offset;
     horizontal = t => {
       const p = path.sample(t);
       p[0] += offset;
@@ -213,7 +243,7 @@ export function createEdges(
     context.tick(3); // Path inverse/line setup and the bearing query below.
     const solver = context.options.geodesic || getDefaultGeodesic();
     const path = new GeodesicPath(first.slice(0, 2), last.slice(0, 2), {geodesic: solver});
-    last[0] = path.end[0];
+    last[0] = end[0] + 360 * Math.round((path.end[0] - end[0]) / 360);
     horizontal = t => path.sample(t);
     if (Math.abs(first[1]) === 90) first[0] = last[0];
     if (Math.abs(last[1]) === 90) last[0] = first[0];

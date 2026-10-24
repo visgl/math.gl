@@ -171,8 +171,8 @@ export function qualifyGeographicSeams(): SeamQualificationRow[] {
     }
   });
   run('independent topology', 'full-width periodic aliases', check => {
-    for (const origin of [-180, 0, 23, 360])
-      for (const seamLongitude of [0, 180, 270]) {
+    for (const origin of [-180, 0, 23, 360, 0.1, 0.2, -0.1, -0.2, 10.1])
+      for (const seamLongitude of [0, 180, 270, 0.1, 179.9, 360.2]) {
         const result = splitGeographicPolygon(
           [{positions: [origin, -10, origin + 360, -10, origin + 360, 10, origin, 10]}],
           {edgeModel: 'linear', seamLongitude}

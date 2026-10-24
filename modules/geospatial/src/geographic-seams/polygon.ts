@@ -11,7 +11,9 @@ import {
   same,
   shift,
   slice,
-  straight
+  straight,
+  worldAt,
+  chartPoint
 } from './edge';
 import type {Edge} from './edge';
 import {GeographicSeamError} from './types';
@@ -35,7 +37,8 @@ function winding(
   point: readonly number[],
   context: Context,
   side?: 'left' | 'right',
-  generatedBoundary = true
+  generatedBoundary = true,
+  longitudeShift = 0
 ): {value: number; boundary: boolean} {
   let value = 0,
     boundary = false;
@@ -47,15 +50,23 @@ function winding(
       if (
         (generatedBoundary || edge.source) &&
         point[1] === a[1] &&
-        point[0] >= Math.min(a[0], b[0]) &&
-        point[0] <= Math.max(a[0], b[0])
+        point[0] >=
+          Math.min(
+            context.projectLongitude(a[0], longitudeShift),
+            context.projectLongitude(b[0], longitudeShift)
+          ) &&
+        point[0] <=
+          Math.max(
+            context.projectLongitude(a[0], longitudeShift),
+            context.projectLongitude(b[0], longitudeShift)
+          )
       )
         boundary = true;
       continue;
     }
     if (point[1] >= Math.min(a[1], b[1]) && point[1] <= Math.max(a[1], b[1])) {
       const t = root(edge, 1, point[1], context),
-        x = edge.sample(t)[0];
+        x = context.projectLongitude(edge.sample(t)[0], longitudeShift);
       if ((generatedBoundary || edge.source) && Math.abs(x - point[0]) <= ANGULAR_TOLERANCE)
         boundary = true;
       if (a[1] > point[1] !== b[1] > point[1] && (side === 'left' ? x >= point[0] : x > point[0]))
@@ -71,10 +82,15 @@ function contains(
   side?: 'left' | 'right'
 ): boolean {
   context.tick();
-  for (let k = Math.ceil((ring.min - p[0]) / 360); k <= Math.floor((ring.max - p[0]) / 360); k++) {
+  // Compare in the output chart, using the same arithmetic as graph endpoints.
+  // Neighboring copies cover boundary quotient rounding without vertex snapping.
+  for (
+    let k = Math.ceil((ring.min - p[0]) / 360) - 1;
+    k <= Math.floor((ring.max - p[0]) / 360) + 1;
+    k++
+  ) {
     context.tick();
-    if (winding(ring.membership, [p[0] + 360 * k, p[1]], context, side, false).value !== 0)
-      return true;
+    if (winding(ring.membership, p, context, side, false, -360 * k).value !== 0) return true;
   }
   return false;
 }
@@ -187,6 +203,13 @@ function reverse(edge: Edge): Edge {
     }
   };
 }
+function canonicalAlias(edge: Edge, context: Context): Edge {
+  const move = (p: number[]): number[] => {
+    const longitude = context.canonicalLongitude(p[0]);
+    return longitude === p[0] ? p : [longitude, ...p.slice(1)];
+  };
+  return {...edge, a: move(edge.a), b: move(edge.b), sample: t => move(edge.sample(t))};
+}
 function interior(edges: Edge[], context: Context): {point: number[]; sign: number} {
   const ys = Array.from(new Set(edges.flatMap(e => [e.a[1], e.b[1]]))).sort((a, b) => a - b);
   let index = 1;
@@ -258,9 +281,32 @@ export function splitGeographicPolygon(
   };
   const pieces: Edge[] = [];
   const meridians = new Map<number, Set<number>>();
-  for (const ring of rings)
+  for (const ring of rings) {
+    if (ring.max - ring.min === 360) {
+      const low = chartPoint([ring.min, 0], worldAt(ring.min, context), context)[0];
+      const high = chartPoint([ring.max, 0], worldAt(ring.max, context), context)[0];
+      const roundoff =
+        4 *
+        Number.EPSILON *
+        Math.max(
+          360,
+          Math.abs(ring.min),
+          Math.abs(ring.max),
+          Math.abs(context.left),
+          Math.abs(context.right)
+        );
+      if (Math.abs(high - low) > Math.min(roundoff, ANGULAR_TOLERANCE))
+        throw new GeographicSeamError('precision', 'Unresolvable full-width longitude alias');
+      if (high === context.left) context.aliasLongitude(low, high);
+      else context.aliasLongitude(high, low);
+    }
+  }
+  for (const ring of rings) {
     for (const original of ring.edges)
-      for (const {edge} of cut(original, context)) {
+      for (const {edge: part} of cut(original, context)) {
+        // Unify only exact representations of this declared full-width pair.
+        // Unrelated nearby vertices never acquire a proximity-based weld.
+        const edge = canonicalAlias(part, context);
         pieces.push(edge);
         if (edge.a[0] === edge.b[0]) {
           const events = meridians.get(edge.a[0]) || new Set<number>();
@@ -269,6 +315,7 @@ export function splitGeographicPolygon(
           meridians.set(edge.a[0], events);
         }
       }
+  }
   for (const edge of pieces) {
     if (edge.a[0] !== edge.b[0]) {
       add(edge);
@@ -318,7 +365,17 @@ export function splitGeographicPolygon(
       if (left && right) continue;
       if (!left && !right)
         throw new GeographicSeamError('topology', 'Unresolvable meridian-coincident boundary');
-      add(seam && !left ? shift(piece, 360) : piece);
+      if (seam && !left) {
+        const assigned = shift(piece, 360),
+          sample = assigned.sample;
+        assigned.a[0] = assigned.b[0] = context.right;
+        assigned.sample = t => {
+          const p = sample(t);
+          p[0] = context.right;
+          return p;
+        };
+        add(assigned);
+      } else add(piece);
     }
   }
   const pole = rings[0].pole;
