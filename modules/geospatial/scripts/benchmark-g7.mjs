@@ -56,7 +56,17 @@ try {
   native=JSON.parse(execFileSync(values.native,['--metadata'],{encoding:'utf8'}));
   assert.equal(native.version,'2.7');assert.equal(native.precisionBits,53);
   assert.equal(native.driverSHA256,hash(join(root,'modules/geospatial/scripts/geographiclib-g7-benchmark.cpp')),'Native binary differs from reviewed driver');
-  native={...native,binarySHA256:hash(values.native),compilerFlags:'-std=c++17 -O2; GEOGRAPHICLIB_PRECISION=2; no LTO'};
+  const qualification=[];
+  for(const op of engines[1].nativeOperations) {
+   const cases=engines[1].inputs(op);
+   const input=cases.length+'\n'+cases.map(r=>[...r.axes,...r.input].join(' ')).join('\n')+'\n';
+   const output=execFileSync(values.native,['--evaluate',op],{input,encoding:'utf8',timeout:60000}).trim();
+   const actual=output.split(/\r?\n/).map(line=>line.trim().split(/\s+/).map(Number));
+   const errors=engines[1].nativeOutputErrors(op,actual);
+   assert(errors.every(error=>Number.isFinite(error)&&error<=1),'Actual native executable failed stored output budgets: '+op);
+   qualification.push({operation:op,rows:errors.length,maxBudgetUsage:Math.max(...errors)});
+  }
+  native={...native,binarySHA256:hash(values.native),compilerFlags:'-std=c++17 -O2; GEOGRAPHICLIB_PRECISION=2; no LTO',qualification};
  }
  const rows=[];
  for(let i=0;i<jobs[0].length;i++) {

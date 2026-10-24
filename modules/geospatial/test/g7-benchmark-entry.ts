@@ -54,6 +54,26 @@ function budget(op: Operation, field: string, a: number): number {
   if (['M12', 'M21'].includes(field)) return 4e-13;
   return op[0] === 'g' && ['azi1', 'azi2', 'a12'].includes(field) ? 1e-9 : 2e-10;
 }
+/** Validate each output from the actual optional native executable before timing. */
+export function nativeOutputErrors(
+  op: Operation,
+  actual: readonly (readonly number[])[]
+): number[] {
+  const cases = inputs(op),
+    names = fields[op];
+  if (actual.length !== cases.length || actual.some(row => row.length !== names.length))
+    throw new Error('Native output shape mismatch: ' + op);
+  return actual.map((row, i) =>
+    Math.max(
+      ...row.map((value, j) =>
+        Number.isFinite(value)
+          ? Math.abs(value - reference.operations[op][i][j]) /
+            budget(op, names[j], cases[i].axes[0])
+          : Infinity
+      )
+    )
+  );
+}
 export function prepareJobs(): Job[] {
   const jobs: Job[] = [];
   for (const op of nativeOperations) {

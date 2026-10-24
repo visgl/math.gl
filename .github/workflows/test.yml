@@ -118,6 +118,7 @@ jobs:
         run: |
           python3 modules/geospatial/scripts/generate-c8-reference.py --check
           python3 modules/geospatial/scripts/generate-g7-reference.py --check
+          node --test modules/geospatial/scripts/benchmark-g7.test.mjs
           yarn check:c8-package
           node modules/geospatial/scripts/qualify-c8.mjs --output /tmp/c8-g7-node.json
 

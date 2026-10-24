@@ -31,7 +31,8 @@ try {
  for(const name of ['core','geospatial','geometry','web-mercator'])symlinkSync(join(root,'modules',name),join(scope,name));
  writeFileSync(join(directory,'package.json'),'{"type":"module"}');
  writeFileSync(join(directory,'consumer.ts'),readFileSync(join(root,'test/types/local-frames/index.ts')));
- writeFileSync(join(directory,'tsconfig.json'),JSON.stringify({compilerOptions:{target:'es2020',module:'NodeNext',moduleResolution:'NodeNext',strict:true,noEmit:true,skipLibCheck:false,types:[]},include:['consumer.ts']}));
+ writeFileSync(join(directory,'consumer.cts'),readFileSync(join(root,'test/types/local-frames/index.cts')));
+ writeFileSync(join(directory,'tsconfig.json'),JSON.stringify({compilerOptions:{target:'es2020',module:'NodeNext',moduleResolution:'NodeNext',strict:true,noEmit:true,skipLibCheck:false,types:[]},include:['consumer.ts','consumer.cts']}));
  execFileSync(process.execPath,[require.resolve('typescript/bin/tsc'),'--project',join(directory,'tsconfig.json')],{stdio:'inherit'});
  const rows=[];
  for(const symbol of ['LocalReferenceFrame','EllipsoidTangentPlane','Ellipsoid','EllipsoidGeodesic','GeodesicPath']) {

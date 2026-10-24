@@ -119,7 +119,9 @@ unrelated baseline code can be retained and distort selective bundle comparisons
 calls that include line setup, reused geodesic/rhumb lines, caller-owned versus
 allocated frame outputs, poses, velocity orientation and tangent operations.
 Both revisions must pass the ordinary overlapping C8 profile and the same native
-G7 output budgets before timing. Newly fixed boundary cases gate the candidate;
+G7 output budgets before timing. An optional native executable must itself pass
+all 72 stored field-by-field controls via `--evaluate` before any timing; matching
+metadata and finite checksums alone do not establish accuracy. Newly fixed boundary cases gate the candidate;
 the benchmark does not compare valid results against baseline failures.
 
 Samples rotate implementation order, adapt aggregate duration, preserve raw
