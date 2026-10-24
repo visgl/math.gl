@@ -59,10 +59,11 @@ callbacks and convex spherical boundaries; they are not verified presets.
 | Ordinary continuous maps | Spherical `mercator` with a finite latitude band | Other scalar projection kernels require custom chart bindings; not all scalar CRS operations are MapEngine presets |
 | Interrupted pseudocylindrical maps | `goode` (land-oriented); `interrupted-sinusoidal`, `interrupted-mollweide`, `interrupted-homolosine` (independent six-lobe cuts); additional presets: `goode-ocean`, `interrupted-boggs`, `interrupted-sinu-mollweide`, `interrupted-quartic-authalic`, `interrupted-mollweide-hemispheres` | Configurable equatorial lobes are available through `interrupted`; oblique Sinu-Mollweide cuts and arbitrary interruption latitudes remain unsupported; no claim of bitwise PROJ/D3 compatibility |
 | Regional composites / insets | `albers-usa`, including optional PR, VI, GU, MP and AS | Other national composites need custom charts; no responsive inset reflow or exact projected rectangular clipping |
-| Quincuncial square-world maps | `peirce-quincuncial`, `gringorten-quincuncial`, and `guyou`, in equatorial aspects | Arbitrary aspect rotation beyond the central meridian |
+| Quincuncial square-world maps | `peirce-quincuncial`, `gringorten-quincuncial`, and `guyou` in equatorial aspects; polar equal-area `petroff` | Arbitrary aspect rotation beyond the central meridian |
 | Star maps | `berghaus` and `gingery`, with 3–24 lobes; Gingery has a configurable central cap | Other star formulas and arbitrary aspect rotation |
 | HEALPix | Spherical `healpix` (H=4, K=3), equal-area, with four polar lobes per hemisphere | rHEALPix polar rearrangement, other H/K values, and pixel indexing |
-| Classical polyhedral maps | `air-ocean` (24-panel radial/gnomonic), `butterfly`, `collignon-butterfly`, `waterman` (W5) | Exact Gray–Fuller mathematics; arbitrary polyhedral nets |
+| Classical polyhedral maps | `air-ocean` (24-panel radial/gnomonic), exact `gray-fuller`, `butterfly`, `collignon-butterfly`, `waterman` (W5) | Arbitrary polyhedral nets |
+| Snyder equal-area polyhedral maps | Spherical `isea` (20 triangular faces) and `dsea` (12 pentagonal faces), in vertex-polar aspects | Ellipsoidal authalic conversion, other polyhedra/nets, and configurable aspect rotation |
 | Myriahedral maps | `myriahedral`: six named cut strategies, five Platonic solids, subdivisions, custom meshes and hinge motion | Guaranteed overlap-free nets, collision-free unfolding, and guaranteed continent connectivity |
 | DGGS-derived unfolding | Custom myriahedral meshes; H3, A5 and S2 adapters in examples | These adapters are not built-in MapEngine definitions or exact DGGS cartographic projection kernels |
 
@@ -398,7 +399,7 @@ primary sources below when a journal's landing page requires payment.
   This preset is not a generic implementation of all Waterman polyhedra.
 - **d3-geo-polygon contributors** supply the ISC-licensed
   [AirOcean topology](https://github.com/d3/d3-geo-polygon).
-  math.gl's radial/gnomonic map does not claim to implement Gray–Fuller's exact projection.
+  math.gl's `air-ocean` remains radial/gnomonic; `gray-fuller` implements Gray's exact face equations independently, with reference tests against D3.
 - **Nicolas “Nico” Belmonte** inspired the interactive myriahedral demonstrations.
   See [our myriahedral background and credits](../../myriahedral-maps.md).
   The hinge mechanics and myriahedral implementation were developed independently;
@@ -410,3 +411,15 @@ Source headers identify adaptations. Checked-in reference fixtures use D3 4.0.0;
 the adjacent generator scripts record normalization and can regenerate them from
 an independently installed D3 source tree. A matching picture alone is not a
 numerical validation.
+
+- **Matthew A. Petroff**, [A Square Equal-Area Map Projection with Low Angular
+  Distortion, Minimal Cusps, and Closed-Form Solutions](https://arxiv.org/abs/2008.13670)
+  (2021). The `petroff` equations are adapted from his
+  [CC0 supplement](https://doi.org/10.5281/zenodo.4661351); see also his
+  [introductory article](https://mpetroff.net/2021/08/square-equal-area-map-projection/).
+- **John P. Snyder**, *An Equal-Area Map Projection for Polyhedral Globes* (1992).
+  `isea` and `dsea` use the [vector formulation explained by BRSR](https://brsr.github.io/2021/08/31/snyder-equal-area.html).
+  Their mesh and net tables follow **Felix Palmer / PROJ**;
+  [PROJ's polyhedral documentation](https://proj.org/en/stable/operations/projections/polyhedral.html)
+  explains the face/subtriangle construction. math.gl implements the projection
+  equations independently and retains PROJ's MIT-style notice for the tables.

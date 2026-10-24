@@ -90,3 +90,8 @@ export {createInterruptedSinuMollweideMap} from './discontinuous/presets';
 export {createInterruptedQuarticAuthalicMap} from './discontinuous/presets';
 export {createInterruptedMollweideHemispheresMap} from './discontinuous/presets';
 export type {PolyhedralMapOptions} from './discontinuous/polyhedral';
+
+export {createGrayFullerMap} from './discontinuous/presets';
+export {createPetroffMap} from './discontinuous/petroff';
+export {createIcosahedralSnyderMap, createDodecahedralSnyderMap} from './discontinuous/snyder';
+export type {SnyderMapOptions} from './discontinuous/snyder';
