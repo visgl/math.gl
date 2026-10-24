@@ -95,6 +95,23 @@ test('Gingery parameters, cap joins, tips and inverse branches', () => {
     expect(() => createGingeryMap(options)).toThrow();
 });
 
+test('Gingery large caps remain invertible across the arc-length integration kink', () => {
+  const map = make({type: 'gingery', lobes: 24, coreAngle: 89});
+  // A quadrature grid crossing the curve's kink previously jumped enough for
+  // picking to reject these valid points after its forward round-trip check.
+  for (const p of [
+    [-99.7515504, -69.22814495467175],
+    [-92.7794817, -25.277322707543476],
+    [96.987645, 53.22570170418041]
+  ])
+    roundTrip(map, p as [number, number]);
+  for (let i = 0; i < 1000; i++)
+    roundTrip(map, [
+      ((i * 137.50776405) % 360) - 180,
+      (Math.asin((2 * (i + 0.5)) / 1000 - 1) * 180) / Math.PI
+    ]);
+});
+
 const lobes = {
   north: [[-180, 0, 180]],
   south: [

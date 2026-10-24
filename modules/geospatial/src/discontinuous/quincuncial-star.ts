@@ -235,19 +235,32 @@ export function createGingeryMap(options: GingeryMapOptions = {}) {
     throw new Error('Gingery coreAngle must be greater than 0 and less than 90 degrees');
   const rho = coreAngle * RAD;
   const half = PI / lobes;
-  // Match the published D3 quadrature; all solves are bounded. The integration
-  // interval and angle are local to one lobe, including at its one-sided edges.
+  // Gauss-Legendre integration on each smooth side of the curve's kink. A
+  // trapezoidal grid spanning the kink jumps when a node crosses it, preventing
+  // forward/inverse convergence for large central caps. All solves are bounded.
+  const nodes = [
+    0.09501250983763744, 0.2816035507792589, 0.4580167776572274, 0.6178762444026438,
+    0.755404408355003, 0.8656312023878318, 0.9445750230732326, 0.9894009349916499
+  ];
+  const weights = [
+    0.1894506104550685, 0.1826034150449236, 0.16915651939500254, 0.14959598881657673,
+    0.12462897125553387, 0.09515851168249278, 0.06225352393864789, 0.027152459411754095
+  ];
   const shape = (alpha: number) => {
     const start = rho * Math.cos(alpha);
     const k = (rho * Math.sin(alpha) - alpha * Math.sin(start)) / (HALF_PI - start);
     const height = (x: number) => alpha * Math.sin(x) - (x < HALF_PI ? k * (x - HALF_PI) : 0);
     const speed = (x: number) => Math.hypot(1, alpha * Math.cos(x) - (x < HALF_PI ? k : 0));
-    const integral = (end: number) => {
-      const step = (end - start) / 50;
-      let sum = speed(start) + speed(end);
-      for (let i = 1; i < 50; i++) sum += 2 * speed(start + i * step);
-      return (sum * step) / 2;
+    const segment = (a: number, b: number) => {
+      const middle = (a + b) / 2,
+        half = (b - a) / 2;
+      let sum = 0;
+      for (let i = 0; i < nodes.length; i++)
+        sum += weights[i] * (speed(middle - half * nodes[i]) + speed(middle + half * nodes[i]));
+      return sum * half;
     };
+    const integral = (end: number) =>
+      end <= HALF_PI ? segment(start, end) : segment(start, HALF_PI) + segment(HALF_PI, end);
     return {start, height, speed, integral};
   };
   return fan(
