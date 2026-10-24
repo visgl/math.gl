@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkproject_website=self.webpackChunkproject_website||[]).push([["2722"],{38409(e,s,r){r.r(s),r.d(s,{NoDecompressor:()=>n});var c=r(23752);class n extends c.ll{name="uncompressed";extensions=[];contentEncodings=[];isSupported=!0;constructor(e={}){super(e)}decompressSync(e){return e}}}}]);

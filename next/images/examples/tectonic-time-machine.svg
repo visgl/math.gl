@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- math.gl
+SPDX-License-Identifier: MIT
+SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+Original schematic artwork; no scientific model geometry.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+<rect width="640" height="360" fill="#07131e"/>
+<circle cx="320" cy="174" r="123" fill="#173b50" stroke="#416379"/>
+<g fill="none" stroke="#6d98ae" opacity=".3"><ellipse cx="320" cy="174" rx="62" ry="123"/><ellipse cx="320" cy="174" rx="123" ry="44"/><path d="M197 174h246M320 51v246"/></g>
+<path d="M280 80l39 10 28 32-21 20-26-4-16 18-31-14-13-33z" fill="#edac76"/>
+<path d="M278 159l34-8 40 15 17 32-28 15-4 44-20 18-17-26 3-33-26-22z" fill="#e6c66c"/>
+<path d="M356 108l33 16 21 43-26 11-28-20-20-20z" fill="#75b8d6"/>
+<g fill="none" stroke="#a8d3e2" stroke-width="2"><path d="M225 118l-27-14m0 0l12-2m-12 2l4 12M392 215l31 12m0 0l-13 2m13-2l-5-12"/></g>
+<text x="32" y="35" fill="#9bbbcf" font-family="system-ui,sans-serif" font-size="12" letter-spacing="3">DEEP TIME / math.gl</text>
+<text x="320" y="338" fill="#d8eaf4" font-family="system-ui,sans-serif" font-size="19" text-anchor="middle">500 Ma ago → Present → Future</text>
+</svg>

@@ -1,0 +1,37 @@
+{
+  "source": "https://github.com/evansiroky/timezone-boundary-builder/releases/download/2026d/timezones-with-oceans.geojson.zip",
+  "version": "2026d",
+  "sourceSha256": "e391c92c7b90339c3afe8558082b4532b8d9afc9daad68da31f4569a1ca61034",
+  "license": "ODbL-1.0",
+  "mapshaperVersion": "0.6.113",
+  "levels": {
+    "low": {
+      "intervalMeters": 20000,
+      "features": 444,
+      "repaired": [
+        "Etc/GMT+4"
+      ],
+      "jsonBytes": 426527,
+      "jsonGzipBytes": 141777,
+      "parquetBytes": 196393,
+      "sha256": {
+        "timezone-geometry-low.json": "37399f2f3b1926ab56610f1057a680b3d06e3b84721d397a62ea250625136522",
+        "timezone-geometry-low.parquet": "f6075ec2f451228391e8b3bf19156ccb570b83805c0300977c160d8efe1e667c"
+      }
+    },
+    "hi": {
+      "intervalMeters": 1000,
+      "features": 444,
+      "repaired": [
+        "Etc/GMT+4"
+      ],
+      "jsonBytes": 3563737,
+      "jsonGzipBytes": 1330289,
+      "parquetBytes": 2412367,
+      "sha256": {
+        "timezone-geometry-hi.json": "2dc7d29df03b238a9ea05ae036ca69ea642f06746e72177073247ca66ba2ae4c",
+        "timezone-geometry-hi.parquet": "0d44e7fbfbbfaccc018b3e2ed3640054c267d9b380e91125106b5caf146025aa"
+      }
+    }
+  }
+}
