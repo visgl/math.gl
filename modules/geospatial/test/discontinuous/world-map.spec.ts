@@ -117,6 +117,9 @@ test('world parameters and description validation', () => {
   expect(() => make('lagrange', {spacing: 2})).toThrow(/Invalid/);
   expect(() => make('lagrange', {spacing: 1})).toThrow(/antipodal clip/);
   expect(() => make('hammer', {coefficient: 1})).toThrow(/antipodal clip/);
+  for (const name of ['cylindrical-stereographic', 'rectangular-polyconic'] as const)
+    for (const parallel of [-90, 90])
+      expect(() => make(name, {parallel})).toThrow(/polar endpoints/);
   expect(() => make('bonne', {parallel: NaN})).toThrow();
   expect(() => make('constructor' as WorldProjection)).toThrow(/Unknown/);
 });

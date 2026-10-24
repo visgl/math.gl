@@ -84,7 +84,7 @@ The 64 names are:
 | --- | --- |
 | Bonne | `parallel: 45` |
 | Bottomley | `fraction: 0.5` |
-| Cylindrical equal-area / stereographic | `parallel: 38.58` / `parallel: 0` |
+| Cylindrical equal-area / stereographic | `parallel: 38.58` / `parallel: 0`; polar parallels are excluded |
 | Foucaut sinusoidal | `alpha: 0.5` |
 | Hammer | `coefficient: 2`, strictly greater than 1; use `quartic-authalic` for the infinite-coefficient limit |
 | Hill | `ratio: 1` |
@@ -92,7 +92,7 @@ The 64 names are:
 | Hyperelliptical | `alpha: 0`, `k: 2.5`, `gamma: 1.183136` |
 | Lagrange | `spacing: 0.5`, strictly less than 1 |
 | Loximuthal | `parallel: 40` |
-| Rectangular polyconic | `parallel: 0` |
+| Rectangular polyconic | `parallel: 0`, strictly between −90° and 90° |
 | Wagner | `poleline: 65`, `parallels: 60`, `inflation: 20`, `ratio: 200` |
 
 These formulas are spherical maps, not ellipsoidal CRS transforms. Their eight

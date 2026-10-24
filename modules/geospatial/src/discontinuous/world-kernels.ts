@@ -235,6 +235,11 @@ export function createWorldKernel(
   });
   if ((name === 'hammer' && values[0] === 1) || (name === 'lagrange' && values[0] === 1))
     throw new Error(`Invalid ${name} parameter: the endpoint requires an antipodal clip`);
+  if (
+    ['cylindrical-stereographic', 'rectangular-polyconic'].includes(name) &&
+    Math.abs(values[0]) === Math.PI / 2
+  )
+    throw new Error(`Invalid ${name} parallel: polar endpoints are singular`);
   const kernel = entry.make(...values);
   for (const lat of [-1.5, -1, -0.5, 0, 0.5, 1, 1.5])
     if (!kernel(1, lat).every(Number.isFinite))
