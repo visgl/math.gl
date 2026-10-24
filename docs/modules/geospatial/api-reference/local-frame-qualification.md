@@ -103,6 +103,15 @@ per-row errors and budgets.
 
 ## G7 benchmark scope
 
+The [recorded Node/native baseline](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/qualification/c8-g7-node.json)
+contains 20 operation groups, 11 rotated samples with a 16 ms minimum aggregate
+window, and sampled heap estimates. It pins the measured implementation commit,
+Node/V8, CPU, compiler, native driver and workload. This shared-host observation
+flags high spread in geodesic inverse, candidate direct and tangent normal lift
+measurements; use its raw samples and flags rather than inferring speedups from
+individual ratios. It is an initial diagnostic baseline, not a quiet-host release
+performance claim.
+
 `benchmark:g7` compares identical current workloads against historical and
 candidate math.gl source/export maps and their explicit `sideEffects` contracts.
 The resolver preserves that metadata for virtual historical modules; otherwise
@@ -116,7 +125,7 @@ the benchmark does not compare valid results against baseline failures.
 Samples rotate implementation order, adapt aggregate duration, preserve raw
 measurements and flag limited windows/spread. Inputs, prepared lines and reusable
 buffers are outside operation timing. Optional heap sampling runs after all
-varied timing; it estimates allocations and cannot prove zero allocation.
+operation timing; it estimates allocations and cannot prove zero allocation.
 
 ```sh
 node modules/geospatial/scripts/benchmark-g7.mjs \
