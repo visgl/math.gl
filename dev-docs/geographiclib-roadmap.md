@@ -48,12 +48,13 @@ records 810 sampled native/independent cases, explicit budgets, native Exact
 limitations, exact input conventions and remaining boundaries. This delivers the
 bounded G3/G4 scalar APIs, not arbitrary-flattening or all near-zero polygon
 certification. G5 now has rhumb inverse/direct/lines/polygons with independent integral and
-native controls. G6 now has capture-bound global closest/next searches and complete finite-ball
+native controls. This PR adds capture-bound global closest/next searches and complete finite-ball
 ellipsoid intersections, including coincident continua and complete segment
-classification in the declared 0.99 ≤ b/a ≤ 1.01 profile. See the
-[global G6 qualification](../docs/modules/geospatial/projection/geographiclib-g6-qualification.md). See the
+classification in the declared 0.99 ≤ b/a ≤ 1.01 profile. This global increment
+remains in open [PR #287](https://github.com/visgl/math.gl/pull/287), not yet on master.
+See the [global G6 qualification](../docs/modules/geospatial/projection/geographiclib-g6-qualification.md) and the
 [G5–G6 qualification](../docs/modules/geospatial/projection/geographiclib-g56-qualification.md).
-G7 performance APIs and G8 wider-domain solvers
+The [landed-review audit](./landed-review-audit.md) records follow-up correctness fixes and separates pending integration from remaining implementation. G7 performance APIs and G8 wider-domain solvers
 remain separate. G0–G2 completion is tracked independently in PR #278.
 
 ## P2 — Wider domains and specialized capabilities

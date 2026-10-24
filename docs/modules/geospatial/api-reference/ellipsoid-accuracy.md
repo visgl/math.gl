@@ -79,11 +79,11 @@ contract used by projection and Cartesian conversion.
 | Prolate geodesics | Exposed; native controls at approximately -1/50 flattening |
 | Ellipsoidal gnomonic | Shared reduced-length/scale formulation; native projection controls |
 | Sphere/oblate ECEF and unique nearest-normal interiors | Shared kernel; independent high-precision mathematical controls |
-| Robust geodesic polygon area/perimeter and edge area | Not exposed or qualified; requires compensated accumulation, pole/dateline crossing and singularity tests |
+| Geodesic polygon area/perimeter and edge area | Exposed with compensated accumulation and bounded independent/native controls; see [G3–G4 qualification](../projection/geographiclib-g34-qualification.md) |
 | Exact geodesics for arbitrary flattening | Not implemented; sixth-order series is not an exact elliptic-integral solver |
 | General triaxial geodesics | Not implemented |
 | Certified nearest surface point on every triaxial/prolate interior | Sampled nearest solutions and unique cusp boundaries qualified; ambiguous minima reject; no universal finite-input certificate |
-| Rhumb lines and geodesic intersections | Not implemented |
+| Rhumb lines and geodesic intersections | Scalar rhumb inverse/direct/lines/polygons and bounded intersections are exposed; see [G5–G6 qualification](../projection/geographiclib-g56-qualification.md). Global ellipsoidal intersection completeness remains in open [PR #287](https://github.com/visgl/math.gl/pull/287) |
 | Magnetic/gravity/geoid models | Outside the ellipsoid geometry API; not implied by geodesic parity |
 | Performance advantage over GeographicLib | No claim; shared implementation plus facade has not established an advantage |
 
