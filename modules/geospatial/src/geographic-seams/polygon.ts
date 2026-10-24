@@ -298,6 +298,16 @@ export function splitGeographicPolygon(
       const x = piece.a[0],
         latitude = (piece.a[1] + piece.b[1]) / 2;
       const seam = x === context.left;
+      // Cancel artificial aliases using their own ring, before subtracting
+      // holes. A genuine hole boundary may coincide with this internal alias.
+      const ring = piece.source && rings[piece.source.ringIndex];
+      if (
+        ring &&
+        ring.max - ring.min >= 360 - ANGULAR_TOLERANCE &&
+        contains(ring, [x, latitude], context, seam ? 'right' : 'left') &&
+        contains(ring, [seam ? context.right : x, latitude], context, seam ? 'left' : 'right')
+      )
+        continue;
       const left = filled(rings, [x, latitude], context, seam ? 'right' : 'left');
       const right = filled(
         rings,

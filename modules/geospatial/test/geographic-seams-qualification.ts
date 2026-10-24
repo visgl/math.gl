@@ -183,6 +183,23 @@ export function qualifyGeographicSeams(): SeamQualificationRow[] {
         let sum = 0;
         for (let j = 1; j < p.length; j++) sum += p[j - 1][0] * p[j][1] - p[j][0] * p[j - 1][1];
         check('planar area', Math.abs(sum / 2), 7200, 1e-9);
+        const holed = splitGeographicPolygon(
+          [
+            {positions: [origin, -10, origin + 360, -10, origin + 360, 10, origin, 10]},
+            {positions: [origin, -5, origin + 10, -5, origin + 10, 5, origin, 5]}
+          ],
+          {edgeModel: 'linear', seamLongitude}
+        );
+        let filledArea = 0;
+        for (const polygon of holed)
+          polygon.rings.forEach((ring, i) => {
+            const q = points(ring.positions);
+            let twice = 0;
+            for (let j = 1; j < q.length; j++)
+              twice += q[j - 1][0] * q[j][1] - q[j][0] * q[j - 1][1];
+            filledArea += (i === 0 ? 1 : -1) * Math.abs(twice / 2);
+          });
+        check('area with coincident hole', filledArea, 7100, 1e-9);
       }
   });
   run('independent topology', 'hole notches and area', check => {

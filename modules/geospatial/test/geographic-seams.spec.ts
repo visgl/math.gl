@@ -140,6 +140,17 @@ test('Full-width aliases cancel at interior meridians and across partial overlap
   expect(partial.length).toBe(1);
   expect(total(partial)).toBe(7200);
 });
+test('A contained hole can coincide with a canceled full-width chart alias', () => {
+  const result = polygon(
+    [{positions: [0, -20, 360, -20, 360, 20, 0, 20]}, {positions: [0, -5, 10, -5, 10, 5, 0, 5]}],
+    linear
+  );
+  closed(result);
+  expect(result.length).toBe(1);
+  expect(result[0].rings.length).toBe(2);
+  expect(total(result)).toBe(14300);
+  expect(result[0].rings[1].edges.every(e => e?.ringIndex === 1)).toBe(true);
+});
 test('A seam-crossing hole becomes notches, not independently closed filled rings', () => {
   const result = polygon(
     [
