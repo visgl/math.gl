@@ -7,7 +7,7 @@
 
 Compile a `MapDescription` into spherical chart projection, layout, picking, and
 optional hinge motion. Import from `@math.gl/geospatial/discontinuous`.
-For a complete rendering workflow, see the [MapEngine guide](../projection/developer-guide/map-engine.md).
+For a complete rendering workflow, see the [MapEngine guide](../developer-guide/map-engine.md).
 The API is experimental and may change before stabilization.
 
 ## MapDescription and MapDefinition
@@ -35,7 +35,10 @@ spherical degrees; the radius does not specify an ellipsoid or a CRS.
 | --- | --- |
 | `healpix` | Spherical H=4, K=3; `centralMeridian: 0`; 8 computational charts, not rHEALPix |
 | `gingery` | `centralMeridian: 0`, `lobes: 6` (integer 3–24), `coreAngle: 30` (strictly between 0° and 90°) |
-| `interrupted` | Required `projection` and `lobes: {north, south}`; optional `centralMeridian: 0`; see below |
+| `interrupted` | Required `projection` and `lobes: {north, south}`; optional `centralMeridian: 0`, `latitudes: {north: 0, south: 0}`; see below |
+| `projection` | Required `projection`: a `MapProjection` from `MAP_PROJECTIONS`; [named projection catalog](../../discontinuous/projection-catalog.md), with preset geographic aspects and regional coverage |
+| `regional` | Required `projection`; optional formula-specific fields documented in the [regional API](../../discontinuous/projection-catalog.md#regional-api) |
+| `world` | `projection`: a `WorldProjection` name from `WORLD_PROJECTIONS`; `parameters`: optional formula-specific values; `centralMeridian: 0`. See [world maps](../../discontinuous/README.md#world-maps). |
 | `mercator` | `centralMeridian: 0`, `maxLatitude: 85.0511287798066`; limit strictly between 0° and 90° |
 | `goode` | Goode land-oriented homolosine cuts: two northern and four southern lobes |
 | `interrupted-sinusoidal` | Independent six-lobe sinusoidal arrangement |
@@ -47,7 +50,7 @@ spherical degrees; the radius does not specify an ellipsoid or a CRS.
 | `isea` | Spherical Snyder equal-area icosahedron; vertex at north pole, 20 faces |
 | `dsea` | Spherical Snyder equal-area dodecahedron; vertex at north pole, 12 faces |
 | `air-ocean` | 24-panel radial/gnomonic map; not Gray-Fuller |
-| `myriahedral` | [Myriahedral options](./myriahedral.md): `preset`, `columns`, `solid`, `subdivisions`, `mesh`, `centralMeridian`, `landSampleStep`; use top-level radius and runtime callbacks |
+| `myriahedral` | [Myriahedral options](../../discontinuous/myriahedral.md): `preset`, `columns`, `solid`, `subdivisions`, `mesh`, `centralMeridian`, `landSampleStep`; use top-level radius and runtime callbacks |
 | `peirce-quincuncial` | `centralMeridian: 0`; equatorial Peirce square-world layout, 8 computational charts |
 | `berghaus` | `centralMeridian: 0`, `lobes: 5`; integer lobes from 3–24, two charts per lobe |
 | `guyou` | `centralMeridian: 0`; two joined conformal hemisphere squares, 8 computational charts |
@@ -157,9 +160,10 @@ Each hemisphere must partition `[-180, 180]` in west-to-east order, without gaps
 or overlaps. Centers must lie within the lobe and be at most 180° from either
 edge. Supported `projection` values are `sinusoidal`, `mollweide`, `homolosine`,
 `boggs`, `sinu-mollweide`, and `quartic-authalic`. Interruptions begin at the
-equator. Wide lobes are subdivided into convex charts with continuous internal
-joins; chart count need not equal lobe count. These options do not implement
-oblique aspects or cuts beginning at arbitrary latitudes.
+optional `latitudes.north` and `latitudes.south` (both default 0°); north must be
+in [0, 90), south in (−90, 0]. Wide lobes are subdivided into convex charts with
+continuous internal joins. The catalog supplies D3's native oblique Sinu-Mollweide
+preset; arbitrary per-lobe latitudes and arbitrary oblique rotations are not options.
 
 All three definitions support the usual seam-aware geometry, fitting, picking,
 and transitions through the globe; none supplies hinge motion. At a cut, use a
@@ -198,7 +202,7 @@ Peirce has four conformal branch points on the hemisphere boundary; finite
 limits are used there, but derivatives are singular. Adaptive line sampling
 approximates curved projected edges; adjust sampling tolerance for output size.
 Input polygons still require an open-hemisphere source chart. See the
-[interactive comparison and support table](../projection/developer-guide/discontinuous-projections.md#supported-map-families).
+[interactive comparison and support table](../developer-guide/discontinuous-projections.md#supported-map-families).
 
 ### Additional segmented and interrupted definitions
 
@@ -223,7 +227,7 @@ Ocean Goode uses the six standard ocean-oriented lobes without duplicated
 extension regions. Polyhedral presets use a root-face origin and a fixed −30°
 planar orientation; use `fit()` instead of assuming D3 screen coordinates.
 
-See [references and implementation credits](../projection/developer-guide/discontinuous-projections.md#references-and-implementation-credits)
+See [references and implementation credits](../developer-guide/discontinuous-projections.md#references-and-implementation-credits)
 for formulas, source provenance, and licensing.
 
 ## MapChartDescription
@@ -233,7 +237,7 @@ for formulas, source provenance, and licensing.
 `Omit<MapRegion, 'project' | 'unproject'> & {projection: string}`.
 Each custom chart has a unique `id`, convex spherical `boundary`, strictly
 interior `interior` point, projection binding key, optional affine `placement`,
-and optional `layout` metadata. See [MapRegion](./README.md) for the geometric
+and optional `layout` metadata. See [MapRegion](../../discontinuous/README.md) for the geometric
 constraints. Bindings return unit-radius local coordinates. Placements and
 optional frames use unit-radius map coordinates; the engine scales them by
 the description's radius. Callback inverses must return spherical degrees or
@@ -286,7 +290,7 @@ Segmentation and disconnection are different properties. Peirce's joined charts
 form a filled square with cuts on the perimeter; Berghaus's lobes remain joined
 to the center while cuts open between their outer edges. Both have cuts without
 being disjoint or hinged. Albers USA has detached components. See
-[segmented, connected, or detached maps](../projection/developer-guide/discontinuous-projections.md#segmented-connected-or-detached).
+[segmented, connected, or detached maps](../developer-guide/discontinuous-projections.md#segmented-connected-or-detached).
 
 ## Static geometry methods
 
@@ -300,7 +304,7 @@ being disjoint or hinged. Albers USA has detached components. See
 | `projectLine(points, sampling?)` | Chart-local `MapLine[]` |
 | `projectPolygon(rings, sampling?)` | Chart-local `MapPolygon[]`, with holes retained |
 
-These use the [static map geometry contract](./README.md): degrees in, placed
+These use the [static map geometry contract](../../discontinuous/README.md): degrees in, placed
 map units out, source coordinates preserved, minor great-circle input edges,
 and hemisphere-bounded polygon inputs. The first containing chart owns a point
 unless a region is specified. Unknown region IDs throw in these methods.
@@ -313,7 +317,7 @@ Inverse gaps return `[]`, not a sentinel coordinate. Map geometry is Y-up.
 `getLayout(): MapLayout` lazily caches boundary sampling, approximate bounds,
 outlines, labels, frames, placements and stable draw order. `fit(options)` takes
 `MapViewportOptions` (`width`, `height`, optional `padding`, `flipY`) and returns
-the [fitted layout](./README.md), including pixel-space `project`/`unproject`
+the [fitted layout](../../discontinuous/README.md), including pixel-space `project`/`unproject`
 functions and region metadata. Default `flipY: true` gives top-left screen
 coordinates. Fitting is uniform and preserves inset scale ratios.
 
@@ -388,3 +392,15 @@ overlap-free morph. Use geographic coordinates to rebuild destination geometry;
 fade differing coverage. Direct transitions between distinct but compatible
 engines, custom reference surfaces, and automatic topology correspondence are
 future extensions.
+
+### containsConvexPolygon(ring, regionId)
+
+<span class="badge">From v5.0 · Experimental</span>
+
+A conservative fast-path query for small convex source rings. `true` means the
+ring fits one region without crossing chart or coverage boundaries. `false`
+means use `projectPolygon()`; it does not imply the polygon is invisible.
+This includes checking whether a cap's excluded interior lies inside the ring,
+even when all original corners are visible. It does not waive the need for
+appropriate mesh subdivision or curved-edge sampling. Ice Age Explorer uses it
+to avoid unnecessary clipping of interior grid cells.

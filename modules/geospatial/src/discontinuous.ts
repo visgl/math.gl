@@ -95,3 +95,18 @@ export {createGrayFullerMap} from './discontinuous/presets';
 export {createPetroffMap} from './discontinuous/petroff';
 export {createIcosahedralSnyderMap, createDodecahedralSnyderMap} from './discontinuous/snyder';
 export type {SnyderMapOptions} from './discontinuous/snyder';
+
+export {createWorldMap} from './discontinuous/world-map';
+export type {
+  WorldMapOptions,
+  WorldProjection,
+  WorldProjectionParameters
+} from './discontinuous/world-map';
+
+export {WORLD_PROJECTIONS} from './discontinuous/world-kernels';
+
+export {createRegionalMap, REGIONAL_PROJECTIONS} from './discontinuous/regional-map';
+export type {RegionalProjection, RegionalMapOptions} from './discontinuous/regional-map';
+
+export {createProjectionMap, MAP_PROJECTIONS} from './discontinuous/projection-catalog';
+export type {MapProjection, ProjectionMapOptions} from './discontinuous/projection-catalog';

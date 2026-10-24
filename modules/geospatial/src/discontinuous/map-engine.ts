@@ -33,6 +33,9 @@ import {
 import {createGrayFullerMap} from './presets';
 import {createPetroffMap} from './petroff';
 import {createIcosahedralSnyderMap, createDodecahedralSnyderMap} from './snyder';
+import {createProjectionMap, type ProjectionMapOptions} from './projection-catalog';
+import {createRegionalMap, type RegionalMapOptions} from './regional-map';
+import {createWorldMap, type WorldMapOptions} from './world-map';
 import {createHealpixMap} from './healpix';
 import {createAlbersUsaMap} from './albers-usa';
 import {createMyriahedralMap, type MyriahedralOptions, type MyriahedralLayout} from './myriahedral';
@@ -52,6 +55,9 @@ export type MapChartDescription = Omit<MapRegion, 'project' | 'unproject'> & {
   projection: string;
 };
 export type MapDefinition =
+  | ({type: 'projection'} & Omit<ProjectionMapOptions, 'radius'>)
+  | ({type: 'regional'} & Omit<RegionalMapOptions, 'radius'>)
+  | ({type: 'world'} & Omit<WorldMapOptions, 'radius'>)
   | {type: 'gray-fuller' | 'isea' | 'dsea'}
   | {type: 'petroff'; centralMeridian?: number}
   | {type: 'healpix'; centralMeridian?: number}
@@ -166,6 +172,15 @@ export class MapEngine {
     this.sampling = {...options.sampling};
     const d = this.description.definition;
     switch (d.type) {
+      case 'projection':
+        this.map = createProjectionMap({...d, radius});
+        break;
+      case 'regional':
+        this.map = createRegionalMap({...d, radius});
+        break;
+      case 'world':
+        this.map = createWorldMap({...d, radius});
+        break;
       case 'gray-fuller':
         this.map = createGrayFullerMap({radius});
         break;
@@ -309,6 +324,10 @@ export class MapEngine {
   }
   findRegions(position: GeographicPosition) {
     return this.map.findRegions(position);
+  }
+  /** True only when a convex source ring needs no coverage or chart clipping. */
+  containsConvexPolygon(ring: readonly GeographicPosition[], regionId: string): boolean {
+    return this.map.containsConvexPolygon(ring, regionId);
   }
   projectPoint(position: GeographicPosition, regionId?: string) {
     return this.map.projectPoint(position, regionId);

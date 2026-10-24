@@ -493,6 +493,7 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
+          node --test modules/geospatial/projection/scripts/benchmark-runtime.test.mjs
           node modules/geospatial/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --min-sample-ms 4 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
 
       # Keep every scenario/layout/direction and seven samples; bound aggregate windows

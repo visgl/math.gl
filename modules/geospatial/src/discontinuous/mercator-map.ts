@@ -68,6 +68,9 @@ export class MercatorMap extends DiscontinuousMap {
     this.limit = maxLatitude;
     this.ymax = radius * Math.asinh(Math.tan(maxLatitude * RAD));
   }
+  override containsConvexPolygon(): boolean {
+    return false;
+  }
   override findRegions(p: GeographicPosition) {
     geographic(p);
     return Math.abs(p[1]) <= this.limit + 1e-10 ? super.findRegions(p) : [];

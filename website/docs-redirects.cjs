@@ -6,6 +6,7 @@ const {dirname, join} = require('node:path');
 
 // Preserve bookmarks when guides move into their owning modules.
 const movedGuides = {
+  "modules/geospatial/discontinuous/map-engine": "modules/geospatial/projection/api-reference/map-engine",
   "developer-guide/external-frameworks": "modules/core#interoperability",
   "developer-guide/math/transformations": "modules/core/developer-guide/transformations",
   "developer-guide/math/view-and-projection": "modules/core/developer-guide/view-and-projection",

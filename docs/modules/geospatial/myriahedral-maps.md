@@ -36,7 +36,7 @@ The example constructs a `MapEngine` with a myriahedral `MapDescription` and
 uses its `motion` layout for the shared polyhedron renderer. Static maps and
 animated geographic features can use the same engine. See the
 [MapEngine guide](./projection/developer-guide/map-engine.md),
-[API reference](./discontinuous/map-engine.md), [preset reference](./discontinuous/myriahedral.md), and
+[API reference](./projection/api-reference/map-engine.md), [preset reference](./discontinuous/myriahedral.md), and
 [background and credits](./projection/developer-guide/myriahedral-projections.md).
 
 For the default sealine preset, the mesh is generated from longitude and latitude, with shared vertices at the

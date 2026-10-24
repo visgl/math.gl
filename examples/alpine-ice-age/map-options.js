@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {MAP_PROJECTIONS} from '@math.gl/geospatial/discontinuous';
 import {REGIONAL_VIEWS} from './regional-views.js';
 
 // Modest panel counts keep map construction and the 1° field mesh interactive.
@@ -21,6 +22,9 @@ export const MYRIAHEDRAL_VIEWS = Object.fromEntries([
 ]);
 
 export const DISCONTINUOUS_VIEWS = {
+  ...Object.fromEntries(
+    MAP_PROJECTIONS.map(name => [`projection:${name}`, `Projection · ${name.replaceAll('-', ' ')}`])
+  ),
   albersUsa: 'Albers USA · Alaska & Hawaii insets',
   interruptedSinusoidal: 'Interrupted sinusoidal',
   interruptedMollweide: 'Interrupted Mollweide',

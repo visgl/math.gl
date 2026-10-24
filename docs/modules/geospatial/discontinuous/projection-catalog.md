@@ -1,0 +1,230 @@
+# Map projection families
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
+</p>
+
+Map projections differ in how they construct coordinates, what geometric
+properties they preserve, and how their geographic domains are cut and arranged.
+Choose a mathematical construction and a layout separately; implementation
+sources are credited in [References and attribution](#references-and-attribution).
+
+For definitions of surface models, paths, reference systems, and distortion properties,
+see [Geospatial terminology](../developer-guide/terminology.md).
+
+## Mathematical families
+
+A projection is a map from a curved surface to a plane. Its **family** describes
+how it constructs coordinates; its **distortion properties** describe what it
+preserves. Its **layout** describes where pieces are joined, cut, or moved.
+These are separate choices: an equal-area formula can be interrupted, and a
+polyhedral net can use conformal, equal-area, or gnomonic face projections.
+
+### Cylindrical and pseudocylindrical maps
+
+In a normal cylindrical projection, meridians are parallel straight lines and
+parallels are perpendicular straight lines. Coordinates have the form
+`x = A λ`, `y = f(φ)`, where λ is longitude relative to the central meridian,
+φ is latitude, and A is a scale factor. The latitude function determines the
+distortion: Mercator is conformal, cylindrical equal-area preserves area, and
+Miller is a compromise. Cylindrical geometry does not imply equal-area behavior.
+
+Pseudocylindrical projections keep straight, parallel parallels but allow curved
+meridians. A common form is `x = λ g(φ)`, `y = h(φ)`. Sinusoidal uses
+`x = R λ cos(φ)`, `y = R φ`, preserving spherical area. Mollweide, the Eckert
+series, and Robinson offer other boundary shapes and distortion distributions;
+not every member is equal-area. Goode homolosine joins sinusoidal and Mollweide
+regions along selected parallels. Interrupting those formulas is a further
+layout choice, not a different mathematical family.
+
+### Conic, pseudoconic, and polyconic maps
+
+Normal conic projections arrange meridians as rays and parallels as concentric
+circular arcs. Albers equal-area conic chooses their spacing to preserve area;
+standard parallels control the distribution of scale distortion. Albers USA
+uses separate regional projections and placements to form a composite map.
+
+Pseudoconic constructions, such as Bonne, allow curved meridians while retaining
+circular parallels. Polyconic constructions use parallel arcs with varying
+centers or radii rather than one common cone. These constructions describe the
+grid's geometry, not a universal area or angle guarantee.
+
+### Azimuthal and perspective maps
+
+A normal azimuthal construction places a point using its angular distance c and
+azimuth θ from a chosen center: `x = ρ(c) sin(θ)`, `y = ρ(c) cos(θ)`.
+The radial function determines the metric property. For example, stereographic
+uses `ρ(c) = 2R tan(c/2)` and is conformal. A finite-distance satellite projection
+comes from perspective rays; its visible horizon limits the geographic domain.
+Clipping to a cap is a domain restriction, not an independent projection family.
+Tilting a perspective view changes its symmetry and horizon geometry.
+
+### Conformal and equal-area constructions on bounded domains
+
+Conformal maps preserve local angles away from singularities. Modified
+stereographic maps apply a complex polynomial to stereographic coordinates to
+control regional distortion; folds or critical points can limit invertibility.
+Peirce quincuncial and Guyou use elliptic-function constructions to obtain square
+or rectangular layouts. Gringorten provides an equal-area square construction.
+A square outline alone therefore says nothing about whether a map preserves
+angles or area.
+
+### Control-point and retroazimuthal maps
+
+Some projections impose conditions relative to selected geographic points rather
+than a single central axis. Two-point equidistant maps preserve distances from
+two control points; Chamberlin balances distance information from three control
+points. Retroazimuthal constructions preserve the bearing from mapped locations
+toward a reference location. These constraints differ from preserving directions
+*from* the center of an azimuthal map, and can require cuts or restricted domains.
+
+### Polyhedral and myriahedral maps
+
+A polyhedral construction partitions the sphere into face domains, projects each
+domain into a plane, and places the faces in a net. Face projection and net
+selection are independent: gnomonic faces map great-circle arcs to straight
+lines, while Snyder's face equations preserve area. Choosing different cut edges
+changes the net without changing the face equations.
+
+Myriahedral maps use many small faces and a cut/hinge graph. Subdivision controls
+the approximation to the sphere; cut selection determines connectivity; rigid
+hinge rotations determine unfolding. An unfolding animation does not by itself
+make the face projection conformal or equal-area.
+
+## Cuts, joins, and placement
+
+| Layout | Mathematical construction | Examples |
+| --- | --- | --- |
+| Interrupted | Divide the geographic domain into lobes, usually with separate central meridians; retain open cuts between selected boundaries | Interrupted sinusoidal, Mollweide, Goode homolosine, Boggs, Sinu-Mollweide |
+| Segmented with continuous joins | Use several coordinate charts whose boundary images coincide along selected edges | Quincuncial layouts; the equatorial and polar zones of HEALPix |
+| Star-shaped | Join radial sectors to a central region while leaving cuts between outer sectors | Berghaus and Gingery |
+| Composite with insets | Project geographic regions separately, then translate and scale their planar images | Albers USA and its state and territory insets |
+| Polyhedral net | Glue selected face edges and cut the others; the retained adjacency determines the net | Butterfly, Waterman, AirOcean, Snyder nets |
+
+A layout can belong to several rows. A polyhedral net is segmented and usually
+interrupted; a star can remain connected despite its cuts. Insets at different
+scales do not preserve a single global area scale, even when their regional
+formulas are equal-area. For seam semantics and supported layouts, see
+[discontinuous maps](../projection/developer-guide/discontinuous-projections.md).
+
+The formulas above use radians and sphere radius R; the public API accepts
+longitude and latitude in degrees. For cartographic classification and further
+reading, see NASA GISS's [projection reference](https://www.giss.nasa.gov/tools/gprojector/help/projections/)
+and Snyder and Voxland's [An Album of Map Projections](https://pubs.usgs.gov/pp/1453/report.pdf).
+
+## Catalog API
+
+<span class="badge">From v5.0 · Experimental</span>
+
+- `MapProjection`: the union of catalog names.
+- `MAP_PROJECTIONS`: the frozen, readonly list of those names.
+- `ProjectionMapOptions`: `{projection: MapProjection, radius?: number}`.
+- `createProjectionMap(options)`: returns a lower-level `DiscontinuousMap`.
+- `MapDefinition`: `{type: 'projection', projection: MapProjection}` selects the
+  same preset in `MapEngine`; output scale comes from `MapDescription.radius`.
+
+Inputs are spherical longitude/latitude in degrees. Outputs use north-positive y
+and a positive radius scale, not D3's pixel translation, screen-y reflection,
+`.center()` or `.angle()` display settings. Use `fit()` for display placement.
+Polyhedral nets may differ by a rigid planar orientation; HEALPix retains
+math.gl's radian-based scale. These do not change geographic coverage or shape.
+
+Catalog names use lowercase hyphenated names: `natural-earth2`, `van-der-grinten3`,
+`modified-stereographic-alaska`, `two-point-equidistant-usa`, and so on. The three
+polyhedral names are `butterfly`, `collignon-butterfly`, and `waterman`.
+See [world maps](./README.md#world-maps) for the 64 ordinary formula names.
+
+## API selection and configuration
+
+| API grouping | Named presets | Configuration / limits |
+| --- | --- | --- |
+| Ordinary world formulas | 64, including Aitoff, Bertin 1953, Eckert I–VI, Gilbert, rectangular Gringorten, Hammer, Hufnagel, Hyperelliptical, Robinson and Wagner variants | `createWorldMap` / `type: 'world'` exposes formula parameters and a central meridian. These are spherical formulas, separate from the scalar ellipsoidal CRS API. |
+| Regional cap-clipped maps | `airy`, `craig`, `littrow`, `satellite` | The cap applies to points, lines, polygons, picking and layout. A satellite's back hemisphere is excluded. |
+| Modified stereographic | `modified-stereographic-alaska`, `modified-stereographic-gs48`, `modified-stereographic-gs50`, `modified-stereographic-miller`, `modified-stereographic-lee` | Preset geographic aspects and regional caps. GS50 can fold near the edge of its cap; inverse positions need not recover the original branch there. |
+| Control-point maps | `chamberlin-africa`, `two-point-azimuthal-usa`, `two-point-equidistant-usa` | Generic control-point versions are available through `createRegionalMap`. |
+| Specialized domains | `armadillo`, `hammer-retroazimuthal`, `wiechel` | Armadillo clips its curved visible domain. Hammer retains separate sides of its hemisphere cuts. |
+| Interrupted maps | `interrupted-sinusoidal`, `interrupted-mollweide`, `interrupted-homolosine`, `interrupted-boggs`, `interrupted-sinu-mollweide`, `interrupted-quartic-authalic`, `interrupted-mollweide-hemispheres` | Presets specify lobe layouts and geographic aspects. Sinu-Mollweide cuts begin at 35° N and 10° S in its oblique frame. Older direct `interrupted-*` definitions retain their documented layouts for compatibility. |
+| Segmented and star maps | `guyou`, `peirce-quincuncial`, `gringorten-quincuncial`, `berghaus`, `gingery`, `healpix` | Catalog quincuncials use polar aspects and Gingery an oblique aspect; direct definitions retain their equatorial aspects. |
+| Polyhedral maps | `butterfly`, `collignon-butterfly`, `waterman` | Default nets. Exact Gray–Fuller, Petroff, Snyder and myriahedral maps remain available through their existing MapEngine definitions. |
+
+For custom maps, use configurable interruptions, custom charts, or myriahedral
+meshes. Arbitrary per-lobe interruption latitudes are not supported. Rendering
+requires the returned region-local geometry; ordinary deck.gl geographic layers
+do not automatically follow these layouts.
+
+## Regional API
+
+<span class="badge">From v5.0 · Experimental</span>
+
+`createRegionalMap(options)` and `{type: 'regional', ...options}` expose regional
+configuration. `RegionalProjection`, `RegionalMapOptions`, and the readonly
+`REGIONAL_PROJECTIONS` preset list are exported from the discontinuous entrypoint.
+The engine takes radius from its description; the lower-level factory accepts
+`radius` directly. Unsupported option keys and invalid values throw.
+
+| Projection | Options |
+| --- | --- |
+| `airy` | `beta: 90` degrees, strictly between 0 and 180; this corresponds to D3's Airy radius accessor, not output radius. Optional `center: [longitude, latitude]`. |
+| `craig` | `parallel: 0`, strictly between −90 and 90; optional `center`. The exact horizon is not uniquely invertible. |
+| `littrow` | Optional `center`; cap 89.999°. Distortion grows sharply near the horizon. |
+| `satellite` | `distance: 2` in Earth radii, greater than 1; `tilt: 0` degrees; optional `center`. Tilt is restricted to keep the horizon away from the camera plane. |
+| `armadillo` | `parallel: 20`, strictly between 0 and 90°. |
+| `hammer-retroazimuthal` | `parallel: 45`, strictly between −90 and 90°. |
+| `modified-stereographic` | Required `coefficients: [[real, imaginary], ...]`, 1–32 finite pairs; optional `center`; cap 90°. Arbitrary polynomials may fold. |
+| `chamberlin` | Required three distinct, nondegenerate `controlPoints`, in longitude/latitude degrees; cap 90°. |
+| `two-point-azimuthal` | Required two distinct, non-antipodal `controlPoints`; finite cap 89.999°. |
+| `two-point-equidistant` | Required two distinct, non-antipodal `controlPoints`; cap 90°. |
+
+Named regional presets retain their native parameters and control frames. Use the
+generic variants when configuring coefficients or control points. An inverse
+returns valid chart candidates, not a guarantee of a globally one-to-one formula.
+At collapsed horizons or polynomial folds, a candidate can differ from the
+original source. Preserve `sourceCoordinates` for rendering and animation.
+
+## Geometry and numerical limits
+
+Edges are minor great-circle arcs. Polygon inputs must fit an open hemisphere;
+split larger polygons first. Clipped horizon curves are sampled, and returned
+polygons stay closed with matching source coordinates. Sampling has a bounded
+work limit; an impractically tight tolerance throws instead of running indefinitely.
+Some formulas stretch a geographic pole into an edge: retain directional polar
+longitude and draw the returned pieces independently.
+
+`DiscontinuousMap.getRegionOutlines(regionId, sampling?)` returns sampled visible
+coverage rings or edge parts for that chart. Layout fitting uses it so regional
+caps contribute their actual outline rather than an unclipped computational
+triangle. It is also new in v5.0 and experimental.
+
+## References and attribution
+
+Many of these implementations build on **Mike Bostock and the D3 contributors'**
+[d3-geo-projection 4.0.0](https://github.com/d3/d3-geo-projection/tree/v4.0.0).
+Its [illustrated reference and historical bibliography](https://github.com/d3/d3-geo-projection/blob/v4.0.0/README.md)
+and [interactive projection notebooks](https://observablehq.com/@d3/-/collection/d3-geo-projection)
+are valuable companions to this documentation. Credit for those implementations
+is separate from credit for the cartographers who developed the projections.
+
+| Component | Source, contribution, and attribution |
+| --- | --- |
+| Continuous world and regional numerical kernels | Adapted from [d3-geo-projection's source](https://github.com/d3/d3-geo-projection/tree/v4.0.0/src), by Mike Bostock and contributors, under ISC. The [file-level kernel inventory](https://github.com/visgl/math.gl/tree/master/modules/geospatial/src/discontinuous/world-kernels) retains individual author comments; its [modification notes](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/discontinuous/world-kernels/README.md) cover every adapted kernel, coefficient table, and numerical helper. |
+| Interrupted lobe definitions | [D3's interrupted implementations](https://github.com/d3/d3-geo-projection/tree/v4.0.0/src/interrupted) supply reference lobe layouts and geographic aspects for sinusoidal, Mollweide, homolosine, Boggs, Sinu-Mollweide, quartic authalic, and Mollweide hemispheres. math.gl supplies its own chart, seam, and geometry interfaces. |
+| Quincuncial, rectangular, and star layouts | D3's [quincuncial construction](https://github.com/d3/d3-geo-projection/tree/v4.0.0/src/quincuncial), [Guyou](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/guyou.js), [Gringorten](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/gringorten.js), [Berghaus](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/berghaus.js), and [Gingery](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/gingery.js) implementations provide adapted numerical and layout work, under ISC. |
+| Butterfly, Collignon butterfly, and Waterman nets | Adapted from [D3's polyhedral implementations](https://github.com/d3/d3-geo-projection/tree/v4.0.0/src/polyhedral), under ISC. See the [historical and mathematical credits](../projection/developer-guide/discontinuous-projections.md#references-and-implementation-credits) for the underlying projections and polyhedra. |
+| AirOcean topology and Gray–Fuller reference | [d3-geo-polygon](https://github.com/d3/d3-geo-polygon) contributors supply ISC-licensed AirOcean topology and orientation. Robert W. Gray's face equations, also published by Philippe Rivière in the [Gray–Fuller source](https://github.com/d3/d3-geo-polygon/blob/main/src/grayfuller.js), are implemented independently; d3-geo-polygon 2.0.1 supplies reference fixtures. |
+| Spherical cap clipping | Adapted from [d3-geo 3.1.1](https://github.com/d3/d3-geo/tree/v3.1.1/src/clip), by Mike Bostock and contributors, under ISC. math.gl adds bounded curve sampling, source correspondence, chart trimming, regional outlines, and inverse safeguards; see the [clipping inventory and modifications](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/discontinuous/spherical-clip/README.md). |
+| Hyperelliptical numerical integration | Ricky Reusser's [adaptive Simpson integration](https://github.com/scijs/integrate-adaptive-simpson), incorporated through d3-geo-projection, retains its MIT attribution and license. |
+| Independent HEALPix implementation | M. R. Calabretta's [HEALPix equations](https://arxiv.org/abs/astro-ph/0412607) are the mathematical source. [D3's HEALPix implementation](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/healpix.js) supplies independent numerical reference values. |
+
+The packaged [third-party inventory](https://github.com/visgl/math.gl/blob/master/modules/geospatial/THIRD-PARTY-NOTICES.md)
+links the retained licenses, source headers, and modification records. There is no
+D3 runtime dependency. Reference fixtures evaluate separate, version-pinned
+upstream installations; tests cover forward coordinates, geographic aspects,
+coverage, inverse residuals, cuts, poles, clipping, and renderer meshes. This is
+numerical validation, not a claim of interchangeable streaming or display APIs.
+
+For **Petroff, Snyder, and myriahedral maps**, see the additional
+[mathematical sources and implementation credits](../projection/developer-guide/discontinuous-projections.md#references-and-implementation-credits)
+and [myriahedral background](../projection/developer-guide/myriahedral-projections.md).
+Nico Belmonte is credited for his influential demonstration; his application code
+is not incorporated.

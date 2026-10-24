@@ -36,7 +36,7 @@ for (const view of Object.keys(DISCONTINUOUS_VIEWS)) {
     // Region lookup scans every panel; sample across the full grid for dense H3 nets.
     const stride = Math.max(1, Math.floor(grid.sources.length / 2000));
     for (let i = 0; i < grid.sources.length; i += stride) {
-      assert(grid.map.findRegions(grid.sources[i]).includes(grid.regionIds[i]));
+      assert(grid.map.findRegions(grid.sources[i]).includes(grid.regionIds[i]), `${view}: ${grid.sources[i]} in ${grid.regionIds[i]}, owners ${grid.map.findRegions(grid.sources[i])}`);
     }
     for (const part of grid.lines) {
       assert(part.coordinates.length > 1);
@@ -230,4 +230,39 @@ test("cooperative grid preparation matches synchronous output and can be cancell
     }),
     { name: "AbortError" },
   );
+});
+
+test("source triangulation preserves a clipped polygon's hole", async () => {
+  const {triangulateSourcePolygon} = await import("./triangulate-source-polygon.js");
+  const rings = [
+    [[0, 0], [4, 0], [4, 4], [0, 4], [0, 0]],
+    [[1, 1], [1, 2], [2, 2], [2, 1], [1, 1]],
+  ];
+  const mesh = triangulateSourcePolygon({coordinates: rings, sourceCoordinates: rings});
+  let area = 0;
+  for (let i = 0; i < mesh.indices.length; i += 3) {
+    const [a, b, c] = mesh.indices.slice(i, i + 3).map(j => mesh.positions[j]);
+    area += Math.abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) / 2;
+  }
+  assert(Math.abs(area - 15) < 1e-10);
+});
+
+test("a visible center does not fill a concave source notch", async () => {
+  const {isConvexSourcePolygon, triangulateSourcePolygon} = await import("./triangulate-source-polygon.js");
+  // A narrow notch in the top edge: the vertex average is still in the polygon.
+  const ring = [[0,0],[6,0],[6,6],[4,6],[4,5],[3,5],[3,6],[0,6],[0,0]];
+  const part = {coordinates:[ring], sourceCoordinates:[ring]};
+  const averageY = ring.slice(0,-1).reduce((sum,p) => sum+p[1],0)/(ring.length-1);
+  assert(averageY > 0 && averageY < 5, "the vertex average is below the notch and remains visible");
+  assert.equal(isConvexSourcePolygon(part), false);
+  assert.equal(isConvexSourcePolygon({coordinates:[ring.slice(0,3).concat([ring[0]])], sourceCoordinates:[ring.slice(0,3).concat([ring[0]])]}), true);
+  const mesh = triangulateSourcePolygon(part);
+  let area = 0;
+  for (let i = 0; i < mesh.indices.length; i += 3) {
+    const [a,b,c] = mesh.indices.slice(i,i+3).map(j => mesh.positions[j]);
+    area += Math.abs((b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]))/2;
+    const center = [(a[0]+b[0]+c[0])/3,(a[1]+b[1]+c[1])/3];
+    assert(!(center[0]>3 && center[0]<4 && center[1]>5));
+  }
+  assert(Math.abs(area-35)<1e-10);
 });

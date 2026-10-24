@@ -61,13 +61,9 @@ const corners = ([left, bottom, right, top]: MapBounds): XY[] => [
 export function getMapLayout(map: DiscontinuousMap, options: MapSamplingOptions = {}): MapLayout {
   const regions = map.regions
     .map((region): MapLayoutRegion => {
-      const boundary = [...region.boundary, region.boundary[0]];
       const outlines = map
-        .projectLine(boundary, options)
-        .filter(p => p.regionId === region.id)
-        .map(p =>
-          Object.freeze(p.coordinates.map(point => Object.freeze([...point]) as GeographicPosition))
-        );
+        .getRegionOutlines(region.id, options)
+        .map(p => Object.freeze(p.map(point => Object.freeze([...point]) as GeographicPosition)));
       const points: GeographicPosition[] = outlines.flat();
       const interior = map.projectPoint(region.interior, region.id);
       if (interior) points.push(interior.position);
