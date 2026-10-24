@@ -1,11 +1,14 @@
 # Projection engine attribution and source provenance
 
+Paths beginning with `src/` below are relative to the `@math.gl/geospatial` package root.
+License files named without a path are in this `projection/` directory.
+
 The math.gl projection engine uses proj4js **2.22.0** as its pinned compatibility
 reference: https://github.com/proj4js/proj4js/tree/v2.22.0.
 
 Except for the original ellipsoidal orthographic kernel (`kernels/ortho.ts`) and
-meridian integration helper (`common/meridian-distance.ts`), the numerical kernels under `src/experimental/kernels/`, numerical helpers under
-`src/experimental/common/`, and CRS datum/ellipsoid/unit/prime-meridian tables are
+meridian integration helper (`common/meridian-distance.ts`), the numerical kernels under `src/projection/experimental/kernels/`, numerical helpers under
+`src/projection/experimental/common/`, and CRS datum/ellipsoid/unit/prime-meridian tables are
 **direct TypeScript ports** of the corresponding proj4js sources. Source comments
 retain attribution to the proj4js authors, with `SPDX-License-Identifier` license
 expressions, `SPDX-FileCopyrightText` credits naming the upstream copyright holders,
@@ -17,7 +20,7 @@ The geocentric/Helmert equations in `datum.ts` and rotation equations in
 in those files.
 
 The NTv2 decoder, GeoTIFF node orientation and interpolation/inverse equations in
-`src/experimental/grids/grid.ts`, `grids/ntv2.ts` and `grids/geotiff.ts` are directly adapted from proj4js 2.22.0
+`src/projection/experimental/grids/grid.ts`, `grids/ntv2.ts` and `grids/geotiff.ts` are directly adapted from proj4js 2.22.0
 `lib/nadgrid.js` and `lib/datum_transform.js`. Their headers retain upstream
 MIT attribution. The per-instance grid registration contract is original math.gl
 code informed by upstream grid-list behavior. Synthetic grid fixtures are authored
@@ -58,7 +61,7 @@ Structured CRS fixtures reproduce selected definitions from the EPSG dataset v11
 terms. Licensed real grids are test-only assets with separate redistribution notices
 under `test/fixtures/real-grids`; none are included in the npm package.
 
-The explicit height stage (`src/experimental/vertical-datum.ts`), regular-grid
+The explicit height stage (`src/projection/experimental/vertical-datum.ts`), regular-grid
 interpolator/geoid adapter (`grids/vertical.ts`) and GTX reader (`grids/gtx.ts`) are
 original math.gl implementations. Their public registration follows the existing
 proj4-style engine API; geoid-height signs and GTX layout/nodata conventions follow
@@ -68,7 +71,7 @@ The structural geoid adapter does not copy or import GeographicLib or `@math.gl/
 code. Applications providing a geoid model retain that model's own license and data terms.
 
 
-`src/experimental/grids/vertical-geotiff.ts` is original math.gl adapter code written
+`src/projection/experimental/grids/vertical-geotiff.ts` is original math.gl adapter code written
 against the PROJ Geodetic TIFF Grid format, not a direct proj4js or PROJ fork. It does
 not copy or import a TIFF decoder. The optional decoding library is chosen by the
 application. Authored synthetic TIFF fixtures and their standard-library encoder are
@@ -76,7 +79,7 @@ MIT math.gl test data/code; PROJ 9.5.1 supplies independent numeric expectations
 
 ## Typed operation pipelines
 
-`src/experimental/projection-pipeline.ts` is original math.gl orchestration inspired
+`src/projection/experimental/projection-pipeline.ts` is original math.gl orchestration inspired
 by PROJ's explicit operation/units model, not a direct PROJ fork. It reuses projection
 kernels and the geocentric/static Helmert equations directly adapted from proj4js in
 `datum.ts`, with their existing attribution and `PROJ4-LICENSE.md`. Independent pipeline
@@ -84,13 +87,13 @@ expectations use pyproj 3.7.2 / PROJ 9.5.1. Authored pipeline cases are MIT math
 data; the reused BETA2007 NTv2 grid retains its attribution in
 `test/fixtures/real-grids/README.md` and is not shipped in the package.
 
-`src/experimental/exact-helmert.ts` directly adapts the exact rotation matrix and
+`src/projection/experimental/exact-helmert.ts` directly adapts the exact rotation matrix and
 convention transpose from PROJ 9.5.1 `src/transformations/helmert.cpp` (Copyright
 (c) 2016, Thomas Knudsen / SDFE), under the MIT-style terms in `PROJ-LICENSE.txt`.
 It is modified into prepared typed point operations; the existing approximate
 Helmert equations remain the attributed proj4js adaptation in `datum.ts`.
 
-`src/experimental/helmert-flat.ts` adds original direct-buffer traversal around
+`src/projection/experimental/helmert-flat.ts` adds original direct-buffer traversal around
 these existing attributed equations. Its small-angle arithmetic follows the
 proj4js adaptation in `datum.ts`; exact matrix application follows the PROJ
 adaptation in `exact-helmert.ts` and consumes that stage's prepared matrix.
@@ -100,7 +103,7 @@ Ordinate-stack and direction-specific orchestration are original math.gl code
 inspired by PROJ pipeline contracts, not direct PROJ or proj4js forks.
 The additional two-by-two GTX is authored MIT test data, not a distributed geoid model.
 
-`src/experimental/kinematic-helmert.ts` is original epoch/rate orchestration following
+`src/projection/experimental/kinematic-helmert.ts` is original epoch/rate orchestration following
 PROJ's documented parameter propagation contract. Its exact matrix/convention
 transpose directly adapts PROJ 9.5.1 `helmert.cpp`, with the Thomas Knudsen / SDFE
 copyright and `PROJ-LICENSE.txt` terms above; its small-angle equations follow the
@@ -110,7 +113,7 @@ not an authoritative CRS operation catalogue. Numerical expectations are generat
 independently with pinned pyproj 3.7.2 / PROJ 9.5.1, with observation time separate from M.
 
 
-`src/experimental/kinematic-helmert-flat.ts` adds original coordinate-buffer
+`src/projection/experimental/kinematic-helmert-flat.ts` adds original coordinate-buffer
 traversal using the epoch preparation and owned coefficients in `kinematic-helmert.ts`.
 The exact matrix application follows that file's existing PROJ adaptation; the
 small-angle matrix application follows its attributed proj4js adaptation. Both
@@ -148,7 +151,7 @@ remain intact. CI checks every source header and the proj4js/PROJ credits.
 
 ## Horizontal grid tuple adapter
 
-`src/experimental/grids/grid.ts` reuses a private working point in the tuple-returning
+`src/projection/experimental/grids/grid.ts` reuses a private working point in the tuple-returning
 adapter. This original adapter change retains the existing attributed interpolation
 and inverse kernel described above. Successful calls still return an owned tuple.
 No additional third-party code or model data is included.

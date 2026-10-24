@@ -91,7 +91,10 @@
     "dist",
     "src",
     "PROJ4-LICENSE.md",
-    "LICENSE"
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md",
+    "ARROW-NOTICE.txt",
+    "APACHE-2.0-LICENSE.txt"
   ],
   "sideEffects": [
     "./src/lib/common.js"

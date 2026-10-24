@@ -14,3 +14,8 @@ MIT attribution and the full terms in [PROJ4-LICENSE.md](./PROJ4-LICENSE.md).
 Expression parsing and evaluation are available at `@math.gl/core/expressions`. The core entry
 includes the basic math function library. Earth-specific and DGGS function libraries are exposed
 separately by `@math.gl/geospatial/expressions` and `@math.gl/dggs/expressions`.
+
+## Sources and credits
+
+See [the packaged source and license index](./THIRD-PARTY-NOTICES.md) and
+[math.gl references and credits](https://math.gl/docs/references-and-credits).

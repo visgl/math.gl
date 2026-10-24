@@ -310,3 +310,15 @@ plane, so the example triangulates each cell across a diagonal into two rigid
 facets. Internal hinges keep each source cell together; the geography-aware
 spanning tree chooses 23 intercell hinges. This finer net shows the actual S2
 cell layout rather than six undivided cube faces.
+
+## Segmented map projections
+
+The global map selector includes Peirce and Gringorten quincuncial, Guyou,
+Berghaus star, octahedral Butterfly, Collignon butterfly, Waterman W5, and
+additional interrupted Boggs, Sinu-Mollweide, quartic-authalic, hemispheric
+Mollweide and ocean Goode presets. All use `MapEngine` through
+`discontinuous-views.js`, including seam splitting and transitions through the globe.
+
+Sinu-Mollweide currently uses equatorial six-lobe cuts, not D3's oblique five-lobe
+arrangement. See the [supported families and projection credits](../../docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md)
+for aspects, limitations, primary references, and D3/PROJ provenance.

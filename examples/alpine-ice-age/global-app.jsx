@@ -35,6 +35,7 @@ export default function GlobalIceAge({
     scene = useRef(null);
   const [baseModel, setModel] = useState(null),
     [error, setError] = useState("");
+  const [preparingMap, setPreparingMap] = useState(false);
   const [climateModel, setClimateModel] = useState(null);
   const [olderStatus, setOlderStatus] = useState("Loading earlier ice masks…");
   const model = earlier && olderModel ? olderModel : baseModel;
@@ -88,8 +89,10 @@ export default function GlobalIceAge({
     return () => controller.abort();
   }, []);
   useEffect(() => {
-    scene.current = createGlobalScene(canvas.current, (e) =>
-      setError(e.message),
+    scene.current = createGlobalScene(
+      canvas.current,
+      (e) => setError(e.message),
+      setPreparingMap,
     );
     return () => {
       scene.current?.finalize();
@@ -101,14 +104,14 @@ export default function GlobalIceAge({
       scene.current?.render(model, { age, view, showIce, ghost, labels });
   }, [model, age, view, showIce, ghost, labels]);
   useEffect(() => {
-    if (!cycleViews || !model) return;
+    if (!cycleViews || !model || preparingMap) return;
     const views = Object.keys(GLOBAL_VIEWS);
     const timer = setTimeout(
       () => setView(views[(views.indexOf(view) + 1) % views.length]),
       8000,
     );
     return () => clearTimeout(timer);
-  }, [cycleViews, model, view]);
+  }, [cycleViews, model, view, preparingMap]);
   useEffect(() => {
     if (!playing || !model) return;
     let previous = performance.now();
@@ -204,6 +207,11 @@ export default function GlobalIceAge({
         {!model && (
           <div className="alpine-loading" role="status">
             {error || "Loading the global ice-sheet reconstruction…"}
+          </div>
+        )}
+        {preparingMap && (
+          <div className="alpine-loading" role="status">
+            Preparing map…
           </div>
         )}
         {model && error && (

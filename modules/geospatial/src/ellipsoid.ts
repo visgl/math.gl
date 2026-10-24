@@ -5,7 +5,7 @@
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms. Original math.gl follow-up uses stable atan2 latitude and numeric cartographic output.
 
 // This file is derived from the Cesium math library under Apache 2 license
-// See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
+// See ../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
 /* eslint-disable */
 import {Vector3, Matrix4, assert, equals, _MathUtils, NumericArray} from '@math.gl/core';

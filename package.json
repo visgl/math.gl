@@ -43,7 +43,8 @@
     "check:parametric-package": "node modules/geometry/scripts/check-parametric-package.mjs",
     "check:geodesic-path-package": "node modules/geospatial/scripts/check-geodesic-path-package.mjs",
     "check:tile-matrix-package": "node modules/geospatial/scripts/check-tile-matrix-package.mjs",
-    "check:packages": "node scripts/check-packages.mjs"
+    "check:packages": "node scripts/check-packages.mjs",
+    "check:attributions": "node scripts/check-attributions.mjs"
   },
   "devDependencies": {
     "@turf/destination": "^7.4.0",

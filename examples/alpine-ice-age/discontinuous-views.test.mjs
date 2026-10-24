@@ -109,12 +109,24 @@ test("Albers USA insets use independent display mesh spacing", () => {
   );
   assert(hasQuarterDegreeVertex);
   assert(hasHalfDegreeVertex);
-  assert(grid.sources.some(([lon], i) => grid.regionIds[i] === "alaska" && lon > 170),
-    "Aleutian cells across the antimeridian must remain in the display mesh");
-  assert(grid.sources.some(([lon], i) => grid.regionIds[i] === "alaska" && lon > 155 && lon < 168),
-    "western Alaska mask cells must remain in the display mesh");
-  assert(grid.sources.some(([, lat], i) => grid.regionIds[i] === "lower48" && lat > 54),
-    "northern great-circle-edge cells must remain in the display mesh");
+  assert(
+    grid.sources.some(
+      ([lon], i) => grid.regionIds[i] === "alaska" && lon > 170,
+    ),
+    "Aleutian cells across the antimeridian must remain in the display mesh",
+  );
+  assert(
+    grid.sources.some(
+      ([lon], i) => grid.regionIds[i] === "alaska" && lon > 155 && lon < 168,
+    ),
+    "western Alaska mask cells must remain in the display mesh",
+  );
+  assert(
+    grid.sources.some(
+      ([, lat], i) => grid.regionIds[i] === "lower48" && lat > 54,
+    ),
+    "northern great-circle-edge cells must remain in the display mesh",
+  );
 });
 
 // The spherical area catches missing/duplicated fan triangles, including at poles
@@ -196,5 +208,26 @@ test("cycling bounds cached mesh retention", () => {
     discontinuousGrid("myriahedral:cylindric", 5),
     first,
     "old mesh evicted",
+  );
+});
+
+test("cooperative grid preparation matches synchronous output and can be cancelled", async () => {
+  const { prepareDiscontinuousGrid } = await import("./discontinuous-views.js");
+  let yields = 0;
+  const grid = await prepareDiscontinuousGrid("guyou", 30, {
+    yieldTask: async () => {
+      yields++;
+    },
+  });
+  assert(yields > 0);
+  assert.strictEqual(grid, discontinuousGrid("guyou", 30));
+  assert(grid.indices.length > 0);
+  const controller = new AbortController();
+  await assert.rejects(
+    prepareDiscontinuousGrid("waterman", 30, {
+      signal: controller.signal,
+      yieldTask: async () => controller.abort(),
+    }),
+    { name: "AbortError" },
   );
 });

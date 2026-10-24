@@ -1,6 +1,8 @@
 // math.gl
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND ISC
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright 2013-2021 Mike Bostock
+// SPDX-FileComment: Interrupted formulas and land/hemisphere lobe tables follow d3-geo-projection 4.0.0 (D3-LICENSE.txt); ocean Goode lobes follow PROJ igh_o documentation. Original math.gl chart assembly and bounded inverse.
 
 import {DiscontinuousMap, type MapRegion, type MapPlacement} from './map-layout';
 import {airOceanMesh} from './air-ocean-mesh';
@@ -105,10 +107,33 @@ export function createGoodeMap(options: {radius?: number} = {}): DiscontinuousMa
   return interruptedMap('homolosine', options.radius, true);
 }
 
+/** Boggs eumorphic with land-oriented equatorial interruptions. */
+export function createInterruptedBoggsMap(options: {radius?: number} = {}) {
+  return interruptedMap('boggs', options.radius, true);
+}
+/** Sinu-Mollweide formula with independent equatorial six-lobe cuts. */
+export function createInterruptedSinuMollweideMap(options: {radius?: number} = {}) {
+  return interruptedMap('sinu-mollweide', options.radius, true);
+}
+/** Quartic authalic with paired hemispheric lobes. */
+export function createInterruptedQuarticAuthalicMap(options: {radius?: number} = {}) {
+  return interruptedMap('quartic-authalic', options.radius, false, 'hemispheres', -20);
+}
+/** Two Mollweide hemispheres, with a -20° central meridian. */
+export function createInterruptedMollweideHemispheresMap(options: {radius?: number} = {}) {
+  return interruptedMap('mollweide', options.radius, false, 'hemispheres', -20);
+}
+/** Ocean-oriented Goode, centered at -160°; no duplicate extension lobes. */
+export function createGoodeOceanMap(options: {radius?: number} = {}) {
+  return interruptedMap('homolosine', options.radius, false, 'ocean', -160);
+}
+
 function interruptedMap(
-  kind: 'sinusoidal' | 'mollweide' | 'homolosine',
+  kind: 'sinusoidal' | 'mollweide' | 'homolosine' | 'boggs' | 'sinu-mollweide' | 'quartic-authalic',
   value?: number,
-  goode = false
+  goode = false,
+  layout: 'default' | 'ocean' | 'hemispheres' = 'default',
+  centralMeridian = 0
 ): DiscontinuousMap {
   const radius = validRadius(value);
   const mollweide = (latitude: number): Position => {
@@ -139,29 +164,61 @@ function interruptedMap(
     if (kind === 'sinusoidal' || (kind === 'homolosine' && Math.abs(latitude) <= transition))
       return [Math.cos(latitude), latitude];
     const [width, height] = mollweide(latitude);
+    if (kind === 'quartic-authalic')
+      return [Math.cos(latitude) / Math.cos(latitude / 2), 2 * Math.sin(latitude / 2)];
+    if (kind === 'boggs')
+      return [
+        2.00276 / (1 / Math.cos(latitude) + 1.11072 / ((width * Math.PI) / (2 * Math.SQRT2))),
+        (latitude + height) / 2.00276
+      ];
+    if (kind === 'sinu-mollweide')
+      return latitude > -transition ? [width, height + correction] : [Math.cos(latitude), latitude];
     return [width, height - (kind === 'homolosine' ? Math.sign(latitude) * correction : 0)];
   };
-  const equatorialScale = kind === 'mollweide' ? (2 * Math.SQRT2) / Math.PI : 1;
+  const equatorialScale = profile(0)[0];
   // Split the wide Eurasian lobe into two convex computational charts sharing
   // one projection. The extra meridian is a continuous join, not a map cut.
-  const lobes = goode
-    ? [
-        [
-          [-180, -100, -40],
-          [-40, 30, 30],
-          [30, 30, 180]
-        ],
-        [
-          [-180, -160, -100],
-          [-100, -60, -20],
-          [-20, 20, 80],
-          [80, 140, 180]
+  const lobes =
+    layout === 'ocean'
+      ? [
+          [
+            [-180, -140, -90],
+            [-90, -10, 60],
+            [60, 130, 180]
+          ],
+          [
+            [-180, -110, -60],
+            [-60, 20, 90],
+            [90, 150, 180]
+          ]
         ]
-      ]
-    : [
-        [-180, -60, 60, 180],
-        [-180, -100, 20, 180]
-      ].map(limits => limits.slice(1).map((east, i) => [limits[i], (limits[i] + east) / 2, east]));
+      : layout === 'hemispheres'
+        ? [0, 1].map(() => [
+            [-180, -90, -90],
+            [-90, -90, 0],
+            [0, 90, 90],
+            [90, 90, 180]
+          ])
+        : goode
+          ? [
+              [
+                [-180, -100, -40],
+                [-40, 30, 30],
+                [30, 30, 180]
+              ],
+              [
+                [-180, -160, -100],
+                [-100, -60, -20],
+                [-20, 20, 80],
+                [80, 140, 180]
+              ]
+            ]
+          : [
+              [-180, -60, 60, 180],
+              [-180, -100, 20, 180]
+            ].map(limits =>
+              limits.slice(1).map((east, i) => [limits[i], (limits[i] + east) / 2, east])
+            );
   const equator = [...new Set(lobes.flat().flatMap(([west, , east]) => [west, east]))].sort(
     (a, b) => a - b
   );
@@ -176,33 +233,32 @@ function interruptedMap(
       ];
       regions.push({
         id: `${sign > 0 ? 'north' : 'south'}-${i}`,
-        boundary,
-        interior: [(west + east) / 2, 45 * sign],
+        boundary: boundary.map(([lon, lat]) => [lon + centralMeridian, lat]),
+        interior: [(west + east) / 2 + centralMeridian, 45 * sign],
         project: ([lon, lat]) => {
-          const delta = ((((lon - center + 180) % 360) + 360) % 360) - 180;
+          const delta = ((((lon - centralMeridian - center + 180) % 360) + 360) % 360) - 180;
           const [width, height] = profile(lat * RAD);
           return [radius * (equatorialScale * center * RAD + delta * RAD * width), radius * height];
         },
         unproject: ([x, y]) => {
           const height = y / radius;
-          const maxHeight = profile(Math.PI / 2)[1];
-          if (Math.abs(height) > maxHeight + 1e-10) return null;
-          let latitude = height;
-          if (kind === 'mollweide' || (kind === 'homolosine' && Math.abs(height) > transition)) {
-            const adjusted = height + (kind === 'homolosine' ? Math.sign(height) * correction : 0);
-            const theta = Math.asin(Math.max(-1, Math.min(1, adjusted / Math.SQRT2)));
-            latitude = Math.asin(
-              Math.max(-1, Math.min(1, (2 * theta + Math.sin(2 * theta)) / Math.PI))
-            );
+          if (height > profile(Math.PI / 2)[1] + 1e-10 || height < profile(-Math.PI / 2)[1] - 1e-10)
+            return null;
+          let low = -Math.PI / 2,
+            high = Math.PI / 2;
+          for (let i = 0; i < 55; i++) {
+            const mid = (low + high) / 2;
+            if (profile(mid)[1] < height) low = mid;
+            else high = mid;
           }
-          latitude = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, latitude));
+          const latitude = (low + high) / 2;
           const width = profile(latitude)[0];
           const relativeX = x / radius - equatorialScale * center * RAD;
           if (Math.abs(width) < 1e-12)
-            return Math.abs(relativeX) < 1e-10 ? [center, sign * 90] : null;
+            return Math.abs(relativeX) < 1e-10 ? [center + centralMeridian, sign * 90] : null;
           const delta = relativeX / width / RAD;
           if (Math.abs(delta) > 180 + 1e-8) return null;
-          return [center + delta, latitude / RAD];
+          return [center + delta + centralMeridian, latitude / RAD];
         }
       });
     }

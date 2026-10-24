@@ -21,18 +21,40 @@ import {
   createGoodeMap,
   createInterruptedSinusoidalMap,
   createInterruptedMollweideMap,
-  createInterruptedHomolosineMap
+  createInterruptedHomolosineMap,
+  createGoodeOceanMap,
+  createInterruptedBoggsMap,
+  createInterruptedSinuMollweideMap,
+  createInterruptedQuarticAuthalicMap,
+  createInterruptedMollweideHemispheresMap
 } from './presets';
 import {createAlbersUsaMap} from './albers-usa';
 import {createMyriahedralMap, type MyriahedralOptions, type MyriahedralLayout} from './myriahedral';
 import {MercatorMap} from './mercator-map';
-import {createPeirceQuincuncialMap, createBerghausMap} from './quincuncial-star';
+import {
+  createPeirceQuincuncialMap,
+  createBerghausMap,
+  createGuyouMap,
+  createGringortenQuincuncialMap
+} from './quincuncial-star';
+import {createButterflyMap, createCollignonButterflyMap, createWatermanMap} from './polyhedral';
 import {geographic} from './math';
 
 /** Serializable chart: runtime projection callbacks are resolved by key. */
 export type MapChartDescription = Omit<MapRegion, 'project' | 'unproject'> & {projection: string};
 export type MapDefinition =
-  | {type: 'peirce-quincuncial'; centralMeridian?: number}
+  | {
+      type:
+        | 'butterfly'
+        | 'collignon-butterfly'
+        | 'waterman'
+        | 'goode-ocean'
+        | 'interrupted-boggs'
+        | 'interrupted-sinu-mollweide'
+        | 'interrupted-quartic-authalic'
+        | 'interrupted-mollweide-hemispheres';
+    }
+  | {type: 'peirce-quincuncial' | 'guyou' | 'gringorten-quincuncial'; centralMeridian?: number}
   | {type: 'berghaus'; centralMeridian?: number; lobes?: number}
   | {type: 'mercator'; centralMeridian?: number; maxLatitude?: number}
   | {
@@ -122,6 +144,37 @@ export class MapEngine {
     this.sampling = {...options.sampling};
     const d = this.description.definition;
     switch (d.type) {
+      case 'guyou':
+        this.map = createGuyouMap({...d, radius});
+        break;
+      case 'gringorten-quincuncial':
+        this.map = createGringortenQuincuncialMap({...d, radius});
+        break;
+      case 'butterfly':
+        this.map = createButterflyMap({radius});
+        break;
+      case 'collignon-butterfly':
+        this.map = createCollignonButterflyMap({radius});
+        break;
+      case 'waterman':
+        this.map = createWatermanMap({radius});
+        break;
+      case 'goode-ocean':
+        this.map = createGoodeOceanMap({radius});
+        break;
+      case 'interrupted-boggs':
+        this.map = createInterruptedBoggsMap({radius});
+        break;
+      case 'interrupted-sinu-mollweide':
+        this.map = createInterruptedSinuMollweideMap({radius});
+        break;
+      case 'interrupted-quartic-authalic':
+        this.map = createInterruptedQuarticAuthalicMap({radius});
+        break;
+      case 'interrupted-mollweide-hemispheres':
+        this.map = createInterruptedMollweideHemispheresMap({radius});
+        break;
+
       case 'peirce-quincuncial':
         this.map = createPeirceQuincuncialMap({...d, radius});
         break;

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Original math.gl polar inverse tangent-plane limit and shared meridional quadrature remove cancellation, truncation and inverse residuals.  Adapted from proj4js 2.22.0 with corrected spherical meridian distance across pole-relative latitudes. See ../../../PROJ4-LICENSE.md for upstream attribution. Independent corrections acknowledge PROJ 9.5.1 src/projections/poly.cpp; see ../../../../projection/PROJ-LICENSE.txt.
+// SPDX-FileComment: Original math.gl polar inverse tangent-plane limit and shared meridional quadrature remove cancellation, truncation and inverse residuals.  Adapted from proj4js 2.22.0 with corrected spherical meridian distance across pole-relative latitudes. See ../../../../projection/PROJ4-LICENSE.md for upstream attribution. Independent corrections acknowledge PROJ 9.5.1 src/projections/poly.cpp; see ../../../../projection/PROJ-LICENSE.txt.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {

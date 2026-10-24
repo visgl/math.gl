@@ -308,3 +308,28 @@ Use `MapEngine` when you also need serializable descriptions, fitting, picking,
 capabilities and transition planning. Consult the
 [support table](../projection/developer-guide/discontinuous-projections.md#supported-map-families)
 for the distinction between these presets and other quincuncial/star variants.
+
+## Additional segmented-map factories
+
+<span class="badge">From v5.0 · Experimental</span>
+
+Each factory returns a `DiscontinuousMap` and accepts an optional positive
+`radius` (default 1). `MapEngine` is the recommended rendering entry point;
+these factories expose the lower-level map object.
+
+| Factory | Options type / extra options |
+| --- | --- |
+| `createGuyouMap` | `QuincuncialMapOptions`: finite `centralMeridian`, default 0 |
+| `createGringortenQuincuncialMap` | `QuincuncialMapOptions`: finite `centralMeridian`, default 0 |
+| `createButterflyMap` | `PolyhedralMapOptions`: `radius` only |
+| `createCollignonButterflyMap` | `PolyhedralMapOptions`: `radius` only |
+| `createWatermanMap` | `PolyhedralMapOptions`: `radius` only |
+| `createGoodeOceanMap` | `{radius?: number}` |
+| `createInterruptedBoggsMap` | `{radius?: number}` |
+| `createInterruptedSinuMollweideMap` | `{radius?: number}` |
+| `createInterruptedQuarticAuthalicMap` | `{radius?: number}` |
+| `createInterruptedMollweideHemispheresMap` | `{radius?: number}` |
+
+`PolyhedralMapOptions` is exported from `@math.gl/geospatial/discontinuous`.
+See the [MapEngine definitions](./map-engine.md#additional-segmented-and-interrupted-definitions)
+for each preset's aspect, cuts, coordinate conventions, and limitations.

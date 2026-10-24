@@ -17,3 +17,8 @@ The package root continues to export these APIs for compatibility. The existing 
 subpath remains available for applications that only need tile-matrix utilities.
 
 [`subdivideGlobeMesh`](https://math.gl/docs/modules/geospatial/api-reference/subdivide-globe-mesh) refines geographic meshes onto a sphere or oblate ellipsoid while preserving shared edges and attribute provenance. Import it from `@math.gl/geospatial/globe`.
+
+## Sources and credits
+
+See [the packaged source and license index](./THIRD-PARTY-NOTICES.md) and
+[math.gl references and credits](https://math.gl/docs/references-and-credits).
