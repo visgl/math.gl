@@ -75,7 +75,13 @@ export function createRegionalMap(options: RegionalMapOptions) {
     const base = createKernelMap({kernel: armadilloRaw(parallel * RAD), radius});
     return new CapMap(
       [...base.regions],
-      p => rotation.local([(((((p[0] + 180) % 360) + 360) % 360) - 180) / 2, p[1]]),
+      p => {
+        // Keep both signed seam edges: folding +180 onto -180 breaks clipping.
+        let longitude = p[0] % 360;
+        if (longitude > 180) longitude -= 360;
+        if (longitude < -180) longitude += 360;
+        return rotation.local([longitude / 2, p[1]]);
+      },
       p => {
         const q = rotation.source(p);
         return Math.abs(q[0]) > 90 + 1e-7

@@ -105,6 +105,14 @@ export class CapMap extends DiscontinuousMap {
       throw new Error('Projection sampling limit exceeded; relax tolerance');
     let emitted = 0;
     const region = this.regions.find(r => r.id === regionId);
+    const local = (p: GeographicPosition) => {
+      // Nonlinear longitude transforms must retain the owning chart's seam side.
+      const longitude =
+        this.nonlinear && region && Math.abs(Math.abs(p[0]) - 180) < 1e-10
+          ? Math.sign(region.interior[0]) * 180
+          : p[0];
+      return this.local([longitude, p[1]]);
+    };
     const projected = (p: Position): Position => {
       const q = region!.project(this.source([p[0] / RAD, p[1] / RAD])),
         [a, b, c, d, x, y] = region!.placement!;
@@ -189,7 +197,7 @@ export class CapMap extends DiscontinuousMap {
     });
     if (polygon) stream.polygonStart();
     const emit = (p: GeographicPosition) => {
-      const q = this.local(p);
+      const q = local(p);
       // Canonicalize the antipode: roundoff from oblique rotations otherwise
       // assigns the same point to opposite sides of the longitude seam.
       if (Math.abs(Math.abs(q[0]) - 180) < 1e-10 && Math.abs(q[1]) < 1e-10) {
@@ -208,8 +216,8 @@ export class CapMap extends DiscontinuousMap {
           sum = add(va, vb);
         if (Math.hypot(...sum) > 1e-10) {
           const mid = coordinates(unit(sum)),
-            v = geographic(this.local(mid)),
-            q = add(geographic(this.local(a)), geographic(this.local(b)));
+            v = geographic(local(mid)),
+            q = add(geographic(local(a)), geographic(local(b)));
           if (
             Math.hypot(...q) > 1e-10 &&
             Math.hypot(...unit(q).map((n, i) => n - v[i])) >
@@ -242,7 +250,7 @@ export class CapMap extends DiscontinuousMap {
     return super
       .projectLine(line, options)
       .flatMap(part =>
-        this.clip([part.sourceCoordinates], false, options).flatMap(line =>
+        this.clip([part.sourceCoordinates], false, options, part.regionId).flatMap(line =>
           super.projectLine(line, options).filter(q => q.regionId === part.regionId)
         )
       );

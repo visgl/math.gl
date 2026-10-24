@@ -364,3 +364,45 @@ test('Hammer retroazimuthal rejects invalid inverse candidates without throwing'
   }
   expect(map.unprojectPoint([100, 100])).toEqual([]);
 });
+
+test('Armadillo preserves both antimeridian edges during clipping', () => {
+  const map = new MapEngine({
+    version: 1,
+    id: 'armadillo-seam',
+    definition: {type: 'regional', projection: 'armadillo'}
+  });
+  for (const side of [-1, 1]) {
+    const line = map.projectLine([
+      [side * 179, 30],
+      [side * 180, 30]
+    ]);
+
+    expect(line.length).toBeGreaterThan(0);
+    expect(line.flatMap(part => part.sourceCoordinates).length).toBeLessThan(10);
+    for (const part of line)
+      for (const point of part.sourceCoordinates) {
+        expect(Math.abs(point[0]) > 180 - 1e-7 ? 180 : point[0] * side).toBeGreaterThanOrEqual(
+          179 - 1e-7
+        );
+        expect(point[1]).toBeCloseTo(30, 2);
+      }
+    const polygons = map.projectPolygon([
+      [
+        [side * 179, 30],
+        [side * 180, 30],
+        [side * 180, 31],
+        [side * 179, 31]
+      ]
+    ]);
+    expect(polygons.length).toBeGreaterThan(0);
+    for (const part of polygons)
+      for (const ring of part.sourceCoordinates)
+        for (const point of ring) {
+          expect(Math.abs(point[0]) > 180 - 1e-7 ? 180 : point[0] * side).toBeGreaterThanOrEqual(
+            179 - 1e-7
+          );
+          expect(point[1]).toBeGreaterThanOrEqual(30 - 1e-7);
+          expect(point[1]).toBeLessThan(31.01);
+        }
+  }
+});
