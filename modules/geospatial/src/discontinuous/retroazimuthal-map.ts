@@ -29,6 +29,7 @@ export function createHammerRetroazimuthalMap({radius = 1, parallel = 45} = {}) 
   };
   kernel.invert = (x, y) => {
     const q = raw.invert(x, y);
+    if (!q?.every(Number.isFinite)) return null;
     const source = rotation.source([q[0] / RAD, q[1] / RAD]);
     if (x) source[0] = Math.sign(x) * Math.abs(source[0]);
     return source.map(v => v * RAD);

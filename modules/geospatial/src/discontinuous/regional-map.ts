@@ -75,7 +75,7 @@ export function createRegionalMap(options: RegionalMapOptions) {
     const base = createKernelMap({kernel: armadilloRaw(parallel * RAD), radius});
     return new CapMap(
       [...base.regions],
-      p => rotation.local([p[0] / 2, p[1]]),
+      p => rotation.local([(((((p[0] + 180) % 360) + 360) % 360) - 180) / 2, p[1]]),
       p => {
         const q = rotation.source(p);
         return Math.abs(q[0]) > 90 + 1e-7

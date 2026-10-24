@@ -317,3 +317,50 @@ test('polar cap clipping does not turn tangent chart slivers into antipodal poly
         expect(point[1]).toBeGreaterThan(-89.99901);
       }
 });
+
+test('Armadillo wraps longitude before applying its half-longitude domain', () => {
+  const map = new MapEngine({
+    version: 1,
+    id: 'wrapped-armadillo',
+    definition: {type: 'regional', projection: 'armadillo'}
+  });
+  for (const [longitude, latitude] of [
+    [0, 0],
+    [-120, 30],
+    [120, 60],
+    [0, -89]
+  ]) {
+    const point = map.projectPoint([longitude, latitude]);
+    const owners = map.findRegions([longitude, latitude]);
+    for (const offset of [-720, -360, 360, 720]) {
+      expect(map.projectPoint([longitude + offset, latitude])).toEqual(point);
+      expect(map.findRegions([longitude + offset, latitude])).toEqual(owners);
+    }
+  }
+});
+
+test('Hammer retroazimuthal rejects invalid inverse candidates without throwing', () => {
+  const map = new MapEngine({
+    version: 1,
+    id: 'retroazimuthal-picking',
+    definition: {type: 'regional', projection: 'hammer-retroazimuthal'}
+  });
+  for (const position of [
+    [1, 0],
+    [2, 0],
+    [0, 2],
+    [3, 1],
+    [10, 10],
+    [100, 100]
+  ] as [number, number][]) {
+    const candidates = map.unprojectPoint(position);
+    for (const candidate of candidates) {
+      const projected = map.projectPoint(candidate.position, candidate.regionId);
+      expect(projected).not.toBeNull();
+      expect(
+        Math.hypot(projected!.position[0] - position[0], projected!.position[1] - position[1])
+      ).toBeLessThan(1e-8);
+    }
+  }
+  expect(map.unprojectPoint([100, 100])).toEqual([]);
+});
