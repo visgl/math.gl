@@ -1,12 +1,21 @@
 # CHANGELOG
 
-## Unreleased
+## v5.0.0-alpha.20
 
 - feat(geospatial): Add reusable geodesic path sampling and adaptive geodesic polyline subdivision with surface-distance limits, unrolled longitude and original-edge provenance; extend generic subdivision with constant-speed source-edge samplers.
 
 - feat(geospatial): Add reusable local reference frames, geographic heading/pitch/roll poses and velocity-aligned orientations. Extend tangent planes with radial projection, radial/normal surface inversion and packed projection with validity masks; correct three-radius tangent basis orthogonality.
 
 - fix(projection): Implement ellipsoidal orthographic, correct Eckert VI and Equal Earth pole inverses, and repair conic, polyconic and LAEA pole boundaries. Audit unchanged definitions against native PROJ and distinguish numerical accuracy from proj4js compatibility.
+
+- feat(geospatial): Add the unified MapEngine API, renderer-neutral feature preparation, inset layouts, geographic picking, discontinuous maps, Elastic maps, and prepared projection transitions (#271, #272, #279, #286, #294, #296, #297, #300, #301, #305, #307).
+- feat(geometry): Add hinge trees and geography-aware unfolding maps, including reusable myriahedral presets (#268, #274, #275).
+- feat(geospatial): Add qualified ellipsoid metrics, rhumb paths, geographic seam topology, complete global ellipsoidal intersections, elliptic revolution geodesics, triaxial trajectories, exact geodesic edge areas and polygon accumulation (#278, #280, #281, #287, #298, #308, #310).
+- fix(geospatial): Qualify nearest surface points, local frames and grazing contacts; freeze geometry caches and add packed frame transforms, optional ellipsoid frames, OBB quaternion operations and GeographicLib baselines (#273, #302, #304, #309).
+- feat(geoarrow): Expose dimension inference utilities (#303).
+- feat(examples): Add animated DGGS myriahedral views, community controls, responsive map layouts and improved example structure (#276, #288, #289, #311).
+- fix: Resolve findings from landed PR reviews (#295).
+- build: Update Node to 24.22.1, parallelize CI, and update zod, fast-uri, body-parser and undici (#282, #285, #290, #291, #292, #299).
 
 ## v5.0.0-alpha.19
 
