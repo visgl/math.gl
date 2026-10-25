@@ -319,3 +319,43 @@ From v5.0 · Experimental
 Amount must be finite in `[0, 1]`. Returns frames containing `kind`, endpoint region IDs, `coordinates: MapPosition3D[][]`, and `opacity`. Direct frames use linear interpolation and opacity 1. Globe frames flatten/unflatten over the outer 40% of progress and crossfade endpoint geometry during the middle 20%. Invisible parts are omitted. Renderers must apply opacity and own camera fitting, occlusion, easing and animation cancellation. Evaluation creates fresh arrays, without re-clipping geometry.
 
 Intermediate direct shapes may overlap or invert. Endpoint edge sampling and sampled geographic intersection approximate correspondence; they are not a certified error bound or a fold-free parameterization. Inverse picking of intermediate geometry is not provided. See [Elastic maps](https://visgl.github.io/math.gl/next/docs/modules/geospatial/elastic-maps.md) for an animated example.
+
+## prepareFeatures(features, options?)[​](#preparefeaturesfeatures-options "Direct link to prepareFeatures(features, options?)")
+
+From v5.0 · Experimental
+
+Prepares static two-dimensional features for a renderer. Accepts an array of `MapFeature` objects with `geometry`, optional string/finite-number `id`, and optional `properties` / `type: 'Feature'`. Geometry shapes follow GeoJSON: Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon, and nested GeometryCollection. Null geometries retain their feature index but emit no parts. Pass `featureCollection.features`, not the collection itself.
+
+Positions must be finite **longitude/latitude pairs**, with latitude in \[-90, 90]. Altitude and measures are rejected rather than silently dropped. Polygon rings may be open or repeat their first vertex, as in `projectPolygon()`. Source edges are minor great-circle arcs. Invalid geometry throws; no partial result is returned. Collection nesting is limited to 64 levels. Existing MapEngine input limits also apply: polygon inputs must fit their open-hemisphere source chart. This method does not repair invalid topology or automatically subdivide arbitrary global GeoJSON polygons into such charts.
+
+`MapPrepareFeaturesOptions` has `sampling?: MapSamplingOptions`, which overrides the engine defaults, and `polygonOutlines?: boolean` (default true). Preparation is synchronous; callers may batch features or run an engine in a worker.
+
+Returns `PreparedMapGeometry`, a versioned, structured-cloneable object:
+
+| Field        | Meaning                                                                  |
+| ------------ | ------------------------------------------------------------------------ |
+| `version`    | Buffer contract version, currently 1                                     |
+| `mapId`      | Description ID for diagnostics; not a cache key or equivalence guarantee |
+| `featureIds` | Input IDs or null, one per input feature; duplicate IDs are allowed      |
+| `regionIds`  | Chart ID lookup table                                                    |
+| `points`     | Packed vertices, one vertex per part; ownership follows `projectPoint()` |
+| `paths`      | Packed line and original polygon-boundary fragments                      |
+| `polygons`   | Packed closed rings for filled polygon fragments, preserving holes       |
+
+All three batches contain `positions: Float64Array` and `sourcePositions: Float64Array`: interleaved XY in placed map units, and matching longitude/latitude pairs in degrees. They contain no triangle indices, Z, normals, or application attributes. A renderer must use the map's Cartesian coordinates without applying a second geographic projection.
+
+Each batch's `parts` array contains `PreparedMapPart` metadata:
+
+* `featureIndex` indexes the **input feature array**, even after clipping, splitting or skipping a null geometry. Use it to recover the original object for picking, styling and filtering; do not use the generated part index as the feature index.
+* `geometryPath` lists indices through GeometryCollection `geometries` and multipart `coordinates`. For example `[1, 2]` identifies polygon 2 in a MultiPolygon at collection child 1. A simple root geometry has `[]`.
+* `regionIndex` indexes `regionIds`. Retain it for chart-specific inverse picking.
+
+Path parts also have `role: 'line' | 'polygon-outline'`, an original `ringIndex` for polygon outlines (outer = 0), and `closed`. Cut fragments remain open. The `pathStarts: Uint32Array` contains vertex offsets, one per part plus a terminal sentinel. Never join successive path parts across their offsets.
+
+Polygon `polygonStarts: Uint32Array` contains **ring** offsets, one per part plus a sentinel. `ringStarts: Uint32Array` contains **vertex** offsets, one per ring plus a sentinel. Ring 0 of each polygon part is the exterior; remaining rings are holes. Offsets count vertices/rings, never float components or bytes. Multiply a vertex offset by two to slice a position array. Empty batches have `[0]` offsets. Projected winding may depend on chart placement; consumers must normalize winding for their tessellator rather than assume a single global orientation.
+
+Fills and outlines are deliberately separate. Clipping introduces artificial edges to close filled rings. `paths` projects the original source rings instead, so it does **not** add those artificial edges. A source edge lying on a cut remains a real boundary and may occur in multiple chart fragments. Computational chart joins can also split a path without creating a visual map gap.
+
+Output arrays are newly allocated and owned by the caller. Input geometry is not mutated; feature properties and callbacks are not copied into the output. Transfer the typed-array buffers to a worker or renderer using `structuredClone` / `postMessage`; transferred buffers detach at the sender. The payload is not JSON serialization (typed arrays need an explicit encoding for JSON). Preserve the input feature array separately. Generated part order is not a durable feature ID.
+
+This is a static geometry contract, not a deck.gl adapter or surface tessellator. It does not yet provide original-edge interpolation weights, dash-distance continuity, artificial-edge masks for polygon extrusion, or interior mesh vertices for globe/hinge poses. See the [rendering guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/map-engine.md#prepare-feature-buffers-for-a-renderer).
