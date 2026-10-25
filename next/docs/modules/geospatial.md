@@ -127,3 +127,9 @@ Use the geographic tile helpers above for the built-in equal-angle longitude/lat
 [GeodesicPath](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-path.md) reuses a shortest geodesic line for fraction/distance sampling. [subdivideGeodesicPolyline](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/subdivide-geodesic-polyline.md) adaptively maps those paths through a supplied transform with original-edge provenance and optional surface-distance limits. Source angles are degrees, output tolerance uses target units, and longitude unrolling does not split projection seams. Import the sampler from `/ellipsoid` and subdivision from `/globe`.
 
 [Local-frame qualification and G7 benchmark baselines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/local-frame-qualification.md) document the supported numerical profile and independent/native evidence.
+
+### Wider-domain and triaxial geodesics[​](#wider-domain-and-triaxial-geodesics "Direct link to Wider-domain and triaxial geodesics")
+
+* [EllipsoidGeodesicExact](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-geodesic-exact.md): optional elliptic direct/inverse revolution geodesics and reusable distance/arc lines.
+* [TriaxialEllipsoid](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/triaxial-geometry.md): three surface coordinate systems, direction conversions and reusable Cartesian geodesic trajectories.
+* [G8/G9 qualification and support limits](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-g89-qualification.md).
