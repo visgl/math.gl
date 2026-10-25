@@ -2089,8 +2089,9 @@ geodesic.PolygonArea = {};
    *   parameters".
    */
   l.GeodesicLine.prototype.GenPosition = function(arcmode, s12_a12,
-                                                  outmask) {
-    var vals = {},
+                                                  outmask, vals = {}) {
+    // math.gl: optional caller-owned result; numerical equations are unchanged.
+    var
         sig12, ssig12, csig12, B12, AB1, ssig2, csig2, tau12, s, c, serr,
         omg12, lam12, lon12, E, sbet2, cbet2, somg2, comg2, salp2, calp2, dn2,
         B22, AB2, J12, t, B42, salp12, calp12;

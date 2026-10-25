@@ -93,3 +93,14 @@ MIT). The derivative-integral divided difference and adaptive integration are
 original math.gl implementations. `GeodesicPolygonExact` reuses the already
 attributed compensated polygon kernel. Existing GeographicLib copyright notices
 and MIT terms in [LICENSE](./LICENSE) cover these formula adaptations as well.
+
+## Coordinate utilities and packed geodesic results
+
+The small MGRS alphabets, row/band compatibility rule and standard UTM zone
+exceptions adapt GeographicLib 2.7 `MGRS.cpp` / `UTMUPS.cpp`, copyright Charles
+Karney (2008–2022), MIT. The owning module's [LICENSE](./LICENSE) and
+[GeographicLib terms](./GEOGRAPHICLIB-LICENSE.txt) include the notices. The WGS84
+projection facade reuses existing attributed projection kernels. Angle text
+utilities, buffer staging and triaxial sampling are original math.gl work.
+The existing vendored geodesic result function additionally accepts an optional
+caller-owned output; its numerical equations are unchanged.

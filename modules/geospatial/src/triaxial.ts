@@ -61,6 +61,29 @@ export class TriaxialEllipsoid {
   get radii(): readonly [number, number, number] {
     return this.snapshot;
   }
+  /** Area-uniform surface point from independent uniform [0,1) random draws.
+   * Rejection corrects the linear sphere-to-ellipsoid area Jacobian; work is bounded.
+   */
+  sampleSurface(random: () => number = Math.random): [number, number, number] {
+    const draw = () => {
+      const u = random();
+      if (!Number.isFinite(u) || u < 0 || u >= 1)
+        throw new RangeError('Random draws must be in [0,1)');
+      return u;
+    };
+    const minimum = Math.min(...this.axes);
+    for (let attempt = 0; attempt < 1024; attempt++) {
+      const z = 2 * draw() - 1,
+        angle = 2 * Math.PI * draw(),
+        radius = Math.sqrt((1 - z) * (1 + z));
+      const u = [radius * Math.cos(angle), radius * Math.sin(angle), z];
+      const acceptance =
+        minimum === 1 ? 1 : Math.min(1, minimum * Math.hypot(...u.map((x, i) => x / this.axes[i])));
+      if (draw() < acceptance)
+        return u.map((x, i) => x * this.radii[i]) as [number, number, number];
+    }
+    throw new RangeError('Surface sampling work limit exceeded');
+  }
   toCartesian(
     latitude: number,
     longitude: number,

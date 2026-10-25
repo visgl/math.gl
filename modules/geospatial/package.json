@@ -1094,6 +1094,16 @@
       "types": "./dist/triaxial.d.ts",
       "import": "./dist/triaxial.js",
       "require": "./dist/triaxial.cjs"
+    },
+    "./coordinates": {
+      "types": "./dist/coordinates.d.ts",
+      "import": "./dist/coordinates.js",
+      "require": "./dist/coordinates.cjs"
+    },
+    "./geodesic-buffer": {
+      "types": "./dist/geodesic-buffer.d.ts",
+      "import": "./dist/geodesic-buffer.js",
+      "require": "./dist/geodesic-buffer.cjs"
     }
   },
   "files": [
