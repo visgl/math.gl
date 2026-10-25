@@ -1,6 +1,10 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {MapTransition, type MapTransitionOptions} from './map-transition';
+import {createElasticMap} from './elastic/map';
+import type {ElasticMapData} from './elastic/data';
+import type {MapSurface} from './map-layout';
 
 import {
   DiscontinuousMap,
@@ -55,6 +59,7 @@ export type MapChartDescription = Omit<MapRegion, 'project' | 'unproject'> & {
   projection: string;
 };
 export type MapDefinition =
+  | {type: 'elastic'; data: ElasticMapData}
   | ({type: 'projection'} & Omit<ProjectionMapOptions, 'radius'>)
   | ({type: 'regional'} & Omit<RegionalMapOptions, 'radius'>)
   | ({type: 'world'} & Omit<WorldMapOptions, 'radius'>)
@@ -157,7 +162,7 @@ export class MapEngine {
   readonly description: Readonly<MapDescription>;
   readonly capabilities: MapCapabilities;
   readonly motion?: MyriahedralLayout;
-  private readonly map: DiscontinuousMap;
+  private readonly map: MapSurface;
   private readonly sampling: MapSamplingOptions;
   private cachedLayout?: MapLayout;
   private flat?: number[][][];
@@ -172,6 +177,9 @@ export class MapEngine {
     this.sampling = {...options.sampling};
     const d = this.description.definition;
     switch (d.type) {
+      case 'elastic':
+        this.map = createElasticMap(d.data, {radius});
+        break;
       case 'projection':
         this.map = createProjectionMap({...d, radius});
         break;
@@ -484,6 +492,10 @@ export class MapEngine {
           )
         }))
     });
+  }
+  /** Prepare source-corresponding geometry for a direct morph or a globe route. */
+  createTransitionTo(target: MapEngine, options: MapTransitionOptions = {}): MapTransition {
+    return new MapTransition(this, target, options);
   }
   /** Conservative recommendation, not a camera animation or a topology morph. */
   planTransitionTo(target: MapEngine): MapTransitionPlan {

@@ -7,13 +7,15 @@ runtime dependency, native installation or mandatory model download.
 
 ## Numerical evidence
 
-The same 560-row matrix runs in Node, Chromium, Firefox and WebKit:
+The same 2,450-row matrix runs in Node, Chromium, Firefox and WebKit:
 
 | Family | Rows | Reference |
 | --- | ---: | --- |
 | Frames, points/vectors, poses and velocity orientation | 405 | 135 exact-input, 180-digit Decimal controls × ENU, NED and west/up/north frames; both cartographic unit configurations checked in each row |
 | Tangent anchors, bases, projection and radial/normal lifts | 30 | Independent Decimal constrained footpoints, support geometry and line/quadric intersections |
 | Local Cartesian coordinates | 50 | Stored pinned GeographicLib C++ 2.7 controls, binary64 input/output |
+| Near-silhouette line intersections | 1,485 | Exact rational discriminant signs and independent 220-digit Decimal roots, with 999 public API checks |
+| Packed point/vector transforms | 405 | Original Decimal frame controls × three axis selections; four directions/kinds and exact in-place outputs |
 | Numerical boundary regressions | 3 | Analytic sphere contacts/radial rays and independently scaled rigid rotations |
 | G7 solver baseline outputs | 72 | Pinned C++ 2.7 geodesic series and Exact rhumb API controls |
 
@@ -77,9 +79,20 @@ The math.gl Cartesian inverse convention determines its exact-pole frame instead
 Pole bases have independent controls; native comparisons use unique non-polar
 origins and exclude thin/ambiguous-interior cases that do not share that contract.
 
-This matrix is not arbitrary finite-input certification. General ellipsoid normal
-lifts are qualified away from grazing; their retained roundoff contact window is
-not an exact near-horizon classification guarantee. Mutable legacy tangent bases,
+This matrix is not arbitrary finite-input certification. Near-silhouette normal
+lifts now use exact dyadic coefficients and a high-precision integer square root
+instead of promoting small negative discriminants to contact. The 1,485 controls
+extend the original sphere/oblate/three-radius grid with `(2,2,3)` prolate
+geometry at `1e-60`, ordinary and `1e60` scales; this is a sampled grid rather
+than every shape/scale combination. Their mathematical line is defined by the stored binary64 anchor/basis and
+local coordinates; exact rational signs and independent Decimal roots qualify that
+kernel. The 999 public checks cover exact axial silhouettes and off-axis cases
+away from the one-ulp uncertainty of constructing a rounded basis. Basis creation
+has the separate existing angular budget; these tests do not promise identical
+hit/miss decisions for ill-conditioned constructor inputs across runtimes.
+Spheres retain their orthonormal circle convention, including exact contacts.
+The rare exact fallback allocates and is slower than ordinary normal lifts.
+Mutable legacy tangent bases,
 unbounded flattening/scales, temporal attitude continuity and renderer float32
 reconstruction remain outside this profile. No allocation-free pose or universal
 performance claim follows from reusable output arguments.
@@ -90,6 +103,7 @@ From the repository root:
 
 ```sh
 python3 modules/geospatial/scripts/generate-c8-reference.py --check
+python3 modules/geospatial/scripts/generate-c8-contact-reference.py --check
 python3 modules/geospatial/scripts/generate-g7-reference.py --check
 node modules/geospatial/scripts/qualify-c8.mjs --output /tmp/c8-g7-node.json
 node modules/geospatial/scripts/qualify-c8.mjs --browser firefox --output /tmp/c8-g7-firefox.json
@@ -161,3 +175,37 @@ The numerical helpers, inputs, oracle and benchmark callers are original MIT
 math.gl work. Retained Cesium Apache-2.0/MIT and GeographicLib MIT SPDX notices and
 packaged licenses remain with their implementations; no upstream source is
 vendored by this increment.
+
+## G7 packed-frame follow-up
+
+The four packed frame methods retain the scalar point/vector distinction,
+independent physical-error budgets, snapshots and extreme-coordinate fallback.
+They validate the complete input and preflight extreme batches before writing,
+so invalid records and true overflow fail atomically even with in-place output.
+The ordinary path hoists matrix coefficients and reuses caller Float64 storage;
+its implementation creates no per-point vectors.
+
+`benchmark-frame-batches.mjs` compares historical and current scalar loops using
+reused vectors against current packed output on identical inputs. It retains
+wall time and process CPU time, rotated raw samples, spread flags and optional
+heap estimates. Adaptive CPU windows prevent scheduling pauses from shortening
+work; process CPU time includes runtime/background work and is diagnostic rather
+than wall throughput. No new speed gate or native/browser bulk comparison is
+claimed. Setups and all independent accuracy checks occur outside timing.
+
+```sh
+node modules/geospatial/scripts/benchmark-frame-batches.mjs \
+  --baseline-ref 00dd3e4b --points 4096 --samples 11 --min-cpu-ms 8 \
+  --allocations --output /tmp/frame-batches-node.json
+```
+
+The [recorded packed-frame baseline](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/qualification/frame-batches-node.json)
+pins the measured source and runtime and exposes noisy samples. Interpret its
+ratios only for that workload and environment. Existing numerical, bundle,
+allocation, coverage and performance thresholds remain unchanged.
+
+In the recorded 4,096-point workload, packed median process CPU time is about
+17–21% of the current scalar loops with reused vectors. Three operation groups
+have noisy wall measurements, and one current scalar CPU group is flagged for
+spread. These observations justify the bounded packed API but do not establish a
+quiet-host release speedup or a zero-allocation guarantee.

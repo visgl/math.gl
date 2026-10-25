@@ -45,6 +45,11 @@
   },
   {
     "type": "doc",
+    "label": "Elastic maps",
+    "id": "elastic-maps"
+  },
+  {
+    "type": "doc",
     "label": "Polygon playground",
     "id": "polygon-playground"
   },

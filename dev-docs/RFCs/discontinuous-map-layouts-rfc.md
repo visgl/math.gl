@@ -537,3 +537,46 @@ badges. The existing static factories stay available. This iteration does not
 add arbitrary concave chart domains, global polygon clipping, direct topology
 morphing, renderer-specific LOD policies, or ellipsoidal references. Those are
 separate capabilities rather than hidden expectations of a map description.
+
+## Elastic sampled-map backend (implemented)
+
+`MapDefinition` now accepts `{type: 'elastic', data: ElasticMapData}`. The data is
+finite JSON (undefined interpolation nodes use null), and MapEngine snapshots it
+just like analytic definitions. The optional `@math.gl/geospatial/elastic` entrypoint
+holds the three published Elastic datasets. The default discontinuous entrypoint
+contains only the runtime and text importer; compilation performs no network I/O.
+
+The backend implements `MapSurface`, the structural rendering contract shared with
+`DiscontinuousMap`. It does not pretend that the section boundaries are convex or
+that deformed mesh edges are hinges. Geographic octants are convex envelopes for
+clipping and renderer bookkeeping. Each chart also retains its actual, possibly
+concave/complement, longitude/latitude coverage domain. Geometry first splits at
+spherical chart seams, then clips against these domains. Output vertices retain
+source coordinates for globe evaluation and transitions. True outlines drive layout.
+
+Bilinear forward evaluation is restricted to defined grid nodes. Inverse queries
+search bounded grid cells, solve their bilinear equations in locally normalized
+coordinates, validate residuals and domain ownership, and retain multiple branches.
+The published inverse hint table is not treated as an exact inverse. A conservative
+terrain-cell fast path requires an enclosing spherical cap to avoid all domain
+boundaries and undefined interpolation cells.
+
+This category supports loading optimized maps, not optimizing them. Future work
+includes alternative interpolation models, compressed/streamed dataset resources,
+unstructured Danseiji meshes, and asynchronous optimization. Those should preserve
+the shared geometry and picking contract without claiming interchangeability of
+the underlying interpolation rules. Accuracy and sampling limits are documented
+in the Elastic guide and reference.
+
+
+### Prepared Elastic transitions
+
+`MapEngine.createTransitionTo()` adds an explicit prepared-correspondence path.
+Complete Elastic datasets and a bounded set of finite global formulas can morph
+directly. Features are clipped against source and target cuts, with endpoint
+region IDs and shared geographic vertices retained in immutable prepared parts.
+Per-frame evaluation interpolates endpoints without re-clipping. Other pairs
+use source-to-globe, coverage crossfade, globe-to-target. The existing conservative
+transition planner remains unchanged. The renderer owns easing, camera fitting,
+depth ordering, cancellation and intermediate picking. Direct intermediate shapes
+can fold or overlap; this is not a distortion-preserving optimization solver.

@@ -9,6 +9,7 @@ export default defineConfig({
       name: "alpine-workspace-vector",
       enforce: "pre",
       resolveId(source, importer) {
+        if (source === "@math.gl/geospatial/elastic") return fileURLToPath(new URL("../../modules/geospatial/src/elastic.ts", import.meta.url));
         if (source === "@math.gl/geospatial/discontinuous")
           return fileURLToPath(
             new URL(

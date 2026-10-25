@@ -60,3 +60,10 @@ HEALPix is independently implemented from M. R. Calabretta, [Mapping on the HEAL
 `air-ocean` remains gnomonic; the distinct `gray-fuller` preset uses the exact
 Gray–Fuller formula. Neither is advertised as equal-area. Petroff, ISEA, and DSEA
 are spherical equal-area maps; they do not implement ellipsoidal CRS transforms.
+
+## Elastic projection datasets
+
+Elastic I, II and III coordinate tables are by Justin Kunimune, released under the
+[Unlicense](./src/discontinuous/elastic/UNLICENSE.txt). See the
+[provenance record](./src/discontinuous/elastic/README.md) for the pinned revision,
+conversion details, units, and links to the published format and research.
