@@ -146,6 +146,7 @@ See [world maps](./README.md#world-maps) for the 64 ordinary formula names.
 | Specialized domains | `armadillo`, `hammer-retroazimuthal`, `wiechel` | Armadillo clips its curved visible domain. Hammer retains separate sides of its hemisphere cuts. |
 | Interrupted maps | `interrupted-sinusoidal`, `interrupted-mollweide`, `interrupted-homolosine`, `interrupted-boggs`, `interrupted-sinu-mollweide`, `interrupted-quartic-authalic`, `interrupted-mollweide-hemispheres` | Presets specify lobe layouts and geographic aspects. Sinu-Mollweide cuts begin at 35° N and 10° S in its oblique frame. Older direct `interrupted-*` definitions retain their documented layouts for compatibility. |
 | Segmented and star maps | `guyou`, `peirce-quincuncial`, `gringorten-quincuncial`, `berghaus`, `gingery`, `healpix` | Catalog quincuncials use polar aspects and Gingery an oblique aspect; direct definitions retain their equatorial aspects. |
+| Elastic sampled maps | Elastic I, II, III, or caller-supplied regular coordinate tables | Separate optional datasets and `type: 'elastic'`. Bilinear interpolation, section clipping, inverse picking; no optimizer. See [Elastic maps](../elastic-maps.md). |
 | Polyhedral maps | `butterfly`, `collignon-butterfly`, `waterman` | Default nets. Exact Gray–Fuller, Petroff, Snyder and myriahedral maps remain available through their existing MapEngine definitions. |
 
 For custom maps, use configurable interruptions, custom charts, or myriahedral

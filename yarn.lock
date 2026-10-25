@@ -15787,6 +15787,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"math.gl-elastic-maps@workspace:examples/elastic-maps":
+  version: 0.0.0-use.local
+  resolution: "math.gl-elastic-maps@workspace:examples/elastic-maps"
+  dependencies:
+    "@math.gl/geospatial": "workspace:*"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
 "math.gl-expression-playground@workspace:examples/expressions":
   version: 0.0.0-use.local
   resolution: "math.gl-expression-playground@workspace:examples/expressions"

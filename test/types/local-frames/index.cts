@@ -51,3 +51,10 @@ frame.localToFixedPoint([1, 2, 3], new Quaternion());
 // @ts-expect-error Packed outputs require Float64 storage.
 plane.projectPointsFlat(new Float32Array([1, 2, 3]), mode, new Float32Array(2));
 void [optional, extracted, inverse, surface, radial, packed];
+
+const batch: Float64Array = frame.localToFixedPointsFlat(new Float32Array([1, 2, 3]));
+frame.fixedToLocalPointsFlat(batch, batch);
+frame.localToFixedVectorsFlat(batch, batch);
+frame.fixedToLocalVectorsFlat(batch, batch);
+// @ts-expect-error Packed frame outputs require Float64 storage.
+frame.localToFixedPointsFlat(batch, new Float32Array(3));

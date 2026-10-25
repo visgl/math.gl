@@ -152,3 +152,13 @@ The initial workload gates 72 pinned native outputs before timing and compares
 solver setup, direct calls and reused geodesic/rhumb lines. Frame/pose cost uses
 historical math.gl sources with independent C8 controls. Raw samples and sampled
 heap estimates are diagnostic; no throughput threshold or new bulk API is implied.
+
+## C8/G7 follow-up
+
+The next bounded increment extends silhouette qualification with exact rational
+signs and 220-digit line/quadric controls, preserving the spherical contact
+convention. Measured packed local-frame point/vector transforms reuse Float64
+outputs, support exact in-place storage and fail atomically. See the expanded
+[qualification and benchmark profile](../docs/modules/geospatial/api-reference/local-frame-qualification.md).
+Existing numerical and selective bundle budgets remain unchanged; renderer C7,
+G8 Exact geodesics and G9 triaxial geodesics remain separate work.

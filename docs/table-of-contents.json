@@ -251,6 +251,7 @@
           "modules/geospatial/projection/README",
           "modules/geospatial/projection/developer-guide/discontinuous-projections",
           "modules/geospatial/myriahedral-maps",
+          "modules/geospatial/elastic-maps",
           "modules/geospatial/discontinuous/projection-catalog",
           "modules/geospatial/discontinuous/README",
           "modules/geospatial/discontinuous/myriahedral",
@@ -275,6 +276,7 @@
             "items": [
               "modules/geospatial/projection/api-reference/projection",
               "modules/geospatial/projection/api-reference/map-engine",
+              "modules/geospatial/projection/api-reference/elastic",
               "modules/geospatial/projection/api-reference/projection-engine",
               "modules/geospatial/projection/api-reference/projection-transform",
               "modules/geospatial/projection/api-reference/projection-pipeline",

@@ -58,7 +58,7 @@ export function createScene(canvas) {
       context.arc(x, y, 3, 0, 2 * Math.PI);
       context.fill();
       context.fillStyle = '#193747';
-      context.fillText(city.label, x + 5, y - 5);
+      if (width >= (data.minLabelWidth ?? 0)) context.fillText(city.label, x + 5, y - 5);
     }
   };
   const resize = new ResizeObserver(draw);

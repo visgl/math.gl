@@ -113,7 +113,7 @@ operation. Detected graph ambiguities, inconsistent closing attributes and
 unresolvable degeneracies reject instead of silently changing topology.
 
 This tranche covers periodic meridian seams. Arbitrary interrupted-chart networks
-remain with [MapEngine](../discontinuous/map-engine.md) and its explicit clipping
+remain with [MapEngine](../projection/api-reference/map-engine.md) and its explicit clipping
 profiles. Projection-domain clipping and terrain following are separate from seam
 splitting; choosing a seam does not make an invalid projection latitude valid.
 

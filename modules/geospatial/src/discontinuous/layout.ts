@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {
-  DiscontinuousMap,
+  MapSurface,
   MapBounds,
   MapPlacement,
   MapRegionLayout,
@@ -58,7 +58,7 @@ const corners = ([left, bottom, right, top]: MapBounds): XY[] => [
 /** Sample actual projected edges, not just region corners. Bounds are approximate
  * to the supplied angular/chord sampling criteria; callbacks must remain stable.
  */
-export function getMapLayout(map: DiscontinuousMap, options: MapSamplingOptions = {}): MapLayout {
+export function getMapLayout(map: MapSurface, options: MapSamplingOptions = {}): MapLayout {
   const regions = map.regions
     .map((region): MapLayoutRegion => {
       const outlines = map
@@ -163,7 +163,7 @@ export function fitMapLayout(layout: MapLayout, options: MapViewportOptions) {
  * A renderer can still reject candidates hidden by its own geometry or styling.
  */
 export function pickMapLayout(
-  map: DiscontinuousMap,
+  map: MapSurface,
   fitted: ReturnType<typeof fitMapLayout>,
   pixel: GeographicPosition
 ) {
