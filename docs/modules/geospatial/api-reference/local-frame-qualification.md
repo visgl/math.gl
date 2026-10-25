@@ -82,8 +82,9 @@ origins and exclude thin/ambiguous-interior cases that do not share that contrac
 This matrix is not arbitrary finite-input certification. Near-silhouette normal
 lifts now use exact dyadic coefficients and a high-precision integer square root
 instead of promoting small negative discriminants to contact. The 1,485 controls
-cover sphere, oblate, prolate and three-radius geometry at ordinary and `1e±60`
-scales. Their mathematical line is defined by the stored binary64 anchor/basis and
+extend the original sphere/oblate/three-radius grid with `(2,2,3)` prolate
+geometry at `1e-60`, ordinary and `1e60` scales; this is a sampled grid rather
+than every shape/scale combination. Their mathematical line is defined by the stored binary64 anchor/basis and
 local coordinates; exact rational signs and independent Decimal roots qualify that
 kernel. The 999 public checks cover exact axial silhouettes and off-axis cases
 away from the one-ulp uncertainty of constructing a rounded basis. Basis creation
@@ -202,3 +203,9 @@ The [recorded packed-frame baseline](https://github.com/visgl/math.gl/blob/maste
 pins the measured source and runtime and exposes noisy samples. Interpret its
 ratios only for that workload and environment. Existing numerical, bundle,
 allocation, coverage and performance thresholds remain unchanged.
+
+In the recorded 4,096-point workload, packed median process CPU time is about
+17–21% of the current scalar loops with reused vectors. Three operation groups
+have noisy wall measurements, and one current scalar CPU group is flagged for
+spread. These observations justify the bounded packed API but do not establish a
+quiet-host release speedup or a zero-allocation guarantee.
