@@ -162,3 +162,22 @@ outputs, support exact in-place storage and fail atomically. See the expanded
 [qualification and benchmark profile](../docs/modules/geospatial/api-reference/local-frame-qualification.md).
 Existing numerical and selective bundle budgets remain unchanged; renderer C7,
 G8 Exact geodesics and G9 triaxial geodesics remain separate work.
+
+## G8/G9 bounded feature delivery
+
+`EllipsoidGeodesicExact` implements elliptic-integral direct/inverse/lines,
+reduced length/scales, winding and area of the full ellipsoid for `0.25 ≤ b/a ≤ 4`.
+It is explicitly selected through `@math.gl/geospatial/geodesic-exact`; edge area
+and arbitrary-length lines remain separate. The existing series engine is unchanged.
+
+`TriaxialEllipsoid`, through `@math.gl/geospatial/triaxial`, adds geodetic,
+parametric and geocentric surface/direction conversions and Cartesian direct
+geodesics/reusable lines for minimum/maximum axis ratio at least `0.25`.
+It handles signed trajectories and equal-axis limits. Global triaxial inverse,
+Jacobi coordinate charts, conformal coordinates and uniform sampling are not
+implemented by this direct-solver profile.
+
+See the [2,105-row qualification](../docs/modules/geospatial/api-reference/geodesic-g89-qualification.md),
+including independent elliptic series, sphere/principal-plane/conservation checks,
+raw native limitations and unchanged accuracy/bundle gates. Both entries are
+optional and add no dependencies or runtime native/model downloads.
