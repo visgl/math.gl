@@ -345,3 +345,52 @@ test('invalid feature entries cannot silently change the feature index table', (
     maps[0].prepareFeatures([{type: 'Other', geometry: null} as unknown as MapFeature])
   ).toThrow(/features/);
 });
+
+test('collection depth counts collections rather than multipart expansion', () => {
+  const nest = (leaf: MapFeatureGeometry, levels: number) => {
+    let geometry = leaf;
+    for (let i = 0; i < levels; i++)
+      geometry = {type: 'GeometryCollection', geometries: [geometry]};
+    return geometry;
+  };
+  for (const geometry of [
+    {type: 'Point', coordinates: [10, 10]},
+    {
+      type: 'MultiPoint',
+      coordinates: [
+        [10, 10],
+        [20, 20]
+      ]
+    },
+    {
+      type: 'MultiLineString',
+      coordinates: [
+        [
+          [10, 10],
+          [20, 20]
+        ]
+      ]
+    },
+    {
+      type: 'MultiPolygon',
+      coordinates: [
+        [
+          [
+            [10, 10],
+            [20, 10],
+            [10, 20]
+          ]
+        ]
+      ]
+    }
+  ] as MapFeatureGeometry[]) {
+    const result = maps[0].prepareFeatures([{geometry: nest(geometry, 64)}]);
+    expect(
+      result.points.parts.length + result.paths.parts.length + result.polygons.parts.length
+    ).toBeGreaterThan(0);
+    expect(() => maps[0].prepareFeatures([{geometry: nest(geometry, 65)}])).toThrow(/deeply/);
+  }
+  expect(() =>
+    maps[0].prepareFeatures([{geometry: nest({type: 'GeometryCollection', geometries: []}, 64)}])
+  ).toThrow(/deeply/);
+});

@@ -186,7 +186,7 @@ export function prepareMapFeatures(
       }
       case 'MultiPoint':
         geometry.coordinates.forEach((p, i) =>
-          visit({type: 'Point', coordinates: p}, featureIndex, [...path, i], depth + 1)
+          visit({type: 'Point', coordinates: p}, featureIndex, [...path, i], depth)
         );
         break;
       case 'LineString':
@@ -202,6 +202,7 @@ export function prepareMapFeatures(
         geometry.coordinates.forEach((rings, i) => addPolygon(rings, featureIndex, [...path, i]));
         break;
       case 'GeometryCollection':
+        if (depth >= 64) throw new Error('Geometry collections are too deeply nested');
         geometry.geometries.forEach((g, i) => visit(g, featureIndex, [...path, i], depth + 1));
         break;
       default:
