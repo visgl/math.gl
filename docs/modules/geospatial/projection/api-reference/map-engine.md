@@ -389,9 +389,8 @@ Neither matching IDs nor matching JSON establishes callback/topology equivalence
 
 The plan does not execute transitions, match vertex arrays, or promise an
 overlap-free morph. Use geographic coordinates to rebuild destination geometry;
-fade differing coverage. Direct transitions between distinct but compatible
-engines, custom reference surfaces, and automatic topology correspondence are
-future extensions.
+fade differing coverage. For prepared direct correspondence between supported global maps, use
+`createTransitionTo()`. Custom reference surfaces remain unsupported.
 
 ### containsConvexPolygon(ring, regionId)
 
@@ -404,3 +403,66 @@ This includes checking whether a cap's excluded interior lies inside the ring,
 even when all original corners are visible. It does not waive the need for
 appropriate mesh subdivision or curved-edge sampling. Ice Age Explorer uses it
 to avoid unnecessary clipping of interior grid cells.
+
+## Elastic sampled definitions
+
+<span class="badge">From v5.0 · Experimental</span>
+
+`{type: 'elastic', data}` compiles a sampled map through the same geometry, layout,
+picking and globe-evaluation methods. See the [Elastic reference](./elastic.md)
+for data imports, the text importer, and numerical limits.
+
+## createTransitionTo(target, options?)
+
+<span class="badge">From v5.0 · Experimental</span>
+
+Returns a `MapTransition` referencing the two immutable engines. `options.strategy`
+is `'auto'` (default), `'direct'`, or `'via-globe'`. `strategy` and `reason` on the
+result report the selected route. Direct preparation is supported for the same
+engine, complete Elastic coverage, and the `world` formulas `sinusoidal`,
+`mollweide`, and `robinson`. Automatic selection
+falls back to the globe for other pairs, including regional coverage and custom
+charts. An explicitly requested unsupported direct route throws.
+
+Unlike the conservative `planTransitionTo()` recommendation, this method opts
+into splitting geometry against both endpoint maps. It does not change the
+existing plan API or make arbitrary projected vertex arrays compatible.
+
+### MapTransition.projectPoint(position, amount)
+
+<span class="badge">From v5.0 · Experimental</span>
+
+Returns `[x, y, z]` or `null` where the relevant endpoint has no coverage. Direct
+motion linearly interpolates the two projected positions in the plane. Globe
+motion reaches the shared sphere at amount 0.4 and leaves it at 0.6; source
+coverage applies before 0.5 and destination coverage afterward. Points do not
+include opacity; use prepared geometry for coverage crossfades.
+
+### MapTransition.prepareLine(positions, sampling?) / preparePolygon(rings, sampling?)
+
+<span class="badge">From v5.0 · Experimental</span>
+
+Accept the same geographic inputs and sampling options as MapEngine projection
+methods. Return `MapTransitionGeometry` with immutable `parts`. Direct parts have
+`sourceRegionId`, `targetRegionId`, `sourceCoordinates`, `from`, and `to` arrays.
+Every array is a list of rings (a line uses one ring) with corresponding vertices.
+Globe-route parts belong to one endpoint, identified by its region ID. Retain
+these parts separately: joining them would draw across cuts. Preparation can be
+expensive; cache results or prepare features cooperatively outside the frame loop.
+
+### MapTransitionGeometry.evaluate(amount)
+
+<span class="badge">From v5.0 · Experimental</span>
+
+Amount must be finite in `[0, 1]`. Returns frames containing `kind`, endpoint region
+IDs, `coordinates: MapPosition3D[][]`, and `opacity`. Direct frames use linear
+interpolation and opacity 1. Globe frames flatten/unflatten over the outer 40%
+of progress and crossfade endpoint geometry during the middle 20%. Invisible
+parts are omitted. Renderers must apply opacity and own camera fitting, occlusion,
+easing and animation cancellation. Evaluation creates fresh arrays, without
+re-clipping geometry.
+
+Intermediate direct shapes may overlap or invert. Endpoint edge sampling and
+sampled geographic intersection approximate correspondence; they are not a certified error
+bound or a fold-free parameterization. Inverse picking of intermediate geometry
+is not provided. See [Elastic maps](../../elastic-maps.md) for an animated example.

@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {triangulateSourcePolygon, isConvexSourcePolygon} from './triangulate-source-polygon.js';
 import {MapEngine, MAP_PROJECTIONS} from '@math.gl/geospatial/discontinuous';
+import {elasticI, elasticII, elasticIII} from '@math.gl/geospatial/elastic';
 import {MYRIAHEDRAL_VIEWS} from './map-options.js';
 export {MYRIAHEDRAL_VIEWS, DISCONTINUOUS_VIEWS} from './map-options.js';
 
@@ -35,6 +36,9 @@ function dggsPanels(system) {
   return dggsMeshes.get(system);
 }
 const definitions = {
+  'elastic-I': {type: 'elastic', data: elasticI},
+  'elastic-II': {type: 'elastic', data: elasticII},
+  'elastic-III': {type: 'elastic', data: elasticIII},
   ...Object.fromEntries(
     MAP_PROJECTIONS.map(projection => [
       `projection:${projection}`,

@@ -110,3 +110,15 @@ export type {RegionalProjection, RegionalMapOptions} from './discontinuous/regio
 
 export {createProjectionMap, MAP_PROJECTIONS} from './discontinuous/projection-catalog';
 export type {MapProjection, ProjectionMapOptions} from './discontinuous/projection-catalog';
+
+export {createElasticMap} from './discontinuous/elastic/map';
+export {parseElasticMap} from './discontinuous/elastic/data';
+export type {ElasticMapData, ElasticSection} from './discontinuous/elastic/data';
+export type {MapSurface} from './discontinuous/map-layout';
+
+export {MapTransition, MapTransitionGeometry} from './discontinuous/map-transition';
+export type {
+  MapTransitionOptions,
+  MapTransitionPart,
+  MapTransitionFrame
+} from './discontinuous/map-transition';

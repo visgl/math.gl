@@ -581,3 +581,20 @@ function clipPlane(ring: Position[], a: number, b: number, c: number): Position[
   }
   return output;
 }
+
+/** Rendering contract shared by analytic charts and sampled maps. Region
+ * boundaries are convex envelopes; use projection methods and outlines for
+ * exact coverage (caps and sampled sections can occupy only part of a chart).
+ * Sampled seam edge indices address flattened coverage rings. */
+export type MapSurface = Pick<
+  DiscontinuousMap,
+  | 'regions'
+  | 'seams'
+  | 'findRegions'
+  | 'containsConvexPolygon'
+  | 'projectPoint'
+  | 'unprojectPoint'
+  | 'projectLine'
+  | 'projectPolygon'
+  | 'getRegionOutlines'
+>;

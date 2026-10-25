@@ -1079,6 +1079,11 @@
       "types": "./dist/discontinuous.d.ts",
       "import": "./dist/discontinuous.js",
       "require": "./dist/discontinuous.cjs"
+    },
+    "./elastic": {
+      "types": "./dist/elastic.d.ts",
+      "import": "./dist/elastic.js",
+      "require": "./dist/elastic.cjs"
     }
   },
   "files": [
