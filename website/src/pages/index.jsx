@@ -212,7 +212,7 @@ export default function IndexPage() {
             }}
           />
           <div className={styles.heroContent}>
-            <p className={styles.heroEyebrow}>Geospatial &amp; 3D math for JavaScript</p>
+            <p className={styles.heroEyebrow}>Geospatial &amp; 3D math for the Web</p>
             <h1>
               Math for the shape
               <br />

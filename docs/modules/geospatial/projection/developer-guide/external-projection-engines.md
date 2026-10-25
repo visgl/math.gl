@@ -1,4 +1,4 @@
-# Wrap proj4 and D3 projections
+# Using external projection engines
 
 Applications can implement the [`ProjectionEngine`](../api-reference/projection-engine.md)
 interface around another library. This lets consumers accept a common factory while
