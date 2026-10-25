@@ -51,3 +51,11 @@ This is a **direct** solver. There is no global triaxial inverse, closest-route 
 The [G8/G9 matrix](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-g89-qualification.md) compares these original Cartesian trajectories against GeographicLib 2.7's distinct Jacobi solution, including equal-axis limits, three-axis shapes, signed distances and sampled extreme scales. Independent sphere and principal-ellipse identities, speed, surface and Joachimsthal checks supplement native comparisons.
 
 No upstream triaxial implementation is copied or loaded at runtime, and no new dependency or mandatory model data is required. The existing GeographicLib MIT notices identify its role as the offline comparator.
+
+## Area-uniform surface sampling[​](#area-uniform-surface-sampling "Direct link to Area-uniform surface sampling")
+
+`ellipsoid.sampleSurface(random = Math.random)` returns a new Cartesian point in axis units, distributed uniformly by **surface area**, provided the random source supplies independent uniform values in `[0, 1)`. Inject a seeded generator for reproducible simulation. Uniform latitude, uniform parametric angles, and simply stretching a sphere do not produce this distribution.
+
+The original implementation proposes a uniform sphere direction `u`, maps it to `diag(radii) u`, and accepts with probability `min(radii) × length(u / radii)`. The surface Jacobian is proportional to that factor. Shape normalization prevents underflow/overflow; sphere proposals are always accepted. Each attempt uses three draws. The existing minimum/maximum axis ratio of 0.25 gives acceptance probability at least 0.25 under an IID source. The method throws after 1,024 rejected proposals, or immediately for invalid random values. It does not replace invalid draws or promise cryptographic randomness.
+
+Independent normal-coordinate quadrature integrates the reciprocal Gauss curvature, using a distinct coordinate measure, to establish normalized second moments. Five deterministic 32,768-point statistical checks test these expectations and surface residuals in Node and browsers. Their moment tolerance is statistical (0.012), not a claim of pointwise numerical error. Existing triaxial conversion and trajectory accuracy gates remain unchanged. No random-number package is added.

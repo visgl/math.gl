@@ -175,6 +175,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 @math.gl/geospatial provides ellipsoid geometry, geographic/Cartesian conversions, local tangent frames, globe queries, and tile-grid geometry. Use it for WGS84 positions and 3D Tiles bounds without a renderer dependency.
 
 - [Overview](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md): @math.gl/geospatial provides ellipsoid geometry, geographic/Cartesian conversions, local tangent frames, globe queries, and tile-grid geometry. Use it for WGS84 positions and 3D Tiles bounds without a renderer dependency.
+- [Coordinate utilities](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/coordinate-utilities.md): @math.gl/geospatial/coordinates supplies strict angle text, standard WGS84
 - [Ellipsoid](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid.md): A quadratic surface defined in Cartesian coordinates by the equation (x / a)^2 + (y / b)^2 + (z / c)^2 = 1. Primarily used to represent the shape of planetary bodies.
 - [Ellipsoid accuracy and GeographicLib coverage](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-accuracy.md): math.gl targets GeographicLib numerical quality for geodesics and independently
 - [EllipsoidGeodesic](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-geodesic.md): Shortest surface geodesics on an oblate or prolate ellipsoid of revolution, or sphere. This complements the
@@ -185,6 +186,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Exact geodesic edge-area and polygon qualification](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-exact-area-qualification.md): EllipsoidGeodesicExact now optionally computes S12; GeodesicPolygonExact
 - [G8/G9 geodesic qualification](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-g89-qualification.md): This feature increment supplies two optional APIs:
 - [GeodesicIntersections](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-intersections.md): Coordinates and azimuths are degrees; distances use axis units. The qualified
+- [Packed geodesic and rhumb line sampling](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-line-buffer.md): GeodesicLineBuffer and RhumbLineBuffer sample a prepared line into caller-owned
 - [GeodesicPath](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-path.md): A reusable shortest geodesic between two geographic endpoints, sampled by surface-distance
 - [GeodesicPolygon](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-polygon.md): Streaming geodesic polygons and open polylines on revolution ellipsoids. This
 - [Geographic line and polygon seams](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geographic-seams.md): A longitude seam is a discontinuity in the map chart, not a gap in the globe.
