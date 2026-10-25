@@ -69,3 +69,44 @@ test('Exact direct winding uses the compensated polygon transit convention', () 
   expect(Math.abs(l.arcPosition(30).S12! - l.arcPosition(390).S12!)).toBeLessThan(5e-14);
   expect(Math.abs(l.arcPosition(720).S12!)).toBeLessThan(5e-14);
 });
+test('Area requests retain near-coincident inverse support below the old Jacobi guard', () => {
+  for (const ratio of [0.25, 1, 4])
+    for (const delta of [1e-14, 1e-16, 1e-18, 1e-20]) {
+      const e = new EllipsoidGeodesicExact({semiMajorAxis: 1, semiMinorAxis: ratio});
+      const r = e.inverse(0, 0, delta, 0, {area: true});
+      expect(Math.abs(r.S12!)).toBe(0);
+      expect(Number.isFinite(r.s12)).toBe(true);
+      const p = new GeodesicPolygonExact({semiMajorAxis: 1, semiMinorAxis: ratio});
+      expect(p.addPoint(0, 0).addPoint(delta, 0).compute().area).toBe(0);
+    }
+});
+test('Polar full auxiliary circuits preserve exact degree phases', () => {
+  for (const ratio of [0.25, 1, 4])
+    for (const latitude of [-90, 90])
+      for (const arc of [-720, -360, 0, 360, 720]) {
+        const e = new EllipsoidGeodesicExact({semiMajorAxis: 1, semiMinorAxis: ratio});
+        const r = e.line(latitude, 20, 45, {area: true}).arcPosition(arc);
+        expect(Math.abs(r.S12!)).toBe(0);
+        expect(r.lat2).toBe(latitude);
+        expect(Math.abs(r.azi2 - 45)).toBeLessThan(1e-9);
+      }
+});
+
+test('Exact polygons bound generated longitudes while retaining transit parity', () => {
+  const axes = {semiMajorAxis: 1, semiMinorAxis: 1};
+  for (const longitude of [999990, -999990]) {
+    const p = new GeodesicPolygonExact(axes).addPoint(0, longitude).addEdge(90, 1);
+    const q = new GeodesicPolygonExact(axes).addPoint(0, longitude % 720).addEdge(90, 1);
+    expect(p.compute()).toEqual(q.compute());
+    for (let i = 0; i < 5; i++) {
+      p.addEdge(40, 0.2);
+      q.addEdge(40, 0.2);
+    }
+    p.addPoint(20, longitude);
+    q.addPoint(20, longitude % 720);
+    expect(p.compute()).toEqual(q.compute());
+    const before = p.compute();
+    expect(() => p.addPoint(0, 1000001)).toThrow();
+    expect(p.compute()).toEqual(before);
+  }
+});

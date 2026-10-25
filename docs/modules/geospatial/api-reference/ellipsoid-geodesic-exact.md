@@ -79,7 +79,9 @@ The accumulator supports `addPoint(latitude, longitude)`, signed
 `addEdge(azimuth, distance)`, `compute({reverse?, unsigned?})`, nonmutating
 `testPoint`/`testEdge`, `number` and `clear()`. Construction with
 `{polyline: true}` accumulates an open signed perimeter and omits area. It retains
-compensated sums, not vertices. Point insertion selects the inverse solver’s
+compensated sums, not vertices. Internal longitude labels are reduced modulo
+720 degrees so generated edges preserve crossing parity without exhausting the
+external input limit. Point insertion selects the inverse solver’s
 shortest candidate; use direct edges for winding routes. `longitudeTurns` on
 point insertion is rejected when nonzero.
 

@@ -1,7 +1,7 @@
 {
   "provenance": {
     "precisionDigits": 120,
-    "generatorSHA256": "5a2cbc3952c51034d841e1a0ca307a39a5dff6833688e5ef1bac6d6662e5730a"
+    "generatorSHA256": "78bacc1ea95dcdcc4b988a19a1ca57c6182443b540fce9a834f2cb5fbab92155"
   },
   "rows": [
     {
@@ -321,6 +321,174 @@
       "ratio": 1,
       "degrees": 1e-07,
       "expected": 1.523087098933543e-18
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": -90,
+      "arc": -720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": -90,
+      "arc": -360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": -90,
+      "arc": 360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": -90,
+      "arc": 720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": 90,
+      "arc": -720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": 90,
+      "arc": -360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": 90,
+      "arc": 360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": 90,
+      "arc": 720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": -90,
+      "arc": -720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": -90,
+      "arc": -360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": -90,
+      "arc": 360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": -90,
+      "arc": 720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": 90,
+      "arc": -720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": 90,
+      "arc": -360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": 90,
+      "arc": 360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": 90,
+      "arc": 720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": -90,
+      "arc": -720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": -90,
+      "arc": -360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": -90,
+      "arc": 360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": -90,
+      "arc": 720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": 90,
+      "arc": -720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": 90,
+      "arc": -360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": 90,
+      "arc": 360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": 90,
+      "arc": 720,
+      "expected": 0
     }
   ]
 }

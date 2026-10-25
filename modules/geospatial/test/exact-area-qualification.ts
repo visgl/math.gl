@@ -68,7 +68,9 @@ export function qualifyExactArea() {
     let value = NaN,
       failure = '';
     try {
-      if (r.mode === 'edge') value = solver.direct(0, 0, 45, r.distance!, {area: true}).S12!;
+      if (r.mode === 'polar')
+        value = solver.line(r.latitude!, 20, 45, {area: true}).arcPosition(r.arc!).S12!;
+      else if (r.mode === 'edge') value = solver.direct(0, 0, 45, r.distance!, {area: true}).S12!;
       else {
         const d = r.degrees!,
           p = new GeodesicPolygonExact({semiMajorAxis: 1, semiMinorAxis: r.ratio});
@@ -81,7 +83,7 @@ export function qualifyExactArea() {
       failure = String(e);
     }
     const budget =
-      r.mode === 'lune'
+      r.mode === 'lune' || r.mode === 'polar'
         ? 5e-14 * 3
         : r.mode === 'edge'
           ? Math.abs(r.expected) * 2e-8

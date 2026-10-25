@@ -37,6 +37,9 @@ def controls():
   for degrees in ['45','1','.0001','.0000001']:
    delta=D(degrees)*pi/180;t=sine(delta/2)/sine(pi/2-delta/2)
    rows.append(dict(mode='sphere',ratio=1,degrees=float(degrees),expected=float(2*atan(t*t))))
+  for ratio in [.25,1,4]:
+   for latitude in [-90,90]:
+    for arc in [-720,-360,360,720]:rows.append(dict(mode='polar',ratio=ratio,latitude=latitude,arc=arc,expected=0))
   return rows
 p=argparse.ArgumentParser();p.add_argument('--check',action='store_true');args=p.parse_args()
 data=dict(provenance=dict(precisionDigits=120,generatorSHA256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()),rows=controls())

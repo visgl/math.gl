@@ -85,6 +85,7 @@ export class EllipsoidGeodesicExact {
         8 *
           Number.EPSILON *
           (options.area &&
+          distance !== 0 &&
           Math.abs(distance) < 1e-5 * Math.max(this.semiMajorAxis, this.semiMinorAxis)
             ? Math.abs(distance)
             : Math.max(this.semiMajorAxis, this.semiMinorAxis)) +
@@ -111,15 +112,16 @@ export class EllipsoidGeodesicExact {
           ...(options.area && Math.abs(lat2) === 90
             ? {S12: this.engine._c2 * angleMath.AngNormalize(result.azi2 - result.azi1) * DEG}
             : {}),
-          azi2:
-            Math.abs(lat2) === 90
-              ? angleMath.AngNormalize(
-                  endpoint.azi2 + Math.sign(lat2) * (angleMath.AngNormalize(lon2) - endpoint.lon2)
-                )
-              : endpoint.azi2
+          // At an exact pole, preserve the inverse framework's requested-meridian
+          // bearing; a rounded direct endpoint cannot determine that convention.
+          azi2: Math.abs(lat2) === 90 ? result.azi2 : endpoint.azi2
         };
       }
-      if (distance === 0 || Math.abs(endpoint.m12) < 1e-15 * this.semiMajorAxis) break;
+      if (
+        distance === 0 ||
+        (options.area ? endpoint.m12 === 0 : Math.abs(endpoint.m12) < 1e-15 * this.semiMajorAxis)
+      )
+        break;
       const heading = angleMath.sincosd(endpoint.azi2);
       distance += heading.c * north + heading.s * east;
       azimuth += (heading.c * east - heading.s * north) / endpoint.m12 / DEG;
@@ -170,9 +172,13 @@ export class EllipsoidGeodesicExact {
     const unroll = Boolean(options.unrollLongitude),
       azi1 = angleMath.AngNormalize(azimuth);
     const distanceLimit = b * I.E(sig1, 4 * Math.PI);
-    const evaluate = (delta: number, distance?: number): GeodesicResult => {
-      const s2 = s1 * Math.cos(delta) + c1 * Math.sin(delta),
-        c2 = c1 * Math.cos(delta) - s1 * Math.sin(delta);
+    const evaluate = (delta: number, distance?: number, arcDegrees?: number): GeodesicResult => {
+      const phase =
+        arcDegrees === undefined
+          ? {s: Math.sin(delta), c: Math.cos(delta)}
+          : angleMath.sincosd(arcDegrees);
+      const s2 = s1 * phase.c + c1 * phase.s,
+        c2 = c1 * phase.c - s1 * phase.s;
       const dn2 = Math.sqrt(1 + k2 * s2 * s2),
         J = I.J(sig1, delta);
       const chi2 = Math.atan2(sign * sa0 * s2, f1 * dn2 * c2),
@@ -180,6 +186,12 @@ export class EllipsoidGeodesicExact {
       const t = (k2 * (s2 - s1) * (s2 + s1)) / (dn1 + dn2);
       // Form short angular differences from cross/dot products, avoiding subtraction
       // of near-pi phases on tiny edges. The dn difference is rationalized above.
+      const turns = Math.trunc(arcDegrees === undefined ? delta / Math.PI : arcDegrees / 180),
+        remainder = arcDegrees === undefined ? delta - turns * Math.PI : arcDegrees - turns * 180;
+      const parity = Math.abs(turns % 2) === 1 ? -1 : 1;
+      const sr = phase.s * parity;
+      const endS = s2 * parity,
+        endC = c2 * parity;
       const chi =
         sa0 === 0
           ? Math.round(
@@ -187,16 +199,17 @@ export class EllipsoidGeodesicExact {
                 Math.PI
             ) * Math.PI
           : sign *
-            (delta -
-              Math.atan2(Math.sin(delta), Math.cos(delta)) +
-              Math.atan2(
-                sign * sa0 * f1 * (dn1 * Math.sin(delta) - t * s1 * c2),
-                f1 * f1 * dn1 * dn2 * c1 * c2 + sa0 * sa0 * s1 * s2
-              ));
+            (turns * Math.PI +
+              (remainder === 0
+                ? 0
+                : Math.atan2(
+                    sign * sa0 * f1 * (dn1 * sr - t * s1 * endC),
+                    f1 * f1 * dn1 * dn2 * c1 * endC + sa0 * sa0 * s1 * endS
+                  )));
       const longitude =
         (unroll ? lon : angleMath.AngNormalize(lon)) +
         (chi - (e2 / f1) * sa0 * I.H(sig1, delta)) / DEG;
-      const cosine = Math.cos(delta);
+      const cosine = phase.c;
       return {
         lat1: lat,
         lon1: unroll ? lon : angleMath.AngNormalize(lon),
@@ -212,8 +225,8 @@ export class EllipsoidGeodesicExact {
         ...(includeArea
           ? {
               S12: (() => {
-                const sd = Math.sin(delta),
-                  cd = Math.cos(delta);
+                const sd = phase.s,
+                  cd = phase.c;
                 const sine =
                   ca0 *
                   sa0 *
@@ -241,7 +254,7 @@ export class EllipsoidGeodesicExact {
       arcPosition: (arc: number) => {
         finite(arc);
         if (Math.abs(arc) > 720) throw new RangeError('Exact line arc exceeds 720 degrees');
-        return evaluate(arc * DEG);
+        return evaluate(arc * DEG, undefined, arc);
       },
       position: (distance: number) => {
         finite(distance);

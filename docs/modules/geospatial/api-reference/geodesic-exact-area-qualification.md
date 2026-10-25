@@ -15,8 +15,9 @@ inverse shortest-path candidate; a cut locus does not imply route uniqueness.
   crossings, signed distances, complete circuits, self-intersections, reversal,
   unsigned complements and repeated vertices. An additional 1,400 deterministic
   inverse inputs include the prolate/polar conditioning regressions.
-- **53 independent controls** use 120-digit Decimal arithmetic, without the
-  production quadrature or native implementation: ellipsoidal equator/pole
+- **77 independent controls** use 120-digit Decimal arithmetic, without the
+  production quadrature or native implementation: exact full-circuit polar
+  identities, ellipsoidal equator/pole
   patches from analytic surface area, exact spherical right triangles, and tiny
   equatorial triangle/short-direct-edge limits. For the small ellipsoidal cases,
   the local metric gives `b² δ² / 2` for the triangle and `s² / 4` for a 45-degree
