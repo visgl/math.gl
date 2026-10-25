@@ -41,6 +41,7 @@ export function mountElasticMaps(root) {
     }
   };
   listen(find('[data-map]'), 'change', update);
+  listen(find('[data-route]'), 'change', update);
   listen(find('[data-grid]'), 'change', e => scene.setGrid(e.target.checked));
   listen(find('canvas'), 'pointermove', e => {
     if (busy) return;

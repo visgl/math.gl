@@ -140,7 +140,17 @@ export class MapTransition {
     const first = this.source.projectLine(line, options),
       last = this.target.projectLine(line, options);
     const parts: MapTransitionPart[] = [];
-    if (this.strategy === 'direct') {
+    if (this.strategy === 'direct' && this.source === this.target) {
+      for (const p of first)
+        parts.push({
+          kind: 'line',
+          sourceRegionId: p.regionId,
+          targetRegionId: p.regionId,
+          sourceCoordinates: [p.sourceCoordinates],
+          from: [p.coordinates],
+          to: [p.coordinates]
+        });
+    } else if (this.strategy === 'direct') {
       for (const a of first)
         for (const b of this.target.projectLine(a.sourceCoordinates, options)) {
           const source = this.source.regions.find(r => r.id === a.regionId)!;
@@ -180,7 +190,17 @@ export class MapTransition {
     const first = this.source.projectPolygon(rings, options),
       last = this.target.projectPolygon(rings, options),
       parts: MapTransitionPart[] = [];
-    if (this.strategy === 'direct') {
+    if (this.strategy === 'direct' && this.source === this.target) {
+      for (const p of first)
+        parts.push({
+          kind: 'polygon',
+          sourceRegionId: p.regionId,
+          targetRegionId: p.regionId,
+          sourceCoordinates: p.sourceCoordinates,
+          from: p.coordinates,
+          to: p.coordinates
+        });
+    } else if (this.strategy === 'direct') {
       // Intersect the already sampled geographic rings. Re-interpreting a
       // clipped cut boundary as new great-circle input would bend that boundary
       // and can create invalid slivers at a chart's pole or antimeridian.

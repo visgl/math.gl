@@ -212,3 +212,49 @@ test('common polygon refinement covers the world once, including rotated target 
     expect(sum, target.description.id).toBeCloseTo(360 * 180, 5);
   }
 });
+
+test('same-engine direct transitions retain overlapping charts without moving copies', () => {
+  const map = new MapEngine(
+    {
+      version: 1,
+      id: 'overlap',
+      definition: {
+        type: 'custom',
+        charts: [0, 100].map(x => ({
+          id: `chart-${x}`,
+          projection: 'degrees',
+          boundary: [
+            [0, 0],
+            [30, 0],
+            [0, 30]
+          ],
+          interior: [10, 10],
+          placement: [1, 0, 0, 1, x, 0]
+        }))
+      }
+    },
+    {projections: {degrees: {project: ([x, y]) => [x, y], unproject: ([x, y]) => [x, y]}}}
+  );
+  const transition = map.createTransitionTo(map);
+  for (const geometry of [
+    transition.prepareLine([
+      [5, 5],
+      [10, 10]
+    ]),
+    transition.preparePolygon([
+      [
+        [5, 5],
+        [10, 5],
+        [5, 10]
+      ]
+    ])
+  ]) {
+    expect(geometry.parts).toHaveLength(2);
+    for (const part of geometry.parts) {
+      expect(part.sourceRegionId).toBe(part.targetRegionId);
+      expect(part.from).toEqual(part.to);
+    }
+    expect(geometry.evaluate(0.5)).toEqual(geometry.evaluate(0));
+    expect(geometry.evaluate(1)).toEqual(geometry.evaluate(0));
+  }
+});
