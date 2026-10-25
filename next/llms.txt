@@ -182,6 +182,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [EllipsoidMetrics](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-metrics.md): Metrics and auxiliary latitudes for a sphere or an oblate/prolate ellipsoid of
 - [EllipsoidRhumb and RhumbPolygon](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-rhumb.md): A rhumb line is a route that keeps the same compass bearing throughout—for
 - [EllipsoidTangentPlane](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-tangent-plane.md): A two-dimensional east-north plane tangent to a supplied ellipsoid (WGS84 by default). It converts fixed Cartesian
+- [Exact geodesic edge-area and polygon qualification](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-exact-area-qualification.md): EllipsoidGeodesicExact now optionally computes S12; GeodesicPolygonExact
 - [G8/G9 geodesic qualification](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-g89-qualification.md): This feature increment supplies two optional APIs:
 - [GeodesicIntersections](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-intersections.md): Coordinates and azimuths are degrees; distances use axis units. The qualified
 - [GeodesicPath](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-path.md): A reusable shortest geodesic between two geographic endpoints, sampled by surface-distance
