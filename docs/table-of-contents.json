@@ -210,6 +210,7 @@
           "modules/geospatial/api-reference/local-reference-frame",
           "modules/geospatial/api-reference/local-frame-qualification",
           "modules/geospatial/api-reference/ellipsoid-geodesic-exact",
+          "modules/geospatial/api-reference/geodesic-exact-area-qualification",
           "modules/geospatial/api-reference/triaxial-geometry",
           "modules/geospatial/api-reference/geodesic-g89-qualification",
           "modules/geospatial/api-reference/lng-lat-rectangle",

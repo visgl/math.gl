@@ -6,7 +6,8 @@
 import type {GeodesicParameters, GeodesicResult, GeodesicLine} from './ellipsoid-geodesic';
 import {exactInverseEngine, angleMath, library} from './geodesic-exact/inverse-engine';
 import {ellipticIntegrals} from './geodesic-exact/quadrature';
-export type ExactGeodesicOptions = {unrollLongitude?: boolean};
+import {areaCorrection} from './geodesic-exact/area';
+export type ExactGeodesicOptions = {unrollLongitude?: boolean; area?: boolean};
 const DEG = Math.PI / 180;
 function point(lat: number, lon: number) {
   if (!Number.isFinite(lat) || Math.abs(lat) > 90 || !Number.isFinite(lon) || Math.abs(lon) > 1e6)
@@ -17,7 +18,7 @@ function finite(x: number) {
 }
 /** Elliptic-integral revolution geodesics, independently selected from the series solver.
  * Angles are degrees. Qualified axis ratio b/a is [0.25,4], axis scales [1e-60,1e60].
- * Edge area is deliberately not part of this API.
+ * Signed edge area is opt-in and uses squared axis units.
  */
 export class EllipsoidGeodesicExact {
   private readonly engine: ReturnType<typeof exactInverseEngine>;
@@ -53,8 +54,6 @@ export class EllipsoidGeodesicExact {
   ): GeodesicResult {
     point(lat1, lon1);
     point(lat2, lon2);
-    if ((options as ExactGeodesicOptions & {area?: boolean}).area)
-      throw new RangeError('Exact edge area is not supported');
     const result = this.engine.Inverse(
       lat1,
       lon1,
@@ -76,34 +75,53 @@ export class EllipsoidGeodesicExact {
     const meridian = (this.semiMajorAxis * f1 * f1) / denominator ** 3;
     const parallel = (this.semiMajorAxis * target.c) / denominator;
     for (let iteration = 0; iteration < 8; iteration++) {
-      const endpoint = this.direct(lat1, lon1, azimuth, distance);
+      const endpoint = this.direct(lat1, lon1, azimuth, distance, {area: options.area});
       const north = meridian * (lat2 - endpoint.lat2) * DEG;
       const east =
         parallel * angleMath.AngNormalize(angleMath.AngNormalize(lon2) - endpoint.lon2) * DEG;
       // Propagate angular subtraction roundoff into physical endpoint units.
       // Longitude labels near 180 degrees can lose several ulps even on short routes.
       const rounding =
-        8 * Number.EPSILON * Math.max(this.semiMajorAxis, this.semiMinorAxis) +
+        8 *
+          Number.EPSILON *
+          (options.area &&
+          distance !== 0 &&
+          Math.abs(distance) < 1e-5 * Math.max(this.semiMajorAxis, this.semiMinorAxis)
+            ? Math.abs(distance)
+            : Math.max(this.semiMajorAxis, this.semiMinorAxis)) +
         4 *
           Number.EPSILON *
           DEG *
           (Math.abs(meridian) * (Math.abs(lat2) + Math.abs(endpoint.lat2)) +
             Math.abs(parallel) *
               (Math.abs(angleMath.AngNormalize(lon2)) + Math.abs(endpoint.lon2)));
-      if (Math.hypot(north, east) <= rounding)
+      if (Math.hypot(north, east) <= rounding) {
+        let edgeArea = endpoint.S12;
+        if (options.area && Math.abs(lat1) < Math.abs(lat2) && Math.abs(lat2) < 90) {
+          // Evaluate area from the more polar endpoint, so terminal bearing
+          // roundoff is not amplified at a nearly polar endpoint. Reversal is
+          // algebraically exact; the reversed call cannot take this branch.
+          edgeArea = -this.inverse(lat2, lon2, lat1, lon1, {area: true}).S12!;
+        }
         return {
           ...endpoint,
           lat2,
           lon1: result.lon1,
           lon2: result.lon2,
-          azi2:
-            Math.abs(lat2) === 90
-              ? angleMath.AngNormalize(
-                  endpoint.azi2 + Math.sign(lat2) * (angleMath.AngNormalize(lon2) - endpoint.lon2)
-                )
-              : endpoint.azi2
+          ...(options.area ? {S12: edgeArea} : {}),
+          ...(options.area && Math.abs(lat2) === 90
+            ? {S12: this.engine._c2 * angleMath.AngNormalize(result.azi2 - result.azi1) * DEG}
+            : {}),
+          // At an exact pole, preserve the inverse framework's requested-meridian
+          // bearing; a rounded direct endpoint cannot determine that convention.
+          azi2: Math.abs(lat2) === 90 ? result.azi2 : endpoint.azi2
         };
-      if (distance === 0 || Math.abs(endpoint.m12) < 1e-15 * this.semiMajorAxis) break;
+      }
+      if (
+        distance === 0 ||
+        (options.area ? endpoint.m12 === 0 : Math.abs(endpoint.m12) < 1e-15 * this.semiMajorAxis)
+      )
+        break;
       const heading = angleMath.sincosd(endpoint.azi2);
       distance += heading.c * north + heading.s * east;
       azimuth += (heading.c * east - heading.s * north) / endpoint.m12 / DEG;
@@ -128,8 +146,6 @@ export class EllipsoidGeodesicExact {
   ): GeodesicLine {
     point(lat, lon);
     finite(azimuth);
-    if ((options as ExactGeodesicOptions & {area?: boolean}).area)
-      throw new RangeError('Exact edge area is not supported');
     const a = this.semiMajorAxis,
       b = this.semiMinorAxis,
       f1 = b / a,
@@ -152,22 +168,48 @@ export class EllipsoidGeodesicExact {
       I = ellipticIntegrals(k2, ep2),
       dn1 = Math.sqrt(1 + k2 * s1 * s1);
     const sign = sa0 < 0 || Object.is(sa0, -0) ? -1 : 1;
+    const includeArea = Boolean(options.area);
     const unroll = Boolean(options.unrollLongitude),
       azi1 = angleMath.AngNormalize(azimuth);
     const distanceLimit = b * I.E(sig1, 4 * Math.PI);
-    const evaluate = (delta: number, distance?: number): GeodesicResult => {
-      const s2 = s1 * Math.cos(delta) + c1 * Math.sin(delta),
-        c2 = c1 * Math.cos(delta) - s1 * Math.sin(delta);
+    const evaluate = (delta: number, distance?: number, arcDegrees?: number): GeodesicResult => {
+      const phase =
+        arcDegrees === undefined
+          ? {s: Math.sin(delta), c: Math.cos(delta)}
+          : angleMath.sincosd(arcDegrees);
+      const s2 = s1 * phase.c + c1 * phase.s,
+        c2 = c1 * phase.c - s1 * phase.s;
       const dn2 = Math.sqrt(1 + k2 * s2 * s2),
         J = I.J(sig1, delta);
       const chi2 = Math.atan2(sign * sa0 * s2, f1 * dn2 * c2),
         signedChi1 = Math.atan2(sign * sa0 * s1, f1 * dn1 * c1);
-      const chi = sign * (delta - (Math.atan2(s2, c2) - Math.atan2(s1, c1)) + (chi2 - signedChi1));
+      const t = (k2 * (s2 - s1) * (s2 + s1)) / (dn1 + dn2);
+      // Form short angular differences from cross/dot products, avoiding subtraction
+      // of near-pi phases on tiny edges. The dn difference is rationalized above.
+      const turns = Math.trunc(arcDegrees === undefined ? delta / Math.PI : arcDegrees / 180),
+        remainder = arcDegrees === undefined ? delta - turns * Math.PI : arcDegrees - turns * 180;
+      const parity = Math.abs(turns % 2) === 1 ? -1 : 1;
+      const sr = phase.s * parity;
+      const endS = s2 * parity,
+        endC = c2 * parity;
+      const chi =
+        sa0 === 0
+          ? Math.round(
+              (sign * (delta - (Math.atan2(s2, c2) - Math.atan2(s1, c1)) + (chi2 - signedChi1))) /
+                Math.PI
+            ) * Math.PI
+          : sign *
+            (turns * Math.PI +
+              (remainder === 0
+                ? 0
+                : Math.atan2(
+                    sign * sa0 * f1 * (dn1 * sr - t * s1 * endC),
+                    f1 * f1 * dn1 * dn2 * c1 * endC + sa0 * sa0 * s1 * endS
+                  )));
       const longitude =
         (unroll ? lon : angleMath.AngNormalize(lon)) +
         (chi - (e2 / f1) * sa0 * I.H(sig1, delta)) / DEG;
-      const t = (k2 * (s2 - s1) * (s2 + s1)) / (dn1 + dn2),
-        cosine = Math.cos(delta);
+      const cosine = phase.c;
       return {
         lat1: lat,
         lon1: unroll ? lon : angleMath.AngNormalize(lon),
@@ -179,14 +221,40 @@ export class EllipsoidGeodesicExact {
         a12: delta / DEG,
         m12: b * (dn2 * (c1 * s2) - dn1 * (s1 * c2) - c1 * c2 * J),
         M12: cosine + ((t * s2 - c2 * J) * s1) / dn1,
-        M21: cosine - ((t * s1 - c1 * J) * s2) / dn2
+        M21: cosine - ((t * s1 - c1 * J) * s2) / dn2,
+        ...(includeArea
+          ? {
+              S12: (() => {
+                const sd = phase.s,
+                  cd = phase.c;
+                const sine =
+                  ca0 *
+                  sa0 *
+                  (cd <= 0 ? c1 * (1 - cd) + sd * s1 : sd * ((c1 * sd) / (1 + cd) + s1));
+                const cosine = sa0 * sa0 + ca0 * ca0 * c1 * c2;
+                const angle =
+                  ca0 === 0 || sa0 === 0
+                    ? Math.atan2(
+                        sa0 * alpha.c - ca0 * c2 * alpha.s,
+                        ca0 * c2 * alpha.c + sa0 * alpha.s
+                      )
+                    : Math.atan2(sine, cosine);
+                return (
+                  this.engine._c2 * angle +
+                  (a * a * e2 * ca0 * sa0 === 0
+                    ? 0
+                    : a * a * e2 * ca0 * sa0 * areaCorrection(ep2, k2, s1, c1, delta))
+                );
+              })()
+            }
+          : {})
       };
     };
     return {
       arcPosition: (arc: number) => {
         finite(arc);
         if (Math.abs(arc) > 720) throw new RangeError('Exact line arc exceeds 720 degrees');
-        return evaluate(arc * DEG);
+        return evaluate(arc * DEG, undefined, arc);
       },
       position: (distance: number) => {
         finite(distance);
@@ -214,3 +282,9 @@ export class EllipsoidGeodesicExact {
     };
   }
 }
+
+export {GeodesicPolygonExact} from './geodesic-exact/polygon';
+export type {
+  SurfacePolygonOptions as ExactPolygonOptions,
+  SurfacePolygonResult as ExactPolygonResult
+} from './ellipsoid-helpers/surface-polygon';

@@ -167,8 +167,9 @@ G8 Exact geodesics and G9 triaxial geodesics remain separate work.
 
 `EllipsoidGeodesicExact` implements elliptic-integral direct/inverse/lines,
 reduced length/scales, winding and area of the full ellipsoid for `0.25 ≤ b/a ≤ 4`.
-It is explicitly selected through `@math.gl/geospatial/geodesic-exact`; edge area
-and arbitrary-length lines remain separate. The existing series engine is unchanged.
+It is explicitly selected through `@math.gl/geospatial/geodesic-exact`;
+arbitrary-length lines remain separate. The exact-area follow-up adds opt-in
+`S12` and `GeodesicPolygonExact` with the shared compensated accumulator. The existing series engine is unchanged.
 
 `TriaxialEllipsoid`, through `@math.gl/geospatial/triaxial`, adds geodetic,
 parametric and geocentric surface/direction conversions and Cartesian direct
@@ -181,3 +182,6 @@ See the [2,105-row qualification](../docs/modules/geospatial/api-reference/geode
 including independent elliptic series, sphere/principal-plane/conservation checks,
 raw native limitations and unchanged accuracy/bundle gates. Both entries are
 optional and add no dependencies or runtime native/model downloads.
+
+Exact edge area/polygon controls and remaining cancellation boundaries are
+recorded in the [exact area qualification](../docs/modules/geospatial/api-reference/geodesic-exact-area-qualification.md).

@@ -165,8 +165,8 @@ test('Exact distance and arc sampling share the two-circuit domain, including la
     const p = e.direct(30, 999990, r.azi1, r.s12);
     expect(Math.abs(p.lat2 + 20)).toBeLessThan(2e-10);
     expect(Math.abs(p.lon2 - -80)).toBeLessThan(2e-10);
-    const unsupported = {unrollLongitude: false, area: true};
-    expect(() => e.direct(0, 0, 90, 1, unsupported)).toThrow(/area/);
+    const withArea = {unrollLongitude: false, area: true};
+    expect(e.direct(0, 0, 90, 1, withArea).S12).toBe(0);
   }
 });
 test('Triaxial Cartesian trajectories are equivariant under cyclic axis permutations', () => {

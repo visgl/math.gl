@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {
   EllipsoidGeodesicExact,
+  GeodesicPolygonExact,
   type ExactGeodesicOptions
 } from '@math.gl/geospatial/geodesic-exact';
 import {
@@ -23,9 +24,11 @@ const state: CartesianGeodesicState = shape
   .position(2);
 shape.fromCartesian(state.position, system);
 shape.directionFromCartesian(state.position, state.direction);
-// @ts-expect-error Exact edge area is a separate, unsupported API.
 exact.direct(20, 30, 40, 1, {area: true});
 // @ts-expect-error The geometry snapshot cannot be assigned.
 shape.radii = [1, 1, 1];
 // @ts-expect-error Invalid coordinate system.
 shape.toCartesian(20, 30, 'mercator');
+
+const polygon = new GeodesicPolygonExact({semiMajorAxis: 1, semiMinorAxis: 2});
+polygon.addPoint(0, 0).addPoint(0, 10).addPoint(90, 0).compute({unsigned: true});
