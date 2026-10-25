@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.19",
+  "version": "5.0.0-alpha.20",
   "keywords": [
     "earth",
     "geoid",
@@ -87,7 +87,7 @@
   ],
   "sideEffects": false,
   "dependencies": {
-    "@math.gl/core": "5.0.0-alpha.19"
+    "@math.gl/core": "5.0.0-alpha.20"
   },
   "peerDependencies": {
     "astronomy-engine": "^2.1.19"

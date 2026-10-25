@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.19",
+  "version": "5.0.0-alpha.20",
   "keywords": [
     "webgl",
     "javascript",
@@ -1110,9 +1110,9 @@
     "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-alpha.19",
-    "@math.gl/geometry": "5.0.0-alpha.19",
-    "@math.gl/web-mercator": "5.0.0-alpha.19",
+    "@math.gl/core": "5.0.0-alpha.20",
+    "@math.gl/geometry": "5.0.0-alpha.20",
+    "@math.gl/web-mercator": "5.0.0-alpha.20",
     "polygon-clipping": "0.15.7"
   },
   "devDependencies": {
