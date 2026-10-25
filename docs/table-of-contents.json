@@ -212,6 +212,8 @@
           "modules/geospatial/api-reference/ellipsoid-geodesic-exact",
           "modules/geospatial/api-reference/geodesic-exact-area-qualification",
           "modules/geospatial/api-reference/triaxial-geometry",
+          "modules/geospatial/api-reference/coordinate-utilities",
+          "modules/geospatial/api-reference/geodesic-line-buffer",
           "modules/geospatial/api-reference/geodesic-g89-qualification",
           "modules/geospatial/api-reference/lng-lat-rectangle",
           "modules/geospatial/api-reference/make-obb-from-region",

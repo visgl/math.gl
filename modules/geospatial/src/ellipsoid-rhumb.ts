@@ -116,51 +116,55 @@ export class EllipsoidRhumb {
     const area = Boolean(options.area),
       unroll = Boolean(options.unrollLongitude);
     const azi = normalize(azimuth);
-    return {
-      position: (distance: number): RhumbResult => {
-        if (!Number.isFinite(distance)) throw new RangeError('Rhumb distance must be finite');
-        const delta = distance / this.a;
-        if (!Number.isFinite(delta)) throw new RangeError('Unrepresentable rhumb distance');
-        const north = delta * ca;
-        let poleDistance: number | undefined;
-        if (north !== 0) {
-          // Integrate the pole gap directly: subtracting two absolute meridian
-          // ordinates discards valid steps close to a pole, even away from it.
-          const gap =
-            north > 0 ? this.meridianDelta(latitude, 90) : this.meridianDelta(-90, latitude);
-          poleDistance = gap - Math.abs(north);
-          if (Math.abs(poleDistance) < 1e-4 * gap)
-            poleDistance = remainingPoleDistance(
-              this.a,
-              this.b,
-              latitude,
-              azimuth,
-              distance,
-              Math.sign(north)
-            );
-          if (poleDistance < 0) throw new RhumbDomainError('pole-crossing');
-          if (poleDistance === 0) throw new RhumbDomainError('pole');
-        }
-        const polar = north === 0 ? undefined : this.polarEndpoint(latitude, north, poleDistance!);
-        const lat2 =
-          north === 0 ? latitude : (polar?.latitude ?? this.inverseMeridian(latitude, north));
-        if (Math.abs(lat2) === 90) throw new RhumbDomainError('pole');
-        const [meanM, meanP] = polar?.means ?? this.means(latitude, lat2);
-        const dlon = (delta * sa * meanP) / meanM / DEG;
-        const lon2 = unroll ? longitude + dlon : normalize(normalize(longitude) + dlon);
-        if (!Number.isFinite(lon2)) throw new RangeError('Unrepresentable rhumb longitude');
-        const result: RhumbResult = {
-          lat1: latitude,
-          lon1: longitude,
-          lat2,
-          lon2,
-          azi12: azi,
-          s12: distance
-        };
-        if (area) result.S12 = this.area(latitude, lat2, dlon * DEG, polar?.psi);
-        return result;
+    const evaluate = (
+      distance: number,
+      _index?: unknown,
+      _array?: unknown,
+      output?: RhumbResult
+    ): RhumbResult => {
+      if (!Number.isFinite(distance)) throw new RangeError('Rhumb distance must be finite');
+      const delta = distance / this.a;
+      if (!Number.isFinite(delta)) throw new RangeError('Unrepresentable rhumb distance');
+      const north = delta * ca;
+      let poleDistance: number | undefined;
+      if (north !== 0) {
+        // Integrate the pole gap directly: subtracting two absolute meridian
+        // ordinates discards valid steps close to a pole, even away from it.
+        const gap =
+          north > 0 ? this.meridianDelta(latitude, 90) : this.meridianDelta(-90, latitude);
+        poleDistance = gap - Math.abs(north);
+        if (Math.abs(poleDistance) < 1e-4 * gap)
+          poleDistance = remainingPoleDistance(
+            this.a,
+            this.b,
+            latitude,
+            azimuth,
+            distance,
+            Math.sign(north)
+          );
+        if (poleDistance < 0) throw new RhumbDomainError('pole-crossing');
+        if (poleDistance === 0) throw new RhumbDomainError('pole');
       }
+      const polar = north === 0 ? undefined : this.polarEndpoint(latitude, north, poleDistance!);
+      const lat2 =
+        north === 0 ? latitude : (polar?.latitude ?? this.inverseMeridian(latitude, north));
+      if (Math.abs(lat2) === 90) throw new RhumbDomainError('pole');
+      const [meanM, meanP] = polar?.means ?? this.means(latitude, lat2);
+      const dlon = (delta * sa * meanP) / meanM / DEG;
+      const lon2 = unroll ? longitude + dlon : normalize(normalize(longitude) + dlon);
+      if (!Number.isFinite(lon2)) throw new RangeError('Unrepresentable rhumb longitude');
+      const result = output ?? ({} as RhumbResult);
+      result.lat1 = latitude;
+      result.lon1 = longitude;
+      result.lat2 = lat2;
+      result.lon2 = lon2;
+      result.azi12 = azi;
+      result.s12 = distance;
+      if (!area) delete result.S12;
+      if (area) result.S12 = this.area(latitude, lat2, dlon * DEG, polar?.psi);
+      return result;
     };
+    return {position: evaluate};
   }
 
   private means(lat1: number, lat2: number): [number, number] {

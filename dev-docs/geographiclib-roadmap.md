@@ -185,3 +185,20 @@ optional and add no dependencies or runtime native/model downloads.
 
 Exact edge area/polygon controls and remaining cancellation boundaries are
 recorded in the [exact area qualification](../docs/modules/geospatial/api-reference/geodesic-exact-area-qualification.md).
+
+## G10 / G9 sampling / G7 packed-line increment
+
+The coordinate-utility audit found existing UTM/polar stereographic kernels and
+general CRS operations. The optional coordinates entry adds missing standard-zone
+policy, strict angle text and WGS84 MGRS cells through one-metre precision.
+Sub-metre and zone-only MGRS descriptors remain outside that profile.
+
+Triaxial surface sampling corrects the sphere-map area Jacobian with bounded
+rejection and an injectable random source. Independent Gauss-map quadrature tests
+the surface distribution. Packed geodesic/rhumb line samplers add reusable staging,
+atomic commits and result sinks, retaining all scalar/native accuracy gates.
+The recorded benchmark supports lower geodesic allocation estimates and an
+storage benefit, with a throughput tradeoff; rhumb timings are unstable and no universal
+allocation-free claim is made. Remaining G9 work includes coordinate charts and
+separately scoped inverse geodesics; G10 still has the wider GeographicLib text
+profiles and forced-zone facade ergonomics, with generic projection APIs retained.

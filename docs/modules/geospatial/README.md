@@ -144,3 +144,8 @@ document the supported numerical profile and independent/native evidence.
 - [TriaxialEllipsoid](./api-reference/triaxial-geometry.md): three surface coordinate
   systems, direction conversions and reusable Cartesian geodesic trajectories.
 - [G8/G9 qualification and support limits](./api-reference/geodesic-g89-qualification.md).
+
+Optional [coordinate utilities](./api-reference/coordinate-utilities.md) provide
+angle text and WGS84 UTM/UPS/MGRS cells. [Packed line sampling](./api-reference/geodesic-line-buffer.md)
+adds reusable geodesic/rhumb output storage. Triaxial geometry also supports
+[area-uniform surface points](./api-reference/triaxial-geometry.md#area-uniform-surface-sampling).

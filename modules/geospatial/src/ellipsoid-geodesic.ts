@@ -33,6 +33,12 @@ export type GeodesicResult = {
 };
 
 interface EngineLine {
+  GenPosition(
+    arc: boolean,
+    distance: number,
+    mask: number,
+    output?: GeodesicResult
+  ): GeodesicResult;
   Position(distance: number, mask: number): GeodesicResult;
   ArcPosition(arc: number, mask: number): GeodesicResult;
 }
@@ -114,9 +120,15 @@ export class EllipsoidGeodesic {
     const selectedMask = outputMask(options);
     const line = this.engine.Line(latitude, longitude, azimuth, selectedMask | library.DISTANCE_IN);
     return {
-      position(distance: number): GeodesicResult {
+      // Fourth argument is an internal result request; ordinary Array.map arguments remain ignored.
+      position(
+        distance: number,
+        _index?: unknown,
+        _array?: unknown,
+        output?: GeodesicResult
+      ): GeodesicResult {
         validateFinite(distance);
-        return line.Position(distance, selectedMask);
+        return line.GenPosition(false, distance, selectedMask, output);
       },
       arcPosition(arc: number): GeodesicResult {
         validateFinite(arc);
@@ -140,8 +152,7 @@ function outputMask(options: GeodesicOptions): number {
 }
 
 function validateFinite(value: number): void {
-  if (!Number.isFinite(value))
-    throw new Error('Geodesic axes, azimuth, distance and arc must be finite');
+  if (!Number.isFinite(value)) throw new Error('Nonfinite axis, azimuth, distance or arc');
 }
 
 /** @internal Shared engine and non-area mask for projections. Keeping the raw

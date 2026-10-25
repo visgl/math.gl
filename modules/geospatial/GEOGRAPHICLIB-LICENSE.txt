@@ -1,5 +1,6 @@
 The MIT License (MIT).
 
+Copyright (c) 2008-2022, Charles Karney (UTM/UPS zone and MGRS rules)
 Copyright (c) 2011-2022, Charles Karney
 Copyright (c) 2012-2025, Charles Karney (GeodesicExact formulae)
 Copyright (c) 2012-2022, Charles Karney (GeodesicLineExact formulae)

@@ -19,3 +19,8 @@ Original math.gl short-edge area follow-up replaces cancellation in the C4 cosin
 
 Do not replace this robust geodesic solver with a spherical or Vincenty fallback:
 the nearly antipodal tests and reduced-length/scale gnomonic checks must pass.
+
+The optional math.gl `GenPosition` output parameter reuses a caller-owned result
+for packed line sampling. Existing three-argument calls still create independent
+results. No geodesic equations or masks are changed. Internal kernel temporaries
+can still allocate; this is not a universal allocation-free claim.
