@@ -1,4 +1,4 @@
-# Wrap proj4 and D3 projections
+# Using external projection engines
 
 Applications can implement the [`ProjectionEngine`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md) interface around another library. This lets consumers accept a common factory while leaving coordinate conversion to proj4js or D3. These are application adapters; math.gl does not register or load these libraries for you.
 
