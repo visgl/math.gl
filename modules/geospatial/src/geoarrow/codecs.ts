@@ -13,7 +13,7 @@ import type {
   GeoArrowGeometryValue,
   GeoArrowSerialized
 } from './types';
-import {getGeoArrowDimensionSize} from './types';
+import {getGeoArrowDimensionSize, mergeGeoArrowDimensions} from './types';
 import type {GeoArrowBuilderEncoding} from './builder';
 import {GeoArrowBuilder, makeGeoArrowColumnFromGeometryRows} from './builder';
 import {getGeoArrowOffset, isGeoArrowValueValid, materializeGeometryRow} from './layout';
@@ -82,7 +82,7 @@ export function decodeGeoArrowWKB(
           bytes,
           {
             geometry: (header, _count, depth) => {
-              rowDimension = mergeDimensions(rowDimension, header.dimension);
+              rowDimension = mergeGeoArrowDimensions(rowDimension, header.dimension);
               if (concreteRootDepth >= 0 && depth > concreteRootDepth) return;
               concreteRootDepth = -1;
               while (
@@ -112,7 +112,7 @@ export function decodeGeoArrowWKB(
       dimensions[rowIndex] = getDimensionIndex(rowDimension);
       rootFamilies.add(rootFamily);
       schemaKeys.add(getGeometryTypeIdFromIndices(rootFamily, dimensions[rowIndex]));
-      inferredDimension = mergeDimensions(inferredDimension, rowDimension);
+      inferredDimension = mergeGeoArrowDimensions(inferredDimension, rowDimension);
     }
     classifications.push({families, dimensions});
   }
@@ -801,12 +801,6 @@ function getConcreteGeometryTypeFromId(
 
 function getDimensionFromId(typeId: number): GeoArrowDimension {
   return DIMENSIONS[(typeId - 1) % 4];
-}
-
-function mergeDimensions(left: GeoArrowDimension, right: GeoArrowDimension): GeoArrowDimension {
-  const hasZ = left === 'xyz' || left === 'xyzm' || right === 'xyz' || right === 'xyzm';
-  const hasM = left === 'xym' || left === 'xyzm' || right === 'xym' || right === 'xyzm';
-  return hasZ && hasM ? 'xyzm' : hasZ ? 'xyz' : hasM ? 'xym' : 'xy';
 }
 
 function resolveDecodeDimension(
