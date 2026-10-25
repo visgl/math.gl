@@ -117,6 +117,7 @@ jobs:
         timeout-minutes: 2
         run: |
           python3 modules/geospatial/scripts/generate-c8-reference.py --check
+          python3 modules/geospatial/scripts/generate-c8-contact-reference.py --check
           python3 modules/geospatial/scripts/generate-g7-reference.py --check
           node --test modules/geospatial/scripts/benchmark-g7.test.mjs
           yarn check:c8-package
@@ -544,6 +545,13 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node modules/geospatial/scripts/benchmark-g7.mjs --baseline-ref "$BASE_SHA" --points 100 --samples 3 --min-sample-ms 0 --output /tmp/g7-comparison.json
 
+      - name: Measure qualified packed frame transforms
+        if: matrix.suite == 'pipeline'
+        timeout-minutes: 2
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node modules/geospatial/scripts/benchmark-frame-batches.mjs --baseline-ref "$BASE_SHA" --points 1024 --samples 5 --min-cpu-ms 2 --allocations --output /tmp/frame-batch-comparison.json
+
       - name: Compare shared local-frame correctness and costs
         if: matrix.suite == 'projection'
         timeout-minutes: 2
@@ -562,6 +570,7 @@ jobs:
             /tmp/projection-spheroid-comparison.json
             /tmp/projection-local-frame-comparison.json
             /tmp/g7-comparison.json
+            /tmp/frame-batch-comparison.json
           if-no-files-found: error
 
   # Consolidate evidence and enforce the required check on one runner. This avoids

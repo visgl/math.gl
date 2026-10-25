@@ -80,6 +80,25 @@ export class LocalReferenceFrame {
     return this.transform(vector, result, true, false);
   }
 
+  /** Packed XYZ points. Exact in-place operation is supported; other overlap is rejected.
+   * All validation and representability checks finish before writing caller storage.
+   */
+  localToFixedPointsFlat(input: Coordinate, result?: Float64Array): Float64Array {
+    return this.transformFlat(input, result, false, true);
+  }
+
+  fixedToLocalPointsFlat(input: Coordinate, result?: Float64Array): Float64Array {
+    return this.transformFlat(input, result, true, true);
+  }
+
+  localToFixedVectorsFlat(input: Coordinate, result?: Float64Array): Float64Array {
+    return this.transformFlat(input, result, false, false);
+  }
+
+  fixedToLocalVectorsFlat(input: Coordinate, result?: Float64Array): Float64Array {
+    return this.transformFlat(input, result, true, false);
+  }
+
   /** Model-to-fixed affine pose, with unit scale. Angles are radians. */
   headingPitchRollToFixedFrame(attitude: HeadingPitchRoll, result = new Matrix4()): Matrix4 {
     const {heading, pitch, roll} = attitude;
@@ -130,6 +149,75 @@ export class LocalReferenceFrame {
     y.normalize();
     const z = new Vector3(x).cross(y).normalize();
     return result.fromMatrix3([...x, ...y, ...z]).normalize();
+  }
+
+  private transformFlat(
+    input: Coordinate,
+    result: Float64Array | undefined,
+    inverse: boolean,
+    position: boolean
+  ): Float64Array {
+    if (
+      !Number.isSafeInteger(input.length) ||
+      input.length % 3 ||
+      (result && (!(result instanceof Float64Array) || result.length !== input.length))
+    )
+      throw new RangeError('Expected packed XYZ and matching Float64 output');
+    if (
+      result &&
+      input !== result &&
+      ArrayBuffer.isView(input) &&
+      input.buffer === result.buffer &&
+      input.byteOffset < result.byteOffset + result.byteLength &&
+      result.byteOffset < input.byteOffset + input.byteLength
+    )
+      throw new RangeError('Packed frame buffers overlap');
+    let bounded =
+      !position ||
+      Math.max(Math.abs(this.matrix[12]), Math.abs(this.matrix[13]), Math.abs(this.matrix[14])) <=
+        Number.MAX_VALUE / 8;
+    for (let i = 0; i < input.length; i++) {
+      if (!Number.isFinite(input[i])) throw new RangeError('Expected finite packed coordinates');
+      bounded &&= Math.abs(input[i]) <= Number.MAX_VALUE / 8;
+    }
+    // Ordinary bounded coordinates cannot overflow a rigid 3D transform. Only
+    // extreme batches need a preflight pass to preserve atomic failure.
+    const scratch = bounded ? undefined : new Vector3();
+    if (scratch)
+      for (let i = 0; i < input.length; i += 3)
+        this.transform(
+          scratch.set(input[i], input[i + 1], input[i + 2]),
+          scratch,
+          inverse,
+          position
+        );
+    const output = result || new Float64Array(input.length),
+      [xx, xy, xz, , yx, yy, yz, , zx, zy, zz, , ox, oy, oz] = this.matrix;
+    for (let i = 0; i < input.length; i += 3) {
+      const x = input[i] - (inverse && position ? ox : 0),
+        y = input[i + 1] - (inverse && position ? oy : 0),
+        z = input[i + 2] - (inverse && position ? oz : 0);
+      if (scratch) {
+        this.transform(
+          scratch.set(input[i], input[i + 1], input[i + 2]),
+          scratch,
+          inverse,
+          position
+        );
+        output.set(scratch, i);
+      } else {
+        output[i] = inverse
+          ? xx * x + xy * y + xz * z
+          : xx * x + yx * y + zx * z + (position ? ox : 0);
+        output[i + 1] = inverse
+          ? yx * x + yy * y + yz * z
+          : xy * x + yy * y + zy * z + (position ? oy : 0);
+        output[i + 2] = inverse
+          ? zx * x + zy * y + zz * z
+          : xz * x + yz * y + zz * z + (position ? oz : 0);
+      }
+    }
+    return output;
   }
 
   private transform(

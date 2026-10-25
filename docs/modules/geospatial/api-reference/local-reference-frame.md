@@ -98,3 +98,28 @@ It is not an inertial-to-fixed state-vector conversion and adds no rotating-fram
 
 See the [C8 qualification and G7 baselines](./local-frame-qualification.md) for
 independent/native controls, numerical budgets, remaining domains and measured-cost methodology.
+
+## Packed points and vectors
+
+`localToFixedPointsFlat`, `fixedToLocalPointsFlat`, `localToFixedVectorsFlat` and
+`fixedToLocalVectorsFlat` accept packed XYZ numeric arrays. Point methods include
+the cached origin translation; vector methods rotate only. The result is a
+`Float64Array` of the same length. Pass a caller-owned result to reuse storage:
+
+```ts
+const xyz = new Float64Array([1, 2, 3, 4, 5, 6]);
+const fixed = frame.localToFixedPointsFlat(xyz);
+frame.fixedToLocalPointsFlat(fixed, fixed); // exact in-place storage
+```
+
+Input length must be a multiple of three, and supplied output must be Float64
+storage with exactly the same length. Empty input is valid. Exact input/output
+identity is supported; other overlapping buffer views are rejected. Disjoint
+views of one buffer are supported. Invalid inputs or an unrepresentable result
+throw `RangeError` before any caller-owned output is changed, including when a
+later record fails. Extreme finite coordinates retain the scalar scaled fallback.
+Inputs may use Float32 storage, but its prior quantization cannot be recovered.
+
+The packed path hoists the cached matrix coefficients and creates no per-point
+vectors. This is not a universal zero-allocation or throughput guarantee. See the
+[qualification and benchmark profile](./local-frame-qualification.md).
