@@ -28,6 +28,13 @@ for (const [index, method] of frameBatchMethods.entries()) {
     const backing = new Float64Array([1, 2, 3, 4, 5, 6, 7, 8, 9]);
     expect(() => frame[method](backing.subarray(0, 6), backing.subarray(3, 9))).toThrow(/overlap/);
     expect(Array.from(backing)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    const shared = new Float64Array([1, 2, 3, 4, 5, 6, 0, 0, 0, 0, 0, 0]);
+    const source = shared.subarray(0, 6),
+      target = shared.subarray(6);
+    const expected = frame[method](source.slice());
+    expect(frame[method](source, target)).toBe(target);
+    expect(target).toEqual(expected);
+    expect(Array.from(source)).toEqual([1, 2, 3, 4, 5, 6]);
     expect(frame[method]([])).toHaveLength(0);
     expect(frame[method](new Float32Array([1, 2, 3]))).toBeInstanceOf(Float64Array);
     const max = Number.MAX_VALUE;
