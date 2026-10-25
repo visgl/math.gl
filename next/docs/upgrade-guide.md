@@ -41,6 +41,19 @@ Nested entrypoints keep their suffix, for example `@math.gl/crs/wkt` becomes `@m
 | `INTERSECTION.OUTSIDE`, `.INTERSECTING`, `.INSIDE` | `'outside'`, `'intersecting'`, `'inside'` (`CullingResult`)         |
 | `viewport.getLocationAtPoint(options)`             | `viewport.getMapCenterByLngLatPosition(options)`                    |
 
+### Optional ellipsoid and OBB operations[​](#optional-ellipsoid-and-obb-operations "Direct link to Optional ellipsoid and OBB operations")
+
+Frame and quaternion helpers are standalone named exports so unused operations can be removed from bundles.
+
+| Removed API                                                      | Replacement                                                                                                 |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `ellipsoid.eastNorthUpToFixedFrame(origin, result)`              | `eastNorthUpToFixedFrame(ellipsoid, origin, result)` from `@math.gl/geospatial/ellipsoid`                   |
+| `ellipsoid.localFrameToFixedFrame(a, b, c, origin, result)`      | `localFrameToFixedFrame(ellipsoid, a, b, c, origin, result)` from `@math.gl/geospatial/ellipsoid`           |
+| `box.quaternion`                                                 | `getOrientedBoundingBoxQuaternion(box)` from `@math.gl/geometry/culling`                                    |
+| `box.fromCenterHalfSizeQuaternion(center, halfSize, quaternion)` | `makeOrientedBoundingBoxFromQuaternion(center, halfSize, quaternion, box)` from `@math.gl/geometry/culling` |
+
+Frame functions preserve the original matrix conventions and return a new `Matrix4` when the result is omitted. The OBB factory allocates a new box when its optional result is omitted.
+
 ### TypeScript and runtime support[​](#typescript-and-runtime-support "Direct link to TypeScript and runtime support")
 
 * Use TypeScript 6.0 or later for the `Float16Array` declarations.

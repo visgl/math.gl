@@ -41,7 +41,7 @@ The existing P0, G3–G6, allocation, coverage and bundle gates remain unchanged
 
 ## Conventions and remaining domains[​](#conventions-and-remaining-domains "Direct link to Conventions and remaining domains")
 
-`LocalReferenceFrame` follows the geodetic normal, including elevated origins. The legacy `Ellipsoid.localFrameToFixedFrame` uses the Cartesian ellipsoid-gradient convention at elevated origins. Those are different contracts; comparing them as identical frames would be incorrect.
+`LocalReferenceFrame` follows the geodetic normal, including elevated origins. The legacy `localFrameToFixedFrame(ellipsoid, ...)` uses the Cartesian ellipsoid-gradient convention at elevated origins. Those are different contracts; comparing them as identical frames would be incorrect.
 
 C++ `LocalCartesian` retains the longitude supplied to its geodetic-origin constructor even at a pole. An XYZ-only local frame cannot recover that meridian. The math.gl Cartesian inverse convention determines its exact-pole frame instead. Pole bases have independent controls; native comparisons use unique non-polar origins and exclude thin/ambiguous-interior cases that do not share that contract.
 

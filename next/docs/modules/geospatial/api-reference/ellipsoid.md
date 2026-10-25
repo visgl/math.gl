@@ -39,11 +39,11 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial/ellipsoid';
 
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 
-const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
+const transformMatrix = eastNorthUpToFixedFrame(Ellipsoid.WGS84, cartesianOrigin);
 ```
 
 See the [accuracy and GeographicLib coverage audit](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-accuracy.md) for qualified domains, measured geodesic accuracy, and remaining capability gaps.
@@ -182,7 +182,9 @@ Returns
 
 * The modified result parameter, a new `Vector3` instance if none was provided, or `undefined` if the inverse is undefined or unsupported. A defined result contains `[longitude, latitude, height]`, with longitude and latitude in degrees and height in meters above the ellipsoid.
 
-### eastNorthUpToFixedFrame(origin : Number\[3], result : Number\[16]) : Matrix4 | Number\[16][​](#eastnorthuptofixedframeorigin--number3-result--number16--matrix4--number16 "Direct link to eastNorthUpToFixedFrame(origin : Number\[3], result : Number\[16]) : Matrix4 | Number\[16]")
+### eastNorthUpToFixedFrame(ellipsoid, origin : Number\[3], result : Number\[16]) : Matrix4 | Number\[16][​](#eastnorthuptofixedframeellipsoid-origin--number3-result--number16--matrix4--number16 "Direct link to eastNorthUpToFixedFrame(ellipsoid, origin : Number\[3], result : Number\[16]) : Matrix4 | Number\[16]")
+
+Standalone export from `@math.gl/geospatial/ellipsoid` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
 
 Computes a 4x4 transformation matrix from a reference frame with an east-north-up axes centered at the provided origin to the provided ellipsoid's fixed reference frame.
 
@@ -206,7 +208,9 @@ Notes
 
 * Calls `localFrameToFixedFrame` with `east`, `north`, `up` axis.
 
-### localFrameToFixedFrame(String firstAxis, secondAxis : String, thirdAxis : String | null, origin : Number\[3] \[, result : Number\[16]]) : Matrix4 | Number\[16][​](#localframetofixedframestring-firstaxis-secondaxis--string-thirdaxis--string--null-origin--number3--result--number16--matrix4--number16 "Direct link to localFrameToFixedFrame(String firstAxis, secondAxis : String, thirdAxis : String | null, origin : Number\[3] \[, result : Number\[16]]) : Matrix4 | Number\[16]")
+### localFrameToFixedFrame(ellipsoid, String firstAxis, secondAxis : String, thirdAxis : String | null, origin : Number\[3] \[, result : Number\[16]]) : Matrix4 | Number\[16][​](#localframetofixedframeellipsoid-string-firstaxis-secondaxis--string-thirdaxis--string--null-origin--number3--result--number16--matrix4--number16 "Direct link to localFrameToFixedFrame(ellipsoid, String firstAxis, secondAxis : String, thirdAxis : String | null, origin : Number\[3] \[, result : Number\[16]]) : Matrix4 | Number\[16]")
+
+Standalone export from `@math.gl/geospatial/ellipsoid` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
 
 Computes a 4x4 transformation matrix from a reference frame centered at the provided origin to the ellipsoid's fixed reference frame.
 

@@ -83,11 +83,11 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial/ellipsoid';
 
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 
-const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
+const transformMatrix = eastNorthUpToFixedFrame(Ellipsoid.WGS84, cartesianOrigin);
 ```
 
 ## Framework Independence[​](#framework-independence "Direct link to Framework Independence")
