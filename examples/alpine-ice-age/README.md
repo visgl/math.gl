@@ -9,6 +9,16 @@ by default; disable Repeat animation to stop at the present.
 
 ## Run
 
+Map selection prepares both ordinary and discontinuous projection grids in a
+dedicated worker using `@math.gl/geospatial/workers`. The loading indicator shows
+phase progress; **Cancel** stops the job, returns to the globe, and disables
+automatic cycling. Selecting another map or leaving the scene terminates pending
+work. Prepared myriahedral snapshots retain their weighted hinge layout for
+rendering without repeating land sampling and tree selection on the UI thread.
+
+`workers.test.mjs` runs the browser worker entry through a Node worker bridge to
+verify progress, cancellation, buffer ownership, errors and geometry parity.
+
 From the repository root, run `yarn workspace math.gl-alpine-ice-age start`.
 Use `yarn workspace math.gl-alpine-ice-age build` for a standalone build and
 `yarn workspace math.gl-alpine-ice-age test` for dataset/interpolation checks.

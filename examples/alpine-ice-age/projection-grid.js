@@ -37,15 +37,38 @@ const engines = Object.fromEntries(
   ])
 );
 const grids = new Map();
-export function projectionGrid(view) {
-  if (grids.has(view)) return grids.get(view);
+function sourcePositions(view) {
   const positions = new Float64Array(361 * 181 * 2);
   for (let y = 0; y <= 180; y++)
-    for (let x = 0; x <= 360; x++) {
-      const i = (y * 361 + x) * 2;
-      positions.set(regionalCoordinate(view, x - 180, y - 90), i);
-    }
-  if (view !== 'globe') engines[view].projectFlatSync(positions, 2);
+    for (let x = 0; x <= 360; x++)
+      positions.set(regionalCoordinate(view, x - 180, y - 90), (y * 361 + x) * 2);
+  return positions;
+}
+
+export async function prepareProjectionGrid(view, context) {
+  const {projectBulk} = await import('@math.gl/geospatial/workers/operations');
+  const positions = sourcePositions(view);
+  if (view !== 'globe') await projectBulk({
+    projection: {
+      from: `+proj=longlat +R=${R}`,
+      to: `${REGIONAL_VIEWS[view]?.definition || `+proj=${view}`} +R=${R} +units=m`
+    },
+    coordinates: positions
+  }, context);
+  context.report({phase: 'projection-grid', completed: 0, total: 1});
+  const result = projectionGrid(view, positions);
+  context.report({phase: 'projection-grid', completed: 1, total: 1});
+  return result;
+}
+
+export function cacheProjectionGrid(view, grid) {
+  grids.set(view, grid);
+}
+
+export function projectionGrid(view, projectedPositions) {
+  if (grids.has(view)) return grids.get(view);
+  const positions = projectedPositions || sourcePositions(view);
+  if (!projectedPositions && view !== 'globe') engines[view].projectFlatSync(positions, 2);
   let minX = Infinity,
     minY = Infinity,
     maxX = -Infinity,

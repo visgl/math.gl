@@ -250,6 +250,7 @@
         "items": [
           "modules/geospatial/projection/README",
           "modules/geospatial/projection/developer-guide/discontinuous-projections",
+          "modules/geospatial/developer-guide/workers",
           "modules/geospatial/myriahedral-maps",
           "modules/geospatial/discontinuous/projection-catalog",
           "modules/geospatial/discontinuous/README",

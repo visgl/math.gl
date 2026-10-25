@@ -38,7 +38,14 @@ import {createRegionalMap, type RegionalMapOptions} from './regional-map';
 import {createWorldMap, type WorldMapOptions} from './world-map';
 import {createHealpixMap} from './healpix';
 import {createAlbersUsaMap} from './albers-usa';
-import {createMyriahedralMap, type MyriahedralOptions, type MyriahedralLayout} from './myriahedral';
+import {
+  createMyriahedralMap,
+  MyriahedralMap,
+  restoreMyriahedralLayout,
+  type PreparedMyriahedralLayout,
+  type MyriahedralOptions,
+  type MyriahedralLayout
+} from './myriahedral';
 import {MercatorMap} from './mercator-map';
 import {
   createPeirceQuincuncialMap,
@@ -121,6 +128,14 @@ export type MapCapabilities = Readonly<{
   globe: true;
 }>;
 export type MapState = {type: 'map' | 'globe'} | {type: 'hinge'; amount: number};
+/** Same-version worker transport, not a durable file format. */
+export type PreparedMap = {
+  description: Readonly<MapDescription>;
+  capabilities: MapCapabilities;
+  layout: MapLayout;
+  sampling: MapSamplingOptions;
+  motion?: PreparedMyriahedralLayout;
+};
 export type MapPosition3D = [number, number, number];
 export type MapTransitionPlan = Readonly<{
   strategy: 'direct' | 'via-globe';
@@ -161,6 +176,57 @@ export class MapEngine {
   private readonly sampling: MapSamplingOptions;
   private cachedLayout?: MapLayout;
   private flat?: number[][][];
+
+  /** Snapshot resolved setup for a worker result; no callbacks cross the boundary. */
+  toPrepared(): PreparedMap {
+    const motion = this.motion;
+    return structuredClone({
+      description: this.description,
+      capabilities: this.capabilities,
+      layout: this.getLayout(),
+      sampling: {...this.sampling},
+      motion: motion
+        ? {
+            mesh: motion.mesh,
+            edges: motion.edges,
+            panels: motion.panels,
+            targetAngles: motion.targetAngles,
+            rootTransform: Array.from(motion.rootTransform),
+            overlaps: motion.overlaps,
+            preset: motion.preset,
+            radius: motion.radius,
+            cutLandRadians: motion.cutLandRadians
+          }
+        : undefined
+    });
+  }
+
+  /** Restore trusted output of toPrepared from the same library version.
+   * Rebind custom chart functions locally. Myriahedral setup and sampled bounds are reused.
+   */
+  static fromPrepared(prepared: PreparedMap, options: MapEngineOptions = {}): MapEngine {
+    if (!prepared.motion) {
+      const map = new MapEngine(prepared.description, {...options, sampling: prepared.sampling});
+      map.cachedLayout = prepared.layout;
+      return map;
+    }
+    if (
+      prepared.description.version !== 1 ||
+      prepared.description.definition.type !== 'myriahedral'
+    )
+      throw new Error('Prepared motion requires a myriahedral map');
+    const motion = restoreMyriahedralLayout(prepared.motion);
+    const map: MapEngine = Object.create(MapEngine.prototype);
+    Object.assign(map, {
+      description: snapshot(prepared.description),
+      capabilities: Object.freeze({...prepared.capabilities}),
+      sampling: {...prepared.sampling},
+      map: new MyriahedralMap({}, motion),
+      motion,
+      cachedLayout: prepared.layout
+    });
+    return map;
+  }
 
   constructor(description: MapDescription, options: MapEngineOptions = {}) {
     this.description = snapshot(description);

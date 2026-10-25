@@ -62,6 +62,7 @@ export {
 export {MapEngine} from './discontinuous/map-engine';
 export type {
   MapDescription,
+  PreparedMap,
   MapDefinition,
   MapChartDescription,
   MapEngineOptions,

@@ -33,6 +33,8 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 | `@math.gl/geospatial/ellipsoid` | [Ellipsoid](./api-reference/ellipsoid.md), [tangent planes](./api-reference/ellipsoid-tangent-plane.md), [surface geodesics](./api-reference/ellipsoid-geodesic.md), [geodesic paths](./api-reference/geodesic-path.md), [rhumb paths](./api-reference/rhumb-path.md), and [WGS84 helpers](./api-reference/helpers.md) |
 | `@math.gl/geospatial/globe` | [Geographic rectangles](./api-reference/lng-lat-rectangle.md), [region bounding boxes](./api-reference/make-obb-from-region.md), [visibility queries](./api-reference/globe-queries.md), [mesh subdivision](./api-reference/subdivide-globe-mesh.md), [rhumb subdivision](./api-reference/rhumb-path.md), and [geographic seams](./api-reference/geographic-seams.md) |
 | `@math.gl/geospatial/tiles` | [Geographic tile queries](./api-reference/geographic-tiles.md) and [tile-matrix utilities](./api-reference/tile-matrix.md) |
+| `@math.gl/geospatial/workers` | [Cancellable worker tasks](./developer-guide/workers.md) with progress |
+| `@math.gl/geospatial/workers/operations` | Worker-side map setup and bulk projection |
 
 ## Classes
 

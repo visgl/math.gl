@@ -1075,6 +1075,16 @@
       "import": "./dist/geoarrow/tessellation-entry.js",
       "require": "./dist/geoarrow/tessellation-entry.cjs"
     },
+    "./workers": {
+      "types": "./dist/workers.d.ts",
+      "import": "./dist/workers.js",
+      "require": "./dist/workers.cjs"
+    },
+    "./workers/operations": {
+      "types": "./dist/workers/operations.d.ts",
+      "import": "./dist/workers/operations.js",
+      "require": "./dist/workers/operations.cjs"
+    },
     "./discontinuous": {
       "types": "./dist/discontinuous.d.ts",
       "import": "./dist/discontinuous.js",

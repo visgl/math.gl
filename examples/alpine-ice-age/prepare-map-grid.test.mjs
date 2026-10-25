@@ -24,9 +24,9 @@ test("worker preparation hydrates geometry, terminates on completion, and cancel
   try {
     const pending = prepareMapGrid("butterfly", 30);
     const worker = workers.at(-1);
-    assert.deepEqual(worker.message, { view: "butterfly", step: 30 });
+    assert.deepEqual(worker.message, {operation: 'map-grid', input: { view: "butterfly", step: 30 }});
     const { map, ...data } = discontinuousGrid("butterfly", 30);
-    worker.onmessage({ data: structuredClone(data) });
+    worker.onmessage({ data: {type: 'result', result: structuredClone({...data, preparedMap: map.toPrepared()})} });
     const result = await pending;
     assert(worker.terminated);
     assert.deepEqual(result.positions, data.positions);
@@ -44,7 +44,7 @@ test("worker preparation hydrates geometry, terminates on completion, and cancel
     assert(workers.at(-1).terminated);
 
     const failed = prepareMapGrid("waterman", 30);
-    workers.at(-1).onmessage({ data: { error: "Geometry failed" } });
+    workers.at(-1).onmessage({ data: { type: 'error', message: "Geometry failed" } });
     await assert.rejects(failed, /Geometry failed/);
     assert(workers.at(-1).terminated);
   } finally {

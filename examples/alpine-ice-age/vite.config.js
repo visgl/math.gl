@@ -4,6 +4,12 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@math.gl/geospatial/workers/operations': fileURLToPath(new URL('../../modules/geospatial/src/workers/operations.ts', import.meta.url)),
+      '@math.gl/geospatial/workers': fileURLToPath(new URL('../../modules/geospatial/src/workers.ts', import.meta.url)),
+    },
+  },
   plugins: [
     {
       name: "alpine-workspace-vector",

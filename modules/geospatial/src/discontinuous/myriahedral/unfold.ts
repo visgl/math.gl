@@ -126,7 +126,6 @@ export function createLayout(
       );
     }
   }
-  const tree = new HingeTree(panels);
   const origin = center(mesh.faces[0].map(i => mesh.vertices[i]));
   const x = normalize(subtract(mesh.vertices[mesh.faces[0][1]], mesh.vertices[mesh.faces[0][0]]));
   const z = normals[0],
@@ -149,6 +148,41 @@ export function createLayout(
     -dot(z, origin),
     1
   ]);
+  const layout = restoreLayout({
+    mesh,
+    edges,
+    panels,
+    targetAngles,
+    rootTransform: Array.from(rootTransform),
+    overlaps: 0
+  });
+  layout.overlaps = countOverlaps(layout.evaluate(1));
+  return layout;
+}
+
+/** Data-only layout for worker transport; topology and geographic weights are already resolved. */
+export type PreparedHingeLayout = {
+  mesh: Polyhedron;
+  edges: MeshEdge[];
+  panels: HingePanel[];
+  targetAngles: Float64Array;
+  rootTransform: number[];
+  overlaps: number;
+};
+
+/** Restore pose evaluation without repeating spanning-tree selection or overlap counting. */
+export function restoreLayout(data: PreparedHingeLayout) {
+  const {mesh, panels, targetAngles} = data;
+  if (
+    panels.length !== mesh.faces.length ||
+    targetAngles.length !== panels.length ||
+    !targetAngles.every(Number.isFinite) ||
+    data.rootTransform.length !== 16 ||
+    !data.rootTransform.every(Number.isFinite)
+  )
+    throw new Error('Invalid prepared hinge layout');
+  const tree = new HingeTree(panels);
+  const rootTransform = new Matrix4(data.rootTransform);
   const poses = new Float64Array(panels.length * 16),
     angles = new Float64Array(panels.length);
   const evaluate = (amount: number): Vec3[][] => {
@@ -162,9 +196,7 @@ export function createLayout(
       return face.map(v => Array.from(matrix.transformAsPoint(mesh.vertices[v])) as Vec3);
     });
   };
-  const flat = evaluate(1);
-  const overlaps = countOverlaps(flat);
-  return {mesh, edges, panels, targetAngles, tree, rootTransform, evaluate, overlaps};
+  return {...data, tree, rootTransform, evaluate};
 }
 
 /** Count positive-area overlaps of convex faces in the final XY net.
