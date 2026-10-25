@@ -22,6 +22,9 @@ export const MYRIAHEDRAL_VIEWS = Object.fromEntries([
 ]);
 
 export const DISCONTINUOUS_VIEWS = {
+  'elastic-I': 'Elastic I · optimized mesh',
+  'elastic-II': 'Elastic II · optimized mesh',
+  'elastic-III': 'Elastic III · optimized mesh',
   ...Object.fromEntries(
     MAP_PROJECTIONS.map(name => [`projection:${name}`, `Projection · ${name.replaceAll('-', ' ')}`])
   ),

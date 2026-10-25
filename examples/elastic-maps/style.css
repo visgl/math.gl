@@ -1,0 +1,11 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.elastic-maps {font: 14px system-ui; color: #193747; background: #fff; border-radius: 8px; padding: 16px;}
+.elastic-maps .elastic-controls {display:flex; flex-wrap:wrap; gap:12px; align-items:center;}
+.elastic-maps label {display:flex; align-items:center; gap:6px;}
+.elastic-maps [hidden] {display:none;}
+.elastic-maps canvas {display:block; width:100%; height: clamp(240px, 50vw, 560px);}
+.elastic-maps p {min-height:1.5em; margin:8px 0;}
+.elastic-maps small {color:#526b77;}
