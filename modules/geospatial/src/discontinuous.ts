@@ -122,3 +122,13 @@ export type {
   MapTransitionPart,
   MapTransitionFrame
 } from './discontinuous/map-transition';
+
+export type {
+  MapFeatureGeometry,
+  MapFeature,
+  PreparedMapPart,
+  PreparedMapPathPart,
+  PreparedMapVertices,
+  PreparedMapGeometry,
+  MapPrepareFeaturesOptions
+} from './discontinuous/prepare-features';

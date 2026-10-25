@@ -54,14 +54,43 @@ export function createMapData(preset) {
   );
   const coast = coastlines.flatMap(r => map.projectLine(r));
   const grid = graticule.flatMap(r => map.projectLine(r));
-  const polygon = map.projectPolygon(samplePolygon);
+  const prepared = map.prepareFeatures([
+    {id: 'cut-polygon', geometry: {type: 'Polygon', coordinates: samplePolygon}}
+  ]);
+  // Canvas needs arrays of rings; a GPU adapter can consume these packed buffers.
+  const positions = (buffer, start, end) =>
+    Array.from({length: end - start}, (_, i) => [
+      buffer[2 * (start + i)],
+      buffer[2 * (start + i) + 1]
+    ]);
+  const fills = prepared.polygons;
+  const polygon = fills.parts.map((part, i) => {
+    const read = buffer =>
+      Array.from({length: fills.polygonStarts[i + 1] - fills.polygonStarts[i]}, (_, j) => {
+        const ring = fills.polygonStarts[i] + j;
+        return positions(buffer, fills.ringStarts[ring], fills.ringStarts[ring + 1]);
+      });
+    return {
+      regionId: prepared.regionIds[part.regionIndex],
+      coordinates: read(fills.positions),
+      sourceCoordinates: read(fills.sourcePositions)
+    };
+  });
+  const polygonOutlines = prepared.paths.parts.map((part, i) => ({
+    regionId: prepared.regionIds[part.regionIndex],
+    coordinates: positions(
+      prepared.paths.positions,
+      prepared.paths.pathStarts[i],
+      prepared.paths.pathStarts[i + 1]
+    )
+  }));
   const cities = [
     ['London', -0.1, 51.5],
     ['Tokyo', 139.7, 35.7],
     ['New York', -74, 40.7],
     ['Sydney', 151.2, -33.9]
   ].map(([label, lon, lat]) => ({label, ...map.projectPoint([lon, lat])}));
-  const result = {map, coast, grid, polygon, cities, minLabelWidth: 560};
+  const result = {map, coast, grid, polygon, polygonOutlines, prepared, cities, minLabelWidth: 560};
   cache.set(preset, result);
   return result;
 }

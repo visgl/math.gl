@@ -320,10 +320,12 @@ export class DiscontinuousMap {
     bound += 1;
     // Convex single rings need no boolean reconstruction. Direct half-space
     // clipping avoids nearly coincident mask/input edges at exact grid seams.
+    // With holes, clip the convex outer boundary first as well, then retain
+    // Boolean reconstruction for holes. An independently constructed mask can
+    // disagree by roundoff with a coincident source edge.
     const orientation = ringOrientation(planar[0]);
     let totalTurn = 0;
-    const convex =
-      planar.length === 1 &&
+    const convexOuter =
       planar[0].every((p, i, ring) => {
         const q = ring[(i + 1) % ring.length];
         const r = ring[(i + 2) % ring.length];
@@ -346,6 +348,7 @@ export class DiscontinuousMap {
       // Local turns alone also accept self-crossing stars. A convex boundary
       // makes exactly one revolution; this additional check stays linear.
       Math.abs(totalTurn - orientation * 2 * Math.PI) < 1e-7;
+    const convex = planar.length === 1 && convexOuter;
     const origin = planar[0][0];
     let extent = 0;
     for (const p of planar[0])
@@ -364,7 +367,7 @@ export class DiscontinuousMap {
     const inputArea = relativeArea(planar[0]);
     const results: MapPolygon[] = [];
     for (const r of this.compiled) {
-      let clip: Position[] = convex
+      let clip: Position[] = convexOuter
         ? planar[0].slice()
         : [
             [-bound, -bound],
@@ -376,7 +379,7 @@ export class DiscontinuousMap {
       if (clip.length < 3 || ringOrientation(clip) === 0) continue;
       // Roundoff at a tangent seam must not emit a numerical sliver. Compare
       // to the source ring's own scale so genuinely small polygons survive.
-      if (convex && relativeArea(clip) <= inputArea * 1024 * Number.EPSILON) continue;
+      if (convexOuter && relativeArea(clip) <= inputArea * 1024 * Number.EPSILON) continue;
       const polygons = convex
         ? [[[...clip, clip[0]]]]
         : polygonClipping.intersection(planar, [clip]);

@@ -211,3 +211,64 @@ Sinu-Mollweide's oblique cuts, and quincuncial layouts. Use `getLayout()` / `fit
 to measure visible coverage, and keep every returned region-local piece and its
 source coordinates. Do not assume every catalog map covers the entire globe or
 has a globally unique inverse.
+
+## Prepare feature buffers for a renderer
+
+<span class="badge">From v5.0 · Experimental</span>
+
+`prepareFeatures()` provides a framework-independent boundary between geographic
+preparation and rendering. It preserves original feature indices while splitting
+geometry into chart-local parts. It also separates filled polygon rings from
+original polygon outlines, so a renderer does not draw a false border along a cut.
+
+```typescript
+const features = [{
+  id: 'region',
+  properties: {color: [220, 140, 60]},
+  geometry: {
+    type: 'Polygon' as const,
+    coordinates: [[[170, 10], [-170, 10], [-170, 30], [170, 30]]]
+  }
+}];
+const prepared = map.prepareFeatures(features);
+
+for (let i = 0; i < prepared.paths.parts.length; i++) {
+  const part = prepared.paths.parts[i];
+  const positions = prepared.paths.positions.subarray(
+    2 * prepared.paths.pathStarts[i],
+    2 * prepared.paths.pathStarts[i + 1]
+  );
+  const feature = features[part.featureIndex];
+  // Draw this XY path with feature.properties.color.
+  // Keep it separate from adjacent paths, even if they share a featureIndex.
+}
+
+const fills = prepared.polygons;
+for (let i = 0; i < fills.parts.length; i++) {
+  const rings = [];
+  for (let r = fills.polygonStarts[i]; r < fills.polygonStarts[i + 1]; r++) {
+    rings.push(fills.positions.subarray(2 * fills.ringStarts[r], 2 * fills.ringStarts[r + 1]));
+  }
+  // Triangulate and fill rings together, retaining holes. Do not stroke these
+  // rings: the original boundary paths above carry the intended outlines.
+}
+```
+
+Return `features[part.featureIndex]` when a generated part is picked. Use
+`prepared.regionIds[part.regionIndex]` and the engine for chart-specific geographic
+inversion. Points follow the engine's default ownership rule; lines/polygons can
+produce several parts. Application IDs are optional and need not be unique.
+
+Prepare when the data, map or sampling policy changes. Style-only updates can use
+the original feature indices without repeating clipping. If preparation runs in
+a worker, construct an engine from its description there and transfer the output
+buffers back. Scheduling, cancellation, batching and caching belong to the caller;
+`mapId` alone is not a sufficient cache key. XY buffers are map units, so a GPU
+renderer must bind them in a compatible Cartesian view and preserve precision.
+
+The [Elastic example](../../elastic-maps.md) uses this contract for its static
+polygon, including outlines that stop at cuts. This is groundwork for a future
+deck.gl geometry provider. A full integration still needs per-vertex attribute
+provenance, path-cap and dash policies at chart joins, screen-space sampling,
+interior surface meshes, and compatible animation topology. Existing transition
+ring correspondence does not by itself provide a triangulated globe surface.
