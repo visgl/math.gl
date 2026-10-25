@@ -80,7 +80,7 @@ const polygonParts = land.evaluate(progress);
 ```
 
 Automatic direct morphing supports the three Elastic presets, other Elastic data
-with complete defined grid coverage, and a small set of finite global formulas:
+with complete, non-overlapping defined grid coverage, and a small set of finite global formulas:
 sinusoidal, Mollweide, and Robinson. Other pairs
 use the globe route. Explicit `strategy: 'direct'` rejects unsupported coverage;
 `strategy: 'via-globe'` always takes the globe route.

@@ -419,7 +419,7 @@ for data imports, the text importer, and numerical limits.
 Returns a `MapTransition` referencing the two immutable engines. `options.strategy`
 is `'auto'` (default), `'direct'`, or `'via-globe'`. `strategy` and `reason` on the
 result report the selected route. Direct preparation is supported for the same
-engine, complete Elastic coverage, and the `world` formulas `sinusoidal`,
+engine, complete non-overlapping Elastic coverage, and the `world` formulas `sinusoidal`,
 `mollweide`, and `robinson`. Automatic selection
 falls back to the globe for other pairs, including regional coverage and custom
 charts. An explicitly requested unsupported direct route throws.

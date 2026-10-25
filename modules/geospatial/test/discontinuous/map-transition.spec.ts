@@ -258,3 +258,18 @@ test('same-engine direct transitions retain overlapping charts without moving co
     expect(geometry.evaluate(1)).toEqual(geometry.evaluate(0));
   }
 });
+
+test('overlapping Elastic coverage requires a globe route between different engines', () => {
+  const data = {
+    ...elasticI,
+    sections: [...elasticI.sections, ...elasticI.sections.map(s => ({...s, id: `copy-${s.id}`}))]
+  };
+  const overlapping = new MapEngine({
+    version: 1,
+    id: 'overlap',
+    definition: {type: 'elastic', data}
+  });
+  expect(overlapping.createTransitionTo(world).strategy).toBe('via-globe');
+  expect(() => overlapping.createTransitionTo(world, {strategy: 'direct'})).toThrow(/coverage/);
+  expect(overlapping.createTransitionTo(overlapping).strategy).toBe('direct');
+});

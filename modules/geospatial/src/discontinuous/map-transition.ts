@@ -308,7 +308,13 @@ function fullCoverage(map: MapEngine): boolean {
         completeSections = false;
       return valid.length ? polygonClipping.intersection(domain, valid) : [];
     });
-    covered = completeSections && polygonClipping.difference(world, ...domains).length === 0;
+    // Multiple placements of the same geography need a correspondence policy,
+    // not a Cartesian product of charts. Keep those maps on the globe route.
+    const overlaps = domains.some((domain, i) =>
+      domains.slice(i + 1).some(other => polygonClipping.intersection(domain, other).length > 0)
+    );
+    covered =
+      completeSections && !overlaps && polygonClipping.difference(world, ...domains).length === 0;
   } else if (d.type === 'world') {
     // Deliberately bounded to global formulas with finite poles. Other kernels,
     // custom charts and regional maps retain the conservative globe route.
