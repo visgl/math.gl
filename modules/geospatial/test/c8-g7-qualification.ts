@@ -4,9 +4,12 @@
 // SPDX-FileComment: Original Node/browser composition of independent C8 and pinned G7 accuracy controls.
 import {qualifyC8 as local, provenance as c8} from './c8-qualification';
 import {prepareJobs, nativeProvenance} from './g7-benchmark-entry';
-export const provenance = {c8, g7: nativeProvenance};
+import {qualifyFrameBatches} from './frame-batch-qualification';
+import {qualifyContacts, contactProvenance} from './c8-contact-qualification';
+export const provenance = {c8, g7: nativeProvenance, contacts: contactProvenance};
 export function qualifyC8(includeRegressions = true) {
   const rows = local(includeRegressions);
+  if (includeRegressions) rows.push(...qualifyContacts(), ...qualifyFrameBatches());
   for (const job of prepareJobs().filter(j => j.nativeOp))
     job.errors.forEach((usage, index) =>
       rows.push({
