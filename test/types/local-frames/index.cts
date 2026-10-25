@@ -58,3 +58,15 @@ frame.localToFixedVectorsFlat(batch, batch);
 frame.fixedToLocalVectorsFlat(batch, batch);
 // @ts-expect-error Packed frame outputs require Float64 storage.
 frame.localToFixedPointsFlat(batch, new Float32Array(3));
+
+import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial/ellipsoid';
+import {getOrientedBoundingBoxQuaternion, makeOrientedBoundingBoxFromQuaternion} from '@math.gl/geometry/culling';
+const enu: Matrix4 = eastNorthUpToFixedFrame(Ellipsoid.WGS84, [6378137, 0, 0]);
+const reused: number[] = localFrameToFixedFrame(Ellipsoid.WGS84, 'north', 'east', 'down', [6378137, 0, 0], []);
+const box = makeOrientedBoundingBoxFromQuaternion([1, 2, 3], [4, 5, 6], [0, 0, 0, 1]);
+const orientation: Quaternion = getOrientedBoundingBoxQuaternion(box);
+void [enu, reused, orientation];
+// @ts-expect-error Frame methods were replaced by standalone functions.
+Ellipsoid.WGS84.eastNorthUpToFixedFrame([6378137, 0, 0]);
+// @ts-expect-error Quaternion access is now a standalone function.
+box.quaternion;

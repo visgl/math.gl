@@ -8,7 +8,7 @@
 // See ../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
 /* eslint-disable */
-import {Vector3, Matrix4, assert, _MathUtils, NumericArray, config} from '@math.gl/core';
+import {Vector3, assert, _MathUtils, NumericArray, config} from '@math.gl/core';
 import type {SpheroidParameters} from '@math.gl/core/types';
 import {
   spheroidToCartesian,
@@ -23,8 +23,6 @@ import {
   toCartographicFromRadiansComponents
 } from './type-utils';
 
-import type {AxisDirection} from './ellipsoid-helpers/ellipsoid-transform';
-import {localFrameToFixedFrame} from './ellipsoid-helpers/ellipsoid-transform';
 import {scaleToGeodeticSurface, writeResult} from './ellipsoid-helpers/scale-to-geodetic-surface';
 
 const spheroidScratch = {x: 0, y: 0, z: 0};
@@ -263,45 +261,6 @@ export class Ellipsoid {
     const height = (x - point[0]) * nx + (y - point[1]) * ny + (z - point[2]) * nz;
 
     return toCartographicFromRadiansComponents(longitude, latitude, height, result);
-  }
-
-  /** Computes a 4x4 transformation matrix from a reference frame with an east-north-up axes
-   * centered at the provided origin to the provided ellipsoid's fixed reference frame. */
-  eastNorthUpToFixedFrame(origin: Readonly<NumericArray>, result?: Matrix4): Matrix4;
-  eastNorthUpToFixedFrame(origin: Readonly<NumericArray>, result: number[]): number[];
-
-  eastNorthUpToFixedFrame(origin: Readonly<NumericArray>, result = new Matrix4()) {
-    return localFrameToFixedFrame(this, 'east', 'north', 'up', origin, result);
-  }
-
-  /** Computes a 4x4 transformation matrix from a reference frame centered at
-   * the provided origin to the ellipsoid's fixed reference frame.
-   */
-  localFrameToFixedFrame(
-    firstAxis: AxisDirection,
-    secondAxis: AxisDirection,
-    thirdAxis: AxisDirection,
-    origin: Readonly<NumericArray>,
-    result?: Matrix4
-  ): Matrix4;
-  localFrameToFixedFrame<_Matrix4T>(
-    firstAxis: AxisDirection,
-    secondAxis: AxisDirection,
-    thirdAxis: AxisDirection,
-    origin: Readonly<NumericArray>,
-    result: number[]
-  ): number[];
-
-  // Computes a 4x4 transformation matrix from a reference frame centered at
-  // the provided origin to the ellipsoid's fixed reference frame.
-  localFrameToFixedFrame(
-    firstAxis: AxisDirection,
-    secondAxis: AxisDirection,
-    thirdAxis: AxisDirection,
-    origin: Readonly<NumericArray>,
-    result = new Matrix4()
-  ) {
-    return localFrameToFixedFrame(this, firstAxis, secondAxis, thirdAxis, origin, result);
   }
 
   /** Computes the unit vector directed from the center of this ellipsoid toward

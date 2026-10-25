@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original analytic normal/support-point workload; no upstream implementation or model data.
 import {Ellipsoid} from '@math.gl/geospatial';
+import * as ellipsoidAPI from '@math.gl/geospatial/ellipsoid';
 import {createDeformationModel} from '@math.gl/geospatial/projection/deformation';
 import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
 export {measureWorkload} from './benchmark-workload';
@@ -87,6 +88,24 @@ export function source(shape: Shape, polar: boolean, points: number) {
 }
 export function runners(shape: Shape, ned: boolean) {
   const ellipsoid = Ellipsoid.fromSpheroid({semiMajorAxis: shape.a, semiMinorAxis: shape.b});
+  // Run the same workload against historical class APIs and the current function APIs.
+  const legacy = ellipsoid as unknown as {
+    localFrameToFixedFrame: (
+      a: string,
+      b: string,
+      c: string,
+      p: number[],
+      out: number[]
+    ) => number[];
+    eastNorthUpToFixedFrame: (p: number[], out: number[]) => number[];
+  };
+  const writeFrame = ned
+    ? ellipsoidAPI.localFrameToFixedFrame
+      ? () => ellipsoidAPI.localFrameToFixedFrame(ellipsoid, 'north', 'east', 'down', input, matrix)
+      : () => legacy.localFrameToFixedFrame('north', 'east', 'down', input, matrix)
+    : ellipsoidAPI.eastNorthUpToFixedFrame
+      ? () => ellipsoidAPI.eastNorthUpToFixedFrame(ellipsoid, input, matrix)
+      : () => legacy.eastNorthUpToFixedFrame(input, matrix);
   const deformation = model(shape);
   const pipeline = new ProjectionPipeline({
     input: {space: 'geocentric', units: ['m', 'm', 'm']},
@@ -99,8 +118,7 @@ export function runners(shape: Shape, ned: boolean) {
   const geometry = (buffer: Float64Array) => {
     for (let offset = 0; offset < buffer.length; offset += 4) {
       for (let i = 0; i < 3; i++) input[i] = buffer[offset + i];
-      if (ned) ellipsoid.localFrameToFixedFrame('north', 'east', 'down', input, matrix);
-      else ellipsoid.eastNorthUpToFixedFrame(input, matrix);
+      writeFrame();
       const a = ned ? 0.2 : 0.1,
         b = ned ? 0.1 : 0.2,
         c = ned ? -0.3 : 0.3;

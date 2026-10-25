@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return */
 
+import {eastNorthUpToFixedFrame} from './ellipsoid-transforms';
 import {Ellipsoid} from './ellipsoid';
 import {isWGS84} from './type-utils';
 import {toDegrees, toRadians} from '@math.gl/core';
@@ -15,7 +16,7 @@ export const GEOSPATIAL_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {
   cartographicToCartesian: (cartographic: number[], result?: number[]) =>
     Ellipsoid.WGS84.cartographicToCartesian(cartographic, result),
   eastNorthUpToFixedFrame: (origin: number[], result?: number[]) =>
-    Ellipsoid.WGS84.eastNorthUpToFixedFrame(origin, result),
+    eastNorthUpToFixedFrame(Ellipsoid.WGS84, origin, result),
   geodeticSurfaceNormal: (cartesian: number[], result?: number[]) =>
     Ellipsoid.WGS84.geodeticSurfaceNormal(cartesian, result),
   geodeticSurfaceNormalCartographic: (cartographic: number[], result?: number[]) =>

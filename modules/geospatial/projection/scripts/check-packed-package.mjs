@@ -170,8 +170,8 @@ try {
     assert(frames.localFrameToMatrix(basis,{x:10,y:0,z:0},'north','east','down',frameMatrix));
     [0,0,1,0,0,1,0,0,-1,0,0,0,10,0,0,1].forEach((v,i)=>assert(Math.abs(frameMatrix[i]-v)<1e-15));
     assert(!frames.eastNorthUpBasis(0,Infinity,basis));
-    const {Ellipsoid} = await load('@math.gl/geospatial');
-    const equatorialFrame = new Ellipsoid(10,10,5).eastNorthUpToFixedFrame([10,0,0],[]);
+    const {Ellipsoid, eastNorthUpToFixedFrame} = await load('@math.gl/geospatial');
+    const equatorialFrame = eastNorthUpToFixedFrame(new Ellipsoid(10,10,5),[10,0,0],[]);
     [0,1,0,0,0,0,1,0,1,0,0,0,10,0,0,1].forEach((v,i)=>assert(Math.abs(equatorialFrame[i]-v)<1e-15));
     const shape = Ellipsoid.fromSpheroid(core.normalizeCRS('EPSG:4326').ellipsoid);
     const axes = shape.toSpheroid();

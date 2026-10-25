@@ -69,7 +69,7 @@ existing limits and dependency boundaries.
 ## Conventions and remaining domains
 
 `LocalReferenceFrame` follows the geodetic normal, including elevated origins.
-The legacy `Ellipsoid.localFrameToFixedFrame` uses the Cartesian ellipsoid-gradient
+The legacy `localFrameToFixedFrame(ellipsoid, ...)` uses the Cartesian ellipsoid-gradient
 convention at elevated origins. Those are different contracts; comparing them as
 identical frames would be incorrect.
 
