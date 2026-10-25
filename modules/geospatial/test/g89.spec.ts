@@ -192,3 +192,60 @@ test('Triaxial Cartesian trajectories are equivariant under cyclic axis permutat
     }
   }
 });
+test('Exact prolate inverse does not reject a distance-inversion rounding cycle', () => {
+  // Original input, evaluated by the pinned 2.7 binary64 driver in g89-reference provenance.
+  const p = [28.80553487315774, 143.50417493842542, -53.51181722711772, 37.31487178243697];
+  const expected = {
+    s12: 7.9059168844582617,
+    azi1: -165.56308525615211,
+    azi2: -145.42470323424976,
+    m12: 1.1626450336148788,
+    M12: -1.0241630248117413,
+    M21: -3.566367084140543,
+    a12: 147.57978601733384
+  };
+  const e = new EllipsoidGeodesicExact({semiMajorAxis: 1, semiMinorAxis: 4});
+  const result = e.inverse(p[0], p[1], p[2], p[3]);
+  for (const field of ['s12', 'm12', 'M12', 'M21'] as const)
+    expect(Math.abs(result[field] - expected[field])).toBeLessThan(4e-13);
+  for (const field of ['azi1', 'azi2', 'a12'] as const)
+    expect(Math.abs(result[field] - expected[field])).toBeLessThan(1e-9);
+  const endpoint = e.direct(p[0], p[1], result.azi1, result.s12);
+  expect(Math.abs(endpoint.lat2 - p[2])).toBeLessThan(2e-10);
+  expect(Math.abs(endpoint.lon2 - p[3])).toBeLessThan(2e-10);
+});
+test('Exact oblate inverse accounts for endpoint angular subtraction roundoff', () => {
+  // Reviewer input; pinned native GeographicLib 2.7 binary64 output.
+  const e = new EllipsoidGeodesicExact({semiMajorAxis: 1, semiMinorAxis: 0.25});
+  const result = e.inverse(
+    6.902495233565162,
+    121.54290978781484,
+    -29.84644089112399,
+    155.22099900212635
+  );
+  expect(Math.abs(result.s12 - 0.58696869660957074)).toBeLessThan(4e-13);
+  expect(Math.abs(result.m12 - 0.2735768890437773)).toBeLessThan(4e-13);
+  expect(Math.abs(result.M12 + 0.60393639870834048)).toBeLessThan(4e-13);
+  expect(Math.abs(result.M21 + 0.24488793923252217)).toBeLessThan(4e-13);
+  expect(Math.abs(result.azi1 - 98.650362648219257)).toBeLessThan(1e-9);
+  expect(Math.abs(result.azi2 - 86.645855244295205)).toBeLessThan(1e-9);
+  const endpoint = e.direct(result.lat1, result.lon1, result.azi1, result.s12);
+  expect(Math.abs(endpoint.lat2 - result.lat2)).toBeLessThan(2e-10);
+  expect(Math.abs(endpoint.lon2 - result.lon2)).toBeLessThan(2e-10);
+});
+test('Exact inverse accepts the independently reviewed oblate rounding case', () => {
+  const e = new EllipsoidGeodesicExact({semiMajorAxis: 1, semiMinorAxis: 0.25});
+  const result = e.inverse(
+    -23.40879984665662,
+    -140.1450419984758,
+    59.475978654809296,
+    31.725263111293316
+  );
+  // Original reviewer input, pinned native 2.7 binary64 controls.
+  expect(Math.abs(result.s12 - 2.0357321166913729)).toBeLessThan(4e-13);
+  expect(Math.abs(result.m12 - 1.7396471292606852)).toBeLessThan(4e-13);
+  expect(Math.abs(result.M12 + 1.622733190398546)).toBeLessThan(4e-13);
+  expect(Math.abs(result.M21 - 0.55266000622905886)).toBeLessThan(4e-13);
+  expect(Math.abs(result.azi1 - 4.2884267918354384)).toBeLessThan(1e-9);
+  expect(Math.abs(result.azi2 - 175.36832674323335)).toBeLessThan(1e-9);
+});

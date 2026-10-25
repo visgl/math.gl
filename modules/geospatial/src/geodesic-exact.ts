@@ -80,10 +80,17 @@ export class EllipsoidGeodesicExact {
       const north = meridian * (lat2 - endpoint.lat2) * DEG;
       const east =
         parallel * angleMath.AngNormalize(angleMath.AngNormalize(lon2) - endpoint.lon2) * DEG;
-      if (
-        Math.hypot(north, east) <=
-        8 * Number.EPSILON * Math.max(this.semiMajorAxis, this.semiMinorAxis)
-      )
+      // Propagate angular subtraction roundoff into physical endpoint units.
+      // Longitude labels near 180 degrees can lose several ulps even on short routes.
+      const rounding =
+        8 * Number.EPSILON * Math.max(this.semiMajorAxis, this.semiMinorAxis) +
+        4 *
+          Number.EPSILON *
+          DEG *
+          (Math.abs(meridian) * (Math.abs(lat2) + Math.abs(endpoint.lat2)) +
+            Math.abs(parallel) *
+              (Math.abs(angleMath.AngNormalize(lon2)) + Math.abs(endpoint.lon2)));
+      if (Math.hypot(north, east) <= rounding)
         return {
           ...endpoint,
           lat2,
@@ -193,7 +200,7 @@ export class EllipsoidGeodesicExact {
         let delta = Math.max(lower, Math.min(upper, target / I.meanE()));
         for (let i = 0; i < 80; i++) {
           const residual = I.E(sig1, delta) - target;
-          if (Math.abs(residual) <= 4 * Number.EPSILON * Math.max(Math.abs(target), 1e-300))
+          if (Math.abs(residual) <= Number.EPSILON * Math.max(Math.abs(target), 1e-300))
             return evaluate(delta, distance);
           if (residual > 0) upper = delta;
           else lower = delta;
