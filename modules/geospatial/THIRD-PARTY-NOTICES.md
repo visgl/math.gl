@@ -67,3 +67,19 @@ Elastic I, II and III coordinate tables are by Justin Kunimune, released under t
 [Unlicense](./src/discontinuous/elastic/UNLICENSE.txt). See the
 [provenance record](./src/discontinuous/elastic/README.md) for the pinned revision,
 conversion details, units, and links to the published format and research.
+
+## G8/G9 geodesics
+
+`src/geodesic-exact.ts` and `src/geodesic-exact/inverse-engine.ts` adapt the
+auxiliary-sphere, reduced-length/scales and Cayley longitude formulae from Charles
+Karney's GeographicLib **2.7** `GeodesicExact.cpp` and `GeodesicLineExact.cpp`.
+They reuse the already attributed JavaScript inverse-search framework through
+per-instance overrides. Adaptive quadrature, API contracts and endpoint refinement
+are original math.gl work. The [MIT terms](./GEOGRAPHICLIB-LICENSE.txt) and full
+copyright notices are included in the packaged [LICENSE](./LICENSE).
+
+`src/triaxial.ts` and `src/triaxial/integrate.ts` are original Cartesian
+coordinate/geodesic implementations. GeographicLib 2.7's distinct Jacobi solution
+is an offline comparator, not runtime source or a dependency. The original native
+API caller and fixtures pin the source archive and generator; no upstream test
+fixtures or native implementation are incorporated.

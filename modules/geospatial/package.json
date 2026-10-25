@@ -1084,6 +1084,16 @@
       "types": "./dist/elastic.d.ts",
       "import": "./dist/elastic.js",
       "require": "./dist/elastic.cjs"
+    },
+    "./geodesic-exact": {
+      "types": "./dist/geodesic-exact.d.ts",
+      "import": "./dist/geodesic-exact.js",
+      "require": "./dist/geodesic-exact.cjs"
+    },
+    "./triaxial": {
+      "types": "./dist/triaxial.d.ts",
+      "import": "./dist/triaxial.js",
+      "require": "./dist/triaxial.cjs"
     }
   },
   "files": [

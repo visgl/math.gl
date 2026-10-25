@@ -123,6 +123,14 @@ jobs:
           yarn check:c8-package
           node modules/geospatial/scripts/qualify-c8.mjs --output /tmp/c8-g7-node.json
 
+      - name: Qualify wider-domain and triaxial geodesics
+        timeout-minutes: 3
+        run: |
+          python3 modules/geospatial/scripts/generate-g89-reference.py --check
+          python3 modules/geospatial/scripts/generate-g89-independent.py --check
+          node modules/geospatial/scripts/check-g89-package.mjs
+          node modules/geospatial/scripts/qualify-g89.mjs --output /tmp/g89-node.json
+
       - name: Check geographic seam and rhumb APIs, public types and selective budgets
         run: |
           python3 modules/geospatial/scripts/generate-geographic-seam-reference.py --check
@@ -177,6 +185,7 @@ jobs:
             /tmp/projection-accuracy.json
             /tmp/geographic-seams-node.json
             /tmp/c8-g7-node.json
+            /tmp/g89-node.json
             /tmp/deformation-stress-qualification.json
           if-no-files-found: error
 
@@ -428,6 +437,10 @@ jobs:
         timeout-minutes: 2
         run: node modules/geospatial/scripts/qualify-c8.mjs --browser ${{ matrix.browser }} --output /tmp/c8-g7-${{ matrix.browser }}.json
 
+      - name: Qualify wider-domain and triaxial geodesics
+        timeout-minutes: 3
+        run: node modules/geospatial/scripts/qualify-g89.mjs --browser ${{ matrix.browser }} --output /tmp/g89-${{ matrix.browser }}.json
+
       - name: Qualify geographic seam and rhumb controls
         timeout-minutes: 2
         run: node modules/geospatial/scripts/qualify-geographic-seams.mjs --browser ${{ matrix.browser }} --output /tmp/geographic-seams-${{ matrix.browser }}.json
@@ -452,6 +465,7 @@ jobs:
           path: |
             /tmp/geographic-seams-${{ matrix.browser }}.json
             /tmp/c8-g7-${{ matrix.browser }}.json
+            /tmp/g89-${{ matrix.browser }}.json
             /tmp/g6-qualification-${{ matrix.browser }}.json
             /tmp/g56-qualification-${{ matrix.browser }}.json
             /tmp/g34-qualification-${{ matrix.browser }}.json

@@ -136,3 +136,11 @@ not split projection seams. Import the sampler from `/ellipsoid` and subdivision
 
 [Local-frame qualification and G7 benchmark baselines](./api-reference/local-frame-qualification.md)
 document the supported numerical profile and independent/native evidence.
+
+### Wider-domain and triaxial geodesics
+
+- [EllipsoidGeodesicExact](./api-reference/ellipsoid-geodesic-exact.md): optional
+  elliptic direct/inverse revolution geodesics and reusable distance/arc lines.
+- [TriaxialEllipsoid](./api-reference/triaxial-geometry.md): three surface coordinate
+  systems, direction conversions and reusable Cartesian geodesic trajectories.
+- [G8/G9 qualification and support limits](./api-reference/geodesic-g89-qualification.md).
