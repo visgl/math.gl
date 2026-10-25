@@ -6,12 +6,12 @@ import {createScene} from './scene.js';
 import './style.css';
 export function mountElasticMaps(root) {
   root.innerHTML = `<section class="elastic-maps">
-    <div class="elastic-controls"><label>Projection <select data-map><option>I</option><option>II</option><option>III</option><option value="sinusoidal">Sinusoidal</option></select></label>
+    <canvas aria-label="Elastic world map with coastlines and a polygon crossing cuts"></canvas>
+    <div class="elastic-controls"><label>Projection <select data-map><option value="I">Elastic I</option><option value="II">Elastic II</option><option value="III">Elastic III</option><option value="sinusoidal">Sinusoidal</option></select></label>
     <label>Transition <select data-route><option value="auto">Direct morph</option><option value="via-globe">Through globe</option></select></label>
     <label><input data-grid type="checkbox" checked> Graticule</label></div>
-    <canvas aria-label="Elastic world map with coastlines and a polygon crossing cuts"></canvas>
     <p data-status role="status">Move over the map to inspect coordinates.</p>
-    <small>Elastic maps: <a href="https://kunimune.blog/2023/12/29/introducing-the-elastic-projections/">Justin Kunimune</a> (public domain). Coastlines: Natural Earth (public domain). Orange: a polygon crossing cuts.</small>
+    <footer>Elastic maps: <a href="https://kunimune.blog/2023/12/29/introducing-the-elastic-projections/">Justin Kunimune</a> (public domain). Coastlines: Natural Earth (public domain). Orange: a polygon crossing cuts.</footer>
   </section>`;
   const find = s => root.querySelector(s),
     scene = createScene(find('canvas')),
