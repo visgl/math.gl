@@ -58,8 +58,6 @@ const library = geodesic.Geodesic as unknown as Namespace;
 
 /** A geodesic with a fixed starting point and initial azimuth. */
 export interface GeodesicLine {
-  /** Optional reusable result sink; existing custom lines remain compatible. */
-  positionInto?(distance: number, output?: GeodesicResult): GeodesicResult;
   position(distance: number): GeodesicResult;
   arcPosition(arc: number): GeodesicResult;
 }
@@ -154,7 +152,7 @@ function outputMask(options: GeodesicOptions): number {
 }
 
 function validateFinite(value: number): void {
-  if (!Number.isFinite(value)) throw new Error('Expected finite geodesic argument');
+  if (!Number.isFinite(value)) throw new Error('Nonfinite axis, azimuth, distance or arc');
 }
 
 /** @internal Shared engine and non-area mask for projections. Keeping the raw
