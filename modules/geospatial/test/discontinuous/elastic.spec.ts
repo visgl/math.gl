@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
+import {ElasticGrid} from '../../src/discontinuous/elastic/grid';
 import {MapEngine, createElasticMap} from '../../src/discontinuous';
 import {elasticI, elasticII, elasticIII} from '../../src/elastic';
 for (const data of [elasticI, elasticII, elasticIII]) {
@@ -523,4 +524,34 @@ test('output scaling does not turn cuts into joins', () => {
   const bad = synthetic();
   bad.sections[0].complement = 'yes' as unknown as boolean;
   expect(() => createElasticMap(bad)).toThrow(/complement/);
+});
+
+test('collapsed polar edges retain residual-checked inverse representatives', () => {
+  for (const data of [elasticI, elasticII, elasticIII]) {
+    const map = createElasticMap(data);
+    for (const latitude of [-90, 90]) {
+      const hit = map.projectPoint([0, latitude])!;
+      const candidates = map.unprojectPoint(hit.position, hit.regionId);
+      expect(
+        candidates.some(p => Math.abs(p.position[1] - latitude) < 1e-7),
+        data.name
+      ).toBe(true);
+      for (const candidate of candidates) {
+        const projected = map.projectPoint(candidate.position, candidate.regionId)!;
+        expect(
+          Math.hypot(
+            projected.position[0] - hit.position[0],
+            projected.position[1] - hit.position[1]
+          )
+        ).toBeLessThan(1e-8);
+      }
+    }
+  }
+});
+test('constant cells return representatives only for their collapsed image', () => {
+  const data = synthetic();
+  data.sections = [{...data.sections[0], rows: 2, columns: 2, values: [3, 7, 3, 7, 3, 7, 3, 7]}];
+  const grid = new ElasticGrid(data.sections[0], 1);
+  expect(grid.inverse([3, 7]).length).toBeGreaterThan(0);
+  expect(grid.inverse([3.000001, 7])).toEqual([]);
 });

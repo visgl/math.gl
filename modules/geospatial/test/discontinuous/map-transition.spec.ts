@@ -169,3 +169,46 @@ test('direct polygons retain holes and immutable endpoint correspondence', () =>
   frame[0].coordinates[0][0][0] = 999;
   expect(geometry.evaluate(0)[0].coordinates[0][0][0]).not.toBe(999);
 });
+
+test('common polygon refinement covers the world once, including rotated target cuts', () => {
+  const targets = [
+    ...maps,
+    ...(['sinusoidal', 'mollweide', 'robinson'] as const).map(
+      projection =>
+        new MapEngine({
+          version: 1,
+          id: projection,
+          definition: {type: 'world', projection, centralMeridian: -120}
+        })
+    )
+  ];
+  const area = (ring: readonly (readonly [number, number])[]) =>
+    Math.abs(
+      ring.reduce((sum, p, i) => {
+        const q = ring[(i + 1) % ring.length];
+        return sum + p[0] * q[1] - q[0] * p[1];
+      }, 0) / 2
+    );
+  for (const target of targets) {
+    const transition = maps[0].createTransitionTo(target);
+    let sum = 0;
+    for (let lon = -180; lon < 180; lon += 90)
+      for (const ring of [
+        [
+          [lon, 0],
+          [lon + 90, 0],
+          [lon + 45, 90]
+        ],
+        [
+          [lon + 90, 0],
+          [lon, 0],
+          [lon + 45, -90]
+        ]
+      ])
+        for (const part of transition.preparePolygon([ring as [number, number][]]).parts)
+          sum +=
+            area(part.sourceCoordinates[0]) -
+            part.sourceCoordinates.slice(1).reduce((s, r) => s + area(r), 0);
+    expect(sum, target.description.id).toBeCloseTo(360 * 180, 5);
+  }
+});

@@ -123,7 +123,16 @@ const cross2 = (a: readonly number[], b: readonly number[]) => a[0] * b[1] - a[1
  * Normalize locally so output radius does not change inverse conditioning. */
 function invertCell(p: Position[], target: readonly number[]): Position[] {
   const scale = Math.max(...p.slice(1).flatMap(q => q.map((v, i) => Math.abs(v - p[0][i]))));
-  if (!(scale > 0)) return [];
+  if (!(scale > 0))
+    return target.every((v, i) => v === p[0][i])
+      ? [
+          [0, 0],
+          [1, 0],
+          [0, 1],
+          [1, 1],
+          [0.5, 0.5]
+        ]
+      : [];
   const b = p[1].map((v, i) => (v - p[0][i]) / scale),
     c = p[2].map((v, i) => (v - p[0][i]) / scale);
   const d = p[3].map((v, i) => (v - p[0][i]) / scale - b[i] - c[i]);
@@ -136,6 +145,34 @@ function invertCell(p: Position[], target: readonly number[]): Position[] {
     return q === 0 ? [-b / (2 * a)] : [q / a, c / q];
   };
   const output: Position[] = [];
+  const accept = (xy: Position) => {
+    if (!xy.every(v => Number.isFinite(v) && v >= -1e-9 && v <= 1 + 1e-9)) return;
+    const [x, y] = xy.map(v => Math.max(0, Math.min(1, v)));
+    if (Math.hypot(...h.map((v, i) => b[i] * x + c[i] * y + d[i] * x * y - v)) > 1e-9) return;
+    if (!output.some(p => Math.hypot(p[0] - x, p[1] - y) < 1e-8)) output.push([x, y]);
+  };
+  // Elimination loses solutions when a whole edge collapses (notably poles).
+  // Test edge restrictions directly, retaining residual-checked representatives
+  // of a collapsed edge rather than treating its zero denominator as no solution.
+  const corners: Position[] = [
+    [0, 0],
+    [1, 0],
+    [1, 1],
+    [0, 1]
+  ];
+  const value = ([x, y]: Position) => b.map((v, i) => v * x + c[i] * y + d[i] * x * y);
+  for (let i = 0; i < 4; i++) {
+    const start = corners[i],
+      end = corners[(i + 1) % 4],
+      a = value(start),
+      z = value(end);
+    const delta = z.map((v, j) => v - a[j]);
+    const axis = Math.abs(delta[0]) > Math.abs(delta[1]) ? 0 : 1;
+    const parameters =
+      Math.abs(delta[axis]) < 1e-14 ? [0, 0.5, 1] : [(h[axis] - a[axis]) / delta[axis]];
+    for (const t of parameters)
+      accept([start[0] + t * (end[0] - start[0]), start[1] + t * (end[1] - start[1])]);
+  }
   for (const swap of [false, true]) {
     const first = swap ? c : b,
       second = swap ? b : c;
@@ -150,10 +187,7 @@ function invertCell(p: Position[], target: readonly number[]): Position[] {
       if (Math.abs(denominator[axis]) < 1e-14) continue;
       const v = numerator[axis] / denominator[axis];
       const xy: Position = swap ? [v, u] : [u, v];
-      if (!xy.every(v => Number.isFinite(v) && v >= -1e-9 && v <= 1 + 1e-9)) continue;
-      const [x, y] = xy.map(v => Math.max(0, Math.min(1, v)));
-      if (Math.hypot(...h.map((v, i) => b[i] * x + c[i] * y + d[i] * x * y - v)) > 1e-9) continue;
-      if (!output.some(p => Math.hypot(p[0] - x, p[1] - y) < 1e-8)) output.push([x, y]);
+      accept(xy);
     }
   }
   return output;

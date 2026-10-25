@@ -250,6 +250,7 @@ function fullCoverage(map: MapEngine): boolean {
   let covered = false;
   if (d.type === 'elastic') {
     const world = rectangle(-180, -90, 180, 90);
+    let completeSections = true;
     const domains = d.data.sections.map(s => {
       const domain = s.complement
         ? polygonClipping.difference(world, [s.boundary as Position[]])
@@ -282,11 +283,12 @@ function fullCoverage(map: MapEngine): boolean {
           }
         }
       }
-      return runs.length
-        ? polygonClipping.intersection(domain, polygonClipping.union(runs[0], ...runs.slice(1)))
-        : [];
+      const valid = runs.length ? polygonClipping.union(runs[0], ...runs.slice(1)) : [];
+      if (!valid.length || polygonClipping.difference(domain, valid).length)
+        completeSections = false;
+      return valid.length ? polygonClipping.intersection(domain, valid) : [];
     });
-    covered = polygonClipping.difference(world, ...domains).length === 0;
+    covered = completeSections && polygonClipping.difference(world, ...domains).length === 0;
   } else if (d.type === 'world') {
     // Deliberately bounded to global formulas with finite poles. Other kernels,
     // custom charts and regional maps retain the conservative globe route.
