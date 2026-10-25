@@ -28,10 +28,10 @@ remain follow-up work.
 
 | Tranche | Priority / status | Deliverable | Acceptance gate and dependencies |
 | --- | --- | --- | --- |
-| C5: Geographic seams and topology | Meridian line/polygon profile implemented | `splitGeographicPolyline`/`splitGeographicPolygon` implement explicit linear, geodesic and rhumb meridian seams, preserving attributes, components, holes, declared polar caps and source intervals. | Build on C4 and existing layout/cutting contracts. Qualify seam intersections, pole crossings, holes, winding, repeated crossings and degenerate edges. Split seams and clip invalid domains before adaptive projection; retain provenance and do not silently reinterpret edges. |
-| C6: Rhumb path integration | Implemented over scalar G5 | `RhumbPath` and `subdivideRhumbPolyline` reuse the existing G5 solver with distance/fraction sampling, unrolled/turn semantics and original-edge provenance. | Preserve G5 independent/native budgets, winding and pole failure semantics. Qualify sampler height/provenance and work limits; do not introduce a second rhumb solver. |
+| C5: Geographic seams and topology | Meridian profile merged in [PR #298](https://github.com/visgl/math.gl/pull/298) | `splitGeographicPolyline`/`splitGeographicPolygon` implement explicit linear, geodesic and rhumb meridian seams, preserving attributes, components, holes, declared polar caps and source intervals. | Build on C4 and existing layout/cutting contracts. Qualify seam intersections, pole crossings, holes, winding, repeated crossings and degenerate edges. Split seams and clip invalid domains before adaptive projection; retain provenance and do not silently reinterpret edges. |
+| C6: Rhumb path integration | Merged in [PR #298](https://github.com/visgl/math.gl/pull/298) over scalar G5 | `RhumbPath` and `subdivideRhumbPolyline` reuse the existing G5 solver with distance/fraction sampling, unrolled/turn semantics and original-edge provenance. | Preserve G5 independent/native budgets, winding and pole failure semantics. Qualify sampler height/provenance and work limits; do not introduce a second rhumb solver. |
 | C7: Precision and renderer interop | P2 / design needed | Optional coordinate rebasing/high-low encoding utilities and a matching consumer contract for deck.gl/luma.gl. Clarify geographic degrees, projected metres, ECEF/local units and rendering common space. | Establish an actual renderer consumer before selecting a buffer layout. Measure reconstruction and relative subtraction under real float32 arithmetic, including large origins and small offsets. Benchmark setup, throughput, allocation and selective bundle cost; coordinate encoding alone must not imply jitter-free rendering. |
-| C8: Local-operation qualification and ergonomics | P2 / planned | Extend C1–C3 evidence to packaged ESM/CJS exports, public types, Firefox/WebKit, declared numerical domains and measured performance; consider reusable flat frame transforms if a consumer demonstrates value. | Preserve scalar ownership/failure behavior. Add independent physical-error controls and domain-specific budgets before accuracy/performance claims. Do not infer allocation-free poses or universal precision from the existing kernel guards. |
+| C8: Local-operation qualification and ergonomics | Initial bounded profile implemented | Extend C1–C3 evidence to packaged ESM/CJS exports, public types, Firefox/WebKit, declared numerical domains and measured performance; consider reusable flat frame transforms if a consumer demonstrates value. | Preserve scalar ownership/failure behavior. Add independent physical-error controls and domain-specific budgets before accuracy/performance claims. Do not infer allocation-free poses or universal precision from the existing kernel guards. |
 | C9: Celestial frames and precise time | P3 / optional, consumer-driven | Separate optional celestial-frame/time module: explicit ICRF/body-fixed and TEME/pseudo-fixed profiles, time scales, versioned Earth-orientation/precession data providers and state-vector transformations. | Coordinate with the [sun/sky roadmap](./sun-roadmap.md). Define UTC/TAI/TT/UT1 handling, leap-second policy, data coverage/loading and accuracy tiers. Independently validate position and velocity, including the frame-derivative term. Approximate starfield rotation is not a qualified terrestrial frame conversion. |
 
 ## Sequence and ownership
@@ -86,3 +86,12 @@ planar area/filled-set, hole and pole controls. Ordinary angular/fraction errors
 remain gated; ill-conditioned meridian intersections use transverse physical errors.
 Generic geometry remains solver-independent. Existing numerical, bundle, coverage
 and allocation gates remain unchanged; no new runtime dependency is introduced.
+
+## C8 / G7 initial evidence
+
+The [local-frame qualification](../docs/modules/geospatial/api-reference/local-frame-qualification.md)
+adds 560 Node/browser controls, strict ESM/CJS consumers, selective graph guards
+and three numerical fixes. Initial G7 historical/native benchmark baselines
+separate setup, reusable operation cost and sampled allocations; they add no
+bulk signatures or speed claims. Wider domains, generic ellipsoidal grazing,
+additional consumers and browser throughput remain follow-up work.

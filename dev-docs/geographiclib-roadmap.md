@@ -50,7 +50,7 @@ work includes G7 and the remaining frames/paths qualification and wider domains.
 | G4: Edge area and polygons | Geodesic `S12`; polygon/polyline accumulator with point/edge insertion, signed area/perimeter, previews and reset. | Compensated sums; independent sphere identities and ellipsoid references. Cover pole/dateline crossings, reversed winding, self-intersections, degeneracy, many tiny edges and multi-circuit paths. Define algebraic/unsigned area and complement conventions; use meaningful near-zero area budgets. |
 | G5: Rhumb geometry | Constant-bearing inverse/direct, reusable lines and rhumb polygon area. | GeographicLib controls plus independent meridian/parallel/sphere limits. Cover winding, near-east/west courses and pole approach; distinguish undefined/infinite cases from convergence failures. |
 | G6: Geodesic intersections | Closest/next/all searches and segment intersection semantics within an explicit support profile. | Independent residual and segment-membership checks plus GeographicLib comparisons. Cover tangencies, nearly parallel/coincident paths, antipodes and multiple crossings. Specify search bounds, deduplication and ambiguity; bound iteration. |
-| G7: Bulk APIs and performance | Reusable/batch operations with output buffers where benchmarks demonstrate value. | Paired benchmarks against pinned GeographicLib implementations at equal accuracy. Measure setup, throughput, allocations and bundle cost separately. Preserve scalar accuracy and alias contracts. Claim improvements only for measured operations/environments. |
+| G7: Bulk APIs and performance | Initial Node/native baselines are available; reusable/batch operations with output buffers where benchmarks demonstrate value. | Paired benchmarks against pinned GeographicLib implementations at equal accuracy. Measure setup, throughput, allocations and bundle cost separately. Preserve scalar accuracy and alias contracts. Claim improvements only for measured operations/environments. |
 
 ## G3–G4 bounded delivery
 
@@ -144,3 +144,11 @@ and qualification priorities without replacing those plans.
 
 Preserve the existing MIT/Apache-2.0 Cesium notices and GeographicLib MIT notices.
 The new solver and controls are original MIT math.gl work, not an upstream port.
+
+## G7 initial baseline
+
+See [C8 qualification and G7 baselines](../docs/modules/geospatial/api-reference/local-frame-qualification.md).
+The initial workload gates 72 pinned native outputs before timing and compares
+solver setup, direct calls and reused geodesic/rhumb lines. Frame/pose cost uses
+historical math.gl sources with independent C8 controls. Raw samples and sampled
+heap estimates are diagnostic; no throughput threshold or new bulk API is implied.

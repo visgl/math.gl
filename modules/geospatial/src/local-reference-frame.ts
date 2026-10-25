@@ -143,15 +143,42 @@ export class LocalReferenceFrame {
     const x = point[0] - (inverse && position ? m[12] : 0);
     const y = point[1] - (inverse && position ? m[13] : 0);
     const z = point[2] - (inverse && position ? m[14] : 0);
-    const ox = inverse
+    let ox = inverse
       ? m[0] * x + m[1] * y + m[2] * z
       : m[0] * x + m[4] * y + m[8] * z + (position ? m[12] : 0);
-    const oy = inverse
+    let oy = inverse
       ? m[4] * x + m[5] * y + m[6] * z
       : m[1] * x + m[5] * y + m[9] * z + (position ? m[13] : 0);
-    const oz = inverse
+    let oz = inverse
       ? m[8] * x + m[9] * y + m[10] * z
       : m[2] * x + m[6] * y + m[10] * z + (position ? m[14] : 0);
+    if (!Number.isFinite(ox) || !Number.isFinite(oy) || !Number.isFinite(oz)) {
+      // Preserve the ordinary subtract-first path (small offsets at large
+      // origins). Rescale only when an intermediate overflowed before cancellation.
+      const scale = Math.max(
+        Math.abs(point[0]),
+        Math.abs(point[1]),
+        Math.abs(point[2]),
+        position ? Math.abs(m[12]) : 0,
+        position ? Math.abs(m[13]) : 0,
+        position ? Math.abs(m[14]) : 0
+      );
+      const sx = point[0] / scale - (inverse && position ? m[12] / scale : 0);
+      const sy = point[1] / scale - (inverse && position ? m[13] / scale : 0);
+      const sz = point[2] / scale - (inverse && position ? m[14] / scale : 0);
+      ox =
+        (inverse
+          ? m[0] * sx + m[1] * sy + m[2] * sz
+          : m[0] * sx + m[4] * sy + m[8] * sz + (position ? m[12] / scale : 0)) * scale;
+      oy =
+        (inverse
+          ? m[4] * sx + m[5] * sy + m[6] * sz
+          : m[1] * sx + m[5] * sy + m[9] * sz + (position ? m[13] / scale : 0)) * scale;
+      oz =
+        (inverse
+          ? m[8] * sx + m[9] * sy + m[10] * sz
+          : m[2] * sx + m[6] * sy + m[10] * sz + (position ? m[14] / scale : 0)) * scale;
+    }
     if (!Number.isFinite(ox) || !Number.isFinite(oy) || !Number.isFinite(oz))
       throw new RangeError('Frame transformation overflow');
     return result.set(ox, oy, oz);
