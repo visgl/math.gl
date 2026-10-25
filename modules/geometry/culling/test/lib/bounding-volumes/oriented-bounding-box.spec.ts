@@ -20,6 +20,8 @@ import {
   equals
 } from '@math.gl/core';
 import {
+  getOrientedBoundingBoxQuaternion,
+  makeOrientedBoundingBoxFromQuaternion,
   BoundingSphere,
   OrientedBoundingBox,
   makeOrientedBoundingBoxFromPoints,
@@ -86,7 +88,7 @@ test('OrientedBoundingBox#constructor sets expected default values', () => {
 
 test('OrientedBoundingBox#halfSize - should return halfSize of quaternion based OBB', () => {
   const originalHalfSize = [100.45386505126953, 91.120384216308594, 426.03338623046875];
-  const box = new OrientedBoundingBox().fromCenterHalfSizeQuaternion(
+  const box = makeOrientedBoundingBoxFromQuaternion(
     [-122.40277014424709, 37.795204290863012, 134.5439856108278],
     originalHalfSize,
     [0.64432936906814575, 0.76474469900131226, -0.0020481476094573736, 0.0010012148413807154]
@@ -98,23 +100,23 @@ test('OrientedBoundingBox#halfSize - should return halfSize of quaternion based 
   expect(Math.abs(originalHalfSizeVector.len() - halfSizeVector.len()) < delta).toBeTruthy();
 });
 
-test('OrientedBoundingBox#quaternion - should return quaternion of quaternion based OBB', () => {
+test('getOrientedBoundingBoxQuaternion - should return quaternion of quaternion based OBB', () => {
   const originalQuaternion = [
     0.64432936906814575, 0.76474469900131226, -0.0020481476094573736, 0.0010012148413807154
   ];
-  const box = new OrientedBoundingBox().fromCenterHalfSizeQuaternion(
+  const box = makeOrientedBoundingBoxFromQuaternion(
     [-122.40277014424709, 37.795204290863012, 134.5439856108278],
     [100.45386505126953, 91.120384216308594, 426.03338623046875],
     originalQuaternion
   );
   const delta = 0.00000001;
-  const quaternion = box.quaternion;
+  const quaternion = getOrientedBoundingBoxQuaternion(box);
   const originalQuaternionVector = new Vector4(originalQuaternion);
   const quaternionVector = new Vector4(quaternion);
   expect(Math.abs(originalQuaternionVector.len() - quaternionVector.len()) < delta).toBeTruthy();
 });
 
-test('OrientedBoundingBox#fromCenterHalfSizeQuaternion - constructs new OrientedBoundingBox from quaternion-based OBB', () => {
+test('makeOrientedBoundingBoxFromQuaternion - constructs new OrientedBoundingBox from quaternion-based OBB', () => {
   const TEST_CENTER = Object.freeze(
     new Vector3(-122.40277014424709, 37.795204290863012, 134.5439856108278)
   );
@@ -126,7 +128,7 @@ test('OrientedBoundingBox#fromCenterHalfSizeQuaternion - constructs new Oriented
     ])
   );
 
-  const box = new OrientedBoundingBox().fromCenterHalfSizeQuaternion(
+  const box = makeOrientedBoundingBoxFromQuaternion(
     [-122.40277014424709, 37.795204290863012, 134.5439856108278],
     [100.45386505126953, 91.120384216308594, 426.03338623046875],
     [0.64432936906814575, 0.76474469900131226, -0.0020481476094573736, 0.0010012148413807154]
@@ -994,3 +996,23 @@ test.skip('fromRectangle for interesting, degenerate, and edge-case rectangles',
   t.end();
 });
 */
+
+test('OBB quaternion functions preserve rotation, copy inputs and reuse results', () => {
+  const center = [1, 2, 3];
+  const halfSize = [2, 3, 4];
+  const quaternion = [0, 0, Math.SQRT1_2, Math.SQRT1_2];
+  const result = new OrientedBoundingBox();
+  expect(makeOrientedBoundingBoxFromQuaternion(center, halfSize, quaternion, result)).toBe(result);
+  expect(equals(result.halfAxes, [0, 2, 0, -3, 0, 0, 0, 0, 4])).toBe(true);
+  const orientation = getOrientedBoundingBoxQuaternion(result);
+  // q and -q encode the same rotation.
+  expect(
+    Math.abs(orientation.reduce((sum, value, i) => sum + value * quaternion[i], 0))
+  ).toBeCloseTo(1, 14);
+  center.fill(0);
+  halfSize.fill(0);
+  quaternion.fill(0);
+  expect(Array.from(result.center)).toEqual([1, 2, 3]);
+  expect(equals(result.halfAxes, [0, 2, 0, -3, 0, 0, 0, 0, 4])).toBe(true);
+  expect(getOrientedBoundingBoxQuaternion(result)).not.toBe(orientation);
+});

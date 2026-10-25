@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original bounded-profile P0 accuracy and public ownership/unit/boundary regressions; no upstream fixtures copied.
+import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial/ellipsoid';
 import {expect, test} from 'vitest';
 import {config, Vector3} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
@@ -35,7 +36,7 @@ for (const scale of [1e-60, 1, 1e60]) {
   test(`P0 surface frame direction is independent of unit: ${scale}`, () => {
     const shape = new Ellipsoid(2 * scale, 2 * scale, scale);
     const p = [2 * scale, 0, 0];
-    const frame = shape.eastNorthUpToFixedFrame(p);
+    const frame = eastNorthUpToFixedFrame(shape, p);
     close(frame.slice(0, 12), [0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0]);
     close(frame.slice(12, 15), p, scale);
   });
@@ -190,15 +191,15 @@ test('P0 normal intersection invalid numbers and frame failures preserve outputs
         expect(shape.getSurfaceNormalIntersectionWithZAxis([0, 0, 0], bad, out)).toBeUndefined();
         expect(out).toEqual([7, 8, 9, 42]);
         const matrix = Array(16).fill(42);
-        expect(() => shape.eastNorthUpToFixedFrame([bad, 0, 0], matrix)).toThrow();
+        expect(() => eastNorthUpToFixedFrame(shape, [bad, 0, 0], matrix)).toThrow();
         expect(matrix).toEqual(Array(16).fill(42));
       }
     }
     const short = new Float64Array(15).fill(42);
-    expect(() => shape.eastNorthUpToFixedFrame([2, 0, 0], short as unknown as number[])).toThrow();
+    expect(() => eastNorthUpToFixedFrame(shape, [2, 0, 0], short as unknown as number[])).toThrow();
     expect([...short]).toEqual(Array(15).fill(42));
     const matrix = Array(16).fill(42);
-    expect(() => shape.localFrameToFixedFrame('east', 'east', 'up', [2, 0, 0], matrix)).toThrow();
+    expect(() => localFrameToFixedFrame(shape, 'east', 'east', 'up', [2, 0, 0], matrix)).toThrow();
     expect(matrix).toEqual(Array(16).fill(42));
   } finally {
     config.debug = previous;

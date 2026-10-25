@@ -39,3 +39,6 @@ export {GeodesicPath} from '../geodesic-path';
 export type {GeodesicPathOptions} from '../geodesic-path';
 export {RhumbPath} from '../rhumb-path';
 export type {RhumbPathOptions} from '../rhumb-path';
+
+export {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '../ellipsoid-transforms';
+export type {AxisDirection} from '../ellipsoid-transforms';

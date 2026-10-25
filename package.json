@@ -46,6 +46,7 @@
     "check:geographic-seams-package": "node modules/geospatial/scripts/check-geographic-seams-package.mjs",
     "check:geodesic-path-package": "node modules/geospatial/scripts/check-geodesic-path-package.mjs",
     "check:tile-matrix-package": "node modules/geospatial/scripts/check-tile-matrix-package.mjs",
+    "check:tree-shaking": "node scripts/check-tree-shaking.mjs",
     "check:packages": "node scripts/check-packages.mjs",
     "check:attributions": "node scripts/check-attributions.mjs"
   },

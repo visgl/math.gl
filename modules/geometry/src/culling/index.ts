@@ -38,3 +38,8 @@ export type {QueryPoint, TriangleRayHit} from './queries';
 
 export {intersectOrientedBoxes2D} from './oriented-box-2d';
 export type {OrientedBox2D} from './oriented-box-2d';
+
+export {
+  getOrientedBoundingBoxQuaternion,
+  makeOrientedBoundingBoxFromQuaternion
+} from './lib/algorithms/oriented-bounding-box-quaternion';

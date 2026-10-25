@@ -53,7 +53,9 @@ try {
     if(['LocalReferenceFrame','EllipsoidTangentPlane','Ellipsoid'].includes(symbol))assert(sources.every(p=>!p.includes('/vendor/')),'Unexpected vendor solver');
    }
   }
-  assert.deepEqual(graphs[1],graphs[0],symbol+': historical/current package sideEffects contracts or retained dependencies differ');
+  // Optional frame methods were extracted from Ellipsoid. Dependencies may disappear,
+  // but a selective export must not gain a new dependency relative to the qualified baseline.
+  assert(graphs[1].every(path=>graphs[0].includes(path)),symbol+': selective export gained dependencies');
   // Reviewed numerical-fix allowance for C8 only, established before measurement.
   // Existing selective Ellipsoid/geodesic limits and the standalone numeric leaf are unchanged.
   const allowance=['LocalReferenceFrame','EllipsoidTangentPlane'].includes(symbol)?[2000,1000]:[0,32];

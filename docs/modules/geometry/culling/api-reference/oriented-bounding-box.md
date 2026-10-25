@@ -58,6 +58,17 @@ This is an implementation of Stefan Gottschalk's [Collision Queries using Orient
 - `positions` List of `Vector3` points that the bounding box will enclose.
 - `result` Optional object onto which to store the result.
 
+### `getOrientedBoundingBoxQuaternion(box): Quaternion`
+
+Standalone export from `@math.gl/geometry/culling`. Returns the quaternion describing
+an oriented bounding box, excluding the scale of its half axes.
+
+### `makeOrientedBoundingBoxFromQuaternion(center, halfSize, quaternion, result?)`
+
+Standalone export from `@math.gl/geometry/culling`. Constructs an oriented bounding
+box from its center, half sizes and quaternion. Returns a new box or the supplied
+`result` box. Inputs are copied; the result owns its center and half axes.
+
 ## Fields
 
 ### `center: Vector3`
@@ -72,10 +83,6 @@ The transformation matrix, to rotate the box to the right position.
 
 The array with three half-sizes for the bounding box
 
-### `readonly quaternion: Quaternion`
-
-The quaternion describing the orientation of the bounding box
-
 ## Methods
 
 ### `constructor(center = [0, 0, 0], halfAxes = [0, 0, 0, 0, 0, 0, 0, 0, 0])`
@@ -84,10 +91,6 @@ The quaternion describing the orientation of the bounding box
 
 - `center`=`Vector3.ZERO` The center of the box.
 - `halfAxes`=`Matrix3.ZERO` The three orthogonal half-axes of the bounding box. Equivalently, the transformation matrix, to rotate and scale a cube centered at the origin.
-
-### `fromCenterHalfSizeQuaternion(center : number[], halfSize : number[], `quaternion : number[]) : OrientedBoundingBox
-
-Create an OrientedBoundingBox from a half-size-quaternion based OBB
 
 ### `clone() : OrientedBoundingBox`
 
