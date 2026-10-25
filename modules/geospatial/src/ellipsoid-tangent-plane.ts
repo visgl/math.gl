@@ -11,7 +11,7 @@ import {Vector2, Vector3} from '@math.gl/core';
 import type {NumericArray} from '@math.gl/core/types';
 import {Plane} from '@math.gl/geometry/culling';
 import {Ellipsoid} from './ellipsoid';
-import {compensatedDot3, sphereNormalCoordinate} from './ellipsoid-helpers/tangent-plane-numerics';
+import {compensatedDot3, exactNormalIntersection} from './ellipsoid-helpers/tangent-plane-numerics';
 
 export type TangentPlaneProjectionMode = 'normal' | 'radial';
 export type TangentPlaneProjection = {
@@ -22,12 +22,12 @@ export type TangentPlaneProjection = {
 
 /** A two-dimensional east-north plane tangent to an ellipsoid. */
 export class EllipsoidTangentPlane {
-  private _origin: Vector3;
-  private _xAxis: Vector3;
-  private _yAxis: Vector3;
+  private anchor: Vector3;
+  private east: Vector3;
+  private north: Vector3;
   private _plane: Plane;
   private readonly radii: readonly number[];
-  private readonly sphereRadius?: number;
+  private readonly radius?: number;
 
   /**
    * Creates a new plane tangent to an ellipsoid at the provided origin.
@@ -40,14 +40,14 @@ export class EllipsoidTangentPlane {
     finiteInput(origin, 3);
     this.radii = Object.freeze(Array.from(ellipsoid.radii));
     if (this.radii[0] === this.radii[1] && this.radii[1] === this.radii[2])
-      this.sphereRadius = this.radii[0];
+      this.radius = this.radii[0];
     if (!this.radii.every(radius => radius > 0 && Number.isFinite(radius))) {
       throw new RangeError('Tangent plane requires positive finite ellipsoid radii');
     }
     const originOnSurface = ellipsoid.scaleToGeodeticSurface(Array.from(origin), new Vector3());
     if (!originOnSurface) throw new RangeError('Origin has no unique ellipsoid surface point');
 
-    this._origin = new Vector3(originOnSurface);
+    this.anchor = new Vector3(originOnSurface);
     const normal = new Vector3(ellipsoid.geodeticSurfaceNormal(originOnSurface));
     if (!normal.every(Number.isFinite) || !(normal.len() > 0)) {
       throw new RangeError('Cannot resolve tangent-plane normal');
@@ -56,12 +56,12 @@ export class EllipsoidTangentPlane {
     // Use the surface normal, rather than the radial position, so unequal X/Y
     // radii still produce an orthonormal tangent basis.
     const horizontal = Math.hypot(normal[0], normal[1]);
-    this._xAxis =
+    this.east =
       horizontal > 0
         ? new Vector3(-normal[1] / horizontal, normal[0] / horizontal, 0)
         : new Vector3(0, 1, 0);
-    this._yAxis = new Vector3(normal).cross(this._xAxis).normalize();
-    this._plane = new Plane().fromPointNormal(this._origin, normal);
+    this.north = new Vector3(normal).cross(this.east).normalize();
+    this._plane = new Plane().fromPointNormal(this.anchor, normal);
   }
 
   /**
@@ -74,10 +74,10 @@ export class EllipsoidTangentPlane {
   projectPointToNearestOnPlane(cartesian: Readonly<NumericArray>, result = new Vector2()): Vector2 {
     finiteInput(cartesian, 3);
     // Tangential dot products equal orthogonal projection without constructing the 3D footpoint.
-    const x = cartesian[0] - this._origin[0];
-    const y = cartesian[1] - this._origin[1];
-    const z = cartesian[2] - this._origin[2];
-    const projected = writePlanePoint(this, x, y, z, result, this.sphereRadius);
+    const x = cartesian[0] - this.anchor[0];
+    const y = cartesian[1] - this.anchor[1];
+    const z = cartesian[2] - this.anchor[2];
+    const projected = writePlanePoint(this, x, y, z, result, this.radius);
     if (!projected) throw new RangeError('Tangent-plane projection overflow');
     return projected;
   }
@@ -102,14 +102,14 @@ export class EllipsoidTangentPlane {
     const n = this.zAxis;
     const denominator = x * n[0] + y * n[1] + z * n[2];
     if (denominator <= 1e-14) return undefined;
-    const distance = this._origin.dot(n) / denominator;
+    const distance = this.anchor.dot(n) / denominator;
     return writePlanePoint(
       this,
-      x * distance - this._origin[0],
-      y * distance - this._origin[1],
-      z * distance - this._origin[2],
+      x * distance - this.anchor[0],
+      y * distance - this.anchor[1],
+      z * distance - this.anchor[2],
       result,
-      this.sphereRadius
+      this.radius
     );
   }
 
@@ -127,17 +127,17 @@ export class EllipsoidTangentPlane {
     const [rx, ry, rz] = this.radii;
     if (mode === 'radial') {
       const scale = Math.max(
-        Math.abs(this._origin[0]),
-        Math.abs(this._origin[1]),
-        Math.abs(this._origin[2]),
+        Math.abs(this.anchor[0]),
+        Math.abs(this.anchor[1]),
+        Math.abs(this.anchor[2]),
         Math.abs(point[0]),
         Math.abs(point[1])
       );
       const u = point[0] / scale,
         v = point[1] / scale;
-      const x = this._origin[0] / scale + this._xAxis[0] * u + this._yAxis[0] * v;
-      const y = this._origin[1] / scale + this._xAxis[1] * u + this._yAxis[1] * v;
-      const z = this._origin[2] / scale + this._xAxis[2] * u + this._yAxis[2] * v;
+      const x = this.anchor[0] / scale + this.east[0] * u + this.north[0] * v;
+      const y = this.anchor[1] / scale + this.east[1] * u + this.north[1] * v;
+      const z = this.anchor[2] / scale + this.east[2] * u + this.north[2] * v;
       const minimum = Math.min(rx, ry, rz);
       const ax = x * (minimum / rx),
         ay = y * (minimum / ry),
@@ -147,20 +147,10 @@ export class EllipsoidTangentPlane {
       return writeSurfacePoint(rx * (ax / length), ry * (ay / length), rz * (az / length), result);
     }
     const n = this.zAxis;
-    if (this.sphereRadius !== undefined) {
-      const height = sphereNormalCoordinate(this.sphereRadius, point[0], point[1]);
-      if (height === undefined) return undefined;
-      return writeSurfacePoint(
-        this._xAxis[0] * point[0] + this._yAxis[0] * point[1] + n[0] * height,
-        this._xAxis[1] * point[0] + this._yAxis[1] * point[1] + n[1] * height,
-        this._xAxis[2] * point[0] + this._yAxis[2] * point[1] + n[2] * height,
-        result
-      );
-    }
     const p = [
-      this._origin[0] + this._xAxis[0] * point[0] + this._yAxis[0] * point[1],
-      this._origin[1] + this._xAxis[1] * point[0] + this._yAxis[1] * point[1],
-      this._origin[2] + this._xAxis[2] * point[0] + this._yAxis[2] * point[1]
+      this.anchor[0] + this.east[0] * point[0] + this.north[0] * point[1],
+      this.anchor[1] + this.east[1] * point[0] + this.north[1] * point[1],
+      this.anchor[2] + this.east[2] * point[0] + this.north[2] * point[1]
     ];
     if (!p.every(Number.isFinite)) return undefined;
     const ax = n[0] / rx,
@@ -174,9 +164,21 @@ export class EllipsoidTangentPlane {
     const c = px * px + py * py + pz * pz - 1;
     const squaredB = b * b,
       ac = a * c;
-    const error = 8 * Number.EPSILON * (Math.abs(squaredB) + Math.abs(ac));
+    const error = 1e-6 * (Math.abs(squaredB) + Math.abs(ac));
     const discriminant = squaredB - ac;
-    if (!(a > 0 && discriminant >= -error && Number.isFinite(discriminant))) return undefined;
+    if (!(a > 0) || !Number.isFinite(discriminant) || Math.abs(discriminant) <= error) {
+      const exact = exactNormalIntersection(
+        this.radii,
+        this.anchor,
+        this.east,
+        this.north,
+        n,
+        point,
+        this.radius
+      );
+      return exact && writeSurfacePoint(exact[0], exact[1], exact[2], result);
+    }
+    if (discriminant < 0) return undefined;
     // Stable form of the nearer root (-b + sqrt(discriminant)) / a.
     const root = Math.sqrt(Math.max(0, discriminant));
     const t = b > 0 ? -c / (b + root) : (-b + root) / a;
@@ -229,15 +231,15 @@ export class EllipsoidTangentPlane {
   }
 
   get origin(): Vector3 {
-    return this._origin;
+    return this.anchor;
   }
 
   get xAxis(): Vector3 {
-    return this._xAxis;
+    return this.east;
   }
 
   get yAxis(): Vector3 {
-    return this._yAxis;
+    return this.north;
   }
 
   get zAxis(): Vector3 {
@@ -262,13 +264,13 @@ function writePlanePoint(
   y: number,
   z: number,
   result: Vector2,
-  sphereRadius?: number
+  radius?: number
 ): Vector2 | undefined {
   let east = x * plane.xAxis[0] + y * plane.xAxis[1] + z * plane.xAxis[2];
   let north = x * plane.yAxis[0] + y * plane.yAxis[1] + z * plane.yAxis[2];
   if (
-    sphereRadius !== undefined &&
-    Math.abs((east / sphereRadius) ** 2 + (north / sphereRadius) ** 2 - 1) <= 32 * Number.EPSILON
+    radius !== undefined &&
+    Math.abs((east / radius) ** 2 + (north / radius) ** 2 - 1) <= 32 * Number.EPSILON
   ) {
     east = compensatedDot3(x, y, z, plane.xAxis[0], plane.xAxis[1], plane.xAxis[2]);
     north = compensatedDot3(x, y, z, plane.yAxis[0], plane.yAxis[1], plane.yAxis[2]);

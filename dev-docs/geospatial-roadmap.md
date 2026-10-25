@@ -95,3 +95,13 @@ and three numerical fixes. Initial G7 historical/native benchmark baselines
 separate setup, reusable operation cost and sampled allocations; they add no
 bulk signatures or speed claims. Wider domains, generic ellipsoidal grazing,
 additional consumers and browser throughput remain follow-up work.
+
+## C8/G7 follow-up
+
+The next bounded increment extends silhouette qualification with exact rational
+signs and 220-digit line/quadric controls, preserving the spherical contact
+convention. Measured packed local-frame point/vector transforms reuse Float64
+outputs, support exact in-place storage and fail atomically. See the expanded
+[qualification and benchmark profile](../docs/modules/geospatial/api-reference/local-frame-qualification.md).
+Existing numerical and selective bundle budgets remain unchanged; renderer C7,
+G8 Exact geodesics and G9 triaxial geodesics remain separate work.
