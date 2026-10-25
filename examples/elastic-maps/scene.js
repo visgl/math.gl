@@ -55,11 +55,13 @@ export function createScene(canvas) {
         } else if (item.kind === 'polygon') {
           context.fillStyle = '#ed9b4599';
           context.fill('evenodd');
-          context.strokeStyle = '#b45f0b';
-          context.lineWidth = 1;
-          context.stroke();
         } else {
-          context.strokeStyle = item.kind === 'grid' ? '#b6cbd5' : '#24485a';
+          context.strokeStyle =
+            item.kind === 'grid'
+              ? '#b6cbd5'
+              : item.kind === 'polygon-outline'
+                ? '#b45f0b'
+                : '#24485a';
           context.lineWidth = item.kind === 'grid' ? 0.6 : 1;
           context.stroke();
         }
@@ -98,14 +100,15 @@ export function createScene(canvas) {
         ...ocean.map(r => ['ocean', r]),
         ...graticule.map(r => ['grid', r]),
         ...coastlines.map(r => ['coast', r]),
-        ['polygon', samplePolygon]
+        ['polygon', samplePolygon],
+        ...samplePolygon.map(r => ['polygon-outline', [...r, r[0]]])
       ];
       for (let i = 0; i < jobs.length; i++) {
         const [kind, input] = jobs[i];
         geometry.push({
           kind,
           geometry:
-            kind === 'coast' || kind === 'grid'
+            kind === 'coast' || kind === 'grid' || kind === 'polygon-outline'
               ? transition.prepareLine(input)
               : transition.preparePolygon(input)
         });

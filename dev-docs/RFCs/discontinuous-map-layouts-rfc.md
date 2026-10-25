@@ -580,3 +580,25 @@ use source-to-globe, coverage crossfade, globe-to-target. The existing conservat
 transition planner remains unchanged. The renderer owns easing, camera fitting,
 depth ordering, cancellation and intermediate picking. Direct intermediate shapes
 can fold or overlap; this is not a distortion-preserving optimization solver.
+
+### Renderer-neutral feature preparation
+
+`MapEngine.prepareFeatures()` prepares static 2D GeoJSON-shaped feature arrays
+into a versioned, structured-cloneable payload. Float64 XY/geographic vertex
+buffers, Uint32 path/ring/polygon offsets and explicit feature/component/chart
+metadata allow a rendering library to consume split geometry without depending
+on MapEngine internals. Feature properties remain with the caller.
+
+Filled polygon rings and original polygon outlines are independent batches.
+Clipped fill rings necessarily include generated closing edges; outlines come
+from projecting the original source rings and therefore do not invent borders
+along cuts. This also avoids inferring edge provenance from floating-point
+coordinates. True source boundaries that coincide with cuts remain visible.
+
+This first contract deliberately does not claim full tessellator readiness:
+original-edge interpolation weights, dash distances, explicit fill-edge roles,
+interior refinement, animated surface topology and screen-space error control
+remain follow-up work. A deck.gl adapter should start with static 2D fills and
+paths, preserve original feature picking/accessors, and only then motivate a
+shared geometry-provider hook in core layers. No deck.gl dependency belongs in
+math.gl, and no existing core-layer behavior changes implicitly.

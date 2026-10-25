@@ -48,8 +48,9 @@ export function createScene(canvas) {
       context.beginPath();
       for (const ring of part.coordinates) path(ring, true);
       context.fill('evenodd');
-      context.stroke();
+      if (!data.polygonOutlines) context.stroke();
     }
+    if (data.polygonOutlines) lines(data.polygonOutlines, '#b45f0b', 1);
     context.font = '12px system-ui';
     for (const city of data.cities) {
       const [x, y] = fitted.project(city.position);

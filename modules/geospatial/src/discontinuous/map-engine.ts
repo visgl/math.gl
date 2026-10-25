@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {MapTransition, type MapTransitionOptions} from './map-transition';
+import {
+  prepareMapFeatures,
+  type MapFeature,
+  type MapPrepareFeaturesOptions,
+  type PreparedMapGeometry
+} from './prepare-features';
 import {createElasticMap} from './elastic/map';
 import type {ElasticMapData} from './elastic/data';
 import type {MapSurface} from './map-layout';
@@ -348,6 +354,14 @@ export class MapEngine {
   }
   projectPolygon(rings: readonly (readonly GeographicPosition[])[], options?: MapSamplingOptions) {
     return this.map.projectPolygon(rings, {...this.sampling, ...options});
+  }
+  /** Prepare static feature geometry with packed buffers and original-feature identity.
+   * Polygon fills and original outlines are separate, so clipping edges are not stroked. */
+  prepareFeatures(
+    features: readonly MapFeature[],
+    options: MapPrepareFeaturesOptions = {}
+  ): PreparedMapGeometry {
+    return prepareMapFeatures(this, features, options);
   }
   getLayout() {
     this.cachedLayout ??= getMapLayout(this.map, this.sampling);
