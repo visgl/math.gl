@@ -84,7 +84,7 @@ const cap = splitGeographicPolygon([{
 
 Nonpolar rings must fit a single unrolled 360-degree chart. Multiply winding polygons, non-monotone polar winding, self-intersecting input, touching/overlapping holes and arbitrary global complements are outside this profile. The caller must supply simple valid rings; this API is not a global validity checker or repair operation. Detected graph ambiguities, inconsistent closing attributes and unresolvable degeneracies reject instead of silently changing topology.
 
-This tranche covers periodic meridian seams. Arbitrary interrupted-chart networks remain with [MapEngine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/map-engine) and its explicit clipping profiles. Projection-domain clipping and terrain following are separate from seam splitting; choosing a seam does not make an invalid projection latitude valid.
+This tranche covers periodic meridian seams. Arbitrary interrupted-chart networks remain with [MapEngine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/map-engine.md) and its explicit clipping profiles. Projection-domain clipping and terrain following are separate from seam splitting; choosing a seam does not make an invalid projection latitude valid.
 
 ## Accuracy, conditioning and work limits[​](#accuracy-conditioning-and-work-limits "Direct link to Accuracy, conditioning and work limits")
 
