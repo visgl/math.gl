@@ -83,3 +83,13 @@ coordinate/geodesic implementations. GeographicLib 2.7's distinct Jacobi solutio
 is an offline comparator, not runtime source or a dependency. The original native
 API caller and fixtures pin the source archive and generator; no upstream test
 fixtures or native implementation are incorporated.
+
+### Exact edge areas
+
+`src/geodesic-exact/area.ts` and the edge-area decomposition in
+`src/geodesic-exact.ts` adapt the `I4` integrand and azimuth-area formula from
+GeographicLib 2.7 `GeodesicExact.cpp` / `GeodesicLineExact.cpp` (Charles Karney,
+MIT). The derivative-integral divided difference and adaptive integration are
+original math.gl implementations. `GeodesicPolygonExact` reuses the already
+attributed compensated polygon kernel. Existing GeographicLib copyright notices
+and MIT terms in [LICENSE](./LICENSE) cover these formula adaptations as well.

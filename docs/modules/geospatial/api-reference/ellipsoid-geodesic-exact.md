@@ -22,6 +22,7 @@ Angles and azimuths are **degrees**, with latitude before longitude. Distances a
 reduced lengths use the axes' units; `surfaceArea` uses squared units. Results
 include `lat1`, `lon1`, `azi1`, `lat2`, `lon2`, `azi2`, `s12`, `a12`, `m12`,
 `M12` and `M21`, with the same field meanings as `EllipsoidGeodesic`.
+`{area: true}` additionally returns signed edge area `S12` in squared axis units.
 The axes and line options are snapshots. Returned results are independently owned.
 
 ## Choosing the solver
@@ -56,9 +57,42 @@ quadrature and failed inverse convergence throw `RangeError`.
 
 Axes must lie in `[1e-60, 1e60]`, with `0.25 ≤ b/a ≤ 4`. Input longitude magnitude
 is limited to `1e6` degrees. This is a declared, sampled profile, not certification
-of every binary64 input in that box. Edge area `S12`, polygon accumulation and
-arbitrarily long lines are not supplied by this class; requesting edge area at
-runtime is rejected. Existing series-area APIs keep their separate domains.
+of every binary64 input in that box. Arbitrarily long lines remain outside this
+profile. Existing series-area APIs keep their separate domains.
+
+## Exact edge areas and polygons
+
+Use `{area: true}` with `inverse`, `direct` or `line` to request `S12`, the signed
+area between the edge and the equator, closed by endpoint meridians. It is an
+algebraic edge contribution, not the area of an arbitrary polygon on its own.
+Area is omitted by default. At exact poles the endpoint longitude specifies the
+terminal meridian convention.
+
+```ts
+import {GeodesicPolygonExact} from '@math.gl/geospatial/geodesic-exact';
+const polygon = new GeodesicPolygonExact({semiMajorAxis: 1, semiMinorAxis: 2});
+polygon.addPoint(0, 0).addPoint(0, 10).addPoint(90, 0);
+const {perimeter, area} = polygon.compute();
+```
+
+The accumulator supports `addPoint(latitude, longitude)`, signed
+`addEdge(azimuth, distance)`, `compute({reverse?, unsigned?})`, nonmutating
+`testPoint`/`testEdge`, `number` and `clear()`. Construction with
+`{polyline: true}` accumulates an open signed perimeter and omits area. It retains
+compensated sums, not vertices. Point insertion selects the inverse solver’s
+shortest candidate; use direct edges for winding routes. `longitudeTurns` on
+point insertion is rejected when nonzero.
+
+Counterclockwise algebraic area is positive by default; `reverse` flips its sign.
+Signed results lie in `(-surfaceArea/2, surfaceArea/2]`, unsigned results in
+`[0, surfaceArea)`. Self-intersections contribute algebraically. Tiny cancellation
+at zero can select either side of the unsigned modulo boundary. Multi-circuit
+edges retain the line’s existing two-auxiliary-circuit limit.
+
+See [exact area qualification](./geodesic-exact-area-qualification.md) for native
+and independent controls, existing tiny-area budgets and remaining conditioning
+limits. The smooth elliptic correction is integrated directly; its divided
+difference uses a derivative integral to avoid subtracting nearly equal values.
 
 ## Accuracy and sources
 

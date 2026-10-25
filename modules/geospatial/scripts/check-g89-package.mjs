@@ -10,9 +10,10 @@ import {fileURLToPath} from 'node:url';import {gzipSync} from 'node:zlib';import
 import {bundleRuntime} from '../projection/scripts/benchmark-runtime.mjs';
 const root=fileURLToPath(new URL('../../../',import.meta.url)),require=createRequire(import.meta.url);
 for(const load of [p=>import(p),p=>require(p)]){
- const {EllipsoidGeodesicExact:E}=await load('@math.gl/geospatial/geodesic-exact');
+ const {EllipsoidGeodesicExact:E,GeodesicPolygonExact:P}=await load('@math.gl/geospatial/geodesic-exact');
  const {TriaxialEllipsoid:T}=await load('@math.gl/geospatial/triaxial');
  const e=new E({semiMajorAxis:1,semiMinorAxis:2});assert(Math.abs(e.direct(0,0,90,1).lon2-180/Math.PI)<2e-10);
+ const area=new P({semiMajorAxis:1,semiMinorAxis:2}).addPoint(0,0).addPoint(0,10).addPoint(90,0).compute().area;assert(area>0&&Number.isFinite(area));
  const t=new T({radii:[3,2,1]}),p=t.toCartesian(0,0),v=t.directionToCartesian(p,0);
  assert(t.line(p,v).position(1).position.every(Number.isFinite));
 }

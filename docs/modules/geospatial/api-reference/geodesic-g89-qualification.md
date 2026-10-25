@@ -97,8 +97,9 @@ python3 modules/geospatial/scripts/generate-g89-reference.py --native /tmp/g89-n
 ```
 
 The reports retain runtime versions, provenance, per-field errors, budgets and
-native diagnostics. The declared limits, omitted Exact edge area and omitted
-global triaxial inverse are part of the public contracts. Arbitrary flattening,
+native diagnostics. The declared limits and omitted global triaxial inverse are
+part of the public contracts. Exact edge areas/polygons have a separate
+[qualification](./geodesic-exact-area-qualification.md). Arbitrary flattening,
 arbitrarily long trajectories, conformal charts and uniform sampling remain
 outside this increment. No new dependency, native runtime or coefficient dataset
 is added. GeographicLib-derived formulae retain SPDX/MIT credits in source and the
