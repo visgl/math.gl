@@ -321,8 +321,8 @@ export class DiscontinuousMap {
     // Convex single rings need no boolean reconstruction. Direct half-space
     // clipping avoids nearly coincident mask/input edges at exact grid seams.
     // With holes, clip the convex outer boundary first as well, then retain
-    // Boolean reconstruction for holes. An independently constructed mask can
-    // disagree by roundoff with a coincident source edge.
+    // Boolean subtraction for holes. Re-intersecting the clipped exterior with
+    // its source can lose faces when coincident edges disagree by roundoff.
     const orientation = ringOrientation(planar[0]);
     let totalTurn = 0;
     const convexOuter =
@@ -382,7 +382,9 @@ export class DiscontinuousMap {
       if (convexOuter && relativeArea(clip) <= inputArea * 1024 * Number.EPSILON) continue;
       const polygons = convex
         ? [[[...clip, clip[0]]]]
-        : polygonClipping.intersection(planar, [clip]);
+        : convexOuter
+          ? polygonClipping.difference([clip], ...planar.slice(1).map(ring => [ring]))
+          : polygonClipping.intersection(planar, [clip]);
       for (const polygon of polygons) {
         if (relativeArea(polygon[0]) <= inputArea * 1024 * Number.EPSILON) continue;
         const output: MapPolygon = {
