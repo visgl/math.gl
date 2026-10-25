@@ -76,3 +76,5 @@ Extraction canonicalizes pitch to \[-π/2, π/2]. Within `1e-12` of a gimbal loc
 `velocityQuaternion(fixedVelocity, result?: Quaternion)` returns an orientation with model +X along normalized fixed-space velocity. Model +Z is the normalized projection of geodetic up perpendicular to velocity. The remaining axis completes a right-handed basis. Geographic up is used even when this frame's selected axes are NED.
 
 The method returns `undefined`, leaving a supplied quaternion unchanged, for zero velocity, unrepresentable speed, or nearly vertical motion (sine of the angle to up below `1e-12`). Invalid coordinates throw `RangeError`. The operation is stateless: applications must decide whether to hold the previous attitude, switch reference directions, or interpolate across singularities. It is not an inertial-to-fixed state-vector conversion and adds no rotating-frame velocity term.
+
+See the [C8 qualification and G7 baselines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/local-frame-qualification.md) for independent/native controls, numerical budgets, remaining domains and measured-cost methodology.

@@ -125,3 +125,5 @@ Use the geographic tile helpers above for the built-in equal-angle longitude/lat
 ## Geodesic path sampling[​](#geodesic-path-sampling "Direct link to Geodesic path sampling")
 
 [GeodesicPath](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-path.md) reuses a shortest geodesic line for fraction/distance sampling. [subdivideGeodesicPolyline](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/subdivide-geodesic-polyline.md) adaptively maps those paths through a supplied transform with original-edge provenance and optional surface-distance limits. Source angles are degrees, output tolerance uses target units, and longitude unrolling does not split projection seams. Import the sampler from `/ellipsoid` and subdivision from `/globe`.
+
+[Local-frame qualification and G7 benchmark baselines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/local-frame-qualification.md) document the supported numerical profile and independent/native evidence.
