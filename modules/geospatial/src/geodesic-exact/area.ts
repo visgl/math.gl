@@ -23,6 +23,22 @@ function derivative(x: number): number {
   const ratio = (x > 0 ? Math.asinh(root) : Math.asin(root)) / root;
   return 1 + (1 - ratio / Math.sqrt(1 + x)) / (2 * x);
 }
+/** Stable t value for a well-separated divided difference. */
+function value(x: number): number {
+  if (Math.abs(x) < 0.125) {
+    let term = x / 3,
+      sum = x;
+    for (let n = 1; n <= 24; n++) {
+      const next = sum + term;
+      if (next === sum) break;
+      sum = next;
+      term *= (-2 * n * x) / (2 * n + 3);
+    }
+    return sum;
+  }
+  const root = Math.sqrt(Math.abs(x));
+  return x + ((Math.sqrt(1 + x) * (x > 0 ? Math.asinh(root) : Math.asin(root))) / root - 1);
+}
 /** Integrate the smooth correction, evaluating t's divided difference as an
  * integral of its derivative rather than subtracting nearly equal t values.
  */
@@ -34,13 +50,18 @@ export function areaCorrection(
   delta: number
 ): number {
   // I4 is anti-periodic after pi and has zero integral over a full circuit.
-  const remainder = delta % (2 * Math.PI);
+  const remainder = delta % (2 * Math.PI),
+    tX = value(ep2);
   return integrate(
     theta => {
       const s = s1 * Math.cos(theta) + c1 * Math.sin(theta),
         y = k2 * s * s;
       const divided =
-        ep2 === y ? derivative(y) : integrate(u => derivative(y + (ep2 - y) * u), 0, 1);
+        ep2 === y
+          ? derivative(y)
+          : Math.abs(y) <= 1e-8 * Math.abs(ep2)
+            ? (tX - value(y)) / (ep2 - y)
+            : integrate(u => derivative(y + (ep2 - y) * u), 0, 1);
       return (-s * divided) / 2;
     },
     0,
