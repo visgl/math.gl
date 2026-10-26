@@ -106,7 +106,8 @@ export default function TectonicTimeMachine() {
     return () => abort.abort();
   }, [attempt, sourceId]);
   useEffect(() => {
-    if (earlyEarth || !model || model.source.id !== sourceId || model.hasTime(time)) return;
+    if (earlyEarth || !model || model.source.id !== sourceId) return;
+    if (model.hasTime(time)) {setReady(true); return;}
     const abort = new AbortController();
     setReady(false);
     setPlaying(false);
