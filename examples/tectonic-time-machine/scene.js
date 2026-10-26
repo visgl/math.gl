@@ -108,7 +108,7 @@ export function mountScene(
     plateMaxAge = 1000,
     appearanceStatus = null,
     impactGlow = -1;
-  let followPlace=null,followCamera=false,guidedCamera=false,compareFutures=false,cameraMoving=false,lastCameraTime=0,journeyMessage='';
+  let followPlace=null,followCamera=false,guidedCamera=false,compareFutures=false,cameraMoving=false,lastCameraTime=0,journeyMessage='',viewportRevision=0;
   const camera={longitude:0,latitude:15},tracker=createPlaceTracker(),comparison=createFutureComparison();
   const markerMesh={coordinates:new Float64Array(2),projected:new Float64Array(2),positions:new Float64Array(3)};
   const trailMesh={coordinates:new Float64Array(66),projected:new Float64Array(66),positions:new Float64Array(99)};
@@ -166,6 +166,7 @@ export function mountScene(
     getCursor: () => (mode === 'globe' ? 'grab' : 'move')
   });
   function configure() {
+    viewportRevision++;
     const width = root.clientWidth || 800,
       height = root.clientHeight || 550;
     const radius = Math.min(width, height) * 0.39;
@@ -417,19 +418,19 @@ export function mountScene(
         ...formationEffects(time, weights.globe || 0),
         showJourney && new PathLayer({id:'journey-trail',data:trailData,getPath:d=>d.positions,
           coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,getColor:[255,214,120,180],getWidth:2,widthUnits:'pixels',
-          parameters:{depthWriteEnabled:false},updateTriggers:{getPath:[time,journey.count,longitude,latitude,mode,weights,scenario,followPlace]}}),
+          parameters:{depthWriteEnabled:false},updateTriggers:{getPath:[time,journey.count,longitude,latitude,mode,weights,scenario,followPlace,viewportRevision]}}),
         showJourney && new ScatterplotLayer({id:'journey-place',data:markerData,getPosition:d=>d.positions,
           coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,radiusUnits:'pixels',getRadius:6,
           getFillColor:[255,211,104],stroked:true,getLineColor:[255,255,255],getLineWidth:2,lineWidthUnits:'pixels',
-          parameters:{depthWriteEnabled:false},updateTriggers:{getPosition:[time,longitude,latitude,mode,weights,scenario,followPlace]}}),
+          parameters:{depthWriteEnabled:false},updateTriggers:{getPosition:[time,longitude,latitude,mode,weights,scenario,followPlace,viewportRevision]}}),
         showJourney && new TextLayer({id:'journey-label',data:markerData,getPosition:d=>d.positions,
           getText:()=>followPlace.name,coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,
           getSize:12,sizeUnits:'pixels',getColor:[255,235,190],getPixelOffset:[12,-12],getTextAnchor:'start',
           background:true,getBackgroundColor:[5,22,35,200],backgroundPadding:[4,3],
-          parameters:{depthWriteEnabled:false},updateTriggers:{getPosition:[time,longitude,latitude,mode,weights,scenario,followPlace],getText:followPlace.name}}),
+          parameters:{depthWriteEnabled:false},updateTriggers:{getPosition:[time,longitude,latitude,mode,weights,scenario,followPlace,viewportRevision],getText:followPlace.name}}),
         alternativePaths && new PathLayer({id:'future-alternative',data:alternativePaths,getPath:d=>d.positions,
           coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,getColor:[197,160,255,150],getWidth:1.5,widthUnits:'pixels',
-          parameters:{depthWriteEnabled:false},updateTriggers:{getPath:[(weights.globe||0)>.999999?time:alternativePaths,longitude,latitude,mode,weights,scenario]}}),
+          parameters:{depthWriteEnabled:false},updateTriggers:{getPath:[(weights.globe||0)>.999999?time:alternativePaths,longitude,latitude,mode,weights,scenario,viewportRevision]}}),
         new PathLayer({
           id: 'tectonic-grid',
           data: paths,
