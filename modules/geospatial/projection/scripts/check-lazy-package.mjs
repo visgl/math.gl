@@ -105,7 +105,7 @@ export async function load() {${scenario.load}}`,
     const initialInputs = emittedInputs(initial);
     assert(
       !initialInputs.some(path =>
-        /\/experimental\/(kernels|entries\/projections\/(?!merc\.js)|crs\/(wkt|projjson|structured)|grids\/(ntv2|geotiff|grid))/.test(
+        /\/experimental\/(kernels|entries\/projections\/(?!merc\.js)|crs\/(wkt|projjson|structured|resolve)|grids\/(ntv2|geotiff|grid))/.test(
           path
         )
       ),

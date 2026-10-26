@@ -2,8 +2,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {createSpatialReference, inferCRSRepresentation} from '../../../crs/spatial-reference';
-import type {CRSInput, CRSReference, SpatialReference} from '../../../crs/spatial-reference';
+import {inferCRSRepresentation} from '../../../crs/spatial-reference';
+import type {
+  CRSInput,
+  CRSReference,
+  KnownCRSReference,
+  SpatialReference
+} from '../../../crs/spatial-reference';
 import type {CreateProjectionOptions, ProjectionEngineOptions} from '../../types';
 import type {ProjectionDescriptor} from '../projection-descriptor';
 import type {ProjectionPlugin} from '../types';
@@ -15,7 +20,6 @@ type Options = ProjectionEngineOptions<ProjectionPlugin | ProjectionDescriptor> 
 
 /** Capture both endpoints before the first asynchronous lookup. */
 export async function prepareEngineOptions<T extends Options>(options: T): Promise<T> {
-  if (!options.resolver) return options;
   const captured = {
     ...options,
     from: capture(options.from ?? 'WGS84'),
@@ -29,48 +33,44 @@ export async function prepareEngineOptions<T extends Options>(options: T): Promi
 }
 
 /** Local aliases/built-ins and registered readers take precedence over external lookup. */
-export async function prepareCRSInput(input: CRSInput, options: Options): Promise<CRSInput> {
-  if (!options.resolver) return input;
-  const captured = capture(input);
+export async function prepareCRSInput(captured: CRSInput, options: Options): Promise<CRSInput> {
   // Enforce epoch/vertical policy before attempting lookup; metadata must never be dropped.
   const source = resolveCRSInput(captured, options);
   const local = resolveLocalCRSDefinition(source.definition, options);
-  const reference =
+  // resolveCRSInput above rejects unknown/absent references. Callers already captured the input.
+  const reference = (
     typeof captured === 'string' || 'type' in captured
       ? undefined
       : 'crs' in captured
         ? (captured as SpatialReference).crs
-        : (captured as CRSReference);
+        : (captured as CRSReference)
+  ) as KnownCRSReference | undefined;
   const representation =
-    local === source.definition &&
-    reference &&
-    (reference.state === 'explicit' || reference.state === 'default')
+    local === source.definition && reference
       ? reference.representation
       : inferCRSRepresentation(local);
   if (representation !== 'identifier' || options.parsers?.some(p => p.canParse(local))) {
     return captured;
   }
-  const result = await options.resolver.resolve({
+  const result = await options.resolver!.resolve({
     state: 'explicit',
     provenance: reference?.provenance ?? 'unknown',
     definition: local,
     representation
   });
   const definition = resolveCRSInput(result.input, options).definition;
-  if (typeof captured === 'string' || 'type' in captured) return definition;
+  if (!reference) return definition;
   const metadata = captured as CRSReference | SpatialReference;
-  const ref = 'crs' in metadata ? metadata.crs : metadata;
-  if (ref.state !== 'explicit' && ref.state !== 'default') return captured;
   const resolved = {
-    ...ref,
+    ...reference,
     definition,
     representation: inferCRSRepresentation(definition),
     alternatives: [
-      {definition: ref.definition, representation: ref.representation},
-      ...(ref.alternatives ?? [])
+      {definition: reference.definition, representation: reference.representation},
+      ...(reference.alternatives ?? [])
     ]
   };
-  return 'crs' in metadata ? createSpatialReference({...metadata, crs: resolved}) : resolved;
+  return 'crs' in metadata ? {...metadata, crs: resolved} : resolved;
 }
 
 function capture(input: CRSInput): CRSInput {

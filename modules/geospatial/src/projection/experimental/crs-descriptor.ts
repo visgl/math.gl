@@ -4,7 +4,6 @@
 
 import type {CRSMetadata, CRSUnit} from '../../crs/index';
 import type {CRSResolver} from '../../crs/resolver';
-import {prepareCRSInput} from './crs/resolve';
 import {normalizeCRS} from './crs/normalize';
 import {createRenderingScale} from './crs-rendering-scale';
 import {validateScalarOutput, writeScalarOutput} from './scalar-output';
@@ -44,7 +43,8 @@ export async function resolveCRSDescriptor(
   normalization: CRSNormalizationOptions &
     Pick<CreateProjectionOptions, 'enforceAxis'> & {resolver?: CRSResolver},
   options: GetCRSOptions = {},
-  useDefinitionSignature = false
+  useDefinitionSignature = false,
+  prepareInput?: typeof import('./crs/resolve').prepareCRSInput
 ): Promise<CRSDescriptor> {
   // Lazy imports yield control. Capture caller-owned JSON metadata before loading so
   // descriptor metadata and compiled conversions describe the same definition.
@@ -56,7 +56,9 @@ export async function resolveCRSDescriptor(
     ...options,
     converters: options.converters && [...options.converters]
   };
-  const input = await prepareCRSInput(captured, {...normalization, ...conventions});
+  const input = prepareInput
+    ? await prepareInput(captured, {...normalization, ...conventions})
+    : captured;
   const crs = normalizeCRS(input, {...normalization, ...conventions});
   const projection = await engine.createProjectionAsync({
     ...conventions,

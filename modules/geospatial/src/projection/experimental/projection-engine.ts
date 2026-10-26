@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {resolveCRSDescriptor} from './crs-descriptor';
-import {prepareEngineOptions} from './crs/resolve';
+import {hasCRSOverrides, snapshotEngineOptions} from './engine-options';
+import {prepareEngineOptions, prepareCRSInput} from './crs/resolve';
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
 import {ProjectionTransform} from './typescript-projection';
 import type {CRSEngine, CRSDescriptor, GetCRSOptions} from './types';
@@ -32,7 +33,8 @@ export class ConfigurableProjectionEngine<P extends Registration = ProjectionPlu
       definition,
       this.options,
       options,
-      this.useDefinitionSignature
+      this.useDefinitionSignature,
+      this.options.resolver ? prepareCRSInput : undefined
     );
   }
 
@@ -57,30 +59,4 @@ export function createProjectionEngine<P extends Registration = ProjectionPlugin
   return new ConfigurableProjectionEngine(options);
 }
 
-/** Copy registration containers while retaining owned plugin and grid data. */
-export function snapshotEngineOptions<P extends Registration>(
-  options: ProjectionEngineOptions<P>
-): ProjectionEngineOptions<P> {
-  return {
-    ...options,
-    projections: options.projections && [...options.projections],
-    parsers: options.parsers && [...options.parsers],
-    datumCatalogs: options.datumCatalogs && [...options.datumCatalogs],
-    aliases: options.aliases && JSON.parse(JSON.stringify(options.aliases)),
-    datumGrids: options.datumGrids && {...options.datumGrids},
-    verticalGrids: options.verticalGrids && {...options.verticalGrids}
-  };
-}
-
-/** Custom execution registrations can reinterpret the same input definition. */
-export function hasCRSOverrides(options: ProjectionEngineOptions<Registration>): boolean {
-  return Boolean(
-    options.projections ||
-      options.parsers ||
-      options.datumCatalogs ||
-      options.aliases ||
-      options.datumGrids ||
-      options.verticalGrids ||
-      options.resolver
-  );
-}
+export {hasCRSOverrides} from './engine-options';

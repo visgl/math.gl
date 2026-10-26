@@ -137,9 +137,7 @@ export function normalizeCRS(
       throw new TypeScriptCRSError(
         serialized ? 'missing-parser' : 'unknown-syntax',
         inferCRSRepresentation(definition) === 'identifier'
-          ? 'Unsupported CRS definition; unresolved identifier: ' +
-              definition +
-              '; supply an alias or use createProjectionAsync/getCRS with a configured resolver'
+          ? 'Unsupported CRS definition: ' + definition + '; resolve it first'
           : 'Unsupported CRS definition; register a WKT or PROJJSON parser for structured definitions'
       );
     }

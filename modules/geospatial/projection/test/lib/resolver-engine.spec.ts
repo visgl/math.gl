@@ -119,11 +119,11 @@ describe('native engines with optional CRS resolution', () => {
       ]
     });
     const engine = new FullProjectionEngine({resolver});
-    expect(() => engine.createProjection({to: 'APP:target'})).toThrow('createProjectionAsync');
+    expect(() => engine.createProjection({to: 'APP:target'})).toThrow('resolve it first');
     expect(calls).toBe(0);
     const ready = await engine.createProjectionAsync({to: 'APP:target'});
     expect(ready.project([0, 0])[0]).toBe(0);
-    expect(() => engine.createProjection({to: 'APP:target'})).toThrow('createProjectionAsync');
+    expect(() => engine.createProjection({to: 'APP:target'})).toThrow('resolve it first');
     expect(calls).toBe(1);
     expect(engine.createProjection({to: 'EPSG:3857'}).project([0, 0])[0]).toBe(0);
   });
@@ -147,7 +147,7 @@ describe('native engines with optional CRS resolution', () => {
     );
   });
 
-  test('captures both endpoint metadata before an asynchronous lookup', async () => {
+  test.each(['full', 'lazy'])('%s captures both endpoints before async preparation', async kind => {
     let release!: () => void;
     const wait = new Promise<void>(resolve => {
       release = resolve;
@@ -169,7 +169,9 @@ describe('native engines with optional CRS resolution', () => {
       representation: 'identifier' as const,
       provenance: 'metadata' as const
     };
-    const pending = new FullProjectionEngine({resolver}).createProjectionAsync({
+    const engine =
+      kind === 'full' ? new FullProjectionEngine({resolver}) : new LazyProjectionEngine({resolver});
+    const pending = engine.createProjectionAsync({
       from: 'APP:source',
       to
     });
