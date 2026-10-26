@@ -42,3 +42,8 @@ with a separate mask. Query status must be checked before using a result.
 
 See the [API and numerical contract](../../../docs/modules/geospatial/terrain/README.md) and
 [implementation roadmap](../../../dev-docs/terrain-roadmap.md).
+
+The optional `/terrain/surface` entry adds indexed triangle surfaces, barycentric
+height sampling, explicit halfedge topology and BVH ray/segment/nearest queries.
+`/terrain/bounds` adds conservative min/max hierarchies over height-field cells.
+These are CPU/data APIs; shader and device execution stay in luma.gl.

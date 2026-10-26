@@ -38,6 +38,12 @@ const probes = [
     budget: 12000
   },
   {
+    symbol: 'HeightFieldMinMax',
+    packages: ['@math.gl/geospatial/terrain/bounds'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/ellipsoid/],
+    budget: 8000
+  },
+  {
     symbol: 'Ellipsoid',
     packages: ['@math.gl/geospatial', '@math.gl/geospatial/ellipsoid'],
     forbidden: [/\/geometry\//, /\/classes\/matrix[34]\./, /\/local-frame\./,

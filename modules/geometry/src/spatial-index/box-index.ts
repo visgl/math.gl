@@ -20,7 +20,7 @@ export type NearestIndexResult = {index: number; distance: number};
 export type NearestIndexOptions = {
   maxDistance?: number;
   filter?: (index: number) => boolean;
-  /** Exact geometry distance; must be at least the distance to its indexed box. null excludes it. */
+  /** Exact geometry distance, at least its box distance apart from roundoff. Values are never clamped; null excludes it. */
   distanceToItem?: (index: number) => number | null;
 };
 
@@ -161,16 +161,24 @@ export class BoxIndex {
     const stack = this.size ? [0] : [];
     while (stack.length) {
       const node = stack.pop();
-      if (distance(this.nodeBounds, node) > best) continue;
+      const nodeDistance = distance(this.nodeBounds, node);
+      if (nodeDistance > best + getDistanceTolerance(nodeDistance, best)) continue;
       if (this.counts[node]) {
         for (let i = this.starts[node]; i < this.starts[node] + this.counts[node]; i++) {
           const index = this.order[i];
           const lower = distance(this.bounds, index);
-          if (lower > best || (options.filter && !options.filter(index))) continue;
+          if (
+            lower > best + getDistanceTolerance(lower, best) ||
+            (options.filter && !options.filter(index))
+          )
+            continue;
           const exact = options.distanceToItem ? options.distanceToItem(index) : lower;
           if (exact === null) continue;
           validateQueryDistance(exact);
-          if (exact < lower)
+          if (
+            exact < lower &&
+            (!Number.isFinite(lower) || lower - exact > getDistanceTolerance(lower, exact))
+          )
             throw new RangeError('Refinement distance cannot be below box distance');
           if (
             Number.isFinite(exact) &&
@@ -212,17 +220,14 @@ export class BoxIndex {
         unit,
         bounds.subarray(offset, offset + this.dimension),
         bounds.subarray(offset + this.dimension, offset + this.dimension * 2),
-        best + getRayDistanceTolerance(best, best)
+        best + getDistanceTolerance(best, best)
       );
     };
     const rootDistance = this.size ? getEntry(this.nodeBounds, 0) : null;
     const stack = rootDistance === null ? [] : [{index: 0, distance: rootDistance}];
     while (stack.length) {
       const candidate = stack.pop();
-      if (
-        !candidate ||
-        candidate.distance > best + getRayDistanceTolerance(candidate.distance, best)
-      )
+      if (!candidate || candidate.distance > best + getDistanceTolerance(candidate.distance, best))
         continue;
       const node = candidate.index;
       if (this.counts[node]) {
@@ -239,7 +244,7 @@ export class BoxIndex {
           validateQueryDistance(exact);
           if (
             exact < lower &&
-            (!Number.isFinite(lower) || lower - exact > getRayDistanceTolerance(lower, exact))
+            (!Number.isFinite(lower) || lower - exact > getDistanceTolerance(lower, exact))
           )
             throw new RangeError('Refinement distance cannot be below box entry');
           if (
@@ -319,7 +324,7 @@ export class BoxIndex {
 }
 
 /** Relative, unit-independent allowance for independently rounded slab and geometry kernels. */
-function getRayDistanceTolerance(first: number, second: number): number {
+function getDistanceTolerance(first: number, second: number): number {
   return (
     8 * Math.max(Number.MIN_VALUE, Number.EPSILON * Math.max(Math.abs(first), Math.abs(second)))
   );

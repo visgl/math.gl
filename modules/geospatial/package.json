@@ -1134,6 +1134,16 @@
       "types": "./dist/terrain/packed.d.ts",
       "import": "./dist/terrain/packed.js",
       "require": "./dist/terrain/packed.cjs"
+    },
+    "./terrain/surface": {
+      "types": "./dist/terrain/surface.d.ts",
+      "import": "./dist/terrain/surface.js",
+      "require": "./dist/terrain/surface.cjs"
+    },
+    "./terrain/bounds": {
+      "types": "./dist/terrain/bounds.d.ts",
+      "import": "./dist/terrain/bounds.js",
+      "require": "./dist/terrain/bounds.cjs"
     }
   },
   "files": [

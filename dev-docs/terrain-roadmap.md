@@ -32,7 +32,11 @@ versioned f32/u32 upload layout, byte/height-error budgets and validated CPU
 reconstruction. This is a renderer-independent data substrate. Shader code and
 device execution belong to companion luma.gl work.
 
-This is partial T0/T1/T2/T3 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
+Indexed terrain surfaces now provide barycentric sampling, edge topology and
+BVH-backed ray/segment/nearest queries. Conservative cell min/max hierarchies
+retain extrema and source-coverage counts, with exhaustive CPU references.
+
+This is partial T0/T1/T2/T3/T5 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
 spike, vertex-tile reconciliation, persistent cache structures, adaptive meshes,
 and GPU qualification remain open. The remaining sections describe the target architecture and delivery gates.
 
