@@ -43,6 +43,27 @@ const probes = [
     forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/ellipsoid/],
     budget: 8000
   },
+  ...[
+    ['createTerrainMesh', 'mesh', 5000],
+    ['measureTerrainMeshError', 'mesh-error', 6000],
+    ['getTerrainMeshEdge', 'mesh-edges', 3500]
+  ].map(([symbol, entry, budget]) => ({
+    symbol, packages: [`@math.gl/geospatial/terrain/${entry}`], budget,
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /\/martini\./, /martini/, /delatin/,
+      ...['mesh', 'mesh-error', 'mesh-edges'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
+  })),
+  {
+    symbol: 'createMartiniTerrainMesh',
+    packages: ['@math.gl/geospatial/terrain/martini'],
+    forbidden: [/delatin/, /\/geometry\//, /\/core\//, /\/surface\./, /\/terrain\/mesh\./, /\/terrain\/mesh-edges\./],
+    budget: 16000
+  },
+  {
+    symbol: 'createDelatinTerrainMesh',
+    packages: ['@math.gl/geospatial/terrain/delatin'],
+    forbidden: [/martini/, /\/geometry\//, /\/core\//, /\/surface\./, /\/terrain\/mesh-edges\./],
+    budget: 24000
+  },
   {
     symbol: 'Ellipsoid',
     packages: ['@math.gl/geospatial', '@math.gl/geospatial/ellipsoid'],

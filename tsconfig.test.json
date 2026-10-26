@@ -880,6 +880,11 @@
       "@math.gl/geospatial/terrain/packed": ["modules/geospatial/src/terrain/packed.ts"],
       "@math.gl/geospatial/terrain/surface": ["modules/geospatial/src/terrain/surface.ts"],
       "@math.gl/geospatial/terrain/bounds": ["modules/geospatial/src/terrain/bounds.ts"],
+      "@math.gl/geospatial/terrain/mesh": ["modules/geospatial/src/terrain/mesh.ts"],
+      "@math.gl/geospatial/terrain/mesh-error": ["modules/geospatial/src/terrain/mesh-error.ts"],
+      "@math.gl/geospatial/terrain/mesh-edges": ["modules/geospatial/src/terrain/mesh-edges.ts"],
+      "@math.gl/geospatial/terrain/martini": ["modules/geospatial/src/terrain/martini.ts"],
+      "@math.gl/geospatial/terrain/delatin": ["modules/geospatial/src/terrain/delatin.ts"],
       "@math.gl/geospatial/terrain": [
         "./modules/geospatial/src/terrain/index.ts"
       ],

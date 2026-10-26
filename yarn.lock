@@ -5232,7 +5232,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mapbox/martini@npm:^0.2.0":
+"@mapbox/martini@npm:0.2.0, @mapbox/martini@npm:^0.2.0":
   version: 0.2.0
   resolution: "@mapbox/martini@npm:0.2.0"
   checksum: 10c0/6d74edcdb9bc2d5243a0f3a42b6e92dce5a6f9c92481d3478246ca1aabe61adf8bfbd965b32271d81493e2ce49bab9671e19c9fd9e23d8f6f98ffd437f212b6c
@@ -5373,6 +5373,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
+    "@mapbox/martini": "npm:0.2.0"
     "@math.gl/core": "npm:5.0.0-alpha.20"
     "@math.gl/geometry": "npm:5.0.0-alpha.20"
     "@math.gl/web-mercator": "npm:5.0.0-alpha.20"

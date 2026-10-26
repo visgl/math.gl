@@ -591,3 +591,92 @@ Float64 extrema, Uint32 cell-count arrays, dimensions and block size. Missing
 nodes use zero placeholders and zero populated counts. No GPU resources or shader
 code are created. Incremental hierarchy edits and hierarchy-based ray traversal
 remain future work.
+
+## Plain mesh data and optional tessellators
+
+```typescript
+import {createTerrainMesh} from '@math.gl/geospatial/terrain/mesh';
+import {createMartiniTerrainMesh} from '@math.gl/geospatial/terrain/martini';
+import {createDelatinTerrainMesh} from '@math.gl/geospatial/terrain/delatin';
+import {measureTerrainMeshError} from '@math.gl/geospatial/terrain/mesh-error';
+import {getTerrainMeshEdge} from '@math.gl/geospatial/terrain/mesh-edges';
+
+const regular = createTerrainMesh(field);
+const rtin = createMartiniTerrainMesh(field, {maxError: 1, fullEdges: ['maxColumn']});
+const tin = createDelatinTerrainMesh(field, {maxError: 1});
+const report = measureTerrainMeshError(field, rtin);
+const boundaryVertexIds = getTerrainMeshEdge(rtin, 'maxColumn');
+```
+
+Each function is independently imported. The sampling root imports neither tessellator.
+MARTINI imports no Delatin code, and Delatin imports no MARTINI code. These APIs return
+plain detached buffers, with no renderer objects, normals, UVs, query indexes or physics
+methods. `TerrainSurface` can consume the resulting data when those capabilities are needed.
+No shader code is included.
+
+`TerrainGridMesh` contains Float64 `positions` (local XYZ), Uint32 `indices` and
+`gridCoordinates` (packed integer column/row per vertex), source `width`/`height`,
+world `origin` and `heightReference`. World positions are local positions plus origin.
+The default origin is `[field.origin[0], field.origin[1], 0]`; pass an explicit XYZ
+origin to change it. Triangles wind counterclockwise in world XY even for flipped
+or sheared grids. Cell registration places vertices at sample centers. Regular
+meshes preserve the field's diagonal and omit triangles with missing corners;
+unreferenced source vertices remain in their buffers. Builders reject coordinate
+overflow or triangles collapsed by an unsuitable origin.
+
+Both adaptive builders require complete data and a finite nonnegative `maxError`,
+in the source height units (meters under the terrain contract). They return an
+`AdaptiveTerrainMesh` with `error`, `requestedMaxError`, `refinementPasses` and
+`tessellator`. MARTINI uses a pinned 0.2.0 RTIN backend and requires a square
+`(2^k+1)` sample grid. Delatin uses the ISC backend transferred from loaders.gl
+and accepts rectangular grids. It retains synchronous CommonJS support.
+
+The adapters independently measure each candidate against all valid source nodes.
+They refine candidates that fail measurement, for at most nine passes. MARTINI's
+last pass forces the full RTIN; Delatin's last pass uses the regular grid and reports
+`tessellator: 'regular'`. This is a **source-node vertical error bound**, not a
+continuous bound against bilinear interpolation or the field's chosen diagonal.
+A two-by-two saddle can have zero node error and nonzero interior error.
+
+Both accept `maxSamples` (default 1,100,000), `maxTriangles` (default full-grid
+triangle count), and `maxSampleTests` (default 10,000,000 per measurement pass).
+Delatin additionally accepts `maxRefinements`, the maximum backend point insertions
+(default sample count minus four corners); this does not limit the regular fallback.
+Capacity/work exhaustion throws rather than returning an uncertified mesh. These
+are admission, output and work limits, not exact peak-memory or elapsed-time limits.
+
+MARTINI's `fullEdges` forces every source sample on selected sides, named
+`minColumn`, `maxColumn`, `minRow`, `maxRow`. Adjacent same-resolution tiles with
+matching samples and frames can choose different interior tolerances while sharing
+these full boundary vertices. Delatin does not support forced edges. Neither API
+implements mixed-resolution stitching, skirts, geomorphing or a tile scheduler.
+`getTerrainMeshEdge` returns referenced vertex IDs sorted along the selected grid
+side; grid sides are not geographic compass directions or general boundary loops.
+
+`measureTerrainMeshError` validates the grid/frame correspondence, rasterizes
+triangles at integer source nodes, and returns `maxSampleError`, `rmsSampleError`,
+`coveredSampleCount`, `uncoveredSampleCount`, and `sampleTests`. Missing source
+nodes are ignored; uncovered valid nodes are reported separately and must not be
+interpreted as zero error. Overlaps use the worst residual per node. A finite
+`maxSampleTests` bounds triangle bounding-box sample visits. Measurement does not
+certify manifoldness, coverage between nodes, holes, or a continuous error bound.
+
+### Migrating loaders.gl terrain meshing
+
+Keep image decoding, elevation conversion, padding, tile bounds, UVs, skirts,
+workers and mesh schema in loaders.gl. Pass its already decoded and padded heights
+into `HeightField`, then call the selected math.gl tessellator. For an image of
+`imageWidth` by `imageHeight` with one extra border sample, use field dimensions
+`imageWidth + 1` and `imageHeight + 1`, vertex registration, `origin: [minX, maxY]`,
+`columnStep: [xScale, 0]`, and `rowStep: [0, -yScale]`. Preserve the decoder's current
+border policy: MARTINI duplicates the final row/column, while the existing Delatin
+path leaves its padding at zero. Changing that policy is a separate loaders change.
+
+Pass mesh `origin: [0, 0, 0]` if preserving absolute legacy positions. Convert
+positions to Float32 only at the renderer/schema boundary and account for that
+additional precision loss separately. UVs are `column / imageWidth` and
+`row / imageHeight` from `gridCoordinates`. Indices already have correct world
+winding. Independent error verification can refine beyond the old backend result;
+byte-for-byte index identity is not promised. After adopting these APIs, loaders.gl
+can remove its MARTINI dependency and vendored Delatin implementation. This math.gl
+change does not modify loaders.gl itself.
