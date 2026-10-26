@@ -1149,6 +1149,31 @@
       "types": "./dist/geographic-cuts.d.ts",
       "import": "./dist/geographic-cuts.js",
       "require": "./dist/geographic-cuts.cjs"
+    },
+    "./terrain/mesh": {
+      "types": "./dist/terrain/mesh.d.ts",
+      "import": "./dist/terrain/mesh.js",
+      "require": "./dist/terrain/mesh.cjs"
+    },
+    "./terrain/mesh-error": {
+      "types": "./dist/terrain/mesh-error.d.ts",
+      "import": "./dist/terrain/mesh-error.js",
+      "require": "./dist/terrain/mesh-error.cjs"
+    },
+    "./terrain/mesh-edges": {
+      "types": "./dist/terrain/mesh-edges.d.ts",
+      "import": "./dist/terrain/mesh-edges.js",
+      "require": "./dist/terrain/mesh-edges.cjs"
+    },
+    "./terrain/martini": {
+      "types": "./dist/terrain/martini.d.ts",
+      "import": "./dist/terrain/martini.js",
+      "require": "./dist/terrain/martini.cjs"
+    },
+    "./terrain/delatin": {
+      "types": "./dist/terrain/delatin.d.ts",
+      "import": "./dist/terrain/delatin.js",
+      "require": "./dist/terrain/delatin.cjs"
     }
   },
   "files": [
@@ -1165,6 +1190,7 @@
     "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
+    "@mapbox/martini": "0.2.0",
     "@math.gl/core": "5.0.0-alpha.20",
     "@math.gl/geometry": "5.0.0-alpha.20",
     "@math.gl/web-mercator": "5.0.0-alpha.20",

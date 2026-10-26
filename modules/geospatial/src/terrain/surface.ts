@@ -9,7 +9,7 @@ import {
   type IndexQueryResult
 } from '@math.gl/geometry/spatial-index';
 import type {HeightField} from './height-field';
-import {HeightFieldGeometry} from './geometry';
+import {createTerrainMesh} from './mesh';
 import {TerrainSampleStatus as Status, type TerrainSample} from './types';
 
 export type TerrainSurfaceProps = {
@@ -501,10 +501,10 @@ export function createTerrainSurface(
   field: HeightField,
   options: {origin?: readonly [number, number, number]} = {}
 ): TerrainSurface {
-  const mesh = new HeightFieldGeometry(field, {...options, precision: 'float64'});
+  const mesh = createTerrainMesh(field, options);
   return new TerrainSurface({
-    positions: mesh.attributes['POSITION'].value as Float64Array,
-    indices: mesh.indices!.value as Uint16Array | Uint32Array,
+    positions: mesh.positions,
+    indices: mesh.indices,
     origin: mesh.origin,
     heightReference: field.heightReference
   });

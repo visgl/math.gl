@@ -57,3 +57,5 @@ for (const packageName of ['@math.gl/core', '@math.gl/geometry', '@math.gl/geosp
 assert.equal('subdivideGlobeMesh' in await import('@math.gl/geometry/polygon'), false);
 assert.equal(typeof (await import('@math.gl/geospatial/globe')).subdivideGlobeMesh, 'function');
 console.log(`${entrypoints} ESM/CommonJS entrypoints and all published assets/declarations passed across the six packages.`);
+
+await import('./check-terrain-package.mjs');
