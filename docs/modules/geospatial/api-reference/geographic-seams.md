@@ -159,3 +159,11 @@ controls. A shared 317-case matrix runs in Node, Chromium, Firefox and WebKit:
 geodesic seam cases and seven independent sphere/topology controls. Qualification
 reports retain per-case error budgets, source hashes and runtime versions.
 No runtime package dependency is added.
+
+## Global spherical map polygons
+
+For directed spherical polygons that do not fit in one open hemisphere, use
+[global spherical cuts](./global-geographic-cuts.md). They partition hemispheres,
+complements and holes before the existing map engine's lobe/face/cap clipping.
+This profile uses minor great-circle edges; the ellipsoidal/rhumb meridian seam
+APIs above retain their own explicit edge semantics.

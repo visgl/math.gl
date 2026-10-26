@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import type {DiscontinuousMap} from './map-layout.js';
 import {CapMap} from './cap-map';
 import {sphericalRotation} from './rotated-map';
 import {createHammerRetroazimuthalMap} from './retroazimuthal-map';
@@ -14,7 +15,7 @@ import {modifiedStereographicRaw, coefficients} from './world-kernels/modifiedSt
 import {chamberlinRaw} from './world-kernels/chamberlin.js';
 import {twoPointEquidistantRaw} from './world-kernels/twoPointEquidistant.js';
 import {wiechelRaw} from './world-kernels/wiechel.js';
-import {geographic, coordinates, add, unit, cross, dot, angle, RAD, type Vector} from './math';
+import {geographic, coordinates, add, unit, cross, dot, angle, RAD, type Vector} from './math.js';
 import type {WorldKernel} from './world-kernels';
 export const REGIONAL_PROJECTIONS = Object.freeze([
   'hammer-retroazimuthal',
@@ -53,7 +54,7 @@ export type RegionalMapOptions = {
   controlPoints?: readonly (readonly [number, number])[];
 };
 /** Regional formulas with spherical visibility clipping. */
-export function createRegionalMap(options: RegionalMapOptions) {
+export function createRegionalMap(options: RegionalMapOptions): DiscontinuousMap {
   const {projection, radius = 1} = options;
   if (!Number.isFinite(radius) || radius <= 0) throw new Error('Expected positive finite radius');
   if (projection === 'hammer-retroazimuthal') {

@@ -1,8 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {DiscontinuousMap, type GeographicPosition, type MapSamplingOptions} from './map-layout';
-import {geographic, coordinates, RAD, type Position, type Vector} from './math';
+import {DiscontinuousMap, type GeographicPosition, type MapSamplingOptions} from './map-layout.js';
+import {geographic, coordinates, RAD, type Position, type Vector} from './math.js';
 export function sphericalRotation([yaw, pitch, roll = 0]: readonly number[]) {
   const rotate = (v: Vector, axis: number, a: number): Vector => {
     const result = [...v] as Vector,

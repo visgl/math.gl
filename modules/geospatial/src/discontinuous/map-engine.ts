@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {projectSphericalPolygon, type SphericalCutOptions} from './global-polygons';
 import {MapTransition, type MapTransitionOptions} from './map-transition';
 import {
   prepareMapFeatures,
@@ -10,7 +11,7 @@ import {
 } from './prepare-features';
 import {createElasticMap} from './elastic/map';
 import type {ElasticMapData} from './elastic/data';
-import type {MapSurface} from './map-layout';
+import type {MapSurface} from './map-layout.js';
 
 import {
   DiscontinuousMap,
@@ -18,14 +19,14 @@ import {
   type MapBounds,
   type MapRegion,
   type MapSamplingOptions
-} from './map-layout';
+} from './map-layout.js';
 import {
   getMapLayout,
   fitMapLayout,
   pickMapLayout,
   type MapLayout,
   type MapViewportOptions
-} from './layout';
+} from './layout.js';
 import {
   createInterruptedMap,
   type InterruptedMapOptions,
@@ -58,7 +59,7 @@ import {
   createGringortenQuincuncialMap
 } from './quincuncial-star';
 import {createButterflyMap, createCollignonButterflyMap, createWatermanMap} from './polyhedral';
-import {geographic} from './math';
+import {geographic} from './math.js';
 
 /** Serializable chart: runtime projection callbacks are resolved by key. */
 export type MapChartDescription = Omit<MapRegion, 'project' | 'unproject'> & {
@@ -354,6 +355,13 @@ export class MapEngine {
   }
   projectPolygon(rings: readonly (readonly GeographicPosition[])[], options?: MapSamplingOptions) {
     return this.map.projectPolygon(rings, {...this.sampling, ...options});
+  }
+  /** Global spherical boundaries with an explicit filled side, including complements. */
+  projectGlobalPolygon(
+    rings: readonly (readonly GeographicPosition[])[],
+    options: SphericalCutOptions & MapSamplingOptions
+  ) {
+    return projectSphericalPolygon(this.map, rings, {...this.sampling, ...options});
   }
   /** Prepare static feature geometry with packed buffers and original-feature identity.
    * Polygon fills and original outlines are separate, so clipping edges are not stroked. */

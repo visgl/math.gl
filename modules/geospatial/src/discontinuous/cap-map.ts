@@ -11,7 +11,7 @@ import {
   type MapSamplingOptions,
   type MapLine,
   type MapPolygon
-} from './map-layout';
+} from './map-layout.js';
 import {
   geographic,
   coordinates,
@@ -25,7 +25,7 @@ import {
   RAD,
   type Vector,
   type Position
-} from './math';
+} from './math.js';
 
 /** Spherical cap clipping before final projection, including polygon horizon arcs. */
 export class CapMap extends DiscontinuousMap {
