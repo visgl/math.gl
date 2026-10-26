@@ -252,6 +252,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Reproduce the projection scorecard](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/scorecard-methodology.md): The published scorecard consolidates source-matched measurements
 - [Projection API support and migration](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md): @math.gl/geospatial/projection uses the math.gl projection engine by default. projectionEngine supplies
 - [Temporal deformation models](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/temporal-models.md): A coordinate can move between observation epochs because of a steady velocity,
+- [@math.gl/geospatial/terrain](https://visgl.github.io/math.gl/next/docs/modules/geospatial/terrain.md): Experimental CPU terrain data and algorithms, usable in Node.js, browser workers,
 - [@math.gl/geospatial/wkb](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb.md): @math.gl/geospatial/wkb provides dependency-free, synchronous codecs for individual WKB, EWKB, and WKT
 - [WKB and WKT API reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb/api-reference/wkb.md): All APIs are synchronous. Inputs are borrowed and never detached or mutated.
 
