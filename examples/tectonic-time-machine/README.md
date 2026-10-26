@@ -338,3 +338,18 @@ albedo, microrelief and source-elevation shading persist throughout; there is no
 separate switch to a full-texture material. The color variation is art, not
 reconstructed ecosystems or a climate/habitat model. Life chapters receive
 slower playback and can be selected from the timeline.
+
+### Terrain color continuity
+
+The synthetic elevation palette is calibrated once from land-color samples in
+the bundled NASA image, excluding blue ocean and near-white ice/cloud pixels.
+Elevation still controls the PaleoDEM material; calibration is a display color
+choice, not reconstructed ancient vegetation. Source elevation and coastline
+masking are unchanged.
+
+Color and lighting ease toward the imagery material over the last 30 Myr before
+the present and the first 20 Myr of PaleoDEM coverage (540–520 Ma). This avoids an
+instantaneous palette/lighting change when the imagery-on-plates material takes
+over. The boundary blend is illustrative modern imagery, not historical climate
+data. The pre-plant greening restriction still applies. Image arrival also reveals
+both the texture and calibrated palette smoothly over 1.5 seconds, even paused.

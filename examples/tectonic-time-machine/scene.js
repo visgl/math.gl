@@ -30,6 +30,7 @@ import {createFormationEffects} from './formation-effects.js';
 import {SurfaceLayer} from './surface-layer.js';
 import {EARTH_FORMATION_MA, isEarlyEarth, earlyEarthBlend, earlyEarthMaterial, planetaryStage} from './planetary-history.js';
 import {loadPaleoTerrain, terrainBracket} from './paleodem.js';
+import {DEFAULT_TERRAIN_PALETTE, paletteFromImage, textureReveal, terrainImageryWeight} from './terrain-material.js';
 import {loadTerrain} from './terrain.js';
 import {makeMesh, blendWeights, transformMesh, binaryMesh, worldToGeographic} from './geometry.js';
 const RADIUS = 6371008.8,
@@ -115,6 +116,10 @@ export function mountScene(
     geometryLongitude = NaN,
     counts = {active: 0, unresolved: 0};
   const earlyMaterial = {};
+  let terrainLoadedAt=Infinity;
+  const terrainPalette=new Float32Array(DEFAULT_TERRAIN_PALETTE);
+  const displayedPalette=new Float32Array(DEFAULT_TERRAIN_PALETTE);
+  const lowColor=displayedPalette.subarray(0,3), midColor=displayedPalette.subarray(3,6), highColor=displayedPalette.subarray(6,9);
   const iceDynamics = {};
   const formationEffects = createFormationEffects();
   const rotations = new Map(),
@@ -254,6 +259,8 @@ export function mountScene(
     if (!force && now - lastRender < 50) return;
     lastRender = now;
     currentWeights(now);
+    const imageReveal=textureReveal(now,terrainLoadedAt);
+    for(let i=0;i<9;i++) displayedPalette[i]=DEFAULT_TERRAIN_PALETTE[i]+(terrainPalette[i]-DEFAULT_TERRAIN_PALETTE[i])*imageReveal;
     const pose = paleoTerrain?.get(time);
     const usePaleo = !early && historicalTerrain && !regionColors && Boolean(pose);
     if (!early && !usePaleo && model && !model.hasTime(time)) return counts;
@@ -331,6 +338,9 @@ export function mountScene(
           iceVolcanism: glaciations ? iceDynamics.volcanism : 0,
           data: binaryMesh(usePaleo ? paleoMesh : land),
           image: terrainImage,
+          textureWeight: imageReveal,
+          imageryBlend: usePaleo ? terrainImageryWeight(time)*imageReveal : 0,
+          terrainLowColor: lowColor, terrainMidColor: midColor, terrainHighColor: highColor,
           paleoFrameA: usePaleo ? pose.a : null,
           paleoFrameB: usePaleo ? pose.b : null,
           paleoBlend: usePaleo ? pose.blend : 0,
@@ -372,7 +382,7 @@ export function mountScene(
   }
   function animate() {
     render(lastTime, true);
-    animation = transition ? requestAnimationFrame(animate) : 0;
+    animation = transition || (terrainImage && textureReveal(performance.now(),terrainLoadedAt)<1) ? requestAnimationFrame(animate) : 0;
   }
   const tooltip = document.createElement('div');
   tooltip.className = 'tectonic-coordinate-tooltip';
@@ -447,6 +457,11 @@ export function mountScene(
         return;
       }
       terrainImage = image;
+      terrainLoadedAt=performance.now();
+      if(!animation) animation=requestAnimationFrame(animate);
+      try {paletteFromImage(image,terrainPalette);} catch(error) {
+        console.warn('Terrain palette calibration unavailable; using default palette',error);
+      }
       appearanceStatus = null;
       render(lastTime, true);
     })

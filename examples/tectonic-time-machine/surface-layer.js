@@ -9,6 +9,10 @@ const block = `layout(std140) uniform tectonicSurfaceUniforms {
   float isWater;
   float globeWeight;
   float useTexture;
+  float imageryBlend;
+  vec3 terrainLowColor;
+  vec3 terrainMidColor;
+  vec3 terrainHighColor;
   float regionColors;
   float iceCoverage;
   float iceRetreat;
@@ -34,7 +38,7 @@ const surface = {
   name: 'tectonicSurface',
   vs: block,
   fs: block + '\nuniform sampler2D terrainTexture; uniform sampler2D paleoElevationA; uniform sampler2D paleoElevationB;',
-  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32', iceRetreat: 'f32', iceVolcanism: 'f32', microbialLife: 'f32', vegetation: 'f32', paleoBlend: 'f32', paleoTerrain: 'f32', paleoSizeA: 'vec2<f32>', paleoSizeB: 'vec2<f32>', earlyEarth: 'f32', earlyLava: 'f32', earlyBombardment: 'f32', earlyWater: 'f32', earlySteam: 'f32', earlyRain: 'f32', earlyImpactTime: 'f32', earlyTheia: 'f32', earlyOpacity: 'f32', earlyPulse: 'f32'}
+  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', imageryBlend: 'f32', terrainLowColor: 'vec3<f32>', terrainMidColor: 'vec3<f32>', terrainHighColor: 'vec3<f32>', regionColors: 'f32', iceCoverage: 'f32', iceRetreat: 'f32', iceVolcanism: 'f32', microbialLife: 'f32', vegetation: 'f32', paleoBlend: 'f32', paleoTerrain: 'f32', paleoSizeA: 'vec2<f32>', paleoSizeB: 'vec2<f32>', earlyEarth: 'f32', earlyLava: 'f32', earlyBombardment: 'f32', earlyWater: 'f32', earlySteam: 'f32', earlyRain: 'f32', earlyImpactTime: 'f32', earlyTheia: 'f32', earlyOpacity: 'f32', earlyPulse: 'f32'}
 };
 const UNIT_SIZE = new Float32Array([1, 1]);
 const LIGHTS = [
@@ -61,6 +65,11 @@ export class SurfaceLayer extends SolidPolygonLayer {
     earlyImpactTime: 0,
     earlyTheia: 0,
     earlyOpacity: 1,
+    textureWeight: 1,
+    imageryBlend: 0,
+    terrainLowColor: [.28,.38,.19],
+    terrainMidColor: [.59,.48,.32],
+    terrainHighColor: [.73,.70,.63],
     surfaceType: 'land',
     globeWeight: 1,
     regionColors: false,
@@ -212,8 +221,8 @@ export class SurfaceLayer extends SolidPolygonLayer {
           vec3 terrain=texture(terrainTexture,uv).rgb;
           // Raster and coastline geometry differ slightly: fill blue raster fringes with coastal earth.
           float waterPixel=smoothstep(.025,.09,terrain.b-max(terrain.r,terrain.g));
-          terrain=mix(terrain,vec3(.36,.39,.24),waterPixel);
-          vec3 naturalColor=mix(vec3(.36,.42,.28),terrain,tectonicSurface.useTexture);
+          terrain=mix(terrain,tectonicSurface.terrainLowColor,waterPixel);
+          vec3 naturalColor=mix(tectonicSurface.terrainLowColor,terrain,tectonicSurface.useTexture);
           // The same fine substrate remains visible through every greening stage.
           float substrate=.65*tectonicIceDetail(reference,55.)+.35*tectonicIceDetail(reference,145.);
           float microRelief=(substrate-.5)*.00035;
@@ -228,10 +237,13 @@ export class SurfaceLayer extends SolidPolygonLayer {
             float height=mix(paleoHeight(paleoElevationA,tectonicSurface.paleoSizeA,pixel),
               paleoHeight(paleoElevationB,tectonicSurface.paleoSizeB,pixel),tectonicSurface.paleoBlend);
             // Hypsometric colors and exaggerated hill shading from source elevation.
-            naturalColor=mix(vec3(.28,.38,.19),vec3(.59,.48,.32),smoothstep(0.,1800.,height));
-            naturalColor=mix(naturalColor,vec3(.73,.70,.63),smoothstep(1800.,5000.,height));
+            naturalColor=mix(tectonicSurface.terrainLowColor,tectonicSurface.terrainMidColor,smoothstep(0.,1800.,height));
+            naturalColor=mix(naturalColor,tectonicSurface.terrainHighColor,smoothstep(1800.,5000.,height));
             vec3 reliefNormal=tectonicSurfaceNormal(normal,height/6371008.8*8.+microRelief);
             diffuse=.45+.65*max(dot(reliefNormal,light),0.);
+            // Blend the complete material, including lighting, before the source changes.
+            naturalColor=mix(naturalColor,terrain,tectonicSurface.imageryBlend);
+            diffuse=mix(diffuse,.45+.65*max(dot(groundNormal,light),0.),tectonicSurface.imageryBlend);
             if(height<0.) discard;
           }
           float luminance=dot(naturalColor,vec3(.2126,.7152,.0722));
@@ -293,7 +305,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
     };
   }
   draw(params) {
-    const {image, surfaceType, globeWeight, regionColors, iceCoverage, iceRetreat, iceVolcanism, microbialLife, vegetation, paleoFrameA, paleoFrameB, paleoBlend, earlyEarth, earlyLava, earlyBombardment, earlyWater, earlySteam, earlyRain, earlyImpactTime, earlyTheia, earlyOpacity} = this.props;
+    const {image, textureWeight, imageryBlend, terrainLowColor, terrainMidColor, terrainHighColor, surfaceType, globeWeight, regionColors, iceCoverage, iceRetreat, iceVolcanism, microbialLife, vegetation, paleoFrameA, paleoFrameB, paleoBlend, earlyEarth, earlyLava, earlyBombardment, earlyWater, earlySteam, earlyRain, earlyImpactTime, earlyTheia, earlyOpacity} = this.props;
     const textures = this.state.elevationTextures;
     const frames = this.state.elevationFrames;
     frames[0] = paleoFrameA; frames[1] = paleoFrameB;
@@ -321,7 +333,9 @@ export class SurfaceLayer extends SolidPolygonLayer {
         paleoSizeB: paleoFrameB?.size || UNIT_SIZE,
         paleoElevationA: textures.get(paleoFrameA) || this.state.elevationFallback,
         paleoElevationB: textures.get(paleoFrameB) || this.state.elevationFallback,
-        useTexture: image && !paleoFrameA ? 1 : 0,
+        useTexture: image ? textureWeight : 0,
+        imageryBlend: image ? imageryBlend : 0,
+        terrainLowColor, terrainMidColor, terrainHighColor,
         regionColors: regionColors ? 1 : 0,
         terrainTexture: image || this.state.fallbackTexture
       },
