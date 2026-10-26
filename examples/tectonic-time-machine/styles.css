@@ -131,3 +131,5 @@ SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 .tectonic-deep-time-marker:hover,.tectonic-deep-time-marker:focus-visible {z-index:21;}
 .tectonic-event-tooltip.align-start {left:0;transform:none;}
 .tectonic-event-tooltip.align-end {left:auto;right:0;transform:none;}
+.tectonic-journey-controls input[type=number] {width:100%;min-width:0;box-sizing:border-box;border:1px solid #345064;background:#102737;color:#eef6fa;border-radius:4px;padding:5px;}
+.tectonic-future-legend {border-left:2px solid #c5a0ff;padding-left:8px;}
