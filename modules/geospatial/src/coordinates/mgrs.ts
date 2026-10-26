@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) Charles Karney (2008-2022)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: MGRS alphabets and UTM row/band compatibility adapted from GeographicLib 2.7 MGRS.cpp (MIT). Original bounded-precision codec; see ../../GEOGRAPHICLIB-LICENSE.txt.
+// SPDX-FileComment: MGRS alphabets, micrometre digit extraction and UTM row/band compatibility adapted from GeographicLib 2.7 MGRS.cpp (MIT). Original precision-bounded codec; see ../../GEOGRAPHICLIB-LICENSE.txt.
 import {projectGrid, unprojectGrid, type GridCoordinate} from './grid';
 const COLUMNS = ['ABCDEFGH', 'JKLMNPQR', 'STUVWXYZ'],
   ROWS = 'ABCDEFGHJKLMNPQRSTUV',
@@ -34,11 +34,16 @@ function utmRow(band: number, column: number, row: number): number {
   }
   return row;
 }
-/** WGS84 MGRS through one-metre precision; truncates, rather than rounds, cells. */
-export function formatMGRS(latitude: number, longitude: number, precision = 5): string {
-  if (!Number.isInteger(precision) || precision < 0 || precision > 5)
-    throw new RangeError('MGRS precision must be in [0,5]');
-  const grid = projectGrid(latitude, longitude),
+/** WGS84 MGRS through micrometre precision; extra digits do not imply survey accuracy. */
+export function formatMGRS(
+  latitude: number,
+  longitude: number,
+  precision = 5,
+  options: {zone?: number} = {}
+): string {
+  if (!Number.isInteger(precision) || precision < 0 || precision > 11)
+    throw new RangeError('MGRS precision must be in [0,11]');
+  const grid = projectGrid(latitude, longitude, options),
     {zone, north, easting: x} = grid;
   let y = grid.northing;
   if (zone && !north && y === 1e7) y -= 2 ** -28;
@@ -68,14 +73,11 @@ export function formatMGRS(latitude: number, longitude: number, precision = 5): 
       throw new RangeError('Grid outside MGRS domain');
     prefix = UPS_BANDS[band] + UPS_COLUMNS[band][col] + UPS_ROWS[Number(north)][r];
   }
-  const unit = 10 ** (5 - precision);
-  return (
-    prefix +
-    (precision
-      ? String(Math.floor((x - column * TILE) / unit)).padStart(precision, '0') +
-        String(Math.floor((y - row * TILE) / unit)).padStart(precision, '0')
-      : '')
-  );
+  const unit = 10 ** (11 - precision);
+  // Integer micrometres stay below 2^53 throughout the supported envelopes.
+  const digits = (value: number, tile: number) =>
+    String(Math.floor((Math.floor(value * 1e6) - tile * 1e11) / unit)).padStart(precision, '0');
+  return prefix + (precision ? digits(x, column) + digits(y, row) : '');
 }
 export type MGRSCoordinate = GridCoordinate & {
   latitude: number;
@@ -88,8 +90,8 @@ export function parseMGRS(text: string, options: {center?: boolean} = {}): MGRSC
   const match = /^(\d{1,2})?([C-HJ-NP-XABYZ])([A-HJ-NP-Z])([A-HJ-NP-Z])(\d*)$/.exec(
     text.replace(/\s/g, '').toUpperCase()
   );
-  if (!match || match[5].length % 2 || match[5].length > 10)
-    throw new RangeError('Expected a complete MGRS cell with 0–5 digit pairs');
+  if (!match || match[5].length % 2 || match[5].length > 22)
+    throw new RangeError('Expected a complete MGRS cell with 0–11 digit pairs');
   const zone = match[1] ? Number(match[1]) : 0,
     bandText = match[2],
     precision = match[5].length / 2;
@@ -119,8 +121,37 @@ export function parseMGRS(text: string, options: {center?: boolean} = {}): MGRSC
   const grid = {
     zone,
     north,
-    easting: column * TILE + (Number(match[5].slice(0, precision) || 0) + center) * resolution,
-    northing: row * TILE + (Number(match[5].slice(precision) || 0) + center) * resolution
+    easting:
+      ((column * 10 ** precision + Number(match[5].slice(0, precision) || 0) + center) * TILE) /
+      10 ** precision,
+    northing:
+      ((row * 10 ** precision + Number(match[5].slice(precision) || 0) + center) * TILE) /
+      10 ** precision
   };
   return {...grid, ...unprojectGrid(grid), precision, resolution};
+}
+
+/** A grid-zone designation is a region, never a fabricated cell centre. */
+export type MGRSZone = {zone: number; north: boolean; band: string};
+export function parseMGRSZone(text: string): MGRSZone {
+  if (typeof text !== 'string' || text.length > 128) throw new RangeError('Invalid MGRS zone');
+  const m = /^(\d{1,2})?([C-HJ-NP-XABYZ])$/.exec(text.replace(/\s/g, '').toUpperCase());
+  if (!m) throw new RangeError('Expected an MGRS grid-zone designation');
+  const zone = m[1] ? Number(m[1]) : 0,
+    band = m[2];
+  if (m[1] ? zone < 1 || zone > 60 || !BANDS.includes(band) : !UPS_BANDS.includes(band))
+    throw new RangeError('Invalid MGRS zone or band');
+  return {
+    zone,
+    north: zone ? BANDS.indexOf(band) >= 10 : UPS_BANDS.indexOf(band) >= 2,
+    band
+  };
+}
+export function formatMGRSZone(
+  latitude: number,
+  longitude: number,
+  options: {zone?: number} = {}
+): string {
+  const cell = formatMGRS(latitude, longitude, 0, options);
+  return cell.slice(0, cell.length - 2);
 }

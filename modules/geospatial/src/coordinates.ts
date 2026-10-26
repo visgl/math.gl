@@ -8,7 +8,17 @@ export {
   formatGeographicCoordinates
 } from './coordinates/angles';
 export type {AngleAxis} from './coordinates/angles';
-export {standardGridZone, projectGrid, unprojectGrid} from './coordinates/grid';
-export type {GridCoordinate} from './coordinates/grid';
-export {formatMGRS, parseMGRS} from './coordinates/mgrs';
-export type {MGRSCoordinate} from './coordinates/mgrs';
+export {
+  standardGridZone,
+  projectGrid,
+  unprojectGrid,
+  transferGrid
+} from './coordinates/grid';
+export type {GridCoordinate, GridOptions} from './coordinates/grid';
+export {
+  formatMGRS,
+  parseMGRS,
+  formatMGRSZone,
+  parseMGRSZone
+} from './coordinates/mgrs';
+export type {MGRSCoordinate, MGRSZone} from './coordinates/mgrs';

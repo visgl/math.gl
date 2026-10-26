@@ -30,8 +30,34 @@ def inputs():
   rows.append(dict(mode='D',text=text))
  for text in ['31UDQ4825111932','ZAH0000000000','BAN0000000000','31MEV0000099999','00NAA','61NAA','31ZAA','31UAA','31UDQ1','31UDQ123456789012','YAA','ZZA','AAA','BAA','31NAA','32XAA','31VAA','31XAA']:
   rows.append(dict(mode='R',text=text))
+ for latitude,longitude in [(48.8582,2.2945),(-33.86,151.21),(85,40),(-85,-40)]:
+  for precision in range(6,12):rows.append(dict(mode='G',latitude=latitude,longitude=longitude,precision=precision))
+ for latitude,longitude,zone in [(0,3,31),(-0.,3,31),(-1,3,31),(1,3,31),(60,6,31),(60,6,32),(78,20,33),(78,20,35),(83.9,3,0),(84,3,31),(-79.9,3,0),(-80.1,3,31),(45,179,1),(45,-179,60),(40,30,1),(0,0,0),(90,3,31)]:
+  for north in [-1,0,1]:rows.append(dict(mode='F',latitude=latitude,longitude=longitude,zone=zone,north=north))
+ for grid,target,north in [([31,1,500000,0],31,0),([31,0,500000,1e7],31,1),([31,1,500000,-110530],31,0),([31,1,500000,6651411],32,1),([0,1,2e6,2e6],0,0),([31,1,500000,9500000],0,1)]:
+  rows.append(dict(mode='T',grid=grid,zone=target,north=north))
+ for text in ['31U','01N','60M','Y','Z','A','B','32X','00N','61U','31Z','N','ZAH']:
+  # Z mode only supplies native zone/hemisphere; our descriptor parser also requires a zone-only input.
+  if text!='ZAH':rows.append(dict(mode='Z',text=text))
+ for text in ["30'",'30"',"-30'",'30:15.5',"12d30.5'",'W30"']:
+  rows.append(dict(mode='D',text=text))
+ for latitude,longitude,zone in [(60,6,31),(60,6,32),(78,20,33),(78,20,35),(84,3,31),(83.9,3,0),(-80.1,3,31),(-79.9,3,0)]:
+  for precision in range(6):rows.append(dict(mode='H',latitude=latitude,longitude=longitude,zone=zone,precision=precision))
+ for zone in [1,31,60]:
+  for north in [0,1]:
+   for x in [0,100000,500000,900000,1000000]:
+    for y in ([-9100000,0,9500000,9600000] if north else [900000,1000000,10000000,19600000]):
+     rows.append(dict(mode='V',grid=[zone,north,x,y]))
+ for north in [0,1]:
+  for x in ([1200000,2000000,2800000] if north else [700000,2000000,3300000]):
+   for y in ([1200000,2000000,2800000] if north else [700000,2000000,3300000]):
+    rows.append(dict(mode='V',grid=[0,north,x,y]))
  return rows
 def request(r):
+ if r['mode']=='H':return 'H '+' '.join(str(r[k]) for k in ['latitude','longitude','zone','precision'])+'\n'
+ if r['mode']=='V':return 'V '+' '.join(map(str,r['grid']))+'\n'
+ if r['mode']=='F':return 'F '+format(r['latitude'],'.17g')+' '+format(r['longitude'],'.17g')+' '+str(r['zone'])+' '+str(r['north'])+'\n'
+ if r['mode']=='T':return 'T '+' '.join(map(str,r['grid']))+' '+str(r['zone'])+' '+str(r['north'])+'\n'
  if r['mode']=='G':return 'G '+format(r['latitude'],'.17g')+' '+format(r['longitude'],'.17g')+' '+str(r['precision'])+'\n'
  return r['mode']+' '+r['text']+'\n'
 def main():
@@ -47,7 +73,7 @@ def main():
   lines=subprocess.check_output([str(a.native)],input=''.join(map(request,rows)),text=True).splitlines();assert len(lines)==len(rows)
   for row,line in zip(rows,lines):
    if line=='ERROR':row['expected']=None;continue
-   values=line.split();row['expected']=[value if row['mode']=='G' and i==4 else float(value) for i,value in enumerate(values)]
+   values=line.split();row['expected']=[value if (row['mode']=='G' and i==4) or row['mode']=='H' else float(value) for i,value in enumerate(values)]
   DEST.write_text(json.dumps(dict(provenance=provenance,rows=rows),separators=(',',':'),allow_nan=False)+'\n')
  print('Native coordinate controls:',len(rows))
 if __name__=='__main__':main()

@@ -202,3 +202,20 @@ storage benefit, with a throughput tradeoff; rhumb timings are unstable and no u
 allocation-free claim is made. Remaining G9 work includes coordinate charts and
 separately scoped inverse geodesics; G10 still has the wider GeographicLib text
 profiles and forced-zone facade ergonomics, with generic projection APIs retained.
+
+## G10 coordinate-profile follow-up
+
+The next increment adds explicit UTM/UPS zone/hemisphere selection and transfer,
+opt-in native-compatible extended grid envelopes, MGRS cells through micrometre
+text resolution, separate grid-zone descriptors, decimal-minute output and explicit
+longitude-first pairs. Extra MGRS digits expose projection roundoff and do not
+promise micrometre physical positioning accuracy. Arithmetic/scientific angle
+expressions and `INVALID` sentinels remain intentionally outside the strict text
+profile; arbitrary datum/projection selection remains owned by CRS APIs.
+
+G11 is detailed in the [optional Earth-model design](./earth-models-design.md):
+normal gravity first without coefficient files, extend the existing earth/geoid
+entry, then separately scoped harmonic gravity and magnetic fields with explicit
+model/data licenses and no implicit downloads. The [general geographic-cut scope](./general-geographic-cuts.md)
+explains what single-meridian seams cannot support and recommends one real
+projection-domain clipping consumer before arbitrary cut graphs.
