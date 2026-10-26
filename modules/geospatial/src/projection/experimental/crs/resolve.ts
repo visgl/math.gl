@@ -35,13 +35,27 @@ export async function prepareCRSInput(input: CRSInput, options: Options): Promis
   // Enforce epoch/vertical policy before attempting lookup; metadata must never be dropped.
   const source = resolveCRSInput(captured, options);
   const local = resolveLocalCRSDefinition(source.definition, options);
-  if (
-    inferCRSRepresentation(local) !== 'identifier' ||
-    options.parsers?.some(p => p.canParse(local))
-  ) {
+  const reference =
+    typeof captured === 'string' || 'type' in captured
+      ? undefined
+      : 'crs' in captured
+        ? (captured as SpatialReference).crs
+        : (captured as CRSReference);
+  const representation =
+    local === source.definition &&
+    reference &&
+    (reference.state === 'explicit' || reference.state === 'default')
+      ? reference.representation
+      : inferCRSRepresentation(local);
+  if (representation !== 'identifier' || options.parsers?.some(p => p.canParse(local))) {
     return captured;
   }
-  const result = await options.resolver.resolve(local);
+  const result = await options.resolver.resolve({
+    state: 'explicit',
+    provenance: reference?.provenance ?? 'unknown',
+    definition: local,
+    representation
+  });
   const definition = resolveCRSInput(result.input, options).definition;
   if (typeof captured === 'string' || 'type' in captured) return definition;
   const metadata = captured as CRSReference | SpatialReference;

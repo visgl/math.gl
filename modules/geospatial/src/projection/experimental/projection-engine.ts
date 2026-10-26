@@ -43,7 +43,10 @@ export class ConfigurableProjectionEngine<P extends Registration = ProjectionPlu
 
   /** Load only the algorithms required by this CRS pair and return a synchronous transform. */
   async createProjectionAsync(options: CreateProjectionOptions = {}): Promise<ProjectionTransform> {
-    return ProjectionTransform.create(await prepareEngineOptions({...this.options, ...options}));
+    const config = {...this.options, ...options};
+    return ProjectionTransform.create(
+      config.resolver ? await prepareEngineOptions(config) : config
+    );
   }
 }
 

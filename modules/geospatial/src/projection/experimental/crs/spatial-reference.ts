@@ -1,7 +1,12 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import type {CRSInput, CRSReference, ReadonlyCRSDefinition, SpatialReference} from '../../../crs/index';
+import type {
+  CRSInput,
+  CRSReference,
+  ReadonlyCRSDefinition,
+  SpatialReference
+} from '../../../crs/index';
 import {TypeScriptCRSError, unsupportedStage} from './types';
 import type {CRSNormalizationOptions, NormalizedCRS} from './types';
 

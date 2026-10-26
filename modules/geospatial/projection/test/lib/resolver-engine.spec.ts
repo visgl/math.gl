@@ -18,6 +18,42 @@ const makeResolver = (target = projected) =>
   });
 
 describe('native engines with optional CRS resolution', () => {
+  test('honors reference representations during preparation', async () => {
+    const calls: string[] = [];
+    const resolver = createCRSResolver({
+      providers: [
+        {
+          id: 'app',
+          resolve(id) {
+            calls.push(id);
+            return projected;
+          }
+        }
+      ]
+    });
+    const engine = new FullProjectionEngine({resolver});
+    const transform = await engine.createProjectionAsync({
+      to: {
+        state: 'explicit',
+        definition: 'APP:custom/name',
+        provenance: 'metadata',
+        representation: 'identifier'
+      }
+    });
+    expect(transform.project([12, 0])[0]).toBeCloseTo((6378137 * Math.PI) / 15, 6);
+    await expect(
+      engine.createProjectionAsync({
+        to: {
+          state: 'explicit',
+          definition: 'opaque',
+          provenance: 'metadata',
+          representation: 'opaque'
+        }
+      })
+    ).rejects.toThrow();
+    expect(calls).toEqual(['APP:custom/name']);
+  });
+
   test.each(['full', 'configurable', 'lazy'])(
     '%s prepares both endpoints and synchronous descriptor converters',
     async kind => {

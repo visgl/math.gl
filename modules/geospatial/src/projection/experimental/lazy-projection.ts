@@ -123,7 +123,8 @@ export class LazyProjectionEngine implements CRSEngine {
   }
 
   async createProjectionAsync(options: CreateProjectionOptions = {}): Promise<ProjectionTransform> {
-    const config = await prepareEngineOptions({...this.options, ...options});
+    const initial = {...this.options, ...options};
+    const config = initial.resolver ? await prepareEngineOptions(initial) : initial;
     return ProjectionTransform.create({
       ...config,
       projections: configuredProjections(config)
