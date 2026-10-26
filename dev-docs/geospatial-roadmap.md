@@ -105,3 +105,14 @@ outputs, support exact in-place storage and fail atomically. See the expanded
 [qualification and benchmark profile](../docs/modules/geospatial/api-reference/local-frame-qualification.md).
 Existing numerical and selective bundle budgets remain unchanged; renderer C7,
 G8 Exact geodesics and G9 triaxial geodesics remain separate work.
+
+## Global spherical polygon increment
+
+The existing discontinuous-map engine already handles convex chart boundaries,
+interrupted lobes, polyhedral faces and spherical visibility caps. Its prior
+open-hemisphere polygon input restriction is now addressed by an explicit directed
+filled-side atlas adapter (`cutSphericalPolygon`, `projectSphericalPolygon`,
+`MapEngine.projectGlobalPolygon`, and opt-in prepared features). Independent
+hemisphere/complement/hole controls qualify the spherical profile. This is broader
+map-polygon coverage; it is not arbitrary ellipsoidal/rhumb cuts or polygon repair.
+See [global spherical cuts](../docs/modules/geospatial/api-reference/global-geographic-cuts.md).

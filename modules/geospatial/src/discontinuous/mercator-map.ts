@@ -10,7 +10,7 @@ import {
   type MapRegion,
   type MapSamplingOptions
 } from './map-layout';
-import {geographic, RAD} from './math';
+import {geographic, RAD, type Vector} from './math';
 
 /** Spherical Mercator, clipped to a finite latitude band after seam splitting. */
 export class MercatorMap extends DiscontinuousMap {
@@ -47,14 +47,14 @@ export class MercatorMap extends DiscontinuousMap {
           interior: [center + centralMeridian, sign * 45],
           project: ([lon, lat]) => {
             const delta = ((((lon - centralMeridian - center + 180) % 360) + 360) % 360) - 180;
-            // A continuous extension beyond the visible band lets the spherical
-            // clipper sample polar edges without a Mercator singularity. All of
-            // this extension is removed by the subsequent planar band clip.
+            // Keep longitude unchanged in the finite polar extension. Tapering
+            // X toward zero moves latitude-band intersections into other charts.
+            // Directional pole limits are supplied below; the extension is clipped.
             const outside = Math.max(0, Math.abs(lat) - maxLatitude);
-            const taper = 1 - outside / (90 - maxLatitude);
+
             const phi = Math.min(Math.abs(lat), maxLatitude) * RAD;
             return [
-              radius * (center + delta) * RAD * taper,
+              radius * (center + delta) * RAD,
               radius * Math.sign(lat) * (Math.asinh(Math.tan(phi)) + outside * RAD)
             ];
           },
@@ -67,6 +67,11 @@ export class MercatorMap extends DiscontinuousMap {
     super(regions);
     this.limit = maxLatitude;
     this.ymax = radius * Math.asinh(Math.tan(maxLatitude * RAD));
+  }
+  protected override resolveSourceLimit(point: Vector, towards: Vector): Vector {
+    if (Math.hypot(point[0], point[1]) < 1e-14 && Math.hypot(towards[0], towards[1]) > 1e-14)
+      return geographic([Math.atan2(towards[1], towards[0]) / RAD, point[2] > 0 ? 90 : -90]);
+    return point;
   }
   override containsConvexPolygon(): boolean {
     return false;

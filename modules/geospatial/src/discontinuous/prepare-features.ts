@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import type {SphericalCutOptions} from './global-polygons';
 import type {MapEngine} from './map-engine';
 import type {GeographicPosition, MapSamplingOptions} from './map-layout';
 
@@ -61,6 +62,8 @@ export type MapPrepareFeaturesOptions = {
   sampling?: MapSamplingOptions;
   /** Project original polygon boundaries separately; default true. */
   polygonOutlines?: boolean;
+  /** Directed global spherical polygons; original outlines never include atlas connectors. */
+  sphericalCuts?: SphericalCutOptions;
 };
 
 type Vertices = {positions: number[]; sourcePositions: number[]};
@@ -155,7 +158,10 @@ export function prepareMapFeatures(
   ) => {
     if (!input.length) return;
     const rings = input.map(r => r.map(position));
-    for (const p of map.projectPolygon(rings, options.sampling)) {
+    const parts = options.sphericalCuts
+      ? map.projectGlobalPolygon(rings, {...options.sampling, ...options.sphericalCuts})
+      : map.projectPolygon(rings, options.sampling);
+    for (const p of parts) {
       for (let i = 0; i < p.coordinates.length; i++) {
         append(polygons, p.coordinates[i], p.sourceCoordinates[i]);
         ringStarts.push(polygons.positions.length / 2);

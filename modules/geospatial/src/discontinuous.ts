@@ -132,3 +132,10 @@ export type {
   PreparedMapGeometry,
   MapPrepareFeaturesOptions
 } from './discontinuous/prepare-features';
+
+export {cutSphericalPolygon, projectSphericalPolygon} from './discontinuous/global-polygons';
+export type {
+  SphericalCutOptions,
+  SphericalCutPolygon,
+  SphericalCutEdge
+} from './discontinuous/global-polygons';

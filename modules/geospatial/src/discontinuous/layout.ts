@@ -8,7 +8,7 @@ import type {
   MapRegionLayout,
   MapSamplingOptions,
   GeographicPosition
-} from './map-layout';
+} from './map-layout.js';
 
 type XY = [number, number];
 export type MapLayoutRegion = Readonly<{
