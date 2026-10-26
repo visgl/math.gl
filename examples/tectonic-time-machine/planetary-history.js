@@ -17,6 +17,8 @@ export function earlyEarthBlend(time, maxAge) {
   if (!Number.isFinite(time) || time < -EARTH_FORMATION_MA) return 0;
   return smooth01((-time-maxAge+120)/120);
 }
+// Cosmetic heat breathing is deliberately independent of geological playback.
+export function thermalPulse(seconds) {return 1+.08*Math.sin(seconds*2*Math.PI/4.5);}
 // Original procedural art controls, not measured lava coverage or impact rates.
 export function earlyEarthMaterial(time, result = {}) {
   const age = -clampTimelineTime(time);

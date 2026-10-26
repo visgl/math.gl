@@ -4,6 +4,7 @@
 // Original deck.gl material adapter. Imports luma.gl waterMaterial; no upstream shader code is copied.
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {waterMaterial} from '@luma.gl/shadertools';
+import {thermalPulse} from './planetary-history.js';
 const block = `layout(std140) uniform tectonicSurfaceUniforms {
   float isWater;
   float globeWeight;
@@ -22,12 +23,13 @@ const block = `layout(std140) uniform tectonicSurfaceUniforms {
   float earlyImpactTime;
   float earlyTheia;
   float earlyOpacity;
+  float earlyPulse;
 } tectonicSurface;`;
 const surface = {
   name: 'tectonicSurface',
   vs: block,
   fs: block + '\nuniform sampler2D terrainTexture; uniform sampler2D paleoElevationA; uniform sampler2D paleoElevationB;',
-  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32', vegetation: 'f32', paleoBlend: 'f32', paleoTerrain: 'f32', paleoSizeA: 'vec2<f32>', paleoSizeB: 'vec2<f32>', earlyEarth: 'f32', earlyLava: 'f32', earlyBombardment: 'f32', earlyWater: 'f32', earlyImpactTime: 'f32', earlyTheia: 'f32', earlyOpacity: 'f32'}
+  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32', vegetation: 'f32', paleoBlend: 'f32', paleoTerrain: 'f32', paleoSizeA: 'vec2<f32>', paleoSizeB: 'vec2<f32>', earlyEarth: 'f32', earlyLava: 'f32', earlyBombardment: 'f32', earlyWater: 'f32', earlyImpactTime: 'f32', earlyTheia: 'f32', earlyOpacity: 'f32', earlyPulse: 'f32'}
 };
 const UNIT_SIZE = new Float32Array([1, 1]);
 const LIGHTS = [
@@ -170,7 +172,8 @@ export class SurfaceLayer extends SolidPolygonLayer {
           vec3 ground=mix(basalt*illumination,oceanColor,sea);
           // Linear emissive radiance above display white, mapped back to SDR.
           // Theia briefly lights the entire globe, including its unlit hemisphere.
-          vec3 radiance=ground+emission*(1.-.8*sea)+tectonicSurface.earlyTheia*vec3(14.,8.,.18);
+          vec3 radiance=(ground+emission*(1.-.8*sea))*tectonicSurface.earlyPulse
+            +tectonicSurface.earlyTheia*vec3(18.,12.,4.);
           color.rgb=vec3(1.)-exp(-radiance);
           float rim=pow(1.-max(normal.z,0.),5.)*tectonicSurface.globeWeight;
           color.rgb+=vec3(.055,.025,.012)*rim;
@@ -269,6 +272,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
         paleoTerrain: paleoFrameA && paleoFrameB ? 1 : 0,
         paleoBlend,
         earlyEarth: earlyEarth ? 1 : 0,
+        earlyPulse: earlyEarth && earlyLava > .01 ? thermalPulse(performance.now()/1000) : 1,
         earlyLava, earlyBombardment, earlyWater, earlyImpactTime, earlyTheia, earlyOpacity,
         paleoSizeA: paleoFrameA?.size || UNIT_SIZE,
         paleoSizeB: paleoFrameB?.size || UNIT_SIZE,

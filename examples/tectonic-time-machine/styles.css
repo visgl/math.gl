@@ -122,3 +122,12 @@ SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
   .tectonic-controls label {display:block;width:auto;margin-right:0;}
   .tectonic-controls .tectonic-note {display:block;}
 }
+.tectonic-explanations {border-top:1px solid #243e4d;margin-top:10px;padding-top:6px;}
+
+.tectonic-event-tooltip {display:none;position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);width:max-content;max-width:240px;padding:8px 11px;border:1px solid #477185;border-radius:6px;background:#081c2ef5;color:#eaf3f7;box-shadow:0 4px 16px #0006;font:12px/1.4 system-ui,sans-serif;text-align:left;pointer-events:none;z-index:20;}
+.tectonic-event-tooltip strong,.tectonic-event-tooltip span {display:block;white-space:normal;}
+.tectonic-event-tooltip span {font-size:11px;color:#adc4d2;}
+.tectonic-deep-time-marker:hover .tectonic-event-tooltip,.tectonic-deep-time-marker:focus-visible .tectonic-event-tooltip {display:block;}
+.tectonic-deep-time-marker:hover,.tectonic-deep-time-marker:focus-visible {z-index:21;}
+.tectonic-event-tooltip.align-start {left:0;transform:none;}
+.tectonic-event-tooltip.align-end {left:auto;right:0;transform:none;}

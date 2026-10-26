@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {EARTH_FORMATION_MA, clampTimelineTime, isEarlyEarth, earlyEarthBlend, earlyEarthMaterial, planetaryStage, validateGeologicalSeries, selectGeologicalSeries} from './planetary-history.js';
+import {EARTH_FORMATION_MA, clampTimelineTime, isEarlyEarth, earlyEarthBlend, thermalPulse, earlyEarthMaterial, planetaryStage, validateGeologicalSeries, selectGeologicalSeries} from './planetary-history.js';
 
 test('planetary stages distinguish the giant impact from known tectonic history', () => {
   assert.equal(planetaryStage(4567).id, 'accretion');
@@ -83,4 +83,11 @@ test('seas emerge gradually and the plate-data handoff has a continuous visual b
   assert.equal(earlyEarthBlend(-880,1000),0);
   assert.equal(earlyEarthBlend(0,1000),0);
   assert.ok(Math.abs(earlyEarthBlend(-999.99,1000)-1)<1e-6);
+});
+
+test('thermal breathing is subtle, smooth and periodic', () => {
+  assert.equal(thermalPulse(0),1);
+  assert.ok(Math.abs(thermalPulse(4.5)-1)<1e-12);
+  assert.equal(thermalPulse(4.5/4),1.08);
+  assert.equal(thermalPulse(4.5*3/4),.92);
 });

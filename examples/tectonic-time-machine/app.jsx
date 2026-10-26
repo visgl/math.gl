@@ -256,10 +256,6 @@ export default function TectonicTimeMachine() {
             ))}
           </select>
         </label>
-        <p className="tectonic-source-summary">
-          {source.frame} · {source.geometry}
-        </p>
-        {historyStatus && <p className="tectonic-stream-status" role="status">{historyStatus}</p>}
         <div className="tectonic-control-row">
         <label>
           View
@@ -288,10 +284,6 @@ export default function TectonicTimeMachine() {
           <input type="checkbox" checked={cycleViews} onChange={e => setCycleViews(e.target.checked)} />{' '}
           Cycle views every 8 seconds
         </label>
-        {focusEvent ? <p className="tectonic-data-note">Event focus · {focusEvent.name}</p> : earlyEarth && <p className="tectonic-data-note">Deep time · 5× playback until tectonic data begins</p>}
-        {glaciations && playing && glaciationPlaybackSpeed(time, speed) < speed && (
-          <p className="tectonic-data-note">Slower playback · ice edge transition</p>
-        )}
         <label>
           Land appearance
           <select
@@ -306,7 +298,6 @@ export default function TectonicTimeMachine() {
         </label>
         <details className="tectonic-info tectonic-display-options">
           <summary>Display &amp; future options</summary>
-        <p className="tectonic-note">PaleoDEM uses its own PALEOMAP reconstruction. The plate model applies to region colors and earlier/future terrain.</p>
         <label>
           {view === 'globe' ? 'Globe starting longitude' : 'Map central meridian'}
           <input
@@ -349,7 +340,6 @@ export default function TectonicTimeMachine() {
             ))}
           </div>
         )}
-        <p className="tectonic-appearance-status">{appearanceStatus}</p>
         <details className="tectonic-info">
           <summary>Earth history · impacts, climate and extinctions</summary>
           <p className="tectonic-note">
@@ -482,6 +472,18 @@ export default function TectonicTimeMachine() {
               : ''}
           </p>
         </details>
+        <section className="tectonic-explanations" aria-label="View notes">
+        <p className="tectonic-source-summary">
+          {source.frame} · {source.geometry}
+        </p>
+        {historyStatus && <p className="tectonic-stream-status" role="status">{historyStatus}</p>}
+        {focusEvent ? <p className="tectonic-data-note">Event focus · {focusEvent.name}</p> : earlyEarth && <p className="tectonic-data-note">Deep time · 5× playback until tectonic data begins</p>}
+        {glaciations && playing && glaciationPlaybackSpeed(time, speed) < speed && (
+          <p className="tectonic-data-note">Slower playback · ice edge transition</p>
+        )}
+        <p className="tectonic-note">PaleoDEM uses its own PALEOMAP reconstruction. The plate model applies to region colors and earlier/future terrain.</p>
+        <p className="tectonic-appearance-status">{appearanceStatus}</p>
+        </section>
       </aside>
       <footer className="tectonic-timeline">
         <div ref={timeline} className="tectonic-widget" aria-label="Geological playback timeline" />
@@ -499,11 +501,16 @@ export default function TectonicTimeMachine() {
                   type="button"
                   className={`tectonic-deep-time-marker ${available ? 'available' : 'illustrative'}`}
                   style={{left: `${(1 - event.ageMa / 4567) * 100}%`}}
-                  title={`${event.name} · ${event.ageMa} Ma · ${available ? 'Seek to geological age' : 'Seek to illustrative early Earth age'}`}
+                  aria-describedby={`timeline-tip-${event.id}`}
                   aria-label={`${event.name}, ${event.ageMa} Ma. ${available ? 'Seek to event' : 'Seek to illustrative early Earth age'}`}
                   disabled={Boolean(renderError)}
                   onClick={() => seek(-event.ageMa)}
-                />
+                >
+                  <span id={`timeline-tip-${event.id}`} role="tooltip" className={`tectonic-event-tooltip ${event.ageMa > 3800 ? 'align-start' : event.ageMa < 750 ? 'align-end' : ''}`}>
+                    <strong>{event.name}</strong>
+                    <span>{event.ageMa.toLocaleString()} Ma · {available ? 'Seek to geological age' : 'Illustrative early Earth'}</span>
+                  </span>
+                </button>
               );
             })}
           </div>

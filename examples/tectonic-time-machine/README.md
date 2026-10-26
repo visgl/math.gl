@@ -194,7 +194,8 @@ these early surfaces. Gradual cooling/water colors are also illustrative.
 
 Material noise and impact sites live in geographic sphere space, so they follow
 rotation and every projection once. Effects are driven by geological playback
-age: Stop freezes them and revisiting an age reproduces the same appearance.
+age: Stop freezes their evolution and revisiting an age reproduces the same terrain
+and impact state. A subtle cosmetic thermal pulse continues while paused.
 The source-linked event browser and overview rail remain navigation shortcuts
 to the same geological time, with clearly marked illustrative older dates.
 
@@ -279,7 +280,7 @@ morphing transform the global surface once, without applying plate rotations.
 Deep time plays at 5× the selected speed before the chosen plate model begins.
 The final accelerated step lands exactly on that boundary, then normal speed
 and the existing glaciation slowdowns resume. The Theia marker at approximately
-4,500 Ma triggers a brief whole-Earth yellow emissive pulse and halo, which
+4,500 Ma triggers a brief whole-Earth white-hot emissive pulse and halo, which
 fades back to Hadean rock/lava over subsequent timeline ages. The shader uses
 above-white linear radiance and a display tone map; it does not require an HDR
 monitor. Pulse duration and appearance are illustrative, not an impact simulation.
@@ -294,3 +295,9 @@ Evidence supports liquid water by about 4.4 Ga, but the onset and global extent 
 oceans are uncertain. See [older-Earth data candidates and evidence](early-earth-sources.md)
 for verified open releases, limitations and references. **Euramerica (Laurussia)**
 labels the earlier landmass; **Laurasia** labels the later northern Pangaea breakup.
+
+The Theia peak is white-hot, cooling through yellow on its way back to the
+Hadean material. A separate, subtle 4.5-second thermal breathing effect varies
+Hadean intensity by ±8%; it remains alive while paused. Geological age, impact
+positions and impact cooling still freeze with Stop. All of these effects are
+illustrative art rather than physical radiometry or simulated impact histories.

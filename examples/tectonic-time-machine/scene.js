@@ -258,7 +258,7 @@ export function mountScene(
     const glow = early ? Math.round(Math.sqrt(earlyMaterial.theia)*100)/100 : 0;
     if (glow !== impactGlow) {
       impactGlow = glow;
-      canvas.style.filter = glow > 0 ? `drop-shadow(0 0 ${12+glow*20}px rgba(255,220,45,${glow*.8})) drop-shadow(0 0 ${25+glow*35}px rgba(255,185,20,${glow*.6}))` : '';
+      canvas.style.filter = glow > 0 ? `drop-shadow(0 0 ${12+glow*20}px rgba(255,${Math.round(210+45*glow)},${Math.round(50+205*glow)},${glow*.8})) drop-shadow(0 0 ${25+glow*35}px rgba(255,${Math.round(190+65*glow)},${Math.round(25+230*glow)},${glow*.6}))` : '';
     }
     let status;
     if (early) status = `${planetaryStage(-time)?.label} · procedural rock, lava and impacts; no reconstructed geography`;
