@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.18",
+  "version": "5.0.0-alpha.20",
   "keywords": [
     "geometry",
     "gltf",
@@ -81,10 +81,12 @@
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-alpha.18"
+    "@math.gl/core": "5.0.0-alpha.20"
   },
   "sideEffects": false
 }

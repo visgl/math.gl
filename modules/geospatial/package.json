@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.18",
+  "version": "5.0.0-alpha.20",
   "keywords": [
     "webgl",
     "javascript",
@@ -1074,6 +1074,36 @@
       "types": "./dist/geoarrow/tessellation-entry.d.ts",
       "import": "./dist/geoarrow/tessellation-entry.js",
       "require": "./dist/geoarrow/tessellation-entry.cjs"
+    },
+    "./discontinuous": {
+      "types": "./dist/discontinuous.d.ts",
+      "import": "./dist/discontinuous.js",
+      "require": "./dist/discontinuous.cjs"
+    },
+    "./elastic": {
+      "types": "./dist/elastic.d.ts",
+      "import": "./dist/elastic.js",
+      "require": "./dist/elastic.cjs"
+    },
+    "./geodesic-exact": {
+      "types": "./dist/geodesic-exact.d.ts",
+      "import": "./dist/geodesic-exact.js",
+      "require": "./dist/geodesic-exact.cjs"
+    },
+    "./triaxial": {
+      "types": "./dist/triaxial.d.ts",
+      "import": "./dist/triaxial.js",
+      "require": "./dist/triaxial.cjs"
+    },
+    "./coordinates": {
+      "types": "./dist/coordinates.d.ts",
+      "import": "./dist/coordinates.js",
+      "require": "./dist/coordinates.cjs"
+    },
+    "./geodesic-buffer": {
+      "types": "./dist/geodesic-buffer.d.ts",
+      "import": "./dist/geodesic-buffer.js",
+      "require": "./dist/geodesic-buffer.cjs"
     }
   },
   "files": [
@@ -1084,12 +1114,16 @@
     "projection/PROJ4-LICENSE.md",
     "projection/APACHE-2.0-LICENSE.txt",
     "projection/THIRD-PARTY-NOTICES.md",
-    "projection/PROJ-LICENSE.txt"
+    "projection/PROJ-LICENSE.txt",
+    "GEOGRAPHICLIB-LICENSE.txt",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-alpha.18",
-    "@math.gl/geometry": "5.0.0-alpha.18",
-    "@math.gl/web-mercator": "5.0.0-alpha.18"
+    "@math.gl/core": "5.0.0-alpha.20",
+    "@math.gl/geometry": "5.0.0-alpha.20",
+    "@math.gl/web-mercator": "5.0.0-alpha.20",
+    "polygon-clipping": "0.15.7"
   },
   "devDependencies": {
     "proj4": "2.22.0"

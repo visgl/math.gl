@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileCopyrightText: 2011-2015 Vladimir Agafonkin
 // SPDX-FileCopyrightText: 2014 Vladimir Agafonkin
-// SPDX-FileComment: Adapted from SunCalc 1.9.0 with topocentric parallax and USNO sidereal time; full copyright, conditions and disclaimer in ../LICENSE-SUNCALC.
+// SPDX-FileComment: Adapted from SunCalc 1.9.0 with topocentric parallax and USNO sidereal time; full copyright, conditions and disclaimer in ../../sun/LICENSE-SUNCALC.
 // Reference: https://github.com/mourner/suncalc/tree/v1.9.0
 import {getAzimuth, getDeclination, getRightAscension, getSunCoords, toDays} from './suncalc';
 import {getLocalSiderealTime} from './starfield';

@@ -9,7 +9,8 @@
         "label": "Introduction"
       },
       "whats-new",
-      "upgrade-guide"
+      "upgrade-guide",
+      "references-and-credits"
     ]
   },
   {
@@ -102,7 +103,9 @@
         "label": "@math.gl/geometry",
         "items": [
           "modules/geometry/README",
+          "modules/geometry/unfolding-earth",
           "modules/geometry/api-reference/geometry",
+          "modules/geometry/api-reference/hinge-tree",
           "modules/geometry/api-reference/box-geometry",
           "modules/geometry/api-reference/cube-geometry",
           "modules/geometry/api-reference/capsule-geometry",
@@ -163,7 +166,9 @@
       {
         "type": "category",
         "label": "@math.gl/earth",
-        "items": ["modules/earth/README"]
+        "items": [
+          "modules/earth/README"
+        ]
       },
       {
         "type": "category",
@@ -187,12 +192,29 @@
         "label": "@math.gl/geospatial",
         "items": [
           "modules/geospatial/README",
+          "modules/geospatial/developer-guide/terminology",
           "modules/geospatial/api-reference/ellipsoid",
+          "modules/geospatial/api-reference/ellipsoid-metrics",
+          "modules/geospatial/api-reference/geodesic-polygon",
+          "modules/geospatial/api-reference/ellipsoid-rhumb",
+          "modules/geospatial/api-reference/geodesic-intersections",
           "modules/geospatial/api-reference/globe-queries",
           "modules/geospatial/api-reference/subdivide-globe-mesh",
+          "modules/geospatial/api-reference/geodesic-path",
+          "modules/geospatial/api-reference/subdivide-geodesic-polyline",
+          "modules/geospatial/api-reference/rhumb-path",
+          "modules/geospatial/api-reference/geographic-seams",
           "modules/geospatial/api-reference/geographic-tiles",
           "modules/geospatial/api-reference/tile-matrix",
           "modules/geospatial/api-reference/ellipsoid-tangent-plane",
+          "modules/geospatial/api-reference/local-reference-frame",
+          "modules/geospatial/api-reference/local-frame-qualification",
+          "modules/geospatial/api-reference/ellipsoid-geodesic-exact",
+          "modules/geospatial/api-reference/geodesic-exact-area-qualification",
+          "modules/geospatial/api-reference/triaxial-geometry",
+          "modules/geospatial/api-reference/coordinate-utilities",
+          "modules/geospatial/api-reference/geodesic-line-buffer",
+          "modules/geospatial/api-reference/geodesic-g89-qualification",
           "modules/geospatial/api-reference/lng-lat-rectangle",
           "modules/geospatial/api-reference/make-obb-from-region",
           "modules/geospatial/api-reference/helpers"
@@ -233,14 +255,23 @@
         "label": "@math.gl/geospatial/projection",
         "items": [
           "modules/geospatial/projection/README",
+          "modules/geospatial/projection/developer-guide/discontinuous-projections",
+          "modules/geospatial/myriahedral-maps",
+          "modules/geospatial/elastic-maps",
+          "modules/geospatial/discontinuous/projection-catalog",
+          "modules/geospatial/discontinuous/README",
+          "modules/geospatial/discontinuous/myriahedral",
           {
             "type": "category",
             "label": "Developer Guide",
             "items": [
               "modules/geospatial/projection/developer-guide/api-guide",
+              "modules/geospatial/projection/developer-guide/map-engine",
               "modules/geospatial/projection/developer-guide/coordinate-systems",
               "modules/geospatial/projection/developer-guide/projections",
+              "modules/geospatial/projection/developer-guide/myriahedral-projections",
               "modules/geospatial/projection/developer-guide/projection-engine",
+              "modules/geospatial/projection/developer-guide/external-projection-engines",
               "modules/geospatial/projection/developer-guide/deformation-models",
               "modules/geospatial/projection/developer-guide/support"
             ]
@@ -250,6 +281,8 @@
             "label": "API Reference",
             "items": [
               "modules/geospatial/projection/api-reference/projection",
+              "modules/geospatial/projection/api-reference/map-engine",
+              "modules/geospatial/projection/api-reference/elastic",
               "modules/geospatial/projection/api-reference/projection-engine",
               "modules/geospatial/projection/api-reference/projection-transform",
               "modules/geospatial/projection/api-reference/projection-pipeline",
@@ -263,6 +296,7 @@
             "label": "Validation and Measurements",
             "items": [
               "modules/geospatial/projection/ellipsoid-qualification",
+              "modules/geospatial/projection/ellipsoid-p0-qualification",
               "modules/geospatial/projection/deformation-qualification",
               "modules/geospatial/projection/benchmarks",
               "modules/geospatial/projection/scorecard",
@@ -270,6 +304,7 @@
               "modules/geospatial/projection/acceleration",
               "modules/geospatial/projection/parity-audit",
               "modules/geospatial/projection/independent-validation",
+              "modules/geospatial/projection/modern-proj-audit",
               "modules/geospatial/projection/accuracy-domains"
             ]
           }

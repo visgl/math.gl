@@ -31,3 +31,12 @@ test('rejects malformed and unsupported geometry', () => {
   assert.ok(validatePaleoGeometry({...valid, geometry: {type: 'Polygon', coordinates: [[[0, 0], [1, NaN]]]}}).length);
   assert.ok(validatePaleoGeometry(null).length);
 });
+
+test('Every supplied position ordinate must be finite, including sparse and extra dimensions', () => {
+  for (const coordinates of [[0,0,'bad'],[0,0,NaN],[0,0,Infinity],[0,0,,4]]) {
+    const record={...valid,geometry:{type:'Point',coordinates}};
+    assert.ok(validatePaleoGeometry(record).length);
+    assert.deepEqual(featuresForEpoch([record],300,'EXAMPLE2026'),[]);
+  }
+  assert.deepEqual(validatePaleoGeometry({...valid,geometry:{type:'Point',coordinates:[0,0,100,5]}}),[]);
+});

@@ -41,8 +41,14 @@
     "test-pre-commit": "yarn lint && ocular-test node",
     "check:timezone-geometry": "python3 modules/earth/timezone/scripts/check-geometry.py",
     "check:parametric-package": "node modules/geometry/scripts/check-parametric-package.mjs",
+    "check:c8-package": "node modules/geospatial/scripts/check-c8-package.mjs",
+    "benchmark:g7": "node modules/geospatial/scripts/benchmark-g7.mjs",
+    "check:geographic-seams-package": "node modules/geospatial/scripts/check-geographic-seams-package.mjs",
+    "check:geodesic-path-package": "node modules/geospatial/scripts/check-geodesic-path-package.mjs",
     "check:tile-matrix-package": "node modules/geospatial/scripts/check-tile-matrix-package.mjs",
-    "check:packages": "node scripts/check-packages.mjs"
+    "check:tree-shaking": "node scripts/check-tree-shaking.mjs",
+    "check:packages": "node scripts/check-packages.mjs",
+    "check:attributions": "node scripts/check-attributions.mjs"
   },
   "devDependencies": {
     "@turf/destination": "^7.4.0",

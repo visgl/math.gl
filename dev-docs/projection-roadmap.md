@@ -7,12 +7,19 @@ Status: tranches **0–11, including qualification tranches 7A–7D, are impleme
 from `@math.gl/proj4`; its deprecated wrapper alias and `/classic` subpath are removed.
 Prior engine subpaths remain aliases. No package is published by this work.
 
-The upstream corpus has 232 original numeric matches, one independently corrected
-Robinson case and nine deliberate input rejections. All 37 named algorithms have
+The upstream corpus has 230 original numeric matches, three independently corrected
+cases (one Robinson and two ellipsoidal gnomonic) and nine deliberate input rejections. All 37 named algorithms have
 independent references; partial inventory statuses describe the difference from
 unrestricted upstream behavior, not a claim of full-domain geodetic accuracy.
 
 ## Target and upstream baseline
+
+**Numerical target:** modern native PROJ accuracy in explicitly qualified domains.
+Proj4js is a compatibility baseline, not the accuracy ceiling. The
+[modern PROJ audit](../docs/modules/geospatial/projection/modern-proj-audit.md) tracks inherited spherical algorithms,
+exact/near poles, oracle limitations and remaining gaps. Current reproducible
+native references pin pyproj 3.7.2 / PROJ 9.5.1; that is a recorded test oracle,
+not a claim to implement every operation in the newest PROJ release.
 
 Build an independent math.gl projection engine inside `@math.gl/geospatial/projection`, initially alongside
 the existing proj4js wrapper. Keep projection algorithms explicitly pluggable and

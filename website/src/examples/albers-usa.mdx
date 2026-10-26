@@ -1,0 +1,32 @@
+# Albers USA inset map
+
+<p class="badges"><img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" /> <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" /></p>
+
+import Example from '@site/src/components/albers-usa';
+
+<Example compact />
+
+This focused example shows the experimental [`createAlbersUsaMap`,
+`getMapLayout`, `fitMapLayout`, and `pickMapLayout`
+APIs](/docs/modules/geospatial/discontinuous/). States are clipped at region
+boundaries, and the cursor readout resolves geographic coordinates through the
+frontmost inset. The example enables the five inhabited U.S. territory insets
+with `{includeTerritories: true}` alongside Alaska and Hawaii. Alaska is
+displayed at 35% linear scale. The preset's broad geographic masks are not
+political borders or exact D3 inset clips. Minor outlying islands are outside
+this example's coverage.
+
+Use **View globe** to animate the mapped features back onto a sphere, or scrub
+the **Unfold** slider. The mouse wheel and zoom buttons magnify all insets
+together; drag to pan. The globe adds a public-domain Natural Earth 1:110m land
+layer for context. The transition belongs to this example's renderer; the
+static `DiscontinuousMap` API supplies the source coordinates and inset layout.
+The map opens without graticules or inset boxes; the layer controls can show
+them when inspecting the regional composition.
+Unlike [Mapbox's election style](https://www.mapbox.com/election-tiles/albers-usa-projection-style),
+which preprojects vector tiles for display in Web Mercator, this example
+projects the source polygons in the browser with math.gl. Its territory
+arrangement is independent of custom D3 composites.
+
+State boundaries come from [Natural Earth 1:10m](https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/), public domain.
+See the [standalone source](https://github.com/visgl/math.gl/tree/master/examples/albers-usa) and the [discontinuous projection guide](/docs/modules/geospatial/projection/developer-guide/discontinuous-projections).

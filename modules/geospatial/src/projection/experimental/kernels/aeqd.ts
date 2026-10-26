@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Adapted from proj4js 2.22.0; polar meridian integration/inversion is original math.gl code. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Original math.gl inverse Cartesian rotation correction. Adapted from proj4js 2.22.0; polar meridian integration/inversion is original math.gl code. See ../../../../projection/PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
+import {inverseSphericalLatitude} from '../inverse-spherical-latitude';
 export type State = KernelParameters & {
   sin_p12: number;
   cos_p12: number;
@@ -12,7 +13,6 @@ export type State = KernelParameters & {
 };
 import adjust_lon from '../common/adjust_lon';
 import {HALF_PI, EPSLN} from '../common/constants';
-import asinz from '../common/asinz';
 import {meridianDistance, inverseMeridianDistance} from '../common/meridian-distance';
 import {vincentyDirect, vincentyInverse} from '../common/vincenty';
 
@@ -104,7 +104,7 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
     if (Math.abs(rh) <= EPSLN) {
       lat = state.lat0;
     } else {
-      lat = asinz(cosz * state.sin_p12 + (p.y * sinz * state.cos_p12) / rh);
+      lat = inverseSphericalLatitude(state.sin_p12, state.cos_p12, sinz, cosz, p.x, p.y, rh);
       con = Math.abs(state.lat0) - HALF_PI;
       if (Math.abs(con) <= EPSLN) {
         if (state.lat0 >= 0) {

@@ -222,20 +222,27 @@ test('Ellipsoid#scaleToGeodeticSurface scaled in the z direction', () => {
 
 test('Ellipsoid#scaleToGeodeticSurface works without a result parameter', () => {
   const ellipsoid = new Ellipsoid(1.0, 2.0, 3.0);
-  const expected = new Vector3(0.2680893773941855, 1.1160466902266495, 2.3559801120411263);
+  const expected = new Vector3(0.26808937739416683, 1.1160466902265849, 2.3559801120410193);
   const cartesian = new Vector3(4.0, 5.0, 6.0);
   const returnedResult = ellipsoid.scaleToGeodeticSurface(cartesian);
-  expect(equals(returnedResult, expected, _MathUtils.EPSILON16)).toBe(true);
+  // 110-digit independent Decimal nearest-point oracle, rounded to binary64.
+  for (let i = 0; i < 3; i++)
+    expect(Math.abs(returnedResult[i] - expected[i])).toBeLessThanOrEqual(
+      2 * Number.EPSILON * Math.abs(expected[i])
+    );
 });
 
 test('Ellipsoid#scaleToGeodeticSurface works with a result parameter', () => {
   const ellipsoid = new Ellipsoid(1.0, 2.0, 3.0);
-  const expected = new Vector3(0.2680893773941855, 1.1160466902266495, 2.3559801120411263);
+  const expected = new Vector3(0.26808937739416683, 1.1160466902265849, 2.3559801120410193);
   const cartesian = new Vector3(4.0, 5.0, 6.0);
   const result = new Vector3();
   const returnedResult = ellipsoid.scaleToGeodeticSurface(cartesian, result);
   expect(returnedResult === result).toBeTruthy();
-  expect(equals(result, expected, _MathUtils.EPSILON16)).toBe(true);
+  for (let i = 0; i < 3; i++)
+    expect(Math.abs(result[i] - expected[i])).toBeLessThanOrEqual(
+      2 * Number.EPSILON * Math.abs(expected[i])
+    );
 });
 
 test('Ellipsoid#scaleToGeodeticSurface returns undefined at center', () => {

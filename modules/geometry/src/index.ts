@@ -10,6 +10,9 @@ export type {
   GeometryAttributes,
   PrimitiveTopology
 } from './lib/geometry';
+export {HingeTree} from './lib/hinge-tree';
+export type {HingePanel} from './lib/hinge-tree';
+
 export {unpackIndexedGeometry} from './lib/geometry-utils';
 
 export {BoxGeometry, CubeGeometry} from './geometries/box-geometry';

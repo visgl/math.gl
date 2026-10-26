@@ -5,10 +5,10 @@
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
 // This file is derived from the Cesium math library under Apache 2 license
-// See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
+// See ../../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
 import {NumericArray} from '@math.gl/core/types';
-import {Vector3, Matrix3, Matrix4, Quaternion} from '@math.gl/core';
+import {Vector3, Matrix3, Matrix4} from '@math.gl/core';
 
 import type {BoundingVolume} from './bounding-volume';
 import {BoundingSphere} from './bounding-sphere';
@@ -64,41 +64,6 @@ export class OrientedBoundingBox implements BoundingVolume {
     const yAxis = this.halfAxes.getColumn(1);
     const zAxis = this.halfAxes.getColumn(2);
     return [new Vector3(xAxis).len(), new Vector3(yAxis).len(), new Vector3(zAxis).len()];
-  }
-
-  /** Returns a quaternion describing the orientation of the bounding box */
-  get quaternion(): Quaternion {
-    const xAxis = this.halfAxes.getColumn(0);
-    const yAxis = this.halfAxes.getColumn(1);
-    const zAxis = this.halfAxes.getColumn(2);
-    const normXAxis = new Vector3(xAxis).normalize();
-    const normYAxis = new Vector3(yAxis).normalize();
-    const normZAxis = new Vector3(zAxis).normalize();
-    return new Quaternion().fromMatrix3(new Matrix3([...normXAxis, ...normYAxis, ...normZAxis]));
-  }
-
-  /**
-   * Create OrientedBoundingBox from quaternion based OBB,
-   */
-  fromCenterHalfSizeQuaternion(
-    center: number[],
-    halfSize: number[],
-    quaternion: number[]
-  ): OrientedBoundingBox {
-    const quaternionObject = new Quaternion(quaternion);
-    const directionsMatrix = new Matrix3().fromQuaternion(quaternionObject);
-    directionsMatrix[0] = directionsMatrix[0] * halfSize[0];
-    directionsMatrix[1] = directionsMatrix[1] * halfSize[0];
-    directionsMatrix[2] = directionsMatrix[2] * halfSize[0];
-    directionsMatrix[3] = directionsMatrix[3] * halfSize[1];
-    directionsMatrix[4] = directionsMatrix[4] * halfSize[1];
-    directionsMatrix[5] = directionsMatrix[5] * halfSize[1];
-    directionsMatrix[6] = directionsMatrix[6] * halfSize[2];
-    directionsMatrix[7] = directionsMatrix[7] * halfSize[2];
-    directionsMatrix[8] = directionsMatrix[8] * halfSize[2];
-    this.center = new Vector3().from(center);
-    this.halfAxes = directionsMatrix;
-    return this;
   }
 
   /** Duplicates a OrientedBoundingBox instance. */

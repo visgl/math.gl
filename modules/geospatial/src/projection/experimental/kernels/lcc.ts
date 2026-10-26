@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Adapted from proj4js 2.22.0 with exact pole handling instead of latitude perturbation. See ../../../../projection/PROJ4-LICENSE.md for upstream attribution. Independent corrections acknowledge PROJ 9.5.1 src/projections/lcc.cpp; see ../../../../projection/PROJ-LICENSE.txt.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -11,7 +11,6 @@ export type State = KernelParameters & {
 };
 import msfnz from '../common/msfnz';
 import tsfnz from '../common/tsfnz';
-import sign from '../common/sign';
 import adjust_lon from '../common/adjust_lon';
 import phi2z from '../common/phi2z';
 import {HALF_PI, EPSLN} from '../common/constants';
@@ -76,15 +75,10 @@ export function forward(state: State, p: Point): Point | null | undefined | numb
   var lon = p.x;
   var lat = p.y;
 
-  // singular cases :
-  if (Math.abs(2 * Math.abs(lat) - Math.PI) <= EPSLN) {
-    lat = sign(lat) * (HALF_PI - 2 * EPSLN);
-  }
-
   var con = Math.abs(Math.abs(lat) - HALF_PI);
   var ts, rh1;
   if (con > EPSLN) {
-    ts = tsfnz(state.e, lat, Math.sin(lat));
+    ts = state.sphere ? 1 / Math.tan(Math.PI / 4 + lat / 2) : tsfnz(state.e, lat, Math.sin(lat));
     rh1 = state.a * state.f0 * Math.pow(ts, state.ns);
   } else {
     con = lat * state.ns;

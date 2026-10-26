@@ -5,7 +5,7 @@
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
 // This file is derived from the Cesium math library under Apache 2 license
-// See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
+// See ../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
 import {Matrix3, Matrix4, Vector2, Vector3, degrees, radians, _MathUtils} from '@math.gl/core';
 import {OrientedBoundingBox, Plane} from '@math.gl/geometry/culling';

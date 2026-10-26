@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original wrapper of derived Hošek-Wilkie data; reference: https://cgg.mff.cuni.cz/projects/SkylightModelling/
-// Derived BSD-3-Clause data and notices: ./data/sunlight.ts and ../LICENSE-HOSEK-WILKIE.
+// Derived BSD-3-Clause data and notices: ./data/sunlight.ts and ../../sun/LICENSE-HOSEK-WILKIE.
 import {SUNLIGHT_DATA} from './data/sunlight';
 
 export type SunLightOptions = {

@@ -2505,9 +2505,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl-community/editable-layers@npm:^9.4.1":
-  version: 9.4.1
-  resolution: "@deck.gl-community/editable-layers@npm:9.4.1"
+"@deck.gl-community/editable-layers@npm:^9.4.8":
+  version: 9.4.8
+  resolution: "@deck.gl-community/editable-layers@npm:9.4.8"
   dependencies:
     "@math.gl/core": "npm:^4.0.0"
     "@math.gl/web-mercator": "npm:>=4.0.1"
@@ -2558,7 +2558,23 @@ __metadata:
     "@luma.gl/core": ~9.4.0
     "@luma.gl/engine": ~9.4.0
     h3-js: ^4.2.1
-  checksum: 10c0/7cf6436fb52ba4c00ff5cf9b54f29e748edcb7f0df44695db92288cf3a98ec3bb0602976314a518f1cd67e0a19f2bdf3da5f7ea9f36ccde4a480ac85992bbc9e
+  checksum: 10c0/5ae714528d83eefa587dacad2c63f91b69c2c3bc2dfa7aaea85df61b70645264af4161fc4edd8aaaa4868ca5713b3eab18ccd2479fe5cdc8bfa66489f0f98225
+  languageName: node
+  linkType: hard
+
+"@deck.gl-community/panels@npm:^9.4.8":
+  version: 9.4.8
+  resolution: "@deck.gl-community/panels@npm:9.4.8"
+  dependencies:
+    "@probe.gl/stats": "npm:^4.1.1"
+    monaco-editor: "npm:^0.53.0"
+    preact: "npm:^10.17.0"
+  peerDependencies:
+    apache-arrow: ">=17"
+  peerDependenciesMeta:
+    apache-arrow:
+      optional: true
+  checksum: 10c0/c7d82e290e16cda8fae153165399448ce65f04ed71b8f5403e9ebdc6b0150f11044499b476d5244b475a2cfe2ca54c369338ba18de66a0a6fd23151e8c04c1f0
   languageName: node
   linkType: hard
 
@@ -5264,7 +5280,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/core@npm:5.0.0-alpha.18, @math.gl/core@workspace:*, @math.gl/core@workspace:modules/core":
+"@math.gl/core@npm:5.0.0-alpha.20, @math.gl/core@workspace:*, @math.gl/core@workspace:modules/core":
   version: 0.0.0-use.local
   resolution: "@math.gl/core@workspace:modules/core"
   languageName: unknown
@@ -5291,7 +5307,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs@workspace:modules/dggs"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.18"
+    "@math.gl/core": "npm:5.0.0-alpha.20"
     a5-js: "npm:^0.10.0"
     h3-js: "npm:^4.5.0"
     open-location-code: "npm:^1.0.3"
@@ -5303,8 +5319,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/earth@workspace:modules/earth"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.18"
+    "@math.gl/core": "npm:5.0.0-alpha.20"
     astronomy-engine: "npm:2.1.19"
+  peerDependencies:
+    astronomy-engine: ^2.1.19
+  peerDependenciesMeta:
+    astronomy-engine:
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -5330,11 +5351,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/geometry@npm:5.0.0-alpha.18, @math.gl/geometry@workspace:*, @math.gl/geometry@workspace:modules/geometry":
+"@math.gl/geometry@npm:5.0.0-alpha.20, @math.gl/geometry@workspace:*, @math.gl/geometry@workspace:modules/geometry":
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry@workspace:modules/geometry"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.18"
+    "@math.gl/core": "npm:5.0.0-alpha.20"
   languageName: unknown
   linkType: soft
 
@@ -5352,9 +5373,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.18"
-    "@math.gl/geometry": "npm:5.0.0-alpha.18"
-    "@math.gl/web-mercator": "npm:5.0.0-alpha.18"
+    "@math.gl/core": "npm:5.0.0-alpha.20"
+    "@math.gl/geometry": "npm:5.0.0-alpha.20"
+    "@math.gl/web-mercator": "npm:5.0.0-alpha.20"
+    polygon-clipping: "npm:0.15.7"
     proj4: "npm:2.22.0"
   languageName: unknown
   linkType: soft
@@ -5409,11 +5431,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/web-mercator@npm:5.0.0-alpha.18, @math.gl/web-mercator@workspace:*, @math.gl/web-mercator@workspace:modules/web-mercator":
+"@math.gl/web-mercator@npm:5.0.0-alpha.20, @math.gl/web-mercator@workspace:*, @math.gl/web-mercator@workspace:modules/web-mercator":
   version: 0.0.0-use.local
   resolution: "@math.gl/web-mercator@workspace:modules/web-mercator"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-alpha.18"
+    "@math.gl/core": "npm:5.0.0-alpha.20"
     mock-browser: "npm:^0.92.14"
   languageName: unknown
   linkType: soft
@@ -8492,6 +8514,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/trusted-types@npm:^1.0.6":
+  version: 1.0.6
+  resolution: "@types/trusted-types@npm:1.0.6"
+  checksum: 10c0/4bc61ac65b8e42d17c77a23f29cdf94e498acd2e23f4c00cf15c8281de94263ac313d46cbcd7cd1d03c066d497f9396845e3210ff0074f5f90f212cb3e8aac28
+  languageName: node
+  linkType: hard
+
 "@types/unist@npm:*, @types/unist@npm:^3.0.0":
   version: 3.0.3
   resolution: "@types/unist@npm:3.0.3"
@@ -9758,8 +9787,8 @@ __metadata:
   linkType: hard
 
 "body-parser@npm:~1.20.5":
-  version: 1.20.6
-  resolution: "body-parser@npm:1.20.6"
+  version: 1.20.9
+  resolution: "body-parser@npm:1.20.9"
   dependencies:
     bytes: "npm:~3.1.2"
     content-type: "npm:~1.0.5"
@@ -9769,11 +9798,11 @@ __metadata:
     http-errors: "npm:~2.0.1"
     iconv-lite: "npm:~0.4.24"
     on-finished: "npm:~2.4.1"
-    qs: "npm:~6.15.1"
+    qs: "npm:~6.16.0"
     raw-body: "npm:~2.5.3"
     type-is: "npm:~1.6.18"
     unpipe: "npm:~1.0.0"
-  checksum: 10c0/ad477209f1e714c41fa892a7d2fe22e10b23262103cc25cc6492dd3e6f7869cd2d8b00928b543a1a14d3c3663432452a192efd00422fad6f3687b0e38f7e3b07
+  checksum: 10c0/685d3208335377a3dfc6d7bc8b2af6d40d38b9a72e25bab4d9f7aff19d059729d5b1b3a9f5561274f460020bb9166c211d5302abe0b45452665420ca5e16013b
   languageName: node
   linkType: hard
 
@@ -12534,9 +12563,9 @@ __metadata:
   linkType: hard
 
 "fast-uri@npm:^3.0.1":
-  version: 3.1.7
-  resolution: "fast-uri@npm:3.1.7"
-  checksum: 10c0/ca2baa4bde48fc7322bdc692c6636975943ebe4f6dd97e07d70b14e0ab85af2ff30de90f550f5ec2956684fe208e150d85d6cb5f3c74438c8ac1bf86bd435c13
+  version: 3.1.9
+  resolution: "fast-uri@npm:3.1.9"
+  checksum: 10c0/052757540d8c0bbc16bb124a45b8f5cb5d0932f9b89f019221ee41cdb3cafc1db44b2e809d6b888b87922af3e5560a863124454e9d9193e1fc955887357b5add
   languageName: node
   linkType: hard
 
@@ -15650,6 +15679,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"math.gl-albers-usa@workspace:examples/albers-usa":
+  version: 0.0.0-use.local
+  resolution: "math.gl-albers-usa@workspace:examples/albers-usa"
+  dependencies:
+    "@math.gl/geospatial": "workspace:*"
+    d3-geo: "npm:^2.0.2"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
 "math.gl-alpine-ice-age@workspace:examples/alpine-ice-age":
   version: 0.0.0-use.local
   resolution: "math.gl-alpine-ice-age@workspace:examples/alpine-ice-age"
@@ -15661,7 +15700,11 @@ __metadata:
     "@loaders.gl/shapefile": "npm:^4.4.3"
     "@luma.gl/engine": "npm:~9.4.0"
     "@math.gl/core": "workspace:*"
+    "@math.gl/dggs": "workspace:*"
+    "@math.gl/geometry": "workspace:*"
     "@math.gl/geospatial": "workspace:*"
+    a5-js: "npm:^0.10.0"
+    h3-js: "npm:^4.5.0"
     math.gl-parquet-loader: "workspace:*"
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
@@ -15686,6 +15729,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math.gl-core-transforms@workspace:examples/core-transforms"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@luma.gl/core": "npm:~9.4.2"
     "@luma.gl/engine": "npm:~9.4.2"
     "@luma.gl/shadertools": "npm:~9.4.2"
@@ -15700,6 +15744,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math.gl-culling-playground@workspace:examples/culling-playground"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@luma.gl/core": "npm:~9.4.2"
     "@luma.gl/engine": "npm:~9.4.2"
     "@luma.gl/shadertools": "npm:~9.4.2"
@@ -15738,6 +15783,15 @@ __metadata:
     "@math.gl/geometry": "workspace:*"
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
+"math.gl-elastic-maps@workspace:examples/elastic-maps":
+  version: 0.0.0-use.local
+  resolution: "math.gl-elastic-maps@workspace:examples/elastic-maps"
+  dependencies:
+    "@math.gl/geospatial": "workspace:*"
     vite: "npm:^8.2.2"
   languageName: unknown
   linkType: soft
@@ -15809,6 +15863,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math.gl-geometry-viewer@workspace:examples/geometry-viewer"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@luma.gl/core": "npm:~9.4.2"
     "@luma.gl/engine": "npm:~9.4.2"
     "@luma.gl/shadertools": "npm:~9.4.2"
@@ -15872,7 +15927,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math.gl-polygon-playground@workspace:examples/polygon-playground"
   dependencies:
-    "@deck.gl-community/editable-layers": "npm:^9.4.1"
+    "@deck.gl-community/editable-layers": "npm:^9.4.8"
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@deck.gl/core": "npm:~9.4.0"
     "@deck.gl/extensions": "npm:~9.4.0"
     "@deck.gl/geo-layers": "npm:~9.4.0"
@@ -15887,6 +15943,15 @@ __metadata:
     h3-js: "npm:^4.2.1"
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
+"math.gl-quincuncial-star@workspace:examples/quincuncial-star":
+  version: 0.0.0-use.local
+  resolution: "math.gl-quincuncial-star@workspace:examples/quincuncial-star"
+  dependencies:
+    "@math.gl/geospatial": "workspace:*"
     vite: "npm:^8.2.2"
   languageName: unknown
   linkType: soft
@@ -15937,6 +16002,16 @@ __metadata:
     "@luma.gl/engine": "npm:~9.4.0"
     "@luma.gl/shadertools": "npm:~9.4.0"
     "@math.gl/earth": "workspace:*"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
+"math.gl-unfolding-polyhedron@workspace:examples/unfolding-polyhedron":
+  version: 0.0.0-use.local
+  resolution: "math.gl-unfolding-polyhedron@workspace:examples/unfolding-polyhedron"
+  dependencies:
+    "@math.gl/core": "workspace:*"
+    "@math.gl/geometry": "workspace:*"
     vite: "npm:^8.2.2"
   languageName: unknown
   linkType: soft
@@ -17205,6 +17280,15 @@ __metadata:
     jsdom: "npm:^9.12.0"
     lodash: "npm:^4.5"
   checksum: 10c0/fff677f753e6aa42398f0871be0164694b7019360a7d2f2df3259087778e9a9e909e312dd00346c5f34ee6830ea655f675b1352ea2b72cf1b04cfa67b4e25302
+  languageName: node
+  linkType: hard
+
+"monaco-editor@npm:^0.53.0":
+  version: 0.53.0
+  resolution: "monaco-editor@npm:0.53.0"
+  dependencies:
+    "@types/trusted-types": "npm:^1.0.6"
+  checksum: 10c0/016495f0b869ea3a4151b660e5b8653999e54da9834001b4e7e88edae5c749aee2f1b56020bfece51cd08fc8e7125cd9732f414e373aea554e2f2812ee8245f1
   languageName: node
   linkType: hard
 
@@ -18554,6 +18638,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"polygon-clipping@npm:0.15.7":
+  version: 0.15.7
+  resolution: "polygon-clipping@npm:0.15.7"
+  dependencies:
+    robust-predicates: "npm:^3.0.2"
+    splaytree: "npm:^3.1.0"
+  checksum: 10c0/9515283509f1793f22fd87e68662838a6ebbd33cca4fc4bccd9f1b4f366383a4590e9a1cd48287e6897ad018803aeb97ed9ebe38bada5cffa7b4551539a9ab10
+  languageName: node
+  linkType: hard
+
 "postcss-attribute-case-insensitive@npm:^7.0.1":
   version: 7.0.1
   resolution: "postcss-attribute-case-insensitive@npm:7.0.1"
@@ -19535,6 +19629,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "project-website@workspace:website"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@deck.gl/core": "npm:~9.4.0"
     "@deck.gl/layers": "npm:~9.4.0"
     "@deck.gl/widgets": "npm:~9.4.0"
@@ -19712,6 +19807,16 @@ __metadata:
     es-define-property: "npm:^1.0.1"
     side-channel: "npm:^1.1.1"
   checksum: 10c0/8f3f6e45ece255347d57696628401cde29e9ec649fff698b53bd3150dea7cefdf33036e1bc1826b9f110bfa7cb0ec4ab9f5297eca628ce216c55af82c304e08e
+  languageName: node
+  linkType: hard
+
+"qs@npm:~6.16.0":
+  version: 6.16.1
+  resolution: "qs@npm:6.16.1"
+  dependencies:
+    es-define-property: "npm:^1.0.1"
+    side-channel: "npm:^1.1.1"
+  checksum: 10c0/84ee9124b251ab2953132fbea1d70c966aa6e6496cccabedbbb83afa412bf4177bddebc779ca3ddafe23da83b2f593d530b41be6a726e971404fabb20ff22c94
   languageName: node
   linkType: hard
 
@@ -21337,6 +21442,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"splaytree@npm:^3.1.0":
+  version: 3.2.3
+  resolution: "splaytree@npm:3.2.3"
+  checksum: 10c0/b37e0dc4555b018142e0142e5cf576fd2eec7ababb5149947b731f7137728fe799da2fad60b110709aec44f3a7986451d9a9e451c9559601b8ce1d1195dace1a
+  languageName: node
+  linkType: hard
+
 "sprintf-js@npm:^1.1.3":
   version: 1.1.3
   resolution: "sprintf-js@npm:1.1.3"
@@ -22231,9 +22343,9 @@ __metadata:
   linkType: hard
 
 "undici@npm:^6.25.0":
-  version: 6.29.0
-  resolution: "undici@npm:6.29.0"
-  checksum: 10c0/3fb2117985be977ba8b6bd6a242fec915e1b1d0f9681f5adb3f508fb1717352452d65bcfd3bed09e7c776cfda403a4e8edb24a318492f8b2d793439af2b8699b
+  version: 6.29.1
+  resolution: "undici@npm:6.29.1"
+  checksum: 10c0/2d6970289fcbaca69a484e968fbb5e6fdadf7d9bff30bb5476f71b619d143ec76df1c75a309ac3cb3b3d78238793c613dcaad47dc9d92b63f9e8e73b86ffec23
   languageName: node
   linkType: hard
 
@@ -23451,9 +23563,9 @@ __metadata:
   linkType: hard
 
 "zod@npm:^4.1.12":
-  version: 4.6.5
-  resolution: "zod@npm:4.6.5"
-  checksum: 10c0/32eb6c5e98becbe045675b2141c3611451c16ba567f9779231d79af41c4d651ca1c22f154aef7e6c6e77b929f23e43f1154ca05b82e119e922353725d6776af5
+  version: 4.6.7
+  resolution: "zod@npm:4.6.7"
+  checksum: 10c0/4ce2eb14034317b7254e347ca37b5ad591cf8333147030cf05b9b5d31692d45073f7f2747aa50cf8c6b29012194d2b22978cecc89969cf34a0d18e89d0ee7d7b
   languageName: node
   linkType: hard
 

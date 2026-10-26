@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Adapted from proj4js 2.22.0 with bounded Eckert VI inverse pole-line validation. See ../../../../projection/PROJ4-LICENSE.md for upstream attribution. Independent corrections acknowledge PROJ 9.5.1 src/projections/gn_sinu.cpp; see ../../../../projection/PROJ-LICENSE.txt.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -86,7 +86,9 @@ export function inverse(state: State, p: Point): Point | null | undefined | numb
     lat /= state.C_y;
     lon = lon / (state.C_x * (state.m + Math.cos(lat)));
     if (state.m) {
-      lat = asinz((state.m * lat + Math.sin(lat)) / state.n);
+      const sinLatitude = (state.m * lat + Math.sin(lat)) / state.n;
+      if (Math.abs(sinLatitude) > 1 + 8 * Number.EPSILON) return null;
+      lat = asinz(sinLatitude);
     } else if (state.n !== 1) {
       lat = asinz(Math.sin(lat) / state.n);
     }

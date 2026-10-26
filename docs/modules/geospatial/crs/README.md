@@ -11,6 +11,9 @@ The [Coordinate Reference Systems developer guide](/docs/modules/geospatial/crs/
 explains CRS families, representations, coordinate epochs, axis order, vertical coordinates,
 transformation boundaries, and cross-library integration in depth.
 
+For definitions of surface models, paths, reference systems, and distortion properties,
+see [Geospatial terminology](../developer-guide/terminology.md).
+
 ## Installation
 
 ```bash

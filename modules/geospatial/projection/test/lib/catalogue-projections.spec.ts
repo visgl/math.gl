@@ -13,6 +13,7 @@ import upstreamGstmerc from 'proj4/lib/projections/gstmerc';
 import upstreamEqui from 'proj4/lib/projections/equi';
 import * as native from '@math.gl/geospatial/projection/experimental';
 import independent from '../fixtures/native-proj-reference.json';
+import polePrecision from '../fixtures/pole-precision-reference.json';
 import {catalogueProjectionCases} from '../fixtures/catalogue-projections';
 proj4.Proj.projections.add(upstreamOrtho);
 proj4.Proj.projections.add(upstreamGstmerc);
@@ -82,7 +83,9 @@ for (const fixture of catalogueProjectionCases) {
           ]);
           // Cassini signs/refinement and Robinson coefficients intentionally improve
           // on proj4js. Keep their offset/unit checks tied to native PROJ references.
-          const corrected = fixture.id.startsWith('cass') || fixture.id.startsWith('robin');
+          const corrected = ['cass', 'robin', 'ortho', 'gnom', 'somerc'].some(name =>
+            fixture.id.startsWith(name)
+          );
           const oracle = corrected
             ? independent.cases
                 .find(row => row.id === fixture.id)!
@@ -137,7 +140,17 @@ for (const parameters of [
         [-40, -20, 123, 7],
         [80, 60, 123, 7]
       ]) {
-        close(projection.project(point), reference.forward(point), 1e-6);
+        const expected =
+          wrapped === 'longlat'
+            ? reference.forward(point)
+            : [
+                ...polePrecision.nativeCompositionControls.find(
+                  c => c.definition === to && c.input[0] === point[0] && c.input[1] === point[1]
+                )!.forward,
+                123,
+                7
+              ];
+        close(projection.project(point), expected, 1e-6);
         close(projection.unproject(projection.project(point)), point, 1e-8);
       }
     }
@@ -197,15 +210,23 @@ test('world projections cover both hemispheres and longitude wrapping', () => {
       for (const lat of [-80, -45, 0, 45, 80]) {
         const point = [lon, lat, 123, 7];
         const expected =
-          plugin.name === 'robin'
+          plugin.name === 'moll'
             ? [
-                ...independent.cases
-                  .find(row => row.id === 'robin-world-wrapping')!
-                  .results.find(row => row.input[0] === lon && row.input[1] === lat)!.forward,
+                ...polePrecision.cases.find(
+                  c => c.definition === to && c.input[0] === lon && c.input[1] === lat
+                )!.forward,
                 123,
                 7
               ]
-            : reference.forward(point);
+            : plugin.name === 'robin'
+              ? [
+                  ...independent.cases
+                    .find(row => row.id === 'robin-world-wrapping')!
+                    .results.find(row => row.input[0] === lon && row.input[1] === lat)!.forward,
+                  123,
+                  7
+                ]
+              : reference.forward(point);
         close(projection.project(point), expected, 1e-5);
         close(
           projection.unproject(projection.project(point)),

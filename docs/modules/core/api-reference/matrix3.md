@@ -82,6 +82,10 @@ Sets the matrix to a transformation corresponding to the rotations represented b
 
 ### fromMatrix4(matrix4: Matrix4 | number[16]): this
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Copies the upper-left 3x3 elements of `matrix4`, including any scale, and returns this matrix. This differs from `Matrix4.getRotationMatrix3()`, which removes scale.
 
 ### determinant(): number

@@ -13,6 +13,15 @@ geocentric coordinate reference systems. Use it for map coordinates, in-place
 coordinate buffers, explicit datum transformations and coordinate propagation
 between epochs.
 
+Numerical accuracy is evaluated against **native PROJ**. The pinned proj4js
+reference serves compatibility tests and benchmarks. The independent references
+qualify specific configurations and coordinate domains; they do not establish
+complete modern PROJ equivalence. See [independent validation](independent-validation.md)
+and the [modern PROJ audit](modern-proj-audit.md) for coverage and remaining gaps.
+
+For definitions of surface models, paths, reference systems, and distortion properties,
+see [Geospatial terminology](../developer-guide/terminology.md).
+
 ## Tectonic time machine
 
 <TectonicTimeMachine inline height={600} />
@@ -26,6 +35,9 @@ Choose a data source to visit Nuna (Columbia), Rodinia and Pangaea.
 
 [Open the full example](/examples/tectonic-time-machine) for data credits and limits.
 </Admonition>
+
+See [external projection engines](./developer-guide/external-projection-engines.md)
+for proj4js and D3 adapter examples.
 
 ## Quick start
 

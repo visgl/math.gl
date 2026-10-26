@@ -49,12 +49,24 @@ jobs:
         run: yarn install --immutable
 
       - name: Check source license and copyright headers
-        run: yarn check:source-headers
+        run: |
+          yarn check:source-headers
+          yarn check:attributions
 
       - name: Check independent interior references and qualification
         run: |
+          python3 modules/geospatial/projection/scripts/generate-g6-reference.py --check
+          node modules/geospatial/projection/scripts/qualify-g6.mjs --output /tmp/g6-qualification.json
+          python3 modules/geospatial/projection/scripts/generate-g56-reference.py --check
+          node modules/geospatial/projection/scripts/qualify-g56.mjs --output /tmp/g56-qualification.json
+          python3 modules/geospatial/projection/scripts/generate-g34-reference.py --check
+          node modules/geospatial/projection/scripts/qualify-g34.mjs --output /tmp/g34-qualification.json
           python3 modules/geospatial/projection/scripts/generate-interior-reference.py --check
+          python3 modules/geospatial/projection/scripts/generate-nearest-cusp-reference.py --check
           node modules/geospatial/projection/scripts/qualify-interiors.mjs --output /tmp/interior-qualification.json
+          node modules/geospatial/projection/scripts/generate-spheroid-anchor-inputs.mjs --check
+          python3 modules/geospatial/projection/scripts/generate-ellipsoid-p0-reference.py --verify-fixture
+          node modules/geospatial/projection/scripts/qualify-ellipsoid-p0.mjs --output /tmp/ellipsoid-p0-node.json
 
       - name: Check independent deformation stress references and qualification
         run: |
@@ -69,20 +81,11 @@ jobs:
       - name: Validate agent skill and offline evaluation corpus
         run: node --test test/llm/*.test.mjs
 
-      - name: Test website dependency resolution
-        run: node --test website/resolve-math-gl-dependency.test.cjs
-
-      # Match website deployment: build from source before any package dist files exist.
-      - name: Build website
-        run: yarn workspace project-website build
-
-      - name: Build next website
-        env:
-          WEBSITE_BASE_URL: /math.gl/next/
-        run: yarn workspace project-website build
-
       - name: Build code
         run: yarn build
+
+      - name: Check selective imports and optional dependency removal
+        run: yarn check:tree-shaking
 
       - name: Check consolidated packages, exports, and assets
         run: yarn check:packages
@@ -91,6 +94,9 @@ jobs:
         run: |
           yarn workspace math.gl-tectonic-time-machine test
           yarn workspace math.gl-tectonic-time-machine build
+
+      - name: Test expression preview seam handling
+        run: node --test examples/expressions/*.test.mjs
 
       - name: Test Alpine Ice Age dataset and interpolation
         run: yarn workspace math.gl-alpine-ice-age test
@@ -106,6 +112,43 @@ jobs:
 
       - name: Check tile-matrix subpath exports, public types and dependency boundary
         run: yarn check:tile-matrix-package
+
+      - name: Fetch pinned C8 package baseline
+        run: git fetch --no-tags --depth=1 origin b9db6472e72b22ffb52b1c37c97745e68478728a
+
+      - name: Qualify local frames, poses and G7 baseline accuracy
+        timeout-minutes: 2
+        run: |
+          python3 modules/geospatial/scripts/generate-c8-reference.py --check
+          python3 modules/geospatial/scripts/generate-c8-contact-reference.py --check
+          python3 modules/geospatial/scripts/generate-g7-reference.py --check
+          node --test modules/geospatial/scripts/benchmark-g7.test.mjs
+          yarn check:c8-package
+          node modules/geospatial/scripts/qualify-c8.mjs --output /tmp/c8-g7-node.json
+
+      - name: Qualify wider-domain and triaxial geodesics
+        timeout-minutes: 3
+        run: |
+          python3 modules/geospatial/scripts/generate-g89-reference.py --check
+          python3 modules/geospatial/scripts/generate-g89-independent.py --check
+          python3 modules/geospatial/scripts/generate-exact-area-reference.py --check
+          python3 modules/geospatial/scripts/generate-exact-area-independent.py --check
+          python3 modules/geospatial/scripts/generate-utilities-reference.py --check
+          python3 modules/geospatial/scripts/generate-sampling-reference.py --check
+          node modules/geospatial/scripts/check-utilities-package.mjs
+          node modules/geospatial/scripts/check-g89-package.mjs
+          node modules/geospatial/scripts/qualify-g89.mjs --output /tmp/g89-node.json
+          node modules/geospatial/scripts/qualify-exact-area.mjs --output /tmp/exact-area-node.json
+          node modules/geospatial/scripts/qualify-utilities.mjs --output /tmp/utilities-node.json
+
+      - name: Check geographic seam and rhumb APIs, public types and selective budgets
+        run: |
+          python3 modules/geospatial/scripts/generate-geographic-seam-reference.py --check
+          yarn check:geographic-seams-package
+          node modules/geospatial/scripts/qualify-geographic-seams.mjs --output /tmp/geographic-seams-node.json
+
+      - name: Check geodesic paths, public types and selective packages
+        run: yarn check:geodesic-path-package
 
       - name: Check GeoArrow package boundary
         run: yarn check:geoarrow-boundary
@@ -137,6 +180,9 @@ jobs:
           node modules/geospatial/projection/scripts/measure-accuracy.mjs --output /tmp/projection-accuracy.json
           node modules/geospatial/projection/scripts/check-experimental-package.mjs
           node modules/geospatial/projection/scripts/check-packed-package.mjs
+          node modules/geospatial/projection/scripts/check-g6-package.mjs
+          node modules/geospatial/projection/scripts/check-g56-package.mjs
+          node modules/geospatial/projection/scripts/check-g34-package.mjs
           node modules/geospatial/projection/scripts/check-bundle-budget.mjs
           node modules/geospatial/projection/scripts/check-lazy-package.mjs
           node modules/geospatial/projection/scripts/benchmark.mjs --points 100 --samples 3 --min-sample-ms 0
@@ -147,6 +193,11 @@ jobs:
           name: projection-accuracy
           path: |
             /tmp/projection-accuracy.json
+            /tmp/geographic-seams-node.json
+            /tmp/c8-g7-node.json
+            /tmp/g89-node.json
+            /tmp/exact-area-node.json
+            /tmp/utilities-node.json
             /tmp/deformation-stress-qualification.json
           if-no-files-found: error
 
@@ -158,10 +209,24 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('yarn.lock') }}
+          key: ${{ runner.os }}-ubuntu22-playwright-chromium-${{ hashFiles('node_modules/playwright-core/browsers.json') }}
+
+      # The Azure Ubuntu mirror has taken 6+ minutes to fetch browser fonts.
+      # Use Ubuntu's main archive and bound stalled network requests. OS libraries
+      # are still installed on every fresh runner; a browser cache cannot replace them.
+      # Hosted runners also use mirror+file entries backed by apt-mirrors.txt.
+      - name: Configure Ubuntu archive for browser dependencies
+        run: |
+          sudo find /etc/apt -maxdepth 2 -type f \( -name '*.list' -o -name '*.sources' -o -name '*mirrors*.txt' \) \
+            -exec sed -i 's|http[s]*://azure\.archive\.ubuntu\.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' {} +
+          printf 'Acquire::Retries "2";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/80-ci-network
 
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
+
+      - name: Check regressions from landed example reviews
+        timeout-minutes: 2
+        run: node scripts/check-landed-review-examples.mjs
 
       - name: Check projection scorecard integrity and collect Node evidence
         timeout-minutes: 5
@@ -179,9 +244,6 @@ jobs:
           name: projection-scorecard-node
           path: /tmp/projection-scorecard-node
           if-no-files-found: error
-
-      - name: Run Node tests
-        run: yarn test-node
 
       - name: Run headless tests with coverage
         run: yarn test-coverage
@@ -237,6 +299,83 @@ jobs:
               }
             });
 
+  # Website builds must run before package dist files exist, just as in deployment.
+  website:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Node (with Corepack)
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack / Yarn 4
+        run: |
+          corepack enable
+          corepack prepare yarn@4.18.0 --activate
+          yarn -v
+
+      - name: Cache Yarn Berry artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.yarn/berry/cache
+            .yarn/install-state.gz
+          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json') }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Test website dependency resolution
+        run: node --test website/resolve-math-gl-dependency.test.cjs
+
+      # Match website deployment: build from source before any package dist files exist.
+      - name: Build website
+        run: yarn workspace project-website build
+
+      - name: Build next website
+        env:
+          WEBSITE_BASE_URL: /math.gl/next/
+        run: yarn workspace project-website build
+
+  node-tests:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Node (with Corepack)
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack / Yarn 4
+        run: |
+          corepack enable
+          corepack prepare yarn@4.18.0 --activate
+          yarn -v
+
+      - name: Cache Yarn Berry artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.yarn/berry/cache
+            .yarn/install-state.gz
+          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json') }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build code
+        run: yarn build
+
+      - name: Run Node tests
+        run: yarn test-node
+
   projection-browsers:
     name: Projection qualification (${{ matrix.browser }})
     runs-on: ubuntu-22.04
@@ -281,7 +420,17 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ matrix.browser }}-${{ hashFiles('yarn.lock') }}
+          key: ${{ runner.os }}-ubuntu22-playwright-${{ matrix.browser }}-${{ hashFiles('node_modules/playwright-core/browsers.json') }}
+
+      # The Azure Ubuntu mirror has taken 6+ minutes to fetch browser fonts.
+      # Use Ubuntu's main archive and bound stalled network requests. OS libraries
+      # are still installed on every fresh runner; a browser cache cannot replace them.
+      # Hosted runners also use mirror+file entries backed by apt-mirrors.txt.
+      - name: Configure Ubuntu archive for browser dependencies
+        run: |
+          sudo find /etc/apt -maxdepth 2 -type f \( -name '*.list' -o -name '*.sources' -o -name '*mirrors*.txt' \) \
+            -exec sed -i 's|http[s]*://azure\.archive\.ubuntu\.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' {} +
+          printf 'Acquire::Retries "2";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/80-ci-network
 
       - name: Install selected Playwright browser
         run: yarn playwright install --with-deps ${{ matrix.browser }}
@@ -289,8 +438,27 @@ jobs:
       - name: Qualify independent interior and deformation references
         timeout-minutes: 2
         run: |
+          node modules/geospatial/projection/scripts/qualify-g6.mjs --browser ${{ matrix.browser }} --output /tmp/g6-qualification-${{ matrix.browser }}.json
+          node modules/geospatial/projection/scripts/qualify-g56.mjs --browser ${{ matrix.browser }} --output /tmp/g56-qualification-${{ matrix.browser }}.json
+          node modules/geospatial/projection/scripts/qualify-g34.mjs --browser ${{ matrix.browser }} --output /tmp/g34-qualification-${{ matrix.browser }}.json
           node modules/geospatial/projection/scripts/qualify-interiors.mjs --browser ${{ matrix.browser }} --output /tmp/interior-qualification-${{ matrix.browser }}.json
+          node modules/geospatial/projection/scripts/qualify-ellipsoid-p0.mjs --browser ${{ matrix.browser }} --output /tmp/ellipsoid-p0-${{ matrix.browser }}.json
           node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs --browser ${{ matrix.browser }} --output /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
+
+      - name: Qualify C8 frames, poses and G7 baseline controls
+        timeout-minutes: 2
+        run: node modules/geospatial/scripts/qualify-c8.mjs --browser ${{ matrix.browser }} --output /tmp/c8-g7-${{ matrix.browser }}.json
+
+      - name: Qualify wider-domain and triaxial geodesics
+        timeout-minutes: 3
+        run: |
+          node modules/geospatial/scripts/qualify-g89.mjs --browser ${{ matrix.browser }} --output /tmp/g89-${{ matrix.browser }}.json
+          node modules/geospatial/scripts/qualify-exact-area.mjs --browser ${{ matrix.browser }} --output /tmp/exact-area-${{ matrix.browser }}.json
+          node modules/geospatial/scripts/qualify-utilities.mjs --browser ${{ matrix.browser }} --output /tmp/utilities-${{ matrix.browser }}.json
+
+      - name: Qualify geographic seam and rhumb controls
+        timeout-minutes: 2
+        run: node modules/geospatial/scripts/qualify-geographic-seams.mjs --browser ${{ matrix.browser }} --output /tmp/geographic-seams-${{ matrix.browser }}.json
 
       # Retain the complete matrix and three samples in PRs. A bounded 4 ms
       # window supports scorecard diagnostics; master retains the 12 ms profile.
@@ -310,14 +478,28 @@ jobs:
         with:
           name: projection-browser-qualification-${{ matrix.browser }}
           path: |
+            /tmp/geographic-seams-${{ matrix.browser }}.json
+            /tmp/c8-g7-${{ matrix.browser }}.json
+            /tmp/g89-${{ matrix.browser }}.json
+            /tmp/exact-area-${{ matrix.browser }}.json
+            /tmp/utilities-${{ matrix.browser }}.json
+            /tmp/g6-qualification-${{ matrix.browser }}.json
+            /tmp/g56-qualification-${{ matrix.browser }}.json
+            /tmp/g34-qualification-${{ matrix.browser }}.json
             /tmp/projection-browser-qualification.json
             /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
             /tmp/interior-qualification-${{ matrix.browser }}.json
+            /tmp/ellipsoid-p0-${{ matrix.browser }}.json
             /tmp/projection-worker-evaluation-${{ matrix.browser }}.json
           if-no-files-found: error
 
   projection-performance:
     if: github.event_name == 'pull_request'
+    # Keep paired measurements serial within each runner to avoid CPU contention.
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [projection, pipeline]
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
@@ -349,36 +531,60 @@ jobs:
       - name: Build code
         run: yarn build
 
+      - name: Fetch PR base for paired measurements
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: git fetch --no-tags --depth=1 origin "$BASE_SHA"
+
       # Retain all coordinates, layouts and 11 samples; bound adaptive timing windows.
       - name: Compare projection performance against the PR base
+        if: matrix.suite == 'projection'
         timeout-minutes: 10
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          node --test modules/geospatial/projection/scripts/benchmark-runtime.test.mjs
           node modules/geospatial/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --min-sample-ms 4 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
 
       # Keep every scenario/layout/direction and seven samples; bound aggregate windows
       # as reusable-output modes add implementations. Longer local runs keep the 12 ms default.
       - name: Compare pipeline performance against the PR base
+        if: matrix.suite == 'pipeline'
         timeout-minutes: 5
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --min-sample-ms 4 --allocations --reusable-results --output /tmp/projection-pipeline-comparison.json
 
       - name: Check paired grid preparation benchmark
+        if: matrix.suite == 'projection'
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node modules/geospatial/projection/scripts/benchmark-grid-compare.mjs --baseline-ref "$BASE_SHA" --sizes 17,65 --samples 3 --coordinates --allocations --points 1000 --output /tmp/projection-grid-comparison.json
 
       - name: Compare spheroid conversion correctness and costs
+        if: matrix.suite == 'projection'
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node modules/geospatial/projection/scripts/benchmark-spheroid-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-spheroid-comparison.json
 
+      - name: Collect equal-accuracy G7 and C8 benchmark baseline
+        if: matrix.suite == 'pipeline'
+        timeout-minutes: 2
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node modules/geospatial/scripts/benchmark-g7.mjs --baseline-ref "$BASE_SHA" --points 100 --samples 3 --min-sample-ms 0 --output /tmp/g7-comparison.json
+
+      - name: Measure qualified packed frame transforms
+        if: matrix.suite == 'pipeline'
+        timeout-minutes: 2
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node modules/geospatial/scripts/benchmark-frame-batches.mjs --baseline-ref "$BASE_SHA" --points 1024 --samples 5 --min-cpu-ms 2 --allocations --output /tmp/frame-batch-comparison.json
+
       - name: Compare shared local-frame correctness and costs
+        if: matrix.suite == 'projection'
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -387,13 +593,15 @@ jobs:
       - name: Upload paired performance measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: projection-performance-comparison
+          name: projection-performance-comparison-${{ matrix.suite }}
           path: |
             /tmp/projection-performance-comparison.json
             /tmp/projection-pipeline-comparison.json
             /tmp/projection-grid-comparison.json
             /tmp/projection-spheroid-comparison.json
             /tmp/projection-local-frame-comparison.json
+            /tmp/g7-comparison.json
+            /tmp/frame-batch-comparison.json
           if-no-files-found: error
 
   # Consolidate evidence and enforce the required check on one runner. This avoids
@@ -401,7 +609,7 @@ jobs:
   # diagnostic scorecard before enforcing the independent performance result.
   test:
     if: always()
-    needs: [checks, projection-browsers, projection-performance]
+    needs: [checks, website, node-tests, projection-browsers, projection-performance]
     runs-on: ubuntu-22.04
     timeout-minutes: 3
     steps:
@@ -446,11 +654,15 @@ jobs:
       - name: Require all checks to pass
         if: always()
         env:
+          WEBSITE_RESULT: ${{ needs.website.result }}
+          NODE_TESTS_RESULT: ${{ needs.node-tests.result }}
           CHECKS_RESULT: ${{ needs.checks.result }}
           BROWSERS_RESULT: ${{ needs.projection-browsers.result }}
           PERFORMANCE_RESULT: ${{ needs.projection-performance.result }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
+          test "$WEBSITE_RESULT" = success
+          test "$NODE_TESTS_RESULT" = success
           test "$CHECKS_RESULT" = success
           test "$BROWSERS_RESULT" = success
           if [ "$EVENT_NAME" = pull_request ]; then

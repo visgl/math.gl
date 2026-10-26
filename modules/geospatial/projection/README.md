@@ -29,6 +29,12 @@ Float32/Float64 buffers without temporary coordinate arrays in the built-in pipe
 Unsupported CRS variants fail explicitly; the documented support profile defines
 compatibility boundaries.
 
+Native PROJ is the numerical accuracy reference; proj4js 2.22.0 remains a
+compatibility and benchmark reference. Independent forward/inverse fixtures cover
+documented domains, with a separate pole and spherical-approximation audit. This
+does not establish full-domain parity with modern PROJ; see the
+[audit and remaining gaps](../../../docs/modules/geospatial/projection/modern-proj-audit.md).
+
 For documentation please visit the [website](https://math.gl).
 
 ## Attribution

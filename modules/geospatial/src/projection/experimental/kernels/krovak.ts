@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
-// SPDX-FileComment: Direct TypeScript port of proj4js 2.22.0. See ../../../PROJ4-LICENSE.md for the upstream license and attribution.
+// SPDX-FileComment: Adapted from proj4js 2.22.0, using the exact pi/4 constant as in PROJ 9.5.1 src/projections/krovak.cpp to preserve the south pole. See ../../../../projection/PROJ-LICENSE.txt. See ../../../../projection/PROJ4-LICENSE.md for the upstream license and attribution.
 
 import type {KernelParameters, Point} from '../kernel';
 export type State = KernelParameters & {
@@ -31,7 +31,7 @@ function initialize(state: State): void {
 
   /* if scale not set default to 0.9999 */
 
-  state.s45 = 0.785398163397448; /* 45 */
+  state.s45 = Math.PI / 4; /* 45 */
   state.s90 = 2 * state.s45;
   state.fi0 = state.lat0;
   state.e2 = state.es;

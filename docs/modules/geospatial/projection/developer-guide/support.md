@@ -62,10 +62,10 @@ algorithms on demand.
 - Scalar arrays and interleaved Float32/Float64 buffers, including explicit axis
   enforcement and the documented horizontal-extraction mode.
 
-The compatibility corpus has **232 original numeric matches, one reviewed numerical
-correction, and nine intentional input rejections out of 242**. The correction is
-Robinson's coefficient table; the original upstream coordinates remain in the repository.
-Independent PROJ qualification covers **134 configurations / 2,386 projection points**,
+The compatibility corpus has **230 original numeric matches, three reviewed numerical
+corrections, and nine intentional input rejections out of 242**. The corrections cover
+Robinson's coefficient table and modern ellipsoidal gnomonic; the original upstream coordinates remain in the repository.
+Independent PROJ qualification covers **135 configurations / 2,387 projection points**,
 **15 EPSG systems in four formats**, **12 three-dimensional datum chains / 144 points**,
 and **87 real-grid points in NTv2 and GeoTIFF**. See [independent validation](../independent-validation.md)
 for domains, accuracy budgets, source versions and the grid-edge policy.
@@ -128,6 +128,17 @@ Direct construction of `ProjectionTransform` remains available for explicit conf
 No deprecated class aliases are exported during the alpha cycle.
 
 ## Default backend and future work
+
+Native PROJ is the numerical accuracy reference. Proj4js is retained for API/input
+compatibility comparisons and benchmarks; agreement with it does not qualify an
+ellipsoidal algorithm or its pole boundaries. Orthographic now uses ellipsoidal
+equations for ellipsoidal definitions. Ellipsoidal gnomonic uses the shared
+`EllipsoidGeodesic` solver and Karney's reduced-length/geodesic-scale formulation;
+spherical definitions retain spherical equations. Unchanged ellipsoidal definitions
+are checked against native PROJ controls. Forward points require positive geodesic
+scale (inside the gnomonic horizon), and the bounded inverse rejects nonconvergence.
+These sampled controls do not establish uniform accuracy at the singular horizon. See the [modern PROJ audit](../modern-proj-audit.md)
+for retained boundary findings and the numerical domains that remain unqualified.
 
 The package has no runtime dependency on proj4js. The pinned development dependency
 remains for compatibility tests and benchmarks. This rename and wrapper removal

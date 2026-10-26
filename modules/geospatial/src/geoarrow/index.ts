@@ -27,7 +27,9 @@ export type {
 export {
   getGeoArrowDimensionSize,
   getGeoArrowEncodingForGeometry,
-  getGeoArrowGeometryType
+  getGeoArrowGeometryType,
+  inferGeoArrowGeometryDimension,
+  mergeGeoArrowDimensions
 } from './types';
 
 export type {GeoArrowBatchView, GeoArrowRowView} from './views';

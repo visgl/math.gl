@@ -35,6 +35,21 @@
   },
   {
     "type": "doc",
+    "label": "Albers USA inset map",
+    "id": "albers-usa"
+  },
+  {
+    "type": "doc",
+    "label": "Quincuncial and star maps",
+    "id": "quincuncial-star"
+  },
+  {
+    "type": "doc",
+    "label": "Elastic maps",
+    "id": "elastic-maps"
+  },
+  {
+    "type": "doc",
     "label": "Polygon playground",
     "id": "polygon-playground"
   },
@@ -52,6 +67,16 @@
     "type": "doc",
     "label": "Geometry viewer",
     "id": "geometry-viewer"
+  },
+  {
+    "type": "doc",
+    "label": "Unfolding Earth",
+    "id": "unfolding-earth"
+  },
+  {
+    "type": "doc",
+    "label": "Myriahedral maps",
+    "id": "myriahedral-maps"
   },
   {
     "type": "doc",

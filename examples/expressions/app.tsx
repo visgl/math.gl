@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {longitudeCopies, type LongitudeEdges} from './preview-paths';
 import {useCallback, useEffect, useMemo, useRef, useState, type ReactElement} from 'react';
 import {
   BASIC_MATH_FUNCTION_LIBRARY,
@@ -59,9 +60,11 @@ export default function ExpressionPlayground(): ReactElement {
   const [expression, setExpression] = useState(INITIAL_SAMPLE.expression);
   const [contextText, setContextText] = useState(formatJson(INITIAL_SAMPLE.context));
   const [enabledLibraries, setEnabledLibraries] = useState<LibraryId[]>(INITIAL_SAMPLE.libraries);
+  const [longitudeEdges, setLongitudeEdges] = useState<LongitudeEdges>('supplied');
   const [result, setResult] = useState<unknown>();
   const [error, setError] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+  const evaluationId = useRef(0);
 
   const registry = useMemo(() => {
     const nextRegistry = new ExpressionFunctionRegistry();
@@ -74,34 +77,40 @@ export default function ExpressionPlayground(): ReactElement {
   const functionNames = useMemo(() => Object.keys(registry.getFunctionTable()).sort(), [registry]);
 
   const runExpression = useCallback(async () => {
+    const id = ++evaluationId.current;
     setIsRunning(true);
     try {
       const context = JSON.parse(contextText) as Record<string, unknown>;
       const evaluate = compileAsync(expression, {registry});
-      setResult(await evaluate(context));
+      const value = await evaluate(context);
+      if (id !== evaluationId.current) return;
+      setResult(value);
       setError('');
     } catch (caughtError) {
+      if (id !== evaluationId.current) return;
       setResult(undefined);
       setError(caughtError instanceof Error ? caughtError.message : String(caughtError));
     } finally {
-      setIsRunning(false);
+      if (id === evaluationId.current) setIsRunning(false);
     }
   }, [contextText, expression, registry]);
 
   const startEvaluation = useCallback((): void => {
-    runExpression().catch((caughtError: unknown) => {
-      setResult(undefined);
-      setError(caughtError instanceof Error ? caughtError.message : String(caughtError));
-      setIsRunning(false);
-    });
+    void runExpression();
   }, [runExpression]);
 
   useEffect(() => {
     startEvaluation();
+    return () => {
+      evaluationId.current++;
+    };
   }, [startEvaluation]);
 
   function selectSample(sample: ExpressionSample): void {
     setSampleId(sample.id);
+    setLongitudeEdges(
+      sample.id === 'quadkey-boundary' || sample.id === 'geohash-boundary' ? 'supplied' : 'shortest'
+    );
     setExpression(sample.expression);
     setContextText(formatJson(sample.context));
     setEnabledLibraries(sample.libraries);
@@ -235,7 +244,11 @@ export default function ExpressionPlayground(): ReactElement {
             <pre className="result-output">{formatJson(result)}</pre>
           )}
 
-          <GeometryPreview value={result} />
+          <GeometryPreview
+            value={result}
+            edges={longitudeEdges}
+            onEdgesChange={setLongitudeEdges}
+          />
         </section>
       </div>
 
@@ -249,7 +262,15 @@ export default function ExpressionPlayground(): ReactElement {
   );
 }
 
-function GeometryPreview({value}: {value: unknown}): ReactElement {
+function GeometryPreview({
+  value,
+  edges,
+  onEdgesChange
+}: {
+  value: unknown;
+  edges: LongitudeEdges;
+  onEdgesChange: (edges: LongitudeEdges) => void;
+}): ReactElement {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const coordinates = useMemo(() => extractCoordinates(value), [value]);
 
@@ -277,16 +298,19 @@ function GeometryPreview({value}: {value: unknown}): ReactElement {
         return;
       }
 
+      const paths = longitudeCopies(coordinates, edges);
       context.beginPath();
-      coordinates.forEach(([longitude, latitude], index) => {
-        const x = ((longitude + 180) / 360) * bounds.width;
-        const y = ((90 - latitude) / 180) * bounds.height;
-        if (index === 0) {
-          context.moveTo(x, y);
-        } else {
-          context.lineTo(x, y);
-        }
-      });
+      for (const path of paths) {
+        path.forEach(([longitude, latitude], index) => {
+          const x = ((longitude + 180) / 360) * bounds.width;
+          const y = ((90 - latitude) / 180) * bounds.height;
+          if (index === 0) {
+            context.moveTo(x, y);
+          } else {
+            context.lineTo(x, y);
+          }
+        });
+      }
       context.lineJoin = 'round';
       context.lineCap = 'round';
       context.strokeStyle = '#ffffff';
@@ -296,17 +320,19 @@ function GeometryPreview({value}: {value: unknown}): ReactElement {
       context.lineWidth = 3;
       context.stroke();
 
-      if (coordinates.length === 1) {
-        const [longitude, latitude] = coordinates[0];
-        const x = ((longitude + 180) / 360) * bounds.width;
-        const y = ((90 - latitude) / 180) * bounds.height;
-        context.beginPath();
-        context.arc(x, y, 6, 0, Math.PI * 2);
-        context.fillStyle = '#d94736';
-        context.fill();
-        context.strokeStyle = '#ffffff';
-        context.lineWidth = 2;
-        context.stroke();
+      for (const path of paths) {
+        if (path.length === 1) {
+          const [longitude, latitude] = path[0];
+          const x = ((longitude + 180) / 360) * bounds.width;
+          const y = ((90 - latitude) / 180) * bounds.height;
+          context.beginPath();
+          context.arc(x, y, 6, 0, Math.PI * 2);
+          context.fillStyle = '#d94736';
+          context.fill();
+          context.strokeStyle = '#ffffff';
+          context.lineWidth = 2;
+          context.stroke();
+        }
       }
     };
 
@@ -314,12 +340,22 @@ function GeometryPreview({value}: {value: unknown}): ReactElement {
     const resizeObserver = new ResizeObserver(draw);
     resizeObserver.observe(canvas);
     return () => resizeObserver.disconnect();
-  }, [coordinates]);
+  }, [coordinates, edges]);
 
   return (
     <div className="geometry-preview">
       <div className="preview-heading">
         <h2>Geometry</h2>
+        <label>
+          Longitude edges{' '}
+          <select
+            value={edges}
+            onChange={event => onEdgesChange(event.target.value as LongitudeEdges)}
+          >
+            <option value="shortest">Shortest interval</option>
+            <option value="supplied">As supplied (cell extents)</option>
+          </select>
+        </label>
         <span>{coordinates.length ? `${coordinates.length} positions` : 'No coordinates'}</span>
       </div>
       <div className="map-stage">

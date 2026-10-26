@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original normal-support and gradient frame references; no upstream code or model data.
+import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial/ellipsoid';
 import {expect, test} from 'vitest';
 import {config} from '@math.gl/core';
 import {
@@ -90,8 +91,8 @@ for (const radii of shapes)
         const previous = config._cartographicRadians;
         config._cartographicRadians = radians;
         try {
-          close(ellipsoid.eastNorthUpToFixedFrame(origin), angular);
-          close(ellipsoid.localFrameToFixedFrame('north', 'east', 'down', origin), [
+          close(eastNorthUpToFixedFrame(ellipsoid, origin), angular);
+          close(localFrameToFixedFrame(ellipsoid, 'north', 'east', 'down', origin), [
             ...expected.north,
             0,
             ...expected.east,
@@ -128,7 +129,7 @@ test('at height, Cartesian-gradient and geodetic-footpoint up remain intentional
     origin = support(radii, normal, 1e6);
   const ellipsoid = new Ellipsoid(...(radii as [number, number, number])),
     expected = frameAt(origin, radii);
-  const matrix = ellipsoid.eastNorthUpToFixedFrame(origin);
+  const matrix = eastNorthUpToFixedFrame(ellipsoid, origin);
   close(matrix, [...expected.east, 0, ...expected.north, 0, ...expected.up, 0, ...origin, 1]);
   expect(Math.hypot(...expected.up.map((value, i) => value - normal[i]))).toBeGreaterThan(1e-4);
   const point = {x: origin[0], y: origin[1], z: origin[2]};
@@ -148,7 +149,7 @@ for (const radii of [
     const origin = [3, 4, 5],
       ellipsoid = new Ellipsoid(...(radii as [number, number, number]));
     const expected = frameAt(origin, radii);
-    close(ellipsoid.eastNorthUpToFixedFrame(origin), [
+    close(eastNorthUpToFixedFrame(ellipsoid, origin), [
       ...expected.east,
       0,
       ...expected.north,
@@ -171,7 +172,7 @@ test('Cartesian poles, near-pole threshold and center keep historical orientatio
     [0, 0, 0]
   ]) {
     const expected = frameAt(origin, [10, 10, 5]);
-    close(ellipsoid.eastNorthUpToFixedFrame(origin), [
+    close(eastNorthUpToFixedFrame(ellipsoid, origin), [
       ...expected.east,
       0,
       ...expected.north,
@@ -274,7 +275,7 @@ test('recursive custom sampling and frame output setters cannot replace outer sc
   for (const radii of [shapes[0], [10, 12, 15], [10, 10, 15]]) {
     const ellipsoid = new Ellipsoid(...(radii as [number, number, number])),
       origin = [3, 4, 5],
-      expected = ellipsoid.eastNorthUpToFixedFrame(origin);
+      expected = eastNorthUpToFixedFrame(ellipsoid, origin);
     let first = 0;
     const output = new Array(16).fill(0);
     Object.defineProperty(output, 0, {
@@ -283,13 +284,13 @@ test('recursive custom sampling and frame output setters cannot replace outer sc
       },
       set(value: number) {
         first = value;
-        ellipsoid.localFrameToFixedFrame('north', 'east', 'down', [6, 7, -8]);
+        localFrameToFixedFrame(ellipsoid, 'north', 'east', 'down', [6, 7, -8]);
       }
     });
-    expect(ellipsoid.eastNorthUpToFixedFrame(origin, output)).toBe(output);
+    expect(eastNorthUpToFixedFrame(ellipsoid, origin, output)).toBe(output);
     close(output, expected);
     const aliased = [3, 4, 5];
-    expect(ellipsoid.eastNorthUpToFixedFrame(aliased, aliased)).toBe(aliased);
+    expect(eastNorthUpToFixedFrame(ellipsoid, aliased, aliased)).toBe(aliased);
     close(aliased, expected);
   }
 });

@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.18",
+  "version": "5.0.0-alpha.20",
   "keywords": [
     "webgl",
     "javascript",
@@ -90,7 +90,11 @@
   "files": [
     "dist",
     "src",
-    "PROJ4-LICENSE.md"
+    "PROJ4-LICENSE.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md",
+    "ARROW-NOTICE.txt",
+    "APACHE-2.0-LICENSE.txt"
   ],
   "sideEffects": [
     "./src/lib/common.js"

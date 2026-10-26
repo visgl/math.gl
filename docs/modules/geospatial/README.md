@@ -12,6 +12,9 @@ The geospatial group includes `@math.gl/geospatial/ellipsoid`, `/globe`, `/tiles
 `/wkb`, `/geoarrow`, and `/expressions`. `@math.gl/web-mercator` remains available for existing
 imports. DGGS remains a separate package.
 
+New to these concepts? Start with [Geospatial terminology](./developer-guide/terminology.md)
+for geodesics, rhumb lines, chords, ellipsoids, reference systems, and projection properties.
+
 ## Installation
 
 ```bash
@@ -27,8 +30,8 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 
 | Import | APIs |
 | --- | --- |
-| `@math.gl/geospatial/ellipsoid` | [Ellipsoid](./api-reference/ellipsoid.md), [tangent planes](./api-reference/ellipsoid-tangent-plane.md), and [WGS84 helpers](./api-reference/helpers.md) |
-| `@math.gl/geospatial/globe` | [Geographic rectangles](./api-reference/lng-lat-rectangle.md), [region bounding boxes](./api-reference/make-obb-from-region.md), [visibility queries](./api-reference/globe-queries.md), and [mesh subdivision](./api-reference/subdivide-globe-mesh.md) |
+| `@math.gl/geospatial/ellipsoid` | [Ellipsoid](./api-reference/ellipsoid.md), [tangent planes](./api-reference/ellipsoid-tangent-plane.md), [surface geodesics](./api-reference/ellipsoid-geodesic.md), [geodesic paths](./api-reference/geodesic-path.md), [rhumb paths](./api-reference/rhumb-path.md), and [WGS84 helpers](./api-reference/helpers.md) |
+| `@math.gl/geospatial/globe` | [Geographic rectangles](./api-reference/lng-lat-rectangle.md), [region bounding boxes](./api-reference/make-obb-from-region.md), [visibility queries](./api-reference/globe-queries.md), [mesh subdivision](./api-reference/subdivide-globe-mesh.md), [rhumb subdivision](./api-reference/rhumb-path.md), and [geographic seams](./api-reference/geographic-seams.md) |
 | `@math.gl/geospatial/tiles` | [Geographic tile queries](./api-reference/geographic-tiles.md) and [tile-matrix utilities](./api-reference/tile-matrix.md) |
 
 ## Classes
@@ -37,6 +40,7 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 | ----------------------- | --------------------------------------------------------------------------- |
 | `Ellipsoid`             | Implements ellipsoid math and cartographic/Cartesian conversions.           |
 | `Ellipsoid.WGS84`       | An `Ellipsoid` instance initialized with Earth radii per WGS84.             |
+| `LocalReferenceFrame` | Reusable local frames, geographic poses, and velocity-aligned orientations. |
 | `EllipsoidTangentPlane` | Projects WGS84 Cartesian positions into a local east-north plane.           |
 | `LngLatRectangle`       | Represents a longitude-latitude rectangle, including antimeridian crossing. |
 
@@ -77,9 +81,9 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial/ellipsoid';
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
-const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
+const transformMatrix = eastNorthUpToFixedFrame(Ellipsoid.WGS84, cartesianOrigin);
 ```
 
 ## Framework Independence
@@ -115,3 +119,33 @@ extent-to-tile ranges, coverage checks and resolution-based level selection.
 
 Use the geographic tile helpers above for the built-in equal-angle longitude/latitude quadtree
 and antimeridian-aware queries. Explicit matrix queries use half-open edges and never wrap.
+
+## Local frames and poses
+
+[LocalReferenceFrame](./api-reference/local-reference-frame.md) separates point and vector transformations,
+composes geographic heading/pitch/roll poses, and builds velocity-aligned orientations. Import it
+from `@math.gl/geospatial/ellipsoid`. Local distances use the ellipsoid axis units; pose angles use radians.
+
+## Geodesic path sampling
+
+[GeodesicPath](./api-reference/geodesic-path.md) reuses a shortest geodesic line for fraction/distance
+sampling. [subdivideGeodesicPolyline](./api-reference/subdivide-geodesic-polyline.md) adaptively maps
+those paths through a supplied transform with original-edge provenance and optional surface-distance
+limits. Source angles are degrees, output tolerance uses target units, and longitude unrolling does
+not split projection seams. Import the sampler from `/ellipsoid` and subdivision from `/globe`.
+
+[Local-frame qualification and G7 benchmark baselines](./api-reference/local-frame-qualification.md)
+document the supported numerical profile and independent/native evidence.
+
+### Wider-domain and triaxial geodesics
+
+- [EllipsoidGeodesicExact](./api-reference/ellipsoid-geodesic-exact.md): optional
+  elliptic direct/inverse revolution geodesics and reusable distance/arc lines.
+- [TriaxialEllipsoid](./api-reference/triaxial-geometry.md): three surface coordinate
+  systems, direction conversions and reusable Cartesian geodesic trajectories.
+- [G8/G9 qualification and support limits](./api-reference/geodesic-g89-qualification.md).
+
+Optional [coordinate utilities](./api-reference/coordinate-utilities.md) provide
+angle text and WGS84 UTM/UPS/MGRS cells. [Packed line sampling](./api-reference/geodesic-line-buffer.md)
+adds reusable geodesic/rhumb output storage. Triaxial geometry also supports
+[area-uniform surface points](./api-reference/triaxial-geometry.md#area-uniform-surface-sampling).

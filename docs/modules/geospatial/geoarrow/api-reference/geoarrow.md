@@ -23,6 +23,11 @@ descriptor types:
 Related semantic types include `GeoArrowEncoding`, `GeoArrowDimension`,
 `GeoArrowCoordinateLayout`, `GeoArrowGeometryValue`, and `GeoArrowBounds`.
 
+`mergeGeoArrowDimensions(left, right)` combines XYZ and XYM semantics without treating M as Z.
+`inferGeoArrowGeometryDimension(geometry)` inspects tagged geometry coordinate arrays, including
+nested collections, and returns their combined dimension. Three ordinates imply XYZ; callers with
+XYM data should use their declared semantic dimension instead of inferring it from tuple length.
+
 ## Inspection, validation, traversal, and slicing
 
 ### `inspectGeoArrowColumn(column)`

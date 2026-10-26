@@ -21,7 +21,11 @@ export {cutPolygonByGrid, cutPolylineByGrid} from './cut-by-grid';
 export {cutPolylineByMercatorBounds, cutPolygonByMercatorBounds} from './cut-by-mercator-bounds';
 
 export {subdividePolyline} from './subdivide-polyline';
-export type {SubdividePolylineOptions, SubdividedPolyline} from './subdivide-polyline';
+export type {
+  SubdividePolylineOptions,
+  SubdividedPolyline,
+  PolylineEdgeSampler
+} from './subdivide-polyline';
 
 export {subdivideTriangleMesh} from './subdivide-triangle-mesh';
 export type {

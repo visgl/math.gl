@@ -69,6 +69,10 @@
   },
   "overrides": [
     {
+      "includes": ["modules/geospatial/src/discontinuous/world-kernels/*.js", "modules/geospatial/src/discontinuous/spherical-clip/*.js"],
+      "linter": {"rules": {"suspicious": {"noAssignInExpressions": "off"}}}
+    },
+    {
       "includes": ["modules/core/test/threejs-tests/**"],
       "linter": {
         "enabled": false

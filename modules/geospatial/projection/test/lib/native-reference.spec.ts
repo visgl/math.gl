@@ -7,6 +7,7 @@ import * as native from '@math.gl/geospatial/projection/experimental';
 import type {ProjectionPlugin} from '@math.gl/geospatial/projection/experimental';
 import inputs from '../fixtures/native-proj-cases.json';
 import reference from '../fixtures/native-proj-reference.json';
+import {nativeForwardExpectation} from '../native-forward-reference';
 import inventory from '../fixtures/parity-inventory.json';
 
 const projections = Object.values(native).filter((value): value is ProjectionPlugin =>
@@ -48,15 +49,17 @@ for (const [index, fixture] of inputs.cases.entries()) {
         ? fixture.knotInverseTolerance!
         : fixture.inverseTolerance;
     const results = reference.cases[index].results;
+    const expectedForward = (row: (typeof results)[number]) =>
+      nativeForwardExpectation(fixture.definition, row);
     expect(results.map(row => row.input)).toEqual(fixture.points);
     const forward = new Float64Array(results.length * 4);
     const inverse = new Float64Array(results.length * 4);
     for (const [pointIndex, row] of results.entries()) {
       // Inverse starts from PROJ output, never from math.gl's own forward result.
-      close(projection.project(row.input), row.forward, fixture.forwardTolerance);
+      close(projection.project(row.input), expectedForward(row), fixture.forwardTolerance);
       const reusable = new Float64Array(row.forward.length);
       expect(projection.projectToSync(row.input, reusable)).toBe(reusable);
-      close(reusable, row.forward, fixture.forwardTolerance);
+      close(reusable, expectedForward(row), fixture.forwardTolerance);
       expect(projection.unprojectToSync(row.forward, reusable)).toBe(reusable);
       close(reusable, row.inverse, inverseTolerance(row.input));
       close(projection.unproject(row.forward), row.inverse, inverseTolerance(row.input));
@@ -74,7 +77,7 @@ for (const [index, fixture] of inputs.cases.entries()) {
     for (const [pointIndex, row] of results.entries()) {
       close(
         forward.subarray(pointIndex * 4, pointIndex * 4 + 4),
-        [row.forward[0], row.forward[1], row.forward[2] ?? 123, 8],
+        [expectedForward(row)[0], expectedForward(row)[1], row.forward[2] ?? 123, 8],
         fixture.forwardTolerance
       );
       close(

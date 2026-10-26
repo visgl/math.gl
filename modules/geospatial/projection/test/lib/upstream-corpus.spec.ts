@@ -103,7 +103,7 @@ for (const fixture of corpus.fixtures) {
           close(projection.project(fixture.ll), expected.forward, 1e-5);
           close(projection.unproject(expected.forward), fixture.ll, 1e-8);
         } else close(projection.project(fixture.ll), fixture.xy, forwardTolerance);
-        close(projection.unproject(fixture.xy), fixture.ll, inverseTolerance);
+        if (!correction) close(projection.unproject(fixture.xy), fixture.ll, inverseTolerance);
       }
     }
   );

@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 
 const output = process.argv[2];
 if (!output) throw new Error('Usage: node modules/earth/sun/scripts/create-stars-demo.mjs /absolute/path/stars.html');
-const entry = fileURLToPath(new URL('../dist/stars.js', import.meta.url));
+const entry = fileURLToPath(new URL('../../dist/sun/stars.js', import.meta.url));
 const script = `import {STAR_CATALOG_INFO, getStarPositions, getStarLayerData, createMilkyWayBackground} from ${JSON.stringify(entry)};
 const canvas = document.getElementById('sky'), slider = document.getElementById('epoch');
 const context = canvas.getContext('2d');

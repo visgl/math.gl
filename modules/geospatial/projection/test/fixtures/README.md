@@ -219,3 +219,12 @@ corpus; no Python or third-party model dependency is shipped.
 worker experiments: raw samples, cold startup, engine/bootstrap bytes, capabilities
 and source/workload hashes. These are diagnostics, not universal speed thresholds
 or evidence of a Wasm/WebGPU algorithm. Regenerate using `benchmark-workers.mjs`.
+
+## Modern PROJ pole audit
+
+`pole-audit-reference.json` is generated offline by `generate-pole-audit.py` with
+pyproj 3.7.2 / PROJ 9.5.1. It retains 5,560 probes in 143 configurations, including
+all rejected oracle probes. Ellipsoidal definitions remain ellipsoidal.
+`pole-audit-findings.json` records unresolved numeric/domain differences separately
+from accuracy passes. See [the audit](../../../../../docs/modules/geospatial/projection/modern-proj-audit.md)
+for methodology, fixes, oracle limitations and remaining implementation gaps.

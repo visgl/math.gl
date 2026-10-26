@@ -13,6 +13,22 @@ From the repository root, run `yarn workspace math.gl-alpine-ice-age start`.
 Use `yarn workspace math.gl-alpine-ice-age build` for a standalone build and
 `yarn workspace math.gl-alpine-ice-age test` for dataset/interpolation checks.
 
+## Read the map code
+
+This is a full data application. For a short introduction to `MapEngine`, start
+with `../albers-usa/map.js` or `../myriahedral-maps/layout.ts`.
+
+- `global-app.jsx` owns the React controls, data loading, and playback state.
+- `map-options.js` lists the available maps without importing a renderer.
+- `projection-grid.js` constructs and caches ordinary projection grids.
+- `discontinuous-views.js` constructs `MapEngine` instances and clips field geometry.
+- `global-scene.js` owns deck.gl layers and camera rendering.
+- `myriahedral-animation.js` adapts engine frames to the scene's camera.
+
+The UI passes state to the scene. Geometry modules can be exercised without
+mounting React or allocating GPU resources. Data loading and scientific field
+sampling remain separate from map layout and drawing.
+
 ## Data and attribution
 
 Julien Seguinot, Susan Ivy-Ochs, Guillaume Jouvet, Matthias Huss, Martin Funk and
@@ -76,8 +92,7 @@ Mercator clips the display at ±85°; Antarctica remains available in other view
 Global data: Evan J. Gowan (2019), [Global ice sheet reconstruction for the past
 80000 years](https://doi.pangaea.de/10.1594/PANGAEA.905800), supplementary data to
 Gowan and colleagues (2021), [A new global ice sheet reconstruction for the past
-80,000 years](https://doi.org/10.1038/s41467-021-21469-w), Nature Communications 12,
-1199. The derived `global.bin.gz` and `global-manifest.json` assets retain **CC-BY-4.0**.
+80,000 years](https://doi.org/10.1038/s41467-021-21469-w), Nature Communications 12, 1199. The derived `global.bin.gz` and `global-manifest.json` assets retain **CC-BY-4.0**.
 We use PaleoMIST 1.0's corrected April 2021 1° geographical grid and the minimal
 North American MIS 3 scenario. This is a reconstruction of **grounded ice sheets**;
 sea ice and small mountain glaciers are not included. It is a separate dataset,
@@ -195,3 +210,117 @@ The center title is empty between named ice-age windows.
 Chapter titles appear for four seconds after the model loads or a phase changes,
 then fade out over 800 ms. Re-enabling Ice age names introduces the current chapter
 again. Reduced-motion preferences remove the fade.
+
+## Discontinuous maps
+
+The global and earlier-ice-age projection selector includes Albers USA with
+Alaska/Hawaii insets, interrupted sinusoidal, Mollweide, Goode homolosine, and
+gnomonic AirOcean. Geographic grid cells are clipped by region before independent
+triangulation; graticules are split at the same cuts. Cached topology retains
+source coordinates for bilinear sampling of the periodic ice and bed grids.
+These views switch immediately rather than morphing incompatible triangle meshes,
+except for the hinge transitions of myriahedral maps described below.
+Statistics remain global even in the U.S. view. The U.S. masks include surrounding
+land and ocean and do not select political boundaries.
+
+See the [discontinuous projections guide](../../docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md)
+for API examples and limitations.
+
+Inset bounds, viewport fitting, draw order, outlines, and labels come from
+`@math.gl/geospatial/discontinuous` layout metadata. Alaska and Hawaii have visible
+frames. Each region uses its own display mesh spacing: 1° for the contiguous
+U.S., 0.5° for Alaska, and 0.25° for Hawaii. All meshes still sample the same
+1° PaleoMIST reconstruction, so finer display triangles do not invent finer
+ice or terrain measurements. Hawaiian island shapes use a bundled, pinned
+Natural Earth 1:10m modern reference (public domain) because the reconstruction
+grid does not resolve their terrain. This view does not use raster tile sets.
+This overlay does not change ice values, global totals, or reconstruct past shorelines.
+
+### Myriahedral presets (experimental)
+
+The **View → Myriahedral** group offers polyconic, cylindric, azimuthal,
+hemispheres, sealine, and coastline layouts, plus tetrahedron, cube, octahedron,
+dodecahedron, and icosahedron nets. Turn off **Cycle projections** to inspect one
+layout while scrubbing time. These views use the reusable
+`MapEngine` API with myriahedral descriptions: 24-column graticules or one subdivision of each solid.
+Each panel is tessellated independently at approximately the source grid's 1°
+resolution, retaining geographic coordinates for ice and bed interpolation.
+No triangle spans a cut. Layout metadata fits the complete net to the viewport.
+Only the three most recently used discontinuous meshes are cached.
+
+Cuts are fixed across time so geography remains comparable. Sealine and coastline
+weights use the same bundled public-domain Natural Earth 1:110m modern land mask
+as the unfolding example; this is not a reconstruction of past coastlines.
+Selecting a myriahedral view animates from the globe to its fully unfolded net.
+Switching presets folds the current net back to the globe before unfolding the
+next one; ordinary global projections transition through the globe as well.
+Terrain and graticules follow the same library hinge poses. A short initial
+deflation fits spherical samples onto planar panels. Reduced-motion preferences
+skip animations. The standalone example provides manual unfolding and subdivision
+controls. Panel overlaps remain possible, and the
+namesake graticule strategies are not exact analytic equal-area projections.
+
+See the [myriahedral background and credits](../../docs/modules/geospatial/projection/developer-guide/myriahedral-projections.md)
+for Nico Belmonte's inspiration, Jarke van Wijk's research, and implementation limitations.
+
+### H3 base-cell unfolding (experimental)
+
+**Myriahedral · H3 base cells** unfolds the 122 resolution-0 H3 cells: 110
+hexagons and 12 pentagons. Their exact spherical boundary vertices are shared
+between neighboring cells. Because these spherical polygons are not generally
+flat, the example triangulates each cell from its boundary vertices into rigid
+panels. A strong internal hinge preference keeps each H3 cell connected; the
+remaining intercell cuts are selected by the library's maximum spanning tree
+with a modern-land preference. Cell outlines remain visible during unfolding.
+The panel surface is sampled from the 1° ice and terrain grid at roughly 2°
+spacing to keep animation responsive. It is an H3-shaped hinged map, not an
+area-preserving H3 projection or a reconstruction of historic coastlines.
+
+### A5 base-cell unfolding (experimental)
+
+**Myriahedral · A5 base cells** unfolds A5's 12 resolution-0 pentagons.
+A5 returns curved spherical edges, so each original edge is sampled at its
+ends and at matching positions 20/64 and 44/64 along the edge. This makes
+three short planar hinge segments per edge while keeping the shared boundary
+identical in both cells. Only the **middle segment** can join neighboring
+pentagons; the outer segments are cuts. Internal hinges keep each cell's
+triangular panels connected with a closed outline, and geography-aware weights select which middle
+segments join the cells. The result follows the A5 boundary shape at those
+samples; it is a faceted approximation rather than a single rigid pentagon
+or an equal-area projection. Terrain uses the same 1° source, sampled at
+roughly 2° spacing for responsive animation.
+
+**Myriahedral · A5 resolution 1** unfolds the 60 first-level A5 cells. Each
+cell has three curved edges represented by three matching segments; only the
+central segment of each edge can act as an intercell hinge. The 420 triangular
+panels share exact sampled vertices and remain connected within their source
+cells. This finer net uses the same geography-aware cut preference and Earth
+textures as the base-cell view.
+
+### S2 base-cell unfolding (experimental)
+
+**Myriahedral · S2 base cells** unfolds Google's six level-zero S2 cells as
+the faces of a cube. Each face is one rigid panel. Geography-aware weights
+choose five shared edges to keep as hinges, while the other seven edges are
+cuts. The cell outlines remain visible as the cube unfolds.
+
+**Myriahedral · S2 resolution 1** uses the four children of each cube face:
+24 spherical quadrilateral cells. Their corners do not generally lie in one
+plane, so the example triangulates each cell across a diagonal into two rigid
+facets. Internal hinges keep each source cell together; the geography-aware
+spanning tree chooses 23 intercell hinges. This finer net shows the actual S2
+cell layout rather than six undivided cube faces.
+
+## Segmented map projections
+
+The global map selector includes Peirce and Gringorten quincuncial, Guyou,
+Berghaus star, octahedral Butterfly, Collignon butterfly, Waterman W5, and
+additional interrupted Boggs, Sinu-Mollweide, quartic-authalic, hemispheric
+Mollweide and ocean Goode presets. All use `MapEngine` through
+`discontinuous-views.js`, including seam splitting and transitions through the globe.
+
+Sinu-Mollweide currently uses equatorial six-lobe cuts, not D3's oblique five-lobe
+arrangement. See the [supported families and projection credits](../../docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md)
+for aspects, limitations, primary references, and D3/PROJ provenance.
+
+The longitude slider sets the globe longitude or the central meridian of global maps. Drag the globe to rotate; Shift-drag a global flat map to change its central meridian, or drag normally to pan. These controls stay synchronized. Regional/inset maps and geography-aware myriahedral layouts retain their fixed geographic orientation.

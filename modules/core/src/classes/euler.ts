@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileCopyrightText: Copyright (c) 2017 Uber Technologies, Inc.
+// SPDX-FileCopyrightText: Copyright 2010-2017 three.js authors
+// SPDX-FileComment: Euler conversion methods adapted from three.js; see ../../LICENSE.
 
 import {MathArray} from './base/math-array';
 import {NumericArray} from '../types';

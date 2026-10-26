@@ -13,6 +13,16 @@ Cartographic positions are represented as `[longitude, latitude, height]`. Longi
 Use `Ellipsoid.WGS84` for the standard Earth shape, construct three radii directly,
 or use `Ellipsoid.fromSpheroid` to import two-axis geometry from a projection CRS.
 
+Geometry is immutable, including the public `radii`, squared-radius and reciprocal
+vectors. Construct a new `Ellipsoid` to change shape; mutating these vectors throws
+instead of leaving prepared conversion caches inconsistent.
+
+Surface projection selects a qualified nearest point rather than a radial
+approximation. Unique near-cusp and boundary solutions have an exact-dyadic fallback. Ambiguous
+interiors and inputs outside the qualified numerical range return
+`undefined` without changing the supplied output. See the
+[nearest-point qualification and boundary policy](../projection/ellipsoid-qualification.md).
+
 ## Usage
 
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
@@ -34,10 +44,13 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial/ellipsoid';
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
-const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
+const transformMatrix = eastNorthUpToFixedFrame(Ellipsoid.WGS84, cartesianOrigin);
 ```
+
+See the [accuracy and GeographicLib coverage audit](./ellipsoid-accuracy.md) for
+qualified domains, measured geodesic accuracy, and remaining capability gaps.
 
 ## Projection interoperability
 
@@ -68,6 +81,10 @@ An Ellipsoid instance initialized to the WGS84 standard.
 ## Static Methods
 
 ### Ellipsoid.fromSpheroid(parameters: SpheroidParameters): Ellipsoid
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
 
 Constructs radii `[semiMajorAxis, semiMajorAxis, semiMinorAxis]` from an owned
 snapshot of the supplied axes. Accepts the geometry returned by
@@ -132,6 +149,10 @@ Returns
 
 ### toSpheroid(): SpheroidParameters
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
 Returns a new frozen `{semiMajorAxis, semiMinorAxis}` snapshot in metres.
 The snapshot remains independent of subsequent changes to the radii vector.
 Throws for unequal X/Y radii, a prolate spheroid, non-finite axes or zero radii.
@@ -180,7 +201,9 @@ Returns
 
 - The modified result parameter, a new `Vector3` instance if none was provided, or `undefined` if the inverse is undefined or unsupported. A defined result contains `[longitude, latitude, height]`, with longitude and latitude in degrees and height in meters above the ellipsoid.
 
-### eastNorthUpToFixedFrame(origin : Number[3], result : Number[16]) : Matrix4 | Number[16]
+### eastNorthUpToFixedFrame(ellipsoid, origin : Number[3], result : Number[16]) : Matrix4 | Number[16]
+
+Standalone export from `@math.gl/geospatial/ellipsoid` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
 
 Computes a 4x4 transformation matrix from a reference frame with an east-north-up axes centered at the provided origin to the provided ellipsoid's fixed reference frame.
 
@@ -201,7 +224,9 @@ Notes
 
 - Calls `localFrameToFixedFrame` with `east`, `north`, `up` axis.
 
-### localFrameToFixedFrame(String firstAxis, secondAxis : String, thirdAxis : String | null, origin : Number[3] \[, result : Number[16]]) : Matrix4 | Number[16]
+### localFrameToFixedFrame(ellipsoid, String firstAxis, secondAxis : String, thirdAxis : String | null, origin : Number[3] \[, result : Number[16]]) : Matrix4 | Number[16]
+
+Standalone export from `@math.gl/geospatial/ellipsoid` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
 
 Computes a 4x4 transformation matrix from a reference frame centered at the provided origin to the ellipsoid's fixed reference frame.
 
@@ -339,3 +364,35 @@ Notes:
 ## Attribution
 
 This class was ported from [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) under the Apache 2 License.
+
+
+## P0 numeric and output contracts
+
+The [P0 qualification profile](../projection/ellipsoid-p0-qualification.md)
+details the supported samples and all public ownership, unit and boundary
+contracts. Constructor axes must be finite and nonnegative; default/zero shapes
+remain constructible but do not define a valid conversion surface. Normals and
+radial surface projection now return `undefined` for zero/nonfinite rays without
+modifying a supplied result. Forward conversion and normal/Z-axis intersection
+also reject invalid numeric inputs before output writes.
+
+Degree latitudes retain their complement near a pole, avoiding lost radians
+amplified by very flat shapes. Supplied result setters can invoke nested
+conversions without corrupting later output ordinates. The legacy local-frame
+pole neighborhood is bounded by shape scale in small units. These tighten
+previous failure/precision behavior; no runtime dependencies are added.
+
+## Metrics and geodesic areas
+
+Use the separate [EllipsoidMetrics](./ellipsoid-metrics.md) class for revolution
+ellipsoid metrics and auxiliary latitudes. [GeodesicPolygon](./geodesic-polygon.md)
+and optional `EllipsoidGeodesic` edge areas support compensated polygon geometry.
+These APIs use explicit degree units and retain the existing Cartesian API.
+
+[EllipsoidRhumb and RhumbPolygon](./ellipsoid-rhumb.md) provide constant-bearing
+paths and areas. [GeodesicIntersections](./geodesic-intersections.md) provides
+bounded searches with explicit completeness and segment statuses.
+
+[RhumbPath](./rhumb-path.md) adds surface-distance sampling over the existing
+rhumb solver. [Geographic seam splitters](./geographic-seams.md) preserve declared
+edge semantics, attributes, holes and source provenance in a periodic longitude chart.

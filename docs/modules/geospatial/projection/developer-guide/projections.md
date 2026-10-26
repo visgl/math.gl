@@ -136,7 +136,7 @@ algorithm defaults do not define a complete CRS.
 | Oblique stereographic        | `sterea` | `obliqueStereographic`      | Regional conformal alternative; requires a non-polar origin                       |
 | Azimuthal equidistant        | `aeqd`   | `azimuthalEquidistant`      | Sphere or ellipsoid; centered-distance use, with ellipsoidal qualifications below |
 | Gnomonic                     | `gnom`   | `gnomonic`                  | Spherical equations; great-circle paths are straight lines, horizon excluded      |
-| Orthographic                 | `ortho`  | `orthographic`              | Spherical equations; globe-like hemisphere view, invisible points rejected        |
+| Orthographic                 | `ortho`  | `orthographic`              | Spherical and ellipsoidal equations; globe-like hemisphere view, invisible points rejected        |
 
 Choose the center deliberately. Distortion increases away from it, and an antipodal
 point or projection horizon may be undefined. Polar stereographic is useful for
@@ -191,26 +191,29 @@ it does not choose polygon seam splits or tessellation. Use
 [`@math.gl/geometry/polygon`](../../../geometry/polygon/api-reference/polygon.md) for the relevant geometric
 operations. Cube-face selection and tiling likewise belong to the application.
 
-### Not yet supported: discontinuous map layouts
+### Discontinuous map layouts (experimental)
 
-math.gl does not currently provide complete discontinuous map layouts, such as
-Goode's interrupted homolosine, interrupted sinusoidal and Mollweide maps, or the
-Butterfly, Collignon and Waterman polyhedral layouts. These combine
-projection equations with rules for splitting the globe into lobes or faces and
-arranging the resulting pieces on the map.
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+</p>
 
-The missing support is primarily in map rendering: choosing lobes or faces,
-clipping and splitting lines and polygons at their boundaries, and placing the
-pieces into a coherent layout. Transforming each vertex independently is
-insufficient for rendering geometry across those boundaries. The built-in `sinu`
-and `moll` algorithms supply point transforms, but do not construct interrupted
-layouts; `qsc` likewise does not assemble an unfolded polyhedral map.
+The separate [`@math.gl/geospatial/discontinuous` API](../../discontinuous/README.md)
+provides static region-aware point projection, inverse candidates, and seam-aware
+line and polygon projection. Presets include AirOcean, land-oriented Goode, independent interrupted sinusoidal,
+Mollweide and homolosine layouts, Albers USA with optional territories, Peirce
+quincuncial, Berghaus star, and myriahedral layouts.
 
-See the [supported profile](./support.md) for math.gl's current coordinate
-transformation coverage. D3 supports these layouts through
-[`d3-geo`](https://d3js.org/d3-geo) with the clipping-aware projections in
-[`d3-geo-polygon`](https://github.com/d3/d3-geo-polygon#updated-projections).
-Support for these layouts is not currently available in deck.gl.
+See the [support table](./discontinuous-projections.md#supported-map-families)
+for implemented families, exact preset names, and remaining gaps. Historical
+cut arrangements and clipping semantics are not interchangeable: `goode` uses
+land-oriented lobes, while `interrupted-homolosine` uses independent cuts.
+
+Polygon support currently requires each input polygon to fit in an open hemisphere.
+AirOcean here is the cut arrangement, not the Gray-Fuller projection. These layouts
+are not scalar CRS operations and are not automatically supported by existing
+deck.gl geographic layers. The scalar `sinu` and `qsc` kernels remain separate
+from interrupted or unfolded map assembly.
 
 ## Satellite views and rotated maps
 

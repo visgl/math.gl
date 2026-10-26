@@ -18,7 +18,7 @@ from pathlib import Path
 DESTINATION = Path(__file__).resolve().parents[1] / 'test/fixtures/interior-reference.json'
 
 
-def nearest(radii, xyz):
+def nearest(radii, xyz, iterations=320):
     # Reference the stored binary64 input, not its ideal pre-rounding construction.
     axes = [D.from_float(v) for v in radii]
     point = [D.from_float(v) for v in xyz]
@@ -28,7 +28,7 @@ def nearest(radii, xyz):
     squares = [v * v for v in axes]
     lower = -min(squares)
     upper = max(D(1), sum(v * v for v in point).sqrt())
-    for _ in range(320):
+    for _ in range(iterations):
         multiplier = (lower + upper) / 2
         norm = sum((r * p / (r * r + multiplier)) ** 2 for r, p in zip(axes, point))
         if norm > 1:
@@ -86,7 +86,7 @@ def generate():
                         radii = [float(r) for r in axes]
                         reference = nearest(radii, xyz)
                         ordinary = label in ['earth-ratio', 'flattened', 'flat', 'very-flat']
-                        geo_qualified = ordinary or (D(depth) <= D('.5') and label != 'very-flat')
+                        geo_qualified = True
                         cases.append({
                             'id': '/'.join([label, scale, depth, direction]),
                             'shape': label,

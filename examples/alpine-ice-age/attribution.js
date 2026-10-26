@@ -86,3 +86,20 @@ export const KRAPP_SOURCES = [
       "Native 0.5° masks aggregated to 1° display coverage; 5,000-year snapshots with linear visual interpolation. Area integrated on the native grid. No thickness or volume. Regional ice-age labels are approximate correlations.",
   },
 ];
+
+export const INSET_REFERENCE_SOURCES = [
+  {
+    id: "natural-earth-hawaii",
+    title: "Modern Hawaiian island reference",
+    credit: "Natural Earth · public domain",
+    creators: "Natural Earth contributors",
+    dataset:
+      "https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/",
+    license: "Public domain",
+    licenseUrl: "https://www.naturalearthdata.com/about/terms-of-use/",
+    hosted:
+      "https://github.com/nvkelso/natural-earth-vector/tree/ca96624a56bd078437bca8184e78163e5039ad19",
+    changes:
+      "Main Hawaiian islands extracted from 1:10m admin-1 polygons. Modern geographic reference only; not reconstructed ice, terrain elevation, or paleocoastline.",
+  },
+];

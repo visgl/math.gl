@@ -25,10 +25,12 @@ const moved = {
 
 export async function bundleRuntime(root, entry, outfile, baselineCommit) {
   const cache = new Map();
+  // Reject Git tree objects: an extensionless import may name both a source
+  // file and a directory. A tree listing is not loadable module source.
   function git(path) {
     if (!cache.has(path)) {
       try {
-        cache.set(path, execFileSync('git', ['show', baselineCommit + ':' + path], {
+        cache.set(path, execFileSync('git', ['cat-file', 'blob', baselineCommit + ':' + path], {
           cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']
         }));
       } catch (error) {
@@ -58,12 +60,34 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
     return legacy ? file.replace(/^modules\/projection\//, 'modules/proj4/')
       .replace('src/lib/projection.ts', 'src/lib/typescript-proj4-projection.ts') : file;
   }
-  const sourceResult = file => ({
-    path: baselineCommit ? join(root, historicalPath(relative(root, file))) : file,
-    ...(baselineCommit ? {namespace: 'historical'} : {})
-  });
+  const sourceResult = file => {
+    const path = baselineCommit ? historicalPath(relative(root, file)) : relative(root, file);
+    const parts = path.split(/[\\/]/);
+    let sideEffects;
+    if (parts[0] === 'modules' && parts.length > 2) {
+      const manifest = parts.slice(0, 2).join('/') + '/package.json';
+      let contents;
+      try {contents = baselineCommit ? git(manifest) : readFileSync(join(root, manifest), 'utf8');}
+      catch { /* Sources without package metadata retain conservative side effects. */ }
+      const metadata = contents ? JSON.parse(contents) : {};
+      // Virtual historical modules do not inherit filesystem package metadata.
+      // Preserve explicit contracts. Literal lists are used by core; unknown
+      // glob patterns stay conservative instead of guessing their semantics.
+      if (metadata.sideEffects === false) sideEffects = false;
+      else if (Array.isArray(metadata.sideEffects) &&
+        metadata.sideEffects.every(pattern => !/[?*\[\]{}!]/.test(pattern))) {
+        const packagePath = './' + parts.slice(2).join('/');
+        sideEffects = metadata.sideEffects.includes(packagePath);
+      }
+    }
+    return {
+      path: baselineCommit ? join(root, path) : file,
+      ...(baselineCommit ? {namespace: 'historical'} : {}),
+      ...(sideEffects === false ? {sideEffects: false} : {})
+    };
+  };
   function historicalSource(base) {
-    for (const file of [base, base.replace(/\.js$/, '.ts'), base + '.ts', base + '.json', base + '/index.ts']) {
+    for (const file of [base, base.replace(/\.js$/, '.ts'), base + '.ts', base + '.js', base + '.json', base + '/index.ts']) {
       try {git(historicalPath(relative(root, file))); return sourceResult(file);}
       catch { /* Try the next supported source extension. */ }
     }

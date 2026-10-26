@@ -271,6 +271,9 @@ algorithm’s default rendering target. If coverage-specific resolution fails, d
 retrieval uses that default while preserving the declared coverage in metadata.
 Ordinary coordinate conversion does not evaluate rendering bounds.
 
+To wrap proj4js or D3 as a backend, see [external projection engines](./external-projection-engines.md)
+for complete adapter examples.
+
 ## What is pluggable?
 
 | Component                        | Option or API      | Application responsibility                                                              |
