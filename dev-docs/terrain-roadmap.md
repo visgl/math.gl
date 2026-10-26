@@ -20,12 +20,17 @@ metric interpolant gradients and normals, extrema, regular meshes with explicit
 origins, and analytic/mesh conformance tests. See the
 [API contract](../docs/modules/geospatial/terrain/README.md).
 
-The next tranche adds geographic/Web Mercator raster queries with WGS84 metric
+The geographic/tiled tranche adds geographic/Web Mercator raster queries with WGS84 metric
 derivatives, immutable cell-registered tiled snapshots, neighbor halos, explicit
 residency, whole-footprint coarser fallback, and transferable halo copies.
 
-This is partial T0/T1/T2 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
-spike, vertex-tile reconciliation, incremental cache updates, adaptive meshes,
+Incremental snapshots now support atomic insertion, replacement and eviction with
+neighbor-halo invalidation. The opt-in packed-buffer entry adds an experimental
+versioned f32/u32 upload layout, byte/height-error budgets and validated CPU
+reconstruction. This is a data substrate; shader execution is not yet implemented.
+
+This is partial T0/T1/T2/T3 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
+spike, vertex-tile reconciliation, persistent cache structures, adaptive meshes,
 and GPU qualification remain open. The remaining sections describe the target architecture and delivery gates.
 
 ## Recommendation

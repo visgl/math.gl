@@ -32,7 +32,9 @@ The main entry uses affine local Cartesian coordinates and heights in
 meters, with Z up. The optional `/terrain/geographic` entry adds longitude/latitude
 queries and physical east/north derivatives for geographic and Web Mercator rasters.
 The `/terrain/tiled` entry adds cell-registered local-metric tile snapshots, seam
-sampling, residency-aware fallback and transferable halo buffers. No entry converts
+sampling, residency-aware fallback, incremental snapshot updates and transferable halo buffers.
+The `/terrain/packed` entry adds a versioned f32/u32 upload layout with byte and
+height-error budgets and validated CPU reconstruction. No entry converts
 height references. Input arrays are copied; missing samples are stored as finite zeros
 with a separate mask. Query status must be checked before using a result.
 

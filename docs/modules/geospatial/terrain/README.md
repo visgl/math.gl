@@ -264,6 +264,105 @@ buffers with dimensions, metric sample-center transforms, vertex registration,
 triangle diagonal and height-reference metadata. They are suitable
 for worker transfer or preparing GPU buffers; this is not a GPU execution API or
 a shader layout ABI. Missing neighbors have validity zero in the exported halo.
-This version rebuilds halos per snapshot and allocates scalar query temporaries;
-large streaming caches, batch tiled queries, vertex-tile edge reconciliation,
+The incremental update API below reuses unchanged halos. Scalar queries still allocate
+temporaries; persistent map structures, batch tiled queries, vertex-tile edge reconciliation,
 coalesced tile rows, adaptive meshes and GPU kernels remain roadmap work.
+
+## Incremental tile updates
+
+```typescript
+const next = terrain.withTiles({
+  revision: 'dem-2026-11',
+  tiles: [{matrixId: 'fine', column: 0, row: 0,
+    heights: new Float32Array([1, 11, 21, 31])}],
+  remove: []
+});
+for (const change of next.haloChanges) {
+  // Upload copyTileHalo(...) when resident; evict the resource otherwise.
+  console.log(change.matrixId, change.column, change.row, change.resident);
+}
+```
+
+`withTiles()` returns a new snapshot. Inserted/replaced source buffers are copied;
+unchanged source buffers and halos are shared internally. The previous snapshot
+continues to answer exactly the same queries. Map copies cost O(resident tiles),
+but only affected resident halos are rebuilt: changed tiles and their eight
+same-matrix neighbors. This is conservative invalidation, including diagonal
+neighbors needed for corner samples. Updates do not blend matrix levels.
+
+`revision` must be a string different from the immediate parent's revision.
+Revision uniqueness across an application's history is the caller's responsibility.
+A transaction cannot repeat an identifier or both remove and replace it. Validation
+fails atomically without modifying the previous snapshot. Removing an absent tile
+is a no-op. An empty update can advance the revision without invalidating halos.
+
+`tileCount` counts resident sources. `haloChanges` is a frozen, deterministic list
+ordered by matrix identifier, row, then column. It lists resident halos to upload
+and evicted tiles with `resident: false`; the initial snapshot lists all resident
+tiles. Changes are relative to the immediate preceding snapshot, not a cumulative
+log. Consumers skipping revisions must accumulate intervening changes or rebuild
+resources from a separately maintained resident tile inventory. Every exported
+halo carries the new snapshot revision, including an internally shared halo.
+
+## Packed terrain buffers (experimental version 1)
+
+```typescript
+import {HeightField} from '@math.gl/geospatial/terrain';
+import {packTerrainHeightField, unpackTerrainHeightField}
+  from '@math.gl/geospatial/terrain/packed';
+
+const halo = next.copyTileHalo('fine', 0, 0);
+if (halo) {
+  const packed = packTerrainHeightField(new HeightField(halo), {
+    heightOrigin: 0,
+    maxBytes: 1024 * 1024,
+    maxHeightError: 0.01
+  });
+  const quantizedReference = unpackTerrainHeightField(packed);
+}
+```
+
+This opt-in entry has no rendering dependency and creates no GPU resources. It
+specifies four independently owned upload buffers, each with 4-byte scalar
+alignment. The header and transform are each 32 bytes (two 16-byte vectors).
+Typed-array words define the layout; callers handling cross-endian byte streams
+must explicitly convert their byte order.
+
+| Buffer | Scalar layout |
+| --- | --- |
+| `header` | Eight u32 words: version=1, width, height, registration (vertex=0/cell=1), diagonal (00-11=0/10-01=1), sample count, reserved=0, reserved=0 |
+| `transform` | Eight f32 words: column X/Y, row X/Y, inverse00, inverse01, inverse10, inverse11 |
+| `heights` | `width * height` row-major f32 elevations relative to `origin[2]` |
+| `validity` | `width * height` row-major u32 values, exactly 0 or 1 |
+
+`origin` stays in host-side double precision. Subtract its XY components before
+converting query coordinates to f32; subtract 0.5 from transformed grid coordinates
+for cell registration. The inverse transforms relative metric XY into grid
+coordinates. Sample heights are relative to `origin[2]`; reconstruct absolute
+heights by adding that origin at the appropriate precision. `heightReference`
+remains host metadata. Invalid heights are finite zero placeholders regardless
+of the chosen height origin; always consult validity before use.
+
+Packing rounds grid steps to f32, then computes and rounds their inverse. It
+rejects singular rounded grids and nonfinite transforms. **Horizontal grid
+quantization is separate from height quantization**: the packed grid may differ
+from the original grid. `maxHeightError` measures the largest absolute difference
+between source heights and reconstructed packed heights at source nodes, not
+horizontal error, surface interpolation error, or shader arithmetic error. It does
+not certify CPU/GPU parity. Choosing a height origin near the source elevations
+can reduce quantization. Valid heights that overflow f32, overflow reconstruction,
+or exceed the requested height-error budget cause packing to throw.
+
+`maxBytes` is a hard budget for all four upload buffers: `64 + 8 * sampleCount`,
+defaulting to 64 MiB. The count must fit u32. This excludes application/device
+copies, buffer-binding padding, and CPU reconstruction allocations. Packing does
+not choose an adapter, evict pages, schedule uploads, or consult device limits.
+
+`unpackTerrainHeightField()` validates the version, dimensions, flags, buffer
+lengths/types, finite values, binary masks, inverse transform and host metadata.
+It reconstructs a copied CPU reference for the quantized grid and elevations.
+The payload's buffers are mutable and transferable; do not modify or detach them
+while an upload or decoder reads them. Keep the tile identifier and snapshot
+revision alongside the payload in the resource manager. WGSL/GLSL samplers,
+bounded device page tables, shader conformance and luma.gl graph adapters are
+subsequent T3 work.

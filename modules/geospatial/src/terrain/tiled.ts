@@ -12,10 +12,20 @@ import {
   type TerrainSampleOptions
 } from './types';
 
-export type TerrainTile = {
-  matrixId: string;
-  column: number;
-  row: number;
+export type TerrainTileId = {
+  readonly matrixId: string;
+  readonly column: number;
+  readonly row: number;
+};
+
+export type TerrainHaloChange = TerrainTileId & {readonly resident: boolean};
+export type TerrainTileUpdate = {
+  revision: string;
+  tiles?: readonly TerrainTile[];
+  remove?: readonly TerrainTileId[];
+};
+
+export type TerrainTile = TerrainTileId & {
   heights: TerrainArray;
   validity?: Uint8Array;
 };
@@ -44,6 +54,8 @@ type Halo = {field: HeightField};
 export class TiledHeightField {
   readonly revision: string;
   readonly heightReference: string;
+  private readonly crs: string;
+  private changes: readonly TerrainHaloChange[] = Object.freeze([]);
   private readonly diagonal: TerrainDiagonal;
   private readonly matrices: readonly TileMatrix[];
   private readonly tiles = new Map<string, TileData>();
@@ -52,6 +64,7 @@ export class TiledHeightField {
   constructor(props: TiledHeightFieldProps) {
     if (typeof props.revision !== 'string') throw new Error('Terrain revision must be a string');
     this.revision = props.revision;
+    this.crs = props.matrixSet.crs;
     this.diagonal = props.diagonal ?? '00-11';
     if (this.diagonal !== '00-11' && this.diagonal !== '10-01')
       throw new Error('Unknown terrain diagonal');
@@ -75,41 +88,88 @@ export class TiledHeightField {
     )
       throw new Error('Terrain requires unique matrix identifiers');
     for (const tile of props.tiles) {
-      const matrix = this.getMatrix(tile.matrixId);
-      if (
-        !Number.isInteger(tile.column) ||
-        !Number.isInteger(tile.row) ||
-        tile.column < 0 ||
-        tile.row < 0 ||
-        tile.column >= matrix.matrixSize[0] ||
-        tile.row >= matrix.matrixSize[1]
-      )
-        throw new Error('Terrain tile index is outside its matrix');
-      const key = tileKey(matrix.id, tile.column, tile.row);
+      const matrix = this.validateTileId(tile);
+      const key = tileKey(tile.matrixId, tile.column, tile.row);
       if (this.tiles.has(key)) throw new Error('Duplicate terrain tile');
-      const [width, height] = matrix.tileSize;
-      if (
-        tile.heights.length !== width * height ||
-        (tile.validity && tile.validity.length !== width * height)
-      )
-        throw new Error('Terrain tile buffers must match tileSize');
-      if (
-        !(tile.heights instanceof Float32Array || tile.heights instanceof Float64Array) ||
-        (tile.validity !== undefined && !(tile.validity instanceof Uint8Array))
-      )
-        throw new Error('Invalid terrain tile buffer types');
-      const heights = new Float64Array(width * height);
-      const validity = new Uint8Array(width * height);
-      for (let index = 0; index < heights.length; index++) {
-        if (Number.isFinite(tile.heights[index]) && (!tile.validity || tile.validity[index])) {
-          heights[index] = tile.heights[index];
-          validity[index] = 1;
-        }
-      }
-      this.tiles.set(key, {heights, validity});
+      this.tiles.set(key, copyTileData(tile, matrix));
     }
     for (const tile of props.tiles)
       this.buildHalo(this.getMatrix(tile.matrixId), tile.column, tile.row, props.diagonal);
+    this.changes = freezeChanges(
+      props.tiles.map(tile => ({
+        matrixId: tile.matrixId,
+        column: tile.column,
+        row: tile.row,
+        resident: true
+      }))
+    );
+  }
+
+  /** Number of resident source tiles. */
+  get tileCount(): number {
+    return this.tiles.size;
+  }
+
+  /** Halos to upload or evict relative to the preceding snapshot; initial snapshots list all tiles. */
+  get haloChanges(): readonly TerrainHaloChange[] {
+    return this.changes;
+  }
+
+  /** Copy-on-write update. Only changed sources and resident one-tile neighborhoods rebuild halos.
+   * Old snapshots keep their original source buffers and halos. Map copying is O(resident tiles).
+   */
+  withTiles(update: TerrainTileUpdate): TiledHeightField {
+    if (typeof update.revision !== 'string' || update.revision === this.revision)
+      throw new Error('Terrain updates require a different revision string');
+    const replacements = new Map<string, TileData>();
+    const touched = new Map<string, TerrainTileId>();
+    for (const tile of [...(update.tiles ?? []), ...(update.remove ?? [])]) {
+      this.validateTileId(tile);
+      const key = tileKey(tile.matrixId, tile.column, tile.row);
+      if (touched.has(key))
+        throw new Error('Terrain update contains duplicate or conflicting tile identifiers');
+      touched.set(key, tile);
+    }
+    for (const tile of update.tiles ?? [])
+      replacements.set(
+        tileKey(tile.matrixId, tile.column, tile.row),
+        copyTileData(tile, this.getMatrix(tile.matrixId))
+      );
+    const next = new TiledHeightField({
+      matrixSet: {crs: this.crs, matrices: this.matrices},
+      tiles: [],
+      revision: update.revision,
+      diagonal: this.diagonal,
+      heightReference: this.heightReference
+    });
+    for (const [key, tile] of this.tiles) next.tiles.set(key, tile);
+    for (const [key, halo] of this.halos) next.halos.set(key, halo);
+    const affected = new Map<string, TerrainHaloChange>();
+    for (const [key, tile] of touched) {
+      if (replacements.has(key)) next.tiles.set(key, replacements.get(key)!);
+      else {
+        if (!next.tiles.delete(key)) continue;
+        next.halos.delete(key);
+      }
+      for (let row = tile.row - 1; row <= tile.row + 1; row++)
+        for (let column = tile.column - 1; column <= tile.column + 1; column++) {
+          affected.set(tileKey(tile.matrixId, column, row), {
+            matrixId: tile.matrixId,
+            column,
+            row,
+            resident: false
+          });
+        }
+    }
+    const changes: TerrainHaloChange[] = [];
+    for (const [key, tile] of affected) {
+      if (next.tiles.has(key)) {
+        next.buildHalo(next.getMatrix(tile.matrixId), tile.column, tile.row, this.diagonal);
+        changes.push({...tile, resident: true});
+      } else if (this.tiles.has(key)) changes.push(tile);
+    }
+    next.changes = freezeChanges(changes);
+    return next;
   }
 
   /** Independent finite halo buffers for workers or GPU upload; missing values use validity zero.
@@ -368,6 +428,20 @@ export class TiledHeightField {
     });
   }
 
+  private validateTileId(tile: TerrainTileId): TileMatrix {
+    const matrix = this.getMatrix(tile.matrixId);
+    if (
+      !Number.isInteger(tile.column) ||
+      !Number.isInteger(tile.row) ||
+      tile.column < 0 ||
+      tile.row < 0 ||
+      tile.column >= matrix.matrixSize[0] ||
+      tile.row >= matrix.matrixSize[1]
+    )
+      throw new Error('Terrain tile index is outside its matrix');
+    return matrix;
+  }
+
   private getMatrix(id: string): TileMatrix {
     const matrix = this.matrices.find(candidate => candidate.id === id);
     if (!matrix) throw new Error(`Unknown terrain matrix: ${id}`);
@@ -377,4 +451,37 @@ export class TiledHeightField {
 
 function tileKey(id: string, column: number, row: number): string {
   return JSON.stringify([id, column, row]);
+}
+
+function copyTileData(tile: TerrainTile, matrix: TileMatrix): TileData {
+  const [width, height] = matrix.tileSize;
+  if (
+    tile.heights.length !== width * height ||
+    (tile.validity && tile.validity.length !== width * height)
+  )
+    throw new Error('Terrain tile buffers must match tileSize');
+  if (
+    !(tile.heights instanceof Float32Array || tile.heights instanceof Float64Array) ||
+    (tile.validity !== undefined && !(tile.validity instanceof Uint8Array))
+  )
+    throw new Error('Invalid terrain tile buffer types');
+  const heights = new Float64Array(width * height);
+  const validity = new Uint8Array(width * height);
+  for (let index = 0; index < heights.length; index++) {
+    if (Number.isFinite(tile.heights[index]) && (!tile.validity || tile.validity[index])) {
+      heights[index] = tile.heights[index];
+      validity[index] = 1;
+    }
+  }
+  return {heights, validity};
+}
+
+function freezeChanges(changes: TerrainHaloChange[]): readonly TerrainHaloChange[] {
+  changes.sort(
+    (a, b) =>
+      (a.matrixId < b.matrixId ? -1 : a.matrixId > b.matrixId ? 1 : 0) ||
+      a.row - b.row ||
+      a.column - b.column
+  );
+  return Object.freeze(changes.map(change => Object.freeze(change)));
 }

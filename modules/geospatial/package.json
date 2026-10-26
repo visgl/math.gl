@@ -1124,6 +1124,11 @@
       "types": "./dist/terrain/tiled.d.ts",
       "import": "./dist/terrain/tiled.js",
       "require": "./dist/terrain/tiled.cjs"
+    },
+    "./terrain/packed": {
+      "types": "./dist/terrain/packed.d.ts",
+      "import": "./dist/terrain/packed.js",
+      "require": "./dist/terrain/packed.cjs"
     }
   },
   "files": [
