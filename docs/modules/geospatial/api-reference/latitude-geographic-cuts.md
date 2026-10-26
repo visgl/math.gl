@@ -9,8 +9,9 @@ The optional `@math.gl/geospatial/geographic-cuts` entry clips declared linear,
 ellipsoidal geodesic or rhumb edges to a closed latitude band and a configurable
 360-degree longitude chart. It preserves original curve intervals, holes and
 components, and labels the generated parallel and meridian boundaries explicitly.
-It adds no runtime dependencies. Arbitrary oblique horizons and general curved
-cut networks remain outside this bounded profile.
+It adds no runtime dependencies. For oblique ellipsoidal horizons and finite shared circle-boundary graphs, use the
+[geographic atlas](./geographic-atlas.md). Those capabilities remain separate from
+this latitude-band API.
 
 ```ts
 import {
