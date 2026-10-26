@@ -8,22 +8,28 @@ lobe that was never part of the input polygon.
 
 ## What is delivered
 
-`splitGeographicPolyline` / `splitGeographicPolygon` handle a configurable
-360-degree meridian chart with explicit linear/geodesic/rhumb edges, source
-fractions, attributes, components, holes and declared polar caps. Changing
-`seamLongitude` supports a shifted single longitude seam. Existing general planar
-clipping and projection-layout utilities remain useful; they do not by themselves
-establish topology for arbitrary curved geographic edges and surface cuts.
+Two existing APIs have distinct scopes. The geographic-seam API handles explicit
+linear/ellipsoidal-geodesic/rhumb edges at one longitude seam, with source fractions,
+attributes, components and polar caps. Separately, `@math.gl/geospatial/discontinuous`
+already clips spherical minor-great-circle lines and local polygons against
+interrupted lobes, polyhedral faces and visible caps. Its polygon input profile
+requires one open hemisphere. Point-only projection is not its only capability.
 
-## What we miss without general cuts
+The global spherical polygon increment in [PR #317](https://github.com/visgl/math.gl/pull/317)
+addresses that global-input restriction by atlas partitioning, while retaining the
+existing map-specific clippers. It is separate from general ellipsoidal/rhumb cut
+networks. The earlier gap description overstated what was missing by considering
+only the meridian-seam API.
 
-| Workflow | Missing capability / visible failure | Current safe scope |
+## What remains beyond the existing spherical profile
+
+| Workflow | Existing support | Remaining capability |
 | --- | --- | --- |
-| Interrupted world maps | Multiple seams ending or joining inside the globe need lobe assignment and shared-boundary ownership. A route may bridge lobes; land/hole fragments may fill the interruption. | Single-meridian charts, or data already correctly partitioned by the application. |
-| Polyhedral/faceted maps | Classify faces and intersect their spherical/ellipsoidal boundaries; preserve shared-edge identity across vertices where several faces meet. Missing cuts can connect distant faces or duplicate/drop boundary pieces. | Project points, or externally prepared face fragments with a declared edge model. |
-| Orthographic/other limited domains | Clip edges at the actual visible horizon or valid-domain boundary, inserting boundary arcs to close polygon fragments. Dropping invalid vertices loses visible portions and can join unrelated endpoints. | Points with visibility tests; application-owned clipping of full edges/polygons. |
-| Arbitrary regional or oblique surface windows | Intersect curved source edges with non-meridian boundaries and reconstruct holes/components. Planar lon/lat chords can select the wrong intersection or side. | Explicitly qualified planar operations or externally clipped geographic data. |
-| Shared borders across charts | Canonical intersection identities and boundary ownership keep adjacent polygons watertight, including tangencies and cut junctions. Independent per-feature rounding can create cracks or overlapping slivers. | Existing meridian-profile contracts; applications own broader shared topology. |
+| Interrupted world maps | Spherical lobe splitting, local polygon components/holes and placement. | Directed global boundaries/complements (PR #317); arbitrary ellipsoidal/rhumb cut networks remain separate. |
+| Polyhedral/faceted maps | Convex spherical face classification/intersections and existing topology presets. | Broader global polygon input, shared feature-network identity and non-spherical edge/cut models. |
+| Orthographic/limited domains | Spherical cap/horizon clipping and generated closure arcs for the existing map profile. | Qualified ellipsoidal visibility domains and explicit broader curve models, not another point-only visibility test. |
+| Arbitrary regional windows | Existing convex spherical charts and explicit meridian seams. | Arbitrary user-defined curved cut graphs and robust junction ownership across those curves. |
+| Shared borders across charts | Existing spherical chart boundaries and source-coordinate correspondence. | Canonical shared-feature network topology, source intervals for broader edge models and dataset-wide crack/overlap guarantees. |
 
 These gaps affect whole-feature clipping/topology, not the accuracy of the
 existing scalar projection formulas. Adding more vertices or longitude unrolling
@@ -62,7 +68,7 @@ assume geodesic/geodesic intersections solve small-circle or horizon boundaries.
 ## Priority recommendation
 
 Bring a bounded domain-clipping consumer ahead of speculative full cut-graph work.
-For ordinary continuous maps with one longitude seam, the current profile is
-sufficient. For interrupted maps, faceted maps or whole polygons on a visible
-hemisphere, general cuts become a real feature dependency. G11 Earth fields are
+For ordinary continuous maps, the meridian profile is often sufficient. Existing
+spherical interrupted/faceted/cap maps already have their own cutters. Wider
+curve/domain and shared-network requirements should drive further generalization. G11 Earth fields are
 independent: implementing gravity or magnetic models does not close these gaps.

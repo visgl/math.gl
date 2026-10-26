@@ -1,6 +1,8 @@
 # G11: Optional Earth models
 
-This is a proposed feature design, not a delivered API or a parity claim. Keep
+This is a feature design, not a parity claim. Dataset-free normal gravity is now
+implemented separately in [PR #318](https://github.com/visgl/math.gl/pull/318); the
+remaining model increments below remain proposals. Keep
 model evaluation separate from ellipsoid geometry and from coordinate/datum
 operations. A WGS84 position identifies where to evaluate a field; it does not
 supply a gravity or magnetic model.
