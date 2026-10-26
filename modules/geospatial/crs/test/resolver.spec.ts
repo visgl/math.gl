@@ -15,6 +15,29 @@ import {wgs84GeographicCRS} from './projjson-fixtures';
 const WGS84 = '+proj=longlat +datum=WGS84';
 
 describe('opt-in CRS resolver', () => {
+  test('honors declared representations instead of inferring them again', async () => {
+    const resolver = createCRSResolver({
+      providers: [createCRSDictionaryProvider({'APP:custom/name': WGS84, opaque: WGS84})]
+    });
+    const identifier = {
+      state: 'explicit',
+      definition: 'APP:custom/name',
+      representation: 'identifier'
+    } as const;
+    expect((await resolver.resolve(identifier)).input).toMatchObject({definition: WGS84});
+    const opaque = {state: 'explicit', definition: 'opaque', representation: 'opaque'} as const;
+    expect(await resolver.resolve(opaque)).toEqual({input: opaque, lookups: []});
+  });
+
+  test('counts alias hops independently of the initial lookup', async () => {
+    const providers = [createCRSDictionaryProvider({A: 'B', B: WGS84})];
+    expect((await createCRSResolver({providers, maxDepth: 1}).resolve('A')).input).toBe(WGS84);
+    expect((await createCRSResolver({providers, maxDepth: 0}).resolve('B')).input).toBe(WGS84);
+    await expect(createCRSResolver({providers, maxDepth: 0}).resolve('A')).rejects.toMatchObject({
+      reason: 'limit'
+    });
+  });
+
   test('resolves aliases in provider order and retains lookup provenance', async () => {
     const resolver = createCRSResolver({
       providers: [
@@ -233,7 +256,7 @@ describe('opt-in CRS resolver', () => {
   test.each([
     [{}, 'not-found', 16],
     [{A: 'B', B: 'A'}, 'cycle', 16],
-    [{A: 'B', B: WGS84}, 'limit', 1]
+    [{A: 'B', B: 'C', C: WGS84}, 'limit', 1]
   ] as const)(
     'reports missing, circular and excessive alias chains',
     async (entries, reason, maxDepth) => {
@@ -255,7 +278,7 @@ describe('opt-in CRS resolver', () => {
       });
       await expect(resolver.resolve('A')).rejects.toBeInstanceOf(CRSResolutionError);
     }
-    for (const options of [{maxCacheSize: -1}, {maxDepth: 0}, {maxDepth: 1.5}]) {
+    for (const options of [{maxCacheSize: -1}, {maxDepth: -1}, {maxDepth: 1.5}]) {
       expect(() => createCRSResolver({providers: [], ...options})).toThrow(RangeError);
     }
     expect(() => createCRSResolver({providers: [{id: '', resolve: () => null}]})).toThrow();

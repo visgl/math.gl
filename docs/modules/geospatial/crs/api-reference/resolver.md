@@ -27,7 +27,8 @@ keys are exact and case-sensitive. A provider owns any authority-specific normal
 `resolve(input)` accepts the shared `CRSInput`: a definition, `CRSReference`, or
 `SpatialReference`. It returns an immutable `{input, lookups}`. Each lookup records
 the identifier, provider ID and optional version. WKT, PROJ strings, PROJJSON objects
-and opaque definitions pass through without syntax or execution validation.
+and opaque definitions pass through without syntax or execution validation. References
+honor their declared `representation`; only bare definitions use inference.
 
 For source metadata, the resolved definition becomes primary and the original is
 retained in `alternatives`. Existing alternatives, declaration state, provenance,
@@ -50,7 +51,8 @@ another lookup while an older one is still running. Set zero to disable caching.
 Rejections are evicted so a later call can retry. `clear()` evicts all entries but
 does not cancel already returned promises or allow their completion to refill the cache.
 
-Alias traversal is bounded by `maxDepth` (default 16). `CRSResolutionError.reason`
+Alias traversal is bounded by `maxDepth` (default 16), counting hops after the
+initial lookup. Zero permits a direct definition lookup but no alias hops. `CRSResolutionError.reason`
 is `not-found`, `cycle`, `limit`, or `invalid-result`; `identifier` identifies the
 failed lookup. Provider exceptions remain unchanged. The resolver validates the
 shape of returned definitions; semantic validity belongs to the consuming engine.

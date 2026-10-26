@@ -69,7 +69,7 @@ export function createCRSResolver(options: CRSResolverOptions): CRSResolver {
     !Number.isSafeInteger(maxCacheSize) ||
     maxCacheSize < 0 ||
     !Number.isSafeInteger(maxDepth) ||
-    maxDepth < 1
+    maxDepth < 0
   ) {
     throw new RangeError('Invalid CRS resolver cache size or alias depth');
   }
@@ -90,7 +90,7 @@ export function createCRSResolver(options: CRSResolverOptions): CRSResolver {
     visited = new Set<string>()
   ): Promise<DefinitionResult> {
     if (visited.has(identifier)) throw new CRSResolutionError('cycle', identifier);
-    if (visited.size >= maxDepth) throw new CRSResolutionError('limit', identifier);
+    if (visited.size > maxDepth) throw new CRSResolutionError('limit', identifier);
     visited.add(identifier);
     for (const provider of providers) {
       const supplied = await provider.resolve(identifier);
@@ -117,8 +117,11 @@ export function createCRSResolver(options: CRSResolverOptions): CRSResolver {
     throw new CRSResolutionError('not-found', identifier);
   }
 
-  function resolveDefinition(definition: ReadonlyCRSDefinition): Promise<DefinitionResult> {
-    if (typeof definition !== 'string' || inferCRSRepresentation(definition) !== 'identifier') {
+  function resolveDefinition(
+    definition: ReadonlyCRSDefinition,
+    representation = inferCRSRepresentation(definition)
+  ): Promise<DefinitionResult> {
+    if (typeof definition !== 'string' || representation !== 'identifier') {
       return Promise.resolve({definition, lookups: Object.freeze([])});
     }
     const existing = cache.get(definition);
@@ -146,7 +149,7 @@ export function createCRSResolver(options: CRSResolverOptions): CRSResolver {
       const lookups: CRSLookup[] = [];
       async function reference(ref: CRSReference): Promise<CRSReference> {
         if (ref.state !== 'explicit' && ref.state !== 'default') return ref;
-        const result = await resolveDefinition(ref.definition);
+        const result = await resolveDefinition(ref.definition, ref.representation);
         lookups.push(...result.lookups);
         if (!result.lookups.length) return ref;
         return {
