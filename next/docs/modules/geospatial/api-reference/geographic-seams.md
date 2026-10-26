@@ -97,3 +97,7 @@ Near-meridional geodesics have ill-conditioned longitude intersections: nanometr
 `GeographicSeamError` extends `RangeError` and has `reason: 'input' | 'precision' | 'topology' | 'limit'`. Underlying solver domain errors, including `RhumbDomainError`, propagate. No threshold is relaxed when a limit is exhausted.
 
 The implementation and native workloads are original MIT math.gl code. Existing PROJ/GeographicLib SPDX acknowledgements and packaged licenses are retained. Native source compilation is offline only; CI uses stored, provenance-checked controls. A shared 317-case matrix runs in Node, Chromium, Firefox and WebKit: 100 native rhumb adapter cases, 100 native rhumb seam cases, 110 interior geodesic seam cases and seven independent sphere/topology controls. Qualification reports retain per-case error budgets, source hashes and runtime versions. No runtime package dependency is added.
+
+## Global spherical map polygons[​](#global-spherical-map-polygons "Direct link to Global spherical map polygons")
+
+For directed spherical polygons that do not fit in one open hemisphere, use [global spherical cuts](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/global-geographic-cuts.md). They partition hemispheres, complements and holes before the existing map engine's lobe/face/cap clipping. This profile uses minor great-circle edges; the ellipsoidal/rhumb meridian seam APIs above retain their own explicit edge semantics.
