@@ -77,6 +77,7 @@ export class TiledHeightField {
         throw new Error('Terrain matrices need at least two samples per axis');
       return {
         ...matrix,
+        variableMatrixWidths: matrix.variableMatrixWidths ? [] : undefined,
         origin: [...matrix.origin] as [number, number],
         tileSize: [...matrix.tileSize] as [number, number],
         matrixSize: [...matrix.matrixSize] as [number, number]

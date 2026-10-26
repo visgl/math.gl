@@ -247,3 +247,18 @@ test('streaming changes drive standalone halo uploads without including untouche
     expect(decoded.diagonal).toBe(source.diagonal);
   }
 });
+
+test('snapshot updates do not observe mutations to caller-owned matrix metadata', () => {
+  const bands: Array<{coalesce: number; minTileRow: number; maxTileRow: number}> = [];
+  const input = {...matrix, origin: [0, 0] as [number, number], variableMatrixWidths: bands};
+  const original = new TiledHeightField({
+    matrixSet: {crs: 'local', matrices: [input]},
+    tiles: [tile(0, 0)],
+    revision: 'before'
+  });
+  input.origin[0] = 999;
+  bands.push({coalesce: 2, minTileRow: 0, maxTileRow: 0});
+  const next = original.withTiles({revision: 'after', tiles: [tile(1, 0, 30)]});
+  expect(next.sample(2, 1, {matrixId: 'fine'}).height).toBe(20);
+  expect(original.sample(1, 1, {matrixId: 'fine'}).height).toBe(10);
+});
