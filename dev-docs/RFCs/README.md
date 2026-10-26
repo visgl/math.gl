@@ -8,6 +8,7 @@ Writeups of directions in major areas of interest
 
 | Roadmap | Description |
 | ------- | ----------- |
+| [Terrain math and GPU compute](../terrain-roadmap.md) | Shared CPU/GPU terrain surfaces, tiled sampling, meshing, deck.gl fitting, and simulation |
 | [TypeScript proj4 parity](../projection-roadmap.md) | Independent engine, pluggable projections, and staged parity with proj4js |
 
 ## v3.0 RFCs

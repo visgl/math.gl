@@ -1,0 +1,37 @@
+# @math.gl/geospatial/terrain
+
+Experimental renderer-independent height fields, sampling, derivatives, and regular
+terrain meshes. The main entry point has no runtime imports from other packages.
+Mesh construction is available separately from `@math.gl/geospatial/terrain/geometry`.
+
+```ts
+import {HeightField, TerrainSampleStatus} from '@math.gl/geospatial/terrain';
+import {HeightFieldGeometry} from '@math.gl/geospatial/terrain/geometry';
+
+const field = new HeightField({
+  width: 2,
+  height: 2,
+  heights: new Float32Array([0, 2, 1, 4]),
+  columnStep: [10, 0],
+  rowStep: [0, 10],
+  registration: 'vertex',
+  heightReference: 'local-survey'
+});
+
+const sample = field.sample(5, 5);
+if (sample.status === TerrainSampleStatus.VALID) {
+  console.log(sample.height); // 1.75 meters, using bilinear interpolation
+}
+
+const mesh = new HeightFieldGeometry(field);
+// POSITION is relative to mesh.origin; NORMAL is a smooth shading normal.
+// Use field.sample(x, y, {interpolation: 'triangle'}) for the mesh's linear surface.
+```
+
+This initial implementation uses affine local Cartesian coordinates and heights in
+meters, with Z up. It does not interpret longitude/latitude or convert height
+references. Input arrays are copied; missing samples are stored as finite zeros
+with a separate mask. Query status must be checked before using a result.
+
+See the [API and numerical contract](../../../docs/modules/geospatial/terrain/README.md) and
+[implementation roadmap](../../../dev-docs/terrain-roadmap.md).

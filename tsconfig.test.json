@@ -874,6 +874,12 @@
       ],
       "@math.gl/web-mercator/*": [
         "./modules/web-mercator/src/*"
+      ],
+      "@math.gl/geospatial/terrain": [
+        "./modules/geospatial/src/terrain/index.ts"
+      ],
+      "@math.gl/geospatial/terrain/geometry": [
+        "./modules/geospatial/src/terrain/geometry.ts"
       ]
     }
   }
