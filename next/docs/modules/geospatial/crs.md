@@ -140,6 +140,8 @@ The root entry point remains available. Applications that split optional parsing
 
 ## API[​](#api "Direct link to API")
 
+Optional [CRS resolution](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/resolver.md) accepts application-owned catalogues and asynchronous providers through `@math.gl/geospatial/crs/resolver`. Resolution supplies definitions; execution support remains engine-specific.
+
 * `CRSDefinition<T extends PROJJSONCRS = PROJJSONCRS>` — a string definition or PROJJSON object.
 * `PROJJSONCRS` — generated from the official v0.7 schema's `#/definitions/crs`.
 * `PROJJSONCRSType` — all top-level PROJJSON CRS type literals.

@@ -204,6 +204,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Tile matrices](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/tile-matrix.md): @math.gl/geospatial/tile-matrix provides geometry, extent queries and level selection for
 - [Triaxial geometry and geodesics](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/triaxial-geometry.md): TriaxialEllipsoid supplies surface coordinate and direction conversions and
 - [CRS Definitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs.md): @math.gl/geospatial/crs provides lightweight, proj4-independent TypeScript definitions and syntax codecs
+- [Opt-in CRS resolution](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/resolver.md): @math.gl/geospatial/crs/resolver resolves authority identifiers using application-supplied
 - [Spatial Reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/spatial-reference.md): @math.gl/geospatial/crs provides a format-neutral descriptor for reporting how a dataset's coordinates are
 - [Coordinate Reference Systems](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/developer-guide/coordinate-reference-systems.md): A coordinate tuple such as [12.49, 41.89] is not a location by itself. Software also needs to
 - [Geospatial terminology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/terminology.md): Geospatial code combines several kinds of geometry: coordinates in a reference
