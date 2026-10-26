@@ -20,6 +20,12 @@ const probes = [
     budget: 16000
   },
   {
+    symbol: 'packTerrainHeightField',
+    packages: ['@math.gl/geospatial/terrain/packed'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/ellipsoid/],
+    budget: 12000
+  },
+  {
     symbol: 'Ellipsoid',
     packages: ['@math.gl/geospatial', '@math.gl/geospatial/ellipsoid'],
     forbidden: [/\/geometry\//, /\/classes\/matrix[34]\./, /\/local-frame\./,

@@ -4,7 +4,9 @@
 # Terrain math and GPU compute roadmap
 
 Status: proposal, researched October 26, 2026. Phase numbers express dependencies,
-not release dates or staffing commitments. APIs below are design sketches.
+not release dates or staffing commitments. APIs below are design sketches. This is
+a cross-repository roadmap: shader code and device execution belong in luma.gl,
+not math.gl.
 
 ## Implementation progress
 
@@ -20,12 +22,18 @@ metric interpolant gradients and normals, extrema, regular meshes with explicit
 origins, and analytic/mesh conformance tests. See the
 [API contract](../docs/modules/geospatial/terrain/README.md).
 
-The next tranche adds geographic/Web Mercator raster queries with WGS84 metric
+The geographic/tiled tranche adds geographic/Web Mercator raster queries with WGS84 metric
 derivatives, immutable cell-registered tiled snapshots, neighbor halos, explicit
 residency, whole-footprint coarser fallback, and transferable halo copies.
 
-This is partial T0/T1/T2 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
-spike, vertex-tile reconciliation, incremental cache updates, adaptive meshes,
+Incremental snapshots now support atomic insertion, replacement and eviction with
+neighbor-halo invalidation. The opt-in packed-buffer entry adds an experimental
+versioned f32/u32 upload layout, byte/height-error budgets and validated CPU
+reconstruction. This is a renderer-independent data substrate. Shader code and
+device execution belong to companion luma.gl work.
+
+This is partial T0/T1/T2/T3 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
+spike, vertex-tile reconciliation, persistent cache structures, adaptive meshes,
 and GPU qualification remain open. The remaining sections describe the target architecture and delivery gates.
 
 ## Recommendation
@@ -216,7 +224,7 @@ mix revisions while a tile is being replaced or evicted.
 
 | Owner | Proposed responsibilities |
 | --- | --- |
-| `@math.gl/geospatial/terrain` | Typed surface data, CPU reference kernels, query semantics, metadata, resident tile index, interpolation, derivatives, bounds, mesh preparation, and portable kernel/resource descriptions |
+| `@math.gl/geospatial/terrain` | Typed surface data, CPU reference kernels, query semantics, metadata, resident tile index, interpolation, derivatives, bounds, mesh preparation, and renderer-independent data layouts and numerical contracts |
 | Existing math.gl packages | Generic geometry and acceleration primitives where reusable; CRS, projection, ellipsoid, geoid, and culling math |
 | `@loaders.gl/terrain` and raster loaders | Decode/encode formats; preserve original samples, masks, quantization and registration; invoke optional math.gl meshing; retain compatibility output paths |
 | luma.gl terrain adapter, package location to be decided | WGSL/GLSL implementations, buffer/texture allocation, uploads, residency, graph contributors, dispatch, GPU resource lifetime and diagnostics |
@@ -225,6 +233,9 @@ mix revisions while a tile is being replaced or evicted.
 
 Dependency direction is loaders/luma/deck -> math.gl. math.gl remains usable in
 Node and workers without a GPU device, browser DOM, or renderer dependency.
+Do not add WGSL, GLSL, shader generators, GPU bindings or dispatch code to math.gl.
+math.gl supplies CPU algorithms, typed data, layout contracts and conformance
+fixtures; luma.gl implements and validates the GPU consumers.
 Keep meshing, analysis, and geospatial adapters as optional imports when their
 cost warrants it. Avoid introducing a general raster framework before terrain
 consumers demonstrate the need for that extraction.
@@ -245,8 +256,9 @@ flowchart TD
 
 Expose a small operation vocabulary: tile lookup, domain transform, height fetch,
 validity, interpolation, derivative, bounds lookup, and eventually intersection.
-Start with explicit CPU and shader implementations sharing descriptors and
-conformance vectors. Evaluate code generation only if this vocabulary stabilizes;
+Start with explicit math.gl CPU algorithms and luma.gl shader implementations
+sharing data descriptors and conformance vectors. Evaluate shader code generation
+within luma.gl only if this vocabulary stabilizes;
 arbitrary JavaScript callbacks do not constitute a portable GPU program.
 
 The GPU adapter should expose both:
@@ -272,7 +284,7 @@ memory. Once resident, simulation and rendering should reuse resources without
 mandatory per-frame readback. Graph updates must publish data and lookup tables
 together, with ping-pong resources or ordered passes where required.
 
-Use WGSL for the compute baseline, with GLSL sampling parity for existing WebGL2
+In luma.gl, use WGSL for the compute baseline, with GLSL sampling parity for existing WebGL2
 rendering consumers. WebGL2 is a separate capability tier, not a promise of all
 WebGPU compute operations. CPU/GPU agreement is tolerance-based, not bitwise:
 [WGSL floating-point evaluation](https://www.w3.org/TR/WGSL/#floating-point-evaluation)
@@ -347,11 +359,13 @@ metrics are independently checked; mixed-LOD seams have a tested strategy.
 
 ### T3 — GPU sampling substrate and first compute consumer
 
-T3 begins after T1's contract stabilizes and can overlap T2. Implement the resource
-descriptor/packing version, WGSL and GLSL sampling functions, batch graph nodes,
-incremental uploads, explicit statuses, and bounded resident pages. Add derivative
-and min/max reductions where there is a measured consumer. Reuse luma.gl's resource
-and graph machinery; avoid a terrain-specific scheduler.
+T3 begins after T1's contract stabilizes and can overlap T2. In math.gl, implement
+the renderer-independent data descriptor/packing version, CPU reference behavior,
+explicit statuses and conformance fixtures. In companion luma.gl PRs, implement
+WGSL/GLSL sampling functions, batch graph nodes, incremental uploads and bounded
+device-resident pages. Device derivative and min/max reductions also belong in
+luma.gl where justified by a measured consumer. Reuse luma.gl's resource and graph
+machinery; avoid a terrain-specific scheduler.
 
 Integrate a terrain-aware particle example that samples height and validity in
 the particle kernel. Test source missingness, tile replacement, and fixed-step
@@ -484,7 +498,7 @@ published crossover point.
    semantics, shared terrain input, offset/drape/picking integration tests.
 
 Open choices to resolve through those prototypes: exact package/export placement
-for shaders; atlas versus texture-array/storage-buffer layouts; default source
+within luma.gl for shaders; atlas versus texture-array/storage-buffer layouts; default source
 versus displayed-surface offset policy; the smallest supported cross-tile seam
 contract; and whether existing tessellators can be wrapped without maintained
 forks. None should block the CPU reference surface and conformance fixtures.
