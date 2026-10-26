@@ -1,6 +1,6 @@
 # Tectonic time machine
 
-Interactive browser example: −1800 Ma to present to +300 Ma, globe and Equal Earth,
+Interactive browser example: −4567 Ma to present to +300 Ma, globe and Equal Earth,
 Mollweide, Robinson, sinusoidal, Miller cylindrical, equirectangular and Mercator maps. Includes Play / Stop, speed,
 timeline landmarks, central meridian, hover coordinate tooltips, graticule and continent-region coloring.
 
@@ -36,7 +36,7 @@ Each source loads immutable, commit-pinned snapshots from
 [deck.gl-data](https://github.com/visgl/deck.gl-data/tree/master/earth/tectonic-movements/v1).
 Cao has one tagged Parquet file; Müller has separate geometry and rotations. Geometry
 contains WKB polygons in longitude/latitude degrees. Switching sources cancels waiters
-and clamps time to the selected source's range. Different models are never mixed.
+and keeps plate rotations within the selected source's range. Earlier dates use a labeled procedural surface on the same timeline. Different reconstruction models are never mixed.
 
 Sources: [Cao et al. 2024](https://doi.org/10.1016/j.gsf.2024.101922),
 [Müller et al. 2022](https://doi.org/10.5194/se-13-1127-2022),
@@ -111,7 +111,7 @@ A visible Play / Stop button works directly in the inline documentation example.
 The compact expandable info box includes sources and scientific limits.
 
 Ocean ripples and specular lighting use the public luma.gl `waterMaterial` API. Modern
-NASA terrain stays attached to each moving rigid block through projection transitions.
+In the modern-imagery appearance mode, NASA terrain stays attached to each moving rigid block through projection transitions.
 It is visual context, not a reconstruction of ancient mountains, vegetation or ice;
 no elevation is inferred from the image. If imagery fails to load, neutral shaded land
 is shown. Region colors remain available as an alternative.
@@ -174,44 +174,30 @@ the debated Late Heavy Bombardment, early zircons, oxygenation, Cryogenian
 glaciations and the Big Five mass extinction intervals. Entries support text
 search, category filtering and source links.
 
-**Scientific boundaries:** this is an event catalogue, not a 4.567-billion-year
-tectonic reconstruction. Existing plate models still stop at 1,000 or 1,800 Ma.
-A `View at this age` control is shown only when the selected model covers that
-age; older events are browsable but cannot be mapped with nonexistent plates.
-The Theia impact and discrete Late Heavy Bombardment spike are not observed
-reconstructions; ages and event descriptions have model uncertainty.
-No simulated collision animation, stochastic bombardment positions, or
-extinction-rate measurements are implied.
+**Scientific boundaries:** the single playback timeline now spans 4,567 Ma to
++300 Ma, while measured/modelled plate rotations still stop at 1,000 or 1,800 Ma.
+Every event seeks that same timeline. There is no separate exploratory mode,
+blocking overlay or Return action. Play/Stop, scrubbing, rotation and projection
+morphs work continuously across the source boundary.
 
-Future iterations should ingest independently licensed numerical impact-flux
-models, lunar crater observations and paleobiological occurrence/rate data
-via deck.gl-data STAC, with explicit source, model, uncertainty and coordinate
-frame metadata. An extended timeline will require a separate planetary
-visualization mode, rather than stretching rigid plate rotations into the Hadean.
+### Early Earth surface
 
-### Geological event rail
+Before the selected plate model's oldest age, a global procedural material
+replaces the continent layer. The Hadean appearance is dark, rough basalt-like
+crust with bright lava lakes and fissures, rather than an entirely orange globe.
+Around the illustrative late-heavy-bombardment interval (4,100–3,700 Ma), localized
+strikes flash, leave glowing molten pools and rings, then cool. Impact sites and
+visual cadence are original art parameters, not observed coordinates, rates or
+physical asteroid simulations. The existence of a discrete bombardment spike
+remains debated. No modern imagery or reconstructed continents are used for
+these early surfaces. Gradual cooling/water colors are also illustrative.
 
-A separate 4,567–0 Ma overview places sourced event markers on a geological
-age axis. This is **not** the plate reconstruction timeline. Markers within
-the selected source's age range can seek the existing timeline; older
-markers remain visible but are disabled, with an explanation in their
-accessible label and tooltip. Category and text filters apply to both the
-event browser and the rail. Marker positions are linear in millions of
-years, so closely spaced recent events may overlap; the event list remains
-the accessible way to inspect their full details.
-
-The existing TimelineWidget and geological playback bounds are unchanged.
-
-### Early Earth conceptual mode and data readiness
-
-For event ages older than the selected plate model, the event rail and
-browser now offer an **Explore early Earth scenario** action. This pauses
-tectonic playback and covers the map with a separate, deliberately stylized
-planetary scene. Stage labels distinguish accretion, Moon-forming impact
-scenarios, cooling crust and later pre-tectonic Earth. The visual is an
-educational illustration, **not** a physics simulation, reconstructed
-surface, impact geometry or inferred global magma coverage. Returning
-restores the tectonic scene and its existing playback age.
+Material noise and impact sites live in geographic sphere space, so they follow
+rotation and every projection once. Effects are driven by geological playback
+age: Stop freezes their evolution and revisiting an age reproduces the same terrain
+and impact state. A subtle cosmetic thermal pulse continues while paused.
+The source-linked event browser and overview rail remain navigation shortcuts
+to the same geological time, with clearly marked illustrative older dates.
 
 `planetary-history.js` also defines a provenance-gated contract for
 future impact-flux and biodiversity time series. Each series must identify
@@ -258,3 +244,60 @@ checks and projection-aware rendering before exposing any map overlay.
 Land-plant emergence is marked at approximately 470 Ma, with an illustrative
 80 Myr transition from bare earth tones to modern texture colors. This is not
 an ancient vegetation reconstruction; region colors remain a categorical view.
+
+## Historical PaleoDEM terrain
+
+Playback starts at 500 Ma so historical terrain is visible immediately.
+The default **Historical terrain · PaleoDEM** appearance uses Scotese and Wright's
+CC-BY-4.0 PALEOMAP PaleoDEMs v2 from 540 Ma through the present. The 3.1 MB
+[immutable Parquet snapshot](https://media.githubusercontent.com/media/visgl/deck.gl-data/eaa2649826c795492ee89a2632d863788545f2a2/earth/paleogeography/v1/paleodem/paleodem.parquet)
+is registered in the [deck.gl-data STAC catalog](https://github.com/visgl/deck.gl-data/pull/51).
+See the in-example Sources section and [ATTRIBUTION.md](ATTRIBUTION.md).
+
+The loaders.gl TypeScript Parquet decoder streams only `elevation_m` in a worker.
+Grid dimensions and age indexes come from the pinned manifest. Decode starts at
+the requested age, prioritizes seeks, then fills younger history in playback order;
+older snapshots complete in the background. Completed float32 elevation grids
+occupy about 28 MB; only the two displayed grids have GPU textures. Pending,
+failed, or out-of-range terrain uses explicitly labeled illustrative plate imagery.
+The display never labels a stale grid as the requested age.
+
+Land/sea masks and terrain colors are derived from elevation, with bilinear spatial
+sampling, linear interpolation between the bracketing 5 Ma grids, and exaggerated
+8× hill shading. This is a shaded surface, not an extruded elevation mesh. Source
+edge omissions remain uncovered; no missing polar/dateline nodes are extrapolated.
+Colors, vegetation greening and glaciations are illustrative, not reconstructed
+biomes or climate. Plant emergence still controls greening around 470 Ma.
+
+PaleoDEM grids are **already reconstructed in the PALEOMAP frame**. Their global
+surface replaces the plate-template land layer in this appearance mode; it is not
+rotated, clipped to, or presented as compatible with Cao/Müller coastlines. The
+selected plate model still supplies region colors and the earlier/future fallback.
+Choose **Modern NASA imagery on plates** or **Region colors** to see those plate
+models throughout their time ranges. Globe rotation, meridian shifts and projection
+morphing transform the global surface once, without applying plate rotations.
+
+Deep time plays at 5× the selected speed before the chosen plate model begins.
+The final accelerated step lands exactly on that boundary, then normal speed
+and the existing glaciation slowdowns resume. The Theia marker at approximately
+4,500 Ma triggers a brief whole-Earth white-hot emissive pulse and halo, which
+fades back to Hadean rock/lava over subsequent timeline ages. The shader uses
+above-white linear radiance and a display tone map; it does not require an HDR
+monitor. Pulse duration and appearance are illustrative, not an impact simulation.
+
+Event windows temporarily slow Theia/cooling, emerging oceans and late-heavy-
+bombardment playback, while quieter deep time stays accelerated. Sea coverage
+expands gradually through synthetic basins rather than switching materials in a
+single frame. A 120 Myr visual crossfade hands the early surface over to the first
+plate-model frames; it is a display blend, not a merged geological reconstruction.
+
+Evidence supports liquid water by about 4.4 Ga, but the onset and global extent of
+oceans are uncertain. See [older-Earth data candidates and evidence](early-earth-sources.md)
+for verified open releases, limitations and references. **Euramerica (Laurussia)**
+labels the earlier landmass; **Laurasia** labels the later northern Pangaea breakup.
+
+The Theia peak is white-hot, cooling through yellow on its way back to the
+Hadean material. A separate, subtle 4.5-second thermal breathing effect varies
+Hadean intensity by ±8%; it remains alive while paused. Geological age, impact
+positions and impact cooling still freeze with Stop. All of these effects are
+illustrative art rather than physical radiometry or simulated impact histories.

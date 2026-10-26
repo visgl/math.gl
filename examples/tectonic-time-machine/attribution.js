@@ -36,6 +36,17 @@ export function tectonicSources(source) {
         "Coastline geometry supplied within the Müller model archive and simplified for display.",
     });
   entries.push({
+    id: "paleodem",
+    title: "Historical terrain · 0–540 Ma",
+    credit: "Scotese and Wright (2018), PALEOMAP PaleoDEMs v2",
+    creators: "Christopher R. Scotese and Nicky M. Wright.",
+    dataset: "https://doi.org/10.5281/zenodo.5460860",
+    license: "CC BY 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+    hosted: "https://github.com/visgl/deck.gl-data/tree/eaa2649826c795492ee89a2632d863788545f2a2/earth/paleogeography/v1/paleodem",
+    changes: "Lossless source CSV-to-Parquet conversion; elevation-only streaming, float32 display textures, spatial/temporal elevation interpolation, illustrative colors and 8× hill shading. Already reconstructed source coordinates are not rotated with the plate models. Vegetation is illustrative.",
+  });
+  entries.push({
     id: "blue-marble",
     title: "Modern terrain imagery",
     credit: "NASA Blue Marble",

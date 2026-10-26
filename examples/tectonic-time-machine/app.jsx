@@ -9,9 +9,9 @@ import {maintainHistory} from './history-stream.js';
 import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime} from './sources.js';
 import {REGIONS, timeLabel} from './math.js';
 import {EARTH_EVENTS, EVENT_CATEGORIES, filterEarthEvents, eventIsReconstructable} from './earth-events.js';
-import {planetaryStage} from './planetary-history.js';
+import {EARTH_FORMATION_MA, clampTimelineTime, isEarlyEarth, planetaryStage} from './planetary-history.js';
 import {PALEO_FEATURES, featuresAtAge, searchPaleoFeatures} from './paleo-features.js';
-import {TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
+import {playbackFocus, TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
 import AttributionWidget from '../shared/attribution-widget.jsx';
@@ -20,17 +20,18 @@ export default function TectonicTimeMachine() {
   const canvas = useRef(null),
     stage = useRef(null),
     scene = useRef(null),
-    clock = useRef(-930),
+    clock = useRef(-500),
     timeline = useRef(null),
     playback = useRef(null);
-  const [time, setTime] = useState(-930),
+  const [time, setTime] = useState(-500),
     [playing, setPlaying] = useState(false),
     [ready, setReady] = useState(false),
     [status, setStatus] = useState('Ready to load published history'),
     [historyStatus, setHistoryStatus] = useState(''),
     [error, setError] = useState(''),
+    [renderError, setRenderError] = useState(''),
     [attempt, setAttempt] = useState(0);
-  const planetaryAgeRef = useRef(null);
+  const playIntent = useRef(true);
   const [sourceId, setSourceId] = useState(DEFAULT_SOURCE),
     [model, setModel] = useState(null);
   const source = sourceFor(sourceId);
@@ -43,21 +44,28 @@ export default function TectonicTimeMachine() {
     [regionColors, setRegionColors] = useState(false),
     [speed, setSpeed] = useState(20),
     [counts, setCounts] = useState(null),
-    [appearanceStatus, setAppearanceStatus] = useState('Loading terrain imagery…'),
+    [appearanceStatus, setAppearanceStatus] = useState('Loading terrain…'),
+    [paleoActive, setPaleoActive] = useState(false),
+    [historicalTerrain, setHistoricalTerrain] = useState(true),
     [eventCategory, setEventCategory] = useState('all'),
     [eventQuery, setEventQuery] = useState(''),
-    [planetaryAge, setPlanetaryAge] = useState(null),
     [featureQuery, setFeatureQuery] = useState(''),
     [showAllFeatures, setShowAllFeatures] = useState(false);
+  const earlyEarth = isEarlyEarth(time, source.maxAge);
+  const focusEvent = playbackFocus(time);
+  const terrainReady = historicalTerrain && !regionColors && paleoActive;
+  const sceneReady = earlyEarth || terrainReady || ready;
+  const sceneError = renderError || (earlyEarth || terrainReady ? '' : error);
   useEffect(() => {
     const renderer = mountScene(
       canvas.current,
       stage.current,
       timeline.current,
-      e => setError(e.message),
+      e => setRenderError(e.message),
       value => playback.current.advance(value),
       value => playback.current.play(value),
-      setAppearanceStatus
+      (status, active) => {setAppearanceStatus(status); setPaleoActive(active); if (active && playIntent.current) setPlaying(true);},
+      parquetWorkerUrl
     );
     scene.current = renderer;
     const observer = new ResizeObserver(() => renderer.resize());
@@ -67,25 +75,26 @@ export default function TectonicTimeMachine() {
       renderer.dispose();
       scene.current = null;
     };
-  }, []);
+  }, [attempt]);
   useEffect(() => {
     const abort = new AbortController();
     setReady(false);
-    setPlaying(false);
+    setPlaying(isEarlyEarth(clock.current, source.maxAge) && playIntent.current);
     setError('');
+    setRenderError('');
     setHistoryStatus('');
     setModel(null);
     scene.current?.setModel(null);
-    clock.current = clampTime(clock.current, source.maxAge);
+    clock.current = clampTimelineTime(clock.current);
     setTime(clock.current);
-    loadModel({sourceId, time: clock.current, signal: abort.signal, onStatus: setStatus, workerUrl: parquetWorkerUrl})
+    loadModel({sourceId, time: clampTime(clock.current, source.maxAge), signal: abort.signal, onStatus: setStatus, workerUrl: parquetWorkerUrl})
       .then(loaded => {
         if (abort.signal.aborted) return;
         setModel(loaded);
         scene.current?.setModel(loaded);
         setCounts(scene.current?.render(clock.current, true));
         setReady(true);
-        setPlaying(planetaryAgeRef.current === null);
+        setPlaying(playIntent.current);
         setStatus(
           `${loaded.pids.length} plate IDs · ${source.citation} · rotations sampled every 10 Ma`
         );
@@ -94,15 +103,15 @@ export default function TectonicTimeMachine() {
         if (!abort.signal.aborted) {
           setError(e.message);
           setStatus('Historical data could not be loaded');
-          setPlaying(false);
+          setPlaying(isEarlyEarth(clock.current, source.maxAge) && playIntent.current);
         }
       });
     return () => abort.abort();
   }, [attempt, sourceId]);
   useEffect(() => {
-    if (!model || model.source.id !== sourceId || model.hasTime(time)) return;
-    const abort = new AbortController(),
-      resume = playing;
+    if (earlyEarth || !model || model.source.id !== sourceId) return;
+    if ((historicalTerrain && !regionColors && scene.current?.hasTerrain(time)) || model.hasTime(time)) {setReady(true); return;}
+    const abort = new AbortController();
     setReady(false);
     setPlaying(false);
     model
@@ -117,18 +126,18 @@ export default function TectonicTimeMachine() {
         setStatus(
           `${model.pids.length} plate IDs · ${source.citation} · rotations sampled every 10 Ma`
         );
-        setPlaying(resume && planetaryAgeRef.current === null);
+        setPlaying(playIntent.current);
       })
       .catch(e => {
         if (!abort.signal.aborted) setError(e.message);
       });
     return () => abort.abort();
-  }, [time, model, sourceId]);
+  }, [time, model, sourceId, historicalTerrain, regionColors]);
   useEffect(() => {
     if (!model) return;
     const abort = new AbortController();
     const signal = AbortSignal.any([model.signal, abort.signal]);
-    maintainHistory(model, () => clock.current, {
+    maintainHistory(model, () => clampTime(clock.current, model.source.maxAge), {
       signal, onStatus: value => {if (!signal.aborted) setHistoryStatus(value);}
     }).catch(error => {
       if (!signal.aborted) setHistoryStatus(error.message);
@@ -136,16 +145,16 @@ export default function TectonicTimeMachine() {
     return () => abort.abort();
   }, [model]);
   useEffect(() => {
-    if (!cycleViews || !playing || !ready) return;
+    if (!cycleViews || !playing || !sceneReady) return;
     const timer = setTimeout(() => {
       const views = Object.keys(VIEWS);
       setView(views[(views.indexOf(view) + 1) % views.length]);
     }, 8000);
     return () => clearTimeout(timer);
-  }, [cycleViews, playing, ready, view]);
+  }, [cycleViews, playing, sceneReady, view]);
   useEffect(() => {
-    scene.current?.setOptions({view, longitude, scenario, grid, regionColors, glaciations});
-  }, [view, longitude, scenario, grid, regionColors, glaciations]);
+    scene.current?.setOptions({view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, maxAge: source.maxAge});
+  }, [view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, sourceId, attempt]);
   useEffect(() => {
     if (!playing) {
       clock.current = time;
@@ -154,34 +163,27 @@ export default function TectonicTimeMachine() {
     }
   }, [time, ready, playing]);
   useEffect(() => {
-    scene.current?.setPlayback({time, playing: playing && planetaryAge === null, ready: ready && planetaryAge === null, speed, maxAge: source.maxAge});
-  }, [time, playing, ready, speed, sourceId, glaciations, planetaryAge]);
-  const leavePlanetary = () => {
-    planetaryAgeRef.current = null;
-    setPlanetaryAge(null);
-  };
-  const enterPlanetary = age => {
-    planetaryAgeRef.current = age;
-    setPlanetaryAge(age);
-    setPlaying(false);
-  };
+    scene.current?.setPlayback({time, playing: playing && sceneReady && !sceneError,
+      ready: sceneReady && !sceneError, speed, maxAge: EARTH_FORMATION_MA});
+  }, [time, playing, sceneReady, sceneError, speed, glaciations]);
   const seek = value => {
-    leavePlanetary();
-    clock.current = clampTime(Number(value), source.maxAge);
+    clock.current = clampTimelineTime(Number(value));
+    playIntent.current = false;
     setPlaying(false);
+    setPaleoActive(false);
+    scene.current?.render(clock.current, true);
     setTime(clock.current);
   };
   playback.current = {
     advance(value) {
-      if (planetaryAgeRef.current !== null) return;
-      clock.current = clampTime(Number(value), source.maxAge);
+      clock.current = clampTimelineTime(Number(value));
       setTime(clock.current);
       const result = scene.current?.render(clock.current);
       if (result) setCounts(result);
     },
     play(value) {
-      if (planetaryAgeRef.current !== null) return;
-      if (value && clock.current >= 300) clock.current = -source.maxAge;
+      playIntent.current = value;
+      if (value && clock.current >= 300) clock.current = -EARTH_FORMATION_MA;
       setTime(clock.current);
       setPlaying(value);
     }
@@ -191,44 +193,33 @@ export default function TectonicTimeMachine() {
       <div className="tectonic-stage" ref={stage}>
         <canvas
           ref={canvas}
-          aria-label="Animated tectonic reconstruction, drag to rotate or pan and scroll to zoom"
+          aria-label="Animated Earth history, drag to rotate or pan and scroll to zoom"
         />
         <div className="tectonic-heading">
           <span>DEEP TIME / math.gl</span>
           <h2>{timeLabel(time)}</h2>
           <p>
-            {time > 0
+            {earlyEarth ? `${planetaryStage(-time)?.label} · illustrative surface` : time > 0
               ? 'Illustrative future · not a prediction'
-              : `${source.id} · rigid-block reconstruction`}
+              : paleoActive ? 'PALEOMAP · reconstructed paleotopography' : `${source.id} · rigid-block reconstruction`}
           </p>
           <button
             className="tectonic-primary-play"
-            disabled={!ready || Boolean(error) || planetaryAge !== null}
+            disabled={!sceneReady || Boolean(sceneError)}
             aria-label={playing ? 'Stop playback' : 'Play playback'}
             onClick={() => playback.current.play(!playing)}
           >
             <span aria-hidden="true">{playing ? '■' : '▶'}</span> {playing ? 'Stop' : 'Play'}
           </button>
         </div>
-        {planetaryAge !== null && (
-          <div className="tectonic-planetary-mode" role="region" aria-label="Illustrative early Earth mode">
-            <div className="tectonic-planetary-body" aria-hidden="true" />
-            <div className="tectonic-planetary-caption">
-              <strong>{planetaryAge.toLocaleString()} Ma · {planetaryStage(planetaryAge)?.label}</strong>
-              <p>{planetaryStage(planetaryAge)?.description}</p>
-              <p>Conceptual planetary appearance, not reconstructed terrain or impact simulation.</p>
-              <button onClick={leavePlanetary}>Return to tectonic reconstruction</button>
-            </div>
-          </div>
-        )}
         <div className="tectonic-chapters" aria-hidden="true">
           {TIMELINE_CHAPTERS.map(chapter => (
             <div
               key={chapter.name}
-              className={`tectonic-chapter${chapter.name.includes('&') ? ' tectonic-chapter-pair' : ''}`}
+              className={`tectonic-chapter${(chapter.name.includes('&') || chapter.name.includes('(')) ? ' tectonic-chapter-pair' : ''}${chapter.illustrative ? ' tectonic-chapter-planetary' : ''}`}
               style={{
                 opacity:
-                  ready && !error && -chapter.time <= source.maxAge && (glaciations || !chapter.name.startsWith('Snowball Earth'))
+                  sceneReady && !sceneError && (chapter.illustrative || -chapter.time <= source.maxAge) && (glaciations || !chapter.name.startsWith('Snowball Earth'))
                     ? chapterOpacity(chapter, time, scenario)
                     : 0
               }}
@@ -241,26 +232,26 @@ export default function TectonicTimeMachine() {
         <div className="tectonic-instructions">
           Drag to {view === 'globe' ? 'rotate' : 'pan'} · scroll to zoom
         </div>
-        {(!ready || error) && (
+        {(!sceneReady || sceneError) && (
           <div className="tectonic-loading" role="status">
-            <p>{error || status}</p>
-            {error && <button onClick={() => setAttempt(n => n + 1)}>Retry data load</button>}
+            <p>{sceneError || status}</p>
+            {sceneError && <button onClick={() => setAttempt(n => n + 1)}>Retry loading</button>}
           </div>
         )}
       </div>
       <aside className="tectonic-controls">
         <div className="tectonic-controls-title">
-          <h3>Continents in motion</h3>
+          <h3>Earth through time</h3>
           <span className={time > 0 ? 'tectonic-badge future' : 'tectonic-badge'}>
-            {time > 0 ? 'SCENARIO' : 'RECONSTRUCTION'}
+            {earlyEarth || time > 0 ? 'ILLUSTRATION' : 'RECONSTRUCTION'}
           </span>
         </div>
         <label>
-          Data source
+          Plate model
           <select
-            aria-label="Data source"
+            aria-label="Plate model"
             value={sourceId}
-            onChange={e => {leavePlanetary(); setSourceId(e.target.value);}}
+            onChange={e => setSourceId(e.target.value)}
           >
             {Object.values(DATA_SOURCES).map(item => (
               <option key={item.id} value={item.id}>
@@ -269,10 +260,7 @@ export default function TectonicTimeMachine() {
             ))}
           </select>
         </label>
-        <p className="tectonic-source-summary">
-          {source.frame} · {source.geometry}
-        </p>
-        {historyStatus && <p className="tectonic-stream-status" role="status">{historyStatus}</p>}
+        <div className="tectonic-control-row">
         <label>
           View
           <select aria-label="View" value={view} onChange={e => setView(e.target.value)}>
@@ -283,10 +271,37 @@ export default function TectonicTimeMachine() {
             ))}
           </select>
         </label>
+        <label>
+          Playback speed
+          <select
+            aria-label="Playback speed"
+            value={speed}
+            onChange={e => setSpeed(Number(e.target.value))}
+          >
+            <option value="10">10 million years / second</option>
+            <option value="20">20 million years / second</option>
+            <option value="40">40 million years / second</option>
+          </select>
+        </label>
+        </div>
         <label className="tectonic-check">
           <input type="checkbox" checked={cycleViews} onChange={e => setCycleViews(e.target.checked)} />{' '}
           Cycle views every 8 seconds
         </label>
+        <label>
+          Land appearance
+          <select
+            aria-label="Land appearance"
+            value={regionColors ? 'regions' : historicalTerrain ? 'paleodem' : 'terrain'}
+            onChange={e => {setRegionColors(e.target.value === 'regions'); setHistoricalTerrain(e.target.value === 'paleodem');}}
+          >
+            <option value="paleodem">Historical terrain · PaleoDEM (0–540 Ma)</option>
+            <option value="terrain">Modern NASA imagery on plates</option>
+            <option value="regions">Region colors</option>
+          </select>
+        </label>
+        <details className="tectonic-info tectonic-display-options">
+          <summary>Display &amp; future options</summary>
         <label>
           {view === 'globe' ? 'Globe starting longitude' : 'Map central meridian'}
           <input
@@ -310,18 +325,6 @@ export default function TectonicTimeMachine() {
             <option value="polar">Polar assembly · illustrative</option>
           </select>
         </label>
-        <label>
-          Playback speed
-          <select
-            aria-label="Playback speed"
-            value={speed}
-            onChange={e => setSpeed(Number(e.target.value))}
-          >
-            <option value="10">10 million years / second</option>
-            <option value="20">20 million years / second</option>
-            <option value="40">40 million years / second</option>
-          </select>
-        </label>
         <label className="tectonic-check">
           <input type="checkbox" checked={grid} onChange={e => setGrid(e.target.checked)} />{' '}
           Graticule
@@ -330,20 +333,7 @@ export default function TectonicTimeMachine() {
           <input type="checkbox" checked={glaciations} onChange={e => setGlaciations(e.target.checked)} />{' '}
           Glaciations
         </label>
-        {glaciations && playing && glaciationPlaybackSpeed(time, speed) < speed && (
-          <p className="tectonic-data-note">Slower playback · ice edge transition</p>
-        )}
-        <label>
-          Land appearance
-          <select
-            aria-label="Land appearance"
-            value={regionColors ? 'regions' : 'terrain'}
-            onChange={e => setRegionColors(e.target.value === 'regions')}
-          >
-            <option value="terrain">Natural terrain</option>
-            <option value="regions">Region colors</option>
-          </select>
-        </label>
+        </details>
         {regionColors && (
           <div className="tectonic-legend">
             {Object.entries(REGIONS).map(([name, r]) => (
@@ -354,11 +344,10 @@ export default function TectonicTimeMachine() {
             ))}
           </div>
         )}
-        <p className="tectonic-appearance-status">{appearanceStatus}</p>
-        <details className="tectonic-info" open>
+        <details className="tectonic-info">
           <summary>Earth history · impacts, climate and extinctions</summary>
           <p className="tectonic-note">
-            Events extend to 4,567 Ma. Older events are documented chronology,
+            Events extend to 4,567 Ma. Older surfaces are illustrative,
             not rendered plate reconstructions. Theia and the late bombardment
             are hypotheses with model-dependent details.
           </p>
@@ -393,16 +382,9 @@ export default function TectonicTimeMachine() {
                 <small> · {event.ageMa.toLocaleString()} Ma · {event.confidence}</small>
                 <p className="tectonic-note">{event.description}</p>
                 <a href={event.url} target="_blank" rel="noreferrer">{event.source}</a>
-                {eventIsReconstructable(event, source.maxAge) ? (
-                  <button
-                    disabled={!ready || Boolean(error)}
-                    onClick={() => seek(-event.ageMa)}
-                  >View at this age</button>
-                ) : (
-                  <button onClick={() => enterPlanetary(event.ageMa)}>
-                    Explore early Earth scenario
-                  </button>
-                )}
+                <button disabled={Boolean(renderError)} onClick={() => seek(-event.ageMa)}>
+                  View at this age
+                </button>
               </li>
             ))}
           </ul>
@@ -483,19 +465,32 @@ export default function TectonicTimeMachine() {
           </p>
           <p className="tectonic-note">
             Older reconstructions carry greater uncertainty, especially in longitude. Terrain is
-            modern NASA imagery carried with each rigid block. Ancient mountains, vegetation and ice
+            PaleoDEM elevation grids for 0–540 Ma, in their own reconstructed PALEOMAP frame;
+            outside that range, modern NASA imagery carried with rigid blocks. Vegetation and ice
             are not reconstructed. Ocean ripples and lighting are visual effects.
           </p>
           <p className="tectonic-status" role="status">
             {status}
-            {counts && ready
+            {counts && ready && !paleoActive && !earlyEarth
               ? ` · ${counts.active} visible templates${counts.unresolved ? ` · ${counts.unresolved} unresolved templates omitted` : ''}`
               : ''}
           </p>
         </details>
+        <section className="tectonic-explanations" aria-label="View notes">
+        <p className="tectonic-source-summary">
+          {source.frame} · {source.geometry}
+        </p>
+        {historyStatus && <p className="tectonic-stream-status" role="status">{historyStatus}</p>}
+        {focusEvent ? <p className="tectonic-data-note">Event focus · {focusEvent.name}</p> : earlyEarth && <p className="tectonic-data-note">Deep time · 5× playback until tectonic data begins</p>}
+        {glaciations && playing && glaciationPlaybackSpeed(time, speed) < speed && (
+          <p className="tectonic-data-note">Slower playback · ice edge transition</p>
+        )}
+        <p className="tectonic-note">PaleoDEM uses its own PALEOMAP reconstruction. The plate model applies to region colors and earlier/future terrain.</p>
+        <p className="tectonic-appearance-status">{appearanceStatus}</p>
+        </section>
       </aside>
       <footer className="tectonic-timeline">
-        <div ref={timeline} inert={planetaryAge !== null} aria-disabled={planetaryAge !== null} className="tectonic-widget" aria-label="Geological playback timeline" />
+        <div ref={timeline} className="tectonic-widget" aria-label="Geological playback timeline" />
         <div className="tectonic-deep-time" aria-label="Earth history event timeline">
           <div className="tectonic-deep-time-header">
             <strong>4.567 billion years of Earth history</strong>
@@ -508,13 +503,18 @@ export default function TectonicTimeMachine() {
                 <button
                   key={event.id}
                   type="button"
-                  className={`tectonic-deep-time-marker ${available ? 'available' : 'unavailable'}`}
+                  className={`tectonic-deep-time-marker ${available ? 'available' : 'illustrative'}`}
                   style={{left: `${(1 - event.ageMa / 4567) * 100}%`}}
-                  title={`${event.name} · ${event.ageMa} Ma · ${available ? 'Seek to geological age' : 'Explore illustrative early Earth mode'}`}
-                  aria-label={`${event.name}, ${event.ageMa} Ma. ${available ? 'Seek to event' : 'Explore illustrative early Earth mode'}`}
-                  disabled={available && (!ready || Boolean(error))}
-                  onClick={() => available ? seek(-event.ageMa) : enterPlanetary(event.ageMa)}
-                />
+                  aria-describedby={`timeline-tip-${event.id}`}
+                  aria-label={`${event.name}, ${event.ageMa} Ma. ${available ? 'Seek to event' : 'Seek to illustrative early Earth age'}`}
+                  disabled={Boolean(renderError)}
+                  onClick={() => seek(-event.ageMa)}
+                >
+                  <span id={`timeline-tip-${event.id}`} role="tooltip" className={`tectonic-event-tooltip ${event.ageMa > 3800 ? 'align-start' : event.ageMa < 750 ? 'align-end' : ''}`}>
+                    <strong>{event.name}</strong>
+                    <span>{event.ageMa.toLocaleString()} Ma · {available ? 'Seek to geological age' : 'Illustrative early Earth'}</span>
+                  </span>
+                </button>
               );
             })}
           </div>
@@ -524,7 +524,7 @@ export default function TectonicTimeMachine() {
         </div>
         <div className="tectonic-milestones">
           {timelineMilestones(scenario, source.maxAge).map(({time: value, name: label}) => (
-            <button key={value} disabled={!ready || Boolean(error)} onClick={() => seek(value)}>
+            <button key={value} disabled={Boolean(renderError) || (!isEarlyEarth(value, source.maxAge) && (!sceneReady || Boolean(sceneError)))} onClick={() => seek(value)}>
               {label}
               <small>
                 {value < 0 ? `${-value} Ma ago` : value === 0 ? '0 Ma' : `+${value} Ma`}

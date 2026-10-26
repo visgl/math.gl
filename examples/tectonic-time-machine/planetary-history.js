@@ -4,6 +4,31 @@
 // Hadean visual stages are deliberately illustrative, not geological maps.
 export const EARTH_FORMATION_MA = 4567;
 export const PLATE_MODE_MIN_AGE_MA = 1800;
+export function clampTimelineTime(time) {
+  if (!Number.isFinite(time)) throw new RangeError('Invalid timeline time');
+  return Math.max(-EARTH_FORMATION_MA, Math.min(300, time));
+}
+export function isEarlyEarth(time, maxAge) {
+  return Number.isFinite(time) && time < -maxAge && time >= -EARTH_FORMATION_MA;
+}
+function smooth01(value) {const t = Math.max(0, Math.min(1, value)); return t*t*(3-2*t);}
+// A visual handoff, not an interpolation between incompatible plate models.
+export function earlyEarthBlend(time, maxAge) {
+  if (!Number.isFinite(time) || time < -EARTH_FORMATION_MA) return 0;
+  return smooth01((-time-maxAge+120)/120);
+}
+// Cosmetic heat breathing is deliberately independent of geological playback.
+export function thermalPulse(seconds) {return 1+.08*Math.sin(seconds*2*Math.PI/4.5);}
+// Original procedural art controls, not measured lava coverage or impact rates.
+export function earlyEarthMaterial(time, result = {}) {
+  const age = -clampTimelineTime(time);
+  result.lava = smooth01((age-3950)/400) * (.35+.25*smooth01((age-4400)/167));
+  result.bombardment = smooth01((age-3700)/150) * smooth01((4100-age)/150);
+  result.water = .95*smooth01((4500-age)/180);
+  result.theia = age <= 4500 && age >= 4420 ? Math.exp((age-4500)/12) : 0;
+  result.impactTime = (EARTH_FORMATION_MA-age)/12;
+  return result;
+}
 export function planetaryStage(ageMa) {
   if (!Number.isFinite(ageMa) || ageMa < 0 || ageMa > EARTH_FORMATION_MA) return null;
   if (ageMa >= 4530) return {id: 'accretion', label: 'Accretion and early differentiation',
@@ -12,6 +37,8 @@ export function planetaryStage(ageMa) {
     description: 'Theia collision timing and geometry are uncertain. This is not a simulation.'};
   if (ageMa >= 4000) return {id: 'cooling', label: 'Cooling crust and early water',
     description: 'Zircons constrain early crust; global surface appearance is unknown.'};
+  if (ageMa >= 3700 && ageMa < 4000) return {id: 'bombardment', label: 'Late-heavy-bombardment hypothesis',
+    description: 'Illustrative asteroid strikes and cooling lava pools; a discrete impact spike remains debated.'};
   return {id: 'pretectonic', label: 'Early Earth without reliable plate maps',
     description: 'No unique reconstruction of ancient continents is available.'};
 }

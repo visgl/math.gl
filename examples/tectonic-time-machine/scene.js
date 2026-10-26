@@ -24,9 +24,11 @@ import {
   REGIONS,
   timeLabel
 } from './math.js';
-import {snowballCoverage, glaciationPlaybackSpeed} from './timeline.js';
+import {snowballCoverage, timelinePlaybackSpeed} from './timeline.js';
 import {vegetationCoverage} from './earth-events.js';
 import {SurfaceLayer} from './surface-layer.js';
+import {EARTH_FORMATION_MA, isEarlyEarth, earlyEarthBlend, earlyEarthMaterial, planetaryStage} from './planetary-history.js';
+import {loadPaleoTerrain, terrainBracket} from './paleodem.js';
 import {loadTerrain} from './terrain.js';
 import {makeMesh, blendWeights, transformMesh, binaryMesh, worldToGeographic} from './geometry.js';
 const RADIUS = 6371008.8,
@@ -80,7 +82,8 @@ export function mountScene(
   onError,
   onTimeChange,
   onPlayingChange,
-  onAppearanceStatus
+  onAppearanceStatus,
+  workerUrl
 ) {
   let mode = 'globe',
     longitude = 0,
@@ -91,7 +94,14 @@ export function mountScene(
     grid = false,
     glaciations = true,
     regionColors = false,
-    terrainImage = null;
+    terrainImage = null,
+    modernTerrainError = false,
+    paleoTerrain = null,
+    paleoError = false,
+    historicalTerrain = true,
+    plateMaxAge = 1000,
+    appearanceStatus = null,
+    impactGlow = -1;
   let targets = futureRotations(scenario),
     lastTime = -300,
     lastRender = 0;
@@ -103,14 +113,16 @@ export function mountScene(
     geometryTime = NaN,
     geometryLongitude = NaN,
     counts = {active: 0, unresolved: 0};
+  const earlyMaterial = {};
   const rotations = new Map(),
     future = new Map(),
-    ocean = makeMesh(earth);
+    ocean = makeMesh(earth),
+    paleoMesh = makeMesh(earth);
   const scales = {},
     widget = new TimelineWidget({
       id: 'tectonic-playback',
       _container: timelineContainer,
-      timeRange: [-500, 300],
+      timeRange: [-EARTH_FORMATION_MA, 300],
       time: -300,
       playing: false,
       step: 1,
@@ -233,14 +245,44 @@ export function mountScene(
   }
   function render(time, force = false) {
     lastTime = time;
-    if (model && !model.hasTime(time)) return counts;
+    const early = isEarlyEarth(time, plateMaxAge);
+    const earlyMix = earlyEarthBlend(time, plateMaxAge);
     const now = performance.now();
     if (!force && now - lastRender < 50) return;
     lastRender = now;
     currentWeights(now);
-    if (time !== geometryTime || longitude !== geometryLongitude || !land) counts = rebuild(time);
+    const pose = paleoTerrain?.get(time);
+    const usePaleo = !early && historicalTerrain && !regionColors && Boolean(pose);
+    if (!early && !usePaleo && model && !model.hasTime(time)) return counts;
+    if (earlyMix > 0) earlyEarthMaterial(time, earlyMaterial);
+    const glow = early ? Math.round(Math.sqrt(earlyMaterial.theia)*100)/100 : 0;
+    if (glow !== impactGlow) {
+      impactGlow = glow;
+      canvas.style.filter = glow > 0 ? `drop-shadow(0 0 ${12+glow*20}px rgba(255,${Math.round(210+45*glow)},${Math.round(50+205*glow)},${glow*.8})) drop-shadow(0 0 ${25+glow*35}px rgba(255,${Math.round(190+65*glow)},${Math.round(25+230*glow)},${glow*.6}))` : '';
+    }
+    let status;
+    if (early) status = `${planetaryStage(-time)?.label} · procedural rock, lava and impacts; no reconstructed geography`;
+    else if (earlyMix > 0) status = `Blending illustrative early Earth into ${model?.source.id || 'plate'} reconstruction`;
+    else if (regionColors) status = `${model?.source.id || 'Plate model'} · categorical region colors`;
+    else if (usePaleo) status = `PALEOMAP PaleoDEM · ${pose.a.age === pose.b.age ? pose.a.age : `${pose.a.age}–${pose.b.age}`} Ma · source elevation with illustrative colors and 8× hill shading`;
+    else if (historicalTerrain && !regionColors && terrainBracket(time))
+      status = `${paleoError || paleoTerrain?.failed ? 'PaleoDEM unavailable' : 'Loading PaleoDEM'} · showing illustrative plate terrain`;
+    else status = `${terrainImage ? 'Modern NASA imagery' : modernTerrainError ? 'Shaded land' : 'Loading NASA imagery'} on ${model?.source.id || 'moving'} plates · illustrative${historicalTerrain && !regionColors ? ' (PaleoDEM covers 0–540 Ma)' : ''}`;
+    if (status !== appearanceStatus) {
+      appearanceStatus = status;
+    }
+    onAppearanceStatus?.(status, usePaleo);
+    if (!early && !usePaleo && (time !== geometryTime || longitude !== geometryLongitude || !land)) counts = rebuild(time);
     transformMesh(ocean, weights, engines, scales, latitude, true, longitude);
-    transformMesh(land, weights, engines, scales, latitude);
+    if (earlyMix > 0 || usePaleo) {
+      transformMesh(paleoMesh, weights, engines, scales, latitude, false, longitude, true);
+      if (!early && earlyMix > 0) for (let i=0;i<paleoMesh.positions.length;i+=3) {
+        paleoMesh.positions[i]*=1.004;
+        paleoMesh.positions[i+1]*=1.004;
+        paleoMesh.positions[i+2]=paleoMesh.positions[i+2]*1.004+.01*(1-(weights.globe || 0));
+      }
+    }
+    if (!early && !usePaleo) transformMesh(land, weights, engines, scales, latitude);
     paths = [];
     if (grid)
       for (const line of graticule) {
@@ -266,7 +308,7 @@ export function mountScene(
     };
     deck.setProps({
       layers: [
-        new SurfaceLayer({
+        !early && new SurfaceLayer({
           ...common,
           id: 'tectonic-ocean',
           iceCoverage: glaciations ? snowballCoverage(time) : 0,
@@ -274,15 +316,32 @@ export function mountScene(
           surfaceType: 'ocean',
           globeWeight: weights.globe || 0
         }),
-        new SurfaceLayer({
+        !early && new SurfaceLayer({
           ...common,
           id: 'tectonic-land',
           vegetation: vegetationCoverage(time),
           iceCoverage: glaciations ? snowballCoverage(time) : 0,
-          data: binaryMesh(land),
+          data: binaryMesh(usePaleo ? paleoMesh : land),
           image: terrainImage,
+          paleoFrameA: usePaleo ? pose.a : null,
+          paleoFrameB: usePaleo ? pose.b : null,
+          paleoBlend: usePaleo ? pose.blend : 0,
           regionColors,
           globeWeight: weights.globe || 0
+        }),
+        earlyMix > 0 && new SurfaceLayer({
+          ...common,
+          id: 'tectonic-early-earth',
+          data: binaryMesh(paleoMesh),
+          globeWeight: weights.globe || 0,
+          earlyEarth: true,
+          earlyOpacity: earlyMix,
+          earlyLava: earlyMaterial.lava,
+          earlyBombardment: earlyMaterial.bombardment,
+          earlyWater: earlyMaterial.water,
+          earlyImpactTime: earlyMaterial.impactTime,
+          earlyTheia: earlyMaterial.theia,
+          parameters: {depthWriteEnabled: early}
         }),
         new PathLayer({
           id: 'tectonic-grid',
@@ -376,14 +435,29 @@ export function mountScene(
         return;
       }
       terrainImage = image;
-      onAppearanceStatus?.('Modern NASA terrain · carried with the plates');
+      appearanceStatus = null;
       render(lastTime, true);
     })
     .catch(error => {
+      modernTerrainError = true;
       console.warn('Terrain load failed', error);
       if (!appearanceAbort.signal.aborted)
-        onAppearanceStatus?.('Terrain imagery unavailable · showing shaded land');
+        {appearanceStatus = null; render(lastTime, true);}
     });
+  loadPaleoTerrain({signal: appearanceAbort.signal, workerUrl,
+    onUpdate(error) {
+      if (error) paleoError = true;
+      if (!appearanceAbort.signal.aborted) render(lastTime, true);
+    }
+  }).then(value => {
+    if (!appearanceAbort.signal.aborted) {paleoTerrain = value; render(lastTime, true);}
+  }).catch(error => {
+    if (!appearanceAbort.signal.aborted) {
+      paleoError = true;
+      console.warn('PaleoDEM load failed', error);
+      render(lastTime, true);
+    }
+  });
   return {
     setModel(value) {
       model = value;
@@ -391,8 +465,8 @@ export function mountScene(
       geometryTime = NaN;
       render(lastTime, true);
     },
-    setPlayback({time, playing, ready, speed, maxAge}) {
-      widget.setProps({time, playing, step: glaciationPlaybackSpeed(time, speed, glaciations) / 20, timeRange: [-maxAge, 300]});
+    setPlayback({time, playing, ready, speed}) {
+      widget.setProps({time, playing, step: timelinePlaybackSpeed(time, speed, plateMaxAge, glaciations) / 20, timeRange: [-EARTH_FORMATION_MA, 300]});
       timelineContainer.inert = !ready;
       timelineContainer.setAttribute('aria-busy', String(!ready));
     },
@@ -420,8 +494,11 @@ export function mountScene(
       grid = options.grid;
       glaciations = options.glaciations ?? true;
       regionColors = options.regionColors;
+      plateMaxAge = options.maxAge ?? plateMaxAge;
+      historicalTerrain = options.historicalTerrain ?? true;
       return render(lastTime, true);
     },
+    hasTerrain(time) {return historicalTerrain && !regionColors && Boolean(paleoTerrain?.get(time));},
     render,
     resize() {
       configure();
