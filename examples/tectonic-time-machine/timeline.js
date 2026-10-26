@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {isEarlyEarth} from './planetary-history.js';
 // Approximate chapter dates are educational cues, not measured assembly boundaries.
 export const LANDMASS_CHAPTERS = [
   {
@@ -23,15 +24,15 @@ export const LANDMASS_CHAPTERS = [
   },
   {
     time: -400,
-    name: 'Laurussia',
-    detail: 'Laurentia · Baltica · Avalonia',
+    name: 'Euramerica (Laurussia)',
+    detail: 'Earlier Laurentia–Baltica–Avalonia landmass · about 400 Ma',
     fade: [-440, -415, -390, -345]
   },
   {time: -300, name: 'Pangaea', detail: 'A global supercontinent', fade: [-345, -305, -265, -220]},
   {
     time: -180,
     name: 'Laurasia & Gondwana',
-    detail: 'Pangaea separates into northern and southern landmasses',
+    detail: 'Later Pangaea breakup: Laurasia north, Gondwana south',
     fade: [-210, -185, -160, -115]
   },
   {
@@ -60,8 +61,10 @@ export const SNOWBALL_CHAPTERS = [
     fade: [-650, -648, -637, -635]}
 ];
 export const EARLY_EARTH_CHAPTERS = [
-  {time: -4400, name: 'Hadean Earth', detail: 'Dark rocky crust and glowing lava lakes · illustrative',
-    illustrative: true, fade: [-4567, -4500, -4200, -4100]},
+  {time: -4500, name: 'Earth–Theia impact', detail: 'Moon-forming hypothesis · illustrative global flash',
+    illustrative: true, fade: [-4501, -4500, -4490, -4440]},
+  {time: -4400, name: 'Hadean Earth', detail: 'Rocky crust, lava lakes and emerging seas · illustrative',
+    illustrative: true, fade: [-4440, -4410, -4250, -4100]},
   {time: -3900, name: 'Late heavy bombardment', detail: 'Hypothetical impacts and cooling lava pools · illustrative',
     illustrative: true, fade: [-4100, -3980, -3830, -3700]}
 ];
@@ -99,4 +102,24 @@ export function glaciationPlaybackSpeed(time, requestedSpeed, enabled = true) {
     (time >= start - 2 && time <= formed + 1) || (time >= held - 1 && time <= end + 2)
   );
   return nearEdge ? Math.min(requestedSpeed, 0.75) : requestedSpeed;
+}
+
+// Readable event windows are art/playback choices, not geological durations.
+export const PLAYBACK_FOCUS = [
+  {name: 'Theia impact and cooling', fade: [-4520, -4510, -4430, -4420], speed: 4},
+  {name: 'Emerging oceans', fade: [-4470, -4435, -4320, -4250], speed: 12},
+  {name: 'Late heavy bombardment', fade: [-4100, -4000, -3800, -3700], speed: 12}
+];
+export function playbackFocus(time) {
+  return PLAYBACK_FOCUS.find(event => chapterOpacity(event, time) > 0);
+}
+/** Accelerate quiet deep time, linger at events, and land exactly on data coverage. */
+export function timelinePlaybackSpeed(time, requestedSpeed, maxAge, glaciations = true) {
+  const early = isEarlyEarth(time, maxAge);
+  let speed = early ? requestedSpeed * 5 : glaciationPlaybackSpeed(time, requestedSpeed, glaciations);
+  for (const event of PLAYBACK_FOCUS) {
+    const weight = chapterOpacity(event, time);
+    speed += (Math.min(speed, event.speed)-speed)*weight;
+  }
+  return early ? Math.min(speed, (-maxAge-time)*20) : speed;
 }

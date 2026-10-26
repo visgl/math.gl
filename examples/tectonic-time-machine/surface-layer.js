@@ -20,12 +20,14 @@ const block = `layout(std140) uniform tectonicSurfaceUniforms {
   float earlyBombardment;
   float earlyWater;
   float earlyImpactTime;
+  float earlyTheia;
+  float earlyOpacity;
 } tectonicSurface;`;
 const surface = {
   name: 'tectonicSurface',
   vs: block,
   fs: block + '\nuniform sampler2D terrainTexture; uniform sampler2D paleoElevationA; uniform sampler2D paleoElevationB;',
-  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32', vegetation: 'f32', paleoBlend: 'f32', paleoTerrain: 'f32', paleoSizeA: 'vec2<f32>', paleoSizeB: 'vec2<f32>', earlyEarth: 'f32', earlyLava: 'f32', earlyBombardment: 'f32', earlyWater: 'f32', earlyImpactTime: 'f32'}
+  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32', vegetation: 'f32', paleoBlend: 'f32', paleoTerrain: 'f32', paleoSizeA: 'vec2<f32>', paleoSizeB: 'vec2<f32>', earlyEarth: 'f32', earlyLava: 'f32', earlyBombardment: 'f32', earlyWater: 'f32', earlyImpactTime: 'f32', earlyTheia: 'f32', earlyOpacity: 'f32'}
 };
 const UNIT_SIZE = new Float32Array([1, 1]);
 const LIGHTS = [
@@ -48,6 +50,8 @@ export class SurfaceLayer extends SolidPolygonLayer {
     earlyBombardment: 0,
     earlyWater: 0,
     earlyImpactTime: 0,
+    earlyTheia: 0,
+    earlyOpacity: 1,
     surfaceType: 'land',
     globeWeight: 1,
     regionColors: false,
@@ -159,12 +163,18 @@ export class SurfaceLayer extends SolidPolygonLayer {
           vec3 rockyNormal=tectonicSurfaceNormal(normal,relief);
           float illumination=.18+.95*max(dot(rockyNormal,light),0.);
           vec3 basalt=mix(vec3(.027,.025,.024),vec3(.14,.125,.11),rock);
-          float sea=tectonicSurface.earlyWater*(1.-smoothstep(.40,.55,broad));
-          basalt=mix(basalt,vec3(.015,.045,.065),sea);
-          color.rgb=basalt*illumination+emission;
+          float seaLevel=mix(.20,.65,tectonicSurface.earlyWater);
+          float sea=tectonicSurface.earlyWater*(1.-smoothstep(seaLevel-.07,seaLevel+.07,broad));
+          vec3 oceanColor=water_getColorMapped(surfacePosition+vec3(0.,0.,4.),
+            surfacePosition,p,normal,uv).rgb;
+          vec3 ground=mix(basalt*illumination,oceanColor,sea);
+          // Linear emissive radiance above display white, mapped back to SDR.
+          // Theia briefly lights the entire globe, including its unlit hemisphere.
+          vec3 radiance=ground+emission*(1.-.8*sea)+tectonicSurface.earlyTheia*vec3(14.,8.,.18);
+          color.rgb=vec3(1.)-exp(-radiance);
           float rim=pow(1.-max(normal.z,0.),5.)*tectonicSurface.globeWeight;
           color.rgb+=vec3(.055,.025,.012)*rim;
-          color.a=1.;
+          color.a=tectonicSurface.earlyOpacity;
         }else if(tectonicSurface.isWater>.5){
           vec4 water=water_getColorMapped(surfacePosition+vec3(0.,0.,4.),
             surfacePosition,reference,normal,uv);
@@ -237,7 +247,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
     };
   }
   draw(params) {
-    const {image, surfaceType, globeWeight, regionColors, iceCoverage, vegetation, paleoFrameA, paleoFrameB, paleoBlend, earlyEarth, earlyLava, earlyBombardment, earlyWater, earlyImpactTime} = this.props;
+    const {image, surfaceType, globeWeight, regionColors, iceCoverage, vegetation, paleoFrameA, paleoFrameB, paleoBlend, earlyEarth, earlyLava, earlyBombardment, earlyWater, earlyImpactTime, earlyTheia, earlyOpacity} = this.props;
     const textures = this.state.elevationTextures;
     const frames = this.state.elevationFrames;
     frames[0] = paleoFrameA; frames[1] = paleoFrameB;
@@ -259,7 +269,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
         paleoTerrain: paleoFrameA && paleoFrameB ? 1 : 0,
         paleoBlend,
         earlyEarth: earlyEarth ? 1 : 0,
-        earlyLava, earlyBombardment, earlyWater, earlyImpactTime,
+        earlyLava, earlyBombardment, earlyWater, earlyImpactTime, earlyTheia, earlyOpacity,
         paleoSizeA: paleoFrameA?.size || UNIT_SIZE,
         paleoSizeB: paleoFrameB?.size || UNIT_SIZE,
         paleoElevationA: textures.get(paleoFrameA) || this.state.elevationFallback,
@@ -269,7 +279,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
         terrainTexture: image || this.state.fallbackTexture
       },
       waterMaterial: {
-        time: performance.now() / 1000,
+        time: earlyEarth ? earlyImpactTime : performance.now() / 1000,
         opacity: 1,
         baseColor: [0.025, 0.15, 0.27],
         fresnelColor: [0.45, 0.7, 0.85],

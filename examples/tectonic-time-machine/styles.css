@@ -100,3 +100,25 @@ SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 .tectonic-deep-time-axis {display:flex;justify-content:space-between;color:#88a9b9;font:10px ui-monospace,monospace;}
 @media(max-width:650px) {.tectonic-deep-time-header {display:block;}.tectonic-deep-time-header span {display:block;}}
 .tectonic-chapter-planetary strong {font-size:clamp(22px,4.5vw,56px);}
+
+/* Keep everyday controls compact; longer explanations remain in disclosure panels. */
+.tectonic-example {grid-template-columns:minmax(0,1fr) 264px;}
+.tectonic-controls {padding:12px;}
+.tectonic-controls-title {display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px;}
+.tectonic-controls-title h3 {font-size:13px;margin:0;}
+.tectonic-badge {font-size:8px;padding:2px 4px;margin:0;}
+.tectonic-controls label {margin-bottom:8px;font-size:11px;}
+.tectonic-controls select {margin-top:3px;padding:5px;font-size:11px;}
+.tectonic-control-row {display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.tectonic-control-row label {min-width:0;}
+.tectonic-source-summary,.tectonic-stream-status {margin:0 0 7px;font-size:9px;line-height:1.3;}
+.tectonic-note,.tectonic-credits,.tectonic-appearance-status,.tectonic-data-note {margin:6px 0;font-size:10px;line-height:1.3;}
+.tectonic-info {padding:7px 8px;margin-top:7px;}
+.tectonic-info summary {font-size:10px;}
+.tectonic-display-options[open] summary {margin-bottom:8px;}
+.tectonic-controls input[type=range] {margin-top:4px;}
+@media(max-width:650px) {
+  .tectonic-example {grid-template-columns:1fr;}
+  .tectonic-controls label {display:block;width:auto;margin-right:0;}
+  .tectonic-controls .tectonic-note {display:block;}
+}

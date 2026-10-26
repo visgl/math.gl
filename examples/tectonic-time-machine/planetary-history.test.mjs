@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {EARTH_FORMATION_MA, clampTimelineTime, isEarlyEarth, earlyEarthMaterial, planetaryStage, validateGeologicalSeries, selectGeologicalSeries} from './planetary-history.js';
+import {EARTH_FORMATION_MA, clampTimelineTime, isEarlyEarth, earlyEarthBlend, earlyEarthMaterial, planetaryStage, validateGeologicalSeries, selectGeologicalSeries} from './planetary-history.js';
 
 test('planetary stages distinguish the giant impact from known tectonic history', () => {
   assert.equal(planetaryStage(4567).id, 'accretion');
@@ -60,4 +60,27 @@ test('Hadean lakes cool, bombardment is localized in age, and material poses rep
   const scratch = {};
   assert.equal(earlyEarthMaterial(-4400, scratch), scratch);
   assert.ok(scratch.water < earlyEarthMaterial(-3000).water);
+});
+
+test('Theia flashes at impact then fades back to Hadean rather than warming beforehand', () => {
+  assert.equal(earlyEarthMaterial(-4501).theia, 0);
+  assert.equal(earlyEarthMaterial(-4500).theia, 1);
+  assert.ok(earlyEarthMaterial(-4490).theia < 1);
+  assert.ok(earlyEarthMaterial(-4470).theia < earlyEarthMaterial(-4490).theia);
+  assert.equal(earlyEarthMaterial(-4400).theia, 0);
+  assert.ok(earlyEarthMaterial(-4400).lava > 0);
+});
+
+test('seas emerge gradually and the plate-data handoff has a continuous visual blend', () => {
+  assert.equal(earlyEarthMaterial(-4500).water, 0);
+  const halfway=earlyEarthMaterial(-4400).water;
+  assert.ok(halfway > .3 && halfway < .8);
+  assert.equal(earlyEarthMaterial(-4320).water, .95);
+  assert.ok(earlyEarthMaterial(-4399).water-halfway < .01);
+  assert.equal(earlyEarthBlend(-1100,1000),1);
+  assert.equal(earlyEarthBlend(-1000,1000),1);
+  assert.equal(earlyEarthBlend(-940,1000),.5);
+  assert.equal(earlyEarthBlend(-880,1000),0);
+  assert.equal(earlyEarthBlend(0,1000),0);
+  assert.ok(Math.abs(earlyEarthBlend(-999.99,1000)-1)<1e-6);
 });

@@ -11,7 +11,7 @@ import {REGIONS, timeLabel} from './math.js';
 import {EARTH_EVENTS, EVENT_CATEGORIES, filterEarthEvents, eventIsReconstructable} from './earth-events.js';
 import {EARTH_FORMATION_MA, clampTimelineTime, isEarlyEarth, planetaryStage} from './planetary-history.js';
 import {PALEO_FEATURES, featuresAtAge, searchPaleoFeatures} from './paleo-features.js';
-import {TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
+import {playbackFocus, TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
 import AttributionWidget from '../shared/attribution-widget.jsx';
@@ -52,6 +52,7 @@ export default function TectonicTimeMachine() {
     [featureQuery, setFeatureQuery] = useState(''),
     [showAllFeatures, setShowAllFeatures] = useState(false);
   const earlyEarth = isEarlyEarth(time, source.maxAge);
+  const focusEvent = playbackFocus(time);
   const sceneReady = earlyEarth || ready;
   const sceneError = renderError || (earlyEarth ? '' : error);
   useEffect(() => {
@@ -188,7 +189,7 @@ export default function TectonicTimeMachine() {
       <div className="tectonic-stage" ref={stage}>
         <canvas
           ref={canvas}
-          aria-label="Animated tectonic reconstruction, drag to rotate or pan and scroll to zoom"
+          aria-label="Animated Earth history, drag to rotate or pan and scroll to zoom"
         />
         <div className="tectonic-heading">
           <span>DEEP TIME / math.gl</span>
@@ -211,7 +212,7 @@ export default function TectonicTimeMachine() {
           {TIMELINE_CHAPTERS.map(chapter => (
             <div
               key={chapter.name}
-              className={`tectonic-chapter${chapter.name.includes('&') ? ' tectonic-chapter-pair' : ''}${chapter.illustrative ? ' tectonic-chapter-planetary' : ''}`}
+              className={`tectonic-chapter${(chapter.name.includes('&') || chapter.name.includes('(')) ? ' tectonic-chapter-pair' : ''}${chapter.illustrative ? ' tectonic-chapter-planetary' : ''}`}
               style={{
                 opacity:
                   sceneReady && !sceneError && (chapter.illustrative || -chapter.time <= source.maxAge) && (glaciations || !chapter.name.startsWith('Snowball Earth'))
@@ -236,7 +237,7 @@ export default function TectonicTimeMachine() {
       </div>
       <aside className="tectonic-controls">
         <div className="tectonic-controls-title">
-          <h3>Continents in motion</h3>
+          <h3>Earth through time</h3>
           <span className={time > 0 ? 'tectonic-badge future' : 'tectonic-badge'}>
             {earlyEarth || time > 0 ? 'ILLUSTRATION' : 'RECONSTRUCTION'}
           </span>
@@ -259,6 +260,7 @@ export default function TectonicTimeMachine() {
           {source.frame} · {source.geometry}
         </p>
         {historyStatus && <p className="tectonic-stream-status" role="status">{historyStatus}</p>}
+        <div className="tectonic-control-row">
         <label>
           View
           <select aria-label="View" value={view} onChange={e => setView(e.target.value)}>
@@ -269,10 +271,42 @@ export default function TectonicTimeMachine() {
             ))}
           </select>
         </label>
+        <label>
+          Playback speed
+          <select
+            aria-label="Playback speed"
+            value={speed}
+            onChange={e => setSpeed(Number(e.target.value))}
+          >
+            <option value="10">10 million years / second</option>
+            <option value="20">20 million years / second</option>
+            <option value="40">40 million years / second</option>
+          </select>
+        </label>
+        </div>
         <label className="tectonic-check">
           <input type="checkbox" checked={cycleViews} onChange={e => setCycleViews(e.target.checked)} />{' '}
           Cycle views every 8 seconds
         </label>
+        {focusEvent ? <p className="tectonic-data-note">Event focus · {focusEvent.name}</p> : earlyEarth && <p className="tectonic-data-note">Deep time · 5× playback until tectonic data begins</p>}
+        {glaciations && playing && glaciationPlaybackSpeed(time, speed) < speed && (
+          <p className="tectonic-data-note">Slower playback · ice edge transition</p>
+        )}
+        <label>
+          Land appearance
+          <select
+            aria-label="Land appearance"
+            value={regionColors ? 'regions' : historicalTerrain ? 'paleodem' : 'terrain'}
+            onChange={e => {setRegionColors(e.target.value === 'regions'); setHistoricalTerrain(e.target.value === 'paleodem');}}
+          >
+            <option value="paleodem">Historical terrain · PaleoDEM (0–540 Ma)</option>
+            <option value="terrain">Modern NASA imagery on plates</option>
+            <option value="regions">Region colors</option>
+          </select>
+        </label>
+        <details className="tectonic-info tectonic-display-options">
+          <summary>Display &amp; future options</summary>
+        <p className="tectonic-note">PaleoDEM uses its own PALEOMAP reconstruction. The plate model applies to region colors and earlier/future terrain.</p>
         <label>
           {view === 'globe' ? 'Globe starting longitude' : 'Map central meridian'}
           <input
@@ -296,18 +330,6 @@ export default function TectonicTimeMachine() {
             <option value="polar">Polar assembly · illustrative</option>
           </select>
         </label>
-        <label>
-          Playback speed
-          <select
-            aria-label="Playback speed"
-            value={speed}
-            onChange={e => setSpeed(Number(e.target.value))}
-          >
-            <option value="10">10 million years / second</option>
-            <option value="20">20 million years / second</option>
-            <option value="40">40 million years / second</option>
-          </select>
-        </label>
         <label className="tectonic-check">
           <input type="checkbox" checked={grid} onChange={e => setGrid(e.target.checked)} />{' '}
           Graticule
@@ -316,22 +338,7 @@ export default function TectonicTimeMachine() {
           <input type="checkbox" checked={glaciations} onChange={e => setGlaciations(e.target.checked)} />{' '}
           Glaciations
         </label>
-        {glaciations && playing && glaciationPlaybackSpeed(time, speed) < speed && (
-          <p className="tectonic-data-note">Slower playback · ice edge transition</p>
-        )}
-        <label>
-          Land appearance
-          <select
-            aria-label="Land appearance"
-            value={regionColors ? 'regions' : historicalTerrain ? 'paleodem' : 'terrain'}
-            onChange={e => {setRegionColors(e.target.value === 'regions'); setHistoricalTerrain(e.target.value === 'paleodem');}}
-          >
-            <option value="paleodem">Historical terrain · PaleoDEM (0–540 Ma)</option>
-            <option value="terrain">Modern NASA imagery on plates</option>
-            <option value="regions">Region colors</option>
-          </select>
-        </label>
-        <p className="tectonic-note">PaleoDEM uses its own PALEOMAP reconstruction. The plate model applies to region colors and earlier/future terrain.</p>
+        </details>
         {regionColors && (
           <div className="tectonic-legend">
             {Object.entries(REGIONS).map(([name, r]) => (
@@ -343,7 +350,7 @@ export default function TectonicTimeMachine() {
           </div>
         )}
         <p className="tectonic-appearance-status">{appearanceStatus}</p>
-        <details className="tectonic-info" open>
+        <details className="tectonic-info">
           <summary>Earth history · impacts, climate and extinctions</summary>
           <p className="tectonic-note">
             Events extend to 4,567 Ma. Older surfaces are illustrative,

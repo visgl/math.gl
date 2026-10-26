@@ -12,12 +12,18 @@ export function isEarlyEarth(time, maxAge) {
   return Number.isFinite(time) && time < -maxAge && time >= -EARTH_FORMATION_MA;
 }
 function smooth01(value) {const t = Math.max(0, Math.min(1, value)); return t*t*(3-2*t);}
+// A visual handoff, not an interpolation between incompatible plate models.
+export function earlyEarthBlend(time, maxAge) {
+  if (!Number.isFinite(time) || time < -EARTH_FORMATION_MA) return 0;
+  return smooth01((-time-maxAge+120)/120);
+}
 // Original procedural art controls, not measured lava coverage or impact rates.
 export function earlyEarthMaterial(time, result = {}) {
   const age = -clampTimelineTime(time);
   result.lava = smooth01((age-3950)/400) * (.35+.25*smooth01((age-4400)/167));
   result.bombardment = smooth01((age-3700)/150) * smooth01((4100-age)/150);
-  result.water = .85*(1-smooth01((age-3800)/600));
+  result.water = .95*smooth01((4500-age)/180);
+  result.theia = age <= 4500 && age >= 4420 ? Math.exp((age-4500)/12) : 0;
   result.impactTime = (EARTH_FORMATION_MA-age)/12;
   return result;
 }

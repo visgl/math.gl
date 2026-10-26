@@ -1,6 +1,6 @@
 # Tectonic time machine
 
-Interactive browser example: −1800 Ma to present to +300 Ma, globe and Equal Earth,
+Interactive browser example: −4567 Ma to present to +300 Ma, globe and Equal Earth,
 Mollweide, Robinson, sinusoidal, Miller cylindrical, equirectangular and Mercator maps. Includes Play / Stop, speed,
 timeline landmarks, central meridian, hover coordinate tooltips, graticule and continent-region coloring.
 
@@ -275,3 +275,22 @@ selected plate model still supplies region colors and the earlier/future fallbac
 Choose **Modern NASA imagery on plates** or **Region colors** to see those plate
 models throughout their time ranges. Globe rotation, meridian shifts and projection
 morphing transform the global surface once, without applying plate rotations.
+
+Deep time plays at 5× the selected speed before the chosen plate model begins.
+The final accelerated step lands exactly on that boundary, then normal speed
+and the existing glaciation slowdowns resume. The Theia marker at approximately
+4,500 Ma triggers a brief whole-Earth yellow emissive pulse and halo, which
+fades back to Hadean rock/lava over subsequent timeline ages. The shader uses
+above-white linear radiance and a display tone map; it does not require an HDR
+monitor. Pulse duration and appearance are illustrative, not an impact simulation.
+
+Event windows temporarily slow Theia/cooling, emerging oceans and late-heavy-
+bombardment playback, while quieter deep time stays accelerated. Sea coverage
+expands gradually through synthetic basins rather than switching materials in a
+single frame. A 120 Myr visual crossfade hands the early surface over to the first
+plate-model frames; it is a display blend, not a merged geological reconstruction.
+
+Evidence supports liquid water by about 4.4 Ga, but the onset and global extent of
+oceans are uncertain. See [older-Earth data candidates and evidence](early-earth-sources.md)
+for verified open releases, limitations and references. **Euramerica (Laurussia)**
+labels the earlier landmass; **Laurasia** labels the later northern Pangaea breakup.

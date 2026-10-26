@@ -87,3 +87,25 @@ test('playback slows before both ice edges and resumes within events and the war
   assert.equal(glaciationPlaybackSpeed(-716, 20, false), 20);
   assert.equal(glaciationPlaybackSpeed(-716, 0.5), 0.5);
 });
+
+import {timelinePlaybackSpeed} from './timeline.js';
+test('deep time accelerates fivefold and lands exactly on the selected data boundary', () => {
+  assert.equal(timelinePlaybackSpeed(-3000, 20, 1000), 100);
+  assert.equal(timelinePlaybackSpeed(-2000, 40, 1800), 200);
+  const near = -1002;
+  assert.equal(near + timelinePlaybackSpeed(near, 20, 1000)/20, -1000);
+  assert.equal(timelinePlaybackSpeed(-1000, 20, 1000), 20);
+  assert.equal(timelinePlaybackSpeed(-1500, 20, 1800), 20);
+  assert.equal(timelinePlaybackSpeed(-716, 20, 1000), .75);
+});
+
+test('event focus gives Theia, oceans and bombardment time to be seen', () => {
+  assert.equal(timelinePlaybackSpeed(-4500, 20, 1000), 4);
+  assert.equal(timelinePlaybackSpeed(-4400, 20, 1000), 12);
+  assert.equal(timelinePlaybackSpeed(-3900, 20, 1000), 12);
+  assert.ok(timelinePlaybackSpeed(-4515, 20, 1000) < 100);
+  assert.equal(timelinePlaybackSpeed(-4200, 20, 1000), 100);
+  let time=-4500, seconds=0;
+  while (time < -4400) {time+=timelinePlaybackSpeed(time,20,1000)/20;seconds+=.05;}
+  assert.ok(seconds > 10 && seconds < 30, seconds);
+});
