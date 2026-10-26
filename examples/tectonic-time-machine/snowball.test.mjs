@@ -14,6 +14,9 @@ test('ice covers both Cryogenian events but not the intervening warmer interval'
 });
 test('chapter markers are ordered and respect the source age limit', () => {
   const chapters = timelineMilestones('atlantic', 1000);
+  assert(chapters.some(c => c.name === 'Hadean Earth' && c.illustrative));
+  assert(chapters.some(c => c.name === 'Late heavy bombardment' && c.illustrative));
+  assert(chapters.filter(c => c.time < 0 && !c.illustrative).every(c => -c.time <= 1000));
   assert(chapters.some(c => c.name.includes('Sturtian')));
   assert(chapters.some(c => c.name.includes('Marinoan')));
   for (let i = 1; i < chapters.length; i++) assert(chapters[i].time >= chapters[i - 1].time);

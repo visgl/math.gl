@@ -15,12 +15,17 @@ const block = `layout(std140) uniform tectonicSurfaceUniforms {
   float paleoTerrain;
   vec2 paleoSizeA;
   vec2 paleoSizeB;
+  float earlyEarth;
+  float earlyLava;
+  float earlyBombardment;
+  float earlyWater;
+  float earlyImpactTime;
 } tectonicSurface;`;
 const surface = {
   name: 'tectonicSurface',
   vs: block,
   fs: block + '\nuniform sampler2D terrainTexture; uniform sampler2D paleoElevationA; uniform sampler2D paleoElevationB;',
-  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32', vegetation: 'f32', paleoBlend: 'f32', paleoTerrain: 'f32', paleoSizeA: 'vec2<f32>', paleoSizeB: 'vec2<f32>'}
+  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32', vegetation: 'f32', paleoBlend: 'f32', paleoTerrain: 'f32', paleoSizeA: 'vec2<f32>', paleoSizeB: 'vec2<f32>', earlyEarth: 'f32', earlyLava: 'f32', earlyBombardment: 'f32', earlyWater: 'f32', earlyImpactTime: 'f32'}
 };
 const UNIT_SIZE = new Float32Array([1, 1]);
 const LIGHTS = [
@@ -38,6 +43,11 @@ export class SurfaceLayer extends SolidPolygonLayer {
     paleoFrameA: {type: 'object', value: null},
     paleoFrameB: {type: 'object', value: null},
     paleoBlend: 0,
+    earlyEarth: false,
+    earlyLava: 0,
+    earlyBombardment: 0,
+    earlyWater: 0,
+    earlyImpactTime: 0,
     surfaceType: 'land',
     globeWeight: 1,
     regionColors: false,
@@ -116,7 +126,46 @@ export class SurfaceLayer extends SolidPolygonLayer {
         normal=normalize(normal+vec3(0.,0.,.00001));
         vec3 light=normalize(vec3(.5,.55,1.));
         float diffuse=.52+.58*max(dot(normal,light),0.);
-        if(tectonicSurface.isWater>.5){
+        if(tectonicSurface.earlyEarth>.5) {
+          // Original procedural art. Sphere-space noise follows camera rotation and
+          // every projection; neither these lakes nor impact sites are observations.
+          vec3 p=normalize(geographicPosition);
+          float broad=.7*tectonicIceDetail(p,5.)+.3*tectonicIceDetail(p,13.);
+          float rock=.6*tectonicIceDetail(p,22.)+.3*tectonicIceDetail(p,65.)+.1*tectonicIceDetail(p,160.);
+          float relief=.003*rock;
+          float lakes=smoothstep(.59,.73,broad);
+          float cracks=1.-smoothstep(.007,.022,abs(tectonicIceDetail(p,40.)-.5));
+          float lava=tectonicSurface.earlyLava*(lakes+.1*cracks*lakes);
+          float flow=.65+.35*tectonicIceDetail(p+vec3(0.,0.,tectonicSurface.earlyImpactTime*.008),85.);
+          vec3 emission=lava*mix(vec3(.7,.025,.001),vec3(4.,1.4,.12),lakes*flow);
+          emission+=tectonicSurface.earlyLava*smoothstep(.52,.64,broad)*vec3(.14,.016,.001);
+          // Localized strikes, molten pools and cooling crater rings. The age-based
+          // clock is deterministic: scrubbing reproduces a pose, Stop freezes it.
+          for(int i=0;i<4;i++) {
+            float id=floor(tectonicSurface.earlyImpactTime)-float(i);
+            float elapsed=fract(tectonicSurface.earlyImpactTime)+float(i);
+            float z=2.*tectonicIceHash(vec3(id,7.,11.))-1.;
+            float angle=6.2831853*tectonicIceHash(vec3(id,19.,3.));
+            vec3 site=vec3(sqrt(max(0.,1.-z*z))*cos(angle),sqrt(max(0.,1.-z*z))*sin(angle),z);
+            float distance=length(p-site);
+            float core=1.-smoothstep(.025,.085,distance);
+            float ring=exp(-pow((distance-.045-.07*elapsed)/.014,2.));
+            float intensity=tectonicSurface.earlyBombardment;
+            relief-=intensity*.002*core*exp(-elapsed*.4);
+            emission+=intensity*(core*exp(-elapsed*9.)*vec3(7.,2.5,.35)
+              +core*exp(-elapsed*.85)*vec3(1.7,.18,.004)
+              +ring*exp(-elapsed*2.)*vec3(1.4,.3,.012));
+          }
+          vec3 rockyNormal=tectonicSurfaceNormal(normal,relief);
+          float illumination=.18+.95*max(dot(rockyNormal,light),0.);
+          vec3 basalt=mix(vec3(.027,.025,.024),vec3(.14,.125,.11),rock);
+          float sea=tectonicSurface.earlyWater*(1.-smoothstep(.40,.55,broad));
+          basalt=mix(basalt,vec3(.015,.045,.065),sea);
+          color.rgb=basalt*illumination+emission;
+          float rim=pow(1.-max(normal.z,0.),5.)*tectonicSurface.globeWeight;
+          color.rgb+=vec3(.055,.025,.012)*rim;
+          color.a=1.;
+        }else if(tectonicSurface.isWater>.5){
           vec4 water=water_getColorMapped(surfacePosition+vec3(0.,0.,4.),
             surfacePosition,reference,normal,uv);
           vec3 mapSea=vec3(.025,.14,.23);
@@ -188,7 +237,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
     };
   }
   draw(params) {
-    const {image, surfaceType, globeWeight, regionColors, iceCoverage, vegetation, paleoFrameA, paleoFrameB, paleoBlend} = this.props;
+    const {image, surfaceType, globeWeight, regionColors, iceCoverage, vegetation, paleoFrameA, paleoFrameB, paleoBlend, earlyEarth, earlyLava, earlyBombardment, earlyWater, earlyImpactTime} = this.props;
     const textures = this.state.elevationTextures;
     const frames = this.state.elevationFrames;
     frames[0] = paleoFrameA; frames[1] = paleoFrameB;
@@ -209,6 +258,8 @@ export class SurfaceLayer extends SolidPolygonLayer {
         vegetation,
         paleoTerrain: paleoFrameA && paleoFrameB ? 1 : 0,
         paleoBlend,
+        earlyEarth: earlyEarth ? 1 : 0,
+        earlyLava, earlyBombardment, earlyWater, earlyImpactTime,
         paleoSizeA: paleoFrameA?.size || UNIT_SIZE,
         paleoSizeB: paleoFrameB?.size || UNIT_SIZE,
         paleoElevationA: textures.get(paleoFrameA) || this.state.elevationFallback,

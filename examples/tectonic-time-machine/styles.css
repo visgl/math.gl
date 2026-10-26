@@ -95,17 +95,8 @@ SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 .tectonic-deep-time-header span {font-size:10px;color:#8eabba;}
 .tectonic-deep-time-track {position:relative;height:22px;margin:9px 7px 0;border-top:2px solid #416075;}
 .tectonic-deep-time-marker {position:absolute;top:-7px;transform:translateX(-50%);border:1px solid #90b6c9!important;width:11px;height:11px;border-radius:50%!important;padding:0!important;background:#b4d3de!important;min-width:0;}
-.tectonic-deep-time-marker.unavailable {background:#657989!important;border-color:#657989!important;opacity:.65;cursor:help;}
+.tectonic-deep-time-marker.illustrative {background:#d98a53!important;border-color:#f0b37d!important;cursor:pointer;}
 .tectonic-deep-time-marker:focus-visible {outline:2px solid white;outline-offset:3px;}
 .tectonic-deep-time-axis {display:flex;justify-content:space-between;color:#88a9b9;font:10px ui-monospace,monospace;}
 @media(max-width:650px) {.tectonic-deep-time-header {display:block;}.tectonic-deep-time-header span {display:block;}}
-
-/* Deliberately conceptual early-Earth mode: hides the tectonic map, never reuses modern terrain. */
-.tectonic-planetary-mode {position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:flex-start;overflow:auto;flex-direction:column;gap:18px;background:radial-gradient(ellipse at center,#48251e,#10151e 65%,#07131e);padding:40px;text-align:center;}
-.tectonic-planetary-body {flex-shrink:0;margin-top:auto;width:min(36vh,45%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 32% 28%,#f4b766,#ad4932 40%,#3d1e22 72%,#130f19);box-shadow:0 0 45px #d2673d55,inset -18px -16px 30px #100d18;}
-.tectonic-planetary-caption {flex-shrink:0;margin-bottom:auto;max-width:450px;color:#eaf3f7;}
-.tectonic-planetary-caption strong {font-size:18px;}
-.tectonic-planetary-caption p {color:#b7c7d1;font-size:12px;}
-.tectonic-planetary-caption button {margin-top:6px;}
-
-@media(max-width:650px) {.tectonic-planetary-mode {padding:16px;gap:10px;}.tectonic-planetary-body {width:80px;}.tectonic-planetary-caption strong {font-size:15px;}}
+.tectonic-chapter-planetary strong {font-size:clamp(22px,4.5vw,56px);}

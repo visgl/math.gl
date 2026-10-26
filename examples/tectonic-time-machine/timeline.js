@@ -59,7 +59,13 @@ export const SNOWBALL_CHAPTERS = [
     detail: 'Approx. 650–635 Ma · illustrative global ice cover',
     fade: [-650, -648, -637, -635]}
 ];
-export const TIMELINE_CHAPTERS = [...LANDMASS_CHAPTERS, ...SNOWBALL_CHAPTERS];
+export const EARLY_EARTH_CHAPTERS = [
+  {time: -4400, name: 'Hadean Earth', detail: 'Dark rocky crust and glowing lava lakes · illustrative',
+    illustrative: true, fade: [-4567, -4500, -4200, -4100]},
+  {time: -3900, name: 'Late heavy bombardment', detail: 'Hypothetical impacts and cooling lava pools · illustrative',
+    illustrative: true, fade: [-4100, -3980, -3830, -3700]}
+];
+export const TIMELINE_CHAPTERS = [...EARLY_EARTH_CHAPTERS, ...LANDMASS_CHAPTERS, ...SNOWBALL_CHAPTERS];
 /** Ice advances from the poles as each event fades in and retreats as it fades out. */
 export function snowballCoverage(time) {
   return Math.max(...SNOWBALL_CHAPTERS.map(chapter => chapterOpacity(chapter, time)));
@@ -67,7 +73,7 @@ export function snowballCoverage(time) {
 const present = {time: 0, name: 'Present'};
 export function timelineMilestones(scenario, maxAge = 500) {
   return [
-    ...TIMELINE_CHAPTERS.filter(c => c.time < 0 && -c.time <= maxAge).sort((a, b) => a.time - b.time),
+    ...TIMELINE_CHAPTERS.filter(c => c.time < 0 && (c.illustrative || -c.time <= maxAge)).sort((a, b) => a.time - b.time),
     present,
     LANDMASS_CHAPTERS.find(c => c.scenario === scenario) ||
       LANDMASS_CHAPTERS.find(c => c.scenario === 'atlantic')

@@ -36,7 +36,7 @@ Each source loads immutable, commit-pinned snapshots from
 [deck.gl-data](https://github.com/visgl/deck.gl-data/tree/master/earth/tectonic-movements/v1).
 Cao has one tagged Parquet file; Müller has separate geometry and rotations. Geometry
 contains WKB polygons in longitude/latitude degrees. Switching sources cancels waiters
-and clamps time to the selected source's range. Different models are never mixed.
+and keeps plate rotations within the selected source's range. Earlier dates use a labeled procedural surface on the same timeline. Different reconstruction models are never mixed.
 
 Sources: [Cao et al. 2024](https://doi.org/10.1016/j.gsf.2024.101922),
 [Müller et al. 2022](https://doi.org/10.5194/se-13-1127-2022),
@@ -174,44 +174,29 @@ the debated Late Heavy Bombardment, early zircons, oxygenation, Cryogenian
 glaciations and the Big Five mass extinction intervals. Entries support text
 search, category filtering and source links.
 
-**Scientific boundaries:** this is an event catalogue, not a 4.567-billion-year
-tectonic reconstruction. Existing plate models still stop at 1,000 or 1,800 Ma.
-A `View at this age` control is shown only when the selected model covers that
-age; older events are browsable but cannot be mapped with nonexistent plates.
-The Theia impact and discrete Late Heavy Bombardment spike are not observed
-reconstructions; ages and event descriptions have model uncertainty.
-No simulated collision animation, stochastic bombardment positions, or
-extinction-rate measurements are implied.
+**Scientific boundaries:** the single playback timeline now spans 4,567 Ma to
++300 Ma, while measured/modelled plate rotations still stop at 1,000 or 1,800 Ma.
+Every event seeks that same timeline. There is no separate exploratory mode,
+blocking overlay or Return action. Play/Stop, scrubbing, rotation and projection
+morphs work continuously across the source boundary.
 
-Future iterations should ingest independently licensed numerical impact-flux
-models, lunar crater observations and paleobiological occurrence/rate data
-via deck.gl-data STAC, with explicit source, model, uncertainty and coordinate
-frame metadata. An extended timeline will require a separate planetary
-visualization mode, rather than stretching rigid plate rotations into the Hadean.
+### Early Earth surface
 
-### Geological event rail
+Before the selected plate model's oldest age, a global procedural material
+replaces the continent layer. The Hadean appearance is dark, rough basalt-like
+crust with bright lava lakes and fissures, rather than an entirely orange globe.
+Around the illustrative late-heavy-bombardment interval (4,100–3,700 Ma), localized
+strikes flash, leave glowing molten pools and rings, then cool. Impact sites and
+visual cadence are original art parameters, not observed coordinates, rates or
+physical asteroid simulations. The existence of a discrete bombardment spike
+remains debated. No modern imagery or reconstructed continents are used for
+these early surfaces. Gradual cooling/water colors are also illustrative.
 
-A separate 4,567–0 Ma overview places sourced event markers on a geological
-age axis. This is **not** the plate reconstruction timeline. Markers within
-the selected source's age range can seek the existing timeline; older
-markers remain visible but are disabled, with an explanation in their
-accessible label and tooltip. Category and text filters apply to both the
-event browser and the rail. Marker positions are linear in millions of
-years, so closely spaced recent events may overlap; the event list remains
-the accessible way to inspect their full details.
-
-The existing TimelineWidget and geological playback bounds are unchanged.
-
-### Early Earth conceptual mode and data readiness
-
-For event ages older than the selected plate model, the event rail and
-browser now offer an **Explore early Earth scenario** action. This pauses
-tectonic playback and covers the map with a separate, deliberately stylized
-planetary scene. Stage labels distinguish accretion, Moon-forming impact
-scenarios, cooling crust and later pre-tectonic Earth. The visual is an
-educational illustration, **not** a physics simulation, reconstructed
-surface, impact geometry or inferred global magma coverage. Returning
-restores the tectonic scene and its existing playback age.
+Material noise and impact sites live in geographic sphere space, so they follow
+rotation and every projection once. Effects are driven by geological playback
+age: Stop freezes them and revisiting an age reproduces the same appearance.
+The source-linked event browser and overview rail remain navigation shortcuts
+to the same geological time, with clearly marked illustrative older dates.
 
 `planetary-history.js` also defines a provenance-gated contract for
 future impact-flux and biodiversity time series. Each series must identify
