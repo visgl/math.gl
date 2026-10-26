@@ -12,7 +12,7 @@ October 26, 2026: the first local Cartesian foundation is implemented in
 [`@math.gl/geospatial/terrain`](../modules/geospatial/terrain/README.md), with a dependency-free runtime
 sampling entry and optional `@math.gl/geospatial/terrain/geometry` mesh entry. The opt-in subpath follows master's six-package consolidation while keeping
 height-field sampling independent of the geospatial root and its runtime imports.
-Future geographic adapters will compose with existing utilities.
+Optional geographic and tiled adapters extend this contract without adding root imports.
 
 Delivered: copied/normalized affine grids, vertex/cell registration, validity and
 height-reference metadata, scalar/batch nearest/bilinear/triangle sampling,
@@ -20,9 +20,13 @@ metric interpolant gradients and normals, extrema, regular meshes with explicit
 origins, and analytic/mesh conformance tests. See the
 [API contract](../docs/modules/geospatial/terrain/README.md).
 
-This is partial T0/T1 delivery. Independent real-DEM fixtures, geospatial
-adapters, a CPU/GPU/deck.gl spike, tiled snapshots, and GPU qualification remain
-open. The remaining sections describe the target architecture and delivery gates.
+The next tranche adds geographic/Web Mercator raster queries with WGS84 metric
+derivatives, immutable cell-registered tiled snapshots, neighbor halos, explicit
+residency, whole-footprint coarser fallback, and transferable halo copies.
+
+This is partial T0/T1/T2 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
+spike, vertex-tile reconciliation, incremental cache updates, adaptive meshes,
+and GPU qualification remain open. The remaining sections describe the target architecture and delivery gates.
 
 ## Recommendation
 

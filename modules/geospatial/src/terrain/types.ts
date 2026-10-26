@@ -14,7 +14,8 @@ export const TerrainSampleStatus = {
   NO_DATA: 2,
   INVALID_INPUT: 3,
   NUMERIC_ERROR: 4,
-  UNAVAILABLE: 5
+  UNAVAILABLE: 5,
+  NOT_RESIDENT: 6
 } as const;
 
 export type TerrainSampleStatus = (typeof TerrainSampleStatus)[keyof typeof TerrainSampleStatus];

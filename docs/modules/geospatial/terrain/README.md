@@ -186,3 +186,80 @@ adapters, adaptive tessellation, accelerated intersections, shader kernels, and
 deck.gl integration remain planned. CPU tests use analytic planes/saddles and
 independent mesh centroid/normal checks; they do not establish CPU/GPU parity or
 source DEM accuracy.
+
+## Geographic sampling
+
+```typescript
+import {GeographicHeightField} from '@math.gl/geospatial/terrain/geographic';
+
+const terrain = new GeographicHeightField({
+  width: 2, height: 2,
+  heights: new Float32Array([10, 20, 0, 10]),
+  bounds: [179, 59, 181, 61],
+  projection: 'geographic'
+});
+const sample = terrain.sample(180, 60);
+```
+
+Bounds are unwrapped west/south/east/north degrees; queries must use that same
+longitude interval. Geographic and Web Mercator source rasters are supported.
+Rows run north to south by default. Cell registration places samples at pixel
+centers; vertex registration includes bounds endpoints. There is no implicit
+longitude wrapping, latitude clamping, reprojection of raster data, or vertical
+datum conversion. Geographic grids exclude poles. Web Mercator bounds are limited
+to its square world extent in latitude.
+
+Gradients and normals use WGS84 surface-metric east/north axes at the query
+latitude. They describe elevation derivatives on the reference ellipsoid, without
+an altitude-dependent metric correction. Normals are local east/north/up vectors,
+not ECEF vectors. `heightReference` remains an opaque provenance label.
+
+## Tiled snapshots
+
+```typescript
+import {TiledHeightField} from '@math.gl/geospatial/terrain/tiled';
+
+const terrain = new TiledHeightField({
+  revision: 'dem-2026-10',
+  matrixSet: {
+    crs: 'local-meters',
+    matrices: [{
+      id: 'fine', resolution: 10, origin: [0, 0],
+      cornerOfOrigin: 'bottomLeft', tileSize: [2, 2], matrixSize: [1, 1]
+    }]
+  },
+  tiles: [{matrixId: 'fine', column: 0, row: 0,
+    heights: new Float32Array([0, 10, 20, 30])}]
+});
+const sample = terrain.sample(10, 10, {matrixId: 'fine', fallback: 'coarser'});
+const upload = terrain.copyTileHalo('fine', 0, 0);
+```
+
+This initial tiled API accepts **cell-registered rasters in one common local metric
+frame**. Matrix `tileSize` is the raster size; source buffers must match it exactly.
+Matrices may have rectangular pixels and either row direction. CRS identifiers do
+not trigger coordinate conversion. Geographic rasters use the separate geographic
+adapter above; projected meters such as EPSG:3857 are not ground meters and must
+not be passed as a local metric frame when physical slopes are required.
+
+Construction copies and normalizes tile buffers and builds one-cell neighbor
+halos. Create a new snapshot when residency changes; existing snapshots and their
+revision identifiers stay stable. Queries use the same interpolation and diagonal
+rules as `HeightField`, including derivatives across seams. The domain ends at
+outer sample centers. `NOT_RESIDENT` means an interpolation tap has no loaded tile;
+`NO_DATA` means a loaded source explicitly marks a required tap invalid. Known
+no-data takes precedence over missing residency.
+
+Fallback is opt-in and retries the **whole footprint** at a coarser matrix. Both
+axis resolutions must be at least as coarse, with one strictly coarser. Candidates
+sort by X resolution, then Y resolution, then identifier. No-data never triggers
+fallback; no query blends taps from different resolutions. Results include the
+actual matrix, snapshot revision and whether fallback occurred.
+
+`copyTileHalo()` returns independent finite Float64 height and Uint8 validity
+buffers with dimensions and metric sample-center transforms. They are suitable
+for worker transfer or preparing GPU buffers; this is not a GPU execution API or
+a shader layout ABI. Missing neighbors have validity zero in the exported halo.
+This version rebuilds halos per snapshot and allocates scalar query temporaries;
+large streaming caches, batch tiled queries, vertex-tile edge reconciliation,
+coalesced tile rows, adaptive meshes and GPU kernels remain roadmap work.
