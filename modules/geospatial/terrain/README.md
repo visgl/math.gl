@@ -45,5 +45,7 @@ See the [API and numerical contract](../../../docs/modules/geospatial/terrain/RE
 
 The optional `/terrain/surface` entry adds indexed triangle surfaces, barycentric
 height sampling, explicit halfedge topology and BVH ray/segment/nearest queries.
+Bounded query variants report completion and work counts; sphere queries return
+face/edge/vertex contacts with explicit work and contact-capacity limits.
 `/terrain/bounds` adds conservative min/max hierarchies over height-field cells.
 These are CPU/data APIs; shader and device execution stay in luma.gl.
