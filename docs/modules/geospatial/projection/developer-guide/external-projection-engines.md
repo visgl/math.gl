@@ -204,6 +204,12 @@ outside a projection's useful domain; validate the domain required by your app.
 
 ## Use either backend in application code
 
+Consumers that also need `CRSEngine.getCRS()` require metadata, rendering bounds,
+normalization and sizing policy in addition to a prepared transform. Use the
+optional [`createCRSDescriptor`](../api-reference/crs-descriptor.md) helper to
+assemble those backend-owned decisions without math.gl's native CRS normalizer.
+Its tested proj4js example covers synchronous conversions and reusable outputs.
+
 Accept `ProjectionEngine` in consumers and select the backend at setup time. Use
 `createProjectionAsync()` when you want a ready synchronous `PreparedProjection`,
 including when the engine might use lazy math.gl algorithms. The method does not

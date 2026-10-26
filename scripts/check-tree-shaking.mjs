@@ -14,6 +14,12 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
   {
+    symbol: 'createCRSDescriptor',
+    packages: ['@math.gl/geospatial/projection/crs-descriptor'],
+    forbidden: [/\/projection\/experimental\//, /\/crs\/(wkt|proj-string|projjson|resolver)/, /proj-wasm/, /proj4/, /\/core\//],
+    budget: 8000
+  },
+  {
     symbol: 'createSpatialReference',
     packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial/crs/spatial-reference'],
     forbidden: [/\/resolver\./, /\/projection\//, /\/wkt-crs\./],

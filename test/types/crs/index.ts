@@ -189,3 +189,35 @@ const incompleteCorner: CRSBounds[0] = [0, 0];
 void angularUnit;
 void renderingBounds;
 void incompleteCorner;
+
+import {
+  createCRSDescriptor,
+  type CRSDescriptorOptions
+} from '@math.gl/geospatial/projection/crs-descriptor';
+import type {CRSMetadata} from '@math.gl/geospatial/crs';
+import type {CRSConverter, CRSDescriptor} from '@math.gl/geospatial/projection/types';
+declare const externalMetadata: CRSMetadata;
+declare const externalConverter: CRSConverter;
+const descriptorOptions: CRSDescriptorOptions = {
+  metadata: externalMetadata,
+  renderingBounds,
+  renderingScale: () => null,
+  converter: {WGS84: externalConverter}
+};
+const externalDescriptor: CRSDescriptor = createCRSDescriptor(descriptorOptions);
+const reused: Float64Array = externalDescriptor.converter.WGS84.from([1, 2], new Float64Array(2));
+const allocated: number[] = externalDescriptor.converter.WGS84.to([1, 2]);
+// @ts-expect-error A descriptor requires an explicitly prepared WGS84 converter.
+createCRSDescriptor({...descriptorOptions, converter: {}});
+// @ts-expect-error Scale callbacks must be synchronous.
+createCRSDescriptor({...descriptorOptions, renderingScale: async () => [1, 1, 1]});
+const asynchronousConverter: CRSConverter = {
+  ...externalConverter,
+  // @ts-expect-error Converters must be synchronous and support reusable output.
+  from: async () => [1, 2]
+};
+// @ts-expect-error Descriptor metadata is immutable.
+externalDescriptor.ellipsoid.semiMajorAxis = 1;
+void reused;
+void allocated;
+void asynchronousConverter;

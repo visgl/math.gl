@@ -19,9 +19,9 @@ export type CRSUnit = Readonly<{
 export type CRSMetadata = Readonly<{
   /** Coordinate representation; identity describes an explicitly local, unreferenced space. */
   coordinateFrame: 'geographic' | 'projected' | 'geocentric' | 'identity';
-  /** Resolved PROJ algorithm name, not a semantic CRS identity. */
+  /** Backend projection name; native engines use PROJ algorithm names. Not a semantic CRS identity. */
   projection: string;
-  /** Resolved PROJ parameters; angles are degrees and lengths are metres. */
+  /** Backend parameters. Native engines use resolved PROJ parameters: degrees for angles, metres for lengths. */
   parameters: Readonly<Record<string, string | undefined>>;
   /** Resolved rotational ellipsoid. A sphere has equal axes; both axes are in metres. */
   ellipsoid: Readonly<{semiMajorAxis: number; semiMinorAxis: number}>;
