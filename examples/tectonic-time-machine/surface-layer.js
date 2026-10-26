@@ -20,6 +20,8 @@ const block = `layout(std140) uniform tectonicSurfaceUniforms {
   float earlyLava;
   float earlyBombardment;
   float earlyWater;
+  float earlySteam;
+  float earlyRain;
   float earlyImpactTime;
   float earlyTheia;
   float earlyOpacity;
@@ -29,7 +31,7 @@ const surface = {
   name: 'tectonicSurface',
   vs: block,
   fs: block + '\nuniform sampler2D terrainTexture; uniform sampler2D paleoElevationA; uniform sampler2D paleoElevationB;',
-  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32', vegetation: 'f32', paleoBlend: 'f32', paleoTerrain: 'f32', paleoSizeA: 'vec2<f32>', paleoSizeB: 'vec2<f32>', earlyEarth: 'f32', earlyLava: 'f32', earlyBombardment: 'f32', earlyWater: 'f32', earlyImpactTime: 'f32', earlyTheia: 'f32', earlyOpacity: 'f32', earlyPulse: 'f32'}
+  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', regionColors: 'f32', iceCoverage: 'f32', vegetation: 'f32', paleoBlend: 'f32', paleoTerrain: 'f32', paleoSizeA: 'vec2<f32>', paleoSizeB: 'vec2<f32>', earlyEarth: 'f32', earlyLava: 'f32', earlyBombardment: 'f32', earlyWater: 'f32', earlySteam: 'f32', earlyRain: 'f32', earlyImpactTime: 'f32', earlyTheia: 'f32', earlyOpacity: 'f32', earlyPulse: 'f32'}
 };
 const UNIT_SIZE = new Float32Array([1, 1]);
 const LIGHTS = [
@@ -51,6 +53,8 @@ export class SurfaceLayer extends SolidPolygonLayer {
     earlyLava: 0,
     earlyBombardment: 0,
     earlyWater: 0,
+    earlySteam: 0,
+    earlyRain: 0,
     earlyImpactTime: 0,
     earlyTheia: 0,
     earlyOpacity: 1,
@@ -177,6 +181,16 @@ export class SurfaceLayer extends SolidPolygonLayer {
           color.rgb=vec3(1.)-exp(-radiance);
           float rim=pow(1.-max(normal.z,0.),5.)*tectonicSurface.globeWeight;
           color.rgb+=vec3(.055,.025,.012)*rim;
+          // Drifting steam in geographic sphere space, with falling rain streaks.
+          vec3 drift=p+vec3(0.,tectonicSurface.earlyImpactTime*.035,0.);
+          float cloud=tectonicIceDetail(drift,7.);
+          float vapor=tectonicSurface.earlySteam*(.35+.5*cloud);
+          vec3 steamColor=vec3(.57,.60,.63)*(.5+.5*max(dot(normal,light),0.));
+          color.rgb=mix(color.rgb,steamColor,vapor);
+          vec2 rainUV=vec2(atan(p.y,p.x)*85.,asin(clamp(p.z,-1.,1.))*30.);
+          float lane=step(.94,fract(sin(floor(rainUV.x)*127.1)*43758.5));
+          float streak=pow(max(0.,sin(rainUV.y+tectonicSurface.earlyImpactTime*25.)),18.);
+          color.rgb+=vec3(.22,.30,.36)*lane*streak*tectonicSurface.earlyRain;
           color.a=tectonicSurface.earlyOpacity;
         }else if(tectonicSurface.isWater>.5){
           vec4 water=water_getColorMapped(surfacePosition+vec3(0.,0.,4.),
@@ -250,7 +264,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
     };
   }
   draw(params) {
-    const {image, surfaceType, globeWeight, regionColors, iceCoverage, vegetation, paleoFrameA, paleoFrameB, paleoBlend, earlyEarth, earlyLava, earlyBombardment, earlyWater, earlyImpactTime, earlyTheia, earlyOpacity} = this.props;
+    const {image, surfaceType, globeWeight, regionColors, iceCoverage, vegetation, paleoFrameA, paleoFrameB, paleoBlend, earlyEarth, earlyLava, earlyBombardment, earlyWater, earlySteam, earlyRain, earlyImpactTime, earlyTheia, earlyOpacity} = this.props;
     const textures = this.state.elevationTextures;
     const frames = this.state.elevationFrames;
     frames[0] = paleoFrameA; frames[1] = paleoFrameB;
@@ -273,7 +287,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
         paleoBlend,
         earlyEarth: earlyEarth ? 1 : 0,
         earlyPulse: earlyEarth && earlyLava > .01 ? thermalPulse(performance.now()/1000) : 1,
-        earlyLava, earlyBombardment, earlyWater, earlyImpactTime, earlyTheia, earlyOpacity,
+        earlyLava, earlyBombardment, earlyWater, earlySteam, earlyRain, earlyImpactTime, earlyTheia, earlyOpacity,
         paleoSizeA: paleoFrameA?.size || UNIT_SIZE,
         paleoSizeB: paleoFrameB?.size || UNIT_SIZE,
         paleoElevationA: textures.get(paleoFrameA) || this.state.elevationFallback,
