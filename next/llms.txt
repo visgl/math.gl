@@ -194,6 +194,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Global spherical polygon cuts](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/global-geographic-cuts.md): An accurately projected point does not determine how to draw a whole polygon
 - [Globe intersection and occlusion](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/globe-queries.md): {/ SPDX-License-Identifier: MIT /}
 - [Helpers](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/helpers.md): Helper functions for geospatial.
+- [Ellipsoidal and rhumb latitude cuts](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/latitude-geographic-cuts.md): A map can accept only part of a geographic shape. A finite Mercator map needs a
 - [LngLatRectangle](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/lng-lat-rectangle.md): A longitude-latitude rectangle on an ellipsoid. Angular values are stored in radians.
 - [Local-frame qualification and GeographicLib benchmark baselines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/local-frame-qualification.md): The C8 increment qualifies a bounded profile of LocalReferenceFrame, poses,
 - [LocalReferenceFrame](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/local-reference-frame.md): A reusable rigid frame at a fixed Cartesian origin on a sphere or oblate spheroid. The class
