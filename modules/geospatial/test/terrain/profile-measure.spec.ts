@@ -132,3 +132,17 @@ test('profile means use interval weights when a later interval dominates and hei
   expect(result.heightIntegral).toBe(-10);
   expect(result.coveredLength).toBe(4);
 });
+
+test('profile means retain contributions whose interval weights underflow', () => {
+  for (const distance of [1e-100, 1e-10]) {
+    const result = measureTerrainProfile(
+      profile(
+        [0, distance, 2 * distance, 3 * distance, 1e308],
+        [1e308, 1e308, NaN, 0, 0],
+        [0, 0, 2, 0, 0]
+      )
+    );
+    expect(result.meanHeight! / distance).toBeCloseTo(1, 14);
+    expect(result.heightIntegral / 1e308 / distance).toBeCloseTo(1, 14);
+  }
+});

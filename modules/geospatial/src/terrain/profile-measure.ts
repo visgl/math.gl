@@ -106,14 +106,13 @@ export function measureTerrainProfile(
     add(5, average * ds);
     if (previousCovered === 0) meanHeight = average;
     else {
-      const oldWeight = previousCovered / sums[0],
-        newWeight = ds / sums[0];
+      const newWeight = ds / sums[0];
       const delta = average - meanHeight;
       meanHeight = Number.isFinite(delta)
         ? newWeight <= 0.5
-          ? meanHeight + delta * newWeight
-          : average - delta * oldWeight
-        : meanHeight * oldWeight + average * newWeight;
+          ? meanHeight + weighted(delta, ds, sums[0])
+          : average - weighted(delta, previousCovered, sums[0])
+        : weighted(meanHeight, previousCovered, sums[0]) + weighted(average, ds, sums[0]);
       if (!Number.isFinite(meanHeight))
         throw new Error('Terrain profile measurement arithmetic overflow');
     }
@@ -134,4 +133,14 @@ export function measureTerrainProfile(
     meanHeight: sums[0] ? meanHeight : undefined,
     complete: validSampleCount === count
   };
+}
+
+/** Apply tiny weights before division so a representable contribution is not rounded away. */
+function weighted(value: number, part: number, total: number): number {
+  const ratio = part / total;
+  if (ratio < Number.MIN_VALUE / Number.EPSILON) {
+    const product = value * part;
+    if (Number.isFinite(product) && product !== 0) return product / total;
+  }
+  return value * ratio;
 }
