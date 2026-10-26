@@ -63,7 +63,9 @@ export function createFormationEffects() {
     const common={coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,radiusUnits:'meters',
       getPosition:position,getFillColor:color,getRadius:radius,pickable:false,
       updateTriggers:{getPosition:time,getFillColor:[time,globeWeight],getRadius:time}};
-    return [new ScatterplotLayer({...common,id:'formation-debris',data:debris}),
+    // Transparent debris must not write depth and hide the assembling Moon.
+    return [new ScatterplotLayer({...common,id:'formation-debris',data:debris,
+      parameters:{depthWriteEnabled:false}}),
       new CelestialBodyLayer({...common,id:'formation-moon',data:bodies})];
   };
 }
