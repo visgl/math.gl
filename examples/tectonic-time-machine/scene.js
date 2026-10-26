@@ -24,8 +24,8 @@ import {
   REGIONS,
   timeLabel
 } from './math.js';
-import {snowballCoverage, timelinePlaybackSpeed} from './timeline.js';
-import {vegetationCoverage} from './earth-events.js';
+import {snowballCoverage, snowballDynamics, timelinePlaybackSpeed} from './timeline.js';
+import {vegetationCoverage, microbialCoverage} from './earth-events.js';
 import {createFormationEffects} from './formation-effects.js';
 import {SurfaceLayer} from './surface-layer.js';
 import {EARTH_FORMATION_MA, isEarlyEarth, earlyEarthBlend, earlyEarthMaterial, planetaryStage} from './planetary-history.js';
@@ -115,6 +115,7 @@ export function mountScene(
     geometryLongitude = NaN,
     counts = {active: 0, unresolved: 0};
   const earlyMaterial = {};
+  const iceDynamics = {};
   const formationEffects = createFormationEffects();
   const rotations = new Map(),
     future = new Map(),
@@ -308,12 +309,15 @@ export function mountScene(
       pickable: false,
       material: false
     };
+    snowballDynamics(time,iceDynamics);
     deck.setProps({
       layers: [
         !early && new SurfaceLayer({
           ...common,
           id: 'tectonic-ocean',
           iceCoverage: glaciations ? snowballCoverage(time) : 0,
+          iceRetreat: glaciations ? iceDynamics.retreat : 0,
+          iceVolcanism: glaciations ? iceDynamics.volcanism : 0,
           data: binaryMesh(ocean),
           surfaceType: 'ocean',
           globeWeight: weights.globe || 0
@@ -323,6 +327,8 @@ export function mountScene(
           id: 'tectonic-land',
           vegetation: vegetationCoverage(time),
           iceCoverage: glaciations ? snowballCoverage(time) : 0,
+          iceRetreat: glaciations ? iceDynamics.retreat : 0,
+          iceVolcanism: glaciations ? iceDynamics.volcanism : 0,
           data: binaryMesh(usePaleo ? paleoMesh : land),
           image: terrainImage,
           paleoFrameA: usePaleo ? pose.a : null,
@@ -341,6 +347,7 @@ export function mountScene(
           earlyLava: earlyMaterial.lava,
           earlyBombardment: earlyMaterial.bombardment,
           earlyWater: earlyMaterial.water,
+          microbialLife: microbialCoverage(time),
           earlySteam: earlyMaterial.steam,
           earlyRain: earlyMaterial.rain,
           earlyImpactTime: earlyMaterial.impactTime,
