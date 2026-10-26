@@ -22,10 +22,16 @@ describe('opt-in CRS resolver', () => {
     const identifier = {
       state: 'explicit',
       definition: 'APP:custom/name',
+      provenance: 'metadata',
       representation: 'identifier'
     } as const;
     expect((await resolver.resolve(identifier)).input).toMatchObject({definition: WGS84});
-    const opaque = {state: 'explicit', definition: 'opaque', representation: 'opaque'} as const;
+    const opaque = {
+      state: 'explicit',
+      definition: 'opaque',
+      representation: 'opaque',
+      provenance: 'metadata'
+    } as const;
     expect(await resolver.resolve(opaque)).toEqual({input: opaque, lookups: []});
   });
 
