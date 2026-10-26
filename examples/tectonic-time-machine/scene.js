@@ -26,6 +26,7 @@ import {
 } from './math.js';
 import {snowballCoverage, timelinePlaybackSpeed} from './timeline.js';
 import {vegetationCoverage} from './earth-events.js';
+import {createFormationEffects} from './formation-effects.js';
 import {SurfaceLayer} from './surface-layer.js';
 import {EARTH_FORMATION_MA, isEarlyEarth, earlyEarthBlend, earlyEarthMaterial, planetaryStage} from './planetary-history.js';
 import {loadPaleoTerrain, terrainBracket} from './paleodem.js';
@@ -114,6 +115,7 @@ export function mountScene(
     geometryLongitude = NaN,
     counts = {active: 0, unresolved: 0};
   const earlyMaterial = {};
+  const formationEffects = createFormationEffects();
   const rotations = new Map(),
     future = new Map(),
     ocean = makeMesh(earth),
@@ -339,10 +341,13 @@ export function mountScene(
           earlyLava: earlyMaterial.lava,
           earlyBombardment: earlyMaterial.bombardment,
           earlyWater: earlyMaterial.water,
+          earlySteam: earlyMaterial.steam,
+          earlyRain: earlyMaterial.rain,
           earlyImpactTime: earlyMaterial.impactTime,
           earlyTheia: earlyMaterial.theia,
           parameters: {depthWriteEnabled: early}
         }),
+        ...formationEffects(time, weights.globe || 0),
         new PathLayer({
           id: 'tectonic-grid',
           data: paths,

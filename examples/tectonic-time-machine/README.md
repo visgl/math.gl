@@ -301,3 +301,20 @@ Hadean material. A separate, subtle 4.5-second thermal breathing effect varies
 Hadean intensity by ±8%; it remains alive while paused. Geological age, impact
 positions and impact cooling still freeze with Stop. All of these effects are
 illustrative art rather than physical radiometry or simulated impact histories.
+
+### Moon formation and the first seas
+
+The illustrative Theia sequence brings a rocky impactor toward Earth at 4,520–4,500 Ma,
+then reveals a molten debris ring that diminishes as a young Moon grows and cools.
+The ring and bodies use depth-tested deck.gl layers, so Earth occludes the far side.
+They fade with the globe weight during map transitions; surface steam, rain and seas
+continue across all projections. The orbital vignette fades away by 4,320 Ma.
+
+After the flash, drifting steam obscures the cooling surface. A rainy condensation
+interval overlaps expanding synthetic ocean basins, before the atmosphere clears.
+All stages follow the timeline: Stop freezes orbital motion, clouds and rain, and
+seeking reconstructs the same state. The separate subtle thermal pulse remains live.
+The dates, compressed orbital cadence, body sizes, weather and condensation sequence
+are cinematic art, not measured ancient orbits, a climate model or an impact simulation.
+No new imagery or third-party assets are included. The existing 4.4 Ga water-evidence
+reference is an observational anchor, not a date for global ocean completion.

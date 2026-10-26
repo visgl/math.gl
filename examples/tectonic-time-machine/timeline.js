@@ -62,9 +62,13 @@ export const SNOWBALL_CHAPTERS = [
 ];
 export const EARLY_EARTH_CHAPTERS = [
   {time: -4500, name: 'Earth–Theia impact', detail: 'Moon-forming hypothesis · illustrative global flash',
-    illustrative: true, fade: [-4501, -4500, -4490, -4440]},
+    illustrative: true, fade: [-4501, -4500, -4495, -4488]},
+  {time: -4475, name: 'A young Moon', detail: 'Debris gathers and cools · illustrative orbital vignette',
+    illustrative: true, fade: [-4490, -4480, -4455, -4445]},
+  {time: -4430, name: 'The first seas', detail: 'Steam condenses into rain · illustrative, ocean onset uncertain',
+    illustrative: true, fade: [-4445, -4440, -4425, -4415]},
   {time: -4400, name: 'Hadean Earth', detail: 'Rocky crust, lava lakes and emerging seas · illustrative',
-    illustrative: true, fade: [-4440, -4410, -4250, -4100]},
+    illustrative: true, fade: [-4415, -4410, -4250, -4100]},
   {time: -3900, name: 'Late heavy bombardment', detail: 'Hypothetical impacts and cooling lava pools · illustrative',
     illustrative: true, fade: [-4100, -3980, -3830, -3700]}
 ];
