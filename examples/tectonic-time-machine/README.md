@@ -318,3 +318,23 @@ The dates, compressed orbital cadence, body sizes, weather and condensation sequ
 are cinematic art, not measured ancient orbits, a climate model or an impact simulation.
 No new imagery or third-party assets are included. The existing 4.4 Ga water-evidence
 reference is an observational anchor, not a date for global ocean completion.
+
+### Ice and life
+
+Cryogenian ice still advances from the poles in the approximate Sturtian and
+Marinoan windows. During retreat, blue meltwater margins and fractures open in
+the ice; sparse warm volcanic windows become visible during the long frozen
+interval. These are original cinematic materials, not reconstructed eruption
+sites, ice thickness, meltwater maps or a modeled cause of deglaciation. The
+existing [Hoffman et al. (2017) review](https://doi.org/10.1126/sciadv.1600983)
+provides scientific context. Turning off glaciations disables all of these cues.
+
+“Microbial worlds” adds muted ochre/teal mats along the synthetic early-Earth
+shallows after the 3.43 Ga [Strelley Pool stromatolite evidence](https://www.nature.com/articles/nature04764).
+This is an illustrative biological cue, not a claim for the first life, known
+ancient coastlines, microbial pigmentation or global biomass. Land stays bare
+before the existing approximately 470 Ma plant event; vegetation then gains color gradually, with gentle regional variation. Fine substrate
+albedo, microrelief and source-elevation shading persist throughout; there is no
+separate switch to a full-texture material. The color variation is art, not
+reconstructed ecosystems or a climate/habitat model. Life chapters receive
+slower playback and can be selected from the timeline.

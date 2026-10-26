@@ -72,10 +72,40 @@ export const EARLY_EARTH_CHAPTERS = [
   {time: -3900, name: 'Late heavy bombardment', detail: 'Hypothetical impacts and cooling lava pools · illustrative',
     illustrative: true, fade: [-4100, -3980, -3830, -3700]}
 ];
-export const TIMELINE_CHAPTERS = [...EARLY_EARTH_CHAPTERS, ...LANDMASS_CHAPTERS, ...SNOWBALL_CHAPTERS];
+export const LIFE_CHAPTERS = [
+  {time:-3300,name:'Microbial worlds',detail:'Ancient microbial communities · illustrative shoreline colors',
+    illustrative:true,fade:[-3430,-3350,-3250,-3150]},
+  {time:-430,name:'Life reaches the land',detail:'Gradual greening after early land plants · illustrative vegetation',
+    fade:[-470,-450,-410,-390]}
+];
+export const TIMELINE_CHAPTERS = [...EARLY_EARTH_CHAPTERS, ...LANDMASS_CHAPTERS, ...SNOWBALL_CHAPTERS, ...LIFE_CHAPTERS];
+// Competing narratives share one caption slot; never draw titles on top of each other.
+export function activeChapter(time,scenario,maxAge,glaciations=true) {
+  let selected=null, strongest=0;
+  for(const chapter of TIMELINE_CHAPTERS) {
+    if(!chapter.illustrative && -chapter.time>maxAge) continue;
+    if(!glaciations && SNOWBALL_CHAPTERS.includes(chapter)) continue;
+    const opacity=chapterOpacity(chapter,time,scenario);
+    if(opacity>strongest){selected=chapter;strongest=opacity;}
+  }
+  return selected;
+}
 /** Ice advances from the poles as each event fades in and retreats as it fades out. */
 export function snowballCoverage(time) {
   return Math.max(...SNOWBALL_CHAPTERS.map(chapter => chapterOpacity(chapter, time)));
+}
+// Visual deglaciation/volcanism controls, not observed eruption sites or rates.
+export function snowballDynamics(time,result={}) {
+  result.retreat=0;result.volcanism=0;
+  for(const chapter of SNOWBALL_CHAPTERS) {
+    const [,start,end,finish]=chapter.fade;
+    const retreat=Math.max(0,Math.min(1,(time-end)/(finish-end)));
+    const coverage=chapterOpacity(chapter,time);
+    result.retreat=Math.max(result.retreat,retreat*coverage);
+    const progress=Math.max(0,Math.min(1,(time-start)/(end-start)));
+    result.volcanism=Math.max(result.volcanism,progress*coverage);
+  }
+  return result;
 }
 const present = {time: 0, name: 'Present'};
 export function timelineMilestones(scenario, maxAge = 500) {
@@ -110,6 +140,8 @@ export function glaciationPlaybackSpeed(time, requestedSpeed, enabled = true) {
 
 // Readable event windows are art/playback choices, not geological durations.
 export const PLAYBACK_FOCUS = [
+  {name:'Ancient microbial worlds',fade:[-3430,-3380,-3200,-3150],speed:20},
+  {name:'Land plant colonization',fade:[-470,-450,-410,-390],speed:8},
   {name: 'Theia impact and cooling', fade: [-4520, -4510, -4430, -4420], speed: 4},
   {name: 'Emerging oceans', fade: [-4470, -4435, -4320, -4250], speed: 12},
   {name: 'Late heavy bombardment', fade: [-4100, -4000, -3800, -3700], speed: 12}
