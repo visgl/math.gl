@@ -654,11 +654,14 @@ implements mixed-resolution stitching, skirts, geomorphing or a tile scheduler.
 side; grid sides are not geographic compass directions or general boundary loops.
 
 `measureTerrainMeshError` validates the grid/frame correspondence, rasterizes
-triangles at integer source nodes, and returns `maxSampleError`, `rmsSampleError`,
+the stored XY triangles at source nodes, includes Z-origin rounding loss, and returns `maxSampleError`, `rmsSampleError`,
 `coveredSampleCount`, `uncoveredSampleCount`, and `sampleTests`. Missing source
 nodes are ignored; uncovered valid nodes are reported separately and must not be
 interpreted as zero error. Overlaps use the worst residual per node. A finite
-`maxSampleTests` bounds triangle bounding-box sample visits. Measurement does not
+`maxSampleTests` bounds expanded triangle bounding-box sample visits. A conservative coordinate-roundoff
+check rejects origins or ill-conditioned frames that cannot retain sample resolution;
+use a local origin. One extra grid node around each bounding box accounts for XY
+rounding when selecting candidate samples. Measurement does not
 certify manifoldness, coverage between nodes, holes, or a continuous error bound.
 
 ### Migrating loaders.gl terrain meshing

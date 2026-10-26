@@ -134,3 +134,59 @@ test('Delatin independently detects rounded estimates and reports its regular fa
     /fallback triangle capacity/
   );
 });
+
+test('adaptive builders reject origins that cannot represent the requested height accuracy', () => {
+  const source = field(2, 2, x => x);
+  for (const create of [createMartiniTerrainMesh, createDelatinTerrainMesh]) {
+    expect(() => create(source, {maxError: 0, origin: [0, 0, 2 ** 54]})).toThrow(/could not meet/);
+    const mesh = create(source, {maxError: 1, origin: [0, 0, 2 ** 54]});
+    expect(mesh.error.maxSampleError).toBe(1);
+  }
+});
+
+test('adaptive meshes reject XY origins that alias source nodes', () => {
+  const source = new HeightField({
+    width: 4,
+    height: 2,
+    heights: Float64Array.from([0, 1, 2, 3, 0, 1, 2, 3]),
+    columnStep: [0.1, 0]
+  });
+  expect(() => createDelatinTerrainMesh(source, {maxError: 0, origin: [-(2 ** 50), 0, 0]})).toThrow(
+    /XY precision/
+  );
+  const square = new HeightField({
+    width: 3,
+    height: 3,
+    heights: Float64Array.from([0, 1, 2, 0, 1, 2, 0, 1, 2]),
+    columnStep: [0.1, 0]
+  });
+  expect(() => createMartiniTerrainMesh(square, {maxError: 0, origin: [-(2 ** 50), 0, 0]})).toThrow(
+    /XY precision/
+  );
+  // Ordinary non-binary spacing and a local frame remain supported.
+  expect(
+    createDelatinTerrainMesh(source, {maxError: 1e-12}).error.maxSampleError
+  ).toBeLessThanOrEqual(1e-12);
+});
+
+test('adaptive error reports account for smaller stored-XY distortions', () => {
+  const source = new HeightField({
+    width: 3,
+    height: 3,
+    columnStep: [0.1, 0],
+    heights: Float64Array.from([0, 1, 2, 0, 1, 2, 0, 1, 2])
+  });
+  for (const create of [createMartiniTerrainMesh, createDelatinTerrainMesh]) {
+    const mesh = create(source, {maxError: 1e-6, origin: [-(2 ** 20), 0, 0]});
+    const surface = new TerrainSurface(mesh);
+    let maximum = 0;
+    for (let row = 0; row < 3; row++)
+      for (let column = 0; column < 3; column++)
+        maximum = Math.max(maximum, Math.abs(surface.sample(column * 0.1, row).height - column));
+    expect(maximum).toBeGreaterThan(0);
+    expect(mesh.error.maxSampleError).toBeCloseTo(maximum, 14);
+    const exact = create(source, {maxError: 0, origin: [-(2 ** 20), 0, 0]});
+    expect(exact.error.maxSampleError).toBe(0);
+    expect(exact.refinementPasses).toBeGreaterThan(1);
+  }
+});

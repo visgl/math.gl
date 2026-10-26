@@ -119,3 +119,15 @@ test('mesh inspection validates caller-owned arrays, frames, metadata and arithm
   expect(() => createTerrainMesh(field, {origin: [0, 0, NaN]})).toThrow();
   expect(() => createTerrainMesh(field, {origin: [1e30, 1e30, 0]})).toThrow(/degenerate/);
 });
+
+test('mesh error includes height precision lost to a distant Z origin', () => {
+  const field = new HeightField({width: 2, height: 2, heights: Float64Array.from([0, 1, 0, 1])});
+  for (const z of [2 ** 54, -(2 ** 54)]) {
+    const mesh = createTerrainMesh(field, {origin: [0, 0, z]});
+    expect(mesh.positions[5] + z).toBe(0);
+    const report = measureTerrainMeshError(field, mesh);
+    expect(report.maxSampleError).toBe(1);
+    expect(report.rmsSampleError).toBeCloseTo(Math.SQRT1_2, 14);
+    expect(report.coveredSampleCount).toBe(4);
+  }
+});
