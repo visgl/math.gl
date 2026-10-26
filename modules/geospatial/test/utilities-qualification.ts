@@ -1,7 +1,15 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {projectGrid, unprojectGrid, formatMGRS, parseMGRS, parseAngle} from '../src/coordinates';
+import {
+  projectGrid,
+  unprojectGrid,
+  formatMGRS,
+  parseMGRS,
+  parseAngle,
+  transferGrid,
+  parseMGRSZone
+} from '../src/coordinates';
 import {TriaxialEllipsoid} from '../src/triaxial';
 import {EllipsoidGeodesic} from '../src/ellipsoid-geodesic';
 import {EllipsoidRhumb} from '../src/ellipsoid-rhumb';
@@ -44,12 +52,34 @@ export function qualifyUtilities(): Row[] {
         longitude?: number;
         precision?: number;
         text?: string;
+        zone?: number;
+        north?: number;
+        grid?: number[];
         expected: (number | string)[] | null;
       };
       if (r.expected === null) {
         let rejected = false;
         try {
-          parseMGRS(r.text!);
+          if (r.mode === 'F')
+            projectGrid(r.latitude!, r.longitude!, {
+              zone: r.zone,
+              north: r.north! < 0 ? undefined : !!r.north,
+              extended: true
+            });
+          else if (r.mode === 'T')
+            transferGrid(
+              {zone: r.grid![0], north: !!r.grid![1], easting: r.grid![2], northing: r.grid![3]},
+              {zone: r.zone, north: !!r.north, extended: true}
+            );
+          else if (r.mode === 'H')
+            formatMGRS(r.latitude!, r.longitude!, r.precision, {zone: r.zone});
+          else if (r.mode === 'V')
+            unprojectGrid(
+              {zone: r.grid![0], north: !!r.grid![1], easting: r.grid![2], northing: r.grid![3]},
+              {extended: true}
+            );
+          else if (r.mode === 'Z') parseMGRSZone(r.text!);
+          else parseMGRS(r.text!);
         } catch {
           rejected = true;
         }
@@ -61,17 +91,54 @@ export function qualifyUtilities(): Row[] {
         check(Math.abs(parseAngle(r.text!) - Number(e[0])), 2e-12);
         return;
       }
-      if (r.mode === 'R') {
-        if (Number(e[4]) > 5) {
-          let rejected = false;
-          try {
-            parseMGRS(r.text!);
-          } catch {
-            rejected = true;
-          }
-          check(rejected ? 0 : 1, 0.5);
-          return;
+      if (r.mode === 'H') {
+        check(
+          formatMGRS(r.latitude!, r.longitude!, r.precision, {zone: r.zone}) === e[0] ? 0 : 1,
+          0.5
+        );
+        return;
+      }
+      if (r.mode === 'V') {
+        const p = unprojectGrid(
+          {zone: r.grid![0], north: !!r.grid![1], easting: r.grid![2], northing: r.grid![3]},
+          {extended: true}
+        );
+        check(Math.abs(p.latitude - Number(e[0])), 2e-10);
+        // Longitude is undefined at a pole: math.gl keeps its documented zero,
+        // while native UTMUPS selects 180 at the north UPS origin.
+        if (Math.abs(Number(e[0])) === 90) check(p.longitude === 0 ? 0 : 1, 0.5);
+        else check(Math.abs(((p.longitude - Number(e[1]) + 540) % 360) - 180), 2e-10);
+        return;
+      }
+      if (r.mode === 'Z') {
+        const p = parseMGRSZone(r.text!);
+        check(p.zone === e[0] && Number(p.north) === e[1] ? 0 : 1, 0.5);
+        return;
+      }
+      if (r.mode === 'F' || r.mode === 'T') {
+        const p =
+          r.mode === 'F'
+            ? projectGrid(r.latitude!, r.longitude!, {
+                zone: r.zone,
+                north: r.north! < 0 ? undefined : !!r.north,
+                extended: true
+              })
+            : transferGrid(
+                {zone: r.grid![0], north: !!r.grid![1], easting: r.grid![2], northing: r.grid![3]},
+                {zone: r.zone, north: !!r.north, extended: true}
+              );
+        check(p.zone === e[0] && Number(p.north) === e[1] ? 0 : 1, 0.5);
+        check(Math.abs(p.easting - Number(e[2])), 5e-7);
+        check(Math.abs(p.northing - Number(e[3])), 5e-7);
+        if (r.mode === 'F') {
+          const inverse = unprojectGrid(p, {extended: true});
+          check(Math.abs(inverse.latitude - Number(e[4])), 2e-10);
+          if (Math.abs(r.latitude!) !== 90)
+            check(Math.abs(((inverse.longitude - Number(e[5]) + 540) % 360) - 180), 2e-10);
         }
+        return;
+      }
+      if (r.mode === 'R') {
         const p = parseMGRS(r.text!);
         check(p.zone === e[0] && Number(p.north) === e[1] ? 0 : 1, 0.5);
         check(Math.abs(p.easting - Number(e[2])), 1e-8);
@@ -83,7 +150,15 @@ export function qualifyUtilities(): Row[] {
       check(g.zone === e[0] && Number(g.north) === e[1] ? 0 : 1, 0.5);
       check(Math.abs(g.easting - Number(e[2])), 5e-7);
       check(Math.abs(g.northing - Number(e[3])), 5e-7);
-      check(formatMGRS(r.latitude!, r.longitude!, r.precision) === e[4] ? 0 : 1, 0.5);
+      const text = formatMGRS(r.latitude!, r.longitude!, r.precision);
+      if (r.precision! <= 5) check(text === e[4] ? 0 : 1, 0.5);
+      else {
+        // Extra digits expose projection roundoff, not extra physical accuracy.
+        const actual = parseMGRS(text),
+          expected = parseMGRS(String(e[4]));
+        check(Math.abs(actual.easting - expected.easting), 5e-7 + actual.resolution);
+        check(Math.abs(actual.northing - expected.northing), 5e-7 + actual.resolution);
+      }
       const p = parseMGRS(String(e[4]));
       check(Math.abs(p.easting - Number(e[5])), 1e-8);
       check(Math.abs(p.northing - Number(e[6])), 1e-8);

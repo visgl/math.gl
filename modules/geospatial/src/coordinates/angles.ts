@@ -32,6 +32,15 @@ export function parseAngle(text: string, axis: AngleAxis = 'angle'): number {
     throw new RangeError('Hemisphere does not match axis');
   value = value.replace(/\s*([:D°'′"″])\s*/g, '$1');
   const number = '(\\d+(?:\\.\\d*)?|\\.\\d+)';
+  const component = new RegExp('^([+-]?)' + number + '([\'′]|["″])$').exec(value);
+  if (component) {
+    if (Number(component[2]) >= 60) throw new RangeError('Invalid DMS components');
+    const result =
+      ((component[1] === '-' || /[SW]/.test(hemisphere) ? -1 : 1) * Number(component[2])) /
+      (/[′']/.test(component[3]) ? 60 : 3600);
+    validate(result, axis);
+    return result;
+  }
   const decimal = new RegExp('^([+-]?)' + number + '[D°]?$').exec(value);
   const colon = new RegExp('^([+-]?)' + number + ':' + number + '(?::' + number + ')?$').exec(
     value
@@ -58,7 +67,11 @@ export function parseAngle(text: string, axis: AngleAxis = 'angle'): number {
 }
 export function formatAngle(
   value: number,
-  options: {axis?: AngleAxis; format?: 'degrees' | 'dms'; precision?: number} = {}
+  options: {
+    axis?: AngleAxis;
+    format?: 'degrees' | 'dm' | 'dms';
+    precision?: number;
+  } = {}
 ): string {
   const axis = options.axis ?? 'angle',
     format = options.format ?? 'dms',
@@ -68,7 +81,7 @@ export function formatAngle(
     !Number.isInteger(precision) ||
     precision < 0 ||
     precision > 6 ||
-    !['degrees', 'dms'].includes(format)
+    !['degrees', 'dm', 'dms'].includes(format)
   )
     throw new RangeError('Invalid angle format or precision');
   const negative = value < 0 || Object.is(value, -0),
@@ -84,6 +97,22 @@ export function formatAngle(
           : '';
   const prefix = axis === 'angle' && negative ? '-' : '';
   if (format === 'degrees') return prefix + Math.abs(value).toFixed(precision) + '°' + suffix;
+  if (format === 'dm') {
+    const factor = 10 ** precision,
+      ticks = Math.round(Math.abs(value) * 60 * factor);
+    if (!Number.isSafeInteger(ticks))
+      throw new RangeError('DM precision exceeds exact integer range');
+    return (
+      prefix +
+      Math.floor(ticks / (60 * factor)) +
+      '°' +
+      ((ticks % (60 * factor)) / factor)
+        .toFixed(precision)
+        .padStart(precision ? 3 + precision : 2, '0') +
+      '′' +
+      suffix
+    );
+  }
   const factor = 10 ** precision,
     ticks = Math.round(Math.abs(value) * 3600 * factor);
   if (!Number.isSafeInteger(ticks))
@@ -102,21 +131,30 @@ export function formatAngle(
     suffix
   );
 }
-export function parseGeographicCoordinates(text: string): {latitude: number; longitude: number} {
+export function parseGeographicCoordinates(
+  text: string,
+  options: {longitudeFirst?: boolean} = {}
+): {latitude: number; longitude: number} {
   if (typeof text !== 'string' || text.length > 512)
     throw new RangeError('Invalid coordinate text');
   const pair = text.split(',');
   if (pair.length !== 2) throw new RangeError('Use latitude, longitude');
-  return {latitude: parseAngle(pair[0], 'latitude'), longitude: parseAngle(pair[1], 'longitude')};
+  const [lat, lon] = options.longitudeFirst ? [pair[1], pair[0]] : pair;
+  return {
+    latitude: parseAngle(lat, 'latitude'),
+    longitude: parseAngle(lon, 'longitude')
+  };
 }
 export function formatGeographicCoordinates(
   latitude: number,
   longitude: number,
-  options: {format?: 'degrees' | 'dms'; precision?: number} = {}
+  options: {
+    format?: 'degrees' | 'dm' | 'dms';
+    precision?: number;
+    longitudeFirst?: boolean;
+  } = {}
 ): string {
-  return (
-    formatAngle(latitude, {...options, axis: 'latitude'}) +
-    ', ' +
-    formatAngle(longitude, {...options, axis: 'longitude'})
-  );
+  const lat = formatAngle(latitude, {...options, axis: 'latitude'}),
+    lon = formatAngle(longitude, {...options, axis: 'longitude'});
+  return (options.longitudeFirst ? [lon, lat] : [lat, lon]).join(', ');
 }

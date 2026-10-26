@@ -175,8 +175,9 @@ arbitrary-length lines remain separate. The exact-area follow-up adds opt-in
 parametric and geocentric surface/direction conversions and Cartesian direct
 geodesics/reusable lines for minimum/maximum axis ratio at least `0.25`.
 It handles signed trajectories and equal-axis limits. Global triaxial inverse,
-Jacobi coordinate charts, conformal coordinates and uniform sampling are not
-implemented by this direct-solver profile.
+Jacobi coordinate charts and conformal coordinates are not implemented by this
+direct-solver profile. Area-uniform surface sampling is delivered by the later
+G10/G9/G7 increment below.
 
 See the [2,105-row qualification](../docs/modules/geospatial/api-reference/geodesic-g89-qualification.md),
 including independent elliptic series, sphere/principal-plane/conservation checks,
@@ -202,3 +203,20 @@ storage benefit, with a throughput tradeoff; rhumb timings are unstable and no u
 allocation-free claim is made. Remaining G9 work includes coordinate charts and
 separately scoped inverse geodesics; G10 still has the wider GeographicLib text
 profiles and forced-zone facade ergonomics, with generic projection APIs retained.
+
+## G10 coordinate-profile follow-up
+
+The next increment adds explicit UTM/UPS zone/hemisphere selection and transfer,
+opt-in native-compatible extended grid envelopes, MGRS cells through micrometre
+text resolution, separate grid-zone descriptors, decimal-minute output and explicit
+longitude-first pairs. Extra MGRS digits expose projection roundoff and do not
+promise micrometre physical positioning accuracy. Arithmetic/scientific angle
+expressions and `INVALID` sentinels remain intentionally outside the strict text
+profile; arbitrary datum/projection selection remains owned by CRS APIs.
+
+G11 is detailed in the [optional Earth-model design](./earth-models-design.md):
+normal gravity first without coefficient files, extend the existing earth/geoid
+entry, then separately scoped harmonic gravity and magnetic fields with explicit
+model/data licenses and no implicit downloads. The [general geographic-cut scope](./general-geographic-cuts.md)
+explains what single-meridian seams cannot support and recommends one real
+projection-domain clipping consumer before arbitrary cut graphs.

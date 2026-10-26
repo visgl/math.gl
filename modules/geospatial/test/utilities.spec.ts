@@ -10,7 +10,10 @@ import {
   formatMGRS,
   parseMGRS,
   projectGrid,
-  unprojectGrid
+  unprojectGrid,
+  transferGrid,
+  parseMGRSZone,
+  formatMGRSZone
 } from '../src/coordinates';
 import {TriaxialEllipsoid} from '../src/triaxial';
 import {EllipsoidGeodesic} from '../src/ellipsoid-geodesic';
@@ -197,4 +200,87 @@ test('Scalar line callbacks still ignore Array.map indices and source arrays', (
     const distances = [0, 1, 2];
     expect(distances.map(line.position)).toEqual(distances.map(d => line.position(d)));
   }
+});
+
+test('Forced grid transfers retain hemisphere conventions and owned outputs', () => {
+  const natural = projectGrid(60, 6),
+    forced = projectGrid(60, 6, {zone: 31});
+  expect(natural.zone).toBe(32);
+  expect(forced.zone).toBe(31);
+  const moved = transferGrid(natural, {zone: 31});
+  expect(Math.abs(moved.easting - forced.easting)).toBeLessThan(5e-7);
+  expect(Math.abs(moved.northing - forced.northing)).toBeLessThan(5e-7);
+  const continued = projectGrid(-1, 3, {zone: 31, north: true, extended: true});
+  expect(continued.northing).toBeLessThan(0);
+  expect(() => unprojectGrid(continued)).toThrow();
+  expect(unprojectGrid(continued, {extended: true}).latitude).toBeCloseTo(-1, 10);
+  const original = {zone: 31, north: true, easting: 500000.125, northing: 0};
+  const same = transferGrid(original);
+  expect(same).toEqual(original);
+  expect(same).not.toBe(original);
+  expect(Object.is(transferGrid({...original, northing: -0}).northing, -0)).toBe(true);
+  const south = transferGrid(original, {north: false});
+  expect(south).toEqual({...original, north: false, northing: 1e7});
+  expect(transferGrid(south, {north: true})).toEqual(original);
+  expect(() => transferGrid(projectGrid(90, 0), {north: false})).toThrow();
+  for (const options of [{zone: -1}, {zone: 61}, {zone: 1.5}, {zone: NaN}, {north: 'N'}])
+    expect(() => projectGrid(20, 30, options as never)).toThrow();
+  expect(() => projectGrid(20, 30, {zone: 0, extended: true})).toThrow();
+  expect(() => projectGrid(85, 30, {zone: 0, north: false, extended: true})).toThrow();
+  expect(() => projectGrid(0, 100, {zone: 31, extended: true})).toThrow();
+  for (const grid of [
+    {zone: 31, north: true, easting: -1, northing: 0},
+    {zone: 0, north: true, easting: 2e6, northing: 2800001},
+    {zone: 31, north: true, easting: 500000, northing: 9600001}
+  ])
+    expect(() => unprojectGrid(grid, {extended: true})).toThrow();
+});
+test('MGRS sub-metre strings are cells; zone descriptors remain regions', () => {
+  expect(formatMGRSZone(48.8582, 2.2945)).toBe('31U');
+  expect(formatMGRSZone(90, 0)).toBe('Z');
+  expect(formatMGRSZone(60, 6, {zone: 31})).toBe('31V');
+  expect(parseMGRSZone(' 31 u ')).toEqual({zone: 31, north: true, band: 'U'});
+  expect(parseMGRSZone('a')).toEqual({zone: 0, north: false, band: 'A'});
+  for (const text of ['31UDQ', '00N', '61N', '31Z', 'N', 'INVALID', 'ZAH'])
+    expect(() => parseMGRSZone(text)).toThrow();
+  expect(() => parseMGRS('31U')).toThrow();
+  for (let precision = 0; precision <= 11; precision++) {
+    const text = formatMGRS(48.8582, 2.2945, precision);
+    const center = parseMGRS(text),
+      corner = parseMGRS(text, {center: false});
+    expect(center.precision).toBe(precision);
+    expect(center.resolution).toBe(10 ** (5 - precision));
+    expect(Math.abs(center.easting - corner.easting - center.resolution / 2)).toBeLessThan(2e-9);
+    expect(Math.abs(center.northing - corner.northing - center.resolution / 2)).toBeLessThan(2e-9);
+    if (precision > 5) {
+      const tail = text.slice(5),
+        coarse = formatMGRS(48.8582, 2.2945, 5);
+      expect(text.slice(0, 5) + tail.slice(0, 5) + tail.slice(precision, precision + 5)).toBe(
+        coarse
+      );
+    }
+  }
+  expect(() => formatMGRS(0, 3, 12)).toThrow();
+  expect(() => parseMGRS('31UDQ' + '0'.repeat(24))).toThrow();
+  // Independent decimal integer arithmetic at the largest supported digit count.
+  const fine = parseMGRS('31UDQ4825112345611932654321', {center: false});
+  expect(fine.easting).toBeCloseTo(448251.123456, 8);
+  expect(fine.northing).toBeCloseTo(5411932.654321, 8);
+});
+test('Angle text supports minutes, seconds and explicit longitude-first pairs', () => {
+  expect(parseAngle('30′')).toBe(0.5);
+  expect(parseAngle('30″W')).toBe(-1 / 120);
+  expect(Object.is(parseAngle('0′S'), -0)).toBe(true);
+  for (const text of ['60′', '60″', '-60′']) expect(() => parseAngle(text)).toThrow();
+  expect(formatAngle(12 + 59.9999 / 60, {format: 'dm', precision: 3})).toBe('13°00.000′');
+  const options = {format: 'dm', precision: 6, longitudeFirst: true} as const;
+  const text = formatGeographicCoordinates(-12.5, 179.25, options);
+  expect(text).toBe('179°15.000000′E, 12°30.000000′S');
+  expect(parseGeographicCoordinates(text, options)).toEqual({latitude: -12.5, longitude: 179.25});
+  expect(() => parseGeographicCoordinates(text)).toThrow();
+});
+
+test('Angle marker whitespace follows the documented grammar', () => {
+  expect(parseAngle(' 12 ° 30 ′ 40 ″ N ', 'latitude')).toBeCloseTo(12 + 30 / 60 + 40 / 3600, 12);
+  expect(parseAngle('12 : 30 : 40 N', 'latitude')).toBeCloseTo(12 + 30 / 60 + 40 / 3600, 12);
 });
