@@ -134,14 +134,17 @@ jobs:
           python3 modules/geospatial/scripts/generate-exact-area-reference.py --check
           python3 modules/geospatial/scripts/generate-exact-area-independent.py --check
           python3 modules/geospatial/scripts/generate-utilities-reference.py --check
+          python3 modules/earth/scripts/generate-normal-gravity-reference.py --check
           python3 modules/geospatial/scripts/generate-sampling-reference.py --check
           node modules/geospatial/scripts/check-utilities-package.mjs
           node modules/geospatial/scripts/check-global-cuts-package.mjs
+          node modules/earth/scripts/check-normal-gravity-package.mjs
           node modules/geospatial/scripts/check-g89-package.mjs
           node modules/geospatial/scripts/qualify-g89.mjs --output /tmp/g89-node.json
           node modules/geospatial/scripts/qualify-exact-area.mjs --output /tmp/exact-area-node.json
           node modules/geospatial/scripts/qualify-utilities.mjs --output /tmp/utilities-node.json
           node modules/geospatial/scripts/qualify-global-cuts.mjs --output /tmp/global-cuts-node.json
+          node modules/earth/scripts/qualify-normal-gravity.mjs --output /tmp/normal-gravity-node.json
 
       - name: Check geographic seam and rhumb APIs, public types and selective budgets
         run: |
@@ -201,6 +204,7 @@ jobs:
             /tmp/exact-area-node.json
             /tmp/utilities-node.json
             /tmp/global-cuts-node.json
+            /tmp/normal-gravity-node.json
             /tmp/deformation-stress-qualification.json
           if-no-files-found: error
 
@@ -459,6 +463,7 @@ jobs:
           node modules/geospatial/scripts/qualify-exact-area.mjs --browser ${{ matrix.browser }} --output /tmp/exact-area-${{ matrix.browser }}.json
           node modules/geospatial/scripts/qualify-utilities.mjs --browser ${{ matrix.browser }} --output /tmp/utilities-${{ matrix.browser }}.json
           node modules/geospatial/scripts/qualify-global-cuts.mjs --browser ${{ matrix.browser }} --output /tmp/global-cuts-${{ matrix.browser }}.json
+          node modules/earth/scripts/qualify-normal-gravity.mjs --browser ${{ matrix.browser }} --output /tmp/normal-gravity-${{ matrix.browser }}.json
 
       - name: Qualify geographic seam and rhumb controls
         timeout-minutes: 2
@@ -488,6 +493,7 @@ jobs:
             /tmp/exact-area-${{ matrix.browser }}.json
             /tmp/utilities-${{ matrix.browser }}.json
             /tmp/global-cuts-${{ matrix.browser }}.json
+            /tmp/normal-gravity-${{ matrix.browser }}.json
             /tmp/g6-qualification-${{ matrix.browser }}.json
             /tmp/g56-qualification-${{ matrix.browser }}.json
             /tmp/g34-qualification-${{ matrix.browser }}.json

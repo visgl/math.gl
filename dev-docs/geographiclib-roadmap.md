@@ -202,3 +202,14 @@ storage benefit, with a throughput tradeoff; rhumb timings are unstable and no u
 allocation-free claim is made. Remaining G9 work includes coordinate charts and
 separately scoped inverse geodesics; G10 still has the wider GeographicLib text
 profiles and forced-zone facade ergonomics, with generic projection APIs retained.
+
+
+## G11a dataset-free normal gravity
+
+The optional `@math.gl/earth/normal-gravity` entry supplies an immutable normal
+potential/analytic gradient, WGS84 constants, surface magnitude, ECEF and local
+ENU components, with separate gravitational/centrifugal terms. A bounded
+sphere/oblate exterior profile has 720 native and 36 independent 110-digit Decimal
+controls. No datasets, downloads or package dependencies are introduced. This does
+not deliver harmonic gravity/anomalies, geoid synthesis or geomagnetic models;
+those remain separately scoped G11 increments. See [normal gravity](../docs/modules/earth/api-reference/normal-gravity.md).

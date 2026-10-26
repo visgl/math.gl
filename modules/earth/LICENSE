@@ -30,9 +30,10 @@ THE SOFTWARE.
 
 ---
 
-GeographicLib geoid
+GeographicLib geoid and normal gravity
 
 Copyright (c) Charles Karney (2009-2018) <charles@karney.com>
+Copyright (c) Charles Karney (2011-2022) <karney@alum.mit.edu>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
