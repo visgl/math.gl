@@ -147,7 +147,7 @@ export default function TectonicTimeMachine() {
     const abort = new AbortController();
     const signal = AbortSignal.any([model.signal, abort.signal]);
     maintainHistory(model, () => clampTime(clock.current, model.source.maxAge), {
-      signal, onStatus: value => {if (!signal.aborted) setHistoryStatus(value);}
+      signal, onStatus: value => {if (!signal.aborted) {setHistoryStatus(value);scene.current?.refreshHistory();}}
     }).catch(error => {
       if (!signal.aborted) setHistoryStatus(error.message);
     });

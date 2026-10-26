@@ -417,7 +417,7 @@ export function mountScene(
         ...formationEffects(time, weights.globe || 0),
         showJourney && new PathLayer({id:'journey-trail',data:trailData,getPath:d=>d.positions,
           coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,getColor:[255,214,120,180],getWidth:2,widthUnits:'pixels',
-          parameters:{depthWriteEnabled:false},updateTriggers:{getPath:[time,longitude,latitude,mode,weights]}}),
+          parameters:{depthWriteEnabled:false},updateTriggers:{getPath:[time,journey.count,longitude,latitude,mode,weights]}}),
         showJourney && new ScatterplotLayer({id:'journey-place',data:markerData,getPosition:d=>d.positions,
           coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,radiusUnits:'pixels',getRadius:6,
           getFillColor:[255,211,104],stroked:true,getLineColor:[255,255,255],getLineWidth:2,lineWidthUnits:'pixels',
@@ -594,6 +594,7 @@ export function mountScene(
       historicalTerrain = options.historicalTerrain ?? true;
       return render(lastTime, true);
     },
+    refreshHistory() {if(followPlace)return render(lastTime,true);},
     hasTerrain(time) {return historicalTerrain && !regionColors && Boolean(paleoTerrain?.get(time));},
     render,
     resize() {

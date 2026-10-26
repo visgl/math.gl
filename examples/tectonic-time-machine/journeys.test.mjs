@@ -34,7 +34,8 @@ test('place tracking uses source rotations, never invents missing samples, and r
   const saved=Array.from(state.trail),again=tracker.update(-80,'atlantic');
   assert.equal(again,state);assert.deepEqual(Array.from(again.trail),saved);
   assert.equal(tracker.update(-101,'atlantic').available,false);
-  delete rotations[90];assert.equal(tracker.update(-80,'atlantic').count,1,'trail stops before a missing rotation interval');
+  const ninety=rotations[90];delete rotations[90];assert.equal(tracker.update(-80,'atlantic').count,1,'trail stops before a missing rotation interval');
+  rotations[90]=ninety;assert.ok(tracker.update(-80,'atlantic').count>1,'paused trails extend when missing samples arrive');
   delete rotations[100];assert.equal(tracker.update(-100,'atlantic').available,false);
   tracker.setPlace({name:'Ocean',lon:100,lat:0});assert.equal(tracker.update(0,'atlantic').available,false);
   tracker.setModel(null);assert.equal(tracker.update(0,'atlantic').available,false);
