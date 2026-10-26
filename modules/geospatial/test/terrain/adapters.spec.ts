@@ -263,3 +263,71 @@ test('nearest residency follows the selected sample rather than the query tile',
     Status.NO_DATA
   );
 });
+
+test('decimal diagonal queries retain the exact monolithic validity footprint', () => {
+  const matrix: TileMatrix = {
+    ...fine,
+    resolution: 1,
+    resolutionY: 1,
+    origin: [0, 0],
+    cornerOfOrigin: 'bottomLeft'
+  };
+  for (const diagonal of ['00-11', '10-01'] as const) {
+    const source = tiles(matrix);
+    source[0].heights[3] = NaN;
+    const heights = new Float64Array(16);
+    for (const tile of source)
+      for (let y = 0; y < 2; y++)
+        for (let x = 0; x < 2; x++)
+          heights[(tile.row * 2 + y) * 4 + tile.column * 2 + x] = tile.heights[y * 2 + x];
+    const reference = new HeightField({
+      width: 4,
+      height: 4,
+      heights,
+      registration: 'cell',
+      diagonal
+    });
+    const field = new TiledHeightField({
+      matrixSet: {crs: 'local', matrices: [matrix]},
+      tiles: source,
+      revision: 'decimal',
+      diagonal
+    });
+    for (const [x, y] of [
+      [0.6, 1.6],
+      [1.6, 0.6],
+      [0.7, 1.3],
+      [1.3, 0.7],
+      [2.6, 1.6]
+    ]) {
+      const actual = field.sample(x, y, {matrixId: 'fine', interpolation: 'triangle'});
+      const expected = reference.sample(x, y, {interpolation: 'triangle'});
+      expect(actual.status).toBe(expected.status);
+      expect(actual.height).toBeCloseTo(expected.height, 12);
+      expect(actual.gradientX).toBeCloseTo(expected.gradientX, 12);
+      expect(actual.gradientY).toBeCloseTo(expected.gradientY, 12);
+    }
+  }
+});
+
+test('fractional matrix resolutions admit roundoff at outer sample centers only', () => {
+  for (const cornerOfOrigin of ['bottomLeft', 'topLeft'] as const) {
+    const matrix: TileMatrix = {
+      ...fine,
+      resolution: 0.3,
+      resolutionY: 0.3,
+      origin: [0, 0],
+      cornerOfOrigin
+    };
+    const field = snapshot(tiles(matrix), [matrix]);
+    const sign = cornerOfOrigin === 'topLeft' ? -1 : 1;
+    for (const interpolation of ['nearest', 'bilinear', 'triangle'] as const) {
+      const sample = field.sample(1.05, 0.45 * sign, {matrixId: 'fine', interpolation});
+      expect(sample.status).toBe(Status.VALID);
+      expect(sample.height).toBeCloseTo(2 * 1.05 - 3 * 0.45 * sign + 5, 12);
+      expect(
+        field.sample(1.05 + 1e-10, 0.45 * sign, {matrixId: 'fine', interpolation}).status
+      ).toBe(Status.OUTSIDE_DOMAIN);
+    }
+  }
+});

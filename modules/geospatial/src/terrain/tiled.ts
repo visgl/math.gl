@@ -181,7 +181,7 @@ export class TiledHeightField {
             (a, b) =>
               a.resolution - b.resolution ||
               (a.resolutionY ?? a.resolution) - (b.resolutionY ?? b.resolution) ||
-              a.id.localeCompare(b.id)
+              (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
           )
       );
     let result = this.sampleMatrix(requested, x, y, options);
@@ -222,16 +222,20 @@ export class TiledHeightField {
     const [width, height] = matrix.tileSize;
     const dy =
       (matrix.resolutionY ?? matrix.resolution) * (matrix.cornerOfOrigin === 'topLeft' ? -1 : 1);
-    const u = (x - matrix.origin[0]) / matrix.resolution;
-    const v = (y - matrix.origin[1]) / dy;
+    let u = (x - matrix.origin[0]) * (1 / matrix.resolution);
+    let v = (y - matrix.origin[1]) * (1 / dy);
     if (!Number.isFinite(u) || !Number.isFinite(v)) return invalid(Status.NUMERIC_ERROR);
+    const tolerance =
+      8 * Number.EPSILON * Math.max(width * matrix.matrixSize[0], height * matrix.matrixSize[1]);
     if (
-      u < 0.5 ||
-      v < 0.5 ||
-      u > width * matrix.matrixSize[0] - 0.5 ||
-      v > height * matrix.matrixSize[1] - 0.5
+      u < 0.5 - tolerance ||
+      v < 0.5 - tolerance ||
+      u > width * matrix.matrixSize[0] - 0.5 + tolerance ||
+      v > height * matrix.matrixSize[1] - 0.5 + tolerance
     )
       return invalid(Status.OUTSIDE_DOMAIN);
+    u = Math.max(0.5, Math.min(width * matrix.matrixSize[0] - 0.5, u));
+    v = Math.max(0.5, Math.min(height * matrix.matrixSize[1] - 0.5, v));
     const gridU = u - 0.5;
     const gridV = v - 0.5;
     const c = Math.min(Math.floor(gridU), width * matrix.matrixSize[0] - 2);
@@ -250,7 +254,7 @@ export class TiledHeightField {
             ? [a, b, this.diagonal === '00-11' ? d : cc]
             : [this.diagonal === '00-11' ? a : b, cc, d];
     let missing = false;
-    let nearestHeight = 0;
+    const values: number[] = [];
     for (const [column, row] of taps) {
       const tileColumn = Math.floor(column / width);
       const tileRow = Math.floor(row / height);
@@ -261,17 +265,37 @@ export class TiledHeightField {
       }
       const index = (row - tileRow * height) * width + column - tileColumn * width;
       if (!tile.validity[index]) return invalid(Status.NO_DATA);
-      nearestHeight = tile.heights[index];
+      values.push(tile.heights[index]);
     }
     if (missing) return invalid(Status.NOT_RESIDENT);
     if (interpolation === 'nearest')
-      return {...invalid(Status.VALID), height: nearestHeight, gradientStatus: Status.UNAVAILABLE};
-    const column = Math.floor(taps[0][0] / width);
-    const row = Math.floor(taps[0][1] / height);
-    const halo = this.halos.get(tileKey(matrix.id, column, row))!;
-    const localU = u - column * width + 0.5;
-    const localV = v - row * height + 0.5;
-    const result = halo.field.sample(localU, localV, options);
+      return {...invalid(Status.VALID), height: values[0], gradientStatus: Status.UNAVAILABLE};
+    // Use exactly the fractions and footprint selected above. Re-normalizing into a
+    // halo can round a point across a diagonal and change validity or contact normals.
+    const fu = gridU - c;
+    const fv = gridV - r;
+    const [za, zb, zc, zd] = values;
+    const result = invalid(Status.VALID);
+    if (interpolation === 'bilinear') {
+      result.height = (1 - fv) * ((1 - fu) * za + fu * zb) + fv * ((1 - fu) * zc + fu * zd);
+      result.gradientX = (1 - fv) * (zb - za) + fv * (zd - zc);
+      result.gradientY = (1 - fu) * (zc - za) + fu * (zd - zb);
+    } else if (first) {
+      result.gradientX = zb - za;
+      result.gradientY = this.diagonal === '00-11' ? zc - zb : zc - za;
+      result.height =
+        this.diagonal === '00-11'
+          ? (1 - fu) * za + (fu - fv) * zb + fv * zc
+          : (1 - fu - fv) * za + fu * zb + fv * zc;
+    } else {
+      result.gradientX = zc - zb;
+      result.gradientY = this.diagonal === '00-11' ? zb - za : zc - za;
+      result.height =
+        this.diagonal === '00-11'
+          ? (1 - fv) * za + fu * zc + (fv - fu) * zb
+          : (1 - fv) * za + (1 - fu) * zb + (fu + fv - 1) * zc;
+    }
+    if (!Number.isFinite(result.height)) return invalid(Status.NUMERIC_ERROR);
     if (result.gradientStatus === Status.VALID) {
       result.gradientX /= matrix.resolution;
       result.gradientY /= dy;
