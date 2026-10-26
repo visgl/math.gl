@@ -33,9 +33,11 @@ export function calibrateTerrainPalette(pixels,result=new Float32Array(DEFAULT_T
   return result;
 }
 export function paletteFromImage(image,result) {
-  const canvas=new OffscreenCanvas(image.width,image.height);
+  // A small sample is sufficient for color statistics; avoid reading a full raster.
+  const width=Math.min(256,image.width), height=Math.max(1,Math.round(image.height*width/image.width));
+  const canvas=new OffscreenCanvas(width,height);
   const context=canvas.getContext('2d',{willReadFrequently:true});
   if(!context) return result;
-  context.drawImage(image,0,0);
-  return calibrateTerrainPalette(context.getImageData(0,0,image.width,image.height).data,result);
+  context.drawImage(image,0,0,width,height);
+  return calibrateTerrainPalette(context.getImageData(0,0,width,height).data,result);
 }

@@ -274,7 +274,7 @@ export function mountScene(
     if (early) status = `${planetaryStage(-time)?.label} · procedural rock, lava and impacts; no reconstructed geography`;
     else if (earlyMix > 0) status = `Blending illustrative early Earth into ${model?.source.id || 'plate'} reconstruction`;
     else if (regionColors) status = `${model?.source.id || 'Plate model'} · categorical region colors`;
-    else if (usePaleo) status = `PALEOMAP PaleoDEM · ${pose.a.age === pose.b.age ? pose.a.age : `${pose.a.age}–${pose.b.age}`} Ma · source elevation with illustrative colors and 8× hill shading`;
+    else if (usePaleo) status = `PALEOMAP PaleoDEM · ${pose.a.age === pose.b.age ? pose.a.age : `${pose.a.age}–${pose.b.age}`} Ma · source elevation with calibrated colors${terrainImage && terrainImageryWeight(time)>0 ? "; blending toward NASA imagery/lighting" : " and 8× hill shading"}`;
     else if (historicalTerrain && !regionColors && terrainBracket(time))
       status = `${paleoError || paleoTerrain?.failed ? 'PaleoDEM unavailable' : 'Loading PaleoDEM'} · showing illustrative plate terrain`;
     else status = `${terrainImage ? 'Modern NASA imagery' : modernTerrainError ? 'Shaded land' : 'Loading NASA imagery'} on ${model?.source.id || 'moving'} plates · illustrative${historicalTerrain && !regionColors ? ' (PaleoDEM covers 0–540 Ma)' : ''}`;
