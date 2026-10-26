@@ -185,7 +185,7 @@ concerns; this constructor creates only the regular source-grid triangulation.
 
 The local Cartesian foundation, geographic adapters and initial cell-registered
 tiled snapshots, indexed query surfaces and conservative bounds implement portions of the
-[terrain roadmap](../../../../dev-docs/terrain-roadmap.md). Adaptive tessellation, swept-volume contacts and incremental hierarchy updates remain
+[terrain roadmap](https://github.com/visgl/math.gl/blob/master/dev-docs/terrain-roadmap.md). Adaptive tessellation, swept-volume contacts and incremental hierarchy updates remain
 math.gl roadmap work. Shader implementations
 belong in luma.gl and rendering integration belongs in deck.gl. CPU tests use analytic planes/saddles and
 independent mesh centroid/normal checks; they do not establish CPU/GPU parity or

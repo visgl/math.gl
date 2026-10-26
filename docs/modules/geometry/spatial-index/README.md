@@ -82,7 +82,7 @@ Returns original triangle numbers, not vertex numbers. Positions and indices are
   point on one accepted triangle, including face, edge and vertex contacts. Results are sorted
   by original triangle index, not distance. Radius must be finite and nonnegative; zero tests
   point contact. Broad-phase bounds expand slightly for roundoff, but the exact distance must
-  still be <= the unmodified radius. Arithmetic/bounds overflow throws. Adjacent triangles can
+  still be at most the unmodified radius. Arithmetic/bounds overflow throws. Adjacent triangles can
   return coincident points; this is not a reduced contact manifold or a swept collision test.
 
 ## Bounded queries
