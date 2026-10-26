@@ -875,6 +875,8 @@
       "@math.gl/web-mercator/*": [
         "./modules/web-mercator/src/*"
       ],
+      "@math.gl/geospatial/terrain/geographic": ["modules/geospatial/src/terrain/geographic.ts"],
+      "@math.gl/geospatial/terrain/tiled": ["modules/geospatial/src/terrain/tiled.ts"],
       "@math.gl/geospatial/terrain": [
         "./modules/geospatial/src/terrain/index.ts"
       ],

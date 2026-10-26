@@ -1114,6 +1114,16 @@
       "types": "./dist/terrain/geometry.d.ts",
       "import": "./dist/terrain/geometry.js",
       "require": "./dist/terrain/geometry.cjs"
+    },
+    "./terrain/geographic": {
+      "types": "./dist/terrain/geographic.d.ts",
+      "import": "./dist/terrain/geographic.js",
+      "require": "./dist/terrain/geographic.cjs"
+    },
+    "./terrain/tiled": {
+      "types": "./dist/terrain/tiled.d.ts",
+      "import": "./dist/terrain/tiled.js",
+      "require": "./dist/terrain/tiled.cjs"
     }
   },
   "files": [

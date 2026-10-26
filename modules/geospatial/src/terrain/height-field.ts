@@ -154,11 +154,19 @@ export class HeightField {
       return resetSample(result, Status.NUMERIC_ERROR);
     // Admit only roundoff-sized excursions at the outer sample endpoints.
     const tolerance = 8 * Number.EPSILON * Math.max(this.width, this.height);
+    // World coordinates carry rounding at their absolute magnitude before the
+    // origin subtraction. Propagate that uncertainty through the inverse frame.
+    const errorX = 4 * Number.EPSILON * Math.abs(x) + 4 * Number.EPSILON * Math.abs(this.origin[0]);
+    const errorY = 4 * Number.EPSILON * Math.abs(y) + 4 * Number.EPSILON * Math.abs(this.origin[1]);
+    const toleranceU =
+      tolerance + Math.abs(this.inverse[0]) * errorX + Math.abs(this.inverse[1]) * errorY;
+    const toleranceV =
+      tolerance + Math.abs(this.inverse[2]) * errorX + Math.abs(this.inverse[3]) * errorY;
     if (
-      u < -tolerance ||
-      v < -tolerance ||
-      u > this.width - 1 + tolerance ||
-      v > this.height - 1 + tolerance
+      u < -toleranceU ||
+      v < -toleranceV ||
+      u > this.width - 1 + toleranceU ||
+      v > this.height - 1 + toleranceV
     ) {
       return resetSample(result, Status.OUTSIDE_DOMAIN);
     }

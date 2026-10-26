@@ -28,9 +28,12 @@ const mesh = new HeightFieldGeometry(field);
 // Use field.sample(x, y, {interpolation: 'triangle'}) for the mesh's linear surface.
 ```
 
-This initial implementation uses affine local Cartesian coordinates and heights in
-meters, with Z up. It does not interpret longitude/latitude or convert height
-references. Input arrays are copied; missing samples are stored as finite zeros
+The main entry uses affine local Cartesian coordinates and heights in
+meters, with Z up. The optional `/terrain/geographic` entry adds longitude/latitude
+queries and physical east/north derivatives for geographic and Web Mercator rasters.
+The `/terrain/tiled` entry adds cell-registered local-metric tile snapshots, seam
+sampling, residency-aware fallback and transferable halo buffers. No entry converts
+height references. Input arrays are copied; missing samples are stored as finite zeros
 with a separate mask. Query status must be checked before using a result.
 
 See the [API and numerical contract](../../../docs/modules/geospatial/terrain/README.md) and
