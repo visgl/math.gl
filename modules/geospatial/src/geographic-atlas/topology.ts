@@ -4,7 +4,19 @@
 // SPDX-FileComment: Original directed curved-edge reconstruction in a bounded normal-sphere chart.
 import {Context} from '../geographic-seams/edge';
 import {GeographicSeamError} from '../geographic-seams/types';
-import {circle, dot, unit, chartPoint, chartNormal, type V, type ChartFrame} from './math';
+import {
+  circle,
+  dot,
+  unit,
+  cross,
+  add,
+  scale,
+  chartPoint,
+  chartNormal,
+  ANGULAR,
+  type V,
+  type ChartFrame
+} from './math';
 import {roots, sliceCurve, type Curve} from './curves';
 import type {GeographicAtlasEdge, GeographicAtlasPolygon} from './types';
 export type Node = {id: string; n: V; p: number[]; cuts: Set<string>};
@@ -80,6 +92,29 @@ function orientation(edges: readonly Arc[], frame: ChartFrame, context: Context)
         if (w) return Math.sign(w);
       }
   }
+  // Vertices alone do not bound a curved edge's projected extent. A regular
+  // point on any simple boundary has an open interior on one of its two sides.
+  // Probe both sides and use curved-edge winding to verify the witness.
+  for (const edge of edges)
+    for (const t of [0.371, 0.613, 0.5]) {
+      context.tick();
+      const n = normalOf(edge.curve.sample(t)),
+        left = cross(n, edge.curve.derivative(t));
+      if (Math.hypot(...left) === 0) continue;
+      const direction = unit(left);
+      for (let epsilon = 0.0625; epsilon >= ANGULAR; epsilon /= 4)
+        for (const side of [1, -1]) {
+          context.tick();
+          const probe = unit(add(n, scale(direction, side * epsilon)));
+          try {
+            const w = winding(edges, probe, frame, context);
+            if (w) return Math.sign(w);
+          } catch (error) {
+            if (!(error instanceof GeographicSeamError) || error.reason !== 'precision')
+              throw error;
+          }
+        }
+    }
   throw new GeographicSeamError('precision', 'No resolvable chart-ring interior');
 }
 export function polygons(
@@ -124,9 +159,7 @@ export function polygons(
     for (let j = 0; j < cycles.length; j++)
       if (i !== j && winding(cycles[j], normalOf(c[0].curve.sample(0.371)), frame, context))
         containers.push(j);
-    if (containers.length > 1)
-      throw new GeographicSeamError('topology', 'Nested or overlapping atlas rings');
-    return containers[0];
+    return containers;
   });
   const result: GeographicAtlasPolygon[] = [],
     groups = new Map<number, GeographicAtlasPolygon>();
@@ -141,20 +174,23 @@ export function polygons(
       edges: c.map(e => e.descriptor)
     };
   };
-  for (let i = 0; i < cycles.length; i++)
-    if (parents[i] === undefined) {
-      // Every emitted edge has the retained set on its left. A negative root is an orphan hole.
-      if (orientation(cycles[i], frame, context) < 0)
-        throw new GeographicSeamError('topology', 'Orphan atlas hole');
+  const depths = parents.map(p => p.length);
+  for (let i = 0; i < cycles.length; i++) {
+    const expected = depths[i] % 2 === 0 ? 1 : -1;
+    if (orientation(cycles[i], frame, context) !== expected)
+      throw new GeographicSeamError('topology', 'Inconsistent nested atlas winding');
+    if (expected === 1) {
       const p = {chart, rings: [output(cycles[i], sign)]};
       result.push(p);
       groups.set(i, p);
     }
+  }
   for (let i = 0; i < cycles.length; i++)
-    if (parents[i] !== undefined) {
-      const p = groups.get(parents[i]);
-      if (!p) throw new GeographicSeamError('topology', 'Nested atlas holes');
-      p.rings.push(output(cycles[i], -sign));
+    if (depths[i] % 2 === 1) {
+      const immediate = parents[i].filter(j => depths[j] === depths[i] - 1);
+      if (immediate.length !== 1 || !groups.has(immediate[0]))
+        throw new GeographicSeamError('topology', 'Unresolved atlas ring hierarchy');
+      groups.get(immediate[0])!.rings.push(output(cycles[i], -sign));
     }
   return result;
 }

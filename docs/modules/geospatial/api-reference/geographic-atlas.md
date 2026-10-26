@@ -133,7 +133,8 @@ same circle parameterization with opposite orientation. This is per-feature atla
 consistency, not persistent IDs or dataset-wide shared-border reconciliation across
 separate calls. Outer orientation follows the original input; holes have opposite
 orientation. Holes meeting a cut become notches; concave inputs can split into
-multiple components. A chart completely covered by the input receives a generated
+multiple components. Nested retained islands become separate components, with
+holes assigned to their immediate containing component. A chart completely covered by the input receives a generated
 closed boundary even when no original edge enters it.
 
 `clipPolyline(positions, {longitudeTurns?})` retains source order and intervals,
@@ -174,7 +175,7 @@ reject with `GeographicSeamError`. No partial output is returned.
 
 The shared qualification runs 480 pinned native GeographicLib 2.7 interval controls,
 two independent spherical area-conservation/shared-vertex controls and four
-independent ellipsoidal silhouette controls and twelve small-cap controls in Node and Chromium/Firefox/WebKit.
+independent ellipsoidal silhouette controls and twelve small-cap controls and one nested-island topology control in Node and Chromium/Firefox/WebKit.
 Native comparisons retain the existing `2e-12 * semiMajorAxis` along-track and
 `1e-10` degree latitude/conditioned-longitude gates. Independent area and silhouette
 residuals have `2e-12` gates. Additional regressions cover small caps, winding,

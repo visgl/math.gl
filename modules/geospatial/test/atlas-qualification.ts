@@ -224,5 +224,37 @@ export function qualifyAtlas() {
         check(Math.abs(parts[0].positions[parts[0].positions.length - 1] - latitude), 1e-10);
         check(Math.abs(parts[0].edges[0].startFraction - (40 - latitude) / 80), 2e-13);
       });
+  run('independent nested atlas topology', check => {
+    const phi = (70 * Math.PI) / 180,
+      offset = Math.cos((17 * Math.PI) / 180),
+      boundaries = [0, 90, 180, 270].map((lon, i) => ({
+        id: 'cap' + i,
+        normal: [
+          Math.cos(phi) * Math.cos((lon * Math.PI) / 180),
+          Math.cos(phi) * Math.sin((lon * Math.PI) / 180),
+          Math.sin(phi)
+        ] as [number, number, number],
+        offset
+      }));
+    const atlas = new GeographicCutAtlas(
+        {
+          boundaries,
+          charts: [
+            {
+              id: 'nested',
+              center: [0, 0, 1],
+              cuts: boundaries.map(b => ({boundary: b.id, side: -1 as const}))
+            }
+          ]
+        },
+        {edgeModel: 'rhumb'}
+      ),
+      polygons = atlas.clipPolygon([
+        {positions: [-135, -20, -45, -20, 45, -20, 135, -20], pole: 'north'}
+      ]);
+    check(Math.abs(polygons.length - 2), 0.5);
+    check(Math.abs(polygons.reduce((s, p) => s + p.rings.length, 0) - 3), 0.5);
+    check(Math.abs(polygons.filter(p => p.rings.length === 2).length - 1), 0.5);
+  });
   return rows;
 }

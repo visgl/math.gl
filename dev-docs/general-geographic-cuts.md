@@ -82,7 +82,7 @@ outer-plus-hole reconstruction, source fractions and adaptive generated-curve
 sampling support an eight-face octahedral Gauss-map consumer. Every cell has a
 closed hemisphere bound, and shared separators certify disjoint chart interiors.
 
-The 498-case Node/browser qualification retains native/independent budgets and
+The 499-case Node/browser qualification retains native/independent budgets and
 existing bundle limits. Arbitrary callback-defined curves, unresolved higher-order
 junctions, dataset-wide feature-network reconciliation, perspective/elevated/terrain
 visibility and projection-specific layouts remain separate work. This is a finite

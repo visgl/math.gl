@@ -354,3 +354,78 @@ test('Geodesic pole aliases keep the outgoing meridian and original fractions', 
     ).toBeLessThan(2e-13);
   }
 });
+
+test('Nested retained islands become separate components inside an excluded-cap ring', () => {
+  const latitude = (70 * Math.PI) / 180,
+    offset = Math.cos((17 * Math.PI) / 180),
+    boundaries = [0, 90, 180, 270].map((longitude, i) => ({
+      id: 'cap' + i,
+      normal: [
+        Math.cos(latitude) * Math.cos((longitude * Math.PI) / 180),
+        Math.cos(latitude) * Math.sin((longitude * Math.PI) / 180),
+        Math.sin(latitude)
+      ] as [number, number, number],
+      offset
+    }));
+  const atlas = new GeographicCutAtlas(
+    {
+      boundaries,
+      charts: [
+        {
+          id: 'islands',
+          center: [0, 0, 1],
+          cuts: boundaries.map(b => ({boundary: b.id, side: -1 as const}))
+        }
+      ]
+    },
+    {edgeModel: 'rhumb'}
+  );
+  // Adjacent 17-degree caps overlap (centers about 28 degrees apart),
+  // opposite caps do not (40 degrees), and the pole is outside all four.
+  const p = atlas.clipPolygon([
+    {positions: [-135, -20, -45, -20, 45, -20, 135, -20], pole: 'north'}
+  ]);
+  expect(p).toHaveLength(2);
+  expect(p.map(p => p.rings.length).sort()).toEqual([1, 2]);
+});
+
+for (const edgeModel of ['linear', 'geodesic', 'rhumb'] as const)
+  test(`${edgeModel} curved extents supply an interior witness beyond the vertex Y range`, () => {
+    const {atlas, project} = createOrthographicCutAtlas({viewDirection: [1, 0, 0], edgeModel}),
+      input = [
+        {positions: [-45, 19.471220634490695, 0, 22.61986494804043, 45, 19.471220634490695]}
+      ];
+    const polygons = atlas.clipPolygon(input);
+    expect(polygons).toHaveLength(1);
+    expect(polygons[0].rings).toHaveLength(1);
+    const ring = polygons[0].rings[0],
+      ys = [];
+    for (let i = 0; i < ring.normals.length; i += 3)
+      ys.push(ring.normals[i + 2] / (1 + ring.normals[i]));
+    expect(Math.max(...ys) - Math.min(...ys)).toBeLessThan(1e-11);
+    const sampled = atlas.subdivideRing(input, ring, {
+      transform: project,
+      tolerance: 10,
+      maxSegmentLength: 100000
+    });
+    let area = 0;
+    for (let i = 2; i < sampled.positions.length; i += 2)
+      area +=
+        (sampled.positions[i - 2] * sampled.positions[i + 1] -
+          sampled.positions[i] * sampled.positions[i - 1]) /
+        2;
+    expect(Math.abs(area)).toBeGreaterThan(6378137 ** 2 * 1e-8);
+  });
+
+import {circle} from '../src/geographic-atlas/math';
+import {circleCurve, roots} from '../src/geographic-atlas/curves';
+import {Context} from '../src/geographic-seams/edge';
+test('Uncertain circle discriminants reject on either side of grazing contact', () => {
+  const curve = circleCurve(circle('latitude', [0, 0, 1], 0.5), -0.2, 0.2, [], []);
+  // These binary64 coefficients straddle an exact Pythagorean tangency.
+  // The discriminant can round slightly positive as well as slightly negative.
+  for (const offset of [Math.sqrt(3) / 2, Math.sqrt(3) / 2 + Number.EPSILON])
+    expect(() =>
+      roots(curve, circle('grazing', [1, 0, 0], offset), new Context({edgeModel: 'linear'}))
+    ).toThrow(/Unresolved circle tangency/);
+});

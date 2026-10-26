@@ -137,6 +137,6 @@ networks and general ellipsoidal/rhumb global complements remain future work.
 orthographic surface horizons on the declared ellipsoid. A shared normal-space
 circle graph adds finite multi-chart cells, explicit generated-curve provenance,
 shared vertex identities and an octahedral faceted-map consumer. See the
-[atlas API and 498-case qualification](../docs/modules/geospatial/api-reference/geographic-atlas.md).
+[atlas API and 499-case qualification](../docs/modules/geospatial/api-reference/geographic-atlas.md).
 Arbitrary boundary callbacks, unresolved multiple junctions, dataset-wide shared
 feature topology and perspective/terrain visibility remain outside this profile.

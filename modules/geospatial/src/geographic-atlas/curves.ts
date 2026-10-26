@@ -275,7 +275,7 @@ export function roots(
       D = left - right,
       error = ROUND * (Math.abs(left) + Math.abs(right));
     if (D < -error) return {fractions: [], coincident: false};
-    if (D < 0) throw new GeographicSeamError('precision', 'Unresolved circle tangency');
+    if (D <= error) throw new GeographicSeamError('precision', 'Unresolved circle tangency');
     if (sine < Math.sqrt(ROUND))
       throw new GeographicSeamError('precision', 'Unresolved nearly coincident source/cut circles');
     const phase = Math.atan2(B, A),
