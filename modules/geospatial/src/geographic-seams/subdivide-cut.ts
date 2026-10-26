@@ -55,7 +55,8 @@ export function subdivideGeographicCutRing(
     e.kind === 'source' ? {kind: 'source' as const, source: {...e.source}} : {...e}
   );
   const sources = new Map<string, GeodesicPath | RhumbPath | PolylineEdgeSampler>();
-  const geodesic = config.options.geodesic ?? new EllipsoidGeodesic(config.axes);
+  let geodesic = config.options.geodesic;
+  const getGeodesic = () => (geodesic ??= new EllipsoidGeodesic(config.axes));
   let rhumb = config.options.rhumb;
   const getRhumb = () => (rhumb ??= new EllipsoidRhumb(config.axes));
   const result = subdividePolyline(new Float64Array(positions.flat()), {
@@ -90,7 +91,8 @@ export function subdivideGeographicCutRing(
           const first = p[s.edgeIndex],
             last = p[(s.edgeIndex + 1) % p.length],
             edgeTurns = turns[s.ringIndex]?.[s.edgeIndex] ?? 0;
-          if (settings.edgeModel === 'geodesic') path = new GeodesicPath(first, last, {geodesic});
+          if (settings.edgeModel === 'geodesic')
+            path = new GeodesicPath(first, last, {geodesic: getGeodesic()});
           else if (settings.edgeModel === 'rhumb')
             path = new RhumbPath(first, last, {rhumb: getRhumb(), longitudeTurns: edgeTurns});
           else {

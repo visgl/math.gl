@@ -318,3 +318,22 @@ test('Cut profile, descriptor and sampling limits fail explicitly', () => {
     subdivideGeographicCutRing(input, ring, {...options, transform: p => p, tolerance: 0.1})
   ).toThrow();
 });
+
+test('Linear cut subdivision does not impose the unused geodesic shape restrictions', () => {
+  const inputs = [{positions: [-40, -40, 40, -40, 40, 40, -40, 40]}];
+  for (const ellipsoid of [
+    {semiMajorAxis: 1e20, semiMinorAxis: 1},
+    {semiMajorAxis: 1e60, semiMinorAxis: 1e-60},
+    {semiMajorAxis: 1e-60, semiMinorAxis: 1e60}
+  ]) {
+    const options = {edgeModel: 'linear' as const, latitudeRange: [0, 30] as const, ellipsoid};
+    const ring = clipGeographicPolygon(inputs, options)[0].rings[0];
+    const sampled = subdivideGeographicCutRing(inputs, ring, {
+      ...options,
+      transform: p => p,
+      tolerance: 0.1
+    });
+    expect(sampled.positions).toEqual(ring.positions);
+    expect(sampled.edges).toEqual(ring.edges);
+  }
+});
