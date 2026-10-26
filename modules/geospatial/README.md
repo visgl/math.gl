@@ -22,3 +22,5 @@ subpath remains available for applications that only need tile-matrix utilities.
 
 See [the packaged source and license index](./THIRD-PARTY-NOTICES.md) and
 [math.gl references and credits](https://math.gl/docs/references-and-credits).
+
+Use `@math.gl/geospatial/geographic-cuts` for [ellipsoidal/rhumb latitude clipping](https://math.gl/docs/modules/geospatial/api-reference/latitude-geographic-cuts) and adaptive projection that preserves generated parallel boundaries.

@@ -260,6 +260,16 @@ export function createEdges(
     if (Math.abs(first[1]) === 90) first[0] = last[0];
     if (Math.abs(last[1]) === 90) last[0] = first[0];
     const inverse = solver.inverse(originalStart[1], originalStart[0], end[1], end[0]);
+    // A declared meridian has an exact longitude phase. Preserve it rather
+    // than letting solver normalization round a boundary to its other side.
+    if (first[0] === last[0] && (inverse.azi1 === 0 || Math.abs(inverse.azi1) === 180)) {
+      const meridianSample = horizontal;
+      horizontal = t => {
+        const p = meridianSample(t);
+        p[0] = first[0];
+        return p;
+      };
+    }
     const c1 = Math.cos((inverse.azi1 * Math.PI) / 180),
       c2 = Math.cos((inverse.azi2 * Math.PI) / 180);
     if (

@@ -36,6 +36,12 @@ Indexed terrain surfaces now provide barycentric sampling, edge topology and
 BVH-backed ray/segment/nearest queries. Conservative cell min/max hierarchies
 retain extrema and source-coverage counts, with exhaustive CPU references.
 
+Bounded BVH ray/segment/nearest queries now return explicit completion status and
+work counts. Discrete sphere contacts use triangle faces, edges and vertices with
+separate contact and face normals, mask filtering, and contact-capacity limits.
+Incomplete results cannot be interpreted as misses. This advances T5; reduced
+manifolds, capsule contacts, swept queries and solver integration remain open.
+
 This is partial T0/T1/T2/T3/T5 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
 spike, vertex-tile reconciliation, persistent cache structures, adaptive meshes,
 and GPU qualification remain open. The remaining sections describe the target architecture and delivery gates.

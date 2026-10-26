@@ -1144,6 +1144,11 @@
       "types": "./dist/terrain/bounds.d.ts",
       "import": "./dist/terrain/bounds.js",
       "require": "./dist/terrain/bounds.cjs"
+    },
+    "./geographic-cuts": {
+      "types": "./dist/geographic-cuts.d.ts",
+      "import": "./dist/geographic-cuts.js",
+      "require": "./dist/geographic-cuts.cjs"
     }
   },
   "files": [
