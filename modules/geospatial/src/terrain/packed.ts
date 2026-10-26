@@ -124,7 +124,9 @@ export function unpackTerrainHeightField(packed: PackedTerrain): HeightField {
   if (
     !origin ||
     origin.length !== 3 ||
-    !origin.every(Number.isFinite) ||
+    !Number.isFinite(origin[0]) ||
+    !Number.isFinite(origin[1]) ||
+    !Number.isFinite(origin[2]) ||
     typeof packed.heightReference !== 'string' ||
     !Number.isFinite(packed.maxHeightError) ||
     packed.maxHeightError < 0

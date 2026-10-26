@@ -98,6 +98,14 @@ test('mixed transactions match a fresh snapshot and reject ambiguous updates ato
         const b = fresh.sample(x, y, {matrixId: 'fine', interpolation});
         expect({...a, revision: ''}).toEqual({...b, revision: ''});
       }
+  for (let row = 0; row < 4; row++)
+    for (let column = 0; column < 4; column++) {
+      const actual = next.copyTileHalo('fine', column, row);
+      const expected = fresh.copyTileHalo('fine', column, row);
+      expect(actual ? {...actual, revision: ''} : actual).toEqual(
+        expected ? {...expected, revision: ''} : expected
+      );
+    }
   expect(next.haloChanges.some(change => change.column === 3 && change.row === 3)).toBe(false);
   expect(
     initial.withTiles({revision: 'noop', remove: [{matrixId: 'fine', column: 2, row: 2}]})
@@ -261,4 +269,20 @@ test('snapshot updates do not observe mutations to caller-owned matrix metadata'
   const next = original.withTiles({revision: 'after', tiles: [tile(1, 0, 30)]});
   expect(next.sample(2, 1, {matrixId: 'fine'}).height).toBe(20);
   expect(original.sample(1, 1, {matrixId: 'fine'}).height).toBe(10);
+});
+
+test('packed decoder rejects sparse origins even when all heights are missing', () => {
+  const field = new HeightField({
+    width: 2,
+    height: 2,
+    heights: new Float32Array(4),
+    validity: new Uint8Array(4)
+  });
+  for (let axis = 0; axis < 3; axis++) {
+    const packed = packTerrainHeightField(field);
+    const origin = [0, 0, 0];
+    delete origin[axis];
+    packed.origin = origin as [number, number, number];
+    expect(() => unpackTerrainHeightField(packed)).toThrow('host metadata');
+  }
 });
