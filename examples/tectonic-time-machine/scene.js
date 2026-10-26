@@ -247,13 +247,13 @@ export function mountScene(
     lastTime = time;
     const early = isEarlyEarth(time, plateMaxAge);
     const earlyMix = earlyEarthBlend(time, plateMaxAge);
-    if (!early && model && !model.hasTime(time)) return counts;
     const now = performance.now();
     if (!force && now - lastRender < 50) return;
     lastRender = now;
     currentWeights(now);
     const pose = paleoTerrain?.get(time);
     const usePaleo = !early && historicalTerrain && !regionColors && Boolean(pose);
+    if (!early && !usePaleo && model && !model.hasTime(time)) return counts;
     if (earlyMix > 0) earlyEarthMaterial(time, earlyMaterial);
     const glow = early ? Math.round(Math.sqrt(earlyMaterial.theia)*100)/100 : 0;
     if (glow !== impactGlow) {
@@ -270,8 +270,8 @@ export function mountScene(
     else status = `${terrainImage ? 'Modern NASA imagery' : modernTerrainError ? 'Shaded land' : 'Loading NASA imagery'} on ${model?.source.id || 'moving'} plates · illustrative${historicalTerrain && !regionColors ? ' (PaleoDEM covers 0–540 Ma)' : ''}`;
     if (status !== appearanceStatus) {
       appearanceStatus = status;
-      onAppearanceStatus?.(status, usePaleo);
     }
+    onAppearanceStatus?.(status, usePaleo);
     if (!early && !usePaleo && (time !== geometryTime || longitude !== geometryLongitude || !land)) counts = rebuild(time);
     transformMesh(ocean, weights, engines, scales, latitude, true, longitude);
     if (earlyMix > 0 || usePaleo) {
@@ -498,6 +498,7 @@ export function mountScene(
       historicalTerrain = options.historicalTerrain ?? true;
       return render(lastTime, true);
     },
+    hasTerrain(time) {return historicalTerrain && !regionColors && Boolean(paleoTerrain?.get(time));},
     render,
     resize() {
       configure();

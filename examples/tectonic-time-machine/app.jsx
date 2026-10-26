@@ -53,8 +53,9 @@ export default function TectonicTimeMachine() {
     [showAllFeatures, setShowAllFeatures] = useState(false);
   const earlyEarth = isEarlyEarth(time, source.maxAge);
   const focusEvent = playbackFocus(time);
-  const sceneReady = earlyEarth || ready;
-  const sceneError = renderError || (earlyEarth ? '' : error);
+  const terrainReady = historicalTerrain && !regionColors && paleoActive;
+  const sceneReady = earlyEarth || terrainReady || ready;
+  const sceneError = renderError || (earlyEarth || terrainReady ? '' : error);
   useEffect(() => {
     const renderer = mountScene(
       canvas.current,
@@ -63,7 +64,7 @@ export default function TectonicTimeMachine() {
       e => setRenderError(e.message),
       value => playback.current.advance(value),
       value => playback.current.play(value),
-      (status, active) => {setAppearanceStatus(status); setPaleoActive(active);},
+      (status, active) => {setAppearanceStatus(status); setPaleoActive(active); if (active && playIntent.current) setPlaying(true);},
       parquetWorkerUrl
     );
     scene.current = renderer;
@@ -74,12 +75,13 @@ export default function TectonicTimeMachine() {
       renderer.dispose();
       scene.current = null;
     };
-  }, []);
+  }, [attempt]);
   useEffect(() => {
     const abort = new AbortController();
     setReady(false);
     setPlaying(isEarlyEarth(clock.current, source.maxAge) && playIntent.current);
     setError('');
+    setRenderError('');
     setHistoryStatus('');
     setModel(null);
     scene.current?.setModel(null);
@@ -108,7 +110,7 @@ export default function TectonicTimeMachine() {
   }, [attempt, sourceId]);
   useEffect(() => {
     if (earlyEarth || !model || model.source.id !== sourceId) return;
-    if (model.hasTime(time)) {setReady(true); return;}
+    if (scene.current?.hasTerrain(time) || model.hasTime(time)) {setReady(true); return;}
     const abort = new AbortController();
     setReady(false);
     setPlaying(false);
@@ -168,6 +170,8 @@ export default function TectonicTimeMachine() {
     clock.current = clampTimelineTime(Number(value));
     playIntent.current = false;
     setPlaying(false);
+    setPaleoActive(false);
+    scene.current?.render(clock.current, true);
     setTime(clock.current);
   };
   playback.current = {
@@ -231,7 +235,7 @@ export default function TectonicTimeMachine() {
         {(!sceneReady || sceneError) && (
           <div className="tectonic-loading" role="status">
             <p>{sceneError || status}</p>
-            {error && <button onClick={() => setAttempt(n => n + 1)}>Retry data load</button>}
+            {sceneError && <button onClick={() => setAttempt(n => n + 1)}>Retry loading</button>}
           </div>
         )}
       </div>
