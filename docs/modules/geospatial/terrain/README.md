@@ -108,6 +108,7 @@ when fine spatial resolution is required.
 | `INVALID_INPUT` | 3 | Nonfinite query coordinate |
 | `NUMERIC_ERROR` | 4 | Transform, arithmetic, or output conversion overflow |
 | `UNAVAILABLE` | 5 | Requested derivative is undefined for the chosen mode |
+| `NOT_RESIDENT` | 6 | A required tiled sample has no resident source tile |
 
 Numeric fields with a non-valid associated status are zero, including reused
 outputs. Check `gradientStatus` before using gradients or normals. All statuses
@@ -180,10 +181,10 @@ concerns; this constructor creates only the regular source-grid triangulation.
 
 ## Implementation status
 
-This is the local Cartesian foundation of the
-[terrain roadmap](../../../../dev-docs/terrain-roadmap.md). Tiled snapshots, geographic
-adapters, adaptive tessellation, accelerated intersections, shader kernels, and
-deck.gl integration remain planned. CPU tests use analytic planes/saddles and
+The local Cartesian foundation, geographic adapters and initial cell-registered
+tiled snapshots implement portions of the
+[terrain roadmap](../../../../dev-docs/terrain-roadmap.md). Adaptive tessellation,
+accelerated intersections, shader kernels and deck.gl integration remain planned. CPU tests use analytic planes/saddles and
 independent mesh centroid/normal checks; they do not establish CPU/GPU parity or
 source DEM accuracy.
 
