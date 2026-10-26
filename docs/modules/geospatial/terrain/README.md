@@ -186,7 +186,8 @@ concerns; this constructor creates only the regular source-grid triangulation.
 The local Cartesian foundation, geographic adapters and initial cell-registered
 tiled snapshots implement portions of the
 [terrain roadmap](../../../../dev-docs/terrain-roadmap.md). Adaptive tessellation,
-accelerated intersections, shader kernels and deck.gl integration remain planned. CPU tests use analytic planes/saddles and
+accelerated intersections remain math.gl roadmap work. Shader implementations
+belong in luma.gl and rendering integration belongs in deck.gl. CPU tests use analytic planes/saddles and
 independent mesh centroid/normal checks; they do not establish CPU/GPU parity or
 source DEM accuracy.
 
@@ -266,7 +267,8 @@ for worker transfer or preparing GPU buffers; this is not a GPU execution API or
 a shader layout ABI. Missing neighbors have validity zero in the exported halo.
 The incremental update API below reuses unchanged halos. Scalar queries still allocate
 temporaries; persistent map structures, batch tiled queries, vertex-tile edge reconciliation,
-coalesced tile rows, adaptive meshes and GPU kernels remain roadmap work.
+coalesced tile rows and adaptive meshes remain math.gl roadmap work. GPU kernels
+and device resource management belong in luma.gl.
 
 ## Incremental tile updates
 
@@ -364,5 +366,7 @@ It reconstructs a copied CPU reference for the quantized grid and elevations.
 The payload's buffers are mutable and transferable; do not modify or detach them
 while an upload or decoder reads them. Keep the tile identifier and snapshot
 revision alongside the payload in the resource manager. WGSL/GLSL samplers,
-bounded device page tables, shader conformance and luma.gl graph adapters are
-subsequent T3 work.
+bounded device page tables, shader conformance and graph adapters are subsequent
+T3 work in luma.gl, not math.gl. math.gl contains CPU algorithms, numerical
+contracts and renderer-independent data layouts; it does not contain shader code
+or create GPU resources.
