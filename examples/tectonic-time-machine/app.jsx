@@ -110,7 +110,7 @@ export default function TectonicTimeMachine() {
   }, [attempt, sourceId]);
   useEffect(() => {
     if (earlyEarth || !model || model.source.id !== sourceId) return;
-    if (scene.current?.hasTerrain(time) || model.hasTime(time)) {setReady(true); return;}
+    if ((historicalTerrain && !regionColors && scene.current?.hasTerrain(time)) || model.hasTime(time)) {setReady(true); return;}
     const abort = new AbortController();
     setReady(false);
     setPlaying(false);
@@ -132,7 +132,7 @@ export default function TectonicTimeMachine() {
         if (!abort.signal.aborted) setError(e.message);
       });
     return () => abort.abort();
-  }, [time, model, sourceId]);
+  }, [time, model, sourceId, historicalTerrain, regionColors]);
   useEffect(() => {
     if (!model) return;
     const abort = new AbortController();
@@ -154,7 +154,7 @@ export default function TectonicTimeMachine() {
   }, [cycleViews, playing, sceneReady, view]);
   useEffect(() => {
     scene.current?.setOptions({view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, maxAge: source.maxAge});
-  }, [view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, sourceId]);
+  }, [view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, sourceId, attempt]);
   useEffect(() => {
     if (!playing) {
       clock.current = time;
