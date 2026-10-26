@@ -5,7 +5,6 @@
 import polygonClipping from 'polygon-clipping';
 import clipCircle from './spherical-clip/clip-circle.js';
 import {
-  angle,
   basis,
   coordinates,
   cross,
@@ -46,6 +45,10 @@ export type SphericalCutPolygon = {
   edges: SphericalCutEdge[][];
 };
 const TOL = 2e-12;
+// For nearby unit directions, cross(a,b-a) avoids cancellation between
+// products of order one. Keep physical angular tolerances when forming fractions.
+const arcCross = (a: Vector, b: Vector) => cross(a, [b[0] - a[0], b[1] - a[1], b[2] - a[2]]);
+const angle = (a: Vector, b: Vector) => Math.atan2(Math.hypot(...arcCross(a, b)), dot(a, b));
 
 /** Partition global spherical polygons into an open-hemisphere atlas before map clipping.
  * Input topology must be valid. This does not reinterpret edges as ellipsoid geodesics/rhumbs.
@@ -133,14 +136,14 @@ export function cutSphericalPolygon(
           q = ring[(edgeIndex + 1) % ring.length],
           length = angle(p, q);
         if (length < TOL) continue;
-        const n = unit(cross(p, q));
+        const n = unit(arcCross(p, q));
         if (Math.abs(dot(n, a)) > TOL || Math.abs(dot(n, b)) > TOL) continue;
-        const at = (v: Vector) => Math.atan2(dot(cross(p, v), n), dot(p, v)) / length;
+        const at = (v: Vector) => Math.atan2(dot(arcCross(p, v), n), dot(p, v)) / length;
         const startFraction = at(a),
           endFraction = at(b);
         if (
-          Math.min(startFraction, endFraction) >= -TOL &&
-          Math.max(startFraction, endFraction) <= 1 + TOL
+          Math.min(startFraction, endFraction) >= -TOL / length &&
+          Math.max(startFraction, endFraction) <= 1 + TOL / length
         )
           return {
             kind: 'source',
@@ -231,12 +234,12 @@ export function cutSphericalPolygon(
                 length = angle(a, b),
                 candidates: {t: number; p: Vector}[] = [];
               if (length > TOL) {
-                const n = unit(cross(a, b));
+                const n = unit(arcCross(a, b));
                 for (const ring of input)
                   for (const p of ring) {
                     tick();
                     if (Math.abs(dot(n, p)) > TOL) continue;
-                    const t = Math.atan2(dot(cross(a, p), n), dot(a, p)) / length;
+                    const t = Math.atan2(dot(arcCross(a, p), n), dot(a, p)) / length;
                     if (t > TOL && t < 1 - TOL) candidates.push({t, p});
                   }
               }

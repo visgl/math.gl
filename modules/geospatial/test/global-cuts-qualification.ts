@@ -136,6 +136,23 @@ export function qualifyGlobalCuts() {
       2e-10
     );
   }
+  for (const delta of [1e-5, 1e-6, 1e-7, 1e-8])
+    run(
+      'detailed source edges',
+      () => {
+        const ring: P[] = [
+          [10, 10],
+          [40, 10],
+          [40, 10 + delta],
+          [20, 40]
+        ];
+        const parts = cutSphericalPolygon([ring], {interior: 'left'});
+        if (!parts.some(p => p.edges.flat().some(e => e.kind === 'source' && e.edgeIndex === 1)))
+          throw new Error('Short original edge lost ownership');
+        return Math.abs(total(parts) - solidAngle(ring));
+      },
+      2e-10
+    );
   for (const definition of mapDefinitions)
     run(
       'map family ' + ('projection' in definition ? definition.projection : definition.type),
