@@ -276,6 +276,45 @@ for complete adapter examples.
 
 ## What is pluggable?
 
+### Opt-in authority resolution
+
+Configure a [CRS resolver](../../crs/api-reference/resolver.md) on an engine to prepare
+identifiers beyond its built-in aliases. Resolution supplies the definition; the engine
+still validates its algorithms, datum stages, grids and storage conventions.
+
+```ts
+import {FullProjectionEngine} from '@math.gl/geospatial/projection';
+import {createCRSResolver, createCRSDictionaryProvider} from '@math.gl/geospatial/crs/resolver';
+
+const engine = new FullProjectionEngine({resolver: createCRSResolver({providers: [
+  createCRSDictionaryProvider({
+    'APP:regional': '+proj=utm +zone=31 +datum=WGS84 +units=m'
+  })
+]})});
+const transform = await engine.createProjectionAsync({to: 'APP:regional'});
+transform.project([3, 0]); // approximately [500000, 0], synchronous after preparation
+const crs = await engine.getCRS('APP:regional');
+crs.converter.WGS84.from([3, 0]); // also synchronous
+```
+
+`FullProjectionEngine`, `ConfigurableProjectionEngine` and `LazyProjectionEngine`
+accept `resolver`. Caller aliases take precedence over built-in identifiers; registered
+readers retain their declared inputs. External lookup handles remaining identifiers,
+including unresolved endpoints of local alias chains. Full definitions and malformed
+syntax are not sent to a registry as a fallback. Provider errors propagate unchanged;
+a successful lookup can still fail with an engine-specific unsupported-operation error.
+
+Both endpoints and additional `getCRS({converters})` sources are prepared. Source
+coordinate order, units, height metadata and epochs retain the native engine's existing
+validation: resolution never makes unsupported vertical or time-dependent operations valid.
+Inputs are captured before asynchronous work. Resolver configuration contributes to the
+choice of a resolved descriptor signature, but signatures still do not fingerprint engine
+implementations or grid data. Keep downstream caches scoped to their engine instance.
+
+Synchronous `createProjection()` never calls a resolver, including after an earlier async
+lookup. Reuse the prepared transform, pass a complete definition, or register a local alias.
+The default engine has no external resolver, network access or database dependency.
+
 | Component                        | Option or API      | Application responsibility                                                              |
 | -------------------------------- | ------------------ | --------------------------------------------------------------------------------------- |
 | Projection algorithms            | `projections`      | Import and register the algorithms needed by both CRSs                                  |

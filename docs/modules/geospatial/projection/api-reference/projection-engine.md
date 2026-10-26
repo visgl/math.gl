@@ -1,5 +1,11 @@
 # ProjectionEngine
 
+Native engine constructors optionally accept `resolver: CRSResolver` from
+`@math.gl/geospatial/crs/resolver`. `createProjectionAsync()` and `getCRS()` prepare
+external identifiers; `createProjection()` remains synchronous and never looks them up.
+See [authority resolution](../developer-guide/projection-engine.md#opt-in-authority-resolution)
+for precedence, caching and metadata rules.
+
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>

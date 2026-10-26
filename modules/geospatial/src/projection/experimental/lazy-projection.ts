@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original convenience API over projection descriptors. Deferred kernels retain their proj4js/PROJ port notices and licenses.
 import {resolveCRSDescriptor} from './crs-descriptor';
+import {prepareEngineOptions} from './crs/resolve';
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
 import {ProjectionTransform} from './typescript-projection';
 import type {ProjectionTransformOptions} from './typescript-projection';
@@ -121,8 +122,8 @@ export class LazyProjectionEngine implements CRSEngine {
     });
   }
 
-  createProjectionAsync(options: CreateProjectionOptions = {}): Promise<ProjectionTransform> {
-    const config = {...this.options, ...options};
+  async createProjectionAsync(options: CreateProjectionOptions = {}): Promise<ProjectionTransform> {
+    const config = await prepareEngineOptions({...this.options, ...options});
     return ProjectionTransform.create({
       ...config,
       projections: configuredProjections(config)

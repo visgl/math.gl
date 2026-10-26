@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {resolveCRSDescriptor} from './crs-descriptor';
+import {prepareEngineOptions} from './crs/resolve';
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
 import {ProjectionTransform} from './typescript-projection';
 import type {CRSEngine, CRSDescriptor, GetCRSOptions} from './types';
@@ -42,7 +43,7 @@ export class ConfigurableProjectionEngine<P extends Registration = ProjectionPlu
 
   /** Load only the algorithms required by this CRS pair and return a synchronous transform. */
   async createProjectionAsync(options: CreateProjectionOptions = {}): Promise<ProjectionTransform> {
-    return ProjectionTransform.create({...this.options, ...options});
+    return ProjectionTransform.create(await prepareEngineOptions({...this.options, ...options}));
   }
 }
 
@@ -76,6 +77,7 @@ export function hasCRSOverrides(options: ProjectionEngineOptions<Registration>):
       options.datumCatalogs ||
       options.aliases ||
       options.datumGrids ||
-      options.verticalGrids
+      options.verticalGrids ||
+      options.resolver
   );
 }
