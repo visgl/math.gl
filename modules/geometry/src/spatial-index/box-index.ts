@@ -186,7 +186,16 @@ export class BoxIndex {
     point: QueryPoint,
     options: NearestIndexOptions & IndexQueryBudget = {}
   ): IndexQueryResult<NearestIndexResult | null> {
-    validateQueryPoint(point, this.dimension);
+    return this.nearestBoxQuery(point, point, options);
+  }
+
+  /** Nearest indexed box to a filled query box, optionally refined to enclosed geometry. */
+  nearestBoxQuery(
+    minimum: QueryPoint,
+    maximum: QueryPoint,
+    options: NearestIndexOptions & IndexQueryBudget = {}
+  ): IndexQueryResult<NearestIndexResult | null> {
+    this.validateBounds(minimum, maximum);
     const budget = new QueryBudget(options.maxWork);
     let best = options.maxDistance ?? Infinity;
     validateQueryDistance(best);
@@ -196,10 +205,14 @@ export class BoxIndex {
       let x = 0,
         y = 0,
         z = 0;
-      x = Math.max(bounds[start] - point[0], 0, point[0] - bounds[start + this.dimension]);
-      y = Math.max(bounds[start + 1] - point[1], 0, point[1] - bounds[start + this.dimension + 1]);
+      x = Math.max(bounds[start] - maximum[0], 0, minimum[0] - bounds[start + this.dimension]);
+      y = Math.max(
+        bounds[start + 1] - maximum[1],
+        0,
+        minimum[1] - bounds[start + this.dimension + 1]
+      );
       if (this.dimension === 3)
-        z = Math.max(bounds[start + 2] - point[2], 0, point[2] - bounds[start + 5]);
+        z = Math.max(bounds[start + 2] - maximum[2], 0, minimum[2] - bounds[start + 5]);
       return Math.hypot(x, y, z);
     };
     const stack = this.size ? [0] : [];
