@@ -353,3 +353,47 @@ instantaneous palette/lighting change when the imagery-on-plates material takes
 over. The boundary blend is illustrative modern imagery, not historical climate
 data. The pre-plant greening restriction still applies. Image arrival also reveals
 both the texture and calibrated palette smoothly over 1.5 seconds, even paused.
+
+### Journeys and a guided globe camera
+
+Open **Journeys & guided camera** to follow a preset present-day place or enter
+custom longitude/latitude. A point is assigned only to a present-day source polygon,
+respecting polygon holes and dateline crossing. Overlapping distinct plate IDs,
+unassigned locations and missing rotations are reported rather than replaced with
+a nearby plate or stationary trajectory. The marker follows the same rigid plate
+rotation and feature lifetime as the source geometry. Its trail shows up to 100 Myr
+of contiguous available history; it stops at gaps and the model's coverage boundary,
+and its displayed path is cut at view seams.
+After the present it uses the selected illustrative regional assembly path instead
+of published rotations. This does not model local deformation or imply that a
+modern city existed then.
+
+Following selects imagery on the moving plates. PaleoDEM remains a separate
+PALEOMAP reference frame and is disabled while a place is selected, so a model
+marker is not presented as precisely aligned to incompatible historical terrain.
+The marker and trail support all projection morphs; automatic place following
+centers the globe, while maps retain their projected framing. The camera follows
+short longitude arcs across the dateline. Dragging the globe or editing its meridian
+takes control immediately; re-enable following to resume. Choosing a place, switching
+projections and changing camera modes preserve geological time and playback intent.
+
+The optional **Guided event camera** frames Moon formation, microbial worlds,
+Snowball Earth, land colonization and future assembly with smooth original camera
+shots. It pauses automatic projection cycling; users can still select projections.
+Shots are presentation choices, not additional scientific reconstructions. Place
+following and the event camera are mutually exclusive camera modes.
+
+### Comparing future scenarios
+
+**Compare future alternatives** overlays purple outlines from the unselected
+Atlantic/polar scenario after the present. The selected scenario remains textured.
+The comparison uses the largest present-day source block per region for a readable
+outline, omitting smaller fragments and islands; it is not a complete alternative
+coastline or a confidence envelope. Both paths are the existing illustrative
+assemblies, not forecasts. Scenario selection reverses the comparison without
+changing age or stopping playback.
+
+Globe outlines reuse per-ring coordinate buffers during playback. Map outlines
+are seam-clipped and cached for short intervals, and forced seeks rebuild them
+immediately. Place/trail buffers are reused. Paused globe-camera movement reuses
+land topology instead of retriangulating it for each camera frame.

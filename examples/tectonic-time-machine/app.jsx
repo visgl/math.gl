@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useEffect, useRef, useState} from 'react';
+import {FOLLOW_PLACES} from './journeys.js';
 import {mountScene, VIEWS} from './scene.js';
 import {loadModel} from './data.js';
 import parquetWorkerUrl from 'math.gl-parquet-loader/worker';
@@ -51,6 +52,12 @@ export default function TectonicTimeMachine() {
     [eventQuery, setEventQuery] = useState(''),
     [featureQuery, setFeatureQuery] = useState(''),
     [showAllFeatures, setShowAllFeatures] = useState(false);
+  const [journeyId,setJourneyId]=useState('none'),[customPlace,setCustomPlace]=useState(null),
+    [customLon,setCustomLon]=useState('-104.99'),[customLat,setCustomLat]=useState('39.74'),
+    [followCamera,setFollowCamera]=useState(false),[guidedCamera,setGuidedCamera]=useState(false),
+    [compareFutures,setCompareFutures]=useState(false),[journeyStatus,setJourneyStatus]=useState('');
+  const followPlace=journeyId==='custom'?customPlace:FOLLOW_PLACES.find(place=>place.id===journeyId)||null;
+  const customValid=customLon.trim()!==''&&customLat.trim()!==''&&Number.isFinite(Number(customLon))&&Number.isFinite(Number(customLat))&&Math.abs(Number(customLon))<=180&&Math.abs(Number(customLat))<=90;
   const earlyEarth = isEarlyEarth(time, source.maxAge);
   const focusEvent = playbackFocus(time);
   const terrainReady = historicalTerrain && !regionColors && paleoActive;
@@ -65,7 +72,9 @@ export default function TectonicTimeMachine() {
       value => playback.current.advance(value),
       value => playback.current.play(value),
       (status, active) => {setAppearanceStatus(status); setPaleoActive(active); if (active && playIntent.current) setPlaying(true);},
-      parquetWorkerUrl
+      parquetWorkerUrl,
+      setJourneyStatus,
+      () => {setFollowCamera(false);setGuidedCamera(false);}
     );
     scene.current = renderer;
     const observer = new ResizeObserver(() => renderer.resize());
@@ -153,8 +162,8 @@ export default function TectonicTimeMachine() {
     return () => clearTimeout(timer);
   }, [cycleViews, playing, sceneReady, view]);
   useEffect(() => {
-    scene.current?.setOptions({view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, maxAge: source.maxAge});
-  }, [view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, sourceId, attempt]);
+    scene.current?.setOptions({view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, maxAge: source.maxAge, followPlace, followCamera, guidedCamera, compareFutures});
+  }, [view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, sourceId, attempt, followPlace, followCamera, guidedCamera, compareFutures]);
   useEffect(() => {
     if (!playing) {
       clock.current = time;
@@ -296,11 +305,35 @@ export default function TectonicTimeMachine() {
             value={regionColors ? 'regions' : historicalTerrain ? 'paleodem' : 'terrain'}
             onChange={e => {setRegionColors(e.target.value === 'regions'); setHistoricalTerrain(e.target.value === 'paleodem');}}
           >
-            <option value="paleodem">Historical terrain · PaleoDEM (0–540 Ma)</option>
+            <option value="paleodem" disabled={Boolean(followPlace)}>Historical terrain · PaleoDEM (0–540 Ma)</option>
             <option value="terrain">Modern NASA imagery on plates</option>
             <option value="regions">Region colors</option>
           </select>
         </label>
+        <details className="tectonic-info tectonic-journey-controls">
+          <summary>Journeys &amp; guided camera</summary>
+          <label>Follow a present-day place
+            <select aria-label="Follow a place" value={journeyId} onChange={e=>{
+              setJourneyId(e.target.value);
+              if(e.target.value==='none')setFollowCamera(false);
+              if(e.target.value!=='none'){setHistoricalTerrain(false);setRegionColors(false);setFollowCamera(true);setGuidedCamera(false);setCycleViews(false);setView('globe');}
+            }}>
+              <option value="none">None</option>
+              {FOLLOW_PLACES.map(place=><option key={place.id} value={place.id}>{place.name}</option>)}
+              <option value="custom">Custom coordinates</option>
+            </select>
+          </label>
+          {journeyId==='custom'&&<>
+            <div className="tectonic-control-pair">
+              <label>Longitude<input aria-label="Place longitude" type="number" min="-180" max="180" step="any" value={customLon} onChange={e=>setCustomLon(e.target.value)}/></label>
+              <label>Latitude<input aria-label="Place latitude" type="number" min="-90" max="90" step="any" value={customLat} onChange={e=>setCustomLat(e.target.value)}/></label>
+            </div>
+            <button disabled={!customValid} onClick={()=>{setCustomPlace({name:'Custom place',lon:Number(customLon),lat:Number(customLat)});setHistoricalTerrain(false);setFollowCamera(true);setGuidedCamera(false);setView('globe');}}>Follow coordinates</button>
+          </>}
+          <label className="tectonic-check"><input type="checkbox" checked={followCamera} disabled={!followPlace} onChange={e=>{setFollowCamera(e.target.checked);if(e.target.checked){setGuidedCamera(false);setView('globe');}}}/>Follow on globe</label>
+          <label className="tectonic-check"><input type="checkbox" checked={guidedCamera} onChange={e=>{setGuidedCamera(e.target.checked);if(e.target.checked){setFollowCamera(false);setCycleViews(false);setView('globe');}}}/>Guided event camera</label>
+          <label className="tectonic-check"><input type="checkbox" checked={compareFutures} onChange={e=>setCompareFutures(e.target.checked)}/>Compare future alternatives</label>
+        </details>
         <details className="tectonic-info tectonic-display-options">
           <summary>Display &amp; future options</summary>
         <label>
@@ -311,7 +344,7 @@ export default function TectonicTimeMachine() {
             max="180"
             step="5"
             value={longitude}
-            onChange={e => setLongitude(e.target.value)}
+            onChange={e => {setLongitude(e.target.value);setFollowCamera(false);setGuidedCamera(false);}}
           />
           <output>{longitude}°</output>
         </label>
@@ -488,6 +521,10 @@ export default function TectonicTimeMachine() {
         )}
         <p className="tectonic-note">PaleoDEM uses its own PALEOMAP reconstruction. The plate model applies to region colors and earlier/future terrain.</p>
         <p className="tectonic-appearance-status">{appearanceStatus}</p>
+        {journeyStatus&&<p className="tectonic-note">{journeyStatus}</p>}
+        {followPlace&&<p className="tectonic-note">Marker and up-to-100 Myr trail use {source.id} rotations in published history and original illustrative paths after the present. Template lifetimes and missing rotations are respected. Tracking uses plate imagery to keep reference frames aligned.</p>}
+        {(guidedCamera||followPlace)&&<p className="tectonic-note">Drag the globe to take over the camera. Re-enable following or the guided camera to resume.</p>}
+        {compareFutures&&<p className="tectonic-note tectonic-future-legend">{time>0?`Purple major-block outlines: ${scenario==='atlantic'?'polar':'Atlantic'} alternative. Solid land: selected scenario. Both are illustrative.`:'Future outlines appear after the present; playback and age are unchanged.'}</p>}
         </section>
       </aside>
       <footer className="tectonic-timeline">
