@@ -91,7 +91,9 @@ export function createCRSDescriptor(options: CRSDescriptorOptions): CRSDescripto
   requireValue(
     Array.isArray(bounds) &&
       bounds.length === 2 &&
-      bounds.every(row => Array.isArray(row) && row.length === 3 && row.every(Number.isFinite)) &&
+      [...bounds].every(
+        row => Array.isArray(row) && row.length === 3 && [...row].every(Number.isFinite)
+      ) &&
       bounds[0].every((minimum, i) => minimum <= bounds[1][i]),
     'renderingBounds'
   );
@@ -109,7 +111,8 @@ export function createCRSDescriptor(options: CRSDescriptorOptions): CRSDescripto
       : copyScale(suppliedScale);
   requireValue(Object.prototype.hasOwnProperty.call(options.converter, 'WGS84'), 'converter.WGS84');
   const converter = Object.create(null) as Record<string, CRSConverter> & {WGS84: CRSConverter};
-  for (const [key, operations] of Object.entries(options.converter)) {
+  for (const key of Object.getOwnPropertyNames(options.converter)) {
+    const operations = options.converter[key];
     requireValue(Boolean(key.trim()), 'converter key');
     converter[key] = Object.freeze({
       from: bindConversion(operations, 'from'),
@@ -167,7 +170,7 @@ function copyUnit(unit: CRSUnit): CRSUnit {
 function copyScale(value: CRSRenderingScale): CRSRenderingScale {
   requireSynchronous(value);
   requireValue(
-    Array.isArray(value) && value.length === 3 && value.every(positive),
+    Array.isArray(value) && value.length === 3 && [...value].every(positive),
     'renderingScale'
   );
   return Object.freeze([...value]) as CRSRenderingScale;

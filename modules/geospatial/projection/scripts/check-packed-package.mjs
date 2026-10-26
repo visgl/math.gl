@@ -96,6 +96,7 @@ try {
     assert.equal(stable.mercator, api.mercator);
     const subpaths = ${JSON.stringify(subpaths)};
     const optionalEntries = {
+      './crs-descriptor': ['createCRSDescriptor'],
       './web-mercator': ['WebMercatorProjectionEngine'],
       './temporal': ['createTemporalDeformationModel'],
       './datums': ['datumCatalog'],

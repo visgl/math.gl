@@ -150,6 +150,30 @@ describe('backend-independent descriptor construction', () => {
     expect(Object.getPrototypeOf(descriptor.converter)).toBeNull();
   });
 
+  test('copies non-enumerable own converters', () => {
+    const converter = Object.defineProperty({}, 'WGS84', {value: options().converter.WGS84});
+    const descriptor = createCRSDescriptor({...options(), converter});
+    expect(descriptor.converter.WGS84.from([1, 2])).toEqual([1, 2]);
+  });
+
+  test('rejects sparse rendering bounds and constant or callback scales', () => {
+    for (const renderingBounds of [
+      new Array(2),
+      [new Array(3), [1, 2, 3]],
+      [[0, 0, 0], new Array(3)]
+    ]) {
+      expect(() =>
+        createCRSDescriptor({...options(), renderingBounds: renderingBounds as never})
+      ).toThrow('renderingBounds');
+    }
+    const scale = new Array(3) as unknown as [number, number, number];
+    expect(() => createCRSDescriptor({...options(), renderingScale: scale})).toThrow(
+      'renderingScale'
+    );
+    const descriptor = createCRSDescriptor({...options(), renderingScale: () => scale});
+    expect(() => descriptor.getRenderingScale([0, 0])).toThrow('renderingScale');
+  });
+
   test('supports unavailable scale and snapshots callback results', () => {
     const scale: [number, number, number] = [1, 2, 3];
     const descriptor = createCRSDescriptor({
