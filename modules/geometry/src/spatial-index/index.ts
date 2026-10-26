@@ -17,4 +17,4 @@ export type {
   TriangleRayResult,
   TriangleRayOptions
 } from './triangle-bvh';
-export type {TriangleNearestOptions} from './triangle-bvh';
+export type {TriangleNearestOptions, TriangleSegmentResult} from './triangle-bvh';

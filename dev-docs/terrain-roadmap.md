@@ -39,8 +39,11 @@ retain extrema and source-coverage counts, with exhaustive CPU references.
 Bounded BVH ray/segment/nearest queries now return explicit completion status and
 work counts. Discrete sphere contacts use triangle faces, edges and vertices with
 separate contact and face normals, mask filtering, and contact-capacity limits.
-Incomplete results cannot be interpreted as misses. This advances T5; reduced
-manifolds, capsule contacts, swept queries and solver integration remain open.
+Incomplete results cannot be interpreted as misses. Segment/triangle closest-pair
+kernels now support bounded minimum clearance along segments and capsule contacts,
+including straight translating-sphere swept-volume overlap. Closest-pair fractions
+are not first-impact times. This advances T5; reduced manifolds, first-impact queries,
+curved/rotating sweeps and solver integration remain open.
 
 This is partial T0/T1/T2/T3/T5 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
 spike, vertex-tile reconciliation, persistent cache structures, adaptive meshes,
