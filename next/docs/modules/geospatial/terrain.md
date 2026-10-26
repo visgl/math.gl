@@ -393,7 +393,25 @@ const contacts = surface.intersectSphere([1002, 2003, 20], 0.5, {
 
 `maxContacts` defaults to Infinity, or accepts a nonnegative safe integer. Finding an additional contact beyond this capacity makes the list incomplete. Exactly filling capacity can still complete after the remaining search rules out more contacts. An incomplete list is an unspecified subset, not necessarily the deepest contacts. The work budget includes closest-point tests and bounds the number of candidate tests; the contact limit bounds retained results. Adjacent triangles may return duplicate or coincident contacts. Masks exclude visual skirts before exact contact testing.
 
-These are two-sided contacts with a zero-thickness triangle sheet, not a solid volume below the terrain. A sphere wholly below and separated from that sheet has no contact. This is a discrete query, not continuous collision detection: fast movement can tunnel. Manifold reduction, material lookup, response/friction, timestep policy, capsule tests and swept sphere tests remain consumer or future work. No solver or shader is added.
+These are two-sided contacts with a zero-thickness triangle sheet, not a solid volume below the terrain. A sphere wholly below and separated from that sheet has no contact. This is a discrete query, not continuous collision detection: fast movement can tunnel. Manifold reduction, material lookup, response/friction, timestep policy and first-impact tests remain consumer or future work. No solver or shader is added.
+
+### Segment clearance and capsule contacts[​](#segment-clearance-and-capsule-contacts "Direct link to Segment clearance and capsule contacts")
+
+`nearestSegment(start, end, {maxDistance?})` computes minimum Euclidean separation along the entire closed segment. `nearestSegmentQuery(start, end, {maxDistance?, maxWork?})` adds the same bounded completion contract as other queries. The result is a `TerrainSegmentHit`: original `triangleIndex`, `distance`, world terrain `point`, upward face `normal`, world `segmentPoint`, and `segmentFraction` in \[0, 1]. This differs from `intersectSegment`, which returns the first ray intersection: clearance can be positive and considers coplanar overlap. It also differs from vertical height-above-ground sampling. Ties between triangles use the lowest original index. The unlimited method never silently truncates on a work limit.
+
+`intersectCapsule(start, end, radius, {maxWork?, maxContacts?})` returns an envelope containing `TerrainCapsuleContact[]`. Each contact has the sphere-contact fields plus `segmentPoint` and `segmentFraction` for the closest point on the capsule's axis. The normal points from the closest terrain feature toward that axis point; at zero distance it falls back to the upward face normal. `penetration` is radius minus minimum separation. World-origin addition happens after local distance/normal calculations. Both endpoints and the axis interior count; two endpoint-only sphere queries are insufficient. Visual skirts remain excluded by the mask.
+
+```
+const clearance = surface.nearestSegmentQuery(start, end, {maxDistance: 20, maxWork: 512});
+
+const contacts = surface.intersectCapsule(start, end, 0.5, {maxWork: 512, maxContacts: 16});
+
+// Require complete before treating either result as final.
+```
+
+Radius is finite and nonnegative. A point axis reduces geometrically to a sphere, and a zero-radius capsule tests segment overlap. Work/capacity validation, incomplete-list behavior, two-sided sheet semantics and possible duplicate contacts match the sphere API. Output arrays are detached. A capsule can test the volume of a sphere translating on a straight path, but `segmentFraction` is **not time of first impact**. It locates a minimizing pair and may be nonunique. No first-impact, curved-path, rotating-capsule or solver response is implied.
+
+The shared Float64 kernels normalize coordinates before geometric products, with analytic, scale, degeneracy and exhaustive traversal tests. They are not exact or watertight-certified; grazing and ill-conditioned cases remain subject to rounding. Use a local origin and check completion. See the [kernel and numerical contract](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md#segment-clearance-and-capsule-overlap).
 
 ## Conservative height-field bounds[​](#conservative-height-field-bounds "Direct link to Conservative height-field bounds")
 
