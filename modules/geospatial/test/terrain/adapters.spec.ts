@@ -331,3 +331,78 @@ test('fractional matrix resolutions admit roundoff at outer sample centers only'
     }
   }
 });
+
+test('large origins and geographic pixel centers retain valid endpoints without extrapolation', () => {
+  const matrix: TileMatrix = {
+    ...fine,
+    origin: [1000000, 0],
+    resolution: 0.1,
+    resolutionY: 0.1,
+    tileSize: [2, 2],
+    matrixSize: [1, 1],
+    cornerOfOrigin: 'bottomLeft'
+  };
+  const field = snapshot(tiles(matrix), [matrix]);
+  const geographic = new GeographicHeightField({
+    width: 2,
+    height: 2,
+    bounds: [179, 59, 179.002, 59.002],
+    registration: 'cell',
+    heights: new Float64Array([10, 20, 30, 40])
+  });
+  const local = new HeightField({
+    width: 2,
+    height: 2,
+    heights: tiles(matrix)[0].heights,
+    origin: [1000000, 0],
+    columnStep: [0.1, 0],
+    rowStep: [0, 0.1],
+    registration: 'cell'
+  });
+  for (const interpolation of ['nearest', 'bilinear', 'triangle'] as const) {
+    expect(field.sample(1000000.15, 0.05, {matrixId: 'fine', interpolation}).status).toBe(
+      Status.VALID
+    );
+    expect(local.sample(1000000.15, 0.05, {interpolation}).status).toBe(Status.VALID);
+    expect(geographic.sample(179.0005, 59.0015, {interpolation}).status).toBe(Status.VALID);
+    expect(geographic.sample(179.0015, 59.0005, {interpolation}).status).toBe(Status.VALID);
+    expect(field.sample(1000000.150001, 0.05, {matrixId: 'fine', interpolation}).status).toBe(
+      Status.OUTSIDE_DOMAIN
+    );
+    expect(local.sample(1000000.150001, 0.05, {interpolation}).status).toBe(Status.OUTSIDE_DOMAIN);
+    expect(geographic.sample(179.0005 - 1e-8, 59.0015, {interpolation}).status).toBe(
+      Status.OUTSIDE_DOMAIN
+    );
+  }
+});
+
+test('halo reconstruction preserves diagonal, registration and height provenance', () => {
+  const matrix: TileMatrix = {
+    ...fine,
+    matrixSize: [1, 1],
+    origin: [0, 0],
+    resolution: 1,
+    resolutionY: 1,
+    cornerOfOrigin: 'bottomLeft'
+  };
+  for (const diagonal of ['00-11', '10-01'] as const) {
+    const field = new TiledHeightField({
+      matrixSet: {crs: 'local', matrices: [matrix]},
+      revision: 'r',
+      heightReference: 'survey',
+      diagonal,
+      tiles: [{matrixId: 'fine', column: 0, row: 0, heights: new Float64Array([0, 0, 0, 10])}]
+    });
+    const halo = field.copyTileHalo('fine', 0, 0)!;
+    expect(halo.diagonal).toBe(diagonal);
+    expect(halo.registration).toBe('vertex');
+    expect(halo.heightReference).toBe('survey');
+    const reconstructed = new HeightField(halo);
+    const actual = reconstructed.sample(0.75, 0.75, {interpolation: 'triangle'});
+    const expected = field.sample(0.75, 0.75, {matrixId: 'fine', interpolation: 'triangle'});
+    expect(actual.height).toBe(expected.height);
+    expect(actual.gradientX).toBe(expected.gradientX);
+    expect(actual.gradientY).toBe(expected.gradientY);
+    expect(actual.normalZ).toBe(expected.normalZ);
+  }
+});

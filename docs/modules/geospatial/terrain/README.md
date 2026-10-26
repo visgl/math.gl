@@ -95,8 +95,10 @@ is selected on ties. On the `10-01` diagonal, the triangle containing `00` wins.
 These deterministic rules also apply when a neighboring triangle is missing.
 Derivatives at discontinuities are the selected cell/triangle's one-sided value.
 
-Outer endpoint excursions up to `8 * Number.EPSILON * max(width, height)` in grid
-coordinates are clamped to absorb floating-point roundoff. This does not recover
+Outer endpoint excursions are clamped within a roundoff bound: a base
+`8 * Number.EPSILON * max(width, height)` in grid coordinates plus world-coordinate
+rounding propagated through the inverse frame (four epsilon times the absolute
+query and origin magnitudes per axis). This does not recover
 precision already lost in large absolute query coordinates; use local frames
 when fine spatial resolution is required.
 
@@ -258,7 +260,8 @@ fallback; no query blends taps from different resolutions. Results include the
 actual matrix, snapshot revision and whether fallback occurred.
 
 `copyTileHalo()` returns independent finite Float64 height and Uint8 validity
-buffers with dimensions and metric sample-center transforms. They are suitable
+buffers with dimensions, metric sample-center transforms, vertex registration,
+triangle diagonal and height-reference metadata. They are suitable
 for worker transfer or preparing GPU buffers; this is not a GPU execution API or
 a shader layout ABI. Missing neighbors have validity zero in the exported halo.
 This version rebuilds halos per snapshot and allocates scalar query temporaries;

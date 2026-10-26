@@ -129,6 +129,9 @@ export class TiledHeightField {
         columnStep: readonly [number, number];
         rowStep: readonly [number, number];
         revision: string;
+        diagonal: TerrainDiagonal;
+        registration: 'vertex';
+        heightReference: string;
       }
     | undefined {
     const matrix = this.getMatrix(matrixId);
@@ -147,7 +150,10 @@ export class TiledHeightField {
       ],
       columnStep: [matrix.resolution, 0],
       rowStep: [0, dy],
-      revision: this.revision
+      revision: this.revision,
+      diagonal: this.diagonal,
+      registration: 'vertex',
+      heightReference: this.heightReference
     };
   }
 
@@ -227,11 +233,16 @@ export class TiledHeightField {
     if (!Number.isFinite(u) || !Number.isFinite(v)) return invalid(Status.NUMERIC_ERROR);
     const tolerance =
       8 * Number.EPSILON * Math.max(width * matrix.matrixSize[0], height * matrix.matrixSize[1]);
+    const toleranceU =
+      tolerance +
+      (4 * Number.EPSILON * (Math.abs(x) + Math.abs(matrix.origin[0]))) / matrix.resolution;
+    const toleranceV =
+      tolerance + (4 * Number.EPSILON * (Math.abs(y) + Math.abs(matrix.origin[1]))) / Math.abs(dy);
     if (
-      u < 0.5 - tolerance ||
-      v < 0.5 - tolerance ||
-      u > width * matrix.matrixSize[0] - 0.5 + tolerance ||
-      v > height * matrix.matrixSize[1] - 0.5 + tolerance
+      u < 0.5 - toleranceU ||
+      v < 0.5 - toleranceV ||
+      u > width * matrix.matrixSize[0] - 0.5 + toleranceU ||
+      v > height * matrix.matrixSize[1] - 0.5 + toleranceV
     )
       return invalid(Status.OUTSIDE_DOMAIN);
     u = Math.max(0.5, Math.min(width * matrix.matrixSize[0] - 0.5, u));
