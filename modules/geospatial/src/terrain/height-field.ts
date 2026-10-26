@@ -156,8 +156,8 @@ export class HeightField {
     const tolerance = 8 * Number.EPSILON * Math.max(this.width, this.height);
     // World coordinates carry rounding at their absolute magnitude before the
     // origin subtraction. Propagate that uncertainty through the inverse frame.
-    const errorX = 4 * Number.EPSILON * (Math.abs(x) + Math.abs(this.origin[0]));
-    const errorY = 4 * Number.EPSILON * (Math.abs(y) + Math.abs(this.origin[1]));
+    const errorX = 4 * Number.EPSILON * Math.abs(x) + 4 * Number.EPSILON * Math.abs(this.origin[0]);
+    const errorY = 4 * Number.EPSILON * Math.abs(y) + 4 * Number.EPSILON * Math.abs(this.origin[1]);
     const toleranceU =
       tolerance + Math.abs(this.inverse[0]) * errorX + Math.abs(this.inverse[1]) * errorY;
     const toleranceV =

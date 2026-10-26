@@ -406,3 +406,15 @@ test('halo reconstruction preserves diagonal, registration and height provenance
     expect(actual.normalZ).toBe(expected.normalZ);
   }
 });
+
+test('endpoint uncertainty arithmetic does not overflow for finite extreme coordinates', () => {
+  const field = new HeightField({
+    width: 2,
+    height: 2,
+    heights: new Float64Array(4),
+    origin: [1e308, 0],
+    columnStep: [1e150, 0],
+    rowStep: [0, 1e150]
+  });
+  expect(field.sample(1.1e308, 1e150).status).toBe(Status.OUTSIDE_DOMAIN);
+});

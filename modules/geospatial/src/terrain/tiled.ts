@@ -235,9 +235,12 @@ export class TiledHeightField {
       8 * Number.EPSILON * Math.max(width * matrix.matrixSize[0], height * matrix.matrixSize[1]);
     const toleranceU =
       tolerance +
-      (4 * Number.EPSILON * (Math.abs(x) + Math.abs(matrix.origin[0]))) / matrix.resolution;
+      (4 * Number.EPSILON * Math.abs(x) + 4 * Number.EPSILON * Math.abs(matrix.origin[0])) /
+        matrix.resolution;
     const toleranceV =
-      tolerance + (4 * Number.EPSILON * (Math.abs(y) + Math.abs(matrix.origin[1]))) / Math.abs(dy);
+      tolerance +
+      (4 * Number.EPSILON * Math.abs(y) + 4 * Number.EPSILON * Math.abs(matrix.origin[1])) /
+        Math.abs(dy);
     if (
       u < 0.5 - toleranceU ||
       v < 0.5 - toleranceV ||
