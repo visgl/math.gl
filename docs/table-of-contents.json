@@ -167,7 +167,8 @@
         "type": "category",
         "label": "@math.gl/earth",
         "items": [
-          "modules/earth/README"
+          "modules/earth/README",
+          "modules/earth/api-reference/normal-gravity"
         ]
       },
       {
