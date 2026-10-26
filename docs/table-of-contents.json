@@ -249,7 +249,8 @@
               "modules/geospatial/crs/developer-guide/coordinate-reference-systems"
             ]
           },
-          "modules/geospatial/crs/api-reference/spatial-reference"
+          "modules/geospatial/crs/api-reference/spatial-reference",
+          "modules/geospatial/crs/api-reference/resolver"
         ]
       },
       {

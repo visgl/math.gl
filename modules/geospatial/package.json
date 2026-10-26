@@ -99,6 +99,11 @@
       "import": "./dist/crs/spatial-reference.js",
       "require": "./dist/crs/spatial-reference.cjs"
     },
+    "./crs/resolver": {
+      "types": "./dist/crs/resolver.d.ts",
+      "import": "./dist/crs/resolver.js",
+      "require": "./dist/crs/resolver.cjs"
+    },
     "./crs/metadata": {
       "types": "./dist/crs/crs-metadata.d.ts",
       "import": "./dist/crs/crs-metadata.js",

@@ -79,6 +79,9 @@ export type UnresolvedCRSReference = Readonly<{
 /** Normalized CRS state, discriminated without comparing definition strings. */
 export type CRSReference = KnownCRSReference | UnresolvedCRSReference;
 
+/** Shared definition or source metadata accepted by CRS consumers. */
+export type CRSInput = ReadonlyCRSDefinition | CRSReference | SpatialReference;
+
 /**
  * Format-neutral spatial-reference metadata.
  *

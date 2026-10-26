@@ -18,6 +18,7 @@ export type {
 } from './crs';
 export type {
   CreateSpatialReferenceOptions,
+  CRSInput,
   CRSReference,
   KnownCRSReference,
   ReadonlyCRSDefinition,
