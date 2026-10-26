@@ -152,7 +152,7 @@ The mesh agrees with triangle sampling before chosen position quantization. Floa
 
 ## Implementation status[​](#implementation-status "Direct link to Implementation status")
 
-The local Cartesian foundation, geographic adapters and initial cell-registered tiled snapshots, indexed query surfaces and conservative bounds implement portions of the [terrain roadmap](https://visgl.github.io/math.gl/next/math.gl/dev-docs/terrain-roadmap). Adaptive tessellation, swept-volume contacts and incremental hierarchy updates remain math.gl roadmap work. Shader implementations belong in luma.gl and rendering integration belongs in deck.gl. CPU tests use analytic planes/saddles and independent mesh centroid/normal checks; they do not establish CPU/GPU parity or source DEM accuracy.
+The local Cartesian foundation, geographic adapters and initial cell-registered tiled snapshots, indexed query surfaces and conservative bounds implement portions of the [terrain roadmap](https://github.com/visgl/math.gl/blob/master/dev-docs/terrain-roadmap.md). Adaptive tessellation, swept-volume contacts and incremental hierarchy updates remain math.gl roadmap work. Shader implementations belong in luma.gl and rendering integration belongs in deck.gl. CPU tests use analytic planes/saddles and independent mesh centroid/normal checks; they do not establish CPU/GPU parity or source DEM accuracy.
 
 ## Geographic sampling[​](#geographic-sampling "Direct link to Geographic sampling")
 
@@ -347,9 +347,53 @@ Shared **indexed** edges must have at most two active incident triangles, with o
 
 `intersectRay(origin, direction, {maxDistance?})` returns the nearest two-sided hit with original triangle index, metric distance, world point, upward normal and barycentric weights. Direction magnitude does not change distance units. `intersectSegment(start, end)` uses the same query on the closed segment, including endpoints. A zero-length segment returns null. Coplanar rays do not produce hits. `nearest(point, {maxDistance?})` returns the actual Euclidean closest point on an active triangle, which can lie on an edge or vertex. It is not a vertical clearance or signed-distance query. These methods return null when no result lies within the inclusive distance limit; malformed inputs and result overflow throw.
 
-Queries reuse `@math.gl/geometry/spatial-index` for BVH traversal and exact triangle kernels. Contact normals always point upward, even for a ray from below; they are not automatically oriented toward the query. Exact distance ties choose the lowest original triangle index. Boundary decisions use floating-point triangle arithmetic, not an exact-predicate or certified watertight intersection algorithm. At shared edges, a mesh query's chosen one-sided normal can differ from `HeightField`'s cell tie rule even when heights agree. The APIs currently expose distance limits, not bounded traversal-work budgets or swept sphere/capsule tests.
+Queries reuse `@math.gl/geometry/spatial-index` for BVH traversal and exact triangle kernels. Contact normals always point upward, even for a ray from below; they are not automatically oriented toward the query. Exact distance ties choose the lowest original triangle index. Boundary decisions use floating-point triangle arithmetic, not an exact-predicate or certified watertight intersection algorithm. At shared edges, a mesh query's chosen one-sided normal can differ from `HeightField`'s cell tie rule even when heights agree.
 
 `createTerrainSurface(field, {origin?})` reuses `HeightFieldGeometry` with Float64 positions, preserving its diagonal, registration, missing-data holes and local origin. Triangle IDs refer to emitted mesh order, not a stable cell identifier across edits. General decoded triangle meshes can instead be passed directly to `TerrainSurface`; loading/dequantizing file formats remains loaders.gl work.
+
+### Bounded ray, segment and nearest queries[​](#bounded-ray-segment-and-nearest-queries "Direct link to Bounded ray, segment and nearest queries")
+
+`intersectRayQuery(origin, direction, {maxDistance?, maxWork?})`, `intersectSegmentQuery(start, end, {maxWork?})`, and `nearestQuery(point, {maxDistance?, maxWork?})` return `{result, complete, work}`. `result` has the same shape as the corresponding unlimited method. The segment distance limit is always the endpoint distance; a zero-length segment completes with null and zero work.
+
+```
+const query = surface.nearestQuery([1002, 2003, 100], {maxDistance: 50, maxWork: 256});
+
+if (!query.complete) {
+
+  // Defer, retry with more work, or apply the consumer's fallback.
+
+  // Neither a provisional hit nor null is a final collision answer.
+
+} else if (query.result) {
+
+  // Use the final closest terrain point.
+
+}
+```
+
+`maxWork` is Infinity by default, or a nonnegative safe integer. One unit visits a BVH node (including child-bound ordering/pruning) or a leaf triangle (including its bounds, mask and exact kernel). Rejected/skirt triangles consume visits too. Returned `work` never exceeds the limit. Empty surfaces complete at zero work; nonempty surfaces with zero budget are incomplete. The budget bounds traversal/refinement counts, not wall-clock time, construction cost, or numeric error. There is no resumable cursor. See the [shared index contract](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md#bounded-queries). The original ray, segment and nearest methods remain unlimited.
+
+### Sphere contacts[​](#sphere-contacts "Direct link to Sphere contacts")
+
+`intersectSphere(center, radius, {maxWork?, maxContacts?})` returns the same completion envelope, containing an array of `TerrainSphereContact` values. Coordinates are world XYZ in meters and radius is finite and nonnegative. The sphere is closed: tangency counts, and radius zero tests point contact. Contacts are sorted by original triangle index.
+
+Each contact contains `triangleIndex`, closest terrain `point`, Euclidean `distance`, `penetration = radius - distance`, `normal`, and `faceNormal`. The contact normal points from the closest terrain feature toward the sphere center; it can be horizontal at an edge or downward for contact from below. At exactly zero distance its direction is ambiguous, so it falls back deterministically to the upward face normal. `faceNormal` always retains that upward triangle normal. Normals and distances are computed in the local frame before adding the world origin to output points. Results are detached.
+
+```
+const contacts = surface.intersectSphere([1002, 2003, 20], 0.5, {
+
+  maxWork: 512,
+
+  maxContacts: 16
+
+});
+
+// Use as a complete candidate contact set only when contacts.complete is true.
+```
+
+`maxContacts` defaults to Infinity, or accepts a nonnegative safe integer. Finding an additional contact beyond this capacity makes the list incomplete. Exactly filling capacity can still complete after the remaining search rules out more contacts. An incomplete list is an unspecified subset, not necessarily the deepest contacts. The work budget includes closest-point tests and bounds the number of candidate tests; the contact limit bounds retained results. Adjacent triangles may return duplicate or coincident contacts. Masks exclude visual skirts before exact contact testing.
+
+These are two-sided contacts with a zero-thickness triangle sheet, not a solid volume below the terrain. A sphere wholly below and separated from that sheet has no contact. This is a discrete query, not continuous collision detection: fast movement can tunnel. Manifold reduction, material lookup, response/friction, timestep policy, capsule tests and swept sphere tests remain consumer or future work. No solver or shader is added.
 
 ## Conservative height-field bounds[​](#conservative-height-field-bounds "Direct link to Conservative height-field bounds")
 

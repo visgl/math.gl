@@ -34,7 +34,7 @@ points.nearest([1, 2, 4]); // {index: 1, distance: 1}
 
 * `size`, `dimension`: input record count and coordinate dimension.
 * `search(minimum, maximum)`: closed-box overlap candidates, sorted by row index.
-* `nearest(point, {maxDistance = Infinity, filter?, distanceToItem?})`: nearest result `{index,distance}`, or null. Without refinement, distance is to the filled box (or point). `filter(index)` excludes rows. `distanceToItem(index)` can refine a candidate against actual geometry; return null to exclude it. Distances must be nonnegative and no less than the box distance. Geometry must be completely enclosed by the indexed box for pruning to be valid.
+* `nearest(point, {maxDistance = Infinity, filter?, distanceToItem?})`: nearest result `{index,distance}`, or null. Without refinement, distance is to the filled box (or point). `filter(index)` excludes rows. `distanceToItem(index)` can refine a candidate against actual geometry; return null to exclude it. Distances must be nonnegative and no less than the box distance apart from floating-point roundoff. Geometry must be completely enclosed by the indexed box for pruning to be valid.
 * `searchRay(origin, direction, maxDistance = Infinity)`: box candidates sorted by entry distance, then row index. Directions are normalized; a nonunit input does not change distances. An origin inside a box has entry distance zero. Ray direction must be finite and nonzero.
 * `intersectRay(origin, direction, {maxDistance = Infinity, filter?, intersectItem?})`: nearest accepted box/geometry hit, returning `{index,distance}` or null. Unlike `searchRay`, this near-first branch-and-bound traversal does not materialize all candidates. `filter(index)` excludes rows before refinement. `intersectItem(index, currentMaxDistance)` returns an exact Euclidean hit distance or null; without it, box entry distance is used. Geometry must be enclosed by its indexed box, and refinement distances must be nonnegative and at least the box entry distance (allowing eight relative floating-point rounding steps between independently evaluated kernels). Refined distances are never clamped or rounded; broad-phase pruning uses the same allowance so inclusive limits and ties are retained. Rejected hits do not clip later candidates. Limits are inclusive; ties select the lowest original row. Callback order is unspecified, not an all-intersections stream. Exceptions propagate.
 
@@ -45,6 +45,35 @@ points.nearest([1, 2, 4]); // {index: 1, distance: 1}
 * `search(minimum, maximum)`: triangle **bounds** candidates, not exact triangle/box overlap.
 * `intersectRay(origin, direction, {maxDistance = Infinity, backfaceCulling = false, filter?, acceptHit?})`: closest triangle hit `{index,distance,point,barycentric}`, or null. Distances are Euclidean; barycentric components correspond to vertices a,b,c. Degenerate/coplanar triangles have no hit. `filter(index)` excludes an original triangle before exact intersection. `acceptHit(hit)` can reject an exact point using barycentric weights, source validity, clipping or other application constraints. Rejection does not shorten the ray; a valid surface behind a foreground hole can still be selected. Predicates must treat the candidate as immutable; they run only for hits that could improve the accepted result, in unspecified traversal order, not as an all-intersections API. Exceptions propagate. With no predicates, existing behavior is unchanged.
 * `nearest(point, {maxDistance = Infinity, filter?})`: closest point on a filled triangle, returning `{index,distance,point}` or null. Degenerate triangles reduce to segments/points.
+* `intersectSphere(center, radius, {maxWork?, maxResults?, filter?})`: closed-sphere contacts as `{result, complete, work}`. Each result contains `{index,distance,point}` for the closest point on one accepted triangle, including face, edge and vertex contacts. Results are sorted by original triangle index, not distance. Radius must be finite and nonnegative; zero tests point contact. Broad-phase bounds expand slightly for roundoff, but the exact distance must still be at most the unmodified radius. Arithmetic/bounds overflow throws. Adjacent triangles can return coincident points; this is not a reduced contact manifold or a swept collision test.
+
+## Bounded queries[​](#bounded-queries "Direct link to Bounded queries")
+
+`BoxIndex`, `PointIndex` and `TriangleBVH` provide `searchQuery`, `nearestQuery` and `intersectRayQuery`. They take their corresponding query's arguments plus an optional `maxWork` and return `IndexQueryResult<T>`:
+
+```
+const query = boxes.nearestQuery([3, 3], {maxWork: 256});
+
+if (query.complete) {
+
+  // query.result is the final nearest row, or null for a completed miss.
+
+} else {
+
+  // A result is provisional; null does not establish that nothing is nearby.
+
+  // Retry with a larger budget, defer, or use an application-defined fallback.
+
+}
+```
+
+One work unit visits a tree node or a leaf item. A node visit includes its bounds test and up to two child-bound tests used for ordering/pruning. An item visit includes its bounds test, optional filter, and at most one exact refinement. Pruned and rejected visits count too. `work` never exceeds `maxWork`. Input validation and constant query setup happen even with zero budget. Empty indexes complete with zero work; a nonempty index with zero budget returns `complete: false` without invoking filters/refinements. Completing on the last permitted visit returns `complete: true`.
+
+`maxWork` defaults to Infinity; otherwise it must be a nonnegative safe integer. This is a deterministic traversal budget, not a wall-clock, allocation, callback-runtime, or numerical-error bound. Result sorting and formatting are outside the visit counter. There is no continuation cursor. An incomplete nearest/ray result may be superseded by a closer hit or a lower-index tie; it is never a certified final result.
+
+`searchQuery(minimum, maximum, {maxWork?, maxResults?, filter?})` additionally supports an accepted-result limit. `maxResults` follows the same validation as `maxWork`. The filter runs only after box overlap. Finding one more accepted row than the limit returns `complete: false`; exactly filling the limit can still complete if the remaining search proves there are no further matches. At most `maxResults` rows are retained. Partial rows are sorted by original index but are an unspecified traversal subset, not the lowest-index or closest subset. Sphere queries use these same limits and count their closest-point refinement within the leaf item visit. Callbacks may run for the one extra match needed to establish truncation; they must not assume every call yields a returned row.
+
+The existing `search`, `nearest` and `intersectRay` methods remain unlimited. They never silently return budget-truncated results, even when passed a wider options object that contains `maxWork`. `searchRay` remains an unlimited all-candidates query.
 
 The ray and triangle geometry kernels are reused from `@math.gl/geometry/culling/queries`. `@math.gl/geometry/spatial-index/boxes` provides BoxIndex and PointIndex without the triangle code.
 
@@ -70,7 +99,7 @@ GeoArrow adapters can generate one bounds record per non-null row, maintain a ma
 
 ## POC limits[​](#poc-limits "Direct link to POC limits")
 
-Construction uses repeated median sorting (O(n log² n)), and queries can degrade to O(n). `searchRay` materializes and sorts all broad-phase candidates; nearest `intersectRay` queries instead prune against accepted hits during traversal. Incremental updates, packed-buffer serialization/restoration, k-nearest queries, SAH construction, and performance budgets are deferred. Rebuild after changing data. Geometry kernels are not watertight-certified; near-degenerate and extreme-scale numerical qualification is incomplete. This is not a tile scheduler, an ellipsoidal index, or a geodesic nearest-neighbor implementation.
+Construction uses repeated median sorting (O(n log² n)), and queries can degrade to O(n). `searchRay` materializes and sorts all broad-phase candidates; nearest `intersectRay` queries instead prune against accepted hits during traversal. Incremental updates, packed-buffer serialization/restoration, k-nearest queries, SAH construction, and measured latency budgets are deferred. Rebuild after changing data. Geometry kernels are not watertight-certified; near-degenerate and extreme-scale numerical qualification is incomplete. This is not a tile scheduler, an ellipsoidal index, or a geodesic nearest-neighbor implementation.
 
 ## Qualification workloads[​](#qualification-workloads "Direct link to Qualification workloads")
 
