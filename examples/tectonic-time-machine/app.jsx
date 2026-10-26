@@ -11,7 +11,7 @@ import {REGIONS, timeLabel} from './math.js';
 import {EARTH_EVENTS, EVENT_CATEGORIES, filterEarthEvents, eventIsReconstructable} from './earth-events.js';
 import {EARTH_FORMATION_MA, clampTimelineTime, isEarlyEarth, planetaryStage} from './planetary-history.js';
 import {PALEO_FEATURES, featuresAtAge, searchPaleoFeatures} from './paleo-features.js';
-import {activeChapter, playbackFocus, TIMELINE_CHAPTERS, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
+import {activeChapter, playbackFocus, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
 import AttributionWidget from '../shared/attribution-widget.jsx';
@@ -214,21 +214,21 @@ export default function TectonicTimeMachine() {
           </button>
         </div>
         <div className="tectonic-chapters" aria-hidden="true">
-          {TIMELINE_CHAPTERS.map(chapter => (
+          {caption && (
             <div
-              key={chapter.name}
-              className={`tectonic-chapter${(chapter.name.includes('&') || chapter.name.includes('(')) ? ' tectonic-chapter-pair' : ''}${chapter.illustrative ? ' tectonic-chapter-planetary' : ''}`}
+              key={caption.name}
+              className={`tectonic-chapter${(caption.name.includes('&') || caption.name.includes('(')) ? ' tectonic-chapter-pair' : ''}${caption.illustrative ? ' tectonic-chapter-planetary' : ''}`}
               style={{
                 opacity:
-                  sceneReady && !sceneError && chapter === caption
-                    ? chapterOpacity(chapter, time, scenario)
+                  sceneReady && !sceneError 
+                    ? chapterOpacity(caption, time, scenario)
                     : 0
               }}
             >
-              <strong>{chapter.name}</strong>
-              <span>{chapter.detail}</span>
+              <strong>{caption.name}</strong>
+              <span>{caption.detail}</span>
             </div>
-          ))}
+          )}
         </div>
         <div className="tectonic-instructions">
           Drag to {view === 'globe' ? 'rotate' : 'pan'} · scroll to zoom
