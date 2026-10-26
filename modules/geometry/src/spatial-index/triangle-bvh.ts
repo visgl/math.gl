@@ -9,7 +9,12 @@ import {
   validateQueryPoint,
   type QueryPoint
 } from '../culling/queries';
-import {BoxIndex} from './box-index';
+import {
+  BoxIndex,
+  type IndexQueryBudget,
+  type IndexQueryResult,
+  type SearchIndexOptions
+} from './box-index';
 
 export type TriangleBVHOptions = {
   /** Packed xyz vertices. Copied at construction. */
@@ -24,6 +29,7 @@ export type TriangleQueryResult = {
   point: [number, number, number];
 };
 export type TriangleRayResult = TriangleQueryResult & {barycentric: [number, number, number]};
+export type TriangleNearestOptions = {maxDistance?: number; filter?: (index: number) => boolean};
 
 /** Optional application constraints for the nearest accepted triangle intersection. */
 export type TriangleRayOptions = {
@@ -91,16 +97,33 @@ export class TriangleBVH {
     return this.boxes.search(minimum, maximum);
   }
 
+  searchQuery(
+    minimum: QueryPoint,
+    maximum: QueryPoint,
+    options: SearchIndexOptions = {}
+  ): IndexQueryResult<number[]> {
+    return this.boxes.searchQuery(minimum, maximum, options);
+  }
+
   /** Nearest accepted exact hit; application rejection never clips away later candidates. */
   intersectRay(
     origin: QueryPoint,
     direction: QueryPoint,
     options: TriangleRayOptions = {}
   ): TriangleRayResult | null {
+    return this.intersectRayQuery(origin, direction, {...options, maxWork: Infinity}).result;
+  }
+
+  intersectRayQuery(
+    origin: QueryPoint,
+    direction: QueryPoint,
+    options: TriangleRayOptions & IndexQueryBudget = {}
+  ): IndexQueryResult<TriangleRayResult | null> {
     validateQueryPoint(origin, 3);
     const unit = normalizeQueryDirection(direction, 3);
     let result: TriangleRayResult | null = null;
-    this.boxes.intersectRay(origin, direction, {
+    const query = this.boxes.intersectRayQuery(origin, direction, {
+      maxWork: options.maxWork,
       maxDistance: options.maxDistance,
       filter: options.filter,
       intersectItem: (index, maximum) => {
@@ -133,23 +156,80 @@ export class TriangleBVH {
         return null;
       }
     });
-    return result;
+    return {...query, result};
   }
 
-  nearest(
+  nearest(point: QueryPoint, options: TriangleNearestOptions = {}): TriangleQueryResult | null {
+    return this.nearestQuery(point, {...options, maxWork: Infinity}).result;
+  }
+
+  nearestQuery(
     point: QueryPoint,
-    options: {maxDistance?: number; filter?: (index: number) => boolean} = {}
-  ): TriangleQueryResult | null {
-    const result = this.boxes.nearest(point, {
+    options: TriangleNearestOptions & IndexQueryBudget = {}
+  ): IndexQueryResult<TriangleQueryResult | null> {
+    let candidate: TriangleQueryResult | null = null;
+    const query = this.boxes.nearestQuery(point, {
       ...options,
       distanceToItem: index => {
         const closest = getClosestPointOnTriangle(point, ...this.triangle(index));
-        return Math.hypot(point[0] - closest[0], point[1] - closest[1], point[2] - closest[2]);
+        const distance = Math.hypot(
+          point[0] - closest[0],
+          point[1] - closest[1],
+          point[2] - closest[2]
+        );
+        if (
+          !candidate ||
+          distance < candidate.distance ||
+          (distance === candidate.distance && index < candidate.index)
+        )
+          candidate = {index, distance, point: closest};
+        return distance;
       }
     });
-    return result
-      ? {...result, point: getClosestPointOnTriangle(point, ...this.triangle(result.index))}
-      : null;
+    // Reuse the winning refinement rather than running an extra kernel outside the budget.
+    return {...query, result: query.result ? candidate : null};
+  }
+
+  /** All triangle contacts with a closed sphere, sorted by original index (not distance).
+   * Uses closest points on faces, edges and vertices. No contact manifold reduction.
+   */
+  intersectSphere(
+    center: QueryPoint,
+    radius: number,
+    options: SearchIndexOptions = {}
+  ): IndexQueryResult<TriangleQueryResult[]> {
+    validateQueryPoint(center, 3);
+    if (!Number.isFinite(radius) || radius < 0)
+      throw new RangeError('Sphere radius must be finite and nonnegative');
+    const minimum: number[] = [],
+      maximum: number[] = [];
+    for (let axis = 0; axis < 3; axis++) {
+      // Outward allowance keeps the broad phase from dropping roundoff-sized tangencies.
+      // The exact kernel below still uses the caller's unmodified radius.
+      const padding =
+        8 * Math.max(Number.MIN_VALUE, Number.EPSILON * Math.max(Math.abs(center[axis]), radius));
+      minimum.push(center[axis] - radius - padding);
+      maximum.push(center[axis] + radius + padding);
+    }
+    const hits = new Map<number, TriangleQueryResult>();
+    const query = this.boxes.searchQuery(minimum, maximum, {
+      ...options,
+      filter: index => {
+        if (options.filter && !options.filter(index)) return false;
+        const point = getClosestPointOnTriangle(center, ...this.triangle(index));
+        const distance = Math.hypot(
+          center[0] - point[0],
+          center[1] - point[1],
+          center[2] - point[2]
+        );
+        if (!point.every(Number.isFinite) || !Number.isFinite(distance))
+          throw new RangeError('Sphere query arithmetic overflow');
+        if (distance > radius) return false;
+        hits.set(index, {index, distance, point});
+        return true;
+      }
+    });
+    return {...query, result: query.result.map(index => hits.get(index)!)};
   }
 
   private triangle(index: number): [Float64Array, Float64Array, Float64Array] {

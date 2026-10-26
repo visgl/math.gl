@@ -25,7 +25,11 @@ assert.deepEqual(index.intersectRay([1,2],[0,-2]),{index:1,distance:1});
 const mesh=new api.TriangleBVH({positions:[0,0,0,1,0,0,0,1,0]});
 assert.equal(mesh.intersectRay([0.2,0.2,1],[0,0,-2]).distance,1);
 assert.equal(mesh.intersectRay([0.2,0.2,1],[0,0,-2],{acceptHit:()=>false}),null);
-assert.equal(mesh.intersectRay([0.2,0.2,1],[0,0,-2],{filter:()=>false}),null);`;
+assert.equal(mesh.intersectRay([0.2,0.2,1],[0,0,-2],{filter:()=>false}),null);
+assert.deepEqual(mesh.nearestQuery([0,0,1],{maxWork:0}),{result:null,complete:false,work:0});
+assert.equal(mesh.intersectRayQuery([0,0,1],[0,0,-1],{maxWork:2}).complete,true);
+assert.equal(mesh.intersectSphere([0.2,0.2,1],1).result.length,1);
+assert.equal(mesh.intersectSphere([0.2,0.2,1],1,{maxResults:0}).complete,false);`;
   await writeFile(
     join(temporary, 'consumer.mjs'),
     `import assert from 'node:assert/strict'; import * as api from '@math.gl/geometry/spatial-index';
@@ -40,7 +44,7 @@ ${assertions}`
     execFileSync(process.execPath, [join(temporary, file)], {stdio: 'inherit'});
   await writeFile(
     join(temporary, 'consumer.ts'),
-    `import {PointIndex,TriangleBVH,type TriangleRayOptions,type RayIndexOptions} from '@math.gl/geometry/spatial-index';
+    `import {PointIndex,TriangleBVH,type TriangleRayOptions,type RayIndexOptions,type IndexQueryResult,type IndexQueryBudget,type SearchIndexOptions,type TriangleQueryResult} from '@math.gl/geometry/spatial-index';
 const points=new PointIndex({positions:new Float64Array([0,0]),dimension:2});
 const index:number|undefined=points.nearest([0,0])?.index;
 const triangle=new TriangleBVH({positions:[]});
@@ -54,6 +58,12 @@ const options:TriangleRayOptions={filter:index=>index!==2,acceptHit:hit=>{
 triangle.intersectRay([0,0,1],[0,0,-1],options);
 const rayOptions:RayIndexOptions={intersectItem:(index,maximum)=>index===0?Math.min(1,maximum):null};
 points.intersectRay([0,0],[1,0],rayOptions);
+const budget:IndexQueryBudget={maxWork:128};
+const contacts:IndexQueryResult<TriangleQueryResult[]>=triangle.intersectSphere([0,0,0],1,budget);
+const searchOptions:SearchIndexOptions={...budget,maxResults:16,filter:index=>index>0};
+const candidates:IndexQueryResult<number[]>=triangle.searchQuery([0,0,0],[1,1,1],searchOptions);
+triangle.intersectRayQuery([0,0,1],[0,0,-1],{...options,...budget});
+void [contacts,candidates];
 void [index,point];
 // @ts-expect-error invalid dimension
 new PointIndex({positions:[],dimension:4});`

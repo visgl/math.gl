@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {TriangleBVH, BoxIndex} from '@math.gl/geometry/spatial-index';
+import {
+  TriangleBVH,
+  BoxIndex,
+  type IndexQueryBudget,
+  type IndexQueryResult
+} from '@math.gl/geometry/spatial-index';
 import type {HeightField} from './height-field';
 import {HeightFieldGeometry} from './geometry';
 import {TerrainSampleStatus as Status, type TerrainSample} from './types';
@@ -30,6 +35,15 @@ export type TerrainSurfaceHit = {
   normal: [number, number, number];
 };
 export type TerrainSurfaceRayHit = TerrainSurfaceHit & {barycentric: [number, number, number]};
+export type TerrainQueryOptions = IndexQueryBudget & {maxDistance?: number};
+export type TerrainQueryResult<T> = IndexQueryResult<T>;
+export type TerrainSphereContact = Omit<TerrainSurfaceHit, 'normal'> & {
+  /** Unit direction from the closest terrain point toward the center; upward face normal at zero distance. */
+  normal: [number, number, number];
+  /** Upward triangle normal, independent of the contact feature or side. */
+  faceNormal: [number, number, number];
+  penetration: number;
+};
 export type TerrainSurfaceTopology = {
   /** 3 * triangleIndex + local edge; each edge runs vertex j to (j+1)%3. -1 = boundary/inactive. */
   halfedges: Int32Array;
@@ -230,11 +244,21 @@ export class TerrainSurface {
     direction: readonly [number, number, number],
     options: {maxDistance?: number} = {}
   ): TerrainSurfaceRayHit | null {
-    const hit = this.bvh.intersectRay(this.localPoint(origin), direction, {
+    return this.intersectRayQuery(origin, direction, {...options, maxWork: Infinity}).result;
+  }
+
+  /** A partial hit is provisional; an incomplete null result does not establish a miss. */
+  intersectRayQuery(
+    origin: readonly [number, number, number],
+    direction: readonly [number, number, number],
+    options: TerrainQueryOptions = {}
+  ): TerrainQueryResult<TerrainSurfaceRayHit | null> {
+    const query = this.bvh.intersectRayQuery(this.localPoint(origin), direction, {
       ...options,
       filter: i => Boolean(this.validity[i])
     });
-    return hit ? {...this.toHit(hit), barycentric: [...hit.barycentric]} : null;
+    const hit = query.result;
+    return {...query, result: hit ? {...this.toHit(hit), barycentric: [...hit.barycentric]} : null};
   }
 
   /** Closed segment query. A zero-length segment has no directional intersection. */
@@ -242,6 +266,14 @@ export class TerrainSurface {
     start: readonly [number, number, number],
     end: readonly [number, number, number]
   ): TerrainSurfaceRayHit | null {
+    return this.intersectSegmentQuery(start, end).result;
+  }
+
+  intersectSegmentQuery(
+    start: readonly [number, number, number],
+    end: readonly [number, number, number],
+    options: IndexQueryBudget = {}
+  ): TerrainQueryResult<TerrainSurfaceRayHit | null> {
     this.localPoint(start);
     this.localPoint(end);
     const direction: [number, number, number] = [
@@ -251,7 +283,14 @@ export class TerrainSurface {
     ];
     const distance = Math.hypot(...direction);
     if (!Number.isFinite(distance)) throw new Error('Terrain segment length overflow');
-    return distance ? this.intersectRay(start, direction, {maxDistance: distance}) : null;
+    if (!distance) {
+      // Validate even when there is no directional query to perform.
+      const limit = options.maxWork ?? Infinity;
+      if (limit !== Infinity && (!Number.isSafeInteger(limit) || limit < 0))
+        throw new Error('Invalid terrain query work limit');
+      return {result: null, complete: true, work: 0};
+    }
+    return this.intersectRayQuery(start, direction, {...options, maxDistance: distance});
   }
 
   /** Exact Euclidean nearest point, not vertical ground clearance. */
@@ -259,11 +298,49 @@ export class TerrainSurface {
     point: readonly [number, number, number],
     options: {maxDistance?: number} = {}
   ): TerrainSurfaceHit | null {
-    const hit = this.bvh.nearest(this.localPoint(point), {
+    return this.nearestQuery(point, {...options, maxWork: Infinity}).result;
+  }
+
+  nearestQuery(
+    point: readonly [number, number, number],
+    options: TerrainQueryOptions = {}
+  ): TerrainQueryResult<TerrainSurfaceHit | null> {
+    const query = this.bvh.nearestQuery(this.localPoint(point), {
       ...options,
       filter: i => Boolean(this.validity[i])
     });
-    return hit ? this.toHit(hit) : null;
+    return {...query, result: query.result ? this.toHit(query.result) : null};
+  }
+
+  /** Two-sided contacts with the triangle sheet, not solid-ground penetration or swept collision.
+   * Adjacent triangles may contribute coincident contacts. Incomplete lists are not manifolds.
+   */
+  intersectSphere(
+    center: readonly [number, number, number],
+    radius: number,
+    options: IndexQueryBudget & {maxContacts?: number} = {}
+  ): TerrainQueryResult<TerrainSphereContact[]> {
+    const local = this.localPoint(center);
+    const query = this.bvh.intersectSphere(local, radius, {
+      maxWork: options.maxWork,
+      maxResults: options.maxContacts,
+      filter: i => Boolean(this.validity[i])
+    });
+    return {
+      ...query,
+      result: query.result.map(hit => {
+        const contact = this.toHit(hit);
+        // Compute in the local frame: adding a large world origin can round the contact point.
+        const normal: [number, number, number] = hit.distance
+          ? [
+              (local[0] - hit.point[0]) / hit.distance,
+              (local[1] - hit.point[1]) / hit.distance,
+              (local[2] - hit.point[2]) / hit.distance
+            ]
+          : [...contact.normal];
+        return {...contact, faceNormal: contact.normal, normal, penetration: radius - hit.distance};
+      })
+    };
   }
 
   private localPoint(point: readonly [number, number, number]): [number, number, number] {
