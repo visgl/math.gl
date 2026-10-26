@@ -515,3 +515,19 @@ within luma.gl for shaders; atlas versus texture-array/storage-buffer layouts; d
 versus displayed-surface offset policy; the smallest supported cross-tile seam
 contract; and whether existing tessellators can be wrapped without maintained
 forks. None should block the CPU reference surface and conformance fixtures.
+
+## Adaptive meshing tranche
+
+The standalone `terrain/mesh`, `terrain/mesh-error`, and `terrain/mesh-edges`
+entries now provide plain regular mesh creation, bounded nodal error measurement,
+and sorted grid-side extraction. Separate `terrain/martini` and `terrain/delatin`
+adapters provide complete-grid adaptive tessellation with independent error checks.
+MARTINI supports full boundary refinement for same-resolution tile seams. Delatin
+accepts rectangular grids and owns the backend previously vendored in loaders.gl.
+No additional methods were added to `TerrainSurface`; small consumers remain
+independently tree-shakable. Bundle graph and byte-budget probes guard this split.
+
+Remaining meshing work includes mixed-resolution stitching, transition morphs,
+continuous error analysis, real-DEM performance qualification, and the companion
+loaders.gl migration. GPU execution, deck.gl offset/drape integration and residency
+remain companion-repository work. These adapters do not complete all of T2–T4.

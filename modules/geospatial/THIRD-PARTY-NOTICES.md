@@ -18,7 +18,9 @@ latest available upstream releases.
 | d3-geo-polygon contributors | AirOcean topology/rotation; ISC, [AirOcean notice](./src/discontinuous/AIR-OCEAN-LICENSE.txt). |
 
 The separately installed `polygon-clipping` dependency retains its own package
-license. EPSG definitions and external datum-grid fixtures have source-specific
+license. The opt-in terrain/martini entry uses separately installed
+`@mapbox/martini` 0.2.0 by Vladimir Agafonkin / Mapbox under its ISC package license;
+the backend source is not vendored or copied. EPSG definitions and external datum-grid fixtures have source-specific
 terms documented with the CRS schemas and test fixtures; a standards reference
 is not a blanket license to redistribute arbitrary grids.
 
@@ -104,3 +106,11 @@ projection facade reuses existing attributed projection kernels. Angle text
 utilities, buffer staging and triaxial sampling are original math.gl work.
 The existing vendored geodesic result function additionally accepts an optional
 caller-owned output; its numerical equations are unchanged.
+
+## Delatin terrain tessellation
+
+The isolated `src/terrain/vendor/delatin.js` backend is transferred from loaders.gl.
+It retains the ISC copyright of Michael Fogleman and Vladimir Agafonkin (2019),
+with [full terms](./src/terrain/vendor/DELATIN-LICENSE.txt) and
+[exact provenance and modifications](./src/terrain/vendor/README.md).
+The public adapter and mesh contracts are original math.gl work.
