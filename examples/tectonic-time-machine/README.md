@@ -363,7 +363,8 @@ unassigned locations and missing rotations are reported rather than replaced wit
 a nearby plate or stationary trajectory. The marker follows the same rigid plate
 rotation and feature lifetime as the source geometry. Its trail shows up to 100 Myr
 of contiguous available history; it stops at gaps and the model's coverage boundary,
-and its displayed path is cut at view seams.
+and its displayed path is split at map seams so both edges remain visible. Globe
+trails remain continuous.
 After the present it uses the selected illustrative regional assembly path instead
 of published rotations. This does not model local deformation or imply that a
 modern city existed then.

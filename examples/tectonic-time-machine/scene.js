@@ -26,6 +26,7 @@ import {
 } from './math.js';
 import {snowballCoverage, snowballDynamics, timelinePlaybackSpeed} from './timeline.js';
 import {vegetationCoverage, microbialCoverage} from './earth-events.js';
+import {createJourneyTrail} from './journey-trail.js';
 import {createPlaceTracker,easeCamera,cinematicShot} from './journeys.js';
 import {createFutureComparison} from './future-comparison.js';
 import {createFormationEffects} from './formation-effects.js';
@@ -111,8 +112,8 @@ export function mountScene(
   let followPlace=null,followCamera=false,guidedCamera=false,compareFutures=false,cameraMoving=false,lastCameraTime=0,journeyMessage='',viewportRevision=0;
   const camera={longitude:0,latitude:15},tracker=createPlaceTracker(),comparison=createFutureComparison();
   const markerMesh={coordinates:new Float64Array(2),projected:new Float64Array(2),positions:new Float64Array(3)};
-  const trailMesh={coordinates:new Float64Array(66),projected:new Float64Array(66),positions:new Float64Array(99)};
-  const markerData=[markerMesh],trailData=[trailMesh];
+  const journeyTrail=createJourneyTrail();
+  const markerData=[markerMesh];
   let targets = futureRotations(scenario),
     lastTime = -300,
     lastRender = 0;
@@ -355,17 +356,8 @@ export function mountScene(
       transformMesh(markerMesh,weights,engines,scales,latitude);
       for(let i=0;i<3;i++)markerMesh.positions[i]*=1.012;
       markerMesh.positions[2]+=.01*(1-(weights.globe||0));
-      let valid=0;
-      for(let i=0;i<journey.count;i++) {
-        const lon=((journey.trail[i*2]-longitude+180)%360+360)%360-180;
-        if(i&&Math.abs(lon-trailMesh.coordinates[(i-1)*2])>180)break;
-        trailMesh.coordinates[i*2]=lon;trailMesh.coordinates[i*2+1]=journey.trail[i*2+1];valid++;
-      }
-      for(let i=valid;i<33;i++){trailMesh.coordinates[i*2]=trailMesh.coordinates[(valid-1)*2];trailMesh.coordinates[i*2+1]=trailMesh.coordinates[(valid-1)*2+1];}
-      transformMesh(trailMesh,weights,engines,scales,latitude);
-      for(let i=0;i<trailMesh.positions.length;i++)trailMesh.positions[i]*=1.01;
-      for(let i=2;i<trailMesh.positions.length;i+=3)trailMesh.positions[i]+=.008*(1-(weights.globe||0));
     }
+    const trailPaths=showJourney?journeyTrail(journey,longitude,latitude,weights,engines,scales):null;
     const alternativePaths=compareFutures?comparison.update(time,scenario,longitude,latitude,weights,engines,scales,now,force):null;
     snowballDynamics(time,iceDynamics);
     deck.setProps({
@@ -416,9 +408,9 @@ export function mountScene(
           parameters: {depthWriteEnabled: early}
         }),
         ...formationEffects(time, weights.globe || 0),
-        showJourney && new PathLayer({id:'journey-trail',data:trailData,getPath:d=>d.positions,
+        trailPaths?.length>0 && new PathLayer({id:'journey-trail',data:trailPaths,getPath:d=>d.positions,
           coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,getColor:[255,214,120,180],getWidth:2,widthUnits:'pixels',
-          parameters:{depthWriteEnabled:false},updateTriggers:{getPath:[time,journey.count,longitude,latitude,mode,weights,scenario,followPlace,viewportRevision]}}),
+          parameters:{depthWriteEnabled:false},updateTriggers:{getPath:[time,journey.count,trailPaths?.length,longitude,latitude,mode,weights,scenario,followPlace,viewportRevision]}}),
         showJourney && new ScatterplotLayer({id:'journey-place',data:markerData,getPosition:d=>d.positions,
           coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,radiusUnits:'pixels',getRadius:6,
           getFillColor:[255,211,104],stroked:true,getLineColor:[255,255,255],getLineWidth:2,lineWidthUnits:'pixels',

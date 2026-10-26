@@ -5,6 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {unitVector} from './math.js';
 import {containsPlace,createPlaceTracker,easeCamera,cinematicShot} from './journeys.js';
+import {createJourneyTrail} from './journey-trail.js';
 import {createFutureComparison,majorFutureBlocks} from './future-comparison.js';
 function feature(rings) {
   const count=rings.reduce((n,ring)=>n+ring.length/2,0),xyz=new Float64Array(count*3),holes=[];
@@ -92,4 +93,21 @@ test('a place is not reconstructed before its template lifetime even when rotati
   const f=feature([outer]);f.beginAge=50;
   const tracker=createPlaceTracker();tracker.setModel({features:[f],rotations:{60:{1:[.99,0,0,.1]}},source:{maxAge:100}});
   tracker.setPlace({name:'Young template',lon:0,lat:0});assert.equal(tracker.update(-60,'atlantic').available,false);
+});
+
+
+test('map trails retain both sides of a seam and globe trails stay continuous',()=>{
+  const build=createJourneyTrail(),trail=new Float64Array([179,0,-179,0,-177,0]),before=Array.from(trail),journey={trail,count:3};
+  const engines={eqc:{projectFlatSync:coordinates=>coordinates}},scales={eqc:.01};
+  const map=build(journey,0,0,{eqc:1},engines,scales);
+  assert.equal(map.length,2);
+  assert.ok(map.some(path=>path.coordinates[0]>0));assert.ok(map.some(path=>path.coordinates[0]<0));
+  assert.ok(map.reduce((count,path)=>count+path.count,0)>=5,'all three samples plus seam endpoints remain visible');
+  const firstBuffer=map[0].coordinates;
+  const centered=build(journey,180,0,{eqc:1},engines,scales);
+  assert.equal(centered.length,1);assert.equal(centered[0].count,3);assert.equal(centered[0].coordinates,firstBuffer);
+  assert.ok(Math.abs(centered[0].coordinates[0]+1)<1e-9);assert.ok(Math.abs(centered[0].coordinates[4]-3)<1e-9);
+  const globe=build(journey,0,0,{globe:1},{},{});
+  assert.equal(globe.length,1);assert.equal(globe[0].count,3);assert.ok(globe[0].positions.every(Number.isFinite));
+  assert.deepEqual(Array.from(trail),before);
 });
