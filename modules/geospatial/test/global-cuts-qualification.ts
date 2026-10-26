@@ -37,6 +37,44 @@ export function solidAngle(r: readonly GeographicPosition[]): number {
 }
 const total = (parts: ReturnType<typeof cutSphericalPolygon>) =>
   parts.reduce((s, p) => s + p.rings.reduce((s, r) => s + solidAngle(r), 0), 0);
+// Independent filled-set check: ray crossings in a query-centred tangent chart.
+function contains(parts: ReturnType<typeof cutSphericalPolygon>, point: P): boolean {
+  const q = vector(point),
+    axis = Math.abs(q[2]) < 0.9 ? [0, 0, 1] : [0, 1, 0];
+  const cross = (a: number[], b: number[]) => [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0]
+  ];
+  const u = cross(axis, q),
+    length = Math.hypot(...u);
+  for (let i = 0; i < 3; i++) u[i] /= length;
+  const v = cross(q, u);
+  return parts.some(part => {
+    if (
+      part.cellId
+        .split(',')
+        .map(Number)
+        .some((sign, i) => sign * q[i] < -1e-12)
+    )
+      return false;
+    const inside = (ring: readonly GeographicPosition[]) => {
+      const planar = ring.map(p => {
+        const a = vector(p),
+          d = dot(a, q);
+        return [dot(a, u) / d, dot(a, v) / d];
+      });
+      let hit = false;
+      for (let i = 1; i < planar.length; i++) {
+        const a = planar[i - 1],
+          b = planar[i];
+        if (a[1] > 0 !== b[1] > 0 && a[0] + ((b[0] - a[0]) * -a[1]) / (b[1] - a[1]) > 0) hit = !hit;
+      }
+      return hit;
+    };
+    return inside(part.rings[0]) && !part.rings.slice(1).some(inside);
+  });
+}
 export const mapDefinitions: MapDefinition[] = [
   {type: 'goode'},
   {type: 'air-ocean'},
@@ -123,16 +161,24 @@ export function qualifyGlobalCuts() {
     );
     run(
       'hemisphere hole',
-      () =>
-        Math.abs(
-          total(
-            cutSphericalPolygon(
-              [rotate(north, i * 31, (i - 6) * 0.19), rotate(hole, i * 31, (i - 6) * 0.19)],
-              {interior: 'left'}
-            )
-          ) -
-            (2 * Math.PI + solidAngle(hole))
-        ),
+      () => {
+        const outer = rotate(north, i * 31, (i - 6) * 0.19),
+          inner = rotate(hole, i * 31, (i - 6) * 0.19);
+        const parts = cutSphericalPolygon([outer, inner], {interior: 'left'});
+        const holePoint = rotate([[5, 30]], i * 31, (i - 6) * 0.19)[0],
+          filledPoint = rotate([[60, 20]], i * 31, (i - 6) * 0.19)[0];
+        const uncut = cutSphericalPolygon([outer], {interior: 'left'});
+        if (
+          !contains(uncut, holePoint) ||
+          contains(parts, holePoint) ||
+          !contains(parts, filledPoint)
+        )
+          throw new Error('Hole filled-set subtraction failed');
+        // solidAngle(hole) is negative for this clockwise local hole. Make the
+        // subtraction explicit and also verify topology, not just signed area.
+        const expected = 2 * Math.PI - Math.abs(solidAngle(hole));
+        return Math.abs(total(parts) - expected);
+      },
       2e-10
     );
   }
