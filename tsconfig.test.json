@@ -878,6 +878,8 @@
       "@math.gl/geospatial/terrain/geographic": ["modules/geospatial/src/terrain/geographic.ts"],
       "@math.gl/geospatial/terrain/tiled": ["modules/geospatial/src/terrain/tiled.ts"],
       "@math.gl/geospatial/terrain/packed": ["modules/geospatial/src/terrain/packed.ts"],
+      "@math.gl/geospatial/terrain/surface": ["modules/geospatial/src/terrain/surface.ts"],
+      "@math.gl/geospatial/terrain/bounds": ["modules/geospatial/src/terrain/bounds.ts"],
       "@math.gl/geospatial/terrain": [
         "./modules/geospatial/src/terrain/index.ts"
       ],

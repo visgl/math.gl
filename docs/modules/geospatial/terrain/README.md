@@ -184,9 +184,9 @@ concerns; this constructor creates only the regular source-grid triangulation.
 ## Implementation status
 
 The local Cartesian foundation, geographic adapters and initial cell-registered
-tiled snapshots implement portions of the
-[terrain roadmap](../../../../dev-docs/terrain-roadmap.md). Adaptive tessellation,
-accelerated intersections remain math.gl roadmap work. Shader implementations
+tiled snapshots, indexed query surfaces and conservative bounds implement portions of the
+[terrain roadmap](../../../../dev-docs/terrain-roadmap.md). Adaptive tessellation, swept-volume contacts and incremental hierarchy updates remain
+math.gl roadmap work. Shader implementations
 belong in luma.gl and rendering integration belongs in deck.gl. CPU tests use analytic planes/saddles and
 independent mesh centroid/normal checks; they do not establish CPU/GPU parity or
 source DEM accuracy.
@@ -370,3 +370,124 @@ bounded device page tables, shader conformance and graph adapters are subsequent
 T3 work in luma.gl, not math.gl. math.gl contains CPU algorithms, numerical
 contracts and renderer-independent data layouts; it does not contain shader code
 or create GPU resources.
+
+## Triangulated terrain surfaces
+
+```typescript
+import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain/surface';
+
+const surface = new TerrainSurface({
+  positions: new Float64Array([0, 0, 0, 10, 0, 2, 0, 10, 3]),
+  indices: new Uint32Array([0, 1, 2]),
+  origin: [1000, 2000, 0],
+  heightReference: 'local-survey'
+});
+const height = surface.sample(1002, 2003);
+const hit = surface.intersectRay([1002, 2003, 100], [0, 0, -1], {maxDistance: 200});
+const nearest = surface.nearest([1002, 2003, 100]);
+const topology = surface.copyTopology();
+// To query the exact regular triangulation of an existing HeightField:
+// const surface = createTerrainSurface(field, {origin: [1000, 2000, 0]});
+```
+
+`TerrainSurface` accepts copied Float32/Float64 local XYZ vertices and a Uint16/Uint32
+triangle list. Coordinates are local Cartesian meters, Z up. The optional XYZ
+`origin` is a translation into world coordinates; use a local frame to retain
+precision. `heightReference` is provenance only. `triangleCount` includes all input
+triangles; `activeTriangleCount` counts those participating in queries.
+
+An optional Uint8 `triangleValidity` mask excludes zero-marked triangles from all
+queries and topology. Use it to exclude visual skirts or other nonphysical faces.
+All vertex positions must be finite, including those of excluded triangles.
+Active triangles need a finite, nondegenerate XY projection and finite gradients;
+vertical walls belong in a general mesh API, not this 2.5D terrain surface.
+
+Shared **indexed** edges must have at most two active incident triangles, with
+opposite edge directions. Both globally clockwise and counterclockwise meshes
+are accepted, as are disconnected components. Nonmanifold edges and inconsistent
+shared-edge winding throw. Positions are not welded: coincident vertices with
+different indices remain topologically distinct. This validates edge incidence,
+not geometric self-intersections or manifoldness around every vertex.
+
+`copyTopology()` returns detached `halfedges` and `boundaryHalfedges` arrays.
+Halfedge `3 * triangleIndex + j` goes from source vertex `j` to `(j + 1) % 3`.
+Its value is the opposite halfedge index, or -1 for a boundary/inactive edge.
+`boundaryHalfedges` lists only active boundary edges, in input order; it is not
+an ordered boundary-loop list. `copyData()` returns independent positions,
+indices and triangle-validity arrays. Retain `origin` and `heightReference` when
+reconstructing a surface from those arrays.
+
+### Height and geometric queries
+
+`sample(worldX, worldY)` evaluates planar barycentric heights, XY gradients and
+upward contact normals. Its result extends `TerrainSample` with `triangleIndex`
+and three barycentric weights in the original input vertex order. Overlapping
+XY footprints are allowed: the highest local elevation wins; exact ties select
+the lowest original triangle index. Uncovered XY locations (including holes and
+points outside every triangle) return `NO_DATA`; this API does not infer a
+rectangular domain or missing-tile residency. Invalid coordinates return
+`INVALID_INPUT`; unrepresentable arithmetic returns `NUMERIC_ERROR`. Failure
+results have zero numeric sample values, index -1 and zero barycentric weights.
+
+`intersectRay(origin, direction, {maxDistance?})` returns the nearest two-sided
+hit with original triangle index, metric distance, world point, upward normal
+and barycentric weights. Direction magnitude does not change distance units.
+`intersectSegment(start, end)` uses the same query on the closed segment, including
+endpoints. A zero-length segment returns null. Coplanar rays do not produce hits.
+`nearest(point, {maxDistance?})` returns the actual Euclidean closest point on an
+active triangle, which can lie on an edge or vertex. It is not a vertical clearance
+or signed-distance query. These methods return null when no result lies within
+the inclusive distance limit; malformed inputs and result overflow throw.
+
+Queries reuse `@math.gl/geometry/spatial-index` for BVH traversal and exact
+triangle kernels. Contact normals always point upward, even for a ray from below;
+they are not automatically oriented toward the query. Exact distance ties choose
+the lowest original triangle index. Boundary decisions use floating-point triangle
+arithmetic, not an exact-predicate or certified watertight intersection algorithm.
+At shared edges, a mesh query's chosen one-sided normal can differ from
+`HeightField`'s cell tie rule even when heights agree. The APIs currently expose
+distance limits, not bounded traversal-work budgets or swept sphere/capsule tests.
+
+`createTerrainSurface(field, {origin?})` reuses `HeightFieldGeometry` with Float64
+positions, preserving its diagonal, registration, missing-data holes and local
+origin. Triangle IDs refer to emitted mesh order, not a stable cell identifier
+across edits. General decoded triangle meshes can instead be passed directly to
+`TerrainSurface`; loading/dequantizing file formats remains loaders.gl work.
+
+## Conservative height-field bounds
+
+```typescript
+import {HeightFieldMinMax} from '@math.gl/geospatial/terrain/bounds';
+
+const hierarchy = new HeightFieldMinMax(field);
+const bounds = hierarchy.query(); // all cells
+const region = hierarchy.query({minColumn: 0, minRow: 0, maxColumn: 1, maxRow: 2});
+const root = hierarchy.copyLevel(hierarchy.levelCount - 1);
+```
+
+This immutable hierarchy covers `(field.width - 1) * (field.height - 1)` cells.
+Level zero stores extrema of each cell's valid source corners; subsequent levels
+reduce 2×2 children with min/max, never averaging. Odd dimensions and smaller
+outer blocks are supported. A narrow ridge remains in every ancestor bound.
+These bounds conservatively enclose bilinear and regular triangle interpolants
+where those interpolants are valid; they do not describe filtered terrain or
+exaggerated/displayed geometry unless built from those source values.
+
+`query()` accepts an inclusive integer **cell-index** rectangle, not world XY or
+sample indices. Out-of-range, reversed or fractional windows throw rather than
+being silently clipped. It aggregates fully covered hierarchy nodes and refines
+partial overlaps until the requested rectangle is exact. Results include:
+
+- `heightRange`: valid source-corner minimum/maximum, or undefined if none exist.
+- `cellCount`: the number of requested cells.
+- `populatedCellCount`: cells with at least one valid source corner.
+- `completeCellCount`: cells with all four source corners valid.
+
+A populated cell need not contain a valid triangle or bilinear patch. Extrema may
+therefore be conservative even around holes; coverage counts are not a substitute
+for interpolation-specific validity checks. Adjacent cells share source corners,
+but each cell is counted only once. `copyLevel(index)` returns detached finite
+Float64 extrema, Uint32 cell-count arrays, dimensions and block size. Missing
+nodes use zero placeholders and zero populated counts. No GPU resources or shader
+code are created. Incremental hierarchy edits and hierarchy-based ray traversal
+remain future work.
