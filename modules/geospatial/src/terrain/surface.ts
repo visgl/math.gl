@@ -44,6 +44,16 @@ export type TerrainSphereContact = Omit<TerrainSurfaceHit, 'normal'> & {
   faceNormal: [number, number, number];
   penetration: number;
 };
+export type TerrainSegmentHit = TerrainSurfaceHit & {
+  /** Closest point on the input segment, in world coordinates. */
+  segmentPoint: [number, number, number];
+  /** Closest-pair parameter, not first-impact time. */
+  segmentFraction: number;
+};
+export type TerrainCapsuleContact = TerrainSphereContact & {
+  segmentPoint: [number, number, number];
+  segmentFraction: number;
+};
 export type TerrainSurfaceTopology = {
   /** 3 * triangleIndex + local edge; each edge runs vertex j to (j+1)%3. -1 = boundary/inactive. */
   halfedges: Int32Array;
@@ -343,6 +353,84 @@ export class TerrainSurface {
     };
   }
 
+  /** Minimum Euclidean clearance along a closed segment; this is not vertical clearance. */
+  nearestSegment(
+    start: readonly [number, number, number],
+    end: readonly [number, number, number],
+    options: {maxDistance?: number} = {}
+  ): TerrainSegmentHit | null {
+    return this.nearestSegmentQuery(start, end, {...options, maxWork: Infinity}).result;
+  }
+
+  nearestSegmentQuery(
+    start: readonly [number, number, number],
+    end: readonly [number, number, number],
+    options: TerrainQueryOptions = {}
+  ): TerrainQueryResult<TerrainSegmentHit | null> {
+    const query = this.bvh.nearestSegmentQuery(this.localPoint(start), this.localPoint(end), {
+      ...options,
+      filter: i => Boolean(this.validity[i])
+    });
+    const hit = query.result;
+    return {
+      ...query,
+      result: hit
+        ? {
+            ...this.toHit(hit),
+            segmentPoint: this.worldPoint(hit.segmentPoint),
+            segmentFraction: hit.segmentFraction
+          }
+        : null
+    };
+  }
+
+  /** Contacts with a closed capsule's entire axis, including its interior and both caps.
+   * Fractions locate minimum separation, not the first time a translating sphere touches terrain.
+   */
+  intersectCapsule(
+    start: readonly [number, number, number],
+    end: readonly [number, number, number],
+    radius: number,
+    options: IndexQueryBudget & {maxContacts?: number} = {}
+  ): TerrainQueryResult<TerrainCapsuleContact[]> {
+    const query = this.bvh.intersectCapsule(this.localPoint(start), this.localPoint(end), radius, {
+      maxWork: options.maxWork,
+      maxResults: options.maxContacts,
+      filter: i => Boolean(this.validity[i])
+    });
+    return {
+      ...query,
+      result: query.result.map(hit => {
+        const contact = this.toHit(hit);
+        const normal: [number, number, number] = hit.distance
+          ? [
+              (hit.segmentPoint[0] - hit.point[0]) / hit.distance,
+              (hit.segmentPoint[1] - hit.point[1]) / hit.distance,
+              (hit.segmentPoint[2] - hit.point[2]) / hit.distance
+            ]
+          : [...contact.normal];
+        return {
+          ...contact,
+          normal,
+          faceNormal: contact.normal,
+          penetration: radius - hit.distance,
+          segmentPoint: this.worldPoint(hit.segmentPoint),
+          segmentFraction: hit.segmentFraction
+        };
+      })
+    };
+  }
+
+  private worldPoint(point: readonly [number, number, number]): [number, number, number] {
+    const world: [number, number, number] = [
+      point[0] + this.origin[0],
+      point[1] + this.origin[1],
+      point[2] + this.origin[2]
+    ];
+    if (!world.every(Number.isFinite)) throw new Error('Terrain query result overflow');
+    return world;
+  }
+
   private localPoint(point: readonly [number, number, number]): [number, number, number] {
     if (
       point.length !== 3 ||
@@ -365,13 +453,8 @@ export class TerrainSurface {
     distance: number;
     point: [number, number, number];
   }): TerrainSurfaceHit {
-    const point: [number, number, number] = [
-      hit.point[0] + this.origin[0],
-      hit.point[1] + this.origin[1],
-      hit.point[2] + this.origin[2]
-    ];
-    if (!point.every(Number.isFinite) || !Number.isFinite(hit.distance))
-      throw new Error('Terrain query result overflow');
+    const point = this.worldPoint(hit.point);
+    if (!Number.isFinite(hit.distance)) throw new Error('Terrain query result overflow');
     const i = hit.index * 3;
     return {
       triangleIndex: hit.index,

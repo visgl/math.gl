@@ -5,6 +5,20 @@
 /** Low-level Euclidean query kernels shared with spatial indexes. */
 export type QueryPoint = Readonly<ArrayLike<number>>;
 export type TriangleRayHit = {t: number; barycentric: [number, number, number]};
+export type SegmentClosestPoints = {
+  distance: number;
+  pointA: [number, number, number];
+  pointB: [number, number, number];
+  fractionA: number;
+  fractionB: number;
+};
+export type SegmentTriangleClosestPoints = {
+  distance: number;
+  segmentPoint: [number, number, number];
+  trianglePoint: [number, number, number];
+  /** Parameter on the input segment, not a time of impact. */
+  segmentFraction: number;
+};
 
 export function validateQueryPoint(point: QueryPoint, dimension: number): void {
   if (point.length !== dimension) throw new RangeError('Query dimension must match the index');
@@ -145,6 +159,169 @@ export function getClosestPointOnTriangle(
     }
   }
   return best;
+}
+
+/** Closest pair on two closed segments; zero-length segments are points.
+ * Enumerates endpoint projections and the interior line-line stationary point.
+ * Equal computed distances prefer the lowest first-segment parameter, then the second.
+ */
+export function getClosestPointsOnSegments(
+  a0: QueryPoint,
+  a1: QueryPoint,
+  b0: QueryPoint,
+  b1: QueryPoint
+): SegmentClosestPoints {
+  const frame = queryFrame([a0, a1, b0, b1]);
+  const pair = closestSegments(...(frame.points as [number[], number[], number[], number[]]));
+  const pointA = interpolatePoint(a0, a1, pair.fractionA);
+  const pointB = interpolatePoint(b0, b1, pair.fractionB);
+  return {
+    distance: finiteDistance(pointA, pointB),
+    pointA,
+    pointB,
+    fractionA: pair.fractionA,
+    fractionB: pair.fractionB
+  };
+}
+
+/** Closest pair on a closed segment and a filled triangle, including coplanar and degenerate cases.
+ * Face crossings, endpoint-face minima and all three segment-edge minima are considered.
+ * Equal computed distances prefer the lowest segment parameter; other ties use feature order.
+ */
+export function getClosestPointsSegmentTriangle(
+  start: QueryPoint,
+  end: QueryPoint,
+  a: QueryPoint,
+  b: QueryPoint,
+  c: QueryPoint
+): SegmentTriangleClosestPoints {
+  const frame = queryFrame([start, end, a, b, c]);
+  const [s, e, va, vb, vc] = frame.points;
+  const direction = subtract(e, s);
+  if (direction.some(value => value !== 0)) {
+    const hit = intersectRayTriangle(s, direction, va, vb, vc, {maxT: 1});
+    if (hit) {
+      const point = interpolatePoint(start, end, hit.t);
+      return {distance: 0, segmentPoint: point, trianglePoint: [...point], segmentFraction: hit.t};
+    }
+  }
+  let best = {distance: Infinity, segmentFraction: 0, trianglePoint: va};
+  const consider = (point: QueryPoint, trianglePoint: number[], segmentFraction: number): void => {
+    const distance = Math.hypot(...subtract(point, trianglePoint));
+    if (
+      distance < best.distance ||
+      (distance === best.distance && segmentFraction < best.segmentFraction)
+    )
+      best = {distance, segmentFraction, trianglePoint};
+  };
+  consider(s, getClosestPointOnTriangle(s, va, vb, vc), 0);
+  consider(e, getClosestPointOnTriangle(e, va, vb, vc), 1);
+  for (const [v0, v1] of [
+    [va, vb],
+    [vb, vc],
+    [vc, va]
+  ]) {
+    const pair = closestSegments(s, e, v0, v1);
+    consider(
+      interpolatePoint(s, e, pair.fractionA),
+      interpolatePoint(v0, v1, pair.fractionB),
+      pair.fractionA
+    );
+  }
+  // Restore and keep rounded coordinates inside the triangle's closed bounds.
+  const trianglePoint = best.trianglePoint.map((value, axis) =>
+    Math.max(
+      Math.min(a[axis], b[axis], c[axis]),
+      Math.min(Math.max(a[axis], b[axis], c[axis]), start[axis] + value * frame.scale)
+    )
+  ) as [number, number, number];
+  if (!trianglePoint.every(Number.isFinite)) throw new RangeError('Closest-point result overflow');
+  const segmentPoint = interpolatePoint(start, end, best.segmentFraction);
+  return {
+    distance: finiteDistance(segmentPoint, trianglePoint),
+    segmentPoint,
+    trianglePoint,
+    segmentFraction: best.segmentFraction
+  };
+}
+
+/** Translate and uniformly scale before dot/cross products to avoid absolute-scale overflow. */
+function queryFrame(input: QueryPoint[]): {points: number[][]; scale: number} {
+  input.forEach(point => validateQueryPoint(point, 3));
+  const offsets = input.map(point => subtract(point, input[0]));
+  let scale = 0;
+  for (const offset of offsets)
+    for (const value of offset) {
+      if (!Number.isFinite(value)) throw new RangeError('Closest-point coordinate span overflow');
+      scale = Math.max(scale, Math.abs(value));
+    }
+  scale ||= 1;
+  return {points: offsets.map(point => point.map(value => value / scale)), scale};
+}
+
+function closestSegments(
+  a0: QueryPoint,
+  a1: QueryPoint,
+  b0: QueryPoint,
+  b1: QueryPoint
+): {distance: number; fractionA: number; fractionB: number} {
+  const da = subtract(a1, a0),
+    db = subtract(b1, b0);
+  const lengthA = Math.hypot(...da),
+    lengthB = Math.hypot(...db);
+  const ua = da.map(value => (lengthA ? value / lengthA : 0));
+  const ub = db.map(value => (lengthB ? value / lengthB : 0));
+  let best = {distance: Infinity, fractionA: 0, fractionB: 0};
+  const consider = (fractionA: number, fractionB: number): void => {
+    const distance = Math.hypot(
+      ...subtract(interpolatePoint(a0, a1, fractionA), interpolatePoint(b0, b1, fractionB))
+    );
+    if (
+      distance < best.distance ||
+      (distance === best.distance &&
+        (fractionA < best.fractionA ||
+          (fractionA === best.fractionA && fractionB < best.fractionB)))
+    )
+      best = {distance, fractionA, fractionB};
+  };
+  for (const t of [0, 1]) {
+    consider(t, lengthB ? clampUnit(dot(subtract(t ? a1 : a0, b0), ub) / lengthB) : 0);
+    consider(lengthA ? clampUnit(dot(subtract(t ? b1 : b0, a0), ua) / lengthA) : 0, t);
+  }
+  const normal = cross(ua, ub);
+  const sine = Math.hypot(...normal);
+  if (sine > 0) {
+    const unit = normal.map(value => value / sine);
+    const offset = subtract(b0, a0);
+    const fractionA = dot(cross(offset, ub), unit) / sine / lengthA;
+    const fractionB = dot(cross(offset, ua), unit) / sine / lengthB;
+    if (fractionA >= 0 && fractionA <= 1 && fractionB >= 0 && fractionB <= 1)
+      consider(fractionA, fractionB);
+  }
+  return best;
+}
+
+function subtract(a: QueryPoint, b: QueryPoint): number[] {
+  return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+}
+
+function interpolatePoint(a: QueryPoint, b: QueryPoint, t: number): [number, number, number] {
+  return [0, 1, 2].map(axis =>
+    Math.max(
+      Math.min(a[axis], b[axis]),
+      Math.min(Math.max(a[axis], b[axis]), (1 - t) * a[axis] + t * b[axis])
+    )
+  ) as [number, number, number];
+}
+
+function clampUnit(value: number): number {
+  return Math.max(0, Math.min(1, value));
+}
+
+function finiteDistance(a: QueryPoint, b: QueryPoint): number {
+  const distance = Math.hypot(...subtract(a, b));
+  if (!Number.isFinite(distance)) throw new RangeError('Closest-point distance overflow');
+  return distance;
 }
 
 function dot(a: QueryPoint, b: QueryPoint): number {

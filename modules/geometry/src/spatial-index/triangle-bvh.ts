@@ -4,6 +4,7 @@
 
 import {
   getClosestPointOnTriangle,
+  getClosestPointsSegmentTriangle,
   intersectRayTriangle,
   normalizeQueryDirection,
   validateQueryPoint,
@@ -29,6 +30,10 @@ export type TriangleQueryResult = {
   point: [number, number, number];
 };
 export type TriangleRayResult = TriangleQueryResult & {barycentric: [number, number, number]};
+export type TriangleSegmentResult = TriangleQueryResult & {
+  segmentPoint: [number, number, number];
+  segmentFraction: number;
+};
 export type TriangleNearestOptions = {maxDistance?: number; filter?: (index: number) => boolean};
 
 /** Optional application constraints for the nearest accepted triangle intersection. */
@@ -232,6 +237,75 @@ export class TriangleBVH {
     return {...query, result: query.result.map(index => hits.get(index)!)};
   }
 
+  /** Minimum Euclidean distance along the whole closed segment, not first intersection. */
+  nearestSegment(
+    start: QueryPoint,
+    end: QueryPoint,
+    options: TriangleNearestOptions = {}
+  ): TriangleSegmentResult | null {
+    return this.nearestSegmentQuery(start, end, {...options, maxWork: Infinity}).result;
+  }
+
+  nearestSegmentQuery(
+    start: QueryPoint,
+    end: QueryPoint,
+    options: TriangleNearestOptions & IndexQueryBudget = {}
+  ): IndexQueryResult<TriangleSegmentResult | null> {
+    const {minimum, maximum} = segmentBounds(start, end);
+    let candidate: TriangleSegmentResult | null = null;
+    const query = this.boxes.nearestBoxQuery(minimum, maximum, {
+      ...options,
+      distanceToItem: index => {
+        const closest = this.segmentClosest(index, start, end);
+        if (
+          !candidate ||
+          closest.distance < candidate.distance ||
+          (closest.distance === candidate.distance && index < candidate.index)
+        )
+          candidate = closest;
+        return closest.distance;
+      }
+    });
+    return {...query, result: query.result ? candidate : null};
+  }
+
+  /** Closed capsule overlap, with one closest pair per accepted triangle.
+   * A straight translating sphere covers this volume, but segmentFraction is not first-impact time.
+   */
+  intersectCapsule(
+    start: QueryPoint,
+    end: QueryPoint,
+    radius: number,
+    options: SearchIndexOptions = {}
+  ): IndexQueryResult<TriangleSegmentResult[]> {
+    if (!Number.isFinite(radius) || radius < 0)
+      throw new RangeError('Capsule radius must be finite and nonnegative');
+    const {minimum, maximum} = segmentBounds(start, end, radius);
+    const hits = new Map<number, TriangleSegmentResult>();
+    const query = this.boxes.searchQuery(minimum, maximum, {
+      ...options,
+      filter: index => {
+        if (options.filter && !options.filter(index)) return false;
+        const closest = this.segmentClosest(index, start, end);
+        if (closest.distance > radius) return false;
+        hits.set(index, closest);
+        return true;
+      }
+    });
+    return {...query, result: query.result.map(index => hits.get(index)!)};
+  }
+
+  private segmentClosest(index: number, start: QueryPoint, end: QueryPoint): TriangleSegmentResult {
+    const closest = getClosestPointsSegmentTriangle(start, end, ...this.triangle(index));
+    return {
+      index,
+      distance: closest.distance,
+      point: closest.trianglePoint,
+      segmentPoint: closest.segmentPoint,
+      segmentFraction: closest.segmentFraction
+    };
+  }
+
   private triangle(index: number): [Float64Array, Float64Array, Float64Array] {
     const vertex = (i: number): Float64Array => {
       const start = this.indices[index * 3 + i] * 3;
@@ -239,4 +313,33 @@ export class TriangleBVH {
     };
     return [vertex(0), vertex(1), vertex(2)];
   }
+}
+
+function segmentBounds(
+  start: QueryPoint,
+  end: QueryPoint,
+  radius?: number
+): {minimum: number[]; maximum: number[]} {
+  validateQueryPoint(start, 3);
+  validateQueryPoint(end, 3);
+  for (let axis = 0; axis < 3; axis++)
+    if (!Number.isFinite(end[axis] - start[axis]))
+      throw new RangeError('Segment coordinate span overflow');
+  const minimum: number[] = [],
+    maximum: number[] = [];
+  for (let axis = 0; axis < 3; axis++) {
+    // Capsule broad-phase padding only; nearest lower bounds need no expansion.
+    const padding =
+      radius === undefined
+        ? 0
+        : radius +
+          8 *
+            Math.max(
+              Number.MIN_VALUE,
+              Number.EPSILON * Math.max(Math.abs(start[axis]), Math.abs(end[axis]), radius)
+            );
+    minimum.push(Math.min(start[axis], end[axis]) - padding);
+    maximum.push(Math.max(start[axis], end[axis]) + padding);
+  }
+  return {minimum, maximum};
 }

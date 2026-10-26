@@ -47,5 +47,7 @@ The optional `/terrain/surface` entry adds indexed triangle surfaces, barycentri
 height sampling, explicit halfedge topology and BVH ray/segment/nearest queries.
 Bounded query variants report completion and work counts; sphere queries return
 face/edge/vertex contacts with explicit work and contact-capacity limits.
+Segment-clearance and capsule queries cover the full axis, including interior
+contacts missed by endpoint-only sphere tests. They do not report first-impact time.
 `/terrain/bounds` adds conservative min/max hierarchies over height-field cells.
 These are CPU/data APIs; shader and device execution stay in luma.gl.
