@@ -362,6 +362,14 @@ export class GeographicCutAtlas {
     for (let i = 0; i < this.boundaries.length; i++)
       for (let j = 0; j < i; j++) {
         context.tick();
+        if (
+          !this.cells.some(
+            c =>
+              c.cuts.some(r => r.circle === this.boundaries[i]) &&
+              c.cuts.some(r => r.circle === this.boundaries[j])
+          )
+        )
+          continue;
         for (const n of intersections(this.boundaries[i], this.boundaries[j])) {
           if (!relevant([this.boundaries[i].id, this.boundaries[j].id], n)) continue;
           const v = node(n, this.attributes);

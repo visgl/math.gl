@@ -429,3 +429,14 @@ test('Uncertain circle discriminants reject on either side of grazing contact', 
       roots(curve, circle('grazing', [1, 0, 0], offset), new Context({edgeModel: 'linear'}))
     ).toThrow(/Unresolved circle tangency/);
 });
+
+for (const edgeModel of ['linear', 'rhumb'] as const)
+  test(`${edgeModel} ignores circle contacts outside the finite source arc`, () => {
+    const {atlas} = createOrthographicCutAtlas({viewDirection: [1, 0, 1], edgeModel});
+    const visible = atlas.clipPolyline([-20, 45, 20, 45]);
+    expect(visible).toHaveLength(1);
+    expect(visible[0].edges[0].startFraction).toBe(0);
+    expect(visible[0].edges[visible[0].edges.length - 1].endFraction).toBe(1);
+    expect(atlas.clipPolyline([160, -45, 200, -45])).toEqual([]);
+    expect(atlas.clipPolygon([{positions: [-20, 45, 20, 45, 20, 60, -20, 60]}])).toHaveLength(1);
+  });

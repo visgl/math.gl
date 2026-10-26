@@ -164,7 +164,9 @@ sampled target error criterion, not a certified bound for arbitrary transforms.
 Inputs, graph/options and descriptors are snapshots; callbacks cannot mutate an
 operation's saved source geometry. Output arrays and metadata copies are caller-owned.
 
-Circle roots use stable discriminants/chord identities near small caps. Other
+Circle roots use stable discriminants/chord identities near small caps. Contacts
+certifiably outside the finite source arc are excluded before full-circle
+conditioning checks. Other
 curves use bounded normal speeds and second derivatives to exclude empty intervals
 and establish monotone root brackets. Solver error and conditioning still matter:
 this is not arbitrary finite-domain certification. Source circles indistinguishable
@@ -175,7 +177,7 @@ reject with `GeographicSeamError`. No partial output is returned.
 
 The shared qualification runs 480 pinned native GeographicLib 2.7 interval controls,
 two independent spherical area-conservation/shared-vertex controls and four
-independent ellipsoidal silhouette controls and twelve small-cap controls and one nested-island topology control in Node and Chromium/Firefox/WebKit.
+independent ellipsoidal silhouette controls and twelve small-cap controls and one nested-island topology control and two finite-arc contact controls and one graph-incidence control in Node and Chromium/Firefox/WebKit.
 Native comparisons retain the existing `2e-12 * semiMajorAxis` along-track and
 `1e-10` degree latitude/conditioned-longitude gates. Independent area and silhouette
 residuals have `2e-12` gates. Additional regressions cover small caps, winding,

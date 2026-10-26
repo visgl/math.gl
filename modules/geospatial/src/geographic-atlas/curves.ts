@@ -265,6 +265,25 @@ export function roots(
     )
       return {fractions: [], coincident: true};
     if (R === 0) return {fractions: [], coincident: false};
+    const phase = Math.atan2(B, A),
+      low = Math.min(z.start, z.end),
+      high = Math.max(z.start, z.end);
+    const evaluate = (theta: number) => A * Math.cos(theta) + B * Math.sin(theta) - C;
+    let minimum = Math.min(evaluate(low), evaluate(high)),
+      maximum = Math.max(evaluate(low), evaluate(high));
+    // Condition the finite arc, not the entire supporting circle. A remote
+    // tangency/near-coincidence cannot make an otherwise separated arc ambiguous.
+    for (let k = Math.ceil((low - phase) / Math.PI); phase + k * Math.PI <= high; k++) {
+      context.tick();
+      const value = (k % 2 === 0 ? R : -R) - C;
+      minimum = Math.min(minimum, value);
+      maximum = Math.max(maximum, value);
+    }
+    const enclosureError =
+      ROUND *
+      (1 + Math.abs(A) + Math.abs(B) + Math.abs(C) + R * Math.max(Math.abs(low), Math.abs(high)));
+    if (minimum > enclosureError || maximum < -enclosureError)
+      return {fractions: [], coincident: false};
     const sine = Math.hypot(...cross(b.normal, z.normal));
     // Use a cross product near parallel normals; 1-d*d erases small angles.
     const left =
@@ -278,10 +297,7 @@ export function roots(
     if (D <= error) throw new GeographicSeamError('precision', 'Unresolved circle tangency');
     if (sine < Math.sqrt(ROUND))
       throw new GeographicSeamError('precision', 'Unresolved nearly coincident source/cut circles');
-    const phase = Math.atan2(B, A),
-      delta = Math.atan2(Math.sqrt(D), C),
-      low = Math.min(z.start, z.end),
-      high = Math.max(z.start, z.end);
+    const delta = Math.atan2(Math.sqrt(D), C);
     for (const base of [phase - delta, phase + delta])
       for (let k = Math.ceil((low - base) / TAU); base + TAU * k <= high; k++) {
         context.tick();

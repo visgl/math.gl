@@ -256,5 +256,50 @@ export function qualifyAtlas() {
     check(Math.abs(polygons.reduce((s, p) => s + p.rings.length, 0) - 3), 0.5);
     check(Math.abs(polygons.filter(p => p.rings.length === 2).length - 1), 0.5);
   });
+  for (const edgeModel of ['linear', 'rhumb'] as const)
+    run('independent finite-arc contacts ' + edgeModel, check => {
+      const {atlas} = createOrthographicCutAtlas({viewDirection: [1, 0, 1], edgeModel});
+      const visible = atlas.clipPolyline([-20, 45, 20, 45]);
+      check(Math.abs(visible.length - 1), 0.5);
+      if (!visible.length) throw new Error('Missing visible arc');
+      check(Math.abs(visible[0].edges[0].startFraction), 2e-13);
+      check(Math.abs(visible[0].edges[visible[0].edges.length - 1].endFraction - 1), 2e-13);
+      check(atlas.clipPolyline([160, -45, 200, -45]).length, 0.5);
+    });
+  run('independent graph incidence', check => {
+    const atlas = new GeographicCutAtlas(
+        {
+          boundaries: [
+            {id: 'split', normal: [1, 0, 0]},
+            {id: 'north', normal: [0, 0, 1], offset: 0.6},
+            {id: 'remote', normal: [1, 0, 0], offset: 0.8}
+          ],
+          charts: [
+            {
+              id: 'front',
+              center: [1, 0, 0],
+              cuts: [
+                {boundary: 'split', side: 1},
+                {boundary: 'north', side: -1}
+              ]
+            },
+            {
+              id: 'back',
+              center: [-1, 0, 0],
+              cuts: [
+                {boundary: 'split', side: -1},
+                {boundary: 'remote', side: -1}
+              ]
+            }
+          ]
+        },
+        {edgeModel: 'linear'}
+      ),
+      parts = atlas.clipPolyline([-10, 0, 10, 0]);
+    check(Math.abs(parts.length - 1), 0.5);
+    if (parts[0]?.chart !== 'front') throw new Error('Wrong chart');
+    check(Math.abs(parts[0].edges[0].startFraction), 2e-13);
+    check(Math.abs(parts[0].edges[parts[0].edges.length - 1].endFraction - 1), 2e-13);
+  });
   return rows;
 }
