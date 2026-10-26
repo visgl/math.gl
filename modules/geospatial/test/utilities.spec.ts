@@ -218,6 +218,7 @@ test('Forced grid transfers retain hemisphere conventions and owned outputs', ()
   const same = transferGrid(original);
   expect(same).toEqual(original);
   expect(same).not.toBe(original);
+  expect(Object.is(transferGrid({...original, northing: -0}).northing, -0)).toBe(true);
   const south = transferGrid(original, {north: false});
   expect(south).toEqual({...original, north: false, northing: 1e7});
   expect(transferGrid(south, {north: true})).toEqual(original);

@@ -131,7 +131,7 @@ export function transferGrid(grid: GridCoordinate, options: GridOptions = {}): G
     const result = {
       ...grid,
       north,
-      northing: grid.northing + (north === grid.north ? 0 : north ? -1e7 : 1e7)
+      northing: north === grid.north ? grid.northing : grid.northing + (north ? -1e7 : 1e7)
     };
     validateGrid(result, options.extended === true);
     return result;

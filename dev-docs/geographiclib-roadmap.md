@@ -175,8 +175,9 @@ arbitrary-length lines remain separate. The exact-area follow-up adds opt-in
 parametric and geocentric surface/direction conversions and Cartesian direct
 geodesics/reusable lines for minimum/maximum axis ratio at least `0.25`.
 It handles signed trajectories and equal-axis limits. Global triaxial inverse,
-Jacobi coordinate charts, conformal coordinates and uniform sampling are not
-implemented by this direct-solver profile.
+Jacobi coordinate charts and conformal coordinates are not implemented by this
+direct-solver profile. Area-uniform surface sampling is delivered by the later
+G10/G9/G7 increment below.
 
 See the [2,105-row qualification](../docs/modules/geospatial/api-reference/geodesic-g89-qualification.md),
 including independent elliptic series, sphere/principal-plane/conservation checks,
