@@ -1174,6 +1174,26 @@
       "types": "./dist/terrain/delatin.d.ts",
       "import": "./dist/terrain/delatin.js",
       "require": "./dist/terrain/delatin.cjs"
+    },
+    "./terrain/derivatives": {
+      "types": "./dist/terrain/derivatives.d.ts",
+      "import": "./dist/terrain/derivatives.js",
+      "require": "./dist/terrain/derivatives.cjs"
+    },
+    "./terrain/slope-aspect": {
+      "types": "./dist/terrain/slope-aspect.d.ts",
+      "import": "./dist/terrain/slope-aspect.js",
+      "require": "./dist/terrain/slope-aspect.cjs"
+    },
+    "./terrain/profile": {
+      "types": "./dist/terrain/profile.d.ts",
+      "import": "./dist/terrain/profile.js",
+      "require": "./dist/terrain/profile.cjs"
+    },
+    "./terrain/contours": {
+      "types": "./dist/terrain/contours.d.ts",
+      "import": "./dist/terrain/contours.js",
+      "require": "./dist/terrain/contours.cjs"
     }
   },
   "files": [
