@@ -1104,6 +1104,16 @@
       "types": "./dist/geodesic-buffer.d.ts",
       "import": "./dist/geodesic-buffer.js",
       "require": "./dist/geodesic-buffer.cjs"
+    },
+    "./terrain": {
+      "types": "./dist/terrain/index.d.ts",
+      "import": "./dist/terrain/index.js",
+      "require": "./dist/terrain/index.cjs"
+    },
+    "./terrain/geometry": {
+      "types": "./dist/terrain/geometry.d.ts",
+      "import": "./dist/terrain/geometry.js",
+      "require": "./dist/terrain/geometry.cjs"
     }
   },
   "files": [

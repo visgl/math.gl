@@ -14,6 +14,12 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
   {
+    symbol: 'HeightField',
+    packages: ['@math.gl/geospatial/terrain'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/ellipsoid/],
+    budget: 16000
+  },
+  {
     symbol: 'Ellipsoid',
     packages: ['@math.gl/geospatial', '@math.gl/geospatial/ellipsoid'],
     forbidden: [/\/geometry\//, /\/classes\/matrix[34]\./, /\/local-frame\./,
