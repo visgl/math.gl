@@ -1194,6 +1194,21 @@
       "types": "./dist/terrain/contours.d.ts",
       "import": "./dist/terrain/contours.js",
       "require": "./dist/terrain/contours.cjs"
+    },
+    "./terrain/contour-paths": {
+      "types": "./dist/terrain/contour-paths.d.ts",
+      "import": "./dist/terrain/contour-paths.js",
+      "require": "./dist/terrain/contour-paths.cjs"
+    },
+    "./terrain/contour-simplify": {
+      "types": "./dist/terrain/contour-simplify.d.ts",
+      "import": "./dist/terrain/contour-simplify.js",
+      "require": "./dist/terrain/contour-simplify.cjs"
+    },
+    "./terrain/profile-measure": {
+      "types": "./dist/terrain/profile-measure.d.ts",
+      "import": "./dist/terrain/profile-measure.js",
+      "require": "./dist/terrain/profile-measure.cjs"
     }
   },
   "files": [
