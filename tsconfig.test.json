@@ -890,6 +890,18 @@
       ],
       "@math.gl/geospatial/terrain/geometry": [
         "./modules/geospatial/src/terrain/geometry.ts"
+      ],
+      "@math.gl/geospatial/terrain/derivatives": [
+        "./modules/geospatial/src/terrain/derivatives.ts"
+      ],
+      "@math.gl/geospatial/terrain/slope-aspect": [
+        "./modules/geospatial/src/terrain/slope-aspect.ts"
+      ],
+      "@math.gl/geospatial/terrain/profile": [
+        "./modules/geospatial/src/terrain/profile.ts"
+      ],
+      "@math.gl/geospatial/terrain/contours": [
+        "./modules/geospatial/src/terrain/contours.ts"
       ]
     }
   }

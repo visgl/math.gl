@@ -11,7 +11,7 @@ not math.gl.
 ## Implementation progress
 
 October 26, 2026: the first local Cartesian foundation is implemented in
-[`@math.gl/geospatial/terrain`](../modules/geospatial/terrain/README.md), with a dependency-free runtime
+[`@math.gl/geospatial/terrain`](../docs/modules/geospatial/terrain/README.md), with a dependency-free runtime
 sampling entry and optional `@math.gl/geospatial/terrain/geometry` mesh entry. The opt-in subpath follows master's six-package consolidation while keeping
 height-field sampling independent of the geospatial root and its runtime imports.
 Optional geographic and tiled adapters extend this contract without adding root imports.
@@ -45,8 +45,8 @@ including straight translating-sphere swept-volume overlap. Closest-pair fractio
 are not first-impact times. This advances T5; reduced manifolds, first-impact queries,
 curved/rotating sweeps and solver integration remain open.
 
-This is partial T0/T1/T2/T3/T5 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
-spike, vertex-tile reconciliation, persistent cache structures, adaptive meshes,
+This is partial T0/T1/T2/T3/T5/T6 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
+spike, vertex-tile reconciliation, persistent cache structures, mixed-resolution mesh stitching,
 and GPU qualification remain open. The remaining sections describe the target architecture and delivery gates.
 
 ## Recommendation
@@ -531,3 +531,19 @@ Remaining meshing work includes mixed-resolution stitching, transition morphs,
 continuous error analysis, real-DEM performance qualification, and the companion
 loaders.gl migration. GPU execution, deck.gl offset/drape integration and residency
 remain companion-repository work. These adapters do not complete all of T2–T4.
+
+## Terrain analysis tranche
+
+Independent `terrain/derivatives`, `terrain/slope-aspect`, `terrain/profile` and
+`terrain/contours` entries advance T6 with Horn/central-difference raster gradients,
+explicit slope/flat-aspect semantics, bounded sampled profiles and indexed contours
+of the regular triangle surface. They return plain arrays without adding terrain
+class methods or loading tessellators and query indexes. Analytic affine/polynomial,
+saddle/topology, nodata, capacity and precision tests qualify these local Cartesian
+operations. Tree-shaking probes and isolated package consumers guard their boundaries.
+
+Remaining analysis work includes independent real-DEM/GDAL qualification, terrain
+horizons, contour path stitching and cross-tile joining, isobands, filtered versus
+derivative pyramids, and performance qualification at regional scale. Profiles
+are discrete samples, not clearance certificates; contours do not describe the
+bilinear or adaptive-mesh surface. GPU execution remains in luma.gl.

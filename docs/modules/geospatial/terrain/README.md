@@ -683,3 +683,132 @@ winding. Independent error verification can refine beyond the old backend result
 byte-for-byte index identity is not promised. After adopting these APIs, loaders.gl
 can remove its MARTINI dependency and vendored Delatin implementation. This math.gl
 change does not modify loaders.gl itself.
+
+## Raster gradients and slope/aspect
+
+```typescript
+import {createTerrainGradientGrid} from '@math.gl/geospatial/terrain/derivatives';
+import {getTerrainSlopeAspect, createTerrainSlopeAspectGrid} from '@math.gl/geospatial/terrain/slope-aspect';
+
+const gradients = createTerrainGradientGrid(field, {method: 'horn'});
+const angles = createTerrainSlopeAspectGrid(gradients);
+const orientation = getTerrainSlopeAspect(0.25, -0.5);
+```
+
+These are standalone functions, with no new methods on terrain classes. Stencil
+calculation and angle conversion have independent imports. They do not load mesh
+builders, query indexes, rendering classes, or each other at runtime. Outputs are
+owned typed arrays suitable for worker transfer and subsequent GPU upload; no GPU
+resources or shader code are created.
+
+`createTerrainGradientGrid` computes raster derivatives using `horn` (default;
+weighted 3×3 differences) or `zevenbergen-thorne` (central differences). These are
+**raster stencil estimates**, not derivatives of the selected interpolation patch.
+Both require all nine source samples, including the center and diagonal neighbors.
+The outermost sample ring gets `OUTSIDE_DOMAIN`; any missing sample in an interior
+window gives `NO_DATA`. No edge extrapolation, hole filling, or halo fetch occurs.
+Supply a larger height field containing the desired halo when boundary derivatives
+are required. Arithmetic overflow gives `NUMERIC_ERROR`.
+
+The output has `width`, `height`, packed Float64 `gradients` (`dz/dx`, `dz/dy`),
+Uint8 `statuses`, the selected `method`, and the field's origin, steps, registration
+and height-reference metadata. Values are zero for non-VALID statuses. The full
+inverse-transpose affine transform maps index-space differences into world XY,
+including reflected, rotated and sheared grids. Horizontal coordinates and heights
+must share the metric Cartesian units of `HeightField`; geographic degrees need
+an appropriate metric transformation first. `maxSamples` defaults to 1,100,000 and
+is checked before output allocation.
+
+`getTerrainSlopeAspect(gx, gy)` returns slope in radians from horizontal, and
+downhill aspect in radians clockwise from world +Y in `[0, 2π)`. World +Y only
+means north when the caller's frame makes it north. Nonfinite gradients throw.
+An exactly flat surface has slope zero and `aspect: undefined`; no arbitrary
+flat-aspect direction or flatness tolerance is imposed.
+
+`createTerrainSlopeAspectGrid` accepts the gradient grid's dimensions, buffers and
+statuses, validates them, and returns Float64 `slopes`/`aspects` plus copied Uint8
+`statuses`/`aspectStatuses`. Flat samples retain VALID slope and get NO_DATA aspect.
+Other source statuses propagate to both outputs; their numeric values remain zero.
+Its `maxSamples` also defaults to 1,100,000. Conversion can be used independently
+with caller-supplied gradients, without importing the stencil implementation.
+
+The Horn and Zevenbergen–Thorne methods and flat-aspect distinction are also used
+by [GDAL's terrain analysis](https://gdal.org/en/stable/programs/gdaldem.html).
+This implementation uses radians and the explicit affine Cartesian frame above;
+it does not reproduce GDAL's CRS scaling or optional edge interpolation. The
+formulas are implemented here with analytic plane/polynomial and stencil fixtures;
+no GDAL code or runtime dependency is included.
+
+## Elevation profiles
+
+```typescript
+import {sampleTerrainProfile} from '@math.gl/geospatial/terrain/profile';
+
+const profile = sampleTerrainProfile(
+  (x, y) => field.sample(x, y, {interpolation: 'triangle'}),
+  [0, 0, 100, 0, 100, 50],
+  {spacing: 5, maxSamples: 1000}
+);
+```
+
+The first argument is a callback returning `{status, height}`. Bind a height field,
+indexed surface or resident tiled snapshot and the desired interpolation policy in
+that callback. `path` contains packed Cartesian XY vertices. Each nonzero segment
+is divided evenly using `ceil(segmentLength / spacing)`: all corners and the final
+endpoint are retained, and spacing is a nominal maximum within each segment,
+subject to Float64 rounding. Samples are not placed on a global distance lattice.
+Repeated consecutive vertices add no sample; a point or entirely repeated path
+produces one sample. Coordinates are copied before callbacks execute.
+
+Results contain packed Float64 XY `positions`, cumulative horizontal `distances`,
+Float64 `heights`, Uint8 `statuses`, and total horizontal `length`. Missing statuses
+propagate and numeric values remain zero. A VALID callback result with a nonfinite
+height becomes NUMERIC_ERROR; invalid status codes and thrown callbacks cause an
+exception. The function does not bridge missing terrain.
+
+Finite positive `spacing` is required. `maxSamples` defaults to 1,000,000 and bounds
+both input vertex count and planned output count before any callback executes.
+Overflow, lost cumulative-distance increments, or sub-resolution repeated output
+positions throw explicitly. This is a sampled profile: it does not find every
+ridge or cell crossing, certify segment clearance, integrate surface length, or
+compute geographic/geodesic distance. Use surface segment queries for clearance.
+
+## Triangle-surface contours
+
+```typescript
+import {createTerrainContours} from '@math.gl/geospatial/terrain/contours';
+
+const contours = createTerrainContours(field, [100, 200, 300]);
+```
+
+This function extracts contours of the **regular fixed-diagonal triangle surface**.
+It honors `field.diagonal`, registration and affine frame. It does not contour the
+bilinear interpolant or an adaptive mesh, and those surfaces can differ on saddles.
+A triangle with any missing corner is omitted, matching regular mesh creation.
+No contour in an omitted area must not be interpreted as evidence of flat terrain.
+
+Levels must be finite and strictly increasing; an empty list is allowed. The tie
+rule separates strictly-below values from at-or-above values. Completely flat
+triangles and point-only touches produce no segment. An exact level edge is emitted
+when approached from a below-level triangle, and duplicate shared edges are removed.
+Adjacent triangles reuse intersections by source edge or exact source vertex, per
+level. Vertex intersections may form branches: the output is an undirected indexed
+segment graph, not a collection of oriented or stitched paths. Plateau boundaries
+are not generally complete polygon rings under this tie convention.
+
+`TerrainContours` contains Float64 local XYZ `positions`, fractional column/row
+`gridCoordinates`, Uint32 endpoint pairs in `segments`, a `levelIndices` entry for
+each segment, a copied Float64 `levels` array, XYZ `origin`, and `heightReference`.
+Origin defaults to `[field.origin[0], field.origin[1], 0]`; it can be overridden.
+No normals, UVs, triangle mesh, stitching index or renderer objects are constructed.
+Local origins preserve coordinate precision. Nonfinite output, unrepresentable
+edge fractions, and collapsed output segments throw; results are Float64 numerical
+geometry, not an exact-arithmetic or geometric-error certificate.
+
+Admission limits are `maxSamples` (1,100,000), `maxLevels` (256), and
+`maxTriangleTests` (10,000,000). The last bounds `levels × cells × 2`, counting even
+missing triangles, before extraction. Output limits are `maxVertices` (2,000,000)
+and `maxSegments` (1,000,000). Exceeding any limit throws instead of returning partial
+geometry. Output arrays are detached; ordering is deterministic for the same input.
+Path stitching, simplification, isobands, cross-tile joining and adaptive-mesh
+contouring remain separate future operations.

@@ -40,6 +40,23 @@ if (mesh.error.maxSampleError !== 0 || mesh.indices.length !== 6) throw new Erro
     // The next Delatin consumer runs with MARTINI and every other math.gl package absent.
     rmSync(martini, {recursive: true, force: true});
   }
+  // Analysis imports must work with no MARTINI, geometry, or other math.gl package installed.
+  for (const [entry, symbol, expression] of [
+    ['derivatives', 'createTerrainGradientGrid', 'create(field).gradients.length === 18'],
+    ['slope-aspect', 'getTerrainSlopeAspect', 'create(1, 0).slope === Math.PI / 4'],
+    ['profile', 'sampleTerrainProfile', 'create((x: number, y: number) => field.sample(x, y), [0, 0, 2, 0], {spacing: 1}).heights.length === 3'],
+    ['contours', 'createTerrainContours', 'create(field, [0]).segments.length === 0']
+  ]) {
+    const imports = `import {HeightField} from '@math.gl/geospatial/terrain';\nimport {${symbol} as create} from '@math.gl/geospatial/terrain/${entry}';`;
+    const assertion = `const field = new HeightField({width:3,height:3,heights:new Float64Array(9)}); if (!(${expression})) throw new Error('Invalid analysis result');`;
+    const source = imports + '\n' + assertion;
+    const path = join(directory, 'analysis.ts'); writeFileSync(path, source);
+    execFileSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '--noEmit', '--strict', '--skipLibCheck', '--module', 'nodenext', '--target', 'es2020', path], {stdio: 'inherit', cwd: directory});
+    writeFileSync(join(directory, 'analysis.mjs'), source.replaceAll(': number', ''));
+    execFileSync(process.execPath, [join(directory, 'analysis.mjs')]);
+    const cjs = `const {HeightField} = require('@math.gl/geospatial/terrain'); const {${symbol}: create} = require('@math.gl/geospatial/terrain/${entry}');` + assertion.replaceAll(': number', '');
+    writeFileSync(join(directory, 'analysis.cjs'), cjs); execFileSync(process.execPath, [join(directory, 'analysis.cjs')]);
+  }
   console.log('Isolated terrain ESM/CommonJS execution, strict declarations and backend independence passed.');
 } finally {
   rmSync(directory, {recursive: true, force: true});

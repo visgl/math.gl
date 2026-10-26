@@ -52,6 +52,17 @@ const probes = [
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /\/martini\./, /martini/, /delatin/,
       ...['mesh', 'mesh-error', 'mesh-edges'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
   })),
+  ...[
+    ['createTerrainGradientGrid', 'derivatives', 4500],
+    ['getTerrainSlopeAspect', 'slope-aspect', 800],
+    ['createTerrainSlopeAspectGrid', 'slope-aspect', 2500],
+    ['sampleTerrainProfile', 'profile', 4500],
+    ['createTerrainContours', 'contours', 6500]
+  ].map(([symbol, entry, budget]) => ({
+    symbol, packages: [`@math.gl/geospatial/terrain/${entry}`], budget,
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./,
+      ...['derivatives', 'slope-aspect', 'profile', 'contours'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
+  })),
   {
     symbol: 'createMartiniTerrainMesh',
     packages: ['@math.gl/geospatial/terrain/martini'],
