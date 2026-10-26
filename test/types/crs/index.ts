@@ -15,6 +15,22 @@ import {
 } from '@math.gl/geospatial/crs';
 
 const serialized: CRSDefinition = 'EPSG:4326';
+
+import {createCRSResolver, createCRSDictionaryProvider} from '@math.gl/geospatial/crs/resolver';
+import type {CRSInput} from '@math.gl/geospatial/crs';
+const resolver = createCRSResolver({
+  providers: [
+    createCRSDictionaryProvider({
+      'APP:geographic': '+proj=longlat +datum=WGS84'
+    })
+  ]
+});
+resolver.resolve('APP:geographic').then(result => {
+  const input: CRSInput = result.input;
+  // @ts-expect-error Resolution provenance is immutable.
+  result.lookups.push({identifier: 'x', provider: 'x'});
+  return input;
+});
 const geographic: PROJJSONCRSByType<'GeographicCRS'> = {
   type: 'GeographicCRS',
   name: 'WGS 84',

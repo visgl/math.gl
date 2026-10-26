@@ -132,6 +132,10 @@ WKT parser into an eager bundle. Types can still be imported from the root with
 
 ## API
 
+Optional [CRS resolution](./api-reference/resolver.md) accepts application-owned
+catalogues and asynchronous providers through `@math.gl/geospatial/crs/resolver`.
+Resolution supplies definitions; execution support remains engine-specific.
+
 - `CRSDefinition<T extends PROJJSONCRS = PROJJSONCRS>` — a string definition or PROJJSON object.
 - `PROJJSONCRS` — generated from the official v0.7 schema's `#/definitions/crs`.
 - `PROJJSONCRSType` — all top-level PROJJSON CRS type literals.
