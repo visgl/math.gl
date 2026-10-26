@@ -1,9 +1,77 @@
 # Using external projection engines
 
-Applications can implement the [`ProjectionEngine`](../api-reference/projection-engine.md)
-interface around another library. This lets consumers accept a common factory while
-leaving coordinate conversion to proj4js or D3. These are application adapters;
-math.gl does not register or load these libraries for you.
+External libraries can provide CRS definitions, execute coordinate operations, or
+do both. Use the opt-in [`CRSResolver`](../../crs/api-reference/resolver.md) for
+definition lookup. Libraries with synchronous coordinate operations can also
+implement the [`ProjectionEngine`](../api-reference/projection-engine.md) interface.
+These are application integrations; math.gl does not register or load them for you.
+
+## Integrate proj-wasm
+
+[proj-wasm](https://github.com/willcohen/clj-proj) provides PROJ through WebAssembly.
+The [runnable Node and browser example](https://github.com/visgl/math.gl/tree/master/examples/proj-wasm-crs)
+pins **0.1.0** and demonstrates two distinct uses of its public API.
+
+### Resolve definitions for native math.gl execution
+
+The example's `createProjWasmProvider` owns a PROJ context, disables network access,
+uses `projCreateFromDatabase` and `projAsProjjson`, and destroys each temporary PJ
+object. It records the package and EPSG database revision in lookup provenance.
+Its source is in `examples/proj-wasm-crs/provider.mjs`:
+
+```javascript
+import * as proj from 'proj-wasm';
+import {createCRSResolver} from '@math.gl/geospatial/crs/resolver';
+import {FullProjectionEngine} from '@math.gl/geospatial/projection';
+import {createProjWasmProvider} from './provider.mjs';
+
+await proj.init({workers: 1});
+let backend;
+try {
+  backend = await createProjWasmProvider(proj);
+  const resolver = createCRSResolver({providers: [backend.provider]});
+  const engine = new FullProjectionEngine({resolver});
+  const projection = await engine.createProjectionAsync({to: 'EPSG:8857'});
+  const xyz = projection.project([12, 55, 123]); // Native, synchronous Equal Earth.
+} finally {
+  try { await backend?.dispose(); }
+  finally { await proj.shutdown(); }
+}
+```
+
+Initialization and lookup are asynchronous. The prepared native transform then
+runs synchronously and retains math.gl's validation and dimensional conventions.
+Resolution expands the identifier catalogue, not the set of supported native
+operations: the example resolves compound `EPSG:7405` but verifies that strict
+native execution still rejects it. A resolved CRS does not establish that required
+datum grids, epoch handling or vertical operations are available.
+
+Keep the worker pool application-owned when sharing it. Dispose the provider only
+after preparation is complete, and create a fresh resolver if its catalogue or
+configuration changes. The example serves locked dependencies and adjacent WASM,
+worker and database assets locally; its browser smoke test rejects external requests.
+
+### Execute operations with proj-wasm itself
+
+proj-wasm 0.1.0's public worker API remains asynchronous after initialization.
+`createProjectionAsync()` in math.gl must return a **synchronous**
+`PreparedProjection`, so returning promises from its point or buffer methods
+would violate the contract. Use a separate asynchronous preprocessing step for
+direct PROJ execution.
+
+The runnable example calls `projCreateCrsToCrs`, normalizes authority axes with
+`projNormalizeForVisualization`, and awaits `projTransArray`. It compares this
+independent PROJ result with native math.gl for `EPSG:8857`, then releases both
+operations and their context. Input is explicitly longitude/latitude/ellipsoidal
+height; do not map an arbitrary fourth measure ordinate to PROJ's time ordinate.
+Network/grid acquisition and operation selection remain application policies.
+
+Node integration tests and a Chromium smoke test exercise the actual pinned
+package, including offline asset loading, inverse coordinates and unsupported CRS
+behavior. Provider unit tests cover lifecycle and failures. See the example README
+for build, test and serving commands.
+
+## Synchronous adapters
 
 Install the backend you need:
 
