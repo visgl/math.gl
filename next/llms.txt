@@ -111,6 +111,7 @@ The earth group collects Earth model, solar, and timezone utilities. Import the 
 - [getSun](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/get-sun.md): {/ SPDX-License-Identifier: MIT /}
 - [getSunDirection](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/get-sun-direction.md): {/ SPDX-License-Identifier: MIT /}
 - [getSunLight](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/get-sun-light.md): {/ SPDX-License-Identifier: MIT /}
+- [getSunTerminator](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/get-sun-terminator.md): {/ SPDX-License-Identifier: MIT /}
 - [Moon](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/moon.md): {/ SPDX-License-Identifier: MIT /}
 - [Sky](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sky.md): {/ SPDX-License-Identifier: MIT /}
 - [Stars](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/stars.md): {/ SPDX-License-Identifier: MIT /}
