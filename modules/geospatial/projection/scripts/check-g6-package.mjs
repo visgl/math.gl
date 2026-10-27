@@ -12,10 +12,10 @@ import {gzipSync} from 'node:zlib';
 import ts from 'typescript';
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
 const manifest = JSON.parse(readFileSync(join(root, 'modules/geospatial/package.json')));
-const entry = manifest.exports['./ellipsoid'];
-const esm = await import(new URL('../../dist/entries/ellipsoid.js', import.meta.url));
+const entry = manifest.exports['.'];
+const esm = await import(new URL('../../dist/index.js', import.meta.url));
 const cjs = createRequire(import.meta.url)(
-  new URL('../../dist/entries/ellipsoid.cjs', import.meta.url).pathname
+  new URL('../../dist/index.cjs', import.meta.url).pathname
 );
 for (const api of [esm,cjs]) {
   const g=new api.GeodesicIntersections({semiMajorAxis:1,semiMinorAxis:1.01});
@@ -26,7 +26,7 @@ for (const api of [esm,cjs]) {
   assert.equal(g.segments([0,-20],[0,20],[20,30],[30,30]).status,'disjoint');
   assert.equal(typeof api.GeodesicPath,'function');
 }
-assert(entry.types.endsWith('/ellipsoid.d.ts'));
+assert(entry.types.endsWith('/index.d.ts'));
 const measured = {};
 for (const symbol of ['Ellipsoid', 'EllipsoidGeodesic', 'GeodesicIntersections']) {
   const result = await build({

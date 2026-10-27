@@ -26,8 +26,8 @@ const fixtures = {
   staticModel: "export {createDeformationModel} from '@math.gl/geospatial/projection/deformation';",
   projectionBulk: "export * from '@math.gl/geospatial/projection/bulk';",
   projectionAnalysis: "export * from '@math.gl/geospatial/projection/analysis';",
-  numericLeaf: "export * from '@math.gl/core';",
-  coreRoot: "export * from '@math.gl/core';",
+  numericLeaf: "export {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core';",
+  coreRoot: "export {Vector3} from '@math.gl/core';",
   projectionCore: "export {ProjectionTransform} from '@math.gl/geospatial/projection/core';",
   projectionPipeline: "export {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';",
   geospatialEllipsoid: "export {Ellipsoid} from '@math.gl/geospatial';"
@@ -55,7 +55,7 @@ try {
         outfile,
         revision === 'baseline' ? baselineCommit : undefined
       );
-      const inputs = Object.keys(result.metafile.inputs).map(path => path.replaceAll('\\', '/'));
+      const inputs = Object.entries(Object.values(result.metafile.outputs)[0].inputs).filter(([, data]) => data.bytesInOutput > 0).map(([path]) => path.replaceAll('\\', '/'));
       if (revision === 'candidate') {
         if (name !== 'temporalModel')
           assert(
@@ -158,7 +158,7 @@ try {
     schemaVersion: 1,
     baselineCommit,
     methodology:
-      'Identical source-level ESM entries and historical/current source resolver; browser/es2020, esbuild minification and gzip level 9. Numeric leaf is new, with no historical equivalent. Graph checks require no class/culling dependencies for projection, no runtime dependency for the leaf, and no retained leaf in core root. Module loading/setup timing is measured separately.',
+      'Identical source-level ESM entries and historical/current source resolver; browser/es2020, esbuild minification and gzip level 9. Numeric leaf is new, with no historical equivalent. Graph checks require no class/culling dependencies for projection, no runtime dependency for the leaf, and no retained leaf in a selective core-root import. Module loading/setup timing is measured separately.',
     rows
   };
   console.table(

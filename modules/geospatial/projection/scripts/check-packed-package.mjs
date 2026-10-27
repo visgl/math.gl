@@ -4,7 +4,7 @@
 // Exercise actual npm tarballs in a temporary consumer, with no workspace source aliases.
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
-import {mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync} from 'node:fs';
+import {mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, cpSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -47,6 +47,13 @@ try {
       '-C',
       directory
     ]);
+  }
+  // Unbundled root imports evaluate the declared runtime dependencies. The math.gl
+  // packages above remain actual tarballs; copy the installed external dependencies.
+  for (const name of ['@mapbox/martini', 'polygon-clipping', 'robust-predicates', 'splaytree']) {
+    const destination = join(temporary, 'node_modules', name);
+    mkdirSync(join(destination, '..'), {recursive:true});
+    cpSync(join(root, 'node_modules', name), destination, {recursive:true});
   }
   for (const name of [
     'PROJ4-LICENSE.md',
