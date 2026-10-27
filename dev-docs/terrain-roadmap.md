@@ -543,7 +543,23 @@ saddle/topology, nodata, capacity and precision tests qualify these local Cartes
 operations. Tree-shaking probes and isolated package consumers guard their boundaries.
 
 Remaining analysis work includes independent real-DEM/GDAL qualification, terrain
-horizons, contour path stitching and cross-tile joining, isobands, filtered versus
+horizons, cross-tile contour joining and topology-preserving simplification, isobands, filtered versus
 derivative pyramids, and performance qualification at regional scale. Profiles
 are discrete samples, not clearance certificates; contours do not describe the
 bilinear or adaptive-mesh surface. GPU execution remains in luma.gl.
+
+## Contour paths and profile measurements tranche
+
+Independent `terrain/contour-paths`, `terrain/contour-simplify` and
+`terrain/profile-measure` entries continue T6. Graph tracing preserves every edge,
+ends at junctions and closes cycles explicitly. Bounded iterative simplification
+retains shared vertices and cycle anchors, reports measured chord deviation and
+compacts output buffers. Profile measurements report covered/missing intervals,
+ascent/descent, sampled surface length and height integrals without bridging gaps.
+No terrain classes gained methods; each operation has isolated bundle and package
+consumer checks. Analytic, graph, cycle/junction, approximation, missing-data and
+numerical-scale fixtures exercise the contracts.
+
+Contour topology preservation, polygon/isoband construction, cross-tile welding,
+regional real-DEM qualification, horizon queries and filtered pyramids remain open.
+Simplified paths are approximate geometry and are not exact terrain level sets.

@@ -885,6 +885,9 @@
       "@math.gl/geospatial/terrain/mesh-edges": ["modules/geospatial/src/terrain/mesh-edges.ts"],
       "@math.gl/geospatial/terrain/martini": ["modules/geospatial/src/terrain/martini.ts"],
       "@math.gl/geospatial/terrain/delatin": ["modules/geospatial/src/terrain/delatin.ts"],
+      "@math.gl/geospatial/terrain/contour-paths": ["modules/geospatial/src/terrain/contour-paths.ts"],
+      "@math.gl/geospatial/terrain/contour-simplify": ["modules/geospatial/src/terrain/contour-simplify.ts"],
+      "@math.gl/geospatial/terrain/profile-measure": ["modules/geospatial/src/terrain/profile-measure.ts"],
       "@math.gl/geospatial/terrain": [
         "./modules/geospatial/src/terrain/index.ts"
       ],

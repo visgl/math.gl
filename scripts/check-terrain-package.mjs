@@ -45,7 +45,10 @@ if (mesh.error.maxSampleError !== 0 || mesh.indices.length !== 6) throw new Erro
     ['derivatives', 'createTerrainGradientGrid', 'create(field).gradients.length === 18'],
     ['slope-aspect', 'getTerrainSlopeAspect', 'create(1, 0).slope === Math.PI / 4'],
     ['profile', 'sampleTerrainProfile', 'create((x: number, y: number) => field.sample(x, y), [0, 0, 2, 0], {spacing: 1}).heights.length === 3'],
-    ['contours', 'createTerrainContours', 'create(field, [0]).segments.length === 0']
+    ['contours', 'createTerrainContours', 'create(field, [0]).segments.length === 0'],
+    ['contour-paths', 'stitchTerrainContours', "create({positions:new Float64Array(),gridCoordinates:new Float64Array(),segments:new Uint32Array(),levelIndices:new Uint32Array(),levels:new Float64Array(),origin:[0,0,0],heightReference:'unknown'}).offsets.length === 1"],
+    ['contour-simplify', 'simplifyTerrainContourPaths', "create({positions:new Float64Array(),gridCoordinates:new Float64Array(),indices:new Uint32Array(),offsets:Uint32Array.from([0]),closed:new Uint8Array(),levelIndices:new Uint32Array(),levels:new Float64Array(),origin:[0,0,0],heightReference:'unknown'},{maxError:0}).indices.length === 0"],
+    ['profile-measure', 'measureTerrainProfile', 'create({positions:new Float64Array(2),distances:new Float64Array(1),heights:new Float64Array(1),statuses:new Uint8Array(1),length:0}).complete']
   ]) {
     const imports = `import {HeightField} from '@math.gl/geospatial/terrain';\nimport {${symbol} as create} from '@math.gl/geospatial/terrain/${entry}';`;
     const assertion = `const field = new HeightField({width:3,height:3,heights:new Float64Array(9)}); if (!(${expression})) throw new Error('Invalid analysis result');`;
