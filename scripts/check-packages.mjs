@@ -59,3 +59,4 @@ assert.equal(typeof (await import('@math.gl/geospatial/globe')).subdivideGlobeMe
 console.log(`${entrypoints} ESM/CommonJS entrypoints and all published assets/declarations passed across the six packages.`);
 
 await import('./check-terrain-package.mjs');
+await import('./qualify-terrain-dem.mjs');

@@ -563,3 +563,27 @@ numerical-scale fixtures exercise the contracts.
 Contour topology preservation, polygon/isoband construction, cross-tile welding,
 regional real-DEM qualification, horizon queries and filtered pyramids remain open.
 Simplified paths are approximate geometry and are not exact terrain level sets.
+
+## DEM qualification and conforming tile seams tranche
+
+Independent `terrain/vertex-tiles` and `terrain/mesh-stitch` entries add deterministic
+same-level vertex reconciliation and conforming mixed-resolution boundary topology.
+Shared lattice vertices use canonical ownership with an explicit disagreement budget
+and conservative missing-data propagation. Stitching preserves an authoritative
+piecewise-linear edge, inserts union knots, and splits boundary triangles. Normalized
+partial-edge ranges support coarse-to-child quadtree seams, including absent coarse
+midpoints. Output fractional grid coordinates preserve parameterization. Neither
+entry adds class methods or imports mesh builders, query indexes or shaders.
+
+A pinned redistributable GDAL DTED sample, independently generated GDAL 3.9.3
+Horn/Zevenbergen–Thorne slope/aspect outputs, exhaustive adaptive-mesh nodal checks,
+and same-level/partial-edge topology tests provide the first real-DEM qualification.
+The generator records preprocessing and versions; normal tests use committed data.
+A standalone report separates residuals, output bytes and warm microbenchmarks.
+
+This advances T0/T2/T6 without completing their qualification gates. Remaining work:
+additional mountainous/coastal fixtures, full-surface error certificates, regional
+performance, persistent update structures, vertex-tile derivative halos, global seam
+coordination/corner policy, transition morphs and downstream loaders/luma/deck adoption.
+Seam conformance does not imply normal continuity or preserve source terrain away
+from the authoritative edge. GPU execution remains exclusively companion work.

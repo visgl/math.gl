@@ -72,6 +72,14 @@ const probes = [
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/contours\./, /\/profile\./,
       ...['contour-paths', 'contour-simplify', 'profile-measure'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
   })),
+  ...[
+    ['reconcileTerrainVertexTiles', 'vertex-tiles', 5500],
+    ['stitchTerrainMeshEdges', 'mesh-stitch', 11000]
+  ].map(([symbol, entry, budget]) => ({
+    symbol, packages: [`@math.gl/geospatial/terrain/${entry}`], budget,
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./,
+      ...['vertex-tiles', 'mesh-stitch', 'tiled', 'mesh'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
+  })),
   {
     symbol: 'createMartiniTerrainMesh',
     packages: ['@math.gl/geospatial/terrain/martini'],
