@@ -8,7 +8,7 @@ import {
   createCRSResolver,
   createCRSDictionaryProvider,
   CRSResolutionError
-} from '@math.gl/geospatial/crs/resolver';
+} from '@math.gl/geospatial/crs';
 import type {ReadonlyCRSDefinition} from '@math.gl/geospatial/crs';
 import {wgs84GeographicCRS} from './projjson-fixtures';
 

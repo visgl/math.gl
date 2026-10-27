@@ -7,7 +7,7 @@ import {
   subdivideGeographicCutRing,
   type GeographicClipOptions,
   type GeographicCutEdge
-} from '@math.gl/geospatial/geographic-cuts';
+} from '@math.gl/geospatial';
 const options: GeographicClipOptions = {edgeModel: 'geodesic', latitudeRange: [0, 90]};
 const input = [{positions: [-40, -40, 40, -40, 40, 40, -40, 40]}];
 const polygon = clipGeographicPolygon(input, options);

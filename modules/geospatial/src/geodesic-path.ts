@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original distance-parameterized path adapter over math.gl's attributed GeographicLib facade.
 
-import type {NumericArray} from '@math.gl/core/types';
+import type {NumericArray} from '@math.gl/core';
 import {EllipsoidGeodesic, type GeodesicLine} from './ellipsoid-geodesic';
 import {WGS84_RADIUS_X, WGS84_RADIUS_Z} from './constants';
 

@@ -3,12 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {A5Decoder} from '@math.gl/dggs/a5';
-import {GeohashDecoder} from '@math.gl/dggs/geohash';
-import {H3Decoder} from '@math.gl/dggs/h3';
-import {PlusCodeDecoder} from '@math.gl/dggs/plus-code';
-import {QuadkeyDecoder} from '@math.gl/dggs/quadkey';
-import {getS2DescendantIndex, getS2IndexFromToken, getS2Level, S2Decoder} from '@math.gl/dggs/s2';
+import {A5Decoder} from '@math.gl/dggs';
+import {GeohashDecoder} from '@math.gl/dggs';
+import {H3Decoder} from '@math.gl/dggs';
+import {PlusCodeDecoder} from '@math.gl/dggs';
+import {QuadkeyDecoder} from '@math.gl/dggs';
+import {getS2DescendantIndex, getS2IndexFromToken, getS2Level, S2Decoder} from '@math.gl/dggs';
 
 type GlobalGridLayerContract = {
   name: string;

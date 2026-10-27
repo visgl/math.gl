@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original geodesic edge adapter over the shared adaptive polyline subdivision engine.
 
-import {subdividePolyline} from '@math.gl/geometry/polygon';
-import type {SubdividePolylineOptions, SubdividedPolyline} from '@math.gl/geometry/polygon';
+import {subdividePolyline} from '@math.gl/geometry';
+import type {SubdividePolylineOptions, SubdividedPolyline} from '@math.gl/geometry';
 import {GeodesicPath, validateGeographicPosition, type GeodesicPathOptions} from './geodesic-path';
 
 export type SubdivideGeodesicPolylineOptions = Omit<

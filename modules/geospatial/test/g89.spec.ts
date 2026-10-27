@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {EllipsoidGeodesicExact} from '@math.gl/geospatial/geodesic-exact';
-import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid';
-import {TriaxialEllipsoid} from '@math.gl/geospatial/triaxial';
+import {EllipsoidGeodesicExact} from '@math.gl/geospatial';
+import {EllipsoidGeodesic} from '@math.gl/geospatial';
+import {TriaxialEllipsoid} from '@math.gl/geospatial';
 import {ellipticIntegrals} from '../src/geodesic-exact/quadrature';
 import {qualifyG89} from './g89-qualification';
 import independent from './g89-independent.json';

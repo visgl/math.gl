@@ -4,8 +4,8 @@
 
 import {expect, test} from 'vitest';
 import {HeightField, TerrainSampleStatus as Status} from '@math.gl/geospatial/terrain';
-import {createTerrainSurface} from '@math.gl/geospatial/terrain/surface';
-import {sampleTerrainProfile} from '@math.gl/geospatial/terrain/profile';
+import {createTerrainSurface} from '@math.gl/geospatial/terrain';
+import {sampleTerrainProfile} from '@math.gl/geospatial/terrain';
 
 const plane = (x: number, y: number) => ({status: Status.VALID, height: 2 * x + 3 * y});
 

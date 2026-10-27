@@ -9,7 +9,7 @@ import Example from '@site/src/components/culling-queries';
 <Example inline interactive height={520} />
 
 Import `intersectRayBounds`, `intersectRayTriangle`, and `getClosestPointOnTriangle` from
-`@math.gl/geometry/culling` or the lightweight `@math.gl/geometry/culling/queries` entry point.
+`@math.gl/geometry/culling` or the lightweight `@math.gl/geometry/culling` entry point.
 
 - `intersectRayBounds(origin, direction, minimum, maximum, maxT = Infinity)` supports 2D/3D
   closed bounds. Returns entry t, zero for an origin inside, or null. Parallel components and

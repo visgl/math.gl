@@ -70,3 +70,12 @@ export function findDGGSCellColumn(
   }
   return match;
 }
+
+// Public named exports. Implementations remain in independently tree-shakable files.
+export {getGeohashBounds} from './geohash';
+export {
+  GEOHASH_FUNCTION_LIBRARY,
+  QUADKEY_FUNCTION_LIBRARY,
+  S2_FUNCTION_LIBRARY,
+  DGGS_FUNCTION_LIBRARY
+} from './expressions';

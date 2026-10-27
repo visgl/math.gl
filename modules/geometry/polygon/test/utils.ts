@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 // math.gl, MIT license
-import {NumericArray} from '@math.gl/core/types';
+import {NumericArray} from '@math.gl/core';
 
 export function toNested(flatData: NumericArray, options?: {addZ?: boolean}): number[][] {
   const nestedData = [];

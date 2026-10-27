@@ -7,7 +7,7 @@
 Subdivides a polygon by intersecting with a uniform grid.
 
 ```js
-import {cutPolygonByGrid} from '@math.gl/geometry/polygon';
+import {cutPolygonByGrid} from '@math.gl/geometry';
 
 cutPolygonByGrid([0, 15, 15, 0, 0, -15, 0, 15], {size: 2, gridResolution: 20});
 // returns [

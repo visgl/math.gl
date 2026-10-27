@@ -8,7 +8,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 // @ts-nocheck
-import {earcut, Polygon, modifyPolygonWindingDirection} from '@math.gl/geometry/polygon';
+import {earcut, Polygon, modifyPolygonWindingDirection} from '@math.gl/geometry';
 import {toNested} from './utils';
 
 const polygonSmall = [0, 0, 1, 1, 0, 2, -1, 1, -1.25, 0.5, 0, 0];

@@ -16,10 +16,10 @@ import {
   formatGeographicCoordinates,
   type GridCoordinate,
   type MGRSCoordinate
-} from '@math.gl/geospatial/coordinates';
-import {TriaxialEllipsoid} from '@math.gl/geospatial/triaxial';
-import {EllipsoidGeodesic, EllipsoidRhumb} from '@math.gl/geospatial/ellipsoid';
-import {GeodesicLineBuffer, RhumbLineBuffer} from '@math.gl/geospatial/geodesic-buffer';
+} from '@math.gl/geospatial';
+import {TriaxialEllipsoid} from '@math.gl/geospatial';
+import {EllipsoidGeodesic, EllipsoidRhumb} from '@math.gl/geospatial';
+import {GeodesicLineBuffer, RhumbLineBuffer} from '@math.gl/geospatial';
 const grid: GridCoordinate = projectGrid(20, 30);
 unprojectGrid(grid);
 standardGridZone(20, 30);

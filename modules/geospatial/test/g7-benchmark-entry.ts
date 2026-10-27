@@ -8,7 +8,7 @@ import {
   Ellipsoid,
   LocalReferenceFrame,
   EllipsoidTangentPlane
-} from '@math.gl/geospatial/ellipsoid';
+} from '@math.gl/geospatial';
 import {Vector2, Vector3, Matrix4, Quaternion} from '@math.gl/core';
 import workload from './g7-workload.json';
 import reference from './g7-reference.json';

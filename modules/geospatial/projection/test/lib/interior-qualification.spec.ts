@@ -4,7 +4,7 @@
 // SPDX-FileComment: Original independently referenced interior qualification; no upstream fixtures.
 import {expect, test} from 'vitest';
 import {config, Vector3} from '@math.gl/core';
-import {cartesianToSpheroid, spheroidToCartesian} from '@math.gl/core/spheroid';
+import {cartesianToSpheroid, spheroidToCartesian} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
 import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
 import {geocentric} from '@math.gl/geospatial/projection/projections/geocent';

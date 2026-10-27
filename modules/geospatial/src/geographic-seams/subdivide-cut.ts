@@ -7,7 +7,7 @@ import {
   type SubdividePolylineOptions,
   type SubdividedPolyline,
   type PolylineEdgeSampler
-} from '@math.gl/geometry/polygon';
+} from '@math.gl/geometry';
 import {GeodesicPath} from '../geodesic-path';
 import {RhumbPath} from '../rhumb-path';
 import {EllipsoidGeodesic} from '../ellipsoid-geodesic';

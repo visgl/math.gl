@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {BoxIndex, TriangleBVH} from '@math.gl/geometry/spatial-index';
-import {getClosestPointsSegmentTriangle} from '@math.gl/geometry/culling/queries';
+import {BoxIndex, TriangleBVH} from '@math.gl/geometry';
+import {getClosestPointsSegmentTriangle} from '@math.gl/geometry/culling';
 
 test('nearest-box traversal uses conservative closed-box distances and existing budgets', () => {
   const boxes = new BoxIndex({

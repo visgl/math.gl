@@ -10,7 +10,7 @@ import {test, expect} from 'vitest';
 import {toNested} from './utils';
 
 import {configure, equals} from '@math.gl/core';
-import {Polygon} from '@math.gl/geometry/polygon';
+import {Polygon} from '@math.gl/geometry';
 
 const TEST_CASES = [
   {

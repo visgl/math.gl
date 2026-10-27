@@ -18,7 +18,7 @@ latest available upstream releases.
 | NGA / GeographicLib EGM96 distribution | Optional geoid grids; public-domain model data, [provenance, resolution and checksum manifest](./geoid/data/README.md). |
 | OpenStreetMap and Timezone Boundary Builder contributors | Optional simplified timezone boundaries, ODbL-1.0; [source and modifications](./timezone/data/README.md), [full license](./timezone/data/LICENSE-ODbL.txt). The MIT code license does not relicense this database. |
 
-The optional `astronomy-engine` peer supplies planetary ephemerides under its own
+The `astronomy-engine` runtime dependency supplies planetary ephemerides under its own
 MIT license. Source comments cite the physical data and photometric papers used
 by the original math.gl adapters; these are scientific references, not assertions
 that the authors supplied the adapter code. The consolidated [references page](https://math.gl/docs/references-and-credits)

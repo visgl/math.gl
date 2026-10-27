@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {BoxIndex, TriangleBVH} from '@math.gl/geometry/spatial-index';
+import {BoxIndex, TriangleBVH} from '@math.gl/geometry';
 
 test('bounded box queries count node and item visits and complete at the exact budget', () => {
   const boxes = new BoxIndex({dimension: 2, bounds: [0, 0, 1, 1, 0, 0, 1, 1]});

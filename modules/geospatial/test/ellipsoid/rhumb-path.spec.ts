@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original native and analytic adapter/parameterization controls.
 import {expect, test} from 'vitest';
-import {EllipsoidRhumb, RhumbPath, RhumbDomainError} from '@math.gl/geospatial/ellipsoid';
-import {subdivideRhumbPolyline} from '@math.gl/geospatial/globe';
+import {EllipsoidRhumb, RhumbPath, RhumbDomainError} from '@math.gl/geospatial';
+import {subdivideRhumbPolyline} from '@math.gl/geospatial';
 const sphere = new EllipsoidRhumb({semiMajorAxis: 1, semiMinorAxis: 1});
 const rad = Math.PI / 180;
 function close(a: ArrayLike<number>, b: ArrayLike<number>, tolerance = 2e-10) {

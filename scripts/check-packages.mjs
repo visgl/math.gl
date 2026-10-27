@@ -25,19 +25,11 @@ for (const name of expected) {
       assert.notEqual(dependency, manifest.name, 'Subpaths must not create self-dependencies');
     }
   }
-  if (['core', 'earth'].includes(name)) {
-    for (const field of ['dependencies', 'peerDependencies', 'optionalDependencies']) {
-      assert(Object.keys(manifest[field] || {}).every(dependency =>
-        dependency.startsWith('@math.gl/') ||
-        (name === 'earth' && field === 'peerDependencies' && dependency === 'astronomy-engine' &&
-          manifest.peerDependenciesMeta?.[dependency]?.optional === true)),
-        manifest.name + ': vendored implementations must not introduce external runtime dependencies');
-    }
+  if (name === 'core') {
+    assert(Object.keys(manifest.dependencies || {}).every(dependency => dependency.startsWith('@math.gl/')), 'Core must not introduce external runtime dependencies');
   }
   if (name === 'earth') {
-    assert.equal(manifest.peerDependencies?.['astronomy-engine'], '^' + manifest.devDependencies['astronomy-engine'],
-      'The existing astronomy integration must advertise its optional peer');
-    assert.equal(manifest.peerDependenciesMeta?.['astronomy-engine']?.optional, true);
+    assert.equal(manifest.dependencies?.['astronomy-engine'], manifest.devDependencies['astronomy-engine'], 'Root astronomy exports require their runtime dependency');
   }
   for (const [subpath, entry] of Object.entries(manifest.exports)) {
     const targets = typeof entry === 'string' ? [entry] : Object.values(entry);
@@ -54,9 +46,10 @@ for (const name of expected) {
 for (const packageName of ['@math.gl/core', '@math.gl/geometry', '@math.gl/geospatial', '@math.gl/earth']) {
   console.log(`${packageName}: implementation owned by the grouped package`);
 }
-assert.equal('subdivideGlobeMesh' in await import('@math.gl/geometry/polygon'), false);
-assert.equal(typeof (await import('@math.gl/geospatial/globe')).subdivideGlobeMesh, 'function');
+assert.equal('subdivideGlobeMesh' in await import('@math.gl/geometry'), false);
+assert.equal(typeof (await import('@math.gl/geospatial')).subdivideGlobeMesh, 'function');
 console.log(`${entrypoints} ESM/CommonJS entrypoints and all published assets/declarations passed across the six packages.`);
 
 await import('./check-terrain-package.mjs');
+await import('./check-root-exports.mjs');
 await import('./qualify-terrain-dem.mjs');

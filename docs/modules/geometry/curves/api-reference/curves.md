@@ -12,7 +12,7 @@ import {
   CubicBezierCurve,
   HermiteCurve,
   CatmullRomCurve
-} from '@math.gl/geometry/curves';
+} from '@math.gl/geometry';
 ```
 
 ## Constructors

@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';import{execFileSync}from'node:child_process';import{createRequire}from'node:module';import{mkdtempSync,mkdirSync,readFileSync,writeFileSync,symlinkSync,rmSync}from'node:fs';import{tmpdir}from'node:os';import{join,relative}from'node:path';import{fileURLToPath}from'node:url';import{gzipSync}from'node:zlib';import{transform}from'esbuild';import{bundleRuntime}from'../projection/scripts/benchmark-runtime.mjs';
 const root=fileURLToPath(new URL('../../../',import.meta.url)),require=createRequire(import.meta.url);
 for(const load of[p=>import(p),p=>require(p)]){
- const c=await load('@math.gl/geospatial/coordinates'),b=await load('@math.gl/geospatial/geodesic-buffer'),t=await load('@math.gl/geospatial/triaxial');
+ const c=await load('@math.gl/geospatial'),b=await load('@math.gl/geospatial'),t=await load('@math.gl/geospatial');
  assert.equal(c.formatMGRS(90,0),'ZAH0000000000');assert.equal(c.parseAngle('12:30N','latitude'),12.5);
  assert.equal(new t.TriaxialEllipsoid({radii:[1,1,1]}).sampleSurface(()=>0)[2],-1);
  const line={position:distance=>({lat2:1,lon2:2,azi2:3,s12:distance,a12:4,m12:5,M12:6,M21:7})};assert.equal(new b.GeodesicLineBuffer(line,1).positions([1],new Float64Array(8))[3],1);

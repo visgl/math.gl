@@ -227,6 +227,6 @@ The shared numerical derivative and its caller remain allocation-guarded. The an
 source-graph budget remains 4,900 minified / 1,800 gzip bytes; the published-package
 analysis gzip limit is 1,700 bytes. These are distinct builds. Optional projection kernels,
 grid readers, WKT syntax and regional datum data must still stay out of the corresponding
-initial graphs. The metadata-only `@math.gl/geospatial/crs/metadata` import prevents shared WKT
+initial graphs. The metadata-only `@math.gl/geospatial/crs` import prevents shared WKT
 syntax from being hoisted by split-bundle construction. No dependency exclusions or
 coverage thresholds are relaxed by this baseline update.

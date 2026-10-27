@@ -148,7 +148,7 @@ try {
     assert.equal(core.checkProjectionCompatibility(regional,{datumCatalogs:[datumCatalog]}).status,'supported');
     const regionalLazy = await new LazyProjectionEngine({datumCatalogs:[datumCatalog]}).createProjectionAsync({from:regional,to:'EPSG:3857'});
     assert(Number.isFinite(regionalLazy.project([-2,52])[0]));
-    const {spheroidToCartesian, cartesianToSpheroid} = await load('@math.gl/core/spheroid');
+    const {spheroidToCartesian, cartesianToSpheroid} = await load('@math.gl/core');
     const numericOutput = {x:0,y:0,z:3};
     const numericGeometry = {semiMajorAxis:10,semiMinorAxis:5,eccentricitySquared:.75};
     assert(spheroidToCartesian(numericOutput,numericGeometry));
@@ -157,7 +157,7 @@ try {
     assert.deepEqual(numericOutput,{x:0,y:0,z:3});
     assert(!cartesianToSpheroid({x:0,y:0,z:0},numericGeometry,numericOutput));
     assert.deepEqual(numericOutput,{x:0,y:0,z:3});
-    const frames = await load('@math.gl/core/local-frame');
+    const frames = await load('@math.gl/core');
     const basis = frames.createLocalFrameBasis();
     assert(frames.eastNorthUpBasis(0,0,basis));
     const velocityPoint = {x:1,y:2,z:3};
@@ -397,12 +397,12 @@ try {
     class CustomError extends core.TypeScriptCRSError {}
     assert(new CustomError('invalid-definition', 'custom') instanceof api.TypeScriptCRSError);
     assert(!(new core.TypeScriptCRSError('invalid-definition', 'base') instanceof CustomError));
-    const metadata = await load('@math.gl/geospatial/crs/metadata');
+    const metadata = await load('@math.gl/geospatial/crs');
     assert.equal(typeof metadata.getCRSSignature, 'function');
     assert.equal(metadata.linearUnits.ft.metersPerUnit, 0.3048);
-    const {parseWKTCRS} = await load('@math.gl/geospatial/crs/wkt');
-    const {parsePROJString} = await load('@math.gl/geospatial/crs/proj-string');
-    const {inferCRSRepresentation} = await load('@math.gl/geospatial/crs/spatial-reference');
+    const {parseWKTCRS} = await load('@math.gl/geospatial/crs');
+    const {parsePROJString} = await load('@math.gl/geospatial/crs');
+    const {inferCRSRepresentation} = await load('@math.gl/geospatial/crs');
     assert.equal(typeof parseWKTCRS, 'function');
     assert.equal(typeof parsePROJString, 'function');
     assert.equal(inferCRSRepresentation('EPSG:4326'), 'identifier');
@@ -451,7 +451,7 @@ try {
     join(temporary, 'consumer.ts'),
     `
     ${subpaths.map((path, index) => 'import * as entry' + index + " from '@math.gl/geospatial/projection" + path.slice(1) + "';\nvoid entry" + index + ';').join('\n')}
-    import {createLocalFrameBasis, eastNorthUpBasis, eastNorthUpBasisFromDirections, localToFixed, fixedToLocal, localFrameToMatrix, type LocalFrameBasis, type LocalFramePoint, type LocalFrameAxis} from '@math.gl/core/local-frame';
+    import {createLocalFrameBasis, eastNorthUpBasis, eastNorthUpBasisFromDirections, localToFixed, fixedToLocal, localFrameToMatrix, type LocalFrameBasis, type LocalFramePoint, type LocalFrameAxis} from '@math.gl/core';
     const basis: LocalFrameBasis = createLocalFrameBasis();
     const framePoint: LocalFramePoint = {x:1,y:2,z:3};
     const axis: LocalFrameAxis = 'east';
@@ -463,14 +463,14 @@ try {
     eastNorthUpBasis(0,0);
     // @ts-expect-error Axes are named signed local directions.
     localFrameToMatrix(basis,framePoint,'x','y','z',[]);
-    import {spheroidToCartesian, cartesianToSpheroid, type SpheroidPoint, type SpheroidGeometry} from '@math.gl/core/spheroid';
+    import {spheroidToCartesian, cartesianToSpheroid, type SpheroidPoint, type SpheroidGeometry} from '@math.gl/core';
     const numericPoint: SpheroidPoint = {x:0,y:0,z:0};
     const numericGeometry: SpheroidGeometry = {semiMajorAxis:10,semiMinorAxis:5,eccentricitySquared:.75};
     const forwardStatus: boolean = spheroidToCartesian(numericPoint,numericGeometry);
     const inverseStatus: boolean = cartesianToSpheroid(numericPoint,numericGeometry);
     void forwardStatus; void inverseStatus;
     import {Ellipsoid, type SpheroidParameters as GeospatialSpheroid} from '@math.gl/geospatial';
-    import type {SpheroidParameters as TypesSpheroid} from '@math.gl/core/types';
+    import type {SpheroidParameters as TypesSpheroid} from '@math.gl/core';
     import type {SpheroidParameters as CoreSpheroid} from '@math.gl/core';
     import {normalizeCRS, type SpheroidParameters as ProjectionSpheroid} from '@math.gl/geospatial/projection/core';
     const shape = Ellipsoid.fromSpheroid(normalizeCRS('EPSG:4326').ellipsoid);
@@ -656,13 +656,13 @@ try {
     // @ts-expect-error Observation epoch is supplied separately, not in a step.
     const dynamicStep: PipelineStep = {type: 'helmert', translation: [0, 0, 0], epoch: 2020};
     import {mercator} from '@math.gl/geospatial/projection/projections/merc';
-    import {getCRSSignature, linearUnits, type CRSMetadata, type CRSUnit} from '@math.gl/geospatial/crs/metadata';
+    import {getCRSSignature, linearUnits, type CRSMetadata, type CRSUnit} from '@math.gl/geospatial/crs';
     const metadataUnit: CRSUnit = linearUnits.ft;
     const signature: (metadata: CRSMetadata) => string = getCRSSignature;
     void [metadataUnit, signature];
-    import {parseWKTCRS} from '@math.gl/geospatial/crs/wkt';
-    import {parsePROJString} from '@math.gl/geospatial/crs/proj-string';
-    import {inferCRSRepresentation} from '@math.gl/geospatial/crs/spatial-reference';
+    import {parseWKTCRS} from '@math.gl/geospatial/crs';
+    import {parsePROJString} from '@math.gl/geospatial/crs';
+    import {inferCRSRepresentation} from '@math.gl/geospatial/crs';
     void [parseWKTCRS, parsePROJString, inferCRSRepresentation];
     const projection = new ProjectionTransform({to: 'EPSG:3857', projections: [mercator]});
     const a: Float32Array = projection.projectFlat(new Float32Array([1, 2]));

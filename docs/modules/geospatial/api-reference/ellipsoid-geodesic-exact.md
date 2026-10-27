@@ -6,7 +6,7 @@ It also creates reusable lines with distance and auxiliary-sphere arc sampling.
 Select it explicitly through its optional entry point:
 
 ```ts
-import {EllipsoidGeodesicExact} from '@math.gl/geospatial/geodesic-exact';
+import {EllipsoidGeodesicExact} from '@math.gl/geospatial';
 
 const geodesic = new EllipsoidGeodesicExact({
   semiMajorAxis: 6378137,        // equatorial radius a
@@ -69,7 +69,7 @@ Area is omitted by default. At exact poles the endpoint longitude specifies the
 terminal meridian convention.
 
 ```ts
-import {GeodesicPolygonExact} from '@math.gl/geospatial/geodesic-exact';
+import {GeodesicPolygonExact} from '@math.gl/geospatial';
 const polygon = new GeodesicPolygonExact({semiMajorAxis: 1, semiMinorAxis: 2});
 polygon.addPoint(0, 0).addPoint(0, 10).addPoint(90, 0);
 const {perimeter, area} = polygon.compute();

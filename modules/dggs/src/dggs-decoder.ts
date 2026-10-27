@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {type Bounds2D} from '@math.gl/core/types';
+import {type Bounds2D} from '@math.gl/core';
 import {unwrapDGGSBoundary} from './unwrap-dggs-boundary';
 
 /** Optional continuous-longitude geometry output for DGGS decoders. */

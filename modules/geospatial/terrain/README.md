@@ -2,11 +2,11 @@
 
 Experimental renderer-independent height fields, sampling, derivatives, and regular
 terrain meshes. The main entry point has no runtime imports from other packages.
-Mesh construction is available separately from `@math.gl/geospatial/terrain/geometry`.
+Mesh construction is available separately from `@math.gl/geospatial/terrain`.
 
 ```ts
 import {HeightField, TerrainSampleStatus} from '@math.gl/geospatial/terrain';
-import {HeightFieldGeometry} from '@math.gl/geospatial/terrain/geometry';
+import {HeightFieldGeometry} from '@math.gl/geospatial/terrain';
 
 const field = new HeightField({
   width: 2,

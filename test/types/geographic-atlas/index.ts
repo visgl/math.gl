@@ -8,7 +8,7 @@ import {
   createOctahedralCutGraph,
   type GeographicCutGraph,
   type GeographicAtlasRing
-} from '@math.gl/geospatial/geographic-atlas';
+} from '@math.gl/geospatial';
 const graph: GeographicCutGraph = createOctahedralCutGraph();
 const atlas = new GeographicCutAtlas(graph, {edgeModel: 'rhumb'});
 const inputs = [{positions: [-40, -40, 40, -40, 40, 40, -40, 40]}];

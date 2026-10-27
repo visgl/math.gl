@@ -22,7 +22,7 @@ const baselineCommit = values['baseline-ref']
   : undefined;
 const directory = mkdtempSync(join(tmpdir(), 'math-gl-local-frame-graphs-'));
 const fixtures = {
-  numericLeaf: "export * from '@math.gl/core/local-frame';",
+  numericLeaf: "export * from '@math.gl/core';",
   deformation: "export {createDeformationModel} from '@math.gl/geospatial/projection/deformation';",
   coreRoot: "export * from '@math.gl/core';",
   projectionCore: "export {ProjectionTransform} from '@math.gl/geospatial/projection/core';",

@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {EllipsoidGeodesicExact, GeodesicPolygonExact} from '@math.gl/geospatial/geodesic-exact';
+import {EllipsoidGeodesicExact, GeodesicPolygonExact} from '@math.gl/geospatial';
 import native from './exact-area-reference.json';
 import independent from './exact-area-independent.json';
 export const provenance = {native: native.provenance, independent: independent.provenance};

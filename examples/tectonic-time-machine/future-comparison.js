@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Alternative illustrative assembly outlines, not forecast confidence envelopes.
-import {cutPolylineByMercatorBounds} from '@math.gl/geometry/polygon';
+import {cutPolylineByMercatorBounds} from '@math.gl/geometry';
 import {futureRotations,futureRotation,rotateToLonLat} from './math.js';
 import {transformMesh} from './geometry.js';
 // Rank present-day blocks by spherical strip area, for display selection only.

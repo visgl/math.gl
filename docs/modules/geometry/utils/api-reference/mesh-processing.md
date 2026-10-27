@@ -6,7 +6,7 @@
 
 ```typescript
 import {transformGeometry, mergeGeometries, weldGeometry, getDegenerateTriangles}
-  from '@math.gl/geometry/utils';
+  from '@math.gl/geometry';
 ```
 
 These operations accept the module's minimal `Geometry` shape: `mode: GL.TRIANGLES`,

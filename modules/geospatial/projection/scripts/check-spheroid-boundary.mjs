@@ -26,7 +26,7 @@ const fixtures = {
   staticModel: "export {createDeformationModel} from '@math.gl/geospatial/projection/deformation';",
   projectionBulk: "export * from '@math.gl/geospatial/projection/bulk';",
   projectionAnalysis: "export * from '@math.gl/geospatial/projection/analysis';",
-  numericLeaf: "export * from '@math.gl/core/spheroid';",
+  numericLeaf: "export * from '@math.gl/core';",
   coreRoot: "export * from '@math.gl/core';",
   projectionCore: "export {ProjectionTransform} from '@math.gl/geospatial/projection/core';",
   projectionPipeline: "export {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';",

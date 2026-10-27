@@ -1,4 +1,4 @@
-# @math.gl/geometry/spatial-index (POC)
+# @math.gl/geometry (POC)
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -14,7 +14,7 @@ construction reorders leaves. Inputs are copied. Empty indexes are supported. Bo
 counts as overlap, distances are Euclidean input-coordinate units, and ties select the lowest row.
 
 ```ts
-import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry/spatial-index';
+import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry';
 
 const boxes = new BoxIndex({dimension: 2, bounds: [0, 0, 1, 1, 4, 4, 5, 5]});
 boxes.search([0, 0], [2, 2]); // [0]
@@ -161,7 +161,7 @@ minimum separation, **not the earliest contact**; for example, a sphere approach
 touches before its center crosses the plane. No time-of-impact, changing-radius, rotating,
 or curved-path sweep is supplied. Coplanar overlaps may have many minimizing pairs.
 
-The new low-level kernels are exported from `@math.gl/geometry/culling/queries`:
+The new low-level kernels are exported from `@math.gl/geometry/culling`:
 
 - `getClosestPointsOnSegments(a0, a1, b0, b1)` returns `distance`, `pointA`, `pointB`,
   `fractionA`, and `fractionB` for two closed segments.
@@ -182,8 +182,8 @@ For background on closest-pair formulations, see Geometric Tools'
 [segment/triangle query](https://github.com/davideberly/GeometricTools/blob/master/GTE/Mathematics/DistSegment3Triangle3.h)
 and [segment-distance analysis](https://www.geometrictools.com/Documentation/DistanceLine3Line3.pdf).
 
-The ray and triangle geometry kernels are reused from `@math.gl/geometry/culling/queries`.
-`@math.gl/geometry/spatial-index/boxes` provides BoxIndex and PointIndex without the triangle code.
+The ray and triangle geometry kernels are reused from `@math.gl/geometry/culling`.
+`@math.gl/geometry` provides BoxIndex and PointIndex without the triangle code.
 
 For terrain picking, keep physical heights and validity masks in the caller (for
 example loaders.gl height grids). The BVH indexes displayed geometry; it does not

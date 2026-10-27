@@ -29,7 +29,7 @@ assert(entry.types.endsWith('/ellipsoid.d.ts'));
 const measured = {};
 for (const symbol of ['Ellipsoid', 'EllipsoidMetrics', 'EllipsoidGeodesic', 'GeodesicPolygon']) {
   const result = await build({
-    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial/ellipsoid';`, resolveDir: root},
+    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial';`, resolveDir: root},
     bundle: true,
     platform: 'browser',
     format: 'esm',
@@ -56,7 +56,7 @@ try {
   const file = join(temp, 'types.ts');
   writeFileSync(
     file,
-    `import {EllipsoidMetrics, GeodesicPolygon, EllipsoidGeodesic, type AuxiliaryLatitude, type GeodesicPolygonResult} from '@math.gl/geospatial/ellipsoid';
+    `import {EllipsoidMetrics, GeodesicPolygon, EllipsoidGeodesic, type AuxiliaryLatitude, type GeodesicPolygonResult} from '@math.gl/geospatial';
 const axes={semiMajorAxis:1,semiMinorAxis:1};
 const kind:AuxiliaryLatitude='isometric';
 const lat:number=new EllipsoidMetrics(axes).latitudeFromAuxiliary(Infinity,kind);

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Helmert equations directly adapted from proj4js 2.22.0 datumUtils.js. See ../../../projection/PROJ4-LICENSE.md. Geocentric equations now delegate to the attributed @math.gl/core/spheroid leaf.
-import {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core/spheroid';
+// SPDX-FileComment: Helmert equations directly adapted from proj4js 2.22.0 datumUtils.js. See ../../../projection/PROJ4-LICENSE.md. Geocentric equations now delegate to the attributed @math.gl/core leaf.
+import {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core';
 import type {Datum, Ellipsoid} from './crs/types';
 import type {ProjectionPoint} from './types';
 export type Coordinate3D = [number, number, number];

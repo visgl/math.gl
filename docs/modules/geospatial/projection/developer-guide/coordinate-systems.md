@@ -167,7 +167,7 @@ conversion uses registered geoid undulations in meters, with source and destinat
 height operations around the horizontal datum operation. Choose a model matching
 your datum and tide convention. See the
 [height conversion guide](../api-reference/datum-grids.md#convert-geoid-heights) for loading
-GTX or GeoTIFF grids and integrating `@math.gl/earth/geoid`.
+GTX or GeoTIFF grids and integrating `@math.gl/earth`.
 
 A separately declared vertical CRS in WKT, PROJJSON or metadata is not automatically
 executed. Explicit horizontal extraction discards that component; it does not

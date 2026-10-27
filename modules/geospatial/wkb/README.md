@@ -1,9 +1,9 @@
-# @math.gl/geospatial/wkb
+# @math.gl/geospatial
 
 Dependency-free, synchronous codecs for Well-Known Binary (WKB), Extended WKB (EWKB), and
 Well-Known Text (WKT) geometry.
 
-`@math.gl/geospatial/wkb` is the format layer beneath `@math.gl/geospatial/geoarrow`. It parses and writes individual
+`@math.gl/geospatial` is the format layer beneath `@math.gl/geospatial/geoarrow`. It parses and writes individual
 geometry values without importing Arrow, GeoArrow, loaders.gl, or a geometry class hierarchy.
 Applications can therefore use the codecs for row-oriented data, database values, network
 messages, or as a building block for their own columnar adapters.
@@ -19,7 +19,7 @@ The package has no runtime, peer, or optional dependencies.
 ## Quick start
 
 ```typescript
-import {parseWKB, writeWKB, parseWKT, formatWKT} from '@math.gl/geospatial/wkb';
+import {parseWKB, writeWKB, parseWKT, formatWKT} from '@math.gl/geospatial';
 
 const geometry = parseWKT('LINESTRING Z (0 0 5, 10 20 6)');
 const bytes = writeWKB(geometry, 'xyz');
@@ -103,7 +103,7 @@ Use `inspectWKBHeader` when routing or classifying data. It reads only the endia
 dimension flags, and optional EWKB SRID; the coordinate payload does not need to be present.
 
 ```typescript
-import {inspectWKBHeader, scanWKB} from '@math.gl/geospatial/wkb';
+import {inspectWKBHeader, scanWKB} from '@math.gl/geospatial';
 
 const header = inspectWKBHeader(bytes);
 console.log(header.geometryType, header.dimension, header.srid);
@@ -124,7 +124,7 @@ It accepts sliced typed-array views and mixed-endian nested geometries.
 individual numbers rather than temporary coordinate arrays.
 
 ```typescript
-import {visitWKB} from '@math.gl/geospatial/wkb';
+import {visitWKB} from '@math.gl/geospatial';
 
 visitWKB(bytes, {
   geometry: (header, count, depth) => {
@@ -147,7 +147,7 @@ The visitor does not detach or mutate the input and does not create `WellKnownGe
 accepts an existing buffer, a sliced typed-array view, and an optional destination offset.
 
 ```typescript
-import {WKBBuilder} from '@math.gl/geospatial/wkb';
+import {WKBBuilder} from '@math.gl/geospatial';
 
 function emitLine(builder: WKBBuilder): void {
   builder.beginLineString(2);
@@ -205,7 +205,7 @@ with the declared dimension. Formatting treats an all-non-finite coordinate tupl
 delegate individual values to this package:
 
 ```typescript
-import {parseWKB} from '@math.gl/geospatial/wkb';
+import {parseWKB} from '@math.gl/geospatial';
 import {decodeGeoArrowWKB} from '@math.gl/geospatial/geoarrow';
 
 const oneGeometry = parseWKB(bytes);

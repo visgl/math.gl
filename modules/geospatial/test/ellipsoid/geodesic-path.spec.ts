@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {GeodesicPath, EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid';
+import {GeodesicPath, EllipsoidGeodesic} from '@math.gl/geospatial';
 import reference from './geodesic-path-reference.json';
 
 const sphere = new EllipsoidGeodesic({semiMajorAxis: 10, semiMinorAxis: 10});

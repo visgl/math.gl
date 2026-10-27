@@ -30,7 +30,7 @@ assert(entry.types.endsWith('/ellipsoid.d.ts'));
 const measured = {};
 for (const symbol of ['Ellipsoid', 'EllipsoidGeodesic', 'GeodesicIntersections']) {
   const result = await build({
-    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial/ellipsoid';`, resolveDir: root},
+    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial';`, resolveDir: root},
     bundle: true,
     platform: 'browser',
     format: 'esm',
@@ -52,7 +52,7 @@ try {
   const file = join(temp, 'types.ts');
   writeFileSync(
     file,
-    `import {GeodesicIntersections,GeodesicPath,type GeodesicIntersectionPath,type IntersectionPoint} from '@math.gl/geospatial/ellipsoid';
+    `import {GeodesicIntersections,GeodesicPath,type GeodesicIntersectionPath,type IntersectionPoint} from '@math.gl/geospatial';
 const axes={semiMajorAxis:1,semiMinorAxis:1.01};
 const g=new GeodesicIntersections(axes);
 const a:GeodesicIntersectionPath={latitude:0,longitude:0,azimuth:90};

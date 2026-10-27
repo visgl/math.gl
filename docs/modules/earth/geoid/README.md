@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/From-v3.4-blue.svg?style=flat-square" alt="From v3.4" />
 </p>
 
-The `@math.gl/earth/geoid` module evaluates geoid heights from Earth gravity model grids.
+The `@math.gl/earth` module evaluates geoid heights from Earth gravity model grids.
 
 import GeoidGlobe from '@site/src/components/geoid-globe';
 
@@ -36,7 +36,7 @@ interpolation error estimates do not apply to the preview.
 With a bundler supporting asset URL imports (such as Vite):
 
 ```js
-import { parsePGM } from "@math.gl/earth/geoid";
+import { parsePGM } from "@math.gl/earth";
 import gridUrl from "@math.gl/earth/geoid/geoid-egm96-hi.pgm?url";
 
 const response = await fetch(gridUrl);

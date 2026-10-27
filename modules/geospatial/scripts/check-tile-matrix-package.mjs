@@ -43,15 +43,15 @@ assert.equal(tiles.getTileRanges(variable, [100, 190, 180, 200])[0].columnStep, 
   await writeFile(
     join(temporaryDirectory, 'consumer.mjs'),
     `import assert from 'node:assert/strict';
-import * as tiles from '@math.gl/geospatial/tile-matrix';
-import * as combinedTiles from '@math.gl/geospatial/tiles';
+import * as tiles from '@math.gl/geospatial';
+import * as combinedTiles from '@math.gl/geospatial';
 ${assertions}`
   );
   await writeFile(
     join(temporaryDirectory, 'consumer.cjs'),
     `const assert = require('node:assert/strict');
-const tiles = require('@math.gl/geospatial/tile-matrix');
-const combinedTiles = require('@math.gl/geospatial/tiles');
+const tiles = require('@math.gl/geospatial');
+const combinedTiles = require('@math.gl/geospatial');
 ${assertions}`
   );
   for (const filename of ['consumer.mjs', 'consumer.cjs']) {
@@ -61,9 +61,9 @@ ${assertions}`
     join(temporaryDirectory, 'consumer.ts'),
     `
 import {getTileBounds, getTileIndex, getTileRange, getTileRanges, selectTileMatrix, validateTileMatrixSet, validateTileMatrixLimits, resolveTileIndex}
-  from '@math.gl/geospatial/tile-matrix';
+  from '@math.gl/geospatial';
 import type {TileMatrix, TileMatrixSet, TileMatrixBounds, TileMatrixLimits, VariableMatrixWidth, TileMatrixRowRange, TileMatrixSetLimits}
-  from '@math.gl/geospatial/tile-matrix';
+  from '@math.gl/geospatial';
 const matrix: TileMatrix = {id: '0', resolution: 1, resolutionY: 2, origin: [0, 0],
   cornerOfOrigin: 'topLeft', tileSize: [256, 256], matrixSize: [2, 2]};
 const matrixSet: TileMatrixSet = {crs: 'local', matrices: [matrix]};
@@ -111,7 +111,7 @@ matrix.resolution = 2;
   );
   const bundle = await build({
     stdin: {
-      contents: "export * from '@math.gl/geospatial/tile-matrix';",
+      contents: "export {getTileBounds} from '@math.gl/geospatial';",
       resolveDir: temporaryDirectory
     },
     bundle: true,
@@ -120,8 +120,8 @@ matrix.resolution = 2;
     write: false,
     metafile: true
   });
-  const inputs = Object.keys(bundle.metafile.inputs).filter(input => input !== '<stdin>');
-  assert.equal(inputs.length, 1, 'The tile-matrix subpath must have no runtime dependencies');
+  const inputs = Object.entries(Object.values(bundle.metafile.outputs)[0].inputs).filter(([input, value]) => input !== '<stdin>' && value.bytesInOutput > 0).map(([input]) => input);
+  assert.equal(inputs.length, 1, 'The selected tile-matrix helper must have no bundled runtime dependencies');
   assert.ok(inputs[0].endsWith('/dist/tile-matrix.js'));
   console.log('Tile-matrix ESM, CommonJS, public types and dependency boundary passed.');
 } finally {

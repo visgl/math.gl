@@ -4,8 +4,8 @@
 
 import {expect, test} from 'vitest';
 import {HeightField} from '@math.gl/geospatial/terrain';
-import {createTerrainContours} from '@math.gl/geospatial/terrain/contours';
-import {createTerrainSurface} from '@math.gl/geospatial/terrain/surface';
+import {createTerrainContours} from '@math.gl/geospatial/terrain';
+import {createTerrainSurface} from '@math.gl/geospatial/terrain';
 
 function field(
   width: number,

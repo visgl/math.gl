@@ -4,13 +4,13 @@
 
 import {test, expect} from 'vitest';
 import {HeightField} from '@math.gl/geospatial/terrain';
-import {createTerrainGradientGrid} from '@math.gl/geospatial/terrain/derivatives';
-import {createTerrainSlopeAspectGrid} from '@math.gl/geospatial/terrain/slope-aspect';
-import {createMartiniTerrainMesh} from '@math.gl/geospatial/terrain/martini';
-import {createDelatinTerrainMesh} from '@math.gl/geospatial/terrain/delatin';
-import {createTerrainMesh} from '@math.gl/geospatial/terrain/mesh';
-import {reconcileTerrainVertexTiles} from '@math.gl/geospatial/terrain/vertex-tiles';
-import {stitchTerrainMeshEdges} from '@math.gl/geospatial/terrain/mesh-stitch';
+import {createTerrainGradientGrid} from '@math.gl/geospatial/terrain';
+import {createTerrainSlopeAspectGrid} from '@math.gl/geospatial/terrain';
+import {createMartiniTerrainMesh} from '@math.gl/geospatial/terrain';
+import {createDelatinTerrainMesh} from '@math.gl/geospatial/terrain';
+import {createTerrainMesh} from '@math.gl/geospatial/terrain';
+import {reconcileTerrainVertexTiles} from '@math.gl/geospatial/terrain';
+import {stitchTerrainMeshEdges} from '@math.gl/geospatial/terrain';
 import reference from './fixtures/n43-reference.json';
 
 const heights = Float64Array.from(reference.heights, h => h ?? NaN);

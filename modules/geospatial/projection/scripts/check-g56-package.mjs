@@ -28,7 +28,7 @@ assert(entry.types.endsWith('/ellipsoid.d.ts'));
 const measured = {};
 for (const symbol of ['EllipsoidRhumb', 'RhumbPolygon', 'GeodesicIntersections']) {
   const result = await build({
-    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial/ellipsoid';`, resolveDir: root},
+    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial';`, resolveDir: root},
     bundle: true,
     platform: 'browser',
     format: 'esm',
@@ -51,7 +51,7 @@ try {
   const file = join(temp, 'types.ts');
   writeFileSync(
     file,
-    `import {EllipsoidRhumb, RhumbPolygon, GeodesicIntersections, type RhumbResult, type SegmentIntersection} from '@math.gl/geospatial/ellipsoid';
+    `import {EllipsoidRhumb, RhumbPolygon, GeodesicIntersections, type RhumbResult, type SegmentIntersection} from '@math.gl/geospatial';
 const axes={semiMajorAxis:1,semiMinorAxis:1};
 const result:RhumbResult=new EllipsoidRhumb(axes).line(0,0,90,{area:true}).position(1);
 const area:number|undefined=new RhumbPolygon(axes).addPoint(30,0).addPoint(30,0,{longitudeTurns:1}).compute().area;

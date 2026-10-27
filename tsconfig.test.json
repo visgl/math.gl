@@ -8,80 +8,20 @@
       "@math.gl/core": [
         "./modules/core/src/index.ts"
       ],
-      "@math.gl/core/mat3": [
-        "./modules/core/src/mat3.ts"
-      ],
-      "@math.gl/core/mat4": [
-        "./modules/core/src/mat4.ts"
-      ],
-      "@math.gl/core/quat": [
-        "./modules/core/src/quat.ts"
-      ],
-      "@math.gl/core/vec2": [
-        "./modules/core/src/vec2.ts"
-      ],
-      "@math.gl/core/vec3": [
-        "./modules/core/src/vec3.ts"
-      ],
-      "@math.gl/core/vec4": [
-        "./modules/core/src/vec4.ts"
-      ],
-      "@math.gl/core/local-frame": [
-        "./modules/core/src/local-frame.ts"
-      ],
-      "@math.gl/core/spheroid": [
-        "./modules/core/src/spheroid.ts"
-      ],
-      "@math.gl/core/types": [
-        "./modules/core/src/types.ts"
-      ],
-      "@math.gl/core/expressions": [
-        "./modules/core/src/expressions/index.ts"
-      ],
       "@math.gl/core/test/*": [
         "./modules/core/test/*"
       ],
       "@math.gl/geometry": [
         "./modules/geometry/src/index.ts"
       ],
-      "@math.gl/geometry/parametric": [
-        "./modules/geometry/src/parametric.ts"
-      ],
-      "@math.gl/geometry/utils": [
-        "./modules/geometry/src/utils/index.ts"
-      ],
-      "@math.gl/geometry/curves": [
-        "./modules/geometry/src/curves/index.ts"
-      ],
-      "@math.gl/geometry/polygon": [
-        "./modules/geometry/src/polygon/index.ts"
-      ],
       "@math.gl/geometry/culling": [
         "./modules/geometry/src/culling/index.ts"
-      ],
-      "@math.gl/geometry/spatial-index": [
-        "./modules/geometry/src/spatial-index/index.ts"
-      ],
-      "@math.gl/geometry/utils/interpolate-packed-attributes": [
-        "./modules/geometry/src/utils/interpolate-packed-attributes.ts"
-      ],
-      "@math.gl/geometry/culling/oriented-box-2d": [
-        "./modules/geometry/src/culling/oriented-box-2d.ts"
-      ],
-      "@math.gl/geometry/culling/queries": [
-        "./modules/geometry/src/culling/queries.ts"
-      ],
-      "@math.gl/geometry/spatial-index/boxes": [
-        "./modules/geometry/src/spatial-index/box-index.ts"
       ],
       "@math.gl/geometry/test/*": [
         "./modules/geometry/test/*"
       ],
       "@math.gl/geospatial": [
         "./modules/geospatial/src/index.ts"
-      ],
-      "@math.gl/geospatial/tile-matrix": [
-        "./modules/geospatial/src/tile-matrix.ts"
       ],
       "@math.gl/geospatial/crs": [
         "./modules/geospatial/src/crs/index.ts"
@@ -92,41 +32,11 @@
       "@math.gl/geospatial/projection": [
         "./modules/geospatial/src/projection/index.ts"
       ],
-      "@math.gl/geospatial/web-mercator": [
-        "./modules/geospatial/src/web-mercator.ts"
-      ],
-      "@math.gl/geospatial/wkb": [
-        "./modules/geospatial/src/wkb/index.ts"
-      ],
       "@math.gl/geospatial/geoarrow": [
         "./modules/geospatial/src/geoarrow/index.ts"
       ],
-      "@math.gl/geospatial/expressions": [
-        "./modules/geospatial/src/expressions.ts"
-      ],
-      "@math.gl/geospatial/ellipsoid": [
-        "./modules/geospatial/src/entries/ellipsoid.ts"
-      ],
-      "@math.gl/geospatial/globe": [
-        "./modules/geospatial/src/globe.ts"
-      ],
-      "@math.gl/geospatial/tiles": [
-        "./modules/geospatial/src/tiles.ts"
-      ],
       "@math.gl/geospatial/crs/projjson.schema.json": [
         "./modules/geospatial/crs/schemas/projjson.schema.json"
-      ],
-      "@math.gl/geospatial/crs/wkt": [
-        "./modules/geospatial/src/crs/wkt-crs.ts"
-      ],
-      "@math.gl/geospatial/crs/proj-string": [
-        "./modules/geospatial/src/crs/proj-string.ts"
-      ],
-      "@math.gl/geospatial/crs/spatial-reference": [
-        "./modules/geospatial/src/crs/spatial-reference.ts"
-      ],
-      "@math.gl/geospatial/crs/metadata": [
-        "./modules/geospatial/src/crs/crs-metadata.ts"
       ],
       "@math.gl/geospatial/projection/datums": [
         "./modules/geospatial/src/projection/datums.ts"
@@ -677,26 +587,11 @@
       "@math.gl/geospatial/projection/analysis/transform": [
         "./modules/geospatial/src/projection/transform-analysis.ts"
       ],
-      "@math.gl/geospatial/geoarrow/worker": [
-        "./modules/geospatial/src/geoarrow/worker.ts"
-      ],
-      "@math.gl/geospatial/geoarrow/builder": [
-        "./modules/geospatial/src/geoarrow/builder-entry.ts"
-      ],
-      "@math.gl/geospatial/geoarrow/wkb": [
-        "./modules/geospatial/src/geoarrow/wkb-entry.ts"
-      ],
-      "@math.gl/geospatial/geoarrow/tessellation": [
-        "./modules/geospatial/src/geoarrow/tessellation-entry.ts"
-      ],
       "@math.gl/geospatial/test/*": [
         "./modules/geospatial/test/*"
       ],
       "@math.gl/earth": [
         "./modules/earth/src/index.ts"
-      ],
-      "@math.gl/earth/geoid": [
-        "./modules/earth/src/geoid/index.ts"
       ],
       "@math.gl/earth/sun": [
         "./modules/earth/src/sun/index.ts"
@@ -710,20 +605,8 @@
       "@math.gl/earth/geoid/geoid-egm96-hi.pgm": [
         "./modules/earth/geoid/data/geoid-egm96-hi.pgm"
       ],
-      "@math.gl/earth/sun/planets": [
-        "./modules/earth/src/sun/planets.ts"
-      ],
-      "@math.gl/earth/sun/astronomy": [
-        "./modules/earth/src/sun/astronomy.ts"
-      ],
       "@math.gl/earth/sun/stars": [
         "./modules/earth/src/sun/stars.ts"
-      ],
-      "@math.gl/earth/timezone/lookup": [
-        "./modules/earth/src/timezone/lookup.ts"
-      ],
-      "@math.gl/earth/timezone/temporal": [
-        "./modules/earth/src/timezone/temporal.ts"
       ],
       "@math.gl/earth/timezone/timezone-geometry-low.json": [
         "./modules/earth/timezone/data/timezone-geometry-low.json"
@@ -742,27 +625,6 @@
       ],
       "@math.gl/dggs": [
         "./modules/dggs/src/index.ts"
-      ],
-      "@math.gl/dggs/a5": [
-        "./modules/dggs/src/a5.ts"
-      ],
-      "@math.gl/dggs/geohash": [
-        "./modules/dggs/src/geohash.ts"
-      ],
-      "@math.gl/dggs/h3": [
-        "./modules/dggs/src/h3.ts"
-      ],
-      "@math.gl/dggs/plus-code": [
-        "./modules/dggs/src/plus-code.ts"
-      ],
-      "@math.gl/dggs/quadkey": [
-        "./modules/dggs/src/quadkey.ts"
-      ],
-      "@math.gl/dggs/s2": [
-        "./modules/dggs/src/s2.ts"
-      ],
-      "@math.gl/dggs/expressions": [
-        "./modules/dggs/src/expressions.ts"
       ],
       "@math.gl/dggs/test/*": [
         "./modules/dggs/test/*"
@@ -875,38 +737,8 @@
       "@math.gl/web-mercator/*": [
         "./modules/web-mercator/src/*"
       ],
-      "@math.gl/geospatial/terrain/geographic": ["modules/geospatial/src/terrain/geographic.ts"],
-      "@math.gl/geospatial/terrain/tiled": ["modules/geospatial/src/terrain/tiled.ts"],
-      "@math.gl/geospatial/terrain/packed": ["modules/geospatial/src/terrain/packed.ts"],
-      "@math.gl/geospatial/terrain/surface": ["modules/geospatial/src/terrain/surface.ts"],
-      "@math.gl/geospatial/terrain/bounds": ["modules/geospatial/src/terrain/bounds.ts"],
-      "@math.gl/geospatial/terrain/mesh": ["modules/geospatial/src/terrain/mesh.ts"],
-      "@math.gl/geospatial/terrain/mesh-error": ["modules/geospatial/src/terrain/mesh-error.ts"],
-      "@math.gl/geospatial/terrain/mesh-edges": ["modules/geospatial/src/terrain/mesh-edges.ts"],
-      "@math.gl/geospatial/terrain/martini": ["modules/geospatial/src/terrain/martini.ts"],
-      "@math.gl/geospatial/terrain/delatin": ["modules/geospatial/src/terrain/delatin.ts"],
-      "@math.gl/geospatial/terrain/contour-paths": ["modules/geospatial/src/terrain/contour-paths.ts"],
-      "@math.gl/geospatial/terrain/contour-simplify": ["modules/geospatial/src/terrain/contour-simplify.ts"],
-      "@math.gl/geospatial/terrain/profile-measure": ["modules/geospatial/src/terrain/profile-measure.ts"],
-      "@math.gl/geospatial/terrain/vertex-tiles": ["modules/geospatial/src/terrain/vertex-tiles.ts"],
-      "@math.gl/geospatial/terrain/mesh-stitch": ["modules/geospatial/src/terrain/mesh-stitch.ts"],
       "@math.gl/geospatial/terrain": [
         "./modules/geospatial/src/terrain/index.ts"
-      ],
-      "@math.gl/geospatial/terrain/geometry": [
-        "./modules/geospatial/src/terrain/geometry.ts"
-      ],
-      "@math.gl/geospatial/terrain/derivatives": [
-        "./modules/geospatial/src/terrain/derivatives.ts"
-      ],
-      "@math.gl/geospatial/terrain/slope-aspect": [
-        "./modules/geospatial/src/terrain/slope-aspect.ts"
-      ],
-      "@math.gl/geospatial/terrain/profile": [
-        "./modules/geospatial/src/terrain/profile.ts"
-      ],
-      "@math.gl/geospatial/terrain/contours": [
-        "./modules/geospatial/src/terrain/contours.ts"
       ]
     }
   }

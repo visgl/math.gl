@@ -5,7 +5,7 @@ latitude limit before projection; a north-polar orthographic view of a surface
 retains the northern hemisphere. Cutting first prevents invisible geometry from
 joining across the visible boundary.
 
-The optional `@math.gl/geospatial/geographic-cuts` entry clips declared linear,
+The optional `@math.gl/geospatial` entry clips declared linear,
 ellipsoidal geodesic or rhumb edges to a closed latitude band and a configurable
 360-degree longitude chart. It preserves original curve intervals, holes and
 components, and labels the generated parallel and meridian boundaries explicitly.
@@ -17,7 +17,7 @@ this latitude-band API.
 import {
   clipGeographicPolygon,
   subdivideGeographicCutRing
-} from '@math.gl/geospatial/geographic-cuts';
+} from '@math.gl/geospatial';
 
 const inputs = [{positions: [-60, -20, 60, -20, 60, 60, -60, 60]}];
 const options = {

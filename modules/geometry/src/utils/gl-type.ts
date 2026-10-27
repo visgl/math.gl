@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {TypedArray, TypedArrayConstructor} from '@math.gl/core/types';
+import type {TypedArray, TypedArrayConstructor} from '@math.gl/core';
 import {GL_TYPE} from './constants';
 
 const GL_TYPE_TO_ARRAY_TYPE: Record<number, TypedArrayConstructor> = {

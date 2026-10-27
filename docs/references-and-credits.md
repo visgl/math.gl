@@ -106,7 +106,7 @@ models are not full atmospheric or observatory-grade simulations.
 - **Eric Bruneton and Fabrice Neyret**, [Precomputed Atmospheric Scattering](https://ebruneton.github.io/precomputed_atmospheric_scattering/),
   a reference for the cloud/atmosphere model; see source comments for the approximations actually implemented.
 - **Don Cross**, [Astronomy Engine](https://github.com/cosinekitty/astronomy),
-  the optional, separately installed planetary ephemeris provider.
+  the planetary ephemeris runtime dependency.
 - [JPL planetary physical parameters](https://ssd.jpl.nasa.gov/planets/phys_par.html)
   and [USNO sidereal time](https://aa.usno.navy.mil/faq/GAST) supply physical and frame references.
 

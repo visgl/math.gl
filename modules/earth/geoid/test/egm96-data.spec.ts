@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {parsePGM} from '@math.gl/earth/geoid';
+import {parsePGM} from '@math.gl/earth';
 import {openFile} from './utils/file-utils';
 
 test('optional EGM96 grids preserve source samples and longitude wrapping', async () => {

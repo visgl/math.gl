@@ -10,7 +10,7 @@ curve's seam intersections, rather than replacing curved edges with straight
 longitude/latitude chords.
 
 ```ts
-import {splitGeographicPolyline, splitGeographicPolygon} from '@math.gl/geospatial/globe';
+import {splitGeographicPolyline, splitGeographicPolygon} from '@math.gl/geospatial';
 
 const route = splitGeographicPolyline([170, 30, -170, 30], {
   edgeModel: 'geodesic'

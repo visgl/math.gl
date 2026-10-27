@@ -11,7 +11,7 @@ Implements the [Shoelace formula](https://en.wikipedia.org/wiki/Shoelace_formula
 ## Usage
 
 ```js
-import {Polygon} from '@math.gl/geometry/polygon';
+import {Polygon} from '@math.gl/geometry';
 ```
 
 ## Methods

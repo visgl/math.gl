@@ -7,7 +7,7 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial/ellipsoid';
+import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial';
 import {test, expect} from 'vitest';
 import {Vector3, Vector4, Matrix4} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';

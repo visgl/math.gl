@@ -12,7 +12,7 @@ import {gzipSync} from 'node:zlib';
 import {build} from 'esbuild';
 const root=fileURLToPath(new URL('../../../',import.meta.url)),require=createRequire(import.meta.url);
 for(const load of[p=>import(p),p=>require(p)]){
- const {createOrthographicCutAtlas,createOctahedralCutAtlas}=await load('@math.gl/geospatial/geographic-atlas');
+ const {createOrthographicCutAtlas,createOctahedralCutAtlas}=await load('@math.gl/geospatial');
  const {atlas,project}=createOrthographicCutAtlas({viewDirection:[1,1,1],edgeModel:'geodesic'});
  const inputs=[{positions:[-40,-40,40,-40,40,40,-40,40]}],ring=atlas.clipPolygon(inputs)[0].rings[0];
  assert(atlas.subdivideRing(inputs,ring,{transform:project,tolerance:1000}).positions.every(Number.isFinite));
@@ -25,7 +25,7 @@ try{
  for(const ext of['ts','cts'])writeFileSync(join(dir,'consumer.'+ext),readFileSync(join(root,'test/types/geographic-atlas/index.'+ext)));
  writeFileSync(join(dir,'tsconfig.json'),JSON.stringify({compilerOptions:{target:'es2020',module:'NodeNext',moduleResolution:'NodeNext',strict:true,noEmit:true,skipLibCheck:false,types:[]},include:['consumer.ts','consumer.cts']}));
  execFileSync(process.execPath,[require.resolve('typescript/bin/tsc'),'--project',join(dir,'tsconfig.json')],{stdio:'inherit'});
- const result=await build({stdin:{contents:"export {GeographicCutAtlas,createOrthographicCutAtlas,createOctahedralCutAtlas} from '@math.gl/geospatial/geographic-atlas';",resolveDir:root,loader:'ts'},bundle:true,minify:true,write:false,format:'esm',platform:'browser',metafile:true});
+ const result=await build({stdin:{contents:"export {GeographicCutAtlas,createOrthographicCutAtlas,createOctahedralCutAtlas} from '@math.gl/geospatial';",resolveDir:root,loader:'ts'},bundle:true,minify:true,write:false,format:'esm',platform:'browser',metafile:true});
  const code=result.outputFiles[0].contents, bytes=code.byteLength,gzip=gzipSync(code,{level:9}).length;
  // A new optional feature ceiling, not an increase to any existing entry budget.
  assert(bytes<=90000&&gzip<=32000,'Geographic atlas feature ceiling exceeded');
