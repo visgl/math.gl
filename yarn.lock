@@ -2562,6 +2562,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@deck.gl-community/geo-layers@npm:^9.4.8":
+  version: 9.4.8
+  resolution: "@deck.gl-community/geo-layers@npm:9.4.8"
+  dependencies:
+    "@loaders.gl/loader-utils": "npm:^4.5.1"
+    "@loaders.gl/mvt": "npm:^4.5.1"
+    "@loaders.gl/terrain": "npm:^4.5.1"
+    "@luma.gl/shadertools": "npm:~9.4.0"
+    "@math.gl/core": "npm:^4.0.0"
+    "@math.gl/web-mercator": "npm:^4.0.0"
+    "@probe.gl/stats": "npm:^4.1.1"
+    a5-js: "npm:^0.5.0"
+    delaunator: "npm:^5.1.0"
+    h3-js: "npm:^4.2.1"
+  peerDependencies:
+    "@deck.gl/core": ~9.4.0
+    "@deck.gl/extensions": ~9.4.0
+    "@deck.gl/geo-layers": ~9.4.0
+    "@deck.gl/layers": ~9.4.0
+    "@loaders.gl/core": ^4.5.1
+    "@luma.gl/core": ~9.4.0
+    "@luma.gl/engine": ~9.4.0
+  checksum: 10c0/0687815f140c2c85e026780e7c425b187f03b2d2de2bdd30ef07ef133231eba8da55b51d9f5ab910169fbd6c5b313f4eba0de985cf962f345c76182bba00b681
+  languageName: node
+  linkType: hard
+
 "@deck.gl-community/panels@npm:^9.4.8":
   version: 9.4.8
   resolution: "@deck.gl-community/panels@npm:9.4.8"
@@ -4548,6 +4574,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@loaders.gl/core@npm:^4.5.1":
+  version: 4.5.4
+  resolution: "@loaders.gl/core@npm:4.5.4"
+  dependencies:
+    "@loaders.gl/loader-utils": "npm:4.5.4"
+    "@loaders.gl/schema": "npm:4.5.4"
+    "@loaders.gl/schema-utils": "npm:4.5.4"
+    "@loaders.gl/worker-utils": "npm:4.5.4"
+    "@probe.gl/log": "npm:^4.1.1"
+  checksum: 10c0/a5bc2f53ad154f1313dfa1c682cccc77c2a5c8375dd8173c14f3553fa6a360af15f237253b31f3dd86601a46f913b189e8265b5141871fcda1fcd4ba75f8c55e
+  languageName: node
+  linkType: hard
+
 "@loaders.gl/core@npm:~4.4.5":
   version: 4.4.5
   resolution: "@loaders.gl/core@npm:4.4.5"
@@ -4628,6 +4667,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@loaders.gl/geoarrow@npm:4.5.4":
+  version: 4.5.4
+  resolution: "@loaders.gl/geoarrow@npm:4.5.4"
+  dependencies:
+    "@math.gl/polygon": "npm:^4.1.0"
+    apache-arrow: "npm:>= 17.0.0"
+  peerDependencies:
+    "@loaders.gl/core": ~4.5.0
+  checksum: 10c0/a55c3c9eb244a43feee8fb66b1586891fd0603e1a74de44124bf340fd2c0e4ddf51e136052290d46728d1533fd3da1d6e3b9204d60719820b89700317495be92
+  languageName: node
+  linkType: hard
+
 "@loaders.gl/geoarrow@npm:5.0.0-alpha.9":
   version: 5.0.0-alpha.9
   resolution: "@loaders.gl/geoarrow@npm:5.0.0-alpha.9"
@@ -4678,6 +4729,23 @@ __metadata:
   peerDependencies:
     "@loaders.gl/core": ~4.5.0
   checksum: 10c0/834ef9654fa7fbd7a7f5c8425244e0db3547e27c77680a171ab8d849735a5a990620b009d31dfd288643ebb68778aa6bbae293bc264929dd3dcd45d2884ef598
+  languageName: node
+  linkType: hard
+
+"@loaders.gl/gis@npm:4.5.4":
+  version: 4.5.4
+  resolution: "@loaders.gl/gis@npm:4.5.4"
+  dependencies:
+    "@loaders.gl/geoarrow": "npm:4.5.4"
+    "@loaders.gl/loader-utils": "npm:4.5.4"
+    "@loaders.gl/schema": "npm:4.5.4"
+    "@loaders.gl/schema-utils": "npm:4.5.4"
+    "@mapbox/vector-tile": "npm:^1.3.1"
+    "@math.gl/polygon": "npm:^4.1.0"
+    pbf: "npm:^3.2.1"
+  peerDependencies:
+    "@loaders.gl/core": ~4.5.0
+  checksum: 10c0/cce4ae3dbc722e44e4228b256350356ee4baf48e2ed8847360b7bcd4419ca567adb4f3fc148097e2f416223fbc3859fcbe52e3a0a8573275196c61a148d5d35f
   languageName: node
   linkType: hard
 
@@ -4757,6 +4825,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@loaders.gl/images@npm:4.5.4":
+  version: 4.5.4
+  resolution: "@loaders.gl/images@npm:4.5.4"
+  dependencies:
+    "@loaders.gl/loader-utils": "npm:4.5.4"
+  peerDependencies:
+    "@loaders.gl/core": ~4.5.0
+  checksum: 10c0/1fa4192a963f448a2047991c32863973176246cff00a8e23bb14d84952b588ab1f67a67d5369a5c6c7e77b951b0de6006a72389b7b17e8650909fa6b65e59006
+  languageName: node
+  linkType: hard
+
 "@loaders.gl/loader-utils@npm:4.4.5":
   version: 4.4.5
   resolution: "@loaders.gl/loader-utils@npm:4.4.5"
@@ -4790,6 +4869,18 @@ __metadata:
     "@probe.gl/log": "npm:^4.1.1"
     "@probe.gl/stats": "npm:^4.1.1"
   checksum: 10c0/988ac837f35bfa8bb7da0a8843125277965d993e757b95c303970d21807d143a8f0d233f5ba064905b6aab598f70206f3cd4a6b38c578338b3530479e59e5c1e
+  languageName: node
+  linkType: hard
+
+"@loaders.gl/loader-utils@npm:4.5.4, @loaders.gl/loader-utils@npm:^4.5.1":
+  version: 4.5.4
+  resolution: "@loaders.gl/loader-utils@npm:4.5.4"
+  dependencies:
+    "@loaders.gl/schema": "npm:4.5.4"
+    "@loaders.gl/worker-utils": "npm:4.5.4"
+    "@probe.gl/log": "npm:^4.1.1"
+    "@probe.gl/stats": "npm:^4.1.1"
+  checksum: 10c0/3eb14fbe32d1ca6cc673f7d502015b68f68d53e3a09284163520dc5640cdadb9b6e3a8ffe8561e8e944bc0daf1c56240082a398bd0068cddf1eb5424e5be38fc
   languageName: node
   linkType: hard
 
@@ -4833,6 +4924,25 @@ __metadata:
   peerDependencies:
     "@loaders.gl/core": ~4.5.0
   checksum: 10c0/f6f08d22f7a5a4ab3fb0a83a58ac0c8185820ac5ccf15b252499105fc66a0ea72bbfa8fc14220eb2d86aa47caf68451cae847536002db6f8fadbca191ed07246
+  languageName: node
+  linkType: hard
+
+"@loaders.gl/mvt@npm:^4.5.1":
+  version: 4.5.4
+  resolution: "@loaders.gl/mvt@npm:4.5.4"
+  dependencies:
+    "@loaders.gl/gis": "npm:4.5.4"
+    "@loaders.gl/images": "npm:4.5.4"
+    "@loaders.gl/loader-utils": "npm:4.5.4"
+    "@loaders.gl/schema": "npm:4.5.4"
+    "@loaders.gl/schema-utils": "npm:4.5.4"
+    "@math.gl/polygon": "npm:^4.1.0"
+    "@probe.gl/stats": "npm:^4.1.1"
+    pbf: "npm:^3.2.1"
+    zod: "npm:^4.1.12"
+  peerDependencies:
+    "@loaders.gl/core": ~4.5.0
+  checksum: 10c0/7c9f85e1ec92594cdad54be65a7ff53a7aa78652ceb166c448c85e04d9960e1d1f307f1e74d3502fc1c9d753740d2343f71195baf914fe49f4802dc93e6a1020
   languageName: node
   linkType: hard
 
@@ -4901,6 +5011,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@loaders.gl/schema-utils@npm:4.5.4":
+  version: 4.5.4
+  resolution: "@loaders.gl/schema-utils@npm:4.5.4"
+  dependencies:
+    "@loaders.gl/schema": "npm:4.5.4"
+    "@math.gl/types": "npm:^4.1.0"
+    "@types/geojson": "npm:^7946.0.7"
+    apache-arrow: "npm:>= 17.0.0"
+  peerDependencies:
+    "@loaders.gl/core": ~4.5.0
+  checksum: 10c0/30ba445aa9740b3572e3a066b1ae1431d2f7070d13815d50edb65e2b42d5c2360b23712cddbae8f7b1864b3e061a481f10eea4a95061b1b909c6db2d9a73e747
+  languageName: node
+  linkType: hard
+
 "@loaders.gl/schema-utils@npm:5.0.0-alpha.9":
   version: 5.0.0-alpha.9
   resolution: "@loaders.gl/schema-utils@npm:5.0.0-alpha.9"
@@ -4945,6 +5069,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@loaders.gl/schema@npm:4.5.4":
+  version: 4.5.4
+  resolution: "@loaders.gl/schema@npm:4.5.4"
+  dependencies:
+    "@types/geojson": "npm:^7946.0.7"
+    apache-arrow: "npm:>= 17.0.0"
+  checksum: 10c0/e38aeee1a085b6a90eca26f6fe203e05b1f327b258f3d834f0ff29b8ca0b32878c1a37578f2fb41a84b545cc5537f8d5f5ebdfd7fc8646d600112c8741de3a99
+  languageName: node
+  linkType: hard
+
 "@loaders.gl/schema@npm:5.0.0-alpha.9":
   version: 5.0.0-alpha.9
   resolution: "@loaders.gl/schema@npm:5.0.0-alpha.9"
@@ -4981,6 +5115,20 @@ __metadata:
   peerDependencies:
     "@loaders.gl/core": ~4.5.0
   checksum: 10c0/e32250b9e6a63d9a3c9d0c34042fe1e097a7736f7e369cd849dba333372259465ff207e5a87617ada4cb0a63e638a3208c7cf096c0bbbf4a6f189a8dc817d034
+  languageName: node
+  linkType: hard
+
+"@loaders.gl/terrain@npm:^4.5.1":
+  version: 4.5.4
+  resolution: "@loaders.gl/terrain@npm:4.5.4"
+  dependencies:
+    "@loaders.gl/images": "npm:4.5.4"
+    "@loaders.gl/loader-utils": "npm:4.5.4"
+    "@loaders.gl/schema": "npm:4.5.4"
+    "@mapbox/martini": "npm:^0.2.0"
+  peerDependencies:
+    "@loaders.gl/core": ~4.5.0
+  checksum: 10c0/44d2d3e5f9ce16f36ec3ab4f98f69c5f0febed81e242d9ad9bce3f9df46c88c13bbdeba3f8a27fee42bb76420b6af0102f49680d0f350c9976383ca91ab60fbc
   languageName: node
   linkType: hard
 
@@ -5093,6 +5241,15 @@ __metadata:
   peerDependencies:
     "@loaders.gl/core": ~4.5.0
   checksum: 10c0/1c554208e6ce0fdf24e917728b034375703c3891258fc5fee9f1b65d04d6aa74d5071f6887e0acb8482502c251f20f90d59b7e0c52501b7380bca1f8df84caf7
+  languageName: node
+  linkType: hard
+
+"@loaders.gl/worker-utils@npm:4.5.4":
+  version: 4.5.4
+  resolution: "@loaders.gl/worker-utils@npm:4.5.4"
+  peerDependencies:
+    "@loaders.gl/core": ~4.5.0
+  checksum: 10c0/e0f27886eedae01a509fd2e72e8abc5f234e44c5257c647bfc3b9960412551636e17aee8a081cb38d7906bb564ac450fe9374be8c63929551dc9aad971ec1cb2
   languageName: node
   linkType: hard
 
@@ -5441,7 +5598,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/web-mercator@npm:>=4.0.1, @math.gl/web-mercator@npm:^4.1.0":
+"@math.gl/web-mercator@npm:>=4.0.1, @math.gl/web-mercator@npm:^4.0.0, @math.gl/web-mercator@npm:^4.1.0":
   version: 4.1.0
   resolution: "@math.gl/web-mercator@npm:4.1.0"
   dependencies:
@@ -9022,6 +9179,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"a5-js@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "a5-js@npm:0.5.0"
+  dependencies:
+    gl-matrix: "npm:^3.4.3"
+  checksum: 10c0/7880ff27bc0b4b03e339e9677a6179f2e7145686da6cf035e58f969696ff5d75f07c2176620ff73a7752b47f40d26f77214e02c7dc8c037c411484fbbbd0ab48
+  languageName: node
+  linkType: hard
+
 "abab@npm:^1.0.3":
   version: 1.0.4
   resolution: "abab@npm:1.0.4"
@@ -11506,6 +11672,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"delaunator@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "delaunator@npm:5.1.0"
+  dependencies:
+    robust-predicates: "npm:^3.0.2"
+  checksum: 10c0/6489e3598212ab8759575e30f3ac26063471846e25c779048f441f2ccefd25efb9a52275e7e8e3dcc5bf5bc5c35169cf1de27f985d359fd5a24057be88fd1817
+  languageName: node
+  linkType: hard
+
 "delayed-stream@npm:1.0.0, delayed-stream@npm:~1.0.0":
   version: 1.0.0
   resolution: "delayed-stream@npm:1.0.0"
@@ -13112,7 +13287,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gl-matrix@npm:^3.0.0":
+"gl-matrix@npm:^3.0.0, gl-matrix@npm:^3.4.3":
   version: 3.4.4
   resolution: "gl-matrix@npm:3.4.4"
   checksum: 10c0/9aa022ffac0d158212ad0cd29939864ad919ac31cd5dc5a5d35e9d66bb62679ddf152ff7b2173ded20131045e40572b87f31b26a920be2a7583a1516b13b5b4b
@@ -15968,6 +16143,28 @@ __metadata:
     "@math.gl/geometry": "workspace:*"
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
+"math.gl-sun-terminator@workspace:examples/sun-terminator":
+  version: 0.0.0-use.local
+  resolution: "math.gl-sun-terminator@workspace:examples/sun-terminator"
+  dependencies:
+    "@deck.gl-community/geo-layers": "npm:^9.4.8"
+    "@deck.gl-community/panels": "npm:^9.4.8"
+    "@deck.gl/core": "npm:~9.4.0"
+    "@deck.gl/extensions": "npm:~9.4.0"
+    "@deck.gl/geo-layers": "npm:~9.4.0"
+    "@deck.gl/layers": "npm:~9.4.0"
+    "@loaders.gl/core": "npm:^4.5.1"
+    "@luma.gl/core": "npm:~9.4.0"
+    "@luma.gl/engine": "npm:~9.4.0"
+    "@math.gl/earth": "workspace:*"
+    "@math.gl/geospatial": "workspace:*"
+    d3-geo: "npm:^2.0.2"
+    h3-js: "npm:^4.5.0"
+    pngjs: "npm:^7.0.0"
     vite: "npm:^8.2.2"
   languageName: unknown
   linkType: soft
@@ -19630,8 +19827,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "project-website@workspace:website"
   dependencies:
+    "@deck.gl-community/geo-layers": "npm:^9.4.8"
     "@deck.gl-community/panels": "npm:^9.4.8"
     "@deck.gl/core": "npm:~9.4.0"
+    "@deck.gl/extensions": "npm:~9.4.0"
+    "@deck.gl/geo-layers": "npm:~9.4.0"
     "@deck.gl/layers": "npm:~9.4.0"
     "@deck.gl/widgets": "npm:~9.4.0"
     "@docusaurus/core": "npm:^3.10.2"
@@ -19652,6 +19852,8 @@ __metadata:
     "@signalwire/docusaurus-plugin-llms-txt": "npm:^1.2.2"
     "@types/react": "npm:^19.2.18"
     "@vis.gl/docusaurus-website": "npm:2.0.0-alpha.6"
+    d3-geo: "npm:^2.0.2"
+    h3-js: "npm:^4.5.0"
     math.gl-parquet-loader: "workspace:*"
     prism-react-renderer: "npm:^2.4.1"
     proj4: "npm:2.22.0"

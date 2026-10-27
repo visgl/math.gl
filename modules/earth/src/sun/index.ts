@@ -41,3 +41,6 @@ export {
 } from './sky-globe';
 export {getCloudLighting} from './cloud-lighting';
 export type {CloudLighting, CloudLightingOptions} from './cloud-lighting';
+
+export {getSunTerminator} from './terminator';
+export type {SunTerminator, SunTerminatorOptions} from './terminator';

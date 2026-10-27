@@ -90,6 +90,11 @@ jobs:
       - name: Check consolidated packages, exports, and assets
         run: yarn check:packages
 
+      - name: Test and build solar terminator
+        run: |
+          yarn workspace math.gl-sun-terminator test
+          yarn workspace math.gl-sun-terminator build
+
       - name: Test and build tectonic time machine
         run: |
           yarn workspace math.gl-tectonic-time-machine test
@@ -234,6 +239,10 @@ jobs:
 
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
+
+      - name: Test solar terminator rendering and cut-map detail
+        timeout-minutes: 5
+        run: yarn workspace math.gl-sun-terminator test:browser:ci
 
       - name: Check regressions from landed example reviews
         timeout-minutes: 2

@@ -15,6 +15,11 @@
   },
   {
     "type": "doc",
+    "label": "Solar terminator",
+    "id": "sun-terminator"
+  },
+  {
+    "type": "doc",
     "label": "Timezone globe",
     "id": "timezone-globe"
   },
