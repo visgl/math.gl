@@ -6,9 +6,13 @@ import {prepareDiscontinuousGrid} from './discontinuous-views.js';
 import {prepareProjectionGrid} from './projection-grid.js';
 
 createWorker(async ({view, step, discontinuous}, _options, context) => {
-  if (!discontinuous) return prepareProjectionGrid(view, context);
+  if (!discontinuous) {
+    const grid = await prepareProjectionGrid(view, context);
+    // The worker pool reuses cached grids; transfer only independent result buffers.
+    return {...grid, positions: grid.positions.slice(), indices: grid.indices.slice()};
+  }
   const {map, ...grid} = await prepareDiscontinuousGrid(view, step, {
     onProgress: context.reportProgress
   });
-  return {...grid, preparedMap: map.toPrepared()};
+  return {...grid, positions: grid.positions.slice(), indices: grid.indices.slice(), preparedMap: map.toPrepared()};
 });

@@ -284,8 +284,13 @@ export default class WorkerPool {
    */
   _getAvailableWorker(): WorkerThread | null {
     // If a worker has completed and returned to the queue, it can be used
-    if (this.idleQueue.length > 0) {
-      return this.idleQueue.shift() || null;
+    while (this.idleQueue.length > 0) {
+      const worker = this.idleQueue.shift();
+      if (worker?.terminated) {
+        this.count--;
+      } else if (worker) {
+        return worker;
+      }
     }
 
     // Create fresh worker if we haven't yet created the max amount of worker threads for this worker source

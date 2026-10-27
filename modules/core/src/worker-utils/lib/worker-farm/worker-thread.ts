@@ -198,10 +198,14 @@ export default class WorkerThread {
       this.onMessage(data);
     });
     worker.on('error', error => {
+      this.terminated = true;
       this.onError(error as Error);
     });
-    worker.on('exit', _code => {
-      // console.error('exit', code);
+    worker.on('exit', code => {
+      if (!this.terminated) {
+        this.terminated = true;
+        this.onError(new Error(`Worker ${this.name} exited unexpectedly (code ${code})`));
+      }
     });
     return worker;
   }

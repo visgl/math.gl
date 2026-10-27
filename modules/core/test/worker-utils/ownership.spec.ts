@@ -53,3 +53,36 @@ test('transfer discovery deduplicates aliases and traverses cyclic maps and sets
   payload.self = payload;
   expect(getTransferList(payload)).toEqual([buffer]);
 });
+
+test('a crashed or unexpectedly exited Node worker is replaced in its pool', async () => {
+  const crashSource = `const {parentPort} = require('worker_threads');
+parentPort.on('message', ({payload}) => {
+  if (payload.input === 'crash') throw new Error('worker crashed');
+  if (payload.input === 'exit') { parentPort.close(); return; }
+  parentPort.postMessage({source:'loaders.gl', type:'done', payload:{result:payload.input}});
+  if (payload.input === 'idle-exit') setTimeout(() => process.exit(0), 10);
+});`;
+  for (const mode of ['crash', 'exit']) {
+    const options = {source: crashSource, maxConcurrency: 1, reuseWorkers: true};
+    await expect(processOnWorker(worker as WorkerObject, mode, options)).rejects.toThrow();
+    await expect(
+      Promise.race([
+        processOnWorker(worker as WorkerObject, 'replacement', options),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('replacement timed out')), 2000)
+        )
+      ])
+    ).resolves.toBe('replacement');
+  }
+  const options = {source: crashSource, maxConcurrency: 1, reuseWorkers: true};
+  await expect(processOnWorker(worker as WorkerObject, 'idle-exit', options)).resolves.toBe(
+    'idle-exit'
+  );
+  await new Promise(resolve => setTimeout(resolve, 100));
+  await expect(
+    Promise.race([
+      processOnWorker(worker as WorkerObject, 'replacement', options),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('replacement timed out')), 2000))
+    ])
+  ).resolves.toBe('replacement');
+});

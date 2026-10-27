@@ -12,6 +12,19 @@ test('packaged null worker uses the shared protocol', async () => {
   assert.equal(await processOnWorker(NullWorker, 'hello'), 'hello');
 });
 
+test('pooled explorer worker retains cached grids after their results are transferred', async () => {
+  const worker = {id: 'ice-grid-test', name: 'ice-grid-test', module: 'geospatial', version: 'latest',
+    worker: new URL('./discontinuous-grid-worker.js', import.meta.url).href, options: {}};
+  for (const [view, discontinuous] of [['eqearth', false], ['butterfly', true]]) {
+    const input = {view, step: 30, discontinuous};
+    const first = await processOnWorker(worker, input, {maxConcurrency: 1, reuseWorkers: true});
+    const second = await processOnWorker(worker, input, {maxConcurrency: 1, reuseWorkers: true});
+    assert(first.positions.length > 0);
+    assert.deepEqual(second.positions, first.positions);
+    assert.deepEqual(second.indices, first.indices);
+  }
+});
+
 test('packaged bulk worker returns projected data and preserves copied input', async () => {
   const coordinates = new Float64Array([0, 0, 10, 20, 30, 40]);
   const original = coordinates.slice();
