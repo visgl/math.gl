@@ -28,8 +28,14 @@ const probes = [
   {
     symbol: 'HeightField',
     packages: ['@math.gl/geospatial/terrain'],
-    forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/ellipsoid/],
+    forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/ellipsoid/, /\/mesh-skirts\./],
     budget: 16000
+  },
+  {
+    symbol: 'createTerrainSkirt',
+    packages: ['@math.gl/geospatial/terrain'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/height-field\./, /\/surface\./, /martini/, /delatin/],
+    budget: 5000
   },
   {
     symbol: 'packTerrainHeightField',

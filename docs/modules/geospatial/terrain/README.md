@@ -1043,3 +1043,45 @@ observations. On the initial fixture, maximum slope residuals are below `6e-8`
 degrees and circular aspect residuals below `2.3e-5` degrees. The suite uses a
 low-relief regional DEM; mountainous/coastal datasets, continuous approximation
 bounds, regional performance and GPU/rendering conformance remain separate work.
+
+## Visual skirt geometry
+
+```ts
+import {createTerrainSkirt} from '@math.gl/geospatial/terrain';
+
+const visualMesh = createTerrainSkirt(mesh, {height: 50});
+// `visualMesh.positions` and `visualMesh.indices` include the skirts.
+// `visualMesh.triangleValidity` excludes skirt triangles from terrain queries.
+```
+
+`createTerrainSkirt` accepts packed Float32 or Float64 local XYZ positions and
+Uint16 or Uint32 triangle indices. It copies both inputs, retains the original
+triangles, and appends vertical quads lowered by the positive `height` in position
+units. Source triangles must be nondegenerate, counterclockwise in XY, and have
+consistent manifold shared edges. Boundary directions are derived from triangle
+winding, giving outward-facing skirt triangles around both outer boundaries and
+holes. By default every boundary is skirted, including nodata holes.
+
+To select only specific boundary segments, pass `edges` as packed Uint16/Uint32
+vertex pairs. Pair order and direction do not determine winding. Every pair must
+identify a distinct boundary edge; invalid, internal or duplicate edges are rejected.
+An empty list adds no geometry. The builder does not guess tile-side membership,
+generate seams or modify the physical surface.
+
+`skirtVertexOffset` and `skirtTriangleOffset` identify the first appended vertex
+and triangle. `sourceVertexIndices` maps each appended vertex to its original
+vertex, allowing a consumer to copy UVs or other attributes. `triangleValidity`
+contains one for each source triangle and zero for each visual skirt triangle;
+pass it to terrain surface queries to exclude skirts. The returned local `bounds`
+include the lowered vertices. Normals, UVs and other attributes are not generated.
+
+The output preserves Float32/Float64 position precision. It preserves Uint32
+indices, and promotes Uint16 to Uint32 whenever appended vertices would exceed
+65,536 total vertices. A height too small to lower a vertex in the position type,
+or one that would overflow, throws instead of emitting degenerate skirts.
+`maxVertices` and `maxTriangles` default to 2,000,000 and 4,000,000 respectively;
+both input and output are checked before a result is returned.
+
+This named import is tree-shakable: it does not require HeightField, a tessellator,
+renderer or query index. Skirts hide visual gaps; they do not reconcile mismatched
+heights or provide a collision surface.

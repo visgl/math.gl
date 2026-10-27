@@ -62,6 +62,14 @@ if (mesh.error.maxSampleError !== 0 || mesh.indices.length !== 6) throw new Erro
     const cjs = `const {HeightField} = require('@math.gl/geospatial/terrain'); const {${symbol}: create} = require('@math.gl/geospatial/terrain/${entry}');` + assertion.replaceAll(': number', '');
     writeFileSync(join(directory, 'analysis.cjs'), cjs); execFileSync(process.execPath, [join(directory, 'analysis.cjs')]);
   }
+  const skirtSource = `import {createTerrainSkirt} from '@math.gl/geospatial/terrain';
+const result = createTerrainSkirt({positions:new Float64Array([0,0,1,1,0,1,0,1,1]),indices:new Uint16Array([0,1,2])},{height:1});
+if (result.indices.length !== 21 || result.triangleValidity[1] !== 0) throw new Error('Invalid terrain skirt result');`;
+  const skirtPath = join(directory, 'skirt.ts'); writeFileSync(skirtPath, skirtSource);
+  execFileSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '--noEmit', '--strict', '--skipLibCheck', '--module', 'nodenext', '--target', 'es2020', skirtPath], {stdio:'inherit', cwd:directory});
+  writeFileSync(join(directory, 'skirt.mjs'), skirtSource); execFileSync(process.execPath, [join(directory, 'skirt.mjs')]);
+  writeFileSync(join(directory, 'skirt.cjs'), skirtSource.replace("import {createTerrainSkirt} from '@math.gl/geospatial/terrain';", "const {createTerrainSkirt} = require('@math.gl/geospatial/terrain');"));
+  execFileSync(process.execPath, [join(directory, 'skirt.cjs')]);
   console.log('Isolated terrain ESM/CommonJS execution, strict declarations and backend independence passed.');
 } finally {
   rmSync(directory, {recursive: true, force: true});

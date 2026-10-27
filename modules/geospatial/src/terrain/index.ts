@@ -14,3 +14,5 @@ export type {
   TerrainSampleOptions,
   TerrainSampleBatch
 } from './types';
+export {createTerrainSkirt} from './mesh-skirts';
+export type {TerrainSkirtOptions, TerrainSkirtMesh} from './mesh-skirts';
