@@ -115,7 +115,7 @@ try {
     window.navigationDeck.setProps({initialViewState: {target: [0, 0, 0], zoom: 1.4}})
   );
   await page.waitForFunction(() =>
-    window.navigationDeck.props.layers.some((layer) => layer.id === 'h3-cell-grid')
+    window.navigationDeck.props.layers.some((layer) => layer?.id === 'h3-cell-grid')
   );
   assert.equal(await page.evaluate(() => window.getCutViewports('h3').length), 20);
   assert.deepEqual(errors, []);

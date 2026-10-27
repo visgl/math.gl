@@ -13,7 +13,11 @@ try {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(message.text());
+    if (
+      message.type() === 'error' &&
+      !message.text().startsWith('Failed to load resource: net::ERR_FAILED')
+    )
+      errors.push(message.text());
   });
   await page.route('https://gibs.earthdata.nasa.gov/**', (route) => route.abort());
   await page.goto(process.env.SUN_TERMINATOR_URL || 'http://127.0.0.1:5187/test/navigation.html', {
