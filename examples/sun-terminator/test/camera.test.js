@@ -70,3 +70,38 @@ test('out-of-domain centers adjust into perspective coverage', () => {
   assert.equal(result.clamped, true);
   assert.ok(result.camera.target.every(Number.isFinite));
 });
+
+test('coverage-edge focus retains scale when leaving QSC', () => {
+  const sourceView = new OrthographicView({flipY: false});
+  const qsc = transferCamera(
+    'globe',
+    new GlobeView().makeViewport({
+      width: 1000,
+      height: 800,
+      viewState: {longitude: -25, latitude: 38.7, zoom: 3}
+    }),
+    'qsc',
+    sourceView
+  );
+  const source = sourceView.makeViewport({width: 1000, height: 800, viewState: qsc.camera});
+  const result = transferCamera('qsc', source, 'lcc', sourceView);
+  assert.ok(result.camera.zoom > 1, 'an inward derivative must not collapse the destination zoom');
+});
+
+test('failed source inversions recover when switching projections', () => {
+  for (const sourceId of ['ortho', 'imoll']) {
+    const view = new OrthographicView({flipY: false});
+    const source = view.makeViewport({
+      width: 1000,
+      height: 800,
+      viewState: {target: [10000, 10000, 0], zoom: 2}
+    });
+    for (const next of ['globe', 'map', 'eqearth']) {
+      const target = next === 'globe' ? new GlobeView() : next === 'map' ? new MapView() : view;
+      const result = transferCamera(sourceId, source, next, target);
+      assert.ok(result.clamped);
+      const viewport = target.makeViewport({width: 1000, height: 800, viewState: result.camera});
+      assert.ok(geographicCenter(next, viewport).every(Number.isFinite));
+    }
+  }
+});

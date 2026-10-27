@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {projectionEngine} from '@math.gl/geospatial/projection';
-import {PROJECTIONS} from './projections.js';
+import {PROJECTIONS, getProjectionMesh} from './projections.js';
 import {isCutMap, projectCutMap, unprojectCutMap} from './cut-maps.js';
 import {createEndpoint} from './morph.js';
 
@@ -29,9 +29,12 @@ function scaleAt(id, viewport, focus) {
   const project = createEndpoint(id, viewport);
   const center = project(...focus, focus[0]);
   if (!center) return NaN;
+  const extent =
+    id === 'map' ? [-180, -85.051129, 180, 85.051129] : PROJECTIONS.find(p => p.id === id).extent;
+  // Use an inward derivative at a coverage edge; clamped probes have zero scale.
   const values = [
-    [0.01, 0],
-    [0, focus[1] > 89 ? -0.01 : 0.01]
+    [focus[0] + 0.01 > extent[2] ? -0.01 : 0.01, 0],
+    [0, focus[1] + 0.01 > extent[3] ? -0.01 : 0.01]
   ]
     .map(([dx, dy]) => {
       const point = project(focus[0] + dx, focus[1] + dy, focus[0]);
@@ -48,11 +51,16 @@ function scaleAt(id, viewport, focus) {
 
 /** Match geographic focus and local apparent scale, not incompatible zoom numbers. */
 export function transferCamera(sourceId, sourceViewport, targetId, targetView) {
-  let focus = geographicCenter(sourceId, sourceViewport);
+  let focus;
+  try {
+    focus = geographicCenter(sourceId, sourceViewport);
+  } catch {
+    focus = null;
+  }
+  const sourceInvalid = !focus?.every(Number.isFinite);
   const preset = PROJECTIONS.find(p => p.id === targetId);
   const extent = targetId === 'map' ? [-180, -85.051129, 180, 85.051129] : preset.extent;
-  if (!focus.every(Number.isFinite))
-    focus = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+  if (sourceInvalid) focus = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
   const originalFocus = focus;
   focus = [
     Math.max(extent[0], Math.min(extent[2], focus[0])),
@@ -94,7 +102,7 @@ export function transferCamera(sourceId, sourceViewport, targetId, targetView) {
       height: sourceViewport.height,
       viewState: camera
     });
-  const desired = scaleAt(sourceId, sourceViewport, originalFocus);
+  const desired = sourceInvalid ? NaN : scaleAt(sourceId, sourceViewport, originalFocus);
   // Globe camera scale is latitude dependent; measure the actual target viewport.
   for (let i = 0; i < 3; i++) {
     const current = scaleAt(targetId, viewport(), focus);
@@ -104,12 +112,23 @@ export function transferCamera(sourceId, sourceViewport, targetId, targetView) {
       Math.min(camera.maxZoom, camera.zoom + Math.log2(desired / current))
     );
   }
-  const clamped = focus.some((v, i) => Math.abs(v - originalFocus[i]) > 1e-6);
+  const clamped = sourceInvalid || focus.some((v, i) => Math.abs(v - originalFocus[i]) > 1e-6);
   if (targetId === 'albers-usa' && clamped) {
     camera.target = [0, 0, 0];
     camera.zoom = Math.log2(
       Math.min(sourceViewport.width / 91, sourceViewport.height / 47.6) * 0.85
     );
   }
+  if (
+    clamped &&
+    !native &&
+    (sourceInvalid || (extent[2] - extent[0] < 40 && extent[3] - extent[1] < 30))
+  ) {
+    const [left, bottom, right, top] = getProjectionMesh(targetId).bounds;
+    camera.target = [(left + right) / 2, (bottom + top) / 2, 0];
+    camera.zoom = Math.log2(
+      Math.min(sourceViewport.width / (right - left), sourceViewport.height / (top - bottom)) * 0.8
+    );
+  } else if (sourceInvalid && native) camera.zoom = 2;
   return {camera, clamped};
 }

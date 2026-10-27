@@ -274,9 +274,9 @@ export function mountSunTerminator(root) {
             maxZoom: 8,
             tileSize: 256,
             zoomOffset: 0,
-            maxRequests: 4,
-            maxCacheSize: 128,
-            debounceTime: 150,
+            maxRequests: 6,
+            maxCacheSize: 256,
+            debounceTime: 100,
             refinementStrategy: 'best-available',
             onTileError: () => {
               failedTiles = true;
