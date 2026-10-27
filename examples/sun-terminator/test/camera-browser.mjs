@@ -96,6 +96,51 @@ try {
           .filter((f, i) => [i - 1, i, i + 1].some((j) => morphs[j]?.rgb.every((c) => c === 0)))
       )
   );
+  await page.emulateMedia({reducedMotion: 'reduce'});
+  await page.locator('[data-role=view]').selectOption('map');
+  await page.evaluate(() =>
+    window.navigationDeck.setProps({initialViewState: {longitude: 170, latitude: 0, zoom: 3}})
+  );
+  await page.waitForTimeout(100);
+  await page.evaluate(() => {
+    window.seamFrames = [];
+    const deck = window.navigationDeck;
+    deck.setProps({
+      onAfterRender: () => {
+        const gl = document.querySelector('canvas').getContext('webgl2');
+        if (deck.getViewports()[0].id !== 'earth-morph') return;
+        const alpha = [-200, 0, 200].map((offset) => {
+          const pixel = new Uint8Array(4);
+          gl.readPixels(
+            Math.floor(gl.drawingBufferWidth / 2) + offset,
+            Math.floor(gl.drawingBufferHeight / 2),
+            1,
+            1,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            pixel
+          );
+          return pixel[3];
+        });
+        window.seamFrames.push({progress: deck.props.layers[0]?.props.progress, alpha});
+      }
+    });
+  });
+  await page.emulateMedia({reducedMotion: 'no-preference'});
+  for (const id of ['globe', 'map']) {
+    await page.locator('[data-role=view]').selectOption(id);
+    await page.waitForFunction(
+      (id) => window.navigationDeck.getViewports()[0].id === 'earth-' + id,
+      id
+    );
+  }
+  const seamFrames = await page.evaluate(() => window.seamFrames);
+  assert.ok(seamFrames.length > 10);
+  assert.ok(
+    seamFrames.every((frame) => frame.alpha.every((alpha) => alpha > 200)),
+    'antimeridian coverage must remain opaque throughout map/globe morphs: ' +
+      JSON.stringify(seamFrames.filter((frame) => frame.alpha.some((alpha) => alpha <= 200)))
+  );
   assert.deepEqual(errors, []);
   console.log(
     'Passed: center retained through map/globe round trip; ' +

@@ -3,9 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {createMorphMesh, getMorphProgress} from '../morph.js';
+import {createMorphMesh, getMorphProgress, createEndpoint} from '../morph.js';
 import {interruptedPoint} from '../cuts.js';
 import {cutPart} from '../cut-maps.js';
+import {MapView} from '@deck.gl/core';
 
 test('morph retains geographic texture coordinates and uploads both endpoints once', () => {
   const mesh = createMorphMesh(
@@ -91,5 +92,41 @@ test('queued animation timestamps never extrapolate beyond either morph endpoint
     const progress = getMorphProgress(elapsed);
     assert.ok(progress >= previous && progress >= 0 && progress <= 1);
     previous = progress;
+  }
+});
+
+test('map morph endpoints include antimeridian imagery and repeated visible worlds', () => {
+  const make = zoom =>
+    new MapView().makeViewport({
+      width: 1000,
+      height: 800,
+      viewState: {longitude: 170, latitude: 0, zoom}
+    });
+  const endpoint = createEndpoint('map', make(3));
+  const a = endpoint(179, 0, 179),
+    b = endpoint(-179, 0, -179);
+  assert.ok(
+    Math.abs(a.position[0] - b.position[0]) < 30,
+    'both banks must meet in the visible wrapped world'
+  );
+  assert.equal(b.cutPosition[0], 181);
+  assert.equal(a.part, b.part, 'the visible world stays one rigid piece across the antimeridian');
+  const leftBank = endpoint(-10, 0, -9),
+    rightBank = endpoint(-10, 0, -11);
+  assert.notEqual(leftBank.seam, rightBank.seam);
+  assert.ok(Math.abs(rightBank.position[0] - leftBank.position[0] - endpoint.worldWidth) < 1e-6);
+  const overview = createEndpoint('map', make(0));
+  assert.ok(overview.wrapCopies.includes(-1) && overview.wrapCopies.includes(1));
+  const mesh = createMorphMesh(overview, overview, {maxDepth: 0});
+  let left = Infinity,
+    right = -Infinity;
+  for (let i = 0; i < mesh.positions.length; i += 3) {
+    left = Math.min(left, mesh.positions[i]);
+    right = Math.max(right, mesh.positions[i]);
+  }
+  assert.ok(left < -500 && right > 500, 'repeated imagery must cover the entire viewport');
+  for (let i = 0; i < mesh.indices.length; i += 3) {
+    const xs = [0, 1, 2].map(j => mesh.positions[mesh.indices[i + j] * 3]);
+    assert.ok(Math.max(...xs) - Math.min(...xs) < 30, 'no triangle may span the wrap cut');
   }
 });

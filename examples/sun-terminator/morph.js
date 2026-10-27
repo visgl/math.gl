@@ -23,14 +23,20 @@ export function createEndpoint(id, viewport) {
           to: `+proj=${id} +datum=WGS84 +units=m ${preset.parameters}`
         })
       : null;
-  const project = (lon, lat, sector) => {
+  const project = (lon, lat, sector = lon) => {
     const extent = id === 'map' ? [-180, -85.051129, 180, 85.051129] : preset.extent;
     const inside = lon >= extent[0] && lon <= extent[2] && lat >= extent[1] && lat <= extent[3];
     const clampedLon = Math.max(extent[0], Math.min(extent[2], lon));
     const clampedLat = Math.max(extent[1], Math.min(extent[3], lat));
     try {
       const coordinate = native
-        ? [clampedLon, clampedLat, 0]
+        ? [
+            id === 'map'
+              ? clampedLon + 360 * Math.round((viewport.longitude - sector) / 360)
+              : clampedLon,
+            clampedLat,
+            0
+          ]
         : isCutMap(id)
           ? projectCutMap(id, clampedLon, clampedLat, sector)
           : projection
@@ -49,6 +55,7 @@ export function createEndpoint(id, viewport) {
         ],
         cutPosition: coordinate,
         part: coordinate.part ?? (isCutMap(id) ? cutPart(id, lon, lat, sector) : 0),
+        seam: id === 'map' ? Math.round((viewport.longitude - sector) / 360) : 0,
         front:
           id !== 'globe' ||
           Math.sin((lat * Math.PI) / 180) * Math.sin((viewport.latitude * Math.PI) / 180) +
@@ -63,11 +70,18 @@ export function createEndpoint(id, viewport) {
     }
   };
   const cache = new Map();
-  const endpoint = (lon, lat, sector) => {
-    const key = `${lon},${lat},${['isinu', 'imoll'].includes(id) ? cutPart(id, lon, lat, sector) : ''}`;
+  const endpoint = (lon, lat, sector = lon) => {
+    const key = `${lon},${lat},${id === 'map' ? Math.round((viewport.longitude - sector) / 360) : ['isinu', 'imoll'].includes(id) ? cutPart(id, lon, lat, sector) : ''}`;
     if (!cache.has(key)) cache.set(key, project(lon, lat, sector));
     return cache.get(key);
   };
+  if (id === 'map') {
+    endpoint.worldWidth = 512 * viewport.scale;
+    const count = Math.ceil(viewport.width / endpoint.worldWidth / 2);
+    endpoint.wrapCopies = Array.from({length: count * 2 + 1}, (_, i) => i - count).filter(
+      copy => Math.abs(copy * endpoint.worldWidth) < (viewport.width + endpoint.worldWidth) / 2
+    );
+  }
   endpoint.width = viewport.width;
   endpoint.height = viewport.height;
   return endpoint;
@@ -77,7 +91,7 @@ export function createEndpoint(id, viewport) {
  * Refine visible curvature in screen space. Vertices on cut banks are independent;
  * patches outside either endpoint keep their shape and retire instead of stretching.
  */
-export function createMorphMesh(source, target, options = {}) {
+function createSurfaceMesh(source, target, options = {}) {
   const from = [],
     to = [],
     uv = [],
@@ -109,7 +123,7 @@ export function createMorphMesh(source, target, options = {}) {
     if (!groups.has(key)) groups.set(key, {index: groups.size, pairs: [], rotation: 0});
     const group = groups.get(key);
     triangle.forEach(([x, y], i) => {
-      const vertexKey = `${x},${y},${group.index}`;
+      const vertexKey = `${x},${y},${group.index},${va ? (a[i].seam ?? 0) : 0}:${vb ? (b[i].seam ?? 0) : 0}`;
       if (vertices.has(vertexKey)) {
         indices.push(vertices.get(vertexKey));
         return;
@@ -239,4 +253,61 @@ export function createMorphMesh(source, target, options = {}) {
     indices: new Uint32Array(indices),
     vertexCount: indices.length
   };
+}
+
+/** Include repeated Web Mercator worlds while keeping each cut copy independent. */
+export function createMorphMesh(source, target, options = {}) {
+  const copies = [...new Set([...(source.wrapCopies || [0]), ...(target.wrapCopies || [0])])];
+  const endpointForCopy = (endpoint, copy) => {
+    const wrapped = (...args) => {
+      const point = endpoint(...args);
+      if (!point) return null;
+      const supported = copy === 0 || endpoint.wrapCopies?.includes(copy);
+      return {
+        ...point,
+        inside: point.inside && supported,
+        position: [
+          point.position[0] + copy * (endpoint.worldWidth || 0),
+          ...point.position.slice(1)
+        ],
+        cutPosition: point.cutPosition && [
+          point.cutPosition[0] + copy * 360,
+          ...point.cutPosition.slice(1)
+        ]
+      };
+    };
+    wrapped.width = endpoint.width;
+    wrapped.height = endpoint.height;
+    return wrapped;
+  };
+  if (copies.length === 1) return createSurfaceMesh(source, target, options);
+  const meshes = copies.map(copy =>
+    createSurfaceMesh(endpointForCopy(source, copy), endpointForCopy(target, copy), options)
+  );
+  const keys = [
+    'positions',
+    'destination',
+    'texCoords',
+    'lifetime',
+    'pieceCenters',
+    'pieceAngles',
+    'indices'
+  ];
+  const result = {};
+  for (const key of keys) {
+    const TypedArray = meshes[0][key].constructor;
+    result[key] = new TypedArray(meshes.reduce((sum, mesh) => sum + mesh[key].length, 0));
+    let offset = 0,
+      vertexOffset = 0;
+    for (const mesh of meshes) {
+      if (key === 'indices')
+        for (let i = 0; i < mesh.indices.length; i++)
+          result[key][offset + i] = mesh.indices[i] + vertexOffset;
+      else result[key].set(mesh[key], offset);
+      offset += mesh[key].length;
+      vertexOffset += mesh.positions.length / 3;
+    }
+  }
+  result.vertexCount = result.indices.length;
+  return result;
 }
