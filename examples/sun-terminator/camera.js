@@ -17,7 +17,7 @@ function transform(id) {
 /** Geographic focus at the viewport center, including interrupted map lobes. */
 export function geographicCenter(id, viewport) {
   if (id === 'globe' || id === 'map')
-    return [((viewport.longitude + 540) % 360) - 180, viewport.latitude];
+    return [((((viewport.longitude + 180) % 360) + 360) % 360) - 180, viewport.latitude];
   const p = viewport.unproject([viewport.width / 2, viewport.height / 2]);
   if (isCutMap(id)) return unprojectCutMap(id, p);
   return transform(id)

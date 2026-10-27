@@ -105,3 +105,22 @@ test('failed source inversions recover when switching projections', () => {
     }
   }
 });
+
+test('multiple eastward and westward turns preserve geographic focus', () => {
+  for (const longitude of [-1092, -732, -372, -12, 348, 708, 1068]) {
+    for (const id of ['globe', 'map']) {
+      const view = id === 'globe' ? new GlobeView() : new MapView();
+      const source = view.makeViewport({
+        width: 1000,
+        height: 800,
+        viewState: {longitude, latitude: 24, zoom: 3}
+      });
+      assert.deepEqual(geographicCenter(id, source), [-12, 24]);
+      const targetView = new OrthographicView({flipY: false});
+      const result = transferCamera(id, source, 'eqearth', targetView);
+      assert.equal(result.clamped, false);
+      const target = targetView.makeViewport({width: 1000, height: 800, viewState: result.camera});
+      assert.ok(Math.abs(geographicCenter('eqearth', target)[0] + 12) < 1e-6);
+    }
+  }
+});
