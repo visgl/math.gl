@@ -6,6 +6,12 @@ import {PROJECTIONS} from './projections.js';
 
 import {isCutMap, projectCutMap, cutPart} from './cut-maps.js';
 
+/** A queued rAF timestamp can precede CPU mesh preparation; never extrapolate. */
+export function getMorphProgress(elapsed, duration = 1500) {
+  const t = Math.max(0, Math.min(1, elapsed / duration));
+  return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
 /** Project geographic coordinates into the endpoint's current screen space. */
 export function createEndpoint(id, viewport) {
   const preset = PROJECTIONS.find(p => p.id === id);

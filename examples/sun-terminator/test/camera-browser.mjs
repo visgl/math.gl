@@ -76,6 +76,10 @@ try {
   const morphs = frames.filter((frame) => frame.view === 'earth-morph');
   assert.ok(morphs.length > 10, 'must sample intermediate morph frames');
   assert.ok(
+    morphs.every((frame) => frame.progress >= 0 && frame.progress <= 1),
+    'animation progress must never extrapolate past an endpoint'
+  );
+  assert.ok(
     morphs.every(
       (frame) => frame.dayTexture === 'day-overview' && frame.nightTexture === 'night-overview'
     ),

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {createMorphMesh} from '../morph.js';
+import {createMorphMesh, getMorphProgress} from '../morph.js';
 import {interruptedPoint} from '../cuts.js';
 import {cutPart} from '../cut-maps.js';
 
@@ -78,4 +78,18 @@ test('invalid domains and seams never produce nonfinite coordinates', () => {
   );
   assert.ok(mesh.positions.every(Number.isFinite));
   assert.ok(mesh.destination.every(Number.isFinite));
+});
+
+test('queued animation timestamps never extrapolate beyond either morph endpoint', () => {
+  assert.equal(getMorphProgress(-1000), 0);
+  assert.equal(getMorphProgress(-100), 0);
+  assert.equal(getMorphProgress(0), 0);
+  assert.equal(getMorphProgress(1500), 1);
+  assert.equal(getMorphProgress(2000), 1);
+  let previous = 0;
+  for (let elapsed = -300; elapsed <= 1800; elapsed += 10) {
+    const progress = getMorphProgress(elapsed);
+    assert.ok(progress >= previous && progress >= 0 && progress <= 1);
+    previous = progress;
+  }
 });

@@ -24,7 +24,7 @@ import {
 } from '@deck.gl-community/panels';
 import {getSunTerminator} from '@math.gl/earth/sun';
 import {transferCamera} from './camera.js';
-import {createEndpoint, createMorphMesh} from './morph.js';
+import {createEndpoint, createMorphMesh, getMorphProgress} from './morph.js';
 import {PROJECTIONS, getProjectionMesh} from './projections.js';
 import {MorphBitmapLayer} from './morph-bitmap-layer.js';
 import {ProjectedBitmapLayer} from './projected-bitmap-layer.js';
@@ -465,10 +465,9 @@ export function mountSunTerminator(root) {
       const started = performance.now();
       const tick = now => {
         if (disposed || !morph) return;
-        const t = Math.min(1, (now - started) / 1500);
-        morph.progress = t * t * t * (t * (t * 6 - 15) + 10);
+        morph.progress = getMorphProgress(now - started);
         render();
-        if (t < 1) morphFrame = requestAnimationFrame(tick);
+        if (morph.progress < 1) morphFrame = requestAnimationFrame(tick);
         else finish();
       };
       morphFrame = requestAnimationFrame(tick);
