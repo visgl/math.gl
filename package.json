@@ -48,7 +48,8 @@
     "check:tile-matrix-package": "node modules/geospatial/scripts/check-tile-matrix-package.mjs",
     "check:tree-shaking": "node scripts/check-tree-shaking.mjs",
     "check:packages": "node scripts/check-packages.mjs",
-    "check:attributions": "node scripts/check-attributions.mjs"
+    "check:attributions": "node scripts/check-attributions.mjs",
+    "check:terrain-dem": "node scripts/qualify-terrain-dem.mjs"
   },
   "devDependencies": {
     "@turf/destination": "^7.4.0",

@@ -1214,6 +1214,16 @@
       "types": "./dist/terrain/profile-measure.d.ts",
       "import": "./dist/terrain/profile-measure.js",
       "require": "./dist/terrain/profile-measure.cjs"
+    },
+    "./terrain/vertex-tiles": {
+      "types": "./dist/terrain/vertex-tiles.d.ts",
+      "import": "./dist/terrain/vertex-tiles.js",
+      "require": "./dist/terrain/vertex-tiles.cjs"
+    },
+    "./terrain/mesh-stitch": {
+      "types": "./dist/terrain/mesh-stitch.d.ts",
+      "import": "./dist/terrain/mesh-stitch.js",
+      "require": "./dist/terrain/mesh-stitch.cjs"
     }
   },
   "files": [

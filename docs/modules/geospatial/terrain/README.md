@@ -925,3 +925,121 @@ throws. Non-valid heights are ignored. The function uses compensated accumulatio
 for totals and accepts `maxSamples` (default 1,000,000) as an admission bound.
 Outputs are scalar values and do not mutate the profile. This entry does not import
 the profile sampler or any terrain/query class.
+
+## Vertex-tile reconciliation
+
+```ts
+import {reconcileTerrainVertexTiles} from '@math.gl/geospatial/terrain/vertex-tiles';
+
+const reconciled = reconcileTerrainVertexTiles(tiles, {
+  width: 257, height: 257,
+  origin: [0, 0], columnStep: [30, 0], rowStep: [0, -30],
+  heightReference: 'dataset-datum', maxHeightDifference: 0.01
+});
+// Each result has {column, row, field}; field is a detached HeightFieldProps value.
+```
+
+Each input has integer lattice `column`/`row`, a packed Float32/Float64 `heights`
+array and an optional Uint8 `validity` array. All tiles have the declared dimensions,
+metric affine steps and vertical reference. Tile origins advance by `width - 1`
+and `height - 1` sample steps: the outer vertex rows/columns overlap. Cell-registered
+rasters must be explicitly converted by the caller; they are not interpreted as
+vertex tiles automatically. Addresses are local lattice coordinates, not XYZ tile IDs.
+
+The result is sorted by `(column,row)`. At a shared vertex, the lexicographically
+smallest tile owns the height, including four-way corners. The valid-copy height
+range must fit `maxHeightDifference` (default zero). Any missing copy makes every
+copy of that shared vertex missing; missing data is never filled from a neighbor.
+Interior samples remain unchanged. Inputs are copied and never mutated. The result
+reports the number of shared lattice vertices and maximum valid-copy disagreement.
+An incomplete tile set is reconciled only against its present neighbors; reconcile
+again when the set changes. Callers publish the returned set atomically.
+
+`maxTiles` defaults to 4096 and `maxSamples` to 4,000,000 across all input tiles.
+Invalid buffers, duplicate addresses, unsafe lattice arithmetic, excess disagreement,
+and exhausted capacities throw before returning any result. The function imports
+neither `HeightField` nor `TiledHeightField` at runtime. It does not provide tile
+fetching, halos, cross-resolution resampling, or derivative continuity. Shared
+heights remove positional disagreements; adjacent interpolants can still have
+different slopes.
+
+## Conforming mixed-resolution mesh seams
+
+```ts
+import {stitchTerrainMeshEdges} from '@math.gl/geospatial/terrain/mesh-stitch';
+
+const stitched = stitchTerrainMeshEdges(coarseMesh, 'maxColumn', fineMesh, 'minColumn', {
+  rangeA: [0, 0.5], // lower half of coarse grid side meets the full child side
+  maxHeightAdjustment: 2
+});
+// stitched.a and stitched.b are detached meshes in coarseMesh.origin.
+// seamA[i] and seamB[i] address exactly identical XYZ positions.
+```
+
+`TerrainSeamMesh` accepts plain positions, triangle indices, grid coordinates,
+dimensions, origin and height reference. Existing regular/MARTINI/Delatin meshes
+satisfy the input shape. Output grid coordinates are Float64 because inserted
+boundary vertices can lie between source grid samples. These outputs can be
+stitched again, or passed as positions/indices to surface consumers; APIs requiring
+integer `TerrainGridMesh` coordinates do not accept them automatically.
+
+`rangeA` and `rangeB` are increasing intervals in `[0,1]`, measured in ascending
+row or column along the named grid side. Both default to `[0,1]`. Opposite spatial
+orientations are detected. Ranges allow a coarse tile to meet multiple children;
+missing range endpoints are inserted. Full-side mismatches in sample count and
+non-power-of-two ratios are supported too.
+
+Normalized knots separated only by reversal/range-normalization roundoff (within
+eight scaled machine epsilons) reuse existing vertex identities. The function
+rejects ambiguous matches that would collapse distinct vertices on the same side.
+Existing grid coordinates are preserved, so reversed non-power-of-two results can
+be stitched again without accumulating duplicate knots.
+
+A owns the piecewise-linear XYZ profile. The function forms the union of edge
+knots, samples that profile, inserts vertices, and splits adjacent triangles into
+fans. B's boundary conforms to A. Interior vertex positions are retained, rebased
+to A's origin. The output contains no seam skirts or degenerate connector triangles.
+The original input meshes remain unchanged.
+
+`maxHeightAdjustment` defaults to zero. The maximum difference between the original
+edge profiles is checked at the union of knots, including inserted endpoints;
+this bounds their vertical profile difference subject to Float64 arithmetic.
+It is **not** a continuous error certificate for either tile interior or source DEM.
+The displayed boundary triangles change, so recompute derived normals, bounds,
+query indexes and renderer products. Fractional source grid coordinates support
+UV reconstruction. Other per-vertex/per-face attributes are not transferred.
+
+The selected input grid sides must be complete, unique, straight affine boundary
+chains, with exactly one incident triangle per edge. Mesh triangles must have
+positive nonzero XY area. Sides must have opposite interiors and equal height
+reference labels. Holes on the selected side, mismatched endpoints, nonconforming
+input sides and inverted output triangles are rejected. This validates the selected
+boundary, not global mesh manifoldness. Arbitrary curved globe-space edges need
+preparation in a suitable local planar frame.
+
+`coordinateTolerance` is an absolute XY alignment tolerance (default `1e-8` in the
+mesh's metric units). Limits default to 2,000,000 vertices and 4,000,000 triangles
+per mesh, and 100,000 boundary vertices. Both input and output capacities are checked;
+exhaustion throws without returning partial meshes.
+
+For multiple seams, choose consistent authoritative profiles and shared corner
+heights first. Publish all changed meshes together. A later stitch that changes a
+previously shared vertex requires rebuilding the affected neighbors. There is no
+implicit global seam scheduler, transition morph, normal smoothing or source-tile
+mutation. The independent entry imports no tessellator, terrain class or renderer.
+
+## Independent DEM qualification
+
+The committed GDAL DTED fixture and generated GDAL 3.9.3 Horn/Zevenbergen–Thorne
+references exercise 925 valid samples per method, all missing/edge statuses,
+adaptive-mesh nodal errors and same-level seams. Input provenance, preprocessing,
+regeneration commands and tolerances are recorded in
+[the fixture manifest](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/terrain/fixtures/README.md).
+Normal Node and browser tests require no GDAL installation.
+
+After building geospatial, `node scripts/qualify-terrain-dem.mjs` verifies the source
+hash and outputs reproducible numerical residuals, mesh sizes and warm timing
+observations. On the initial fixture, maximum slope residuals are below `6e-8`
+degrees and circular aspect residuals below `2.3e-5` degrees. The suite uses a
+low-relief regional DEM; mountainous/coastal datasets, continuous approximation
+bounds, regional performance and GPU/rendering conformance remain separate work.
