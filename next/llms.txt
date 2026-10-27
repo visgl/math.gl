@@ -189,6 +189,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Packed geodesic and rhumb line sampling](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-line-buffer.md): GeodesicLineBuffer and RhumbLineBuffer sample a prepared line into caller-owned
 - [GeodesicPath](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-path.md): A reusable shortest geodesic between two geographic endpoints, sampled by surface-distance
 - [GeodesicPolygon](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-polygon.md): Streaming geodesic polygons and open polylines on revolution ellipsoids. This
+- [Oblique ellipsoidal visibility and cut graphs](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geographic-atlas.md): An orthographic map can show an ellipsoid from any direction. Its visible surface
 - [Geographic line and polygon seams](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geographic-seams.md): A longitude seam is a discontinuity in the map chart, not a gap in the globe.
 - [Geographic tile queries](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geographic-tiles.md): The helpers define an equal-angle geographic quadtree: one world tile at level zero,
 - [Global spherical polygon cuts](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/global-geographic-cuts.md): An accurately projected point does not determine how to draw a whole polygon
