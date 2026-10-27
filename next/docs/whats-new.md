@@ -8,7 +8,7 @@
 
 ## v5.0[​](#v50 "Direct link to v5.0")
 
-* `@math.gl/geospatial/tile-matrix` adds public complete-set and coverage validation, plus `resolveTileIndex` for canonical integer tile addresses. Coalesced requests use the same alias-aware coverage as row-range selection. See [Tile matrices](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/tile-matrix.md).
+* `@math.gl/geospatial` adds public complete-set and coverage validation, plus `resolveTileIndex` for canonical integer tile addresses. Coalesced requests use the same alias-aware coverage as row-range selection. See [Tile matrices](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/tile-matrix.md).
 
 * `@math.gl/geometry` adds flat-sided `PrismGeometry` and solid `RingGeometry`, including hexagonal prisms and capped annular segments. The optional parametric entry adds rotated, capped segments to `TorusGeometry` while preserving its full-torus defaults.
 
@@ -24,7 +24,7 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 * Detects conventional cell-column names for all bundled decoders to power data-driven visualization layers.
 * Adds validated S2 token/index conversion, exact polar and antimeridian bounds, and face-aware spatial descendant addressing.
 
-**`@math.gl/core/types`**
+**`@math.gl/core`**
 
 * Sized array types provide stronger guarantees for math class inputs and outputs.
 
@@ -39,7 +39,7 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 * `SphericalCoordinates` now uses the structural `Vector3Like` type and direct calculations, avoiding runtime dependencies on `Vector3` and `vec3`.
 * Core named-import gzip fixtures are 6–62% smaller than v4.1; the full public-entry fixture is 37% smaller. See the bundling guide for methodology and measurements.
 
-**`@math.gl/core/expressions`** (NEW EXPERIMENTAL MODULE)
+**`@math.gl/core`** (NEW EXPERIMENTAL MODULE)
 
 * Promotes the expression parser previously embedded in `@deck.gl/json` to a documented experimental module.
 * Parses, evaluates, and compiles synchronous or asynchronous JavaScript-style expressions.
@@ -59,7 +59,7 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 * Adds immutable, format-neutral spatial-reference descriptors that preserve definition representation, alternatives, provenance, coordinate epoch, frame, stored order, and explicit default/unknown/absent state.
 * Adds a comprehensive CRS developer guide covering standards, serialization versus semantics, axis order, dynamic and vertical CRS, transformation boundaries, and integration guidance.
 
-**`@math.gl/geospatial/wkb`** (NEW MODULE)
+**`@math.gl/geospatial`** (NEW MODULE)
 
 * Adds dependency-free synchronous WKB, EWKB, and WKT codecs over plain geometry values.
 * Supports both endian orders, ISO and EWKB dimension headers, EWKB SRIDs, all geometry families, nested collections, dimension tokens, MultiPoint variants, and empty geometry.
@@ -102,14 +102,14 @@ Status: prerelease development. TypeScript consumers require TypeScript 6.0 or l
 * Adds analytic glTF 2.1 box, capsule, cylinder, plane, and sphere queries for clipping/culling, rays, transforms, and enclosing bounds.
 * Culling results now use descriptive string literal types.
 
-**`@math.gl/geometry/utils`** (NEW MODULE)
+**`@math.gl/geometry`** (NEW MODULE)
 
 * Promotes the renderer-independent geometry helpers previously maintained in `@loaders.gl/math`.
 * Adds typed geometry traversal, vertex-normal generation, component-type conversion, packed RGB565 colors, octahedral attribute compression, and typed-array utilities.
 
-**`@math.gl/geometry/polygon`**
+**`@math.gl/geometry`**
 
-* Adds [`subdivideGlobeMesh`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/subdivide-globe-mesh.md) in `@math.gl/geospatial/globe` for conforming globe subdivision with preserved attribute provenance.
+* Adds [`subdivideGlobeMesh`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/subdivide-globe-mesh.md) in `@math.gl/geospatial` for conforming globe subdivision with preserved attribute provenance.
 * Polygon winding directions now use descriptive string literal types.
 * Adds adaptive [triangle-mesh subdivision](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/subdivide-triangle-mesh.md) with shared-edge refinement and attribute interpolation.
 * Adds adaptive [polyline subdivision](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/subdivide-polyline.md) through application-supplied coordinate transforms.
@@ -139,7 +139,7 @@ This minor release brings:
 
 * `Vector2Like` - `Matrix4Like` - New types to specify numeric inputs of a specific length.
 
-**`@math.gl/core/types`**
+**`@math.gl/core`**
 
 * `Bounds`, `Bounds2D` and `Bounds3D` - New types for expressing [bounds](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds.md) (extents).
 * `NumberArray2` - `NumberArray16` - New types to specify numeric arrays of a specific length.
@@ -175,7 +175,7 @@ This release brings:
 * `config` is now truly global (stored on `globalThis`).
 * `gl-matrix` dependency removed.
 
-**`@math.gl/core/types`**
+**`@math.gl/core`**
 
 * New `isTypedArray()` and `isNumericArray()` utilities that check values and return properly restricted types to help write clean TypeScript code (e.g. avoids the `DataView` case when using `ArrayBuffer.isView()`).
 
@@ -185,11 +185,11 @@ Release Date: June 10, 2022
 
 Codebase has been fully converted to TypeScript. In general this means that users can expect the types exported from math.gl to be considerably improved, however in some function signatures are no longer supported. For details, consult the [upgrade guide](https://visgl.github.io/math.gl/next/docs/upgrade-guide.md).
 
-**`@math.gl/core/types` (NEW)**
+**`@math.gl/core` (NEW)**
 
 * New module that exports a few TypeScript types that e.g. generalize handling of numeric arrays.
 
-**`@math.gl/geometry/polygon` (NEW)**
+**`@math.gl/geometry` (NEW)**
 
 * Includes earcut 2.2 (various bug fixes for edge cases)
 * The `earcut` utility supports a new argument `plane` to calculate tesselation on alternative projection planes.
@@ -203,7 +203,7 @@ Release Date: July 14, 2021
 * `getBounds()` now supports an optional `fovy` parameter on the `WebMercatorViewport` object
 * `getProjectionMatrix()` and `getProjectionParameters()` now accept a `fovy` parameter
 
-**`@math.gl/geometry/polygon`**
+**`@math.gl/geometry`**
 
 * Improve performance of `getPolygonSignedArea()` by 3x
 * Addition of `earcut()` method for triangulating polygons
@@ -217,13 +217,13 @@ Release Date: July 14, 2021
 
 Release Date: Jan 7, 2021
 
-**`@math.gl/earth/geoid`** - New module
+**`@math.gl/earth`** - New module
 
 * Support for [geoid](https://en.wikipedia.org/wiki/Geoid)-based [earth gravity models](https://en.wikipedia.org/wiki/Earth_Gravitational_Model).
 * New `Geoid` class calculates the height offset (aka "undulation") from the pure ellipsoid for a given lng/lat (using spherical harmonics).
 * `Geoid` instances can be initialized with PGM-encoded earth gravity model coefficient files from standard sources.
 
-**`@math.gl/geometry/polygon`**
+**`@math.gl/geometry`**
 
 * Support for flat arrays (e.g. polygons stored in typed arrays)
 * Support for calling polygon utilities directly on arrays, without a `Polygon` instance.
@@ -245,7 +245,7 @@ Release Date: July 18, 2020
 
 * TypeScript type definitions (`.d.ts` files) are now exported for all math.gl modules.
 
-**`@math.gl/geometry/polygon`** - New module
+**`@math.gl/geometry`** - New module
 
 * A new module offering geospatial polygon clipping functions.
 

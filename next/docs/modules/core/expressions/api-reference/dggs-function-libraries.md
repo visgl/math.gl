@@ -2,12 +2,12 @@
 
 ![From-v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
-Import optional Discrete Global Grid System function tables from `@math.gl/dggs/expressions`.
+Import optional Discrete Global Grid System function tables from `@math.gl/dggs`.
 
 ```
-import {ExpressionFunctionRegistry, compile} from '@math.gl/core/expressions';
+import {ExpressionFunctionRegistry, compile} from '@math.gl/core';
 
-import {DGGS_FUNCTION_LIBRARY} from '@math.gl/dggs/expressions';
+import {DGGS_FUNCTION_LIBRARY} from '@math.gl/dggs';
 
 
 

@@ -15,7 +15,7 @@ math.gl computes on the CPU and has no GPU dependencies. Its arrays and coordina
 * **Geospatial** - CRS, projections, WKB, and GeoArrow through **`@math.gl/geospatial`**
 * **Earth utilities** - Geoid, sun, and timezone APIs through **`@math.gl/earth`**
 * **Discrete global grids** - Lightweight geometry decoders and cell-column detection for common grid encodings. **`@math.gl/dggs`**
-* **3D math** - 3D primitives, geometry processing and culling: **`@math.gl/geometry`**, **`@math.gl/geometry/utils`**, **`@math.gl/geometry/culling`**
+* **3D math** - 3D primitives, geometry processing and culling: **`@math.gl/geometry`**, **`@math.gl/geometry`**, **`@math.gl/geometry/culling`**
 
 ## Modules[​](#modules "Direct link to Modules")
 
@@ -36,11 +36,11 @@ The implementations live in these grouped packages. The former standalone leaf p
 
 Vectors, matrices and shared numeric types.
 
-| Module                                                                                                            | Description                                                  |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| [`@math.gl/core`](https://visgl.github.io/math.gl/next/docs/modules/core.md)                         | Vectors, matrices, quaternions and reusable math primitives. |
-| [`@math.gl/core/types`](https://visgl.github.io/math.gl/next/docs/modules/core/types.md)             | Shared TypeScript contracts for numeric and geospatial data. |
-| [`@math.gl/core/expressions`](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md) | Parse and evaluate compact expressions (experimental).       |
+| Module                                                                                                | Description                                                  |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [`@math.gl/core`](https://visgl.github.io/math.gl/next/docs/modules/core.md)             | Vectors, matrices, quaternions and reusable math primitives. |
+| [`@math.gl/core`](https://visgl.github.io/math.gl/next/docs/modules/core/types.md)       | Shared TypeScript contracts for numeric and geospatial data. |
+| [`@math.gl/core`](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md) | Parse and evaluate compact expressions (experimental).       |
 
 ### 3D[​](#3d "Direct link to 3D")
 
@@ -48,22 +48,22 @@ Curves, meshes, geometry processing and visibility.
 
 | Module                                                                                                            | Description                                               |
 | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| [`@math.gl/geometry/curves`](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves.md)   | Parametric curves, interpolation and arc-length sampling. |
+| [`@math.gl/geometry`](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves.md)          | Parametric curves, interpolation and arc-length sampling. |
 | [`@math.gl/geometry`](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)                 | Renderer-independent primitive meshes and tessellation.   |
-| [`@math.gl/geometry/utils`](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils.md)     | Typed-array geometry processing utilities.                |
+| [`@math.gl/geometry`](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils.md)           | Typed-array geometry processing utilities.                |
 | [`@math.gl/geometry/culling`](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling.md) | Bounding volumes, intersection tests and visibility.      |
 
 ### Spatial[​](#spatial "Direct link to Spatial")
 
 Geometry operations, geographic indexing and columnar data.
 
-| Module                                                                                                                        | Description                                                                      |
-| ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [`@math.gl/geometry/polygon`](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md)             | Clipping, subdivision and polygon and line geometry operations.                  |
-| [`@math.gl/geometry/spatial-index`](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md) | Static box, point and triangle indexes for range, ray and nearest queries (POC). |
-| [`@math.gl/dggs`](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)                                     | Decode boundaries and columns for common global grid encodings.                  |
-| [`@math.gl/geospatial/geoarrow`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow.md)       | Columnar geospatial layouts and kernels over typed-array buffers.                |
-| [`@math.gl/geospatial/wkb`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb.md)                 | WKB, EWKB and WKT geometry codecs.                                               |
+| Module                                                                                                                  | Description                                                                      |
+| ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [`@math.gl/geometry`](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md)               | Clipping, subdivision and polygon and line geometry operations.                  |
+| [`@math.gl/geometry`](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md)         | Static box, point and triangle indexes for range, ray and nearest queries (POC). |
+| [`@math.gl/dggs`](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)                               | Decode boundaries and columns for common global grid encodings.                  |
+| [`@math.gl/geospatial/geoarrow`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow.md) | Columnar geospatial layouts and kernels over typed-array buffers.                |
+| [`@math.gl/geospatial`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb.md)               | WKB, EWKB and WKT geometry codecs.                                               |
 
 ### Earth[​](#earth "Direct link to Earth")
 
@@ -75,7 +75,7 @@ Coordinate reference systems, Earth models, maps and time.
 | [`@math.gl/geospatial/projection`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) | Coordinate transformations, pluggable projections and explicit epochs. |
 | [`@math.gl/web-mercator`](https://visgl.github.io/math.gl/next/docs/modules/web-mercator.md)                   | Web Mercator map and camera utilities.                                 |
 | [`@math.gl/geospatial`](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md)                       | Ellipsoid geometry and geographic coordinate frames.                   |
-| [`@math.gl/earth/geoid`](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md)                     | Earth gravity models and geoid height conversion.                      |
+| [`@math.gl/earth`](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md)                           | Earth gravity models and geoid height conversion.                      |
 | [`@math.gl/earth/timezone`](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md)               | Geographic timezone lookup and local calendar calculations.            |
 | [`@math.gl/earth/sun`](https://visgl.github.io/math.gl/next/docs/modules/earth/sun.md)                         | Sun position, daylight and atmospheric lighting.                       |
 | [`@math.gl/earth`](https://visgl.github.io/math.gl/next/docs/modules/earth.md)                                 | Grouped entry points for geoid, sun, and timezone utilities.           |
@@ -108,7 +108,7 @@ math.gl is fully supported on:
 math.gl was inspired by and built upon some of the most proven open source JavaScript math libraries:
 
 * [`gl-matrix`](http://glmatrix.net/) - adapted vector and matrix kernels retained in core; no runtime dependency on the package
-* [`expression-eval`](https://www.npmjs.com/package/expression-eval) by [@donmccurdy](https://github.com/donmccurdy) - inspiration and source material for `@math.gl/core/expressions`
+* [`expression-eval`](https://www.npmjs.com/package/expression-eval) by [@donmccurdy](https://github.com/donmccurdy) - inspiration and source material for `@math.gl/core`
 * THREE.js math library - math.gl classes are API-compatible with a subset of the THREE.js classes and pass THREE.js test suites.
 * The CesiumJS math library (Apache2) - The geospatial and culling modules were ported from Cesium code base.
 

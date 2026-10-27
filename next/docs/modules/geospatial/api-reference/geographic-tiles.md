@@ -5,7 +5,7 @@
 ```
 import {getGeographicTile, getGeographicTileBounds, getGeographicTileRanges}
 
-  from '@math.gl/geospatial/tiles';
+  from '@math.gl/geospatial';
 
 
 
@@ -60,4 +60,4 @@ The height interval is application supplied. Index construction and storage belo
 
 ## Explicit tile matrix grids[​](#explicit-tile-matrix-grids "Direct link to Explicit tile matrix grids")
 
-For projected grids or service-defined origins, resolutions and tile dimensions, use [Tile matrix utilities](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/tile-matrix.md) from `@math.gl/geospatial/tile-matrix`. They provide compact extent ranges and resolution-based matrix selection without assuming this geographic quadtree layout. Their far outer edges are excluded and queries do not wrap; the geographic helpers above retain their world-edge and antimeridian semantics.
+For projected grids or service-defined origins, resolutions and tile dimensions, use [Tile matrix utilities](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/tile-matrix.md) from `@math.gl/geospatial`. They provide compact extent ranges and resolution-based matrix selection without assuming this geographic quadtree layout. Their far outer edges are excluded and queries do not wrap; the geographic helpers above retain their world-edge and antimeridian semantics.

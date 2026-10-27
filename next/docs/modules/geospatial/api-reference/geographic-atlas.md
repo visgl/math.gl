@@ -2,12 +2,12 @@
 
 An orthographic map can show an ellipsoid from any direction. Its visible surface ends where the outward normal is perpendicular to the viewing direction. Clipping only latitude works for a polar view; an oblique view needs a curved horizon and correct polygon closure along that horizon.
 
-`@math.gl/geospatial/geographic-atlas` adds this visibility consumer and a finite, shared cut graph for multi-chart maps. Source edges retain their declared linear, ellipsoidal geodesic or rhumb geometry. The optional entry adds no dependencies.
+`@math.gl/geospatial` adds this visibility consumer and a finite, shared cut graph for multi-chart maps. Source edges retain their declared linear, ellipsoidal geodesic or rhumb geometry. The optional entry adds no dependencies.
 
 ## Orthographic visibility[​](#orthographic-visibility "Direct link to Orthographic visibility")
 
 ```
-import {createOrthographicCutAtlas} from '@math.gl/geospatial/geographic-atlas';
+import {createOrthographicCutAtlas} from '@math.gl/geospatial';
 
 
 
@@ -41,7 +41,7 @@ This is parallel-ray **surface** visibility. It does not compute perspective cam
 Each boundary is a circle in **unit surface-normal space**: `dot(normalized(boundary.normal), surfaceNormal) = offset`. The offset defaults to zero. On an ellipsoid, its surface image is generally a curved geographic boundary. Orthographic horizons have offset zero; parallels are another special case. These are geodetic normals, not geocentric directions.
 
 ```
-import {GeographicCutAtlas} from '@math.gl/geospatial/geographic-atlas';
+import {GeographicCutAtlas} from '@math.gl/geospatial';
 
 
 
@@ -71,7 +71,7 @@ This finite circle-boundary graph supports user-defined regional cells and facet
 ## A faceted-map consumer[​](#a-faceted-map-consumer "Direct link to A faceted-map consumer")
 
 ```
-import {createOctahedralCutAtlas} from '@math.gl/geospatial/geographic-atlas';
+import {createOctahedralCutAtlas} from '@math.gl/geospatial';
 
 
 

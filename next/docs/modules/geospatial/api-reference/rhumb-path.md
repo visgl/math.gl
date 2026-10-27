@@ -3,9 +3,9 @@
 A rhumb path maintains a constant compass bearing. It generally travels farther than a shortest geodesic. `RhumbPath` adapts the existing [ellipsoidal rhumb solver](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid-rhumb.md) to the same surface-distance sampling interface as [GeodesicPath](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-path.md).
 
 ```
-import {RhumbPath} from '@math.gl/geospatial/ellipsoid';
+import {RhumbPath} from '@math.gl/geospatial';
 
-import {subdivideRhumbPolyline} from '@math.gl/geospatial/globe';
+import {subdivideRhumbPolyline} from '@math.gl/geospatial';
 
 
 

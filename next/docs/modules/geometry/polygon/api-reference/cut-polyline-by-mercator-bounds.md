@@ -5,7 +5,7 @@
 Splits a geospatial polyline at the [180th meridian](https://en.wikipedia.org/wiki/180th_meridian).
 
 ```
-import {cutPolylineByMercatorBounds} from '@math.gl/geometry/polygon';
+import {cutPolylineByMercatorBounds} from '@math.gl/geometry';
 
 
 

@@ -12,7 +12,7 @@ The `@math.gl/geometry` module provides renderer-independent CPU mesh data and p
 
 All generated meshes use `triangle-list` topology and expose `POSITION`, `NORMAL` and `TEXCOORD_0` typed-array attributes. Index buffers automatically use 32-bit values when a mesh has more than 65,535 vertices.
 
-The geometry group also provides `@math.gl/geometry/utils`, `/curves`, `/polygon`, `/culling`, and `/spatial-index` subpaths. The polygon module combines general tessellation and mesh refinement with geographic helpers such as Mercator clipping and globe subdivision.
+The geometry group also provides `@math.gl/geometry`, `/curves`, `/polygon`, `/culling`, and `/spatial-index` subpaths. The polygon module combines general tessellation and mesh refinement with geographic helpers such as Mercator clipping and globe subdivision.
 
 ## Installation[​](#installation "Direct link to Installation")
 
@@ -63,6 +63,6 @@ An infinite glTF plane cannot be tessellated, so `PlaneGeometry` requires finite
 
 ## Parametric surfaces[​](#parametric-surfaces "Direct link to Parametric surfaces")
 
-The optional [`@math.gl/geometry/parametric`](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/parametric.md) subpath provides torus, lathe and sampled surface generators, with an interactive gallery.
+The optional [`@math.gl/geometry`](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/parametric.md) subpath provides torus, lathe and sampled surface generators, with an interactive gallery.
 
 The experimental `HingeTree` evaluates rigid panels connected by hinges. See the [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/unfolding-polyhedron).

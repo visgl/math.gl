@@ -13,7 +13,7 @@ For distance-parameterized sampling and adaptive subdivision, see [RhumbPath and
 Constant-bearing geometry is available from the optional ellipsoid entry:
 
 ```
-import {EllipsoidRhumb, RhumbPolygon} from '@math.gl/geospatial/ellipsoid';
+import {EllipsoidRhumb, RhumbPolygon} from '@math.gl/geospatial';
 
 const axes = {semiMajorAxis: 6378137, semiMinorAxis: 6356752.314245179};
 

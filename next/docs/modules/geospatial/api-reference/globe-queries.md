@@ -7,7 +7,7 @@
 These public APIs supply reusable CPU geometry for globe picking, label/annotation occlusion, limb meshes and imagery coverage. They do not depend on Kepler, deck.gl viewports or GPU state. Existing `SphereShape` remains useful for general transformed shape picking; `EllipsoidOccluder` specializes in planetary segment and limb queries.
 
 ```
-import {EllipsoidOccluder, getGlobeHorizonBounds, splitGlobeBounds} from '@math.gl/geospatial/globe';
+import {EllipsoidOccluder, getGlobeHorizonBounds, splitGlobeBounds} from '@math.gl/geospatial';
 
 
 

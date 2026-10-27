@@ -156,7 +156,7 @@ const worldAreas = projectionEngine.createProjection({
 worldAreas.project([12, 55]);
 ```
 
-[Equal Earth](https://proj.org/en/stable/operations/projections/eqearth.html) is a useful starting point for area-preserving world maps. A projection converts points; it does not choose polygon seam splits or tessellation. Use [`@math.gl/geometry/polygon`](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/polygon.md) for the relevant geometric operations. Cube-face selection and tiling likewise belong to the application.
+[Equal Earth](https://proj.org/en/stable/operations/projections/eqearth.html) is a useful starting point for area-preserving world maps. A projection converts points; it does not choose polygon seam splits or tessellation. Use [`@math.gl/geometry`](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/polygon.md) for the relevant geometric operations. Cube-face selection and tiling likewise belong to the application.
 
 ### Discontinuous map layouts (experimental)[​](#discontinuous-map-layouts-experimental "Direct link to Discontinuous map layouts (experimental)")
 

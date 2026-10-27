@@ -4,10 +4,12 @@
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
-`@math.gl/earth/sun/stars` is an optional entry point with 7,000 real bright-star sources and proper motion. It has no Astronomy Engine dependency. Importing the main `@math.gl/earth/sun` entry does not include this catalog.
+`@math.gl/earth/sun` is an optional entry point with 7,000 real bright-star sources and proper motion. It has no Astronomy Engine dependency. Bundlers can exclude unused catalog data from selective named imports.
 
 ```
-import {STAR_CATALOG, getStarPositions, createMilkyWayBackground} from '@math.gl/earth/sun/stars';
+import {STAR_CATALOG} from '@math.gl/earth/sun/stars';
+
+import {getStarPositions, createMilkyWayBackground} from '@math.gl/earth/sun';
 
 import {getStarfieldRotation} from '@math.gl/earth/sun';
 
@@ -74,7 +76,7 @@ Fixed equatorial J2000 axes are +X = RA 0/Dec 0, +Y = RA 6h/Dec 0, +Z = north ce
 Use the shared globe adapters to turn the observer's local sky ray into a deck.gl LNGLAT rendering position:
 
 ```
-import {getStarPositions} from '@math.gl/earth/sun/stars';
+import {getStarPositions} from '@math.gl/earth/sun';
 
 import {createSkyObserver, getStarfieldRotation, getSkyGlobePosition} from '@math.gl/earth/sun';
 
@@ -110,7 +112,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 
-import {getStarPositions, getStarLayerData} from '@math.gl/earth/sun/stars';
+import {getStarPositions, getStarLayerData} from '@math.gl/earth/sun';
 
 
 

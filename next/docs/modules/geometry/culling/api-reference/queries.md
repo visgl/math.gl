@@ -8,7 +8,7 @@ Loading <!-- -->Ray & closest-point lab<!-- -->…
 
 ⛶
 
-Import `intersectRayBounds`, `intersectRayTriangle`, and `getClosestPointOnTriangle` from `@math.gl/geometry/culling` or the lightweight `@math.gl/geometry/culling/queries` entry point.
+Import `intersectRayBounds`, `intersectRayTriangle`, and `getClosestPointOnTriangle` from `@math.gl/geometry/culling` or the lightweight `@math.gl/geometry/culling` entry point.
 
 * `intersectRayBounds(origin, direction, minimum, maximum, maxT = Infinity)` supports 2D/3D closed bounds. Returns entry t, zero for an origin inside, or null. Parallel components and boundary contact are supported. Bounds must be ordered and dimensions must match.
 * `intersectRayTriangle(origin, direction, a, b, c, options?)` accepts 3D arrays and returns `{t, barycentric: [aWeight, bWeight, cWeight]}` or null. Options are `maxT` and `backfaceCulling` (default false, counterclockwise fronts). Degenerate triangles and coplanar rays have no hit. The triangle is filled, including its edges and vertices.

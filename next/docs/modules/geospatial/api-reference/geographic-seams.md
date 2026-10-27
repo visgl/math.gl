@@ -5,7 +5,7 @@ A longitude seam is a discontinuity in the map chart, not a gap in the globe. Lo
 `splitGeographicPolyline` and `splitGeographicPolygon` split declared geographic edges into a configurable 360-degree longitude chart. They use the selected curve's seam intersections, rather than replacing curved edges with straight longitude/latitude chords.
 
 ```
-import {splitGeographicPolyline, splitGeographicPolygon} from '@math.gl/geospatial/globe';
+import {splitGeographicPolyline, splitGeographicPolygon} from '@math.gl/geospatial';
 
 
 

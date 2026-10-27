@@ -56,7 +56,7 @@ import {
 
   type ExpressionFunctionLibrary
 
-} from '@math.gl/core/expressions';
+} from '@math.gl/core';
 
 
 

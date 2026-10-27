@@ -17,7 +17,7 @@ import {
 
   CatmullRomCurve
 
-} from '@math.gl/geometry/curves';
+} from '@math.gl/geometry';
 ```
 
 ## Constructors[​](#constructors "Direct link to Constructors")

@@ -2,16 +2,16 @@
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
-`@math.gl/geospatial/tile-matrix` provides geometry, extent queries and level selection for rectangular tile grids, including coalesced row bands, in any coordinate system. The subpath has no runtime dependencies; its types and functions are also exported from `@math.gl/geospatial/tiles`, alongside geographic tile queries.
+`@math.gl/geospatial` provides geometry, extent queries and level selection for rectangular tile grids, including coalesced row bands, in any coordinate system. The subpath has no runtime dependencies; its types and functions are also exported from `@math.gl/geospatial`, alongside geographic tile queries.
 
 ```
 import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix,
 
   validateTileMatrixSet, resolveTileIndex}
 
-  from '@math.gl/geospatial/tile-matrix';
+  from '@math.gl/geospatial';
 
-import type {TileMatrix, TileMatrixSet} from '@math.gl/geospatial/tile-matrix';
+import type {TileMatrix, TileMatrixSet} from '@math.gl/geospatial';
 
 
 

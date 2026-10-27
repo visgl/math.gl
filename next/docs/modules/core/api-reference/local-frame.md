@@ -2,7 +2,7 @@
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
-Use `@math.gl/core/local-frame` to rotate offsets or velocities between a local **east, north, up (ENU)** frame and fixed Cartesian XYZ, or build a local-to-fixed matrix. The numeric functions accept reusable storage and have no runtime imports, CRS lookup, ellipsoid dependency or global angle setting. They are an optional entry, absent from the core root.
+Use `@math.gl/core` to rotate offsets or velocities between a local **east, north, up (ENU)** frame and fixed Cartesian XYZ, or build a local-to-fixed matrix. The numeric functions accept reusable storage and have no runtime imports, CRS lookup, ellipsoid dependency or global angle setting. They are an optional entry, absent from the core root.
 
 ```
 import {
@@ -11,7 +11,7 @@ import {
 
   localFrameToMatrix
 
-} from '@math.gl/core/local-frame';
+} from '@math.gl/core';
 
 
 

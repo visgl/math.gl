@@ -2,7 +2,7 @@
 
 ![From v3.2](https://img.shields.io/badge/From-v3.2-blue.svg?style=flat-square)
 
-`@math.gl/geometry/polygon` clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.
+`@math.gl/geometry` clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.
 
 <!-- -->
 
@@ -23,7 +23,7 @@ npm install @math.gl/geometry
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {earcut} from '@math.gl/geometry/polygon';
+import {earcut} from '@math.gl/geometry';
 
 
 

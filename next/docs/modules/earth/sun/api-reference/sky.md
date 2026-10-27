@@ -2,12 +2,12 @@
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
-`getSkySnapshot` puts the Sun, Moon, seven planets, Galilean moons and a J2000 star-field orientation into one consistent **geometric topocentric ENU frame**. Install the optional MIT-licensed `astronomy-engine` peer. The main entry point retains the lightweight SunCalc position APIs without importing that peer.
+`getSkySnapshot` puts the Sun, Moon, seven planets, Galilean moons and a J2000 star-field orientation into one consistent **geometric topocentric ENU frame**. The MIT-licensed `astronomy-engine` is a declared runtime dependency. Bundlers can remove it when selecting unrelated named exports.
 
 ```
 import {createSkyObserver} from '@math.gl/earth/sun';
 
-import {getSkySnapshot, createSkyContext} from '@math.gl/earth/sun/astronomy';
+import {getSkySnapshot, createSkyContext} from '@math.gl/earth/sun';
 
 
 

@@ -5,9 +5,9 @@
 Test two oriented rectangles in a shared two-dimensional Euclidean coordinate space. This scalar separating-axis query is useful for rotated screen-space labels and other planar collision checks. It does not require 3D bounding volumes, matrices or renderer objects.
 
 ```
-import {intersectOrientedBoxes2D} from '@math.gl/geometry/culling/oriented-box-2d';
+import {intersectOrientedBoxes2D} from '@math.gl/geometry/culling';
 
-import type {OrientedBox2D} from '@math.gl/geometry/culling/oriented-box-2d';
+import type {OrientedBox2D} from '@math.gl/geometry/culling';
 
 
 

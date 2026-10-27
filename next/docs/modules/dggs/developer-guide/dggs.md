@@ -7,7 +7,7 @@ Global grid encodings identify cells rather than individual coordinates. Use `@m
 Choose a decoder for the encoding used by your data:
 
 ```
-import {GeohashDecoder} from '@math.gl/dggs/geohash';
+import {GeohashDecoder} from '@math.gl/dggs';
 
 
 

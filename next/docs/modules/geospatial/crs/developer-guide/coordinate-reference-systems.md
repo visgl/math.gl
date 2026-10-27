@@ -9,7 +9,7 @@ This guide explains the CRS model used across math.gl. It also draws an importan
 * Use [`@math.gl/geospatial/crs`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs.md) to type CRS definitions, preserve WKT or PROJ syntax, and describe how a dataset references its coordinates.
 * Use [`@math.gl/geospatial/projection`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) to execute a supported horizontal, projected, geocentric, or datum-grid transformation.
 * Use [`@math.gl/geospatial`](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md) for ellipsoid, cartographic/ECEF, and local tangent-plane mathematics.
-* Use [`@math.gl/earth/geoid`](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md) when an application supplies a geoid model for ellipsoidal/orthometric height conversion.
+* Use [`@math.gl/earth`](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md) when an application supplies a geoid model for ellipsoidal/orthometric height conversion.
 * Do not infer a transformation from the presence of metadata. A result is transformed only after its coordinates, bounds, origins, and other spatial values have actually been updated.
 
 ## What a CRS describes[​](#what-a-crs-describes "Direct link to What a CRS describes")
@@ -285,7 +285,7 @@ h = H + N
 H = h - N
 ```
 
-The model must be sampled at the appropriate geographic position. `@math.gl/earth/geoid` parses and interpolates application-supplied models; it does not download them. A geoid is not terrain, and it cannot resolve terrain-relative or scene-relative placement.
+The model must be sampled at the appropriate geographic position. `@math.gl/earth` parses and interpolates application-supplied models; it does not download them. A geoid is not terrain, and it cannot resolve terrain-relative or scene-relative placement.
 
 ## Deterministic and browser-safe behavior[​](#deterministic-and-browser-safe-behavior "Direct link to Deterministic and browser-safe behavior")
 

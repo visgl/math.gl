@@ -3,7 +3,7 @@
 `TriaxialEllipsoid` supplies surface coordinate and direction conversions and initial-value geodesic trajectories for three unequal axes. A geodesic is the surface path whose acceleration has no tangential component. Unlike a revolution ellipsoid, a triaxial surface has no single axis of rotational symmetry.
 
 ```
-import {TriaxialEllipsoid} from '@math.gl/geospatial/triaxial';
+import {TriaxialEllipsoid} from '@math.gl/geospatial';
 
 
 

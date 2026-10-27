@@ -3,9 +3,9 @@
 Adaptively samples geographic geodesic edges through a supplied continuous transform. It reuses [GeodesicPath](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-path.md) and the shared [subdividePolyline](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/subdivide-polyline.md) engine.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid} from '@math.gl/geospatial';
 
-import {subdivideGeodesicPolyline} from '@math.gl/geospatial/globe';
+import {subdivideGeodesicPolyline} from '@math.gl/geospatial';
 
 
 

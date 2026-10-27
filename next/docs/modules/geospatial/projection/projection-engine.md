@@ -570,19 +570,19 @@ Choose a model whose horizontal datum, vertical datum, tide convention and area 
 
 `ProjectionTransform` and the full and lazy engines accept the same `verticalGrids` map. Load grid data before constructing the projection. Lazy projection algorithms can still preload separately. No file, network request, TIFF decoder or geoid model is imported implicitly. The optional readers can themselves be dynamically imported.
 
-For an already loaded `@math.gl/earth/geoid` model, use the structural adapter:
+For an already loaded `@math.gl/earth` model, use the structural adapter:
 
 ```
 import { createGeoidGrid } from "@math.gl/geospatial/projection/grids/vertical";
 
 
 
-// geoid is a previously prepared @math.gl/earth/geoid Geoid instance.
+// geoid is a previously prepared @math.gl/earth Geoid instance.
 
 const verticalGrids = { local: createGeoidGrid(geoid) };
 ```
 
-The adapter calls `getHeight(latitudeDegrees, longitudeDegrees)` and retains the model's interpolation and ownership rules. It adds no runtime dependency on `@math.gl/earth/geoid`. `createVerticalGrid({origin, step, size, offsets, noData})` instead snapshots a regular bilinear grid. Origin and positive spacing are degrees; rows run south to north and columns west to east. `parseGTXGrid(ArrayBuffer)` snapshots big-endian float32 metre offsets from the [GTX format](https://gdal.org/en/stable/drivers/raster/gtx.html). Its conventional -88.8888 sentinel, non-finite nodes, and values outside ±1000 metres are treated as nodata, consistent with PROJ's GTX reader.
+The adapter calls `getHeight(latitudeDegrees, longitudeDegrees)` and retains the model's interpolation and ownership rules. It adds no runtime dependency on `@math.gl/earth`. `createVerticalGrid({origin, step, size, offsets, noData})` instead snapshots a regular bilinear grid. Origin and positive spacing are degrees; rows run south to north and columns west to east. `parseGTXGrid(ArrayBuffer)` snapshots big-endian float32 metre offsets from the [GTX format](https://gdal.org/en/stable/drivers/raster/gtx.html). Its conventional -88.8888 sentinel, non-finite nodes, and values outside ±1000 metres are treated as nodata, consistent with PROJ's GTX reader.
 
 Both snapshot readers include the outer nodes and do not extrapolate. Longitudes can be expressed in equivalent 360-degree turns, including bounded grids crossing the antimeridian. A missing global seam cell is not synthesized; the grid must cover the requested coordinate. A nodata corner with nonzero interpolation weight makes that sample uncovered. Ordered `+geoidgrids=regional,global` lists try the first covering grid. Prefix an optional registration with `@`; use an explicit final `null` for a zero-offset fallback. Missing required registrations fail construction; uncovered coordinates and non-finite custom offsets throw during transformation.
 

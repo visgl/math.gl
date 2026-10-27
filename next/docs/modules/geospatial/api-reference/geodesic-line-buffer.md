@@ -3,9 +3,9 @@
 `GeodesicLineBuffer` and `RhumbLineBuffer` sample a prepared line into caller-owned `Float64Array` storage. They stage results before committing, so a nonfinite input, missing field, domain failure or nonfinite result leaves the caller's output unchanged. Preparation allocates staging once; capacity is fixed and at most one million samples.
 
 ```
-import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid';
+import {EllipsoidGeodesic} from '@math.gl/geospatial';
 
-import {GeodesicLineBuffer} from '@math.gl/geospatial/geodesic-buffer';
+import {GeodesicLineBuffer} from '@math.gl/geospatial';
 
 const geodesic = new EllipsoidGeodesic({
 

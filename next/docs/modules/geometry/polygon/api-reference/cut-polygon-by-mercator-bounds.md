@@ -5,7 +5,7 @@
 Splits a geospatial polygon at the [180th meridian](https://en.wikipedia.org/wiki/180th_meridian) and the top (`latitude=90`) and bottom (`latitude=-90`) edges of the Web Mercator map.
 
 ```
-import {cutPolygonByMercatorBounds} from '@math.gl/geometry/polygon';
+import {cutPolygonByMercatorBounds} from '@math.gl/geometry';
 
 
 

@@ -2,7 +2,7 @@
 
 ![From v3.4](https://img.shields.io/badge/From-v3.4-blue.svg?style=flat-square)
 
-The `@math.gl/earth/geoid` module evaluates geoid heights from Earth gravity model grids.
+The `@math.gl/earth` module evaluates geoid heights from Earth gravity model grids.
 
 <!-- -->
 
@@ -30,7 +30,7 @@ Data remain separate from the JavaScript entry point. The low grid is downsample
 With a bundler supporting asset URL imports (such as Vite):
 
 ```
-import { parsePGM } from "@math.gl/earth/geoid";
+import { parsePGM } from "@math.gl/earth";
 
 import gridUrl from "@math.gl/earth/geoid/geoid-egm96-hi.pgm?url";
 

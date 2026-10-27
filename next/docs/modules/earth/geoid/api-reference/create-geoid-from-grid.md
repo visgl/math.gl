@@ -2,10 +2,10 @@
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
-Creates a `Geoid` from a complete global grid of decoded unsigned 16-bit samples. It uses the same bilinear or cubic interpolation as `parsePGM`, without requiring Arrow or a Parquet decoder in `@math.gl/earth/geoid`.
+Creates a `Geoid` from a complete global grid of decoded unsigned 16-bit samples. It uses the same bilinear or cubic interpolation as `parsePGM`, without requiring Arrow or a Parquet decoder in `@math.gl/earth`.
 
 ```
-import {createGeoidFromGrid} from '@math.gl/earth/geoid';
+import {createGeoidFromGrid} from '@math.gl/earth';
 
 
 
@@ -53,6 +53,6 @@ The array is borrowed without copying or converting to PGM bytes. Typed-array su
 
 The `earth/geoid/v1` datasets in [deck.gl-data](https://github.com/visgl/deck.gl-data/tree/codex/geoid-parquet/earth/geoid/v1) contain `raw_value`, `row`, and `column` fields plus grid metadata. Extract the complete `raw_value` column as a `Uint16Array`, using dimensions, offset and scale from the manifest or `geoid` schema metadata. Assemble chunked columns first; restore row/column order if a query reordered rows. Filtered or incomplete tables cannot be used as a complete grid. Do not pass the decoded `geoid_height` column as raw samples.
 
-`@math.gl/core/types` provides `isUint16Array()` and `isFloat16Array()` to distinguish unsigned integer samples from native half-precision floats across realms. Float16Array heights and Uint16Array binary16 bit patterns are different encodings from GeographicLib raw samples and cannot be passed as this grid's raw values.
+`@math.gl/core` provides `isUint16Array()` and `isFloat16Array()` to distinguish unsigned integer samples from native half-precision floats across realms. Float16Array heights and Uint16Array binary16 bit patterns are different encodings from GeographicLib raw samples and cannot be passed as this grid's raw values.
 
 Invalid dimensions, array type/count, or offset/scale throw an error. The factory does not inspect coordinates or verify the grid's provenance. Use the high grid for height conversion; the low grid is a decimated visualization preview. Interpolation error bounds are unspecified for this generic input.

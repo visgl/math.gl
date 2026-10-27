@@ -2,12 +2,12 @@
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
-The optional `@math.gl/core/spheroid` entry provides low-level conversions between longitude/latitude/ellipsoidal height and Cartesian XYZ for spheres and oblate spheroids. It is also used by geospatial and the projection engine. It imports no vector classes, global configuration, CRS definitions or model data.
+The optional `@math.gl/core` entry provides low-level conversions between longitude/latitude/ellipsoidal height and Cartesian XYZ for spheres and oblate spheroids. It is also used by geospatial and the projection engine. It imports no vector classes, global configuration, CRS definitions or model data.
 
 For CRS units, axes, datums, grids and epochs, use [`ProjectionEngine`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md). For three-radius geometry, surface normals and local frames, use [`Ellipsoid`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid.md).
 
 ```
-import {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core/spheroid';
+import {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core';
 
 
 

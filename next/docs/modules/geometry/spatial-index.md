@@ -1,4 +1,4 @@
-# @math.gl/geometry/spatial-index (POC)
+# @math.gl/geometry (POC)
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
@@ -11,7 +11,7 @@ Loading <!-- -->Spatial query explorer<!-- -->…
 This proof of concept indexes static Cartesian boxes, points, and triangles. It uses a median-split BVH with typed-array storage, retaining original row/triangle indices even when construction reorders leaves. Inputs are copied. Empty indexes are supported. Bounding contact counts as overlap, distances are Euclidean input-coordinate units, and ties select the lowest row.
 
 ```
-import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry/spatial-index';
+import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry';
 
 
 
@@ -85,7 +85,7 @@ The existing `search`, `nearest` and `intersectRay` methods remain unlimited. Th
 
 A capsule also describes the volume covered by a fixed-radius sphere translating along a straight segment. A complete empty query rules out that swept-volume overlap with the indexed geometry under the floating-point query contract. The returned fraction locates minimum separation, **not the earliest contact**; for example, a sphere approaching a plane touches before its center crosses the plane. No time-of-impact, changing-radius, rotating, or curved-path sweep is supplied. Coplanar overlaps may have many minimizing pairs.
 
-The new low-level kernels are exported from `@math.gl/geometry/culling/queries`:
+The new low-level kernels are exported from `@math.gl/geometry/culling`:
 
 * `getClosestPointsOnSegments(a0, a1, b0, b1)` returns `distance`, `pointA`, `pointB`, `fractionA`, and `fractionB` for two closed segments.
 * `getClosestPointsSegmentTriangle(start, end, a, b, c)` returns `distance`, `segmentPoint`, `trianglePoint`, and `segmentFraction`. It considers face crossings, both endpoint/face distances, and all three segment/edge distances. Degenerate triangles reduce to edges/points.
@@ -94,7 +94,7 @@ Inputs must be finite XYZ points. Coordinate spans and output distances that ove
 
 For background on closest-pair formulations, see Geometric Tools' [segment/triangle query](https://github.com/davideberly/GeometricTools/blob/master/GTE/Mathematics/DistSegment3Triangle3.h) and [segment-distance analysis](https://www.geometrictools.com/Documentation/DistanceLine3Line3.pdf).
 
-The ray and triangle geometry kernels are reused from `@math.gl/geometry/culling/queries`. `@math.gl/geometry/spatial-index/boxes` provides BoxIndex and PointIndex without the triangle code.
+The ray and triangle geometry kernels are reused from `@math.gl/geometry/culling`. `@math.gl/geometry` provides BoxIndex and PointIndex without the triangle code.
 
 For terrain picking, keep physical heights and validity masks in the caller (for example loaders.gl height grids). The BVH indexes displayed geometry; it does not infer datums, reconstruct elevation, or apply exaggeration:
 

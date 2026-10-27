@@ -3,7 +3,7 @@
 A reusable shortest geodesic between two geographic endpoints, sampled by surface-distance fraction or distance. It adapts the existing GeographicLib-backed `EllipsoidGeodesic` line; it does not introduce a spherical or Vincenty fallback.
 
 ```
-import {GeodesicPath} from '@math.gl/geospatial/ellipsoid';
+import {GeodesicPath} from '@math.gl/geospatial';
 
 
 

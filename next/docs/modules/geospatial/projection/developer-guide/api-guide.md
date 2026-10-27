@@ -186,7 +186,7 @@ Grids supply data to transforms and pipelines. They neither choose an operation 
 | Vertical/geoid offset  | `createVerticalGrid`, `createGeoidGrid` (`/grids/vertical`), `parseGTXGrid` (`/grids/gtx`), `loadVerticalGeoTIFFGrid` (`/grids/vertical-geotiff`) → `VerticalGrid` | `verticalGrids` with `+geoidgrids`, or pipeline `vgridshift`. |
 | ENU velocity           | `createVelocityGrid` (`/grids/velocity`), `loadVelocityGeoTIFFGrid` (`/grids/velocity-geotiff`) → `VelocityGrid`                                                   | A deformation model, then a pipeline `deformation` step.      |
 
-GeoTIFF adapters consume separately decoded data and import no TIFF decoder. NTv2/GTX readers consume file bytes. `createGeoidGrid` adapts a prepared `@math.gl/earth/geoid` model; `createVerticalGrid` snapshots regular metre offsets. Match the horizontal datum, vertical reference, tide convention and coverage to the operation. The application owns fetching, decoding, data terms and caching.
+GeoTIFF adapters consume separately decoded data and import no TIFF decoder. NTv2/GTX readers consume file bytes. `createGeoidGrid` adapts a prepared `@math.gl/earth` model; `createVerticalGrid` snapshots regular metre offsets. Match the horizontal datum, vertical reference, tide convention and coverage to the operation. The application owns fetching, decoding, data terms and caching.
 
 ```
 import {ProjectionTransform} from '@math.gl/geospatial/projection/core';

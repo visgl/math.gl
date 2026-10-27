@@ -51,7 +51,7 @@ These references describe the models used by Earth utilities. Source comments id
 * **Ferdinando Patat and collaborators**, [UBVRI twilight sky brightness at ESO-Paranal](https://arxiv.org/abs/astro-ph/0604128).
 * **Francisco J. Ballesteros**, [New insights into black bodies](https://arxiv.org/abs/1201.1809), used for the documented stellar color-temperature approximation.
 * **Eric Bruneton and Fabrice Neyret**, [Precomputed Atmospheric Scattering](https://ebruneton.github.io/precomputed_atmospheric_scattering/), a reference for the cloud/atmosphere model; see source comments for the approximations actually implemented.
-* **Don Cross**, [Astronomy Engine](https://github.com/cosinekitty/astronomy), the optional, separately installed planetary ephemeris provider.
+* **Don Cross**, [Astronomy Engine](https://github.com/cosinekitty/astronomy), the planetary ephemeris runtime dependency.
 * [JPL planetary physical parameters](https://ssd.jpl.nasa.gov/planets/phys_par.html) and [USNO sidereal time](https://aa.usno.navy.mil/faq/GAST) supply physical and frame references.
 
 ## Datasets, imagery and examples[​](#datasets-imagery-and-examples "Direct link to Datasets, imagery and examples")

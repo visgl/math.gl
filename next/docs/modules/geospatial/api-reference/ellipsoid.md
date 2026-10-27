@@ -19,7 +19,7 @@ Surface projection selects a qualified nearest point rather than a radial approx
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid} from '@math.gl/geospatial';
 
 const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
 
@@ -29,7 +29,7 @@ const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPo
 Determine the Cartographic representation of a Cartesian position on a WGS84 ellipsoid.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid} from '@math.gl/geospatial';
 
 const cartesianPosition = [17832.12, 83234.52, 952313.73];
 
@@ -39,7 +39,7 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```
-import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial';
 
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 
@@ -53,7 +53,7 @@ See the [accuracy and GeographicLib coverage audit](https://visgl.github.io/math
 `@math.gl/geospatial/projection` uses spheres and oblate spheroids: its X/Y equatorial radii are equal. `Ellipsoid` also supports three independent radii. The adapters exchange only the common geometry; they do not transfer a datum, axis order, units or epoch.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid} from '@math.gl/geospatial';
 
 import {normalizeCRS} from '@math.gl/geospatial/projection/core';
 
@@ -184,7 +184,7 @@ Returns
 
 ### eastNorthUpToFixedFrame(ellipsoid, origin : Number\[3], result : Number\[16]) : Matrix4 | Number\[16][​](#eastnorthuptofixedframeellipsoid-origin--number3-result--number16--matrix4--number16 "Direct link to eastNorthUpToFixedFrame(ellipsoid, origin : Number\[3], result : Number\[16]) : Matrix4 | Number\[16]")
 
-Standalone export from `@math.gl/geospatial/ellipsoid` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
+Standalone export from `@math.gl/geospatial` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
 
 Computes a 4x4 transformation matrix from a reference frame with an east-north-up axes centered at the provided origin to the provided ellipsoid's fixed reference frame.
 
@@ -210,7 +210,7 @@ Notes
 
 ### localFrameToFixedFrame(ellipsoid, String firstAxis, secondAxis : String, thirdAxis : String | null, origin : Number\[3] \[, result : Number\[16]]) : Matrix4 | Number\[16][​](#localframetofixedframeellipsoid-string-firstaxis-secondaxis--string-thirdaxis--string--null-origin--number3--result--number16--matrix4--number16 "Direct link to localFrameToFixedFrame(ellipsoid, String firstAxis, secondAxis : String, thirdAxis : String | null, origin : Number\[3] \[, result : Number\[16]]) : Matrix4 | Number\[16]")
 
-Standalone export from `@math.gl/geospatial/ellipsoid` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
+Standalone export from `@math.gl/geospatial` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
 
 Computes a 4x4 transformation matrix from a reference frame centered at the provided origin to the ellipsoid's fixed reference frame.
 
@@ -228,7 +228,7 @@ Returns
 
 `eastNorthUpToFixedFrame` and `localFrameToFixedFrame` use a Cartesian origin in the ellipsoid's distance units; `config._cartographicRadians` does not affect them. Their column-major matrix rotates local axes and translates by that origin. Supply a reusable `Matrix4` or `number[]` to avoid a new result per call.
 
-Up is the normalized Cartesian origin divided by squared radii. On the surface this is the surface normal; at height it can differ from the normal at the inverse geodetic position used by deformation. Sphere/oblate frames share the original [`@math.gl/core/local-frame`](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/local-frame.md) basis and matrix functions while retaining this normal choice. Three-radius/prolate frames retain the historical geometry path. At Cartesian poles (|x| and |y| ≤ 1e-14), east is +Y and north/up use the sign of z. The historical center matrix is singular; it is not a usable orthonormal frame.
+Up is the normalized Cartesian origin divided by squared radii. On the surface this is the surface normal; at height it can differ from the normal at the inverse geodetic position used by deformation. Sphere/oblate frames share the original [`@math.gl/core`](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/local-frame.md) basis and matrix functions while retaining this normal choice. Three-radius/prolate frames retain the historical geometry path. At Cartesian poles (|x| and |y| ≤ 1e-14), east is +Y and north/up use the sign of z. The historical center matrix is singular; it is not a usable orthonormal frame.
 
 ### geocentricSurfaceNormal(cartesian : Number\[3], result : Number\[3]) : Vector3 | Number\[3][​](#geocentricsurfacenormalcartesian--number3-result--number3--vector3--number3 "Direct link to geocentricSurfaceNormal(cartesian : Number\[3], result : Number\[3]) : Vector3 | Number\[3]")
 

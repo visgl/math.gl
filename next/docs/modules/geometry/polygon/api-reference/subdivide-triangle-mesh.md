@@ -37,7 +37,7 @@ Use this mode when the application has its own resolution policy, such as a sour
 Triangulate the polygon in its source coordinate space, then refine that mesh. This preserves the original triangles' source coverage and hole boundaries. For already triangulated loader output, pass its positions and indices directly.
 
 ```
-import {earcut, subdivideTriangleMesh} from '@math.gl/geometry/polygon';
+import {earcut, subdivideTriangleMesh} from '@math.gl/geometry';
 
 
 

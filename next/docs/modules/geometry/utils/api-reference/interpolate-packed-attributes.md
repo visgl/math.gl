@@ -4,14 +4,14 @@
 
 Reconstruct attributes in interleaved vertex buffers from original-vertex provenance, such as the output of `subdivideTriangleMesh` or `subdivideGlobeMesh`. The helper does not depend on a renderer, GPU API, or polygon module at runtime. It returns a fresh `Uint8Array` with the same record stride and never modifies its input.
 
-Use the dedicated `@math.gl/geometry/utils/interpolate-packed-attributes` subpath for a standalone import with no runtime dependencies. The root package also exports the helper and its types for convenience; its existing geometry-processing dependencies are unchanged.
+Use the dedicated `@math.gl/geometry` subpath for a standalone import with no runtime dependencies. The root package also exports the helper and its types for convenience; its existing geometry-processing dependencies are unchanged.
 
 ## Example[​](#example "Direct link to Example")
 
 ```
-import {interpolatePackedAttributes} from '@math.gl/geometry/utils/interpolate-packed-attributes';
+import {interpolatePackedAttributes} from '@math.gl/geometry';
 
-import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
+import {subdivideTriangleMesh} from '@math.gl/geometry';
 
 
 
@@ -63,7 +63,7 @@ const attributes = [
 
   {type: 'uint8', size: 4, byteOffset: 12, interpolation: 'flat'}
 
-] satisfies import('@math.gl/geometry/utils/interpolate-packed-attributes').PackedAttribute[];
+] satisfies import('@math.gl/geometry').PackedAttribute[];
 ```
 
 ## API[​](#api "Direct link to API")

@@ -1,4 +1,4 @@
-# @math.gl/geometry/curves
+# @math.gl/geometry
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
@@ -11,7 +11,7 @@ Loading <!-- -->Curve flight lab<!-- -->…
 The curves module provides renderer-independent parametric curves for 2D and 3D Cartesian coordinates. Use it for camera paths, trajectories, interpolation, and sampled line geometry.
 
 ```
-import {CatmullRomCurve, CurveArcLength} from '@math.gl/geometry/curves';
+import {CatmullRomCurve, CurveArcLength} from '@math.gl/geometry';
 
 
 

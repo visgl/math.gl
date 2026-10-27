@@ -136,11 +136,11 @@ The descriptor can retain alternate source representations and a coordinate epoc
 
 ## Optional syntax entry points[​](#optional-syntax-entry-points "Direct link to Optional syntax entry points")
 
-The root entry point remains available. Applications that split optional parsing code can instead import `parseWKTCRS` and related WKT APIs from `@math.gl/geospatial/crs/wkt`, PROJ string APIs from `@math.gl/geospatial/crs/proj-string`, and metadata helpers from `@math.gl/geospatial/crs/spatial-reference`. Each subpath includes ESM, CommonJS and declarations. Separate imports prevent a shared root barrel from pulling an otherwise deferred WKT parser into an eager bundle. Types can still be imported from the root with `import type`. Inspect the application's emitted chunks when combining import styles.
+The root entry point remains available. Applications that split optional parsing code can instead import `parseWKTCRS` and related WKT APIs from `@math.gl/geospatial/crs`, PROJ string APIs from `@math.gl/geospatial/crs`, and metadata helpers from `@math.gl/geospatial/crs`. Each subpath includes ESM, CommonJS and declarations. Separate imports prevent a shared root barrel from pulling an otherwise deferred WKT parser into an eager bundle. Types can still be imported from the root with `import type`. Inspect the application's emitted chunks when combining import styles.
 
 ## API[​](#api "Direct link to API")
 
-Optional [CRS resolution](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/resolver.md) accepts application-owned catalogues and asynchronous providers through `@math.gl/geospatial/crs/resolver`. Resolution supplies definitions; execution support remains engine-specific.
+Optional [CRS resolution](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/resolver.md) accepts application-owned catalogues and asynchronous providers through `@math.gl/geospatial/crs`. Resolution supplies definitions; execution support remains engine-specific.
 
 * `CRSDefinition<T extends PROJJSONCRS = PROJJSONCRS>` — a string definition or PROJJSON object.
 * `PROJJSONCRS` — generated from the official v0.7 schema's `#/definitions/crs`.

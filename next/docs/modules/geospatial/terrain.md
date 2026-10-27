@@ -2,7 +2,7 @@
 
 Experimental CPU terrain data and algorithms, usable in Node.js, browser workers, and rendering applications. The initial implementation provides affine height fields and regular meshes in local Cartesian coordinates. Coordinates and heights use meters; the surface is Z-up.
 
-Terrain is an opt-in subpath of the consolidated geospatial package. Its sampling entry has no runtime package imports; geographic adapters can compose it with CRS, projection, ellipsoid, and geoid utilities. The separate `@math.gl/geospatial/terrain/geometry` entry imports `@math.gl/geometry`.
+Terrain APIs are available from `@math.gl/geospatial/terrain` and `@math.gl/geospatial`. Named imports are tree-shakable; unbundled module loaders evaluate the root entry and its declared dependencies.
 
 ## HeightField[​](#heightfield "Direct link to HeightField")
 
@@ -129,7 +129,7 @@ Float32 outputs round results to Float32. Overflow becomes `NUMERIC_ERROR` and z
 ## HeightFieldGeometry[​](#heightfieldgeometry "Direct link to HeightFieldGeometry")
 
 ```
-import {HeightFieldGeometry} from '@math.gl/geospatial/terrain/geometry';
+import {HeightFieldGeometry} from '@math.gl/geospatial/terrain';
 
 
 
@@ -157,7 +157,7 @@ The local Cartesian foundation, geographic adapters and initial cell-registered 
 ## Geographic sampling[​](#geographic-sampling "Direct link to Geographic sampling")
 
 ```
-import {GeographicHeightField} from '@math.gl/geospatial/terrain/geographic';
+import {GeographicHeightField} from '@math.gl/geospatial/terrain';
 
 
 
@@ -183,7 +183,7 @@ Gradients and normals use WGS84 surface-metric east/north axes at the query lati
 ## Tiled snapshots[​](#tiled-snapshots "Direct link to Tiled snapshots")
 
 ```
-import {TiledHeightField} from '@math.gl/geospatial/terrain/tiled';
+import {TiledHeightField} from '@math.gl/geospatial/terrain';
 
 
 
@@ -261,7 +261,7 @@ import {HeightField} from '@math.gl/geospatial/terrain';
 
 import {packTerrainHeightField, unpackTerrainHeightField}
 
-  from '@math.gl/geospatial/terrain/packed';
+  from '@math.gl/geospatial/terrain';
 
 
 
@@ -304,7 +304,7 @@ Packing rounds grid steps to f32, then computes and rounds their inverse. It rej
 ## Triangulated terrain surfaces[​](#triangulated-terrain-surfaces "Direct link to Triangulated terrain surfaces")
 
 ```
-import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain/surface';
+import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain';
 
 
 
@@ -347,7 +347,7 @@ Shared **indexed** edges must have at most two active incident triangles, with o
 
 `intersectRay(origin, direction, {maxDistance?})` returns the nearest two-sided hit with original triangle index, metric distance, world point, upward normal and barycentric weights. Direction magnitude does not change distance units. `intersectSegment(start, end)` uses the same query on the closed segment, including endpoints. A zero-length segment returns null. Coplanar rays do not produce hits. `nearest(point, {maxDistance?})` returns the actual Euclidean closest point on an active triangle, which can lie on an edge or vertex. It is not a vertical clearance or signed-distance query. These methods return null when no result lies within the inclusive distance limit; malformed inputs and result overflow throw.
 
-Queries reuse `@math.gl/geometry/spatial-index` for BVH traversal and exact triangle kernels. Contact normals always point upward, even for a ray from below; they are not automatically oriented toward the query. Exact distance ties choose the lowest original triangle index. Boundary decisions use floating-point triangle arithmetic, not an exact-predicate or certified watertight intersection algorithm. At shared edges, a mesh query's chosen one-sided normal can differ from `HeightField`'s cell tie rule even when heights agree.
+Queries reuse `@math.gl/geometry` for BVH traversal and exact triangle kernels. Contact normals always point upward, even for a ray from below; they are not automatically oriented toward the query. Exact distance ties choose the lowest original triangle index. Boundary decisions use floating-point triangle arithmetic, not an exact-predicate or certified watertight intersection algorithm. At shared edges, a mesh query's chosen one-sided normal can differ from `HeightField`'s cell tie rule even when heights agree.
 
 `createTerrainSurface(field, {origin?})` reuses `HeightFieldGeometry` with Float64 positions, preserving its diagonal, registration, missing-data holes and local origin. Triangle IDs refer to emitted mesh order, not a stable cell identifier across edits. General decoded triangle meshes can instead be passed directly to `TerrainSurface`; loading/dequantizing file formats remains loaders.gl work.
 
@@ -416,7 +416,7 @@ The shared Float64 kernels normalize coordinates before geometric products, with
 ## Conservative height-field bounds[​](#conservative-height-field-bounds "Direct link to Conservative height-field bounds")
 
 ```
-import {HeightFieldMinMax} from '@math.gl/geospatial/terrain/bounds';
+import {HeightFieldMinMax} from '@math.gl/geospatial/terrain';
 
 
 
@@ -443,15 +443,15 @@ A populated cell need not contain a valid triangle or bilinear patch. Extrema ma
 ## Plain mesh data and optional tessellators[​](#plain-mesh-data-and-optional-tessellators "Direct link to Plain mesh data and optional tessellators")
 
 ```
-import {createTerrainMesh} from '@math.gl/geospatial/terrain/mesh';
+import {createTerrainMesh} from '@math.gl/geospatial/terrain';
 
-import {createMartiniTerrainMesh} from '@math.gl/geospatial/terrain/martini';
+import {createMartiniTerrainMesh} from '@math.gl/geospatial/terrain';
 
-import {createDelatinTerrainMesh} from '@math.gl/geospatial/terrain/delatin';
+import {createDelatinTerrainMesh} from '@math.gl/geospatial/terrain';
 
-import {measureTerrainMeshError} from '@math.gl/geospatial/terrain/mesh-error';
+import {measureTerrainMeshError} from '@math.gl/geospatial/terrain';
 
-import {getTerrainMeshEdge} from '@math.gl/geospatial/terrain/mesh-edges';
+import {getTerrainMeshEdge} from '@math.gl/geospatial/terrain';
 
 
 
@@ -466,7 +466,7 @@ const report = measureTerrainMeshError(field, rtin);
 const boundaryVertexIds = getTerrainMeshEdge(rtin, 'maxColumn');
 ```
 
-Each function is independently imported. The sampling root imports neither tessellator. MARTINI imports no Delatin code, and Delatin imports no MARTINI code. These APIs return plain detached buffers, with no renderer objects, normals, UVs, query indexes or physics methods. `TerrainSurface` can consume the resulting data when those capabilities are needed. No shader code is included.
+Bundlers can eliminate unused named exports: sampling-only bundles retain neither tessellator, and selecting one backend excludes the other. These APIs return plain detached buffers, with no renderer objects, normals, UVs, query indexes or physics methods. `TerrainSurface` can consume the resulting data when those capabilities are needed. No shader code is included.
 
 `TerrainGridMesh` contains Float64 `positions` (local XYZ), Uint32 `indices` and `gridCoordinates` (packed integer column/row per vertex), source `width`/`height`, world `origin` and `heightReference`. World positions are local positions plus origin. The default origin is `[field.origin[0], field.origin[1], 0]`; pass an explicit XYZ origin to change it. Triangles wind counterclockwise in world XY even for flipped or sheared grids. Cell registration places vertices at sample centers. Regular meshes preserve the field's diagonal and omit triangles with missing corners; unreferenced source vertices remain in their buffers. Builders reject coordinate overflow or triangles collapsed by an unsuitable origin.
 
@@ -489,9 +489,9 @@ Pass mesh `origin: [0, 0, 0]` if preserving absolute legacy positions. Convert p
 ## Raster gradients and slope/aspect[​](#raster-gradients-and-slopeaspect "Direct link to Raster gradients and slope/aspect")
 
 ```
-import {createTerrainGradientGrid} from '@math.gl/geospatial/terrain/derivatives';
+import {createTerrainGradientGrid} from '@math.gl/geospatial/terrain';
 
-import {getTerrainSlopeAspect, createTerrainSlopeAspectGrid} from '@math.gl/geospatial/terrain/slope-aspect';
+import {getTerrainSlopeAspect, createTerrainSlopeAspectGrid} from '@math.gl/geospatial/terrain';
 
 
 
@@ -502,7 +502,7 @@ const angles = createTerrainSlopeAspectGrid(gradients);
 const orientation = getTerrainSlopeAspect(0.25, -0.5);
 ```
 
-These are standalone functions, with no new methods on terrain classes. Stencil calculation and angle conversion have independent imports. They do not load mesh builders, query indexes, rendering classes, or each other at runtime. Outputs are owned typed arrays suitable for worker transfer and subsequent GPU upload; no GPU resources or shader code are created.
+These are standalone functions, with no new methods on terrain classes. Stencil calculation and angle conversion are independently tree-shakable. A selective bundle does not retain mesh builders, query indexes, rendering classes, or the other calculation. Outputs are owned typed arrays suitable for worker transfer and subsequent GPU upload; no GPU resources or shader code are created.
 
 `createTerrainGradientGrid` computes raster derivatives using `horn` (default; weighted 3×3 differences) or `zevenbergen-thorne` (central differences). These are **raster stencil estimates**, not derivatives of the selected interpolation patch. Both require all nine source samples, including the center and diagonal neighbors. The outermost sample ring gets `OUTSIDE_DOMAIN`; any missing sample in an interior window gives `NO_DATA`. No edge extrapolation, hole filling, or halo fetch occurs. Supply a larger height field containing the desired halo when boundary derivatives are required. Arithmetic overflow gives `NUMERIC_ERROR`.
 
@@ -517,7 +517,7 @@ The Horn and Zevenbergen–Thorne methods and flat-aspect distinction are also u
 ## Elevation profiles[​](#elevation-profiles "Direct link to Elevation profiles")
 
 ```
-import {sampleTerrainProfile} from '@math.gl/geospatial/terrain/profile';
+import {sampleTerrainProfile} from '@math.gl/geospatial/terrain';
 
 
 
@@ -541,7 +541,7 @@ Finite positive `spacing` is required. `maxSamples` defaults to 1,000,000 and bo
 ## Triangle-surface contours[​](#triangle-surface-contours "Direct link to Triangle-surface contours")
 
 ```
-import {createTerrainContours} from '@math.gl/geospatial/terrain/contours';
+import {createTerrainContours} from '@math.gl/geospatial/terrain';
 
 
 
@@ -559,9 +559,9 @@ Admission limits are `maxSamples` (1,100,000), `maxLevels` (256), and `maxTriang
 ## Contour paths and bounded simplification[​](#contour-paths-and-bounded-simplification "Direct link to Contour paths and bounded simplification")
 
 ```
-import {stitchTerrainContours} from '@math.gl/geospatial/terrain/contour-paths';
+import {stitchTerrainContours} from '@math.gl/geospatial/terrain';
 
-import {simplifyTerrainContourPaths} from '@math.gl/geospatial/terrain/contour-simplify';
+import {simplifyTerrainContourPaths} from '@math.gl/geospatial/terrain';
 
 
 
@@ -600,7 +600,7 @@ The two entries import neither contour extraction nor each other. They operate o
 ## Profile measurements and coverage[​](#profile-measurements-and-coverage "Direct link to Profile measurements and coverage")
 
 ```
-import {measureTerrainProfile} from '@math.gl/geospatial/terrain/profile-measure';
+import {measureTerrainProfile} from '@math.gl/geospatial/terrain';
 
 
 
@@ -623,7 +623,7 @@ The supplied cumulative `distances` are authoritative horizontal stationing. The
 ## Vertex-tile reconciliation[​](#vertex-tile-reconciliation "Direct link to Vertex-tile reconciliation")
 
 ```
-import {reconcileTerrainVertexTiles} from '@math.gl/geospatial/terrain/vertex-tiles';
+import {reconcileTerrainVertexTiles} from '@math.gl/geospatial/terrain';
 
 
 
@@ -649,7 +649,7 @@ The result is sorted by `(column,row)`. At a shared vertex, the lexicographicall
 ## Conforming mixed-resolution mesh seams[​](#conforming-mixed-resolution-mesh-seams "Direct link to Conforming mixed-resolution mesh seams")
 
 ```
-import {stitchTerrainMeshEdges} from '@math.gl/geospatial/terrain/mesh-stitch';
+import {stitchTerrainMeshEdges} from '@math.gl/geospatial/terrain';
 
 
 
@@ -680,10 +680,34 @@ The selected input grid sides must be complete, unique, straight affine boundary
 
 `coordinateTolerance` is an absolute XY alignment tolerance (default `1e-8` in the mesh's metric units). Limits default to 2,000,000 vertices and 4,000,000 triangles per mesh, and 100,000 boundary vertices. Both input and output capacities are checked; exhaustion throws without returning partial meshes.
 
-For multiple seams, choose consistent authoritative profiles and shared corner heights first. Publish all changed meshes together. A later stitch that changes a previously shared vertex requires rebuilding the affected neighbors. There is no implicit global seam scheduler, transition morph, normal smoothing or source-tile mutation. The independent entry imports no tessellator, terrain class or renderer.
+For multiple seams, choose consistent authoritative profiles and shared corner heights first. Publish all changed meshes together. A later stitch that changes a previously shared vertex requires rebuilding the affected neighbors. There is no implicit global seam scheduler, transition morph, normal smoothing or source-tile mutation. A selective bundle retains no tessellator, terrain class or renderer.
 
 ## Independent DEM qualification[​](#independent-dem-qualification "Direct link to Independent DEM qualification")
 
 The committed GDAL DTED fixture and generated GDAL 3.9.3 Horn/Zevenbergen–Thorne references exercise 925 valid samples per method, all missing/edge statuses, adaptive-mesh nodal errors and same-level seams. Input provenance, preprocessing, regeneration commands and tolerances are recorded in [the fixture manifest](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/terrain/fixtures/README.md). Normal Node and browser tests require no GDAL installation.
 
 After building geospatial, `node scripts/qualify-terrain-dem.mjs` verifies the source hash and outputs reproducible numerical residuals, mesh sizes and warm timing observations. On the initial fixture, maximum slope residuals are below `6e-8` degrees and circular aspect residuals below `2.3e-5` degrees. The suite uses a low-relief regional DEM; mountainous/coastal datasets, continuous approximation bounds, regional performance and GPU/rendering conformance remain separate work.
+
+## Visual skirt geometry[​](#visual-skirt-geometry "Direct link to Visual skirt geometry")
+
+```
+import {createTerrainSkirt} from '@math.gl/geospatial/terrain';
+
+
+
+const visualMesh = createTerrainSkirt(mesh, {height: 50});
+
+// `visualMesh.positions` and `visualMesh.indices` include the skirts.
+
+// `visualMesh.triangleValidity` excludes skirt triangles from terrain queries.
+```
+
+`createTerrainSkirt` accepts packed Float32 or Float64 local XYZ positions and Uint16 or Uint32 triangle indices. It copies both inputs, retains the original triangles, and appends vertical quads lowered by the positive `height` in position units. Source triangles must be nondegenerate, counterclockwise in XY, and have consistent manifold shared edges. Boundary directions are derived from triangle winding, giving outward-facing skirt triangles around both outer boundaries and holes. By default every boundary is skirted, including nodata holes.
+
+To select only specific boundary segments, pass `edges` as packed Uint16/Uint32 vertex pairs. Pair order and direction do not determine winding. Every pair must identify a distinct boundary edge; invalid, internal or duplicate edges are rejected. An empty list adds no geometry. The builder does not guess tile-side membership, generate seams or modify the physical surface.
+
+`skirtVertexOffset` and `skirtTriangleOffset` identify the first appended vertex and triangle. `sourceVertexIndices` maps each appended vertex to its original vertex, allowing a consumer to copy UVs or other attributes. `triangleValidity` contains one for each source triangle and zero for each visual skirt triangle; pass it to terrain surface queries to exclude skirts. The returned local `bounds` include the lowered vertices. Normals, UVs and other attributes are not generated.
+
+The output preserves Float32/Float64 position precision. It preserves Uint32 indices, and promotes Uint16 to Uint32 whenever appended vertices would exceed 65,536 total vertices. A height too small to lower a vertex in the position type, or one that would overflow, throws instead of emitting degenerate skirts. `maxVertices` and `maxTriangles` default to 2,000,000 and 4,000,000 respectively; both input and output are checked before a result is returned.
+
+A selective named-import bundle retains no HeightField, tessellator, renderer or query index. Skirts hide visual gaps; they do not reconcile mismatched heights or provide a collision surface.

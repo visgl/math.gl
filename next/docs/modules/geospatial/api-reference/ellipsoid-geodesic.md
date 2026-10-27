@@ -3,7 +3,7 @@
 Shortest surface geodesics on an oblate or prolate ellipsoid of revolution, or sphere. This complements the three-dimensional coordinate conversions in `Ellipsoid`.
 
 ```
-import {Ellipsoid, EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid, EllipsoidGeodesic} from '@math.gl/geospatial';
 
 
 

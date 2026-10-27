@@ -4,14 +4,14 @@
 
 Returns sky positions and disk geometry for Mercury, Venus, Mars, Jupiter, Saturn, Uranus and Neptune, plus Jupiter's Galilean moons: Io, Europa, Ganymede and Callisto.
 
-This optional entry point requires the MIT-licensed JavaScript package [Astronomy Engine](https://github.com/cosinekitty/astronomy/tree/v2.1.19/source/js). Install it explicitly; the main `@math.gl/earth/sun` entry point does not load it.
+The planetary APIs use the MIT-licensed JavaScript package [Astronomy Engine](https://github.com/cosinekitty/astronomy/tree/v2.1.19/source/js), a declared dependency of `@math.gl/earth`. Bundlers can exclude it from unrelated named imports.
 
 ```
-npm install @math.gl/earth astronomy-engine
+npm install @math.gl/earth
 ```
 
 ```
-import {getPlanetSkyInfo} from '@math.gl/earth/sun/planets';
+import {getPlanetSkyInfo} from '@math.gl/earth/sun';
 
 
 
@@ -101,7 +101,7 @@ This is an **uncalibrated rendering heuristic**, not a prediction of an individu
 Use a separate event search when you need times, rather than doing this work every frame:
 
 ```
-import {getPlanetVisibilityTimes} from '@math.gl/earth/sun/planets';
+import {getPlanetVisibilityTimes} from '@math.gl/earth/sun';
 
 
 
@@ -145,9 +145,9 @@ The function performs ephemeris calculations; reuse results across rendering fra
 
 ## Sources and licenses[​](#sources-and-licenses "Direct link to Sources and licenses")
 
-* [Astronomy Engine 2.1.19 JavaScript API](https://github.com/cosinekitty/astronomy/tree/v2.1.19/source/js): planetary positions, Galilean satellite vectors, light-time solver, frame rotations and planetary photometry. Its [MIT license](https://github.com/cosinekitty/astronomy/blob/v2.1.19/LICENSE) remains with the separately installed dependency. No upstream source is copied into math.gl, and no native compiler is required.
+* [Astronomy Engine 2.1.19 JavaScript API](https://github.com/cosinekitty/astronomy/tree/v2.1.19/source/js): planetary positions, Galilean satellite vectors, light-time solver, frame rotations and planetary photometry. Its [MIT license](https://github.com/cosinekitty/astronomy/blob/v2.1.19/LICENSE) remains with the dependency. No upstream source is copied into math.gl, and no native compiler is required.
 * [JPL planetary physical parameters](https://ssd.jpl.nasa.gov/planets/phys_par.html) and [satellite physical parameters](https://ssd.jpl.nasa.gov/sats/phys_par/): mean radii in kilometers used for disk sizes and spherical Jupiter geometry.
 * [IAU 2015 Resolution B3](https://www.iau.org/static/resolutions/IAU2015_English.pdf): nominal solar radius for the conical-umbra approximation.
 * [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/): independently queried numeric reference positions. Fixture comments record the observer, coordinate frame and units.
 
-The adapter is original MIT-licensed TypeScript. SPDX comments identify its license, math.gl copyright and the referenced package/model. The optional peer dependency keeps ephemeris code separate from consumers using only the main sunlight/moon APIs.
+The adapter is original MIT-licensed TypeScript. SPDX comments identify its license, math.gl copyright and the referenced package/model. Selective bundles can exclude ephemeris code when it is not used.

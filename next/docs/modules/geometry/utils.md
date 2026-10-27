@@ -1,4 +1,4 @@
-# @math.gl/geometry/utils
+# @math.gl/geometry
 
 ![From v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)
 
@@ -19,7 +19,7 @@ npm install @math.gl/geometry
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {GL, computeVertexNormals, octDecode} from '@math.gl/geometry/utils';
+import {GL, computeVertexNormals, octDecode} from '@math.gl/geometry';
 
 import {Vector3} from '@math.gl/core';
 

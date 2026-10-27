@@ -9,9 +9,9 @@
 | File/network loading, schemas, GeoParquet metadata       | loaders.gl                                  |
 | Adapting table/vector buffers to descriptors             | loaders.gl or the table runtime integration |
 | Physical validation, traversal, bounds, mapping, winding | `@math.gl/geospatial/geoarrow`              |
-| Individual WKB/WKT parsing and formatting                | `@math.gl/geospatial/wkb`                   |
-| WKB/WKT column descriptors and adapters                  | `@math.gl/geospatial/geoarrow/wkb`          |
-| Polygon/MultiPolygon tessellation                        | `@math.gl/geospatial/geoarrow/tessellation` |
+| Individual WKB/WKT parsing and formatting                | `@math.gl/geospatial`                       |
+| WKB/WKT column descriptors and adapters                  | `@math.gl/geospatial/geoarrow`              |
+| Polygon/MultiPolygon tessellation                        | `@math.gl/geospatial/geoarrow`              |
 | GPU buffer creation and rendering                        | luma.gl/deck.gl                             |
 | Worker scheduling and ownership policy                   | the application or loader                   |
 
@@ -21,24 +21,24 @@ This boundary prevents a graphics package from owning general-purpose geospatial
 
 The tentpole implementation established the important conformance matrix: all geometry families, XY/XYZ/XYM/XYZM, separated/interleaved coordinates, regular/large offsets, null/empty/chunked rows, dense unions, geometry collections, WKB/WKT, bounds, mapping, winding, resource budgets, and transfer-list deduplication. Those semantics are represented directly in `GeoArrowColumn`.
 
-| Loader-facing concept          | Runtime-neutral equivalent                                |
-| ------------------------------ | --------------------------------------------------------- |
-| Arrow `Vector` or `Data`       | `GeoArrowColumn` / `GeoArrowArray` descriptor tree        |
-| Arrow field layout oracle      | adapter validation plus `validateGeoArrowColumn`          |
-| `inspectGeoArrowVector`        | `inspectGeoArrowColumn`                                   |
-| `getGeoarrowVertexCount`       | `getGeoArrowVertexCount`                                  |
-| Native vector-to-geometry rows | `materializeGeoArrowRows` after buffer adaptation         |
-| Arrow bounds kernel            | `getGeoArrowBounds`                                       |
-| Arrow coordinate mapper        | `mapGeoArrowCoordinates` or `mapGeoArrowCoordinatesInto`  |
-| Arrow builder output           | `GeoArrowBuilderTarget` and borrowed descriptors          |
-| Arrow WKB/WKT construction     | `@math.gl/geospatial/geoarrow/wkb` plus plain descriptors |
-| Arrow transfer traversal       | descriptor `getGeoArrowTransferList`                      |
+| Loader-facing concept          | Runtime-neutral equivalent                               |
+| ------------------------------ | -------------------------------------------------------- |
+| Arrow `Vector` or `Data`       | `GeoArrowColumn` / `GeoArrowArray` descriptor tree       |
+| Arrow field layout oracle      | adapter validation plus `validateGeoArrowColumn`         |
+| `inspectGeoArrowVector`        | `inspectGeoArrowColumn`                                  |
+| `getGeoarrowVertexCount`       | `getGeoArrowVertexCount`                                 |
+| Native vector-to-geometry rows | `materializeGeoArrowRows` after buffer adaptation        |
+| Arrow bounds kernel            | `getGeoArrowBounds`                                      |
+| Arrow coordinate mapper        | `mapGeoArrowCoordinates` or `mapGeoArrowCoordinatesInto` |
+| Arrow builder output           | `GeoArrowBuilderTarget` and borrowed descriptors         |
+| Arrow WKB/WKT construction     | `@math.gl/geospatial/geoarrow` plus plain descriptors    |
+| Arrow transfer traversal       | descriptor `getGeoArrowTransferList`                     |
 
 The loaders adapter should inspect Arrow schema/type metadata, then expose the physical buffers. It should preserve chunking, view offsets, validity bit offsets, list offset width, union type IDs and child names, semantic dimension, coordinate layout, CRS, and edge metadata. It should not iterate rows through scalar accessors. The adapter is the only place that imports Apache Arrow.
 
 For serialized input, pass the borrowed Binary/LargeBinary/BinaryView descriptor directly to `decodeGeoArrowWKB`. Do not consolidate chunks or view data buffers first. Leave `dimension` at its metadata value and use the decoder's default `infer` policy unless trusted extension metadata explicitly requests normalization. Request the final coordinate layout, float width, and offset width in that call so math.gl writes those buffers once.
 
-Use `getGeoArrowWKBVertexCount` when sizing or policy decisions need a serialized vertex count. It uses the shared `@math.gl/geospatial/wkb` structural visitor in count-only mode, so loaders.gl does not need to retain its separate WKB count parser.
+Use `getGeoArrowWKBVertexCount` when sizing or policy decisions need a serialized vertex count. It uses the shared `@math.gl/geospatial` structural visitor in count-only mode, so loaders.gl does not need to retain its separate WKB count parser.
 
 For mixed output, adapt math.gl's stable per-chunk child schema directly to Arrow dense unions. There is no union validity buffer: a null row selects a child slot that is null in that child's validity bitmap. This is deliberate and avoids an adapter-only null encoding.
 
@@ -46,13 +46,13 @@ For mixed output, adapt math.gl's stable per-chunk child schema directly to Arro
 
 The private prototype coupled tessellation and interleaving to Arrow vectors, worker lifecycle, and renderer-oriented options. The math.gl API separates these layers:
 
-| luma prototype                    | New API                                                         |
-| --------------------------------- | --------------------------------------------------------------- |
-| Arrow-specific interleaving       | `interleaveGeoArrowCoordinates`                                 |
-| Arrow dense-union normalization   | `normalizeGeoArrowUnion`                                        |
-| `tessellateArrowPolygons`         | `tessellateGeoArrowPolygons`                                    |
-| implicit worker fallback          | explicit `@math.gl/geospatial/geoarrow/worker` transfer payload |
-| renderer-owned result assumptions | positions, row indices, indices, dimensions, and counts         |
+| luma prototype                    | New API                                                  |
+| --------------------------------- | -------------------------------------------------------- |
+| Arrow-specific interleaving       | `interleaveGeoArrowCoordinates`                          |
+| Arrow dense-union normalization   | `normalizeGeoArrowUnion`                                 |
+| `tessellateArrowPolygons`         | `tessellateGeoArrowPolygons`                             |
+| implicit worker fallback          | explicit `@math.gl/geospatial/geoarrow` transfer payload |
+| renderer-owned result assumptions | positions, row indices, indices, dimensions, and counts  |
 
 The tessellation kernel retains the prototype's important behavior: Polygon/MultiPolygon and dense union support, holes, source-row identity across multipolygon primitives, Float64-to-Float32 output, separated/interleaved equivalence, ZM preservation, large polygons, and Uint16/Uint32 index choice. Color expansion and GPU resource creation stay in the renderer because they are not geometry math.
 
@@ -108,6 +108,6 @@ All downstream consumers can then share math.gl kernels without importing the ru
 
 1. Add a zero-copy adapter and fixture tests in loaders.gl.
 2. Compare descriptor inspection, count, bounds, conversion, WKB/WKT, and tessellation against the existing Arrow-backed fixtures.
-3. Replace luma's private interleaving and tessellation imports with `@math.gl/geospatial/geoarrow` and `@math.gl/geospatial/geoarrow/tessellation`.
+3. Replace luma's private interleaving and tessellation imports with `@math.gl/geospatial/geoarrow` and `@math.gl/geospatial/geoarrow`.
 4. Keep worker orchestration in luma/loaders and use `prepareGeoArrowTransfer` for payloads.
 5. Delete the duplicated kernels only after exact output fixtures and buffer-identity assertions pass in the consumer repositories.

@@ -3,7 +3,7 @@
 `EllipsoidGeodesicExact` solves direct and inverse geodesics on oblate and prolate ellipsoids using elliptic-integral evaluations rather than a flattening series. It also creates reusable lines with distance and auxiliary-sphere arc sampling. Select it explicitly through its optional entry point:
 
 ```
-import {EllipsoidGeodesicExact} from '@math.gl/geospatial/geodesic-exact';
+import {EllipsoidGeodesicExact} from '@math.gl/geospatial';
 
 
 
@@ -47,7 +47,7 @@ Axes must lie in `[1e-60, 1e60]`, with `0.25 ≤ b/a ≤ 4`. Input longitude mag
 Use `{area: true}` with `inverse`, `direct` or `line` to request `S12`, the signed area between the edge and the equator, closed by endpoint meridians. It is an algebraic edge contribution, not the area of an arbitrary polygon on its own. Area is omitted by default. At exact poles the endpoint longitude specifies the terminal meridian convention.
 
 ```
-import {GeodesicPolygonExact} from '@math.gl/geospatial/geodesic-exact';
+import {GeodesicPolygonExact} from '@math.gl/geospatial';
 
 const polygon = new GeodesicPolygonExact({semiMajorAxis: 1, semiMinorAxis: 2});
 

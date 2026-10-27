@@ -142,7 +142,7 @@ Legacy descriptors that omit child metadata fall back to the parent column decla
 
 `GeoArrowSerialized` stores WKB as `binary` and WKT as `utf8`. It borrows a byte buffer plus Int32 or Int64 offsets and supports the same `offset`, `offsetBase`, validity, slicing, and chunk rules as native geometry. Arrow BinaryView-style values can instead borrow four-word view records and a list of out-of-line data buffers; short values remain inline in the view record. No consolidation copy is required at the descriptor boundary.
 
-Inspection does not decode serialized payloads. Decode explicitly with `decodeGeoArrowWKB` or `decodeGeoArrowWKT` from `@math.gl/geospatial/geoarrow/wkb` before coordinate algorithms.
+Inspection does not decode serialized payloads. Decode explicitly with `decodeGeoArrowWKB` or `decodeGeoArrowWKT` from `@math.gl/geospatial/geoarrow` before coordinate algorithms.
 
 ## Boxes[​](#boxes "Direct link to Boxes")
 

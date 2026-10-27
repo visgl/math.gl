@@ -5,7 +5,7 @@
 Subdivides a polygon by intersecting with a uniform grid.
 
 ```
-import {cutPolygonByGrid} from '@math.gl/geometry/polygon';
+import {cutPolygonByGrid} from '@math.gl/geometry';
 
 
 

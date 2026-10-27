@@ -39,7 +39,7 @@ The 64 bit index layout allocates 3 bits for the face id and 60 bits for the Hil
 
 ### S2 hierarchy functions[​](#s2-hierarchy-functions "Direct link to S2 hierarchy functions")
 
-The `@math.gl/dggs/s2` subpath also exports lightweight hierarchy helpers:
+The `@math.gl/dggs` subpath also exports lightweight hierarchy helpers:
 
 * `isS2TokenValid(token: unknown): boolean`
 * `isS2IndexValid(index: unknown): boolean`

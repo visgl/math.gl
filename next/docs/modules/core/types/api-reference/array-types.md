@@ -12,7 +12,7 @@ math.gl includes `Float16Array` in its public array types, but does not install 
 
 Use `NativeFloat16ArrayConstructor` to detect native or polyfilled support. Use `getFloat16ArrayConstructor()` when an application can use `Uint16Array` as a fallback containing encoded IEEE 754 binary16 bit patterns. The fallback does not encode numeric assignments or decode values when read.
 
-`NativeFloat16ArrayConstructor` is captured when `@math.gl/core/types` is evaluated. Applications using a polyfill must install it before importing `@math.gl/core/types`.
+`NativeFloat16ArrayConstructor` is captured when `@math.gl/core` is evaluated. Applications using a polyfill must install it before importing `@math.gl/core`.
 
 ## Types[​](#types "Direct link to Types")
 
@@ -95,7 +95,7 @@ Remarks:
 
 ### `NativeFloat16ArrayConstructor: TypedArrayConstructor | undefined`[​](#nativefloat16arrayconstructor-typedarrayconstructor--undefined "Direct link to nativefloat16arrayconstructor-typedarrayconstructor--undefined")
 
-The native `Float16Array` constructor, or `undefined` when the current JavaScript runtime does not provide it. The value is captured when `@math.gl/core/types` is evaluated.
+The native `Float16Array` constructor, or `undefined` when the current JavaScript runtime does not provide it. The value is captured when `@math.gl/core` is evaluated.
 
 ### `getFloat16ArrayConstructor(): TypedArrayConstructor`[​](#getfloat16arrayconstructor-typedarrayconstructor "Direct link to getfloat16arrayconstructor-typedarrayconstructor")
 

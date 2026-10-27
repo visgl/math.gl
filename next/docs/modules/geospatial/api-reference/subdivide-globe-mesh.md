@@ -7,7 +7,7 @@
 Refines an already triangulated geographic mesh onto a sphere or oblate spheroid. This composes the existing shared-edge-conforming subdivision engine with the shared spheroid conversion kernel; it does not introduce a second tessellator.
 
 ```
-import {subdivideGlobeMesh} from '@math.gl/geospatial/globe';
+import {subdivideGlobeMesh} from '@math.gl/geospatial';
 
 
 

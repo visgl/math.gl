@@ -21,8 +21,8 @@ The API centers on computational results: IANA identifiers, numeric fields, and 
 Capabilities have separate dependency boundaries:
 
 * `@math.gl/earth/timezone`: offsets, local calendar fields, timezone labels, runtime identifier support, and lazy geographic lookup. These utilities use native `Intl`.
-* `@math.gl/earth/timezone/lookup`: synchronous approximate geographic lookup with the compact boundary table.
-* `@math.gl/earth/timezone/temporal`: local-day boundaries, local-time conversion, and offset transitions. This entry point uses a vendored copy of `@js-temporal/polyfill` 0.5.1 (including JSBI) for Temporal algorithms across supported browsers and Node versions. It does not modify globals. Its vendored compatibility implementation is isolated from root and lookup consumers; it still uses runtime timezone rules.
+* `@math.gl/earth/timezone`: synchronous approximate geographic lookup with the compact boundary table.
+* `@math.gl/earth/timezone`: local-day boundaries, local-time conversion, and offset transitions. This entry point uses a vendored copy of `@js-temporal/polyfill` 0.5.1 (including JSBI) for Temporal algorithms across supported browsers and Node versions. It does not modify globals. Its vendored compatibility implementation is isolated from root and lookup consumers; it still uses runtime timezone rules.
 
 The package does not ship an `Intl` polyfill or a separate date-specific timezone-rule database.
 
@@ -50,12 +50,12 @@ const local = getLocalDateTime(timezone, instant); // year/month/day and clock f
 const label = new Intl.DateTimeFormat('en', {timeZone: timezone, dateStyle: 'full'}).format(instant);
 ```
 
-The root offset utility uses native `Intl.DateTimeFormat`, without importing the geographic table. The asynchronous lookup loads that table on first use and reuses the loaded module. Bundlers with dynamic-import code splitting can put lookup data in a separate chunk; downloading it is deferred, not eliminated. Importing only the offset utility allows tree shaking to remove lookup entirely.
+The offset utility uses native `Intl.DateTimeFormat`; a tree-shaken named import excludes the geographic table. Unbundled root imports evaluate their statically exported modules. The asynchronous lookup loads that table on first use and reuses the loaded module. Bundlers with dynamic-import code splitting can put lookup data in a separate chunk; downloading it is deferred, not eliminated. Importing only the offset utility allows tree shaking to remove lookup entirely.
 
 For synchronous lookup, import the dedicated entry point:
 
 ```
-import {lookupTimezone} from '@math.gl/earth/timezone/lookup';
+import {lookupTimezone} from '@math.gl/earth/timezone';
 
 
 
@@ -75,7 +75,7 @@ import {
 
   localDateTimeToInstant
 
-} from '@math.gl/earth/timezone/temporal';
+} from '@math.gl/earth/timezone';
 
 
 

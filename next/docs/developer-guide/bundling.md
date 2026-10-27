@@ -17,9 +17,9 @@ Modern production bundlers can then remove unused classes and methods. Avoid ret
 The low-level gl-matrix-compatible functions are intentionally separate from the root entry point in v5. Import only the module needed by the application:
 
 ```
-import * as mat4 from '@math.gl/core/mat4';
+import {mat4} from '@math.gl/core';
 
-import * as vec3 from '@math.gl/core/vec3';
+import {vec3} from '@math.gl/core';
 ```
 
 Available low-level subpaths are `/mat3`, `/mat4`, `/quat`, `/vec2`, `/vec3`, and `/vec4`.

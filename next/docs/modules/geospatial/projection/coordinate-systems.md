@@ -123,7 +123,7 @@ The configurable engine requires grids to be supplied by the application; it doe
 
 Ellipsoidal height **h** is measured relative to the reference ellipsoid. Gravity-related height **H** is measured relative to a physical height datum. For a matching geoid model with undulation **N**, the usual conversion is **h = H + N**. A longitude/latitude projection on its own does not perform this conversion.
 
-The third ordinate is ellipsoidal height by default. Explicit `+geoidgrids` conversion uses registered geoid undulations in meters, with source and destination height operations around the horizontal datum operation. Choose a model matching your datum and tide convention. See the [height conversion guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/datum-grids.md#convert-geoid-heights) for loading GTX or GeoTIFF grids and integrating `@math.gl/earth/geoid`.
+The third ordinate is ellipsoidal height by default. Explicit `+geoidgrids` conversion uses registered geoid undulations in meters, with source and destination height operations around the horizontal datum operation. Choose a model matching your datum and tide convention. See the [height conversion guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/datum-grids.md#convert-geoid-heights) for loading GTX or GeoTIFF grids and integrating `@math.gl/earth`.
 
 A separately declared vertical CRS in WKT, PROJJSON or metadata is not automatically executed. Explicit horizontal extraction discards that component; it does not convert its heights. Validate the height semantics before calling a 3D transform.
 
