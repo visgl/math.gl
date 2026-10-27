@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {sampleTerrainProfile, type TerrainProfile} from '@math.gl/geospatial/terrain/profile';
-import {measureTerrainProfile} from '@math.gl/geospatial/terrain/profile-measure';
+import {sampleTerrainProfile, type TerrainProfile} from '@math.gl/geospatial/terrain';
+import {measureTerrainProfile} from '@math.gl/geospatial/terrain';
 
 function profile(distances: number[], heights: number[], statuses?: number[]): TerrainProfile {
   return {

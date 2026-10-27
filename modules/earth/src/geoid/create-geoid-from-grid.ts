@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Geoid} from './geoid';
-import {isUint16Array} from '@math.gl/core/types';
+import {isUint16Array} from '@math.gl/core';
 
 /** A complete global grid of raw samples in GeographicLib node order. */
 export type GeoidGridProps = {

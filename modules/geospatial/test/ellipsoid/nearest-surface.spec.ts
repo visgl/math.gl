@@ -4,7 +4,7 @@
 // SPDX-FileComment: Original controls using independent Decimal references and analytic distance minima.
 import {expect, test} from 'vitest';
 import {Ellipsoid} from '@math.gl/geospatial';
-import {cartesianToSpheroid} from '@math.gl/core/spheroid';
+import {cartesianToSpheroid} from '@math.gl/core';
 import fixtures from '../../projection/test/fixtures/interior-reference.json';
 import cuspFixtures from '../../projection/test/fixtures/nearest-cusp-reference.json';
 

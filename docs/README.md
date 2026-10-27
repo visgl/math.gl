@@ -23,7 +23,7 @@ math.gl computes on the CPU and has no GPU dependencies. Its arrays and coordina
 - **Geospatial** - CRS, projections, WKB, and GeoArrow through **`@math.gl/geospatial`**
 - **Earth utilities** - Geoid, sun, and timezone APIs through **`@math.gl/earth`**
 - **Discrete global grids** - Lightweight geometry decoders and cell-column detection for common grid encodings. **`@math.gl/dggs`**
-- **3D math** - 3D primitives, geometry processing and culling: **`@math.gl/geometry`**, **`@math.gl/geometry/utils`**, **`@math.gl/geometry/culling`**
+- **3D math** - 3D primitives, geometry processing and culling: **`@math.gl/geometry`**, **`@math.gl/geometry`**, **`@math.gl/geometry/culling`**
 
 ## Modules
 
@@ -48,8 +48,8 @@ Vectors, matrices and shared numeric types.
 | Module | Description |
 | --- | --- |
 | [`@math.gl/core`](./modules/core/README.md) | Vectors, matrices, quaternions and reusable math primitives. |
-| [`@math.gl/core/types`](./modules/core/types/README.md) | Shared TypeScript contracts for numeric and geospatial data. |
-| [`@math.gl/core/expressions`](./modules/core/expressions/README.md) | Parse and evaluate compact expressions (experimental). |
+| [`@math.gl/core`](./modules/core/types/README.md) | Shared TypeScript contracts for numeric and geospatial data. |
+| [`@math.gl/core`](./modules/core/expressions/README.md) | Parse and evaluate compact expressions (experimental). |
 
 ### 3D
 
@@ -57,9 +57,9 @@ Curves, meshes, geometry processing and visibility.
 
 | Module | Description |
 | --- | --- |
-| [`@math.gl/geometry/curves`](./modules/geometry/curves/README.md) | Parametric curves, interpolation and arc-length sampling. |
+| [`@math.gl/geometry`](./modules/geometry/curves/README.md) | Parametric curves, interpolation and arc-length sampling. |
 | [`@math.gl/geometry`](./modules/geometry/README.md) | Renderer-independent primitive meshes and tessellation. |
-| [`@math.gl/geometry/utils`](./modules/geometry/utils/README.md) | Typed-array geometry processing utilities. |
+| [`@math.gl/geometry`](./modules/geometry/utils/README.md) | Typed-array geometry processing utilities. |
 | [`@math.gl/geometry/culling`](./modules/geometry/culling/README.md) | Bounding volumes, intersection tests and visibility. |
 
 ### Spatial
@@ -68,11 +68,11 @@ Geometry operations, geographic indexing and columnar data.
 
 | Module | Description |
 | --- | --- |
-| [`@math.gl/geometry/polygon`](./modules/geometry/polygon/README.md) | Clipping, subdivision and polygon and line geometry operations. |
-| [`@math.gl/geometry/spatial-index`](./modules/geometry/spatial-index/README.md) | Static box, point and triangle indexes for range, ray and nearest queries (POC). |
+| [`@math.gl/geometry`](./modules/geometry/polygon/README.md) | Clipping, subdivision and polygon and line geometry operations. |
+| [`@math.gl/geometry`](./modules/geometry/spatial-index/README.md) | Static box, point and triangle indexes for range, ray and nearest queries (POC). |
 | [`@math.gl/dggs`](./modules/dggs/README.md) | Decode boundaries and columns for common global grid encodings. |
 | [`@math.gl/geospatial/geoarrow`](./modules/geospatial/geoarrow/README.md) | Columnar geospatial layouts and kernels over typed-array buffers. |
-| [`@math.gl/geospatial/wkb`](./modules/geospatial/wkb/README.md) | WKB, EWKB and WKT geometry codecs. |
+| [`@math.gl/geospatial`](./modules/geospatial/wkb/README.md) | WKB, EWKB and WKT geometry codecs. |
 
 ### Earth
 
@@ -84,7 +84,7 @@ Coordinate reference systems, Earth models, maps and time.
 | [`@math.gl/geospatial/projection`](./modules/geospatial/projection/README.md) | Coordinate transformations, pluggable projections and explicit epochs. |
 | [`@math.gl/web-mercator`](./modules/web-mercator/README.md) | Web Mercator map and camera utilities. |
 | [`@math.gl/geospatial`](./modules/geospatial/README.md) | Ellipsoid geometry and geographic coordinate frames. |
-| [`@math.gl/earth/geoid`](./modules/earth/geoid/README.md) | Earth gravity models and geoid height conversion. |
+| [`@math.gl/earth`](./modules/earth/geoid/README.md) | Earth gravity models and geoid height conversion. |
 | [`@math.gl/earth/timezone`](./modules/earth/timezone/README.md) | Geographic timezone lookup and local calendar calculations. |
 | [`@math.gl/earth/sun`](./modules/earth/sun/README.md) | Sun position, daylight and atmospheric lighting. |
 | [`@math.gl/earth`](./modules/earth/README.md) | Grouped entry points for geoid, sun, and timezone utilities. |
@@ -119,7 +119,7 @@ math.gl is fully supported on:
 math.gl was inspired by and built upon some of the most proven open source JavaScript math libraries:
 
 - [`gl-matrix`](http://glmatrix.net/) - adapted vector and matrix kernels retained in core; no runtime dependency on the package
-- [`expression-eval`](https://www.npmjs.com/package/expression-eval) by [@donmccurdy](https://github.com/donmccurdy) - inspiration and source material for `@math.gl/core/expressions`
+- [`expression-eval`](https://www.npmjs.com/package/expression-eval) by [@donmccurdy](https://github.com/donmccurdy) - inspiration and source material for `@math.gl/core`
 - THREE.js math library - math.gl classes are API-compatible with a subset of the THREE.js classes and pass THREE.js test suites.
 - The CesiumJS math library (Apache2) - The geospatial and culling modules were ported from Cesium code base.
 

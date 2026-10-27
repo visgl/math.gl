@@ -1,11 +1,11 @@
-# @math.gl/geometry/curves
+# @math.gl/geometry
 
 Renderer-independent 2D and 3D Euclidean curves: lines, quadratic and cubic Bézier curves,
 cubic Hermite curves, and open or closed Catmull–Rom splines. Includes analytic derivatives,
 unit tangents, flat Float64 sampling, and reusable approximate arc-length tables.
 
 ```ts
-import {CubicBezierCurve, CurveArcLength} from '@math.gl/geometry/curves';
+import {CubicBezierCurve, CurveArcLength} from '@math.gl/geometry';
 
 const curve = new CubicBezierCurve([0, 0, 0], [1, 2, 0], [3, 2, 1], [4, 0, 1]);
 const point = curve.getPoint(0.5);

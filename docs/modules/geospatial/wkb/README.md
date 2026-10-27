@@ -1,15 +1,15 @@
-# @math.gl/geospatial/wkb
+# @math.gl/geospatial
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-`@math.gl/geospatial/wkb` provides dependency-free, synchronous codecs for individual WKB, EWKB, and WKT
+`@math.gl/geospatial` provides dependency-free, synchronous codecs for individual WKB, EWKB, and WKT
 geometry values. It is the neutral format layer used by `@math.gl/geospatial/geoarrow`, but has no dependency
 on GeoArrow or Apache Arrow.
 
 ```typescript
-import {parseWKB, writeWKB, parseWKT, formatWKT} from '@math.gl/geospatial/wkb';
+import {parseWKB, writeWKB, parseWKT, formatWKT} from '@math.gl/geospatial';
 
 const geometry = parseWKT('POINT Z (1 2 3)');
 const bytes = writeWKB(geometry, 'xyz');

@@ -5,7 +5,7 @@
 </p>
 
 ```ts
-import {CubicBezierCurve, CurveArcLength} from '@math.gl/geometry/curves';
+import {CubicBezierCurve, CurveArcLength} from '@math.gl/geometry';
 
 const curve = new CubicBezierCurve([0, 0], [0, 2], [3, 2], [3, 0]);
 const traversal = new CurveArcLength(curve, 2048);

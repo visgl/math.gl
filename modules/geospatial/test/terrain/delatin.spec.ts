@@ -4,10 +4,10 @@
 
 import {expect, test} from 'vitest';
 import {HeightField} from '@math.gl/geospatial/terrain';
-import {createDelatinTerrainMesh} from '@math.gl/geospatial/terrain/delatin';
-import {createMartiniTerrainMesh} from '@math.gl/geospatial/terrain/martini';
-import {measureTerrainMeshError} from '@math.gl/geospatial/terrain/mesh-error';
-import {TerrainSurface} from '@math.gl/geospatial/terrain/surface';
+import {createDelatinTerrainMesh} from '@math.gl/geospatial/terrain';
+import {createMartiniTerrainMesh} from '@math.gl/geospatial/terrain';
+import {measureTerrainMeshError} from '@math.gl/geospatial/terrain';
+import {TerrainSurface} from '@math.gl/geospatial/terrain';
 
 function field(width: number, height: number, fn: (x: number, y: number) => number) {
   return new HeightField({

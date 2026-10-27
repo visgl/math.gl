@@ -6,7 +6,7 @@ surface path whose acceleration has no tangential component. Unlike a revolution
 ellipsoid, a triaxial surface has no single axis of rotational symmetry.
 
 ```ts
-import {TriaxialEllipsoid} from '@math.gl/geospatial/triaxial';
+import {TriaxialEllipsoid} from '@math.gl/geospatial';
 
 const surface = new TriaxialEllipsoid({radii: [3, 2, 1]});
 const start = surface.toCartesian(30, 40, 'geodetic');

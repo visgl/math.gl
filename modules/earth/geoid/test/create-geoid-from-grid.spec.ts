@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {createGeoidFromGrid, parsePGM} from '@math.gl/earth/geoid';
-import type {GeoidGridProps} from '@math.gl/earth/geoid';
+import {createGeoidFromGrid, parsePGM} from '@math.gl/earth';
+import type {GeoidGridProps} from '@math.gl/earth';
 import {openFile} from './utils/file-utils';
 import {createForeignTypedArray} from '../../../../test/utils/foreign-typed-array';
 

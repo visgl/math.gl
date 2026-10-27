@@ -721,17 +721,17 @@ datum shift: declare the datum or explicit `+towgs84` parameters when a shift is
 algorithms can still preload separately. No file, network request, TIFF decoder or geoid
 model is imported implicitly. The optional readers can themselves be dynamically imported.
 
-For an already loaded `@math.gl/earth/geoid` model, use the structural adapter:
+For an already loaded `@math.gl/earth` model, use the structural adapter:
 
 ```typescript
 import { createGeoidGrid } from "@math.gl/geospatial/projection/grids/vertical";
 
-// geoid is a previously prepared @math.gl/earth/geoid Geoid instance.
+// geoid is a previously prepared @math.gl/earth Geoid instance.
 const verticalGrids = { local: createGeoidGrid(geoid) };
 ```
 
 The adapter calls `getHeight(latitudeDegrees, longitudeDegrees)` and retains the model's
-interpolation and ownership rules. It adds no runtime dependency on `@math.gl/earth/geoid`.
+interpolation and ownership rules. It adds no runtime dependency on `@math.gl/earth`.
 `createVerticalGrid({origin, step, size, offsets, noData})` instead snapshots a regular
 bilinear grid. Origin and positive spacing are degrees; rows run south to north and
 columns west to east. `parseGTXGrid(ArrayBuffer)` snapshots big-endian float32 metre

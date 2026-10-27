@@ -9,15 +9,15 @@ the output of `subdivideTriangleMesh` or `subdivideGlobeMesh`. The helper does n
 renderer, GPU API, or polygon module at runtime. It returns a fresh `Uint8Array` with the same
 record stride and never modifies its input.
 
-Use the dedicated `@math.gl/geometry/utils/interpolate-packed-attributes` subpath for a standalone
+Use the dedicated `@math.gl/geometry` subpath for a standalone
 import with no runtime dependencies. The root package also exports the helper and its types for
 convenience; its existing geometry-processing dependencies are unchanged.
 
 ## Example
 
 ```ts
-import {interpolatePackedAttributes} from '@math.gl/geometry/utils/interpolate-packed-attributes';
-import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
+import {interpolatePackedAttributes} from '@math.gl/geometry';
+import {subdivideTriangleMesh} from '@math.gl/geometry';
 
 // Two Float32 UV components per source vertex, expressed as a byte view.
 const sourceUVs = new Float32Array([0, 0, 1, 0, 1, 1, 0, 1]);
@@ -47,7 +47,7 @@ const attributes = [
   },
   {type: 'uint16', size: 2, byteOffset: 8, interpolation: 'linear'},
   {type: 'uint8', size: 4, byteOffset: 12, interpolation: 'flat'}
-] satisfies import('@math.gl/geometry/utils/interpolate-packed-attributes').PackedAttribute[];
+] satisfies import('@math.gl/geometry').PackedAttribute[];
 ```
 
 ## API

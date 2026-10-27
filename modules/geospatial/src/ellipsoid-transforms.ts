@@ -5,7 +5,7 @@
 // SPDX-FileComment: Extracted Cesium-derived frame adapters; see ../LICENSE for attribution.
 
 import {Matrix4} from '@math.gl/core';
-import type {NumericArray} from '@math.gl/core/types';
+import type {NumericArray} from '@math.gl/core';
 import type {Ellipsoid} from './ellipsoid';
 import {localFrameToFixedFrame as computeLocalFrame} from './ellipsoid-helpers/ellipsoid-transform';
 import type {AxisDirection} from './ellipsoid-helpers/ellipsoid-transform';

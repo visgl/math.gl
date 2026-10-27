@@ -2,14 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original normal-support and gradient frame references; no upstream code or model data.
-import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial/ellipsoid';
+import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial';
 import {expect, test} from 'vitest';
 import {config} from '@math.gl/core';
-import {
-  createLocalFrameBasis,
-  eastNorthUpBasis,
-  localFrameToMatrix
-} from '@math.gl/core/local-frame';
+import {createLocalFrameBasis, eastNorthUpBasis, localFrameToMatrix} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
 import {createDeformationModel} from '@math.gl/geospatial/projection/deformation';
 import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';

@@ -4,10 +4,10 @@
 
 import {expect, test} from 'vitest';
 import {HeightField} from '@math.gl/geospatial/terrain';
-import {createMartiniTerrainMesh} from '@math.gl/geospatial/terrain/martini';
-import {measureTerrainMeshError} from '@math.gl/geospatial/terrain/mesh-error';
-import {getTerrainMeshEdge} from '@math.gl/geospatial/terrain/mesh-edges';
-import {TerrainSurface} from '@math.gl/geospatial/terrain/surface';
+import {createMartiniTerrainMesh} from '@math.gl/geospatial/terrain';
+import {measureTerrainMeshError} from '@math.gl/geospatial/terrain';
+import {getTerrainMeshEdge} from '@math.gl/geospatial/terrain';
+import {TerrainSurface} from '@math.gl/geospatial/terrain';
 
 function field(size: number, fn: (x: number, y: number) => number): HeightField {
   return new HeightField({

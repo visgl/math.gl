@@ -9,9 +9,9 @@ import {
   compileAsync,
   eval as evaluate,
   parse
-} from '@math.gl/core/expressions';
+} from '@math.gl/core';
 
-test('@math.gl/core/expressions#ExpressionFunctionRegistry', () => {
+test('@math.gl/core#ExpressionFunctionRegistry', () => {
   const registry = new ExpressionFunctionRegistry()
     .registerFunction('double', (value: number) => value * 2)
     .registerFunctions({
@@ -26,7 +26,7 @@ test('@math.gl/core/expressions#ExpressionFunctionRegistry', () => {
   expect(registry.unregisterFunction('missing'), 'reports missing functions').toBeFalsy();
 });
 
-test('@math.gl/core/expressions#ExpressionFunctionRegistry collisions', () => {
+test('@math.gl/core#ExpressionFunctionRegistry collisions', () => {
   const registry = new ExpressionFunctionRegistry([{transform: (value: number) => value + 1}]);
 
   expect(
@@ -49,7 +49,7 @@ test('@math.gl/core/expressions#ExpressionFunctionRegistry collisions', () => {
   ).toThrow(/Invalid expression function name/);
 });
 
-test('@math.gl/core/expressions#ExpressionFunctionRegistry precedence and isolation', () => {
+test('@math.gl/core#ExpressionFunctionRegistry precedence and isolation', () => {
   const first = new ExpressionFunctionRegistry([{valueOf: () => 1}]);
   const second = new ExpressionFunctionRegistry([{valueOf: () => 2}]);
 
@@ -69,7 +69,7 @@ test('@math.gl/core/expressions#ExpressionFunctionRegistry precedence and isolat
   ).toBeTruthy();
 });
 
-test('@math.gl/core/expressions#ExpressionFunctionRegistry async', async () => {
+test('@math.gl/core#ExpressionFunctionRegistry async', async () => {
   const registry = new ExpressionFunctionRegistry().registerFunction(
     'load',
     async (value: number) => await Promise.resolve(value * 2)

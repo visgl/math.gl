@@ -5,14 +5,14 @@ ends where the outward normal is perpendicular to the viewing direction. Clippin
 only latitude works for a polar view; an oblique view needs a curved horizon and
 correct polygon closure along that horizon.
 
-`@math.gl/geospatial/geographic-atlas` adds this visibility consumer and a finite,
+`@math.gl/geospatial` adds this visibility consumer and a finite,
 shared cut graph for multi-chart maps. Source edges retain their declared linear,
 ellipsoidal geodesic or rhumb geometry. The optional entry adds no dependencies.
 
 ## Orthographic visibility
 
 ```ts
-import {createOrthographicCutAtlas} from '@math.gl/geospatial/geographic-atlas';
+import {createOrthographicCutAtlas} from '@math.gl/geospatial';
 
 const {atlas, project, right, up} = createOrthographicCutAtlas({
   edgeModel: 'geodesic',
@@ -46,7 +46,7 @@ curved geographic boundary. Orthographic horizons have offset zero; parallels ar
 another special case. These are geodetic normals, not geocentric directions.
 
 ```ts
-import {GeographicCutAtlas} from '@math.gl/geospatial/geographic-atlas';
+import {GeographicCutAtlas} from '@math.gl/geospatial';
 
 const atlas = new GeographicCutAtlas({
   boundaries: [{id: 'split', normal: [0, 1, 0]}],
@@ -84,7 +84,7 @@ fail explicitly rather than receiving a guessed topology.
 ## A faceted-map consumer
 
 ```ts
-import {createOctahedralCutAtlas} from '@math.gl/geospatial/geographic-atlas';
+import {createOctahedralCutAtlas} from '@math.gl/geospatial';
 
 const map = createOctahedralCutAtlas({edgeModel: 'geodesic'});
 const pieces = map.atlas.clipPolygon(inputs);

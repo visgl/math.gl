@@ -4,7 +4,7 @@
 
 // @ts-expect-error tsconfig issue?
 import type {Bench} from 'probe.gl/bench';
-import {writeWKB} from '@math.gl/geospatial/wkb';
+import {writeWKB} from '@math.gl/geospatial';
 import {
   convertGeoArrowColumn,
   decodeGeoArrowWKB,

@@ -6,8 +6,8 @@ than a shortest geodesic. `RhumbPath` adapts the existing
 sampling interface as [GeodesicPath](./geodesic-path.md).
 
 ```ts
-import {RhumbPath} from '@math.gl/geospatial/ellipsoid';
-import {subdivideRhumbPolyline} from '@math.gl/geospatial/globe';
+import {RhumbPath} from '@math.gl/geospatial';
+import {subdivideRhumbPolyline} from '@math.gl/geospatial';
 
 const route = new RhumbPath([170, 30, 10], [-170, 30, 30]);
 const halfway = route.sample(0.5); // [180, 30, 20]

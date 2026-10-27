@@ -4,7 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {Matrix4, Quaternion, Vector3, config} from '@math.gl/core';
-import {Ellipsoid, LocalReferenceFrame} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid, LocalReferenceFrame} from '@math.gl/geospatial';
 
 function close(actual: ArrayLike<number>, expected: ArrayLike<number>, digits = 10): void {
   expect(actual.length).toBe(expected.length);

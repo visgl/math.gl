@@ -15,7 +15,7 @@ import {
   sinusoidal,
   millerCylindrical
 } from '@math.gl/geospatial/projection';
-import {cutPolygonByMercatorBounds, cutPolylineByMercatorBounds} from '@math.gl/geometry/polygon';
+import {cutPolygonByMercatorBounds, cutPolylineByMercatorBounds} from '@math.gl/geometry';
 import {
   historicalRotation,
   futureRotation,

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {Geoid} from '@math.gl/earth/geoid';
+import {Geoid} from '@math.gl/earth';
 import {openFile} from './utils/file-utils';
 
 const PGM_FILE_PATH = 'modules/earth/geoid/test/data/egm84-30.pgm';

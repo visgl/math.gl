@@ -7,7 +7,7 @@ Global grid encodings identify cells rather than individual coordinates. Use `@m
 Choose a decoder for the encoding used by your data:
 
 ```js
-import {GeohashDecoder} from '@math.gl/dggs/geohash';
+import {GeohashDecoder} from '@math.gl/dggs';
 
 const center = GeohashDecoder.cellToLngLat('9q8yy');
 const boundary = GeohashDecoder.cellToBoundary('9q8yy');

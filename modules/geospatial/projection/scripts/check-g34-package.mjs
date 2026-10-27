@@ -12,10 +12,10 @@ import {gzipSync} from 'node:zlib';
 import ts from 'typescript';
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
 const manifest = JSON.parse(readFileSync(join(root, 'modules/geospatial/package.json')));
-const entry = manifest.exports['./ellipsoid'];
-const esm = await import(new URL('../../dist/entries/ellipsoid.js', import.meta.url));
+const entry = manifest.exports['.'];
+const esm = await import(new URL('../../dist/index.js', import.meta.url));
 const cjs = createRequire(import.meta.url)(
-  new URL('../../dist/entries/ellipsoid.cjs', import.meta.url).pathname
+  new URL('../../dist/index.cjs', import.meta.url).pathname
 );
 for (const api of [esm, cjs]) {
   const m = new api.EllipsoidMetrics({semiMajorAxis: 1, semiMinorAxis: 1});
@@ -25,11 +25,11 @@ for (const api of [esm, cjs]) {
     Math.abs(p.addPoint(0, 0).addPoint(0, 90).addPoint(90, 0).compute().area - Math.PI / 2) < 1e-14
   );
 }
-assert(entry.types.endsWith('/ellipsoid.d.ts'));
+assert(entry.types.endsWith('/index.d.ts'));
 const measured = {};
 for (const symbol of ['Ellipsoid', 'EllipsoidMetrics', 'EllipsoidGeodesic', 'GeodesicPolygon']) {
   const result = await build({
-    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial/ellipsoid';`, resolveDir: root},
+    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial';`, resolveDir: root},
     bundle: true,
     platform: 'browser',
     format: 'esm',
@@ -56,7 +56,7 @@ try {
   const file = join(temp, 'types.ts');
   writeFileSync(
     file,
-    `import {EllipsoidMetrics, GeodesicPolygon, EllipsoidGeodesic, type AuxiliaryLatitude, type GeodesicPolygonResult} from '@math.gl/geospatial/ellipsoid';
+    `import {EllipsoidMetrics, GeodesicPolygon, EllipsoidGeodesic, type AuxiliaryLatitude, type GeodesicPolygonResult} from '@math.gl/geospatial';
 const axes={semiMajorAxis:1,semiMinorAxis:1};
 const kind:AuxiliaryLatitude='isometric';
 const lat:number=new EllipsoidMetrics(axes).latitudeFromAuxiliary(Infinity,kind);

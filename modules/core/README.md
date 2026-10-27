@@ -6,14 +6,14 @@ This module contains classes for vectors and matrices etc.
 
 For documentation please visit the [website](https://math.gl).
 
-The optional `@math.gl/core/spheroid` numeric entry supports the shared sphere/oblate
+The optional `@math.gl/core` numeric entry supports the shared sphere/oblate
 conversion paths used by geospatial and projection. It does not import vector/matrix
 classes or global configuration. Its existing proj4js-derived arithmetic retains
 MIT attribution and the full terms in [PROJ4-LICENSE.md](./PROJ4-LICENSE.md).
 
-Expression parsing and evaluation are available at `@math.gl/core/expressions`. The core entry
+Expression parsing and evaluation are available at `@math.gl/core`. The core entry
 includes the basic math function library. Earth-specific and DGGS function libraries are exposed
-separately by `@math.gl/geospatial/expressions` and `@math.gl/dggs/expressions`.
+separately by `@math.gl/geospatial` and `@math.gl/dggs`.
 
 ## Sources and credits
 

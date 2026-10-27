@@ -3,13 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {
-  simplifyTerrainContourPaths,
-  type TerrainContourPaths
-} from '@math.gl/geospatial/terrain/contour-simplify';
+import {simplifyTerrainContourPaths, type TerrainContourPaths} from '@math.gl/geospatial/terrain';
 import {HeightField} from '@math.gl/geospatial/terrain';
-import {createTerrainContours} from '@math.gl/geospatial/terrain/contours';
-import {stitchTerrainContours} from '@math.gl/geospatial/terrain/contour-paths';
+import {createTerrainContours} from '@math.gl/geospatial/terrain';
+import {stitchTerrainContours} from '@math.gl/geospatial/terrain';
 
 function path(
   points: number[],

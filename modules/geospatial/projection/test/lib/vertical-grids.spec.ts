@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original fixtures; independent PROJ 9.5.1 pipelines supply numeric expectations.
 import {expect, test} from 'vitest';
-import {parsePGM} from '@math.gl/earth/geoid';
+import {parsePGM} from '@math.gl/earth';
 import {wgs84Egm2008CompoundCRS} from '@math.gl/geospatial/crs/test/projjson-fixtures';
 import {
   FullProjectionEngine,

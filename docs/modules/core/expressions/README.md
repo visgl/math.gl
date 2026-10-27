@@ -5,9 +5,9 @@
   <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
 </p>
 
-The experimental expression parser and evaluator are available from `@math.gl/core/expressions`.
-Geospatial function libraries are exported from `@math.gl/geospatial/expressions`; DGGS function
-libraries are exported from `@math.gl/dggs/expressions`.
+The experimental expression parser and evaluator are available from `@math.gl/core`.
+Geospatial function libraries are exported from `@math.gl/geospatial`; DGGS function
+libraries are exported from `@math.gl/dggs`.
 
 It extracts the expression machinery that has shipped inside `@deck.gl/json` and provides it as a core subpath. Its API remains experimental.
 
@@ -22,7 +22,7 @@ npm install @math.gl/core
 Evaluate a parsed expression against a data object:
 
 ```js
-import {parse, eval as evaluate} from '@math.gl/core/expressions';
+import {parse, eval as evaluate} from '@math.gl/core';
 
 const expression = parse('value * scale + 1');
 const result = evaluate(expression, {value: 3, scale: 2});
@@ -32,7 +32,7 @@ const result = evaluate(expression, {value: 3, scale: 2});
 Compile an expression once and reuse it:
 
 ```js
-import {compile} from '@math.gl/core/expressions';
+import {compile} from '@math.gl/core';
 
 const accessor = compile('points[1].value');
 const result = accessor({points: [{value: 1}, {value: 4}]});
@@ -45,8 +45,8 @@ Supply function libraries through parser options:
 import {
   BASIC_MATH_FUNCTION_LIBRARY,
   compile
-} from '@math.gl/core/expressions';
-import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial/expressions';
+} from '@math.gl/core';
+import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial';
 
 const fn = compile('cartographicToCartesian([toRadians(longitude), toRadians(latitude), 0])', {
   libraries: [BASIC_MATH_FUNCTION_LIBRARY, GEOSPATIAL_FUNCTION_LIBRARY]
@@ -63,7 +63,7 @@ import {
   BASIC_MATH_FUNCTION_LIBRARY,
   ExpressionFunctionRegistry,
   compile
-} from '@math.gl/core/expressions';
+} from '@math.gl/core';
 
 const registry = new ExpressionFunctionRegistry()
   .registerFunctions(BASIC_MATH_FUNCTION_LIBRARY)
@@ -77,7 +77,7 @@ fn({value: 2.4});
 Compile a JSON-style accessor expression that disallows function calls:
 
 ```js
-import {parseExpressionString} from '@math.gl/core/expressions';
+import {parseExpressionString} from '@math.gl/core';
 
 const getFill = parseExpressionString('style.fill.color');
 const fill = getFill({style: {fill: {color: '#08f'}}});
@@ -102,7 +102,7 @@ const fill = getFill({style: {fill: {color: '#08f'}}});
 
 ## Function Libraries
 
-The WGS84 helper library is exported from `@math.gl/geospatial/expressions`; install
+The WGS84 helper library is exported from `@math.gl/geospatial`; install
 `@math.gl/geospatial` to use it. DGGS libraries require `@math.gl/dggs`.
 The evaluator APIs accept a `libraries` option:
 
@@ -116,7 +116,7 @@ Libraries are merged left-to-right and then overlaid with the input context obje
 
 For applications that build function sets incrementally, use an [`ExpressionFunctionRegistry`](/docs/modules/core/expressions/api-reference/function-registry). The registry rejects accidental name collisions and can be shared by multiple compiled expressions without changing module-global state.
 
-Optional [DGGS function tables](/docs/modules/core/expressions/api-reference/dggs-function-libraries) are available from `@math.gl/dggs/expressions`.
+Optional [DGGS function tables](/docs/modules/core/expressions/api-reference/dggs-function-libraries) are available from `@math.gl/dggs`.
 
 Try the APIs in the [expression playground](https://math.gl/examples/expressions).
 

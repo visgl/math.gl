@@ -4,11 +4,8 @@
 
 import {test, expect} from 'vitest';
 import {HeightField} from '@math.gl/geospatial/terrain';
-import {createTerrainMesh} from '@math.gl/geospatial/terrain/mesh';
-import {
-  stitchTerrainMeshEdges,
-  type TerrainSeamMesh
-} from '@math.gl/geospatial/terrain/mesh-stitch';
+import {createTerrainMesh} from '@math.gl/geospatial/terrain';
+import {stitchTerrainMeshEdges, type TerrainSeamMesh} from '@math.gl/geospatial/terrain';
 
 function mesh(size: number, x: number, curved = false) {
   return createTerrainMesh(

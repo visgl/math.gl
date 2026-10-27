@@ -7,7 +7,7 @@
 Computes a triangulation of a polygon using the [earcut library](https://github.com/mapbox/earcut).
 
 ```js
-import {earcut} from '@math.gl/geometry/polygon';
+import {earcut} from '@math.gl/geometry';
 
 earcut([10, 0, 0, 50, 60, 60, 70, 10]);
 // returns [1, 0, 3, 3, 2, 1]

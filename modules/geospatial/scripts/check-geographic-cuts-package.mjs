@@ -12,7 +12,7 @@ import {gzipSync} from 'node:zlib';
 import {build} from 'esbuild';
 const root=fileURLToPath(new URL('../../../',import.meta.url)),require=createRequire(import.meta.url);
 for(const load of[p=>import(p),p=>require(p)]){
- const {clipGeographicPolygon,clipGeographicPolyline,subdivideGeographicCutRing}=await load('@math.gl/geospatial/geographic-cuts');
+ const {clipGeographicPolygon,clipGeographicPolyline,subdivideGeographicCutRing}=await load('@math.gl/geospatial');
  const input=[{positions:[-40,-40,40,-40,40,40,-40,40]}],options={edgeModel:'geodesic',latitudeRange:[0,30]};
  const polygons=clipGeographicPolygon(input,options);assert.equal(polygons.length,1);
  assert(clipGeographicPolyline([0,-20,10,20],options).length>0);
@@ -26,7 +26,7 @@ try{
  for(const ext of['ts','cts'])writeFileSync(join(dir,'consumer.'+ext),readFileSync(join(root,'test/types/geographic-cuts/index.'+ext)));
  writeFileSync(join(dir,'tsconfig.json'),JSON.stringify({compilerOptions:{target:'es2020',module:'NodeNext',moduleResolution:'NodeNext',strict:true,noEmit:true,skipLibCheck:false,types:[]},include:['consumer.ts','consumer.cts']}));
  execFileSync(process.execPath,[require.resolve('typescript/bin/tsc'),'--project',join(dir,'tsconfig.json')],{stdio:'inherit'});
- const result=await build({stdin:{contents:"export {clipGeographicPolygon,subdivideGeographicCutRing} from '@math.gl/geospatial/geographic-cuts';",resolveDir:root,loader:'ts'},bundle:true,minify:true,write:false,format:'esm',platform:'browser',metafile:true});
+ const result=await build({stdin:{contents:"export {clipGeographicPolygon,subdivideGeographicCutRing} from '@math.gl/geospatial';",resolveDir:root,loader:'ts'},bundle:true,minify:true,write:false,format:'esm',platform:'browser',metafile:true});
  const code=result.outputFiles[0].contents, bytes=code.byteLength,gzip=gzipSync(code,{level:9}).length;
  // A new optional feature ceiling, not an increase to any existing entry budget.
  assert(bytes<=80000&&gzip<=29000,'Latitude cuts feature ceiling exceeded');

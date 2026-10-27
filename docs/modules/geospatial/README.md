@@ -8,7 +8,7 @@
 
 Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](../earth/geoid/README.md) and [projection](./projection/README.md).
 
-The geospatial group includes `@math.gl/geospatial/ellipsoid`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`,
+The geospatial group includes `@math.gl/geospatial`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`,
 `/wkb`, `/geoarrow`, and `/expressions`. `@math.gl/web-mercator` remains available for existing
 imports. DGGS remains a separate package.
 
@@ -30,11 +30,11 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 
 | Import | APIs |
 | --- | --- |
-| `@math.gl/geospatial/ellipsoid` | [Ellipsoid](./api-reference/ellipsoid.md), [tangent planes](./api-reference/ellipsoid-tangent-plane.md), [surface geodesics](./api-reference/ellipsoid-geodesic.md), [geodesic paths](./api-reference/geodesic-path.md), [rhumb paths](./api-reference/rhumb-path.md), and [WGS84 helpers](./api-reference/helpers.md) |
-| `@math.gl/geospatial/globe` | [Geographic rectangles](./api-reference/lng-lat-rectangle.md), [region bounding boxes](./api-reference/make-obb-from-region.md), [visibility queries](./api-reference/globe-queries.md), [mesh subdivision](./api-reference/subdivide-globe-mesh.md), [rhumb subdivision](./api-reference/rhumb-path.md), and [geographic seams](./api-reference/geographic-seams.md) |
-| `@math.gl/geospatial/geographic-atlas` | [Oblique ellipsoidal visibility and shared cut graphs](./api-reference/geographic-atlas.md) |
-| `@math.gl/geospatial/geographic-cuts` | [Ellipsoidal/rhumb latitude-domain clipping and adaptive projection](./api-reference/latitude-geographic-cuts.md) |
-| `@math.gl/geospatial/tiles` | [Geographic tile queries](./api-reference/geographic-tiles.md) and [tile-matrix utilities](./api-reference/tile-matrix.md) |
+| `@math.gl/geospatial` | [Ellipsoid](./api-reference/ellipsoid.md), [tangent planes](./api-reference/ellipsoid-tangent-plane.md), [surface geodesics](./api-reference/ellipsoid-geodesic.md), [geodesic paths](./api-reference/geodesic-path.md), [rhumb paths](./api-reference/rhumb-path.md), and [WGS84 helpers](./api-reference/helpers.md) |
+| `@math.gl/geospatial` | [Geographic rectangles](./api-reference/lng-lat-rectangle.md), [region bounding boxes](./api-reference/make-obb-from-region.md), [visibility queries](./api-reference/globe-queries.md), [mesh subdivision](./api-reference/subdivide-globe-mesh.md), [rhumb subdivision](./api-reference/rhumb-path.md), and [geographic seams](./api-reference/geographic-seams.md) |
+| `@math.gl/geospatial` | [Oblique ellipsoidal visibility and shared cut graphs](./api-reference/geographic-atlas.md) |
+| `@math.gl/geospatial` | [Ellipsoidal/rhumb latitude-domain clipping and adaptive projection](./api-reference/latitude-geographic-cuts.md) |
+| `@math.gl/geospatial` | [Geographic tile queries](./api-reference/geographic-tiles.md) and [tile-matrix utilities](./api-reference/tile-matrix.md) |
 
 ## Classes
 
@@ -67,7 +67,7 @@ Expand the infobox to explore query regions and levels.
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid} from '@math.gl/geospatial';
 const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
 const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPosition);
 ```
@@ -75,7 +75,7 @@ const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPo
 Determine the Cartographic representation of a Cartesian position on a WGS84 ellipsoid.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid} from '@math.gl/geospatial';
 const cartesianPosition = [17832.12, 83234.52, 952313.73];
 const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPosition);
 ```
@@ -83,7 +83,7 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```js
-import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial';
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 const transformMatrix = eastNorthUpToFixedFrame(Ellipsoid.WGS84, cartesianOrigin);
 ```
@@ -110,12 +110,12 @@ conservative imagery coverage without a viewport or rendering dependency.
 
 ## Globe mesh subdivision
 
-[subdivideGlobeMesh](./api-reference/subdivide-globe-mesh.md) refines triangulated longitude/latitude meshes onto a sphere or oblate ellipsoid, preserving shared edges and attribute provenance. Import it and `SubdivideGlobeMeshOptions` from `@math.gl/geospatial/globe`.
+[subdivideGlobeMesh](./api-reference/subdivide-globe-mesh.md) refines triangulated longitude/latitude meshes onto a sphere or oblate ellipsoid, preserving shared edges and attribute provenance. Import it and `SubdivideGlobeMeshOptions` from `@math.gl/geospatial`.
 
 ## Tile matrices
 
 [Tile matrix types and utilities](./api-reference/tile-matrix.md) describe supplied rectangular
-grids in any coordinate system. Import from `@math.gl/geospatial/tile-matrix` for a lightweight
+grids in any coordinate system. Import from `@math.gl/geospatial` for a lightweight
 entry point with no runtime dependencies. Helpers provide bounds, coordinate lookup, compact
 extent-to-tile ranges, coverage checks and resolution-based level selection.
 
@@ -126,7 +126,7 @@ and antimeridian-aware queries. Explicit matrix queries use half-open edges and 
 
 [LocalReferenceFrame](./api-reference/local-reference-frame.md) separates point and vector transformations,
 composes geographic heading/pitch/roll poses, and builds velocity-aligned orientations. Import it
-from `@math.gl/geospatial/ellipsoid`. Local distances use the ellipsoid axis units; pose angles use radians.
+from `@math.gl/geospatial`. Local distances use the ellipsoid axis units; pose angles use radians.
 
 ## Geodesic path sampling
 

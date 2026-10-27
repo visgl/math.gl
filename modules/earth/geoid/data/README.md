@@ -1,7 +1,7 @@
 # Optional EGM96 grids
 
 These 16-bit big-endian PGM grids work directly with `parsePGM`. They are optional
-package subpath exports; importing `@math.gl/earth/geoid` does not load any grid.
+package subpath exports; importing `@math.gl/earth` does not load any grid.
 
 | Export | Grid | Purpose |
 | --- | --- | --- |

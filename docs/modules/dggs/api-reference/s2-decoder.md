@@ -49,7 +49,7 @@ outside `[-180, 180]`. Level-zero polar faces span the full longitude range.
 
 ### S2 hierarchy functions
 
-The `@math.gl/dggs/s2` subpath also exports lightweight hierarchy helpers:
+The `@math.gl/dggs` subpath also exports lightweight hierarchy helpers:
 
 - `isS2TokenValid(token: unknown): boolean`
 - `isS2IndexValid(index: unknown): boolean`

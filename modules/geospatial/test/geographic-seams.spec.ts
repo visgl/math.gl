@@ -3,13 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original analytic topology/attribute controls and pinned native curve-root controls.
 import {expect, test} from 'vitest';
-import {EllipsoidRhumb, EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid';
+import {EllipsoidRhumb, EllipsoidGeodesic} from '@math.gl/geospatial';
 import {
   splitGeographicPolyline as line,
   splitGeographicPolygon as polygon,
   GeographicSeamError
-} from '@math.gl/geospatial/globe';
-import type {GeographicSeamPolygon, GeographicSeamRing} from '@math.gl/geospatial/globe';
+} from '@math.gl/geospatial';
+import type {GeographicSeamPolygon, GeographicSeamRing} from '@math.gl/geospatial';
 import {qualifyGeographicSeams} from './geographic-seams-qualification';
 const linear = {edgeModel: 'linear' as const};
 const rhumb = new EllipsoidRhumb({semiMajorAxis: 1, semiMinorAxis: 1});

@@ -4,7 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {HeightField} from '@math.gl/geospatial/terrain';
-import {HeightFieldMinMax} from '@math.gl/geospatial/terrain/bounds';
+import {HeightFieldMinMax} from '@math.gl/geospatial/terrain';
 
 test('hierarchy windows exactly match exhaustive corner bounds on odd rectangular grids', () => {
   const field = new HeightField({

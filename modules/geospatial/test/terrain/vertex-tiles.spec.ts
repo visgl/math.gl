@@ -4,9 +4,9 @@
 
 import {test, expect} from 'vitest';
 import {HeightField} from '@math.gl/geospatial/terrain';
-import {reconcileTerrainVertexTiles} from '@math.gl/geospatial/terrain/vertex-tiles';
-import {createTerrainMesh} from '@math.gl/geospatial/terrain/mesh';
-import {stitchTerrainMeshEdges} from '@math.gl/geospatial/terrain/mesh-stitch';
+import {reconcileTerrainVertexTiles} from '@math.gl/geospatial/terrain';
+import {createTerrainMesh} from '@math.gl/geospatial/terrain';
+import {stitchTerrainMeshEdges} from '@math.gl/geospatial/terrain';
 
 const tile = (column: number, row: number, offset = 0) => ({
   column,

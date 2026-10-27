@@ -7,7 +7,7 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        find: '@math.gl/geometry/parametric',
+        find: '@math.gl/geometry',
         replacement: fileURLToPath(
           new URL('../../modules/geometry/src/parametric.ts', import.meta.url)
         )

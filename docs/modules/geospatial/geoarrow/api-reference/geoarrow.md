@@ -207,7 +207,7 @@ values. Set `encoding: 'geoarrow.geometry'` to force a dense union for homogeneo
 
 ### `decodeGeoArrowWKB(column, options?)` / `decodeGeoArrowWKT(column)`
 
-Import these functions from `@math.gl/geospatial/geoarrow/wkb`. They decode serialized chunks into native
+Import these functions from `@math.gl/geospatial/geoarrow`. They decode serialized chunks into native
 descriptors while preserving nulls, metadata, CRS, edge semantics, and source chunking. WKB accepts
 mixed endianness, WKB/EWKB/ISO dimensions, mixed families and dimensions, recursive collections,
 regular binary storage, and Arrow BinaryView-style storage.
@@ -221,7 +221,7 @@ regular binary storage, and Arrow BinaryView-style storage.
 | `coordinateLayout` | `interleaved` or `separated` | `interleaved` |
 | `coordinateType` | `float32` or `float64` | `float64` |
 | `offsetType` | `int32` or `int64` | `int32` |
-| `traversal` | `@math.gl/geospatial/wkb` traversal/resource limits | none |
+| `traversal` | `@math.gl/geospatial` traversal/resource limits | none |
 
 `infer` reads semantic dimensions from WKB headers rather than trusting the placeholder dimension
 on a Binary descriptor. Concrete family rows use header-only classification plus exact measure and
@@ -240,13 +240,13 @@ optional traversal limits are the same as `decodeGeoArrowWKB`.
 
 ### `encodeGeoArrowWKB(column)` / `encodeGeoArrowWKT(column)`
 
-Import these functions from `@math.gl/geospatial/geoarrow/wkb`. They encode native descriptors into
+Import these functions from `@math.gl/geospatial/geoarrow`. They encode native descriptors into
 variable-width serialized descriptors using an exact measure/write pass per source chunk. WKB
 encoding traverses physical descriptors directly, retains chunk boundaries, and represents
 dense-union child nulls in the serialized validity bitmap. A column already in the requested
 encoding is returned unchanged.
 
-Individual geometry parsing and formatting live in `@math.gl/geospatial/wkb`. GeoArrow's four codec functions
+Individual geometry parsing and formatting live in `@math.gl/geospatial`. GeoArrow's four codec functions
 adapt those neutral codecs to serialized column descriptors, validity, offsets, chunks, CRS, and
 metadata.
 
@@ -254,7 +254,7 @@ metadata.
 
 ### `tessellateGeoArrowPolygons(column, options?)`
 
-Import this optional function from `@math.gl/geospatial/geoarrow/tessellation`. It returns `GeoArrowTessellation`:
+Import this optional function from `@math.gl/geospatial/geoarrow`. It returns `GeoArrowTessellation`:
 
 | Field | Meaning |
 | --- | --- |
@@ -284,5 +284,5 @@ omitted and no buffer is detached.
 
 ### `prepareGeoArrowTransfer(column)`
 
-Available from `@math.gl/geospatial/geoarrow/worker`. Returns `{column, transferList}` for explicit use with
+Available from `@math.gl/geospatial/geoarrow`. Returns `{column, transferList}` for explicit use with
 `postMessage` or another structured-clone transport.

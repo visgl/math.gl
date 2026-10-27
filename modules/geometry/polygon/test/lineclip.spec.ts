@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {clipPolyline, clipPolygon} from '@math.gl/geometry/polygon';
+import {clipPolyline, clipPolygon} from '@math.gl/geometry';
 
 export function flatten(arr: unknown, result: any[] = []): any[] {
   if (Array.isArray(arr)) {

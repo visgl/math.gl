@@ -6,10 +6,10 @@
 
 `@math.gl/core` provides array-based vectors, matrices, quaternions, and coordinate helpers. Use it to compose transforms, rotate geometry, and work with reusable numeric objects.
 
-Shared types and expression parsing are available at `@math.gl/core/types` and
-`@math.gl/core/expressions`. The basic math expression library is included there; geospatial and
-DGGS expression functions live at `@math.gl/geospatial/expressions` and
-`@math.gl/dggs/expressions`.
+Shared types and expression parsing are available at `@math.gl/core` and
+`@math.gl/core`. The basic math expression library is included there; geospatial and
+DGGS expression functions live at `@math.gl/geospatial` and
+`@math.gl/dggs`.
 
 
 import Example from '@site/src/components/core-transforms';
@@ -63,7 +63,7 @@ Start with [transformations](./developer-guide/transformations.md) and [3D rotat
 
 ## Numeric local frames
 
-The optional [`@math.gl/core/local-frame`](./api-reference/local-frame.md) entry
+The optional [`@math.gl/core`](./api-reference/local-frame.md) entry
 provides ENU/XYZ rotations and ENU/NED matrices with reusable outputs. Angles are
 explicit radians, distances retain their units, and the leaf has no runtime
 imports. It is not reexported from the core root.

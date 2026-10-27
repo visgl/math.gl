@@ -29,7 +29,7 @@
 
 import {test, expect} from 'vitest';
 import fs from 'fs';
-import {earcut} from '@math.gl/geometry/polygon';
+import {earcut} from '@math.gl/geometry';
 import {extractAreas, deviation, flatten} from './earcut-utils';
 import expected from './data/earcut/expected';
 

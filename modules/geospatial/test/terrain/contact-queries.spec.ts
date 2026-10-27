@@ -4,8 +4,8 @@
 
 import {expect, test} from 'vitest';
 import {HeightField} from '@math.gl/geospatial/terrain';
-import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain/surface';
-import {getClosestPointOnTriangle} from '@math.gl/geometry/culling/queries';
+import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain';
+import {getClosestPointOnTriangle} from '@math.gl/geometry/culling';
 
 function sheet(): TerrainSurface {
   return new TerrainSurface({

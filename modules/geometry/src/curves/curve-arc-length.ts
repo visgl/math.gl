@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {NumericArray} from '@math.gl/core/types';
+import type {NumericArray} from '@math.gl/core';
 import {Curve, validateDivisions, validateParameter} from './curve';
 
 /** Reusable polyline approximation to a curve's cumulative arc length. */

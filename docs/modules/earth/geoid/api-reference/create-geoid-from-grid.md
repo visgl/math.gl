@@ -6,10 +6,10 @@
 
 Creates a `Geoid` from a complete global grid of decoded unsigned 16-bit samples.
 It uses the same bilinear or cubic interpolation as `parsePGM`, without requiring
-Arrow or a Parquet decoder in `@math.gl/earth/geoid`.
+Arrow or a Parquet decoder in `@math.gl/earth`.
 
 ```typescript
-import {createGeoidFromGrid} from '@math.gl/earth/geoid';
+import {createGeoidFromGrid} from '@math.gl/earth';
 
 // Decode Parquet in the application, then extract the complete raw_value column.
 const geoid = createGeoidFromGrid({
@@ -58,7 +58,7 @@ restore row/column order if a query reordered rows. Filtered or incomplete table
 cannot be used as a complete grid. Do not pass the decoded `geoid_height` column
 as raw samples.
 
-`@math.gl/core/types` provides `isUint16Array()` and `isFloat16Array()` to distinguish
+`@math.gl/core` provides `isUint16Array()` and `isFloat16Array()` to distinguish
 unsigned integer samples from native half-precision floats across realms.
 Float16Array heights and Uint16Array binary16 bit patterns are different encodings
 from GeographicLib raw samples and cannot be passed as this grid's raw values.

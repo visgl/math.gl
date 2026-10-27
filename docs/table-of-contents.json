@@ -21,7 +21,8 @@
       "developer-guide/debugging",
       "developer-guide/performance",
       "developer-guide/bundling",
-      "developer-guide/working-with-ai"
+      "developer-guide/working-with-ai",
+      "developer-guide/root-exports-migration"
     ]
   },
   {

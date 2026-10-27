@@ -80,5 +80,5 @@ result as `signature` when structured input or overrides require resolved metada
 default string definitions retain the original string.
 
 Import `getCRSSignature`, `linearUnits`, `CRSMetadata` and `CRSUnit` from
-`@math.gl/geospatial/crs/metadata` when only resolved metadata is needed. This entry keeps
+`@math.gl/geospatial/crs` when only resolved metadata is needed. This entry keeps
 WKT/PROJ syntax readers out of the initial graph of code-split applications.

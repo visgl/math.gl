@@ -36,20 +36,20 @@ assert.equal(mesh.intersectCapsule([0.2,0.2,1],[0.2,0.2,-1],0.1).result[0].segme
 assert.equal(index.nearestBoxQuery([0,0],[2,2]).result.distance,0);`;
   await writeFile(
     join(temporary, 'consumer.mjs'),
-    `import assert from 'node:assert/strict'; import * as api from '@math.gl/geometry/spatial-index';
+    `import assert from 'node:assert/strict'; import * as api from '@math.gl/geometry';
 ${assertions}`
   );
   await writeFile(
     join(temporary, 'consumer.cjs'),
-    `const assert=require('node:assert/strict'),api=require('@math.gl/geometry/spatial-index');
+    `const assert=require('node:assert/strict'),api=require('@math.gl/geometry');
 ${assertions}`
   );
   for (const file of ['consumer.mjs', 'consumer.cjs'])
     execFileSync(process.execPath, [join(temporary, file)], {stdio: 'inherit'});
   await writeFile(
     join(temporary, 'consumer.ts'),
-    `import {PointIndex,TriangleBVH,type TriangleRayOptions,type RayIndexOptions,type IndexQueryResult,type IndexQueryBudget,type SearchIndexOptions,type TriangleQueryResult,type TriangleSegmentResult} from '@math.gl/geometry/spatial-index';
-import {getClosestPointsOnSegments,getClosestPointsSegmentTriangle,type SegmentClosestPoints,type SegmentTriangleClosestPoints} from '@math.gl/geometry/culling/queries';
+    `import {PointIndex,TriangleBVH,type TriangleRayOptions,type RayIndexOptions,type IndexQueryResult,type IndexQueryBudget,type SearchIndexOptions,type TriangleQueryResult,type TriangleSegmentResult} from '@math.gl/geometry';
+import {getClosestPointsOnSegments,getClosestPointsSegmentTriangle,type SegmentClosestPoints,type SegmentTriangleClosestPoints} from '@math.gl/geometry/culling';
 const points=new PointIndex({positions:new Float64Array([0,0]),dimension:2});
 const index:number|undefined=points.nearest([0,0])?.index;
 const triangle=new TriangleBVH({positions:[]});
@@ -99,7 +99,7 @@ new PointIndex({positions:[],dimension:4});`
   );
   const bundle = await build({
     stdin: {
-      contents: "export {PointIndex} from '@math.gl/geometry/spatial-index/boxes';",
+      contents: "export {PointIndex} from '@math.gl/geometry';",
       resolveDir: temporary
     },
     bundle: true,

@@ -6,23 +6,23 @@ This module contains geospatial math, primarly ellipsoid math for dealing with t
 
 For documentation please visit the [website](https://math.gl).
 
-The grouped subpaths include `@math.gl/geospatial/ellipsoid`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`,
+The grouped subpaths include `@math.gl/geospatial`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`,
 `/wkb`, `/geoarrow`, `/expressions`, and the experimental `/discontinuous`. DGGS remains a separate module at `@math.gl/dggs`.
 `@math.gl/web-mercator` remains available for existing applications.
 
-Use `@math.gl/geospatial/ellipsoid` for ellipsoid coordinate math and local tangent frames,
-`@math.gl/geospatial/globe` for geographic regions, bounding boxes, horizon bounds, occlusion, and globe mesh subdivision,
-and `@math.gl/geospatial/tiles` for geographic tile queries and tile-matrix utilities.
+Use `@math.gl/geospatial` for ellipsoid coordinate math and local tangent frames,
+`@math.gl/geospatial` for geographic regions, bounding boxes, horizon bounds, occlusion, and globe mesh subdivision,
+and `@math.gl/geospatial` for geographic tile queries and tile-matrix utilities.
 The package root continues to export these APIs for compatibility. The existing `/tile-matrix`
 subpath remains available for applications that only need tile-matrix utilities.
 
-[`subdivideGlobeMesh`](https://math.gl/docs/modules/geospatial/api-reference/subdivide-globe-mesh) refines geographic meshes onto a sphere or oblate ellipsoid while preserving shared edges and attribute provenance. Import it from `@math.gl/geospatial/globe`.
+[`subdivideGlobeMesh`](https://math.gl/docs/modules/geospatial/api-reference/subdivide-globe-mesh) refines geographic meshes onto a sphere or oblate ellipsoid while preserving shared edges and attribute provenance. Import it from `@math.gl/geospatial`.
 
 ## Sources and credits
 
 See [the packaged source and license index](./THIRD-PARTY-NOTICES.md) and
 [math.gl references and credits](https://math.gl/docs/references-and-credits).
 
-Use `@math.gl/geospatial/geographic-cuts` for [ellipsoidal/rhumb latitude clipping](https://math.gl/docs/modules/geospatial/api-reference/latitude-geographic-cuts) and adaptive projection that preserves generated parallel boundaries.
+Use `@math.gl/geospatial` for [ellipsoidal/rhumb latitude clipping](https://math.gl/docs/modules/geospatial/api-reference/latitude-geographic-cuts) and adaptive projection that preserves generated parallel boundaries.
 
-Use `@math.gl/geospatial/geographic-atlas` for [oblique ellipsoidal visibility and shared cut graphs](https://math.gl/docs/modules/geospatial/api-reference/geographic-atlas), including an octahedral faceted-map consumer.
+Use `@math.gl/geospatial` for [oblique ellipsoidal visibility and shared cut graphs](https://math.gl/docs/modules/geospatial/api-reference/geographic-atlas), including an octahedral faceted-map consumer.

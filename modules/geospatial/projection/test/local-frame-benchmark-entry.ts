@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original analytic normal/support-point workload; no upstream implementation or model data.
 import {Ellipsoid} from '@math.gl/geospatial';
-import * as ellipsoidAPI from '@math.gl/geospatial/ellipsoid';
+import * as ellipsoidAPI from '@math.gl/geospatial';
 import {createDeformationModel} from '@math.gl/geospatial/projection/deformation';
 import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
 export {measureWorkload} from './benchmark-workload';

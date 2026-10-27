@@ -3,13 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original independent and full GeographicLib C++ qualification; no upstream implementation imported.
 import {config} from '@math.gl/core';
-import {cartesianToSpheroid, spheroidToCartesian} from '@math.gl/core/spheroid';
-import {
-  createLocalFrameBasis,
-  eastNorthUpBasis,
-  fixedToLocal,
-  localToFixed
-} from '@math.gl/core/local-frame';
+import {cartesianToSpheroid, spheroidToCartesian} from '@math.gl/core';
+import {createLocalFrameBasis, eastNorthUpBasis, fixedToLocal, localToFixed} from '@math.gl/core';
 import {Ellipsoid, EllipsoidGeodesic} from '@math.gl/geospatial';
 import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
 import {gnomonic} from '@math.gl/geospatial/projection/projections/gnom';

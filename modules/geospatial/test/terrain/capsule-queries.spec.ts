@@ -4,7 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {HeightField} from '@math.gl/geospatial/terrain';
-import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain/surface';
+import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain';
 
 function sheet(): TerrainSurface {
   return new TerrainSurface({

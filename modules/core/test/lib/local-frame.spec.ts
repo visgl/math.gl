@@ -11,7 +11,7 @@ import {
   fixedToLocal,
   localFrameToMatrix,
   type LocalFrameAxis
-} from '@math.gl/core/local-frame';
+} from '@math.gl/core';
 const axes = ['east', 'north', 'up', 'west', 'south', 'down'] as const;
 // Authored orthonormal Pythagorean frame, independent of trigonometric construction.
 const directions = {

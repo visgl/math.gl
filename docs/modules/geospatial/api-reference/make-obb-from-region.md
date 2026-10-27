@@ -12,7 +12,7 @@ The returned box is expressed in ellipsoid-fixed Cartesian coordinates. Its orie
 
 ```js
 import {toRadians} from '@math.gl/core';
-import {makeOBBFromRegion} from '@math.gl/geospatial/globe';
+import {makeOBBFromRegion} from '@math.gl/geospatial';
 
 const region = [
   toRadians(-30), // west
@@ -50,8 +50,8 @@ This describes a 20° region centered on ±180°. A region from `10°` to `-10°
 The optional ellipsoid defaults to `Ellipsoid.WGS84`:
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
-import {makeOBBFromRegion} from '@math.gl/geospatial/globe';
+import {Ellipsoid} from '@math.gl/geospatial';
+import {makeOBBFromRegion} from '@math.gl/geospatial';
 
 const moon = new Ellipsoid(1737400, 1737400, 1737400);
 const box = makeOBBFromRegion(region, moon);

@@ -67,7 +67,7 @@ original math.gl implementations. Their public registration follows the existing
 proj4-style engine API; geoid-height signs and GTX layout/nodata conventions follow
 PROJ/GDAL documentation. No proj4js or PROJ implementation was copied into these files.
 Independent expectations use PROJ 9.5.1; the tiny GTX model is authored MIT test data.
-The structural geoid adapter does not copy or import GeographicLib or `@math.gl/earth/geoid`
+The structural geoid adapter does not copy or import GeographicLib or `@math.gl/earth`
 code. Applications providing a geoid model retain that model's own license and data terms.
 
 
@@ -159,7 +159,7 @@ No additional third-party code or model data is included.
 ## Shared spheroid arithmetic
 
 The existing proj4js-derived geocentric forward equations and Hannover inverse from
-`datum.ts` now live in `@math.gl/core/spheroid`, used by projection and the qualified
+`datum.ts` now live in `@math.gl/core`, used by projection and the qualified
 sphere/oblate geometry paths. The numeric leaf retains the proj4js SPDX copyright,
 MIT identifier and full `PROJ4-LICENSE.md` in the core package. The safeguarded
 surface/exterior fallback and adapters are original math.gl work. No new upstream

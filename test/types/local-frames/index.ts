@@ -10,7 +10,7 @@ import {
   type HeadingPitchRoll,
   type TangentPlaneProjection,
   type TangentPlaneProjectionMode
-} from '@math.gl/geospatial/ellipsoid';
+} from '@math.gl/geospatial';
 import {LocalReferenceFrame as RootFrame} from '@math.gl/geospatial';
 const options: LocalReferenceFrameOptions = {
   ellipsoid: Ellipsoid.WGS84,
@@ -56,7 +56,7 @@ frame.fixedToLocalVectorsFlat(batch, batch);
 // @ts-expect-error Packed frame outputs require Float64 storage.
 frame.localToFixedPointsFlat(batch, new Float32Array(3));
 
-import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial/ellipsoid';
+import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial';
 import {
   getOrientedBoundingBoxQuaternion,
   makeOrientedBoundingBoxFromQuaternion

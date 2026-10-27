@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {GeographicCutAtlas,createOrthographicCutAtlas,createOctahedralCutAtlas,createOctahedralCutGraph,type GeographicCutGraph,type GeographicAtlasRing} from '@math.gl/geospatial/geographic-atlas';
+import {GeographicCutAtlas,createOrthographicCutAtlas,createOctahedralCutAtlas,createOctahedralCutGraph,type GeographicCutGraph,type GeographicAtlasRing} from '@math.gl/geospatial';
 const graph:GeographicCutGraph=createOctahedralCutGraph();
 const atlas=new GeographicCutAtlas(graph,{edgeModel:'rhumb'});
 const inputs=[{positions:[-40,-40,40,-40,40,40,-40,40]}];

@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import type {NumericArray} from '@math.gl/core';
 import {equals} from '@math.gl/core';
-import {cutPolylineByGrid, cutPolygonByGrid} from '@math.gl/geometry/polygon';
+import {cutPolylineByGrid, cutPolygonByGrid} from '@math.gl/geometry';
 
 import {flatten} from './lineclip.spec';
 

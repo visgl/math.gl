@@ -4,10 +4,10 @@
 
 import {expect, test} from 'vitest';
 import {HeightField} from '@math.gl/geospatial/terrain';
-import {HeightFieldGeometry} from '@math.gl/geospatial/terrain/geometry';
-import {createTerrainMesh} from '@math.gl/geospatial/terrain/mesh';
-import {measureTerrainMeshError} from '@math.gl/geospatial/terrain/mesh-error';
-import {getTerrainMeshEdge} from '@math.gl/geospatial/terrain/mesh-edges';
+import {HeightFieldGeometry} from '@math.gl/geospatial/terrain';
+import {createTerrainMesh} from '@math.gl/geospatial/terrain';
+import {measureTerrainMeshError} from '@math.gl/geospatial/terrain';
+import {getTerrainMeshEdge} from '@math.gl/geospatial/terrain';
 
 test('plain regular meshes match renderer geometry across frames, diagonals, registration and holes', () => {
   for (const diagonal of ['00-11', '10-01'] as const)

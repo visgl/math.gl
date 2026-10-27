@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/From-v3.2-blue.svg?style=flat-square" alt="From v3.2" />
 </p>
 
-`@math.gl/geometry/polygon` clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.
+`@math.gl/geometry` clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.
 
 
 import Example from '@site/src/components/polygon-playground';
@@ -24,7 +24,7 @@ npm install @math.gl/geometry
 ## Usage
 
 ```js
-import {earcut} from '@math.gl/geometry/polygon';
+import {earcut} from '@math.gl/geometry';
 
 const positions = [0, 0, 1, 0, 1, 1, 0, 1];
 const indices = earcut(positions, [], 2); // Two triangles

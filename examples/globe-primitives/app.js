@@ -6,7 +6,7 @@ import {
   getGlobeHorizonBounds,
   splitGlobeBounds,
   subdivideGlobeMesh
-} from '@math.gl/geospatial/globe';
+} from '@math.gl/geospatial';
 
 import {BLUE_MARBLE_WORLD_URL} from '../common/blue-marble.js';
 

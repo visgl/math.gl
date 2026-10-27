@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {H3Decoder} from '@math.gl/dggs/h3';
+import {H3Decoder} from '@math.gl/dggs';
 
 const H3_TOKEN = '89283082803ffff';
 const H3_INDEX = 617700169957507071n;

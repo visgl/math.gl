@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {NumericArray} from '@math.gl/core/types';
+import type {NumericArray} from '@math.gl/core';
 import {Curve, copyPoints, type CurvePoint} from './curve';
 
 /** Cubic curve with endpoint derivatives (not unit tangent directions). */
