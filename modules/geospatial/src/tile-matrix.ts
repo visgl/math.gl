@@ -55,6 +55,12 @@ export type TileMatrixLimits = {
   readonly maxTileRow: number;
 };
 
+/** Inclusive base-grid coverage identified by native matrix ID; omitted levels have no coverage. */
+export type TileMatrixSetLimits = readonly (TileMatrixLimits & {
+  /** Native identifier of the matrix addressed by this coverage rectangle. */
+  readonly tileMatrix: string;
+})[];
+
 /** An exact row-band range of canonical columns, enumerated using columnStep. */
 export type TileMatrixRowRange = TileMatrixLimits & {
   /** Increment between canonical columns; rows increment by one. */
@@ -66,10 +72,63 @@ export function validateTileMatrix(matrix: TileMatrix): void {
   validateTileMatrixGeometry(matrix);
 }
 
+/**
+ * Validates complete geometry, a nonempty opaque CRS identifier, unique matrix IDs and optional
+ * identified coverage. Empty sets and empty coverage lists are valid. Does not mutate inputs,
+ * interpret the CRS, or require ordered levels or quadtree relationships.
+ */
+export function validateTileMatrixSet(
+  matrixSet: TileMatrixSet,
+  limits?: TileMatrixSetLimits
+): void {
+  if (
+    !matrixSet ||
+    typeof matrixSet.crs !== 'string' ||
+    !matrixSet.crs.trim() ||
+    !Array.isArray(matrixSet.matrices)
+  ) {
+    throw new RangeError('Invalid tile matrix set');
+  }
+  const matrices = new Map<string, TileMatrix>();
+  for (const matrix of matrixSet.matrices) {
+    validateTileMatrix(matrix);
+    if (matrices.has(matrix.id)) throw new RangeError('Tile matrix identifiers must be unique');
+    matrices.set(matrix.id, matrix);
+  }
+  if (limits === undefined) return;
+  if (!Array.isArray(limits)) throw new RangeError('Tile matrix set limits require an array');
+  const identifiers = new Set<string>();
+  for (const limit of limits) {
+    if (
+      !limit ||
+      typeof limit.tileMatrix !== 'string' ||
+      !limit.tileMatrix ||
+      identifiers.has(limit.tileMatrix)
+    ) {
+      throw new RangeError('Tile matrix set limits require unique matrix identifiers');
+    }
+    const matrix = matrices.get(limit.tileMatrix);
+    if (!matrix) throw new RangeError('Tile matrix limits reference an unknown matrix');
+    validateTileMatrixCoverage(matrix, limit);
+    identifiers.add(limit.tileMatrix);
+  }
+}
+
+/** Validates complete matrix geometry and inclusive base-grid coverage without mutating either. */
+export function validateTileMatrixLimits(matrix: TileMatrix, limits: TileMatrixLimits): void {
+  validateTileMatrix(matrix);
+  validateTileMatrixCoverage(matrix, limits);
+}
+
 /** Validates geometry and returns a sorted copy of the declared coalescence bands. */
 function validateTileMatrixGeometry(matrix: TileMatrix): VariableMatrixWidth[] {
   if (
+    !matrix ||
     typeof matrix.id !== 'string' ||
+    !Array.isArray(matrix.origin) ||
+    !Array.isArray(matrix.tileSize) ||
+    !Array.isArray(matrix.matrixSize) ||
+    (matrix.variableMatrixWidths !== undefined && !Array.isArray(matrix.variableMatrixWidths)) ||
     !matrix.id ||
     matrix.origin.length !== 2 ||
     matrix.tileSize.length !== 2 ||
@@ -86,9 +145,9 @@ function validateTileMatrixGeometry(matrix: TileMatrix): VariableMatrixWidth[] {
   ) {
     throw new RangeError('Invalid tile matrix geometry');
   }
-  const bands = [...(matrix.variableMatrixWidths ?? [])].sort(
-    (first, second) => first.minTileRow - second.minTileRow
-  );
+  const bands = [...(matrix.variableMatrixWidths ?? [])];
+  if (bands.some(band => !band)) throw new RangeError('Invalid variable matrix width');
+  bands.sort((first, second) => first.minTileRow - second.minTileRow);
   let previousRow = -1;
   for (const band of bands) {
     if (
@@ -131,20 +190,56 @@ export function isTileIndexInRange(
   limits?: TileMatrixLimits
 ): boolean {
   validateTileMatrix(matrix);
-  if (limits) validateTileMatrixLimits(matrix, limits);
+  if (limits) validateTileMatrixCoverage(matrix, limits);
   return (
-    Number.isSafeInteger(column) &&
-    Number.isSafeInteger(row) &&
-    column >= 0 &&
-    row >= 0 &&
-    column < matrix.matrixSize[0] &&
-    row < matrix.matrixSize[1] &&
+    isTileIndexWithinMatrix(matrix, column, row) &&
     (!limits ||
       (column >= limits.minTileColumn &&
         column <= limits.maxTileColumn &&
         row >= limits.minTileRow &&
         row <= limits.maxTileRow))
   );
+}
+
+/** Tests base-grid indices against already validated dimensions. */
+function isTileIndexWithinMatrix(matrix: TileMatrix, column: number, row: number): boolean {
+  return (
+    Number.isSafeInteger(column) &&
+    Number.isSafeInteger(row) &&
+    column >= 0 &&
+    row >= 0 &&
+    column < matrix.matrixSize[0] &&
+    row < matrix.matrixSize[1]
+  );
+}
+
+/**
+ * Resolves integer base-grid indices to a canonical column/row, or null for noninteger,
+ * nonfinite, outside-matrix or unavailable indices. A coalesced tile is available when any of
+ * its aliases intersects the inclusive base-grid limits; the canonical column may precede
+ * minTileColumn. Validates geometry and limits even for an invalid query. Does not wrap or mutate.
+ */
+export function resolveTileIndex(
+  matrix: TileMatrix,
+  column: number,
+  row: number,
+  limits?: TileMatrixLimits
+): [number, number] | null {
+  validateTileMatrix(matrix);
+  if (limits !== undefined) validateTileMatrixCoverage(matrix, limits);
+  if (!isTileIndexWithinMatrix(matrix, column, row)) return null;
+  const coalesce = getRowCoalesce(matrix, row);
+  const canonicalColumn = Math.floor(column / coalesce) * coalesce;
+  if (
+    limits &&
+    (row < limits.minTileRow ||
+      row > limits.maxTileRow ||
+      canonicalColumn > limits.maxTileColumn ||
+      canonicalColumn + coalesce - 1 < limits.minTileColumn)
+  ) {
+    return null;
+  }
+  return [canonicalColumn, row];
 }
 
 /** Returns the entire tile footprint, including column aliases. Throws for out-of-range indices. */
@@ -255,7 +350,8 @@ function findTileAxisBoundary(
 }
 
 /** Validates inclusive coverage limits against the dimensions of an already validated matrix. */
-function validateTileMatrixLimits(matrix: TileMatrix, limits: TileMatrixLimits): void {
+function validateTileMatrixCoverage(matrix: TileMatrix, limits: TileMatrixLimits): void {
+  if (!limits) throw new RangeError('Invalid tile matrix limits');
   const values = [limits.minTileColumn, limits.maxTileColumn, limits.minTileRow, limits.maxTileRow];
   if (
     !values.every(value => Number.isSafeInteger(value) && value >= 0) ||
@@ -334,7 +430,7 @@ export function getTileRange(
   if (matrix.variableMatrixWidths?.length) {
     throw new RangeError('Use getTileRanges for variable-width matrices');
   }
-  if (limits) validateTileMatrixLimits(matrix, limits);
+  if (limits) validateTileMatrixCoverage(matrix, limits);
   return getRegularTileRange(matrix, bounds, limits);
 }
 
@@ -358,7 +454,7 @@ export function getTileRanges(
   limits?: TileMatrixLimits
 ): TileMatrixRowRange[] {
   const declaredBands = validateTileMatrixGeometry(matrix);
-  if (limits) validateTileMatrixLimits(matrix, limits);
+  if (limits) validateTileMatrixCoverage(matrix, limits);
   validateTileQueryBounds(bounds);
   const bands: VariableMatrixWidth[] = [];
   let nextRow = 0;
@@ -464,7 +560,7 @@ function getTileAxisRange(
  * coordinate units per pixel. Returns null for an empty set; ties retain the first matrix.
  * Uses nominal uncoalesced resolution; selection is independent of row.
  * Uses the larger axis resolution for anisotropic pixels, so both axes meet the target.
- * Validates every matrix and unique identifiers. Does not sort or mutate the set.
+ * Validates the complete set, including its CRS identifier. Does not sort or mutate the set.
  */
 export function selectTileMatrix(
   matrixSet: TileMatrixSet,
@@ -477,11 +573,8 @@ export function selectTileMatrix(
   let finest: TileMatrix | null = null;
   let selectedResolution = -Infinity;
   let finestResolution = Infinity;
-  const identifiers = new Set<string>();
+  validateTileMatrixSet(matrixSet);
   for (const matrix of matrixSet.matrices) {
-    validateTileMatrix(matrix);
-    if (identifiers.has(matrix.id)) throw new RangeError('Tile matrix identifiers must be unique');
-    identifiers.add(matrix.id);
     const resolution = Math.max(matrix.resolution, matrix.resolutionY ?? matrix.resolution);
     if (!finest || resolution < finestResolution) {
       finest = matrix;

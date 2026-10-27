@@ -9,7 +9,8 @@ rectangular tile grids, including coalesced row bands, in any coordinate system.
 its types and functions are also exported from `@math.gl/geospatial/tiles`, alongside geographic tile queries.
 
 ```typescript
-import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix}
+import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix,
+  validateTileMatrixSet, resolveTileIndex}
   from '@math.gl/geospatial/tile-matrix';
 import type {TileMatrix, TileMatrixSet} from '@math.gl/geospatial/tile-matrix';
 
@@ -72,6 +73,57 @@ indexing, range queries, and floating-point extent validation all use each axis'
 Throws `RangeError` for malformed geometry, nonfinite extents or tile spans too small to distinguish
 at the origin or far edge in floating-point coordinates. All geometry utilities validate the matrix.
 
+## validateTileMatrixSet(matrixSet, limits?)
+
+Validates a complete set: a nonempty CRS string, an array of valid matrices and unique native IDs.
+The CRS is opaque; this does not establish that a projection engine supports it. Unordered levels
+and an empty matrix array are valid. Inputs are not sorted or mutated.
+
+Optional `TileMatrixSetLimits` is a readonly array of `TileMatrixLimits` rectangles with a
+`tileMatrix` identifier on each entry. IDs must be unique and refer to matrices in the set; every
+rectangle must fit its matrix. Omitted levels and an empty list describe no available coverage at
+those levels. Validation checks this structure; it does not query actual tile availability.
+
+```typescript
+validateTileMatrixSet(matrixSet, [{
+  tileMatrix: '2m', minTileColumn: 1, maxTileColumn: 3,
+  minTileRow: 0, maxTileRow: 2
+}]);
+```
+
+Malformed sets or coverage throw `RangeError`. Partial service metadata belongs in the adapter's
+own metadata representation until complete geometry is available.
+
+## validateTileMatrixLimits(matrix, limits)
+
+Validates the matrix geometry and one inclusive base-grid coverage rectangle. Bounds must be
+nonnegative safe integers, minima must not exceed maxima, and maxima must fit matrix dimensions.
+An alias-only column interval is valid for a coalesced row; limits need not start on a canonical
+column. Malformed geometry or limits throw `RangeError`. Inputs are not mutated.
+
+## resolveTileIndex(matrix, column, row, limits?)
+
+Resolves integer base-grid indices to `[canonicalColumn, row]`. Returns `null` for noninteger,
+nonfinite, outside-matrix or unavailable indices. Geometry and supplied limits are validated first,
+even when the queried indices are invalid. Rows retain their native numbering for both origin corners.
+
+For a coalesced row, a tile is available when **any alias** intersects the inclusive base-grid limits.
+The canonical column can precede `minTileColumn`, and the input itself need not be the covered alias.
+Regular rows retain their original column. This agrees with `getTileRanges` and avoids a
+bounds-to-range round trip for an integer request.
+
+```typescript
+const coalesced = {...matrix, matrixSize: [4, 3] as const, variableMatrixWidths: [
+  {coalesce: 2, minTileRow: 0, maxTileRow: 0}
+]};
+const limits = {minTileColumn: 1, maxTileColumn: 1, minTileRow: 0, maxTileRow: 0};
+resolveTileIndex(coalesced, 0, 0, limits); // [0, 0]
+resolveTileIndex(coalesced, 1, 0, limits); // [0, 0]
+```
+
+The function accepts tile indices; `getTileIndex` instead maps a coordinate to a containing tile. It does not
+wrap indices, interpret CRS identifiers, infer parents or fetch content.
+
 ## getTileBounds(matrix, column, row)
 
 Returns `TileMatrixBounds`, a readonly `[minX, minY, maxX, maxY]` tuple in matrix coordinates.
@@ -108,12 +160,13 @@ enumerate the returned rectangle; even a compact range can describe many tiles.
 
 Checks integer indices and optional inclusive `TileMatrixLimits`. Malformed limits throw
 `RangeError`. Limits must fit inside matrix dimensions and describe a rectangular coverage subset.
-They do not guarantee that a tile exists on a server.
+They do not guarantee that a tile exists on a server. This predicate checks the supplied base index
+against limits literally. Use `resolveTileIndex` for alias-aware logical tile availability.
 
 ## selectTileMatrix(matrixSet, targetResolution)
 
 Selects the **coarsest matrix whose resolution is at or below the target**. If all matrices are
-coarser than the target, returns the finest available matrix. Returns `null` for an empty set.
+coarser than the target, returns the finest available matrix. Returns `null` for an empty set. Sets are checked with `validateTileMatrixSet`, including their CRS identifier.
 Equal-resolution ties retain the first matrix in the supplied array. The returned matrix is the
 original object, and the set is not sorted or mutated.
 

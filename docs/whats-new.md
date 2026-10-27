@@ -8,6 +8,10 @@
 
 ## v5.0
 
+- `@math.gl/geospatial/tile-matrix` adds public complete-set and coverage validation, plus
+  `resolveTileIndex` for canonical integer tile addresses. Coalesced requests use the same
+  alias-aware coverage as row-range selection. See [Tile matrices](./modules/geospatial/api-reference/tile-matrix.md).
+
 - `@math.gl/geometry` adds flat-sided `PrismGeometry` and solid `RingGeometry`, including
   hexagonal prisms and capped annular segments. The optional parametric entry adds
   rotated, capped segments to `TorusGeometry` while preserving its full-torus defaults.
