@@ -321,6 +321,7 @@
         "items": [
           "modules/earth/sun/README",
           "modules/earth/sun/api-reference/sun",
+          "modules/earth/sun/api-reference/get-sun-terminator",
           "modules/earth/sun/api-reference/moon",
           "modules/earth/sun/api-reference/get-planet-sky-info",
           "modules/earth/sun/api-reference/stars",
