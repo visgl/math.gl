@@ -5,10 +5,9 @@ and rendering applications. The initial implementation provides affine height
 fields and regular meshes in local Cartesian coordinates. Coordinates and heights
 use meters; the surface is Z-up.
 
-Terrain is an opt-in subpath of the consolidated geospatial package. Its sampling
-entry has no runtime package imports; geographic adapters can compose it with
-CRS, projection, ellipsoid, and geoid utilities. The separate
-`@math.gl/geospatial/terrain/geometry` entry imports `@math.gl/geometry`.
+Terrain APIs are available from `@math.gl/geospatial/terrain` and `@math.gl/geospatial`.
+Named imports are tree-shakable; unbundled module loaders evaluate the root
+entry and its declared dependencies.
 
 ## HeightField
 
@@ -148,7 +147,7 @@ boundary selection when using Float32 input coordinates.
 ## HeightFieldGeometry
 
 ```ts
-import {HeightFieldGeometry} from '@math.gl/geospatial/terrain/geometry';
+import {HeightFieldGeometry} from '@math.gl/geospatial/terrain';
 
 const mesh = new HeightFieldGeometry(terrain, {
   precision: 'float32' // or float64 for CPU geometry
@@ -194,7 +193,7 @@ source DEM accuracy.
 ## Geographic sampling
 
 ```typescript
-import {GeographicHeightField} from '@math.gl/geospatial/terrain/geographic';
+import {GeographicHeightField} from '@math.gl/geospatial/terrain';
 
 const terrain = new GeographicHeightField({
   width: 2, height: 2,
@@ -221,7 +220,7 @@ not ECEF vectors. `heightReference` remains an opaque provenance label.
 ## Tiled snapshots
 
 ```typescript
-import {TiledHeightField} from '@math.gl/geospatial/terrain/tiled';
+import {TiledHeightField} from '@math.gl/geospatial/terrain';
 
 const terrain = new TiledHeightField({
   revision: 'dem-2026-10',
@@ -311,7 +310,7 @@ halo carries the new snapshot revision, including an internally shared halo.
 ```typescript
 import {HeightField} from '@math.gl/geospatial/terrain';
 import {packTerrainHeightField, unpackTerrainHeightField}
-  from '@math.gl/geospatial/terrain/packed';
+  from '@math.gl/geospatial/terrain';
 
 const halo = next.copyTileHalo('fine', 0, 0);
 if (halo) {
@@ -374,7 +373,7 @@ or create GPU resources.
 ## Triangulated terrain surfaces
 
 ```typescript
-import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain/surface';
+import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain';
 
 const surface = new TerrainSurface({
   positions: new Float64Array([0, 0, 0, 10, 0, 2, 0, 10, 3]),
@@ -439,7 +438,7 @@ active triangle, which can lie on an edge or vertex. It is not a vertical cleara
 or signed-distance query. These methods return null when no result lies within
 the inclusive distance limit; malformed inputs and result overflow throw.
 
-Queries reuse `@math.gl/geometry/spatial-index` for BVH traversal and exact
+Queries reuse `@math.gl/geometry` for BVH traversal and exact
 triangle kernels. Contact normals always point upward, even for a ray from below;
 they are not automatically oriented toward the query. Exact distance ties choose
 the lowest original triangle index. Boundary decisions use floating-point triangle
@@ -557,7 +556,7 @@ completion. See the [kernel and numerical contract](../../geometry/spatial-index
 ## Conservative height-field bounds
 
 ```typescript
-import {HeightFieldMinMax} from '@math.gl/geospatial/terrain/bounds';
+import {HeightFieldMinMax} from '@math.gl/geospatial/terrain';
 
 const hierarchy = new HeightFieldMinMax(field);
 const bounds = hierarchy.query(); // all cells
@@ -595,11 +594,11 @@ remain future work.
 ## Plain mesh data and optional tessellators
 
 ```typescript
-import {createTerrainMesh} from '@math.gl/geospatial/terrain/mesh';
-import {createMartiniTerrainMesh} from '@math.gl/geospatial/terrain/martini';
-import {createDelatinTerrainMesh} from '@math.gl/geospatial/terrain/delatin';
-import {measureTerrainMeshError} from '@math.gl/geospatial/terrain/mesh-error';
-import {getTerrainMeshEdge} from '@math.gl/geospatial/terrain/mesh-edges';
+import {createTerrainMesh} from '@math.gl/geospatial/terrain';
+import {createMartiniTerrainMesh} from '@math.gl/geospatial/terrain';
+import {createDelatinTerrainMesh} from '@math.gl/geospatial/terrain';
+import {measureTerrainMeshError} from '@math.gl/geospatial/terrain';
+import {getTerrainMeshEdge} from '@math.gl/geospatial/terrain';
 
 const regular = createTerrainMesh(field);
 const rtin = createMartiniTerrainMesh(field, {maxError: 1, fullEdges: ['maxColumn']});
@@ -608,8 +607,8 @@ const report = measureTerrainMeshError(field, rtin);
 const boundaryVertexIds = getTerrainMeshEdge(rtin, 'maxColumn');
 ```
 
-Each function is independently imported. The sampling root imports neither tessellator.
-MARTINI imports no Delatin code, and Delatin imports no MARTINI code. These APIs return
+Bundlers can eliminate unused named exports: sampling-only bundles retain neither
+tessellator, and selecting one backend excludes the other. These APIs return
 plain detached buffers, with no renderer objects, normals, UVs, query indexes or physics
 methods. `TerrainSurface` can consume the resulting data when those capabilities are needed.
 No shader code is included.
@@ -687,8 +686,8 @@ change does not modify loaders.gl itself.
 ## Raster gradients and slope/aspect
 
 ```typescript
-import {createTerrainGradientGrid} from '@math.gl/geospatial/terrain/derivatives';
-import {getTerrainSlopeAspect, createTerrainSlopeAspectGrid} from '@math.gl/geospatial/terrain/slope-aspect';
+import {createTerrainGradientGrid} from '@math.gl/geospatial/terrain';
+import {getTerrainSlopeAspect, createTerrainSlopeAspectGrid} from '@math.gl/geospatial/terrain';
 
 const gradients = createTerrainGradientGrid(field, {method: 'horn'});
 const angles = createTerrainSlopeAspectGrid(gradients);
@@ -696,8 +695,8 @@ const orientation = getTerrainSlopeAspect(0.25, -0.5);
 ```
 
 These are standalone functions, with no new methods on terrain classes. Stencil
-calculation and angle conversion have independent imports. They do not load mesh
-builders, query indexes, rendering classes, or each other at runtime. Outputs are
+calculation and angle conversion are independently tree-shakable. A selective
+bundle does not retain mesh builders, query indexes, rendering classes, or the other calculation. Outputs are
 owned typed arrays suitable for worker transfer and subsequent GPU upload; no GPU
 resources or shader code are created.
 
@@ -742,7 +741,7 @@ no GDAL code or runtime dependency is included.
 ## Elevation profiles
 
 ```typescript
-import {sampleTerrainProfile} from '@math.gl/geospatial/terrain/profile';
+import {sampleTerrainProfile} from '@math.gl/geospatial/terrain';
 
 const profile = sampleTerrainProfile(
   (x, y) => field.sample(x, y, {interpolation: 'triangle'}),
@@ -776,7 +775,7 @@ compute geographic/geodesic distance. Use surface segment queries for clearance.
 ## Triangle-surface contours
 
 ```typescript
-import {createTerrainContours} from '@math.gl/geospatial/terrain/contours';
+import {createTerrainContours} from '@math.gl/geospatial/terrain';
 
 const contours = createTerrainContours(field, [100, 200, 300]);
 ```
@@ -816,8 +815,8 @@ Isobands, cross-tile joining and adaptive-mesh contouring remain future operatio
 ## Contour paths and bounded simplification
 
 ```typescript
-import {stitchTerrainContours} from '@math.gl/geospatial/terrain/contour-paths';
-import {simplifyTerrainContourPaths} from '@math.gl/geospatial/terrain/contour-simplify';
+import {stitchTerrainContours} from '@math.gl/geospatial/terrain';
+import {simplifyTerrainContourPaths} from '@math.gl/geospatial/terrain';
 
 const paths = stitchTerrainContours(contours);
 const simplified = simplifyTerrainContourPaths(paths, {
@@ -891,7 +890,7 @@ plain data without terrain classes, tessellators or rendering dependencies.
 ## Profile measurements and coverage
 
 ```typescript
-import {measureTerrainProfile} from '@math.gl/geospatial/terrain/profile-measure';
+import {measureTerrainProfile} from '@math.gl/geospatial/terrain';
 
 const measurements = measureTerrainProfile(profile);
 // Check measurements.complete and coveredLength before interpreting totals.
@@ -929,7 +928,7 @@ the profile sampler or any terrain/query class.
 ## Vertex-tile reconciliation
 
 ```ts
-import {reconcileTerrainVertexTiles} from '@math.gl/geospatial/terrain/vertex-tiles';
+import {reconcileTerrainVertexTiles} from '@math.gl/geospatial/terrain';
 
 const reconciled = reconcileTerrainVertexTiles(tiles, {
   width: 257, height: 257,
@@ -966,7 +965,7 @@ different slopes.
 ## Conforming mixed-resolution mesh seams
 
 ```ts
-import {stitchTerrainMeshEdges} from '@math.gl/geospatial/terrain/mesh-stitch';
+import {stitchTerrainMeshEdges} from '@math.gl/geospatial/terrain';
 
 const stitched = stitchTerrainMeshEdges(coarseMesh, 'maxColumn', fineMesh, 'minColumn', {
   rangeA: [0, 0.5], // lower half of coarse grid side meets the full child side
@@ -1026,7 +1025,7 @@ For multiple seams, choose consistent authoritative profiles and shared corner
 heights first. Publish all changed meshes together. A later stitch that changes a
 previously shared vertex requires rebuilding the affected neighbors. There is no
 implicit global seam scheduler, transition morph, normal smoothing or source-tile
-mutation. The independent entry imports no tessellator, terrain class or renderer.
+mutation. A selective bundle retains no tessellator, terrain class or renderer.
 
 ## Independent DEM qualification
 
@@ -1082,6 +1081,5 @@ or one that would overflow, throws instead of emitting degenerate skirts.
 `maxVertices` and `maxTriangles` default to 2,000,000 and 4,000,000 respectively;
 both input and output are checked before a result is returned.
 
-This named import is tree-shakable: it does not require HeightField, a tessellator,
-renderer or query index. Skirts hide visual gaps; they do not reconcile mismatched
+A selective named-import bundle retains no HeightField, tessellator, renderer or query index. Skirts hide visual gaps; they do not reconcile mismatched
 heights or provide a collision surface.

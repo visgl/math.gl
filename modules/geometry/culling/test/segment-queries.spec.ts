@@ -7,7 +7,7 @@ import {
   getClosestPointsOnSegments,
   getClosestPointsSegmentTriangle,
   getClosestPointOnTriangle
-} from '@math.gl/geometry/culling/queries';
+} from '@math.gl/geometry/culling';
 
 const triangle = [
   [0, 0, 0],

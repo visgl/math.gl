@@ -1,4 +1,4 @@
-# @math.gl/geometry/curves
+# @math.gl/geometry
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -12,7 +12,7 @@ The curves module provides renderer-independent parametric curves for 2D and 3D 
 coordinates. Use it for camera paths, trajectories, interpolation, and sampled line geometry.
 
 ```ts
-import {CatmullRomCurve, CurveArcLength} from '@math.gl/geometry/curves';
+import {CatmullRomCurve, CurveArcLength} from '@math.gl/geometry';
 
 const path = new CatmullRomCurve([
   [0, 0, 0],

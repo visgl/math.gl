@@ -6,7 +6,7 @@ import {
   subdividePolyline,
   type SubdividePolylineOptions,
   type SubdividedPolyline
-} from '@math.gl/geometry/polygon';
+} from '@math.gl/geometry';
 import {Context, same, type Edge} from '../geographic-seams/edge';
 import {GeographicSeamError} from '../geographic-seams/types';
 import type {GeodesicParameters} from '../ellipsoid-geodesic';

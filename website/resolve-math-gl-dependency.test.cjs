@@ -32,7 +32,7 @@ test('workspace imports retain source aliases without any built dist files', t =
     workspace(root, name);
     assert.equal(resolveDependency(`@math.gl/${name}`, context, modules), `@math.gl/${name}`);
   }
-  assert.equal(resolveDependency('@math.gl/geospatial/crs/wkt', context, modules), '@math.gl/geospatial/crs/wkt');
+  assert.equal(resolveDependency('@math.gl/geospatial/crs', context, modules), '@math.gl/geospatial/crs');
 });
 test('installed dependencies keep math.gl 4.x even when a 5.x workspace exists', t => {
   const root = fixture(t), modules = join(root, 'modules');
@@ -56,25 +56,11 @@ test('missing packages are reported instead of silently falling back to workspac
   assert.throws(() => resolveDependency('@math.gl/missing', root, join(root, 'modules')), {code: 'MODULE_NOT_FOUND'});
 });
 
-test('website resolves the CRS metadata entry directly from source', () => {
+test('website resolves grouped roots directly from source', () => {
   const config = require('./docusaurus.config.js');
-  const plugin = config.plugins.find(
-    entry => Array.isArray(entry) && entry[0] === '@vis.gl/docusaurus-website/plugin-webpack-config'
-  );
-  assert.equal(
-    plugin[1].resolve.alias['@math.gl/geospatial/crs/metadata$'],
-    join(__dirname, '../modules/geospatial/src/crs/crs-metadata.ts')
-  );
-});
-
-test('website resolves grouped geospatial APIs without package builds', () => {
-  const config = require('./docusaurus.config.js');
-  const plugin = config.plugins.find(
-    entry => Array.isArray(entry) && entry[0] === '@vis.gl/docusaurus-website/plugin-webpack-config'
-  );
+  const plugin = config.plugins.find(entry => Array.isArray(entry) && entry[0] === '@vis.gl/docusaurus-website/plugin-webpack-config');
   const aliases = plugin[1].resolve.alias;
-  assert.equal(aliases['@math.gl/geospatial/expressions$'], join(__dirname, '../modules/geospatial/src/expressions.ts'));
-  assert.equal(aliases['@math.gl/geospatial/globe$'], join(__dirname, '../modules/geospatial/src/globe.ts'));
-  assert.equal(aliases['@math.gl/geospatial/ellipsoid$'], join(__dirname, '../modules/geospatial/src/entries/ellipsoid.ts'));
-  assert.equal(aliases['@math.gl/geospatial'], undefined);
+  assert.equal(aliases['@math.gl/geospatial$'], join(__dirname, '../modules/geospatial/src/index.ts'));
+  assert.equal(aliases['@math.gl/geometry$'], join(__dirname, '../modules/geometry/src/index.ts'));
+  assert.equal(aliases['@math.gl/geospatial/crs$'], join(__dirname, '../modules/geospatial/src/crs/index.ts'));
 });

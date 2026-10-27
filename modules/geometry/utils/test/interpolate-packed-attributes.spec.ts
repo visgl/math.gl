@@ -3,13 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {interpolatePackedAttributes} from '@math.gl/geometry/utils/interpolate-packed-attributes';
-import type {
-  PackedAttribute,
-  PackedAttributeType
-} from '@math.gl/geometry/utils/interpolate-packed-attributes';
-import {interpolatePackedAttributes as rootInterpolation} from '@math.gl/geometry/utils';
-import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
+import {interpolatePackedAttributes} from '@math.gl/geometry';
+import type {PackedAttribute, PackedAttributeType} from '@math.gl/geometry';
+import {interpolatePackedAttributes as rootInterpolation} from '@math.gl/geometry';
+import {subdivideTriangleMesh} from '@math.gl/geometry';
 
 const midpoint = {sourceVertexIndices: [0, 1, 0], sourceVertexWeights: [0.5, 0.5, 0]};
 const identity = {sourceVertexIndices: [0, 0, 0], sourceVertexWeights: [1, 0, 0]};

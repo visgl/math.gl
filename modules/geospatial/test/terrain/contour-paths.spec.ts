@@ -4,8 +4,8 @@
 
 import {expect, test} from 'vitest';
 import {HeightField} from '@math.gl/geospatial/terrain';
-import {createTerrainContours, type TerrainContours} from '@math.gl/geospatial/terrain/contours';
-import {stitchTerrainContours} from '@math.gl/geospatial/terrain/contour-paths';
+import {createTerrainContours, type TerrainContours} from '@math.gl/geospatial/terrain';
+import {stitchTerrainContours} from '@math.gl/geospatial/terrain';
 
 function graph(
   points: number[],

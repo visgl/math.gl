@@ -13,15 +13,23 @@ import {bundleRuntime} from '../modules/geospatial/projection/scripts/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/], budget:1000},
+  {symbol:'vec3Normalize', packages:['@math.gl/core'], forbidden:[/mat4/, /vec2/, /expressions/], budget:500},
+  {symbol:'getGeohashBounds', packages:['@math.gl/dggs'], forbidden:[/h3-js/, /a5-js/, /open-location-code/, /s2-geometry/], budget:2500},
+  {symbol:'getClosestPointsSegmentTriangle', packages:['@math.gl/geometry'], forbidden:[/parametric/, /spatial-index/, /terrain/, /earcut/], budget:5000},
+  {symbol:'getStarColor', packages:['@math.gl/earth'], forbidden:[/astronomy-engine/, /bright-stars/], budget:700},
+  {symbol:'getGalacticAcceleration', packages:['@math.gl/earth'], forbidden:[/astronomy-engine/, /bright-stars/], budget:1200},
+  {symbol:'getTimezoneOffset', packages:['@math.gl/earth'], forbidden:[/astronomy-engine/, /tz-lookup/, /bright-stars/], budget:1500},
+  {symbol:'parseWKB', packages:['@math.gl/geospatial'], forbidden:[/martini/, /delatin/, /surface\./, /geometry\//], budget:4500},
   {
     symbol: 'createSpatialReference',
-    packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial/crs/spatial-reference'],
+    packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial/crs'],
     forbidden: [/\/resolver\./, /\/projection\//, /\/wkt-crs\./],
     budget: 6000
   },
   {
     symbol: 'createCRSResolver',
-    packages: ['@math.gl/geospatial/crs/resolver'],
+    packages: ['@math.gl/geospatial/crs'],
     forbidden: [/\/projection\//, /\/wkt-crs\./, /proj-wasm/, /\/core\//],
     budget: 8000
   },
@@ -33,19 +41,19 @@ const probes = [
   },
   {
     symbol: 'createTerrainSkirt',
-    packages: ['@math.gl/geospatial/terrain'],
+    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
     forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/height-field\./, /\/surface\./, /martini/, /delatin/],
     budget: 5000
   },
   {
     symbol: 'packTerrainHeightField',
-    packages: ['@math.gl/geospatial/terrain/packed'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/ellipsoid/],
     budget: 12000
   },
   {
     symbol: 'HeightFieldMinMax',
-    packages: ['@math.gl/geospatial/terrain/bounds'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/ellipsoid/],
     budget: 8000
   },
@@ -54,7 +62,7 @@ const probes = [
     ['measureTerrainMeshError', 'mesh-error', 6000],
     ['getTerrainMeshEdge', 'mesh-edges', 3500]
   ].map(([symbol, entry, budget]) => ({
-    symbol, packages: [`@math.gl/geospatial/terrain/${entry}`], budget,
+    symbol, packages: ['@math.gl/geospatial/terrain'], budget,
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /\/martini\./, /martini/, /delatin/,
       ...['mesh', 'mesh-error', 'mesh-edges'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
   })),
@@ -65,7 +73,7 @@ const probes = [
     ['sampleTerrainProfile', 'profile', 4500],
     ['createTerrainContours', 'contours', 6500]
   ].map(([symbol, entry, budget]) => ({
-    symbol, packages: [`@math.gl/geospatial/terrain/${entry}`], budget,
+    symbol, packages: ['@math.gl/geospatial/terrain'], budget,
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./,
       ...['derivatives', 'slope-aspect', 'profile', 'contours'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
   })),
@@ -74,7 +82,7 @@ const probes = [
     ['simplifyTerrainContourPaths', 'contour-simplify', 8500],
     ['measureTerrainProfile', 'profile-measure', 4500]
   ].map(([symbol, entry, budget]) => ({
-    symbol, packages: [`@math.gl/geospatial/terrain/${entry}`], budget,
+    symbol, packages: ['@math.gl/geospatial/terrain'], budget,
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/contours\./, /\/profile\./,
       ...['contour-paths', 'contour-simplify', 'profile-measure'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
   })),
@@ -82,25 +90,25 @@ const probes = [
     ['reconcileTerrainVertexTiles', 'vertex-tiles', 5500],
     ['stitchTerrainMeshEdges', 'mesh-stitch', 11000]
   ].map(([symbol, entry, budget]) => ({
-    symbol, packages: [`@math.gl/geospatial/terrain/${entry}`], budget,
+    symbol, packages: ['@math.gl/geospatial/terrain'], budget,
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./,
       ...['vertex-tiles', 'mesh-stitch', 'tiled', 'mesh'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
   })),
   {
     symbol: 'createMartiniTerrainMesh',
-    packages: ['@math.gl/geospatial/terrain/martini'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/delatin/, /\/geometry\//, /\/core\//, /\/surface\./, /\/terrain\/mesh\./, /\/terrain\/mesh-edges\./],
     budget: 16000
   },
   {
     symbol: 'createDelatinTerrainMesh',
-    packages: ['@math.gl/geospatial/terrain/delatin'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/martini/, /\/geometry\//, /\/core\//, /\/surface\./, /\/terrain\/mesh-edges\./],
     budget: 24000
   },
   {
     symbol: 'Ellipsoid',
-    packages: ['@math.gl/geospatial', '@math.gl/geospatial/ellipsoid'],
+    packages: ['@math.gl/geospatial', '@math.gl/geospatial'],
     forbidden: [/\/geometry\//, /\/classes\/matrix[34]\./, /\/local-frame\./,
       /\/ellipsoid-transform/, /\/vendor\//, /\/src\/projection\//, /\/dist\/projection\//],
     budget: 24000

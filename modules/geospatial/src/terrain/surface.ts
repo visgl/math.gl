@@ -7,7 +7,7 @@ import {
   BoxIndex,
   type IndexQueryBudget,
   type IndexQueryResult
-} from '@math.gl/geometry/spatial-index';
+} from '@math.gl/geometry';
 import type {HeightField} from './height-field';
 import {createTerrainMesh} from './mesh';
 import {TerrainSampleStatus as Status, type TerrainSample} from './types';

@@ -4,13 +4,9 @@
 // SPDX-FileComment: Original geodetic frame and pose composition over math.gl local-frame kernels.
 
 import {Matrix4, Quaternion, Vector3, config} from '@math.gl/core';
-import {
-  createLocalFrameBasis,
-  eastNorthUpBasis,
-  localFrameToMatrix
-} from '@math.gl/core/local-frame';
-import type {LocalFrameAxis} from '@math.gl/core/local-frame';
-import type {NumericArray} from '@math.gl/core/types';
+import {createLocalFrameBasis, eastNorthUpBasis, localFrameToMatrix} from '@math.gl/core';
+import type {LocalFrameAxis} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core';
 import {Ellipsoid} from './ellipsoid';
 
 export type LocalReferenceFrameOptions = {

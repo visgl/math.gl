@@ -1,4 +1,4 @@
-# @math.gl/earth/geoid
+# @math.gl/earth
 
 [math.gl](https://math.gl/docs) is a suite of math modules for 3D and geospatial applications.
 

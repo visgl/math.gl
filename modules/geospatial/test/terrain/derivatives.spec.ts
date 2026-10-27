@@ -4,11 +4,8 @@
 
 import {expect, test} from 'vitest';
 import {HeightField, TerrainSampleStatus as Status} from '@math.gl/geospatial/terrain';
-import {createTerrainGradientGrid} from '@math.gl/geospatial/terrain/derivatives';
-import {
-  getTerrainSlopeAspect,
-  createTerrainSlopeAspectGrid
-} from '@math.gl/geospatial/terrain/slope-aspect';
+import {createTerrainGradientGrid} from '@math.gl/geospatial/terrain';
+import {getTerrainSlopeAspect, createTerrainSlopeAspectGrid} from '@math.gl/geospatial/terrain';
 
 for (const method of ['horn', 'zevenbergen-thorne'] as const) {
   test(`${method} recovers world plane gradients in rotated, reflected and sheared metric grids`, () => {

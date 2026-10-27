@@ -15,11 +15,11 @@ Invalid dates and unsupported timezone identifiers throw `RangeError`. Results u
 
 ## lookupTimezoneAsync(coordinates)
 
-Root export returning `Promise<string>`. Lazily imports `@math.gl/earth/timezone/lookup`; concurrent and later calls share the import. If loading fails, the promise rejects and a later call retries.
+Root export returning `Promise<string>`. Lazily imports `@math.gl/earth/timezone`; concurrent and later calls share the import. If loading fails, the promise rejects and a later call retries.
 
 ## lookupTimezone(coordinates)
 
-Synchronous export from `@math.gl/earth/timezone/lookup`, returning one approximate IANA timezone identifier. Importing this entry point brings in the geographic table.
+Synchronous export from `@math.gl/earth/timezone`, returning one approximate IANA timezone identifier. Importing this entry point brings in the geographic table.
 
 Both lookup APIs accept a readonly `[longitude, latitude]` tuple in degrees. Longitude must be finite and within `[-180, 180]`; latitude must be finite and within `[-90, 90]`. Invalid values throw `RangeError` (or reject asynchronously). Coordinates are not wrapped or clamped. Ocean and boundary behavior follow the upstream lookup data.
 
@@ -41,13 +41,13 @@ Root export returning whether the current runtime's `Intl.DateTimeFormat` accept
 
 ## getStartOfDay(timezone, date?)
 
-Export from `@math.gl/earth/timezone/temporal`, returning epoch milliseconds for the first valid instant of the date's local calendar day. The date is a `Date` or epoch milliseconds and defaults to now.
+Export from `@math.gl/earth/timezone`, returning epoch milliseconds for the first valid instant of the date's local calendar day. The date is a `Date` or epoch milliseconds and defaults to now.
 
 If midnight is skipped, returns the first valid time later in that day. If the day starts twice, chooses the earlier start. Consecutive local days need not be 24 hours apart. The supplied instant always identifies an existing local day; use `localDateTimeToInstant` to resolve an explicitly supplied local date.
 
 ## localDateTimeToInstant(timezone, fields, options?)
 
-Export from `@math.gl/earth/timezone/temporal`, returning epoch milliseconds. `fields` is a `LocalDateTimeInput`: required integer `year`, `month`, and `day`, plus optional integer `hour`, `minute`, `second`, and `millisecond` that default to zero. Uses the proleptic Gregorian calendar. Invalid dates and out-of-range fields throw `RangeError` rather than being normalized. Leap-second input is not supported.
+Export from `@math.gl/earth/timezone`, returning epoch milliseconds. `fields` is a `LocalDateTimeInput`: required integer `year`, `month`, and `day`, plus optional integer `hour`, `minute`, `second`, and `millisecond` that default to zero. Uses the proleptic Gregorian calendar. Invalid dates and out-of-range fields throw `RangeError` rather than being normalized. Leap-second input is not supported.
 
 `options.disambiguation` controls repeated or nonexistent local clock times:
 
@@ -62,7 +62,7 @@ The return value is an instant; format it with `Intl` or inspect it with `getLoc
 
 ## getTimezoneTransitions(timezone, start, end)
 
-Export from `@math.gl/earth/timezone/temporal`, returning a chronologically ordered `TimezoneTransition[]`. Each record contains `instant` (epoch milliseconds), `offsetBefore`, and `offsetAfter` (minutes east of UTC).
+Export from `@math.gl/earth/timezone`, returning a chronologically ordered `TimezoneTransition[]`. Each record contains `instant` (epoch milliseconds), `offsetBefore`, and `offsetAfter` (minutes east of UTC).
 
 `start` and `end` are Dates or epoch milliseconds. The interval is `[start, end)`: a transition at start is included and one at end is excluded. Equal endpoints and intervals without changes return `[]`. Invalid instants, unsupported identifiers, or an end before start throw `RangeError`.
 

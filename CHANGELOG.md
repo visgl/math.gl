@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+- **Breaking:** Move tree-shakeable APIs to package and capability roots and remove superseded API subpaths. Projection catalogs and data paths remain. Earth now requires `astronomy-engine`; core exposes matrix/vector namespaces and prefixed individual operations. See the root-export migration guide.
+
 ## v5.0.0-alpha.20
 
 - feat(geospatial): Add reusable geodesic path sampling and adaptive geodesic polyline subdivision with surface-distance limits, unrolled longitude and original-edge provenance; extend generic subdivision with constant-speed source-edge samplers.

@@ -33,11 +33,6 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./tile-matrix": {
-      "types": "./dist/tile-matrix.d.ts",
-      "import": "./dist/tile-matrix.js",
-      "require": "./dist/tile-matrix.cjs"
-    },
     "./crs": {
       "types": "./dist/crs/index.d.ts",
       "import": "./dist/crs/index.js",
@@ -48,72 +43,12 @@
       "import": "./dist/projection/index.js",
       "require": "./dist/projection/index.cjs"
     },
-    "./web-mercator": {
-      "types": "./dist/web-mercator.d.ts",
-      "import": "./dist/web-mercator.js",
-      "require": "./dist/web-mercator.cjs"
-    },
-    "./wkb": {
-      "types": "./dist/wkb/index.d.ts",
-      "import": "./dist/wkb/index.js",
-      "require": "./dist/wkb/index.cjs"
-    },
     "./geoarrow": {
       "types": "./dist/geoarrow/index.d.ts",
       "import": "./dist/geoarrow/index.js",
       "require": "./dist/geoarrow/index.cjs"
     },
-    "./expressions": {
-      "types": "./dist/expressions.d.ts",
-      "import": "./dist/expressions.js",
-      "require": "./dist/expressions.cjs"
-    },
-    "./ellipsoid": {
-      "types": "./dist/entries/ellipsoid.d.ts",
-      "import": "./dist/entries/ellipsoid.js",
-      "require": "./dist/entries/ellipsoid.cjs"
-    },
-    "./globe": {
-      "types": "./dist/globe.d.ts",
-      "import": "./dist/globe.js",
-      "require": "./dist/globe.cjs"
-    },
-    "./geographic-atlas": {
-      "types": "./dist/geographic-atlas.d.ts",
-      "import": "./dist/geographic-atlas.js",
-      "require": "./dist/geographic-atlas.cjs"
-    },
-    "./tiles": {
-      "types": "./dist/tiles.d.ts",
-      "import": "./dist/tiles.js",
-      "require": "./dist/tiles.cjs"
-    },
     "./crs/projjson.schema.json": "./crs/schemas/projjson.schema.json",
-    "./crs/wkt": {
-      "types": "./dist/crs/wkt-crs.d.ts",
-      "import": "./dist/crs/wkt-crs.js",
-      "require": "./dist/crs/wkt-crs.cjs"
-    },
-    "./crs/proj-string": {
-      "types": "./dist/crs/proj-string.d.ts",
-      "import": "./dist/crs/proj-string.js",
-      "require": "./dist/crs/proj-string.cjs"
-    },
-    "./crs/spatial-reference": {
-      "types": "./dist/crs/spatial-reference.d.ts",
-      "import": "./dist/crs/spatial-reference.js",
-      "require": "./dist/crs/spatial-reference.cjs"
-    },
-    "./crs/resolver": {
-      "types": "./dist/crs/resolver.d.ts",
-      "import": "./dist/crs/resolver.js",
-      "require": "./dist/crs/resolver.cjs"
-    },
-    "./crs/metadata": {
-      "types": "./dist/crs/crs-metadata.d.ts",
-      "import": "./dist/crs/crs-metadata.js",
-      "require": "./dist/crs/crs-metadata.cjs"
-    },
     "./projection/datums": {
       "types": "./dist/projection/datums.d.ts",
       "import": "./dist/projection/datums.js",
@@ -1065,26 +1000,6 @@
       "import": "./dist/projection/transform-analysis.js",
       "require": "./dist/projection/transform-analysis.cjs"
     },
-    "./geoarrow/worker": {
-      "types": "./dist/geoarrow/worker.d.ts",
-      "import": "./dist/geoarrow/worker.js",
-      "require": "./dist/geoarrow/worker.cjs"
-    },
-    "./geoarrow/builder": {
-      "types": "./dist/geoarrow/builder-entry.d.ts",
-      "import": "./dist/geoarrow/builder-entry.js",
-      "require": "./dist/geoarrow/builder-entry.cjs"
-    },
-    "./geoarrow/wkb": {
-      "types": "./dist/geoarrow/wkb-entry.d.ts",
-      "import": "./dist/geoarrow/wkb-entry.js",
-      "require": "./dist/geoarrow/wkb-entry.cjs"
-    },
-    "./geoarrow/tessellation": {
-      "types": "./dist/geoarrow/tessellation-entry.d.ts",
-      "import": "./dist/geoarrow/tessellation-entry.js",
-      "require": "./dist/geoarrow/tessellation-entry.cjs"
-    },
     "./discontinuous": {
       "types": "./dist/discontinuous.d.ts",
       "import": "./dist/discontinuous.js",
@@ -1095,135 +1010,10 @@
       "import": "./dist/elastic.js",
       "require": "./dist/elastic.cjs"
     },
-    "./geodesic-exact": {
-      "types": "./dist/geodesic-exact.d.ts",
-      "import": "./dist/geodesic-exact.js",
-      "require": "./dist/geodesic-exact.cjs"
-    },
-    "./triaxial": {
-      "types": "./dist/triaxial.d.ts",
-      "import": "./dist/triaxial.js",
-      "require": "./dist/triaxial.cjs"
-    },
-    "./coordinates": {
-      "types": "./dist/coordinates.d.ts",
-      "import": "./dist/coordinates.js",
-      "require": "./dist/coordinates.cjs"
-    },
-    "./geodesic-buffer": {
-      "types": "./dist/geodesic-buffer.d.ts",
-      "import": "./dist/geodesic-buffer.js",
-      "require": "./dist/geodesic-buffer.cjs"
-    },
     "./terrain": {
       "types": "./dist/terrain/index.d.ts",
       "import": "./dist/terrain/index.js",
       "require": "./dist/terrain/index.cjs"
-    },
-    "./terrain/geometry": {
-      "types": "./dist/terrain/geometry.d.ts",
-      "import": "./dist/terrain/geometry.js",
-      "require": "./dist/terrain/geometry.cjs"
-    },
-    "./terrain/geographic": {
-      "types": "./dist/terrain/geographic.d.ts",
-      "import": "./dist/terrain/geographic.js",
-      "require": "./dist/terrain/geographic.cjs"
-    },
-    "./terrain/tiled": {
-      "types": "./dist/terrain/tiled.d.ts",
-      "import": "./dist/terrain/tiled.js",
-      "require": "./dist/terrain/tiled.cjs"
-    },
-    "./terrain/packed": {
-      "types": "./dist/terrain/packed.d.ts",
-      "import": "./dist/terrain/packed.js",
-      "require": "./dist/terrain/packed.cjs"
-    },
-    "./terrain/surface": {
-      "types": "./dist/terrain/surface.d.ts",
-      "import": "./dist/terrain/surface.js",
-      "require": "./dist/terrain/surface.cjs"
-    },
-    "./terrain/bounds": {
-      "types": "./dist/terrain/bounds.d.ts",
-      "import": "./dist/terrain/bounds.js",
-      "require": "./dist/terrain/bounds.cjs"
-    },
-    "./geographic-cuts": {
-      "types": "./dist/geographic-cuts.d.ts",
-      "import": "./dist/geographic-cuts.js",
-      "require": "./dist/geographic-cuts.cjs"
-    },
-    "./terrain/mesh": {
-      "types": "./dist/terrain/mesh.d.ts",
-      "import": "./dist/terrain/mesh.js",
-      "require": "./dist/terrain/mesh.cjs"
-    },
-    "./terrain/mesh-error": {
-      "types": "./dist/terrain/mesh-error.d.ts",
-      "import": "./dist/terrain/mesh-error.js",
-      "require": "./dist/terrain/mesh-error.cjs"
-    },
-    "./terrain/mesh-edges": {
-      "types": "./dist/terrain/mesh-edges.d.ts",
-      "import": "./dist/terrain/mesh-edges.js",
-      "require": "./dist/terrain/mesh-edges.cjs"
-    },
-    "./terrain/martini": {
-      "types": "./dist/terrain/martini.d.ts",
-      "import": "./dist/terrain/martini.js",
-      "require": "./dist/terrain/martini.cjs"
-    },
-    "./terrain/delatin": {
-      "types": "./dist/terrain/delatin.d.ts",
-      "import": "./dist/terrain/delatin.js",
-      "require": "./dist/terrain/delatin.cjs"
-    },
-    "./terrain/derivatives": {
-      "types": "./dist/terrain/derivatives.d.ts",
-      "import": "./dist/terrain/derivatives.js",
-      "require": "./dist/terrain/derivatives.cjs"
-    },
-    "./terrain/slope-aspect": {
-      "types": "./dist/terrain/slope-aspect.d.ts",
-      "import": "./dist/terrain/slope-aspect.js",
-      "require": "./dist/terrain/slope-aspect.cjs"
-    },
-    "./terrain/profile": {
-      "types": "./dist/terrain/profile.d.ts",
-      "import": "./dist/terrain/profile.js",
-      "require": "./dist/terrain/profile.cjs"
-    },
-    "./terrain/contours": {
-      "types": "./dist/terrain/contours.d.ts",
-      "import": "./dist/terrain/contours.js",
-      "require": "./dist/terrain/contours.cjs"
-    },
-    "./terrain/contour-paths": {
-      "types": "./dist/terrain/contour-paths.d.ts",
-      "import": "./dist/terrain/contour-paths.js",
-      "require": "./dist/terrain/contour-paths.cjs"
-    },
-    "./terrain/contour-simplify": {
-      "types": "./dist/terrain/contour-simplify.d.ts",
-      "import": "./dist/terrain/contour-simplify.js",
-      "require": "./dist/terrain/contour-simplify.cjs"
-    },
-    "./terrain/profile-measure": {
-      "types": "./dist/terrain/profile-measure.d.ts",
-      "import": "./dist/terrain/profile-measure.js",
-      "require": "./dist/terrain/profile-measure.cjs"
-    },
-    "./terrain/vertex-tiles": {
-      "types": "./dist/terrain/vertex-tiles.d.ts",
-      "import": "./dist/terrain/vertex-tiles.js",
-      "require": "./dist/terrain/vertex-tiles.cjs"
-    },
-    "./terrain/mesh-stitch": {
-      "types": "./dist/terrain/mesh-stitch.d.ts",
-      "import": "./dist/terrain/mesh-stitch.js",
-      "require": "./dist/terrain/mesh-stitch.cjs"
     }
   },
   "files": [

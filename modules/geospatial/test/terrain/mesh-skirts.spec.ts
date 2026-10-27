@@ -151,7 +151,7 @@ test('hole boundaries are included by default and may be selected independently'
 });
 
 test('skirt validity integrates with terrain surface sampling', async () => {
-  const {TerrainSurface} = await import('@math.gl/geospatial/terrain/surface');
+  const {TerrainSurface} = await import('@math.gl/geospatial/terrain');
   const result = createTerrainSkirt(quad(), {height: 5});
   const surface = new TerrainSurface(result);
   expect(surface.activeTriangleCount).toBe(2);

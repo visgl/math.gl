@@ -1,4 +1,4 @@
-# @math.gl/geometry/spatial-index (POC)
+# @math.gl/geometry (POC)
 
 Experimental static 2D/3D box and point indexes and a triangle BVH. Queries return original
 input row or triangle indices. Intended as a reusable mathematical foundation for loaders and

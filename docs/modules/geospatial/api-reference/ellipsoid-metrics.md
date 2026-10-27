@@ -4,7 +4,7 @@ Metrics and auxiliary latitudes for a sphere or an oblate/prolate ellipsoid of
 revolution. This separate class keeps new geometry out of Cartesian-only bundles.
 
 ```typescript
-import {EllipsoidMetrics} from '@math.gl/geospatial/ellipsoid';
+import {EllipsoidMetrics} from '@math.gl/geospatial';
 
 const metrics = new EllipsoidMetrics({
   semiMajorAxis: 6378137,

@@ -212,7 +212,7 @@ to prepare data once, then register it under application-owned names.
 | ENU velocity | `createVelocityGrid` (`/grids/velocity`), `loadVelocityGeoTIFFGrid` (`/grids/velocity-geotiff`) → `VelocityGrid` | A deformation model, then a pipeline `deformation` step. |
 
 GeoTIFF adapters consume separately decoded data and import no TIFF decoder. NTv2/GTX
-readers consume file bytes. `createGeoidGrid` adapts a prepared `@math.gl/earth/geoid` model;
+readers consume file bytes. `createGeoidGrid` adapts a prepared `@math.gl/earth` model;
 `createVerticalGrid` snapshots regular metre offsets. Match the horizontal datum,
 vertical reference, tide convention and coverage to the operation. The application
 owns fetching, decoding, data terms and caching.

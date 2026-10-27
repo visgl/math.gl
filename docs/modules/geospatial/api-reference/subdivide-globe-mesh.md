@@ -12,7 +12,7 @@ This composes the existing shared-edge-conforming subdivision engine with the
 shared spheroid conversion kernel; it does not introduce a second tessellator.
 
 ```js
-import {subdivideGlobeMesh} from '@math.gl/geospatial/globe';
+import {subdivideGlobeMesh} from '@math.gl/geospatial';
 
 const mesh = subdivideGlobeMesh({
   // Dateline coordinates are unwrapped; the intended span is 20°, not 340°.

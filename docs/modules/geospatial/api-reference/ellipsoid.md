@@ -28,7 +28,7 @@ interiors and inputs outside the qualified numerical range return
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid} from '@math.gl/geospatial';
 const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
 const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPosition);
 ```
@@ -36,7 +36,7 @@ const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPo
 Determine the Cartographic representation of a Cartesian position on a WGS84 ellipsoid.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid} from '@math.gl/geospatial';
 const cartesianPosition = [17832.12, 83234.52, 952313.73];
 const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPosition);
 ```
@@ -44,7 +44,7 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```js
-import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial';
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 const transformMatrix = eastNorthUpToFixedFrame(Ellipsoid.WGS84, cartesianOrigin);
 ```
@@ -59,7 +59,7 @@ are equal. `Ellipsoid` also supports three independent radii. The adapters excha
 only the common geometry; they do not transfer a datum, axis order, units or epoch.
 
 ```ts
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid} from '@math.gl/geospatial';
 import {normalizeCRS} from '@math.gl/geospatial/projection/core';
 
 const crs = normalizeCRS('+proj=longlat +ellps=GRS80');
@@ -203,7 +203,7 @@ Returns
 
 ### eastNorthUpToFixedFrame(ellipsoid, origin : Number[3], result : Number[16]) : Matrix4 | Number[16]
 
-Standalone export from `@math.gl/geospatial/ellipsoid` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
+Standalone export from `@math.gl/geospatial` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
 
 Computes a 4x4 transformation matrix from a reference frame with an east-north-up axes centered at the provided origin to the provided ellipsoid's fixed reference frame.
 
@@ -226,7 +226,7 @@ Notes
 
 ### localFrameToFixedFrame(ellipsoid, String firstAxis, secondAxis : String, thirdAxis : String | null, origin : Number[3] \[, result : Number[16]]) : Matrix4 | Number[16]
 
-Standalone export from `@math.gl/geospatial/ellipsoid` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
+Standalone export from `@math.gl/geospatial` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
 
 Computes a 4x4 transformation matrix from a reference frame centered at the provided origin to the ellipsoid's fixed reference frame.
 
@@ -250,7 +250,7 @@ Supply a reusable `Matrix4` or `number[]` to avoid a new result per call.
 Up is the normalized Cartesian origin divided by squared radii. On the surface
 this is the surface normal; at height it can differ from the normal at the inverse
 geodetic position used by deformation. Sphere/oblate frames share the original
-[`@math.gl/core/local-frame`](../../core/api-reference/local-frame.md) basis and
+[`@math.gl/core`](../../core/api-reference/local-frame.md) basis and
 matrix functions while retaining this normal choice. Three-radius/prolate frames
 retain the historical geometry path. At Cartesian poles (|x| and |y| ≤ 1e-14), east
 is +Y and north/up use the sign of z. The historical center matrix is singular;

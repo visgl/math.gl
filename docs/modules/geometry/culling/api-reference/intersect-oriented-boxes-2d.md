@@ -9,8 +9,8 @@ scalar separating-axis query is useful for rotated screen-space labels and other
 collision checks. It does not require 3D bounding volumes, matrices or renderer objects.
 
 ```ts
-import {intersectOrientedBoxes2D} from '@math.gl/geometry/culling/oriented-box-2d';
-import type {OrientedBox2D} from '@math.gl/geometry/culling/oriented-box-2d';
+import {intersectOrientedBoxes2D} from '@math.gl/geometry/culling';
+import type {OrientedBox2D} from '@math.gl/geometry/culling';
 
 const angle = Math.PI / 4;
 const first: OrientedBox2D = {

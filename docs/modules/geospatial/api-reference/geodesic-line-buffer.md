@@ -7,8 +7,8 @@ unchanged. Preparation allocates staging once; capacity is fixed and at most one
 million samples.
 
 ```ts
-import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid';
-import {GeodesicLineBuffer} from '@math.gl/geospatial/geodesic-buffer';
+import {EllipsoidGeodesic} from '@math.gl/geospatial';
+import {GeodesicLineBuffer} from '@math.gl/geospatial';
 const geodesic = new EllipsoidGeodesic({
   semiMajorAxis: 6378137, semiMinorAxis: 6356752.314245179
 });

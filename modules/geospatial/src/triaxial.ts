@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original normal/parametric/geocentric surface coordinates and Cartesian geodesic ODE. Qualified independently against GeographicLib 2.7 Jacobi trajectories (Charles Karney, MIT), not a port of that implementation.
-import type {NumericArray} from '@math.gl/core/types';
+import type {NumericArray} from '@math.gl/core';
 import {integrateGeodesic} from './triaxial/integrate';
 export type TriaxialCoordinates = 'geodetic' | 'parametric' | 'geocentric';
 export type TriaxialParameters = {radii: readonly [number, number, number]};

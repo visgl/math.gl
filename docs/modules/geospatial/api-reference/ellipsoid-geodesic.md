@@ -4,7 +4,7 @@ Shortest surface geodesics on an oblate or prolate ellipsoid of revolution, or s
 three-dimensional coordinate conversions in `Ellipsoid`.
 
 ```typescript
-import {Ellipsoid, EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid';
+import {Ellipsoid, EllipsoidGeodesic} from '@math.gl/geospatial';
 
 const geodesic = new EllipsoidGeodesic(Ellipsoid.WGS84.toSpheroid());
 const route = geodesic.inverse(40, -75, 35, 140);

@@ -13,11 +13,11 @@ import {
   evalAsync,
   parse,
   parseExpressionString
-} from '@math.gl/core/expressions';
-import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial/expressions';
+} from '@math.gl/core';
+import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial';
 import {get} from '../../src/expressions/get';
 
-test('@math.gl/core/expressions#eval', () => {
+test('@math.gl/core#eval', () => {
   expect(evaluate(parse('x * 2 + 1'), {x: 3}), 'evaluates arithmetic expressions').toBe(7);
   expect(evaluate(parse('foo.bar'), {foo: {bar: 5}}), 'resolves member expressions').toBe(5);
   expect(evaluate(parse('flag ? a : b'), {flag: false, a: 1, b: 2}), 'evaluates conditionals').toBe(
@@ -26,19 +26,19 @@ test('@math.gl/core/expressions#eval', () => {
   expect(evaluate(parse('[x, y, x + y]'), {x: 2, y: 4}), 'evaluates arrays').toEqual([2, 4, 6]);
 });
 
-test('@math.gl/core/expressions#compile', () => {
+test('@math.gl/core#compile', () => {
   const accessor = compile('points[1].value + offset');
   expect(accessor({points: [{value: 1}, {value: 4}], offset: 3}), 'compiles expressions').toBe(7);
 });
 
-test('@math.gl/core/expressions#compile with function libraries', () => {
+test('@math.gl/core#compile with function libraries', () => {
   const fn = compile('clamp(sin(angle), 0, 1)', {
     libraries: [BASIC_MATH_FUNCTION_LIBRARY]
   });
   expect(fn({angle: Math.PI / 2}), 'uses the bundled basic math function library').toBe(1);
 });
 
-test('@math.gl/core/expressions#function library precedence', () => {
+test('@math.gl/core#function library precedence', () => {
   const firstLibrary = {transform: (value: number) => value + 1};
   const secondLibrary = {transform: (value: number) => value * 2};
   const fn = compile('transform(value)', {
@@ -52,7 +52,7 @@ test('@math.gl/core/expressions#function library precedence', () => {
   ).toBe(2);
 });
 
-test('@math.gl/core/expressions#compileAsync', async () => {
+test('@math.gl/core#compileAsync', async () => {
   const fn = compileAsync('loader(value) + 1');
   const result = await fn({
     value: 4,
@@ -63,7 +63,7 @@ test('@math.gl/core/expressions#compileAsync', async () => {
   expect(result, 'supports async call evaluation').toBe(9);
 });
 
-test('@math.gl/core/expressions#evalAsync', async () => {
+test('@math.gl/core#evalAsync', async () => {
   const result = await evalAsync(parse('fetcher(value) * 2'), {
     value: 5,
     async fetcher(input: number) {
@@ -73,7 +73,7 @@ test('@math.gl/core/expressions#evalAsync', async () => {
   expect(result, 'evaluates async call expressions').toBe(12);
 });
 
-test('@math.gl/core/expressions#eval with geospatial function library', () => {
+test('@math.gl/core#eval with geospatial function library', () => {
   const result = evaluate(
     parse('cartographicToCartesian(position)'),
     {position: [0, 0, 0]},
@@ -82,7 +82,7 @@ test('@math.gl/core/expressions#eval with geospatial function library', () => {
   expect(result, 'uses the bundled geospatial function library').toEqual([6378137, 0, 0]);
 });
 
-test('@math.gl/core/expressions#parseExpressionString', () => {
+test('@math.gl/core#parseExpressionString', () => {
   const identity = parseExpressionString('-');
   const property = parseExpressionString('a.b.c');
   const expression = parseExpressionString('value * 3');
@@ -95,12 +95,12 @@ test('@math.gl/core/expressions#parseExpressionString', () => {
   );
 });
 
-test('@math.gl/core/expressions#addBinaryOp', () => {
+test('@math.gl/core#addBinaryOp', () => {
   addBinaryOp('**', 11, (a: number, b: number) => a ** b);
   expect(evaluate(parse('2 ** 3'), {}), 'supports custom operators').toBe(8);
 });
 
-test('@math.gl/core/expressions#get handles cached paths and non-object intermediates', () => {
+test('@math.gl/core#get handles cached paths and non-object intermediates', () => {
   const row = {nested: {value: 7}, scalar: 3};
   expect(get(row, 'nested.value')).toBe(7);
   expect(get(row, 'nested.value')).toBe(7);
@@ -109,7 +109,7 @@ test('@math.gl/core/expressions#get handles cached paths and non-object intermed
   expect(get(row, 'null.value')).toBeUndefined();
 });
 
-test('@math.gl/core/expressions exposes the complete WGS84 function library', () => {
+test('@math.gl/core exposes the complete WGS84 function library', () => {
   const library = GEOSPATIAL_FUNCTION_LIBRARY;
   const cartesian = [6378137, 0, 0];
   expect(library.cartesianToCartographic(cartesian)).toHaveLength(3);
@@ -126,7 +126,7 @@ test('@math.gl/core/expressions exposes the complete WGS84 function library', ()
   expect(library.toRadians(0)).toBe(0);
 });
 
-test('@math.gl/core/expressions evaluates every built-in operator family', () => {
+test('@math.gl/core evaluates every built-in operator family', () => {
   const cases: Array<[string, unknown]> = [
     ['0 || 7', 7],
     ['3 && 7', 7],
@@ -161,7 +161,7 @@ test('@math.gl/core/expressions evaluates every built-in operator family', () =>
   expect(evaluate(parse('!value'), {value: 0})).toBe(true);
 });
 
-test('@math.gl/core/expressions resolves computed members and preserves method receivers', () => {
+test('@math.gl/core resolves computed members and preserves method receivers', () => {
   const context = {
     key: 'value',
     object: {
@@ -178,14 +178,14 @@ test('@math.gl/core/expressions resolves computed members and preserves method r
   expect(() => evaluate(parse('object.constructor'), context)).toThrow(/disallowed/);
 });
 
-test('@math.gl/core/expressions supports custom unary and default-precedence binary operators', () => {
+test('@math.gl/core supports custom unary and default-precedence binary operators', () => {
   addUnaryOp('%%', (value: number) => value * 10);
   addBinaryOp('@@', (left: number, right: number) => left - right);
   expect(evaluate(parse('%%2'), {})).toBe(20);
   expect(evaluate(parse('10 @@ 3'), {})).toBe(7);
 });
 
-test('@math.gl/core/expressions#evalAsync covers nested arrays, members and branches', async () => {
+test('@math.gl/core#evalAsync covers nested arrays, members and branches', async () => {
   const context = {
     value: 3,
     key: 'value',

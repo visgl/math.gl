@@ -5,8 +5,8 @@ reuses [GeodesicPath](./geodesic-path.md) and the shared
 [subdividePolyline](../../geometry/polygon/api-reference/subdivide-polyline.md) engine.
 
 ```typescript
-import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
-import {subdivideGeodesicPolyline} from '@math.gl/geospatial/globe';
+import {Ellipsoid} from '@math.gl/geospatial';
+import {subdivideGeodesicPolyline} from '@math.gl/geospatial';
 
 const result = subdivideGeodesicPolyline([170, 20, 100, -170, 40, 500], {
   size: 3,

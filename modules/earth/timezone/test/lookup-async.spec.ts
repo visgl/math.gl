@@ -6,7 +6,7 @@ import {expect, test, vi} from 'vitest';
 import {lookupTimezoneAsync} from '../../src/timezone/lookup-async';
 
 const state = vi.hoisted(() => ({loads: 0, calls: 0}));
-vi.mock('@math.gl/earth/timezone/lookup', () => {
+vi.mock('../../src/timezone/lookup', () => {
   state.loads++;
   return {
     lookupTimezone: () => {

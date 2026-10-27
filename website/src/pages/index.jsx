@@ -175,13 +175,24 @@ const modulesById = new Map(
   modules.map(module => [module.packageName.replace('@math.gl/', ''), module])
 );
 
+const publicEntries = {
+  "@math.gl/core/types": "@math.gl/core",
+  "@math.gl/core/expressions": "@math.gl/core",
+  "@math.gl/earth/geoid": "@math.gl/earth",
+  "@math.gl/geometry/utils": "@math.gl/geometry",
+  "@math.gl/geometry/curves": "@math.gl/geometry",
+  "@math.gl/geometry/polygon": "@math.gl/geometry",
+  "@math.gl/geometry/spatial-index": "@math.gl/geometry",
+  "@math.gl/geospatial/wkb": "@math.gl/geospatial"
+};
+
 function ModuleCard({module, baseUrl}) {
   const docsUrl = `${baseUrl}docs/modules/${module.packageName.replace('@math.gl/', '')}`;
   return (
     <a className={`${styles.card} ${styles[module.theme]}`} href={docsUrl}>
       <div className={styles.cardImage}>
         <img src={`${baseUrl}images/${module.image}`} alt={module.imageAlt} loading="lazy" />
-        <span className={styles.packageName}>{module.packageName}</span>
+        <span className={styles.packageName}>{publicEntries[module.packageName] || module.packageName}</span>
       </div>
       <div className={styles.cardBody}>
         <div className={styles.cardHeading}>

@@ -8,7 +8,7 @@ export default defineConfig({
     // Query kernels remain independent of the full culling bundle.
     alias: [
       {
-        find: '@math.gl/geometry/culling/queries',
+        find: '@math.gl/geometry/culling',
         replacement: fileURLToPath(new URL('../../modules/geometry/src/culling/queries.ts', import.meta.url))
       },
       ...['core', 'culling', 'types', 'spatial-index'].map(name => ({

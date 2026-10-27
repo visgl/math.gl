@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {PlusCodeDecoder} from '@math.gl/dggs/plus-code';
+import {PlusCodeDecoder} from '@math.gl/dggs';
 
 const PLUS_CODE = '849VQHFJ+X6';
 

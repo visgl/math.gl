@@ -27,7 +27,7 @@
 
 // @ts-nocheck external code
 
-import {getPolygonSignedArea} from '@math.gl/geometry/polygon';
+import {getPolygonSignedArea} from '@math.gl/geometry';
 
 /**
  * return a percentage difference between the polygon area and its triangulation area;

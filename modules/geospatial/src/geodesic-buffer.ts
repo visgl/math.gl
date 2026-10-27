@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import type {NumericArray} from '@math.gl/core/types';
+import type {NumericArray} from '@math.gl/core';
 import type {GeodesicLine} from './ellipsoid-geodesic';
 import type {RhumbLine} from './ellipsoid-rhumb';
 export const GEODESIC_BUFFER_FIELDS = Object.freeze([

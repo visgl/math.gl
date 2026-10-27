@@ -7,7 +7,7 @@
 Subdivides a polyline by intersecting with a uniform grid.
 
 ```js
-import {cutPolylineByGrid} from '@math.gl/geometry/polygon';
+import {cutPolylineByGrid} from '@math.gl/geometry';
 
 cutPolylineByGrid([-10, -10, 10, 10, 30, -10], {size: 2, gridResolution: 10});
 // returns [-10, -10, 0, 0, 10, 10, 20, 0, 30, -10]

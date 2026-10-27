@@ -31,41 +31,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    },
-    "./a5": {
-      "types": "./dist/a5.d.ts",
-      "import": "./dist/a5.js",
-      "require": "./dist/a5.cjs"
-    },
-    "./geohash": {
-      "types": "./dist/geohash.d.ts",
-      "import": "./dist/geohash.js",
-      "require": "./dist/geohash.cjs"
-    },
-    "./h3": {
-      "types": "./dist/h3.d.ts",
-      "import": "./dist/h3.js",
-      "require": "./dist/h3.cjs"
-    },
-    "./plus-code": {
-      "types": "./dist/plus-code.d.ts",
-      "import": "./dist/plus-code.js",
-      "require": "./dist/plus-code.cjs"
-    },
-    "./quadkey": {
-      "types": "./dist/quadkey.d.ts",
-      "import": "./dist/quadkey.js",
-      "require": "./dist/quadkey.cjs"
-    },
-    "./s2": {
-      "types": "./dist/s2.d.ts",
-      "import": "./dist/s2.js",
-      "require": "./dist/s2.cjs"
-    },
-    "./expressions": {
-      "types": "./dist/expressions.d.ts",
-      "import": "./dist/expressions.js",
-      "require": "./dist/expressions.cjs"
     }
   },
   "files": [
@@ -82,5 +47,6 @@
   },
   "devDependencies": {
     "s2-geometry": "^1.2.10"
-  }
+  },
+  "sideEffects": false
 }

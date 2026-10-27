@@ -10,8 +10,8 @@ import {fileURLToPath} from 'node:url';import {gzipSync} from 'node:zlib';import
 import {bundleRuntime} from '../projection/scripts/benchmark-runtime.mjs';
 const root=fileURLToPath(new URL('../../../',import.meta.url)),require=createRequire(import.meta.url);
 for(const load of [p=>import(p),p=>require(p)]){
- const {EllipsoidGeodesicExact:E,GeodesicPolygonExact:P}=await load('@math.gl/geospatial/geodesic-exact');
- const {TriaxialEllipsoid:T}=await load('@math.gl/geospatial/triaxial');
+ const {EllipsoidGeodesicExact:E,GeodesicPolygonExact:P}=await load('@math.gl/geospatial');
+ const {TriaxialEllipsoid:T}=await load('@math.gl/geospatial');
  const e=new E({semiMajorAxis:1,semiMinorAxis:2});assert(Math.abs(e.direct(0,0,90,1).lon2-180/Math.PI)<2e-10);
  const area=new P({semiMajorAxis:1,semiMinorAxis:2}).addPoint(0,0).addPoint(0,10).addPoint(90,0).compute().area;assert(area>0&&Number.isFinite(area));
  const t=new T({radii:[3,2,1]}),p=t.toCartesian(0,0),v=t.directionToCartesian(p,0);
@@ -28,7 +28,7 @@ try{
  const rows=[];
  // New-feature ceilings established separately. Existing selective/bundle gates are unchanged.
  for(const [entry,symbol,minified,gzip] of [['geodesic-exact','EllipsoidGeodesicExact',35000,14000],['triaxial','TriaxialEllipsoid',12000,4500]]){
-  const source=join(dir,entry+'.ts'),out=join(dir,entry+'.mjs');writeFileSync(source,`export {${symbol}} from '@math.gl/geospatial/${entry}';`);
+  const source=join(dir,entry+'.ts'),out=join(dir,entry+'.mjs');writeFileSync(source,`export {${symbol}} from '@math.gl/geospatial';`);
   const result=await bundleRuntime(root,relative(root,source),out);const{code}=await transform(readFileSync(out,'utf8'),{minify:true,target:'es2020',legalComments:'none'});
   const size={minified:Buffer.byteLength(code),gzip:gzipSync(code,{level:9}).length};assert(size.minified<=minified&&size.gzip<=gzip,entry+' feature budget exceeded');
   const inputs=Object.entries(Object.values(result.metafile.outputs)[0].inputs).filter(([,v])=>v.bytesInOutput>0).map(([p])=>p);
