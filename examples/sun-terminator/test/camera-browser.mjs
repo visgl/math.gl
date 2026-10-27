@@ -44,6 +44,15 @@ try {
         );
         window.centerFrames.push({
           view: deck.getViewports()[0].id,
+          progress: deck.props.layers[0]?.props.progress,
+          actualLayer: deck.layerManager.getLayers()[0]?.id,
+          actualProgress: deck.layerManager.getLayers()[0]?.props.progress,
+          pipeline:
+            deck.layerManager.getLayers()[0]?.state?.model?.pipeline?.sharedRenderPipeline
+              ?.linkStatus,
+          loaded: deck.layerManager.getLayers()[0]?.isLoaded,
+          offscreen: Boolean(gl.getParameter(gl.FRAMEBUFFER_BINDING)),
+          error: gl.getError(),
           dayTexture: deck.props.layers[0]?.props.image?.id,
           nightTexture: deck.props.layers[0]?.props.nightImage?.id,
           rgb: Array.from(pixel.slice(0, 3))
@@ -76,7 +85,12 @@ try {
   assert.equal(
     dark.length,
     0,
-    'daylit center must never go dark during morph: ' + JSON.stringify(dark.slice(0, 5))
+    'daylit center must never go dark during morph: ' +
+      JSON.stringify(
+        morphs
+          .map((f, i) => ({...f, index: i}))
+          .filter((f, i) => [i - 1, i, i + 1].some((j) => morphs[j]?.rgb.every((c) => c === 0)))
+      )
   );
   assert.deepEqual(errors, []);
   console.log(

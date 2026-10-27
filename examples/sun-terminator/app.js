@@ -181,8 +181,6 @@ export function mountSunTerminator(root) {
   const initialLongitude =
     (((Math.atan2(initialSun[1], initialSun[0]) * 180) / Math.PI + 85 + 540) % 360) - 180;
   const deck = new Deck({
-    // A new view must draw on its first frame, rather than clear while a shader links.
-    deviceProps: {_disabledFeatures: {'compilation-status-async-webgl': true}},
     canvas: root.querySelector('canvas'),
     parent: root,
     views: new GlobeView({id: 'earth-globe', controller: panController, resolution: 2}),
