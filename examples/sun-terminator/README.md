@@ -79,6 +79,6 @@ The +0–24 h slider scrubs relative to the time at load, or the last manually e
 UTC date/time. Playback loops over this 24-hour interval. Editing date/time resets
 the slider anchor. Playback and morph animation frames are cancelled on unmount.
 
-Decoded overview images remain owned by the example, so each layer can create its own GPU textures during a morph without borrowing textures from a finalized layer.
+Overview GPU textures remain owned by the renderer and are reused across projection and morph layers, avoiding a blank frame while a new layer uploads imagery. They are destroyed after deck finalization.
 
 Run `yarn workspace math.gl-sun-terminator test:cuts:browser` to check high-zoom GPU morphs, constant buffers, inset layouts, and cleanup.

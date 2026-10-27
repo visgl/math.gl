@@ -147,13 +147,15 @@ export function mountSunTerminator(root) {
       }
     });
   }
-  // Keep decoded source pixels owned by the example. GPU textures belong to
-  // individual layers and must never be borrowed from a layer being finalized.
+  // Own overview textures at renderer scope so a new morph layer draws immediately.
+  // Layer finalization must not destroy textures still used by the next projection.
   const dayOverview = new Image();
   const nightOverview = new Image();
   dayOverview.src = DAY_OVERVIEW;
   nightOverview.src = NIGHT_OVERVIEW;
   let overviewDecoded = false;
+  let dayTexture = null;
+  let nightTexture = null;
   const panController = {
     dragMode: 'pan',
     dragRotate: false,
@@ -186,6 +188,9 @@ export function mountSunTerminator(root) {
     onViewStateChange: ({viewState}) => {
       return {...viewState, bearing: 0, pitch: 0};
     },
+    onLoad: () => {
+      if (overviewDecoded) render();
+    },
     onAfterRender: () => {
       if (!overviewReady && deck.props.layers[0]?.isLoaded) {
         overviewReady = true;
@@ -206,6 +211,26 @@ export function mountSunTerminator(root) {
     })
     .catch(() => {});
   function render() {
+    if (overviewDecoded && deck.device && !dayTexture) {
+      const createOverviewTexture = (image, id) => {
+        const texture = deck.device.createTexture({
+          id,
+          data: image,
+          mipLevels: deck.device.getMipLevelCount(image.width, image.height),
+          sampler: {
+            minFilter: 'linear',
+            magFilter: 'linear',
+            mipmapFilter: 'linear',
+            addressModeU: 'clamp-to-edge',
+            addressModeV: 'clamp-to-edge'
+          }
+        });
+        texture.generateMipmapsWebGL();
+        return texture;
+      };
+      dayTexture = createOverviewTexture(dayOverview, 'day-overview');
+      nightTexture = createOverviewTexture(nightOverview, 'night-overview');
+    }
     const {sunDirection} = getSunTerminator(timestamp);
     const shading = {
       sunDirection,
@@ -225,8 +250,8 @@ export function mountSunTerminator(root) {
             mesh: morph.surface,
             progress: morph.progress,
             coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-            image: overviewDecoded ? dayOverview : DAY_OVERVIEW,
-            nightImage: overviewDecoded ? nightOverview : NIGHT_OVERVIEW,
+            image: dayTexture || DAY_OVERVIEW,
+            nightImage: nightTexture || NIGHT_OVERVIEW,
             bounds: [-180, -90, 180, 90],
             _imageCoordinateSystem: 'lnglat',
             ...shading,
@@ -249,8 +274,8 @@ export function mountSunTerminator(root) {
               id: `projected-${activeView}`,
               mesh,
               coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-              image: overviewDecoded ? dayOverview : DAY_OVERVIEW,
-              nightImage: overviewDecoded ? nightOverview : NIGHT_OVERVIEW,
+              image: dayTexture || DAY_OVERVIEW,
+              nightImage: nightTexture || NIGHT_OVERVIEW,
               bounds: [-180, -90, 180, 90],
               _imageCoordinateSystem: 'lnglat',
               ...shading,
@@ -259,8 +284,8 @@ export function mountSunTerminator(root) {
           : new DayNightBitmapLayer({
               // Rebuild mesh and texture projection when switching MapView/GlobeView.
               id: `earth-overview-${activeView}`,
-              image: overviewDecoded ? dayOverview : DAY_OVERVIEW,
-              nightImage: overviewDecoded ? nightOverview : NIGHT_OVERVIEW,
+              image: dayTexture || DAY_OVERVIEW,
+              nightImage: nightTexture || NIGHT_OVERVIEW,
               bounds: [-180, -90, 180, 90],
               _imageCoordinateSystem: 'lnglat',
               ...shading
@@ -420,7 +445,7 @@ export function mountSunTerminator(root) {
         changeView();
       }
     };
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (!dayTexture || !nightTexture || matchMedia('(prefers-reduced-motion: reduce)').matches) {
       finish();
     } else {
       const targetViewport = targetView.makeViewport({
@@ -505,6 +530,8 @@ export function mountSunTerminator(root) {
     deck.finalize();
     imageryTiles.finalize();
     usaMask?.destroy();
+    dayTexture?.destroy();
+    nightTexture?.destroy();
     manager.finalize();
     root.replaceChildren();
   };

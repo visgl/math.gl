@@ -44,6 +44,8 @@ try {
         );
         window.centerFrames.push({
           view: deck.getViewports()[0].id,
+          dayTexture: deck.props.layers[0]?.props.image?.id,
+          nightTexture: deck.props.layers[0]?.props.nightImage?.id,
           rgb: Array.from(pixel.slice(0, 3))
         });
       }
@@ -64,6 +66,12 @@ try {
   const frames = await page.evaluate(() => window.centerFrames);
   const morphs = frames.filter((frame) => frame.view === 'earth-morph');
   assert.ok(morphs.length > 10, 'must sample intermediate morph frames');
+  assert.ok(
+    morphs.every(
+      (frame) => frame.dayTexture === 'day-overview' && frame.nightTexture === 'night-overview'
+    ),
+    'morphs must reuse renderer-owned GPU textures immediately'
+  );
   const dark = morphs.filter((frame) => frame.rgb.reduce((a, b) => a + b, 0) < 100);
   assert.equal(
     dark.length,
