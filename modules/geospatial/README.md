@@ -24,3 +24,5 @@ See [the packaged source and license index](./THIRD-PARTY-NOTICES.md) and
 [math.gl references and credits](https://math.gl/docs/references-and-credits).
 
 Use `@math.gl/geospatial/geographic-cuts` for [ellipsoidal/rhumb latitude clipping](https://math.gl/docs/modules/geospatial/api-reference/latitude-geographic-cuts) and adaptive projection that preserves generated parallel boundaries.
+
+Use `@math.gl/geospatial/geographic-atlas` for [oblique ellipsoidal visibility and shared cut graphs](https://math.gl/docs/modules/geospatial/api-reference/geographic-atlas), including an octahedral faceted-map consumer.

@@ -206,6 +206,7 @@
           "modules/geospatial/api-reference/rhumb-path",
           "modules/geospatial/api-reference/geographic-seams",
           "modules/geospatial/api-reference/latitude-geographic-cuts",
+          "modules/geospatial/api-reference/geographic-atlas",
           "modules/geospatial/api-reference/global-geographic-cuts",
           "modules/geospatial/api-reference/geographic-tiles",
           "modules/geospatial/api-reference/tile-matrix",

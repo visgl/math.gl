@@ -78,6 +78,11 @@
       "import": "./dist/globe.js",
       "require": "./dist/globe.cjs"
     },
+    "./geographic-atlas": {
+      "types": "./dist/geographic-atlas.d.ts",
+      "import": "./dist/geographic-atlas.js",
+      "require": "./dist/geographic-atlas.cjs"
+    },
     "./tiles": {
       "types": "./dist/tiles.d.ts",
       "import": "./dist/tiles.js",

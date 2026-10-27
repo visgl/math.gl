@@ -102,7 +102,7 @@ function contains(
   }
   return false;
 }
-function filled(
+export function filled(
   rings: Ring[],
   p: readonly number[],
   context: Context,
@@ -114,7 +114,7 @@ function filled(
     !rings.slice(1).some(r => contains(r, p, context, side, verticalSide))
   );
 }
-function prepare(input: GeographicPolygonRing, index: number, context: Context): Ring {
+export function prepare(input: GeographicPolygonRing, index: number, context: Context): Ring {
   const positions = context.read(input.positions);
   if (
     positions.length > 1 &&
@@ -220,7 +220,7 @@ function canonicalAlias(edge: Edge, context: Context): Edge {
   };
   return {...edge, a: move(edge.a), b: move(edge.b), sample: t => move(edge.sample(t))};
 }
-function interior(edges: Edge[], context: Context): {point: number[]; sign: number} {
+export function interior(edges: Edge[], context: Context): {point: number[]; sign: number} {
   const ys = Array.from(new Set(edges.flatMap(e => [e.a[1], e.b[1]]))).sort((a, b) => a - b);
   let index = 1;
   for (let i = 2; i < ys.length; i++) if (ys[i] - ys[i - 1] > ys[index] - ys[index - 1]) index = i;
