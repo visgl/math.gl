@@ -28,7 +28,7 @@ try{
  const rows=[];
  // New-feature ceilings established separately. Existing selective/bundle gates are unchanged.
  for(const [entry,symbol,minified,gzip] of [['geodesic-exact','EllipsoidGeodesicExact',35000,14000],['triaxial','TriaxialEllipsoid',12000,4500]]){
-  const source=join(dir,entry+'.ts'),out=join(dir,entry+'.mjs');writeFileSync(source,`export {${symbol}} from '@math.gl/geospatial/${entry}';`);
+  const source=join(dir,entry+'.ts'),out=join(dir,entry+'.mjs');writeFileSync(source,`export {${symbol}} from '@math.gl/geospatial';`);
   const result=await bundleRuntime(root,relative(root,source),out);const{code}=await transform(readFileSync(out,'utf8'),{minify:true,target:'es2020',legalComments:'none'});
   const size={minified:Buffer.byteLength(code),gzip:gzipSync(code,{level:9}).length};assert(size.minified<=minified&&size.gzip<=gzip,entry+' feature budget exceeded');
   const inputs=Object.entries(Object.values(result.metafile.outputs)[0].inputs).filter(([,v])=>v.bytesInOutput>0).map(([p])=>p);

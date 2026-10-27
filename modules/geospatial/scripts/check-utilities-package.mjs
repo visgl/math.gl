@@ -17,7 +17,7 @@ try{
  const rows=[];
  // New optional-entry ceilings set separately; existing budgets are unchanged.
  for(const[entry,symbol,minified,gzip]of[['coordinates','*',60000,20000],['coordinates','parseAngle',4000,1600],['geodesic-buffer','*',8000,3000]]){
-  const source=join(dir,'entry.ts'),out=join(dir,'out.mjs');writeFileSync(source,symbol==='*'?`export * from '@math.gl/geospatial/${entry}';`:`export {${symbol}} from '@math.gl/geospatial/${entry}';`);
+  const source=join(dir,'entry.ts'),out=join(dir,'out.mjs');const names = symbol !== '*' ? symbol : entry === 'coordinates' ? 'parseAngle,formatAngle,parseGeographicCoordinates,formatGeographicCoordinates,standardGridZone,projectGrid,unprojectGrid,transferGrid,formatMGRS,parseMGRS,formatMGRSZone,parseMGRSZone' : 'GEODESIC_BUFFER_FIELDS,RHUMB_BUFFER_FIELDS,GeodesicLineBuffer,RhumbLineBuffer';writeFileSync(source,`export {${names}} from '@math.gl/geospatial';`);
   const result=await bundleRuntime(root,relative(root,source),out),{code}=await transform(readFileSync(out,'utf8'),{minify:true,target:'es2020',legalComments:'none'});
   const size={minified:Buffer.byteLength(code),gzip:gzipSync(code,{level:9}).length};assert(size.minified<=minified&&size.gzip<=gzip,entry+' feature budget exceeded');
   const inputs=Object.entries(Object.values(result.metafile.outputs)[0].inputs).filter(([,v])=>v.bytesInOutput>0).map(([p])=>p);
