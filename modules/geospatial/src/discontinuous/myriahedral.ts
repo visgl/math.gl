@@ -5,7 +5,12 @@
 import {DiscontinuousMap, type GeographicPosition, type MapRegion} from './map-layout';
 import {coordinates, geographic, angle, RAD} from './math';
 import {createGraticule} from './myriahedral/graticule';
-import {createLayout, type MeshEdge} from './myriahedral/unfold';
+import {
+  createLayout,
+  restoreLayout,
+  type PreparedHingeLayout,
+  type MeshEdge
+} from './myriahedral/unfold';
 import {
   createSolid,
   center,
@@ -192,13 +197,34 @@ export type MyriahedralLayout = ReturnType<typeof createLayout> & {
   cutLandRadians?: number;
 };
 
+export type PreparedMyriahedralLayout = PreparedHingeLayout & {
+  preset: MyriahedralPreset;
+  radius: number;
+  cutLandRadians?: number;
+};
+
+export function restoreMyriahedralLayout(data: PreparedMyriahedralLayout): MyriahedralLayout {
+  if (!Number.isFinite(data.radius) || data.radius <= 0)
+    throw new Error('Invalid prepared map radius');
+  const layout = restoreLayout({...data, mesh: snapshotMesh(data.mesh)});
+  const evaluate = (amount: number) =>
+    layout.evaluate(amount).map(face => face.map(p => p.map(v => v * data.radius) as Vec3));
+  return {
+    ...layout,
+    preset: data.preset,
+    radius: data.radius,
+    cutLandRadians: data.cutLandRadians,
+    evaluate
+  };
+}
+
 /** A static seam-aware projection with the same panel IDs and layout as its animation.
  * Radial/gnomonic mapping is locally approximate, not equal-area or conformal.
  */
 export class MyriahedralMap extends DiscontinuousMap {
   readonly layout: MyriahedralLayout;
-  constructor(options: MyriahedralOptions = {}) {
-    const layout = createMyriahedralLayout(options);
+  constructor(options: MyriahedralOptions = {}, prepared?: MyriahedralLayout) {
+    const layout = prepared ?? createMyriahedralLayout(options);
     super(regions(layout));
     this.layout = layout;
   }

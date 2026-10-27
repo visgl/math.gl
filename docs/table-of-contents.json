@@ -52,7 +52,8 @@
               "modules/core/developer-guide/homogeneous-coordinates",
               "modules/core/developer-guide/coordinate-systems",
               "modules/core/developer-guide/rotations",
-              "modules/core/developer-guide/floating-point"
+              "modules/core/developer-guide/floating-point",
+              "modules/core/developer-guide/workers"
             ]
           },
           "modules/core/api-reference/euler",

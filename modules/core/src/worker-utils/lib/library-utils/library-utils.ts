@@ -1,0 +1,304 @@
+// loaders.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+
+/* global importScripts */
+import {isBrowser, isWorker} from '../env-utils/globals';
+import {assert} from '../env-utils/assert';
+import {VERSION} from '../env-utils/version';
+
+export type LoadLibraryOptions<ModulesT extends Record<string, any> = Record<string, any>> = {
+  useLocalLibraries?: boolean;
+  CDN?: string | null;
+  modules?: ModulesT;
+  // Core must not be supplied
+  core?: never;
+};
+
+type ExtractableLoadLibraryOptions<ModulesT extends Record<string, any> = Record<string, any>> = {
+  useLocalLibraries?: boolean;
+  CDN?: string | null;
+  modules?: ModulesT;
+  core?: {
+    useLocalLibraries?: boolean;
+    CDN?: string | null;
+  } | null;
+};
+
+const loadLibraryPromises: Record<string, Promise<any>> = {}; // promises
+
+export function extractLoadLibraryOptions<
+  ModulesT extends Record<string, any> = Record<string, any>
+>(options: ExtractableLoadLibraryOptions<ModulesT> = {}): LoadLibraryOptions<ModulesT> {
+  const useLocalLibraries = options.useLocalLibraries ?? options.core?.useLocalLibraries;
+  const CDN = getCDNOption(options.CDN, options.core?.CDN);
+  const modules = options.modules;
+
+  return {
+    ...(useLocalLibraries !== undefined ? {useLocalLibraries} : {}),
+    ...(CDN !== undefined ? {CDN} : {}),
+    ...(modules !== undefined ? {modules} : {})
+  };
+}
+
+/**
+ * Extracts a valid CDN option from normalized or legacy loader options.
+ * @param cdn Deprecated top-level CDN option.
+ * @param coreCDN Nested core CDN option.
+ * @returns CDN option if it is a string or null.
+ */
+function getCDNOption(cdn: unknown, coreCDN: unknown): string | null | undefined {
+  if (typeof cdn === 'string' || cdn === null) {
+    return cdn as string | null;
+  }
+  if (typeof coreCDN === 'string' || coreCDN === null) {
+    return coreCDN as string | null;
+  }
+  return undefined;
+}
+
+/**
+ * Dynamically loads a library ("module")
+ *
+ * - wasm library: Array buffer is returned
+ * - js library: Parse JS is returned
+ *
+ * Method depends on environment
+ * - browser - script element is created and installed on document
+ * - classic worker - importScripts loads a classic wrapper
+ * - module worker - native import loads an ESM wrapper and returns its exports
+ * - node - file is required
+ *
+ * @param libraryUrl
+ * @param moduleName
+ * @param options
+ * @param libraryName Classic asset name used for URL resolution and overrides.
+ * @param moduleLibraryName ESM asset name used by module workers unless the classic URL is overridden.
+ */
+export async function loadLibrary(
+  libraryUrl: string,
+  moduleName: string | null = null,
+  options: LoadLibraryOptions = {},
+  libraryName: string | null = null,
+  moduleLibraryName: string | null = null
+): Promise<any> {
+  let moduleLibraryUrl = libraryUrl;
+  if (moduleName) {
+    const requestedLibraryName = libraryName || libraryUrl;
+    const injectedLibrary = options.modules?.[requestedLibraryName];
+    if (injectedLibrary !== undefined && typeof injectedLibrary !== 'string') {
+      return injectedLibrary;
+    }
+    libraryUrl = getLibraryUrl(libraryUrl, moduleName, options, libraryName);
+    const hasLibraryOverride = typeof injectedLibrary === 'string';
+    moduleLibraryUrl =
+      moduleLibraryName &&
+      (!hasLibraryOverride || typeof options.modules?.[moduleLibraryName] === 'string')
+        ? getLibraryUrl(moduleLibraryName, moduleName, options, moduleLibraryName)
+        : libraryUrl;
+  }
+  // Workers may select different ESM adapters for the same classic asset.
+  const cacheKey = getLibraryCacheKey(libraryUrl, moduleLibraryUrl, isWorker);
+
+  loadLibraryPromises[cacheKey] =
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    loadLibraryPromises[cacheKey] || loadLibraryFromFile(libraryUrl, moduleLibraryUrl);
+  return await loadLibraryPromises[cacheKey];
+}
+
+/** Identifies a library load, including the alternate adapter available in workers. */
+export function getLibraryCacheKey(
+  libraryUrl: string,
+  moduleLibraryUrl: string,
+  worker: boolean
+): string {
+  return worker ? JSON.stringify([libraryUrl, moduleLibraryUrl]) : libraryUrl;
+}
+
+// TODO - sort out how to resolve paths for main/worker and dev/prod
+export function getLibraryUrl(
+  library: string,
+  moduleName?: string,
+  options: LoadLibraryOptions = {},
+  libraryName: string | null = null
+): string {
+  if (options?.core) {
+    throw new Error('loadLibrary: options.core must be pre-normalized');
+  }
+  libraryName = libraryName || library;
+
+  // Allow application to import and supply libraries through `options.modules`
+  // TODO - See js-module-utils in loader-utils
+  const modules = options.modules || {};
+  if (typeof modules[libraryName] === 'string') {
+    return modules[libraryName];
+  }
+
+  // Check if already a URL after checking overrides so callers can replace
+  // default CDN URLs with locally bundled assets.
+  if (!options.useLocalLibraries && library.startsWith('http')) {
+    return library;
+  }
+
+  // Load from local files, not from CDN scripts in Node.js
+  // TODO - needs to locate the modules directory when installed!
+  if (!isBrowser) {
+    return `modules/${moduleName}/dist/libs/${libraryName}`;
+  }
+
+  // In browser, load from external scripts
+  if (options.CDN) {
+    if (typeof options.CDN !== 'string') {
+      throw new Error('loadLibrary: options.CDN must be a string or null');
+    }
+    assert(options.CDN.startsWith('http'));
+    return `${options.CDN}/${moduleName}@${VERSION}/dist/libs/${libraryName}`;
+  }
+
+  // TODO - loading inside workers requires paths relative to worker script location...
+  if (isWorker) {
+    return libraryName.endsWith('.mjs') ? `./libs/${libraryName}` : `../src/libs/${libraryName}`;
+  }
+
+  return `modules/${moduleName}/src/libs/${libraryName}`;
+}
+
+async function loadLibraryFromFile(libraryUrl: string, moduleLibraryUrl: string): Promise<any> {
+  if (libraryUrl.endsWith('wasm')) {
+    return await loadAsArrayBuffer(libraryUrl);
+  }
+
+  if (!isBrowser) {
+    // TODO - Node doesn't yet support dynamic import from https URLs
+    // try {
+    //   return await import(libraryUrl);
+    // } catch (error) {
+    //   console.error(error);
+    // }
+    const {requireFromFile} = globalThis.loaders || {};
+    try {
+      const result = await requireFromFile?.(libraryUrl);
+      if (result || !libraryUrl.includes('/dist/libs/')) {
+        return result;
+      }
+      return await requireFromFile?.(libraryUrl.replace('/dist/libs/', '/src/libs/'));
+    } catch (error) {
+      if (libraryUrl.includes('/dist/libs/')) {
+        try {
+          return await requireFromFile?.(libraryUrl.replace('/dist/libs/', '/src/libs/'));
+        } catch {
+          // ignore
+        }
+      }
+      // biome-ignore lint/suspicious/noConsole: Preserve upstream worker diagnostics.
+      console.error(error); // eslint-disable-line no-console
+      return null;
+    }
+  }
+  if (isWorker) {
+    return loadLibraryInWorker(libraryUrl, moduleLibraryUrl);
+  }
+  // TODO - fix - should be more secure than string parsing since observes CORS
+  // if (isBrowser) {
+  //   return await loadScriptFromFile(libraryUrl);
+  // }
+
+  const scriptSource = await loadAsText(libraryUrl);
+  return loadLibraryFromString(scriptSource, libraryUrl);
+}
+
+/** Loads classic scripts or native ESM exports without evaluating fetched source or masking failures. */
+export async function loadLibraryInWorker(
+  libraryUrl: string,
+  moduleLibraryUrl: string = libraryUrl
+): Promise<unknown> {
+  try {
+    // A zero-argument probe rejects in module workers without loading any script.
+    importScripts();
+  } catch {
+    // Resolve local asset paths against the same worker location used by importScripts.
+    const moduleUrl = new URL(moduleLibraryUrl, globalThis.location.href).href;
+    const library = await import(/* @vite-ignore */ moduleUrl);
+    return library.default ?? library;
+  }
+  return importScripts(libraryUrl);
+}
+
+/** Installs fetched library source on the browser main thread. Workers use script or module loading. */
+function loadLibraryFromString(scriptSource: string, id: string): null | any {
+  const script = document.createElement('script');
+  script.id = id;
+  // most browsers like a separate text node but some throw an error. The second method covers those.
+  try {
+    script.appendChild(document.createTextNode(scriptSource));
+  } catch (_e) {
+    script.text = scriptSource;
+  }
+  document.body.appendChild(script);
+  return null;
+}
+
+async function loadAsArrayBuffer(url: string): Promise<ArrayBuffer> {
+  const {readFileAsArrayBuffer} = globalThis.loaders || {};
+  if (isBrowser || !readFileAsArrayBuffer || url.startsWith('http')) {
+    const response = await fetch(url);
+    return await response.arrayBuffer();
+  }
+  try {
+    return await readFileAsArrayBuffer(url);
+  } catch {
+    if (url.includes('/dist/libs/')) {
+      return await readFileAsArrayBuffer(url.replace('/dist/libs/', '/src/libs/'));
+    }
+    throw new Error(`Failed to load ArrayBuffer from ${url}`);
+  }
+}
+
+/**
+ * Load a file from local file system
+ * @param filename
+ * @returns
+ */
+async function loadAsText(url: string): Promise<string> {
+  const {readFileAsText} = globalThis.loaders || {};
+  if (isBrowser || !readFileAsText || url.startsWith('http')) {
+    const response = await fetch(url);
+    return await response.text();
+  }
+  try {
+    return await readFileAsText(url);
+  } catch {
+    if (url.includes('/dist/libs/')) {
+      return await readFileAsText(url.replace('/dist/libs/', '/src/libs/'));
+    }
+    throw new Error(`Failed to load text from ${url}`);
+  }
+}
+
+/*
+async function loadScriptFromFile(libraryUrl) {
+  const script = document.createElement('script');
+  script.src = libraryUrl;
+  return await new Promise((resolve, reject) => {
+    script.onload = data => {
+      resolve(data);
+    };
+    script.onerror = reject;
+  });
+}
+*/
+
+// TODO - technique for module injection into worker, from THREE.DracoLoader...
+/*
+function combineWorkerWithLibrary(worker, jsContent) {
+  var fn = wWorker.toString();
+  var body = [
+    '// injected',
+    jsContent,
+    '',
+    '// worker',
+    fn.substring(fn.indexOf('{') + 1, fn.lastIndexOf('}'))
+  ].join('\n');
+  this.workerSourceURL = URL.createObjectURL(new Blob([body]));
+}
+*/

@@ -1,46 +1,44 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {
-  createMap,
-  prepareDiscontinuousGrid,
-  MYRIAHEDRAL_VIEWS,
-} from "./discontinuous-views.js";
+import {processOnWorker} from '@math.gl/core/worker-utils';
+import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {prepareDiscontinuousGrid, DISCONTINUOUS_VIEWS} from './discontinuous-views.js';
+import {cacheProjectionGrid, prepareProjectionGrid} from './projection-grid.js';
 
 const cache = new Map();
+const loadWorker = () => new Worker(new URL('./discontinuous-grid-worker.js', import.meta.url), {type: 'module'});
+const IceAgeGridWorker = {id: 'ice-age-grid', name: 'Ice Age grid', module: 'geospatial',
+  version: 'latest', worker: true, loadWorker, options: {}};
 
-/** Browser preparation with a cancellable worker for static segmented maps. */
-export async function prepareMapGrid(view, step, { signal } = {}) {
+/** Cancel a queued or running job when its selection is superseded. */
+export async function prepareMapGrid(view, step, {signal, onProgress = () => {}, runTask = processOnWorker} = {}) {
   signal?.throwIfAborted();
   const key = `${view}:${step}`;
   if (cache.has(key)) return cache.get(key);
-  // Complex chart clipping and adaptive layout sampling can themselves be long
-  // operations. Keep static map preparation entirely off the browser UI thread.
-  if (typeof Worker !== "undefined" && !MYRIAHEDRAL_VIEWS[view]) {
-    const data = await new Promise((resolve, reject) => {
-      const worker = new Worker(
-        new URL("./discontinuous-grid-worker.js", import.meta.url),
-        { type: "module" },
-      );
-      const finish = (error, result) => {
-        worker.terminate();
-        signal?.removeEventListener("abort", abort);
-        if (error) reject(error);
-        else resolve(result);
-      };
-      const abort = () => finish(signal.reason);
-      signal?.addEventListener("abort", abort, { once: true });
-      worker.onmessage = ({ data }) =>
-        data.error ? finish(new Error(data.error)) : finish(null, data);
-      worker.onerror = (event) =>
-        finish(new Error(event.message || "Map preparation failed"));
-      worker.postMessage({ view, step });
-    });
+  const discontinuous = Boolean(DISCONTINUOUS_VIEWS[view]);
+  let result;
+  if (typeof Worker !== 'undefined') {
+    const data = await runTask(IceAgeGridWorker, {view, step, discontinuous},
+      {worker: true, signal, onProgress, inputOwnership: 'copy'});
     signal?.throwIfAborted();
-    const result = { ...data, map: createMap(view) };
-    if (cache.size >= 3) cache.delete(cache.keys().next().value);
-    cache.set(key, result);
-    return result;
+    if (discontinuous) {
+      const {preparedMap, ...grid} = data;
+      result = {...grid, map: MapEngine.fromPrepared(preparedMap)};
+    } else result = data;
+  } else if (discontinuous) {
+    result = await prepareDiscontinuousGrid(view, step, {signal, onProgress});
+  } else {
+    result = await prepareProjectionGrid(view, {
+      reportProgress: progress => {
+        signal?.throwIfAborted();
+        onProgress(progress);
+      }
+    });
   }
-  return prepareDiscontinuousGrid(view, step, { signal });
+  signal?.throwIfAborted();
+  if (!discontinuous) cacheProjectionGrid(view, result);
+  if (cache.size >= 3) cache.delete(cache.keys().next().value);
+  cache.set(key, result);
+  return result;
 }

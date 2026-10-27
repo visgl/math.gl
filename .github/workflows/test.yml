@@ -84,6 +84,9 @@ jobs:
       - name: Build code
         run: yarn build
 
+      - name: Check worker API types
+        run: yarn check:worker-types
+
       - name: Check selective imports and optional dependency removal
         run: yarn check:tree-shaking
 

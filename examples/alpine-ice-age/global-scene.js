@@ -66,6 +66,7 @@ export function createGlobalScene(
   onError,
   onLoading = () => {},
   onLongitude = () => {},
+  onProgress = () => {},
 ) {
   let current,
     options,
@@ -165,7 +166,7 @@ export function createGlobalScene(
       pending.controller.abort();
       pending = null;
     }
-    if (DISCONTINUOUS_VIEWS[opts.view] && !prepared.has(opts.view)) {
+    if (!prepared.has(opts.view)) {
       if (pending) {
         pending.model = model;
         pending.opts = opts;
@@ -175,8 +176,12 @@ export function createGlobalScene(
       pending = request;
       canvas.setAttribute("aria-busy", "true");
       onLoading(true);
+      onProgress({phase: 'starting', completed: 0});
       prepareMapGrid(opts.view, gridStep(opts.view), {
         signal: request.controller.signal,
+        onProgress: (progress) => {
+          if (!disposed && pending === request) onProgress(progress);
+        },
       })
         .then((grid) => {
           if (disposed || pending !== request) return;
@@ -194,7 +199,7 @@ export function createGlobalScene(
           render(request.model, request.opts);
         })
         .catch((error) => {
-          if (request.controller.signal.aborted || disposed) return;
+          if (request.controller.signal.aborted || disposed || pending !== request) return;
           pending = null;
           canvas.removeAttribute("aria-busy");
           onLoading(false);
