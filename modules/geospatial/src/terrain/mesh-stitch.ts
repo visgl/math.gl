@@ -188,6 +188,27 @@ export function stitchTerrainMeshEdges(
     pb.ts = pb.ts.reverse().map(t => 1 - t);
     pb.direction *= -1;
   }
+  // Range normalization and reversal can put equivalent rational knots a few
+  // ulps apart. Match B to A, retaining existing vertex IDs on each side. Never
+  // merge two distinct vertices from the same boundary.
+  const canonicalize = (values: number[], anchors: number[]) => {
+    let cursor = 0;
+    const result = values.map(t => {
+      while (cursor + 1 < anchors.length && anchors[cursor + 1] <= t) cursor++;
+      let nearest = anchors[cursor];
+      if (cursor + 1 < anchors.length && Math.abs(anchors[cursor + 1] - t) < Math.abs(nearest - t))
+        nearest = anchors[cursor + 1];
+      return Math.abs(t - nearest) <= 8 * Number.EPSILON * Math.max(1, Math.abs(t)) ? nearest : t;
+    });
+    if (result.some((t, i) => i > 0 && t <= result[i - 1]))
+      throw new Error('Stitching knots are numerically indistinguishable');
+    return result;
+  };
+  pa.ts = canonicalize(pa.ts, [0, 1]);
+  pb.ts = canonicalize(
+    pb.ts,
+    [...new Set([0, 1, ...pa.ts])].sort((x, y) => x - y)
+  );
   if (
     xyDistance(first, endpoint(pb, 0)) > tolerance ||
     xyDistance(last, endpoint(pb, 1)) > tolerance ||
@@ -259,9 +280,11 @@ export function stitchTerrainMeshEdges(
       const existing = lookup.get(ts[i]),
         id = existing ?? next++;
       positions.set(xyz.subarray(3 * i, 3 * i + 3), 3 * id);
-      gridCoordinates[2 * id + p.axis] = p.value;
-      gridCoordinates[2 * id + 1 - p.axis] =
-        (p.range[0] + (reverse ? 1 - ts[i] : ts[i]) * (p.range[1] - p.range[0])) * p.along;
+      if (existing === undefined) {
+        gridCoordinates[2 * id + p.axis] = p.value;
+        gridCoordinates[2 * id + 1 - p.axis] =
+          (p.range[0] + (reverse ? 1 - ts[i] : ts[i]) * (p.range[1] - p.range[0])) * p.along;
+      }
       seam[i] = id;
       lookup.set(ts[i], id);
     }

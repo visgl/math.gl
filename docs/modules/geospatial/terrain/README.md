@@ -989,6 +989,12 @@ orientations are detected. Ranges allow a coarse tile to meet multiple children;
 missing range endpoints are inserted. Full-side mismatches in sample count and
 non-power-of-two ratios are supported too.
 
+Normalized knots separated only by reversal/range-normalization roundoff (within
+eight scaled machine epsilons) reuse existing vertex identities. The function
+rejects ambiguous matches that would collapse distinct vertices on the same side.
+Existing grid coordinates are preserved, so reversed non-power-of-two results can
+be stitched again without accumulating duplicate knots.
+
 A owns the piecewise-linear XYZ profile. The function forms the union of edge
 knots, samples that profile, inserts vertices, and splits adjacent triangles into
 fans. B's boundary conforms to A. Interior vertex positions are retained, rebased

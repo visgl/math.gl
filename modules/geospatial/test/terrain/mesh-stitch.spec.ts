@@ -281,3 +281,49 @@ test('stitching rejects boundary topology defects and checks output rather than 
   bent.positions[3 * 6] += 0.01;
   expect(() => stitchTerrainMeshEdges(a, 'maxColumn', bent, 'minColumn')).toThrow(/straight/);
 });
+
+test('reversed non-power-of-two knots reuse vertex identities and remain stitchable', () => {
+  for (const size of [4, 6, 7, 10]) {
+    const a = mesh(size, 0);
+    const b = createTerrainMesh(
+      new HeightField({
+        width: size,
+        height: size,
+        origin: [2, 1],
+        columnStep: [-1 / (size - 1), 0],
+        rowStep: [0, -1 / (size - 1)],
+        heights: Float64Array.from(
+          {length: size * size},
+          (_, i) => 2 * (2 - (i % size) / (size - 1)) + 3 * (1 - Math.floor(i / size) / (size - 1))
+        )
+      })
+    );
+    const result = stitchTerrainMeshEdges(a, 'maxColumn', b, 'maxColumn', {
+      maxHeightAdjustment: 1e-12
+    });
+    expect(result.seamA).toHaveLength(size);
+    expect(result.seamB).toHaveLength(size);
+    expect(result.a.positions.length).toBe(a.positions.length);
+    expect(result.b.positions.length).toBe(b.positions.length);
+    expect(result.b.gridCoordinates).toEqual(Float64Array.from(b.gridCoordinates));
+    const again = stitchTerrainMeshEdges(result.a, 'maxColumn', result.b, 'maxColumn');
+    expect(again.a).toEqual(result.a);
+    expect(again.b).toEqual(result.b);
+    seamEdges(result.a, result.seamA);
+    seamEdges(result.b, result.seamB);
+  }
+});
+
+test('ambiguous subprecision knots are rejected rather than collapsing a source boundary', () => {
+  const a = mesh(3, 0),
+    grid = Float64Array.from(a.gridCoordinates);
+  for (let id = 3; id < 6; id++) {
+    grid[2 * id + 1] = Number.EPSILON;
+    a.positions[3 * id + 1] = Number.EPSILON / 2;
+  }
+  expect(() =>
+    stitchTerrainMeshEdges({...a, gridCoordinates: grid}, 'maxColumn', mesh(3, 1), 'minColumn', {
+      maxHeightAdjustment: 10
+    })
+  ).toThrow(/indistinguishable/);
+});
