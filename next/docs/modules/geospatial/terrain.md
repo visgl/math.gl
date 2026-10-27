@@ -554,4 +554,68 @@ Levels must be finite and strictly increasing; an empty list is allowed. The tie
 
 `TerrainContours` contains Float64 local XYZ `positions`, fractional column/row `gridCoordinates`, Uint32 endpoint pairs in `segments`, a `levelIndices` entry for each segment, a copied Float64 `levels` array, XYZ `origin`, and `heightReference`. Origin defaults to `[field.origin[0], field.origin[1], 0]`; it can be overridden. No normals, UVs, triangle mesh, stitching index or renderer objects are constructed. Local origins preserve coordinate precision. Nonfinite output, unrepresentable edge fractions, and collapsed output segments throw; results are Float64 numerical geometry, not an exact-arithmetic or geometric-error certificate.
 
-Admission limits are `maxSamples` (1,100,000), `maxLevels` (256), and `maxTriangleTests` (10,000,000). The last bounds `levels × cells × 2`, counting even missing triangles, before extraction. Output limits are `maxVertices` (2,000,000) and `maxSegments` (1,000,000). Exceeding any limit throws instead of returning partial geometry. Output arrays are detached; ordering is deterministic for the same input. Path stitching, simplification, isobands, cross-tile joining and adaptive-mesh contouring remain separate future operations.
+Admission limits are `maxSamples` (1,100,000), `maxLevels` (256), and `maxTriangleTests` (10,000,000). The last bounds `levels × cells × 2`, counting even missing triangles, before extraction. Output limits are `maxVertices` (2,000,000) and `maxSegments` (1,000,000). Exceeding any limit throws instead of returning partial geometry. Output arrays are detached; ordering is deterministic for the same input. Path stitching and bounded simplification are separate entries described below. Isobands, cross-tile joining and adaptive-mesh contouring remain future operations.
+
+## Contour paths and bounded simplification[​](#contour-paths-and-bounded-simplification "Direct link to Contour paths and bounded simplification")
+
+```
+import {stitchTerrainContours} from '@math.gl/geospatial/terrain/contour-paths';
+
+import {simplifyTerrainContourPaths} from '@math.gl/geospatial/terrain/contour-simplify';
+
+
+
+const paths = stitchTerrainContours(contours);
+
+const simplified = simplifyTerrainContourPaths(paths, {
+
+  maxError: 0.5,
+
+  maxDistanceTests: 1_000_000
+
+});
+```
+
+Stitching traces maximal chains through degree-two vertices. Ends and junctions terminate paths; remaining degree-two components become closed cycles. A loop attached to a junction is also explicitly closed. Every input segment occurs in exactly one output path. Connectivity is determined by vertex ID, never by a coordinate tolerance: coincident vertices with different IDs remain separate. There is no cross-tile welding, orientation selection, polygon filling or nesting classification. Output ordering is deterministic for a fixed vertex/segment order.
+
+`TerrainContourPaths` contains copied `positions`, `gridCoordinates`, `levels`, `origin` and `heightReference`, plus:
+
+* `indices`: Uint32 packed vertex IDs in path order.
+* `offsets`: Uint32 path boundaries, beginning with zero and ending at indices.length.
+* `levelIndices`: one Uint32 level ID per path.
+* `closed`: one Uint8 flag per path. Closed paths repeat their first vertex at the end.
+
+Empty graphs return offsets `[0]`. The stitcher validates typed-array shapes, finite coordinates, strictly increasing levels, frame metadata, vertex/level membership, and level heights. Duplicate edges, self-edges, collapsed XY edges, and a vertex shared between different levels are rejected. A junction is not arbitrarily paired into through-paths. Unreferenced input vertices are retained in the copied vertex buffers so vertex IDs remain stable.
+
+Both operations accept `maxVertices` (2,000,000), `maxSegments` (1,000,000), `maxPaths` (1,000,000), `maxIndices` (2,000,000), and `maxLevels` (256). Stitching checks input and output capacities. Simplification checks these input capacities; its compacted output never has more vertices, indices or paths. Limits are nonnegative integers within the Uint32 representation. Exceeding a capacity throws, with no partial result. These bound element counts rather than exact peak memory or elapsed time.
+
+`simplifyTerrainContourPaths` uses iterative Ramer–Douglas–Peucker subdivision in local XY. `maxError` is required, finite and nonnegative, in the metric coordinate units of the contour data. It keeps open-path endpoints, vertices shared across paths, and three deterministic anchors per closed path. Closed paths retain at least three distinct vertex IDs and a closing repeated index. Coincident chord endpoints force additional retained vertices to avoid zero-length output edges. Caller-supplied paths must have consistent offsets/closure, nondegenerate adjacent edges, and no repeated interior vertex IDs within an individual path.
+
+The output has the same path data contract, compacted vertex buffers, and `sourceVertexIndices` mapping each output vertex to its input vertex ID. It also reports `requestedMaxError`, `maxDeviation` and `distanceTests`. The measured maximum is the distance of discarded source vertices to their corresponding replacement chord. This also bounds the linear source edges between those vertices in ordinary Euclidean geometry, subject to Float64 arithmetic. Retained vertices have zero displacement. Numeric overflow throws. `maxDistanceTests` (default 10,000,000) bounds point-to-segment evaluations, including failed candidate chords; exhaustion throws rather than returning an unfinished simplification. The iterative implementation avoids call-stack growth on long paths.
+
+This is a geometric approximation, **not topology-preserving simplification**. New crossings, changed nesting, orientation changes or collapsed polygon area are possible. A replacement chord need not follow the terrain's exact level set. Do not use these paths as guaranteed valid isoband polygons or collision contours. [CGAL's topology-preserving approach](https://doc.cgal.org/6.0/Polyline_simplification_2/index.html) uses additional constraints to prevent intersections and nesting changes; those capabilities remain future work here. No CGAL code or dependency is included.
+
+The two entries import neither contour extraction nor each other. They operate on plain data without terrain classes, tessellators or rendering dependencies.
+
+## Profile measurements and coverage[​](#profile-measurements-and-coverage "Direct link to Profile measurements and coverage")
+
+```
+import {measureTerrainProfile} from '@math.gl/geospatial/terrain/profile-measure';
+
+
+
+const measurements = measureTerrainProfile(profile);
+
+// Check measurements.complete and coveredLength before interpreting totals.
+```
+
+This independent function measures the sampled piecewise-linear profile without resampling terrain. It returns total horizontal `length`, `coveredLength`, `missingLength`, covered/missing segment counts and `validSampleCount`. Only intervals whose **two endpoints are VALID** contribute to covered measurements:
+
+* `ascent` and `descent`: positive accumulated elevation gains and losses.
+* `surfaceLength`: sum of `hypot(horizontal interval, elevation change)`.
+* `heightIntegral`: trapezoidal height integral over covered horizontal intervals.
+* `meanHeight`: distance-weighted mean over covered intervals, or undefined when none exist. It is accumulated separately so a tiny integral underflow does not automatically erase the mean.
+
+`minimumHeight` and `maximumHeight` cover every valid sampled height, including isolated samples. They are undefined if no sample is valid. Missing intervals are not bridged, and no missing-height estimate is substituted. `complete` means every sample is VALID: a valid single-point profile is complete, with zero interval lengths and undefined mean; an invalid single point is incomplete even though its missing length is zero. Extrema and total ascent describe the samples, not unseen ridges or valleys between them.
+
+The supplied cumulative `distances` are authoritative horizontal stationing. They must begin at zero, increase strictly, and end at `profile.length`. XY positions are validated but not used to recompute stationing, which may carry different rounding. Buffer shapes, statuses and valid heights are checked; numeric overflow throws. Non-valid heights are ignored. The function uses compensated accumulation for totals and accepts `maxSamples` (default 1,000,000) as an admission bound. Outputs are scalar values and do not mutate the profile. This entry does not import the profile sampler or any terrain/query class.
