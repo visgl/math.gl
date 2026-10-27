@@ -10,7 +10,10 @@ import {
   getTileRanges,
   selectTileMatrix,
   isTileIndexInRange,
-  validateTileMatrix
+  validateTileMatrix,
+  validateTileMatrixSet,
+  validateTileMatrixLimits,
+  resolveTileIndex
 } from '../src/tile-matrix';
 import type {TileMatrix} from '../src/tile-matrix';
 
@@ -477,3 +480,147 @@ test.each(['topLeft', 'bottomLeft'] as const)(
     ]);
   }
 );
+
+test('set validation accepts unordered native IDs and optional sparse coverage without mutation', () => {
+  const matrices = Object.freeze([
+    Object.freeze({...matrix, id: 'detail'}),
+    Object.freeze({...matrix, id: 'coarse', resolution: 8})
+  ]);
+  const set = Object.freeze({crs: 'local:survey', matrices});
+  const limits = Object.freeze([
+    Object.freeze({
+      tileMatrix: 'coarse',
+      minTileColumn: 1,
+      maxTileColumn: 2,
+      minTileRow: 0,
+      maxTileRow: 1
+    })
+  ]);
+  expect(() => validateTileMatrixSet(set, limits)).not.toThrow();
+  expect(() => validateTileMatrixSet(set, [])).not.toThrow();
+  expect(() => validateTileMatrixSet({crs: 'local', matrices: []}, [])).not.toThrow();
+  expect(set.matrices.map(level => level.id)).toEqual(['detail', 'coarse']);
+  expect(selectTileMatrix(set, 3)).toBe(matrices[0]);
+});
+
+test.each([
+  null,
+  {crs: '', matrices: []},
+  {crs: '   ', matrices: []},
+  {crs: 1, matrices: []},
+  {crs: 'local'},
+  {crs: 'local', matrices: {}},
+  {crs: 'local', matrices: [matrix, matrix]},
+  {crs: 'local', matrices: [null]},
+  {crs: 'local', matrices: [{...matrix, origin: undefined}]},
+  {crs: 'local', matrices: [{...matrix, resolution: 0}]},
+  {crs: 'local', matrices: [{...matrix, variableMatrixWidths: {}}]},
+  {crs: 'local', matrices: [{...matrix, variableMatrixWidths: [null]}]}
+])('public set validation and selection reject malformed complete sets: %j', set => {
+  expect(() => validateTileMatrixSet(set as any)).toThrow(RangeError);
+  expect(() => selectTileMatrix(set as any, 1)).toThrow(RangeError);
+});
+
+test('set coverage rejects unknown/duplicate IDs and validates all levels', () => {
+  const set = {crs: 'local', matrices: [matrix, {...matrix, id: 'fine'}]};
+  const limit = {
+    tileMatrix: 'fine',
+    minTileColumn: 0,
+    maxTileColumn: 0,
+    minTileRow: 0,
+    maxTileRow: 0
+  };
+  for (const limits of [
+    [{...limit, tileMatrix: 'unknown'}],
+    [limit, limit],
+    [{...limit, tileMatrix: ''}],
+    [{...limit, maxTileColumn: 3}],
+    [null],
+    {}
+  ]) {
+    expect(() => validateTileMatrixSet(set, limits as any)).toThrow(RangeError);
+  }
+});
+
+test('public limits validation checks geometry and inclusive safe base indices', () => {
+  const limit = {minTileColumn: 0, maxTileColumn: 2, minTileRow: 0, maxTileRow: 1};
+  expect(() => validateTileMatrixLimits(matrix, Object.freeze(limit))).not.toThrow();
+  for (const invalid of [
+    null,
+    {...limit, minTileColumn: -1},
+    {...limit, maxTileColumn: 3},
+    {...limit, maxTileRow: 2},
+    {...limit, minTileRow: 1.5},
+    {...limit, maxTileRow: Infinity},
+    {...limit, minTileColumn: 2, maxTileColumn: 1}
+  ]) {
+    expect(() => validateTileMatrixLimits(matrix, invalid as any)).toThrow(RangeError);
+  }
+  expect(() => validateTileMatrixLimits({...matrix, resolution: 0}, limit)).toThrow(RangeError);
+  expect(() => resolveTileIndex(matrix, -1, -1, {...limit, maxTileColumn: 3})).toThrow(RangeError);
+});
+
+test.each(['topLeft', 'bottomLeft'] as const)(
+  'integer alias resolution agrees with row ranges for %s',
+  cornerOfOrigin => {
+    const grid: TileMatrix = {
+      ...matrix,
+      cornerOfOrigin,
+      resolution: 0.1,
+      resolutionY: 0.2,
+      matrixSize: [6, 3],
+      variableMatrixWidths: [{coalesce: 3, minTileRow: 1, maxTileRow: 1}]
+    };
+    const limits = {minTileColumn: 1, maxTileColumn: 1, minTileRow: 1, maxTileRow: 1};
+    for (const column of [0, 1, 2])
+      expect(resolveTileIndex(grid, column, 1, limits)).toEqual([0, 1]);
+    expect(isTileIndexInRange(grid, 0, 1, limits)).toBe(false);
+    expect(resolveTileIndex(grid, 3, 1, limits)).toBeNull();
+    expect(resolveTileIndex(grid, 1, 0, limits)).toBeNull();
+    expect(resolveTileIndex(grid, 2, 0)).toEqual([2, 0]);
+    for (const coverage of [
+      undefined,
+      limits,
+      {...limits, minTileColumn: 4, maxTileColumn: 5, maxTileRow: 2}
+    ]) {
+      for (let row = 0; row < 3; row++) {
+        for (let column = 0; column < 6; column++) {
+          const ranges = getTileRanges(grid, getTileBounds(grid, column, row), coverage);
+          expect(resolveTileIndex(grid, column, row, coverage)).toEqual(
+            ranges.length ? [ranges[0].minTileColumn, row] : null
+          );
+        }
+      }
+    }
+    for (const index of [-1, 6, 0.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])
+      expect(resolveTileIndex(grid, index, 1)).toBeNull();
+    for (const row of [-1, 3, 0.5, NaN, Infinity])
+      expect(resolveTileIndex(grid, 0, row)).toBeNull();
+  }
+);
+
+test('canonical resolution preserves large integer columns and regular-grid coverage', () => {
+  const width = 2 ** 32;
+  const grid: TileMatrix = {
+    ...matrix,
+    origin: [0, 0],
+    resolution: 1,
+    tileSize: [1, 1],
+    matrixSize: [width, 1],
+    variableMatrixWidths: [{coalesce: 4, minTileRow: 0, maxTileRow: 0}]
+  };
+  expect(resolveTileIndex(grid, width - 1, 0)).toEqual([width - 4, 0]);
+  const limits = {minTileColumn: 1, maxTileColumn: 1, minTileRow: 0, maxTileRow: 0};
+  expect(resolveTileIndex(matrix, 1, 0, limits)).toEqual([1, 0]);
+  expect(resolveTileIndex(matrix, 0, 0, limits)).toBeNull();
+  expect(() => resolveTileIndex({...matrix, resolution: 0}, -1, -1)).toThrow(RangeError);
+});
+
+test('set validation rejects sparse row bands with RangeError', () => {
+  expect(() =>
+    validateTileMatrixSet({
+      crs: 'local',
+      matrices: [{...matrix, variableMatrixWidths: new Array(1)}]
+    })
+  ).toThrow(RangeError);
+});

@@ -19,6 +19,9 @@ try {
   await symlink(join(repositoryRoot, 'modules/geospatial'), join(consumerScope, 'geospatial'));
   await writeFile(join(temporaryDirectory, 'package.json'), '{"type":"module"}');
   const assertions = `
+for (const name of ['validateTileMatrixSet', 'validateTileMatrixLimits', 'resolveTileIndex']) {
+  assert.equal(typeof combinedTiles[name], 'function');
+}
 const matrix = {id: 'coarse', resolution: 2, origin: [100, 200],
   cornerOfOrigin: 'topLeft', tileSize: [10, 5], matrixSize: [3, 2]};
 assert.deepEqual(tiles.getTileIndex(matrix, [120, 190]), [1, 1]);
@@ -29,18 +32,26 @@ assert.deepEqual(tiles.getTileBounds({...matrix, resolutionY: 3}, 1, 1), [120, 1
 const variable = {...matrix, matrixSize: [4, 2],
   variableMatrixWidths: [{coalesce: 2, minTileRow: 0, maxTileRow: 0}]};
 assert.deepEqual(tiles.getTileIndex(variable, [130, 200]), [0, 0]);
+const coverage = {minTileColumn: 1, maxTileColumn: 1, minTileRow: 0, maxTileRow: 0};
+tiles.validateTileMatrixSet({crs: 'local', matrices: [variable]}, [{...coverage, tileMatrix: variable.id}]);
+tiles.validateTileMatrixLimits(variable, coverage);
+assert.deepEqual(tiles.resolveTileIndex(variable, 0, 0, coverage), [0, 0]);
+assert.deepEqual(tiles.resolveTileIndex(variable, 1, 0, coverage), [0, 0]);
+assert.equal(tiles.resolveTileIndex(variable, 2, 0, coverage), null);
 assert.equal(tiles.getTileRanges(variable, [100, 190, 180, 200])[0].columnStep, 2);
 `;
   await writeFile(
     join(temporaryDirectory, 'consumer.mjs'),
     `import assert from 'node:assert/strict';
 import * as tiles from '@math.gl/geospatial/tile-matrix';
+import * as combinedTiles from '@math.gl/geospatial/tiles';
 ${assertions}`
   );
   await writeFile(
     join(temporaryDirectory, 'consumer.cjs'),
     `const assert = require('node:assert/strict');
 const tiles = require('@math.gl/geospatial/tile-matrix');
+const combinedTiles = require('@math.gl/geospatial/tiles');
 ${assertions}`
   );
   for (const filename of ['consumer.mjs', 'consumer.cjs']) {
@@ -49,9 +60,9 @@ ${assertions}`
   await writeFile(
     join(temporaryDirectory, 'consumer.ts'),
     `
-import {getTileBounds, getTileIndex, getTileRange, getTileRanges, selectTileMatrix}
+import {getTileBounds, getTileIndex, getTileRange, getTileRanges, selectTileMatrix, validateTileMatrixSet, validateTileMatrixLimits, resolveTileIndex}
   from '@math.gl/geospatial/tile-matrix';
-import type {TileMatrix, TileMatrixSet, TileMatrixBounds, TileMatrixLimits, VariableMatrixWidth, TileMatrixRowRange}
+import type {TileMatrix, TileMatrixSet, TileMatrixBounds, TileMatrixLimits, VariableMatrixWidth, TileMatrixRowRange, TileMatrixSetLimits}
   from '@math.gl/geospatial/tile-matrix';
 const matrix: TileMatrix = {id: '0', resolution: 1, resolutionY: 2, origin: [0, 0],
   cornerOfOrigin: 'topLeft', tileSize: [256, 256], matrixSize: [2, 2]};
@@ -61,7 +72,13 @@ const range: TileMatrixLimits | null = getTileRange(matrix, bounds);
 const selected: TileMatrix | null = selectTileMatrix(matrixSet, 1);
 const band: VariableMatrixWidth = {coalesce: 2, minTileRow: 0, maxTileRow: 0};
 const rowRanges: TileMatrixRowRange[] = getTileRanges({...matrix, variableMatrixWidths: [band]}, bounds);
-void [range, rowRanges, selected, getTileIndex(matrix, [0, 0])];
+const coverage: TileMatrixSetLimits = [{tileMatrix: '0', minTileColumn: 0, maxTileColumn: 0, minTileRow: 0, maxTileRow: 0}];
+validateTileMatrixSet(matrixSet, coverage);
+validateTileMatrixLimits(matrix, coverage[0]);
+const canonical: [number, number] | null = resolveTileIndex(matrix, 1, 0, coverage[0]);
+void [range, rowRanges, selected, canonical, getTileIndex(matrix, [0, 0])];
+// @ts-expect-error limits must identify a matrix
+validateTileMatrixSet(matrixSet, [{minTileColumn: 0, maxTileColumn: 0, minTileRow: 0, maxTileRow: 0}]);
 // @ts-expect-error resolution targets are numeric
 selectTileMatrix(matrixSet, '1');
 // @ts-expect-error matrix geometry is readonly
