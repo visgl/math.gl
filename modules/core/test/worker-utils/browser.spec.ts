@@ -9,6 +9,7 @@ import {
   WorkerFarm,
   getWorkerCapabilities,
   createSharedWorkerState,
+  createWorker,
   type WorkerObject
 } from '../../src/worker-utils';
 
@@ -32,6 +33,18 @@ const source = `self.onmessage = ({data: {type, payload}}) => {
 };`;
 
 afterEach(() => WorkerFarm.getWorkerFarm().destroy());
+
+test('createWorker leaves the browser window message handler untouched', async () => {
+  const original = window.onmessage;
+  const handler = () => {};
+  window.onmessage = handler;
+  try {
+    await createWorker(() => 'unexpected');
+    expect(window.onmessage).toBe(handler);
+  } finally {
+    window.onmessage = original;
+  }
+});
 
 test('browser workers report progress and preserve requested buffer ownership', async () => {
   for (const inputOwnership of ['copy', 'transfer'] as const) {

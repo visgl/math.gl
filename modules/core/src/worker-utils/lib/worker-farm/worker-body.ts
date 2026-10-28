@@ -40,7 +40,11 @@ const onMessageWrapperMap = new Map<WorkerMessageListener, (message: WorkerMessa
 export default class WorkerBody {
   /** Check that we are actually in a worker thread */
   static async inWorkerThread(): Promise<boolean> {
-    return typeof self !== 'undefined' || Boolean(await getParentPort());
+    const workerGlobalScope = (globalThis as any).WorkerGlobalScope;
+    return (
+      (typeof workerGlobalScope === 'function' && globalThis instanceof workerGlobalScope) ||
+      Boolean(await getParentPort())
+    );
   }
 
   /*
