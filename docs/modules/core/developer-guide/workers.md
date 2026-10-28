@@ -108,8 +108,9 @@ Otherwise the runtime terminates it and subsequent jobs use a replacement.
 Legacy custom workers without cancellation support require termination.
 
 A synchronous CPU loop cannot receive cancellation messages while it blocks the
-worker event loop. Cooperative processors must yield to a task (for example
-`setTimeout`, not just a resolved Promise) and check `context.signal`. Bulk
+worker event loop. Message-based cooperative processors must yield to a task (for example
+`setTimeout`, not just a resolved Promise) and check `context.signal`.
+Optional atomic shared-state polling can avoid this yield requirement; see below. Bulk
 projection does this between chunks. Synchronous map setup still requires hard
 cancellation. Cancellation does not roll back mutations to persistent state or
 shared memory, and transferred input cannot be recovered automatically.
@@ -226,3 +227,71 @@ latency, throughput, sampled process RSS, persistent projection, overload,
 cancellation, crash recovery, teardown, and optional pinned library comparisons.
 Performance depends on workload, ownership policy and environment; these APIs
 alone do not establish a universal performance ranking.
+
+## Optional shared memory between caller and workers
+
+`getWorkerCapabilities()` probes workers, SharedArrayBuffer allocation, Atomics,
+and whether structured cloning preserves shared backing storage. It reports
+`sharedMemory`, `crossOriginIsolated`, and an unavailability reason. Browser
+sharing requires a secure context and cross-origin isolation, usually configured
+with these response headers (and compatible cross-origin assets):
+
+```text
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+Node does not require these headers. `createSharedWorkerState()` returns `null`
+when unavailable; ordinary message-based execution still works.
+
+```ts
+import {createSharedWorkerState, getWorkerCapabilities} from '@math.gl/core/worker-utils';
+
+const state = createSharedWorkerState();
+console.log(getWorkerCapabilities());
+const result = projectBulkInWorker(input, {
+  cancellationMode: 'cooperative',
+  signal: controller.signal,
+  sharedState: state?.buffer
+});
+// The main thread may poll state?.snapshot without a progress message round trip.
+await result;
+console.log(state?.snapshot); // completed, total, revision, cancelled
+```
+
+Cooperative jobs automatically get a fresh shared control buffer when available.
+Supply an explicitly created buffer to observe it on the caller, or set
+`sharedState: false` to force message-only behavior. No input data is automatically
+converted to shared memory. The fixed 16-byte runtime control buffer is excluded
+from application input-byte reservations, just like worker/message overhead.
+
+Custom processors receive `context.sharedState` and `context.throwIfAborted()`.
+The latter checks both the native worker signal and the atomic cancellation
+flag. Calling it within a synchronous CPU loop can observe main-thread aborts
+without processing a cancellation message. Algorithms must still poll; arbitrary
+JavaScript cannot be forcibly interrupted while preserving worker state.
+`context.signal` alone updates when the worker processes the cancellation message.
+When shared memory is unavailable or disabled, yielding remains necessary.
+
+Workers may call `context.sharedState?.setProgress(completed, total)` to publish
+int32 counters; bulk projection does so at chunk boundaries. Phase names and units
+continue over normal progress messages. Each snapshot field is atomic, but a
+snapshot is not a transaction across fields. The revision counter wraps as int32.
+Counters support nonnegative signed int32 values; `total: -1` means unknown.
+
+Use one fresh control buffer per job and do not reuse a cancelled buffer. Calling
+`state.cancel()` directly is observed by cooperating processors, but it does not
+by itself reject a queued caller or start a termination deadline; use AbortSignal
+for runtime-managed cancellation. Cancellation never rolls back shared writes.
+
+For application-defined state or datasets, allocate your own SharedArrayBuffer,
+pass its typed views in an operation/resource input, and use Atomics for shared
+integer synchronization. `inputOwnership: 'share'` rejects ordinary transferable
+storage and preserves shared buffers. Use an ownership protocol or double
+buffering for floating-point data; concurrent Float64Array writes are not made
+transactional by the runtime. Persistent resource inputs can retain such buffers
+while the main thread keeps its own views.
+
+The isolated browser regression suite runs with
+`MATHGL_TEST_SHARED_MEMORY=1 yarn vitest run --project headless modules/core/test/worker-utils/browser.spec.ts`.
+CI exercises both isolated sharing and the default message fallback.

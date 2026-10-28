@@ -5,6 +5,12 @@ import {createWorker} from '@math.gl/core/worker-utils';
 let runs = 0;
 await createWorker(async (input, options, context) => {
   runs++;
+  if (input?.mode === 'shared-spin') {
+    context.sharedState.setProgress(1, 2);
+    const deadline = performance.now() + 3000;
+    while (performance.now() < deadline) context.throwIfAborted();
+    throw new Error('Shared cancellation was not observed');
+  }
   if (input?.mode === 'crash') process.exit(1);
   if (input?.mode === 'cooperate') {
     context.reportProgress({phase: 'running', completed: 0, unit: 'tasks'});

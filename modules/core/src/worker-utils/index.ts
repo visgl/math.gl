@@ -94,3 +94,10 @@ export type {
   WorkerResourceObject,
   ResourceRequest
 } from './lib/worker-api/worker-resource';
+
+export {
+  getWorkerCapabilities,
+  createSharedWorkerState,
+  SharedWorkerState
+} from './lib/worker-api/shared-state';
+export type {WorkerCapabilities, SharedWorkerSnapshot} from './lib/worker-api/shared-state';

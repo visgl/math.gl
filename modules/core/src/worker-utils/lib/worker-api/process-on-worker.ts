@@ -23,6 +23,7 @@ import {
   getWorkerName
 } from './get-worker-url';
 import {getTransferList, getTransferListForWriter} from '../worker-utils/get-transfer-list';
+import {prepareSharedState, SharedWorkerState} from './shared-state';
 import {isBrowser} from '../env-utils/globals';
 import {getInputByteLength} from '../worker-utils/get-input-byte-length';
 
@@ -95,6 +96,7 @@ export async function processOnWorker<Input, Output, Options extends object>(
     !['copy', 'transfer', 'share'].includes(options.inputOwnership)
   )
     throw new Error('Invalid worker input ownership');
+  options = prepareSharedState(options);
   throwIfAborted(options.signal);
   validateSharedInput(options, [data, serializableOptions(options), jobContext]);
   const name = getWorkerName(worker as WorkerObject);
@@ -113,9 +115,10 @@ export async function processOnWorker<Input, Output, Options extends object>(
     undefined,
     options.signal,
     {
-      inputBytes: getInputByteLength([data, serializableOptions(options), jobContext]),
+      inputBytes: getInputByteLength([data, budgetOptions(options), jobContext]),
       priority: options.priority,
       admission: options.admission,
+      sharedState: options.sharedState ? new SharedWorkerState(options.sharedState) : undefined,
       cancellationMode: options.cancellationMode,
       cancellationTimeout: options.cancellationTimeout
     }
@@ -189,13 +192,14 @@ async function* processOnWorkerInBatchesIterator<InputBatch, OutputBatch>(
   context: WorkerContext,
   jobContext: WorkerJobContext
 ): AsyncIterable<OutputBatch> {
+  options = prepareSharedState(options);
   throwIfAborted(options.signal);
   const name = getWorkerName(worker);
   const workerPool =
     options.workerPool ??
     WorkerFarm.getWorkerFarm(options).getWorkerPool(getWorkerPoolTarget(worker, options, name));
   validateSharedInput(options, [serializableOptions(options), jobContext]);
-  const contextBytes = getInputByteLength([serializableOptions(options), jobContext]);
+  const contextBytes = getInputByteLength([budgetOptions(options), jobContext]);
   const inputBytes = options.inputBytes ?? contextBytes;
   if (workerPool.requiresInputBytes && options.inputBytes === undefined) {
     throw new Error('Byte-bounded batch sessions require inputBytes');
@@ -287,6 +291,7 @@ async function* processOnWorkerInBatchesIterator<InputBatch, OutputBatch>(
 
           case 'error': {
             const error = new Error(payload.error || 'Worker batch processing failed');
+            error.name = payload.errorName || 'Error';
             activeJob.error(error);
             failOutput(error);
             break;
@@ -310,6 +315,7 @@ async function* processOnWorkerInBatchesIterator<InputBatch, OutputBatch>(
         inputBytes,
         priority: options.priority,
         admission: options.admission,
+        sharedState: options.sharedState ? new SharedWorkerState(options.sharedState) : undefined,
         cancellationMode: options.cancellationMode,
         cancellationTimeout: options.cancellationTimeout
       }
@@ -493,7 +499,9 @@ async function onMessage(
 
     case 'error':
       // Worker encountered an error
-      job.error(new Error(payload.error));
+      const error = new Error(payload.error);
+      error.name = payload.errorName || 'Error';
+      job.error(error);
       break;
 
     case 'process':
@@ -574,4 +582,10 @@ export function validateSharedInput(options: WorkerOptions, input: unknown): voi
       'Share ownership requires SharedArrayBuffer storage; ordinary transferables are not allowed'
     );
   }
+}
+
+/** Runtime control storage is fixed overhead, not part of application input reservations. */
+function budgetOptions(options: ProcessOnWorkerOptions): Record<string, any> {
+  const {sharedState, ...inputOptions} = serializableOptions(options);
+  return inputOptions;
 }

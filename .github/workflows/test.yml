@@ -252,6 +252,11 @@ jobs:
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
 
+      - name: Test isolated shared-memory worker state
+        env:
+          MATHGL_TEST_SHARED_MEMORY: '1'
+        run: yarn vitest run --project headless modules/core/test/worker-utils/browser.spec.ts
+
       - name: Test solar terminator rendering and cut-map detail
         timeout-minutes: 5
         run: yarn workspace math.gl-sun-terminator test:browser:ci

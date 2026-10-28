@@ -68,3 +68,13 @@ test('cached projection grids skip reprojecting and emit completed progress', as
   assert.equal(result, cached);
   assert.deepEqual(progress, [{phase: 'projection-grid', completed: 1, total: 1, unit: 'tasks'}]);
 });
+
+test('bulk projection publishes progress in optional shared control state', async () => {
+  const {createSharedWorkerState} = await import('@math.gl/core/worker-utils');
+  const state = createSharedWorkerState();
+  assert(state);
+  await projectBulkInWorker({projection: {to: 'EPSG:3857'}, coordinates: new Float64Array([0, 0, 10, 20])},
+    {sharedState: state.buffer, cancellationMode: 'cooperative'});
+  assert.equal(state.snapshot.completed, 2);
+  assert.equal(state.snapshot.total, 2);
+});

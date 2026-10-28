@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {expect, test as baseTest} from 'vitest';
+import {expect, vi, test as baseTest} from 'vitest';
 import {isBrowser} from '../../src/worker-utils/lib/env-utils/globals';
 const test = baseTest.runIf(!isBrowser);
 const assert = Object.assign((value: unknown) => expect(Boolean(value)).toBe(true), {
@@ -436,4 +436,121 @@ test('destroy from a debug hook rejects the dequeued job instead of stranding it
   await assert.rejects(start(pool, 8), /destroyed before job start/);
   await pool.destroy();
   assert.equal(pool.stats.inFlightBytes, 0);
+});
+
+import {
+  getWorkerCapabilities,
+  createSharedWorkerState,
+  SharedWorkerState
+} from '../../src/worker-utils/lib/worker-api/shared-state';
+
+test('shared-memory capabilities probe actual atomic storage and shared cloning', () => {
+  assert.equal(getWorkerCapabilities().sharedMemory, true);
+  const state = createSharedWorkerState();
+  const workerView = new SharedWorkerState(structuredClone(state.buffer));
+  workerView.setProgress(3, 10);
+  assert.equal(state.snapshot.completed, 3);
+  assert.equal(state.snapshot.total, 10);
+  state.cancel();
+  assert.equal(workerView.snapshot.cancelled, true);
+  assert.throws(() => workerView.throwIfCancelled(), /cancelled/);
+  assert.throws(() => state.setProgress(0.5), RangeError);
+  assert.throws(() => new SharedWorkerState(new SharedArrayBuffer(4)), /16-byte/);
+});
+
+test('shared cancellation interrupts a polling synchronous loop without a worker event-loop yield', async () => {
+  const pool = new WorkerPool({url: runtime.worker, maxConcurrency: 1});
+  const controller = new AbortController();
+  const state = createSharedWorkerState();
+  const timer = setInterval(() => {
+    if (state.snapshot.completed === 1) controller.abort(new Error('stop shared loop'));
+  }, 1);
+  try {
+    await assert.rejects(
+      processOnWorker(
+        runtime,
+        {mode: 'shared-spin'},
+        {
+          workerPool: pool,
+          sharedState: state.buffer,
+          signal: controller.signal,
+          cancellationMode: 'cooperative'
+        }
+      ),
+      /stop shared loop/
+    );
+    assert.equal(await processOnWorker(runtime, {mode: 'count'}, {workerPool: pool}), 2);
+    assert.equal(state.snapshot.cancelled, true);
+    assert.equal(pool.stats.workersCreated, 1);
+  } finally {
+    clearInterval(timer);
+    await pool.destroy();
+  }
+});
+
+test('shared-memory probing falls back when unavailable or blocked', () => {
+  vi.stubGlobal('SharedArrayBuffer', undefined);
+  try {
+    assert.equal(getWorkerCapabilities().sharedMemory, false);
+    assert.equal(createSharedWorkerState(), null);
+  } finally {
+    vi.unstubAllGlobals();
+  }
+  vi.stubGlobal('structuredClone', () => {
+    throw new Error('blocked');
+  });
+  try {
+    assert.equal(getWorkerCapabilities().sharedMemoryUnavailableReason, 'blocked');
+    assert.equal(createSharedWorkerState(), null);
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+
+test('an explicit shared cancellation flag preserves AbortError and releases the worker', async () => {
+  const pool = new WorkerPool({url: runtime.worker, maxConcurrency: 1});
+  const state = createSharedWorkerState();
+  const timer = setInterval(() => {
+    if (state.snapshot.completed === 1) state.cancel();
+  }, 1);
+  try {
+    await expect(
+      processOnWorker(
+        runtime,
+        {mode: 'shared-spin'},
+        {workerPool: pool, sharedState: state.buffer, cancellationMode: 'cooperative'}
+      )
+    ).rejects.toMatchObject({name: 'AbortError'});
+    assert.equal(await processOnWorker(runtime, {mode: 'count'}, {workerPool: pool}), 2);
+    assert.equal(pool.stats.cancelled, 1);
+    assert.equal(pool.stats.workersCreated, 1);
+  } finally {
+    clearInterval(timer);
+    await pool.destroy();
+  }
+});
+
+test('a persistent resource and main thread both update application-owned atomic state', async () => {
+  const descriptor = {
+    ...runtime,
+    id: 'resource-shared',
+    name: 'resource shared',
+    worker: new URL('./fixtures/resource-worker.mjs', import.meta.url).href
+  };
+  const counter = new Int32Array(new SharedArrayBuffer(4));
+  Atomics.store(counter, 0, 10);
+  const resource = await createWorkerResource(
+    descriptor,
+    {value: 0, counter: counter.buffer},
+    {inputOwnership: 'share'}
+  );
+  try {
+    assert.equal(await resource.run(2), 2);
+    assert.equal(Atomics.load(counter, 0), 12);
+    Atomics.store(counter, 0, 20);
+    assert.equal(await resource.run(3), 5);
+    assert.equal(Atomics.load(counter, 0), 23);
+  } finally {
+    await resource.destroy();
+  }
 });

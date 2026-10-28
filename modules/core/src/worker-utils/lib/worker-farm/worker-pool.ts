@@ -6,6 +6,7 @@ import type {LoadWorker, WorkerMessageType, WorkerMessagePayload} from '../../ty
 import {isMobile} from '../env-utils/globals';
 import WorkerThread from './worker-thread';
 import WorkerJob from './worker-job';
+import type {SharedWorkerState} from '../worker-api/shared-state';
 import type {WorkerJobMetrics, WorkerPoolStats} from '../../types';
 
 /** WorkerPool onDebug Callback Parameters */
@@ -60,6 +61,7 @@ type QueuedJob = {
   inputBytes: number;
   priority: number;
   queuedAt: number;
+  sharedState?: SharedWorkerState;
   cancellationMode?: 'terminate' | 'cooperative';
   cancellationTimeout?: number;
   onMessage: OnMessage;
@@ -331,6 +333,7 @@ export default class WorkerPool {
       inputBytes?: number;
       priority?: number;
       admission?: WorkerAdmission;
+      sharedState?: SharedWorkerState;
       cancellationMode?: 'terminate' | 'cooperative';
       cancellationTimeout?: number;
     } = {}
@@ -400,6 +403,7 @@ export default class WorkerPool {
         inputBytes,
         priority,
         queuedAt: performance.now(),
+        sharedState: scheduling.sharedState,
         cancellationMode: scheduling.cancellationMode,
         cancellationTimeout: scheduling.cancellationTimeout,
         onMessage,
@@ -491,6 +495,7 @@ export default class WorkerPool {
       }
       // Create a worker job to let the app access thread and manage job completion
       const job = new WorkerJob(queuedJob.name, workerThread);
+      job.sharedState = queuedJob.sharedState;
       queuedJob.removeAbortListener();
       const abortJob = (): void => {
         if (queuedJob.cancellationMode === 'cooperative') {

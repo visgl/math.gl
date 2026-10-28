@@ -4,6 +4,7 @@
 
 import type {WorkerMessageType, WorkerMessagePayload} from '../../types';
 import WorkerThread from './worker-thread';
+import type {SharedWorkerState} from '../worker-api/shared-state';
 
 /**
  * Represents one Job handled by a WorkerPool or WorkerFarm
@@ -13,6 +14,7 @@ export default class WorkerJob {
   readonly workerThread: WorkerThread;
   isRunning: boolean = true;
   isCancelled = false;
+  sharedState?: SharedWorkerState;
   failed = false;
   postMessageMs = 0;
   executionMs?: number;
@@ -86,6 +88,7 @@ export default class WorkerJob {
     }
     this.isRunning = false;
     this.failed = true;
+    if (this.sharedState?.snapshot.cancelled) this.isCancelled = true;
     clearTimeout(this.cancellationTimer);
     this.complete();
     this._reject(error);
@@ -99,7 +102,10 @@ export default class WorkerJob {
       return;
     }
     this.isCancelled = true;
-    this._reject(reason ?? createAbortError(`Worker job "${this.name}" was cancelled`));
+    this.sharedState?.cancel();
+    this._reject(
+      arguments.length ? reason : createAbortError(`Worker job "${this.name}" was cancelled`)
+    );
     try {
       this.workerThread.postMessage({source: 'loaders.gl', type: 'cancel', payload: {}}, []);
       this.cancellationTimer = setTimeout(() => this.abort(reason), timeout);
@@ -117,6 +123,7 @@ export default class WorkerJob {
       return;
     }
     this.isCancelled = true;
+    this.sharedState?.cancel();
     this.workerThread.destroy();
     this.error(
       arguments.length ? reason : createAbortError(`Worker job "${this.name}" was aborted`)

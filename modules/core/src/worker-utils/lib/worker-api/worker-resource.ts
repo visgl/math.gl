@@ -9,6 +9,7 @@ import {getWorkerName} from './get-worker-url';
 import {getWorkerPoolTarget, validateSharedInput} from './process-on-worker';
 import {getTransferListForWriter} from '../worker-utils/get-transfer-list';
 import {getInputByteLength} from '../worker-utils/get-input-byte-length';
+import {prepareSharedState, SharedWorkerState} from './shared-state';
 import {createWorker} from './create-worker';
 
 export type ResourceRequest<Init, Input> =
@@ -73,14 +74,19 @@ export async function createWorkerResource<Init, Input, Output>(
   const invoke = async (request: ResourceRequest<Init, Input>, callOptions: WorkerOptions) => {
     if (incarnation?.terminated)
       throw new Error('Worker resource was invalidated; create a new resource');
-    const {signal, onProgress, onMetrics, ...serializable} = {...options, ...callOptions};
+    const prepared = prepareSharedState({...options, ...callOptions});
+    const {signal, onProgress, onMetrics, ...serializable} = prepared;
     validateSharedInput(serializable, [request, serializable]);
+    const {sharedState: _controlBuffer, ...inputOptions} = serializable;
     const job = await pool.startJob(
       worker.name,
       (active, type, payload) => {
         if (type === 'done') active.done(payload);
-        else if (type === 'error') active.error(new Error(payload.error));
-        else if (type === 'progress' && !active.isCancelled) {
+        else if (type === 'error') {
+          const error = new Error(payload.error);
+          error.name = payload.errorName || 'Error';
+          active.error(error);
+        } else if (type === 'progress' && !active.isCancelled) {
           try {
             onProgress?.(payload.progress);
           } catch (error) {
@@ -91,7 +97,8 @@ export async function createWorkerResource<Init, Input, Output>(
       undefined,
       signal,
       {
-        inputBytes: getInputByteLength([request, serializable]),
+        sharedState: prepared.sharedState ? new SharedWorkerState(prepared.sharedState) : undefined,
+        inputBytes: getInputByteLength([request, inputOptions]),
         priority: callOptions.priority,
         cancellationMode: callOptions.cancellationMode ?? options.cancellationMode,
         cancellationTimeout: callOptions.cancellationTimeout ?? options.cancellationTimeout

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {SharedWorkerState} from './lib/worker-api/shared-state';
+
 /** Progress measured independently within a named phase. */
 export type WorkerProgress = {
   /** Operation being measured. */
@@ -49,6 +51,8 @@ export type WorkerPoolStats = {
 export type WorkerOptions = {
   /** Copy input or transfer its backing buffers; transfer preserves the loaders.gl default. */
   inputOwnership?: 'copy' | 'transfer' | 'share';
+  /** Shared control buffer, or false to disable automatic cooperative shared control. */
+  sharedState?: SharedArrayBuffer | false;
   /** Hard termination is the compatibility default. Cooperative mode requires createWorker support. */
   cancellationMode?: 'terminate' | 'cooperative';
   /** Grace period before hard termination; defaults to 1000 ms. */
@@ -93,6 +97,9 @@ export type LoadWorker = () => Worker | null;
 export type WorkerContext = {
   /** Worker-side signal; long CPU loops must yield and check it to cooperate. */
   signal?: AbortSignal;
+  sharedState?: SharedWorkerState;
+  /** Checks the message signal and atomic shared cancellation, including inside synchronous loops. */
+  throwIfAborted?: () => void;
   /** Reports progress from the active worker job. */
   reportProgress?: (progress: WorkerProgress) => void;
   process?: Process;
@@ -198,6 +205,7 @@ export type WorkerMessagePayload = {
   input?: any; // Transferable;
   result?: any; // Transferable
   error?: string;
+  errorName?: string;
 };
 
 export type WorkerMessageData = {

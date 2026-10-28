@@ -51,11 +51,13 @@ export async function projectBulk(
   const total = coordinates.length / dimension;
   context.reportProgress?.({phase: 'bulk-projection', completed: 0, total, unit: 'records'});
   for (let start = 0; start < total; start += chunkSize) {
+    context.throwIfAborted?.();
     context.signal?.throwIfAborted();
     const end = Math.min(total, start + chunkSize);
     const chunk = coordinates.subarray(start * dimension, end * dimension);
     if (input.inverse) projection.unprojectFlatSync(chunk, dimension);
     else projection.projectFlatSync(chunk, dimension);
+    if (total <= 0x7fffffff) context.sharedState?.setProgress(end, total);
     context.reportProgress?.({phase: 'bulk-projection', completed: end, total, unit: 'records'});
     await new Promise(resolve => setTimeout(resolve, 0));
   }

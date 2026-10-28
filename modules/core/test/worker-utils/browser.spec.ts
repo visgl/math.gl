@@ -7,6 +7,8 @@ import {
   processOnWorker,
   processOnWorkerInBatches,
   WorkerFarm,
+  getWorkerCapabilities,
+  createSharedWorkerState,
   type WorkerObject
 } from '../../src/worker-utils';
 
@@ -144,3 +146,52 @@ test('browser resources initialize once and dispose deterministically', async ()
   }
   await expect(resource.run(1)).rejects.toThrow('destroyed');
 });
+
+test('browser capability detection follows isolation and retains the message fallback', () => {
+  const capabilities = getWorkerCapabilities();
+  if ((globalThis as any).__mathglSharedMemoryExpected)
+    expect(capabilities.sharedMemory).toBe(true);
+  if (!globalThis.crossOriginIsolated) {
+    expect(capabilities.sharedMemory).toBe(false);
+    expect(capabilities.sharedMemoryUnavailableReason).toBe('cross-origin-isolation');
+    expect(createSharedWorkerState()).toBe(null);
+  } else {
+    expect(capabilities.sharedMemory).toBe(true);
+  }
+});
+
+baseTest.runIf(isBrowser && getWorkerCapabilities().sharedMemory)(
+  'isolated browser workers observe shared cancellation inside a synchronous polling loop',
+  async () => {
+    const {WorkerPool} = await import('../../src/worker-utils');
+    const pool = new WorkerPool({
+      maxConcurrency: 1,
+      loadWorker: () =>
+        new Worker(new URL('./fixtures/runtime-worker.mjs', import.meta.url), {type: 'module'})
+    });
+    const controller = new AbortController();
+    const state = createSharedWorkerState();
+    const timer = setInterval(() => {
+      if (state.snapshot.completed === 1) controller.abort(new Error('stop shared loop'));
+    }, 1);
+    try {
+      await expect(
+        processOnWorker(
+          worker,
+          {mode: 'shared-spin'},
+          {
+            workerPool: pool,
+            sharedState: state.buffer,
+            signal: controller.signal,
+            cancellationMode: 'cooperative'
+          }
+        )
+      ).rejects.toThrow('stop shared loop');
+      await expect(processOnWorker(worker, {mode: 'count'}, {workerPool: pool})).resolves.toBe(2);
+      expect(pool.stats.workersCreated).toBe(1);
+    } finally {
+      clearInterval(timer);
+      await pool.destroy();
+    }
+  }
+);

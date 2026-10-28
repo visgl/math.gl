@@ -76,3 +76,21 @@ void processOnWorker(
   }
 );
 void resourceResult;
+
+import {
+  getWorkerCapabilities,
+  createSharedWorkerState,
+  type SharedWorkerSnapshot
+} from '@math.gl/core/worker-utils';
+const capabilities = getWorkerCapabilities();
+const shared = createSharedWorkerState();
+if (shared && capabilities.sharedMemory) {
+  shared.setProgress(1, 10);
+  const snapshot: SharedWorkerSnapshot = shared.snapshot;
+  void snapshot.completed;
+  void processOnWorker(
+    worker,
+    {count: 1},
+    {sharedState: shared.buffer, cancellationMode: 'cooperative'}
+  );
+}

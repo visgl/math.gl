@@ -11,6 +11,7 @@ import type {
   Process,
   ProcessInBatches
 } from '../../types';
+import {SharedWorkerState} from './shared-state';
 import AsyncQueue from '../async-queue/async-queue';
 import WorkerBody from '../worker-farm/worker-body';
 // import {validateWorkerVersion} from './validate-worker-version';
@@ -56,20 +57,33 @@ export async function createWorker(
     const startedAt = performance.now();
     const reporter =
       type === 'process' || type === 'process-in-batches' ? createProgressReporter() : undefined;
+    let sharedState: SharedWorkerState | undefined;
+    const throwIfAborted = () => {
+      controller?.signal.throwIfAborted();
+      sharedState?.throwIfCancelled();
+    };
     const jobContext = {
       ...context,
       signal: controller?.signal,
+      sharedState,
+      throwIfAborted,
       reportProgress: (progress: WorkerProgress) => {
-        if (!controller?.signal.aborted) reporter?.report(progress);
+        if (!controller?.signal.aborted && !sharedState?.snapshot.cancelled)
+          reporter?.report(progress);
       }
     };
     try {
+      if (controller && payload.options?.['sharedState']) {
+        sharedState = new SharedWorkerState(payload.options['sharedState']);
+        jobContext.sharedState = sharedState;
+      }
       switch (type) {
         case 'preload':
           WorkerBody.postMessage('done', {});
           break;
 
         case 'process':
+          throwIfAborted();
           if (!process) {
             throw new Error('Worker does not support atomic processing');
           }
@@ -79,7 +93,7 @@ export async function createWorker(
             jobContext,
             payload.context || {}
           );
-          controller?.signal.throwIfAborted();
+          throwIfAborted();
           reporter?.finish();
           await WorkerBody.postMessage('done', {
             result,
@@ -88,6 +102,7 @@ export async function createWorker(
           break;
 
         case 'process-in-batches':
+          throwIfAborted();
           if (!processInBatches) {
             throw new Error('Worker does not support batched processing');
           }
@@ -103,11 +118,11 @@ export async function createWorker(
               payload.context || {}
             );
             for await (const batch of resultIterator) {
-              controller?.signal.throwIfAborted();
+              throwIfAborted();
               await WorkerBody.postMessage('output-batch', {result: batch});
               await outputAcknowledgements.next();
             }
-            controller?.signal.throwIfAborted();
+            throwIfAborted();
             reporter?.finish();
             await WorkerBody.postMessage('done', {executionMs: performance.now() - startedAt});
           } finally {
@@ -140,9 +155,12 @@ export async function createWorker(
         default:
       }
     } catch (error) {
-      reporter?.finish();
+      reporter?.finish(controller?.signal.aborted || sharedState?.snapshot.cancelled);
       const message = error instanceof Error ? error.message : '';
-      await WorkerBody.postMessage('error', {error: message});
+      await WorkerBody.postMessage('error', {
+        error: message,
+        errorName: error instanceof Error ? error.name : 'Error'
+      });
     } finally {
       if (controller && activeController === controller) activeController = null;
     }
@@ -231,7 +249,8 @@ function createProgressReporter() {
       }
     },
     /** Flushes final progress and suppresses reports from stale callbacks. */
-    finish(): void {
+    finish(discard = false): void {
+      if (discard) pending = undefined;
       flush();
       finished = true;
     }
