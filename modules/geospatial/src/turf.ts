@@ -50,8 +50,8 @@ function range(array: GeoArrowArray, index: number): [number, number] {
   return [a, b];
 }
 function scalar(array: GeoArrowArray, index: number): number {
-  if (array.kind !== 'primitive' || !isGeoArrowValueValid(array.validity, index))
-    throw new Error('Invalid GeoArrow coordinate');
+  if (array.kind !== 'primitive') throw new Error('Invalid GeoArrow coordinate');
+  if (!isGeoArrowValueValid(array.validity, index)) return NaN;
   return Number(array.values[(array.offset || 0) + index * (array.stride || 1)]);
 }
 function point(array: GeoArrowArray, index: number): Point | null {
@@ -60,13 +60,13 @@ function point(array: GeoArrowArray, index: number): Point | null {
     const i = ((array.offset || 0) + index) * array.size;
     const x = scalar(array.child, i),
       y = scalar(array.child, i + 1);
-    return Number.isNaN(x) && Number.isNaN(y) ? null : [x, y];
+    return !Number.isFinite(x) || !Number.isFinite(y) ? null : [x, y];
   }
   if (array.kind === 'struct') {
     const i = (array.offset || 0) + index;
     const x = scalar(array.children['x'], i),
       y = scalar(array.children['y'], i);
-    return Number.isNaN(x) && Number.isNaN(y) ? null : [x, y];
+    return !Number.isFinite(x) || !Number.isFinite(y) ? null : [x, y];
   }
   throw new Error('Invalid GeoArrow coordinate storage');
 }
@@ -234,6 +234,7 @@ function ringArea(array: GeoArrowArray, a: number, b: number): number {
 function polygonArea(array: GeoArrowArray, index: number): number {
   const [a, b] = range(array, index);
   if (array.kind !== 'list') throw new Error('Invalid polygon');
+  if (a === b || !isGeoArrowValueValid(array.child.validity, a)) return 0;
   let sum = 0;
   for (let i = a; i < b; i++) {
     if (!isGeoArrowValueValid(array.child.validity, i)) continue;
@@ -337,6 +338,7 @@ function ringContains(array: GeoArrowArray, a: number, b: number, p: Point): num
 function polygonContains(array: GeoArrowArray, index: number, p: Point): number {
   const [a, b] = range(array, index);
   if (array.kind !== 'list') throw new Error('Invalid polygon');
+  if (a === b || !isGeoArrowValueValid(array.child.validity, a)) return -1;
   for (let i = a; i < b; i++) {
     if (!isGeoArrowValueValid(array.child.validity, i)) continue;
     const [x, y] = range(array.child, i);

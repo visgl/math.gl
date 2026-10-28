@@ -131,3 +131,34 @@ test('empty point sentinels do not contaminate calculations', () => {
     throw new Error('Expected point');
   expect([...out.child.values]).toEqual([4, 6]);
 });
+
+test('null coordinate components and exterior rings do not produce false results', () => {
+  const separated = makeGeoArrowColumnFromGeometryRows([point(1, 2)], {
+    coordinateLayout: 'separated'
+  });
+  const chunk = separated.chunks[0];
+  if (chunk.kind !== 'struct' || chunk.children.x.kind !== 'primitive')
+    throw new Error('Expected separated point');
+  const invalid = {
+    ...separated,
+    chunks: [
+      {
+        ...chunk,
+        children: {
+          ...chunk.children,
+          x: {...chunk.children.x, validity: {values: new Uint8Array([0])}}
+        }
+      }
+    ]
+  };
+  expect(distance(invalid, separated).validity[0]).toBe(0);
+  const poly = column([polygon]);
+  const outer = poly.chunks[0];
+  if (outer.kind !== 'list' || outer.child.kind !== 'list') throw new Error('Expected polygon');
+  const missingOuter = {
+    ...poly,
+    chunks: [{...outer, child: {...outer.child, validity: {values: new Uint8Array([2])}}}]
+  };
+  expect(area(missingOuter).values[0]).toBe(0);
+  expect(booleanPointInPolygon(column([point(1, 1)]), missingOuter).values[0]).toBe(0);
+});
