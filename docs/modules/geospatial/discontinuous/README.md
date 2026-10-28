@@ -15,6 +15,25 @@ below remain useful when only the lower-level static map is needed.
 Project geographic points, lines, and polygons into a map with cuts. Import this
 API separately from scalar CRS transforms:
 
+## Feature support
+
+A map-engine checklist for interrupted, inset, polyhedral and other multi-chart projections.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature | math.gl support | Notes |
+| --- | --- | --- |
+| Point projection and inverse candidates | ✅ Implemented | Region-aware forward/inverse results retain chart identity; overlaps can produce multiple inverse candidates. |
+| Seam-aware lines and polygons | ✅ Implemented | Supported clipping/sampling preserves region IDs and source-coordinate provenance; render each returned part separately. |
+| Interrupted, inset and polyhedral presets | ✅ Implemented | [Projection families](./projection-catalog.md) include interrupted maps, Albers USA, polyhedral nets, quincuncial and star layouts. |
+| Continuous spherical world-map formulas | ✅ Implemented | The catalogue exposes ordinary world projections through the same MapEngine contracts and documented parameter limits. |
+| Custom regions, layout and viewport fitting | ✅ Implemented | Explicit regions, fitted chart layouts and region-aware picking remain independent of a renderer. |
+| Global spherical filled-side topology | ✅ Implemented | [Global polygon adapters](../api-reference/global-geographic-cuts.md) support explicit directed fills within their chart/profile constraints. |
+| Reusable preparation and worker transport | ✅ Implemented | MapEngine preparation can be transported using the [task runtime](../../core/tasks/README.md); same-version snapshots are not a durable file format. |
+| Arbitrary invalid-polygon repair | ❌ Not implemented | Malformed topology and unsupported chart/edge configurations are rejected; this is not a universal geometry repair engine. |
+| Ellipsoidal datum/epoch transformations | ❌ Not implemented | These are spherical map/layout operations; use the separate [CRS projection engine](../projection/README.md) for datum and epoch operations. |
+| Certified continuous error and arbitrary cut networks | ◐ Partial | Sampling and cut adapters have explicit supported profiles; approximation targets do not certify every callback, seam network or singular boundary. |
+
 ```typescript
 import {
   createAirOceanMap,

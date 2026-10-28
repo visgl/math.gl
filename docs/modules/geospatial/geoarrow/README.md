@@ -8,6 +8,25 @@
 It defines a small immutable descriptor ABI over borrowed typed arrays and implements synchronous
 geometry kernels directly over that ABI.
 
+## Feature support
+
+Columnar geometry capabilities over a runtime-neutral borrowed-buffer ABI.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature | math.gl support | Notes |
+| --- | --- | --- |
+| Native and mixed geometry layouts | ✅ Implemented | [Physical layouts](./physical-layouts.md) cover homogeneous geometries, dense unions and collections with explicit XY/XYZ/XYM/XYZM semantics. |
+| Null, empty, sliced and chunked arrays | ✅ Implemented | Logical offsets, validity bitmaps and safe Int64 offsets preserve ownership and null/empty distinctions. |
+| Validation, traversal and bounds | ✅ Implemented | [Inspection and kernels](./api-reference/geoarrow.md) operate on column descriptors without requiring per-row geometry materialization. |
+| Builders and physical-layout conversion | ✅ Implemented | Two-pass builders, interleave/separate conversion, union normalization and rewinding have explicit allocation/identity rules. |
+| Coordinate mapping and reusable destinations | ✅ Implemented | Coordinate transforms can write caller-owned targets with validated layouts. |
+| WKB/WKT column codecs | ✅ Implemented | Serialized columns retain offsets, validity, chunks and metadata through the documented codecs. |
+| Polygon tessellation and transfer preparation | ✅ Implemented | Flat positions/indices include row attribution; explicit resource limits and transfer helpers bound supported operations. |
+| Direct Arrow Table/RecordBatch integration | ◐ Partial | The descriptor ABI is runtime-neutral. Applications or loaders adapt their Arrow runtime at the boundary. |
+| Complete GIS topology/overlay engine | ❌ Not implemented | No general GEOS-style union, overlay, topology-repair or spatial-database engine is provided by these column kernels. |
+| GPU-resident column execution | ❌ Not implemented | The kernels are synchronous CPU operations; GPU upload/compute and device memory ownership belong to consumers. |
+
 ## Design goals
 
 - **Columnar first:** inspection, counting, and bounds do not create per-row geometry objects.

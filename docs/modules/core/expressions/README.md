@@ -11,6 +11,22 @@ libraries are exported from `@math.gl/dggs`.
 
 It extracts the expression machinery that has shipped inside `@deck.gl/json` and provides it as a core subpath. Its API remains experimental.
 
+## Feature support
+
+Expression-language features for reusable data accessors and application-provided function libraries.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature | math.gl support | Notes |
+| --- | --- | --- |
+| Expression parsing and evaluation | ✅ Implemented | [Parse and evaluate](./api-reference/expression-eval.md) JSEP expressions against an explicit context. |
+| Reusable compiled accessors | ✅ Implemented | Synchronous and asynchronous compile/evaluate APIs reuse parsed expressions. |
+| Custom operators and function libraries | ✅ Implemented | Isolated [function registries](./api-reference/function-registry.md), custom operators, basic math, and optional geospatial/DGGS libraries. |
+| Restricted property-access expressions | ✅ Implemented | [parseExpressionString](./api-reference/parse-expression-string.md) builds accessors with function calls disabled. |
+| Full JavaScript programs and process isolation | ❌ Not implemented | This is an expression evaluator, not a separate JavaScript runtime or security sandbox; registered functions run application code. |
+| Reactive dependency tracking | ❌ Not implemented | No incremental dependency graph, automatic invalidation, or reactive recomputation engine. |
+| Shader compilation and automatic differentiation | ❌ Not implemented | Compilation produces reusable JavaScript evaluators, without a GPU code generator or differentiation backend. |
+
 ## Installation
 
 ```bash

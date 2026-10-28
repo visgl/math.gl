@@ -8,6 +8,22 @@
 
 Use `import type` for declarations that add no runtime code:
 
+## Feature support
+
+Numeric representation and shape contracts shared by the math.gl packages.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature | math.gl support | Notes |
+| --- | --- | --- |
+| Number and typed-array declarations | ✅ Implemented | [NumericArray, TypedArray and constructor types](./api-reference/array-types.md), with BigInt typed arrays represented separately. |
+| Fixed-component array types | ✅ Implemented | Sized NumberArray/NumericArray variants cover commonly used vector, matrix, and bounds lengths. |
+| Runtime representation guards | ✅ Implemented | [Array and typed-array guards](./api-reference/array-types.md) include intrinsic, cross-realm Uint16 and Float16 checks. |
+| Half-float storage capability detection | ✅ Implemented | Native Float16Array detection and constructor selection; the Uint16 fallback stores encoded bits rather than decoded numeric values. |
+| Bounds and spheroid contracts | ✅ Implemented | [Bounds2D/3D](./api-reference/bounds.md) and SpheroidParameters describe geometry independently of renderers and CRS engines. |
+| Runtime enforcement of sized declarations | ❌ Not implemented | Type declarations do not validate buffer length, coordinate units, or physical meaning at runtime. |
+| Bundled Float16 arithmetic polyfill | ❌ Not implemented | The helpers select/detect storage. They do not supply numeric half-float array semantics when the runtime lacks them. |
+
 ```typescript
 import type {NumericArray, NumberArray3, Bounds3D} from '@math.gl/core';
 ```
