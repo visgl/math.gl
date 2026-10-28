@@ -213,3 +213,33 @@ test('native rhumb operations match Turf across the antimeridian', async () => {
   expect(rotation.values[0]).toBeCloseTo(0, 8);
   expect(rotation.values[1]).toBeCloseTo(-1, 8);
 });
+
+test('native generated circles, bounds polygons, arcs, and line sampling', async () => {
+  const api = await import('../src/turf');
+  const {materializeGeoArrowRows} = await import('../src/geoarrow/index');
+  const {default: oracleCircle} = await import('@turf/circle');
+  const input = column([point(10, 20), null]);
+  const generated = api.circle(input, 10, {steps: 8});
+  const actual = materializeGeoArrowRows(generated);
+  const expected = oracleCircle([10, 20], 10, {steps: 8}).geometry;
+  expect(actual[1]).toBeNull();
+  expect(actual[0].type).toBe('Polygon');
+  if (actual[0].type !== 'Polygon') throw new Error('Expected polygon');
+  actual[0].coordinates[0].forEach((p, i) => {
+    expect(p[0]).toBeCloseTo(expected.coordinates[0][i][0], 10);
+    expect(p[1]).toBeCloseTo(expected.coordinates[0][i][1], 10);
+  });
+  expect([...bbox(api.bboxPolygon(column([polygon]))).values]).toEqual([0, 0, 10, 10]);
+  expect(materializeGeoArrowRows(api.lineArc(input, 10, 0, 90, {steps: 8}))[1]).toBeNull();
+  const line = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [10, 0]
+      ]
+    }
+  ]);
+  expect(bbox(api.along(line, 5, {units: 'degrees'})).values[0]).toBeCloseTo(5, 10);
+  expect(bbox(api.along(line, 20, {units: 'degrees'})).values[0]).toBeCloseTo(10, 10);
+});

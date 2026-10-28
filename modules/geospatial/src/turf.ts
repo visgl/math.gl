@@ -656,3 +656,150 @@ export function transformRotate(
     ];
   });
 }
+
+function generatedPaths(
+  source: GeoArrowColumn,
+  count: number,
+  size: number,
+  polygon: boolean,
+  generate: (row: number, vertex: number) => Point | null
+): GeoArrowColumn {
+  const values = new Float64Array(count * size * 2),
+    validity = new Uint8Array(Math.ceil(count / 8));
+  const offsets = new Int32Array(count + 1);
+  for (let row = 0; row < count; row++) {
+    offsets[row + 1] = (row + 1) * size;
+    let present = true;
+    for (let vertex = 0; vertex < size; vertex++) {
+      const p = generate(row, vertex);
+      if (p) values.set(p, (row * size + vertex) * 2);
+      else present = false;
+    }
+    if (present) valid(validity, row);
+  }
+  const coordinates: GeoArrowArray = {
+    kind: 'fixed-size-list',
+    size: 2,
+    length: count * size,
+    child: {kind: 'primitive', length: values.length, values}
+  };
+  const paths: GeoArrowArray = {kind: 'list', length: count, offsets, child: coordinates};
+  const geometry: GeoArrowArray = polygon
+    ? {
+        kind: 'list',
+        length: count,
+        offsets: Int32Array.from({length: count + 1}, (_, i) => i),
+        child: paths,
+        validity: {values: validity}
+      }
+    : {...paths, validity: {values: validity}};
+  return {
+    encoding: polygon ? 'geoarrow.polygon' : 'geoarrow.linestring',
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    spatialReference: source.spatialReference,
+    metadata: source.metadata,
+    edges: source.edges,
+    chunks: [geometry]
+  };
+}
+
+function checkedSteps(steps = 64): number {
+  if (!Number.isInteger(steps) || steps < 4 || steps > 65536)
+    throw new RangeError('steps must be an integer from 4 through 65536');
+  return steps;
+}
+
+/** Generates one spherical circle polygon per point. */
+export function circle(
+  column: GeoArrowColumn,
+  radius: number,
+  options: TurfDistanceOptions & {steps?: number} = {}
+): GeoArrowColumn {
+  const input = rows(column, points),
+    steps = checkedSteps(options.steps);
+  if (!Number.isFinite(radius) || radius < 0)
+    throw new RangeError('radius must be finite and nonnegative');
+  const radians = radius / units(1, options.units);
+  return generatedPaths(column, input.length, steps + 1, true, (i, j) => {
+    const row = input[i],
+      p = row.valid ? point(row.array, row.index) : null;
+    return p ? destinationPoint(p, radians, (-360 * (j % steps)) / steps) : null;
+  });
+}
+
+/** Generates a rectangular polygon from each row's bounds. */
+export function bboxPolygon(column: GeoArrowColumn): GeoArrowColumn {
+  rows(column, native);
+  const bounds = getGeoArrowRowBounds(column);
+  return generatedPaths(column, bounds.length, 5, true, (i, j) => {
+    const b = bounds[i];
+    if (!b) return null;
+    return [b[j === 1 || j === 2 ? 2 : 0], b[j === 2 || j === 3 ? 3 : 1]];
+  });
+}
+
+/** Generates a clockwise spherical arc per center point. Equal bearings generate a full circle. */
+export function lineArc(
+  column: GeoArrowColumn,
+  radius: number,
+  bearing1: number,
+  bearing2: number,
+  options: TurfDistanceOptions & {steps?: number} = {}
+): GeoArrowColumn {
+  const input = rows(column, points),
+    steps = checkedSteps(options.steps);
+  if (![radius, bearing1, bearing2].every(Number.isFinite) || radius < 0)
+    throw new RangeError('Radius and bearings must be finite; radius must be nonnegative');
+  const start = ((bearing1 % 360) + 360) % 360,
+    end = ((bearing2 % 360) + 360) % 360;
+  const sweep = (end - start + 360) % 360 || 360;
+  const segments = Math.ceil((sweep * steps) / 360),
+    radians = radius / units(1, options.units);
+  return generatedPaths(column, input.length, segments + 1, false, (i, j) => {
+    const row = input[i],
+      p = row.valid ? point(row.array, row.index) : null;
+    return p ? destinationPoint(p, radians, start + Math.min((j * 360) / steps, sweep)) : null;
+  });
+}
+
+/** Samples each LineString at a surface distance from its start, clamped at its end. */
+export function along(
+  column: GeoArrowColumn,
+  distanceValue: number,
+  options: TurfDistanceOptions = {}
+): GeoArrowColumn {
+  const input = rows(column, ['geoarrow.linestring']);
+  if (!Number.isFinite(distanceValue) || distanceValue < 0)
+    throw new RangeError('distance must be finite and nonnegative');
+  const target = distanceValue / units(1, options.units);
+  return pointOutput(column, input.length, i => {
+    const row = input[i];
+    if (!row.valid || row.array.kind !== 'list') return null;
+    const [a, b] = range(row.array, row.index);
+    let previous: Point | null = null,
+      travelled = 0;
+    for (let j = a; j < b; j++) {
+      const p = point(row.array.child, j);
+      if (!p) {
+        previous = null;
+        continue;
+      }
+      if (previous) {
+        const segment = angular(previous, p);
+        if (travelled + segment >= target) {
+          const delta = (p[0] - previous[0]) * RAD;
+          const heading = Math.atan2(
+            Math.sin(delta) * Math.cos(p[1] * RAD),
+            Math.cos(previous[1] * RAD) * Math.sin(p[1] * RAD) -
+              Math.sin(previous[1] * RAD) * Math.cos(p[1] * RAD) * Math.cos(delta)
+          );
+          return destinationPoint(previous, target - travelled, heading / RAD);
+        }
+        travelled += segment;
+      } else if (target === 0) return p;
+      previous = p;
+    }
+    return previous;
+  });
+}
