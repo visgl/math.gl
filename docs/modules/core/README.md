@@ -16,6 +16,24 @@ DGGS expression functions live at `@math.gl/geospatial` and
 
 import Example from '@site/src/components/core-transforms';
 
+## Feature support
+
+Core numerical capabilities for graphics, transforms, and reusable coordinate objects.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature | math.gl support | Notes |
+| --- | --- | --- |
+| Vectors and small dense matrices | ✅ Implemented | [Vector2/3/4](./api-reference/vector.md) and [Matrix3/4](./api-reference/matrix.md), with mutable array-compatible storage. |
+| Quaternion and Euler rotations | ✅ Implemented | [Quaternions](./api-reference/quaternion.md), [Euler angles](./api-reference/euler.md), interpolation, and rotation-order conventions. |
+| Rigid poses and local frames | ✅ Implemented | [Pose](./api-reference/pose.md) and [local frames](./api-reference/local-frame.md); units and coordinate conventions remain explicit. |
+| Spherical and spheroid coordinates | ✅ Implemented | [SphericalCoordinates](./api-reference/spherical-coordinates.md) and [spheroid conversions](./api-reference/spheroid.md) within their documented shape domains. |
+| Reusable outputs and numeric interoperability | ✅ Implemented | [MathArray](./api-reference/math-array.md) operations interoperate with arrays and typed arrays; individual methods document ownership. |
+| Expressions and worker execution | ✅ Implemented | Optional [expression](./expressions/README.md) and [task](./tasks/README.md) capabilities have their own contracts and feature cards. |
+| General dense/sparse linear algebra | ❌ Not implemented | No public general-size QR/SVD, sparse factorization, or tensor engine. The matrix classes target graphics-sized transforms. |
+| Arbitrary-precision arithmetic and autodifferentiation | ❌ Not implemented | Numerical classes use JavaScript numbers; no arbitrary-precision scalar or gradient-tape backend. |
+| Built-in SIMD, WASM, or GPU numeric backend | ❌ Not implemented | CPU JavaScript math is implemented; accelerated numerical backends remain [roadmap research](https://github.com/visgl/math.gl/blob/master/dev-docs/ROADMAP.md). Worker scheduling is a separate capability. |
+
 ## Core transforms
 
 <Example inline />

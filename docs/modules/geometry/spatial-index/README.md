@@ -13,6 +13,26 @@ median-split BVH with typed-array storage, retaining original row/triangle indic
 construction reorders leaves. Inputs are copied. Empty indexes are supported. Bounding contact
 counts as overlap, distances are Euclidean input-coordinate units, and ties select the lowest row.
 
+## Feature support
+
+Modern spatial-index capabilities, with the current proof-of-concept limits kept explicit.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature | math.gl support | Notes |
+| --- | --- | --- |
+| Static box and point indexes | ✅ Implemented | BoxIndex and PointIndex use copied 2D/3D Cartesian data and retain original row indices. |
+| Triangle BVH queries | ✅ Implemented | TriangleBVH supports closest ray hits, nearest points, and bounded sphere/segment/capsule queries. |
+| Refinement and acceptance predicates | ✅ Implemented | Bounds candidates can be refined against application geometry; rejected hits do not hide valid farther surfaces. |
+| Deterministic work/result budgets | ✅ Implemented | Query envelopes report completion and work. Incomplete results are provisional, including apparent misses. |
+| Stable ties and masked geometry | ✅ Implemented | Deterministic original-index ties and explicit filtering preserve application row identity. |
+| Incremental insertion, deletion and refitting | ❌ Not implemented | Indexes are static snapshots; rebuild after changing geometry. |
+| SAH construction and k-nearest search | ❌ Not implemented | The [POC limits](#poc-limits) retain median-split construction and defer SAH/k-nearest APIs. |
+| Packed index persistence and continuation cursors | ❌ Not implemented | No public serialized-index restoration or resumable query cursor. Work budgets are not memory/time guarantees. |
+| Geodesic/ellipsoidal nearest-neighbor indexing | ❌ Not implemented | Queries use Cartesian Euclidean geometry, not geographic surface distance. |
+
+## Usage
+
 ```ts
 import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry';
 
