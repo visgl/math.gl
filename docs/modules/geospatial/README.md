@@ -35,6 +35,7 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 | `@math.gl/geospatial` | [Oblique ellipsoidal visibility and shared cut graphs](./api-reference/geographic-atlas.md) |
 | `@math.gl/geospatial` | [Ellipsoidal/rhumb latitude-domain clipping and adaptive projection](./api-reference/latitude-geographic-cuts.md) |
 | `@math.gl/geospatial` | [Geographic tile queries](./api-reference/geographic-tiles.md) and [tile-matrix utilities](./api-reference/tile-matrix.md) |
+| `@math.gl/geospatial/workers` | [Map setup and bulk projection in workers](../core/developer-guide/workers.md) |
 
 ## Classes
 

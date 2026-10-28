@@ -38,6 +38,17 @@ export default getVitestConfig({
       }
     },
     headless: {
+      server: {
+        headers: process.env.MATHGL_TEST_SHARED_MEMORY === '1' ? {
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp'
+        } : {}
+      },
+      define: {
+        'globalThis.__mathglSharedMemoryExpected': JSON.stringify(
+          process.env.MATHGL_TEST_SHARED_MEMORY === '1'
+        )
+      },
       optimizeDeps: {include: ['proj4/lib/datum_transform', 'geotiff']},
       test: {
         include: includePatterns,

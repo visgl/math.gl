@@ -1015,6 +1015,16 @@
       "import": "./dist/terrain/index.js",
       "require": "./dist/terrain/index.cjs"
     },
+    "./workers": {
+      "types": "./dist/workers/index.d.ts",
+      "import": "./dist/workers/index.js",
+      "require": "./dist/workers/index.cjs"
+    },
+    "./workers/operations": {
+      "types": "./dist/workers/operations.d.ts",
+      "import": "./dist/workers/operations.js",
+      "require": "./dist/workers/operations.cjs"
+    },
     "./turf": {
       "types": "./dist/turf.d.ts",
       "import": "./dist/turf.js",

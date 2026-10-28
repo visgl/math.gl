@@ -13,6 +13,7 @@ import { Deck, OrthographicView, COORDINATE_SYSTEM } from "@deck.gl/core";
 import { SimpleMeshLayer } from "@deck.gl/mesh-layers";
 import { PathLayer, PolygonLayer, TextLayer } from "@deck.gl/layers";
 import { prepareMapGrid } from "./prepare-map-grid.js";
+import { createMapPreparationGate } from "./map-preparation-gate.js";
 import { fitMapLayout } from "@math.gl/geospatial/discontinuous";
 import { Geometry } from "@luma.gl/engine";
 import { projectionGrid, projectCoordinate } from "./projection-grid.js";
@@ -66,6 +67,7 @@ export function createGlobalScene(
   onError,
   onLoading = () => {},
   onLongitude = () => {},
+  onProgress = () => {},
 ) {
   let current,
     options,
@@ -80,6 +82,7 @@ export function createGlobalScene(
     route = [];
   const animations = new WeakMap();
   const prepared = new Map();
+  const preparationGate = createMapPreparationGate();
   let pending,
     disposed = false,
     fields;
@@ -158,6 +161,7 @@ export function createGlobalScene(
   }
   function render(model, opts) {
     if (disposed) return;
+    if (!preparationGate.allows(opts.view)) return;
     // Options may change repeatedly while a mesh is pending; honor the latest
     // requested value even when it equals the last displayed longitude.
     if (opts.longitude !== undefined) longitude = Number(opts.longitude);
@@ -165,7 +169,7 @@ export function createGlobalScene(
       pending.controller.abort();
       pending = null;
     }
-    if (DISCONTINUOUS_VIEWS[opts.view] && !prepared.has(opts.view)) {
+    if (!prepared.has(opts.view)) {
       if (pending) {
         pending.model = model;
         pending.opts = opts;
@@ -175,8 +179,12 @@ export function createGlobalScene(
       pending = request;
       canvas.setAttribute("aria-busy", "true");
       onLoading(true);
+      onProgress({phase: 'starting', completed: 0});
       prepareMapGrid(opts.view, gridStep(opts.view), {
         signal: request.controller.signal,
+        onProgress: (progress) => {
+          if (!disposed && pending === request) onProgress(progress);
+        },
       })
         .then((grid) => {
           if (disposed || pending !== request) return;
@@ -194,7 +202,7 @@ export function createGlobalScene(
           render(request.model, request.opts);
         })
         .catch((error) => {
-          if (request.controller.signal.aborted || disposed) return;
+          if (request.controller.signal.aborted || disposed || pending !== request) return;
           pending = null;
           canvas.removeAttribute("aria-busy");
           onLoading(false);
@@ -700,6 +708,19 @@ export function createGlobalScene(
   resize.observe(canvas);
   return {
     render,
+    cancelPreparation() {
+      if (!pending) return {cancelledView: null, displayedView: options?.view};
+      const request = pending;
+      pending = null;
+      const cancelledView = preparationGate.cancel(request);
+      canvas.removeAttribute("aria-busy");
+      onLoading(false);
+      onProgress(null);
+      return {cancelledView, displayedView: options?.view};
+    },
+    retryPreparation() {
+      preparationGate.retry();
+    },
     finalize() {
       disposed = true;
       pending?.controller.abort();

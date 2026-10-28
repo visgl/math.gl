@@ -29,6 +29,9 @@ export default function GlobalIceAge({onMode, onOlderReady, olderModel, earlier 
     [error, setError] = useState('');
   const [longitude, setLongitude] = useState(0);
   const [preparingMap, setPreparingMap] = useState(false);
+  const [cancelledMap, setCancelledMap] = useState(null);
+  const [mapRetry, setMapRetry] = useState(0);
+  const [mapProgress, setMapProgress] = useState(null);
   const [climateModel, setClimateModel] = useState(null);
   const [olderStatus, setOlderStatus] = useState('Loading earlier ice masks…');
   const model = earlier && olderModel ? olderModel : baseModel;
@@ -86,7 +89,8 @@ export default function GlobalIceAge({onMode, onOlderReady, olderModel, earlier 
       canvas.current,
       e => setError(e.message),
       setPreparingMap,
-      setLongitude
+      setLongitude,
+      setMapProgress
     );
     return () => {
       scene.current?.finalize();
@@ -103,7 +107,10 @@ export default function GlobalIceAge({onMode, onOlderReady, olderModel, earlier 
         labels,
         longitude
       });
-  }, [model, age, view, showIce, ghost, labels, longitude]);
+  }, [model, age, view, showIce, ghost, labels, longitude, mapRetry]);
+  useEffect(() => {
+    if (cancelledMap && view !== cancelledMap) setCancelledMap(null);
+  }, [view, cancelledMap]);
   useEffect(() => {
     if (!cycleViews || !model || preparingMap) return;
     const views = Object.keys(GLOBAL_VIEWS);
@@ -198,7 +205,32 @@ export default function GlobalIceAge({onMode, onOlderReady, olderModel, earlier 
         )}
         {preparingMap && (
           <div className="alpine-loading" role="status">
-            Preparing map…
+            {mapProgress?.phase === 'bulk-projection' ? 'Projecting coordinates' : 'Preparing map'}
+            {mapProgress?.total > 1
+              ? `… ${Math.round(100 * mapProgress.completed / mapProgress.total)}%`
+              : '…'}
+            <progress
+              aria-label="Map preparation progress"
+              max={mapProgress?.total || 1}
+              value={mapProgress?.total ? mapProgress.completed : undefined}
+            />
+            <button onClick={() => {
+              setCycleViews(false);
+              setPlaying(false);
+              const {cancelledView, displayedView} = scene.current?.cancelPreparation() || {};
+              setCancelledMap(cancelledView && (!displayedView || displayedView === cancelledView) ? cancelledView : null);
+              setView(displayedView || 'globe');
+            }}>Cancel</button>
+          </div>
+        )}
+        {cancelledMap === view && !preparingMap && (
+          <div className="alpine-loading" role="status">
+            Map preparation cancelled.{' '}
+            <button onClick={() => {
+              scene.current?.retryPreparation();
+              setCancelledMap(null);
+              setMapRetry(value => value + 1);
+            }}>Retry</button>
           </div>
         )}
         {model && error && (

@@ -35,6 +35,16 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./worker-utils": {
+      "types": "./dist/worker-utils/index.d.ts",
+      "import": "./dist/worker-utils/index.js",
+      "require": "./dist/worker-utils/index.cjs"
+    },
+    "./tasks": {
+      "types": "./dist/tasks/index.d.ts",
+      "import": "./dist/tasks/index.js",
+      "require": "./dist/tasks/index.cjs"
     }
   },
   "files": [
@@ -44,9 +54,20 @@
     "LICENSE",
     "THIRD-PARTY-NOTICES.md",
     "ARROW-NOTICE.txt",
-    "APACHE-2.0-LICENSE.txt"
+    "APACHE-2.0-LICENSE.txt",
+    "LOADERS-GL-LICENSE.txt"
   ],
   "sideEffects": [
     "./src/lib/common.js"
-  ]
+  ],
+  "browser": {
+    "./dist/worker-utils/lib/node/worker_threads.js": "./dist/worker-utils/lib/node/worker_threads-browser.js",
+    "./src/worker-utils/lib/node/worker_threads.ts": "./src/worker-utils/lib/node/worker_threads-browser.ts",
+    "./dist/worker-utils/lib/process-utils/child-process-proxy.js": "./dist/worker-utils/lib/process-utils/child-process-proxy.browser.js",
+    "./src/worker-utils/lib/process-utils/child-process-proxy.ts": "./src/worker-utils/lib/process-utils/child-process-proxy.browser.ts",
+    "child_process": false,
+    "fs": false,
+    "module": false,
+    "path": false
+  }
 }

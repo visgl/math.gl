@@ -1,14 +1,19 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import { discontinuousGrid } from "./discontinuous-views.js";
+import {createWorker} from '@math.gl/core/worker-utils';
+import {prepareDiscontinuousGrid} from './discontinuous-views.js';
+import {prepareProjectionGrid} from './projection-grid.js';
 
-self.onmessage = ({ data: { view, step } }) => {
-  try {
-    const { map, ...grid } = discontinuousGrid(view, step);
-    // MapEngine owns functions; only geometry and layout data cross the boundary.
-    self.postMessage(grid, [grid.positions.buffer, grid.indices.buffer]);
-  } catch (error) {
-    self.postMessage({ error: error.message });
+createWorker(async ({view, step, discontinuous}, _options, context) => {
+  if (!discontinuous) {
+    const grid = await prepareProjectionGrid(view, context);
+    // The worker pool reuses cached grids; transfer only independent result buffers.
+    return {...grid, positions: grid.positions.slice(), indices: grid.indices.slice()};
   }
-};
+  const {map, ...grid} = await prepareDiscontinuousGrid(view, step, {
+    signal: {throwIfAborted: context.throwIfAborted},
+    onProgress: context.reportProgress
+  });
+  return {...grid, positions: grid.positions.slice(), indices: grid.indices.slice(), preparedMap: map.toPrepared()};
+});

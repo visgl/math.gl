@@ -1,0 +1,10 @@
+{
+  "name": "mathgl-worker-comparators",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "comlink": "4.4.2",
+    "piscina": "5.3.2",
+    "workerpool": "10.0.3"
+  }
+}

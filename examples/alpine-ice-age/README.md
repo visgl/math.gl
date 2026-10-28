@@ -9,6 +9,11 @@ by default; disable Repeat animation to stop at the present.
 
 ## Run
 
+Map setup and bulk projection run in shared worker pools when workers are
+available. The loading indicator shows phase progress. Cancel stops pending work,
+returns to the globe and disables automatic cycling; selecting another view
+also cancels the obsolete job.
+
 From the repository root, run `yarn workspace math.gl-alpine-ice-age start`.
 Use `yarn workspace math.gl-alpine-ice-age build` for a standalone build and
 `yarn workspace math.gl-alpine-ice-age test` for dataset/interpolation checks.

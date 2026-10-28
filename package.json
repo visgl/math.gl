@@ -21,6 +21,7 @@
     "check:source-headers": "node scripts/check-source-headers.mjs",
     "check:curves-package": "node modules/geometry/curves/scripts/check-package.mjs",
     "check:crs-types": "npx tsc --project test/types/crs/tsconfig.json",
+    "check:worker-types": "npx tsc --project test/types/workers/tsconfig.json",
     "check:geoarrow-boundary": "node modules/geospatial/geoarrow/scripts/check-package-boundary.mjs",
     "check:timezone-types": "npx tsc --project test/types/timezone/tsconfig.json",
     "check:timezone-boundary": "node modules/earth/timezone/scripts/check-package-boundary.mjs",
@@ -49,7 +50,9 @@
     "check:tree-shaking": "node scripts/check-tree-shaking.mjs",
     "check:packages": "node scripts/check-packages.mjs",
     "check:attributions": "node scripts/check-attributions.mjs",
-    "check:terrain-dem": "node scripts/qualify-terrain-dem.mjs"
+    "check:terrain-dem": "node scripts/qualify-terrain-dem.mjs",
+    "benchmark:workers": "node test/bench/workers/index.mjs",
+    "check:tasks": "node modules/core/scripts/check-tasks.mjs"
   },
   "devDependencies": {
     "@turf/destination": "^7.4.0",

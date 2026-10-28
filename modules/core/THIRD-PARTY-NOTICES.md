@@ -8,6 +8,7 @@ latest available upstream releases.
 
 | Source / author | Use and retained notice |
 | --- | --- |
+| loaders.gl / vis.gl contributors | Worker runtime copied from loaders.gl master `504d859ced`, then adapted in `src/worker-utils`; MIT; [loaders.gl license](./LOADERS-GL-LICENSE.txt). |
 | gl-matrix — Brandon Jones, Colin MacKenzie IV | Adapted kernels in `src/gl-matrix`; MIT; complete terms in [LICENSE](./LICENSE). This is retained source, not merely API inspiration. |
 | three.js authors | Adapted math methods, including Euler conversion; MIT, [LICENSE](./LICENSE). Other methods provide API compatibility without implying source copying. |
 | proj4js authors | Shared spheroid conversion arithmetic; MIT, [PROJ4-LICENSE.md](./PROJ4-LICENSE.md). |

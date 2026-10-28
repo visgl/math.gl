@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {triangulateSourcePolygon, isConvexSourcePolygon} from './triangulate-source-polygon.js';
 import {MapEngine, MAP_PROJECTIONS} from '@math.gl/geospatial/discontinuous';
+import {setupMap} from '@math.gl/geospatial/workers/operations';
 import {elasticI, elasticII, elasticIII} from '@math.gl/geospatial/elastic';
 import {MYRIAHEDRAL_VIEWS} from './map-options.js';
 export {MYRIAHEDRAL_VIEWS, DISCONTINUOUS_VIEWS} from './map-options.js';
@@ -87,7 +88,7 @@ const definitions = {
   interruptedMollweide: {type: 'interrupted-mollweide'},
   interruptedHomolosine: {type: 'goode'}
 };
-export function createMap(view) {
+export function createMap(view, context) {
   const options = MYRIAHEDRAL_VIEWS[view];
   const panels = options?.dggs ? dggsPanels(options.dggs) : null;
   const definition = options
@@ -98,13 +99,12 @@ export function createMap(view) {
       }
     : definitions[view];
   if (!definition) throw new Error(`Unknown map: ${view}`);
-  return new MapEngine(
-    {version: 1, id: view, definition},
-    {
+  const description = {version: 1, id: view, definition};
+  const bindings = {
       isLand: ([lon, lat]) => isLand(lon, lat),
       edgeWeight: panels ? (edge, weight) => dggsCellWeight(edge, weight, panels) : undefined
-    }
-  );
+  };
+  return context ? setupMap(description, context, bindings) : new MapEngine(description, bindings);
 }
 const cache = new Map();
 
@@ -131,7 +131,7 @@ export function sampleField(field, sample) {
 }
 
 /** Clip source grid cells before triangulation; each emitted triangle belongs to one region. */
-function* buildGrid(view, step = 1) {
+function* buildGrid(view, step = 1, context) {
   const key = `${view}:${step}`;
   if (cache.has(key)) {
     const cached = cache.get(key);
@@ -140,7 +140,7 @@ function* buildGrid(view, step = 1) {
     return cached;
   }
   if (!(step > 0 && 180 % step === 0)) throw new Error('Grid step must divide 180');
-  const map = createMap(view);
+  const map = createMap(view, context);
   const layout = map.getLayout();
   // Match sampling accuracy to the fitted map extent, including unbounded kernels
   // whose finite display horizon spans many more map units than ordinary maps.
@@ -344,18 +344,24 @@ export function discontinuousGrid(view, step = 1) {
 export async function prepareDiscontinuousGrid(
   view,
   step = 1,
-  {signal, yieldTask = () => new Promise(resolve => setTimeout(resolve, 0))} = {}
+  {signal, onProgress = () => {}, yieldTask = () => new Promise(resolve => setTimeout(resolve, 0))} = {}
 ) {
-  const builder = buildGrid(view, step);
+  const builder = buildGrid(view, step, {reportProgress: onProgress});
   try {
     // Paint the selection/loading state before starting any geometry work.
     await yieldTask();
     let deadline = performance.now() + 8;
+    let completed = 0;
     while (true) {
       signal?.throwIfAborted();
       const next = builder.next();
-      if (next.done) return next.value;
+      if (next.done) {
+        onProgress({phase: 'map-grid', completed, total: completed, unit: 'chunks'});
+        return next.value;
+      }
+      completed++;
       if (performance.now() >= deadline) {
+        onProgress({phase: 'map-grid', completed, unit: 'chunks'});
         await yieldTask();
         deadline = performance.now() + 8;
       }

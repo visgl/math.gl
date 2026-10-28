@@ -74,6 +74,20 @@
       },
       {
         "type": "category",
+        "label": "@math.gl/core/tasks",
+        "items": [
+          "modules/core/tasks/README",
+          "modules/core/developer-guide/workers",
+          "modules/core/tasks/developer-guide/execution",
+          "modules/core/tasks/developer-guide/custom-workers",
+          "modules/core/tasks/developer-guide/persistent-resources",
+          "modules/core/tasks/developer-guide/shared-memory",
+          "modules/core/tasks/developer-guide/benchmarks",
+          "modules/core/tasks/api-reference/runtime"
+        ]
+      },
+      {
+        "type": "category",
         "label": "@math.gl/core/expressions (experimental)",
         "items": [
           "modules/core/expressions/README",
