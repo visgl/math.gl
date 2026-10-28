@@ -162,3 +162,31 @@ test('null coordinate components and exterior rings do not produce false results
   expect(area(missingOuter).values[0]).toBe(0);
   expect(booleanPointInPolygon(column([point(1, 1)]), missingOuter).values[0]).toBe(0);
 });
+
+test('coordinate transforms preserve rows and round-trip Web Mercator', async () => {
+  const {truncate, toMercator, toWgs84} = await import('../src/turf');
+  const input = column([point(12.3456789, 45.1234567), null]);
+  const rounded = truncate(input, {precision: 3});
+  expect([...bbox(rounded).values].slice(0, 2)).toEqual([12.346, 45.123]);
+  const output = toWgs84(toMercator(input));
+  const bounds = bbox(output);
+  expect(bounds.validity[0]).toBe(1);
+  expect(bounds.values[0]).toBeCloseTo(12.3456789, 9);
+  expect(bounds.values[1]).toBeCloseTo(45.1234567, 9);
+  expect(() => truncate(input, {precision: -1})).toThrow(RangeError);
+});
+
+test('batched destination, midpoint and bounds center', async () => {
+  const {destination, midpoint, center} = await import('../src/turf');
+  const {default: turfDestination} = await import('@turf/destination');
+  const source = column([point(10, 20), null]);
+  const expected = turfDestination([10, 20], 100, 45).geometry.coordinates;
+  const actual = bbox(destination(source, 100, 45));
+  expect(actual.values[0]).toBeCloseTo(expected[0], 10);
+  expect(actual.values[1]).toBeCloseTo(expected[1], 10);
+  expect(actual.validity[0]).toBe(1);
+  const half = bbox(midpoint(column([point(0, 0)]), column([point(20, 0)])));
+  expect(half.values[0]).toBeCloseTo(10, 10);
+  expect(half.values[1]).toBeCloseTo(0, 10);
+  expect([...bbox(center(column([polygon]))).values]).toEqual([5, 5, 5, 5]);
+});

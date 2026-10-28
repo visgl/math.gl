@@ -4,7 +4,7 @@
 
 import type {GeoArrowArray, GeoArrowColumn} from './geoarrow/types';
 import {isGeoArrowValueValid} from './geoarrow/layout';
-import {getGeoArrowRowBounds} from './geoarrow/kernels';
+import {getGeoArrowRowBounds, mapGeoArrowCoordinates} from './geoarrow/kernels';
 
 /** A nullable, row-aligned numeric or boolean result. Validity is an Arrow bitmap. */
 export type TurfBatchResult<T extends Float64Array | Uint8Array> = {
@@ -385,4 +385,159 @@ export function booleanPointInPolygon(
     valid(out.validity, i);
   }
   return out;
+}
+
+/** Deep-copies native coordinate and topology buffers. */
+export function clone(column: GeoArrowColumn): GeoArrowColumn {
+  rows(column, native);
+  return mapGeoArrowCoordinates(column, coordinate => coordinate);
+}
+
+/** Rounds coordinate ordinates to a decimal precision without mutating the input. */
+export function truncate(
+  column: GeoArrowColumn,
+  options: {precision?: number} = {}
+): GeoArrowColumn {
+  rows(column, native);
+  const precision = options.precision ?? 6;
+  if (!Number.isInteger(precision) || precision < 0 || precision > 15) {
+    throw new RangeError('precision must be an integer between 0 and 15');
+  }
+  const factor = 10 ** precision;
+  return mapGeoArrowCoordinates(column, coordinate =>
+    coordinate.map(value => Math.round(value * factor) / factor)
+  );
+}
+
+/** Projects longitude/latitude degrees to spherical Web Mercator meters. */
+export function toMercator(column: GeoArrowColumn): GeoArrowColumn {
+  rows(column, native);
+  const radius = 6378137;
+  const maximum = 20037508.342789244;
+  return {
+    ...mapGeoArrowCoordinates(column, coordinate => {
+      const longitude =
+        Math.abs(coordinate[0]) <= 180
+          ? coordinate[0]
+          : coordinate[0] - Math.sign(coordinate[0]) * 360;
+      const x = radius * longitude * RAD;
+      const y = radius * Math.log(Math.tan(Math.PI / 4 + (coordinate[1] * RAD) / 2));
+      return [
+        Math.max(-maximum, Math.min(maximum, x)),
+        Math.max(-maximum, Math.min(maximum, y)),
+        ...coordinate.slice(2)
+      ];
+    }),
+    spatialReference: null
+  };
+}
+
+/** Converts spherical Web Mercator meters to longitude/latitude degrees. */
+export function toWgs84(column: GeoArrowColumn): GeoArrowColumn {
+  rows(column, native);
+  return {
+    ...mapGeoArrowCoordinates(column, coordinate => [
+      coordinate[0] / 6378137 / RAD,
+      (2 * Math.atan(Math.exp(coordinate[1] / 6378137)) - Math.PI / 2) / RAD,
+      ...coordinate.slice(2)
+    ]),
+    spatialReference: null
+  };
+}
+
+function pointOutput(
+  source: GeoArrowColumn,
+  count: number,
+  calculate: (index: number) => Point | null
+): GeoArrowColumn {
+  const values = new Float64Array(count * 2);
+  const validity = new Uint8Array(Math.ceil(count / 8));
+  for (let i = 0; i < count; i++) {
+    const p = calculate(i);
+    if (p) {
+      values.set(p, i * 2);
+      valid(validity, i);
+    }
+  }
+  return {
+    encoding: 'geoarrow.point',
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    spatialReference: source.spatialReference,
+    edges: source.edges,
+    chunks: [
+      {
+        kind: 'fixed-size-list',
+        size: 2,
+        length: count,
+        validity: {values: validity},
+        child: {kind: 'primitive', length: values.length, values}
+      }
+    ]
+  };
+}
+
+/** Center of each geometry's XY bounding box. */
+export function center(column: GeoArrowColumn): GeoArrowColumn {
+  rows(column, native);
+  const bounds = getGeoArrowRowBounds(column);
+  return pointOutput(column, bounds.length, i =>
+    bounds[i] ? [(bounds[i][0] + bounds[i][2]) / 2, (bounds[i][1] + bounds[i][3]) / 2] : null
+  );
+}
+
+function destinationPoint(p: Point, radians: number, bearingDegrees: number): Point {
+  const latitude = p[1] * RAD,
+    bearing = bearingDegrees * RAD;
+  const y = Math.asin(
+    Math.sin(latitude) * Math.cos(radians) +
+      Math.cos(latitude) * Math.sin(radians) * Math.cos(bearing)
+  );
+  const x =
+    p[0] * RAD +
+    Math.atan2(
+      Math.sin(bearing) * Math.sin(radians) * Math.cos(latitude),
+      Math.cos(radians) - Math.sin(latitude) * Math.sin(y)
+    );
+  return [x / RAD, y / RAD];
+}
+
+/** Destination for each point at a common great-circle distance and bearing. */
+export function destination(
+  column: GeoArrowColumn,
+  distanceValue: number,
+  bearingDegrees: number,
+  options: TurfDistanceOptions = {}
+): GeoArrowColumn {
+  if (!Number.isFinite(distanceValue) || !Number.isFinite(bearingDegrees))
+    throw new RangeError('Distance and bearing must be finite');
+  const input = rows(column, points),
+    radians = distanceValue / units(1, options.units);
+  return pointOutput(column, input.length, i => {
+    const row = input[i];
+    const p = row.valid ? point(row.array, row.index) : null;
+    return p ? destinationPoint(p, radians, bearingDegrees) : null;
+  });
+}
+
+/** Great-circle midpoint with row pairing or single-row broadcasting. */
+export function midpoint(a: GeoArrowColumn, b: GeoArrowColumn): GeoArrowColumn {
+  const left = rows(a, points),
+    right = rows(b, points),
+    count = paired(left, right);
+  return pointOutput(a, count, i => {
+    const x = left[left.length === 1 ? 0 : i],
+      y = right[right.length === 1 ? 0 : i];
+    if (!x.valid || !y.valid) return null;
+    const p = point(x.array, x.index),
+      q = point(y.array, y.index);
+    if (!p || !q) return null;
+    const delta = (q[0] - p[0]) * RAD;
+    const angle = Math.atan2(
+      Math.sin(delta) * Math.cos(q[1] * RAD),
+      Math.cos(p[1] * RAD) * Math.sin(q[1] * RAD) -
+        Math.sin(p[1] * RAD) * Math.cos(q[1] * RAD) * Math.cos(delta)
+    );
+    return destinationPoint(p, angular(p, q) / 2, angle / RAD);
+  });
 }
