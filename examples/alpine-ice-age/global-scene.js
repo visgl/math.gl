@@ -709,13 +709,14 @@ export function createGlobalScene(
   return {
     render,
     cancelPreparation() {
-      if (!pending) return null;
+      if (!pending) return {cancelledView: null, displayedView: options?.view};
       const request = pending;
       pending = null;
-      const view = preparationGate.cancel(request);
+      const cancelledView = preparationGate.cancel(request);
       canvas.removeAttribute("aria-busy");
       onLoading(false);
-      return view;
+      onProgress(null);
+      return {cancelledView, displayedView: options?.view};
     },
     retryPreparation() {
       preparationGate.retry();
