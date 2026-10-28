@@ -15,6 +15,7 @@ const files = new Map();
 for (const [name, example, entry] of [
   ['unfold','geometry/unfolding-polyhedron','main.ts'],
   ['globe','geospatial/globe-primitives','app.js'],
+  ['albers','geospatial/albers-usa','standalone.js'],
   ['expressions','core/expressions','main.tsx']
 ]) {
   const plugins = name === 'expressions' ? [{
@@ -91,6 +92,20 @@ try {
   });
   await page.waitForFunction(()=>window.reviewGL.isContextLost());
   assert.equal(await page.locator('#app').evaluate(root=>root.childElementCount),0);
+
+  await page.goto(url+'/albers');
+  for (const width of [1200, 600, 375]) {
+    await page.setViewportSize({width, height:1000});
+    const info = page.locator('.example-info-box');
+    await info.scrollIntoViewIfNeeded();
+    assert((await info.boundingBox()).height > 100, 'Inline panel must retain its natural content height');
+    const toggle = info.getByRole('button', {name: 'Albers USA', exact:true});
+    await toggle.click();
+    await page.locator('.view-toggle').waitFor({state:'hidden'});
+    await toggle.click();
+    await page.locator('.view-toggle').waitFor({state:'visible'});
+  }
+  await page.setViewportSize({width:1200,height:1000});
 
   await page.goto(url+'/globe');
   await page.waitForFunction(()=>document.querySelector('#imagery-status').textContent.includes('unavailable'));

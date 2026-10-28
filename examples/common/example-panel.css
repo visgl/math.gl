@@ -46,3 +46,9 @@ aside.example-panel.deck-widget-container {
  * measurement back into the outer box before its content lays out. */
 .example-panel > .deck-widget-box { max-height: none !important; }
 .example-panel > .deck-widget-box > section > header { display: block !important; margin: 0 !important; border: 0; }
+
+/* Inline controls have no predetermined host height. Bound their content against
+ * the viewport instead of the empty host measured during the first mount. */
+.example-info-box > .deck-widget-box > section {
+  max-height: min(80vh, 720px) !important;
+}
