@@ -5,13 +5,14 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "test": "node --test provider.test.mjs integration.test.mjs",
+    "test": "node --test provider.test.mjs batch.test.mjs integration.test.mjs",
     "build": "node build-browser.mjs",
     "start": "node server.mjs",
     "test:browser": "node browser-test.mjs",
     "example": "node node.mjs"
   },
   "dependencies": {
+    "@math.gl/core": "workspace:*",
     "@math.gl/geospatial": "workspace:*",
     "proj-wasm": "0.1.0"
   },

@@ -16186,6 +16186,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math.gl-proj-wasm-crs@workspace:examples/geospatial/proj-wasm-crs"
   dependencies:
+    "@math.gl/core": "workspace:*"
     "@math.gl/geospatial": "workspace:*"
     esbuild: "npm:^0.28.1"
     playwright: "npm:^1.62.1"

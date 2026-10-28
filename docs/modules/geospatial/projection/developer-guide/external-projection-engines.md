@@ -320,3 +320,23 @@ The interface unifies method names, not projection semantics or capabilities.
 Keep the supported CRS pairs, units, axis conventions and dimensional limits of
 each adapter explicit. A new backend does not become a math.gl `ProjectionPlugin`;
 use a plugin instead when math.gl should own CRS parsing and datum operations.
+
+## Asynchronous proj-wasm batches before rendering
+
+Applications written against math.gl's projection interfaces can also use asynchronous external
+engines by separating preprocessing from synchronous rendering. The extended
+[proj-wasm example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/proj-wasm-crs)
+prepares one normalized operation, transforms bounded packed XYZ batches, retains source row IDs,
+and transfers the resulting buffers to a math.gl task worker. It exercises real proj-wasm in both
+Node and Chromium; proj-wasm remains a private example dependency.
+
+Its latest-view runner discards superseded results, while the processor serializes operation reuse,
+rejects partial failures and drains accepted work before disposal. Cancellation is cooperative rather
+than native-call preemption. Copying into and out of upstream WASM is separate from the explicitly
+verified transfer of completed buffers to the downstream task. Changed CRS/operation/grid state
+requires a new processor; source data and view revisions must still participate in result invalidation.
+
+This recipe does not put Promise-returning functions into `CRSDescriptor.converter`. An async-only
+engine produces prepared geometry before the renderer consumes it. It also does not infer spherical
+stream clipping or repair topology: combine it with explicit geometry preparation for lines, polygons
+and rasters. Its XYZ/time policy and ownership boundaries are documented in the example README.
