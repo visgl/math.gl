@@ -120,7 +120,16 @@ export async function* runTaskInBatches<Input, Output, Options extends object>(
         finished = true;
         return;
       }
-      yield await runTask(task, next.value, options, context, jobContext);
+      // Options/context belong to the whole iterable, not to its first request.
+      // Retain their caller-owned buffers while each independent input may be transferred.
+      const request = reusableBatchRequest<Input, Options>(next.value, options, jobContext);
+      yield await runTask<Input, Output, Options>(
+        task,
+        next.value,
+        request.options,
+        context,
+        request.context
+      );
     }
   } finally {
     if (!finished) {
@@ -299,4 +308,40 @@ function yieldToEventLoop(signal?: AbortSignal): Promise<void> {
     signal?.addEventListener('abort', abort, {once: true});
     if (signal?.aborted) abort();
   });
+}
+
+/** Copy reusable metadata per request, preserving aliases within options/context. */
+function reusableBatchRequest<Input, Options extends object>(
+  input: Input,
+  options: TaskOptions<Input> & Partial<Options>,
+  jobContext: WorkerJobContext
+): {options: TaskOptions<Input> & Partial<Options>; context: WorkerJobContext} {
+  if (options.inputOwnership === 'copy' || options.inputOwnership === 'share') {
+    return {options, context: jobContext};
+  }
+  const {
+    signal,
+    onProgress,
+    onMetrics,
+    onDebug,
+    onExecution,
+    workerPool,
+    admission,
+    execution,
+    mainThread,
+    sharedState,
+    ...portable
+  } = options;
+  const metadata = {
+    options: getTransferListForWriter(portable),
+    context: getTransferListForWriter(jobContext)
+  };
+  const metadataTransfers = new Set(getTransferList(metadata));
+  if (getTransferList(input).some(buffer => metadataTransfers.has(buffer))) {
+    throw new Error(
+      'Transferred batch input aliases reusable options/context; use inputOwnership: copy'
+    );
+  }
+  const copied = structuredClone(metadata);
+  return {options: {...options, ...copied.options}, context: copied.context};
 }

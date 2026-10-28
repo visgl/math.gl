@@ -14,6 +14,10 @@ examples, start with [custom workers](../developer-guide/custom-workers.md),
 `runTaskInBatches(task, inputIterable, options?, context?, jobContext?)` returns an
 AsyncIterable of independent atomic outputs, in input order, with one request in
 flight. It does not invoke the descriptor's stateful `processInBatches` method.
+Reusable option/context buffers are copied per request when batch inputs transfer;
+input/metadata transfer aliases are rejected before detachment (use copy mode).
+Shared metadata remains shared; transfer-only metadata must be installed in a
+persistent resource instead of being reused across requests.
 
 `TaskOptions<Input>` extends worker options with:
 

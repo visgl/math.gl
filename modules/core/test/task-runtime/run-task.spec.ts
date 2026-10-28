@@ -265,3 +265,80 @@ test('async routing diagnostics cannot produce an unhandled rejection or fail th
     })
   ).toEqual(new Float64Array([2]));
 });
+
+test('independent transfer batches retain reusable option/context buffers across local and worker routes', async () => {
+  const weights = new Float64Array([3]);
+  const backing = new ArrayBuffer(16);
+  const optionView = new Uint8Array(backing, 0, 8);
+  const contextView = new Uint8Array(backing, 8, 8);
+  const inputs = [new Float64Array([1]), new Float64Array([2, 3])];
+  const routes = [];
+  const result = [];
+  const local = {
+    ...task,
+    process: (input, options, _context, jobContext) => {
+      expect(options.optionView.buffer).toBe(jobContext.contextView.buffer);
+      expect(options.weights[0]).toBe(3);
+      return input.map(value => value * (options.scale ?? 2));
+    }
+  };
+  for await (const output of runTaskInBatches(
+    local,
+    inputs,
+    {
+      mainThread: {maxSize: 8},
+      weights,
+      optionView,
+      onExecution: route => routes.push(route)
+    },
+    {},
+    {contextView}
+  ))
+    result.push(output);
+  expect(routes).toEqual(['main-thread', 'worker']);
+  expect(result).toEqual([new Float64Array([2]), new Float64Array([4, 6])]);
+  expect(inputs.map(input => input.byteLength)).toEqual([0, 0]);
+  expect(weights.byteLength).toBe(8);
+  expect(backing.byteLength).toBe(16);
+});
+
+test('all-worker transfer batches keep metadata reusable after the first request', async () => {
+  const weights = new Float64Array([3]);
+  const contextData = new Float64Array([4]);
+  const outputs = [];
+  for await (const output of runTaskInBatches(
+    task,
+    [new Float64Array([1]), new Float64Array([2])],
+    {execution: 'worker', weights},
+    {},
+    {contextData}
+  )) {
+    outputs.push(output[0]);
+  }
+  expect(outputs).toEqual([2, 4]);
+  expect(weights.byteLength).toBe(8);
+  expect(contextData.byteLength).toBe(8);
+});
+
+test('transfer aliases with reusable metadata reject before detachment; copy preserves aliases', async () => {
+  const input = new Float64Array([1]);
+  const transferring = runTaskInBatches(task, [input], {execution: 'main-thread', metadata: input});
+  await expect(transferring[Symbol.asyncIterator]().next()).rejects.toThrow('aliases reusable');
+  expect(input.byteLength).toBe(8);
+  const aliasTask = {
+    ...task,
+    process: (data, options) => {
+      expect(data.buffer).toBe(options.metadata.buffer);
+      return data;
+    }
+  };
+  const copied = [];
+  for await (const result of runTaskInBatches(aliasTask, [input], {
+    execution: 'main-thread',
+    inputOwnership: 'copy',
+    metadata: input
+  }))
+    copied.push(result);
+  expect(copied[0]).toEqual(input);
+  expect(input.byteLength).toBe(8);
+});

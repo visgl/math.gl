@@ -84,6 +84,14 @@ batches does not monopolize the microtask queue. It cannot preempt one expensive
 processor call. Aborting while waiting for a blocked producer rejects promptly and
 requests best-effort iterator cleanup.
 
+Reusable ordinary buffers in options and job context are copied per request, so
+transferring one batch does not detach metadata needed by later batches. Each
+batch's own input still transfers in transfer mode. Input sharing a transferable
+buffer with reusable metadata is rejected before detachment; use `copy` for that
+layout. Shared metadata stays shared. Use persistent resources or shared storage
+for large reusable datasets to avoid repeatedly copying them. Non-copyable
+transfer-only metadata, such as a MessagePort, cannot be reused this way.
+
 These are independent **atomic** requests, with no leased cross-batch worker
 state. Use `processOnWorkerInBatches` for a stateful streaming processor, or a
 resource handle when initialization must remain pinned to a worker. A one-use
