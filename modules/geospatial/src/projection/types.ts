@@ -7,6 +7,7 @@ import type {ProjectionPlugin} from './experimental/types';
 import type {ProjectionDescriptor} from './experimental/projection-descriptor';
 import type {ProjectionCoordinate, ProjectionOutput} from './experimental/scalar-output';
 import type {ProjectionArray} from './experimental/typescript-projection';
+import type {CRSResolver} from '../crs/resolver';
 
 type Registration = ProjectionPlugin | ProjectionDescriptor;
 
@@ -14,7 +15,10 @@ type Registration = ProjectionPlugin | ProjectionDescriptor;
 export type ProjectionEngineOptions<P extends Registration = ProjectionPlugin> = Omit<
   ProjectionTransformOptions<P>,
   'from' | 'to'
->;
+> & {
+  /** Optional authority lookup during asynchronous preparation; never used by sync calls. */
+  resolver?: CRSResolver;
+};
 
 /** CRS pair and behavior for an independent transform. */
 export type CreateProjectionOptions = Pick<

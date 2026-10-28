@@ -209,7 +209,12 @@ export default function GlobalIceAge({onMode, onOlderReady, olderModel, earlier 
               max={mapProgress?.total || 1}
               value={mapProgress?.total ? mapProgress.completed : undefined}
             />
-            <button onClick={() => { setCycleViews(false); setView('globe'); }}>Cancel</button>
+            <button onClick={() => {
+              setCycleViews(false);
+              setPlaying(false);
+              const displayedView = scene.current?.cancelPreparation();
+              if (displayedView) setView(displayedView);
+            }}>Cancel</button>
           </div>
         )}
         {model && error && (

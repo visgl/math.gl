@@ -705,6 +705,15 @@ export function createGlobalScene(
   resize.observe(canvas);
   return {
     render,
+    cancelPreparation() {
+      const request = pending;
+      pending = null;
+      request?.controller.abort();
+      canvas.removeAttribute("aria-busy");
+      onLoading(false);
+      onProgress(null);
+      return options?.view;
+    },
     finalize() {
       disposed = true;
       pending?.controller.abort();

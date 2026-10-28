@@ -108,3 +108,54 @@ test('explicit main-thread map setup matches the worker descriptor', async () =>
   assert.deepEqual(MapEngine.fromPrepared(local).getLayout(), MapEngine.fromPrepared(remote).getLayout());
   assert.deepEqual(MapEngine.fromPrepared(local).projectPoint([10, 20]), MapEngine.fromPrepared(remote).projectPoint([10, 20]));
 });
+
+test('scene cancellation aborts repeated globe requests and ignores late completion', async () => {
+  const {readFile} = await import('node:fs/promises');
+  const {runInNewContext} = await import('node:vm');
+  const {transformSync} = await import('esbuild');
+  const source = await readFile(new URL('./global-scene.js', import.meta.url), 'utf8');
+  const requests = [];
+  const loading = [], progress = [], errors = [];
+  const attributes = new Map();
+  const module = {exports: {}};
+  class Stub {setProps() {} finalize() {} observe() {} disconnect() {}}
+  runInNewContext(transformSync(source, {format: 'cjs'}).code, {
+    module, exports: module.exports, AbortController,
+    window: {matchMedia: () => ({matches: true})},
+    ResizeObserver: Stub,
+    require: path => path === './prepare-map-grid.js' ? {
+      prepareMapGrid: (view, step, options) => new Promise((resolve, reject) => {
+        requests.push({view, ...options, resolve, reject});
+      })
+    } : {Deck: Stub, OrthographicView: Stub}
+  });
+  const canvas = {
+    addEventListener() {}, removeEventListener() {},
+    setAttribute: (key, value) => attributes.set(key, value),
+    removeAttribute: key => attributes.delete(key)
+  };
+  const scene = module.exports.createGlobalScene(canvas, e => errors.push(e),
+    value => loading.push(value), () => {}, value => progress.push(value));
+  for (let i = 0; i < 2; i++) {
+    scene.render({}, {view: 'globe'});
+    const request = requests.at(-1);
+    assert.equal(request.signal.aborted, false);
+    assert.equal(attributes.get('aria-busy'), 'true');
+    scene.cancelPreparation();
+    assert.equal(request.signal.aborted, true);
+    assert.equal(attributes.has('aria-busy'), false);
+    assert.equal(loading.at(-1), false);
+    assert.equal(progress.at(-1), null);
+    const count = progress.length;
+    request.onProgress({completed: 1});
+    assert.equal(progress.length, count);
+    // Neither a late success nor a late failure may render or report an error.
+    if (i === 0) request.resolve({});
+    else request.reject(new Error('late failure'));
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(requests.length, i + 1);
+    assert.deepEqual(errors, []);
+  }
+  scene.cancelPreparation();
+  scene.finalize();
+});
