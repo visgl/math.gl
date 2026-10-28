@@ -322,3 +322,19 @@ describe.each(['native', 'proj4js'])('%s descriptor conformance', backend => {
     expect(Array.from(output)).toEqual([77, 88]);
   });
 });
+
+test('descriptor snapshots an optional domain without changing rendering bounds or CRS identity', () => {
+  const base = options();
+  const outer: [number, number][] = [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+    [0, 0]
+  ];
+  const descriptor = createCRSDescriptor({...base, projectionDomain: {polygons: [{outer}]}});
+  outer[0][0] = 99;
+  expect(descriptor.projectionDomain!.polygons[0].outer[0]).toEqual([0, 0]);
+  expect(descriptor.renderingBounds).toEqual(base.renderingBounds);
+  expect(descriptor.signature).toBe(createCRSDescriptor(base).signature);
+  expect(createCRSDescriptor(base).projectionDomain).toBeUndefined();
+});

@@ -87,3 +87,12 @@ export type {
   CRSRenderingScale,
   CRSRenderingScaleCallback
 } from './crs-descriptor-types';
+
+export {createCRSProjectionDomain} from './projection-domain';
+export type {
+  CRSProjectionDomainPoint,
+  CRSProjectionDomainRing,
+  CRSProjectionDomainPolygon,
+  CRSProjectionPeriod,
+  CRSProjectionDomain
+} from './projection-domain';
