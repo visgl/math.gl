@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {CRSProjectionDomain} from './projection-domain';
 import type {CRSMetadata} from './crs-metadata';
 
 /** Supported coordinate input storage. */
@@ -63,6 +64,8 @@ export interface CRSDescriptor extends CRSMetadata {
    * may still be converted; being inside it does not guarantee a valid conversion.
    */
   readonly renderingBounds: CRSBounds;
+  /** Optional explicit target-plane validity geometry. Absence means unknown. */
+  readonly projectionDomain?: CRSProjectionDomain;
   /** Constant scale or target-position callback; no viewport fallback is applied. */
   readonly renderingScale: CRSRenderingScale | CRSRenderingScaleCallback;
   /** Return rendering sizing factors at the anchor; null means sampling is unavailable

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {createCRSProjectionDomain, type CRSProjectionDomain} from './projection-domain';
 import {getCRSSignature} from './crs-metadata';
 import type {CRSMetadata, CRSUnit} from './crs-metadata';
 import type {
@@ -20,6 +21,8 @@ export type CRSDescriptorOptions = Readonly<{
   /** Optional opaque caller identity. Defaults to getCRSSignature(metadata). */
   signature?: string;
   renderingBounds: CRSBounds;
+  /** Backend-supplied target domain, independently snapshotted when present. */
+  projectionDomain?: CRSProjectionDomain;
   renderingScale: CRSRenderingScale | CRSRenderingScaleCallback;
   /** WGS84 means longitude/latitude degrees and ellipsoidal height metres. */
   converter: Readonly<Record<string, CRSConverter>> & {readonly WGS84: CRSConverter};
@@ -124,6 +127,9 @@ export function createCRSDescriptor(options: CRSDescriptorOptions): CRSDescripto
     ...metadata,
     signature,
     renderingBounds,
+    ...(options.projectionDomain === undefined
+      ? {}
+      : {projectionDomain: createCRSProjectionDomain(options.projectionDomain)}),
     renderingScale,
     getRenderingScale: (coordinate: CRSCoordinate) =>
       typeof renderingScale === 'function' ? renderingScale(coordinate) : renderingScale,
