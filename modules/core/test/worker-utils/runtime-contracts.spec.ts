@@ -52,6 +52,33 @@ test('close drains accepted work, rejects new work and releases admissions', asy
   await assert.rejects(start(pool, 0), /destroyed/);
 });
 
+test('close called from dispatch diagnostics waits for the accepted job', async () => {
+  let closing: Promise<void>;
+  let pool: WorkerPool;
+  pool = new WorkerPool({
+    source,
+    onDebug: () => {
+      closing = pool.close();
+    }
+  });
+  const job = await start(pool, 0);
+  job.done({ok: true});
+  assert.deepEqual(await job.result, {ok: true});
+  await closing;
+});
+
+test('close rejects timeout overflow without closing the pool', async () => {
+  const pool = new WorkerPool({source});
+  try {
+    await assert.rejects(pool.close({timeout: 30 * 24 * 60 * 60 * 1000}), /timeout/);
+    const job = await start(pool, 0);
+    job.done({});
+    await pool.close();
+  } finally {
+    await pool.destroy();
+  }
+});
+
 test('close deadline terminates active work and settles queued jobs', async () => {
   const pool = new WorkerPool({source, maxConcurrency: 1});
   const first = await start(pool, 0);

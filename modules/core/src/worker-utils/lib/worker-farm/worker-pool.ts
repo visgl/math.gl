@@ -109,6 +109,7 @@ export default class WorkerPool {
   private jobQueue: QueuedJob[] = [];
   private idleQueue: WorkerThread[] = [];
   private activeJobs = new Set<WorkerJob>();
+  private startingJobs = 0;
   private count = 0;
   private workers = new Set<WorkerThread>();
   private queuedBytes = 0;
@@ -245,9 +246,9 @@ export default class WorkerPool {
     if (this.isDestroyed) return this.destroy();
     if (
       options.timeout !== undefined &&
-      (!Number.isFinite(options.timeout) || options.timeout < 0)
+      (!Number.isFinite(options.timeout) || options.timeout < 0 || options.timeout > 0x7fffffff)
     ) {
-      return Promise.reject(new RangeError('Close timeout must be finite and nonnegative'));
+      return Promise.reject(new RangeError('Close timeout must be between 0 and 2147483647 ms'));
     }
     this.isClosing = true;
     const reason = new Error('Worker pool is closing');
@@ -279,7 +280,8 @@ export default class WorkerPool {
   }
 
   private _checkDrained(): void {
-    if (this.isClosing && !this.jobQueue.length && !this.activeJobs.size) this.onDrained?.();
+    if (this.isClosing && !this.jobQueue.length && !this.activeJobs.size && !this.startingJobs)
+      this.onDrained?.();
   }
 
   /**
@@ -527,6 +529,7 @@ export default class WorkerPool {
     // We have a worker, dequeue and start the job
     const queuedJob = this.jobQueue.shift();
     if (queuedJob) {
+      this.startingJobs++;
       this.queuedBytes -= queuedJob.inputBytes;
       this.inFlightBytes += queuedJob.inputBytes;
       this.totals.peakInFlightBytes = Math.max(this.totals.peakInFlightBytes, this.inFlightBytes);
@@ -545,6 +548,7 @@ export default class WorkerPool {
       }
 
       if (this.isDestroyed || workerThread.terminated) {
+        this.startingJobs--;
         this.inFlightBytes -= queuedJob.inputBytes;
         queuedJob.removeAbortListener();
         queuedJob.onReject(new Error('Worker pool was destroyed before job start'));
@@ -563,6 +567,7 @@ export default class WorkerPool {
       queuedJob.signal?.addEventListener('abort', abortJob, {once: true});
       if (queuedJob.signal?.aborted) abortJob();
       this.activeJobs.add(job);
+      this.startingJobs--;
       workerThread.ref();
 
       // Set the worker thread's message handlers

@@ -242,8 +242,9 @@ clear those opt-in timeline entries in the application.
 
 `await pool.close({timeout?})` stops new jobs and admissions, rejects pending
 admission waits, invalidates unused reservations, and lets submitted jobs drain.
-It then terminates workers. A finite timeout forces termination of unfinished
-jobs; omit it to wait indefinitely. Repeated calls return the same promise.
+It then terminates workers. A timeout from 0 through 2,147,483,647 milliseconds
+forces termination of unfinished jobs; omit it to wait indefinitely. Repeated
+calls return the same promise.
 
 `await pool.destroy(reason?)` rejects queued/active work and admission waits, then
 waits for worker termination. It is idempotent. `await farm.destroy(reason?)`
