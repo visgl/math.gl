@@ -80,7 +80,7 @@ test('bulk projection publishes progress in optional shared control state', asyn
 });
 
 test('task runtime routes small projection batches locally with worker numerical parity', async () => {
-  const {runTask} = await import('@math.gl/core/task-runtime');
+  const {runTask} = await import('@math.gl/core/tasks');
   const {BulkProjectionWorker} = await import('@math.gl/geospatial/workers');
   const coordinates = new Float64Array([0, 0, 10, 20, 30, 40]);
   const original = coordinates.slice();
@@ -100,7 +100,7 @@ test('task runtime routes small projection batches locally with worker numerical
 });
 
 test('explicit main-thread map setup matches the worker descriptor', async () => {
-  const {runTask} = await import('@math.gl/core/task-runtime');
+  const {runTask} = await import('@math.gl/core/tasks');
   const {MapSetupWorker} = await import('@math.gl/geospatial/workers');
   const description = {version: 1, id: 'local-map', definition: {type: 'mercator'}};
   const local = await runTask(MapSetupWorker, description, {execution: 'main-thread', inputOwnership: 'copy'});

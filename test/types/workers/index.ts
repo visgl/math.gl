@@ -98,7 +98,7 @@ if (shared && capabilities.sharedMemory) {
 // @ts-expect-error Configure resource pool budgets at creation, not on an individual call.
 resource.run({delta: 1}, {maxQueuedBytes: 1024});
 
-import {runTask, runTaskInBatches, type TaskDescriptor} from '@math.gl/core/task-runtime';
+import {runTask, runTaskInBatches, type TaskDescriptor} from '@math.gl/core/tasks';
 declare const typedTask: TaskDescriptor<{count: number}, {value: number}, {precision: number}>;
 const localResult: Promise<{value: number}> = runTask(
   typedTask,

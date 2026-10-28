@@ -11,7 +11,7 @@ cancellation at chunk boundaries, and yields so message-based cancellation works
 without shared memory.
 
 ```ts
-import {createWorker} from '@math.gl/core/task-runtime';
+import {createWorker} from '@math.gl/core/tasks';
 
 await createWorker(async (
   input: Float64Array,
@@ -43,7 +43,7 @@ incoming worker messages.
 Create `scale.ts` next to the worker source:
 
 ```ts
-import type {WorkerObject} from '@math.gl/core/task-runtime';
+import type {WorkerObject} from '@math.gl/core/tasks';
 
 export const ScaleWorker: WorkerObject<
   Float64Array, Float64Array, {scale?: number}
@@ -74,7 +74,7 @@ supported; see [descriptor fields](../api-reference/runtime.md#workerobject).
 ## 3. Run and cancel
 
 ```ts
-import {processOnWorker} from '@math.gl/core/task-runtime';
+import {processOnWorker} from '@math.gl/core/tasks';
 import {ScaleWorker} from './scale.js';
 
 const controller = new AbortController();
@@ -103,7 +103,7 @@ The worker installs it with `createWorker(scale)`; the descriptor also supplies 
 as its local processor:
 
 ```ts
-import {runTask} from '@math.gl/core/task-runtime';
+import {runTask} from '@math.gl/core/tasks';
 import {scale} from './scale-operation.js';
 
 ScaleWorker.process = scale;
@@ -122,7 +122,7 @@ A direct pool keeps your scheduling policy independent of the shared singleton
 farm. Use the browser factory in a browser; Node uses the worker URL instead.
 
 ```ts
-import {isBrowser, WorkerPool, processOnWorker} from '@math.gl/core/task-runtime';
+import {isBrowser, WorkerPool, processOnWorker} from '@math.gl/core/tasks';
 import {ScaleWorker} from './scale.js';
 
 const pool = new WorkerPool({
@@ -161,7 +161,7 @@ A batch processor consumes an iterable and emits an async iterable. Install it
 as the second argument of `createWorker` in a worker module:
 
 ```ts
-import {createWorker, type ProcessInBatches} from '@math.gl/core/task-runtime';
+import {createWorker, type ProcessInBatches} from '@math.gl/core/tasks';
 
 const batches: ProcessInBatches<Float64Array, Float64Array> = async function* (
   input, _options, context
@@ -177,7 +177,7 @@ await createWorker((input: Float64Array) => input.map(value => value * 2), batch
 Declare `workerInBatches: true` on its typed descriptor, then consume results:
 
 ```ts
-import {processOnWorkerInBatches} from '@math.gl/core/task-runtime';
+import {processOnWorkerInBatches} from '@math.gl/core/tasks';
 
 // BatchWorker follows the descriptor pattern above for the batch worker module.
 for await (const output of processOnWorkerInBatches(BatchWorker, inputBatches, {

@@ -74,16 +74,16 @@
       },
       {
         "type": "category",
-        "label": "@math.gl/core/task-runtime",
+        "label": "@math.gl/core/tasks",
         "items": [
-          "modules/core/task-runtime/README",
+          "modules/core/tasks/README",
           "modules/core/developer-guide/workers",
-          "modules/core/task-runtime/developer-guide/execution",
-          "modules/core/task-runtime/developer-guide/custom-workers",
-          "modules/core/task-runtime/developer-guide/persistent-resources",
-          "modules/core/task-runtime/developer-guide/shared-memory",
-          "modules/core/task-runtime/developer-guide/benchmarks",
-          "modules/core/task-runtime/api-reference/runtime"
+          "modules/core/tasks/developer-guide/execution",
+          "modules/core/tasks/developer-guide/custom-workers",
+          "modules/core/tasks/developer-guide/persistent-resources",
+          "modules/core/tasks/developer-guide/shared-memory",
+          "modules/core/tasks/developer-guide/benchmarks",
+          "modules/core/tasks/api-reference/runtime"
         ]
       },
       {

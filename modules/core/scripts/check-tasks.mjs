@@ -3,10 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
-import * as tasks from '@math.gl/core/task-runtime';
+import * as tasks from '@math.gl/core/tasks';
 import * as workers from '@math.gl/core/worker-utils';
 const require = createRequire(import.meta.url);
-const cjsTasks = require('@math.gl/core/task-runtime');
+const cjsTasks = require('@math.gl/core/tasks');
 const cjsWorkers = require('@math.gl/core/worker-utils');
 assert.equal(tasks.WorkerFarm, workers.WorkerFarm);
 assert.equal(cjsTasks.WorkerFarm, cjsWorkers.WorkerFarm);
@@ -19,4 +19,4 @@ for (const api of [tasks, cjsTasks]) {
   assert.equal(input.byteLength, 16);
   await api.WorkerFarm.getWorkerFarm().destroy();
 }
-console.log('Task runtime ESM/CommonJS exports, compatibility identity, worker assets and local dispatch passed.');
+console.log('Tasks ESM/CommonJS exports, compatibility identity, worker assets and local dispatch passed.');

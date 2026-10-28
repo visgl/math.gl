@@ -20,7 +20,7 @@ thread.
 ## Set a measured threshold
 
 ```ts
-import {runTask} from '@math.gl/core/task-runtime';
+import {runTask} from '@math.gl/core/tasks';
 import {BulkProjectionWorker} from '@math.gl/geospatial/workers';
 
 const projected = await runTask(BulkProjectionWorker, {
@@ -60,7 +60,7 @@ pool statistics and onMetrics do not include local calls.
 ## Process independent batches
 
 ```ts
-import {runTaskInBatches} from '@math.gl/core/task-runtime';
+import {runTaskInBatches} from '@math.gl/core/tasks';
 import {BulkProjectionWorker} from '@math.gl/geospatial/workers';
 
 for await (const projected of runTaskInBatches(BulkProjectionWorker, requests, {

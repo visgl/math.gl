@@ -1,13 +1,13 @@
-# Task runtime
+# Tasks
 
 Move expensive numerical work off the main thread while keeping control of input
 ownership, queue capacity, cancellation, and resource lifetime. Small independent
 batches can run on the main thread to avoid worker round trips.
-`@math.gl/core/task-runtime` is an optional entry in `@math.gl/core` for browser
+`@math.gl/core/tasks` is an optional entry in `@math.gl/core` for browser
 and Node workers. Geospatial operations consume the same runtime through
 `@math.gl/geospatial/workers`.
 
-![Requests flow from the main thread through a bounded queue to reusable workers, with optional shared control state](/images/task-runtime.svg)
+![Requests flow from the main thread through a bounded queue to reusable workers, with optional shared control state](/images/tasks.svg)
 
 ## What you can build
 
@@ -35,7 +35,7 @@ import {
   processOnWorker,
   createWorkerResource,
   getWorkerCapabilities
-} from '@math.gl/core/task-runtime';
+} from '@math.gl/core/tasks';
 ```
 
 The ordinary `@math.gl/core` math entry does not require the task runtime.
@@ -48,7 +48,7 @@ and low-level transfer default; loaders.gl compatibility migration is separate.
 ## Avoid worker round trips for small tasks
 
 ```ts
-import {runTask} from '@math.gl/core/task-runtime';
+import {runTask} from '@math.gl/core/tasks';
 import {BulkProjectionWorker} from '@math.gl/geospatial/workers';
 
 const result = await runTask(BulkProjectionWorker, {

@@ -9,7 +9,7 @@ one dedicated worker. Subsequent calls serialize on that same worker incarnation
 Create `projection-resource-worker.ts`:
 
 ```ts
-import {createResourceWorker} from '@math.gl/core/task-runtime';
+import {createResourceWorker} from '@math.gl/core/tasks';
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
 
 await createResourceWorker({
@@ -50,7 +50,7 @@ shared memory.
 import {
   createWorkerResource,
   type WorkerResourceObject
-} from '@math.gl/core/task-runtime';
+} from '@math.gl/core/tasks';
 
 type Definition = {from: string; to: string};
 const ProjectionResource: WorkerResourceObject<

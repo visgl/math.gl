@@ -5,7 +5,7 @@
     "description": "Vectors, matrices, task execution, shared numeric types and expression evaluation.",
     "modules": [
       "core",
-      "core/task-runtime",
+      "core/tasks",
       "core/types",
       "core/expressions"
     ]

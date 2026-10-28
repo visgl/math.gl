@@ -7,7 +7,7 @@ individual message. Sharing does not make arbitrary concurrent writes safe.
 ## Detect availability
 
 ```ts
-import {getWorkerCapabilities, createSharedWorkerState} from '@math.gl/core/task-runtime';
+import {getWorkerCapabilities, createSharedWorkerState} from '@math.gl/core/tasks';
 
 const capabilities = getWorkerCapabilities();
 // workers, sharedMemory, crossOriginIsolated, sharedMemoryUnavailableReason
@@ -52,7 +52,7 @@ development-server headers do not configure production hosting.
 ## Observe control state without progress round trips
 
 ```ts
-import {createSharedWorkerState} from '@math.gl/core/task-runtime';
+import {createSharedWorkerState} from '@math.gl/core/tasks';
 import {projectBulkInWorker} from '@math.gl/geospatial/workers';
 
 const state = createSharedWorkerState();
@@ -101,7 +101,7 @@ between chunks when its record count fits int32.
 ## Poll cancellation in synchronous work
 
 ```ts
-import {createWorker} from '@math.gl/core/task-runtime';
+import {createWorker} from '@math.gl/core/tasks';
 
 await createWorker((input: Float64Array, _options, context) => {
   const output = new Float64Array(input.length);
@@ -132,7 +132,7 @@ that survives resource calls, a worker can retain an atomic view:
 
 ```ts
 // counter-worker.ts
-import {createResourceWorker} from '@math.gl/core/task-runtime';
+import {createResourceWorker} from '@math.gl/core/tasks';
 
 await createResourceWorker({
   initialize: (buffer: SharedArrayBuffer) => new Int32Array(buffer),
@@ -145,7 +145,7 @@ On the caller, describe it as
 [browser/Node descriptor pattern](./persistent-resources.md#caller-create-run-dispose):
 
 ```ts
-import {createWorkerResource, getWorkerCapabilities} from '@math.gl/core/task-runtime';
+import {createWorkerResource, getWorkerCapabilities} from '@math.gl/core/tasks';
 
 if (getWorkerCapabilities().sharedMemory) {
   const counter = new Int32Array(new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT));

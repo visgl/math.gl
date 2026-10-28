@@ -1,6 +1,6 @@
 # Worker runtime API
 
-Import runtime functions and types from `@math.gl/core/task-runtime`. For runnable
+Import runtime functions and types from `@math.gl/core/tasks`. For runnable
 examples, start with [custom workers](../developer-guide/custom-workers.md),
 [persistent resources](../developer-guide/persistent-resources.md), and
 [shared memory](../developer-guide/shared-memory.md).

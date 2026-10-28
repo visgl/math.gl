@@ -1,14 +1,14 @@
 # Worker processing
 
-Start with the [task runtime overview](../task-runtime/README.md) for a quick
+Start with the [tasks overview](../tasks/README.md) for a quick
 start and an ownership comparison. Follow the
-[custom worker tutorial](../task-runtime/developer-guide/custom-workers.md),
-[persistent resource guide](../task-runtime/developer-guide/persistent-resources.md),
-[shared-memory guide](../task-runtime/developer-guide/shared-memory.md), or
-[API reference](../task-runtime/api-reference/runtime.md) for complete examples
+[custom worker tutorial](../tasks/developer-guide/custom-workers.md),
+[persistent resource guide](../tasks/developer-guide/persistent-resources.md),
+[shared-memory guide](../tasks/developer-guide/shared-memory.md), or
+[API reference](../tasks/api-reference/runtime.md) for complete examples
 and option defaults. This page describes scheduling and execution contracts.
 
-`@math.gl/core/task-runtime` exposes task dispatch and the shared worker runtime.
+`@math.gl/core/tasks` exposes task dispatch and the shared worker runtime.
 `@math.gl/core/worker-utils` remains a compatibility entry for the worker APIs
 copied from loaders.gl:
 `createWorker`, `processOnWorker`, `processOnWorkerInBatches`, `preloadWorker`,
@@ -234,7 +234,7 @@ asynchronous delivery costs. Throwing diagnostics are isolated from execution.
 `performanceMarks: true` additionally emits `math.gl.worker:<job name>` measures;
 applications should consume and clear those opt-in timeline entries.
 
-See [the benchmark harness](../task-runtime/developer-guide/benchmarks.md) for cold/warm
+See [the benchmark harness](../tasks/developer-guide/benchmarks.md) for cold/warm
 latency, throughput, sampled process RSS, persistent projection, overload,
 cancellation, crash recovery, teardown, and optional pinned library comparisons.
 Performance depends on workload, ownership policy and environment; these APIs

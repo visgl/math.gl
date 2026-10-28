@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" role="img" aria-labelledby="title description">
-  <title id="title">Task runtime architecture</title>
+  <title id="title">Task execution architecture</title>
   <desc id="description">A main thread submits typed work through a bounded scheduler to reusable workers. Optional shared memory connects cancellation and progress state.</desc>
   <defs>
     <linearGradient id="background" x2="1" y2="1"><stop stop-color="#081625"/><stop offset="1" stop-color="#142d43"/></linearGradient>
@@ -12,7 +12,7 @@
     <path d="M600 218H698"/><path d="M600 218H650V318H698"/>
   </g>
   <g font-family="system-ui, sans-serif">
-    <text x="42" y="56" fill="#9eebdf" font-size="16" letter-spacing="3">TASK RUNTIME</text>
+    <text x="42" y="56" fill="#9eebdf" font-size="16" letter-spacing="3">TASKS</text>
     <rect x="40" y="128" width="220" height="180" rx="18" fill="#142d43" stroke="#497b94" stroke-width="2"/>
     <text x="65" y="168" fill="#eff9ff" font-size="25" font-weight="650">Main thread</text>
     <text x="65" y="206" fill="#bfd4e0" font-size="18">Typed requests</text>

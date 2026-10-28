@@ -79,7 +79,7 @@ const pool = new WorkerPool({
 ```
 
 `workerUrl` and `record` belong to the application; import `WorkerPool` from
-`@math.gl/core/task-runtime`. Queue wait indicates scheduling pressure; startup
+`@math.gl/core/tasks`. Queue wait indicates scheduling pressure; startup
 latency indicates cold-worker cost; `postMessageMs` captures only the synchronous
 send cost. Processor elapsed time includes its awaits. These durations overlap.
 Consume and clear optional performance entries, and await pool destruction when

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test, afterEach, vi} from 'vitest';
-import {runTask, runTaskInBatches, WorkerFarm, type TaskDescriptor} from '../../src/task-runtime';
+import {runTask, runTaskInBatches, WorkerFarm, type TaskDescriptor} from '../../src/tasks';
 
 const processor = vi.fn((input: Float64Array, options: {scale?: number} = {}) =>
   input.map(value => value * (options.scale ?? 2))
