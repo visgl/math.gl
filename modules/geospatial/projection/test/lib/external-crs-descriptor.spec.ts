@@ -3,7 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {describe, expect, test} from 'vitest';
-import {createCRSDescriptor} from '@math.gl/geospatial/crs';
+import {
+  createCRSDescriptor,
+  createCRSExecutionIdentity,
+  getCRSExecutionKey
+} from '@math.gl/geospatial/crs';
 import type {CRSDescriptorOptions} from '@math.gl/geospatial/crs';
 import type {CRSConversion, CRSDescriptor, CRSCoordinate, CRSOutput} from '@math.gl/geospatial/crs';
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
@@ -337,4 +341,102 @@ test('descriptor snapshots an optional domain without changing rendering bounds 
   expect(descriptor.renderingBounds).toEqual(base.renderingBounds);
   expect(descriptor.signature).toBe(createCRSDescriptor(base).signature);
   expect(createCRSDescriptor(base).projectionDomain).toBeUndefined();
+});
+
+test('execution identity separates CRS metadata from cache invalidation', () => {
+  const identity = {
+    backend: 'proj-wasm',
+    version: '0.1.0',
+    operation: 'visualization',
+    parameters: {longitude: 0, axis: 'enu'},
+    resources: {grid: 'sha256:a'},
+    revision: '1'
+  };
+  const build = (executionIdentity = identity) =>
+    createCRSDescriptor({...options(), executionIdentity});
+  const a = build();
+  const key = getCRSExecutionKey(a);
+  expect(getCRSExecutionKey(createCRSDescriptor(options()))).toBeNull();
+  expect(build({...identity, parameters: {axis: 'enu', longitude: 0}}).signature).toBe(a.signature);
+  expect(getCRSExecutionKey(build({...identity, parameters: {axis: 'enu', longitude: 0}}))).toBe(
+    key
+  );
+  for (const changed of [
+    {...identity, backend: 'math.gl'},
+    {...identity, version: '0.2.0'},
+    {...identity, operation: 'strict'},
+    {...identity, resources: {grid: 'sha256:b'}},
+    {...identity, parameters: {longitude: 1, axis: 'enu'}},
+    {...identity, revision: '2'}
+  ]) {
+    expect(build(changed).signature).toBe(a.signature);
+    expect(getCRSExecutionKey(build(changed))).not.toBe(key);
+  }
+  identity.resources.grid = 'mutated';
+  expect(getCRSExecutionKey(a)).toBe(key);
+  expect(Object.isFrozen(a.executionIdentity?.resources)).toBe(true);
+  const domain = {
+    polygons: [
+      {
+        outer: [
+          [0, 0],
+          [1, 0],
+          [0, 1],
+          [0, 0]
+        ] as [number, number][]
+      }
+    ]
+  };
+  const b = createCRSDescriptor({
+    ...options(),
+    executionIdentity: a.executionIdentity,
+    projectionDomain: domain
+  });
+  expect(getCRSExecutionKey(b)).not.toBe(key);
+  const before = getCRSExecutionKey(b);
+  domain.polygons[0].outer[1][0] = 2;
+  expect(getCRSExecutionKey(b)).toBe(before);
+  expect(
+    getCRSExecutionKey(
+      createCRSDescriptor({
+        ...options(),
+        executionIdentity: a.executionIdentity,
+        projectionDomain: domain
+      })
+    )
+  ).not.toBe(before);
+  expect(
+    getCRSExecutionKey(
+      createCRSDescriptor({
+        ...options(),
+        executionIdentity: a.executionIdentity,
+        converter: {...options().converter, local: options().converter.WGS84}
+      })
+    )
+  ).not.toBe(key);
+});
+
+test('execution identity rejects ambiguous provenance and safely retains arbitrary record keys', () => {
+  const identity = {backend: 'test', version: '1', operation: 'identity'};
+  for (const value of [
+    null,
+    {...identity, backend: ''},
+    {...identity, version: 1},
+    {...identity, revision: ' '},
+    {...identity, parameters: []},
+    {...identity, parameters: {x: NaN}},
+    {...identity, parameters: {x: -0}},
+    {...identity, parameters: {x: undefined}},
+    {...identity, resources: {grid: ''}},
+    {...identity, resources: new Date()},
+    {...identity, parameters: {'': 1}}
+  ]) {
+    expect(() => createCRSExecutionIdentity(value as never)).toThrow();
+  }
+  const result = createCRSExecutionIdentity({
+    ...identity,
+    parameters: JSON.parse('{"__proto__":"literal","flag":true,"none":null}')
+  });
+  expect(result.parameters?.__proto__).toBe('literal');
+  expect(Object.isFrozen(result)).toBe(true);
 });

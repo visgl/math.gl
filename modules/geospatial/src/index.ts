@@ -13,6 +13,8 @@ export {
   createSpatialReference,
   createCRSDescriptor,
   createCRSProjectionDomain,
+  createCRSExecutionIdentity,
+  getCRSExecutionKey,
   inferCRSRepresentation,
   encodeWKTCRS,
   parseWKTCRS,
@@ -26,6 +28,7 @@ export {
   linearUnits
 } from './crs/index';
 export type {
+  CRSExecutionIdentity,
   CRSDefinition,
   CRSIdentifier,
   CRSStringDefinition,
