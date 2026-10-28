@@ -13,6 +13,7 @@ import { Deck, OrthographicView, COORDINATE_SYSTEM } from "@deck.gl/core";
 import { SimpleMeshLayer } from "@deck.gl/mesh-layers";
 import { PathLayer, PolygonLayer, TextLayer } from "@deck.gl/layers";
 import { prepareMapGrid } from "./prepare-map-grid.js";
+import { createMapPreparationGate } from "./map-preparation-gate.js";
 import { fitMapLayout } from "@math.gl/geospatial/discontinuous";
 import { Geometry } from "@luma.gl/engine";
 import { projectionGrid, projectCoordinate } from "./projection-grid.js";
@@ -81,6 +82,7 @@ export function createGlobalScene(
     route = [];
   const animations = new WeakMap();
   const prepared = new Map();
+  const preparationGate = createMapPreparationGate();
   let pending,
     disposed = false,
     fields;
@@ -159,6 +161,7 @@ export function createGlobalScene(
   }
   function render(model, opts) {
     if (disposed) return;
+    if (!preparationGate.allows(opts.view)) return;
     // Options may change repeatedly while a mesh is pending; honor the latest
     // requested value even when it equals the last displayed longitude.
     if (opts.longitude !== undefined) longitude = Number(opts.longitude);
@@ -705,6 +708,18 @@ export function createGlobalScene(
   resize.observe(canvas);
   return {
     render,
+    cancelPreparation() {
+      if (!pending) return null;
+      const request = pending;
+      pending = null;
+      const view = preparationGate.cancel(request);
+      canvas.removeAttribute("aria-busy");
+      onLoading(false);
+      return view;
+    },
+    retryPreparation() {
+      preparationGate.retry();
+    },
     finalize() {
       disposed = true;
       pending?.controller.abort();

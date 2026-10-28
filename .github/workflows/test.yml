@@ -262,6 +262,12 @@ jobs:
         env:
           MATHGL_TEST_SHARED_MEMORY: '1'
         run: yarn vitest run --project headless modules/core/test/worker-utils/browser.spec.ts
+      - name: Test proj-wasm CRS integration in Node and Chromium
+        timeout-minutes: 2
+        run: |
+          yarn workspace math.gl-proj-wasm-crs test
+          yarn workspace math.gl-proj-wasm-crs build
+          yarn workspace math.gl-proj-wasm-crs test:browser
 
       - name: Test solar terminator rendering and cut-map detail
         timeout-minutes: 5

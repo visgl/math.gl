@@ -29,6 +29,8 @@ export default function GlobalIceAge({onMode, onOlderReady, olderModel, earlier 
     [error, setError] = useState('');
   const [longitude, setLongitude] = useState(0);
   const [preparingMap, setPreparingMap] = useState(false);
+  const [cancelledMap, setCancelledMap] = useState(false);
+  const [mapRetry, setMapRetry] = useState(0);
   const [mapProgress, setMapProgress] = useState(null);
   const [climateModel, setClimateModel] = useState(null);
   const [olderStatus, setOlderStatus] = useState('Loading earlier ice masks…');
@@ -105,7 +107,10 @@ export default function GlobalIceAge({onMode, onOlderReady, olderModel, earlier 
         labels,
         longitude
       });
-  }, [model, age, view, showIce, ghost, labels, longitude]);
+  }, [model, age, view, showIce, ghost, labels, longitude, mapRetry]);
+  useEffect(() => {
+    if (view !== 'globe') setCancelledMap(false);
+  }, [view]);
   useEffect(() => {
     if (!cycleViews || !model || preparingMap) return;
     const views = Object.keys(GLOBAL_VIEWS);
@@ -209,7 +214,22 @@ export default function GlobalIceAge({onMode, onOlderReady, olderModel, earlier 
               max={mapProgress?.total || 1}
               value={mapProgress?.total ? mapProgress.completed : undefined}
             />
-            <button onClick={() => { setCycleViews(false); setView('globe'); }}>Cancel</button>
+            <button onClick={() => {
+              const cancelledView = scene.current?.cancelPreparation();
+              setCycleViews(false);
+              setCancelledMap(cancelledView === 'globe');
+              setView('globe');
+            }}>Cancel</button>
+          </div>
+        )}
+        {cancelledMap && view === 'globe' && !preparingMap && (
+          <div className="alpine-loading" role="status">
+            Map preparation cancelled.{' '}
+            <button onClick={() => {
+              scene.current?.retryPreparation();
+              setCancelledMap(false);
+              setMapRetry(value => value + 1);
+            }}>Retry</button>
           </div>
         )}
         {model && error && (
