@@ -42,3 +42,29 @@ test('worker preparation restores geometry, caches success and propagates cancel
     else globalThis.Worker = original;
   }
 });
+
+test('ordinary grids survive preparation cache eviction without another worker request', async () => {
+  const original = globalThis.Worker;
+  globalThis.Worker = class {};
+  const calls = [];
+  const runTask = async (_descriptor, input) => {
+    calls.push(input.view);
+    return {positions: new Float64Array([calls.length, 2]), indices: new Uint32Array([0]),
+      maxX: 1, maxY: 1, centerX: 0, centerY: 0};
+  };
+  try {
+    const first = await prepareMapGrid('globe', 1, {runTask});
+    for (const view of ['eqearth', 'mercator', 'mollweide']) {
+      await prepareMapGrid(view, 1, {runTask});
+    }
+    assert.deepEqual(calls, ['globe', 'eqearth', 'mercator', 'mollweide']);
+    assert.strictEqual(await prepareMapGrid('globe', 1, {runTask}), first);
+    assert.equal(calls.length, 4);
+    const controller = new AbortController();
+    controller.abort();
+    await assert.rejects(prepareMapGrid('globe', 1, {runTask, signal: controller.signal}), {name: 'AbortError'});
+  } finally {
+    if (original === undefined) delete globalThis.Worker;
+    else globalThis.Worker = original;
+  }
+});
