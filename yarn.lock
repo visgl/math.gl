@@ -16032,6 +16032,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"math.gl-geoarrow-stream-worker@workspace:examples/geoarrow-stream-worker":
+  version: 0.0.0-use.local
+  resolution: "math.gl-geoarrow-stream-worker@workspace:examples/geoarrow-stream-worker"
+  dependencies:
+    "@math.gl/core": "workspace:*"
+    "@math.gl/geospatial": "workspace:*"
+    d3-geo: "npm:^2.0.2"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
 "math.gl-geographic-tiles@workspace:examples/geospatial/geographic-tiles":
   version: 0.0.0-use.local
   resolution: "math.gl-geographic-tiles@workspace:examples/geospatial/geographic-tiles"

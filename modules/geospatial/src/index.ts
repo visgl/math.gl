@@ -382,3 +382,11 @@ export type {
 } from './terrain/vertex-tiles';
 export {stitchTerrainMeshEdges} from './terrain/mesh-stitch';
 export type {TerrainSeamMesh, TerrainMeshStitchOptions} from './terrain/mesh-stitch';
+
+export {streamGeoArrow, tessellateGeoArrowStream} from './geoarrow/index';
+export type {
+  GeoArrowGeometryStream,
+  StreamGeoArrowOptions,
+  TessellateGeoArrowStreamOptions,
+  GeoArrowStreamMesh
+} from './geoarrow/index';

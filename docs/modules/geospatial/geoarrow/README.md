@@ -58,3 +58,6 @@ getGeoArrowBounds(points);
 
 The package README also contains complete examples for two-pass building, codecs, tessellation,
 resource limits, worker transfers, and runtime adapters.
+
+See [Geometry streams and task workers](./geometry-streams.md) for external-engine clipping,
+polygon tessellation and source-row attribution without materializing GeoJSON.
