@@ -92,7 +92,7 @@ together, and when to use each.
 | `WebMercatorProjectionEngine` (`/web-mercator`)                      | You need only WGS84 and EPSG:3857 with a minimal bundle                      |
 | `ProjectionPipeline` (`/pipeline`)                                   | You need explicit operation order or coordinate epochs                       |
 | `OperationCatalog` (`/operations`)                                   | You need to select among application-reviewed transformations                |
-| [`createCRSDescriptor`](./api-reference/crs-descriptor.md) (`/crs-descriptor`) | You have external converters and explicit CRS metadata/rendering policy |
+| [`createCRSDescriptor`](../crs/api-reference/crs-descriptor.md) (`@math.gl/geospatial/crs`) | You have external converters and explicit CRS metadata/rendering policy |
 
 The package root exports the full and configurable engines and the default `projectionEngine`.
 `Projection` and `ProjectionEngine` are type contracts, available from `/types`. `/core`

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {getCRSSignature} from '../crs/crs-metadata';
-import type {CRSMetadata, CRSUnit} from '../crs/crs-metadata';
+import {getCRSSignature} from './crs-metadata';
+import type {CRSMetadata, CRSUnit} from './crs-metadata';
 import type {
   CRSBounds,
   CRSConversion,
@@ -11,8 +11,8 @@ import type {
   CRSDescriptor,
   CRSRenderingScale,
   CRSRenderingScaleCallback
-} from './types';
-import type {ProjectionCoordinate, ProjectionOutput} from './types';
+} from './crs-descriptor-types';
+import type {CRSCoordinate, CRSOutput} from './crs-descriptor-types';
 
 /** Backend-owned operations and rendering policy for an already prepared target CRS. */
 export type CRSDescriptorOptions = Readonly<{
@@ -104,7 +104,7 @@ export function createCRSDescriptor(options: CRSDescriptorOptions): CRSDescripto
   const suppliedScale = options.renderingScale;
   const renderingScale =
     typeof suppliedScale === 'function'
-      ? (coordinate: ProjectionCoordinate): CRSRenderingScale | null => {
+      ? (coordinate: CRSCoordinate): CRSRenderingScale | null => {
           const result = suppliedScale(coordinate);
           return result === null ? null : copyScale(result);
         }
@@ -125,21 +125,18 @@ export function createCRSDescriptor(options: CRSDescriptorOptions): CRSDescripto
     signature,
     renderingBounds,
     renderingScale,
-    getRenderingScale: (coordinate: ProjectionCoordinate) =>
+    getRenderingScale: (coordinate: CRSCoordinate) =>
       typeof renderingScale === 'function' ? renderingScale(coordinate) : renderingScale,
     converter: Object.freeze(converter)
   });
 }
 
 function bindConversion(owner: CRSConverter, key: keyof CRSConverter): CRSConversion {
-  const operation = owner?.[key] as (
-    coordinate: ProjectionCoordinate,
-    output?: ProjectionOutput
-  ) => ProjectionOutput;
+  const operation = owner?.[key] as (coordinate: CRSCoordinate, output?: CRSOutput) => CRSOutput;
   requireValue(typeof operation === 'function', `converter.${key}`);
-  function convert(coordinate: ProjectionCoordinate): number[];
-  function convert<T extends ProjectionOutput>(coordinate: ProjectionCoordinate, output: T): T;
-  function convert(coordinate: ProjectionCoordinate, output?: ProjectionOutput): ProjectionOutput {
+  function convert(coordinate: CRSCoordinate): number[];
+  function convert<T extends CRSOutput>(coordinate: CRSCoordinate, output: T): T;
+  function convert(coordinate: CRSCoordinate, output?: CRSOutput): CRSOutput {
     // Capture the method and receiver at construction. Never adapt promises into sync conversions.
     const result = operation.call(owner, coordinate, output);
     requireSynchronous(result);

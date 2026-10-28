@@ -3,14 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {describe, expect, test} from 'vitest';
-import {createCRSDescriptor} from '@math.gl/geospatial/projection/crs-descriptor';
-import type {CRSDescriptorOptions} from '@math.gl/geospatial/projection/crs-descriptor';
-import type {
-  CRSConversion,
-  CRSDescriptor,
-  ProjectionCoordinate,
-  ProjectionOutput
-} from '@math.gl/geospatial/projection/types';
+import {createCRSDescriptor} from '@math.gl/geospatial/crs';
+import type {CRSDescriptorOptions} from '@math.gl/geospatial/crs';
+import type {CRSConversion, CRSDescriptor, CRSCoordinate, CRSOutput} from '@math.gl/geospatial/crs';
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
 import {getCRSSignature} from '@math.gl/geospatial/crs';
 import {
@@ -18,9 +13,9 @@ import {
   equalCylindricalDefinition
 } from '../../examples/proj4-crs-descriptor';
 
-function identity(input: ProjectionCoordinate): number[];
-function identity<T extends ProjectionOutput>(input: ProjectionCoordinate, output: T): T;
-function identity(input: ProjectionCoordinate, output?: ProjectionOutput): ProjectionOutput {
+function identity(input: CRSCoordinate): number[];
+function identity<T extends CRSOutput>(input: CRSCoordinate, output: T): T;
+function identity(input: CRSCoordinate, output?: CRSOutput): CRSOutput {
   if (!output) return Array.from(input);
   const copy = Array.from(input);
   for (let i = 0; i < copy.length; i++) output[i] = copy[i];
@@ -129,7 +124,7 @@ describe('backend-independent descriptor construction', () => {
   test('captures methods with their receivers and stores arbitrary source keys safely', () => {
     const owner = {
       calls: 0,
-      from(input: ProjectionCoordinate, output?: ProjectionOutput) {
+      from(input: CRSCoordinate, output?: CRSOutput) {
         this.calls++;
         return output ? identity(input, output) : identity(input);
       },

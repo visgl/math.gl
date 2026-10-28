@@ -10,6 +10,11 @@
   },
   {
     "type": "doc",
+    "label": "Switch projection engines",
+    "id": "external-projection-engines"
+  },
+  {
+    "type": "doc",
     "label": "Expressions (experimental)",
     "id": "expressions"
   },

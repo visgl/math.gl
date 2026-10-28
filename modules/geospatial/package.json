@@ -990,11 +990,6 @@
       "import": "./dist/projection/types.js",
       "require": "./dist/projection/types.cjs"
     },
-    "./projection/crs-descriptor": {
-      "types": "./dist/projection/crs-descriptor.d.ts",
-      "import": "./dist/projection/crs-descriptor.js",
-      "require": "./dist/projection/crs-descriptor.cjs"
-    },
     "./projection/web-mercator": {
       "types": "./dist/projection/web-mercator.d.ts",
       "import": "./dist/projection/web-mercator.js",

@@ -253,7 +253,8 @@
             ]
           },
           "modules/geospatial/crs/api-reference/spatial-reference",
-          "modules/geospatial/crs/api-reference/resolver"
+          "modules/geospatial/crs/api-reference/resolver",
+          "modules/geospatial/crs/api-reference/crs-descriptor"
         ]
       },
       {
@@ -290,7 +291,6 @@
               "modules/geospatial/projection/api-reference/map-engine",
               "modules/geospatial/projection/api-reference/elastic",
               "modules/geospatial/projection/api-reference/projection-engine",
-              "modules/geospatial/projection/api-reference/crs-descriptor",
               "modules/geospatial/projection/api-reference/projection-transform",
               "modules/geospatial/projection/api-reference/projection-pipeline",
               "modules/geospatial/projection/api-reference/operation-catalog",

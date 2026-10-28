@@ -190,12 +190,9 @@ void angularUnit;
 void renderingBounds;
 void incompleteCorner;
 
-import {
-  createCRSDescriptor,
-  type CRSDescriptorOptions
-} from '@math.gl/geospatial/projection/crs-descriptor';
+import {createCRSDescriptor, type CRSDescriptorOptions} from '@math.gl/geospatial/crs';
 import type {CRSMetadata} from '@math.gl/geospatial/crs';
-import type {CRSConverter, CRSDescriptor} from '@math.gl/geospatial/projection/types';
+import type {CRSConverter, CRSDescriptor} from '@math.gl/geospatial/crs';
 declare const externalMetadata: CRSMetadata;
 declare const externalConverter: CRSConverter;
 const descriptorOptions: CRSDescriptorOptions = {
@@ -221,3 +218,23 @@ externalDescriptor.ellipsoid.semiMajorAxis = 1;
 void reused;
 void allocated;
 void asynchronousConverter;
+
+// CRS owns the shared contract; existing projection imports remain assignable.
+import type {CRSCoordinate, CRSOutput} from '@math.gl/geospatial/crs';
+import type {
+  CRSDescriptor as ProjectionCRSDescriptor,
+  ProjectionCoordinate,
+  ProjectionOutput
+} from '@math.gl/geospatial/projection/types';
+import {createCRSDescriptor as createRootCRSDescriptor} from '@math.gl/geospatial';
+const projectionDescriptor: ProjectionCRSDescriptor = externalDescriptor;
+const crsDescriptor: CRSDescriptor = projectionDescriptor;
+declare const crsCoordinate: CRSCoordinate;
+declare const crsOutput: CRSOutput;
+const projectionCoordinate: ProjectionCoordinate = crsCoordinate;
+const projectionOutput: ProjectionOutput = crsOutput;
+const rootDescriptor: CRSDescriptor = createRootCRSDescriptor(descriptorOptions);
+void crsDescriptor;
+void projectionCoordinate;
+void projectionOutput;
+void rootDescriptor;

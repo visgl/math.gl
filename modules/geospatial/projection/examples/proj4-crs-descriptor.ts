@@ -3,12 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import proj4 from 'proj4';
-import {createCRSDescriptor} from '@math.gl/geospatial/projection/crs-descriptor';
-import type {
-  CRSConversion,
-  ProjectionCoordinate,
-  ProjectionOutput
-} from '@math.gl/geospatial/projection/types';
+import {createCRSDescriptor} from '@math.gl/geospatial/crs';
+import type {CRSConversion, CRSCoordinate, CRSOutput} from '@math.gl/geospatial/crs';
 
 const radius = 6371000;
 export const equalCylindricalDefinition = '+proj=eqc +R=6371000 +lat_ts=0 +units=m';
@@ -48,9 +44,9 @@ export function createProj4CRSDescriptor() {
 }
 
 function conversion(operation: (xy: number[]) => number[]): CRSConversion {
-  function convert(input: ProjectionCoordinate): number[];
-  function convert<T extends ProjectionOutput>(input: ProjectionCoordinate, output: T): T;
-  function convert(input: ProjectionCoordinate, output?: ProjectionOutput): ProjectionOutput {
+  function convert(input: CRSCoordinate): number[];
+  function convert<T extends CRSOutput>(input: CRSCoordinate, output: T): T;
+  function convert(input: CRSCoordinate, output?: CRSOutput): CRSOutput {
     if (input.length < 2 || !Array.from(input).slice(0, 3).every(Number.isFinite)) {
       throw new Error('Expected finite XY or XYZ coordinates');
     }

@@ -1,12 +1,12 @@
 # createCRSDescriptor
 
 Assemble a `CRSDescriptor` for an external backend from explicit metadata, prepared
-converters and rendering policy. This optional entry imports no native CRS parser,
-projection catalogue, resolver, proj4js or WASM runtime:
+converters and rendering policy. Importing this helper retains no native CRS parser,
+projection catalogue, resolver, proj4js or WASM runtime in a tree-shaken bundle:
 
 ```typescript
-import {createCRSDescriptor} from '@math.gl/geospatial/projection/crs-descriptor';
-import type {CRSDescriptorOptions} from '@math.gl/geospatial/projection/crs-descriptor';
+import {createCRSDescriptor} from '@math.gl/geospatial/crs';
+import type {CRSDescriptorOptions, CRSDescriptor, CRSConverter} from '@math.gl/geospatial/crs';
 ```
 
 The helper can be used inside an application's `CRSEngine.getCRS()` implementation.
@@ -20,7 +20,7 @@ rendering derivatives. The backend must supply those decisions before constructi
 | `metadata` | Shared `CRSMetadata` from `@math.gl/geospatial/crs`: frame, backend projection name/parameters, ellipsoid, effective axes and component units, lossiness and optional area of use. |
 | `converter` | Map of prepared `CRSConverter` objects. An own `WGS84` entry is required. Additional source keys are exact strings. |
 | `renderingBounds` | Finite ordered XYZ envelope in target units and axis order. Zero width on an axis is allowed. This is a rendering policy, not an operation validity test. |
-| `renderingScale` | Three positive finite factors, or a synchronous callback returning those factors or `null` when unavailable. Uses the existing [descriptor scale conventions](./projection-engine.md). |
+| `renderingScale` | Three positive finite factors, or a synchronous callback returning those factors or `null` when unavailable. Uses the existing [descriptor scale conventions](../../projection/api-reference/projection-engine.md). |
 | `signature` | Optional nonempty opaque identity. Defaults to `getCRSSignature(metadata)`. This does not fingerprint backend implementations or grid contents. |
 
 Each converter supplies synchronous `from`, `to` and `normalize` operations:
@@ -80,4 +80,4 @@ yarn exec vitest run --project node modules/geospatial/projection/test/lib/exter
 
 proj-wasm's asynchronous public API cannot directly supply these synchronous
 converters. Use it for definition resolution followed by native preparation, or
-for separate asynchronous preprocessing. See [external engines](../developer-guide/external-projection-engines.md).
+for separate asynchronous preprocessing. See [external engines](../../projection/developer-guide/external-projection-engines.md).

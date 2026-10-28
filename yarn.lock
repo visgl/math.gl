@@ -8249,6 +8249,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/d3-geo@npm:2":
+  version: 2.0.7
+  resolution: "@types/d3-geo@npm:2.0.7"
+  dependencies:
+    "@types/geojson": "npm:*"
+  checksum: 10c0/bd94cadc278647a643a6be3206f7258bc34fda1a1994dbf8beeb7990d9ff0d3e268f5743b9c67b7d36e21047bc62b9150c3aa3742936f66c6994b2124c8f9ba8
+  languageName: node
+  linkType: hard
+
 "@types/debug@npm:^4.0.0":
   version: 4.1.13
   resolution: "@types/debug@npm:4.1.13"
@@ -8328,7 +8337,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/geojson@npm:^7946.0.10, @types/geojson@npm:^7946.0.16, @types/geojson@npm:^7946.0.7, @types/geojson@npm:^7946.0.8":
+"@types/geojson@npm:*, @types/geojson@npm:^7946.0.10, @types/geojson@npm:^7946.0.16, @types/geojson@npm:^7946.0.7, @types/geojson@npm:^7946.0.8":
   version: 7946.0.16
   resolution: "@types/geojson@npm:7946.0.16"
   checksum: 10c0/1ff24a288bd5860b766b073ead337d31d73bdc715e5b50a2cee5cb0af57a1ed02cc04ef295f5fa68dc40fe3e4f104dd31282b2b818a5ba3231bc1001ba084e3c
@@ -19845,6 +19854,7 @@ __metadata:
     "@math.gl/web-mercator": "workspace:*"
     "@mdx-js/react": "npm:^3.1.1"
     "@signalwire/docusaurus-plugin-llms-txt": "npm:^1.2.2"
+    "@types/d3-geo": "npm:2"
     "@types/react": "npm:^19.2.18"
     "@vis.gl/docusaurus-website": "npm:2.0.0-alpha.6"
     d3-geo: "npm:^2.0.2"
