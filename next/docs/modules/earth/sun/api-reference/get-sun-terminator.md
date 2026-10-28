@@ -1,5 +1,7 @@
 <!-- -->
 
+<!-- -->
+
 # getSunTerminator
 
 Returns the geometric solar-altitude outline and the direction toward the Sun. Use it to draw sunset or twilight boundaries and to mask night imagery on a map or globe.
@@ -65,6 +67,12 @@ const isDark = dot < Math.sin((boundary.altitude * Math.PI) / 180);
 ```
 
 Boundary points satisfy equality. At 0° the boundary is a great circle; negative thresholds describe smaller circles enclosing the dark region. Geometry covers the entire sphere; clip it to the supported latitude range when displaying a Web Mercator map.
+
+## Interactive example[​](#interactive-example "Direct link to Interactive example")
+
+Loading <!-- -->Solar terminator<!-- -->…
+
+⛶⛶ Explore fullscreen
 
 ## Accuracy and rendering[​](#accuracy-and-rendering "Direct link to Accuracy and rendering")
 
