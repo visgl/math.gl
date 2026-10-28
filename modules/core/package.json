@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.20",
+  "version": "5.0.0-beta.1",
   "keywords": [
     "webgl",
     "javascript",
@@ -62,8 +62,8 @@
   ],
   "browser": {
     "./dist/worker-utils/lib/node/worker_threads.js": "./dist/worker-utils/lib/node/worker_threads-browser.js",
-    "./src/worker-utils/lib/node/worker_threads.ts": "./src/worker-utils/lib/node/worker_threads-browser.ts",
     "./dist/worker-utils/lib/process-utils/child-process-proxy.js": "./dist/worker-utils/lib/process-utils/child-process-proxy.browser.js",
+    "./src/worker-utils/lib/node/worker_threads.ts": "./src/worker-utils/lib/node/worker_threads-browser.ts",
     "./src/worker-utils/lib/process-utils/child-process-proxy.ts": "./src/worker-utils/lib/process-utils/child-process-proxy.browser.ts",
     "child_process": false,
     "fs": false,
