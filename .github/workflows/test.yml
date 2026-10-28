@@ -92,6 +92,11 @@ jobs:
           node --test examples/geospatial/geoarrow-stream-worker/worker.test.mjs
           yarn workspace math.gl-geoarrow-stream-worker build
 
+      - name: Test raster mesh composition
+        run: |
+          yarn workspace math.gl-raster-mesh-preparation test
+          yarn workspace math.gl-raster-mesh-preparation build
+
       - name: Check worker API types
         run: yarn check:worker-types
 

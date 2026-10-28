@@ -1,0 +1,19 @@
+{
+  "name": "math.gl-raster-mesh-preparation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "test": "node --test prepare.test.mjs"
+  },
+  "dependencies": {
+    "@math.gl/geometry": "workspace:*",
+    "@math.gl/geospatial": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^8.2.2"
+  }
+}
