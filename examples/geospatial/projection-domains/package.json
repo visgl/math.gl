@@ -6,9 +6,10 @@
   "license": "MIT",
   "scripts": {
     "start": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node build-lab.mjs",
     "test": "node --experimental-strip-types --test test/*.test.ts test/*.test.mjs",
-    "test:browser": "node browser-test.mjs"
+    "test:browser": "node browser-test.mjs && node lab/browser-test.mjs",
+    "benchmark": "node lab/benchmark.mjs"
   },
   "dependencies": {
     "@deck.gl-community/panels": "^9.4.8",
@@ -19,7 +20,9 @@
     "@math.gl/geometry": "workspace:*",
     "@math.gl/geospatial": "workspace:*",
     "d3-geo": "^3.1.1",
-    "d3-geo-polygon": "2.0.1"
+    "d3-geo-polygon": "2.0.1",
+    "proj-wasm": "0.1.0",
+    "proj4": "2.22.0"
   },
   "devDependencies": {
     "@types/d3-geo": "^3.1.0",

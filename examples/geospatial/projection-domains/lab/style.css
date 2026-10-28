@@ -1,0 +1,22 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.raster-projection-lab{position:relative;height:720px;background:#102131;color:#dceaf3;font:13px system-ui,sans-serif;overflow:hidden;border-radius:8px}
+.lab-standalone .raster-projection-lab{height:100vh;min-height:680px;border-radius:0}
+.raster-projection-lab .lab-info{position:absolute;z-index:2;right:12px;top:12px;width:280px;max-height:calc(100% - 24px);overflow:auto}
+.raster-projection-lab .lab-info label{display:block;margin:10px 0;color:#bdd0dd;font-size:12px}
+.raster-projection-lab .lab-info select{display:block;width:100%;margin-top:5px;padding:6px;background:#142b3a;border:1px solid #476173;border-radius:4px;color:#fff}
+.raster-projection-lab .lab-info input[type=range]{display:block;width:100%;margin-top:5px}
+.raster-projection-lab .lab-info button{margin:4px 4px 4px 0;padding:6px 9px;background:#214a5a;color:#e5f8fa;border:1px solid #50818c;border-radius:4px;cursor:pointer}
+.raster-projection-lab .lab-info button:disabled{opacity:.45;cursor:default}
+.raster-projection-lab .lab-info p,.raster-projection-lab .lab-info small{font-size:11px;line-height:1.5;color:#a5bdcc}
+.raster-projection-lab .maps{position:absolute;inset:12px 304px 80px 12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.raster-projection-lab .maps article{display:flex;flex-direction:column;min-width:0;border:1px solid #334b5d;border-radius:6px;overflow:hidden;background:#142534}
+.raster-projection-lab .maps h2{font-size:13px;line-height:1.4;margin:12px 10px 5px;color:#dceaf3}
+.raster-projection-lab .maps p{margin:0 10px 10px;font-size:11px;color:#9bb6c5}
+.raster-projection-lab .map{flex:1;min-height:0;position:relative;background:radial-gradient(ellipse at center,#1c3446,#0a1823)}
+.raster-projection-lab output{display:block;min-height:75px;padding:10px;font-size:11px;color:#9fd4cc}
+.raster-projection-lab .lab-status{position:absolute;bottom:0;left:12px;right:304px;margin:0;padding:10px 0;min-height:60px;font-size:11px;line-height:1.5;color:#99afbf}
+.raster-projection-lab pre{white-space:pre-wrap;font-size:10px;max-height:160px;overflow:auto;background:#081923;padding:8px;border-radius:4px}
+@media(max-width:800px){.raster-projection-lab .maps{grid-template-columns:1fr;right:292px}.raster-projection-lab .lab-info{width:260px}.raster-projection-lab .maps p{display:none}}

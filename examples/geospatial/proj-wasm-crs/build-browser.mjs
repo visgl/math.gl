@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {build} from 'esbuild';
 import {fileURLToPath} from 'node:url';
-import {dirname, join} from 'node:path';
-import {cp, mkdir, readFile, writeFile} from 'node:fs/promises';
+import {mkdir, writeFile} from 'node:fs/promises';
+import {copyProjVendor} from './vendor.mjs';
 
 const output = new URL('./dist/', import.meta.url);
 await mkdir(output, {recursive: true});
@@ -29,42 +29,7 @@ await build({entryPoints: [fileURLToPath(new URL('./raster-worker.mjs', import.m
 // Copy installed, lockfile-pinned packages including their notices; no CDN is needed.
 // Resolve package roots through this repository's node_modules installation.
 // This also works for import-only exports and avoids copying nested package roots.
-async function packageRoot(name, start) {
-  for (let directory = start; ; directory = dirname(directory)) {
-    const candidate = join(directory, 'node_modules', name);
-    try {
-      await readFile(join(candidate, 'package.json'));
-      return candidate;
-    } catch (error) {
-      if (error.code !== 'ENOENT') throw error;
-    }
-    if (dirname(directory) === directory) throw new Error(`No installed package for ${name}`);
-  }
-}
-const projRoot = await packageRoot('proj-wasm', dirname(fileURLToPath(import.meta.url)));
-const ffiRoot = await packageRoot('ffi-wasm', projRoot);
-const workerRoot = await packageRoot('worker-router', ffiRoot);
-const packages = {
-  'proj-wasm': projRoot,
-  'ffi-wasm': ffiRoot,
-  'resource-tracker': await packageRoot('resource-tracker', projRoot),
-  'squint-cljs': await packageRoot('squint-cljs', projRoot),
-  'worker-router': workerRoot,
-  comlink: await packageRoot('comlink', workerRoot)
-};
-for (const [name, directory] of Object.entries(packages)) {
-  await cp(directory, new URL(`vendor/${name}/`, output), {recursive: true});
-}
-const imports = {
-  'proj-wasm': './vendor/proj-wasm/dist/proj.mjs',
-  'ffi-wasm': './vendor/ffi-wasm/dist/ffi-wasm.mjs',
-  'resource-tracker': './vendor/resource-tracker/resource.mjs',
-  'squint-cljs/core.js': './vendor/squint-cljs/core.js',
-  'squint-cljs/src/squint/string.js': './vendor/squint-cljs/src/squint/string.js',
-  'worker-router': './vendor/worker-router/dist/index.mjs',
-  'worker-router/worker-bootstrap': './vendor/worker-router/dist/worker-bootstrap.mjs',
-  comlink: './vendor/comlink/dist/esm/comlink.mjs'
-};
+const imports = await copyProjVendor(output);
 await writeFile(
   new URL('index.html', output),
   `<!doctype html>

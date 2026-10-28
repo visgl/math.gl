@@ -42,3 +42,6 @@ tsconfig.tsbuildinfo
 # Python generator caches
 __pycache__/
 *.pyc
+
+# Generated standalone projection lab and local WASM assets
+website/static/projection-lab/

@@ -16272,6 +16272,8 @@ __metadata:
     d3-geo: "npm:^3.1.1"
     d3-geo-polygon: "npm:2.0.1"
     playwright: "npm:^1.62.1"
+    proj-wasm: "npm:0.1.0"
+    proj4: "npm:2.22.0"
     typescript: "npm:^6.0.3"
     vite: "npm:^8.2.2"
   languageName: unknown

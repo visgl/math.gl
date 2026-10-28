@@ -357,3 +357,9 @@ completed mesh into an owned math.gl task worker. Node and Chromium validate coo
 texture error and buffer ownership. Native charts still supply target inverse branches and domain
 geometry; proj-wasm converts geographic samples into the ellipsoidal source raster CRS. This division
 is explicit: asynchronous point conversion alone does not provide chart clipping or topology repair.
+
+The separate [Antarctica and Fiji projection lab](/examples/raster-projection-lab) lets applications
+compare native math.gl with proj4js, D3 and real proj-wasm stages. It names each backend's role,
+preserves chart/source identity, demonstrates source-grid versus target-grid preparation where
+supported, and exports moving-center rebuild measurements. External engines and their WASM assets
+remain private example dependencies. Published math.gl packages acquire no hard engine dependency.

@@ -51,3 +51,24 @@ vector preprocessing, so it is suitable for these bounded fixtures rather than l
 Tests retain the original geometry regressions, add native buffer-transfer checks, and exercise all
 nine projection/raster combinations in Chromium against the production bundle. The renderer is not
 a new deck.gl projection engine integration or a replacement for generic layer clipping.
+
+## Antarctica and Fiji lab
+
+The standalone `lab.html` and website **Antarctica and Fiji projection lab** page use the qualified
+`warp/` preparation recipe. Build with `yarn workspace math.gl-projection-domains build`, then serve
+`dist/` over HTTP (the website build does this automatically). The production build copies pinned
+proj-wasm assets locally and injects their import map; the original Vite development entry remains
+the smaller streaming demo. No CDN or access token is needed.
+
+The lab compares inverse meshes (source-texel error) and continuous source-grid meshes (declared
+display-space error), with explicit unsupported cases. Native/proj4js/D3 work runs in an owned task
+pool. proj-wasm owns separate WASM workers; its main-document orchestration uses bounded async
+frontiers. Parameter changes abort previous jobs and reject stale results. The website uses the same mount function and shared infobox as other examples. Optional WASM
+assets are local; mounted labs reference-count their shared WASM pool, while every lab owns its
+task pool and operation contexts. Unmount waits for accepted work before releasing resources.
+
+Run `yarn workspace math.gl-projection-domains benchmark` for reproducible sequential CPU rebuild
+measurements. The browser's moving-center button additionally includes worker transport and exports
+its measurements. Neither is a throughput or frame-rate promise. Changing projection parameters
+rebuilds domains and meshes; camera zoom only inspects existing geometry and does not requalify the
+forward display-space error bound.

@@ -1,0 +1,41 @@
+# Antarctica and Fiji projection lab
+
+Applications written against math.gl's projection interfaces can use external projection engines.
+This recipe keeps conversion, chart preparation and rendering separate: math.gl prepares meshes,
+optional engines supply conversions, and deck.gl renders the resulting buffers.
+
+import Link from '@docusaurus/Link';
+import Example from '@site/src/components/raster-projection-lab';
+
+<Example />
+
+The Antarctic raster is a synthetic pixel grid in **ellipsoidal EPSG:3031** and contains the South
+Pole. Fiji uses a rotated geographic grid crossing 180°. UTM 60 and a complete world image provide
+additional seam fixtures. The checkerboard reveals texture interpolation and coverage; it is not
+satellite imagery.
+
+The left view refines target triangles against inverse error in source texels. The right view uses
+math.gl's source-grid subdivision against error at a declared display scale, where continuous source
+patches are supported. These are different criteria; timing differences are not an equal-accuracy
+performance comparison. A pole-to-line or interrupted source-grid case remains explicitly unsupported.
+The target-grid path preserves target area even when source UVs collapse at the pole.
+
+Native math.gl supplies chart ownership. proj4js and **proj-wasm** can supply the source-CRS transform;
+D3 can supply the spherical target projection while math.gl handles the ellipsoidal source conversion.
+The selectors state this division rather than imply that every engine implements every complete
+pipeline. D3's separate geometry-stream clipping recipe remains on the
+<Link to="/examples/projection-domains">Projection domains page</Link>.
+
+**Measure moving center** records five sequential orthographic rebuilds, including worker transport.
+Export the measurements to inspect preparation time, buffer sizes and geometry counts. It makes no
+frame-rate claim. Changing engine, source grid, target, center or tolerance rebuilds the mesh;
+superseded results cannot update the display. The example uses the shared collapsible infobox, owns its task workers, and releases its share of
+the optional WASM pool on unmount.
+
+The [source, qualification and limitations](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/warp)
+explain sampled domain boundaries, sampled image exclusion, error probes and bounded failure behavior.
+The fixed fixtures have independent PROJ coordinate and coverage checks. This is not generic domain
+clipping in deck.gl layers, a universal accuracy certificate, or a COG tile-selection implementation.
+
+See <Link to="/docs/modules/geospatial/projection/developer-guide/external-projection-engines">external projection engines</Link>
+and <Link to="/docs/modules/geospatial/crs/developer-guide/raster-mesh-preparation">source-grid raster preparation</Link>.

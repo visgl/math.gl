@@ -45,7 +45,7 @@ export function createCharts(sourceName='antarctica', target='world', {center=[0
     // The polar square lies south of -30 degrees, including after rotation.
     // This conservative footprint avoids evaluating its antipodal singularity.
     const bounds=sourceName==='world' ? [[-180,-90,180,90]] : sourceName==='fiji' ? [[-180,-60,-125,30],[125,-60,180,30]] : sourceName==='utm60' ? [[-180,-5,-170,20],[170,-5,180,20]] : [[-180,-90,180,-25]];
-    return bounds.map((b,i)=>make(`world-${i}`,rectangle(...b),p=>p,p=>[p[0]+360*Math.round(((b[0]+b[2])/2-p[0])/360),p[1]]));
+    return bounds.map((b,i)=>make(`world-${i}`,rectangle(...b),p=>p,p=>p[0]>=b[0]&&p[0]<=b[2]?p:[p[0]+360*Math.round(((b[0]+b[2])/2-p[0])/360),p[1]]));
   }
   if(target==='interrupted') {
     if(!['antarctica','rotated-polar'].includes(sourceName)) throw new RangeError('Interrupted fixture requires a polar source grid');

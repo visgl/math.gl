@@ -100,6 +100,11 @@
       },
       {
         "type": "doc",
+        "label": "Antarctica and Fiji projection lab",
+        "id": "raster-projection-lab"
+      },
+      {
+        "type": "doc",
         "id": "benchmarks"
       }
     ]

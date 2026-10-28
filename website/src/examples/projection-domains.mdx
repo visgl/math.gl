@@ -5,6 +5,7 @@ engines: prepare their geometry streams and domain boundaries, then hand the res
 a renderer. This example uses D3 for clipping/resampling, math.gl for native GeoArrow streaming,
 triangulation and worker execution, and deck.gl to draw the results.
 
+import Link from '@docusaurus/Link';
 import Example from '@site/src/components/projection-domains';
 
 <Example />
@@ -16,5 +17,10 @@ domain geometry; it is not inferred from rendering bounds.
 This is the math.gl adaptation of [deck.gl #10966](https://github.com/visgl/deck.gl/pull/10966).
 The [source and limitations](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains)
 explain bounded target-grid meshing and unresolved inverse singularities. Compare the
-[source-grid raster recipe](/docs/modules/geospatial/crs/developer-guide/raster-mesh-preparation)
-and [external-engine integration guide](/docs/modules/geospatial/projection/developer-guide/external-projection-engines).
+<Link to="/docs/modules/geospatial/crs/developer-guide/raster-mesh-preparation">source-grid raster recipe</Link>
+and <Link to="/docs/modules/geospatial/projection/developer-guide/external-projection-engines">external-engine integration guide</Link>.
+
+The <Link to="/examples/raster-projection-lab">Antarctica and Fiji projection lab</Link> adds actual EPSG:3031
+source grids, adaptive texture-error preparation, native/proj4js/D3/proj-wasm choices, and moving-center
+measurements. It replaces the omission heuristic for its qualified fixtures; this page retains the
+original bounded D3 streaming demonstration.
