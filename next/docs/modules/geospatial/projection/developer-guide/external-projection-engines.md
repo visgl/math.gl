@@ -58,7 +58,21 @@ The runnable example calls `projCreateCrsToCrs`, normalizes authority axes with 
 
 Node integration tests and a Chromium smoke test exercise the actual pinned package, including offline asset loading, inverse coordinates and unsupported CRS behavior. Provider unit tests cover lifecycle and failures. See the example README for build, test and serving commands.
 
-Prepared native transforms and `CRSDescriptor` converter callbacks remain synchronous. An asynchronously initialized engine can supply them only if its prepared point and buffer operations are synchronous. The backend-independent descriptor builder and interactive math.gl/proj4js/D3 comparison are developed in [PR #326](https://github.com/visgl/math.gl/pull/326).
+## Switch engines in the same application[​](#switch-engines-in-the-same-application "Direct link to Switch engines in the same application")
+
+Applications written against math.gl's projection interfaces can still work with external projection engines using this recipe: adapt a backend to `ProjectionEngine`, return a synchronous `PreparedProjection`, and inject it into the application. The rendering code below is unchanged when you select math.gl, proj4js or D3.
+
+<!-- -->
+
+Projection engine math.glLocation London (0)
+
+The same application projects a graticule and a location through the selected engine.
+
+Preparing engine…
+
+XY only · latitude −80° to 80° · spherical Mercator · D3 scale 6,378,137, zero translation, north-positive Y. No datum or height conversion.
+
+[Open the separate example page](https://visgl.github.io/math.gl/next/examples/external-projection-engines) for the recipe, source and limits. The comparison uses XY spherical Mercator with matching units and axes; it does not imply that all backend CRS or geometry capabilities coincide.
 
 ## Synchronous adapters[​](#synchronous-adapters "Direct link to Synchronous adapters")
 
@@ -387,6 +401,16 @@ projection.projectTo([12, 55], output); // Writes into output.
 To use another invertible D3 projection, change the factory and the accepted target identifier together. A finite point result does not guarantee visibility: direct point projection bypasses D3's stream clipping. For lines and polygons, retain [`geoPath`](https://d3js.org/d3-geo/path) and D3's streaming pipeline for clipping, antimeridian splitting and adaptive resampling. Inversion can also be ambiguous outside a projection's useful domain; validate the domain required by your app.
 
 ## Use either backend in application code[​](#use-either-backend-in-application-code "Direct link to Use either backend in application code")
+
+Consumers that also need `CRSEngine.getCRS()` require metadata, rendering bounds, normalization and sizing policy in addition to a prepared transform. Use the optional [`createCRSDescriptor`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/crs-descriptor.md) helper to assemble those backend-owned decisions without math.gl's native CRS normalizer. Import the builder and descriptor types from the existing CRS entry point:
+
+```
+import {createCRSDescriptor, type CRSDescriptorOptions} from '@math.gl/geospatial/crs';
+```
+
+The helper adds no dependency on proj4js, D3 or proj-wasm. Applications install and own their chosen backend. Its tested proj4js example covers synchronous conversions and reusable outputs. Descriptor converters must be synchronous: preparing a backend asynchronously does not make an asynchronous point API usable as a converter.
+
+For **proj-wasm**, use its asynchronous API for definition resolution followed by native math.gl preparation, or for separate asynchronous coordinate preprocessing. Do not pass promise-returning operations to `createCRSDescriptor`; it rejects them. See the [builder's contracts and limitations](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/crs-descriptor.md). The builder supplies metadata and rendering policy plumbing; it does not adapt an async execution API into a synchronous one.
 
 Accept `ProjectionEngine` in consumers and select the backend at setup time. Use `createProjectionAsync()` when you want a ready synchronous `PreparedProjection`, including when the engine might use lazy math.gl algorithms. The method does not make these external adapters asynchronous internally or load external grid data.
 

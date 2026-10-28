@@ -8,6 +8,10 @@ The [Coordinate Reference Systems developer guide](https://visgl.github.io/math.
 
 For definitions of surface models, paths, reference systems, and distortion properties, see [Geospatial terminology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/terminology.md).
 
+## Prepared descriptors[​](#prepared-descriptors "Direct link to Prepared descriptors")
+
+Use [`createCRSDescriptor`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/crs-descriptor.md) from `@math.gl/geospatial/crs` to assemble metadata, prepared external converters and rendering policy without importing a projection engine. Descriptor and converter types are exported from the same entry point. The builder is also available from `@math.gl/geospatial`.
+
 ## Installation[​](#installation "Direct link to Installation")
 
 ```
