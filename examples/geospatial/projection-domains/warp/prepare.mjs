@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {earcut, clipTriangleMesh, interpolatePackedAttributes} from '@math.gl/geometry';
+import {earcut, interpolatePackedAttributes} from '@math.gl/geometry';
 import {createCRSProjectionDomain} from '@math.gl/geospatial/crs';
 import {runWarpSync, WarpError} from './refine.mjs';
 
@@ -24,13 +24,40 @@ export function seedDomain(domain) {
  * The chart owns the inverse branch. Pixels are affine in the raster's native CRS.
  * Image-footprint clipping interpolates target positions using math.gl provenance. */
 export function finishInverse(refined, {width,height,row,id}) {
-  const clipped=clipTriangleMesh(refined,{regions:[[[0,0],[width,0],[width,height],[0,height]]],
-    maxVertices:600000,maxTriangles:300000,maxIntersections:600000});
-  const attributes=interpolatePackedAttributes(new Uint8Array(refined.sourcePositions.buffer),clipped,
-    {byteStride:16,attributes:[{type:'float64',size:2,byteOffset:0,interpolation:'linear'}]});
-  return {positions:new Float64Array(attributes.buffer), uv:Float64Array.from(clipped.positions,(v,i)=>v/(i%2 ? height : width)),
-    indices:clipped.indices, sourceRows:new Uint32Array(clipped.indices.length/3).fill(row), chart:id,
-    diagnostics:{...refined.diagnostics,outputTriangles:clipped.indices.length/3}};
+  // Clip affine UV constraints in each triangle's barycentric parameter space.
+  // UV area may be zero at a pole even when target area is positive. A planar
+  // source-XY clipper would discard that valid geometry before attribute interpolation.
+  const sourceVertexIndices=[],sourceVertexWeights=[],indices=[];
+  for(let face=0;face<refined.indices.length;face+=3) {
+    const ids=Array.from(refined.indices.slice(face,face+3));
+    const value=(w,axis)=>w.reduce((sum,weight,i)=>sum+weight*refined.positions[ids[i]*2+axis],0);
+    let polygon=[[1,0,0],[0,1,0],[0,0,1]];
+    for(const [axis,boundary,sign] of [[0,0,1],[0,width,-1],[1,0,1],[1,height,-1]]) {
+      const next=[];
+      for(let i=0;i<polygon.length;i++) {
+        const a=polygon[i],b=polygon[(i+1)%polygon.length];
+        const da=(value(a,axis)-boundary)*sign,db=(value(b,axis)-boundary)*sign;
+        if(da>=0)next.push(a);
+        if((da<0)!==(db<0)){const t=da/(da-db);next.push(a.map((v,j)=>v+t*(b[j]-v)));}
+      }
+      polygon=next;
+    }
+    const start=sourceVertexWeights.length/3;
+    if(start+polygon.length>600000 || indices.length/3+Math.max(0,polygon.length-2)>300000)
+      throw new WarpError('limit','Raster clipping output budget exhausted');
+    for(const weights of polygon){sourceVertexIndices.push(...ids);sourceVertexWeights.push(...weights);}
+    for(let i=1;i+1<polygon.length;i++)indices.push(start,start+i,start+i+1);
+  }
+  const records=new Float64Array(refined.positions.length*2);
+  for(let i=0;i<refined.positions.length/2;i++)records.set([
+    refined.sourcePositions[i*2],refined.sourcePositions[i*2+1],refined.positions[i*2],refined.positions[i*2+1]],i*4);
+  const provenance={sourceVertexIndices:new Uint32Array(sourceVertexIndices),sourceVertexWeights:new Float64Array(sourceVertexWeights)};
+  const attributes=interpolatePackedAttributes(new Uint8Array(records.buffer),provenance,
+    {byteStride:32,attributes:[{type:'float64',size:4,byteOffset:0,interpolation:'linear'}]});
+  const values=new Float64Array(attributes.buffer),positions=new Float64Array(values.length/2),uv=new Float64Array(values.length/2);
+  for(let i=0;i<values.length/4;i++){positions.set(values.slice(i*4,i*4+2),i*2);uv.set([values[i*4+2]/width,values[i*4+3]/height],i*2);}
+  return {positions,uv,indices:new Uint32Array(indices),sourceRows:new Uint32Array(indices.length/3).fill(row),chart:id,
+    diagnostics:{...refined.diagnostics,outputTriangles:indices.length/3}};
 }
 export function prepareInverse(chart, options={}) {
   if (![chart.width,chart.height].every(x=>Number.isSafeInteger(x)&&x>0) || !Number.isSafeInteger(chart.row) || chart.row<0 || chart.row>0xffffffff)

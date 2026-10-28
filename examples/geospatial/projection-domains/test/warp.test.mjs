@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createCharts,createSource,rectangle} from '../warp/fixtures.mjs';
-import {prepareInverse,inspectWarp,seedDomain} from '../warp/prepare.mjs';
+import {prepareInverse,inspectWarp,seedDomain,finishInverse} from '../warp/prepare.mjs';
 import {runWarpSync,WarpError} from '../warp/refine.mjs';
 const reference=JSON.parse(readFileSync(new URL('../warp/reference.json',import.meta.url)));
 
@@ -95,5 +95,23 @@ test('adaptive shared-edge refinement remains conforming',()=>{
     const a=m.indices[i+e],b=m.indices[i+(e+1)%3],dx=p[b*2]-p[a*2],dy=p[b*2+1]-p[a*2+1];
     for(let j=0;j<p.length/2;j++)if(j!==a&&j!==b){const x=p[j*2]-p[a*2],y=p[j*2+1]-p[a*2+1],t=(x*dx+y*dy)/(dx*dx+dy*dy);
       assert(!(t>1e-9&&t<1-1e-9&&Math.abs(x*dy-y*dx)<1e-12),'T-junction');}
+  }
+});
+
+
+test('pole-to-line target coverage survives collapsed source-pixel triangles',()=>{
+  const chart=createCharts('antarctica','world')[0],mesh=prepareInverse(chart,{tolerance:1});
+  for(let lon=-175;lon<180;lon+=10)for(const lat of [-90,-89.9,-89,-88]) {
+    const pixel=sample(mesh,[lon,lat]),expected=chart.inverse([lon,lat]);
+    assert(pixel,`uncovered polar target ${lon},${lat}`);
+    assert(Math.hypot(pixel[0]-expected[0],pixel[1]-expected[1])<=1);
+  }
+});
+test('rank-zero and partially clipped rank-one UV mappings retain target area',()=>{
+  for(const [uv,expectedArea] of [[[.5,.5,.5,.5,.5,.5],.5],[[-1,0,1,0,1,0],.375]]) {
+    const m=finishInverse({sourcePositions:new Float64Array([0,0,1,0,0,1]),positions:new Float64Array(uv),indices:new Uint32Array([0,1,2]),diagnostics:{}},{width:1,height:1,row:7,id:'degenerate-uv'});
+    let area=0;
+    for(let i=0;i<m.indices.length;i+=3){const [a,b,c]=Array.from(m.indices.slice(i,i+3),j=>m.positions.slice(j*2,j*2+2));area+=Math.abs((b[0]-a[0])*(c[1]-a[1])-(c[0]-a[0])*(b[1]-a[1]))/2;}
+    assert.equal(area,expectedArea);assert(m.uv.every(v=>v>=0&&v<=1));assert(m.sourceRows.every(r=>r===7));
   }
 });

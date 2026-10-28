@@ -13,8 +13,9 @@ The EPSG:3031 square contains the pole. The full-world rectangle includes both p
 
 `prepareInverse` triangulates each explicit domain, refines target triangles against inverse
 error measured in **source texels**, and clips the resulting source-pixel triangles to the
-image footprint. math.gl's `clipTriangleMesh` and `interpolatePackedAttributes` carry the target
-positions through those cuts. Chart IDs and source row IDs remain explicit. Seam vertices in
+image footprint. Clipping uses affine UV constraints in each triangle's barycentric parameter space;
+math.gl's `interpolatePackedAttributes` carries target positions through those cuts. This preserves
+nonzero target area when UVs collapse to a point or line at the pole. Chart IDs and source row IDs remain explicit. Seam vertices in
 different charts are never welded. Source-grid refinement remains demonstrated by the sibling
 `raster-mesh-preparation` example, where error is measured in output-coordinate units.
 
