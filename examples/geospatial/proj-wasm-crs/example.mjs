@@ -4,6 +4,7 @@
 
 import {createCRSResolver} from '@math.gl/geospatial/crs';
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
+import {runBatchExample} from './batch-example.mjs';
 import {createProjWasmProvider} from './provider.mjs';
 
 /** Runs the same real database/coordinate workflow in Node and a browser. */
@@ -55,6 +56,7 @@ export async function runExample() {
       unsupported = error.message;
     }
     return {
+      batch: await runBatchExample(proj),
       input,
       mathgl,
       wasm,

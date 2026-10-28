@@ -14,8 +14,12 @@ await build({
   bundle: true,
   format: 'esm',
   platform: 'browser',
-  external: ['proj-wasm']
+  external: ['proj-wasm', 'node:*']
 });
+
+await build({entryPoints: [fileURLToPath(new URL('./consume-worker.mjs', import.meta.url))],
+  outfile: fileURLToPath(new URL('consume-worker.mjs', output)), bundle: true, format: 'esm',
+  platform: 'browser', external: ['node:*']});
 
 // Keep upstream module/worker URLs and adjacent WASM/database assets intact.
 // Copy installed, lockfile-pinned packages including their notices; no CDN is needed.
@@ -62,7 +66,7 @@ await writeFile(
   `<!doctype html>
 <html lang="en"><meta charset="utf-8"><title>math.gl + proj-wasm CRS resolution</title>
 <h1>Resolve with proj-wasm, transform with math.gl</h1>
-<p>EPSG:8857 (Equal Earth), with an independent asynchronous PROJ comparison.</p>
+<p>EPSG:8857 (Equal Earth), with an asynchronous packed-batch PROJ comparison and transferred worker buffers.</p>
 <pre id="result">Preparing local WASM and CRS database…</pre>
 <script type="importmap">${JSON.stringify({imports})}</script>
 <script type="module" src="./browser.mjs"></script></html>`
