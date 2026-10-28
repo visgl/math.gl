@@ -234,6 +234,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Elastic maps](https://visgl.github.io/math.gl/next/docs/modules/geospatial/elastic-maps.md): In this module, Elastic refers to Justin Kunimune's named family of numerical
 - [@math.gl/geospatial/geoarrow](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow.md): @math.gl/geospatial/geoarrow is the Arrow-runtime-independent home for columnar geospatial math in math.gl.
 - [GeoArrow API reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow/api-reference/geoarrow.md): All root functions are synchronous. Unless a function explicitly returns a new column or fills a
+- [Geometry streams and task workers](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow/geometry-streams.md): streamGeoArrow and tessellateGeoArrowStream are named exports from
 - [Migrating GeoArrow work into math.gl](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow/migration-guide.md): @math.gl/geospatial/geoarrow consolidates the reusable math from the loaders.gl GeoArrow tentpole work and
 - [GeoArrow physical layouts](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow/physical-layouts.md): The descriptor model separates physical storage from the library that owns it. Descriptors are
 - [Myriahedral maps](https://visgl.github.io/math.gl/next/docs/modules/geospatial/myriahedral-maps.md): Unfold a globe into a geographically organized net: the Americas on the left,

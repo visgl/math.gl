@@ -62,3 +62,5 @@ getGeoArrowBounds(points);
 * [Migration guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow/migration-guide.md) maps the loaders.gl and luma.gl prototypes onto the runtime-neutral API.
 
 The package README also contains complete examples for two-pass building, codecs, tessellation, resource limits, worker transfers, and runtime adapters.
+
+See [Geometry streams and task workers](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow/geometry-streams.md) for external-engine clipping, polygon tessellation and source-row attribution without materializing GeoJSON.
