@@ -7,7 +7,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc --noEmit && vite build",
-    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "test": "node --experimental-strip-types --test test/*.test.ts test/*.test.mjs",
     "test:browser": "node browser-test.mjs"
   },
   "dependencies": {
