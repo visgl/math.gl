@@ -340,3 +340,10 @@ This recipe does not put Promise-returning functions into `CRSDescriptor.convert
 engine produces prepared geometry before the renderer consumes it. It also does not infer spherical
 stream clipping or repair topology: combine it with explicit geometry preparation for lines, polygons
 and rasters. Its XYZ/time policy and ownership boundaries are documented in the example README.
+
+## Geometry streams and projection domains
+
+The [Projection domains example](/examples/projection-domains) combines native math.gl GeoArrow
+streaming and task workers with D3 clipping, interrupted lobes, and inverse-mapped synthetic rasters.
+It preserves source feature identity and illustrates why point conversion, validity domains and
+geometry topology are separate concerns. See its source for the explicit sampling limits.

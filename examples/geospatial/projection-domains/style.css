@@ -1,0 +1,10 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.projection-domains {position:relative;height:680px;background:#111d2a;color:#eef3f7;font:14px system-ui;overflow:hidden}
+.projection-domains .projection-map {position:absolute;inset:0 0 65px}
+.projection-domains aside {position:absolute;z-index:2;top:12px;right:12px;width:280px;max-width:calc(100% - 24px)}
+.projection-domains label {display:block;margin:12px 0}
+.projection-domains select {display:block;width:100%;padding:5px;margin-top:4px;background:#22364c;color:#eef3f7}
+.projection-domains output {position:absolute;bottom:0;padding:12px;min-height:40px;color:#b6cfdd;pointer-events:none}

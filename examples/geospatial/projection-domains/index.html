@@ -1,0 +1,7 @@
+<!doctype html>
+<!-- math.gl
+SPDX-License-Identifier: MIT
+SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+-->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Projection domains and external engines</title></head>
+<body style="margin:0"><div id="example"></div><script type="module">import {mountProjectionDomains} from './main.ts'; const dispose = mountProjectionDomains(document.querySelector('#example')); window.addEventListener('pagehide', event => {if (!event.persisted) void dispose();});</script></body></html>

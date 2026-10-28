@@ -95,6 +95,11 @@
       },
       {
         "type": "doc",
+        "label": "Projection domains",
+        "id": "projection-domains"
+      },
+      {
+        "type": "doc",
         "id": "benchmarks"
       }
     ]

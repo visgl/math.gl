@@ -1,0 +1,20 @@
+# Projection domains and external engines
+
+Applications written against math.gl's projection interfaces can still use external projection
+engines: prepare their geometry streams and domain boundaries, then hand the resulting buffers to
+a renderer. This example uses D3 for clipping/resampling, math.gl for native GeoArrow streaming,
+triangulation and worker execution, and deck.gl to draw the results.
+
+import Example from '@site/src/components/projection-domains';
+
+<Example />
+
+Switch between three projections and three synthetic rasters. Polygon pieces retain their source
+row IDs across antimeridian cuts and interrupted lobes. The white outline is explicit target-plane
+domain geometry; it is not inferred from rendering bounds.
+
+This is the math.gl adaptation of [deck.gl #10966](https://github.com/visgl/deck.gl/pull/10966).
+The [source and limitations](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains)
+explain bounded target-grid meshing and unresolved inverse singularities. Compare the
+[source-grid raster recipe](/docs/modules/geospatial/crs/developer-guide/raster-mesh-preparation)
+and [external-engine integration guide](/docs/modules/geospatial/projection/developer-guide/external-projection-engines).

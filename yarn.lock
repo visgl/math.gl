@@ -2604,7 +2604,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/core@npm:~9.4.0":
+"@deck.gl/core@npm:^9.4.0, @deck.gl/core@npm:~9.4.0":
   version: 9.4.0
   resolution: "@deck.gl/core@npm:9.4.0"
   dependencies:
@@ -2677,7 +2677,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/layers@npm:~9.4.0":
+"@deck.gl/layers@npm:^9.4.0, @deck.gl/layers@npm:~9.4.0":
   version: 9.4.0
   resolution: "@deck.gl/layers@npm:9.4.0"
   dependencies:
@@ -2699,7 +2699,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@deck.gl/mesh-layers@npm:~9.4.0":
+"@deck.gl/mesh-layers@npm:^9.4.0, @deck.gl/mesh-layers@npm:~9.4.0":
   version: 9.4.0
   resolution: "@deck.gl/mesh-layers@npm:9.4.0"
   dependencies:
@@ -8263,6 +8263,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/d3-geo@npm:^3.1.0":
+  version: 3.1.1
+  resolution: "@types/d3-geo@npm:3.1.1"
+  dependencies:
+    "@types/geojson": "npm:*"
+  checksum: 10c0/bb0405ec99a6b5947d9b47481171f2514c7cbd7dc028a80463193e0ea7411cde997c2813d25146c670c8c0bee08867cdc839fce029586647c8465b5627551493
+  languageName: node
+  linkType: hard
+
 "@types/debug@npm:^4.0.0":
   version: 4.1.13
   resolution: "@types/debug@npm:4.1.13"
@@ -10766,6 +10775,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commander@npm:7, commander@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "commander@npm:7.2.0"
+  checksum: 10c0/8d690ff13b0356df7e0ebbe6c59b4712f754f4b724d4f473d3cc5b3fdcf978e3a5dc3078717858a2ceb50b0f84d0660a7f22a96cdc50fb877d0c9bb31593d23a
+  languageName: node
+  linkType: hard
+
 "commander@npm:^10.0.0":
   version: 10.0.1
   resolution: "commander@npm:10.0.1"
@@ -10784,13 +10800,6 @@ __metadata:
   version: 5.1.0
   resolution: "commander@npm:5.1.0"
   checksum: 10c0/da9d71dbe4ce039faf1fe9eac3771dca8c11d66963341f62602f7b66e36d2a3f8883407af4f9a37b1db1a55c59c0c1325f186425764c2e963dc1d67aec2a4b6d
-  languageName: node
-  linkType: hard
-
-"commander@npm:^7.2.0":
-  version: 7.2.0
-  resolution: "commander@npm:7.2.0"
-  checksum: 10c0/8d690ff13b0356df7e0ebbe6c59b4712f754f4b724d4f473d3cc5b3fdcf978e3a5dc3078717858a2ceb50b0f84d0660a7f22a96cdc50fb877d0c9bb31593d23a
   languageName: node
   linkType: hard
 
@@ -11484,12 +11493,58 @@ __metadata:
   languageName: node
   linkType: hard
 
+"d3-array@npm:1 - 3, d3-array@npm:2.5.0 - 3":
+  version: 3.2.4
+  resolution: "d3-array@npm:3.2.4"
+  dependencies:
+    internmap: "npm:1 - 2"
+  checksum: 10c0/08b95e91130f98c1375db0e0af718f4371ccacef7d5d257727fe74f79a24383e79aba280b9ffae655483ffbbad4fd1dec4ade0119d88c4749f388641c8bf8c50
+  languageName: node
+  linkType: hard
+
 "d3-array@npm:^2.5.0":
   version: 2.12.1
   resolution: "d3-array@npm:2.12.1"
   dependencies:
     internmap: "npm:^1.0.0"
   checksum: 10c0/7eca10427a9f113a4ca6a0f7301127cab26043fd5e362631ef5a0edd1c4b2dd70c56ed317566700c31e4a6d88b55f3951aaba192291817f243b730cb2352882e
+  languageName: node
+  linkType: hard
+
+"d3-geo-polygon@npm:2.0.1":
+  version: 2.0.1
+  resolution: "d3-geo-polygon@npm:2.0.1"
+  dependencies:
+    d3-array: "npm:2.5.0 - 3"
+    d3-geo: "npm:2 - 3"
+    d3-geo-projection: "npm:4"
+  checksum: 10c0/4fe3b89d0f9e83e165d2c1842a2aaab9f6599fa7082c8863ad56cc2406a826d30c0c8f365c14e202d11b01623ae863e6b02780b6c7251a8310297100abbf8452
+  languageName: node
+  linkType: hard
+
+"d3-geo-projection@npm:4":
+  version: 4.0.0
+  resolution: "d3-geo-projection@npm:4.0.0"
+  dependencies:
+    commander: "npm:7"
+    d3-array: "npm:1 - 3"
+    d3-geo: "npm:1.12.0 - 3"
+  bin:
+    geo2svg: bin/geo2svg.js
+    geograticule: bin/geograticule.js
+    geoproject: bin/geoproject.js
+    geoquantize: bin/geoquantize.js
+    geostitch: bin/geostitch.js
+  checksum: 10c0/59fba176fb1bfcee2c46f3e543d97189179dead8e3e3ec030611d4878415f547ee710090a1a03dea085541227bb007d2080c32ddd0f817782c7e312680fd087c
+  languageName: node
+  linkType: hard
+
+"d3-geo@npm:1.12.0 - 3, d3-geo@npm:2 - 3, d3-geo@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "d3-geo@npm:3.1.1"
+  dependencies:
+    d3-array: "npm:2.5.0 - 3"
+  checksum: 10c0/d32270dd2dc8ac3ea63e8805d63239c4c8ec6c0d339d73b5e5a30a87f8f54db22a78fb434369799465eae169503b25f9a107c642c8a16c32a3285bc0e6d8e8c1
   languageName: node
   linkType: hard
 
@@ -14515,6 +14570,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"internmap@npm:1 - 2":
+  version: 2.0.3
+  resolution: "internmap@npm:2.0.3"
+  checksum: 10c0/8cedd57f07bbc22501516fbfc70447f0c6812871d471096fad9ea603516eacc2137b633633daf432c029712df0baefd793686388ddf5737e3ea15074b877f7ed
+  languageName: node
+  linkType: hard
+
 "internmap@npm:^1.0.0":
   version: 1.0.1
   resolution: "internmap@npm:1.0.1"
@@ -16191,6 +16253,26 @@ __metadata:
     esbuild: "npm:^0.28.1"
     playwright: "npm:^1.62.1"
     proj-wasm: "npm:0.1.0"
+  languageName: unknown
+  linkType: soft
+
+"math.gl-projection-domains@workspace:examples/geospatial/projection-domains":
+  version: 0.0.0-use.local
+  resolution: "math.gl-projection-domains@workspace:examples/geospatial/projection-domains"
+  dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
+    "@deck.gl/core": "npm:^9.4.0"
+    "@deck.gl/layers": "npm:^9.4.0"
+    "@deck.gl/mesh-layers": "npm:^9.4.0"
+    "@math.gl/core": "workspace:*"
+    "@math.gl/geospatial": "workspace:*"
+    "@types/d3-geo": "npm:^3.1.0"
+    "@types/node": "npm:^22.20.1"
+    d3-geo: "npm:^3.1.1"
+    d3-geo-polygon: "npm:2.0.1"
+    playwright: "npm:^1.62.1"
+    typescript: "npm:^6.0.3"
+    vite: "npm:^8.2.2"
   languageName: unknown
   linkType: soft
 
