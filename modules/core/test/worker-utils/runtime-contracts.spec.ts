@@ -24,11 +24,25 @@ import {
 } from '../../src/worker-utils/lib/worker-api/process-on-worker';
 import WorkerFarm from '../../src/worker-utils/lib/worker-farm/worker-farm';
 import {createWorkerResource} from '../../src/worker-utils/lib/worker-api/worker-resource';
+import {getLoadableWorkerURL} from '../../src/worker-utils/lib/worker-utils/get-loadable-worker-url';
 
 const source = "require('worker_threads').parentPort.on('message', () => {});";
 const tick = () => new Promise(resolve => setImmediate(resolve));
 const start = (pool, bytes, priority = 0, signal: AbortSignal = undefined) =>
   pool.startJob('test', undefined, undefined, signal, {inputBytes: bytes, priority});
+
+test('module URLs remain direct and worker types use separate pools', async () => {
+  const url = 'https://example.test/worker.mjs';
+  assert.equal(getLoadableWorkerURL({url, workerType: 'module'}), url);
+  const farm = WorkerFarm.getWorkerFarm();
+  try {
+    const classic = farm.getWorkerPool({name: 'type-test', url});
+    const module = farm.getWorkerPool({name: 'type-test', url, workerType: 'module'});
+    assert.notEqual(classic, module);
+  } finally {
+    await farm.destroy();
+  }
+});
 
 test('counts entire backing buffers once through cyclic maps, sets and views', () => {
   const buffer = new ArrayBuffer(64);
@@ -54,6 +68,13 @@ test('option sanitization preserves cycles, collections and buffer identities', 
   assert(result.map.get(result).has(result));
   assert.deepEqual(result.fn, {});
   assert.doesNotThrow(() => structuredClone(result));
+});
+
+test('option sanitization preserves compiled WebAssembly modules', () => {
+  const module = new WebAssembly.Module(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0]));
+  const result: any = getTransferListForWriter({module});
+  assert.equal(result.module, module);
+  assert(structuredClone(result).module instanceof WebAssembly.Module);
 });
 
 test('in-flight budget gates dispatch and priorities are stable', async () => {

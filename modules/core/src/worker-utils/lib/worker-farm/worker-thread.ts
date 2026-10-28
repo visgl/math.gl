@@ -18,6 +18,7 @@ export type WorkerThreadProps = {
   source?: string;
   /** Worker script URL. */
   url?: string;
+  workerType?: 'classic' | 'module';
   /** Lazily resolves the classic worker URL used as a fallback. */
   getUrl?: () => string;
   /** Creates a browser Worker directly. */
@@ -31,6 +32,7 @@ export default class WorkerThread {
   readonly name: string;
   readonly source: string | undefined;
   readonly url: string | undefined;
+  readonly workerType: 'classic' | 'module';
   /** Lazily resolves the classic worker URL used as a fallback. */
   readonly getUrl: (() => string) | undefined;
   /** Creates a browser Worker directly. */
@@ -60,6 +62,7 @@ export default class WorkerThread {
     this.name = name;
     this.source = source;
     this.url = url;
+    this.workerType = props.workerType ?? 'classic';
     this.getUrl = getUrl;
     this.loadWorker = loadWorker;
     this.onMessage = NOOP;
@@ -155,8 +158,12 @@ export default class WorkerThread {
     }
 
     const url = this.url || this.getUrl?.();
-    this._loadableURL = getLoadableWorkerURL({source: this.source, url});
-    const worker = new Worker(this._loadableURL, {name: this.name});
+    this._loadableURL = getLoadableWorkerURL({
+      source: this.source,
+      url,
+      workerType: this.workerType
+    });
+    const worker = new Worker(this._loadableURL, {name: this.name, type: this.workerType});
 
     return this._initializeBrowserWorker(worker);
   }
