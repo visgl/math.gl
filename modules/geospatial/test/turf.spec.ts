@@ -191,3 +191,25 @@ test('batched destination, midpoint and bounds center', async () => {
   expect(half.values[1]).toBeCloseTo(0, 10);
   expect([...bbox(center(column([polygon]))).values]).toEqual([5, 5, 5, 5]);
 });
+
+test('native rhumb operations match Turf across the antimeridian', async () => {
+  const api = await import('../src/turf');
+  const {default: oracleDistance} = await import('@turf/rhumb-distance');
+  const {default: oracleBearing} = await import('@turf/rhumb-bearing');
+  const {default: oracleDestination} = await import('@turf/rhumb-destination');
+  const a = point(179, 35),
+    b = point(-179, 40);
+  const left = column([a, null]),
+    right = column([b]);
+  expect(api.rhumbDistance(left, right).values[0]).toBeCloseTo(oracleDistance(a, b), 8);
+  expect(api.rhumbBearing(left, right).values[0]).toBeCloseTo(oracleBearing(a, b), 8);
+  expect(api.rhumbDistance(left, right).validity[0]).toBe(1);
+  const expected = oracleDestination(a, 500, 70).geometry.coordinates;
+  const actual = bbox(api.rhumbDestination(left, 500, 70));
+  expect(actual.values[0]).toBeCloseTo(expected[0], 9);
+  expect(actual.values[1]).toBeCloseTo(expected[1], 9);
+  expect([...bbox(api.transformTranslate(left, 500, 70)).values]).toEqual([...actual.values]);
+  const rotation = bbox(api.transformRotate(column([point(1, 0)]), 90, {pivot: [0, 0]}));
+  expect(rotation.values[0]).toBeCloseTo(0, 8);
+  expect(rotation.values[1]).toBeCloseTo(-1, 8);
+});
