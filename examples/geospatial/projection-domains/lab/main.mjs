@@ -10,6 +10,8 @@ import {engines,capability} from './backends.mjs';
 import {mountInfoBox} from '../../../common/info-box.js';
 import {acquireWasm} from './wasm-runtime.mjs';
 import './style.css';
+import earthImageUrl from '../../../earth/sun-terminator/assets/day.jpg';
+import {resampleImagery} from './imagery.mjs';
 export function mountProjectionLab(root,{wasmAssetBase=new URL('./',document.baseURI).href}={}) {
 root.classList.add('raster-projection-lab');
 root.innerHTML=`<section class="maps"><article><h2>Target grid → inverse UVs</h2><p>Threshold in source texels.</p><div class="map" data-map="inverse"></div><output data-stats="inverse"></output></article><article><h2>Source grid → projected positions</h2><p>Threshold at the declared display scale.</p><div class="map" data-map="forward"></div><output data-stats="forward"></output></article></section>
@@ -18,17 +20,24 @@ root.innerHTML=`<section class="maps"><article><h2>Target grid → inverse UVs</
 <label>Target map<select data-target><option value="orthographic">Orthographic hemisphere</option><option value="world">World · equirectangular</option><option value="perspective">Tilted perspective</option><option value="interrupted">Interrupted sinusoidal</option></select></label>
 <label>Engine<select data-engine>${Object.entries(engines).map(([id,label])=>`<option value="${id}">${label}</option>`).join('')}</select></label>
 <label>Error threshold<select data-tolerance><option value="2">2 pixels</option><option value="1">1 pixel</option><option value=".5">0.5 pixels</option><option value="4">4 pixels</option></select></label>
-<label>Center longitude <input data-lon type="range" min="-180" max="180" value="0" step="5"></label><label>Center latitude <input data-lat type="range" min="-90" max="-50" value="-90" step="5"></label><label><input data-wire type="checkbox"> Mesh edges</label>
+<label>Center longitude <input data-lon type="range" min="-180" max="180" value="0" step="5"></label><label>Center latitude <input data-lat type="range" min="-90" max="-50" value="-90" step="5"></label><label><input data-imagery type="checkbox" checked> Earth imagery</label><label><input data-wire type="checkbox"> Mesh edges</label>
 <button data-benchmark>Measure moving center</button><button data-export disabled>Export measurements</button>
-<p data-note></p><pre data-measurements hidden></pre><small>Checkerboard fixtures use actual source CRSs. Domains and error criteria are sampled. No COG loading or tile selection.</small></aside>
+<p data-note></p><pre data-measurements hidden></pre><small><span data-imagery-note>NASA Blue Marble overview imagery, resampled into the source grid. Uncheck Earth imagery for the diagnostic checkerboard.</span> <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble/" target="_blank" rel="noreferrer">NASA / GIBS credit</a>. Domains and error criteria are sampled. No COG loading or tile selection.</small></aside>
 <p class="lab-status" role="status" data-status>Preparing chart geometry…</p>`;
 const disposeInfo=mountInfoBox(root.querySelector('aside'),{title:'Antarctica & Fiji',theme:'sleek-dark',width:280});
-const $=selector=>root.querySelector(selector),source=$('[data-source]'),target=$('[data-target]'),engine=$('[data-engine]'),tolerance=$('[data-tolerance]'),lon=$('[data-lon]'),lat=$('[data-lat]'),wire=$('[data-wire]'),status=$('[data-status]');
+const $=selector=>root.querySelector(selector),source=$('[data-source]'),target=$('[data-target]'),engine=$('[data-engine]'),tolerance=$('[data-tolerance]'),lon=$('[data-lon]'),lat=$('[data-lat]'),wire=$('[data-wire]'),imagery=$('[data-imagery]'),status=$('[data-status]');
 const texture=document.createElement('canvas');texture.width=texture.height=256;const ctx=texture.getContext('2d');
 for(let y=0;y<8;y++)for(let x=0;x<8;x++){ctx.fillStyle=(x+y)%2?'#215f83':'#60aaa7';ctx.fillRect(x*32,y*32,32,32);ctx.fillStyle='#eaf8ff';ctx.font='10px monospace';ctx.fillText(`${x},${y}`,x*32+5,y*32+19);}
 ctx.strokeStyle='#ffd48b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(128,128,9,0,Math.PI*2);ctx.stroke();
 const decks={},results={};let generation=0,active,disposed=false,wasmPromise,wasmHandle,benchmarking=false,measurementRows=null;
-const pending=new Set();
+const pending=new Set(),imageCache=new Map();let imagePromise;
+async function getEarthTexture(name,signal) {
+  if(imageCache.has(name))return imageCache.get(name);
+  imagePromise??=new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;const context=canvas.getContext('2d');context.drawImage(image,0,0);resolve(context.getImageData(0,0,canvas.width,canvas.height));};image.onerror=()=>reject(new Error('Bundled Earth imagery could not load'));image.src=earthImageUrl;});
+  const raster=await resampleImagery(await imagePromise,name,{signal,yieldFrame:()=>new Promise(resolve=>setTimeout(resolve,0))});
+  const canvas=document.createElement('canvas');canvas.width=raster.width;canvas.height=raster.height;canvas.getContext('2d').putImageData(new ImageData(raster.data,raster.width,raster.height),0,0);
+  imageCache.set(name,canvas);return canvas;
+}
 const loadWorker=()=>new Worker(new URL('./worker.mjs',import.meta.url),{type:'module'});
 const pool=new WorkerPool({name:'raster-projection-lab',loadWorker,maxConcurrency:2,maxQueuedJobs:2});
 const task={id:'raster-lab',name:'Raster lab',module:'example',version:'1',options:{},loadWorker};
@@ -36,16 +45,22 @@ for(const mode of ['inverse','forward'])decks[mode]=new Deck({parent:$(`[data-ma
   initialViewState:{target:[0,0,0],zoom:0},controller:true,
   getTooltip:({object})=>object?`Source row ${object.row}; chart ${object.chart}`:null});
 function render(mode,result) {
+  // Place the two already-cut Pacific charts next to each other for inspection.
+  // Only display coordinates change; preparation buffers and UVs stay untouched.
+  const pacific=['fiji','utm60'].includes(result.sourceName);
+  const offset=chart=>pacific&&result.domains.some(d=>d.chart===chart&&d.ring.every(p=>p[0]<=0))?360:0;
+  const meshes=result.meshes.map(m=>({...m,positions:m.positions.map((v,i)=>v+(i%2===0?offset(m.chart):0))}));
+  const domains=result.domains.map(d=>({...d,ring:d.ring.map(([x,y])=>[x+offset(d.chart),y])}));
   const extent=[Infinity,Infinity,-Infinity,-Infinity];
-  for(const mesh of result.meshes)for(let i=0;i<mesh.positions.length;i+=2){extent[0]=Math.min(extent[0],mesh.positions[i]);extent[1]=Math.min(extent[1],mesh.positions[i+1]);extent[2]=Math.max(extent[2],mesh.positions[i]);extent[3]=Math.max(extent[3],mesh.positions[i+1]);}
-  for(const {ring} of result.domains)for(const [x,y] of ring){extent[0]=Math.min(extent[0],x);extent[1]=Math.min(extent[1],y);extent[2]=Math.max(extent[2],x);extent[3]=Math.max(extent[3],y);}
+  for(const mesh of meshes)for(let i=0;i<mesh.positions.length;i+=2){extent[0]=Math.min(extent[0],mesh.positions[i]);extent[1]=Math.min(extent[1],mesh.positions[i+1]);extent[2]=Math.max(extent[2],mesh.positions[i]);extent[3]=Math.max(extent[3],mesh.positions[i+1]);}
+  for(const {ring} of domains)for(const [x,y] of ring){extent[0]=Math.min(extent[0],x);extent[1]=Math.min(extent[1],y);extent[2]=Math.max(extent[2],x);extent[3]=Math.max(extent[3],y);}
   const map=$(`[data-map="${mode}"]`),scale=Math.min((map.clientWidth-32)/Math.max(1e-8,extent[2]-extent[0]),(map.clientHeight-32)/Math.max(1e-8,extent[3]-extent[1]));
-  const layers=result.meshes.map((m,i)=>new SimpleMeshLayer({id:`${mode}-raster-${i}`,data:[{row:m.sourceRows[0],chart:m.chart}],
+  const layers=meshes.map((m,i)=>new SimpleMeshLayer({id:`${mode}-raster-${i}`,data:[{row:m.sourceRows[0],chart:m.chart}],
     mesh:{attributes:{positions:{value:Float32Array.from({length:m.positions.length/2*3},(_,j)=>j%3===2?0:m.positions[Math.floor(j/3)*2+j%3]),size:3},texCoords:{value:new Float32Array(m.uv),size:2}},indices:{value:m.indices,size:1}},
-    texture,material:false,getPosition:[0,0,0],getColor:[255,255,255],coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,pickable:true,parameters:{depthCompare:'always'}}));
-  layers.push(new PathLayer({id:`${mode}-charts`,data:result.domains,getPath:d=>d.ring,coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,getColor:[240,244,250],getWidth:1.4,widthUnits:'pixels',parameters:{depthCompare:'always'}}));
+    texture:imagery.checked&&result.earthTexture?result.earthTexture:texture,material:false,getPosition:[0,0,0],getColor:[255,255,255],coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,pickable:true,parameters:{depthCompare:'always'}}));
+  layers.push(new PathLayer({id:`${mode}-charts`,data:domains,getPath:d=>d.ring,coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,getColor:[240,244,250],getWidth:1.4,widthUnits:'pixels',parameters:{depthCompare:'always'}}));
   if(wire.checked) {
-    const edges=[];for(const m of result.meshes)for(let i=0;i<m.indices.length;i+=3){const p=Array.from(m.indices.slice(i,i+3),j=>Array.from(m.positions.slice(j*2,j*2+2)));edges.push([...p,p[0]]);}
+    const edges=[];for(const m of meshes)for(let i=0;i<m.indices.length;i+=3){const p=Array.from(m.indices.slice(i,i+3),j=>Array.from(m.positions.slice(j*2,j*2+2)));edges.push([...p,p[0]]);}
     layers.push(new PathLayer({id:`${mode}-mesh`,data:edges,getPath:d=>d,coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,getColor:[255,209,137,110],getWidth:.6,widthUnits:'pixels',parameters:{depthCompare:'always'}}));
   }
   const view=Number.isFinite(scale)?{target:[(extent[0]+extent[2])/2,(extent[1]+extent[3])/2,0],zoom:Math.log2(scale)}:{target:[0,0,0],zoom:0};
@@ -59,6 +74,9 @@ async function update() {
   delete root.dataset.ready;delete root.dataset.error;
   status.textContent='Preparing continuous charts…';
   $('[data-note]').textContent=s.engine==='native'?'Native math.gl owns conversion and chart preparation.':s.engine==='d3'?'D3 supplies spherical target conversion; native math.gl supplies the ellipsoidal source conversion and declared charts.':`${engines[s.engine]} converts geographic samples to the source CRS; native math.gl owns target inverse branches and chart geometry.`;
+  let earthTexture;
+  try{earthTexture=await getEarthTexture(s.source,signal);}catch(error){if(current!==generation||disposed)return;$('[data-imagery-note]').textContent=`Earth imagery unavailable: ${error.message}. Showing diagnostic checkerboard.`;}
+  if(current!==generation||disposed)return;
   const jobs=['inverse','forward'].map(async mode=>{
     const reason=capability(s.engine,s.source,s.target,mode),output=$(`[data-stats="${mode}"]`);
     if(reason){delete results[mode];decks[mode].setProps({layers:[]});output.textContent=reason;return;}
@@ -67,7 +85,7 @@ async function update() {
       const result=s.engine==='wasm' ? await prepareJob({...s,mode},{signal,proj:await getWasm()})
         : await runTask(task,{...s,mode},{execution:'worker',workerPool:pool,signal});
       if(current!==generation||disposed)return;
-      results[mode]=result;render(mode,result);
+      result.sourceName=s.source;result.earthTexture=earthTexture;results[mode]=result;render(mode,result);
     }catch(error){if(current!==generation||disposed)return;delete results[mode];decks[mode].setProps({layers:[]});output.textContent=`Cannot prepare: ${error.message}`;if(mode==='inverse')root.dataset.error=error.message;}
   });
   await Promise.all(jobs);
@@ -84,7 +102,7 @@ function constrain() {
   schedule();
 }
 for(const el of [source,target,engine,tolerance,lon,lat])el.addEventListener('change',constrain);
-wire.addEventListener('change',()=>{for(const mode of Object.keys(results))render(mode,results[mode]);});
+for(const control of [wire,imagery])control.addEventListener('change',()=>{for(const mode of Object.keys(results))render(mode,results[mode]);});
 async function benchmark(){
   if(benchmarking||disposed)return;benchmarking=true;const button=$('[data-benchmark]');button.disabled=true;
   const controller=new AbortController();active?.abort();const current=++generation;active=controller;
@@ -103,7 +121,7 @@ async function benchmark(){
 }
 $('[data-benchmark]').addEventListener('click',()=>track(benchmark()));
 $('[data-export]').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(measurementRows,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='projection-lab-measurements.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),0);});
-async function dispose(){if(disposed)return;disposed=true;generation++;active?.abort();disposeInfo();for(const deck of Object.values(decks))deck.finalize();root.replaceChildren();await Promise.allSettled([...pending]);try{await pool.destroy();}finally{await wasmHandle?.release();}}
+async function dispose(){if(disposed)return;disposed=true;generation++;active?.abort();disposeInfo();for(const deck of Object.values(decks))deck.finalize();root.replaceChildren();await Promise.allSettled([...pending]);imageCache.clear();try{await pool.destroy();}finally{await wasmHandle?.release();}}
 constrain();
 return {dispose,update:()=>{schedule();},get results(){return results;}};
 }

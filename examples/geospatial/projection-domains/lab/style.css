@@ -20,3 +20,5 @@
 .raster-projection-lab .lab-status{position:absolute;bottom:0;left:12px;right:304px;margin:0;padding:10px 0;min-height:60px;font-size:11px;line-height:1.5;color:#99afbf}
 .raster-projection-lab pre{white-space:pre-wrap;font-size:10px;max-height:160px;overflow:auto;background:#081923;padding:8px;border-radius:4px}
 @media(max-width:800px){.raster-projection-lab .maps{grid-template-columns:1fr;right:292px}.raster-projection-lab .lab-info{width:260px}.raster-projection-lab .maps p{display:none}}
+
+.raster-projection-lab .lab-info a{color:#9fd4ee}

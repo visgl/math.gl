@@ -72,3 +72,13 @@ measurements. The browser's moving-center button additionally includes worker tr
 its measurements. Neither is a throughput or frame-rate promise. Changing projection parameters
 rebuilds domains and meshes; camera zoom only inspects existing geometry and does not requalify the
 forward display-space error bound.
+
+### Lab imagery
+
+Earth imagery is on by default; the shared infobox toggles the diagnostic checkerboard without
+rebuilding meshes. The lab reuses the bundled [NASA Blue Marble overview](../../earth/sun-terminator/assets/README.md)
+and resamples its north-up geographic pixels into each fixture's 256 × 256 source grid, using the
+actual ellipsoidal polar CRS and rotated Fiji transform. Bilinear sampling wraps longitude and clamps
+at the poles. Both texture modes share the same UVs and source-pixel error policy. This is overview
+imagery, not live imagery, a higher-resolution tile service or a COG demonstration. NASA Earth
+Observatory and NASA GIBS/ESDIS supply the imagery; no additional remote requests are needed.
