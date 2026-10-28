@@ -58,11 +58,15 @@ function point(array: GeoArrowArray, index: number): Point | null {
   if (!isGeoArrowValueValid(array.validity, index)) return null;
   if (array.kind === 'fixed-size-list') {
     const i = ((array.offset || 0) + index) * array.size;
-    return [scalar(array.child, i), scalar(array.child, i + 1)];
+    const x = scalar(array.child, i),
+      y = scalar(array.child, i + 1);
+    return Number.isNaN(x) && Number.isNaN(y) ? null : [x, y];
   }
   if (array.kind === 'struct') {
     const i = (array.offset || 0) + index;
-    return [scalar(array.children['x'], i), scalar(array.children['y'], i)];
+    const x = scalar(array.children['x'], i),
+      y = scalar(array.children['y'], i);
+    return Number.isNaN(x) && Number.isNaN(y) ? null : [x, y];
   }
   throw new Error('Invalid GeoArrow coordinate storage');
 }

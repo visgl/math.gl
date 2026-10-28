@@ -111,3 +111,23 @@ test('chunked separated multipolygons and null bitmap slices', () => {
   expect([...booleanPointInPolygon(column([point(20.5, 0.5)]), sliced).values]).toEqual([0, 1]);
   expect(booleanPointInPolygon(column([point(20.5, 0.5)]), sliced).validity[0]).toBe(2);
 });
+
+test('empty point sentinels do not contaminate calculations', () => {
+  const empty = column([point(NaN, NaN)]);
+  expect(centroid(empty).chunks[0].validity.values[0]).toBe(0);
+  expect(distance(empty, column([point(1, 2)])).validity[0]).toBe(0);
+  const multi = column([
+    {
+      type: 'MultiPoint',
+      coordinates: [
+        [NaN, NaN],
+        [4, 6]
+      ]
+    }
+  ]);
+  expect([...bbox(multi).values]).toEqual([4, 6, 4, 6]);
+  const out = centroid(multi).chunks[0];
+  if (out.kind !== 'fixed-size-list' || out.child.kind !== 'primitive')
+    throw new Error('Expected point');
+  expect([...out.child.values]).toEqual([4, 6]);
+});
