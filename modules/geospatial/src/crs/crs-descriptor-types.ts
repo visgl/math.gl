@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {CRSExecutionIdentity} from './execution-identity';
 import type {CRSProjectionDomain} from './projection-domain';
 import type {CRSMetadata} from './crs-metadata';
 
@@ -58,6 +59,8 @@ export interface CRSDescriptor extends CRSMetadata {
    * not guarantee packed-coordinate interchangeability across engines.
    */
   readonly signature: string;
+  /** Optional backend execution provenance; absent means unknown. Separate from CRS identity. */
+  readonly executionIdentity?: CRSExecutionIdentity;
   /** Finite XYZ envelope chosen as an appropriate rendering target, in effective units and axis order.
    * Bounds describe a rendering policy for the reference surface, not the algorithm's
    * mathematical validity domain or altitude limits. Coordinates outside the envelope

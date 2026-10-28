@@ -96,3 +96,6 @@ export type {
   CRSProjectionPeriod,
   CRSProjectionDomain
 } from './projection-domain';
+
+export {createCRSExecutionIdentity, getCRSExecutionKey} from './execution-identity';
+export type {CRSExecutionIdentity} from './execution-identity';

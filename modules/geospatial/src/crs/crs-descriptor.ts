@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {createCRSProjectionDomain, type CRSProjectionDomain} from './projection-domain';
+import {createCRSExecutionIdentity, type CRSExecutionIdentity} from './execution-identity';
 import {getCRSSignature} from './crs-metadata';
 import type {CRSMetadata, CRSUnit} from './crs-metadata';
 import type {
@@ -20,6 +21,8 @@ export type CRSDescriptorOptions = Readonly<{
   metadata: CRSMetadata;
   /** Optional opaque caller identity. Defaults to getCRSSignature(metadata). */
   signature?: string;
+  /** Opt-in provenance for execution cache invalidation; never inferred from callbacks. */
+  executionIdentity?: CRSExecutionIdentity;
   renderingBounds: CRSBounds;
   /** Backend-supplied target domain, independently snapshotted when present. */
   projectionDomain?: CRSProjectionDomain;
@@ -126,6 +129,9 @@ export function createCRSDescriptor(options: CRSDescriptorOptions): CRSDescripto
   return Object.freeze({
     ...metadata,
     signature,
+    ...(options.executionIdentity === undefined
+      ? {}
+      : {executionIdentity: createCRSExecutionIdentity(options.executionIdentity)}),
     renderingBounds,
     ...(options.projectionDomain === undefined
       ? {}
