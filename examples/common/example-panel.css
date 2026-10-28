@@ -17,3 +17,32 @@ aside.example-panel.deck-widget-container {
   max-width: 100% !important;
   box-sizing: border-box;
 }
+
+/* Let the common panel own chrome while each example positions its host. */
+.example-panel.deck-widget-container {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
+  backdrop-filter: none;
+  min-width: 0;
+}
+.example-panel .example-info-content { padding: 12px; }
+.example-panel .example-info-content > :first-child { margin-top: 0; }
+.example-panel .example-info-content > :last-child { margin-bottom: 0; }
+.example-panel .example-info-content h1,
+.example-panel .example-info-content h2 { color: inherit; font-size: 1rem; }
+.example-panel .deck-widget-box { max-height: inherit; }
+.example-panel .deck-widget-box > section { max-height: inherit; overflow: auto; }
+.query-example > .example-panel { position: absolute; left: 16px; top: 16px; z-index: 2; width: min(290px, calc(100% - 76px)); max-height: calc(100% - 78px); overflow: auto; }
+
+.unfolding-polyhedron .selectors > .deck-widget-box,
+.unfolding-polyhedron .controls > .deck-widget-box { width: 100%; }
+.unfolding-polyhedron .selectors .example-info-content,
+.unfolding-polyhedron .controls .example-info-content { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+
+/* PanelManager measures viewport space; an auto-height host must not feed a tiny
+ * measurement back into the outer box before its content lays out. */
+.example-panel > .deck-widget-box { max-height: none !important; }
+.example-panel > .deck-widget-box > section > header { display: block !important; margin: 0 !important; border: 0; }

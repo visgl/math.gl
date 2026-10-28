@@ -99,7 +99,7 @@ radius with meter positions. Convert axes into the documented X/Y/Z convention
 before calling the geographic bounds helper. The helper does not accept WGS84 ECEF
 as a spherical approximation implicitly.
 
-The [standalone example](https://github.com/visgl/math.gl/tree/master/examples/globe-primitives)
+The [standalone example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/globe-primitives)
 composes these queries with [subdivideGlobeMesh](./subdivide-globe-mesh.md), demonstrating elevated labels,
 true ray misses and polar/antimeridian coverage without Kepler dependencies.
 

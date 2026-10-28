@@ -83,6 +83,6 @@ coastline-distance-field meshes and Archimedean presets are not generated.
 The default Natural Earth land/ocean view works offline. Optional NASA Blue Marble
 is loaded online from GIBS with attribution; geometry and land masks remain usable
 if imagery is unavailable. See the
-[imagery terms](https://github.com/visgl/math.gl/blob/master/examples/unfolding-polyhedron/IMAGERY.md),
-[land-mask provenance](https://github.com/visgl/math.gl/blob/master/examples/unfolding-polyhedron/data/README.md),
-and [example source](https://github.com/visgl/math.gl/tree/master/examples/myriahedral-maps).
+[imagery terms](https://github.com/visgl/math.gl/blob/master/examples/geometry/unfolding-polyhedron/IMAGERY.md),
+[land-mask provenance](https://github.com/visgl/math.gl/blob/master/examples/geometry/unfolding-polyhedron/data/README.md),
+and [example source](https://github.com/visgl/math.gl/tree/master/examples/geospatial/myriahedral-maps).

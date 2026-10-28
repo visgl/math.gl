@@ -11,12 +11,12 @@ import {
   subtract,
   type Solid,
   type Vec3
-} from '../../../../examples/unfolding-polyhedron/polyhedra';
+} from '../../../../examples/geometry/unfolding-polyhedron/polyhedra';
 import {
   createLayout,
   maximumSpanningTree,
   countOverlaps
-} from '../../../../examples/unfolding-polyhedron/layout';
+} from '../../../../examples/geometry/unfolding-polyhedron/layout';
 
 for (const [solid, v, e, f, degree] of [
   ['tetrahedron', 4, 6, 4, 3],

@@ -1,0 +1,25 @@
+{
+  "name": "math.gl-geoid-globe",
+  "version": "5.0.0-alpha.12",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@deck.gl-community/panels": "^9.4.8",
+    "@deck.gl/core": "~9.4.0",
+    "@deck.gl/layers": "~9.4.0",
+    "@loaders.gl/core": "^4.4.3",
+    "@luma.gl/core": "~9.4.0",
+    "@luma.gl/engine": "~9.4.0",
+    "@luma.gl/shadertools": "~9.4.0",
+    "@math.gl/earth": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^8.2.2"
+  }
+}

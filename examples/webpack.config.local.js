@@ -26,7 +26,7 @@ const LOCAL_DEVELOPMENT_CONFIG = {
     stats: {
       warnings: false
     },
-    contentBase: [resolve('.'), resolve('../../')]
+    contentBase: [resolve('.'), resolve(__dirname, '..')]
   },
 
   // this is required by draco

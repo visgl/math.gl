@@ -51,7 +51,7 @@ The examples sidebar and timezone overview both render
 inline documentation frame enables interaction in fullscreen so globe controls do
 not capture page scrolling. Unmounting finalizes Deck and cancels data requests.
 
-The renderer and scoped styles are shared with `examples/timezone-globe`.
+The renderer and scoped styles are shared with `examples/earth/timezone-globe`.
 `modules/earth/timezone/data` is a static directory; `useBaseUrl` supplies geometry URLs
 for both `/math.gl/` and `/math.gl/next/`. Low geometry loads initially, and high
 geometry is fetched when selected. The static directory also provides the data
@@ -71,7 +71,7 @@ website's typography or navigation.
 
 The geoid overview and examples sidebar render `src/components/geoid-globe` using
 `src/components/live-globe`, the fullscreen frame shared with the timezone globe.
-The renderer and scoped styles are shared with `examples/geoid-globe`.
+The renderer and scoped styles are shared with `examples/earth/geoid-globe`.
 The geoid example fetches version-pinned EGM96 assets from deck.gl-data;
 `useBaseUrl` preserves deployment prefixes. The 1° preview loads first, and the
 original 15′ grid loads when selected. Hover heights use `getHeight` with the
@@ -79,7 +79,7 @@ selected interpolation; the colored texture uses the same fixed signed scale.
 
 ## Polygon and core playgrounds
 
-`examples/polygon-playground` and `examples/core-transforms` share their React
+`examples/geometry/polygon-playground` and `examples/core/core-transforms` share their React
 renderers with the website sidebar and module overviews. Each can run standalone
 with its workspace `start` script. Both use the lazy fullscreen documentation
 frame. The polygon example uses deck.gl-community editing in Cartesian coordinates
@@ -89,7 +89,7 @@ separate camera. Unmounting disposes controls, Deck, observers, and render loops
 
 ## Geometry viewer
 
-`src/components/geometry-viewer` embeds the shared `examples/geometry-viewer` renderer
+`src/components/geometry-viewer` embeds the shared `examples/geometry/geometry-viewer` renderer
 in the overview and each primitive reference page. Pass `geometry` for a CPU mesh,
 or `geometryType` and `geometryProps` for a primitive constructor and its options.
 The gallery offers all nine primitives. luma.gl `Model` renders depth-tested meshes

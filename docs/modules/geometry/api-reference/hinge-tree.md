@@ -77,7 +77,7 @@ they may alias the output. Later evaluations do not alter previously returned bu
 the same buffer is supplied again. Invalid inputs throw before output writes; overflow during
 composition throws and may leave partial output. Floating-point error accumulates in deep trees.
 
-See the [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/unfolding-polyhedron)
+See the [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/geometry/unfolding-polyhedron)
 for all five Platonic solids, subdivided icosahedra, automatic maximum-spanning-tree
 cut selection, and a WebGL 2 renderer. The mesh/layout builder is experimental
 example code, separate from this API.
