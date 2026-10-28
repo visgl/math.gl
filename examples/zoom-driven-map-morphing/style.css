@@ -1,0 +1,60 @@
+/* math.gl | SPDX-License-Identifier: MIT | SPDX-FileCopyrightText: Copyright (c) vis.gl contributors */
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: #e4eff8;
+  background: #081827;
+  font:
+    14px/1.5 system-ui,
+    sans-serif;
+}
+#app {
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+.morph-panel {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 280px;
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+p {
+  color: #b8cfdf;
+}
+label {
+  display: block;
+  margin-top: 14px;
+}
+input {
+  display: block;
+  width: 100%;
+  accent-color: #61d4db;
+}
+output {
+  float: right;
+}
+small {
+  color: #95acbb;
+}
+#pick {
+  color: #ffca75;
+}
+
+.morph-controls {
+  padding: var(--panel-padding);
+  color: var(--menu-text);
+}
