@@ -59,9 +59,12 @@ export function finishInverse(refined, {width,height,row,id}) {
   return {positions,uv,indices:new Uint32Array(indices),sourceRows:new Uint32Array(indices.length/3).fill(row),chart:id,
     diagnostics:{...refined.diagnostics,outputTriangles:indices.length/3}};
 }
-export function prepareInverse(chart, options={}) {
+export function validateChart(chart) {
   if (![chart.width,chart.height].every(x=>Number.isSafeInteger(x)&&x>0) || !Number.isSafeInteger(chart.row) || chart.row<0 || chart.row>0xffffffff)
     throw new WarpError('input','Invalid source raster metadata');
+}
+export function prepareInverse(chart, options={}) {
+  validateChart(chart);
   return finishInverse(runWarpSync(seedDomain(chart.domain),chart.inverse,{clipBounds:[0,0,chart.width,chart.height],...options}),chart);
 }
 

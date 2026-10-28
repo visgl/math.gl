@@ -51,3 +51,24 @@ polar source pixels, whose value is continuous at the pole; a longitude-based wo
 an additional singular parameterization there. Dynamic centers are restricted to the documented
 southern fixture domain. `inspectWarp` supplies additional post-clipping evidence; it does not
 turn the sampled criterion into a mathematical certificate.
+
+## Asynchronous frontiers and proj-wasm
+
+`prepareInverseAsync(chart, evaluate, options)` uses the same refinement state machine.
+The evaluator receives packed target XY and returns packed source-pixel XY. `batchSize` bounds
+individual calls; the cumulative sample budget bounds the complete job. Inputs are snapshotted,
+results are validated, and AbortSignal is checked before and after every awaited call. Cancellation
+cannot interrupt a native PROJ call already in progress, but it prevents partial/stale publication.
+
+The sibling `proj-wasm-crs/raster-example.mjs` runs a real PROJ operation for the source-grid
+conversion throughout adaptive refinement, then transfers the resulting mesh into an owned math.gl
+task worker. Node and Chromium exercise the same path, including buffer detachment and identity.
+Native charts supply target inverse branches; proj-wasm supplies WGS84-to-source conversion.
+This hybrid is intentional: an external point transformer does not infer interrupted chart cuts.
+One normalized operation is reused and disposed before the application-owned WASM pool shuts down.
+
+Compare actual samples and qualified error, not exact triangulation across different engines:
+roundoff at clipping boundaries can change triangle counts without changing supported coverage.
+Changing engine/version, operation, resource revisions, chart/domain, source grid/data or sampling
+policy invalidates derived meshes. Use `getCRSExecutionKey` only as the execution part of a complete
+application cache key; absent execution provenance must not be treated as a reusable backend key.

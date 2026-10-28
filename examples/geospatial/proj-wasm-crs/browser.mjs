@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {runExample} from './example.mjs';
+import {runRasterExample} from './raster-example.mjs';
 
-globalThis.exampleResult = runExample();
+globalThis.exampleResult = runExample().then(async result => ({...result,raster:await runRasterExample()}));
 globalThis.exampleResult.then(
   (result) => {
     document.querySelector('#result').textContent = JSON.stringify(result, null, 2);
