@@ -173,6 +173,25 @@ settings. Concurrency must be a positive safe integer. Budgets/count limits acce
 nonnegative safe integers or `Infinity`; the aging interval must be positive and
 finite. Configure finite limits appropriate to the application.
 
+For example, a two-worker pool accepting at most eight waiting jobs and
+64 MiB of queued or in-flight input buffers can be configured as follows:
+
+```ts
+const pool = new WorkerPool({
+  url: workerUrl, // Application-supplied worker URL.
+  maxConcurrency: 2,
+  maxMobileConcurrency: 2,
+  maxQueuedJobs: 8,
+  maxQueuedBytes: 64 * 1024 * 1024,
+  maxInFlightBytes: 64 * 1024 * 1024
+});
+// Pass {workerPool: pool} to task calls, then await pool.close({timeout: 5000}).
+```
+
+These example values are starting points, not a universal recommendation.
+Measure your input sizes and worker costs; buffers in outputs, worker caches,
+other allocations, and process memory are outside these budgets.
+
 ### reserve and WorkerAdmission
 
 ```ts
@@ -220,6 +239,12 @@ Diagnostic callback exceptions do not prevent worker release.
 clear those opt-in timeline entries in the application.
 
 ### Teardown and preloading
+
+`await pool.close({timeout?})` stops new jobs and admissions, rejects pending
+admission waits, invalidates unused reservations, and lets submitted jobs drain.
+It then terminates workers. A timeout from 0 through 2,147,483,647 milliseconds
+forces termination of unfinished jobs; omit it to wait indefinitely. Repeated
+calls return the same promise.
 
 `await pool.destroy(reason?)` rejects queued/active work and admission waits, then
 waits for worker termination. It is idempotent. `await farm.destroy(reason?)`

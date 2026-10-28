@@ -109,6 +109,7 @@ export default class WorkerPool {
   private jobQueue: QueuedJob[] = [];
   private idleQueue: WorkerThread[] = [];
   private activeJobs = new Set<WorkerJob>();
+  private startingJobs = 0;
   private count = 0;
   private workers = new Set<WorkerThread>();
   private queuedBytes = 0;
@@ -116,6 +117,9 @@ export default class WorkerPool {
   private maxQueuedBytes = Infinity;
   private maxInFlightBytes = Infinity;
   private isDestroyed = false;
+  private isClosing = false;
+  private closing?: Promise<void>;
+  private onDrained?: () => void;
   private destruction?: Promise<void>;
   private maxQueuedJobs = Infinity;
   private maxPendingAdmissions = 128;
@@ -151,6 +155,7 @@ export default class WorkerPool {
     const {signal} = options;
     if (signal?.aborted) return Promise.reject(signal.reason);
     if (this.isDestroyed) return Promise.reject(new Error('Worker pool was destroyed'));
+    if (this.isClosing) return Promise.reject(new Error('Worker pool is closing'));
     if (
       !Number.isSafeInteger(inputBytes) ||
       inputBytes < 0 ||
@@ -183,7 +188,7 @@ export default class WorkerPool {
   }
 
   private _admit(): void {
-    while (!this.isDestroyed && this.admissions.length) {
+    while (!this.isDestroyed && !this.isClosing && this.admissions.length) {
       const waiter = this.admissions[0];
       if (waiter.inputBytes > this.maxQueuedBytes || waiter.inputBytes > this.maxInFlightBytes) {
         this.admissions.shift();
@@ -235,6 +240,50 @@ export default class WorkerPool {
     this.setProps(props);
   }
 
+  /** Reject new work, drain submitted jobs, and terminate workers; optionally force termination after a deadline. */
+  close(options: {timeout?: number} = {}): Promise<void> {
+    if (this.closing) return this.closing;
+    if (this.isDestroyed) return this.destroy();
+    if (
+      options.timeout !== undefined &&
+      (!Number.isFinite(options.timeout) || options.timeout < 0 || options.timeout > 0x7fffffff)
+    ) {
+      return Promise.reject(new RangeError('Close timeout must be between 0 and 2147483647 ms'));
+    }
+    this.isClosing = true;
+    const reason = new Error('Worker pool is closing');
+    this.admissions.splice(0).forEach(waiter => {
+      waiter.cleanup();
+      waiter.reject(reason);
+    });
+    this.reservations.clear();
+    this.reservedBytes = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const drained = new Promise<void>(resolve => {
+      this.onDrained = resolve;
+    });
+    const deadline =
+      options.timeout === undefined
+        ? drained
+        : Promise.race([
+            drained,
+            new Promise<void>(resolve => {
+              timer = setTimeout(resolve, options.timeout);
+            })
+          ]);
+    this.closing = deadline.then(async () => {
+      clearTimeout(timer);
+      await this.destroy();
+    });
+    this._checkDrained();
+    return this.closing;
+  }
+
+  private _checkDrained(): void {
+    if (this.isClosing && !this.jobQueue.length && !this.activeJobs.size && !this.startingJobs)
+      this.onDrained?.();
+  }
+
   /**
    * Terminates all workers in the pool and aborts active jobs.
    * @param reason Optional error delivered to active jobs.
@@ -245,6 +294,7 @@ export default class WorkerPool {
     const workers = [...this.workers];
     // Abort active jobs so callers receive an error when a development worker is invalidated.
     this.isDestroyed = true;
+    this.onDrained?.();
     this.activeJobs.forEach(job => job.abort(reason));
     this.admissions.splice(0).forEach(waiter => {
       waiter.cleanup();
@@ -323,6 +373,7 @@ export default class WorkerPool {
     }
     this._admit();
     void this._startQueuedJob();
+    this._checkDrained();
   }
 
   /** Whether batch callers must declare a retained-input reservation. */
@@ -362,6 +413,7 @@ export default class WorkerPool {
     if (this.isDestroyed) {
       return Promise.reject(new Error('Worker pool was destroyed'));
     }
+    if (this.isClosing) return Promise.reject(new Error('Worker pool is closing'));
     const {inputBytes = 0, priority = 0} = scheduling;
     if (!Number.isSafeInteger(inputBytes) || inputBytes < 0 || !Number.isFinite(priority)) {
       throw new RangeError('Invalid worker scheduling inputBytes or priority');
@@ -402,6 +454,7 @@ export default class WorkerPool {
           void this._startQueuedJob();
           queuedJob.removeAbortListener();
           onReject(signal?.reason);
+          this._checkDrained();
         }
       };
       const queuedJob: QueuedJob = {
@@ -466,6 +519,7 @@ export default class WorkerPool {
       queuedJob?.removeAbortListener();
       queuedJob?.onReject(error);
       void this._startQueuedJob();
+      this._checkDrained();
       return;
     }
     if (!workerThread) {
@@ -475,6 +529,7 @@ export default class WorkerPool {
     // We have a worker, dequeue and start the job
     const queuedJob = this.jobQueue.shift();
     if (queuedJob) {
+      this.startingJobs++;
       this.queuedBytes -= queuedJob.inputBytes;
       this.inFlightBytes += queuedJob.inputBytes;
       this.totals.peakInFlightBytes = Math.max(this.totals.peakInFlightBytes, this.inFlightBytes);
@@ -493,6 +548,7 @@ export default class WorkerPool {
       }
 
       if (this.isDestroyed || workerThread.terminated) {
+        this.startingJobs--;
         this.inFlightBytes -= queuedJob.inputBytes;
         queuedJob.removeAbortListener();
         queuedJob.onReject(new Error('Worker pool was destroyed before job start'));
@@ -511,6 +567,7 @@ export default class WorkerPool {
       queuedJob.signal?.addEventListener('abort', abortJob, {once: true});
       if (queuedJob.signal?.aborted) abortJob();
       this.activeJobs.add(job);
+      this.startingJobs--;
       workerThread.ref();
 
       // Set the worker thread's message handlers
@@ -611,6 +668,7 @@ export default class WorkerPool {
     if (!this.isDestroyed) {
       this._startQueuedJob(); // eslint-disable-line @typescript-eslint/no-floating-promises
     }
+    this._checkDrained();
   }
 
   /**

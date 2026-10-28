@@ -70,6 +70,7 @@ non-isolated browser tests.
 const pool = new WorkerPool({
   url: workerUrl,
   maxConcurrency: 2,
+  // Bound both queued job count and retained input bytes for your workload.
   maxQueuedJobs: 8,
   maxQueuedBytes: 64 * 1024 * 1024,
   maxInFlightBytes: 64 * 1024 * 1024,
