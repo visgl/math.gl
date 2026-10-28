@@ -3,6 +3,7 @@
 Use a resource handle when initialization is expensive or requests share a
 projection, index, cached dataset, or WASM instance. Initialization runs once in
 one dedicated worker. Subsequent calls serialize on that same worker incarnation.
+For asset loading and WASM-specific cancellation, see [WASM in workers](./wasm.md).
 
 ## Worker: initialize a projection once
 

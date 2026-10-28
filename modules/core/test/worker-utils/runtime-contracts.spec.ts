@@ -265,6 +265,32 @@ const runtime = {
   worker: new URL('./fixtures/runtime-worker.mjs', import.meta.url).href
 };
 
+test('WASM resources initialize once and survive cooperative cancellation', async () => {
+  const descriptor = {
+    ...runtime,
+    worker: new URL('./fixtures/wasm-resource-worker.mjs', import.meta.url).href
+  };
+  const resource = await createWorkerResource(
+    descriptor,
+    new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0])
+  );
+  try {
+    assert.deepEqual(await resource.run('first'), {valid: true, calls: 1});
+    const controller = new AbortController();
+    const cancelled = resource.run('cancel', {
+      signal: controller.signal,
+      cancellationMode: 'cooperative',
+      onProgress: () => controller.abort(new Error('stop WASM'))
+    });
+    await assert.rejects(cancelled, /stop WASM/);
+    assert.deepEqual(await resource.run('next'), {valid: true, calls: 3});
+    assert.equal(resource.stats.workersCreated, 1);
+  } finally {
+    await resource.destroy();
+  }
+  await assert.rejects(resource.run('closed'), /destroyed/);
+});
+
 test('cooperative cancellation drains before reuse and preserves worker-local state', async () => {
   const pool = new WorkerPool({url: runtime.worker, maxConcurrency: 1});
   const controller = new AbortController();

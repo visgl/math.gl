@@ -180,6 +180,35 @@ test('browser resources initialize once and dispose deterministically', async ()
   await expect(resource.run(1)).rejects.toThrow('destroyed');
 });
 
+test('browser WASM resource retains its instance after cooperative cancellation', async () => {
+  const {createWorkerResource} = await import('../../src/worker-utils');
+  const resource = await createWorkerResource(
+    {
+      ...worker,
+      loadWorker: () =>
+        new Worker(new URL('./fixtures/wasm-resource-worker.mjs', import.meta.url), {
+          type: 'module'
+        })
+    },
+    new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0])
+  );
+  try {
+    await expect(resource.run('first')).resolves.toEqual({valid: true, calls: 1});
+    const controller = new AbortController();
+    await expect(
+      resource.run('cancel', {
+        signal: controller.signal,
+        cancellationMode: 'cooperative',
+        onProgress: () => controller.abort(new Error('stop WASM'))
+      })
+    ).rejects.toThrow('stop WASM');
+    await expect(resource.run('next')).resolves.toEqual({valid: true, calls: 3});
+    expect(resource.stats.workersCreated).toBe(1);
+  } finally {
+    await resource.destroy();
+  }
+});
+
 test('browser capability detection follows isolation and retains the message fallback', () => {
   const capabilities = getWorkerCapabilities();
   if ((globalThis as any).__mathglSharedMemoryExpected)
