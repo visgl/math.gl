@@ -4,13 +4,14 @@ External libraries can provide CRS definitions, execute coordinate operations, o
 do both. Use the opt-in [`CRSResolver`](../../crs/api-reference/resolver.md) for
 definition lookup. Libraries with synchronous coordinate operations can also
 implement the [`ProjectionEngine`](../api-reference/projection-engine.md) interface.
-These are application integrations; math.gl does not register or load them for you.
+Applications written against math.gl's projection interfaces can still use external
+projection engines through these adapters. math.gl does not register or load external
+libraries for you, and they are not dependencies of published math.gl packages.
 
 ## Integrate proj-wasm
 
 [proj-wasm](https://github.com/willcohen/clj-proj) provides PROJ through WebAssembly.
-The resolver-engine integration in [PR #321](https://github.com/visgl/math.gl/pull/321) is required for the native preparation recipe below.
-The [runnable Node and browser example](https://github.com/visgl/math.gl/tree/codex/crs-resolver-engine/examples/proj-wasm-crs)
+The [runnable Node and browser example](https://github.com/visgl/math.gl/tree/master/examples/proj-wasm-crs)
 pins **0.1.0** and demonstrates two distinct uses of its public API.
 
 ### Resolve definitions for native math.gl execution
@@ -22,7 +23,7 @@ Its source is in `examples/proj-wasm-crs/provider.mjs`:
 
 ```javascript
 import * as proj from 'proj-wasm';
-import {createCRSResolver} from '@math.gl/geospatial';
+import {createCRSResolver} from '@math.gl/geospatial/crs';
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
 import {createProjWasmProvider} from './provider.mjs';
 

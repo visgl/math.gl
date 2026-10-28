@@ -29,13 +29,13 @@ const probes = [
   },
   {
     symbol: 'createSpatialReference',
-    packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial/crs'],
+    packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial'],
     forbidden: [/\/resolver\./, /\/projection\//, /\/wkt-crs\./],
     budget: 6000
   },
   {
     symbol: 'createCRSResolver',
-    packages: ['@math.gl/geospatial/crs'],
+    packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial'],
     forbidden: [/\/projection\//, /\/wkt-crs\./, /proj-wasm/, /\/core\//],
     budget: 8000
   },

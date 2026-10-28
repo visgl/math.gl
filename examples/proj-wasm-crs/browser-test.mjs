@@ -1,0 +1,34 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import assert from 'node:assert/strict';
+import {chromium} from 'playwright';
+import {serve} from './server.mjs';
+
+const {server, url} = await serve();
+let browser;
+try {
+  browser = await chromium.launch({headless: true});
+  const page = await browser.newPage();
+  const external = [];
+  page.on('request', (request) => {
+    if (!request.url().startsWith(url)) external.push(request.url());
+  });
+  await page.goto(url);
+  await page.waitForFunction(() => globalThis.exampleComplete, null, {timeout: 60000});
+  const result = await page.evaluate(() => globalThis.exampleResult);
+  assert.equal(result.lookup.identifier, 'EPSG:8857');
+  for (let i = 0; i < 3; i++) {
+    assert.ok(Math.abs(result.mathgl[i] - result.wasm[i]) < 1e-6);
+    assert.ok(Math.abs(result.inverse[i] - result.input[i]) < 1e-8);
+  }
+  assert.equal(result.compoundType, 'CompoundCRS');
+  assert.match(result.unsupported, /compound|vertical/i);
+  assert.deepEqual(external, [], 'Example loads all assets locally');
+  console.log(
+    'Chromium: real database lookup, native/PROJ agreement, unsupported CRS and local assets passed'
+  );
+} finally {
+  if (browser) await browser.close();
+  await new Promise((done) => server.close(done));
+}

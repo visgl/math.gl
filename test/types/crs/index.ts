@@ -31,6 +31,11 @@ resolver.resolve('APP:geographic').then(result => {
   result.lookups.push({identifier: 'x', provider: 'x'});
   return input;
 });
+const resolvingEngine = new FullProjectionEngine({resolver});
+resolvingEngine.createProjectionAsync({to: 'APP:geographic'}).then(projection => {
+  const coordinate: number[] = projection.project([12, 55]);
+  return coordinate;
+});
 const geographic: PROJJSONCRSByType<'GeographicCRS'> = {
   type: 'GeographicCRS',
   name: 'WGS 84',
