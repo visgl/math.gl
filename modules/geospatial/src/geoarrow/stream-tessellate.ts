@@ -101,7 +101,7 @@ export function tessellateGeoArrowStream(
           if (
             Math.abs(areas[j]) > Math.abs(areas[i]) &&
             (parent < 0 || Math.abs(areas[j]) < Math.abs(areas[parent])) &&
-            contains(rings[j], r[0], r[1])
+            containsRing(rings[j], r)
           )
             parent = j;
         }
@@ -168,14 +168,38 @@ function signedArea(ring: number[]): number {
   if (!Number.isFinite(result)) throw new RangeError('Unrepresentable stream ring area');
   return result;
 }
-function contains(ring: number[], x: number, y: number): boolean {
+function containsRing(outer: number[], inner: number[]): boolean {
+  // Ignore shared boundary points. Testing edge midpoints also handles an inscribed
+  // ring whose vertices all lie on the exterior boundary.
+  for (let i = 0; i < inner.length; i += 2) {
+    const j = (i + 2) % inner.length;
+    for (const [x, y] of [
+      [inner[i], inner[i + 1]],
+      [inner[i] / 2 + inner[j] / 2, inner[i + 1] / 2 + inner[j + 1] / 2]
+    ]) {
+      const location = locate(outer, x, y);
+      if (location !== 0) return location > 0;
+    }
+  }
+  return true;
+}
+// -1 outside, 0 on the boundary, 1 inside.
+function locate(ring: number[], x: number, y: number): number {
   let inside = false;
   for (let i = 0, j = ring.length - 2; i < ring.length; j = i, i += 2) {
     const ax = ring[i],
       ay = ring[i + 1],
       bx = ring[j],
       by = ring[j + 1];
+    if (
+      (bx - ax) * (y - ay) === (by - ay) * (x - ax) &&
+      x >= Math.min(ax, bx) &&
+      x <= Math.max(ax, bx) &&
+      y >= Math.min(ay, by) &&
+      y <= Math.max(ay, by)
+    )
+      return 0;
     if (ay > y !== by > y && x < ((bx - ax) * (y - ay)) / (by - ay) + ax) inside = !inside;
   }
-  return inside;
+  return inside ? 1 : -1;
 }

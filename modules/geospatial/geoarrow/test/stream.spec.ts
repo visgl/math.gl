@@ -259,3 +259,62 @@ test('stream sink rejects malformed event sequences and drops degenerate rings',
   });
   expect(result.indices.length).toBe(0);
 });
+
+test('touching ring classification is independent of its starting vertex', () => {
+  const outer = [
+    [0, 0],
+    [4, 0],
+    [4, 4],
+    [0, 4],
+    [0, 0]
+  ];
+  for (const [points, expectedArea, pieces] of [
+    [
+      [
+        [4, 2],
+        [3, 1],
+        [3, 3]
+      ],
+      15,
+      1
+    ],
+    [
+      [
+        [4, 2],
+        [5, 1],
+        [5, 3]
+      ],
+      17,
+      2
+    ],
+    [
+      [
+        [0, 2],
+        [2, 0],
+        [4, 2],
+        [2, 4]
+      ],
+      8,
+      1
+    ]
+  ] as [number[][], number, number][]) {
+    for (let shift = 0; shift < points.length; shift++) {
+      const ring = [...points.slice(shift), ...points.slice(0, shift)];
+      const column = GeoArrowBuilder.build(
+        [{type: 'Polygon', coordinates: [outer, [...ring, ring[0]]]}],
+        {encoding: 'geoarrow.polygon', dimension: 'xy'}
+      );
+      const mesh = tessellateGeoArrowStream(column);
+      let area = 0;
+      for (let i = 0; i < mesh.indices.length; i += 3) {
+        const [a, b, c] = Array.from(mesh.indices.slice(i, i + 3), j => j * 2);
+        const p = mesh.positions;
+        area +=
+          Math.abs((p[b] - p[a]) * (p[c + 1] - p[a + 1]) - (p[b + 1] - p[a + 1]) * (p[c] - p[a])) /
+          2;
+      }
+      expect(area).toBeCloseTo(expectedArea);
+      expect(mesh.polygonSourceRows.length).toBe(pieces);
+    }
+  }
+});
