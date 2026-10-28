@@ -15,6 +15,15 @@ try {
     assert.equal(await page.locator('#lab').getAttribute('data-error'),null);
   }
   await ready('antarctica','native','orthographic');
+  assert(await page.isChecked('[data-imagery]'));
+  assert.equal(await page.evaluate(()=>window.projectionLab.results.inverse.earthTexture.width),256);
+  await page.evaluate(()=>{window.initialMesh=window.projectionLab.results.inverse.meshes;});
+  const earthView=await page.locator('[data-map="inverse"]').screenshot();
+  await page.uncheck('[data-imagery]');
+  const checkerView=await page.locator('[data-map="inverse"]').screenshot();
+  assert(!earthView.equals(checkerView),'texture toggle must visibly change the raster');
+  assert(await page.evaluate(()=>window.initialMesh===window.projectionLab.results.inverse.meshes));
+  await page.check('[data-imagery]');
   if(process.env.CAPTURE_INITIAL)await page.screenshot({path:process.env.CAPTURE_INITIAL});
   for(const engine of ['proj4','d3','wasm','native']) {
     await page.selectOption('[data-engine]',engine);await ready('antarctica',engine,'orthographic');
@@ -32,6 +41,7 @@ try {
   await page.selectOption('[data-engine]','wasm');await page.selectOption('[data-source]','fiji');await page.selectOption('[data-engine]','native');await ready('fiji','native','world');
   await page.click('[data-benchmark]');await page.waitForFunction(()=>!document.querySelector('[data-export]').disabled,null,{timeout:120000});
   assert.match(await page.locator('[data-measurements]').innerText(),/endToEndMs/);
+  await page.uncheck('[data-wire]');
   if(process.env.CAPTURE_SCREENSHOT)await page.screenshot({path:process.env.CAPTURE_SCREENSHOT});
   await page.evaluate(()=>window.projectionLab.dispose());
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);

@@ -9,10 +9,15 @@ import Example from '@site/src/components/raster-projection-lab';
 
 <Example />
 
-The Antarctic raster is a synthetic pixel grid in **ellipsoidal EPSG:3031** and contains the South
-Pole. Fiji uses a rotated geographic grid crossing 180°. UTM 60 and a complete world image provide
-additional seam fixtures. The checkerboard reveals texture interpolation and coverage; it is not
-satellite imagery.
+The Antarctic raster uses a pixel grid in **ellipsoidal EPSG:3031** and contains the South
+Pole. **Earth imagery** is enabled by default: the bundled NASA Blue Marble overview is resampled
+into each source grid, including the rotated Antarctic and Fiji grids. Switch it off in the infobox
+to show the diagnostic checkerboard. Fiji uses a rotated geographic grid crossing 180°. UTM 60 and a complete world image provide
+additional seam fixtures. The Fiji and UTM views place the already-cut Pacific charts side by side
+around 180° for inspection; preparation coordinates and seam topology remain unchanged. The checkerboard reveals texture interpolation and coverage. The imagery is a low-resolution
+visual reference, not live or survey-grade data. Both textures use the same 256 × 256 source grid
+and UVs, so switching textures does not change geometry or the declared error policy.
+Imagery credit: [NASA Earth Observatory / GIBS](https://science.nasa.gov/earth/earth-observatory/blue-marble/).
 
 The left view refines target triangles against inverse error in source texels. The right view uses
 math.gl's source-grid subdivision against error at a declared display scale, where continuous source
