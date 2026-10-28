@@ -464,6 +464,7 @@ function pointOutput(
     dimension: 'xy',
     coordinateLayout: 'interleaved',
     spatialReference: source.spatialReference,
+    metadata: source.metadata,
     edges: source.edges,
     chunks: [
       {

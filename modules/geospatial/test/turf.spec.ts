@@ -179,7 +179,8 @@ test('coordinate transforms preserve rows and round-trip Web Mercator', async ()
 test('batched destination, midpoint and bounds center', async () => {
   const {destination, midpoint, center} = await import('../src/turf');
   const {default: turfDestination} = await import('@turf/destination');
-  const source = column([point(10, 20), null]);
+  const source = {...column([point(10, 20), null]), metadata: {label: 'test'}};
+  expect(destination(source, 100, 45).metadata).toEqual(source.metadata);
   const expected = turfDestination([10, 20], 100, 45).geometry.coordinates;
   const actual = bbox(destination(source, 100, 45));
   expect(actual.values[0]).toBeCloseTo(expected[0], 10);
