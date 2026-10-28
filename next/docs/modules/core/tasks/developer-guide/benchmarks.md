@@ -56,6 +56,8 @@ const pool = new WorkerPool({
 
   maxConcurrency: 2,
 
+  // Bound both queued job count and retained input bytes for your workload.
+
   maxQueuedJobs: 8,
 
   maxQueuedBytes: 64 * 1024 * 1024,
