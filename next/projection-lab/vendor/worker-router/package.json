@@ -1,0 +1,57 @@
+{
+  "name": "@wcohen/worker-router",
+  "version": "0.0.2",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Web Worker / worker_threads pool with Comlink RPC and multiple handler modules per worker; one API for browser and Node",
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./worker-bootstrap": {
+      "import": "./dist/worker-bootstrap.mjs"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && mkdir -p dist && (cd src/cljc && npx squint compile pool.cljc) && npx esbuild src/cljc/pool.mjs --bundle --format=esm --banner:js=\"/*\n * Copyright (c) 2026 Will Cohen\n *\n * Part of worker-router, under the Apache License v2.0 with LLVM Exceptions.\n * See LICENSE for license information.\n * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception\n */\" --external:comlink --external:squint-cljs/* --external:node:* --outfile=dist/index.mjs && cp src/worker-bootstrap.mjs dist/worker-bootstrap.mjs && cp src/index.d.ts dist/index.d.ts",
+    "pretest": "npm run build && (cd test/cljc && npx squint compile pool_test.cljc)",
+    "test": "node test/cljc/pool_test.mjs"
+  },
+  "dependencies": {
+    "comlink": "^4.4.2",
+    "squint-cljs": "^0.14.208"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.3",
+    "playwright": "^1.61.1"
+  },
+  "keywords": [
+    "worker-router",
+    "worker-pool",
+    "web-worker",
+    "worker-threads",
+    "comlink",
+    "rpc"
+  ],
+  "author": "Will Cohen",
+  "license": "Apache-2.0 WITH LLVM-exception",
+  "engines": {
+    "node": ">=21"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/willcohen/worker-router.git"
+  }
+}

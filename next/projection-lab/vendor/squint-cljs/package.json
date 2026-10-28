@@ -1,0 +1,80 @@
+{
+  "name": "squint-cljs",
+  "type": "module",
+  "sideEffects": false,
+  "version": "0.14.211",
+  "files": [
+    "core.js",
+    "src/squint/core.js",
+    "string.js",
+    "src/squint/string.js",
+    "src/squint/set.js",
+    "src/squint/html.js",
+    "src/squint/math.js",
+    "src/squint/walk.js",
+    "src/squint/multi.js",
+    "src/squint/record.js",
+    "src/squint/test.js",
+    "src/squint/edn.js",
+    "lib",
+    "node_cli.js",
+    "index.js",
+    "node-api.js",
+    "vite.js",
+    "vite-common.js"
+  ],
+  "bin": {
+    "squint": "node_cli.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
+    "@thi.ng/hiccup": "^5.3.29",
+    "@vercel/ncc": "^0.34.0",
+    "argparse": "^2.0.1",
+    "chalk": "^5.6.2",
+    "esbuild": "^0.28.1",
+    "eslint": "^8.57.1",
+    "jotai": "^2.15.1",
+    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
+    "pg": "^8.16.3",
+    "playwright": "^1.56.1",
+    "prettier": "^2.8.8",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "shadow-cljs": "^3.4.11",
+    "squint-cljs": "./",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "chokidar": "^4.0.3"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/borkdude"
+    }
+  ],
+  "exports": {
+    ".": "./index.js",
+    "./index.js": "./index.js",
+    "./core.js": "./core.js",
+    "./string.js": "./string.js",
+    "./src/squint/core.js": "./src/squint/core.js",
+    "./src/squint/set.js": "./src/squint/set.js",
+    "./src/squint/math.js": "./src/squint/math.js",
+    "./src/squint/walk.js": "./src/squint/walk.js",
+    "./src/squint/string.js": "./src/squint/string.js",
+    "./node-api.js": "./node-api.js",
+    "./vite": "./vite.js",
+    "./vite.js": "./vite.js",
+    "./vite-common.js": "./vite-common.js",
+    "./src/squint/html.js": "./src/squint/html.js",
+    "./src/squint/multi.js": "./src/squint/multi.js",
+    "./src/squint/record.js": "./src/squint/record.js",
+    "./src/squint/test.js": "./src/squint/test.js",
+    "./src/squint/edn.js": "./src/squint/edn.js",
+    "./lib/node.nrepl_server.js": "./lib/node.nrepl_server.js"
+  }
+}

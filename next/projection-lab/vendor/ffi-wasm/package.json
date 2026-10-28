@@ -1,0 +1,70 @@
+{
+  "name": "ffi-wasm",
+  "version": "0.0.3",
+  "type": "module",
+  "description": "Helper utilities for WASM libraries in the Squint (ClojureScript) ecosystem. The JavaScript half of clj-native (Clojars: net.willcohen/native).",
+  "main": "dist/ffi-wasm.mjs",
+  "exports": {
+    ".": "./dist/ffi-wasm.mjs",
+    "./handler": "./dist/handler.mjs",
+    "./handler-runtime": "./dist/handler_runtime.mjs",
+    "./handler-fs": "./dist/handler_fs.mjs",
+    "./handler-heap": "./dist/handler_heap.mjs",
+    "./handler-paths": "./dist/handler_paths.mjs",
+    "./handler-env": "./dist/handler_env.mjs",
+    "./pool": "./dist/ffi-wasm.mjs",
+    "./workload-pool": "./dist/ffi-wasm.mjs",
+    "./platform-state": "./dist/ffi-wasm.mjs",
+    "./dispatch": "./dist/ffi-wasm.mjs",
+    "./macros": "./dist/ffi-wasm.mjs",
+    "./test-runner": "./dist/test_runner.mjs",
+    "./http-bridge": "./dist/http_bridge.mjs",
+    "./fetch-worker": "./dist/fetch_worker.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/ffi-wasm.mjs",
+    "dist/handler.mjs",
+    "dist/handler_runtime.mjs",
+    "dist/handler_fs.mjs",
+    "dist/handler_heap.mjs",
+    "dist/handler_paths.mjs",
+    "dist/handler_env.mjs",
+    "dist/http_bridge.mjs",
+    "dist/fetch_worker.mjs",
+    "dist/test_runner.mjs",
+    "src/cljc/net/willcohen/native/macros.cljc",
+    "src/cljc/net/willcohen/native/macros.mjs"
+  ],
+  "scripts": {
+    "prepack": "bb build:js"
+  },
+  "dependencies": {
+    "resource-tracker": "^0.0.1",
+    "worker-router": "npm:@wcohen/worker-router@^0.0.2"
+  },
+  "peerDependencies": {
+    "squint-cljs": "^0.14.210"
+  },
+  "peerDependenciesMeta": {
+    "squint-cljs": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0",
+    "squint-cljs": "^0.14.210"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "Apache-2.0 WITH LLVM-exception",
+  "author": "Will Cohen",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/willcohen/clj-native.git"
+  }
+}
