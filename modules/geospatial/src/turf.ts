@@ -1198,3 +1198,89 @@ export function kinks(column: GeoArrowColumn): GeoArrowColumn {
     return true;
   });
 }
+/** Arithmetic vertex mean per geometry, including polygon closing vertices (Turf centerMean semantics). */
+export function centerMean(column: GeoArrowColumn): GeoArrowColumn {
+  const input = rows(column, native);
+  return pointOutput(column, input.length, i => {
+    const row = input[i];
+    if (!row.valid) return null;
+    let x = 0,
+      y = 0,
+      count = 0;
+    walk(row.array, row.index, depths[column.encoding], p => {
+      x += p[0];
+      y += p[1];
+      count++;
+    });
+    return count ? [x / count, y / count] : null;
+  });
+}
+
+/** Clockwise angle at the middle point, with single-row broadcasting on all three inputs. */
+export function angle(
+  start: GeoArrowColumn,
+  middle: GeoArrowColumn,
+  end: GeoArrowColumn,
+  options: {mercator?: boolean; explementary?: boolean} = {}
+): TurfBatchResult<Float64Array> {
+  const inputs = [start, middle, end].map(c => rows(c, points));
+  const sizes = inputs.map(r => r.length),
+    count = sizes.find(n => n !== 1) ?? 1;
+  if (sizes.some(n => n !== 1 && n !== count))
+    throw new RangeError('Angle batch lengths must match or contain one row');
+  const out = result(count) as TurfBatchResult<Float64Array>;
+  for (let i = 0; i < count; i++) {
+    const p = inputs.map(r => {
+      const row = r[r.length === 1 ? 0 : i];
+      return row.valid ? point(row.array, row.index) : null;
+    });
+    if (p.some(v => !v)) continue;
+    const heading = (a: Point, b: Point) =>
+      options.mercator
+        ? rhumbAngle(a, b) / RAD
+        : Math.atan2(
+            Math.sin((b[0] - a[0]) * RAD) * Math.cos(b[1] * RAD),
+            Math.cos(a[1] * RAD) * Math.sin(b[1] * RAD) -
+              Math.sin(a[1] * RAD) * Math.cos(b[1] * RAD) * Math.cos((b[0] - a[0]) * RAD)
+          ) / RAD;
+    const value = (heading(p[1], p[2]) - heading(p[1], p[0]) + 360) % 360;
+    out.values[i] = options.explementary ? 360 - value : value;
+    valid(out.validity, i);
+  }
+  return out;
+}
+
+/** Tests corresponding LineString segments for parallel rhumb headings. */
+export function booleanParallel(a: GeoArrowColumn, b: GeoArrowColumn): TurfBatchResult<Uint8Array> {
+  const left = rows(a, ['geoarrow.linestring']),
+    right = rows(b, ['geoarrow.linestring']),
+    count = paired(left, right),
+    out = result(count, true) as TurfBatchResult<Uint8Array>;
+  for (let i = 0; i < count; i++) {
+    const x = left[left.length === 1 ? 0 : i],
+      y = right[right.length === 1 ? 0 : i];
+    if (!x.valid || !y.valid) continue;
+    const p = segments(x, a.encoding),
+      q = segments(y, b.encoding);
+    let parallel = p.length > 0 && p.length === q.length;
+    for (let j = 0; parallel && j < p.length; j++) {
+      const u = point(p[j].array, p[j].index),
+        v = point(p[j].array, p[j].index + 1),
+        w = point(q[j].array, q[j].index),
+        z = point(q[j].array, q[j].index + 1);
+      if (!u || !v || !w || !z) {
+        parallel = false;
+        break;
+      }
+      const difference = (rhumbAngle(u, v) - rhumbAngle(w, z)) / RAD;
+      const deviation = Math.abs(difference - Math.round(difference / 180) * 180);
+      if (deviation > 1e-10) {
+        parallel = false;
+        break;
+      }
+    }
+    out.values[i] = Number(parallel);
+    valid(out.validity, i);
+  }
+  return out;
+}
