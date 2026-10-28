@@ -81,6 +81,9 @@ jobs:
       - name: Validate agent skill and offline evaluation corpus
         run: node --test test/llm/*.test.mjs
 
+      - name: Test beta release preparation
+        run: node --test scripts/publish-beta.test.mjs
+
       - name: Build code
         run: yarn build
 
