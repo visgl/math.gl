@@ -83,6 +83,7 @@ export function getTransferListForWriter(object: object | null): object {
       value instanceof ArrayBuffer ||
       (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer) ||
       value instanceof Date ||
+      (typeof WebAssembly !== 'undefined' && value instanceof WebAssembly.Module) ||
       isTransferable(value)
     )
       return value;

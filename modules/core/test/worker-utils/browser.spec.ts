@@ -34,6 +34,26 @@ const source = `self.onmessage = ({data: {type, payload}}) => {
 
 afterEach(() => WorkerFarm.getWorkerFarm().destroy());
 
+test('module worker URL overrides preserve compiled WASM options', async () => {
+  const code = `export {}; self.onmessage = ({data}) => {
+    if (data.type === 'process') self.postMessage({source: 'loaders.gl', type: 'done',
+      payload: {result: data.payload.options.compiled instanceof WebAssembly.Module}});
+  };`;
+  const url = URL.createObjectURL(new Blob([code], {type: 'application/javascript'}));
+  const compiled = new WebAssembly.Module(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0]));
+  try {
+    await expect(
+      processOnWorker(worker, null, {
+        [worker.id]: {workerUrl: url},
+        workerType: 'module',
+        compiled
+      })
+    ).resolves.toBe(true);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+});
+
 test('createWorker leaves the browser window message handler untouched', async () => {
   const original = window.onmessage;
   const handler = () => {};

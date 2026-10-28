@@ -83,6 +83,8 @@ export type WorkerOptions = {
   reuseWorkers?: boolean;
   _workerType?: string;
   workerUrl?: string;
+  /** Browser worker script type for URL or source targets. Defaults to classic. */
+  workerType?: 'classic' | 'module';
   [key: string]: any; // TODO
 };
 
