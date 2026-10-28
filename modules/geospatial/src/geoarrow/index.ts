@@ -104,3 +104,8 @@ export {tessellateGeoArrowPolygons} from './tessellate';
 // Public named exports. Implementations remain in independently tree-shakable files.
 export {prepareGeoArrowTransfer} from './worker';
 export type {GeoArrowTransfer} from './worker';
+
+export {streamGeoArrow} from './stream';
+export type {GeoArrowGeometryStream, StreamGeoArrowOptions} from './stream';
+export {tessellateGeoArrowStream} from './stream-tessellate';
+export type {TessellateGeoArrowStreamOptions, GeoArrowStreamMesh} from './stream-tessellate';

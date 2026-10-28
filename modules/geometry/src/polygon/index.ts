@@ -33,3 +33,10 @@ export type {
   SubdivideTriangleMeshOptions,
   SubdividedTriangleMesh
 } from './subdivide-triangle-mesh';
+
+export {clipTriangleMesh} from './clip-triangle-mesh';
+export type {
+  MeshClipRegion,
+  ClipTriangleMeshOptions,
+  ClippedTriangleMesh
+} from './clip-triangle-mesh';

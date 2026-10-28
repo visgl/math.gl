@@ -193,3 +193,10 @@ export type {
   Geometry as UtilityGeometry,
   GeometryAttribute as UtilityGeometryAttribute
 } from './utils/geometry';
+
+export {clipTriangleMesh} from './polygon/clip-triangle-mesh';
+export type {
+  MeshClipRegion,
+  ClipTriangleMeshOptions,
+  ClippedTriangleMesh
+} from './polygon/clip-triangle-mesh';

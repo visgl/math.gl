@@ -87,6 +87,11 @@ jobs:
       - name: Build code
         run: yarn build
 
+      - name: Test GeoArrow stream worker example
+        run: |
+          node --test examples/geospatial/geoarrow-stream-worker/worker.test.mjs
+          yarn workspace math.gl-geoarrow-stream-worker build
+
       - name: Check worker API types
         run: yarn check:worker-types
 
