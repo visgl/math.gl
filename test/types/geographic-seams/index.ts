@@ -1,20 +1,20 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {RhumbPath, EllipsoidRhumb} from '@math.gl/geospatial/ellipsoid';
-import type {RhumbPathOptions} from '@math.gl/geospatial/ellipsoid';
+import {RhumbPath, EllipsoidRhumb} from '@math.gl/geospatial';
+import type {RhumbPathOptions} from '@math.gl/geospatial';
 import {
   subdivideRhumbPolyline,
   splitGeographicPolyline,
   splitGeographicPolygon,
   GeographicSeamError
-} from '@math.gl/geospatial/globe';
+} from '@math.gl/geospatial';
 import type {
   GeographicSeamOptions,
   GeographicPolygonRing,
   GeographicSeamPolygon,
   GeographicEdgeSource
-} from '@math.gl/geospatial/globe';
+} from '@math.gl/geospatial';
 import {RhumbPath as RootPath, splitGeographicPolygon as rootSplit} from '@math.gl/geospatial';
 const options: RhumbPathOptions = {
   rhumb: new EllipsoidRhumb({semiMajorAxis: 1, semiMinorAxis: 1}),

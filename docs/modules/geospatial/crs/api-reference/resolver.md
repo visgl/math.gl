@@ -1,11 +1,13 @@
 # Opt-in CRS resolution
 
-`@math.gl/geospatial/crs/resolver` resolves authority identifiers using application-supplied
+`@math.gl/geospatial/crs` resolves authority identifiers using application-supplied
 providers. It has no bundled authority database and performs no network access or coordinate
-transformation. Import it explicitly; the CRS root does not load it.
+transformation. Resolution is opt-in: create a resolver explicitly and pass it to
+a projection engine. Named imports from the CRS or geospatial root are tree-shakable;
+unused resolution code is removed by bundlers.
 
 ```ts
-import {createCRSResolver, createCRSDictionaryProvider} from '@math.gl/geospatial/crs/resolver';
+import {createCRSResolver, createCRSDictionaryProvider} from '@math.gl/geospatial/crs';
 
 const resolver = createCRSResolver({providers: [
   createCRSDictionaryProvider({
@@ -15,6 +17,15 @@ const resolver = createCRSResolver({providers: [
 const {input, lookups} = await resolver.resolve('APP:regional');
 // input is a full definition. A projection engine must still validate and execute it.
 ```
+
+## Prepare native transforms
+
+Pass the resolver to `FullProjectionEngine`, `ConfigurableProjectionEngine` or
+`LazyProjectionEngine`, then call `createProjectionAsync()` or `getCRS()` to resolve
+unknown identifiers before native preparation. The resulting coordinate methods
+are synchronous. Synchronous `createProjection()` never initiates provider lookup.
+See [engine resolution and precedence](../../projection/developer-guide/projection-engine.md#opt-in-authority-resolution)
+and the [proj-wasm integration recipe](../../projection/developer-guide/external-projection-engines.md#integrate-proj-wasm).
 
 ## Providers and lookup results
 

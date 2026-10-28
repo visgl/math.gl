@@ -21,7 +21,7 @@ For distance-parameterized sampling and adaptive subdivision, see
 Constant-bearing geometry is available from the optional ellipsoid entry:
 
 ```ts
-import {EllipsoidRhumb, RhumbPolygon} from '@math.gl/geospatial/ellipsoid';
+import {EllipsoidRhumb, RhumbPolygon} from '@math.gl/geospatial';
 const axes = {semiMajorAxis: 6378137, semiMinorAxis: 6356752.314245179};
 const rhumb = new EllipsoidRhumb(axes);
 const leg = rhumb.inverse(40, -73, 51, 0, {area: true});

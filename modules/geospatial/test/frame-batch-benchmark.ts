@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {Vector3} from '@math.gl/core';
-import {LocalReferenceFrame} from '@math.gl/geospatial/ellipsoid';
+import {LocalReferenceFrame} from '@math.gl/geospatial';
 import reference from './c8-reference.json';
 export {qualifyFrameBatches} from './frame-batch-qualification';
 export function prepareFrameBatches(points: number, packed: boolean) {

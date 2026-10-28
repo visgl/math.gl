@@ -20,11 +20,13 @@ for (const [name, example, entry] of [
   const plugins = name === 'expressions' ? [{
     name: 'controlled-async-evaluation',
     setup(builder) {
-      builder.onResolve({filter: /^@math\.gl\/core\/expressions$/}, () => ({path:'controlled',namespace:'review'}));
+      builder.onResolve({filter: /^@math\.gl\/core$/}, args =>
+        args.importer === resolve(root,'examples/expressions/app.tsx') ? {path:'controlled',namespace:'review'} : null
+      );
       builder.onLoad({filter:/.*/,namespace:'review'}, () => ({
         resolveDir:root,
-        contents:`export * from ${JSON.stringify(resolve(root,'modules/core/src/expressions/index.ts'))};
-import {compileAsync as original} from ${JSON.stringify(resolve(root,'modules/core/src/expressions/index.ts'))};
+        contents:`export * from ${JSON.stringify(resolve(root,'modules/core/src/index.ts'))};
+import {compileAsync as original} from ${JSON.stringify(resolve(root,'modules/core/src/index.ts'))};
 export function compileAsync(expression,options) {
   if (expression === 'reviewPending') return () => new Promise((yes,no) => {
     window.reviewRequest=(window.reviewRequest || 0)+1;

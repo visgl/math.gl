@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original bounded-profile P0 accuracy and public ownership/unit/boundary regressions; no upstream fixtures copied.
-import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial/ellipsoid';
+import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial';
 import {expect, test} from 'vitest';
 import {config, Vector3} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';

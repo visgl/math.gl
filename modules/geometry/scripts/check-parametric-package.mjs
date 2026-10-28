@@ -28,17 +28,17 @@ assert.equal(new api.LatheGeometry({points:[[1,0],[1,1]]}).attributes.POSITION.s
 assert.equal(new api.ParametricGeometry({uSegments:1,vSegments:1,sample:(u,v)=>[u,v,0]}).vertexCount,6);`;
   await writeFile(
     join(temporary, 'consumer.mjs'),
-    `import assert from 'node:assert/strict';import * as api from '@math.gl/geometry/parametric';import * as primitives from '@math.gl/geometry';${checks}`
+    `import assert from 'node:assert/strict';import * as api from '@math.gl/geometry';import * as primitives from '@math.gl/geometry';${checks}`
   );
   await writeFile(
     join(temporary, 'consumer.cjs'),
-    `const assert=require('node:assert/strict'),api=require('@math.gl/geometry/parametric'),primitives=require('@math.gl/geometry');${checks}`
+    `const assert=require('node:assert/strict'),api=require('@math.gl/geometry'),primitives=require('@math.gl/geometry');${checks}`
   );
   for (const file of ['consumer.mjs', 'consumer.cjs'])
     execFileSync(process.execPath, [join(temporary, file)], {stdio: 'inherit'});
   await writeFile(
     join(temporary, 'consumer.ts'),
-    `import {ParametricGeometry,TorusGeometry,LatheGeometry,type SurfaceSampler} from '@math.gl/geometry/parametric';
+    `import {ParametricGeometry,TorusGeometry,LatheGeometry,type SurfaceSampler} from '@math.gl/geometry';
 import {PrismGeometry,RingGeometry,type PrismGeometryProps,type RingGeometryProps} from '@math.gl/geometry';
 const prism:PrismGeometryProps={sides:6,startAngle:1};new PrismGeometry(prism);
 const ring:RingGeometryProps={innerRadius:.5,outerRadius:1,sweepAngle:1};new RingGeometry(ring);
@@ -62,13 +62,13 @@ const sample:SurfaceSampler=(u,v)=>new Float64Array([u,v,0]);new ParametricGeome
     {stdio: 'inherit', cwd: temporary}
   );
   const bundle = await build({
-    entryPoints: [join(root, 'modules/geometry/src/index.ts')],
+    stdin: {contents: "export {PrismGeometry} from './modules/geometry/src/index.ts'", resolveDir: root},
     bundle: true,
     write: false,
     metafile: true,
     format: 'esm'
   });
-  assert.ok(Object.keys(bundle.metafile.inputs).every(path => !path.includes('/parametric/')));
+  assert.ok(Object.entries(Object.values(bundle.metafile.outputs)[0].inputs).every(([path, value]) => !path.includes('/parametric/') || value.bytesInOutput === 0));
   console.log('Parametric ESM, CommonJS, public types and root isolation passed');
 } finally {
   await rm(temporary, {recursive: true, force: true});

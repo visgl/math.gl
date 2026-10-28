@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {createCRSResolver} from '@math.gl/geospatial/crs/resolver';
+import {createCRSResolver} from '@math.gl/geospatial/crs';
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
 import {createProjWasmProvider} from './provider.mjs';
 

@@ -11,7 +11,7 @@
 // - It has not been fully adapted to math.gl conventions
 // - Documentation has not been ported
 
-import {NumericArray} from '@math.gl/core/types';
+import {NumericArray} from '@math.gl/core';
 import {assert, Matrix4, Vector2} from '@math.gl/core';
 import {PerspectiveOffCenterFrustum} from './perspective-off-center-frustum';
 import {CullingVolume} from './culling-volume';

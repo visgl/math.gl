@@ -7,7 +7,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "test": "node --test math.test.mjs snowball.test.mjs paleo-features.test.mjs paleo-geometry.test.mjs earth-events.test.mjs planetary-history.test.mjs paleodem.test.mjs"
+    "test": "node --test math.test.mjs snowball.test.mjs paleo-features.test.mjs paleo-geometry.test.mjs earth-events.test.mjs planetary-history.test.mjs paleodem.test.mjs terrain-material.test.mjs journeys.test.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "~9.4.0",

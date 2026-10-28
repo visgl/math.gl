@@ -14,6 +14,6 @@ Original math.gl code is MIT-licensed; generated data carries its own SPDX notic
 
 Lunar ephemeris and illumination calculations are adapted from SunCalc 1.9.0 under BSD-2-Clause. The full notice is included in `LICENSE-SUNCALC`. Original moonlight and star-field rotation code is MIT-licensed; source files carry SPDX ownership and provenance comments.
 
-The optional `@math.gl/earth/sun/planets` entry point uses the separately installed
-MIT-licensed `astronomy-engine` peer for planetary and Galilean moon ephemerides.
+The `@math.gl/earth/sun` entry point uses the declared
+MIT-licensed `astronomy-engine` dependency for planetary and Galilean moon ephemerides.
 Its original TypeScript adapter records API and physical-data references in SPDX comments.

@@ -22,9 +22,9 @@ assert.equal(fixture.cases.length, 180);
 
 for (const format of ['esm', 'cjs']) {
   const load = format === 'esm' ? name => import(name) : name => require(name);
-  const {GeodesicPath, EllipsoidGeodesic} = await load('@math.gl/geospatial/ellipsoid');
-  const {subdivideGeodesicPolyline} = await load('@math.gl/geospatial/globe');
-  const {subdividePolyline} = await load('@math.gl/geometry/polygon');
+  const {GeodesicPath, EllipsoidGeodesic} = await load('@math.gl/geospatial');
+  const {subdivideGeodesicPolyline} = await load('@math.gl/geospatial');
+  const {subdividePolyline} = await load('@math.gl/geometry');
   const packageRoot = await load('@math.gl/geospatial');
   assert.equal(typeof packageRoot.GeodesicPath, 'function');
   assert.equal(typeof packageRoot.subdivideGeodesicPolyline, 'function');

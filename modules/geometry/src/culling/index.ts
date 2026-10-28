@@ -43,3 +43,13 @@ export {
   getOrientedBoundingBoxQuaternion,
   makeOrientedBoundingBoxFromQuaternion
 } from './lib/algorithms/oriented-bounding-box-quaternion';
+
+// Public named exports. Implementations remain in independently tree-shakable files.
+export {
+  validateQueryPoint,
+  validateQueryDistance,
+  normalizeQueryDirection,
+  getClosestPointsOnSegments,
+  getClosestPointsSegmentTriangle
+} from './queries';
+export type {SegmentClosestPoints, SegmentTriangleClosestPoints} from './queries';

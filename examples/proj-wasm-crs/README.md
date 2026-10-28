@@ -1,7 +1,7 @@
 # Resolve CRS definitions with proj-wasm
 
 This example pins `proj-wasm` **0.1.0** and uses its bundled authority database as
-an opt-in `@math.gl/geospatial/crs/resolver` provider. The runnable workflow:
+an opt-in `@math.gl/geospatial/crs` provider. The runnable workflow:
 
 1. Disables PROJ network access and resolves `EPSG:8857` to PROJJSON.
 2. Prepares a native math.gl Equal Earth transform asynchronously, then executes it synchronously.

@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {earcut} from '@math.gl/geometry/polygon';
+import {earcut} from '@math.gl/geometry';
 
 /** Triangulate clipped source geometry; a cap fragment need not have a visible fan center. */
 function projectSourcePolygon(part) {

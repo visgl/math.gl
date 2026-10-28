@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {describe, expect, test} from 'vitest';
-import {createCRSResolver, createCRSDictionaryProvider} from '@math.gl/geospatial/crs/resolver';
+import {createCRSResolver, createCRSDictionaryProvider} from '@math.gl/geospatial/crs';
 import {createSpatialReference} from '@math.gl/geospatial/crs';
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
 import {ConfigurableProjectionEngine} from '@math.gl/geospatial/projection/core';

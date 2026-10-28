@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Matrix4} from '@math.gl/core';
-import type {TypedArray, TypedArrayConstructor} from '@math.gl/core/types';
+import type {TypedArray, TypedArrayConstructor} from '@math.gl/core';
 import {GL} from './constants';
 import {getAttributeValues, type Geometry, type GeometryAttribute} from './geometry';
 

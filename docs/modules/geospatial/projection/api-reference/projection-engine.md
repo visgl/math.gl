@@ -1,7 +1,7 @@
 # ProjectionEngine
 
 Native engine constructors optionally accept `resolver: CRSResolver` from
-`@math.gl/geospatial/crs/resolver`. `createProjectionAsync()` and `getCRS()` prepare
+`@math.gl/geospatial/crs`. `createProjectionAsync()` and `getCRS()` prepare
 external identifiers; `createProjection()` remains synchronous and never looks them up.
 See [authority resolution](../developer-guide/projection-engine.md#opt-in-authority-resolution)
 for precedence, caching and metadata rules.

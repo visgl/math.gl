@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original compensated binary64 products for tangent contacts; no upstream code copied.
-import type {NumericArray} from '@math.gl/core/types';
+import type {NumericArray} from '@math.gl/core';
 import {ratio} from './exact-nearest-surface';
 const SPLITTER = 134217729;
 function productError(a: number, b: number, product: number): number {

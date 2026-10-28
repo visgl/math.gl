@@ -7,7 +7,7 @@ import {
   cellToChildren as a5Children,
   getRes0Cells as a5Cells,
 } from "a5-js";
-import { S2Decoder } from "@math.gl/dggs/s2";
+import { S2Decoder } from "@math.gl/dggs";
 
 const rad = Math.PI / 180;
 const unit = ([lon, lat]) => [

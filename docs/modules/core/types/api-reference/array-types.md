@@ -18,8 +18,8 @@ Use `NativeFloat16ArrayConstructor` to detect native or polyfilled support. Use
 encoded IEEE 754 binary16 bit patterns. The fallback does not encode numeric assignments or decode
 values when read.
 
-`NativeFloat16ArrayConstructor` is captured when `@math.gl/core/types` is evaluated. Applications using
-a polyfill must install it before importing `@math.gl/core/types`.
+`NativeFloat16ArrayConstructor` is captured when `@math.gl/core` is evaluated. Applications using
+a polyfill must install it before importing `@math.gl/core`.
 
 ## Types
 
@@ -114,7 +114,7 @@ Remarks:
 ### `NativeFloat16ArrayConstructor: TypedArrayConstructor | undefined`
 
 The native `Float16Array` constructor, or `undefined` when the current JavaScript runtime does not
-provide it. The value is captured when `@math.gl/core/types` is evaluated.
+provide it. The value is captured when `@math.gl/core` is evaluated.
 
 ### `getFloat16ArrayConstructor(): TypedArrayConstructor`
 

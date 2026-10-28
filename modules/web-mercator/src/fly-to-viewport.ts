@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {lerp} from './math-utils';
 import {scaleToZoom, zoomToScale, lngLatToWorld, worldToLngLat} from './web-mercator-utils';
-import * as vec2 from '@math.gl/core/vec2';
+import {vec2} from '@math.gl/core';
 
 import type {ViewportProps} from './normalize-viewport-props';
 

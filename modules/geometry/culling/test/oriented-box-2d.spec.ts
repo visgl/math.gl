@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {intersectOrientedBoxes2D} from '@math.gl/geometry/culling/oriented-box-2d';
-import type {OrientedBox2D} from '@math.gl/geometry/culling/oriented-box-2d';
+import {intersectOrientedBoxes2D} from '@math.gl/geometry/culling';
+import type {OrientedBox2D} from '@math.gl/geometry/culling';
 import {intersectOrientedBoxes2D as rootIntersection} from '@math.gl/geometry/culling';
 
 /** Construct a small fixture using half-sizes and a radians-based width direction. */

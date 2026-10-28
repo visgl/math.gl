@@ -4,7 +4,7 @@ Streaming geodesic polygons and open polylines on revolution ellipsoids. This
 optional class retains compensated area/perimeter sums, not a vertex list.
 
 ```typescript
-import {GeodesicPolygon, EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid';
+import {GeodesicPolygon, EllipsoidGeodesic} from '@math.gl/geospatial';
 
 const axes = {semiMajorAxis: 6378137, semiMinorAxis: 6356752.314245179};
 const polygon = new GeodesicPolygon(axes);

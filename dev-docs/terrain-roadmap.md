@@ -11,7 +11,7 @@ not math.gl.
 ## Implementation progress
 
 October 26, 2026: the first local Cartesian foundation is implemented in
-[`@math.gl/geospatial/terrain`](../modules/geospatial/terrain/README.md), with a dependency-free runtime
+[`@math.gl/geospatial/terrain`](../docs/modules/geospatial/terrain/README.md), with a dependency-free runtime
 sampling entry and optional `@math.gl/geospatial/terrain/geometry` mesh entry. The opt-in subpath follows master's six-package consolidation while keeping
 height-field sampling independent of the geospatial root and its runtime imports.
 Optional geographic and tiled adapters extend this contract without adding root imports.
@@ -32,8 +32,21 @@ versioned f32/u32 upload layout, byte/height-error budgets and validated CPU
 reconstruction. This is a renderer-independent data substrate. Shader code and
 device execution belong to companion luma.gl work.
 
-This is partial T0/T1/T2/T3 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
-spike, vertex-tile reconciliation, persistent cache structures, adaptive meshes,
+Indexed terrain surfaces now provide barycentric sampling, edge topology and
+BVH-backed ray/segment/nearest queries. Conservative cell min/max hierarchies
+retain extrema and source-coverage counts, with exhaustive CPU references.
+
+Bounded BVH ray/segment/nearest queries now return explicit completion status and
+work counts. Discrete sphere contacts use triangle faces, edges and vertices with
+separate contact and face normals, mask filtering, and contact-capacity limits.
+Incomplete results cannot be interpreted as misses. Segment/triangle closest-pair
+kernels now support bounded minimum clearance along segments and capsule contacts,
+including straight translating-sphere swept-volume overlap. Closest-pair fractions
+are not first-impact times. This advances T5; reduced manifolds, first-impact queries,
+curved/rotating sweeps and solver integration remain open.
+
+This is partial T0/T1/T2/T3/T5/T6 delivery. Independent real-DEM fixtures, a CPU/GPU/deck.gl
+spike, vertex-tile reconciliation, persistent cache structures, mixed-resolution mesh stitching,
 and GPU qualification remain open. The remaining sections describe the target architecture and delivery gates.
 
 ## Recommendation
@@ -502,3 +515,75 @@ within luma.gl for shaders; atlas versus texture-array/storage-buffer layouts; d
 versus displayed-surface offset policy; the smallest supported cross-tile seam
 contract; and whether existing tessellators can be wrapped without maintained
 forks. None should block the CPU reference surface and conformance fixtures.
+
+## Adaptive meshing tranche
+
+The standalone `terrain/mesh`, `terrain/mesh-error`, and `terrain/mesh-edges`
+entries now provide plain regular mesh creation, bounded nodal error measurement,
+and sorted grid-side extraction. Separate `terrain/martini` and `terrain/delatin`
+adapters provide complete-grid adaptive tessellation with independent error checks.
+MARTINI supports full boundary refinement for same-resolution tile seams. Delatin
+accepts rectangular grids and owns the backend previously vendored in loaders.gl.
+No additional methods were added to `TerrainSurface`; small consumers remain
+independently tree-shakable. Bundle graph and byte-budget probes guard this split.
+
+Remaining meshing work includes mixed-resolution stitching, transition morphs,
+continuous error analysis, real-DEM performance qualification, and the companion
+loaders.gl migration. GPU execution, deck.gl offset/drape integration and residency
+remain companion-repository work. These adapters do not complete all of T2–T4.
+
+## Terrain analysis tranche
+
+Independent `terrain/derivatives`, `terrain/slope-aspect`, `terrain/profile` and
+`terrain/contours` entries advance T6 with Horn/central-difference raster gradients,
+explicit slope/flat-aspect semantics, bounded sampled profiles and indexed contours
+of the regular triangle surface. They return plain arrays without adding terrain
+class methods or loading tessellators and query indexes. Analytic affine/polynomial,
+saddle/topology, nodata, capacity and precision tests qualify these local Cartesian
+operations. Tree-shaking probes and isolated package consumers guard their boundaries.
+
+Remaining analysis work includes independent real-DEM/GDAL qualification, terrain
+horizons, cross-tile contour joining and topology-preserving simplification, isobands, filtered versus
+derivative pyramids, and performance qualification at regional scale. Profiles
+are discrete samples, not clearance certificates; contours do not describe the
+bilinear or adaptive-mesh surface. GPU execution remains in luma.gl.
+
+## Contour paths and profile measurements tranche
+
+Independent `terrain/contour-paths`, `terrain/contour-simplify` and
+`terrain/profile-measure` entries continue T6. Graph tracing preserves every edge,
+ends at junctions and closes cycles explicitly. Bounded iterative simplification
+retains shared vertices and cycle anchors, reports measured chord deviation and
+compacts output buffers. Profile measurements report covered/missing intervals,
+ascent/descent, sampled surface length and height integrals without bridging gaps.
+No terrain classes gained methods; each operation has isolated bundle and package
+consumer checks. Analytic, graph, cycle/junction, approximation, missing-data and
+numerical-scale fixtures exercise the contracts.
+
+Contour topology preservation, polygon/isoband construction, cross-tile welding,
+regional real-DEM qualification, horizon queries and filtered pyramids remain open.
+Simplified paths are approximate geometry and are not exact terrain level sets.
+
+## DEM qualification and conforming tile seams tranche
+
+Independent `terrain/vertex-tiles` and `terrain/mesh-stitch` entries add deterministic
+same-level vertex reconciliation and conforming mixed-resolution boundary topology.
+Shared lattice vertices use canonical ownership with an explicit disagreement budget
+and conservative missing-data propagation. Stitching preserves an authoritative
+piecewise-linear edge, inserts union knots, and splits boundary triangles. Normalized
+partial-edge ranges support coarse-to-child quadtree seams, including absent coarse
+midpoints. Output fractional grid coordinates preserve parameterization. Neither
+entry adds class methods or imports mesh builders, query indexes or shaders.
+
+A pinned redistributable GDAL DTED sample, independently generated GDAL 3.9.3
+Horn/Zevenbergen–Thorne slope/aspect outputs, exhaustive adaptive-mesh nodal checks,
+and same-level/partial-edge topology tests provide the first real-DEM qualification.
+The generator records preprocessing and versions; normal tests use committed data.
+A standalone report separates residuals, output bytes and warm microbenchmarks.
+
+This advances T0/T2/T6 without completing their qualification gates. Remaining work:
+additional mountainous/coastal fixtures, full-surface error certificates, regional
+performance, persistent update structures, vertex-tile derivative halos, global seam
+coordination/corner policy, transition morphs and downstream loaders/luma/deck adoption.
+Seam conformance does not imply normal continuity or preserve source terrain away
+from the authoritative edge. GPU execution remains exclusively companion work.

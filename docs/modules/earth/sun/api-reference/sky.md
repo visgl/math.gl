@@ -13,12 +13,12 @@ sidebar_label: Sky
 
 `getSkySnapshot` puts the Sun, Moon, seven planets, Galilean moons and a J2000
 star-field orientation into one consistent **geometric topocentric ENU frame**.
-Install the optional MIT-licensed `astronomy-engine` peer. The main entry point
-retains the lightweight SunCalc position APIs without importing that peer.
+The MIT-licensed `astronomy-engine` is a declared runtime dependency. Bundlers
+can remove it when selecting unrelated named exports.
 
 ```ts
 import {createSkyObserver} from '@math.gl/earth/sun';
-import {getSkySnapshot, createSkyContext} from '@math.gl/earth/sun/astronomy';
+import {getSkySnapshot, createSkyContext} from '@math.gl/earth/sun';
 
 const observer = createSkyObserver({latitude: 37.8, longitude: -122.4, elevation: 0});
 const sky = getSkySnapshot(Date.now(), observer, {

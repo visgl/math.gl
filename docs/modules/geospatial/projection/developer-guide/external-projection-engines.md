@@ -4,7 +4,9 @@ External libraries can provide CRS definitions, execute coordinate operations, o
 do both. Use the opt-in [`CRSResolver`](../../crs/api-reference/resolver.md) for
 definition lookup. Libraries with synchronous coordinate operations can also
 implement the [`ProjectionEngine`](../api-reference/projection-engine.md) interface.
-These are application integrations; math.gl does not register or load them for you.
+Applications written against math.gl's projection interfaces can still use external
+projection engines through these adapters. math.gl does not register or load external
+libraries for you, and they are not dependencies of published math.gl packages.
 
 ## Integrate proj-wasm
 
@@ -21,7 +23,7 @@ Its source is in `examples/proj-wasm-crs/provider.mjs`:
 
 ```javascript
 import * as proj from 'proj-wasm';
-import {createCRSResolver} from '@math.gl/geospatial/crs/resolver';
+import {createCRSResolver} from '@math.gl/geospatial/crs';
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
 import {createProjWasmProvider} from './provider.mjs';
 
@@ -70,6 +72,11 @@ Node integration tests and a Chromium smoke test exercise the actual pinned
 package, including offline asset loading, inverse coordinates and unsupported CRS
 behavior. Provider unit tests cover lifecycle and failures. See the example README
 for build, test and serving commands.
+
+Prepared native transforms and `CRSDescriptor` converter callbacks remain synchronous.
+An asynchronously initialized engine can supply them only if its prepared point and
+buffer operations are synchronous. The backend-independent descriptor builder and
+interactive math.gl/proj4js/D3 comparison are developed in [PR #326](https://github.com/visgl/math.gl/pull/326).
 
 ## Synchronous adapters
 

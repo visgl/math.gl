@@ -9,12 +9,8 @@
 
 /* eslint-disable */
 import {Vector3, assert, _MathUtils, NumericArray, config} from '@math.gl/core';
-import type {SpheroidParameters} from '@math.gl/core/types';
-import {
-  spheroidToCartesian,
-  cartesianToSpheroid,
-  type SpheroidGeometry
-} from '@math.gl/core/spheroid';
+import type {SpheroidParameters} from '@math.gl/core';
+import {spheroidToCartesian, cartesianToSpheroid, type SpheroidGeometry} from '@math.gl/core';
 
 import {WGS84_RADIUS_X, WGS84_RADIUS_Y, WGS84_RADIUS_Z} from './constants';
 import {

@@ -100,3 +100,7 @@ export type {
   TessellateGeoArrowPolygonsOptions
 } from './tessellate';
 export {tessellateGeoArrowPolygons} from './tessellate';
+
+// Public named exports. Implementations remain in independently tree-shakable files.
+export {prepareGeoArrowTransfer} from './worker';
+export type {GeoArrowTransfer} from './worker';

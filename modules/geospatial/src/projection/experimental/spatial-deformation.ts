@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original shared source-sampled displacement and bounded inverse kernel; no upstream implementation copied.
 import type {inverseDisplacement} from './deformation-inverse';
-import {createLocalFrameBasis, eastNorthUpBasis, localToFixed} from '@math.gl/core/local-frame';
+import {createLocalFrameBasis, eastNorthUpBasis, localToFixed} from '@math.gl/core';
 import {geocentricToGeodeticInPlace} from './datum';
 import type {ProjectionPoint} from './types';
 import type {DeformationModel, DeformationModelOptions} from './deformation';

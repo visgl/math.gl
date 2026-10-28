@@ -10,6 +10,16 @@ const moduleGroups = require('./module-groups.json');
 const docsTableOfContents = structuredClone(require('../docs/table-of-contents.json'));
 const apiReference = docsTableOfContents.find(section => section.label === 'API Reference');
 const moduleReferences = new Map(apiReference.items.map(item => [item.label.split(' ')[0], item]));
+const migratedEntries = {
+  "@math.gl/core/types": "@math.gl/core",
+  "@math.gl/core/expressions": "@math.gl/core",
+  "@math.gl/geometry/curves": "@math.gl/geometry",
+  "@math.gl/geometry/spatial-index": "@math.gl/geometry",
+  "@math.gl/geometry/utils": "@math.gl/geometry",
+  "@math.gl/geospatial/wkb": "@math.gl/geospatial",
+  "@math.gl/earth/geoid": "@math.gl/earth",
+  "@math.gl/geometry/polygon": "@math.gl/geometry"
+};
 apiReference.items = moduleGroups.map(group => ({
   type: 'category',
   label: group.label,
@@ -17,7 +27,10 @@ apiReference.items = moduleGroups.map(group => ({
     const reference = moduleReferences.get('@math.gl/' + moduleId);
     if (!reference) throw new Error('Missing API reference for module: ' + moduleId);
     moduleReferences.delete('@math.gl/' + moduleId);
-    return reference;
+    const previous = '@math.gl/' + moduleId;
+    return migratedEntries[previous]
+      ? {...reference, label: migratedEntries[previous] + ' — ' + moduleId.split('/').slice(1).join('/')}
+      : reference;
   })
 }));
 if (moduleReferences.size) {
@@ -87,19 +100,6 @@ webpackPlugin[1].resolve.modules.unshift('node_modules');
 // Preserve the published Parquet worker as a bundled asset, shared with Vite's ?url import.
 webpackPlugin[1].module = {rules: [{resourceQuery: /\?url$/, type: 'asset/resource'}]};
 const aliases = webpackPlugin[1].resolve.alias;
-aliases['@math.gl/geometry/spatial-index$'] = resolve(__dirname, '../modules/geometry/src/spatial-index/index.ts');
-aliases['@math.gl/geometry/culling/queries$'] = resolve(__dirname, '../modules/geometry/src/culling/queries.ts');
-aliases['@math.gl/geometry/curves$'] = resolve(__dirname, '../modules/geometry/src/curves/index.ts');
-aliases['@math.gl/geospatial/crs$'] = aliases['@math.gl/geospatial/crs'];
-aliases['@math.gl/geospatial/crs/metadata$'] = resolve(__dirname, '../modules/geospatial/src/crs/crs-metadata.ts');
-aliases['@math.gl/geospatial/crs/wkt$'] = resolve(__dirname, '../modules/geospatial/src/crs/wkt-crs.ts');
-aliases['@math.gl/geospatial/crs/proj-string$'] = resolve(__dirname, '../modules/geospatial/src/crs/proj-string.ts');
-aliases['@math.gl/geospatial/crs/spatial-reference$'] = resolve(
-  __dirname,
-  '../modules/geospatial/src/crs/spatial-reference.ts'
-);
-delete aliases['@math.gl/geospatial/crs'];
-
 // Dependencies such as deck.gl 9.4 require math.gl 4.x. Keep their imports on
 // their installed dependency versions rather than the website's 5.x source aliases.
 webpackPlugin[1].plugins = [
@@ -175,10 +175,6 @@ config.markdown = {
 delete config.onBrokenMarkdownLinks;
 
 module.exports = config;
-
-aliases['@math.gl/geometry/parametric$'] = resolve(__dirname, '../modules/geometry/src/parametric.ts');
-aliases['@math.gl/geometry$'] = resolve(__dirname, '../modules/geometry/src/index.ts');
-delete aliases['@math.gl/geometry'];
 
 // Exact aliases cover every consolidated public entrypoint, including nested subpaths.
 for (const name of ['core', 'geometry', 'geospatial', 'earth', 'dggs', 'web-mercator']) {

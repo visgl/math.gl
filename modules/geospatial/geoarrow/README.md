@@ -41,7 +41,7 @@ import {
   getGeoArrowVertexCount,
   mapGeoArrowCoordinates
 } from '@math.gl/geospatial/geoarrow';
-import {GeoArrowBuilder} from '@math.gl/geospatial/geoarrow/builder';
+import {GeoArrowBuilder} from '@math.gl/geospatial/geoarrow';
 
 const column = GeoArrowBuilder.build(
   [
@@ -233,7 +233,7 @@ import {
   encodeGeoArrowWKB,
   decodeGeoArrowWKT,
   encodeGeoArrowWKT
-} from '@math.gl/geospatial/geoarrow/wkb';
+} from '@math.gl/geospatial/geoarrow';
 
 const wkb = encodeGeoArrowWKB(polygons);
 const decoded = decodeGeoArrowWKB(wkb, {
@@ -281,20 +281,20 @@ traversal limits, and supports regular offset storage and BinaryView storage. Us
 need counts before deciding whether to allocate native buffers.
 
 Parsing or formatting one geometry is intentionally provided by the dependency-free
-`@math.gl/geospatial/wkb` package. The GeoArrow `/wkb` bridge consumes its visitors and two-pass builder:
+`@math.gl/geospatial` package. The GeoArrow `/wkb` bridge consumes its visitors and two-pass builder:
 
 ```typescript
-import {parseWKB, writeWKB, parseWKT, formatWKT} from '@math.gl/geospatial/wkb';
+import {parseWKB, writeWKB, parseWKT, formatWKT} from '@math.gl/geospatial';
 ```
 
 The descriptor and buffer-algorithm implementation does not require Apache Arrow. The `/wkb`
-subpath (and the legacy root codec re-exports) uses `@math.gl/geospatial/wkb`; install it when using those
+subpath (and the legacy root codec re-exports) uses `@math.gl/geospatial`; install it when using those
 functions.
 
 ## Polygon tessellation
 
 ```typescript
-import {tessellateGeoArrowPolygons} from '@math.gl/geospatial/geoarrow/tessellation';
+import {tessellateGeoArrowPolygons} from '@math.gl/geospatial/geoarrow';
 
 const mesh = tessellateGeoArrowPolygons(polygons, {
   positionSize: 3,
@@ -308,7 +308,7 @@ const mesh = tessellateGeoArrowPolygons(polygons, {
 
 Polygon, MultiPolygon, and polygon members of dense unions or geometry collections are supported.
 Holes are retained, duplicate closing coordinates are omitted from mesh vertices, and every output
-vertex retains its top-level source row. Tessellation uses `@math.gl/geometry/polygon` and is synchronous.
+vertex retains its top-level source row. Tessellation uses `@math.gl/geometry` and is synchronous.
 
 ## Resource limits
 
@@ -331,7 +331,7 @@ assertGeoArrowResourceLimits(column, {
 Root APIs are synchronous. Worker-specific payload preparation is isolated in the optional subpath:
 
 ```typescript
-import {prepareGeoArrowTransfer} from '@math.gl/geospatial/geoarrow/worker';
+import {prepareGeoArrowTransfer} from '@math.gl/geospatial/geoarrow';
 
 const payload = prepareGeoArrowTransfer(column);
 worker.postMessage(payload.column, {transfer: payload.transferList});
@@ -385,11 +385,11 @@ the producer runtime.
 - Layout: `inspectGeoArrowColumn`, `validateGeoArrowColumn`, slicing and traversal
 - Buffer algorithms: count, bounds, row bounds, map, interleave, convert, rewind, union
   normalization, resource limits
-- Construction: `@math.gl/geospatial/geoarrow/builder`
-- Column codecs: `@math.gl/geospatial/geoarrow/wkb` (individual parsing/formatting is provided by
-  `@math.gl/geospatial/wkb`)
-- Meshes: `@math.gl/geospatial/geoarrow/tessellation`
-- Transfer: `getGeoArrowTransferList`, plus `@math.gl/geospatial/geoarrow/worker`
+- Construction: `@math.gl/geospatial/geoarrow`
+- Column codecs: `@math.gl/geospatial/geoarrow` (individual parsing/formatting is provided by
+  `@math.gl/geospatial`)
+- Meshes: `@math.gl/geospatial/geoarrow`
+- Transfer: `getGeoArrowTransferList`, plus `@math.gl/geospatial/geoarrow`
 
 See the math.gl documentation for the full [physical-layout guide](../../../docs/modules/geospatial/geoarrow/physical-layouts.md),
 [API reference](../../../docs/modules/geospatial/geoarrow/api-reference/geoarrow.md), and

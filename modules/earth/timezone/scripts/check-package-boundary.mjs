@@ -31,9 +31,9 @@ try {
   for (const [name, source] of Object.entries({
     offset: "export {getTimezoneOffset} from '@math.gl/earth/timezone';",
     calendar: "export {getLocalDateTime, getTimezoneLabel, isTimezoneSupported} from '@math.gl/earth/timezone';",
-    temporal: "export {getStartOfDay, getTimezoneTransitions, localDateTimeToInstant} from '@math.gl/earth/timezone/temporal';",
+    temporal: "export {getStartOfDay, getTimezoneTransitions, localDateTimeToInstant} from '@math.gl/earth/timezone';",
     lazy: "export {lookupTimezoneAsync} from '@math.gl/earth/timezone';",
-    sync: "export {lookupTimezone} from '@math.gl/earth/timezone/lookup';"
+    sync: "export {lookupTimezone} from '@math.gl/earth/timezone';"
   })) {
     const result = await build({
       ...options,
@@ -69,8 +69,8 @@ try {
     execFileSync(process.execPath, ['--input-type=module', '-e', `
       import assert from 'node:assert/strict';
       import {getTimezoneOffset, getLocalDateTime, getTimezoneLabel, isTimezoneSupported, lookupTimezoneAsync} from '@math.gl/earth/timezone';
-      import {getStartOfDay, getTimezoneTransitions, localDateTimeToInstant} from '@math.gl/earth/timezone/temporal';
-      import {lookupTimezone} from '@math.gl/earth/timezone/lookup';
+      import {getStartOfDay, getTimezoneTransitions, localDateTimeToInstant} from '@math.gl/earth/timezone';
+      import {lookupTimezone} from '@math.gl/earth/timezone';
       assert.equal(getTimezoneOffset('America/New_York', Date.parse('2024-07-15T12:00:00Z')), -240);
       assert.equal(getLocalDateTime('Asia/Kathmandu', Date.parse('2024-12-31T20:00:00Z')).year, 2025);
       assert.equal(isTimezoneSupported('America/New_York'), true);
@@ -89,14 +89,14 @@ try {
     assert.equal(root.getLocalDateTime('UTC', 0).year, 1970);
     const originalIntl = globalThis.Intl;
     const originalTemporal = globalThis.Temporal;
-    const calendar = require('@math.gl/earth/timezone/temporal');
+    const calendar = require('@math.gl/earth/timezone');
     assert.equal(globalThis.Intl, originalIntl);
     assert.equal(globalThis.Temporal, originalTemporal);
     assert.equal(calendar.getStartOfDay('UTC', 0), 0);
     assert.equal(calendar.localDateTimeToInstant('UTC', {year: 1970, month: 1, day: 1}), 0);
     assert.deepEqual(calendar.getTimezoneTransitions('UTC', 0, 1), []);
     assert.equal(root.getTimezoneOffset('Asia/Kathmandu', 0), 330);
-    const {lookupTimezone} = require('@math.gl/earth/timezone/lookup');
+    const {lookupTimezone} = require('@math.gl/earth/timezone');
     assert.equal(lookupTimezone([-74.006, 40.7128]), 'America/New_York');
     root.lookupTimezoneAsync([-74.006, 40.7128]).then(zone => assert.equal(zone, 'America/New_York'));
   `]);

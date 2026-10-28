@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-export type {TypedArray, TypedArrayConstructor} from '@math.gl/core/types';
+export type {TypedArray, TypedArrayConstructor} from '@math.gl/core';
 
 export {GL, GL_TYPE, GL_PRIMITIVE, GL_PRIMITIVE_MODE} from './constants';
 export {default as GLType} from './gl-type';

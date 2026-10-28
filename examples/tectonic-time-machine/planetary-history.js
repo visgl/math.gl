@@ -26,6 +26,9 @@ export function earlyEarthMaterial(time, result = {}) {
   result.bombardment = smooth01((age-3700)/150) * smooth01((4100-age)/150);
   result.water = .95*smooth01((4500-age)/180);
   result.theia = age <= 4500 && age >= 4420 ? Math.exp((age-4500)/12) : 0;
+  // Staged condensation: steam peaks after impact, then rain clears the atmosphere.
+  result.steam = smooth01((4500-age)/12)*(1-smooth01((4440-age)/100));
+  result.rain = smooth01((4470-age)/35)*(1-smooth01((4380-age)/60));
   result.impactTime = (EARTH_FORMATION_MA-age)/12;
   return result;
 }

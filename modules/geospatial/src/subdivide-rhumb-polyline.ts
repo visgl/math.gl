@@ -3,12 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original rhumb adapter for the existing adaptive subdivision engine.
 
-import {subdividePolyline} from '@math.gl/geometry/polygon';
+import {subdividePolyline} from '@math.gl/geometry';
 import type {
   SubdividePolylineOptions,
   SubdividedPolyline,
   PolylineEdgeSampler
-} from '@math.gl/geometry/polygon';
+} from '@math.gl/geometry';
 import {RhumbPath, type RhumbPathOptions} from './rhumb-path';
 import {validateGeographicPosition} from './geodesic-path';
 

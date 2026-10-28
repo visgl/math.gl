@@ -2,11 +2,11 @@
 
 Experimental renderer-independent height fields, sampling, derivatives, and regular
 terrain meshes. The main entry point has no runtime imports from other packages.
-Mesh construction is available separately from `@math.gl/geospatial/terrain/geometry`.
+Mesh construction is available separately from `@math.gl/geospatial/terrain`.
 
 ```ts
 import {HeightField, TerrainSampleStatus} from '@math.gl/geospatial/terrain';
-import {HeightFieldGeometry} from '@math.gl/geospatial/terrain/geometry';
+import {HeightFieldGeometry} from '@math.gl/geospatial/terrain';
 
 const field = new HeightField({
   width: 2,
@@ -42,3 +42,12 @@ with a separate mask. Query status must be checked before using a result.
 
 See the [API and numerical contract](../../../docs/modules/geospatial/terrain/README.md) and
 [implementation roadmap](../../../dev-docs/terrain-roadmap.md).
+
+The optional `/terrain/surface` entry adds indexed triangle surfaces, barycentric
+height sampling, explicit halfedge topology and BVH ray/segment/nearest queries.
+Bounded query variants report completion and work counts; sphere queries return
+face/edge/vertex contacts with explicit work and contact-capacity limits.
+Segment-clearance and capsule queries cover the full axis, including interior
+contacts missed by endpoint-only sphere tests. They do not report first-impact time.
+`/terrain/bounds` adds conservative min/max hierarchies over height-field cells.
+These are CPU/data APIs; shader and device execution stay in luma.gl.

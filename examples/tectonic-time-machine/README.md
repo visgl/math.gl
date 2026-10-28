@@ -58,7 +58,7 @@ present day, assembling by +250 Ma and held until +300 Ma. They are not publishe
 Amasia/Aurica/Pangaea Proxima reconstructions or physical forecasts. Geological Ma
 is the animation time axis, not a CRS coordinate epoch or a trajectory integrator.
 
-`@math.gl/geometry/polygon` cuts geographic rings at the dateline, respecting holes and polar
+`@math.gl/geometry` cuts geographic rings at the dateline, respecting holes and polar
 closure, before `CRSProjection.projectFlatSync` transforms numeric XY buffers.
 Mercator is displayed with its ±85.05112878° latitude cap. Globe and map rendering
 use deck.gl; no basemap, service credentials or map API key is required.
@@ -301,3 +301,100 @@ Hadean material. A separate, subtle 4.5-second thermal breathing effect varies
 Hadean intensity by ±8%; it remains alive while paused. Geological age, impact
 positions and impact cooling still freeze with Stop. All of these effects are
 illustrative art rather than physical radiometry or simulated impact histories.
+
+### Moon formation and the first seas
+
+The illustrative Theia sequence brings a rocky impactor toward Earth at 4,520–4,500 Ma,
+then reveals a molten debris ring that diminishes as a young Moon grows and cools.
+The ring and bodies use depth-tested deck.gl layers, so Earth occludes the far side.
+They fade with the globe weight during map transitions; surface steam, rain and seas
+continue across all projections. The orbital vignette fades away by 4,320 Ma.
+
+After the flash, drifting steam obscures the cooling surface. A rainy condensation
+interval overlaps expanding synthetic ocean basins, before the atmosphere clears.
+All stages follow the timeline: Stop freezes orbital motion, clouds and rain, and
+seeking reconstructs the same state. The separate subtle thermal pulse remains live.
+The dates, compressed orbital cadence, body sizes, weather and condensation sequence
+are cinematic art, not measured ancient orbits, a climate model or an impact simulation.
+No new imagery or third-party assets are included. The existing 4.4 Ga water-evidence
+reference is an observational anchor, not a date for global ocean completion.
+
+### Ice and life
+
+Cryogenian ice still advances from the poles in the approximate Sturtian and
+Marinoan windows. During retreat, blue meltwater margins and fractures open in
+the ice; sparse warm volcanic windows become visible during the long frozen
+interval. These are original cinematic materials, not reconstructed eruption
+sites, ice thickness, meltwater maps or a modeled cause of deglaciation. The
+existing [Hoffman et al. (2017) review](https://doi.org/10.1126/sciadv.1600983)
+provides scientific context. Turning off glaciations disables all of these cues.
+
+“Microbial worlds” adds muted ochre/teal mats along the synthetic early-Earth
+shallows after the 3.43 Ga [Strelley Pool stromatolite evidence](https://www.nature.com/articles/nature04764).
+This is an illustrative biological cue, not a claim for the first life, known
+ancient coastlines, microbial pigmentation or global biomass. Land stays bare
+before the existing approximately 470 Ma plant event; vegetation then gains color gradually, with gentle regional variation. Fine substrate
+albedo, microrelief and source-elevation shading persist throughout; there is no
+separate switch to a full-texture material. The color variation is art, not
+reconstructed ecosystems or a climate/habitat model. Life chapters receive
+slower playback and can be selected from the timeline.
+
+### Terrain color continuity
+
+The synthetic elevation palette is calibrated once from land-color samples in
+the bundled NASA image, excluding blue ocean and near-white ice/cloud pixels.
+Elevation still controls the PaleoDEM material; calibration is a display color
+choice, not reconstructed ancient vegetation. Source elevation and coastline
+masking are unchanged.
+
+Color and lighting ease toward the imagery material over the last 30 Myr before
+the present and the first 20 Myr of PaleoDEM coverage (540–520 Ma). This avoids an
+instantaneous palette/lighting change when the imagery-on-plates material takes
+over. The boundary blend is illustrative modern imagery, not historical climate
+data. The pre-plant greening restriction still applies. Image arrival also reveals
+both the texture and calibrated palette smoothly over 1.5 seconds, even paused.
+
+### Journeys and a guided globe camera
+
+Open **Journeys & guided camera** to follow a preset present-day place or enter
+custom longitude/latitude. A point is assigned only to a present-day source polygon,
+respecting polygon holes and dateline crossing. Overlapping distinct plate IDs,
+unassigned locations and missing rotations are reported rather than replaced with
+a nearby plate or stationary trajectory. The marker follows the same rigid plate
+rotation and feature lifetime as the source geometry. Its trail shows up to 100 Myr
+of contiguous available history; it stops at gaps and the model's coverage boundary,
+and its displayed path is split at map seams so both edges remain visible. Globe
+trails remain continuous.
+After the present it uses the selected illustrative regional assembly path instead
+of published rotations. This does not model local deformation or imply that a
+modern city existed then.
+
+Following selects imagery on the moving plates. PaleoDEM remains a separate
+PALEOMAP reference frame and is disabled while a place is selected, so a model
+marker is not presented as precisely aligned to incompatible historical terrain.
+The marker and trail support all projection morphs; automatic place following
+centers the globe, while maps retain their projected framing. The camera follows
+short longitude arcs across the dateline. Dragging the globe or editing its meridian
+takes control immediately; re-enable following to resume. Choosing a place, switching
+projections and changing camera modes preserve geological time and playback intent.
+
+The optional **Guided event camera** frames Moon formation, microbial worlds,
+Snowball Earth, land colonization and future assembly with smooth original camera
+shots. It pauses automatic projection cycling; users can still select projections.
+Shots are presentation choices, not additional scientific reconstructions. Place
+following and the event camera are mutually exclusive camera modes.
+
+### Comparing future scenarios
+
+**Compare future alternatives** overlays purple outlines from the unselected
+Atlantic/polar scenario after the present. The selected scenario remains textured.
+The comparison uses the largest present-day source block per region for a readable
+outline, omitting smaller fragments and islands; it is not a complete alternative
+coastline or a confidence envelope. Both paths are the existing illustrative
+assemblies, not forecasts. Scenario selection reverses the comparison without
+changing age or stopping playback.
+
+Globe outlines reuse per-ring coordinate buffers during playback. Map outlines
+are seam-clipped and cached for short intervals, and forced seeks rebuild them
+immediately. Place/trail buffers are reused. Paused globe-camera movement reuses
+land topology instead of retriangulating it for each camera frame.

@@ -4,13 +4,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms. Scaled east normalization and the small-unit pole neighborhood are original math.gl fixes.
 
-import {NumericArray} from '@math.gl/core/types';
+import {NumericArray} from '@math.gl/core';
 import {Vector3, assert} from '@math.gl/core';
 import {
   createLocalFrameBasis,
   eastNorthUpBasisFromDirections,
   localFrameToMatrix
-} from '@math.gl/core/local-frame';
+} from '@math.gl/core';
 
 import type {Ellipsoid} from '../ellipsoid';
 

@@ -72,3 +72,18 @@ For ordinary continuous maps, the meridian profile is often sufficient. Existing
 spherical interrupted/faceted/cap maps already have their own cutters. Wider
 curve/domain and shared-network requirements should drive further generalization. G11 Earth fields are
 independent: implementing gravity or magnetic models does not close these gaps.
+
+## Oblique visibility and finite atlas increment
+
+The optional [geographic atlas](../docs/modules/geospatial/api-reference/geographic-atlas.md)
+now provides arbitrary-direction orthographic ellipsoid surface visibility and a
+finite graph of oriented normal-space circles. Shared boundaries/vertices, simple
+outer-plus-hole reconstruction, source fractions and adaptive generated-curve
+sampling support an eight-face octahedral Gauss-map consumer. Every cell has a
+closed hemisphere bound, and shared separators certify disjoint chart interiors.
+
+The 502-case Node/browser qualification retains native/independent budgets and
+existing bundle limits. Arbitrary callback-defined curves, unresolved higher-order
+junctions, dataset-wide feature-network reconciliation, perspective/elevated/terrain
+visibility and projection-specific layouts remain separate work. This is a finite
+atlas implementation, not a claim of universal geographic clipping completeness.

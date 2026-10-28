@@ -120,20 +120,19 @@ The descriptor can retain alternate source representations and a coordinate epoc
 definitions and descriptor-owned arrays are cloned and recursively frozen. See the
 [Spatial Reference API](/docs/modules/geospatial/crs/api-reference/spatial-reference).
 
-## Optional syntax entry points
+## Imports and bundle boundaries
 
-The root entry point remains available. Applications that split optional parsing code
-can instead import `parseWKTCRS` and related WKT APIs from `@math.gl/geospatial/crs/wkt`, PROJ
-string APIs from `@math.gl/geospatial/crs/proj-string`, and metadata helpers from
-`@math.gl/geospatial/crs/spatial-reference`. Each subpath includes ESM, CommonJS and declarations.
-Separate imports prevent a shared root barrel from pulling an otherwise deferred
-WKT parser into an eager bundle. Types can still be imported from the root with
-`import type`. Inspect the application's emitted chunks when combining import styles.
+Import syntax codecs, metadata helpers and the optional resolver as named exports
+from `@math.gl/geospatial/crs` or `@math.gl/geospatial`. These consolidated entry
+points provide ESM, CommonJS and declarations; separate nested syntax or resolver
+export paths are no longer supported. Use `import type` for TypeScript-only APIs.
+Tree-shaking bundlers can remove unused codecs and resolution code. CommonJS and
+namespace imports can retain more code; inspect emitted bundles when size matters.
 
 ## API
 
 Optional [CRS resolution](./api-reference/resolver.md) accepts application-owned
-catalogues and asynchronous providers through `@math.gl/geospatial/crs/resolver`.
+catalogues and asynchronous providers through `@math.gl/geospatial/crs`.
 Resolution supplies definitions; execution support remains engine-specific.
 
 - `CRSDefinition<T extends PROJJSONCRS = PROJJSONCRS>` — a string definition or PROJJSON object.

@@ -11,6 +11,11 @@ export function vegetationCoverage(time) {
   const fraction = Math.max(0, Math.min(1, (time + LAND_PLANTS_AGE_MA) / 80));
   return fraction * fraction * (3 - 2 * fraction);
 }
+// A visual cue anchored to stromatolite evidence, not a global biomass estimate.
+export function microbialCoverage(time) {
+  const onset=Math.max(0,Math.min(1,(time+3430)/200));
+  return onset*onset*(3-2*onset)*(1-vegetationCoverage(time));
+}
 export const EARTH_EVENTS = [
   {id: 'solar-system', name: 'Formation of the Solar System', ageMa: 4567,
     category: 'planetary', uncertaintyMa: 2, confidence: 'high',
@@ -24,6 +29,10 @@ export const EARTH_EVENTS = [
     category: 'geology', uncertaintyMa: 50, confidence: 'high',
     description: 'Jack Hills zircons record ancient crustal material; interpretations of surface water remain debated.',
     source: 'Wilde et al. (2001)', url: 'https://doi.org/10.1038/35051550'},
+  {id: 'microbial-reefs', name: 'Ancient microbial reefs', ageMa: 3430,
+    category: 'life', uncertaintyMa: 30, confidence: 'high',
+    description: 'Strelley Pool stromatolites provide evidence for ancient microbial communities. Shoreline colors are illustrative, not reconstructed biomass or the origin of life.',
+    source: 'Allwood et al. (2006)', url: 'https://www.nature.com/articles/nature04764'},
   {id: 'early-oceans', name: 'Early surface water and oceans — zircon evidence', ageMa: 4400,
     category: 'environment', uncertaintyMa: 100, confidence: 'high',
     description: 'Zircon isotope evidence supports interaction with liquid water by about 4.4 Ga. The onset, persistence and global ocean extent are uncertain; the visual condensation sequence is illustrative.',

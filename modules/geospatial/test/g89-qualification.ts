@@ -1,8 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {EllipsoidGeodesicExact} from '@math.gl/geospatial/geodesic-exact';
-import {TriaxialEllipsoid, type TriaxialCoordinates} from '@math.gl/geospatial/triaxial';
+import {EllipsoidGeodesicExact} from '@math.gl/geospatial';
+import {TriaxialEllipsoid, type TriaxialCoordinates} from '@math.gl/geospatial';
 import reference from './g89-reference.json';
 import independent from './g89-independent.json';
 export const provenance = {native: reference.provenance, independent: independent.provenance};

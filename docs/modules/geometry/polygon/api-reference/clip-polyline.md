@@ -7,7 +7,7 @@
 Clips a polyline with a bounding box.
 
 ```js
-import {clipPolyline} from '@math.gl/geometry/polygon';
+import {clipPolyline} from '@math.gl/geometry';
 
 clipPolyline([-10, -10, 10, 10, 30, -10], [0, 0, 20, 20], {size: 2});
 // returns [[0, 0, 10, 10, 20, 0]]

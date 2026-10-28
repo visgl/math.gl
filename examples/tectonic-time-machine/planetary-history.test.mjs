@@ -91,3 +91,40 @@ test('thermal breathing is subtle, smooth and periodic', () => {
   assert.equal(thermalPulse(4.5/4),1.08);
   assert.equal(thermalPulse(4.5*3/4),.92);
 });
+
+test('steam condenses through a rainy interval before clear early seas', () => {
+  assert.equal(earlyEarthMaterial(-4501).steam,0);
+  assert.equal(earlyEarthMaterial(-4501).rain,0);
+  assert.ok(earlyEarthMaterial(-4480).steam>.9);
+  assert.ok(earlyEarthMaterial(-4430).rain>.9);
+  assert.ok(earlyEarthMaterial(-4430).steam>earlyEarthMaterial(-4380).steam);
+  assert.equal(earlyEarthMaterial(-4320).steam,0);
+  assert.equal(earlyEarthMaterial(-4320).rain,0);
+  assert.equal(earlyEarthMaterial(-4320).water,.95);
+  for(let age=4567;age>=4000;age--) {
+    const state=earlyEarthMaterial(-age);
+    for(const key of ['steam','rain','water']) assert.ok(state[key]>=0&&state[key]<=1);
+  }
+});
+
+test('orbital vignette is bounded, seekable and fades with map transitions', async () => {
+  const {createFormationEffects}=await import('./formation-effects.js');
+  const effects=createFormationEffects();
+  assert.deepEqual(effects(-4567,1),[]);
+  assert.deepEqual(effects(-4300,1),[]);
+  assert.deepEqual(effects(-4475,0),[]);
+  const snapshot=time=>JSON.stringify(effects(time,1).map(layer=>layer.props.data));
+  const pose=snapshot(-4475);
+  snapshot(-4450);
+  assert.equal(snapshot(-4475),pose,'seeking reconstructs the same orbital state');
+  for(const time of [-4520,-4501,-4500,-4499,-4475,-4440,-4320]) {
+    for(const layer of effects(time,1)) for(const body of layer.props.data) {
+      assert.ok(body.position.every(Number.isFinite));
+      assert.ok(Number.isFinite(body.radius)&&body.radius>=0);
+      assert.ok(body.color[3]>=0&&body.color[3]<=255);
+    }
+  }
+  const opaque=effects(-4475,1)[1].props.data[0].color[3];
+  const blended=effects(-4475,.5)[1].props.data[0].color[3];
+  assert.equal(blended,opaque*.5);
+});

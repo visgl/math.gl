@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v5.0.0-beta.1
+
+- **Breaking:** Move tree-shakeable APIs to package and capability roots and remove superseded API subpaths. Projection catalogs and data paths remain. Earth now requires `astronomy-engine`; core exposes matrix/vector namespaces and prefixed individual operations. See the root-export migration guide.
+
+- feat(terrain): Add height fields, regular and adaptive MARTINI/Delatin meshes, tiled and incremental snapshots, accelerated contacts and clearance queries, gradients, profiles, contours, mixed-resolution seam reconciliation and skirts (#314, #315, #319, #323, #324, #329, #331, #334, #335, #337, #339).
+- feat(geospatial): Add an opt-in CRS definition resolver, coordinate utilities, triaxial sampling, packed line buffers, ellipsoidal visibility, shared cut atlases, latitude-domain cuts and TileMatrixSet validation (#312, #313, #317, #320, #327, #333, #336).
+- feat(earth): Add solar terminators, evolving early-Earth terrain and imagery, place journeys, guided cameras, and future comparisons (#266, #325, #328, #330, #332, #338).
+- build(deps): Update postcss-selector-parser (#316).
+- Release tooling now transitions alpha versions to beta.1 explicitly; subsequent prerelease runs increment the beta number. Trusted publishing continues to use npm's beta tag.
+
 ## v5.0.0-alpha.20
 
 - feat(geospatial): Add reusable geodesic path sampling and adaptive geodesic polyline subdivision with surface-distance limits, unrolled longitude and original-edge provenance; extend generic subdivision with constant-speed source-edge samplers.

@@ -64,3 +64,13 @@ export {
 export type {CRSMetadata, CRSUnit} from './crs-metadata';
 export {getCRSSignature} from './crs-metadata';
 export {linearUnits} from './units-table';
+
+// Public named exports. Implementations remain in independently tree-shakable files.
+export {createCRSDictionaryProvider, createCRSResolver, CRSResolutionError} from './resolver';
+export type {
+  CRSDefinitionProvider,
+  CRSLookup,
+  CRSResolution,
+  CRSResolverOptions,
+  CRSResolver
+} from './resolver';

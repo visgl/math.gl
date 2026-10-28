@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {earcut} from '@math.gl/geometry/polygon';
+import {earcut} from '@math.gl/geometry';
 import type {GeoArrowColumn, GeoArrowGeometryValue} from './types';
 import {getGeoArrowDimensionSize} from './types';
 import {materializeGeoArrowRows} from './layout';

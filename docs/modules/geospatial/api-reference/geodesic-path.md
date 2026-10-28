@@ -5,7 +5,7 @@ fraction or distance. It adapts the existing GeographicLib-backed `EllipsoidGeod
 it does not introduce a spherical or Vincenty fallback.
 
 ```typescript
-import {GeodesicPath} from '@math.gl/geospatial/ellipsoid';
+import {GeodesicPath} from '@math.gl/geospatial';
 
 const path = new GeodesicPath([170, 20, 100], [-170, 40, 500]);
 const midpoint = path.sample(0.5);

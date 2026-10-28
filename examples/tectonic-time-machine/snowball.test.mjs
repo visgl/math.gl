@@ -109,3 +109,29 @@ test('event focus gives Theia, oceans and bombardment time to be seen', () => {
   while (time < -4400) {time+=timelinePlaybackSpeed(time,20,1000)/20;seconds+=.05;}
   assert.ok(seconds > 10 && seconds < 30, seconds);
 });
+
+
+test('deglaciation dynamics stay bounded and vanish outside glaciations',async()=>{
+  const {snowballDynamics}=await import('./timeline.js');
+  const scratch={};
+  assert.equal(snowballDynamics(-700,scratch),scratch);
+  assert.equal(scratch.retreat,0);
+  assert.ok(scratch.volcanism>0);
+  assert.ok(snowballDynamics(-661).retreat>0);
+  assert.ok(snowballDynamics(-636).retreat>0);
+  for(const time of [-800,-659,-651,-634,0]) assert.deepEqual(snowballDynamics(time),{retreat:0,volcanism:0});
+  for(let time=-720;time<=-630;time+=.1){
+    const state=snowballDynamics(time);
+    assert.ok(state.retreat>=0&&state.retreat<=1);
+    assert.ok(state.volcanism>=0&&state.volcanism<=1);
+  }
+});
+
+
+test('one dominant caption survives overlapping life and continent chapters',async()=>{
+  const {activeChapter}=await import('./timeline.js');
+  assert.equal(activeChapter(-430,'atlantic',1000).name,'Life reaches the land');
+  assert.equal(activeChapter(-400,'atlantic',1000).name,'Euramerica (Laurussia)');
+  assert.equal(activeChapter(-700,'atlantic',1000,false),null);
+  assert.equal(activeChapter(-700,'atlantic',500),null);
+});

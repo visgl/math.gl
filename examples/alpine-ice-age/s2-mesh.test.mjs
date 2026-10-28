@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { S2Decoder } from "@math.gl/dggs/s2";
+import { S2Decoder } from "@math.gl/dggs";
 import { createS2MyriahedralMesh } from "./dggs-mesh.js";
 import { discontinuousGrid } from "./discontinuous-views.js";
 
