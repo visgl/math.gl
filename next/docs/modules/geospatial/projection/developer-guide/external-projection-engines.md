@@ -425,3 +425,7 @@ This recipe does not put Promise-returning functions into `CRSDescriptor.convert
 ## Geometry streams and projection domains[​](#geometry-streams-and-projection-domains "Direct link to Geometry streams and projection domains")
 
 The [Projection domains example](https://visgl.github.io/math.gl/next/examples/projection-domains) combines native math.gl GeoArrow streaming and task workers with D3 clipping, interrupted lobes, and inverse-mapped synthetic rasters. It preserves source feature identity and illustrates why point conversion, validity domains and geometry topology are separate concerns. See its source for the explicit sampling limits.
+
+### Adaptive raster batches[​](#adaptive-raster-batches "Direct link to Adaptive raster batches")
+
+The [proj-wasm raster recipe](https://github.com/visgl/math.gl/blob/master/examples/geospatial/proj-wasm-crs/raster-example.mjs) drives adaptive raster refinement with real asynchronous PROJ sample batches. It reuses a normalized operation, bounds each frontier batch, checks cancellation around awaited calls, and transfers the completed mesh into an owned math.gl task worker. Node and Chromium validate coordinate agreement, texture error and buffer ownership. Native charts still supply target inverse branches and domain geometry; proj-wasm converts geographic samples into the ellipsoidal source raster CRS. This division is explicit: asynchronous point conversion alone does not provide chart clipping or topology repair.
