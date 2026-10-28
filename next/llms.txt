@@ -170,6 +170,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Overview](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md): @math.gl/geometry clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.
 - [clipPolygon](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/clip-polygon.md): Clips a polygon with a bounding box.
 - [clipPolyline](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/clip-polyline.md): Clips a polyline with a bounding box.
+- [clipTriangleMesh](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/clip-triangle-mesh.md): clipTriangleMesh is exported from @math.gl/geometry and its existing polygon entry.
 - [cutPolygonByGrid](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/cut-polygon-by-grid.md): Subdivides a polygon by intersecting with a uniform grid.
 - [cutPolygonByMercatorBounds](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/cut-polygon-by-mercator-bounds.md): Splits a geospatial polygon at the 180th meridian and the top (latitude=90) and bottom (latitude=-90) edges of the Web Mercator map.
 - [cutPolylineByGrid](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/cut-polyline-by-grid.md): Subdivides a polyline by intersecting with a uniform grid.

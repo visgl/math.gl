@@ -43,3 +43,5 @@ See [polygon utilities](https://visgl.github.io/math.gl/next/docs/modules/geomet
 ## Attribution[​](#attribution "Direct link to Attribution")
 
 The `earcut` implementation derives from Mapbox's earcut library under the ISC license. Source headers and distributed notices retain the applicable attribution.
+
+`clipTriangleMesh` clips prepared target-plane triangles to disjoint convex regions, including periodic copies, and preserves original-vertex weights for UV and other attribute interpolation. Concave domains and holes can be supplied as triangulated regions. See the [clipping API reference](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/clip-triangle-mesh.md).
