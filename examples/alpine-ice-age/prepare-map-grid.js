@@ -4,7 +4,7 @@
 import {processOnWorker} from '@math.gl/core/worker-utils';
 import {MapEngine} from '@math.gl/geospatial/discontinuous';
 import {prepareDiscontinuousGrid, DISCONTINUOUS_VIEWS} from './discontinuous-views.js';
-import {cacheProjectionGrid, prepareProjectionGrid} from './projection-grid.js';
+import {cacheProjectionGrid, getCachedProjectionGrid, prepareProjectionGrid} from './projection-grid.js';
 
 const cache = new Map();
 const loadWorker = () => new Worker(new URL('./discontinuous-grid-worker.js', import.meta.url), {type: 'module'});
@@ -17,6 +17,10 @@ export async function prepareMapGrid(view, step, {signal, onProgress = () => {},
   const key = `${view}:${step}`;
   if (cache.has(key)) return cache.get(key);
   const discontinuous = Boolean(DISCONTINUOUS_VIEWS[view]);
+  if (!discontinuous) {
+    const grid = getCachedProjectionGrid(view);
+    if (grid) return grid;
+  }
   let result;
   if (typeof Worker !== 'undefined') {
     const data = await runTask(IceAgeGridWorker, {view, step, discontinuous},

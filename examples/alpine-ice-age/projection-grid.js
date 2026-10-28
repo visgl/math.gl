@@ -70,6 +70,11 @@ export function cacheProjectionGrid(view, grid) {
   grids.set(view, grid);
 }
 
+/** Return an existing mesh without triggering synchronous projection. */
+export function getCachedProjectionGrid(view) {
+  return grids.get(view);
+}
+
 export function projectionGrid(view, projectedPositions) {
   if (grids.has(view)) return grids.get(view);
   const positions = projectedPositions || sourcePositions(view);
