@@ -13,15 +13,16 @@ import {chromium} from 'playwright';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const files = new Map();
 for (const [name, example, entry] of [
-  ['unfold','unfolding-polyhedron','main.ts'],
-  ['globe','globe-primitives','app.js'],
-  ['expressions','expressions','main.tsx']
+  ['unfold','geometry/unfolding-polyhedron','main.ts'],
+  ['globe','geospatial/globe-primitives','app.js'],
+  ['albers','geospatial/albers-usa','standalone.js'],
+  ['expressions','core/expressions','main.tsx']
 ]) {
   const plugins = name === 'expressions' ? [{
     name: 'controlled-async-evaluation',
     setup(builder) {
       builder.onResolve({filter: /^@math\.gl\/core$/}, args =>
-        args.importer === resolve(root,'examples/expressions/app.tsx') ? {path:'controlled',namespace:'review'} : null
+        args.importer === resolve(root,'examples/core/expressions/app.tsx') ? {path:'controlled',namespace:'review'} : null
       );
       builder.onLoad({filter:/.*/,namespace:'review'}, () => ({
         resolveDir:root,
@@ -40,7 +41,7 @@ export function compileAsync(expression,options) {
   const result = await build({
     entryPoints:[resolve(root,`examples/${example}/${entry}`)],
     outfile:resolve(root,`.review-output/${name}.js`),
-    bundle:true,format:'esm',platform:'browser',write:false,plugins
+    bundle:true,format:'esm',platform:'browser',write:false,plugins,loader:{'.ttf':'dataurl'}
   });
   for (const file of result.outputFiles) files.set('/'+basename(file.path),file.contents);
   const html=readFileSync(resolve(root,`examples/${example}/index.html`),'utf8')
@@ -67,6 +68,12 @@ try {
 
   await page.goto(url+'/unfold');
   await page.waitForSelector('#app canvas');
+  const panel = page.locator('.example-info-box').first();
+  await panel.getByRole('button', {name: 'Geometry and cuts'}).click();
+  await page.locator('#solid').waitFor({state: 'hidden'});
+  await panel.getByRole('button', {name: 'Geometry and cuts'}).click();
+  await page.locator('#solid').waitFor({state: 'visible'});
+  assert.equal(await page.locator('#solid').inputValue(), 'icosahedron');
   const sizes=await page.evaluate(()=>{
     const root=document.querySelector('#app'),canvas=root.querySelector('canvas');
     const height=()=>canvas.getBoundingClientRect().height;
@@ -85,6 +92,20 @@ try {
   });
   await page.waitForFunction(()=>window.reviewGL.isContextLost());
   assert.equal(await page.locator('#app').evaluate(root=>root.childElementCount),0);
+
+  await page.goto(url+'/albers');
+  for (const width of [1200, 600, 375]) {
+    await page.setViewportSize({width, height:1000});
+    const info = page.locator('.example-info-box');
+    await info.scrollIntoViewIfNeeded();
+    assert((await info.boundingBox()).height > 100, 'Inline panel must retain its natural content height');
+    const toggle = info.getByRole('button', {name: 'Albers USA', exact:true});
+    await toggle.click();
+    await page.locator('.view-toggle').waitFor({state:'hidden'});
+    await toggle.click();
+    await page.locator('.view-toggle').waitFor({state:'visible'});
+  }
+  await page.setViewportSize({width:1200,height:1000});
 
   await page.goto(url+'/globe');
   await page.waitForFunction(()=>document.querySelector('#imagery-status').textContent.includes('unavailable'));

@@ -56,7 +56,7 @@
     "modules/*/src",
     "modules/*/test",
     "modules/*/*/test",
-    "examples/expressions"
+    "examples/core/expressions"
   ],
   "exclude": [
     "node_modules",

@@ -11,7 +11,7 @@ libraries for you, and they are not dependencies of published math.gl packages.
 ## Integrate proj-wasm
 
 [proj-wasm](https://github.com/willcohen/clj-proj) provides PROJ through WebAssembly.
-The [runnable Node and browser example](https://github.com/visgl/math.gl/tree/master/examples/proj-wasm-crs)
+The [runnable Node and browser example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/proj-wasm-crs)
 pins **0.1.0** and demonstrates two distinct uses of its public API.
 
 ### Resolve definitions for native math.gl execution
@@ -19,7 +19,7 @@ pins **0.1.0** and demonstrates two distinct uses of its public API.
 The example's `createProjWasmProvider` owns a PROJ context, disables network access,
 uses `projCreateFromDatabase` and `projAsProjjson`, and destroys each temporary PJ
 object. It records the package and EPSG database revision in lookup provenance.
-Its source is in `examples/proj-wasm-crs/provider.mjs`:
+Its source is in `examples/geospatial/proj-wasm-crs/provider.mjs`:
 
 ```javascript
 import * as proj from 'proj-wasm';

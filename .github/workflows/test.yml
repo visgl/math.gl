@@ -119,7 +119,7 @@ jobs:
           yarn workspace math.gl-tectonic-time-machine build
 
       - name: Test expression preview seam handling
-        run: node --test examples/expressions/*.test.mjs
+        run: node --test examples/core/expressions/*.test.mjs
 
       - name: Test Alpine Ice Age dataset and interpolation
         run: yarn workspace math.gl-alpine-ice-age test

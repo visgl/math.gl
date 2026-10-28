@@ -5,22 +5,104 @@
     "id": "index"
   },
   {
-    "type": "doc",
-    "id": "benchmarks"
-  },
-  {
-    "type": "doc",
-    "label": "Switch projection engines",
-    "id": "external-projection-engines"
-  },
-  {
-    "type": "doc",
-    "label": "Expressions (experimental)",
-    "id": "expressions"
+    "type": "category",
+    "label": "@math.gl/core",
+    "collapsed": false,
+    "items": [
+      {
+        "type": "doc",
+        "label": "Core transforms",
+        "id": "core-transforms"
+      },
+      {
+        "type": "doc",
+        "label": "Expressions (experimental)",
+        "id": "expressions"
+      }
+    ]
   },
   {
     "type": "category",
-    "label": "Earth",
+    "label": "@math.gl/geometry",
+    "collapsed": false,
+    "items": [
+      {
+        "type": "doc",
+        "label": "Curve flight lab",
+        "id": "curves"
+      },
+      {
+        "type": "doc",
+        "label": "Geometry viewer",
+        "id": "geometry-viewer"
+      },
+      {
+        "type": "doc",
+        "label": "Unfolding Earth",
+        "id": "unfolding-earth"
+      },
+      {
+        "type": "doc",
+        "label": "Polygon playground",
+        "id": "polygon-playground"
+      },
+      {
+        "type": "doc",
+        "label": "Frustum culling",
+        "id": "culling-playground"
+      }
+    ]
+  },
+  {
+    "type": "category",
+    "label": "@math.gl/geospatial",
+    "collapsed": false,
+    "items": [
+      {
+        "type": "doc",
+        "id": "benchmarks"
+      },
+      {
+        "type": "doc",
+        "label": "Switch projection engines",
+        "id": "external-projection-engines"
+      },
+      {
+        "type": "doc",
+        "label": "Albers USA inset map",
+        "id": "albers-usa"
+      },
+      {
+        "type": "doc",
+        "label": "Quincuncial and star maps",
+        "id": "quincuncial-star"
+      },
+      {
+        "type": "doc",
+        "label": "Elastic maps",
+        "id": "elastic-maps"
+      },
+      {
+        "type": "doc",
+        "label": "Myriahedral maps",
+        "id": "myriahedral-maps"
+      },
+      {
+        "type": "doc",
+        "label": "Tectonic time machine",
+        "id": "tectonic-time-machine"
+      },
+      {
+        "type": "doc",
+        "label": "Glaciation Explorer",
+        "id": "alpine-ice-age"
+      }
+    ]
+  },
+  {
+    "type": "category",
+    "label": "@math.gl/earth",
+    "collapsed": false,
     "items": [
       {
         "type": "doc",
@@ -36,67 +118,7 @@
         "type": "doc",
         "label": "Geoid globe",
         "id": "geoid-globe"
-      },
-      {
-        "type": "doc",
-        "label": "Tectonic time machine",
-        "id": "tectonic-time-machine"
-      },
-      {
-        "type": "doc",
-        "label": "Glaciation Explorer",
-        "id": "alpine-ice-age"
       }
     ]
-  },
-  {
-    "type": "doc",
-    "label": "Albers USA inset map",
-    "id": "albers-usa"
-  },
-  {
-    "type": "doc",
-    "label": "Quincuncial and star maps",
-    "id": "quincuncial-star"
-  },
-  {
-    "type": "doc",
-    "label": "Elastic maps",
-    "id": "elastic-maps"
-  },
-  {
-    "type": "doc",
-    "label": "Polygon playground",
-    "id": "polygon-playground"
-  },
-  {
-    "type": "doc",
-    "label": "Core transforms",
-    "id": "core-transforms"
-  },
-  {
-    "type": "doc",
-    "label": "Curve flight lab",
-    "id": "curves"
-  },
-  {
-    "type": "doc",
-    "label": "Geometry viewer",
-    "id": "geometry-viewer"
-  },
-  {
-    "type": "doc",
-    "label": "Unfolding Earth",
-    "id": "unfolding-earth"
-  },
-  {
-    "type": "doc",
-    "label": "Myriahedral maps",
-    "id": "myriahedral-maps"
-  },
-  {
-    "type": "doc",
-    "label": "Frustum culling",
-    "id": "culling-playground"
   }
 ]

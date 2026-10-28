@@ -9,7 +9,8 @@
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-heading-ids": "ocular-doc-headers ../docs",
-    "deploy": "docusaurus deploy"
+    "deploy": "docusaurus deploy",
+    "screenshots": "node scripts/update-example-screenshots.mjs"
   },
   "dependencies": {
     "@deck.gl-community/geo-layers": "^9.4.8",
