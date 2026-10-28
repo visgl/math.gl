@@ -10,6 +10,12 @@
 - build(deps): Update postcss-selector-parser (#316).
 - Release tooling now transitions alpha versions to beta.1 explicitly; subsequent prerelease runs increment the beta number. Trusted publishing continues to use npm's beta tag.
 
+- feat(crs): Add descriptor builders, explicit target-plane domains, opt-in execution identity, and external-engine/proj-wasm integration (#321, #326, #354, #361).
+- feat(geoarrow): Add native batched Turf measurements, transforms, rhumb operations and intersection kernels, geometry streams, and projection-worker examples (#347, #349, #353, #356, #357, #360).
+- feat(core): Add main-thread and pooled-worker tasks, module worker URLs, configurable WASM resources, batch preprocessing and transfer examples, and graceful worker-pool shutdown (#342, #350, #351, #358, #363).
+- feat(geometry): Clip triangle meshes with attribute provenance and document raster mesh refinement/domain clipping recipes (#355, #362).
+- feat(examples): Add zoom-driven globe/Mercator views, cached projection grids, module feature cards, standardized panels, module navigation, and embedded solar-terminator documentation (#344, #346, #348, #352, #359, #364).
+
 ## v5.0.0-alpha.20
 
 - feat(geospatial): Add reusable geodesic path sampling and adaptive geodesic polyline subdivision with surface-distance limits, unrolled longitude and original-edge provenance; extend generic subdivision with constant-speed source-edge samplers.
