@@ -26,6 +26,8 @@ Support describes the public API in the current repository. Notes identify limit
 | Incremental streaming of a single geometry | ❌ Not implemented | Codecs process individual complete values synchronously; [GeoArrow](../geoarrow/README.md) handles column/chunk envelopes. |
 | Topology validation and CRS transformation | ❌ Not implemented | Syntax decoding does not validate polygon topology, repair geometry, or transform coordinates. |
 
+## Usage
+
 ```typescript
 import {parseWKB, writeWKB, parseWKT, formatWKT} from '@math.gl/geospatial';
 

@@ -27,6 +27,8 @@ Support describes the public API in the current repository. Notes identify limit
 | Moving frames and swept meshes | ❌ Not implemented | Frenet/parallel-transport frames and sweep/extrusion generation are outside the current curve API. |
 | Geodesic interpolation and seam handling | ❌ Not implemented | These curves operate in Cartesian coordinates. Use [geospatial paths](../../geospatial/api-reference/geodesic-path.md) for surface routes. |
 
+## Usage
+
 ```ts
 import {CatmullRomCurve, CurveArcLength} from '@math.gl/geometry';
 

@@ -31,6 +31,8 @@ Support describes the public API in the current repository. Notes identify limit
 | Packed index persistence and continuation cursors | ❌ Not implemented | No public serialized-index restoration or resumable query cursor. Work budgets are not memory/time guarantees. |
 | Geodesic/ellipsoidal nearest-neighbor indexing | ❌ Not implemented | Queries use Cartesian Euclidean geometry, not geographic surface distance. |
 
+## Usage
+
 ```ts
 import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry';
 

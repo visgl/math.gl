@@ -6,8 +6,6 @@
 
 `@math.gl/core` provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
 
-Use `import type` for declarations that add no runtime code:
-
 ## Feature support
 
 Numeric representation and shape contracts shared by the math.gl packages.
@@ -23,6 +21,10 @@ Support describes the public API in the current repository. Notes identify limit
 | Bounds and spheroid contracts | ✅ Implemented | [Bounds2D/3D](./api-reference/bounds.md) and SpheroidParameters describe geometry independently of renderers and CRS engines. |
 | Runtime enforcement of sized declarations | ❌ Not implemented | Type declarations do not validate buffer length, coordinate units, or physical meaning at runtime. |
 | Bundled Float16 arithmetic polyfill | ❌ Not implemented | The helpers select/detect storage. They do not supply numeric half-float array semantics when the runtime lacks them. |
+
+## Usage
+
+Use `import type` for declarations that add no runtime code:
 
 ```typescript
 import type {NumericArray, NumberArray3, Bounds3D} from '@math.gl/core';

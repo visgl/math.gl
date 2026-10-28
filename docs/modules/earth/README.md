@@ -1,7 +1,7 @@
 # @math.gl/earth
 
-The earth group collects Earth model, solar, and timezone utilities. Import the specific utility you
-need from its subpath:
+The earth group collects Earth model, solar, and timezone utilities. Specific utilities are available
+from their subpaths.
 
 ## Feature support
 
@@ -19,6 +19,8 @@ Support describes the public API in the current repository. Notes identify limit
 | Globally calibrated visibility/lighting tiers | ◐ Partial | Shared sky models are implemented; observational calibration, star visibility integration and tier budgets remain in the [sun roadmap](https://github.com/visgl/math.gl/blob/master/dev-docs/sun-roadmap.md). |
 | Gravity/magnetic spherical-harmonic models | ❌ Not implemented | No general coefficient-backed gravity or geomagnetic field engine; optional Earth models are [G11 scope/design work](https://github.com/visgl/math.gl/blob/master/dev-docs/geographiclib-roadmap.md). |
 | Qualified ICRF/ITRF/TEME state transformations | ❌ Not implemented | Full versioned Earth-orientation/time providers and state-vector frame derivatives remain [celestial-frame roadmap work](https://github.com/visgl/math.gl/blob/master/dev-docs/geospatial-roadmap.md). |
+
+## Usage
 
 ```ts
 import {Geoid} from '@math.gl/earth';
