@@ -21,6 +21,7 @@ export default class WorkerJob {
   /** Settles only when the worker can be reused, even after cooperative cancellation. */
   readonly completion: Promise<void>;
   private complete: () => void = () => {};
+  private processStarted = false;
   private cancellationTimer?: ReturnType<typeof setTimeout>;
   /** Promise that resolves when Job is done */
   readonly result: Promise<any>;
@@ -51,6 +52,8 @@ export default class WorkerJob {
   ): void {
     if (!this.isRunning || this.isCancelled) return;
     const startedAt = performance.now();
+    if (type === 'process' || type === 'process-in-batches' || type === 'preload')
+      this.processStarted = true;
     try {
       this.workerThread.postMessage(
         {
@@ -103,9 +106,15 @@ export default class WorkerJob {
     }
     this.isCancelled = true;
     this.sharedState?.cancel();
-    this._reject(
-      arguments.length ? reason : createAbortError(`Worker job "${this.name}" was cancelled`)
-    );
+    const abortReason = arguments.length
+      ? reason
+      : createAbortError(`Worker job "${this.name}" was cancelled`);
+    if (!this.processStarted) {
+      // Nothing was posted: settle the lease without terminating or waiting for an acknowledgement.
+      this.error(abortReason);
+      return;
+    }
+    this._reject(abortReason);
     try {
       this.workerThread.postMessage({source: 'loaders.gl', type: 'cancel', payload: {}}, []);
       this.cancellationTimer = setTimeout(() => this.abort(reason), timeout);

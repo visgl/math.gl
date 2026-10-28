@@ -576,3 +576,63 @@ test('resource disposal does not inherit an already-cancelled initialization con
   await resource.destroy();
   assert.equal(Atomics.load(new Int32Array(disposed), 0), 1);
 });
+
+test('cooperative cancellation before atomic dispatch immediately preserves the warm worker', async () => {
+  const pool = new WorkerPool({url: runtime.worker, maxConcurrency: 1});
+  try {
+    assert.equal(await processOnWorker(runtime, {mode: 'count'}, {workerPool: pool}), 1);
+    const controller = new AbortController();
+    const result = processOnWorker(
+      runtime,
+      {mode: 'ignore'},
+      {workerPool: pool, signal: controller.signal, cancellationMode: 'cooperative'}
+    );
+    controller.abort(new Error('before dispatch'));
+    await assert.rejects(result, /before dispatch/);
+    assert.equal(await processOnWorker(runtime, {mode: 'count'}, {workerPool: pool}), 2);
+    assert.equal(pool.stats.workersCreated, 1);
+    assert.equal(pool.stats.workerRestarts, 0);
+  } finally {
+    await pool.destroy();
+  }
+});
+
+test('cooperative cancellation before batch dispatch releases its lease without replacement', async () => {
+  const pool = new WorkerPool({url: runtime.worker, maxConcurrency: 1});
+  try {
+    assert.equal(await processOnWorker(runtime, {mode: 'count'}, {workerPool: pool}), 1);
+    const controller = new AbortController();
+    const batches = processOnWorkerInBatches(runtime, [1], {
+      workerPool: pool,
+      signal: controller.signal,
+      cancellationMode: 'cooperative'
+    });
+    const next = batches[Symbol.asyncIterator]().next();
+    controller.abort(new Error('before batch dispatch'));
+    await assert.rejects(next, /before batch dispatch/);
+    assert.equal(await processOnWorker(runtime, {mode: 'count'}, {workerPool: pool}), 2);
+    assert.equal(pool.stats.workersCreated, 1);
+  } finally {
+    await pool.destroy();
+  }
+});
+
+test('cooperative cancellation before resource dispatch preserves initialized state', async () => {
+  const descriptor = {
+    ...runtime,
+    id: 'resource-pre-dispatch',
+    name: 'resource pre-dispatch',
+    worker: new URL('./fixtures/resource-worker.mjs', import.meta.url).href
+  };
+  const resource = await createWorkerResource(descriptor, {value: 10});
+  try {
+    const controller = new AbortController();
+    const result = resource.run(100, {signal: controller.signal, cancellationMode: 'cooperative'});
+    controller.abort(new Error('before resource dispatch'));
+    await assert.rejects(result, /before resource dispatch/);
+    assert.equal(await resource.run(2), 12);
+    assert.equal(resource.stats.workersCreated, 1);
+  } finally {
+    await resource.destroy();
+  }
+});

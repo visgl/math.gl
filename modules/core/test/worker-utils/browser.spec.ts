@@ -195,3 +195,33 @@ baseTest.runIf(isBrowser && getWorkerCapabilities().sharedMemory)(
     }
   }
 );
+
+test('browser cooperative cancellation before dispatch preserves the warm worker', async () => {
+  const {WorkerPool} = await import('../../src/worker-utils');
+  const pool = new WorkerPool({
+    maxConcurrency: 1,
+    loadWorker: () =>
+      new Worker(new URL('./fixtures/runtime-worker.mjs', import.meta.url), {type: 'module'})
+  });
+  try {
+    await expect(processOnWorker(worker, {mode: 'count'}, {workerPool: pool})).resolves.toBe(1);
+    const controller = new AbortController();
+    const result = processOnWorker(
+      worker,
+      {mode: 'ignore'},
+      {
+        workerPool: pool,
+        signal: controller.signal,
+        cancellationMode: 'cooperative',
+        sharedState: false
+      }
+    );
+    controller.abort(new Error('before dispatch'));
+    await expect(result).rejects.toThrow('before dispatch');
+    await expect(processOnWorker(worker, {mode: 'count'}, {workerPool: pool})).resolves.toBe(2);
+    expect(pool.stats.workersCreated).toBe(1);
+    expect(pool.stats.workerRestarts).toBe(0);
+  } finally {
+    await pool.destroy();
+  }
+});
