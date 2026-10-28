@@ -17,10 +17,10 @@ export async function runWarpAsync(mesh,evaluate,{signal,batchSize=1024,...optio
       const output=new Float64Array(step.value.length);
       for(let start=0;start<output.length;start+=batchSize*2) {
         aborted(signal);
-        const input=step.value.slice(start,start+batchSize*2);
+        const input=step.value.slice(start,start+batchSize*2),expectedLength=input.length;
         const result=await evaluate(input,{signal});batches++;
         aborted(signal);
-        if(!(result instanceof Float64Array)||result.length!==input.length||!result.every(Number.isFinite))
+        if(!(result instanceof Float64Array)||result.length!==expectedLength||!result.every(Number.isFinite))
           throw new WarpError('domain','Invalid batch result');
         output.set(result,start);
       }

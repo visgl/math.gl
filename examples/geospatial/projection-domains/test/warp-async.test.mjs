@@ -36,3 +36,11 @@ test('native asynchronous chart evaluator matches synchronous preparation',async
   const sync=prepareInverse(chart,{tolerance:2});
   for(const k of ['positions','indices','uv','sourceRows'])assert.deepEqual(mesh[k],sync[k]);
 });
+
+test('a batch evaluator may transfer its owned sample buffer',async()=>{
+  const result=await runWarpAsync(seed,async points=>{
+    const moved=structuredClone(points,{transfer:[points.buffer]});
+    assert.equal(points.byteLength,0);return batch(moved);
+  },{batchSize:7,tolerance:.02});
+  assert.deepEqual(result.positions,runWarpSync(seed,transform,{tolerance:.02}).positions);
+});
