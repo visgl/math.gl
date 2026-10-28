@@ -1049,3 +1049,140 @@ export function booleanConcave(column: GeoArrowColumn): TurfBatchResult<Uint8Arr
   });
   return out;
 }
+
+type TurfSegment = {array: GeoArrowArray; index: number; path: number; first: number; last: number};
+const lineFamilies = ['geoarrow.linestring', 'geoarrow.multilinestring', ...polygons];
+function segments(row: Row, encoding: string): TurfSegment[] {
+  const output: TurfSegment[] = [];
+  let path = 0;
+  if (row.valid)
+    lines(row.array, row.index, depths[encoding], (array, first, last) => {
+      for (let index = first; index + 1 < last; index++)
+        output.push({array, index, path, first, last});
+      path++;
+    });
+  return output;
+}
+function segmentCrossing(a: TurfSegment, b: TurfSegment): Point | null {
+  const p = point(a.array, a.index),
+    q = point(a.array, a.index + 1);
+  const r = point(b.array, b.index),
+    s = point(b.array, b.index + 1);
+  if (!p || !q || !r || !s) return null;
+  const dx = q[0] - p[0],
+    dy = q[1] - p[1],
+    ex = s[0] - r[0],
+    ey = s[1] - r[1];
+  const denominator = dx * ey - dy * ex;
+  // Collinear overlaps have no isolated intersection point.
+  if (denominator === 0) return null;
+  const rx = r[0] - p[0],
+    ry = r[1] - p[1];
+  const t = (rx * ey - ry * ex) / denominator,
+    u = (rx * dy - ry * dx) / denominator;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1 ? [p[0] + t * dx, p[1] + t * dy] : null;
+}
+function intersectionOutput(
+  source: GeoArrowColumn,
+  count: number,
+  visit: (row: number, emit: (p: Point) => void) => boolean
+): GeoArrowColumn {
+  const offsets = new Int32Array(count + 1),
+    validity = new Uint8Array(Math.ceil(count / 8));
+  for (let i = 0; i < count; i++) {
+    let size = 0;
+    if (visit(i, () => size++)) valid(validity, i);
+    const next = offsets[i] + size;
+    if (next > 0x7fffffff) throw new RangeError('Intersection output exceeds Int32 offsets');
+    offsets[i + 1] = next;
+  }
+  const values = new Float64Array(offsets[count] * 2);
+  for (let i = 0; i < count; i++) {
+    let index = offsets[i];
+    visit(i, p => {
+      values.set(p, index * 2);
+      index++;
+    });
+  }
+  return {
+    encoding: 'geoarrow.multipoint',
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    spatialReference: source.spatialReference,
+    metadata: source.metadata,
+    edges: source.edges,
+    chunks: [
+      {
+        kind: 'list',
+        length: count,
+        offsets,
+        validity: {values: validity},
+        child: {
+          kind: 'fixed-size-list',
+          size: 2,
+          length: offsets[count],
+          child: {kind: 'primitive', length: values.length, values}
+        }
+      }
+    ]
+  };
+}
+/** Isolated planar boundary intersections per paired row. Collinear overlaps are omitted.
+ * Uses an exhaustive segment scan; intended for bounded per-row geometries.
+ */
+export function lineIntersect(
+  a: GeoArrowColumn,
+  b: GeoArrowColumn,
+  options: {removeDuplicates?: boolean} = {}
+): GeoArrowColumn {
+  const left = rows(a, lineFamilies),
+    right = rows(b, lineFamilies),
+    count = paired(left, right);
+  return intersectionOutput(a, count, (i, emit) => {
+    const x = left[left.length === 1 ? 0 : i],
+      y = right[right.length === 1 ? 0 : i];
+    if (!x.valid || !y.valid) return false;
+    const seen = new Set<string>();
+    const xs = segments(x, a.encoding),
+      ys = segments(y, b.encoding);
+    for (const p of xs)
+      for (const q of ys) {
+        const crossing = segmentCrossing(p, q);
+        if (!crossing) continue;
+        const key = `${crossing[0]},${crossing[1]}`;
+        if (options.removeDuplicates !== false && seen.has(key)) continue;
+        seen.add(key);
+        emit(crossing);
+      }
+    return true;
+  });
+}
+/** Isolated self-intersections per row, excluding ordinary adjacent segment joins. */
+export function kinks(column: GeoArrowColumn): GeoArrowColumn {
+  const input = rows(column, lineFamilies);
+  return intersectionOutput(column, input.length, (i, emit) => {
+    const row = input[i];
+    if (!row.valid) return false;
+    const edges = segments(row, column.encoding),
+      seen = new Set<string>();
+    for (let j = 0; j < edges.length; j++)
+      for (let k = j + 1; k < edges.length; k++) {
+        const a = edges[j],
+          b = edges[k];
+        if (a.path === b.path && b.index === a.index + 1) continue;
+        if (a.path === b.path && a.index === a.first && b.index === a.last - 2) {
+          const first = point(a.array, a.first),
+            last = point(a.array, a.last - 1);
+          if (first && last && first[0] === last[0] && first[1] === last[1]) continue;
+        }
+        const crossing = segmentCrossing(a, b);
+        if (!crossing) continue;
+        const key = `${crossing[0]},${crossing[1]}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          emit(crossing);
+        }
+      }
+    return true;
+  });
+}

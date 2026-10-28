@@ -353,3 +353,69 @@ test('point-on-line tolerance works perpendicular to axis-aligned segments', asy
     0
   );
 });
+
+test('native boundary intersections and kinks preserve row alignment', async () => {
+  const api = await import('../src/turf');
+  const {materializeGeoArrowRows, validateGeoArrowColumn} = await import('../src/geoarrow/index');
+  const {lineIntersect: oracle} = await import('@turf/line-intersect');
+  const a = {
+    type: 'LineString' as const,
+    coordinates: [
+      [0, 0],
+      [2, 2],
+      [4, 0]
+    ]
+  };
+  const b = {
+    type: 'LineString' as const,
+    coordinates: [
+      [0, 1],
+      [4, 1]
+    ]
+  };
+  const result = api.lineIntersect(column([a, null]), column([b]));
+  expect(validateGeoArrowColumn(result).valid).toBe(true);
+  const output = materializeGeoArrowRows(result);
+  expect(output[0]).toEqual({
+    type: 'MultiPoint',
+    coordinates: oracle(a, b).features.map(f => f.geometry.coordinates)
+  });
+  expect(output[1]).toBeNull();
+  const bow = column([
+    {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0, 0],
+          [2, 2],
+          [0, 2],
+          [2, 0],
+          [0, 0]
+        ]
+      ]
+    }
+  ]);
+  expect(materializeGeoArrowRows(api.kinks(bow))[0]).toEqual({
+    type: 'MultiPoint',
+    coordinates: [[1, 1]]
+  });
+  expect(materializeGeoArrowRows(api.kinks(column([polygon])))[0]).toEqual({
+    type: 'MultiPoint',
+    coordinates: []
+  });
+  const parallel = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 3],
+        [4, 3]
+      ]
+    }
+  ]);
+  expect(materializeGeoArrowRows(api.lineIntersect(column([a]), parallel))[0]).toEqual({
+    type: 'MultiPoint',
+    coordinates: []
+  });
+  const sliced = sliceGeoArrowColumn(column([a, a, a]), 1, 3);
+  expect(materializeGeoArrowRows(api.lineIntersect(sliced, column([b])))).toHaveLength(2);
+});
