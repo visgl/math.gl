@@ -542,3 +542,117 @@ export function midpoint(a: GeoArrowColumn, b: GeoArrowColumn): GeoArrowColumn {
     return destinationPoint(p, angular(p, q) / 2, angle / RAD);
   });
 }
+
+function rhumbAngle(a: Point, b: Point): number {
+  let longitude = (b[0] - a[0]) * RAD;
+  if (Math.abs(longitude) > Math.PI) longitude += longitude > 0 ? -2 * Math.PI : 2 * Math.PI;
+  const latitude = Math.log(
+    Math.tan((b[1] * RAD) / 2 + Math.PI / 4) / Math.tan((a[1] * RAD) / 2 + Math.PI / 4)
+  );
+  return Math.atan2(longitude, latitude);
+}
+
+/** Constant-bearing distance on Turf's spherical earth, in the selected units. */
+export function rhumbDistance(
+  a: GeoArrowColumn,
+  b: GeoArrowColumn,
+  options: TurfDistanceOptions = {}
+): TurfBatchResult<Float64Array> {
+  return pointPair(a, b, (p, q) => {
+    const delta = (q[1] - p[1]) * RAD;
+    let longitude = Math.abs(q[0] - p[0]) * RAD;
+    if (longitude > Math.PI) longitude = 2 * Math.PI - longitude;
+    const psi = Math.log(
+      Math.tan((q[1] * RAD) / 2 + Math.PI / 4) / Math.tan((p[1] * RAD) / 2 + Math.PI / 4)
+    );
+    const scale = Math.abs(psi) > 1e-11 ? delta / psi : Math.cos(p[1] * RAD);
+    return units(Math.hypot(delta, scale * longitude), options.units);
+  });
+}
+
+/** Constant-bearing heading in degrees, with optional reciprocal final bearing. */
+export function rhumbBearing(
+  a: GeoArrowColumn,
+  b: GeoArrowColumn,
+  options: {final?: boolean} = {}
+): TurfBatchResult<Float64Array> {
+  return pointPair(a, b, (p, q) => rhumbAngle(options.final ? q : p, options.final ? p : q) / RAD);
+}
+
+function rhumbDestinationPoint(p: Point, radians: number, bearingDegrees: number): Point {
+  const phi = p[1] * RAD,
+    theta = bearingDegrees * RAD;
+  const delta = radians * Math.cos(theta);
+  let latitude = phi + delta;
+  if (Math.abs(latitude) > Math.PI / 2)
+    latitude = latitude > 0 ? Math.PI - latitude : -Math.PI - latitude;
+  const psi = Math.log(Math.tan(latitude / 2 + Math.PI / 4) / Math.tan(phi / 2 + Math.PI / 4));
+  const scale = Math.abs(psi) > 1e-11 ? delta / psi : Math.cos(phi);
+  let longitude =
+    (((p[0] * RAD + (radians * Math.sin(theta)) / scale + 3 * Math.PI) % (2 * Math.PI)) - Math.PI) /
+    RAD;
+  if (longitude - p[0] > 180) longitude -= 360;
+  if (p[0] - longitude > 180) longitude += 360;
+  return [longitude, latitude / RAD];
+}
+
+/** Constant-bearing destination for each input point. */
+export function rhumbDestination(
+  column: GeoArrowColumn,
+  distanceValue: number,
+  bearingDegrees: number,
+  options: TurfDistanceOptions = {}
+): GeoArrowColumn {
+  if (!Number.isFinite(distanceValue) || !Number.isFinite(bearingDegrees))
+    throw new RangeError('Distance and bearing must be finite');
+  const input = rows(column, points),
+    radians = distanceValue / units(1, options.units);
+  return pointOutput(column, input.length, i => {
+    const row = input[i],
+      p = row.valid ? point(row.array, row.index) : null;
+    return p ? rhumbDestinationPoint(p, radians, bearingDegrees) : null;
+  });
+}
+
+/** Translates every vertex along a rhumb line, preserving Z and M. */
+export function transformTranslate(
+  column: GeoArrowColumn,
+  distanceValue: number,
+  direction: number,
+  options: TurfDistanceOptions = {}
+): GeoArrowColumn {
+  rows(column, native);
+  if (!Number.isFinite(distanceValue) || !Number.isFinite(direction))
+    throw new RangeError('Distance and direction must be finite');
+  const radians = distanceValue / units(1, options.units);
+  return mapGeoArrowCoordinates(column, p => [
+    ...rhumbDestinationPoint([p[0], p[1]], radians, direction),
+    ...p.slice(2)
+  ]);
+}
+
+/** Rotates each geometry around an explicit pivot, using Turf's rhumb convention. */
+export function transformRotate(
+  column: GeoArrowColumn,
+  angle: number,
+  options: {pivot: readonly [number, number]}
+): GeoArrowColumn {
+  rows(column, native);
+  if (!Number.isFinite(angle) || !options.pivot.every(Number.isFinite))
+    throw new RangeError('Angle and pivot must be finite');
+  const pivot: Point = [options.pivot[0], options.pivot[1]];
+  return mapGeoArrowCoordinates(column, p => {
+    const phi = (p[1] - pivot[1]) * RAD;
+    const psi = Math.log(
+      Math.tan((p[1] * RAD) / 2 + Math.PI / 4) / Math.tan((pivot[1] * RAD) / 2 + Math.PI / 4)
+    );
+    const q = Math.abs(psi) > 1e-11 ? phi / psi : Math.cos(pivot[1] * RAD);
+    let longitude = Math.abs(p[0] - pivot[0]) * RAD;
+    if (longitude > Math.PI) longitude = 2 * Math.PI - longitude;
+    const distance = Math.hypot(phi, q * longitude);
+    return [
+      ...rhumbDestinationPoint(pivot, distance, rhumbAngle(pivot, [p[0], p[1]]) / RAD + angle),
+      ...p.slice(2)
+    ];
+  });
+}
