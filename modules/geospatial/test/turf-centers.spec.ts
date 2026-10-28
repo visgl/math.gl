@@ -86,3 +86,21 @@ test('parallel tolerance includes reversed diagonal headings', () => {
   expect(booleanParallel(a, b).values[0]).toBe(1);
   expect(booleanParallel(b, a).values[0]).toBe(1);
 });
+
+test('parallel rejects unmatched segments and empty lines', () => {
+  const line = (coordinates: number[][]) =>
+    makeGeoArrowColumnFromGeometryRows([{type: 'LineString', coordinates}]);
+  const short = line([
+    [0, 0],
+    [1, 0]
+  ]);
+  const turning = line([
+    [0, 1],
+    [1, 1],
+    [1, 2]
+  ]);
+  expect(booleanParallel(short, turning).values[0]).toBe(0);
+  expect(booleanParallel(turning, short).values[0]).toBe(0);
+  expect(booleanParallel(line([]), short).values[0]).toBe(0);
+  expect(booleanParallel(line([[0, 0]]), short).values[0]).toBe(0);
+});

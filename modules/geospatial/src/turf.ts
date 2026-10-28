@@ -1262,8 +1262,8 @@ export function booleanParallel(a: GeoArrowColumn, b: GeoArrowColumn): TurfBatch
     if (!x.valid || !y.valid) continue;
     const p = segments(x, a.encoding),
       q = segments(y, b.encoding);
-    let parallel = true;
-    for (let j = 0; j < Math.min(p.length, q.length); j++) {
+    let parallel = p.length > 0 && p.length === q.length;
+    for (let j = 0; parallel && j < p.length; j++) {
       const u = point(p[j].array, p[j].index),
         v = point(p[j].array, p[j].index + 1),
         w = point(q[j].array, q[j].index),
