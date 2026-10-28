@@ -904,3 +904,147 @@ export function transformScale(
     ];
   });
 }
+
+/** Views Polygon rings as a MultiLineString column without copying buffers. */
+export function polygonToLine(column: GeoArrowColumn): GeoArrowColumn {
+  rows(column, ['geoarrow.polygon']);
+  return {...column, encoding: 'geoarrow.multilinestring'};
+}
+
+/** Views closed LineStrings as single-ring polygons. Open and degenerate rings are rejected. */
+export function lineToPolygon(column: GeoArrowColumn): GeoArrowColumn {
+  const input = rows(column, ['geoarrow.linestring']);
+  for (const row of input) {
+    if (!row.valid || row.array.kind !== 'list') continue;
+    const [a, b] = range(row.array, row.index);
+    if (a === b) continue;
+    const first = point(row.array.child, a),
+      last = point(row.array.child, b - 1);
+    if (b - a < 4 || !first || !last || first[0] !== last[0] || first[1] !== last[1])
+      throw new RangeError('lineToPolygon requires closed rings with at least four coordinates');
+  }
+  return {
+    ...column,
+    encoding: 'geoarrow.polygon',
+    chunks: column.chunks.map(chunk => ({
+      kind: 'list' as const,
+      length: chunk.length,
+      validity: chunk.validity,
+      offsets: Int32Array.from({length: chunk.length + 1}, (_, i) => i),
+      child: chunk
+    }))
+  };
+}
+
+/** Emits all nonempty XY vertices as point rows in traversal order. Null geometries emit no rows. */
+export function explode(column: GeoArrowColumn): GeoArrowColumn {
+  const input = rows(column, native);
+  let count = 0;
+  for (const row of input)
+    if (row.valid) walk(row.array, row.index, depths[column.encoding], () => count++);
+  const values = new Float64Array(count * 2);
+  let index = 0;
+  for (const row of input)
+    if (row.valid)
+      walk(row.array, row.index, depths[column.encoding], p => {
+        values.set(p, index * 2);
+        index++;
+      });
+  return {
+    encoding: 'geoarrow.point',
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    spatialReference: column.spatialReference,
+    metadata: column.metadata,
+    edges: column.edges,
+    chunks: [
+      {
+        kind: 'fixed-size-list',
+        size: 2,
+        length: count,
+        child: {kind: 'primitive', length: values.length, values}
+      }
+    ]
+  };
+}
+
+/** Emits each adjacent pair from line and polygon rings as a two-vertex LineString. */
+export function lineSegment(column: GeoArrowColumn): GeoArrowColumn {
+  const input = rows(column, ['geoarrow.linestring', 'geoarrow.multilinestring', ...polygons]);
+  const visit = (emit: (p: Point, q: Point) => void) => {
+    for (const row of input)
+      if (row.valid)
+        lines(row.array, row.index, depths[column.encoding], (array, a, b) => {
+          for (let j = a + 1; j < b; j++) {
+            const p = point(array, j - 1),
+              q = point(array, j);
+            if (p && q) emit(p, q);
+          }
+        });
+  };
+  let count = 0;
+  visit(() => count++);
+  const values = new Float64Array(count * 4),
+    offsets = Int32Array.from({length: count + 1}, (_, i) => i * 2);
+  let index = 0;
+  visit((p, q) => {
+    values.set(p, index * 4);
+    values.set(q, index * 4 + 2);
+    index++;
+  });
+  return {
+    encoding: 'geoarrow.linestring',
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    spatialReference: column.spatialReference,
+    metadata: column.metadata,
+    edges: column.edges,
+    chunks: [
+      {
+        kind: 'list',
+        length: count,
+        offsets,
+        child: {
+          kind: 'fixed-size-list',
+          size: 2,
+          length: count * 2,
+          child: {kind: 'primitive', length: values.length, values}
+        }
+      }
+    ]
+  };
+}
+
+/** Tests whether a Polygon's exterior ring contains turns of both orientations. Holes are ignored. */
+export function booleanConcave(column: GeoArrowColumn): TurfBatchResult<Uint8Array> {
+  const input = rows(column, ['geoarrow.polygon']),
+    out = result(input.length, true) as TurfBatchResult<Uint8Array>;
+  input.forEach((row, i) => {
+    if (!row.valid || row.array.kind !== 'list') return;
+    valid(out.validity, i);
+    const [firstRing, lastRing] = range(row.array, row.index);
+    const rings = row.array.child;
+    if (
+      firstRing === lastRing ||
+      rings.kind !== 'list' ||
+      !isGeoArrowValueValid(rings.validity, firstRing)
+    )
+      return;
+    const [a, b] = range(rings, firstRing),
+      n = b - a - 1;
+    if (n < 3) return;
+    let positive = false,
+      negative = false;
+    for (let j = 0; j < n; j++) {
+      const p = point(rings.child, a + j),
+        q = point(rings.child, a + ((j + 1) % n)),
+        r = point(rings.child, a + ((j + 2) % n));
+      if (!p || !q || !r) continue;
+      const cross = (q[0] - p[0]) * (r[1] - q[1]) - (q[1] - p[1]) * (r[0] - q[0]);
+      positive ||= cross > 0;
+      negative ||= cross < 0;
+    }
+    out.values[i] = Number(positive && negative);
+  });
+  return out;
+}

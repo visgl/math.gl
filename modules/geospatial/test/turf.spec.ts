@@ -269,3 +269,56 @@ test('line predicates, ring orientation and explicit-origin scale', async () => 
   expect(bbox(scaled).values[0]).toBeCloseTo(2, 9);
   expect(bbox(scaled).values[1]).toBeCloseTo(0, 9);
 });
+
+test('native geometry conversion and decomposition preserve topology', async () => {
+  const api = await import('../src/turf');
+  const {materializeGeoArrowRows, getGeoArrowRowCount, validateGeoArrowColumn} = await import(
+    '../src/geoarrow/index'
+  );
+  const input = column([polygon, null]);
+  const lines = api.polygonToLine(input);
+  expect(lines.encoding).toBe('geoarrow.multilinestring');
+  expect(lines.chunks).toBe(input.chunks);
+  expect(validateGeoArrowColumn(lines).valid).toBe(true);
+  expect(getGeoArrowRowCount(api.explode(input))).toBe(10);
+  expect(getGeoArrowRowCount(api.lineSegment(input))).toBe(8);
+  const ring = column([{type: 'LineString', coordinates: polygon.coordinates[0]}]);
+  const converted = api.lineToPolygon(ring);
+  expect(validateGeoArrowColumn(converted).valid).toBe(true);
+  expect(materializeGeoArrowRows(converted)[0]).toEqual({
+    type: 'Polygon',
+    coordinates: [polygon.coordinates[0]]
+  });
+  expect(() =>
+    api.lineToPolygon(
+      column([
+        {
+          type: 'LineString',
+          coordinates: [
+            [0, 0],
+            [1, 1]
+          ]
+        }
+      ])
+    )
+  ).toThrow(/closed/);
+  expect(api.booleanConcave(input).validity[0]).toBe(1);
+  expect(api.booleanConcave(input).values[0]).toBe(0);
+  const concave = column([
+    {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0, 0],
+          [4, 0],
+          [2, 1],
+          [4, 4],
+          [0, 4],
+          [0, 0]
+        ]
+      ]
+    }
+  ]);
+  expect(api.booleanConcave(concave).values[0]).toBe(1);
+  expect(getGeoArrowRowCount(api.lineSegment(sliceGeoArrowColumn(input, 1, 2)))).toBe(0);
+});
