@@ -387,7 +387,8 @@ function readNestedCoordinates(
   return values;
 }
 
-function readCoordinate(array: GeoArrowArray, index: number): number[] | null {
+/** Internal physical coordinate reader shared by buffer-oriented kernels. */
+export function readCoordinate(array: GeoArrowArray, index: number): number[] | null {
   if (!isGeoArrowValueValid(array.validity, index)) return null;
   if (array.kind === 'fixed-size-list') {
     const listIndex = (array.offset || 0) + index;
